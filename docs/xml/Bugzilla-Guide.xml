@@ -22,6 +22,7 @@
 <!ENTITY bz "http://www.bugzilla.org/">
 <!ENTITY bz-ver "2.16.7">
 <!ENTITY bz-date "2004-07-10">
+<!ENTITY current-year "2004">
 <!ENTITY bz-cvs-ver "2.19.1">
 <!ENTITY landfillbase "http://landfill.bugzilla.org/bugzilla-&bz-ver;/">
 <!ENTITY bzg-ver "2.16.7">

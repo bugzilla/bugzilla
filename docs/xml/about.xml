@@ -1,5 +1,6 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook V4.1//EN" [
 <!ENTITY conventions SYSTEM "conventions.xml"> ] > -->
+<!-- $Id: about.xml,v 1.6.2.6 2004/12/13 03:23:21 jake%bugzilla.org Exp $ -->
 
 <chapter id="about">
 <title>About This Guide</title>
@@ -7,7 +8,7 @@
   <section id="copyright">
     <title>Copyright Information</title>
     <blockquote>
-      <attribution>Copyright (c) 2000-2003 Matthew P. Barnson and &bzg-auth;</attribution>
+      <attribution>Copyright (c) 2000-&current-year; Matthew P. Barnson and &bzg-auth;</attribution>
       <para>
 	Permission is granted to copy, distribute and/or modify this
 	document under the terms of the GNU Free Documentation
@@ -171,6 +172,16 @@
         </listitem>
       </varlistentry>
 
+      <varlistentry>
+        <term>Dave Miller <email>justdave@bugzilla.org</email></term>
+        <listitem>
+          <para>for taking over as project lead when Tara stepped down and
+          continually pusing to have relevant changes pushed back to this
+          2.16 branch of the documentation.
+          </para>
+        </listitem>
+      </varlistentry>
+
     </variablelist>
 
     <para>
@@ -190,6 +201,7 @@
         <member>Joe Robins</member>
         <member>Kevin Brannen</member>
         <member>Ron Teitelbaum</member>
+        <member>Shane Travis</member>
         <member>Spencer Smith</member>
         <member>Zach Liption</member>
       </simplelist>

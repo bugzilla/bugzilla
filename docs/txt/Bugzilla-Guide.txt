@@ -999,7 +999,7 @@ perl -pi -e
    limited to 16 characters.
 
    bash# mysql -u root mysql
-   mysql> UPDATE user SET Password=PASSWORD('<new_password'>) WHERE
+   mysql> UPDATE user SET Password=PASSWORD('<new_password>') WHERE
    user='root';
    mysql> FLUSH PRIVILEGES;
 
@@ -1251,7 +1251,7 @@ set=ISO-8859-1/i" *.cgi *.pl
    speeds for other users. If your Bugzilla installation is experiencing
    this problem , you may install the Apache module mod_throttle which
    can limit connections by ip-address. You may download this module at
-   http://www.snert.com/Software/Throttle/. Follow the instructions to
+   http://www.snert.com/Software/mod_throttle/ Follow the instructions to
    install into your Apache install. This module only functions with the
    Apache web server! You may use the ThrottleClientIP command provided
    by this module to accomplish this goal. See the Module Instructions

@@ -316,7 +316,7 @@ sub record_votes {
     SendSQL("LOCK TABLES bugs WRITE, bugs_activity WRITE, votes WRITE, 
              longdescs WRITE, profiles READ, products READ, components READ, 
              cc READ, dependencies READ, groups READ, fielddefs READ, 
-             namedqueries READ, whine_queries READ, watch READ, 
+             namedqueries READ, watch READ, 
              profiles AS watchers READ, profiles AS watched READ, 
              user_group_map READ, bug_group_map READ");
     

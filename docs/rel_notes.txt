@@ -58,6 +58,12 @@ see the Bugzilla Guide for more information.
   problem for you, please comment on the below bug.
   (bug 124589)
 
+- Placing comments in localconfig is deprecated.  If you have done
+  this, they will likely get nuked with some post-2.16 version of
+  Bugzilla, as checksetup.pl will likely automatically rewrite localconfig
+  to automatically get the latest comments.
+  (bug 147776)
+
 *** Outstanding Issues Of Note ***
  
 - Bug counts (on reports.cgi) can be very slow if you have to
@@ -130,7 +136,16 @@ see the Bugzilla Guide for more information.
 
 - Real names were not HTML filtered, causing possible cross
   site scripting attacks.
-  (bug 146447)
+  (bug 146447, 147486)
+
+- Mass change would set the groupset of every bug to be the
+  groupset of the first bug.
+  (bug 107718)
+
+- It was possible for random confidential information to be
+  divulged, if the shadow database was in use and became
+  corrupted.
+  (bug 92263)
 
 ********************************************
 *** USERS UPGRADING FROM 2.14 OR EARLIER ***

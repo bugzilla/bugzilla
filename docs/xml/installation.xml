@@ -2094,7 +2094,7 @@ pid-file=/home/foo/mymysql/the.pid
         <prompt>bash$</prompt>
         <command>sh Configure -de -Dprefix=/home/foo/perl</command>
         <prompt>bash$</prompt>
-        <command>make && make test && make install</command>
+        <command>make &amp;&amp; make test &amp;&amp; make install</command>
       </screen>
 
       <para>Once you have Perl installed into a directory (probably

@@ -1333,7 +1333,7 @@ if ($order) {
                               . "name <em>$qfragment</em>.";
                     if ($order_from_cookie) {
                         my $cookiepath = Param("cookiepath");
-                        print "Set-Cookie: LASTORDER= ; path=$cookiepath; expires=Sun, 30-Jun-80 00:00:00 GMT\n";
+                        print "Set-Cookie: LASTORDER= ; path=$cookiepath; expires=Tue, 15-Sep-1998 21:49:00 GMT\n";
                         $error =~ s/form submission/cookie/;
                         $error .= "  The cookie has been cleared.";
                     }
@@ -1576,15 +1576,15 @@ if ($format->{'extension'} eq "html") {
 
     if ($order) {
         my $qorder = url_quote($order);
-        print "Set-Cookie: LASTORDER=$qorder ; path=$cookiepath; expires=Sun, 30-Jun-2029 00:00:00 GMT\n";
+        print "Set-Cookie: LASTORDER=$qorder ; path=$cookiepath; expires=Sat, 30-Jun-2029 00:00:00 GMT\n";
     }
     my $bugids = join(":", map( $_->{'id'}, @bugs));
     # See also Bug 111999
     if (length($bugids) < 4000) {
-        print "Set-Cookie: BUGLIST=$bugids ; path=$cookiepath; expires=Sun, 30-Jun-2029 00:00:00 GMT\n";
+        print "Set-Cookie: BUGLIST=$bugids ; path=$cookiepath; expires=Sat, 30-Jun-2029 00:00:00 GMT\n";
     }
     else {
-        print "Set-Cookie: BUGLIST= ; path=$cookiepath; expires=Sun, 30-Jun-2029 00:00:00 GMT\n";
+        print "Set-Cookie: BUGLIST= ; path=$cookiepath; expires=Sat, 30-Jun-2029 00:00:00 GMT\n";
         $vars->{'toolong'} = 1;
     }
 }

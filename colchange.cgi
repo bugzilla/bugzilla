@@ -84,8 +84,8 @@ if (defined $::FORM{'rememberedquery'}) {
     my $list = join(" ", @collist);
     my $urlbase = Param("urlbase");
     my $cookiepath = Param("cookiepath");
-    print "Set-Cookie: COLUMNLIST=$list ; path=$cookiepath ; expires=Sun, 30-Jun-2029 00:00:00 GMT\n";
-    print "Set-Cookie: SPLITHEADER=$::FORM{'splitheader'} ; path=$cookiepath ; expires=Sun, 30-Jun-2029 00:00:00 GMT\n";
+    print "Set-Cookie: COLUMNLIST=$list ; path=$cookiepath ; expires=Sat, 30-Jun-2029 00:00:00 GMT\n";
+    print "Set-Cookie: SPLITHEADER=$::FORM{'splitheader'} ; path=$cookiepath ; expires=Sat, 30-Jun-2029 00:00:00 GMT\n";
     print "Refresh: 0; URL=buglist.cgi?$::FORM{'rememberedquery'}\n";
     print "\n";
     print "<META HTTP-EQUIV=Refresh CONTENT=\"1; URL=$urlbase"."buglist.cgi?$::FORM{'rememberedquery'}\">\n";

@@ -89,7 +89,7 @@ if ($::userid) {
                 }
             }
             print "Set-Cookie: $cookiename= ; path=" . Param("cookiepath") . 
-                  "; expires=Sun, 30-Jun-1980 00:00:00 GMT\n";
+                  "; expires=Tue, 15-Sep-1998 21:49:00 GMT\n";
         }
     }
 }

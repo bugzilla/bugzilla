@@ -51,8 +51,8 @@ if ($::userid) {
 }
 
 my $cookiepath = Param("cookiepath");
-print "Set-Cookie: Bugzilla_login= ; path=$cookiepath; expires=Sun, 30-Jun-80 00:00:00 GMT
-Set-Cookie: Bugzilla_logincookie= ; path=$cookiepath; expires=Sun, 30-Jun-80 00:00:00 GMT
+print "Set-Cookie: Bugzilla_login= ; path=$cookiepath; expires=Tue, 15-Sep-1998 21:49:00 GMT
+Set-Cookie: Bugzilla_logincookie= ; path=$cookiepath; expires=Tue, 15-Sep-1998 21:49:00 GMT
 ";
 
 delete $::COOKIE{"Bugzilla_login"};

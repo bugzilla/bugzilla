@@ -55,8 +55,8 @@ if(Param('useLDAP')) {
 # Clear out the login cookies.  Make people log in again if they create an
 # account; otherwise, they'll probably get confused.
 my $cookiepath = Param("cookiepath");
-print "Set-Cookie: Bugzilla_login= ; path=$cookiepath; expires=Sun, 30-Jun-80 00:00:00 GMT
-Set-Cookie: Bugzilla_logincookie= ; path=$cookiepath; expires=Sun, 30-Jun-80 00:00:00 GMT\n";
+print "Set-Cookie: Bugzilla_login= ; path=$cookiepath; expires=Tue, 15-Sep-1998 21:49:00 GMT
+Set-Cookie: Bugzilla_logincookie= ; path=$cookiepath; expires=Tue, 15-Sep-1998 21:49:00 GMT\n";
 
 print "Content-Type: text/html\n\n";
 

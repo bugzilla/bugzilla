@@ -79,10 +79,18 @@ CLASS="section"
 ><H2
 CLASS="section"
 ><A
-NAME="AEN1145">4.5.1. Modifying Your Running System</H2
+NAME="AEN1144">4.5.1. Modifying Your Running System</H2
 ><P
 >Bugzilla optimizes database lookups by storing all relatively
-      static information in the versioncache file, located in the data/
+      static information in the 
+      <TT
+CLASS="filename"
+>versioncache</TT
+> file, located in the 
+      <TT
+CLASS="filename"
+>data/</TT
+>
       subdirectory under your installation directory.</P
 ><P
 >If you make a change to the structural data in your database (the
@@ -92,8 +100,11 @@ CLASS="QUOTE"
 >"constants"</SPAN
 >
 
-      encoded in defparams.pl, you will need to remove the cached content
-      from the data directory (by doing a 
+      encoded in <TT
+CLASS="filename"
+>defparams.pl</TT
+>, you will need to remove 
+      the cached content from the data directory (by doing a 
       <SPAN
 CLASS="QUOTE"
 >"rm data/versioncache"</SPAN
@@ -101,7 +112,11 @@ CLASS="QUOTE"
 
       ), or your changes won't show up.</P
 ><P
->That file gets automatically regenerated whenever it's more than
+> <TT
+CLASS="filename"
+>versioncache</TT
+> 
+      gets automatically regenerated whenever it's more than
       an hour old, so Bugzilla will eventually notice your changes by itself,
       but generally you want it to notice right away, so that you can test
       things.</P
@@ -111,7 +126,7 @@ CLASS="section"
 ><H2
 CLASS="section"
 ><A
-NAME="AEN1152">4.5.2. Upgrading From Previous Versions</H2
+NAME="AEN1155">4.5.2. Upgrading From Previous Versions</H2
 ><P
 >A plain Bugzilla is fairly easy to upgrade from one version to a
       newer one. However, things get a bit more complicated if you've made
@@ -131,7 +146,11 @@ CLASS="filename"
 >Because the developers of Bugzilla are constantly adding new
       tables, columns and fields, you'll probably get SQL errors if you just
       update the code and attempt to use Bugzilla. Always run the
-      checksetup.pl script whenever you upgrade your installation.</P
+      <TT
+CLASS="filename"
+>checksetup.pl</TT
+> 
+      script whenever you upgrade your installation.</P
 ><P
 >If you are running Bugzilla version 2.8 or lower, and wish to
       upgrade to the latest version, please consult the file,
@@ -147,11 +166,13 @@ NAME="htaccess">4.5.3. <TT
 CLASS="filename"
 >.htaccess</TT
 >
-
       files and security</H2
 ><P
->To enhance the security of your Bugzilla installation, Bugzilla
-      will generate 
+>To enhance the security of your Bugzilla installation, Bugzilla's
+      <TT
+CLASS="filename"
+>checksetup.pl</TT
+> script will generate 
       <I
 CLASS="glossterm"
 >&#13;        <TT
@@ -162,13 +183,8 @@ CLASS="filename"
 >
 
       files which the Apache webserver can use to restrict access to the
-      bugzilla data files. The checksetup script will generate the 
-      <TT
-CLASS="filename"
->.htaccess</TT
->
-
-      files. These .htaccess files will not work with Apache 1.2.x - but this
+      bugzilla data files. 
+      These .htaccess files will not work with Apache 1.2.x - but this
       has security holes, so you shouldn't be using it anyway. 
       <DIV
 CLASS="note"
@@ -241,7 +257,8 @@ CLASS="filename"
 
       file:</P
 ><P
->&#13;        <TABLE
+>&#13;      
+<TABLE
 BORDER="0"
 BGCOLOR="#E0E0E0"
 WIDTH="100%"
@@ -251,18 +268,17 @@ WIDTH="100%"
 COLOR="#000000"
 ><PRE
 CLASS="programlisting"
->&#13;
-&#60;Directory /usr/local/bugzilla/&#62;
+>&#13;  &#60;Directory /usr/local/bugzilla/&#62;
   Options +FollowSymLinks +Indexes +Includes +ExecCGI
   AllowOverride All
 &#60;/Directory&#62;
-
-        </PRE
+</PRE
 ></FONT
 ></TD
 ></TR
 ></TABLE
 >
+
       </P
 ><P
 >The important part above is 
@@ -286,34 +302,30 @@ CLASS="filename"
       will not have sufficient permissions to protect your Bugzilla
       installation.</P
 ><P
->If you are using Internet Information Server or other web server
-      which does not observe 
+>If you are using Internet Information Server (IIS) or another 
+      web server which does not observe 
       <TT
 CLASS="filename"
 >.htaccess</TT
 >
-
       conventions, you can disable their creation by editing 
       <TT
 CLASS="filename"
 >localconfig</TT
 >
-
       and setting the 
       <TT
 CLASS="varname"
 >$create_htaccess</TT
 >
-
       variable to 
       <TT
 CLASS="parameter"
 ><I
 >0</I
 ></TT
->
-
-      .</P
+>.
+      </P
 ></DIV
 ><DIV
 CLASS="section"
@@ -342,15 +354,13 @@ CLASS="filename"
 HREF="http://www.snert.com/Software/Throttle/"
 TARGET="_top"
 >&#13;      http://www.snert.com/Software/Throttle/</A
->
-
-      . Follow the instructions to install into your Apache install. 
+>. 
+      Follow the instructions to install into your Apache install. 
       <EM
 >This module only functions with the Apache web
       server!</EM
 >
-
-      . You may use the 
+      You may use the 
       <B
 CLASS="command"
 >ThrottleClientIP</B
@@ -363,7 +373,6 @@ TARGET="_top"
 >Module
       Instructions</A
 >
-
       for more information.</P
 ></DIV
 ><DIV
@@ -399,11 +408,8 @@ WIDTH="100%"
 COLOR="#000000"
 ><PRE
 CLASS="programlisting"
->bash# cd &#60;your_bugzilla_dir&#62;; 
-        for i in `ls *.cgi`; \ do
-        cat $i | sed 's/Content-type\: text\/html/Content-Type: text\/html\;
-        charset=ISO-8859-1/' &#62;$i.tmp; \ mv $i.tmp $i;
-        done</PRE
+>bash# perl -pi -e "s/Content-Type\: text\/html/Content-Type\: text\/html\; charset=ISO-8859-1/i" *.cgi *.pl
+        </PRE
 ></FONT
 ></TD
 ></TR

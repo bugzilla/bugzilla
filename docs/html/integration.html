@@ -13,8 +13,8 @@ REL="UP"
 TITLE="Administering Bugzilla"
 HREF="administration.html"><LINK
 REL="PREVIOUS"
-TITLE="Template Customisation"
-HREF="cust-templates.html"><LINK
+TITLE="Upgrading to New Releases"
+HREF="upgrading.html"><LINK
 REL="NEXT"
 TITLE="The Bugzilla FAQ"
 HREF="faq.html"></HEAD
@@ -45,7 +45,7 @@ WIDTH="10%"
 ALIGN="left"
 VALIGN="bottom"
 ><A
-HREF="cust-templates.html"
+HREF="upgrading.html"
 ACCESSKEY="P"
 >Prev</A
 ></TD
@@ -73,13 +73,13 @@ CLASS="section"
 ><H1
 CLASS="section"
 ><A
-NAME="integration">5.8. Integrating Bugzilla with Third-Party Tools</H1
+NAME="integration">5.9. Integrating Bugzilla with Third-Party Tools</H1
 ><DIV
 CLASS="section"
 ><H2
 CLASS="section"
 ><A
-NAME="bonsai">5.8.1. Bonsai</H2
+NAME="bonsai">5.9.1. Bonsai</H2
 ><P
 >Bonsai is a web-based tool for managing 
     <A
@@ -90,68 +90,51 @@ HREF="integration.html#cvs"
     . Using Bonsai, administrators can control open/closed status of trees,
     query a fast relational database back-end for change, branch, and comment
     information, and view changes made since the last time the tree was
-    closed. These kinds of changes cause the engineer responsible to be 
-    <SPAN
-CLASS="QUOTE"
->"on the hook"</SPAN
->
-
-    (include cool URL link here for Hook policies at mozilla.org). Bonsai
-    also includes gateways to 
+    closed. Bonsai
+    also integrates with  
     <A
 HREF="integration.html#tinderbox"
 >Tinderbox, the Mozilla automated build management system</A
->
-
-    and Bugzilla</P
+>.
+    </P
 ></DIV
 ><DIV
 CLASS="section"
 ><H2
 CLASS="section"
 ><A
-NAME="cvs">5.8.2. CVS</H2
+NAME="cvs">5.9.2. CVS</H2
 ><P
 >CVS integration is best accomplished, at this point, using the
-    Bugzilla Email Gateway. There have been some files submitted to allow
-    greater CVS integration, but we need to make certain that Bugzilla is not
-    tied into one particular software management package.</P
+    Bugzilla Email Gateway.</P
 ><P
->Follow the instructions in the FAQ for enabling Bugzilla e-mail
+>Follow the instructions in this Guide for enabling Bugzilla e-mail
     integration. Ensure that your check-in script sends an email to your
     Bugzilla e-mail gateway with the subject of 
     <SPAN
 CLASS="QUOTE"
 >"[Bug XXXX]"</SPAN
->
-
-    , and you can have CVS check-in comments append to your Bugzilla bug. If
+>, 
+    and you can have CVS check-in comments append to your Bugzilla bug. If
     you have your check-in script include an @resolution field, you can even
     change the Bugzilla bug state.</P
 ><P
->There is also a project, based upon somewhat dated Bugzilla code,
-    to integrate CVS and Bugzilla through CVS' ability to email. Check it out
-    at: 
+>There is also a CVSZilla project, based upon somewhat dated 
+    Bugzilla code, to integrate CVS and Bugzilla through CVS' ability to 
+    email. Check it out at: 
     <A
 HREF="http://homepages.kcbbs.gen.nz/~tonyg/"
 TARGET="_top"
 >&#13;    http://homepages.kcbbs.gen.nz/~tonyg/</A
->
-
-    , under the 
-    <SPAN
-CLASS="QUOTE"
->"cvszilla"</SPAN
->
-
-    link.</P
+>.
+    </P
 ></DIV
 ><DIV
 CLASS="section"
 ><H2
 CLASS="section"
 ><A
-NAME="scm">5.8.3. Perforce SCM</H2
+NAME="scm">5.9.3. Perforce SCM</H2
 ><P
 >You can find the project page for Bugzilla and Teamtrack Perforce
     integration (p4dti) at: 
@@ -189,7 +172,7 @@ CLASS="section"
 ><H2
 CLASS="section"
 ><A
-NAME="tinderbox">5.8.4. Tinderbox/Tinderbox2</H2
+NAME="tinderbox">5.9.4. Tinderbox/Tinderbox2</H2
 ><P
 >We need Tinderbox integration information.</P
 ></DIV
@@ -210,7 +193,7 @@ WIDTH="33%"
 ALIGN="left"
 VALIGN="top"
 ><A
-HREF="cust-templates.html"
+HREF="upgrading.html"
 ACCESSKEY="P"
 >Prev</A
 ></TD
@@ -238,7 +221,7 @@ ACCESSKEY="N"
 WIDTH="33%"
 ALIGN="left"
 VALIGN="top"
->Template Customisation</TD
+>Upgrading to New Releases</TD
 ><TD
 WIDTH="34%"
 ALIGN="center"

@@ -145,8 +145,16 @@ NAME="quicksearch">3.2.2. Quicksearch</H2
 ><P
 >Quicksearch is a single-text-box query tool which uses
       metacharacters to indicate what is to be searched. For example, typing
-      "foo|bar" into Quicksearch would search for "foo" or "bar" in the 
-      summary and status whiteboard of a bug; adding ":BazProduct" would
+      "<TT
+CLASS="filename"
+>foo|bar</TT
+>" 
+      into Quicksearch would search for "foo" or "bar" in the 
+      summary and status whiteboard of a bug; adding 
+      "<TT
+CLASS="filename"
+>:BazProduct</TT
+>" would
       search only in that product.
       </P
 ><P
@@ -169,7 +177,7 @@ NAME="commenting">3.2.3. Comments</H2
 >If you are changing the fields on a bug, only comment if
       either you have something pertinent to say, or Bugzilla requires it.
       Otherwise, you may spam people unnecessarily with bug mail.
-      To take an example: a user sets up their account to filter out messages
+      To take an example: a user can set up their account to filter out messages
       where someone just adds themselves to the CC field of a bug
       (which happens a lot.) If you come along, add yourself to the CC field,
       and add a comment saying "Adding self to CC", then that person
@@ -198,8 +206,8 @@ NAME="attachments">3.2.4. Attachments</H2
       you are pointing out a single-pixel problem.
       </P
 ><P
->Don't attach simple test cases (e.g. one html file and one 
-      css file and one image) as a ZIP file. Instead, upload them in 
+>Don't attach simple test cases (e.g. one HTML file, one 
+      CSS file and an image) as a ZIP file. Instead, upload them in 
       reverse order and edit the referring file so that they point to the
       attached files. This way, the test case works immediately 
       out of the bug.
@@ -210,7 +218,7 @@ CLASS="section"
 ><H2
 CLASS="section"
 ><A
-NAME="AEN460">3.2.5. Filing Bugs</H2
+NAME="AEN462">3.2.5. Filing Bugs</H2
 ><P
 >Try to make sure that everything said in the summary is also 
       said in the first comment. Summaries are often updated and this will

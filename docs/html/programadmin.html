@@ -74,39 +74,12 @@ CLASS="section"
 CLASS="section"
 ><A
 NAME="programadmin">5.3. Product, Component, Milestone, and Version Administration</H1
-><TABLE
-BORDER="0"
-WIDTH="100%"
-CELLSPACING="0"
-CELLPADDING="0"
-CLASS="EPIGRAPH"
-><TR
-><TD
-WIDTH="45%"
->&nbsp;</TD
-><TD
-WIDTH="45%"
-ALIGN="LEFT"
-VALIGN="TOP"
-><I
-><P
-><I
->Dear Lord, we have to get our users to do WHAT?</I
-></P
-></I
-></TD
-></TR
-></TABLE
 ><DIV
 CLASS="section"
 ><H2
 CLASS="section"
 ><A
 NAME="products">5.3.1. Products</H2
-><FONT
-COLOR="RED"
->Formerly, and in some spots still, called
-      "Programs"</FONT
 ><P
 >&#13;      <A
 HREF="glossary.html#gloss-product"
@@ -116,18 +89,17 @@ CLASS="glossterm"
 ></A
 >
 
-      are the broadest category in Bugzilla, and you should have the least of
-      these. If your company makes computer games, you should have one
-      product per game, and possibly a few special products (website,
-      meetings...)</P
+      are the broadest category in Bugzilla, and tend to represent real-world
+      shipping products. E.g. if your company makes computer games, 
+      you should have one product per game, perhaps a "Common" product for 
+      units of technology used in multiple games, and maybe a few special
+       products (Website, Administration...)</P
 ><P
->A Product (formerly called "Program", and still referred to that
-      way in some portions of the source code) controls some very important
-      functions. The number of "votes" available for users to vote for the
-      most important bugs is set per-product, as is the number of votes
+>Many of Bugzilla's settings are configurable on a per-product
+      basis. The number of "votes" available to users is set per-product, 
+      as is the number of votes
       required to move a bug automatically from the UNCONFIRMED status to the
-      NEW status. One can close a Product for further bug entry and define
-      various Versions available from the Edit product screen.</P
+      NEW status.</P
 ><P
 >To create a new product:</P
 ><P
@@ -136,77 +108,25 @@ CLASS="glossterm"
 TYPE="1"
 ><LI
 ><P
->Select "components" from the yellow footer</P
-><DIV
-CLASS="tip"
-><P
-></P
-><TABLE
-CLASS="tip"
-WIDTH="100%"
-BORDER="0"
-><TR
-><TD
-WIDTH="25"
-ALIGN="CENTER"
-VALIGN="TOP"
-><IMG
-SRC="../images/tip.gif"
-HSPACE="5"
-ALT="Tip"></TD
-><TD
-ALIGN="LEFT"
-VALIGN="TOP"
-><P
->It may seem counterintuitive to click "components" when you
-            want to edit the properties associated with Products. This is one
-            of a long list of things we want in Bugzilla 3.0...</P
-></TD
-></TR
-></TABLE
-></DIV
+>Select "products" from the footer</P
 ></LI
 ><LI
 ><P
->Select the "Add" link to the right of "Add a new
-          product".</P
+>Select the "Add" link in the bottom right</P
 ></LI
 ><LI
 ><P
 >Enter the name of the product and a description. The
-          Description field is free-form.</P
+          Description field may contain HTML.</P
 ></LI
 ></OL
-><DIV
-CLASS="tip"
-><P
-></P
-><TABLE
-CLASS="tip"
-WIDTH="100%"
-BORDER="0"
-><TR
-><TD
-WIDTH="25"
-ALIGN="CENTER"
-VALIGN="TOP"
-><IMG
-SRC="../images/tip.gif"
-HSPACE="5"
-ALT="Tip"></TD
-><TD
-ALIGN="LEFT"
-VALIGN="TOP"
 ><P
 >Don't worry about the "Closed for bug entry", "Maximum Votes
-        per person", "Maximum votes a person can put on a single bug",
-        "Number of votes a bug in this Product needs to automatically get out
-        of the UNCOMFIRMED state", and "Version" options yet. We'll cover
-        those in a few moments.</P
-></TD
-></TR
-></TABLE
-></DIV
+      per person", "Maximum votes a person can put on a single bug",
+      "Number of votes a bug in this Product needs to automatically get out
+      of the UNCOMFIRMED state", and "Version" options yet. We'll cover
+      those in a few moments.
+      </P
 ></DIV
 ><DIV
 CLASS="section"
@@ -215,33 +135,15 @@ CLASS="section"
 ><A
 NAME="components">5.3.2. Components</H2
 ><P
->Components are subsections of a Product. 
-      <DIV
-CLASS="example"
-><A
-NAME="AEN1424"><P
-><B
->Example 5-1. Creating some Components</B
-></P
-><DIV
-CLASS="informalexample"
-><A
-NAME="AEN1426"><P
-></P
+>Components are subsections of a Product. E.g. the computer game 
+      you are designing may have a "UI"
+      component, an "API" component, a "Sound System" component, and a
+      "Plugins" component, each overseen by a different programmer. It
+      often makes sense to divide Components in Bugzilla according to the
+      natural divisions of responsibility within your Product or
+      company.</P
 ><P
->The computer game you are designing may have a "UI"
-          component, an "API" component, a "Sound System" component, and a
-          "Plugins" component, each overseen by a different programmer. It
-          often makes sense to divide Components in Bugzilla according to the
-          natural divisions of responsibility within your Product or
-          company.</P
-><P
-></P
-></DIV
-></DIV
->
-
-      Each component has a owner and (if you turned it on in the parameters),
+>&#13;      Each component has a owner and (if you turned it on in the parameters),
       a QA Contact. The owner should be the primary person who fixes bugs in
       that component. The QA Contact should be the person who will ensure
       these bugs are completely fixed. The Owner, QA Contact, and Reporter
@@ -250,10 +152,9 @@ NAME="AEN1426"><P
       dictate the 
       <EM
 >default assignments</EM
->
-
-      ; the Owner and QA Contact fields in a bug are otherwise unrelated to
-      the Component.</P
+>; 
+      these can be changed on bug submission, or at any later point in
+      a bug's life.</P
 ><P
 >To create a new Component:</P
 ><P
@@ -267,81 +168,16 @@ TYPE="1"
 ></LI
 ><LI
 ><P
->Select the "Add" link to the right of the "Add a new
-          component" text on the "Select Component" page.</P
+>Select the "Add" link in the bottom right.</P
 ></LI
 ><LI
 ><P
->Fill out the "Component" field, a short "Description", and
-          the "Initial Owner". The Component and Description fields are
-          free-form; the "Initial Owner" field must be that of a user ID
-          already existing in the database. If the initial owner does not
-          exist, Bugzilla will refuse to create the component. 
-          <DIV
-CLASS="tip"
-><P
-></P
-><TABLE
-CLASS="tip"
-WIDTH="100%"
-BORDER="0"
-><TR
-><TD
-WIDTH="25"
-ALIGN="CENTER"
-VALIGN="TOP"
-><IMG
-SRC="../images/tip.gif"
-HSPACE="5"
-ALT="Tip"></TD
-><TD
-ALIGN="LEFT"
-VALIGN="TOP"
-><P
->Is your "Default Owner" a user who is not yet in the
-            database? No problem. 
-            <P
-></P
-><OL
-TYPE="a"
-><LI
-><P
->Select the "Log out" link on the footer of the
-                page.</P
-></LI
-><LI
-><P
->Select the "New Account" link on the footer of the
-                "Relogin" page</P
-></LI
-><LI
-><P
->Type in the email address of the default owner you want
-                to create in the "E-mail address" field, and her full name in
-                the "Real name" field, then select the "Submit Query"
-                button.</P
-></LI
-><LI
-><P
->Now select "Log in" again, type in your login
-                information, and you can modify the product to use the
-                Default Owner information you require.</P
-></LI
-></OL
->
-            </P
-></TD
-></TR
-></TABLE
-></DIV
->
+>Fill out the "Component" field, a short "Description", 
+          the "Initial Owner" and "Initial QA Contact" (if enabled.) 
+          The Component and Description fields may contain HTML; 
+          the "Initial Owner" field must be a login name
+          already existing in the database. 
           </P
-></LI
-><LI
-><P
->Either Edit more components or return to the Bugzilla Query
-          Page. To return to the Product you were editing, you must select
-          the Components link as before.</P
 ></LI
 ></OL
 ></DIV
@@ -353,60 +189,9 @@ CLASS="section"
 NAME="versions">5.3.3. Versions</H2
 ><P
 >Versions are the revisions of the product, such as "Flinders
-      3.1", "Flinders 95", and "Flinders 2000". Using Versions helps you
-      isolate code changes and are an aid in reporting. 
-      <DIV
-CLASS="example"
-><A
-NAME="AEN1453"><P
-><B
->Example 5-2. Common Use of Versions</B
-></P
-><DIV
-CLASS="informalexample"
-><A
-NAME="AEN1455"><P
-></P
-><P
->A user reports a bug against Version "Beta 2.0" of your
-          product. The current Version of your software is "Release Candidate
-          1", and no longer has the bug. This will help you triage and
-          classify bugs according to their relevance. It is also possible
-          people may report bugs against bleeding-edge beta versions that are
-          not evident in older versions of the software. This can help
-          isolate code changes that caused the bug</P
-><P
-></P
-></DIV
-></DIV
->
-
-      <DIV
-CLASS="example"
-><A
-NAME="AEN1457"><P
-><B
->Example 5-3. A Different Use of Versions</B
-></P
-><DIV
-CLASS="informalexample"
-><A
-NAME="AEN1459"><P
-></P
-><P
->This field has been used to good effect by an online service
-          provider in a slightly different way. They had three versions of
-          the product: "Production", "QA", and "Dev". Although it may be the
-          same product, a bug in the development environment is not normally
-          as critical as a Production bug, nor does it need to be reported
-          publicly. When used in conjunction with Target Milestones, one can
-          easily specify the environment where a bug can be reproduced, and
-          the Milestone by which it will be fixed.</P
-><P
-></P
-></DIV
-></DIV
->
+      3.1", "Flinders 95", and "Flinders 2000". Version is not a multi-select
+      field; the usual practice is to select the most recent version with
+      the bug.
       </P
 ><P
 >To create and edit Versions:</P
@@ -421,26 +206,12 @@ TYPE="1"
 ><LI
 ><P
 >You will notice that the product already has the default
-          version "undefined". If your product doesn't use version numbers,
-          you may want to leave this as it is or edit it so that it is "---".
-          You can then go back to the edit versions page and add new versions
-          to your product.</P
-><P
->Otherwise, click the "Add" button to the right of the "Add a
-          new version" text.</P
+          version "undefined". Click the "Add" link in the bottom right.</P
 ></LI
 ><LI
 ><P
->Enter the name of the Version. This can be free-form
-          characters up to the limit of the text box. Then select the "Add"
-          button.</P
-></LI
-><LI
-><P
->At this point you can select "Edit" to edit more Versions, or
-          return to the "Query" page, from which you can navigate back to the
-          product through the "components" link at the foot of the Query
-          page.</P
+>Enter the name of the Version. This field takes text only. 
+          Then click the "Add" button.</P
 ></LI
 ></OL
 ></DIV
@@ -453,8 +224,7 @@ NAME="milestones">5.3.4. Milestones</H2
 ><P
 >Milestones are "targets" that you plan to get a bug fixed by. For
       example, you have a bug that you plan to fix for your 3.0 release, it
-      would be assigned the milestone of 3.0. Or, you have a bug that you
-      plan to fix for 2.8, this would have a milestone of 2.8.</P
+      would be assigned the milestone of 3.0.</P
 ><DIV
 CLASS="note"
 ><P
@@ -477,8 +247,8 @@ ALIGN="LEFT"
 VALIGN="TOP"
 ><P
 >Milestone options will only appear for a Product if you turned
-        the "usetargetmilestone" field in the "Edit Parameters" screen
-        "On".</P
+        on the "usetargetmilestone" Param in the "Edit Parameters" screen.
+        </P
 ></TD
 ></TR
 ></TABLE
@@ -492,55 +262,33 @@ VALIGN="TOP"
 TYPE="1"
 ><LI
 ><P
->Select "edit milestones"</P
+>Select "Edit milestones" from the "Edit product" page.</P
 ></LI
 ><LI
 ><P
->Select "Add" to the right of the "Add a new milestone"
+>Select "Add" in the bottom right corner.
           text</P
 ></LI
 ><LI
 ><P
 >Enter the name of the Milestone in the "Milestone" field. You
-          can optionally set the "Sortkey", which is a positive or negative
+          can optionally set the "sortkey", which is a positive or negative
           number (-255 to 255) that defines where in the list this particular
-          milestone appears. Select "Add".</P
-><DIV
-CLASS="example"
-><A
-NAME="AEN1485"><P
-><B
->Example 5-4. Using SortKey with Target Milestone</B
-></P
-><DIV
-CLASS="informalexample"
-><A
-NAME="AEN1487"><P
-></P
-><P
->Let's say you create a target milestone called "Release
-              1.0", with Sortkey set to "0". Later, you realize that you will
-              have a public beta, called "Beta1". You can create a Milestone
-              called "Beta1", with a Sortkey of "-1" in order to ensure
-              people will see the Target Milestone of "Beta1" earlier on the
-              list than "Release 1.0"</P
-><P
-></P
-></DIV
-></DIV
+          milestone appears. This is because milestones often do not 
+          occur in alphanumeric order For example, "Future" might be
+          after "Release 1.2". Select "Add".</P
 ></LI
 ><LI
 ><P
->If you want to add more milestones, select the "Edit" link.
-          If you don't, well shoot, you have to go back to the "query" page
-          and select "components" again, and make your way back to the
-          Product you were editing. 
-          <DIV
-CLASS="note"
+>From the Edit product screen, you can enter the URL of a 
+          page which gives information about your milestones and what
+          they mean. </P
+><DIV
+CLASS="tip"
 ><P
 ></P
 ><TABLE
-CLASS="note"
+CLASS="tip"
 WIDTH="100%"
 BORDER="0"
 ><TR
@@ -549,47 +297,21 @@ WIDTH="25"
 ALIGN="CENTER"
 VALIGN="TOP"
 ><IMG
-SRC="../images/note.gif"
+SRC="../images/tip.gif"
 HSPACE="5"
-ALT="Note"></TD
+ALT="Tip"></TD
 ><TD
 ALIGN="LEFT"
 VALIGN="TOP"
 ><P
->This is another in the list of unusual user interface
-            decisions that we'd like to get cleaned up. Shouldn't there be a
-            link to the effect of "edit the Product I was editing when I
-            ended up here"? In any case, clicking "components" in the footer
-            takes you back to the "Select product" screen, from which you can
-            begin editing your product again.</P
+>If you want your milestone document to be restricted so
+          that it can only be viewed by people in a particular Bugzilla
+          group, the best way is to attach the document to a bug in that
+          group, and make the URL the URL of that attachment.</P
 ></TD
 ></TR
 ></TABLE
 ></DIV
->
-          </P
-></LI
-><LI
-><P
->From the Edit product screen again (once you've made your way
-          back), enter the URL for a description of what your milestones are
-          for this product in the "Milestone URL" field. It should be of the
-          format "http://www.foo.com/bugzilla/product_milestones.html"</P
-><P
->Some common uses of this field include product descriptions,
-          product roadmaps, and of course a simple description of the meaning
-          of each milestone.</P
-></LI
-><LI
-><P
->If you're using Target Milestones, the "Default Milestone"
-          field must have some kind of entry. If you really don't care if
-          people set coherent Target Milestones, simply leave this at the
-          default, "---". However, controlling and regularly updating the
-          Default Milestone field is a powerful tool when reporting the
-          status of projects.</P
-><P
->Select the "Update" button when you are done.</P
 ></LI
 ></OL
 ></DIV

@@ -16,8 +16,8 @@ REL="PREVIOUS"
 TITLE="Administering Bugzilla"
 HREF="administration.html"><LINK
 REL="NEXT"
-TITLE="User Administration"
-HREF="useradmin.html"></HEAD
+TITLE="Upgrading to New Releases"
+HREF="upgrading.html"></HEAD
 ><BODY
 CLASS="section"
 BGCOLOR="#FFFFFF"
@@ -59,7 +59,7 @@ WIDTH="10%"
 ALIGN="right"
 VALIGN="bottom"
 ><A
-HREF="useradmin.html"
+HREF="upgrading.html"
 ACCESSKEY="N"
 >Next</A
 ></TD
@@ -143,7 +143,7 @@ CLASS="filename"
 CLASS="command"
 >usebuggroups</B
 >:
-        Thisdictates whether or not to implement group-based security for
+        This dictates whether or not to implement group-based security for
         Bugzilla. If set, Bugzilla bugs can have an associated 'group',
         defining which users are allowed to see and edit the
         bug.</P
@@ -165,12 +165,13 @@ CLASS="command"
 CLASS="command"
 >usebuggroupsentry</B
 >:
-        When set to <SPAN
+        Bugzilla Products can have a group associated with them, so that
+        certain users can only see bugs in certain products. When this parameter
+        is set to <SPAN
 CLASS="QUOTE"
 >"on"</SPAN
->, this 
-        puts all bugs be placed in the group for their product immediately
-        after creation.</P
+>, this places all newly-created bugs in the
+        group for their product immediately.</P
 ></LI
 ><LI
 ><P
@@ -257,7 +258,9 @@ CLASS="command"
 
         If you need to shut down Bugzilla to perform administration, enter
         some descriptive HTML here and anyone who tries to use Bugzilla will
-        receive a page to that effect.
+        receive a page to that effect. Obviously, editparams.cgi will
+        still be accessible so you can remove the HTML and re-enable Bugzilla.
+        :-)
         </P
 ></LI
 ><LI
@@ -418,7 +421,7 @@ WIDTH="33%"
 ALIGN="right"
 VALIGN="top"
 ><A
-HREF="useradmin.html"
+HREF="upgrading.html"
 ACCESSKEY="N"
 >Next</A
 ></TD
@@ -442,7 +445,7 @@ ACCESSKEY="U"
 WIDTH="33%"
 ALIGN="right"
 VALIGN="top"
->User Administration</TD
+>Upgrading to New Releases</TD
 ></TR
 ></TABLE
 ></DIV

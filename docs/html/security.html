@@ -74,37 +74,12 @@ CLASS="section"
 CLASS="section"
 ><A
 NAME="security">5.6. Bugzilla Security</H1
-><TABLE
-BORDER="0"
-WIDTH="100%"
-CELLSPACING="0"
-CELLPADDING="0"
-CLASS="EPIGRAPH"
-><TR
-><TD
-WIDTH="45%"
->&nbsp;</TD
-><TD
-WIDTH="45%"
-ALIGN="LEFT"
-VALIGN="TOP"
-><I
-><P
-><I
->Putting your money in a wall safe is better protection than
-      depending on the fact that no one knows that you hide your money in a
-      mayonnaise jar in your fridge.</I
-></P
-></I
-></TD
-></TR
-></TABLE
 ><DIV
-CLASS="note"
+CLASS="warning"
 ><P
 ></P
 ><TABLE
-CLASS="note"
+CLASS="warning"
 WIDTH="100%"
 BORDER="0"
 ><TR
@@ -113,14 +88,14 @@ WIDTH="25"
 ALIGN="CENTER"
 VALIGN="TOP"
 ><IMG
-SRC="../images/note.gif"
+SRC="../images/warning.gif"
 HSPACE="5"
-ALT="Note"></TD
+ALT="Warning"></TD
 ><TD
 ALIGN="LEFT"
 VALIGN="TOP"
 ><P
->Poorly-configured MySQL, Bugzilla, and FTP installations have
+>Poorly-configured MySQL and Bugzilla installations have
       given attackers full access to systems in the past. Please take these
       guidelines seriously, even for Bugzilla machines hidden away behind
       your firewall. 80% of all computer trespassers are insiders, not
@@ -129,9 +104,7 @@ VALIGN="TOP"
 ></TR
 ></TABLE
 ></DIV
-><P
->Secure your installation. 
-    <DIV
+><DIV
 CLASS="note"
 ><P
 ></P
@@ -165,8 +138,9 @@ TARGET="_top"
 ></TR
 ></TABLE
 ></DIV
->
-
+><P
+>To secure your installation:
+     
     <P
 ></P
 ><OL
@@ -174,8 +148,8 @@ TYPE="1"
 ><LI
 ><P
 >Ensure you are running at least MysQL version 3.22.32 or newer.
-        Earlier versions had notable security holes and poorly secured
-        default configuration choices.</P
+        Earlier versions had notable security holes and (from a security
+        point of view) poor default configuration choices.</P
 ></LI
 ><LI
 ><P
@@ -186,19 +160,11 @@ TYPE="1"
 
         Read 
         <A
-HREF="http://www.mysql.com/documentation/mysql/bychapter/manual_Privilege_system.html"
+HREF="http://www.mysql.com/doc/P/r/Privilege_system.html"
 TARGET="_top"
 >&#13;        The MySQL Privilege System</A
 >
-
         until you can recite it from memory!</P
-><P
->At the very least, ensure you password the "mysql -u root"
-        account and the "bugs" account, establish grant table rights (consult
-        the Keystone guide in Appendix C: The Bugzilla Database for some
-        easy-to-use details) that do not allow CREATE, DROP, RELOAD,
-        SHUTDOWN, and PROCESS for user "bugs". I wrote up the Keystone advice
-        back when I knew far less about security than I do now : )</P
 ></LI
 ><LI
 ><P
@@ -264,69 +230,40 @@ CLASS="QUOTE"
 ><LI
 ><P
 >Ensure you have adequate access controls for the
-        $BUGZILLA_HOME/data/ and $BUGZILLA_HOME/shadow/ directories, as well
-        as the $BUGZILLA_HOME/localconfig and $BUGZILLA_HOME/globals.pl
-        files. The localconfig file stores your "bugs" user password, which
-        would be terrible to have in the hands of a criminal, while the
-        "globals.pl" stores some default information regarding your
-        installation which could aid a system cracker. In addition, some
-        files under $BUGZILLA_HOME/data/ store sensitive information, and
-        $BUGZILLA_HOME/shadow/ stores bug information for faster retrieval.
-        If you fail to secure these directories and this file, you will
-        expose bug information to those who may not be allowed to see
-        it.</P
-><DIV
-CLASS="note"
-><P
-></P
-><TABLE
-CLASS="note"
-WIDTH="100%"
-BORDER="0"
-><TR
-><TD
-WIDTH="25"
-ALIGN="CENTER"
-VALIGN="TOP"
-><IMG
-SRC="../images/note.gif"
-HSPACE="5"
-ALT="Note"></TD
-><TD
-ALIGN="LEFT"
-VALIGN="TOP"
+        $BUGZILLA_HOME/data/ directory, as well as the
+        $BUGZILLA_HOME/localconfig file.
+        The localconfig file stores your "bugs" database account password. 
+        In addition, some
+        files under $BUGZILLA_HOME/data/ store sensitive information.
+        </P
 ><P
 >Bugzilla provides default .htaccess files to protect the most
-          common Apache installations. However, you should verify these are
-          adequate according to the site-wide security policy of your web
-          server, and ensure that the .htaccess files are allowed to
-          "override" default permissions set in your Apache configuration
-          files. Covering Apache security is beyond the scope of this Guide;
-          please consult the Apache documentation for details.</P
+        common Apache installations. However, you should verify these are
+        adequate according to the site-wide security policy of your web
+        server, and ensure that the .htaccess files are allowed to
+        "override" default permissions set in your Apache configuration
+        files. Covering Apache security is beyond the scope of this Guide;
+        please consult the Apache documentation for details.</P
 ><P
 >If you are using a web server that does not support the
-          .htaccess control method, 
-          <EM
+        .htaccess control method, 
+        <EM
 >you are at risk!</EM
 >
 
-          After installing, check to see if you can view the file
-          "localconfig" in your web browser (e.g.: 
-          <A
+        After installing, check to see if you can view the file
+        "localconfig" in your web browser (e.g.: 
+        <A
 HREF="http://bugzilla.mozilla.org/localconfig"
 TARGET="_top"
->&#13;          http://bugzilla.mozilla.org/localconfig</A
+>&#13;        http://bugzilla.mozilla.org/localconfig</A
 >
 
-          ). If you can read the contents of this file, your web server has
-          not secured your bugzilla directory properly and you must fix this
-          problem before deploying Bugzilla. If, however, it gives you a
-          "Forbidden" error, then it probably respects the .htaccess
-          conventions and you are good to go.</P
-></TD
-></TR
-></TABLE
-></DIV
+        ). If you can read the contents of this file, your web server has
+        not secured your bugzilla directory properly and you must fix this
+        problem before deploying Bugzilla. If, however, it gives you a
+        "Forbidden" error, then it probably respects the .htaccess
+        conventions and you are good to go.</P
 ><P
 >When you run checksetup.pl, the script will attempt to modify
         various permissions on files which Bugzilla uses. If you do not have
@@ -385,7 +322,7 @@ TARGET="_top"
         65572</A
 >
 
-        for adequate protection in your data/ and shadow/ directories.</P
+        for adequate protection in your data/ directory.</P
 ><P
 >Note the instructions which follow are Apache-specific. If you
         use IIS, Netscape, or other non-Apache web servers, please consult
@@ -407,15 +344,6 @@ CLASS="literallayout"
 CLASS="literallayout"
 >&#60;Files&nbsp;localconfig&#62;&nbsp;deny&nbsp;from&nbsp;all&nbsp;&#60;/Files&#62;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;allow&nbsp;from&nbsp;all</P
->
-        </P
-><P
->Place the following text into a file named ".htaccess",
-        readable by your web server, in your $BUGZILLA_HOME/shadow directory.
-        
-        <P
-CLASS="literallayout"
->deny&nbsp;from&nbsp;all</P
 >
         </P
 ></LI

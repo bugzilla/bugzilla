@@ -16,8 +16,8 @@ REL="PREVIOUS"
 TITLE="Bugzilla Security"
 HREF="security.html"><LINK
 REL="NEXT"
-TITLE="Integrating Bugzilla with Third-Party Tools"
-HREF="integration.html"></HEAD
+TITLE="Upgrading to New Releases"
+HREF="upgrading.html"></HEAD
 ><BODY
 CLASS="section"
 BGCOLOR="#FFFFFF"
@@ -59,7 +59,7 @@ WIDTH="10%"
 ALIGN="right"
 VALIGN="bottom"
 ><A
-HREF="integration.html"
+HREF="upgrading.html"
 ACCESSKEY="N"
 >Next</A
 ></TD
@@ -97,7 +97,7 @@ CLASS="section"
 ><H2
 CLASS="section"
 ><A
-NAME="AEN1611">5.7.1. What to Edit</H2
+NAME="AEN1524">5.7.1. What to Edit</H2
 ><P
 >&#13;        There are several ways to take advantage of Bugzilla's templates,
         and which you use depends on what you want to do. The Bugzilla
@@ -138,11 +138,12 @@ CLASS="command"
         automagically merged into your modified versions.
       </P
 ><P
->&#13;        The other method is to copy the templates into 
-        <TT
+>&#13;        The other method is to copy the templates into a mirrored directory
+        structure under  <TT
 CLASS="filename"
 >template/en/custom</TT
->. This method is better if
+>. 
+        This method is better if
         you are going to make major changes, because it is guaranteed that
         the contents of this directory will not be touched during an upgrade,
         and you can then decide whether to continue using your own templates,
@@ -157,16 +158,48 @@ CLASS="filename"
 HREF="http://www.template-toolkit.org"
 TARGET="_top"
 >Template Toolkit home
-        page </A
+        page</A
 >.
       </P
+><DIV
+CLASS="note"
+><P
+></P
+><TABLE
+CLASS="note"
+WIDTH="100%"
+BORDER="0"
+><TR
+><TD
+WIDTH="25"
+ALIGN="CENTER"
+VALIGN="TOP"
+><IMG
+SRC="../images/note.gif"
+HSPACE="5"
+ALT="Note"></TD
+><TD
+ALIGN="LEFT"
+VALIGN="TOP"
+><P
+>&#13;          Don't directly edit the compiled templates in 
+          <TT
+CLASS="filename"
+>data/template/*</TT
+> - your
+          changes will be lost when Template Toolkit recompiles them.
+        </P
+></TD
+></TR
+></TABLE
+></DIV
 ></DIV
 ><DIV
 CLASS="section"
 ><H2
 CLASS="section"
 ><A
-NAME="AEN1626">5.7.2. Particular Templates</H2
+NAME="AEN1542">5.7.2. Particular Templates</H2
 ><P
 >&#13;        There are a few templates you may be particularly interested in
         customising for your installation.
@@ -184,13 +217,121 @@ CLASS="command"
         Editing these is a way to quickly get a distinctive look and
         feel for your Bugzilla installation.
       </P
+><P
+>&#13;        <B
+CLASS="command"
+>bug/create/create.html.tmpl</B
+> and
+        <B
+CLASS="command"
+>bug/create/comment.txt.tmpl</B
+>:
+        You may wish to get bug submitters to give certain bits of structured
+        information, each in a separate input widget, for which there is not a
+        field in the database. The bug entry system has been designed in an
+        extensible fashion to enable you to define arbitrary fields and widgets,
+        and have their values appear formatted in the initial
+        Description (rather than in database fields.)
+      </P
+><P
+>&#13;        To make this work, create a custom template for 
+        <TT
+CLASS="filename"
+>enter_bug.cgi</TT
+> (the default template, on which you
+        could base it, is <TT
+CLASS="filename"
+>create.html.tmpl</TT
+>),
+        and either call it <TT
+CLASS="filename"
+>create.html.tmpl</TT
+> or
+        <TT
+CLASS="filename"
+>create-&#60;formatname&#62;.html.tmpl</TT
+>.
+        Put it in the <TT
+CLASS="filename"
+>custom/bug/create</TT
+>
+        directory. In it, add widgets for each piece of information you'd like
+        collected - such as a build number, or set of steps to reproduce.
+      </P
+><P
+>&#13;        Then, create a template like 
+        <TT
+CLASS="filename"
+>custom/bug/create/comment.txt.tmpl</TT
+>, which
+        references the form fields you have created. When a bug report is
+        submitted, the initial comment attached to the bug report will be
+        formatted according to the layout of this template.
+      </P
+><P
+>&#13;        For example, if your enter_bug template had a field
+        <TABLE
+BORDER="0"
+BGCOLOR="#E0E0E0"
+WIDTH="100%"
+><TR
+><TD
+><FONT
+COLOR="#000000"
+><PRE
+CLASS="programlisting"
+>&#13;        &#60;input type="text" name="buildid" size="30"&#62;
+        </PRE
+></FONT
+></TD
+></TR
+></TABLE
+>
+        and then your comment.txt.tmpl had
+        <TABLE
+BORDER="0"
+BGCOLOR="#E0E0E0"
+WIDTH="100%"
+><TR
+><TD
+><FONT
+COLOR="#000000"
+><PRE
+CLASS="programlisting"
+>&#13;        BuildID: [% form.buildid %]
+        </PRE
+></FONT
+></TD
+></TR
+></TABLE
+>
+        then
+        <TABLE
+BORDER="0"
+BGCOLOR="#E0E0E0"
+WIDTH="100%"
+><TR
+><TD
+><FONT
+COLOR="#000000"
+><PRE
+CLASS="programlisting"
+>&#13;        BuildID: 20020303
+        </PRE
+></FONT
+></TD
+></TR
+></TABLE
+>
+        would appear in the initial checkin comment.
+      </P
 ></DIV
 ><DIV
 CLASS="section"
 ><H2
 CLASS="section"
 ><A
-NAME="AEN1632">5.7.3. Template Formats</H2
+NAME="AEN1563">5.7.3. Template Formats</H2
 ><P
 >&#13;        Some CGIs have the ability to use more than one template. For
         example, buglist.cgi can output bug lists as RDF or two
@@ -273,7 +414,7 @@ WIDTH="33%"
 ALIGN="right"
 VALIGN="top"
 ><A
-HREF="integration.html"
+HREF="upgrading.html"
 ACCESSKEY="N"
 >Next</A
 ></TD
@@ -297,7 +438,7 @@ ACCESSKEY="U"
 WIDTH="33%"
 ALIGN="right"
 VALIGN="top"
->Integrating Bugzilla with Third-Party Tools</TD
+>Upgrading to New Releases</TD
 ></TR
 ></TABLE
 ></DIV

@@ -13,8 +13,8 @@ REL="UP"
 TITLE="Installation"
 HREF="installation.html"><LINK
 REL="PREVIOUS"
-TITLE="General Installation Notes"
-HREF="geninstall.html"><LINK
+TITLE="Mac OS X Installation Notes"
+HREF="osx.html"><LINK
 REL="NEXT"
 TITLE="Administering Bugzilla"
 HREF="administration.html"></HEAD
@@ -45,7 +45,7 @@ WIDTH="10%"
 ALIGN="left"
 VALIGN="bottom"
 ><A
-HREF="geninstall.html"
+HREF="osx.html"
 ACCESSKEY="P"
 >Prev</A
 ></TD
@@ -73,7 +73,7 @@ CLASS="section"
 ><H1
 CLASS="section"
 ><A
-NAME="troubleshooting">4.6. Troubleshooting</H1
+NAME="troubleshooting">4.5. Troubleshooting</H1
 ><P
 >This section gives solutions to common Bugzilla installation
     problems.
@@ -83,7 +83,7 @@ CLASS="section"
 ><H2
 CLASS="section"
 ><A
-NAME="AEN1208">4.6.1. DBD::Sponge::db prepare failed</H2
+NAME="AEN1208">4.5.1. DBD::Sponge::db prepare failed</H2
 ><P
 >&#13;        The following error message may appear due to a bug in DBD::mysql
         (over which the Bugzilla team have no control):
@@ -98,18 +98,22 @@ WIDTH="100%"
 COLOR="#000000"
 ><PRE
 CLASS="programlisting"
-> "DBD::Sponge::db prepare failed: Cannot determine NUM_OF_FIELDS at D:/Perl/site/lib/DBD/mysql.pm line 248.
+> DBD::Sponge::db prepare failed: Cannot determine NUM_OF_FIELDS at D:/Perl/site/lib/DBD/mysql.pm line 248.
   SV = NULL(0x0) at 0x20fc444
   REFCNT = 1
-  FLAGS = (PADBUSY,PADMY)"
+  FLAGS = (PADBUSY,PADMY)
 </PRE
 ></FONT
 ></TD
 ></TR
 ></TABLE
 ><P
->&#13;        To fix this, go to &#60;path-to-perl&#62;/lib/DBD/sponge.pm in your Perl 
-        installation and replace
+>&#13;        To fix this, go to 
+        <TT
+CLASS="filename"
+>&#60;path-to-perl&#62;/lib/DBD/sponge.pm</TT
+> 
+        in your Perl installation and replace
       </P
 ><TABLE
 BORDER="0"
@@ -163,7 +167,7 @@ CLASS="section"
 ><H2
 CLASS="section"
 ><A
-NAME="paranoid-security">4.6.2. cannot chdir(/var/spool/mqueue)</H2
+NAME="paranoid-security">4.5.2. cannot chdir(/var/spool/mqueue)</H2
 ><P
 >If you are installing Bugzilla on SuSE Linux, or some other
       distributions with 
@@ -231,7 +235,7 @@ WIDTH="33%"
 ALIGN="left"
 VALIGN="top"
 ><A
-HREF="geninstall.html"
+HREF="osx.html"
 ACCESSKEY="P"
 >Prev</A
 ></TD
@@ -259,7 +263,7 @@ ACCESSKEY="N"
 WIDTH="33%"
 ALIGN="left"
 VALIGN="top"
->General Installation Notes</TD
+>Mac OS X Installation Notes</TD
 ><TD
 WIDTH="34%"
 ALIGN="center"

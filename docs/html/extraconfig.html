@@ -79,21 +79,69 @@ CLASS="section"
 ><H2
 CLASS="section"
 ><A
-NAME="AEN836">4.2.1. Dependency Charts</H2
+NAME="AEN840">4.2.1. Dependency Charts</H2
 ><P
 >As well as the text-based dependency graphs, Bugzilla also
       supports dependency graphing, using a package called 'dot'.
-      Exactly how this works is controlled by the 'webdotbase' parameter.
+      Exactly how this works is controlled by the 'webdotbase' parameter,
+      which can have one of three values:
       </P
 ><P
->(To be written...</P
+>&#13;        <P
+></P
+><OL
+TYPE="1"
+><LI
+><P
+>&#13;            A complete file path to the command 'dot' (part of 
+            <A
+HREF="http://www.graphviz.org/"
+TARGET="_top"
+>GraphViz</A
+>) 
+            will generate the graphs locally
+            </P
+></LI
+><LI
+><P
+>&#13;            A URL prefix pointing to an installation of the webdot package will
+            generate the graphs remotely
+            </P
+></LI
+><LI
+><P
+>&#13;            A blank value will disable dependency graphing.
+            </P
+></LI
+></OL
+>
+      </P
+><P
+>So, to get this working, install
+      <A
+HREF="http://www.graphviz.org/"
+TARGET="_top"
+>GraphViz</A
+>. If you
+      do that, you need to
+      <A
+HREF="http://httpd.apache.org/docs/mod/mod_imap.html"
+TARGET="_top"
+>enable
+      server-side image maps</A
+> in Apache.
+      Alternatively, you could set up a webdot server, or use the AT&#38;T 
+      public webdot server (the
+      default for the webdotbase param). Note that AT&#38;T's server won't work
+      if Bugzilla is only accessible using HTTPS.
+      </P
 ></DIV
 ><DIV
 CLASS="section"
 ><H2
 CLASS="section"
 ><A
-NAME="AEN840">4.2.2. Bug Graphs</H2
+NAME="AEN855">4.2.2. Bug Graphs</H2
 ><P
 >As long as you installed the GD and Graph::Base Perl modules you
       might as well turn on the nifty Bugzilla bug reporting graphs.</P
@@ -150,7 +198,7 @@ CLASS="section"
 ><H2
 CLASS="section"
 ><A
-NAME="AEN853">4.2.3. The Whining Cron</H2
+NAME="AEN868">4.2.3. The Whining Cron</H2
 ><P
 >By now you have a fully functional Bugzilla, but what good are
       bugs if they're not annoying? To help make those bugs more annoying you
@@ -321,6 +369,290 @@ TARGET="_top"
       primary email address. On most directory servers available, this is
       "mail", but you may need to change this.
       </P
+></DIV
+><DIV
+CLASS="section"
+><H2
+CLASS="section"
+><A
+NAME="content-type">4.2.5. Preventing untrusted Bugzilla content from executing malicious
+      Javascript code</H2
+><P
+>It is possible for a Bugzilla to execute malicious Javascript
+      code. Due to internationalization concerns, we are unable to
+      incorporate the code changes necessary to fulfill the CERT advisory
+      requirements mentioned in 
+      <A
+HREF="http://www.cet.org/tech_tips/malicious_code_mitigation.html/#3"
+TARGET="_top"
+>&#13;      http://www.cet.org/tech_tips/malicious_code_mitigation.html/#3</A
+>.
+      Executing the following code snippet from a UNIX command shell will
+      rectify the problem if your Bugzilla installation is intended for an
+      English-speaking audience. As always, be sure your Bugzilla
+      installation has a good backup before making changes, and I recommend
+      you understand what the script is doing before executing it.</P
+><P
+>&#13;        <TABLE
+BORDER="0"
+BGCOLOR="#E0E0E0"
+WIDTH="100%"
+><TR
+><TD
+><FONT
+COLOR="#000000"
+><PRE
+CLASS="programlisting"
+>bash# perl -pi -e "s/Content-Type\: text\/html/Content-Type\: text\/html\; charset=ISO-8859-1/i" *.cgi *.pl
+        </PRE
+></FONT
+></TD
+></TR
+></TABLE
+>
+      </P
+><P
+>All this one-liner command does is search for all instances of 
+      <SPAN
+CLASS="QUOTE"
+>"Content-type: text/html"</SPAN
+>
+
+      and replaces it with 
+      <SPAN
+CLASS="QUOTE"
+>"Content-Type: text/html; charset=ISO-8859-1"</SPAN
+>
+
+      . This specification prevents possible Javascript attacks on the
+      browser, and is suggested for all English-speaking sites. For
+      non-English-speaking Bugzilla sites, I suggest changing 
+      <SPAN
+CLASS="QUOTE"
+>"ISO-8859-1"</SPAN
+>, above, to 
+      <SPAN
+CLASS="QUOTE"
+>"UTF-8"</SPAN
+>.</P
+></DIV
+><DIV
+CLASS="section"
+><H2
+CLASS="section"
+><A
+NAME="htaccess">4.2.6. <TT
+CLASS="filename"
+>.htaccess</TT
+>
+      files and security</H2
+><P
+>To enhance the security of your Bugzilla installation, Bugzilla's
+      <TT
+CLASS="filename"
+>checksetup.pl</TT
+> script will generate 
+      <I
+CLASS="glossterm"
+>&#13;        <TT
+CLASS="filename"
+>.htaccess</TT
+>
+      </I
+>
+
+      files which the Apache webserver can use to restrict access to the
+      bugzilla data files. 
+      These .htaccess files will not work with Apache 1.2.x - but this
+      has security holes, so you shouldn't be using it anyway. 
+      <DIV
+CLASS="note"
+><P
+></P
+><TABLE
+CLASS="note"
+WIDTH="100%"
+BORDER="0"
+><TR
+><TD
+WIDTH="25"
+ALIGN="CENTER"
+VALIGN="TOP"
+><IMG
+SRC="../images/note.gif"
+HSPACE="5"
+ALT="Note"></TD
+><TD
+ALIGN="LEFT"
+VALIGN="TOP"
+><P
+>If you are using an alternate provider of 
+        <SPAN
+CLASS="productname"
+>webdot</SPAN
+>
+
+        services for graphing (as described when viewing 
+        <TT
+CLASS="filename"
+>editparams.cgi</TT
+>
+
+        in your web browser), you will need to change the ip address in 
+        <TT
+CLASS="filename"
+>data/webdot/.htaccess</TT
+>
+
+        to the ip address of the webdot server that you are using.</P
+></TD
+></TR
+></TABLE
+></DIV
+>
+      </P
+><P
+>The default .htaccess file may not provide adequate access
+      restrictions, depending on your web server configuration. Be sure to
+      check the &#60;Directory&#62; entries for your Bugzilla directory so that
+      the 
+      <TT
+CLASS="filename"
+>.htaccess</TT
+>
+
+      file is allowed to override web server defaults. For instance, let's
+      assume your installation of Bugzilla is installed to 
+      <TT
+CLASS="filename"
+>/usr/local/bugzilla</TT
+>
+
+      . You should have this &#60;Directory&#62; entry in your 
+      <TT
+CLASS="filename"
+>httpd.conf</TT
+>
+
+      file:</P
+><P
+>&#13;      
+<TABLE
+BORDER="0"
+BGCOLOR="#E0E0E0"
+WIDTH="100%"
+><TR
+><TD
+><FONT
+COLOR="#000000"
+><PRE
+CLASS="programlisting"
+>&#13;  &#60;Directory /usr/local/bugzilla/&#62;
+  Options +FollowSymLinks +Indexes +Includes +ExecCGI
+  AllowOverride All
+&#60;/Directory&#62;
+</PRE
+></FONT
+></TD
+></TR
+></TABLE
+>
+
+      </P
+><P
+>The important part above is 
+      <SPAN
+CLASS="QUOTE"
+>"AllowOverride All"</SPAN
+>
+
+      . Without that, the 
+      <TT
+CLASS="filename"
+>.htaccess</TT
+>
+
+      file created by 
+      <TT
+CLASS="filename"
+>checksetup.pl</TT
+>
+
+      will not have sufficient permissions to protect your Bugzilla
+      installation.</P
+><P
+>If you are using Internet Information Server (IIS) or another 
+      web server which does not observe 
+      <TT
+CLASS="filename"
+>.htaccess</TT
+>
+      conventions, you can disable their creation by editing 
+      <TT
+CLASS="filename"
+>localconfig</TT
+>
+      and setting the 
+      <TT
+CLASS="varname"
+>$create_htaccess</TT
+>
+      variable to 
+      <TT
+CLASS="parameter"
+><I
+>0</I
+></TT
+>.
+      </P
+></DIV
+><DIV
+CLASS="section"
+><H2
+CLASS="section"
+><A
+NAME="mod-throttle">4.2.7. <TT
+CLASS="filename"
+>mod_throttle</TT
+>
+
+      and Security</H2
+><P
+>It is possible for a user, by mistake or on purpose, to access
+      the database many times in a row which can result in very slow access
+      speeds for other users. If your Bugzilla installation is experiencing
+      this problem , you may install the Apache module 
+      <TT
+CLASS="filename"
+>mod_throttle</TT
+>
+
+      which can limit connections by ip-address. You may download this module
+      at 
+      <A
+HREF="http://www.snert.com/Software/Throttle/"
+TARGET="_top"
+>&#13;      http://www.snert.com/Software/Throttle/</A
+>. 
+      Follow the instructions to install into your Apache install. 
+      <EM
+>This module only functions with the Apache web
+      server!</EM
+>
+      You may use the 
+      <B
+CLASS="command"
+>ThrottleClientIP</B
+>
+
+      command provided by this module to accomplish this goal. See the 
+      <A
+HREF="http://www.snert.com/Software/Throttle/"
+TARGET="_top"
+>Module
+      Instructions</A
+>
+      for more information.</P
 ></DIV
 ></DIV
 ><DIV

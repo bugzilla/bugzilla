@@ -1912,7 +1912,7 @@ binmode(STDOUT);
     <section>
       <title>Introduction</title>
 
-      <para>If you are running an *NIX OS as non-root, either due
+      <para>If you are running a *NIX OS as non-root, either due
       to lack of access (web hosts, for example) or for security
       reasons, this will detail how to install Bugzilla on such
       a setup. It is recommended that you read through the
@@ -2179,7 +2179,7 @@ pid-file=/home/foo/mymysql/the.pid
       <title>HTTP Server</title>
 
       <para>Ideally, this also needs to be installed as root and
-      running under a special webserver account. As long as
+      run under a special webserver account. As long as
       the web server will allow the running of *.cgi files outside of a
       cgi-bin, and a way of denying web access to certain files (such as a
       .htaccess file), you should be good in this department.</para>
@@ -2260,7 +2260,7 @@ pid-file=/home/foo/mymysql/the.pid
       <warning>
         <para>The one option in <filename>localconfig</filename> you
         might have problems with is the web server group. If you can't
-        successful browse to the <filename>index.cgi</filename> (like
+        successfully browse to the <filename>index.cgi</filename> (like
         a Forbidden error), you may have to relax your permissions,
         and blank out the web server group. Of course, this may pose
         as a security risk. Having a properly jailed shell and/or

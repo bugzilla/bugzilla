@@ -1611,6 +1611,7 @@ $table{tokens} =
 
 # Get a list of the existing tables (if any) in the database
 my @tables;
+my $zz = $DBI::VERSION; # mention it to eliminate "used only once" warning on perl 5.00503
 if ($DBI::VERSION < 1.20) {
     @tables = map { $_ =~ s/.*\.//; $_ } $dbh->tables;
 }

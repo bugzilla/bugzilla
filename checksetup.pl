@@ -1610,7 +1610,7 @@ $table{tokens} =
 ###########################################################################
 
 # Get a list of the existing tables (if any) in the database
-$sth = $dbh->table_info(undef, undef, undef, "TABLE");
+my $sth = $dbh->table_info(undef, undef, undef, "TABLE");
 my @tables = @{$dbh->selectcol_arrayref($sth, { Columns => [3] })};
 #print 'Tables: ', join " ", @tables, "\n";
 

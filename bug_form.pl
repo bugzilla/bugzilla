@@ -38,7 +38,6 @@ sub bug_form_pl_sillyness {
     $zz = @::legal_keywords;
     $zz = @::legal_opsys;
     $zz = @::legal_platform;
-    $zz = @::legal_product;
     $zz = @::legal_priority;
     $zz = @::settable_resolution;
     $zz = @::legal_severity;
@@ -65,13 +64,13 @@ select
         reporter,
         bug_file_loc,
         short_desc,
-        target_milestone,
-        qa_contact,
-        status_whiteboard,
+	target_milestone,
+	qa_contact,
+	status_whiteboard,
         date_format(creation_ts,'%Y-%m-%d %H:%i'),
         groupset,
-        delta_ts,
-        sum(votes.count)
+	delta_ts,
+	sum(votes.count)
 from bugs left join votes using(bug_id)
 where bugs.bug_id = $id
 group by bugs.bug_id";
@@ -126,7 +125,7 @@ my $sev_popup = make_options(\@::legal_severity, $bug{'bug_severity'});
 
 
 my $component_popup = make_options($::components{$bug{'product'}},
-                                   $bug{'component'});
+				   $bug{'component'});
 
 my $ccSet = new RelationSet;
 $ccSet->mergeFromDB("select who from cc where bug_id=$id");
@@ -149,6 +148,49 @@ if (defined $URL && $URL ne "none" && $URL ne "NULL" && $URL ne "") {
     $URL = "<B>URL:</B>";
 }
 
+#
+# Make a list of products the user has access to
+#
+
+my (@prodlist, $product_popup);
+foreach my $p (sort(keys %::versions)) {
+    if ($p eq $bug{'product'}) {
+        # if it's the product the bug is already in, it's ALWAYS in
+        # the popup, period, whether the user can see it or not, and
+        # regardless of the disallownew setting.
+        push(@prodlist, $p);
+        next;
+    }
+    if (defined $::proddesc{$p} && $::proddesc{$p} eq '0') {
+        # Special hack.  If we stuffed a "0" into proddesc, that means
+        # that disallownew was set for this bug, and so we don't want
+        # to allow people to specify that product here.
+        next;
+    }
+    if(Param("usebuggroupsentry")
+        && GroupExists($p)
+        && !UserInGroup($p))
+    {
+        # If we're using bug groups to restrict entry on products, and
+        # this product has a bug group, and the user is not in that
+        # group, we don't want to include that product in this list.
+        next;
+    }
+    push(@prodlist, $p);
+}
+
+# If the user has access to multiple products, display a popup, otherwise 
+# display the current product.
+
+if (1 < @prodlist) {
+    $product_popup = "<SELECT NAME=product>" .
+        make_options(\@prodlist, $bug{'product'}) .
+        "</SELECT>";
+}
+else {
+    $product_popup = $bug{'product'};
+}
+
 print "
 <INPUT TYPE=HIDDEN NAME=\"delta_ts\" VALUE=\"$bug{'delta_ts'}\">
 <INPUT TYPE=HIDDEN NAME=\"longdesclength\" VALUE=\"$longdesclength\">
@@ -162,9 +204,7 @@ print "
     <TD ALIGN=RIGHT><B>Reporter:</B></TD><TD>$bug{'reporter'}</TD>
 </TR><TR>
     <TD ALIGN=RIGHT><B>Product:</B></TD>
-    <TD><SELECT NAME=product>" .
-    make_options(\@::legal_product, $bug{'product'}) .
-    "</SELECT></TD>
+    <TD>$product_popup</TD>
   <TD>&nbsp;</TD>
     <TD ALIGN=RIGHT><B>OS:</B></TD>
     <TD><SELECT NAME=op_sys>" .
@@ -283,27 +323,18 @@ if (@::legal_keywords) {
 };
 }
 
-# 2001-05-16 myk@mozilla.org: use the attachment tracker to display attachments
-# if this installation has enabled use of the attachment tracker.
-if (Param('useattachmenttracker')) {
-    print "</table>\n";
-    use Attachment;
-    &Attachment::list($id);
-} else {
-    print "<tr><td align=right><B>Attachments:</b></td>\n";
-    SendSQL("select attach_id, creation_ts, mimetype, description from attachments where bug_id = $id");
-    while (MoreSQLData()) {
-        my ($attachid, $date, $mimetype, $desc) = (FetchSQLData());
-        if ($date =~ /^(\d\d)(\d\d)(\d\d)(\d\d)(\d\d)(\d\d)(\d\d)$/) {
-            $date = "$3/$4/$2 $5:$6";
-        }
-        my $link = "showattachment.cgi?attach_id=$attachid";
-        $desc = value_quote($desc);
-        $mimetype = html_quote($mimetype);
-        print qq{<td><a href="$link">$date</a></td><td colspan=6>$desc&nbsp;&nbsp;&nbsp;($mimetype)</td></tr><tr><td></td>};
+print "<tr><td align=right><B>Attachments:</b></td>\n";
+SendSQL("select attach_id, creation_ts, mimetype, description from attachments where bug_id = $id");
+while (MoreSQLData()) {
+    my ($attachid, $date, $mimetype, $desc) = (FetchSQLData());
+    if ($date =~ /^(\d\d)(\d\d)(\d\d)(\d\d)(\d\d)(\d\d)(\d\d)$/) {
+        $date = "$3/$4/$2 $5:$6";
     }
-    print "<td colspan=7><a href=\"createattachment.cgi?id=$id\">Create a new attachment</a> (proposed patch, testcase, etc.)</td></tr></table>\n";
+    my $link = "showattachment.cgi?attach_id=$attachid";
+    $desc = value_quote($desc);
+    print qq{<td><a href="$link">$date</a></td><td colspan=6>$desc&nbsp;&nbsp;&nbsp;($mimetype)</td></tr><tr><td></td>};
 }
+print "<td colspan=7><a href=\"createattachment.cgi?id=$id\">Create a new attachment</a> (proposed patch, testcase, etc.)</td></tr></table>\n";
 
 
 sub EmitDependList {
@@ -341,13 +372,10 @@ if (Param("usedependencies")) {
 if ($::prodmaxvotes{$bug{'product'}}) {
     print qq{
 <table><tr>
-<th><a href="votehelp.html">Votes:</a></th>
-<td>
-$bug{'votes'}&nbsp;&nbsp;&nbsp;
-<a href="showvotes.cgi?bug_id=$id">Show votes for this bug</a>&nbsp;&nbsp;&nbsp;
-<a href="showvotes.cgi?voteon=$id">Vote for this bug</a>
-</td>
-</tr></table>
+<th><a href="votehelp.html">Votes</a> for bug $id:</th><td>
+<a href="showvotes.cgi?bug_id=$id">$bug{'votes'}</a>
+&nbsp;&nbsp;&nbsp;<a href="showvotes.cgi?voteon=$id">Vote for this bug</a>
+</td></tr></table>
 };
 }
 
@@ -358,49 +386,38 @@ print "
 <TEXTAREA WRAP=HARD NAME=comment ROWS=10 COLS=80></TEXTAREA><BR>";
 
 
-if ($::usergroupset ne '0' || $bug{'groupset'} ne '0') {
-    SendSQL("select bit, name, description, (bit & $bug{'groupset'} != 0), " .
-            "(bit & $::usergroupset != 0) from groups where isbuggroup != 0 " .
+if ($::usergroupset ne '0') {
+    SendSQL("select bit, name, description, (bit & $bug{'groupset'} != 0) " .
+	    "from groups where bit & $::usergroupset != 0 " .
+	    "and isbuggroup != 0 " . 
             # Include active groups as well as inactive groups to which
             # the bug already belongs.  This way the bug can be removed
             # from an inactive group but can only be added to active ones.
-            "and ((isactive = 1 and (bit & $::usergroupset != 0)) or " .
-            "(bit & $bug{'groupset'} != 0)) " . 
-            "order by description");
+            "and (isactive = 1 or (bit & $bug{'groupset'} != 0)) " . 
+	    "order by description");
     # We only print out a header bit for this section if there are any
     # results.
     my $groupFound = 0;
-    my $inAllGroups = 1;
     while (MoreSQLData()) {
-      my ($bit, $name, $description, $ison, $ingroup) = (FetchSQLData());
+      my ($bit, $name, $description, $ison) = (FetchSQLData());
       # For product groups, we only want to display the checkbox if either
       # (1) The bit is already set, or
-      # (2) The user is in the group, but either:
-      #     (a) The group is a product group for the current product, or
-      #     (b) The group name isn't a product name
-      # This measns that all product groups will be skipped, but non-product
-      # bug groups will still be displayed.
-      if($ison || ($ingroup && (($name eq $bug{'product'}) ||
-                                (!defined $::proddesc{$name})))) {
+      # (2) It's the group for this product.
+      # All other product groups will be skipped.  Non-product bug groups
+      # will still be displayed.
+      if($ison || ($name eq $bug{'product'}) || (!defined $::proddesc{$name})) {
         if(!$groupFound) {
           print "<br><b>Only users in the selected groups can view this bug:</b><br>\n";
-          print "<font size=\"-1\">(Unchecking all boxes makes this a public bug.)</font><br><br>\n";
+          print "<font size=\"-1\">(Leave all boxes unchecked to make this a public bug.)</font><br><br>\n";
           $groupFound = 1;
-        }
-        if(!$ingroup) {
-            $inAllGroups = 0;
         }
         # Modifying this to use checkboxes instead
         my $checked = $ison ? " CHECKED" : "";
-        my $disabled = $ingroup ? "" : " DISABLED=\"disabled\"";
         # indent these a bit
         print "&nbsp;&nbsp;&nbsp;&nbsp;";
-        print "<input type=checkbox name=\"bit-$bit\" value=1$checked$disabled>\n";
+        print "<input type=checkbox name=\"bit-$bit\" value=1$checked>\n";
         print "$description<br>\n";
       }
-    }
-    if (!$inAllGroups) {
-        print "<b>Only members of a group can change the visibility of a bug for that group</b><br>";
     }
 
     # If the bug is restricted to a group, display checkboxes that allow
@@ -471,7 +488,7 @@ if ($status eq $::unconfirmedstate) {
     $canconfirm = UserInGroup("canconfirm") || ($::userid == 0);
     if ($canedit || $canconfirm) {
         print "<INPUT TYPE=radio NAME=knob VALUE=confirm>";
-        print "Confirm bug (change status to <b>NEW</b>)<br>";
+	print "Confirm bug (change status to <b>NEW</b>)<br>";
         $knum++;
     }
 }
@@ -508,9 +525,9 @@ if ($canedit || $::userid == $assignedtoid ||
         $knum++;
         print "<INPUT TYPE=radio NAME=knob VALUE=duplicate>
         Resolve bug, mark it as duplicate of bug # 
-        <INPUT NAME=dup_id SIZE=6 ONCHANGE=\"if (this.value != '') {document.changeform.knob\[$knum\].checked=true}\"><br>\n";
+        <INPUT NAME=dup_id SIZE=6 ONCHANGE=\"document.changeform.knob\[$knum\].checked=true\"><br>\n";
         $knum++;
-        my $assign_element = "<INPUT NAME=\"assigned_to\" SIZE=32 ONCHANGE=\"if ((this.value != ".SqlQuote($bug{'assigned_to_email'}) .") && (this.value != '')) { document.changeform.knob\[$knum\].checked=true; }\" VALUE=\"$bug{'assigned_to_email'}\">";
+        my $assign_element = "<INPUT NAME=\"assigned_to\" SIZE=32 ONCHANGE=\"document.changeform.knob\[$knum\].checked=true\" VALUE=\"$bug{'assigned_to_email'}\">";
 
         print "<INPUT TYPE=radio NAME=knob VALUE=reassign> 
           <A HREF=\"bug_status.html#assigned_to\">Reassign</A> bug to
@@ -580,11 +597,11 @@ if ( Param("move-enabled") && (defined $::COOKIE{"Bugzilla_login"}) && ($::COOKI
 
 print "<BR></FORM>";
 
-print qq|
-<table><tr><td align=left><B><a name="c0" href="#c0">Description:</a></B></td>
+print "
+<table><tr><td align=left><B>Description:</B></td>
 <td align=right width=100%>Opened: $bug{'creation_ts'}</td></tr></table>
 <HR>
-|;
+";
 print $bug{'long_desc'};
 print "
 <HR>\n";

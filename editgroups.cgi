@@ -22,6 +22,7 @@
 #                 Joel Peshkin <bugreport@peshkin.net>
 #                 Jacob Steenhagen <jake@bugzilla.org>
 #                 Vlad Dascalu <jocuri@softhome.net>
+#                 Frédéric Buclin <LpSolit@gmail.com>
 
 # Code derived from editowners.cgi and editusers.cgi
 
@@ -31,6 +32,8 @@ use lib ".";
 use Bugzilla;
 use Bugzilla::Constants;
 require "CGI.pl";
+
+my $dbh = Bugzilla->dbh;
 
 use vars qw($template $vars);
 
@@ -48,6 +51,7 @@ if (!UserInGroup("creategroups")) {
 }
 
 my $action  = trim($::FORM{action} || '');
+my $back = "<BR>Click the <b>Back</b> button and try again.";
 
 # RederiveRegexp: update user_group_map with regexp-based grants
 sub RederiveRegexp ($$)
@@ -71,18 +75,6 @@ sub RederiveRegexp ($$)
             $sthdel->execute($uid, $gid, GRANT_REGEXP);
         }
     }
-}
-
-# TestGroup: check if the group name exists
-sub TestGroup ($)
-{
-    my $group = shift;
-
-    # does the group exist?
-    SendSQL("SELECT name
-             FROM groups
-             WHERE name=" . SqlQuote($group));
-    return FetchOneColumn();
 }
 
 sub ShowError ($)
@@ -122,9 +114,92 @@ sub PutTrailer (@)
     PutFooter();
 }
 
-#
-# action='' -> No action specified, get a list.
-#
+# CheckGroupID checks that a positive integer is given and is
+# actually a valid group ID. If all tests are successful, the
+# trimmed group ID is returned.
+
+sub CheckGroupID {
+    my ($group_id) = @_;
+    $group_id = trim($group_id || 0);
+    if (!$group_id) {
+        ShowError("No group was specified." . $back);
+        PutFooter();
+        exit;
+    }
+    unless (detaint_natural($group_id)
+              && Bugzilla->dbh->selectrow_array("SELECT id FROM groups WHERE id = ?",
+                                                undef, $group_id))
+    {
+        ShowError("The group you specified does not exist." . $back);
+        PutFooter();
+        exit;
+    }
+    return $group_id;
+}
+
+# This subroutine is called when:
+# - a new group is created. CheckGroupName checks that its name
+#   is not empty and is not already used by any existing group.
+# - an existing group is edited. CheckGroupName checks that its
+#   name has not been deleted or renamed to another existing
+#   group name (whose group ID is different from $group_id).
+# In both cases, an error message is returned to the user if any
+# test fails! Else, the trimmed group name is returned.
+
+sub CheckGroupName {
+    my ($name, $group_id) = @_;
+    $name = trim($name || '');
+    trick_taint($name);
+    if (!$name) {
+        ShowError("Please enter a group name." . $back);
+        PutFooter();
+        exit;
+    }
+    my $excludeself = (defined $group_id) ? " AND id != $group_id" : "";
+    my $name_exists = Bugzilla->dbh->selectrow_array("SELECT name FROM groups " .
+                                                     "WHERE name = ? $excludeself",
+                                                     undef, $name);
+    if ($name_exists) {
+        ShowError("The <em>" . html_quote($name) . "</em> group already exists." . $back);
+        PutFooter();
+        exit;
+    }
+    return $name;
+}
+
+# CheckGroupDesc checks that a non empty description is given. The
+# trimmed description is returned.
+
+sub CheckGroupDesc {
+    my ($desc) = @_;
+    $desc = trim($desc || '');
+    trick_taint($desc);
+    if (!$desc) {
+        ShowError("Please enter a group description." . $back);
+        PutFooter();
+        exit;
+    }
+    return $desc;
+}
+
+# CheckGroupRegexp checks that the regular expression is valid
+# (the regular expression being optional, the test is successful
+# if none is given, as expected). The trimmed regular expression
+# is returned.
+
+sub CheckGroupRegexp {
+    my ($regexp) = @_;
+    $regexp = trim($regexp || '');
+    trick_taint($regexp);
+    if (!eval {qr/$regexp/}) {
+        ShowError("The regular expression you entered is invalid." . $back);
+        PutFooter();
+        exit;
+    }
+    return $regexp;
+}
+
+# If no action is specified, get a list of all groups available.
 
 unless ($action) {
     PutHeader("Edit Groups","Edit Groups","This lets you edit the groups available to put users in.");
@@ -197,19 +272,12 @@ than deleting the group as well as a way to maintain lists of users without clut
 if ($action eq 'changeform') {
     PutHeader("Change Group");
 
-    my $gid = trim($::FORM{group} || '');
-    detaint_natural($gid);
-    unless ($gid) {
-        ShowError("No group specified.<BR>" .
-                  "Click the <b>Back</b> button and try again.");
-        PutFooter();
-        exit;
-    }
-
-    SendSQL("SELECT id, name, description, userregexp, isactive, isbuggroup
-             FROM groups WHERE id=$gid");
-    my ($group_id, $name, $description, $rexp, $isactive, $isbuggroup) 
-        = FetchSQLData();
+    # Check that an existing group ID is given
+    my $group_id = CheckGroupID($::FORM{'group'});
+    my ($name, $description, $rexp, $isactive, $isbuggroup) =
+        $dbh->selectrow_array("SELECT name, description, userregexp, " .
+                              "isactive, isbuggroup " .
+                              "FROM groups WHERE id = ?", undef, $group_id);
 
     print "<FORM METHOD=POST ACTION=editgroups.cgi>\n";
     print "<TABLE BORDER=1 CELLPADDING=4>";
@@ -315,7 +383,7 @@ if ($action eq 'changeform') {
 <BR>
 EOF
     print "<INPUT TYPE=HIDDEN NAME=\"action\" VALUE=\"postchanges\">\n";
-    print "<INPUT TYPE=HIDDEN NAME=\"group\" VALUE=$gid>\n";
+    print "<INPUT TYPE=HIDDEN NAME=\"group\" VALUE=$group_id>\n";
     print "</FORM>";
 
 
@@ -348,40 +416,13 @@ if ($action eq 'add') {
 if ($action eq 'new') {
     PutHeader("Adding new group");
 
-    # Cleanups and valididy checks
-    my $name = trim($::FORM{name} || '');
-    my $desc = trim($::FORM{desc} || '');
-    my $regexp = trim($::FORM{regexp} || '');
-    # convert an undefined value in the inactive field to zero
-    # (this occurs when the inactive checkbox is not checked
-    # and the browser does not send the field to the server)
+    # Check that a not already used group name is given, that
+    # a description is also given and check if the regular
+    # expression is valid (if any).
+    my $name = CheckGroupName($::FORM{'name'});
+    my $desc = CheckGroupDesc($::FORM{'desc'});
+    my $regexp = CheckGroupRegexp($::FORM{'regexp'});
     my $isactive = $::FORM{isactive} ? 1 : 0;
-
-    unless ($name) {
-        ShowError("You must enter a name for the new group.<BR>" .
-                  "Please click the <b>Back</b> button and try again.");
-        PutFooter();
-        exit;
-    }
-    unless ($desc) {
-        ShowError("You must enter a description for the new group.<BR>" .
-                  "Please click the <b>Back</b> button and try again.");
-        PutFooter();
-        exit;
-    }
-    if (TestGroup($name)) {
-        ShowError("The group '" . $name . "' already exists.<BR>" .
-                  "Please click the <b>Back</b> button and try again.");
-        PutFooter();
-        exit;
-    }
-
-    if (!eval {qr/$regexp/}) {
-        ShowError("The regular expression you entered is invalid. " .
-                  "Please click the <b>Back</b> button and try again.");
-        PutFooter();
-        exit;
-    }
 
     # Add the new group
     SendSQL("INSERT INTO groups ( " .
@@ -424,26 +465,20 @@ if ($action eq 'new') {
 
 if ($action eq 'del') {
     PutHeader("Delete group");
-    my $gid = trim($::FORM{group} || '');
-    detaint_natural($gid);
-    unless ($gid) {
-        ShowError("No group specified.<BR>" .
-                  "Click the <b>Back</b> button and try again.");
-        PutFooter();
-        exit;
-    }
-    SendSQL("SELECT id FROM groups WHERE id=$gid");
-    if (!FetchOneColumn()) {
-        ShowError("That group doesn't exist.<BR>" .
-                  "Click the <b>Back</b> button and try again.");
-        PutFooter();
-        exit;
-    }
-    SendSQL("SELECT name,description " .
-            "FROM groups " .
-            "WHERE id=$gid");
+    # Check that an existing group ID is given
+    my $gid = CheckGroupID($::FORM{'group'});
+    my ($name, $desc, $isbuggroup) =
+        $dbh->selectrow_array("SELECT name, description, isbuggroup " .
+                              "FROM groups WHERE id = ?", undef, $gid);
 
-    my ($name, $desc) = FetchSQLData();
+    # System groups cannot be deleted!
+    if (!$isbuggroup) {
+        ShowError("<em>" . html_quote($name) . "</em> is a system group.
+                   This group cannot be deleted." . $back);
+        PutFooter();
+        exit;
+    }
+
     print "<table border=1>\n";
     print "<tr>";
     print "<th>Id</th>";
@@ -522,18 +557,19 @@ You cannot delete this group while it is tied to a product.</B><BR>
 
 if ($action eq 'delete') {
     PutHeader("Deleting group");
-    my $gid = trim($::FORM{group} || '');
-    detaint_natural($gid);
-    unless ($gid) {
-        ShowError("No group specified.<BR>" .
-                  "Click the <b>Back</b> button and try again.");
+    # Check that an existing group ID is given
+    my $gid = CheckGroupID($::FORM{'group'});
+    my ($name, $isbuggroup) =
+        $dbh->selectrow_array("SELECT name, isbuggroup FROM groups " .
+                              "WHERE id = ?", undef, $gid);
+
+    # System groups cannot be deleted!
+    if (!$isbuggroup) {
+        ShowError("<em>" . html_quote($name) . "</em> is a system group.
+                   This group cannot be deleted." . $back);
         PutFooter();
         exit;
     }
-    SendSQL("SELECT name " .
-            "FROM groups " .
-            "WHERE id = $gid");
-    my ($name) = FetchSQLData();
 
     my $cantdelete = 0;
 
@@ -626,12 +662,11 @@ if ($action eq 'postchanges') {
 }
 
 if (($action eq 'remove_all_regexp') || ($action eq 'remove_all')) {
-    # remove all explicit users from the group with gid $::FORM{group} 
+    # remove all explicit users from the group with gid = $::FORM{group} 
     # that match the regexp stored in the db for that group 
     # or all of them period
-    my $dbh = Bugzilla->dbh;
-    my $gid = $::FORM{group};
-    detaint_natural($gid);
+    my $gid = CheckGroupID($::FORM{'group'});
+
     my $sth = $dbh->prepare("SELECT name, userregexp FROM groups
                              WHERE id = ?");
     $sth->execute($gid);
@@ -733,45 +768,60 @@ sub confirmRemove {
 
 # Helper sub to handle the making of changes to a group
 sub doGroupChanges {
-    my $gid = trim($::FORM{group} || '');
-    detaint_natural($gid);
-    unless ($gid) {
-        ShowError("No group specified.<BR>" .
-                  "Click the <b>Back</b> button and try again.");
-        PutFooter();
-        exit;
-    }
+    my $dbh = Bugzilla->dbh;
+    my $sth;
+
+    $dbh->do("LOCK TABLES groups WRITE, group_group_map WRITE,
+              user_group_map WRITE, profiles READ");
+
+    # Check that the given group ID and regular expression are valid.
+    # If tests are successful, trimmed values are returned by CheckGroup*.
+    my $gid = CheckGroupID($::FORM{'group'});
+    my $regexp = CheckGroupRegexp($::FORM{'rexp'});
+
+    # The name and the description of system groups cannot be edited.
+    # We then need to know if the group being edited is a system group.
     SendSQL("SELECT isbuggroup FROM groups WHERE id = $gid");
     my ($isbuggroup) = FetchSQLData();
+    my $name;
+    my $desc;
+    my $isactive;
     my $chgs = 0;
-    if (($isbuggroup == 1) && ($::FORM{"oldname"} ne $::FORM{"name"})) {
-        $chgs = 1;
-        SendSQL("UPDATE groups SET name = " . 
-            SqlQuote($::FORM{"name"}) . " WHERE id = $gid");
-    }
-    if (($isbuggroup == 1) && ($::FORM{"olddesc"} ne $::FORM{"desc"})) {
-        $chgs = 1;
-        SendSQL("UPDATE groups SET description = " . 
-            SqlQuote($::FORM{"desc"}) . " WHERE id = $gid");
-    }
-    if ($::FORM{"oldrexp"} ne $::FORM{"rexp"}) {
-        $chgs = 1;
-        if (!eval {qr/$::FORM{"rexp"}/}) {
-            ShowError("The regular expression you entered is invalid. " .
-                      "Please click the <b>Back</b> button and try again.");
-            PutFooter();
-            exit;
+
+    # We trust old values given by the template. If they are hacked
+    # in a way that some of the tests below become negative, the
+    # corresponding attributes are not updated in the DB, which does
+    # not hurt.
+    if ($isbuggroup) {
+        # Check that the group name and its description are valid
+        # and return trimmed values if tests are successful.
+        $name = CheckGroupName($::FORM{'name'}, $gid);
+        $desc = CheckGroupDesc($::FORM{'desc'});
+        $isactive = $::FORM{'isactive'} ? 1 : 0;
+
+        if ($name ne $::FORM{"oldname"}) {
+            $chgs = 1;
+            $sth = $dbh->do("UPDATE groups SET name = ? WHERE id = ?",
+                            undef, $name, $gid);
         }
-        SendSQL("UPDATE groups SET userregexp = " . 
-            SqlQuote($::FORM{"rexp"}) . " WHERE id = $gid");
-        RederiveRegexp($::FORM{"rexp"}, $gid);
+        if ($desc ne $::FORM{"olddesc"}) {
+            $chgs = 1;
+            $sth = $dbh->do("UPDATE groups SET description = ? WHERE id = ?",
+                            undef, $desc, $gid);
+        }
+        if ($isactive ne $::FORM{"oldisactive"}) {
+            $chgs = 1;
+            $sth = $dbh->do("UPDATE groups SET isactive = ? WHERE id = ?",
+                            undef, $isactive, $gid);
+        }
     }
-    if (($isbuggroup == 1) && ($::FORM{"oldisactive"} ne $::FORM{"isactive"})) {
+    if ($regexp ne $::FORM{"oldrexp"}) {
         $chgs = 1;
-        SendSQL("UPDATE groups SET isactive = " . 
-            SqlQuote($::FORM{"isactive"}) . " WHERE id = $gid");
+        $sth = $dbh->do("UPDATE groups SET userregexp = ? WHERE id = ?",
+                        undef, $regexp, $gid);
+        RederiveRegexp($regexp, $gid);
     }
-    
+
     print "Checking....";
     foreach my $b (grep(/^oldgrp-\d*$/, keys %::FORM)) {
         if (defined($::FORM{$b})) {
@@ -817,5 +867,6 @@ sub doGroupChanges {
         # mark the changes
         SendSQL("UPDATE groups SET last_changed = NOW() WHERE id = $gid");
     }
-    return $gid, $chgs, $::FORM{"rexp"};
+    $dbh->do("UNLOCK TABLES");
+    return $gid, $chgs, $regexp;
 }

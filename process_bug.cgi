@@ -352,6 +352,9 @@ sub CheckCanChangeField {
     # START DO_NOT_CHANGE
     my ($field, $bugid, $oldvalue, $newvalue) = (@_);
 
+    $oldvalue = defined($oldvalue) ? $oldvalue : '';
+    $newvalue = defined($newvalue) ? $newvalue : '';
+
     # Convert email IDs into addresses for $oldvalue
     if (($field eq "assigned_to") || 
         ($field eq "reporter") || 

@@ -70,7 +70,7 @@ foreach my $email (sort (keys %bugs)) {
         $msg .= "    -> ${urlbase}show_bug.cgi?id=$i\n";
     }
 
-    Bugzilla::BugMail::MessageToMTA($msg);
+    Bugzilla::BugMail::MessageToMTA($msg, $substs{'email'});
 
     print "$email      " . join(" ", @{$bugs{$email}}) . "\n";
 }

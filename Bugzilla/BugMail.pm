@@ -850,16 +850,14 @@ sub NewProcessOnePerson ($$$$$$$$$$$$$) {
     
     my $msg = PerformSubsts($template, \%substs);
 
-    MessageToMTA($msg);
+    MessageToMTA($msg, $person);
 
     push(@sentlist, $person);
     return 1;
 }
 
-# XXX: Should eventually add $mail_from and $mail_to options to 
-# control the SMTP Envelope. -mkanat
-sub MessageToMTA ($) {
-   my ($msg) = (@_);
+sub MessageToMTA ($;$$) {
+   my ($msg, $rcpt_to) = (@_);
 
     my $sendmailparam = "";
     unless (Param("sendmailnow")) {

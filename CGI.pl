@@ -226,7 +226,7 @@ sub MailPassword {
                              "login" => $login,
                              "password" => $password});
 
-    Bugzilla::BugMail::MessageToMTA($msg);
+    Bugzilla::BugMail::MessageToMTA($msg, $login . Param('emailsuffix'));
 }
 
 sub PutHeader {

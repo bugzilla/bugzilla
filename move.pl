@@ -168,7 +168,7 @@ $template->process("bug/show.xml.tmpl", { bugs => \@bugs,
 
 $msg .= "\n";
 
-Bugzilla::BugMail::MessageToMTA($msg);
+Bugzilla::BugMail::MessageToMTA($msg, $to);
 
 my $logstr = "XML: bugs $buglist sent to $to";
 Log($logstr);

@@ -115,7 +115,7 @@ sub MailMessage {
   $header.= "Subject: $subject\n\n";
 
   my $sendmessage = $header . $message . "\n";
-  Bugzilla::BugMail::MessageToMTA($sendmessage);
+  Bugzilla::BugMail::MessageToMTA($sendmessage, $recipients[0]);
 
   Log($subject . " sent to: $to");
 }

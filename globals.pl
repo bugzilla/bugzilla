@@ -1390,7 +1390,7 @@ sub RemoveVotes {
             my $msg = PerformSubsts(Param("voteremovedmail"),
                                     \%substs);
 
-            Bugzilla::BugMail::MessageToMTA($msg);
+            Bugzilla::BugMail::MessageToMTA($msg, $substs{'to'});
         }
         SendSQL("SELECT SUM(vote_count) FROM votes WHERE bug_id = $id");
         my $v = FetchOneColumn();

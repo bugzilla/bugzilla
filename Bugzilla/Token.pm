@@ -92,7 +92,7 @@ sub IssueEmailChangeToken {
     $template->process("account/email/change-old.txt.tmpl", $vars, \$message)
       || ThrowTemplateError($template->error());
 
-    Bugzilla::BugMail::MessageToMTA($message);
+    Bugzilla::BugMail::MessageToMTA($message, $vars->{'emailaddress'});
 
     $vars->{'token'} = $newtoken;
     $vars->{'emailaddress'} = $new_email . Param('emailsuffix');
@@ -101,7 +101,7 @@ sub IssueEmailChangeToken {
     $template->process("account/email/change-new.txt.tmpl", $vars, \$message)
       || ThrowTemplateError($template->error());
 
-    Bugzilla::BugMail::MessageToMTA($message);
+    Bugzilla::BugMail::MessageToMTA($message, $vars->{'emailaddress'});
 }
 
 sub IssuePasswordToken {
@@ -153,7 +153,7 @@ sub IssuePasswordToken {
                                                                $vars, \$message)
       || ThrowTemplateError($template->error());
 
-    Bugzilla::BugMail::MessageToMTA($message);
+    Bugzilla::BugMail::MessageToMTA($message, $vars->{'emailaddress'});
 }
 
 
@@ -229,7 +229,7 @@ sub Cancel {
     $template->process("account/cancel-token.txt.tmpl", $vars, \$message)
       || ThrowTemplateError($template->error());
 
-    Bugzilla::BugMail::MessageToMTA($message);
+    Bugzilla::BugMail::MessageToMTA($message, $vars->{'emailaddress'});
 
     # Delete the token from the database.
     &::SendSQL("LOCK TABLES tokens WRITE");

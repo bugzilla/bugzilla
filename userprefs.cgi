@@ -17,7 +17,7 @@
 #                 Dan Mosedale <dmose@mozilla.org>
 #                 Alan Raetz <al_raetz@yahoo.com>
 #                 David Miller <justdave@syndicomm.com>
-#                 Christopher Aillon <christopher@aillon.com>
+#
 
 use diagnostics;
 use strict;
@@ -171,7 +171,7 @@ sub SaveAccount {
                  WHERE   userid = $userid");
     }
     SendSQL("UPDATE profiles SET " .
-            "realname = " . SqlQuote(trim($::FORM{'realname'})) .
+            "realname = " . SqlQuote($::FORM{'realname'}) .
             " WHERE userid = $userid");
 }
 
@@ -299,7 +299,7 @@ sub showExcludeSelf (\%) {
                 <table><tr><td colspan=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 <b>Global options:</b></tr>
                 <tr><td width=150></td><td>
-                Only email me reports of changes made by other people
+                Do not email me bugs that I change
              <input type="checkbox" name="ExcludeSelf" VALUE="on" $excludeSelf>
                 <br>
                 </td>
@@ -502,7 +502,7 @@ sub SaveFooter {
 
 
 sub ShowPermissions {
-    print "<TR><TD>You have the following permission bits set on your account:\n";
+    print "You have the following permission bits set on your account:\n";
     print "<P><UL>\n";
     my $found = 0;
     SendSQL("SELECT description FROM groups " .
@@ -532,7 +532,6 @@ sub ShowPermissions {
         }
         print "</UL>\n";
     }
-    print "</TR></TD>\n";
 }
         
 

@@ -66,7 +66,6 @@ if (defined($login)) {
     # We've been asked to create an account.
     my $realname = trim($::FORM{'realname'});
     CheckEmailSyntax($login);
-    trick_taint($login);
     $vars->{'login'} = $login;
     
     if (!ValidateNewUser($login)) {

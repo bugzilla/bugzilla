@@ -1,4 +1,4 @@
-The 2.16.6 release fixes several bugs in 2.16.5, including some
+The 2.16.7 release fixes some bugs in 2.16.6, including some
 security related issues.
 
 **************************
@@ -125,6 +125,33 @@ installation.
   however use the option "The bug is resolved or verified" to achieve
   part of this.
   (bug 146261)
+
+*********************************************************
+*** USERS UPGRADING FROM ALL VERSIONS PRIOR TO 2.16.7 ***
+*********************************************************
+
+*** Security fixes ***
+
+- It is possible to send a carefully crafted HTTP POST message to
+  process_bug.cgi which will remove keywords from a bug even if you don't have
+  permissions to edit all bug fields (the "editbugs" permission).  Such changes
+  are reported in "bug changed" email notifications, so they are easily
+  detected and reversed if someone abuses it.  Users are now prevented from
+  making changes to keywords if they do not have editbugs privileges. (bug
+  252638)
+
+*** Bug fixes of note ***
+
+- Enforce a minimum of 10 minutes between attempts to reset a password, so
+  we don't mailbomb the user if someone submits the form many times in a
+  row. (bug 250897)
+
+- Put products in alphabetical order on the create attachment status page.
+  (bug 251427)
+
+- Specify MyISAM as the table type when creating new tables.  MySQL 4.1 and
+  up default to InnoDB, which doesn't support some of the indexing methods
+  that we use. (bug 263165)
 
 *********************************************************
 *** USERS UPGRADING FROM ALL VERSIONS PRIOR TO 2.16.6 ***

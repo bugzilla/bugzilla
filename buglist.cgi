@@ -815,6 +815,13 @@ sub GenerateSQL {
         push(@funcnames, $key);
     }
 
+    if ($debug) {
+        # If we're going to be printing debug stuff, we need the content
+        # type. This doesn't affect later stuff, because we call exit, and
+        # never return from this sub
+        print "Content-Type: text/html\n\n";
+    }
+
     # first we delete any sign of "Chart #-1" from the HTML form hash
     # since we want to guarantee the user didn't hide something here
     my @badcharts = grep /^(field|type|value)-1-/, (keys %F);

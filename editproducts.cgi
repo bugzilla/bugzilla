@@ -1200,8 +1200,9 @@ if ($action eq 'update') {
     SendSQL("UNLOCK TABLES");
 
     if ($checkvotes) {
-        print "Checking existing votes in this product for anybody who now has too many votes.";
+        # 1. too many votes for a single user on a single bug.
         if ($maxvotesperbug < $votesperuser) {
+            print "<br>Checking existing votes in this product for anybody who now has too many votes for a single bug.";
             SendSQL("SELECT votes.who, votes.bug_id " .
                     "FROM votes, bugs " .
                     "WHERE bugs.bug_id = votes.bug_id " .
@@ -1219,6 +1220,12 @@ if ($action eq 'update') {
                 print qq{<br>Removed votes for bug <A HREF="show_bug.cgi?id=$id">$id</A> from $name\n};
             }
         }
+
+        # 2. too many total votes for a single user.
+        # This part doesn't work in the general case because RemoveVotes
+        # doesn't enforce votesperuser (except per-bug when it's less
+        # than maxvotesperbug).  See RemoveVotes in globals.pl.
+        print "<br>Checking existing votes in this product for anybody who now has too many total votes.";
         SendSQL("SELECT votes.who, votes.vote_count FROM votes, bugs " .
                 "WHERE bugs.bug_id = votes.bug_id " .
                 " AND bugs.product_id = $product_id");
@@ -1238,7 +1245,7 @@ if ($action eq 'update') {
                         " AND bugs.product_id = $product_id " .
                         " AND votes.who = $who");
                 while (MoreSQLData()) {
-                    my $id = FetchSQLData();
+                    my ($id) = FetchSQLData();
                     RemoveVotes($id, $who,
                                 "The rules for voting on this product has changed; you had too many\ntotal votes, so all votes have been removed.");
                     my $name = DBID_to_name($who);
@@ -1246,20 +1253,18 @@ if ($action eq 'update') {
                 }
             }
         }
+        # 3. enough votes to confirm
         SendSQL("SELECT bug_id FROM bugs " .
                 "WHERE product_id = $product_id " .
                 "  AND bug_status = '$::unconfirmedstate' " .
                 "  AND votes >= $votestoconfirm");
-        my @list;
+        if (MoreSQLData()) {
+            print "<br>Checking unconfirmed bugs in this product for any which now have sufficient votes.";
+        }
         while (MoreSQLData()) {
-            push(@list, FetchOneColumn());
+            # The user id below is used for activity log purposes
+            CheckIfVotedConfirmed(FetchOneColumn(), Bugzilla->user->id);
         }
-        foreach my $id (@list) {
-            SendSQL("SELECT who FROM votes WHERE bug_id = $id");
-            my $who = FetchOneColumn();
-            CheckIfVotedConfirmed($id, $who);
-        }
-
     }
 
     PutTrailer($localtrailer);

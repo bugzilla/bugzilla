@@ -304,7 +304,7 @@ sub CheckCanChangeField {
             return 1;
         }
     } elsif ($reporterid eq $whoid || $ownerid eq $whoid ||
-             $qacontactid eq $whoid) {
+             (Param('useqacontact') && $qacontactid eq $whoid)) {
         return 1;
     }
     SendSQL("UNLOCK TABLES");

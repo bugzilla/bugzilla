@@ -20,6 +20,7 @@
 # Contributor(s): Terry Weissman <terry@mozilla.org>
 #                 Dan Mosedale <dmose@mozilla.org>
 #                 Jake <jake@acutex.net>
+#                 Bradley Baetz <bbaetz@cs.mcgill.ca>
 
 # Contains some global variables and routines used throughout bugzilla.
 
@@ -833,6 +834,12 @@ sub detaint_string {
     my ($str) = @_;
     $str =~ m/^(.*)$/s;
     $str = $1;
+}
+
+sub detaint_natural {
+    $_[0] =~ /^(\d+)$/;
+    $_[0] = $1;
+    return (defined($_[0]));
 }
 
 # This routine quoteUrls contains inspirations from the HTML::FromText CPAN

@@ -269,9 +269,9 @@ sub ProcessOneBug {
     my %AlreadySeen = ();
     my $checkperson = "";
     foreach my $person (@emailList) {
-	# don't modify the original so it sends out with the right case
-	# based on who came first.
-	$checkperson = lc($person);
+        # don't modify the original so it sends out with the right case
+        # based on who came first.
+        $checkperson = lc($person);
         if ( !($AlreadySeen{$checkperson}) ) {
             push(@allEmail,$person);
             $AlreadySeen{$checkperson}++;
@@ -377,7 +377,7 @@ sub filterExcludeList ($$) {
     my $checkperson = "";
 
     foreach my $person (@result) {
-	$checkperson = lc($person);
+        $checkperson = lc($person);
         if ( !($alreadySeen{$checkperson}) ) {
             push(@uniqueResult,$person);
             $alreadySeen{$checkperson}++;

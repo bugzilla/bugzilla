@@ -224,7 +224,7 @@ DefParam("shutdownhtml",
 DefParam("sendmailnow",
          "If this is on, Bugzilla will tell sendmail to send any e-mail immediately. If you have a large number of users with a large amount of e-mail traffic, enabling this option may dramatically slow down Bugzilla. Best used for smaller installations of Bugzilla.",
          "b",
-         0);
+         1);
 
 DefParam("passwordmail",
 q{The email that gets sent to people to tell them their password.  Within

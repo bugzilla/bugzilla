@@ -1283,6 +1283,17 @@ skip-networking
       </para>
 
       <para>
+        <command>list/table.html.tmpl</command>:
+        This template controls the appearance of the bug lists created
+        by Bugzilla. Editing this template allows per-column control of
+        the width and title of a column, the maximum display length of
+        each entry, and the wrap behaviour of long entries.
+        For long bug lists, Bugzilla inserts a 'break' every 100 bugs by
+        default; this behaviour is also controlled by this template, and
+        that value can be modified here.
+      </para>
+
+      <para>
         <command>bug/create/user-message.html.tmpl</command>:
         This is a message that appears near the top of the bug reporting page.
         By modifying this, you can tell your users how they should report

@@ -37,7 +37,6 @@ sub sillyness {
     $zz = $::db_name;
     $zz = $::defaultqueryname;
     $zz = $::unconfirmedstate;
-    $zz = $::userid;
     $zz = @::components;
     $zz = @::default_column_list;
     $zz = @::legal_keywords;
@@ -163,7 +162,9 @@ sub GenerateSQL {
              "LEFT JOIN profiles map_qa_contact ON bugs.qa_contact = map_qa_contact.userid"));
     unshift(@wherepart,
             ("bugs.assigned_to = map_assigned_to.userid",
-             "bugs.reporter = map_reporter.userid"));
+             "bugs.reporter = map_reporter.userid",
+             "bugs.groupset & $::usergroupset = bugs.groupset"));
+
 
     my $minvotes;
     if (defined $F{'votes'}) {
@@ -339,8 +340,6 @@ sub GenerateSQL {
     }
 
     my $chartid;
-    # $statusid is used by the code that queries for attachment statuses.
-    my $statusid = 0;
     my $f;
     my $ff;
     my $t;
@@ -394,8 +393,7 @@ sub GenerateSQL {
          },
          "^attachments\..*," => sub {
              my $table = "attachments_$chartid";
-             push(@supptables, "attachments $table");
-             push(@wherepart, "bugs.bug_id = $table.bug_id");
+             push(@supptables, "LEFT JOIN attachments $table ON bugs.bug_id = $table.bug_id");
              $f =~ m/^attachments\.(.*)$/;
              my $field = $1;
              if ($t eq "changedby") {
@@ -414,47 +412,12 @@ sub GenerateSQL {
                  $field = "creation_ts";
                  $t = "greaterthan";
              }
-             if ($field eq "ispatch" && $v ne "0" && $v ne "1") {
-                 return Error("The only legal values for the 'Attachment is patch' " .
-                              "field are 0 and 1.");
-             }
-             if ($field eq "isobsolete" && $v ne "0" && $v ne "1") {
-                 return Error("The only legal values for the 'Attachment is obsolete' " .
-                              "field are 0 and 1.");
+             if ($field eq "ispatch") {
+                 if ($v ne "0" && $v ne "1") {
+                     return Error("The only legal values for the 'Attachment is patch' field is 0 or 1.");
+                 }
              }
              $f = "$table.$field";
-         },
-         # 2001-05-16 myk@mozilla.org: enable querying against attachment status
-         # if this installation has enabled use of the attachment tracker.
-         "^attachstatusdefs.name," => sub {
-             # When searching for multiple statuses within a single boolean chart,
-             # we want to match each status record separately.  In other words,
-             # "status = 'foo' AND status = 'bar'" should match attachments with
-             # one status record equal to "foo" and another one equal to "bar",
-             # not attachments where the same status record equals both "foo" and
-             # "bar" (which is nonsensical).  In order to do this we must add an
-             # additional counter to the end of the "attachstatuses" and 
-             # "attachstatusdefs" table references.
-             ++$statusid;
-
-             my $attachtable = "attachments_$chartid";
-             my $statustable = "attachstatuses_${chartid}_$statusid";
-             my $statusdefstable = "attachstatusdefs_${chartid}_$statusid";
-             push(@supptables, "attachments $attachtable");
-             push(@supptables, "attachstatuses $statustable");
-             push(@supptables, "attachstatusdefs $statusdefstable");
-             push(@wherepart, "bugs.bug_id = $attachtable.bug_id");
-             push(@wherepart, "$attachtable.attach_id = $statustable.attach_id");
-             push(@wherepart, "$statustable.statusid = $statusdefstable.id");
-
-             # When the operator is changedbefore, changedafter, changedto, 
-             # or changedby, $f appears in the query as "fielddefs.name = '$f'",
-             # so it must be the exact name of the table/field as they appear
-             # in the fielddefs table (i.e. attachstatusdefs.name).  For all 
-             # other operators, $f appears in the query as "$f = value", so it
-             # should be the name of the table/field with the correct table
-             # alias for this chart entry (f.e. attachstatusdefs_0.name).
-             $f = ($t =~ /^changed/) ? "attachstatusdefs.name" : "$statusdefstable.name";
          },
          "^changedin," => sub {
              $f = "(to_days(now()) - to_days(bugs.delta_ts))";
@@ -498,23 +461,23 @@ sub GenerateSQL {
              }
          },
 
-         "^dependson," => sub {
+	 "^dependson," => sub {
                 my $table = "dependson_" . $chartid;
-                push(@supptables, "dependencies $table");
-                $ff = "$table.$f";
-                $ref = $funcsbykey{",$t"};
-                &$ref;
+		push(@supptables, "dependencies $table");
+		$ff = "$table.$f";
+		$ref = $funcsbykey{",$t"};
+		&$ref;
                 push(@wherepart, "$table.blocked = bugs.bug_id");
-         },
+	 },
 
-         "^blocked," => sub {
+	 "^blocked," => sub {
                 my $table = "blocked_" . $chartid;
-                push(@supptables, "dependencies $table");
-                $ff = "$table.$f";
-                $ref = $funcsbykey{",$t"};
-                &$ref;
+		push(@supptables, "dependencies $table");
+		$ff = "$table.$f";
+		$ref = $funcsbykey{",$t"};
+		&$ref;
                 push(@wherepart, "$table.dependson = bugs.bug_id");
-         },
+	 },
 
 
          ",equals" => sub {
@@ -595,15 +558,6 @@ sub GenerateSQL {
              push(@wherepart, "$table.bug_id = bugs.bug_id");
              push(@wherepart, "$table.fieldid = $ftable.fieldid");
              $term = "($ftable.name = '$f' AND $table.bug_when > $q)";
-         },
-         ",changedfrom" => sub {
-             my $table = "act_$chartid";
-             my $ftable = "fielddefs_$chartid";
-             push(@supptables, "bugs_activity $table");
-             push(@supptables, "fielddefs $ftable");
-             push(@wherepart, "$table.bug_id = bugs.bug_id");
-             push(@wherepart, "$table.fieldid = $ftable.fieldid");
-             $term = "($ftable.name = '$f' AND $table.removed = $q)";
          },
          ",changedto" => sub {
              my $table = "act_$chartid";
@@ -808,14 +762,10 @@ sub GenerateSQL {
             $suppseen{$str} = 1;
         }
     }
-
     my $query =  ("SELECT " . join(', ', @fields) .
                   " FROM $suppstring" .
                   " WHERE " . join(' AND ', (@wherepart, @andlist)) .
                   " GROUP BY bugs.bug_id");
-
-    $query = SelectVisible($query, $::userid, $::usergroupset);
-
     if ($debug) {
         print "<P><CODE>" . value_quote($query) . "</CODE><P>\n";
         exit();
@@ -854,7 +804,7 @@ CMD: for ($::FORM{'cmdtype'}) {
         last CMD;
     };
     /^editnamed$/ && do {
-        my $url = "query.cgi?" . LookupNamedQuery($::FORM{"namedcmd"});
+	my $url = "query.cgi?" . LookupNamedQuery($::FORM{"namedcmd"});
         print qq{Content-type: text/html
 Refresh: 0; URL=$url
 
@@ -994,7 +944,7 @@ DefCol("summary", "substring(bugs.short_desc, 1, 60)", "Summary", "bugs.short_de
 DefCol("summaryfull", "bugs.short_desc", "Summary", "bugs.short_desc", 1);
 DefCol("status_whiteboard", "bugs.status_whiteboard", "StatusSummary", "bugs.status_whiteboard", 1);
 DefCol("component", "substring(bugs.component, 1, 8)", "Comp",
-       "bugs.component");
+	"bugs.component");
 DefCol("product", "substring(bugs.product, 1, 8)", "Product", "bugs.product");
 DefCol("version", "substring(bugs.version, 1, 5)", "Vers", "bugs.version");
 DefCol("os", "substring(bugs.op_sys, 1, 4)", "OS", "bugs.op_sys");
@@ -1076,6 +1026,8 @@ ReconnectToShadowDatabase();
 
 my $query = GenerateSQL(\@fields, undef, undef, $::buffer);
 
+
+
 if ($::COOKIE{'LASTORDER'}) {
     if ((!$::FORM{'order'}) || $::FORM{'order'} =~ /^reuse/i) {
         $::FORM{'order'} = url_decode($::COOKIE{'LASTORDER'});
@@ -1107,10 +1059,6 @@ if (defined $::FORM{'order'} && $::FORM{'order'} ne "") {
             $::FORM{'order'} = "map_assigned_to.login_name, bugs.bug_status, priority, bugs.bug_id";
             last ORDER;
         };
-        /Changed/ && do {
-            $::FORM{'order'} = "bugs.delta_ts, bugs.bug_status, bugs.priority, map_assigned_to.login_name, bugs.bug_id";
-            last ORDER;
-        };
         # DEFAULT
         $::FORM{'order'} = "bugs.bug_status, bugs.priority, map_assigned_to.login_name, bugs.bug_id";
     }
@@ -1137,7 +1085,6 @@ if ($::FORM{'debug'} && $serverpush) {
 if (Param('expectbigqueries')) {
     SendSQL("set option SQL_BIG_TABLES=1");
 }
-
 SendSQL($query);
 
 my $count = 0;
@@ -1217,7 +1164,6 @@ my @bugarray;
 my %prodhash;
 my %statushash;
 my %ownerhash;
-my %qahash;
 
 my $pricol = -1;
 my $sevcol = -1;
@@ -1232,9 +1178,6 @@ for (my $colcount = 0 ; $colcount < @collist ; $colcount++) {
 }
 
 my @weekday= qw( Sun Mon Tue Wed Thu Fri Sat );
-
-# Truncate email to 30 chars per bug #103592
-my $maxemailsize = 30;
 
 while (@row = FetchSQLData()) {
     my $bug_id = shift @row;
@@ -1260,13 +1203,13 @@ while (@row = FetchSQLData()) {
         }
         my $customstyle = "";
         if ($severity) {
-            if ($severity eq "enh") {
+            if ($severity eq "enhan") {
                 $customstyle = "style='font-style:italic ! important'";
             }
-            if ($severity eq "blo") {
+            if ($severity eq "block") {
                 $customstyle = "style='color:red ! important; font-weight:bold ! important'";
             }
-            if ($severity eq "cri") {
+            if ($severity eq "criti") {
                 $customstyle = "style='color:red; ! important'";
             }
         }
@@ -1287,26 +1230,17 @@ while (@row = FetchSQLData()) {
                 }
                 if ($c eq "owner") {
                     $ownerhash{$value} = 1;
-                }
-                if ($c eq "qa_contact") {
-                    $qahash{$value} = 1;
-                }
-                if ( ($c eq "owner" || $c eq "qa_contact" ) &&
-                        length $value > $maxemailsize )  {
-                    my $trunc = substr $value, 0, $maxemailsize;
-                    $value = value_quote($value);
-                    $value = qq|<SPAN TITLE="$value">$trunc...</SPAN>|;
-                } elsif( $c eq 'changeddate' or $c eq 'opendate' ) {
-                    my $age = time() - $value;
-                    my ($s,$m,$h,$d,$mo,$y,$wd)= localtime $value;
-                    if( $age < 18*60*60 ) {
-                        $value = sprintf "%02d:%02d:%02d", $h,$m,$s;
-                    } elsif ( $age < 6*24*60*60 ) {
-                        $value = sprintf "%s %02d:%02d", $weekday[$wd],$h,$m;
-                    } else {
-                        $value = sprintf "%04d-%02d-%02d", 1900+$y,$mo+1,$d;
-                    }
-                }
+		}elsif( $c eq 'changeddate' or $c eq 'opendate' ) {
+		    my $age= time() - $value;
+		    my ($s,$m,$h,$d,$mo,$y,$wd)= localtime $value;
+		    if( $age < 18*60*60 ) {
+			$value= sprintf "%02d:%02d:%02d", $h,$m,$s;
+		    }elsif( $age < 6*24*60*60 ) {
+			$value= sprintf "%s %02d:%02d", $weekday[$wd],$h,$m;
+		    }else {
+			$value= sprintf "%04d-%02d-%02d", 1900+$y,$mo+1,$d;
+		    }
+		}
                 if ($::needquote{$c} || $::needquote{$c} == 5) {
                     $value = html_quote($value);
                 } else {
@@ -1355,8 +1289,7 @@ if ($serverpush) {
 my $toolong = 0;
 if ($::FORM{'order'}) {
     my $q = url_quote($::FORM{'order'});
-    my $cookiepath = Param("cookiepath");
-    print "Set-Cookie: LASTORDER=$q ; path=$cookiepath; expires=Sun, 30-Jun-2029 00:00:00 GMT\n";
+    print "Set-Cookie: LASTORDER=$q ; path=/; expires=Sun, 30-Jun-2029 00:00:00 GMT\n";
 }
 if (length($buglist) < 4000) {
     print "Set-Cookie: BUGLIST=$buglist\n\n";
@@ -1364,7 +1297,7 @@ if (length($buglist) < 4000) {
     print "Set-Cookie: BUGLIST=\n\n";
     $toolong = 1;
 }
-PutHeader($::querytitle, undef, "", "", navigation_links($buglist));
+PutHeader($::querytitle);
 
 
 print "
@@ -1593,8 +1526,8 @@ if($::usergroupset ne '0') {
         print "
 <INPUT TYPE=radio NAME=knob VALUE=confirm>
         Confirm bugs (change status to <b>NEW</b>)<br>";
-        $knum++;
     }
+    $knum++;
     print "
 <INPUT TYPE=radio NAME=knob VALUE=accept>
         Accept bugs (change status to <b>ASSIGNED</b>)<br>";
@@ -1690,23 +1623,14 @@ if ($count > 0) {
         print "Change several bugs at once</A></NOBR>\n";
     }
     my @owners = sort(keys(%ownerhash));
-    my $suffix = Param('emailsuffix');
     if (@owners > 1 && UserInGroup("editbugs")) {
+        my $suffix = Param('emailsuffix');
         if ($suffix ne "") {
             map(s/$/$suffix/, @owners);
         }
         my $list = join(',', @owners);
         print qq{&nbsp;&nbsp;\n};
-        print qq{<A HREF="mailto:$list">Send&nbsp;mail&nbsp;to&nbsp;bug&nbsp;owners</A>\n};
-    }
-    my @qacontacts = sort(keys(%qahash));
-    if (@qacontacts > 1 && UserInGroup("editbugs") && Param("useqacontact")) {
-        if ($suffix ne "") {
-            map(s/$/$suffix/, @qacontacts); 
-        }
-        my $list = join(',', @qacontacts);
-        print qq{&nbsp;&nbsp;\n};
-        print qq{<A HREF="mailto:$list">Send&nbsp;mail&nbsp;to&nbsp;bug&nbsp;QA&nbsp;contacts</A>\n};
+        print qq{<NOBR><A HREF="mailto:$list">Send mail to bug owners</A></NOBR>\n};
     }
     print qq{&nbsp;&nbsp;\n};
     print qq{<NOBR><A HREF="query.cgi?$::buffer">Edit this query</A></NOBR>\n};

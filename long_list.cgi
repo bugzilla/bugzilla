@@ -32,7 +32,6 @@ require "CGI.pl";
 sub sillyness {
     my $zz;
     $zz = $::legal_keywords;
-    $zz = $::userid;
     $zz = $::usergroupset;
     $zz = %::FORM;
 }
@@ -69,13 +68,13 @@ select
   bugs.status_whiteboard,
   bugs.keywords
 from bugs,profiles assign,profiles report
-where assign.userid = bugs.assigned_to and report.userid = bugs.reporter and";
+where assign.userid = bugs.assigned_to and report.userid = bugs.reporter and
+bugs.groupset & $::usergroupset = bugs.groupset and";
 
 $::FORM{'buglist'} = "" unless exists $::FORM{'buglist'};
 foreach my $bug (split(/:/, $::FORM{'buglist'})) {
     detaint_natural($bug) || next;
-    SendSQL(SelectVisible("$generic_query bugs.bug_id = $bug",
-                          $::userid, $::usergroupset));
+    SendSQL("$generic_query bugs.bug_id = $bug");
 
     my @row;
     if (@row = FetchSQLData()) {
@@ -106,12 +105,12 @@ foreach my $bug (split(/:/, $::FORM{'buglist'})) {
             }
             print "<TD><B>QA Contact:</B> $name\n";
         }
-        print "<TR><TD COLSPAN=2><B>Component:</B> $component\n";
+        print "<TR><TD><B>Component:</B> $component\n";
         if (Param("usetargetmilestone")) {
-            print "<TD COLSPAN=2><B>Target Milestone:</B> $target_milestone\n";
+            print "<TD><B>Target milestone:</B>$target_milestone\n";
         }
         print "<TR><TD COLSPAN=6><B>URL:</B>&nbsp;";
-        print "<A HREF=\"" . $url . "\">" .  html_quote($url) . "</A>\n"; 
+	print "<A HREF=\"" . $url . "\">" .  html_quote($url) . "</A>\n"; 
         print "<TR><TD COLSPAN=6><B>Summary:</B> " . html_quote($shortdesc) . "\n";
         if (@::legal_keywords) {
             print "<TR><TD><B>Keywords: </B>$keywords</TD></TR>\n";

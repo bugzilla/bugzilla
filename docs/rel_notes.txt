@@ -127,7 +127,7 @@ installation.
   (bug 146261)
 
 *********************************************************
-*** USERS UPGRADING FROM ALL VERSIONS PRIOR TO 2.16.5 ***
+*** USERS UPGRADING FROM ALL VERSIONS PRIOR TO 2.16.6 ***
 *********************************************************
 
 *** Security fixes ***

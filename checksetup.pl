@@ -3197,14 +3197,12 @@ if (GetFieldDef('bugs_activity', 'oldvalue')) {
 # http://bugzilla.mozilla.org/show_bug.cgi?id=90933
 ChangeFieldType("profiles", "disabledtext", "mediumtext not null");
 
-# 2001-07-26 myk@mozilla.org bug39816: 
-# Add fields to the bugs table that record whether or not the reporter,
-# assignee, QA contact, and users on the cc: list can see bugs even when
+# 2001-07-26 myk@mozilla.org            bug 39816 (original)
+# 2002-02-06 bbaetz@student.usyd.edu.au bug 97471 (revision)
+# Add fields to the bugs table that record whether or not the reporter
+# and users on the cc: list can see bugs even when
 # they are not members of groups to which the bugs are restricted.
-# 2002-02-06 bbaetz@student.usyd.edu.au - assignee/qa can always see the bug
 AddField("bugs", "reporter_accessible", "tinyint not null default 1");
-#AddField("bugs", "assignee_accessible", "tinyint not null default 1");
-#AddField("bugs", "qacontact_accessible", "tinyint not null default 1");
 AddField("bugs", "cclist_accessible", "tinyint not null default 1");
 
 # 2001-08-21 myk@mozilla.org bug84338:
@@ -4092,7 +4090,20 @@ if (GetFieldDef("user_group_map", "isderived")) {
 
 AddField('flags', 'is_active', 'tinyint not null default 1');
 
-    
+# 2005-02-21 - LpSolit@gmail.com - Bug 279910
+# qacontact_accessible and assignee_accessible field names no longer exist
+# in the 'bugs' table. Their corresponding entries in the 'bugs_activity'
+# table should therefore be marked as obsolete, meaning that they cannot
+# be used anymore when querying the database - they are not deleted in
+# order to keep track of these fields in the activity table.
+if (!GetFieldDef('fielddefs', 'obsolete')) {
+    AddField('fielddefs', 'obsolete', 'tinyint not null default 0');
+    print "Marking qacontact_accessible and assignee_accessible as obsolete fields...\n";
+    $dbh->do("UPDATE fielddefs SET obsolete = 1
+              WHERE name = 'qacontact_accessible'
+                 OR name = 'assignee_accessible'");
+}
+
 
 # 2005-02-20 - LpSolit@gmail.com - Bug 277504
 # When migrating quips from the '$datadir/comments' file to the DB,

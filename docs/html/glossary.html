@@ -10,8 +10,8 @@ REL="HOME"
 TITLE="The Bugzilla Guide - 2.16.3 Release"
 HREF="index.html"><LINK
 REL="PREVIOUS"
-TITLE="SourceForge"
-HREF="variant-sourceforge.html"></HEAD
+TITLE="How to use this License for your documents"
+HREF="gfdl-howto.html"></HEAD
 ><BODY
 CLASS="glossary"
 BGCOLOR="#FFFFFF"
@@ -39,7 +39,7 @@ WIDTH="10%"
 ALIGN="left"
 VALIGN="bottom"
 ><A
-HREF="variant-sourceforge.html"
+HREF="gfdl-howto.html"
 ACCESSKEY="P"
 >Prev</A
 ></TD
@@ -70,7 +70,7 @@ CLASS="glossdiv"
 ><H1
 CLASS="glossdiv"
 ><A
-NAME="AEN2300"
+NAME="AEN2372"
 ></A
 >0-9, high ascii</H1
 ><DL
@@ -136,6 +136,110 @@ CLASS="acronym"
 >
 
         world-wide-web server.</P
+><P
+></P
+><DIV
+CLASS="variablelist"
+><P
+><B
+>Useful Directives when configuring Bugzilla</B
+></P
+><DL
+><DT
+><TT
+CLASS="computeroutput"
+><A
+HREF="http://httpd.apache.org/docs-2.0/mod/core.html#addhandler"
+TARGET="_top"
+>AddHandler</A
+></TT
+></DT
+><DD
+><P
+>Tell Apache that it's OK to run CGI scripts.</P
+></DD
+><DT
+><TT
+CLASS="computeroutput"
+><A
+HREF="http://httpd.apache.org/docs-2.0/mod/core.html#allowoverride"
+TARGET="_top"
+>AllowOverride</A
+></TT
+>, <TT
+CLASS="computeroutput"
+><A
+HREF="http://httpd.apache.org/docs-2.0/mod/core.html#options"
+TARGET="_top"
+>Options</A
+></TT
+></DT
+><DD
+><P
+>These directives are used to tell Apache many things about
+              the directory they apply to. For Bugzilla's purposes, we need
+              them to allow script execution and <TT
+CLASS="filename"
+>.htaccess</TT
+>
+              overrides.
+              </P
+></DD
+><DT
+><TT
+CLASS="computeroutput"
+><A
+HREF="http://httpd.apache.org/docs-2.0/mod/mod_dir.html#directoryindex"
+TARGET="_top"
+>DirectoryIndex</A
+></TT
+></DT
+><DD
+><P
+>Used to tell Apache what files are indexes. If you can
+              not add <TT
+CLASS="filename"
+>index.cgi</TT
+> to the list of valid files,
+              you'll need to set <TT
+CLASS="computeroutput"
+>$index_html</TT
+> to
+              1 in <TT
+CLASS="filename"
+>localconfig</TT
+> so
+              <B
+CLASS="command"
+>./checksetup.pl</B
+> will create an
+              <TT
+CLASS="filename"
+>index.html</TT
+> that redirects to
+              <TT
+CLASS="filename"
+>index.cgi</TT
+>.
+              </P
+></DD
+><DT
+><TT
+CLASS="computeroutput"
+><A
+HREF="http://httpd.apache.org/docs-2.0/mod/core.html#scriptinterpretersource"
+TARGET="_top"
+>ScriptInterpreterSource</A
+></TT
+></DT
+><DD
+><P
+>Used when running Apache on windows so the shebang line
+              doesn't have to be changed in every Bugzilla script.
+              </P
+></DD
+></DL
+></DIV
 ></DD
 ></DL
 ></DIV
@@ -185,6 +289,9 @@ CLASS="QUOTE"
         "Find" box.</P
 ></DD
 ><DT
+><A
+NAME="gloss-bugzilla"
+></A
 ><B
 >Bugzilla</B
 ></DT
@@ -202,8 +309,28 @@ CLASS="glossdiv"
 ><A
 NAME="gloss-c"
 ></A
-></H1
+>C</H1
 ><DL
+><DT
+><A
+NAME="gloss-cgi"
+></A
+><B
+>Common Gateway Interface</B
+></DT
+> (CGI)<DD
+><P
+><SPAN
+CLASS="acronym"
+>CGI</SPAN
+> is an acronym for Common Gateway Interface.
+        This is a standard for interfacing an external application with a web
+        server. Bugzilla is an example of a <SPAN
+CLASS="acronym"
+>CGI</SPAN
+> application.
+        </P
+></DD
 ><DT
 ><A
 NAME="gloss-component"
@@ -289,7 +416,7 @@ CLASS="glossdiv"
 ><A
 NAME="gloss-g"
 ></A
-></H1
+>G</H1
 ><DL
 ><DT
 ><B
@@ -329,21 +456,78 @@ NAME="gloss-m"
 >M</H1
 ><DL
 ><DT
+><A
+NAME="gloss-mta"
+></A
 ><B
->mysqld</B
+>Message Transport Agent</B
+></DT
+> (MTA)<DD
+><P
+>A Message Transport Agent is used to control the flow of email
+        on a system. Many unix based systems use
+        <A
+HREF="http://www.sendmail.org"
+TARGET="_top"
+>sendmail</A
+> which is what
+        Bugzilla expects to find by default at <TT
+CLASS="filename"
+>/usr/sbin/sendmail</TT
+>.
+        Many other MTA's will work, but they all require that the
+        <TT
+CLASS="option"
+>sendmailnow</TT
+> param be set to <TT
+CLASS="literal"
+>on</TT
+>.
+        </P
+></DD
+><DT
+><A
+NAME="gloss-mysql"
+></A
+><B
+>MySQL</B
 ></DT
 ><DD
 ><P
->mysqld is the name of the 
-        <I
+>MySQL is currently the required
+        <A
+HREF="glossary.html#gloss-rdbms"
+><I
 CLASS="glossterm"
->daemon</I
->
-
-        for the MySQL database. In general, it is invoked automatically
-        through the use of the System V init scripts on GNU/Linux and
-        AT&#38;T System V-based systems, such as Solaris and HP/UX, or
-        through the RC scripts on BSD-based systems.</P
+>RDBMS</I
+></A
+> for Bugzilla. MySQL
+        can be downloaded from <A
+HREF="http://www.mysql.com"
+TARGET="_top"
+>http://www.mysql.com</A
+>. While you
+        should familiarize yourself with all of the documentation, some high
+        points are:
+        </P
+><P
+></P
+><UL
+><LI
+><P
+><A
+HREF="http://www.mysql.com/doc/P/r/Privilege_system.html"
+TARGET="_top"
+>MySQL
+            Privilege System</A
+> - Much more detailed information about
+            the suggestions in <A
+HREF="security.html#security-mysql"
+>Section 5.6.2</A
+>.
+            </P
+></LI
+></UL
 ></DD
 ></DL
 ></DIV
@@ -429,6 +613,30 @@ CLASS="QUOTE"
 >
 
         field in a bug.</P
+></DD
+></DL
+></DIV
+><DIV
+CLASS="glossdiv"
+><H1
+CLASS="glossdiv"
+><A
+NAME="gloss-r"
+></A
+>R</H1
+><DL
+><DT
+><A
+NAME="gloss-rdbms"
+></A
+><B
+>Relational DataBase Managment System</B
+></DT
+> (RDBMS)<DD
+><P
+>A relational database management system is a database system
+        that stores information in tables that are related to each other.
+        </P
 ></DD
 ></DL
 ></DIV
@@ -542,6 +750,21 @@ CLASS="QUOTE"
         giving you the ability to declare by which milestone a bug will be
         fixed, or an enhancement will be implemented.</P
 ></DD
+><DT
+><A
+NAME="gloss-tcl"
+></A
+><B
+>Tool Command Language</B
+></DT
+> (TCL)<DD
+><P
+>TCL is an open source scripting language available for Windows,
+        Macintosh, and Unix based systems. Bugzilla 1.0 was written in TCL but
+        never released. The first release of Bugzilla was 2.0, which was when
+        it was ported to perl.
+        </P
+></DD
 ></DL
 ></DIV
 ><DIV
@@ -555,16 +778,70 @@ NAME="gloss-z"
 ><DL
 ><DT
 ><A
-NAME="zarro-boogs-found"
+NAME="gloss-zarro"
 ></A
 ><B
 >Zarro Boogs Found</B
 ></DT
 ><DD
 ><P
->This is the cryptic response sent by Bugzilla when a query
-        returned no results. It is just a goofy way of saying "Zero Bugs
-        Found".</P
+>This is just a goofy way of saying that there were no bugs
+        found matching your query. When asked to explain this message,
+        Terry had the following to say:
+        </P
+><A
+NAME="AEN2566"
+></A
+><TABLE
+BORDER="0"
+WIDTH="100%"
+CELLSPACING="0"
+CELLPADDING="0"
+CLASS="BLOCKQUOTE"
+><TR
+><TD
+WIDTH="10%"
+VALIGN="TOP"
+>&nbsp;</TD
+><TD
+WIDTH="80%"
+VALIGN="TOP"
+><P
+>I've been asked to explain this ... way back when, when
+          Netscape released version 4.0 of its browser, we had a release
+          party.  Naturally, there had been a big push to try and fix every
+          known bug before the release. Naturally, that hadn't actually
+          happened.  (This is not unique to Netscape or to 4.0; the same thing
+          has happened with every software project I've ever seen.)  Anyway,
+          at the release party, T-shirts were handed out that said something
+          like "Netscape 4.0: Zarro Boogs". Just like the software, the
+          T-shirt had no known bugs.  Uh-huh.
+          </P
+><P
+>So, when you query for a list of bugs, and it gets no results,
+          you can think of this as a friendly reminder.  Of *course* there are
+          bugs matching your query, they just aren't in the bugsystem yet...
+          </P
+></TD
+><TD
+WIDTH="10%"
+VALIGN="TOP"
+>&nbsp;</TD
+></TR
+><TR
+><TD
+COLSPAN="2"
+ALIGN="RIGHT"
+VALIGN="TOP"
+>--<SPAN
+CLASS="attribution"
+>Terry Weissman</SPAN
+></TD
+><TD
+WIDTH="10%"
+>&nbsp;</TD
+></TR
+></TABLE
 ></DD
 ></DL
 ></DIV
@@ -585,7 +862,7 @@ WIDTH="33%"
 ALIGN="left"
 VALIGN="top"
 ><A
-HREF="variant-sourceforge.html"
+HREF="gfdl-howto.html"
 ACCESSKEY="P"
 >Prev</A
 ></TD
@@ -609,7 +886,7 @@ VALIGN="top"
 WIDTH="33%"
 ALIGN="left"
 VALIGN="top"
->SourceForge</TD
+>How to use this License for your documents</TD
 ><TD
 WIDTH="34%"
 ALIGN="center"

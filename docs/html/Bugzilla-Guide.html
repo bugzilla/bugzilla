@@ -58,7 +58,7 @@ NAME="AEN9"
 >The Bugzilla Team</H3
 ><P
 CLASS="pubdate"
->2003-02-16<BR></P
+>2003-04-23<BR></P
 ><DIV
 ><DIV
 CLASS="abstract"
@@ -77,7 +77,7 @@ NAME="AEN14"
 ><P
 >  
 	      This documentation is maintained in DocBook 4.1.2 XML format.
-        Changes are best submitted as plain text or SGML diffs, attached
+        Changes are best submitted as plain text or XML diffs, attached
         to a bug filed in
         <A
 HREF="http://bugzilla.mozilla.org/enter_bug.cgi?product=Bugzilla&component=Documentation"
@@ -320,7 +320,7 @@ HREF="#variants"
 ><DL
 ><DT
 >D.1. <A
-HREF="#rhbugzilla"
+HREF="#variant-redhat"
 >Red Hat Bugzilla</A
 ></DT
 ><DT
@@ -351,9 +351,98 @@ HREF="#variant-sourceforge"
 ></DL
 ></DD
 ><DT
+>E. <A
+HREF="#gfdl"
+>GNU Free Documentation License</A
+></DT
+><DD
+><DL
+><DT
+>0. <A
+HREF="#gfdl-0"
+>PREAMBLE</A
+></DT
+><DT
+>1. <A
+HREF="#gfdl-1"
+>APPLICABILITY AND DEFINITIONS</A
+></DT
+><DT
+>2. <A
+HREF="#gfdl-2"
+>VERBATIM COPYING</A
+></DT
+><DT
+>3. <A
+HREF="#gfdl-3"
+>COPYING IN QUANTITY</A
+></DT
+><DT
+>4. <A
+HREF="#gfdl-4"
+>MODIFICATIONS</A
+></DT
+><DT
+>5. <A
+HREF="#gfdl-5"
+>COMBINING DOCUMENTS</A
+></DT
+><DT
+>6. <A
+HREF="#gfdl-6"
+>COLLECTIONS OF DOCUMENTS</A
+></DT
+><DT
+>7. <A
+HREF="#gfdl-7"
+>AGGREGATION WITH INDEPENDENT WORKS</A
+></DT
+><DT
+>8. <A
+HREF="#gfdl-8"
+>TRANSLATION</A
+></DT
+><DT
+>9. <A
+HREF="#gfdl-9"
+>TERMINATION</A
+></DT
+><DT
+>10. <A
+HREF="#gfdl-10"
+>FUTURE REVISIONS OF THIS LICENSE</A
+></DT
+><DT
+><A
+HREF="#gfdl-howto"
+>How to use this License for your documents</A
+></DT
+></DL
+></DD
+><DT
 ><A
 HREF="#glossary"
 >Glossary</A
+></DT
+></DL
+></DIV
+><DIV
+CLASS="LOT"
+><DL
+CLASS="LOT"
+><DT
+><B
+>List of Figures</B
+></DT
+><DT
+>4-1. <A
+HREF="#trouble-filetemp-errors"
+>Other File::Temp error messages</A
+></DT
+><DT
+>4-2. <A
+HREF="#trouble-filetemp-patch"
+>Patch for File::Temp in Perl 5.6.0</A
 ></DT
 ></DL
 ></DIV
@@ -367,19 +456,19 @@ CLASS="LOT"
 ></DT
 ><DT
 >4-1. <A
-HREF="#AEN924"
+HREF="#AEN861"
 >Installing ActivePerl ppd Modules on Microsoft
             Windows</A
 ></DT
 ><DT
 >4-2. <A
-HREF="#AEN937"
+HREF="#AEN874"
 >Installing OpenInteract ppd Modules manually on Microsoft
             Windows</A
 ></DT
 ><DT
 >4-3. <A
-HREF="#AEN1119"
+HREF="#AEN1056"
 >Removing encrypt() for Windows NT Bugzilla version 2.12 or
           earlier</A
 ></DT
@@ -438,7 +527,10 @@ VALIGN="TOP"
 	License, Version 1.1 or any later version published  by the
 	Free Software Foundation; with no Invariant Sections, no
 	Front-Cover Texts, and  with no Back-Cover Texts.  A copy of
-	the license is included below.
+	the license is included in <A
+HREF="#gfdl"
+>Appendix E</A
+>.
       </P
 ></TD
 ><TD
@@ -453,7 +545,7 @@ ALIGN="RIGHT"
 VALIGN="TOP"
 >--<SPAN
 CLASS="attribution"
->Copyright (c) 2000-2002 Matthew P. Barnson and The Bugzilla Team</SPAN
+>Copyright (c) 2000-2003 Matthew P. Barnson and The Bugzilla Team</SPAN
 ></TD
 ><TD
 WIDTH="10%"
@@ -465,507 +557,6 @@ WIDTH="10%"
       copyright, or publishing this document in non-electronic form,
       please contact The Bugzilla Team. 
     </P
-><DIV
-CLASS="section"
-><HR><H2
-CLASS="section"
-><A
-NAME="gfdl"
-></A
->1.1.1. GNU Free Documentation License</H2
-><P
->Version 1.1, March 2000</P
-><A
-NAME="AEN39"
-></A
-><BLOCKQUOTE
-CLASS="BLOCKQUOTE"
-><P
->Copyright (C) 2000 Free Software Foundation, Inc. 59 Temple Place,
-    Suite 330, Boston, MA 02111-1307 USA Everyone is permitted to copy and
-    distribute verbatim copies of this license document, but changing it is
-    not allowed.</P
-></BLOCKQUOTE
-><DIV
-CLASS="section"
-><HR><H3
-CLASS="section"
-><A
-NAME="gfdl-0"
-></A
->0. PREAMBLE</H3
-><P
->The purpose of this License is to make a manual, textbook, or other
-    written document "free" in the sense of freedom: to assure everyone the
-    effective freedom to copy and redistribute it, with or without modifying
-    it, either commercially or noncommercially. Secondarily, this License
-    preserves for the author and publisher a way to get credit for their
-    work, while not being considered responsible for modifications made by
-    others.</P
-><P
->This License is a kind of "copyleft", which means that derivative
-    works of the document must themselves be free in the same sense. It
-    complements the GNU General Public License, which is a copyleft license
-    designed for free software.</P
-><P
->We have designed this License in order to use it for manuals for
-    free software, because free software needs free documentation: a free
-    program should come with manuals providing the same freedoms that the
-    software does. But this License is not limited to software manuals; it
-    can be used for any textual work, regardless of subject matter or whether
-    it is published as a printed book. We recommend this License principally
-    for works whose purpose is instruction or reference.</P
-></DIV
-><DIV
-CLASS="section"
-><HR><H3
-CLASS="section"
-><A
-NAME="gfdl-1"
-></A
->1. APPLICABILITY AND DEFINITIONS</H3
-><P
->This License applies to any manual or other work that contains a
-    notice placed by the copyright holder saying it can be distributed under
-    the terms of this License. The "Document", below, refers to any such
-    manual or work. Any member of the public is a licensee, and is addressed
-    as "you".</P
-><P
->A "Modified Version" of the Document means any work containing the
-    Document or a portion of it, either copied verbatim, or with
-    modifications and/or translated into another language.</P
-><P
->A "Secondary Section" is a named appendix or a front-matter section
-    of the Document that deals exclusively with the relationship of the
-    publishers or authors of the Document to the Document's overall subject
-    (or to related matters) and contains nothing that could fall directly
-    within that overall subject. (For example, if the Document is in part a
-    textbook of mathematics, a Secondary Section may not explain any
-    mathematics.) The relationship could be a matter of historical connection
-    with the subject or with related matters, or of legal, commercial,
-    philosophical, ethical or political position regarding them.</P
-><P
->The "Invariant Sections" are certain Secondary Sections whose
-    titles are designated, as being those of Invariant Sections, in the
-    notice that says that the Document is released under this License.</P
-><P
->The "Cover Texts" are certain short passages of text that are
-    listed, as Front-Cover Texts or Back-Cover Texts, in the notice that says
-    that the Document is released under this License.</P
-><P
->A "Transparent" copy of the Document means a machine-readable copy,
-    represented in a format whose specification is available to the general
-    public, whose contents can be viewed and edited directly and
-    straightforwardly with generic text editors or (for images composed of
-    pixels) generic paint programs or (for drawings) some widely available
-    drawing editor, and that is suitable for input to text formatters or for
-    automatic translation to a variety of formats suitable for input to text
-    formatters. A copy made in an otherwise Transparent file format whose
-    markup has been designed to thwart or discourage subsequent modification
-    by readers is not Transparent. A copy that is not "Transparent" is called
-    "Opaque".</P
-><P
->Examples of suitable formats for Transparent copies include plain
-    ASCII without markup, Texinfo input format, LaTeX input format, SGML or
-    XML using a publicly available DTD, and standard-conforming simple HTML
-    designed for human modification. Opaque formats include PostScript, PDF,
-    proprietary formats that can be read and edited only by proprietary word
-    processors, SGML or XML for which the DTD and/or processing tools are not
-    generally available, and the machine-generated HTML produced by some word
-    processors for output purposes only.</P
-><P
->The "Title Page" means, for a printed book, the title page itself,
-    plus such following pages as are needed to hold, legibly, the material
-    this License requires to appear in the title page. For works in formats
-    which do not have any title page as such, "Title Page" means the text
-    near the most prominent appearance of the work's title, preceding the
-    beginning of the body of the text.</P
-></DIV
-><DIV
-CLASS="section"
-><HR><H3
-CLASS="section"
-><A
-NAME="gfdl-2"
-></A
->2. VERBATIM COPYING</H3
-><P
->You may copy and distribute the Document in any medium, either
-    commercially or noncommercially, provided that this License, the
-    copyright notices, and the license notice saying this License applies to
-    the Document are reproduced in all copies, and that you add no other
-    conditions whatsoever to those of this License. You may not use technical
-    measures to obstruct or control the reading or further copying of the
-    copies you make or distribute. However, you may accept compensation in
-    exchange for copies. If you distribute a large enough number of copies
-    you must also follow the conditions in section 3.</P
-><P
->You may also lend copies, under the same conditions stated above,
-    and you may publicly display copies.</P
-></DIV
-><DIV
-CLASS="section"
-><HR><H3
-CLASS="section"
-><A
-NAME="gfdl-3"
-></A
->3. COPYING IN QUANTITY</H3
-><P
->If you publish printed copies of the Document numbering more than
-    100, and the Document's license notice requires Cover Texts, you must
-    enclose the copies in covers that carry, clearly and legibly, all these
-    Cover Texts: Front-Cover Texts on the front cover, and Back-Cover Texts
-    on the back cover. Both covers must also clearly and legibly identify you
-    as the publisher of these copies. The front cover must present the full
-    title with all words of the title equally prominent and visible. You may
-    add other material on the covers in addition. Copying with changes
-    limited to the covers, as long as they preserve the title of the Document
-    and satisfy these conditions, can be treated as verbatim copying in other
-    respects.</P
-><P
->If the required texts for either cover are too voluminous to fit
-    legibly, you should put the first ones listed (as many as fit reasonably)
-    on the actual cover, and continue the rest onto adjacent pages.</P
-><P
->If you publish or distribute Opaque copies of the Document
-    numbering more than 100, you must either include a machine-readable
-    Transparent copy along with each Opaque copy, or state in or with each
-    Opaque copy a publicly-accessible computer-network location containing a
-    complete Transparent copy of the Document, free of added material, which
-    the general network-using public has access to download anonymously at no
-    charge using public-standard network protocols. If you use the latter
-    option, you must take reasonably prudent steps, when you begin
-    distribution of Opaque copies in quantity, to ensure that this
-    Transparent copy will remain thus accessible at the stated location until
-    at least one year after the last time you distribute an Opaque copy
-    (directly or through your agents or retailers) of that edition to the
-    public.</P
-><P
->It is requested, but not required, that you contact the authors of
-    the Document well before redistributing any large number of copies, to
-    give them a chance to provide you with an updated version of the
-    Document.</P
-></DIV
-><DIV
-CLASS="section"
-><HR><H3
-CLASS="section"
-><A
-NAME="gfdl-4"
-></A
->4. MODIFICATIONS</H3
-><P
->You may copy and distribute a Modified Version of the Document
-    under the conditions of sections 2 and 3 above, provided that you release
-    the Modified Version under precisely this License, with the Modified
-    Version filling the role of the Document, thus licensing distribution and
-    modification of the Modified Version to whoever possesses a copy of it.
-    In addition, you must do these things in the Modified Version:</P
-><P
-></P
-><OL
-TYPE="A"
-><LI
-><P
->Use in the Title Page (and on the covers, if any) a title
-        distinct from that of the Document, and from those of previous
-        versions (which should, if there were any, be listed in the History
-        section of the Document). You may use the same title as a previous
-        version if the original publisher of that version gives
-        permission.</P
-></LI
-><LI
-><P
->List on the Title Page, as authors, one or more persons or
-        entities responsible for authorship of the modifications in the
-        Modified Version, together with at least five of the principal
-        authors of the Document (all of its principal authors, if it has less
-        than five).</P
-></LI
-><LI
-><P
->State on the Title page the name of the publisher of the
-        Modified Version, as the publisher.</P
-></LI
-><LI
-><P
->Preserve all the copyright notices of the Document.</P
-></LI
-><LI
-><P
->Add an appropriate copyright notice for your modifications
-        adjacent to the other copyright notices.</P
-></LI
-><LI
-><P
->Include, immediately after the copyright notices, a license
-        notice giving the public permission to use the Modified Version under
-        the terms of this License, in the form shown in the Addendum
-        below.</P
-></LI
-><LI
-><P
->Preserve in that license notice the full lists of Invariant
-        Sections and required Cover Texts given in the Document's license
-        notice.</P
-></LI
-><LI
-><P
->Include an unaltered copy of this License.</P
-></LI
-><LI
-><P
->Preserve the section entitled "History", and its title, and add
-        to it an item stating at least the title, year, new authors, and
-        publisher of the Modified Version as given on the Title Page. If
-        there is no section entitled "History" in the Document, create one
-        stating the title, year, authors, and publisher of the Document as
-        given on its Title Page, then add an item describing the Modified
-        Version as stated in the previous sentence.</P
-></LI
-><LI
-><P
->Preserve the network location, if any, given in the Document
-        for public access to a Transparent copy of the Document, and likewise
-        the network locations given in the Document for previous versions it
-        was based on. These may be placed in the "History" section. You may
-        omit a network location for a work that was published at least four
-        years before the Document itself, or if the original publisher of the
-        version it refers to gives permission.</P
-></LI
-><LI
-><P
->In any section entitled "Acknowledgements" or "Dedications",
-        preserve the section's title, and preserve in the section all the
-        substance and tone of each of the contributor acknowledgements and/or
-        dedications given therein.</P
-></LI
-><LI
-><P
->Preserve all the Invariant Sections of the Document, unaltered
-        in their text and in their titles. Section numbers or the equivalent
-        are not considered part of the section titles.</P
-></LI
-><LI
-><P
->Delete any section entitled "Endorsements". Such a section may
-        not be included in the Modified Version.</P
-></LI
-><LI
-><P
->Do not retitle any existing section as "Endorsements" or to
-        conflict in title with any Invariant Section.</P
-></LI
-></OL
-><P
->If the Modified Version includes new front-matter sections or
-    appendices that qualify as Secondary Sections and contain no material
-    copied from the Document, you may at your option designate some or all of
-    these sections as invariant. To do this, add their titles to the list of
-    Invariant Sections in the Modified Version's license notice. These titles
-    must be distinct from any other section titles.</P
-><P
->You may add a section entitled "Endorsements", provided it contains
-    nothing but endorsements of your Modified Version by various parties--for
-    example, statements of peer review or that the text has been approved by
-    an organization as the authoritative definition of a standard.</P
-><P
->You may add a passage of up to five words as a Front-Cover Text,
-    and a passage of up to 25 words as a Back-Cover Text, to the end of the
-    list of Cover Texts in the Modified Version. Only one passage of
-    Front-Cover Text and one of Back-Cover Text may be added by (or through
-    arrangements made by) any one entity. If the Document already includes a
-    cover text for the same cover, previously added by you or by arrangement
-    made by the same entity you are acting on behalf of, you may not add
-    another; but you may replace the old one, on explicit permission from the
-    previous publisher that added the old one.</P
-><P
->The author(s) and publisher(s) of the Document do not by this
-    License give permission to use their names for publicity for or to assert
-    or imply endorsement of any Modified Version.</P
-></DIV
-><DIV
-CLASS="section"
-><HR><H3
-CLASS="section"
-><A
-NAME="gfdl-5"
-></A
->5. COMBINING DOCUMENTS</H3
-><P
->You may combine the Document with other documents released under
-    this License, under the terms defined in section 4 above for modified
-    versions, provided that you include in the combination all of the
-    Invariant Sections of all of the original documents, unmodified, and list
-    them all as Invariant Sections of your combined work in its license
-    notice.</P
-><P
->The combined work need only contain one copy of this License, and
-    multiple identical Invariant Sections may be replaced with a single copy.
-    If there are multiple Invariant Sections with the same name but different
-    contents, make the title of each such section unique by adding at the end
-    of it, in parentheses, the name of the original author or publisher of
-    that section if known, or else a unique number. Make the same adjustment
-    to the section titles in the list of Invariant Sections in the license
-    notice of the combined work.</P
-><P
->In the combination, you must combine any sections entitled
-    "History" in the various original documents, forming one section entitled
-    "History"; likewise combine any sections entitled "Acknowledgements", and
-    any sections entitled "Dedications". You must delete all sections
-    entitled "Endorsements."</P
-></DIV
-><DIV
-CLASS="section"
-><HR><H3
-CLASS="section"
-><A
-NAME="gfdl-6"
-></A
->6. COLLECTIONS OF DOCUMENTS</H3
-><P
->You may make a collection consisting of the Document and other
-    documents released under this License, and replace the individual copies
-    of this License in the various documents with a single copy that is
-    included in the collection, provided that you follow the rules of this
-    License for verbatim copying of each of the documents in all other
-    respects.</P
-><P
->You may extract a single document from such a collection, and
-    distribute it individually under this License, provided you insert a copy
-    of this License into the extracted document, and follow this License in
-    all other respects regarding verbatim copying of that document.</P
-></DIV
-><DIV
-CLASS="section"
-><HR><H3
-CLASS="section"
-><A
-NAME="gfdl-7"
-></A
->7. AGGREGATION WITH INDEPENDENT WORKS</H3
-><P
->A compilation of the Document or its derivatives with other
-    separate and independent documents or works, in or on a volume of a
-    storage or distribution medium, does not as a whole count as a Modified
-    Version of the Document, provided no compilation copyright is claimed for
-    the compilation. Such a compilation is called an "aggregate", and this
-    License does not apply to the other self-contained works thus compiled
-    with the Document, on account of their being thus compiled, if they are
-    not themselves derivative works of the Document.</P
-><P
->If the Cover Text requirement of section 3 is applicable to these
-    copies of the Document, then if the Document is less than one quarter of
-    the entire aggregate, the Document's Cover Texts may be placed on covers
-    that surround only the Document within the aggregate. Otherwise they must
-    appear on covers around the whole aggregate.</P
-></DIV
-><DIV
-CLASS="section"
-><HR><H3
-CLASS="section"
-><A
-NAME="gfdl-8"
-></A
->8. TRANSLATION</H3
-><P
->Translation is considered a kind of modification, so you may
-    distribute translations of the Document under the terms of section 4.
-    Replacing Invariant Sections with translations requires special
-    permission from their copyright holders, but you may include translations
-    of some or all Invariant Sections in addition to the original versions of
-    these Invariant Sections. You may include a translation of this License
-    provided that you also include the original English version of this
-    License. In case of a disagreement between the translation and the
-    original English version of this License, the original English version
-    will prevail.</P
-></DIV
-><DIV
-CLASS="section"
-><HR><H3
-CLASS="section"
-><A
-NAME="gfdl-9"
-></A
->9. TERMINATION</H3
-><P
->You may not copy, modify, sublicense, or distribute the Document
-    except as expressly provided for under this License. Any other attempt to
-    copy, modify, sublicense or distribute the Document is void, and will
-    automatically terminate your rights under this License. However, parties
-    who have received copies, or rights, from you under this License will not
-    have their licenses terminated so long as such parties remain in full
-    compliance.</P
-></DIV
-><DIV
-CLASS="section"
-><HR><H3
-CLASS="section"
-><A
-NAME="gfdl-10"
-></A
->10. FUTURE REVISIONS OF THIS LICENSE</H3
-><P
->The Free Software Foundation may publish new, revised versions of
-    the GNU Free Documentation License from time to time. Such new versions
-    will be similar in spirit to the present version, but may differ in
-    detail to address new problems or concerns. See 
-    <A
-HREF="http://www.gnu.org/copyleft/"
-TARGET="_top"
->&#13;    http://www.gnu.org/copyleft/</A
->
-
-    .</P
-><P
->Each version of the License is given a distinguishing version
-    number. If the Document specifies that a particular numbered version of
-    this License "or any later version" applies to it, you have the option of
-    following the terms and conditions either of that specified version or of
-    any later version that has been published (not as a draft) by the Free
-    Software Foundation. If the Document does not specify a version number of
-    this License, you may choose any version ever published (not as a draft)
-    by the Free Software Foundation.</P
-></DIV
-><DIV
-CLASS="section"
-><HR><H3
-CLASS="section"
-><A
-NAME="gfdl-howto"
-></A
->How to use this License for your documents</H3
-><P
->To use this License in a document you have written, include a copy
-    of the License in the document and put the following copyright and
-    license notices just after the title page:</P
-><A
-NAME="AEN129"
-></A
-><BLOCKQUOTE
-CLASS="BLOCKQUOTE"
-><P
->Copyright (c) YEAR YOUR NAME. Permission is granted to copy,
-      distribute and/or modify this document under the terms of the GNU Free
-      Documentation License, Version 1.1 or any later version published by
-      the Free Software Foundation; with the Invariant Sections being LIST
-      THEIR TITLES, with the Front-Cover Texts being LIST, and with the
-      Back-Cover Texts being LIST. A copy of the license is included in the
-      section entitled "GNU Free Documentation License".</P
-></BLOCKQUOTE
-><P
->If you have no Invariant Sections, write "with no Invariant
-    Sections" instead of saying which ones are invariant. If you have no
-    Front-Cover Texts, write "no Front-Cover Texts" instead of "Front-Cover
-    Texts being LIST"; likewise for Back-Cover Texts.</P
-><P
->If your document contains nontrivial examples of program code, we
-    recommend releasing these examples in parallel under your choice of free
-    software license, such as the GNU General Public License, to permit their
-    use in free software.</P
-></DIV
-></DIV
 ></DIV
 ><DIV
 CLASS="section"
@@ -1027,39 +618,27 @@ NAME="newversions"
 >1.3. New Versions</H1
 ><P
 >&#13;      This is the 2.16.3 version of The Bugzilla Guide. It is so named 
-      to match the current version of Bugzilla. If you are
+      to match the version of Bugzilla it is disributed with. If you are
       reading this from any source other than those below, please
       check one of these mirrors to make sure you are reading an
       up-to-date version of the Guide.
     </P
 ><P
->&#13;      This document can be found in the following places:
-    </P
-><P
->&#13;      <P
-></P
-><UL
-><LI
-><P
->&#13;	    <A
-HREF="http://www.bugzilla.org/"
+>&#13;      The newest version of this guide can always be found at <A
+HREF="http://www.bugzilla.org"
 TARGET="_top"
 >bugzilla.org</A
->
-	  </P
-></LI
-><LI
+>; including
+      documentation for past releases and the current development version.
+    </P
 ><P
->&#13;	    <A
-HREF="http://www.linuxdoc.org/"
+>&#13;      The documentation for the most recent stable release of Bugzilla can also
+      be found at
+      <A
+HREF="http://www.tldp.org"
 TARGET="_top"
->The Linux
-	      Documentation Project</A
->
-	  </P
-></LI
-></UL
->
+>The Linux Documentation Project</A
+>.
     </P
 ><P
 >&#13;      The latest version of this document can always be checked out via CVS.
@@ -1100,66 +679,115 @@ NAME="credits"
       contribution to the Bugzilla community:
     </P
 ><P
->&#13;      <A
-HREF="mailto://mbarnson@sisna.com"
-TARGET="_top"
->Matthew P. Barnson</A
->
-      for the Herculaean task of pulling together the Bugzilla Guide and
-      shepherding it to 2.14.
-    </P
+></P
+><DIV
+CLASS="variablelist"
+><DL
+><DT
+>Matthew P. Barnson <TT
+CLASS="email"
+>&#60;<A
+HREF="mailto:mbarnson@sisna.com"
+>mbarnson@sisna.com</A
+>&#62;</TT
+></DT
+><DD
 ><P
->&#13;      <A
-HREF="mailto://terry@mozilla.org"
-TARGET="_top"
->Terry Weissman</A
->
-      for initially writing Bugzilla and creating the
-      README upon which the UNIX installation documentation is largely based.
-    </P
+>for the Herculaean task of pulling together the Bugzilla Guide
+          and shepherding it to 2.14.
+          </P
+></DD
+><DT
+>Terry Weissman <TT
+CLASS="email"
+>&#60;<A
+HREF="mailto:terry@mozilla.org"
+>terry@mozilla.org</A
+>&#62;</TT
+></DT
+><DD
 ><P
->&#13;      <A
-HREF="mailto://tara@tequilarista.org"
-TARGET="_top"
->Tara Hernandez</A
->  
-      for keeping Bugzilla development going
-      strong after Terry left mozilla.org
-    </P
+>for initially writing Bugzilla and creating the README upon
+          which the UNIX installation documentation is largely based.
+          </P
+></DD
+><DT
+>Tara Hernandez <TT
+CLASS="email"
+>&#60;<A
+HREF="mailto:tara@tequilarists.org"
+>tara@tequilarists.org</A
+>&#62;</TT
+></DT
+><DD
 ><P
->&#13;      <A
-HREF="mailto://dkl@redhat.com"
-TARGET="_top"
->Dave Lawrence</A
-> 
-      for providing insight into the key differences between Red Hat's
-      customized Bugzilla, and being largely responsible for the "Red
-      Hat Bugzilla" appendix
-    </P
+>for keeping Bugzilla development going strong after Terry left
+          mozilla.org and for running landfill.
+          </P
+></DD
+><DT
+>Dave Lawrence <TT
+CLASS="email"
+>&#60;<A
+HREF="mailto:dkl@redhat.com"
+>dkl@redhat.com</A
+>&#62;</TT
+></DT
+><DD
 ><P
->&#13;      <A
-HREF="mailto://endico@mozilla.org"
-TARGET="_top"
->Dawn Endico</A
-> for
-      being a hacker extraordinaire and putting up with my incessant
-      questions and arguments on irc.mozilla.org in #mozwebtools
-    </P
+>for providing insight into the key differences between Red
+          Hat's customized Bugzilla, and being largely responsible for
+          <A
+HREF="#variant-redhat"
+>Section D.1</A
+>.
+          </P
+></DD
+><DT
+>Dawn Endico <TT
+CLASS="email"
+>&#60;<A
+HREF="mailto:endico@mozilla.org"
+>endico@mozilla.org</A
+>&#62;</TT
+></DT
+><DD
+><P
+>for being a hacker extraordinaire and putting up with Matthew's
+          incessant questions and arguments on irc.mozilla.org in #mozwebtools
+          </P
+></DD
+><DT
+>Jacob Steenhagen <TT
+CLASS="email"
+>&#60;<A
+HREF="mailto:jake@bugzilla.org"
+>jake@bugzilla.org</A
+>&#62;</TT
+></DT
+><DD
+><P
+>for taking over documentation during the 2.17 development
+          period and backporting relevent docs changes to this 2.16 branch.
+          </P
+></DD
+></DL
+></DIV
 ><P
 >&#13;      Last but not least, all the members of the 
       <A
 HREF="news://news.mozilla.org/netscape/public/mozilla/webtools"
 TARGET="_top"
-> netscape.public.mozilla.webtools</A
-> newsgroup.  Without your discussions, insight, suggestions, and patches, this could never have happened.
+>news://news.mozilla.org/netscape/public/mozilla/webtools</A
+>
+      newsgroup.  Without your discussions, insight, suggestions, and patches,
+      this could never have happened.
     </P
 ><P
 >&#13;      Thanks also go to the following people for significant contributions 
-      to this documentation (in no particular order):
-    </P
-><P
->&#13;      Zach Liption, Andrew Pearson, Spencer Smith, Eric Hanson, Kevin Brannen,
-      Ron Teitelbaum, Jacob Steenhagen, Joe Robins, Gervase Markham.
+      to this documentation (in alphabetical order):
+      Andrew Pearson, Ben FrantzDale, Eric Hanson, Gervase Markham, Joe Robins, Kevin Brannen, Ron Teitelbaum, Spencer Smith, Zach Liption
+      .
     </P
 ></DIV
 ><DIV
@@ -1175,7 +803,7 @@ NAME="conventions"
 ><DIV
 CLASS="informaltable"
 ><A
-NAME="AEN179"
+NAME="AEN109"
 ></A
 ><P
 ></P
@@ -1199,7 +827,7 @@ VALIGN="MIDDLE"
 ><TD
 ALIGN="LEFT"
 VALIGN="MIDDLE"
->Warnings</TD
+>Use caution</TD
 ><TD
 ALIGN="LEFT"
 VALIGN="MIDDLE"
@@ -1310,7 +938,7 @@ VALIGN="TOP"
 ><TD
 ALIGN="LEFT"
 VALIGN="MIDDLE"
->Information requiring special attention</TD
+>Warnings</TD
 ><TD
 ALIGN="LEFT"
 VALIGN="MIDDLE"
@@ -1475,6 +1103,23 @@ VALIGN="MIDDLE"
 ><TD
 ALIGN="LEFT"
 VALIGN="MIDDLE"
+>Term found in the glossary</TD
+><TD
+ALIGN="LEFT"
+VALIGN="MIDDLE"
+>&#13;            <A
+HREF="#gloss-bugzilla"
+><I
+CLASS="glossterm"
+>Bugzilla</I
+></A
+>
+          </TD
+></TR
+><TR
+><TD
+ALIGN="LEFT"
+VALIGN="MIDDLE"
 >Code Example</TD
 ><TD
 ALIGN="LEFT"
@@ -1531,8 +1176,14 @@ NAME="whatis"
 >&#13;    Bugzilla is a bug- or issue-tracking system. Bug-tracking
     systems allow individual or groups of developers effectively to keep track
     of outstanding problems with their product. 
-    Bugzilla was originally
-    written by Terry Weissman in a programming language called TCL, to
+    Bugzilla was originally written by Terry Weissman in a programming language
+    called <A
+HREF="#gloss-tcl"
+><I
+CLASS="glossterm"
+>TCL</I
+></A
+>, to
     replace a rudimentary bug-tracking database used internally by Netscape
     Communications. Terry later ported Bugzilla to Perl from TCL, and in Perl
     it remains to this day. Most commercial defect-tracking software vendors
@@ -2225,7 +1876,7 @@ CLASS="section"
 ><HR><H2
 CLASS="section"
 ><A
-NAME="AEN435"
+NAME="AEN370"
 ></A
 >3.2.1. Autolinkification</H2
 ><P
@@ -2373,7 +2024,7 @@ CLASS="section"
 ><HR><H2
 CLASS="section"
 ><A
-NAME="AEN464"
+NAME="AEN399"
 ></A
 >3.2.5. Filing Bugs</H2
 ><P
@@ -2530,7 +2181,7 @@ CLASS="section"
 ><H2
 CLASS="section"
 ><A
-NAME="AEN493"
+NAME="AEN428"
 ></A
 >4.1.1. Introduction</H2
 ><P
@@ -2550,7 +2201,7 @@ CLASS="section"
 ><HR><H2
 CLASS="section"
 ><A
-NAME="AEN497"
+NAME="AEN432"
 ></A
 >4.1.2. Package List</H2
 ><DIV
@@ -3285,7 +2936,7 @@ CLASS="section"
 ><HR><H3
 CLASS="section"
 ><A
-NAME="AEN643"
+NAME="AEN578"
 ></A
 >4.1.5.1. DBI</H3
 ><P
@@ -3300,7 +2951,7 @@ CLASS="section"
 ><HR><H3
 CLASS="section"
 ><A
-NAME="AEN646"
+NAME="AEN581"
 ></A
 >4.1.5.2. Data::Dumper</H3
 ><P
@@ -3314,7 +2965,7 @@ CLASS="section"
 ><HR><H3
 CLASS="section"
 ><A
-NAME="AEN649"
+NAME="AEN584"
 ></A
 >4.1.5.3. MySQL-related modules</H3
 ><P
@@ -3340,7 +2991,7 @@ CLASS="section"
 ><HR><H3
 CLASS="section"
 ><A
-NAME="AEN654"
+NAME="AEN589"
 ></A
 >4.1.5.4. TimeDate modules</H3
 ><P
@@ -3356,7 +3007,7 @@ CLASS="section"
 ><HR><H3
 CLASS="section"
 ><A
-NAME="AEN657"
+NAME="AEN592"
 ></A
 >4.1.5.5. GD (optional)</H3
 ><P
@@ -3411,7 +3062,7 @@ CLASS="section"
 ><HR><H3
 CLASS="section"
 ><A
-NAME="AEN664"
+NAME="AEN599"
 ></A
 >4.1.5.6. Chart::Base (optional)</H3
 ><P
@@ -3426,7 +3077,7 @@ CLASS="section"
 ><HR><H3
 CLASS="section"
 ><A
-NAME="AEN667"
+NAME="AEN602"
 ></A
 >4.1.5.7. Template Toolkit</H3
 ><P
@@ -3444,7 +3095,7 @@ CLASS="section"
 ><HR><H2
 CLASS="section"
 ><A
-NAME="AEN670"
+NAME="AEN605"
 ></A
 >4.1.6. HTTP Server</H2
 ><P
@@ -3622,7 +3273,7 @@ CLASS="section"
 ><HR><H2
 CLASS="section"
 ><A
-NAME="AEN689"
+NAME="AEN624"
 ></A
 >4.1.7. Bugzilla</H2
 ><P
@@ -3735,7 +3386,7 @@ CLASS="section"
 ><HR><H2
 CLASS="section"
 ><A
-NAME="AEN706"
+NAME="AEN641"
 ></A
 >4.1.8. Setting Up the MySQL Database</H2
 ><P
@@ -3902,13 +3553,41 @@ CLASS="command"
 ></P
 >
       </P
+><DIV
+CLASS="note"
+><P
+></P
+><TABLE
+CLASS="note"
+WIDTH="100%"
+BORDER="0"
+><TR
+><TD
+WIDTH="25"
+ALIGN="CENTER"
+VALIGN="TOP"
+><IMG
+SRC="../images/note.gif"
+HSPACE="5"
+ALT="Note"></TD
+><TD
+ALIGN="LEFT"
+VALIGN="TOP"
+><P
+>If you are using MySQL 4, the bugs user also needs to be granted
+        the LOCK TABLES and CREATE TEMPORARY TABLES permissions.
+        </P
+></TD
+></TR
+></TABLE
+></DIV
 ></DIV
 ><DIV
 CLASS="section"
 ><HR><H2
 CLASS="section"
 ><A
-NAME="AEN742"
+NAME="AEN679"
 ></A
 >4.1.9. <TT
 CLASS="filename"
@@ -4061,7 +3740,7 @@ CLASS="section"
 ><HR><H2
 CLASS="section"
 ><A
-NAME="AEN774"
+NAME="AEN711"
 ></A
 >4.1.10. Configuring Bugzilla</H2
 ><P
@@ -4087,7 +3766,7 @@ CLASS="section"
 ><H2
 CLASS="section"
 ><A
-NAME="AEN780"
+NAME="AEN717"
 ></A
 >4.2.1. Dependency Charts</H2
 ><P
@@ -4151,7 +3830,7 @@ CLASS="section"
 ><HR><H2
 CLASS="section"
 ><A
-NAME="AEN795"
+NAME="AEN732"
 ></A
 >4.2.2. Bug Graphs</H2
 ><P
@@ -4210,7 +3889,7 @@ CLASS="section"
 ><HR><H2
 CLASS="section"
 ><A
-NAME="AEN808"
+NAME="AEN745"
 ></A
 >4.2.3. The Whining Cron</H2
 ><P
@@ -5002,7 +4681,7 @@ CLASS="command"
 ><DIV
 CLASS="example"
 ><A
-NAME="AEN924"
+NAME="AEN861"
 ></A
 ><P
 ><B
@@ -5062,7 +4741,7 @@ TARGET="_top"
           <DIV
 CLASS="example"
 ><A
-NAME="AEN937"
+NAME="AEN874"
 ></A
 ><P
 ><B
@@ -6204,7 +5883,7 @@ VALIGN="TOP"
 ><P
 >From Andrew Pearson: 
         <A
-NAME="AEN1107"
+NAME="AEN1044"
 ></A
 ><BLOCKQUOTE
 CLASS="BLOCKQUOTE"
@@ -6289,7 +5968,7 @@ VALIGN="TOP"
         <DIV
 CLASS="example"
 ><A
-NAME="AEN1119"
+NAME="AEN1056"
 ></A
 ><P
 ><B
@@ -6402,7 +6081,7 @@ CLASS="command"
     This should go through the motions of downloading the latest version of
     the GD module, then it will open a shell and drop you into the build
     directory. Apply <A
-HREF="../sgml/gd-makefile.patch"
+HREF="../xml/gd-makefile.patch"
 TARGET="_top"
 >this patch</A
 > 
@@ -6487,7 +6166,7 @@ CLASS="section"
 ><HR><H2
 CLASS="section"
 ><A
-NAME="AEN1153"
+NAME="AEN1090"
 ></A
 >4.5.1. Bundle::Bugzilla makes me upgrade to Perl 5.6.1</H2
 ><P
@@ -6512,7 +6191,7 @@ CLASS="section"
 ><HR><H2
 CLASS="section"
 ><A
-NAME="AEN1158"
+NAME="AEN1095"
 ></A
 >4.5.2. DBD::Sponge::db prepare failed</H2
 ><P
@@ -6650,6 +6329,116 @@ CLASS="filename"
 >
       as root to fix this problem.
       </P
+></DIV
+><DIV
+CLASS="section"
+><HR><H2
+CLASS="section"
+><A
+NAME="trouble-filetemp"
+></A
+>4.5.4. Your vendor has not defined Fcntl macro O_NOINHERIT</H2
+><P
+>This is caused by a bug in the version of
+      <SPAN
+CLASS="productname"
+>File::Temp</SPAN
+> that is distributed with perl
+      5.6.0. Many minor variations of this error have been reported. Examples
+      can be found in <A
+HREF="#trouble-filetemp-errors"
+>Figure 4-1</A
+>.
+      </P
+><DIV
+CLASS="figure"
+><A
+NAME="trouble-filetemp-errors"
+></A
+><P
+><B
+>Figure 4-1. Other File::Temp error messages</B
+></P
+><TABLE
+BORDER="0"
+BGCOLOR="#E0E0E0"
+WIDTH="100%"
+><TR
+><TD
+><FONT
+COLOR="#000000"
+><PRE
+CLASS="programlisting"
+>&#13;Your vendor has not defined Fcntl macro O_NOINHERIT, used 
+at /usr/lib/perl5/site_perl/5.6.0/File/Temp.pm line 208.
+
+Your vendor has not defined Fcntl macro O_EXLOCK, used 
+at /usr/lib/perl5/site_perl/5.6.0/File/Temp.pm line 210.
+
+Your vendor has not defined Fcntl macro O_TEMPORARY, used 
+at /usr/lib/perl5/site_perl/5.6.0/File/Temp.pm line 233.
+        </PRE
+></FONT
+></TD
+></TR
+></TABLE
+></DIV
+><P
+>Numerous people have reported that upgrading to version 5.6.1
+      or higher solved the problem for them. A less involved fix is to apply
+      the patch in <A
+HREF="#trouble-filetemp-patch"
+>Figure 4-2</A
+>. The patch is also
+      available as a <A
+HREF="../xml/filetemp.patch"
+TARGET="_top"
+>patch file</A
+>.
+      </P
+><DIV
+CLASS="figure"
+><A
+NAME="trouble-filetemp-patch"
+></A
+><P
+><B
+>Figure 4-2. Patch for File::Temp in Perl 5.6.0</B
+></P
+><TABLE
+BORDER="0"
+BGCOLOR="#E0E0E0"
+WIDTH="100%"
+><TR
+><TD
+><FONT
+COLOR="#000000"
+><PRE
+CLASS="programlisting"
+>&#13;--- File/Temp.pm.orig   Thu Feb  6 16:26:00 2003
++++ File/Temp.pm        Thu Feb  6 16:26:23 2003
+@@ -205,6 +205,7 @@
+     # eg CGI::Carp
+     local $SIG{__DIE__} = sub {};
+     local $SIG{__WARN__} = sub {};
++    local *CORE::GLOBAL::die = sub {};
+     $bit = &#38;$func();
+     1;
+   };
+@@ -226,6 +227,7 @@
+     # eg CGI::Carp
+     local $SIG{__DIE__} = sub {};
+     local $SIG{__WARN__} = sub {};
++    local *CORE::GLOBAL::die = sub {};
+     $bit = &#38;$func();
+     1;
+   };
+        </PRE
+></FONT
+></TD
+></TR
+></TABLE
+></DIV
 ></DIV
 ></DIV
 ></DIV
@@ -8490,7 +8279,7 @@ CLASS="section"
 ><HR><H2
 CLASS="section"
 ><A
-NAME="AEN1581"
+NAME="AEN1532"
 ></A
 >5.7.1. What to Edit</H2
 ><P
@@ -8605,7 +8394,7 @@ CLASS="section"
 ><HR><H2
 CLASS="section"
 ><A
-NAME="AEN1600"
+NAME="AEN1551"
 ></A
 >5.7.2. How To Edit Templates</H2
 ><P
@@ -8687,7 +8476,7 @@ CLASS="section"
 ><HR><H2
 CLASS="section"
 ><A
-NAME="AEN1610"
+NAME="AEN1561"
 ></A
 >5.7.3. Template Formats</H2
 ><P
@@ -8749,7 +8538,7 @@ CLASS="section"
 ><HR><H2
 CLASS="section"
 ><A
-NAME="AEN1623"
+NAME="AEN1574"
 ></A
 >5.7.4. Particular Templates</H2
 ><P
@@ -9565,64 +9354,71 @@ HREF="#faq-general"
 ><DL
 ><DT
 >A.1.1. <A
-HREF="#AEN1766"
+HREF="#faq-general-information"
 >&#13;	    Where can I find information about Bugzilla?</A
 ></DT
 ><DT
 >A.1.2. <A
-HREF="#AEN1772"
+HREF="#faq-general-license"
 >&#13;	    What license is Bugzilla distributed under?
 	  </A
 ></DT
 ><DT
 >A.1.3. <A
-HREF="#AEN1778"
+HREF="#faq-general-support"
 >&#13;	    How do I get commercial support for Bugzilla?
 	  </A
 ></DT
 ><DT
 >A.1.4. <A
-HREF="#AEN1785"
+HREF="#faq-general-companies"
 >&#13;	    What major companies or projects are currently using Bugzilla
 	    for bug-tracking?
 	  </A
 ></DT
 ><DT
 >A.1.5. <A
-HREF="#AEN1810"
+HREF="#faq-general-maintainers"
 >&#13;	    Who maintains Bugzilla?
 	  </A
 ></DT
 ><DT
 >A.1.6. <A
-HREF="#AEN1816"
+HREF="#faq-general-compare"
 >&#13;	    How does Bugzilla stack up against other bug-tracking databases?
 	  </A
 ></DT
 ><DT
 >A.1.7. <A
-HREF="#AEN1822"
->&#13;	    Why doesn't Bugzilla offer this or that feature or compatability
+HREF="#faq-general-bzmissing"
+>&#13;	    Why doesn't Bugzilla offer this or that feature or compatibility
 	    with this other tracking software?
 	  </A
 ></DT
 ><DT
 >A.1.8. <A
-HREF="#AEN1829"
+HREF="#faq-general-mysql"
 >&#13;	    Why MySQL?  I'm interested in seeing Bugzilla run on
 	    Oracle/Sybase/Msql/PostgreSQL/MSSQL.
 	  </A
 ></DT
 ><DT
 >A.1.9. <A
-HREF="#AEN1834"
->&#13;	    Why do the scripts say "/usr/bonsaitools/bin/perl" instead of
-	    "/usr/bin/perl" or something else?
+HREF="#faq-general-bonsaitools"
+>&#13;	    Why do the scripts say
+            <TT
+CLASS="filename"
+>/usr/bonsaitools/bin/perl</TT
+> instead of
+	    <TT
+CLASS="filename"
+>/usr/bin/perl</TT
+> or something else?
 	  </A
 ></DT
 ><DT
 >A.1.10. <A
-HREF="#AEN1840"
+HREF="#faq-general-cookie"
 >&#13;	    Is there an easy way to change the Bugzilla cookie name?
 	  </A
 ></DT
@@ -9637,41 +9433,41 @@ HREF="#faq-phb"
 ><DL
 ><DT
 >A.2.1. <A
-HREF="#AEN1850"
+HREF="#faq-phb-client"
 >&#13;	    Is Bugzilla web-based, or do you have to have specific software or
 	    a specific operating system on your machine?
 	  </A
 ></DT
 ><DT
 >A.2.2. <A
-HREF="#AEN1855"
+HREF="#faq-phb-integration"
 >&#13;	    Can Bugzilla integrate with
 	    Perforce (SCM software)?
 	  </A
 ></DT
 ><DT
 >A.2.3. <A
-HREF="#AEN1860"
+HREF="#faq-phb-projects"
 >&#13;	    Does Bugzilla allow the user to track multiple projects?
 	  </A
 ></DT
 ><DT
 >A.2.4. <A
-HREF="#AEN1865"
+HREF="#faq-phb-sorting"
 >&#13;	    If I am on many projects, and search for all bugs assigned to me, will
 	    Bugzilla list them for me and allow me to sort by project, severity etc?
 	  </A
 ></DT
 ><DT
 >A.2.5. <A
-HREF="#AEN1870"
+HREF="#faq-phb-attachments"
 >&#13;	    Does Bugzilla allow attachments (text, screenshots, URLs etc)? If yes,
 	    are there any that are NOT allowed?
 	  </A
 ></DT
 ><DT
 >A.2.6. <A
-HREF="#AEN1875"
+HREF="#faq-phb-priorities"
 >&#13;	    Does Bugzilla allow us to define our own priorities and levels? Do we
 	    have complete freedom to change the labels of fields and format of them, and
 	    the choice of acceptable values?
@@ -9679,35 +9475,35 @@ HREF="#AEN1875"
 ></DT
 ><DT
 >A.2.7. <A
-HREF="#AEN1882"
+HREF="#faq-phb-reporting"
 >&#13;	    Does Bugzilla provide any reporting features, metrics, graphs, etc? You
 	    know, the type of stuff that management likes to see. :)
 	  </A
 ></DT
 ><DT
 >A.2.8. <A
-HREF="#AEN1889"
+HREF="#faq-phb-email"
 >&#13;	    Is there email notification and if so, what do you see when you get an
 	    email?
 	  </A
 ></DT
 ><DT
 >A.2.9. <A
-HREF="#AEN1894"
+HREF="#faq-phb-cclist"
 >&#13;	    Can email notification be set up to send to multiple
 	    people, some on the To List, CC List, BCC List etc?
 	  </A
 ></DT
 ><DT
 >A.2.10. <A
-HREF="#AEN1899"
+HREF="#faq-phb-emailapp"
 >&#13;	    Do users have to have any particular
 	    type of email application?
 	  </A
 ></DT
 ><DT
 >A.2.11. <A
-HREF="#AEN1906"
+HREF="#faq-phb-data"
 >&#13;	    Does Bugzilla allow data to be imported and exported? If I had outsiders
 	    write up a bug report using a MS Word bug template, could that template be
 	    imported into "matching" fields? If I wanted to take the results of a query
@@ -9716,28 +9512,28 @@ HREF="#AEN1906"
 ></DT
 ><DT
 >A.2.12. <A
-HREF="#AEN1914"
+HREF="#faq-phb-l10n"
 >&#13;	    Has anyone converted Bugzilla to another language to be used in other
 	    countries? Is it localizable?
 	  </A
 ></DT
 ><DT
 >A.2.13. <A
-HREF="#AEN1919"
+HREF="#faq-phb-reports"
 >&#13;	    Can a user create and save reports? Can they do this in Word format?
 	    Excel format?
 	  </A
 ></DT
 ><DT
 >A.2.14. <A
-HREF="#AEN1924"
+HREF="#faq-phb-searching"
 >&#13;	    Does Bugzilla have the ability to search by word, phrase, compound
 	    search?
 	  </A
 ></DT
 ><DT
 >A.2.15. <A
-HREF="#AEN1929"
+HREF="#faq-phb-midair"
 >&#13;	     Does Bugzilla provide record locking when there is simultaneous access
 	    to the same bug? Does the second person get a notice that the bug is in use
 	    or how are they notified?
@@ -9745,19 +9541,19 @@ HREF="#AEN1929"
 ></DT
 ><DT
 >A.2.16. <A
-HREF="#AEN1934"
+HREF="#faq-phb-backup"
 >&#13;	    Are there any backup features provided?
 	  </A
 ></DT
 ><DT
 >A.2.17. <A
-HREF="#AEN1940"
+HREF="#faq-phb-livebackup"
 >&#13;	    Can users be on the system while a backup is in progress?
 	  </A
 ></DT
 ><DT
 >A.2.18. <A
-HREF="#AEN1945"
+HREF="#faq-phb-maintenance"
 >&#13;	    What type of human resources are needed to be on staff to install and
 	    maintain Bugzilla? Specifically, what type of skills does the person need to
 	    have? I need to find out if we were to go with Bugzilla, what types of
@@ -9767,7 +9563,7 @@ HREF="#AEN1945"
 ></DT
 ><DT
 >A.2.19. <A
-HREF="#AEN1951"
+HREF="#faq-phb-installtime"
 >&#13;	    What time frame are we looking at if we decide to hire people to install
 	    and maintain the Bugzilla? Is this something that takes hours or weeks to
 	    install and a couple of hours per week to maintain and customize or is this
@@ -9777,7 +9573,7 @@ HREF="#AEN1951"
 ></DT
 ><DT
 >A.2.20. <A
-HREF="#AEN1956"
+HREF="#faq-phb-cost"
 >&#13;	    Is there any licensing fee or other fees for using Bugzilla? Any
 	    out-of-pocket cost other than the bodies needed as identified above?
 	  </A
@@ -9793,20 +9589,20 @@ HREF="#faq-security"
 ><DL
 ><DT
 >A.3.1. <A
-HREF="#AEN1963"
+HREF="#faq-security-mysql"
 >&#13;	    How do I completely disable MySQL security if it's giving me problems
 	    (I've followed the instructions in the installation section of this guide)?
 	  </A
 ></DT
 ><DT
 >A.3.2. <A
-HREF="#AEN1969"
+HREF="#faq-security-knownproblems"
 >&#13;	    Are there any security problems with Bugzilla?
 	  </A
 ></DT
 ><DT
 >A.3.3. <A
-HREF="#AEN1974"
+HREF="#faq-security-mysqluser"
 >&#13;	    I've implemented the security fixes mentioned in Chris Yeh's security
 	    advisory of 5/10/2000 advising not to run MySQL as root, and am running into
 	    problems with MySQL no longer working correctly.
@@ -9823,48 +9619,48 @@ HREF="#faq-email"
 ><DL
 ><DT
 >A.4.1. <A
-HREF="#AEN1981"
+HREF="#faq-email-nomail"
 >&#13;	    I have a user who doesn't want to receive any more email from Bugzilla.
 	    How do I stop it entirely for this user?
 	  </A
 ></DT
 ><DT
 >A.4.2. <A
-HREF="#AEN1986"
+HREF="#faq-email-testing"
 >&#13;	    I'm evaluating/testing Bugzilla, and don't want it to send email to
 	    anyone but me. How do I do it?
 	  </A
 ></DT
 ><DT
 >A.4.3. <A
-HREF="#AEN1991"
+HREF="#faq-email-whine"
 >&#13;	    I want whineatnews.pl to whine at something more, or other than, only new
 	    bugs. How do I do it?
 	  </A
 ></DT
 ><DT
 >A.4.4. <A
-HREF="#AEN1997"
+HREF="#faq-email-procmail"
 >&#13;	    I don't like/want to use Procmail to hand mail off to bug_email.pl.
 	    What alternatives do I have?
 	  </A
 ></DT
 ><DT
 >A.4.5. <A
-HREF="#AEN2004"
+HREF="#faq-email-mailif"
 >&#13;	    How do I set up the email interface to submit/change bugs via email?
 	  </A
 ></DT
 ><DT
 >A.4.6. <A
-HREF="#AEN2009"
+HREF="#faq-email-sendmailnow"
 >&#13;	    Email takes FOREVER to reach me from Bugzilla -- it's extremely slow.
 	    What gives?
 	  </A
 ></DT
 ><DT
 >A.4.7. <A
-HREF="#AEN2016"
+HREF="#faq-email-nonreceived"
 >&#13;	     How come email from Bugzilla changes never reaches me?
 	  </A
 ></DT
@@ -9879,39 +9675,33 @@ HREF="#faq-db"
 ><DL
 ><DT
 >A.5.1. <A
-HREF="#AEN2024"
+HREF="#faq-db-oracle"
 >&#13;	    I've heard Bugzilla can be used with Oracle?
 	  </A
 ></DT
 ><DT
 >A.5.2. <A
-HREF="#AEN2029"
+HREF="#faq-db-corrupted"
 >&#13;	    I think my database might be corrupted, or contain invalid entries. What
 	    do I do?
 	  </A
 ></DT
 ><DT
 >A.5.3. <A
-HREF="#AEN2037"
+HREF="#faq-db-manualedit"
 >&#13;	    I want to manually edit some entries in my database. How?
 	  </A
 ></DT
 ><DT
 >A.5.4. <A
-HREF="#AEN2042"
->&#13;	    I try to add myself as a user, but Bugzilla always tells me my password is wrong.
-	  </A
-></DT
-><DT
->A.5.5. <A
-HREF="#AEN2047"
+HREF="#faq-db-permissions"
 >&#13;	    I think I've set up MySQL permissions correctly, but Bugzilla still can't
 	    connect.
 	  </A
 ></DT
 ><DT
->A.5.6. <A
-HREF="#AEN2052"
+>A.5.5. <A
+HREF="#faq-db-synchronize"
 >&#13;	    How do I synchronize bug information among multiple different Bugzilla
 	    databases?
 	  </A
@@ -9927,26 +9717,26 @@ HREF="#faq-nt"
 ><DL
 ><DT
 >A.6.1. <A
-HREF="#AEN2061"
+HREF="#faq-nt-easiest"
 >&#13;	    What is the easiest way to run Bugzilla on Win32 (Win98+/NT/2K)?
 	  </A
 ></DT
 ><DT
 >A.6.2. <A
-HREF="#AEN2066"
+HREF="#faq-nt-bundle"
 >&#13;	    Is there a "Bundle::Bugzilla" equivalent for Win32?
 	  </A
 ></DT
 ><DT
 >A.6.3. <A
-HREF="#AEN2071"
+HREF="#faq-nt-mappings"
 >&#13;	    CGI's are failing with a "something.cgi is not a valid Windows NT
 	    application" error. Why?
 	  </A
 ></DT
 ><DT
 >A.6.4. <A
-HREF="#AEN2079"
+HREF="#faq-nt-dbi"
 >&#13;	    I'm having trouble with the perl modules for NT not being able to talk to
 	    to the database.
 	  </A
@@ -9962,40 +9752,33 @@ HREF="#faq-use"
 ><DL
 ><DT
 >A.7.1. <A
-HREF="#AEN2100"
+HREF="#faq-use-changeaddress"
 >&#13;	    How do I change my user name (email address) in Bugzilla?
 	  </A
 ></DT
 ><DT
 >A.7.2. <A
-HREF="#AEN2105"
+HREF="#faq-use-query"
 >&#13;	    The query page is very confusing.  Isn't there a simpler way to query?
 	  </A
 ></DT
 ><DT
 >A.7.3. <A
-HREF="#AEN2110"
+HREF="#faq-use-accept"
 >&#13;	    I'm confused by the behavior of the "accept" button in the Show Bug form.
 	    Why doesn't it assign the bug to me when I accept it?
 	  </A
 ></DT
 ><DT
 >A.7.4. <A
-HREF="#AEN2120"
+HREF="#faq-use-attachment"
 >&#13;	    I can't upload anything into the database via the "Create Attachment"
 	    link.  What am I doing wrong?
 	  </A
 ></DT
 ><DT
 >A.7.5. <A
-HREF="#AEN2125"
->&#13;	    Email submissions to Bugzilla that have attachments end up asking me to
-	    save it as a "cgi" file.
-	  </A
-></DT
-><DT
->A.7.6. <A
-HREF="#AEN2130"
+HREF="#faq-use-keyword"
 >&#13;	    How do I change a keyword in Bugzilla, once some bugs are using it?
 	  </A
 ></DT
@@ -10010,20 +9793,20 @@ HREF="#faq-hacking"
 ><DL
 ><DT
 >A.8.1. <A
-HREF="#AEN2137"
+HREF="#faq-hacking-bugzillabugs"
 >&#13;	    What bugs are in Bugzilla right now?
 	  </A
 ></DT
 ><DT
 >A.8.2. <A
-HREF="#AEN2146"
+HREF="#faq-hacking-priority"
 >&#13;	    How can I change the default priority to a null value?  For instance, have the default
 	    priority be "---" instead of "P2"?
 	  </A
 ></DT
 ><DT
 >A.8.3. <A
-HREF="#AEN2152"
+HREF="#faq-hacking-patches"
 >&#13;	    What's the best way to submit patches?  What guidelines should I follow?
 	  </A
 ></DT
@@ -10043,7 +9826,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1766"
+NAME="faq-general-information"
 ></A
 ><B
 >A.1.1. </B
@@ -10071,7 +9854,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1772"
+NAME="faq-general-license"
 ></A
 ><B
 >A.1.2. </B
@@ -10100,7 +9883,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1778"
+NAME="faq-general-support"
 ></A
 ><B
 >A.1.3. </B
@@ -10114,7 +9897,16 @@ CLASS="answer"
 ><B
 > </B
 >
-	    <A
+            <A
+HREF="http://bugzilla.org/consulting.html"
+TARGET="_top"
+>http://bugzilla.org/consulting.html</A
+>
+            is a list of people and companies who have asked us to list them
+            as consultants for Bugzilla.
+          </P
+><P
+>&#13;	    <A
 HREF="http://www.collab.net/"
 TARGET="_top"
 >www.collab.net</A
@@ -10137,7 +9929,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1785"
+NAME="faq-general-companies"
 ></A
 ><B
 >A.1.4. </B
@@ -10154,7 +9946,7 @@ CLASS="answer"
 >
 	    There are <EM
 >dozens</EM
-> of major comapanies with public
+> of major companies with public
 	    Bugzilla sites to track bugs in their products.  A few include:
 	    <P
 ></P
@@ -10172,10 +9964,6 @@ BORDER="0"
 ><TR
 ><TD
 >NASA</TD
-></TR
-><TR
-><TD
->AtHome Corporation</TD
 ></TR
 ><TR
 ><TD
@@ -10247,7 +10035,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1810"
+NAME="faq-general-maintainers"
 ></A
 ><B
 >A.1.5. </B
@@ -10267,7 +10055,7 @@ HREF="http://www.bugzilla.org/who_we_are.html"
 TARGET="_top"
 >core team</A
 >,
-      led by Dave Miller (justdave@syndicomm.com).      
+      led by Dave Miller (justdave@netscape.com).      
 	  </P
 ></DIV
 ></DIV
@@ -10277,7 +10065,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1816"
+NAME="faq-general-compare"
 ></A
 ><B
 >A.1.6. </B
@@ -10315,12 +10103,12 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1822"
+NAME="faq-general-bzmissing"
 ></A
 ><B
 >A.1.7. </B
 >
-	    Why doesn't Bugzilla offer this or that feature or compatability
+	    Why doesn't Bugzilla offer this or that feature or compatibility
 	    with this other tracking software?
 	  </P
 ></DIV
@@ -10355,7 +10143,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1829"
+NAME="faq-general-mysql"
 ></A
 ><B
 >A.1.8. </B
@@ -10370,9 +10158,28 @@ CLASS="answer"
 ><B
 > </B
 >
-      There is DB-independence work afoot. PostgreSQL support is planned
-      for 2.18, and full DB-independence can't be far further on.
+            MySQL was originally chosen because it is free, easy to install,
+            and was available for the hardware Netscape intended to run it on.
 	  </P
+><P
+>&#13;            There is currently work in progress to make Bugzilla work on
+            PostgreSQL and Sybase in the default distribution.  You can track
+            the progress of these initiatives in bugs <A
+HREF="http://bugzilla.mozilla.org/show_bug.cgi?id=98304"
+TARGET="_top"
+>98304</A
+>
+            and <A
+HREF="http://bugzilla.mozilla.org/show_bug.cgi?id=173130"
+TARGET="_top"
+>173130</A
+>
+            respectively.
+          </P
+><P
+>&#13;            Once both of these are done, adding support for additional
+            database servers should be trivial.
+          </P
 ></DIV
 ></DIV
 ><DIV
@@ -10381,13 +10188,20 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1834"
+NAME="faq-general-bonsaitools"
 ></A
 ><B
 >A.1.9. </B
 >
-	    Why do the scripts say "/usr/bonsaitools/bin/perl" instead of
-	    "/usr/bin/perl" or something else?
+	    Why do the scripts say
+            <TT
+CLASS="filename"
+>/usr/bonsaitools/bin/perl</TT
+> instead of
+	    <TT
+CLASS="filename"
+>/usr/bin/perl</TT
+> or something else?
 	  </P
 ></DIV
 ><DIV
@@ -10396,16 +10210,41 @@ CLASS="answer"
 ><B
 > </B
 >
-	     Mozilla.org uses /usr/bonsaitools/bin/perl, because originally
-       Terry wanted a place to put a version of Perl and other tools 
-       that was strictly under his control. 
-    </P
+	     Mozilla.org used <TT
+CLASS="filename"
+>/usr/bonsaitools/bin/perl</TT
+>,
+             because originally Terry wanted a place to put a version of Perl
+             and other tools that was strictly under his control. 
+          </P
+><DIV
+CLASS="note"
 ><P
->&#13;		  We always recommend that, if possible, you keep the path
-		  as /usr/bonsaitools/bin/perl, and simply add symlink.  
-      This will make upgrading
-		  your Bugzilla much easier in the future.
-		</P
+></P
+><TABLE
+CLASS="note"
+WIDTH="100%"
+BORDER="0"
+><TR
+><TD
+WIDTH="25"
+ALIGN="CENTER"
+VALIGN="TOP"
+><IMG
+SRC="../images/note.gif"
+HSPACE="5"
+ALT="Note"></TD
+><TD
+ALIGN="LEFT"
+VALIGN="TOP"
+><P
+>&#13;              This convention was abonded during the 2.17 development cycle so
+              it will no longer be an issue when 2.18 comes out.
+            </P
+></TD
+></TR
+></TABLE
+></DIV
 ></DIV
 ></DIV
 ><DIV
@@ -10414,7 +10253,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1840"
+NAME="faq-general-cookie"
 ></A
 ><B
 >A.1.10. </B
@@ -10476,7 +10315,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1850"
+NAME="faq-phb-client"
 ></A
 ><B
 >A.2.1. </B
@@ -10502,7 +10341,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1855"
+NAME="faq-phb-integration"
 ></A
 ><B
 >A.2.2. </B
@@ -10528,7 +10367,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1860"
+NAME="faq-phb-projects"
 ></A
 ><B
 >A.2.3. </B
@@ -10542,11 +10381,39 @@ CLASS="answer"
 ><B
 > </B
 >
-	    Absolutely!  You can track any number of Products (although you
-      are limited to about 55 or so if
-      you are using Product-Based Groups), that can each be composed of any
-      number of Components.
+	    Absolutely!  You can track any number of Products that can each be
+            composed of any number of Components.
 	  </P
+><DIV
+CLASS="note"
+><P
+></P
+><TABLE
+CLASS="note"
+WIDTH="100%"
+BORDER="0"
+><TR
+><TD
+WIDTH="25"
+ALIGN="CENTER"
+VALIGN="TOP"
+><IMG
+SRC="../images/note.gif"
+HSPACE="5"
+ALT="Note"></TD
+><TD
+ALIGN="LEFT"
+VALIGN="TOP"
+><P
+>There are only 55 groups available in version 2.16 of
+            Bugzilla. If you are using product groups, this will also limit
+            the number of products you can have. This limit does not exist in
+            the current 2.17 development releases and will not exist in 2.18.
+            </P
+></TD
+></TR
+></TABLE
+></DIV
 ></DIV
 ></DIV
 ><DIV
@@ -10555,7 +10422,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1865"
+NAME="faq-phb-sorting"
 ></A
 ><B
 >A.2.4. </B
@@ -10580,7 +10447,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1870"
+NAME="faq-phb-attachments"
 ></A
 ><B
 >A.2.5. </B
@@ -10597,9 +10464,9 @@ CLASS="answer"
 >
 	    Yes - any sort of attachment is allowed, although administrators can
       configure a maximum size.  
-      There are many specific MIME-types that are pre-defined by Bugzilla,
-	    but you may specify any arbitrary MIME-type you need when you
-	    upload the file. 
+            Bugzilla gives the user the option of either using the MIME-type
+            supplied by the browser, choosing from a pre-defined list or
+            manually typing any arbitrary MIME-type. 
 	  </P
 ></DIV
 ></DIV
@@ -10609,7 +10476,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1875"
+NAME="faq-phb-priorities"
 ></A
 ><B
 >A.2.6. </B
@@ -10636,7 +10503,7 @@ CLASS="answer"
 HREF="http://bugzilla.mozilla.org/show_bug.cgi?id=91037"
 TARGET="_top"
 >http://bugzilla.mozilla.org/show_bug.cgi?id=91037</A
->
+>.
 	  </P
 ></DIV
 ></DIV
@@ -10646,7 +10513,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1882"
+NAME="faq-phb-reporting"
 ></A
 ><B
 >A.2.7. </B
@@ -10664,18 +10531,51 @@ CLASS="answer"
 	    Yes.  Look at <A
 HREF="http://bugzilla.mozilla.org/reports.cgi"
 TARGET="_top"
->&#13;	    http://bugzilla.mozilla.org/reports.cgi</A
-> for basic reporting
-	    and graphing facilities.
+>http://bugzilla.mozilla.org/reports.cgi</A
+>
+	    for samples of what Bugzilla can do in reporting and graphing.
 	  </P
 ><P
->&#13;	    For more advanced reporting, I recommend hooking up a professional
-	    reporting package, such as Crystal Reports, and use ODBC to access
-	    the MySQL database.  You can do a lot through the Query page of
-	    Bugzilla as well, but right now Advanced Reporting is much
-	    better accomplished through third-party utilities that can
-	    interface with the database directly.
+>&#13;            If you can not get the reports you want from the included reporting
+            scripts, it is possible to hook up a professional reporting package
+            such as Crystal Reports using ODBC. If you choose to do this,
+            beware that giving direct access to the database does contain some
+            security implications. Even if you give read-only access to the
+            bugs database it will bypass the secure bugs features of Bugzilla.
 	  </P
+><DIV
+CLASS="note"
+><P
+></P
+><TABLE
+CLASS="note"
+WIDTH="100%"
+BORDER="0"
+><TR
+><TD
+WIDTH="25"
+ALIGN="CENTER"
+VALIGN="TOP"
+><IMG
+SRC="../images/note.gif"
+HSPACE="5"
+ALT="Note"></TD
+><TD
+ALIGN="LEFT"
+VALIGN="TOP"
+><P
+>&#13;              Bugzilla's current development versions can do a lot more in the
+              way of reporting. To see examples, check out
+              <A
+HREF="http://bugzilla.mozilla.org/report.cgi"
+TARGET="_top"
+>http://bugzilla.mozilla.org/report.cgi</A
+>.
+            </P
+></TD
+></TR
+></TABLE
+></DIV
 ></DIV
 ></DIV
 ><DIV
@@ -10684,7 +10584,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1889"
+NAME="faq-phb-email"
 ></A
 ><B
 >A.2.8. </B
@@ -10711,7 +10611,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1894"
+NAME="faq-phb-cclist"
 ></A
 ><B
 >A.2.9. </B
@@ -10736,7 +10636,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1899"
+NAME="faq-phb-emailapp"
 ></A
 ><B
 >A.2.10. </B
@@ -10795,7 +10695,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1906"
+NAME="faq-phb-data"
 ></A
 ><B
 >A.2.11. </B
@@ -10812,28 +10712,39 @@ CLASS="answer"
 ><B
 > </B
 >
-	    Mozilla allows data export through a custom DTD in XML format.
-	    It does not, however, export to specific formats other than the
-	    XML Mozilla DTD.  Importing the data into Excel or any other application
-	    is left as an exercise for the reader.
-	  </P
+            Bugzilla can only output buglists as HTML in version 2.16. There
+            are other formats available (CSV and RDF) in the newer development
+            versions.
+          </P
 ><P
->&#13;	    If you create import filters to other applications from Mozilla's XML,
-	    please submit your modifications for inclusion in future Bugzilla
-	    distributions.
-	  </P
+>&#13;            Bugzilla can export bugs using <TT
+CLASS="filename"
+>xml.cgi</TT
+> with
+            either a bug number or list of bug numbers.
+          </P
 ><P
->&#13;	    As for data import, any application can send data to Bugzilla through
-	    the HTTP protocol, or through Mozilla's XML API.  However, it seems
-	    kind of silly to put another front-end in front of Bugzilla;
-	    it makes more sense to create a simplified bug submission form in
-	    HTML.  You can find an excellent example at
-	    <A
-HREF="http://www.mozilla.org/quality/help/bugzilla-helper.html"
-TARGET="_top"
->&#13;	    http://www.mozilla.org/quality/help/bugzilla-helper.html</A
+>&#13;            Currently the only script included with Bugzilla that can import
+            data is <TT
+CLASS="filename"
+>importxml.pl</TT
+> which is intended to be
+            used for importing the data generated by <TT
+CLASS="filename"
+>xml.cgi</TT
 >
-	  </P
+            in association with bug moving. Any other use is left as an
+            exercise for the user.
+          </P
+><P
+>&#13;            There are also scripts included in the <TT
+CLASS="filename"
+>contrib/</TT
+>
+            directory for using e-mail to import information into Bugzilla,
+            but these scripts are not currently supported and included for
+            educational purposes.
+          </P
 ></DIV
 ></DIV
 ><DIV
@@ -10842,7 +10753,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1914"
+NAME="faq-phb-l10n"
 ></A
 ><B
 >A.2.12. </B
@@ -10857,10 +10768,20 @@ CLASS="answer"
 ><B
 > </B
 >
-	    To a certain extent, yes. 2.16's templates mean that you can localise
-      the user-facing UI (and several projects are doing exactly that.) However,
-      error messages and the admin interface are currently not localisable.
-      This should be achieved by 2.18.
+            Yes.  For more information including available translated templates,
+            see <A
+HREF="http://www.bugzilla.org/download.html#localizations"
+TARGET="_top"
+>http://www.bugzilla.org/download.html#localizations</A
+>.
+            The admin interfaces are still not included in these translated
+            templates and is therefore still English only.  Also, there may be
+            issues with the charset not being declared.  See <A
+HREF="http://bugzilla.mozilla.org/show_bug.cgi?id=126266"
+TARGET="_top"
+>bug 126226</A
+>
+            for more information.
 	  </P
 ></DIV
 ></DIV
@@ -10870,7 +10791,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1919"
+NAME="faq-phb-reports"
 ></A
 ><B
 >A.2.13. </B
@@ -10885,7 +10806,7 @@ CLASS="answer"
 ><B
 > </B
 >
-	    Yes.  No.  No.
+	    Yes.  No.  Not in 2.16.
 	  </P
 ></DIV
 ></DIV
@@ -10895,7 +10816,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1924"
+NAME="faq-phb-searching"
 ></A
 ><B
 >A.2.14. </B
@@ -10921,7 +10842,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1929"
+NAME="faq-phb-midair"
 ></A
 ><B
 >A.2.15. </B
@@ -10948,7 +10869,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1934"
+NAME="faq-phb-backup"
 ></A
 ><B
 >A.2.16. </B
@@ -10978,7 +10899,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1940"
+NAME="faq-phb-livebackup"
 ></A
 ><B
 >A.2.17. </B
@@ -11004,7 +10925,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1945"
+NAME="faq-phb-maintenance"
 ></A
 ><B
 >A.2.18. </B
@@ -11039,7 +10960,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1951"
+NAME="faq-phb-installtime"
 ></A
 ><B
 >A.2.19. </B
@@ -11072,7 +10993,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1956"
+NAME="faq-phb-cost"
 ></A
 ><B
 >A.2.20. </B
@@ -11106,7 +11027,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1963"
+NAME="faq-security-mysql"
 ></A
 ><B
 >A.3.1. </B
@@ -11135,7 +11056,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1969"
+NAME="faq-security-knownproblems"
 ></A
 ><B
 >A.3.2. </B
@@ -11163,7 +11084,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1974"
+NAME="faq-security-mysqluser"
 ></A
 ><B
 >A.3.3. </B
@@ -11199,7 +11120,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1981"
+NAME="faq-email-nomail"
 ></A
 ><B
 >A.4.1. </B
@@ -11215,7 +11136,11 @@ CLASS="answer"
 > </B
 >
 	    The user should be able to set
-	    this in user email preferences (uncheck all boxes.)
+	    this in user email preferences (uncheck all boxes) or you can add
+            their email address to the <TT
+CLASS="filename"
+>data/nomail</TT
+> file.
 	  </P
 ></DIV
 ></DIV
@@ -11225,7 +11150,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1986"
+NAME="faq-email-testing"
 ></A
 ><B
 >A.4.2. </B
@@ -11240,7 +11165,7 @@ CLASS="answer"
 ><B
 > </B
 >
-	    Edit the "changedmail" Param. Replace "To:" with "X-Real-To:",
+	    Edit the "newchangedmail" Param. Replace "To:" with "X-Real-To:",
 	    replace "Cc:" with "X-Real-CC:", and add a "To: &#60;youremailaddress&#62;".
 	  </P
 ></DIV
@@ -11251,7 +11176,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1991"
+NAME="faq-email-whine"
 ></A
 ><B
 >A.4.3. </B
@@ -11267,10 +11192,10 @@ CLASS="answer"
 > </B
 >
 	    Try Klaas Freitag's excellent patch for "whineatassigned" functionality.
-	    You can find it at<A
-HREF=" http://bugzilla.mozilla.org/show_bug.cgi?id=6679"
+	    You can find it at <A
+HREF="http://bugzilla.mozilla.org/show_bug.cgi?id=6679"
 TARGET="_top"
->&#13;	      http://bugzilla.mozilla.org/show_bug.cgi?id=6679</A
+>http://bugzilla.mozilla.org/show_bug.cgi?id=6679</A
 >. This
 	    patch is against an older version of Bugzilla, so you must apply
 	    the diffs manually.
@@ -11283,7 +11208,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1997"
+NAME="faq-email-procmail"
 ></A
 ><B
 >A.4.4. </B
@@ -11301,7 +11226,7 @@ CLASS="answer"
 	    You can call bug_email.pl directly from your aliases file, with
 	    an entry like this:
 	    <A
-NAME="AEN2001"
+NAME="AEN1973"
 ></A
 ><BLOCKQUOTE
 CLASS="BLOCKQUOTE"
@@ -11322,7 +11247,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN2004"
+NAME="faq-email-mailif"
 ></A
 ><B
 >A.4.5. </B
@@ -11347,7 +11272,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN2009"
+NAME="faq-email-sendmailnow"
 ></A
 ><B
 >A.4.6. </B
@@ -11382,7 +11307,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN2016"
+NAME="faq-email-nonreceived"
 ></A
 ><B
 >A.4.7. </B
@@ -11422,7 +11347,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN2024"
+NAME="faq-db-oracle"
 ></A
 ><B
 >A.5.1. </B
@@ -11436,10 +11361,11 @@ CLASS="answer"
 ><B
 > </B
 >
-	    Red Hat Bugzilla works with Oracle.  The current version
-	    from Mozilla.org does not have this capability.  Unfortunately, though
-	    you will sacrifice a lot of the really great features available in
-	    Bugzilla 2.14 and 2.16 if you go with the 2.8-based Redhat version.
+            Red Hat's old version of Bugzilla (based on 2.8) worked on Oracle.
+            Red Hat's newer version (based on 2.17.1 and soon to be merged into
+            the main distribution) runs on PostgreSQL.  At this time we know of
+            no recent ports of Bugzilla to Oracle but do intend to support it
+            in the future (possibly the 2.20 time-frame).
 	  </P
 ></DIV
 ></DIV
@@ -11449,7 +11375,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN2029"
+NAME="faq-db-corrupted"
 ></A
 ><B
 >A.5.2. </B
@@ -11496,7 +11422,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN2037"
+NAME="faq-db-manualedit"
 ></A
 ><B
 >A.5.3. </B
@@ -11512,10 +11438,22 @@ CLASS="answer"
 >
 	     There is no facility in Bugzilla itself to do this. It's also generally
 	    not a smart thing to do if you don't know exactly what you're doing.
-	    However, if you understand SQL you can use the mysqladmin utility to
-	    manually insert, delete, and modify table information. Personally, I
-	    use "phpMyAdmin". You have to compile a PHP module with MySQL
-	    support to make it work, but it's very clean and easy to use.
+	    However, if you understand SQL you can use the <B
+CLASS="command"
+>mysql</B
+>
+            command line utility to manually insert, delete and modify table
+            information.  There are also more intuitive GUI clients available.
+            Personal favorites of the Bugzilla team are <A
+HREF="http://www.phpmyadmin.net/"
+TARGET="_top"
+>phpMyAdmin</A
+> and <A
+HREF="http://www.mysql.com/downloads/gui-mycc.html"
+TARGET="_top"
+>MySQL Control
+            Center</A
+>.
 	  </P
 ></DIV
 ></DIV
@@ -11525,36 +11463,10 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN2042"
+NAME="faq-db-permissions"
 ></A
 ><B
 >A.5.4. </B
->
-	    I try to add myself as a user, but Bugzilla always tells me my password is wrong.
-	  </P
-></DIV
-><DIV
-CLASS="answer"
-><P
-><B
-> </B
->
-	    Certain version of MySQL (notably, 3.23.29 and 3.23.30) accidentally disabled
-	    the "crypt()" function.  This prevented MySQL from storing encrypted passwords.
-	    Upgrade to the "3.23 stable" version of MySQL and you should be good to go.
-	  </P
-></DIV
-></DIV
-><DIV
-CLASS="qandaentry"
-><DIV
-CLASS="question"
-><P
-><A
-NAME="AEN2047"
-></A
-><B
->A.5.5. </B
 >
 	    I think I've set up MySQL permissions correctly, but Bugzilla still can't
 	    connect.
@@ -11568,10 +11480,42 @@ CLASS="answer"
 >
 	    Try running MySQL from its binary: "mysqld --skip-grant-tables". This
 	    will allow you to completely rule out grant tables as the cause of your
-	    frustration. However, I do not recommend you run it this way on a regular
-	    basis, unless you really want your web site defaced and your machine
-	    cracked.
-	  </P
+            frustration. If this Bugzilla is able to connect at this point then
+            you need to check that you have granted proper permission to the user
+            password combo defined in <TT
+CLASS="filename"
+>localconfig</TT
+>.
+          </P
+><DIV
+CLASS="warning"
+><P
+></P
+><TABLE
+CLASS="warning"
+WIDTH="100%"
+BORDER="0"
+><TR
+><TD
+WIDTH="25"
+ALIGN="CENTER"
+VALIGN="TOP"
+><IMG
+SRC="../images/warning.gif"
+HSPACE="5"
+ALT="Warning"></TD
+><TD
+ALIGN="LEFT"
+VALIGN="TOP"
+><P
+>&#13;              Running MySQL with this command line option is very insecure and
+              should only be done when not connected to the external network
+              as a troubleshooting step.
+            </P
+></TD
+></TR
+></TABLE
+></DIV
 ></DIV
 ></DIV
 ><DIV
@@ -11580,10 +11524,10 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN2052"
+NAME="faq-db-synchronize"
 ></A
 ><B
->A.5.6. </B
+>A.5.5. </B
 >
 	    How do I synchronize bug information among multiple different Bugzilla
 	    databases?
@@ -11626,7 +11570,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN2061"
+NAME="faq-nt-easiest"
 ></A
 ><B
 >A.6.1. </B
@@ -11651,7 +11595,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN2066"
+NAME="faq-nt-bundle"
 ></A
 ><B
 >A.6.2. </B
@@ -11677,7 +11621,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN2071"
+NAME="faq-nt-mappings"
 ></A
 ><B
 >A.6.3. </B
@@ -11700,7 +11644,7 @@ CLASS="answer"
 ><P
 >&#13;	    Microsoft has some advice on this matter, as well:
 	    <A
-NAME="AEN2076"
+NAME="AEN2049"
 ></A
 ><BLOCKQUOTE
 CLASS="BLOCKQUOTE"
@@ -11725,7 +11669,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN2079"
+NAME="faq-nt-dbi"
 ></A
 ><B
 >A.6.4. </B
@@ -11802,7 +11746,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN2100"
+NAME="faq-use-changeaddress"
 ></A
 ><B
 >A.7.1. </B
@@ -11827,7 +11771,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN2105"
+NAME="faq-use-query"
 ></A
 ><B
 >A.7.2. </B
@@ -11853,7 +11797,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN2110"
+NAME="faq-use-accept"
 ></A
 ><B
 >A.7.3. </B
@@ -11908,7 +11852,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN2120"
+NAME="faq-use-attachment"
 ></A
 ><B
 >A.7.4. </B
@@ -11935,37 +11879,10 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN2125"
+NAME="faq-use-keyword"
 ></A
 ><B
 >A.7.5. </B
->
-	    Email submissions to Bugzilla that have attachments end up asking me to
-	    save it as a "cgi" file.
-	  </P
-></DIV
-><DIV
-CLASS="answer"
-><P
-><B
-> </B
->
-	    Yup.  Just rename it once you download it, or save it under a different
-	    filename.  This will not be fixed anytime soon, because it would
-	    cripple some other functionality.
-	  </P
-></DIV
-></DIV
-><DIV
-CLASS="qandaentry"
-><DIV
-CLASS="question"
-><P
-><A
-NAME="AEN2130"
-></A
-><B
->A.7.6. </B
 >
 	    How do I change a keyword in Bugzilla, once some bugs are using it?
 	  </P
@@ -11996,7 +11913,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN2137"
+NAME="faq-hacking-bugzillabugs"
 ></A
 ><B
 >A.8.1. </B
@@ -12027,7 +11944,7 @@ TARGET="_top"
 	    This list includes bugs for the 2.18 release that have already
 	    been fixed and checked into CVS.  Please consult the
 	    <A
-HREF="http://www.mozilla.org/projects/bugzilla/"
+HREF="http://www.bugzilla.org/"
 TARGET="_top"
 >&#13;	      Bugzilla Project Page</A
 > for details on how to
@@ -12042,7 +11959,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN2146"
+NAME="faq-hacking-priority"
 ></A
 ><B
 >A.8.2. </B
@@ -12074,7 +11991,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN2152"
+NAME="faq-hacking-patches"
 ></A
 ><B
 >A.8.3. </B
@@ -12272,7 +12189,7 @@ CLASS="section"
 ><HR><H2
 CLASS="section"
 ><A
-NAME="AEN2194"
+NAME="AEN2162"
 ></A
 >B.2.1. Bugzilla Database Basics</H2
 ><P
@@ -12388,7 +12305,7 @@ CLASS="section"
 ><HR><H3
 CLASS="section"
 ><A
-NAME="AEN2221"
+NAME="AEN2189"
 ></A
 >B.2.1.1. Bugzilla Database Tables</H3
 ><P
@@ -12813,16 +12730,25 @@ CLASS="section"
 ><HR><H1
 CLASS="section"
 ><A
-NAME="rhbugzilla"
+NAME="variant-redhat"
 ></A
 >D.1. Red Hat Bugzilla</H1
 ><P
->Red Hat Bugzilla is a fork of Bugzilla 2.8. 
-    One of its major benefits is the ability
-    to work with Oracle, MySQL, and PostGreSQL databases serving as the
-    back-end, instead of just MySQL. Dave Lawrence of Red Hat is 
-    active in the Bugzilla community, and we hope to see a reunification
-    of the fork before too long.</P
+>Red Hat's old fork of Bugzilla which was based on version 2.8 is now
+    obsolete.  The newest version in use is based on version 2.17.1 and is in
+    the process of being integrated into the main Bugzilla source tree.  The
+    back-end is modified to work with PostgreSQL instead of MySQL and they have
+    custom templates to get their desired look and feel, but other than that it
+    is Bugzilla 2.17.1.  Dave Lawrence of Red Hat put forth a great deal of
+    effort to make sure that the changes he made could be integrated back into
+    the main tree. 
+    <A
+HREF="http://bugzilla.mozilla.org/show_bug.cgi?id=98304"
+TARGET="_top"
+>Bug
+    98304</A
+> exists to track this integration.
+    </P
 ><P
 >URL: 
     <A
@@ -12831,6 +12757,8 @@ TARGET="_top"
 >&#13;    http://bugzilla.redhat.com/bugzilla/</A
 >
     </P
+><P
+>This section last updated 24 Dec 2002</P
 ></DIV
 ><DIV
 CLASS="section"
@@ -12845,6 +12773,8 @@ NAME="variant-fenris"
     Loki went into receivership, it died. While Loki's other code lives on,
     its custodians recommend Bugzilla for future bug-tracker deployments.
     </P
+><P
+>This section last updated 27 Jul 2002</P
 ></DIV
 ><DIV
 CLASS="section"
@@ -12860,8 +12790,10 @@ NAME="variant-issuezilla"
     at tigris.org is their Java-based bug-tracker, 
     <A
 HREF="#variant-scarab"
->Scarab</A
+>Section D.4</A
 >.</P
+><P
+>This section last updated 27 Jul 2002</P
 ></DIV
 ><DIV
 CLASS="section"
@@ -12873,7 +12805,7 @@ NAME="variant-scarab"
 >D.4. Scarab</H1
 ><P
 >Scarab is a new open source bug-tracking system built using Java
-    Serlet technology. It is currently at version 1.0 beta 8.</P
+    Servlet technology. It is currently at version 1.0 beta 13.</P
 ><P
 >URL: 
     <A
@@ -12882,6 +12814,8 @@ TARGET="_top"
 >http://scarab.tigris.org</A
 >
     </P
+><P
+>This section last updated 18 Jan 2003</P
 ></DIV
 ><DIV
 CLASS="section"
@@ -12907,6 +12841,8 @@ TARGET="_top"
     </A
 >
     </P
+><P
+>This section last updated 27 Jul 2002</P
 ></DIV
 ><DIV
 CLASS="section"
@@ -12928,6 +12864,508 @@ TARGET="_top"
 >&#13;    http://www.sourceforge.net</A
 >
     </P
+><P
+>This section last updated 27 Jul 2002</P
+></DIV
+></DIV
+><DIV
+CLASS="appendix"
+><HR><H1
+><A
+NAME="gfdl"
+></A
+>Appendix E. GNU Free Documentation License</H1
+><P
+>Version 1.1, March 2000</P
+><A
+NAME="AEN2277"
+></A
+><BLOCKQUOTE
+CLASS="BLOCKQUOTE"
+><P
+>Copyright (C) 2000 Free Software Foundation, Inc. 59 Temple Place,
+    Suite 330, Boston, MA 02111-1307 USA Everyone is permitted to copy and
+    distribute verbatim copies of this license document, but changing it is
+    not allowed.</P
+></BLOCKQUOTE
+><DIV
+CLASS="section"
+><HR><H1
+CLASS="section"
+><A
+NAME="gfdl-0"
+></A
+>0. PREAMBLE</H1
+><P
+>The purpose of this License is to make a manual, textbook, or other
+    written document "free" in the sense of freedom: to assure everyone the
+    effective freedom to copy and redistribute it, with or without modifying
+    it, either commercially or noncommercially. Secondarily, this License
+    preserves for the author and publisher a way to get credit for their
+    work, while not being considered responsible for modifications made by
+    others.</P
+><P
+>This License is a kind of "copyleft", which means that derivative
+    works of the document must themselves be free in the same sense. It
+    complements the GNU General Public License, which is a copyleft license
+    designed for free software.</P
+><P
+>We have designed this License in order to use it for manuals for
+    free software, because free software needs free documentation: a free
+    program should come with manuals providing the same freedoms that the
+    software does. But this License is not limited to software manuals; it
+    can be used for any textual work, regardless of subject matter or whether
+    it is published as a printed book. We recommend this License principally
+    for works whose purpose is instruction or reference.</P
+></DIV
+><DIV
+CLASS="section"
+><HR><H1
+CLASS="section"
+><A
+NAME="gfdl-1"
+></A
+>1. APPLICABILITY AND DEFINITIONS</H1
+><P
+>This License applies to any manual or other work that contains a
+    notice placed by the copyright holder saying it can be distributed under
+    the terms of this License. The "Document", below, refers to any such
+    manual or work. Any member of the public is a licensee, and is addressed
+    as "you".</P
+><P
+>A "Modified Version" of the Document means any work containing the
+    Document or a portion of it, either copied verbatim, or with
+    modifications and/or translated into another language.</P
+><P
+>A "Secondary Section" is a named appendix or a front-matter section
+    of the Document that deals exclusively with the relationship of the
+    publishers or authors of the Document to the Document's overall subject
+    (or to related matters) and contains nothing that could fall directly
+    within that overall subject. (For example, if the Document is in part a
+    textbook of mathematics, a Secondary Section may not explain any
+    mathematics.) The relationship could be a matter of historical connection
+    with the subject or with related matters, or of legal, commercial,
+    philosophical, ethical or political position regarding them.</P
+><P
+>The "Invariant Sections" are certain Secondary Sections whose
+    titles are designated, as being those of Invariant Sections, in the
+    notice that says that the Document is released under this License.</P
+><P
+>The "Cover Texts" are certain short passages of text that are
+    listed, as Front-Cover Texts or Back-Cover Texts, in the notice that says
+    that the Document is released under this License.</P
+><P
+>A "Transparent" copy of the Document means a machine-readable copy,
+    represented in a format whose specification is available to the general
+    public, whose contents can be viewed and edited directly and
+    straightforwardly with generic text editors or (for images composed of
+    pixels) generic paint programs or (for drawings) some widely available
+    drawing editor, and that is suitable for input to text formatters or for
+    automatic translation to a variety of formats suitable for input to text
+    formatters. A copy made in an otherwise Transparent file format whose
+    markup has been designed to thwart or discourage subsequent modification
+    by readers is not Transparent. A copy that is not "Transparent" is called
+    "Opaque".</P
+><P
+>Examples of suitable formats for Transparent copies include plain
+    ASCII without markup, Texinfo input format, LaTeX input format, SGML or
+    XML using a publicly available DTD, and standard-conforming simple HTML
+    designed for human modification. Opaque formats include PostScript, PDF,
+    proprietary formats that can be read and edited only by proprietary word
+    processors, SGML or XML for which the DTD and/or processing tools are not
+    generally available, and the machine-generated HTML produced by some word
+    processors for output purposes only.</P
+><P
+>The "Title Page" means, for a printed book, the title page itself,
+    plus such following pages as are needed to hold, legibly, the material
+    this License requires to appear in the title page. For works in formats
+    which do not have any title page as such, "Title Page" means the text
+    near the most prominent appearance of the work's title, preceding the
+    beginning of the body of the text.</P
+></DIV
+><DIV
+CLASS="section"
+><HR><H1
+CLASS="section"
+><A
+NAME="gfdl-2"
+></A
+>2. VERBATIM COPYING</H1
+><P
+>You may copy and distribute the Document in any medium, either
+    commercially or noncommercially, provided that this License, the
+    copyright notices, and the license notice saying this License applies to
+    the Document are reproduced in all copies, and that you add no other
+    conditions whatsoever to those of this License. You may not use technical
+    measures to obstruct or control the reading or further copying of the
+    copies you make or distribute. However, you may accept compensation in
+    exchange for copies. If you distribute a large enough number of copies
+    you must also follow the conditions in section 3.</P
+><P
+>You may also lend copies, under the same conditions stated above,
+    and you may publicly display copies.</P
+></DIV
+><DIV
+CLASS="section"
+><HR><H1
+CLASS="section"
+><A
+NAME="gfdl-3"
+></A
+>3. COPYING IN QUANTITY</H1
+><P
+>If you publish printed copies of the Document numbering more than
+    100, and the Document's license notice requires Cover Texts, you must
+    enclose the copies in covers that carry, clearly and legibly, all these
+    Cover Texts: Front-Cover Texts on the front cover, and Back-Cover Texts
+    on the back cover. Both covers must also clearly and legibly identify you
+    as the publisher of these copies. The front cover must present the full
+    title with all words of the title equally prominent and visible. You may
+    add other material on the covers in addition. Copying with changes
+    limited to the covers, as long as they preserve the title of the Document
+    and satisfy these conditions, can be treated as verbatim copying in other
+    respects.</P
+><P
+>If the required texts for either cover are too voluminous to fit
+    legibly, you should put the first ones listed (as many as fit reasonably)
+    on the actual cover, and continue the rest onto adjacent pages.</P
+><P
+>If you publish or distribute Opaque copies of the Document
+    numbering more than 100, you must either include a machine-readable
+    Transparent copy along with each Opaque copy, or state in or with each
+    Opaque copy a publicly-accessible computer-network location containing a
+    complete Transparent copy of the Document, free of added material, which
+    the general network-using public has access to download anonymously at no
+    charge using public-standard network protocols. If you use the latter
+    option, you must take reasonably prudent steps, when you begin
+    distribution of Opaque copies in quantity, to ensure that this
+    Transparent copy will remain thus accessible at the stated location until
+    at least one year after the last time you distribute an Opaque copy
+    (directly or through your agents or retailers) of that edition to the
+    public.</P
+><P
+>It is requested, but not required, that you contact the authors of
+    the Document well before redistributing any large number of copies, to
+    give them a chance to provide you with an updated version of the
+    Document.</P
+></DIV
+><DIV
+CLASS="section"
+><HR><H1
+CLASS="section"
+><A
+NAME="gfdl-4"
+></A
+>4. MODIFICATIONS</H1
+><P
+>You may copy and distribute a Modified Version of the Document
+    under the conditions of sections 2 and 3 above, provided that you release
+    the Modified Version under precisely this License, with the Modified
+    Version filling the role of the Document, thus licensing distribution and
+    modification of the Modified Version to whoever possesses a copy of it.
+    In addition, you must do these things in the Modified Version:</P
+><P
+></P
+><OL
+TYPE="A"
+><LI
+><P
+>Use in the Title Page (and on the covers, if any) a title
+        distinct from that of the Document, and from those of previous
+        versions (which should, if there were any, be listed in the History
+        section of the Document). You may use the same title as a previous
+        version if the original publisher of that version gives
+        permission.</P
+></LI
+><LI
+><P
+>List on the Title Page, as authors, one or more persons or
+        entities responsible for authorship of the modifications in the
+        Modified Version, together with at least five of the principal
+        authors of the Document (all of its principal authors, if it has less
+        than five).</P
+></LI
+><LI
+><P
+>State on the Title page the name of the publisher of the
+        Modified Version, as the publisher.</P
+></LI
+><LI
+><P
+>Preserve all the copyright notices of the Document.</P
+></LI
+><LI
+><P
+>Add an appropriate copyright notice for your modifications
+        adjacent to the other copyright notices.</P
+></LI
+><LI
+><P
+>Include, immediately after the copyright notices, a license
+        notice giving the public permission to use the Modified Version under
+        the terms of this License, in the form shown in the Addendum
+        below.</P
+></LI
+><LI
+><P
+>Preserve in that license notice the full lists of Invariant
+        Sections and required Cover Texts given in the Document's license
+        notice.</P
+></LI
+><LI
+><P
+>Include an unaltered copy of this License.</P
+></LI
+><LI
+><P
+>Preserve the section entitled "History", and its title, and add
+        to it an item stating at least the title, year, new authors, and
+        publisher of the Modified Version as given on the Title Page. If
+        there is no section entitled "History" in the Document, create one
+        stating the title, year, authors, and publisher of the Document as
+        given on its Title Page, then add an item describing the Modified
+        Version as stated in the previous sentence.</P
+></LI
+><LI
+><P
+>Preserve the network location, if any, given in the Document
+        for public access to a Transparent copy of the Document, and likewise
+        the network locations given in the Document for previous versions it
+        was based on. These may be placed in the "History" section. You may
+        omit a network location for a work that was published at least four
+        years before the Document itself, or if the original publisher of the
+        version it refers to gives permission.</P
+></LI
+><LI
+><P
+>In any section entitled "Acknowledgements" or "Dedications",
+        preserve the section's title, and preserve in the section all the
+        substance and tone of each of the contributor acknowledgements and/or
+        dedications given therein.</P
+></LI
+><LI
+><P
+>Preserve all the Invariant Sections of the Document, unaltered
+        in their text and in their titles. Section numbers or the equivalent
+        are not considered part of the section titles.</P
+></LI
+><LI
+><P
+>Delete any section entitled "Endorsements". Such a section may
+        not be included in the Modified Version.</P
+></LI
+><LI
+><P
+>Do not retitle any existing section as "Endorsements" or to
+        conflict in title with any Invariant Section.</P
+></LI
+></OL
+><P
+>If the Modified Version includes new front-matter sections or
+    appendices that qualify as Secondary Sections and contain no material
+    copied from the Document, you may at your option designate some or all of
+    these sections as invariant. To do this, add their titles to the list of
+    Invariant Sections in the Modified Version's license notice. These titles
+    must be distinct from any other section titles.</P
+><P
+>You may add a section entitled "Endorsements", provided it contains
+    nothing but endorsements of your Modified Version by various parties--for
+    example, statements of peer review or that the text has been approved by
+    an organization as the authoritative definition of a standard.</P
+><P
+>You may add a passage of up to five words as a Front-Cover Text,
+    and a passage of up to 25 words as a Back-Cover Text, to the end of the
+    list of Cover Texts in the Modified Version. Only one passage of
+    Front-Cover Text and one of Back-Cover Text may be added by (or through
+    arrangements made by) any one entity. If the Document already includes a
+    cover text for the same cover, previously added by you or by arrangement
+    made by the same entity you are acting on behalf of, you may not add
+    another; but you may replace the old one, on explicit permission from the
+    previous publisher that added the old one.</P
+><P
+>The author(s) and publisher(s) of the Document do not by this
+    License give permission to use their names for publicity for or to assert
+    or imply endorsement of any Modified Version.</P
+></DIV
+><DIV
+CLASS="section"
+><HR><H1
+CLASS="section"
+><A
+NAME="gfdl-5"
+></A
+>5. COMBINING DOCUMENTS</H1
+><P
+>You may combine the Document with other documents released under
+    this License, under the terms defined in section 4 above for modified
+    versions, provided that you include in the combination all of the
+    Invariant Sections of all of the original documents, unmodified, and list
+    them all as Invariant Sections of your combined work in its license
+    notice.</P
+><P
+>The combined work need only contain one copy of this License, and
+    multiple identical Invariant Sections may be replaced with a single copy.
+    If there are multiple Invariant Sections with the same name but different
+    contents, make the title of each such section unique by adding at the end
+    of it, in parentheses, the name of the original author or publisher of
+    that section if known, or else a unique number. Make the same adjustment
+    to the section titles in the list of Invariant Sections in the license
+    notice of the combined work.</P
+><P
+>In the combination, you must combine any sections entitled
+    "History" in the various original documents, forming one section entitled
+    "History"; likewise combine any sections entitled "Acknowledgements", and
+    any sections entitled "Dedications". You must delete all sections
+    entitled "Endorsements."</P
+></DIV
+><DIV
+CLASS="section"
+><HR><H1
+CLASS="section"
+><A
+NAME="gfdl-6"
+></A
+>6. COLLECTIONS OF DOCUMENTS</H1
+><P
+>You may make a collection consisting of the Document and other
+    documents released under this License, and replace the individual copies
+    of this License in the various documents with a single copy that is
+    included in the collection, provided that you follow the rules of this
+    License for verbatim copying of each of the documents in all other
+    respects.</P
+><P
+>You may extract a single document from such a collection, and
+    distribute it individually under this License, provided you insert a copy
+    of this License into the extracted document, and follow this License in
+    all other respects regarding verbatim copying of that document.</P
+></DIV
+><DIV
+CLASS="section"
+><HR><H1
+CLASS="section"
+><A
+NAME="gfdl-7"
+></A
+>7. AGGREGATION WITH INDEPENDENT WORKS</H1
+><P
+>A compilation of the Document or its derivatives with other
+    separate and independent documents or works, in or on a volume of a
+    storage or distribution medium, does not as a whole count as a Modified
+    Version of the Document, provided no compilation copyright is claimed for
+    the compilation. Such a compilation is called an "aggregate", and this
+    License does not apply to the other self-contained works thus compiled
+    with the Document, on account of their being thus compiled, if they are
+    not themselves derivative works of the Document.</P
+><P
+>If the Cover Text requirement of section 3 is applicable to these
+    copies of the Document, then if the Document is less than one quarter of
+    the entire aggregate, the Document's Cover Texts may be placed on covers
+    that surround only the Document within the aggregate. Otherwise they must
+    appear on covers around the whole aggregate.</P
+></DIV
+><DIV
+CLASS="section"
+><HR><H1
+CLASS="section"
+><A
+NAME="gfdl-8"
+></A
+>8. TRANSLATION</H1
+><P
+>Translation is considered a kind of modification, so you may
+    distribute translations of the Document under the terms of section 4.
+    Replacing Invariant Sections with translations requires special
+    permission from their copyright holders, but you may include translations
+    of some or all Invariant Sections in addition to the original versions of
+    these Invariant Sections. You may include a translation of this License
+    provided that you also include the original English version of this
+    License. In case of a disagreement between the translation and the
+    original English version of this License, the original English version
+    will prevail.</P
+></DIV
+><DIV
+CLASS="section"
+><HR><H1
+CLASS="section"
+><A
+NAME="gfdl-9"
+></A
+>9. TERMINATION</H1
+><P
+>You may not copy, modify, sublicense, or distribute the Document
+    except as expressly provided for under this License. Any other attempt to
+    copy, modify, sublicense or distribute the Document is void, and will
+    automatically terminate your rights under this License. However, parties
+    who have received copies, or rights, from you under this License will not
+    have their licenses terminated so long as such parties remain in full
+    compliance.</P
+></DIV
+><DIV
+CLASS="section"
+><HR><H1
+CLASS="section"
+><A
+NAME="gfdl-10"
+></A
+>10. FUTURE REVISIONS OF THIS LICENSE</H1
+><P
+>The Free Software Foundation may publish new, revised versions of
+    the GNU Free Documentation License from time to time. Such new versions
+    will be similar in spirit to the present version, but may differ in
+    detail to address new problems or concerns. See 
+    <A
+HREF="http://www.gnu.org/copyleft/"
+TARGET="_top"
+>&#13;    http://www.gnu.org/copyleft/</A
+>
+
+    .</P
+><P
+>Each version of the License is given a distinguishing version
+    number. If the Document specifies that a particular numbered version of
+    this License "or any later version" applies to it, you have the option of
+    following the terms and conditions either of that specified version or of
+    any later version that has been published (not as a draft) by the Free
+    Software Foundation. If the Document does not specify a version number of
+    this License, you may choose any version ever published (not as a draft)
+    by the Free Software Foundation.</P
+></DIV
+><DIV
+CLASS="section"
+><HR><H1
+CLASS="section"
+><A
+NAME="gfdl-howto"
+></A
+>How to use this License for your documents</H1
+><P
+>To use this License in a document you have written, include a copy
+    of the License in the document and put the following copyright and
+    license notices just after the title page:</P
+><A
+NAME="AEN2367"
+></A
+><BLOCKQUOTE
+CLASS="BLOCKQUOTE"
+><P
+>Copyright (c) YEAR YOUR NAME. Permission is granted to copy,
+      distribute and/or modify this document under the terms of the GNU Free
+      Documentation License, Version 1.1 or any later version published by
+      the Free Software Foundation; with the Invariant Sections being LIST
+      THEIR TITLES, with the Front-Cover Texts being LIST, and with the
+      Back-Cover Texts being LIST. A copy of the license is included in the
+      section entitled "GNU Free Documentation License".</P
+></BLOCKQUOTE
+><P
+>If you have no Invariant Sections, write "with no Invariant
+    Sections" instead of saying which ones are invariant. If you have no
+    Front-Cover Texts, write "no Front-Cover Texts" instead of "Front-Cover
+    Texts being LIST"; likewise for Back-Cover Texts.</P
+><P
+>If your document contains nontrivial examples of program code, we
+    recommend releasing these examples in parallel under your choice of free
+    software license, such as the GNU General Public License, to permit their
+    use in free software.</P
 ></DIV
 ></DIV
 ><DIV
@@ -12942,7 +13380,7 @@ CLASS="glossdiv"
 ><H1
 CLASS="glossdiv"
 ><A
-NAME="AEN2300"
+NAME="AEN2372"
 ></A
 >0-9, high ascii</H1
 ><DL
@@ -13008,6 +13446,110 @@ CLASS="acronym"
 >
 
         world-wide-web server.</P
+><P
+></P
+><DIV
+CLASS="variablelist"
+><P
+><B
+>Useful Directives when configuring Bugzilla</B
+></P
+><DL
+><DT
+><TT
+CLASS="computeroutput"
+><A
+HREF="http://httpd.apache.org/docs-2.0/mod/core.html#addhandler"
+TARGET="_top"
+>AddHandler</A
+></TT
+></DT
+><DD
+><P
+>Tell Apache that it's OK to run CGI scripts.</P
+></DD
+><DT
+><TT
+CLASS="computeroutput"
+><A
+HREF="http://httpd.apache.org/docs-2.0/mod/core.html#allowoverride"
+TARGET="_top"
+>AllowOverride</A
+></TT
+>, <TT
+CLASS="computeroutput"
+><A
+HREF="http://httpd.apache.org/docs-2.0/mod/core.html#options"
+TARGET="_top"
+>Options</A
+></TT
+></DT
+><DD
+><P
+>These directives are used to tell Apache many things about
+              the directory they apply to. For Bugzilla's purposes, we need
+              them to allow script execution and <TT
+CLASS="filename"
+>.htaccess</TT
+>
+              overrides.
+              </P
+></DD
+><DT
+><TT
+CLASS="computeroutput"
+><A
+HREF="http://httpd.apache.org/docs-2.0/mod/mod_dir.html#directoryindex"
+TARGET="_top"
+>DirectoryIndex</A
+></TT
+></DT
+><DD
+><P
+>Used to tell Apache what files are indexes. If you can
+              not add <TT
+CLASS="filename"
+>index.cgi</TT
+> to the list of valid files,
+              you'll need to set <TT
+CLASS="computeroutput"
+>$index_html</TT
+> to
+              1 in <TT
+CLASS="filename"
+>localconfig</TT
+> so
+              <B
+CLASS="command"
+>./checksetup.pl</B
+> will create an
+              <TT
+CLASS="filename"
+>index.html</TT
+> that redirects to
+              <TT
+CLASS="filename"
+>index.cgi</TT
+>.
+              </P
+></DD
+><DT
+><TT
+CLASS="computeroutput"
+><A
+HREF="http://httpd.apache.org/docs-2.0/mod/core.html#scriptinterpretersource"
+TARGET="_top"
+>ScriptInterpreterSource</A
+></TT
+></DT
+><DD
+><P
+>Used when running Apache on windows so the shebang line
+              doesn't have to be changed in every Bugzilla script.
+              </P
+></DD
+></DL
+></DIV
 ></DD
 ></DL
 ></DIV
@@ -13057,6 +13599,9 @@ CLASS="QUOTE"
         "Find" box.</P
 ></DD
 ><DT
+><A
+NAME="gloss-bugzilla"
+></A
 ><B
 >Bugzilla</B
 ></DT
@@ -13074,8 +13619,28 @@ CLASS="glossdiv"
 ><A
 NAME="gloss-c"
 ></A
-></H1
+>C</H1
 ><DL
+><DT
+><A
+NAME="gloss-cgi"
+></A
+><B
+>Common Gateway Interface</B
+></DT
+> (CGI)<DD
+><P
+><SPAN
+CLASS="acronym"
+>CGI</SPAN
+> is an acronym for Common Gateway Interface.
+        This is a standard for interfacing an external application with a web
+        server. Bugzilla is an example of a <SPAN
+CLASS="acronym"
+>CGI</SPAN
+> application.
+        </P
+></DD
 ><DT
 ><A
 NAME="gloss-component"
@@ -13161,7 +13726,7 @@ CLASS="glossdiv"
 ><A
 NAME="gloss-g"
 ></A
-></H1
+>G</H1
 ><DL
 ><DT
 ><B
@@ -13201,21 +13766,78 @@ NAME="gloss-m"
 >M</H1
 ><DL
 ><DT
+><A
+NAME="gloss-mta"
+></A
 ><B
->mysqld</B
+>Message Transport Agent</B
+></DT
+> (MTA)<DD
+><P
+>A Message Transport Agent is used to control the flow of email
+        on a system. Many unix based systems use
+        <A
+HREF="http://www.sendmail.org"
+TARGET="_top"
+>sendmail</A
+> which is what
+        Bugzilla expects to find by default at <TT
+CLASS="filename"
+>/usr/sbin/sendmail</TT
+>.
+        Many other MTA's will work, but they all require that the
+        <TT
+CLASS="option"
+>sendmailnow</TT
+> param be set to <TT
+CLASS="literal"
+>on</TT
+>.
+        </P
+></DD
+><DT
+><A
+NAME="gloss-mysql"
+></A
+><B
+>MySQL</B
 ></DT
 ><DD
 ><P
->mysqld is the name of the 
-        <I
+>MySQL is currently the required
+        <A
+HREF="#gloss-rdbms"
+><I
 CLASS="glossterm"
->daemon</I
->
-
-        for the MySQL database. In general, it is invoked automatically
-        through the use of the System V init scripts on GNU/Linux and
-        AT&#38;T System V-based systems, such as Solaris and HP/UX, or
-        through the RC scripts on BSD-based systems.</P
+>RDBMS</I
+></A
+> for Bugzilla. MySQL
+        can be downloaded from <A
+HREF="http://www.mysql.com"
+TARGET="_top"
+>http://www.mysql.com</A
+>. While you
+        should familiarize yourself with all of the documentation, some high
+        points are:
+        </P
+><P
+></P
+><UL
+><LI
+><P
+><A
+HREF="http://www.mysql.com/doc/P/r/Privilege_system.html"
+TARGET="_top"
+>MySQL
+            Privilege System</A
+> - Much more detailed information about
+            the suggestions in <A
+HREF="#security-mysql"
+>Section 5.6.2</A
+>.
+            </P
+></LI
+></UL
 ></DD
 ></DL
 ></DIV
@@ -13301,6 +13923,30 @@ CLASS="QUOTE"
 >
 
         field in a bug.</P
+></DD
+></DL
+></DIV
+><DIV
+CLASS="glossdiv"
+><H1
+CLASS="glossdiv"
+><A
+NAME="gloss-r"
+></A
+>R</H1
+><DL
+><DT
+><A
+NAME="gloss-rdbms"
+></A
+><B
+>Relational DataBase Managment System</B
+></DT
+> (RDBMS)<DD
+><P
+>A relational database management system is a database system
+        that stores information in tables that are related to each other.
+        </P
 ></DD
 ></DL
 ></DIV
@@ -13414,6 +14060,21 @@ CLASS="QUOTE"
         giving you the ability to declare by which milestone a bug will be
         fixed, or an enhancement will be implemented.</P
 ></DD
+><DT
+><A
+NAME="gloss-tcl"
+></A
+><B
+>Tool Command Language</B
+></DT
+> (TCL)<DD
+><P
+>TCL is an open source scripting language available for Windows,
+        Macintosh, and Unix based systems. Bugzilla 1.0 was written in TCL but
+        never released. The first release of Bugzilla was 2.0, which was when
+        it was ported to perl.
+        </P
+></DD
 ></DL
 ></DIV
 ><DIV
@@ -13427,16 +14088,70 @@ NAME="gloss-z"
 ><DL
 ><DT
 ><A
-NAME="zarro-boogs-found"
+NAME="gloss-zarro"
 ></A
 ><B
 >Zarro Boogs Found</B
 ></DT
 ><DD
 ><P
->This is the cryptic response sent by Bugzilla when a query
-        returned no results. It is just a goofy way of saying "Zero Bugs
-        Found".</P
+>This is just a goofy way of saying that there were no bugs
+        found matching your query. When asked to explain this message,
+        Terry had the following to say:
+        </P
+><A
+NAME="AEN2566"
+></A
+><TABLE
+BORDER="0"
+WIDTH="100%"
+CELLSPACING="0"
+CELLPADDING="0"
+CLASS="BLOCKQUOTE"
+><TR
+><TD
+WIDTH="10%"
+VALIGN="TOP"
+>&nbsp;</TD
+><TD
+WIDTH="80%"
+VALIGN="TOP"
+><P
+>I've been asked to explain this ... way back when, when
+          Netscape released version 4.0 of its browser, we had a release
+          party.  Naturally, there had been a big push to try and fix every
+          known bug before the release. Naturally, that hadn't actually
+          happened.  (This is not unique to Netscape or to 4.0; the same thing
+          has happened with every software project I've ever seen.)  Anyway,
+          at the release party, T-shirts were handed out that said something
+          like "Netscape 4.0: Zarro Boogs". Just like the software, the
+          T-shirt had no known bugs.  Uh-huh.
+          </P
+><P
+>So, when you query for a list of bugs, and it gets no results,
+          you can think of this as a friendly reminder.  Of *course* there are
+          bugs matching your query, they just aren't in the bugsystem yet...
+          </P
+></TD
+><TD
+WIDTH="10%"
+VALIGN="TOP"
+>&nbsp;</TD
+></TR
+><TR
+><TD
+COLSPAN="2"
+ALIGN="RIGHT"
+VALIGN="TOP"
+>--<SPAN
+CLASS="attribution"
+>Terry Weissman</SPAN
+></TD
+><TD
+WIDTH="10%"
+>&nbsp;</TD
+></TR
+></TABLE
 ></DD
 ></DL
 ></DIV

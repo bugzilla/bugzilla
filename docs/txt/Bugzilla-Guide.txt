@@ -5,7 +5,7 @@ Matthew P. Barnson
 
 The Bugzilla Team
 
-   2003-02-16
+   2003-04-23
 
    This is the documentation for Bugzilla, the mozilla.org bug-tracking
    system. Bugzilla is an enterprise-class piece of software that powers

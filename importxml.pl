@@ -374,14 +374,14 @@ for (my $k=1 ; $k <= $bugqty ; $k++) {
 
   my @product;
   my @component;
-  if ((@product = grep /^$prod$/i, @::legal_product) &&
-      (@component = grep /^$comp$/i, @{$::components{$product[0]}}) ) {
+  if ((@product = grep { lc($prod) eq lc($_) } @::legal_product) &&
+      (@component = grep { lc($comp) eq lc($_) } @{$::components{$product[0]}}) ) {
     push (@query, "product");
     push (@values, SqlQuote($product[0]) );
     push (@query, "component");
     push (@values, SqlQuote($component[0]) );
-  } elsif ((@product = grep /^$default_prod$/i, @::legal_product) &&
-      (@component = grep /^$default_comp$/i, @{$::components{$product[0]}}) ) {
+  } elsif ((@product = grep { lc($default_prod) eq lc($_) } @::legal_product) &&
+      (@component = grep { lc($default_comp) eq lc($_) } @{$::components{$product[0]}}) ) {
     push (@query, "product");
     push (@values, SqlQuote($product[0]) );
     push (@query, "component");

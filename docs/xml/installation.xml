@@ -1245,7 +1245,7 @@ AllowOverride Limit
           <computeroutput>
             <prompt>C:&gt;</prompt>
 
-            <command>ppm &lt;modulename&gt;</command>
+            <command>ppm install &lt;modulename&gt;</command>
           </computeroutput>
           </para>
 
@@ -1253,14 +1253,13 @@ AllowOverride Limit
             <title>Installing ActivePerl ppd Modules on Microsoft
             Windows</title>
 
-            <para>
-              <prompt>C:&gt;</prompt>
-
-              <command>ppm 
-              <option>DBD-Mysql</option>
-              </command>
-            </para>
-
+            <programlisting>
+<command>ppm repository add oi http://openinteract.sourceforge.net/ppmpackages</command>
+<command>ppm install DBD-mysql</command>
+<command>ppm install Template-Toolkit</command>
+<command>ppm install TimeDate</command>
+            </programlisting>
+          
             <para>Watch your capitalization!</para>
           </example>
 

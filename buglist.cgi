@@ -1051,10 +1051,11 @@ ReconnectToShadowDatabase();
 my $query = GenerateSQL(\@fields, undef, undef, $::buffer);
 
 
-
+my $order_from_cookie = 0;
 if ($::COOKIE{'LASTORDER'}) {
     if ((!$::FORM{'order'}) || $::FORM{'order'} =~ /^reuse/i) {
         $::FORM{'order'} = url_decode($::COOKIE{'LASTORDER'});
+        $order_from_cookie = 1;
     }
 }
 
@@ -1068,7 +1069,21 @@ if (defined $::FORM{'order'} && $::FORM{'order'} ne "") {
 
     ORDER: for ($::FORM{'order'}) {
         /\./ && do {
-            # This (hopefully) already has fieldnames in it, so we're done.
+            # A custom list of columns.  Make sure each column is valid.
+            foreach my $fragment (split(/,/, $::FORM{'order'})) {
+                my $ident_iregexp = "[a-z_][0-9a-z_]*";
+                if (trim($fragment) !~ /^${ident_iregexp}\.${ident_iregexp}(\s+(asc|desc))?$/i) {
+                    my $qfragment = html_quote($fragment);
+                    my $error = "The custom sort order you specified in your "
+                              . "form submission contains an invalid column "
+                              . "descriptor <em>$qfragment</em>.";
+                    if ($order_from_cookie) {
+                        $error =~ s/form submission/cookie/;
+                    }
+                    DisplayError($error);
+                    exit;
+                }
+            }
             last ORDER;
         };
         /Number/ && do {

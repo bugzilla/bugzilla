@@ -1112,6 +1112,7 @@ if ($my_webservergroup) {
     fixPerms('data/webdot', $<, $webservergid, 007, 1);
     fixPerms('data/webdot/.htaccess', $<, $webservergid, 027);
     fixPerms('data/params', $<, $webservergid, 017);
+    fixPerms('data/comments', $<, $webservergid, 017);
     fixPerms('*', $<, $webservergid, 027);
     fixPerms('template', $<, $webservergid, 027, 1);
     fixPerms('css', $<, $webservergid, 027, 1);

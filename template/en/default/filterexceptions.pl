@@ -385,7 +385,7 @@
 
 'account/prefs/email.html.tmpl' => [
   'watchedusers', # Email
-  'useqacontact ? \'5\' : \'4\'',
+  '(useqacontact AND usevotes) ? \'5\' : ((useqacontact OR usevotes) ? \'4\' : \'3\')',
   'role',
   'reason.name',
   'reason.description',

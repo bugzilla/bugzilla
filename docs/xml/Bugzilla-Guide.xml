@@ -20,11 +20,12 @@
 <!ENTITY revhistory SYSTEM "revhistory.xml">
 
 <!ENTITY bz "http://www.bugzilla.org/">
-<!ENTITY bz-ver "2.16.4">
-<!ENTITY bz-date "2003-11-01">
-<!ENTITY bz-cvs-ver "2.17">
-<!ENTITY bzg-ver "2.16.4">
-<!ENTITY bzg-cvs-ver "2.17.5">
+<!ENTITY bz-ver "2.16.5">
+<!ENTITY bz-date "2004-03-04">
+<!ENTITY bz-cvs-ver "2.17.7">
+<!ENTITY landfillbase "http://landfill.bugzilla.org/bugzilla-&bz-ver;/">
+<!ENTITY bzg-ver "2.16.5">
+<!ENTITY bzg-cvs-ver "2.17.7">
 <!ENTITY bzg-auth "The Bugzilla Team">
 <!ENTITY bzg-bugs "<ulink url='http://bugzilla.mozilla.org/enter_bug.cgi?product=Bugzilla&amp;component=Documentation'>Bugzilla</ulink>">
 <!ENTITY mysql "http://www.mysql.com/">

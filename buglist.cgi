@@ -101,9 +101,10 @@ my $serverpush =
   exists $ENV{'HTTP_USER_AGENT'} 
     && $ENV{'HTTP_USER_AGENT'} =~ /Mozilla.[3-9]/ 
       && $ENV{'HTTP_USER_AGENT'} !~ /[Cc]ompatible/
-        && $format->{'extension'} eq "html"
-          && !defined($::FORM{'serverpush'})
-            || $::FORM{'serverpush'};
+        && $ENV{'HTTP_USER_AGENT'} !~ /WebKit/
+          && $format->{'extension'} eq "html"
+            && !defined($::FORM{'serverpush'})
+              || $::FORM{'serverpush'};
 
 my $order = $::FORM{'order'} || "";
 my $order_from_cookie = 0;  # True if $order set using $::COOKIE{'LASTORDER'}

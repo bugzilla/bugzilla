@@ -569,12 +569,27 @@ if ($my_create_htaccess) {
     open HTACCESS, ">.htaccess";
     print HTACCESS <<'END';
 # don't allow people to retrieve non-cgi executable files or our private data
-<FilesMatch ^(.*\.pl|localconfig|processmail|syncshadowdb)$>
+<FilesMatch ^(.*\.pl|localconfig.*|processmail|syncshadowdb)$>
   deny from all
 </FilesMatch>
 END
     close HTACCESS;
     chmod $fileperm, ".htaccess";
+  } else {
+    # 2002-12-21 Bug 186383
+    open HTACCESS, ".htaccess";
+    my $oldaccess = "";
+    while (<HTACCESS>) {
+      $oldaccess .= $_;
+    }
+    close HTACCESS;
+    if ($oldaccess =~ s/(localconfig)(\|)/$1.*$2/) {
+      print "Repairing .htaccess...\n";
+      open HTACCESS, ">.htaccess";
+      print HTACCESS $oldaccess;
+      close HTACCESS;
+    }
+
   }
   if (!-e "data/.htaccess") {
     print "Creating data/.htaccess...\n";

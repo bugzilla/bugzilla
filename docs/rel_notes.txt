@@ -1,4 +1,4 @@
-The 2.16.2 release fixes some minor security issues in 2.16.1.
+The 2.16.2 release fixes some minor issues in 2.16.1.
 
 **************************
 *** ABOUT THIS VERSION ***
@@ -20,8 +20,9 @@ problems with your installation.
 It is also recommended that if you can, you immediately fix
 any problems you find.  Be aware that if the sanity check page
 contains more errors after an upgrade, it doesn't necessarily
-mean there are more errors in your database, as it is likely
-they weren't being checked for in the old version.
+mean there are more errors in your database, as additional
+tests are added to the sanity check over time, and it is likely
+those errors weren't being checked for in the old version.
 
 Failure to do this may mean that bugzilla will not
 work correctly.
@@ -50,17 +51,16 @@ XML::Parser (any)
 *** Deprecated Features ***
 
 - This is possibly the last stable release that will work with
-  MySQL version 3.22.  Soon Bugzilla will require at least
-  version 3.23.x.  The exact minimum version number required
-  has not yet been decided.
+  MySQL version 3.22.  Development versions of Bugzilla currently
+  require at least version 3.23.6.
   (bug 87958)
 
 - This is possibly the last stable release to support the
-  shadow database.  The replacement (using MySQL's built in
-  replication) is not present in 2.16, but we expect that
-  very few sites use this feature, so we are not planning a
-  transition period.  If this would cause a problem for you,
-  please comment on the below bug.
+  shadow database.  Support for it has already been removed
+  in CVS.  The replacement (using MySQL's built in replication)
+  is not present in 2.16.2, but we expect that very few sites use
+  this feature, so we are not planning a transition period.  If
+  this would cause a problem for you, please comment on the below bug.
   (bug 124589)
 
 - Placing comments in localconfig is deprecated.  If you have done

@@ -91,6 +91,16 @@ if (defined $::FORM{'id'}) {
 # Make sure there are bugs to process.
 scalar(@idlist) || ThrowUserError("no_bugs_chosen");
 
+# Validate all timetracking fields
+foreach my $field ("estimated_time", "work_time", "remaining_time") {
+    if (defined $::FORM{$field}) {
+        my $er_time = trim($::FORM{$field});
+        if ($er_time ne $::FORM{'dontchange'}) {
+            Bugzilla::Bug::ValidateTime($er_time, $field);
+        }
+    }
+}
+
 # do a match on the fields if applicable
 
 # The order of these function calls is important, as both Flag::validate
@@ -773,16 +783,8 @@ if (UserInGroup(Param('timetrackinggroup'))) {
         if (defined $::FORM{$field}) {
             my $er_time = trim($::FORM{$field});
             if ($er_time ne $::FORM{'dontchange'}) {
-                if ($er_time > 99999.99) {
-                    ThrowUserError("value_out_of_range", {field => $field});
-                }
-                if ($er_time =~ /^(?:\d+(?:\.\d*)?|\.\d+)$/) {
-                    DoComma();
-                    $::query .= "$field = " . SqlQuote($er_time);
-                } else {
-                    ThrowUserError("need_positive_number",
-                                   {field => $field});
-                }
+                DoComma();
+                $::query .= "$field = " . SqlQuote($er_time);
             }
         }
     }
@@ -1282,9 +1284,6 @@ foreach my $id (@idlist) {
 
     delete $::FORM{'work_time'} unless UserInGroup(Param('timetrackinggroup'));
 
-    if ($::FORM{'work_time'} && $::FORM{'work_time'} > 99999.99) {
-        ThrowUserError("value_out_of_range", {field => 'work_time'});
-    }
     if ($::FORM{'comment'} || $::FORM{'work_time'}) {
         if ($::FORM{'work_time'} && 
             (!defined $::FORM{'comment'} || $::FORM{'comment'} =~ /^\s*$/)) {

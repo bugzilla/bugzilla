@@ -152,12 +152,12 @@
     [% tableheader %]
   [% END %]
 
-  <tr class="bz_[% bug.bug_severity FILTER css_class_quote %]
-             bz_[% bug.priority FILTER css_class_quote %]
-             bz_[% bug.bug_status FILTER css_class_quote %]
-             [%+ "bz_$bug.resolution" FILTER css_class_quote IF bug.resolution %]
-             [%+ "bz_secure" IF bug.isingroups %]
-             [%+ count % 2 == 1 ? "bz_odd" : "bz_even" %]
+  <tr class="bz_[% bug.bug_severity FILTER css_class_quote -%]
+             bz_[% bug.priority FILTER css_class_quote -%]
+             bz_[% bug.bug_status FILTER css_class_quote -%]
+             [%+ "bz_$bug.resolution" FILTER css_class_quote IF bug.resolution -%]
+             [%+ "bz_secure" IF bug.isingroups -%]
+             [%+ count % 2 == 1 ? "bz_odd" : "bz_even" -%]
              ">
              
 

@@ -1,5 +1,5 @@
-The 2.16.5 release fixes several bugs in 2.16.4.  There are no
-security related issues fixed in this release.
+The 2.16.6 release fixes several bugs in 2.16.5, including some
+security related issues.
 
 **************************
 *** ABOUT THIS VERSION ***
@@ -125,6 +125,46 @@ installation.
   however use the option "The bug is resolved or verified" to achieve
   part of this.
   (bug 146261)
+
+*********************************************************
+*** USERS UPGRADING FROM ALL VERSIONS PRIOR TO 2.16.5 ***
+*********************************************************
+
+*** Security fixes ***
+
+- If Bugzilla is configured to hide entire products from some users, both
+  duplicates.cgi and the form for mass-editing a list of bugs in buglist.cgi
+  can disclose the names of those hidden products to such users.
+  (bugs 234825 and 234855)
+
+- Several administration CGIs echo invalid data back to the user without
+  escaping it.  (bug 235265)
+
+- A user with privileges to grant membership to any group (i.e. usually an
+  administrator) can trick editusers.cgi into executing arbitrary SQL.
+  (bug 244272)
+
+*** Bug fixes of note ***
+
+- Allow XML import to function when there are regexp metacharacters in product
+  names (bug 237591) 
+
+- Allow the bug_email.pl contrib script to work with useqacontact (bug 239912) 
+
+- Improve the error message used by checksetup.pl when the MySQL requirements
+  are not met (bug 240228) 
+
+- Elimnate the warning in checksetup.pl about the minimum sendmail version (bug
+  240060) 
+
+- $webservergroup now defaults to group 'apache' in new installations (bug
+  224477)
+
+- Correct a situation where a bugmail message could be sent twice to a user
+  being added to the CC list if the address was entered in a different case
+  than the user registered with.  (bug 117297)
+
+- Various documentation updates
 
 *********************************************************
 *** USERS UPGRADING FROM ALL VERSIONS PRIOR TO 2.16.4 ***

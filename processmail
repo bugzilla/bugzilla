@@ -854,6 +854,7 @@ if ($ARGV[0] eq "rescanall") {
         print "All appropriate mail appears to have been sent\n"
     }
     foreach my $id (@list) {
+        %seen = ();
         if (detaint_natural($id)) {
             ProcessOneBug($id);
         }

@@ -20,7 +20,7 @@
 
       <tbody>
         <row>
-          <entry>Warnings</entry>
+          <entry>Use caution</entry>
 
           <entry>
             <caution>
@@ -50,7 +50,7 @@
         </row>
 
         <row>
-          <entry>Information requiring special attention</entry>
+          <entry>Warnings</entry>
 
           <entry>
             <warning>
@@ -131,6 +131,14 @@
 
           <entry>
             <emphasis>word</emphasis>
+          </entry>
+        </row>
+
+        <row>
+          <entry>Term found in the glossary</entry>
+
+          <entry>
+            <glossterm linkend="gloss-bugzilla">Bugzilla</glossterm>
           </entry>
         </row>
 

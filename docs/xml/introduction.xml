@@ -8,8 +8,8 @@
     Bugzilla is a bug- or issue-tracking system. Bug-tracking
     systems allow individual or groups of developers effectively to keep track
     of outstanding problems with their product. 
-    Bugzilla was originally
-    written by Terry Weissman in a programming language called TCL, to
+    Bugzilla was originally written by Terry Weissman in a programming language
+    called <glossterm linkend="gloss-tcl">TCL</glossterm>, to
     replace a rudimentary bug-tracking database used internally by Netscape
     Communications. Terry later ported Bugzilla to Perl from TCL, and in Perl
     it remains to this day. Most commercial defect-tracking software vendors

@@ -1201,7 +1201,7 @@ if ($my_db_check) {
     if ( vers_cmp($sql_vers,$sql_want) > -1 ) {
         print "ok: found v$sql_vers\n";
     } else {
-        die "Your MySQL server v$sql_vers is too old./n" . 
+        die "\nYour MySQL server v$sql_vers is too old.\n" . 
             "   Bugzilla requires version $sql_want or later of MySQL.\n" . 
             "   Please visit http://www.mysql.com/ and download a newer version.\n";
     }

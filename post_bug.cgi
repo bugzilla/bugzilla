@@ -479,7 +479,8 @@ $vars->{'mailrecipients'} = { 'cc' => \@cc,
                               'changer' => $::COOKIE{'Bugzilla_login'} };
 
 if (defined $::FORM{'qa_contact'}) {
-    $vars->{'mailrecipients'}->{'qa'} = DBID_to_name($::FORM{'qa_contact'});
+    $vars->{'mailrecipients'}->{'qacontact'} =
+        DBID_to_name($::FORM{'qa_contact'});
 }
 
 $vars->{'id'} = $id;

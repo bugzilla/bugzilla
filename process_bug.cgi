@@ -1715,7 +1715,7 @@ foreach my $id (@idlist) {
 
     $vars->{'mailrecipients'} = { 'cc' => \@ccRemoved,
                                   'owner' => $origOwner,
-                                  'qa' => $origQaContact,
+                                  'qacontact' => $origQaContact,
                                   'changer' => $::COOKIE{'Bugzilla_login'} };
 
     $vars->{'id'} = $id;

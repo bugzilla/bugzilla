@@ -135,7 +135,7 @@ sub show_user {
     
     my $canedit = 1 if ($name eq $::COOKIE{'Bugzilla_login'});
     
-    SendSQL("LOCK TABLES bugs READ, products READ, votes WRITE,
+    SendSQL("LOCK TABLES bugs READ, products READ, profiles READ, votes WRITE,
              cc AS selectVisible_cc READ");
     
     if ($canedit && $bug_id) {
@@ -188,7 +188,9 @@ sub show_user {
             # and they can see there are votes 'missing', but not on what bug
             # they are. This seems a reasonable compromise; the alternative is
             # to lie in the totals.
-            next if !CanSeeBug($id, $who, $usergroupset);            
+            next if !CanSeeBug($id, 
+                               DBNameToIdAndCheck($::COOKIE{'Bugzilla_login'}),
+                               $usergroupset);            
             
             push (@bugs, { id => $id, 
                            summary => $summary,

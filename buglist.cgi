@@ -1072,7 +1072,7 @@ if (defined $::FORM{'order'} && $::FORM{'order'} ne "") {
             # A custom list of columns.  Make sure each column is valid.
             foreach my $fragment (split(/,/, $::FORM{'order'})) {
                 my $ident_iregexp = "[a-z_][0-9a-z_]*";
-                if (trim($fragment) !~ /^${ident_iregexp}\.${ident_iregexp}(\s+(asc|desc))?$/i) {
+                if ($fragment !~ /^\s*${ident_iregexp}\.${ident_iregexp}(\s+(asc|desc))?\s*$/i) {
                     my $qfragment = html_quote($fragment);
                     my $error = "The custom sort order you specified in your "
                               . "form submission contains an invalid column "
@@ -1095,7 +1095,7 @@ if (defined $::FORM{'order'} && $::FORM{'order'} ne "") {
             last ORDER;
         };
         /Assign/ && do {
-            $::FORM{'order'} = "map_assigned_to.login_name, bugs.bug_status, priority, bugs.bug_id";
+            $::FORM{'order'} = "map_assigned_to.login_name, bugs.bug_status, bugs.priority, bugs.bug_id";
             last ORDER;
         };
         # DEFAULT

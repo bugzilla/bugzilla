@@ -1,4 +1,4 @@
-The 2.16.5 release fixes a few bugs in 2.16.4.  There are no
+The 2.16.5 release fixes several bugs in 2.16.4.  There are no
 security related issues fixed in this release.
 
 **************************
@@ -7,6 +7,8 @@ security related issues fixed in this release.
 
 Bug numbers referenced in this document are all on
 bugzilla.mozilla.org unless otherwise specified.
+
+Scroll down for change history.
 
 *** Recommended Practice For The Upgrade ***
 
@@ -129,6 +131,29 @@ installation.
 *********************************************************
 
 *** Bug fixes of note ***
+
+- Fix a "used only once" warning that ocurred only in perl 5.00503
+  (bug 2321691)
+
+- When a user is creating a new account and enters an invalid email
+  address, the error page sent the "Content-type" header twice, causing
+  the second one to be visible at the top of the page.
+  (bug 137121)
+
+- An HTML encoding issue which only affected Internet Explorer was
+  corrected in the "Change several bugs at once" page.
+  (bug 181106)
+ 
+- During initial setup, using invalid characters in the administrator
+  password would present an error message stating your password was
+  too long or too short instead of telling you it had invalid
+  characters.
+  (bug 166755)
+
+- When a user reset their own password via an emailed token, the new
+  password in the first field would be accepted if the second password
+  field was left blank.
+  (bug 123077)
 
 - Reopening bugs from the "change several bugs at once" page now works.
   (bug 95430)

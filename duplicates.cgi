@@ -57,7 +57,7 @@ my $sortby = formvalue("sortby");
 my $changedsince = formvalue("changedsince", 7);
 my $maxrows = formvalue("maxrows", 100);
 my $openonly = formvalue("openonly");
-my $reverse = formvalue("reverse");
+my $reverse = formvalue("reverse") ? 1 : 0;
 my $product = formvalue("product");
 my $sortvisible = formvalue("sortvisible");
 my @buglist = (split(/[:,]/, formvalue("bug_id")));
@@ -147,6 +147,18 @@ my $generic_query = "
 # Limit to a single product if requested             
 $generic_query .= (" product = " . SqlQuote($product) . " AND ") if $product;
  
+my $origmaxrows = $maxrows;
+detaint_natural($maxrows)
+  || ThrowUserError("The maximum number of rows, '" . html_quote($origmaxrows) .
+                    "', must be a positive integer.",
+                    "Invalid Max Rows");
+
+my $origchangedsince = $changedsince;
+detaint_natural($changedsince)
+  || ThrowUserError("The 'changed since' value, '" . html_quote($origchangedsince) .
+                    "', must be an integer >= 0.",
+                    "Invalid Changed Since");
+
 my @bugs;
 my @bug_ids; 
 my $loop = 0;

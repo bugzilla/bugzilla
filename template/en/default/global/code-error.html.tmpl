@@ -56,7 +56,7 @@
   <pre>
 Variables:
   [% FOREACH key = variables.keys %]
-    [%+ key %]: [%+ variables.$key %]
+    [%+ key FILTER html %]: [%+ variables.$key FILTER html %]
   [% END %]
   </pre>
 [% END %]

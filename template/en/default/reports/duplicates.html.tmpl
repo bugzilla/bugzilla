@@ -59,7 +59,7 @@
 <h3><a name="params">Change Parameters</a></h3>
 
 <form method="get" action="duplicates.cgi">
-  <input type="hidden" name="sortby" value="[% sortby %]">
+  <input type="hidden" name="sortby" value="[% sortby FILTER html %]">
   <input type="hidden" name="reverse" value="[% reverse %]">
   <input type="hidden" name="bug_id" value="[% bug_ids_string %]">
   <table>
@@ -83,8 +83,8 @@
       <td rowspan="4" valign="top">
         <select name="product" size="5" multiple="multiple">
           [% FOREACH p = products %]
-            <option name="[% p %]"
-            [% " selected" IF product == p %]>[% p %]</option>
+            <option name="[% p FILTER html %]"
+            [% " selected" IF product == p %]>[% p FILTER html %]</option>
           [% END %]
         </select>
       </td>

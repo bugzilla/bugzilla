@@ -123,6 +123,7 @@ unless (UserInGroup("editkeywords")) {
 
 
 my $action  = trim($::FORM{action}  || '');
+detaint_natural($::FORM{id});
 
 
 if ($action eq "") {

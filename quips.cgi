@@ -1,4 +1,4 @@
-#!/usr/bonsaitools/bin/perl -w
+#!/usr/bonsaitools/bin/perl
 # -*- Mode: perl; indent-tabs-mode: nil -*-
 #
 # The contents of this file are subject to the Mozilla Public
@@ -49,7 +49,7 @@ if (exists $::FORM{show_quips}) {
 
     if (open (COMMENTS, "<data/comments")) {
         while (<COMMENTS>) {
-            print $_,"<br>\n";
+            print html_quote($_),"<br>\n";
         }
         close COMMENTS;
     }

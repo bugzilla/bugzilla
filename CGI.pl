@@ -965,7 +965,11 @@ sub ThrowTemplateError {
             time this message appeared.
           </p>
           <script> <!--
-            document.write("<p>URL: " + document.location + "</p>");
+            document.write("<p>URL: " +
+                           document.location.href.replace(/&/g, "&amp;")
+                                                 .replace(/</g, "&lt;")
+                                                 .replace(/>/g, "&gt;") +
+                           "</p>");
           // -->
           </script>
           <p>Template->process() failed twice.<br>

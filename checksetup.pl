@@ -3024,4 +3024,3 @@ if (GetFieldDef("logincookies", "hostname")) {
 
 unlink "data/versioncache";
 
-print "Reminder: Bugzilla now requires version 8.7 or later of sendmail.\n";

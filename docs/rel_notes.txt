@@ -1,4 +1,5 @@
-The 2.16.4 release fixes a few security issues and bugs in 2.16.3.
+The 2.16.5 release fixes a few bugs in 2.16.4.  There are no
+security related issues fixed in this release.
 
 **************************
 *** ABOUT THIS VERSION ***
@@ -43,87 +44,11 @@ AppConfig v1.52
 Template Toolkit v2.07
 Text::Wrap v20001.0131
 File::Spec v0.82
-File::Temp (any)   *** NEW in 2.16.3 ***
+File::Temp (any)
 Data::Dumper, Date::Parse, CGI::Carp (any)
 GD v1.19 (optional)
 Chart::Base v0.99 (optional)
 XML::Parser (any, optional)
-
-*********************************************************
-*** USERS UPGRADING FROM ALL VERSIONS PRIOR TO 2.16.4 ***
-*********************************************************
-
-*** SECURITY ISSUES RESOLVED ***
-
-- A user with 'editproducts' privileges (i.e. usually an administrator)
-  can select arbitrary SQL to be run by the nightly statistics cron job
-  (collectstats.pl), by giving a product a special name. (bug 214290)
-
-- A user with 'editkeywords' privileges (i.e. usually an administrator)
-  can inject arbitrary SQL via the URL used to edit an existing keyword.
-  (bug 219044)
-
-- When deleting products and the 'usebuggroups' parameter is on, the
-  privilege which allows someone to add people to the group which is
-  being deleted does not get removed, allowing people with that
-  privilege to get that privilege for the next group that is created
-  which reuses that group ID.  Note that this only allows someone who
-  had been granted privileges in the past to retain them. (bug 219690)
-
-- If you know the email address of someone who has voted on a secure
-  bug, you can access the summary of that bug even if you do not have
-  sufficient permissions to view the bug itself. (bug 209376)
-
-*** Bug fixes of note ***
-
-Perl 5.8.0 Compatibility fixes:
-
-- Two taint errors were fixed, one in process_bug.cgi, and 
-  another in post_bug.cgi (bugs 220332 and 177828)
-
-MySQL 4.0 Compatibility fixes:
-
-- A cosmetic fix was applied to votes.cgi (if there were no 
-  votes, the "0" was not displayed) due to a change in semantics 
-  in SUM() in MySQL 4.0 (bug 217422)
-
-DBD::mysql > 2.1026 Compatibility fixes:
-
-- DBD::mysql versions after 2.1026 return the table list quoted, which
-  broke the existing "table exists" check in checksetup.pl, which caused
-  the second and subsequent attempts to run checksetup.pl to fail. (bug
-  212095) 
-
-Miscellaneous bug fixes:
-
-- A Mozilla-specific reference was removed from one of the report
-  templates (bug 221626)
-
-- It was possible to enter a situation where you were unable to get to
-  editparams.cgi to turn the shutdownhtml param back off after you
-  turned it on when Apache was configured to run Bugzilla in suexec
-  mode. (bug 213384)
-
-- The processmail rescanall task would not send e-mails about more than
-  one bug to the same address (bug 219508)
-
-- If Bugzilla hadn't been accessed in the last hour when the
-  collectstats.pl or whineatnews.pl cron jobs ran, the versioncache
-  would get recreated with the file owner being the user the cron job
-  was running as (usually not the webserver user), causing subsequent
-  access to Bugzilla by the webserver to fail until the permissions were
-  fixed. Now if versioncache isn't readable when accessing from the
-  webserver, we pretend it doesn't exist and recreate it again (bug
-  219508).
-
-- The 'sendmailnow' param is now on by default in new installations
-  (this does not affect existing installations) (bug 219508).
-
-- The 008filter.t test would fail if you had multiple language packs
-  installed. It now properly tests all of the installed language packs
-  (bug 219508).
-
-A few minor documentation changes were committed.
 
 *** Deprecated Features ***
 
@@ -154,7 +79,8 @@ installation.
   "keyword cache" on bugs, and queries on keywords may not work
   properly, until you rebuild the cache on the sanity check page
   (sanitycheck.cgi).  The changer will receive a warning to do this when
-  altering the keyword.  (bug 69621)
+  altering the keyword.
+  (bug 69621)
 
 - Email notifications will not work out of the box if you are using
   Postfix, Exim or possibly other non-SendMail mail transfer agents, as
@@ -167,33 +93,167 @@ installation.
 - Users behind rotating transparent proxies or otherwise having an IP
   that changes each URL fetch may find they need to log in regularly.
   Note that a fix for this problem has been integrated to the
-  development (2.17) branch. (bug 20122)
+  development (2.17) branch.
+  (bug 20122)
 
 - If you search on any CC or added comments, as well as at least one
   other of CC, added comments, assignee, reporter, etc, then the search
   can be very slow.  This is because of limitations of the MySQL
-  optimiser.  (bug 96101)
+  optimiser.
+  (bug 96101)
 
 - It is recommended you use the high speed XS Stash of the Template
   Toolkit, in order to achieve best performance.  However, there are
   known problems with XS Stash and Perl 5.005_02 and lower.  If you wish
   to use these older versions of Perl, please use the regular stash.
   You are asked which stash you want to use at Template Toolkit
-  installation time.  (bug 140674)
+  installation time.
+  (bug 140674)
 
 - Querying on CC takes too long on big databases. This bug has also been
-  fixed on the development branch (bug 127200).
+  fixed on the development branch.
+  (bug 127200)
 
 - Attachment changes have no midair collision detection, unlike bug
-  changes. (bug 99215)
+  changes.
+  (bug 99215)
 
 - The email preferences option "Priority, status, severity, and/or
   milestone changes" does not actually report status changes.  You can
   however use the option "The bug is resolved or verified" to achieve
-  part of this.  (bug 146261)
+  part of this.
+  (bug 146261)
+
+*********************************************************
+*** USERS UPGRADING FROM ALL VERSIONS PRIOR TO 2.16.4 ***
+*********************************************************
+
+*** Bug fixes of note ***
+
+- Reopening bugs from the "change several bugs at once" page now works.
+  (bug 95430)
+
+- Fix a regression in xml.cgi caused by the previous bugfix for MySQL
+  SUM() changes.  The original fix didn't work properly either.
+  (bug 225474)
+
+- No longer use server push with the "Safari" browser, which claims to
+  use the Mozilla layout engine but doesn't.
+  (bug 188712)
+
+- Creating a shadow database no longer fails with taint mode errors.
+  (bug 227510)
+  
+- If you change your cookiepath setting at some stage (because you have
+  moved the directory Bugzilla resides on your webserver), users can
+  have login cookies with the old cookiepath, and their browsers will
+  send multiple logincookies.  Bugzilla now uses the first rather than
+  the last in order to get the most specific cookie which will be the
+  correct one.
+  (bug 121419)	
+  
+- Fixed a regression caused by the previous DBD::mysql fixes, that
+  caused older versions of DBD::mysql to break due to not supporting
+  the new DBI syntax.
+  (bug 224815)
+
+- Bugzilla no longer sends out invalid dates for cookie expiry.  This
+  bug had no known user visible ramifications.
+  (bug 228706)
+  
+- Update the shadow database parameters description to tell the user
+  about permissions requirements for creating a shadow database.
+  (bug 227513)
+
+- Various documentation updates.
 
 *********************************************************
 *** USERS UPGRADING FROM ALL VERSIONS PRIOR TO 2.16.3 ***
+*********************************************************
+
+*** SECURITY ISSUES RESOLVED ***
+
+- A user with 'editproducts' privileges (i.e. usually an administrator)
+  can select arbitrary SQL to be run by the nightly statistics cron job
+  (collectstats.pl), by giving a product a special name.
+  (bug 214290)
+
+- A user with 'editkeywords' privileges (i.e. usually an administrator)
+  can inject arbitrary SQL via the URL used to edit an existing keyword.
+  (bug 219044)
+
+- When deleting products and the 'usebuggroups' parameter is on, the
+  privilege which allows someone to add people to the group which is
+  being deleted does not get removed, allowing people with that
+  privilege to get that privilege for the next group that is created
+  which reuses that group ID.  Note that this only allows someone who
+  had been granted privileges in the past to retain them.
+  (bug 219690)
+
+- If you know the email address of someone who has voted on a secure
+  bug, you can access the summary of that bug even if you do not have
+  sufficient permissions to view the bug itself.
+  (bug 209376)
+
+*** Bug fixes of note ***
+
+Perl 5.8.0 Compatibility fixes:
+
+- Two taint errors were fixed, one in process_bug.cgi, and 
+  another in post_bug.cgi.
+  (bugs 220332 and 177828)
+
+MySQL 4.0 Compatibility fixes:
+
+- A cosmetic fix was applied to votes.cgi (if there were no 
+  votes, the "0" was not displayed) due to a change in semantics 
+  in SUM() in MySQL 4.0.
+  (bug 217422)
+
+DBD::mysql > 2.1026 Compatibility fixes:
+
+- DBD::mysql versions after 2.1026 return the table list quoted, which
+  broke the existing "table exists" check in checksetup.pl, which caused
+  the second and subsequent attempts to run checksetup.pl to fail.
+  (bug 212095) 
+
+Miscellaneous bug fixes:
+
+- A Mozilla-specific reference was removed from one of the report
+  templates.
+  (bug 221626)
+
+- It was possible to enter a situation where you were unable to get to
+  editparams.cgi to turn the shutdownhtml param back off after you
+  turned it on when Apache was configured to run Bugzilla in suexec
+  mode.
+  (bug 213384)
+  
+- The processmail rescanall task would not send e-mails about more than
+  one bug to the same address.
+  (bug 219508)
+
+- If Bugzilla hadn't been accessed in the last hour when the
+  collectstats.pl or whineatnews.pl cron jobs ran, the versioncache
+  would get recreated with the file owner being the user the cron job
+  was running as (usually not the webserver user), causing subsequent
+  access to Bugzilla by the webserver to fail until the permissions were
+  fixed. Now if versioncache isn't readable when accessing from the
+  webserver, we pretend it doesn't exist and recreate it again.
+  (bug 160422)
+
+- The 'sendmailnow' param is now on by default in new installations
+  (this does not affect existing installations).
+  (bug 146087)
+
+- The 008filter.t test would fail if you had multiple language packs
+  installed. It now properly tests all of the installed language packs.
+  (bug 203318)
+
+- A few minor documentation changes were committed.
+
+*********************************************************
+*** USERS UPGRADING FROM ALL VERSIONS PRIOR TO 2.16.2 ***
 *********************************************************
 
 *** SECURITY ISSUES RESOLVED ***
@@ -206,7 +266,7 @@ installation.
 - Several XSS vulnerabilities were fixed in which user
   input was not escaped when being displayed. A new 
   test has been added to warn about unfiltered data in template
-  files (t/008filter.t)
+  files (t/008filter.t).
   (bug 192677)
 
 - An issue was fixed in which the QA contact was still treated as the QA
@@ -224,6 +284,10 @@ installation.
   is part of the Perl distribution for Perl 5.6.1 and later, but if you're
   using an older version of Perl you'll need to install it with CPAN.
   (bug 197153)
+
+** IMPORTANT CHANGES ***
+
+- New module requirement: File::Temp, as mentioned above.
 
 *** Bug fixes of note ***
 

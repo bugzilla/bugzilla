@@ -75,28 +75,76 @@ CLASS="section"
 ><A
 NAME="win32">4.3. Win32 Installation Notes</H1
 ><P
->This section covers installation on Microsoft Windows 95, 98, ME,
-    NT, and 2000. Bugzilla works fine on Win32 platforms, but please remember
-    that the Bugzilla team and the author of the Guide neither endorse nor
-    support installation on Microsoft Windows. Bugzilla installs and runs 
-    <EM
->best</EM
->
-
-    and 
-    <EM
->easiest</EM
->
-
-    on UNIX-like operating systems, and that is the way it will stay for the
-    foreseeable future. The Bugzilla team is considering supporting Win32 for
-    the 2.16 release and later.</P
-><P
->The easiest way to install Bugzilla on Intel-archiecture machines
+>This section covers installation on Microsoft Windows. 
+    Bugzilla has been made to work on Win32 platforms, but the Bugzilla team
+    wish to emphasise that The easiest way to install Bugzilla on
+    Intel-archiecture machines
     is to install some variant of GNU/Linux, then follow the UNIX
     installation instructions in this Guide. If you have any influence in the
     platform choice for running this system, please choose GNU/Linux instead
     of Microsoft Windows.</P
+><DIV
+CLASS="warning"
+><P
+></P
+><TABLE
+CLASS="warning"
+WIDTH="100%"
+BORDER="0"
+><TR
+><TD
+WIDTH="25"
+ALIGN="CENTER"
+VALIGN="TOP"
+><IMG
+SRC="../images/warning.gif"
+HSPACE="5"
+ALT="Warning"></TD
+><TD
+ALIGN="LEFT"
+VALIGN="TOP"
+><P
+>After that warning, here's the situation for 2.16
+      and Windows. It doesn't work at all out of the box. 
+      You are almost certainly better off getting
+      the 2.17 version from CVS (after consultation with the Bugzilla Team to
+      make sure you are pulling on a stable day) because we'll be doing a load
+      of work to make the Win32 experience more pleasant than it is now.
+      </P
+></TD
+></TR
+></TABLE
+></DIV
+><P
+>&#13;    If you still want to try this, to have any hope of getting it to work,
+    you'll need to apply the 
+    <A
+HREF=""
+TARGET="_top"
+>mail patch</A
+> from 
+    <A
+HREF="http://bugzilla.mozilla.org/show_bug.cgi?id=124174"
+TARGET="_top"
+>bug 124174</A
+>.
+    After that, you'll need to read the (outdated) installation 
+    instructions below, some (probably a lot better) <A
+HREF="http://bugzilla.mozilla.org/attachment.cgi?id=84430&action=view"
+TARGET="_top"
+>more
+     recent ones</A
+> kindly provided by Toms Baugis and Jean-Sebastien 
+     Guay, and also check the 
+     <A
+HREF="http://www.bugzilla.org/releases/2.16/docs/win32.html"
+TARGET="_top"
+>Bugzilla 2.16 Win32 update page
+     </A
+>. If we get time,
+     we'll write some better installation instructions for 2.16 and put
+     them up there. But no promises.
+    </P
 ><DIV
 CLASS="section"
 ><H2
@@ -337,7 +385,7 @@ CLASS="command"
 ><DIV
 CLASS="example"
 ><A
-NAME="AEN984"><P
+NAME="AEN989"><P
 ><B
 >Example 4-1. Installing ActivePerl ppd Modules on Microsoft
             Windows</B
@@ -395,7 +443,7 @@ TARGET="_top"
           <DIV
 CLASS="example"
 ><A
-NAME="AEN997"><P
+NAME="AEN1002"><P
 ><B
 >Example 4-2. Installing OpenInteract ppd Modules manually on Microsoft
             Windows</B
@@ -1533,7 +1581,7 @@ VALIGN="TOP"
 ><P
 >From Andrew Pearson: 
         <A
-NAME="AEN1167"><BLOCKQUOTE
+NAME="AEN1172"><BLOCKQUOTE
 CLASS="BLOCKQUOTE"
 ><P
 >You can make Bugzilla work with Personal Web Server for
@@ -1616,7 +1664,7 @@ VALIGN="TOP"
         <DIV
 CLASS="example"
 ><A
-NAME="AEN1179"><P
+NAME="AEN1184"><P
 ><B
 >Example 4-3. Removing encrypt() for Windows NT Bugzilla version 2.12 or
           earlier</B

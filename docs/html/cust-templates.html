@@ -97,10 +97,10 @@ CLASS="section"
 ><H2
 CLASS="section"
 ><A
-NAME="AEN1529">5.7.1. What to Edit</H2
+NAME="AEN1539">5.7.1. What to Edit</H2
 ><P
->&#13;        There are several ways to take advantage of Bugzilla's templates,
-        and which you use depends on what you want to do. The Bugzilla
+>&#13;        There are two different ways of editing of Bugzilla's templates,
+        and which you use depends mainly on how you upgrade Bugzilla. The
         template directory structure is that there's a top level directory,
         <TT
 CLASS="filename"
@@ -111,30 +111,32 @@ CLASS="filename"
 CLASS="filename"
 >en</TT
 >. Underneath that, there
-        are two directories - <TT
+        is the <TT
 CLASS="filename"
 >default</TT
-> and 
+> directory and optionally the 
         <TT
 CLASS="filename"
 >custom</TT
-> (you may have to create
-        <TT
-CLASS="filename"
->custom</TT
-> yourself.) The <TT
+> directory. The <TT
 CLASS="filename"
 >default</TT
 >
-        directory contains all the templates shipped with Bugzilla.
+        directory contains all the templates shipped with Bugzilla, whereas
+        the <TT
+CLASS="filename"
+>custom</TT
+> directory does not exist at first and
+        must be created if you want to use it.
       </P
 ><P
->&#13;        One method of making customisations is to directly edit the templates
-        in <TT
+>&#13;        The first method of making customisations is to directly edit the
+        templates in <TT
 CLASS="filename"
 >template/en/default</TT
->. This is probably the
-        best method for small changes, because if you then execute a
+>. This is
+        probably the best method for small changes if you are going to use
+        the CVS method of upgrading, because if you then execute a
         <B
 CLASS="command"
 >cvs update</B
@@ -142,49 +144,33 @@ CLASS="command"
         automagically merged into your modified versions.
       </P
 ><P
+>&#13;        If you use this method, your installation will break if CVS conflicts
+        occur.
+      </P
+><P
 >&#13;        The other method is to copy the templates into a mirrored directory
-        structure under  <TT
+        structure under <TT
 CLASS="filename"
 >template/en/custom</TT
->. 
-        This method is better if
-        you are going to make major changes, because it is guaranteed that
-        the contents of this directory will not be touched during an upgrade,
-        and you can then decide whether to continue using your own templates,
-        or make the effort to merge your changes into the new versions by
-        hand. This is also the correct method to use if you upgrade Bugzilla
-        by untarring tarballs over the top, rather than using CVS. It's perfectly
-        acceptable to mix and match these two methods.
+>.  The templates
+        in this directory automatically override those in default.  
+        This is the technique you
+        need to use if you use the overwriting method of upgrade, because
+        otherwise your changes will be lost.  This method is also better if
+        you are using the CVS method of upgrading and are going to make major
+        changes, because it is guaranteed that the contents of this directory
+        will not be touched during an upgrade, and you can then decide whether
+        to continue using your own templates, or make the effort to merge your
+        changes into the new versions by hand.
       </P
 ><P
->&#13;        Editing templates is a good way of doing a "poor man's custom fields".
-        For example, if you don't use the Status Whiteboard, but want to have
-        a free-form text entry box for "Build Identifier", then you can just
-        edit the templates to change the field labels. It's still be called
-        status_whiteboard internally, but your users don't need to know that.
-      </P
-><P
->&#13;        If you are making changes to contribute back to Bugzilla (and we'd
-        love to have them), then please read the 
-        <A
-HREF="http://www.bugzilla.org/developerguide.html"
-TARGET="_top"
->Developers 
-        Guide</A
-> first.
-      </P
-><P
->&#13;        The syntax of the Template Toolkit language is beyond the scope of
-        this guide. It's reasonably easy to pick up by looking at the current 
-        templates; or, you can read the manual, available on the
-        <A
-HREF="http://www.template-toolkit.org"
-TARGET="_top"
->Template Toolkit home
-        page</A
->. However, you should particularly remember (for security
-        reasons) to always HTML filter things which come from the database or
-        user input, to prevent cross-site scripting attacks.
+>&#13;        If you use this method, your installation may break if incompatible
+        changes are made to the template interface.  If such changes are made
+        they will be documented in the release notes, provided you are using a
+        stable release of Bugzilla.  If you use using unstable code, you will
+        need to deal with this one yourself, although if possible the changes
+        will be mentioned before they occur in the deprecations section of the
+        previous stable release's release notes.
       </P
 ><DIV
 CLASS="note"
@@ -224,7 +210,87 @@ CLASS="section"
 ><H2
 CLASS="section"
 ><A
-NAME="AEN1551">5.7.2. Template Formats</H2
+NAME="AEN1558">5.7.2. How To Edit Templates</H2
+><P
+>&#13;        The syntax of the Template Toolkit language is beyond the scope of
+        this guide. It's reasonably easy to pick up by looking at the current 
+        templates; or, you can read the manual, available on the
+        <A
+HREF="http://www.template-toolkit.org"
+TARGET="_top"
+>Template Toolkit home
+        page</A
+>. However, you should particularly remember (for security
+        reasons) to always HTML filter things which come from the database or
+        user input, to prevent cross-site scripting attacks.
+      </P
+><P
+>&#13;        However, one thing you should take particular care about is the need
+        to properly HTML filter data that has been passed into the template.
+        This means that if the data can possibly contain special HTML characters
+        such as &#60;, and the data was not intended to be HTML, they need to be
+        converted to entity form, ie &#38;lt;.  You use the 'html' filter in the
+        Template Toolkit to do this.  If you fail to do this, you may open up
+        your installation to cross-site scripting attacks.
+      </P
+><P
+>&#13;        Also note that Bugzilla adds a few filters of its own, that are not
+        in standard Template Toolkit.  In particular, the 'url_quote' filter
+        can convert characters that are illegal or have special meaning in URLs,
+        such as &#38;, to the encoded form, ie %26.  This actually encodes most
+        characters (but not the common ones such as letters and numbers and so
+        on), including the HTML-special characters, so there's never a need to
+        HTML filter afterwards.
+      </P
+><P
+>&#13;        Editing templates is a good way of doing a "poor man's custom fields".
+        For example, if you don't use the Status Whiteboard, but want to have
+        a free-form text entry box for "Build Identifier", then you can just
+        edit the templates to change the field labels. It's still be called
+        status_whiteboard internally, but your users don't need to know that.
+      </P
+><DIV
+CLASS="note"
+><P
+></P
+><TABLE
+CLASS="note"
+WIDTH="100%"
+BORDER="0"
+><TR
+><TD
+WIDTH="25"
+ALIGN="CENTER"
+VALIGN="TOP"
+><IMG
+SRC="../images/note.gif"
+HSPACE="5"
+ALT="Note"></TD
+><TD
+ALIGN="LEFT"
+VALIGN="TOP"
+><P
+>&#13;          If you are making template changes that you intend on submitting back
+          for inclusion in standard Bugzilla, you should read the relevant
+          sections of the 
+          <A
+HREF="http://www.bugzilla.org/developerguide.html"
+TARGET="_top"
+>Developers'
+          Guide</A
+>.
+          </P
+></TD
+></TR
+></TABLE
+></DIV
+></DIV
+><DIV
+CLASS="section"
+><H2
+CLASS="section"
+><A
+NAME="AEN1568">5.7.3. Template Formats</H2
 ><P
 >&#13;        Some CGIs have the ability to use more than one template. For
         example, buglist.cgi can output bug lists as RDF or two
@@ -284,7 +350,7 @@ CLASS="section"
 ><H2
 CLASS="section"
 ><A
-NAME="AEN1564">5.7.3. Particular Templates</H2
+NAME="AEN1581">5.7.4. Particular Templates</H2
 ><P
 >&#13;        There are a few templates you may be particularly interested in
         customising for your installation.
@@ -300,14 +366,42 @@ CLASS="command"
 >&#13;        <B
 CLASS="command"
 >global/header.html.tmpl</B
-> and
-        <B
+>:
+        This defines the header that goes on all Bugzilla pages.
+        The header includes the banner, which is what appears to users
+        and is probably what you want to edit instead.  However the
+        header also includes the HTML HEAD section, so you could for
+        example add a stylesheet or META tag by editing the header.
+      </P
+><P
+>&#13;        <B
+CLASS="command"
+>global/banner.html.tmpl</B
+>:
+        This contains the "banner", the part of the header that appears
+        at the top of all Bugzilla pages.  The default banner is reasonably
+        barren, so you'll probably want to customise this to give your
+        installation a distinctive look and feel.  It is recommended you
+        preserve the Bugzilla version number in some form so the version 
+        you are running can be determined, and users know what docs to read.
+      </P
+><P
+>&#13;        <B
 CLASS="command"
 >global/footer.html.tmpl</B
 >:
-        These define the header and footer that go on all Bugzilla pages.
-        Editing these is a way to quickly get a distinctive look and
-        feel for your Bugzilla installation.
+        This defines the footer that goes on all Bugzilla pages.  Editing
+        this is another way to quickly get a distinctive look and feel for
+        your Bugzilla installation.
+      </P
+><P
+>&#13;        <B
+CLASS="command"
+>bug/create/user-message.html.tmpl</B
+>:
+        This is a message that appears near the top of the bug reporting page.
+        By modifying this, you can tell your users how they should report
+        bugs.
       </P
 ><P
 >&#13;        <B

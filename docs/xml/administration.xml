@@ -50,6 +50,8 @@
         groups of users. I suggest leaving
         this parameter <emphasis>off</emphasis>
         while initially testing your Bugzilla.</para>
+
+        <para>For more information see <xref linkend="groups"/>.</para>
       </step>
 
       <step>

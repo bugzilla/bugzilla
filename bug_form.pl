@@ -202,7 +202,7 @@ print "
     <TD ALIGN=RIGHT><B><A HREF=\"bug_status.html#rep_platform\">Platform:</A></B></TD>
     <TD><SELECT NAME=rep_platform>$platform_popup</SELECT></TD>
   <TD>&nbsp;</TD>
-    <TD ALIGN=RIGHT><B>Reporter:</B></TD><TD>$bug{'reporter'}</TD>
+    <TD ALIGN=RIGHT><B>Reporter:</B></TD><TD>" . html_quote($bug{'reporter'}) . "</TD>
 </TR><TR>
     <TD ALIGN=RIGHT><B>Product:</B></TD>
     <TD>$product_popup</TD>

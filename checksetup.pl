@@ -807,7 +807,7 @@ if ($my_webservergroup && !$silent) {
         # that we can't chgrp to
         my $webservergid = (getgrnam($my_webservergroup))[2]
                            or die("no such group: $my_webservergroup");
-        if ($< != 0 && !grep(/^$webservergid$/, split(" ", $)))) {
+        if ($< != 0 && !grep($_ eq $webservergid, split(" ", $)))) {
             print <<EOF;
 
 Warning: you have entered a value for the "webservergroup" parameter in 
@@ -1483,7 +1483,7 @@ if ($my_db_check) {
     }
 
     my @databases = $dbh->func('_ListDBs');
-    unless (grep /^$my_db_name$/, @databases) {
+    unless (grep($_ eq $my_db_name, @databases)) {
        print "Creating database $my_db_name ...\n";
        if (!$dbh->func('createdb', $my_db_name, 'admin')) {
             my $error = $dbh->errstr;
@@ -2054,7 +2054,7 @@ my $my_platforms  = '"' . join('", "', @my_platforms)  . '"';
 
 # go throught our %table hash and create missing tables
 while (my ($tabname, $fielddef) = each %table) {
-    next if grep /^$tabname$/, @tables;
+    next if grep($_ eq $tabname, @tables);
     print "Creating table $tabname ...\n";
 
     # add lines here if you add more --LOCAL-- config vars that end up in

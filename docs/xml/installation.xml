@@ -169,10 +169,12 @@
   <para>
     At least version 8.7 of <ulink url="http://www.sendmail.org">Sendmail</ulink>,
     or any Sendmail-compatible MTA congruent with this version or higher.
-    <note>
-      Windows users will have to see the <xref linkend="win32" /> for one alternative to Sendmail for Windows.
-    </note>
   </para>
+    <note>
+    <para>
+      Windows users will have to see the <xref linkend="win32" /> for one alternative to Sendmail for Windows.
+    </para>
+  </note>
 </listitem>
 
 

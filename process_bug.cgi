@@ -43,8 +43,7 @@ use vars %::versions,
     %::legal_platform,
     %::legal_priority,
     %::target_milestone,
-    %::legal_severity,
-    %::superusergroupset;
+    %::legal_severity;
 
 my $whoid = confirm_login();
 
@@ -69,11 +68,6 @@ if (defined $::FORM{'id'}) {
     }
 }
 
-# Make sure there are bugs to process.
-scalar(@idlist)
-  || DisplayError("You did not select any bugs to modify.")
-  && exit;
-
 # For each bug being modified, make sure its ID is a valid bug number 
 # representing an existing bug that the user is authorized to access.
 foreach my $id (@idlist) {
@@ -95,7 +89,7 @@ if (defined $::FORM{'dup_id'} && $::FORM{'knob'} eq "duplicate") {
 # list.  Thus we have to make sure this bug ID is also valid,
 # since a malicious cracker might alter their cookies for the purpose
 # gaining access to bugs they are not authorized to access.
-if ( defined $::COOKIE{"BUGLIST"} && defined $::FORM{'id'} ) {
+if ( $::COOKIE{"BUGLIST"} ne "" && defined $::FORM{'id'} ) {
     my @buglist = split( /:/ , $::COOKIE{"BUGLIST"} );
     my $idx = lsearch( \@buglist , $::FORM{"id"} );
     if ($idx < $#buglist) {
@@ -353,11 +347,6 @@ empowered user, may make that change to the $f field.
 
 # Confirm that the reporter of the current bug can access the bug we are duping to.
 sub DuplicateUserConfirm {
-    # if we've already been through here, then exit
-    if (defined $::FORM{'confirm_add_duplicate'}) {
-        return;
-    }
-
     my $dupe = trim($::FORM{'id'});
     my $original = trim($::FORM{'dup_id'});
     
@@ -366,13 +355,45 @@ sub DuplicateUserConfirm {
     SendSQL("SELECT profiles.groupset FROM profiles WHERE profiles.userid =".SqlQuote($reporter));
     my $reportergroupset = FetchOneColumn();
 
-    if (CanSeeBug($original, $reporter, $reportergroupset)) {
+    SendSQL("SELECT ((groupset & $reportergroupset) = groupset) , reporter , assigned_to , qa_contact , 
+                    reporter_accessible , assignee_accessible , qacontact_accessible , cclist_accessible 
+             FROM   bugs 
+             WHERE  bug_id = $original");
+
+    my ($isauthorized, $originalreporter, $assignee, $qacontact, $reporter_accessible, 
+        $assignee_accessible, $qacontact_accessible, $cclist_accessible) = FetchSQLData();
+
+    # If reporter is authorized via the database, or is the original reporter, assignee,
+    # or QA Contact, we'll automatically confirm they can be added to the cc list
+    if ($isauthorized 
+        || ($reporter_accessible && $originalreporter == $reporter)
+          || ($assignee_accessible && $assignee == $reporter)
+            || ($qacontact_accessible && $qacontact == $reporter)) {
+            
         $::FORM{'confirm_add_duplicate'} = "1";
-        return;
+        return;    
     }
 
-    SendSQL("SELECT cclist_accessible FROM bugs WHERE bug_id = $original");
-    my $cclist_accessible = FetchOneColumn();
+    # Try to authorize the user one more time by seeing if they are on 
+    # the cc: list.  If so, finish validation and return.
+    if ($cclist_accessible ) {
+        my @cclist;
+        SendSQL("SELECT cc.who 
+                 FROM   bugs , cc
+                 WHERE  bugs.bug_id = $original
+                 AND    cc.bug_id = bugs.bug_id
+                ");
+        while (my ($ccwho) = FetchSQLData()) {
+            if ($reporter == $ccwho) {
+                $::FORM{'confirm_add_duplicate'} = "1";
+                return;
+            }
+        }
+    }
+
+    if (defined $::FORM{'confirm_add_duplicate'}) {
+        return;
+    }
     
     # Once in this part of the subroutine, the user has not been auto-validated
     # and the duper has not chosen whether or not to add to CC list, so let's
@@ -482,19 +503,7 @@ sub ChangeStatus {
     my ($str) = (@_);
     if ($str ne $::dontchange) {
         DoComma();
-        # Ugly, but functional.  We don't want to change Status if we are
-        # reasigning non-open bugs via the mass change form.
-        if ( ($::FORM{knob} eq 'reassign' || $::FORM{knob} eq 'reassignbycomponent') &&
-             ! defined $::FORM{id} && $str eq 'NEW' ) {
-            # If we got to here, we're dealing with a reassign from the mass
-            # change page.  We don't know (and can't easily figure out) if this
-            # bug is open or closed.  If it's closed, we don't want to change
-            # its status to NEW.  We have to put some logic into the SQL itself
-            # to handle that.
-            my @open_state = map(SqlQuote($_), OpenStates());
-            my $open_state = join(", ", @open_state);
-            $::query .= "bug_status = IF(bug_status IN($open_state), '$str', bug_status)";
-        } elsif (IsOpenedState($str)) {
+        if (IsOpenedState($str)) {
             $::query .= "bug_status = IF(everconfirmed = 1, '$str', '$::unconfirmedstate')";
         } else {
             $::query .= "bug_status = '$str'";
@@ -544,30 +553,45 @@ sub CheckonComment( $ ) {
 # select lists.  This means that instead of looking for the bit-X values in
 # the form, we need to loop through all the bug groups this user has access
 # to, and for each one, see if it's selected.
-# In order to make mass changes work correctly, keep a sum of bits for groups
-# added, and another one for groups removed, and then let mysql do the bit
-# operations
-# If the form element isn't present, or the user isn't in the group, leave
-# it as-is
+# In addition, adding a little extra work so that we don't clobber groupsets
+# for bugs where the user doesn't have access to the group, but does to the
+# bug (as with the proposed reporter access patch.)
 if($::usergroupset ne '0') {
-    my $groupAdd = "0";
-    my $groupDel = "0";
-
-    SendSQL("SELECT bit, isactive FROM groups WHERE " .
-            "isbuggroup != 0 AND bit & $::usergroupset != 0 ORDER BY bit");
-    while (my ($b, $isactive) = FetchSQLData()) {
-        if (!$::FORM{"bit-$b"}) {
-            $groupDel .= "+$b";
-        } elsif ($::FORM{"bit-$b"} == 1 && $isactive) {
-            $groupAdd .= "+$b";
-        }
+  # We want to start from zero and build up, since if all boxes have been
+  # unchecked, we want to revert to 0.
+  DoComma();
+  $::query .= "groupset = 0";
+  my ($id) = (@idlist);
+  SendSQL(<<_EOQ_);
+    SELECT bit, bit & $::usergroupset != 0, bit & bugs.groupset != 0
+    FROM groups, bugs
+    WHERE isbuggroup != 0 AND bug_id = $id
+    ORDER BY bit
+_EOQ_
+  while (my ($b, $userhasgroup, $bughasgroup) = FetchSQLData()) {
+    if (!$::FORM{"bit-$b"}) {
+      # If we make it here, the item didn't exist on the form or the user
+      # said to clear it.  The only time we add this group back in is if
+      # the bug already has this group on it and the user can't access it.
+      if ($bughasgroup && !$userhasgroup) {
+        $::query .= " + $b";
+      }
+    } elsif ($::FORM{"bit-$b"} == -1) {
+      # If we get here, the user came from the change several bugs form, and
+      # said not to change this group restriction.  So we'll add this group
+      # back in only if the bug already has it.
+      if ($bughasgroup) {
+        $::query .= " + $b";
+      }
+    } else {
+      # If we get here, the user said to set this group.  If they don't have
+      # access to it, we'll use what's already on the bug, otherwise we'll
+      # add this one in.
+      if ($userhasgroup || $bughasgroup) {
+        $::query .= " + $b";
+      }
     }
-    if ($groupAdd ne "0" || $groupDel ne "0") {
-        DoComma();
-        # mysql < 3.23.5 doesn't support the ~ operator, even though
-        # the docs say that it does
-        $::query .= "groupset = ((groupset & ($::superusergroupset - ($groupDel))) | ($groupAdd))";
-    }
+  }
 }
 
 foreach my $field ("rep_platform", "priority", "bug_severity",          
@@ -644,7 +668,7 @@ if (defined $::FORM{newcc} || defined $::FORM{removecc} || defined $::FORM{massc
         $cc_add = $::FORM{newcc};
         # We came from bug_form which uses a select box to determine what cc's
         # need to be removed...
-        if (defined $::FORM{removecc} && $::FORM{cc}) {
+        if (defined $::FORM{removecc}) {
             $cc_remove = join (",", @{$::MFORM{cc}});
         }
     }
@@ -749,12 +773,12 @@ SWITCH: for ($::FORM{'knob'}) {
         last SWITCH;
     };   
     /^reopen$/  && CheckonComment( "reopen" ) && do {
-                SendSQL("SELECT resolution FROM bugs WHERE bug_id = $::FORM{'id'}");
+		SendSQL("SELECT resolution FROM bugs WHERE bug_id = $::FORM{'id'}");
         ChangeStatus('REOPENED');
         ChangeResolution('');
-                if (FetchOneColumn() eq 'DUPLICATE') {
-                        SendSQL("DELETE FROM duplicates WHERE dupe = $::FORM{'id'}");
-                }
+		if (FetchOneColumn() eq 'DUPLICATE') {
+			SendSQL("DELETE FROM duplicates WHERE dupe = $::FORM{'id'}");
+		}		
         last SWITCH;
     };
     /^verify$/ && CheckonComment( "verify" ) && do {
@@ -866,7 +890,6 @@ sub SnapShotDeps {
 
 
 my $timestamp;
-my $bug_changed;
 
 sub FindWrapPoint {
     my ($string, $startpos) = @_;
@@ -916,8 +939,7 @@ sub LogActivityEntry {
         my $fieldid = GetFieldID($col);
         SendSQL("INSERT INTO bugs_activity " .
                 "(bug_id,who,bug_when,fieldid,removed,added) VALUES " .
-                "($i,$whoid," . SqlQuote($timestamp) . ",$fieldid,$removestr,$addstr)");
-        $bug_changed = 1;
+                "($i,$whoid,$timestamp,$fieldid,$removestr,$addstr)");
     }
 }
 
@@ -939,11 +961,9 @@ sub LogDependencyActivity {
 #
 foreach my $id (@idlist) {
     my %dependencychanged;
-    $bug_changed = 0;
     my $write = "WRITE";        # Might want to make a param to control
                                 # whether we do LOW_PRIORITY ...
     SendSQL("LOCK TABLES bugs $write, bugs_activity $write, cc $write, " .
-            "cc AS selectVisible_cc $write, " .
             "profiles $write, dependencies $write, votes $write, " .
             "keywords $write, longdescs $write, fielddefs $write, " .
             "keyworddefs READ, groups READ, attachments READ, products READ");
@@ -1058,7 +1078,7 @@ The changes made were:
                 }
             }
 
-            if ($me eq 'dependson') {
+	    if ($me eq 'dependson') {
                 my @deps   =  @{$deps{'dependson'}};
                 my @blocks =  @{$deps{'blocked'}};
                 my @union = ();
@@ -1068,10 +1088,10 @@ The changes made were:
                 foreach my $b (@deps, @blocks) { $union{$b}++ && $isect{$b}++ }
                 @union = keys %union;
                 @isect = keys %isect;
-                if (@isect > 0) {
+		if (@isect > 0) {
                     my $both;
                     foreach my $i (@isect) {
-                       $both = $both . "#" . $i . " ";
+                       $both = $both . "#" . $i . " ";	
                     }
                     PuntTryAgain("Dependency loop detected!<P>" .
                                  "This bug can't be both blocked and dependent " .
@@ -1122,14 +1142,17 @@ The changes made were:
                     " WHERE bug_id = $id");
         }
     }
+
     my $query = "$basequery\nwhere bug_id = $id";
     
 # print "<PRE>$query</PRE>\n";
 
     if ($::comma ne "") {
         SendSQL($query);
+        SendSQL("select delta_ts from bugs where bug_id = $id");
+    } else {
+        SendSQL("select now()");
     }
-    SendSQL("select now()");
     $timestamp = FetchOneColumn();
     
     if (defined $::FORM{'comment'}) {
@@ -1342,9 +1365,7 @@ The changes made were:
             LogActivityEntry($id,$col,$old,$new);
         }
     }
-    if ($bug_changed) {
-        SendSQL("UPDATE bugs SET delta_ts = " . SqlQuote($timestamp) . " WHERE bug_id = $id");
-    }
+    
     print "<TABLE BORDER=1><TD><H2>Changes to bug $id submitted</H2>\n";
     SendSQL("unlock tables");
 

@@ -242,47 +242,65 @@
     <section id="install-mysql">
       <title>MySQL</title>
 
-      <para>Visit the MySQL homepage at 
-      <ulink url="http://www.mysql.com">www.mysql.com</ulink>
-      to grab and install the latest stable release of the server. 
+      <para>
+        Visit the MySQL homepage at 
+        <ulink url="http://www.mysql.com">www.mysql.com</ulink>
+        to grab and install the latest stable release of MySQL.
       </para>
       
       <note>
-        <para> Many of the binary
-        versions of MySQL store their data files in 
-        <filename>/var</filename>.
-        On some Unix systems, this is part of a smaller root partition,
-        and may not have room for your bug database. You can set the data
-         directory as an option to <filename>configure</filename>
-         if you build MySQL from source yourself.</para>
+        <para>
+          Many of the binary versions of MySQL store their data files
+          in <filename>/var</filename>. On some Unix systems, this is
+          part of a smaller root partition, and may not have room for
+          your bug database. You can set the data directory as an
+          option to <filename>configure</filename> if you build MySQL
+          from source yourself.
+        </para>
       </note>
 
-      <para>If you install from something other than an RPM or Debian 
-      package, you will need to add <filename>mysqld</filename>
-      to your init scripts so the server daemon will come back up whenever
-      your machine reboots. Further discussion of UNIX init sequences are
-      beyond the scope of this guide. 
+      <para>
+        If you install from something other than an RPM or Debian 
+        package, you will need to add <filename>mysqld</filename>
+        to your init scripts so the server daemon will come back up
+        whenever your machine reboots. Further discussion of UNIX
+        init sequences are beyond the scope of this guide. 
       </para>
 
-      <para>Change your init script to start 
-      <filename>mysqld</filename>
-      with the ability to accept large packets. By default, 
-      <filename>mysqld</filename>
-      only accepts packets up to 64K long. This limits the size of
-      attachments you may put on bugs. If you add 
-      <option>-O max_allowed_packet=1M</option>
-      to the command that starts 
-      <filename>mysqld</filename>
-      (or <filename>safe_mysqld</filename>), 
-      then you will be able to have attachments up to about 1 megabyte.
-      There is a Bugzilla parameter for maximum attachment size;
-      you should configure it to match the value you choose here.</para>
+      <para>
+        By default, MySQL will only accept packets up to 64Kb in size.
+        If you want to have attachments larger than this, you will need
+        to modify your <filename>/etc/my.cnf</filename> as below.
+      </para>
 
-      <para>If you plan on running Bugzilla and MySQL on the same machine,
-      consider using the 
-      <option>--skip-networking</option>
-      option in the init script. This enhances security by preventing
-      network access to MySQL.</para>
+      <para>
+        If you are using MySQL 4.0 or newer, enter:
+      </para>
+      <screen>  [mysqld]
+  # Allow packets up to 1M
+  max_allowed_packet=1M</screen>
+
+      <para>
+        If you are using an older version of MySQL, enter:
+      </para>
+      <screen>  [mysqld]
+  # Allow packets up to 1M
+  set-variable = max_allowed_packet=1M</screen>
+
+      <para>
+        There is also a parameter in Bugzilla called 'maxattachmentsize'
+        (default = 1000 Kb) that controls the maximum allowable attachment
+        size. Attachments larger than <emphasis>either</emphasis> the 
+        'max_allowed_packet' or 'maxattachmentsize' value will not be
+        accepted by Bugzilla.
+      </para>
+
+      <para>
+        If you plan on running Bugzilla and MySQL on the same machine,
+        consider using the <option>--skip-networking</option>
+        option in the init script. This enhances security by preventing
+        network access to MySQL.
+      </para>
         
     </section>
 

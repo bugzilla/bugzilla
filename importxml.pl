@@ -53,10 +53,7 @@ BEGIN {
  $::path = $0;
  $::path =~ m#(.*)/[^/]+#;
  $::path = $1;
- $::path ||= '.';  # $0 is empty at compile time.  This line will
-                   # have no effect on this script at runtime.
 }
-
 chdir $::path;
 use lib ($::path);
 
@@ -132,11 +129,7 @@ sub Log {
 sub Lock {
     if ($::lockcount <= 0) {
         $::lockcount = 0;
-        if (!open(LOCKFID, ">>data/maillock")) {
-            mkdir "data", 0777;
-            chmod 0777, "data";
-            open(LOCKFID, ">>data/maillock") || die "Can't open lockfile.";
-        }
+        open(LOCKFID, ">>data/maillock") || die "Can't open lockfile.";
         my $val = flock(LOCKFID,2);
         if (!$val) { # '2' is magic 'exclusive lock' const.
             print "Content-type: text/html\n\n";

@@ -38,7 +38,7 @@ use strict;
 # Shut up misguided -w warnings about "used only once".  For some reason,
 # "use vars" chokes on me when I try it here.
 
-sub defparams_pl_sillyness {
+sub bug_form_pl_sillyness {
     my $zz;
     $zz = %::param_checker;
     $zz = %::param_desc;
@@ -47,15 +47,13 @@ sub defparams_pl_sillyness {
 
 sub WriteParams {
     foreach my $i (@::param_list) {
-        if (!defined $::param{$i}) {
-            $::param{$i} = $::param_default{$i};
+	if (!defined $::param{$i}) {
+	    $::param{$i} = $::param_default{$i};
             if (!defined $::param{$i}) {
                 die "No default parameter ever specified for $i";
             }
-        }
+	}
     }
-    mkdir("data", 0777);
-    chmod 0777, "data";
     my $tmpname = "data/params.$$";
     open(FID, ">$tmpname") || die "Can't create $tmpname";
     my $v = $::param{'version'};
@@ -66,7 +64,7 @@ sub WriteParams {
     print FID "1;\n";
     close FID;
     rename $tmpname, "data/params" || die "Can't rename $tmpname to data/params";
-    chmod 0666, "data/params";
+    ChmodDataFile('data/params', 0666);
 }
     
 
@@ -77,7 +75,7 @@ sub DefParam {
     $::param_type{$id} = $type;
     $::param_default{$id} = $default;
     if (defined $checker) {
-        $::param_checker{$id} = $checker;
+	$::param_checker{$id} = $checker;
     }
 }
 
@@ -85,7 +83,7 @@ sub DefParam {
 sub check_numeric {
     my ($value) = (@_);
     if ($value !~ /^[0-9]+$/) {
-        return "must be a numeric value";
+	return "must be a numeric value";
     }
     return "";
 }
@@ -122,44 +120,39 @@ sub check_shadowdb {
 # b -- A boolean value (either 1 or 0)
 
 DefParam("maintainer",
-         "The email address of the person who maintains this installation of Bugzilla.",
-         "t",
+	 "The email address of the person who maintains this installation of Bugzilla.",
+	 "t",
          'THE MAINTAINER HAS NOT YET BEEN SET');
 
 DefParam("urlbase",
-         "The URL that is the common initial leading part of all Bugzilla URLs.",
-         "t",
-         "http://cvs-mirror.mozilla.org/webtools/bugzilla/",
-         \&check_urlbase);
+	 "The URL that is the common initial leading part of all Bugzilla URLs.",
+	 "t",
+	 "http://cvs-mirror.mozilla.org/webtools/bugzilla/",
+	 \&check_urlbase);
 
 sub check_urlbase {
     my ($url) = (@_);
     if ($url !~ m:^http.*/$:) {
-        return "must be a legal URL, that starts with http and ends with a slash.";
+	return "must be a legal URL, that starts with http and ends with a slash.";
     }
     return "";
 }
 
-DefParam("cookiepath", 
-  "Directory path under your document root that holds your Bugzilla installation. Make sure to begin with a /.",
-  "t",
-  "/");
-
 DefParam("preferlists",
-        "If this is on, Bugzilla will display most selection options as selection lists. If this is off, Bugzilla will use radio buttons and checkboxes instead.",
-        "b",
-        1);
+	"If this is on, Bugzilla will display most selection options as selection lists. If this is off, Bugzilla will use radio buttons and checkboxes instead.",
+	"b",
+	1);
 
 DefParam("capitalizelists",
-        "If this is on, Bugzilla will capitalize list entries, checkboxes, and radio buttons. If this is off, Bugzilla will leave these items untouched.",
-        "b",
-        0);
+	"If this is on, Bugzilla will capitalize list entries, checkboxes, and radio buttons. If this is off, Bugzilla will leave these items untouched.",
+	"b",
+	0);
 
 
 DefParam("usequip",
-        "If this is on, Bugzilla displays a silly quip at the beginning of buglists, and lets users add to the list of quips.",
-        "b",
-        1);
+	"If this is on, Bugzilla displays a silly quip at the beginning of buglists, and lets users add to the list of quips.",
+	"b",
+	1);
 
 # Added parameter - JMR, 2/16/00
 DefParam("usebuggroups",
@@ -200,7 +193,7 @@ DefParam("despotbaseurl",
 sub check_despotbaseurl {
     my ($url) = (@_);
     if ($url !~ /^http.*cgi$/) {
-        return "must be a legal URL, that starts with http and ends with .cgi";
+	return "must be a legal URL, that starts with http and ends with .cgi";
     }
     return "";
 }
@@ -247,7 +240,7 @@ DefParam("bodyhtml",
          'BGCOLOR="#FFFFFF" TEXT="#000000" LINK="#0000EE" VLINK="#551A8B" ALINK="#FF0000"');
 
 DefParam("footerhtml",
-         "HTML to add to the bottom of every page. By default it displays the blurbhtml, and %commandmenu%, a menu of useful commands.  You probably really want either bannerhtml or footerhtml to include %commandmenu%.",
+         "HTML to add to the bottom of every page. By default it displays the blurbhtml, and %commandmenu%, a menu of useful commands.  You probably really want either headerhtml or footerhtml to include %commandmenu%.",
          "l",
          '<TABLE BORDER="0"><TR><TD BGCOLOR="#000000" VALIGN="TOP">
 <TABLE BORDER="0" CELLPADDING="10" CELLSPACING="0" WIDTH="100%" BGCOLOR="lightyellow">
@@ -456,9 +449,9 @@ You will get this message once a day until you've dealt with these bugs!
 
 
 DefParam("defaultquery",
-          "This is the default query that initially comes up when you submit a bug.  It's in URL parameter format, which makes it hard to read.  Sorry!",
-         "t",
-         "bug_status=NEW&bug_status=ASSIGNED&bug_status=REOPENED&order=%22Importance%22");
+ 	 "This is the default query that initially comes up when you submit a bug.  It's in URL parameter format, which makes it hard to read.  Sorry!",
+	 "t",
+	 "bug_status=NEW&bug_status=ASSIGNED&bug_status=REOPENED&order=%22Importance%22");
 
 
 DefParam("letsubmitterchoosepriority",
@@ -485,9 +478,9 @@ DefParam("defaultpriority",
 
 
 DefParam("usetargetmilestone",
-         "Do you wish to use the Target Milestone field?",
-         "b",
-         0);
+	 "Do you wish to use the Target Milestone field?",
+	 "b",
+	 0);
 
 DefParam("nummilestones",
          "If using Target Milestone, how many milestones do you wish to
@@ -508,20 +501,20 @@ DefParam("musthavemilestoneonaccept",
          0);
 
 DefParam("useqacontact",
-         "Do you wish to use the QA Contact field?",
-         "b",
-         0);
+	 "Do you wish to use the QA Contact field?",
+	 "b",
+	 0);
 
 DefParam("usestatuswhiteboard",
-         "Do you wish to use the Status Whiteboard field?",
-         "b",
-         0);
+	 "Do you wish to use the Status Whiteboard field?",
+	 "b",
+	 0);
 
 DefParam("usebrowserinfo",
-         "Do you want bug reports to be assigned an OS & Platform based on the browser
-          the user makes the report from?",
-         "b",
-         1);
+	 "Do you want bug reports to be assigned an OS & Platform based on the browser
+	  the user makes the report from?",
+	 "b",
+	 1);
 
 DefParam("usedependencies",
          "Do you wish to use dependencies (allowing you to mark which bugs depend on which other ones)?",
@@ -544,9 +537,9 @@ DefParam("expectbigqueries",
          0);
 
 DefParam("emailregexp",
-         'This defines the regexp to use for legal email addresses.  The default tries to match fully qualified email addresses.  Another popular value to put here is <tt>^[^@]+$</tt>, which means "local usernames, no @ allowed."',
+         'This defines the regexp to use for legal email addresses.  The default tries to match fully qualified email addresses.  Another popular value to put here is <tt>^[^@]*$</tt>, which means "local usernames, no @ allowed.',
          "t",
-         q:^[^@]+@[^@]+\\.[^@]+$:);
+         q:^[^@]*@[^@]*\\.[^@]*$:);
 
 DefParam("emailregexpdesc",
          "This describes in english words what kinds of legal addresses are allowed by the <tt>emailregexp</tt> param.",
@@ -642,7 +635,7 @@ DefParam("supportwatchers",
 DefParam("move-enabled",
          "If this is on, Bugzilla will allow certain people to move bugs to the defined database.",
          "b",
-         0);
+	 0);
 DefParam("move-button-text",
          "The text written on the Move button. Explain where the bug is being moved to.",
          "t",
@@ -673,34 +666,5 @@ DefParam("moved-default-component",
          "Bugs moved from other databases to here are assigned to this component.",
          "t",
          '');
-
-DefParam("useattachmenttracker",
-         "Whether or not to use the attachment tracker that adds additional features for tracking bug attachments.",
-         "b",
-         0);
-
-# The maximum size (in bytes) for patches and non-patch attachments.
-# The default limit is 1000KB, which is 24KB less than mysql's default
-# maximum packet size (which determines how much data can be sent in a
-# single mysql packet and thus how much data can be inserted into the
-# database) to provide breathing space for the data in other fields of
-# the attachment record as well as any mysql packet overhead (I don't
-# know of any, but I suspect there may be some.)
-
-DefParam("maxpatchsize",
-         "The maximum size (in kilobytes) of patches.  Bugzilla will not 
-          accept patches greater than this number of kilobytes in size.
-          To accept patches of any size (subject to the limitations of 
-          your server software), set this value to zero." ,
-         "t",
-         '1000');
-
-DefParam("maxattachmentsize" , 
-         "The maximum size (in kilobytes) of non-patch attachments.  Bugzilla 
-          will not accept attachments greater than this number of kilobytes 
-          in size.  To accept attachments of any size (subject to the
-          limitations of your server software), set this value to zero." , 
-         "t" , 
-         '1000');
 
 1;

@@ -668,14 +668,17 @@ AllowOverride Limit
       Modify it to reflect your setup if you will be connecting from
       another machine or as a different user.</para>
 
-      <para>Remember to set &lt;bugs_password&gt; to some unique password. 
+      <para>Remember to set &lt;bugs_password&gt; to some unique password.</para>
+
+      <para>If you are using MySQL 4.0 or newer, enter:
       <simplelist>
         <member>
           <computeroutput>
             <prompt>mysql&gt;</prompt>
 
             <command>GRANT SELECT,INSERT,UPDATE,DELETE,INDEX,
-            ALTER,CREATE,DROP,REFERENCES ON bugs.* TO bugs@localhost
+            ALTER,CREATE,DROP,LOCK TABLES,CREATE TEMPORARY
+            TABLES,REFERENCES ON bugs.* TO bugs@localhost
             IDENTIFIED BY '&lt;bugs_password&gt;';</command>
           </computeroutput>
         </member>
@@ -690,11 +693,29 @@ AllowOverride Limit
       </simplelist>
       </para>
 
-      <note>
-        <para>If you are using MySQL 4, the bugs user also needs to be granted
-        the LOCK TABLES and CREATE TEMPORARY TABLES permissions.
-        </para>
-      </note>
+      <para>If you are using an older version of MySQL,
+        the LOCK TABLES and CREATE TEMPORARY TABLES permissions
+        need to be removed from the list:
+        <simplelist>
+          <member>
+            <computeroutput>
+              <prompt>mysql&gt;</prompt>
+
+              <command>GRANT SELECT,INSERT,UPDATE,DELETE,INDEX,
+              ALTER,CREATE,DROP,REFERENCES ON bugs.* TO bugs@localhost
+              IDENTIFIED BY '&lt;bugs_password&gt;';</command>
+            </computeroutput>
+          </member>
+
+          <member>
+            <computeroutput>
+              <prompt>mysql&gt;</prompt>
+
+              <command>FLUSH PRIVILEGES;</command>
+            </computeroutput>
+          </member>
+        </simplelist>
+      </para>
     </section>
 
     <section>

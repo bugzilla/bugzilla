@@ -1,4 +1,4 @@
-The 2.16.7 release fixes some bugs in 2.16.6, including some
+The 2.16.8 release fixes some bugs in 2.16.7, including some
 security related issues.
 
 **************************
@@ -125,6 +125,38 @@ installation.
   however use the option "The bug is resolved or verified" to achieve
   part of this.
   (bug 146261)
+
+
+*********************************************************
+*** USERS UPGRADING FROM ALL VERSIONS PRIOR TO 2.16.8 ***
+*********************************************************
+
+*** Security Fixes ***
+
+Summary:     XSS in Internal Error messages in Bugzilla 2.16.7 and 2.18rc3
+CVE Name:    CAN-2004-1061
+Reference:   https://bugzilla.mozilla.org/show_bug.cgi?id=272620
+Details:
+     It is possible to send a carefully crafted URL to Bugzilla designed to
+trigger an error message.  The Internal Error message includes javascript code
+which displays the URL the user is visiting.  The javascript code does not
+escape the URL before displaying it, allowing scripts contained in the URL to
+be executed by the browser.  Many browsers do not allow unescaped URLs to be
+sent to a webserver (thus complying with RFC 2616 section 2.3.1 and RFC 2396
+section 2.4.3), and are thus immune to this issue.
+    Browsers which are known to be immune: Firefox 1.0, Mozilla 1.7.5,
+Camino 0.8.2, Netscape 7.2, Safari 1.2.4
+     Browsers known to be susceptible: Internet Explorer 6 SP2,
+Konqueror 3.2
+     Browsers not listed here have not been tested.
+
+
+*** Bug fixes of note ***
+
+- bug 253088 Users with bless permissions but without the "editusers"
+  privilege can now successfully use editusers.cgi.
+
+- The documentation has been updated to be more accurate in many places.
 
 *********************************************************
 *** USERS UPGRADING FROM ALL VERSIONS PRIOR TO 2.16.7 ***

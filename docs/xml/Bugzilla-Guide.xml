@@ -36,6 +36,7 @@
 <!ENTITY bz-nextver "2.18">
 <!ENTITY bz-date "2004-10-24">
 <!ENTITY % bz-devel "IGNORE">
+<!ENTITY current-year "2004">
 
 <!ENTITY landfillbase "http://landfill.bugzilla.org/bugzilla-2.18-branch/">
 <!ENTITY bz "http://www.bugzilla.org/">

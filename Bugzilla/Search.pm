@@ -450,6 +450,9 @@ sub init {
                  push(@fields, $select_term);
              }
          },
+         "^content," => sub {
+             ThrowUserError("search_content_without_matches");
+         },
          "^commenter," => sub {    
              my $chartseq;
              my $list;
@@ -783,6 +786,9 @@ sub init {
          },
          ",lessthan" => sub {
              $term = "$ff < $q";
+         },
+         ",matches" => sub {
+             ThrowUserError("search_content_without_matches");
          },
          ",greaterthan" => sub {
              $term = "$ff > $q";

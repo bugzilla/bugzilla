@@ -225,7 +225,7 @@
             <prompt>mysql&gt;</prompt>
 
             <command>
-              update profiles set groupset=0x7ffffffffffffff where login_name =
+              update profiles set groupset=0x7fffffffffffffff where login_name =
               "(user's login name)";
             </command>
           </member>

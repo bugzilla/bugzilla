@@ -1376,7 +1376,7 @@ sub RemoveVotes {
             if (open(SENDMAIL, "|/usr/lib/sendmail $sendmailparm -t -i")) {
                 my %substs;
 
-                $substs{"to"} = $name;
+                $substs{"to"} = $name . Param('emailsuffix');
                 $substs{"bugid"} = $id;
                 $substs{"reason"} = $reason;
 

@@ -57,7 +57,7 @@ foreach (@myproducts) {
 sub check_data_dir {
     my $dir = shift;
 
-    if (! -d) {
+    if (! -d $dir) {
         mkdir $dir, 0777;
         chmod 0777, $dir;
     }

@@ -65,7 +65,13 @@ see the Bugzilla Guide for more information.
   (bug 147776)
 
 *** Outstanding Issues Of Note ***
- 
+
+These issues may have been fixed in later stable or development
+versions of Bugzilla.  If you are interested in tracking these
+bugs, please see the bug report numbers listed to find out the
+status of the fix for these bugs, or to obtain a patch that can
+fix the problem on your installation.
+
 - Bug counts (on reports.cgi) can be very slow if you have to
   count a lot of bugs.  In this case the connection can time
   out before thepage finishes loading.  Extending the cgi
@@ -109,6 +115,11 @@ see the Bugzilla Guide for more information.
 - Querying on CC takes too long on big databases.
   (bug 127200)
 
+- The email preferences option "Priority, status, severity, and/or milestone
+  changes" does not actually report status changes.  You can however use the
+  option "The bug is resolved or verified" to achieve part of this.
+  (bug 130821)
+
 ***********************************************
 *** USERS UPGRADING FROM 2.14.1 OR EARLIER  ***
 ***********************************************
@@ -141,6 +152,11 @@ see the Bugzilla Guide for more information.
 - Mass change would set the groupset of every bug to be the
   groupset of the first bug.
   (bug 107718)
+
+- Some browsers (eg NetPositive) interacted with Bugzilla
+  badly and could have various form problems, including
+  removing group restrictions on bugs.
+  (bug 148674)
 
 - It was possible for random confidential information to be
   divulged, if the shadow database was in use and became

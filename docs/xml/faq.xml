@@ -204,22 +204,23 @@
       <qandaentry>
 	<question id="faq-general-bonsaitools">
 	  <para>
-	    Why do the scripts say "/usr/bonsaitools/bin/perl" instead of
-	    "/usr/bin/perl" or something else?
+	    Why do the scripts say
+            <filename>/usr/bonsaitools/bin/perl</filename> instead of
+	    <filename>/usr/bin/perl</filename> or something else?
 	  </para>
 	</question>
 	<answer>
 	  <para>
-	     Mozilla.org uses /usr/bonsaitools/bin/perl, because originally
-       Terry wanted a place to put a version of Perl and other tools 
-       that was strictly under his control. 
-    </para>
-		<para>
-		  We always recommend that, if possible, you keep the path
-		  as /usr/bonsaitools/bin/perl, and simply add symlink.  
-      This will make upgrading
-		  your Bugzilla much easier in the future.
-		</para>
+	     Mozilla.org used <filename>/usr/bonsaitools/bin/perl</filename>,
+             because originally Terry wanted a place to put a version of Perl
+             and other tools that was strictly under his control. 
+          </para>
+          <note>
+            <para>
+              This convention was abonded during the 2.17 development cycle so
+              it will no longer be an issue when 2.18 comes out.
+            </para>
+          </note>
 	</answer>
       </qandaentry>
 
@@ -451,7 +452,7 @@
 	<answer>
           <para>
             Bugzilla can only output buglists as HTML in version 2.16. There
-            are other formats available (CVS and RDF) in the newer development
+            are other formats available (CSV and RDF) in the newer development
             versions.
           </para>
           <para>
@@ -485,7 +486,7 @@
 	  <para>
             Yes.  For more information including available translated templates,
             see <ulink
-            url="http://www.bugzilla.org/download.html">http://www.bugzilla.org/download.html</ulink>.
+            url="http://www.bugzilla.org/download.html#localizations"/>.
             The admin interfaces are still not included in these translated
             templates and is therefore still English only.  Also, there may be
             issues with the charset not being declared.  See <ulink
@@ -732,8 +733,8 @@
 	<answer>
 	  <para>
 	    Try Klaas Freitag's excellent patch for "whineatassigned" functionality.
-	    You can find it at<ulink url=" http://bugzilla.mozilla.org/show_bug.cgi?id=6679">
-	      http://bugzilla.mozilla.org/show_bug.cgi?id=6679</ulink>. This
+	    You can find it at <ulink
+            url="http://bugzilla.mozilla.org/show_bug.cgi?id=6679"/>. This
 	    patch is against an older version of Bugzilla, so you must apply
 	    the diffs manually.
 	  </para>
@@ -1162,7 +1163,7 @@
 	    <ulink url="http://bugzilla.mozilla.org/buglist.cgi?product=Bugzilla&amp;target_milestone=Bugzilla+2.18">here</ulink>.
 	    This list includes bugs for the 2.18 release that have already
 	    been fixed and checked into CVS.  Please consult the
-	    <ulink url="http://www.mozilla.org/projects/bugzilla/">
+	    <ulink url="http://www.bugzilla.org/">
 	      Bugzilla Project Page</ulink> for details on how to
 	    check current sources out of CVS so you can have these
 	    bug fixes early!

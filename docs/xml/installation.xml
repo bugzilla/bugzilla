@@ -961,7 +961,7 @@ AllowOverride Limit
       incorporate the code changes necessary to fulfill the CERT advisory
       requirements mentioned in 
       <ulink
-      url="http://www.cet.org/tech_tips/malicious_code_mitigation.html/#3">
+      url="http://www.cert.org/tech_tips/malicious_code_mitigation.html/#3">
       http://www.cet.org/tech_tips/malicious_code_mitigation.html/#3</ulink>.
       Executing the following code snippet from a UNIX command shell will
       rectify the problem if your Bugzilla installation is intended for an

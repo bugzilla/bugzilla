@@ -100,6 +100,10 @@ for "crash secure SSL flash".
     <td></td>
     <td>
       <input type="submit" value="Search">
+      [% IF known_name %]
+        <input type="hidden" name="query_based_on" 
+               value="[% known_name FILTER html %]">
+      [% END %]
     </td>
   </tr>
 </table>

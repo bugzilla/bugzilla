@@ -793,6 +793,28 @@ AllowOverride Limit
     </section>
 
     <section>
+      <title>Mail Transfer Agent (MTA)</title>
+    
+      <para>Bugzilla is dependent on the availability of an e-mail system for its user
+      authentication and for other tasks. </para>
+    
+      <para>On Linux, any Sendmail-compatible MTA (Mail Transfer Agent) will suffice.
+      Sendmail, Postfix, qmail and Exim are examples of common MTAs. Sendmail is the 
+      original Unix MTA, but the others are easier to configure, and therefore many people
+      replace Sendmail with Postfix or Exim. They are drop-in replacements, so that Bugzilla
+      will not distinguish between them.</para>
+
+      <para>Consult the manual for the specific MTA you choose for detailed installation
+      instructions. Each of these programs will have their own configuration files where you must
+      configure certain parameters to ensure that the mail is delivered properly. They
+      are implemented as services, and you should ensure that the MTA is in the
+      auto-start list of services for the machine.</para>
+
+      <para>If a simple mail sent with the command-line 'mail' program succeeds, then
+      Bugzilla should also be fine.</para>
+    </section>
+  
+    <section>
       <title>Configuring Bugzilla</title>
       <para>
       You should run through the parameters on the Edit Parameters page

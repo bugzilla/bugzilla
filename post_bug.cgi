@@ -212,6 +212,10 @@ if (defined $::FORM{'cc'}) {
             my $ccid = DBNameToIdAndCheck($person);
             if ($ccid && !$ccids{$ccid}) {
                 $ccids{$ccid} = 1;
+                # if we got here, the DB has already verified that the email
+                # is legit.  Unless the admin has screwed with the emailregexp
+                # it'll be safe.
+                trick_taint($person);
                 push(@cc, $person);
             }
         }

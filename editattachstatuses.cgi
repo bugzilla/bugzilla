@@ -212,7 +212,7 @@ sub create
   # Display a form for creating a new attachment status flag.
 
   # Retrieve a list of products to which the attachment status may apply.
-  SendSQL("SELECT product FROM products");
+  SendSQL("SELECT product FROM products ORDER BY product");
   my @products;
   push(@products, FetchSQLData()) while MoreSQLData();
 

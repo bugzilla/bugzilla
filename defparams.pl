@@ -61,7 +61,7 @@ sub WriteParams {
     my $v = $::param{'version'};
     delete $::param{'version'};  # Don't write the version number out to
                                 # the params file.
-    print $fh GenerateCode('%::param');
+    print $fh (GenerateCode('%::param'));
     $::param{'version'} = $v;
     print $fh "1;\n";
     close $fh;

@@ -14,7 +14,7 @@
     <para>
       <mediaobject>
         <imageobject>
-          <imagedata fileref="../images/dbschema.jpg" format="JPG" />
+          <imagedata fileref="../images/dbschema.jpg" format="JPG" scale="45" />
         </imageobject>
 
         <textobject>

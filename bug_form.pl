@@ -83,7 +83,7 @@ sub show_bug {
         bug_file_loc, short_desc, target_milestone, 
         qa_contact, status_whiteboard, 
         date_format(creation_ts,'%Y-%m-%d %H:%i'),
-        groupset, delta_ts, sum(votes.count)
+        groupset, delta_ts, ifnull(sum(votes.count),0)
     FROM bugs LEFT JOIN votes USING(bug_id)
     WHERE bugs.bug_id = $id
     GROUP BY bugs.bug_id";

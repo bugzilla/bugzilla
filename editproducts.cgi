@@ -40,6 +40,7 @@ require "globals.pl";
 sub sillyness {
     my $zz;
     $zz = $::unconfirmedstate;
+    $zz = $::superusergroupset;
 }
 
 
@@ -687,7 +688,7 @@ if ($action eq 'delete') {
             SendSQL("UPDATE profiles " .
                     "SET groupset = groupset - $bit " .
                     "WHERE (groupset & $bit) " .
-                    "AND (groupset != 9223372036854710271)");
+                    "AND (groupset != $::superusergroupset)");
             print "Users dropped from group '$group_desc'.<BR>\n";
 
             SendSQL("DELETE FROM groups " .

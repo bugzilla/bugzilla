@@ -124,12 +124,12 @@ sub _create {
 # Accessors for user attributes
 sub id { $_[0]->{id}; }
 sub login { $_[0]->{login}; }
-sub email { $_[0]->{login}; }
+sub email { $_[0]->{login} . Param('emailsuffix'); }
 sub name { $_[0]->{name}; }
 sub showmybugslink { $_[0]->{showmybugslink}; }
 
-# Generate a string to identify the user by name + email if the user
-# has a name or by email only if she doesn't.
+# Generate a string to identify the user by name + login if the user
+# has a name or by login only if she doesn't.
 sub identity {
     my $self = shift;
 

@@ -16,8 +16,8 @@ REL="PREVIOUS"
 TITLE="Mac OS X Installation Notes"
 HREF="osx.html"><LINK
 REL="NEXT"
-TITLE="Administering Bugzilla"
-HREF="administration.html"></HEAD
+TITLE="Troubleshooting"
+HREF="troubleshooting.html"></HEAD
 ><BODY
 CLASS="section"
 BGCOLOR="#FFFFFF"
@@ -59,7 +59,7 @@ WIDTH="10%"
 ALIGN="right"
 VALIGN="bottom"
 ><A
-HREF="administration.html"
+HREF="troubleshooting.html"
 ACCESSKEY="N"
 >Next</A
 ></TD
@@ -73,13 +73,13 @@ CLASS="section"
 ><H1
 CLASS="section"
 ><A
-NAME="geninstall">4.4. General Installation Notes</H1
+NAME="geninstall">4.5. General Installation Notes</H1
 ><DIV
 CLASS="section"
 ><H2
 CLASS="section"
 ><A
-NAME="AEN992">4.4.1. Modifying Your Running System</H2
+NAME="AEN1145">4.5.1. Modifying Your Running System</H2
 ><P
 >Bugzilla optimizes database lookups by storing all relatively
       static information in the versioncache file, located in the data/
@@ -111,7 +111,7 @@ CLASS="section"
 ><H2
 CLASS="section"
 ><A
-NAME="AEN999">4.4.2. Upgrading From Previous Versions</H2
+NAME="AEN1152">4.5.2. Upgrading From Previous Versions</H2
 ><P
 >A plain Bugzilla is fairly easy to upgrade from one version to a
       newer one. However, things get a bit more complicated if you've made
@@ -143,7 +143,7 @@ CLASS="section"
 ><H2
 CLASS="section"
 ><A
-NAME="htaccess">4.4.3. <TT
+NAME="htaccess">4.5.3. <TT
 CLASS="filename"
 >.htaccess</TT
 >
@@ -320,7 +320,7 @@ CLASS="section"
 ><H2
 CLASS="section"
 ><A
-NAME="mod-throttle">4.4.4. <TT
+NAME="mod-throttle">4.5.4. <TT
 CLASS="filename"
 >mod_throttle</TT
 >
@@ -371,7 +371,7 @@ CLASS="section"
 ><H2
 CLASS="section"
 ><A
-NAME="content-type">4.4.5. Preventing untrusted Bugzilla content from executing malicious
+NAME="content-type">4.5.5. Preventing untrusted Bugzilla content from executing malicious
       Javascript code</H2
 ><P
 >It is possible for a Bugzilla to execute malicious Javascript
@@ -435,50 +435,6 @@ CLASS="QUOTE"
 >"UTF-8"</SPAN
 >.</P
 ></DIV
-><DIV
-CLASS="section"
-><H2
-CLASS="section"
-><A
-NAME="paranoid-security">4.4.6. cannot chdir(/var/spool/mqueue)</H2
-><P
->If you are installing Bugzilla on SuSE Linux, or some other
-      distributions with 
-      <SPAN
-CLASS="QUOTE"
->"paranoid"</SPAN
->
-      security options, it is possible that the checksetup.pl script may fail
-      with the error: 
-      <SPAN
-CLASS="errorname"
->cannot chdir(/var/spool/mqueue): Permission
-      denied</SPAN
->.
-      </P
-><P
->&#13;      This is because your 
-      <TT
-CLASS="filename"
->/var/spool/mqueue</TT
->
-      directory has a mode of 
-      <SPAN
-CLASS="QUOTE"
->"drwx------"</SPAN
->. Type 
-      <B
-CLASS="command"
->chmod 755 
-      <TT
-CLASS="filename"
->/var/spool/mqueue</TT
->
-      </B
->
-      as root to fix this problem.
-      </P
-></DIV
 ></DIV
 ><DIV
 CLASS="NAVFOOTER"
@@ -514,7 +470,7 @@ WIDTH="33%"
 ALIGN="right"
 VALIGN="top"
 ><A
-HREF="administration.html"
+HREF="troubleshooting.html"
 ACCESSKEY="N"
 >Next</A
 ></TD
@@ -538,7 +494,7 @@ ACCESSKEY="U"
 WIDTH="33%"
 ALIGN="right"
 VALIGN="top"
->Administering Bugzilla</TD
+>Troubleshooting</TD
 ></TR
 ></TABLE
 ></DIV

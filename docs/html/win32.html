@@ -13,8 +13,8 @@ REL="UP"
 TITLE="Installation"
 HREF="installation.html"><LINK
 REL="PREVIOUS"
-TITLE="Step-by-step Install"
-HREF="stepbystep.html"><LINK
+TITLE="Optional Additional Configuration"
+HREF="extraconfig.html"><LINK
 REL="NEXT"
 TITLE="Mac OS X Installation Notes"
 HREF="osx.html"></HEAD
@@ -45,7 +45,7 @@ WIDTH="10%"
 ALIGN="left"
 VALIGN="bottom"
 ><A
-HREF="stepbystep.html"
+HREF="extraconfig.html"
 ACCESSKEY="P"
 >Prev</A
 ></TD
@@ -73,7 +73,7 @@ CLASS="section"
 ><H1
 CLASS="section"
 ><A
-NAME="win32">4.2. Win32 Installation Notes</H1
+NAME="win32">4.3. Win32 Installation Notes</H1
 ><P
 >This section covers installation on Microsoft Windows 95, 98, ME,
     NT, and 2000. Bugzilla works fine on Win32 platforms, but please remember
@@ -102,7 +102,7 @@ CLASS="section"
 ><H2
 CLASS="section"
 ><A
-NAME="wininstall">4.2.1. Win32 Installation: Step-by-step</H2
+NAME="wininstall">4.3.1. Win32 Installation: Step-by-step</H2
 ><DIV
 CLASS="note"
 ><P
@@ -337,7 +337,7 @@ CLASS="command"
 ><DIV
 CLASS="example"
 ><A
-NAME="AEN760"><P
+NAME="AEN917"><P
 ><B
 >Example 4-2. Installing ActivePerl ppd Modules on Microsoft
             Windows</B
@@ -395,7 +395,7 @@ TARGET="_top"
           <DIV
 CLASS="example"
 ><A
-NAME="AEN773"><P
+NAME="AEN930"><P
 ><B
 >Example 4-3. Installing OpenInteract ppd Modules manually on Microsoft
             Windows</B
@@ -1509,7 +1509,7 @@ CLASS="section"
 ><H2
 CLASS="section"
 ><A
-NAME="addlwintips">4.2.2. Additional Windows Tips</H2
+NAME="addlwintips">4.3.2. Additional Windows Tips</H2
 ><DIV
 CLASS="tip"
 ><P
@@ -1533,7 +1533,7 @@ VALIGN="TOP"
 ><P
 >From Andrew Pearson: 
         <A
-NAME="AEN943"><BLOCKQUOTE
+NAME="AEN1100"><BLOCKQUOTE
 CLASS="BLOCKQUOTE"
 ><P
 >You can make Bugzilla work with Personal Web Server for
@@ -1616,7 +1616,7 @@ VALIGN="TOP"
         <DIV
 CLASS="example"
 ><A
-NAME="AEN955"><P
+NAME="AEN1112"><P
 ><B
 >Example 4-4. Removing encrypt() for Windows NT Bugzilla version 2.12 or
           earlier</B
@@ -1669,66 +1669,6 @@ CLASS="programlisting"
 ></TABLE
 ></DIV
 ></DIV
-><DIV
-CLASS="section"
-><H2
-CLASS="section"
-><A
-NAME="bzldap">4.2.3. Bugzilla LDAP Integration</H2
-><P
->What follows is some late-breaking information on using the LDAP
-      authentication options with Bugzilla. The author has not tested these
-      (nor even formatted this section!) so please contribute feedback to the
-      newsgroup.</P
-><P
-CLASS="literallayout"
->Mozilla::LDAP&nbsp;module&nbsp;The&nbsp;Mozilla::LDAP&nbsp;module&nbsp;allows&nbsp;you<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;to&nbsp;use&nbsp;LDAP&nbsp;for&nbsp;authentication&nbsp;to&nbsp;the&nbsp;Bugzilla&nbsp;system.&nbsp;This&nbsp;module&nbsp;is<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;not&nbsp;required&nbsp;if&nbsp;you&nbsp;are&nbsp;not&nbsp;using&nbsp;LDAP.&nbsp;Mozilla::LDAP&nbsp;(aka&nbsp;PerLDAP)&nbsp;is<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;available&nbsp;for&nbsp;download&nbsp;from&nbsp;http://www.mozilla.org/directory.&nbsp;NOTE:&nbsp;The<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Mozilla::LDAP&nbsp;module&nbsp;requires&nbsp;Netscape's&nbsp;Directory&nbsp;SDK.&nbsp;Follow&nbsp;the&nbsp;link<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;"Directory&nbsp;SDK&nbsp;for&nbsp;C"&nbsp;on&nbsp;that&nbsp;same&nbsp;page&nbsp;to&nbsp;download&nbsp;the&nbsp;SDK&nbsp;first.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;After&nbsp;you&nbsp;have&nbsp;installed&nbsp;this&nbsp;SDK,&nbsp;then&nbsp;install&nbsp;the&nbsp;PerLDAP&nbsp;module.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;----------------------------------------------------------------------<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Post-Installation&nbsp;Checklist<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;----------------------------------------------------------------------<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Set&nbsp;useLDAP&nbsp;to&nbsp;"On"&nbsp;**only**&nbsp;if&nbsp;you&nbsp;will&nbsp;be&nbsp;using&nbsp;an&nbsp;LDAP&nbsp;directory&nbsp;for<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;authentication.&nbsp;Be&nbsp;very&nbsp;careful&nbsp;when&nbsp;setting&nbsp;up&nbsp;this&nbsp;parameter;&nbsp;if&nbsp;you<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;set&nbsp;LDAP&nbsp;authentication,&nbsp;but&nbsp;do&nbsp;not&nbsp;have&nbsp;a&nbsp;valid&nbsp;LDAP&nbsp;directory&nbsp;set&nbsp;up,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;you&nbsp;will&nbsp;not&nbsp;be&nbsp;able&nbsp;to&nbsp;log&nbsp;back&nbsp;in&nbsp;to&nbsp;Bugzilla&nbsp;once&nbsp;you&nbsp;log&nbsp;out.&nbsp;(If<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;this&nbsp;happens,&nbsp;you&nbsp;can&nbsp;get&nbsp;back&nbsp;in&nbsp;by&nbsp;manually&nbsp;editing&nbsp;the&nbsp;data/params<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;file,&nbsp;and&nbsp;setting&nbsp;useLDAP&nbsp;back&nbsp;to&nbsp;0.)&nbsp;If&nbsp;using&nbsp;LDAP,&nbsp;you&nbsp;must&nbsp;set&nbsp;the<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;three&nbsp;additional&nbsp;parameters:&nbsp;Set&nbsp;LDAPserver&nbsp;to&nbsp;the&nbsp;name&nbsp;(and&nbsp;optionally<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;port)&nbsp;of&nbsp;your&nbsp;LDAP&nbsp;server.&nbsp;If&nbsp;no&nbsp;port&nbsp;is&nbsp;specified,&nbsp;it&nbsp;defaults&nbsp;to&nbsp;the<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default&nbsp;port&nbsp;of&nbsp;389.&nbsp;(e.g&nbsp;"ldap.mycompany.com"&nbsp;or<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"ldap.mycompany.com:1234")&nbsp;Set&nbsp;LDAPBaseDN&nbsp;to&nbsp;the&nbsp;base&nbsp;DN&nbsp;for&nbsp;searching<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;users&nbsp;in&nbsp;your&nbsp;LDAP&nbsp;directory.&nbsp;(e.g.&nbsp;"ou=People,o=MyCompany")&nbsp;uids<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;must&nbsp;be&nbsp;unique&nbsp;under&nbsp;the&nbsp;DN&nbsp;specified&nbsp;here.&nbsp;Set&nbsp;LDAPmailattribute&nbsp;to<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;name&nbsp;of&nbsp;the&nbsp;attribute&nbsp;in&nbsp;your&nbsp;LDAP&nbsp;directory&nbsp;which&nbsp;contains&nbsp;the<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;primary&nbsp;email&nbsp;address.&nbsp;On&nbsp;most&nbsp;directory&nbsp;servers&nbsp;available,&nbsp;this&nbsp;is<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"mail",&nbsp;but&nbsp;you&nbsp;may&nbsp;need&nbsp;to&nbsp;change&nbsp;this.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;----------------------------------------------------------------------<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Not&nbsp;sure&nbsp;where&nbsp;this&nbsp;bit&nbsp;should&nbsp;go,&nbsp;but&nbsp;it's&nbsp;important&nbsp;that&nbsp;it&nbsp;be&nbsp;in<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;there&nbsp;somewhere...)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;----------------------------------------------------------------------<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Using&nbsp;LDAP&nbsp;authentication&nbsp;for&nbsp;Bugzilla:&nbsp;The&nbsp;existing&nbsp;authentication<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;scheme&nbsp;for&nbsp;Bugzilla&nbsp;uses&nbsp;email&nbsp;addresses&nbsp;as&nbsp;the&nbsp;primary&nbsp;user&nbsp;ID,&nbsp;and&nbsp;a<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;password&nbsp;to&nbsp;authenticate&nbsp;that&nbsp;user.&nbsp;All&nbsp;places&nbsp;within&nbsp;Bugzilla&nbsp;where<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;you&nbsp;need&nbsp;to&nbsp;deal&nbsp;with&nbsp;user&nbsp;ID&nbsp;(e.g&nbsp;assigning&nbsp;a&nbsp;bug)&nbsp;use&nbsp;the&nbsp;email<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;address.&nbsp;The&nbsp;LDAP&nbsp;authentication&nbsp;builds&nbsp;on&nbsp;top&nbsp;of&nbsp;this&nbsp;scheme,&nbsp;rather<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;than&nbsp;replacing&nbsp;it.&nbsp;The&nbsp;initial&nbsp;log&nbsp;in&nbsp;is&nbsp;done&nbsp;with&nbsp;a&nbsp;username&nbsp;and<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;password&nbsp;for&nbsp;the&nbsp;LDAP&nbsp;directory.&nbsp;This&nbsp;then&nbsp;fetches&nbsp;the&nbsp;email&nbsp;address<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;from&nbsp;LDAP&nbsp;and&nbsp;authenticates&nbsp;seamlessly&nbsp;in&nbsp;the&nbsp;standard&nbsp;Bugzilla<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;authentication&nbsp;scheme&nbsp;using&nbsp;this&nbsp;email&nbsp;address.&nbsp;If&nbsp;an&nbsp;account&nbsp;for&nbsp;this<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;address&nbsp;already&nbsp;exists&nbsp;in&nbsp;your&nbsp;Bugzilla&nbsp;system,&nbsp;it&nbsp;will&nbsp;log&nbsp;in&nbsp;to&nbsp;that<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;account.&nbsp;If&nbsp;no&nbsp;account&nbsp;for&nbsp;that&nbsp;email&nbsp;address&nbsp;exists,&nbsp;one&nbsp;is&nbsp;created&nbsp;at<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;time&nbsp;of&nbsp;login.&nbsp;(In&nbsp;this&nbsp;case,&nbsp;Bugzilla&nbsp;will&nbsp;attempt&nbsp;to&nbsp;use&nbsp;the<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"displayName"&nbsp;or&nbsp;"cn"&nbsp;attribute&nbsp;to&nbsp;determine&nbsp;the&nbsp;user's&nbsp;full&nbsp;name.)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;After&nbsp;authentication,&nbsp;all&nbsp;other&nbsp;user-related&nbsp;tasks&nbsp;are&nbsp;still&nbsp;handled&nbsp;by<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;email&nbsp;address,&nbsp;not&nbsp;LDAP&nbsp;username.&nbsp;You&nbsp;still&nbsp;assign&nbsp;bugs&nbsp;by&nbsp;email<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;address,&nbsp;query&nbsp;on&nbsp;users&nbsp;by&nbsp;email&nbsp;address,&nbsp;etc.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;----------------------------------------------------------------------</P
-></DIV
 ></DIV
 ><DIV
 CLASS="NAVFOOTER"
@@ -1746,7 +1686,7 @@ WIDTH="33%"
 ALIGN="left"
 VALIGN="top"
 ><A
-HREF="stepbystep.html"
+HREF="extraconfig.html"
 ACCESSKEY="P"
 >Prev</A
 ></TD
@@ -1774,7 +1714,7 @@ ACCESSKEY="N"
 WIDTH="33%"
 ALIGN="left"
 VALIGN="top"
->Step-by-step Install</TD
+>Optional Additional Configuration</TD
 ><TD
 WIDTH="34%"
 ALIGN="center"

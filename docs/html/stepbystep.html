@@ -16,8 +16,8 @@ REL="PREVIOUS"
 TITLE="Installation"
 HREF="installation.html"><LINK
 REL="NEXT"
-TITLE="Win32 Installation Notes"
-HREF="win32.html"></HEAD
+TITLE="Optional Additional Configuration"
+HREF="extraconfig.html"></HEAD
 ><BODY
 CLASS="section"
 BGCOLOR="#FFFFFF"
@@ -59,7 +59,7 @@ WIDTH="10%"
 ALIGN="right"
 VALIGN="bottom"
 ><A
-HREF="win32.html"
+HREF="extraconfig.html"
 ACCESSKEY="N"
 >Next</A
 ></TD
@@ -79,7 +79,7 @@ CLASS="section"
 ><H2
 CLASS="section"
 ><A
-NAME="AEN354">4.1.1. Introduction</H2
+NAME="AEN489">4.1.1. Introduction</H2
 ><P
 >Bugzilla has been successfully installed under Solaris, Linux,
       and Win32. Win32 is not yet officially supported, but many people
@@ -97,7 +97,7 @@ CLASS="section"
 ><H2
 CLASS="section"
 ><A
-NAME="AEN358">4.1.2. Package List</H2
+NAME="AEN493">4.1.2. Package List</H2
 ><DIV
 CLASS="note"
 ><P
@@ -134,94 +134,180 @@ HREF="stepbystep.html#bundlebugzilla"
 ></DIV
 ><P
 >The software packages necessary for the proper running of
-      Bugzilla are: 
+      Bugzilla (with download links) are: 
       <P
 ></P
 ><OL
 TYPE="1"
 ><LI
 ><P
->MySQL database server and the mysql client (3.22.5 or
-          greater)</P
+>&#13;    <A
+HREF="http://www.mysql.com/"
+TARGET="_top"
+>MySQL database server</A
+>
+    (3.22.5 or greater)
+  </P
 ></LI
 ><LI
 ><P
->Perl (5.005 or greater, 5.6.1 is recommended if you wish to
-          use Bundle::Bugzilla)</P
+>&#13;    <A
+HREF="http://www.perl.org"
+TARGET="_top"
+>Perl</A
+>
+    (5.005 or greater, 5.6.1 is recommended if you wish to
+    use Bundle::Bugzilla)
+  </P
 ></LI
 ><LI
 ><P
 >Perl Modules (minimum version):
-          <P
+  <P
 ></P
 ><OL
 TYPE="a"
 ><LI
 ><P
->Template (v2.07)</P
+>&#13;        <A
+HREF="http://www.template-toolkit.org"
+TARGET="_top"
+>Template</A
+>
+        (v2.07)
+      </P
 ></LI
 ><LI
 ><P
->AppConfig (v1.52)</P
+>&#13;        <A
+HREF="http://www.cpan.org/modules/by-module/AppConfig/"
+TARGET="_top"
+>AppConfig 
+        </A
+>
+        (v1.52)
+      </P
 ></LI
 ><LI
 ><P
->Text::Wrap (v2001.0131)</P
+>&#13;        Text::Wrap 
+        (v2001.0131)
+      </P
 ></LI
 ><LI
 ><P
->File::Spec (v0.8.2)</P
+>&#13;        <A
+HREF="http://search.cpan.org/search?dist=File-Spec"
+TARGET="_top"
+>File::Spec 
+        </A
+>
+        (v0.8.2)
+      </P
 ></LI
 ><LI
 ><P
->Data::Dumper (any)</P
+>&#13;        <A
+HREF="http://www.cpan.org/modules/by-module/Data/"
+TARGET="_top"
+>Data::Dumper 
+        </A
+> 
+        (any)
+      </P
 ></LI
 ><LI
 ><P
->DBD::mysql (v1.2209)</P
+>&#13;        <A
+HREF="http://www.cpan.org/modules/by-module/Mysql/"
+TARGET="_top"
+>DBD::mysql
+        </A
+> 
+        (v1.2209)
+      </P
 ></LI
 ><LI
 ><P
->DBI (v1.13)</P
+>&#13;        <A
+HREF="http://www.cpan.org/modules/by-module/DBI/"
+TARGET="_top"
+>DBI</A
+> 
+        (v1.13)
+      </P
 ></LI
 ><LI
 ><P
->Date::Parse (any)</P
+>&#13;        <A
+HREF="http://www.cpan.org/modules/by-module/Date/"
+TARGET="_top"
+>Date::Parse
+        </A
+> 
+        (any)
+      </P
 ></LI
 ><LI
 ><P
->CGI::Carp (any)</P
+>&#13;        CGI::Carp 
+        (any)
+      </P
 ></LI
 ></OL
 >
-          and, optionally:
-          <P
+  and, optionally:
+  <P
 ></P
 ><OL
 TYPE="a"
 ><LI
 ><P
->GD (v1.19) for bug charting</P
+>&#13;        <A
+HREF="http://www.cpan.org/modules/by-module/GD/"
+TARGET="_top"
+>GD</A
+>
+        (v1.19) for bug charting
+      </P
 ></LI
 ><LI
 ><P
->Chart::Base (v0.99c) for bug charting</P
+>&#13;        <A
+HREF="http://www.cpan.org/modules/by-module/Chart/"
+TARGET="_top"
+>Chart::Base 
+        </A
+>
+        (v0.99c) for bug charting
+      </P
 ></LI
 ><LI
 ><P
->XML::Parser (any) for the XML interface</P
+>&#13;        XML::Parser 
+        (any) for the XML interface
+      </P
 ></LI
 ><LI
 ><P
->MIME::Parser (any) for the email interface</P
+>&#13;        MIME::Parser 
+        (any) for the email interface
+      </P
 ></LI
 ></OL
 >          
-          </P
+  </P
 ></LI
 ><LI
 ><P
->The web server of your choice. Apache is recommended.</P
+>&#13;    The web server of your choice. 
+    <A
+HREF="http://www.apache.org/"
+TARGET="_top"
+>Apache</A
+> 
+    is highly recommended.
+  </P
 ></LI
 ></OL
 >
@@ -579,11 +665,6 @@ NAME="perl-modules">4.1.5. Perl Modules</H2
       All Perl modules can be found on the
       Comprehensive Perl Archive Network (CPAN) at http://www.cpan.org. The
       CPAN servers have a real tendency to bog down, so please use mirrors.
-      The current location at the time of this writing can be found in 
-      <A
-HREF="downloadlinks.html"
->Appendix B</A
->.
     </P
 ><P
 >Quality, general Perl module installation instructions can be
@@ -594,7 +675,7 @@ HREF="downloadlinks.html"
       <DIV
 CLASS="informalexample"
 ><A
-NAME="AEN460"><P
+NAME="AEN606"><P
 ></P
 ><P
 >&#13;          <TT
@@ -619,7 +700,7 @@ CLASS="command"
       <DIV
 CLASS="informalexample"
 ><A
-NAME="AEN465"><P
+NAME="AEN611"><P
 ></P
 ><P
 >Untar the module tarball -- it should create its own
@@ -754,7 +835,7 @@ CLASS="section"
 ><H3
 CLASS="section"
 ><A
-NAME="AEN493">4.1.5.1. DBI</H3
+NAME="AEN639">4.1.5.1. DBI</H3
 ><P
 >The DBI module is a generic Perl module used the
       MySQL-related modules. As long as your Perl installation was done
@@ -767,7 +848,7 @@ CLASS="section"
 ><H3
 CLASS="section"
 ><A
-NAME="AEN496">4.1.5.2. Data::Dumper</H3
+NAME="AEN642">4.1.5.2. Data::Dumper</H3
 ><P
 >The Data::Dumper module provides data structure persistence for
       Perl (similar to Java's serialization). It comes with later
@@ -779,7 +860,7 @@ CLASS="section"
 ><H3
 CLASS="section"
 ><A
-NAME="AEN499">4.1.5.3. MySQL-related modules</H3
+NAME="AEN645">4.1.5.3. MySQL-related modules</H3
 ><P
 >The Perl/MySQL interface requires a few mutually-dependent Perl
       modules. These modules are grouped together into the the
@@ -803,7 +884,7 @@ CLASS="section"
 ><H3
 CLASS="section"
 ><A
-NAME="AEN504">4.1.5.4. TimeDate modules</H3
+NAME="AEN650">4.1.5.4. TimeDate modules</H3
 ><P
 >Many of the more common date/time/calendar related Perl modules
       have been grouped into a bundle similar to the MySQL modules bundle.
@@ -817,7 +898,7 @@ CLASS="section"
 ><H3
 CLASS="section"
 ><A
-NAME="AEN507">4.1.5.5. GD (optional)</H3
+NAME="AEN653">4.1.5.5. GD (optional)</H3
 ><P
 >The GD library was written by Thomas Boutell a long while ago to
       programatically generate images in C. Since then it's become the
@@ -870,16 +951,11 @@ CLASS="section"
 ><H3
 CLASS="section"
 ><A
-NAME="AEN514">4.1.5.6. Chart::Base (optional)</H3
+NAME="AEN660">4.1.5.6. Chart::Base (optional)</H3
 ><P
 >The Chart module provides Bugzilla with on-the-fly charting
       abilities. It can be installed in the usual fashion after it has been
-      fetched from CPAN where it is found as the Chart-x.x... tarball, linked
-      in 
-      <A
-HREF="downloadlinks.html"
->Appendix B</A
->. 
+      fetched from CPAN. 
       Note that earlier versions that 0.99c used GIFs, which are no longer
       supported by the latest versions of GD.</P
 ></DIV
@@ -889,7 +965,7 @@ CLASS="section"
 ><H2
 CLASS="section"
 ><A
-NAME="AEN518">4.1.6. HTTP Server</H2
+NAME="AEN663">4.1.6. HTTP Server</H2
 ><P
 >You have a freedom of choice here - Apache, Netscape or any other
       server on UNIX would do. You can run the web server on a
@@ -1064,7 +1140,7 @@ CLASS="section"
 ><H2
 CLASS="section"
 ><A
-NAME="AEN537">4.1.7. Bugzilla</H2
+NAME="AEN682">4.1.7. Bugzilla</H2
 ><P
 >You should untar the Bugzilla files into a directory that you're
       willing to make writable by the default web server user (probably 
@@ -1139,23 +1215,14 @@ CLASS="filename"
 >/usr/bin/perl</TT
 >). 
       Otherwise you must hack all the .cgi files to change where they look
-      for Perl. This can be done using
-      <A
-HREF="setperl.html"
->The setperl.csh Utility</A
->, 
-      found in 
-      <A
-HREF="patches.html"
->Useful Patches and Utilities for Bugzilla</A
->, or the below one-liner. 
+      for Perl. This can be done using the following Perl one-liner. 
       I suggest using the symlink approach for future release
       compatibility.
        
       <DIV
 CLASS="example"
 ><A
-NAME="AEN553"><P
+NAME="AEN696"><P
 ><B
 >Example 4-1. Changing the path to Perl</B
 ></P
@@ -1195,7 +1262,7 @@ CLASS="section"
 ><H2
 CLASS="section"
 ><A
-NAME="AEN558">4.1.8. Setting Up the MySQL Database</H2
+NAME="AEN701">4.1.8. Setting Up the MySQL Database</H2
 ><P
 >After you've gotten all the software installed and working you're
       ready to start preparing the database for its life as the back end to
@@ -1363,7 +1430,7 @@ CLASS="section"
 ><H2
 CLASS="section"
 ><A
-NAME="AEN593">4.1.9. <TT
+NAME="AEN736">4.1.9. <TT
 CLASS="filename"
 >checksetup.pl</TT
 ></H2
@@ -1479,7 +1546,9 @@ CLASS="filename"
       <TT
 CLASS="filename"
 >checksetup.pl</TT
->. 
+>. (Note: on some security-conscious
+      systems, you may need to change the login shell for the webserver 
+      account before you can do this.)
       On this second run, it will create the database and an administrator
       account for which you will be prompted to provide information.</P
 ><DIV
@@ -1516,7 +1585,7 @@ CLASS="section"
 ><H2
 CLASS="section"
 ><A
-NAME="AEN625">4.1.10. Securing MySQL</H2
+NAME="AEN768">4.1.10. Securing MySQL</H2
 ><P
 >If you followed the installation instructions for setting up your
       "bugs" and "root" user in MySQL, much of this should not apply to you.
@@ -1787,156 +1856,6 @@ TYPE="1"
 >
       </P
 ></DIV
-><DIV
-CLASS="section"
-><H2
-CLASS="section"
-><A
-NAME="AEN691">4.1.11. Optional Additional Configuration</H2
-><DIV
-CLASS="section"
-><H3
-CLASS="section"
-><A
-NAME="AEN693">4.1.11.1. The Whining Cron</H3
-><P
->By now you have a fully functional Bugzilla, but what good are
-        bugs if they're not annoying? To help make those bugs more annoying you
-        can set up Bugzilla's automatic whining system to complain at engineers
-        which leave their bugs in the NEW state without triaging them.
-        </P
-><P
->&#13;        This can be done by
-        adding the following command as a daily crontab entry (for help on that
-        see that crontab man page): 
-        <P
-></P
-><TABLE
-BORDER="0"
-><TBODY
-><TR
-><TD
->&#13;            <TT
-CLASS="computeroutput"
->&#13;              <B
-CLASS="command"
->cd &#60;your-bugzilla-directory&#62; ;
-              ./whineatnews.pl</B
->
-            </TT
->
-          </TD
-></TR
-></TBODY
-></TABLE
-><P
-></P
->
-        </P
-><DIV
-CLASS="tip"
-><P
-></P
-><TABLE
-CLASS="tip"
-WIDTH="100%"
-BORDER="0"
-><TR
-><TD
-WIDTH="25"
-ALIGN="CENTER"
-VALIGN="TOP"
-><IMG
-SRC="../images/tip.gif"
-HSPACE="5"
-ALT="Tip"></TD
-><TD
-ALIGN="LEFT"
-VALIGN="TOP"
-><P
->Depending on your system, crontab may have several manpages.
-          The following command should lead you to the most useful page for
-          this purpose: 
-          <TABLE
-BORDER="0"
-BGCOLOR="#E0E0E0"
-WIDTH="100%"
-><TR
-><TD
-><FONT
-COLOR="#000000"
-><PRE
-CLASS="programlisting"
->man 5 crontab</PRE
-></FONT
-></TD
-></TR
-></TABLE
->
-          </P
-></TD
-></TR
-></TABLE
-></DIV
-></DIV
-><DIV
-CLASS="section"
-><H3
-CLASS="section"
-><A
-NAME="AEN704">4.1.11.2. Bug Graphs</H3
-><P
->As long as you installed the GD and Graph::Base Perl modules you
-        might as well turn on the nifty Bugzilla bug reporting graphs.</P
-><P
->Add a cron entry like this to run 
-        <TT
-CLASS="filename"
->collectstats.pl</TT
-> 
-        daily at 5 after midnight: 
-        <P
-></P
-><TABLE
-BORDER="0"
-><TBODY
-><TR
-><TD
->&#13;            <TT
-CLASS="computeroutput"
->&#13;              <TT
-CLASS="prompt"
->bash#</TT
->
-
-              <B
-CLASS="command"
->crontab -e</B
->
-            </TT
->
-          </TD
-></TR
-><TR
-><TD
->&#13;            <TT
-CLASS="computeroutput"
->5 0 * * * cd &#60;your-bugzilla-directory&#62; ;
-            ./collectstats.pl</TT
->
-          </TD
-></TR
-></TBODY
-></TABLE
-><P
-></P
->
-        </P
-><P
->After two days have passed you'll be able to view bug graphs from
-        the Bug Reports page.</P
-></DIV
-></DIV
 ></DIV
 ><DIV
 CLASS="NAVFOOTER"
@@ -1972,7 +1891,7 @@ WIDTH="33%"
 ALIGN="right"
 VALIGN="top"
 ><A
-HREF="win32.html"
+HREF="extraconfig.html"
 ACCESSKEY="N"
 >Next</A
 ></TD
@@ -1996,7 +1915,7 @@ ACCESSKEY="U"
 WIDTH="33%"
 ALIGN="right"
 VALIGN="top"
->Win32 Installation Notes</TD
+>Optional Additional Configuration</TD
 ></TR
 ></TABLE
 ></DIV

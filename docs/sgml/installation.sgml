@@ -31,83 +31,140 @@
       </note>
 
       <para>The software packages necessary for the proper running of
-      Bugzilla are: 
+      Bugzilla (with download links) are: 
       <orderedlist>
-        <listitem>
-          <para>MySQL database server and the mysql client (3.22.5 or
-          greater)</para>
-        </listitem>
+      
+      
+<listitem>
+  <para>
+    <ulink url="http://www.mysql.com/">MySQL database server</ulink>
+    (3.22.5 or greater)
+  </para>
+</listitem>
 
-        <listitem>
-          <para>Perl (5.005 or greater, 5.6.1 is recommended if you wish to
-          use Bundle::Bugzilla)</para>
-        </listitem>
+<listitem>
+  <para>
+    <ulink url="http://www.perl.org">Perl</ulink>
+    (5.005 or greater, 5.6.1 is recommended if you wish to
+    use Bundle::Bugzilla)
+  </para>
+</listitem>
 
-        <listitem>
-          <para>Perl Modules (minimum version):
-          <orderedlist>
-            <listitem>
-              <para>Template (v2.07)</para>
-            </listitem>
+<listitem>
+  <para>Perl Modules (minimum version):
+  <orderedlist>
+    <listitem>
+      <para>
+        <ulink url="http://www.template-toolkit.org">Template</ulink>
+        (v2.07)
+      </para>
+    </listitem>
 
-            <listitem>
-              <para>AppConfig (v1.52)</para>
-            </listitem>
+    <listitem>
+      <para>
+        <ulink url="http://www.cpan.org/modules/by-module/AppConfig/">AppConfig 
+        </ulink>
+        (v1.52)
+      </para>
+    </listitem>
 
-            <listitem>
-              <para>Text::Wrap (v2001.0131)</para>
-            </listitem>
+    <listitem>
+      <para>
+        Text::Wrap 
+        (v2001.0131)
+      </para>
+    </listitem>
 
-            <listitem>
-              <para>File::Spec (v0.8.2)</para>
-            </listitem>
+    <listitem>
+      <para>
+        <ulink url="http://search.cpan.org/search?dist=File-Spec">File::Spec 
+        </ulink>
+        (v0.8.2)
+      </para>
+    </listitem>
 
-            <listitem>
-              <para>Data::Dumper (any)</para>
-            </listitem>
+    <listitem>
+      <para>
+        <ulink url="http://www.cpan.org/modules/by-module/Data/">Data::Dumper 
+        </ulink> 
+        (any)
+      </para>
+    </listitem>
 
-            <listitem>
-              <para>DBD::mysql (v1.2209)</para>
-            </listitem>
+    <listitem>
+      <para>
+        <ulink url="http://www.cpan.org/modules/by-module/Mysql/">DBD::mysql
+        </ulink> 
+        (v1.2209)
+      </para>
+    </listitem>
 
-            <listitem>
-              <para>DBI (v1.13)</para>
-            </listitem>
+    <listitem>
+      <para>
+        <ulink url="http://www.cpan.org/modules/by-module/DBI/">DBI</ulink> 
+        (v1.13)
+      </para>
+    </listitem>
 
-            <listitem>
-              <para>Date::Parse (any)</para>
-            </listitem>
+    <listitem>
+      <para>
+        <ulink url="http://www.cpan.org/modules/by-module/Date/">Date::Parse
+        </ulink> 
+        (any)
+      </para>
+    </listitem>
 
-            <listitem>
-              <para>CGI::Carp (any)</para>
-            </listitem>
+    <listitem>
+      <para>
+        CGI::Carp 
+        (any)
+      </para>
+    </listitem>
 
-          </orderedlist>
-          and, optionally:
-          <orderedlist>  
-            <listitem>
-              <para>GD (v1.19) for bug charting</para>
-            </listitem>
+  </orderedlist>
+  and, optionally:
+  <orderedlist>  
+    <listitem>
+      <para>
+        <ulink url="http://www.cpan.org/modules/by-module/GD/">GD</ulink>
+        (v1.19) for bug charting
+      </para>
+    </listitem>
 
-            <listitem>
-              <para>Chart::Base (v0.99c) for bug charting</para>
-            </listitem>
+    <listitem>
+      <para>
+        <ulink url="http://www.cpan.org/modules/by-module/Chart/">Chart::Base 
+        </ulink>
+        (v0.99c) for bug charting
+      </para>
+    </listitem>
 
-            <listitem>
-              <para>XML::Parser (any) for the XML interface</para>
-            </listitem>
+    <listitem>
+      <para>
+        XML::Parser 
+        (any) for the XML interface
+      </para>
+    </listitem>
 
-            <listitem>
-              <para>MIME::Parser (any) for the email interface</para>
-            </listitem>
-          </orderedlist>          
-          </para>
-        </listitem>
+    <listitem>
+      <para>
+        MIME::Parser 
+        (any) for the email interface
+      </para>
+    </listitem>
+  </orderedlist>          
+  </para>
+</listitem>
 
 
-        <listitem>
-          <para>The web server of your choice. Apache is recommended.</para>
-        </listitem>
+<listitem>
+  <para>
+    The web server of your choice. 
+    <ulink url="http://www.apache.org/">Apache</ulink> 
+    is highly recommended.
+  </para>
+</listitem>
+
 
       </orderedlist>
 
@@ -266,8 +323,6 @@
       All Perl modules can be found on the
       Comprehensive Perl Archive Network (CPAN) at http://www.cpan.org. The
       CPAN servers have a real tendency to bog down, so please use mirrors.
-      The current location at the time of this writing can be found in 
-      <xref linkend="downloadlinks" />.
     </para>
     
       <para>Quality, general Perl module installation instructions can be
@@ -430,9 +485,7 @@
 
       <para>The Chart module provides Bugzilla with on-the-fly charting
       abilities. It can be installed in the usual fashion after it has been
-      fetched from CPAN where it is found as the Chart-x.x... tarball, linked
-      in 
-      <xref linkend="downloadlinks" />. 
+      fetched from CPAN. 
       Note that earlier versions that 0.99c used GIFs, which are no longer
       supported by the latest versions of GD.</para>
     </section>
@@ -528,10 +581,7 @@
       for the correct location of your Perl executable (probably 
       <filename>/usr/bin/perl</filename>). 
       Otherwise you must hack all the .cgi files to change where they look
-      for Perl. This can be done using
-      <xref linkend="setperl" />, 
-      found in 
-      <xref linkend="patches" />, or the below one-liner. 
+      for Perl. This can be done using the following Perl one-liner. 
       I suggest using the symlink approach for future release
       compatibility.
        
@@ -698,7 +748,9 @@
       <para>Once you are happy with the settings, 
       <filename>su</filename> to the user
       your web server runs as, and re-run 
-      <filename>checksetup.pl</filename>. 
+      <filename>checksetup.pl</filename>. (Note: on some security-conscious
+      systems, you may need to change the login shell for the webserver 
+      account before you can do this.)
       On this second run, it will create the database and an administrator
       account for which you will be prompted to provide information.</para>
 
@@ -854,69 +906,142 @@
       </orderedlist>
       </para>
     </section>
+  </section>
+  
+  <section id="extraconfig">
+    <title>Optional Additional Configuration</title>
 
     <section>
-      <title>Optional Additional Configuration</title>
+      <title>Dependency Charts</title>
 
-      <section>
-        <title>The Whining Cron</title>
+      <para>As well as the text-based dependency graphs, Bugzilla also
+      supports dependency graphing, using a package called 'dot'.
+      Exactly how this works is controlled by the 'webdotbase' parameter.
+      </para>
 
-        <para>By now you have a fully functional Bugzilla, but what good are
-        bugs if they're not annoying? To help make those bugs more annoying you
-        can set up Bugzilla's automatic whining system to complain at engineers
-        which leave their bugs in the NEW state without triaging them.
+      <para>(To be written...</para>
+   </section>
+
+    <section>
+      <title>Bug Graphs</title>
+
+      <para>As long as you installed the GD and Graph::Base Perl modules you
+      might as well turn on the nifty Bugzilla bug reporting graphs.</para>
+
+      <para>Add a cron entry like this to run 
+      <filename>collectstats.pl</filename> 
+      daily at 5 after midnight: 
+      <simplelist>
+        <member>
+          <computeroutput>
+            <prompt>bash#</prompt>
+
+            <command>crontab -e</command>
+          </computeroutput>
+        </member>
+
+        <member>
+          <computeroutput>5 0 * * * cd &lt;your-bugzilla-directory&gt; ;
+          ./collectstats.pl</computeroutput>
+        </member>
+      </simplelist>
+      </para>
+
+      <para>After two days have passed you'll be able to view bug graphs from
+      the Bug Reports page.</para>
+    </section>
+
+    <section>
+      <title>The Whining Cron</title>
+
+      <para>By now you have a fully functional Bugzilla, but what good are
+      bugs if they're not annoying? To help make those bugs more annoying you
+      can set up Bugzilla's automatic whining system to complain at engineers
+      which leave their bugs in the NEW state without triaging them.
+      </para>
+      <para>
+      This can be done by
+      adding the following command as a daily crontab entry (for help on that
+      see that crontab man page): 
+      <simplelist>
+        <member>
+          <computeroutput>
+            <command>cd &lt;your-bugzilla-directory&gt; ;
+            ./whineatnews.pl</command>
+          </computeroutput>
+        </member>
+      </simplelist>
+      </para>
+
+      <tip>
+        <para>Depending on your system, crontab may have several manpages.
+        The following command should lead you to the most useful page for
+        this purpose: 
+        <programlisting>man 5 crontab</programlisting>
         </para>
-        <para>
-        This can be done by
-        adding the following command as a daily crontab entry (for help on that
-        see that crontab man page): 
-        <simplelist>
-          <member>
-            <computeroutput>
-              <command>cd &lt;your-bugzilla-directory&gt; ;
-              ./whineatnews.pl</command>
-            </computeroutput>
-          </member>
-        </simplelist>
-        </para>
+      </tip>
+    </section>
 
-        <tip>
-          <para>Depending on your system, crontab may have several manpages.
-          The following command should lead you to the most useful page for
-          this purpose: 
-          <programlisting>man 5 crontab</programlisting>
+    <section id="bzldap">
+      <title>LDAP Authentication</title>
+      <para>
+        <warning>
+          <para>This information on using the LDAP
+            authentication options with Bugzilla is old, and the authors do
+            not know of anyone who has tested it. Approach with caution.
           </para>
-        </tip>
-      </section>
-
-      <section>
-        <title>Bug Graphs</title>
-
-        <para>As long as you installed the GD and Graph::Base Perl modules you
-        might as well turn on the nifty Bugzilla bug reporting graphs.</para>
-
-        <para>Add a cron entry like this to run 
-        <filename>collectstats.pl</filename> 
-        daily at 5 after midnight: 
-        <simplelist>
-          <member>
-            <computeroutput>
-              <prompt>bash#</prompt>
-
-              <command>crontab -e</command>
-            </computeroutput>
-          </member>
-
-          <member>
-            <computeroutput>5 0 * * * cd &lt;your-bugzilla-directory&gt; ;
-            ./collectstats.pl</computeroutput>
-          </member>
-        </simplelist>
-        </para>
-
-        <para>After two days have passed you'll be able to view bug graphs from
-        the Bug Reports page.</para>
-      </section>
+        </warning>
+      </para>
+      
+      <para>
+      The existing authentication
+      scheme for Bugzilla uses email addresses as the primary user ID, and a
+      password to authenticate that user. All places within Bugzilla where
+      you need to deal with user ID (e.g assigning a bug) use the email
+      address. The LDAP authentication builds on top of this scheme, rather
+      than replacing it. The initial log in is done with a username and
+      password for the LDAP directory. This then fetches the email address
+      from LDAP and authenticates seamlessly in the standard Bugzilla
+      authentication scheme using this email address. If an account for this
+      address already exists in your Bugzilla system, it will log in to that
+      account. If no account for that email address exists, one is created at
+      the time of login. (In this case, Bugzilla will attempt to use the
+      "displayName" or "cn" attribute to determine the user's full name.)
+      After authentication, all other user-related tasks are still handled by
+      email address, not LDAP username. You still assign bugs by email
+      address, query on users by email address, etc.
+      </para>
+      
+      <para>Using LDAP for Bugzilla authentication requires the 
+      Mozilla::LDAP (aka PerLDAP) Perl module. The
+      Mozilla::LDAP module in turn requires Netscape's Directory SDK for C.
+      After you have installed the SDK, then install the PerLDAP module.
+      Mozilla::LDAP and the Directory SDK for C are both 
+      <ulink url="http://www.mozilla.org/directory/">available for
+      download</ulink> from mozilla.org. 
+      </para>
+      
+      <para>
+      Set the Param 'useLDAP' to "On" **only** if you will be using an LDAP
+      directory for
+      authentication. Be very careful when setting up this parameter; if you
+      set LDAP authentication, but do not have a valid LDAP directory set up,
+      you will not be able to log back in to Bugzilla once you log out. (If
+      this happens, you can get back in by manually editing the data/params
+      file, and setting useLDAP back to 0.)
+      </para>
+      
+      <para>If using LDAP, you must set the
+      three additional parameters: Set LDAPserver to the name (and optionally
+      port) of your LDAP server. If no port is specified, it defaults to the
+      default port of 389. (e.g "ldap.mycompany.com" or
+      "ldap.mycompany.com:1234") Set LDAPBaseDN to the base DN for searching
+      for users in your LDAP directory. (e.g. "ou=People,o=MyCompany") uids
+      must be unique under the DN specified here. Set LDAPmailattribute to
+      the name of the attribute in your LDAP directory which contains the
+      primary email address. On most directory servers available, this is
+      "mail", but you may need to change this.
+      </para>      
     </section>
   </section>
 
@@ -1639,62 +1764,6 @@ binmode(STDOUT);
         </para>
       </tip>
     </section>
-
-    <section id="bzldap">
-      <title>Bugzilla LDAP Integration</title>
-
-      <para>What follows is some late-breaking information on using the LDAP
-      authentication options with Bugzilla. The author has not tested these
-      (nor even formatted this section!) so please contribute feedback to the
-      newsgroup.</para>
-
-      <literallayout>Mozilla::LDAP module The Mozilla::LDAP module allows you
-      to use LDAP for authentication to the Bugzilla system. This module is
-      not required if you are not using LDAP. Mozilla::LDAP (aka PerLDAP) is
-      available for download from http://www.mozilla.org/directory. NOTE: The
-      Mozilla::LDAP module requires Netscape's Directory SDK. Follow the link
-      for "Directory SDK for C" on that same page to download the SDK first.
-      After you have installed this SDK, then install the PerLDAP module.
-      ----------------------------------------------------------------------
-      Post-Installation Checklist
-      ----------------------------------------------------------------------
-      Set useLDAP to "On" **only** if you will be using an LDAP directory for
-      authentication. Be very careful when setting up this parameter; if you
-      set LDAP authentication, but do not have a valid LDAP directory set up,
-      you will not be able to log back in to Bugzilla once you log out. (If
-      this happens, you can get back in by manually editing the data/params
-      file, and setting useLDAP back to 0.) If using LDAP, you must set the
-      three additional parameters: Set LDAPserver to the name (and optionally
-      port) of your LDAP server. If no port is specified, it defaults to the
-      default port of 389. (e.g "ldap.mycompany.com" or
-      "ldap.mycompany.com:1234") Set LDAPBaseDN to the base DN for searching
-      for users in your LDAP directory. (e.g. "ou=People,o=MyCompany") uids
-      must be unique under the DN specified here. Set LDAPmailattribute to
-      the name of the attribute in your LDAP directory which contains the
-      primary email address. On most directory servers available, this is
-      "mail", but you may need to change this.
-      ----------------------------------------------------------------------
-      (Not sure where this bit should go, but it's important that it be in
-      there somewhere...)
-      ----------------------------------------------------------------------
-      Using LDAP authentication for Bugzilla: The existing authentication
-      scheme for Bugzilla uses email addresses as the primary user ID, and a
-      password to authenticate that user. All places within Bugzilla where
-      you need to deal with user ID (e.g assigning a bug) use the email
-      address. The LDAP authentication builds on top of this scheme, rather
-      than replacing it. The initial log in is done with a username and
-      password for the LDAP directory. This then fetches the email address
-      from LDAP and authenticates seamlessly in the standard Bugzilla
-      authentication scheme using this email address. If an account for this
-      address already exists in your Bugzilla system, it will log in to that
-      account. If no account for that email address exists, one is created at
-      the time of login. (In this case, Bugzilla will attempt to use the
-      "displayName" or "cn" attribute to determine the user's full name.)
-      After authentication, all other user-related tasks are still handled by
-      email address, not LDAP username. You still assign bugs by email
-      address, query on users by email address, etc.
-      ----------------------------------------------------------------------</literallayout>
-    </section>
   </section>
 
   <section id="osx">
@@ -1978,6 +2047,56 @@ binmode(STDOUT);
       <quote>ISO-8859-1</quote>, above, to 
       <quote>UTF-8</quote>.</para>
     </section>
+  </section>
+  
+  <section id="troubleshooting">
+    <title>Troubleshooting</title>
+    
+    <para>This section gives solutions to common Bugzilla installation
+    problems.
+    </para>
+    
+    <section>
+      <title>DBD::Sponge::db prepare failed</title>
+      
+      <para>
+        The following error message may appear due to a bug in DBD::mysql
+        (over which the Bugzilla team have no control):
+      </para>
+      
+<programlisting><![CDATA[ "DBD::Sponge::db prepare failed: Cannot determine NUM_OF_FIELDS at D:/Perl/site/lib/DBD/mysql.pm line 248.
+  SV = NULL(0x0) at 0x20fc444
+  REFCNT = 1
+  FLAGS = (PADBUSY,PADMY)"
+]]></programlisting>
+
+      <para>
+        To fix this, go to &lt;path-to-perl&gt;/lib/DBD/sponge.pm in your Perl 
+        installation and replace
+      </para>
+        
+<programlisting><![CDATA[ my $numFields;
+ if ($attribs->{'NUM_OF_FIELDS'}) {
+     $numFields = $attribs->{'NUM_OF_FIELDS'};
+ } elsif ($attribs->{'NAME'}) {
+     $numFields = @{$attribs->{NAME}};
+]]></programlisting>
+
+      <para>
+        by
+      </para>
+
+<programlisting><![CDATA[ my $numFields;
+ if ($attribs->{'NUM_OF_FIELDS'}) {
+     $numFields = $attribs->{'NUM_OF_FIELDS'};
+ } elsif ($attribs->{'NAMES'}) {
+     $numFields = @{$attribs->{NAMES}};
+]]></programlisting>
+
+      <para>
+        (note the S added to NAME.)      
+      </para>
+    </section>
     
     <section id="paranoid-security">
       <title>cannot chdir(/var/spool/mqueue)</title>
@@ -1987,8 +2106,8 @@ binmode(STDOUT);
       <quote>paranoid</quote>
       security options, it is possible that the checksetup.pl script may fail
       with the error: 
-      <errorname>cannot chdir(/var/spool/mqueue): Permission
-      denied</errorname>.
+<programlisting><![CDATA[cannot chdir(/var/spool/mqueue): Permission denied
+]]></programlisting>
       </para>
       
       <para>
@@ -2001,7 +2120,7 @@ binmode(STDOUT);
       </command>
       as root to fix this problem.
       </para>
-    </section>
+    </section>    
   </section>
 </chapter>
 

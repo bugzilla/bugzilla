@@ -133,49 +133,6 @@ RewriteRule ^/([0-9]+)$ http://foo.bar.com/show_bug.cgi?id=$1 [L,R]
 
   </section>
 
-  <section id="quicksearch">
-    <title>The Quicksearch Utility</title>
-
-    <para>Quicksearch is a single-text-box query tool which uses metacharacters
-    to indicate what is to be searched. For example, "foo@bar.com" would be
-    looked for in email address fields, because it contains an @ and so
-    is an email address.
-    </para>
-    
-    <para>Quicksearch consists of two Javascript files, 
-    "quicksearch.js" and "localconfig.js",
-    and two documentation files, "quicksearch.html" and
-    "quicksearchhack.html". More information on how to use Quicksearch
-    can be found there. You'll find the Quicksearch box on Bugzilla's
-    front page.</para>
-
-    <para>To take full advantage of the query power, the Bugzilla maintainer
-    must edit "localconfig.js" and change the parameters according to the local
-    installation.</para>
-
-    <para>Currently, keywords must be hard-coded in localconfig.js. If they
-    are not, keywords are not automatically recognized. This means, if
-    localconfig.js is left unconfigured, that searching for a bug with the
-    "foo" keyword will only find bugs with "foo" in the summary, status
-    whiteboard, product or component name, but not those with the keyword
-    "foo".</para>
-
-    <para>Workarounds for Bugzilla users: 
-    <simplelist>
-      <member>search for '!foo' (this will find only bugs with the keyword
-      "foo"</member>
-
-      <member>search 'foo,!foo' (equivalent to 'foo OR keyword:foo')</member>
-    </simplelist>
-    </para>
-
-    <para>When this tool is ported from client-side JavaScript to server-side
-    Perl, the requirement for hard-coding keywords can be fixed. 
-    <ulink url="http://bugzilla.mozilla.org/show_bug.cgi?id=70907">This
-    bug</ulink>
-
-    has details.</para>
-  </section>
 </appendix>
 
 <!-- Keep this comment at the end of the file

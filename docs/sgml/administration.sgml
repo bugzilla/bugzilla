@@ -829,258 +829,258 @@
         </listitem>
       </orderedlist>
     </section>
+  </section>
+  
+  <section id="voting">
+    <title>Voting</title>
 
-    <section id="voting">
-      <title>Voting</title>
+    <para>The concept of "voting" is a poorly understood, yet powerful
+    feature for the management of open-source projects. Each user is
+    assigned so many Votes per product, which they can freely reassign (or
+    assign multiple votes to a single bug). This allows developers to gauge
+    user need for a particular enhancement or bugfix. By allowing bugs with
+    a certain number of votes to automatically move from "UNCONFIRMED" to
+    "NEW", users of the bug system can help high-priority bugs garner
+    attention so they don't sit for a long time awaiting triage.</para>
 
-      <para>The concept of "voting" is a poorly understood, yet powerful
-      feature for the management of open-source projects. Each user is
-      assigned so many Votes per product, which they can freely reassign (or
-      assign multiple votes to a single bug). This allows developers to gauge
-      user need for a particular enhancement or bugfix. By allowing bugs with
-      a certain number of votes to automatically move from "UNCONFIRMED" to
-      "NEW", users of the bug system can help high-priority bugs garner
-      attention so they don't sit for a long time awaiting triage.</para>
+    <para>The daunting challenge of Votes is deciding where you draw the
+    line for a "vocal majority". If you only have a user base of 100 users,
+    setting a low threshold for bugs to move from UNCONFIRMED to NEW makes
+    sense. As the Bugzilla user base expands, however, these thresholds
+    must be re-evaluated. You should gauge whether this feature is worth
+    the time and close monitoring involved, and perhaps forego
+    implementation until you have a critical mass of users who demand
+    it.</para>
 
-      <para>The daunting challenge of Votes is deciding where you draw the
-      line for a "vocal majority". If you only have a user base of 100 users,
-      setting a low threshold for bugs to move from UNCONFIRMED to NEW makes
-      sense. As the Bugzilla user base expands, however, these thresholds
-      must be re-evaluated. You should gauge whether this feature is worth
-      the time and close monitoring involved, and perhaps forego
-      implementation until you have a critical mass of users who demand
-      it.</para>
+    <para>To modify Voting settings:</para>
 
-      <para>To modify Voting settings:</para>
+    <orderedlist>
+      <listitem>
+        <para>Navigate to the "Edit product" screen for the Product you
+        wish to modify</para>
+      </listitem>
 
-      <orderedlist>
-        <listitem>
-          <para>Navigate to the "Edit product" screen for the Product you
-          wish to modify</para>
-        </listitem>
+      <listitem>
+        <para>Set "Maximum Votes per person" to your calculated value.
+        Setting this field to "0" disables voting.</para>
+      </listitem>
 
-        <listitem>
-          <para>Set "Maximum Votes per person" to your calculated value.
-          Setting this field to "0" disables voting.</para>
-        </listitem>
+      <listitem>
+        <para>Set "Maximum Votes a person can put on a single bug" to your
+        calculated value. It should probably be some number lower than the
+        "Maximum votes per person". Setting this field to "0" disables
+        voting, but leaves the voting options open to the user. This is
+        confusing.</para>
+      </listitem>
 
-        <listitem>
-          <para>Set "Maximum Votes a person can put on a single bug" to your
-          calculated value. It should probably be some number lower than the
-          "Maximum votes per person". Setting this field to "0" disables
-          voting, but leaves the voting options open to the user. This is
-          confusing.</para>
-        </listitem>
+      <listitem>
+        <para>Set "Number of votes a bug in this product needs to
+        automatically get out of the UNCONFIRMED state" to your calculated
+        number. Setting this field to "0" disables the automatic move of
+        bugs from UNCONFIRMED to NEW. Some people advocate leaving this at
+        "0", but of what use are Votes if your Bugzilla user base is unable
+        to affect which bugs appear on Development radar? 
+        <tip>
+          <para>You should probably set this number to higher than a small
+          coalition of Bugzilla users can influence it. Most sites use this
+          as a "referendum" mechanism -- if users are able to vote a bug
+          out of UNCONFIRMED, it is a 
+          <emphasis>really</emphasis>
 
-        <listitem>
-          <para>Set "Number of votes a bug in this product needs to
-          automatically get out of the UNCONFIRMED state" to your calculated
-          number. Setting this field to "0" disables the automatic move of
-          bugs from UNCONFIRMED to NEW. Some people advocate leaving this at
-          "0", but of what use are Votes if your Bugzilla user base is unable
-          to affect which bugs appear on Development radar? 
-          <tip>
-            <para>You should probably set this number to higher than a small
-            coalition of Bugzilla users can influence it. Most sites use this
-            as a "referendum" mechanism -- if users are able to vote a bug
-            out of UNCONFIRMED, it is a 
-            <emphasis>really</emphasis>
+          bad bug!</para>
+        </tip>
+        </para>
+      </listitem>
 
-            bad bug!</para>
-          </tip>
-          </para>
-        </listitem>
+      <listitem>
+        <para>Once you have adjusted the values to your preference, select
+        the "Update" button.</para>
+      </listitem>
+    </orderedlist>
+  </section>
 
-        <listitem>
-          <para>Once you have adjusted the values to your preference, select
-          the "Update" button.</para>
-        </listitem>
-      </orderedlist>
-    </section>
+  <section id="groups">
+    <title>Groups and Group Security</title>
 
-    <section id="groups">
-      <title>Groups and Group Security</title>
+    <para>Groups can be very useful in bugzilla, because they allow users
+    to isolate bugs or products that should only be seen by certain people.
+    Groups can also be a complicated minefield of interdependencies and
+    weirdness if mismanaged. 
+    <example>
+      <title>When to Use Group Security</title>
 
-      <para>Groups can be very useful in bugzilla, because they allow users
-      to isolate bugs or products that should only be seen by certain people.
-      Groups can also be a complicated minefield of interdependencies and
-      weirdness if mismanaged. 
-      <example>
-        <title>When to Use Group Security</title>
+      <informalexample>
+        <para>Many Bugzilla sites isolate "Security-related" bugs from all
+        other bugs. This way, they can have a fix ready before the security
+        vulnerability is announced to the world. You can create a
+        "Security" product which, by default, has no members, and only add
+        members to the group (in their individual User page, as described
+        under User Administration) who should have priveleged access to
+        "Security" bugs. Alternately, you may create a Group independently
+        of any Product, and change the Group mask on individual bugs to
+        restrict access to members only of certain Groups.</para>
+      </informalexample>
+    </example>
 
-        <informalexample>
-          <para>Many Bugzilla sites isolate "Security-related" bugs from all
-          other bugs. This way, they can have a fix ready before the security
-          vulnerability is announced to the world. You can create a
-          "Security" product which, by default, has no members, and only add
-          members to the group (in their individual User page, as described
-          under User Administration) who should have priveleged access to
-          "Security" bugs. Alternately, you may create a Group independently
-          of any Product, and change the Group mask on individual bugs to
-          restrict access to members only of certain Groups.</para>
-        </informalexample>
-      </example>
+    Groups only work if you enable the "usebuggroups" paramater. In
+    addition, if the "usebuggroupsentry" parameter is "On", one can
+    restrict access to products by groups, so that only members of a
+    product group are able to view bugs within that product. Group security
+    in Bugzilla can be divided into two categories: Generic and
+    Product-Based.</para>
 
-      Groups only work if you enable the "usebuggroups" paramater. In
-      addition, if the "usebuggroupsentry" parameter is "On", one can
-      restrict access to products by groups, so that only members of a
-      product group are able to view bugs within that product. Group security
-      in Bugzilla can be divided into two categories: Generic and
-      Product-Based.</para>
+    <note>
+      <para>Groups in Bugzilla are a complicated beast that evolved out of
+      very simple user permission bitmasks, apparently itself derived from
+      common concepts in UNIX access controls. A "bitmask" is a
+      fixed-length number whose value can describe one, and only one, set
+      of states. For instance, UNIX file permissions are assigned bitmask
+      values: "execute" has a value of 1, "write" has a value of 2, and
+      "read" has a value of 4. Add them together, and a file can be read,
+      written to, and executed if it has a bitmask of "7". (This is a
+      simplified example -- anybody who knows UNIX security knows there is
+      much more to it than this. Please bear with me for the purpose of
+      this note.) The only way a bitmask scheme can work is by doubling the
+      bit count for each value. Thus if UNIX wanted to offer another file
+      permission, the next would have to be a value of 8, then the next 16,
+      the next 32, etc.</para>
 
-      <note>
-        <para>Groups in Bugzilla are a complicated beast that evolved out of
-        very simple user permission bitmasks, apparently itself derived from
-        common concepts in UNIX access controls. A "bitmask" is a
-        fixed-length number whose value can describe one, and only one, set
-        of states. For instance, UNIX file permissions are assigned bitmask
-        values: "execute" has a value of 1, "write" has a value of 2, and
-        "read" has a value of 4. Add them together, and a file can be read,
-        written to, and executed if it has a bitmask of "7". (This is a
-        simplified example -- anybody who knows UNIX security knows there is
-        much more to it than this. Please bear with me for the purpose of
-        this note.) The only way a bitmask scheme can work is by doubling the
-        bit count for each value. Thus if UNIX wanted to offer another file
-        permission, the next would have to be a value of 8, then the next 16,
-        the next 32, etc.</para>
+      <para>Similarly, Bugzilla offers a bitmask to define group
+      permissions, with an internal limit of 64. Several are already
+      occupied by built-in permissions. The way around this limitation is
+      to avoid assigning groups to products if you have many products,
+      avoid bloating of group lists, and religiously prune irrelevant
+      groups. In reality, most installations of Bugzilla support far fewer
+      than 64 groups, so this limitation has not hit for most sites, but it
+      is on the table to be revised for Bugzilla 3.0 because it interferes
+      with the security schemes of some administrators.</para>
+    </note>
 
-        <para>Similarly, Bugzilla offers a bitmask to define group
-        permissions, with an internal limit of 64. Several are already
-        occupied by built-in permissions. The way around this limitation is
-        to avoid assigning groups to products if you have many products,
-        avoid bloating of group lists, and religiously prune irrelevant
-        groups. In reality, most installations of Bugzilla support far fewer
-        than 64 groups, so this limitation has not hit for most sites, but it
-        is on the table to be revised for Bugzilla 3.0 because it interferes
-        with the security schemes of some administrators.</para>
-      </note>
+    <para>To enable Generic Group Security ("usebuggroups"):</para>
 
-      <para>To enable Generic Group Security ("usebuggroups"):</para>
+    <orderedlist>
+      <listitem>
+        <para>Turn "On" "usebuggroups" in the "Edit Parameters"
+        screen.</para>
+      </listitem>
 
-      <orderedlist>
-        <listitem>
-          <para>Turn "On" "usebuggroups" in the "Edit Parameters"
-          screen.</para>
-        </listitem>
+      <listitem>
+        <para>You will generally have no groups set up. Select the "groups"
+        link in the footer.</para>
+      </listitem>
 
-        <listitem>
-          <para>You will generally have no groups set up. Select the "groups"
-          link in the footer.</para>
-        </listitem>
+      <listitem>
+        <para>Take a moment to understand the instructions on the "Edit
+        Groups" screen. Once you feel confident you understand what is
+        expected of you, select the "Add Group" link.</para>
+      </listitem>
 
-        <listitem>
-          <para>Take a moment to understand the instructions on the "Edit
-          Groups" screen. Once you feel confident you understand what is
-          expected of you, select the "Add Group" link.</para>
-        </listitem>
+      <listitem>
+        <para>Fill out the "New Name" (remember, no spaces!), "New
+        Description", and "New User RegExp" fields. "New User RegExp"
+        allows you to automatically place all users who fulfill the Regular
+        Expression into the new group. 
+        <example>
+          <title>Creating a New Group</title>
 
-        <listitem>
-          <para>Fill out the "New Name" (remember, no spaces!), "New
-          Description", and "New User RegExp" fields. "New User RegExp"
-          allows you to automatically place all users who fulfill the Regular
-          Expression into the new group. 
-          <example>
-            <title>Creating a New Group</title>
+          <informalexample>
+            <para>I created a group called DefaultGroup with a description
+            of 
+            <quote>This is simply a group to play with</quote>
 
-            <informalexample>
-              <para>I created a group called DefaultGroup with a description
-              of 
-              <quote>This is simply a group to play with</quote>
+            , and a New User RegExp of 
+            <quote>.*@mydomain.tld</quote>
 
-              , and a New User RegExp of 
-              <quote>.*@mydomain.tld</quote>
+            . This new group automatically includes all Bugzilla users with
+            "@mydomain.tld" at the end of their user id. When I finished,
+            my new group was assigned bit #128.</para>
+          </informalexample>
+        </example>
 
-              . This new group automatically includes all Bugzilla users with
-              "@mydomain.tld" at the end of their user id. When I finished,
-              my new group was assigned bit #128.</para>
-            </informalexample>
-          </example>
+        When you have finished, select the Add button.</para>
+      </listitem>
+    </orderedlist>
 
-          When you have finished, select the Add button.</para>
-        </listitem>
-      </orderedlist>
+    <para>To enable Product-Based Group Security
+    (usebuggroupsentry):</para>
 
-      <para>To enable Product-Based Group Security
-      (usebuggroupsentry):</para>
+    <warning>
+      <para>Don't forget that you only have 64 groups masks available,
+      total, for your installation of Bugzilla! If you plan on having more
+      than 50 products in your individual Bugzilla installation, and
+      require group security for your products, you should consider either
+      running multiple Bugzillas or using Generic Group Security instead of
+      Product-Based ("usebuggroupsentry") Group Security.</para>
+    </warning>
 
-      <warning>
-        <para>Don't forget that you only have 64 groups masks available,
-        total, for your installation of Bugzilla! If you plan on having more
-        than 50 products in your individual Bugzilla installation, and
-        require group security for your products, you should consider either
-        running multiple Bugzillas or using Generic Group Security instead of
-        Product-Based ("usebuggroupsentry") Group Security.</para>
-      </warning>
+    <orderedlist>
+      <listitem>
+        <para>Turn "On" "usebuggroups" and "usebuggroupsentry" in the "Edit
+        Parameters" screen.</para>
 
-      <orderedlist>
-        <listitem>
-          <para>Turn "On" "usebuggroups" and "usebuggroupsentry" in the "Edit
-          Parameters" screen.</para>
+        <warning>
+          <para>"usebuggroupsentry" has the capacity to prevent the
+          administrative user from directly altering bugs because of
+          conflicting group permissions. If you plan on using
+          "usebuggroupsentry", you should plan on restricting
+          administrative account usage to administrative duties only. In
+          other words, manage bugs with an unpriveleged user account, and
+          manage users, groups, Products, etc. with the administrative
+          account.</para>
+        </warning>
+      </listitem>
 
-          <warning>
-            <para>"usebuggroupsentry" has the capacity to prevent the
-            administrative user from directly altering bugs because of
-            conflicting group permissions. If you plan on using
-            "usebuggroupsentry", you should plan on restricting
-            administrative account usage to administrative duties only. In
-            other words, manage bugs with an unpriveleged user account, and
-            manage users, groups, Products, etc. with the administrative
-            account.</para>
-          </warning>
-        </listitem>
+      <listitem>
+        <para>You will generally have no Groups set up, unless you enabled
+        "usebuggroupsentry" prior to creating any Products. To create
+        "Generic Group Security" groups, follow the instructions given
+        above. To create Product-Based Group security, simply follow the
+        instructions for creating a new Product. If you need to add users
+        to these new groups as you create them, you will find the option to
+        add them to the group available under the "Edit User"
+        screens.</para>
+      </listitem>
+    </orderedlist>
 
-        <listitem>
-          <para>You will generally have no Groups set up, unless you enabled
-          "usebuggroupsentry" prior to creating any Products. To create
-          "Generic Group Security" groups, follow the instructions given
-          above. To create Product-Based Group security, simply follow the
-          instructions for creating a new Product. If you need to add users
-          to these new groups as you create them, you will find the option to
-          add them to the group available under the "Edit User"
-          screens.</para>
-        </listitem>
-      </orderedlist>
+    <para>You may find this example illustrative for how bug groups work. 
+    <example>
+      <title>Bugzilla Groups</title>
 
-      <para>You may find this example illustrative for how bug groups work. 
-      <example>
-        <title>Bugzilla Groups</title>
-
-        <literallayout>Bugzilla Groups example ----------------------- For
-        this example, let us suppose we have four groups, call them Group1,
-        Group2, Group3, and Group4. We have 5 users, User1, User2, User3,
-        User4, User5. We have 8 bugs, Bug1, ..., Bug8. Group membership is
-        defined by this chart: (X denotes that user is in that group.) (I
-        apologize for the nasty formatting of this table. Try viewing it in a
-        text-based browser or something for now. -MPB) G G G G r r r r o o o
-        o u u u u p p p p 1 2 3 4 +-+-+-+-+ User1|X| | | | +-+-+-+-+ User2|
-        |X| | | +-+-+-+-+ User3|X| |X| | +-+-+-+-+ User4|X|X|X| | +-+-+-+-+
-        User5| | | | | +-+-+-+-+ Bug restrictions are defined by this chart:
-        (X denotes that bug is restricted to that group.) G G G G r r r r o o
-        o o u u u u p p p p 1 2 3 4 +-+-+-+-+ Bug1| | | | | +-+-+-+-+ Bug2|
-        |X| | | +-+-+-+-+ Bug3| | |X| | +-+-+-+-+ Bug4| | | |X| +-+-+-+-+
-        Bug5|X|X| | | +-+-+-+-+ Bug6|X| |X| | +-+-+-+-+ Bug7|X|X|X| |
-        +-+-+-+-+ Bug8|X|X|X|X| +-+-+-+-+ Who can see each bug? Bug1 has no
-        group restrictions. Therefore, Bug1 can be seen by any user, whatever
-        their group membership. This is going to be the only bug that User5
-        can see, because User5 isn't in any groups. Bug2 can be seen by
-        anyone in Group2, that is User2 and User4. Bug3 can be seen by anyone
-        in Group3, that is User3 and User4. Bug4 can be seen by anyone in
-        Group4. Nobody is in Group4, so none of these users can see Bug4.
-        Bug5 can be seen by anyone who is in _both_ Group1 and Group2. This
-        is only User4. User1 cannot see it because he is not in Group2, and
-        User2 cannot see it because she is not in Group1. Bug6 can be seen by
-        anyone who is in both Group1 and Group3. This would include User3 and
-        User4. Similar to Bug5, User1 cannot see Bug6 because he is not in
-        Group3. Bug7 can be seen by anyone who is in Group1, Group2, and
-        Group3. This is only User4. All of the others are missing at least
-        one of those group privileges, and thus cannot see the bug. Bug8 can
-        be seen by anyone who is in Group1, Group2, Group3, and Group4. There
-        is nobody in all four of these groups, so nobody can see Bug8. It
-        doesn't matter that User4 is in Group1, Group2, and Group3, since he
-        isn't in Group4.</literallayout>
-      </example>
-      </para>
-    </section>
+      <literallayout>Bugzilla Groups example ----------------------- For
+      this example, let us suppose we have four groups, call them Group1,
+      Group2, Group3, and Group4. We have 5 users, User1, User2, User3,
+      User4, User5. We have 8 bugs, Bug1, ..., Bug8. Group membership is
+      defined by this chart: (X denotes that user is in that group.) (I
+      apologize for the nasty formatting of this table. Try viewing it in a
+      text-based browser or something for now. -MPB) G G G G r r r r o o o
+      o u u u u p p p p 1 2 3 4 +-+-+-+-+ User1|X| | | | +-+-+-+-+ User2|
+      |X| | | +-+-+-+-+ User3|X| |X| | +-+-+-+-+ User4|X|X|X| | +-+-+-+-+
+      User5| | | | | +-+-+-+-+ Bug restrictions are defined by this chart:
+      (X denotes that bug is restricted to that group.) G G G G r r r r o o
+      o o u u u u p p p p 1 2 3 4 +-+-+-+-+ Bug1| | | | | +-+-+-+-+ Bug2|
+      |X| | | +-+-+-+-+ Bug3| | |X| | +-+-+-+-+ Bug4| | | |X| +-+-+-+-+
+      Bug5|X|X| | | +-+-+-+-+ Bug6|X| |X| | +-+-+-+-+ Bug7|X|X|X| |
+      +-+-+-+-+ Bug8|X|X|X|X| +-+-+-+-+ Who can see each bug? Bug1 has no
+      group restrictions. Therefore, Bug1 can be seen by any user, whatever
+      their group membership. This is going to be the only bug that User5
+      can see, because User5 isn't in any groups. Bug2 can be seen by
+      anyone in Group2, that is User2 and User4. Bug3 can be seen by anyone
+      in Group3, that is User3 and User4. Bug4 can be seen by anyone in
+      Group4. Nobody is in Group4, so none of these users can see Bug4.
+      Bug5 can be seen by anyone who is in _both_ Group1 and Group2. This
+      is only User4. User1 cannot see it because he is not in Group2, and
+      User2 cannot see it because she is not in Group1. Bug6 can be seen by
+      anyone who is in both Group1 and Group3. This would include User3 and
+      User4. Similar to Bug5, User1 cannot see Bug6 because he is not in
+      Group3. Bug7 can be seen by anyone who is in Group1, Group2, and
+      Group3. This is only User4. All of the others are missing at least
+      one of those group privileges, and thus cannot see the bug. Bug8 can
+      be seen by anyone who is in Group1, Group2, Group3, and Group4. There
+      is nobody in all four of these groups, so nobody can see Bug8. It
+      doesn't matter that User4 is in Group1, Group2, and Group3, since he
+      isn't in Group4.</literallayout>
+    </example>
+    </para>
   </section>
 
   <section id="security">
@@ -1258,6 +1258,137 @@
     </orderedlist>
     </para>
   </section>
+
+  <section id="cust-templates">
+    <title>Template Customisation</title>
+    
+    <para>
+      One of the large changes for 2.16 was the templatisation of the
+      entire user-facing UI, using the 
+      <ulink url="http://www.template-toolkit.org">Template Toolkit</ulink>.
+      Administrators can now configure the look and feel of Bugzilla without
+      having to edit Perl files or face the nightmare of massive merge
+      conflicts when they upgrade to a newer version in the future.
+    </para>
+    
+    <para>
+      Templatisation also makes localised versions of Bugzilla possible, 
+      for the first time. In the future, a Bugzilla installation may
+      have templates installed for multiple localisations, and select
+      which ones to use based on the user's browser language setting.      
+    </para>
+    
+    <section>
+      <title>What to Edit</title>
+      <para>
+        There are several ways to take advantage of Bugzilla's templates,
+        and which you use depends on what you want to do. The Bugzilla
+        template directory structure is that there's a top level directory,
+        <filename>template</filename>, which contains a directory for
+        each installed localisation. The default English templates are
+        therefore in <filename>en</filename>. Underneath that, there
+        are two directories - <filename>default</filename> and 
+        <filename>custom</filename>. The <filename>default</filename>
+        directory contains all the templates shipped with Bugzilla.
+      </para>
+
+      <para>
+        One method of making customisations is to directly edit the templates
+        in <filename>template/en/default</filename>. This is probably the
+        best method for small changes, because if you then execute a
+        <command>cvs update</command>, any template fixes will get
+        automagically merged into your modified versions.
+      </para>
+
+      <para>
+        The other method is to copy the templates into 
+        <filename>template/en/custom</filename>. This method is better if
+        you are going to make major changes, because it is guaranteed that
+        the contents of this directory will not be touched during an upgrade,
+        and you can then decide whether to continue using your own templates,
+        or make the effort to merge your changes into the new versions by
+        hand.
+      </para>
+
+      <para>
+        The syntax of the Template Toolkit language is beyond the scope of
+        this guide. It's reasonably easy to pick up by looking at the current 
+        templates; or, you can read the manual, available on the
+        <ulink url="http://www.template-toolkit.org">Template Toolkit home
+        page </ulink>.
+      </para>
+    </section>
+        
+    <section>
+      <title>Particular Templates</title>
+      
+      <para>
+        There are a few templates you may be particularly interested in
+        customising for your installation.
+      </para>
+      
+      <para>
+        <command>global/header.html.tmpl</command> and
+        <command>global/footer.html.tmpl</command>:
+        These define the header and footer that go on all Bugzilla pages.
+        Editing these is a way to quickly get a distinctive look and
+        feel for your Bugzilla installation.
+      </para>      
+    </section>
+    
+    <section>
+      <title>Template Formats</title>
+      
+      <para>
+        Some CGIs have the ability to use more than one template. For
+        example, buglist.cgi can output bug lists as RDF or two
+        different forms of HTML (complex and simple). (Try this out
+        by appending <filename>&amp;format=simple</filename> to a buglist.cgi
+        URL on your Bugzilla installation.) This
+        mechanism, called template 'formats', is extensible.
+      </para>
+      
+      <para>
+        To see if a CGI supports multiple output formats, grep the
+        CGI for "ValidateOutputFormat". If it's not present, adding
+        multiple format support isn't too hard - see how it's done in
+        other CGIs.
+      </para>
+      
+      <para>
+        To make a new format template for a CGI which supports this, 
+        open a current template for
+        that CGI and take note of the INTERFACE comment (if present.) This 
+        comment defines what variables are passed into this template. If 
+        there isn't one, I'm afraid you'll have to read the template and
+        the code to find out what information you get. 
+      </para>     
+  
+      <para>
+        Write your template in whatever markup or text style is appropriate.
+      </para>
+      
+      <para>
+        You now need to decide what content type you want your template
+        served as. Open up the localconfig file and find the $contenttypes
+        variable. If your content type is not there, add it. Remember
+        the three- or four-letter tag assigned to you content type. 
+        This tag will be part of the template filename.
+      </para>
+      
+      <para>
+        Save the template as <filename>&lt;stubname&gt;-&lt;formatname&gt;.&lt;contenttypetag&gt;.tmpl</filename>. 
+        Try out the template by calling the CGI as 
+        <filename>&lt;cginame&gt;.cgi?format=&lt;formatname&gt;</filename> .
+      </para> 
+    </section>          
+    
+  </section>
+
+
+  <!-- Integrating Bugzilla with Third-Party Tools -->
+  &integration;
+
 </chapter>
 
 <!-- Keep this comment at the end of the file

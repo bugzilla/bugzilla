@@ -16,7 +16,6 @@
 <!ENTITY database SYSTEM "database.sgml">
 <!ENTITY patches SYSTEM "patches.sgml">
 <!ENTITY variants SYSTEM "variants.sgml">
-<!ENTITY requiredsoftware SYSTEM "requiredsoftware.sgml">
 <!ENTITY introduction SYSTEM "introduction.sgml">
 <!ENTITY revhistory SYSTEM "revhistory.sgml">
 
@@ -76,19 +75,30 @@ try to avoid clutter and feel free to waste space in the code to make it more re
 
     <abstract>
       <para>
-	This is the documentation for Bugzilla, the mozilla.org
-	bug-tracking system.
-	Bugzilla is an enterprise-class piece of software
-	that powers issue-tracking for hundreds of
-	organizations around the world, tracking millions of bugs.
+	      This is the documentation for Bugzilla, the mozilla.org
+	      bug-tracking system.
+	      Bugzilla is an enterprise-class piece of software
+	      that powers issue-tracking for hundreds of
+	      organizations around the world, tracking millions of bugs.
       </para>
+
       <para>
-	This documentation is maintained in DocBook 4.1.2 XML format.
-  Changes are best submitted as plain text or SGML diffs, attached
-  to a Bugzilla bug.
+      <warning>
+      <para>IMPORTANT: this documentation is currently being
+      updated for the Bugzilla 2.16 release and is in an unusual state of
+      flux. Even more than normal, don't believe everything,
+      or even anything, you read.
+      </para>
+      </warning>
+      </para>
+      
+      <para>  
+	      This documentation is maintained in DocBook 4.1.2 XML format.
+        Changes are best submitted as plain text or SGML diffs, attached
+        to a bug filed in
+        <ulink url="http://bugzilla.mozilla.org/enter_bug.cgi?product=Bugzilla">bugzilla.mozilla.org</ulink>.
       </para>
     </abstract>
-
 
     <keywordset>
       <keyword>Bugzilla</keyword>
@@ -106,7 +116,7 @@ try to avoid clutter and feel free to waste space in the code to make it more re
 <!-- About This Guide -->
 &about;
 
-<!-- Using Bugzilla -->
+<!-- Introduction -->
 &introduction;
 
 <!-- Using Bugzilla -->
@@ -118,17 +128,8 @@ try to avoid clutter and feel free to waste space in the code to make it more re
 <!-- Administering Bugzilla -->
 &administration;
 
-<!-- Integrating Bugzilla with Third-Party Tools -->
-&integration;
-
-<!-- Major Bugzilla Variants -->
-&variants;
-
 <!-- Appendix: The Frequently Asked Questions -->
 &faq;
-
-<!-- Appendix: Required Bugzilla Software Links -->
-&requiredsoftware;
 
 <!-- Appendix: The Database Schema -->
 &database;
@@ -136,8 +137,8 @@ try to avoid clutter and feel free to waste space in the code to make it more re
 <!-- Appendix: Custom Patches -->
 &patches;
 
-<!-- Appendix: The GNU Free Documentation License -->
-&gfdl;
+<!-- Appendix: Major Bugzilla Variants -->
+&variants;
 
 <!-- Glossary -->
 &glossary;

@@ -1,6 +1,6 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook V4.1//EN" > -->
 <!-- Keep these tools listings in alphabetical order please. -MPB -->
-<chapter id="integration">
+<section id="integration">
   <title>Integrating Bugzilla with Third-Party Tools</title>
 
   <section id="bonsai"
@@ -86,7 +86,7 @@
 
     <para>We need Tinderbox integration information.</para>
   </section>
-</chapter>
+</section>
 
 <!-- Keep this comment at the end of the file
 Local variables:

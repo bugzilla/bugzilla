@@ -1,4 +1,4 @@
-The 2.16.2 release fixes some minor issues in 2.16.1.
+The 2.16.3 release fixes several security issues and bugs in 2.16.2.
 
 **************************
 *** ABOUT THIS VERSION ***
@@ -24,7 +24,7 @@ mean there are more errors in your database, as additional
 tests are added to the sanity check over time, and it is likely
 those errors weren't being checked for in the old version.
 
-Failure to do this may mean that bugzilla will not
+Failure to do this may mean that Bugzilla will not
 work correctly.
 
 Administrators must make sure that certain files are
@@ -43,24 +43,83 @@ AppConfig v1.52
 Template Toolkit v2.07
 Text::Wrap v20001.0131
 File::Spec v0.82
+File::Temp (any)   *** NEW in 2.16.3 ***
 Data::Dumper, Date::Parse, CGI::Carp (any)
 GD v1.19 (optional)
 Chart::Base v0.99 (optional)
-XML::Parser (any)
+XML::Parser (any, optional)
+
+*********************************************************
+*** USERS UPGRADING FROM ALL VERSIONS PRIOR TO 2.16.3 ***
+*********************************************************
+
+*** SECURITY ISSUES RESOLVED ***
+
+- A cross site scripting (XSS) vulnerability was fixed in which bug 
+  summaries were not properly filtered when a user viewed a dependency graph 
+  allowing JavaScript to be embedded on that page.
+  (bug 192661)
+  
+- Several XSS vulnerabilities were fixed in which user
+  input was not escaped when being displayed. A new 
+  test has been added to warn about unfiltered data in template
+  files (t/008filter.t)
+  (bug 192677)
+
+- An issue was fixed in which the QA contact was still treated as the QA
+  contact even after the 'useqacontact' setting was turned off. This also
+  allowed the QA contact to edit the security groups and view secured bugs that
+  he/she was allowed to access prior to the 'useqacontact' setting being
+  deactivated.
+  (bug 194394)
+  
+- Fixed a situation where an attacker (with local access to the webserver)
+  could overwrite any file on the webserver to which the webserver user
+  has write access by creating appropriately named symbolic links in the
+  data and webdot directories (world-writable in many configurations).
+  Bugzilla now uses File::Temp to create secure temporary files.  File::Temp
+  is part of the Perl distribution for Perl 5.6.1 and later, but if you're
+  using an older version of Perl you'll need to install it with CPAN.
+  (bug 197153)
+
+*** Bug fixes of note ***
+
+- An issue was fixed in which administrator rights could be removed from an
+  administrator who deleted a product while the 'usebuggroups' setting is
+  activated.
+  (bug 157704) 
+  
+- Fixed an issue in which importxml.pl would fail the test suite when running
+  under perl 5.8.0 with the optional XML::Parse module. 
+  (bug 172331)
+  
+- There was previously a bug in CGI.pl in which the following warning 
+  would be given under certain conditions: 
+  "Character in "c" format wrapped at CGI.pl..." 
+  This is now fixed. In some cases the warning was filling up web server log
+  files.
+  (bug 194125)
+  
+- Fixed a bug in which long component names (in excess of 50 characters) would
+  be accepted when creating the component but would cause problems when trying
+  to use that component on a bug because it would get truncated. It is now no
+  longer possible to create components with names in excess of 50 characters. 
+  (bug 197180)
+  
+- Fixed a bug in checksetup.pl in which permissions were not being fixed 
+  on the 'data/comments' file, the quip file. 
+  (bug 160279)
 
 *** Deprecated Features ***
 
-- This is possibly the last stable release that will work with
-  MySQL version 3.22.  Development versions of Bugzilla currently
-  require at least version 3.23.6.
+- 2.16 is the last major release that will work with MySQL version 3.22.x.
+  Development versions of Bugzilla currently require at least version 3.23.41.
   (bug 87958)
 
-- This is possibly the last stable release to support the
-  shadow database.  Support for it has already been removed
-  in CVS.  The replacement (using MySQL's built in replication)
-  is not present in 2.16.2, but we expect that very few sites use
-  this feature, so we are not planning a transition period.  If
-  this would cause a problem for you, please comment on the below bug.
+- 2.16 is the last major release to support the shadow database.  Support for
+  it has already been removed in CVS.  The replacement (using MySQL's built in
+  replication) is not present in 2.16.x, but we expect that very few sites use
+  this feature, so we are not planning a transition period.
   (bug 124589)
 
 - Placing comments in localconfig is deprecated.  If you have done

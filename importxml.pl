@@ -229,7 +229,7 @@ if (defined $tree->[1][0]->{'urlbase'}) {
 }
   
 
-my $bugqty = ($#{@{$tree}->[1]} +1 -3) / 4;
+my $bugqty = ($#{$tree->[1]} +1 -3) / 4;
 my $log = "Imported $bugqty bug(s) from $urlbase,\n  sent by $exporter.\n\n";
 for (my $k=1 ; $k <= $bugqty ; $k++) {
   my $cur = $k*4;
@@ -263,7 +263,7 @@ for (my $k=1 ; $k <= $bugqty ; $k++) {
  
   my %bug_fields;
   my $err = "";
-  for (my $i=3 ; $i < $#{@{$tree}->[1][$cur]} ; $i=$i+4) {
+  for (my $i=3 ; $i < $#{$tree->[1][$cur]} ; $i=$i+4) {
     if (defined $multiple_fields{$tree->[1][$cur][$i]}) {
       if (defined $bug_fields{$tree->[1][$cur][$i]}) {
         $bug_fields{$tree->[1][$cur][$i]} .= " " .  $tree->[1][$cur][$i+1][2];
@@ -279,7 +279,7 @@ for (my $k=1 ; $k <= $bugqty ; $k++) {
       $err .= "<$tree->[1][$cur][$i]>";
       if (defined $tree->[1][$cur][$i+1][3]) {
         $err .= "\n";
-        for (my $j=3 ; $j < $#{@{$tree}->[1][$cur][$i+1]} ; $j=$j+4) {
+        for (my $j=3 ; $j < $#{$tree->[1][$cur][$i+1]} ; $j=$j+4) {
           $err .= "  <". $tree->[1][$cur][$i+1][$j] . ">";
           $err .= " $tree->[1][$cur][$i+1][$j+1][2] ";
           $err .= "</". $tree->[1][$cur][$i+1][$j] . ">\n";
@@ -292,7 +292,7 @@ for (my $k=1 ; $k <= $bugqty ; $k++) {
   }
 
   my @long_descs;
-  for (my $i=3 ; $i < $#{@{$tree}->[1][$cur]} ; $i=$i+4) {
+  for (my $i=3 ; $i < $#{$tree->[1][$cur]} ; $i=$i+4) {
     if ($tree->[1][$cur][$i] =~ /long_desc/) {
       my %long_desc;
       $long_desc{'who'} = $tree->[1][$cur][$i+1][4][2];
@@ -406,9 +406,9 @@ for (my $k=1 ; $k <= $bugqty ; $k++) {
     push (@query, "version");
   } else {
     push (@query, "version");
-    push (@values, SqlQuote(@{$::versions{$product[0]}}->[0]));
+    push (@values, SqlQuote($::versions{$product[0]}->[0]));
     $err .= "Unknown version $bug_fields{'version'} in product $product[0]. ";
-    $err .= "Setting version to \"@{$::versions{$product[0]}}->[0]\".\n";
+    $err .= "Setting version to \"$::versions{$product[0]}->[0]\".\n";
   }
 
   if (defined ($bug_fields{'priority'}) &&

@@ -152,7 +152,7 @@ if (Param("useqacontact")) {
     }
 }
 
-if (UserInGroup("canedit") || UserInGroup("canconfirm")) {
+if (UserInGroup("editbugs") || UserInGroup("canconfirm")) {
     # Default to NEW if the user hasn't selected another status
     $::FORM{'bug_status'} ||= "NEW";
 } else {

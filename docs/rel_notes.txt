@@ -1,6 +1,11 @@
-2.16 has not been released yet - these are prerelease notes.
+After (as usual) far too long a period, the Bugzilla Team
+is relieved to finally announce Bugzilla 2.16.
 
-Insert nice little intro for version 2.16 here.
+This release adds significant new abilities to Bugzilla,
+both for the administrator and the user. The most important,
+and time-consuming of these features is the templatisation
+of all user-facing scripts, allowing administrators to 
+easily customise the look and feel of their Bugzilla.
 
 **************************
 *** ABOUT THIS VERSION ***

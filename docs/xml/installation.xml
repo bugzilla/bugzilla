@@ -735,58 +735,61 @@ AllowOverride Limit
       permissions, set up the 
       <filename>data</filename>
       directory, and create all the MySQL tables. 
-      <simplelist>
-        <member>
-          <computeroutput>
-            <prompt>bash#</prompt>
 
-            <command>./checksetup.pl</command>
-          </computeroutput>
-        </member>
-      </simplelist>
-
-      The first time you run it, it will create a file called 
-      <filename>localconfig</filename>.</para>
+      <para>
+        At this point, you need to <filename>su</filename> to root. You
+        should remain as root until the end of the install. Then run:
+      </para>
       
-      <para>This file contains a variety of settings you may need to tweak
-      including how Bugzilla should connect to the MySQL database.</para>
+      <screen><prompt>bash#</prompt> ./checksetup.pl</screen>
 
-      <para>The connection settings include: 
-      <orderedlist>
-        <listitem>
-          <para>server's host: just use 
-          <quote>localhost</quote>
-          if the MySQL server is local</para>
-        </listitem>
-
-        <listitem>
-          <para>database name: 
-          <quote>bugs</quote>
-          if you're following these directions</para>
-        </listitem>
-
-        <listitem>
-          <para>MySQL username: 
-          <quote>bugs</quote>
-          if you're following these directions</para>
-        </listitem>
-
-        <listitem>
-          <para>Password for the 
-          <quote>bugs</quote>
-          MySQL account; (&lt;bugs_password&gt;) above</para>
-        </listitem>
-      </orderedlist>
+      <para>
+        The first time you run it, it will create a file called 
+        <filename>localconfig</filename>.
+        This file contains a variety of settings you may need to tweak
+        including how Bugzilla should connect to the MySQL database.
       </para>
 
-      <para>Once you are happy with the settings, 
-      <filename>su</filename> to the user
-      your web server runs as, and re-run 
-      <filename>checksetup.pl</filename>. (Note: on some security-conscious
-      systems, you may need to change the login shell for the webserver 
-      account before you can do this.)
-      On this second run, it will create the database and an administrator
-      account for which you will be prompted to provide information.</para>
+      <para>
+        The connection settings include: 
+        <orderedlist>
+          <listitem>
+            <para>
+              server's host: just use <quote>localhost</quote>
+              if the MySQL server is local
+            </para>
+          </listitem>
+
+          <listitem>
+            <para>
+              database name: <quote>bugs</quote>
+              if you're following these directions
+            </para>
+          </listitem>
+
+          <listitem>
+            <para>
+              MySQL username: <quote>bugs</quote>
+              if you're following these directions
+            </para>
+          </listitem>
+
+          <listitem>
+            <para>
+              Password for the <quote>bugs</quote>
+              MySQL account; (&lt;bugs_password&gt;) above
+            </para>
+          </listitem>
+        </orderedlist>
+      </para>
+
+      <para>
+        Once you are happy with the settings, re-run 
+        <filename>checksetup.pl</filename>.
+        On this second run, it will create the database and an administrator
+        account for which you will be prompted to provide information.
+      </para>
+
 
       <note>
         <para>The checksetup.pl script is designed so that you can run it at

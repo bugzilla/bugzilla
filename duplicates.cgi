@@ -205,7 +205,10 @@ $vars->{'openonly'} = $openonly;
 $vars->{'reverse'} = $reverse;
 $vars->{'format'} = $::FORM{'format'};
 $vars->{'product'} = $product;
-$vars->{'products'} = \@::legal_product;
+my @entry_products = grep {(!Param("usebuggroups") 
+                         || !GroupExists($_) 
+                         || UserInGroup($_))} @::legal_product;
+$vars->{'products'} = \@entry_products;
 
 
 my $format = ValidateOutputFormat($::FORM{'format'}, "duplicates", "reports");

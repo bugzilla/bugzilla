@@ -9,6 +9,7 @@
 <!ENTITY glossary SYSTEM "glossary.xml">
 <!ENTITY installation SYSTEM "installation.xml">
 <!ENTITY administration SYSTEM "administration.xml">
+<!ENTITY security SYSTEM "security.xml">
 <!ENTITY using SYSTEM "using.xml">
 <!ENTITY integration SYSTEM "integration.xml">
 <!ENTITY index SYSTEM "index.xml">
@@ -141,6 +142,9 @@
 
 <!-- Administering Bugzilla -->
 &administration;
+
+<!-- Securing Bugzilla -->
+&security;
 
 <!-- Customizing Bugzilla -->
 &customization;

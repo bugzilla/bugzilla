@@ -286,8 +286,11 @@ Code Changes Which May Affect Customizations
 
 - Use Bugzilla->user->login in place of $::COOKIE{Bugzilla_login}
 
-- You can tell if there's a user logged in or not by checking if
-  Bugzilla->user exists rather than looking for $::userid==0
+- You can tell if there's a user logged in or not by using
+  Bugzilla->user rather than looking for $::userid==0.
+  In new 2.18 code, use defined(Bugzilla->user) && (Bugzilla->user->id)
+  In 2.20, this will become just (Bugzilla->user->id)
+  In templates, always test [% IF user.id %] rather than [% IF user %]
 
 
 Recommended Practice for the Upgrade

@@ -9,7 +9,8 @@
     <para>This section contains information for end-users of Bugzilla. 
     There is a Bugzilla test installation, called 
     <ulink url="http://landfill.tequilarista.org/">Landfill</ulink>, 
-    which you are welcome to play with. However, it does not necessarily
+    which you are welcome to play with (if it's up.) 
+    However, it does not necessarily
     have all Bugzilla features enabled, and often runs cutting-edge versions
     of Bugzilla for testing, so some things may work slightly differently
     than mentioned here.</para>
@@ -57,8 +58,8 @@
         </listitem>
       </orderedlist>
 
-      <para>You are now logged in. Bugzilla uses cookies for authentication,
-      so (unless your IP address changes) you should not have to log in
+      <para>You are now logged in. Bugzilla uses cookies for authentication
+      so, unless your IP address changes, you should not have to log in
       again.</para>
     </section>
 
@@ -73,14 +74,14 @@
 
       is a good example. Note that the labels for most fields are hyperlinks;
       clicking them will take you to context-sensitive help on that
-      particular field.</para>
+      particular field. Fields marked * may not be present on every
+      installation of Bugzilla.</para>
 
       <orderedlist>
         <listitem>
           <para>
-          <emphasis>Product and Component</emphasis>
-
-          : Bugs are divided up by Product and Component, with a Product
+          <emphasis>Product and Component</emphasis>: 
+          Bugs are divided up by Product and Component, with a Product
           having one or more Components in it. For example,
           bugzilla.mozilla.org's "Bugzilla" Product is composed of several
           Components: 
@@ -153,7 +154,7 @@
 
         <listitem>
           <para>
-          <emphasis>URL:</emphasis>
+          <emphasis>*URL:</emphasis>
           A URL associated with the bug, if any.</para>
         </listitem>
 
@@ -165,14 +166,14 @@
 
         <listitem>
           <para>
-          <emphasis>Status Whiteboard:</emphasis>
+          <emphasis>*Status Whiteboard:</emphasis>
           (a.k.a. Whiteboard) A free-form text area for adding short notes
           and tags to a bug.</para>
         </listitem>
 
         <listitem>
           <para>
-          <emphasis>Keywords:</emphasis>
+          <emphasis>*Keywords:</emphasis>
           The administrator can define keywords which you can use to tag and
           categorise bugs - e.g. The Mozilla Project has keywords like crash
           and regression.</para>
@@ -212,7 +213,7 @@
 
         <listitem>
           <para>
-          <emphasis>Target:</emphasis>
+          <emphasis>*Target:</emphasis>
           (a.k.a. Target Milestone) A future version by which the bug is to
           be fixed. e.g. The Bugzilla Project's milestones for future
           Bugzilla versions are 2.18, 2.20, 3.0, etc. Milestones are not
@@ -241,7 +242,7 @@
 
         <listitem>
           <para>
-          <emphasis>Dependencies:</emphasis>
+          <emphasis>*Dependencies:</emphasis>
           If this bug cannot be fixed unless other bugs are fixed (depends
           on), or this bug stops other bugs being fixed (blocks), their
           numbers are recorded here.</para>
@@ -249,7 +250,7 @@
 
         <listitem>
           <para>
-          <emphasis>Votes:</emphasis>
+          <emphasis>*Votes:</emphasis>
           Whether this bug has any votes.</para>
         </listitem>
 
@@ -339,9 +340,8 @@
       reading pleasure into the 
       <ulink
       url="http://landfill.tequilarista.org/bugzilla-tip/bugwritinghelp.html">
-      Bug Writing Guidelines</ulink>
-
-      . While some of the advice is Mozilla-specific, the basic principles of
+      Bug Writing Guidelines</ulink>. 
+      While some of the advice is Mozilla-specific, the basic principles of
       reporting Reproducible, Specific bugs, isolating the Product you are
       using, the Version of the Product, the Component which failed, the
       Hardware Platform, and Operating System you were using at the time of
@@ -415,8 +415,10 @@
 
       <para>Quicksearch is a single-text-box query tool which uses
       metacharacters to indicate what is to be searched. For example, typing
-      "foo|bar" into Quicksearch would search for "foo" or "bar" in the 
-      summary and status whiteboard of a bug; adding ":BazProduct" would
+      "<filename>foo|bar</filename>" 
+      into Quicksearch would search for "foo" or "bar" in the 
+      summary and status whiteboard of a bug; adding 
+      "<filename>:BazProduct</filename>" would
       search only in that product.
       </para>
 
@@ -432,7 +434,7 @@
       <para>If you are changing the fields on a bug, only comment if
       either you have something pertinent to say, or Bugzilla requires it.
       Otherwise, you may spam people unnecessarily with bug mail.
-      To take an example: a user sets up their account to filter out messages
+      To take an example: a user can set up their account to filter out messages
       where someone just adds themselves to the CC field of a bug
       (which happens a lot.) If you come along, add yourself to the CC field,
       and add a comment saying "Adding self to CC", then that person
@@ -460,8 +462,8 @@
       you are pointing out a single-pixel problem.
       </para>
       
-      <para>Don't attach simple test cases (e.g. one html file and one 
-      css file and one image) as a ZIP file. Instead, upload them in 
+      <para>Don't attach simple test cases (e.g. one HTML file, one 
+      CSS file and an image) as a ZIP file. Instead, upload them in 
       reverse order and edit the referring file so that they point to the
       attached files. This way, the test case works immediately 
       out of the bug.
@@ -525,8 +527,7 @@
       "Users to watch" text entry box you can receive a copy of all the
       bugmail of other users (security settings permitting.) This powerful
       functionality enables seamless transitions as developers change
-      projects, managers wish to get in touch with the issues faced by their
-      direct reports, or users go on vacation.</para>
+      projects or users go on holiday.</para>
 
       <note>
         <para>The ability to watch other users may not be available in all

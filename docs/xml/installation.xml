@@ -25,7 +25,7 @@
         <para> If you are running the very most recent
         version of Perl and MySQL (both the executables and development
         libraries) on your system, you can skip these manual installation 
-        steps for the Perl modules by using Bundle::Bugzilla in 
+        steps for the Perl modules by using Bundle::Bugzilla; see
         <xref linkend="bundlebugzilla" />.
         </para>
       </note>
@@ -70,7 +70,7 @@
 
     <listitem>
       <para>
-        Text::Wrap 
+        <ulink url="http://www.cpan.org/authors/id/MUIR/modules/Text-Tabs%2BWrap-2001.0131.tar.gz">Text::Wrap</ulink> 
         (v2001.0131)
       </para>
     </listitem>
@@ -240,14 +240,13 @@
         versions of MySQL store their data files in 
         <filename>/var</filename>.
         On some Unix systems, this is part of a smaller root partition,
-        and may not have room for your bug database. If you decide to build
-        from sources you can easily set the dataDir as an option to 
-        <filename>configure</filename>.</para>
+        and may not have room for your bug database. You can set the data
+         directory as an option to <filename>configure</filename>
+         if you build MySQL from source yourself.</para>
       </note>
 
-      <para>If you install from source or non-package (RPM, deb, etc.)
-      binaries you need to add 
-      <firstterm>mysqld</firstterm>
+      <para>If you install from something other than an RPM or Debian 
+      package, you will need to add <filename>mysqld</filename>
       to your init scripts so the server daemon will come back up whenever
       your machine reboots. Further discussion of UNIX init sequences are
       beyond the scope of this guide. 
@@ -296,10 +295,7 @@
 
         from 
         <glossterm linkend="gloss-cpan">CPAN</glossterm>, 
-        which installs all required modules for you. 
-        If you wish to use
-        Bundle::Bugzilla, you must be using the latest version of
-        Perl.</para>
+        which installs all required modules for you.</para>
 
         <para>
           <computeroutput>
@@ -321,74 +317,74 @@
       
     <para> 
       All Perl modules can be found on the
-      Comprehensive Perl Archive Network (CPAN) at http://www.cpan.org. The
+      <ulink url="http://www.cpan.org">Comprehensive Perl 
+      Archive Network</ulink> (CPAN). The
       CPAN servers have a real tendency to bog down, so please use mirrors.
     </para>
     
       <para>Quality, general Perl module installation instructions can be
       found on the CPAN website, but the easy thing to do is to just use the
-      CPAN shell which does all the hard work for you.</para>
+      CPAN shell which does all the hard work for you.
+      To use the CPAN shell to install a module: 
+      </para>
 
-      <para>To use the CPAN shell to install a module: 
-      <informalexample>
-        <para>
-          <computeroutput>
-            <prompt>bash#</prompt>
-            <command>perl -MCPAN -e 'install "&lt;modulename&gt;"'</command>
-          </computeroutput>
-        </para>
-      </informalexample>
-
+      <para>
+        <computeroutput>
+          <prompt>bash#</prompt>
+          <command>perl -MCPAN -e 'install "&lt;modulename&gt;"'</command>
+        </computeroutput>
+      </para>
+      
+      <para>
       To do it the hard way: 
-      <informalexample>
-        <para>Untar the module tarball -- it should create its own
-        directory</para>
+      </para>
+      
+      <para>Untar the module tarball -- it should create its own
+      directory</para>
 
-        <para>CD to the directory just created, and enter the following
-        commands: 
-        <orderedlist>
-          <listitem>
-            <para>
-              <computeroutput>
-                <prompt>bash#</prompt>
+      <para>CD to the directory just created, and enter the following
+      commands: 
+      <orderedlist>
+        <listitem>
+          <para>
+            <computeroutput>
+              <prompt>bash#</prompt>
 
-                <command>perl Makefile.PL</command>
-              </computeroutput>
-            </para>
-          </listitem>
+              <command>perl Makefile.PL</command>
+            </computeroutput>
+          </para>
+        </listitem>
 
-          <listitem>
-            <para>
-              <computeroutput>
-                <prompt>bash#</prompt>
+        <listitem>
+          <para>
+            <computeroutput>
+              <prompt>bash#</prompt>
 
-                <command>make</command>
-              </computeroutput>
-            </para>
-          </listitem>
+              <command>make</command>
+            </computeroutput>
+          </para>
+        </listitem>
 
-          <listitem>
-            <para>
-              <computeroutput>
-                <prompt>bash#</prompt>
+        <listitem>
+          <para>
+            <computeroutput>
+              <prompt>bash#</prompt>
 
-                <command>make test</command>
-              </computeroutput>
-            </para>
-          </listitem>
+              <command>make test</command>
+            </computeroutput>
+          </para>
+        </listitem>
 
-          <listitem>
-            <para>
-              <computeroutput>
-                <prompt>bash#</prompt>
+        <listitem>
+          <para>
+            <computeroutput>
+              <prompt>bash#</prompt>
 
-                <command>make install</command>
-              </computeroutput>
-            </para>
-          </listitem>
-        </orderedlist>
-        </para>
-      </informalexample>
+              <command>make install</command>
+            </computeroutput>
+          </para>
+        </listitem>
+      </orderedlist>
       </para>
       
       <warning>
@@ -509,13 +505,13 @@
 
       <para>You'll want to make sure that your web server will run any file
       with the .cgi extension as a CGI and not just display it. If you're
-      using Apache that means uncommenting the following line in the srm.conf
+      using Apache that means uncommenting the following line in the httpd.conf
       file: 
       <programlisting>AddHandler cgi-script .cgi</programlisting>
       </para>
 
       <para>With Apache you'll also want to make sure that within the
-      access.conf file the line: 
+      httpd.conf file the line: 
       <programlisting>Options ExecCGI AllowOverride Limit</programlisting>
 
       is in the stanza that covers the directories into which you intend to
@@ -525,9 +521,8 @@
           <para>AllowOverride Limit allows the use of a Deny statement in the
           .htaccess file generated by checksetup.pl</para>
 
-          <para>Users of newer versions of Apache will generally find both of
-          the above lines will be in the httpd.conf file, rather than srm.conf
-          or access.conf.</para>
+          <para>Users of older versions of Apache may find the above lines 
+          in the srm.conf and access.conf files, respecitvely.</para>
         </note>
       </para>
       
@@ -581,21 +576,17 @@
       for the correct location of your Perl executable (probably 
       <filename>/usr/bin/perl</filename>). 
       Otherwise you must hack all the .cgi files to change where they look
-      for Perl. This can be done using the following Perl one-liner. 
-      I suggest using the symlink approach for future release
-      compatibility.
-       
-      <example>
-        <title>Changing the path to Perl</title>
-        <para>You can simply run this Perl one-liner to change
-        your path to perl in all the files in your Bugzilla installation: 
+      for Perl. This can be done using the following Perl one-liner, but 
+      I suggest using the symlink approach to avoid upgrade hassles.
+      </para>
+      
+      <para> 
         <programlisting>perl -pi -e
         's@#\!/usr/bonsaitools/bin/perl@#\!/usr/bin/perl@' *cgi *pl Bug.pm
         processmail syncshadowdb</programlisting>
 
         Change <filename>/usr/bin/perl</filename> to match the location
-        of Perl on your machine.</para>
-      </example>
+        of Perl on your machine.
       </para>
     </section>
 
@@ -718,29 +709,25 @@
         <listitem>
           <para>server's host: just use 
           <quote>localhost</quote>
-
           if the MySQL server is local</para>
         </listitem>
 
         <listitem>
           <para>database name: 
           <quote>bugs</quote>
-
           if you're following these directions</para>
         </listitem>
 
         <listitem>
           <para>MySQL username: 
           <quote>bugs</quote>
-
           if you're following these directions</para>
         </listitem>
 
         <listitem>
           <para>Password for the 
           <quote>bugs</quote>
-
-          MySQL account (&lt;bugs_password&gt;) above</para>
+          MySQL account; (&lt;bugs_password&gt;) above</para>
         </listitem>
       </orderedlist>
       </para>
@@ -906,6 +893,15 @@
       </orderedlist>
       </para>
     </section>
+    
+    <section>
+      <title>Configuring Bugzilla</title>
+      <para>
+      You should run through the parameters on the Edit Parameters page
+      (link in the footer) and set them all to appropriate values. 
+      They key parameters are documented in <xref linkend="parameters" />.
+      </para>
+    </section>
   </section>
   
   <section id="extraconfig">
@@ -916,10 +912,43 @@
 
       <para>As well as the text-based dependency graphs, Bugzilla also
       supports dependency graphing, using a package called 'dot'.
-      Exactly how this works is controlled by the 'webdotbase' parameter.
+      Exactly how this works is controlled by the 'webdotbase' parameter,
+      which can have one of three values:
       </para>
 
-      <para>(To be written...</para>
+      <para>
+        <orderedlist>
+          <listitem>
+            <para>
+            A complete file path to the command 'dot' (part of 
+            <ulink url="http://www.graphviz.org/">GraphViz</ulink>) 
+            will generate the graphs locally
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+            A URL prefix pointing to an installation of the webdot package will
+            generate the graphs remotely
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+            A blank value will disable dependency graphing.
+            </para>
+          </listitem>
+        </orderedlist>
+      </para>
+      
+      <para>So, to get this working, install
+      <ulink url="http://www.graphviz.org/">GraphViz</ulink>. If you
+      do that, you need to
+      <ulink url="http://httpd.apache.org/docs/mod/mod_imap.html">enable
+      server-side image maps</ulink> in Apache.
+      Alternatively, you could set up a webdot server, or use the AT&amp;T 
+      public webdot server (the
+      default for the webdotbase param). Note that AT&amp;T's server won't work
+      if Bugzilla is only accessible using HTTPS.
+      </para>
    </section>
 
     <section>
@@ -1042,6 +1071,151 @@
       primary email address. On most directory servers available, this is
       "mail", but you may need to change this.
       </para>      
+    </section>
+    
+    <section id="content-type"
+    xreflabel="Preventing untrusted Bugzilla content from executing malicious Javascript code">
+
+      <title>Preventing untrusted Bugzilla content from executing malicious
+      Javascript code</title>
+
+      <para>It is possible for a Bugzilla to execute malicious Javascript
+      code. Due to internationalization concerns, we are unable to
+      incorporate the code changes necessary to fulfill the CERT advisory
+      requirements mentioned in 
+      <ulink
+      url="http://www.cet.org/tech_tips/malicious_code_mitigation.html/#3">
+      http://www.cet.org/tech_tips/malicious_code_mitigation.html/#3</ulink>.
+      Executing the following code snippet from a UNIX command shell will
+      rectify the problem if your Bugzilla installation is intended for an
+      English-speaking audience. As always, be sure your Bugzilla
+      installation has a good backup before making changes, and I recommend
+      you understand what the script is doing before executing it.</para>
+
+      <para>
+        <programlisting>bash# perl -pi -e "s/Content-Type\: text\/html/Content-Type\: text\/html\; charset=ISO-8859-1/i" *.cgi *.pl
+        </programlisting>
+      </para>
+
+      <para>All this one-liner command does is search for all instances of 
+      <quote>Content-type: text/html</quote>
+
+      and replaces it with 
+      <quote>Content-Type: text/html; charset=ISO-8859-1</quote>
+
+      . This specification prevents possible Javascript attacks on the
+      browser, and is suggested for all English-speaking sites. For
+      non-English-speaking Bugzilla sites, I suggest changing 
+      <quote>ISO-8859-1</quote>, above, to 
+      <quote>UTF-8</quote>.</para>
+    </section>    
+    
+    <section id="htaccess" xreflabel=".htaccess files and security">
+      <title>
+      <filename>.htaccess</filename>
+      files and security</title>
+
+      <para>To enhance the security of your Bugzilla installation, Bugzilla's
+      <filename>checksetup.pl</filename> script will generate 
+      <glossterm>
+        <filename>.htaccess</filename>
+      </glossterm>
+
+      files which the Apache webserver can use to restrict access to the
+      bugzilla data files. 
+      These .htaccess files will not work with Apache 1.2.x - but this
+      has security holes, so you shouldn't be using it anyway. 
+      <note>
+        <para>If you are using an alternate provider of 
+        <productname>webdot</productname>
+
+        services for graphing (as described when viewing 
+        <filename>editparams.cgi</filename>
+
+        in your web browser), you will need to change the ip address in 
+        <filename>data/webdot/.htaccess</filename>
+
+        to the ip address of the webdot server that you are using.</para>
+      </note>
+      </para>
+
+      <para>The default .htaccess file may not provide adequate access
+      restrictions, depending on your web server configuration. Be sure to
+      check the &lt;Directory&gt; entries for your Bugzilla directory so that
+      the 
+      <filename>.htaccess</filename>
+
+      file is allowed to override web server defaults. For instance, let's
+      assume your installation of Bugzilla is installed to 
+      <filename>/usr/local/bugzilla</filename>
+
+      . You should have this &lt;Directory&gt; entry in your 
+      <filename>httpd.conf</filename>
+
+      file:</para>
+
+      <para>
+      
+<programlisting><![CDATA[
+  <Directory /usr/local/bugzilla/>
+  Options +FollowSymLinks +Indexes +Includes +ExecCGI
+  AllowOverride All
+</Directory>
+]]></programlisting>
+
+      </para>
+
+      <para>The important part above is 
+      <quote>AllowOverride All</quote>
+
+      . Without that, the 
+      <filename>.htaccess</filename>
+
+      file created by 
+      <filename>checksetup.pl</filename>
+
+      will not have sufficient permissions to protect your Bugzilla
+      installation.</para>
+
+      <para>If you are using Internet Information Server (IIS) or another 
+      web server which does not observe 
+      <filename>.htaccess</filename>
+      conventions, you can disable their creation by editing 
+      <filename>localconfig</filename>
+      and setting the 
+      <varname>$create_htaccess</varname>
+      variable to 
+      <parameter>0</parameter>.
+      </para>
+    </section>
+
+    <section id="mod-throttle"
+    xreflabel="Using mod_throttle to prevent Denial of Service attacks">
+      <title>
+      <filename>mod_throttle</filename>
+
+      and Security</title>
+
+      <para>It is possible for a user, by mistake or on purpose, to access
+      the database many times in a row which can result in very slow access
+      speeds for other users. If your Bugzilla installation is experiencing
+      this problem , you may install the Apache module 
+      <filename>mod_throttle</filename>
+
+      which can limit connections by ip-address. You may download this module
+      at 
+      <ulink url="http://www.snert.com/Software/Throttle/">
+      http://www.snert.com/Software/Throttle/</ulink>. 
+      Follow the instructions to install into your Apache install. 
+      <emphasis>This module only functions with the Apache web
+      server!</emphasis>
+      You may use the 
+      <command>ThrottleClientIP</command>
+
+      command provided by this module to accomplish this goal. See the 
+      <ulink url="http://www.snert.com/Software/Throttle/">Module
+      Instructions</ulink>
+      for more information.</para>
     </section>
   </section>
 
@@ -1792,9 +1966,9 @@ binmode(STDOUT);
     most of the software that it installs. This means your libraries and
     headers for libgd will be at /sw/lib and /sw/include instead of /usr/lib
     and /usr/local/include. Because of these changed locations for the
-    libraries, the Perl GD module will not install directly via CPAN (it
+    libraries, the Perl GD module will not install directly via CPAN, because it
     looks for the specific paths instead of getting them from your
-    environment). But there's a way around that :-)</para>
+    environment. But there's a way around that :-)</para>
 
     <para>Instead of typing 
     <quote>install GD</quote>
@@ -1807,7 +1981,7 @@ binmode(STDOUT);
     directory. Apply <ulink url="../sgml/gd-makefile.patch">this patch</ulink> 
     to the Makefile.PL file (save the
     patch into a file and use the command 
-    <command>patch &lt; patchfile</command>.
+    <command>patch &lt; patchfile</command>.)
     </para>
     
     <para>Then, run these commands to finish the installation of the GD
@@ -1832,223 +2006,12 @@ binmode(STDOUT);
       <member>And don't forget to run 
       <command>exit</command>
 
-      to get back to cpan.</member>
+      to get back to CPAN.</member>
     </simplelist>
     </para>
 
   </section>
 
-  <section id="geninstall" xreflabel="General Installation Notes">
-    <title>General Installation Notes</title>
-
-    <section>
-      <title>Modifying Your Running System</title>
-
-      <para>Bugzilla optimizes database lookups by storing all relatively
-      static information in the versioncache file, located in the data/
-      subdirectory under your installation directory.</para>
-
-      <para>If you make a change to the structural data in your database (the
-      versions table for example), or to the 
-      <quote>constants</quote>
-
-      encoded in defparams.pl, you will need to remove the cached content
-      from the data directory (by doing a 
-      <quote>rm data/versioncache</quote>
-
-      ), or your changes won't show up.</para>
-
-      <para>That file gets automatically regenerated whenever it's more than
-      an hour old, so Bugzilla will eventually notice your changes by itself,
-      but generally you want it to notice right away, so that you can test
-      things.</para>
-    </section>
-
-    <section>
-      <title>Upgrading From Previous Versions</title>
-
-      <para>A plain Bugzilla is fairly easy to upgrade from one version to a
-      newer one. However, things get a bit more complicated if you've made
-      changes to Bugzilla's code. In this case, you may have to re-make or
-      reapply those changes. It is recommended that you take a backup of your
-      database and your entire Bugzilla installation before attempting an
-      upgrade. You can upgrade a 'clean' installation by untarring a new
-      tarball over the old installation. If you are upgrading from 2.12 or
-      later, you can type 
-      <filename>cvs -z3 update</filename>
-
-      , and resolve conflicts if there are any.</para>
-
-      <para>Because the developers of Bugzilla are constantly adding new
-      tables, columns and fields, you'll probably get SQL errors if you just
-      update the code and attempt to use Bugzilla. Always run the
-      checksetup.pl script whenever you upgrade your installation.</para>
-
-      <para>If you are running Bugzilla version 2.8 or lower, and wish to
-      upgrade to the latest version, please consult the file,
-      "UPGRADING-pre-2.8" in the Bugzilla root directory after untarring the
-      archive.</para>
-    </section>
-
-    <section id="htaccess" xreflabel=".htaccess files and security">
-      <title>
-      <filename>.htaccess</filename>
-
-      files and security</title>
-
-      <para>To enhance the security of your Bugzilla installation, Bugzilla
-      will generate 
-      <glossterm>
-        <filename>.htaccess</filename>
-      </glossterm>
-
-      files which the Apache webserver can use to restrict access to the
-      bugzilla data files. The checksetup script will generate the 
-      <filename>.htaccess</filename>
-
-      files. These .htaccess files will not work with Apache 1.2.x - but this
-      has security holes, so you shouldn't be using it anyway. 
-      <note>
-        <para>If you are using an alternate provider of 
-        <productname>webdot</productname>
-
-        services for graphing (as described when viewing 
-        <filename>editparams.cgi</filename>
-
-        in your web browser), you will need to change the ip address in 
-        <filename>data/webdot/.htaccess</filename>
-
-        to the ip address of the webdot server that you are using.</para>
-      </note>
-      </para>
-
-      <para>The default .htaccess file may not provide adequate access
-      restrictions, depending on your web server configuration. Be sure to
-      check the &lt;Directory&gt; entries for your Bugzilla directory so that
-      the 
-      <filename>.htaccess</filename>
-
-      file is allowed to override web server defaults. For instance, let's
-      assume your installation of Bugzilla is installed to 
-      <filename>/usr/local/bugzilla</filename>
-
-      . You should have this &lt;Directory&gt; entry in your 
-      <filename>httpd.conf</filename>
-
-      file:</para>
-
-      <para>
-        <programlisting>
-<![CDATA[
-<Directory /usr/local/bugzilla/>
-  Options +FollowSymLinks +Indexes +Includes +ExecCGI
-  AllowOverride All
-</Directory>
-]]>
-        </programlisting>
-      </para>
-
-      <para>The important part above is 
-      <quote>AllowOverride All</quote>
-
-      . Without that, the 
-      <filename>.htaccess</filename>
-
-      file created by 
-      <filename>checksetup.pl</filename>
-
-      will not have sufficient permissions to protect your Bugzilla
-      installation.</para>
-
-      <para>If you are using Internet Information Server or other web server
-      which does not observe 
-      <filename>.htaccess</filename>
-
-      conventions, you can disable their creation by editing 
-      <filename>localconfig</filename>
-
-      and setting the 
-      <varname>$create_htaccess</varname>
-
-      variable to 
-      <parameter>0</parameter>
-
-      .</para>
-    </section>
-
-    <section id="mod-throttle"
-    xreflabel="Using mod_throttle to prevent Denial of Service attacks">
-      <title>
-      <filename>mod_throttle</filename>
-
-      and Security</title>
-
-      <para>It is possible for a user, by mistake or on purpose, to access
-      the database many times in a row which can result in very slow access
-      speeds for other users. If your Bugzilla installation is experiencing
-      this problem , you may install the Apache module 
-      <filename>mod_throttle</filename>
-
-      which can limit connections by ip-address. You may download this module
-      at 
-      <ulink url="http://www.snert.com/Software/Throttle/">
-      http://www.snert.com/Software/Throttle/</ulink>
-
-      . Follow the instructions to install into your Apache install. 
-      <emphasis>This module only functions with the Apache web
-      server!</emphasis>
-
-      . You may use the 
-      <command>ThrottleClientIP</command>
-
-      command provided by this module to accomplish this goal. See the 
-      <ulink url="http://www.snert.com/Software/Throttle/">Module
-      Instructions</ulink>
-
-      for more information.</para>
-    </section>
-
-    <section id="content-type"
-    xreflabel="Preventing untrusted Bugzilla contentfrom executing malicious Javascript code">
-
-      <title>Preventing untrusted Bugzilla content from executing malicious
-      Javascript code</title>
-
-      <para>It is possible for a Bugzilla to execute malicious Javascript
-      code. Due to internationalization concerns, we are unable to
-      incorporate the code changes necessary to fulfill the CERT advisory
-      requirements mentioned in 
-      <ulink
-      url="http://www.cet.org/tech_tips/malicious_code_mitigation.html/#3">
-      http://www.cet.org/tech_tips/malicious_code_mitigation.html/#3</ulink>.
-      Executing the following code snippet from a UNIX command shell will
-      rectify the problem if your Bugzilla installation is intended for an
-      English-speaking audience. As always, be sure your Bugzilla
-      installation has a good backup before making changes, and I recommend
-      you understand what the script is doing before executing it.</para>
-
-      <para>
-        <programlisting>bash# cd &lt;your_bugzilla_dir&gt;; 
-        for i in `ls *.cgi`; \ do
-        cat $i | sed 's/Content-type\: text\/html/Content-Type: text\/html\;
-        charset=ISO-8859-1/' &gt;$i.tmp; \ mv $i.tmp $i;
-        done</programlisting>
-      </para>
-
-      <para>All this one-liner command does is search for all instances of 
-      <quote>Content-type: text/html</quote>
-
-      and replaces it with 
-      <quote>Content-Type: text/html; charset=ISO-8859-1</quote>
-
-      . This specification prevents possible Javascript attacks on the
-      browser, and is suggested for all English-speaking sites. For
-      non-English-speaking Bugzilla sites, I suggest changing 
-      <quote>ISO-8859-1</quote>, above, to 
-      <quote>UTF-8</quote>.</para>
-    </section>
-  </section>
-  
   <section id="troubleshooting">
     <title>Troubleshooting</title>
     
@@ -2064,15 +2027,16 @@ binmode(STDOUT);
         (over which the Bugzilla team have no control):
       </para>
       
-<programlisting><![CDATA[ "DBD::Sponge::db prepare failed: Cannot determine NUM_OF_FIELDS at D:/Perl/site/lib/DBD/mysql.pm line 248.
+<programlisting><![CDATA[ DBD::Sponge::db prepare failed: Cannot determine NUM_OF_FIELDS at D:/Perl/site/lib/DBD/mysql.pm line 248.
   SV = NULL(0x0) at 0x20fc444
   REFCNT = 1
-  FLAGS = (PADBUSY,PADMY)"
+  FLAGS = (PADBUSY,PADMY)
 ]]></programlisting>
 
       <para>
-        To fix this, go to &lt;path-to-perl&gt;/lib/DBD/sponge.pm in your Perl 
-        installation and replace
+        To fix this, go to 
+        <filename>&lt;path-to-perl&gt;/lib/DBD/sponge.pm</filename> 
+        in your Perl installation and replace
       </para>
         
 <programlisting><![CDATA[ my $numFields;

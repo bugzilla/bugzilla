@@ -46,80 +46,34 @@ RewriteRule ^/([0-9]+)$ http://foo.bar.com/show_bug.cgi?id=$1 [L,R]
   <section id="cmdline">
     <title>Command-line Bugzilla Queries</title>
 
-    <para>There are a suite of utilities for querying Bugzilla from the 
-    command line. Although there's no particular reason why they
-    shouldn't work, they have not been tested with 2.16.</para>
-
-    <procedure>
-      <step>
-        <para>Download three files:</para>
-
-        <substeps>
-          <step>
-            <para>
-              <computeroutput>
-                <prompt>bash$</prompt>
-
-                <command>wget -O query.conf
-                'http://bugzilla.mozilla.org/showattachment.cgi?attach_id=26157'</command>
-              </computeroutput>
-            </para>
-          </step>
-
-          <step>
-            <para>
-              <computeroutput>
-                <prompt>bash$</prompt>
-
-                <command>wget -O buglist
-                'http://bugzilla.mozilla.org/showattachment.cgi?attach_id=26944'</command>
-              </computeroutput>
-            </para>
-          </step>
-
-          <step>
-            <para>
-              <computeroutput>
-                <prompt>bash#</prompt>
-
-                <command>wget -O bugs
-                'http://bugzilla.mozilla.org/showattachment.cgi?attach_id=26215'</command>
-              </computeroutput>
-            </para>
-          </step>
-        </substeps>
-      </step>
-
-      <step>
-        <para>Make your utilities executable: 
-        <computeroutput>
-          <prompt>bash$</prompt>
-
-          <command>chmod u+x buglist bugs</command>
-        </computeroutput>
-        </para>
-      </step>
-    </procedure>
+    <para>There are a suite of Unix utilities for querying Bugzilla from the 
+    command line. They live in the 
+    <filename class="directory">contrib/cmdline</filename> 
+    directory. However, they
+    have not yet been updated to work with 2.16 (post-templatisation.).
+    There are three files - <filename>query.conf</filename>, 
+    <filename>buglist</filename> and <filename>bugs</filename>.</para>
     
-    <para>The query.conf file contains the mapping from options to field
+    <para><filename>query.conf</filename> 
+    contains the mapping from options to field
     names and comparison types. Quoted option names are "grepped" for, so it
     should be easy to edit this file. Comments (#) have no effect; you must
     make sure these lines do not contain any quoted "option".</para>
 
-    <para>buglist is a shell script which submits a Bugzilla query and writes
+    <para><filename>buglist</filename>
+    is a shell script which submits a Bugzilla query and writes
     the resulting HTML page to stdout. It supports both short options, (such
     as "-Afoo" or "-Rbar") and long options (such as "--assignedto=foo" or
     "--reporter=bar"). If the first character of an option is not "-", it is
     treated as if it were prefixed with "--default=".</para>
 
-    <para>The columlist is taken from the COLUMNLIST environment variable.
+    <para>The column list is taken from the COLUMNLIST environment variable.
     This is equivalent to the "Change Columns" option when you list bugs in
-    buglist.cgi. If you have already used Bugzilla, use 
-    <command>grep COLUMLIST ~/.netscape/cookies</command>
+    buglist.cgi. If you have already used Bugzilla, grep for COLUMNLIST
+    in your cookies file to see your current COLUMNLIST setting.</para>
 
-    to see your current COLUMNLIST setting.</para>
-
-    <para>bugs is a simple shell script which calls buglist and extracts the
+    <para><filename>bugs</filename> is a simple shell script which calls
+    <filename>buglist</filename> and extracts the
     bug numbers from the output. Adding the prefix
     "http://bugzilla.mozilla.org/buglist.cgi?bug_id=" turns the bug list into
     a working link if any bugs are found. Counting bugs is easy. Pipe the
@@ -127,7 +81,8 @@ RewriteRule ^/([0-9]+)$ http://foo.bar.com/show_bug.cgi?id=$1 [L,R]
     <command>sed -e 's/,/ /g' | wc | awk '{printf $2 "\n"}'</command>
     </para>
 
-    <para>Akkana says she has good results piping buglist output through 
+    <para>Akkana Peck says she has good results piping 
+    <filename>buglist</filename> output through 
     <command>w3m -T text/html -dump</command>
     </para>
 

@@ -593,44 +593,52 @@ AllowOverride Limit
     <section>
       <title>Bugzilla</title>
 
-      <para>You should untar the Bugzilla files into a directory that you're
-      willing to make writable by the default web server user (probably 
-      <quote>nobody</quote>). 
-      You may decide to put the files in the main web space for your
-      web server or perhaps in 
-      <filename>/usr/local</filename>
-      with a symbolic link in the web space that points to the Bugzilla
-      directory.</para>
+      <para>
+        You should untar the Bugzilla files into a directory that you're
+        willing to make writable by the default web server user (probably 
+        <quote>nobody</quote>). You may decide to put the files in the
+        main web space for your web server or perhaps in 
+        <filename>/usr/local</filename> with a symbolic link in the web
+        space that points to the Bugzilla directory.
+      </para>
 
       <tip>
-        <para>If you symlink the bugzilla directory into your Apache's HTML
-        heirarchy, you may receive 
-        <errorname>Forbidden</errorname>
-        errors unless you add the 
-        <quote>FollowSymLinks</quote>
-        directive to the &lt;Directory&gt; entry for the HTML root
-        in httpd.conf.</para>
+        <para>
+          If you symlink the bugzilla directory into your Apache's HTML
+          heirarchy, you may receive <errorname>Forbidden</errorname>
+          errors unless you add the <quote>FollowSymLinks</quote>
+          directive to the &lt;Directory&gt; entry for the HTML root
+          in httpd.conf.
+        </para>
       </tip>
 
-      <para>Once all the files are in a web accessible directory, make that
-      directory writable by your webserver's user. This is a temporary step
-      until you run the post-install 
-      <filename>checksetup.pl</filename>
-      script, which locks down your installation.</para>
+      <para>
+        Add <filename>index.cgi</filename> to the end of the
+        <computeroutput>DirectoryIndex</computeroutput> line.
+      </para>
+          
 
-      <para>Lastly, you'll need to set up a symbolic link to 
-      <filename>/usr/bonsaitools/bin/perl</filename>
-      for the correct location of your Perl executable (probably 
-      <filename>/usr/bin/perl</filename>). 
-      Otherwise you must hack all the .cgi files to change where they look
-      for Perl. This can be done using the following Perl one-liner, but 
-      I suggest using the symlink approach to avoid upgrade hassles.
+      <para>
+        Once all the files are in a web accessible directory, make that
+        directory writable by your webserver's user. This is a temporary
+        step until you run the post-install <filename>checksetup.pl</filename>
+        script, which locks down your installation.
+      </para>
+
+      <para>
+        Lastly, you'll need to set up a symbolic link to 
+        <filename>/usr/bonsaitools/bin/perl</filename>
+        for the correct location of your Perl executable (probably 
+        <filename>/usr/bin/perl</filename>). Otherwise you must hack all
+        the .cgi files to change where they look for Perl. This can be
+        done using the following Perl one-liner, but I suggest using the
+        symlink approach to avoid upgrade hassles.
       </para>
       
       <para> 
-        <programlisting>perl -pi -e
-        's@#\!/usr/bonsaitools/bin/perl@#\!/usr/bin/perl@' *cgi *pl Bug.pm
-        processmail syncshadowdb</programlisting>
+        <programlisting>
+perl -pi -e 's@#\!/usr/bonsaitools/bin/perl@#\!/usr/bin/perl@' *cgi *pl Bug.pm processmail syncshadowdb
+        </programlisting>
 
         Change <filename>/usr/bin/perl</filename> to match the location
         of Perl on your machine.

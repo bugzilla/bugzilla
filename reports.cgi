@@ -530,7 +530,7 @@ sub chart_image_name {
     # Instead, just require that each field name consists only of letters
     # and number
 
-    if ($FORM{'datasets'} !~ m/[A-Za-z0-9:]/) {
+    if ($FORM{'datasets'} !~ m/^[A-Za-z0-9:]+$/) {
         die "Invalid datasets $FORM{'datasets'}";
     }
     # Since we pass the tests, consider it OK

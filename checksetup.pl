@@ -399,7 +399,7 @@ LocalVar('webservergroup', '
 # and you cannot set this up any other way. YOU HAVE BEEN WARNED.
 # If you set this to anything besides "", you will need to run checksetup.pl
 # as root, or as a user who is a member of the specified group.
-$webservergroup = "nobody";
+$webservergroup = "apache";
 ');
 
 
@@ -1014,8 +1014,8 @@ if (-e "data/params") {
 #
 # Here we use --CHMOD-- and friends to set the file permissions
 #
-# The rationale is that the web server generally runs as nobody and so the cgi
-# scripts should not be writable for nobody, otherwise someone may be possible
+# The rationale is that the web server generally runs as apache and so the cgi
+# scripts should not be writable for apache, otherwise someone may be possible
 # to change the cgi's when exploiting some security flaw somewhere (not
 # necessarily in Bugzilla!)
 #

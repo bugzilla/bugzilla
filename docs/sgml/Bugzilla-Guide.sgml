@@ -20,10 +20,11 @@
 <!ENTITY revhistory SYSTEM "revhistory.sgml">
 
 <!ENTITY bz "http://www.bugzilla.org/">
-<!ENTITY bz-ver "2.16">
+<!ENTITY bz-ver "2.16.3">
+<!ENTITY bz-date "2003-02-16">
 <!ENTITY bz-cvs-ver "2.17">
 <!ENTITY bzg-date "April 2nd, 2002">
-<!ENTITY bzg-ver "2.16">
+<!ENTITY bzg-ver "2.16.3">
 <!ENTITY bzg-cvs-ver "2.17.0">
 <!ENTITY bzg-auth "The Bugzilla Team">
 <!ENTITY bzg-bugs "<ulink url='http://bugzilla.mozilla.org/enter_bug.cgi?product=Bugzilla&amp;component=Documentation'>Bugzilla</ulink>">
@@ -58,7 +59,7 @@ try to avoid clutter and feel free to waste space in the code to make it more re
 <!-- Header -->
 
   <bookinfo>
-    <title>The Bugzilla Guide</title>
+    <title>The Bugzilla Guide - &bzg-ver; Release</title>
 
     <authorgroup>
       <author>
@@ -72,6 +73,8 @@ try to avoid clutter and feel free to waste space in the code to make it more re
         <surname>Team</surname>
       </author>
     </authorgroup>
+
+    <pubdate>&bz-date;</pubdate>
 
     <abstract>
       <para>

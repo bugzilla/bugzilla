@@ -341,7 +341,7 @@
         the form in order to make the template functional. Its value should
         be the suffix of the template filename. For example, if the file
         is called <filename>create-cust.html.tmpl</filename>, then
-        <computeroutput>&lt;input type="hidden" name="format" value="cust"&gt;</computeroutput>
+        <programlisting>&lt;input type="hidden" name="format" value="cust"&gt;</programlisting>
         should be used inside the form.
       </para>
 

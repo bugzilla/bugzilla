@@ -82,7 +82,7 @@ sub collect_stats {
             if( $product eq "-All-" ) {
                 SendSQL("select count(bug_status) from bugs where bug_status='$status'");
             } else {
-                SendSQL("select count(bug_status) from bugs where bug_status='$status' and product='$product'");
+                SendSQL("select count(bug_status) from bugs where bug_status='$status' and product=" . SqlQuote($product));
             }
 
             push @row, FetchOneColumn();
@@ -92,7 +92,7 @@ sub collect_stats {
             if( $product eq "-All-" ) {
                 SendSQL("select count(resolution) from bugs where resolution='$resolution'");
             } else {
-                SendSQL("select count(resolution) from bugs where resolution='$resolution' and product='$product'");
+                SendSQL("select count(resolution) from bugs where resolution='$resolution' and product=" . SqlQuote($product));
             }
 
             push @row, FetchOneColumn();

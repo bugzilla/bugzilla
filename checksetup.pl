@@ -1610,8 +1610,14 @@ $table{tokens} =
 ###########################################################################
 
 # Get a list of the existing tables (if any) in the database
-my $sth = $dbh->table_info(undef, undef, undef, "TABLE");
-my @tables = @{$dbh->selectcol_arrayref($sth, { Columns => [3] })};
+my @tables;
+if ($DBI::VERSION < 1.20) {
+    @tables = map { $_ =~ s/.*\.//; $_ } $dbh->tables;
+}
+else {
+    my $sth = $dbh->table_info(undef, undef, undef, "TABLE");
+    @tables = @{$dbh->selectcol_arrayref($sth, { Columns => [3] })};
+}
 #print 'Tables: ', join " ", @tables, "\n";
 
 # add lines here if you add more --LOCAL-- config vars that end up in the enums:
@@ -1907,7 +1913,7 @@ sub bailout {   # this is just in case we get interrupted while getting passwd
     exit 1;
 }
 
-$sth = $dbh->prepare(<<_End_Of_SQL_);
+my $sth = $dbh->prepare(<<_End_Of_SQL_);
   SELECT login_name
   FROM profiles
   WHERE groupset=9223372036854775807

@@ -166,7 +166,7 @@ XML::Parser (any)
 - 2.16 introduces "templatisation", a new feature that allows
   administrators to easily customise the HTML output of Bugzilla
   without altering Perl code.  Bugzilla uses the "Template Toolkit"
-  for this.    Please see the "Template Customisation" section of the
+  for this.  Please see the "Template Customisation" section of the
   Bugzilla Guide for more details.
 
   Administrators who ran the 2.15 development version and customised

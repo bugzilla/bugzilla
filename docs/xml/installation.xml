@@ -670,52 +670,25 @@ AllowOverride Limit
 
       <para>Remember to set &lt;bugs_password&gt; to some unique password.</para>
 
-      <para>If you are using MySQL 4.0 or newer, enter:
-      <simplelist>
-        <member>
-          <computeroutput>
-            <prompt>mysql&gt;</prompt>
+      <para>If you are using MySQL 4.0 or newer, enter:</para>
 
-            <command>GRANT SELECT,INSERT,UPDATE,DELETE,INDEX,
-            ALTER,CREATE,DROP,LOCK TABLES,CREATE TEMPORARY
-            TABLES,REFERENCES ON bugs.* TO bugs@localhost
-            IDENTIFIED BY '&lt;bugs_password&gt;';</command>
-          </computeroutput>
-        </member>
+        <screen>  <prompt>mysql&gt;</prompt> <command>GRANT SELECT, INSERT,
+         UPDATE, DELETE, INDEX, ALTER, CREATE, LOCK TABLES,
+         CREATE TEMPORARY TABLES, DROP, REFERENCES ON bugs.*
+         TO bugs@localhost IDENTIFIED BY '<replaceable>$db_pass</replaceable>';</command>
+  <prompt>mysql&gt;</prompt> <command>FLUSH PRIVILEGES;</command></screen>
 
-        <member>
-          <computeroutput>
-            <prompt>mysql&gt;</prompt>
+        <para>If you are using an older version of MySQL,
+          the <computeroutput>LOCK TABLES</computeroutput> and 
+          <computeroutput>CREATE TEMPORARY TABLES</computeroutput>
+          permissions will be unavailable and should be removed from the permissions
+          list. In this case, the following command line can be used:</para>
 
-            <command>FLUSH PRIVILEGES;</command>
-          </computeroutput>
-        </member>
-      </simplelist>
-      </para>
-
-      <para>If you are using an older version of MySQL,
-        the LOCK TABLES and CREATE TEMPORARY TABLES permissions
-        need to be removed from the list:
-        <simplelist>
-          <member>
-            <computeroutput>
-              <prompt>mysql&gt;</prompt>
-
-              <command>GRANT SELECT,INSERT,UPDATE,DELETE,INDEX,
-              ALTER,CREATE,DROP,REFERENCES ON bugs.* TO bugs@localhost
-              IDENTIFIED BY '&lt;bugs_password&gt;';</command>
-            </computeroutput>
-          </member>
-
-          <member>
-            <computeroutput>
-              <prompt>mysql&gt;</prompt>
-
-              <command>FLUSH PRIVILEGES;</command>
-            </computeroutput>
-          </member>
-        </simplelist>
-      </para>
+        <screen>  <prompt>mysql&gt;</prompt> <command>GRANT SELECT, INSERT,
+         UPDATE, DELETE, INDEX, ALTER, CREATE, DROP,
+         REFERENCES ON bugs.* TO bugs@localhost IDENTIFIED BY
+         '<replaceable>$db_pass</replaceable>';</command>
+    <prompt>mysql&gt;</prompt> <command>FLUSH PRIVILEGES;</command></screen>
     </section>
 
     <section>

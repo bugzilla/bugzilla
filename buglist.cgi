@@ -1525,8 +1525,10 @@ $vars->{'currenttime'} = time2str("%a %b %e %T %Z %Y", time());
 if ($dotweak) {
     $vars->{'dotweak'} = 1;
     $vars->{'use_keywords'} = 1 if @::legal_keywords;
-
-    $vars->{'products'} = \@::legal_product;
+    my @entry_products = grep {(!Param("usebuggroups") 
+                             || !GroupExists($_) 
+                             || UserInGroup($_))} @::legal_product;
+    $vars->{'products'} = \@entry_products;
     $vars->{'platforms'} = \@::legal_platform;
     $vars->{'priorities'} = \@::legal_priority;
     $vars->{'severities'} = \@::legal_severity;

@@ -834,7 +834,7 @@
         <listitem>
           <para>If you run MySQL on the same machine as your httpd server, you
           should consider disabling networking from within MySQL by adding
-          the following to your <filename>/etc/my.conf</filename>:
+          the following to your <filename>/etc/my.cnf</filename>:
           </para>
           <programlisting>
 [myslqd]

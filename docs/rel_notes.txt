@@ -1,14 +1,18 @@
-The 2.14.2 release fixes several security issues that became known to us after 
-the Bugzilla 2.14.1 release. Please see the upgrade procedure below for
-details on how to upgrade to 2.14.2.
+The 2.14.2 release fixes several security issues that became known
+to us after the Bugzilla 2.14.1 release.  Please see the upgrade
+procedure below for details on how to upgrade to 2.14.2.
 
 Please note that the upcoming release of 2.16 will incorporate
 various rearchitectures that will make failure-to-validate
 and failure-to-filter errors harder to insert and easier to
-spot.  In particular this means there may be specific holes
-in the 2.14 line that are unknown but have been fixed, and they
-will probably not be fixed in the 2.14 line, at least until they
-are known.
+spot.  In particular this means there may be holes in the 2.14
+line that have not been discovered, yet are fixed in 2.16.  If
+such holes exist they probably won't be fixed in 2.14 point
+releases, unless they are discovered.
+
+There may be future point releases of 2.14, even after the
+release of 2.16, however support for 2.14 will likely be
+dropped at some stage after the 2.16 release.
 
 **************************
 *** ABOUT THIS VERSION ***

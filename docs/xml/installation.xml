@@ -734,15 +734,15 @@ perl -pi -e 's@#\!/usr/bonsaitools/bin/perl@#\!/usr/bin/perl@' *cgi *pl Bug.pm p
       <filename>checksetup.pl</filename>
       </title>
 
-      <para>Next, run the magic checksetup.pl script. (Many thanks to 
-      <ulink url="mailto:holgerschurig@nikocity.de">Holger Schurig </ulink> 
-      for writing this script!) 
-      This script is designed to make sure your MySQL database and other
-      configuration options are consistent with the Bugzilla CGI files. 
-      It will make sure Bugzilla files and directories have reasonable
-      permissions, set up the 
-      <filename>data</filename>
-      directory, and create all the MySQL tables. 
+      <para>
+        Next, run the magic checksetup.pl script. (Many thanks to 
+        <ulink url="mailto:holgerschurig@nikocity.de">Holger Schurig </ulink> 
+        for writing this script!) This script is designed to make sure your
+        MySQL database and other configuration options are consistent with
+        the Bugzilla CGI files. It will make sure Bugzilla files and directories 
+        have reasonable permissions, set up the <filename>data</filename>
+        directory, and create all the MySQL tables.
+      </para>
 
       <para>
         At this point, you need to <filename>su</filename> to root. You

@@ -60,6 +60,7 @@ my $user = Bugzilla->login(LOGIN_REQUIRED);
 my $whoid = $user->id;
 
 my $cgi = Bugzilla->cgi;
+my $dbh = Bugzilla->dbh;
 
 my $requiremilestone = 0;
 

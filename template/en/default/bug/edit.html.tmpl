@@ -412,7 +412,7 @@
       <input type="radio" name="knob" value="reassign"> 
       <a href="bug_status.html#assigned_to">Reassign</a> bug to
       <input name="assigned_to" size="32" 
-             onchange="if ((this.value != '[% bug.assigned_to_email FILTER js %]') && 
+             onchange="if ((this.value != '[% bug.assigned_to_email FILTER js FILTER html %]') && 
                             (this.value != '')) {
                          document.changeform.knob[[% knum %]].checked=true; 
                        }"  

@@ -314,9 +314,14 @@ if ($action eq 'list') {
           die "Unknown match type";
       }
       $query .= SqlQuote($matchstr) . " ORDER BY login_name";
-    } elsif (exists $::FORM{'query'}) {
+    } elsif (exists $::FORM{'group'}) {
+      my $group = $::FORM{'group'};
+      detaint_natural($group);
+      die "Invalid group" unless $group;
       $query = "SELECT login_name,realname,disabledtext " .
-          "FROM profiles WHERE " . $::FORM{'query'} . " ORDER BY login_name";
+               "FROM profiles WHERE ((groupset & $group) " .
+               "                     OR (blessgroupset & $group)) " .
+               "ORDER BY login_name";
     } else {
       die "Missing parameters";
     }

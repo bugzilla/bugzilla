@@ -398,8 +398,9 @@ if ($action eq 'del') {
        print "
 <B>One or more users belong to this group. You cannot delete this group while
 there are users in it.</B><BR>
-<A HREF=\"editusers.cgi?action=list&query=" .
-url_quote("(groupset & $bit) OR (blessgroupset & $bit)") . "\">Show me which users.</A> - <INPUT TYPE=CHECKBOX NAME=\"removeusers\">Remove all users from
+<A HREF=\"editusers.cgi?action=list&amp;group=$bit\">
+Show me which users.</A> - 
+<INPUT TYPE=CHECKBOX NAME=\"removeusers\">Remove all users from
 this group for me<P>
 ";
     }

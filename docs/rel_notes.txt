@@ -71,6 +71,13 @@ way.  These views may be more appropriate for particular data types, and are
 suitable for saving and then putting into presentations or web pages.
 
 
+Generic Charting
+----------------
+
+Bugzilla's new charting feature allows you to display flexible summary charts,
+based on configurable data sets (bug 16009).
+
+
 Request System
 ---------------
 
@@ -209,13 +216,6 @@ The fact that raw email addresses are displayed in Bugzilla makes it trivial
 for bots that spamharvest to spider through Bugzilla, in particular, through
 Bugzilla's buglists. This change adds HTML obfuscation of email addresses as
 they appear in the Bugzilla web pages.
-
-
-Generic Charting
-----------------
-
-Bugzilla's new charting feature allows you to display flexible summary charts,
-based on configurable data sets (bug 16009).
 
 
 Miscellaneous Improvements

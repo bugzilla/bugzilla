@@ -485,6 +485,20 @@
       Note that earlier versions that 0.99c used GIFs, which are no longer
       supported by the latest versions of GD.</para>
     </section>
+    
+    <section>
+      <title>Template Toolkit</title>
+
+      <para>When you install Template Toolkit, you'll get asked various
+      questions about features to enable. The defaults are fine, except
+      that it is recommended you use the high speed XS Stash of the Template
+      Toolkit, in order to achieve best performance.  However, there are
+      known problems with XS Stash and Perl 5.005_02 and lower.  If you
+      wish to use these older versions of Perl, please use the regular
+      stash.</para>
+    </section> 
+
+    
   </section>
   
     <section>
@@ -639,7 +653,7 @@
       and enter &lt;new_password&gt;. Remember that MySQL user names have
       nothing to do with Unix user names (login names).</para>
 
-      <para>Next, we create the 
+      <para>Next, we use an SQL <command>GRANT</command> command to create a 
       <quote>bugs</quote>
 
       user, and grant sufficient permissions for checksetup.pl, which we'll

@@ -223,12 +223,11 @@
     </qandadiv>
 
     <qandadiv id="faq-phb">
-      <title>Pointy-Haired-Boss Questions</title>
+      <title>Managerial Questions</title>
       <para>
 	<note>
 	  <para>
-	    The title of this section doesn't mean you're a PHB -- it just means
-	    you probably HAVE a PHB who wants to know this :)
+	    Questions likely to be asked by managers. :-)
 	  </para>
 	</note>
       </para>
@@ -345,7 +344,7 @@
 	  <para>
 	    Yes.  Look at <ulink url="http://bugzilla.mozilla.org/reports.cgi">
 	    http://bugzilla.mozilla.org/reports.cgi</ulink> for basic reporting
-	    facilities.
+	    and graphing facilities.
 	  </para>
 	  <para>
 	    For more advanced reporting, I recommend hooking up a professional
@@ -552,8 +551,7 @@
 	<answer>
 	  <para>
 	    If Bugzilla is set up correctly from the start, continuing maintenance
-      needs
-	    are minimal and can be completed by unskilled labor.
+      needs are minimal and can be done easily using the web interface.
 	  </para>
 	  <para>
 	    Commercial Bug-tracking software typically costs somewhere upwards

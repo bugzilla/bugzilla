@@ -399,6 +399,7 @@
         <member>bug 23456, comment 53</member>
         <member>attachment 4321</member>
         <member>mailto:george@example.com</member>
+        <member>george@example.com</member>
         <member>ftp://ftp.mozilla.org</member>
         <member>Most other sorts of URL</member>
       </simplelist>

@@ -928,7 +928,8 @@
         each installed localisation. The default English templates are
         therefore in <filename>en</filename>. Underneath that, there
         are two directories - <filename>default</filename> and 
-        <filename>custom</filename>. The <filename>default</filename>
+        <filename>custom</filename> (you may have to create
+        <filename>custom</filename> yourself.) The <filename>default</filename>
         directory contains all the templates shipped with Bugzilla.
       </para>
 
@@ -948,15 +949,34 @@
         the contents of this directory will not be touched during an upgrade,
         and you can then decide whether to continue using your own templates,
         or make the effort to merge your changes into the new versions by
-        hand.
+        hand. This is also the correct method to use if you upgrade Bugzilla
+        by untarring tarballs over the top, rather than using CVS. It's perfectly
+        acceptable to mix and match these two methods.
       </para>
 
       <para>
+        Editing templates is a good way of doing a "poor man's custom fields".
+        For example, if you don't use the Status Whiteboard, but want to have
+        a free-form text entry box for "Build Identifier", then you can just
+        edit the templates to change the field labels. It's still be called
+        status_whiteboard internally, but your users don't need to know that.
+      </para>
+      
+      <para>
+        If you are making changes to contribute back to Bugzilla (and we'd
+        love to have them), then please read the 
+        <ulink url="http://www.bugzilla.org/developerguide.html">Developers 
+        Guide</ulink> first.
+      </para>
+      
+     <para>
         The syntax of the Template Toolkit language is beyond the scope of
         this guide. It's reasonably easy to pick up by looking at the current 
         templates; or, you can read the manual, available on the
         <ulink url="http://www.template-toolkit.org">Template Toolkit home
-        page</ulink>.
+        page</ulink>. However, you should particularly remember (for security
+        reasons) to always HTML filter things which come from the database or
+        user input, to prevent cross-site scripting attacks.
       </para>
       
       <note>
@@ -967,69 +987,7 @@
         </para>
       </note>
     </section>
-        
-    <section>
-      <title>Particular Templates</title>
-      
-      <para>
-        There are a few templates you may be particularly interested in
-        customising for your installation.
-      </para>
-      
-      <para>
-        <command>global/header.html.tmpl</command> and
-        <command>global/footer.html.tmpl</command>:
-        These define the header and footer that go on all Bugzilla pages.
-        Editing these is a way to quickly get a distinctive look and
-        feel for your Bugzilla installation.
-      </para>      
-
-      <para>
-        <command>bug/create/create.html.tmpl</command> and
-        <command>bug/create/comment.txt.tmpl</command>:
-        You may wish to get bug submitters to give certain bits of structured
-        information, each in a separate input widget, for which there is not a
-        field in the database. The bug entry system has been designed in an
-        extensible fashion to enable you to define arbitrary fields and widgets,
-        and have their values appear formatted in the initial
-        Description (rather than in database fields.)
-      </para>
-        
-      <para>
-        To make this work, create a custom template for 
-        <filename>enter_bug.cgi</filename> (the default template, on which you
-        could base it, is <filename>create.html.tmpl</filename>),
-        and either call it <filename>create.html.tmpl</filename> or
-        <filename>create-&lt;formatname&gt;.html.tmpl</filename>.
-        Put it in the <filename class="directory">custom/bug/create</filename>
-        directory. In it, add widgets for each piece of information you'd like
-        collected - such as a build number, or set of steps to reproduce.
-      </para>
-
-      <para>
-        Then, create a template like 
-        <filename>custom/bug/create/comment.txt.tmpl</filename>, which
-        references the form fields you have created. When a bug report is
-        submitted, the initial comment attached to the bug report will be
-        formatted according to the layout of this template.
-      </para> 
-
-      <para>
-        For example, if your enter_bug template had a field
-        <programlisting>
-        &lt;input type="text" name="buildid" size="30"&gt;
-        </programlisting>
-        and then your comment.txt.tmpl had
-        <programlisting>
-        BuildID: [% form.buildid %]
-        </programlisting>
-        then
-        <programlisting>
-        BuildID: 20020303
-        </programlisting>
-        would appear in the initial checkin comment.
-      </para>        
-    </section>
+            
     
     <section>
       <title>Template Formats</title>
@@ -1065,7 +1023,8 @@
       
       <para>
         You now need to decide what content type you want your template
-        served as. Open up the localconfig file and find the $contenttypes
+        served as. Open up the <filename>localconfig</filename> file and find the 
+        <filename>$contenttypes</filename>
         variable. If your content type is not there, add it. Remember
         the three- or four-letter tag assigned to you content type. 
         This tag will be part of the template filename.
@@ -1076,6 +1035,73 @@
         Try out the template by calling the CGI as 
         <filename>&lt;cginame&gt;.cgi?format=&lt;formatname&gt;</filename> .
       </para>       
+    </section>
+    
+    
+    <section>
+      <title>Particular Templates</title>
+      
+      <para>
+        There are a few templates you may be particularly interested in
+        customising for your installation.
+      </para>
+      
+      <para>
+        <command>index.html.tmpl</command>:
+        This is the Bugzilla front page.
+      </para>      
+
+      <para>
+        <command>global/header.html.tmpl</command> and
+        <command>global/footer.html.tmpl</command>:
+        These define the header and footer that go on all Bugzilla pages.
+        Editing these is a way to quickly get a distinctive look and
+        feel for your Bugzilla installation.
+      </para>      
+
+      <para>
+        <command>bug/create/create.html.tmpl</command> and
+        <command>bug/create/comment.txt.tmpl</command>:
+        You may wish to get bug submitters to give certain bits of structured
+        information, each in a separate input widget, for which there is not a
+        field in the database. The bug entry system has been designed in an
+        extensible fashion to enable you to define arbitrary fields and widgets,
+        and have their values appear formatted in the initial
+        Description, rather than in database fields. An example of this
+        is the mozilla.org 
+        <ulink url="http://bugzilla.mozilla.org/enter_bug.cgi?format=guided">guided 
+        bug submission form</ulink>.
+      </para>
+        
+      <para>
+        To make this work, create a custom template for 
+        <filename>enter_bug.cgi</filename> (the default template, on which you
+        could base it, is <filename>create.html.tmpl</filename>),
+        and either call it <filename>create.html.tmpl</filename> or use a format and
+        call it <filename>create-&lt;formatname&gt;.html.tmpl</filename>.
+        Put it in the <filename class="directory">custom/bug/create</filename>
+        directory. In it, add widgets for each piece of information you'd like
+        collected - such as a build number, or set of steps to reproduce.
+      </para>
+
+      <para>
+        Then, create a template like 
+        <filename>custom/bug/create/comment.txt.tmpl</filename>, also named
+        after your format if you are using one, which
+        references the form fields you have created. When a bug report is
+        submitted, the initial comment attached to the bug report will be
+        formatted according to the layout of this template.
+      </para> 
+
+      <para>
+        For example, if your enter_bug template had a field
+        <programlisting>&lt;input type="text" name="buildid" size="30"&gt;</programlisting>
+        and then your comment.txt.tmpl had
+        <programlisting>BuildID: [% form.buildid %]</programlisting>
+        then
+        <programlisting>BuildID: 20020303</programlisting>
+        would appear in the initial checkin comment.
+      </para>        
     </section>          
     
   </section>
@@ -1084,17 +1110,25 @@
     <title>Upgrading to New Releases</title>
 
     <para>A plain Bugzilla is fairly easy to upgrade from one version to a
-    newer one. However, things get a bit more complicated if you've made
-    changes to Bugzilla's code. In this case, you may have to re-make or
-    reapply those changes. It is recommended that you take a backup of your
-    database and your entire Bugzilla installation before attempting an
+    newer one. Always read the release notes to see if there are any issues
+    that you might need to take note of. It is recommended that you take a 
+    backup of your database and your entire Bugzilla installation before attempting an
     upgrade. You can upgrade a 'clean' installation by untarring a new
     tarball over the old installation. If you are upgrading from 2.12 or
-    later, you can type 
-    <filename>cvs -z3 update</filename>, 
-    and resolve conflicts if there are any.</para>
+    later, and have cvs installed, you can type <filename>cvs -z3 update</filename>, 
+    and resolve conflicts if there are any.
+    </para>
+    
+    <para>However, things get a bit more complicated if you've made
+    changes to Bugzilla's code. In this case, you may have to re-make or
+    reapply those changes. One good method is to take a diff of your customised
+    version against the original, so you can survey all that you've changed.
+    Hopefully, templatisation will reduce the need for
+    this in the future.</para>
 
-    <para>Because the developers of Bugzilla are constantly adding new
+    <para>From version 2.8 onwards, Bugzilla databases can be automatically
+    carried forward during an upgrade. However, because the developers of
+    Bugzilla are constantly adding new
     tables, columns and fields, you'll probably get SQL errors if you just
     update the code and attempt to use Bugzilla. Always run the
     <filename>checksetup.pl</filename> 

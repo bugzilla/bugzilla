@@ -58,8 +58,6 @@ my $cookiepath = Param("cookiepath");
 print "Set-Cookie: Bugzilla_login= ; path=$cookiepath; expires=Tue, 15-Sep-1998 21:49:00 GMT
 Set-Cookie: Bugzilla_logincookie= ; path=$cookiepath; expires=Tue, 15-Sep-1998 21:49:00 GMT\n";
 
-print "Content-Type: text/html\n\n";
-
 my $login = $::FORM{'login'};
 
 if (defined($login)) {
@@ -68,6 +66,8 @@ if (defined($login)) {
     CheckEmailSyntax($login);
     $vars->{'login'} = $login;
     
+    print "Content-Type: text/html\n\n";
+
     if (!ValidateNewUser($login)) {
         # Account already exists        
         $template->process("account/exists.html.tmpl", $vars)
@@ -83,6 +83,8 @@ if (defined($login)) {
       || ThrowTemplateError($template->error());
     exit;
 }
+
+print "Content-Type: text/html\n\n";
 
 # Show the standard "would you like to create an account?" form.
 $template->process("account/create.html.tmpl", $vars)

@@ -243,7 +243,7 @@ print "
 </TR><TR>
     <TD ALIGN=RIGHT><B><A HREF=\"bug_status.html#assigned_to\">Assigned&nbsp;To:
         </A></B></TD>
-      <TD>$bug{'assigned_to'}</TD>
+      <TD>" . html_quote($bug{'assigned_to'}) . "</TD>
   <TD>&nbsp;</TD>";
 
 if (Param("usetargetmilestone")) {

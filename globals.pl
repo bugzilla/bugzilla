@@ -1058,7 +1058,7 @@ sub GetLongDescriptionAsHTML {
         if ($count) {
             $result .= "<BR><BR><I>------- Additional Comments From ";
               if ($who) {
-                  $result .= qq{<A HREF="mailto:$email">$who</A> } .
+                  $result .= "<A HREF=\"mailto:$email\">" . html_quote($who) . "</A> " .
                       time2str("%Y-%m-%d %H:%M", str2time($when)) .
                           " -------</I><BR>\n";
               } else {

@@ -13,7 +13,10 @@ REL="UP"
 TITLE="Useful Patches and Utilities for Bugzilla"
 HREF="patches.html"><LINK
 REL="PREVIOUS"
-TITLE="Apache mod_rewrite magic"
+TITLE="Apache 
+    mod_rewrite
+
+    magic"
 HREF="rewrite.html"><LINK
 REL="NEXT"
 TITLE="Command-line Bugzilla Queries"
@@ -75,169 +78,177 @@ CLASS="section"
 ><A
 NAME="setperl">D.2. The setperl.csh Utility</H1
 ><P
->	 You can use the "setperl.csh" utility to quickly and
-      easily change the path to perl on all your Bugzilla files. This
-      is a C-shell script; if you do not have "csh" or "tcsh" in the
-      search path on your system, it will not work!
-    </P
+>You can use the "setperl.csh" utility to quickly and easily change
+    the path to perl on all your Bugzilla files. This is a C-shell script; if
+    you do not have "csh" or "tcsh" in the search path on your system, it
+    will not work!</P
 ><DIV
 CLASS="procedure"
 ><OL
 TYPE="1"
 ><LI
 ><P
->&#13;	  Download the "setperl.csh" utility to your Bugzilla
-	  directory and make it executable.
-	</P
+>Download the "setperl.csh" utility to your Bugzilla directory
+        and make it executable.</P
 ><OL
 CLASS="SUBSTEPS"
 TYPE="a"
 ><LI
 ><P
->&#13;	      <TT
+>&#13;              <TT
 CLASS="computeroutput"
->&#13;		<TT
+>&#13;                <TT
 CLASS="prompt"
 >bash#</TT
 >
-		<B
+
+                <B
 CLASS="command"
 >cd /your/path/to/bugzilla</B
 >
-	      </TT
+              </TT
 >
-	    </P
+            </P
 ></LI
 ><LI
 ><P
->&#13;	      <TT
+>&#13;              <TT
 CLASS="computeroutput"
-> <TT
+>&#13;                <TT
 CLASS="prompt"
 >bash#</TT
-> <B
-CLASS="command"
->wget -O
-		  setperl.csh
-		  'http://bugzilla.mozilla.org/showattachment.cgi?attach_id=10795'</B
-> </TT
 >
-	    </P
+
+                <B
+CLASS="command"
+>wget -O setperl.csh
+                'http://bugzilla.mozilla.org/showattachment.cgi?attach_id=10795'</B
+>
+              </TT
+>
+            </P
 ></LI
 ><LI
 ><P
->&#13;	      <TT
+>&#13;              <TT
 CLASS="computeroutput"
-> <TT
+>&#13;                <TT
 CLASS="prompt"
 >bash#</TT
-> <B
-CLASS="command"
->chmod
-		  u+x setperl.csh</B
-> </TT
 >
-	    </P
+
+                <B
+CLASS="command"
+>chmod u+x setperl.csh</B
+>
+              </TT
+>
+            </P
 ></LI
 ></OL
 ></LI
 ><LI
 ><P
->&#13;	  Prepare (and fix) Bugzilla file permissions.
-	</P
+>Prepare (and fix) Bugzilla file permissions.</P
 ><OL
 CLASS="SUBSTEPS"
 TYPE="a"
 ><LI
 ><P
->&#13;	      <TT
+>&#13;              <TT
 CLASS="computeroutput"
->&#13;		<TT
+>&#13;                <TT
 CLASS="prompt"
 >bash#</TT
 >
-		<B
+
+                <B
 CLASS="command"
 >chmod u+w *</B
 >
-	      </TT
+              </TT
 >
-	    </P
+            </P
 ></LI
 ><LI
 ><P
->&#13;	      <TT
+>&#13;              <TT
 CLASS="computeroutput"
-> <TT
+>&#13;                <TT
 CLASS="prompt"
 >bash#</TT
-> <B
+>
+
+                <B
 CLASS="command"
->chmod
-		  u+x duplicates.cgi</B
-> </TT
+>chmod u+x duplicates.cgi</B
 >
-	    </P
+              </TT
+>
+            </P
 ></LI
 ><LI
 ><P
->&#13;	      <TT
+>&#13;              <TT
 CLASS="computeroutput"
->&#13;		<TT
+>&#13;                <TT
 CLASS="prompt"
 >bash#</TT
 >
-		<B
+
+                <B
 CLASS="command"
 >chmod a-x bug_status.html</B
 >
-	      </TT
+              </TT
 >
-	    </P
+            </P
 ></LI
 ></OL
 ></LI
 ><LI
 ><P
->&#13;	  Run the script:
-	</P
+>Run the script:</P
 ><P
->&#13;	  <TT
+>&#13;          <TT
 CLASS="computeroutput"
-> <TT
+>&#13;            <TT
 CLASS="prompt"
 >bash#</TT
 >
-	    <B
+
+            <B
 CLASS="command"
 >./setperl.csh /your/path/to/perl</B
 >
-	  </TT
+          </TT
 >
-<DIV
+
+          <DIV
 CLASS="example"
 ><A
-NAME="AEN2380"><P
+NAME="AEN2111"><P
 ><B
 >Example D-1. Using Setperl to set your perl path</B
 ></P
 ><P
->&#13;	      <TT
+>&#13;              <TT
 CLASS="computeroutput"
-> <TT
+>&#13;                <TT
 CLASS="prompt"
 >bash#</TT
 >
-		<B
+
+                <B
 CLASS="command"
 >./setperl.csh /usr/bin/perl</B
 >
-	      </TT
+              </TT
 >
             </P
 ></DIV
 >
-	</P
+        </P
 ></LI
 ></OL
 ></DIV
@@ -286,10 +297,13 @@ ACCESSKEY="N"
 WIDTH="33%"
 ALIGN="left"
 VALIGN="top"
->Apache <TT
+>Apache 
+    <TT
 CLASS="filename"
 >mod_rewrite</TT
-> magic</TD
+>
+
+    magic</TD
 ><TD
 WIDTH="34%"
 ALIGN="center"

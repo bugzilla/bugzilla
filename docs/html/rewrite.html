@@ -1,7 +1,10 @@
 <HTML
 ><HEAD
 ><TITLE
->Apache mod_rewrite magic</TITLE
+>Apache 
+    mod_rewrite
+
+    magic</TITLE
 ><META
 NAME="GENERATOR"
 CONTENT="Modular DocBook HTML Stylesheet Version 1.76b+
@@ -73,30 +76,37 @@ CLASS="section"
 ><H1
 CLASS="section"
 ><A
-NAME="rewrite">D.1. Apache <TT
+NAME="rewrite">D.1. Apache 
+    <TT
 CLASS="filename"
 >mod_rewrite</TT
-> magic</H1
+>
+
+    magic</H1
 ><P
->Apache's <TT
+>Apache's 
+    <TT
 CLASS="filename"
 >mod_rewrite</TT
-> module lets you do some truly amazing things with URL rewriting.  Here are a couple of examples of what you can do.</P
+>
+
+    module lets you do some truly amazing things with URL rewriting. Here are
+    a couple of examples of what you can do.</P
 ><P
 ></P
 ><OL
 TYPE="1"
 ><LI
 ><P
->&#13;	  Make it so if someone types
-	  <TT
+>Make it so if someone types 
+        <TT
 CLASS="computeroutput"
 >http://www.foo.com/12345</TT
->,
-	  Bugzilla spits back
-	  http://www.foo.com/show_bug.cgi?id=12345. Try setting up
-	  your VirtualHost section for Bugzilla with a rule like
-	  this:</P
+>
+
+        , Bugzilla spits back http://www.foo.com/show_bug.cgi?id=12345. Try
+        setting up your VirtualHost section for Bugzilla with a rule like
+        this:</P
 ><TABLE
 BORDER="0"
 BGCOLOR="#E0E0E0"
@@ -113,7 +123,7 @@ RewriteEngine On
 RewriteRule ^/([0-9]+)$ http://foo.bar.com/show_bug.cgi?id=$1 [L,R]
 &#60;/VirtualHost&#62;
 
-	</PRE
+        </PRE
 ></FONT
 ></TD
 ></TR
@@ -121,14 +131,15 @@ RewriteRule ^/([0-9]+)$ http://foo.bar.com/show_bug.cgi?id=$1 [L,R]
 ></LI
 ><LI
 ><P
->There are many, many more things you can do with
-	  mod_rewrite.  As time goes on, I will include many more in
-	  the Guide.  For now, though, please refer to the mod_rewrite
-	  documentation at <A
+>There are many, many more things you can do with mod_rewrite.
+        As time goes on, I will include many more in the Guide. For now,
+        though, please refer to the mod_rewrite documentation at 
+        <A
 HREF="http://www.apache.org"
 TARGET="_top"
 >http://www.apache.org</A
-></P
+>
+        </P
 ></LI
 ></OL
 ></DIV

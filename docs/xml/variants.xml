@@ -30,38 +30,26 @@
   <section id="variant-fenris" xreflabel="Loki Bugzilla, a.k.a. Fenris">
     <title>Loki Bugzilla (Fenris)</title>
 
-    <para>Fenris can be found at 
-    <ulink url="http://fenris.lokigames.com/">
-    http://fenris.lokigames.com</ulink>
-
-    . It is a fork from Bugzilla.</para>
+    <para>Fenris was a fork from Bugzilla made by Loki Games; when
+    Loki went into receivership, it died. While Loki's other code lives on,
+    its custodians recommend Bugzilla for future bug-tracker deployments.
+    </para>
   </section>
 
   <section id="variant-issuezilla" xreflabel="Issuezilla">
     <title>Issuezilla</title>
 
-    <para>Issuezilla is another fork from Bugzilla, and seems nearly as
-    popular as the Red Hat Bugzilla fork. Some Issuezilla team members are
-    regular contributors to the Bugzilla mailing list/newsgroup. Issuezilla
-    is not the primary focus of bug-tracking at tigris.org, however. Their
-    Java-based bug-tracker, 
-    <xref linkend="variant-scarab" />
-
-    , is under heavy development and looks promising!</para>
-
-    <para>URL: 
-    <ulink url="http://issuezilla.tigris.org/servlets/ProjectHome">
-    http://issuezilla.tigris.org/servlets/ProjectHome</ulink>
-    </para>
+    <para>Issuezilla was another fork from Bugzilla, made by collab.net and
+    hosted at tigris.org. It is also dead; the primary focus of bug-tracking 
+    at tigris.org is their Java-based bug-tracker, 
+    <xref linkend="variant-scarab"/>.</para>
   </section>
 
-  <section id="variant-scarab"
-  xreflabel="Scarab, a newfangled Java-based issue tracker">
+  <section id="variant-scarab" xreflabel="Scarab">
     <title>Scarab</title>
 
-    <para>Scarab is a promising new bug-tracking system built using Java
-    Serlet technology. As of this writing, no source code has been released
-    as a package, but you can obtain the code from CVS.</para>
+    <para>Scarab is a new bug-tracking system built using Java
+    Serlet technology. It is currently at version 1.0 beta 7.</para>
 
     <para>URL: 
     <ulink url="http://scarab.tigris.org/">http://scarab.tigris.org</ulink>
@@ -72,9 +60,7 @@
     <title>Perforce SCM</title>
 
     <para>Although Perforce isn't really a bug tracker, it can be used as
-    such through the 
-    <quote>jobs</quote>
-
+    such through the <quote>jobs</quote>
     functionality.</para>
 
     <para>
@@ -87,10 +73,9 @@
   <section id="variant-sourceforge" xreflabel="SourceForge">
     <title>SourceForge</title>
 
-    <para>SourceForge is more of a way of coordinating geographically
-    distributed free software and open source projects over the Internet than
-    strictly a bug tracker, but if you're hunting for bug-tracking for your
-    open project, it may be just what the software engineer ordered!</para>
+    <para>SourceForge is a way of coordinating geographically
+    distributed free software and open source projects over the Internet.
+    It has a built-in bug tracker, but it's not highly thought of.</para>
 
     <para>URL: 
     <ulink url="http://www.sourceforge.net">

@@ -17,6 +17,7 @@
 <!ENTITY patches SYSTEM "patches.sgml">
 <!ENTITY variants SYSTEM "variants.sgml">
 <!ENTITY requiredsoftware SYSTEM "requiredsoftware.sgml">
+<!ENTITY introduction SYSTEM "introduction.sgml">
 <!ENTITY revhistory SYSTEM "revhistory.sgml">
 
 <!ENTITY bz "http://www.bugzilla.org/">
@@ -61,14 +62,15 @@ try to avoid clutter and feel free to waste space in the code to make it more re
     <title>The Bugzilla Guide</title>
 
     <authorgroup>
-
       <author>
-	<firstname>Matthew</firstname>
-	<othername>P.</othername>
-	<surname>Barnson</surname>
-	<affiliation>
-	  <address><email>mbarnson@sisna.com</email></address>
-	</affiliation>
+        <firstname>Matthew</firstname>
+        <othername>P.</othername>
+        <surname>Barnson</surname>
+      </author>
+      <author>
+        <firstname>The</firstname>
+        <othername>Bugzilla</othername>
+        <surname>Team</surname>
       </author>
     </authorgroup>
 
@@ -103,6 +105,9 @@ try to avoid clutter and feel free to waste space in the code to make it more re
 
 <!-- About This Guide -->
 &about;
+
+<!-- Using Bugzilla -->
+&introduction;
 
 <!-- Using Bugzilla -->
 &using;

@@ -1907,7 +1907,7 @@ sub bailout {   # this is just in case we get interrupted while getting passwd
     exit 1;
 }
 
-my $sth = $dbh->prepare(<<_End_Of_SQL_);
+$sth = $dbh->prepare(<<_End_Of_SQL_);
   SELECT login_name
   FROM profiles
   WHERE groupset=9223372036854775807

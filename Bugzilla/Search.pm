@@ -306,7 +306,15 @@ sub init {
     }
 
     if (defined $params->param('content')) {
-        push(@specialchart, ['content', 'matches', $params->param('content')]);
+        # Append a new chart implementing content quicksearch
+        my $chart;
+        for ($chart = 0 ; $params->param("field$chart-0-0") ; $chart++) {};
+        $params->param("field$chart-0-0", 'content');
+        $params->param("type$chart-0-0", 'matches');
+        $params->param("value$chart-0-0", $params->param('content'));
+        $params->param("field$chart-0-1", 'short_desc');
+        $params->param("type$chart-0-1", 'allwords');
+        $params->param("value$chart-0-1", $params->param('content'));
     }
 
     my $chartid;
@@ -980,8 +988,6 @@ sub init {
 # @supptables = Tables and/or table aliases used in query
 # %suppseen   = A hash used to store all the tables in supptables to weed
 #               out duplicates.
-# @supplist   = A list used to accumulate all the JOIN clauses for each
-#               chart to merge the ON sections of each.
 # $suppstring = String which is pasted into query containing all table names
 
     # get a list of field names to verify the user-submitted chart fields against
@@ -1063,25 +1069,15 @@ sub init {
     }
     my %suppseen = ("bugs" => 1);
     my $suppstring = "bugs";
-    my @supplist = (" ");
     foreach my $str (@supptables) {
         if (!$suppseen{$str}) {
-            if ($str =~ /^(LEFT|INNER) JOIN/i) {
-                $str =~ /^(.*?)\s+ON\s+(.*)$/i;
-                my ($leftside, $rightside) = ($1, $2);
-                if ($suppseen{$leftside}) {
-                    $supplist[$suppseen{$leftside}] .= " AND ($rightside)";
-                } else {
-                    $suppseen{$leftside} = scalar @supplist;
-                    push @supplist, " $leftside ON ($rightside)";
-                }
-            } else {
-                $suppstring .= ", $str";
-                $suppseen{$str} = 1;
+            if ($str !~ /^(LEFT|INNER) JOIN/i) {
+                $suppstring .= ",";
             }
+            $suppstring .= " $str";
+            $suppseen{$str} = 1;
         }
     }
-    $suppstring .= join('', @supplist);
     
     # Make sure we create a legal SQL query.
     @andlist = ("1 = 1") if !@andlist;

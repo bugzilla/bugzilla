@@ -17,9 +17,10 @@
 # Copyright (C) 2001 Jacob Steenhagen. All
 # Rights Reserved.
 #
-# Contributor(s): Jacob Steenhagen <jake@acutex.net>
+# Contributor(s): Jacob Steenhagen <jake@bugzilla.org>
 #                 Zach Lipton <zach@zachlipton.com>
 #                 David D. Kilzer <ddkilzer@kilzer.net>
+#                 Tobias Burnus <burnus@net-b.de>
 #
 
 #################
@@ -37,8 +38,7 @@ use CGI qw(-no_debug);
 
 use File::Spec 0.82;
 use Template;
-use Test::More tests => (  scalar(@Support::Templates::referenced_files)
-                         + scalar(@Support::Templates::actual_files) * 2);
+use Test::More tests => ( scalar(@referenced_files) + $num_actual_files * 2 );
 
 # Capture the TESTOUT from Test::More or Test::Builder for printing errors.
 # This will handle verbosity for us automatically.
@@ -54,73 +54,84 @@ my $fh;
     }
 }
 
-my $include_path = $Support::Templates::include_path;
+# Checks whether one of the passed files exists
+sub existOnce {
+  foreach my $file (@_) {
+    return $file  if -e $file;
+  }
+  return 0;
+}
 
 # Check to make sure all templates that are referenced in
 # Bugzilla exist in the proper place.
 
-foreach my $file(@Support::Templates::referenced_files) {
-    my $path = File::Spec->catfile($include_path, $file);
-    if (-e $path) {
-        ok(1, "$path exists");
-    } else {
-        ok(0, "$path does not exist --ERROR");
+foreach my $lang (@languages) {
+    foreach my $file (@referenced_files) {
+        my @path = map(File::Spec->catfile($_, $file),
+                       split(':', $include_path{$lang}));
+        if (my $path = existOnce(@path)) {
+            ok(1, "$path exists");
+        } else {
+            ok(0, "$file cannot be located --ERROR");
+            print $fh "Looked in:\n  " . join("\n  ", @path);
+        }
     }
 }
 
-# Processes all the templates to make sure they have good syntax
-my $template = Template->new(
-{
-    INCLUDE_PATH => $include_path ,
-    # Need to define filters used in the codebase, they don't
-    # actually have to function in this test, just be defined.
-    # See globals.pl for the actual codebase definitions.
-    FILTERS =>
+foreach my $include_path (@include_paths) {
+    # Processes all the templates to make sure they have good syntax
+    my $provider = Template::Provider->new(
     {
-        html_linebreak => sub { return $_; },
-        js        => sub { return $_ } ,
-        strike    => sub { return $_ } ,
-        url_quote => sub { return $_ } ,
-    },
-}
-);
+        INCLUDE_PATH => $include_path ,
+        # Need to define filters used in the codebase, they don't
+        # actually have to function in this test, just be defined.
+        # See globals.pl for the actual codebase definitions.
+        FILTERS =>
+        {
+            html_linebreak => sub { return $_; },
+            js        => sub { return $_ } ,
+            strike    => sub { return $_ } ,
+            url_quote => sub { return $_ } ,
+            xml       => sub { return $_ } ,
+            quoteUrls => sub { return $_ } ,
+            bug_link => [ sub { return sub { return $_; } }, 1] ,
+            csv       => sub { return $_ } ,
+            time      => sub { return $_ } ,
+        },
+    }
+    );
 
-open SAVEOUT, ">&STDOUT";     # stash the original output stream
-open SAVEERR, ">&STDERR";
-open STDOUT, "> /dev/null";   # discard all output
-open STDERR, "> /dev/null";
-foreach my $file(@Support::Templates::actual_files) {
-    my $path = File::Spec->catfile($include_path, $file);
-    if (-e $path) {
-        if ($template->process($file)) {
-            ok(1, "$file syntax ok");
+    foreach my $file (@{$actual_files{$include_path}}) {
+        my $path = File::Spec->catfile($include_path, $file);
+        if (-e $path) {
+            my ($data, $err) = $provider->fetch($file);
+
+            if (!$err) {
+                ok(1, "$file syntax ok");
+            }
+            else {
+                ok(0, "$file has bad syntax --ERROR");
+                print $fh $data . "\n";
+            }
         }
         else {
-            ok(0, "$file has bad syntax --ERROR");
-            print $fh $template->error() . "\n";
+            ok(1, "$path doesn't exist, skipping test");
         }
     }
-    else {
-        ok(1, "$path doesn't exist, skipping test");
-    }
-}
-open STDOUT, ">&SAVEOUT";     # redirect back to original stream
-open STDERR, ">&SAVEERR";
-close SAVEOUT;
-close SAVEERR;
 
-# check to see that all templates have a version string:
+    # check to see that all templates have a version string:
 
-foreach my $file(@Support::Templates::actual_files) {
-    my $path = File::Spec->catfile($include_path, $file);
-    open(TMPL, $path);
-    my $firstline = <TMPL>;
-    if ($firstline =~ /\d+\.\d+\@[\w\.-]+/) {
-        ok(1,"$file has a version string");
-    } else {
-        ok(0,"$file does not have a version string --ERROR");
+    foreach my $file (@{$actual_files{$include_path}}) {
+        my $path = File::Spec->catfile($include_path, $file);
+        open(TMPL, $path);
+        my $firstline = <TMPL>;
+        if ($firstline =~ /\d+\.\d+\@[\w\.-]+/) {
+            ok(1,"$file has a version string");
+        } else {
+            ok(0,"$file does not have a version string --ERROR");
+        }
+        close(TMPL);
     }
-    close(TMPL);
 }
 
 exit 0;

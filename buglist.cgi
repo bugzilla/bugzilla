@@ -606,6 +606,11 @@ my @selectnames = map($columns->{$_}->{'name'}, @selectcolumns);
 if (!$order || $order =~ /^reuse/i) {
     if ($::COOKIE{'LASTORDER'}) {
       $order = $::COOKIE{'LASTORDER'};
+           
+      # Cookies from early versions of Specific Search included this text,
+      # which is now invalid.
+      $order =~ s/ LIMIT 200//;  
+      
       $order_from_cookie = 1;
     }
     else {

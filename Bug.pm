@@ -27,12 +27,14 @@ use strict;
 
 use DBI;
 use RelationSet;
-use vars qw($unconfirmedstate $legal_keywords);
 require "globals.pl";
 require "CGI.pl";
 package Bug;
 use CGI::Carp qw(fatalsToBrowser);
 my %ok_field;
+
+@::legal_keywords = @::legal_keywords; # kill "used only once" warning
+$::unconfirmedstate = $::unconfirmedstate;
 
 for my $key (qw (bug_id product version rep_platform op_sys bug_status 
                 resolution priority bug_severity component assigned_to
@@ -87,7 +89,7 @@ sub initBug  {
   }
   else {
      if ($user_id =~ /^\@/) {
-        $user_id = &::DBname_to_id($user_id); 
+	$user_id = &::DBname_to_id($user_id); 
      }
   }
      
@@ -114,9 +116,10 @@ sub initBug  {
       groupset, delta_ts, sum(votes.count)
     from bugs left join votes using(bug_id)
     where bugs.bug_id = $bug_id
+    and bugs.groupset & $usergroupset = bugs.groupset
     group by bugs.bug_id";
 
-  &::SendSQL(&::SelectVisible($query, $user_id, $usergroupset));
+  &::SendSQL($query);
   my @row;
 
   if (@row = &::FetchSQLData()) {
@@ -128,11 +131,11 @@ sub initBug  {
                        "bug_file_loc", "short_desc", "target_milestone",
                        "qa_contact", "status_whiteboard", "creation_ts",
                        "groupset", "delta_ts", "votes") {
-        $fields{$field} = shift @row;
-        if ($fields{$field}) {
-            $self->{$field} = $fields{$field};
-        }
-        $count++;
+	$fields{$field} = shift @row;
+	if ($fields{$field}) {
+	    $self->{$field} = $fields{$field};
+	}
+	$count++;
     }
   } else {
     &::SendSQL("select groupset from bugs where bug_id = $bug_id");
@@ -445,7 +448,6 @@ sub Collision {
     my $write = "WRITE";        # Might want to make a param to control
                                 # whether we do LOW_PRIORITY ...
     &::SendSQL("LOCK TABLES bugs $write, bugs_activity $write, cc $write, " .
-               "cc AS selectVisible_cc $write, " .
             "profiles $write, dependencies $write, votes $write, " .
             "keywords $write, longdescs $write, fielddefs $write, " .
             "keyworddefs READ, groups READ, attachments READ, products READ");

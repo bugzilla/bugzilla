@@ -38,7 +38,7 @@
 ###Compilation###
 BEGIN { use lib 't/'; }
 BEGIN { use Support::Files; }
-BEGIN { $tests = @Support::Files::testitems + 4; }
+BEGIN { $tests = @Support::Files::testitems + 3; }
 BEGIN { use Test::More tests => $tests; }
 
 use strict;
@@ -78,9 +78,8 @@ foreach my $file (@testitems) {
 
 # and the libs:                                                                 
 use_ok('Token'); # 52                                                 
-use_ok('Attachment'); # 53                                            
-use_ok('Bug'); # 54                                            
-use_ok('RelationSet'); # 55                                           
+use_ok('Bug'); # 53                                            
+use_ok('RelationSet'); # 54                                           
 
 
 

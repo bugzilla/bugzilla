@@ -856,7 +856,7 @@ sub NewProcessOnePerson ($$$$$$$$$$$$$) {
     return 1;
 }
 
-sub MessageToMTA ($;$$) {
+sub MessageToMTA ($;$) {
    my ($msg, $rcpt_to) = (@_);
 
     my $sendmailparam = "";

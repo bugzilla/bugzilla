@@ -1,34 +1,3 @@
-After many hours of banging heads against brick walls and
-much imbibed caffeine, the Bugzilla team is proud to
-announce Bugzilla 2.14.
-
-This release is primarily a security release, in order to
-rectify security issues.  However, some other important
-changes were made.
-
-Recommended Practice For The Upgrade
-------------------------------------
-
-As always, please ensure you have ran checksetup.pl after
-replacing the files in your installation.
-
-It is recommended that you view the sanity check page
-(sanitycheck.cgi) both before the upgrade and after running
-checksetup.pl after the upgrade, to see if there are any
-problems with your installation.
-
-It is also recommended that if you can, you immediately fix
-any problems you find.  Be aware that if the sanity check page
-contains more errors after an upgrade, it doesn't necessarily
-mean there are more errors in your database, as it is likely
-they weren't being checked for in the old version.
-
-Administrators must make sure that certain files are
-inaccessible or confidential information might become
-available to enterprising individuals.  This includes the
-localconfig file and the entire data directory.  Please
-see the Bugzilla Guide for more information.
-
 **************************
 *** ABOUT THIS VERSION ***
 **************************
@@ -36,305 +5,316 @@ see the Bugzilla Guide for more information.
 Bugs referenced in the following text are bug numbers on
 bugzilla.mozilla.org.
 
+The 2.14.1 release fixes several security issues that became known to us after 
+the Bugzilla 2.14 release. Please see the upgrade procedure below for details 
+on how to upgrade to 2.14.1.
+
+****************************
+*** Bugs fixed in 2.14.1 ***
+****************************
+
+Bugzilla user account hijacking exploits:
+
+Bug 54901: If LDAP Authentication was being used, Bugzilla would allow you
+to log in as anyone if you left the password blank.
+
+Bug 108385: It was possible to add comments as someone else by editing the
+HTML on the show_bug.cgi page before submitting the form.User identity is
+checked now, and the form values suggesting the username are now ignored.
+
+Bug 108516: It was possible to file a bug as someone else by editing the
+HTML on enter_bug.cgi before submitting the form. User identity is now
+checked and the form values giving user ID are now ignored.
+
+Bugzilla account security:
+
+Bug 102141: The Product popup menu on the show_bug form listed all
+products, even if the user didn't have access to all of them. It now only
+shows products the user has access to (and the product the bug is in, if
+the user is viewing it because of some other override)
+
+Bug 108821: If you had any blessgroupset privs (the ability to change only
+specific privileges for other users), it was possible to change your own
+groupset (privileges) by altering the page HTML before submitting on
+editusers.cgi.
+
+Untrusted variables:
+
+Bug 98146: An untrusted variable was echoed back to user in the HTML output
+if there was a login error while editing votes.
+
+Arbitrary SQL execution:
+
+Bug 108812: buglist.cgi had an undocumented parameter that allowed you to
+pass arbitrary SQL for the "WHERE" part of a query. This has been disabled.
+
+Bug 108822: It was possible for a user to send arbitrary SQL by inserting
+single quotes in the "mybugslink" field in the user preferences.
+
+Bug 109679: buglist.cgi was not validating that the field names being
+passed from the "boolean chart" query form were valid field names, thus
+allowing arbitrary SQL to be inserted if you edited the HTML by hand before
+submitting the form.
+
+Bug 109690: long_list.cgi was not validating that the bug ID parameter was
+actually a number, allowing arbitrary SQL to be inserted if you edited the
+HTML by hand.
+
+
+Recommended Practice For The Upgrade
+------------------------------------
+
+As always, please ensure you have ran checksetup.pl after
+replacing the files in your installation.
+
+If you are upgrading from a version prior to 2.14, it is
+recommended that you view the sanity check page
+(sanitycheck.cgi) both before the upgrade and after running
+checksetup.pl after the upgrade, to see if there are any
+problems with your installation.  Of course, it doesn't hurt
+to run it on occasion anyway.
+
+It is also recommended that if you can, you immediately fix
+any problems you find. Be aware that if the sanity check page
+contains more errors after an upgrade, it doesn't necessarily
+mean there are more errors in your database, as it is likely
+they weren't being checked for in the old version.
+
+Administrators must make sure that certain files are
+inaccessible or confidential information might become
+available to enterprising individuals. This includes the
+localconfig file and the entire data directory. Please
+see the Bugzilla Guide (in the docs/ directory of the bugzilla
+tree) for more information.
+
+
+***************************************
+*** Information on the 2.14 release ***
+***************************************
+
+If you are upgrading from a release earlier than 2.14, you 
+may find it helpful to know about these changes new to 2.14 and 
+2.14.1:
+
 *** IMPORTANT CHANGES ***
 
-- Bugzilla 2.14 no longer supports old email tech.  Upon
-  upgrading, all users will be moved over to new email tech.
-  This should speed up upgrading for installations with
-  a large number of bugs.
-  (bug 71552)
+- Bugzilla 2.14 no longer supports old email tech. Upon
+upgrading, all users will be moved over to new email tech.
+This should speed up upgrading for installations with
+a large number of bugs.
+(bug 71552)
 
 - There is new functionality for people to see why they are
-  receiving notification mails.
+receiving notification mails.
 
-  Previously, some people filtered old email tech
-  notifications depending on whether they were in the To or the
-  CC header, in order to get a limited way of determining why
-  they were receiving the notification for filtering purposes.
+Previously, some people filtered old email tech
+notifications depending on whether they were in the To or the
+CC header, in order to get a limited way of determining why
+they were receiving the notification for filtering purposes.
 
-  Existing installations will need to make changes to support
-  this feature.  The receive reasons can be added to the
-  notifications as a header and/or in the body.  To add these
-  you will need to modify your newchangedmail parameter on
-  editparams.cgi, either by resetting it or appropriately
-  modifying it.  The header value is specified by
-  %reasonsheader% and the body by %reasonsbody%.  For example,
-  the new default parameter is:
+Existing installations will need to make changes to support
+this feature.The receive reasons can be added to the
+notifications as a header and/or in the body.To add these
+you will need to modify your newchangedmail parameter on
+editparams.cgi, either by resetting it or appropriately
+modifying it.The header value is specified by
+%reasonsheader% and the body by %reasonsbody%.For example,
+the new default parameter is:
 
-  --------------------------------------------------
-  From: bugzilla-daemon
-  To: %to%
-  Subject: [Bug %bugid%] %neworchanged%%summary%
-  X-Bugzilla-Reason: %reasonsheader%
+--------------------------------------------------
+From: bugzilla-daemon
+To: %to%
+Subject: [Bug %bugid%] %neworchanged%%summary%
+X-Bugzilla-Reason: %reasonsheader%
 
-  %urlbase%show_bug.cgi?id=%bugid%
+%urlbase%show_bug.cgi?id=%bugid%
 
-  %diffs%
+%diffs%
 
 
 
-  %reasonsbody%
-  --------------------------------------------------
+%reasonsbody%
+--------------------------------------------------
 
-  (bug 26194)
+(bug 26194)
 
 - Very long fields (especially multi-valued fields like keywords,
-  CCs, dependencies) on bug activity and notifications previously
-  could get truncated, resulting in useless notifications and data
-  loss on bug activity.  Now the multi-valued fields only show
-  changes, and very big changes are split into multiple lines.
-  Where data loss has already occurred on bug activity, it is
-  indicated using question marks.
-  (bug 55161, 92266)
+CCs, dependencies) on bug activity and notifications previously
+could get truncated, resulting in useless notifications and data
+loss on bug activity.Now the multi-valued fields only show
+changes, and very big changes are split into multiple lines.
+Where data loss has already occurred on bug activity, it is
+indicated using question marks.
+(bug 55161, 92266)
 
 - Previously, when a product's voting preferences changed all
-  votes were removed from all the bugs in the product.  Also,
-  when a bug was moved to another product, all of its votes
-  were removed.  This no longer occurs.
+votes were removed from all the bugs in the product.Also,
+when a bug was moved to another product, all of its votes
+were removed.This no longer occurs.
 
-  Instead, if the action would leave one or more bugs with
-  greater than the maximum number of votes per person per bug,
-  the number of votes will be reduced to the maximum.  The
-  person will still be notified of this as before.
+Instead, if the action would leave one or more bugs with
+greater than the maximum number of votes per person per bug,
+the number of votes will be reduced to the maximum.The
+person will still be notified of this as before.
 
-  If the action would leave a user with more votes in a product
-  than is allowed, the limit will be breached so as to not lose
-  votes.  However the user will not be able to update their
-  votes except to fix this situation.  No further action is taken
-  in this version to make sure that the user does this.
-  (bug 28882, 92593)
+ If the action would leave a user with more votes in a product
+ than is allowed, the limit will be breached so as to not lose
+ votes.However the user will not be able to update their
+ votes except to fix this situation.No further action is taken
+ in this version to make sure that the user does this.
+ (bug 28882, 92593)
 
-*** SECURITY ISSUES RESOLVED ***
+ *** Other changes of note ***
+ 
+ - Groups can now be marked inactive, so you can't add a new
+ restriction on that group to a bug, while leaving bugs that
+ were previously restricted on that group alone.
+ (bug 75482)
+ - backdoor.cgi has been removed from the installation.It was
+ old code that was Netscape-specific and its name was scaring
+ people.
+ (bug 87983)
+ - You can now add or remove from CC on the bulk change page.
+ (bug 12819)
+ - New users created by administrators are now automatically
+ inserted into groups according to the group's regular
+ expression.Administrators must edit the user in a second
+ step to override these choices.Previously the
+ administrator specified these explicitly which could lead
+ to incorrect settings.
+ (bug 45164)
+ - The userregexp of system groups can now be edited without
+ resorting to direct database access.
+ (bug 65290)
+ 
+ 
 
-- Multiple instances of unauthorised access to confidential
-  bugs has been fixed.
-  (bug 39524, 39526, 39527, 39531, 39533, 70189, 82781)
-- Multiple instances of untrusted parameters not being
-  checked/escaped was fixed.  These included definite security
-  holes.
-  (bug 38854, 38855, 38859, 39536, 87701, 95235)
-- After logging in passwords no longer appear in the URL.
-  (bug 15980)
-- Procedures to prevent unauthorised access to confidential
-  files are now simpler.  In particular the shadow directory
-  no longer exists and the data/comments file no longer needs
-  to be directly accessible, so the entire data directory can
-  be blocked.  However, no changes are required here if you
-  have a properly secured 2.12 installation as no new files
-  must be protected.
-  (bug 71552, 73191)
-- If they do not already exist, checksetup.pl will attempt to
-  write Apache .htaccess files by default, to prevent
-  unauthorised access to confidential files.  You can turn this
-  off in the localconfig file.
-  (bug 76154)
-- Sanity check can now only be run by people in the 'editbugs'
-  group.  Although it would be better to have a separate
-  group, this is not possible until the limitation on the
-  number of groups allowed has been removed.
-  (bug 54556)
-- The password is no longer stored in plaintext form.  It will
-  be eradicated next time you run checksetup.pl.  A user must
-  now change their password via a password change request that
-  gets validated at their e-mail account, rather than have it
-  mailed to them.
-  (bug 74032)
-- When you using product groups and you move a bug between
-  products (single or mass change), the bug will no longer be
-  restricted to the old product's group (if it was) and will
-  be restricted to the new product's group.
-  (bug 66235)
-- There are now options on a bug to choose whether the
-  reporter, assignee, QA and CCs can access a bug even if
-  they aren't in groups the bug it is restricted to.
-  (bug 39816)
-- You can no longer mark a bug as a duplicate of a bug you
-  can't see, and if you mark a bug a duplicate of a bug
-  the reporter cannot see you will be given options as to
-  what to do regarding adding the reporter of the resolved
-  bug to the CC of the open bug.
-  (bug 96085)
+ *** Outstanding issues of note ***
+ 
+ - Bug counts (on reports.cgi) can be very slow if you have to
+ count a lot of bugs.In this case the connection can time
+ out before thepage finishes loading. Extending the cgi
+ timeout on your web server might help this situation.
+ (bug 63249)
+ - Renaming or removing keywords will not update the "keyword
+ cache", and queries on keywords may not work properly, until
+ you rebuild the cache on the sanity check page
+ (sanitycheck.cgi).The changer will receive a warning to do
+ this when altering the keyword.
+ (bug 69621)
+ - Email notifications will not work out of the box if you are
+ using Postfix, Exim or possibly other non-SendMail mail
+ transfer agents, as Bugzilla sends mail by default in
+ "deferred" mode using the "-ODeliveryMode=deferred" command
+ line option, which needs to be supported by the sendmail
+ program.To fix this, you can turn on the "sendmailnow"
+ parameter on the Edit Parameters page (editparams.cgi).
+ (bug 50159)
+ - The new options to let people see a bug when their name
+ is on it but who aren't in the groups the bug is restricted
+ to only allow people to view bugs if they know the bug number.
+ It still will not show up in these people's buglists and
+ they will not receive email about changes to the bugs.
+ (bugs 95024, 97469)
+ 
+ **********************************************************
+ *** USERS UPGRADING FROM 2.10 OR EARLIER - 2.12 ISSUES ***
+ **********************************************************
+ 
+ These release notes may be of use to those upgrading from a release earlier 
+ than 2.12. 
+ 
+ *** IMPORTANT CHANGES ***
+ 
+ - There is now a facility for users to choose the sort of
+ notifications they wish to receive.This facility will
+ probably be improved in future versions.
+ (bug 17464)
+ 
+ - "Changed" will no longer appear on the subject line of
+ change notification emails.Because of this, you should
+ change the subject line in your 'changedmail' and
+ 'newchangedmail' params on editparams.cgi. The subject
+ line needs to be changed from
+ 
+ Subject: [Bug %bugid%] %neworchanged% - %summary%
+ 
+ to
+ 
+ Subject: [Bug %bugid%] %neworchanged%%summary%
+ 
+ or whatever is appropriate for the subject you are using
+ on your system. Note the removal of the " - " in the
+ middle.
+ (bug 29820)
+ 
+ - Some security holes have been fixed where shell escape characters
+ could be passed to Bugzilla, allowing remote users to execute
+ system commands on the web server.
+ 
+ *** Other changes of note ***
+ 
+ - Bug titles now appear in the page title, and will hence
+ display in the user's browser's bookmarks and history.
+ (bug 22041)
+ - Edit groups functionality (editgroups.cgi).
+ (bug 25010)
+ - Support for moving bugs to other Bugzilla databases.
+ (bug 36133)
+ - Bugzilla now can generate a frequently reported bugs list
+ based on what duplicates you receive.
+ (bug 25693)
+ - When installing Bugzilla fresh, the administrator account is
+ now created in checksetup.pl.
+ (bug 17773)
+ - Stored queries now show their name above the bug list, which
+ helps the user when they have multiple bug lists in multiple
+ browser windows.It also appears in the page title, and will
+ hence display in the user's browser's bookmarks and history.
+ (bug 52228)
+ - All states and resolutions can now be collected for charting.
+ (bug 6682)
+ - A new search-engine-like "quick search" feature appears on
+ the front page to try and making searching easier.
+ (bug 69793)
+ - Querying on dependencies now works in the advanced query
+ section of the query page.
+ (bug 30823)
+ - When a bug is marked as a duplicate, the reporter of the
+ resolved bug is automatically added to the CC list of the
+ open bug.
+ (bug 28676)
+ 
+ 
+ *** Bug fixes of note ***
+ 
+ - Notification emails will now always be sent to QA contacts.
+ Previously they wouldn't if you were using new email tech.
+ (bug 30826)
+ - When marking a bug as a duplicate, the duplicate stamp marked
+ on the open bug will no longer be written too early (such as
+ on mid-air collisions).
+ (bug 7873)
+ - Various bug fixes were made to the initial assignee and QA
+ of a component.It is no longer possible to enter an
+ invalid address.They will also now properly update when
+ a user's email address is changed.Sanity check will now
+ check these.
+ (bug 66876)
+ - Administrators can no longer create an email accounts that do
+ not match the global email regular expression parameter.
+ Previously this could occur and would cause sanity check
+ errors.
+ (bug 32971)
+ - The resolution field can no longer become empty when the
+ bug is resolved.This occurred because of midair collisions.
+ (bug 49306)
+ 
+ 
+ *******************************************
+ *** USERS UPGRADING FROM 2.8 OR EARLIER ***
+ *******************************************
+ 
+ Release notes were not compiled for versions of Bugzilla before
+ 2.12.
 
-*** Other changes of note ***
-
-- Groups can now be marked inactive, so you can't add a new
-  restriction on that group to a bug, while leaving bugs that
-  were previously restricted on that group alone.
-  (bug 75482)
-- backdoor.cgi has been removed from the installation.  It was
-  old code that was Netscape-specific and its name was scaring
-  people.
-  (bug 87983)
-- You can now add or remove from CC on the bulk change page.
-  (bug 12819)
-- New users created by administrators are now automatically
-  inserted into groups according to the group's regular
-  expression.  Administrators must edit the user in a second
-  step to override these choices.  Previously the
-  administrator specified these explicitly which could lead
-  to incorrect settings.
-  (bug 45164)
-- The userregexp of system groups can now be edited without
-  resorting to direct database access.
-  (bug 65290)
-
-
-*** Bug fixes of note ***
-
-- The bug list page was sometimes bringing up a not logged in
-  footer when the user was logged in and the installation was
-  using a shadow database.
-  (bug 47914)
-- You can now view the bug summary in your browser title for
-  a group-restricted bug if you have proper permissions.
-  (bug 71767)
-- Quick search for search terms did not work in IE5.
-  This has been worked around.
-  (bug 77699)
-- Quick search for search terms crashed NN4.76/4.77 for Unix.
-  This has been worked around.
-  (bug 83619)
-- Queries on bugs you have commented on using the "added
-  comment" feature should be a lot faster and not time out
-  on large installations due to the addition of an index.
-  (bug 57350)
-- You can now alter group settings on bulk change for groups
-  that aren't on for all bugs or off for all bugs.
-  (bug 84714)
-- New bug notifications now include the CC and QA fields.
-  (bug 28458)
-- Bugzilla is now more Windows friendly, although it is still
-  not an official platform.
-  (bug 88179, 29064)
-- Passwords are now encrypted using Perl's encrypt function.
-  This makes Bugzilla more portable to more operating systems.
-  (bug 77473)
-- Bugzilla didn't properly shut down when told to - some
-  queries could still be sent to the database.
-  (bug 95082)
-
-*** Outstanding issues of note ***
-
-- Bug counts (on reports.cgi) can be very slow if you have to
-  count a lot of bugs.  In this case the connection can time
-  out before the  page finishes loading.  Extending the cgi
-  timeout on your web server might help this situation.
-  (bug 63249)
-- Renaming or removing keywords will not update the "keyword
-  cache", and queries on keywords may not work properly, until
-  you rebuild the cache on the sanity check page
-  (sanitycheck.cgi).  The changer will receive a warning to do
-  this when altering the keyword.
-  (bug 69621)
-- Email notifications will not work out of the box if you are
-  using Postfix, Exim or possibly other non-SendMail mail
-  transfer agents, as Bugzilla sends mail by default in
-  "deferred" mode using the "-ODeliveryMode=deferred" command
-  line option, which needs to be supported by the sendmail
-  program.  To fix this, you can turn on the "sendmailnow"
-  parameter on the Edit Parameters page (editparams.cgi).
-  (bug 50159)
-- The new options to let people see a bug when their name
-  is on it but who aren't in the groups the bug is restricted
-  to only allow people to view bugs if they know the bug number.
-  It still will not show up in these people's buglists and
-  they will not receive email about changes to the bugs.
-  (bugs 95024, 97469)
-
-**********************************************************
-*** USERS UPGRADING FROM 2.10 OR EARLIER - 2.12 ISSUES ***
-**********************************************************
-
-*** IMPORTANT CHANGES ***
-
-- There is now a facility for users to choose the sort of
-  notifications they wish to receive.  This facility will
-  probably be improved in future versions.
-  (bug 17464)
-
-- "Changed" will no longer appear on the subject line of
-  change notification emails.  Because of this, you should
-  change the subject line in your 'changedmail' and
-  'newchangedmail' params on editparams.cgi. The subject
-  line needs to be changed from
-
-    Subject: [Bug %bugid%] %neworchanged% - %summary%
-
-  to
-
-    Subject: [Bug %bugid%] %neworchanged%%summary%
-
-  or whatever is appropriate for the subject you are using
-  on your system. Note the removal of the " - " in the
-  middle.
-  (bug 29820)
-
-- Some security holes have been fixed where shell escape characters
-  could be passed to Bugzilla, allowing remote users to execute
-  system commands on the web server.
-
-*** Other changes of note ***
-
-- Bug titles now appear in the page title, and will hence
-  display in the user's browser's bookmarks and history.
-  (bug 22041)
-- Edit groups functionality (editgroups.cgi).
-  (bug 25010)
-- Support for moving bugs to other Bugzilla databases.
-  (bug 36133)
-- Bugzilla now can generate a frequently reported bugs list
-  based on what duplicates you receive.
-  (bug 25693)
-- When installing Bugzilla fresh, the administrator account is
-  now created in checksetup.pl.
-  (bug 17773)
-- Stored queries now show their name above the bug list, which
-  helps the user when they have multiple bug lists in multiple
-  browser windows.  It also appears in the page title, and will
-  hence display in the user's browser's bookmarks and history.
-  (bug 52228)
-- All states and resolutions can now be collected for charting.
-  (bug 6682)
-- A new search-engine-like "quick search" feature appears on
-  the front page to try and making searching easier.
-  (bug 69793)
-- Querying on dependencies now works in the advanced query
-  section of the query page.
-  (bug 30823)
-- When a bug is marked as a duplicate, the reporter of the
-  resolved bug is automatically added to the CC list of the
-  open bug.
-  (bug 28676)
-
-
-*** Bug fixes of note ***
-
-- Notification emails will now always be sent to QA contacts.
-  Previously they wouldn't if you were using new email tech.
-  (bug 30826)
-- When marking a bug as a duplicate, the duplicate stamp marked
-  on the open bug will no longer be written too early (such as
-  on mid-air collisions).
-  (bug 7873)
-- Various bug fixes were made to the initial assignee and QA
-  of a component.  It is no longer possible to enter an
-  invalid address.  They will also now properly update when
-  a user's email address is changed.  Sanity check will now
-  check these.
-  (bug 66876)
-- Administrators can no longer create an email accounts that do
-  not match the global email regular expression parameter.
-  Previously this could occur and would cause sanity check
-  errors.
-  (bug 32971)
-- The resolution field can no longer become empty when the
-  bug is resolved.  This occurred because of midair collisions.
-  (bug 49306)
-
-
-*******************************************
-*** USERS UPGRADING FROM 2.8 OR EARLIER ***
-*******************************************
-
-Release notes were not compiled for versions of Bugzilla before
-2.12.

@@ -1,4 +1,4 @@
-The 2.16.3 release fixes several security issues and bugs in 2.16.2.
+The 2.16.4 release fixes a few security issues and bugs in 2.16.3.
 
 **************************
 *** ABOUT THIS VERSION ***
@@ -17,9 +17,9 @@ It is recommended that you view the sanity check page
 checksetup.pl after the upgrade, to see if there are any
 problems with your installation.
 
-It is also recommended that if you can, you immediately fix
-any problems you find.  Be aware that if the sanity check page
-contains more errors after an upgrade, it doesn't necessarily
+It is also recommended that, if possible, you fix any 
+problems you find immediately.  Be aware that if the sanity check 
+page contains more errors after an upgrade, it doesn't necessarily
 mean there are more errors in your database, as additional
 tests are added to the sanity check over time, and it is likely
 those errors weren't being checked for in the old version.
@@ -48,6 +48,149 @@ Data::Dumper, Date::Parse, CGI::Carp (any)
 GD v1.19 (optional)
 Chart::Base v0.99 (optional)
 XML::Parser (any, optional)
+
+*********************************************************
+*** USERS UPGRADING FROM ALL VERSIONS PRIOR TO 2.16.4 ***
+*********************************************************
+
+*** SECURITY ISSUES RESOLVED ***
+
+- A user with 'editproducts' privileges (i.e. usually an administrator)
+  can select arbitrary SQL to be run by the nightly statistics cron job
+  (collectstats.pl), by giving a product a special name. (bug 214290)
+
+- A user with 'editkeywords' privileges (i.e. usually an administrator)
+  can inject arbitrary SQL via the URL used to edit an existing keyword.
+  (bug 219044)
+
+- When deleting products and the 'usebuggroups' parameter is on, the
+  privilege which allows someone to add people to the group which is
+  being deleted does not get removed, allowing people with that
+  privilege to get that privilege for the next group that is created
+  which reuses that group ID.  Note that this only allows someone who
+  had been granted privileges in the past to retain them. (bug 219690)
+
+- If you know the email address of someone who has voted on a secure
+  bug, you can access the summary of that bug even if you do not have
+  sufficient permissions to view the bug itself. (bug 209376)
+
+*** Bug fixes of note ***
+
+Perl 5.8.0 Compatibility fixes:
+
+- Two taint errors were fixed, one in process_bug.cgi, and 
+  another in post_bug.cgi (bugs 220332 and 177828)
+
+MySQL 4.0 Compatibility fixes:
+
+- A cosmetic fix was applied to votes.cgi (if there were no 
+  votes, the "0" was not displayed) due to a change in semantics 
+  in SUM() in MySQL 4.0 (bug 217422)
+
+DBD::mysql > 2.1026 Compatibility fixes:
+
+- DBD::mysql versions after 2.1026 return the table list quoted, which
+  broke the existing "table exists" check in checksetup.pl, which caused
+  the second and subsequent attempts to run checksetup.pl to fail. (bug
+  212095) 
+
+Miscellaneous bug fixes:
+
+- A Mozilla-specific reference was removed from one of the report
+  templates (bug 221626)
+
+- It was possible to enter a situation where you were unable to get to
+  editparams.cgi to turn the shutdownhtml param back off after you
+  turned it on when Apache was configured to run Bugzilla in suexec
+  mode. (bug 213384)
+
+- The processmail rescanall task would not send e-mails about more than
+  one bug to the same address (bug 219508)
+
+- If Bugzilla hadn't been accessed in the last hour when the
+  collectstats.pl or whineatnews.pl cron jobs ran, the versioncache
+  would get recreated with the file owner being the user the cron job
+  was running as (usually not the webserver user), causing subsequent
+  access to Bugzilla by the webserver to fail until the permissions were
+  fixed. Now if versioncache isn't readable when accessing from the
+  webserver, we pretend it doesn't exist and recreate it again (bug
+  219508).
+
+- The 'sendmailnow' param is now on by default in new installations
+  (this does not affect existing installations) (bug 219508).
+
+- The 008filter.t test would fail if you had multiple language packs
+  installed. It now properly tests all of the installed language packs
+  (bug 219508).
+
+A few minor documentation changes were committed.
+
+*** Deprecated Features ***
+
+- 2.16 is the last major release that will work with MySQL version
+  3.22.x.  Development versions of Bugzilla currently require at least
+  version 3.23.41.  (bug 87958)
+
+- 2.16 is the last major release to support the shadow database.
+  Support for it has already been removed in CVS.  The replacement
+  (using MySQL's built in replication) is not present in 2.16.x, but we
+  expect that very few sites use this feature, so we are not planning a
+  transition period.  (bug 124589)
+
+- Placing comments in localconfig is deprecated.  If you have done this,
+  they will likely get nuked with future version of Bugzilla, as
+  checksetup.pl will likely automatically rewrite localconfig to
+  automatically get the latest comments.  (bug 147776)
+
+*** Outstanding Issues Of Note ***
+
+These issues may have been fixed in later stable or development versions
+of Bugzilla.  If you are interested in tracking these bugs, please see
+the bug report numbers listed to find out the status of the fix for
+these bugs, or to obtain a patch that can fix the problem on your
+installation.
+
+- Renaming or removing keywords that are in use will not update the
+  "keyword cache" on bugs, and queries on keywords may not work
+  properly, until you rebuild the cache on the sanity check page
+  (sanitycheck.cgi).  The changer will receive a warning to do this when
+  altering the keyword.  (bug 69621)
+
+- Email notifications will not work out of the box if you are using
+  Postfix, Exim or possibly other non-SendMail mail transfer agents, as
+  Bugzilla sends mail by default in "deferred" mode using the
+  "-ODeliveryMode=deferred" command line option, which needs to be
+  supported by the sendmail program.  To fix this, you can turn on the
+  "sendmailnow" parameter on the Edit Parameters page (editparams.cgi).
+  (bug 37765)
+
+- Users behind rotating transparent proxies or otherwise having an IP
+  that changes each URL fetch may find they need to log in regularly.
+  Note that a fix for this problem has been integrated to the
+  development (2.17) branch. (bug 20122)
+
+- If you search on any CC or added comments, as well as at least one
+  other of CC, added comments, assignee, reporter, etc, then the search
+  can be very slow.  This is because of limitations of the MySQL
+  optimiser.  (bug 96101)
+
+- It is recommended you use the high speed XS Stash of the Template
+  Toolkit, in order to achieve best performance.  However, there are
+  known problems with XS Stash and Perl 5.005_02 and lower.  If you wish
+  to use these older versions of Perl, please use the regular stash.
+  You are asked which stash you want to use at Template Toolkit
+  installation time.  (bug 140674)
+
+- Querying on CC takes too long on big databases. This bug has also been
+  fixed on the development branch (bug 127200).
+
+- Attachment changes have no midair collision detection, unlike bug
+  changes. (bug 99215)
+
+- The email preferences option "Priority, status, severity, and/or
+  milestone changes" does not actually report status changes.  You can
+  however use the option "The bug is resolved or verified" to achieve
+  part of this.  (bug 146261)
 
 *********************************************************
 *** USERS UPGRADING FROM ALL VERSIONS PRIOR TO 2.16.3 ***
@@ -109,78 +252,6 @@ XML::Parser (any, optional)
 - Fixed a bug in checksetup.pl in which permissions were not being fixed 
   on the 'data/comments' file, the quip file. 
   (bug 160279)
-
-*** Deprecated Features ***
-
-- 2.16 is the last major release that will work with MySQL version 3.22.x.
-  Development versions of Bugzilla currently require at least version 3.23.41.
-  (bug 87958)
-
-- 2.16 is the last major release to support the shadow database.  Support for
-  it has already been removed in CVS.  The replacement (using MySQL's built in
-  replication) is not present in 2.16.x, but we expect that very few sites use
-  this feature, so we are not planning a transition period.
-  (bug 124589)
-
-- Placing comments in localconfig is deprecated.  If you have done
-  this, they will likely get nuked with future version of
-  Bugzilla, as checksetup.pl will likely automatically rewrite localconfig
-  to automatically get the latest comments.
-  (bug 147776)
-
-*** Outstanding Issues Of Note ***
-
-These issues may have been fixed in later stable or development
-versions of Bugzilla.  If you are interested in tracking these
-bugs, please see the bug report numbers listed to find out the
-status of the fix for these bugs, or to obtain a patch that can
-fix the problem on your installation.
-
-- Renaming or removing keywords that are in use will not update
-  the "keyword cache" on bugs, and queries on keywords may not work
-  properly, until you rebuild the cache on the sanity check page
-  (sanitycheck.cgi).  The changer will receive a warning to do
-  this when altering the keyword.
-  (bug 69621)
-
-- Email notifications will not work out of the box if you are
-  using Postfix, Exim or possibly other non-SendMail mail
-  transfer agents, as Bugzilla sends mail by default in
-  "deferred" mode using the "-ODeliveryMode=deferred" command
-  line option, which needs to be supported by the sendmail
-  program.  To fix this, you can turn on the "sendmailnow"
-  parameter on the Edit Parameters page (editparams.cgi).
-  (bug 37765)
-
-- Users behind rotating transparent proxies or otherwise having
-  an IP that changes each URL fetch will find they need to log in
-  regularly.
-  (bug 20122)
-
-- If you search on any CC or added comments, as well as at least
-  one other of CC, added comments, assignee, reporter, etc, then
-  the search can be very slow.  This is because of limitations of
-  the MySQL optimiser.
-  (bug 96101)
-
-- It is recommended you use the high speed XS Stash of the Template
-  Toolkit, in order to achieve best performance.  However, there are
-  known problems with XS Stash and Perl 5.005_02 and lower.  If you
-  wish to use these older versions of Perl, please use the regular
-  stash.  You are asked which stash you want to use at Template Toolkit
-  installation time.
-  (bug 140674)
-
-- Querying on CC takes too long on big databases.
-  (bug 127200)
-
-- Attachment changes have no midair collision detection, unlike bug changes.
-  (bug 99215)
-
-- The email preferences option "Priority, status, severity, and/or milestone
-  changes" does not actually report status changes.  You can however use the
-  option "The bug is resolved or verified" to achieve part of this.
-  (bug 130821)
 
 *****************************************************************
 *** USERS UPGRADING FROM 2.16.1 OR EARLIER, 2.14.4 OR EARLIER ***

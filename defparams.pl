@@ -93,6 +93,12 @@ sub check_numeric {
 sub check_shadowdb {
     my ($value) = (@_);
     $value = trim($value);
+    if ($value =~ /^([A-Za-z0-9_]+)$/) {
+        $value = $1;
+    }
+    else {
+        return "Invalid database name.  Database names must include only alphanumeric characters and underscores.";
+    }
     if ($value eq "") {
         return "";
     }

@@ -108,15 +108,11 @@ sub SaveAccount {
 
         if ($pwd1 ne "" || $pwd2 ne "")
         {
-            if ($pwd1 ne $pwd2) {
-                DisplayError("The two passwords you entered did not match.");
-                exit;
-            }
             if ($::FORM{'new_password1'} eq '') {
                 DisplayError("You must enter a new password.");
                 exit;
             }
-            my $passworderror = ValidatePassword($pwd1);
+            my $passworderror = ValidatePassword($pwd1, $pwd2);
             (DisplayError($passworderror) && exit) if $passworderror;
         
             my $cryptedpassword = SqlQuote(Crypt($pwd1));

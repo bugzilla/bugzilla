@@ -856,7 +856,7 @@ sub ValidatePassword {
         return "The password is less than three characters long.  It must be at least three characters.";
     } elsif ( length($password) > 16 ) {
         return "The password is more than 16 characters long.  It must be no more than 16 characters.";
-    } elsif ( $matchpassword && $password ne $matchpassword ) { 
+    } elsif ( (defined $matchpassword) && ($password ne $matchpassword) ) { 
         return "The two passwords do not match.";
     }
 

@@ -76,20 +76,28 @@ CLASS="section"
 NAME="upgrading">5.8. Upgrading to New Releases</H1
 ><P
 >A plain Bugzilla is fairly easy to upgrade from one version to a
-    newer one. However, things get a bit more complicated if you've made
-    changes to Bugzilla's code. In this case, you may have to re-make or
-    reapply those changes. It is recommended that you take a backup of your
-    database and your entire Bugzilla installation before attempting an
+    newer one. Always read the release notes to see if there are any issues
+    that you might need to take note of. It is recommended that you take a 
+    backup of your database and your entire Bugzilla installation before attempting an
     upgrade. You can upgrade a 'clean' installation by untarring a new
     tarball over the old installation. If you are upgrading from 2.12 or
-    later, you can type 
-    <TT
+    later, and have cvs installed, you can type <TT
 CLASS="filename"
 >cvs -z3 update</TT
 >, 
-    and resolve conflicts if there are any.</P
+    and resolve conflicts if there are any.
+    </P
 ><P
->Because the developers of Bugzilla are constantly adding new
+>However, things get a bit more complicated if you've made
+    changes to Bugzilla's code. In this case, you may have to re-make or
+    reapply those changes. One good method is to take a diff of your customised
+    version against the original, so you can survey all that you've changed.
+    Hopefully, templatisation will reduce the need for
+    this in the future.</P
+><P
+>From version 2.8 onwards, Bugzilla databases can be automatically
+    carried forward during an upgrade. However, because the developers of
+    Bugzilla are constantly adding new
     tables, columns and fields, you'll probably get SQL errors if you just
     update the code and attempt to use Bugzilla. Always run the
     <TT

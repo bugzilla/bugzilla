@@ -79,7 +79,7 @@ CLASS="section"
 ><H2
 CLASS="section"
 ><A
-NAME="AEN491">4.1.1. Introduction</H2
+NAME="AEN492">4.1.1. Introduction</H2
 ><P
 >Bugzilla has been successfully installed under Solaris, Linux,
       and Win32. Win32 is not yet officially supported, but many people
@@ -97,7 +97,7 @@ CLASS="section"
 ><H2
 CLASS="section"
 ><A
-NAME="AEN495">4.1.2. Package List</H2
+NAME="AEN496">4.1.2. Package List</H2
 ><DIV
 CLASS="note"
 ><P
@@ -822,7 +822,7 @@ CLASS="section"
 ><H3
 CLASS="section"
 ><A
-NAME="AEN641">4.1.5.1. DBI</H3
+NAME="AEN642">4.1.5.1. DBI</H3
 ><P
 >The DBI module is a generic Perl module used the
       MySQL-related modules. As long as your Perl installation was done
@@ -835,7 +835,7 @@ CLASS="section"
 ><H3
 CLASS="section"
 ><A
-NAME="AEN644">4.1.5.2. Data::Dumper</H3
+NAME="AEN645">4.1.5.2. Data::Dumper</H3
 ><P
 >The Data::Dumper module provides data structure persistence for
       Perl (similar to Java's serialization). It comes with later
@@ -847,7 +847,7 @@ CLASS="section"
 ><H3
 CLASS="section"
 ><A
-NAME="AEN647">4.1.5.3. MySQL-related modules</H3
+NAME="AEN648">4.1.5.3. MySQL-related modules</H3
 ><P
 >The Perl/MySQL interface requires a few mutually-dependent Perl
       modules. These modules are grouped together into the the
@@ -871,7 +871,7 @@ CLASS="section"
 ><H3
 CLASS="section"
 ><A
-NAME="AEN652">4.1.5.4. TimeDate modules</H3
+NAME="AEN653">4.1.5.4. TimeDate modules</H3
 ><P
 >Many of the more common date/time/calendar related Perl modules
       have been grouped into a bundle similar to the MySQL modules bundle.
@@ -885,7 +885,7 @@ CLASS="section"
 ><H3
 CLASS="section"
 ><A
-NAME="AEN655">4.1.5.5. GD (optional)</H3
+NAME="AEN656">4.1.5.5. GD (optional)</H3
 ><P
 >The GD library was written by Thomas Boutell a long while ago to
       programatically generate images in C. Since then it's become the
@@ -938,7 +938,7 @@ CLASS="section"
 ><H3
 CLASS="section"
 ><A
-NAME="AEN662">4.1.5.6. Chart::Base (optional)</H3
+NAME="AEN663">4.1.5.6. Chart::Base (optional)</H3
 ><P
 >The Chart module provides Bugzilla with on-the-fly charting
       abilities. It can be installed in the usual fashion after it has been
@@ -946,13 +946,28 @@ NAME="AEN662">4.1.5.6. Chart::Base (optional)</H3
       Note that earlier versions that 0.99c used GIFs, which are no longer
       supported by the latest versions of GD.</P
 ></DIV
+><DIV
+CLASS="section"
+><H3
+CLASS="section"
+><A
+NAME="AEN666">4.1.5.7. Template Toolkit</H3
+><P
+>When you install Template Toolkit, you'll get asked various
+      questions about features to enable. The defaults are fine, except
+      that it is recommended you use the high speed XS Stash of the Template
+      Toolkit, in order to achieve best performance.  However, there are
+      known problems with XS Stash and Perl 5.005_02 and lower.  If you
+      wish to use these older versions of Perl, please use the regular
+      stash.</P
+></DIV
 ></DIV
 ><DIV
 CLASS="section"
 ><H2
 CLASS="section"
 ><A
-NAME="AEN665">4.1.6. HTTP Server</H2
+NAME="AEN669">4.1.6. HTTP Server</H2
 ><P
 >You have a freedom of choice here - Apache, Netscape or any other
       server on UNIX would do. You can run the web server on a
@@ -1126,7 +1141,7 @@ CLASS="section"
 ><H2
 CLASS="section"
 ><A
-NAME="AEN684">4.1.7. Bugzilla</H2
+NAME="AEN688">4.1.7. Bugzilla</H2
 ><P
 >You should untar the Bugzilla files into a directory that you're
       willing to make writable by the default web server user (probably 
@@ -1237,7 +1252,7 @@ CLASS="section"
 ><H2
 CLASS="section"
 ><A
-NAME="AEN701">4.1.8. Setting Up the MySQL Database</H2
+NAME="AEN705">4.1.8. Setting Up the MySQL Database</H2
 ><P
 >After you've gotten all the software installed and working you're
       ready to start preparing the database for its life as the back end to
@@ -1327,7 +1342,10 @@ CLASS="command"
       and enter &#60;new_password&#62;. Remember that MySQL user names have
       nothing to do with Unix user names (login names).</P
 ><P
->Next, we create the 
+>Next, we use an SQL <B
+CLASS="command"
+>GRANT</B
+> command to create a 
       <SPAN
 CLASS="QUOTE"
 >"bugs"</SPAN
@@ -1405,7 +1423,7 @@ CLASS="section"
 ><H2
 CLASS="section"
 ><A
-NAME="AEN736">4.1.9. <TT
+NAME="AEN741">4.1.9. <TT
 CLASS="filename"
 >checksetup.pl</TT
 ></H2
@@ -1556,7 +1574,7 @@ CLASS="section"
 ><H2
 CLASS="section"
 ><A
-NAME="AEN768">4.1.10. Securing MySQL</H2
+NAME="AEN773">4.1.10. Securing MySQL</H2
 ><P
 >If you followed the installation instructions for setting up your
       "bugs" and "root" user in MySQL, much of this should not apply to you.
@@ -1832,7 +1850,7 @@ CLASS="section"
 ><H2
 CLASS="section"
 ><A
-NAME="AEN834">4.1.11. Configuring Bugzilla</H2
+NAME="AEN839">4.1.11. Configuring Bugzilla</H2
 ><P
 >&#13;      You should run through the parameters on the Edit Parameters page
       (link in the footer) and set them all to appropriate values. 

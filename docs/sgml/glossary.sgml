@@ -41,6 +41,50 @@
         <acronym>NCSA</acronym>
 
         world-wide-web server.</para>
+
+        <variablelist>
+          <title>Useful Directives when configuring Bugzilla</title>
+
+          <varlistentry>
+            <term><computeroutput><ulink url="http://httpd.apache.org/docs-2.0/mod/core.html#addhandler">AddHandler</ulink></computeroutput></term>
+            <listitem>
+              <para>Tell Apache that it's OK to run CGI scripts.</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term><computeroutput><ulink url="http://httpd.apache.org/docs-2.0/mod/core.html#allowoverride">AllowOverride</ulink></computeroutput></term>
+            <term><computeroutput><ulink url="http://httpd.apache.org/docs-2.0/mod/core.html#options">Options</ulink></computeroutput></term>
+            <listitem>
+              <para>These directives are used to tell Apache many things about
+              the directory they apply to. For Bugzilla's purposes, we need
+              them to allow script execution and <filename>.htaccess</filename>
+              overrides.
+              </para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term><computeroutput><ulink url="http://httpd.apache.org/docs-2.0/mod/mod_dir.html#directoryindex">DirectoryIndex</ulink></computeroutput></term>
+            <listitem>
+              <para>Used to tell Apache what files are indexes. If you can
+              not add <filename>index.cgi</filename> to the list of valid files,
+              you'll need to set <computeroutput>$index_html</computeroutput> to
+              1 in <filename>localconfig</filename> so
+              <command>./checksetup.pl</command> will create an
+              <filename>index.html</filename> that redirects to
+              <filename>index.cgi</filename>.
+              </para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term><computeroutput><ulink url="http://httpd.apache.org/docs-2.0/mod/core.html#scriptinterpretersource">ScriptInterpreterSource</ulink></computeroutput></term>
+            <listitem>
+              <para>Used when running Apache on windows so the shebang line
+              doesn't have to be changed in every Bugzilla script.
+              </para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+
       </glossdef>
     </glossentry>
   </glossdiv>
@@ -86,8 +130,19 @@
   </glossdiv>
 
   <glossdiv id="gloss-c">
-    <title>
-    </title>
+    <title>C</title>
+
+    <glossentry id="gloss-cgi">
+      <glossterm>Common Gateway Interface</glossterm>
+      <acronym>CGI</acronym>
+      <glossdef>
+        <para><acronym>CGI</acronym> is an acronym for Common Gateway Interface.
+        This is a standard for interfacing an external application with a web
+        server. Bugzilla is an example of a <acronym>CGI</acronym> application.
+        </para>
+      </glossdef>
+    </glossentry>
+
 
     <glossentry id="gloss-component">
       <glossterm>Component</glossterm>
@@ -138,8 +193,7 @@
   </glossdiv>
 
   <glossdiv id="gloss-g">
-    <title>
-    </title>
+    <title>G</title>
 
     <glossentry>
       <glossterm>Groups</glossterm>
@@ -162,17 +216,39 @@
   <glossdiv id="gloss-m">
     <title>M</title>
 
-    <glossentry>
-      <glossterm>mysqld</glossterm>
+    <glossentry id="gloss-mta">
+      <glossterm>Message Transport Agent</glossterm>
+      <acronym>MTA</acronym>
 
       <glossdef>
-        <para>mysqld is the name of the 
-        <glossterm>daemon</glossterm>
+        <para>A Message Transport Agent is used to control the flow of email
+        on a system. Many unix based systems use
+        <ulink url="http://www.sendmail.org">sendmail</ulink> which is what
+        Bugzilla expects to find by default at <filename>/usr/sbin/sendmail</filename>.
+        Many other MTA's will work, but they all require that the
+        <option>sendmailnow</option> param be set to <literal>on</literal>.
+        </para>
+      </glossdef>
+    </glossentry>
 
-        for the MySQL database. In general, it is invoked automatically
-        through the use of the System V init scripts on GNU/Linux and
-        AT&amp;T System V-based systems, such as Solaris and HP/UX, or
-        through the RC scripts on BSD-based systems.</para>
+    <glossentry id="gloss-mysql">
+      <glossterm>MySQL</glossterm>
+
+      <glossdef>
+        <para>MySQL is currently the required
+        <glossterm linkend="gloss-rdbms">RDBMS</glossterm> for Bugzilla. MySQL
+        can be downloaded from <ulink url="http://www.mysql.com"/>. While you
+        should familiarize yourself with all of the documentation, some high
+        points are:
+        </para>
+        <itemizedlist>
+          <listitem>
+            <para><ulink url="http://www.mysql.com/doc/P/r/Privilege_system.html">MySQL
+            Privilege System</ulink> - Much more detailed information about
+            the suggestions in <xref linkend="security-mysql"/>.
+            </para>
+          </listitem>
+        </itemizedlist>
       </glossdef>
     </glossentry>
   </glossdiv>
@@ -227,6 +303,21 @@
         <quote>QA Contact</quote>
 
         field in a bug.</para>
+      </glossdef>
+    </glossentry>
+  </glossdiv>
+
+  <glossdiv id="gloss-r">
+    <title>R</title>
+
+    <glossentry id="gloss-rdbms">
+      <glossterm>Relational DataBase Managment System</glossterm>
+      <acronym>RDBMS</acronym>
+
+      <glossdef>
+        <para>A relational database management system is a database system
+        that stores information in tables that are related to each other.
+        </para>
       </glossdef>
     </glossentry>
   </glossdiv>
@@ -291,20 +382,54 @@
         fixed, or an enhancement will be implemented.</para>
       </glossdef>
     </glossentry>
+
+    <glossentry id="gloss-tcl">
+      <glossterm>Tool Command Language</glossterm>
+      <acronym>TCL</acronym>
+      <glossdef>
+        <para>TCL is an open source scripting language available for Windows,
+        Macintosh, and Unix based systems. Bugzilla 1.0 was written in TCL but
+        never released. The first release of Bugzilla was 2.0, which was when
+        it was ported to perl.
+        </para>
+      </glossdef>
+    </glossentry>
   </glossdiv>
 
   <glossdiv id="gloss-z">
     <title>Z</title>
 
-    <glossentry id="zarro-boogs-found" xreflabel="Zarro Boogs Found">
+    <glossentry id="gloss-zarro">
       <glossterm>Zarro Boogs Found</glossterm>
 
       <glossdef>
-        <para>This is the cryptic response sent by Bugzilla when a query
-        returned no results. It is just a goofy way of saying "Zero Bugs
-        Found".</para>
+        <para>This is just a goofy way of saying that there were no bugs
+        found matching your query. When asked to explain this message,
+        Terry had the following to say:
+        </para>
+
+        <blockquote>
+          <attribution>Terry Weissman</attribution>
+          <para>I've been asked to explain this ... way back when, when
+          Netscape released version 4.0 of its browser, we had a release
+          party.  Naturally, there had been a big push to try and fix every
+          known bug before the release. Naturally, that hadn't actually
+          happened.  (This is not unique to Netscape or to 4.0; the same thing
+          has happened with every software project I've ever seen.)  Anyway,
+          at the release party, T-shirts were handed out that said something
+          like "Netscape 4.0: Zarro Boogs". Just like the software, the
+          T-shirt had no known bugs.  Uh-huh.
+          </para>
+
+          <para>So, when you query for a list of bugs, and it gets no results,
+          you can think of this as a friendly reminder.  Of *course* there are
+          bugs matching your query, they just aren't in the bugsystem yet...
+          </para>
+        </blockquote>
+
       </glossdef>
     </glossentry>
+
   </glossdiv>
 </glossary>
 

@@ -568,6 +568,8 @@ if (defined $::FORM{newcc} || defined $::FORM{removecc} || defined $::FORM{massc
         $cc_remove =~ s/[\s,]+/ /g; # Change all delimiters to a single space
         foreach my $person ( split(" ", $cc_remove) ) {
             my $pid = DBNameToIdAndCheck($person);
+            # if we got here, the DB has already verified the email
+            trick_taint($person);
             $cc_remove{$pid} = $person;
         }
     }

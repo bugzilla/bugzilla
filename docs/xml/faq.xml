@@ -14,7 +14,7 @@
       <title>General Questions</title>
 
       <qandaentry>
-	<question>
+	<question id="faq-general-information">
 	  <para>
 	    Where can I find information about Bugzilla?</para>
 	</question>
@@ -28,7 +28,7 @@
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-general-license">
 	  <para>
 	    What license is Bugzilla distributed under?
 	  </para>
@@ -43,12 +43,17 @@
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-general-support">
 	  <para>
 	    How do I get commercial support for Bugzilla?
 	  </para>
 	</question>
 	<answer>
+          <para>
+            <ulink url="http://bugzilla.org/consulting.html"/>
+            is a list of people and companies who have asked us to list them
+            as consultants for Bugzilla.
+          </para>
 	  <para>
 	    <ulink url="http://www.collab.net/">www.collab.net</ulink> offers
 	    Bugzilla as part of their standard offering to large projects.
@@ -65,7 +70,7 @@
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-general-companies">
 	  <para>
 	    What major companies or projects are currently using Bugzilla
 	    for bug-tracking?
@@ -73,13 +78,12 @@
 	</question>
 	<answer>
 	  <para>
-	    There are <emphasis>dozens</emphasis> of major comapanies with public
+	    There are <emphasis>dozens</emphasis> of major companies with public
 	    Bugzilla sites to track bugs in their products.  A few include:
 	    <simplelist>
 	      <member>Netscape/AOL</member>
 	      <member>Mozilla.org</member>
 	      <member>NASA</member>
-	      <member>AtHome Corporation</member>
 	      <member>Red Hat Software</member>
 	      <member>SuSe Corp</member>
 	      <member>The Horde Project</member>
@@ -103,7 +107,7 @@
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-general-maintainers">
 	  <para>
 	    Who maintains Bugzilla?
 	  </para>
@@ -112,13 +116,13 @@
 	  <para>
 	    A 
       <ulink url="http://www.bugzilla.org/who_we_are.html">core team</ulink>,
-      led by Dave Miller (justdave@syndicomm.com).      
+      led by Dave Miller (justdave@netscape.com).      
 	  </para>
 	</answer>
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-general-compare">
 	  <para>
 	    How does Bugzilla stack up against other bug-tracking databases?
 	  </para>
@@ -145,9 +149,9 @@
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-general-bzmissing">
 	  <para>
-	    Why doesn't Bugzilla offer this or that feature or compatability
+	    Why doesn't Bugzilla offer this or that feature or compatibility
 	    with this other tracking software?
 	  </para>
 	</question>
@@ -170,7 +174,7 @@
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-general-mysql">
 	  <para>
 	    Why MySQL?  I'm interested in seeing Bugzilla run on
 	    Oracle/Sybase/Msql/PostgreSQL/MSSQL.
@@ -178,14 +182,27 @@
 	</question>
 	<answer>
 	  <para>
-      There is DB-independence work afoot. PostgreSQL support is planned
-      for 2.18, and full DB-independence can't be far further on.
+            MySQL was originally chosen because it is free, easy to install,
+            and was available for the hardware Netscape intended to run it on.
 	  </para>
+          <para>
+            There is currently work in progress to make Bugzilla work on
+            PostgreSQL and Sybase in the default distribution.  You can track
+            the progress of these initiatives in bugs <ulink
+            url="http://bugzilla.mozilla.org/show_bug.cgi?id=98304">98304</ulink>
+            and <ulink
+            url="http://bugzilla.mozilla.org/show_bug.cgi?id=173130">173130</ulink>
+            respectively.
+          </para>
+          <para>
+            Once both of these are done, adding support for additional
+            database servers should be trivial.
+          </para>
 	</answer>
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-general-bonsaitools">
 	  <para>
 	    Why do the scripts say "/usr/bonsaitools/bin/perl" instead of
 	    "/usr/bin/perl" or something else?
@@ -208,7 +225,7 @@
 
 
       <qandaentry>
-	<question>
+	<question id="faq-general-cookie">
 	  <para>
 	    Is there an easy way to change the Bugzilla cookie name?
 	  </para>
@@ -233,7 +250,7 @@
       </para>
 
       <qandaentry>
-	<question>
+	<question id="faq-phb-client">
 	  <para>
 	    Is Bugzilla web-based, or do you have to have specific software or
 	    a specific operating system on your machine?
@@ -248,7 +265,7 @@
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-phb-integration">
 	  <para>
 	    Can Bugzilla integrate with
 	    Perforce (SCM software)?
@@ -263,23 +280,28 @@
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-phb-projects">
 	  <para>
 	    Does Bugzilla allow the user to track multiple projects?
 	  </para>
 	</question>
 	<answer>
 	  <para>
-	    Absolutely!  You can track any number of Products (although you
-      are limited to about 55 or so if
-      you are using Product-Based Groups), that can each be composed of any
-      number of Components.
+	    Absolutely!  You can track any number of Products that can each be
+            composed of any number of Components.
 	  </para>
+          <note>
+            <para>There are only 55 groups available in version 2.16 of
+            Bugzilla. If you are using product groups, this will also limit
+            the number of products you can have. This limit does not exist in
+            the current 2.17 development releases and will not exist in 2.18.
+            </para>
+          </note>
 	</answer>
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-phb-sorting">
 	  <para>
 	    If I am on many projects, and search for all bugs assigned to me, will
 	    Bugzilla list them for me and allow me to sort by project, severity etc?
@@ -293,7 +315,7 @@
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-phb-attachments">
 	  <para>
 	    Does Bugzilla allow attachments (text, screenshots, URLs etc)? If yes,
 	    are there any that are NOT allowed?
@@ -303,15 +325,15 @@
 	  <para>
 	    Yes - any sort of attachment is allowed, although administrators can
       configure a maximum size.  
-      There are many specific MIME-types that are pre-defined by Bugzilla,
-	    but you may specify any arbitrary MIME-type you need when you
-	    upload the file. 
+            Bugzilla gives the user the option of either using the MIME-type
+            supplied by the browser, choosing from a pre-defined list or
+            manually typing any arbitrary MIME-type. 
 	  </para>
 	</answer>
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-phb-priorities">
 	  <para>
 	    Does Bugzilla allow us to define our own priorities and levels? Do we
 	    have complete freedom to change the labels of fields and format of them, and
@@ -327,14 +349,13 @@
 	  <para>
 	    There is no GUI for adding fields to Bugzilla at this
 	    time.  You can follow development of this feature at
-	    <ulink
-		   url="http://bugzilla.mozilla.org/show_bug.cgi?id=91037">http://bugzilla.mozilla.org/show_bug.cgi?id=91037</ulink>
+	    <ulink url="http://bugzilla.mozilla.org/show_bug.cgi?id=91037"/>.
 	  </para>
 	</answer>
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-phb-reporting">
 	  <para>
 	    Does Bugzilla provide any reporting features, metrics, graphs, etc? You
 	    know, the type of stuff that management likes to see. :)
@@ -342,23 +363,22 @@
 	</question>
 	<answer>
 	  <para>
-	    Yes.  Look at <ulink url="http://bugzilla.mozilla.org/reports.cgi">
-	    http://bugzilla.mozilla.org/reports.cgi</ulink> for basic reporting
-	    and graphing facilities.
+	    Yes.  Look at <ulink url="http://bugzilla.mozilla.org/reports.cgi"/>
+	    for samples of what Bugzilla can do in reporting and graphing.
 	  </para>
 	  <para>
-	    For more advanced reporting, I recommend hooking up a professional
-	    reporting package, such as Crystal Reports, and use ODBC to access
-	    the MySQL database.  You can do a lot through the Query page of
-	    Bugzilla as well, but right now Advanced Reporting is much
-	    better accomplished through third-party utilities that can
-	    interface with the database directly.
+            If you can not get the reports you want from the included reporting
+            scripts, it is possible to hook up a professional reporting package
+            such as Crystal Reports using ODBC. If you choose to do this,
+            beware that giving direct access to the database does contain some
+            security implications. Even if you give read-only access to the
+            bugs database it will bypass the secure bugs features of Bugzilla.
 	  </para>
 	</answer>
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-phb-email">
 	  <para>
 	    Is there email notification and if so, what do you see when you get an
 	    email?
@@ -374,7 +394,7 @@
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-phb-cclist">
 	  <para>
 	    Can email notification be set up to send to multiple
 	    people, some on the To List, CC List, BCC List etc?
@@ -388,7 +408,7 @@
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-phb-emailapp">
 	  <para>
 	    Do users have to have any particular
 	    type of email application?
@@ -413,7 +433,7 @@
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-phb-data">
 	  <para>
 	    Does Bugzilla allow data to be imported and exported? If I had outsiders
 	    write up a bug report using a MS Word bug template, could that template be
@@ -422,31 +442,33 @@
 	  </para>
 	</question>
 	<answer>
-	  <para>
-	    Mozilla allows data export through a custom DTD in XML format.
-	    It does not, however, export to specific formats other than the
-	    XML Mozilla DTD.  Importing the data into Excel or any other application
-	    is left as an exercise for the reader.
-	  </para>
-	  <para>
-	    If you create import filters to other applications from Mozilla's XML,
-	    please submit your modifications for inclusion in future Bugzilla
-	    distributions.
-	  </para>
-	  <para>
-	    As for data import, any application can send data to Bugzilla through
-	    the HTTP protocol, or through Mozilla's XML API.  However, it seems
-	    kind of silly to put another front-end in front of Bugzilla;
-	    it makes more sense to create a simplified bug submission form in
-	    HTML.  You can find an excellent example at
-	    <ulink url="http://www.mozilla.org/quality/help/bugzilla-helper.html">
-	    http://www.mozilla.org/quality/help/bugzilla-helper.html</ulink>
-	  </para>
+          <para>
+            Bugzilla can only output buglists as HTML in version 2.16. There
+            are other formats available (CVS and RDF) in the newer development
+            versions.
+          </para>
+          <para>
+            Bugzilla can export bugs using <filename>xml.cgi</filename> with
+            either a bug number or list of bug numbers.
+          </para>
+          <para>
+            Currently the only script included with Bugzilla that can import
+            data is <filename>importxml.pl</filename> which is intended to be
+            used for importing the data generated by <filename>xml.cgi</filename>
+            in association with bug moving. Any other use is left as an
+            exercise for the user.
+          </para>
+          <para>
+            There are also scripts included in the <filename>contrib/</filename>
+            directory for using e-mail to import information into Bugzilla,
+            but these scripts are not currently supported and included for
+            educational purposes.
+          </para>
 	</answer>
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-phb-l10n">
 	  <para>
 	    Has anyone converted Bugzilla to another language to be used in other
 	    countries? Is it localizable?
@@ -454,16 +476,20 @@
 	</question>
 	<answer>
 	  <para>
-	    To a certain extent, yes. 2.16's templates mean that you can localise
-      the user-facing UI (and several projects are doing exactly that.) However,
-      error messages and the admin interface are currently not localisable.
-      This should be achieved by 2.18.
+            Yes.  For more information including available translated templates,
+            see <ulink
+            url="http://www.bugzilla.org/download.html">http://www.bugzilla.org/download.html</ulink>.
+            The admin interfaces are still not included in these translated
+            templates and is therefore still English only.  Also, there may be
+            issues with the charset not being declared.  See <ulink
+            url="http://bugzilla.mozilla.org/show_bug.cgi?id=126266">bug 126226</ulink>
+            for more information.
 	  </para>
 	</answer>
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-phb-reports">
 	  <para>
 	    Can a user create and save reports? Can they do this in Word format?
 	    Excel format?
@@ -471,13 +497,13 @@
 	</question>
 	<answer>
 	  <para>
-	    Yes.  No.  No.
+	    Yes.  No.  Not in 2.16.
 	  </para>
 	</answer>
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-phb-searching">
 	  <para>
 	    Does Bugzilla have the ability to search by word, phrase, compound
 	    search?
@@ -492,7 +518,7 @@
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-phb-midair">
 	  <para>
 	     Does Bugzilla provide record locking when there is simultaneous access
 	    to the same bug? Does the second person get a notice that the bug is in use
@@ -508,7 +534,7 @@
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-phb-backup">
 	  <para>
 	    Are there any backup features provided?
 	  </para>
@@ -524,7 +550,7 @@
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-phb-livebackup">
 	  <para>
 	    Can users be on the system while a backup is in progress?
 	  </para>
@@ -539,7 +565,7 @@
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-phb-maintenance">
 	  <para>
 	    What type of human resources are needed to be on staff to install and
 	    maintain Bugzilla? Specifically, what type of skills does the person need to
@@ -563,7 +589,7 @@
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-phb-installtime">
 	  <para>
 	    What time frame are we looking at if we decide to hire people to install
 	    and maintain the Bugzilla? Is this something that takes hours or weeks to
@@ -585,7 +611,7 @@
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-phb-cost">
 	  <para>
 	    Is there any licensing fee or other fees for using Bugzilla? Any
 	    out-of-pocket cost other than the bodies needed as identified above?
@@ -604,7 +630,7 @@
       <title>Bugzilla Security</title>
 
       <qandaentry>
-	<question>
+	<question id="faq-security-mysql">
 	  <para>
 	    How do I completely disable MySQL security if it's giving me problems
 	    (I've followed the instructions in the installation section of this guide)?
@@ -620,7 +646,7 @@
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-security-knownproblems">
 	  <para>
 	    Are there any security problems with Bugzilla?
 	  </para>
@@ -638,7 +664,7 @@
 
 
       <qandaentry>
-	<question>
+	<question id="faq-security-mysqluser">
 	  <para>
 	    I've implemented the security fixes mentioned in Chris Yeh's security
 	    advisory of 5/10/2000 advising not to run MySQL as root, and am running into
@@ -659,7 +685,7 @@
       <title>Bugzilla Email</title>
 
       <qandaentry>
-	<question>
+	<question id="faq-email-nomail">
 	  <para>
 	    I have a user who doesn't want to receive any more email from Bugzilla.
 	    How do I stop it entirely for this user?
@@ -668,13 +694,14 @@
 	<answer>
 	  <para>
 	    The user should be able to set
-	    this in user email preferences (uncheck all boxes.)
+	    this in user email preferences (uncheck all boxes) or you can add
+            their email address to the <filename>data/nomail</filename> file.
 	  </para>
 	</answer>
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-email-testing">
 	  <para>
 	    I'm evaluating/testing Bugzilla, and don't want it to send email to
 	    anyone but me. How do I do it?
@@ -682,14 +709,14 @@
 	</question>
 	<answer>
 	  <para>
-	    Edit the "changedmail" Param. Replace "To:" with "X-Real-To:",
+	    Edit the "newchangedmail" Param. Replace "To:" with "X-Real-To:",
 	    replace "Cc:" with "X-Real-CC:", and add a "To: &lt;youremailaddress&gt;".
 	  </para>
 	</answer>
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-email-whine">
 	  <para>
 	    I want whineatnews.pl to whine at something more, or other than, only new
 	    bugs. How do I do it?
@@ -707,7 +734,7 @@
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-email-procmail">
 	  <para>
 	    I don't like/want to use Procmail to hand mail off to bug_email.pl.
 	    What alternatives do I have?
@@ -730,7 +757,7 @@
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-email-mailif">
 	  <para>
 	    How do I set up the email interface to submit/change bugs via email?
 	  </para>
@@ -744,7 +771,7 @@
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-email-sendmailnow">
 	  <para>
 	    Email takes FOREVER to reach me from Bugzilla -- it's extremely slow.
 	    What gives?
@@ -765,7 +792,7 @@
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-email-nonreceived">
 	  <para>
 	     How come email from Bugzilla changes never reaches me?
 	  </para>
@@ -790,23 +817,24 @@
       <title>Bugzilla Database</title>
 
       <qandaentry>
-	<question>
+	<question id="faq-db-oracle">
 	  <para>
 	    I've heard Bugzilla can be used with Oracle?
 	  </para>
 	</question>
 	<answer>
 	  <para>
-	    Red Hat Bugzilla works with Oracle.  The current version
-	    from Mozilla.org does not have this capability.  Unfortunately, though
-	    you will sacrifice a lot of the really great features available in
-	    Bugzilla 2.14 and 2.16 if you go with the 2.8-based Redhat version.
+            Red Hat's old version of Bugzilla (based on 2.8) worked on Oracle.
+            Red Hat's newer version (based on 2.17.1 and soon to be merged into
+            the main distribution) runs on PostgreSQL.  At this time we know of
+            no recent ports of Bugzilla to Oracle but do intend to support it
+            in the future (possibly the 2.20 time-frame).
 	  </para>
 	</answer>
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-db-corrupted">
 	  <para>
 	    I think my database might be corrupted, or contain invalid entries. What
 	    do I do?
@@ -834,7 +862,7 @@
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-db-manualedit">
 	  <para>
 	    I want to manually edit some entries in my database. How?
 	  </para>
@@ -843,31 +871,19 @@
 	  <para>
 	     There is no facility in Bugzilla itself to do this. It's also generally
 	    not a smart thing to do if you don't know exactly what you're doing.
-	    However, if you understand SQL you can use the mysqladmin utility to
-	    manually insert, delete, and modify table information. Personally, I
-	    use "phpMyAdmin". You have to compile a PHP module with MySQL
-	    support to make it work, but it's very clean and easy to use.
+	    However, if you understand SQL you can use the <command>mysql</command>
+            command line utility to manually insert, delete and modify table
+            information.  There are also more intuitive GUI clients available.
+            Personal favorites of the Bugzilla team are <ulink
+            url="http://www.phpmyadmin.net/">phpMyAdmin</ulink> and <ulink
+            url="http://www.mysql.com/downloads/gui-mycc.html">MySQL Control
+            Center</ulink>.
 	  </para>
 	</answer>
       </qandaentry>
 
       <qandaentry>
-	<question>
-	  <para>
-	    I try to add myself as a user, but Bugzilla always tells me my password is wrong.
-	  </para>
-	</question>
-	<answer>
-	  <para>
-	    Certain version of MySQL (notably, 3.23.29 and 3.23.30) accidentally disabled
-	    the "crypt()" function.  This prevented MySQL from storing encrypted passwords.
-	    Upgrade to the "3.23 stable" version of MySQL and you should be good to go.
-	  </para>
-	</answer>
-      </qandaentry>
-
-      <qandaentry>
-	<question>
+	<question id="faq-db-permissions">
 	  <para>
 	    I think I've set up MySQL permissions correctly, but Bugzilla still can't
 	    connect.
@@ -877,15 +893,22 @@
 	  <para>
 	    Try running MySQL from its binary: "mysqld --skip-grant-tables". This
 	    will allow you to completely rule out grant tables as the cause of your
-	    frustration. However, I do not recommend you run it this way on a regular
-	    basis, unless you really want your web site defaced and your machine
-	    cracked.
-	  </para>
+            frustration. If this Bugzilla is able to connect at this point then
+            you need to check that you have granted proper permission to the user
+            password combo defined in <filename>localconfig</filename>.
+          </para>
+          <warning>
+            <para>
+              Running MySQL with this command line option is very insecure and
+              should only be done when not connected to the external network
+              as a troubleshooting step.
+            </para>
+          </warning>
 	</answer>
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-db-synchronize">
 	  <para>
 	    How do I synchronize bug information among multiple different Bugzilla
 	    databases?
@@ -916,7 +939,7 @@
       <title>Bugzilla and Win32</title>
 
       <qandaentry>
-	<question>
+	<question id="faq-nt-easiest">
 	  <para>
 	    What is the easiest way to run Bugzilla on Win32 (Win98+/NT/2K)?
 	  </para>
@@ -930,7 +953,7 @@
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-nt-bundle">
 	  <para>
 	    Is there a "Bundle::Bugzilla" equivalent for Win32?
 	  </para>
@@ -945,7 +968,7 @@
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-nt-mappings">
 	  <para>
 	    CGI's are failing with a "something.cgi is not a valid Windows NT
 	    application" error. Why?
@@ -977,7 +1000,7 @@
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-nt-dbi">
 	  <para>
 	    I'm having trouble with the perl modules for NT not being able to talk to
 	    to the database.
@@ -1027,7 +1050,7 @@
       <title>Bugzilla Usage</title>
 
       <qandaentry>
-	<question>
+	<question id="faq-use-changeaddress">
 	  <para>
 	    How do I change my user name (email address) in Bugzilla?
 	  </para>
@@ -1041,7 +1064,7 @@
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-use-query">
 	  <para>
 	    The query page is very confusing.  Isn't there a simpler way to query?
 	  </para>
@@ -1056,7 +1079,7 @@
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-use-accept">
 	  <para>
 	    I'm confused by the behavior of the "accept" button in the Show Bug form.
 	    Why doesn't it assign the bug to me when I accept it?
@@ -1080,7 +1103,7 @@
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-use-attachment">
 	  <para>
 	    I can't upload anything into the database via the "Create Attachment"
 	    link.  What am I doing wrong?
@@ -1096,7 +1119,7 @@
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-use-attachments">
 	  <para>
 	    Email submissions to Bugzilla that have attachments end up asking me to
 	    save it as a "cgi" file.
@@ -1112,7 +1135,7 @@
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-use-keyword">
 	  <para>
 	    How do I change a keyword in Bugzilla, once some bugs are using it?
 	  </para>
@@ -1132,7 +1155,7 @@
       <title>Bugzilla Hacking</title>
 
       <qandaentry>
-	<question>
+	<question id="faq-hacking-bugzillabugs">
 	  <para>
 	    What bugs are in Bugzilla right now?
 	  </para>
@@ -1157,7 +1180,7 @@
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-hacking-priority">
 	  <para>
 	    How can I change the default priority to a null value?  For instance, have the default
 	    priority be "---" instead of "P2"?
@@ -1175,7 +1198,7 @@
       </qandaentry>
 
       <qandaentry>
-	<question>
+	<question id="faq-hacking-patches">
 	  <para>
 	    What's the best way to submit patches?  What guidelines should I follow?
 	  </para>

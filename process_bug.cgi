@@ -277,6 +277,7 @@ sub CheckCanChangeField {
         SendSQL("SELECT reporter, assigned_to, qa_contact FROM bugs " .
                 "WHERE bug_id = $bugid");
         ($reporterid, $ownerid, $qacontactid) = (FetchSQLData());
+        $lastbugid = $bugid;
     }
     # Let reporter change bug status, even if they can't edit bugs.
     # If reporter can't re-open their bug they will just file a duplicate.

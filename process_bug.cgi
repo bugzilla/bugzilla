@@ -657,12 +657,8 @@ SWITCH: for ($::FORM{'knob'}) {
         last SWITCH;
     };   
     /^reopen$/  && CheckonComment( "reopen" ) && do {
-                SendSQL("SELECT resolution FROM bugs WHERE bug_id = $::FORM{'id'}");
         ChangeStatus('REOPENED');
         ChangeResolution('');
-                if (FetchOneColumn() eq 'DUPLICATE') {
-                        SendSQL("DELETE FROM duplicates WHERE dupe = $::FORM{'id'}");
-                }
         last SWITCH;
     };
     /^verify$/ && CheckonComment( "verify" ) && do {
@@ -850,7 +846,7 @@ foreach my $id (@idlist) {
     my $write = "WRITE";        # Might want to make a param to control
                                 # whether we do LOW_PRIORITY ...
     SendSQL("LOCK TABLES bugs $write, bugs_activity $write, cc $write, " .
-            "cc AS selectVisible_cc $write, " .
+            "cc AS selectVisible_cc $write, duplicates $write, " .
             "profiles $write, dependencies $write, votes $write, " .
             "keywords $write, longdescs $write, fielddefs $write, " .
             "keyworddefs READ, groups READ, attachments READ, products READ");
@@ -1030,6 +1026,13 @@ foreach my $id (@idlist) {
     if ($::comma ne "") {
         SendSQL($query);
     }
+    # Check for duplicates if the bug is [re]open
+    SendSQL("SELECT resolution FROM bugs WHERE bug_id = $id");
+    my $resolution = FetchOneColumn();
+    if ($resolution eq '') {
+        SendSQL("DELETE FROM duplicates WHERE dupe = $id");
+    }
+    
     SendSQL("select now()");
     $timestamp = FetchOneColumn();
     

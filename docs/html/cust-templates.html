@@ -1,0 +1,306 @@
+<HTML
+><HEAD
+><TITLE
+>Template Customisation</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.76b+
+"><LINK
+REL="HOME"
+TITLE="The Bugzilla Guide"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="Administering Bugzilla"
+HREF="administration.html"><LINK
+REL="PREVIOUS"
+TITLE="Bugzilla Security"
+HREF="security.html"><LINK
+REL="NEXT"
+TITLE="Integrating Bugzilla with Third-Party Tools"
+HREF="integration.html"></HEAD
+><BODY
+CLASS="section"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The Bugzilla Guide</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="security.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 5. Administering Bugzilla</TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="integration.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="section"
+><H1
+CLASS="section"
+><A
+NAME="cust-templates">5.7. Template Customisation</H1
+><P
+>&#13;      One of the large changes for 2.16 was the templatisation of the
+      entire user-facing UI, using the 
+      <A
+HREF="http://www.template-toolkit.org"
+TARGET="_top"
+>Template Toolkit</A
+>.
+      Administrators can now configure the look and feel of Bugzilla without
+      having to edit Perl files or face the nightmare of massive merge
+      conflicts when they upgrade to a newer version in the future.
+    </P
+><P
+>&#13;      Templatisation also makes localised versions of Bugzilla possible, 
+      for the first time. In the future, a Bugzilla installation may
+      have templates installed for multiple localisations, and select
+      which ones to use based on the user's browser language setting.      
+    </P
+><DIV
+CLASS="section"
+><H2
+CLASS="section"
+><A
+NAME="AEN1611">5.7.1. What to Edit</H2
+><P
+>&#13;        There are several ways to take advantage of Bugzilla's templates,
+        and which you use depends on what you want to do. The Bugzilla
+        template directory structure is that there's a top level directory,
+        <TT
+CLASS="filename"
+>template</TT
+>, which contains a directory for
+        each installed localisation. The default English templates are
+        therefore in <TT
+CLASS="filename"
+>en</TT
+>. Underneath that, there
+        are two directories - <TT
+CLASS="filename"
+>default</TT
+> and 
+        <TT
+CLASS="filename"
+>custom</TT
+>. The <TT
+CLASS="filename"
+>default</TT
+>
+        directory contains all the templates shipped with Bugzilla.
+      </P
+><P
+>&#13;        One method of making customisations is to directly edit the templates
+        in <TT
+CLASS="filename"
+>template/en/default</TT
+>. This is probably the
+        best method for small changes, because if you then execute a
+        <B
+CLASS="command"
+>cvs update</B
+>, any template fixes will get
+        automagically merged into your modified versions.
+      </P
+><P
+>&#13;        The other method is to copy the templates into 
+        <TT
+CLASS="filename"
+>template/en/custom</TT
+>. This method is better if
+        you are going to make major changes, because it is guaranteed that
+        the contents of this directory will not be touched during an upgrade,
+        and you can then decide whether to continue using your own templates,
+        or make the effort to merge your changes into the new versions by
+        hand.
+      </P
+><P
+>&#13;        The syntax of the Template Toolkit language is beyond the scope of
+        this guide. It's reasonably easy to pick up by looking at the current 
+        templates; or, you can read the manual, available on the
+        <A
+HREF="http://www.template-toolkit.org"
+TARGET="_top"
+>Template Toolkit home
+        page </A
+>.
+      </P
+></DIV
+><DIV
+CLASS="section"
+><H2
+CLASS="section"
+><A
+NAME="AEN1626">5.7.2. Particular Templates</H2
+><P
+>&#13;        There are a few templates you may be particularly interested in
+        customising for your installation.
+      </P
+><P
+>&#13;        <B
+CLASS="command"
+>global/header.html.tmpl</B
+> and
+        <B
+CLASS="command"
+>global/footer.html.tmpl</B
+>:
+        These define the header and footer that go on all Bugzilla pages.
+        Editing these is a way to quickly get a distinctive look and
+        feel for your Bugzilla installation.
+      </P
+></DIV
+><DIV
+CLASS="section"
+><H2
+CLASS="section"
+><A
+NAME="AEN1632">5.7.3. Template Formats</H2
+><P
+>&#13;        Some CGIs have the ability to use more than one template. For
+        example, buglist.cgi can output bug lists as RDF or two
+        different forms of HTML (complex and simple). (Try this out
+        by appending <TT
+CLASS="filename"
+>&#38;format=simple</TT
+> to a buglist.cgi
+        URL on your Bugzilla installation.) This
+        mechanism, called template 'formats', is extensible.
+      </P
+><P
+>&#13;        To see if a CGI supports multiple output formats, grep the
+        CGI for "ValidateOutputFormat". If it's not present, adding
+        multiple format support isn't too hard - see how it's done in
+        other CGIs.
+      </P
+><P
+>&#13;        To make a new format template for a CGI which supports this, 
+        open a current template for
+        that CGI and take note of the INTERFACE comment (if present.) This 
+        comment defines what variables are passed into this template. If 
+        there isn't one, I'm afraid you'll have to read the template and
+        the code to find out what information you get. 
+      </P
+><P
+>&#13;        Write your template in whatever markup or text style is appropriate.
+      </P
+><P
+>&#13;        You now need to decide what content type you want your template
+        served as. Open up the localconfig file and find the $contenttypes
+        variable. If your content type is not there, add it. Remember
+        the three- or four-letter tag assigned to you content type. 
+        This tag will be part of the template filename.
+      </P
+><P
+>&#13;        Save the template as <TT
+CLASS="filename"
+>&#60;stubname&#62;-&#60;formatname&#62;.&#60;contenttypetag&#62;.tmpl</TT
+>. 
+        Try out the template by calling the CGI as 
+        <TT
+CLASS="filename"
+>&#60;cginame&#62;.cgi?format=&#60;formatname&#62;</TT
+> .
+      </P
+></DIV
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="security.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="integration.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+>Bugzilla Security</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="administration.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+>Integrating Bugzilla with Third-Party Tools</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

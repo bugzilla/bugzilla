@@ -3826,7 +3826,7 @@ if (!$series_exists) {
     require Bugzilla::Series;
       
     # We prepare the handle to insert the series data    
-    my$seriesdatasth = $dbh->prepare("INSERT INTO series_data " . 
+    my $seriesdatasth = $dbh->prepare("INSERT INTO series_data " . 
                                      "(series_id, series_date, series_value) " .
                                      "VALUES (?, ?, ?)");
 

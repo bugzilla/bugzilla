@@ -26,6 +26,8 @@ use strict;
 
 use lib qw(.);
 
+use File::Temp;
+
 require "CGI.pl";
 
 ConnectToDatabase();
@@ -59,11 +61,11 @@ sub CreateImagemap {
 }
 
 sub AddLink {
-    my ($blocked, $dependson) = (@_);
+    my ($blocked, $dependson, $fh) = (@_);
     my $key = "$blocked,$dependson";
     if (!exists $edgesdone{$key}) {
         $edgesdone{$key} = 1;
-        print DOT "$blocked -> $dependson\n";
+        print $fh "$blocked -> $dependson\n";
         $seen{$blocked} = 1;
         $seen{$dependson} = 1;
     }
@@ -76,12 +78,13 @@ if (!defined($::FORM{'id'}) && !defined($::FORM{'doall'})) {
     exit;
 }    
 
-my $filename = "data/webdot/$$.dot";
+my ($fh, $filename) = File::Temp::tempfile("XXXXXXXXXX",
+                                           SUFFIX => '.dot',
+                                           DIR => "data/webdot");
 my $urlbase = Param('urlbase');
 
-open(DOT, ">$filename") || die "Can't create $filename";
-print DOT "digraph G {";
-print DOT qq{
+print $fh "digraph G {";
+print $fh qq{
 graph [URL="${urlbase}query.cgi", rankdir=$::FORM{'rankdir'}, size="64,64"]
 node [URL="${urlbase}show_bug.cgi?id=\\N", style=filled, color=lightgrey]
 };
@@ -93,7 +96,7 @@ if ($::FORM{'doall'}) {
 
     while (MoreSQLData()) {
         my ($blocked, $dependson) = FetchSQLData();
-        AddLink($blocked, $dependson);
+        AddLink($blocked, $dependson, $fh);
     }
 } else {
     foreach my $i (split('[\s,]+', $::FORM{'id'})) {
@@ -117,7 +120,7 @@ if ($::FORM{'doall'}) {
                 push @stack, $dependson;
             }
 
-            AddLink($blocked, $dependson);
+            AddLink($blocked, $dependson, $fh);
         }
     }
 
@@ -157,15 +160,15 @@ foreach my $k (keys(%seen)) {
     }
 
     if (@params) {
-        print DOT "$k [" . join(',', @params) . "]\n";
+        print $fh "$k [" . join(',', @params) . "]\n";
     } else {
-        print DOT "$k\n";
+        print $fh "$k\n";
     }
 }
 
 
-print DOT "}\n";
-close DOT;
+print $fh "}\n";
+close $fh;
 
 chmod 0777, $filename;
 
@@ -178,11 +181,23 @@ if ($webdotbase =~ /^https?:/) {
      $vars->{'map_url'} = $url . ".map";
 } else {
     # Local dot installation
-    my $pngfilename = "data/webdot/$$.png";
-    my $mapfilename = "data/webdot/$$.map";
-    system("$webdotbase","-Tpng","-o","$pngfilename","$filename");
+    my $dotfh;
+    my ($pngfh, $pngfilename) = File::Temp::tempfile("XXXXXXXXXX",
+                                                     SUFFIX => '.png',
+                                                     DIR => 'data/webdot');
+    open (DOT, '-|') or exec ($webdotbase, "-Tpng", $filename);
+    print $pngfh $_ while <DOT>;
+    close DOT;
+    close $pngfh;
     $vars->{'image_url'} = $pngfilename;
-    system("$webdotbase","-Tismap","-o","$mapfilename","$filename");
+
+    my ($mapfh, $mapfilename) = File::Temp::tempfile("XXXXXXXXXX",
+                                                     SUFFIX => '.map',
+                                                     DIR => 'data/webdot');
+    open (DOT, '-|') or exec ($webdotbase, "-Tismap", $filename);
+    print $mapfh $_ while <DOT>;
+    close DOT;
+    close $mapfh;
     $vars->{'image_map'} = CreateImagemap($mapfilename);
 }
 

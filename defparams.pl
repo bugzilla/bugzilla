@@ -55,15 +55,16 @@ sub WriteParams {
         }
     }
 
-    my $tmpname = "data/params.$$";
-    open(FID, ">$tmpname") || die "Can't create $tmpname";
+    require File::Temp;
+    my ($fh, $tmpname) = File::Temp::tempfile("params.XXXXX",
+                                              DIR=>'data');
     my $v = $::param{'version'};
     delete $::param{'version'};  # Don't write the version number out to
                                 # the params file.
-    print FID GenerateCode('%::param');
+    print $fh GenerateCode('%::param');
     $::param{'version'} = $v;
-    print FID "1;\n";
-    close FID;
+    print $fh "1;\n";
+    close $fh;
     rename $tmpname, "data/params" || die "Can't rename $tmpname to data/params";
     ChmodDataFile('data/params', 0666);
 }
@@ -439,7 +440,7 @@ sub check_webdotbase {
         # Check .htaccess allows access to generated images
         if(-e "data/webdot/.htaccess") {
             open HTACCESS, "data/webdot/.htaccess";
-            if(! grep(/png/,<HTACCESS>)) {
+            if(! grep(/ \\\.png\$/,<HTACCESS>)) {
                 print "Dependency graph images are not accessible.\nDelete data/webdot/.htaccess and re-run checksetup.pl to rectify.\n";
             }
             close HTACCESS;

@@ -1134,43 +1134,78 @@ skip-networking
       which ones to use based on the user's browser language setting.      
     </para>
     
-    <section>
-      <title>What to Edit</title>
+    <section id="template-directory">
+      <title>Template Directory Structure</title>
       <para>
-        There are two different ways of editing of Bugzilla's templates,
-        and which you use depends mainly on how you upgrade Bugzilla. The
-        template directory structure is that there's a top level directory,
-        <filename>template</filename>, which contains a directory for
-        each installed localisation. The default English templates are
-        therefore in <filename>en</filename>. Underneath that, there
-        is the <filename>default</filename> directory and optionally the 
-        <filename>custom</filename> directory. The <filename>default</filename>
-        directory contains all the templates shipped with Bugzilla, whereas
-        the <filename>custom</filename> directory does not exist at first and
-        must be created if you want to use it.
+        The template directory structure starts with top level directory 
+        named <filename>template</filename>, which contains a directory
+        for each installed localization. The next level defines the
+        language used in the templates. Bugzilla comes with English
+        templates, so the directory name is <filename>en</filename>,
+        and we will discuss <filename>template/en</filename> throughout
+        the documentation. Below <filename>template/en</filename> is the
+        <filename>default</filename> directory, which contains all the
+        standard templates shipped with Bugzilla.
       </para>
 
+      <warning>
+        <para>
+          A directory <filename>data/templates</filename> also exists;
+          this is where Template Toolkit puts the compiled versions of
+          the templates from either the default or custom directories.
+          <emphasis>Do not</emphasis> directly edit the files in this
+          directory, or all your changes will be lost the next time
+          Template Toolkit recompiles the templates.
+        </para>
+      </warning>
+    </section>
+
+    <section id="template-method">
+      <title>Choosing a Customization Method</title>
       <para>
-        The first method of making customisations is to directly edit the
-        templates in <filename>template/en/default</filename>. This is
-        probably the best method for small changes if you are going to use
-        the CVS method of upgrading, because if you then execute a
-        <command>cvs update</command>, any template fixes will get
-        automagically merged into your modified versions.
-      </para>
+        If you want to edit Bugzilla's templates, the first decision
+        you must make is how you want to go about doing so. There are two
+        choices, and which you use depends mainly on the scope of your 
+        modifications, and the method you plan to use to upgrade Bugzilla.
+      </para> 
 
       <para>
-        If you use this method, your installation will break if CVS conflicts
-        occur.
+        The first method of making customizations is to directly edit the
+        templates found in <filename>template/en/default</filename>.
+        This is probably the best way to go about it if you are going to
+        be upgrading Bugzilla through CVS, because if you then execute
+        a <command>cvs update</command>, any changes you have made will
+        be merged automagically with the updated versions.
       </para>
 
+      <note>
+        <para>
+          If you use this method, and CVS conflicts occur during an
+          update, the conflicted templates (and possibly other parts
+          of your installation) will not work until they are resolved.
+        </para>
+      </note>
+
       <para>
-        The other method is to copy the templates into a mirrored directory
-        structure under <filename>template/en/custom</filename>.  The templates
-        in this directory automatically override those in default.  
-        This is the technique you
-        need to use if you use the overwriting method of upgrade, because
-        otherwise your changes will be lost.  This method is also better if
+        The second method is to copy the templates to be modified
+        into a mirrored directory structure under 
+        <filename>template/en/custom</filename>. Templates in this
+        directory structure automatically override any identically-named
+        and identically-located templates in the 
+        <filename>default</filename> directory. 
+      </para>
+
+      <note>
+        <para>
+          The <filename>custom</filename> directory does not exist
+          at first and must be created if you want to use it.
+        </para>
+      </note>
+
+      <para>
+        The second method of customization should be used if you 
+        use the overwriting method of upgrade, because otherwise 
+        your changes will be lost.  This method may also be better if
         you are using the CVS method of upgrading and are going to make major
         changes, because it is guaranteed that the contents of this directory
         will not be touched during an upgrade, and you can then decide whether
@@ -1179,9 +1214,9 @@ skip-networking
       </para>
 
       <para>
-        If you use this method, your installation may break if incompatible
-        changes are made to the template interface.  If such changes are made
-        they will be documented in the release notes, provided you are using a
+        Using this method, your installation may break if incompatible
+        changes are made to the template interface.  Such changes should
+        be documented in the release notes, provided you are using a
         stable release of Bugzilla.  If you use using unstable code, you will
         need to deal with this one yourself, although if possible the changes
         will be mentioned before they occur in the deprecations section of the
@@ -1190,40 +1225,52 @@ skip-networking
 
       <note>
         <para>
-          Don't directly edit the compiled templates in 
-          <filename class="directory">data/template/*</filename> - your
-          changes will be lost when Template Toolkit recompiles them.
+          Regardless of which method you choose, it is recommended that
+          you run <command>./checksetup.pl</command> after creating or
+          editing any templates in the <filename>template/en/default</filename>
+          directory, and after editing any templates in the 
+          <filename>custom</filename> directory.
         </para>
       </note>
 
-      <note>
-        <para>It is recommended that you run <command>./checksetup.pl</command>
-        after any template edits, especially if you've created a new file in
-        the <filename class="directory">custom</filename> directory.
+      <warning>
+        <para>
+          It is <emphasis>required</emphasis> that you run 
+          <command>./checksetup.pl</command> after creating a new
+          template in the <filename>custom</filename> directory. Failure
+          to do so will raise an incomprehensible error message.
         </para>
-      </note>
+      </warning>
     </section>
     
-    <section>
+    <section id="template-edit">
       <title>How To Edit Templates</title>
+      
+      <note>
+        <para>
+          If you are making template changes that you intend on submitting back
+          for inclusion in standard Bugzilla, you should read the relevant
+          sections of the 
+          <ulink url="http://www.bugzilla.org/docs/developer.html">Developers'
+          Guide</ulink>.
+        </para>
+      </note>
       
      <para>
         The syntax of the Template Toolkit language is beyond the scope of
         this guide. It's reasonably easy to pick up by looking at the current 
         templates; or, you can read the manual, available on the
         <ulink url="http://www.template-toolkit.org">Template Toolkit home
-        page</ulink>. However, you should particularly remember (for security
-        reasons) to always HTML filter things which come from the database or
-        user input, to prevent cross-site scripting attacks.
+        page</ulink>.
       </para>
       
       <para>
-        However, one thing you should take particular care about is the need
+        One thing you should take particular care about is the need
         to properly HTML filter data that has been passed into the template.
         This means that if the data can possibly contain special HTML characters
         such as &lt;, and the data was not intended to be HTML, they need to be
         converted to entity form, ie &amp;lt;.  You use the 'html' filter in the
-        Template Toolkit to do this.  If you fail to do this, you may open up
+        Template Toolkit to do this.  If you forget, you may open up
         your installation to cross-site scripting attacks.
       </para>
 
@@ -1238,41 +1285,35 @@ skip-networking
       </para>
  
       <para>
-        Editing templates is a good way of doing a "poor man's custom fields".
-        For example, if you don't use the Status Whiteboard, but want to have
-        a free-form text entry box for "Build Identifier", then you can just
+        Editing templates is a good way of doing a <quote>poor man's custom
+        fields</quote>. For example, if you don't use the Status Whiteboard,
+        but want to have a free-form text entry box for <quote>Build
+        Identifier</quote>, then you can just
         edit the templates to change the field labels. It's still be called
         status_whiteboard internally, but your users don't need to know that.
       </para>
       
-      <note>
-        <para>
-          If you are making template changes that you intend on submitting back
-          for inclusion in standard Bugzilla, you should read the relevant
-          sections of the 
-          <ulink url="http://www.bugzilla.org/docs/developer.html">Developers'
-          Guide</ulink>.
-        </para>
-      </note>
     </section>
             
     
-    <section>
+    <section id="template-formats">
       <title>Template Formats</title>
       
       <para>
-        Some CGIs have the ability to use more than one template. For
-        example, buglist.cgi can output bug lists as RDF or two
-        different forms of HTML (complex and simple). (Try this out
+        Some CGIs have the ability to use more than one template. For example,
+        <filename>buglist.cgi</filename> can output itself as RDF, or as two 
+        formats of HTML (complex and simple). If you would like to 
+        retrieve a certain format, you can use the &amp;format=&lt;format&gt; 
+        (such as simple or complex) in the URL. (Try this out
         by appending <filename>&amp;format=simple</filename> to a buglist.cgi
-        URL on your Bugzilla installation.) This
-        mechanism, called template 'formats', is extensible.
+        URL on your Bugzilla installation.) The mechanism that provides this 
+        feature is extensible.
       </para>
       
       <para>
         To see if a CGI supports multiple output formats, grep the
-        CGI for "ValidateOutputFormat". If it's not present, adding
-        multiple format support isn't too hard - see how it's done in
+        CGI for <quote>ValidateOutputFormat</quote>. If it's not present,
+        adding multiple format support isn't too hard; see how it's done in
         other CGIs.
       </para>
       
@@ -1294,7 +1335,7 @@ skip-networking
         served as. Open up the <filename>localconfig</filename> file and find the 
         <filename>$contenttypes</filename>
         variable. If your content type is not there, add it. Remember
-        the three- or four-letter tag assigned to you content type. 
+        the three- or four-letter tag assigned to your content type. 
         This tag will be part of the template filename.
       </para>
       
@@ -1330,7 +1371,8 @@ skip-networking
 
       <para>
         <command>global/banner.html.tmpl</command>:
-        This contains the "banner", the part of the header that appears
+        This contains the <quote>banner</quote>, the part of the header
+        that appears
         at the top of all Bugzilla pages.  The default banner is reasonably
         barren, so you'll probably want to customise this to give your
         installation a distinctive look and feel.  It is recommended you
@@ -1379,35 +1421,43 @@ skip-networking
       <para>
         <command>bug/create/create.html.tmpl</command> and
         <command>bug/create/comment.txt.tmpl</command>:
-        You may wish to get bug submitters to give certain bits of structured
-        information, each in a separate input widget, for which there is not a
-        field in the database. The bug entry system has been designed in an
-        extensible fashion to enable you to define arbitrary fields and widgets,
-        and have their values appear formatted in the initial
-        Description, rather than in database fields. An example of this
-        is the mozilla.org 
-        <ulink url="http://bugzilla.mozilla.org/enter_bug.cgi?format=guided">guided 
-        bug submission form</ulink>.
+        You may not wish to go to the effort of creating custom fields in
+        Bugzilla, yet you want to make sure that each bug report contains
+        a number of pieces of important information for which there is not
+        a special field. The bug entry system has been designed in an
+        extensible fashion to enable you to add arbitrary HTML widgets,
+        such as drop-down lists or textboxes, to the bug entry page
+        and have their values appear formatted in the initial comment.
       </para>
+      
+      <para>  
+        An example of this is the mozilla.org 
+        <ulink url="http://landfill.bugzilla.org/bugzilla-tip/enter_bug.cgi?product=WorldControl&amp;format=guided">guided 
+        bug submission form</ulink>. The code for this comes with the Bugzilla
+        distribution as an example for you to copy. It can be found in the
+        files 
+        <filename>create-guided.html.tmpl</filename> and
+        <filename>comment-guided.html.tmpl</filename>.
+      </para>  
 
       <para>
-        To make this work, create a custom template for 
-        <filename>enter_bug.cgi</filename> (the default template, on which you
-        could base it, is <filename>create.html.tmpl</filename>),
-        and either call it <filename>create.html.tmpl</filename> or use a format and
-        call it <filename>create-&lt;formatname&gt;.html.tmpl</filename>.
-        Put it in the <filename class="directory">custom/bug/create</filename>
-        directory. In it, add widgets for each piece of information you'd like
+        So to use this feature, create a custom template for 
+        <filename>enter_bug.cgi</filename>. The default template, on which
+        you could base it, is 
+        <filename>custom/bug/create/create.html.tmpl</filename>.
+        Call it <filename>create-&lt;formatname&gt;.html.tmpl</filename>,
+        and in it, add widgets for each piece of information you'd like
         collected - such as a build number, or set of steps to reproduce.
       </para>
 
       <para>
         Then, create a template like 
-        <filename>custom/bug/create/comment.txt.tmpl</filename>, also named
-        after your format if you are using one, which
-        references the form fields you have created. When a bug report is
-        submitted, the initial comment attached to the bug report will be
-        formatted according to the layout of this template.
+        <filename>custom/bug/create/comment.txt.tmpl</filename>, and call it 
+        <filename>comment-&lt;formatname&gt;.txt.tmpl</filename>. This 
+        template should reference the form fields you have created using
+        the syntax <filename>[% form.&lt;fieldname&gt; %]</filename>. When a 
+        bug report is submitted, the initial comment attached to the bug
+        report will be formatted according to the layout of this template.
       </para> 
 
       <para>

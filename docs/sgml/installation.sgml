@@ -1122,6 +1122,10 @@
       non-English-speaking Bugzilla sites, I suggest changing 
       <quote>ISO-8859-1</quote>, above, to 
       <quote>UTF-8</quote>.</para>
+      
+      <para>Note: using &lt;meta&gt; tags to set the charset is not
+      recommended, as there's a bug in Netscape 4.x which causes pages
+      marked up in this way to load twice.</para>
     </section>    
     
     <section id="htaccess" xreflabel=".htaccess files and security">
@@ -1236,25 +1240,40 @@
   <section id="win32" xreflabel="Win32 Installation Notes">
     <title>Win32 Installation Notes</title>
 
-    <para>This section covers installation on Microsoft Windows 95, 98, ME,
-    NT, and 2000. Bugzilla works fine on Win32 platforms, but please remember
-    that the Bugzilla team and the author of the Guide neither endorse nor
-    support installation on Microsoft Windows. Bugzilla installs and runs 
-    <emphasis>best</emphasis>
-
-    and 
-    <emphasis>easiest</emphasis>
-
-    on UNIX-like operating systems, and that is the way it will stay for the
-    foreseeable future. The Bugzilla team is considering supporting Win32 for
-    the 2.16 release and later.</para>
-
-    <para>The easiest way to install Bugzilla on Intel-archiecture machines
+    <para>This section covers installation on Microsoft Windows. 
+    Bugzilla has been made to work on Win32 platforms, but the Bugzilla team
+    wish to emphasise that The easiest way to install Bugzilla on
+    Intel-archiecture machines
     is to install some variant of GNU/Linux, then follow the UNIX
     installation instructions in this Guide. If you have any influence in the
     platform choice for running this system, please choose GNU/Linux instead
     of Microsoft Windows.</para>
 
+    <warning>
+      <para>After that warning, here's the situation for 2.16
+      and Windows. It doesn't work at all out of the box. 
+      You are almost certainly better off getting
+      the 2.17 version from CVS (after consultation with the Bugzilla Team to
+      make sure you are pulling on a stable day) because we'll be doing a load
+      of work to make the Win32 experience more pleasant than it is now.
+      </para>
+    </warning>
+
+    <para>
+    If you still want to try this, to have any hope of getting it to work,
+    you'll need to apply the 
+    <ulink url="">mail patch</ulink> from 
+    <ulink url="http://bugzilla.mozilla.org/show_bug.cgi?id=124174">bug 124174</ulink>.
+    After that, you'll need to read the (outdated) installation 
+    instructions below, some (probably a lot better) <ulink url="http://bugzilla.mozilla.org/attachment.cgi?id=84430&amp;action=view">more
+     recent ones</ulink> kindly provided by Toms Baugis and Jean-Sebastien 
+     Guay, and also check the 
+     <ulink url="http://www.bugzilla.org/releases/2.16/docs/win32.html">Bugzilla 2.16 Win32 update page
+     </ulink>. If we get time,
+     we'll write some better installation instructions for 2.16 and put
+     them up there. But no promises.
+    </para>
+    
     <section id="wininstall" xreflabel="Win32 Installation: Step-by-step">
       <title>Win32 Installation: Step-by-step</title>
 
@@ -2033,6 +2052,26 @@ binmode(STDOUT);
     problems.
     </para>
     
+    <section>
+      <title>Bundle::Bugzilla makes me upgrade to Perl 5.6.1</title>
+
+      <para>
+      Try executing <command>perl -MCPAN -e 'install CPAN'</command>
+      and then continuing.
+      </para>
+      
+      <para>
+      Certain older versions of the CPAN toolset were somewhat naive about how
+      to upgrade Perl modules. When a couple of modules got rolled into the core
+      Perl distribution for 5.6.1, CPAN thought that the best way to get those
+      modules up to date was to haul down the Perl distribution itself and
+      build it. Needless to say, this has caused headaches for just about
+      everybody. Upgrading to a newer version of CPAN with the
+      commandline above should fix things.
+      </para>
+    </section>
+
+
     <section>
       <title>DBD::Sponge::db prepare failed</title>
       

@@ -104,7 +104,10 @@
     management, chip design and development problem tracking (both
     pre-and-post fabrication), and software and hardware bug tracking for
     luminaries such as Redhat, NASA, Linux-Mandrake, and VA Systems.
-    Combined with systems such as CVS, Bonsai, or Perforce SCM, Bugzilla
+    Combined with systems such as 
+    <ulink url="http://www.cvshome.org">CVS</ulink>, 
+    <ulink url="http://www.mozilla.org/bonsai.html">Bonsai</ulink>, or 
+    <ulink url="http://www.perforce.com">Perforce SCM</ulink>, Bugzilla
     provides a powerful, easy-to-use solution to configuration management and
     replication problems.</para>
 

@@ -13,9 +13,8 @@
   <section id="rhbugzilla" xreflabel="Red Hat Bugzilla">
     <title>Red Hat Bugzilla</title>
 
-    <para>Red Hat Bugzilla is probably the most popular Bugzilla, after
-    Bugzilla itself, on the planet. One of the major benefits of Red Hat
-    Bugzilla is the ability
+    <para>Red Hat Bugzilla is a fork of Bugzilla 2.8. 
+    One of its major benefits is the ability
     to work with Oracle, MySQL, and PostGreSQL databases serving as the
     back-end, instead of just MySQL. Dave Lawrence of Red Hat is 
     active in the Bugzilla community, and we hope to see a reunification
@@ -49,7 +48,7 @@
     <title>Scarab</title>
 
     <para>Scarab is a new open source bug-tracking system built using Java
-    Serlet technology. It is currently at version 1.0 beta 7.</para>
+    Serlet technology. It is currently at version 1.0 beta 8.</para>
 
     <para>URL: 
     <ulink url="http://scarab.tigris.org/">http://scarab.tigris.org</ulink>

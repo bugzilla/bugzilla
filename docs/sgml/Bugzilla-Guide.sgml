@@ -82,16 +82,6 @@ try to avoid clutter and feel free to waste space in the code to make it more re
 	      organizations around the world, tracking millions of bugs.
       </para>
 
-      <para>
-      <warning>
-      <para>IMPORTANT: this documentation is currently being
-      updated for the Bugzilla 2.16 release and is in an unusual state of
-      flux. Even more than normal, don't believe everything,
-      or even anything, you read.
-      </para>
-      </warning>
-      </para>
-      
       <para>  
 	      This documentation is maintained in DocBook 4.1.2 XML format.
         Changes are best submitted as plain text or SGML diffs, attached

@@ -138,11 +138,9 @@
           <entry>Code Example</entry>
 
           <entry>
-            <programlisting>
-<sgmltag class="starttag">para</sgmltag>
+            <programlisting><sgmltag class="starttag">para</sgmltag>
 Beginning and end of paragraph
-<sgmltag class="endtag">para</sgmltag>
-            </programlisting>
+<sgmltag class="endtag">para</sgmltag></programlisting>
           </entry>
         </row>
       </tbody>

@@ -8,7 +8,7 @@
 
     <para>This section contains information for end-users of Bugzilla. 
     There is a Bugzilla test installation, called 
-    <ulink url="http://landfill.tequilarista.org/">Landfill</ulink>, 
+    <ulink url="http://landfill.bugzilla.org/">Landfill</ulink>, 
     which you are welcome to play with (if it's up.) 
     However, it does not necessarily
     have all Bugzilla features enabled, and often runs cutting-edge versions
@@ -22,8 +22,8 @@
       Consult with the administrator responsible for your installation of
       Bugzilla for the URL you should use to access it. If you're
       test-driving Bugzilla, use this URL: 
-      <ulink url="http://landfill.tequilarista.org/bugzilla-tip/">
-      http://landfill.tequilarista.org/bugzilla-tip/</ulink>
+      <ulink url="http://landfill.bugzilla.org/bugzilla-tip/">
+      http://landfill.bugzilla.org/bugzilla-tip/</ulink>
       </para>
 
       <orderedlist>
@@ -69,7 +69,7 @@
       <para>The core of Bugzilla is the screen which displays a particular
       bug. It's a good place to explain some Bugzilla concepts. 
       <ulink
-      url="http://landfill.tequilarista.org/bugzilla-tip/show_bug.cgi?id=1">
+      url="http://landfill.bugzilla.org/bugzilla-tip/show_bug.cgi?id=1">
       Bug 1 on Landfill</ulink>
 
       is a good example. Note that the labels for most fields are hyperlinks;
@@ -269,8 +269,8 @@
       <para>The Bugzilla Search page is is the interface where you can find
       any bug report, comment, or patch currently in the Bugzilla system. You
       can play with it here: 
-      <ulink url="http://landfill.tequilarista.org/bugzilla-tip/query.cgi">
-      landfill.tequilarista.org/bugzilla-tip/query.cgi</ulink>
+      <ulink url="http://landfill.bugzilla.org/bugzilla-tip/query.cgi">
+      landfill.bugzilla.org/bugzilla-tip/query.cgi</ulink>
 
       .</para>
 
@@ -282,7 +282,7 @@
       <para>Highly advanced querying is done using Boolean Charts, which have
       their own 
       <ulink
-      url="http://landfill.tequilarista.org/bugzilla-tip/booleanchart.html">
+      url="http://landfill.bugzilla.org/bugzilla-tip/booleanchart.html">
       context-sensitive help</ulink>
 
       .</para>
@@ -339,7 +339,7 @@
       <para>Years of bug writing experience has been distilled for your
       reading pleasure into the 
       <ulink
-      url="http://landfill.tequilarista.org/bugzilla-tip/bugwritinghelp.html">
+      url="http://landfill.bugzilla.org/bugzilla-tip/bugwritinghelp.html">
       Bug Writing Guidelines</ulink>. 
       While some of the advice is Mozilla-specific, the basic principles of
       reporting Reproducible, Specific bugs, isolating the Product you are
@@ -353,11 +353,11 @@
       <orderedlist>
         <listitem>
           <para>Go to 
-          <ulink url="http://landfill.tequilarista.org/bugzilla-tip/">
+          <ulink url="http://landfill.bugzilla.org/bugzilla-tip/">
           Landfill</ulink>
           in your browser and click 
           <ulink
-          url="http://landfill.tequilarista.org/bugzilla-tip/enter_bug.cgi">
+          url="http://landfill.bugzilla.org/bugzilla-tip/enter_bug.cgi">
           Enter a new bug report</ulink>.
           </para>
         </listitem>

@@ -153,6 +153,10 @@ Konqueror 3.2
 
 *** Bug fixes of note ***
 
+- Bug 276907 Prevent URLs with javascript: and data: URI schemes from getting
+  linked in the URL field on the show_bug.cgi page, to prevent people from
+  abusing it.
+
 - bug 253088 Users with bless permissions but without the "editusers"
   privilege can now successfully use editusers.cgi.
 

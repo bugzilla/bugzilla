@@ -79,7 +79,7 @@
 #     add more MySQL-related checks                    --MYSQL--
 #     change table definitions                         --TABLE--
 #     add more groups                                  --GROUPS--
-#     create initial administrator account             --ADMIN--
+#     create initial administrator account            --ADMIN--
 #
 # Note: sometimes those special comments occur more then once. For
 # example, --LOCAL-- is at least 3 times in this code!  --TABLE--
@@ -94,6 +94,9 @@
 use diagnostics;
 use strict;
 
+#
+# This are the --LOCAL-- variables defined in 'localconfig'
+# 
 # 12/17/00 justdave@syndicomm.com - removed declarations of the localconfig
 # variables from this location.  We don't want these declared here.  They'll
 # automatically get declared in the process of reading in localconfig, and
@@ -120,8 +123,8 @@ sub trim {
 #
 
 print "\nChecking perl modules ...\n";
-unless (eval "require 5.005") {
-    die "Sorry, you need at least Perl 5.005\n";
+unless (eval "require 5.004") {
+    die "Sorry, you need at least Perl 5.004\n";
 }
 
 # vers_cmp is adapted from Sort::Versions 1.3 1996/07/11 13:37:00 kjahds,
@@ -189,9 +192,6 @@ unless (have_vers("DBI","1.13"))          { push @missing,"DBI" }
 unless (have_vers("Data::Dumper",0))      { push @missing,"Data::Dumper" }
 unless (have_vers("DBD::mysql","1.2209")) { push @missing,"DBD::mysql" }
 unless (have_vers("Date::Parse",0))       { push @missing,"Date::Parse" }
-unless (have_vers("AppConfig","1.52"))    { push @missing,"AppConfig" }
-unless (have_vers("Template","2.01"))     { push @missing,"Template" }
-unless (have_vers("Text::Wrap","2001.0131")) { push @missing,"Text::Wrap" }
 
 # If CGI::Carp was loaded successfully for version checking, it changes the
 # die and warn handlers, we don't want them changed, so we need to stash the
@@ -282,25 +282,6 @@ sub LocalVar ($$)
 # Set up the defaults for the --LOCAL-- variables below:
 #
 
-my $mysql_binaries = `which mysql`;
-if ($mysql_binaries =~ /no mysql/) {
-    # If which didn't find it, just provide a reasonable default
-    $mysql_binaries = "/usr/bin";
-} else {
-    $mysql_binaries =~ s:/mysql\n$::;
-}
-
-LocalVar('mysqlpath', <<"END");
-#
-# In order to do certain functions in Bugzilla (such as sync the shadow
-# database), we require the MySQL Binaries (mysql, mysqldump, and mysqladmin).
-# Because it's possible that these files aren't in your path, you can specify
-# their location here.
-# Please specify only the directory name, with no trailing slash.
-\$mysqlpath = "$mysql_binaries";
-END
-
-
 LocalVar('create_htaccess', <<'END');
 #
 # If you are using Apache for your web server, Bugzilla can create .htaccess
@@ -310,8 +291,6 @@ LocalVar('create_htaccess', <<'END');
 # installation is in must be within the jurisdiction of a <Directory> block
 # in the httpd.conf file that has 'AllowOverride Limit' in it.  If it has
 # 'AllowOverride All' or other options with Limit, that's fine.
-# (Older Apache installations may use an access.conf file to store these
-# <Directory> blocks.)
 # If this is set to 1, Bugzilla will create these files if they don't exist.
 # If this is set to 0, Bugzilla will not create these files.
 $create_htaccess = 1;
@@ -400,7 +379,7 @@ LocalVar('opsys', '
         "Windows 95",
         "Windows 98",
         "Windows ME",  # Millenium Edition (upgrade of 98)
-        "Windows 2000",
+	"Windows 2000",
         "Windows NT",
         "Mac System 7",
         "Mac System 7.5",
@@ -408,8 +387,7 @@ LocalVar('opsys', '
         "Mac System 8.0",
         "Mac System 8.5",
         "Mac System 8.6",
-        "Mac System 9.x",
-        "MacOS X",
+	"Mac System 9.0",
         "Linux",
         "BSDI",
         "FreeBSD",
@@ -489,7 +467,7 @@ my @my_opsys = @{*{$main::{'opsys'}}{ARRAY}};
 
 unless (-d 'data') {
     print "Creating data directory ...\n";
-    # permissions for non-webservergroup are fixed later on
+	# permissions for non-webservergroup are fixed later on
     mkdir 'data', 0770; 
     mkdir 'data/mimedump-tmp', 01777; 
     open FILE, '>>data/comments'; close FILE;
@@ -503,7 +481,7 @@ unless (-d 'data') {
 # a Bugzilla with the old data format, and so upgrade their data files.
 unless (-d 'graphs') {
     print "Creating graphs directory...\n";
-    # permissions for non-webservergroup are fixed later on
+	# permissions for non-webservergroup are fixed later on
     mkdir 'graphs', 0770; 
     # Upgrade data format
     foreach my $in_file (glob("data/mining/*"))
@@ -591,7 +569,7 @@ if ($my_create_htaccess) {
     open HTACCESS, ">.htaccess";
     print HTACCESS <<'END';
 # don't allow people to retrieve non-cgi executable files or our private data
-<FilesMatch ^(.*\.pl|localconfig|processmail|syncshadowdb|runtests.sh)$>
+<FilesMatch ^(.*\.pl|localconfig|processmail|syncshadowdb)$>
   deny from all
 </FilesMatch>
 END
@@ -683,7 +661,7 @@ unlink "data/versioncache";
 
 # These are the files which need to be marked executable
 my @executable_files = ('processmail', 'whineatnews.pl', 'collectstats.pl',
-   'checksetup.pl', 'syncshadowdb', 'importxml.pl', 'runtests.sh');
+   'checksetup.pl', 'syncshadowdb', 'importxml.pl');
 
 # tell me if a file is executable.  All CGI files and those in @executable_files
 # are executable
@@ -713,10 +691,10 @@ sub fixPerms {
       if (!(-d $file)) {
         # check if the file is executable.
         if (isExecutableFile($file)) {
-          #printf ("Changing $file to %o",$exeperm);
+	  #printf ("Changing $file to %o",$exeperm);
           chmod $exeperm, $file;
         } else {
-          #print ("Changing $file to %o", $normperm);
+	  #print ("Changing $file to %o", $normperm);
           chmod $normperm, $file;
         }
       }
@@ -860,7 +838,6 @@ my %table;
 
 $table{bugs_activity} = 
    'bug_id mediumint not null,
-    attach_id mediumint null,
     who mediumint not null,
     bug_when datetime not null,
     fieldid mediumint not null,
@@ -882,32 +859,9 @@ $table{attachments} =
     filename mediumtext not null,
     thedata longblob not null,
     submitter_id mediumint not null,
-    isobsolete tinyint not null default 0, 
 
     index(bug_id),
     index(creation_ts)';
-
-# 2001-05-05 myk@mozilla.org: Tables to support the attachment tracker.
-# "attachstatuses" stores one record for each status on each attachment.
-# "attachstatusdefs" defines the statuses that can be set on attachments.
-# Note: These tables are only used if the parameter "useattachmenttracker"
-# is turned on via editparameters.cgi.
-
-$table{attachstatuses} =
-   '
-     attach_id    MEDIUMINT    NOT NULL , 
-     statusid     SMALLINT     NOT NULL , 
-     PRIMARY KEY(attach_id, statusid) 
-   ';
-
-$table{attachstatusdefs} =
-   '
-     id           SMALLINT     NOT NULL  PRIMARY KEY , 
-     name         VARCHAR(50)  NOT NULL , 
-     description  MEDIUMTEXT   NULL , 
-     sortkey      SMALLINT     NOT NULL  DEFAULT 0 , 
-     product      VARCHAR(64)  NOT NULL 
-   ';
 
 #
 # Apostrophe's are not supportied in the enum types.
@@ -1038,7 +992,7 @@ $table{logincookies} =
    'cookie mediumint not null auto_increment primary key,
     userid mediumint not null,
     cryptpassword varchar(34),
-    hostname varchar(128),
+    ipaddr varchar(40) NOT NULL,
     lastused timestamp,
 
     index(lastused)';
@@ -1340,8 +1294,6 @@ AddFDef("attachments.description", "Attachment description", 0);
 AddFDef("attachments.thedata", "Attachment data", 0);
 AddFDef("attachments.mimetype", "Attachment mime type", 0);
 AddFDef("attachments.ispatch", "Attachment is patch", 0);
-AddFDef("attachments.isobsolete", "Attachment is obsolete", 0);
-AddFDef("attachstatusdefs.name", "Attachment Status", 0);
 AddFDef("target_milestone", "Target Milestone", 0);
 AddFDef("delta_ts", "Last changed date", 0);
 AddFDef("(to_days(now()) - to_days(bugs.delta_ts))", "Days since bug changed",
@@ -1489,23 +1441,6 @@ if ($sth->rows == 0) {
   my $pass2 = "*";
   my $admin_ok = 0;
   my $admin_create = 1;
-  my $mailcheckexp = "";
-  my $mailcheck    = ""; 
-
-  # Here we look to see what the emailregexp is set to so we can 
-  # check the email addy they enter. Bug 96675. If they have no 
-  # params (likely but not always the case), we use the default.
-  if (-e "data/params") { 
-    require "data/params"; # if they have a params file, use that
-  }
-  if ($::params{emailregexp}) {
-    $mailcheckexp = $::params{emailregexp};
-    $mailcheck    = $::params{emailregexpdesc};
-  } else {
-    $mailcheckexp = '^[^@]+@[^@]+\\.[^@]+$';
-    $mailcheck    = 'A legal address must contain exactly one \'@\', 
-      and at least one \'.\' after the @.';
-  }
 
   print "\nLooks like we don't have an administrator set up yet.  Either this is your\n";
   print "first time using Bugzilla, or your administrator's privs might have accidently\n";
@@ -1517,11 +1452,6 @@ if ($sth->rows == 0) {
       chomp $login;
       if(! $login ) {
         print "\nYou DO want an administrator, don't you?\n";
-      }
-      unless ($login =~ /$mailcheckexp/) {
-        print "\nThe login address is invalid:\n";
-        print "$mailcheck\n";
-        die "Please try again\n";
       }
     }
     $login = $dbh->quote($login);
@@ -2329,29 +2259,29 @@ if ( CountIndexes('keywords') != 3 ) {
 $sth = $dbh->prepare("SELECT count(*) from duplicates");
 $sth->execute();
 if (!($sth->fetchrow_arrayref()->[0])) {
-        # populate table
-        print("Populating duplicates table...\n");
+	# populate table
+	print("Populating duplicates table...\n");
+	
+	$sth = $dbh->prepare("SELECT longdescs.bug_id, thetext FROM longdescs left JOIN bugs using(bug_id) WHERE (thetext " . 
+	        "regexp '[.*.]{3,3} This bug has been marked as a duplicate of [[:digit:]]{1,5} [.*.]{3,3}') AND (resolution = 'DUPLICATE') ORDER" .
+			" BY longdescs.bug_when");
+	$sth->execute();
 
-        $sth = $dbh->prepare("SELECT longdescs.bug_id, thetext FROM longdescs left JOIN bugs using(bug_id) WHERE (thetext " . 
-                "regexp '[.*.]{3,3} This bug has been marked as a duplicate of [[:digit:]]{1,5} [.*.]{3,3}') AND (resolution = 'DUPLICATE') ORDER" .
-                        " BY longdescs.bug_when");
-        $sth->execute();
+	my %dupes;
+	my $key;
+	
+	# Because of the way hashes work, this loop removes all but the last dupe
+	# resolution found for a given bug.
+	while (my ($dupe, $dupe_of) = $sth->fetchrow_array()) {
+		$dupes{$dupe} = $dupe_of;
+	}
 
-        my %dupes;
-        my $key;
-
-        # Because of the way hashes work, this loop removes all but the last dupe
-        # resolution found for a given bug.
-        while (my ($dupe, $dupe_of) = $sth->fetchrow_array()) {
-                $dupes{$dupe} = $dupe_of;
-        }
-
-        foreach $key (keys(%dupes))
-        {
-                $dupes{$key} =~ s/.*\*\*\* This bug has been marked as a duplicate of (\d{1,5}) \*\*\*.*?/$1/sm;
-                $dbh->do("INSERT INTO duplicates VALUES('$dupes{$key}', '$key')");
-                #                                        BugItsADupeOf   Dupe
-        }
+	foreach $key (keys(%dupes))
+	{
+		$dupes{$key} =~ s/.*\*\*\* This bug has been marked as a duplicate of (\d{1,5}) \*\*\*.*?/$1/sm;
+		$dbh->do("INSERT INTO duplicates VALUES('$dupes{$key}', '$key')");
+		#					 BugItsADupeOf   Dupe
+	}
 }
 
 # 2000-12-18.  Added an 'emailflags' field for storing preferences about
@@ -2392,12 +2322,6 @@ unless (-d 'data/duplicates') {
 #
 AddField('groups', 'isactive', 'tinyint not null default 1');
 
-#
-# 2001-06-15 myk@mozilla.org:
-# isobsolete determines whether or not an attachment is pertinent/relevant/valid.
-#
-AddField('attachments', 'isobsolete', 'tinyint not null default 0');
-
 # 2001-04-29 jake@acutex.net - Remove oldemailtech
 #   http://bugzilla.mozilla.org/show_bugs.cgi?id=71552
 if (-d 'shadow') {
@@ -2424,19 +2348,19 @@ installation has many users.
 ENDTEXT
 
     # Re-crypt everyone's password.
-    my $sth = $dbh->prepare("SELECT userid, password FROM profiles");
-    $sth->execute();
+	  my $sth = $dbh->prepare("SELECT userid, password FROM profiles");
+	  $sth->execute();
 
     my $i = 1;
 
     print "Fixing password #1... ";
-    while (my ($userid, $password) = $sth->fetchrow_array()) {
+	  while (my ($userid, $password) = $sth->fetchrow_array()) {
         my $cryptpassword = $dbh->quote(Crypt($password));
         $dbh->do("UPDATE profiles SET cryptpassword = $cryptpassword WHERE userid = $userid");
         ++$i;
         # Let the user know where we are at every 500 records.
         print "$i... " if !($i%500);
-    }
+	  }
     print "$i... Done.\n";
 
     # Drop the plaintext password field and resize the cryptpassword field.
@@ -2546,10 +2470,17 @@ AddField("bugs", "assignee_accessible", "tinyint not null default 1");
 AddField("bugs", "qacontact_accessible", "tinyint not null default 1");
 AddField("bugs", "cclist_accessible", "tinyint not null default 1");
 
-# 2001-08-21 myk@mozilla.org bug84338:
-# Add a field for the attachment ID to the bugs_activity table, so installations
-# using the attachment manager can record changes to attachments.
-AddField("bugs_activity", "attach_id", "mediumint null");
+# 2002-03-15 bbaetz@student.usyd.edu.au - bug 129466; 
+# 2002-05-13 2_14_1-BRANCH backport - preed@sigkill.com
+# Use the ip, not the hostname, in the logincookies table
+if (GetFieldDef("logincookies", "hostname")) {
+    # We've changed what we match against, so all entries are now invalid
+    $dbh->do("DELETE FROM logincookies");
+
+    # Now update the logincookies schema
+    DropField("logincookies", "hostname");
+    AddField("logincookies", "ipaddr", "varchar(40) NOT NULL");
+}
 
 # If you had to change the --TABLE-- definition in any way, then add your
 # differential change code *** A B O V E *** this comment.

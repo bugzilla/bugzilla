@@ -374,6 +374,13 @@
             security implications. Even if you give read-only access to the
             bugs database it will bypass the secure bugs features of Bugzilla.
 	  </para>
+          <note>
+            <para>
+              Bugzilla's current development versions can do a lot more in the
+              way of reporting. To see examples, check out
+              <ulink url="http://bugzilla.mozilla.org/report.cgi"/>.
+            </para>
+          </note>
 	</answer>
       </qandaentry>
 
@@ -1114,22 +1121,6 @@
 	    The most likely cause is a very old browser or a browser that is
 	    incompatible with file upload via POST.  Download the latest Netscape,
 	    Microsoft, or Mozilla browser to handle uploads correctly.
-	  </para>
-	</answer>
-      </qandaentry>
-
-      <qandaentry>
-	<question id="faq-use-attachments">
-	  <para>
-	    Email submissions to Bugzilla that have attachments end up asking me to
-	    save it as a "cgi" file.
-	  </para>
-	</question>
-	<answer>
-	  <para>
-	    Yup.  Just rename it once you download it, or save it under a different
-	    filename.  This will not be fixed anytime soon, because it would
-	    cripple some other functionality.
 	  </para>
 	</answer>
       </qandaentry>

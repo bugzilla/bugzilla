@@ -3519,7 +3519,9 @@ WIDTH="100%"
 COLOR="#000000"
 ><PRE
 CLASS="programlisting"
->Options ExecCGI<br>AllowOverride Limit</PRE
+>&#13;Options ExecCGI
+AllowOverride Limit
+      </PRE
 ></FONT
 ></TD
 ></TR
@@ -9411,8 +9413,12 @@ CLASS="QUOTE"
 >"[Bug XXXX]"</SPAN
 >, 
     and you can have CVS check-in comments append to your Bugzilla bug. If
-    you have your check-in script include an @resolution field, you can even
-    change the Bugzilla bug state.</P
+    you  want to have the bug be closed automatically, you'll have to modify
+    the <TT
+CLASS="filename"
+>contrib/bugzilla_email_append.pl</TT
+> script.
+    </P
 ><P
 >There is also a CVSZilla project, based upon somewhat dated 
     Bugzilla code, to integrate CVS and Bugzilla through CVS' ability to 
@@ -9499,64 +9505,64 @@ HREF="#faq-general"
 ><DL
 ><DT
 >A.1.1. <A
-HREF="#AEN1723"
+HREF="#AEN1724"
 >&#13;	    Where can I find information about Bugzilla?</A
 ></DT
 ><DT
 >A.1.2. <A
-HREF="#AEN1729"
+HREF="#AEN1730"
 >&#13;	    What license is Bugzilla distributed under?
 	  </A
 ></DT
 ><DT
 >A.1.3. <A
-HREF="#AEN1735"
+HREF="#AEN1736"
 >&#13;	    How do I get commercial support for Bugzilla?
 	  </A
 ></DT
 ><DT
 >A.1.4. <A
-HREF="#AEN1742"
+HREF="#AEN1743"
 >&#13;	    What major companies or projects are currently using Bugzilla
 	    for bug-tracking?
 	  </A
 ></DT
 ><DT
 >A.1.5. <A
-HREF="#AEN1767"
+HREF="#AEN1768"
 >&#13;	    Who maintains Bugzilla?
 	  </A
 ></DT
 ><DT
 >A.1.6. <A
-HREF="#AEN1773"
+HREF="#AEN1774"
 >&#13;	    How does Bugzilla stack up against other bug-tracking databases?
 	  </A
 ></DT
 ><DT
 >A.1.7. <A
-HREF="#AEN1779"
+HREF="#AEN1780"
 >&#13;	    Why doesn't Bugzilla offer this or that feature or compatability
 	    with this other tracking software?
 	  </A
 ></DT
 ><DT
 >A.1.8. <A
-HREF="#AEN1786"
+HREF="#AEN1787"
 >&#13;	    Why MySQL?  I'm interested in seeing Bugzilla run on
 	    Oracle/Sybase/Msql/PostgreSQL/MSSQL.
 	  </A
 ></DT
 ><DT
 >A.1.9. <A
-HREF="#AEN1791"
+HREF="#AEN1792"
 >&#13;	    Why do the scripts say "/usr/bonsaitools/bin/perl" instead of
 	    "/usr/bin/perl" or something else?
 	  </A
 ></DT
 ><DT
 >A.1.10. <A
-HREF="#AEN1797"
+HREF="#AEN1798"
 >&#13;	    Is there an easy way to change the Bugzilla cookie name?
 	  </A
 ></DT
@@ -9571,41 +9577,41 @@ HREF="#faq-phb"
 ><DL
 ><DT
 >A.2.1. <A
-HREF="#AEN1807"
+HREF="#AEN1808"
 >&#13;	    Is Bugzilla web-based, or do you have to have specific software or
 	    a specific operating system on your machine?
 	  </A
 ></DT
 ><DT
 >A.2.2. <A
-HREF="#AEN1812"
+HREF="#AEN1813"
 >&#13;	    Can Bugzilla integrate with
 	    Perforce (SCM software)?
 	  </A
 ></DT
 ><DT
 >A.2.3. <A
-HREF="#AEN1817"
+HREF="#AEN1818"
 >&#13;	    Does Bugzilla allow the user to track multiple projects?
 	  </A
 ></DT
 ><DT
 >A.2.4. <A
-HREF="#AEN1822"
+HREF="#AEN1823"
 >&#13;	    If I am on many projects, and search for all bugs assigned to me, will
 	    Bugzilla list them for me and allow me to sort by project, severity etc?
 	  </A
 ></DT
 ><DT
 >A.2.5. <A
-HREF="#AEN1827"
+HREF="#AEN1828"
 >&#13;	    Does Bugzilla allow attachments (text, screenshots, URLs etc)? If yes,
 	    are there any that are NOT allowed?
 	  </A
 ></DT
 ><DT
 >A.2.6. <A
-HREF="#AEN1832"
+HREF="#AEN1833"
 >&#13;	    Does Bugzilla allow us to define our own priorities and levels? Do we
 	    have complete freedom to change the labels of fields and format of them, and
 	    the choice of acceptable values?
@@ -9613,35 +9619,35 @@ HREF="#AEN1832"
 ></DT
 ><DT
 >A.2.7. <A
-HREF="#AEN1839"
+HREF="#AEN1840"
 >&#13;	    Does Bugzilla provide any reporting features, metrics, graphs, etc? You
 	    know, the type of stuff that management likes to see. :)
 	  </A
 ></DT
 ><DT
 >A.2.8. <A
-HREF="#AEN1846"
+HREF="#AEN1847"
 >&#13;	    Is there email notification and if so, what do you see when you get an
 	    email?
 	  </A
 ></DT
 ><DT
 >A.2.9. <A
-HREF="#AEN1851"
+HREF="#AEN1852"
 >&#13;	    Can email notification be set up to send to multiple
 	    people, some on the To List, CC List, BCC List etc?
 	  </A
 ></DT
 ><DT
 >A.2.10. <A
-HREF="#AEN1856"
+HREF="#AEN1857"
 >&#13;	    Do users have to have any particular
 	    type of email application?
 	  </A
 ></DT
 ><DT
 >A.2.11. <A
-HREF="#AEN1863"
+HREF="#AEN1864"
 >&#13;	    Does Bugzilla allow data to be imported and exported? If I had outsiders
 	    write up a bug report using a MS Word bug template, could that template be
 	    imported into "matching" fields? If I wanted to take the results of a query
@@ -9650,28 +9656,28 @@ HREF="#AEN1863"
 ></DT
 ><DT
 >A.2.12. <A
-HREF="#AEN1871"
+HREF="#AEN1872"
 >&#13;	    Has anyone converted Bugzilla to another language to be used in other
 	    countries? Is it localizable?
 	  </A
 ></DT
 ><DT
 >A.2.13. <A
-HREF="#AEN1876"
+HREF="#AEN1877"
 >&#13;	    Can a user create and save reports? Can they do this in Word format?
 	    Excel format?
 	  </A
 ></DT
 ><DT
 >A.2.14. <A
-HREF="#AEN1881"
+HREF="#AEN1882"
 >&#13;	    Does Bugzilla have the ability to search by word, phrase, compound
 	    search?
 	  </A
 ></DT
 ><DT
 >A.2.15. <A
-HREF="#AEN1886"
+HREF="#AEN1887"
 >&#13;	     Does Bugzilla provide record locking when there is simultaneous access
 	    to the same bug? Does the second person get a notice that the bug is in use
 	    or how are they notified?
@@ -9679,19 +9685,19 @@ HREF="#AEN1886"
 ></DT
 ><DT
 >A.2.16. <A
-HREF="#AEN1891"
+HREF="#AEN1892"
 >&#13;	    Are there any backup features provided?
 	  </A
 ></DT
 ><DT
 >A.2.17. <A
-HREF="#AEN1897"
+HREF="#AEN1898"
 >&#13;	    Can users be on the system while a backup is in progress?
 	  </A
 ></DT
 ><DT
 >A.2.18. <A
-HREF="#AEN1902"
+HREF="#AEN1903"
 >&#13;	    What type of human resources are needed to be on staff to install and
 	    maintain Bugzilla? Specifically, what type of skills does the person need to
 	    have? I need to find out if we were to go with Bugzilla, what types of
@@ -9701,7 +9707,7 @@ HREF="#AEN1902"
 ></DT
 ><DT
 >A.2.19. <A
-HREF="#AEN1908"
+HREF="#AEN1909"
 >&#13;	    What time frame are we looking at if we decide to hire people to install
 	    and maintain the Bugzilla? Is this something that takes hours or weeks to
 	    install and a couple of hours per week to maintain and customize or is this
@@ -9711,7 +9717,7 @@ HREF="#AEN1908"
 ></DT
 ><DT
 >A.2.20. <A
-HREF="#AEN1913"
+HREF="#AEN1914"
 >&#13;	    Is there any licensing fee or other fees for using Bugzilla? Any
 	    out-of-pocket cost other than the bodies needed as identified above?
 	  </A
@@ -9727,20 +9733,20 @@ HREF="#faq-security"
 ><DL
 ><DT
 >A.3.1. <A
-HREF="#AEN1920"
+HREF="#AEN1921"
 >&#13;	    How do I completely disable MySQL security if it's giving me problems
 	    (I've followed the instructions in the installation section of this guide)?
 	  </A
 ></DT
 ><DT
 >A.3.2. <A
-HREF="#AEN1926"
+HREF="#AEN1927"
 >&#13;	    Are there any security problems with Bugzilla?
 	  </A
 ></DT
 ><DT
 >A.3.3. <A
-HREF="#AEN1931"
+HREF="#AEN1932"
 >&#13;	    I've implemented the security fixes mentioned in Chris Yeh's security
 	    advisory of 5/10/2000 advising not to run MySQL as root, and am running into
 	    problems with MySQL no longer working correctly.
@@ -9757,48 +9763,48 @@ HREF="#faq-email"
 ><DL
 ><DT
 >A.4.1. <A
-HREF="#AEN1938"
+HREF="#AEN1939"
 >&#13;	    I have a user who doesn't want to receive any more email from Bugzilla.
 	    How do I stop it entirely for this user?
 	  </A
 ></DT
 ><DT
 >A.4.2. <A
-HREF="#AEN1943"
+HREF="#AEN1944"
 >&#13;	    I'm evaluating/testing Bugzilla, and don't want it to send email to
 	    anyone but me. How do I do it?
 	  </A
 ></DT
 ><DT
 >A.4.3. <A
-HREF="#AEN1948"
+HREF="#AEN1949"
 >&#13;	    I want whineatnews.pl to whine at something more, or other than, only new
 	    bugs. How do I do it?
 	  </A
 ></DT
 ><DT
 >A.4.4. <A
-HREF="#AEN1954"
+HREF="#AEN1955"
 >&#13;	    I don't like/want to use Procmail to hand mail off to bug_email.pl.
 	    What alternatives do I have?
 	  </A
 ></DT
 ><DT
 >A.4.5. <A
-HREF="#AEN1961"
+HREF="#AEN1962"
 >&#13;	    How do I set up the email interface to submit/change bugs via email?
 	  </A
 ></DT
 ><DT
 >A.4.6. <A
-HREF="#AEN1966"
+HREF="#AEN1967"
 >&#13;	    Email takes FOREVER to reach me from Bugzilla -- it's extremely slow.
 	    What gives?
 	  </A
 ></DT
 ><DT
 >A.4.7. <A
-HREF="#AEN1973"
+HREF="#AEN1974"
 >&#13;	     How come email from Bugzilla changes never reaches me?
 	  </A
 ></DT
@@ -9813,39 +9819,39 @@ HREF="#faq-db"
 ><DL
 ><DT
 >A.5.1. <A
-HREF="#AEN1981"
+HREF="#AEN1982"
 >&#13;	    I've heard Bugzilla can be used with Oracle?
 	  </A
 ></DT
 ><DT
 >A.5.2. <A
-HREF="#AEN1986"
+HREF="#AEN1987"
 >&#13;	    I think my database might be corrupted, or contain invalid entries. What
 	    do I do?
 	  </A
 ></DT
 ><DT
 >A.5.3. <A
-HREF="#AEN1994"
+HREF="#AEN1995"
 >&#13;	    I want to manually edit some entries in my database. How?
 	  </A
 ></DT
 ><DT
 >A.5.4. <A
-HREF="#AEN1999"
+HREF="#AEN2000"
 >&#13;	    I try to add myself as a user, but Bugzilla always tells me my password is wrong.
 	  </A
 ></DT
 ><DT
 >A.5.5. <A
-HREF="#AEN2004"
+HREF="#AEN2005"
 >&#13;	    I think I've set up MySQL permissions correctly, but Bugzilla still can't
 	    connect.
 	  </A
 ></DT
 ><DT
 >A.5.6. <A
-HREF="#AEN2009"
+HREF="#AEN2010"
 >&#13;	    How do I synchronize bug information among multiple different Bugzilla
 	    databases?
 	  </A
@@ -9861,26 +9867,26 @@ HREF="#faq-nt"
 ><DL
 ><DT
 >A.6.1. <A
-HREF="#AEN2018"
+HREF="#AEN2019"
 >&#13;	    What is the easiest way to run Bugzilla on Win32 (Win98+/NT/2K)?
 	  </A
 ></DT
 ><DT
 >A.6.2. <A
-HREF="#AEN2023"
+HREF="#AEN2024"
 >&#13;	    Is there a "Bundle::Bugzilla" equivalent for Win32?
 	  </A
 ></DT
 ><DT
 >A.6.3. <A
-HREF="#AEN2028"
+HREF="#AEN2029"
 >&#13;	    CGI's are failing with a "something.cgi is not a valid Windows NT
 	    application" error. Why?
 	  </A
 ></DT
 ><DT
 >A.6.4. <A
-HREF="#AEN2036"
+HREF="#AEN2037"
 >&#13;	    I'm having trouble with the perl modules for NT not being able to talk to
 	    to the database.
 	  </A
@@ -9896,40 +9902,40 @@ HREF="#faq-use"
 ><DL
 ><DT
 >A.7.1. <A
-HREF="#AEN2057"
+HREF="#AEN2058"
 >&#13;	    How do I change my user name (email address) in Bugzilla?
 	  </A
 ></DT
 ><DT
 >A.7.2. <A
-HREF="#AEN2062"
+HREF="#AEN2063"
 >&#13;	    The query page is very confusing.  Isn't there a simpler way to query?
 	  </A
 ></DT
 ><DT
 >A.7.3. <A
-HREF="#AEN2067"
+HREF="#AEN2068"
 >&#13;	    I'm confused by the behavior of the "accept" button in the Show Bug form.
 	    Why doesn't it assign the bug to me when I accept it?
 	  </A
 ></DT
 ><DT
 >A.7.4. <A
-HREF="#AEN2077"
+HREF="#AEN2078"
 >&#13;	    I can't upload anything into the database via the "Create Attachment"
 	    link.  What am I doing wrong?
 	  </A
 ></DT
 ><DT
 >A.7.5. <A
-HREF="#AEN2082"
+HREF="#AEN2083"
 >&#13;	    Email submissions to Bugzilla that have attachments end up asking me to
 	    save it as a "cgi" file.
 	  </A
 ></DT
 ><DT
 >A.7.6. <A
-HREF="#AEN2087"
+HREF="#AEN2088"
 >&#13;	    How do I change a keyword in Bugzilla, once some bugs are using it?
 	  </A
 ></DT
@@ -9944,20 +9950,20 @@ HREF="#faq-hacking"
 ><DL
 ><DT
 >A.8.1. <A
-HREF="#AEN2094"
+HREF="#AEN2095"
 >&#13;	    What bugs are in Bugzilla right now?
 	  </A
 ></DT
 ><DT
 >A.8.2. <A
-HREF="#AEN2103"
+HREF="#AEN2104"
 >&#13;	    How can I change the default priority to a null value?  For instance, have the default
 	    priority be "---" instead of "P2"?
 	  </A
 ></DT
 ><DT
 >A.8.3. <A
-HREF="#AEN2109"
+HREF="#AEN2110"
 >&#13;	    What's the best way to submit patches?  What guidelines should I follow?
 	  </A
 ></DT
@@ -9977,7 +9983,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1723"
+NAME="AEN1724"
 ></A
 ><B
 >A.1.1. </B
@@ -10005,7 +10011,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1729"
+NAME="AEN1730"
 ></A
 ><B
 >A.1.2. </B
@@ -10034,7 +10040,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1735"
+NAME="AEN1736"
 ></A
 ><B
 >A.1.3. </B
@@ -10071,7 +10077,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1742"
+NAME="AEN1743"
 ></A
 ><B
 >A.1.4. </B
@@ -10181,7 +10187,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1767"
+NAME="AEN1768"
 ></A
 ><B
 >A.1.5. </B
@@ -10211,7 +10217,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1773"
+NAME="AEN1774"
 ></A
 ><B
 >A.1.6. </B
@@ -10249,7 +10255,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1779"
+NAME="AEN1780"
 ></A
 ><B
 >A.1.7. </B
@@ -10289,7 +10295,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1786"
+NAME="AEN1787"
 ></A
 ><B
 >A.1.8. </B
@@ -10315,7 +10321,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1791"
+NAME="AEN1792"
 ></A
 ><B
 >A.1.9. </B
@@ -10348,7 +10354,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1797"
+NAME="AEN1798"
 ></A
 ><B
 >A.1.10. </B
@@ -10410,7 +10416,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1807"
+NAME="AEN1808"
 ></A
 ><B
 >A.2.1. </B
@@ -10436,7 +10442,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1812"
+NAME="AEN1813"
 ></A
 ><B
 >A.2.2. </B
@@ -10462,7 +10468,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1817"
+NAME="AEN1818"
 ></A
 ><B
 >A.2.3. </B
@@ -10489,7 +10495,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1822"
+NAME="AEN1823"
 ></A
 ><B
 >A.2.4. </B
@@ -10514,7 +10520,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1827"
+NAME="AEN1828"
 ></A
 ><B
 >A.2.5. </B
@@ -10543,7 +10549,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1832"
+NAME="AEN1833"
 ></A
 ><B
 >A.2.6. </B
@@ -10580,7 +10586,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1839"
+NAME="AEN1840"
 ></A
 ><B
 >A.2.7. </B
@@ -10618,7 +10624,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1846"
+NAME="AEN1847"
 ></A
 ><B
 >A.2.8. </B
@@ -10645,7 +10651,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1851"
+NAME="AEN1852"
 ></A
 ><B
 >A.2.9. </B
@@ -10670,7 +10676,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1856"
+NAME="AEN1857"
 ></A
 ><B
 >A.2.10. </B
@@ -10729,7 +10735,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1863"
+NAME="AEN1864"
 ></A
 ><B
 >A.2.11. </B
@@ -10776,7 +10782,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1871"
+NAME="AEN1872"
 ></A
 ><B
 >A.2.12. </B
@@ -10804,7 +10810,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1876"
+NAME="AEN1877"
 ></A
 ><B
 >A.2.13. </B
@@ -10829,7 +10835,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1881"
+NAME="AEN1882"
 ></A
 ><B
 >A.2.14. </B
@@ -10855,7 +10861,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1886"
+NAME="AEN1887"
 ></A
 ><B
 >A.2.15. </B
@@ -10882,7 +10888,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1891"
+NAME="AEN1892"
 ></A
 ><B
 >A.2.16. </B
@@ -10912,7 +10918,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1897"
+NAME="AEN1898"
 ></A
 ><B
 >A.2.17. </B
@@ -10938,7 +10944,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1902"
+NAME="AEN1903"
 ></A
 ><B
 >A.2.18. </B
@@ -10973,7 +10979,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1908"
+NAME="AEN1909"
 ></A
 ><B
 >A.2.19. </B
@@ -11006,7 +11012,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1913"
+NAME="AEN1914"
 ></A
 ><B
 >A.2.20. </B
@@ -11040,7 +11046,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1920"
+NAME="AEN1921"
 ></A
 ><B
 >A.3.1. </B
@@ -11069,7 +11075,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1926"
+NAME="AEN1927"
 ></A
 ><B
 >A.3.2. </B
@@ -11097,7 +11103,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1931"
+NAME="AEN1932"
 ></A
 ><B
 >A.3.3. </B
@@ -11133,7 +11139,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1938"
+NAME="AEN1939"
 ></A
 ><B
 >A.4.1. </B
@@ -11159,7 +11165,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1943"
+NAME="AEN1944"
 ></A
 ><B
 >A.4.2. </B
@@ -11185,7 +11191,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1948"
+NAME="AEN1949"
 ></A
 ><B
 >A.4.3. </B
@@ -11217,7 +11223,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1954"
+NAME="AEN1955"
 ></A
 ><B
 >A.4.4. </B
@@ -11235,7 +11241,7 @@ CLASS="answer"
 	    You can call bug_email.pl directly from your aliases file, with
 	    an entry like this:
 	    <A
-NAME="AEN1958"
+NAME="AEN1959"
 ></A
 ><BLOCKQUOTE
 CLASS="BLOCKQUOTE"
@@ -11256,7 +11262,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1961"
+NAME="AEN1962"
 ></A
 ><B
 >A.4.5. </B
@@ -11281,7 +11287,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1966"
+NAME="AEN1967"
 ></A
 ><B
 >A.4.6. </B
@@ -11316,7 +11322,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1973"
+NAME="AEN1974"
 ></A
 ><B
 >A.4.7. </B
@@ -11356,7 +11362,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1981"
+NAME="AEN1982"
 ></A
 ><B
 >A.5.1. </B
@@ -11383,7 +11389,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1986"
+NAME="AEN1987"
 ></A
 ><B
 >A.5.2. </B
@@ -11430,7 +11436,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1994"
+NAME="AEN1995"
 ></A
 ><B
 >A.5.3. </B
@@ -11459,7 +11465,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN1999"
+NAME="AEN2000"
 ></A
 ><B
 >A.5.4. </B
@@ -11485,7 +11491,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN2004"
+NAME="AEN2005"
 ></A
 ><B
 >A.5.5. </B
@@ -11514,7 +11520,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN2009"
+NAME="AEN2010"
 ></A
 ><B
 >A.5.6. </B
@@ -11560,7 +11566,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN2018"
+NAME="AEN2019"
 ></A
 ><B
 >A.6.1. </B
@@ -11585,7 +11591,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN2023"
+NAME="AEN2024"
 ></A
 ><B
 >A.6.2. </B
@@ -11611,7 +11617,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN2028"
+NAME="AEN2029"
 ></A
 ><B
 >A.6.3. </B
@@ -11634,7 +11640,7 @@ CLASS="answer"
 ><P
 >&#13;	    Microsoft has some advice on this matter, as well:
 	    <A
-NAME="AEN2033"
+NAME="AEN2034"
 ></A
 ><BLOCKQUOTE
 CLASS="BLOCKQUOTE"
@@ -11659,7 +11665,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN2036"
+NAME="AEN2037"
 ></A
 ><B
 >A.6.4. </B
@@ -11736,7 +11742,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN2057"
+NAME="AEN2058"
 ></A
 ><B
 >A.7.1. </B
@@ -11761,7 +11767,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN2062"
+NAME="AEN2063"
 ></A
 ><B
 >A.7.2. </B
@@ -11787,7 +11793,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN2067"
+NAME="AEN2068"
 ></A
 ><B
 >A.7.3. </B
@@ -11842,7 +11848,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN2077"
+NAME="AEN2078"
 ></A
 ><B
 >A.7.4. </B
@@ -11869,7 +11875,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN2082"
+NAME="AEN2083"
 ></A
 ><B
 >A.7.5. </B
@@ -11896,7 +11902,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN2087"
+NAME="AEN2088"
 ></A
 ><B
 >A.7.6. </B
@@ -11930,7 +11936,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN2094"
+NAME="AEN2095"
 ></A
 ><B
 >A.8.1. </B
@@ -11976,7 +11982,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN2103"
+NAME="AEN2104"
 ></A
 ><B
 >A.8.2. </B
@@ -12008,7 +12014,7 @@ CLASS="qandaentry"
 CLASS="question"
 ><P
 ><A
-NAME="AEN2109"
+NAME="AEN2110"
 ></A
 ><B
 >A.8.3. </B
@@ -12206,7 +12212,7 @@ CLASS="section"
 ><HR><H2
 CLASS="section"
 ><A
-NAME="AEN2151"
+NAME="AEN2152"
 ></A
 >B.2.1. Bugzilla Database Basics</H2
 ><P
@@ -12322,7 +12328,7 @@ CLASS="section"
 ><HR><H3
 CLASS="section"
 ><A
-NAME="AEN2178"
+NAME="AEN2179"
 ></A
 >B.2.1.1. Bugzilla Database Tables</H3
 ><P
@@ -12876,7 +12882,7 @@ CLASS="glossdiv"
 ><H1
 CLASS="glossdiv"
 ><A
-NAME="AEN2257"
+NAME="AEN2258"
 ></A
 >0-9, high ascii</H1
 ><DL

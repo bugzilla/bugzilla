@@ -101,6 +101,7 @@ sub ShowError ($)
 sub PutTrailer (@)
 {
     my (@links) = ("Back to the <a href=\"./\">index</a>", @_);
+    SendSQL("UNLOCK TABLES");
 
     my $count = $#links;
     my $num = 0;
@@ -677,7 +678,6 @@ if (($action eq 'remove_all_regexp') || ($action eq 'remove_all')) {
              SET last_changed = NOW()
              WHERE id = ?");
     $sth->execute($gid);
-    $dbh->do("UNLOCK TABLES");
     PutTrailer("back to the <a href=\"editgroups.cgi\">group list</a>");
     exit;
 }

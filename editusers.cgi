@@ -209,6 +209,8 @@ sub EmitFormElements ($$$$)
 sub PutTrailer (@)
 {
     my (@links) = ("Back to the <a href=\"./\">index</a>");
+    SendSQL("UNLOCK TABLES");
+
     if($editall && Bugzilla::Auth->can_edit) {
           push(@links,
               "<a href=\"editusers.cgi?action=add\">add</a> a new user");

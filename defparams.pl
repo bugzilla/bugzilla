@@ -169,7 +169,7 @@ DefParam("usebuggroupsentry",
          0); 
 
 DefParam("shadowdb",
-         "If non-empty, then this is the name of another database in which Bugzilla will keep a shadow read-only copy of everything.  This is done so that long slow read-only operations can be used against this db, and not lock up things for everyone else.  Turning on this parameter will create the given database; be careful not to use the name of an existing database with useful data in it!",
+         "If non-empty, then this is the name of another database in which Bugzilla will keep a shadow read-only copy of everything.  This is done so that long slow read-only operations can be used against this db, and not lock up things for everyone else.  Turning on this parameter will create the given database; be careful not to use the name of an existing database with useful data in it! The db_user you defined in the localconfig file must already have permission to access and write to the new database name before entering the name here, or the database creation will fail.  The same permissions should be granted as for the primary database used by Bugzilla.",
          "t",
          "",
          \&check_shadowdb);

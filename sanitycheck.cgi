@@ -84,8 +84,7 @@ my $cgi = Bugzilla->cgi;
 UserInGroup("editbugs")
   || ThrowUserError("sanity_check_access_denied");
 
-print "Content-type: text/html\n";
-print "\n";
+print $cgi->header();
 
 my @row;
 

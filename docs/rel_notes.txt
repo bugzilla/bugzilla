@@ -1,17 +1,18 @@
-The 2.14.5 release fixes some minor security issues in 2.14.4.  Please
-see the upgrade procedure below for details on how to upgrade to 2.14.5.
+The 2.14.5 release fixes some security issues in 2.14.4.  Please see the
+upgrade procedure below for details on how to upgrade to 2.14.5.
 
-Regarding security issues, please note that the release of 2.16.2
-(simultaneous with 2.14.5) incorporates various rearchitectures
-that make failure-to-validate and failure-to-filter errors
-harder to insert and easier to spot.  In particular this means
-there may be holes in the 2.14 line that have not been
-discovered, yet are fixed in the 2.16 line.  If such holes exist
-they probably won't be fixed in 2.14 point releases, unless they
-are discovered.
+*** PLEASE NOTE ***: The Bugzilla team no longer supports the 2.14 branch.
+This is the last point release of 2.14, there will not be any more.   From
+this point onwards if any additional security holes are discovered, you
+will need to upgrade to a newer branch (i.e. 2.16.2 or later) or you will 
+be on your own in patching your installation. 
 
-There may be future point releases of 2.14, however support for
-2.14 will likely be dropped at some stage soon.
+Regarding security issues, please note that the 2.16 line (2.16.2 was 
+released simultaneous with 2.14.5) incorporates various rearchitectures 
+that make failure-to-validate and failure-to-filter errors harder to 
+insert and easier to spot.  In particular this means there may be holes 
+in the 2.14 line that have not been discovered, yet are fixed in the 
+2.16 line.
 
 **************************
 *** ABOUT THIS VERSION ***
@@ -33,8 +34,9 @@ problems with your installation.
 It is also recommended that if you can, you immediately fix
 any problems you find.  Be aware that if the sanity check page
 contains more errors after an upgrade, it doesn't necessarily
-mean there are more errors in your database, as it is likely
-they weren't being checked for in the old version.
+mean there are more errors in your database, as additional
+tests are added to the sanity check over time, and it is likely
+those errors weren't being checked for in the old version.
 
 Failure to do this may mean that bugzilla will not
 work correctly.
@@ -47,25 +49,22 @@ see the Bugzilla Guide for more information.
 
 *** Deprecated Features ***
 
-- The 2.16 line will possibly be the last stable release that will
-  work with MySQL version 3.22.  Soon Bugzilla will require at least
-  version 3.23.x.  The exact minimum version number required
-  has not yet been decided.
-  (bug 87958)
+- The 2.16 line is the last stable release that will work with
+  MySQL version 3.22.  Bugzilla in CVS requires at least 
+  version 3.23.6.  (bug 87958)
 
-- The 2.16 line will possibly be the last stable release to support
-  the shadow database.  The replacement (using MySQL's built in
-  replication) is not present in 2.14.4 or 2.16, but we expect
-  that very few sites use this feature, so we are not planning a
-  transition period.  If this would cause a
-  problem for you, please comment on the below bug.
-  (bug 124589)
+- The 2.16 line is the last stable release to support the
+  "shadow" database.  The replacement (using MySQL's built-in
+  replication) is not present in 2.14.5 or 2.16.2, but we
+  expect that very few sites use this feature, so we are not
+  planning a transition period.  If this would cause a problem
+  for you, please comment on the below bug.  (bug 124589)
 
-- Placing comments in localconfig is deprecated.  If you have done
-  this, they will likely get nuked with some post-2.16 version of
-  Bugzilla, as checksetup.pl will likely automatically rewrite localconfig
-  to automatically get the latest comments.
-  (bug 147776)
+- Placing comments in localconfig is deprecated.  If you have
+  done this, they will likely get nuked with some post-2.16
+  version of Bugzilla, as checksetup.pl will likely
+  automatically rewrite localconfig to automatically get the
+  latest instructional comments.  (bug 147776)
 
 *** Outstanding Issues Of Note ***
 

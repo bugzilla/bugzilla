@@ -22,8 +22,6 @@
 #                 Joe Robins <jmrobins@tgix.com>
 #                 Dave Miller <justdave@syndicomm.com>
 #                 Christopher Aillon <christopher@aillon.com>
-#                 Gervase Markham <gerv@gerv.net>
-#                 Christian Reis <kiko@async.com.br>
 
 # Contains some global routines used throughout the CGI scripts of Bugzilla.
 
@@ -42,6 +40,7 @@ use strict;
 
 sub CGI_pl_sillyness {
     my $zz;
+    $zz = %::FILENAME;
     $zz = %::MFORM;
     $zz = %::dontchange;
 }
@@ -98,33 +97,33 @@ sub ParseUrlString {
     my %isnull;
     my $remaining = $buffer;
     while ($remaining ne "") {
-        my $item;
-        if ($remaining =~ /^([^&]*)&(.*)$/) {
-            $item = $1;
-            $remaining = $2;
-        } else {
-            $item = $remaining;
-            $remaining = "";
-        }
+	my $item;
+	if ($remaining =~ /^([^&]*)&(.*)$/) {
+	    $item = $1;
+	    $remaining = $2;
+	} else {
+	    $item = $remaining;
+	    $remaining = "";
+	}
 
-        my $name;
-        my $value;
-        if ($item =~ /^([^=]*)=(.*)$/) {
-            $name = $1;
-            $value = url_decode($2);
-        } else {
-            $name = $item;
-            $value = "";
-        }
-        if ($value ne "") {
-            if (defined $f->{$name}) {
-                $f->{$name} .= $value;
-                my $ref = $m->{$name};
-                push @$ref, $value;
-            } else {
-                $f->{$name} = $value;
-                $m->{$name} = [$value];
-            }
+	my $name;
+	my $value;
+	if ($item =~ /^([^=]*)=(.*)$/) {
+	    $name = $1;
+	    $value = url_decode($2);
+	} else {
+	    $name = $item;
+	    $value = "";
+	}
+	if ($value ne "") {
+	    if (defined $f->{$name}) {
+		$f->{$name} .= $value;
+		my $ref = $m->{$name};
+		push @$ref, $value;
+	    } else {
+		$f->{$name} = $value;
+		$m->{$name} = [$value];
+	    }
         } else {
             $isnull{$name} = 1;
         }
@@ -147,63 +146,46 @@ sub ProcessFormFields {
 
 
 sub ProcessMultipartFormFields {
-    my ($boundary) = @_;
-
-    # Initialize variables that store whether or not we are parsing a header,
-    # the name of the part we are parsing, and its value (which is incomplete
-    # until we finish parsing the part).
-    my $inheader = 1;
-    my $fieldname = "";
-    my $fieldvalue = "";
-
-    # Read the input stream line by line and parse it into a series of parts,
-    # each one containing a single form field and its value and each one
-    # separated from the next by the value of $boundary.
+    my ($boundary) = (@_);
+    $boundary =~ s/^-*//;
     my $remaining = $ENV{"CONTENT_LENGTH"};
+    my $inheader = 1;
+    my $itemname = "";
+#    open(DEBUG, ">debug") || die "Can't open debugging thing";
+#    print DEBUG "Boundary is '$boundary'\n";
     while ($remaining > 0 && ($_ = <STDIN>)) {
         $remaining -= length($_);
-
-        # If the current input line is a boundary line, save the previous
-        # form value and reset the storage variables.
+#        print DEBUG "< $_";
         if ($_ =~ m/^-*$boundary/) {
-            if ( $fieldname ) {
-                chomp($fieldvalue);
-                $fieldvalue =~ s/\r$//;
-                if ( defined $::FORM{$fieldname} ) {
-                    $::FORM{$fieldname} .= $fieldvalue;
-                    push @{$::MFORM{$fieldname}}, $fieldvalue;
-                } else {
-                    $::FORM{$fieldname} = $fieldvalue;
-                    $::MFORM{$fieldname} = [$fieldvalue];
-                }
-            }
-
+#            print DEBUG "Entered header\n";
             $inheader = 1;
-            $fieldname = "";
-            $fieldvalue = "";
+            $itemname = "";
+            next;
+        }
 
-        # If the current input line is a header line, look for a blank line
-        # (meaning the end of the headers), a Content-Disposition header
-        # (containing the field name and, for uploaded file parts, the file 
-        # name), or a Content-Type header (containing the content type for 
-        # file parts).
-        } elsif ( $inheader ) {
+        if ($inheader) {
             if (m/^\s*$/) {
                 $inheader = 0;
-            } elsif (m/^Content-Disposition:\s*form-data\s*;\s*name\s*=\s*"([^\"]+)"/i) {
-                $fieldname = $1;
-                if (m/;\s*filename\s*=\s*"([^\"]+)"/i) {
-                    $::FILE{$fieldname}->{'filename'} = $1;
-                }
-            } elsif ( m|^Content-Type:\s*([^/]+/[^\s;]+)|i ) {
-                $::FILE{$fieldname}->{'contenttype'} = $1;
+#                print DEBUG "left header\n";
+                $::FORM{$itemname} = "";
             }
-
-        # If the current input line is neither a boundary line nor a header,
-        # it must be part of the field value, so append it to the value.
-        } else {
-          $fieldvalue .= $_;
+            if (m/^Content-Disposition:\s*form-data\s*;\s*name\s*=\s*"([^\"]+)"/i) {
+                $itemname = $1;
+#                print DEBUG "Found itemname $itemname\n";
+                if (m/;\s*filename\s*=\s*"([^\"]+)"/i) {
+                    $::FILENAME{$itemname} = $1;
+                }
+            }
+            
+            next;
         }
+        $::FORM{$itemname} .= $_;
+    }
+    delete $::FORM{""};
+    # Get rid of trailing newlines.
+    foreach my $i (keys %::FORM) {
+        chomp($::FORM{$i});
+        $::FORM{$i} =~ s/\r$//;
     }
 }
 
@@ -224,15 +206,8 @@ sub CheckFormField (\%$;\@) {
          (defined($legalsRef) && 
           lsearch($legalsRef, $formRef->{$fieldname})<0) ){
 
-        SendSQL("SELECT description FROM fielddefs WHERE name=" . SqlQuote($fieldname));
-        my $result = FetchOneColumn();
-        if ($result) {
-            PuntTryAgain("A legal $result was not set.");
-        }
-        else {
-            PuntTryAgain("A legal $fieldname was not set.");
-            print Param("browserbugmessage");
-        }
+        print "A legal $fieldname was not set; ";
+        print Param("browserbugmessage");
         PutFooter();
         exit 0;
       }
@@ -263,10 +238,7 @@ sub ValidateBugID {
     # Make sure the bug number is a positive integer.
     # Whitespace can be ignored because the SQL server will ignore it.
     $id =~ /^\s*([1-9][0-9]*)\s*$/
-      || DisplayError("The bug number is invalid. If you are trying to use " .
-                      "QuickSearch, you need to enable JavaScript in your " .
-                      "browser. To help us fix this limitation, look " .
-                      "<a href=\"http://bugzilla.mozilla.org/show_bug.cgi?id=70907\">here</a>.") 
+      || DisplayError("The bug number is invalid.") 
       && exit;
 
     # Get the values of the usergroupset and userid global variables
@@ -274,25 +246,93 @@ sub ValidateBugID {
     # setting those local variables to the default value of zero if
     # the global variables are undefined.
 
-    # First check that the bug exists
-    SendSQL("SELECT bug_id FROM bugs WHERE bug_id = $id");
+    # "usergroupset" stores the set of groups the user is a member of,
+    # while "userid" stores the user's unique ID.  These variables are
+    # set globally by either confirm_login() or quietly_check_login(),
+    # one of which should be run before calling this function; otherwise
+    # this function will treat the user as if they were not logged in
+    # and throw an error if they try to access a bug that requires
+    # permissions/authorization to access.
+    my $usergroupset = $::usergroupset || 0;
+    my $userid = $::userid || 0;
 
-    FetchOneColumn()
+    # Query the database for the bug, retrieving a boolean value that
+    # represents whether or not the user is authorized to access the bug.  
+
+    # Users are authorized to access bugs if they are a member of all 
+    # groups to which the bug is restricted.  User group membership and 
+    # bug restrictions are stored as bits within bitsets, so authorization
+    # can be determined by comparing the intersection of the user's
+    # bitset with the bug's bitset.  If the result matches the bug's bitset
+    # the user is a member of all groups to which the bug is restricted
+    # and is authorized to access the bug.
+
+    # A user is also authorized to access a bug if she is the reporter, 
+    # assignee, QA contact, or member of the cc: list of the bug and the bug 
+    # allows users in those roles to see the bug.  The boolean fields 
+    # reporter_accessible, assignee_accessible, qacontact_accessible, and 
+    # cclist_accessible identify whether or not those roles can see the bug.
+
+    # Bit arithmetic is performed by MySQL instead of Perl because bitset
+    # fields in the database are 64 bits wide (BIGINT), and Perl installations
+    # may or may not support integers larger than 32 bits.  Using bitsets
+    # and doing bitset arithmetic is probably not cross-database compatible,
+    # however, so these mechanisms are likely to change in the future.
+
+    # Get data from the database about whether or not the user belongs to
+    # all groups the bug is in, and who are the bug's reporter and qa_contact
+    # along with which roles can always access the bug.
+    SendSQL("SELECT ((groupset & $usergroupset) = groupset) , reporter , assigned_to , qa_contact , 
+                    reporter_accessible , assignee_accessible , qacontact_accessible , cclist_accessible 
+             FROM   bugs 
+             WHERE  bug_id = $id");
+
+    # Make sure the bug exists in the database.
+    MoreSQLData()
       || DisplayError("Bug #$id does not exist.")
-        && exit;
+      && exit;
 
-    return if CanSeeBug($id, $::userid, $::usergroupset);
+    my ($isauthorized, $reporter, $assignee, $qacontact, $reporter_accessible, 
+        $assignee_accessible, $qacontact_accessible, $cclist_accessible) = FetchSQLData();
+
+    # Finish validation and return if the user is a member of all groups to which the bug belongs.
+    return if $isauthorized;
+
+    # Finish validation and return if the user is in a role that has access to the bug.
+    if ($userid) {
+        return 
+	  if ($reporter_accessible && $reporter == $userid)
+            || ($assignee_accessible && $assignee == $userid)
+              || ($qacontact_accessible && $qacontact == $userid);
+    }
+
+    # Try to authorize the user one more time by seeing if they are on 
+    # the cc: list.  If so, finish validation and return.
+    if ( $cclist_accessible ) {
+        my @cclist;
+        SendSQL("SELECT cc.who 
+                 FROM   bugs , cc
+                 WHERE  bugs.bug_id = $id
+                 AND    cc.bug_id = bugs.bug_id
+                ");
+        while (my ($ccwho) = FetchSQLData()) {
+            # more efficient to just check the var here instead of
+            # creating a potentially huge array to grep against
+            return if ($userid == $ccwho);
+        }
+
+    }
 
     # The user did not pass any of the authorization tests, which means they
     # are not authorized to see the bug.  Display an error and stop execution.
     # The error the user sees depends on whether or not they are logged in
-    # (i.e. $::userid contains the user's positive integer ID).
-    if ($::userid) {
+    # (i.e. $userid contains the user's positive integer ID).
+    if ($userid) {
         DisplayError("You are not authorized to access bug #$id.");
     } else {
         DisplayError(
           qq|You are not authorized to access bug #$id.  To see this bug, you
-          must first <a href="show_bug.cgi?id=$id&amp;GoAheadAndLogIn=1">log in 
+          must first <a href="show_bug.cgi?id=$id&GoAheadAndLogIn=1">log in 
           to an account</a> with the appropriate permissions.|
         );
     }
@@ -346,69 +386,27 @@ sub value_quote {
 sub navigation_header {
     if (defined $::COOKIE{"BUGLIST"} && $::COOKIE{"BUGLIST"} ne "" &&
         defined $::FORM{'id'}) {
-        my @bugs = split(/:/, $::COOKIE{"BUGLIST"});
-        my $cur = lsearch(\@bugs, $::FORM{"id"});
-        print "<B>Bug List:</B> (@{[$cur + 1]} of @{[$#bugs + 1]})\n";
-        print "<A HREF=\"show_bug.cgi?id=$bugs[0]\">First</A>\n";
-        print "<A HREF=\"show_bug.cgi?id=$bugs[$#bugs]\">Last</A>\n";
-        if ($cur > 0) {
-            print "<A HREF=\"show_bug.cgi?id=$bugs[$cur - 1]\">Prev</A>\n";
-        } else {
-            print "<I><FONT COLOR=\#777777>Prev</FONT></I>\n";
-        }
-        if ($cur < $#bugs) {
-            $::next_bug = $bugs[$cur + 1];
-            print "<A HREF=\"show_bug.cgi?id=$::next_bug\">Next</A>\n";
-        } else {
-            print "<I><FONT COLOR=\#777777>Next</FONT></I>\n";
-        }
+	my @bugs = split(/:/, $::COOKIE{"BUGLIST"});
+	my $cur = lsearch(\@bugs, $::FORM{"id"});
+	print "<B>Bug List:</B> (@{[$cur + 1]} of @{[$#bugs + 1]})\n";
+	print "<A HREF=\"show_bug.cgi?id=$bugs[0]\">First</A>\n";
+	print "<A HREF=\"show_bug.cgi?id=$bugs[$#bugs]\">Last</A>\n";
+	if ($cur > 0) {
+	    print "<A HREF=\"show_bug.cgi?id=$bugs[$cur - 1]\">Prev</A>\n";
+	} else {
+	    print "<I><FONT COLOR=\#777777>Prev</FONT></I>\n";
+	}
+	if ($cur < $#bugs) {
+	    $::next_bug = $bugs[$cur + 1];
+	    print "<A HREF=\"show_bug.cgi?id=$::next_bug\">Next</A>\n";
+	} else {
+	    print "<I><FONT COLOR=\#777777>Next</FONT></I>\n";
+	}
         print qq{&nbsp;&nbsp;<A HREF="buglist.cgi?regetlastlist=1">Show list</A>\n};
     }
     print "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF=query.cgi>Query page</A>\n";
     print "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF=enter_bug.cgi>Enter new bug</A>\n"
 }
-
-# Adds <link> elements for bug lists. These can be inserted into the header by
-# (ab)using the "jscript" parameter to PutHeader, which inserts an arbitrary
-# string into the header. This function is modelled on the one above.
-sub navigation_links($) {
-    my ($buglist) = @_;
-    
-    my $retval = "";
-    
-    # We need to be able to pass in a buglist because when you sort on a column
-    # the bugs in the cookie you are given will still be in the old order.
-    # If a buglist isn't passed, we just use the cookie.
-    $buglist ||= $::COOKIE{"BUGLIST"};
-    
-    if (defined $buglist && $buglist ne "") {
-    my @bugs = split(/:/, $buglist);
-        
-        if (defined $::FORM{'id'}) {
-            # We are on an individual bug
-            my $cur = lsearch(\@bugs, $::FORM{"id"});
-
-            if ($cur > 0) {
-                $retval .= "<link rel=\"First\" href=\"show_bug.cgi?id=$bugs[0]\" />\n";
-                $retval .= "<link rel=\"Prev\" href=\"show_bug.cgi?id=$bugs[$cur - 1]\" />\n";
-            } 
-            if ($cur < $#bugs) {
-                $retval .= "<link rel=\"Next\" href=\"show_bug.cgi?id=$bugs[$cur + 1]\" />\n";
-                $retval .= "<link rel=\"Last\" href=\"show_bug.cgi?id=$bugs[$#bugs]\" />\n";
-            }
-
-            $retval .= "<link rel=\"Up\" href=\"buglist.cgi?regetlastlist=1\" />\n";
-            $retval .= "<link rel=\"Contents\" href=\"buglist.cgi?regetlastlist=1\" />\n";
-        } else {
-            # We are on a bug list
-            $retval .= "<link rel=\"First\" href=\"show_bug.cgi?id=$bugs[0]\" />\n";
-            $retval .= "<link rel=\"Next\" href=\"show_bug.cgi?id=$bugs[0]\" />\n";
-            $retval .= "<link rel=\"Last\" href=\"show_bug.cgi?id=$bugs[$#bugs]\" />\n";
-        }
-    }
-    
-    return $retval;
-} 
 
 sub make_checkboxes {
     my ($src,$default,$isregexp,$name) = (@_);
@@ -438,7 +436,7 @@ sub make_checkboxes {
         }
     }
     if (!$found && $default ne "") {
-        $popup .= "<INPUT NAME=$name TYPE=CHECKBOX CHECKED>$default";
+	$popup .= "<INPUT NAME=$name TYPE=CHECKBOX CHECKED>$default";
     }
     return $popup;
 }
@@ -514,9 +512,9 @@ sub make_selection_widget {
                     if ($type eq "CHECKBOX") {
                         $popup .= "<INPUT NAME=$groupname type=checkbox VALUE=\"$item\" CHECKED>$displaytext<br>";
                     } elsif ($type eq "RADIO") {
-                        $popup .= "<INPUT NAME=$groupname type=radio VALUE=\"$item\" CHECKED>$displaytext<br>";
+                        $popup .= "<INPUT NAME=$groupname type=radio VALUE=\"$item\" check>$displaytext<br>";
                     } else {
-                        $popup .= "<OPTION SELECTED VALUE=\"$item\">$displaytext\n";
+                        $popup .= "<OPTION SELECTED VALUE=\"$item\">$displaytext";
                     }
                     $found = 1;
                 } else {
@@ -537,7 +535,7 @@ sub make_selection_widget {
         } elsif ($type eq "RADIO") {
             $popup .= "<INPUT NAME=$groupname type=radio checked>$default";
         } else {
-            $popup .= "<OPTION SELECTED>$default\n";
+            $popup .= "<OPTION SELECTED>$default";
         }
     }
     if ($type eq "LIST") {
@@ -564,10 +562,10 @@ sub make_options {
                 }
                 $last = $item;
                 if ($isregexp ? $item =~ $default : $default eq $item) {
-                    $popup .= "<OPTION SELECTED VALUE=\"$item\">$item\n";
+                    $popup .= "<OPTION SELECTED VALUE=\"$item\">$item";
                     $found = 1;
                 } else {
-                    $popup .= "<OPTION VALUE=\"$item\">$item\n";
+                    $popup .= "<OPTION VALUE=\"$item\">$item";
                 }
             }
         }
@@ -590,7 +588,7 @@ sub make_options {
         exit 0;
               
       } else {
-        $popup .= "<OPTION SELECTED>$default\n";
+	$popup .= "<OPTION SELECTED>$default";
       }
     }
     return $popup;
@@ -641,7 +639,7 @@ sub BuildPulldown {
 sub PasswordForLogin {
     my ($login) = (@_);
     SendSQL("select cryptpassword from profiles where login_name = " .
-            SqlQuote($login));
+	    SqlQuote($login));
     my $result = FetchOneColumn();
     if (!defined $result) {
         $result = "";
@@ -656,7 +654,7 @@ sub quietly_check_login() {
     $::disabledreason = '';
     $::userid = 0;
     if (defined $::COOKIE{"Bugzilla_login"} &&
-        defined $::COOKIE{"Bugzilla_logincookie"}) {
+	defined $::COOKIE{"Bugzilla_logincookie"}) {
         ConnectToDatabase();
         if (!defined $ENV{'REMOTE_HOST'}) {
             $ENV{'REMOTE_HOST'} = $ENV{'REMOTE_ADDR'};
@@ -664,14 +662,14 @@ sub quietly_check_login() {
         SendSQL("SELECT profiles.userid, profiles.groupset, " .
                 "profiles.login_name, " .
                 "profiles.login_name = " .
-                SqlQuote($::COOKIE{"Bugzilla_login"}) .
-                " AND profiles.cryptpassword = logincookies.cryptpassword " .
-                "AND logincookies.hostname = " .
-                SqlQuote($ENV{"REMOTE_HOST"}) .
+		SqlQuote($::COOKIE{"Bugzilla_login"}) .
+		" AND profiles.cryptpassword = logincookies.cryptpassword " .
+		"AND logincookies.hostname = " .
+		SqlQuote($ENV{"REMOTE_HOST"}) .
                 ", profiles.disabledtext " .
-                " FROM profiles, logincookies WHERE logincookies.cookie = " .
-                SqlQuote($::COOKIE{"Bugzilla_logincookie"}) .
-                " AND profiles.userid = logincookies.userid");
+		" FROM profiles, logincookies WHERE logincookies.cookie = " .
+		SqlQuote($::COOKIE{"Bugzilla_logincookie"}) .
+		" AND profiles.userid = logincookies.userid");
         my @row;
         if (@row = FetchSQLData()) {
             my ($userid, $groupset, $loginname, $ok, $disabledtext) = (@row);
@@ -866,6 +864,21 @@ sub confirm_login {
          exit;
        }
 
+       # if no password was provided, then fail the authentication
+       # while it may be valid to not have an LDAP password, when you
+       # bind without a password (regardless of the binddn value), you
+       # will get an anonymous bind.  I do not know of a way to determine
+       # whether a bind is anonymous or not without making changes to the
+       # LDAP access control settings
+       if ( ! $::FORM{"LDAP_password"} ) {
+         print "Content-type: text/html\n\n";
+         PutHeader("Login Failed");
+         print "You did not provide a password.\n";
+         print "Please click <b>Back</b> and try again.\n";
+         PutFooter();
+         exit;
+       }
+
        # We've got our anonymous bind;  let's look up this user.
        my $dnEntry = $LDAPconn->search(Param("LDAPBaseDN"),"subtree","uid=".$::FORM{"LDAP_login"});
        if(!$dnEntry) {
@@ -940,18 +953,23 @@ sub confirm_login {
        my $logincookie = FetchOneColumn();
 
        $::COOKIE{"Bugzilla_logincookie"} = $logincookie;
-       my $cookiepath = Param("cookiepath");
-       print "Set-Cookie: Bugzilla_login=$enteredlogin ; path=$cookiepath; expires=Sun, 30-Jun-2029 00:00:00 GMT\n";
-       print "Set-Cookie: Bugzilla_logincookie=$logincookie ; path=$cookiepath; expires=Sun, 30-Jun-2029 00:00:00 GMT\n";
+       print "Set-Cookie: Bugzilla_login=$enteredlogin ; path=/; expires=Sun, 30-Jun-2029 00:00:00 GMT\n";
+       print "Set-Cookie: Bugzilla_logincookie=$logincookie ; path=/; expires=Sun, 30-Jun-2029 00:00:00 GMT\n";
+
+       # This next one just cleans out any old bugzilla passwords that may
+       # be sitting around in the cookie files, from the bad old days when
+       # we actually stored the password there.
+       print "Set-Cookie: Bugzilla_password= ; path=/; expires=Sun, 30-Jun-80 00:00:00 GMT\n";
     }
+
 
     my $loginok = quietly_check_login();
 
     if ($loginok != 1) {
         if ($::disabledreason) {
-            my $cookiepath = Param("cookiepath");
-            print "Set-Cookie: Bugzilla_login= ; path=$cookiepath; expires=Sun, 30-Jun-80 00:00:00 GMT
-Set-Cookie: Bugzilla_logincookie= ; path=$cookiepath; expires=Sun, 30-Jun-80 00:00:00 GMT
+            print "Set-Cookie: Bugzilla_login= ; path=/; expires=Sun, 30-Jun-80 00:00:00 GMT
+Set-Cookie: Bugzilla_logincookie= ; path=/; expires=Sun, 30-Jun-80 00:00:00 GMT
+Set-Cookie: Bugzilla_password= ; path=/; expires=Sun, 30-Jun-80 00:00:00 GMT
 Content-type: text/html
 
 ";
@@ -972,10 +990,10 @@ Content-type: text/html
           print "I need a legitimate e-mail address and password to continue.\n";
         }
         if (!defined $nexturl || $nexturl eq "") {
-            # Sets nexturl to be argv0, stripping everything up to and
-            # including the last slash (or backslash on Windows).
-            $0 =~ m:[^/\\]*$:;
-            $nexturl = $&;
+	    # Sets nexturl to be argv0, stripping everything up to and
+	    # including the last slash (or backslash on Windows).
+	    $0 =~ m:[^/\\]*$:;
+	    $nexturl = $&;
         }
         my $method = "POST";
 # We always want to use POST here, because we're submitting a password and don't
@@ -1015,15 +1033,7 @@ Content-type: text/html
         # (except for Bugzilla_login and Bugzilla_password which we
         # already added as text fields above).
         foreach my $i ( grep( $_ !~ /^Bugzilla_/ , keys %::FORM ) ) {
-          if (scalar(@{$::MFORM{$i}}) > 1) {
-            # This field has multiple values; add each one separately.
-            foreach my $val (@{$::MFORM{$i}}) {
-              print qq|<input type="hidden" name="$i" value="@{[value_quote($val)]}">\n|;
-            }
-          } else {
-            # This field has a single value; add it.
             print qq|<input type="hidden" name="$i" value="@{[value_quote($::FORM{$i})]}">\n|;
-          }
         }
 
         print qq|
@@ -1036,17 +1046,16 @@ Content-type: text/html
         unless( Param("useLDAP") ) {
             print qq|
               <hr>
-              <p>If you don't have a Bugzilla account, you can 
-              <a href="createaccount.cgi">create a new account</a>.</p>
               <form method="get" action="token.cgi">
                 <input type="hidden" name="a" value="reqpw">
-                If you have an account, but have forgotten your password,
+                If you have forgotten your password,
                 enter your login name below and submit a request 
                 to change your password.<br>
                 <input size="35" name="loginname">
                 <input type="submit" value="Submit Request">
               </form>
               <hr>
+              If you don't have a Bugzilla account, you can <a href="createaccount.cgi">create a new account</a>.
             |;
         }
 
@@ -1076,13 +1085,13 @@ sub PutHeader {
     my ($title, $h1, $h2, $extra, $jscript) = (@_);
 
     if (!defined $h1) {
-        $h1 = $title;
+	$h1 = $title;
     }
     if (!defined $h2) {
-        $h2 = "";
+	$h2 = "";
     }
     if (!defined $extra) {
-       $extra = "";
+	$extra = "";
     }
     $jscript ||= "";
     # If we are shutdown, we want a very basic page to give that
@@ -1096,32 +1105,26 @@ sub PutHeader {
         $jscript = "";
     }
 
-    print qq|
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<HTML>
-<HEAD>
-<TITLE>$title</TITLE>
-| . Param("headerhtml") . qq|
-$jscript
-</HEAD>
-<BODY | . Param("bodyhtml") . qq| $extra>
-| . PerformSubsts(Param("bannerhtml"), undef) . qq|
-<TABLE BORDER="0" CELLSPACING="0">
-<TR>
-<TD VALIGN="TOP" ALIGN="LEFT">
-    <TABLE BORDER="0" CELLPADDING="0" CELLSPACING="2">
-    <TR><TD VALIGN="TOP" ALIGN="LEFT">
-        <FONT SIZE="+1">
-        <B>$h1</B>
-        </FONT>
-    </TD></TR>
-    </TABLE>
-</TD>
-<TD VALIGN="MIDDLE">&nbsp;</TD>
-<TD VALIGN="MIDDLE" ALIGN="LEFT">
-$h2
-</TD></TR></TABLE>
-    |;
+    print "<HTML><HEAD>\n<TITLE>$title</TITLE>\n";
+    print Param("headerhtml") . "\n$jscript\n</HEAD>\n";
+    print "<BODY " . Param("bodyhtml") . " $extra>\n";
+
+    print PerformSubsts(Param("bannerhtml"), undef);
+
+    print "<TABLE BORDER=0 CELLSPACING=0 WIDTH=\"100%\">\n";
+    print " <TR>\n";
+    print "  <TD WIDTH=10% VALIGN=TOP ALIGN=LEFT>\n";
+    print "   <TABLE BORDER=0 CELLPADDING=0 CELLSPACING=2>\n";
+    print "    <TR><TD VALIGN=TOP ALIGN=LEFT NOWRAP>\n";
+    print "     <FONT SIZE=+1><B>$h1</B></FONT>";
+    print "    </TD></TR>\n";
+    print "   </TABLE>\n";
+    print "  </TD>\n";
+    print "  <TD VALIGN=CENTER>&nbsp;</TD>\n";
+    print "  <TD VALIGN=CENTER ALIGN=LEFT>\n";
+
+    print "$h2\n";
+    print "</TD></TR></TABLE>\n";
 
     if (Param("shutdownhtml")) {
         # If we are dealing with the params page, we want
@@ -1135,19 +1138,8 @@ $h2
 }
 
 
-# Putfooter echoes footerhtml and by default prints closing tags
-#
-# param
-#   dontclose (boolean): avoid sending </body></html>
-#
-# Example:
-# Putfooter(); # normal close
-# Putfooter(1); # don't send closing tags
-
 sub PutFooter {
-    my ( $dontclose ) = @_;
     print PerformSubsts(Param("footerhtml"));
-    print "\n</body></html>\n" if ( ! $dontclose );
     SyncAnyPendingShadowChanges();
 }
 
@@ -1217,8 +1209,7 @@ sub DumpBugActivity {
         $datepart = "and bugs_activity.bug_when >= $starttime";
     }
     my $query = "
-        SELECT IFNULL(fielddefs.description, bugs_activity.fieldid),
-                bugs_activity.attach_id,
+        SELECT IFNULL(fielddefs.name, bugs_activity.fieldid),
                 bugs_activity.bug_when,
                 bugs_activity.removed, bugs_activity.added,
                 profiles.login_name
@@ -1243,9 +1234,7 @@ sub DumpBugActivity {
     my @row;
     my $incomplete_data = 0;
     while (@row = FetchSQLData()) {
-        my ($field,$attachid,$when,$removed,$added,$who) = (@row);
-        $field =~ s/^Attachment/<a href="attachment.cgi?id=$attachid&amp;action=view">Attachment #$attachid<\/a>/ 
-          if (Param('useattachmenttracker') && $attachid);
+        my ($field,$when,$removed,$added,$who) = (@row);
         $removed = html_quote($removed);
         $added = html_quote($added);
         $removed = "&nbsp;" if $removed eq "";
@@ -1276,105 +1265,90 @@ sub DumpBugActivity {
 
 sub GetCommandMenu {
     my $loggedin = quietly_check_login();
-    if (!defined $::anyvotesallowed) {
-        GetVersionTable();
-    }
-    my $html = qq {
-<FORM METHOD="GET" ACTION="show_bug.cgi">
+    my $html = "";
+    $html .= <<"--endquote--";
+<FORM METHOD=GET ACTION="show_bug.cgi">
 <TABLE width="100%"><TR><TD>
 Actions:
 </TD><TD VALIGN="middle" NOWRAP>
-<a href="enter_bug.cgi">New</a> | 
-<a href="query.cgi">Query</a> |
-};
+<a href='enter_bug.cgi'>New</a> | <a href='query.cgi'>Query</a> |
+--endquote--
 
     if (-e "query2.cgi") {
-        $html .= "[<a href=\"query2.cgi\">beta</a>]";
+        $html .= "[<a href='query2.cgi'>beta</a>]";
     }
     
-    $html .= qq{ 
-<INPUT TYPE="SUBMIT" VALUE="Find"> bug \# 
-<INPUT NAME="id" SIZE="6">
-| <a href="reports.cgi">Reports</a> 
-};
+    $html .=
+        qq{ <INPUT TYPE=SUBMIT VALUE="Find"> bug \# <INPUT NAME=id SIZE=6>};
+
+    $html .= " | <a href='reports.cgi'>Reports</a>"; 
     if ($loggedin) {
         if ($::anyvotesallowed) {
-            $html .= " | <A HREF=\"showvotes.cgi\">My votes</A>\n";
+            $html .= " | <A HREF=\"showvotes.cgi\">My votes</A>";
         }
     }
     if ($loggedin) {
-        #a little mandatory SQL, used later on
+    	#a little mandatory SQL, used later on
         SendSQL("SELECT mybugslink, userid, blessgroupset FROM profiles " .
                 "WHERE login_name = " . SqlQuote($::COOKIE{'Bugzilla_login'}));
         my ($mybugslink, $userid, $blessgroupset) = (FetchSQLData());
         
         #Begin settings
-        $html .= qq{
-</TD><TD>
-    &nbsp;
-</TD><TD VALIGN="middle">
-Edit <a href="userprefs.cgi">prefs</a>
-};
+        $html .= "</TD><TD>&nbsp;</TD><TD VALIGN=middle><NOBR>Edit <a href='userprefs.cgi'>prefs</a></NOBR>";
         if (UserInGroup("tweakparams")) {
-            $html .= ", <a href=\"editparams.cgi\">parameters</a>\n";
+            $html .= ", <a href=editparams.cgi>parameters</a>";
+            $html .= ", <a href=sanitycheck.cgi><NOBR>sanity check</NOBR></a>";
         }
         if (UserInGroup("editusers") || $blessgroupset) {
-            $html .= ", <a href=\"editusers.cgi\">users</a>\n";
+            $html .= ", <a href=editusers.cgi>users</a>";
         }
         if (UserInGroup("editcomponents")) {
-            $html .= ", <a href=\"editproducts.cgi\">components</a>\n";
-            $html .= ", <a href=\"editattachstatuses.cgi\">
-              attachment&nbsp;statuses</a>\n" if Param('useattachmenttracker');
+            $html .= ", <a href=editproducts.cgi>components</a>";
         }
         if (UserInGroup("creategroups")) {
-            $html .= ", <a href=\"editgroups.cgi\">groups</a>\n";
+            $html .= ", <a href=editgroups.cgi>groups</a>";
         }
         if (UserInGroup("editkeywords")) {
-            $html .= ", <a href=\"editkeywords.cgi\">keywords</a>\n";
+            $html .= ", <a href=editkeywords.cgi>keywords</a>";
         }
-        if (UserInGroup("tweakparams")) {
-            $html .= "| <a href=\"sanitycheck.cgi\">Sanity&nbsp;check</a>\n";
-        }
-
-        $html .= qq{ 
-| <a href="relogin.cgi">Log&nbsp;out</a> $::COOKIE{'Bugzilla_login'}
-</TD></TR> 
-};
+        $html .= " | <NOBR><a href=relogin.cgi>Log out</a> $::COOKIE{'Bugzilla_login'}</NOBR>";
+        $html .= "</TD></TR>";
         
-        #begin preset queries
+		#begin preset queries
         my $mybugstemplate = Param("mybugstemplate");
         my %substs;
         $substs{'userid'} = url_quote($::COOKIE{"Bugzilla_login"});
-        $html .= "<TR>";
-        $html .= "<TD>Preset&nbsp;Queries: </TD>";
+        if (!defined $::anyvotesallowed) {
+            GetVersionTable();
+        }
+        $html .= "</TR><TR>";
+        $html .= "<TD>Preset Queries: </TD>";
         $html .= "<TD colspan=3>\n";
         if ($mybugslink) {
             my $mybugsurl = PerformSubsts($mybugstemplate, \%substs);
-            $html = $html . "<A HREF=\"$mybugsurl\">My&nbsp;bugs</A>\n";
+            $html = $html . "<A HREF='$mybugsurl'><NOBR>My bugs</NOBR></A>";
         }
         SendSQL("SELECT name FROM namedqueries " .
                 "WHERE userid = $userid AND linkinfooter");
         my $anynamedqueries = 0;
         while (MoreSQLData()) {
             my ($name) = (FetchSQLData());
-            my $disp_name = $name;
-            $disp_name =~ s/ /&nbsp;/g;
             if ($anynamedqueries || $mybugslink) { $html .= " | " }
             $anynamedqueries = 1;
-            $html .= "<A HREF=\"buglist.cgi?cmdtype=runnamed&amp;namedcmd=" .
-                     url_quote($name) . "\">$disp_name</A>\n";
+            $html .= "<A HREF=\"buglist.cgi?&cmdtype=runnamed&namedcmd=" .
+                     url_quote($name) . "\"><NOBR>$name</NOBR></A>";
         }
-        $html .= "</TD></TR>\n";
+        $html .= "</TR>\n<TR>";
     } else {
-        $html .= "</TD><TD>&nbsp;</TD><TD valign=\"middle\" align=\"right\">\n";
+    $html .= "</TD><TD>&nbsp;</TD><TD valign=middle align=right>\n";
         $html .=
-            " <a href=\"createaccount.cgi\">New&nbsp;account</a>\n";
+            " <a href=\"createaccount.cgi\"><NOBR>New account</NOBR></a>\n";
         $html .=
-            " | <a href=\"query.cgi?GoAheadAndLogIn=1\">Log&nbsp;in</a>";
+            " | <NOBR><a href=query.cgi?GoAheadAndLogIn=1>Log in</a></NOBR>";
         $html .= "</TD></TR>";
     }
-    $html .= "</TABLE>";                
     $html .= "</FORM>\n";
+    $html .= "</TABLE>";                
     return $html;
 }
 
@@ -1414,12 +1388,12 @@ if (defined $ENV{"REQUEST_METHOD"}) {
 
 if (defined $ENV{"HTTP_COOKIE"}) {
     foreach my $pair (split(/;/, $ENV{"HTTP_COOKIE"})) {
-        $pair = trim($pair);
-        if ($pair =~ /^([^=]*)=(.*)$/) {
-            $::COOKIE{$1} = $2;
-        } else {
-            $::COOKIE{$pair} = "";
-        }
+	$pair = trim($pair);
+	if ($pair =~ /^([^=]*)=(.*)$/) {
+	    $::COOKIE{$1} = $2;
+	} else {
+	    $::COOKIE{$pair} = "";
+	}
     }
 }
 

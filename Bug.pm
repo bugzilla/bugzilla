@@ -112,7 +112,7 @@ sub initBug  {
       resolution, priority, bug_severity, component, assigned_to, reporter,
       bug_file_loc, short_desc, target_milestone, qa_contact,
       status_whiteboard, date_format(creation_ts,'%Y-%m-%d %H:%i'),
-      groupset, delta_ts, sum(votes.count)
+      groupset, delta_ts, ifnull(sum(votes.vote_count),0),
     from bugs left join votes using(bug_id)
     where bugs.bug_id = $bug_id
     group by bugs.bug_id";

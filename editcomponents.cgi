@@ -123,7 +123,7 @@ sub EmitFormElements ($$$$$)
                                              $initialqacontactid ? DBID_to_name ($initialqacontactid) : '');
 
     print "  <TH ALIGN=\"right\">Component:</TH>\n";
-    print "  <TD><INPUT SIZE=64 MAXLENGTH=255 NAME=\"component\" VALUE=\"" .
+    print "  <TD><INPUT SIZE=64 MAXLENGTH=50 NAME=\"component\" VALUE=\"" .
         value_quote($component) . "\">\n";
     print "      <INPUT TYPE=HIDDEN NAME=\"product\" VALUE=\"" .
         value_quote($product) . "\"></TD>\n";
@@ -382,6 +382,11 @@ if ($action eq 'new') {
     if (TestComponent($product,$component)) {
         print "The component '$component' already exists. Please press\n";
         print "<b>Back</b> and try again.\n";
+        PutTrailer($localtrailer);
+        exit;
+    }
+    if (length($component) > 50) {
+        print "Sorry, the name of a component is limited to 50 characters.";
         PutTrailer($localtrailer);
         exit;
     }
@@ -708,6 +713,12 @@ if ($action eq 'update') {
     my $initialqacontactold = trim($::FORM{initialqacontactold} || '');
 
     CheckComponent($product,$componentold);
+
+    if (length($component) > 50) {
+        print "Sorry, the name of a component is limited to 50 characters.";
+        PutTrailer($localtrailer);
+        exit;
+    }
 
     # Note that the order of this tests is important. If you change
     # them, be sure to test for WHERE='$component' or WHERE='$componentold'

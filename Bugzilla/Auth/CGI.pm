@@ -167,13 +167,7 @@ sub login {
 
     # The account may be disabled
     if ($authres == AUTH_DISABLED) {
-        # Clear the cookie
-
-        $cgi->send_cookie(-name => 'Bugzilla_login',
-                          -expires => "Tue, 15-Sep-1998 21:49:00 GMT");
-        $cgi->send_cookie(-name => 'Bugzilla_logincookie',
-                          -expires => "Tue, 15-Sep-1998 21:49:00 GMT");
-
+        clear_browser_cookies();
         # and throw a user error
         ThrowUserError("account_disabled",
                        {'disabled_reason' => $extra});
@@ -222,8 +216,10 @@ sub logout {
 sub clear_browser_cookies {
     my $cgi = Bugzilla->cgi;
     $cgi->send_cookie(-name => "Bugzilla_login",
+                      -value => "",
                       -expires => "Tue, 15-Sep-1998 21:49:00 GMT");
     $cgi->send_cookie(-name => "Bugzilla_logincookie",
+                      -value => "",
                       -expires => "Tue, 15-Sep-1998 21:49:00 GMT");
 }
 

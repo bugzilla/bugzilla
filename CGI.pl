@@ -499,10 +499,10 @@ sub GetUserInfo {
     $user{'login'} = $::COOKIE{"Bugzilla_login"};
     $user{'userid'} = $userid;
     
-    SendSQL("SELECT mybugslink, realname, groupset FROM profiles " . 
-            "WHERE userid = $userid");
-    ($user{'showmybugslink'}, $user{'realname'}, $user{'groupset'}) =
-                                                                 FetchSQLData();
+    SendSQL("SELECT mybugslink, realname, groupset, blessgroupset " . 
+            "FROM profiles WHERE userid = $userid");
+    ($user{'showmybugslink'}, $user{'realname'}, $user{'groupset'},
+                                       $user{'blessgroupset'}) = FetchSQLData();
 
     SendSQL("SELECT name, query, linkinfooter FROM namedqueries " .
             "WHERE userid = $userid");

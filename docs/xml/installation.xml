@@ -526,7 +526,10 @@
 
       <para>With Apache you'll also want to make sure that within the
       httpd.conf file the line: 
-      <programlisting>Options ExecCGI AllowOverride Limit</programlisting>
+      <programlisting>
+Options ExecCGI
+AllowOverride Limit
+      </programlisting>
 
       is in the stanza that covers the directories into which you intend to
       put the bugzilla .html and .cgi files.

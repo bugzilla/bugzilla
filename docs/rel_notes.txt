@@ -1,23 +1,18 @@
-The 2.14.3 release fixes a regression in the ability to sort
-buglists on more than one field, which was caused by the 2.14.2
-security update.  Also fixed in this release is a possible
-misuse of a system() call in contrib/bug_email.pl (which is
-not supported at this time, but we felt it would be useful to
-fix as long as we knew about it).  Please see the upgrade
-procedure below for details on how to upgrade to 2.14.3.
+The 2.14.4 release fixes some major bugs, including security
+bugs.  Please see the upgrade procedure below for details on how
+to upgrade to 2.14.4.
 
-Regarding security issues, please note that the release of 2.16
-(simultaneous with 2.14.3) incorporates various rearchitectures
+Regarding security issues, please note that the release of 2.16.1
+(simultaneous with 2.14.4) incorporates various rearchitectures
 that make failure-to-validate and failure-to-filter errors
 harder to insert and easier to spot.  In particular this means
 there may be holes in the 2.14 line that have not been
-discovered, yet are fixed in 2.16.  If such holes exist they
-probably won't be fixed in 2.14 point releases, unless they are
-discovered.
+discovered, yet are fixed in the 2.16 line.  If such holes exist
+they probably won't be fixed in 2.14 point releases, unless they
+are discovered.
 
-There may be future point releases of 2.14, even after the
-release of 2.16, however support for 2.14 will likely be
-dropped at some stage after the 2.16 release.
+There may be future point releases of 2.14, however support for
+2.14 will likely be dropped at some stage soon.
 
 **************************
 *** ABOUT THIS VERSION ***
@@ -61,7 +56,7 @@ see the Bugzilla Guide for more information.
 
 - The 2.16 line will possibly be the last stable release to support
   the shadow database.  The replacement (using MySQL's built in
-  replication) is not present in 2.14.2 or 2.16, but we expect
+  replication) is not present in 2.14.4 or 2.16, but we expect
   that very few sites use this feature, so we are not planning a
   transition period.  If this would cause a
   problem for you, please comment on the below bug.
@@ -83,7 +78,7 @@ fix the problem on your installation.
 
 - Bug counts (on reports.cgi) can be very slow if you have to
   count a lot of bugs.  In this case the connection can time
-  out before thepage finishes loading.  Extending the cgi
+  out before the page finishes loading.  Extending the cgi
   timeout on your web server might help this situation.
   (bug 63249)
 
@@ -129,16 +124,39 @@ fix the problem on your installation.
   option "The bug is resolved or verified" to achieve part of this.
   (bug 130821)
 
+***********************************************
+*** USERS UPGRADING FROM 2.14.3 OR EARLIER  ***
+***********************************************
 
+*** SECURITY ISSUES RESOLVED ***
+
+- When a new product is added to an installation with 47 groups or more and
+  "usebuggroups" is enabled, the new group will be assigned a groupset bit
+  using Perl math that is not exact beyond 2^48.  This results in the new
+  group being defined with a "bit" that has several bits set.  As users are
+  given access to the new group, those users will also gain access to
+  spurious lower group privileges.  Also, group bits were not always reused
+  when groups were deleted.
+  (bug 167485)
+
+- The email interface had another insecure single parameter system call.  This
+  could potentially allow arbitrary shell commands to be run.  This file is
+  not supported at this time, but as long as we knew about the problem, we
+  couldn't overlook it.
+  (bug 163024)
+
+*** Bug fixes of note ***
+
+- The email interface was broken.  This was a 2.14.3 regression.  This file
+  is not supported at this time, but as long as we knew about the problem, we
+  couldn't overlook it.
+  (bug 160631)
 
 ***********************************************
 *** USERS UPGRADING FROM 2.14.2 OR EARLIER  ***
 ***********************************************
 
-- The fix for bug 130821 in 2.14.2 broke being able to sort
-  bug lists on more than one field.  buglist.cgi now allows
-  you to sort on more than one field again.
-  (bug 152138)
+*** SECURITY ISSUES RESOLVED ***
 
 - Basic maintenance on contrib/bug_email.pl and
   contrib/bugzilla_email_append.pl which also fixes a
@@ -146,6 +164,13 @@ fix the problem on your installation.
   These files are not supported at this time, but as long
   as we knew about the problem, we couldn't overlook it.
   (bug 154008)
+
+*** Bug fixes of note ***
+
+- The fix for bug 130821 in 2.14.2 broke being able to sort
+  bug lists on more than one field.  buglist.cgi now allows
+  you to sort on more than one field again.
+  (bug 152138)
 
 ***********************************************
 *** USERS UPGRADING FROM 2.14.1 OR EARLIER  ***

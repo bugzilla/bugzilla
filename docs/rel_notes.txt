@@ -1,9 +1,8 @@
-The 2.14.4 release fixes some major bugs, including security
-bugs.  Please see the upgrade procedure below for details on how
-to upgrade to 2.14.4.
+The 2.14.5 release fixes some minor security issues in 2.14.4.  Please
+see the upgrade procedure below for details on how to upgrade to 2.14.5.
 
-Regarding security issues, please note that the release of 2.16.1
-(simultaneous with 2.14.4) incorporates various rearchitectures
+Regarding security issues, please note that the release of 2.16.2
+(simultaneous with 2.14.5) incorporates various rearchitectures
 that make failure-to-validate and failure-to-filter errors
 harder to insert and easier to spot.  In particular this means
 there may be holes in the 2.14 line that have not been
@@ -23,7 +22,7 @@ bugzilla.mozilla.org unless otherwise specified.
 
 *** Recommended Practice For The Upgrade ***
 
-As always, please ensure you have ran checksetup.pl after
+As always, please ensure you have run checksetup.pl after
 replacing the files in your installation.
 
 It is recommended that you view the sanity check page
@@ -123,6 +122,23 @@ fix the problem on your installation.
   changes" does not actually report status changes.  You can however use the
   option "The bug is resolved or verified" to achieve part of this.
   (bug 130821)
+
+***********************************************
+*** USERS UPGRADING FROM 2.14.4 OR EARLIER  ***
+***********************************************
+
+*** SECURITY ISSUES RESOLVED ***
+
+- Fixed a cross site scriptability issue in quips.  This is only a problem
+  if quips with HTML could have been inserted into your quips files.  Bugzilla
+  has not allowed this since 2.12.
+  (bug 179329)
+- checksetup.pl will now attempt to prevent access to "editor backups" of
+  localconfig.
+  (bug 186383)
+- collectstats.pl no longer makes data/mining (which contains graphing
+  information) world writeable.
+  (bug 183188)
 
 ***********************************************
 *** USERS UPGRADING FROM 2.14.3 OR EARLIER  ***

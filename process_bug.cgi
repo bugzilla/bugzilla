@@ -42,7 +42,6 @@ use RelationSet;
 use vars qw(%versions
           %components
           %COOKIE
-          %MFORM
           %legal_keywords
           %legal_opsys
           %legal_platform
@@ -188,6 +187,7 @@ if ((($::FORM{'id'} && $::FORM{'product'} ne $::oldproduct)
     # a verification form.
     if (!$vok || !$cok || !$mok || (Param('usebuggroups') && !defined($::FORM{'addtonewgroup'}))) {
         $vars->{'form'} = \%::FORM;
+        $vars->{'mform'} = \%::MFORM;
         
         if (!$vok || !$cok || !$mok) {
             $vars->{'verify_fields'} = 1;
@@ -344,6 +344,7 @@ sub DuplicateUserConfirm {
     # ask the duper what he/she wants to do.
     
     $vars->{'form'} = \%::FORM;
+    $vars->{'mform'} = \%::MFORM;
     $vars->{'original_bug_id'} = $original;
     $vars->{'duplicate_bug_id'} = $dupe;
     
@@ -885,6 +886,7 @@ foreach my $id (@idlist) {
 
         $::FORM{'delta_ts'} = $delta_ts;
         $vars->{'form'} = \%::FORM;
+        $vars->{'mform'} = \%::MFORM;
         
         $vars->{'bug_id'} = $id;
         $vars->{'quoteUrls'} = \&quoteUrls;

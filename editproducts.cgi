@@ -686,8 +686,9 @@ if ($action eq 'delete') {
             # I'm merely checking to make sure that the groupset is not
             # the superuser groupset in doing this update...
             SendSQL("UPDATE profiles " .
-                    "SET groupset = groupset - $bit " .
-                    "WHERE (groupset & $bit) " .
+                    "SET groupset = (groupset | $bit) - $bit, " .
+                    "blessgroupset = (blessgroupset | $bit) - $bit " .
+                    "WHERE ((groupset & $bit) or (blessgroupset & $bit)) " .
                     "AND (groupset != $::superusergroupset)");
             print "Users dropped from group '$group_desc'.<BR>\n";
 

@@ -71,7 +71,7 @@ incremental_restore()
       </a>
     [% END %]
   [% END %] 
-  (<a name="[% file.filename FILTER html %]_sec[% section_num %]"><a href="#[% file.filename FILTER html %]_sec[% section_num %]">Link Here</a></a>)
+  (<a name="[% file.filename FILTER html %]_sec[% section_num %]" href="#[% file.filename FILTER html %]_sec[% section_num %]">Link Here</a>)
   </th></tr>
   [% FOREACH group = section.groups %]
     [% IF group.context %]

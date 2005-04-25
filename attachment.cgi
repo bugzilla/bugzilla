@@ -951,9 +951,9 @@ sub insert
                            # for Perl 5.6.0.  If we ever require Perl 5.6.1 or
                            # newer, or detaint something other than $::FORM{'bugid'}
                            # in ValidateBugID above, then this can go away.
-  my $contenttypemethod = $::FORM{'contenttypemethod'};
+  my $contenttypemethod = $::FORM{'contenttypemethod'} || '';
   trick_taint($contenttypemethod); # Same Perl 5.6.0 hack as above
-  $contenttype = $::FORM{'contenttype'};
+  $contenttype = $::FORM{'contenttype'} || '';
   trick_taint($contenttype); # Same Perl 5.6.0 hack as above
   $vars->{'bugid'} = $bugid;
   $vars->{'attachid'} = $attachid;

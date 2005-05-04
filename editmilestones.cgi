@@ -87,6 +87,21 @@ sub CheckMilestone ($$)
     }
 }
 
+sub CheckSortkey ($$)
+{
+    my ($milestone,$sortkey) = @_;
+
+    if (!detaint_signed($sortkey) || $sortkey < -32768 || $sortkey > 32767) {
+        print "The sortkey for a milestone must be a number between -32768 ";
+        print "and 32767 inclusive.  Please press\n";
+        print "<b>Back</b> and try again.\n";
+        PutTrailer();
+        exit;
+    }
+
+    return $sortkey;
+}
+
 
 #
 # Displays the form to edit a milestone
@@ -295,12 +310,9 @@ if ($action eq 'new') {
         PutTrailer($localtrailer);
         exit;
     }
-    if (!detaint_natural($sortkey)) {
-        print "The sortkey for a milestone must be a number. Please press\n";
-        print "<b>Back</b> and try again.\n";
-        PutTrailer($localtrailer);
-        exit;
-    }
+
+    $sortkey = CheckSortkey($milestone,$sortkey);
+
     if (TestMilestone($product,$milestone)) {
         print "The milestone '$milestone' already exists. Please press\n";
         print "<b>Back</b> and try again.\n";
@@ -518,13 +530,8 @@ if ($action eq 'update') {
                          milestones WRITE,
                          products WRITE");
 
-    if ($sortkey != $sortkeyold) {
-        if (!detaint_natural($sortkey)) {
-            print "The sortkey for a milestone must be a number. Please press\n";
-            print "<b>Back</b> and try again.\n";
-            PutTrailer($localtrailer);
-            exit;
-        }
+    if ($sortkey ne $sortkeyold) {
+        $sortkey = CheckSortkey($milestone,$sortkey);
         SendSQL("UPDATE milestones SET sortkey=$sortkey
                  WHERE product_id=" . $product_id . "
                    AND value=" . SqlQuote($milestoneold));

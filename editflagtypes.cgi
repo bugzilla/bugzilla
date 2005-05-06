@@ -133,9 +133,11 @@ sub edit {
     # Otherwise set the target type (the minimal information about the type
     # that the template needs to know) from the URL parameter and default
     # the list of inclusions to all categories.
-    else { 
+    else {
+        my %inclusions;
+        $inclusions{"__Any__:__Any__"} = "0:0";
         $vars->{'type'} = { 'target_type' => $::FORM{'target_type'} , 
-                            'inclusions'  => ["__Any__:__Any__"] };
+                            'inclusions'  => \%inclusions };
     }
     
     # Return the appropriate HTTP response headers.
@@ -158,13 +160,13 @@ sub processCategoryChange {
     if ($categoryAction eq 'include') {
         validateProduct();
         validateComponent();
-        my $category = ($::FORM{'product'} || "__Any__") . ":" . ($::FORM{'component'} || "__Any__");
+        my $category = ($product_id || 0) . ":" . ($component_id || 0);
         push(@inclusions, $category) unless grep($_ eq $category, @inclusions);
     }
     elsif ($categoryAction eq 'exclude') {
         validateProduct();
         validateComponent();
-        my $category = ($::FORM{'product'} || "__Any__") . ":" . ($::FORM{'component'} || "__Any__");
+        my $category = ($product_id || 0) . ":" . ($component_id || 0);
         push(@exclusions, $category) unless grep($_ eq $category, @exclusions);
     }
     elsif ($categoryAction eq 'removeInclusion') {
@@ -173,7 +175,12 @@ sub processCategoryChange {
     elsif ($categoryAction eq 'removeExclusion') {
         @exclusions = map(($_ eq $::FORM{'exclusion_to_remove'} ? () : $_), @exclusions);
     }
-    
+
+    # Convert the array @clusions('prod_ID:comp_ID') back to a hash of
+    # the form %clusions{'prod_name:comp_name'} = 'prod_ID:comp_ID'
+    my %inclusions = clusion_array_to_hash(\@inclusions);
+    my %exclusions = clusion_array_to_hash(\@exclusions);
+
     # Get this installation's products and components.
     GetVersionTable();
 
@@ -186,8 +193,8 @@ sub processCategoryChange {
     $vars->{'action'} = $::FORM{'action'};
     my $type = {};
     foreach my $key (keys %::FORM) { $type->{$key} = $::FORM{$key} }
-    $type->{'inclusions'} = \@inclusions;
-    $type->{'exclusions'} = \@exclusions;
+    $type->{'inclusions'} = \%inclusions;
+    $type->{'exclusions'} = \%exclusions;
     $vars->{'type'} = $type;
     
     # Return the appropriate HTTP response headers.
@@ -196,6 +203,21 @@ sub processCategoryChange {
     # Generate and return the UI (HTML page) from the appropriate template.
     $template->process("admin/flag-type/edit.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
+}
+
+# Convert the array @clusions('prod_ID:comp_ID') back to a hash of
+# the form %clusions{'prod_name:comp_name'} = 'prod_ID:comp_ID'
+sub clusion_array_to_hash {
+    my $array = shift;
+    my %hash;
+    foreach my $ids (@$array) {
+        trick_taint($ids);
+        my ($product_id, $component_id) = split(":", $ids);
+        my $product_name = get_product_name($product_id) || "__Any__";
+        my $component_name = get_component_name($component_id) || "__Any__";
+        $hash{"$product_name:$component_name"} = $ids;
+    }
+    return %hash;
 }
 
 sub insert {
@@ -231,16 +253,7 @@ sub insert {
                  $::FORM{'is_multiplicable'})");
     
     # Populate the list of inclusions/exclusions for this flag type.
-    foreach my $category_type ("inclusions", "exclusions") {
-        foreach my $category (@{$::MFORM{$category_type}}) {
-          my ($product, $component) = split(/:/, $category);
-          my $product_id = get_product_id($product) || "NULL";
-          my $component_id = 
-            get_component_id($product_id, $component) || "NULL";
-          SendSQL("INSERT INTO flag$category_type (type_id, product_id, " . 
-                  "component_id) VALUES ($id, $product_id, $component_id)");
-        }
-    }
+    validateAndSubmit($id);
     
     SendSQL("UNLOCK TABLES");
 
@@ -286,18 +299,7 @@ sub update {
               WHERE  id = $::FORM{'id'}");
     
     # Update the list of inclusions/exclusions for this flag type.
-    foreach my $category_type ("inclusions", "exclusions") {
-        SendSQL("DELETE FROM flag$category_type WHERE type_id = $::FORM{'id'}");
-        foreach my $category (@{$::MFORM{$category_type}}) {
-          my ($product, $component) = split(/:/, $category);
-          my $product_id = get_product_id($product) || "NULL";
-          my $component_id = 
-            get_component_id($product_id, $component) || "NULL";
-          SendSQL("INSERT INTO flag$category_type (type_id, product_id, " . 
-                  "component_id) VALUES ($::FORM{'id'}, $product_id, " . 
-                  "$component_id)");
-        }
-    }
+    validateAndSubmit($::FORM{'id'});
 
     SendSQL("UNLOCK TABLES");
     
@@ -500,3 +502,36 @@ sub validateAllowMultiple {
     $::FORM{'is_multiplicable'} = $::FORM{'is_multiplicable'} ? 1 : 0;
 }
 
+# At this point, values either come the DB itself or have been recently
+# added by the user and have passed all validation tests.
+# The only way to have invalid product/component combinations is to
+# hack the URL. So we silently ignore them, if any.
+sub validateAndSubmit ($) {
+    my ($id) = @_;
+    my $dbh = Bugzilla->dbh;
+
+    foreach my $category_type ("inclusions", "exclusions") {
+        # Will be used several times below.
+        my $sth = $dbh->prepare("INSERT INTO flag$category_type " .
+                                "(type_id, product_id, component_id) " .
+                                "VALUES (?, ?, ?)");
+
+        $dbh->do("DELETE FROM flag$category_type WHERE type_id = ?", undef, $id);
+        foreach my $category (@{$::MFORM{$category_type}}) {
+            trick_taint($category);
+            my ($product_id, $component_id) = split(":", $category);
+            # The product does not exist.
+            next if ($product_id && !get_product_name($product_id));
+            # A component was selected without a product being selected.
+            next if (!$product_id && $component_id);
+            # The component does not belong to this product.
+            next if ($component_id
+                     && !$dbh->selectrow_array("SELECT id FROM components
+                                                WHERE id = ? AND product_id = ?",
+                                                undef, ($component_id, $product_id)));
+            $product_id ||= undef;
+            $component_id ||= undef;
+            $sth->execute($id, $product_id, $component_id);
+        }
+    }
+}

@@ -1702,10 +1702,9 @@ foreach my $id (@idlist) {
         }
     }
     # Set and update flags.
-    if ($UserInEditGroupSet) {
-        my $target = Bugzilla::Flag::GetTarget($id);
-        Bugzilla::Flag::process($target, $timestamp, \%::FORM);
-    }
+    my $target = Bugzilla::Flag::GetTarget($id);
+    Bugzilla::Flag::process($target, $timestamp, \%::FORM);
+
     if ($bug_changed) {
         SendSQL("UPDATE bugs SET delta_ts = " . SqlQuote($timestamp) . " WHERE bug_id = $id");
     }

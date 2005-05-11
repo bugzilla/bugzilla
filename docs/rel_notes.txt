@@ -126,6 +126,15 @@ installation.
   part of this.
   (bug 146261)
 
+*********************************************************
+*** USERS UPGRADING FROM ALL VERSIONS PRIOR TO 2.16.9 ***
+*********************************************************
+
+ This is only a security fix release, for a possible minor
+ security problem. You can see the details of the security
+ fix at:
+
+ http://www.bugzilla.org/security/2.16.8/
 
 *********************************************************
 *** USERS UPGRADING FROM ALL VERSIONS PRIOR TO 2.16.8 ***

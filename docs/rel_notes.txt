@@ -1,11 +1,13 @@
-***************************************
-*** The Bugzilla 2.18 Release Notes ***
-***************************************
+*****************************************
+*** The Bugzilla 2.18.1 Release Notes ***
+*****************************************
 
 Table of Contents
 *****************
 
 - Introduction
+- Important Updates In This Point Release
+    * Version 2.18.1
 - Requirements
     * Dependency Requirements
 - What's New?
@@ -35,20 +37,48 @@ Table of Contents
     * Note About Upgrading From MySQL With ISAM Tables
     * Steps for Upgrading
 - Outstanding Issues (<======================== IMPORTANT, PLEASE READ)
-- Security Fixes In This Release
+- Security Fixes In 2.18 Releases
 - Detailed Version-To-Version Release Notes
 
 
 Introduction
 ************
 
-This document contains the release notes for Bugzilla 2.18.  In this document
-recently added, changed, and removed features of Bugzilla are described.
+This document contains the release notes for Bugzilla 2.18 and
+the bugfix releases after 2.18. In this document, recently added,
+changed, and removed features of Bugzilla are described.
 
-The 2.18 release is the first in a new stable series, containing the results
-of over two years of hard and dedicated work by volunteers all over the world
-under the lead of Dave Miller.
+The 2.18 release is our current stable series, containing the results
+of over two years of hard and dedicated work by volunteers all over 
+the world under the lead of Dave Miller.
 
+
+Important Updates In This Point Release
+***************************************
+
+There are usually many other bug fixes than those listed below,
+but the below fixes are the ones that we thought System Administrators
+would like to specifically know about.
+
+To see a listing of all changes in this release, you can use the
+table available at:
+
+http://www.bugzilla.org/status/changes.html
+
+Version 2.18.1
+--------------
+
++ You can now enter a negative time for "Hours Worked"
+  in the time-tracking area. (Bug 271276)
+
++ The BugMail.pm customization required for Windows (as
+  described in the Bugzilla Guide) now actually works. (Bug 280911)
+
++ Users who were using Bugzilla 2.8 can now successfully upgrade
+  to 2.18.1 (they couldn't upgrade to 2.18). (Bug 283403)
+
++ Dependency mails are now properly sent during a mass-change of bugs.
+  (Bug 178157)
 
 Requirements
 ************
@@ -570,7 +600,9 @@ They each have a bug number for http://bugzilla.mozilla.org/
   Template Toolkit (after 2.14).
 
 - bug 266579: Users may be able to circumvent not having "canconfirm" privileges
-  in some circumstances.
+  in some circumstances. This is fixed starting with 2.19.3, but will not
+  be fixed in any 2.18 release, as the changes require to fix it are quite
+  large.
 
 - bug 99215: Attachment changes have no mid-air collision detection, unlike bug
   changes.
@@ -578,8 +610,6 @@ They each have a bug number for http://bugzilla.mozilla.org/
 - bug 57350: Searching using the "commenter is" option may be VERY slow. Note 
   that searching for "field: comment, changed by: user@domain.com" is fast, 
   though.
-
-- bug 178157: "Dependency changed" mails may not be sent during a mass-change.
 
 - bug 151509: Using the boolean chart option "contains the string" with the 
   "flag name" field or certain other fields will cause Bugzilla to emit an 
@@ -595,8 +625,11 @@ They each have a bug number for http://bugzilla.mozilla.org/
   show up in the result list.
 
 
-Security Fixes In This Release
-******************************
+Security Fixes In 2.18 Releases
+*******************************
+
+Version 2.18
+------------
 
 Summary:     XSS in Internal Error messages in Bugzilla 2.16.7 and 2.18rc3
 CVE Name:    CAN-2004-1061
@@ -614,6 +647,15 @@ Camino 0.8.2, Netscape 7.2, Safari 1.2.4
      Browsers known to be susceptible: Internet Explorer 6 SP2,
 Konqueror 3.2
      Browsers not listed here have not been tested.
+
+
+Version 2.18.1
+--------------
+
+Two security issues were fixed in Bugzilla 2.18.1, neither of them 
+critical.
+
+See http://www.bugzilla.org/security/2.16.8/ for details.
 
 
 Detailed Version-To-Version Release Notes

@@ -76,7 +76,7 @@ our $webdotdir = "$datadir/webdot";
 Exporter::export_ok_tags('admin', 'db', 'locations');
 
 # Bugzilla version
-$Bugzilla::Config::VERSION = "2.18";
+$Bugzilla::Config::VERSION = "2.18.1";
 
 use Safe;
 

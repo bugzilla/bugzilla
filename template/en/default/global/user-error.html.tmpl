@@ -166,8 +166,9 @@
 
   [% ELSIF error == "entry_access_denied" %]
     [% title = "Permission Denied" %]
-    Sorry; you do not have the permissions necessary to enter [% terms.abug %]
-    against the [% product FILTER html %] product.
+    Sorry, either the product <em>[% product FILTER html %]</em> does not
+    exist, or you don't have the required permissions to
+    enter [% terms.abug %] against that product.
 
   [% ELSIF error == "file_not_specified" %]
     [% title = "No File Specified" %]
@@ -608,6 +609,11 @@
     kilobytes (KB) in size.
     Patches cannot be more than [% Param('maxpatchsize') %] KB in size.
     Try breaking your patch into several pieces.
+
+  [% ELSIF error == "product_disabled" %]
+    [% title = BLOCK %]Product closed for [% terms.Bugs %] Entry[% END %]
+    Sorry, entering [% terms.bugs %] into
+    product <em>[% product FILTER html %]</em> has been disabled.
 
   [% ELSIF error == "product_edit_denied" %]
     [% title = "Product Edit Access Denied" %]

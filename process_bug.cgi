@@ -45,7 +45,8 @@ use Bugzilla::Flag;
 
 # Shut up misguided -w warnings about "used only once":
 
-use vars qw(%versions
+use vars qw(@legal_product
+          %versions
           %components
           %COOKIE
           %legal_opsys
@@ -247,8 +248,24 @@ if ((($::FORM{'id'} && $::FORM{'product'} ne $::oldproduct)
                        "abort");
     }
  
-    CheckFormField(\%::FORM, 'product', \@::legal_product);
     my $prod = $::FORM{'product'};
+    trick_taint($prod);
+
+    # If at least one bug does not belong to the product we are
+    # moving to, we have to check whether or not the user is
+    # allowed to enter bugs into that product.
+    # Note that this check must be done early to avoid the leakage
+    # of component, version and target milestone names.
+    my $check_can_enter =
+        $dbh->selectrow_array("SELECT 1 FROM bugs
+                               INNER JOIN products
+                               ON bugs.product_id = products.id
+                               WHERE products.name != ?
+                               AND bugs.bug_id IN
+                               (" . join(',', @idlist) . ") LIMIT 1",
+                               undef, $prod) || 0;
+
+    if ($check_can_enter) { CanEnterProductOrWarn($prod) }
 
     # note that when this script is called from buglist.cgi (rather
     # than show_bug.cgi), it's possible that the product will be changed
@@ -708,6 +725,7 @@ if ($::FORM{'component'} ne $::FORM{'dontchange'}) {
                                 product => $::FORM{'product'}});
     
     DoComma();
+    $::FORM{'component_id'} = $comp_id;
     $::query .= "component_id = $comp_id";
 }
 
@@ -1122,17 +1140,6 @@ foreach my $id (@idlist) {
             "group_control_map READ");
     my @oldvalues = SnapShotBug($id);
     my %oldhash;
-    # Fun hack.  @::log_columns only contains the component_id,
-    # not the name (since bug 43600 got fixed).  So, we need to have
-    # this id ready for the loop below, otherwise anybody can
-    # change the component of a bug (we checked product above).
-    # http://bugzilla.mozilla.org/show_bug.cgi?id=180545
-    my $product_id = get_product_id($::FORM{'product'});
-    
-    if ($::FORM{'component'} ne $::FORM{'dontchange'}) {
-        $::FORM{'component_id'} = 
-                            get_component_id($product_id, $::FORM{'component'});
-    }
     
     my $i = 0;
     foreach my $col (@::log_columns) {
@@ -1183,13 +1190,6 @@ foreach my $id (@idlist) {
                       { product => $oldhash{'product'} }, "abort");
     }
 
-    if (defined $::FORM{'product'} 
-        && $::FORM{'product'} ne $::FORM{'dontchange'} 
-        && $::FORM{'product'} ne $oldhash{'product'}
-        && !CanEnterProduct($::FORM{'product'})) {
-        ThrowUserError("entry_access_denied",
-                       { product => $::FORM{'product'} }, "abort");
-    }
     if ($requiremilestone) {
         # musthavemilestoneonaccept applies only if at least two
         # target milestones are defined for the current product.

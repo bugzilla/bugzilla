@@ -48,6 +48,8 @@ sub login {
     # First, try the actual login method against form variables
     my $username = $cgi->param("Bugzilla_login");
     my $passwd = $cgi->param("Bugzilla_password");
+    
+    $cgi->delete('Bugzilla_login', 'Bugzilla_password');
 
     my $authmethod = Param("loginmethod");
     my ($authres, $userid, $extra, $info) =

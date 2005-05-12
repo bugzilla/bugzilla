@@ -39,7 +39,8 @@ use RelationSet;
 
 # Shut up misguided -w warnings about "used only once":
 
-use vars qw(%versions
+use vars qw(@legal_product
+          %versions
           %components
           %COOKIE
           %legal_keywords
@@ -163,8 +164,18 @@ if ((($::FORM{'id'} && $::FORM{'product'} ne $::oldproduct)
      || (!$::FORM{'id'} && $::FORM{'product'} ne $::dontchange))
     && CheckonComment( "reassignbycomponent" ))
 {
-    CheckFormField(\%::FORM, 'product', \@::legal_product);
     my $prod = $::FORM{'product'};
+
+    # If at least one bug does not belong to the product we are
+    # moving to, we have to check whether or not the user is
+    # allowed to enter bugs into that product.
+    # Note that this check must be done early to avoid the leakage
+    # of component, version and target milestone names.
+    SendSQL("SELECT 1 FROM bugs
+             WHERE product != " . SqlQuote($prod) .
+           " AND bug_id IN (" . join(',', @idlist) . ") LIMIT 1");
+
+    if (FetchOneColumn()) { CanEnterProductOrWarn($prod) }
 
     # note that when this script is called from buglist.cgi (rather
     # than show_bug.cgi), it's possible that the product will be changed

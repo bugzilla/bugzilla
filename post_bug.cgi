@@ -92,13 +92,7 @@ if (defined $::FORM{'maketemplate'}) {
 umask 0;
 
 # Some sanity checking
-if(Param("usebuggroupsentry") && GroupExists($product)) {
-    if(!UserInGroup($product)) {
-        DisplayError("Sorry; you do not have the permissions necessary to enter
-                      a bug against this product.", "Permission Denied");
-        exit;
-    }
-}
+CanEnterProductOrWarn($product);
 
 if (!$::FORM{'component'}) {
     DisplayError("You must choose a component that corresponds to this bug.

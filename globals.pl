@@ -841,6 +841,50 @@ sub CanSeeBug {
     return $ret;
 }
 
+sub CanEnterProductOrWarn {
+    # Determines whether or not a user can enter bugs into the product.
+    my ($productname) = @_;
+
+    if (!GroupExists($productname)
+        || (Param("usebuggroupsentry")
+            && !UserInGroup($productname)))
+    {
+        DisplayError("Sorry, either this product does not exist, or you
+                      don't have the required permissions to enter a bug
+                      against that product.", "Permission Denied");
+        exit;
+    }
+
+    SendSQL("SELECT CASE WHEN disallownew = 0 THEN 1 ELSE 0 END
+             FROM products INNER JOIN components
+             ON components.program = products.product
+             WHERE products.product = " . SqlQuote($productname) . " LIMIT 1");
+
+    my $status = FetchOneColumn();
+
+    # Return 1 if the user can enter bugs into that product;
+    # return 0 if the product is closed for new bug entry;
+    # return undef if the product has no component.
+
+    if (!defined($status)) {
+        my $error = "Sorry; there needs to be at least one component for this " .
+                    "product in order to create a new bug. ";
+        if (UserInGroup('editcomponents')) {
+            $error .= "<a href=\"editcomponents.cgi\">Create a new component</a>\n";
+        }
+        else {              
+            $error .= "Please contact " . Param("maintainer") . ", detailing " .
+                      "the product in which you tried to create a new bug.\n";
+        }
+        DisplayError($error);   
+        exit;
+    } elsif (!$status) {
+        DisplayError("Sorry, entering bugs into this product has been disabled.");
+        exit;
+    }
+    return $status;
+}
+
 sub ValidatePassword {
     # Determines whether or not a password is valid (i.e. meets Bugzilla's
     # requirements for length and content).  If the password is valid, the

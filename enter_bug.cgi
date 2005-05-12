@@ -224,38 +224,11 @@ confirm_login() if (!(Param("usebuggroupsentry")));
 
 # If the usebuggroupsentry parameter is set, we need to check and make sure
 # that the user has permission to enter a bug against this product.
-if(Param("usebuggroupsentry") 
-   && GroupExists($product) 
-   && !UserInGroup($product)) 
-{
-    DisplayError("Sorry; you do not have the permissions necessary to " .
-                 "enter a bug against this product.\n");         
-    exit;
-}
+CanEnterProductOrWarn($product);
 
 GetVersionTable();
 
-if (lsearch(\@::enterable_products, $product) == -1) {
-    DisplayError("'" . html_quote($product) . "' is not a valid product.");
-    exit;
-}
-    
-if (0 == @{$::components{$product}}) {
-    my $error = "Sorry; there needs to be at least one component for this " .
-                "product in order to create a new bug. ";
-    if (UserInGroup('editcomponents')) {
-        $error .= "<a href=\"editcomponents.cgi\">" . 
-                  "Create a new component</a>\n";
-    }
-    else {              
-        $error .= "Please contact " . Param("maintainer") . ", detailing " .
-                  "the product in which you tried to create a new bug.\n";
-    }
-        
-    DisplayError($error);   
-    exit;
-} 
-elsif (1 == @{$::components{$product}}) {
+if (1 == @{$::components{$product}}) {
     # Only one component; just pick it.
     $::FORM{'component'} = $::components{$product}->[0];
 }

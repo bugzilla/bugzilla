@@ -25,9 +25,9 @@
      * bz-date to the release date
 -->
 
-<!ENTITY bz-ver "2.18">
-<!ENTITY bz-nextver "2.18.1">
-<!ENTITY bz-date "2005-01-14">
+<!ENTITY bz-ver "2.18.1">
+<!ENTITY bz-nextver "2.18.2">
+<!ENTITY bz-date "2005-05-11">
 <!ENTITY current-year "2005">
 
 <!ENTITY landfillbase "http://landfill.bugzilla.org/bugzilla-2.18-branch/">

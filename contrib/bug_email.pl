@@ -38,7 +38,7 @@
 #
 # You need to work with bug_email.pl the MIME::Parser installed.
 # 
-# $Id: bug_email.pl,v 1.20.2.1 2005/05/12 17:23:38 lpsolit%gmail.com Exp $
+# $Id: bug_email.pl,v 1.20.2.2 2005/05/12 19:18:00 lpsolit%gmail.com Exp $
 ###############################################################
 
 # 02/12/2000 (SML)
@@ -826,10 +826,15 @@ if (! CheckPermissions("CreateBugs", $SenderShort ) ) {
 
 # Set QA
 if (Param("useqacontact")) {
-    SendSQL("select initialqacontact from components, products where components.product_id = products.id AND products.name=" .
-            SqlQuote($Control{'product'}) .
-            " and components.name=" . SqlQuote($Control{'component'}));
-    $Control{'qa_contact'} = FetchOneColumn();
+    if (defined($Control{'qa_contact'}) 
+        && $Control{'qa_contact'} !~ /^\s*$/ ) {
+        $Control{'qa_contact'} = DBname_to_id($Control{'qa_contact'});
+    } else {
+        SendSQL("select initialqacontact from components, products where components.product_id = products.id AND products.name=" .
+                SqlQuote($Control{'product'}) .
+                " and components.name=" . SqlQuote($Control{'component'}));
+        $Control{'qa_contact'} = FetchOneColumn();
+    }
 }
 
 # Set Assigned - assigned_to depends on the product, cause initialowner 

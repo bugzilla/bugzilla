@@ -1,5 +1,5 @@
-The 2.16.8 release fixes some bugs in 2.16.7, including some
-security related issues.
+The 2.16.10 release repairs a critical bug in
+2.16.9 where no user could enter a bug, under many circumstances.
 
 **************************
 *** ABOUT THIS VERSION ***

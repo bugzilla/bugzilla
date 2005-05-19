@@ -845,8 +845,14 @@ sub CanEnterProductOrWarn {
     # Determines whether or not a user can enter bugs into the product.
     my ($productname) = @_;
 
-    if (!GroupExists($productname)
+    SendSQL("SELECT product FROM products WHERE product = " .
+            SqlQuote($productname));
+
+    my $product_exists = (defined(FetchOneColumn())) ? 1 : 0;
+
+    if (!$product_exists
         || (Param("usebuggroupsentry")
+            && GroupExists($productname)
             && !UserInGroup($productname)))
     {
         DisplayError("Sorry, either this product does not exist, or you

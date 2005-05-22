@@ -393,8 +393,10 @@ sub CheckCanChangeField {
     elsif (trim($oldvalue) eq trim($newvalue)) {
         return 1;
     # numeric fields need to be compared using == 
-    } elsif (($field eq "estimated_time" || $field eq "remaining_time") &&
-             $oldvalue == $newvalue) {
+    } elsif (($field eq "estimated_time" || $field eq "remaining_time")
+             && $newvalue ne $::FORM{'dontchange'}
+             && $oldvalue == $newvalue)
+    {
         return 1;
     }
         

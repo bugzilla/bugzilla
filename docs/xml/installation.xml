@@ -1,5 +1,5 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"> -->
-<!-- $Id: installation.xml,v 1.72.2.21 2005/03/19 11:22:55 mkanat%kerio.com Exp $ -->
+<!-- $Id: installation.xml,v 1.72.2.22 2005/05/26 20:42:41 mozilla%colinogilvie.co.uk Exp $ -->
 <chapter id="installing-bugzilla">
   <title>Installing Bugzilla</title>
 
@@ -1436,7 +1436,7 @@ close SENDMAIL;
 use Net::SMTP;
 my $smtp_server = 'smtp.mycompany.com';  # change this
 
-($enableSendMail && $rcpt_to) || return;
+($enableSendMail &amp;&amp; $rcpt_to) || return;
 
 # Use die on error, so that the mail will be in the 'unsent mails' and
 # can be sent from the sanity check page.

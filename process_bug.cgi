@@ -1712,19 +1712,6 @@ foreach my $id (@idlist) {
     }
     SendSQL("UNLOCK TABLES");
 
-    $vars->{'mailrecipients'} = { 'cc' => \@ccRemoved,
-                                  'owner' => $origOwner,
-                                  'qacontact' => $origQaContact,
-                                  'changer' => $::COOKIE{'Bugzilla_login'} };
-
-    $vars->{'id'} = $id;
-    
-    # Let the user know the bug was changed and who did and didn't
-    # receive email about the change.
-    $template->process("bug/process/results.html.tmpl", $vars)
-      || ThrowTemplateError($template->error());
-    $vars->{'header_done'} = 1;
-    
     if ($duplicate) {
         # Check to see if Reporter of this bug is reporter of Dupe 
         SendSQL("SELECT reporter FROM bugs WHERE bug_id = " . SqlQuote($::FORM{'id'}));
@@ -1744,7 +1731,27 @@ foreach my $id (@idlist) {
         AppendComment($duplicate, $::COOKIE{'Bugzilla_login'}, "*** Bug $::FORM{'id'} has been marked as a duplicate of this bug. ***", 0);
         CheckFormFieldDefined(\%::FORM,'comment');
         SendSQL("INSERT INTO duplicates VALUES ($duplicate, $::FORM{'id'})");
+    }
+
+    # Now all changes to the DB have been made. It's time to email
+    # all concerned users, including the bug itself, but also the
+    # duplicated bug and dependent bugs, if any.
         
+    $vars->{'mailrecipients'} = { 'cc' => \@ccRemoved,
+                                  'owner' => $origOwner,
+                                  'qacontact' => $origQaContact,
+                                  'changer' => $::COOKIE{'Bugzilla_login'} };
+
+    $vars->{'id'} = $id;
+    
+    # Let the user know the bug was changed and who did and didn't
+    # receive email about the change.
+    $template->process("bug/process/results.html.tmpl", $vars)
+      || ThrowTemplateError($template->error());
+    $vars->{'header_done'} = 1;
+    
+
+    if ($duplicate) {
         $vars->{'mailrecipients'} = { 'changer' => $::COOKIE{'Bugzilla_login'} 
                                     }; 
 

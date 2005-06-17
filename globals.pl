@@ -1016,14 +1016,14 @@ sub DBNameToIdAndCheck {
 #           used on variables that cannot be touched by users.
 
 sub trick_taint {
-    $_[0] =~ /^(.*)$/s;
-    $_[0] = $1;
+    my ($match) = $_[0] =~ /^(.*)$/s;
+    $_[0] = $match;
     return (defined($_[0]));
 }
 
 sub detaint_natural {
-    $_[0] =~ /^(\d+)$/;
-    $_[0] = $1;
+    my ($match) = $_[0] =~ /^(\d+)$/;
+    $_[0] = $match;
     return (defined($_[0]));
 }
 

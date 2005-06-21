@@ -720,6 +720,7 @@ if ($::FORM{'limit'} && detaint_natural($::FORM{'limit'})) {
 }
 elsif ($fulltext) {
     $query .= " LIMIT 200";
+    $vars->{'sorted_by_relevance'} = 1;
 }
 
 

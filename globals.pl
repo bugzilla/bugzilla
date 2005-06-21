@@ -727,11 +727,11 @@ sub ValidatePassword {
     my ($password, $matchpassword) = @_;
     
     if (length($password) < 3) {
-        ThrowUserError("password_too_short");
+        ThrowUserError("password_too_short", $::vars);
     } elsif (length($password) > 16) {
-        ThrowUserError("password_too_long");
+        ThrowUserError("password_too_long", $::vars);
     } elsif ((defined $matchpassword) && ($password ne $matchpassword)) {
-        ThrowUserError("passwords_dont_match");
+        ThrowUserError("passwords_dont_match", $::vars);
     }
 }
 

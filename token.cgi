@@ -66,11 +66,7 @@ if ($cgi->param('t')) {
   $::quotedtoken = SqlQuote($::token);
   
   # Make sure the token contains only valid characters in the right amount.
-  my $validationerror = ValidatePassword($::token);
-  if ($validationerror) {
-      ThrowUserError("token_invalid");
-  }
-
+  ValidatePassword($::token);
 
   Bugzilla::Token::CleanTokenTable();
 

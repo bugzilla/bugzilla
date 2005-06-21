@@ -467,12 +467,7 @@ if ($action eq 'new') {
         PutTrailer($localtrailer);
         exit;
     }
-    my $passworderror = ValidatePassword($password);
-    if ( $passworderror ) {
-        print $passworderror;
-        PutTrailer($localtrailer);
-        exit;
-    }
+    ValidatePassword($password);
 
     # Add the new user
     SendSQL("INSERT INTO profiles ( " .
@@ -820,22 +815,18 @@ if ($action eq 'update') {
 
     # Update the database with the user's new password if they changed it.
     if ( Bugzilla::Auth->can_edit && $editall && $password ) {
-        my $passworderror = ValidatePassword($password);
-        if ( !$passworderror ) {
-            my $cryptpassword = SqlQuote(Crypt($password));
-            my $loginname = SqlQuote($userold);
-            SendSQL("UPDATE  profiles
-                     SET     cryptpassword = $cryptpassword
-                     WHERE   login_name = $loginname");
-            SendSQL("SELECT userid
-                     FROM profiles
-                     WHERE login_name=" . SqlQuote($userold));
-            my $userid = FetchOneColumn();
-            Bugzilla->logout_user_by_id($userid);
-            print "Updated password.<BR>\n";
-        } else {
-            print "Did not update password: $passworderror<br>\n";
-        }
+        ValidatePassword($password);
+        my $cryptpassword = SqlQuote(Crypt($password));
+        my $loginname = SqlQuote($userold);
+        SendSQL("UPDATE  profiles
+                 SET     cryptpassword = $cryptpassword
+                 WHERE   login_name = $loginname");
+        SendSQL("SELECT userid
+                 FROM profiles
+                 WHERE login_name=" . SqlQuote($userold));
+        my $userid = FetchOneColumn();
+        Bugzilla->logout_user_by_id($userid);
+        print "Updated password.<BR>\n";
     }
     if ($editall && $realname ne $realnameold) {
         SendSQL("UPDATE profiles

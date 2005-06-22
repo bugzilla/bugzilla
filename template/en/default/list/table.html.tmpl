@@ -171,7 +171,7 @@
     [% END %]
     <td class="first-child">
       <a href="show_bug.cgi?id=[% bug.bug_id %]">[% bug.bug_id %]</a>
-      <span style="display: none">[%+ '[SEC]' IF bug.secure_mode %]</span>
+      <span style="display: none">[%+ '[SEC]' IF bug.isingroups %]</span>
     </td>
 
     [% FOREACH column = displaycolumns %]

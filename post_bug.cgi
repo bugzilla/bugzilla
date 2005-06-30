@@ -471,15 +471,14 @@ if (UserInGroup("editbugs")) {
     }
 }
 
-# Email everyone the details of the new bug 
-$vars->{'mailrecipients'} = { 'cc' => \@cc,
-                              'owner' => DBID_to_name($::FORM{'assigned_to'}),
-                              'reporter' => $::COOKIE{'Bugzilla_login'},
-                              'changer' => $::COOKIE{'Bugzilla_login'} };
+# Gather everyone interested in the details of the new bug (forced recipients)
+my $mailrecipients = { 'cc' => \@cc,
+                       'owner' => DBID_to_name($::FORM{'assigned_to'}),
+                       'reporter' => $::COOKIE{'Bugzilla_login'},
+                       'changer' => $::COOKIE{'Bugzilla_login'} };
 
 if (defined $::FORM{'qa_contact'}) {
-    $vars->{'mailrecipients'}->{'qacontact'} =
-        DBID_to_name($::FORM{'qa_contact'});
+    $mailrecipients->{'qacontact'} = DBID_to_name($::FORM{'qa_contact'});
 }
 
 $vars->{'id'} = $id;
@@ -492,10 +491,17 @@ $vars->{'sentmail'} = [];
 
 push (@{$vars->{'sentmail'}}, { type => 'created',
                                 id => $id,
+                                mailrecipients => $mailrecipients
                               });
 
 foreach my $i (@all_deps) {
-    push (@{$vars->{'sentmail'}}, { type => 'dep', id => $i, });
+    push (@{$vars->{'sentmail'}}, { type => 'dep',
+                                    id => $i,
+                                    mailrecipients => {
+                                      # Only force changer for dep BugMail
+                                      'changer' => $::COOKIE{'Bugzilla_login'}
+                                    }
+                                  });
 }
 
 my @bug_list;

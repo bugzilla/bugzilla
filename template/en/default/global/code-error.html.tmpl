@@ -145,10 +145,28 @@
     is attached to [% terms.bug %] [%+ attach_bug_id FILTER html %], 
     but you tried to flag it as obsolete while creating a new attachment to 
     [% terms.bug %] [%+ my_bug_id FILTER html %].
-        
+
+  [% ELSIF error == "invalid_flag_association" %]
+    [% title = "Invalid Flag Association" %]
+    Some flags do not belong to
+    [% IF attach_id %]
+      attachment [% attach_id FILTER html %].
+    [% ELSE %]
+      [%+ terms.bug %] [%+ bug_id FILTER html %].
+    [% END %]
+
   [% ELSIF error == "flag_nonexistent" %]
     There is no flag with ID #[% id FILTER html %].
-  
+
+  [% ELSIF error == "flags_not_available" %]
+    [% title = "Flag Editing not Allowed" %]
+    Flags cannot be set or changed when
+    changing several [% terms.bugs %] at once.
+
+  [% ELSIF error == "flag_requestee_disabled" %]
+    [% title = "Flag not Specifically Requestable" %]
+    The flag <em>[% name FILTER html %]</em> is not specifically requestable.
+
   [% ELSIF error == "flag_status_invalid" %]
     The flag status <em>[% status FILTER html %]</em>
     [% IF id %]
@@ -166,6 +184,10 @@
   [% ELSIF error == "flag_type_id_invalid" %]
     The flag type ID <em>[% id FILTER html %]</em> is not
     a positive integer.
+
+  [% ELSIF error == "flag_type_inactive" %]
+    [% title = "Inactive Flag Types" %]
+    Some flag types are inactive and cannot be used to create new flags.
 
   [% ELSIF error == "flag_type_nonexistent" %]
     There is no flag type with the ID <em>[% id FILTER html %]</em>.

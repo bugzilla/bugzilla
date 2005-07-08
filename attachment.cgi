@@ -146,7 +146,7 @@ elsif ($action eq "update")
   # in the requestee fields are legitimate user email addresses.
   Bugzilla::User::match_field({ '^requestee(_type)?-(\d+)$' => 
                                     { 'type' => 'single' } });
-  Bugzilla::Flag::validate(\%::FORM, $bugid);
+  Bugzilla::Flag::validate(\%::FORM, $bugid, $::FORM{'id'});
   Bugzilla::FlagType::validate(\%::FORM, $bugid, $::FORM{'id'});
   
   update();

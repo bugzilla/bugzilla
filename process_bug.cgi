@@ -145,12 +145,11 @@ foreach my $field ("dependson", "blocked") {
     'assigned_to'               => { 'type' => 'single' },
     '^requestee(_type)?-(\d+)$' => { 'type' => 'single' },
 });
-# Validate flags, but only if the user is changing a single bug,
-# since the multi-change form doesn't include flag changes.
-if (defined $::FORM{'id'}) {
-    Bugzilla::Flag::validate(\%::FORM, $::FORM{'id'});
-    Bugzilla::FlagType::validate(\%::FORM, $::FORM{'id'});
-}
+
+# Validate flags in all cases. validate() should not detect any
+# reference to flags if $::FORM{'id'} is undefined.
+Bugzilla::Flag::validate(\%::FORM, $::FORM{'id'});
+Bugzilla::FlagType::validate(\%::FORM, $::FORM{'id'});
 
 ######################################################################
 # End Data/Security Validation

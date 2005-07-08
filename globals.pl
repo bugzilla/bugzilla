@@ -698,7 +698,8 @@ sub CanSeeBug {
         " user_group_map.group_id = bug_group_map.group_id" .
         " AND user_group_map.isbless = 0" .
         " AND user_group_map.user_id = $userid" .
-        " WHERE bugs.bug_id = $id GROUP BY bugs.bug_id";
+        " WHERE bugs.bug_id = $id AND creation_ts IS NOT NULL" .
+        " GROUP BY bugs.bug_id";
     PushGlobalSQLState();
     SendSQL($query);
     my ($found_id, $reporter, $assigned_to, $qa_contact,
@@ -706,8 +707,9 @@ sub CanSeeBug {
         $found_cc, $found_groups, $found_members) 
         = FetchSQLData();
     PopGlobalSQLState();
-    return (
-               ($found_groups == 0) 
+    return ($found_id
+            &&
+              (($found_groups == 0) 
                || (($userid > 0) && 
                   (
                        ($assigned_to == $userid) 
@@ -716,6 +718,7 @@ sub CanSeeBug {
                     || ($found_cc && $cc_access) 
                     || ($found_groups == $found_members)
                   ))
+              )
            );
 }
 

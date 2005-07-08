@@ -1691,7 +1691,7 @@ $table{bugs} =
     bug_file_loc text,
     bug_severity enum($my_severities) not null,
     bug_status enum("UNCONFIRMED", "NEW", "ASSIGNED", "REOPENED", "RESOLVED", "VERIFIED", "CLOSED") not null,
-    creation_ts datetime not null,
+    creation_ts datetime,
     delta_ts timestamp not null,
     short_desc mediumtext not null,
     op_sys enum($my_opsys) not null,
@@ -4126,6 +4126,10 @@ if (!GetFieldDef('quips', 'userid')->[2]) {
     print "Changing owner to NULL for quips where the owner is unknown...\n";
     $dbh->do('UPDATE quips SET userid = NULL WHERE userid = 0');
 }
+
+# 2005-06-14 - LpSolit@gmail.com - Bug 292544: only set creation_ts
+# when all bug fields have been correctly set.
+ChangeFieldType('bugs', 'creation_ts', 'datetime');
 
 
 # If you had to change the --TABLE-- definition in any way, then add your

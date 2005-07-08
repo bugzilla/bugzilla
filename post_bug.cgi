@@ -320,8 +320,9 @@ if (UserInGroup("editbugs") && defined($::FORM{'dependson'})) {
 }
 
 # Build up SQL string to add bug.
+# creation_ts will only be set when all other fields are defined.
 my $sql = "INSERT INTO bugs " . 
-  "(" . join(",", @used_fields) . ", reporter, creation_ts, " .
+  "(" . join(",", @used_fields) . ", reporter, " .
   "estimated_time, remaining_time) " .
   "VALUES (";
 
@@ -335,7 +336,7 @@ $comment = trim($comment);
 # OK except for the fact that it causes e-mail to be suppressed.
 $comment = $comment ? $comment : " ";
 
-$sql .= "$::userid, now(), ";
+$sql .= "$::userid, ";
 
 # Time Tracking
 if (UserInGroup(Param("timetrackinggroup")) &&
@@ -405,6 +406,11 @@ while (MoreSQLData()) {
 }
 
 # Add the bug report to the DB.
+SendSQL("LOCK TABLES bugs WRITE, bug_group_map WRITE, longdescs WRITE,
+         cc WRITE, keywords WRITE, dependencies WRITE,
+         bugs_activity WRITE, groups READ, user_group_map READ,
+         keyworddefs READ, fielddefs READ");
+
 SendSQL($sql);
 
 SendSQL("select now()");
@@ -470,6 +476,13 @@ if (UserInGroup("editbugs")) {
         }
     }
 }
+
+# All fields related to the newly created bug are set.
+# The bug can now be made accessible.
+SendSQL("UPDATE bugs SET creation_ts = " . SqlQuote($timestamp) .
+        " WHERE bug_id = $id");
+
+SendSQL("UNLOCK TABLES");
 
 # Gather everyone interested in the details of the new bug (forced recipients)
 my $mailrecipients = { 'cc' => \@cc,

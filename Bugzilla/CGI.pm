@@ -188,9 +188,8 @@ sub send_cookie {
         ThrowCodeError('cookies_need_value');
     }
 
-    # Add the default path and the domain in.
+    # Add the default path in.
     $paramhash{'-path'} = Param('cookiepath');
-    $paramhash{'-domain'} = Param('cookiedomain') if Param('cookiedomain');
 
     # Move the param list back into an array for the call to cookie().
     foreach (keys(%paramhash)) {

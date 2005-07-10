@@ -1,5 +1,5 @@
 *****************************************
-*** The Bugzilla 2.18.2 Release Notes ***
+*** The Bugzilla 2.18.3 Release Notes ***
 *****************************************
 
 Table of Contents
@@ -9,6 +9,7 @@ Table of Contents
 - Important Updates In This Point Release
     * Version 2.18.1
     * Version 2.18.2
+    * Version 2.18.3
 - Requirements
     * Dependency Requirements
 - What's New?
@@ -95,6 +96,12 @@ Version 2.18.2
 + If sendmail dies while you are marking a bug 
   as a duplicate, the duplicates table will no longer become 
   corrupted. (Bug 225042)
+
+Version 2.18.3
+--------------
+
++ The query.cgi page was broken in 2.18.2 by bug 300138.
+  That is now fixed.
 
 
 Requirements

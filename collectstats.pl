@@ -118,7 +118,7 @@ FIN
 }
 
 sub calculate_dupes {
-    SendSQL("SELECT * FROM duplicates");
+    SendSQL("SELECT dupe_of, dupe FROM duplicates");
 
     my %dupes;
     my %count;

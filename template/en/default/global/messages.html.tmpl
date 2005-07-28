@@ -158,7 +158,11 @@
   [% ELSIF message_tag == "shutdown" %]
     [% title = "$terms.Bugzilla is Down" %]
     [% Param("shutdownhtml") %]
-    
+    [% IF userid %]
+      <p>For security reasons, you have been logged out automatically.
+      The cookie that was remembering your login is now gone.
+    [% END %]
+
   [% ELSE %]
     [%# Give sensible error if error functions are used incorrectly.
       #%]        

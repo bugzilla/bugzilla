@@ -29,7 +29,7 @@ use Bugzilla::Util;
 use Bugzilla::Error;
 use Bugzilla::Config qw($datadir);
 
-require "globals.pl";
+require "CGI.pl";
 
 my $cgi = Bugzilla->cgi;
 my $dbh = Bugzilla->dbh;

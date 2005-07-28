@@ -20,6 +20,8 @@
 use strict;
 use lib ".";
 
+require "CGI.pl";
+
 use Bugzilla;
 use Bugzilla::Util;
 use Bugzilla::Error;

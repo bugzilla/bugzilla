@@ -67,15 +67,21 @@ require 'globals.pl';
 use vars qw($template $vars);
 
 # If Bugzilla is shut down, do not go any further, just display a message
-# to the user about the downtime.  (do)editparams.cgi is exempted from
-# this message, of course, since it needs to be available in order for
+# to the user about the downtime and log out.  (do)editparams.cgi is exempted
+# from this message, of course, since it needs to be available in order for
 # the administrator to open Bugzilla back up.
 if (Param("shutdownhtml") && $0 !~ m:(^|[\\/])(do)?editparams\.cgi$:) {
-    $::vars->{'message'} = "shutdown";
+    # For security reasons, log out users when Bugzilla is down.
+    # Bugzilla->login() is required to catch the logincookie, if any.
+    my $user = Bugzilla->login(LOGIN_OPTIONAL);
+    my $userid = $user->id;
+    Bugzilla->logout();
     
     # Return the appropriate HTTP response headers.
     print Bugzilla->cgi->header();
     
+    $::vars->{'message'} = "shutdown";
+    $::vars->{'userid'} = $userid;
     # Generate and return an HTML message about the downtime.
     $::template->process("global/message.html.tmpl", $::vars)
       || ThrowTemplateError($::template->error());

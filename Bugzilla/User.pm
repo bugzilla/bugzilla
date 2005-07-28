@@ -1255,6 +1255,8 @@ L<Bugzilla-E<gt>user|Bugzilla/"user">.
 
 =head1 CONSTANTS
 
+=over
+
 =item C<USER_MATCH_MULTIPLE>
 
 Returned by C<match_field()> when at least one field matched more than 
@@ -1274,6 +1276,8 @@ user.
 
 Passed in to match_field to tell match_field to never display a 
 confirmation screen.
+
+=back
 
 =head1 METHODS
 
@@ -1527,10 +1531,10 @@ for flag mail.
 
 =head1 CLASS FUNCTIONS
 
-=over4
-
 These are functions that are not called on a User object, but instead are
 called "statically," just like a normal procedural function.
+
+=over 4
 
 =item C<insert_new_user>
 

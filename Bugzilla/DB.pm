@@ -54,6 +54,9 @@ use Bugzilla::Util;
 # Bugzilla.pm. See bug 192531 for details.
 our $_current_sth;
 our @SQLStateStack = ();
+
+my $_fetchahead;
+
 sub SendSQL {
     my ($str) = @_;
 
@@ -64,6 +67,8 @@ sub SendSQL {
     # This is really really ugly, but its what we get for not doing
     # error checking for 5 years. See bug 189446 and bug 192531
     $_current_sth->{RaiseError} = 0;
+
+    undef $_fetchahead;
 }
 
 # Its much much better to use bound params instead of this
@@ -80,8 +85,6 @@ sub SqlQuote {
     return $res;
 }
 
-# XXX - mod_perl
-my $_fetchahead;
 sub MoreSQLData {
     return 1 if defined $_fetchahead;
 

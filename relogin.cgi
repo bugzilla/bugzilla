@@ -27,12 +27,13 @@ use vars qw($template $vars);
 
 use lib qw(.);
 
+use Bugzilla::Constants;
 require "CGI.pl";
 
 # We don't want to remove a random logincookie from the db, so
 # call Bugzilla->login(). If we're logged in after this, then
 # the logincookie must be correct
-Bugzilla->login();
+Bugzilla->login(LOGIN_OPTIONAL);
 
 Bugzilla->logout();
 

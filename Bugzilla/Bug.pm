@@ -29,7 +29,7 @@ use strict;
 
 use Bugzilla::RelationSet;
 use vars qw($unconfirmedstate $legal_keywords @legal_platform
-            @legal_priority @legal_severity @legal_opsys @legal_bugs_status
+            @legal_priority @legal_severity @legal_opsys @legal_bug_status
             @settable_resolution %components %versions %target_milestone
             @enterable_products %milestoneurl %prodmaxvotes);
 
@@ -473,7 +473,7 @@ sub choices {
        'priority' => \@::legal_priority,
        'bug_severity' => \@::legal_severity,
        'op_sys' => \@::legal_opsys,
-       'bug_status' => \@::legal_bugs_status,
+       'bug_status' => \@::legal_bug_status,
        'resolution' => \@res,
        'component' => $::components{$self->{product}},
        'version' => $::versions{$self->{product}},

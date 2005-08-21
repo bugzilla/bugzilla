@@ -263,7 +263,7 @@ sub get_next_event {
                             $user_objects{$mailto} = $owner;
                         }
                         elsif ($whineatothers) {
-                            $user_objects{$mailto} = Bugzilla::User->new($mailto);
+                            $user_objects{$mailto} = Bugzilla::User->new($mailto,DERIVE_GROUPS_TABLES_ALREADY_LOCKED);
                         }
                     }
                 }
@@ -282,7 +282,7 @@ sub get_next_event {
                         for my $row (@{$sth->fetchall_arrayref}) {
                             if (not defined $user_objects{$row->[0]}) {
                                 $user_objects{$row->[0]} =
-                                    Bugzilla::User->new($row->[0]);
+                                    Bugzilla::User->new($row->[0],DERIVE_GROUPS_TABLES_ALREADY_LOCKED);
                             }
                         }
                     }

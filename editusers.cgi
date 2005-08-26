@@ -25,7 +25,6 @@ use vars qw( $vars );
 
 use Bugzilla;
 use Bugzilla::User;
-use Bugzilla::Bug;
 use Bugzilla::Flag;
 use Bugzilla::Config;
 use Bugzilla::Constants;

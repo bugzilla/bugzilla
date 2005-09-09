@@ -595,14 +595,11 @@ if (defined $cgi->param('id')) {
     }
 }
 
-my $action = '';
-if (defined $cgi->param('action')) {
-  $action = trim($cgi->param('action'));
-}
-if (Param("move-enabled") && $action eq Param("move-button-text")) {
+my $action = trim($cgi->param('action') || '');
+
+if ($action eq Param('move-button-text')) {
   $cgi->param('buglist', join (":", @idlist));
   do "move.pl" || die "Error executing move.cgi: $!";
-  PutFooter();
   exit;
 }
 

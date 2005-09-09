@@ -876,17 +876,7 @@ $vars->{'closedstates'} = ['CLOSED', 'VERIFIED', 'RESOLVED'];
 $vars->{'urlquerypart'} = $::buffer;
 $vars->{'urlquerypart'} =~ s/(order|cmdtype)=[^&]*&?//g;
 $vars->{'order'} = $order;
-
-# The user's login account name (i.e. email address).
-my $login = $::COOKIE{'Bugzilla_login'};
-
 $vars->{'caneditbugs'} = UserInGroup('editbugs');
-
-# Whether or not this user is authorized to move bugs to another installation.
-$vars->{'ismover'} = 1
-  if Param('move-enabled')
-    && defined($login)
-      && Param('movers') =~ /^(\Q$login\E[,\s])|([,\s]\Q$login\E[,\s]+)/;
 
 my @bugowners = keys %$bugowners;
 if (scalar(@bugowners) > 1 && UserInGroup('editbugs')) {

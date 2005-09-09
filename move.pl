@@ -38,15 +38,18 @@ use Bugzilla::BugMail;
 
 $::lockcount = 0;
 
+my $cgi = Bugzilla->cgi;
+
 unless ( Param("move-enabled") ) {
+  print $cgi->header();
+  PutHeader("Move Bugs");
   print "\n<P>Sorry. Bug moving is not enabled here. ";
   print "If you need to move a bug, contact " . Param("maintainer");
+  PutFooter();
   exit;
 }
 
-Bugzilla->login(LOGIN_REQUIRED);
-
-my $cgi = Bugzilla->cgi;
+my $user = Bugzilla->login(LOGIN_REQUIRED);
 
 sub Log {
     my ($str) = (@_);
@@ -90,11 +93,7 @@ if (!defined $cgi->param('buglist')) {
   exit;
 }
 
-my $exporter = Bugzilla->user->login;
-my $movers = Param("movers");
-$movers =~ s/\s?,\s?/|/g;
-$movers =~ s/@/\@/g;
-unless ($exporter =~ /($movers)/) {
+unless ($user->is_mover) {
   print $cgi->header();
   PutHeader("Move Bugs");
   print "<P>You do not have permission to move bugs<P>\n";
@@ -103,14 +102,15 @@ unless ($exporter =~ /($movers)/) {
 }
 
 my @bugs;
+my $exporterid = $user->id;
 
-print "<P>\n";
+print $cgi->header();
+PutHeader("Move Bugs");
+
 foreach my $id (split(/:/, scalar($cgi->param('buglist')))) {
-  my $bug = new Bugzilla::Bug($id, $::userid);
+  my $bug = new Bugzilla::Bug($id, $exporterid);
   push @bugs, $bug;
   if (!$bug->error) {
-    my $exporterid = DBNameToIdAndCheck($exporter);
-
     my $fieldid = GetFieldID("bug_status");
     my $cur_status= $bug->bug_status;
     SendSQL("INSERT INTO bugs_activity " .
@@ -130,7 +130,7 @@ foreach my $id (split(/:/, scalar($cgi->param('buglist')))) {
         $comment .= $cgi->param('comment') . "\n\n";
     }
     $comment .= "Bug moved to " . Param("move-to-url") . ".\n\n";
-    $comment .= "If the move succeeded, $exporter will receive a mail\n";
+    $comment .= "If the move succeeded, " . $user->login . " will receive a mail\n";
     $comment .= "containing the number of the new bug in the other database.\n";
     $comment .= "If all went well,  please mark this bug verified, and paste\n";
     $comment .= "in a link to the new bug. Otherwise, reopen this bug.\n";
@@ -138,10 +138,9 @@ foreach my $id (split(/:/, scalar($cgi->param('buglist')))) {
         "($id,  $exporterid, now(), " . SqlQuote($comment) . ")");
 
     print "<P>Bug $id moved to " . Param("move-to-url") . ".<BR>\n";
-    Bugzilla::BugMail::Send($id, { 'changer' => $exporter });
+    Bugzilla::BugMail::Send($id, { 'changer' => $user->login });
   }
 }
-print "<P>\n";
 
 my $buglist = $cgi->param('buglist');
 $buglist =~ s/:/,/g;
@@ -172,3 +171,4 @@ Bugzilla::BugMail::MessageToMTA($msg, $to);
 
 my $logstr = "XML: bugs $buglist sent to $to";
 Log($logstr);
+PutFooter();

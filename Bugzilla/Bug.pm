@@ -396,12 +396,9 @@ sub user {
 
     $self->{'user'} = {};
 
-    my $movers = Param("movers");
-    $movers =~ s/\s?,\s?/|/g;
-    $movers =~ s/@/\@/g;
-    $self->{'user'}->{'canmove'} = Param("move-enabled") 
-      && (defined $::COOKIE{"Bugzilla_login"}) 
-        && ($::COOKIE{"Bugzilla_login"} =~ /$movers/);
+    $self->{'user'}->{'canmove'} = Param('move-enabled')
+                                   && $::userid
+                                   && Bugzilla->user->is_mover;
 
     # In the below, if the person hasn't logged in ($::userid == 0), then
     # we treat them as if they can do anything.  That's because we don't

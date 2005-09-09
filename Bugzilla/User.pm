@@ -698,6 +698,17 @@ sub email_prefs {
     return $self->{email_prefs};
 }
 
+sub is_mover {
+    my $self = shift;
+
+    if (!defined $self->{'is_mover'}) {
+        my @movers = map { trim($_) } split(',', Param('movers'));
+        $self->{'is_mover'} = ($self->id
+                               && lsearch(\@movers, $self->login) != -1);
+    }
+    return $self->{'is_mover'};
+}
+
 1;
 
 __END__
@@ -849,6 +860,12 @@ all MySQL supported, this will go away.
 =item C<can_bless>
 
 Returns C<1> if the user can bless at least one group. Otherwise returns C<0>.
+
+=item C<is_mover>
+
+Returns true if the user is in the list of users allowed to move bugs
+to another database. Note that this method doesn't check whether bug
+moving is enabled.
 
 =back
 

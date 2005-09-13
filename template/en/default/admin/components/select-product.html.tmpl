@@ -39,9 +39,6 @@
   title = "Edit components for which product?"
 %]
 
-[% bug_count_contentlink = BLOCK %]buglist.cgi?component=%%name%%&amp;product=
-  [%- product FILTER url_quote %][% END %]
-
 [% columns = [
      { 
        name => "name"
@@ -62,7 +59,7 @@
       name => 'bug_count'
       heading => "$terms.Bugs"
       align => "right"
-      contentlink => bug_count_contentlink
+      contentlink => "buglist.cgi?product=%%name%%"
     }) %]
 
 [% END %]

@@ -720,6 +720,7 @@ if ($action eq 'delete') {
                                   {product => $product});
 
     $vars->{'product'} = $product;
+    $vars->{'classification'} = $classification;
 
     my $bug_ids = $dbh->selectcol_arrayref(q{
         SELECT bug_id FROM bugs

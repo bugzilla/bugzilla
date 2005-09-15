@@ -1249,7 +1249,7 @@ if ($action eq 'update') {
         SendSQL("UPDATE products
                  SET milestoneurl=" . SqlQuote($milestoneurl) . "
                  WHERE id=$product_id");
-        print "Updated mile stone URL.<BR>\n";
+        print "Updated milestone URL.<BR>\n";
     }
 
 

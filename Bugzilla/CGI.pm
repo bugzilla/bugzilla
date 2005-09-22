@@ -55,7 +55,7 @@ sub new {
     $self->charset('');
 
     # Redirect to SSL if required
-    if (Param('sslbase') ne '' and Param('ssl') eq 'always') {
+    if (Param('sslbase') ne '' and Param('ssl') eq 'always' and i_am_cgi()) {
         $self->require_https(Param('sslbase'));
     }
 

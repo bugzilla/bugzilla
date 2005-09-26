@@ -83,7 +83,7 @@ if ($action eq 'search') {
     my $nextCondition;
     my $visibleGroups;
 
-    if (Param('usevisibilitygroups')) {
+    if (!$editusers && Param('usevisibilitygroups')) {
         # Show only users in visible groups.
         $visibleGroups = visibleGroupsAsString();
 
@@ -197,7 +197,7 @@ if ($action eq 'search') {
     $otherUser 
         || ThrowCodeError('invalid_user_id', {'userid' => $cgi->param('userid')});
 
-    canSeeUser($otherUserID)
+    $editusers || canSeeUser($otherUserID)
         || ThrowUserError('auth_failure', {reason => "not_visible",
                                            action => "modify",
                                            object => "user"});
@@ -228,7 +228,7 @@ if ($action eq 'search') {
                          'group_group_map READ',
                          'group_group_map AS ggm READ');
  
-    canSeeUser($otherUserID)
+    $editusers || canSeeUser($otherUserID)
         || ThrowUserError('auth_failure', {reason => "not_visible",
                                            action => "modify",
                                            object => "user"});
@@ -396,11 +396,6 @@ if ($action eq 'search') {
     $editusers || ThrowUserError('auth_failure', {group  => "editusers",
                                                   action => "delete",
                                                   object => "users"});
-    canSeeUser($otherUserID) || ThrowUserError('auth_failure',
-                                               {reason => "not_visible",
-                                                action => "delete",
-                                                object => "user"});
-
     $vars->{'otheruser'}      = $otherUser;
     $vars->{'editcomponents'} = UserInGroup('editcomponents');
 
@@ -506,10 +501,6 @@ if ($action eq 'search') {
                                  {group  => "editusers",
                                   action => "delete",
                                   object => "users"});
-    canSeeUser($otherUserID) || ThrowUserError('auth_failure',
-                                               {reason => "not_visible",
-                                                action => "delete",
-                                                object => "user"});
     @{$otherUser->product_responsibilities()}
         && ThrowUserError('user_has_responsibility');
 

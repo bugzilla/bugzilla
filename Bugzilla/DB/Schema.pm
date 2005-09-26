@@ -20,6 +20,7 @@
 # Contributor(s): Andrew Dunstan <andrew@dunslane.net>,
 #                 Edward J. Sabol <edwardjsabol@iname.com>
 #                 Max Kanat-Alexander <mkanat@bugzilla.org>
+#                 Dennis Melentyev <dennis.melentyev@infopulse.com.ua>
 
 package Bugzilla::DB::Schema;
 
@@ -35,7 +36,12 @@ use strict;
 use Bugzilla::Error;
 use Bugzilla::Util;
 
+use Safe;
+# Historical, needed for SCHEMA_VERSION = '1.00'
 use Storable qw(dclone freeze thaw);
+
+# New SCHEMA_VERSION (2.00) use this
+use Data::Dumper;
 
 =head1 NAME
 
@@ -141,7 +147,7 @@ which can be used to specify the type of index such as UNIQUE or FULLTEXT.
 
 =cut
 
-use constant SCHEMA_VERSION  => '1.00';
+use constant SCHEMA_VERSION  => '2.00';
 use constant ABSTRACT_SCHEMA => {
 
     # BUG-RELATED TABLES
@@ -1967,18 +1973,24 @@ sub columns_equal {
               Do not attempt to manipulate this data directly,
               as the format may change at any time in the future.
               The only thing you should do with the returned value
-              is either store it somewhere or deserialize it.
+              is either store it somewhere (coupled with appropriate 
+              SCHEMA_VERSION) or deserialize it.
 
 =cut
 
 sub serialize_abstract {
     my ($self) = @_;
-    # We do this so that any two stored Schemas will have the
-    # same byte representation if they are identical.
-    # We don't need it currently, but it might make things
-    # easier in the future.
-    local $Storable::canonical = 1;
-    return freeze($self->{abstract_schema});
+    
+    # Make it ok to eval
+    local $Data::Dumper::Purity = 1;
+    
+    # Avoid cross-refs
+    local $Data::Dumper::Deepcopy = 1;
+    
+    # Always sort keys to allow textual compare
+    local $Data::Dumper::Sortkeys = 1;
+    
+    return Dumper($self->{abstract_schema});
 }
 
 =item C<deserialize_abstract($serialized, $version)>
@@ -1998,12 +2010,16 @@ sub serialize_abstract {
 sub deserialize_abstract {
     my ($class, $serialized, $version) = @_;
 
-    my $thawed_hash = thaw($serialized);
-
-    # At this point, we have no backwards-compatibility
-    # code to write, so $version is ignored.
-    # For what $version ought to be used for, see the
-    # "private" section of the SCHEMA_VERSION docs.
+    my $thawed_hash;
+    if (int($version) < 2) {
+        $thawed_hash = thaw($serialized);
+    }
+    else {
+        my $cpt = new Safe;
+        $cpt->reval($serialized) ||
+            die "Unable to restore cached schema: " . $@;
+        $thawed_hash = ${$cpt->varglob('VAR1')};
+    }
 
     return $class->new(undef, $thawed_hash);
 }
@@ -2034,7 +2050,7 @@ object.
 
 sub get_empty_schema {
     my ($class) = @_;
-    return $class->deserialize_abstract(freeze({}));
+    return $class->deserialize_abstract(Dumper({}), SCHEMA_VERSION);
 }
 
 1;

@@ -499,6 +499,14 @@ if ($action eq 'new') {
     }
 
     my $description  = trim($cgi->param('description')  || '');
+
+    if ($description eq '') {
+        print "You must enter a description for product '$product'. Please press\n";
+        print "<b>Back</b> and try again.\n";
+        PutTrailer($localtrailer);
+        exit;
+    }
+
     my $milestoneurl = trim($cgi->param('milestoneurl') || '');
     my $disallownew = 0;
     $disallownew = 1 if $cgi->param('disallownew');

@@ -84,8 +84,17 @@ if (!defined $product || $product eq "") {
        my %classifications;
     
        foreach my $c (GetSelectableClassifications()) {
-           $classdesc{$c} = $::classdesc{$c};
-           $classifications{$c} = $::classifications{$c};
+           my $found = 0;
+           foreach my $p (@enterable_products) {
+              if (CanEnterProduct($p)
+                  && IsInClassification($c,$p)) {
+                      $found = 1;
+              }
+           }
+           if ($found) {
+               $classdesc{$c} = $::classdesc{$c};
+               $classifications{$c} = $::classifications{$c};
+           }
        }
 
        my $classification_size = scalar(keys %classdesc);

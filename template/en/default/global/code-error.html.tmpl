@@ -144,11 +144,6 @@
       [%+ terms.bug %] [%+ bug_id FILTER html %].
     [% END %]
 
-  [% ELSIF error == "invalid_isactive_flag" %]
-    [% title = "Invalid isactive flag" %]        
-    The active flag was improperly set.  There may be
-    a problem with [% terms.Bugzilla %] or [% terms.abug %] in your browser.
-
   [% ELSIF error == "invalid_series_id" %]
     [% title = "Invalid Series" %]
     The series_id [% series_id FILTER html %] is not valid. It may be that
@@ -228,10 +223,6 @@
     it. Series: [% series.category FILTER html %] / 
     [%+ series.subcategory FILTER html %] / 
     [%+ series.name FILTER html %].
-    
-  [% ELSIF error == "no_y_axis_defined" %]
-    No Y axis was defined when creating report. The X axis is optional,
-    but the Y axis is compulsory.
     
   [% ELSIF error == "need_quipid" %]
     A valid quipid is needed.

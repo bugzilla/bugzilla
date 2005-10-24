@@ -586,7 +586,7 @@ sub get_unified_diff
   my ($bugid, $description, $ispatch, $thedata) = FetchSQLData();
   if (!$ispatch) {
     $vars->{'attach_id'} = $id;
-    ThrowCodeError("must_be_patch");
+    ThrowUserError("must_be_patch");
   }
 
   # Reads in the patch, converting to unified diff in a temp file

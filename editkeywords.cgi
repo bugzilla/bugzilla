@@ -124,7 +124,7 @@ if ($action eq 'new') {
 
     if (FetchOneColumn()) {
         $vars->{'name'} = $name;
-        ThrowUserError("keyword_already_exists");
+        ThrowUserError("keyword_already_exists", $vars);
     }
 
 

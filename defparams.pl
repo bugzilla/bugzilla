@@ -1357,7 +1357,8 @@ Reason: %reason%
 
   {
    name => 'usemenuforusers',
-   desc => 'If this option is set, a popup menu will be used where a user' .
+   desc => 'If this option is set, Bugzilla will offer you a list' .
+           ' to select from (instead of a text entry field) where a user' .
            ' needs to be selected.  This option should not be enabled on' .
            ' sites where there are a large number of users.',
    type => 'b',

@@ -327,7 +327,7 @@ while (my $event = get_next_event) {
 
     # We loop for each target user because some of the queries will be using
     # subjective pronouns
-    Bugzilla->switch_to_shadow_db();
+    $dbh = Bugzilla->switch_to_shadow_db();
     for my $target (@{$event->{'mailto'}}) {
         my $args = {
             'subject'     => $event->{'subject'},
@@ -352,7 +352,7 @@ while (my $event = get_next_event) {
 
         mail($args);
     }
-    Bugzilla->switch_to_main_db();
+    $dbh = Bugzilla->switch_to_main_db();
 }
 
 ################################################################################

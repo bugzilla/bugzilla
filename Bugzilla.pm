@@ -144,12 +144,20 @@ sub switch_to_shadow_db {
     }
 
     $_dbh = $_dbh_shadow;
+    # we have to return $class->dbh instead of $_dbh as
+    # $_dbh_shadow may be undefined if no shadow DB is used
+    # and no connection to the main DB has been established yet.
+    return $class->dbh;
 }
 
 sub switch_to_main_db {
     my $class = shift;
 
     $_dbh = $_dbh_main;
+    # We have to return $class->dbh instead of $_dbh as
+    # $_dbh_main may be undefined if no connection to the main DB
+    # has been established yet.
+    return $class->dbh;
 }
 
 # Private methods

@@ -150,7 +150,7 @@ if (defined $cgi->param('cleangroupsnow')) {
     # If any page starts taking longer than one hour to load, this interval
     # should be revised.
     SendSQL("SELECT MAX(last_changed) FROM groups WHERE last_changed < NOW() - " . 
-            $dbh->sql_interval('1 HOUR'));
+            $dbh->sql_interval(1, 'HOUR'));
     (my $cutoff) = FetchSQLData();
     Status("Cutoff is $cutoff");
     SendSQL("SELECT COUNT(*) FROM user_group_map");
@@ -255,7 +255,7 @@ if (defined $cgi->param('rescanallBugMail')) {
     Status("OK, now attempting to send unsent mail");
     SendSQL("SELECT bug_id FROM bugs 
               WHERE (lastdiffed IS NULL OR lastdiffed < delta_ts) AND
-             delta_ts < now() - " . $dbh->sql_interval('30 minute') .
+             delta_ts < now() - " . $dbh->sql_interval(30, 'MINUTE') .
             " ORDER BY bug_id");
     my @list;
     while (MoreSQLData()) {
@@ -867,7 +867,7 @@ Status("Checking for unsent mail");
 
 SendSQL("SELECT bug_id " .
         "FROM bugs WHERE (lastdiffed IS NULL OR lastdiffed < delta_ts) AND " .
-        "delta_ts < now() - " . $dbh->sql_interval('30 minute') .
+        "delta_ts < now() - " . $dbh->sql_interval(30, 'MINUTE') .
         " ORDER BY bug_id");
 
 while (@row = FetchSQLData()) {

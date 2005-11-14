@@ -130,9 +130,9 @@ sub sql_date_format {
 }
 
 sub sql_interval {
-    my ($self, $interval) = @_;
+    my ($self, $interval, $units) = @_;
     
-    return "INTERVAL '$interval'";
+    return "$interval * INTERVAL '1 $units'";
 }
 
 sub sql_string_concat {

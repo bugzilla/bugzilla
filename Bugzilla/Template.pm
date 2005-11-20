@@ -284,6 +284,13 @@ sub create {
             # Prevents line break on hyphens and whitespaces.
             no_break => sub {
                 my ($var) = @_;
+    my %opts = @_;
+    if ($opts{'clean_cache'}) {
+        # checksetup.pl will call us once for any template/lang directory.
+        # We need a possibility to reset the cache, so that no files from
+        # the previous language pollute the action.
+        $template_include_path = undef;
+    }
                 $var =~ s/ /\&nbsp;/g;
                 $var =~ s/-/\&#8209;/g;
                 return $var;

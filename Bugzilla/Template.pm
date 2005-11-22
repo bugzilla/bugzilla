@@ -203,6 +203,14 @@ $Template::Stash::SCALAR_OPS->{ truncate } =
 
 sub create {
     my $class = shift;
+    my %opts = @_;
+
+    # checksetup.pl will call us once for any template/lang directory.
+    # We need a possibility to reset the cache, so that no files from
+    # the previous language pollute the action.
+    if ($opts{'clean_cache'}) {
+        $template_include_path = undef;
+    }
 
     # IMPORTANT - If you make any configuration changes here, make sure to
     # make them in t/004.template.t and checksetup.pl.
@@ -284,13 +292,6 @@ sub create {
             # Prevents line break on hyphens and whitespaces.
             no_break => sub {
                 my ($var) = @_;
-    my %opts = @_;
-    if ($opts{'clean_cache'}) {
-        # checksetup.pl will call us once for any template/lang directory.
-        # We need a possibility to reset the cache, so that no files from
-        # the previous language pollute the action.
-        $template_include_path = undef;
-    }
                 $var =~ s/ /\&nbsp;/g;
                 $var =~ s/-/\&#8209;/g;
                 return $var;

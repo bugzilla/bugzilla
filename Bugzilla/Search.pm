@@ -1625,6 +1625,6 @@ sub BuildOrderBy {
         return;
     }
 
-    push(@$stringlist, $orderfield . ' ' . $orderdirection);
+    push(@$stringlist, trim($orderfield . ' ' . $orderdirection));
 }
 1;

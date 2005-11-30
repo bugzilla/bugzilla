@@ -1421,6 +1421,9 @@ import Bugzilla::User::Setting qw(add_setting);
 require Bugzilla::Util;
 import Bugzilla::Util qw(bz_crypt trim html_quote);
 
+require Bugzilla::User;
+import Bugzilla::User qw(insert_new_user);
+
 # globals.pl clears the PATH, but File::Find uses Cwd::cwd() instead of
 # Cwd::getcwd(), which we need to do because `pwd` isn't in the path - see
 # http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2001-09/msg00115.html
@@ -4331,9 +4334,6 @@ if ($sth->rows == 0) {
             }
         }
 
-        # Crypt the administrator's password
-        my $cryptedpassword = bz_crypt($pass1);
-
         if ($^O !~ /MSWin32/i) {
             system("stty","echo"); # re-enable input echoing
         }
@@ -4343,12 +4343,7 @@ if ($sth->rows == 0) {
         $SIG{QUIT} = 'DEFAULT';
         $SIG{TERM} = 'DEFAULT';
 
-        $dbh->do(
-          q{INSERT INTO profiles (login_name, realname, cryptpassword, 
-                                  disabledtext, refreshed_when)
-            VALUES (?, ?, ?, ?, ?)},
-            undef, $login, $realname, $cryptedpassword, 
-            '', '1900-01-01 00:00:00');
+        insert_new_user($login, $realname, $pass1);
     }
 
     # Put the admin in each group if not already    

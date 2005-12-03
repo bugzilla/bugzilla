@@ -47,7 +47,7 @@ use Bugzilla::Search;
 
 GetVersionTable();
 
-Bugzilla->login(LOGIN_REQUIRED);
+Bugzilla->login();
 
 Bugzilla->switch_to_shadow_db();
 

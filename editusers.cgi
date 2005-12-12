@@ -319,7 +319,9 @@ if ($action eq 'list') {
           $matchstr = '.'
                 unless $matchstr;
       } else {
-          die "Unknown match type";
+          print "Unknown match type: " . html_quote($::FORM{'matchtype'});
+          PutTrailer();
+          exit;
       }
       $query .= SqlQuote($matchstr) . " ORDER BY login_name";
     } elsif (exists $::FORM{'group'}) {
@@ -328,7 +330,9 @@ if ($action eq 'list') {
           "FROM profiles, user_group_map WHERE profiles.userid = user_group_map.user_id
            AND group_id=" . $::FORM{'group'} . " ORDER BY login_name";
     } else {
-      die "Missing parameters";
+      print "The search cannot be executed. There are missing parameters.";
+      PutTrailer();
+      exit;
     }
 
     SendSQL($query);

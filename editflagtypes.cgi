@@ -488,7 +488,18 @@ sub validateCCList {
                         { cc_list => $cgi->param('cc_list') });
     
     my @addresses = split(/[, ]+/, $cgi->param('cc_list'));
-    foreach my $address (@addresses) { CheckEmailSyntax($address) }
+    # We do not call Util::validate_email_syntax because these
+    # addresses do not require to match 'emailregexp' and do not
+    # depend on 'emailsuffix'. So we limit ourselves to a simple
+    # sanity check:
+    # - match the syntax of a fully qualified email address;
+    # - do not contain any illegal character.
+    foreach my $address (@addresses) {
+        ($address =~ /^[\w\.\+\-=]+@[\w\.\-]+\.[\w\-]+$/
+           && $address !~ /[\\\(\)<>&,;:"\[\] \t\r\n]/)
+          || ThrowUserError('illegal_email_address',
+                            {addr => $address, default => 1});
+    }
 }
 
 sub validateProduct {

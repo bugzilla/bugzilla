@@ -23,6 +23,7 @@
 
 use diagnostics;
 use strict;
+use File::Temp;
 
 require "globals.pl";
 require "defparams.pl";
@@ -40,7 +41,7 @@ sub sillyness {
 my $verbose = 0;
 my $syncall = 0;
 my $shutdown = 0;
-my $tempdir = "data";
+my $tempdir = File::Spec->tmpdir;
 my $force = 0;
 
 my $shutdown_msg = "Bugzilla is temporarily disabled while the database is backed up. Try again in a few minutes.";
@@ -233,13 +234,14 @@ if ($syncall) {
     }
     Verbose("Locking entire database");
     SendSQL($query);
-    my $tempfile = "$tempdir/tmpsyncshadow.$$";
+    my ($tmpfh, $tempfile) = File::Temp::tempfile("syncshadowdb.XXXXX",
+                                 DIR => $tempdir, UNLINK => 1);
     Verbose("Dumping database to a temp file ($tempfile).");
     my @ARGS = ("-u", $::db_user);
     if ($::db_pass) { push @ARGS, "-p$::db_pass" }
     push @ARGS, "-l", "-e", $::db_name, @tables;
     open SAVEOUT, ">&STDOUT";     # stash the original output stream
-    open STDOUT, ">$tempfile";    # redirect to file
+    open STDOUT, ">&", $tmpfh;    # redirect to temp filehandle
     select STDOUT; $| = 1;        # disable buffering
     system("$::mysqlpath/mysqldump", @ARGS);
     open STDOUT, ">&SAVEOUT";     # redirect back to original stream
@@ -251,7 +253,7 @@ if ($syncall) {
     if ($verbose) {
         $extra .= " -v";
     }
-    open(MYSQL, "cat $tempfile | $::mysqlpath/mysql $extra " .
+    open (MYSQL, "/bin/cat $tempfile | $::mysqlpath/mysql $extra " .
          Param("shadowdb") . "|") || die "Couldn't do db copy";
     my $count = 0;
     while (<MYSQL>) {
@@ -262,7 +264,7 @@ if ($syncall) {
         }
     }
     close(MYSQL);
-    unlink($tempfile);
+    close($tmpfh);
     Verbose("");
     
     

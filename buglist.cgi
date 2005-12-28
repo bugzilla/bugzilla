@@ -59,6 +59,10 @@ use vars qw($db_name
 my $cgi = Bugzilla->cgi;
 my $dbh = Bugzilla->dbh;
 
+# We have to check the login here to get the correct footer
+# if an error is thrown.
+Bugzilla->login();
+
 if (length($::buffer) == 0) {
     print $cgi->header(-refresh=> '10; URL=query.cgi');
     ThrowUserError("buglist_parameters_required");
@@ -79,9 +83,6 @@ if ($dotweak) {
                                          action => "modify",
                                          object => "multiple_bugs"});
     GetVersionTable();
-}
-else {
-    Bugzilla->login();
 }
 
 # Hack to support legacy applications that think the RDF ctype is at format=rdf.

@@ -966,15 +966,21 @@ sub notify {
 
     $::vars->{'flag'} = $flag;
 
-    my $message;
-    my $rv = 
-      $::template->process($template_file, $::vars, \$message);
-    if (!$rv) {
-        Bugzilla->cgi->header();
-        ThrowTemplateError($::template->error());
-    }
+    # Process and send notification for each recipient
+    foreach my $to ($flag->{'addressee'} ? $flag->{'addressee'}->email : '',
+                    split(/[, ]+/, $flag->{'type'}->{'cc_list'}))
+    {
+        next unless $to;
+        my $message;
+        $::vars->{'to'} = $to;
+        my $rv = $::template->process($template_file, $::vars, \$message);
+        if (!$rv) {
+            Bugzilla->cgi->header();
+            ThrowTemplateError($::template->error());
+        }
 
-    Bugzilla::BugMail::MessageToMTA($message);
+        Bugzilla::BugMail::MessageToMTA($message);
+    }
 }
 
 # Cancel all request flags from the attachment being obsoleted.

@@ -1,5 +1,8 @@
-The 2.16.10 release repairs a critical bug in
-2.16.9 where no user could enter a bug, under many circumstances.
+Bugzilla 2.16.11 is a security fix for the Bugzilla 2.16
+series. Users of the Bugzilla 2.16 series should strongly
+consider upgrading to the 2.20 series, as Bugzilla 2.16
+will soon be reaching end-of-life, at which time there will
+be no further security fixes released for the 2.16 series.
 
 **************************
 *** ABOUT THIS VERSION ***
@@ -125,6 +128,23 @@ installation.
   however use the option "The bug is resolved or verified" to achieve
   part of this.
   (bug 146261)
+
+**********************************************************
+*** USERS UPGRADING FROM ALL VERSIONS PRIOR TO 2.16.11 ***
+**********************************************************
+
+ This is only a security fix release, for a local privilege
+ escalation issue. You can see the details of this security
+ fix at:
+
+ http://www.bugzilla.org/security/2.16.10-nr/
+
+**********************************************************
+*** USERS UPGRADING FROM ALL VERSIONS PRIOR TO 2.16.10 ***
+**********************************************************
+
+ The 2.16.10 release repairs a critical bug in 2.16.9 where
+ no user could enter a bug, under many circumstances.
 
 *********************************************************
 *** USERS UPGRADING FROM ALL VERSIONS PRIOR TO 2.16.9 ***

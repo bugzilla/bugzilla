@@ -1,5 +1,5 @@
 *****************************************
-*** The Bugzilla 2.18.4 Release Notes ***
+*** The Bugzilla 2.18.5 Release Notes ***
 *****************************************
 
 Table of Contents
@@ -7,10 +7,7 @@ Table of Contents
 
 - Introduction
 - Important Updates In This Point Release
-    * Version 2.18.1
-    * Version 2.18.2
-    * Version 2.18.3
-    * Version 2.18.4
+    * Versions 2.18.1 - 2.18.5
 - Requirements
     * Dependency Requirements
 - What's New?
@@ -114,6 +111,13 @@ Version 2.18.4
   Bugzilla while the "shutdownhtml" parameter is active.
   (bug 273767)
 
+Version 2.18.5
+--------------
+
++ The "All Closed" chart that is created by default in
+  New Charts now actually represents all closed bugs,
+  and not all bugs in the product.
+  (bug 300473)
 
 Requirements
 ************
@@ -708,6 +712,14 @@ possible Information Leak.
 
 See http://www.bugzilla.org/security/2.18.4/ for details.
 
+Version 2.18.5
+--------------
+
+The Bugzilla team fixed one security flaw in Bugzilla 2.18,
+a possible SQL Injection only accessible to an administrator.
+You can see the details at:
+
+http://www.bugzilla.org/security/2.18.5/
 
 Detailed Version-To-Version Release Notes
 *****************************************

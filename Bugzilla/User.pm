@@ -67,7 +67,7 @@ use constant MATCH_SKIP_CONFIRM  => 1;
 
 sub new {
     my $invocant = shift;
-    my $user_id = shift;
+    my ($user_id, $tables_locked) = @_;
 
     if ($user_id) {
         my $uid = $user_id;
@@ -76,7 +76,7 @@ sub new {
                             {argument => 'userID',
                              value    => $uid,
                              function => 'Bugzilla::User::new'});
-        return $invocant->_create("userid=?", $user_id);
+        return $invocant->_create('userid = ?', $user_id, $tables_locked);
     }
     else {
         return $invocant->_create;
@@ -93,10 +93,11 @@ sub new {
 # in the id its already had to validate (or the User.pm object, of course)
 sub new_from_login {
     my $invocant = shift;
-    my $login = shift;
+    my ($login, $tables_locked) = @_;
 
     my $dbh = Bugzilla->dbh;
-    return $invocant->_create($dbh->sql_istrcmp('login_name', '?'), $login);
+    return $invocant->_create($dbh->sql_istrcmp('login_name', '?'),
+                              $login, $tables_locked);
 }
 
 # Internal helper for the above |new| methods

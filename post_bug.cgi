@@ -109,7 +109,10 @@ umask 0;
 my $component_id = get_component_id($product_id, $::FORM{component});
 $component_id || ThrowUserError("require_component");
 
-if (!defined $::FORM{'short_desc'} || trim($::FORM{'short_desc'}) eq "") {
+# Set the parameter to itself, but cleaned up
+$::FORM{'short_desc'} = clean_text($::FORM{'short_desc'});
+
+if (!defined $::FORM{'short_desc'} || $::FORM{'short_desc'} eq "") {
     ThrowUserError("require_summary");
 }
 

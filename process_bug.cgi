@@ -559,6 +559,7 @@ if (defined $::FORM{'id'}) {
     CheckFormFieldDefined(\%::FORM, 'bug_file_loc');
     CheckFormFieldDefined(\%::FORM, 'short_desc');
     CheckFormFieldDefined(\%::FORM, 'longdesclength');
+    $::FORM{'short_desc'} = clean_text($::FORM{'short_desc'});
 
     if (trim($::FORM{'short_desc'}) eq "") {
         ThrowUserError("require_summary");

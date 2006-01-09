@@ -33,7 +33,7 @@ use base qw(Exporter);
                              html_quote url_quote value_quote xml_quote
                              css_class_quote
                              lsearch max min
-                             trim format_time);
+                             trim format_time clean_text);
 
 use Bugzilla::Config;
 
@@ -191,6 +191,12 @@ sub format_time {
     return $time;
 }
 
+sub clean_text {
+    my ($dtext) = shift;
+    $dtext =~  s/[\x00-\x1F\x7F]+/ /g;   # change control characters to a space
+    return trim($dtext);
+}
+
 1;
 
 __END__
@@ -341,6 +347,10 @@ Returns the minimum from a set of values.
 
 Removes any leading or trailing whitespace from a string. This routine does not
 modify the existing string.
+
+=item C<clean_text($str)>
+Returns the parameter "cleaned" by exchanging non-printable characters with spaces.
+Specifically characters (ASCII 0 through 31) and (ASCII 127) will become ASCII 32 (Space).
 
 =back
 

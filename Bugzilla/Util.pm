@@ -39,7 +39,7 @@ use base qw(Exporter);
                              trim wrap_comment find_wrap_point
                              format_time format_time_decimal
                              file_mod_time
-                             bz_crypt);
+                             bz_crypt clean_text);
 
 use Bugzilla::Config;
 use Bugzilla::Error;
@@ -359,6 +359,12 @@ sub ValidateDate {
     } 
 }
 
+sub clean_text {
+    my ($dtext) = shift;
+    $dtext =~ s/[\x00-\x1F\x7F]+/ /g;   # change control characters to a space
+    return trim($dtext);
+}
+
 1;
 
 __END__
@@ -610,6 +616,10 @@ Takes a string and returns a C<crypt>ed value for it, using a random salt.
 
 Please always use this function instead of the built-in perl "crypt"
 when initially encrypting a password.
+
+=item C<clean_text($str)>
+Returns the parameter "cleaned" by exchanging non-printable characters with a space.
+Specifically characters (ASCII 0 through 31) and (ASCII 127) will become ASCII 32 (Space).
 
 =begin undocumented
 

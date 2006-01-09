@@ -4168,6 +4168,25 @@ if (@$broken_nonopen_series) {
     print " done.\n";
 }
 
+# Fixup for Bug 101380
+# "Newlines, nulls, leading/trailing spaces are getting into summaries"
+
+my $controlchar_bugs =
+    $dbh->selectall_arrayref("SELECT short_desc, bug_id FROM bugs WHERE " .
+                             "'short_desc' " . $dbh->sql_regexp . 
+                             " '[[:cntrl:]]'");
+if (@$controlchar_bugs)
+{
+    print 'Cleaning control characters from bug summaries...';
+    foreach (@$controlchar_bugs) {
+        my ($short_desc, $bug_id) = @$_;
+        print " $bug_id...";
+        $short_desc = clean_text($short_desc);
+        $dbh->do("UPDATE bugs SET short_desc = ? WHERE bug_id = ?",
+                 undef, $short_desc, $bug_id);
+    }
+    print " done.\n";
+}
 
 # If you had to change the --TABLE-- definition in any way, then add your
 # differential change code *** A B O V E *** this comment.

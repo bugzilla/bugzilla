@@ -1574,6 +1574,12 @@ sub trim {
     return $str;
 }
 
+sub clean_text {
+    my ($dtext) = shift;
+    $dtext =~  s/[\x00-\x1F\x7F]+/ /g;   # change control characters to spaces
+    return trim($dtext);
+}
+
 ###############################################################################
 # Global Templatization Code
 

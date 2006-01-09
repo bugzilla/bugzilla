@@ -100,7 +100,8 @@ if (!$::FORM{'component'}) {
     exit;                  
 }
 
-if (!defined $::FORM{'short_desc'} || trim($::FORM{'short_desc'}) eq "") {
+$::FORM{'short_desc'} = clean_text($::FORM{'short_desc'});
+if (!defined $::FORM{'short_desc'} || $::FORM{'short_desc'} eq "") {
     DisplayError("You must enter a summary for this bug.");
     exit;
 }

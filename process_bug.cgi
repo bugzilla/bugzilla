@@ -125,6 +125,8 @@ if ( Param("usetargetmilestone") ) {
   CheckFormFieldDefined(\%::FORM, 'target_milestone');
 }
 
+$::FORM{'short_desc'} = clean_text($::FORM{'short_desc'});
+
 #
 # This function checks if there is a comment required for a specific
 # function and tests, if the comment was given.

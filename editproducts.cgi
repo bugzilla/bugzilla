@@ -409,7 +409,7 @@ if (!$action && !$product) {
 #
 
 if ($action eq 'add') {
-    PutHeader("Add product");
+    PutHeader("Add Product");
 
     if (Param('useclassification')) {
         CheckClassification($classification);
@@ -791,7 +791,7 @@ if ($action eq 'delete') {
 #
 
 if ($action eq 'edit' || (!$action && $product)) {
-    PutHeader("Edit product");
+    PutHeader("Edit Product");
     CheckProduct($product);
     my $classification_id=1;
     if (Param('useclassification')) {
@@ -893,7 +893,7 @@ if ($action eq 'edit' || (!$action && $product)) {
     }
 
     print "</TD>\n</TR><TR>\n";
-    print "  <TH ALIGN=\"right\" VALIGN=\"top\"><A HREF=\"editproducts.cgi?action=editgroupcontrols&product=", url_quote($product), $classhtmlvar,"\">Edit Group Access Controls</A></TH>\n";
+    print "  <TH ALIGN=\"right\" VALIGN=\"top\"><A HREF=\"editproducts.cgi?action=editgroupcontrols&product=", url_quote($product), $classhtmlvar,"\">Edit Group Access Controls:</A></TH>\n";
     print "<TD>\n";
     SendSQL("SELECT id, name, isactive, entry, membercontrol, othercontrol, canedit " .
             "FROM groups, " .
@@ -1017,7 +1017,7 @@ if ($action eq 'updategroupcontrols') {
             exit;                
         }
     }
-    PutHeader("Update group access controls for product \"$product\"");
+    PutHeader("Update group access controls for $product");
     $headerdone = 1;
     SendSQL("SELECT id, name FROM groups " .
             "WHERE isbuggroup != 0 AND isactive != 0");

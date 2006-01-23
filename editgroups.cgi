@@ -454,7 +454,8 @@ if ($action eq 'delete') {
         SendSQL("UPDATE flagtypes SET request_group_id = NULL 
                  WHERE request_group_id = $gid");
         SendSQL("DELETE FROM user_group_map WHERE group_id = $gid");
-        SendSQL("DELETE FROM group_group_map WHERE grantor_id = $gid");
+        SendSQL("DELETE FROM group_group_map
+                 WHERE grantor_id = $gid OR member_id = $gid");
         SendSQL("DELETE FROM bug_group_map WHERE group_id = $gid");
         SendSQL("DELETE FROM group_control_map WHERE group_id = $gid");
         SendSQL("DELETE FROM whine_schedules WHERE " .

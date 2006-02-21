@@ -710,7 +710,7 @@ Version 2.18.4
 The Bugzilla team fixed one security flaw in Bugzilla 2.18, a
 possible Information Leak.
 
-See http://www.bugzilla.org/security/2.18.4/ for details.
+See http://www.bugzilla.org/security/2.18.3/ for details.
 
 Version 2.18.5
 --------------
@@ -719,7 +719,7 @@ The Bugzilla team fixed one security flaw in Bugzilla 2.18,
 a possible SQL Injection only accessible to an administrator.
 You can see the details at:
 
-http://www.bugzilla.org/security/2.18.5/
+http://www.bugzilla.org/security/2.18.4/
 
 Detailed Version-To-Version Release Notes
 *****************************************

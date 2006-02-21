@@ -664,7 +664,7 @@ extremely specific information leak.
 To see details on the vulnerabilities that were fixed, see the 
 Security Advisory at:
 
-http://www.bugzilla.org/security/2.16.10/
+http://www.bugzilla.org/security/2.18.4/
 
 
 Release Notes for Previous Versions

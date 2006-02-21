@@ -31,10 +31,10 @@
      For a devel release, simple bump bz-ver and bz-date
 -->
 
-<!ENTITY bz-ver "2.20">
-<!ENTITY bz-nextver "2.20.1">
-<!ENTITY bz-date "2005-09-30">
-<!ENTITY current-year "2005">
+<!ENTITY bz-ver "2.20.1">
+<!ENTITY bz-nextver "2.20.2">
+<!ENTITY bz-date "2006-02-20">
+<!ENTITY current-year "2006">
 
 <!ENTITY landfillbase "http://landfill.bugzilla.org/bugzilla-tip/">
 <!ENTITY bz "http://www.bugzilla.org/">
@@ -99,7 +99,6 @@
 
   <bookinfo>
     <title>The Bugzilla Guide - &bz-ver; 
-    <!-- BZ-DEVEL -->Development <!-- /BZ-DEVEL -->
     Release</title>
 
     <authorgroup>

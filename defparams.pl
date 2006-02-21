@@ -480,7 +480,8 @@ sub find_languages {
            'If you have a large database and this page takes a long time to ' .
            'load, try increasing this number.',
    type => 't',
-   default => '2'
+   default => '2',
+   checker => \&check_numeric
   },
 
   {
@@ -574,7 +575,8 @@ Configure bugmail: %urlbase%userprefs.cgi?tab=email
              state before our cronjob will whine at the owner.<br>
              Set to 0 to disable whining.},
    type => 't',
-   default => 7
+   default => 7,
+   checker => \&check_numeric
   },
 
   {

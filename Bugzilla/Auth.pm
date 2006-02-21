@@ -55,7 +55,7 @@ sub has_db {
     return 0;
 }
 
-# Returns the network address for a given ip
+# Returns the network address for a given IP
 sub get_netaddr {
     my $ipaddr = shift;
 

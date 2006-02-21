@@ -92,6 +92,11 @@ if (defined $cgi->param('format') && $cgi->param('format') eq "rdf"
     $cgi->delete('format');
 }
 
+# Treat requests for ctype=rss as requests for ctype=atom
+if (defined $cgi->param('ctype') && $cgi->param('ctype') eq "rss") {
+    $cgi->param('ctype', "atom");
+}
+
 # The js ctype presents a security risk; a malicious site could use it  
 # to gather information about secure bugs. So, we only allow public bugs to be
 # retrieved with this format.
@@ -649,9 +654,9 @@ if ($format->{'extension'} eq 'ics') {
     push(@selectcolumns, "opendate") if !grep($_ eq 'opendate', @selectcolumns);
 }
 
-if ($format->{'extension'} eq 'rss') {
-    # This is the list of fields that are needed by the rss filter.
-    my @required_rss_columns = (
+if ($format->{'extension'} eq 'atom') {
+    # This is the list of fields that are needed by the Atom filter.
+    my @required_atom_columns = (
       'short_desc',
       'opendate',
       'changeddate',
@@ -662,7 +667,7 @@ if ($format->{'extension'} eq 'rss') {
       'bug_status'
     );
 
-    foreach my $required (@required_rss_columns) {
+    foreach my $required (@required_atom_columns) {
         push(@selectcolumns, $required) if !grep($_ eq $required,@selectcolumns);
     }
 }
@@ -896,7 +901,7 @@ while (my @row = $buglist_sth->fetchrow_array()) {
             s/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/$1-$2-$3 $4:$5:$6/;
 
         # Put in the change date as a time, so that the template date plugin
-        # can format the date in any way needed by the template. ICS and RSS
+        # can format the date in any way needed by the template. ICS and Atom
         # have specific, and different, date and time formatting.
         $bug->{'changedtime'} = str2time($bug->{'changeddate'});
         $bug->{'changeddate'} = DiffDate($bug->{'changeddate'});        

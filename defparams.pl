@@ -213,7 +213,8 @@ DefParam("LDAPmailattribute",
 DefParam("mostfreqthreshold",
          "The minimum number of duplicates a bug needs to show up on the <A HREF=\"duplicates.cgi\">most frequently reported bugs page</a>. If you have a large database and this page takes a long time to load, try increasing this number.",
          "t",
-         "2");
+         "2",
+         \&check_numeric);
 
 
 DefParam("mybugstemplate",
@@ -604,7 +605,8 @@ DefParam("maxpatchsize",
           To accept patches of any size (subject to the limitations of 
           your server software), set this value to zero." ,
          "t",
-         '1000');
+         '1000',
+         \&check_numeric);
 
 DefParam("maxattachmentsize" , 
          "The maximum size (in kilobytes) of non-patch attachments.  Bugzilla 
@@ -612,6 +614,7 @@ DefParam("maxattachmentsize" ,
           in size.  To accept attachments of any size (subject to the
           limitations of your server software), set this value to zero." , 
          "t" , 
-         '1000');
+         '1000',
+         \&check_numeric);
 
 1;

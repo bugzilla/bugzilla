@@ -8,6 +8,12 @@
     <section>
       <title>Introduction</title>
 
+      <para>Please note that Bugzilla 2.16.x will become unsupported with
+      the release of Bugzilla 2.22. If you're installing Bugzilla for the
+      first time, please consider a newer stable version. Stable versions
+      of Bugzilla can be found at <ulink url="http://www.bugzilla.org/">
+      http://www.bugzilla.org/</ulink></para>
+
       <para>Bugzilla has been successfully installed under Solaris, Linux,
       and Win32. Win32 is not yet officially supported, but many people
       have got it working fine.
@@ -38,7 +44,10 @@
 <listitem>
   <para>
     <ulink url="http://www.mysql.com/">MySQL database server</ulink>
-    (3.22.5 or greater)
+    (3.22.5 or greater. Note that versions of Bugzilla prior to 2.20RC1 do
+    not work with MySQL 5.0.12 or higher. If you intend to install
+    Bugzilla using MySQL 5.x as your back-end, please use a more current
+    release of Bugzilla).
   </para>
 </listitem>
 
@@ -245,7 +254,11 @@
       <para>
         Visit the MySQL homepage at 
         <ulink url="http://www.mysql.com">www.mysql.com</ulink>
-        to grab and install the latest stable release of MySQL.
+        to grab and install the latest stable 4.x release of MySQL.
+        Note that versions of Bugzilla prior to 2.20RC1 do not work with MySQL
+        5.0.12 or higher. If you intend to install Bugzilla using
+        MySQL 5.x as your back-end, please use a more current release
+        of Bugzilla).
       </para>
       
       <note>
@@ -708,7 +721,7 @@ perl -pi -e 's@#\!/usr/bonsaitools/bin/perl@#\!/usr/bin/perl@' *cgi *pl Bug.pm p
 
       <para>Remember to set &lt;bugs_password&gt; to some unique password.</para>
 
-      <para>If you are using MySQL 4.0 or newer, enter:</para>
+      <para>If you are using MySQL 4.x or newer, enter:</para>
 
         <screen>  <prompt>mysql&gt;</prompt> <command>GRANT SELECT, INSERT,
          UPDATE, DELETE, INDEX, ALTER, CREATE, LOCK TABLES,

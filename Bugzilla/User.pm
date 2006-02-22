@@ -1194,8 +1194,10 @@ sub insert_new_user ($$;$$) {
     $disabledtext ||= '';
 
     # If not specified, generate a new random password for the user.
+    # If the password is '*', do not encrypt it; we are creating a user
+    # based on the ENV auth method.
     $password ||= &::GenerateRandomPassword();
-    my $cryptpassword = bz_crypt($password);
+    my $cryptpassword = ($password ne '*') ? bz_crypt($password) : $password;
 
     # XXX - These should be moved into ValidateNewUser or CheckEmailSyntax
     #       At the least, they shouldn't be here. They're safe for now, though.

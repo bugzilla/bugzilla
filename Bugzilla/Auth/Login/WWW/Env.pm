@@ -26,6 +26,7 @@ use strict;
 use Bugzilla::Config;
 use Bugzilla::Error;
 use Bugzilla::Util;
+use Bugzilla::User;
 
 sub login {
     my ($class, $type) = @_;
@@ -116,12 +117,9 @@ sub login {
                 # Need to create a new user with that email address.  Note
                 # that cryptpassword has been filled in with '*', since the
                 # user has no DB password.
-                $sth = $dbh->prepare("INSERT INTO profiles ( " .
-                                     "login_name, cryptpassword, " .
-                                     "realname, disabledtext " .
-                                     ") VALUES ( ?, ?, ?, '' )");
-                $sth->execute($env_email, '*', $env_realname);
-                $matched_userid = $dbh->bz_last_key('profiles', 'userid');
+                insert_new_user($env_email, $env_realname, '*');
+                my $new_user = Bugzilla::User->new_from_login($env_email);
+                $matched_userid = $new_user->id;
             }
         }
     }

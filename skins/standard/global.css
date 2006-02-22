@@ -216,7 +216,7 @@ body
 
     #footer .label
     {
-        width: 7.2em;
+        width: 8.2em;
         display: block;
         float: left;
 
@@ -242,7 +242,7 @@ body
 
     #footer .links
     {
-        display: block;
+        display: table-cell;
 
         padding: 0.1em 0.2em;
     }
@@ -250,8 +250,6 @@ body
     /* hide from MSIE and NN4 */
     [id]#footer .links
     {
-        display: table-cell;
-
         padding-top: 0;
         
         vertical-align: baseline;

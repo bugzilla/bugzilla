@@ -1,5 +1,5 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"> -->
-<!-- $Id: installation.xml,v 1.72.2.24 2005/12/30 15:30:08 mozilla%colinogilvie.co.uk Exp $ -->
+<!-- $Id: installation.xml,v 1.72.2.25 2006/02/21 16:44:48 jocuri%softhome.net Exp $ -->
 <chapter id="installing-bugzilla">
   <title>Installing Bugzilla</title>
 
@@ -60,7 +60,10 @@
       </step>
       <step>
         <para><link linkend="install-mysql">Install MySQL</link>
-        (&min-mysql-ver; or above)
+        (&min-mysql-ver; or above. Note that versions of Bugzilla prior to
+        2.20RC1 do not work with MySQL 5.0.12 or higher. If you intend to
+        install Bugzilla using MySQL 5.x as your back-end, please use a more
+        current release of Bugzilla).
         </para>
       </step>
       <step>
@@ -108,7 +111,10 @@
       <para>
       If you don't have it and your OS doesn't provide official packages, 
       visit <ulink url="http://www.mysql.com"/>. You need MySQL version
-      &min-mysql-ver; or higher.
+      &min-mysql-ver; or higher. Note that versions of Bugzilla prior to
+      2.20RC1 do not work with MySQL 5.0.12 or higher. If you intend to
+      install Bugzilla using MySQL 5.x as your back-end, please use a more
+      current release of Bugzilla).
       </para>
       
       <note>
@@ -590,7 +596,7 @@
         </para>
 
         <para>
-          If you are using MySQL 4.0 or newer, enter:
+          If you are using MySQL 4.x or newer, enter:
         </para>
         <screen>  [mysqld]
   # Allow packets up to 1M

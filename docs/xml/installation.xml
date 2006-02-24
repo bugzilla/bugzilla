@@ -469,7 +469,7 @@
       <title>MySQL-related modules</title>
 
       <para>The Perl/MySQL interface requires a few mutually-dependent Perl
-      modules. These modules are grouped together into the the
+      modules. These modules are grouped together into the
       Msql-Mysql-modules package.</para> 
 
       <para>The MakeMaker process will ask you a few questions about the

@@ -2006,7 +2006,7 @@ binmode(STDOUT);
         If you're using a web host, chances are that you have a
         separate database which is already locked down (or one big
         database with limited/no access to the other areas), but you
-        may want to ask your system adminstrator what the security
+        may want to ask your system administrator what the security
         settings are set to, and/or run the <command>GRANT</command>
         command for you.</para>
 

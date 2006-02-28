@@ -325,6 +325,12 @@
 
       get the buglist as comma-separated values, for import into e.g.
       a spreadsheet.</member>
+
+      <member>
+      <emphasis>iCalendar:</emphasis>
+
+      Get the buglist as an iCalendar file. Each bug is represented as a 
+      to-do item in the imported calendar.</member>
       
       <member>
       <emphasis>Change Columns:</emphasis>

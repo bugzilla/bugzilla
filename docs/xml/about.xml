@@ -1,6 +1,6 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook V4.1//EN" [
 <!ENTITY conventions SYSTEM "conventions.xml"> ] > -->
-<!-- $Id: about.xml,v 1.6.2.7 2004/12/13 03:29:58 jake%bugzilla.org Exp $ -->
+<!-- $Id: about.xml,v 1.6.2.8 2006/02/28 00:31:55 jocuri%softhome.net Exp $ -->
 
 <chapter id="about">
 <title>About This Guide</title>
@@ -88,22 +88,45 @@
       documentation for past releases and the current development version.
     </para>
     <para>
-      The documentation for the most recent stable release of Bugzilla can also
-      be found at
-      <ulink url="http://www.tldp.org">The Linux Documentation Project</ulink>.
-    </para>
- 
-    <para>
-      The latest version of this document can always be checked out via CVS.
-	    Please follow the instructions available at 
-      <ulink url="http://www.mozilla.org/cvs.html">the Mozilla CVS page</ulink>,
-      and check out the <filename>mozilla/webtools/bugzilla/docs/</filename>
-      subtree.
+      The latest version of this guide can always be found at <ulink
+      url="http://www.bugzilla.org"/>, or checked out via CVS by
+      following the <ulink url="http://www.mozilla.org/cvs.html">Mozilla 
+      CVS</ulink> instructions and check out the 
+      <filename>mozilla/webtools/bugzilla/docs/</filename>
+      subtree. However, you should read the version
+      which came with the Bugzilla release you are using.
     </para>
     <para>
-      The Bugzilla Guide is currently only available in English. 
-      If you would like to volunteer to translate it, please contact
-      <ulink url="mailto:justdave@syndicomm.com">Dave Miller</ulink>.
+      The Bugzilla Guide, or a section of it, is also available in
+      the following languages:
+      <ulink url="http://www.traduc.org/docs/guides/lecture/bugzilla/">French</ulink>,
+      <ulink url="http://bugzilla-de.sourceforge.net/docs/html/">German</ulink>,
+      <ulink url="http://www.bugzilla.jp/docs/2.18/">Japanese</ulink>.
+      Note that these documents may be written for a different Bugzilla version.
+    </para>
+    
+    <para>  
+      In addition, there are Bugzilla template localisation projects in
+      the following languages. They may have translated documentation 
+      available: 
+      <ulink url="http://sourceforge.net/projects/bugzilla-ar/">Arabic</ulink>,
+      <ulink url="http://sourceforge.net/projects/bugzilla-be/">Belarusian</ulink>,
+      <ulink url="http://openfmi.net/projects/mozilla-bg/">Bulgarian</ulink>,
+      <ulink url="http://sourceforge.net/projects/bugzilla-br/">Brazilian Portuguese</ulink>,
+      <ulink url="http://sourceforge.net/projects/bugzilla-cn/">Chinese</ulink>,
+      <ulink url="http://sourceforge.net/projects/bugzilla-fr/">French</ulink>,
+      <ulink url="http://germzilla.wurblzap.net/">German</ulink>,
+      <ulink url="http://sourceforge.net/projects/bugzilla-it/">Italian</ulink>,
+      <ulink url="http://www.bugzilla.jp/about/jp.html">Japanese</ulink>,
+      <ulink url="http://sourceforge.net/projects/bugzilla-kr/">Korean</ulink>,
+      <ulink url="http://sourceforge.net/projects/bugzilla-ru/">Russian</ulink> and
+      <ulink url="http://sourceforge.net/projects/bugzilla-es/">Spanish</ulink>.
+    </para>
+    
+    <para>  
+      If you would like to volunteer to translate the Guide into additional
+      languages, please contact
+      <ulink url="mailto:justdave@bugzilla.org">Dave Miller</ulink>.
     </para>
   </section>
 

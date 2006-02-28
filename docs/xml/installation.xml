@@ -1906,74 +1906,111 @@ binmode(STDOUT);
 
   <section id="osx">
     <title>Mac OS X Installation Notes</title>
-
-    <para>There are a lot of common libraries and utilities out there that
-    Apple did not include with Mac OS X, but which run perfectly well on it.
-    The GD library, which Bugzilla needs to do bug graphs, is one of
-    these.</para>
-
-    <para>The easiest way to get a lot of these is with a program called
-    Fink, which is similar in nature to the CPAN installer, but installs
-    common GNU utilities. Fink is available from
-    &lt;http://sourceforge.net/projects/fink/&gt;.</para>
-
-    <para>Follow the instructions for setting up Fink. Once it's installed,
-    you'll want to run the following as root: 
-    <command>fink install gd</command>
-    </para>
-
-    <para>It will prompt you for a number of dependencies, type 'y' and hit
-    enter to install all of the dependencies. Then watch it work.</para>
-
-    <para>To prevent creating conflicts with the software that Apple installs
-    by default, Fink creates its own directory tree at /sw where it installs
-    most of the software that it installs. This means your libraries and
-    headers for libgd will be at /sw/lib and /sw/include instead of /usr/lib
-    and /usr/local/include. Because of these changed locations for the
-    libraries, the Perl GD module will not install directly via CPAN, because it
-    looks for the specific paths instead of getting them from your
-    environment. But there's a way around that :-)</para>
-
-    <para>Instead of typing 
-    <quote>install GD</quote>
-    at the 
-    <prompt>cpan&gt;</prompt>
-    prompt, type 
-    <command>look GD</command>. 
-    This should go through the motions of downloading the latest version of
-    the GD module, then it will open a shell and drop you into the build
-    directory. Apply <ulink url="../xml/gd-makefile.patch">this patch</ulink> 
-    to the Makefile.PL file (save the
-    patch into a file and use the command 
-    <command>patch &lt; patchfile</command>.)
-    </para>
     
-    <para>Then, run these commands to finish the installation of the GD
-    module: 
-    <simplelist>
-      <member>
-        <command>perl Makefile.PL</command>
-      </member>
+    <section id="macosx-sendmail">
+      <title>Sendmail</title>
 
-      <member>
-        <command>make</command>
-      </member>
+      <para>In Mac OS X 10.3 and later,
+      <ulink url="http://www.postfix.org/">Postfix</ulink>
+      is used as the built-in email server. Postfix provides an executable
+      that mimics sendmail enough to fool Bugzilla, as long as Bugzilla can
+      find it.</para>
 
-      <member>
-        <command>make test</command>
-      </member>
+      <para>The substitute Sendmail executable is located at
+      <filename>/usr/sbin/sendmail</filename>, while Bugzilla expects the
+      executable to be located at <filename>/usr/lib/sendmail</filename>.
+      Rather than copying the sendmail executable, a symbolic link can be
+      used. To create the symbolic link, launch the Terminal application
+      and execute the following command:</para>
 
-      <member>
-        <command>make install</command>
-      </member>
+      <screen>
+<prompt>[localhost:~]</prompt> <command>sudo ln -s /usr/sbin/sendmail
+/usr/lib/sendmail</command> <co id="macosx-sendmail-sudo"/>
+<prompt>Enter Password:</prompt> <command>********</command>
+      </screen>
+      <calloutlist>
+        <callout arearefs="macosx-sendmail-sudo">
+          <para>You must be logged in as administrator to run this
+          command. Enter your password if prompted.</para>
+        </callout>
+      </calloutlist>
 
-      <member>And don't forget to run 
-      <command>exit</command>
+      <para>The other change to be made involves turning on the sendmailnow
+      Bugzilla parameter, which is described in <xref linkend="parameters"/>.
+      </para>
+      
+    </section>
+    
+    <section id="macosx-libraries">
+      <title>Libraries &amp; Perl Modules on Mac OS X</title>
 
-      to get back to CPAN.</member>
-    </simplelist>
-    </para>
+      <para>There are a lot of common libraries and utilities out there that
+      Apple did not include with Mac OS X, but which run perfectly well on it.
+      The GD library, which Bugzilla needs to do bug graphs, is one of
+      these.</para>
 
+      <para>The easiest way to get a lot of these is with a program called
+      Fink, which is similar in nature to the CPAN installer, but installs
+      common GNU utilities. Fink is available from
+      &lt;http://sourceforge.net/projects/fink/&gt;.</para>
+
+      <para>Follow the instructions for setting up Fink. Once it's installed,
+      you'll want to run the following as root: 
+      <command>fink install gd</command>
+      </para>
+
+      <para>It will prompt you for a number of dependencies, type 'y' and hit
+      enter to install all of the dependencies. Then watch it work.</para>
+
+      <para>To prevent creating conflicts with the software that Apple installs
+      by default, Fink creates its own directory tree at /sw where it installs
+      most of the software that it installs. This means your libraries and
+      headers for libgd will be at /sw/lib and /sw/include instead of /usr/lib
+      and /usr/local/include. Because of these changed locations for the
+      libraries, the Perl GD module will not install directly via CPAN, because
+      it looks for the specific paths instead of getting them from your
+      environment. But there's a way around that :-)</para>
+
+      <para>Instead of typing 
+      <quote>install GD</quote>
+      at the 
+      <prompt>cpan&gt;</prompt>
+      prompt, type 
+      <command>look GD</command>. 
+      This should go through the motions of downloading the latest version of
+      the GD module, then it will open a shell and drop you into the build
+      directory. Apply <ulink url="../xml/gd-makefile.patch">this patch</ulink> 
+      to the Makefile.PL file (save the
+      patch into a file and use the command 
+      <command>patch &lt; patchfile</command>.)
+      </para>
+    
+      <para>Then, run these commands to finish the installation of the GD
+      module: 
+      <simplelist>
+        <member>
+          <command>perl Makefile.PL</command>
+        </member>
+
+        <member>
+          <command>make</command>
+        </member>
+
+        <member>
+          <command>make test</command>
+        </member>
+
+        <member>
+          <command>make install</command>
+        </member>
+
+        <member>And don't forget to run 
+        <command>exit</command>
+
+        to get back to CPAN.</member>
+      </simplelist>
+      </para>
+    </section>
   </section>
 
   <section id="nonroot">

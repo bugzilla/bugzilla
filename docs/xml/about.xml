@@ -1,6 +1,6 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook V4.1//EN" [
 <!ENTITY conventions SYSTEM "conventions.xml"> ] > -->
-<!-- $Id: about.xml,v 1.6.2.8 2006/02/28 00:31:55 jocuri%softhome.net Exp $ -->
+<!-- $Id: about.xml,v 1.6.2.9 2006/02/28 00:50:13 jocuri%softhome.net Exp $ -->
 
 <chapter id="about">
 <title>About This Guide</title>
@@ -81,11 +81,6 @@
       reading this from any source other than those below, please
       check one of these mirrors to make sure you are reading an
       up-to-date version of the Guide.
-    </para>
-    <para>
-      The newest version of this guide can always be found at <ulink
-      url="http://www.bugzilla.org">bugzilla.org</ulink>; including
-      documentation for past releases and the current development version.
     </para>
     <para>
       The latest version of this guide can always be found at <ulink

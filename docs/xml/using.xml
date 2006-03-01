@@ -491,6 +491,21 @@
       </para>     
     </section>
     
+    <section id="dependencytree">
+      <title>Dependency Tree</title>
+      
+      <para>
+        On the <quote>Dependency tree</quote> page linked from each bug
+        page, you can see the dependency relationship from the bug as a
+        tree structure.
+      </para>
+      
+      <para>
+        You can change how much depth to show, and you can hide resolved bugs
+        from this page.
+      </para>
+    </section>
+    
     <section>
       <title>Filing Bugs</title>
       

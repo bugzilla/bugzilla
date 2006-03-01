@@ -1004,8 +1004,8 @@ skip-networking
       as <quote>root</quote> introduces obvious security problems, but the
       problems introduced by running everything as <quote>nobody</quote> may
       not be so obvious. Basically, if you're running every daemon as
-      <quote>nobody</quote> and one of them gets comprimised, they all get
-      comprimised. For this reason it is recommended that you create a user
+      <quote>nobody</quote> and one of them gets compromised, they all get
+      compromised. For this reason it is recommended that you create a user
       account for each daemon.
       </para>
 

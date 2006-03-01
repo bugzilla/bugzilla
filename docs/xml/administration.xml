@@ -951,7 +951,7 @@
         <listitem>
           <para>Consult the documentation that came with your system for
           information on making <application>mysqld</application> run as an
-          unprivleged user.
+          unprivileged user.
           </para>
         </listitem>
 

@@ -30,7 +30,7 @@
 </p>
 
 <form action="page.cgi" method="post">
-  <textarea cols="[% constants.COMMENT_COLS %]" rows="20" name="text"></textarea>
+  <textarea cols="[% constants.COMMENT_COLS FILTER none %]" rows="20" name="text"></textarea>
   <br>
   <input type="hidden" name="id" value="linked.html">
   <input value="Linkify" type="submit">

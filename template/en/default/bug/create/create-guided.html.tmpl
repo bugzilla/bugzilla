@@ -333,7 +333,7 @@ function PutDescription() {
       <b>Details</b>
     </td>
     <td valign="top">
-      <textarea rows="6" cols="[% constants.COMMENT_COLS %]" name="comment"></textarea>
+      <textarea rows="6" cols="[% constants.COMMENT_COLS FILTER none %]" name="comment"></textarea>
       <p>
         Expand on the Summary. Please be
         as specific as possible about what is wrong.
@@ -381,7 +381,7 @@ function PutDescription() {
       <b>Steps to Reproduce</b>
     </td>
     <td valign="top">
-<textarea rows="4" cols="[% constants.COMMENT_COLS %]" name="reproduce_steps">
+<textarea rows="4" cols="[% constants.COMMENT_COLS FILTER none %]" name="reproduce_steps">
 1.
 2.
 3.
@@ -398,7 +398,7 @@ function PutDescription() {
       <b>Actual Results</b>
     </td>
     <td valign="top">
-      <textarea rows="4" cols="[% constants.COMMENT_COLS %]" name="actual_results"></textarea>
+      <textarea rows="4" cols="[% constants.COMMENT_COLS FILTER none %]" name="actual_results"></textarea>
       <p>
         What happened after you performed the steps above?
       </p>
@@ -410,7 +410,7 @@ function PutDescription() {
       <b>Expected Results</b>
     </td>
     <td valign="top">
-      <textarea rows="4" cols="[% constants.COMMENT_COLS %]" name="expected_results"></textarea>
+      <textarea rows="4" cols="[% constants.COMMENT_COLS FILTER none %]" name="expected_results"></textarea>
       <p>
         What should the software have done instead?
       </p>
@@ -422,7 +422,7 @@ function PutDescription() {
       <b>Additional Information</b>
     </td>
     <td valign="top">
-      <textarea rows="8" cols="[% constants.COMMENT_COLS %]" name="additional_info"></textarea>
+      <textarea rows="8" cols="[% constants.COMMENT_COLS FILTER none %]" name="additional_info"></textarea>
       <p>
         Add any additional information you feel may be
         relevant to this [% terms.bug %], such as the <b>theme</b> you were

@@ -558,7 +558,7 @@
   [% END %]
   <br>
   <a name="add_comment"></a>
-  <textarea name="comment" id="comment" rows="10" cols="[% constants.COMMENT_COLS %]"
+  <textarea name="comment" id="comment" rows="10" cols="[% constants.COMMENT_COLS FILTER none %]"
             accesskey="c"></textarea>
 
   [% IF NOT bug.cc || NOT bug.cc.contains(user.login) %]

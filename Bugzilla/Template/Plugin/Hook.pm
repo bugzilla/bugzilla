@@ -80,4 +80,4 @@ Template Toolkit plugin to process hooks added into templates by extensions.
 =head1 SEE ALSO
 
 L<Template::Plugin>,
-L<http://bugzilla.mozilla.org/show_bug.cgi?id=229658>
+L<http:E<sol>E<sol>bugzilla.mozilla.orgE<sol>show_bug.cgi?id=229658>

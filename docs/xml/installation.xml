@@ -1639,7 +1639,7 @@ perl -pi -e 's@#\!/usr/bonsaitools/bin/perl@#\!/usr/bin/perl@' *cgi *pl Bug.pm p
             </step>
 
             <step>
-              <para>Find and comment out all occurences of 
+              <para>Find and comment out all occurrences of 
               <quote>
                 <command>open(SENDMAIL</command>
               </quote>

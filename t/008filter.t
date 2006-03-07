@@ -141,7 +141,10 @@ foreach my $path (@Support::Templates::include_paths) {
             # filtered, we may not catch that case.
             next if $directive =~ /FILTER\ (html|csv|js|url_quote|quoteUrls|
                                             time|uri|xml)/x;
-
+            
+            # Make sure we're not looking for ./ in the $safe hash
+            $file =~ s#^\./##;
+            
             # Exclude those on the nofilter list
             if (defined($safe{$file}{$directive})) {
                 $safe{$file}{$directive}++;

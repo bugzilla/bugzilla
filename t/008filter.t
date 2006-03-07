@@ -160,6 +160,9 @@ sub directive_ok {
     $directive =~ s/^[+-]?\s*//;
     $directive =~ s/\s*[+-]?$//;
 
+    # Make sure we're not looking for ./ in the $safe hash
+    $file =~ s#^\./##;
+
     # Exclude those on the nofilter list
     if (defined($safe{$file}{$directive})) {
         $safe{$file}{$directive}++;

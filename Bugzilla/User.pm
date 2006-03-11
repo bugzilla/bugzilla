@@ -982,7 +982,7 @@ sub match_field {
     # Skip confirmation if we were told to, or if we don't need to confirm.
     return $retval if ($behavior == MATCH_SKIP_CONFIRM || !$need_confirm);
 
-    $vars->{'script'}        = $ENV{'SCRIPT_NAME'}; # for self-referencing URLs
+    $vars->{'script'}        = Bugzilla->cgi->url(-relative => 1); # for self-referencing URLs
     $vars->{'fields'}        = $fields; # fields being matched
     $vars->{'matches'}       = $matches; # matches that were made
     $vars->{'matchsuccess'}  = $matchsuccess; # continue or fail

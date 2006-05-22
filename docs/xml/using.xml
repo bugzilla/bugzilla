@@ -892,21 +892,6 @@
         </listitem>
         <listitem>
           <para>
-            After changing bugs - This controls which bugs or no bugs
-            are shown in the page after you changed bugs.
-            You can select the bug you've changed this time, or the next
-            bug of the list.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            Add individual bugs to saved searches - this controls
-            whether you can add individual bugs to saved searches
-            or you can't.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
             When viewing a bug, show comments in this order -
             This controls the order of comments, you can select below:
             <simplelist>

@@ -268,9 +268,9 @@ sub bz_setup_database {
     # For fixing the inconsistent naming of Schema indexes,
     # we also check for one of those inconsistently-named indexes.
     my @tables = $self->bz_table_list_real();
-    if ( scalar(@tables) && 
-         ($self->bz_index_info_real('bugs', 'assigned_to') ||
-          $self->bz_index_info_real('flags', 'flags_bidattid_idx')) )
+    if (grep($_ eq 'bugs', @tables)
+        && ($self->bz_index_info_real('bugs', 'assigned_to')
+            || $self->bz_index_info_real('flags', 'flags_bidattid_idx')) )
     {
 
         # This is a check unrelated to the indexes, to see if people are

@@ -974,7 +974,7 @@ if ($action eq 'update') {
         }
 
         $vars->{'confirmedbugs'} = \@updated_bugs;
-        $vars->{'changer'} = $whoid;
+        $vars->{'changer'} = $user->login;
     }
 
     $vars->{'old_product'} = $product_old;

@@ -4274,7 +4274,7 @@ if (scalar(@$controlchar_bugs))
 #
 
 #
-# BugZilla uses --GROUPS-- to assign various rights to its users.
+# Bugzilla uses --GROUPS-- to assign various rights to its users.
 #
 
 AddGroup('tweakparams', 'Can tweak operating parameters');

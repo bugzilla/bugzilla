@@ -38,7 +38,7 @@
 #
 # You need to work with bug_email.pl the MIME::Parser installed.
 # 
-# $Id: bug_email.pl,v 1.31.2.3 2006/06/19 16:18:56 vladd%bugzilla.org Exp $
+# $Id: bug_email.pl,v 1.31.2.4 2006/06/19 16:20:48 vladd%bugzilla.org Exp $
 ###############################################################
 
 # 02/12/2000 (SML)
@@ -999,7 +999,7 @@ if ( $Version eq "" ) {
 
 $Control{'version'} = $Version;
 
-# GroupsSet: Protections for Bug info. This paramter controls the visiblility of the 
+# GroupsSet: Protections for Bug info. This paramter controls the visibility of the 
 # given bug. An Error in the given Buggroup is not a blocker, a default is taken.
 #
 # The GroupSet is accepted only as literals linked with whitespaces, plus-signs or kommas

@@ -438,7 +438,7 @@ if (UserInGroup("editbugs")) {
     if (@keywordlist) {
         # Make sure that we have the correct case for the kw
         SendSQL("SELECT name FROM keyworddefs WHERE id IN ( " .
-                join(',', @keywordlist) . ")");
+                join(',', @keywordlist) . ") ORDER BY name");
         my @list;
         while (MoreSQLData()) {
             push (@list, FetchOneColumn());

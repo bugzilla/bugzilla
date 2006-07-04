@@ -171,19 +171,19 @@ if (Param("useqacontact")) {
     }
 }
 
-if (UserInGroup("editbugs") || UserInGroup("canconfirm")) {
-    # Default to NEW if the user hasn't selected another status
-    if (!defined $cgi->param('bug_status')) {
-        $cgi->param(-name => 'bug_status', -value => "NEW");
+my $votes_to_confirm = $dbh->selectrow_array('SELECT votestoconfirm
+                                              FROM products WHERE id = ?',
+                                              undef, $product_id);
+my $bug_status = 'UNCONFIRMED';
+if ($votes_to_confirm) {
+    # Default to NEW if the user with privs hasn't selected another status.
+    if (UserInGroup('editbugs') || UserInGroup('canconfirm')) {
+        $bug_status = scalar($cgi->param('bug_status')) || 'NEW';
     }
 } else {
-    # Default to UNCONFIRMED if we are using it, NEW otherwise
-    $cgi->param(-name => 'bug_status', -value => 'UNCONFIRMED');
-    SendSQL("SELECT votestoconfirm FROM products WHERE id = $product_id");
-    if (!FetchOneColumn()) {   
-        $cgi->param(-name => 'bug_status', -value => "NEW");
-    }
+    $bug_status = 'NEW';
 }
+$cgi->param(-name => 'bug_status', -value => $bug_status);
 
 if (!defined $cgi->param('target_milestone')) {
     SendSQL("SELECT defaultmilestone FROM products WHERE name=$sql_product");

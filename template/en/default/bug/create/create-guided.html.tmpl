@@ -210,7 +210,7 @@ function PutDescription() {
                     size="5" onchange="PutDescription()">
               [% FOREACH c = component_ %]
                 <option value="[% c.name FILTER html %]"
-                  [% " selected=\"selected\"" IF c == default.component_ %]>
+                  [% " selected=\"selected\"" IF c.name == default.component_ %]>
                   [% c.name FILTER html %]
                 </option>
               [% END %]

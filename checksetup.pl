@@ -354,6 +354,7 @@ my %ppm_modules = (
     'Mail::Mailer'      => 'MailTools',
     'Mail::Base64'      => 'MIME-Base64',
     'MIME::Tools'       => 'MIME-Tools',
+    'Template::Plugin::GD' => 'Template',
 );
 
 sub install_command {
@@ -378,6 +379,7 @@ foreach my $module (@{$modules}) {
 
 print "\nThe following Perl modules are optional:\n" unless $silent;
 my $gd          = have_vers("GD","1.20");
+my $template_gd = have_vers('Template::Plugin::GD::Image', 0);
 my $chartbase   = have_vers("Chart::Base","1.0");
 my $xmlparser   = have_vers("XML::Twig",0);
 my $gdgraph     = have_vers("GD::Graph",0);
@@ -416,7 +418,7 @@ if (!$imagemagick && !$silent) {
     "   " . install_command("Image::Magick") . "\n\n";
 
 }
-if ((!$gd || !$gdgraph || !$gdtextalign) && !$silent) {
+if ((!$gd || !$gdgraph || !$gdtextalign || !$template_gd) && !$silent) {
     print "If you you want to see graphical bug reports (bar, pie and line ";
     print "charts of \ncurrent data), you should install libgd and the ";
     print "following Perl modules:\n\n";
@@ -425,6 +427,8 @@ if ((!$gd || !$gdgraph || !$gdtextalign) && !$silent) {
         if !$gdgraph;
     print "GD::Text::Align: " . install_command("GD::Text::Align") . "\n"
         if !$gdtextalign;
+    print "Template::Plugin::GD: " . install_command('Template::Plugin::GD')
+          . "\n" if !$template_gd;
     print "\n";
 }
 if (!$patchreader && !$silent) {

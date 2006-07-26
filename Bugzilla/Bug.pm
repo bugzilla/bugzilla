@@ -35,8 +35,6 @@ use vars qw($legal_keywords @legal_platform
             @settable_resolution %components %versions %target_milestone
             @enterable_products %milestoneurl %prodmaxvotes);
 
-use CGI::Carp qw(fatalsToBrowser);
-
 use Bugzilla::Attachment;
 use Bugzilla::BugMail;
 use Bugzilla::Config;

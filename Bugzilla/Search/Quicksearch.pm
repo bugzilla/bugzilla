@@ -25,6 +25,7 @@ use strict;
 
 use Bugzilla::Config;
 use Bugzilla::Error;
+use Bugzilla::Util;
 
 use base qw(Exporter);
 @Bugzilla::Search::Quicksearch::EXPORT = qw(quicksearch);
@@ -102,6 +103,7 @@ my $or = 0;
 
 sub quicksearch {
     my ($searchstring) = (@_);
+    my $urlbase = correct_urlbase();
 
     # Remove leading and trailing commas and whitespace.
     $searchstring =~ s/(^[\s,]+|[\s,]+$)//g;
@@ -115,8 +117,7 @@ sub quicksearch {
 
         if (index($searchstring, ',') < $[) {
             # Single bug number; shortcut to show_bug.cgi.
-            print $cgi->redirect(-uri => Param('urlbase') .
-                                         "show_bug.cgi?id=$searchstring");
+            print $cgi->redirect(-uri => "${urlbase}show_bug.cgi?id=$searchstring");
             exit;
         }
         else {
@@ -135,8 +136,7 @@ sub quicksearch {
                                                   WHERE alias = ?},
                                                undef,
                                                $1)) {
-                print $cgi->redirect(-uri => Param('urlbase') .
-                                             "show_bug.cgi?id=$1");
+                print $cgi->redirect(-uri => "${urlbase}show_bug.cgi?id=$1");
                 exit;
             }
         }
@@ -378,8 +378,7 @@ sub quicksearch {
 
     if ($cgi->param('load')) {
         # Param 'load' asks us to display the query in the advanced search form.
-        print $cgi->redirect(-uri => Param('urlbase') . "query.cgi?" .
-                                     "format=advanced&amp;" .
+        print $cgi->redirect(-uri => "${urlbase}query.cgi?format=advanced&amp;" .
                                      $modified_query_string);
     }
 

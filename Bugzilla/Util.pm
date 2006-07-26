@@ -34,7 +34,7 @@ use base qw(Exporter);
                              detaint_signed
                              html_quote url_quote value_quote xml_quote
                              css_class_quote
-                             i_am_cgi
+                             i_am_cgi correct_urlbase
                              lsearch max min
                              diff_arrays diff_strings
                              trim wrap_comment find_wrap_point
@@ -145,6 +145,20 @@ sub i_am_cgi {
     # I use SERVER_SOFTWARE because it's required to be
     # defined for all requests in the CGI spec.
     return exists $ENV{'SERVER_SOFTWARE'} ? 1 : 0;
+}
+
+sub correct_urlbase {
+    return Param('urlbase') if Param('ssl') eq 'never';
+
+    if (Param('sslbase')) {
+        return Param('sslbase') if Param('ssl') eq 'always';
+        # Authenticated Sessions
+        return Param('sslbase') if Bugzilla->user->id;
+    }
+
+    # Set to "authenticated sessions" but nobody's logged in, or
+    # sslbase isn't set.
+    return Param('urlbase');
 }
 
 sub lsearch {
@@ -425,6 +439,7 @@ Bugzilla::Util - Generic utility functions for bugzilla
 
   # Functions that tell you about your environment
   my $is_cgi = i_am_cgi();
+  my $urlbase  = correct_urlbase();
 
   # Functions for searching
   $loc = lsearch(\@arr, $val);
@@ -545,6 +560,11 @@ Converts the %xx encoding from the given URL back to its original form.
 Tells you whether or not you are being run as a CGI script in a web
 server. For example, it would return false if the caller is running
 in a command-line script.
+
+=item C<correct_urlbase()>
+
+Returns either the C<sslbase> or C<urlbase> parameter, depending on the
+current setting for the C<ssl> parameter.
 
 =back
 

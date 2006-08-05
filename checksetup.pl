@@ -1532,7 +1532,7 @@ EOF
 }
 
 # now get a handle to the database:
-my $dbh = Bugzilla::DB::connect_main();
+my $dbh = Bugzilla->dbh;
 
 END { $dbh->disconnect if $dbh }
 

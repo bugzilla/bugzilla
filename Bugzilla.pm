@@ -242,7 +242,7 @@ my $_batch;
 sub batch {
     my $class = shift;
     my $newval = shift;
-    if ($newval) {
+    if (defined $newval) {
         $_batch = $newval;
     }
     return $_batch || 0;

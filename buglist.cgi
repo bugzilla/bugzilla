@@ -118,6 +118,13 @@ if ((defined $cgi->param('ctype')) && ($cgi->param('ctype') eq "js")) {
     Bugzilla->logout_request();
 }
 
+# An agent is a program that automatically downloads and extracts data
+# on its user's behalf.  If this request comes from an agent, we turn off
+# various aspects of bug list functionality so agent requests succeed
+# and coexist nicely with regular user requests.  Currently the only agent
+# we know about is Firefox's microsummary feature.
+my $agent = ($cgi->http('X-Moz') && $cgi->http('X-Moz') =~ /\bmicrosummary\b/);
+
 # Determine the format in which the user would like to receive the output.
 # Uses the default format if the user did not specify an output format;
 # otherwise validates the user's choice against the list of available formats.
@@ -139,8 +146,9 @@ my $serverpush =
       && $ENV{'HTTP_USER_AGENT'} =~ /Mozilla.[3-9]/ 
         && $ENV{'HTTP_USER_AGENT'} !~ /[Cc]ompatible/
           && $ENV{'HTTP_USER_AGENT'} !~ /WebKit/
-            && !defined($cgi->param('serverpush'))
-              || $cgi->param('serverpush');
+            && !$agent
+              && !defined($cgi->param('serverpush'))
+                || $cgi->param('serverpush');
 
 my $order = $cgi->param('order') || "";
 my $order_from_cookie = 0;  # True if $order set using the LASTORDER cookie
@@ -1083,7 +1091,7 @@ $vars->{'defaultsavename'} = $cgi->param('query_based_on');
 my $contenttype;
 my $disp = "inline";
 
-if ($format->{'extension'} eq "html") {
+if ($format->{'extension'} eq "html" && !$agent) {
     if ($order) {
         $cgi->send_cookie(-name => 'LASTORDER',
                           -value => $order,

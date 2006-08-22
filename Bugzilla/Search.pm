@@ -186,12 +186,12 @@ sub init {
             $params->delete('bug_status');
         }
         elsif ($bug_statuses[0] eq '__open__') {
-            $params->param('bug_status', map(&::IsOpenedState($_) ? $_ : undef, 
-                                             @::legal_bug_status));
+            $params->param('bug_status', grep(&::IsOpenedState($_), 
+                                              @::legal_bug_status));
         }
         elsif ($bug_statuses[0] eq "__closed__") {
-            $params->param('bug_status', map(&::IsOpenedState($_) ? undef : $_, 
-                                             @::legal_bug_status));
+            $params->param('bug_status', grep(! &::IsOpenedState($_), 
+                                              @::legal_bug_status));
         }
     }
     

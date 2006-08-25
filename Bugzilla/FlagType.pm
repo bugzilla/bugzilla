@@ -344,15 +344,6 @@ sub validate {
     # this bug/attachment. This check will be done later when
     # processing new flags, see Flag::FormToNewFlags().
 
-    # All flag types have to be active
-    my $inactive_flagtypes =
-        $dbh->selectrow_array("SELECT 1 FROM flagtypes
-                               WHERE id IN (" . join(',', @ids) . ")
-                               AND is_active = 0 " .
-                               $dbh->sql_limit(1));
-
-    ThrowCodeError("flag_type_inactive") if $inactive_flagtypes;
-
     foreach my $id (@ids) {
         my $status = $cgi->param("flag_type-$id");
         my @requestees = $cgi->param("requestee_type-$id");
@@ -364,6 +355,10 @@ sub validate {
         my $flag_type = get($id);
         $flag_type 
           || ThrowCodeError("flag_type_nonexistent", { id => $id });
+
+        # Make sure the flag type is active.
+        $flag_type->{'is_active'}
+          || ThrowCodeError('flag_type_inactive', {'type' => $flag_type->{'name'}});
 
         # Make sure the value of the field is a valid status.
         grep($status eq $_, qw(X + - ?))

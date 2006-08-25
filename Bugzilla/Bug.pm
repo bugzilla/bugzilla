@@ -1318,7 +1318,10 @@ sub AUTOLOAD {
 
   $attr =~ s/.*:://;
   return unless $attr=~ /[^A-Z]/;
-  confess ("invalid bug attribute $attr") unless $ok_field{$attr};
+  if (!$ok_field{$attr}) {
+      require Carp;
+      Carp::confess("invalid bug attribute $attr");
+  }
 
   no strict 'refs';
   *$AUTOLOAD = sub {

@@ -4031,8 +4031,30 @@ $dbh->bz_drop_index('flags', 'type_id');
 # 2005-04-28 - LpSolit@gmail.com - Bug 7233: add an index to versions
 $dbh->bz_alter_column('versions', 'value',
                       {TYPE => 'varchar(64)', NOTNULL => 1});
-$dbh->bz_add_index('versions', 'versions_product_id_idx',
-                   {TYPE => 'UNIQUE', FIELDS => [qw(product_id value)]});
+
+# A helper for the below code
+sub _de_dup_version {
+    my ($product_id, $version) = @_;
+    my $dbh = Bugzilla->dbh;
+    print "Fixing duplicate version $version in product_id $product_id...\n";
+    $dbh->do('DELETE FROM versions WHERE product_id = ? AND value = ?',
+             undef, $product_id, $version);
+    $dbh->do('INSERT INTO versions (product_id, value) VALUES (?,?)',
+             undef, $product_id, $version);
+}
+
+# Versions could be duplicated, since they didn't have a UNIQUE index.
+if (!$dbh->bz_index_info('versions', 'versions_product_id_idx')) {
+    my $dup_versions = $dbh->selectall_arrayref(
+        'SELECT product_id, value FROM versions
+       GROUP BY product_id, value HAVING COUNT(value) > 1', {Slice=>{}});
+    foreach my $dup_version (@$dup_versions) {
+        _de_dup_version($dup_version->{product_id}, $dup_version->{value});
+    }
+
+    $dbh->bz_add_index('versions', 'versions_product_id_idx',
+        {TYPE => 'UNIQUE', FIELDS => [qw(product_id value)]});
+}
 
 # Milestone sortkeys get a default just like all other sortkeys.
 if (!exists $dbh->bz_column_info('milestones', 'sortkey')->{DEFAULT}) {

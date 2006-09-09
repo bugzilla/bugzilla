@@ -313,7 +313,7 @@ my $modules = [
     },
     { 
         name => 'Template', 
-        version => '2.08' 
+        version => '2.10' 
     }, 
     { 
         name => 'Text::Wrap',

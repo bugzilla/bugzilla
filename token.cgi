@@ -67,9 +67,8 @@ if ($cgi->param('t')) {
   $::token = $cgi->param('t');
   
   # Make sure the token contains only valid characters in the right amount.
-  # Validate password will throw an error if token is invalid
+  # ValidatePassword will throw an error if token is invalid
   ValidatePassword($::token);
-  trick_taint($::token); # Only used in placeholders
 
   Bugzilla::Token::CleanTokenTable();
 
@@ -99,8 +98,10 @@ if ($cgi->param('t')) {
 # If the user is requesting a password change, make sure they submitted
 # their login name and it exists in the database, and that the DB module is in
 # the list of allowed verification methods.
+my $login_name;
 if ( $::action eq 'reqpw' ) {
-    defined $cgi->param('loginname')
+    $login_name = $cgi->param('loginname');
+    defined $login_name
       || ThrowUserError("login_needed_for_password_change");
 
     # check verification methods
@@ -108,27 +109,25 @@ if ( $::action eq 'reqpw' ) {
         ThrowUserError("password_change_requests_not_allowed");
     }
 
-    # Make sure the login name looks like an email address.
-    validate_email_syntax($cgi->param('loginname'))
-      || ThrowUserError('illegal_email_address',
-                        {addr => $cgi->param('loginname')});
+    validate_email_syntax($login_name)
+      || ThrowUserError('illegal_email_address', {addr => $login_name});
 
-    my $loginname = $cgi->param('loginname');
-    trick_taint($loginname); # Used only in a placeholder
     my ($user_id) = $dbh->selectrow_array('SELECT userid FROM profiles WHERE ' .
                                           $dbh->sql_istrcmp('login_name', '?'),
-                                          undef, $loginname);
+                                          undef, $login_name);
     $user_id || ThrowUserError("account_inexistent");
 }
 
 # If the user is changing their password, make sure they submitted a new
 # password and that the new password is valid.
+my $password;
 if ( $::action eq 'chgpw' ) {
-    defined $cgi->param('password')
+    $password = $cgi->param('password');
+    defined $password
       && defined $cgi->param('matchpassword')
       || ThrowUserError("require_new_password");
 
-    ValidatePassword($cgi->param('password'), $cgi->param('matchpassword'));
+    ValidatePassword($password, $cgi->param('matchpassword'));
 }
 
 ################################################################################
@@ -140,13 +139,13 @@ if ( $::action eq 'chgpw' ) {
 # that variable and runs the appropriate code.
 
 if ($::action eq 'reqpw') { 
-    requestChangePassword(); 
+    requestChangePassword($login_name);
 } elsif ($::action eq 'cfmpw') { 
     confirmChangePassword(); 
 } elsif ($::action eq 'cxlpw') { 
     cancelChangePassword(); 
 } elsif ($::action eq 'chgpw') { 
-    changePassword(); 
+    changePassword($password);
 } elsif ($::action eq 'cfmem') {
     confirmChangeEmail();
 } elsif ($::action eq 'cxlem') {
@@ -167,7 +166,8 @@ exit;
 ################################################################################
 
 sub requestChangePassword {
-    Bugzilla::Token::IssuePasswordToken($cgi->param('loginname'));
+    my ($login_name) = @_;
+    Bugzilla::Token::IssuePasswordToken($login_name);
 
     $vars->{'message'} = "password_change_request";
 
@@ -194,11 +194,11 @@ sub cancelChangePassword {
 }
 
 sub changePassword {
+    my ($password) = @_;
     my $dbh = Bugzilla->dbh;
 
     # Create a crypted version of the new password
-    my $cryptedpassword = bz_crypt($cgi->param('password'));
-    trick_taint($cryptedpassword); # Used only in a placeholder
+    my $cryptedpassword = bz_crypt($password);
 
     # Get the user's ID from the tokens table.
     my ($userid) = $dbh->selectrow_array('SELECT userid FROM tokens

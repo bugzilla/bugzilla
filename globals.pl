@@ -401,6 +401,8 @@ sub ValidatePassword {
     } elsif ((defined $matchpassword) && ($password ne $matchpassword)) {
         ThrowUserError("passwords_dont_match");
     }
+    # Having done these checks makes us consider the password untainted.
+    trick_taint($_[0]);
 }
 
 sub DBID_to_name {

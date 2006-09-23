@@ -381,6 +381,10 @@ sub validate_email_syntax {
     my ($addr) = @_;
     my $match = Param('emailregexp');
     my $ret = ($addr =~ /$match/ && $addr !~ /[\\\(\)<>&,;:"\[\] \t\r\n]/);
+    if ($ret) {
+        # We assume these checks to suffice to consider the address untainted.
+        trick_taint($_[0]);
+    }
     return $ret ? 1 : 0;
 }
 

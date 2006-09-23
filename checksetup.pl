@@ -1094,7 +1094,7 @@ END
 # if research.att.com ever changes their IP, or if you use a different
 # webdot server, you'll need to edit this
 <FilesMatch \.dot$>
-  Allow from 192.20.225.10
+  Allow from 192.20.225.0/24
   Deny from all
 </FilesMatch>
 
@@ -1108,6 +1108,21 @@ Deny from all
 END
     close HTACCESS;
     chmod $fileperm, "$webdotdir/.htaccess";
+  }
+  else {
+      # The public webdot IP address changed.
+      my $webdot = new IO::File("$webdotdir/.htaccess", 'r')
+         || die "$webdotdir/.htaccess: $!";
+      my $webdot_data;
+      { local $/; $webdot_data = <$webdot>; }
+      $webdot->close;
+      if ($webdot_data =~ /192\.20\.225\.10/) {
+          print "Repairing $webdotdir/.htaccess...\n";
+          $webdot_data =~ s/192\.20\.225\.10/192.20.225.0\/24/g;
+          $webdot = new IO::File("$webdotdir/.htaccess", 'w') || die $!;
+          print $webdot $webdot_data;
+          $webdot->close;
+      }
   }
 
 }

@@ -426,7 +426,8 @@ sub ProcessOneBug {
                                           $relationship, 
                                           $diffs, 
                                           $newcomments, 
-                                          $changer))
+                                          $changer,
+                                          !$start))
                 {
                     push(@rels_which_want, $relationship);
                 }

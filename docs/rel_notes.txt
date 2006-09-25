@@ -7,7 +7,7 @@ Table of Contents
 
 - Introduction
 - Important Updates In This Point Release
-    * Versions 2.18.1 - 2.18.5
+    * Versions 2.18.1 - 2.18.6
 - Requirements
     * Dependency Requirements
 - What's New?
@@ -118,6 +118,11 @@ Version 2.18.5
   New Charts now actually represents all closed bugs,
   and not all bugs in the product.
   (bug 300473)
+
+Version 2.18.6
+--------------
+
+This is a security-only release. See the Security Fixes section.
 
 Requirements
 ************
@@ -720,6 +725,19 @@ a possible SQL Injection only accessible to an administrator.
 You can see the details at:
 
 http://www.bugzilla.org/security/2.18.4/
+
+Version 2.18.6
+--------------
+
+The Bugzilla team fixed three security flaws that existed in 
+versions of Bugzilla prior to this one. They were cross-site
+scripting and information leak flaws. None of them were of
+critical severity, though we still strongly recommend that you
+update any 2.18.x installation to at least 2.18.6, to be safe. 
+You can see details at:
+
+http://www.bugzilla.org/security/2.18.5/
+
 
 Detailed Version-To-Version Release Notes
 *****************************************

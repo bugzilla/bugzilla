@@ -7,8 +7,7 @@ Table of Contents
 
 - Introduction
 - Important Updates in this Point Release
-    * Version 2.20.1
-    * Version 2.20.2
+    * Version 2.20.1 - 2.20.3
 - Minimum Requirements
     * Perl
     * For MySQL Users
@@ -155,6 +154,20 @@ Version 2.20.2
 
 + Email preferences are now set correctly when creating a new user account
   using the ENV method (bug 327355).
+
+Version 2.20.3
+--------------
+
+This release contains minor fixes and security updates. Fixes of note are:
+
++ votes.cgi can correctly confirm a bug, now (bug 351300).
+
++ checksetup.pl correctly reports if your Template::Plugin::GD module
+  is missing, which could lead to charts and graphs not working
+  (bug 345389).
+
+Also see the Security Fixes section for the security updates in this
+release.
 
 
 Minimum Requirements
@@ -690,6 +703,25 @@ To see details on the vulnerabilities that were fixed, see the
 Security Advisory at:
 
 http://www.bugzilla.org/security/2.18.4/
+
+2.20.2
+------
+
+No security fixes in this release.
+
+2.20.3
+------
+
+The Bugzilla team fixed two Information Leaks and two Cross-Site
+Scripting vulnerabilities that existed in versions of Bugzilla
+prior to 2.20.3. None of them are considered to be of critical
+severity, but we still strongly recommend that you update any
+2.20.x installation to 2.20.3.
+
+To see details on the vulnerabilities that were fixed, see the
+Security Advisory at:
+
+http://www.bugzilla.org/security/2.18.5/
 
 
 Release Notes for Previous Versions

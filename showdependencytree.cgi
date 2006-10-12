@@ -45,7 +45,7 @@ my $dbh = Bugzilla->switch_to_shadow_db();
 
 # Make sure the bug ID is a positive integer representing an existing
 # bug that the user is authorized to access.
-my $id = $cgi->param('id');
+my $id = $cgi->param('id') || ThrowUserError('invalid_bug_id_or_alias');
 ValidateBugID($id);
 
 my $hide_resolved = $cgi->param('hide_resolved') ? 1 : 0;

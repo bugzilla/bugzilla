@@ -23,7 +23,7 @@
 #               Dawn Endico <endico@mozilla.org>
 #               Joe Robins <jmrobins@tgix.com>
 #               Gavin Shelley <bugzilla@chimpychompy.org>
-#               Frédéric Buclin <LpSolit@gmail.com>
+#               FrÃ©dÃ©ric Buclin <LpSolit@gmail.com>
 #               Greg Hendricks <ghendricks@novell.com>
 #
 # Direct any questions on this source code to
@@ -78,7 +78,7 @@ sub CheckProduct ($)
     }
 
     unless (TestProduct $prod) {
-        print "Sorry, product '$prod' does not exist.";
+        print "Sorry, product '" . html_quote($prod) . "' does not exist.";
         PutTrailer();
         exit;
     }
@@ -110,7 +110,7 @@ sub CheckClassification ($)
     }
 
     unless (TestClassification $cl) {
-        print "Sorry, classification '$cl' does not exist.";
+        print "Sorry, classification '" . html_quote($cl) . "' does not exist.";
         PutTrailer();
         exit;
     }
@@ -157,7 +157,8 @@ sub CheckClassificationProduct ($$)
     my $res = $dbh->selectrow_array($query, undef, ($prod, $cl));
 
     unless ($res) {
-        print "Sorry, classification->product '$cl'->'$prod' does not exist.";
+        print "Sorry, classification->product '" . html_quote($cl) .
+              "'->'" . html_quote($prod) . "' does not exist.";
         PutTrailer();
         exit;
     }
@@ -473,7 +474,7 @@ if ($action eq 'new') {
 
         # Check for exact case sensitive match:
         if ($existing_product eq $product) {
-            print "The product '$product' already exists. Please press\n";
+            print "The product '" . html_quote($product) . "' already exists. Please press\n";
             print "<b>Back</b> and try again.\n";
             PutTrailer($localtrailer);
             exit;
@@ -481,8 +482,8 @@ if ($action eq 'new') {
 
         # Next check for a case-insensitive match:
         if (lc($existing_product) eq lc($product)) {
-            print "The new product '$product' differs from existing product ";
-            print "'$existing_product' only in case. Please press\n";
+            print "The new product '" . html_quote($product) . "' differs from existing product '";
+            print html_quote($existing_product) . "' only in case. Please press\n";
             print "<b>Back</b> and try again.\n";
             PutTrailer($localtrailer);
             exit;
@@ -492,7 +493,7 @@ if ($action eq 'new') {
     my $version = trim($cgi->param('version') || '');
 
     if ($version eq '') {
-        print "You must enter a version for product '$product'. Please press\n";
+        print "You must enter a version for product '" . html_quote($product) . "'. Please press\n";
         print "<b>Back</b> and try again.\n";
         PutTrailer($localtrailer);
         exit;
@@ -501,7 +502,7 @@ if ($action eq 'new') {
     my $description  = trim($cgi->param('description')  || '');
 
     if ($description eq '') {
-        print "You must enter a description for product '$product'. Please press\n";
+        print "You must enter a description for product '" . html_quote($product) . "'. Please press\n";
         print "<b>Back</b> and try again.\n";
         PutTrailer($localtrailer);
         exit;
@@ -840,8 +841,8 @@ if ($action eq 'edit' || (!$action && $product)) {
         while ( MoreSQLData() ) {
             my ($component, $description) = FetchSQLData();
             $description ||= "<FONT COLOR=\"red\">description missing</FONT>";
-            print "<tr><th align=right valign=top>$component:</th>";
-            print "<td valign=top>$description</td></tr>\n";
+            print "<tr><th align=right valign=top>" . html_quote($component) . ":</th>";
+            print "<td valign=top>" . html_light_quote($description) . "</td></tr>\n";
         }
         print "</table>\n";
     } else {
@@ -861,7 +862,7 @@ if ($action eq 'edit' || (!$action && $product)) {
         while ( MoreSQLData() ) {
             my ($version) = FetchSQLData();
             print "<BR>" if $br;
-            print $version;
+            print html_quote($version);
             $br = 1;
         }
     } else {
@@ -884,7 +885,7 @@ if ($action eq 'edit' || (!$action && $product)) {
             while ( MoreSQLData() ) {
                 my ($milestone) = FetchSQLData();
                 print "<BR>" if $br;
-                print $milestone;
+                print html_quote($milestone);
                 $br = 1;
             }
         } else {
@@ -1317,7 +1318,7 @@ if ($action eq 'update') {
 
         if (lc($product) ne lc($productold) &&
             TestProduct($product)) {
-            print "Sorry, product name '$product' is already in use.";
+            print "Sorry, product name '" . html_quote($product) . "' is already in use.";
             $dbh->bz_unlock_tables(UNLOCK_ABORT);
             PutTrailer($localtrailer);
             exit;
@@ -1347,7 +1348,8 @@ if ($action eq 'update') {
                 my ($who, $id) = (@$ref);
                 RemoveVotes($id, $who, "The rules for voting on this product has changed;\nyou had too many votes for a single bug.");
                 my $name = DBID_to_name($who);
-                print qq{<br>Removed votes for bug <A HREF="show_bug.cgi?id=$id">$id</A> from $name\n};
+                print "<br>Removed votes for bug <A HREF=\"show_bug.cgi?id=$id\">$id</A> from " .
+                      html_quote($name) . "\n";
             }
         }
 
@@ -1379,7 +1381,8 @@ if ($action eq 'update') {
                     RemoveVotes($id, $who,
                                 "The rules for voting on this product has changed; you had too many\ntotal votes, so all votes have been removed.");
                     my $name = DBID_to_name($who);
-                    print qq{<br>Removed votes for bug <A HREF="show_bug.cgi?id=$id">$id</A> from $name\n};
+                    print "<br>Removed votes for bug <A HREF=\"show_bug.cgi?id=$id\">$id</A> from " .
+                          html_quote($name) . "\n";
                 }
             }
         }

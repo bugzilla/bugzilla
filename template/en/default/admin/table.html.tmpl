@@ -32,7 +32,7 @@
   #                  with the key xxx in data hash of the current row.
   #     content: If specified, the content of this variable is used
   #              instead of the data pulled from the current row. 
-  #              NOTE: This value is not HTML filtered at output!
+  #              NOTE: This value is only partially HTML filtered!
   #     content_use_field: If defined and true, then each value in the 
   #                        column corresponds with a key in the
   #                        field_descs field, and that value from the 
@@ -41,8 +41,8 @@
   #                        This content WILL be HTML-filtered in this case.
   #     align: left/center/right. Controls the horizontal alignment of the
   #            text in the column.
-  #     allow_html_content: if defined, then this column allows html content
-  #                         so it will not be filtered 
+  #     allow_html_content: if defined, then this column allows some html content
+  #                         and so it will be only partially filtered.
   #     yesno_field: Turn the data from 0/!0 into Yes/No
   #
   # data:
@@ -72,8 +72,9 @@
 [% FOREACH row = data %]
   <tr>
     [% FOREACH c = columns %]
-      <td [% IF c.align %] align="[% c.align FILTER html %]" [% END %]>
-      
+      <td [% IF c.align %] align="[% c.align FILTER html %]" [% END %]
+          [% IF row.class %] class="[% row.class FILTER html %]" [% END %]>
+
         [% IF c.contentlink %]
           [% link_uri = c.contentlink %]
           [% WHILE link_uri.search('%%(.+?)%%')%]
@@ -93,7 +94,7 @@
            [% colname = row.${c.name} %]
            [% field_descs.${colname} FILTER html %]
         [% ELSIF c.content %]
-            [% c.content %]
+            [% c.content FILTER html_light %]
         [% ELSE %]
           [% IF c.yesno_field %]
             [% IF row.${c.name} %]
@@ -103,7 +104,7 @@
             [% END %]
           [% ELSE %]
             [% IF c.allow_html_content %]
-              [% row.${c.name} FILTER none %]
+              [% row.${c.name} FILTER html_light %]
             [% ELSE %]
               [% row.${c.name} FILTER html %]
             [% END %]

@@ -54,7 +54,7 @@
         <a href="editgroups.cgi?action=changeform&amp;group=[% group.id FILTER url_quote %]">
           [% group.name FILTER html %]</a>
       </td>
-      <td>[% group.description FILTER html %]</td>
+      <td>[% group.description FILTER html_light %]</td>
       <td>[% group.regexp FILTER html %]&nbsp;</td>
 
       <td align="center">

@@ -31,7 +31,7 @@
     </tr>
     <tr>
       <th align="right">Description:</th>
-      <td><textarea rows=4 cols=64 name="description">[% description %]</textarea></TD>
+      <td><textarea rows=4 cols=64 name="description">[% description FILTER html %]</textarea></TD>
     </tr>
     <tr valign=top>
       <th align="right"><a href="editproducts.cgi?classification=[% classification FILTER url_quote %]">Edit products</a></th>
@@ -43,7 +43,7 @@
                 <th align=right valign=top>[% product.name FILTER html %]</th>
                 <td valign=top>
                   [% IF product.description %]
-                    [% product.description FILTER none %]
+                    [% product.description FILTER html_light %]
                   [% ELSE %]
                     <font color="red">description missing</font>
                   [% END %]

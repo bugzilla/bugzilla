@@ -38,8 +38,8 @@
                  [% setting_descs.$name OR name FILTER html %]
               </td>
               <td>
-                <select name="[% name %]" id="[% name %]">
-                  <option value="[% default_name %]"
+                <select name="[% name FILTER html %]" id="[% name FILTER html %]">
+                  <option value="[% default_name FILTER html %]"
                     [% ' selected="selected"' IF settings.${name}.is_default %]>
                     Site Default ([% setting_descs.${default_val} OR default_val FILTER html %])
                   </option>

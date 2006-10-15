@@ -35,7 +35,7 @@
       <td valign="top">Description:</td>
       <td valign="top" colspan=3>
         [% IF description %]
-          [% description %]
+          [% description FILTER html_light %]
         [% ELSE %]
           <font color="red">description missing</font>
         [% END %]

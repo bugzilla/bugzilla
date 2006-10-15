@@ -105,7 +105,6 @@
 
 'reports/components.html.tmpl' => [
   'numcols',
-  'comp.description', 
 ],
 
 'reports/duplicates-table.html.tmpl' => [
@@ -128,7 +127,6 @@
 ],
 
 'reports/keywords.html.tmpl' => [
-  'keyword.description', 
   'keyword.bugcount', 
 ],
 
@@ -207,14 +205,8 @@
 
 'list/edit-multiple.html.tmpl' => [
   'group.id', 
-  'group.description',
-  'group.description FILTER inactive', 
   'knum', 
   'menuname', 
-],
-
-'list/list-simple.html.tmpl' => [
-  'title', 
 ],
 
 'list/list.rdf.tmpl' => [
@@ -247,13 +239,8 @@
   'VERSION', 
 ],
 
-'global/choose-classification.html.tmpl' => [
-  'classdesc.$p', 
-],
-
 'global/choose-product.html.tmpl' => [
   'target',
-  'proddesc.$p', 
 ],
 
 # You are not permitted to add any values here. Everything in this file should 
@@ -339,7 +326,6 @@
   'bug.bug_id', 
   'bug.votes', 
   'group.bit', 
-  'group.description', 
   'dep.title', 
   'dep.fieldname', 
   'accesskey', 
@@ -421,7 +407,6 @@
 
 'bug/create/create.html.tmpl' => [
   'g.bit',
-  'g.description',
   'sel.name',
   'sel.description',
   'cloned_bug_id'
@@ -499,23 +484,6 @@
 
 'admin/table.html.tmpl' => [
   'link_uri',
-  'c.content'
-],
-
-'admin/classifications/del.html.tmpl' => [
-  'description', 
-],
-
-'admin/classifications/edit.html.tmpl' => [
-  'description', 
-],
-
-'admin/classifications/reclassify.html.tmpl' => [
-  'description', 
-],
-
-'admin/classifications/select.html.tmpl' => [
-  'cl.description', 
 ],
 
 'admin/products/groupcontrol/confirm-edit.html.tmpl' => [
@@ -635,11 +603,6 @@
   'bug_count'
 ],
 
-'admin/settings/edit.html.tmpl' => [
-  'name',
-  'checkbox_name'
-],
-
 'account/login.html.tmpl' => [
   'target', 
 ],
@@ -650,21 +613,11 @@
   'prefname',
 ],
 
-'account/prefs/permissions.html.tmpl' => [
-  'bit_description.name', 
-  'bit_description.desc', 
-],
-
 'account/prefs/prefs.html.tmpl' => [
   'tab.name', 
   'tab.description', 
   'current_tab.name', 
   'current_tab.description', 
-],
-
-'account/prefs/settings.html.tmpl' => [
-  'name',
-  'default_name'
 ],
 
 );

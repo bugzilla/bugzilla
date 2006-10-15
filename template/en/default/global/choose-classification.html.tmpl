@@ -55,7 +55,7 @@
     </th>
 
     [% IF classdesc.$p %]
-      <td valign="top">&nbsp;[% classdesc.$p %]</td>
+      <td valign="top">&nbsp;[% classdesc.$p FILTER html_light %]</td>
     [% END %]
   </tr>
   [% END %]

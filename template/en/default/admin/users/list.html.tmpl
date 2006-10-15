@@ -38,11 +38,9 @@
     heading            => 'Edit user...'
     contentlink        => 'editusers.cgi?action=edit&amp;userid=%%userid%%' _
                           listselectionurlparams
-    allow_html_content => 1
    }
    {name               => 'realname'
     heading            => 'Real name'
-    allow_html_content => 1
    }
   ]
 %]
@@ -59,22 +57,12 @@
 [% END %]
 
 [% FOREACH thisuser = users %]
-  [%# We FILTER html here because we need admin/table.html.tmpl to accept HTML
-    # for styling, so we cannot let admin/table.html.tmpl do the FILTER.
-    #%]
-  [% thisuser.login_name = BLOCK %]
-    [% thisuser.login_name FILTER html %]
-  [% END %]
-  [% IF thisuser.realname %]
-    [% thisuser.realname = BLOCK %]
-      [% thisuser.realname FILTER html %]
-    [% END %]
-  [% ELSE %]
-    [% SET thisuser.realname = '<span style="color: red">missing</span>' %]
-  [% END %]
   [% IF thisuser.disabledtext %]
-    [% thisuser.login_name = "<span class=\"bz_inactive\">$thisuser.login_name</span>" %]
-    [% thisuser.realname = "<span class=\"bz_inactive\">$thisuser.realname</span>" %]
+    [% SET thisuser.class = "bz_inactive" %]
+  [% END %]
+  [% UNLESS thisuser.realname %]
+    [% SET thisuser.realname = "missing" %]
+    [% SET thisuser.class = thisuser.disabledtext ? "bz_inactive missing" : "missing" %]
   [% END %]
 [% END %]
 

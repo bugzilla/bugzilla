@@ -89,6 +89,8 @@ use base qw(Exporter);
     FULLTEXT_BUGLIST_LIMIT
 
     SENDMAIL_EXE
+
+    SAFE_PROTOCOLS
 );
 
 @Bugzilla::Constants::EXPORT_OK = qw(contenttypes);
@@ -237,5 +239,10 @@ use constant FULLTEXT_BUGLIST_LIMIT => 200;
 
 # Path to sendmail.exe (Windows only)
 use constant SENDMAIL_EXE => '/usr/lib/sendmail.exe';
+
+# Protocols which are considered as safe.
+use constant SAFE_PROTOCOLS => ('afs', 'cid', 'ftp', 'gopher', 'http', 'https',
+                                'irc', 'mid', 'news', 'nntp', 'prospero', 'telnet',
+                                'view-source', 'wais');
 
 1;

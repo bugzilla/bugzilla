@@ -56,13 +56,6 @@
   [% classification_url_part = "" %]
 [% END %]
 
-[% UNLESS class_description %]
-  [% class_description = '<span style="color: red">missing</span>' %]
-[% END %]
-[% UNLESS prod_description %]
-  [% prod_description = '<span style="color: red">missing</span>' %]
-[% END %]
-
 [% IF disallownew %]
   [% disallownew = "closed" %]
 [% ELSE %]
@@ -82,8 +75,13 @@
     </tr>
     <tr>
       <td>Classification Description:</td>
-      [%# descriptions are intentionally not filtered to allow html content %]
-      <td>[% class_description FILTER none %]</td>
+      <td>
+        [% IF class_description %]
+          [% class_description FILTER html_light %]
+        [% ELSE %]
+          <span style="color: red">missing</span>
+        [% END %]
+      </td>
     </tr>
   [% END %]
 
@@ -98,8 +96,13 @@
   </tr>
   <tr>
     <td valign="top">Description:</td>
-    [%# descriptions are intentionally not filtered to allow html content %]
-    <td valign="top">[% prod_description FILTER none %]</td>
+    <td valign="top">
+      [% IF prod_description %]
+        [% prod_description FILTER html_light %]
+      [% ELSE %]
+        <span style="color: red">missing</span>
+      [% END %]
+    </td>
   </tr>
 
   [% IF Param('usetargetmilestone') %]
@@ -140,10 +143,9 @@
           [% FOREACH c = components %]
             <tr>
               <th align="right">[% c.name FILTER html %]:</th>
-              [%# descriptions are intentionally not filtered to allow html content %]
               <td>
                 [% IF c.description %]
-                  [% c.description FILTER none %]
+                  [% c.description FILTER html_light %]
                 [% ELSE %]
                   <span style="color: red">missing</span>
                 [% END %]

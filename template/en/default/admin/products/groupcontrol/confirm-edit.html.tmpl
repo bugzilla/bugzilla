@@ -22,7 +22,9 @@
 
 [% PROCESS global/variables.none.tmpl %]
 
-[% PROCESS global/header.html.tmpl title="Confirm Group Control Change for product \'$product\'" %]
+[% title = BLOCK %]Confirm Group Control Change for product '[% product FILTER html %]'[% END %]
+
+[% PROCESS global/header.html.tmpl title = title %]
 
 [% FOREACH group = mandatory_groups %]
 <P>

@@ -36,7 +36,9 @@
 [% PROCESS global/variables.none.tmpl %]
 
 [% IF query_products.size %]
-  [% title = "Most Frequently Reported $terms.Bugs for ${query_products.join(', ')}" %]
+  [% title = BLOCK %]
+    Most Frequently Reported [% terms.Bugs %] for [% query_products.join(', ') FILTER html %]
+  [% END %]
 [% ELSE %]
   [% title = "Most Frequently Reported $terms.Bugs" %]
 [% END%]

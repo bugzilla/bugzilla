@@ -673,10 +673,9 @@ if (($action eq 'remove_all_regexp') || ($action eq 'remove_all')) {
     my ($name, $regexp) = $sth->fetchrow_array();
     if ($action eq 'remove_all_regexp') {
         PutHeader("Removing All Explicit Group Memberships Matching "
-                . "Group RegExp from \'" . html_quote($name) . "\'");
+                . "Group RegExp from \'$name\'");
     } else {
-        PutHeader("Removing All Explicit Group Memberships from \'"
-                . html_quote($name) . "\'");
+        PutHeader("Removing All Explicit Group Memberships from \'$name\'");
     }
     $dbh->do("LOCK TABLES
                   groups WRITE,

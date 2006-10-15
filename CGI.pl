@@ -236,8 +236,13 @@ sub MailPassword {
 }
 
 sub PutHeader {
-    ($vars->{'title'}, $vars->{'h1'}, $vars->{'h2'}) = (@_);
-     
+    my ($title, $h1, $h2) = @_;
+
+    # We filter fields here.
+    $vars->{'title'} = html_quote($title) if defined $title;
+    $vars->{'h1'} = html_quote($h1) if defined $h1;
+    $vars->{'h2'} = html_quote($h2) if defined $h2;
+
     $::template->process("global/header.html.tmpl", $::vars)
       || ThrowTemplateError($::template->error());
     $vars->{'header_done'} = 1;

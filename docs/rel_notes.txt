@@ -729,11 +729,11 @@ http://www.bugzilla.org/security/2.18.4/
 Version 2.18.6
 --------------
 
-The Bugzilla team fixed three security flaws that existed in 
+The Bugzilla team fixed four security flaws that existed in
 versions of Bugzilla prior to this one. They were cross-site
-scripting and information leak flaws. None of them were of
-critical severity, though we still strongly recommend that you
-update any 2.18.x installation to at least 2.18.6, to be safe. 
+scripting and information leak flaws. We strongly recommend that you
+update any 2.18.x installation to at least 2.18.6, to be safe.
+
 You can see details at:
 
 http://www.bugzilla.org/security/2.18.5/

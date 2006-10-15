@@ -57,6 +57,8 @@ use base qw(Exporter);
     GRANT_DIRECT
     GRANT_DERIVED
     GRANT_REGEXP
+
+    SAFE_PROTOCOLS
 );
 
 @Bugzilla::Constants::EXPORT_OK = qw(contenttypes);
@@ -190,5 +192,10 @@ use constant DEFAULT_EMAIL_SETTINGS =>
 use constant GRANT_DIRECT => 0;
 use constant GRANT_DERIVED => 1;
 use constant GRANT_REGEXP => 2;
+
+# Protocols which are considered as safe.
+use constant SAFE_PROTOCOLS => ('afs', 'cid', 'ftp', 'gopher', 'http', 'https',
+                                'irc', 'mid', 'news', 'nntp', 'prospero', 'telnet',
+                                'view-source', 'wais');
 
 1;

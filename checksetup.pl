@@ -347,6 +347,8 @@ my $xmlparser   = have_vers("XML::Parser",0);
 my $gdgraph     = have_vers("GD::Graph",0);
 my $gdtextalign = have_vers("GD::Text::Align",0);
 my $patchreader = have_vers("PatchReader","0.9.4");
+my $html_parser = have_vers("HTML::Parser", ($] >= 5.008) ? "3.40" : 0);
+my $scrubber    = have_vers("HTML::Scrubber", 0);
 
 print "\n" unless $silent;
 
@@ -385,6 +387,15 @@ if (!$patchreader && !$silent) {
     print "If you want to see pretty HTML views of patches, you should ";
     print "install the \nPatchReader module:\n";
     print "PatchReader: " . install_command("PatchReader") . "\n";
+}
+if ((!$scrubber || !$html_parser) && !$silent) {
+    print "If you want additional HTML tags within product and group ";
+    print "descriptions,\nyou should install:\n";
+    print "HTML::Scrubber: " . install_command("HTML::Scrubber") . "\n"
+        if !$scrubber;
+    print "HTML::Parser: " . install_command("HTML::Parser") . "\n"
+        if !$html_parser;
+    print "\n";
 }
 
 if (%missing) {

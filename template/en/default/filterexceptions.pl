@@ -91,7 +91,6 @@
 
 'reports/components.html.tmpl' => [
   'numcols',
-  'comp.description', 
 ],
 
 'reports/duplicates-table.html.tmpl' => [
@@ -115,7 +114,6 @@
 ],
 
 'reports/keywords.html.tmpl' => [
-  'keyword.description', 
   'keyword.bugcount', 
 ],
 
@@ -196,14 +194,8 @@
 
 'list/edit-multiple.html.tmpl' => [
   'group.id', 
-  'group.description',
-  'group.description FILTER inactive', 
   'knum', 
   'menuname', 
-],
-
-'list/list-simple.html.tmpl' => [
-  'title', 
 ],
 
 'list/list.html.tmpl' => [
@@ -241,7 +233,6 @@
 
 'global/choose-product.html.tmpl' => [
   'target',
-  'proddesc.$p', 
 ],
 
 # You are not permitted to add any values here. Everything in this file should 
@@ -328,7 +319,6 @@
   'bug.bug_id', 
   'bug.votes', 
   'group.bit', 
-  'group.description', 
   'dep.title', 
   'dep.fieldname', 
   'accesskey', 
@@ -404,7 +394,6 @@
 
 'bug/create/create.html.tmpl' => [
   'g.bit',
-  'g.description',
   'sel.name',
   'sel.description',
 ],
@@ -534,11 +523,6 @@
   'role', 
   'reason.name', 
   'reason.description',
-],
-
-'account/prefs/permissions.html.tmpl' => [
-  'bit_description.name', 
-  'bit_description.desc', 
 ],
 
 'account/prefs/prefs.html.tmpl' => [

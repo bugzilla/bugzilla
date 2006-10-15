@@ -22,7 +22,7 @@
 #                 Joel Peshkin <bugreport@peshkin.net>
 #                 Jacob Steenhagen <jake@bugzilla.org>
 #                 Vlad Dascalu <jocuri@softhome.net>
-#                 Frédéric Buclin <LpSolit@gmail.com>
+#                 FrÃ©dÃ©ric Buclin <LpSolit@gmail.com>
 
 # Code derived from editowners.cgi and editusers.cgi
 
@@ -222,7 +222,7 @@ unless ($action) {
         my ($groupid, $name, $desc, $regexp, $isactive, $isbuggroup) = FetchSQLData();
         print "<tr>\n";
         print "<td>" . html_quote($name) . "</td>\n";
-        print "<td>" . html_quote($desc) . "</td>\n";
+        print "<td>" . html_light_quote($desc) . "</td>\n";
         print "<td>" . html_quote($regexp) . "&nbsp</td>\n";
         print "<td align=center>";
         print "X" if (($isactive != 0) && ($isbuggroup != 0));
@@ -291,7 +291,7 @@ if ($action eq 'changeform') {
     }
     print "</TD></TR><TR><TH>Description:</TH><TD>";
     if ($isbuggroup == 0) {
-        print html_quote($description);
+        print html_light_quote($description);
     } else {
         print "<INPUT TYPE=HIDDEN NAME=\"olddesc\" VALUE=\"" .
         html_quote($description) . "\">
@@ -356,7 +356,7 @@ if ($action eq 'changeform') {
         print "<TD><INPUT TYPE=checkbox NAME=\"grp-$grpid\" $grpchecked VALUE=1>";
         print "<INPUT TYPE=HIDDEN NAME=\"oldgrp-$grpid\" VALUE=$grpmember></TD>";
         print "<TD><B>" . html_quote($grpnam) . "</B></TD>";
-        print "<TD>" . html_quote($grpdesc) . "</TD>";
+        print "<TD>" . html_light_quote($grpdesc) . "</TD>";
         print "</TR>\n";
     }
 
@@ -487,8 +487,8 @@ if ($action eq 'del') {
     print "</tr>\n";
     print "<tr>\n";
     print "<td>$gid</td>\n";
-    print "<td>$name</td>\n";
-    print "<td>$desc</td>\n";
+    print "<td>" . html_quote($name) . "</td>\n";
+    print "<td>" . html_light_quote($desc) . "</td>\n";
     print "</tr>\n";
     print "</table>\n";
 
@@ -529,10 +529,10 @@ group before checking the box.<P>
     if (MoreSQLData()) {
        $cantdelete = 1;
        print "
-<B>This group is tied to the <U>$name</U> product.
+<B>This group is tied to the <U>" . html_quote($name) . "</U> product.
 You cannot delete this group while it is tied to a product.</B><BR>
 <INPUT TYPE=CHECKBOX NAME=\"unbind\">Delete this group anyway, and make the
-<U>$name</U> product publicly visible.<BR>
+<U>" . html_quote($name) . "</U> product publicly visible.<BR>
 ";
     }
 
@@ -746,14 +746,14 @@ sub confirmRemove {
         print "<a href=\"editgroups.cgi\">return to the Edit Groups page</a>\n";
         return;
     }
-    print "from group $::FORM{name}.<p>\n";
+    print "from group " . html_quote($::FORM{name}) . ".<p>\n";
     print "Generally, you will only need to do this when upgrading groups ";
     print "created with Bugzilla versions 2.16 and prior. Use this option ";
     print "with <b>extreme care</b> and consult the Bugzilla Guide for ";
     print "further information.<p>\n";
     
     print "<FORM METHOD=POST ACTION=editgroups.cgi>\n";
-    print "<INPUT TYPE=HIDDEN NAME=\"group\" VALUE=$group>\n";
+    print "<INPUT TYPE=HIDDEN NAME=\"group\" VALUE=" . html_quote($group) . ">\n";
     
     if ($remove_regexp_only) {
         print "<INPUT TYPE=HIDDEN NAME=\"action\" VALUE=\"remove_all_regexp\">\n";

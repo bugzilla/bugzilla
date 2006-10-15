@@ -63,7 +63,7 @@ sub CheckProduct ($)
     }
 
     unless (TestProduct $prod) {
-        print "Sorry, product '$prod' does not exist.";
+        print "Sorry, product '" . html_quote($prod) . "' does not exist.";
         PutTrailer();
         exit;
     }
@@ -94,7 +94,8 @@ sub CheckVersion ($$)
     CheckProduct($prod);
 
     unless (TestVersion $prod,$ver) {
-        print "Sorry, version '$ver' for product '$prod' does not exist.";
+        print "Sorry, version '" . html_quote($ver) . "' for product '" .
+              html_quote($prod) . "' does not exist.";
         PutTrailer();
         exit;
     }
@@ -206,8 +207,8 @@ unless ($product) {
         $description ||= "<FONT COLOR=\"red\">missing</FONT>";
         $bugs ||= "none";
         print "<TR>\n";
-        print "  <TD VALIGN=\"top\"><A HREF=\"editversions.cgi?product=", url_quote($product), "\"><B>$product</B></A></TD>\n";
-        print "  <TD VALIGN=\"top\">$description</TD>\n";
+        print "  <TD VALIGN=\"top\"><A HREF=\"editversions.cgi?product=", url_quote($product), "\"><B>", html_quote($product), "</B></A></TD>\n";
+        print "  <TD VALIGN=\"top\">" . html_light_quote($description) . "</TD>\n";
         print "  <TD VALIGN=\"top\">$bugs</TD>\n";
         #print "  <TD VALIGN=\"top\"><A HREF=\"editversions.cgi?action=edit&product=", url_quote($product), "\">Edit</A></TD>\n";
     }
@@ -239,7 +240,7 @@ unless ($action) {
     while ( MoreSQLData() ) {
         my $version = FetchOneColumn();
         print "<TR>\n";
-        print "  <TD VALIGN=\"top\"><A HREF=\"editversions.cgi?product=", url_quote($product), "&version=", url_quote($version), "&action=edit\"><B>$version</B></A></TD>\n";
+        print "  <TD VALIGN=\"top\"><A HREF=\"editversions.cgi?product=", url_quote($product), "&version=", url_quote($version), "&action=edit\"><B>" . html_quote($version) . "</B></A></TD>\n";
         #print "  <TD VALIGN=\"top\">$bugs</TD>\n";
         print "  <TD VALIGN=\"top\"><A HREF=\"editversions.cgi?product=", url_quote($product), "&version=", url_quote($version), "&action=del\"><B>Delete</B></A></TD>\n";
         print "</TR>";
@@ -305,7 +306,7 @@ if ($action eq 'new') {
         exit;
     }
     if (TestVersion($product,$version)) {
-        print "The version '$version' already exists. Please press\n";
+        print "The version '" . html_quote($version) . "' already exists. Please press\n";
         print "<b>Back</b> and try again.\n";
         PutTrailer($localtrailer);
         exit;
@@ -321,7 +322,8 @@ if ($action eq 'new') {
     unlink "$datadir/versioncache";
 
     print "OK, done.<p>\n";
-    PutTrailer("<A HREF=\"editversions.cgi?product=$product&amp;action=add\">add</a> another version or $localtrailer");
+    PutTrailer("<A HREF=\"editversions.cgi?product=" . url_quote($product) .
+               "&amp;action=add\">add</a> another version or $localtrailer");
     exit;
 }
 
@@ -352,10 +354,10 @@ if ($action eq 'del') {
 
     print "</TR><TR>\n";
     print "  <TH ALIGN=\"left\" VALIGN=\"top\">Product:</TH>\n";
-    print "  <TD VALIGN=\"top\">$product</TD>\n";
+    print "  <TD VALIGN=\"top\">" . html_quote($product) . "</TD>\n";
     print "</TR><TR>\n";
     print "  <TH ALIGN=\"left\" VALIGN=\"top\">Version:</TH>\n";
-    print "  <TD VALIGN=\"top\">$version</TD>\n";
+    print "  <TD VALIGN=\"top\">" . html_quote($version) . "</TD>\n";
     print "</TR><TR>\n";
     print "  <TH ALIGN=\"left\" VALIGN=\"top\">Bugs:</TH>\n";
     print "  <TD VALIGN=\"top\">", $bugs || 'none' , "</TD>\n";
@@ -512,7 +514,7 @@ if ($action eq 'update') {
             exit;
         }
         if (TestVersion($product,$version)) {
-            print "Sorry, version '$version' is already in use.";
+            print "Sorry, version '" . html_quote($version) . "' is already in use.";
             PutTrailer($localtrailer);
             exit;
         }

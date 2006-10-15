@@ -80,7 +80,7 @@ sub CheckProduct ($)
     }
 
     unless (TestProduct $prod) {
-        print "Sorry, product '$prod' does not exist.";
+        print "Sorry, product '" . html_quote($prod) . "' does not exist.";
         PutTrailer();
         exit;
     }
@@ -231,8 +231,8 @@ unless ($action) {
         $disallownew = $disallownew ? 'closed' : 'open';
         $bugs        ||= 'none';
         print "<TR>\n";
-        print "  <TD VALIGN=\"top\"><A HREF=\"editproducts.cgi?action=edit&product=", url_quote($product), "\"><B>$product</B></A></TD>\n";
-        print "  <TD VALIGN=\"top\">$description</TD>\n";
+        print "  <TD VALIGN=\"top\"><A HREF=\"editproducts.cgi?action=edit&product=", url_quote($product), "\"><B>", html_quote($product), "</B></A></TD>\n";
+        print "  <TD VALIGN=\"top\">" . html_light_quote($description) . "</TD>\n";
         print "  <TD VALIGN=\"top\">$disallownew</TD>\n";
         print "  <TD VALIGN=\"top\" ALIGN=\"right\">$votesperuser</TD>\n";
         print "  <TD VALIGN=\"top\" ALIGN=\"right\">$maxvotesperbug</TD>\n";
@@ -308,7 +308,7 @@ if ($action eq 'new') {
         exit;
     }
     if (TestProduct($product)) {
-        print "The product '$product' already exists. Please press\n";
+        print "The product '" . html_quote($product) . "' already exists. Please press\n";
         print "<b>Back</b> and try again.\n";
         PutTrailer($localtrailer);
         exit;
@@ -317,7 +317,7 @@ if ($action eq 'new') {
     my $version = trim($::FORM{version} || '');
 
     if ($version eq '') {
-        print "You must enter a version for product '$product'. Please press\n";
+        print "You must enter a version for product '" . html_quote($product) . "'. Please press\n";
         print "<b>Back</b> and try again.\n";
         PutTrailer($localtrailer);
         exit;
@@ -460,7 +460,8 @@ if ($action eq 'del') {
              FROM products
              WHERE name=" . SqlQuote($product));
     my ($product_id, $description, $milestoneurl, $disallownew) = FetchSQLData();
-    my $milestonelink = $milestoneurl ? "<a href=\"$milestoneurl\">$milestoneurl</a>"
+    my $milestonelink = $milestoneurl ? '<a href="' . html_quote($milestoneurl) .'">' .
+                                        html_quote($milestoneurl) . '</a>'
                                       : "<font color=\"red\">missing</font>";
     $description ||= "<FONT COLOR=\"red\">description missing</FONT>";
     $disallownew = $disallownew ? 'closed' : 'open';
@@ -472,11 +473,11 @@ if ($action eq 'del') {
 
     print "</TR><TR>\n";
     print "  <TD VALIGN=\"top\">Product:</TD>\n";
-    print "  <TD VALIGN=\"top\">$product</TD>\n";
+    print "  <TD VALIGN=\"top\">" . html_quote($product) . "</TD>\n";
 
     print "</TR><TR>\n";
     print "  <TD VALIGN=\"top\">Description:</TD>\n";
-    print "  <TD VALIGN=\"top\">$description</TD>\n";
+    print "  <TD VALIGN=\"top\">" . html_light_quote($description) . "</TD>\n";
 
     if (Param('usetargetmilestone')) {
         print "</TR><TR>\n";
@@ -500,8 +501,8 @@ if ($action eq 'del') {
         while ( MoreSQLData() ) {
             my ($component, $description) = FetchSQLData();
             $description ||= "<FONT COLOR=\"red\">description missing</FONT>";
-            print "<tr><th align=right valign=top>$component:</th>";
-            print "<td valign=top>$description</td></tr>\n";
+            print "<tr><th align=right valign=top>" . html_quote($component) . ":</th>";
+            print "<td valign=top>" . html_light_quote($description) . "</td></tr>\n";
         }
         print "</table>\n";
     } else {
@@ -520,7 +521,7 @@ if ($action eq 'del') {
         while ( MoreSQLData() ) {
             my ($version) = FetchSQLData();
             print "<BR>" if $br;
-            print $version;
+            print html_quote($version);
             $br = 1;
         }
     } else {
@@ -543,7 +544,7 @@ if ($action eq 'del') {
             while ( MoreSQLData() ) {
                 my ($milestone) = FetchSQLData();
                 print "<BR>" if $br;
-                print $milestone;
+                print html_quote($milestone);
                 $br = 1;
             }
         } else {
@@ -672,7 +673,7 @@ if ($action eq 'delete') {
 
     SendSQL("DELETE FROM products
              WHERE id=$product_id");
-    print "Product '$product' deleted.<BR>\n";
+    print "Product '" . html_quote($product) . "' deleted.<BR>\n";
 
     unlink "$datadir/versioncache";
     PutTrailer($localtrailer);
@@ -718,8 +719,8 @@ if ($action eq 'edit') {
         while ( MoreSQLData() ) {
             my ($component, $description) = FetchSQLData();
             $description ||= "<FONT COLOR=\"red\">description missing</FONT>";
-            print "<tr><th align=right valign=top>$component:</th>";
-            print "<td valign=top>$description</td></tr>\n";
+            print "<tr><th align=right valign=top>" . html_quote($component) . ":</th>";
+            print "<td valign=top>" . html_light_quote($description) . "</td></tr>\n";
         }
         print "</table>\n";
     } else {
@@ -739,7 +740,7 @@ if ($action eq 'edit') {
         while ( MoreSQLData() ) {
             my ($version) = FetchSQLData();
             print "<BR>" if $br;
-            print $version;
+            print html_quote($version);
             $br = 1;
         }
     } else {
@@ -762,7 +763,7 @@ if ($action eq 'edit') {
             while ( MoreSQLData() ) {
                 my ($milestone) = FetchSQLData();
                 print "<BR>" if $br;
-                print $milestone;
+                print html_quote($milestone);
                 $br = 1;
             }
         } else {
@@ -1168,7 +1169,7 @@ if ($action eq 'update') {
                 "WHERE value = " . SqlQuote($defaultmilestone) .
                 "  AND product_id = $product_id");
         if (!FetchOneColumn()) {
-            print "Sorry, the milestone $defaultmilestone must be defined first.";
+            print "Sorry, the milestone " . html_quote($defaultmilestone) . " must be defined first.";
             PutTrailer($localtrailer);
             exit;
         }
@@ -1188,7 +1189,7 @@ if ($action eq 'update') {
             exit;
         }
         if (TestProduct($product)) {
-            print "Sorry, product name '$product' is already in use.";
+            print "Sorry, product name '" . html_quote($product) . "' is already in use.";
             PutTrailer($localtrailer);
             exit;
         }
@@ -1217,7 +1218,8 @@ if ($action eq 'update') {
                 my ($who, $id) = (@$ref);
                 RemoveVotes($id, $who, "The rules for voting on this product has changed;\nyou had too many votes for a single bug.");
                 my $name = DBID_to_name($who);
-                print qq{<br>Removed votes for bug <A HREF="show_bug.cgi?id=$id">$id</A> from $name\n};
+                print "<br>Removed votes for bug <A HREF=\"show_bug.cgi?id=$id\">$id</A> from " .
+                      html_quote($name) . "\n";
             }
         }
 
@@ -1249,7 +1251,8 @@ if ($action eq 'update') {
                     RemoveVotes($id, $who,
                                 "The rules for voting on this product has changed; you had too many\ntotal votes, so all votes have been removed.");
                     my $name = DBID_to_name($who);
-                    print qq{<br>Removed votes for bug <A HREF="show_bug.cgi?id=$id">$id</A> from $name\n};
+                    print "<br>Removed votes for bug <A HREF=\"show_bug.cgi?id=$id\">$id</A> from " .
+                          html_quote($name) . "\n";
                 }
             }
         }
@@ -1346,10 +1349,10 @@ if ($action eq 'editgroupcontrols') {
         print "</TR>\n";
         my ($groupid, $groupname, $entry, $membercontrol, $othercontrol, 
             $canedit) = FetchSQLData();
-        print "<TR id=\"row_$groupname\" class=\"hstyle\" ";
-        print "onload=\"document.row.row_$groupname.color=green\">\n";
+        print "<TR id=\"row_" . html_quote($groupname) . "\" class=\"hstyle\" ";
+        print "onload=\"document.row.row_" . html_quote($groupname) . ".color=green\">\n";
         print "  <TD>\n";
-        print "    $groupname\n";
+        print "    " . html_quote($groupname) . "\n";
         print "  </TD><TD>\n";
         $entry |= 0;
         print "    <INPUT TYPE=CHECKBOX NAME=\"entry_$groupid\" VALUE=1";
@@ -1407,14 +1410,14 @@ if ($action eq 'editgroupcontrols') {
             "ORDER BY name");
     while (MoreSQLData()) {
         my ($groupid, $groupname) = FetchSQLData();
-        print "<OPTION VALUE=\"$groupid\">$groupname</OPTION>\n";
+        print "<OPTION VALUE=\"$groupid\">" . html_quote($groupname) . "</OPTION>\n";
     }
     print "</SELECT><BR><BR>\n";
 
     print "<INPUT TYPE=SUBMIT VALUE=\"Update\">\n";
     print "<INPUT TYPE=RESET>\n";
     print "<INPUT TYPE=HIDDEN NAME=\"action\" VALUE=\"updategroupcontrols\">\n";
-    print "<INPUT TYPE=HIDDEN NAME=\"product\" VALUE=\"$product\">\n";
+    print "<INPUT TYPE=HIDDEN NAME=\"product\" VALUE=\"" . html_quote($product) . "\">\n";
     print "</FORM>\n";
     print "<P>note: Any group controls Set to NA/NA with no other checkboxes ";
     print "will automatically be removed from the panel the next time ";

@@ -23,7 +23,7 @@
   # product: string. The product this is the components list for.
   # components: List of hashes. May be empty. Each hash has four members:
   #   name: string. Name of the component.
-  #   description: string. Description of the component. May contain HTML.
+  #   description: string. Description of the component. Can contain some limited HTML code.
   #   initialowner: string. Component's initial owner.
   #   initialqacontact: string. Component's initial QA contact.
   #%]
@@ -93,7 +93,7 @@
   </tr>
   <tr>
     <td colspan="[% numcols - 1 %]">
-      [% comp.description %]
+      [% comp.description FILTER html_light %]
     </td>
   </tr>
 [% END %]

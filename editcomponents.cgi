@@ -77,7 +77,7 @@ sub CheckProduct ($)
     }
 
     unless (TestProduct $prod) {
-        print "Sorry, product '$prod' does not exist.";
+        print "Sorry, product '" . html_quote($prod) . "' does not exist.";
         PutTrailer();
         exit;
     }
@@ -109,7 +109,8 @@ sub CheckComponent ($$)
     CheckProduct($prod);
 
     unless (TestComponent $prod,$comp) {
-        print "Sorry, component '$comp' for product '$prod' does not exist.";
+        print "Sorry, component '" . html_quote($comp) . "' for product '" .
+              html_quote($prod) . "' does not exist.";
         PutTrailer();
         exit;
     }
@@ -255,8 +256,8 @@ unless ($product) {
         my ($product, $description, $bugs) = FetchSQLData();
         $description ||= "<FONT COLOR=\"red\">missing</FONT>";
         print "<TR>\n";
-        print "  <TD VALIGN=\"top\"><A HREF=\"editcomponents.cgi?product=", url_quote($product), "\"><B>$product</B></A></TD>\n";
-        print "  <TD VALIGN=\"top\">$description</TD>\n";
+        print "  <TD VALIGN=\"top\"><A HREF=\"editcomponents.cgi?product=", url_quote($product), "\"><B>", html_quote($product), "</B></A></TD>\n";
+        print "  <TD VALIGN=\"top\">" . html_light_quote($description) . "</TD>\n";
         if ($dobugcounts) {
             $bugs ||= "none";
             print "  <TD VALIGN=\"top\">$bugs</TD>\n";
@@ -312,10 +313,10 @@ unless ($action) {
         my $initialowner = $initialownerid ? DBID_to_name ($initialownerid) : "<FONT COLOR=\"red\">missing</FONT>";
         my $initialqacontact = $initialqacontactid ? DBID_to_name ($initialqacontactid) : "<FONT COLOR=\"red\">missing</FONT>";
         print "<TR>\n";
-        print "  <TD VALIGN=\"top\"><A HREF=\"editcomponents.cgi?product=", url_quote($product), "&component=", url_quote($component), "&action=edit\"><B>$component</B></A></TD>\n";
-        print "  <TD VALIGN=\"top\">$desc</TD>\n";
-        print "  <TD VALIGN=\"top\">$initialowner</TD>\n";
-        print "  <TD VALIGN=\"top\">$initialqacontact</TD>\n"
+        print "  <TD VALIGN=\"top\"><A HREF=\"editcomponents.cgi?product=", url_quote($product), "&component=", url_quote($component), "&action=edit\"><B>", html_quote($component), "</B></A></TD>\n";
+        print "  <TD VALIGN=\"top\">" . html_light_quote($desc) . "</TD>\n";
+        print "  <TD VALIGN=\"top\">" . html_quote($initialowner) . "</TD>\n";
+        print "  <TD VALIGN=\"top\">" . html_quote($initialqacontact) . "</TD>\n"
                 if Param('useqacontact');
         if ($dobugcounts) {
             $bugs ||= 'none';
@@ -391,7 +392,7 @@ if ($action eq 'new') {
         exit;
     }
     if (TestComponent($product,$component)) {
-        print "The component '$component' already exists. Please press\n";
+        print "The component '" . html_quote($component) . "' already exists. Please press\n";
         print "<b>Back</b> and try again.\n";
         PutTrailer($localtrailer);
         exit;
@@ -406,7 +407,8 @@ if ($action eq 'new') {
     my $description = trim($::FORM{description} || '');
 
     if ($description eq '') {
-        print "You must enter a description for the component '$component'. Please press\n";
+        print "You must enter a description for the component '" .
+              html_quote($component) . "'. Please press\n";
         print "<b>Back</b> and try again.\n";
         PutTrailer($localtrailer);
         exit;
@@ -415,7 +417,8 @@ if ($action eq 'new') {
     my $initialowner = trim($::FORM{initialowner} || '');
 
     if ($initialowner eq '') {
-        print "You must enter an initial owner for the component '$component'. Please press\n";
+        print "You must enter an initial owner for the component '" .
+              html_quote($component) . "'. Please press\n";
         print "<b>Back</b> and try again.\n";
         PutTrailer($localtrailer);
         exit;
@@ -423,8 +426,8 @@ if ($action eq 'new') {
 
     my $initialownerid = DBname_to_id ($initialowner);
     if (!$initialownerid) {
-        print "You must use an existing Bugzilla account as initial owner for the component
-'$component'. Please press\n";
+        print "You must use an existing Bugzilla account as initial owner for the component'" .
+              html_quote($component) . "'. Please press\n";
         print "<b>Back</b> and try again.\n";
         PutTrailer($localtrailer);
         exit;
@@ -434,7 +437,8 @@ if ($action eq 'new') {
     my $initialqacontactid = DBname_to_id ($initialqacontact);
     if (Param('useqacontact')) {
         if (!$initialqacontactid && $initialqacontact ne '') {
-            print "You must use an existing Bugzilla account as initial QA contact for the component '$component'. Please press\n";
+            print "You must use an existing Bugzilla account as initial QA contact for the component '" .
+                  html_quote($component) . "'. Please press\n";
             print "<b>Back</b> and try again.\n";
             PutTrailer($localtrailer);
             exit;
@@ -533,7 +537,8 @@ if ($action eq 'del') {
 
     my $initialowner = $initialownerid ? DBID_to_name ($initialownerid) : "<FONT COLOR=\"red\">missing</FONT>";
     my $initialqacontact = $initialqacontactid ? DBID_to_name ($initialqacontactid) : "<FONT COLOR=\"red\">missing</FONT>";
-    my $milestonelink = $milestoneurl ? "<A HREF=\"$milestoneurl\">$milestoneurl</A>"
+    my $milestonelink = $milestoneurl ? '<A HREF="' . html_quote($milestoneurl) . '">' .
+                                        html_quote($milestoneurl) . '</A>'
                                       : "<FONT COLOR=\"red\">missing</FONT>";
     $pdesc            ||= "<FONT COLOR=\"red\">missing</FONT>";
     $disallownew        = $disallownew ? 'closed' : 'open';
@@ -545,20 +550,20 @@ if ($action eq 'del') {
 
     print "</TR><TR>\n";
     print "  <TD VALIGN=\"top\">Component:</TD>\n";
-    print "  <TD VALIGN=\"top\">$component</TD>";
+    print "  <TD VALIGN=\"top\">" . html_quote($component) . "</TD>";
 
     print "</TR><TR>\n";
     print "  <TD VALIGN=\"top\">Component description:</TD>\n";
-    print "  <TD VALIGN=\"top\">$cdesc</TD>";
+    print "  <TD VALIGN=\"top\">" . html_light_quote($cdesc) . "</TD>";
 
     print "</TR><TR>\n";
     print "  <TD VALIGN=\"top\">Initial owner:</TD>\n";
-    print "  <TD VALIGN=\"top\">$initialowner</TD>";
+    print "  <TD VALIGN=\"top\">" . html_quote($initialowner) . "</TD>";
 
     if (Param('useqacontact')) {
         print "</TR><TR>\n";
         print "  <TD VALIGN=\"top\">Initial QA contact:</TD>\n";
-        print "  <TD VALIGN=\"top\">$initialqacontact</TD>";
+        print "  <TD VALIGN=\"top\">" . html_quote($initialqacontact) . "</TD>";
     }
     SendSQL("SELECT count(bug_id)
              FROM bugs
@@ -566,11 +571,11 @@ if ($action eq 'del') {
 
     print "</TR><TR>\n";
     print "  <TD VALIGN=\"top\">Component of product:</TD>\n";
-    print "  <TD VALIGN=\"top\">$product</TD>\n";
+    print "  <TD VALIGN=\"top\">" . html_quote($product) . "</TD>\n";
 
     print "</TR><TR>\n";
     print "  <TD VALIGN=\"top\">Description:</TD>\n";
-    print "  <TD VALIGN=\"top\">$pdesc</TD>\n";
+    print "  <TD VALIGN=\"top\">" . html_light_quote($pdesc) . "</TD>\n";
 
     if (Param('usetargetmilestone')) {
          print "</TR><TR>\n";
@@ -837,7 +842,7 @@ if ($action eq 'update') {
             exit;
         }
         if (TestComponent($product,$component)) {
-            print "Sorry, component name '$component' is already in use.";
+            print "Sorry, component name '" . html_quote($component) . "' is already in use.";
             PutTrailer($localtrailer);
             exit;
         }

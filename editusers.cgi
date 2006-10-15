@@ -76,7 +76,7 @@ sub CheckUser ($)
     }
 
     unless (TestUser $user) {
-        print "Sorry, user '$user' does not exist.";
+        print "Sorry, user '" . html_quote($user) . "' does not exist.";
         PutTrailer();
         exit;
     }
@@ -87,6 +87,7 @@ sub CheckUser ($)
 sub EmitElement ($$)
 {
     my ($name, $value) = (@_);
+    $name = html_quote($name);
     $value = value_quote($value);
     if ($editall) {
         print qq{<TD><INPUT SIZE=64 MAXLENGTH=255 NAME="$name" VALUE="$value"></TD>\n};
@@ -193,7 +194,7 @@ sub EmitFormElements ($$$$)
                 print ']' if ($isderived);
                 print '*' if ($isregexp);
                 print "</TD><TD><B>";
-                print ucfirst($name) . "</B>: $description</TD>\n";
+                print html_quote(ucfirst($name)) . "</B>: " . html_light_quote($description) . "</TD>\n";
             }
         }
         print "</TR></TABLE></TD>\n";
@@ -466,7 +467,7 @@ if ($action eq 'new') {
         exit;
     }
     if (!ValidateNewUser($user)) {
-        print "The user '$user' does already exist. Please press\n";
+        print "The user '" . html_quote($user) . "' does already exist. Please press\n";
         print "<b>Back</b> and try again.\n";
         PutTrailer($localtrailer);
         exit;
@@ -490,7 +491,7 @@ if ($action eq 'new') {
     SendSQL("SELECT last_insert_id()");
     my ($newuserid) = FetchSQLData();
 
-    print "To change ${user}'s permissions, go back and " .
+    print "To change " . html_quote($user) . "'s permissions, go back and " .
         "<a href=\"editusers.cgi?action=edit&user=" . url_quote($user) .
         "\">edit</a> this user.";
     print "<p>\n";
@@ -535,7 +536,7 @@ if ($action eq 'del') {
 
     print "</TR><TR>\n";
     print "  <TD VALIGN=\"top\">Login name:</TD>\n";
-    print "  <TD VALIGN=\"top\">$user</TD>\n";
+    print "  <TD VALIGN=\"top\">" . html_quote($user) . "</TD>\n";
 
     print "</TR><TR>\n";
     print "  <TD VALIGN=\"top\">Real name:</TD>\n";
@@ -554,7 +555,7 @@ if ($action eq 'del') {
     while ( MoreSQLData() ) {
         my ($name) = FetchSQLData();
         print "<br>\n" if $found;
-        print ucfirst $name;
+        print html_quote(ucfirst($name));
         $found = 1;
     }
     print "none" unless $found;
@@ -580,7 +581,7 @@ if ($action eq 'del') {
         my ($product, $component) = FetchSQLData();
         print "<a href=\"editcomponents.cgi?product=", url_quote($product),
                 "&component=", url_quote($component),
-                "&action=edit\">$product: $component</a>";
+                "&action=edit\">" . html_quote($product) . ": " . html_quote($component) . "</a>";
         $found    = 1;
         $nodelete = 'initial bug owner';
     }
@@ -605,7 +606,7 @@ if ($action eq 'del') {
         my ($product, $component) = FetchSQLData();
         print "<a href=\"editcomponents.cgi?product=", url_quote($product),
                 "&component=", url_quote($component),
-                "&action=edit\">$product: $component</a>";
+                "&action=edit\">" . html_quote($product) . ": " . html_quote($component) . "</a>";
         $found    = 1;
         $nodelete = 'initial QA contact';
     }
@@ -615,7 +616,7 @@ if ($action eq 'del') {
 
 
     if ($nodelete) {
-        print "<P>You can't delete this user because '$user' is an $nodelete ",
+        print "<P>You can't delete this user because '" . html_quote($user) . "' is an $nodelete ",
               "for at least one product.";
         PutTrailer($localtrailer);
         exit;
@@ -628,7 +629,7 @@ if ($action eq 'del') {
     print "<FORM METHOD=POST ACTION=editusers.cgi>\n";
     print "<INPUT TYPE=SUBMIT VALUE=\"Yes, delete\">\n";
     print "<INPUT TYPE=HIDDEN NAME=\"action\" VALUE=\"delete\">\n";
-    print "<INPUT TYPE=HIDDEN NAME=\"user\" VALUE=\"$user\">\n";
+    print "<INPUT TYPE=HIDDEN NAME=\"user\" VALUE=\"" . html_quote($user) . "\">\n";
     print "</FORM>";
 
     PutTrailer($localtrailer);
@@ -700,8 +701,8 @@ if ($action eq 'edit') {
     EmitFormElements($thisuserid, $user, $realname, $disabledtext);
     
     print "</TR></TABLE>\n";
-    print "<INPUT TYPE=HIDDEN NAME=\"userold\" VALUE=\"$user\">\n";
-    print "<INPUT TYPE=HIDDEN NAME=\"realnameold\" VALUE=\"$realname\">\n";
+    print "<INPUT TYPE=HIDDEN NAME=\"userold\" VALUE=\"" . html_quote($user) . "\">\n";
+    print "<INPUT TYPE=HIDDEN NAME=\"realnameold\" VALUE=\"" . html_quote($realname) . "\">\n";
     print "<INPUT TYPE=HIDDEN NAME=\"disabledtextold\" VALUE=\"" .
         value_quote($disabledtext) . "\">\n";
     print "<INPUT TYPE=HIDDEN NAME=\"action\" VALUE=\"update\">\n";
@@ -720,7 +721,7 @@ if ($action eq 'edit') {
         print "<FORM METHOD=POST ACTION=editusers.cgi>\n";
         print "<INPUT TYPE=SUBMIT VALUE=\"Delete User\">\n";
         print "<INPUT TYPE=HIDDEN NAME=\"action\" VALUE=\"del\">\n";
-        print "<INPUT TYPE=HIDDEN NAME=\"user\" VALUE=\"$user\">\n";
+        print "<INPUT TYPE=HIDDEN NAME=\"user\" VALUE=\"" . html_quote($user) . "\">\n";
         print "</FORM>";
     }
 
@@ -777,10 +778,10 @@ if ($action eq 'update') {
                 SendSQL("INSERT INTO user_group_map 
                          (user_id, group_id, isbless, grant_type)
                          VALUES ($thisuserid, $groupid, 0," . GRANT_DIRECT . ")");
-                print "Added user to group $name<BR>\n";
+                print "Added user to group " . html_quote($name) . "<BR>\n";
                 push(@grpadd, $name);
             } else {
-                print "Dropped user from group $name<BR>\n";
+                print "Dropped user from group " . html_quote($name) . "<BR>\n";
                 push(@grpdel, $name);
             }
             PopGlobalSQLState();
@@ -797,9 +798,9 @@ if ($action eq 'update') {
                 SendSQL("INSERT INTO user_group_map 
                          (user_id, group_id, isbless, grant_type)
                          VALUES ($thisuserid, $groupid, 1," . GRANT_DIRECT . ")");
-                print "Granted user permission to bless group $name<BR>\n";
+                print "Granted user permission to bless group " . html_quote($name) . "<BR>\n";
             } else {
-                print "Revoked user's permission to bless group $name<BR>\n";
+                print "Revoked user's permission to bless group " . html_quote($name) . "<BR>\n";
             }
             PopGlobalSQLState();
             
@@ -859,7 +860,7 @@ if ($action eq 'update') {
             exit;
         }
         if (TestUser($user)) {
-            print "Sorry, user name '$user' is already in use.";
+            print "Sorry, user name '" . html_quote($user) . "' is already in use.";
             $userold = url_quote($userold);
             $localtrailer =~ s/XXX/$userold/;
             push @localtrailers, $localtrailer;

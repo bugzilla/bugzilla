@@ -50,7 +50,7 @@ sub CheckProduct ($)
     }
 
     unless (TestProduct $prod) {
-        print "Sorry, product '$prod' does not exist.";
+        print "Sorry, product '" . html_quote($prod) . "' does not exist.";
         PutTrailer();
         exit;
     }
@@ -81,7 +81,8 @@ sub CheckMilestone ($$)
     CheckProduct($prod);
 
     unless (TestMilestone $prod,$mile) {
-        print "Sorry, milestone '$mile' for product '$prod' does not exist.";
+        print "Sorry, milestone '" . html_quote($mile) . "' for product '" .
+              html_quote($prod) . "' does not exist.";
         PutTrailer();
         exit;
     }
@@ -209,8 +210,8 @@ unless ($product) {
         my ($product, $description) = FetchSQLData();
         $description ||= "<FONT COLOR=\"red\">missing</FONT>";
         print "<TR>\n";
-        print "  <TD VALIGN=\"top\"><A HREF=\"editmilestones.cgi?product=", url_quote($product), "\"><B>$product</B></A></TD>\n";
-        print "  <TD VALIGN=\"top\">$description</TD>\n";
+        print "  <TD VALIGN=\"top\"><A HREF=\"editmilestones.cgi?product=", url_quote($product), "\"><B>", html_quote($product), "</B></A></TD>\n";
+        print "  <TD VALIGN=\"top\">" . html_light_quote($description) . "</TD>\n";
     }
     print "</TR></TABLE>\n";
 
@@ -244,7 +245,7 @@ unless ($action) {
         my ($milestone,$sortkey,$bugs) = FetchSQLData();
         $bugs ||= 'none';
         print "<TR>\n";
-        print "  <TD VALIGN=\"top\"><A HREF=\"editmilestones.cgi?product=", url_quote($product), "&milestone=", url_quote($milestone), "&action=edit\"><B>$milestone</B></A></TD>\n";
+        print "  <TD VALIGN=\"top\"><A HREF=\"editmilestones.cgi?product=", url_quote($product), "&milestone=", url_quote($milestone), "&action=edit\"><B>", html_quote($milestone), "</B></A></TD>\n";
         #print "  <TD VALIGN=\"top\">$bugs</TD>\n";
         print "  <TD VALIGN=\"top\" ALIGN=\"right\">$sortkey</TD>\n";
         print "  <TD VALIGN=\"top\"><A HREF=\"editmilestones.cgi?product=", url_quote($product), "&milestone=", url_quote($milestone), "&action=del\"><B>Delete</B></A></TD>\n";
@@ -314,7 +315,7 @@ if ($action eq 'new') {
     $sortkey = CheckSortkey($milestone,$sortkey);
 
     if (TestMilestone($product,$milestone)) {
-        print "The milestone '$milestone' already exists. Please press\n";
+        print "The milestone '" . html_quote($milestone) . "' already exists. Please press\n";
         print "<b>Back</b> and try again.\n";
         PutTrailer($localtrailer);
         exit;
@@ -330,7 +331,8 @@ if ($action eq 'new') {
     unlink "$datadir/versioncache";
 
     print "OK, done.<p>\n";
-    PutTrailer("<A HREF=\"editmilestones.cgi?product=$product&amp;action=add\">add</a> another milestone or $localtrailer");
+    PutTrailer("<A HREF=\"editmilestones.cgi?product=" . url_quote($product) .
+               "&amp;action=add\">add</a> another milestone or $localtrailer");
     exit;
 }
 
@@ -366,10 +368,10 @@ if ($action eq 'del') {
 
     print "</TR><TR>\n";
     print "  <TH ALIGN=\"left\" VALIGN=\"top\">Product:</TH>\n";
-    print "  <TD VALIGN=\"top\">$product</TD>\n";
+    print "  <TD VALIGN=\"top\">" . html_quote($product) . "</TD>\n";
     print "</TR><TR>\n";
     print "  <TH ALIGN=\"left\" VALIGN=\"top\">Milestone:</TH>\n";
-    print "  <TD VALIGN=\"top\">$milestone</TD>\n";
+    print "  <TD VALIGN=\"top\">" . html_quote($milestone) . "</TD>\n";
     print "</TR><TR>\n";
     print "  <TH ALIGN=\"left\" VALIGN=\"top\">Bugs:</TH>\n";
     print "  <TD VALIGN=\"top\">", $bugs || 'none' , "</TD>\n";
@@ -545,7 +547,7 @@ if ($action eq 'update') {
             exit;
         }
         if (TestMilestone($product,$milestone)) {
-            print "Sorry, milestone '$milestone' is already in use.";
+            print "Sorry, milestone '" . html_quote($milestone) . "' is already in use.";
             PutTrailer($localtrailer);
             exit;
         }

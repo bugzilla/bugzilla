@@ -1248,6 +1248,10 @@ sub UserInGroup {
     return defined Bugzilla->user && defined Bugzilla->user->groups->{$_[0]};
 }
 
+sub UserIsInsider {
+    return defined Bugzilla->user && Bugzilla->user->is_insider;
+}
+
 sub UserCanBlessGroup {
     my ($groupname) = (@_);
     PushGlobalSQLState();

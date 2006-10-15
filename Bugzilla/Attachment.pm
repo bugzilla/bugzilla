@@ -84,9 +84,8 @@ sub query
   my @attachments = ();
   while (&::MoreSQLData()) {
     my %a;
-    my $submitter_id;
     ($a{'attachid'}, $a{'date'}, $a{'contenttype'}, $a{'description'},
-     $a{'ispatch'}, $a{'isobsolete'}, $a{'isprivate'}, $submitter_id, 
+     $a{'ispatch'}, $a{'isobsolete'}, $a{'isprivate'}, $a{'submitter_id'},
      $a{'datasize'}) = &::FetchSQLData();
 
     # Retrieve a list of flags for this attachment.
@@ -97,7 +96,7 @@ sub query
     # ie the are the submitter, or they have canedit.
     # Also show the link if the user is not logged in - in that cae,
     # They'll be prompted later
-    $a{'canedit'} = ($::userid == 0 || (($submitter_id == $::userid ||
+    $a{'canedit'} = ($::userid == 0 || (($a{'submitter_id'} == $::userid ||
                      $in_editbugs) && $caneditproduct));
     push @attachments, \%a;
   }

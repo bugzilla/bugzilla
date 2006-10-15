@@ -59,11 +59,6 @@ sub queue {
     
     validateStatus($cgi->param('status'));
     validateGroup($cgi->param('group'));
-    
-    my $attach_join_clause = "flags.attach_id = attachments.attach_id";
-    if (Param("insidergroup") && !UserInGroup(Param("insidergroup"))) {
-        $attach_join_clause .= " AND attachments.isprivate < 1";
-    }
 
     my $query = 
     # Select columns describing each flag, the bug/attachment on which
@@ -92,7 +87,7 @@ sub queue {
     # and user_group_map tables to help us weed out secure bugs to which
     # the user should not have access.
     " FROM      flags 
-                LEFT JOIN attachments ON ($attach_join_clause), 
+                LEFT JOIN attachments ON flags.attach_id = attachments.attach_id,
                 flagtypes, 
                 profiles AS requesters
                 LEFT JOIN profiles AS requestees 
@@ -115,7 +110,16 @@ sub queue {
       AND       flags.setter_id     = requesters.userid
       AND       flags.bug_id        = bugs.bug_id
     ";
-    
+
+    unless (UserIsInsider()) {
+        $query .= " AND (attachments.attach_id IS NULL
+                         OR attachments.isprivate = 0";
+        if (defined Bugzilla->user) {
+            $query .= " OR attachments.submitter_id = " . Bugzilla->user->id;
+        }
+        $query .= ")";
+    }
+
     # Non-deleted flags only
     $query .= " AND flags.is_active = 1 ";
     

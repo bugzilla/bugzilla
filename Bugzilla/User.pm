@@ -709,6 +709,17 @@ sub is_mover {
     return $self->{'is_mover'};
 }
 
+sub is_insider {
+    my $self = shift;
+
+    if (!defined $self->{'is_insider'}) {
+        my $insider_group = Param('insidergroup');
+        $self->{'is_insider'} =
+            ($insider_group && $self->in_group($insider_group)) ? 1 : 0;
+    }
+    return $self->{'is_insider'};
+}
+
 1;
 
 __END__
@@ -866,6 +877,11 @@ Returns C<1> if the user can bless at least one group. Otherwise returns C<0>.
 Returns true if the user is in the list of users allowed to move bugs
 to another database. Note that this method doesn't check whether bug
 moving is enabled.
+
+=item C<is_insider>
+
+Returns true if the user can access private comments and attachments,
+i.e. if the 'insidergroup' parameter is set and the user belongs to this group.
 
 =back
 

@@ -140,7 +140,16 @@ elsif ($action eq "update")
   validateContentType() unless $::FORM{'ispatch'};
   validateIsObsolete();
   validatePrivate();
-  
+
+  # If the submitter of the attachment is not in the insidergroup,
+  # be sure that he cannot overwrite the private bit.
+  # This check must be done before calling Bugzilla::Flag*::validate(),
+  # because they will look at the private bit when checking permissions.
+  unless (UserIsInsider()) {
+      SendSQL("SELECT isprivate FROM attachments WHERE attach_id = $::FORM{'id'}");
+      $::FORM{'isprivate'} = FetchOneColumn();
+  }
+
   # The order of these function calls is important, as both Flag::validate
   # and FlagType::validate assume User::match_field has ensured that the values
   # in the requestee fields are legitimate user email addresses.
@@ -186,15 +195,18 @@ sub validateID
      || ThrowUserError("invalid_attach_id", { attach_id => $cgi->param($param) });
   
     # Make sure the attachment exists in the database.
-    SendSQL("SELECT bug_id, isprivate FROM attachments WHERE attach_id = $attach_id");
+    SendSQL("SELECT bug_id, isprivate, submitter_id FROM attachments
+             WHERE attach_id = $attach_id");
     MoreSQLData()
       || ThrowUserError("invalid_attach_id", { attach_id => $attach_id });
 
     # Make sure the user is authorized to access this attachment's bug.
-    ($bugid, my $isprivate) = FetchSQLData();
+    ($bugid, my $isprivate, my $submitter_id) = FetchSQLData();
     ValidateBugID($bugid);
-    if (($isprivate > 0 ) && Param("insidergroup") && 
-        !(UserInGroup(Param("insidergroup")))) {
+    if ($isprivate
+        && (!defined Bugzilla->user || Bugzilla->user->id != $submitter_id)
+        && !UserIsInsider())
+    {
         ThrowUserError("attachment_access_denied");
     }
 
@@ -237,16 +249,26 @@ sub validateCanEdit
     # before calling this sub
     return if $::userid == 0;
 
+    my $dbh = Bugzilla->dbh;
+
+    my ($is_private, $submitter_id) =
+        $dbh->selectrow_array('SELECT isprivate, submitter_id
+                               FROM attachments WHERE attach_id = ?',
+                               undef, $attach_id);
+
+    # Bug 97729 - the submitter can edit their attachments
+    return if (defined Bugzilla->user && $submitter_id == Bugzilla->user->id);
+
+    # Only people in the insider group can view private attachments.
+    if ($is_private && !UserIsInsider()) {
+        ThrowUserError('illegal_attachment_edit', {attach_id => $attach_id});
+    }
+
     # People in editbugs can edit all attachments
     return if UserInGroup("editbugs");
 
-    # Bug 97729 - the submitter can edit their attachments
-    SendSQL("SELECT attach_id FROM attachments WHERE " .
-            "attach_id = $attach_id AND submitter_id = $::userid");
-
-    FetchSQLData()
-      || ThrowUserError("illegal_attachment_edit",
-                        { attach_id => $attach_id });
+    # If we come here, then this attachment cannot be seen by the user.
+    ThrowUserError("illegal_attachment_edit", { attach_id => $attach_id });
 }
 
 sub validateCanChangeAttachment 
@@ -420,6 +442,9 @@ sub validateObsolete
 
     my ($bugid, $isobsolete, $description) = FetchSQLData();
 
+    # Check that the user can modify this attachment
+    validateCanEdit($attachid);
+
     $vars->{'description'} = $description;
     
     if ($bugid != $::FORM{'bugid'})
@@ -433,9 +458,6 @@ sub validateObsolete
     {
       ThrowCodeError("attachment_already_obsolete", $vars);
     }
-
-    # Check that the user can modify this attachment
-    validateCanEdit($attachid);
   }
 }
 
@@ -725,10 +747,22 @@ sub diff
   {
     $vars->{other_patches} = [];
     if ($::interdiffbin && $::diffpath) {
-      # Get list of attachments on this bug.
+      # Get the list of attachments that the user can view in this bug.
       # Ignore the current patch, but select the one right before it
       # chronologically.
-      SendSQL("SELECT attach_id, description FROM attachments WHERE bug_id = $bugid AND ispatch = 1 ORDER BY creation_ts DESC");
+      my $and_isprivate = '';
+      unless (UserIsInsider()) {
+          $and_isprivate = 'AND (isprivate = 0';
+          if (defined Bugzilla->user) {
+              $and_isprivate .= ' OR submitter_id = ' . Bugzilla->user->id;
+          }
+          $and_isprivate .= ')';
+      }
+
+      SendSQL("SELECT attach_id, description FROM attachments
+               WHERE bug_id = $bugid AND ispatch = 1 $and_isprivate
+               ORDER BY creation_ts DESC");
+
       my $select_next_patch = 0;
       while (my ($other_id, $other_desc) = FetchSQLData()) {
         if ($other_id eq $::FORM{'id'}) {
@@ -757,10 +791,18 @@ sub viewall
 
   # Retrieve the attachments from the database and write them into an array
   # of hashes where each hash represents one attachment.
-    my $privacy = "";
-    if (Param("insidergroup") && !(UserInGroup(Param("insidergroup")))) {
-        $privacy = "AND isprivate < 1 ";
+
+    # By default, private attachments are not accessible, unless the user
+    # is in the insider group or submitted the attachment.
+    my $privacy = '';
+    unless (UserIsInsider()) {
+        $privacy = 'AND (isprivate = 0';
+        if (defined Bugzilla->user) {
+            $privacy .= ' OR submitter_id = ' . Bugzilla->user->id;
+        }
+        $privacy .= ')';
     }
+
     SendSQL("SELECT attach_id, DATE_FORMAT(creation_ts, '%Y.%m.%d %H:%i'),
             mimetype, description, ispatch, isobsolete, isprivate, 
             LENGTH(thedata)
@@ -986,7 +1028,18 @@ sub edit
 
   # Retrieve a list of attachments for this bug as well as a summary of the bug
   # to use in a navigation bar across the top of the screen.
-  SendSQL("SELECT attach_id FROM attachments WHERE bug_id = $bugid ORDER BY attach_id");
+  my $and_isprivate = '';
+  unless (UserIsInsider()) {
+      $and_isprivate = 'AND (isprivate = 0';
+      if (defined Bugzilla->user) {
+          $and_isprivate .= ' OR submitter_id = ' . Bugzilla->user->id;
+      }
+      $and_isprivate .= ')';
+  }
+
+  SendSQL("SELECT attach_id FROM attachments
+           WHERE bug_id = $bugid $and_isprivate ORDER BY attach_id");
+
   my @bugattachments;
   push(@bugattachments, FetchSQLData()) while (MoreSQLData());
   SendSQL("SELECT short_desc FROM bugs WHERE bug_id = $bugid");

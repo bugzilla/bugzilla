@@ -117,7 +117,7 @@ if ($cgi->param("field")) {
 }
 
 unless (UserInGroup(Param("timetrackinggroup"))) {
-    @fieldlist = grep($_ !~ /_time$/, @fieldlist);
+    @fieldlist = grep($_ !~ /(^deadline|_time)$/, @fieldlist);
 }
 
 foreach (@fieldlist) {

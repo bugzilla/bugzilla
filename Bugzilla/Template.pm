@@ -498,7 +498,9 @@ sub create {
                 }
                 return $var;
             },
-            
+
+            html_light => \&Bugzilla::Util::html_light_quote,
+
             # iCalendar contentline filter
             ics => [ sub {
                          my ($context, @args) = @_;

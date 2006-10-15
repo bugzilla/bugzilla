@@ -205,7 +205,7 @@
             <td>
               [% resolution_descs.${bug.resolution} FILTER html %]
               [% IF bug.resolution == "DUPLICATE" %]
-                of [% terms.bug %] [%+ "${bug.dup_id}" FILTER bug_link(bug.dup_id) %]
+                of [% terms.bug %] [%+ "${bug.dup_id}" FILTER bug_link(bug.dup_id) FILTER none %]
               [% END %]
             </td>
           </tr>
@@ -594,7 +594,7 @@
       <input type="checkbox" name="bit-[% group.bit %]" value="1"
         [% " checked=\"checked\"" IF group.ison %]
         [% " disabled=\"disabled\"" IF NOT group.ingroup %]>
-      [% group.description %]
+      [% group.description FILTER html_light %]
       <br>
       [% END %]
     [% END %]
@@ -651,7 +651,7 @@
   <th align="right">[% terms.Bug %] [%+ bug.bug_id %] [%+ dep.title %]:</th>
   <td>
   [% FOREACH depbug = bug.${dep.fieldname} %]
-    [% depbug FILTER bug_link(depbug) %][% " " %]
+    [% depbug FILTER bug_link(depbug) FILTER none %][% " " %]
   [% END %]
   </td>
   <td>

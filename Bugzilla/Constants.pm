@@ -91,6 +91,8 @@ use base qw(Exporter);
     ADMIN_GROUP_NAME
 
     SENDMAIL_EXE
+
+    SAFE_PROTOCOLS
 );
 
 @Bugzilla::Constants::EXPORT_OK = qw(contenttypes);
@@ -242,5 +244,10 @@ use constant ADMIN_GROUP_NAME => 'admin';
 
 # Path to sendmail.exe (Windows only)
 use constant SENDMAIL_EXE => '/usr/lib/sendmail.exe';
+
+# Protocols which are considered as safe.
+use constant SAFE_PROTOCOLS => ('afs', 'cid', 'ftp', 'gopher', 'http', 'https',
+                                'irc', 'mid', 'news', 'nntp', 'prospero', 'telnet',
+                                'view-source', 'wais');
 
 1;

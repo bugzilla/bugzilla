@@ -49,7 +49,7 @@
     </th>
 
     [% IF proddesc.$p %]
-      <td valign="top">[% proddesc.$p %]</td>
+      <td valign="top">[% proddesc.$p FILTER html_light %]</td>
     [% END %]
   </tr>
 [% END %]

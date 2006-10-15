@@ -244,6 +244,7 @@
   'javascript', 
   'style', 
   'onload',
+  'title',
   'h1',
   'h2',
   'h3', 

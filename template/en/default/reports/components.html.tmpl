@@ -30,7 +30,7 @@
   
 [% filtered_product = product FILTER html %]
 [% PROCESS global/header.html.tmpl 
-  title = "Components for $product"
+  title = "Components for $filtered_product"
   h2 = filtered_product %]
 
 [% IF Param("useqacontact") %]

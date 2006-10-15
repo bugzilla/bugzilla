@@ -396,7 +396,8 @@ sub _get_local_filename {
 
 =item C<get_attachments_by_bug($bug_id)>
 
-Description: retrieves and returns the attachments for the given bug.
+Description: retrieves and returns the attachments the currently logged in
+             user can view for the given bug.
 
 Params:     C<$bug_id> - integer - the ID of the bug for which
             to retrieve and return attachments.
@@ -409,10 +410,22 @@ Returns:    a reference to an array of attachment objects.
 
 sub get_attachments_by_bug {
     my ($class, $bug_id) = @_;
-    my $attach_ids = Bugzilla->dbh->selectcol_arrayref("SELECT attach_id
-                                                        FROM attachments
-                                                        WHERE bug_id = ?",
-                                                       undef, $bug_id);
+    my $user = Bugzilla->user;
+    my $dbh = Bugzilla->dbh;
+
+    # By default, private attachments are not accessible, unless the user
+    # is in the insider group or submitted the attachment.
+    my $and_restriction = '';
+    my @values = ($bug_id);
+
+    unless ($user->is_insider) {
+        $and_restriction = 'AND (isprivate = 0 OR submitter_id = ?)';
+        push(@values, $user->id);
+    }
+
+    my $attach_ids = $dbh->selectcol_arrayref("SELECT attach_id FROM attachments
+                                               WHERE bug_id = ? $and_restriction",
+                                               undef, @values);
     my $attachments = Bugzilla::Attachment->get_list($attach_ids);
     return $attachments;
 }

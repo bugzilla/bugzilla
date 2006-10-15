@@ -32,9 +32,8 @@
     [% END %]
     <th bgcolor="#cccccc" align="left">Actions</th>
   </tr>
-  [% canseeprivate = !Param("insidergroup") || UserInGroup(Param("insidergroup")) %]
   [% FOREACH attachment = attachments %]
-    [% IF !attachment.isprivate || canseeprivate %]
+    [% IF !attachment.isprivate || user.is_insider || attachment.attacher.id == user.id %]
       <tr [% "class=\"bz_private\"" IF attachment.isprivate %]>
         <td valign="top">
           <a href="attachment.cgi?id=[% attachment.id %]">[% attachment.description FILTER html FILTER obsolete(attachment.isobsolete) %]</a>

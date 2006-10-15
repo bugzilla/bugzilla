@@ -443,7 +443,7 @@
 ],
 
 'attachment/show-multiple.html.tmpl' => [
-  'a.attachid', 
+  'a.id',
   'flag.status'
 ],
 

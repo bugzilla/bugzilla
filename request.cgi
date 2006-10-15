@@ -57,14 +57,10 @@ exit;
 sub queue {
     my $cgi = Bugzilla->cgi;
     my $dbh = Bugzilla->dbh;
+    my $user = Bugzilla->user;
 
     my $status = validateStatus($cgi->param('status'));
     my $form_group = validateGroup($cgi->param('group'));
-
-    my $attach_join_clause = "flags.attach_id = attachments.attach_id";
-    if (Param("insidergroup") && !UserInGroup(Param("insidergroup"))) {
-        $attach_join_clause .= " AND attachments.isprivate < 1";
-    }
 
     my $query = 
     # Select columns describing each flag, the bug/attachment on which
@@ -86,7 +82,7 @@ sub queue {
     "
       FROM           flags 
            LEFT JOIN attachments
-                  ON ($attach_join_clause)
+                  ON flags.attach_id = attachments.attach_id
           INNER JOIN flagtypes
                   ON flags.type_id = flagtypes.id
           INNER JOIN profiles AS requesters
@@ -102,7 +98,7 @@ sub queue {
            LEFT JOIN bug_group_map AS bgmap
                   ON bgmap.bug_id = bugs.bug_id
                  AND bgmap.group_id NOT IN (" .
-                     join(', ', (-1, values(%{Bugzilla->user->groups}))) . ")
+                     join(', ', (-1, values(%{$user->groups}))) . ")
            LEFT JOIN cc AS ccmap
                   ON ccmap.who = $::userid
                  AND ccmap.bug_id = bugs.bug_id
@@ -115,7 +111,13 @@ sub queue {
                  (bugs.assigned_to = $::userid) " .
                  (Param('useqacontact') ? "OR
                  (bugs.qa_contact = $::userid))" : ")");
-    
+
+    unless ($user->is_insider) {
+        $query .= " AND (attachments.attach_id IS NULL
+                         OR attachments.isprivate = 0
+                         OR attachments.submitter_id = " . $user->id . ")";
+    }
+
     # Non-deleted flags only
     $query .= " AND flags.is_active = 1 ";
     

@@ -1018,7 +1018,7 @@ if ($action eq 'updategroupcontrols') {
             exit;                
         }
     }
-    PutHeader("Update group access controls for $product");
+    PutHeader("Update group access controls for " . html_quote($product));
     $headerdone = 1;
     SendSQL("SELECT id, name FROM groups " .
             "WHERE isbuggroup != 0 AND isactive != 0");

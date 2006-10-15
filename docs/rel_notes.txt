@@ -1,5 +1,5 @@
 *****************************************
-*** The Bugzilla 2.18.5 Release Notes ***
+*** The Bugzilla 2.18.6 Release Notes ***
 *****************************************
 
 Table of Contents

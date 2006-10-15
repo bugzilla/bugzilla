@@ -160,10 +160,10 @@ body
 
     #message
     {
-    	border: 1px solid red;
+        border: 1px solid red;
 
-    	padding: 0.3em;
-    	color: green;
+        padding: 0.3em;
+        color: green;
     }
 /* header (end)   */
 
@@ -335,3 +335,11 @@ td.tab.spacer
 }
 
 table#flags th, table#flags td { vertical-align: baseline; text-align: left; }
+
+.throw_error {
+    background-color: #ff0000;
+    color: black;
+    font-size: 120%;
+    margin: 1em;
+    padding: 0.5em 1em;
+}

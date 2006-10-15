@@ -41,6 +41,7 @@ use Bugzilla::Config qw(:DEFAULT $datadir);
 use Bugzilla::Product;
 use Bugzilla::Classification;
 use Bugzilla::Milestone;
+use Bugzilla::Token;
 
 # Shut up misguided -w warnings about "used only once".  "use vars" just
 # doesn't work for me.
@@ -72,6 +73,7 @@ my $classification_name = trim($cgi->param('classification') || '');
 my $product_name = trim($cgi->param('product') || '');
 my $action  = trim($cgi->param('action')  || '');
 my $showbugcounts = (defined $cgi->param('showbugcounts'));
+my $token = $cgi->param('token');
 
 #
 # product = '' -> Show nice list of classifications (if
@@ -132,6 +134,8 @@ if ($action eq 'add') {
             Bugzilla::Classification::check_classification($classification_name);
         $vars->{'classification'} = $classification;
     }
+    $vars->{'token'} = issue_session_token('add_product');
+
     $template->process("admin/products/create.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
 
@@ -144,7 +148,7 @@ if ($action eq 'add') {
 #
 
 if ($action eq 'new') {
-
+    check_token_data($token, 'add_product');
     # Cleanups and validity checks
 
     my $classification_id = 1;
@@ -307,6 +311,7 @@ if ($action eq 'new') {
     }
     # Make versioncache flush
     unlink "$datadir/versioncache";
+    delete_token($token);
 
     $vars->{'product'} = $product;
     
@@ -341,6 +346,7 @@ if ($action eq 'del') {
     }
 
     $vars->{'product'} = $product;
+    $vars->{'token'} = issue_session_token('delete_product');
 
     $template->process("admin/products/confirm-delete.html.tmpl", $vars)
         || ThrowTemplateError($template->error());
@@ -352,6 +358,7 @@ if ($action eq 'del') {
 #
 
 if ($action eq 'delete') {
+    check_token_data($token, 'delete_product');
     # First make sure the product name is valid.
     my $product = Bugzilla::Product::check_product($product_name);
 
@@ -414,6 +421,7 @@ if ($action eq 'delete') {
     $dbh->bz_unlock_tables();
 
     unlink "$datadir/versioncache";
+    delete_token($token);
 
     $template->process("admin/products/deleted.html.tmpl", $vars)
         || ThrowTemplateError($template->error());
@@ -469,9 +477,9 @@ if ($action eq 'edit' || (!$action && $product_name)) {
         }
     }
     $vars->{'group_controls'} = $group_controls;
-
     $vars->{'product'} = $product;
-        
+    $vars->{'token'} = issue_session_token('edit_product');
+
     $template->process("admin/products/edit.html.tmpl", $vars)
         || ThrowTemplateError($template->error());
 
@@ -483,6 +491,7 @@ if ($action eq 'edit' || (!$action && $product_name)) {
 #
 
 if ($action eq 'updategroupcontrols') {
+    check_token_data($token, 'edit_group_controls');
     # First make sure the product name is valid.
     my $product = Bugzilla::Product::check_product($product_name);
 
@@ -724,10 +733,10 @@ if ($action eq 'updategroupcontrols') {
     }
     $dbh->bz_unlock_tables();
 
+    delete_token($token);
+
     $vars->{'removed_na'} = \@removed_na;
-
     $vars->{'added_mandatory'} = \@added_mandatory;
-
     $vars->{'product'} = $product;
 
     $template->process("admin/products/groupcontrol/updated.html.tmpl", $vars)
@@ -739,7 +748,7 @@ if ($action eq 'updategroupcontrols') {
 # action='update' -> update the product
 #
 if ($action eq 'update') {
-
+    check_token_data($token, 'edit_product');
     my $product_old_name    = trim($cgi->param('product_old_name')    || '');
     my $description         = trim($cgi->param('description')         || '');
     my $disallownew         = trim($cgi->param('disallownew')         || '');
@@ -976,6 +985,7 @@ if ($action eq 'update') {
         $vars->{'confirmedbugs'} = \@updated_bugs;
         $vars->{'changer'} = $user->login;
     }
+    delete_token($token);
 
     $vars->{'old_product'} = $product_old;
     $vars->{'product'} = $product;
@@ -1018,6 +1028,7 @@ if ($action eq 'editgroupcontrols') {
 
     $vars->{'product'} = $product;
     $vars->{'groups'} = $groups;
+    $vars->{'token'} = issue_session_token('edit_group_controls');
 
     $vars->{'const'} = {
         'CONTROLMAPNA' => CONTROLMAPNA,

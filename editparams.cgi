@@ -28,6 +28,7 @@ use lib ".";
 use Bugzilla::Constants;
 use Bugzilla::Config qw(:DEFAULT :admin :params $datadir);
 use Bugzilla::Config::Common;
+use Bugzilla::Token;
 
 require "globals.pl";
 use vars qw(@parampanels);
@@ -45,6 +46,7 @@ $user->in_group('tweakparams')
                                      object => "parameters"});
 
 my $action = trim($cgi->param('action') || '');
+my $token  = $cgi->param('token');
 my $current_panel = $cgi->param('section') || 'core';
 $current_panel =~ /^([A-Za-z0-9_-]+)$/;
 $current_panel = $1;
@@ -69,6 +71,7 @@ foreach my $panel (@parampanels) {
 $vars->{panels} = \@panels;
 
 if ($action eq 'save' && $current_module) {
+    check_token_data($token, 'edit_parameters');
     my @changes = ();
     my @module_param_list = "Bugzilla::Config::${current_module}"->get_param_list();
 
@@ -129,7 +132,10 @@ if ($action eq 'save' && $current_module) {
 
     WriteParams();
     unlink "$datadir/versioncache";
+    delete_token($token);
 }
+
+$vars->{'token'} = issue_session_token('edit_parameters');
 
 $template->process("admin/params/editparams.html.tmpl", $vars)
     || ThrowTemplateError($template->error());

@@ -21,7 +21,7 @@
 # Contributor(s): Holger Schurig <holgerschurig@nikocity.de>
 #                 Terry Weissman <terry@mozilla.org>
 #                 Gavin Shelley <bugzilla@chimpychompy.org>
-#                 Frédéric Buclin <LpSolit@gmail.com>
+#                 FrÃ©dÃ©ric Buclin <LpSolit@gmail.com>
 #
 #
 # Direct any questions on this source code to
@@ -37,6 +37,7 @@ use Bugzilla::Constants;
 use Bugzilla::Config qw(:DEFAULT $datadir);
 use Bugzilla::Product;
 use Bugzilla::Version;
+use Bugzilla::Token;
 
 my $cgi = Bugzilla->cgi;
 my $dbh = Bugzilla->dbh;
@@ -63,6 +64,7 @@ my $product_name = trim($cgi->param('product') || '');
 my $version_name = trim($cgi->param('version') || '');
 my $action       = trim($cgi->param('action')  || '');
 my $showbugcounts = (defined $cgi->param('showbugcounts'));
+my $token        = $cgi->param('token');
 
 #
 # product = '' -> Show nice list of products
@@ -110,7 +112,7 @@ unless ($action) {
 #
 
 if ($action eq 'add') {
-
+    $vars->{'token'} = issue_session_token('add_version');
     $vars->{'product'} = $product->name;
     $template->process("admin/versions/create.html.tmpl",
                        $vars)
@@ -126,7 +128,7 @@ if ($action eq 'add') {
 #
 
 if ($action eq 'new') {
-
+    check_token_data($token, 'add_version');
     # Cleanups and validity checks
     $version_name || ThrowUserError('version_blank_name');
 
@@ -147,6 +149,7 @@ if ($action eq 'new') {
 
     # Make versioncache flush
     unlink "$datadir/versioncache";
+    delete_token($token);
 
     $vars->{'name'} = $version_name;
     $vars->{'product'} = $product->name;
@@ -175,6 +178,8 @@ if ($action eq 'del') {
     $vars->{'bug_count'} = $bugs;
     $vars->{'name'} = $version->name;
     $vars->{'product'} = $product->name;
+    $vars->{'token'} = issue_session_token('delete_version');
+
     $template->process("admin/versions/confirm-delete.html.tmpl",
                        $vars)
       || ThrowTemplateError($template->error());
@@ -189,7 +194,7 @@ if ($action eq 'del') {
 #
 
 if ($action eq 'delete') {
-
+    check_token_data($token, 'delete_version');
     my $version = Bugzilla::Version::check_version($product,
                                                    $version_name);
 
@@ -204,6 +209,7 @@ if ($action eq 'delete') {
               undef, ($product->id, $version->name));
 
     unlink "$datadir/versioncache";
+    delete_token($token);
 
     $vars->{'name'} = $version->name;
     $vars->{'product'} = $product->name;
@@ -228,6 +234,7 @@ if ($action eq 'edit') {
 
     $vars->{'name'}    = $version->name;
     $vars->{'product'} = $product->name;
+    $vars->{'token'} = issue_session_token('edit_version');
 
     $template->process("admin/versions/edit.html.tmpl",
                        $vars)
@@ -243,7 +250,7 @@ if ($action eq 'edit') {
 #
 
 if ($action eq 'update') {
-
+    check_token_data($token, 'edit_version');
     $version_name || ThrowUserError('version_not_specified');
 
     # Remove unprintable characters
@@ -288,7 +295,8 @@ if ($action eq 'update') {
         $vars->{'updated_name'} = 1;
     }
 
-    $dbh->bz_unlock_tables(); 
+    $dbh->bz_unlock_tables();
+    delete_token($token);
 
     $vars->{'name'} = $version_name;
     $vars->{'product'} = $product->name;

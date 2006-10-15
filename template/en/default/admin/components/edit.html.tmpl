@@ -94,6 +94,7 @@
    <input type="hidden" name="action" value="update">
    <input type="hidden" name="componentold" value="[% comp.name FILTER html %]">
    <input type="hidden" name="product" value="[% prod.name FILTER html %]">
+   <input type="hidden" name="token" value="[% token FILTER html %]">
    <input type="submit" value="Update"> or <a 
         href="editcomponents.cgi?action=del&amp;product=
         [%- prod.name FILTER url_quote %]&amp;component=

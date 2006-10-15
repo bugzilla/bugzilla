@@ -29,6 +29,7 @@ use Bugzilla::Util;
 use Bugzilla::Error;
 use Bugzilla::Config qw($datadir);
 use Bugzilla::Classification;
+use Bugzilla::Token;
 
 require "globals.pl";
 
@@ -68,7 +69,8 @@ ThrowUserError("auth_classification_not_enabled") unless Param("useclassificatio
 #
 my $action     = trim($cgi->param('action')         || '');
 my $class_name = trim($cgi->param('classification') || '');
-    
+my $token      = $cgi->param('token');
+
 #
 # action='' -> Show nice list of classifications
 #
@@ -88,6 +90,7 @@ unless ($action) {
 #
 
 if ($action eq 'add') {
+    $vars->{'token'} = issue_session_token('add_classification');
     LoadTemplate($action);
 }
 
@@ -96,7 +99,7 @@ if ($action eq 'add') {
 #
 
 if ($action eq 'new') {
-
+    check_token_data($token, 'add_classification');
     $class_name || ThrowUserError("classification_not_specified");
 
     my $classification =
@@ -119,7 +122,7 @@ if ($action eq 'new') {
     unlink "$datadir/versioncache";
 
     $vars->{'classification'} = $class_name;
-
+    delete_token($token);
     LoadTemplate($action);
 }
 
@@ -143,7 +146,7 @@ if ($action eq 'del') {
     }
 
     $vars->{'classification'} = $classification;
-
+    $vars->{'token'} = issue_session_token('delete_classification');
     LoadTemplate($action);
 }
 
@@ -152,7 +155,7 @@ if ($action eq 'del') {
 #
 
 if ($action eq 'delete') {
-
+    check_token_data($token, 'delete_classification');
     my $classification =
         Bugzilla::Classification::check_classification($class_name);
 
@@ -176,7 +179,7 @@ if ($action eq 'delete') {
     unlink "$datadir/versioncache";
 
     $vars->{'classification'} = $classification;
-
+    delete_token($token);
     LoadTemplate($action);
 }
 
@@ -192,7 +195,7 @@ if ($action eq 'edit') {
         Bugzilla::Classification::check_classification($class_name);
 
     $vars->{'classification'} = $classification;
-
+    $vars->{'token'} = issue_session_token('edit_classification');
     LoadTemplate($action);
 }
 
@@ -201,7 +204,7 @@ if ($action eq 'edit') {
 #
 
 if ($action eq 'update') {
-
+    check_token_data($token, 'edit_classification');
     $class_name || ThrowUserError("classification_not_specified");
 
     my $class_old_name = trim($cgi->param('classificationold') || '');
@@ -240,7 +243,7 @@ if ($action eq 'update') {
     }
 
     $dbh->bz_unlock_tables();
-
+    delete_token($token);
     LoadTemplate($action);
 }
 
@@ -257,26 +260,30 @@ if ($action eq 'reclassify') {
                              WHERE name = ?");
 
     if (defined $cgi->param('add_products')) {
+        check_token_data($token, 'reclassify_classifications');
         if (defined $cgi->param('prodlist')) {
             foreach my $prod ($cgi->param("prodlist")) {
                 trick_taint($prod);
                 $sth->execute($classification->id, $prod);
             }
         }
+        delete_token($token);
     } elsif (defined $cgi->param('remove_products')) {
+        check_token_data($token, 'reclassify_classifications');
         if (defined $cgi->param('myprodlist')) {
             foreach my $prod ($cgi->param("myprodlist")) {
                 trick_taint($prod);
                 $sth->execute(1,$prod);
             }
         }
+        delete_token($token);
     }
 
     my @classifications = 
         Bugzilla::Classification::get_all_classifications;
     $vars->{'classifications'} = \@classifications;
     $vars->{'classification'} = $classification;
-
+    $vars->{'token'} = issue_session_token('reclassify_classifications');
     LoadTemplate($action);
 }
 

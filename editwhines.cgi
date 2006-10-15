@@ -33,6 +33,8 @@ require "globals.pl";
 use Bugzilla::Constants;
 use Bugzilla::User;
 use Bugzilla::Group;
+use Bugzilla::Token;
+
 # require the user to have logged in
 my $user = Bugzilla->login(LOGIN_REQUIRED);
 
@@ -46,7 +48,7 @@ my $vars     = {};
 my $dbh      = Bugzilla->dbh;
 
 my $userid   = $user->id;
-
+my $token    = $cgi->param('token');
 my $sth; # database statement handle
 
 # $events is a hash ref, keyed by event id, that stores the active user's
@@ -83,6 +85,7 @@ my $can_mail_others = UserInGroup('bz_canusewhineatothers');
 # removed, then what was altered.
 
 if ($cgi->param('update')) {
+    check_token_data($token, 'edit_whine');
     if ($cgi->param("add_event")) {
         # we create a new event
         $sth = $dbh->prepare("INSERT INTO whine_events " .
@@ -346,6 +349,7 @@ if ($cgi->param('update')) {
             }
         }
     }
+    delete_token($token);
 }
 
 $vars->{'mail_others'} = $can_mail_others;
@@ -433,6 +437,7 @@ $vars->{'available_queries'} = [];
 while (my ($query) = $sth->fetchrow_array) {
     push @{$vars->{'available_queries'}}, $query;
 }
+$vars->{'token'} = issue_session_token('edit_whine');
 
 $template->process("whine/schedule.html.tmpl", $vars)
   || ThrowTemplateError($template->error());

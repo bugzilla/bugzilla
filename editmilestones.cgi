@@ -12,7 +12,7 @@
 # Matt Masson <matthew@zeroknowledge.com>
 #
 # Contributors : Gavin Shelley <bugzilla@chimpychompy.org>
-#                Frédéric Buclin <LpSolit@gmail.com>
+#                FrÃ©dÃ©ric Buclin <LpSolit@gmail.com>
 #
 
 
@@ -26,6 +26,7 @@ use Bugzilla::Config qw(:DEFAULT $datadir);
 use Bugzilla::Product;
 use Bugzilla::Milestone;
 use Bugzilla::Bug;
+use Bugzilla::Token;
 
 my $cgi = Bugzilla->cgi;
 my $dbh = Bugzilla->dbh;
@@ -54,6 +55,7 @@ my $milestone_name = trim($cgi->param('milestone')   || '');
 my $sortkey        = trim($cgi->param('sortkey')     || 0);
 my $action         = trim($cgi->param('action')      || '');
 my $showbugcounts = (defined $cgi->param('showbugcounts'));
+my $token          = $cgi->param('token');
 
 #
 # product = '' -> Show nice list of products
@@ -103,7 +105,7 @@ unless ($action) {
 #
 
 if ($action eq 'add') {
-
+    $vars->{'token'} = issue_session_token('add_milestone');
     $vars->{'product'} = $product->name;
     $template->process("admin/milestones/create.html.tmpl",
                        $vars)
@@ -119,7 +121,7 @@ if ($action eq 'add') {
 #
 
 if ($action eq 'new') {
-
+    check_token_data($token, 'add_milestone');
     $milestone_name || ThrowUserError('milestone_blank_name');
 
     if (length($milestone_name) > 20) {
@@ -147,6 +149,7 @@ if ($action eq 'new') {
 
     # Make versioncache flush
     unlink "$datadir/versioncache";
+    delete_token($token);
 
     $vars->{'name'} = $milestone_name;
     $vars->{'product'} = $product->name;
@@ -179,6 +182,7 @@ if ($action eq 'del') {
     }
 
     $vars->{'bug_count'} = $milestone->bug_count;
+    $vars->{'token'} = issue_session_token('delete_milestone');
 
     $template->process("admin/milestones/confirm-delete.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
@@ -192,7 +196,7 @@ if ($action eq 'del') {
 #
 
 if ($action eq 'delete') {
-
+    check_token_data($token, 'delete_milestone');
     my $milestone =
         Bugzilla::Milestone::check_milestone($product,
                                              $milestone_name);
@@ -233,6 +237,7 @@ if ($action eq 'delete') {
              undef, ($product->id, $milestone->name));
 
     unlink "$datadir/versioncache";
+    delete_token($token);
 
     $template->process("admin/milestones/deleted.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
@@ -256,6 +261,7 @@ if ($action eq 'edit') {
     $vars->{'sortkey'} = $milestone->sortkey;
     $vars->{'name'}    = $milestone->name;
     $vars->{'product'} = $product->name;
+    $vars->{'token'}   = issue_session_token('edit_milestone');
 
     $template->process("admin/milestones/edit.html.tmpl",
                        $vars)
@@ -271,7 +277,7 @@ if ($action eq 'edit') {
 #
 
 if ($action eq 'update') {
-
+    check_token_data($token, 'edit_milestone');
     my $milestone_old_name = trim($cgi->param('milestoneold') || '');
     my $milestone_old =
         Bugzilla::Milestone::check_milestone($product,
@@ -350,6 +356,7 @@ if ($action eq 'update') {
     }
 
     $dbh->bz_unlock_tables();
+    delete_token($token);
 
     $vars->{'name'} = $milestone_name;
     $vars->{'product'} = $product->name;

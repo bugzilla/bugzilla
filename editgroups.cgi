@@ -34,6 +34,7 @@ use Bugzilla::Constants;
 use Bugzilla::Config qw(:DEFAULT :admin);
 use Bugzilla::Group;
 use Bugzilla::User;
+use Bugzilla::Token;
 require "globals.pl";
 
 my $cgi = Bugzilla->cgi;
@@ -51,6 +52,7 @@ $user->in_group('creategroups')
                                      object => "groups"});
 
 my $action = trim($cgi->param('action') || '');
+my $token  = $cgi->param('token');
 
 # RederiveRegexp: update user_group_map with regexp-based grants
 sub RederiveRegexp
@@ -250,6 +252,7 @@ if ($action eq 'changeform') {
     $vars->{'isactive'}    = $isactive;
     $vars->{'isbuggroup'}  = $isbuggroup;
     $vars->{'groups'}      = \@groups;
+    $vars->{'token'}       = issue_session_token('edit_group');
 
     print $cgi->header();
     $template->process("admin/groups/edit.html.tmpl", $vars)
@@ -265,6 +268,7 @@ if ($action eq 'changeform') {
 #
 
 if ($action eq 'add') {
+    $vars->{'token'} = issue_session_token('add_group');
     print $cgi->header();
     $template->process("admin/groups/create.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
@@ -279,6 +283,7 @@ if ($action eq 'add') {
 #
 
 if ($action eq 'new') {
+    check_token_data($token, 'add_group');
     # Check that a not already used group name is given, that
     # a description is also given and check if the regular
     # expression is valid (if any).
@@ -315,6 +320,7 @@ if ($action eq 'new') {
                   undef, ($gid, CONTROLMAPSHOWN, CONTROLMAPNA));
     }
     RederiveRegexp($regexp, $gid);
+    delete_token($token);
 
     print $cgi->header();
     $template->process("admin/groups/created.html.tmpl", $vars)
@@ -380,6 +386,7 @@ if ($action eq 'del') {
     $vars->{'hasproduct'}  = $hasproduct;
     $vars->{'hasflags'}    = $hasflags;
     $vars->{'buglist'}     = $buglist;
+    $vars->{'token'}       = issue_session_token('delete_group');
 
     print $cgi->header();
     $template->process("admin/groups/delete.html.tmpl", $vars)
@@ -393,6 +400,7 @@ if ($action eq 'del') {
 #
 
 if ($action eq 'delete') {
+    check_token_data($token, 'delete_group');
     # Check that an existing group ID is given
     my $gid = CheckGroupID($cgi->param('group'));
     my ($name, $isbuggroup) =
@@ -475,6 +483,8 @@ if ($action eq 'delete') {
     $dbh->do('DELETE FROM groups WHERE id = ?',
               undef, $gid);
 
+    delete_token($token);
+
     print $cgi->header();
     $template->process("admin/groups/deleted.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
@@ -487,6 +497,7 @@ if ($action eq 'delete') {
 #
 
 if ($action eq 'postchanges') {
+    check_token_data($token, 'edit_group');
     # ZLL: Bug 181589: we need to have something to remove explicitly listed users from
     # groups in order for the conversion to 2.18 groups to work
     my $action;
@@ -508,7 +519,8 @@ if ($action eq 'postchanges') {
     if ($action == 2) {
         $vars->{'regexp'} = $regexp;
     }
-    
+    delete_token($token);
+
     print $cgi->header();
     $template->process("admin/groups/change.html.tmpl", $vars)
       || ThrowTemplateError($template->error());

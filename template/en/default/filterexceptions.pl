@@ -529,7 +529,6 @@
 
 'admin/flag-type/list.html.tmpl' => [
   'type.id', 
-  'type.flag_count', 
 ],
 
 

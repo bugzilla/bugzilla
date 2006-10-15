@@ -27,6 +27,7 @@ use Bugzilla::Util;
 use Bugzilla::Error;
 use Bugzilla::Constants;
 use Bugzilla::Config qw(:DEFAULT :admin :locations);
+use Bugzilla::Token;
 
 # List of different tables that contain the changeable field values
 # (the old "enums.") Keep them in alphabetical order by their 
@@ -116,6 +117,7 @@ my $field   = trim($cgi->param('field')   || '');
 my $value   = trim($cgi->param('value')   || '');
 my $sortkey = trim($cgi->param('sortkey') || '0');
 my $action  = trim($cgi->param('action')  || '');
+my $token   = $cgi->param('token');
 
 # Gives the name of the parameter associated with the field
 # and representing its default value.
@@ -175,6 +177,8 @@ if ($action eq 'add') {
 
     $vars->{'value'} = $value;
     $vars->{'field'} = $field;
+    $vars->{'token'} = issue_session_token('add_field_value');
+
     $template->process("admin/fieldvalues/create.html.tmpl",
                        $vars)
       || ThrowTemplateError($template->error());
@@ -187,6 +191,7 @@ if ($action eq 'add') {
 # action='new' -> add field value entered in the 'action=add' screen
 #
 if ($action eq 'new') {
+    check_token_data($token, 'add_field_value');
     FieldMustExist($field);
     trick_taint($field);
 
@@ -218,6 +223,7 @@ if ($action eq 'new') {
     $sth->execute($value, $sortkey);
 
     unlink "$datadir/versioncache";
+    delete_token($token);
 
     $vars->{'value'} = $value;
     $vars->{'field'} = $field;
@@ -248,6 +254,8 @@ if ($action eq 'del') {
     $vars->{'value'} = $value;
     $vars->{'field'} = $field;
     $vars->{'param_name'} = $defaults{$field};
+    $vars->{'token'} = issue_session_token('delete_field_value');
+
     $template->process("admin/fieldvalues/confirm-delete.html.tmpl",
                        $vars)
       || ThrowTemplateError($template->error());
@@ -260,6 +268,7 @@ if ($action eq 'del') {
 # action='delete' -> really delete the field value
 #
 if ($action eq 'delete') {
+    check_token_data($token, 'delete_field_value');
     ValueMustExist($field, $value);
     if ($value eq Param($defaults{$field})) {
         ThrowUserError('fieldvalue_is_default', {field      => $field,
@@ -288,6 +297,7 @@ if ($action eq 'delete') {
     $dbh->bz_unlock_tables();
 
     unlink "$datadir/versioncache";
+    delete_token($token);
 
     $vars->{'value'} = $value;
     $vars->{'field'} = $field;
@@ -312,6 +322,7 @@ if ($action eq 'edit') {
 
     $vars->{'value'} = $value;
     $vars->{'field'} = $field;
+    $vars->{'token'} = issue_session_token('edit_field_value');
 
     $template->process("admin/fieldvalues/edit.html.tmpl",
                        $vars)
@@ -325,6 +336,7 @@ if ($action eq 'edit') {
 # action='update' -> update the field value
 #
 if ($action eq 'update') {
+    check_token_data($token, 'edit_field_value');
     my $valueold   = trim($cgi->param('valueold')   || '');
     my $sortkeyold = trim($cgi->param('sortkeyold') || '0');
 
@@ -396,6 +408,7 @@ if ($action eq 'update') {
         unlink "$datadir/versioncache";
         $vars->{'default_value_updated'} = 1;
     }
+    delete_token($token);
 
     $vars->{'value'} = $value;
     $vars->{'field'} = $field;

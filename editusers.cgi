@@ -31,6 +31,7 @@ use Bugzilla::Constants;
 use Bugzilla::Util;
 use Bugzilla::Field;
 use Bugzilla::Group;
+use Bugzilla::Token;
 
 my $user = Bugzilla->login(LOGIN_REQUIRED);
 
@@ -55,6 +56,7 @@ print $cgi->header();
 my $action         = $cgi->param('action') || 'search';
 my $otherUserID    = $cgi->param('userid');
 my $otherUserLogin = $cgi->param('user');
+my $token          = $cgi->param('token');
 
 # Prefill template vars with data used in all or nearly all templates
 $vars->{'editusers'} = $editusers;
@@ -168,6 +170,8 @@ if ($action eq 'search') {
                                                   action => "add",
                                                   object => "users"});
 
+    $vars->{'token'} = issue_session_token('add_user');
+
     $template->process('admin/users/create.html.tmpl', $vars)
        || ThrowTemplateError($template->error());
 
@@ -177,6 +181,7 @@ if ($action eq 'search') {
                                                   action => "add",
                                                   object => "users"});
 
+    check_token_data($token, 'add_user');
     my $login        = $cgi->param('login');
     my $password     = $cgi->param('password');
     my $realname     = trim($cgi->param('name')         || '');
@@ -212,6 +217,10 @@ if ($action eq 'search') {
     $dbh->bz_unlock_tables();
     userDataToVars($new_user_id);
 
+    delete_token($token);
+
+    # We already display the updated page. We have to recreate a token now.
+    $vars->{'token'} = issue_session_token('edit_user');
     $vars->{'message'} = 'account_created';
     $template->process('admin/users/edit.html.tmpl', $vars)
        || ThrowTemplateError($template->error());
@@ -223,6 +232,7 @@ if ($action eq 'search') {
 
 ###########################################################################
 } elsif ($action eq 'update') {
+    check_token_data($token, 'edit_user');
     my $otherUser = check_user($otherUserID, $otherUserLogin);
     $otherUserID = $otherUser->id;
 
@@ -403,6 +413,7 @@ if ($action eq 'search') {
 
     # XXX: userDataToVars may be off when editing ourselves.
     userDataToVars($otherUserID);
+    delete_token($token);
 
     $vars->{'message'} = 'account_updated';
     $vars->{'loginold'} = $loginold;
@@ -411,6 +422,9 @@ if ($action eq 'search') {
     $vars->{'groups_removed_from'} = \@groupsRemovedFrom;
     $vars->{'groups_granted_rights_to_bless'} = \@groupsGrantedRightsToBless;
     $vars->{'groups_denied_rights_to_bless'} = \@groupsDeniedRightsToBless;
+    # We already display the updated page. We have to recreate a token now.
+    $vars->{'token'} = issue_session_token('edit_user');
+
     $template->process('admin/users/edit.html.tmpl', $vars)
        || ThrowTemplateError($template->error());
 
@@ -484,12 +498,14 @@ if ($action eq 'search') {
            AND mailto_type = ?
           },
         undef, ($otherUserID, MAILTO_USER));
+    $vars->{'token'} = issue_session_token('delete_user');
 
     $template->process('admin/users/confirm-delete.html.tmpl', $vars)
        || ThrowTemplateError($template->error());
 
 ###########################################################################
 } elsif ($action eq 'delete') {
+    check_token_data($token, 'delete_user');
     my $otherUser = check_user($otherUserID, $otherUserLogin);
     $otherUserID = $otherUser->id;
 
@@ -703,6 +719,7 @@ if ($action eq 'search') {
     $dbh->do('DELETE FROM profiles WHERE userid = ?', undef, $otherUserID);
 
     $dbh->bz_unlock_tables();
+    delete_token($token);
 
     $vars->{'message'} = 'account_deleted';
     $vars->{'otheruser'}{'login'} = $otherUser->login;
@@ -826,6 +843,7 @@ sub edit_processing {
                                            object => "user"});
 
     userDataToVars($otherUser->id);
+    $vars->{'token'} = issue_session_token('edit_user');
 
     $template->process('admin/users/edit.html.tmpl', $vars)
        || ThrowTemplateError($template->error());

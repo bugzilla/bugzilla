@@ -712,10 +712,9 @@ No security fixes in this release.
 2.20.3
 ------
 
-The Bugzilla team fixed two Information Leaks and two Cross-Site
+The Bugzilla team fixed two Information Leaks and three Cross-Site
 Scripting vulnerabilities that existed in versions of Bugzilla
-prior to 2.20.3. None of them are considered to be of critical
-severity, but we still strongly recommend that you update any
+prior to 2.20.3. We still strongly recommend that you update any
 2.20.x installation to 2.20.3.
 
 To see details on the vulnerabilities that were fixed, see the

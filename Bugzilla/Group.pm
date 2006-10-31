@@ -104,6 +104,15 @@ sub last_changed { return $_[0]->{'last_changed'}; }
 sub user_regexp  { return $_[0]->{'userregexp'};   }
 sub is_active    { return $_[0]->{'isactive'};     }
 
+###############################
+####        Methods        ####
+###############################
+
+sub is_active_bug_group {
+    my $self = shift;
+    return $self->is_active && $self->is_bug_group;
+}
+
 ################################
 #####  Module Subroutines    ###
 ################################
@@ -161,6 +170,7 @@ Bugzilla::Group - Bugzilla group class.
     my $last_changed = $group->last_changed;
     my $user_reg_exp = $group->user_reg_exp;
     my $is_active    = $group->is_active;
+    my $is_active_bug_group = $group->is_active_bug_group;
 
     my $group_id = Bugzilla::Group::ValidateGroupName('admin', @users);
     my @groups = Bugzilla::get_all_groups();

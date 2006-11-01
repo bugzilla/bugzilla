@@ -364,14 +364,24 @@ foreach my $b (grep(/^bit-\d*$/, $cgi->param())) {
             $vars->{'bit'} = $v;
             ThrowCodeError("inactive_group");
         }
-        my ($permit) = $user->in_group_id($v);
-        if (!$permit) {
-            SendSQL("SELECT othercontrol FROM group_control_map
-                     WHERE group_id = $v AND product_id = $product_id");
-            my ($othercontrol) = FetchSQLData();
-            $permit = (($othercontrol == CONTROLMAPSHOWN)
-                       || ($othercontrol == CONTROLMAPDEFAULT));
-        }
+        my ($membercontrol, $othercontrol) =
+            $dbh->selectrow_array('SELECT membercontrol, othercontrol
+                                     FROM group_control_map
+                                    WHERE group_id = ? AND product_id = ?',
+                                    undef, ($v, $product_id));
+
+        # If these values are undefined or zero, then this group
+        # cannot be a valid one for this product.
+        next unless ($membercontrol || $othercontrol);
+
+        my $permit = ($user->in_group_id($v)
+                      && ($membercontrol == CONTROLMAPSHOWN
+                          || $membercontrol == CONTROLMAPDEFAULT))
+                     ||
+                       (!$user->in_group_id($v)
+                        && ($othercontrol == CONTROLMAPSHOWN
+                            || $othercontrol == CONTROLMAPDEFAULT));
+
         if ($permit) {
             push(@groupstoadd, $v)
         }

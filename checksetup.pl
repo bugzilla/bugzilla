@@ -35,6 +35,7 @@
 #                 Lance Larsh <lance.larsh@oracle.com>
 #                 A. Karl Kornel <karl@kornel.name>
 #                 Marc Schumann <wurblzap@gmail.com>
+#                 Noel Cragg <noel@red-bean.com>
 #
 #
 #
@@ -2261,8 +2262,9 @@ if (!$dbh->bz_column_info('bugs', 'lastdiffed')) {
 # declared to be unique.  Sure enough, somehow, I got 22 duplicated entries
 # in my database.  This code detects that, cleans up the duplicates, and
 # then tweaks the table to declare the field to be unique.  What a pain.
-if (!$dbh->bz_index_info('profiles', 'profiles_login_name_idx') ||
-    !$dbh->bz_index_info('profiles', 'profiles_login_name_idx')->{TYPE}) {
+if (!$dbh->bz_index_info('profiles', 'profiles_login_name_idx')
+    || !$dbh->bz_index_info('profiles', 'profiles_login_name_idx')->{TYPE})
+{
     print "Searching for duplicate entries in the profiles table ...\n";
     while (1) {
         # This code is weird in that it loops around and keeps doing this
@@ -2495,7 +2497,9 @@ if (!$dbh->bz_column_info('products', 'defaultmilestone')) {
 # prevents certain database inconsistencies, and, moreover, is required for
 # new generalized list code to work.
 
-if (!$dbh->bz_index_info('cc', 'cc_bug_id_idx')->{TYPE}) {
+if (!$dbh->bz_index_info('cc', 'cc_bug_id_idx')
+    || !$dbh->bz_index_info('cc', 'cc_bug_id_idx')->{TYPE})
+{
 
     # XXX should eliminate duplicate entries before altering
     #
@@ -2504,7 +2508,9 @@ if (!$dbh->bz_index_info('cc', 'cc_bug_id_idx')->{TYPE}) {
                       {TYPE => 'UNIQUE', FIELDS => [qw(bug_id who)]});
 }    
 
-if (!$dbh->bz_index_info('keywords', 'keywords_bug_id_idx')->{TYPE}) {
+if (!$dbh->bz_index_info('keywords', 'keywords_bug_id_idx')
+    || !$dbh->bz_index_info('keywords', 'keywords_bug_id_idx')->{TYPE})
+{
 
     # XXX should eliminate duplicate entries before altering
     #

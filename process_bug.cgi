@@ -1370,7 +1370,8 @@ if ($prod_changed && Param("strict_isolation")) {
         $sth_cc->execute($id);
         my @blocked_cc = ();
         while (my ($pid) = $sth_cc->fetchrow_array) {
-            $usercache{$pid} ||= Bugzilla::User->new($pid);
+            # Ignore deleted accounts. They will never get notification.
+            $usercache{$pid} ||= Bugzilla::User->new($pid) || next;
             my $cc_user = $usercache{$pid};
             if (!$cc_user->can_edit_product($prod_id)) {
                 push (@blocked_cc, $cc_user->login);
@@ -1385,7 +1386,7 @@ if ($prod_changed && Param("strict_isolation")) {
         $sth_bug->execute($id);
         my ($assignee, $qacontact) = $sth_bug->fetchrow_array;
         if (!$assignee_checked) {
-            $usercache{$assignee} ||= Bugzilla::User->new($assignee);
+            $usercache{$assignee} ||= Bugzilla::User->new($assignee) || next;
             my $assign_user = $usercache{$assignee};
             if (!$assign_user->can_edit_product($prod_id)) {
                     ThrowUserError('invalid_user_group',
@@ -1395,7 +1396,7 @@ if ($prod_changed && Param("strict_isolation")) {
             }
         }
         if (!$qacontact_checked && $qacontact) {
-            $usercache{$qacontact} ||= Bugzilla::User->new($qacontact);
+            $usercache{$qacontact} ||= Bugzilla::User->new($qacontact) || next;
             my $qa_user = $usercache{$qacontact};
             if (!$qa_user->can_edit_product($prod_id)) {
                     ThrowUserError('invalid_user_group',

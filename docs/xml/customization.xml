@@ -731,8 +731,21 @@
       <filename>data/versioncache</filename> for the list called 
       <filename>@::log_columns</filename>. If you need help writing custom
       rules for your organization, ask in the newsgroup.
-    </para>    
-  </section>   
+    </para>
+
+    <section id="cust-group-check">
+      <title>Modification in UserInGroup()</title>
+
+      <para>
+        The <filename>UserInGroup()</filename> function in the
+        <filename>Bugzilla/User.pm</filename> module only accepts
+        one argument since 2.17.5: the name of a group. This check
+        is now always done against the current user, and a second
+        argument specifying the user ID to check this group against
+        is no longer valid and an error is thrown if you try to.
+      </para>
+    </section>
+  </section>
   
   <section id="dbmodify">
     <title>Modifying Your Running System</title>

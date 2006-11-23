@@ -974,6 +974,9 @@ fielddefs:  A nifty table that defines other tables. For instance, when you
 submit a form that changes the value of "AssignedTo" this table allows
 translation to the actual field name "assigned_to" for entry into MySQL.
 
+group_control_map:  This table stores the relationship between groups and
+products.
+
 groups:  defines bitmasks for groups. A bitmask is a number that can uniquely
 identify group memberships. For instance, say the group that is allowed to
 tweak parameters is assigned a value of "1", the group that is allowed to edit

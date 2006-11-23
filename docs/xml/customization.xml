@@ -1012,9 +1012,12 @@ milestones:  Interesting that milestones are associated with a specific product
 in this table, but Bugzilla does not yet support differing milestones by
 product through the standard configuration interfaces.
 
-namedqueries:  This is where everybody stores their "custom queries". Very
-cool feature; it beats the tar out of having to bookmark each cool query you
-construct.
+namedqueries:  This is where everybody stores their "Saved Searches".
+Very cool feature; it beats the tar out of having to bookmark each
+cool query you construct.  This table stores the id of the user,
+name of the <quote>Saved Search</quote>, whether or not to show the
+<quote>Saved Search</quote> in the user's footer, and
+the query string of the <quote>Saved Search</quote>.
 
 products:  What products you have, whether new bug entries are allowed for the
 product, what milestone you're working toward on that product, votes, etc. It

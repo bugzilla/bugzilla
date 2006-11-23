@@ -964,10 +964,9 @@ any entries in the CC field of the bug. Note that, like most other tables in
 Bugzilla, it does not refer to users by their user names, but by their unique
 userid, stored as a primary key in the profiles table.
 
-components: This stores the programs and components (or products and
-components, in newer Bugzilla parlance) for Bugzilla. Curiously, the "program"
-(product) field is the full name of the product, rather than some other unique
-identifier, like bug_id and user_id are elsewhere in the database.
+components:  This stores name, the description and initial
+owner/qacontact of the component, and to which product the components
+belong.
 
 dependencies: Stores data about those cool dependency trees.
 

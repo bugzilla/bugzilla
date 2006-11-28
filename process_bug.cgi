@@ -1310,13 +1310,9 @@ sub SnapShotBug {
 
 
 sub SnapShotDeps {
-    my ($i, $target, $me) = (@_);
-    SendSQL("SELECT $target FROM dependencies WHERE $me = $i ORDER BY $target");
-    my @list;
-    while (MoreSQLData()) {
-        push(@list, FetchOneColumn());
-    }
-    return join(',', @list);
+    my ($bug_id, $target, $me) = (@_);
+    my $list = Bugzilla::Bug::EmitDependList($me, $target, $bug_id);
+    return join(',', @$list);
 }
 
 

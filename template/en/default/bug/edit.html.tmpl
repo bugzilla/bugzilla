@@ -655,9 +655,10 @@
   [% END %]
   </td>
   <td>
-    <input name="[% dep.fieldname %]" accesskey="[% accesskey %]"
+    <input name="[% dep.fieldname %]" [% " accesskey=\"$accesskey\"" IF accesskey %]
            value="[% bug.${dep.fieldname}.join(', ') %]">
   </td>
+  [% accesskey = undef %]
 [% END %]
 
 
@@ -667,7 +668,7 @@
 
 [% BLOCK select %]
   <td>
-    <label for="[% selname %]" accesskey="[% accesskey %]">
+    <label for="[% selname %]"[% " accesskey=\"$accesskey\"" IF accesskey %]>
       <select name="[% selname %]" id="[% selname %]">
         [% FOREACH x = bug.choices.${selname} %]
           <option value="[% x FILTER html %]"
@@ -677,4 +678,5 @@
       </select>
     </label>
   </td>
+  [% accesskey = undef %]
 [% END %]

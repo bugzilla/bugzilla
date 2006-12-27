@@ -320,7 +320,7 @@
   'group.bit', 
   'dep.title', 
   'dep.fieldname', 
-  'accesskey', 
+  '" accesskey=\"$accesskey\"" IF accesskey',
   'bug.${dep.fieldname}.join(\', \')', 
   'selname',
 ],

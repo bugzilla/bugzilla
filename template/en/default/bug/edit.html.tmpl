@@ -298,6 +298,7 @@
             </td>
             <td>
                [% INCLUDE global/userselect.html.tmpl
+                  id => "newcc"
                   name => "newcc"
                   value => ""
                   accesskey => "a"
@@ -345,6 +346,7 @@
              </td>
              <td colspan="7">
                [% INCLUDE global/userselect.html.tmpl
+                  id => "qa_contact"
                   name => "qa_contact"
                   value => bug.qa_contact.login
                   accesskey => "q"

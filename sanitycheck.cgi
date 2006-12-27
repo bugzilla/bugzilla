@@ -22,6 +22,7 @@
 #                 Matthew Tuck <matty@chariot.net.au>
 #                 Max Kanat-Alexander <mkanat@bugzilla.org>
 #                 Marc Schumann <wurblzap@gmail.com>
+#                 Frédéric Buclin <LpSolit@gmail.com>
 
 use strict;
 
@@ -82,6 +83,7 @@ my $template = Bugzilla->template;
 # As this script can now alter the group_control_map table, we no longer
 # let users with editbugs privs run it anymore.
 UserInGroup("editcomponents")
+  || (UserInGroup('editkeywords') && defined $cgi->param('rebuildkeywordcache'))
   || ThrowUserError("auth_failure", {group  => "editcomponents",
                                      action => "run",
                                      object => "sanity_check"});
@@ -91,6 +93,16 @@ print $cgi->header();
 my @row;
 
 $template->put_header("Bugzilla Sanity Check");
+
+###########################################################################
+# Users with 'editkeywords' privs only can only check keywords.
+###########################################################################
+unless (UserInGroup('editcomponents')) {
+    check_votes_or_keywords('keywords');
+    Status("Sanity check completed.");
+    $template->put_footer();
+    exit;
+}
 
 ###########################################################################
 # Fix vote cache
@@ -570,154 +582,185 @@ while (my ($id,$email) = (FetchSQLData())) {
 # Perform vote/keyword cache checks
 ###########################################################################
 
-my $offervotecacherebuild = 0;
-
 sub AlertBadVoteCache {
     my ($id) = (@_);
     Alert("Bad vote cache for bug " . BugLink($id));
-    $offervotecacherebuild = 1;
 }
 
-SendSQL("SELECT bug_id, votes, keywords FROM bugs " .
-        "WHERE votes != 0 OR keywords != ''");
+check_votes_or_keywords();
 
-my %votes;
-my %bugid;
-my %keyword;
+sub check_votes_or_keywords {
+    my $check = shift || 'all';
 
-while (@row = FetchSQLData()) {
-    my($id, $v, $k) = (@row);
-    if ($v != 0) {
-        $votes{$id} = $v;
-    }
-    if ($k) {
-        $keyword{$id} = $k;
-    }
-}
+    my $dbh = Bugzilla->dbh;
+    my $sth = $dbh->prepare(q{SELECT bug_id, votes, keywords
+                                FROM bugs
+                               WHERE votes != 0 OR keywords != ''});
+    $sth->execute;
 
-Status("Checking cached vote counts");
-SendSQL("SELECT bug_id, SUM(vote_count) FROM votes " .
-        $dbh->sql_group_by('bug_id'));
+    my %votes;
+    my %keyword;
 
-while (@row = FetchSQLData()) {
-    my ($id, $v) = (@row);
-    if ($v <= 0) {
-        Alert("Bad vote sum for bug $id");
-    } else {
-        if (!defined $votes{$id} || $votes{$id} != $v) {
-            AlertBadVoteCache($id);
+    while (my ($id, $v, $k) = $sth->fetchrow_array) {
+        if ($v != 0) {
+            $votes{$id} = $v;
         }
-        delete $votes{$id};
-    }
-}
-foreach my $id (keys %votes) {
-    AlertBadVoteCache($id);
-}
-
-if ($offervotecacherebuild) {
-    print qq{<a href="sanitycheck.cgi?rebuildvotecache=1">Click here to rebuild the vote cache</a><p>\n};
-}
-
-
-Status("Checking keywords table");
-
-my %keywordids;
-SendSQL("SELECT id, name FROM keyworddefs");
-while (@row = FetchSQLData()) {
-    my ($id, $name) = (@row);
-    if ($keywordids{$id}) {
-        Alert("Duplicate entry in keyworddefs for id $id");
-    }
-    $keywordids{$id} = 1;
-    if ($name =~ /[\s,]/) {
-        Alert("Bogus name in keyworddefs for id $id");
-    }
-}
-
-
-SendSQL("SELECT bug_id, keywordid FROM keywords ORDER BY bug_id, keywordid");
-my $lastid;
-my $lastk;
-while (@row = FetchSQLData()) {
-    my ($id, $k) = (@row);
-    if (!$keywordids{$k}) {
-        Alert("Bogus keywordids $k found in keywords table");
-    }
-    if (defined $lastid && $id eq $lastid && $k eq $lastk) {
-        Alert("Duplicate keyword ids found in bug " . BugLink($id));
-    }
-    $lastid = $id;
-    $lastk = $k;
-}
-
-Status("Checking cached keywords");
-
-my %realk;
-
-if (defined $cgi->param('rebuildkeywordcache')) {
-    $dbh->bz_lock_tables('bugs write', 'keywords read',
-                                  'keyworddefs read');
-}
-
-SendSQL("SELECT keywords.bug_id, keyworddefs.name " .
-        "FROM keywords " .
-        "INNER JOIN keyworddefs " .
-        "   ON keyworddefs.id = keywords.keywordid " .
-        "INNER JOIN bugs " .
-        "   ON keywords.bug_id = bugs.bug_id " .
-        "ORDER BY keywords.bug_id, keyworddefs.name");
-
-my $lastb = 0;
-my @list;
-while (1) {
-    my ($b, $k) = FetchSQLData();
-    if (!defined $b || $b != $lastb) {
-        if (@list) {
-            $realk{$lastb} = join(', ', @list);
+        if ($k) {
+            $keyword{$id} = $k;
         }
-        if (!$b) {
-            last;
-        }
-        $lastb = $b;
-        @list = ();
     }
-    push(@list, $k);
+
+    # If we only want to check keywords, skip checks about votes.
+    _check_votes(\%votes) unless ($check eq 'keywords');
+    # If we only want to check votes, skip checks about keywords.
+    _check_keywords(\%keyword) unless ($check eq 'votes');
 }
 
-my @badbugs = ();
+sub _check_votes {
+    my $votes = shift;
 
-foreach my $b (keys(%keyword)) {
-    if (!exists $realk{$b} || $realk{$b} ne $keyword{$b}) {
-        push(@badbugs, $b);
-    }
-}
-foreach my $b (keys(%realk)) {
-    if (!exists $keyword{$b}) {
-        push(@badbugs, $b);
-    }
-}
-if (@badbugs) {
-    @badbugs = sort {$a <=> $b} @badbugs;
-    Alert(scalar(@badbugs) . " bug(s) found with incorrect keyword cache: " .
-          BugListLinks(@badbugs));
-    if (defined $cgi->param('rebuildkeywordcache')) {
-        Status("OK, now fixing keyword cache.");
-        foreach my $b (@badbugs) {
-            my $k = '';
-            if (exists($realk{$b})) {
-                $k = $realk{$b};
+    Status("Checking cached vote counts");
+    my $dbh = Bugzilla->dbh;
+    my $sth = $dbh->prepare(q{SELECT bug_id, SUM(vote_count)
+                                FROM votes }.
+                                $dbh->sql_group_by('bug_id'));
+    $sth->execute;
+
+    my $offer_votecache_rebuild = 0;
+
+    while (my ($id, $v) = $sth->fetchrow_array) {
+        if ($v <= 0) {
+            Alert("Bad vote sum for bug $id");
+        } else {
+            if (!defined $votes->{$id} || $votes->{$id} != $v) {
+                AlertBadVoteCache($id);
+                $offer_votecache_rebuild = 1;
             }
-            SendSQL("UPDATE bugs SET keywords = " . SqlQuote($k) .
-                    " WHERE bug_id = $b");
+            delete $votes->{$id};
         }
-        Status("Keyword cache fixed.");
-    } else {
-        print qq{<a href="sanitycheck.cgi?rebuildkeywordcache=1">Click here to rebuild the keyword cache</a><p>\n};
+    }
+    foreach my $id (keys %$votes) {
+        AlertBadVoteCache($id);
+        $offer_votecache_rebuild = 1;
+    }
+
+    if ($offer_votecache_rebuild) {
+        print qq{<a href="sanitycheck.cgi?rebuildvotecache=1">Click here to rebuild the vote cache</a><p>\n};
     }
 }
 
-if (defined $cgi->param('rebuildkeywordcache')) {
-    $dbh->bz_unlock_tables();
+sub _check_keywords {
+    my $keyword = shift;
+
+    Status("Checking keywords table");
+    my $dbh = Bugzilla->dbh;
+    my $cgi = Bugzilla->cgi;
+
+    my %keywordids;
+    my $keywords = $dbh->selectall_arrayref(q{SELECT id, name
+                                                FROM keyworddefs});
+
+    foreach (@$keywords) {
+        my ($id, $name) = @$_;
+        if ($keywordids{$id}) {
+            Alert("Duplicate entry in keyworddefs for id $id");
+        }
+        $keywordids{$id} = 1;
+        if ($name =~ /[\s,]/) {
+            Alert("Bogus name in keyworddefs for id $id");
+        }
+    }
+
+    my $sth = $dbh->prepare(q{SELECT bug_id, keywordid
+                                FROM keywords
+                            ORDER BY bug_id, keywordid});
+    $sth->execute;
+    my $lastid;
+    my $lastk;
+    while (my ($id, $k) = $sth->fetchrow_array) {
+        if (!$keywordids{$k}) {
+            Alert("Bogus keywordids $k found in keywords table");
+        }
+        if (defined $lastid && $id eq $lastid && $k eq $lastk) {
+            Alert("Duplicate keyword ids found in bug " . BugLink($id));
+        }
+        $lastid = $id;
+        $lastk = $k;
+    }
+
+    Status("Checking cached keywords");
+
+    if (defined $cgi->param('rebuildkeywordcache')) {
+        $dbh->bz_lock_tables('bugs write', 'keywords read', 'keyworddefs read');
+    }
+
+    my $query = q{SELECT keywords.bug_id, keyworddefs.name
+                    FROM keywords
+              INNER JOIN keyworddefs
+                      ON keyworddefs.id = keywords.keywordid
+              INNER JOIN bugs
+                      ON keywords.bug_id = bugs.bug_id
+                ORDER BY keywords.bug_id, keyworddefs.name};
+
+    $sth = $dbh->prepare($query);
+    $sth->execute;
+
+    my $lastb = 0;
+    my @list;
+    my %realk;
+    while (1) {
+        my ($b, $k) = $sth->fetchrow_array;
+        if (!defined $b || $b != $lastb) {
+            if (@list) {
+                $realk{$lastb} = join(', ', @list);
+            }
+            last unless $b;
+
+            $lastb = $b;
+            @list = ();
+        }
+        push(@list, $k);
+    }
+
+    my @badbugs = ();
+
+    foreach my $b (keys(%$keyword)) {
+        if (!exists $realk{$b} || $realk{$b} ne $keyword->{$b}) {
+            push(@badbugs, $b);
+        }
+    }
+    foreach my $b (keys(%realk)) {
+        if (!exists $keyword->{$b}) {
+            push(@badbugs, $b);
+        }
+    }
+    if (@badbugs) {
+        @badbugs = sort {$a <=> $b} @badbugs;
+        Alert(scalar(@badbugs) . " bug(s) found with incorrect keyword cache: " .
+              BugListLinks(@badbugs));
+
+        my $sth_update = $dbh->prepare(q{UPDATE bugs
+                                            SET keywords = ?
+                                          WHERE bug_id = ?});
+
+        if (defined $cgi->param('rebuildkeywordcache')) {
+            Status("OK, now fixing keyword cache.");
+            foreach my $b (@badbugs) {
+                my $k = '';
+                if (exists($realk{$b})) {
+                    $k = $realk{$b};
+                }
+                $sth_update->execute($k, $b);
+            }
+            Status("Keyword cache fixed.");
+        } else {
+            print qq{<a href="sanitycheck.cgi?rebuildkeywordcache=1">Click here to rebuild the keyword cache</a><p>\n};
+        }
+    }
+
+    if (defined $cgi->param('rebuildkeywordcache')) {
+        $dbh->bz_unlock_tables();
+    }
 }
 
 ###########################################################################
@@ -866,7 +909,7 @@ BugCheck("bugs
 
 Status("Checking for unsent mail");
 
-@badbugs = ();
+my @badbugs = ();
 
 SendSQL("SELECT bug_id " .
         "FROM bugs WHERE (lastdiffed IS NULL OR lastdiffed < delta_ts) AND " .

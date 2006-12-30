@@ -592,10 +592,6 @@ attachment.cgi midairs. See bug 223878 for details.
 sub modify {
     my ($cgi, $timestamp) = @_;
 
-    # Use the date/time we were given if possible (allowing calling code
-    # to synchronize the comment's timestamp with those of other records).
-    $timestamp = ($timestamp ? &::SqlQuote($timestamp) : "NOW()");
-    
     # Extract a list of flags from the form data.
     my @ids = map(/^flag-(\d+)$/ ? $1 : (), $cgi->param());
     

@@ -868,7 +868,7 @@ foreach my $field ("rep_platform", "priority", "bug_severity",
 }
 
 my $prod_id;
-my $prod_changed;
+my $prod_changed = 0; # Used by strict_isolation only.
 my @newprod_ids;
 if ($cgi->param('product') ne $cgi->param('dontchange')) {
     $prod_id = get_product_id($cgi->param('product'));
@@ -878,8 +878,25 @@ if ($cgi->param('product') ne $cgi->param('dontchange')) {
       
     DoComma();
     @newprod_ids = ($prod_id);
-    $prod_changed = 1;
     $::query .= "product_id = $prod_id";
+    if (Param("strict_isolation")) {
+        # If the bug remains in the same product, leave $prod_changed set to 0.
+        # Even with 'strict_isolation' turned on, we ignore users who already
+        # play a role for the bug; else you would never be able to edit it.
+        # If you want to move the bug to another product, then you first have to
+        # remove these users from the bug.
+        if (defined $cgi->param('id')) {
+            my $curr_product_id =
+              $dbh->selectrow_array('SELECT product_id FROM bugs WHERE bug_id = ?',
+                                     undef, $cgi->param('id'));
+            if ($curr_product_id != $prod_id) {
+                $prod_changed = 1;
+            }
+        }
+        else {
+            $prod_changed = 1;
+        }
+    }
 } else {
     @newprod_ids = @{$dbh->selectcol_arrayref("SELECT DISTINCT product_id
                                                FROM bugs 
@@ -1045,6 +1062,13 @@ if (defined $cgi->param('qa_contact')
     if ($name ne $cgi->param('dontchange')) {
         $qacontact = DBNameToIdAndCheck($name) if ($name ne "");
         if ($qacontact && Param("strict_isolation")) {
+            my $curr_qa_contact_id = 0;
+            if (defined $cgi->param('id')) {
+                $curr_qa_contact_id = $dbh->selectrow_array(
+                    'SELECT qa_contact FROM bugs WHERE bug_id = ?',
+                     undef, $cgi->param('id')) || 0;
+            }
+            if ($qacontact != $curr_qa_contact_id) {
                 $usercache{$qacontact} ||= Bugzilla::User->new($qacontact);
                 my $qa_user = $usercache{$qacontact};
                 foreach my $product_id (@newprod_ids) {
@@ -1058,6 +1082,7 @@ if (defined $cgi->param('qa_contact')
                                           });
                     }
                 }
+            }
         }
         $qacontact_checked = 1;
         DoComma();

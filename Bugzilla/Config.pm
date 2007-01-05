@@ -27,6 +27,7 @@
 #                 Christopher Aillon <christopher@aillon.com>
 #                 Erik Stambaugh <erik@dasbistro.com>
 #                 Frédéric Buclin <LpSolit@gmail.com>
+#                 Guzman Braso <gbn@hqso.net>
 
 package Bugzilla::Config;
 
@@ -53,6 +54,14 @@ use base qw(Exporter);
 
 # constant paths
 our $libpath = '.';
+
+# importxml.pl, when run by a mail daemon, sets the bugzilla path explicitly.
+# This then mucks it up, so if we are coming from importxml.pl, set $libpath
+# back to the way it was.
+if ($::path) {
+    $libpath = $::path;
+}
+
 our $templatedir = "$libpath/template";
 
 # variable paths

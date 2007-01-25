@@ -3023,7 +3023,8 @@ if ($dbh->bz_column_info("profiles", "groupset")) {
     # so all unique keys are removed first and then added back in
     $dbh->bz_drop_index('groups', 'groups_bit_idx');
     $dbh->bz_drop_index('groups', 'groups_name_idx');
-    if ($dbh->primary_key(undef, undef, 'groups')) {
+    my @primary_key = $dbh->primary_key(undef, undef, 'groups');
+    if (@primary_key) {
         $dbh->do("ALTER TABLE groups DROP PRIMARY KEY");
     }
 

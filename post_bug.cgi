@@ -458,6 +458,7 @@ if (UserInGroup("editbugs")) {
                 " WHERE bug_id = $id");
     }
     if ($cgi->param('dependson') || $cgi->param('blocked')) {
+        my $sth_bug_time = $dbh->prepare('UPDATE bugs SET delta_ts = ? WHERE bug_id = ?');
         foreach my $pair (["blocked", "dependson"], ["dependson", "blocked"]) {
             my ($me, $target) = @{$pair};
 
@@ -467,6 +468,7 @@ if (UserInGroup("editbugs")) {
                 push(@all_deps, $i); # list for mailing dependent bugs
                 # Log the activity for the other bug:
                 LogActivityEntry($i, $me, "", $id, $user->id, $timestamp);
+                $sth_bug_time->execute($timestamp, $i);
             }
         }
     }

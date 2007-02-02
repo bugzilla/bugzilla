@@ -7,7 +7,7 @@ Table of Contents
 
 - Introduction
 - Important Updates in this Point Release
-    * Version 2.20.1 - 2.20.3
+    * Version 2.20.1 - 2.20.4
 - Minimum Requirements
     * Perl
     * For MySQL Users
@@ -168,6 +168,11 @@ This release contains minor fixes and security updates. Fixes of note are:
 
 Also see the Security Fixes section for the security updates in this
 release.
+
+Version 2.20.4
+--------------
+
+This is a security-only release--see the Security Fixes section.
 
 
 Minimum Requirements
@@ -721,6 +726,16 @@ To see details on the vulnerabilities that were fixed, see the
 Security Advisory at:
 
 http://www.bugzilla.org/security/2.18.5/
+
+2.20.4
+------
+
+Bugzilla 2.20.4 fixes a Cross-Site Scripting vulnerability that
+was introduced in Bugzilla 2.20.1.
+
+For more details, you can read the security advisory here:
+
+http://www.bugzilla.org/security/2.20.3/
 
 
 Release Notes for Previous Versions

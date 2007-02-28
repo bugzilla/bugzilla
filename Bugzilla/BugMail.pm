@@ -705,10 +705,9 @@ sub prepare_comments {
         if ($count) {
             $result .= "\n\n--- Comment #$count from ";
             if ($comment->{'name'} eq $comment->{'email'}) {
-                $result .= $comment->{'email'} . Bugzilla->params->{'emailsuffix'};
+                $result .= $comment->{'email'};
             } else {
-                $result .= $comment->{'name'} . " <" . $comment->{'email'} .
-                           Bugzilla->params->{'emailsuffix'} . ">";
+                $result .= $comment->{'name'} . " <" . $comment->{'email'} . ">";
             }
             $result .= "  " . format_time($comment->{'time'}) . " ---\n";
         }

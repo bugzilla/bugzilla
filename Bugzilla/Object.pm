@@ -171,6 +171,8 @@ sub update {
     my $table    = $self->DB_TABLE;
     my $id_field = $self->ID_FIELD;
 
+    $dbh->bz_start_transaction();
+
     my $old_self = $self->new($self->id);
     
     my (@update_columns, @values, %changes);
@@ -199,6 +201,8 @@ sub update {
     $dbh->do("UPDATE $table SET $columns WHERE $id_field = ?", undef, 
              @values, $self->id) if @values;
 
+    $dbh->bz_commit_transaction();
+
     return \%changes;
 }
 
@@ -210,9 +214,13 @@ sub create {
     my ($class, $params) = @_;
     my $dbh = Bugzilla->dbh;
 
+    $dbh->bz_start_transaction();
     $class->check_required_create_fields($params);
     my $field_values = $class->run_create_validators($params);
-    return $class->insert_create_data($field_values);
+    my $object = $class->insert_create_data($field_values);
+    $dbh->bz_commit_transaction();
+
+    return $object;
 }
 
 sub check_required_create_fields {

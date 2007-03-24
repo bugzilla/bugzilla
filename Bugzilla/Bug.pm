@@ -264,6 +264,8 @@ sub create {
     my $class  = shift;
     my $dbh = Bugzilla->dbh;
 
+    $dbh->bz_start_transaction();
+
     $class->check_required_create_fields(@_);
     my $params = $class->run_create_validators(@_);
 
@@ -290,10 +292,6 @@ sub create {
     # protected by groups.
     my $timestamp = $params->{creation_ts}; 
     delete $params->{creation_ts};
-
-    $dbh->bz_lock_tables('bugs WRITE', 'bug_group_map WRITE', 
-        'longdescs WRITE', 'cc WRITE', 'keywords WRITE', 'dependencies WRITE',
-        'bugs_activity WRITE', 'fielddefs READ');
 
     my $bug = $class->insert_create_data($params);
 
@@ -342,6 +340,12 @@ sub create {
         $sth_bug_time->execute($timestamp, $blocked_id);
     }
 
+    $dbh->bz_commit_transaction();
+
+    # Because MySQL doesn't support transactions on the longdescs table,
+    # we do this after we've committed the transaction. That way we're
+    # fairly sure we're inserting a good Bug ID.
+
     # And insert the comment. We always insert a comment on bug creation,
     # but sometimes it's blank.
     my @columns = qw(bug_id who bug_when thetext);
@@ -357,7 +361,6 @@ sub create {
     $dbh->do('INSERT INTO longdescs (' . join(',', @columns)  . ")
                    VALUES ($qmarks)", undef, @values);
 
-    $dbh->bz_unlock_tables();
 
     return $bug;
 }

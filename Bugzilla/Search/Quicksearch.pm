@@ -91,6 +91,7 @@ use constant MAPPINGS => {
 
 # We might want to put this into localconfig or somewhere
 use constant PLATFORMS => ('pc', 'sun', 'macintosh', 'mac');
+use constant OPSYSTEMS => ('windows', 'win', 'linux');
 use constant PRODUCT_EXCEPTIONS => (
     'row',   # [Browser]
              #   ^^^
@@ -288,9 +289,12 @@ sub quicksearch {
                         # Having ruled out the special cases, we may now split
                         # by comma, which is another legal boolean OR indicator.
                         foreach my $word (split(/,/, $or_operand)) {
-                            # Platform
-                            if (grep({lc($word) eq $_} PLATFORMS)) {
+                            # Platform and operating system
+                            if (grep({lc($word) eq $_} PLATFORMS)
+                                || grep({lc($word) eq $_} OPSYSTEMS)) {
                                 addChart('rep_platform', 'substring',
+                                         $word, $negate);
+                                addChart('op_sys', 'substring',
                                          $word, $negate);
                             }
                             # Priority

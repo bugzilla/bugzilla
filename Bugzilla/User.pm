@@ -1459,7 +1459,7 @@ sub wants_mail {
                                   AND relationship = ?
                                   AND event IN (' . join(',', @$events) . ') ' .
                                       $dbh->sql_limit(1),
-                              undef, ($self->{'id'}, $relationship));
+                              undef, ($self->id, $relationship));
 
     return defined($wants_mail) ? 1 : 0;
 }

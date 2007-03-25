@@ -47,3 +47,9 @@ dt {
 dd {
   margin-bottom: 1.5em;
 }
+
+.contribute {
+    border: 1px dotted black;
+    padding: .5em;
+    font-size: small;
+}

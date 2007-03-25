@@ -309,7 +309,7 @@ sub print_module_instructions {
     my ($check_results, $output) = @_;
 
     # We only print these notes if we have to.
-    if ((!$output && %{$check_results->{missing}})
+    if ((!$output && @{$check_results->{missing}})
         || ($output && $check_results->{any_missing}))
     {
         print "\n* NOTE: You must run any commands listed below as "

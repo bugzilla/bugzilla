@@ -89,11 +89,21 @@
       [% IF curpanel == -1 %]
         [% PROCESS admin/params/index.html.tmpl panels = panels %]
       [% ELSE %]
+
+        <div class="contribute"><strong>Note:</strong>
+          [%+ terms.Bugzilla %] is developed entirely by volunteers. The
+          best way to give back to the [% terms.Bugzilla %] project is
+          to <a href="http://www.bugzilla.org/contribute/">contribute</a>
+          yourself! You don't have to be a programmer to contribute, there are
+          lots of things that we need.
+        </div>
+
         <p>
           This lets you edit the basic operating parameters of [% terms.Bugzilla %].
           Be careful!<br>
           Any item you check "Reset" on will get reset to its default value.
         </p>
+
         [%# CONTENT PANEL %]
         <form method="post" action="editparams.cgi">
           [% PROCESS admin/params/common.html.tmpl panel = current_panel %]

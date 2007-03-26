@@ -121,14 +121,14 @@ sub OPTIONAL_MODULES {
         feature => 'Graphical Reports'
     },
     {
-        package => 'GDGraph',
-        module  => 'GD::Graph',
+        package => 'GDTextUtil',
+        module  => 'GD::Text',
         version => 0,
         feature => 'Graphical Reports'
     },
-    { 
-        package => 'GDTextUtil',
-        module  => 'GD::Text',
+    {
+        package => 'GDGraph',
+        module  => 'GD::Graph',
         version => 0,
         feature => 'Graphical Reports'
     },

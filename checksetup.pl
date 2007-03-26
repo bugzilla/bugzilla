@@ -44,9 +44,6 @@
 
 use strict;
 use 5.008;
-# If we've installed modules into the local directory, we want to
-# be sure that the local directory comes first in @INC.
-use lib '.';
 use File::Basename;
 use Getopt::Long qw(:config bundling);
 use Pod::Usage;

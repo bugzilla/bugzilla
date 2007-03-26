@@ -71,7 +71,7 @@ __END__
 
 =head1 NAME
 
-Bugzilla::WebSerice - The Web Service interface to Bugzilla
+Bugzilla::WebService - The Web Service interface to Bugzilla
 
 =head1 DESCRIPTION
 

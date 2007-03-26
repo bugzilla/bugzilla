@@ -66,14 +66,14 @@ sub REQUIRED_MODULES {
         version => '2.21'
     },
     {
-        package => 'DBI',
-        module  => 'DBI',
-        version => '1.41'
-    },
-    {
         package => 'PathTools',
         module  => 'File::Spec',
         version => '0.84'
+    },
+    {
+        package => 'DBI',
+        module  => 'DBI',
+        version => '1.41'
     },
     {
         package => 'Template-Toolkit',

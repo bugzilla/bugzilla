@@ -205,22 +205,6 @@ sub validateContext
   return $context;
 }
 
-sub validateCanChangeAttachment 
-{
-    my ($attachid) = @_;
-    my $dbh = Bugzilla->dbh;
-    my ($productid) = $dbh->selectrow_array(
-            "SELECT product_id
-             FROM attachments
-             INNER JOIN bugs
-             ON bugs.bug_id = attachments.bug_id
-             WHERE attach_id = ?", undef, $attachid);
-
-    Bugzilla->user->can_edit_product($productid)
-      || ThrowUserError("illegal_attachment_edit",
-                        { attach_id => $attachid });
-}
-
 sub validateCanChangeBug
 {
     my ($bugid) = @_;
@@ -600,7 +584,7 @@ sub update
     my $bug = new Bugzilla::Bug($bugid);
     my $attachment = Bugzilla::Attachment->get($attach_id);
     $attachment->validate_can_edit($bug->product_id);
-    validateCanChangeAttachment($attach_id);
+    validateCanChangeBug($bugid);
     Bugzilla::Attachment->validate_description(THROW_ERROR);
     Bugzilla::Attachment->validate_is_patch(THROW_ERROR);
     Bugzilla::Attachment->validate_content_type(THROW_ERROR) unless $cgi->param('ispatch');
@@ -775,7 +759,7 @@ sub delete_attachment {
     # Make sure the administrator is allowed to edit this attachment.
     my ($attach_id, $bug_id) = validateID();
     my $attachment = Bugzilla::Attachment->get($attach_id);
-    validateCanChangeAttachment($attach_id);
+    validateCanChangeBug($bug_id);
 
     $attachment->datasize || ThrowUserError('attachment_removed');
 

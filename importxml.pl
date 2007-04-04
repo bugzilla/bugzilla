@@ -22,6 +22,7 @@
 #                 Gregary Hendricks <ghendricks@novell.com>
 #                 Vance Baarda <vrb@novell.com>
 #                 Guzman Braso <gbn@hqso.net>
+#                 Erik Purins <epurins@day1studios.com>
 
 # This script reads in xml bug data from standard input and inserts
 # a new bug into bugzilla. Everything before the beginning <?xml line
@@ -1007,6 +1008,27 @@ sub process_bug {
     push( @query,  "bug_status" );
     push( @values, $status );
 
+    # Custom fields
+    foreach my $custom_field (Bugzilla->custom_field_names) {
+        next unless defined($bug_fields{$custom_field});
+        my $field = new Bugzilla::Field({name => $custom_field});
+        if ($field->type == FIELD_TYPE_FREETEXT) {
+            push(@query, $custom_field);
+            push(@values, clean_text($bug_fields{$custom_field}));
+        } elsif ($field->type == FIELD_TYPE_SINGLE_SELECT) {
+            my $is_well_formed = check_field($custom_field, scalar $bug_fields{$custom_field},
+                                             undef, ERR_LEVEL);
+            if ($is_well_formed) {
+                push(@query, $custom_field);
+                push(@values, $bug_fields{$custom_field});
+            } else {
+                $err .= "Skipping illegal value \"$bug_fields{$custom_field}\" in $custom_field.\n" ;
+            }
+        } else {
+            $err .= "Type of custom field $custom_field is an unhandled FIELD_TYPE: " .
+                    $field->type . "\n";
+        }
+    }
 
     # For the sake of sanitycheck.cgi we do this.
     # Update lastdiffed if you do not want to have mail sent

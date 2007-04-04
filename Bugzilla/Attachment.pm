@@ -728,8 +728,8 @@ sub insert_attachment_for_bug {
     my $filename;
     my $contenttype;
     my $isurl;
-    $class->validate_is_patch($throw_error) || return 0;
-    $class->validate_description($throw_error) || return 0;
+    $class->validate_is_patch($throw_error) || return;
+    $class->validate_description($throw_error) || return;
 
     if (Bugzilla->params->{'allow_attach_url'}
         && ($attachurl =~ /^(http|https|ftp):\/\/\S+/)
@@ -743,16 +743,16 @@ sub insert_attachment_for_bug {
         $cgi->delete('bigfile');
     }
     else {
-        $filename = _validate_filename($throw_error) || return 0;
+        $filename = _validate_filename($throw_error) || return;
         # need to validate content type before data as
         # we now check the content type for image/bmp in _validate_data()
         unless ($cgi->param('ispatch')) {
-            $class->validate_content_type($throw_error) || return 0;
+            $class->validate_content_type($throw_error) || return;
         }
         $data = _validate_data($throw_error, $hr_vars);
         # If the attachment is stored locally, $data eq ''.
         # If an error is thrown, $data eq '0'.
-        ($data ne '0') || return 0;
+        ($data ne '0') || return;
         $contenttype = $cgi->param('contenttype');
 
         # These are inserted using placeholders so no need to panic
@@ -826,7 +826,7 @@ sub insert_attachment_for_bug {
                 close AH;
                 close $fh;
                 unlink "$attachdir/$hash/attachment.$attachid";
-                $throw_error ? ThrowUserError("local_file_too_large") : return 0;
+                $throw_error ? ThrowUserError("local_file_too_large") : return;
             }
         }
         close AH;
@@ -874,8 +874,8 @@ sub insert_attachment_for_bug {
         $$hr_vars->{'flag_creation_error'} = $@;
     }
 
-    # Return the ID of the new attachment.
-    return $attachid;
+    # Return the new attachment object.
+    return $attachment;
 }
 
 1;

@@ -15,12 +15,12 @@
   #%]
 
 [%# INTERFACE:
-  # attachid: ID of the attachment the user wants to delete.
+  # attachment: object of the attachment the user wants to delete.
   # reason: string; The reason provided by the user.
   # date: the date when the request to delete the attachment was made.
   #%]
 
-The content of attachment [% attachid %] has been deleted by
+The content of attachment [% attachment.id %] has been deleted by
     [%+ user.identity %]
 [% IF reason %]
 who provided the following reason:

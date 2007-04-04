@@ -414,10 +414,8 @@
 ],
 
 'attachment/created.html.tmpl' => [
-  'attachid', 
-  'bugid', 
-  'contenttype', 
-  '"$terms.bug $bugid" FILTER bug_link(bugid)',
+  'attachment.id',
+  'attachment.bug_id',
 ],
 
 'attachment/edit.html.tmpl' => [
@@ -439,8 +437,7 @@
 ],
 
 'attachment/updated.html.tmpl' => [
-  'attachid', 
-  '"$terms.bug $bugid" FILTER bug_link(bugid)',
+  'attachment.id',
 ],
 
 'attachment/diff-header.html.tmpl' => [

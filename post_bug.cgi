@@ -187,15 +187,15 @@ if (defined $cgi->param('version')) {
 # Add an attachment if requested.
 if (defined($cgi->upload('data')) || $cgi->param('attachurl')) {
     $cgi->param('isprivate', $cgi->param('commentprivacy'));
-    my $attach_id = Bugzilla::Attachment->insert_attachment_for_bug(!THROW_ERROR,
+    my $attachment = Bugzilla::Attachment->insert_attachment_for_bug(!THROW_ERROR,
                                                   $bug, $user, $timestamp, \$vars);
 
-    if ($attach_id) {
+    if ($attachment) {
         # Update the comment to include the new attachment ID.
         # This string is hardcoded here because Template::quoteUrls()
         # expects to find this exact string.
-        my $new_comment = "Created an attachment (id=$attach_id)\n" .
-                          $cgi->param('description') . "\n";
+        my $new_comment = "Created an attachment (id=" . $attachment->id . ")\n" .
+                          $attachment->description . "\n";
         # We can use $bug->longdescs here because we are sure that the bug
         # description is of type CMT_NORMAL. No need to include it if it's
         # empty, though.

@@ -20,10 +20,7 @@
   #%]
 
 [%# INTERFACE:
-  # bugid: integer. ID of the bug we just attached an attachment to.
-  # attachid: integer. ID of the attachment just created.
-  # description: string. Description of the attachment just created.
-  # contenttype: string. The Content Type we attached it as.
+  # attachment: object of the attachment just created.
   # contenttypemethod: string. How we got the content type of the attachment.
   #  Possible values: autodetect, list, manual.
   #%]
@@ -36,11 +33,12 @@
 
 <dl>
   <dt>
-    <a title="[% description FILTER html %]" href="attachment.cgi?id=[% attachid %]&amp;action=edit">Attachment #[% attachid %]</a>
-    to [% "$terms.bug $bugid" FILTER bug_link(bugid) %] created
+    <a title="[% attachment.description FILTER html %]"
+       href="attachment.cgi?id=[% attachment.id %]&amp;action=edit">Attachment #[% attachment.id %]</a>
+    to [% "$terms.bug $attachment.bug_id" FILTER bug_link(attachment.bug_id) FILTER none %] created
   </dt>
   <dd>
-    [% PROCESS "bug/process/bugmail.html.tmpl" mailing_bugid = bugid %]
+    [% PROCESS "bug/process/bugmail.html.tmpl" mailing_bugid = attachment.bug_id %]
     [% IF convertedbmp %]
       <p>
         <b>Note:</b> [% terms.Bugzilla %] automatically converted your BMP image file to a
@@ -50,9 +48,9 @@
     [% IF contenttypemethod == 'autodetect' %]
       <p>
         <b>Note:</b> [% terms.Bugzilla %] automatically detected the content type
-        <em>[% contenttype %]</em> for this attachment.  If this is
-        incorrect, correct the value by
-        editing the attachment's <a href="attachment.cgi?id=[% attachid %]&amp;action=edit">details</a>.
+        <em>[% attachment.contenttype FILTER html %]</em> for this attachment.  If this is
+        incorrect, correct the value by editing the attachment's
+        <a href="attachment.cgi?id=[% attachment.id %]&amp;action=edit">details</a>.
       </p>
     [% END %]
 
@@ -62,8 +60,8 @@
 </dl>
 
 <p>
-<a href="attachment.cgi?bugid=[% bugid %]&amp;action=enter">Create
- Another Attachment to [% terms.Bug %] #[% bugid %]</a>
+<a href="attachment.cgi?bugid=[% attachment.bug_id %]&amp;action=enter">Create
+ Another Attachment to [% terms.Bug %] #[% attachment.bug_id %]</a>
 </p>
 
 [% PROCESS global/footer.html.tmpl %]

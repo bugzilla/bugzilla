@@ -115,6 +115,7 @@
 
 /* footer (begin) */
     #footer {
+        clear: both;
         margin-top: 5px;
         width: 100%;
         background: #edf2f2;

@@ -310,6 +310,10 @@ dl dl > dt {
     padding-left: 1em;
 }
 
+div.user_match {
+    margin-bottom: 1em;
+}
+
 .box {
     border: 1px solid black;
     color: black;

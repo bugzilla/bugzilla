@@ -460,6 +460,10 @@
   'section_num'
 ],
 
+'admin/admin.html.tmpl' => [
+  'class'
+],
+
 'admin/table.html.tmpl' => [
   'link_uri'
 ],

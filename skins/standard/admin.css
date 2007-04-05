@@ -43,3 +43,25 @@ p.areyoureallyreallysure {
 tr.param_disabled {
     background-color: lightgrey;
 }
+
+td.admin_links {
+    width: 50%;
+    padding: 1em;
+    vertical-align: top;
+}
+
+td.admin_links dt {
+    margin-top: 1em;
+}
+
+td.admin_links dt.forbidden, td.admin_links dd.forbidden {
+    font-size: smaller;
+    font-style: italic;
+    color: #aaa;
+}
+
+td.admin_links dt.forbidden a, td.admin_links dd.forbidden a {
+    text-decoration: none;
+    color: inherit;
+    cursor: default;
+}

@@ -55,6 +55,13 @@
 
   [% IF user.login %]
     <li><span class="separator">| </span><a href="userprefs.cgi">Preferences</a></li>
+    [% IF user.groups.tweakparams || user.groups.editusers || user.can_bless
+          || (Param('useclassification') && user.groups.editclassifications)
+          || user.groups.editcomponents || user.groups.admin || user.groups.creategroups
+          || user.groups.editkeywords || user.groups.bz_canusewhines
+          || user.get_products_by_permission("editcomponents").size %]
+      <li><span class="separator">| </span><a href="admin.cgi">Administration</a></li>
+    [% END %]
     <li>
       <span class="separator">| </span>
       [% IF user.authorizer.can_logout %]

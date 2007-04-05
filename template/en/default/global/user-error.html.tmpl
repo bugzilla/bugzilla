@@ -148,7 +148,9 @@
       use
     [% END %]
 
-    [% IF object == "attachment" %]
+    [% IF object == "administrative_pages" %]
+      administrative pages
+    [% ELSIF object == "attachment" %]
       this attachment
     [% ELSIF object == "bugs" %]
       [%+ terms.bugs %]

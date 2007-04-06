@@ -190,7 +190,7 @@ MakeDocs('big HTML', "jade -V nochunks -t sgml -i html -d " .
 MakeDocs('big text', "lynx -dump -justify=off -nolist Bugzilla-Guide.html " .
 	 "> ../txt/Bugzilla-Guide.txt");
 
-if (! grep("--with-pdf", @ARGV)) {
+if (! grep($_ eq "--with-pdf", @ARGV)) {
     exit;
 }
 

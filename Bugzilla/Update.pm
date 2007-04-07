@@ -22,7 +22,7 @@ use Bugzilla::Constants;
 
 use constant REMOTE_FILE   => 'http://updates.bugzilla.org/bugzilla-update.xml';
 use constant LOCAL_FILE    => "/bugzilla-update.xml"; # Relative to datadir.
-use constant TIME_INTERVAL => 604800; # Default is one week, in seconds.
+use constant TIME_INTERVAL => 86400; # Default is one day, in seconds.
 use constant TIMEOUT       => 5; # Number of seconds before timeout.
 
 # Look for new releases and notify logged in administrators about them.

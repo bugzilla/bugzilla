@@ -322,6 +322,10 @@ div.user_match {
     padding: 0.5em 1em;
 }
 
+.collapsed {
+    display: none;
+}
+
 /* Rules specific for printing */
 @media print {
     #header, #footer {

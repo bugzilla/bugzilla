@@ -37,6 +37,58 @@
         comment_elem.className.replace(/(\s*|^)bz_private(\s*|$)/, '$2');
     }
   }
+
+  /* The functions below expand and collapse comments  */
+
+  function toggle_comment_display(link, comment_id) {
+    var comment = document.getElementById('comment_text_' + comment_id);
+    var re = new RegExp(/\bcollapsed\b/);
+    if (comment.className.match(re))
+        expand_comment(link, comment);
+    else
+        collapse_comment(link, comment);
+  }
+
+  function toggle_all_comments(action) {
+    var num_comments = [% comments.size FILTER html %];
+
+    // If for some given ID the comment doesn't exist, this doesn't mean
+    // there are no more comments, but that the comment is private and
+    // the user is not allowed to view it.
+
+    for (var id = 0; id < num_comments; id++) {
+        var comment = document.getElementById('comment_text_' + id);
+        if (!comment)
+            continue;
+
+        var link = document.getElementById('comment_link_' + id);
+        if (action == 'collapse')
+            collapse_comment(link, comment);
+        else
+            expand_comment(link, comment);
+    }
+  }
+
+  function collapse_comment(link, comment) {
+    link.innerHTML = "(+)";
+    link.title = "Expand the comment.";
+    comment.className = "collapsed";
+  }
+
+  function expand_comment(link, comment) {
+    link.innerHTML = "(-)";
+    link.title = "Collapse the comment";
+    comment.className = "";
+  }
+
+  /* This way, we are sure that browsers which do not support JS
+   * won't display this link  */
+
+  function addCollapseLink(count) {
+    document.write(' <a href="#" id="comment_link_' + count +
+                   '" onclick="toggle_comment_display(this, ' +  count +
+                   '); return false;" title="Collapse the comment.">(-)</a> ');
+  }
   //-->
   </script>
 
@@ -69,6 +121,11 @@
     [% END %]
 [% END %]
 
+[% IF mode == "edit" %]
+  <a href="#" onclick="toggle_all_comments('collapse'); return false;">Collapse All Comments</a> -
+  <a href="#" onclick="toggle_all_comments('expand'); return false;">Expand All Comments</a>
+  <hr>
+[% END %]
 
 [% FOREACH comment = comments %]
   [% IF count >= start_at %]
@@ -96,9 +153,10 @@
           <tr>
             <th align="left">
               <b><a name="c0" href="show_bug.cgi?id=[% bug.bug_id %]#c0">
-                Description</a>:</b>&nbsp;&nbsp;
+                Description</a>:</b>
                 [% IF mode == "edit" %]
                   [%%]<script type="text/javascript"><!-- 
+                    addCollapseLink(0);
                     addReplyLink(0);
                   //--></script>
                 [% END %]
@@ -122,6 +180,7 @@
           </i>
           [% IF mode == "edit" %]
           <script type="text/javascript"><!-- 
+            addCollapseLink([% count %]);
             addReplyLink([% count %]); //--></script>
           [% END %]
           <span class="comment_rule">-------</span>

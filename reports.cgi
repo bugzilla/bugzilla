@@ -75,7 +75,7 @@ if (! defined $cgi->param('product')) {
       || ThrowCodeError('chart_dir_nonexistent',
                         {dir => $dir, graph_dir => $graph_dir});
 
-    my %default_sel = map { $_ => 1 } qw/UNCONFIRMED NEW ASSIGNED REOPENED/;
+    my %default_sel = map { $_ => 1 } BUG_STATE_OPEN;
 
     my @datasets;
     my @data = get_data($dir);

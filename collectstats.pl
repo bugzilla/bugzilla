@@ -72,19 +72,21 @@ my $datadir = bz_locations()->{'datadir'};
 my @myproducts = map {$_->name} Bugzilla::Product->get_all;
 unshift(@myproducts, "-All-");
 
-# As we can now customize the list of resolutions, looking at the actual list
-# of available resolutions only is not enough as some now removed resolutions
+# As we can now customize statuses and resolutions, looking at the current list
+# of legal values only is not enough as some now removed statuses and resolutions
 # may have existed in the past, or have been renamed. We want them all.
-my @resolutions = @{get_legal_field_values('resolution')};
-my $old_resolutions =
-    $dbh->selectcol_arrayref('SELECT bugs_activity.added
+my $fields = {};
+foreach my $field ('bug_status', 'resolution') {
+    my $values = get_legal_field_values($field);
+    my $old_values = $dbh->selectcol_arrayref(
+                             "SELECT bugs_activity.added
                                 FROM bugs_activity
                           INNER JOIN fielddefs
                                   ON fielddefs.id = bugs_activity.fieldid
-                           LEFT JOIN resolution
-                                  ON resolution.value = bugs_activity.added
+                           LEFT JOIN $field
+                                  ON $field.value = bugs_activity.added
                                WHERE fielddefs.name = ?
-                                 AND resolution.id IS NULL
+                                 AND $field.id IS NULL
 
                                UNION
 
@@ -92,18 +94,20 @@ my $old_resolutions =
                                 FROM bugs_activity
                           INNER JOIN fielddefs
                                   ON fielddefs.id = bugs_activity.fieldid
-                           LEFT JOIN resolution
-                                  ON resolution.value = bugs_activity.removed
+                           LEFT JOIN $field
+                                  ON $field.value = bugs_activity.removed
                                WHERE fielddefs.name = ?
-                                 AND resolution.id IS NULL',
-                               undef, ('resolution', 'resolution'));
+                                 AND $field.id IS NULL",
+                               undef, ($field, $field));
 
-push(@resolutions, @$old_resolutions);
+    push(@$values, @$old_values);
+    $fields->{$field} = $values;
+}
+
+my @statuses = @{$fields->{'bug_status'}};
+my @resolutions = @{$fields->{'resolution'}};
 # Exclude "" from the resolution list.
 @resolutions = grep {$_} @resolutions;
-
-# Actually, the list of statuses is predefined. This will change in the near future.
-my @statuses = qw(NEW ASSIGNED REOPENED UNCONFIRMED RESOLVED VERIFIED CLOSED);
 
 my $tstart = time;
 foreach (@myproducts) {

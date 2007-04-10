@@ -190,7 +190,7 @@
                column == 'estimated_time' %]
         [% PROCESS formattimeunit time_unit=bug.$column %] 
       [% ELSIF column == 'bug_status' %]
-        [%- status_descs.${bug.$column}.truncate(abbrev.$column.maxlength, abbrev.$column.ellipsis) FILTER html %]
+        [%- get_status(bug.$column).truncate(abbrev.$column.maxlength, abbrev.$column.ellipsis) FILTER html %]
       [% ELSIF column == 'resolution' %]
         [%- get_resolution(bug.$column).truncate(abbrev.$column.maxlength, abbrev.$column.ellipsis) FILTER html %]
       [% ELSE %]

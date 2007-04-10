@@ -92,6 +92,8 @@
                     "VERIFIED"    => "VERIFIED",
                     "CLOSED"      => "CLOSED" } %]
 
+[% MACRO get_status(status) GET status_descs.$status || status %]
+
 [% resolution_descs = { "FIXED"      => "FIXED",
                         "INVALID"    => "INVALID",
                         "WONTFIX"    => "WONTFIX",

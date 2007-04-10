@@ -264,7 +264,7 @@ function handleWantsAttachment(wants_attachment) {
   <input type="hidden" name="bug_status" 
          value="[% default.bug_status FILTER html %]">
     <td align="right" valign="top"><strong>Initial State:</strong></td>
-    <td valign="top">[% status_descs.${default.bug_status} FILTER html %]</td>
+    <td valign="top">[% get_status(default.bug_status) FILTER html %]</td>
 [% ELSE %]
     [% sel = { description => 'Initial State', name => 'bug_status' } %]
     [% INCLUDE select %]
@@ -600,7 +600,7 @@ function handleWantsAttachment(wants_attachment) {
       <option value="[% x FILTER html %]"
         [% " selected=\"selected\"" IF x == default.${sel.name} %]>
         [% IF sel.name == "bug_status" %]
-          [% status_descs.$x FILTER html %]
+          [% get_status(x) FILTER html %]
         [% ELSE %]
           [% x FILTER html %]
         [% END %]</option>

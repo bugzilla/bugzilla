@@ -107,7 +107,7 @@
   <td>
     Enter the number of votes [% terms.abug %] in this product needs to
     automatically get out of the
-    <a href="page.cgi?id=fields.html#status">[% status_descs.UNCONFIRMED FILTER html %]</a>
+    <a href="page.cgi?id=fields.html#status">[% get_status("UNCONFIRMED") FILTER html %]</a>
     state.<br>
     <input size="5" maxlength="5" name="votestoconfirm" 
            value="[% product.votestoconfirm FILTER html %]">

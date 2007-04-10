@@ -83,7 +83,7 @@
                       change.fieldname == 'work_time' %]
                   [% PROCESS formattimeunit time_unit=change.removed %]
                 [% ELSIF change.fieldname == 'bug_status' %]
-                  [% status_descs.${change.removed} FILTER html %]
+                  [% get_status(change.removed) FILTER html %]
                 [% ELSIF change.fieldname == 'resolution' %]
                   [% get_resolution(change.removed) FILTER html %]
                 [% ELSIF change.fieldname == 'blocked' ||
@@ -103,7 +103,7 @@
                       change.fieldname == 'work_time' %]
                   [% PROCESS formattimeunit time_unit=change.added %]
                 [% ELSIF change.fieldname == 'bug_status' %]
-                  [% status_descs.${change.added} FILTER html %]
+                  [% get_status(change.added) FILTER html %]
                 [% ELSIF change.fieldname == 'resolution' %]
                   [% get_resolution(change.added) FILTER html %]
                 [% ELSIF change.fieldname == 'blocked' ||

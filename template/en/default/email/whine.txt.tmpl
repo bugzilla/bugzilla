@@ -31,8 +31,8 @@ You have one or more [% terms.bugs %] assigned to you in the [% terms.Bugzilla %
 [% terms.bug %] tracking system ([% Param("urlbase") %]) that require
 attention.
 
-All of these [% terms.bugs %] are in the [% status_descs.NEW %] or 
-[% status_descs.REOPENED %] state, and have not been
+All of these [% terms.bugs %] are in the [% get_status("NEW") %] or
+[% get_status("REOPENED") %] state, and have not been
 touched in [% Param("whinedays") %] days or more.
 You need to take a look at them, and decide on an initial action.
 
@@ -47,7 +47,7 @@ Generally, this means one of three things:
 (3) You decide the [% terms.bug %] belongs to you, but you can't solve it this moment.
     Just use the "Accept [% terms.bug %]" command.
 
-To get a list of all [% status_descs.NEW %]/[% status_descs.REOPENED %] [%+ terms.bugs %], you can use this URL (bookmark
+To get a list of all [% get_status("NEW") %]/[% get_status("REOPENED") %] [%+ terms.bugs %], you can use this URL (bookmark
 it if you like!):
 
  [% Param("urlbase") %]buglist.cgi?bug_status=NEW&bug_status=REOPENED&assigned_to=[% email %]
@@ -55,7 +55,7 @@ it if you like!):
 Or, you can use the general query page, at 
 [%+ Param("urlbase") %]query.cgi
 
-Appended below are the individual URLs to get to all of your [% status_descs.NEW %] [%+ terms.bugs %]
+Appended below are the individual URLs to get to all of your [% get_status("NEW") %] [%+ terms.bugs %]
 that haven't been touched for a week or more.
 
 You will get this message once a day until you've dealt with these [% terms.bugs %]!

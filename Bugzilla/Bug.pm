@@ -1495,6 +1495,90 @@ sub bug_alias_to_id {
 }
 
 #####################################################################
+# Workflow Control routines
+#####################################################################
+
+sub get_new_status_and_resolution {
+    my ($self, $action, $resolution) = @_;
+    my $dbh = Bugzilla->dbh;
+
+    my $status;
+    if ($action eq 'none') {
+        # Leaving the status unchanged doesn't need more investigation.
+        return ($self->bug_status, $self->resolution);
+    }
+    elsif ($action eq 'reopen') {
+        $status = $self->everconfirmed ? 'REOPENED' : 'UNCONFIRMED';
+        $resolution = '';
+    }
+    elsif ($action =~ /^reassign(?:bycomponent)?$/) {
+        if (!is_open_state($self->bug_status) || $self->bug_status eq 'UNCONFIRMED') {
+            $status = $self->bug_status;
+        }
+        else {
+            $status = 'NEW';
+        }
+        $resolution = $self->resolution;
+    }
+    elsif ($action eq 'duplicate') {
+        # Only alter the bug status if the bug is currently open.
+        $status = is_open_state($self->bug_status) ? 'RESOLVED' : $self->bug_status;
+        $resolution = 'DUPLICATE';
+    }
+    elsif ($action eq 'change_resolution') {
+        $status = $self->bug_status;
+        # You cannot change the resolution of an open bug.
+        ThrowUserError('resolution_not_allowed') if is_open_state($status);
+        $resolution || ThrowUserError('missing_resolution', {status => $status});
+    }
+    elsif ($action eq 'clearresolution') {
+        $status = $self->bug_status;
+        is_open_state($status) || ThrowUserError('missing_resolution', {status => $status});
+        $resolution = '';
+    }
+    else {
+        # That's where actions not requiring any specific trigger (such as future
+        # custom statuses) come.
+        # XXX - This is hardcoded here for now, but will disappear soon when
+        #       this routine will look at the DB directly to get the workflow.
+        if ($action eq 'confirm') {
+            $status = 'NEW';
+        }
+        elsif ($action eq 'accept') {
+            $status = 'ASSIGNED';
+        }
+        elsif ($action eq 'resolve') {
+            $status = 'RESOLVED';
+        }
+        elsif ($action eq 'verify') {
+            $status = 'VERIFIED';
+        }
+        elsif ($action eq 'close') {
+            $status = 'CLOSED';
+        }
+        else {
+            ThrowCodeError('unknown_action', { action => $action });
+        }
+
+        if (is_open_state($status)) {
+            # Open bugs have no resolution.
+            $resolution = '';
+        }
+        else {
+            # All non-open statuses must have a resolution.
+            $resolution || ThrowUserError('missing_resolution', {status => $status});
+        }
+    }
+    # Now it's time to validate the bug resolution.
+    # Bug resolutions have no workflow specific rules, so any valid
+    # resolution will do it.
+    check_field('resolution', $resolution) if ($resolution ne '');
+    trick_taint($resolution);
+
+    return ($status, $resolution);
+}
+
+#####################################################################
 # Subroutines
 #####################################################################
 

@@ -977,6 +977,11 @@
       does not exist.
     [% END %]
 
+  [% ELSIF error == "missing_resolution" %]
+    [% title = "Resolution Required" %]
+    A valid resolution is required to mark [% terms.bugs %] as
+    [%+ status FILTER upper FILTER html %].
+
   [% ELSIF error == "move_bugs_disabled" %]
     [% title = BLOCK %][% terms.Bug %] Moving Disabled[% END %]
     Sorry, [% terms.bug %] moving has been disabled. If you need

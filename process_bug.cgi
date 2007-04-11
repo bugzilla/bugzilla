@@ -643,9 +643,6 @@ sub DoComma {
     $::comma = ",";
 }
 
-# $everconfirmed is used by ChangeStatus() to determine whether we are
-# confirming the bug or not.
-local our $everconfirmed;
 sub DoConfirm {
     my $bug = shift;
     if ($bug->check_can_change_field("canconfirm", 0, 1, 
@@ -653,111 +650,6 @@ sub DoConfirm {
     {
         DoComma();
         $::query .= "everconfirmed = 1";
-        $everconfirmed = 1;
-    }
-}
-
-sub ChangeStatus {
-    my ($str) = (@_);
-    my $cgi = Bugzilla->cgi;
-    my $dbh = Bugzilla->dbh;
-
-    if (!$cgi->param('dontchange')
-        || $str ne $cgi->param('dontchange')) {
-        DoComma();
-        if ($cgi->param('knob') eq 'reopen') {
-            # When reopening, we need to check whether the bug was ever
-            # confirmed or not
-            $::query .= "bug_status = CASE WHEN everconfirmed = 1 THEN " .
-                        $dbh->quote($str) . " ELSE 'UNCONFIRMED' END";
-        } elsif (is_open_state($str)) {
-            # Note that we cannot combine this with the above branch - here we
-            # need to check if bugs.bug_status is open, (since we don't want to
-            # reopen closed bugs when reassigning), while above the whole point
-            # is to reopen a closed bug.
-            # Currently, the UI doesn't permit a user to reassign a closed bug
-            # from the single bug page (only during a mass change), but they
-            # could still hack the submit, so don't restrict this extended
-            # check to the mass change page for safety/sanity/consistency
-            # purposes.
-
-            # The logic for this block is:
-            # If the new state is open:
-            #   If the old state was open
-            #     If the bug was confirmed
-            #       - move it to the new state
-            #     Else
-            #       - Set the state to unconfirmed
-            #   Else
-            #     - leave it as it was
-
-            # This is valid only because 'reopen' is the only thing which moves
-            # from closed to open, and it's handled above
-            # This also relies on the fact that confirming and accepting have
-            # already called DoConfirm before this is called
-
-            my @open_state = map($dbh->quote($_), BUG_STATE_OPEN);
-            my $open_state = join(", ", @open_state);
-
-            # If we are changing everconfirmed to 1, we have to take this change
-            # into account and the new bug status is given by $str.
-            my $cond = $dbh->quote($str);
-            # If we are not setting everconfirmed, the new bug status depends on
-            # the actual value of everconfirmed, which is bug-specific.
-            unless ($everconfirmed) {
-                $cond = "(CASE WHEN everconfirmed = 1 THEN " . $cond .
-                        " ELSE 'UNCONFIRMED' END)";
-            }
-            $::query .= "bug_status = CASE WHEN bug_status IN($open_state) THEN " .
-                                      $cond . " ELSE bug_status END";
-        } else {
-            $::query .= "bug_status = ?";
-            push(@values, $str);
-        }
-        # If bugs are reassigned and their status is "UNCONFIRMED", they
-        # should keep this status instead of "NEW" as suggested here.
-        # This point is checked for each bug later in the code.
-        $cgi->param('bug_status', $str);
-    }
-}
-
-sub ChangeResolution {
-    my ($bug, $str) = (@_);
-    my $dbh = Bugzilla->dbh;
-    my $cgi = Bugzilla->cgi;
-
-    if (!$cgi->param('dontchange')
-        || $str ne $cgi->param('dontchange'))
-    {
-        # Make sure the user is allowed to change the resolution.
-        # If the user is changing several bugs at once using the UI,
-        # then he has enough privs to do so. In the case he is hacking
-        # the URL, we don't care if he reads --UNKNOWN-- as a resolution
-        # in the error message.
-        my $old_resolution = '-- UNKNOWN --';
-        my $bug_id = $cgi->param('id');
-        if ($bug_id) {
-            $old_resolution =
-                $dbh->selectrow_array('SELECT resolution FROM bugs WHERE bug_id = ?',
-                                       undef, $bug_id);
-        }
-        unless ($bug->check_can_change_field('resolution', $old_resolution, $str,
-                                             \$PrivilegesRequired))
-        {
-            $vars->{'oldvalue'} = $old_resolution;
-            $vars->{'newvalue'} = $str;
-            $vars->{'field'} = 'resolution';
-            $vars->{'privs'} = $PrivilegesRequired;
-            ThrowUserError("illegal_change", $vars);
-        }
-
-        DoComma();
-        $::query .= "resolution = ?";
-        trick_taint($str);
-        push(@values, $str);
-        # We define this variable here so that customized installations
-        # may set rules based on the resolution in Bug::check_can_change_field().
-        $cgi->param('resolution', $str);
     }
 }
 
@@ -1042,13 +934,11 @@ SWITCH: for ($cgi->param('knob')) {
     };
     /^confirm$/ && CheckonComment( "confirm" ) && do {
         DoConfirm($bug);
-        ChangeStatus('NEW');
         last SWITCH;
     };
     /^accept$/ && CheckonComment( "accept" ) && do {
         DoConfirm($bug);
-        ChangeStatus('ASSIGNED');
-        if (Bugzilla->params->{"usetargetmilestone"} 
+        if (Bugzilla->params->{"usetargetmilestone"}
             && Bugzilla->params->{"musthavemilestoneonaccept"}) 
         {
             $requiremilestone = 1;
@@ -1056,7 +946,6 @@ SWITCH: for ($cgi->param('knob')) {
         last SWITCH;
     };
     /^clearresolution$/ && CheckonComment( "clearresolution" ) && do {
-        ChangeResolution($bug, '');
         last SWITCH;
     };
     /^(resolve|change_resolution)$/ && CheckonComment( "resolve" ) && do {
@@ -1080,8 +969,6 @@ SWITCH: for ($cgi->param('knob')) {
             # RESOLVED bugs should have no time remaining;
             # more time can be added for the VERIFY step, if needed.
             _remove_remaining_time();
-
-            ChangeStatus('RESOLVED');
         }
         else {
             # You cannot use change_resolution if there is at least
@@ -1094,16 +981,12 @@ SWITCH: for ($cgi->param('knob')) {
 
             ThrowUserError('resolution_not_allowed') if $is_open;
         }
-
-        ChangeResolution($bug, $cgi->param('resolution'));
         last SWITCH;
     };
     /^reassign$/ && CheckonComment( "reassign" ) && do {
         if ($cgi->param('andconfirm')) {
             DoConfirm($bug);
         }
-        ChangeStatus('NEW');
-        DoComma();
         if (defined $cgi->param('assigned_to')
             && trim($cgi->param('assigned_to')) ne "") { 
             $assignee = login_to_id(trim($cgi->param('assigned_to')), THROW_ERROR);
@@ -1125,6 +1008,7 @@ SWITCH: for ($cgi->param('knob')) {
         } else {
             ThrowUserError("reassign_to_empty");
         }
+        DoComma();
         $::query .= "assigned_to = ?";
         push(@values, $assignee);
         $assignee_checked = 1;
@@ -1134,23 +1018,17 @@ SWITCH: for ($cgi->param('knob')) {
         if ($cgi->param('compconfirm')) {
             DoConfirm($bug);
         }
-        ChangeStatus('NEW');
         last SWITCH;
     };
     /^reopen$/  && CheckonComment( "reopen" ) && do {
-        ChangeStatus('REOPENED');
-        ChangeResolution($bug, '');
         last SWITCH;
     };
     /^verify$/ && CheckonComment( "verify" ) && do {
-        ChangeStatus('VERIFIED');
         last SWITCH;
     };
     /^close$/ && CheckonComment( "close" ) && do {
         # CLOSED bugs should have no time remaining.
         _remove_remaining_time();
-
-        ChangeStatus('CLOSED');
         last SWITCH;
     };
     /^duplicate$/ && CheckonComment( "duplicate" ) && do {
@@ -1196,9 +1074,6 @@ SWITCH: for ($cgi->param('knob')) {
 
         # DUPLICATE bugs should have no time remaining.
         _remove_remaining_time();
-
-        ChangeStatus('RESOLVED');
-        ChangeResolution($bug, 'DUPLICATE');
         last SWITCH;
     };
 
@@ -1391,7 +1266,29 @@ if ($prod_changed && Bugzilla->params->{"strict_isolation"}) {
 foreach my $id (@idlist) {
     my $query = $basequery;
     my @bug_values = @values;
+    # XXX We really have to get rid of $::comma.
+    my $comma = $::comma;
     my $old_bug_obj = new Bugzilla::Bug($id);
+
+    my $status;
+    my $resolution = $old_bug_obj->resolution;
+    # These are the only actions where we care about the resolution field.
+    if ($cgi->param('knob') =~ /^(?:resolve|change_resolution)$/) {
+        $resolution = $cgi->param('resolution');
+    }
+    ($status, $resolution) =
+      $old_bug_obj->get_new_status_and_resolution(scalar $cgi->param('knob'), $resolution);
+
+    if ($status ne $old_bug_obj->bug_status) {
+        $query .= "$comma bug_status = ?";
+        push(@bug_values, $status);
+        $comma = ',';
+    }
+    if ($resolution ne $old_bug_obj->resolution) {
+        $query .= "$comma resolution = ?";
+        push(@bug_values, $resolution);
+        $comma = ',';
+    }
 
     if ($cgi->param('knob') eq 'reassignbycomponent') {
         # We have to check whether the bug is moved to another product
@@ -1402,23 +1299,22 @@ foreach my $id (@idlist) {
                                            FROM components
                                            WHERE components.id = ?',
                                            undef, $new_comp_id);
-        $query .= ", assigned_to = ?";
+        $query .= "$comma assigned_to = ?";
         push(@bug_values, $assignee);
+        $comma = ',';
         if (Bugzilla->params->{"useqacontact"}) {
             $qacontact = $dbh->selectrow_array('SELECT initialqacontact
                                                 FROM components
                                                 WHERE components.id = ?',
                                                 undef, $new_comp_id);
             if ($qacontact) {
-                $query .= ", qa_contact = ?";
+                $query .= "$comma qa_contact = ?";
                 push(@bug_values, $qacontact);
             }
             else {
-                $query .= ", qa_contact = NULL";
+                $query .= "$comma qa_contact = NULL";
             }
         }
-
-        
 
         # And add in the Default CC for the Component.
         my $comp_obj = $component || new Bugzilla::Component($new_comp_id);
@@ -1466,20 +1362,18 @@ foreach my $id (@idlist) {
         }
         $oldhash{$col} = $oldvalues[$i];
         $formhash{$col} = $cgi->param($col) if defined $cgi->param($col);
+        # The status and resolution are defined by the workflow.
+        $formhash{$col} = $status if $col eq 'bug_status';
+        $formhash{$col} = $resolution if $col eq 'resolution';
         $i++;
     }
     # If the user is reassigning bugs, we need to:
     # - convert $newhash{'assigned_to'} and $newhash{'qa_contact'}
     #   email addresses into their corresponding IDs;
-    # - update $newhash{'bug_status'} to its real state if the bug
-    #   is in the unconfirmed state.
     $formhash{'qa_contact'} = $qacontact if Bugzilla->params->{'useqacontact'};
     if ($cgi->param('knob') eq 'reassignbycomponent'
         || $cgi->param('knob') eq 'reassign') {
         $formhash{'assigned_to'} = $assignee;
-        if ($oldhash{'bug_status'} eq 'UNCONFIRMED') {
-            $formhash{'bug_status'} = $oldhash{'bug_status'};
-        }
     }
     # This hash is required by Bug::check_can_change_field().
     my $cgi_hash = {
@@ -1487,9 +1381,6 @@ foreach my $id (@idlist) {
         'knob'       => scalar $cgi->param('knob')
     };
     foreach my $col (@editable_bug_fields) {
-        # The 'resolution' field is checked by ChangeResolution(),
-        # i.e. only if we effectively use it.
-        next if ($col eq 'resolution');
         if (exists $formhash{$col}
             && !$old_bug_obj->check_can_change_field($col, $oldhash{$col}, $formhash{$col},
                                                      \$PrivilegesRequired, $cgi_hash))
@@ -1665,14 +1556,12 @@ foreach my $id (@idlist) {
     }
     $query .= " WHERE bug_id = ?";
     push(@bug_values, $id);
-    
-    if ($::comma ne "") {
+
+    if ($comma ne '') {
         $dbh->do($query, undef, @bug_values);
     }
 
     # Check for duplicates if the bug is [re]open or its resolution is changed.
-    my $resolution = $dbh->selectrow_array(
-        q{SELECT resolution FROM bugs WHERE bug_id = ?}, undef, $id);
     if ($resolution ne 'DUPLICATE') {
         $dbh->do(q{DELETE FROM duplicates WHERE dupe = ?}, undef, $id);
     }

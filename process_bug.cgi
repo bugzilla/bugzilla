@@ -744,6 +744,8 @@ if ($cgi->param('product') ne $cgi->param('dontchange')) {
 }
 
 my $component;
+my (%cc_add, %cc_remove);
+
 if ($cgi->param('component') ne $cgi->param('dontchange')) {
     if (scalar(@newprod_ids) > 1) {
         ThrowUserError("no_component_change_for_multiple_products");
@@ -756,6 +758,16 @@ if ($cgi->param('component') ne $cgi->param('dontchange')) {
     DoComma();
     $::query .= "component_id = ?";
     push(@values, $component->id);
+
+    # Add in the default CC list for the component if we are moving bugs.
+    if (!$cgi->param('id') || $component->id != $bug->component_id) {
+        foreach my $cc (@{$component->initial_cc}) {
+            # NewCC must be defined or the code below won't insert
+            # any CCs.
+            $cgi->param('newcc') || $cgi->param('newcc', "");
+            $cc_add{$cc->id} = $cc->login;
+        }
+    }
 }
 
 # If this installation uses bug aliases, and the user is changing the alias,
@@ -829,12 +841,9 @@ if ( defined $cgi->param('id') &&
     }
 }
 
-my $duplicate;
-
 # We need to check the addresses involved in a CC change before we touch any bugs.
 # What we'll do here is formulate the CC data into two hashes of ID's involved
 # in this CC change.  Then those hashes can be used later on for the actual change.
-my (%cc_add, %cc_remove);
 if (defined $cgi->param('newcc')
     || defined $cgi->param('addselfcc')
     || defined $cgi->param('removecc')
@@ -891,9 +900,38 @@ my $assignee_checked = 0;
 
 my %usercache = ();
 
-if (defined $cgi->param('qa_contact')
-    && $cgi->param('knob') ne "reassignbycomponent")
+if (defined $cgi->param('assigned_to')
+    && !$cgi->param('set_default_assignee')
+    && trim($cgi->param('assigned_to')) ne $cgi->param('dontchange'))
 {
+    my $name = trim($cgi->param('assigned_to'));
+    if ($name ne "") {
+        $assignee = login_to_id($name, THROW_ERROR);
+        if (Bugzilla->params->{"strict_isolation"}) {
+            $usercache{$assignee} ||= Bugzilla::User->new($assignee);
+            my $assign_user = $usercache{$assignee};
+            foreach my $product_id (@newprod_ids) {
+                if (!$assign_user->can_edit_product($product_id)) {
+                    my $product_name = Bugzilla::Product->new($product_id)->name;
+                    ThrowUserError('invalid_user_group',
+                                      {'users'   => $assign_user->login,
+                                       'product' => $product_name,
+                                       'bug_id' => (scalar(@idlist) > 1)
+                                                     ? undef : $idlist[0]
+                                      });
+                }
+            }
+        }
+    } else {
+        ThrowUserError("reassign_to_empty");
+    }
+    DoComma();
+    $::query .= "assigned_to = ?";
+    push(@values, $assignee);
+    $assignee_checked = 1;
+};
+
+if (defined $cgi->param('qa_contact') && !$cgi->param('set_default_qa_contact')) {
     my $name = trim($cgi->param('qa_contact'));
     # The QA contact cannot be deleted from show_bug.cgi for a single bug!
     if ($name ne $cgi->param('dontchange')) {
@@ -927,6 +965,12 @@ if (defined $cgi->param('qa_contact')
         }
     }
 }
+
+if ($cgi->param('set_default_assignee') || $cgi->param('set_default_qa_contact')) {
+    CheckonComment('reassignbycomponent');
+}
+
+my $duplicate; # It will store the ID of the bug we are pointing to, if any.
 
 SWITCH: for ($cgi->param('knob')) {
     /^none$/ && do {
@@ -980,43 +1024,6 @@ SWITCH: for ($cgi->param('knob')) {
                                      AND bug_status IN ($open_states)");
 
             ThrowUserError('resolution_not_allowed') if $is_open;
-        }
-        last SWITCH;
-    };
-    /^reassign$/ && CheckonComment( "reassign" ) && do {
-        if ($cgi->param('andconfirm')) {
-            DoConfirm($bug);
-        }
-        if (defined $cgi->param('assigned_to')
-            && trim($cgi->param('assigned_to')) ne "") { 
-            $assignee = login_to_id(trim($cgi->param('assigned_to')), THROW_ERROR);
-            if (Bugzilla->params->{"strict_isolation"}) {
-                $usercache{$assignee} ||= Bugzilla::User->new($assignee);
-                my $assign_user = $usercache{$assignee};
-                foreach my $product_id (@newprod_ids) {
-                    if (!$assign_user->can_edit_product($product_id)) {
-                        my $product_name = Bugzilla::Product->new($product_id)->name;
-                        ThrowUserError('invalid_user_group',
-                                          {'users'   => $assign_user->login,
-                                           'product' => $product_name,
-                                           'bug_id' => (scalar(@idlist) > 1)
-                                                         ? undef : $idlist[0]
-                                          });
-                    }
-                }
-            }
-        } else {
-            ThrowUserError("reassign_to_empty");
-        }
-        DoComma();
-        $::query .= "assigned_to = ?";
-        push(@values, $assignee);
-        $assignee_checked = 1;
-        last SWITCH;
-    };
-    /^reassignbycomponent$/  && CheckonComment( "reassignbycomponent" ) && do {
-        if ($cgi->param('compconfirm')) {
-            DoConfirm($bug);
         }
         last SWITCH;
     };
@@ -1290,10 +1297,10 @@ foreach my $id (@idlist) {
         $comma = ',';
     }
 
-    if ($cgi->param('knob') eq 'reassignbycomponent') {
-        # We have to check whether the bug is moved to another product
-        # and/or component before reassigning. If $component is defined,
-        # use it; else use the product/component the bug is already in.
+    # We have to check whether the bug is moved to another product
+    # and/or component before reassigning. If $component is defined,
+    # use it; else use the product/component the bug is already in.
+    if ($cgi->param('set_default_assignee')) {
         my $new_comp_id = $component ? $component->id : $old_bug_obj->{'component_id'};
         $assignee = $dbh->selectrow_array('SELECT initialowner
                                            FROM components
@@ -1302,29 +1309,22 @@ foreach my $id (@idlist) {
         $query .= "$comma assigned_to = ?";
         push(@bug_values, $assignee);
         $comma = ',';
-        if (Bugzilla->params->{"useqacontact"}) {
-            $qacontact = $dbh->selectrow_array('SELECT initialqacontact
-                                                FROM components
-                                                WHERE components.id = ?',
-                                                undef, $new_comp_id);
-            if ($qacontact) {
-                $query .= "$comma qa_contact = ?";
-                push(@bug_values, $qacontact);
-            }
-            else {
-                $query .= "$comma qa_contact = NULL";
-            }
-        }
+    }
 
-        # And add in the Default CC for the Component.
-        my $comp_obj = $component || new Bugzilla::Component($new_comp_id);
-        my @new_init_cc = @{$comp_obj->initial_cc};
-        foreach my $cc (@new_init_cc) {
-            # NewCC must be defined or the code below won't insert
-            # any CCs.
-            $cgi->param('newcc') || $cgi->param('newcc', []);
-            $cc_add{$cc->id} = $cc->login;
+    if (Bugzilla->params->{'useqacontact'} && $cgi->param('set_default_qa_contact')) {
+        my $new_comp_id = $component ? $component->id : $old_bug_obj->{'component_id'};
+        $qacontact = $dbh->selectrow_array('SELECT initialqacontact
+                                            FROM components
+                                            WHERE components.id = ?',
+                                            undef, $new_comp_id);
+        if ($qacontact) {
+            $query .= "$comma qa_contact = ?";
+            push(@bug_values, $qacontact);
         }
+        else {
+            $query .= "$comma qa_contact = NULL";
+        }
+        $comma = ',';
     }
 
     my %dependencychanged;
@@ -1362,24 +1362,19 @@ foreach my $id (@idlist) {
         }
         $oldhash{$col} = $oldvalues[$i];
         $formhash{$col} = $cgi->param($col) if defined $cgi->param($col);
-        # The status and resolution are defined by the workflow.
-        $formhash{$col} = $status if $col eq 'bug_status';
-        $formhash{$col} = $resolution if $col eq 'resolution';
         $i++;
     }
-    # If the user is reassigning bugs, we need to:
-    # - convert $newhash{'assigned_to'} and $newhash{'qa_contact'}
-    #   email addresses into their corresponding IDs;
+    # The status and resolution are defined by the workflow.
+    $formhash{'bug_status'} = $status;
+    $formhash{'resolution'} = $resolution;
+
+    # We need to convert $newhash{'assigned_to'} and $newhash{'qa_contact'}
+    # email addresses into their corresponding IDs;
     $formhash{'qa_contact'} = $qacontact if Bugzilla->params->{'useqacontact'};
-    if ($cgi->param('knob') eq 'reassignbycomponent'
-        || $cgi->param('knob') eq 'reassign') {
-        $formhash{'assigned_to'} = $assignee;
-    }
+    $formhash{'assigned_to'} = $assignee;
+
     # This hash is required by Bug::check_can_change_field().
-    my $cgi_hash = {
-        'dontchange' => scalar $cgi->param('dontchange'),
-        'knob'       => scalar $cgi->param('knob')
-    };
+    my $cgi_hash = {'dontchange' => scalar $cgi->param('dontchange')};
     foreach my $col (@editable_bug_fields) {
         if (exists $formhash{$col}
             && !$old_bug_obj->check_can_change_field($col, $oldhash{$col}, $formhash{$col},

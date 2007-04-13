@@ -150,14 +150,34 @@
     </tr>
   [% END %]
 
+  <tr>
+    <th><label for="assigned_to">Assignee:</label></th>
+    <td colspan="3">
+      [% INCLUDE global/userselect.html.tmpl
+           id => "assigned_to"
+           name => "assigned_to"
+           value => dontchange
+           do_not_change => dontchange
+           size => 32
+      %]
+      <input type="checkbox" id="set_default_assignee" name="set_default_assignee" value="1">
+      <label for="set_default_assignee">Reset Assignee to default</label>
+    </td>
+  </tr>
+
   [% IF Param("useqacontact") %]
     <tr>
       <th><label for="qa_contact">QA Contact:</label></th>
       <td colspan="3">
-        <input id="qa_contact"
-               name="qa_contact"
-               value="[% dontchange FILTER html %]"
-               size="32">
+        [% INCLUDE global/userselect.html.tmpl
+             id => "qa_contact"
+             name => "qa_contact"
+             value => dontchange
+             do_not_change => dontchange
+             size => 32
+        %]
+        <input type="checkbox" id="set_default_qa_contact" name="set_default_qa_contact" value="1">
+        <label for="set_default_qa_contact">Reset QA Contact to default</label>
       </td>
     </tr>
   [% END %]
@@ -335,27 +355,6 @@
   <input id="knob-close" type="radio" name="knob" value="close">
   <label for="knob-close">Mark [% terms.bugs %] as <b>[% get_status("CLOSED") FILTER html %]</b></label><br>
 [% END %]
-
-[% knum = knum + 1 %]
-<input id="knob-reassign" type="radio" name="knob" value="reassign">
-<label for="knob-reassign"><a href="page.cgi?id=fields.html#assigned_to">
-  Reassign</a> [% terms.bugs %] to
-</label>
-[% INCLUDE global/userselect.html.tmpl
-   name => "assigned_to"
-   value => user.login
-   size => 32
-   onchange => "document.forms.changeform.knob[$knum].checked=true;"
-%]<br>
-
-[% knum = knum + 1 %]
-<input id="knob-reassignbycomponent"
-       type="radio"
-       name="knob"
-       value="reassignbycomponent">
-<label for="knob-reassignbycomponent">
-  Reassign [% terms.bugs %] to default assignee of selected component
-</label><br>
 
 <input type="submit" id="commit" value="Commit">
 

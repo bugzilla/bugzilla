@@ -667,7 +667,7 @@
 [%############################################################################%]
 
 [% BLOCK section_people %]
-  <table cellpadding="1" cellspacing="1">
+  <table cellpadding="3" cellspacing="1">
     <tr>
       <td align="right">
         <b>Reporter</b>:
@@ -678,20 +678,34 @@
     </tr>
 
     <tr>
-      <td align="right">
-        <b><a href="page.cgi?id=fields.html#assigned_to">Assigned&nbsp;To</a></b>:
+      <td align="right" valign="top">
+        <b><a href="page.cgi?id=fields.html#assigned_to">Assignee</a></b>:
       </td>
       <td>
-        [% INCLUDE user_identity user => bug.assigned_to %]
+        [% IF bug.check_can_change_field("assigned_to", 0, 1) %]
+          [% INCLUDE global/userselect.html.tmpl
+               id => "assigned_to"
+               name => "assigned_to"
+               value => bug.assigned_to.login
+               size => 30
+          %]
+          <br>
+          <input type="checkbox" id="set_default_assignee" name="set_default_assignee" value="1">
+          <label for="set_default_assignee">Reset Assignee to default</label>
+        [% ELSE %]
+          <input type="hidden" name="assigned_to" id="assigned_to"
+                 value="[% bug.assigned_to.login FILTER html %]">
+          [% INCLUDE user_identity user => bug.assigned_to %]
+        [% END %]
       </td>
     </tr>
 
     [% IF Param('useqacontact') %]
     <tr>
-      <td align="right">
+      <td align="right" valign="top">
         <label for="qa_contact" accesskey="q"><b><u>Q</u>A Contact</b></label>:
       </td>
-      <td colspan="7">
+      <td>
         [% IF bug.check_can_change_field("qa_contact", 0, 1) %]
           [% INCLUDE global/userselect.html.tmpl
               id => "qa_contact"
@@ -700,6 +714,9 @@
               size => 30
               emptyok => 1
           %]
+          <br>
+          <input type="checkbox" id="set_default_qa_contact" name="set_default_qa_contact" value="1">
+          <label for="set_default_qa_contact">Reset QA Contact to default</label>
         [% ELSE %]
           <input type="hidden" name="qa_contact" id="qa_contact"
                  value="[% bug.qa_contact.login FILTER html %]">

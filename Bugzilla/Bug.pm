@@ -1511,15 +1511,6 @@ sub get_new_status_and_resolution {
         $status = $self->everconfirmed ? 'REOPENED' : 'UNCONFIRMED';
         $resolution = '';
     }
-    elsif ($action =~ /^reassign(?:bycomponent)?$/) {
-        if (!is_open_state($self->bug_status) || $self->bug_status eq 'UNCONFIRMED') {
-            $status = $self->bug_status;
-        }
-        else {
-            $status = 'NEW';
-        }
-        $resolution = $self->resolution;
-    }
     elsif ($action eq 'duplicate') {
         # Only alter the bug status if the bug is currently open.
         $status = is_open_state($self->bug_status) ? 'RESOLVED' : $self->bug_status;
@@ -2150,14 +2141,6 @@ sub check_can_change_field {
 
     # Allow anyone to change comments.
     if ($field =~ /^longdesc/) {
-        return 1;
-    }
-
-    # Ignore the assigned_to field if the bug is not being reassigned
-    if ($field eq 'assigned_to'
-        && $data->{'knob'} ne 'reassignbycomponent'
-        && $data->{'knob'} ne 'reassign')
-    {
         return 1;
     }
 

@@ -208,7 +208,7 @@ sub _check_mailhead { return $_[1] ? 1 : 0; }
 
 sub _check_name {
     my ($invocant, $name, $is_custom) = @_;
-    $name = clean_text($name);
+    $name = lc(clean_text($name));
     $name || ThrowUserError('field_missing_name');
 
     # Don't want to allow a name that might mess up SQL.

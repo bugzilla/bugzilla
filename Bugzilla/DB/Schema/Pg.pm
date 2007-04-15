@@ -92,6 +92,11 @@ sub _initialize {
 
 sub get_rename_column_ddl {
     my ($self, $table, $old_name, $new_name) = @_;
+    if (lc($old_name) eq lc($new_name)) {
+        # if the only change is a case change, return an empty list, since Pg
+        # is case-insensitive and will return an error about a duplicate name
+        return ();
+    }
     my @sql = ("ALTER TABLE $table RENAME COLUMN $old_name TO $new_name");
     my $def = $self->get_column_abstract($table, $old_name);
     if ($def->{TYPE} =~ /SERIAL/i) {
@@ -102,6 +107,16 @@ sub get_rename_column_ddl {
                     SET DEFAULT NEXTVAL('${table}_${new_name}_seq')");
     }
     return @sql;
+}
+
+sub get_rename_table_sql {
+    my ($self, $old_name, $new_name) = @_;
+    if (lc($old_name) eq lc($new_name)) {
+        # if the only change is a case change, return an empty list, since Pg
+        # is case-insensitive and will return an error about a duplicate name
+        return ();
+    }
+    return ("ALTER TABLE $old_name RENAME TO $new_name");
 }
 
 sub _get_alter_type_sql {

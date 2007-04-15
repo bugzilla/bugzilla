@@ -394,6 +394,9 @@
   [% ELSIF message_tag == "install_table_drop" %]
     Dropping the '[% name FILTER html %]' table...
 
+  [% ELSIF message_tag == "install_table_rename" %]
+    Renaming the '[% old FILTER html %]' table to '[% new FILTER html %]'...
+
   [% ELSIF message_tag == "install_urlbase_default" %]
     Now that you have installed [% terms.Bugzilla %], you should visit the
     'Parameters' page (linked in the footer of the Administrator

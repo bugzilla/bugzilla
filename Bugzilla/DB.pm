@@ -749,7 +749,7 @@ sub bz_rename_column {
 
     if ($old_col_exists) {
         my $already_renamed = $self->bz_column_info($table, $new_name);
-            ThrowCodeError('column_rename_conflict',
+            ThrowCodeError('db_rename_conflict',
                            { old => "$table.$old_name", 
                              new => "$table.$new_name" }) if $already_renamed;
         my @statements = $self->_bz_real_schema->get_rename_column_ddl(
@@ -765,6 +765,23 @@ sub bz_rename_column {
         $self->_bz_real_schema->rename_column($table, $old_name, $new_name);
         $self->_bz_store_real_schema;
     }
+}
+
+sub bz_rename_table {
+    my ($self, $old_name, $new_name) = @_;
+    my $old_table = $self->bz_table_info($old_name);
+    return if !$old_table;
+
+    my $new = $self->bz_table_info($new_name);
+    ThrowCodeError('db_rename_conflict', { old => $old_name,
+                                           new => $new_name }) if $new;
+    my @sql = $self->_bz_real_schema->get_rename_table_sql($old_name, $new_name);
+    print get_text('install_table_rename', 
+                   { old => $old_name, new => $new_name }) . "\n"
+        if Bugzilla->usage_mode == USAGE_MODE_CMDLINE;
+    $self->do($_) foreach @sql;
+    $self->_bz_real_schema->rename_table($old_name, $new_name);
+    $self->_bz_store_real_schema;
 }
 
 #####################################################################
@@ -2148,6 +2165,31 @@ that you want to rename
 =item C<$old_name> - The current name of the column that you want to rename
 
 =item C<$new_name> - The new name of the column
+
+=back
+
+=item B<Returns> (nothing)
+
+=back
+
+=item C<bz_rename_table>
+
+=over
+
+=item B<Description>
+
+Renames a table in the database. Does nothing if the table doesn't exist.
+
+Throws an error if the old table exists and there is already a table 
+with the new name.
+
+=item B<Params>
+
+=over
+
+=item C<$old_name> - The current name of the table.
+
+=item C<$new_name> - What you're renaming the table to.
 
 =back
 

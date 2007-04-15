@@ -1911,6 +1911,37 @@ sub get_rename_column_ddl {
         . " has not implemented a method.";
 }
 
+
+sub get_rename_table_sql {
+
+=item C<get_rename_table_sql>
+
+=over
+
+=item B<Description>
+
+Gets SQL to rename a table in the database.
+
+=item B<Params>
+
+=over
+
+=item C<$old_name> - The current name of the table.
+
+=item C<$new_name> - The new name of the table.
+
+=back
+
+=item B<Returns>: An array of SQL statements to rename a table.
+
+=back
+
+=cut
+
+    my ($self, $old_name, $new_name) = @_;
+    return ("ALTER TABLE $old_name RENAME TO $new_name");
+}
+
 =item C<delete_table($name)>
 
  Description: Deletes a table from this Schema object.
@@ -2060,6 +2091,23 @@ sub add_table {
         $self->{abstract_schema}->{$name} = {FIELDS => []};
         $self->{schema}->{$name}          = {FIELDS => []};
     }
+}
+
+
+
+sub rename_table {
+
+=item C<rename_table>
+
+Renames a table from C<$old_name> to C<$new_name> in this Schema object.
+
+=cut
+
+
+    my ($self, $old_name, $new_name) = @_;
+    my $table = $self->get_table_abstract($old_name);
+    $self->delete_table($old_name);
+    $self->add_table($new_name, $table);
 }
 
 sub delete_column {

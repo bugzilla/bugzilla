@@ -118,7 +118,7 @@
     without specifying a default or something for $set_nulls_to, because
     there are NULL values currently in it.
 
-  [% ELSIF error == "column_rename_conflict" %]
+  [% ELSIF error == "db_rename_conflict" %]
     Name conflict: Cannot rename [% old FILTER html %] to
     [% new FILTER html %] because [% new FILTER html %] already exists.
 

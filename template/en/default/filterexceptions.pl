@@ -216,11 +216,6 @@
   'bug.bug_id', 
 ],
 
-'global/help.html.tmpl' => [
-  'h.id', 
-  'h.html', 
-],
-
 'global/choose-product.html.tmpl' => [
   'target',
 ],

@@ -114,6 +114,12 @@ sub get_param_list {
   },
 
   {
+   name => 'proxy_url',
+   type => 't',
+   default => ''
+  },
+
+  {
    name => 'upgrade_notification',
    type => 's',
    choices => ['development_snapshot', 'latest_stable_release',

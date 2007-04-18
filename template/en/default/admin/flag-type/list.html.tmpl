@@ -31,8 +31,8 @@
     .inactive { color: #787878; }
     .multiplicable { display: block; }
   "
-  onload="selectProduct(document.forms[0], 'product', 'component', '__All__');"
-  javascript_urls=["productmenu.js"]
+  onload="var f = document.forms[0]; selectProduct(f.product, f.component, null, null, '__All__');"
+  javascript_urls=["js/productform.js"]
 %]
 
 <p>
@@ -60,7 +60,7 @@
     <tr>
       <th><label for="product">Product:</label></th>
       <td>
-        <select name="product" onchange="selectProduct(this.form, 'product', 'component', '__Any__');">
+        <select name="product" onchange="selectProduct(this, this.form.component, null, null, '__Any__');">
           <option value="">__Any__</option>
           [% FOREACH prod = products %]
             <option value="[% prod.name FILTER html %]"

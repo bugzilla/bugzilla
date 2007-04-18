@@ -22,12 +22,14 @@
 
 [%# The javascript block gets used in header.html.tmpl. %]
 [% javascript = BLOCK %]
-  var usetms = 0; // do we have target milestone?
-  var first_load = 1; // is this the first time we load the page?
-  var last_sel = []; // caches last selection
+  var useclassification = false; // No classification level in use
+  var first_load = true; // Is this the first time we load the page?
+  var last_sel = []; // Caches last selection
   var cpts = new Array();
+  [% n = 1 %]
   [% FOREACH prod = products %]
-    cpts['[% prod.name FILTER js %]'] = [
+    cpts['[% n %]'] = [
       [%- FOREACH comp = prod.components %]'[% comp.name FILTER js %]'[% ", " UNLESS loop.last %] [%- END -%] ];
+    [% n = n+1 %]
   [% END %]
 [% END %]

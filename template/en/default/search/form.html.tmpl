@@ -93,12 +93,12 @@ function doOnSelectProduct(selectmode) {
         if (useclassification && f.classification.selectedIndex > -1) {
             selectClassification(f.classification, f.product, f.component, f.version, milestone);
         } else {
-            selectProduct(f.product, f.component, f.version, milestone);
+            selectProduct(f.product, f.component, f.version, milestone, null);
         }
     } else if (selectmode == 1) {
         selectClassification(f.classification, f.product, f.component, f.version, milestone);
     } else {
-        selectProduct(f.product, f.component, f.version, milestone);
+        selectProduct(f.product, f.component, f.version, milestone, null);
     }
 }
 

@@ -38,6 +38,7 @@
      && (user.groups.tweakparams || user.groups.editusers || user.can_bless
          || (Param('useclassification') && user.groups.editclassifications)
          || user.groups.editcomponents || user.groups.admin || user.groups.creategroups
+         || user.get_products_by_permission("editcomponents").size
          || user.groups.editkeywords || user.groups.bz_canusewhines) %]
 
     [% print_pipe = 0 %]

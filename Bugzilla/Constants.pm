@@ -40,6 +40,10 @@ use File::Basename;
     BUGZILLA_VERSION
 
     bz_locations
+
+    IS_NULL
+    NOT_NULL
+
     CONTROLMAPNA
     CONTROLMAPSHOWN
     CONTROLMAPDEFAULT
@@ -147,6 +151,17 @@ use File::Basename;
 #
 # Bugzilla version
 use constant BUGZILLA_VERSION => "3.1";
+
+# These are unique values that are unlikely to match a string or a number,
+# to be used in criteria for match() functions and other things. They start
+# and end with spaces because most Bugzilla stuff has trim() called on it,
+# so this is unlikely to match anything we get out of the DB.
+#
+# We can't use a reference, because Template Toolkit doesn't work with
+# them properly (constants.IS_NULL => {} just returns an empty string instead
+# of the reference).
+use constant IS_NULL  => '  __IS_NULL__  ';
+use constant NOT_NULL => '  __NOT_NULL__  ';
 
 #
 # ControlMap constants for group_control_map.

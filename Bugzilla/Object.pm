@@ -23,6 +23,7 @@ use strict;
 
 package Bugzilla::Object;
 
+use Bugzilla::Constants;
 use Bugzilla::Util;
 use Bugzilla::Error;
 
@@ -132,6 +133,42 @@ sub new_from_list {
         bless($object, $class);
     }
     return $objects;
+}
+
+# Note: Future extensions to this could be:
+#  * Accept arrays for an IN clause
+#  * Add a MATCH_JOIN constant so that we can join against
+#    certain other tables for the WHERE criteria.
+sub match {
+    my ($invocant, $criteria) = @_;
+    my $class = ref($invocant) || $invocant;
+    my $dbh   = Bugzilla->dbh;
+    my $id    = $class->ID_FIELD;
+    my $table = $class->DB_TABLE;
+
+    return [$class->get_all] if !$criteria;
+
+    my (@terms, @values);
+    foreach my $field (keys %$criteria) {
+        my $value = $criteria->{$field};
+        if ($value eq NOT_NULL) {
+            push(@terms, "$field IS NOT NULL");
+        }
+        elsif ($value eq IS_NULL) {
+            push(@terms, "$field IS NULL");
+        }
+        else {
+            push(@terms, "$field = ?");
+            push(@values, $value);
+        }
+    }
+
+    my $where = join(' AND ', @terms);
+    my $ids   = $dbh->selectcol_arrayref(
+        "SELECT $id FROM $table WHERE $where", undef, @values)
+        || [];
+
+    return $class->new_from_list($ids);
 }
 
 ###############################
@@ -461,6 +498,38 @@ A fully-initialized object.
                           be skipped.
 
  Returns:     A reference to an array of objects.
+
+=item C<match>
+
+=over
+
+=item B<Description>
+
+Gets a list of objects from the database based on certain criteria.
+
+Basically, a simple way of doing a sort of "SELECT" statement (like SQL)
+to get objects.
+
+All criteria are joined by C<AND>, so adding more criteria will give you
+a smaller set of results, not a larger set.
+
+=item B<Params>
+
+A hashref, where the keys are column names of the table, pointing to the 
+value that you want to match against for that column. 
+
+There are two special values, the constants C<NULL> and C<NOT_NULL>,
+which means "give me objects where this field is NULL or NOT NULL,
+respectively."
+
+If you don't specify any criteria, calling this function is the same
+as doing C<[$class-E<gt>get_all]>.
+
+=item B<Returns>
+
+An arrayref of objects, or an empty arrayref if there are no matches.
+
+=back
 
 =back
 

@@ -504,6 +504,7 @@ sub update_table_definitions {
         {TYPE => 'MEDIUMSERIAL', NOTNULL => 1, PRIMARYKEY => 1});
 
     _fix_uppercase_custom_field_names();
+    _fix_uppercase_index_names();
 
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
@@ -2750,7 +2751,28 @@ sub _fix_uppercase_custom_field_names {
                      undef, lc($name), $name);
         }
     }
-    
+}
+
+sub _fix_uppercase_index_names {
+    # We forgot to fix indexes in the above code.
+    my $dbh = Bugzilla->dbh;
+    my $fields = $dbh->selectcol_arrayref(
+        'SELECT name FROM fielddefs WHERE type = ? AND custom = 1',
+        undef, FIELD_TYPE_SINGLE_SELECT);
+    foreach my $field (@$fields) {
+        my $indexes = $dbh->bz_table_indexes($field);
+        foreach my $name (keys %$indexes) {
+            next if $name eq lc($name);
+            my $index = $indexes->{$name};
+            # Lowercase the name and everything in the definition.
+            my $new_name   = lc($name);
+            my @new_fields = map {lc($_)} @{$index->{FIELDS}};
+            my $new_def = {FIELDS => \@new_fields, TYPE => $index->{TYPE}};
+            $new_def = \@new_fields if !$index->{TYPE};
+            $dbh->bz_drop_index($field, $name);
+            $dbh->bz_add_index($field, $new_name, $new_def);
+        }
+    }
 }
 
 1;

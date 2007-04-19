@@ -1588,6 +1588,13 @@ sub get_table_columns {
 
 } #eosub--get_table_columns
 
+sub get_table_indexes_abstract {
+    my ($self, $table) = @_;
+    my $table_def = $self->get_table_abstract($table);
+    my %indexes = @{$table_def->{INDEXES} || []};
+    return \%indexes;
+}
+
 sub get_create_database_sql {
     my ($self, $name) = @_;
     return ("CREATE DATABASE $name");

@@ -841,6 +841,17 @@ sub bz_table_columns {
     return $self->_bz_real_schema->get_table_columns($table);
 }
 
+sub bz_table_indexes {
+    my ($self, $table) = @_;
+    my $indexes = $self->_bz_real_schema->get_table_indexes_abstract($table);
+    my %return_indexes;
+    # We do this so that they're always hashes.
+    foreach my $name (keys %$indexes) {
+        $return_indexes{$name} = $self->bz_index_info($table, $name);
+    }
+    return \%return_indexes;
+}
+
 #####################################################################
 # Protected "Real Database" Schema Information Methods
 #####################################################################

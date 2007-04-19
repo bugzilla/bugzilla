@@ -38,12 +38,12 @@ X-Bugzilla-Target-Milestone: [% targetmilestone %]
 X-Bugzilla-Changed-Fields: [% changedfields %]
 [%+ threadingmarker %]
 
-[%+ Param('urlbase') %]show_bug.cgi?id=[% bugid %]
+[%+ urlbase %]show_bug.cgi?id=[% bugid %]
 
 [%+ diffs %]
 
 -- 
-Configure bugmail: [% Param('urlbase') %]userprefs.cgi?tab=email
+Configure bugmail: [% urlbase %]userprefs.cgi?tab=email
 ------- You are receiving this mail because: -------
 [% FOREACH relationship = reasons %]
   [% SWITCH relationship %]

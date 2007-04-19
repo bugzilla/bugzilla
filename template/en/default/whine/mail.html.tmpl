@@ -51,7 +51,7 @@
 
     <p align="left">
       [% IF author.login == recipient.login %]
-        <a href="[%+ Param('urlbase') FILTER html %]editwhines.cgi">Click
+        <a href="[%+ urlbase FILTER html %]editwhines.cgi">Click
             here to edit your whine schedule</a>
       [% ELSE %]
         This search was scheduled by [% author.login FILTER html %].
@@ -77,7 +77,7 @@
 
     [% FOREACH bug=query.bugs %]
       <tr>
-        <td align="left"><a href="[%+ Param('urlbase') FILTER html %]show_bug.cgi?id=
+        <td align="left"><a href="[%+ urlbase FILTER html %]show_bug.cgi?id=
             [%- bug.bug_id %]">[% bug.bug_id %]</a></td>
         <td align="left">[% bug.bug_severity FILTER html %]</td>
         <td align="left">[% bug.priority FILTER html %]</td>

@@ -218,7 +218,7 @@
   #%]
 
   <body onload="[% onload %]"
-        class="[% Param('urlbase').replace('^https?://','').replace('/$','').replace('[-~@:/.]+','-') %]
+        class="[% urlbase.replace('^https?://','').replace('/$','').replace('[-~@:/.]+','-') %]
                [% FOREACH class = bodyclasses %]
                  [% ' ' %][% class FILTER css_class_quote %]
                [% END %]">

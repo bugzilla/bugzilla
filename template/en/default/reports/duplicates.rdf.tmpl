@@ -26,12 +26,12 @@
      xmlns:bz="http://www.bugzilla.org/rdf#"
      xmlns:nc="http://home.netscape.com/NC-rdf#">
 
-<bz:duplicates_report rdf:about="[% Param('urlbase') %]data/duplicates.rdf">
+<bz:duplicates_report rdf:about="[% urlbase FILTER xml %]data/duplicates.rdf">
   <bz:bugs>
     <Seq>
       [% FOREACH bug = bugs %]
         <li>
-          <bz:bug rdf:about="[% Param('urlbase') %]show_bug.cgi?id=[% bug.id %]">
+          <bz:bug rdf:about="[% urlbase FILTER xml %]show_bug.cgi?id=[% bug.id %]">
             <bz:id nc:parseType="Integer">[% bug.id %]</bz:id>
             <bz:resolution>[% bug.resolution FILTER html %]</bz:resolution>
             <bz:duplicate_count nc:parseType="Integer">[% bug.count %]</bz:duplicate_count>

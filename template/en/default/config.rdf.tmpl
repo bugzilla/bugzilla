@@ -27,7 +27,7 @@
      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
      xmlns:bz="http://www.bugzilla.org/rdf#">
 
-<bz:installation rdf:about="[% Param('urlbase') FILTER html %]">
+<bz:installation rdf:about="[% urlbase FILTER xml %]">
   <bz:install_version>[% constants.BUGZILLA_VERSION FILTER html %]</bz:install_version>
   <bz:maintainer>[% Param('maintainer') FILTER html %]</bz:maintainer>
 
@@ -107,13 +107,13 @@
     <Seq>
       [% FOREACH product = products %]
         <li>
-          <bz:product rdf:about="[% Param('urlbase') %]product.cgi?name=[% product.name FILTER uri %]">
+          <bz:product rdf:about="[% urlbase FILTER xml %]product.cgi?name=[% product.name FILTER uri %]">
             <bz:name>[% product.name FILTER html %]</bz:name>
 
             <bz:components>
               <Seq>
                 [% FOREACH component = product.components %]
-                  <li resource="[% Param('urlbase') %]component.cgi?name=[% component.name FILTER uri %]"/>
+                  <li resource="[% urlbase FILTER xml %]component.cgi?name=[% component.name FILTER uri %]"/>
                 [% END %]
               </Seq>
             </bz:components>
@@ -121,7 +121,7 @@
             <bz:versions>
               <Seq>
                 [% FOREACH version = product.versions %]
-                  <li resource="[% Param('urlbase') %]version.cgi?name=[% version.name FILTER uri %]"/>
+                  <li resource="[% urlbase FILTER xml %]version.cgi?name=[% version.name FILTER uri %]"/>
                 [% END %]
               </Seq>
             </bz:versions>
@@ -130,7 +130,7 @@
               <bz:target_milestones>
                 <Seq>
                   [% FOREACH milestone = product.milestones %]
-                    <li resource="[% Param('urlbase') %]milestone.cgi?name=[% milestone.name FILTER uri %]"/>
+                    <li resource="[% urlbase FILTER xml %]milestone.cgi?name=[% milestone.name FILTER uri %]"/>
                   [% END %]
                 </Seq>
               </bz:target_milestones>
@@ -147,7 +147,7 @@
       [% FOREACH product = products %]
         [% FOREACH component = product.components %]
           <li>
-            <bz:component rdf:about="[% Param('urlbase') %]component.cgi?name=[% component.name FILTER uri %]">
+            <bz:component rdf:about="[% urlbase FILTER xml %]component.cgi?name=[% component.name FILTER uri %]">
               <bz:name>[% component.name FILTER html %]</bz:name>
             </bz:component>
           </li>
@@ -161,7 +161,7 @@
       [% FOREACH product = products %]
         [% FOREACH version = product.versions %]
           <li>
-            <bz:version rdf:about="[% Param('urlbase') %]version.cgi?name=[% version.name FILTER uri %]">
+            <bz:version rdf:about="[% urlbase FILTER xml %]version.cgi?name=[% version.name FILTER uri %]">
               <bz:name>[% version.name FILTER html %]</bz:name>
             </bz:version>
           </li>
@@ -176,7 +176,7 @@
         [% FOREACH product = products %]
           [% FOREACH milestone = product.milestones %]
             <li>
-              <bz:target_milestone rdf:about="[% Param('urlbase') %]milestone.cgi?name=[% milestone.name FILTER uri %]">
+              <bz:target_milestone rdf:about="[% urlbase FILTER xml %]milestone.cgi?name=[% milestone.name FILTER uri %]">
                 <bz:name>[% milestone.name FILTER html %]</bz:name>
               </bz:target_milestone>
             </li>
@@ -191,7 +191,7 @@
       [% PROCESS "global/field-descs.none.tmpl" %]
       [% FOREACH item = field %]
         <li>
-          <bz:field rdf:about="[% Param('urlbase') %]field.cgi?name=[% item.name FILTER uri %]">
+          <bz:field rdf:about="[% urlbase FILTER xml %]field.cgi?name=[% item.name FILTER uri %]">
             <bz:name>[% item.name FILTER html %]</bz:name>
             <bz:description>[% (field_descs.${item.name} OR item.description) FILTER html %]</bz:description>
           </bz:field>

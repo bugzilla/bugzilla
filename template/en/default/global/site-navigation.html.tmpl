@@ -31,7 +31,7 @@
 [% cgi = Bugzilla.cgi %]
 
 [% IF NOT (cgi.user_agent("MSIE [1-6]") OR cgi.user_agent("Mozilla/4")) %]
-  <link rel="Top" href="[% Param('urlbase') %]">
+  <link rel="Top" href="[% urlbase FILTER html %]">
 
   [%# *** Bug List Navigation *** %]
   [% IF bug && bug_list && bug_list.size > 0 %]

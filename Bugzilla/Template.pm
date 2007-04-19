@@ -804,6 +804,9 @@ sub create {
                 Bugzilla::BugMail::Send($id, $mailrecipients);
             },
 
+            # Allow templates to access the "corect" URLBase value
+            'urlbase' => sub { return Bugzilla::Util::correct_urlbase(); },
+
             # These don't work as normal constants.
             DB_MODULE        => \&Bugzilla::Constants::DB_MODULE,
             REQUIRED_MODULES => 

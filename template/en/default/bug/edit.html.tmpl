@@ -556,7 +556,7 @@
         <b>[% terms.Bug %]#</b>:
       </td>
       <td>
-        <a href="[% Param('urlbase') %]show_bug.cgi?id=[% bug.bug_id %]">
+        <a href="[% urlbase FILTER html %]show_bug.cgi?id=[% bug.bug_id %]">
            [% bug.bug_id %]</a>
       </td>
     </tr>

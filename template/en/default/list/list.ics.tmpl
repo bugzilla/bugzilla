@@ -27,8 +27,8 @@ VERSION:2.0
 BEGIN:VTODO
 [%+ PROCESS ics_dtstart +%]
 [%+ PROCESS ics_summary +%]
-[%+ PROCESS ics_uid base_url=Param('urlbase') bug_id=bug.bug_id +%]
-[%+ PROCESS ics_url base_url=Param('urlbase') bug_id=bug.bug_id +%]
+[%+ PROCESS ics_uid base_url=urlbase bug_id=bug.bug_id +%]
+[%+ PROCESS ics_url base_url=urlbase bug_id=bug.bug_id +%]
 [%+ PROCESS ics_status bug_status = bug.bug_status +%]
 [%+ PROCESS ics_dtstamp +%]
 [% IF bug.changeddate %]

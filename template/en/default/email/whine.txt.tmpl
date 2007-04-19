@@ -28,7 +28,7 @@ X-Bugzilla-Type: whine
 [This e-mail has been automatically generated.]
 
 You have one or more [% terms.bugs %] assigned to you in the [% terms.Bugzilla %] 
-[% terms.bug %] tracking system ([% Param("urlbase") %]) that require
+[% terms.bug %] tracking system ([% urlbase %]) that require
 attention.
 
 All of these [% terms.bugs %] are in the [% get_status("NEW") %] or
@@ -50,10 +50,10 @@ Generally, this means one of three things:
 To get a list of all [% get_status("NEW") %]/[% get_status("REOPENED") %] [%+ terms.bugs %], you can use this URL (bookmark
 it if you like!):
 
- [% Param("urlbase") %]buglist.cgi?bug_status=NEW&bug_status=REOPENED&assigned_to=[% email %]
+ [% urlbase %]buglist.cgi?bug_status=NEW&bug_status=REOPENED&assigned_to=[% email %]
 
 Or, you can use the general query page, at 
-[%+ Param("urlbase") %]query.cgi
+[%+ urlbase %]query.cgi
 
 Appended below are the individual URLs to get to all of your [% get_status("NEW") %] [%+ terms.bugs %]
 that haven't been touched for a week or more.
@@ -62,5 +62,5 @@ You will get this message once a day until you've dealt with these [% terms.bugs
 
 [% FOREACH bug = bugs %]
  [%+ bug.summary %]
-    -> [% Param("urlbase") %]show_bug.cgi?id=[% bug.id %]
+    -> [% urlbase %]show_bug.cgi?id=[% bug.id %]
 [% END %]

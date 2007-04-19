@@ -50,13 +50,13 @@ X-Bugzilla-Type: request
 
 [% terms.Bug %] [%+ bugidsummary %]
 [% END %]
-[%+ Param('urlbase') %]show_bug.cgi?id=[% bug.bug_id %]
+[%+ urlbase %]show_bug.cgi?id=[% bug.bug_id %]
 [% IF attachment %]
 
 [% FILTER bullet = wrap(80) %]
 Attachment [% attidsummary %]
 [%- END %]
-[%+ Param('urlbase') %]attachment.cgi?id=[% attachment.id %]&action=edit
+[%+ urlbase %]attachment.cgi?id=[% attachment.id %]&action=edit
 [%- END %]
 [%- FILTER bullet = wrap(80) %]
 

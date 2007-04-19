@@ -40,7 +40,7 @@
 
 [% IF author.login == recipient.login %]
   To edit your whine schedule, visit the following URL:
-  [%+ Param('urlbase') %]editwhines.cgi
+  [%+ urlbase %]editwhines.cgi
 [% ELSE %]
   This search was scheduled by [% author.login %].
 [% END %]
@@ -53,7 +53,7 @@
 
  [% FOREACH bug=query.bugs %]
   [% terms.Bug +%] [%+ bug.bug_id %]:
-  [%+ Param('urlbase') %]show_bug.cgi?id=[% bug.bug_id +%]
+  [%+ urlbase %]show_bug.cgi?id=[% bug.bug_id +%]
   Priority: [%+ bug.priority -%]
   Severity: [%+ bug.bug_severity -%]
   Platform: [%+ bug.rep_platform %]

@@ -46,7 +46,7 @@ function addSidebar() {
     var sidebarname=window.location.host;
     if (!/bug/i.test(sidebarname))
       sidebarname="[% terms.Bugzilla %] "+sidebarname;
-    window.sidebar.addPanel (sidebarname, "[% Param('urlbase') %]sidebar.cgi", "");
+    window.sidebar.addPanel (sidebarname, "[% urlbase FILTER html %]sidebar.cgi", "");
   }
   else
   {
@@ -129,7 +129,7 @@ function addSidebar() {
 [% END %]
     <li id="sidebar"><a href="javascript:addSidebar()">Add to Sidebar</a> (requires a Mozilla browser like Mozilla Firefox)</li>
     <li id="quick_search_plugin">
-      <a href="javascript:window.external.AddSearchProvider('[% Param('urlbase') %]search_plugin.cgi')">Install
+      <a href="javascript:window.external.AddSearchProvider('[% urlbase FILTER html %]search_plugin.cgi')">Install
       the Quick Search plugin</a> (requires Firefox 2 or Internet Explorer 7)
     </li>
 

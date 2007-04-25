@@ -173,8 +173,8 @@ sub _synchronize_data {
 sub _compare_versions {
     my ($old_ver, $new_ver) = @_;
     while (scalar(@$old_ver) && scalar(@$new_ver)) {
-        my $old = shift(@$old_ver);
-        my $new = shift(@$new_ver);
+        my $old = shift(@$old_ver) || 0;
+        my $new = shift(@$new_ver) || 0;
         return $new <=> $old if ($new <=> $old);
     }
     return scalar(@$new_ver) <=> scalar(@$old_ver);

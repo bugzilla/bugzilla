@@ -38,6 +38,7 @@ our @EXPORT_OK = qw(
     indicate_progress
     install_string
     is_web
+    template_include_path
     vers_cmp
 );
 
@@ -453,6 +454,47 @@ inside of the string.
 =item B<Returns>: The appropriate string, with variables replaced.
 
 =back
+
+=item C<template_include_path>
+
+Used by L<Bugzilla::Template> and L</install_string> to determine the
+directories where templates are installed. Templates can be installed
+in many places. They're listed here in the basic order that they're
+searched:
+
+=over
+
+=item extensions/C<$extension>/template/C<$language>/C<$project>
+
+=item extensions/C<$extension>/template/C<$language>/custom
+
+=item extensions/C<$extension>/template/C<$language>/default
+
+=item template/C<$language>/C<$project>
+
+=item template/C<$language>/custom
+
+=item template/C<$language>/default
+
+=back
+
+C<$project> has to do with installations that are using the C<$ENV{PROJECT}>
+variable to have different "views" on a single Bugzilla.
+
+The F<default> directory includes templates shipped with Bugzilla.
+
+The F<custom> directory is a directory for local installations to override
+the F<default> templates. Any individual template in F<custom> will
+override a template of the same name and path in F<default>.
+
+C<$language> is a language code, C<en> being the default language shipped
+with Bugzilla. Localizers ship other languages.
+
+C<$extension> is the name of any directory in the F<extensions/> directory.
+Each extension has its own directory.
+
+Note that languages are sorted by the user's preference (as specified
+in their browser, usually), and extensions are sorted alphabetically.
 
 =item C<vers_cmp>
 

@@ -49,13 +49,6 @@ sub get_param_list {
    type => 't' ,
    default => 'en' ,
    checker => \&check_languages
-  },
-
-  {
-   name => 'defaultlanguage',
-   type => 't' ,
-   default => 'en' ,
-   checker => \&check_languages
   } );
   return @param_list;
 }

@@ -38,9 +38,11 @@
                "to be displayed. Note that you must install the appropriate " _
                "language pack before adding a language to this Param. The " _
                "language used is the one in this list with the highest " _
-               "q-value in the user's Accept-Language header.<br> " _
-               "Available languages: $available_languages" ,
+               "q-value in the user's Accept-Language header.<br><br> " _
 
-  defaultlanguage => "The UI language $terms.Bugzilla falls back on if no suitable " _
-                     "language is found in the user's Accept-Language header." }
-%]
+               "If the none of these languages are in the user's" _
+               " Accept-Language header, the first item in this list will be" _
+               " used. <br><br>" _
+
+               "Available languages: $available_languages"
+} %]

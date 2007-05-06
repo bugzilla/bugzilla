@@ -36,6 +36,7 @@ use strict;
 
 use Bugzilla::Constants;
 use Bugzilla::Install::Requirements;
+use Bugzilla::Install::Util qw(template_include_path);
 use Bugzilla::Util;
 use Bugzilla::User;
 use Bugzilla::Error;
@@ -78,113 +79,17 @@ sub _load_constants {
     return \%constants;
 }
 
-# Make an ordered list out of a HTTP Accept-Language header see RFC 2616, 14.4
-# We ignore '*' and <language-range>;q=0
-# For languages with the same priority q the order remains unchanged.
-sub sortAcceptLanguage {
-    sub sortQvalue { $b->{'qvalue'} <=> $a->{'qvalue'} }
-    my $accept_language = $_[0];
-
-    # clean up string.
-    $accept_language =~ s/[^A-Za-z;q=0-9\.\-,]//g;
-    my @qlanguages;
-    my @languages;
-    foreach(split /,/, $accept_language) {
-        if (m/([A-Za-z\-]+)(?:;q=(\d(?:\.\d+)))?/) {
-            my $lang   = $1;
-            my $qvalue = $2;
-            $qvalue = 1 if not defined $qvalue;
-            next if $qvalue == 0;
-            $qvalue = 1 if $qvalue > 1;
-            push(@qlanguages, {'qvalue' => $qvalue, 'language' => $lang});
-        }
-    }
-
-    return map($_->{'language'}, (sort sortQvalue @qlanguages));
-}
-
 # Returns the path to the templates based on the Accept-Language
 # settings of the user and of the available languages
 # If no Accept-Language is present it uses the defined default
 # Templates may also be found in the extensions/ tree
 sub getTemplateIncludePath {
-    my $lang = Bugzilla->request_cache->{'language'} || "";
-    # Return cached value if available
-
-    my $include_path = Bugzilla->request_cache->{"template_include_path_$lang"};
-    return $include_path if $include_path;
-
-    my $templatedir = bz_locations()->{'templatedir'};
-    my $project     = bz_locations()->{'project'};
-
-    my $languages = trim(Bugzilla->params->{'languages'});
-    if (not ($languages =~ /,/)) {
-       if ($project) {
-           $include_path = [
-               "$templatedir/$languages/$project",
-               "$templatedir/$languages/custom",
-               "$templatedir/$languages/default"
-           ];
-       } else {
-           $include_path = [
-               "$templatedir/$languages/custom",
-               "$templatedir/$languages/default"
-           ];
-       }
-    }
-    my @languages       = sortAcceptLanguage($languages);
-    # If $lang is specified, only consider this language.
-    my @accept_language = ($lang) || sortAcceptLanguage($ENV{'HTTP_ACCEPT_LANGUAGE'} || "");
-    my @usedlanguages;
-    foreach my $language (@accept_language) {
-        # Per RFC 1766 and RFC 2616 any language tag matches also its 
-        # primary tag. That is 'en' (accept language)  matches 'en-us',
-        # 'en-uk' etc. but not the otherway round. (This is unfortunately
-        # not very clearly stated in those RFC; see comment just over 14.5
-        # in http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.4)
-        if(my @found = grep /^\Q$language\E(-.+)?$/i, @languages) {
-            push (@usedlanguages, @found);
-        }
-    }
-    push(@usedlanguages, Bugzilla->params->{'defaultlanguage'});
-    if ($project) {
-        $include_path = [
-           map((
-               "$templatedir/$_/$project",
-               "$templatedir/$_/custom",
-               "$templatedir/$_/default"
-               ), @usedlanguages
-            )
-        ];
-    } else {
-        $include_path = [
-           map((
-               "$templatedir/$_/custom",
-               "$templatedir/$_/default"
-               ), @usedlanguages
-            )
-        ];
-    }
-    
-    # add in extension template directories:
-    my @extensions = glob(bz_locations()->{'extensionsdir'} . "/*");
-    foreach my $extension (@extensions) {
-        trick_taint($extension); # since this comes right from the filesystem
-                                 # we have bigger issues if it is insecure
-        push(@$include_path,
-            map((
-                $extension."/template/".$_),
-               @usedlanguages));
-    }
-    
-    # remove duplicates since they keep popping up:
-    my @dirs;
-    foreach my $dir (@$include_path) {
-        push(@dirs, $dir) unless grep ($dir eq $_, @dirs);
-    }
-    Bugzilla->request_cache->{"template_include_path_$lang"} = \@dirs;
-    
-    return Bugzilla->request_cache->{"template_include_path_$lang"};
+    my $cache = Bugzilla->request_cache;
+    my $lang  = $cache->{'language'} || "";
+    $cache->{"template_include_path_$lang"} ||= template_include_path({
+        use_languages => trim(Bugzilla->params->{'languages'}),
+        only_language => $lang });
+    return $cache->{"template_include_path_$lang"};
 }
 
 sub get_format {

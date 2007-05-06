@@ -145,7 +145,7 @@ if ($action eq 'save' && $current_module) {
         # then we delete it (the user pref is reset to the default one).
         my @languages = split(/[\s,]+/, Bugzilla->params->{'languages'});
         map {trick_taint($_)} @languages;
-        add_setting('lang', \@languages, Bugzilla->params->{'defaultlanguage'}, undef, 1);
+        add_setting('lang', \@languages, $languages[0], undef, 1);
     }
 
     $vars->{'message'} = 'parameters_updated';

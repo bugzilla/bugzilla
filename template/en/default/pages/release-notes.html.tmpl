@@ -24,8 +24,6 @@
   style_urls = ['skins/standard/release-notes.css'] 
 %]
 
-<p><big>These release notes are currently a <strong>DRAFT</strong>.</big></p>
-
 <h2>Table of Contents</h2>
 
 <ul class="bz_toc">
@@ -312,6 +310,10 @@
 <p>You can control these notifications by changing the 
   <kbd>upgrade_notification</kbd> parameter.</p>
 
+<p>If your Bugzilla installation is on a machine that needs to go through
+  a proxy to access the web, you may also have to set the <kbd>proxy_url</kbd>
+  parameter.</p>
+
 <h3><a name="v30_feat_welc"></a>Welcome Page for New Installs</h3>
 
 <p>When you log in for the first time on a brand-new [% terms.Bugzilla %]
@@ -461,6 +463,20 @@
     There is currently no way to change this restriction, and the 
     groupings will not be updated if the group configuration
     for the Product changes.</li>
+  <li><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=370370">
+    [%- terms.Bug %] 370370</a>: mod_perl support may currently not
+    be working on Windows machines. Also, even when it does work,
+    editparams.cgi seems to crash on certain versions of mod_perl.</li>
+  <li><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=361149">
+    [%- terms.Bug %] 361149</a>: If you are using Perl 5.8.0, you may
+    get a lot of warnings in your Apache error_log about "deprecated
+    pseudo-hashes." These are harmless--they are a bug in Perl 5.8.0.
+    Perl 5.8.1 and later do not have this problem.</li>
+  <li>Bugzilla 3.0rc1 allowed custom field column names in the database
+    to be mixed-case. Bugzilla 3.0 only allows lowercase column names.
+    It will fix any column names that you have made mixed-case, but
+    if you have custom fields that previously were mixed-case in any
+    Saved Search, you will have to re-create that Saved Search yourself.</li>
 </ul>
 
 <h2><a name="v30_upgrading"></a>How to Upgrade From An Older Version</h2>
@@ -483,6 +499,10 @@
     at that time, that you have to follow before you can complete
     the upgrade. Don't do the conversion yourself manually--follow
     the instructions of checksetup.pl.</li>
+  <li>If you ever ran 2.23.3, 2.23.4, or 3.0rc1, you will have to run
+    <kbd>./collectstats.pl --regenerate</kbd> at the command line, because
+    the data for your Old Charts is corrupted. This can take several days,
+    so you may only want to run it if you use Old Charts.</li>
   <li>You should also read the Outstanding Issues sections of
     <a href="#v30_previous">older release notes</a> if you are upgrading
     from a version lower than 2.22.</li>

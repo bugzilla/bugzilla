@@ -310,9 +310,9 @@
 <p>You can control these notifications by changing the 
   <kbd>upgrade_notification</kbd> parameter.</p>
 
-<p>If your Bugzilla installation is on a machine that needs to go through
-  a proxy to access the web, you may also have to set the <kbd>proxy_url</kbd>
-  parameter.</p>
+<p>If your [% terms.Bugzilla %] installation is on a machine that needs to go
+  through a proxy to access the web, you may also have to set the
+  <kbd>proxy_url</kbd> parameter.</p>
 
 <h3><a name="v30_feat_welc"></a>Welcome Page for New Installs</h3>
 
@@ -470,13 +470,14 @@
   <li><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=361149">
     [%- terms.Bug %] 361149</a>: If you are using Perl 5.8.0, you may
     get a lot of warnings in your Apache error_log about "deprecated
-    pseudo-hashes." These are harmless--they are a bug in Perl 5.8.0.
-    Perl 5.8.1 and later do not have this problem.</li>
-  <li>Bugzilla 3.0rc1 allowed custom field column names in the database
-    to be mixed-case. Bugzilla 3.0 only allows lowercase column names.
-    It will fix any column names that you have made mixed-case, but
-    if you have custom fields that previously were mixed-case in any
-    Saved Search, you will have to re-create that Saved Search yourself.</li>
+    pseudo-hashes." These are harmless--they are a b[%# fool test %]ug in 
+    Perl 5.8.0. Perl 5.8.1 and later do not have this problem.</li>
+  <li>[% terms.Bugzilla %] 3.0rc1 allowed custom field column names in 
+    the database to be mixed-case. [% terms.Bugzilla %] 3.0 only allows
+    lowercase column names. It will fix any column names that you have
+    made mixed-case, but if you have custom fields that previously were
+    mixed-case in any Saved Search, you will have to re-create that Saved
+    Search yourself.</li>
 </ul>
 
 <h2><a name="v30_upgrading"></a>How to Upgrade From An Older Version</h2>

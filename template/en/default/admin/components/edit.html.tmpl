@@ -104,7 +104,7 @@
       <td>[% terms.Bugs %]:</td>
       <td>
 [% IF comp.bug_count > 0 %]
-        <a title="Bugs in component '[% comp.name FILTER html %]'"
+        <a title="[% terms.Bugs %] in component '[% comp.name FILTER html %]'"
            href="buglist.cgi?component=
                 [%- comp.name FILTER url_quote %]&amp;product=
                 [%- product.name FILTER url_quote %]">[% comp.bug_count %]</a>

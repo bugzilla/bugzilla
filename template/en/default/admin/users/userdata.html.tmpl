@@ -64,12 +64,12 @@
     </td>
   </tr>
   <tr>
-    <th><label for="disable_mail">Bugmail Disabled:</label></th>
+    <th><label for="disable_mail">[% terms.Bug %]mail Disabled:</label></th>
     <td>
       <input type="checkbox" name="disable_mail" id="disable_mail" value="1" 
       [% IF otheruser.email_disabled %] checked="checked" [% END %] />
-      (This affects bugmail and whinemail, not password-reset or other 
-      non-bug-related emails)
+      (This affects [% terms.bug %]mail and whinemail, not password-reset or other 
+      non-[% terms.bug %]-related emails)
     </td>
   </tr>
   <tr>

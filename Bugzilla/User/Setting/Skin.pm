@@ -33,7 +33,7 @@ sub legal_values {
 
     return $self->{'legal_values'} if defined $self->{'legal_values'};
 
-    my $dirbase = bz_locations()->{'skinsdir'};
+    my $dirbase = bz_locations()->{'skinsdir'} . '/contrib';
     # Avoid modification of the list BUILTIN_SKIN_NAMES points to by copying the
     # list over instead of simply writing $legal_values = BUILTIN_SKIN_NAMES.
     my @legal_values = @{(BUILTIN_SKIN_NAMES)};

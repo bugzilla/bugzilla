@@ -68,9 +68,9 @@
               The disable text has been modified.
             [% ELSIF field == 'disable_mail' %]
               [% IF otheruser.email_disabled %]
-                Bugmail has been disabled.
+                [% terms.Bug %]mail has been disabled.
               [% ELSE %]
-                Bugmail has been enabled.
+                [% terms.Bug %]mail has been enabled.
               [% END %]
             [% END %]
           </li>

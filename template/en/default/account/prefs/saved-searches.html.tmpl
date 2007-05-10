@@ -53,7 +53,7 @@
       [% END %]
     </tr>
     <tr>
-      <td>My Bugs</td>
+      <td>My [% terms.Bugs %]</td>
       <td>
         [% filtered_username = user.login FILTER url_quote %]
         <a href="[% Param('mybugstemplate').replace('%userid%', filtered_username) %]">Run</a>

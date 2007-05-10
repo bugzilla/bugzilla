@@ -2082,6 +2082,9 @@ elsif ($action eq 'next_bug') {
 
 # End the response page.
 unless (Bugzilla->usage_mode == USAGE_MODE_EMAIL) {
+    # The user pref is 'Do nothing', so all we need is the current bug ID.
+    $vars->{'bug'} = {bug_id => scalar $cgi->param('id')};
+
     $template->process("bug/navigate.html.tmpl", $vars)
         || ThrowTemplateError($template->error());
     $template->process("global/footer.html.tmpl", $vars)

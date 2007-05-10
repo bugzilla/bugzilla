@@ -27,7 +27,6 @@
      * bz-ver to current stable
      * bz-nexver to next stable
      * bz-date to the release date
-     * Remove the BZ-DEVEL comments
      - COMPILE DOCS AND CHECKIN -
        Also, tag and tarball before completing
      * bz-ver to devel version
@@ -35,9 +34,9 @@
      For a devel release, simple bump bz-ver and bz-date
 -->
 
-<!ENTITY bz-ver "3.0rc1">
-<!ENTITY bz-nextver "3.0">
-<!ENTITY bz-date "2007-02-25">
+<!ENTITY bz-ver "3.0">
+<!ENTITY bz-nextver "3.2">
+<!ENTITY bz-date "2007-05-09">
 <!ENTITY current-year "2007">
 
 <!ENTITY landfillbase "http://landfill.bugzilla.org/bugzilla-tip/">
@@ -77,9 +76,7 @@
 <!-- Header -->
 
   <bookinfo>
-    <title>The Bugzilla Guide - &bz-ver; 
-    <!-- BZ-DEVEL -->Development <!-- /BZ-DEVEL -->
-    Release</title>
+    <title>The Bugzilla Guide - &bz-ver;  Release</title>
 
     <authorgroup>
       <corpauthor>The Bugzilla Team</corpauthor>

@@ -97,13 +97,13 @@
   <p>
   Updated milestone URL 
   [% IF old_product.milestone_url != '' %]
-    from<br> <a href="[%- old_product.milestone_url FILTER html %]">'
-    [%- old_product.milestone_url FILTER html %]'</a>
+    from<br> <a href="[%- old_product.milestone_url FILTER html %]">
+    [%- old_product.milestone_url FILTER html %]</a>
   [% END %]
   to
   [% IF product.milestone_url != '' %]
-     <br><a href="[%- product.milestone_url FILTER html %]">'
-     [%- product.milestone_url FILTER html %]'</a>.
+     <br><a href="[%- product.milestone_url FILTER html %]">
+     [%- product.milestone_url FILTER html %]</a>.
   [% ELSE %]
     be empty.
   [% END %]

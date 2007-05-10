@@ -61,6 +61,7 @@ sub FILESYSTEM {
     my $webdotdir     = bz_locations()->{'webdotdir'};
     my $templatedir   = bz_locations()->{'templatedir'};
     my $libdir        = bz_locations()->{'libpath'};
+    my $skinsdir      = bz_locations()->{'skinsdir'};
 
     my $ws_group      = Bugzilla->localconfig->{'webservergroup'};
 
@@ -201,9 +202,9 @@ sub FILESYSTEM {
 
     # Each standard stylesheet has an associated custom stylesheet that
     # we create.
-    foreach my $standard (<skins/standard/*.css>) {
+    foreach my $standard (<$skinsdir/standard/*.css>) {
         my $custom = $standard;
-        $custom =~ s|^skins/standard|skins/custom|;
+        $custom =~ s|\Q$skinsdir\E/standard|$skinsdir/custom|;
         $create_files{$custom} = { perms => $ws_readable, contents => <<EOT
 /*
  * Custom rules for $standard.

@@ -29,7 +29,9 @@
 
 [% PROCESS global/variables.none.tmpl %]
 
-[% title = BLOCK %]Edit Component '[% comp.name FILTER html %]'[% END %]
+[% title = BLOCK %]
+  Edit component '[% comp.name FILTER html %]' of product '[% product.name FILTER html %]'
+[% END %]
 [% PROCESS global/header.html.tmpl
   title = title
 %]

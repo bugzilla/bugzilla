@@ -518,8 +518,6 @@
 ],
 
 'admin/users/confirm-delete.html.tmpl' => [
-  'andstring',
-  'responsibilityterms.$responsibility',
   'reporter',
   'assignee_or_qa',
   'cc',

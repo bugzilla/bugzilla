@@ -917,14 +917,33 @@ sub product_responsibilities {
     return $self->{'product_resp'} if defined $self->{'product_resp'};
     return [] unless $self->id;
 
-    my $comp_ids = $dbh->selectcol_arrayref('SELECT id FROM components
-                                              WHERE initialowner = ?
-                                                 OR initialqacontact = ?',
-                                              undef, ($self->id, $self->id));
+    my $list = $dbh->selectall_arrayref('SELECT product_id, id
+                                           FROM components
+                                          WHERE initialowner = ?
+                                             OR initialqacontact = ?',
+                                  {Slice => {}}, ($self->id, $self->id));
 
+    unless ($list) {
+        $self->{'product_resp'} = [];
+        return $self->{'product_resp'};
+    }
+
+    my @prod_ids = map {$_->{'product_id'}} @$list;
+    my $products = Bugzilla::Product->new_from_list(\@prod_ids);
     # We cannot |use| it, because Component.pm already |use|s User.pm.
     require Bugzilla::Component;
-    $self->{'product_resp'} = Bugzilla::Component->new_from_list($comp_ids);
+    my @comp_ids = map {$_->{'id'}} @$list;
+    my $components = Bugzilla::Component->new_from_list(\@comp_ids);
+
+    my @prod_list;
+    # @$products is already sorted alphabetically.
+    foreach my $prod (@$products) {
+        # We use @components instead of $prod->components because we only want
+        # components where the user is either the default assignee or QA contact.
+        push(@prod_list, {product    => $prod,
+                          components => [grep {$_->product_id == $prod->id} @$components]});
+    }
+    $self->{'product_resp'} = \@prod_list;
     return $self->{'product_resp'};
 }
 

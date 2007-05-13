@@ -30,7 +30,7 @@
 [% PROCESS global/header.html.tmpl
   title = title
   message = message
-  style_urls = ['skins/standard/editusers.css']
+  style_urls = ['skins/standard/admin.css', 'skins/standard/editusers.css']
 %]
 
 [% PROCESS admin/users/listselectvars.html.tmpl
@@ -96,6 +96,17 @@
       </td>
     </tr>
   [% END %]
+
+  <tr>
+    <th>Product responsibilities:</th>
+    <td>
+      [% IF otheruser.product_responsibilities.size %]
+        [% PROCESS admin/users/responsibilities.html.tmpl otheruser = otheruser %]
+      [% ELSE %]
+        <em>none</em>
+      [% END %]
+    </td>
+  </tr>
 </table>
 
 <p>

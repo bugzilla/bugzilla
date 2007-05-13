@@ -55,12 +55,6 @@
   listselectionvalues = listselectionvalues
 %]
 
-[% responsibilityterms = {
-  'default_assignee'   => 'Default Assignee',
-  'default_qa_contact' => 'Default QA Contact'
-  }
-%]
-
 <table class="main">
   <tr>
     <th>Login name:</th>
@@ -88,30 +82,7 @@
     <tr>
       <th>Product responsibilities:</th>
       <td>
-        <ul>
-          [% FOREACH component = otheruser.product_responsibilities %]
-            <li>
-              [% andstring = '' %]
-              [% FOREACH responsibility = ['default_assignee', 'default_qa_contact'] %]
-                [% IF component.${responsibility}.id == otheruser.id %]
-                  [% andstring %] [% responsibilityterms.$responsibility %]
-                  [% andstring = ' and ' %]
-                [% END %]
-              [% END %]
-              for
-              [% IF user.in_group("editcomponents", component.product_id) %]
-                <a href="editcomponents.cgi?action=edit&amp;product=
-                         [% component.product.name FILTER url_quote %]&amp;component=
-                         [% component.name FILTER url_quote %]">
-              [% END %]
-                [%+ component.product.name FILTER html %]:
-                [% component.name FILTER html %]
-              [% IF user.in_group("editcomponents", component.product_id) %]
-                </a>
-              [% END %]
-            </li>
-          [% END %]
-        </ul>
+        [% PROCESS admin/users/responsibilities.html.tmpl otheruser = otheruser %]
       </td>
     </tr>
   [% END %]

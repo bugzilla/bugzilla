@@ -364,6 +364,7 @@ $vars->{'bug_severity'}          = get_legal_field_values('bug_severity');
 $vars->{'rep_platform'}          = get_legal_field_values('rep_platform');
 $vars->{'op_sys'}                = get_legal_field_values('op_sys');
 
+$vars->{'valid_keywords'}        = [map($_->name, Bugzilla::Keyword->get_all)];
 $vars->{'use_keywords'}          = 1 if Bugzilla::Keyword::keyword_count();
 
 $vars->{'assigned_to'}           = formvalue('assigned_to');

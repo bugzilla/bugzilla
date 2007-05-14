@@ -1127,6 +1127,7 @@ $vars->{'currenttime'} = time();
 # The following variables are used when the user is making changes to multiple bugs.
 if ($dotweak) {
     $vars->{'dotweak'} = 1;
+    $vars->{'valid_keywords'} = [map($_->name, Bugzilla::Keyword->get_all)];
     $vars->{'use_keywords'} = 1 if Bugzilla::Keyword::keyword_count();
 
     $vars->{'products'} = Bugzilla->user->get_enterable_products;

@@ -255,6 +255,7 @@ if ($cgi->cookie("BUGLIST")) {
     @bug_list = split(/:/, $cgi->cookie("BUGLIST"));
 }
 $vars->{'bug_list'} = \@bug_list;
+$vars->{'valid_keywords'} = [map($_->name, Bugzilla::Keyword->get_all)];
 $vars->{'use_keywords'} = 1 if Bugzilla::Keyword::keyword_count();
 
 if ($token) {

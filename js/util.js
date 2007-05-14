@@ -20,6 +20,7 @@
  *
  * Contributor(s):
  *   Max Kanat-Alexander <mkanat@bugzilla.org>
+ *   Christopher A. Aillon <christopher@aillon.com>
  *
  * ***** END LICENSE BLOCK ***** */
 
@@ -113,4 +114,101 @@ function bz_getFullWidth(fromObj)
     }
 
     return scrollX;
+}
+
+/**
+ * Create wanted options in a select form control.
+ *
+ * @param  aSelect        Select form control to manipulate.
+ * @param  aValue         Value attribute of the new option element.
+ * @param  aTextValue     Value of a text node appended to the new option
+ *                        element.
+ * @param  aOwnerDocument Owner document of the new option element. If not
+ *                        specified then "document" will be used.
+ * @return                Created option element.
+ */
+function bz_createOptionInSelect(aSelect, aValue, aTextValue, aOwnerDocument)
+{
+  if (!aOwnerDocument) {
+    aOwnerDocument = document;
+  }
+
+  var myOption = aOwnerDocument.createElement("option");
+  myOption.setAttribute("value", aValue);
+
+  var myTextNode = aOwnerDocument.createTextNode(aTextValue)
+  myOption.appendChild(myTextNode);
+
+  aSelect.appendChild(myOption);
+
+  return myOption;
+}
+
+/**
+ * Clears all options from a select form control.
+ *
+ * @param  aElm       Select form control of which options to clear.
+ * @param  aSkipFirst Boolean; true to skip (not clear) first option in the
+ *                    select and false to remove all options.
+ */
+function bz_clearOptions(aElm, aSkipFirst)
+{
+  var start = 0;
+
+  // Skip the first element? (for 'Choose One' type foo)
+  if (aSkipFirst) {
+    start = 1;
+  }
+
+  var length = aElm.options.length;
+
+  for (var run = start; run < length; run++) {
+    aElm.removeChild(aElm.options[start]);
+  }
+}
+
+/**
+ * Takes an array and moves all the values to an select.
+ *
+ * @param aSelect         Select form control to populate. Will be cleared
+ *                        before array values are created in it.
+ * @param aArray          Array with values to populate select with.
+ * @param aSkipFirst      Boolean; true to skip (not touch) first option in the
+ *                        select and false to remove all options.
+ * @param aUseNameAsValue Boolean; true if name is used as value and false if
+ *                        not.
+ */
+function bz_populateSelectFromArray(aSelect, aArray, aSkipFirst, aUseNameAsValue)
+{
+  // Clear the field
+  bz_clearOptions(aSelect, aSkipFirst);
+
+  for (var run = 0; run < aArray.length; run++) {
+    if (aUseNameAsValue) {
+      bz_createOptionInSelect(aSelect, aArray[run], aArray[run]);
+    } else {
+      bz_createOptionInSelect(aSelect, aArray[run][0], aArray[run][0]);
+    }
+  }
+}
+
+/**
+ * Checks if a specified value is in the specified array.
+ *
+ * @param  aArray Array to search for the value.
+ * @param  aValue Value to search from the array.
+ * @return        Boolean; true if value is found in the array and false if not.
+ */
+function bz_isValueInArray(aArray, aValue)
+{
+  var run = 0;
+  var len = aArray.length;
+
+  for ( ; run < len; run++) {
+    if (aArray[run] == aValue) {
+      return true;
+    }
+  }
+
+  return false;
 }

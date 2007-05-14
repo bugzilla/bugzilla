@@ -31,7 +31,7 @@
 [% PROCESS global/header.html.tmpl
   title = title
   style_urls = [ 'skins/standard/create_attachment.css' ]
-  javascript_urls = [ "js/attachment.js" ]
+  javascript_urls = [ "js/attachment.js", "js/util.js", "js/keyword-chooser.js" ]
 %]
 
 <script type="text/javascript">
@@ -486,7 +486,7 @@ function handleWantsAttachment(wants_attachment) {
           </strong>
         </td>
         <td colspan="3">
-          <input name="keywords" size="60" value="[% keywords FILTER html %]"> (optional)
+          <input id="keywords" name="keywords" size="60" value="[% keywords FILTER html %]" onfocus="this.chooser.open();"> (optional)
         </td>
       </tr>
     [% END %]
@@ -574,6 +574,12 @@ function handleWantsAttachment(wants_attachment) {
   </table>
   <input type="hidden" name="form_name" value="enter_bug">
 </form>
+
+[% IF use_keywords %]
+  [% PROCESS "bug/keyword-chooser.html.tmpl"
+    sel_keywords = keywords.split(', ')
+  %]
+[% END %]
 
 [%# Links or content with more information about the bug being created. %]
 [% Hook.process("end") %]

@@ -66,6 +66,7 @@ my $cgi = Bugzilla->cgi;
 my $dbh = Bugzilla->dbh;
 my $template = Bugzilla->template;
 local our $vars = {};
+$vars->{'valid_keywords'} = [map($_->name, Bugzilla::Keyword->get_all)];
 $vars->{'use_keywords'} = 1 if Bugzilla::Keyword::keyword_count();
 
 my @editable_bug_fields = editable_bug_fields();

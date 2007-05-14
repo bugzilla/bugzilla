@@ -346,3 +346,14 @@ div.user_match {
 .field_value {
     vertical-align: top;
 }
+
+#keyword-chooser {
+    padding: 10px;
+    position: absolute;
+    z-index: 25;
+    top: 50px;
+    left: 50px;
+    border: 2px solid #404D6C;
+    -moz-border-radius: 5px;
+    background: white;
+}

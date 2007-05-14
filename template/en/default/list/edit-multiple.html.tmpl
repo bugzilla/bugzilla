@@ -204,7 +204,8 @@
         </label>
       </th>
       <td colspan="3">
-        <input id="keywords" name="keywords" size="32">
+        <input id="keywords" name="keywords" size="32" 
+               onfocus = "this.chooser.open();">
         <select name="keywordaction">
           <option value="add">Add these keywords</option>
           <option value="delete">Delete these keywords</option>
@@ -237,6 +238,12 @@
   [% END %]
 
 </table>
+
+[% IF use_keywords %]
+  [% PROCESS "bug/keyword-chooser.html.tmpl"
+    sel_keywords = keywords.split(', ')
+  %]
+[% END %]
 
 <b><label for="comment">Additional Comments:</label></b><br>
 [% INCLUDE global/textarea.html.tmpl

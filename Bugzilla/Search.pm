@@ -451,14 +451,11 @@ sub init {
              $term = "bugs.$f <> " . pronoun($1, $user);
           },
          "^(assigned_to|reporter),(?!changed)" => sub {
-             my $list = $self->ListIDsForEmail($t, $v);
-             if ($list) {
-                 $term = "bugs.$f IN ($list)"; 
-             } else {
-                 push(@supptables, "INNER JOIN profiles AS map_$f " .
-                                   "ON bugs.$f = map_$f.userid");
-                 $f = "map_$f.login_name";
-             }
+             my $real_f = $f;
+             $f = "login_name";
+             $ff = "profiles.login_name";
+             $funcsbykey{",$t"}->();
+             $term = "bugs.$real_f IN (SELECT userid FROM profiles WHERE $term)";
          },
          "^qa_contact,(?!changed)" => sub {
              push(@supptables, "LEFT JOIN profiles AS map_qa_contact " .
@@ -518,49 +515,21 @@ sub init {
                                "AND cc_$chartseq.who = $match");
              $term = "cc_$chartseq.who IS NULL";
          },
-         "^cc,(anyexact|substring|regexp)" => sub {
-             my $list;
-             $list = $self->ListIDsForEmail($t, $v);
-             my $chartseq = $chartid;
-             if ($chartid eq "") {
-                 $chartseq = "CC$sequence";
-                 $sequence++;
-             }
-             if ($list) {
-                 push(@supptables, "LEFT JOIN cc AS cc_$chartseq " .
-                                   "ON bugs.bug_id = cc_$chartseq.bug_id " .
-                                   "AND cc_$chartseq.who IN($list)");
-                 $term = "cc_$chartseq.who IS NOT NULL";
-             } else {
-                 push(@supptables, "LEFT JOIN cc AS cc_$chartseq " .
-                                   "ON bugs.bug_id = cc_$chartseq.bug_id");
-                 push(@supptables,
-                            "LEFT JOIN profiles AS map_cc_$chartseq " .
-                            "ON cc_$chartseq.who = map_cc_$chartseq.userid");
-
-                 $ff = $f = "map_cc_$chartseq.login_name";
-                 my $ref = $funcsbykey{",$t"};
-                 &$ref;
-             }
-         },
          "^cc,(?!changed)" => sub {
              my $chartseq = $chartid;
              if ($chartid eq "") {
                  $chartseq = "CC$sequence";
                  $sequence++;
              }
-            push(@supptables, "LEFT JOIN cc AS cc_$chartseq " .
-                              "ON bugs.bug_id = cc_$chartseq.bug_id");
-
-            $ff = $f = "map_cc_$chartseq.login_name";
-            my $ref = $funcsbykey{",$t"};
-            &$ref;
-            push(@supptables, 
-                        "LEFT JOIN profiles AS map_cc_$chartseq " .
-                        "ON (cc_$chartseq.who = map_cc_$chartseq.userid " .
-                        "AND ($term))"
-                );
-            $term = "$f IS NOT NULL";
+             $f = "login_name";
+             $ff = "profiles.login_name";
+             $funcsbykey{",$t"}->();
+             push(@supptables, "LEFT JOIN cc AS cc_$chartseq " .
+                               "ON bugs.bug_id = cc_$chartseq.bug_id " .
+                               "AND cc_$chartseq.who IN" .
+                               "(SELECT userid FROM profiles WHERE $term)"
+                               );
+             $term = "cc_$chartseq.who IS NOT NULL";
          },
 
          "^long_?desc,changedby" => sub {
@@ -668,8 +637,6 @@ sub init {
          },
          "^commenter," => sub {
              my $chartseq = $chartid;
-             my $list;
-             $list = $self->ListIDsForEmail($t, $v);
              if ($chartid eq "") {
                  $chartseq = "LD$sequence";
                  $sequence++;
@@ -681,20 +648,15 @@ sub init {
              {
                  $extra = "AND $table.isprivate < 1";
              }
-             if ($list) {
-                 push(@supptables, "LEFT JOIN longdescs AS $table " .
-                                   "ON $table.bug_id = bugs.bug_id $extra " .
-                                   "AND $table.who IN ($list)");
-                 $term = "$table.who IS NOT NULL";
-             } else {
-                 push(@supptables, "LEFT JOIN longdescs AS $table " .
-                                   "ON $table.bug_id = bugs.bug_id $extra");
-                 push(@supptables, "LEFT JOIN profiles AS map_$table " .
-                                   "ON $table.who = map_$table.userid");
-                 $ff = $f = "map_$table.login_name";
-                 my $ref = $funcsbykey{",$t"};
-                 &$ref;
-             }
+             $f = "login_name";
+             $ff = "profiles.login_name";
+             $funcsbykey{",$t"}->();
+             push(@supptables, "LEFT JOIN longdescs AS $table " .
+                               "ON $table.bug_id = bugs.bug_id $extra " .
+                               "AND $table.who IN" .
+                               "(SELECT userid FROM profiles WHERE $term)"
+                               );
+             $term = "$table.who IS NOT NULL";
          },
          "^long_?desc," => sub {
              my $table = "longdescs_$chartid";
@@ -1549,59 +1511,6 @@ sub SqlifyDate {
         ThrowUserError("illegal_date", { date => $str });
     }
     return time2str("%Y-%m-%d %H:%M:%S", $date);
-}
-
-# ListIDsForEmail returns a string with a comma-joined list
-# of userids matching email addresses
-# according to the type specified.
-# Currently, this only supports regexp, exact, anyexact, and substring matches.
-# Matches will return up to 50 matching userids
-# If a match type is unsupported or returns too many matches,
-# ListIDsForEmail returns an undef.
-sub ListIDsForEmail {
-    my ($self, $type, $email) = (@_);
-    my $old = $self->{"emailcache"}{"$type,$email"};
-    return undef if ($old && $old eq "---");
-    return $old if $old;
-    
-    my $dbh = Bugzilla->dbh;
-    my @list = ();
-    my $list = "---";
-    if ($type eq 'anyexact') {
-        foreach my $w (split(/,/, $email)) {
-            $w = trim($w);
-            my $id = login_to_id($w);
-            if ($id > 0) {
-                push(@list,$id)
-            }
-        }
-        $list = join(',', @list);
-    } elsif ($type eq 'substring') {
-        my $sql_email = $dbh->quote($email);
-        trick_taint($sql_email);
-        my $result = $dbh->selectcol_arrayref(
-                    q{SELECT userid FROM profiles WHERE } .
-                    $dbh->sql_position(lc($sql_email), q{LOWER(login_name)}) .
-                    q{ > 0 } . $dbh->sql_limit(51));
-        @list = @{$result};
-        if (scalar(@list) < 50) {
-            $list = join(',', @list);
-        }
-    } elsif ($type eq 'regexp') {
-        my $sql_email = $dbh->quote($email);
-        trick_taint($sql_email);
-        my $result = $dbh->selectcol_arrayref(
-                        qq{SELECT userid FROM profiles WHERE } .
-                        $dbh->sql_regexp("login_name", $sql_email) .
-                        q{ } . $dbh->sql_limit(51));
-        @list = @{$result};
-        if (scalar(@list) < 50) {
-            $list = join(',', @list);
-        }
-    }
-    $self->{"emailcache"}{"$type,$email"} = $list;
-    return undef if ($list eq "---");
-    return $list;
 }
 
 sub build_subselect {

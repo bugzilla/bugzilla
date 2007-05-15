@@ -51,7 +51,14 @@
     [% END %]
   </td>
 </tr>
+
+[%# XXX This condition (can_change_password) will cause a problem
+  # if we ever have a login system that can create accounts through
+  # createaccount.cgi but can't change passwords.
+  #%]
+  
 [% IF editusers %]
+  [% IF user.authorizer.can_change_password %]
   <tr>
     <th><label for="password">Password:</label></th>
     <td>
@@ -63,6 +70,7 @@
       [% END %]
     </td>
   </tr>
+  [% END %]
   <tr>
     <th><label for="disable_mail">[% terms.Bug %]mail Disabled:</label></th>
     <td>

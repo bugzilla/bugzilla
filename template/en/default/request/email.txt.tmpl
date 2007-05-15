@@ -27,12 +27,14 @@
 [% attidsummary = attachment.id _ ': ' _ attachment.description %]
 [% statuses = { '+' => "granted" , '-' => 'denied' , 'X' => "canceled" ,
                 '?' => "asked" } %]
+
+[% to_identity = "" %]
 [% IF flag.status == '?' %]
-  [% to_identity = flag.addressee.identity _ " for" %]
+  [% to_identity = flag.requestee.identity _ " for" %]
   [% subject_status = "requested" %]
 [% ELSE %]
-  [% IF flag.addressee %]
-    [% to_identity = flag.addressee.identity _ "'s request for" %]
+  [% IF flag.requester %]
+    [% to_identity = flag.requester.identity _ "'s request for" %]
   [% END %]
   [% subject_status = statuses.${flag.status} %]
 [% END %]

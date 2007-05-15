@@ -185,42 +185,16 @@ $cgi->param('comment', $bug->_check_comment($cgi->param('comment')));
 # instead of throwing an error, f.e. when one or more of the values
 # is a bug alias that gets converted to its corresponding bug ID
 # during validation.
-foreach my $field ("dependson", "blocked") {
-    if ($cgi->param('id')) {
-        my @old = @{$bug->$field};
-        my @new;
-        foreach my $id (split(/[\s,]+/, $cgi->param($field))) {
-            next unless $id;
-            ValidateBugID($id, $field);
-            push @new, $id;
-        }
-        $cgi->param($field, join(",", @new));
-        my ($added, $removed) = Bugzilla::Util::diff_arrays(\@old, \@new);
-        foreach my $id (@$added , @$removed) {
-            # ValidateBugID is called without $field here so that it will
-            # throw an error if any of the changed bugs are not visible.
-            ValidateBugID($id);
-            if (Bugzilla->params->{"strict_isolation"}) {
-                my $deltabug = new Bugzilla::Bug($id);
-                if (!$user->can_edit_product($deltabug->{'product_id'})) {
-                    $vars->{'field'} = $field;
-                    ThrowUserError("illegal_change_deps", $vars);
-                }
-            }
-        }
-        if ((@$added || @$removed)
-            && !$bug->check_can_change_field($field, 0, 1, \$PrivilegesRequired))
-        {
-            $vars->{'privs'} = $PrivilegesRequired;
-            $vars->{'field'} = $field;
-            ThrowUserError("illegal_change", $vars);
-        }
-    } else {
-        # Bugzilla does not support mass-change of dependencies so they
-        # are not validated.  To prevent a URL-hacking risk, the dependencies
-        # are deleted for mass-changes.
-        $cgi->delete($field);
-    }
+if ($cgi->param('id')) {
+    my ($dependson, $blocks) = $bug->_check_dependencies(
+        scalar $cgi->param('dependson'), scalar $cgi->param('blocked'));
+    $cgi->param('dependson', $dependson);
+    $cgi->param('blocked',   $blocks);
+}
+# Right now, you can't modify dependencies on a mass change.
+else {
+    $cgi->delete('dependson');
+    $cgi->delete('blocked');
 }
 
 # do a match on the fields if applicable

@@ -411,7 +411,8 @@ sub run_create_validators {
                                     $params->{assigned_to}, $params->{qa_contact});
 
     ($params->{dependson}, $params->{blocked}) = 
-        $class->_check_dependencies($product, $params->{dependson}, $params->{blocked});
+        $class->_check_dependencies($params->{dependson}, $params->{blocked},
+                                    $product);
 
     # You can't set these fields on bug creation (or sometimes ever).
     delete $params->{resolution};
@@ -701,28 +702,59 @@ sub _check_deadline {
 # Takes two comma/space-separated strings and returns arrayrefs
 # of valid bug IDs.
 sub _check_dependencies {
-    my ($invocant, $product, $depends_on, $blocks) = @_;
+    my ($invocant, $depends_on, $blocks, $product) = @_;
 
-    # Only editbugs users can set dependencies on bug entry.
-    return ([], []) unless Bugzilla->user->in_group('editbugs', $product->id);
-
-    $depends_on ||= '';
-    $blocks     ||= '';
-
-    # Make sure all the bug_ids are valid.
-    my @results;
-    foreach my $string ($depends_on, $blocks) {
-        my @array = split(/[\s,]+/, $string);
-        # Eliminate nulls
-        @array = grep($_, @array);
-        # $field is not passed to ValidateBugID to prevent adding new
-        # dependencies on inaccessible bugs.
-        ValidateBugID($_) foreach (@array);
-        push(@results, \@array);
+    if (!ref $invocant) {
+        # Only editbugs users can set dependencies on bug entry.
+        return ([], []) unless Bugzilla->user->in_group('editbugs',
+                                                        $product->id);
     }
 
-    #                               dependson    blocks
-    my %deps = ValidateDependencies($results[0], $results[1]);
+    my %deps_in = (dependson => $depends_on || '', blocked => $blocks || '');
+
+    foreach my $type qw(dependson blocked) {
+        my @bug_ids = split(/[\s,]+/, $deps_in{$type});
+        # Eliminate nulls.
+        @bug_ids = grep {$_} @bug_ids;
+        # We do Validate up here to make sure all aliases are converted to IDs.
+        ValidateBugID($_, $type) foreach @bug_ids;
+       
+        my @check_access = @bug_ids;
+        # When we're updating a bug, only added or removed bug_ids are 
+        # checked for whether or not we can see/edit those bugs.
+        if (ref $invocant) {
+            my $old = $invocant->$type;
+            my ($removed, $added) = diff_arrays($old, \@bug_ids);
+            @check_access = (@$added, @$removed);
+            
+            # Check field permissions if we've changed anything.
+            if (@check_access) {
+                my $privs;
+                if (!$invocant->check_can_change_field($type, 0, 1, \$privs)) {
+                    ThrowUserError('illegal_change', { field => $type,
+                                                       privs => $privs });
+                }
+            }
+        }
+
+        my $user = Bugzilla->user;
+        foreach my $modified_id (@check_access) {
+            ValidateBugID($modified_id);
+            # Under strict isolation, you can't modify a bug if you can't
+            # edit it, even if you can see it.
+            if (Bugzilla->params->{"strict_isolation"}) {
+                my $delta_bug = new Bugzilla::Bug($modified_id);
+                if (!$user->can_edit_product($delta_bug->{'product_id'})) {
+                    ThrowUserError("illegal_change_deps", {field => $type});
+                }
+            }
+        }
+        
+        $deps_in{$type} = \@bug_ids;
+    }
+        
+    # And finally, check for dependency loops.
+    my %deps = ValidateDependencies($deps_in{dependson}, $deps_in{blocked});
 
     return ($deps{'dependson'}, $deps{'blocked'});
 }

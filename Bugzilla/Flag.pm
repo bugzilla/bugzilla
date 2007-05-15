@@ -746,6 +746,7 @@ sub modify {
             my $requester;
             if ($flag->status eq '?') {
                 $requester = $flag->setter;
+                $flag->{'requester'} = $requester;
             }
             # Now update the flag object with its new values.
             $flag->{'setter'} = $setter;
@@ -905,6 +906,7 @@ sub clear {
     my $requester;
     if ($flag->status eq '?') {
         $requester = $flag->setter;
+        $flag->{'requester'} = $requester;
     }
 
     # Now update the flag object to its new values. The last

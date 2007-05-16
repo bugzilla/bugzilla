@@ -38,6 +38,7 @@ use lib ".";
 
 use Bugzilla;
 use Bugzilla::Constants;
+use Bugzilla::Error;
 use Bugzilla::Util;
 use Bugzilla::Search;
 use Bugzilla::User;

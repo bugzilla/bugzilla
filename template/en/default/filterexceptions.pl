@@ -543,6 +543,16 @@
   'comp.bug_count'
 ],
 
+'admin/workflow/edit.html.tmpl' => [
+  'status.id',
+  'new_status.id',
+],
+
+'admin/workflow/comment.html.tmpl' => [
+  'status.id',
+  'new_status.id',
+],
+
 'account/login.html.tmpl' => [
   'target', 
 ],

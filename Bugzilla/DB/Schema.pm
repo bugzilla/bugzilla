@@ -583,6 +583,7 @@ use constant ABSTRACT_SCHEMA => {
             sortkey  => {TYPE => 'INT2', NOTNULL => 1, DEFAULT => 0},
             isactive => {TYPE => 'BOOLEAN', NOTNULL => 1, 
                          DEFAULT => 'TRUE'},
+            is_open  => {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'TRUE'},
         ],
         INDEXES => [
             bug_status_value_idx  => {FIELDS => ['value'],
@@ -668,6 +669,19 @@ use constant ABSTRACT_SCHEMA => {
             op_sys_value_idx   => {FIELDS => ['value'],
                                    TYPE => 'UNIQUE'},
             op_sys_sortkey_idx => ['sortkey', 'value'],
+        ],
+    },
+
+    status_workflow => {
+        FIELDS => [
+            # On bug creation, there is no old value.
+            old_status      => {TYPE => 'INT2'},
+            new_status      => {TYPE => 'INT2', NOTNULL => 1},
+            require_comment => {TYPE => 'INT1', NOTNULL => 1, DEFAULT => 0},
+        ],
+        INDEXES => [
+            status_workflow_idx  => {FIELDS => ['old_status', 'new_status'],
+                                     TYPE => 'UNIQUE'},
         ],
     },
 

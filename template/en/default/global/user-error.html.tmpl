@@ -189,7 +189,7 @@
     [% ELSIF object == "settings" %]
       settings
     [% ELSIF object == "sudo_session" %]
-      an sudo session
+      a sudo session
     [% ELSIF object == "timetracking_summaries" %]
       time-tracking summary reports
     [% ELSIF object == "user" %]
@@ -198,6 +198,8 @@
       users
     [% ELSIF object == "versions" %]
       versions
+    [% ELSIF object == "workflow" %]
+      the workflow
     [% END %].
 
     [% Hook.process("auth_failure") %]

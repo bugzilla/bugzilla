@@ -65,3 +65,41 @@ td.admin_links dt.forbidden a, td.admin_links dd.forbidden a {
     color: inherit;
     cursor: default;
 }
+
+.col-header {
+    width: 8em;
+}
+
+.checkbox-cell {
+    border: 1px black solid;
+}
+
+/* Grey-green color */
+.open-status {
+    color: #286;
+}
+
+/* Brown-red color */
+.closed-status {
+    color: #a63;
+}
+
+/* Dark green color */
+.checked {
+    background-color: #5b4;
+}
+
+/* Dark red color */
+td.forbidden {
+    background-color: #811;
+}
+
+tr.highlight:hover {
+    background-color: yellow;
+}
+
+th.title {
+    font-size: larger;
+    text-align: center;
+    vertical-align: middle;
+}

@@ -506,6 +506,9 @@ sub update_table_definitions {
     _fix_uppercase_custom_field_names();
     _fix_uppercase_index_names();
 
+    # 2007-05-17 LpSolit@gmail.com - Bug 344965
+    _initialize_workflow();
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################
@@ -2772,6 +2775,90 @@ sub _fix_uppercase_index_names {
             $dbh->bz_drop_index($field, $name);
             $dbh->bz_add_index($field, $new_name, $new_def);
         }
+    }
+}
+
+sub _initialize_workflow {
+    my $dbh = Bugzilla->dbh;
+
+    if (!$dbh->bz_column_info('bug_status', 'is_open')) {
+        $dbh->bz_add_column('bug_status', 'is_open',
+                            {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'TRUE'});
+
+        # Till now, bug statuses were not customizable. Nevertheless, local
+        # changes are possible and so we will try to respect these changes.
+        # This means: get the status of bugs having a resolution different from ''
+        # and mark these statuses as 'closed', even if some of these statuses are
+        # expected to be open statuses. Bug statuses we have no information about
+        # are left as 'open'.
+        my @statuses =
+          @{$dbh->selectcol_arrayref('SELECT DISTINCT bug_status FROM bugs
+                                      WHERE resolution != ?', undef, '')};
+
+        # Append the default list of closed statuses. Duplicated statuses don't hurt.
+        @statuses = map {$dbh->quote($_)} (@statuses, qw(RESOLVED VERIFIED CLOSED));
+
+        print "Marking closed bug statuses as such...\n";
+        $dbh->do('UPDATE bug_status SET is_open = 0 WHERE value IN (' .
+                  join(', ', @statuses) . ')');
+    }
+
+    # Populate the status_workflow table. We do nothing if the table already
+    # has entries. If all bug status transitions have been deleted, the
+    # workflow will be restored to its default schema.
+    my $count = $dbh->selectrow_array('SELECT COUNT(*) FROM status_workflow');
+    return if $count;
+
+    my $create = Bugzilla->params->{'commentoncreate'};
+    my $confirm = Bugzilla->params->{'commentonconfirm'};
+    my $accept = Bugzilla->params->{'commentonaccept'};
+    my $resolve = Bugzilla->params->{'commentonresolve'};
+    my $verify = Bugzilla->params->{'commentonverify'};
+    my $close = Bugzilla->params->{'commentonclose'};
+    my $reopen = Bugzilla->params->{'commentonreopen'};
+    # This was till recently the only way to get back to NEW for
+    # confirmed bugs, so we use this parameter here.
+    my $reassign = Bugzilla->params->{'commentonreassign'};
+
+    # This is the default workflow.
+    my @workflow = ([undef, 'UNCONFIRMED', $create],
+                    [undef, 'NEW', $create],
+                    [undef, 'ASSIGNED', $create],
+                    ['UNCONFIRMED', 'NEW', $confirm],
+                    ['UNCONFIRMED', 'ASSIGNED', $accept],
+                    ['UNCONFIRMED', 'RESOLVED', $resolve],
+                    ['NEW', 'ASSIGNED', $accept],
+                    ['NEW', 'RESOLVED', $resolve],
+                    ['ASSIGNED', 'NEW', $reassign],
+                    ['ASSIGNED', 'RESOLVED', $resolve],
+                    ['REOPENED', 'NEW', $reassign],
+                    ['REOPENED', 'ASSIGNED', $accept],
+                    ['REOPENED', 'RESOLVED', $resolve],
+                    ['RESOLVED', 'UNCONFIRMED', $reopen],
+                    ['RESOLVED', 'REOPENED', $reopen],
+                    ['RESOLVED', 'VERIFIED', $verify],
+                    ['RESOLVED', 'CLOSED', $close],
+                    ['VERIFIED', 'UNCONFIRMED', $reopen],
+                    ['VERIFIED', 'REOPENED', $reopen],
+                    ['VERIFIED', 'CLOSED', $close],
+                    ['CLOSED', 'UNCONFIRMED', $reopen],
+                    ['CLOSED', 'REOPENED', $reopen]);
+
+    print "Now filling the 'status_workflow' table with valid bug status transitions...\n";
+    my $sth_select = $dbh->prepare('SELECT id FROM bug_status WHERE value = ?');
+    my $sth = $dbh->prepare('INSERT INTO status_workflow (old_status, new_status,
+                                         require_comment) VALUES (?, ?, ?)');
+
+    foreach my $transition (@workflow) {
+        my ($from, $to);
+        # If it's an initial state, there is no "old" value.
+        $from = $dbh->selectrow_array($sth_select, undef, $transition->[0])
+          if $transition->[0];
+        $to = $dbh->selectrow_array($sth_select, undef, $transition->[1]);
+        # If one of the bug statuses doesn't exist, the transition is invalid.
+        next if (($transition->[0] && !$from) || !$to);
+
+        $sth->execute($from, $to, $transition->[2] ? 1 : 0);
     }
 }
 

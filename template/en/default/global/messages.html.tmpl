@@ -491,7 +491,10 @@
     You entered a username that matched more than one
     user, so we have instead left the [% match_field FILTER html %]
     field blank.
-    
+
+  [% ELSIF message_tag == "workflow_updated" %]
+    The workflow has been updated.
+
   [% ELSE %]
     [%# Give sensible error if error functions are used incorrectly.
       #%]        

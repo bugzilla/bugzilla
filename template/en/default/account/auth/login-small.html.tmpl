@@ -25,6 +25,9 @@
   # then we are accessing the home page. %]
 
 [% script_name = cgi.url(Relative => 1) %]
+[% IF !script_name %]
+ [% script_name = "index.cgi" %]
+[% END %]
 
 [%# If SSL is in use, use 'sslbase', else use 'urlbase'. %]
 [% IF Param("sslbase") != "" && Param("ssl") != "never" %]

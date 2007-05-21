@@ -24,6 +24,10 @@
   # target: string. URL to go to after login.
   #%]
 
+[% IF !target %]
+ [% target = "index.cgi" %]
+[% END %]
+  
 [% PROCESS global/variables.none.tmpl %]
 
 [% PROCESS global/header.html.tmpl

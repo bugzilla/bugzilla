@@ -41,6 +41,8 @@ use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Util;
 
+use Date::Format qw(time2str);
+
 use Encode qw(encode);
 use Email::MIME;
 # Loading this gives us encoding_set.
@@ -89,6 +91,11 @@ sub MessageToMTA {
         $hostname = $1;
         $from .= "\@$hostname" if $from !~ /@/;
         $email->header_set('From', $from);
+        
+        # Sendmail adds a Date: header also, but others may not.
+        if (!defined $email->header('Date')) {
+            $email->header_set('Date', time2str("%a, %e %b %Y %T %z", time()));
+        }
     }
 
     if ($method eq "SMTP") {

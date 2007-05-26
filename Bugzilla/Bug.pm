@@ -537,7 +537,7 @@ sub _check_bug_status {
 
 sub _check_cc {
     my ($invocant, $component, $ccs) = @_;
-    return [] unless $ccs;
+    return [map {$_->id} @{$component->initial_cc}] unless $ccs;
 
     my %cc_ids;
     foreach my $person (@$ccs) {

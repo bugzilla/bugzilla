@@ -1211,22 +1211,26 @@ sub _initialize {
     my $self = shift;
     my $abstract_schema = shift;
 
-    $abstract_schema ||= ABSTRACT_SCHEMA;
+    if (!$abstract_schema) {
+        # While ABSTRACT_SCHEMA cannot be modified, $abstract_schema can be.
+        # So, we dclone it to prevent anything from mucking with the constant.
+        $abstract_schema = dclone(ABSTRACT_SCHEMA);
 
-    # Let extensions add tables, but make sure they can't modify existing 
-    # tables. If we don't lock/unlock keys, lock_value complains.
-    lock_keys(%$abstract_schema);
-    lock_value(%$abstract_schema, $_) foreach (keys %$abstract_schema);
-    unlock_keys(%$abstract_schema);
-    Bugzilla::Hook::process('db_schema-abstract_schema', 
-                            { schema => $abstract_schema });
-    unlock_hash(%$abstract_schema);
+        # Let extensions add tables, but make sure they can't modify existing
+        # tables. If we don't lock/unlock keys, lock_value complains.
+        lock_keys(%$abstract_schema);
+        foreach my $table (keys %{ABSTRACT_SCHEMA()}) {
+            lock_value(%$abstract_schema, $table) 
+                if exists $abstract_schema->{$table};
+        }
+        unlock_keys(%$abstract_schema);
+        Bugzilla::Hook::process('db_schema-abstract_schema', 
+                                { schema => $abstract_schema });
+        unlock_hash(%$abstract_schema);
+    }
 
     $self->{schema} = dclone($abstract_schema);
-    # While ABSTRACT_SCHEMA cannot be modified, 
-    # $self->{abstract_schema} can be. So, we dclone it to prevent
-    # anything from mucking with the constant.
-    $self->{abstract_schema} = dclone($abstract_schema);
+    $self->{abstract_schema} = $abstract_schema;
 
     return $self;
 

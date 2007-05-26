@@ -32,6 +32,7 @@ use Bugzilla::Search;
 use Bugzilla::Util;
 use Bugzilla::Error;
 use Bugzilla::User;
+use Bugzilla::Token;
 
 my $template = Bugzilla->template;
 local our $vars = {};
@@ -51,6 +52,9 @@ sub DoAccount {
 
     if(Bugzilla->params->{'allowemailchange'} 
        && Bugzilla->user->authorizer->can_change_email) {
+       # First delete old tokens.
+       Bugzilla::Token::CleanTokenTable();
+
         my @token = $dbh->selectrow_array(
             "SELECT tokentype, issuedate + " .
                     $dbh->sql_interval(MAX_TOKEN_AGE, 'DAY') . ", eventdata

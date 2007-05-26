@@ -107,6 +107,12 @@ test calls.
 
 Specify a file that contains settings for the creating of a new bug.
 
+=item --field
+
+Pass a field name to get legal values for this field. It must be either a
+global select field (such as bug_status, resolution, rep_platform, op_sys,
+priority, bug_severity) or a custom select field.
+
 =back
 
 =head1 DESCRIPTION

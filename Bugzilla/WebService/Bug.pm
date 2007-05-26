@@ -130,6 +130,8 @@ sub legal_values {
 
     my @custom_select =
         Bugzilla->get_fields({ type => FIELD_TYPE_SINGLE_SELECT });
+    # We only want field names.
+    @custom_select = map {$_->name} @custom_select;
 
     my $values;
     if (grep($_ eq $field, GLOBAL_SELECT_FIELDS, @custom_select)) {

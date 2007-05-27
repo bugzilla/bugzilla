@@ -22,7 +22,7 @@ package Bugzilla::Install::DB;
 
 use strict;
 
-use Bugzilla::Bug qw(is_open_state);
+use Bugzilla::Bug qw(BUG_STATE_OPEN is_open_state);
 use Bugzilla::Constants;
 use Bugzilla::Hook;
 use Bugzilla::Install::Util qw(indicate_progress);

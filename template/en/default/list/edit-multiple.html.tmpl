@@ -18,6 +18,7 @@
   #
   # Contributor(s): Myk Melez <myk@mozilla.org>
   #                 Max Kanat-Alexander <mkanat@bugzilla.org>
+  #                 Frédéric Buclin <LpSolit@gmail.com>
   #%]
 
 [% PROCESS global/variables.none.tmpl %]
@@ -301,66 +302,25 @@
 
 
 
-[% knum = 0 %]
 <input id="knob-none" type="radio" name="knob" value="none" checked="checked">
 <label for="knob-none">Do nothing else</label><br>
 
-[% IF bugstatuses.size == 1 && bugstatuses.0 == unconfirmedstate %]
-  [% knum = knum + 1 %]
-  <input id="knob-confirm" type="radio" name="knob" value="confirm">
-  <label for="knob-confirm">
-    Confirm [% terms.bugs %] (change status to <b>[% get_status("NEW") FILTER html %]</b>)
-  </label><br>
+[% FOREACH bug_status = new_bug_statuses %]
+    <input type="radio" id="knob_[% bug_status.id FILTER html %]" name="knob"
+           value="[% bug_status.name FILTER html %]">
+    <label for="knob_[% bug_status.id FILTER html %]">
+      Change status to <b>[% get_status(bug_status.name) FILTER html %]</b>
+    </label>
+    [% IF !bug_status.is_open %]
+      and set the resolution to [% PROCESS select_resolution field = "knob_${bug_status.id}" %]
+    [% END %]
+    <br>
 [% END %]
 
-[%# If all the bugs being changed are open, allow the user to accept them,
-    clear their resolution or resolve them. %]
-[% IF !bugstatuses.containsany(closedstates) %]
-  [% knum = knum + 1 %]
-  <input id="knob-accept" type="radio" name="knob" value="accept">
-  <label for="knob-accept">
-    Accept [% terms.bugs %] (change status to <b>[% get_status("ASSIGNED") FILTER html %]</b>)
-  </label><br>
-
-  [% knum = knum + 1 %]
+[%# If all the bugs being changed are open, allow the user to clear their resolution. %]
+[% IF !current_bug_statuses.containsany(closedstates) %]
   <input id="knob-clearresolution" type="radio" name="knob" value="clearresolution">
   <label for="knob-clearresolution">Clear the resolution</label><br>
-
-  [% knum = knum + 1 %]
-  <input id="knob-resolve" type="radio" name="knob" value="resolve">
-  <label for="knob-resolve">
-    Resolve [% terms.bugs %], changing <a href="page.cgi?id=fields.html#resolution">resolution</a> to
-  </label>
-  <select name="resolution" onchange="document.forms.changeform.knob[[% knum %]].checked=true">
-    [% FOREACH resolution = resolutions %]
-      [% NEXT IF !resolution %]
-      <option value="[% resolution FILTER html %]">
-        [% get_resolution(resolution) FILTER html %]
-      </option>
-    [% END %]
-  </select><br>
-
-[% END %]
-
-[%# If all the bugs are closed, allow the user to reopen them. %]
-[% IF !bugstatuses.containsany(openstates) %]
-  [% knum = knum + 1 %]
-  <input id="knob-reopen" type="radio" name="knob" value="reopen">
-  <label for="knob-reopen">Reopen [% terms.bugs %]</label><br>
-[% END %]
-
-[% IF bugstatuses.size == 1 %]
-  [% IF bugstatuses.contains('RESOLVED') %]
-    [% knum = knum + 1 %]
-    <input id="knob-verify" type="radio" name="knob" value="verify">
-    <label for="knob-verify">Mark [% terms.bugs %] as <b>[% get_status("VERIFIED") FILTER html %]</b></label><br>
-  [% END %]
-[% END %]
-
-[% IF !bugstatuses.containsany(openstates) AND !bugstatuses.contains('CLOSED') %]
-  [% knum = knum + 1 %]
-  <input id="knob-close" type="radio" name="knob" value="close">
-  <label for="knob-close">Mark [% terms.bugs %] as <b>[% get_status("CLOSED") FILTER html %]</b></label><br>
 [% END %]
 
 <input type="submit" id="commit" value="Commit">
@@ -381,6 +341,16 @@
     [% FOREACH menuitem = menuitems %]
       [% IF property %][% menuitem = menuitem.$property %][% END %]
       <option value="[% menuitem FILTER html %]">[% menuitem FILTER html %]</option>
+    [% END %]
+  </select>
+[% END %]
+
+[% BLOCK select_resolution %]
+  <select name="resolution"
+          onchange="document.forms['changeform'].[% field FILTER html %].checked=true">
+    [% FOREACH r = resolutions %]
+      [% NEXT IF !r %]
+      <option value="[% r FILTER html %]">[% get_resolution(r) FILTER html %]</option>
     [% END %]
   </select>
 [% END %]

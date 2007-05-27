@@ -120,6 +120,11 @@ sub send_results {
     $vars->{'header_done'} = 1;
 }
 
+sub comment_exists {
+    my $cgi = Bugzilla->cgi;
+    return ($cgi->param('comment') && $cgi->param('comment') =~ /\S+/) ? 1 : 0;
+}
+
 ######################################################################
 # Begin Data/Security Validation
 ######################################################################
@@ -244,32 +249,6 @@ if ($cgi->cookie("BUGLIST") && defined $cgi->param('id')) {
     $vars->{'bug_list'} = \@bug_list;
 }
 
-# This function checks if there is a comment required for a specific
-# function and tests, if the comment was given.
-# If comments are required for functions is defined by params.
-#
-sub CheckonComment {
-    my ($function) = (@_);
-    my $cgi = Bugzilla->cgi;
-    
-    # Param is 1 if comment should be added !
-    my $ret = Bugzilla->params->{ "commenton" . $function };
-
-    # Allow without comment in case of undefined Params.
-    $ret = 0 unless ( defined( $ret ));
-
-    if( $ret ) {
-        if (!defined $cgi->param('comment')
-            || $cgi->param('comment') =~ /^\s*$/) {
-            # No comment - sorry, action not allowed !
-            ThrowUserError("comment_required");
-        } else {
-            $ret = 0;
-        }
-    }
-    return( ! $ret ); # Return val has to be inverted
-}
-
 # Figure out whether or not the user is trying to change the product
 # (either the "product" variable is not set to "don't change" or the
 # user is changing a single bug and has changed the bug's product),
@@ -287,11 +266,13 @@ if (defined $cgi->param('id')) {
 defined($cgi->param('product'))
   || ThrowCodeError('undefined_field', { field => 'product' });
 
-if (((defined $cgi->param('id') && $cgi->param('product') ne $oldproduct) 
+if ((defined $cgi->param('id') && $cgi->param('product') ne $oldproduct)
      || (!$cgi->param('id')
          && $cgi->param('product') ne $cgi->param('dontchange')))
-    && CheckonComment( "reassignbycomponent" ))
 {
+    if (Bugzilla->params->{'commentonreassignbycomponent'} && !comment_exists()) {
+        ThrowUserError('comment_required');
+    }
     # Check to make sure they actually have the right to change the product
     if (!$bug->check_can_change_field('product', $oldproduct, $cgi->param('product'),
                                       \$PrivilegesRequired))
@@ -439,6 +420,7 @@ defined($cgi->param('component'))
 
 # Confirm that the reporter of the current bug can access the bug we are duping to.
 sub DuplicateUserConfirm {
+    my ($dupe, $original) = @_;
     my $cgi = Bugzilla->cgi;
     my $dbh = Bugzilla->dbh;
     my $template = Bugzilla->template;
@@ -448,11 +430,6 @@ sub DuplicateUserConfirm {
         return;
     }
 
-    # Remember that we validated both these ids earlier, so we know
-    # they are both valid bug ids
-    my $dupe = $cgi->param('id');
-    my $original = $cgi->param('dup_id');
-    
     my $reporter = $dbh->selectrow_array(
         q{SELECT reporter FROM bugs WHERE bug_id = ?}, undef, $dupe);
     my $rep_user = Bugzilla::User->new($reporter);
@@ -616,16 +593,6 @@ sub _remove_remaining_time {
 sub DoComma {
     $::query .= "$::comma\n    ";
     $::comma = ",";
-}
-
-sub DoConfirm {
-    my $bug = shift;
-    if ($bug->check_can_change_field("canconfirm", 0, 1, 
-                                     \$PrivilegesRequired)) 
-    {
-        DoComma();
-        $::query .= "everconfirmed = 1";
-    }
 }
 
 # Changing this so that it will process groups from checkboxes instead of
@@ -941,126 +908,53 @@ if (defined $cgi->param('qa_contact') && !$cgi->param('set_default_qa_contact'))
     }
 }
 
-if ($cgi->param('set_default_assignee') || $cgi->param('set_default_qa_contact')) {
-    CheckonComment('reassignbycomponent');
+if (($cgi->param('set_default_assignee') || $cgi->param('set_default_qa_contact'))
+    && Bugzilla->params->{'commentonreassignbycomponent'} && !comment_exists())
+{
+        ThrowUserError('comment_required');
 }
 
 my $duplicate; # It will store the ID of the bug we are pointing to, if any.
 
-SWITCH: for ($cgi->param('knob')) {
-    /^none$/ && do {
-        last SWITCH;
-    };
-    /^confirm$/ && CheckonComment( "confirm" ) && do {
-        DoConfirm($bug);
-        last SWITCH;
-    };
-    /^accept$/ && CheckonComment( "accept" ) && do {
-        DoConfirm($bug);
-        if (Bugzilla->params->{"usetargetmilestone"}
-            && Bugzilla->params->{"musthavemilestoneonaccept"}) 
-        {
-            $requiremilestone = 1;
-        }
-        last SWITCH;
-    };
-    /^clearresolution$/ && CheckonComment( "clearresolution" ) && do {
-        last SWITCH;
-    };
-    /^(resolve|change_resolution)$/ && CheckonComment( "resolve" ) && do {
-        # Check here, because it's the only place we require the resolution
-        check_field('resolution', scalar $cgi->param('resolution'),
-                    Bugzilla::Bug->settable_resolutions);
-
-        # don't resolve as fixed while still unresolved blocking bugs
-        if (Bugzilla->params->{"noresolveonopenblockers"}
-            && $cgi->param('resolution') eq 'FIXED')
-        {
-            my @dependencies = Bugzilla::Bug::CountOpenDependencies(@idlist);
-            if (scalar @dependencies > 0) {
-                ThrowUserError("still_unresolved_bugs",
-                               { dependencies     => \@dependencies,
-                                 dependency_count => scalar @dependencies });
-            }
-        }
-
-        if ($cgi->param('knob') eq 'resolve') {
-            # RESOLVED bugs should have no time remaining;
-            # more time can be added for the VERIFY step, if needed.
-            _remove_remaining_time();
-        }
-        else {
-            # You cannot use change_resolution if there is at least
-            # one open bug.
-            my $open_states = join(',', map {$dbh->quote($_)} BUG_STATE_OPEN);
-            my $idlist = join(',', @idlist);
-            my $is_open =
-              $dbh->selectrow_array("SELECT 1 FROM bugs WHERE bug_id IN ($idlist)
-                                     AND bug_status IN ($open_states)");
-
-            ThrowUserError('resolution_not_allowed') if $is_open;
-        }
-        last SWITCH;
-    };
-    /^reopen$/  && CheckonComment( "reopen" ) && do {
-        last SWITCH;
-    };
-    /^verify$/ && CheckonComment( "verify" ) && do {
-        last SWITCH;
-    };
-    /^close$/ && CheckonComment( "close" ) && do {
-        # CLOSED bugs should have no time remaining.
-        _remove_remaining_time();
-        last SWITCH;
-    };
-    /^duplicate$/ && CheckonComment( "duplicate" ) && do {
-        # You cannot mark bugs as duplicates when changing
-        # several bugs at once.
-        unless (defined $cgi->param('id')) {
-            ThrowUserError('dupe_not_allowed');
-        }
-
-        # Make sure we can change the original bug (issue A on bug 96085)
-        defined($cgi->param('dup_id'))
-          || ThrowCodeError('undefined_field', { field => 'dup_id' });
-
-        $duplicate = $cgi->param('dup_id');
-        ValidateBugID($duplicate, 'dup_id');
-        $cgi->param('dup_id', $duplicate);
-
-        # Make sure a loop isn't created when marking this bug
-        # as duplicate.
-        my %dupes;
-        my $dupe_of = $duplicate;
-        my $sth = $dbh->prepare('SELECT dupe_of FROM duplicates
-                                 WHERE dupe = ?');
-
-        while ($dupe_of) {
-            if ($dupe_of == $cgi->param('id')) {
-                ThrowUserError('dupe_loop_detected', { bug_id  => $cgi->param('id'),
-                                                       dupe_of => $duplicate });
-            }
-            # If $dupes{$dupe_of} is already set to 1, then a loop
-            # already exists which does not involve this bug.
-            # As the user is not responsible for this loop, do not
-            # prevent him from marking this bug as a duplicate.
-            last if exists $dupes{"$dupe_of"};
-            $dupes{"$dupe_of"} = 1;
-            $sth->execute($dupe_of);
-            $dupe_of = $sth->fetchrow_array;
-        }
-
-        # Also, let's see if the reporter has authorization to see
-        # the bug to which we are duping. If not we need to prompt.
-        DuplicateUserConfirm();
-
-        # DUPLICATE bugs should have no time remaining.
-        _remove_remaining_time();
-        last SWITCH;
-    };
-
-    ThrowCodeError("unknown_action", { action => $cgi->param('knob') });
+# Make sure the bug status transition is legal for all bugs.
+my $knob = scalar $cgi->param('knob');
+# Special actions (duplicate, change_resolution and clearresolution) are outside
+# the workflow.
+if (!grep { $knob eq $_ } SPECIAL_STATUS_WORKFLOW_ACTIONS) {
+    Bugzilla::Bug->check_status_transition($knob, \@idlist);
+    my $bug_status = new Bugzilla::Status({name => $knob});
+    # Fill the resolution field with the correct value (e.g. in case the
+    # workflow allows several open -> closed transitions).
+    if ($bug_status->is_open) {
+        $cgi->delete('resolution');
+    }
+    else {
+        $cgi->param('resolution', $cgi->param('resolution_knob_' . $bug_status->id));
+    }
 }
+elsif ($knob eq 'change_resolution') {
+    # Fill the resolution field with the correct value.
+    $cgi->param('resolution', $cgi->param('resolution_knob_change_resolution'));
+}
+else {
+    # The resolution field is not in use.
+    $cgi->delete('resolution');
+}
+
+# The action is a valid one.
+trick_taint($knob);
+# Some information is required for checks.
+$vars->{comment_exists} = comment_exists();
+$vars->{bug_id} = $cgi->param('id');
+$vars->{dup_id} = $cgi->param('dup_id');
+$vars->{resolution} = $cgi->param('resolution') || '';
+Bugzilla::Bug->check_status_change_triggers($knob, \@idlist, $vars);
+
+# Some triggers require extra actions.
+$duplicate = $vars->{dup_id};
+$requiremilestone = $vars->{requiremilestone};
+DuplicateUserConfirm($vars->{bug_id}, $duplicate) if $vars->{DuplicateUserConfirm};
+_remove_remaining_time() if $vars->{remove_remaining_time};
 
 my @keywordlist;
 my %keywordseen;
@@ -1252,14 +1146,15 @@ foreach my $id (@idlist) {
     my $comma = $::comma;
     my $old_bug_obj = new Bugzilla::Bug($id);
 
-    my $status;
+    my ($status, $everconfirmed);
     my $resolution = $old_bug_obj->resolution;
-    # These are the only actions where we care about the resolution field.
-    if ($cgi->param('knob') =~ /^(?:resolve|change_resolution)$/) {
+    # We only care about the resolution field if the user explicitly edits it
+    # or if he closes the bug.
+    if ($knob eq 'change_resolution' || $cgi->param('resolution')) {
         $resolution = $cgi->param('resolution');
     }
-    ($status, $resolution) =
-      $old_bug_obj->get_new_status_and_resolution(scalar $cgi->param('knob'), $resolution);
+    ($status, $resolution, $everconfirmed) =
+      $old_bug_obj->get_new_status_and_resolution($knob, $resolution);
 
     if ($status ne $old_bug_obj->bug_status) {
         $query .= "$comma bug_status = ?";
@@ -1269,6 +1164,11 @@ foreach my $id (@idlist) {
     if ($resolution ne $old_bug_obj->resolution) {
         $query .= "$comma resolution = ?";
         push(@bug_values, $resolution);
+        $comma = ',';
+    }
+    if ($everconfirmed ne $old_bug_obj->everconfirmed) {
+        $query .= "$comma everconfirmed = ?";
+        push(@bug_values, $everconfirmed);
         $comma = ',';
     }
 
@@ -1314,7 +1214,7 @@ foreach my $id (@idlist) {
             "user_group_map READ", "group_group_map READ", "flagtypes READ",
             "flaginclusions AS i READ", "flagexclusions AS e READ",
             "keyworddefs READ", "groups READ", "attachments READ",
-            "group_control_map AS oldcontrolmap READ",
+            "bug_status READ", "group_control_map AS oldcontrolmap READ",
             "group_control_map AS newcontrolmap READ",
             "group_control_map READ", "email_setting READ", "classifications READ");
 

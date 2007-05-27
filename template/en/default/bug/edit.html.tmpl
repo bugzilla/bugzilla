@@ -595,7 +595,7 @@
       <td align="right">
         <b><a href="page.cgi?id=fields.html#status">Status</a></b>:
       </td>
-      <td>[% status_descs.${bug.bug_status} FILTER html %]</td>
+      <td>[% get_status(bug.bug_status) FILTER html %]</td>
     </tr>
 
     <tr>

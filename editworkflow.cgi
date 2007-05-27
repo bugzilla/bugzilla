@@ -27,6 +27,7 @@ use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Token;
+use Bugzilla::Status;
 
 my $cgi = Bugzilla->cgi;
 my $dbh = Bugzilla->dbh;
@@ -41,12 +42,6 @@ $user->in_group('admin')
 
 my $action = $cgi->param('action') || 'edit';
 my $token = $cgi->param('token');
-
-sub get_statuses {
-    my $statuses = $dbh->selectall_arrayref('SELECT id, value, is_open FROM bug_status
-                                             ORDER BY sortkey, value', { Slice => {} });
-    return $statuses;
-}
 
 sub get_workflow {
     my $workflow = $dbh->selectall_arrayref('SELECT old_status, new_status, require_comment
@@ -64,7 +59,7 @@ sub load_template {
     my $template = Bugzilla->template;
     my $vars = {};
 
-    $vars->{'statuses'} = get_statuses();
+    $vars->{'statuses'} = [Bugzilla::Status->get_all];
     $vars->{'workflow'} = get_workflow();
     $vars->{'token'} = issue_session_token("workflow_$filename");
     $vars->{'message'} = $message;
@@ -79,9 +74,8 @@ if ($action eq 'edit') {
 }
 elsif ($action eq 'update') {
     check_token_data($token, 'workflow_edit');
-    my $statuses = get_statuses;
+    my $statuses = [Bugzilla::Status->get_all];
     my $workflow = get_workflow();
-    my $initial_state = {id => 0};
 
     my $sth_insert = $dbh->prepare('INSERT INTO status_workflow (old_status, new_status)
                                     VALUES (?, ?)');
@@ -90,22 +84,28 @@ elsif ($action eq 'update') {
     my $sth_delnul = $dbh->prepare('DELETE FROM status_workflow
                                     WHERE old_status IS NULL AND new_status = ?');
 
-    foreach my $old ($initial_state, @$statuses) {
-        # Hashes cannot have undef as a key, so we use 0. But the DB
-        # must store undef, for referential integrity.
-        my $old_id_for_db = $old->{'id'} || undef;
-        foreach my $new (@$statuses) {
-            next if $old->{'id'} == $new->{'id'};
+    # Part 1: Initial bug statuses.
+    foreach my $new (@$statuses) {
+        if ($cgi->param('w_0_' . $new->id)) {
+            $sth_insert->execute(undef, $new->id)
+              unless defined $workflow->{0}->{$new->id};
+        }
+        else {
+            $sth_delnul->execute($new->id);
+        }
+    }
 
-            if ($cgi->param('w_' . $old->{'id'} . '_' . $new->{'id'})) {
-                $sth_insert->execute($old_id_for_db, $new->{'id'})
-                  unless defined $workflow->{$old->{'id'}}->{$new->{'id'}};
-            }
-            elsif ($old_id_for_db) {
-                $sth_delete->execute($old_id_for_db, $new->{'id'});
+    # Part 2: Bug status changes.
+    foreach my $old (@$statuses) {
+        foreach my $new (@$statuses) {
+            next if $old->id == $new->id;
+
+            if ($cgi->param('w_' . $old->id . '_' . $new->id)) {
+                $sth_insert->execute($old->id, $new->id)
+                  unless defined $workflow->{$old->id}->{$new->id};
             }
             else {
-                $sth_delnul->execute($new->{'id'});
+                $sth_delete->execute($old->id, $new->id);
             }
         }
     }

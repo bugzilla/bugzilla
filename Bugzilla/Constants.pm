@@ -120,8 +120,6 @@ use File::Basename;
     FIELD_TYPE_FREETEXT
     FIELD_TYPE_SINGLE_SELECT
 
-    BUG_STATE_OPEN
-
     USAGE_MODE_BROWSER
     USAGE_MODE_CMDLINE
     USAGE_MODE_WEBSERVICE
@@ -350,10 +348,6 @@ use constant MAX_TOKEN_AGE => 3;
 use constant SAFE_PROTOCOLS => ('afs', 'cid', 'ftp', 'gopher', 'http', 'https',
                                 'irc', 'mid', 'news', 'nntp', 'prospero', 'telnet',
                                 'view-source', 'wais');
-
-# States that are considered to be "open" for bugs.
-use constant BUG_STATE_OPEN => ('NEW', 'REOPENED', 'ASSIGNED', 
-                                'UNCONFIRMED');
 
 # Usage modes. Default USAGE_MODE_BROWSER. Use with Bugzilla->usage_mode.
 use constant USAGE_MODE_BROWSER    => 0;

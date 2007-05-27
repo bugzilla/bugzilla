@@ -191,8 +191,7 @@
 
 'list/edit-multiple.html.tmpl' => [
   'group.id', 
-  'knum', 
-  'menuname', 
+  'menuname',
 ],
 
 'list/list.rdf.tmpl' => [
@@ -317,10 +316,6 @@
   '" maxlength=\"$maxlength\"" IF maxlength',
   '" onfocus=\"$onfocus\"" IF onfocus',
   'flag.status',
-],
-
-'bug/knob.html.tmpl' => [
-  'knum', 
 ],
 
 'bug/navigate.html.tmpl' => [

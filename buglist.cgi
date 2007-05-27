@@ -1139,8 +1139,26 @@ if ($dotweak) {
 
     $vars->{'unconfirmedstate'} = 'UNCONFIRMED';
 
-    $vars->{'bugstatuses'} = [ keys %$bugstatuses ];
+    # Convert bug statuses to their ID.
+    my @bug_statuses = map {$dbh->quote($_)} keys %$bugstatuses;
+    my $bug_status_ids =
+      $dbh->selectcol_arrayref('SELECT id FROM bug_status
+                                WHERE value IN (' . join(', ', @bug_statuses) .')');
 
+    # This query collects new statuses which are common to all current bug statuses.
+    # It also accepts transitions where the bug status doesn't change.
+    $bug_status_ids =
+      $dbh->selectcol_arrayref('SELECT DISTINCT new_status
+                                FROM status_workflow sw1
+                                WHERE NOT EXISTS (SELECT * FROM status_workflow sw2
+                                                  WHERE sw2.old_status != sw1.new_status
+                                                  AND sw2.old_status IN (' . join(', ', @$bug_status_ids) . ')
+                                                  AND NOT EXISTS (SELECT * FROM status_workflow sw3
+                                                                  WHERE sw3.new_status = sw1.new_status
+                                                                  AND sw3.old_status = sw2.old_status))');
+
+    $vars->{'current_bug_statuses'} = [keys %$bugstatuses];
+    $vars->{'new_bug_statuses'} = Bugzilla::Status->new_from_list($bug_status_ids);
     # The groups to which the user belongs.
     $vars->{'groups'} = GetGroups();
 

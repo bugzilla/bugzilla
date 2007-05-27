@@ -18,42 +18,39 @@
   #
   # Contributor(s): Gervase Markham <gerv@gerv.net>
   #                 Vaskin Kissoyan <vkissoyan@yahoo.com>
+  #                 Frédéric Buclin <LpSolit@gmail.com>
   #%]
 
 [% PROCESS global/variables.none.tmpl %]
 
-[%# *** Knob *** %]
-
 <br>
 <div id="knob">
   <div id="knob-options">
-
-  [% knum = 1 %]
   [% initial_action_shown = 0 %]
 
-  [% IF bug.isunconfirmed && bug.user.canconfirm %]
+  [%# These actions are based on the current custom workflow. %]
+  [% FOREACH bug_status = bug.status.can_change_to %]
+    [% NEXT IF bug.isunconfirmed && bug_status.is_open && !bug.user.canconfirm %]
+    [% NEXT IF bug.isopened && !bug.isunconfirmed && bug_status.is_open && !bug.user.canedit %]
+    [% NEXT IF !bug_status.is_open && !bug.user.canedit && !bug.user.isreporter %]
+    [% NEXT IF !bug_status.is_open && bug_status.is_open && !bug.user.canedit && !bug.user.isreporter %]
+    [%# Special hack to only display UNCO or REOP when reopening, but not both;
+      # for compatibility with older versions. %]
+    [% NEXT IF !bug.isopened && (bug.everconfirmed && bug_status.name == "UNCONFIRMED"
+                                 || !bug.everconfirmed && bug_status.name == "REOPENED") %]
     [% PROCESS initial_action %]
-    <input type="radio" id="knob-confirm" name="knob" value="confirm">
-    <label for="knob-confirm">
-      Confirm [% terms.bug %] (change status to <b>[% get_status("NEW") FILTER html %]</b>)
+    <input type="radio" id="knob_[% bug_status.id FILTER html %]" name="knob"
+           value="[% bug_status.name FILTER html %]">
+    <label for="knob_[% bug_status.id FILTER html %]">
+      Change status to <b>[% get_status(bug_status.name) FILTER html %]</b>
     </label>
+    [% IF bug.isopened && !bug_status.is_open %]
+      and set the resolution to [% PROCESS select_resolution field = "knob_${bug_status.id}" %]
+    [% END %]
     <br>
-    [% knum = knum + 1 %]
   [% END %]
 
-  [% IF bug.isopened && bug.bug_status != "ASSIGNED" && bug.user.canedit
-        && (!bug.isunconfirmed || bug.user.canconfirm) %]
-    [% PROCESS initial_action %]
-    <input type="radio" id="knob-accept" name="knob" value="accept">
-    <label for="knob-accept">
-      Accept [% terms.bug %] (
-      [% IF bug.isunconfirmed %]confirm [% terms.bug %], and [% END %]change
-      status to <b>[% get_status("ASSIGNED") FILTER html %]</b>)
-    </label>
-    <br>
-    [% knum = knum + 1 %]
-  [% END %]
-
+  [%# These actions are special and are independent of the workflow. %]
   [% IF bug.user.canedit || bug.user.isreporter %]
     [% IF bug.isopened %]
       [% IF bug.resolution %]
@@ -64,65 +61,27 @@
           <b>[% get_resolution(bug.resolution) FILTER html %]</b>)
         </label>
         <br>
-        [% knum = knum + 1 %]
       [% END %]
-
-      [% PROCESS initial_action %]
-      <input type="radio" id="knob-resolve" name="knob" value="resolve">
-      <label for="knob-resolve">
-        Resolve [% terms.bug %], changing 
-        <a href="page.cgi?id=fields.html#resolution">resolution</a> to
-      </label>  
-      [% PROCESS select_resolution %]
-
-      [% PROCESS duplicate %]
     [% ELSE %]
-      [% IF bug.resolution != "MOVED" ||
-           (bug.resolution == "MOVED" && bug.user.canmove) %]
+      [% IF bug.resolution != "MOVED" || bug.user.canmove %]
         [% PROCESS initial_action %]
-        <input type="radio" id="knob-change-resolution" name="knob" value="change_resolution">
-        <label for="knob-change-resolution">
+        <input type="radio" id="knob_change_resolution" name="knob" value="change_resolution">
+        <label for="knob_change_resolution">
           Change <a href="page.cgi?id=fields.html#resolution">resolution</a> to
         </label>
-        [% PROCESS select_resolution %]
-
-        [% PROCESS duplicate %]
-
-        <input type="radio" id="knob-reopen" name="knob" value="reopen">
-        <label for="knob-reopen">
-          Reopen [% terms.bug %]
-        </label>
+        [% PROCESS select_resolution field = "knob_change_resolution" %]
         <br>
-        [% knum = knum + 1 %]
-      [% END %]
-      [% IF bug.bug_status == "RESOLVED" %]
-        [% PROCESS initial_action %]
-        <input type="radio" id="knob-verify" name="knob" value="verify">
-        <label for="knob-verify">
-          Mark [% terms.bug %] as <b>[% get_status("VERIFIED") FILTER html %]</b>
-        </label>
-        <br>
-        [% knum = knum + 1 %]
-      [% END %]
-      [% IF bug.bug_status != "CLOSED" %]
-        [% PROCESS initial_action %]
-        <input type="radio" id="knob-close" name="knob" value="close">
-        <label for="knob-close">
-          Mark [% terms.bug %] as <b>[% get_status("CLOSED") FILTER html %]</b>
-        </label>
-        <br>
-        [% knum = knum + 1 %]
       [% END %]
     [% END %]
+
+    [% PROCESS duplicate %]
   [% END %]
   </div>
 
   <div id="knob-buttons">
-  <input type="submit" value="Commit" id="commit">
+    <input type="submit" value="Commit" id="commit">
     [% IF bug.user.canmove %]
-      &nbsp; <font size="+1"><b> | </b></font> &nbsp;
-      <input type="submit" name="action" id="action"
-             value="[% Param("move-button-text") %]">
+      <input type="submit" name="action" id="action" value="[% Param("move-button-text") %]">
     [% END %]
   </div>
 </div>
@@ -143,23 +102,20 @@
 [% END %]
 
 [% BLOCK select_resolution %]
-  <select name="resolution"
-          onchange="document.changeform.knob[[% knum %]].checked=true">
+  <select name="resolution_[% field FILTER html %]"
+          onchange="document.forms['changeform'].[% field FILTER html %].checked=true">
     [% FOREACH r = bug.choices.resolution %]
       <option value="[% r FILTER html %]">[% get_resolution(r) FILTER html %]</option>
     [% END %]
   </select>
-  <br>
-  [% knum = knum + 1 %]
 [% END %]
 
 [% BLOCK duplicate %]
-  <input type="radio" id="knob-duplicate" name="knob" value="duplicate">
-  <label for="knob-duplicate">
+  <input type="radio" id="knob_duplicate" name="knob" value="duplicate">
+  <label for="knob_duplicate">
     Mark the [% terms.bug %] as duplicate of [% terms.bug %] #
   </label>
   <input name="dup_id" size="6"
-         onchange="if (this.value != '') {document.changeform.knob[[% knum %]].checked=true}">
+         onchange="if (this.value != '') {document.forms['changeform'].knob_duplicate.checked=true}">
   <br>
-  [% knum = knum + 1 %]
 [% END %]

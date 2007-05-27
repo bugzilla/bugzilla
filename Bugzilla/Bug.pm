@@ -42,6 +42,7 @@ use Bugzilla::Error;
 use Bugzilla::Product;
 use Bugzilla::Component;
 use Bugzilla::Group;
+use Bugzilla::Status;
 
 use List::Util qw(min);
 use Storable qw(dclone);
@@ -52,8 +53,9 @@ use base qw(Bugzilla::Object Exporter);
     bug_alias_to_id ValidateBugAlias ValidateBugID
     RemoveVotes CheckIfVotedConfirmed
     LogActivityEntry
-    is_open_state
+    BUG_STATE_OPEN is_open_state
     editable_bug_fields
+    SPECIAL_STATUS_WORKFLOW_ACTIONS
 );
 
 #####################################################################
@@ -176,6 +178,19 @@ use constant VALID_ENTRY_STATUS => qw(
     ASSIGNED
 );
 
+use constant SPECIAL_STATUS_WORKFLOW_ACTIONS => qw(
+    none
+    duplicate
+    change_resolution
+    clearresolution
+);
+
+sub BUG_STATE_OPEN {
+    # XXX - We should cache this list.
+    my $dbh = Bugzilla->dbh;
+    return @{$dbh->selectcol_arrayref('SELECT value FROM bug_status WHERE is_open = 1')};
+}
+
 #####################################################################
 
 sub new {
@@ -212,12 +227,6 @@ sub new {
         $error_self->{'error'}  = 'NotFound';
         return $error_self;
     }
-
-    # XXX At some point these should be moved into accessors.
-    # They only are here because this is how Bugzilla::Bug
-    # originally did things, before it was a Bugzilla::Object.
-    $self->{'isunconfirmed'} = ($self->{bug_status} eq 'UNCONFIRMED');
-    $self->{'isopened'}      = is_open_state($self->{bug_status});
 
     return $self;
 }
@@ -1025,8 +1034,7 @@ sub set_status {
     my ($self, $status) = @_;
     $self->set('bug_status', $status); 
     # Check for the everconfirmed transition
-    $self->_set_everconfirmed(1) if ($status eq 'NEW'
-                                     || $status eq 'ASSIGNED');
+    $self->_set_everconfirmed(1) if (is_open_state($status) && $status ne 'UNCONFIRMED');
 }
 
 ########################
@@ -1247,6 +1255,16 @@ sub flag_types {
     return $self->{'flag_types'};
 }
 
+sub isopened {
+    my $self = shift;
+    return is_open_state($self->{bug_status}) ? 1 : 0;
+}
+
+sub isunconfirmed {
+    my $self = shift;
+    return ($self->bug_status eq 'UNCONFIRMED') ? 1 : 0;
+}
+
 sub keywords {
     my ($self) = @_;
     return $self->{'keywords'} if exists $self->{'keywords'};
@@ -1317,6 +1335,13 @@ sub reporter {
     return $self->{'reporter'};
 }
 
+sub status {
+    my $self = shift;
+    return undef if $self->{'error'};
+
+    $self->{'status'} ||= new Bugzilla::Status({name => $self->{'bug_status'}});
+    return $self->{'status'};
+}
 
 sub show_attachment_flags {
     my ($self) = @_;
@@ -1530,18 +1555,159 @@ sub bug_alias_to_id {
 # Workflow Control routines
 #####################################################################
 
+# Make sure that the new status is valid for ALL bugs.
+sub check_status_transition {
+    my ($self, $new_status, $bug_ids) = @_;
+    my $dbh = Bugzilla->dbh;
+
+    check_field('bug_status', $new_status);
+    trick_taint($new_status);
+
+    my $illegal_statuses =
+      $dbh->selectcol_arrayref('SELECT DISTINCT bug_status.value
+                                  FROM bug_status
+                            INNER JOIN bugs
+                                    ON bugs.bug_status = bug_status.value
+                                 WHERE bug_id IN (' . join (',', @$bug_ids). ')
+                                   AND bug_status.id NOT IN (SELECT old_status
+                                                               FROM status_workflow
+                                                         INNER JOIN bug_status b_s
+                                                                 ON b_s.id = status_workflow.new_status
+                                                              WHERE b_s.value = ?)',
+                                 undef, $new_status);
+
+    if (scalar(@$illegal_statuses)) {
+        ThrowUserError('illegal_bug_status_transition', {old => $illegal_statuses,
+                                                         new => $new_status})
+    }
+}
+
+# Make sure all checks triggered by the workflow are successful.
+# Some are hardcoded and come from older versions of Bugzilla.
+sub check_status_change_triggers {
+    my ($self, $action, $bug_ids, $vars) = @_;
+    my $dbh = Bugzilla->dbh;
+    $vars ||= {};
+
+    # First, make sure no comment is required if there is none.
+    # If a comment is given, then this check is useless.
+    if (!$vars->{comment_exists}) {
+        if (grep { $action eq $_ } SPECIAL_STATUS_WORKFLOW_ACTIONS) {
+            # 'commentonnone' doesn't exist, so this is safe.
+            ThrowUserError('comment_required') if Bugzilla->params->{"commenton$action"};
+        }
+        else {
+            my $required_for_transitions =
+              $dbh->selectcol_arrayref('SELECT DISTINCT bug_status.value
+                                          FROM bug_status
+                                    INNER JOIN bugs
+                                            ON bugs.bug_status = bug_status.value
+                                    INNER JOIN status_workflow
+                                            ON bug_status.id = old_status
+                                    INNER JOIN bug_status b_s
+                                            ON b_s.id = new_status
+                                         WHERE bug_id IN (' . join (',', @$bug_ids). ')
+                                           AND b_s.value = ?
+                                           AND require_comment = 1',
+                                         undef, $action);
+
+            if (scalar(@$required_for_transitions)) {
+                ThrowUserError('comment_required', {old => $required_for_transitions,
+                                                    new => $action});
+            }
+        }
+    }
+
+    # Now run hardcoded checks.
+    # There is no checks for these actions.
+    return if ($action eq 'none' || $action eq 'clearresolution');
+
+    if ($action eq 'duplicate') {
+        # You cannot mark bugs as duplicates when changing
+        # several bugs at once.
+        $vars->{bug_id} || ThrowUserError('dupe_not_allowed');
+
+        # Make sure we can change the original bug (issue A on bug 96085)
+        $vars->{dup_id} || ThrowCodeError('undefined_field', { field => 'dup_id' });
+        ValidateBugID($vars->{dup_id}, 'dup_id');
+
+        # Make sure a loop isn't created when marking this bug
+        # as duplicate.
+        my %dupes;
+        my $dupe_of = $vars->{dup_id};
+        my $sth = $dbh->prepare('SELECT dupe_of FROM duplicates
+                                 WHERE dupe = ?');
+
+        while ($dupe_of) {
+            if ($dupe_of == $vars->{bug_id}) {
+                ThrowUserError('dupe_loop_detected', { bug_id  => $vars->{bug_id},
+                                                       dupe_of => $vars->{dup_id} });
+            }
+            # If $dupes{$dupe_of} is already set to 1, then a loop
+            # already exists which does not involve this bug.
+            # As the user is not responsible for this loop, do not
+            # prevent him from marking this bug as a duplicate.
+            last if exists $dupes{"$dupe_of"};
+            $dupes{"$dupe_of"} = 1;
+            $sth->execute($dupe_of);
+            $dupe_of = $sth->fetchrow_array;
+        }
+
+        # Also, let's see if the reporter has authorization to see
+        # the bug to which we are duping. If not we need to prompt.
+        $vars->{DuplicateUserConfirm} = 1;
+
+        # DUPLICATE bugs should have no time remaining.
+        $vars->{remove_remaining_time} = 1;
+    }
+    elsif ($action eq 'change_resolution' || !is_open_state($action)) {
+        # don't resolve as fixed while still unresolved blocking bugs
+        if (Bugzilla->params->{"noresolveonopenblockers"}
+            && $vars->{resolution} eq 'FIXED')
+        {
+            my @dependencies = Bugzilla::Bug::CountOpenDependencies(@$bug_ids);
+            if (scalar @dependencies > 0) {
+                ThrowUserError("still_unresolved_bugs",
+                               { dependencies     => \@dependencies,
+                                 dependency_count => scalar @dependencies });
+            }
+        }
+
+        # You cannot use change_resolution if there is at least one open bug
+        # nor can you close open bugs if no resolution is given.
+        my $open_states = join(',', map {$dbh->quote($_)} BUG_STATE_OPEN);
+        my $idlist = join(',', @$bug_ids);
+        my $is_open =
+          $dbh->selectrow_array("SELECT 1 FROM bugs WHERE bug_id IN ($idlist)
+                                 AND bug_status IN ($open_states)");
+
+        if ($is_open) {
+            ThrowUserError('resolution_not_allowed') if ($action eq 'change_resolution');
+            ThrowUserError('missing_resolution', {status => $action}) if !$vars->{resolution};
+        }
+        # Now is good time to validate the resolution, if any.
+        check_field('resolution', $vars->{resolution},
+                    Bugzilla::Bug->settable_resolutions) if $vars->{resolution};
+
+        $vars->{remove_remaining_time} = 1 if ($action ne 'change_resolution');
+    }
+    elsif ($action eq 'ASSIGNED'
+           && Bugzilla->params->{"usetargetmilestone"}
+           && Bugzilla->params->{"musthavemilestoneonaccept"})
+    {
+        $vars->{requiremilestone} = 1;
+    }
+}
+
 sub get_new_status_and_resolution {
     my ($self, $action, $resolution) = @_;
     my $dbh = Bugzilla->dbh;
 
     my $status;
+    my $everconfirmed = $self->everconfirmed;
     if ($action eq 'none') {
         # Leaving the status unchanged doesn't need more investigation.
-        return ($self->bug_status, $self->resolution);
-    }
-    elsif ($action eq 'reopen') {
-        $status = $self->everconfirmed ? 'REOPENED' : 'UNCONFIRMED';
-        $resolution = '';
+        return ($self->bug_status, $self->resolution, $self->everconfirmed);
     }
     elsif ($action eq 'duplicate') {
         # Only alter the bug status if the bug is currently open.
@@ -1560,36 +1726,20 @@ sub get_new_status_and_resolution {
         $resolution = '';
     }
     else {
-        # That's where actions not requiring any specific trigger (such as future
-        # custom statuses) come.
-        # XXX - This is hardcoded here for now, but will disappear soon when
-        #       this routine will look at the DB directly to get the workflow.
-        if ($action eq 'confirm') {
-            $status = 'NEW';
-        }
-        elsif ($action eq 'accept') {
-            $status = 'ASSIGNED';
-        }
-        elsif ($action eq 'resolve') {
-            $status = 'RESOLVED';
-        }
-        elsif ($action eq 'verify') {
-            $status = 'VERIFIED';
-        }
-        elsif ($action eq 'close') {
-            $status = 'CLOSED';
-        }
-        else {
-            ThrowCodeError('unknown_action', { action => $action });
-        }
-
+        $status = $action;
         if (is_open_state($status)) {
             # Open bugs have no resolution.
             $resolution = '';
+            $everconfirmed = ($status eq 'UNCONFIRMED') ? 0 : 1;
+        }
+        elsif (is_open_state($self->bug_status)) {
+            # A resolution is required to close bugs.
+            $resolution || ThrowUserError('missing_resolution', {status => $status});
         }
         else {
-            # All non-open statuses must have a resolution.
-            $resolution || ThrowUserError('missing_resolution', {status => $status});
+            # Already closed bugs can only change their resolution
+            # using the change_resolution action.
+            $resolution = $self->resolution
         }
     }
     # Now it's time to validate the bug resolution.
@@ -1598,7 +1748,7 @@ sub get_new_status_and_resolution {
     check_field('resolution', $resolution) if ($resolution ne '');
     trick_taint($resolution);
 
-    return ($status, $resolution);
+    return ($status, $resolution, $everconfirmed);
 }
 
 #####################################################################
@@ -1968,7 +2118,7 @@ sub CountOpenDependencies {
             "FROM bugs, dependencies " .
            "WHERE blocked IN (" . (join "," , @bug_list) . ") " .
              "AND bug_id = dependson " .
-             "AND bug_status IN ('" . (join "','", BUG_STATE_OPEN)  . "') " .
+             "AND bug_status IN (" . join(', ', map {$dbh->quote($_)} BUG_STATE_OPEN)  . ") " .
           $dbh->sql_group_by('blocked'));
     $sth->execute();
 

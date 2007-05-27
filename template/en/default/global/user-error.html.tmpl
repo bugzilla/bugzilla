@@ -243,7 +243,13 @@
 
   [% ELSIF error == "comment_required" %]
     [% title = "Comment Required" %]
-    You have to specify a <b>comment</b> on this change.
+    You have to specify a <b>comment</b>
+    [% IF old.size && new %]
+      to change the [% terms.bug %] status from [% old.join(", ") FILTER html %]
+      to [% new FILTER html %].
+    [% ELSE %]
+      on this change.
+    [% END %]
     Please explain your change.
 
   [% ELSIF error == "comment_too_long" %]
@@ -633,7 +639,12 @@
     [% title = "Your Search Makes No Sense" %]
     The only legal values for the <em>Attachment is patch</em> field are
     0 and 1.
-         
+
+  [% ELSIF error == "illegal_bug_status_transition" %]
+    [% title = "Illegal $terms.Bug Status Change" %]
+    You are not allowed to change the [% terms.bug %] status from
+    [%+ old.join(", ") FILTER html %] to [%+ new FILTER html %].
+
   [% ELSIF error == "illegal_change" %]
     [% title = "Not allowed" %]
     You tried to change the 

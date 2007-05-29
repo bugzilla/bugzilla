@@ -23,6 +23,7 @@
 #                 Vance Baarda <vrb@novell.com>
 #                 Guzman Braso <gbn@hqso.net>
 #                 Erik Purins <epurins@day1studios.com>
+#                 Frédéric Buclin <LpSolit@gmail.com>
 
 # This script reads in xml bug data from standard input and inserts
 # a new bug into bugzilla. Everything before the beginning <?xml line
@@ -88,6 +89,7 @@ use Bugzilla::Util;
 use Bugzilla::Constants;
 use Bugzilla::Keyword;
 use Bugzilla::Field;
+use Bugzilla::Status;
 
 use MIME::Base64;
 use MIME::Parser;
@@ -916,7 +918,30 @@ sub process_bug {
         $err .= "This bug was marked DUPLICATE in the database ";
         $err .= "it was moved from.\n    Changing resolution to \"MOVED\"\n";
     } 
-    
+
+    # If there is at least 1 initial bug status different from UNCO, use it,
+    # else use the open bug status with the lowest sortkey (different from UNCO).
+    my @bug_statuses = @{Bugzilla::Status->can_change_to()};
+    @bug_statuses = grep { $_->name ne 'UNCONFIRMED' } @bug_statuses;
+
+    my $initial_status;
+    if (scalar(@bug_statuses)) {
+        $initial_status = $bug_statuses[0]->name;
+    }
+    else {
+        @bug_statuses = @{Bugzilla::Status->get_all()};
+        # Exclude UNCO and inactive bug statuses.
+        @bug_statuses = grep { $_->is_active && $_->name ne 'UNCONFIRMED'} @bug_statuses;
+        my @open_statuses = grep { $_->is_open } @bug_statuses;
+        if (scalar(@open_statuses)) {
+            $initial_status = $open_statuses[0]->name;
+        }
+        else {
+            # There is NO other open bug statuses outside UNCO???
+            Error("no open bug statuses available.");
+        }
+    }
+
     if($has_status){
         if($valid_status){
             if($is_open){
@@ -927,7 +952,7 @@ sub process_bug {
                 }
                 if($changed_owner){
                     if($everconfirmed){  
-                        $status = "NEW";
+                        $status = $initial_status;
                     }
                     else{
                         $status = "UNCONFIRMED";
@@ -941,9 +966,9 @@ sub process_bug {
                 if($everconfirmed){
                     if($status eq "UNCONFIRMED"){
                         $err .= "Bug Status was UNCONFIRMED but everconfirmed was true\n";
-                        $err .= "   Setting status to NEW\n";
+                        $err .= "   Setting status to $initial_status\n";
                         $err .= "Resetting votes to 0\n" if ( $bug_fields{'votes'} );
-                        $status = "NEW";
+                        $status = $initial_status;
                     }
                 }
                 else{ # $everconfirmed is false
@@ -958,8 +983,8 @@ sub process_bug {
                if(!$has_res){
                    $err .= "Missing Resolution. Setting status to ";
                    if($everconfirmed){
-                       $status = "NEW";
-                       $err .= "NEW\n";
+                       $status = $initial_status;
+                       $err .= "$initial_status\n";
                    }
                    else{
                        $status = "UNCONFIRMED";
@@ -975,7 +1000,7 @@ sub process_bug {
         }
         else{ # $valid_status is false
             if($everconfirmed){  
-                $status = "NEW";
+                $status = $initial_status;
             }
             else{
                 $status = "UNCONFIRMED";
@@ -989,7 +1014,7 @@ sub process_bug {
     }
     else{ #has_status is false
         if($everconfirmed){  
-            $status = "NEW";
+            $status = $initial_status;
         }
         else{
             $status = "UNCONFIRMED";

@@ -65,7 +65,7 @@ sub CreateImagemap {
             $default = qq{<area alt="" shape="default" href="$1">\n};
         }
 
-        if ($line =~ /^rectangle \((.*),(.*)\) \((.*),(.*)\) (http[^ ]*) (\d+)$/) {
+        if ($line =~ /^rectangle \((.*),(.*)\) \((.*),(.*)\) (http[^ ]*) (\d+)(\\n.*)?$/) {
             my ($leftx, $rightx, $topy, $bottomy, $url, $bugid) = ($1, $3, $2, $4, $5, $6);
 
             # Pick up bugid from the mapdata label field. Getting the title from

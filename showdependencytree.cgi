@@ -131,7 +131,7 @@ sub GenerateTree {
         if (!$bugs->{$dep_id}->{'error'}
             && Bugzilla->user->can_see_bug($dep_id)
             && (!$maxdepth || $depth <= $maxdepth) 
-            && ($bugs->{$dep_id}->{'isopened'} || !$hide_resolved))
+            && ($bugs->{$dep_id}->isopened || !$hide_resolved))
         {
             # Due to AUTOLOAD in Bug.pm, we cannot add 'dependencies'
             # as a bug object attribute from here.

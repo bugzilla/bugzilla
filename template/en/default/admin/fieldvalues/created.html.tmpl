@@ -16,21 +16,23 @@
 
 [%# INTERFACE:
   # value: string; the name of the newly created field value
-  # field: string; the name of the field the value belongs to
+  # field: object; the field the value belongs to
   #%]
   
-[% title = BLOCK %]New Value '[% value FILTER html %]' added to 
-  '[% field FILTER html %]' field[% END %]
+[% title = BLOCK %]
+  New Value '[% value FILTER html %]' added to '[% field.description FILTER html %]'
+  ([% field.name FILTER html %]) field
+[% END %]
 [% PROCESS global/header.html.tmpl
   title = title
 %]
 
 <p>The value '<a title="Edit value '[% value FILTER html %]' of 
-   for the '[% field FILTER html %]' field"
+   for the '[% field.description FILTER html %]' field"
    href="editvalues.cgi?action=edit&amp;field=
-   [%- field FILTER url_quote %]&amp;value=[% value FILTER url_quote %]">
+   [%- field.name FILTER url_quote %]&amp;value=[% value FILTER url_quote %]">
    [%- value FILTER html %]</a>' has been added as a valid choice for
-   the '[% field FILTER html %]' field.</p>
+   the '[% field.description FILTER html %]' field.</p>
 
 [% PROCESS admin/fieldvalues/footer.html.tmpl %]
 

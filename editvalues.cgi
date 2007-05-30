@@ -27,6 +27,7 @@ use Bugzilla::Error;
 use Bugzilla::Constants;
 use Bugzilla::Config qw(:admin);
 use Bugzilla::Token;
+use Bugzilla::Field;
 
 # List of different tables that contain the changeable field values
 # (the old "enums.") Keep them in alphabetical order by their 
@@ -63,13 +64,13 @@ sub FieldMustExist {
     # Is it a valid field to be editing?
     FieldExists($field) ||
         ThrowUserError('fieldname_invalid', {'field' => $field});
+
+    return new Bugzilla::Field({name => $field});
 }
 
 # Returns if the specified value exists for the field specified.
 sub ValueExists {
     my ($field, $value) = @_;
-    FieldMustExist($field);
-    trick_taint($field);
     # Value is safe because it's being passed only to a SELECT
     # statement via a placeholder.
     trick_taint($value);
@@ -155,20 +156,19 @@ unless ($field) {
     exit;
 }
 
+# At this point, the field is defined.
+$vars->{'field'} = FieldMustExist($field);
+trick_taint($field);
 
 #
 # action='' -> Show nice list of values.
 #
 unless ($action) {
-    FieldMustExist($field);
-    # Now we know the $field is valid.
-    trick_taint($field);
-
-    my $fieldvalues = 
+    my $fieldvalues =
         $dbh->selectall_arrayref("SELECT value AS name, sortkey"
                                . "  FROM $field ORDER BY sortkey, value",
                                  {Slice =>{}});
-    $vars->{'field'} = $field;
+
     $vars->{'values'} = $fieldvalues;
     $vars->{'default'} = Bugzilla->params->{$defaults{$field}} if defined $defaults{$field};
     $vars->{'static'} = $static{$field} if exists $static{$field};
@@ -184,10 +184,7 @@ unless ($action) {
 # (next action will be 'new')
 #
 if ($action eq 'add') {
-    FieldMustExist($field);
-
     $vars->{'value'} = $value;
-    $vars->{'field'} = $field;
     $vars->{'token'} = issue_session_token('add_field_value');
     $template->process("admin/fieldvalues/create.html.tmpl",
                        $vars)
@@ -202,8 +199,6 @@ if ($action eq 'add') {
 #
 if ($action eq 'new') {
     check_token_data($token, 'add_field_value');
-    FieldMustExist($field);
-    trick_taint($field);
 
     # Cleanups and validity checks
     $value || ThrowUserError('fieldvalue_undefined');
@@ -235,7 +230,6 @@ if ($action eq 'new') {
     delete_token($token);
 
     $vars->{'value'} = $value;
-    $vars->{'field'} = $field;
     $template->process("admin/fieldvalues/created.html.tmpl",
                        $vars)
       || ThrowTemplateError($template->error());
@@ -250,7 +244,6 @@ if ($action eq 'new') {
 #
 if ($action eq 'del') {
     ValueMustExist($field, $value);
-    trick_taint($field);
     trick_taint($value);
 
     # See if any bugs are still using this value.
@@ -261,7 +254,6 @@ if ($action eq 'del') {
         $dbh->selectrow_array("SELECT COUNT(*) FROM $field");
 
     $vars->{'value'} = $value;
-    $vars->{'field'} = $field;
     $vars->{'param_name'} = $defaults{$field};
 
     # If the value cannot be deleted, throw an error.
@@ -286,7 +278,6 @@ if ($action eq 'delete') {
     ValueMustExist($field, $value);
 
     $vars->{'value'} = $value;
-    $vars->{'field'} = $field;
     $vars->{'param_name'} = $defaults{$field};
 
     if (defined $defaults{$field}
@@ -299,7 +290,6 @@ if ($action eq 'delete') {
         ThrowUserError('fieldvalue_not_deletable', $vars);
     }
 
-    trick_taint($field);
     trick_taint($value);
 
     $dbh->bz_lock_tables('bugs READ', "$field WRITE");
@@ -334,14 +324,12 @@ if ($action eq 'delete') {
 #
 if ($action eq 'edit') {
     ValueMustExist($field, $value);
-    trick_taint($field);
     trick_taint($value);
 
     $vars->{'sortkey'} = $dbh->selectrow_array(
         "SELECT sortkey FROM $field WHERE value = ?", undef, $value) || 0;
 
     $vars->{'value'} = $value;
-    $vars->{'field'} = $field;
     $vars->{'is_static'} = (lsearch($static{$field}, $value) >= 0) ? 1 : 0;
     $vars->{'token'} = issue_session_token('edit_field_value');
 
@@ -361,12 +349,9 @@ if ($action eq 'update') {
     my $sortkeyold = trim($cgi->param('sortkeyold') || '0');
 
     ValueMustExist($field, $valueold);
-    trick_taint($field);
     trick_taint($valueold);
 
     $vars->{'value'} = $value;
-    $vars->{'field'} = $field;
-
     # If the value cannot be renamed, throw an error.
     if (lsearch($static{$field}, $valueold) >= 0 && $value ne $valueold) {
         $vars->{'old_value'} = $valueold;

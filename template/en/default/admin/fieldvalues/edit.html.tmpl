@@ -17,13 +17,15 @@
 [%# INTERFACE:
   # value: string; The field value we are editing.
   # sortkey: number; Sortkey of the field value we are editing.
-  # field: string; The field this value belongs to.
+  # field: object; The field this value belongs to.
   #%]
 
 [% PROCESS global/variables.none.tmpl %]
 
-[% title = BLOCK %]Edit Value '[% value FILTER html %]'  '
-                   [%- field FILTER html %]'[% END %]
+[% title = BLOCK %]
+  Edit Value '[% value FILTER html %]' for the '[% field.description FILTER html %]'
+  ([% field.name FILTER html %]) field
+[% END %]
 [% PROCESS global/header.html.tmpl
   title = title
 %]
@@ -54,7 +56,7 @@
   <input type="hidden" name="valueold" value="[% value FILTER html %]">
   <input type="hidden" name="sortkeyold" value="[% sortkey FILTER html %]">
   <input type="hidden" name="action" value="update">
-  <input type="hidden" name="field" value="[% field FILTER html %]">
+  <input type="hidden" name="field" value="[% field.name FILTER html %]">
   <input type="hidden" name="token" value="[% token FILTER html %]">
   <input type="submit" id="update" value="Update">
 </form>

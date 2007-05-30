@@ -23,13 +23,15 @@
   #
   # value & updated_value: the name of the field value
   # sortkey & updated_sortkey: the field value sortkey
-  # field: string; the field that the value belongs to
+  # field: object; the field that the value belongs to
   # default_value_updated: boolean; whether the default value for
   #                        this field has been updated
   #%]
   
-[% title = BLOCK %]Updating Value '[% value FILTER html %]' of the
-                   '[% field FILTER html %]' Field[% END %]
+[% title = BLOCK %]
+  Updating Value '[% value FILTER html %]' of the '[% field.description FILTER html %]'
+  ([% field.name FILTER html %]) Field
+[% END %]
 [% PROCESS global/header.html.tmpl
   title = title
 %]

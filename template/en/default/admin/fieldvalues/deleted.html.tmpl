@@ -17,12 +17,14 @@
 [%# INTERFACE:
   # value: string; the field value that was deleted.
   #
-  # field: string; the field the value was deleted from.
+  # field: object; the field the value was deleted from.
   #
   #%]
   
-[% title = BLOCK %]Deleted Value '[% value FILTER html %]' for the
-                   '[% field FILTER html %]' Field[% END %]
+[% title = BLOCK %]
+  Deleted Value '[% value FILTER html %]' for the '[% field.description FILTER html %]'
+  ([% field.name FILTER html %]) Field
+[% END %]
 [% PROCESS global/header.html.tmpl
   title = title
 %]

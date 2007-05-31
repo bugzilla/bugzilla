@@ -263,6 +263,10 @@ table#flags td {
     text-align: left;
 }
 
+.flag_select {
+    min-width: 3em;
+}
+
 .throw_error {
     background-color: #ff0000;
     color: black;

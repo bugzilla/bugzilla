@@ -105,7 +105,8 @@
         <td>
           <select id="flag-[% flag.id %]" name="flag-[% flag.id %]" 
                   title="[% type.description FILTER html %]"
-                  onchange="toggleRequesteeField(this);">
+                  onchange="toggleRequesteeField(this);"
+                  class="flag_select">
             [%# Only display statuses the user is allowed to set. %]
             [% IF user.can_request_flag(type) %]
               <option value="X"></option>
@@ -156,7 +157,8 @@
           <select id="flag_type-[% type.id %]" name="flag_type-[% type.id %]" 
                   title="[% type.description FILTER html %]"
                   [% " disabled=\"disabled\"" UNLESS user.can_request_flag(type) %]
-                  onchange="toggleRequesteeField(this);">
+                  onchange="toggleRequesteeField(this);"
+                  class="flag_select">
             <option value="X"></option>
             [% IF type.is_requestable && user.can_request_flag(type) %]
               <option value="?">?</option>
@@ -199,7 +201,8 @@
         <select id="flag_type-[% type.id %]" name="flag_type-[% type.id %]" 
                 title="[% type.description FILTER html %]"
                 [% " disabled=\"disabled\"" UNLESS user.can_request_flag(type) %]
-                onchange="toggleRequesteeField(this);">
+                onchange="toggleRequesteeField(this);"
+                class="flag_select">
           <option value="X"></option>
           [% IF type.is_requestable && user.can_request_flag(type) %]
             <option value="?">?</option>

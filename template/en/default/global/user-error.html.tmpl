@@ -229,7 +229,7 @@
   [% ELSIF error == "buglist_parameters_required" %]
     [% title = "Parameters Required" %]
     [% docslinks = {'query.html' => "Searching for $terms.bugs",
-                    'list.html'  => "$terms.Bug lists"} %]
+                    'query.html#list' => "$terms.Bug lists"} %]
     You may not search, or create saved searches, without any search terms.
 
   [% ELSIF error == "bugs_not_changed" %]
@@ -982,7 +982,7 @@
   [% ELSIF error == "missing_query" %]
     [% title = "Missing Search" %]
     [% docslinks = {'query.html' => "Searching for $terms.bugs",
-                    'list.html'  => "$terms.Bug lists"} %]
+                    'query.html#list' => "$terms.Bug lists"} %]
     The search named <em>[% queryname FILTER html %]</em>
     [% IF sharer_id && sharer_id != user.id %]
       has not been made visible to you.
@@ -1281,7 +1281,7 @@
 
   [% ELSIF error == "query_name_missing" %]
     [% title = "No Search Name Specified" %]
-    [% docslinks = {'list.html' => "About $terms.bug lists"} %]
+    [% docslinks = {'query.html#list' => "$terms.Bug lists"} %]
     You must enter a name for your search.
 
   [% ELSIF error == "query_name_too_long" %]

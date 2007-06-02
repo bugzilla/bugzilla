@@ -40,7 +40,7 @@
 [% error_message = BLOCK %]
   [% IF    error == "action_unrecognized" %]
     [% docslinks = {'query.html' => "Searching for $terms.bugs",
-                    'list.html'  => "$terms.Bug lists"} %]
+                    'query.html#list' => "$terms.Bug lists"} %]
     I don't recognize the value (<em>[% action FILTER html %]</em>)
     of the <em>action</em> variable.
   

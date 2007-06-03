@@ -951,7 +951,7 @@ $vars->{resolution} = $cgi->param('resolution') || '';
 Bugzilla::Bug->check_status_change_triggers($knob, \@idlist, $vars);
 
 # Some triggers require extra actions.
-$duplicate = $vars->{dup_id};
+$duplicate = $vars->{dup_id} if ($knob eq 'duplicate');
 $requiremilestone = $vars->{requiremilestone};
 DuplicateUserConfirm($vars->{bug_id}, $duplicate) if $vars->{DuplicateUserConfirm};
 _remove_remaining_time() if $vars->{remove_remaining_time};

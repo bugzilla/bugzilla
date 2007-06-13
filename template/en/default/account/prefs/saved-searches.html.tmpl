@@ -112,6 +112,10 @@
                 >[% group.name FILTER html %]</option>
               [% END %]
             </select>
+            [% IF q.shared_with_users %]
+              (shared with [% q.shared_with_users FILTER html %]
+              [%+ q.shared_with_users > 1 ? "users" : "user" %])
+            [% END %]
           </td>
         [% END %]
       </tr>

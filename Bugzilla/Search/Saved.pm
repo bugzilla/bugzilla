@@ -170,6 +170,23 @@ sub shared_with_group {
     return $self->{shared_with_group};
 }
 
+sub shared_with_users {
+    my $self = shift;
+    my $dbh = Bugzilla->dbh;
+
+    if (!exists $self->{shared_with_users}) {
+        $self->{shared_with_users} =
+          $dbh->selectrow_array('SELECT COUNT(*)
+                                   FROM namedqueries_link_in_footer
+                             INNER JOIN namedqueries
+                                     ON namedquery_id = id
+                                  WHERE namedquery_id = ?
+                                    AND user_id != userid',
+                                  undef, $self->id);
+    }
+    return $self->{shared_with_users};
+}
+
 ####################
 # Simple Accessors #
 ####################
@@ -208,6 +225,7 @@ __END__
  my $edit_link  = $query->edit_link;
  my $search_url = $query->url;
  my $owner      = $query->user;
+ my $num_subscribers = $query->shared_with_users;
 
 =head1 DESCRIPTION
 
@@ -261,5 +279,10 @@ True if the search contains only a list of Bug IDs.
 
 The L<Bugzilla::Group> that this search is shared with. C<undef> if
 this search isn't shared.
+
+=item C<shared_with_users>
+
+Returns how many users (besides the author of the saved search) are
+using the saved search, i.e. have it displayed in their footer.
 
 =back

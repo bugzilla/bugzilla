@@ -426,12 +426,18 @@
     Invalid setting for post_bug_submit_action
 
   [% ELSE %]
-    [% title = "Internal error" %]
-    An internal error has occurred, but [% terms.Bugzilla %] doesn't know
-    what <code>[% error FILTER html %]</code> means.
+    [%# Try to find hooked error messages %]
+    [% error_message = Hook.process("errors") %]
+    [% IF NOT error_message %]
+      [% title = "Internal error" %]
+      An internal error has occurred, but [% terms.Bugzilla %] doesn't know
+      what <code>[% error FILTER html %]</code> means.
 
-    If you are a [% terms.Bugzilla %] end-user seeing this message, please save
-    this page and send it to [% Param('maintainer') %].
+      If you are a [% terms.Bugzilla %] end-user seeing this message, please save
+      this page and send it to [% Param('maintainer') %].
+    [% ELSE %]
+      [% error_message FILTER none %]
+    [% END %]
   [% END %]
 [% END %]
 

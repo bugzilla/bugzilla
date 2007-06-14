@@ -12,6 +12,7 @@
   # The Original Code is the Bugzilla Bug Tracking System.
   #
   # Contributor(s): Max Kanat-Alexander <mkanat@bugzilla.org>
+  #                 Frédéric Buclin <LpSolit@gmail.com>
   #%]
 
 [%# INTERFACE:
@@ -41,6 +42,24 @@
       <td><input id="sortkey" size="10" maxlength="20" name="sortkey"
                  value=""></td>
     </tr>
+    [% IF field.name == "bug_status" %]
+      <tr>
+        <th align="right"><label for="is_open">Status Type:</label></th>
+        <td>
+          <input type="radio" id="open_status" name="is_open" value="1" checked="checked">
+          <label for="open_status">Open</label><br>
+          <input type="radio" id="closed_status" name="is_open" value="0">
+          <label for="closed_status">Closed (requires a Resolution)</label>
+        </td>
+      </tr>
+      <tr>
+        <th>&nbsp;</th>
+        <td>
+          Note: The open/close attribute can only be set now, when you create
+          the status. It cannot be edited later.
+        </td>
+      </tr>
+    [% END %]
   </table>
   <input type="submit" id="create" value="Add">
   <input type="hidden" name="action" value="new">

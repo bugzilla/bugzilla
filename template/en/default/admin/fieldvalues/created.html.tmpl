@@ -34,6 +34,11 @@
    [%- value FILTER html %]</a>' has been added as a valid choice for
    the '[% field.description FILTER html %]' field.</p>
 
+[% IF field.name == "bug_status" %]
+  You should now visit the <a href="editworkflow.cgi">status workflow page</a>
+  to include your new [% terms.bug %] status.
+[% END %]
+
 [% PROCESS admin/fieldvalues/footer.html.tmpl %]
 
 [% PROCESS global/footer.html.tmpl %]

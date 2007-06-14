@@ -28,14 +28,14 @@ use Bugzilla::Constants;
 use Bugzilla::Config qw(:admin);
 use Bugzilla::Token;
 use Bugzilla::Field;
+use Bugzilla::Bug;
 
 # List of different tables that contain the changeable field values
 # (the old "enums.") Keep them in alphabetical order by their 
 # English name from field-descs.html.tmpl.
 # Format: Array of valid field names.
-# Admins may add bug_status to this list, but they do so at their own risk.
 our @valid_fields = ('op_sys', 'rep_platform', 'priority', 'bug_severity',
-                     'resolution');
+                     'bug_status', 'resolution');
 
 # Add custom select fields.
 my @custom_fields = Bugzilla->get_fields({custom => 1,
@@ -136,6 +136,7 @@ $defaults{'bug_severity'} = 'defaultseverity';
 # Alternatively, a list of non-editable values can be specified.
 # In this case, only the sortkey can be altered.
 my %static;
+$static{'bug_status'} = ['UNCONFIRMED'];
 $static{'resolution'} = ['', 'FIXED', 'MOVED', 'DUPLICATE'];
 $static{$_->name} = ['---'] foreach (@custom_fields);
 
@@ -219,13 +220,24 @@ if ($action eq 'new') {
                        {'field' => $field,
                         'value' => $value});
     }
+    if ($field eq 'bug_status'
+        && (grep { lc($value) eq $_ } SPECIAL_STATUS_WORKFLOW_ACTIONS))
+    {
+        $vars->{'value'} = $value;
+        ThrowUserError('fieldvalue_reserved_word', $vars);
+    }
+
     # Value is only used in a SELECT placeholder and through the HTML filter.
     trick_taint($value);
 
     # Add the new field value.
-    my $sth = $dbh->prepare("INSERT INTO $field ( value, sortkey )
-                             VALUES ( ?, ? )");
-    $sth->execute($value, $sortkey);
+    $dbh->do("INSERT INTO $field (value, sortkey) VALUES (?, ?)",
+             undef, ($value, $sortkey));
+
+    if ($field eq 'bug_status' && !$cgi->param('is_open')) {
+        # The bug status is a closed state, but they are open by default.
+        $dbh->do('UPDATE bug_status SET is_open = 0 WHERE value = ?', undef, $value);
+    }
 
     delete_token($token);
 
@@ -292,7 +304,9 @@ if ($action eq 'delete') {
 
     trick_taint($value);
 
-    $dbh->bz_lock_tables('bugs READ', "$field WRITE");
+    my @lock_tables = ('bugs READ', "$field WRITE");
+    push(@lock_tables, 'status_workflow WRITE') if ($field eq 'bug_status');
+    $dbh->bz_lock_tables(@lock_tables);
 
     # Check if there are any bugs that still have this value.
     my $bug_ids = $dbh->selectcol_arrayref(
@@ -304,6 +318,14 @@ if ($action eq 'delete') {
         ThrowUserError("fieldvalue_still_has_bugs", 
                        { field => $field, value => $value,
                          count => scalar(@$bug_ids) });
+    }
+
+    if ($field eq 'bug_status') {
+        my $status_id = $dbh->selectrow_arrayref('SELECT id FROM bug_status
+                                                  WHERE value = ?', undef, $value);
+        $dbh->do('DELETE FROM status_workflow
+                  WHERE old_status = ? OR new_status = ?',
+                  undef, ($status_id, $status_id));
     }
 
     $dbh->do("DELETE FROM $field WHERE value = ?", undef, $value);
@@ -332,6 +354,10 @@ if ($action eq 'edit') {
     $vars->{'value'} = $value;
     $vars->{'is_static'} = (lsearch($static{$field}, $value) >= 0) ? 1 : 0;
     $vars->{'token'} = issue_session_token('edit_field_value');
+    if ($field eq 'bug_status') {
+        $vars->{'is_open'} = $dbh->selectrow_array('SELECT is_open FROM bug_status
+                                                    WHERE value = ?', undef, $value);
+    }
 
     $template->process("admin/fieldvalues/edit.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
@@ -390,6 +416,12 @@ if ($action eq 'update') {
         }
         if (ValueExists($field, $value)) {
             ThrowUserError('fieldvalue_already_exists', $vars);
+        }
+        if ($field eq 'bug_status'
+            && (grep { lc($value) eq $_ } SPECIAL_STATUS_WORKFLOW_ACTIONS))
+        {
+            $vars->{'value'} = $value;
+            ThrowUserError('fieldvalue_reserved_word', $vars);
         }
         trick_taint($value);
 

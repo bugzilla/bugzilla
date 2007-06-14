@@ -496,6 +496,10 @@ CrossCheck('whine_events', 'id',
 CrossCheck('attachments', 'attach_id',
            ['attach_data', 'id']);
 
+CrossCheck('bug_status', 'id',
+           ['status_workflow', 'old_status'],
+           ['status_workflow', 'new_status']);
+
 ###########################################################################
 # Perform double field referential (cross) checks
 ###########################################################################

@@ -459,6 +459,12 @@
     [% title = "Field Value Not Specified" %]
     No field value specified when trying to edit a field value.
 
+  [% ELSIF error == "fieldvalue_reserved_word" %]
+    [% title = "Reserved Word Not Allowed" %]
+    You cannot use the '[% value FILTER html %]' value for the
+    '[% field.description FILTER html %]' field. This value is used internally.
+    Please choose another one.
+
   [% ELSIF error == "fieldvalue_sortkey_invalid" %]
     [% title = "Invalid Field Value Sortkey" %]
     The sortkey '[% sortkey FILTER html %]' for the '[% name FILTER html %]'

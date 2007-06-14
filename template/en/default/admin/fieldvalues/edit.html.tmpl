@@ -50,7 +50,12 @@
       <td><input id="sortkey" size="20" maxlength="20" name="sortkey" value="
       [%- sortkey FILTER html %]"></td>
     </tr>
-
+    [% IF field.name == "bug_status" %]
+      <tr>
+        <th align="right"><label for="is_open">Status Type:</label></th>
+        <td>[% IF is_open %]Open[% ELSE %]Closed[% END %]</td>
+      </tr>
+    [% END %]
   </table>
 
   <input type="hidden" name="valueold" value="[% value FILTER html %]">

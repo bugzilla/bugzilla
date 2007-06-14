@@ -59,61 +59,19 @@ sub get_param_list {
   },
 
   {
-   name => 'commentoncreate',
-   type => 'b',
-   default => 0
-  },
-
-  {
-   name => 'commentonaccept',
-   type => 'b',
-   default => 0
-  },
-
-  {
    name => 'commentonclearresolution',
    type => 'b',
    default => 0
   },
 
   {
-   name => 'commentonconfirm',
-   type => 'b',
-   default => 0
-  },
-
-  {
-   name => 'commentonresolve',
-   type => 'b',
-   default => 0
-  },
-
-  {
-   name => 'commentonreassign',
+   name => 'commentonchange_resolution',
    type => 'b',
    default => 0
   },
 
   {
    name => 'commentonreassignbycomponent',
-   type => 'b',
-   default => 0
-  },
-
-  {
-   name => 'commentonreopen',
-   type => 'b',
-   default => 0
-  },
-
-  {
-   name => 'commentonverify',
-   type => 'b',
-   default => 0
-  },
-
-  {
-   name => 'commentonclose',
    type => 'b',
    default => 0
   },

@@ -378,6 +378,11 @@ sub run_create_validators {
     ($params->{bug_status}, $params->{everconfirmed})
         = $class->_check_bug_status($params->{bug_status}, $product);
 
+    # Check whether a comment is required on bug creation.
+    my $vars = {};
+    $vars->{comment_exists} = ($params->{comment} =~ /\S+/) ? 1 : 0;
+    Bugzilla::Bug->check_status_change_triggers($params->{bug_status}, [], $vars);
+
     $params->{target_milestone} = $class->_check_target_milestone($product,
         $params->{target_milestone});
 
@@ -653,10 +658,6 @@ sub _check_comment {
 
     # Creation-only checks
     if (!ref $invocant) {
-        if (Bugzilla->params->{"commentoncreate"} && !$comment) {
-            ThrowUserError("description_required");
-        }
-
         # On creation only, there must be a single-space comment, or
         # email will be supressed.
         $comment = ' ' if $comment eq '';
@@ -1588,6 +1589,19 @@ sub check_status_change_triggers {
             # 'commentonnone' doesn't exist, so this is safe.
             ThrowUserError('comment_required') if Bugzilla->params->{"commenton$action"};
         }
+        elsif (!scalar(@$bug_ids)) {
+            # The bug is being created; that's why $bug_ids is undefined.
+            my $comment_required =
+              $dbh->selectrow_array('SELECT require_comment
+                                       FROM status_workflow
+                                 INNER JOIN bug_status
+                                         ON id = new_status
+                                      WHERE old_status IS NULL
+                                        AND value = ?',
+                                      undef, $action);
+
+            ThrowUserError('description_required') if $comment_required;
+        }
         else {
             my $required_for_transitions =
               $dbh->selectcol_arrayref('SELECT DISTINCT bug_status.value
@@ -1613,6 +1627,10 @@ sub check_status_change_triggers {
     # Now run hardcoded checks.
     # There is no checks for these actions.
     return if ($action eq 'none' || $action eq 'clearresolution');
+
+    # Also leave now if we are creating a new bug (we only want to check
+    # if a comment is required on bug creation).
+    return unless scalar(@$bug_ids);
 
     if ($action eq 'duplicate') {
         # You cannot mark bugs as duplicates when changing

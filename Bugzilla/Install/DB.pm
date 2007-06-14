@@ -115,6 +115,7 @@ sub update_fielddefs_definition {
 # the purpose of a column.
 #
 sub update_table_definitions {
+    my $old_params = shift;
     my $dbh = Bugzilla->dbh;
     _update_pre_checksetup_bugzillas();
 
@@ -507,7 +508,7 @@ sub update_table_definitions {
     _fix_uppercase_index_names();
 
     # 2007-05-17 LpSolit@gmail.com - Bug 344965
-    _initialize_workflow();
+    _initialize_workflow($old_params);
 
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
@@ -2779,6 +2780,7 @@ sub _fix_uppercase_index_names {
 }
 
 sub _initialize_workflow {
+    my $old_params = shift;
     my $dbh = Bugzilla->dbh;
 
     if (!$dbh->bz_column_info('bug_status', 'is_open')) {
@@ -2809,16 +2811,16 @@ sub _initialize_workflow {
     my $count = $dbh->selectrow_array('SELECT COUNT(*) FROM status_workflow');
     return if $count;
 
-    my $create = Bugzilla->params->{'commentoncreate'};
-    my $confirm = Bugzilla->params->{'commentonconfirm'};
-    my $accept = Bugzilla->params->{'commentonaccept'};
-    my $resolve = Bugzilla->params->{'commentonresolve'};
-    my $verify = Bugzilla->params->{'commentonverify'};
-    my $close = Bugzilla->params->{'commentonclose'};
-    my $reopen = Bugzilla->params->{'commentonreopen'};
+    my $create = $old_params->{'commentoncreate'};
+    my $confirm = $old_params->{'commentonconfirm'};
+    my $accept = $old_params->{'commentonaccept'};
+    my $resolve = $old_params->{'commentonresolve'};
+    my $verify = $old_params->{'commentonverify'};
+    my $close = $old_params->{'commentonclose'};
+    my $reopen = $old_params->{'commentonreopen'};
     # This was till recently the only way to get back to NEW for
     # confirmed bugs, so we use this parameter here.
-    my $reassign = Bugzilla->params->{'commentonreassign'};
+    my $reassign = $old_params->{'commentonreassign'};
 
     # This is the default workflow.
     my @workflow = ([undef, 'UNCONFIRMED', $create],

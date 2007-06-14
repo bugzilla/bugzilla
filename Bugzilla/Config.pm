@@ -199,18 +199,16 @@ sub update_params {
 
     # --- REMOVE OLD PARAMS ---
 
-    my @oldparams;
+    my %oldparams;
     # Remove any old params, put them in old-params.txt
     foreach my $item (keys %$param) {
         if (!grep($_ eq $item, map ($_->{'name'}, @param_list))) {
-            local $Data::Dumper::Terse  = 1;
-            local $Data::Dumper::Indent = 0;
-            push (@oldparams, [$item, Data::Dumper->Dump([$param->{$item}])]);
+            $oldparams{$item} = $param->{$item};
             delete $param->{$item};
         }
     }
 
-    if (@oldparams) {
+    if (scalar(keys %oldparams)) {
         my $op_file = new IO::File('old-params.txt', '>>', 0600)
           || die "old-params.txt: $!";
 
@@ -218,11 +216,14 @@ sub update_params {
               " and so have been\nmoved from your parameters file into",
               " old-params.txt:\n";
 
-        foreach my $p (@oldparams) {
-            my ($item, $value) = @$p;
-            print $op_file "\n\n$item:\n$value\n";
-            print $item;
-            print ", " unless $item eq $oldparams[$#oldparams]->[0];
+        local $Data::Dumper::Terse  = 1;
+        local $Data::Dumper::Indent = 0;
+
+        my $comma = "";
+        foreach my $item (keys %oldparams) {
+            print $op_file "\n\n$item:\n" . Data::Dumper->Dump([$oldparams{$item}]) . "\n";
+            print "${comma}$item";
+            $comma = ", ";
         }
         print "\n";
         $op_file->close;
@@ -250,6 +251,10 @@ sub update_params {
     }
 
     write_params($param);
+
+    # Return deleted params and values so that checksetup.pl has a chance
+    # to convert old params to new data.
+    return %oldparams;
 }
 
 sub write_params {

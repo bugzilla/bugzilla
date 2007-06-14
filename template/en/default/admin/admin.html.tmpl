@@ -75,18 +75,18 @@
         can also edit some specific attributes of products such as
         <a href="editcomponents.cgi">components</a>, <a href="editversions.cgi">versions</a>
         and <a href="editmilestones.cgi">milestones</a> directly.</dd>
-      </dl>
-    </td>
 
-    <td class="admin_links">
-      <dl>
         [% class = user.groups.editcomponents ? "" : "forbidden" %]
         <dt class="[% class %]"><a href="editflagtypes.cgi">Flags</a></dt>
         <dd class="[% class %]">A flag is a custom 4-states attribute of [% terms.bugs %]
         and/or attachments. These states are: granted, denied, requested and undefined.
         You can set as many flags as desired per [% terms.bug %], and define which users
         are allowed to edit them.</dd>
+      </dl>
+    </td>
 
+    <td class="admin_links">
+      <dl>
         [% class = user.groups.admin ? "" : "forbidden" %]
         <dt class="[% class %]"><a href="editfields.cgi">Custom Fields</a></dt>
         <dd class="[% class %]">[% terms.Bugzilla %] lets you define fields which are
@@ -101,6 +101,11 @@
         <dd class="[% class %]">Define legal values for fields whose values must belong
         to some given list. This is also the place where you define legal values for some
         types of custom fields.</dd>
+
+        <dt class="[% class %]"><a href="editworkflow.cgi">[%terms.Bug %] Status Workflow</a></dt>
+        <dd class="[% class %]">Customize your workflow and choose initial [% terms.bug %]
+        statuses available on [% terms.bug %] creation and allowed [% terms.bug %] status
+        transitions when editing existing [% terms.bugs %].</dd>
 
         [% class = user.groups.creategroups ? "" : "forbidden" %]
         <dt class="[% class %]"><a href="editgroups.cgi">Groups</a></dt>

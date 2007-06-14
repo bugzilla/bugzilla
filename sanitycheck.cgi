@@ -201,7 +201,7 @@ if ($cgi->param('repair_creation_date')) {
                                         WHERE bug_id = ?');
 
     # All bugs have an entry in the 'longdescs' table when they are created,
-    # even if 'commentoncreate' is turned off.
+    # even if no comment is required.
     my $sth_getDate = $dbh->prepare('SELECT MIN(bug_when) FROM longdescs
                                      WHERE bug_id = ?');
 

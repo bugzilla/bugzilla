@@ -155,7 +155,7 @@ create_htaccess() if $lc_hash->{'create_htaccess'};
 
 # Remove parameters from the params file that no longer exist in Bugzilla,
 # and set the defaults for new ones
-update_params();
+my %old_params = update_params();
 
 ###########################################################################
 # Pre-compile --TEMPLATE-- code
@@ -193,7 +193,7 @@ Bugzilla::Field::populate_field_definitions();
 # Update the tables to the current definition --TABLE--
 ###########################################################################
 
-Bugzilla::Install::DB::update_table_definitions();        
+Bugzilla::Install::DB::update_table_definitions(\%old_params);
 
 ###########################################################################
 # Bugzilla uses --GROUPS-- to assign various rights to its users.

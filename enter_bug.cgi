@@ -49,6 +49,7 @@ use Bugzilla::Classification;
 use Bugzilla::Keyword;
 use Bugzilla::Token;
 use Bugzilla::Field;
+use Bugzilla::Status;
 
 my $user = Bugzilla->login(LOGIN_REQUIRED);
 
@@ -494,29 +495,24 @@ if ( Bugzilla->params->{'usetargetmilestone'} ) {
 }
 
 # Construct the list of allowable statuses.
-#
-# * If the product requires votes to confirm:
-#   users with privs   : NEW + ASSI + UNCO
-#   users with no privs: UNCO
-#
-# * If the product doesn't require votes to confirm:
-#   users with privs   : NEW + ASSI
-#   users with no privs: NEW (as these users cannot reassign
-#                             bugs to them, it doesn't make sense
-#                             to let them mark bugs as ASSIGNED)
+my $initial_statuses = Bugzilla::Status->can_change_to();
+# Exclude closed states from the UI, even if the workflow allows them.
+# The back-end code will still accept them, though.
+@$initial_statuses = grep { $_->is_open } @$initial_statuses;
 
-my @status;
-if ($has_editbugs || $has_canconfirm) {
-    @status = ('NEW', 'ASSIGNED');
-}
-elsif (!$product->votes_to_confirm) {
-    @status = ('NEW');
-}
-if ($product->votes_to_confirm) {
-    push(@status, 'UNCONFIRMED');
+my @status = map { $_->name } @$initial_statuses;
+# UNCONFIRMED is illegal if votes_to_confirm = 0.
+@status = grep {$_ ne 'UNCONFIRMED'} @status unless $product->votes_to_confirm;
+scalar(@status) || ThrowUserError('no_initial_bug_status');
+
+# If the user has no privs...
+unless ($has_editbugs || $has_canconfirm) {
+    # ... use UNCONFIRMED if available, else use the first status of the list.
+    my $bug_status = (grep {$_ eq 'UNCONFIRMED'} @status) ? 'UNCONFIRMED' : $status[0];
+    @status = ($bug_status);
 }
 
-$vars->{'bug_status'} = \@status; 
+$vars->{'bug_status'} = \@status;
 
 # Get the default from a template value if it is legitimate.
 # Otherwise, set the default to the first item on the list.

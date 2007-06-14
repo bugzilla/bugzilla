@@ -170,14 +170,6 @@ use constant MAX_LINE_LENGTH => 254;
 # Used in ValidateComment(). Gives the max length allowed for a comment.
 use constant MAX_COMMENT_LENGTH => 65535;
 
-# The statuses that are valid on enter_bug.cgi and post_bug.cgi.
-# The order is important--see _check_bug_status
-use constant VALID_ENTRY_STATUS => qw(
-    UNCONFIRMED
-    NEW
-    ASSIGNED
-);
-
 use constant SPECIAL_STATUS_WORKFLOW_ACTIONS => qw(
     none
     duplicate
@@ -593,38 +585,38 @@ sub _check_bug_status {
     my ($invocant, $status, $product) = @_;
     my $user = Bugzilla->user;
 
-    my %valid_statuses;
+    my @valid_statuses;
     if (ref $invocant) {
         $invocant->{'prod_obj'} ||= 
             new Bugzilla::Product({name => $invocant->product});
         $product = $invocant->{'prod_obj'};
-        my $field = new Bugzilla::Field({ name => 'bug_status' });
-        %valid_statuses = map { $_ => 1 } @{$field->legal_values};
+        @valid_statuses = map { $_->name } @{$invocant->status->can_change_to};
     }
     else {
-        %valid_statuses = map { $_ => 1 } VALID_ENTRY_STATUS;
+        @valid_statuses = map { $_->name } @{Bugzilla::Status->can_change_to()};
+    }
 
+    if (!$product->votes_to_confirm) {
+        # UNCONFIRMED becomes an invalid status if votes_to_confirm is 0,
+        # even if you are in editbugs.
+        @valid_statuses = grep {$_ ne 'UNCONFIRMED'} @valid_statuses;
+    }
+
+    if (!ref($invocant)) {
         if ($user->in_group('editbugs', $product->id)
             || $user->in_group('canconfirm', $product->id)) {
-           # Default to NEW if the user with privs hasn't selected another
-           # status.
-           $status ||= 'NEW';
-        }
-        elsif (!$product->votes_to_confirm) {
-            # Without privs, products that don't support UNCONFIRMED default 
-            # to NEW.
-            $status = 'NEW';
+           # If the user with privs hasn't selected another status,
+           # select the first one of the list.
+           $status ||= $valid_statuses[0];
         }
         else {
-            $status = 'UNCONFIRMED';
+            # A user with no privs cannot choose the initial status.
+            $status = $valid_statuses[0];
         }
     }
 
-    # UNCONFIRMED becomes an invalid status if votes_to_confirm is 0,
-    # even if you are in editbugs.
-    delete $valid_statuses{'UNCONFIRMED'} if !$product->votes_to_confirm;
-
-    check_field('bug_status', $status, [keys %valid_statuses]);
+    # This check already takes the workflow into account.
+    check_field('bug_status', $status, \@valid_statuses);
 
     return $status if ref $invocant;
     return ($status, $status eq 'UNCONFIRMED' ? 0 : 1);

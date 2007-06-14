@@ -58,14 +58,25 @@ sub can_change_to {
     my $self = shift;
     my $dbh = Bugzilla->dbh;
 
-    if (!defined $self->{'can_change_to'}) {
-        my $new_status_ids = $dbh->selectcol_arrayref('SELECT new_status
+    if (!ref($self) || !defined $self->{'can_change_to'}) {
+        my ($cond, @args);
+        if (ref($self)) {
+            $cond = '= ?';
+            push(@args, $self->id);
+        }
+        else {
+            $cond = 'IS NULL';
+            # Let's do it so that the code below works in all cases.
+            $self = {};
+        }
+
+        my $new_status_ids = $dbh->selectcol_arrayref("SELECT new_status
                                                          FROM status_workflow
                                                    INNER JOIN bug_status
                                                            ON id = new_status
                                                         WHERE isactive = 1
-                                                          AND old_status = ?',
-                                                        undef, $self->id);
+                                                          AND old_status $cond",
+                                                        undef, @args);
 
         $self->{'can_change_to'} = Bugzilla::Status->new_from_list($new_status_ids);
     }

@@ -87,7 +87,7 @@ sub MessageToMTA {
         # Sendmail will automatically append our hostname to the From
         # address, but other mailers won't.
         my $urlbase = Bugzilla->params->{'urlbase'};
-        $urlbase =~ m|//([^/]+)/?|;
+        $urlbase =~ m|//([^:/]+)[:/]?|;
         $hostname = $1;
         $from .= "\@$hostname" if $from !~ /@/;
         $email->header_set('From', $from);

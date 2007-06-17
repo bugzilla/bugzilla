@@ -224,8 +224,16 @@ if ($bug_id) {
     _die_on_fault($soapresult);
     $result = $soapresult->result;
     my $bug = $result->{bugs}->[0];
-    foreach (keys(%$bug)) {
-        print "$_: $$bug{$_}\n";
+    foreach my $field (keys(%$bug)) {
+        my $value = $bug->{$field};
+        if (ref($value) eq 'HASH') {
+            foreach (keys %$value) {
+                print "$_: " . $value->{$_} . "\n";
+            }
+        }
+        else {
+            print "$field: $value\n";
+        }
     }
 }
 

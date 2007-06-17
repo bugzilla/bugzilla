@@ -56,6 +56,11 @@
 
   smtpserver => "The SMTP server address (if using SMTP for mail delivery).",
 
+  smtp_debug => "If enabled, this will print detailed information to your" _
+                " web server's error log about the communication between" _
+                " $terms.Bugzilla and your SMTP server. You can use this to" _
+                " troubleshoot email problems.",
+
   whinedays => "The number of days that we'll let a $terms.bug sit untouched in a NEW " _
                "state before our cronjob will whine at the owner.<br> " _
                "Set to 0 to disable whining.",

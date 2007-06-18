@@ -489,7 +489,7 @@ sub run_queries {
 sub get_query {
     my ($name, $user) = @_;
     my $qname = $name;
-    $sth_get_query->execute($user->{'id'}, $qname);
+    $sth_get_query->execute($user->id, $qname);
     my $fetched = $sth_get_query->fetch;
     $sth_get_query->finish;
     return $fetched ? $fetched->[0] : '';

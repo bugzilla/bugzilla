@@ -230,11 +230,8 @@ $vars->{'title_tag'} = "bug_processed";
 # negatives, but never false positives, and should catch the majority of cases.
 # It only works at all in the single bug case.
 if (defined $cgi->param('id')) {
-    my $delta_ts = $dbh->selectrow_array(
-        q{SELECT delta_ts FROM bugs WHERE bug_id = ?},
-        undef, $cgi->param('id'));
-    
-    if (defined $cgi->param('delta_ts') && $cgi->param('delta_ts') ne $delta_ts)
+    if (defined $cgi->param('delta_ts')
+        && $cgi->param('delta_ts') ne $bug->delta_ts)
     {
         $vars->{'title_tag'} = "mid_air";
         ThrowCodeError('undefined_field', {field => 'longdesclength'})
@@ -254,19 +251,11 @@ if ($cgi->cookie("BUGLIST") && defined $cgi->param('id')) {
 # user is changing a single bug and has changed the bug's product),
 # and make the user verify the version, component, target milestone,
 # and bug groups if so.
-my $oldproduct = '';
-if (defined $cgi->param('id')) {
-    $oldproduct = $dbh->selectrow_array(
-        q{SELECT name FROM products INNER JOIN bugs
-        ON products.id = bugs.product_id WHERE bug_id = ?},
-        undef, $cgi->param('id'));
-}
-
 # At this point, the product must be defined, even if set to "dontchange".
 defined($cgi->param('product'))
   || ThrowCodeError('undefined_field', { field => 'product' });
 
-if ((defined $cgi->param('id') && $cgi->param('product') ne $oldproduct)
+if ((defined $cgi->param('id') && $cgi->param('product') ne $bug->product)
      || (!$cgi->param('id')
          && $cgi->param('product') ne $cgi->param('dontchange')))
 {
@@ -274,6 +263,7 @@ if ((defined $cgi->param('id') && $cgi->param('product') ne $oldproduct)
         ThrowUserError('comment_required');
     }
     # Check to make sure they actually have the right to change the product
+    my $oldproduct = (defined $cgi->param('id')) ? $bug->product : '';
     if (!$bug->check_can_change_field('product', $oldproduct, $cgi->param('product'),
                                       \$PrivilegesRequired))
     {
@@ -284,26 +274,25 @@ if ((defined $cgi->param('id') && $cgi->param('product') ne $oldproduct)
         ThrowUserError("illegal_change", $vars);
     }
 
-    my $prod = $cgi->param('product');
-    my $prod_obj = new Bugzilla::Product({name => $prod});
-    trick_taint($prod);
+    my $product_name = $cgi->param('product');
+    my $product = new Bugzilla::Product({name => $product_name});
 
     # If at least one bug does not belong to the product we are
     # moving to, we have to check whether or not the user is
     # allowed to enter bugs into that product.
     # Note that this check must be done early to avoid the leakage
     # of component, version and target milestone names.
-    my $check_can_enter =
-        $dbh->selectrow_array("SELECT 1 FROM bugs
-                               INNER JOIN products
-                               ON bugs.product_id = products.id
-                               WHERE products.name != ?
-                               AND bugs.bug_id IN
-                               (" . join(',', @idlist) . ") " .
-                               $dbh->sql_limit(1),
-                               undef, $prod);
-
-    if ($check_can_enter) { $user->can_enter_product($prod, 1) }
+    my $check_can_enter = 1;
+    if ($product) {
+        $check_can_enter =
+          $dbh->selectrow_array("SELECT 1 FROM bugs
+                                 WHERE product_id != ?
+                                 AND bugs.bug_id IN
+                                 (" . join(',', @idlist) . ") " .
+                                 $dbh->sql_limit(1),
+                                 undef, $product->id);
+    }
+    if ($check_can_enter) { $user->can_enter_product($product_name, 1) }
 
     # note that when this script is called from buglist.cgi (rather
     # than show_bug.cgi), it's possible that the product will be changed
@@ -313,8 +302,8 @@ if ((defined $cgi->param('id') && $cgi->param('product') ne $oldproduct)
     # pretty weird case, and not terribly unreasonable behavior, but 
     # worthy of a comment, perhaps.
     #
-    my @version_names = map($_->name, @{$prod_obj->versions});
-    my @component_names = map($_->name, @{$prod_obj->components});
+    my @version_names = map($_->name, @{$product->versions});
+    my @component_names = map($_->name, @{$product->components});
     my $vok = 0;
     if (defined $cgi->param('version')) {
         $vok = lsearch(\@version_names, $cgi->param('version')) >= 0;
@@ -327,7 +316,7 @@ if ((defined $cgi->param('id') && $cgi->param('product') ne $oldproduct)
     my $mok = 1;   # so it won't affect the 'if' statement if milestones aren't used
     my @milestone_names = ();
     if ( Bugzilla->params->{"usetargetmilestone"} ) {
-       @milestone_names = map($_->name, @{$prod_obj->milestones});
+       @milestone_names = map($_->name, @{$product->milestones});
        $mok = 0;
        if (defined $cgi->param('target_milestone')) {
            $mok = lsearch(\@milestone_names, $cgi->param('target_milestone')) >= 0;
@@ -347,16 +336,16 @@ if ((defined $cgi->param('id') && $cgi->param('product') ne $oldproduct)
             if (!$vok) {
                 ThrowUserError('version_not_valid', {
                     version => $cgi->param('version'),
-                    product => $cgi->param('product')});
+                    product => $product->name});
             }
             if (!$cok) {
                 ThrowUserError('component_not_valid', {
-                    product => $cgi->param('product'),
+                    product => $product->name,
                     name    => $cgi->param('component')});
             }
             if (!$mok) {
                 ThrowUserError('milestone_not_valid', {
-                    product   => $cgi->param('product'),
+                    product   => $product->name,
                     milestone => $cgi->param('target_milestone')});
             }
         }
@@ -391,9 +380,7 @@ if ((defined $cgi->param('id') && $cgi->param('product') ne $oldproduct)
                 if ($mok) {
                     $defaults{'target_milestone'} = $cgi->param('target_milestone');
                 } else {
-                    $defaults{'target_milestone'} = $dbh->selectrow_array(
-                        q{SELECT defaultmilestone FROM products 
-                        WHERE name = ?}, undef, $prod);
+                    $defaults{'target_milestone'} = $product->default_milestone;
                 }
             }
             else {
@@ -430,11 +417,7 @@ sub DuplicateUserConfirm {
         return;
     }
 
-    my $reporter = $dbh->selectrow_array(
-        q{SELECT reporter FROM bugs WHERE bug_id = ?}, undef, $dupe);
-    my $rep_user = Bugzilla::User->new($reporter);
-
-    if ($rep_user->can_see_bug($original)) {
+    if ($dupe->reporter->can_see_bug($original)) {
         $cgi->param('confirm_add_duplicate', '1');
         return;
     }
@@ -454,7 +437,7 @@ sub DuplicateUserConfirm {
     # ask the duper what he/she wants to do.
     
     $vars->{'original_bug_id'} = $original;
-    $vars->{'duplicate_bug_id'} = $dupe;
+    $vars->{'duplicate_bug_id'} = $dupe->bug_id;
     
     # Confirm whether or not to add the reporter to the cc: list
     # of the original bug (the one this bug is being duped against).
@@ -953,7 +936,8 @@ Bugzilla::Bug->check_status_change_triggers($knob, \@idlist, $vars);
 # Some triggers require extra actions.
 $duplicate = $vars->{dup_id} if ($knob eq 'duplicate');
 $requiremilestone = $vars->{requiremilestone};
-DuplicateUserConfirm($vars->{bug_id}, $duplicate) if $vars->{DuplicateUserConfirm};
+# $vars->{DuplicateUserConfirm} is true only if a single bug is being edited.
+DuplicateUserConfirm($bug, $duplicate) if $vars->{DuplicateUserConfirm};
 _remove_remaining_time() if $vars->{remove_remaining_time};
 
 my @keywordlist;
@@ -1176,7 +1160,7 @@ foreach my $id (@idlist) {
     # and/or component before reassigning. If $component is defined,
     # use it; else use the product/component the bug is already in.
     if ($cgi->param('set_default_assignee')) {
-        my $new_comp_id = $component ? $component->id : $old_bug_obj->{'component_id'};
+        my $new_comp_id = $component ? $component->id : $old_bug_obj->component_id;
         $assignee = $dbh->selectrow_array('SELECT initialowner
                                            FROM components
                                            WHERE components.id = ?',
@@ -1187,7 +1171,7 @@ foreach my $id (@idlist) {
     }
 
     if (Bugzilla->params->{'useqacontact'} && $cgi->param('set_default_qa_contact')) {
-        my $new_comp_id = $component ? $component->id : $old_bug_obj->{'component_id'};
+        my $new_comp_id = $component ? $component->id : $old_bug_obj->component_id;
         $qacontact = $dbh->selectrow_array('SELECT initialqacontact
                                             FROM components
                                             WHERE components.id = ?',
@@ -1304,20 +1288,15 @@ foreach my $id (@idlist) {
     if ($requiremilestone) {
         # musthavemilestoneonaccept applies only if at least two
         # target milestones are defined for the current product.
-        my $prod_obj = new Bugzilla::Product({'name' => $oldhash{'product'}});
-        my $nb_milestones = scalar(@{$prod_obj->milestones});
-        if ($nb_milestones > 1) {
+        my $old_product = new Bugzilla::Product({name => $oldhash{'product'}});
+        if (scalar(@{$old_product->milestones}) > 1) {
             my $value = $cgi->param('target_milestone');
             if (!defined $value || $value eq $cgi->param('dontchange')) {
                 $value = $oldhash{'target_milestone'};
             }
-            my $defaultmilestone =
-                $dbh->selectrow_array("SELECT defaultmilestone
-                                       FROM products WHERE id = ?",
-                                       undef, $oldhash{'product_id'});
             # if musthavemilestoneonaccept == 1, then the target
             # milestone must be different from the default one.
-            if ($value eq $defaultmilestone) {
+            if ($value eq $old_product->default_milestone) {
                 ThrowUserError("milestone_required", { bug_id => $id });
             }
         }
@@ -1832,27 +1811,22 @@ foreach my $id (@idlist) {
         $dbh->do('DELETE FROM duplicates WHERE dupe = ?',
                   undef, $cgi->param('id'));
 
-        # Check to see if Reporter of this bug is reporter of Dupe 
-        my $reporter = $dbh->selectrow_array(
-            q{SELECT reporter FROM bugs WHERE bug_id = ?}, undef, $id);
-        my $isreporter = $dbh->selectrow_array(
-            q{SELECT reporter FROM bugs WHERE bug_id = ? AND reporter = ?},
-            undef, $duplicate, $reporter);
+        my $dup = new Bugzilla::Bug($duplicate);
+        my $reporter = $new_bug_obj->reporter;
         my $isoncc = $dbh->selectrow_array(q{SELECT who FROM cc
                                            WHERE bug_id = ? AND who = ?},
-                                           undef, $duplicate, $reporter);
-        unless ($isreporter || $isoncc
+                                           undef, $duplicate, $reporter->id);
+        unless (($reporter->id == $dup->reporter->id) || $isoncc
                 || !$cgi->param('confirm_add_duplicate')) {
-            # The reporter is oblivious to the existence of the new bug and is permitted access
-            # ... add 'em to the cc (and record activity)
-            LogActivityEntry($duplicate,"cc","",user_id_to_login($reporter),
+            # The reporter is oblivious to the existence of the original bug
+            # and is permitted access. Add him to the cc (and record activity).
+            LogActivityEntry($duplicate,"cc","",$reporter->name,
                              $whoid,$timestamp);
             $dbh->do(q{INSERT INTO cc (who, bug_id) VALUES (?, ?)},
-                     undef, $reporter, $duplicate);
+                     undef, $reporter->id, $duplicate);
         }
         # Bug 171639 - Duplicate notifications do not need to be private.
-        my $dup = new Bugzilla::Bug($duplicate);
-        $dup->add_comment("", { type => CMT_HAS_DUPE, 
+        $dup->add_comment("", { type => CMT_HAS_DUPE,
                                 extra_data => $new_bug_obj->bug_id });
         $dup->update($timestamp);
 

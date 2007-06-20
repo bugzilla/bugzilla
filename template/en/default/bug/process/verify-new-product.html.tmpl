@@ -17,20 +17,16 @@
   # Rights Reserved.
   #
   # Contributor(s): Myk Melez <myk@mozilla.org>
+  #                 Frédéric Buclin <LpSolit@gmail.com>
   #%]
 
 [%# INTERFACE:
-  # verify_fields: boolean; whether or not to verify
-  #   the version, component, and target milestone fields
+  # product: object; the new product.
   # versions: array; versions for the new product.
   # components: array; components for the new product.
   # milestones: array; milestones for the new product.
   # defaults: hash; keys are names of fields, values are defaults for
   #   those fields
-  # verify_bug_group: boolean; whether or not to ask the user
-  #   if they want to add the bug to its new product's group
-  # use_target_milestone: boolean; whether or not to use
-  #   the target milestone field
   #%]
 
 [%# The global Bugzilla->cgi object is used to obtain form variable values. %]
@@ -45,15 +41,14 @@
 <form action="process_bug.cgi" method="post">
 
 [% PROCESS "global/hidden-fields.html.tmpl"
-     exclude=(verify_fields ? "^version|component|target_milestone$" : "") %]
+     exclude=("^version|component|target_milestone|bit-\\d+$") %]
 
 <input type="hidden" name="confirm_product_change" value="1">
 [%# Verify the version, component, and target milestone fields. %]
-[% IF verify_fields %]
-  <h3>Verify Version, Component[% ", Target Milestone" IF use_target_milestone %]</h3>
+  <h3>Verify Version, Component[% ", Target Milestone" IF Param("usetargetmilestone") %]</h3>
 
   <p>
-  [% IF use_target_milestone %]
+  [% IF Param("usetargetmilestone") %]
     You are moving the [% terms.bug %](s) to the product 
     <b>[% cgi.param("product") FILTER html %]</b>,
     and the version, component, and/or target milestone fields are no longer
@@ -84,7 +79,7 @@
                    default=defaults.component
                    size=10 %]
       </td>
-      [% IF use_target_milestone %]
+      [% IF Param("usetargetmilestone") %]
         <td>
           <b>Target Milestone:</b><br>
         [% PROCESS "global/select-menu.html.tmpl"
@@ -97,22 +92,72 @@
     </tr>
   </table>
 
-[% END %]
-
-[% IF verify_bug_group %]
   <h3>Verify [% terms.Bug %] Group</h3>
 
-  <p>
-    Do you want to add the [% terms.bug %] to its new product's default groups (if any)?
-  </p>
+  [% IF old_groups.size %]
+    <p>These groups are not legal for the '[% product.name FILTER html %]'
+    product or you are not allowed to restrict [% terms.bugs %] to these groups.
+    [%+ terms.Bugs %] will no longer be restricted to these groups and may become
+    public if no other group applies:<br>
+    [% FOREACH group = old_groups %]
+      <input type="checkbox" id="bit-[% group.id FILTER html %]"
+             name="bit-[% group.id FILTER html %]" disabled="disabled" value="1">
+      <label for="bit-[% group.id FILTER html %]">
+        [% group.name FILTER html %]: [% group.description FILTER html %]
+      </label>
+      <br>
+    [% END %]
+    </p>
+  [% END %]
 
-  <p>
-    <input type="radio" name="addtonewgroup" value="no"><b>no</b><br>
-    <input type="radio" name="addtonewgroup" value="yes"><b>yes</b><br>
-    <input type="radio" name="addtonewgroup" value="yesifinold" checked="checked">
-      <b>yes, but only if the [% terms.bug %] was in any of its old product's default groups</b><br>
-  </p>
-[% END %]
+  [% mandatory_groups = [] %]
+  [% optional_groups = [] %]
+
+  [% FOREACH gid = product.group_controls.keys %]
+    [% group = product.group_controls.$gid %]
+    [% NEXT UNLESS group.group.is_active %]
+
+    [% IF group.membercontrol == constants.CONTROLMAPMANDATORY
+          || (group.othercontrol ==  constants.CONTROLMAPMANDATORY && !user.in_group(group.group.name)) %]
+      [% mandatory_groups.push(group) %]
+    [% ELSIF (group.membercontrol != constants.CONTROLMAPNA && user.in_group(group.group.name))
+              || group.othercontrol != constants.CONTROLMAPNA %]
+      [% optional_groups.push(group) %]
+    [% END %]
+  [% END %]
+
+  [% IF optional_groups.size %]
+    <p>These groups are optional. You can decide to restrict [% terms.bugs %] to
+    one or more of the following groups:<br>
+    [% FOREACH group = optional_groups %]
+      <input type="checkbox" id="bit-[% group.group.id FILTER html %]"
+             name="bit-[% group.group.id FILTER html %]"
+             [% ((group.membercontrol == constants.CONTROLMAPDEFAULT && user.in_group(group.group.name))
+                 || (group.othercontrol == constants.CONTROLMAPDEFAULT && !user.in_group(group.group.name))
+                 || cgi.param("bit-$group.group.id") == 1) ?
+                 'checked="checked"' : ''
+             %] value="1">
+      <label for="bit-[% group.group.id FILTER html %]">
+        [% group.group.name FILTER html %]: [% group.group.description FILTER html %]
+      </label>
+      <br>
+    [% END %]
+    </p>
+  [% END %]
+
+  [% IF mandatory_groups.size %]
+    <p>These groups are mandatory and [% terms.bugs %] will be automatically
+    restricted to these groups:<br>
+    [% FOREACH group = mandatory_groups %]
+      <input type="checkbox" id="bit-[% group.group.id FILTER html %]" checked="checked"
+             name="bit-[% group.group.id FILTER html %]" value="1" disabled="disabled">
+      <label for="bit-[% group.group.id FILTER html %]">
+        [% group.group.name FILTER html %]: [% group.group.description FILTER html %]
+      </label>
+      <br>
+    [% END %]
+    </p>
+  [% END %]
 
 <input type="submit" id="change_product" value="Commit">
 

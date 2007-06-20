@@ -78,34 +78,6 @@ local our $PrivilegesRequired = 0;
 # Subroutines
 ######################################################################
 
-sub BugInGroupId {
-    my ($bug_id, $group_id) = @_;
-    detaint_natural($bug_id);
-    detaint_natural($group_id);
-    my ($in_group) = Bugzilla->dbh->selectrow_array(
-        "SELECT CASE WHEN bug_id != 0 THEN 1 ELSE 0 END
-           FROM bug_group_map
-          WHERE bug_id = ? AND group_id = ?", undef, ($bug_id, $group_id));
-    return $in_group;
-}
-
-# This function checks if there are any default groups defined.
-# If so, then groups may have to be changed when bugs move from
-# one bug to another.
-sub AnyDefaultGroups {
-    my $dbh = Bugzilla->dbh;
-    my $any_default =
-        $dbh->selectrow_array('SELECT 1
-                                 FROM group_control_map
-                           INNER JOIN groups
-                                   ON groups.id = group_control_map.group_id
-                                WHERE isactive != 0
-                                  AND (membercontrol = ? OR othercontrol = ?) ' .
-                                 $dbh->sql_limit(1),
-                                 undef, (CONTROLMAPDEFAULT, CONTROLMAPDEFAULT));
-    return $any_default;
-}
-
 # Used to send email when an update is done.
 sub send_results {
     my ($bug_id, $vars) = @_;
@@ -329,8 +301,7 @@ if ((defined $cgi->param('id') && $cgi->param('product') ne $bug->product)
     # shown. Also show the verification form if the product-specific fields
     # somehow still need to be verified, or if we need to verify whether or not
     # to add the bugs to their new product's group.
-    if (!$vok || !$cok || !$mok || !defined $cgi->param('confirm_product_change')
-        || (AnyDefaultGroups() && !defined $cgi->param('addtonewgroup'))) {
+    if (!$vok || !$cok || !$mok || !defined $cgi->param('confirm_product_change')) {
 
         if (Bugzilla->usage_mode == USAGE_MODE_EMAIL) {
             if (!$vok) {
@@ -349,52 +320,53 @@ if ((defined $cgi->param('id') && $cgi->param('product') ne $bug->product)
                     milestone => $cgi->param('target_milestone')});
             }
         }
-        
-        if (!$vok || !$cok || !$mok
-            || !defined $cgi->param('confirm_product_change'))
-        {
-            $vars->{'verify_fields'} = 1;
-            my %defaults;
-            # We set the defaults to these fields to the old value,
-            # if it's a valid option, otherwise we use the default where
-            # that's appropriate
-            $vars->{'versions'} = \@version_names;
-            if ($vok) {
-                $defaults{'version'} = $cgi->param('version');
-            }
-            elsif (scalar(@version_names) == 1) {
-                $defaults{'version'} = $version_names[0];
-            }
 
-            $vars->{'components'} = \@component_names;
-            if ($cok) {
-                $defaults{'component'} = $cgi->param('component');
-            }
-            elsif (scalar(@component_names) == 1) {
-                $defaults{'component'} = $component_names[0];
-            }
+        $vars->{'product'} = $product;
+        my %defaults;
+        # We set the defaults to these fields to the old value,
+        # if it's a valid option, otherwise we use the default where
+        # that's appropriate
+        $vars->{'versions'} = \@version_names;
+        if ($vok) {
+            $defaults{'version'} = $cgi->param('version');
+        }
+        elsif (scalar(@version_names) == 1) {
+            $defaults{'version'} = $version_names[0];
+        }
 
-            if (Bugzilla->params->{"usetargetmilestone"}) {
-                $vars->{'use_target_milestone'} = 1;
-                $vars->{'milestones'} = \@milestone_names;
-                if ($mok) {
-                    $defaults{'target_milestone'} = $cgi->param('target_milestone');
-                } else {
-                    $defaults{'target_milestone'} = $product->default_milestone;
-                }
-            }
-            else {
-                $vars->{'use_target_milestone'} = 0;
-            }
-            $vars->{'defaults'} = \%defaults;
+        $vars->{'components'} = \@component_names;
+        if ($cok) {
+            $defaults{'component'} = $cgi->param('component');
         }
-        else {
-            $vars->{'verify_fields'} = 0;
+        elsif (scalar(@component_names) == 1) {
+            $defaults{'component'} = $component_names[0];
         }
-        
-        $vars->{'verify_bug_group'} = (AnyDefaultGroups() 
-                                       && !defined $cgi->param('addtonewgroup'));
-        
+
+        if (Bugzilla->params->{"usetargetmilestone"}) {
+            $vars->{'milestones'} = \@milestone_names;
+            if ($mok) {
+                $defaults{'target_milestone'} = $cgi->param('target_milestone');
+            } else {
+                $defaults{'target_milestone'} = $product->default_milestone;
+            }
+        }
+        $vars->{'defaults'} = \%defaults;
+
+        # Get the ID of groups which are no longer valid in the new product.
+        my $gids =
+          $dbh->selectcol_arrayref('SELECT bgm.group_id
+                                      FROM bug_group_map AS bgm
+                                     WHERE bgm.bug_id IN (' . join(', ', @idlist) . ')
+                                       AND bgm.group_id NOT IN
+                                           (SELECT gcm.group_id
+                                              FROM group_control_map AS gcm
+                                             WHERE gcm.product_id = ?
+                                               AND ((gcm.membercontrol != ?
+                                                    AND gcm.group_id IN (' . $grouplist . '))
+                                                    OR gcm.othercontrol != ?))',
+                                     undef, ($product->id, CONTROLMAPNA, CONTROLMAPNA));
+        $vars->{'old_groups'} = Bugzilla::Group->new_from_list($gids);
+
         $template->process("bug/process/verify-new-product.html.tmpl", $vars)
           || ThrowTemplateError($template->error());
         exit;
@@ -576,36 +548,6 @@ sub _remove_remaining_time {
 sub DoComma {
     $::query .= "$::comma\n    ";
     $::comma = ",";
-}
-
-# Changing this so that it will process groups from checkboxes instead of
-# select lists.  This means that instead of looking for the bit-X values in
-# the form, we need to loop through all the bug groups this user has access
-# to, and for each one, see if it's selected.
-# If the form element isn't present, or the user isn't in the group, leave
-# it as-is
-
-my @groupAdd = ();
-my @groupDel = ();
-
-my $groups = $dbh->selectall_arrayref(
-    qq{SELECT groups.id, isactive FROM groups
-        WHERE id IN($grouplist) AND isbuggroup = 1});
-foreach my $group (@$groups) {
-    my ($b, $isactive) = @$group;
-    # The multiple change page may not show all groups a bug is in
-    # (eg product groups when listing more than one product)
-    # Only consider groups which were present on the form. We can't do this
-    # for single bug changes because non-checked checkboxes aren't present.
-    # All the checkboxes should be shown in that case, though, so it isn't
-    # an issue there
-    if (defined $cgi->param('id') || defined $cgi->param("bit-$b")) {
-        if (!$cgi->param("bit-$b")) {
-            push(@groupDel, $b);
-        } elsif ($cgi->param("bit-$b") == 1 && $isactive) {
-            push(@groupAdd, $b);
-        }
-    }
 }
 
 foreach my $field ("rep_platform", "priority", "bug_severity",
@@ -966,8 +908,7 @@ if (!grep($keywordaction eq $_, qw(add delete makeexact))) {
 }
 
 if ($::comma eq ""
-    && (! @groupAdd) && (! @groupDel)
-    && (!Bugzilla::Keyword::keyword_count() 
+    && (!Bugzilla::Keyword::keyword_count()
         || (0 == @keywordlist && $keywordaction ne "makeexact"))
     && defined $cgi->param('masscc') && ! $cgi->param('masscc')
     ) {
@@ -1285,18 +1226,21 @@ foreach my $id (@idlist) {
                       { product => $oldhash{'product'} });
     }
 
+    # If we are editing a single bug or if bugs are being moved into
+    # a specific product, $product is defined. If $product is undefined,
+    # then we don't move bugs, so we can use their current product.
+    my $new_product = $product || new Bugzilla::Product({name => $oldhash{'product'}});
     if ($requiremilestone) {
         # musthavemilestoneonaccept applies only if at least two
-        # target milestones are defined for the current product.
-        my $old_product = new Bugzilla::Product({name => $oldhash{'product'}});
-        if (scalar(@{$old_product->milestones}) > 1) {
+        # target milestones are defined for the product.
+        if (scalar(@{$new_product->milestones}) > 1) {
             my $value = $cgi->param('target_milestone');
             if (!defined $value || $value eq $cgi->param('dontchange')) {
                 $value = $oldhash{'target_milestone'};
             }
             # if musthavemilestoneonaccept == 1, then the target
             # milestone must be different from the default one.
-            if ($value eq $old_product->default_milestone) {
+            if ($value eq $new_product->default_milestone) {
                 ThrowUserError("milestone_required", { bug_id => $id });
             }
         }
@@ -1415,60 +1359,69 @@ foreach my $id (@idlist) {
         $dbh->do(q{DELETE FROM duplicates WHERE dupe = ?}, undef, $id);
     }
 
-    my %groupsrequired = ();
-    my %groupsforbidden = ();
-    my $group_controls =
-        $dbh->selectall_arrayref(q{SELECT id, membercontrol
-                                     FROM groups
-                                LEFT JOIN group_control_map
-                                       ON id = group_id
-                                      AND product_id = ?
-                                    WHERE isactive != 0},
-        undef, $oldhash{'product_id'});
-    foreach my $group_control (@$group_controls) {
-        my ($group, $control) = @$group_control;
-        $control ||= 0;
-        unless ($control > CONTROLMAPNA)  {
-            $groupsforbidden{$group} = 1;
+    # First of all, get all groups the bug is currently restricted to.
+    my $initial_groups =
+      $dbh->selectcol_arrayref('SELECT group_id, name
+                                  FROM bug_group_map
+                            INNER JOIN groups
+                                    ON groups.id = bug_group_map.group_id
+                                 WHERE bug_id = ?', {Columns=>[1,2]}, $id);
+    my %original_groups = @$initial_groups;
+    my %updated_groups = %original_groups;
+
+    # Now let's see which groups have to be added or removed.
+    foreach my $gid (keys %{$new_product->group_controls}) {
+        my $group = $new_product->group_controls->{$gid};
+        # Leave inactive groups alone.
+        next unless $group->{group}->is_active;
+
+        if ($group->{membercontrol} == CONTROLMAPMANDATORY
+            || ($group->{othercontrol} == CONTROLMAPMANDATORY && !$user->in_group_id($gid)))
+        {
+            $updated_groups{$gid} = $group->{group}->name;
         }
-        if ($control == CONTROLMAPMANDATORY) {
-            $groupsrequired{$group} = 1;
+        elsif ($group->{membercontrol} == CONTROLMAPNA
+               || ($group->{othercontrol} == CONTROLMAPNA && !$user->in_group_id($gid)))
+        {
+            delete $updated_groups{$gid};
+        }
+        # When editing several bugs at once, only consider groups which
+        # have been displayed.
+        elsif (defined $cgi->param('id') || defined $cgi->param("bit-$gid")) {
+            if (!$cgi->param("bit-$gid")) {
+                delete $updated_groups{$gid};
+            }
+            # Note that == 1 is important, because == -1 means "ignore this group".
+            elsif ($cgi->param("bit-$gid") == 1) {
+                $updated_groups{$gid} = $group->{group}->name;
+            }
         }
     }
-
-    my @groupAddNames = ();
-    my @groupAddNamesAll = ();
-    my $sth = $dbh->prepare(q{INSERT INTO bug_group_map (bug_id, group_id)
-                                   VALUES (?, ?)});
-    foreach my $grouptoadd (@groupAdd, keys %groupsrequired) {
-        next if $groupsforbidden{$grouptoadd};
-        my $group_obj = new Bugzilla::Group($grouptoadd);
-        push(@groupAddNamesAll, $group_obj->name);
-        if (!BugInGroupId($id, $grouptoadd)) {
-            push(@groupAddNames, $group_obj->name);
-            $sth->execute($id, $grouptoadd);
-        }
+    # We also have to remove groups which are not legal in the new product.
+    foreach my $gid (keys %updated_groups) {
+        delete $updated_groups{$gid}
+          unless exists $new_product->group_controls->{$gid};
     }
-    my @groupDelNames = ();
-    my @groupDelNamesAll = ();
-    $sth = $dbh->prepare(q{DELETE FROM bug_group_map
-                                 WHERE bug_id = ? AND group_id = ?});
-    foreach my $grouptodel (@groupDel, keys %groupsforbidden) {
-        my $group_obj = new Bugzilla::Group($grouptodel);
-        push(@groupDelNamesAll, $group_obj->name);
-        next if $groupsrequired{$grouptodel};
-        if (BugInGroupId($id, $grouptodel)) {
-            push(@groupDelNames, $group_obj->name);
-        }
-        $sth->execute($id, $grouptodel);
+    my ($removed, $added) = diff_arrays([keys %original_groups], [keys %updated_groups]);
+
+    # We can now update the DB.
+    if (scalar(@$removed)) {
+        $dbh->do('DELETE FROM bug_group_map WHERE bug_id = ?
+                  AND group_id IN (' . join(', ', @$removed) . ')',
+                  undef, $id);
+    }
+    if (scalar(@$added)) {
+        my $sth = $dbh->prepare('INSERT INTO bug_group_map
+                                 (bug_id, group_id) VALUES (?, ?)');
+        $sth->execute($id, $_) foreach @$added;
     }
 
-    my $groupDelNames = join(',', @groupDelNames);
-    my $groupAddNames = join(',', @groupAddNames);
-
-    if ($groupDelNames ne $groupAddNames) {
-        LogActivityEntry($id, "bug_group", $groupDelNames, $groupAddNames,
-                         $whoid, $timestamp); 
+    # Add the changes to the bug_activity table.
+    if (scalar(@$removed) || scalar(@$added)) {
+        my @removed_names = map { $original_groups{$_} } @$removed;
+        my @added_names = map { $updated_groups{$_} } @$added;
+        LogActivityEntry($id, 'bug_group', join(',', @removed_names),
+                         join(',', @added_names), $whoid, $timestamp);
         $bug_changed = 1;
     }
 
@@ -1581,128 +1534,7 @@ foreach my $id (@idlist) {
         }
     }
 
-    # When a bug changes products and the old or new product is associated
-    # with a bug group, it may be necessary to remove the bug from the old
-    # group or add it to the new one.  There are a very specific series of
-    # conditions under which these activities take place, more information
-    # about which can be found in comments within the conditionals below.
-    # Check if the user has changed the product to which the bug belongs;
-    if ($cgi->param('product') ne $cgi->param('dontchange')
-        && $cgi->param('product') ne $oldhash{'product'})
-    {
-        # Depending on the "addtonewgroup" variable, groups with
-        # defaults will change.
-        #
-        # For each group, determine
-        # - The group id and if it is active
-        # - The control map value for the old product and this group
-        # - The control map value for the new product and this group
-        # - Is the user in this group?
-        # - Is the bug in this group?
-        my $groups = $dbh->selectall_arrayref(
-            qq{SELECT DISTINCT groups.id, isactive,
-                               oldcontrolmap.membercontrol,
-                               newcontrolmap.membercontrol,
-                      CASE WHEN groups.id IN ($grouplist) THEN 1 ELSE 0 END,
-                      CASE WHEN bug_group_map.group_id IS NOT NULL
-                                THEN 1 ELSE 0 END
-                 FROM groups
-            LEFT JOIN group_control_map AS oldcontrolmap
-                   ON oldcontrolmap.group_id = groups.id
-                  AND oldcontrolmap.product_id = ?
-            LEFT JOIN group_control_map AS newcontrolmap
-                   ON newcontrolmap.group_id = groups.id
-                  AND newcontrolmap.product_id = ?
-            LEFT JOIN bug_group_map
-                   ON bug_group_map.group_id = groups.id
-                  AND bug_group_map.bug_id = ?},
-            undef, $oldhash{'product_id'}, $product->id, $id);
-        my @groupstoremove = ();
-        my @groupstoadd = ();
-        my @defaultstoremove = ();
-        my @defaultstoadd = ();
-        my @allgroups = ();
-        my $buginanydefault = 0;
-        my $buginanychangingdefault = 0;
-        foreach my $group (@$groups) {
-            my ($groupid, $isactive, $oldcontrol, $newcontrol,
-                   $useringroup, $bugingroup) = @$group;
-            # An undefined newcontrol is none.
-            $newcontrol = CONTROLMAPNA unless $newcontrol;
-            $oldcontrol = CONTROLMAPNA unless $oldcontrol;
-            push(@allgroups, $groupid);
-            if (($bugingroup) && ($isactive)
-                && ($oldcontrol == CONTROLMAPDEFAULT)) {
-                # Bug was in a default group.
-                $buginanydefault = 1;
-                if (($newcontrol != CONTROLMAPDEFAULT)
-                    && ($newcontrol != CONTROLMAPMANDATORY)) {
-                    # Bug was in a default group that no longer is.
-                    $buginanychangingdefault = 1;
-                    push (@defaultstoremove, $groupid);
-                }
-            }
-            if (($isactive) && (!$bugingroup)
-                && ($newcontrol == CONTROLMAPDEFAULT)
-                && ($useringroup)) {
-                push (@defaultstoadd, $groupid);
-            }
-            if (($bugingroup) && ($isactive) && ($newcontrol == CONTROLMAPNA)) {
-                # Group is no longer permitted.
-                push(@groupstoremove, $groupid);
-            }
-            if ((!$bugingroup) && ($isactive) 
-                && ($newcontrol == CONTROLMAPMANDATORY)) {
-                # Group is now required.
-                push(@groupstoadd, $groupid);
-            }
-        }
-        # If addtonewgroups = "yes", old default groups will be removed
-        # and new default groups will be added.
-        # If addtonewgroups = "yesifinold", old default groups will be removed
-        # and new default groups will be added only if the bug was in ANY
-        # of the old default groups.
-        # If addtonewgroups = "no", old default groups will be removed and not
-        # replaced.
-        push(@groupstoremove, @defaultstoremove);
-        if (AnyDefaultGroups()
-            && (($cgi->param('addtonewgroup') eq 'yes')
-            || (($cgi->param('addtonewgroup') eq 'yesifinold')
-            && ($buginanydefault)))) {
-            push(@groupstoadd, @defaultstoadd);
-        }
-
-        # Now actually update the bug_group_map.
-        my @DefGroupsAdded = ();
-        my @DefGroupsRemoved = ();
-        my $sth_insert =
-            $dbh->prepare(q{INSERT INTO bug_group_map (bug_id, group_id)
-                                 VALUES (?, ?)});
-        my $sth_delete = $dbh->prepare(q{DELETE FROM bug_group_map
-                                               WHERE bug_id = ?
-                                                 AND group_id = ?});
-        foreach my $groupid (@allgroups) {
-            my $thisadd = grep( ($_ == $groupid), @groupstoadd);
-            my $thisdel = grep( ($_ == $groupid), @groupstoremove);
-            if ($thisadd) {
-                my $group_obj = new Bugzilla::Group($groupid);
-                push(@DefGroupsAdded, $group_obj->name);
-                $sth_insert->execute($id, $groupid);
-            } elsif ($thisdel) {
-                my $group_obj = new Bugzilla::Group($groupid);
-                push(@DefGroupsRemoved, $group_obj->name);
-                $sth_delete->execute($id, $groupid);
-            }
-        }
-        if ((@DefGroupsAdded) || (@DefGroupsRemoved)) {
-            LogActivityEntry($id, "bug_group",
-                join(', ', @DefGroupsRemoved),
-                join(', ', @DefGroupsAdded),
-                     $whoid, $timestamp); 
-        }
-    }
-  
-    # get a snapshot of the newly set values out of the database, 
+    # get a snapshot of the newly set values out of the database,
     # and then generate any necessary bug activity entries by seeing 
     # what has changed since before we wrote out the new values.
     #

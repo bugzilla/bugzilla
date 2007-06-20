@@ -671,17 +671,17 @@ if (defined $cgi->param('id')) {
         q{SELECT group_id FROM bug_group_map WHERE bug_id = ?},
         undef, $cgi->param('id'));
     if ( $havegroup ) {
-        DoComma();
-        $cgi->param('reporter_accessible',
-                    $cgi->param('reporter_accessible') ? '1' : '0');
-        $::query .= "reporter_accessible = ?";
-        push(@values, $cgi->param('reporter_accessible'));
-
-        DoComma();
-        $cgi->param('cclist_accessible',
-                    $cgi->param('cclist_accessible') ? '1' : '0');
-        $::query .= "cclist_accessible = ?";
-        push(@values, $cgi->param('cclist_accessible'));
+        foreach my $field ('reporter_accessible', 'cclist_accessible') {
+            if ($bug->check_can_change_field($field, 0, 1, \$PrivilegesRequired)) {
+                DoComma();
+                $cgi->param($field, $cgi->param($field) ? '1' : '0');
+                $::query .= " $field = ?";
+                push(@values, $cgi->param($field));
+            }
+            else {
+                $cgi->delete($field);
+            }
+        }
     }
 }
 

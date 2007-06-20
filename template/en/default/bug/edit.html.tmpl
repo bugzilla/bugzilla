@@ -518,11 +518,13 @@
       <p>
         <input type="checkbox" value="1"
                name="reporter_accessible" id="reporter_accessible"
-               [% " checked" IF bug.reporter_accessible %]>
+               [% " checked" IF bug.reporter_accessible %]
+               [% " disabled=\"disabled\"" UNLESS bug.check_can_change_field("reporter_accessible", 0, 1) %]>
         <label for="reporter_accessible">Reporter</label>
         <input type="checkbox" value="1"
                name="cclist_accessible" id="cclist_accessible"
-               [% " checked" IF bug.cclist_accessible %]>
+               [% " checked" IF bug.cclist_accessible %]
+               [% " disabled=\"disabled\"" UNLESS bug.check_can_change_field("cclist_accessible", 0, 1) %]>
         <label for="cclist_accessible">CC List</label>
       </p>
     [% END %]

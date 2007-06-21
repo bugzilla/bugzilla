@@ -227,6 +227,7 @@ if ($cgi->cookie("BUGLIST") && defined $cgi->param('id')) {
 defined($cgi->param('product'))
   || ThrowCodeError('undefined_field', { field => 'product' });
 
+my $product_change = 0;
 if ((defined $cgi->param('id') && $cgi->param('product') ne $bug->product)
      || (!$cgi->param('id')
          && $cgi->param('product') ne $cgi->param('dontchange')))
@@ -371,6 +372,7 @@ if ((defined $cgi->param('id') && $cgi->param('product') ne $bug->product)
           || ThrowTemplateError($template->error());
         exit;
     }
+    $product_change = 1;
 }
 
 # At this point, the component must be defined, even if set to "dontchange".
@@ -1387,7 +1389,12 @@ foreach my $id (@idlist) {
         }
         # When editing several bugs at once, only consider groups which
         # have been displayed.
-        elsif (defined $cgi->param('id') || defined $cgi->param("bit-$gid")) {
+        # Only members of a group can add/remove the bug to/from it,
+        # unless the bug is being moved to another product in which case
+        # non-members can also edit group restrictions.
+        elsif (($user->in_group_id($gid) || $product_change)
+               && (defined $cgi->param('id') || defined $cgi->param("bit-$gid")))
+        {
             if (!$cgi->param("bit-$gid")) {
                 delete $updated_groups{$gid};
             }

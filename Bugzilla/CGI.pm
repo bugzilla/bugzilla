@@ -194,13 +194,13 @@ sub multipart_start {
     
     my %args = @_;
 
-    # CGI.pm::multipart_start doesn't accept a -charset parameter, so
+    # CGI.pm::multipart_start doesn't honour its own charset information, so
     # we do it ourselves here
-    if (defined $args{-charset} && defined $args{-type}) {
+    if (defined $self->charset() && defined $args{-type}) {
         # Remove any existing charset specifier
         $args{-type} =~ s/;.*$//;
         # and add the specified one
-        $args{-type} .= "; charset=$args{-charset}";
+        $args{-type} .= '; charset=' . $self->charset();
     }
         
     my $headers = $self->SUPER::multipart_start(%args);

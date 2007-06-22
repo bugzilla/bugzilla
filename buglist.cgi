@@ -397,6 +397,8 @@ if ($cgi->param('cmdtype') eq "dorem" && $cgi->param('remaction') =~ /^run/) {
     # with the HTTP headers.
     $filename =~ s/\s/_/g;
 }
+$filename =~ s/\\/\\\\/g; # escape backslashes
+$filename =~ s/"/\\"/g; # escape quotes
 
 # Take appropriate action based on user's request.
 if ($cgi->param('cmdtype') eq "dorem") {  
@@ -957,14 +959,9 @@ if ($cgi->param('debug')) {
 
 # Time to use server push to display an interim message to the user until
 # the query completes and we can display the bug list.
-my $disposition = '';
 if ($serverpush) {
-    $filename =~ s/\\/\\\\/g; # escape backslashes
-    $filename =~ s/"/\\"/g; # escape quotes
-    $disposition = qq#inline; filename="$filename"#;
-
-    print $cgi->multipart_init(-content_disposition => $disposition);
-    print $cgi->multipart_start();
+    print $cgi->multipart_init();
+    print $cgi->multipart_start(-type => 'text/html');
 
     # Generate and return the UI (HTML page) from the appropriate template.
     $template->process("list/server-push.html.tmpl", $vars)
@@ -1189,7 +1186,7 @@ $vars->{'defaultsavename'} = $cgi->param('query_based_on');
 # Generate HTTP headers
 
 my $contenttype;
-my $disp = "inline";
+my $disposition = "inline";
 
 if ($format->{'extension'} eq "html" && !$agent) {
     if ($order) {
@@ -1221,23 +1218,21 @@ else {
 if ($format->{'extension'} eq "csv") {
     # We set CSV files to be downloaded, as they are designed for importing
     # into other programs.
-    $disp = "attachment";
+    $disposition = "attachment";
 }
 
+# Suggest a name for the bug list if the user wants to save it as a file.
+$disposition .= "; filename=\"$filename\"";
+
 if ($serverpush) {
-    # close the "please wait" page, then open the buglist page
+    # Close the "please wait" page, then open the buglist page
     print $cgi->multipart_end();
-    my @extra;
-    push @extra, (-charset => "utf8") if Bugzilla->params->{"utf8"};
-    print $cgi->multipart_start(-type => $contenttype, 
-                                -content_disposition => $disposition, 
-                                @extra);
-} else {
-    # Suggest a name for the bug list if the user wants to save it as a file.
-    # If we are doing server push, then we did this already in the HTTP headers
-    # that started the server push, so we don't have to do it again here.
-    print $cgi->header(-type => $contenttype,
-                       -content_disposition => "$disp; filename=$filename");
+    print $cgi->multipart_start(-type                => $contenttype,
+                                -content_disposition => $disposition);
+}
+else {
+    print $cgi->header(-type                => $contenttype,
+                       -content_disposition => $disposition);
 }
 
 

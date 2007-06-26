@@ -72,7 +72,15 @@ sub get_param_list {
    type    => 't',
    default => '4',
    checker => \&check_numeric
-  } );
+  },
+  
+  {
+   name => 'quicksearch_allow_empty_words',
+   type => 'b',
+   default => 0
+  }
+  
+  );
   return @param_list;
 }
 

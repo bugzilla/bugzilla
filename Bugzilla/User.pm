@@ -131,6 +131,14 @@ sub new {
     return $class->SUPER::new(@_);
 }
 
+sub check {
+    my ($username) = @_;
+    $username = trim($username);
+    my $user = new Bugzilla::User({ name => $username })
+        || ThrowUserError('invalid_username', { name => $username });
+    return $user;
+}
+
 sub update {
     my $self = shift;
     my $changes = $self->SUPER::update(@_);
@@ -2071,6 +2079,11 @@ Params: login_name - B<Required> The login name for the new user.
             empty string.
         disable_mail - If 1, bug-related mail will not be  sent to this user; 
             if 0, mail will be sent depending on the user's  email preferences.
+
+=item C<check>
+
+Takes a username as its only argument. Throws an error if there is no
+user with that username. Returns a C<Bugzilla::User> object.
 
 =item C<is_available_username>
 

@@ -27,6 +27,7 @@
 #                 Frédéric Buclin <LpSolit@gmail.com>
 #                 Lance Larsh <lance.larsh@oracle.com>
 #                 Akamai Technologies <bugzilla-dev@akamai.com>
+#                 Max Kanat-Alexander <mkanat@bugzilla.org>
 
 # Implementation notes for this file:
 #
@@ -107,7 +108,7 @@ sub comment_exists {
 # named "id_x" where "x" is the bug number.
 # For each bug being modified, make sure its ID is a valid bug number 
 # representing an existing bug that the user is authorized to access.
-my @idlist;
+my (@idlist, @bug_objects);
 if (defined $cgi->param('id')) {
   my $id = $cgi->param('id');
   ValidateBugID($id);
@@ -116,12 +117,15 @@ if (defined $cgi->param('id')) {
   # lots of later code will need it, and will obtain it from there
   $cgi->param('id', $id);
   push @idlist, $id;
+  push(@bug_objects, new Bugzilla::Bug($id));
 } else {
     foreach my $i ($cgi->param()) {
         if ($i =~ /^id_([1-9][0-9]*)/) {
             my $id = $1;
             ValidateBugID($id);
             push @idlist, $id;
+            # We do this until we have Bugzilla::Bug->new_from_list.
+            push(@bug_objects, new Bugzilla::Bug($id));
         }
     }
 }
@@ -130,7 +134,7 @@ if (defined $cgi->param('id')) {
 scalar(@idlist) || ThrowUserError("no_bugs_chosen");
 
 # Build a bug object using the first bug id, for validations.
-my $bug = new Bugzilla::Bug($idlist[0]);
+my $bug = $bug_objects[0];
 
 # Make sure form param 'dontchange' is defined so it can be compared to easily.
 $cgi->param('dontchange','') unless defined $cgi->param('dontchange');
@@ -613,7 +617,7 @@ if ($cgi->param('product') ne $cgi->param('dontchange')) {
 }
 
 my $component;
-my (%cc_add, %cc_remove);
+my (@cc_add, @cc_remove);
 
 if ($cgi->param('component') ne $cgi->param('dontchange')) {
     if (scalar(@newprod_ids) > 1) {
@@ -634,7 +638,7 @@ if ($cgi->param('component') ne $cgi->param('dontchange')) {
             # NewCC must be defined or the code below won't insert
             # any CCs.
             $cgi->param('newcc') || $cgi->param('newcc', "");
-            $cc_add{$cc->id} = $cc->login;
+            push(@cc_add, $cc->login);
         }
     }
 }
@@ -710,13 +714,15 @@ if ( defined $cgi->param('id') &&
     }
 }
 
-# We need to check the addresses involved in a CC change before we touch any bugs.
-# What we'll do here is formulate the CC data into two hashes of ID's involved
-# in this CC change.  Then those hashes can be used later on for the actual change.
+# We need to check the addresses involved in a CC change before we touch 
+# any bugs. What we'll do here is formulate the CC data into two arrays of
+# users involved in this CC change.  Then those arrays can be used later 
+# on for the actual change.
 if (defined $cgi->param('newcc')
     || defined $cgi->param('addselfcc')
     || defined $cgi->param('removecc')
     || defined $cgi->param('masscc')) {
+        
     # If masscc is defined, then we came from buglist and need to either add or
     # remove cc's... otherwise, we came from bugform and may need to do both.
     my ($cc_add, $cc_remove) = "";
@@ -735,23 +741,15 @@ if (defined $cgi->param('newcc')
         }
     }
 
-    if ($cc_add) {
-        $cc_add =~ s/[\s,]+/ /g; # Change all delimiters to a single space
-        foreach my $person ( split(" ", $cc_add) ) {
-            my $pid = login_to_id($person, THROW_ERROR);
-            $cc_add{$pid} = $person;
-        }
-    }
-    if ($cgi->param('addselfcc')) {
-        $cc_add{$whoid} = $user->login;
-    }
-    if ($cc_remove) {
-        $cc_remove =~ s/[\s,]+/ /g; # Change all delimiters to a single space
-        foreach my $person ( split(" ", $cc_remove) ) {
-            my $pid = login_to_id($person, THROW_ERROR);
-            $cc_remove{$pid} = $person;
-        }
-    }
+    push(@cc_add, split(/[\s,]+/, $cc_add)) if $cc_add;
+    push(@cc_add, Bugzilla->user) if $cgi->param('addselfcc');
+
+    push(@cc_remove, split(/[\s,]+/, $cc_remove)) if $cc_remove;
+}
+
+foreach my $b (@bug_objects) {
+    $b->remove_cc($_) foreach @cc_remove;
+    $b->add_cc($_, $product) foreach @cc_add;
 }
 
 # Store the new assignee and QA contact IDs (if any). This is the
@@ -991,25 +989,6 @@ sub LogDependencyActivity {
     return 0;
 }
 
-if (Bugzilla->params->{"strict_isolation"}) {
-    my @blocked_cc = ();
-    foreach my $pid (keys %cc_add) {
-        $usercache{$pid} ||= Bugzilla::User->new($pid);
-        my $cc_user = $usercache{$pid};
-        foreach my $product_id (@newprod_ids) {
-            if (!$cc_user->can_edit_product($product_id)) {
-                push (@blocked_cc, $cc_user->login);
-                last;
-            }
-        }
-    }
-    if (scalar(@blocked_cc)) {
-        ThrowUserError("invalid_user_group", 
-            {'users' => \@blocked_cc,
-             'bug_id' => (scalar(@idlist) > 1) ? undef : $idlist[0]});
-    }
-}
-
 if ($prod_changed && Bugzilla->params->{"strict_isolation"}) {
     my $sth_cc = $dbh->prepare("SELECT who
                                 FROM cc
@@ -1060,6 +1039,8 @@ if ($prod_changed && Bugzilla->params->{"strict_isolation"}) {
     }
 }
 
+
+my %bug_objects = map {$_->id => $_} @bug_objects;
 
 # This loop iterates once for each bug to be processed (i.e. all the
 # bugs selected when this script is called with multiple bugs selected
@@ -1432,51 +1413,9 @@ foreach my $id (@idlist) {
         $bug_changed = 1;
     }
 
-    my @ccRemoved = (); 
-    if (defined $cgi->param('newcc')
-        || defined $cgi->param('addselfcc')
-        || defined $cgi->param('removecc')
-        || defined $cgi->param('masscc')) {
-        # Get the current CC list for this bug
-        my %oncc;
-        my $cc_list = $dbh->selectcol_arrayref(
-            q{SELECT who FROM cc WHERE bug_id = ?}, undef, $id);
-        foreach my $who (@$cc_list) {
-            $oncc{$who} = 1;
-        }
+    my ($cc_removed) = $bug_objects{$id}->update_cc($timestamp);
+    $cc_removed = [map {$_->login} @$cc_removed];
 
-        my (@added, @removed) = ();
-
-        my $sth_insert = $dbh->prepare(q{INSERT INTO cc (bug_id, who)
-                                              VALUES (?, ?)});
-        foreach my $pid (keys %cc_add) {
-            # If this person isn't already on the cc list, add them
-            if (! $oncc{$pid}) {
-                $sth_insert->execute($id, $pid);
-                push (@added, $cc_add{$pid});
-                $oncc{$pid} = 1;
-            }
-        }
-        my $sth_delete = $dbh->prepare(q{DELETE FROM cc
-                                          WHERE bug_id = ? AND who = ?});
-        foreach my $pid (keys %cc_remove) {
-            # If the person is on the cc list, remove them
-            if ($oncc{$pid}) {
-                $sth_delete->execute($id, $pid);
-                push (@removed, $cc_remove{$pid});
-                $oncc{$pid} = 0;
-            }
-        }
-
-        # If any changes were found, record it in the activity log
-        if (scalar(@removed) || scalar(@added)) {
-            my $removed = join(", ", @removed);
-            my $added = join(", ", @added);
-            LogActivityEntry($id,"cc",$removed,$added,$whoid,$timestamp);
-            $bug_changed = 1;
-        }
-        @ccRemoved = @removed;
-    }
 
     # We need to send mail for dependson/blocked bugs if the dependencies
     # change or the status or resolution change. This var keeps track of that.
@@ -1677,7 +1616,7 @@ foreach my $id (@idlist) {
     # all concerned users, including the bug itself, but also the
     # duplicated bug and dependent bugs, if any.
 
-    $vars->{'mailrecipients'} = { 'cc' => \@ccRemoved,
+    $vars->{'mailrecipients'} = { 'cc' => $cc_removed,
                                   'owner' => $origOwner,
                                   'qacontact' => $origQaContact,
                                   'changer' => Bugzilla->user->login };

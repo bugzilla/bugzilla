@@ -471,6 +471,40 @@ sub update {
     return $changes;
 }
 
+# XXX Temporary hack until all of process_bug uses update().
+sub update_cc {
+    my $self = shift;
+    
+    my $dbh = Bugzilla->dbh;
+    my $delta_ts = shift || $dbh->selectrow_array("SELECT NOW()");
+    
+    my $old_bug = $self->new($self->id);
+    my @old_cc = map {$_->id} @{$old_bug->cc_users};
+    my @new_cc = map {$_->id} @{$self->cc_users};
+    my ($removed, $added) = diff_arrays(\@old_cc, \@new_cc);
+    
+    if (scalar @$removed) {
+        $dbh->do('DELETE FROM cc WHERE bug_id = ? AND who IN (' .
+                  join(',', @$removed) . ')', undef, $self->id);
+    }
+    foreach my $user_id (@$added) {
+        $dbh->do('INSERT INTO cc (bug_id, who) VALUES (?,?)',
+                 undef, $self->id, $user_id);
+    }
+    my $removed_users = Bugzilla::User->new_from_list($removed);
+    my $added_users   = Bugzilla::User->new_from_list($added);
+   
+    # If any changes were found, record it in the activity log
+    if (scalar @$removed || scalar @$added) {
+        my $removed_names = join ', ', (map {$_->login} @$removed_users);
+        my $added_names   = join ', ', (map {$_->login} @$added_users);
+        LogActivityEntry($self->id, "cc", $removed_names, $added_names,
+                         Bugzilla->user->id, $delta_ts);
+    }
+
+    return ($removed_users, $added_users);
+}
+
 # This is the correct way to delete bugs from the DB.
 # No bug should be deleted from anywhere else except from here.
 #
@@ -1034,6 +1068,38 @@ sub set_status {
 # "Add/Remove" Methods #
 ########################
 
+# Accepts a User object or a username. Adds the user only if they
+# don't already exist as a CC on the bug.
+sub add_cc {
+    # XXX $product is a temporary hack until all of process_bug uses Bug
+    # objects for updating.
+    my ($self, $user_or_name, $product) = @_;
+    return if !$user_or_name;
+    my $user = ref $user_or_name ? $user_or_name
+                                 : Bugzilla::User::check($user_or_name);
+
+    my $product_id = $product ? $product->id : $self->{product_id};
+    if (Bugzilla->params->{strict_isolation}
+        && !$user->can_edit_product($product_id))
+    {
+        ThrowUserError('invalid_user_group', { users  => $user->login,
+                                               bug_id => $self->id });
+    }
+
+    my $cc_users = $self->cc_users;
+    push(@$cc_users, $user) if !grep($_->id == $user->id, @$cc_users);
+}
+
+# Accepts a User object or a username. Removes the User if they exist
+# in the list, but doesn't throw an error if they don't exist.
+sub remove_cc {
+    my ($self, $user_or_name) = @_;
+    my $user = ref $user_or_name ? $user_or_name
+                                 : Bugzilla::User::check($user_or_name);
+    my $cc_users = $self->cc_users;
+    @$cc_users = grep { $_->id != $user->id } @$cc_users;
+}
+
 # $bug->add_comment("comment", {isprivate => 1, work_time => 10.5,
 #                               type => CMT_NORMAL, extra_data => $data});
 sub add_comment {
@@ -1183,6 +1249,19 @@ sub cc {
     $self->{'cc'} = undef if !scalar(@{$self->{'cc'}});
 
     return $self->{'cc'};
+}
+
+# XXX Eventually this will become the standard "cc" method used everywhere.
+sub cc_users {
+    my $self = shift;
+    return $self->{'cc_users'} if exists $self->{'cc_users'};
+    return [] if $self->{'error'};
+    
+    my $dbh = Bugzilla->dbh;
+    my $cc_ids = $dbh->selectcol_arrayref(
+        'SELECT who FROM cc WHERE bug_id = ?', undef, $self->id);
+    $self->{'cc_users'} = Bugzilla::User->new_from_list($cc_ids);
+    return $self->{'cc_users'};
 }
 
 sub component {

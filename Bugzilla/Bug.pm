@@ -388,7 +388,7 @@ sub run_create_validators {
 
     $params->{version} = $class->_check_version($product, $params->{version});
 
-    $params->{keywords} = $class->_check_keywords($product, $params->{keywords});
+    $params->{keywords} = $class->_check_keywords($params->{keywords}, $product);
 
     $params->{groups} = $class->_check_groups($product,
         $params->{groups});
@@ -496,13 +496,52 @@ sub update_cc {
    
     # If any changes were found, record it in the activity log
     if (scalar @$removed || scalar @$added) {
-        my $removed_names = join ', ', (map {$_->login} @$removed_users);
-        my $added_names   = join ', ', (map {$_->login} @$added_users);
+        my $removed_names = join(', ', (map {$_->login} @$removed_users));
+        my $added_names   = join(', ', (map {$_->login} @$added_users));
         LogActivityEntry($self->id, "cc", $removed_names, $added_names,
                          Bugzilla->user->id, $delta_ts);
     }
 
     return ($removed_users, $added_users);
+}
+
+# XXX Temporary hack until all of process_bug uses update()
+sub update_keywords {
+    my $self = shift;
+    
+    my $dbh = Bugzilla->dbh;
+    my $delta_ts = shift || $dbh->selectrow_array("SELECT NOW()");
+    
+    my $old_bug = $self->new($self->id);
+    my @old_ids = map { $_->id } @{$old_bug->keyword_objects};
+    my @new_ids = map { $_->id } @{$self->keyword_objects};
+
+    my ($removed, $added) = diff_arrays(\@old_ids, \@new_ids);
+
+    if (scalar @$removed) {
+        $dbh->do('DELETE FROM keywords WHERE bug_id = ? AND keywordid IN ('
+                 . join(',', @$removed) . ')', undef, $self->id);
+    }
+    foreach my $keyword_id (@$added) {
+        $dbh->do('INSERT INTO keywords (bug_id, keywordid) VALUES (?,?)',
+                 undef, $self->id, $keyword_id);
+    }
+    
+    $dbh->do('UPDATE bugs SET keywords = ? WHERE bug_id = ?', undef,
+             $self->keywords, $self->id);
+
+    my $removed_keywords = Bugzilla::Keyword->new_from_list($removed);
+    my $added_keywords   = Bugzilla::Keyword->new_from_list($added);
+
+    # If any changes were found, record it in the activity log
+    if (scalar @$removed || scalar @$added) {
+        my $removed_names = join(', ', (map {$_->name} @$removed_keywords));
+        my $added_names   = join(', ', (map {$_->name} @$added_keywords));
+        LogActivityEntry($self->id, "keywords", $removed_names,
+                         $added_names, Bugzilla->user->id, $delta_ts);
+    }
+
+    return [$removed_keywords, $added_keywords];
 }
 
 # This is the correct way to delete bugs from the DB.
@@ -626,9 +665,7 @@ sub _check_bug_status {
 
     my @valid_statuses;
     if (ref $invocant) {
-        $invocant->{'prod_obj'} ||= 
-            new Bugzilla::Product({name => $invocant->product});
-        $product = $invocant->{'prod_obj'};
+        $product = $invocant->product_obj;
         @valid_statuses = map { $_->name } @{$invocant->status->can_change_to};
     }
     else {
@@ -846,11 +883,15 @@ sub _check_groups {
 }
 
 sub _check_keywords {
-    my ($invocant, $product, $keyword_string) = @_;
+    my ($invocant, $keyword_string, $product) = @_;
     $keyword_string = trim($keyword_string);
-    return [] if (!$keyword_string
-                  || !Bugzilla->user->in_group('editbugs', $product->id));
-
+    return [] if !$keyword_string;
+    
+    # On creation, only editbugs users can set keywords.
+    if (!ref $invocant) {
+        return [] if !Bugzilla->user->in_group('editbugs', $product->id);
+    }
+    
     my %keywords;
     foreach my $keyword (split(/[\s,]+/, $keyword_string)) {
         next unless $keyword;
@@ -1068,6 +1109,8 @@ sub set_status {
 # "Add/Remove" Methods #
 ########################
 
+# These are in alphabetical order by field name.
+
 # Accepts a User object or a username. Adds the user only if they
 # don't already exist as a CC on the bug.
 sub add_cc {
@@ -1140,6 +1183,57 @@ sub add_comment {
     }
 
     push(@{$self->{added_comments}}, $add_comment);
+}
+
+# There was a lot of duplicate code when I wrote this as three separate
+# functions, so I just combined them all into one. This is also easier for
+# process_bug to use.
+sub modify_keywords {
+    my ($self, $keywords, $action) = @_;
+    
+    $action ||= "makeexact";
+    if (!grep($action eq $_, qw(add delete makeexact))) {
+        $action = "makeexact";
+    }
+    
+    $keywords = $self->_check_keywords($keywords);
+
+    my (@result, $any_changes);
+    if ($action eq 'makeexact') {
+        @result = @$keywords;
+        # Check if anything was added or removed.
+        my @old_ids = map { $_->id } @{$self->keyword_objects};
+        my @new_ids = map { $_->id } @result;
+        my ($removed, $added) = diff_arrays(\@old_ids, \@new_ids);
+        $any_changes = scalar @$removed || scalar @$added;
+    }
+    else {
+        # We're adding or deleting specific keywords.
+        my %keys = map {$_->id => $_} @{$self->keyword_objects};
+        if ($action eq 'add') {
+            $keys{$_->id} = $_ foreach @$keywords;
+        }
+        else {
+            delete $keys{$_->id} foreach @$keywords;
+        }
+        @result = values %keys;
+        $any_changes = scalar @$keywords;
+    }
+    # Make sure we retain the sort order.
+    @result = sort {lc($a->name) cmp lc($b->name)} @result;
+    
+    if ($any_changes) {
+        my $privs;
+        my $new = join(', ', (map {$_->name} @result));
+        my $check = $self->check_can_change_field('keywords', 0, 1, \$privs)
+            || ThrowUserError('illegal_change', { field    => 'keywords',
+                                                  oldvalue => $self->keywords,
+                                                  newvalue => $new,
+                                                  privs    => $privs });
+    }
+
+    $self->{'keyword_objects'} = \@result;
+    return $any_changes;
 }
 
 #####################################################################
@@ -1339,20 +1433,20 @@ sub isunconfirmed {
 
 sub keywords {
     my ($self) = @_;
-    return $self->{'keywords'} if exists $self->{'keywords'};
-    return () if $self->{'error'};
+    return join(', ', (map { $_->name } @{$self->keyword_objects}));
+}
+
+# XXX At some point, this should probably replace the normal "keywords" sub.
+sub keyword_objects {
+    my $self = shift;
+    return $self->{'keyword_objects'} if defined $self->{'keyword_objects'};
+    return [] if $self->{'error'};
 
     my $dbh = Bugzilla->dbh;
-    my $list_ref = $dbh->selectcol_arrayref(
-         "SELECT keyworddefs.name
-            FROM keyworddefs, keywords
-           WHERE keywords.bug_id = ?
-             AND keyworddefs.id = keywords.keywordid
-        ORDER BY keyworddefs.name",
-        undef, ($self->bug_id));
-
-    $self->{'keywords'} = join(', ', @$list_ref);
-    return $self->{'keywords'};
+    my $ids = $dbh->selectcol_arrayref(
+         "SELECT keywordid FROM keywords WHERE bug_id = ?", undef, $self->id);
+    $self->{'keyword_objects'} = Bugzilla::Keyword->new_from_list($ids);
+    return $self->{'keyword_objects'};
 }
 
 sub longdescs {
@@ -1368,8 +1462,7 @@ sub milestoneurl {
     return $self->{'milestoneurl'} if exists $self->{'milestoneurl'};
     return '' if $self->{'error'};
 
-    $self->{'prod_obj'} ||= new Bugzilla::Product({name => $self->product});
-    $self->{'milestoneurl'} = $self->{'prod_obj'}->milestone_url;
+    $self->{'milestoneurl'} = $self->product_obj->milestone_url;
     return $self->{'milestoneurl'};
 }
 
@@ -1381,6 +1474,14 @@ sub product {
         'SELECT name FROM products WHERE id = ?',
         undef, $self->{product_id});
     return $self->{product};
+}
+
+# XXX This should eventually replace the "product" subroutine.
+sub product_obj {
+    my $self = shift;
+    return {} if $self->{error};
+    $self->{prod_obj} ||= new Bugzilla::Product($self->{product_id});
+    return $self->{prod_obj};
 }
 
 sub qa_contact {
@@ -1443,10 +1544,8 @@ sub use_votes {
     my ($self) = @_;
     return 0 if $self->{'error'};
 
-    $self->{'prod_obj'} ||= new Bugzilla::Product({name => $self->product});
-
     return Bugzilla->params->{'usevotes'} 
-           && $self->{'prod_obj'}->votes_per_user > 0;
+           && $self->product_obj->votes_per_user > 0;
 }
 
 sub groups {
@@ -1549,7 +1648,6 @@ sub choices {
     return {} if $self->{'error'};
 
     $self->{'choices'} = {};
-    $self->{prod_obj} ||= new Bugzilla::Product({name => $self->product});
 
     my @prodlist = map {$_->name} @{Bugzilla->user->get_enterable_products};
     # The current product is part of the popup, even if new bugs are no longer
@@ -1571,9 +1669,9 @@ sub choices {
        'op_sys'       => get_legal_field_values('op_sys'),
        'bug_status'   => get_legal_field_values('bug_status'),
        'resolution'   => \@res,
-       'component'    => [map($_->name, @{$self->{prod_obj}->components})],
-       'version'      => [map($_->name, @{$self->{prod_obj}->versions})],
-       'target_milestone' => [map($_->name, @{$self->{prod_obj}->milestones})],
+       'component'    => [map($_->name, @{$self->product_obj->components})],
+       'version'      => [map($_->name, @{$self->product_obj->versions})],
+       'target_milestone' => [map($_->name, @{$self->product_obj->milestones})],
       };
 
     return $self->{'choices'};

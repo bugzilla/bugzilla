@@ -882,34 +882,18 @@ $requiremilestone = $vars->{requiremilestone};
 DuplicateUserConfirm($bug, $duplicate) if $vars->{DuplicateUserConfirm};
 _remove_remaining_time() if $vars->{remove_remaining_time};
 
-my @keywordlist;
-my %keywordseen;
-
+my $any_keyword_changes;
 if (defined $cgi->param('keywords')) {
-    foreach my $keyword (split(/[\s,]+/, $cgi->param('keywords'))) {
-        if ($keyword eq '') {
-            next;
-        }
-        my $keyword_obj = new Bugzilla::Keyword({name => $keyword});
-        if (!$keyword_obj) {
-            ThrowUserError("unknown_keyword",
-                           { keyword => $keyword });
-        }
-        if (!$keywordseen{$keyword_obj->id}) {
-            push(@keywordlist, $keyword_obj->id);
-            $keywordseen{$keyword_obj->id} = 1;
-        }
+    foreach my $b (@bug_objects) {
+        my $return =
+            $b->modify_keywords(scalar $cgi->param('keywords'),
+                                scalar $cgi->param('keywordaction'));
+        $any_keyword_changes ||= $return;
     }
 }
 
-my $keywordaction = $cgi->param('keywordaction') || "makeexact";
-if (!grep($keywordaction eq $_, qw(add delete makeexact))) {
-    $keywordaction = "makeexact";
-}
-
 if ($::comma eq ""
-    && (!Bugzilla::Keyword::keyword_count()
-        || (0 == @keywordlist && $keywordaction ne "makeexact"))
+    && !$any_keyword_changes
     && defined $cgi->param('masscc') && ! $cgi->param('masscc')
     ) {
     if (!defined $cgi->param('comment') || $cgi->param('comment') =~ /^\s*$/) {
@@ -1184,25 +1168,6 @@ foreach my $id (@idlist) {
         }
     }
     
-    # When editing multiple bugs, users can specify a list of keywords to delete
-    # from bugs.  If the list matches the current set of keywords on those bugs,
-    # Bug::check_can_change_field will fail to check permissions because it thinks
-    # the list hasn't changed. To fix that, we have to call Bug::check_can_change_field
-    # again with old!=new if the keyword action is "delete" and old=new.
-    if ($keywordaction eq "delete"
-        && defined $cgi->param('keywords')
-        && length(@keywordlist) > 0
-        && $cgi->param('keywords') eq $oldhash{keywords}
-        && !$old_bug_obj->check_can_change_field("keywords", "old is not", "equal to new",
-                                                 \$PrivilegesRequired))
-    {
-        $vars->{'oldvalue'} = $oldhash{keywords};
-        $vars->{'newvalue'} = "no keywords";
-        $vars->{'field'} = "keywords";
-        $vars->{'privs'} = $PrivilegesRequired;
-        ThrowUserError("illegal_change", $vars);
-    }
-
     $oldhash{'product'} = $old_bug_obj->product;
     if (!Bugzilla->user->can_edit_product($oldhash{'product_id'})) {
         ThrowUserError("product_edit_denied",
@@ -1287,49 +1252,8 @@ foreach my $id (@idlist) {
         $bug_changed = 1;
     }
 
-    if (Bugzilla::Keyword::keyword_count() 
-        && defined $cgi->param('keywords')) 
-    {
-        # There are three kinds of "keywordsaction": makeexact, add, delete.
-        # For makeexact, we delete everything, and then add our things.
-        # For add, we delete things we're adding (to make sure we don't
-        # end up having them twice), and then we add them.
-        # For delete, we just delete things on the list.
-        my $changed = 0;
-        if ($keywordaction eq "makeexact") {
-            $dbh->do(q{DELETE FROM keywords WHERE bug_id = ?},
-                     undef, $id);
-            $changed = 1;
-        }
-        my $sth_delete = $dbh->prepare(q{DELETE FROM keywords
-                                               WHERE bug_id = ?
-                                                 AND keywordid = ?});
-        my $sth_insert =
-            $dbh->prepare(q{INSERT INTO keywords (bug_id, keywordid)
-                                 VALUES (?, ?)});
-        foreach my $keyword (@keywordlist) {
-            if ($keywordaction ne "makeexact") {
-                $sth_delete->execute($id, $keyword);
-                $changed = 1;
-            }
-            if ($keywordaction ne "delete") {
-                $sth_insert->execute($id, $keyword);
-                $changed = 1;
-            }
-        }
-        if ($changed) {
-            my $list = $dbh->selectcol_arrayref(
-                q{SELECT keyworddefs.name
-                    FROM keyworddefs
-              INNER JOIN keywords 
-                      ON keyworddefs.id = keywords.keywordid
-                   WHERE keywords.bug_id = ?
-                ORDER BY keyworddefs.name},
-                undef, $id);
-            $dbh->do("UPDATE bugs SET keywords = ? WHERE bug_id = ?",
-                     undef, join(', ', @$list), $id);
-        }
-    }
+    $bug_objects{$id}->update_keywords($timestamp);
+    
     $query .= " WHERE bug_id = ?";
     push(@bug_values, $id);
 
@@ -1546,10 +1470,8 @@ foreach my $id (@idlist) {
                 $origQaContact = $old;
             }
 
-            # If this is the keyword field, only record the changes, not everything.
-            if ($col eq 'keywords') {
-                ($old, $new) = diff_strings($old, $new);
-            }
+            # update_keywords does this for us already.
+            next if ($col eq 'keywords');
 
             if ($col eq 'product') {
                 # If some votes have been removed, RemoveVotes() returns

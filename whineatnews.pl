@@ -71,7 +71,7 @@ foreach my $bug (@$slt_bugs) {
 
 foreach my $email (sort (keys %bugs)) {
     my $user = new Bugzilla::User({name => $email});
-    return if $user->email_disabled;
+    next if $user->email_disabled;
 
     my $vars = {'email' => $email};
 

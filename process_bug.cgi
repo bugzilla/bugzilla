@@ -1358,21 +1358,23 @@ foreach my $id (@idlist) {
         # Leave inactive groups alone.
         next unless $group->{group}->is_active;
 
+        # Only members of a group can add/remove the bug to/from it,
+        # unless the bug is being moved to another product in which case
+        # non-members can also edit group restrictions.
         if ($group->{membercontrol} == CONTROLMAPMANDATORY
-            || ($group->{othercontrol} == CONTROLMAPMANDATORY && !$user->in_group_id($gid)))
+            || ($product_change && $group->{othercontrol} == CONTROLMAPMANDATORY
+                && !$user->in_group_id($gid)))
         {
             $updated_groups{$gid} = $group->{group}->name;
         }
         elsif ($group->{membercontrol} == CONTROLMAPNA
-               || ($group->{othercontrol} == CONTROLMAPNA && !$user->in_group_id($gid)))
+               || ($product_change && $group->{othercontrol} == CONTROLMAPNA
+                   && !$user->in_group_id($gid)))
         {
             delete $updated_groups{$gid};
         }
         # When editing several bugs at once, only consider groups which
         # have been displayed.
-        # Only members of a group can add/remove the bug to/from it,
-        # unless the bug is being moved to another product in which case
-        # non-members can also edit group restrictions.
         elsif (($user->in_group_id($gid) || $product_change)
                && (defined $cgi->param('id') || defined $cgi->param("bit-$gid")))
         {

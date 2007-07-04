@@ -20,6 +20,7 @@
 #
 # Contributor(s): Terry Weissman <terry@mozilla.org>
 #                 Joseph Heenan <joseph@heenan.me.uk>
+#                 Frédéric Buclin <LpSolit@gmail.com>
 
 
 # This is a script suitable for running once a day from a cron job.  It 
@@ -33,6 +34,7 @@ use lib '.';
 use Bugzilla;
 use Bugzilla::Mailer;
 use Bugzilla::Util;
+use Bugzilla::User;
 
 # Whining is disabled if whinedays is zero
 exit unless Bugzilla->params->{'whinedays'} >= 1;
@@ -68,9 +70,10 @@ foreach my $bug (@$slt_bugs) {
 
 
 foreach my $email (sort (keys %bugs)) {
-    my $vars = {
-        'email' => $email
-    };
+    my $user = new Bugzilla::User({name => $email});
+    return if $user->email_disabled;
+
+    my $vars = {'email' => $email};
 
     my @bugs = ();
     foreach my $i (@{$bugs{$email}}) {

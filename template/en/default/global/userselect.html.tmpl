@@ -25,6 +25,7 @@
   # emptyok: optional, select only;  if true, prepend menu option to start of select
   # multiple: optional, do multiselect box, value is size (height) of box
   # do_not_change: optional, contains the string meaning "do not alter this role"
+  # custom_userlist: optional, specify a limited list of users to use
   #%]
 
 [% IF Param("usemenuforusers") %]
@@ -45,7 +46,11 @@
     </option>
   [% END %]
 
-  [% FOREACH tmpuser = user.get_userlist %]
+  [% UNLESS custom_userlist %]
+    [% custom_userlist = user.get_userlist %]
+  [% END %]
+
+  [% FOREACH tmpuser = custom_userlist %]
     [% IF tmpuser.visible OR value.match("\\b$tmpuser.login\\b") %]
       <option value="[% tmpuser.login FILTER html %]"
         [% " selected=\"selected\"" IF value.match("\\b$tmpuser.login\\b") %]

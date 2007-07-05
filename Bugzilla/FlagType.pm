@@ -186,6 +186,11 @@ sub sortkey          { return $_[0]->{'sortkey'};          }
 
 =over
 
+=item C<grant_list>
+
+Returns a reference to an array of users who have permission to grant this flag type.
+The arrays are populated with hashrefs containing the login, identity and visibility of users.
+
 =item C<grant_group>
 
 Returns the group (as a Bugzilla::Group object) in which a user
@@ -213,6 +218,17 @@ explicitly excluded from the flagtype.
 =back
 
 =cut
+
+sub grant_list {
+    my $self = shift;
+    my @custusers;
+    my @allusers = @{Bugzilla->user->get_userlist};
+    foreach my $user (@allusers) {
+        my $user_obj = new Bugzilla::User({name => $user->{login}});
+        push(@custusers, $user) if $user_obj->can_set_flag($self);
+    }
+    return \@custusers;
+}
 
 sub grant_group {
     my $self = shift;

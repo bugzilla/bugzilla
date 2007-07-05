@@ -259,7 +259,7 @@ span.quote {
 
 table#flags th,
 table#flags td {
-    vertical-align: baseline;
+    vertical-align: middle;
     text-align: left;
 }
 

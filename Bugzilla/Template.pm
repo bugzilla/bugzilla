@@ -638,7 +638,7 @@ sub create {
                              my ($output) = "";
 
                              $var =~ s/[\r\n]/ /g;
-                             $var =~ s/([;\\\"])/\\$1/g;
+                             $var =~ s/([;\\\",])/\\$1/g;
 
                              if ($par) {
                                  $output = sprintf("%s:%s", $par, $var);

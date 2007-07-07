@@ -506,6 +506,58 @@ sub update_cc {
 }
 
 # XXX Temporary hack until all of process_bug uses update()
+sub update_dependencies {
+    # We need to send mail for dependson/blocked bugs if the dependencies
+    # change or the status or resolution change. This var keeps track of that.
+    my $check_dep_bugs = 0;
+
+    my $self = shift;
+    
+    my $dbh = Bugzilla->dbh;
+    my $delta_ts = shift || $dbh->selectrow_array("SELECT NOW()");
+    
+    my $old_bug = $self->new($self->id);
+    
+    my %changes;
+    foreach my $pair ([qw(dependson blocked)], [qw(blocked dependson)]) {
+        my ($type, $other) = @$pair;
+        my $old = $old_bug->$type;
+        my $new = $self->$type;
+        
+        my ($removed, $added) = diff_arrays($old, $new);
+        foreach my $removed_id (@$removed) {
+            $dbh->do("DELETE FROM dependencies WHERE $type = ? AND $other = ?",
+                     undef, $removed_id, $self->id);
+            
+            # Add an activity entry for the other bug.
+            LogActivityEntry($removed_id, $other, $self->id, '',
+                             Bugzilla->user->id, $delta_ts);
+            # Update delta_ts on the other bug so that we trigger mid-airs.
+            $dbh->do('UPDATE bugs SET delta_ts = ? WHERE bug_id = ?',
+                     undef, $delta_ts, $removed_id);
+        }
+        foreach my $added_id (@$added) {
+            $dbh->do("INSERT INTO dependencies ($type, $other) VALUES (?,?)",
+                     undef, $added_id, $self->id);
+            
+            # Add an activity entry for the other bug.
+            LogActivityEntry($added_id, $other, '', $self->id,
+                             Bugzilla->user->id, $delta_ts);
+            # Update delta_ts on the other bug so that we trigger mid-airs.
+            $dbh->do('UPDATE bugs SET delta_ts = ? WHERE bug_id = ?',
+                     undef, $delta_ts, $added_id);
+        }
+        
+        LogActivityEntry($self->id, $type, join(', ', @$removed),
+                         join(', ', @$added), Bugzilla->user->id, $delta_ts);
+        
+        $changes{$type} = [$removed, $added];
+    }
+
+    return \%changes;
+}
+
+# XXX Temporary hack until all of process_bug uses update()
 sub update_keywords {
     my $self = shift;
     
@@ -1096,6 +1148,16 @@ sub fields {
 # "Set" Methods #
 #################
 
+sub set_dependencies {
+    my ($self, $dependson, $blocked) = @_;
+    ($dependson, $blocked) = $self->_check_dependencies($dependson, $blocked);
+    # These may already be detainted, but all setters are supposed to
+    # detaint their input if they've run a validator (just as though
+    # we had used Bugzilla::Object::set), so we do that here.
+    detaint_natural($_) foreach (@$dependson, @$blocked);
+    $self->{'dependson'} = $dependson;
+    $self->{'blocked'}   = $blocked;
+}
 sub _set_everconfirmed { $_[0]->set('everconfirmed', $_[1]); }
 sub set_resolution     { $_[0]->set('resolution',    $_[1]); }
 sub set_status { 

@@ -166,11 +166,11 @@ $cgi->param('comment', $bug->_check_comment($cgi->param('comment')));
 # instead of throwing an error, f.e. when one or more of the values
 # is a bug alias that gets converted to its corresponding bug ID
 # during validation.
-if ($cgi->param('id')) {
-    my ($dependson, $blocks) = $bug->_check_dependencies(
-        scalar $cgi->param('dependson'), scalar $cgi->param('blocked'));
-    $cgi->param('dependson', $dependson);
-    $cgi->param('blocked',   $blocks);
+if ($cgi->param('id') && (defined $cgi->param('dependson')
+                          || defined $cgi->param('blocked')) )
+{
+    $bug->set_dependencies(scalar $cgi->param('dependson'),
+                           scalar $cgi->param('blocked'));
 }
 # Right now, you can't modify dependencies on a mass change.
 else {
@@ -945,33 +945,7 @@ sub SnapShotBug {
     return @row;
 }
 
-
-sub SnapShotDeps {
-    my ($bug_id, $target, $me) = (@_);
-    my $list = Bugzilla::Bug::EmitDependList($me, $target, $bug_id);
-    return join(',', @$list);
-}
-
-
 my $timestamp;
-
-local our $bug_changed;
-sub LogDependencyActivity {
-    my ($i, $oldstr, $target, $me, $timestamp) = (@_);
-    my $dbh = Bugzilla->dbh;
-    my $newstr = SnapShotDeps($i, $target, $me);
-    if ($oldstr ne $newstr) {
-        # Figure out what's really different...
-        my ($removed, $added) = diff_strings($oldstr, $newstr);
-        LogActivityEntry($i,$target,$removed,$added,$whoid,$timestamp);
-        # update timestamp on target bug so midairs will be triggered
-        $dbh->do(q{UPDATE bugs SET delta_ts = ? WHERE bug_id = ?},
-                 undef, $timestamp, $i);
-        $bug_changed = 1;
-        return 1;
-    }
-    return 0;
-}
 
 if ($prod_changed && Bugzilla->params->{"strict_isolation"}) {
     my $sth_cc = $dbh->prepare("SELECT who
@@ -1094,8 +1068,7 @@ foreach my $id (@idlist) {
         $comma = ',';
     }
 
-    my %dependencychanged;
-    $bug_changed = 0;
+    my $bug_changed = 0;
     my $write = "WRITE";        # Might want to make a param to control
                                 # whether we do LOW_PRIORITY ...
     $dbh->bz_lock_tables("bugs $write", "bugs_activity $write", "cc $write",
@@ -1215,11 +1188,6 @@ foreach my $id (@idlist) {
           || ThrowTemplateError($template->error());
         exit;
     }
-
-    # Gather the dependency list, and make sure there are no circular refs
-    my %deps = Bugzilla::Bug::ValidateDependencies(scalar($cgi->param('dependson')),
-                                                   scalar($cgi->param('blocked')),
-                                                   $id);
 
     #
     # Start updating the relevant database entries
@@ -1342,69 +1310,14 @@ foreach my $id (@idlist) {
     my ($cc_removed) = $bug_objects{$id}->update_cc($timestamp);
     $cc_removed = [map {$_->login} @$cc_removed];
 
-
-    # We need to send mail for dependson/blocked bugs if the dependencies
-    # change or the status or resolution change. This var keeps track of that.
-    my $check_dep_bugs = 0;
-
-    foreach my $pair ("blocked/dependson", "dependson/blocked") {
-        my ($me, $target) = split("/", $pair);
-
-        my @oldlist = @{$dbh->selectcol_arrayref("SELECT $target FROM dependencies
-                                                  WHERE $me = ? ORDER BY $target",
-                                                  undef, $id)};
-
-        # Only bugs depending on the current one should get notification.
-        # Bugs blocking the current one never get notification, unless they
-        # are added or removed from the dependency list. This case is treated
-        # below.
-        @dependencychanged{@oldlist} = 1 if ($me eq 'dependson');
-
-        if (defined $cgi->param($target)) {
-            my %snapshot;
-            my @newlist = sort {$a <=> $b} @{$deps{$target}};
-
-            while (0 < @oldlist || 0 < @newlist) {
-                if (@oldlist == 0 || (@newlist > 0 &&
-                                      $oldlist[0] > $newlist[0])) {
-                    $snapshot{$newlist[0]} = SnapShotDeps($newlist[0], $me,
-                                                          $target);
-                    shift @newlist;
-                } elsif (@newlist == 0 || (@oldlist > 0 &&
-                                           $newlist[0] > $oldlist[0])) {
-                    $snapshot{$oldlist[0]} = SnapShotDeps($oldlist[0], $me,
-                                                          $target);
-                    shift @oldlist;
-                } else {
-                    if ($oldlist[0] != $newlist[0]) {
-                        ThrowCodeError('list_comparison_error');
-                    }
-                    shift @oldlist;
-                    shift @newlist;
-                }
-            }
-            my @keys = keys(%snapshot);
-            if (@keys) {
-                my $oldsnap = SnapShotDeps($id, $target, $me);
-                $dbh->do(qq{DELETE FROM dependencies WHERE $me = ?},
-                         undef, $id);
-                my $sth =
-                    $dbh->prepare(qq{INSERT INTO dependencies ($me, $target)
-                                          VALUES (?, ?)});
-                foreach my $i (@{$deps{$target}}) {
-                    $sth->execute($id, $i);
-                }
-                foreach my $k (@keys) {
-                    LogDependencyActivity($k, $snapshot{$k}, $me, $target, $timestamp);
-                }
-                LogDependencyActivity($id, $oldsnap, $target, $me, $timestamp);
-                $check_dep_bugs = 1;
-                # All bugs added or removed from the dependency list
-                # must be notified.
-                @dependencychanged{@keys} = 1;
-            }
-        }
-    }
+    my ($dep_changes) = $bug_objects{$id}->update_dependencies($timestamp);
+    
+    # Convert the "changes" hash into a list of all the bug ids, then
+    # convert that into a hash to eliminate duplicates. ("map {@$_}" collapses
+    # an array of arrays.)
+    my @all_changed_deps = map { @$_ } @{$dep_changes->{'dependson'}};
+    push(@all_changed_deps, map { @$_ } @{$dep_changes->{'blocked'}});
+    my %changed_deps = map { $_ => 1 } @all_changed_deps;
 
     # get a snapshot of the newly set values out of the database,
     # and then generate any necessary bug activity entries by seeing 
@@ -1432,7 +1345,8 @@ foreach my $id (@idlist) {
 
     # $msgs will store emails which have to be sent to voters, if any.
     my $msgs;
-
+    my %notify_deps;
+    
     foreach my $c (@editable_bug_fields) {
         my $col = $c;           # We modify it, don't want to modify array
                                 # values in place.
@@ -1483,10 +1397,12 @@ foreach my $id (@idlist) {
                 CheckIfVotedConfirmed($id, $whoid);
             }
 
+            # If this bug has changed from opened to closed or vice-versa,
+            # then all of the bugs we block need to be notified.
             if ($col eq 'bug_status' 
                 && is_open_state($old) ne is_open_state($new))
             {
-                $check_dep_bugs = 1;
+                $notify_deps{$_} = 1 foreach (@{$bug_objects{$id}->blocked});
             }
 
             LogActivityEntry($id,$col,$old,$new,$whoid,$timestamp);
@@ -1563,18 +1479,17 @@ foreach my $id (@idlist) {
         send_results($duplicate, $vars);
     }
 
-    if ($check_dep_bugs) {
-        foreach my $k (keys(%dependencychanged)) {
-            $vars->{'mailrecipients'} = { 'changer' => Bugzilla->user->login }; 
-            $vars->{'id'} = $k;
-            $vars->{'type'} = "dep";
+    my %all_dep_changes = (%notify_deps, %changed_deps);
+    foreach my $id (sort { $a <=> $b } (keys %all_dep_changes)) {
+        $vars->{'mailrecipients'} = { 'changer' => Bugzilla->user->login };
+        $vars->{'id'} = $id;
+        $vars->{'type'} = "dep";
 
-            # Let the user (if he is able to see the bug) know we checked to 
-            # see if we should email notice of this change to users with a 
-            # relationship to the dependent bug and who did and didn't 
-            # receive email about it.
-            send_results($k, $vars);
-        }
+        # Let the user (if he is able to see the bug) know we checked to
+        # see if we should email notice of this change to users with a 
+        # relationship to the dependent bug and who did and didn't 
+        # receive email about it.
+        send_results($id, $vars);
     }
 }
 

@@ -210,9 +210,6 @@
     There is no such group: [% group FILTER html %]. Check your $webservergroup
     setting in [% constants.bz_locations.localconfig FILTER html %].
 
-  [% ELSIF error == "list_comparison_error" %]
-    Unexpected error in list comparing code.
-
   [% ELSIF error == "mismatched_bug_ids_on_obsolete" %]
     Attachment [% attach_id FILTER html %] ([% description FILTER html %]) 
     is attached to [% terms.bug %] [%+ attach_bug_id FILTER html %], 

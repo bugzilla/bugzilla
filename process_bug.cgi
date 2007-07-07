@@ -472,7 +472,7 @@ if ($action eq Bugzilla->params->{'move-button-text'}) {
                          'user_group_map READ', 'classifications READ',
                          'products READ', 'components READ', 'votes READ',
                          'cc READ', 'fielddefs READ', 'bug_status READ',
-                         'resolution READ');
+                         'status_workflow READ', 'resolution READ');
 
     my @bugs;
     # First update all moved bugs.

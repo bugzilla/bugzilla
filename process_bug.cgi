@@ -59,6 +59,8 @@ use Bugzilla::Component;
 use Bugzilla::Keyword;
 use Bugzilla::Flag;
 
+use Storable qw(dclone);
+
 my $user = Bugzilla->login(LOGIN_REQUIRED);
 local our $whoid = $user->id;
 my $grouplist = $user->groups_as_string;
@@ -474,18 +476,19 @@ if ($action eq Bugzilla->params->{'move-button-text'}) {
                          'cc READ', 'fielddefs READ', 'bug_status READ',
                          'status_workflow READ', 'resolution READ');
 
-    my @bugs;
     # First update all moved bugs.
-    foreach my $id (@idlist) {
-        my $bug = new Bugzilla::Bug($id);
-        push(@bugs, $bug);
-        $bug->add_comment(scalar $cgi->param('comment'), 
+    foreach my $bug (@bug_objects) {
+        $bug->add_comment(scalar $cgi->param('comment'),
                           { type => CMT_MOVED_TO, extra_data => $user->login });
+    }
+    # Don't export the new status and resolution. We want the current ones.
+    local $Storable::forgive_me = 1;
+    my $bugs = dclone(\@bug_objects);
+    foreach my $bug (@bug_objects) {
         $bug->set_status('RESOLVED');
         $bug->set_resolution('MOVED');
     }
-
-    $_->update() foreach @bugs;
+    $_->update() foreach @bug_objects;
     $dbh->bz_unlock_tables();
 
     # Now send emails.
@@ -511,7 +514,7 @@ if ($action eq Bugzilla->params->{'move-button-text'}) {
         $displayfields{$_} = 1;
     }
 
-    $template->process("bug/show.xml.tmpl", { bugs => \@bugs,
+    $template->process("bug/show.xml.tmpl", { bugs => $bugs,
                                               displayfields => \%displayfields,
                                             }, \$msg)
       || ThrowTemplateError($template->error());

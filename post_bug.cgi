@@ -62,7 +62,7 @@ if ($token) {
               && ($old_bug_id =~ "^createbug:"))
     {
         # The token is invalid.
-        ThrowUserError('token_inexistent');
+        ThrowUserError('token_does_not_exist');
     }
 
     $old_bug_id =~ s/^createbug://;

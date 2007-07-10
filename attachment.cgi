@@ -684,7 +684,7 @@ sub delete_attachment {
                   && ($event eq 'attachment' . $attachment->id))
         {
             # The token is invalid.
-            ThrowUserError('token_inexistent');
+            ThrowUserError('token_does_not_exist');
         }
 
         # The token is valid. Delete the content of the attachment.

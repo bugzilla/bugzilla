@@ -72,7 +72,7 @@ if ($cgi->param('t')) {
   # Make sure the token exists in the database.
   my ($tokentype) = $dbh->selectrow_array('SELECT tokentype FROM tokens
                                            WHERE token = ?', undef, $::token);
-  $tokentype || ThrowUserError("token_inexistent");
+  $tokentype || ThrowUserError("token_does_not_exist");
 
   # Make sure the token is the correct type for the action being taken.
   if ( grep($::action eq $_ , qw(cfmpw cxlpw chgpw)) && $tokentype ne 'password' ) {

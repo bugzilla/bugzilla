@@ -1412,7 +1412,7 @@
     <tt>[% product FILTER html %]</tt> product, which exceeds the maximum of
     [%+ max FILTER html %] votes for this product.
 
-  [% ELSIF error == "token_inexistent" %]
+  [% ELSIF error == "token_does_not_exist" %]
     [% title = "Token Does Not Exist" %]
     The token you submitted does not exist, has expired, or has
     been canceled.

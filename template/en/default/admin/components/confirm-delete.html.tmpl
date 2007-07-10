@@ -26,7 +26,8 @@
   #               which the component belongs.
   #%]
 
-[% title = BLOCK %]Delete Component of Product '[% product.name FILTER html %]'
+[% title = BLOCK %]Delete component '[% comp.name FILTER html %]'
+from '[% product.name FILTER html %]' product
   [% END %]
 
 [% PROCESS global/header.html.tmpl

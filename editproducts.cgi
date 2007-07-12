@@ -408,8 +408,15 @@ if ($action eq 'delete') {
 
     $dbh->bz_lock_tables('products WRITE', 'components WRITE',
                          'versions WRITE', 'milestones WRITE',
-                         'group_control_map WRITE',
+                         'group_control_map WRITE', 'component_cc WRITE',
                          'flaginclusions WRITE', 'flagexclusions WRITE');
+
+    my $comp_ids = $dbh->selectcol_arrayref('SELECT id FROM components
+                                             WHERE product_id = ?',
+                                             undef, $product->id);
+
+    $dbh->do('DELETE FROM component_cc WHERE component_id IN
+              (' . join(',', @$comp_ids) . ')') if scalar(@$comp_ids);
 
     $dbh->do("DELETE FROM components WHERE product_id = ?",
              undef, $product->id);

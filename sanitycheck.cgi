@@ -453,7 +453,8 @@ CrossCheck("profiles", "userid",
            ["tokens", "userid"],
            ["user_group_map", "user_id"],
            ["components", "initialowner", "name"],
-           ["components", "initialqacontact", "name"]);
+           ["components", "initialqacontact", "name"],
+           ["component_cc", "user_id"]);
 
 CrossCheck("products", "id",
            ["bugs", "product_id", "bug_id"],
@@ -463,6 +464,9 @@ CrossCheck("products", "id",
            ["group_control_map", "product_id"],
            ["flaginclusions", "product_id", "type_id"],
            ["flagexclusions", "product_id", "type_id"]);
+
+CrossCheck("components", "id",
+           ["component_cc", "component_id"]);
 
 # Check the former enum types -mkanat@bugzilla.org
 CrossCheck("bug_status", "value",

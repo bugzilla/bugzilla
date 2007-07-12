@@ -877,9 +877,10 @@ sub _check_dependencies {
         
         $deps_in{$type} = \@bug_ids;
     }
-        
+
     # And finally, check for dependency loops.
-    my %deps = ValidateDependencies($deps_in{dependson}, $deps_in{blocked});
+    my $bug_id = ref($invocant) ? $invocant->id : 0;
+    my %deps = ValidateDependencies($deps_in{dependson}, $deps_in{blocked}, $bug_id);
 
     return ($deps{'dependson'}, $deps{'blocked'});
 }

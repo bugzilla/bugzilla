@@ -149,8 +149,15 @@ use constant UPDATE_VALIDATORS => {
 
 use constant UPDATE_COLUMNS => qw(
     everconfirmed
+    bug_file_loc
+    bug_severity
     bug_status
+    op_sys
+    priority
+    rep_platform
     resolution
+    short_desc
+    status_whiteboard
 );
 
 # This is used by add_comment to know what we validate before putting in
@@ -1145,6 +1152,19 @@ sub fields {
 # Mutators 
 #####################################################################
 
+# To run check_can_change_field.
+sub _set_global_validator {
+    my ($self, $value, $field) = @_;
+    my $current_value = $self->$field;
+    my $privs;
+    $self->check_can_change_field($field, $current_value, $value, \$privs)
+        || ThrowUserError('illegal_change', { field    => $field,
+                                              oldvalue => $current_value,
+                                              newvalue => $value,
+                                              privs    => $privs });
+}
+
+
 #################
 # "Set" Methods #
 #################
@@ -1160,13 +1180,20 @@ sub set_dependencies {
     $self->{'blocked'}   = $blocked;
 }
 sub _set_everconfirmed { $_[0]->set('everconfirmed', $_[1]); }
+sub set_op_sys         { $_[0]->set('op_sys',        $_[1]); }
+sub set_platform       { $_[0]->set('rep_platform',  $_[1]); }
+sub set_priority       { $_[0]->set('priority',      $_[1]); }
 sub set_resolution     { $_[0]->set('resolution',    $_[1]); }
+sub set_severity       { $_[0]->set('bug_severity',  $_[1]); }
 sub set_status { 
     my ($self, $status) = @_;
     $self->set('bug_status', $status); 
     # Check for the everconfirmed transition
     $self->_set_everconfirmed(1) if (is_open_state($status) && $status ne 'UNCONFIRMED');
 }
+sub set_status_whiteboard { $_[0]->set('status_whiteboard', $_[1]); }
+sub set_summary        { $_[0]->set('short_desc',    $_[1]); }
+sub set_url            { $_[0]->set('bug_file_loc',  $_[1]); }
 
 ########################
 # "Add/Remove" Methods #

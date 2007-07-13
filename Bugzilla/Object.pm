@@ -196,6 +196,10 @@ sub set {
     if (exists $validators{$field}) {
         my $validator = $validators{$field};
         $value = $self->$validator($value, $field);
+
+        if ($self->can('_set_global_validator')) {
+            $self->_set_global_validator($value, $field);
+        }
     }
 
     $self->{$field} = $value;
@@ -649,6 +653,12 @@ Used for updating fields. Calls the validator for this field,
 if it exists. Subclasses should use this function
 to implement the various C<set_> mutators for their different
 fields.
+
+If your class defines a method called C<_set_global_validator>,
+C<set> will call it with C<($value, $field)> as arguments, after running
+the validator for this particular field. C<_set_global_validator> does not
+return anything.
+
 
 See L</VALIDATORS> for more information.
 

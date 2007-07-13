@@ -446,18 +446,29 @@ if (defined $cgi->param('id')) {
                                                 scalar $cgi->param('version')));
     $cgi->param('target_milestone', $bug->_check_target_milestone($prod,
         scalar $cgi->param('target_milestone')));
-    $cgi->param('rep_platform', 
-                $bug->_check_rep_platform($cgi->param('rep_platform')));
-    $cgi->param('op_sys',
-                $bug->_check_op_sys($cgi->param('op_sys')));
-    $cgi->param('priority',
-                $bug->_check_priority($cgi->param('priority')));
-    $cgi->param('bug_severity',
-                $bug->_check_bug_severity($cgi->param('bug_severity')));
-    $cgi->param('bug_file_loc',
-                $bug->_check_bug_file_loc($cgi->param('bug_file_loc')));
-    $cgi->param('short_desc', 
-                $bug->_check_short_desc($cgi->param('short_desc')));
+}
+
+my %methods = (
+    bug_severity => 'set_severity',
+    rep_platform => 'set_platform',
+    short_desc   => 'set_summary',
+    bug_file_loc => 'set_url',
+);
+foreach my $b (@bug_objects) {
+    foreach my $field_name (qw(op_sys rep_platform priority bug_severity
+                               bug_file_loc status_whiteboard short_desc))
+    {
+        # We only update the field if it's defined and it's not set
+        # to dontchange.
+        if ( defined $cgi->param($field_name)
+             && (!$cgi->param('dontchange')
+                 || $cgi->param($field_name) ne $cgi->param('dontchange')) )
+        {
+            my $method = $methods{$field_name};
+            $method ||= "set_" . $field_name;
+            $b->$method($cgi->param($field_name));
+        }
+    }
 }
 
 my $action = trim($cgi->param('action') || '');
@@ -559,9 +570,7 @@ sub DoComma {
     $::comma = ",";
 }
 
-foreach my $field ("rep_platform", "priority", "bug_severity",
-                   "bug_file_loc", "short_desc", "version", "op_sys",
-                   "target_milestone", "status_whiteboard") {
+foreach my $field ("version", "target_milestone") {
     if (defined $cgi->param($field)) {
         if (!$cgi->param('dontchange')
             || $cgi->param($field) ne $cgi->param('dontchange')) {
@@ -1192,36 +1201,33 @@ foreach my $id (@idlist) {
         exit;
     }
 
-    #
-    # Start updating the relevant database entries
-    #
-
-    $timestamp = $dbh->selectrow_array(q{SELECT NOW()});
-
     my $work_time;
     if (Bugzilla->user->in_group(Bugzilla->params->{'timetrackinggroup'})) {
         $work_time = $cgi->param('work_time');
-        if ($work_time) {
-            # add_comment (called below) can in theory raise an error,
-            # but because we've already validated work_time here it's
-            # safe to log the entry before adding the comment.
-            LogActivityEntry($id, "work_time", "", $work_time,
-                             $whoid, $timestamp);
-        }
     }
 
     if ($cgi->param('comment') || $work_time || $duplicate) {
         my $type = $duplicate ? CMT_DUPE_OF : CMT_NORMAL;
 
-        $old_bug_obj->add_comment(scalar($cgi->param('comment')),
+        $bug_objects{$id}->add_comment(scalar($cgi->param('comment')),
             { isprivate => scalar($cgi->param('commentprivacy')),
               work_time => $work_time, type => $type, 
               extra_data => $duplicate});
-        # XXX When update() is used for other things than comments,
-        # this should probably be moved.
-        $old_bug_obj->update($timestamp);
         $bug_changed = 1;
     }
+    
+    #################################
+    # Start Actual Database Updates #
+    #################################
+    
+    $timestamp = $dbh->selectrow_array(q{SELECT NOW()});
+
+    if ($work_time) {
+        LogActivityEntry($id, "work_time", "", $work_time,
+                         $whoid, $timestamp);
+    }
+
+    $bug_objects{$id}->update($timestamp);
 
     $bug_objects{$id}->update_keywords($timestamp);
     
@@ -1387,8 +1393,10 @@ foreach my $id (@idlist) {
                 $origQaContact = $old;
             }
 
-            # update_keywords does this for us already.
-            next if ($col eq 'keywords');
+            # Bugzilla::Bug does these for us already.
+            next if grep($_ eq $col, qw(keywords op_sys rep_platform priority
+                                        bug_severity short_desc
+                                        status_whiteboard bug_file_loc));
 
             if ($col eq 'product') {
                 # If some votes have been removed, RemoveVotes() returns

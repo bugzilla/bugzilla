@@ -430,7 +430,7 @@ This allows for localization of strings used during installation.
 Let's say your template string looks like this:
 
  The ##animal## jumped over the ##plant##.
- 
+
 Let's say that string is called 'animal_jump_plant'. So you call the function
 like this:
 

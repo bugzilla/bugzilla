@@ -591,12 +591,7 @@ foreach my $field (Bugzilla->get_fields({custom => 1, obsolete => 0})) {
         && (!$cgi->param('dontchange')
             || $cgi->param($fname) ne $cgi->param('dontchange')))
     {
-        DoComma();
-        $::query .= "$fname = ?";
-        my $value = $cgi->param($fname);
-        check_field($fname, $value) if ($field->type == FIELD_TYPE_SINGLE_SELECT);
-        trick_taint($value);
-        push(@values, $value);
+        $_->set_custom_field($field, $cgi->param($fname)) foreach @bug_objects;
     }
 }
 
@@ -1397,7 +1392,8 @@ foreach my $id (@idlist) {
             # Bugzilla::Bug does these for us already.
             next if grep($_ eq $col, qw(keywords op_sys rep_platform priority
                                         bug_severity short_desc
-                                        status_whiteboard bug_file_loc));
+                                        status_whiteboard bug_file_loc),
+                                     Bugzilla->custom_field_names);
 
             if ($col eq 'product') {
                 # If some votes have been removed, RemoveVotes() returns

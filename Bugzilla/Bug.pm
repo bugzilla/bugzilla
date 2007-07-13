@@ -133,12 +133,19 @@ sub VALIDATORS {
         status_whiteboard => \&_check_status_whiteboard,
     };
 
-    my @select_fields = Bugzilla->get_fields({custom => 1, obsolete => 0,
-                                              type => FIELD_TYPE_SINGLE_SELECT});
-
-    foreach my $field (@select_fields) {
-        $validators->{$field->name} = \&_check_select_field;
+    # Set up validators for custom fields.    
+    my @custom_fields = Bugzilla->get_fields({custom => 1, obsolete => 0});
+    foreach my $field (@custom_fields) {
+        my $validator;
+        if ($field->type == FIELD_TYPE_SINGLE_SELECT) {
+            $validator = \&_check_select_field;
+        }
+        else {
+            $validator = \&_check_freetext_field;
+        }
+        $validators->{$field->name} = $validator;
     }
+
     return $validators;
 };
 
@@ -147,18 +154,22 @@ use constant UPDATE_VALIDATORS => {
     resolution => \&_check_resolution,
 };
 
-use constant UPDATE_COLUMNS => qw(
-    everconfirmed
-    bug_file_loc
-    bug_severity
-    bug_status
-    op_sys
-    priority
-    rep_platform
-    resolution
-    short_desc
-    status_whiteboard
-);
+sub UPDATE_COLUMNS {
+    my @columns = qw(
+        everconfirmed
+        bug_file_loc
+        bug_severity
+        bug_status
+        op_sys
+        priority
+        rep_platform
+        resolution
+        short_desc
+        status_whiteboard
+    );
+    push(@columns, Bugzilla->custom_field_names);
+    return @columns;
+};
 
 # This is used by add_comment to know what we validate before putting in
 # the DB.
@@ -896,6 +907,8 @@ sub _check_estimated_time {
     return $_[0]->_check_time($_[1], 'estimated_time');
 }
 
+sub _check_freetext_field { return defined $_[1] ? trim($_[1]) : ''; }
+
 sub _check_groups {
     my ($invocant, $product, $group_ids) = @_;
 
@@ -1169,6 +1182,11 @@ sub _set_global_validator {
 # "Set" Methods #
 #################
 
+sub set_custom_field {
+    my ($self, $field, $value) = @_;
+    ThrowCodeError('field_not_custom', { field => $field }) if !$field->custom;
+    $self->set($field->name, $value);
+}
 sub set_dependencies {
     my ($self, $dependson, $blocked) = @_;
     ($dependson, $blocked) = $self->_check_dependencies($dependson, $blocked);

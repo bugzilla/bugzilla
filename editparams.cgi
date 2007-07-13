@@ -34,6 +34,7 @@ use Bugzilla::Error;
 use Bugzilla::Token;
 use Bugzilla::User;
 use Bugzilla::User::Setting;
+use Bugzilla::Status;
 
 my $user = Bugzilla->login(LOGIN_REQUIRED);
 my $cgi = Bugzilla->cgi;
@@ -136,6 +137,9 @@ if ($action eq 'save' && $current_module) {
             }
             if ($name eq 'languages') {
                 $update_lang_user_pref = 1;
+            }
+            if ($name eq 'duplicate_or_move_bug_status') {
+                Bugzilla::Status::add_missing_bug_status_transitions($value);
             }
         }
     }

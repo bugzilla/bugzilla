@@ -39,6 +39,7 @@
     [% NEXT IF !bug.isopened && (bug.everconfirmed && bug_status.name == "UNCONFIRMED"
                                  || !bug.everconfirmed && bug_status.name == "REOPENED") %]
     [% PROCESS initial_action %]
+    [% NEXT IF bug_status.name == bug.bug_status %]
     <input type="radio" id="knob_[% bug_status.id FILTER html %]" name="knob"
            value="[% bug_status.name FILTER html %]">
     <label for="knob_[% bug_status.id FILTER html %]">

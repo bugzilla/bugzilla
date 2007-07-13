@@ -40,6 +40,7 @@ use Bugzilla::Util;
 use Bugzilla::Constants;
 use Bugzilla::Field;
 use Bugzilla::Group;
+use Bugzilla::Status;
 
 use base qw(Exporter);
 @Bugzilla::Config::Common::EXPORT =
@@ -48,7 +49,7 @@ use base qw(Exporter);
        check_opsys check_shadowdb check_urlbase check_webdotbase
        check_netmask check_user_verify_class check_image_converter
        check_languages check_mail_delivery_method check_notification
-       check_timezone check_utf8
+       check_timezone check_utf8 check_bug_status
 );
 
 # Checking functions for the various values
@@ -162,6 +163,15 @@ sub check_opsys {
     if (lsearch(['', @$legal_OS], $value) < 0) {
         return "Must be empty or a legal operating system value: one of " .
             join(", ", @$legal_OS);
+    }
+    return "";
+}
+
+sub check_bug_status {
+    my $bug_status = shift;
+    my @closed_bug_statuses = map {$_->name} Bugzilla::Status::closed_bug_statuses();
+    if (lsearch(\@closed_bug_statuses, $bug_status) < 0) {
+        return "Must be a valid closed status: one of " . join(', ', @closed_bug_statuses);
     }
     return "";
 }

@@ -69,12 +69,14 @@
 
       [% FOREACH new_status = statuses %]
         [% IF status.id != new_status.id %]
-          <td align="center" class="checkbox-cell
-              [% " checked" IF workflow.${status.id}.${new_status.id}.defined %]"
+          [% checked = workflow.${status.id}.${new_status.id}.defined ? 1 : 0 %]
+          [% mandatory = (status.id && new_status.name == Param("duplicate_or_move_bug_status")) ? 1 : 0 %]
+          <td align="center" class="checkbox-cell[% " checked" IF checked || mandatory %]"
               title="From [% status.name FILTER html %] to [% new_status.name FILTER html %]">
             <input type="checkbox" name="w_[% status.id %]_[% new_status.id %]"
                    id="w_[% status.id %]_[% new_status.id %]" onclick="toggle_cell(this)"
-              [% " checked='checked'" IF workflow.${status.id}.${new_status.id}.defined %]>
+                   [%+ "checked='checked'" IF checked || mandatory %]
+                   [%+ "disabled='disabled'" IF mandatory %]>
           </td>
         [% ELSE %]
           <td class="checkbox-cell forbidden">&nbsp;</td>
@@ -83,6 +85,17 @@
     </tr>
   [% END %]
 </table>
+
+<p>
+  When [% terms.abug %] is marked as a duplicate of another one or is moved
+  to another installation, the [% terms.bug %] status is automatically set to
+  <b>[% Param("duplicate_or_move_bug_status") FILTER html %]</b>. All transitions to
+  this [% terms.bug %] status must then be valid (this is the reason why you cannot edit
+  them above).<br>
+  Note: you can change this setting by visiting the
+  <a href="editparams.cgi?section=bugchange#duplicate_or_move_bug_status">Parameters</a>
+  page and editing the <i>duplicate_or_move_bug_status</i> parameter.
+</p>
 
 <p align="center">
   <input type="hidden" name="action" value="update">

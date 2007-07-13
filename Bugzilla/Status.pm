@@ -54,15 +54,22 @@ sub is_open   { return $_[0]->{'is_open'};  }
 #####       Methods        ####
 ###############################
 
+sub closed_bug_statuses {
+    my @bug_statuses = Bugzilla::Status->get_all;
+    @bug_statuses = grep { !$_->is_open } @bug_statuses;
+    return @bug_statuses;
+}
+
 sub can_change_to {
     my $self = shift;
     my $dbh = Bugzilla->dbh;
 
     if (!ref($self) || !defined $self->{'can_change_to'}) {
-        my ($cond, @args);
+        my ($cond, @args, $self_exists);
         if (ref($self)) {
             $cond = '= ?';
             push(@args, $self->id);
+            $self_exists = 1;
         }
         else {
             $cond = 'IS NULL';
@@ -78,12 +85,37 @@ sub can_change_to {
                                                           AND old_status $cond",
                                                         undef, @args);
 
+        # Allow the bug status to remain unchanged.
+        push(@$new_status_ids, $self->id) if $self_exists;
         $self->{'can_change_to'} = Bugzilla::Status->new_from_list($new_status_ids);
     }
 
     return $self->{'can_change_to'};
 }
 
+sub add_missing_bug_status_transitions {
+    my $bug_status = shift || Bugzilla->params->{'duplicate_or_move_bug_status'};
+    my $dbh = Bugzilla->dbh;
+    my $new_status = new Bugzilla::Status({name => $bug_status});
+    # Silently discard invalid bug statuses.
+    $new_status || return;
+
+    my $missing_statuses = $dbh->selectcol_arrayref('SELECT id
+                                                       FROM bug_status
+                                                  LEFT JOIN status_workflow
+                                                         ON old_status = id
+                                                        AND new_status = ?
+                                                      WHERE old_status IS NULL',
+                                                      undef, $new_status->id);
+
+    my $sth = $dbh->prepare('INSERT INTO status_workflow
+                             (old_status, new_status) VALUES (?, ?)');
+
+    foreach my $old_status_id (@$missing_statuses) {
+        next if ($old_status_id == $new_status->id);
+        $sth->execute($old_status_id, $new_status->id);
+    }
+}
 
 1;
 
@@ -100,6 +132,10 @@ Bugzilla::Status - Bug status class.
     my $bug_status = new Bugzilla::Status({name => 'ASSIGNED'});
     my $bug_status = new Bugzilla::Status(4);
 
+    my @closed_bug_statuses = Bugzilla::Status::closed_bug_statuses();
+
+    Bugzilla::Status::add_missing_bug_status_transitions($bug_status);
+
 =head1 DESCRIPTION
 
 Status.pm represents a bug status object. It is an implementation
@@ -113,6 +149,15 @@ below.
 
 =over
 
+=item C<closed_bug_statuses>
+
+ Description: Returns a list of C<Bugzilla::Status> objects which can have
+              a resolution associated with them ("closed" bug statuses).
+
+ Params:      none.
+
+ Returns:     A list of Bugzilla::Status objects.
+
 =item C<can_change_to>
 
  Description: Returns the list of active statuses a bug can be changed to
@@ -121,6 +166,14 @@ below.
  Params:      none.
 
  Returns:     A list of Bugzilla::Status objects.
+
+=item C<add_missing_bug_status_transitions>
+
+ Description: Insert all missing transitions to a given bug status.
+
+ Params:      $bug_status - The value (name) of a bug status.
+
+ Returns:     nothing.
 
 =back
 

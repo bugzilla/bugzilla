@@ -100,7 +100,10 @@ elsif ($action eq 'update') {
         foreach my $new (@$statuses) {
             next if $old->id == $new->id;
 
-            if ($cgi->param('w_' . $old->id . '_' . $new->id)) {
+            # All transitions to 'duplicate_or_move_bug_status' must be valid.
+            if ($cgi->param('w_' . $old->id . '_' . $new->id)
+                || ($new->name eq Bugzilla->params->{'duplicate_or_move_bug_status'}))
+            {
                 $sth_insert->execute($old->id, $new->id)
                   unless defined $workflow->{$old->id}->{$new->id};
             }

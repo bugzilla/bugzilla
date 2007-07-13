@@ -29,6 +29,7 @@ use Bugzilla::Config qw(:admin);
 use Bugzilla::Token;
 use Bugzilla::Field;
 use Bugzilla::Bug;
+use Bugzilla::Status;
 
 # List of different tables that contain the changeable field values
 # (the old "enums.") Keep them in alphabetical order by their 
@@ -136,7 +137,7 @@ $defaults{'bug_severity'} = 'defaultseverity';
 # Alternatively, a list of non-editable values can be specified.
 # In this case, only the sortkey can be altered.
 my %static;
-$static{'bug_status'} = ['UNCONFIRMED'];
+$static{'bug_status'} = ['UNCONFIRMED', Bugzilla->params->{'duplicate_or_move_bug_status'}];
 $static{'resolution'} = ['', 'FIXED', 'MOVED', 'DUPLICATE'];
 $static{$_->name} = ['---'] foreach (@custom_fields);
 
@@ -234,9 +235,14 @@ if ($action eq 'new') {
     $dbh->do("INSERT INTO $field (value, sortkey) VALUES (?, ?)",
              undef, ($value, $sortkey));
 
-    if ($field eq 'bug_status' && !$cgi->param('is_open')) {
-        # The bug status is a closed state, but they are open by default.
-        $dbh->do('UPDATE bug_status SET is_open = 0 WHERE value = ?', undef, $value);
+    if ($field eq 'bug_status') {
+        unless ($cgi->param('is_open')) {
+            # The bug status is a closed state, but they are open by default.
+            $dbh->do('UPDATE bug_status SET is_open = 0 WHERE value = ?', undef, $value);
+        }
+        # Allow the transition from this new bug status to the one used
+        # by the 'duplicate_or_move_bug_status' parameter.
+        Bugzilla::Status::add_missing_bug_status_transitions();
     }
 
     delete_token($token);

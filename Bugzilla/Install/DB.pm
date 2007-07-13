@@ -2783,85 +2783,102 @@ sub _initialize_workflow {
     my $old_params = shift;
     my $dbh = Bugzilla->dbh;
 
-    if (!$dbh->bz_column_info('bug_status', 'is_open')) {
-        $dbh->bz_add_column('bug_status', 'is_open',
-                            {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'TRUE'});
+    $dbh->bz_add_column('bug_status', 'is_open',
+                        {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'TRUE'});
 
-        # Till now, bug statuses were not customizable. Nevertheless, local
-        # changes are possible and so we will try to respect these changes.
-        # This means: get the status of bugs having a resolution different from ''
-        # and mark these statuses as 'closed', even if some of these statuses are
-        # expected to be open statuses. Bug statuses we have no information about
-        # are left as 'open'.
-        my @statuses =
-          @{$dbh->selectcol_arrayref('SELECT DISTINCT bug_status FROM bugs
-                                      WHERE resolution != ?', undef, '')};
+    # Till now, bug statuses were not customizable. Nevertheless, local
+    # changes are possible and so we will try to respect these changes.
+    # This means: get the status of bugs having a resolution different from ''
+    # and mark these statuses as 'closed', even if some of these statuses are
+    # expected to be open statuses. Bug statuses we have no information about
+    # are left as 'open'.
+    my @closed_statuses =
+      @{$dbh->selectcol_arrayref('SELECT DISTINCT bug_status FROM bugs
+                                  WHERE resolution != ?', undef, '')};
 
-        # Append the default list of closed statuses. Duplicated statuses don't hurt.
-        @statuses = map {$dbh->quote($_)} (@statuses, qw(RESOLVED VERIFIED CLOSED));
+    # Append the default list of closed statuses *unless* we detect at least
+    # one closed state in the DB (i.e. with is_open = 0). This would mean that
+    # the DB has already been updated at least once and maybe the admin decided
+    # that e.g. 'RESOLVED' is now an open state, in which case we don't want to
+    # override this attribute. At least one bug status has to be a closed state
+    # anyway (due to the 'duplicate_or_move_bug_status' parameter) so it's safe
+    # to use this criteria.
+    my $num_closed_states = $dbh->selectrow_array('SELECT COUNT(*) FROM bug_status
+                                                   WHERE is_open = 0');
+
+    if (!$num_closed_states) {
+        @closed_statuses =
+          map {$dbh->quote($_)} (@closed_statuses, qw(RESOLVED VERIFIED CLOSED));
 
         print "Marking closed bug statuses as such...\n";
         $dbh->do('UPDATE bug_status SET is_open = 0 WHERE value IN (' .
-                  join(', ', @statuses) . ')');
+                  join(', ', @closed_statuses) . ')');
     }
 
     # Populate the status_workflow table. We do nothing if the table already
     # has entries. If all bug status transitions have been deleted, the
     # workflow will be restored to its default schema.
     my $count = $dbh->selectrow_array('SELECT COUNT(*) FROM status_workflow');
-    return if $count;
 
-    my $create = $old_params->{'commentoncreate'};
-    my $confirm = $old_params->{'commentonconfirm'};
-    my $accept = $old_params->{'commentonaccept'};
-    my $resolve = $old_params->{'commentonresolve'};
-    my $verify = $old_params->{'commentonverify'};
-    my $close = $old_params->{'commentonclose'};
-    my $reopen = $old_params->{'commentonreopen'};
-    # This was till recently the only way to get back to NEW for
-    # confirmed bugs, so we use this parameter here.
-    my $reassign = $old_params->{'commentonreassign'};
+    if (!$count) {
+        # Make sure the variables below are defined as
+        # status_workflow.require_comment cannot be NULL.
+        my $create = $old_params->{'commentoncreate'} || 0;
+        my $confirm = $old_params->{'commentonconfirm'} || 0;
+        my $accept = $old_params->{'commentonaccept'} || 0;
+        my $resolve = $old_params->{'commentonresolve'} || 0;
+        my $verify = $old_params->{'commentonverify'} || 0;
+        my $close = $old_params->{'commentonclose'} || 0;
+        my $reopen = $old_params->{'commentonreopen'} || 0;
+        # This was till recently the only way to get back to NEW for
+        # confirmed bugs, so we use this parameter here.
+        my $reassign = $old_params->{'commentonreassign'} || 0;
 
-    # This is the default workflow.
-    my @workflow = ([undef, 'UNCONFIRMED', $create],
-                    [undef, 'NEW', $create],
-                    [undef, 'ASSIGNED', $create],
-                    ['UNCONFIRMED', 'NEW', $confirm],
-                    ['UNCONFIRMED', 'ASSIGNED', $accept],
-                    ['UNCONFIRMED', 'RESOLVED', $resolve],
-                    ['NEW', 'ASSIGNED', $accept],
-                    ['NEW', 'RESOLVED', $resolve],
-                    ['ASSIGNED', 'NEW', $reassign],
-                    ['ASSIGNED', 'RESOLVED', $resolve],
-                    ['REOPENED', 'NEW', $reassign],
-                    ['REOPENED', 'ASSIGNED', $accept],
-                    ['REOPENED', 'RESOLVED', $resolve],
-                    ['RESOLVED', 'UNCONFIRMED', $reopen],
-                    ['RESOLVED', 'REOPENED', $reopen],
-                    ['RESOLVED', 'VERIFIED', $verify],
-                    ['RESOLVED', 'CLOSED', $close],
-                    ['VERIFIED', 'UNCONFIRMED', $reopen],
-                    ['VERIFIED', 'REOPENED', $reopen],
-                    ['VERIFIED', 'CLOSED', $close],
-                    ['CLOSED', 'UNCONFIRMED', $reopen],
-                    ['CLOSED', 'REOPENED', $reopen]);
+        # This is the default workflow.
+        my @workflow = ([undef, 'UNCONFIRMED', $create],
+                        [undef, 'NEW', $create],
+                        [undef, 'ASSIGNED', $create],
+                        ['UNCONFIRMED', 'NEW', $confirm],
+                        ['UNCONFIRMED', 'ASSIGNED', $accept],
+                        ['UNCONFIRMED', 'RESOLVED', $resolve],
+                        ['NEW', 'ASSIGNED', $accept],
+                        ['NEW', 'RESOLVED', $resolve],
+                        ['ASSIGNED', 'NEW', $reassign],
+                        ['ASSIGNED', 'RESOLVED', $resolve],
+                        ['REOPENED', 'NEW', $reassign],
+                        ['REOPENED', 'ASSIGNED', $accept],
+                        ['REOPENED', 'RESOLVED', $resolve],
+                        ['RESOLVED', 'UNCONFIRMED', $reopen],
+                        ['RESOLVED', 'REOPENED', $reopen],
+                        ['RESOLVED', 'VERIFIED', $verify],
+                        ['RESOLVED', 'CLOSED', $close],
+                        ['VERIFIED', 'UNCONFIRMED', $reopen],
+                        ['VERIFIED', 'REOPENED', $reopen],
+                        ['VERIFIED', 'CLOSED', $close],
+                        ['CLOSED', 'UNCONFIRMED', $reopen],
+                        ['CLOSED', 'REOPENED', $reopen]);
 
-    print "Now filling the 'status_workflow' table with valid bug status transitions...\n";
-    my $sth_select = $dbh->prepare('SELECT id FROM bug_status WHERE value = ?');
-    my $sth = $dbh->prepare('INSERT INTO status_workflow (old_status, new_status,
-                                         require_comment) VALUES (?, ?, ?)');
+        print "Now filling the 'status_workflow' table with valid bug status transitions...\n";
+        my $sth_select = $dbh->prepare('SELECT id FROM bug_status WHERE value = ?');
+        my $sth = $dbh->prepare('INSERT INTO status_workflow (old_status, new_status,
+                                             require_comment) VALUES (?, ?, ?)');
 
-    foreach my $transition (@workflow) {
-        my ($from, $to);
-        # If it's an initial state, there is no "old" value.
-        $from = $dbh->selectrow_array($sth_select, undef, $transition->[0])
-          if $transition->[0];
-        $to = $dbh->selectrow_array($sth_select, undef, $transition->[1]);
-        # If one of the bug statuses doesn't exist, the transition is invalid.
-        next if (($transition->[0] && !$from) || !$to);
+        foreach my $transition (@workflow) {
+            my ($from, $to);
+            # If it's an initial state, there is no "old" value.
+            $from = $dbh->selectrow_array($sth_select, undef, $transition->[0])
+              if $transition->[0];
+            $to = $dbh->selectrow_array($sth_select, undef, $transition->[1]);
+            # If one of the bug statuses doesn't exist, the transition is invalid.
+            next if (($transition->[0] && !$from) || !$to);
 
-        $sth->execute($from, $to, $transition->[2] ? 1 : 0);
+            $sth->execute($from, $to, $transition->[2] ? 1 : 0);
+        }
     }
+
+    # Make sure the bug status used by the 'duplicate_or_move_bug_status'
+    # parameter has all the required transitions set.
+    Bugzilla::Status::add_missing_bug_status_transitions();
 }
 
 1;

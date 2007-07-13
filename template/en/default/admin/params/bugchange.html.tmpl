@@ -25,6 +25,9 @@
 %]
 
 [% param_descs = {
+  duplicate_or_move_bug_status => "When $terms.abug is marked as a duplicate of another one " _
+                                  "or is moved to another installation, use this $terms.bug status."
+
   letsubmitterchoosepriority => "If this is on, then people submitting $terms.bugs can " _
                                 "choose an initial priority for that ${terms.bug}. " _
                                 "If off, then all $terms.bugs initially have the default " _

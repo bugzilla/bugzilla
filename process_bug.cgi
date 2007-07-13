@@ -496,8 +496,9 @@ if ($action eq Bugzilla->params->{'move-button-text'}) {
     local $Storable::forgive_me = 1;
     my $bugs = dclone(\@bug_objects);
     foreach my $bug (@bug_objects) {
-        $bug->set_status('RESOLVED');
-        $bug->set_resolution('MOVED');
+        my ($status, $resolution) = $bug->get_new_status_and_resolution('move');
+        $bug->set_status($status);
+        $bug->set_resolution($resolution);
     }
     $_->update() foreach @bug_objects;
     $dbh->bz_unlock_tables();

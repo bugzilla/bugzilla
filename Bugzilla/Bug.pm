@@ -1986,10 +1986,10 @@ sub get_new_status_and_resolution {
         # Leaving the status unchanged doesn't need more investigation.
         return ($self->bug_status, $self->resolution, $self->everconfirmed);
     }
-    elsif ($action eq 'duplicate') {
-        # Only alter the bug status if the bug is currently open.
-        $status = is_open_state($self->bug_status) ? 'RESOLVED' : $self->bug_status;
-        $resolution = 'DUPLICATE';
+    elsif ($action eq 'duplicate' || $action eq 'move') {
+        # Always change the bug status, even if the bug was already "closed".
+        $status = Bugzilla->params->{'duplicate_or_move_bug_status'};
+        $resolution = ($action eq 'duplicate') ? 'DUPLICATE' : 'MOVED';
     }
     elsif ($action eq 'change_resolution') {
         $status = $self->bug_status;

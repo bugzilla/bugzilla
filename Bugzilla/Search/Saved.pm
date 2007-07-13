@@ -197,7 +197,7 @@ __END__
 
 =head1 NAME
 
- Bugzilla::Search::Saved - A saved search
+Bugzilla::Search::Saved - A saved search
 
 =head1 SYNOPSIS
 

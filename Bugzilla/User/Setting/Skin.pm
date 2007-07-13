@@ -60,8 +60,6 @@ __END__
 
 Bugzilla::User::Setting::Skin - Object for a user preference setting for skins
 
-=head1 SYNOPSIS
-
 =head1 DESCRIPTION
 
 Skin.pm extends Bugzilla::User::Setting and implements a class specialized for

@@ -50,7 +50,7 @@ use Storable qw(dclone);
 use base qw(Bugzilla::Object Exporter);
 @Bugzilla::Bug::EXPORT = qw(
     AppendComment ValidateComment
-    bug_alias_to_id ValidateBugAlias ValidateBugID
+    bug_alias_to_id ValidateBugID
     RemoveVotes CheckIfVotedConfirmed
     LogActivityEntry
     BUG_STATE_OPEN is_open_state
@@ -156,6 +156,7 @@ use constant UPDATE_VALIDATORS => {
 
 sub UPDATE_COLUMNS {
     my @columns = qw(
+        alias
         everconfirmed
         bug_file_loc
         bug_severity
@@ -472,8 +473,10 @@ sub update {
     # this code should go below the duplicates-table-updating code below.
     foreach my $field (keys %$changes) {
         my $change = $changes->{$field};
-        LogActivityEntry($self->id, $field, $change->[0], $change->[1], 
-                         Bugzilla->user->id, $delta_ts);
+        my $from = defined $change->[0] ? $change->[0] : '';
+        my $to   = defined $change->[1] ? $change->[1] : '';
+        LogActivityEntry($self->id, $field, $from, $to, Bugzilla->user->id,
+                         $delta_ts);
     }
 
     # If this bug is no longer a duplicate, it no longer belongs in the
@@ -691,7 +694,28 @@ sub _check_alias {
    my ($invocant, $alias) = @_;
    $alias = trim($alias);
    return undef if (!Bugzilla->params->{'usebugaliases'} || !$alias);
-   ValidateBugAlias($alias);
+
+    # Make sure the alias isn't too long.
+    if (length($alias) > 20) {
+        ThrowUserError("alias_too_long");
+    }
+    # Make sure the alias isn't just a number.
+    if ($alias =~ /^\d+$/) {
+        ThrowUserError("alias_is_numeric", { alias => $alias });
+    }
+    # Make sure the alias has no commas or spaces.
+    if ($alias =~ /[, ]/) {
+        ThrowUserError("alias_has_comma_or_space", { alias => $alias });
+    }
+    # Make sure the alias is unique, or that it's already our alias.
+    my $other_bug = new Bugzilla::Bug($alias);
+    if (!$other_bug->{error}
+        && (!ref $invocant || $other_bug->id != $invocant->id))
+    {
+        ThrowUserError("alias_in_use", { alias => $alias,
+                                         bug_id => $other_bug->id });
+    }
+
    return $alias;
 }
 
@@ -1182,6 +1206,7 @@ sub _set_global_validator {
 # "Set" Methods #
 #################
 
+sub set_alias { $_[0]->set('alias', $_[1]); }
 sub set_custom_field {
     my ($self, $field, $value) = @_;
     ThrowCodeError('field_not_custom', { field => $field }) if !$field->custom;
@@ -2750,53 +2775,6 @@ sub ValidateBugID {
     } else {
         ThrowUserError("bug_access_query", {'bug_id' => $id});
     }
-}
-
-# ValidateBugAlias:
-#   Check that the bug alias is valid and not used by another bug.  If 
-#   curr_id is specified, verify the alias is not used for any other
-#   bug id.  
-sub ValidateBugAlias {
-    my ($alias, $curr_id) = @_;
-    my $dbh = Bugzilla->dbh;
-
-    $alias = trim($alias || "");
-    trick_taint($alias);
-
-    if ($alias eq "") {
-        ThrowUserError("alias_not_defined");
-    }
-
-    # Make sure the alias isn't too long.
-    if (length($alias) > 20) {
-        ThrowUserError("alias_too_long");
-    }
-
-    # Make sure the alias is unique.
-    my $query = "SELECT bug_id FROM bugs WHERE alias = ?";
-    if ($curr_id && detaint_natural($curr_id)) {
-        $query .= " AND bug_id != $curr_id";
-    }
-    my $id = $dbh->selectrow_array($query, undef, $alias); 
-
-    my $vars = {};
-    $vars->{'alias'} = $alias;
-    if ($id) {
-        $vars->{'bug_id'} = $id;
-        ThrowUserError("alias_in_use", $vars);
-    }
-
-    # Make sure the alias isn't just a number.
-    if ($alias =~ /^\d+$/) {
-        ThrowUserError("alias_is_numeric", $vars);
-    }
-
-    # Make sure the alias has no commas or spaces.
-    if ($alias =~ /[, ]/) {
-        ThrowUserError("alias_has_comma_or_space", $vars);
-    }
-
-    $_[0] = $alias;
 }
 
 # Validate and return a hash of dependencies

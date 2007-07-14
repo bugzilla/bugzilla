@@ -56,7 +56,6 @@ use constant WS_ERROR_CODE => {
     bug_access_denied           => 102,
     invalid_field_name          => 108,
     # These all mean "invalid alias"
-    alias_not_defined        => 103,
     alias_too_long           => 103,
     alias_in_use             => 103,
     alias_is_numeric         => 103,

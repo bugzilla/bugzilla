@@ -651,28 +651,13 @@ if ($cgi->param('component') ne $cgi->param('dontchange')) {
     }
 }
 
-# If this installation uses bug aliases, and the user is changing the alias,
-# add this change to the query.
-if (Bugzilla->params->{"usebugaliases"} && defined $cgi->param('alias')) {
-    my $alias = trim($cgi->param('alias'));
-    
-    # Since aliases are unique (like bug numbers), they can only be changed
-    # for one bug at a time, so ignore the alias change unless only a single
-    # bug is being changed.
-    if (scalar(@idlist) == 1) {
-        # Add the alias change to the query.  If the field contains the blank 
-        # value, make the field be NULL to indicate that the bug has no alias.
-        # Otherwise, if the field contains a value, update the record 
-        # with that value.
-        DoComma();
-        if ($alias ne "") {
-            ValidateBugAlias($alias, $idlist[0]);
-            $::query .= "alias = ?";
-            push(@values, $alias);
-        } else {
-            $::query .= "alias = NULL";
-        }
-    }
+# Since aliases are unique (like bug numbers), they can only be changed
+# for one bug at a time. So if we're doing a mass-change, we ignore
+# the alias field.
+if (Bugzilla->params->{"usebugaliases"} && defined $cgi->param('alias')
+    && scalar(@bug_objects) == 1)
+{
+    $bug_objects[0]->set_alias($cgi->param('alias'));
 }
 
 # If the user is submitting changes from show_bug.cgi for a single bug,
@@ -1391,7 +1376,7 @@ foreach my $id (@idlist) {
 
             # Bugzilla::Bug does these for us already.
             next if grep($_ eq $col, qw(keywords op_sys rep_platform priority
-                                        bug_severity short_desc
+                                        bug_severity short_desc alias
                                         status_whiteboard bug_file_loc),
                                      Bugzilla->custom_field_names);
 

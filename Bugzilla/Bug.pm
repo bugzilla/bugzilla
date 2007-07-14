@@ -151,12 +151,15 @@ sub VALIDATORS {
 
 use constant UPDATE_VALIDATORS => {
     bug_status => \&_check_bug_status,
+    cclist_accessible   => \&Bugzilla::Object::check_boolean,
+    reporter_accessible => \&Bugzilla::Object::check_boolean,
     resolution => \&_check_resolution,
 };
 
 sub UPDATE_COLUMNS {
     my @columns = qw(
         alias
+        cclist_accessible
         everconfirmed
         bug_file_loc
         bug_severity
@@ -164,6 +167,7 @@ sub UPDATE_COLUMNS {
         op_sys
         priority
         rep_platform
+        reporter_accessible
         resolution
         short_desc
         status_whiteboard
@@ -1207,6 +1211,7 @@ sub _set_global_validator {
 #################
 
 sub set_alias { $_[0]->set('alias', $_[1]); }
+sub set_cclist_accessible { $_[0]->set('cclist_accessible', $_[1]); }
 sub set_custom_field {
     my ($self, $field, $value) = @_;
     ThrowCodeError('field_not_custom', { field => $field }) if !$field->custom;
@@ -1226,6 +1231,7 @@ sub _set_everconfirmed { $_[0]->set('everconfirmed', $_[1]); }
 sub set_op_sys         { $_[0]->set('op_sys',        $_[1]); }
 sub set_platform       { $_[0]->set('rep_platform',  $_[1]); }
 sub set_priority       { $_[0]->set('priority',      $_[1]); }
+sub set_reporter_accessible { $_[0]->set('reporter_accessible', $_[1]); }
 sub set_resolution     { $_[0]->set('resolution',    $_[1]); }
 sub set_severity       { $_[0]->set('bug_severity',  $_[1]); }
 sub set_status { 

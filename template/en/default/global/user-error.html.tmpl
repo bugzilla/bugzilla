@@ -651,10 +651,10 @@
     [% title = "Not allowed" %]
     You tried to change the 
     <strong>[% field_descs.$field FILTER html %]</strong> field 
-    [% IF oldvalue %]
+    [% IF oldvalue.defined %]
       from <em>[% oldvalue FILTER html %]</em>
     [% END %]
-    [% IF newvalue %]
+    [% IF newvalue.defined %]
       to <em>[% newvalue FILTER html %]</em>
     [% END %]
     , but only

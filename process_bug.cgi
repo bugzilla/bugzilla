@@ -651,36 +651,27 @@ if ($cgi->param('component') ne $cgi->param('dontchange')) {
     }
 }
 
-# Since aliases are unique (like bug numbers), they can only be changed
-# for one bug at a time. So if we're doing a mass-change, we ignore
-# the alias field.
-if (Bugzilla->params->{"usebugaliases"} && defined $cgi->param('alias')
-    && scalar(@bug_objects) == 1)
-{
-    $bug_objects[0]->set_alias($cgi->param('alias'));
-}
-
-# If the user is submitting changes from show_bug.cgi for a single bug,
-# and that bug is restricted to a group, process the checkboxes that
-# allowed the user to set whether or not the reporter
-# and cc list can see the bug even if they are not members of all groups 
-# to which the bug is restricted.
+# Certain changes can only happen on individual bugs, never on mass-changes.
 if (defined $cgi->param('id')) {
-    my ($havegroup) = $dbh->selectrow_array(
-        q{SELECT group_id FROM bug_group_map WHERE bug_id = ?},
-        undef, $cgi->param('id'));
-    if ( $havegroup ) {
-        foreach my $field ('reporter_accessible', 'cclist_accessible') {
-            if ($bug->check_can_change_field($field, 0, 1, \$PrivilegesRequired)) {
-                DoComma();
-                $cgi->param($field, $cgi->param($field) ? '1' : '0');
-                $::query .= " $field = ?";
-                push(@values, $cgi->param($field));
-            }
-            else {
-                $cgi->delete($field);
-            }
-        }
+    my $bug = $bug_objects[0];
+    
+    # Since aliases are unique (like bug numbers), they can only be changed
+    # for one bug at a time.
+    if (Bugzilla->params->{"usebugaliases"} && defined $cgi->param('alias')) {
+        $bug->set_alias($cgi->param('alias'));
+    }
+
+    # reporter_accessible and cclist_accessible--these are only set if
+    # the user can change them and there are groups on the bug.
+    # (If the user can't change the field, the checkboxes don't appear
+    #  on show_bug, thus it would look like the user was trying to
+    #  uncheck them, which would then be denied by the set_ functions,
+    #  throwing a confusing error.)
+    if (scalar @{$bug->groups}) {
+        $bug->set_cclist_accessible($cgi->param('cclist_accessible'))
+            if $bug->check_can_change_field('cclist_accessible', 0, 1);
+        $bug->set_reporter_accessible($cgi->param('reporter_accessible'))
+            if $bug->check_can_change_field('reporter_accessible', 0, 1);
     }
 }
 
@@ -1377,6 +1368,7 @@ foreach my $id (@idlist) {
             # Bugzilla::Bug does these for us already.
             next if grep($_ eq $col, qw(keywords op_sys rep_platform priority
                                         bug_severity short_desc alias
+                                        reporter_accessible cclist_accessible
                                         status_whiteboard bug_file_loc),
                                      Bugzilla->custom_field_names);
 

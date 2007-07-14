@@ -333,6 +333,12 @@ sub get_all {
     return @$objects;
 }
 
+###############################
+####      Validators     ######
+###############################
+
+sub check_boolean { return $_[1] ? 1 : 0 }
+
 1;
 
 __END__
@@ -676,6 +682,20 @@ be the same as the name of the field in L</VALIDATORS>, if it exists there.
 =item B<Returns> (nothing)
 
 =back
+
+=back
+
+=head2 Simple Validators
+
+You can use these in your subclass L</VALIDATORS> or L</UPDATE_VALIDATORS>.
+Note that you have to reference them like C<\&Bugzilla::Object::check_boolean>,
+you can't just write C<\&check_boolean>.
+
+=over
+
+=item C<check_boolean>
+
+Returns C<1> if the passed-in value is true, C<0> otherwise.
 
 =back
 

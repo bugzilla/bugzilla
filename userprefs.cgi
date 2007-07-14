@@ -82,8 +82,8 @@ sub SaveAccount {
     my $pwd1 = $cgi->param('new_password1');
     my $pwd2 = $cgi->param('new_password2');
 
-    if ($cgi->param('Bugzilla_password') ne "" || 
-        $pwd1 ne "" || $pwd2 ne "") 
+    if ($user->authorizer->can_change_password
+        && ($cgi->param('Bugzilla_password') ne "" || $pwd1 ne "" || $pwd2 ne ""))
     {
         my ($oldcryptedpwd) = $dbh->selectrow_array(
                         q{SELECT cryptpassword FROM profiles WHERE userid = ?},
@@ -115,7 +115,10 @@ sub SaveAccount {
         }
     }
 
-    if(Bugzilla->params->{"allowemailchange"} && $cgi->param('new_login_name')) {
+    if ($user->authorizer->can_change_email
+        && Bugzilla->params->{"allowemailchange"}
+        && $cgi->param('new_login_name'))
+    {
         my $old_login_name = $cgi->param('Bugzilla_login');
         my $new_login_name = trim($cgi->param('new_login_name'));
 

@@ -667,7 +667,7 @@ if (defined $cgi->param('id')) {
     #  on show_bug, thus it would look like the user was trying to
     #  uncheck them, which would then be denied by the set_ functions,
     #  throwing a confusing error.)
-    if (scalar @{$bug->groups}) {
+    if (scalar @{$bug->groups_in}) {
         $bug->set_cclist_accessible($cgi->param('cclist_accessible'))
             if $bug->check_can_change_field('cclist_accessible', 0, 1);
         $bug->set_reporter_accessible($cgi->param('reporter_accessible'))

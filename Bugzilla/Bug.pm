@@ -1753,6 +1753,17 @@ sub groups {
     return $self->{'groups'};
 }
 
+sub groups_in {
+    my $self = shift;
+    return $self->{'groups_in'} if exists $self->{'groups_in'};
+    return [] if $self->{'error'};
+    my $group_ids = Bugzilla->dbh->selectcol_arrayref(
+        'SELECT group_id FROM bug_group_map WHERE bug_id = ?',
+        undef, $self->id);
+    $self->{'groups_in'} = Bugzilla::Group->new_from_list($group_ids);
+    return $self->{'groups_in'};
+}
+
 sub user {
     my $self = shift;
     return $self->{'user'} if exists $self->{'user'};

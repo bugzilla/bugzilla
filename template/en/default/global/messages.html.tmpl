@@ -141,12 +141,6 @@
     [% title = "Adding field to search page..." %]
     [% link  = "Click here if the page does not redisplay automatically." %]
 
-  [% ELSIF message_tag == "buglist_load_named_query" %]
-    [% title = BLOCK %]
-      Loading your search named [% namedcmd FILTER html %]
-    [% END %]
-    [% link  = "Click here if the page does not redisplay automatically." %]
-
   [% ELSIF message_tag == "buglist_updated_named_query" %]
     Your search named <code>[% queryname FILTER html %]</code> has been updated.
 

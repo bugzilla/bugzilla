@@ -32,8 +32,7 @@
   [% FOREACH bug_status = bug.status.can_change_to %]
     [% NEXT IF bug.isunconfirmed && bug_status.is_open && !bug.user.canconfirm %]
     [% NEXT IF bug.isopened && !bug.isunconfirmed && bug_status.is_open && !bug.user.canedit %]
-    [% NEXT IF !bug_status.is_open && !bug.user.canedit && !bug.user.isreporter %]
-    [% NEXT IF !bug_status.is_open && bug_status.is_open && !bug.user.canedit && !bug.user.isreporter %]
+    [% NEXT IF (!bug_status.is_open || !bug.isopened) && !bug.user.canedit && !bug.user.isreporter %]
     [%# Special hack to only display UNCO or REOP when reopening, but not both;
       # for compatibility with older versions. %]
     [% NEXT IF !bug.isopened && (bug.everconfirmed && bug_status.name == "UNCONFIRMED"

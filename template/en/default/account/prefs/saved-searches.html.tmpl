@@ -135,6 +135,9 @@
         Shared By
       </th>
       <th>
+        Shared To
+      </th>
+      <th>
         Run
       </th>
       <th>
@@ -148,6 +151,7 @@
       <tr>
         <td>[% q.name FILTER html %]</td>
         <td>[% q.user.identity FILTER html %]</td>
+        <td>[% q.shared_with_group.name FILTER html %]</td>
         <td>
           <a href="buglist.cgi?cmdtype=dorem&amp;remaction=run&amp;namedcmd=
                    [% q.name FILTER url_quote %]&amp;sharer_id=

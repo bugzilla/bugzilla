@@ -79,6 +79,11 @@ use constant MAPPINGS => {
                 "keywords" => "keywords",    # no change
                 "kw" => "keywords",
                 "group" => "bug_group",
+                "flag" => "flagtypes.name",
+                "requestee" => "requestees.login_name",
+                "req" => "requestees.login_name",
+                "setter" => "setters.login_name",
+                "set" => "setters.login_name",
                 # Attachments
                 "attachment" => "attachments.description",
                 "attachmentdesc" => "attachments.description",
@@ -270,6 +275,12 @@ sub quicksearch {
                         # votes:xx ("at least xx votes")
                         addChart('votes', 'greaterthan', $1, $negate);
                     }
+                    elsif ($or_operand =~ /^([^\?]+\?)([^\?]*)$/) {
+                        # Flag and requestee shortcut
+                        addChart('flagtypes.name', 'substring', $1, $negate);
+                        $chart++; $and = $or = 0; # Next chart for boolean AND
+                        addChart('requestees.login_name', 'substring', $2, $negate);
+                    }
                     elsif ($or_operand =~ /^([^:]+):([^:]+)$/) {
                         # generic field1,field2,field3:value1,value2 notation
                         my @fields = split(/,/, $1);
@@ -428,6 +439,8 @@ sub splitString {
     foreach (@parts) {
         # Remove quotes
         s/"//g;
+        # Protect plus signs from becoming a blank
+        s/\+/%2B/g;
     }
                         
     return @parts;

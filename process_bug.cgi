@@ -197,7 +197,7 @@ foreach my $field ("dependson", "blocked") {
             push @new, $id;
         }
         $cgi->param($field, join(",", @new));
-        my ($added, $removed) = Bugzilla::Util::diff_arrays(\@old, \@new);
+        my ($removed, $added) = diff_arrays(\@old, \@new);
         foreach my $id (@$added , @$removed) {
             # ValidateBugID is called without $field here so that it will
             # throw an error if any of the changed bugs are not visible.

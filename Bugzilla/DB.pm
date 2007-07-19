@@ -942,22 +942,28 @@ sub bz_rollback_transaction {
 #####################################################################
 
 sub db_new {
-    my ($class, $dsn, $user, $pass, $attributes) = @_;
+    my ($class, $dsn, $user, $pass, $override_attrs) = @_;
 
     # set up default attributes used to connect to the database
-    # (if not defined by DB specific implementation)
-    $attributes = { RaiseError => 0,
-                    AutoCommit => 1,
-                    PrintError => 0,
-                    ShowErrorStatement => 1,
-                    HandleError => \&_handle_error,
-                    TaintIn => 1,
-                    FetchHashKeyName => 'NAME',  
-                    # Note: NAME_lc causes crash on ActiveState Perl
-                    # 5.8.4 (see Bug 253696)
-                    # XXX - This will likely cause problems in DB
-                    # back ends that twiddle column case (Oracle?)
-                  } if (!defined($attributes));
+    # (may be overridden by DB driver implementations)
+    my $attributes = { RaiseError => 0,
+                       AutoCommit => 1,
+                       PrintError => 0,
+                       ShowErrorStatement => 1,
+                       HandleError => \&_handle_error,
+                       TaintIn => 1,
+                       FetchHashKeyName => 'NAME',  
+                       # Note: NAME_lc causes crash on ActiveState Perl
+                       # 5.8.4 (see Bug 253696)
+                       # XXX - This will likely cause problems in DB
+                       # back ends that twiddle column case (Oracle?)
+                     };
+
+    if ($override_attrs) {
+        foreach my $key (keys %$override_attrs) {
+            $attributes->{$key} = $override_attrs->{$key};
+        }
+    }
 
     # connect using our known info to the specified db
     # Apache::DBI will cache this when using mod_perl
@@ -2340,7 +2346,9 @@ Constructor
 
 =item C<$pass> - password used to log in to the database
 
-=item C<\%attributes> - set of attributes for DB connection (optional)
+=item C<\%override_attrs> - set of attributes for DB connection (optional).
+You only have to set attributes that you want to be different from
+the default attributes set inside of C<db_new>.
 
 =back
 

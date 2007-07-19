@@ -44,6 +44,7 @@ my $action = $cgi->param('action') || 'edit';
 my $token = $cgi->param('token');
 
 sub get_workflow {
+    my $dbh = Bugzilla->dbh;
     my $workflow = $dbh->selectall_arrayref('SELECT old_status, new_status, require_comment
                                              FROM status_workflow');
     my %workflow;

@@ -748,6 +748,15 @@ sub insert_attachment_for_bug {
         # we now check the content type for image/bmp in _validate_data()
         unless ($cgi->param('ispatch')) {
             $class->validate_content_type($throw_error) || return 0;
+
+            # Set the ispatch flag to 1 if we're set to autodetect
+            # and the content type is text/x-diff or text/x-patch
+            if ($cgi->param('contenttypemethod') eq 'autodetect'
+                && $cgi->param('contenttype') =~ m{text/x-(?:diff|patch)})
+            {
+                $cgi->param('ispatch', 1);
+                $cgi->param('contenttype', 'text/plain');
+            }
         }
         $data = _validate_data($throw_error, $hr_vars);
         # If the attachment is stored locally, $data eq ''.

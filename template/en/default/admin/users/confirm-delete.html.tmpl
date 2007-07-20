@@ -73,7 +73,7 @@
   <tr>
     <th>Group set:</th>
     <td>
-      [% IF groups.size %]
+      [% IF otheruser.groups.size %]
         <ul>
           [% FOREACH group = otheruser.groups.keys %]
             <li>[% group FILTER html %]</li>

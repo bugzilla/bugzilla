@@ -244,8 +244,10 @@ chmod 0777, $filename;
 my $webdotbase = Bugzilla->params->{'webdotbase'};
 
 if ($webdotbase =~ /^https?:/) {
-     # Remote dot server
-     my $url = perform_substs($webdotbase) . $filename;
+     # Remote dot server. We don't hardcode 'urlbase' here in case
+     # 'sslbase' is in use.
+     $webdotbase =~ s/%([a-z]*)%/Bugzilla->params->{$1}/g;
+     my $url = $webdotbase . $filename;
      $vars->{'image_url'} = $url . ".gif";
      $vars->{'map_url'} = $url . ".map";
 } else {

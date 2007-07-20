@@ -1295,6 +1295,20 @@
     [% title = "Query Name Too Long" %]
     The name of the query must be less than 64 characters long.
 
+  [% ELSIF error == "quicksearch_unknown_field" %]
+    [% title = "Unknown QuickSearch Field" %]
+    [% IF fields.unique.size == 1 %]
+      Field <code>[% fields.first FILTER html %]</code> is not a known field.
+    [% ELSE %]
+      Fields
+      [% FOREACH field = fields.unique.sort %]
+         <code>[% field FILTER html %]</code>
+         [% ', ' UNLESS loop.last() %]
+      [% END %]
+      are not known fields.
+    [% END %]
+    The legal field names are <a href="page.cgi?id=quicksearchhack.html">listed here</a>.
+
   [% ELSIF error == "reassign_to_empty" %]
     [% title = "Illegal Reassignment" %]
     To reassign [% terms.abug %], you must provide an address for

@@ -513,17 +513,22 @@ elsif (($cgi->param('cmdtype') eq "doit") && defined $cgi->param('remtype')) {
             }
 
             my %bug_ids;
+            my $is_new_name = 0;
             if ($query_name) {
                 # Make sure this name is not already in use by a normal saved search.
                 if (LookupNamedQuery($query_name, undef, QUERY_LIST, !THROW_ERROR)) {
                     ThrowUserError('query_name_exists', {'name' => $query_name});
                 }
+                $is_new_name = 1;
             }
-            else {
-                # No new query name has been given. We retrieve bug IDs
-                # currently set in the selected saved search.
-                $query_name = $cgi->param('oldqueryname');
-                my $old_query = LookupNamedQuery($query_name, undef, LIST_OF_BUGS);
+            # If no new tag name has been given, use the selected one.
+            $query_name ||= $cgi->param('oldqueryname');
+
+            # Don't throw an error if it's a new tag name: if the tag already
+            # exists, add/remove bugs to it, else create it. But if we are
+            # considering an existing tag, then it has to exist and we throw
+            # an error if it doesn't (hence the usage of !$is_new_name).
+            if (my $old_query = LookupNamedQuery($query_name, undef, LIST_OF_BUGS, !$is_new_name)) {
                 # We get the encoded query. We need to decode it.
                 my $old_cgi = new Bugzilla::CGI($old_query);
                 foreach my $bug_id (split /[\s,]+/, scalar $old_cgi->param('bug_id')) {

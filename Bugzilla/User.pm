@@ -1518,7 +1518,7 @@ sub is_global_watcher {
 
     if (!defined $self->{'is_global_watcher'}) {
         my @watchers = split(/[,\s]+/, Bugzilla->params->{'globalwatchers'});
-        $self->{'is_global_watcher'} = grep { $_ eq $self->login } @watchers;
+        $self->{'is_global_watcher'} = scalar(grep { $_ eq $self->login } @watchers) ? 1 : 0;
     }
     return  $self->{'is_global_watcher'};
 }

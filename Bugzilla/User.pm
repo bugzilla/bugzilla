@@ -1486,6 +1486,16 @@ sub is_insider {
     return $self->{'is_insider'};
 }
 
+sub is_global_watcher {
+    my $self = shift;
+
+    if (!defined $self->{'is_global_watcher'}) {
+        my @watchers = split(/[,\s]+/, Bugzilla->params->{'globalwatchers'});
+        $self->{'is_global_watcher'} = grep { $_ eq $self->login } @watchers;
+    }
+    return  $self->{'is_global_watcher'};
+}
+
 sub get_userlist {
     my $self = shift;
 
@@ -2027,6 +2037,11 @@ moving is enabled.
 
 Returns true if the user can access private comments and attachments,
 i.e. if the 'insidergroup' parameter is set and the user belongs to this group.
+
+=item C<is_global_watcher>
+
+Returns true if the user is a global watcher,
+i.e. if the 'globalwatchers' parameter contains the user.
 
 =back
 

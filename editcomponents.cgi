@@ -218,7 +218,7 @@ if ($action eq 'new') {
     my $prodcomp = "&product="   . url_quote($product->name) .
                    "&component=" . url_quote($comp_name);
 
-    # For localisation reasons, we get the title of the queries from the
+    # For localization reasons, we get the title of the queries from the
     # submitted form.
     my $open_name = $cgi->param('open_name');
     my $nonopen_name = $cgi->param('nonopen_name');

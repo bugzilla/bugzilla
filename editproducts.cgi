@@ -317,7 +317,7 @@ if ($action eq 'new') {
             push(@series, [$resolution, "resolution=" .url_quote($resolution)]);
         }
 
-        # For localisation reasons, we get the name of the "global" subcategory
+        # For localization reasons, we get the name of the "global" subcategory
         # and the title of the "open" query from the submitted form.
         my @openedstatuses = BUG_STATE_OPEN;
         my $query = 

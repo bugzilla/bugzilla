@@ -73,7 +73,7 @@ my $action = $cgi->param('action');
 my $series_id = $cgi->param('series_id');
 
 # Because some actions are chosen by buttons, we can't encode them as the value
-# of the action param, because that value is localisation-dependent. So, we
+# of the action param, because that value is localization-dependent. So, we
 # encode it in the name, as "action-<action>". Some params even contain the
 # series_id they apply to (e.g. subscribe, unsubscribe).
 my @actions = grep(/^action-/, $cgi->param());

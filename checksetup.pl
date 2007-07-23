@@ -3509,7 +3509,7 @@ if (!$series_exists) {
              qw(FIXED INVALID WONTFIX LATER REMIND DUPLICATE WORKSFORME MOVED);
     my @fields = (@statuses, @resolutions);
 
-    # We have a localisation problem here. Where do we get these values?
+    # We have a localization problem here. Where do we get these values?
     my $all_name = "-All-";
     my $open_name = "All Open";
         

@@ -823,8 +823,8 @@ BugCheck("bugs WHERE bug_status = 'UNCONFIRMED' AND everconfirmed = 1",
          "Bugs that are UNCONFIRMED but have everconfirmed set");
 # The below list of resolutions is hardcoded because we don't know if future
 # resolutions will be confirmed, unconfirmed or maybeconfirmed.  I suspect
-# they will be maybeconfirmed, e.g. ASLEEP and REMIND.  This hardcoding should
-# disappear when we have customised statuses.
+# they will be maybeconfirmed, e.g. ASLEEP and REMIND.  This hard-coding should
+# disappear when we have customized statuses.
 BugCheck("bugs WHERE bug_status IN ('NEW', 'ASSIGNED', 'REOPENED') AND everconfirmed = 0",
          "Bugs with confirmed status but don't have everconfirmed set"); 
 

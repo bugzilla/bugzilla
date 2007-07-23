@@ -118,7 +118,7 @@ if ( $::action eq 'reqpw' ) {
     my ($user_id) = $dbh->selectrow_array('SELECT userid FROM profiles WHERE ' .
                                           $dbh->sql_istrcmp('login_name', '?'),
                                           undef, $login_name);
-    $user_id || ThrowUserError("account_inexistent");
+    $user_id || ThrowUserError("account_does_not_exist", {'email' => $login_name});
 }
 
 # If the user is changing their password, make sure they submitted a new

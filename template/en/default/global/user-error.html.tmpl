@@ -68,9 +68,10 @@
       that login name.
     [% END %]
 
-  [% ELSIF error == "account_inexistent" %]
+  [% ELSIF error == "account_does_not_exist" %]
     [% title = "Account Does Not Exist" %]
-    There is no [% terms.Bugzilla %] account with that login name.
+    <code>[% email FILTER html %]</code> is not a valid [% terms.Bugzilla %]
+    account.
 
   [% ELSIF error == "alias_has_comma_or_space" %]
     [% title = "Invalid Characters In Alias" %]

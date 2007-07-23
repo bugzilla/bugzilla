@@ -629,12 +629,12 @@
     You entered <tt>[% value FILTER html %]</tt>, which isn't.
     
   [% ELSIF error == "illegal_attachment_edit" %]
-    [% title = "Unauthorised Action" %]
-    You are not authorised to edit attachment [% attach_id FILTER html %].
+    [% title = "Unauthorized Action" %]
+    You are not authorized to edit attachment [% attach_id FILTER html %].
 
   [% ELSIF error == "illegal_attachment_edit_bug" %]
-    [% title = "Unauthorised Action" %]
-    You are not authorised to edit attachments on [% terms.bug %] 
+    [% title = "Unauthorized Action" %]
+    You are not authorized to edit attachments on [% terms.bug %] 
     [%+ bug_id FILTER html %].
          
   [% ELSIF error == "illegal_attachment_is_patch" %]
@@ -721,12 +721,12 @@
   [% ELSIF error == "illegal_series_creation" %]
     [% admindocslinks = {'groups.html' => 'Group security'} %]
     [% docslinks = {'reporting.html' => 'Reporting'} %]
-    You are not authorised to create series.
+    You are not authorized to create series.
         
   [% ELSIF error == "illegal_series_edit" %]
     [% admindocslinks = {'groups.html' => 'Group security'} %]
     [% docslinks = {'reporting.html' => 'Reporting'} %]
-    You are not authorised to edit this series. To do this, you must either
+    You are not authorized to edit this series. To do this, you must either
     be its creator, or an administrator.
         
   [% ELSIF error == "insufficient_data_points" %]

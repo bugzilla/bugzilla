@@ -173,7 +173,7 @@ Bugzilla::Error - Error handling utilities for Bugzilla
 
 Various places throughout the Bugzilla codebase need to report errors to the
 user. The C<Throw*Error> family of functions allow this to be done in a
-generic and localisable manner.
+generic and localizable manner.
 
 These functions automatically unlock the database tables, if there were any
 locked. They will also roll back the transaction, if it is supported by

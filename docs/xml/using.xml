@@ -243,7 +243,7 @@
       <listitem>
         <para>
         <emphasis>Priority:</emphasis>
-        The bug assignee uses this field to prioritise his or her bugs.
+        The bug assignee uses this field to prioritize his or her bugs.
         It's a good idea not to change this on other people's bugs.</para>
       </listitem>
 
@@ -1064,7 +1064,7 @@
   <section id="userpreferences">
     <title>User Preferences</title>
 
-    <para>Once you have logged in, you can customise various aspects of
+    <para>Once you have logged in, you can customize various aspects of
     Bugzilla via the "Edit prefs" link in the page footer.
     The preferences are split into three tabs:</para>
 

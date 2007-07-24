@@ -25,12 +25,9 @@
   #               which the component belongs.
   #%]
   
-[% title = BLOCK %]Add component to Product '[% product.name FILTER html %]'[% END %]
-[% subheader = BLOCK %]This page allows you to add a new component to product
-                '[% product.name FILTER html %]'.[% END %]
+[% title = BLOCK %]Add component to the [% product.name FILTER html %] product[% END %]
 [% PROCESS global/header.html.tmpl
   title = title
-  subheader = subheader
 %]
 
 <form method="post" action="editcomponents.cgi">

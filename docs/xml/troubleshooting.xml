@@ -1,5 +1,5 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"> -->
-<!-- $Id: troubleshooting.xml,v 1.12 2006/07/31 22:22:51 mkanat%bugzilla.org Exp $ -->
+<!-- $Id: troubleshooting.xml,v 1.13 2007/07/24 18:22:02 timeless%mozdev.org Exp $ -->
 
 <appendix id="troubleshooting">
 <title>Troubleshooting</title>
@@ -22,7 +22,7 @@
     <para>If you have made it all the way through
     <xref linkend="installation"/> (Installation) and
     <xref linkend="configuration"/> (Configuration) but accessing the Bugzilla
-    URL doesn't work, the first thing to do is to check your webserver error
+    URL doesn't work, the first thing to do is to check your web server error
     log. For Apache, this is often located at
     <filename>/etc/logs/httpd/error_log</filename>. The error messages
     you see may be self-explanatory enough to enable you to diagnose and
@@ -32,7 +32,7 @@
 
     <para>
       Bugzilla can also log all user-based errors (and many code-based errors)
-      that occur, without polluting the web server error log.  To enable
+      that occur, without polluting the web server's error log.  To enable
       Bugzilla error logging, create a file that Bugzilla can write to, named
       <filename>errorlog</filename>, in the Bugzilla <filename>data</filename>
       directory.  Errors will be logged as they occur, and will include the type
@@ -45,10 +45,10 @@
   </section>
         
   <section id="trbl-testserver">
-  <title>The Apache webserver is not serving Bugzilla pages</title>
+  <title>The Apache web server is not serving Bugzilla pages</title>
     <para>After you have run <command>checksetup.pl</command> twice,
     run <command>testserver.pl http://yoursite.yourdomain/yoururl</command>
-    to confirm that your webserver is configured properly for
+    to confirm that your web server is configured properly for
     Bugzilla.
     </para>
     <programlisting>
@@ -75,9 +75,9 @@ TEST-OK Webserver is preventing fetch of http://landfill.bugzilla.org/bugzilla-t
         </para>
       </listitem>
       <listitem>
-	<para>The permissions on your library directories are set incorrectly.
-	They must, at the very least, be readable by the webserver user or
-	group. It is recommended that they be world readable.
+        <para>The permissions on your library directories are set incorrectly.
+        They must, at the very least, be readable by the web server user or
+        group. It is recommended that they be world readable.
         </para>
       </listitem>
     </orderedlist>
@@ -144,7 +144,7 @@ TEST-OK Webserver is preventing fetch of http://landfill.bugzilla.org/bugzilla-t
   
   <para>The most-likely cause is that the <quote>cookiepath</quote> parameter
   is not set correctly in the Bugzilla configuration.  You can change this (if
-  you're a Bugzilla administrator) from the editparams.cgi page via the web.
+  you're a Bugzilla administrator) from the editparams.cgi page via the web interface.
   </para>
 
   <para>The value of the cookiepath parameter should be the actual directory

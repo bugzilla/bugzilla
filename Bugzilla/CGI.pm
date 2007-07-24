@@ -45,7 +45,7 @@ use Bugzilla::Util;
 $| = 1;
 
 # Ignore SIGTERM and SIGPIPE - this prevents DB corruption. If the user closes
-# their browser window while a script is running, the webserver sends these
+# their browser window while a script is running, the web server sends these
 # signals, and we don't want to die half way through a write.
 $::SIG{TERM} = 'IGNORE';
 $::SIG{PIPE} = 'IGNORE';

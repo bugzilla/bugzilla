@@ -1,5 +1,5 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"> -->
-<!-- $Id: installation.xml,v 1.138 2007/03/10 01:20:23 vladd%bugzilla.org Exp $ -->
+<!-- $Id: installation.xml,v 1.139 2007/07/24 18:22:02 timeless%mozdev.org Exp $ -->
 <chapter id="installing-bugzilla">
   <title>Installing Bugzilla</title>
 
@@ -9,8 +9,8 @@
     <note>
       <para>If you just want to <emphasis>use</emphasis> Bugzilla, 
       you do not need to install it. None of this chapter is relevant to
-      you. Ask your Bugzilla administrator
-      for the URL to access it over the web.
+      you. Ask your Bugzilla administrator for the URL to access it from
+      your web browser.
       </para>
     </note>
 
@@ -164,7 +164,7 @@
        However, we strongly recommend using the Apache web server
        (either 1.3.x or 2.x), and 
        the installation instructions usually assume you are
-        using it. If you have got Bugzilla working using another webserver,
+        using it. If you have got Bugzilla working using another web server,
         please share your experiences with us by filing a bug in &bzg-bugs;.
       </para>
       
@@ -182,10 +182,9 @@
         Download a Bugzilla tarball (or check it out from CVS) and place
         it in a suitable directory, accessible by the default web server user 
         (probably <quote>apache</quote> or <quote>www</quote>). 
-        Good locations are either directly in the main web space for your
-        web server or perhaps in 
-        <filename>/usr/local</filename>
-        with a symbolic link from the web space.
+        Good locations are either directly in the web server's document directories or
+        in <filename>/usr/local</filename> with a symbolic link to the web server's 
+        document directories or an alias in the web server's configuration.
       </para>
 
       <caution>
@@ -197,7 +196,7 @@
       </caution>
       
       <para>Once all the files are in a web accessible directory, make that
-      directory writable by your webserver's user. This is a temporary step
+      directory writable by your web server's user. This is a temporary step
       until you run the 
       <filename>checksetup.pl</filename>
       script, which locks down your installation.</para>
@@ -1048,14 +1047,14 @@
                 <para>
                 <filename>checksetup.pl</filename> can set tighter permissions
                 on Bugzilla's files and directories if it knows what group the
-                webserver runs as. Find the <computeroutput>Group</computeroutput>
+                web server runs as. Find the <computeroutput>Group</computeroutput>
                 line in <filename>httpd.conf</filename>, place the value found
                 there in the <replaceable>$webservergroup</replaceable> variable
                 in <filename>localconfig</filename>, then rerun
                 <filename>checksetup.pl</filename>.
                 </para>
             </step>
-    
+
             <step>
                 <para>
                 Optional: If Bugzilla does not actually reside in the webspace
@@ -1118,7 +1117,7 @@
 				<para>
 					<filename>checksetup.pl</filename> can set tighter permissions
 					on Bugzilla's files and directories if it knows what group the
-					webserver runs as. Find the <computeroutput>Group</computeroutput>
+					web server runs as. Find the <computeroutput>Group</computeroutput>
 					line in <filename>httpd.conf</filename>, place the value found
 					there in the <replaceable>$webservergroup</replaceable> variable
 					in <filename>localconfig</filename>, then rerun
@@ -1241,7 +1240,7 @@ c:\perl\bin\perl.exe -xc:\bugzilla -wT "%s" %s
             The ActiveState install may have already created an entry for
             .pl files that is limited to <quote>GET,HEAD,POST</quote>. If
             so, this mapping should be <emphasis>removed</emphasis> as
-            Bugzilla's .pl files are not designed to be run via a webserver.
+            Bugzilla's .pl files are not designed to be run via a web server.
           </para>
         </note>
 
@@ -2223,7 +2222,7 @@ pid-file=/home/foo/mymysql/the.pid
       <title>HTTP Server</title>
 
       <para>Ideally, this also needs to be installed as root and
-      run under a special webserver account. As long as
+      run under a special web server account. As long as
       the web server will allow the running of *.cgi files outside of a
       cgi-bin, and a way of denying web access to certain files (such as a
       .htaccess file), you should be good in this department.</para>

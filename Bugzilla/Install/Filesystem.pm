@@ -86,7 +86,7 @@ sub FILESYSTEM {
     my $owner_dir_readable = 0700;
     # Writeable by the web server.
     my $ws_dir_writeable = $ws_group ? 0770 : 01777;
-    # The webserver can overwrite files owned by other users, 
+    # The web server can overwrite files owned by other users, 
     # in this directory.
     my $ws_dir_full_control = $ws_group ? 0770 : 0777;
 
@@ -275,13 +275,13 @@ Deny from all
 EOT
         },
 
-        # Even though $datadir may not (and should not) be in the webtree,
-        # we can't know for sure, so create the .htaccess anyway. It's harmless
-        # if it's not accessible...
+        # Even though $datadir may not (and should not) be accessible from the 
+        # web server, we can't know for sure, so create the .htaccess anyway. 
+        # It's harmless if it isn't accessible...
         "$datadir/.htaccess" => { perms    => $ws_readable, contents => <<EOT
 # Nothing in this directory is retrievable unless overridden by an .htaccess
 # in a subdirectory; the only exception is duplicates.rdf, which is used by
-# duplicates.xul and must be loadable over the web
+# duplicates.xul and must be accessible from the web server
 deny from all
 <Files duplicates.rdf>
   allow from all

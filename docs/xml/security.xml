@@ -1,5 +1,5 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"> -->
-<!-- $Id: security.xml,v 1.16 2006/11/20 19:48:43 lpsolit%gmail.com Exp $ -->
+<!-- $Id: security.xml,v 1.17 2007/07/24 18:22:02 timeless%mozdev.org Exp $ -->
 
 <chapter id="security">
 <title>Bugzilla Security</title>
@@ -57,7 +57,7 @@
     
       <note>
         <para>You will need to set the <option>webservergroup</option> option
-        in <filename>localconfig</filename> to the group your webserver runs
+        in <filename>localconfig</filename> to the group your web server runs
         as. This will allow <filename>./checksetup.pl</filename> to set file
         permissions on Unix systems so that nothing is world-writable.
         </para>
@@ -137,7 +137,7 @@
     <section id="security-mysql-network">
     <title>Network Access</title>
     
-      <para>If MySQL and your webserver both run on the same machine and you
+      <para>If MySQL and your web server both run on the same machine and you
       have no other reason to access MySQL remotely, then you should disable
       the network access. This, along with the suggestion in
       <xref linkend="security-os-ports"/>, will help protect your system from
@@ -178,12 +178,12 @@ skip-networking
     
       <para>
         There are many files that are placed in the Bugzilla directory
-        area that should not be accessible from the web. Because of the way
+        area that should not be accessible from the web server. Because of the way
         Bugzilla is currently layed out, the list of what should and should not
         be accessible is rather complicated. A quick way is to run
-	<filename>testserver.pl</filename> to check if your web server serves
+        <filename>testserver.pl</filename> to check if your web server serves
         Bugzilla files as expected. If not, you may want to follow the few
-	steps below.
+        steps below.
       </para>
       
       <tip>

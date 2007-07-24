@@ -50,7 +50,7 @@ use constant LOCALCONFIG_VARS => (
         desc    => <<EOT
 # If you are using Apache as your web server, Bugzilla can create .htaccess
 # files for you that will instruct Apache not to serve files that shouldn't
-# be accessed from the web (like your local configuration data and non-cgi
+# be accessed from the web browser (like your local configuration data and non-cgi
 # executable files).  For this to work, the directory your Bugzilla
 # installation is in must be within the jurisdiction of a <Directory> block
 # in the httpd.conf file that has 'AllowOverride Limit' in it.  If it has

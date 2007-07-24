@@ -815,7 +815,7 @@ sub insert_attachment_for_bug {
     $sth->bind_param(1, $data, $dbh->BLOB_TYPE);
     $sth->execute();
 
-    # If the file is to be stored locally, stream the file from the webserver
+    # If the file is to be stored locally, stream the file from the web server
     # to the local file without reading it into a local variable.
     if ($cgi->param('bigfile')) {
         my $attachdir = bz_locations()->{'attachdir'};

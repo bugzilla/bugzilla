@@ -95,13 +95,13 @@ sub AddLink {
 }
 
 # The list of valid directions. Some are not proposed in the dropdrown
-# menu despite they are valid ones.
+# menu despite the fact that they are valid.
 my @valid_rankdirs = ('LR', 'RL', 'TB', 'BT');
 
-my $rankdir = $cgi->param('rankdir') || "LR";
+my $rankdir = $cgi->param('rankdir') || 'TB';
 # Make sure the submitted 'rankdir' value is valid.
 if (lsearch(\@valid_rankdirs, $rankdir) < 0) {
-    $rankdir = 'LR';
+    $rankdir = 'TB';
 }
 
 my $display = $cgi->param('display') || 'tree';

@@ -48,9 +48,18 @@
 [% error_message = BLOCK %]
   [% IF    error == "account_creation_disabled" %]
     [% title = "Account Creation Disabled" %]
-    User account creation has been disabled or restricted.
+    User account creation has been disabled.
     <hr>
-    New accounts must be created by an administrator.
+    New accounts must be created by an administrator. The
+    maintainer is [% Param("maintainer") %].
+
+  [% ELSIF error == "account_creation_restricted" %]
+    [% title = "Account Creation Restricted" %]
+    User account creation has been restricted.
+    <hr>
+    Contact your administrator or the maintainer
+    ([% Param("maintainer") %]) for information about
+    creating an account.
 
   [% ELSIF error == "account_disabled" %]
     [% title = "Account Disabled" %]

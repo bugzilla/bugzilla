@@ -64,7 +64,7 @@ if (defined($login)) {
     $vars->{'login'} = $login;
 
     if ($login !~ /$createexp/) {
-        ThrowUserError("account_creation_disabled");
+        ThrowUserError("account_creation_restricted");
     }
 
     # Create and send a token for this new account.

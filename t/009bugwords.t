@@ -79,7 +79,7 @@ foreach my $file (@testitems) {
         # "Bugzilla"
         if (grep /(?<!X\-)Bugzilla(?!_|::|-&gt|\.pm)/, $text) {
             # Exclude JS comments, hyperlinks, USE, and variable assignment.
-            unless (grep /(\/\/.*|(org|api).*>|USE |= )Bugzilla/, $text) {
+            unless (grep /(\/\/.*|org.*>|api\/|USE |= )Bugzilla/, $text) {
                 push(@errors, [$lineno, $text]);
                 next;
             }

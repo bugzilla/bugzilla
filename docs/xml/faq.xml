@@ -1390,8 +1390,10 @@ password=mypassword
         </question>
         <answer>
           <para>
-            New in 2.16 - go to the Account section of the Preferences. You
-            will be emailed at both addresses for confirmation.
+            New in 2.16 - you can change it from the Name and Password
+            section in Preferences. You will be emailed at both addresses for
+            confirmation. 'Administrative Policies' must have the
+            'allowemailchange' parameter set to <quote>On</quote>.
           </para>
         </answer>
       </qandaentry>

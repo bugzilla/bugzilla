@@ -48,7 +48,7 @@
         [% IF user.groups.tweakparams %]
           <li>[% '<span class="separator">| </span>' IF print_pipe %]<a href="editparams.cgi">Parameters</a></li>
           [% print_pipe = 1 %]
-          <li>[% '<span class="separator">| </span>' IF print_pipe %]<a href="editsettings.cgi">User Preferences</a></li>
+          <li>[% '<span class="separator">| </span>' IF print_pipe %]<a href="editsettings.cgi">Default Preferences</a></li>
         [% END %]
         [% IF user.groups.editcomponents %]
           <li>[% '<span class="separator">| </span>' IF print_pipe %]<a href="sanitycheck.cgi">Sanity Check</a></li>

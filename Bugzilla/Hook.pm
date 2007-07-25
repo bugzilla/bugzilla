@@ -68,7 +68,7 @@ Bugzilla::Hook - Extendible extension hooks for Bugzilla code
 =head1 DESCRIPTION
 
 Bugzilla allows extension modules to drop in and add routines at 
-arbitrary points in Bugzilla code. These points are refered to as 
+arbitrary points in Bugzilla code. These points are referred to as
 hooks. When a piece of standard Bugzilla code wants to allow an extension
 to perform additional functions, it uses Bugzilla::Hook's L</process>
 subroutine to invoke any extension code if installed. 

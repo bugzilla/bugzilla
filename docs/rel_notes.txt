@@ -274,11 +274,13 @@ It now:
   * Is much more forgiving about small problems in the XML
 
 
-Adding Individual Bugs to Saved Searches
-----------------------------------------
+Adding Individual Bugs to Saved Searches (Tagging)
+--------------------------------------------------
 Users now have the option of adding an individual bug to any
-particular Saved Search. If you don't like having the entry box in
-your footer for this feature, you can disable it in your Preferences.
+particular Saved Search. Individual users that disagree with the site
+default can add or remove this feature (which appears as an entry box
+visible in the footer) by changing the General Preferences setting
+called "Enable tags for bugs".
 
 
 Attach URLs

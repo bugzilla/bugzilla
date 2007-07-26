@@ -247,7 +247,11 @@ sub SaveEmail {
     my $dbh = Bugzilla->dbh;
     my $cgi = Bugzilla->cgi;
     my $user = Bugzilla->user;
-    
+
+    if (Bugzilla->params->{"supportwatchers"}) {
+        Bugzilla::User::match_field($cgi, { 'new_watchedusers' => {'type' => 'multi'} });
+    }
+
     ###########################################################################
     # Role-based preferences
     ###########################################################################
@@ -319,7 +323,8 @@ sub SaveEmail {
                                    . " WHERE watcher = ?", undef, $user->id);
 
         # The new information given to us by the user.
-        my @new_watch_names = split(/[,\s]+/, $cgi->param('new_watchedusers'));
+        my $new_watched_users = join(',', $cgi->param('new_watchedusers')) || '';
+        my @new_watch_names = split(/[,\s]+/, $new_watched_users);
         my %new_watch_ids;
 
         foreach my $username (@new_watch_names) {

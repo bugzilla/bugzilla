@@ -271,7 +271,7 @@ if ($webdotbase =~ /^https?:/) {
     # Under mod_perl, pngfilename will have an absolute path, and we
     # need to make that into a relative path.
     my $cgi_root = bz_locations()->{cgi_path};
-    $pngfilename =~ s/^\Q$cgi_root\E//;
+    $pngfilename =~ s#^\Q$cgi_root\E/?##;
     
     $vars->{'image_url'} = $pngfilename;
 

@@ -1169,16 +1169,26 @@ sub match_field {
                 # The field is a requestee field; in order for its name 
                 # to show up correctly on the confirmation page, we need 
                 # to find out the name of its flag type.
-                if ($field_name =~ /^requestee-(\d+)$/) {
-                    require Bugzilla::Flag;
-                    my $flag = new Bugzilla::Flag($1);
-                    $expanded_fields->{$field_name}->{'flag_type'} = 
-                      $flag->type;
-                }
-                elsif ($field_name =~ /^requestee_type-(\d+)$/) {
-                    require Bugzilla::FlagType;
-                    $expanded_fields->{$field_name}->{'flag_type'} = 
-                      new Bugzilla::FlagType($1);
+                if ($field_name =~ /^requestee(_type)?-(\d+)$/) {
+                    my $flag_type;
+                    if ($1) {
+                        require Bugzilla::FlagType;
+                        $flag_type = new Bugzilla::FlagType($2);
+                    }
+                    else {
+                        require Bugzilla::Flag;
+                        my $flag = new Bugzilla::Flag($2);
+                        $flag_type = $flag->type if $flag;
+                    }
+                    if ($flag_type) {
+                        $expanded_fields->{$field_name}->{'flag_type'} = $flag_type;
+                    }
+                    else {
+                        # No need to look for a valid requestee if the flag(type)
+                        # has been deleted (may occur in race conditions).
+                        delete $expanded_fields->{$field_name};
+                        $cgi->delete($field_name);
+                    }
                 }
             }
         }

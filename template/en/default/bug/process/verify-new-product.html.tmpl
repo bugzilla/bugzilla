@@ -17,6 +17,7 @@
   # Rights Reserved.
   #
   # Contributor(s): Myk Melez <myk@mozilla.org>
+  #                 Frédéric Buclin <LpSolit@gmail.com>
   #%]
 
 [%# INTERFACE:
@@ -31,6 +32,8 @@
   #   if they want to add the bug to its new product's group
   # use_target_milestone: boolean; whether or not to use
   #   the target milestone field
+  # old_groups: a list of group objects which are not available
+  #   for the new product.
   #%]
 
 [%# The global Bugzilla->cgi object is used to obtain form variable values. %]
@@ -99,22 +102,37 @@
 
 [% END %]
 
-[% IF verify_bug_group %]
+[% IF verify_bug_group || old_groups.size %]
   <h3>Verify [% terms.Bug %] Group</h3>
 
-  <p>
-    Do you want to add the [% terms.bug %] to its new product's default groups (if any)?
-  </p>
+  [% IF old_groups.size %]
+    <p>The following groups are not legal for the <b>[% cgi.param("product") FILTER html %]</b>
+    product or you are not allowed to restrict [% terms.bugs %] to these groups:</p>
+    <ul>
+      [% FOREACH group = old_groups %]
+        <li>[% group.name FILTER html %]: [% group.description FILTER html %]</li>
+      [% END %]
+    </ul>
+    <p><b>[%+ terms.Bugs %] will no longer be restricted to these groups and may become
+    public if no other group applies.</b></p>
+  [% END %]
 
-  <p>
-    <input type="radio" name="addtonewgroup" value="no"><b>no</b><br>
-    <input type="radio" name="addtonewgroup" value="yes"><b>yes</b><br>
-    <input type="radio" name="addtonewgroup" value="yesifinold" checked="checked">
-      <b>yes, but only if the [% terms.bug %] was in any of its old product's default groups</b><br>
-  </p>
+  [% IF verify_bug_group %]
+    <p>
+      This new product has default groups associated to it. Do you want to add the
+      [%+ terms.bug %] to them?<br>
+      <input type="radio" id="add_no" name="addtonewgroup" value="no"><label for="add_no">no</label><br>
+      <input type="radio" id="add_yes" name="addtonewgroup" value="yes"><label for="add_yes">yes</label><br>
+      <input type="radio" id="add_yesifinold" name="addtonewgroup" value="yesifinold" checked="checked">
+        <label for="add_yesifinold">yes, but only if the [% terms.bug %] was in any of
+        its old product's default groups</label>
+    </p>
+  [% END %]
 [% END %]
 
-<input type="submit" id="change_product" value="Commit">
+<p>
+  <input type="submit" id="change_product" value="Commit">
+</p>
 
 </form>
 <hr>

@@ -434,8 +434,8 @@
 
   [% ELSIF message_tag == "remaining_time_zeroed" %]
     The [% field_descs.remaining_time FILTER html %] field has been 
-    set to zero automatically as part of marking this [% terms.bug %]
-    as either RESOLVED or CLOSED.
+    set to zero automatically as part of closing this [% terms.bug %]
+    or moving it from one closed state to another.
 
   [% ELSIF message_tag == "sanitycheck" %]
     [%# We use this way to call sanitycheck-specific messages so that

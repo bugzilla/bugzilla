@@ -160,12 +160,15 @@ sub UPDATE_COLUMNS {
     my @columns = qw(
         alias
         cclist_accessible
+        deadline
+        estimated_time
         everconfirmed
         bug_file_loc
         bug_severity
         bug_status
         op_sys
         priority
+        remaining_time
         rep_platform
         reporter_accessible
         resolution
@@ -175,6 +178,11 @@ sub UPDATE_COLUMNS {
     push(@columns, Bugzilla->custom_field_names);
     return @columns;
 };
+
+use constant NUMERIC_COLUMNS => qw(
+    estimated_time
+    remaining_time
+);
 
 # This is used by add_comment to know what we validate before putting in
 # the DB.
@@ -860,10 +868,15 @@ sub _check_component {
 
 sub _check_deadline {
     my ($invocant, $date) = @_;
-    $date = trim($date);
+    
+    # Check time-tracking permissions.
     my $tt_group = Bugzilla->params->{"timetrackinggroup"};
-    return undef unless $date && $tt_group 
-                        && Bugzilla->user->in_group($tt_group);
+    my $current = ref $invocant ? $invocant->deadline : undef;
+    return $current unless $tt_group && Bugzilla->user->in_group($tt_group);
+    
+    # Validate entered deadline
+    $date = trim($date);
+    return undef if !$date;
     validate_date($date)
         || ThrowUserError('illegal_date', { date   => $date,
                                             format => 'YYYY-MM-DD' });
@@ -1115,8 +1128,14 @@ sub _check_target_milestone {
 
 sub _check_time {
     my ($invocant, $time, $field) = @_;
+
+    my $current = 0;
+    if (ref $invocant && $field ne 'work_time') {
+        $current = $invocant->$field;
+    }
     my $tt_group = Bugzilla->params->{"timetrackinggroup"};
-    return 0 unless $tt_group && Bugzilla->user->in_group($tt_group);
+    return $current unless $tt_group && Bugzilla->user->in_group($tt_group);
+    
     $time = trim($time) || 0;
     ValidateTime($time, $field);
     return $time;
@@ -1217,6 +1236,7 @@ sub set_custom_field {
     ThrowCodeError('field_not_custom', { field => $field }) if !$field->custom;
     $self->set($field->name, $value);
 }
+sub set_deadline { $_[0]->set('deadline', $_[1]); }
 sub set_dependencies {
     my ($self, $dependson, $blocked) = @_;
     ($dependson, $blocked) = $self->_check_dependencies($dependson, $blocked);
@@ -1227,10 +1247,14 @@ sub set_dependencies {
     $self->{'dependson'} = $dependson;
     $self->{'blocked'}   = $blocked;
 }
+sub set_estimated_time { $_[0]->set('estimated_time', $_[1]); }
 sub _set_everconfirmed { $_[0]->set('everconfirmed', $_[1]); }
 sub set_op_sys         { $_[0]->set('op_sys',        $_[1]); }
 sub set_platform       { $_[0]->set('rep_platform',  $_[1]); }
 sub set_priority       { $_[0]->set('priority',      $_[1]); }
+sub set_remaining_time { $_[0]->set('remaining_time', $_[1]); }
+# Used only when closing a bug or moving between closed states.
+sub _zero_remaining_time { $_[0]->{'remaining_time'} = 0; }
 sub set_reporter_accessible { $_[0]->set('reporter_accessible', $_[1]); }
 sub set_resolution     { $_[0]->set('resolution',    $_[1]); }
 sub set_severity       { $_[0]->set('bug_severity',  $_[1]); }
@@ -1905,10 +1929,11 @@ sub check_status_transition {
 # Make sure all checks triggered by the workflow are successful.
 # Some are hardcoded and come from older versions of Bugzilla.
 sub check_status_change_triggers {
-    my ($self, $action, $bug_ids, $vars) = @_;
+    my ($self, $action, $bugs, $vars) = @_;
     my $dbh = Bugzilla->dbh;
     $vars ||= {};
 
+    my @bug_ids = map {$_->id} @$bugs;
     # First, make sure no comment is required if there is none.
     # If a comment is given, then this check is useless.
     if (!$vars->{comment_exists}) {
@@ -1916,8 +1941,8 @@ sub check_status_change_triggers {
             # 'commentonnone' doesn't exist, so this is safe.
             ThrowUserError('comment_required') if Bugzilla->params->{"commenton$action"};
         }
-        elsif (!scalar(@$bug_ids)) {
-            # The bug is being created; that's why $bug_ids is undefined.
+        elsif (!scalar @bug_ids) {
+            # The bug is being created; that's why @bug_ids is undefined.
             my $comment_required =
               $dbh->selectrow_array('SELECT require_comment
                                        FROM status_workflow
@@ -1939,7 +1964,7 @@ sub check_status_change_triggers {
                                             ON bug_status.id = old_status
                                     INNER JOIN bug_status b_s
                                             ON b_s.id = new_status
-                                         WHERE bug_id IN (' . join (',', @$bug_ids). ')
+                                         WHERE bug_id IN (' . join (',', @bug_ids). ')
                                            AND b_s.value = ?
                                            AND require_comment = 1',
                                          undef, $action);
@@ -1957,7 +1982,7 @@ sub check_status_change_triggers {
 
     # Also leave now if we are creating a new bug (we only want to check
     # if a comment is required on bug creation).
-    return unless scalar(@$bug_ids);
+    return unless scalar @bug_ids;
 
     if ($action eq 'duplicate') {
         # You cannot mark bugs as duplicates when changing
@@ -1995,14 +2020,15 @@ sub check_status_change_triggers {
         $vars->{DuplicateUserConfirm} = 1;
 
         # DUPLICATE bugs should have no time remaining.
-        $vars->{remove_remaining_time} = 1;
+        $_->_zero_remaining_time() foreach @$bugs;
+        $vars->{'message'} = "remaining_time_zeroed";
     }
     elsif ($action eq 'change_resolution' || !is_open_state($action)) {
         # don't resolve as fixed while still unresolved blocking bugs
         if (Bugzilla->params->{"noresolveonopenblockers"}
             && $vars->{resolution} eq 'FIXED')
         {
-            my @dependencies = Bugzilla::Bug::CountOpenDependencies(@$bug_ids);
+            my @dependencies = Bugzilla::Bug::CountOpenDependencies(@bug_ids);
             if (scalar @dependencies > 0) {
                 ThrowUserError("still_unresolved_bugs",
                                { dependencies     => \@dependencies,
@@ -2013,7 +2039,7 @@ sub check_status_change_triggers {
         # You cannot use change_resolution if there is at least one open bug
         # nor can you close open bugs if no resolution is given.
         my $open_states = join(',', map {$dbh->quote($_)} BUG_STATE_OPEN);
-        my $idlist = join(',', @$bug_ids);
+        my $idlist = join(',', @bug_ids);
         my $is_open =
           $dbh->selectrow_array("SELECT 1 FROM bugs WHERE bug_id IN ($idlist)
                                  AND bug_status IN ($open_states)");
@@ -2026,7 +2052,14 @@ sub check_status_change_triggers {
         check_field('resolution', $vars->{resolution},
                     Bugzilla::Bug->settable_resolutions) if $vars->{resolution};
 
-        $vars->{remove_remaining_time} = 1 if ($action ne 'change_resolution');
+        if ($action ne 'change_resolution') {
+            foreach my $b (@$bugs) {
+                if ($b->bug_status ne $action) {
+                    $b->_zero_remaining_time;
+                    $vars->{'message'} = "remaining_time_zeroed";
+                }
+            }
+        }
     }
     elsif ($action eq 'ASSIGNED'
            && Bugzilla->params->{"usetargetmilestone"}
@@ -2652,7 +2685,7 @@ sub check_can_change_field {
         return 1;
     # numeric fields need to be compared using ==
     } elsif (($field eq 'estimated_time' || $field eq 'remaining_time')
-             && $newvalue ne $data->{'dontchange'}
+             && (!$data || $newvalue ne $data->{'dontchange'})
              && $oldvalue == $newvalue)
     {
         return 1;
@@ -2671,6 +2704,15 @@ sub check_can_change_field {
     # $PrivilegesRequired = 1 : the reporter, assignee or an empowered user;
     # $PrivilegesRequired = 2 : the assignee or an empowered user;
     # $PrivilegesRequired = 3 : an empowered user.
+    
+    # Only users in the time-tracking group can change time-tracking fields.
+    if ( grep($_ eq $field, qw(deadline estimated_time remaining_time)) ) {
+        my $tt_group = Bugzilla->params->{timetrackinggroup};
+        if (!$tt_group || !$user->in_group($tt_group)) {
+            $$PrivilegesRequired = 3;
+            return 0;
+        }
+    }
 
     # Allow anyone with (product-specific) "editbugs" privs to change anything.
     if ($user->in_group('editbugs', $self->{'product_id'})) {

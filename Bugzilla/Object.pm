@@ -32,6 +32,7 @@ use constant ID_FIELD   => 'id';
 use constant LIST_ORDER => NAME_FIELD;
 
 use constant UPDATE_VALIDATORS => {};
+use constant NUMERIC_COLUMNS   => ();
 
 ###############################
 ####    Initialization     ####
@@ -216,6 +217,7 @@ sub update {
 
     my $old_self = $self->new($self->id);
     
+    my %numeric = map { $_ => 1 } $self->NUMERIC_COLUMNS;
     my (@update_columns, @values, %changes);
     foreach my $column ($self->UPDATE_COLUMNS) {
         my ($old, $new) = ($old_self->{$column}, $self->{$column});
@@ -225,7 +227,7 @@ sub update {
         if (!defined $new || !defined $old) {
             next if !defined $new && !defined $old;
         }
-        elsif ($old eq $new) {
+        elsif ( ($numeric{$column} && $old == $new) || $old eq $new ) {
             next;
         }
 
@@ -444,6 +446,14 @@ L<Bugzilla::Bug> has good examples in its code of when to use this.
 A list of columns to update when L</update> is called.
 If a field can't be changed, it shouldn't be listed here. (For example,
 the L</ID_FIELD> usually can't be updated.)
+
+=item C<NUMERIC_COLUMNS>
+
+When L</update> is called, it compares each column in the object to its
+current value in the database. It only updates columns that have changed.
+
+Any column listed in NUMERIC_COLUMNS is treated as a number, not as a string,
+during these comparisons.
 
 =back
 

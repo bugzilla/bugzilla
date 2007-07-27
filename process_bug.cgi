@@ -144,13 +144,12 @@ $cgi->param('dontchange','') unless defined $cgi->param('dontchange');
 # Make sure the 'knob' param is defined; else set it to 'none'.
 $cgi->param('knob', 'none') unless defined $cgi->param('knob');
 
-# Validate all timetracking fields
-foreach my $field ("estimated_time", "work_time", "remaining_time") {
-    if (defined $cgi->param($field) 
-        && $cgi->param($field) ne $cgi->param('dontchange')) 
-    {
-        $cgi->param($field, $bug->_check_time($cgi->param($field), $field));
-    }
+# Validate work_time
+if (defined $cgi->param('work_time') 
+    && $cgi->param('work_time') ne $cgi->param('dontchange')) 
+{
+    $cgi->param('work_time', $bug->_check_time($cgi->param('work_time'),
+                                               'work_time'));
 }
 
 if (Bugzilla->user->in_group(Bugzilla->params->{'timetrackinggroup'})) {
@@ -456,7 +455,8 @@ my %methods = (
 );
 foreach my $b (@bug_objects) {
     foreach my $field_name (qw(op_sys rep_platform priority bug_severity
-                               bug_file_loc status_whiteboard short_desc))
+                               bug_file_loc status_whiteboard short_desc
+                               deadline remaining_time estimated_time))
     {
         # We only update the field if it's defined and it's not set
         # to dontchange.
@@ -549,22 +549,6 @@ $::query = "UPDATE bugs SET";
 $::comma = "";
 local our @values;
 umask(0);
-
-sub _remove_remaining_time {
-    my $cgi = Bugzilla->cgi;
-    if (Bugzilla->user->in_group(Bugzilla->params->{'timetrackinggroup'})) {
-        if ( defined $cgi->param('remaining_time') 
-             && $cgi->param('remaining_time') > 0 )
-        {
-            $cgi->param('remaining_time', 0);
-            $vars->{'message'} = "remaining_time_zeroed";
-        }
-    }
-    else {
-        DoComma();
-        $::query .= "remaining_time = 0";
-    }
-}
 
 sub DoComma {
     $::query .= "$::comma\n    ";
@@ -857,14 +841,13 @@ $vars->{comment_exists} = comment_exists();
 $vars->{bug_id} = $cgi->param('id');
 $vars->{dup_id} = $cgi->param('dup_id');
 $vars->{resolution} = $cgi->param('resolution') || '';
-Bugzilla::Bug->check_status_change_triggers($knob, \@idlist, $vars);
+Bugzilla::Bug->check_status_change_triggers($knob, \@bug_objects, $vars);
 
 # Some triggers require extra actions.
 $duplicate = $vars->{dup_id} if ($knob eq 'duplicate');
 $requiremilestone = $vars->{requiremilestone};
 # $vars->{DuplicateUserConfirm} is true only if a single bug is being edited.
 DuplicateUserConfirm($bug, $duplicate) if $vars->{DuplicateUserConfirm};
-_remove_remaining_time() if $vars->{remove_remaining_time};
 
 my $any_keyword_changes;
 if (defined $cgi->param('keywords')) {
@@ -882,36 +865,6 @@ if ($::comma eq ""
     ) {
     if (!defined $cgi->param('comment') || $cgi->param('comment') =~ /^\s*$/) {
         ThrowUserError("bugs_not_changed");
-    }
-}
-
-# Process data for Time Tracking fields
-if (Bugzilla->user->in_group(Bugzilla->params->{'timetrackinggroup'})) {
-    foreach my $field ("estimated_time", "remaining_time") {
-        if (defined $cgi->param($field)) {
-            my $er_time = trim($cgi->param($field));
-            if ($er_time ne $cgi->param('dontchange')) {
-                DoComma();
-                $::query .= "$field = ?";
-                trick_taint($er_time);
-                push(@values, $er_time);
-            }
-        }
-    }
-
-    if (defined $cgi->param('deadline')) {
-        DoComma();
-        if ($cgi->param('deadline')) {
-            validate_date($cgi->param('deadline'))
-              || ThrowUserError('illegal_date', {date => $cgi->param('deadline'),
-                                                 format => 'YYYY-MM-DD'});
-            $::query .= "deadline = ?";
-            my $deadline = $cgi->param('deadline');
-            trick_taint($deadline);
-            push(@values, $deadline);
-        } else {
-            $::query .= "deadline = NULL";
-        }
     }
 }
 
@@ -980,7 +933,6 @@ if ($prod_changed && Bugzilla->params->{"strict_isolation"}) {
         }
     }
 }
-
 
 my %bug_objects = map {$_->id => $_} @bug_objects;
 
@@ -1368,6 +1320,7 @@ foreach my $id (@idlist) {
             # Bugzilla::Bug does these for us already.
             next if grep($_ eq $col, qw(keywords op_sys rep_platform priority
                                         bug_severity short_desc alias
+                                        deadline estimated_time remaining_time
                                         reporter_accessible cclist_accessible
                                         status_whiteboard bug_file_loc),
                                      Bugzilla->custom_field_names);

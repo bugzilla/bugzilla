@@ -300,7 +300,9 @@
 
 [% END %]
 
-
+[% all_open_bugs = !current_bug_statuses.containsany(closedstates) %]
+[% all_closed_bugs = !current_bug_statuses.containsany(openstates) %]
+[% display_warning = 0 %]
 
 <input id="knob-none" type="radio" name="knob" value="none" checked="checked">
 <label for="knob-none">Do nothing else</label><br>
@@ -311,16 +313,33 @@
     <label for="knob_[% bug_status.id FILTER html %]">
       Change status to <b>[% get_status(bug_status.name) FILTER html %]</b>
     </label>
-    [% IF !bug_status.is_open %]
-      and set the resolution to [% PROCESS select_resolution field = "knob_${bug_status.id}" %]
+    [%# Closed bugs cannot have their resolution changed this way. %]
+    [% IF !bug_status.is_open && !all_closed_bugs %]
+      and set the resolution to [% PROCESS select_resolution id = bug_status.id %]
+      [%+ "(*)" UNLESS all_open_bugs %]
+      [% display_warning = 1 UNLESS all_open_bugs %]
     [% END %]
     <br>
 [% END %]
 
 [%# If all the bugs being changed are open, allow the user to clear their resolution. %]
-[% IF !current_bug_statuses.containsany(closedstates) %]
+[% IF all_open_bugs %]
   <input id="knob-clearresolution" type="radio" name="knob" value="clearresolution">
   <label for="knob-clearresolution">Clear the resolution</label><br>
+[% END %]
+
+[%# If all the bugs being changed are closed, allow the user to change their resolution. %]
+[% IF all_closed_bugs %]
+  <input type="radio" id="knob_change_resolution" name="knob" value="change_resolution">
+  <label for="knob_change_resolution">Change resolution to</label>
+  [%+ PROCESS select_resolution id = "change_resolution" %]<br>
+[% END %]
+
+[% IF display_warning %]
+  <p class="box">
+    (*) Note that the resolution will only be applied to open [% terms.bugs %].
+    Already closed [% terms.bugs %] will keep their resolution unchanged.
+  </p>
 [% END %]
 
 <input type="submit" id="commit" value="Commit">
@@ -346,8 +365,8 @@
 [% END %]
 
 [% BLOCK select_resolution %]
-  <select name="resolution"
-          onchange="document.forms['changeform'].[% field FILTER html %].checked=true">
+  <select id="resolution_knob_[% id FILTER html %]" name="resolution_knob_[% id FILTER html %]"
+          onchange="document.forms['changeform'].[% "knob_$id" FILTER html %].checked=true">
     [% FOREACH r = resolutions %]
       [% NEXT IF !r %]
       <option value="[% r FILTER html %]">[% get_resolution(r) FILTER html %]</option>

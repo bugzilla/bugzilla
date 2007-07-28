@@ -1099,9 +1099,8 @@ $vars->{'buglist_joined'} = join(',', @bugidlist);
 $vars->{'columns'} = $columns;
 $vars->{'displaycolumns'} = \@displaycolumns;
 
-my @openstates = BUG_STATE_OPEN;
-$vars->{'openstates'} = \@openstates;
-$vars->{'closedstates'} = ['CLOSED', 'VERIFIED', 'RESOLVED'];
+$vars->{'openstates'} = [BUG_STATE_OPEN];
+$vars->{'closedstates'} = [map {$_->name} Bugzilla::Status::closed_bug_statuses()];
 
 # The list of query fields in URL query string format, used when creating
 # URLs to the same query results page with different parameters (such as

@@ -93,6 +93,28 @@ sub can_change_to {
     return $self->{'can_change_to'};
 }
 
+sub can_change_from {
+    my $self = shift;
+    my $dbh = Bugzilla->dbh;
+
+    if (!defined $self->{'can_change_from'}) {
+        my $old_status_ids = $dbh->selectcol_arrayref('SELECT old_status
+                                                         FROM status_workflow
+                                                   INNER JOIN bug_status
+                                                           ON id = old_status
+                                                        WHERE isactive = 1
+                                                          AND new_status = ?
+                                                          AND old_status IS NOT NULL',
+                                                        undef, $self->id);
+
+        # Allow the bug status to remain unchanged.
+        push(@$old_status_ids, $self->id);
+        $self->{'can_change_from'} = Bugzilla::Status->new_from_list($old_status_ids);
+    }
+
+    return $self->{'can_change_from'};
+}
+
 sub add_missing_bug_status_transitions {
     my $bug_status = shift || Bugzilla->params->{'duplicate_or_move_bug_status'};
     my $dbh = Bugzilla->dbh;
@@ -161,7 +183,20 @@ below.
 =item C<can_change_to>
 
  Description: Returns the list of active statuses a bug can be changed to
-              given the current bug status.
+              given the current bug status. If this method is called as a
+              class method, then it returns all bug statuses available on
+              bug creation.
+
+ Params:      none.
+
+ Returns:     A list of Bugzilla::Status objects.
+
+=item C<can_change_from>
+
+ Description: Returns the list of active statuses a bug can be changed from
+              given the new bug status. If the bug status is available on
+              bug creation, this method doesn't return this information.
+              You have to call C<can_change_to> instead.
 
  Params:      none.
 

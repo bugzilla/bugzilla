@@ -814,8 +814,11 @@ my $knob = scalar $cgi->param('knob');
 # Special actions (duplicate, change_resolution and clearresolution) are outside
 # the workflow.
 if (!grep { $knob eq $_ } SPECIAL_STATUS_WORKFLOW_ACTIONS) {
-    Bugzilla::Bug->check_status_transition($knob, \@idlist);
+    # Make sure the bug status exists and is active.
+    check_field('bug_status', $knob);
     my $bug_status = new Bugzilla::Status({name => $knob});
+    $_->check_status_transition($bug_status) foreach @bug_objects;
+
     # Fill the resolution field with the correct value (e.g. in case the
     # workflow allows several open -> closed transitions).
     if ($bug_status->is_open) {

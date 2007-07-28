@@ -655,7 +655,7 @@
   [% ELSIF error == "illegal_bug_status_transition" %]
     [% title = "Illegal $terms.Bug Status Change" %]
     You are not allowed to change the [% terms.bug %] status from
-    [%+ old.join(", ") FILTER html %] to [%+ new FILTER html %].
+    [%+ old FILTER html %] to [% new FILTER html %].
 
   [% ELSIF error == "illegal_change" %]
     [% title = "Not allowed" %]

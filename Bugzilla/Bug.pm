@@ -1899,30 +1899,13 @@ sub bug_alias_to_id {
 # Workflow Control routines
 #####################################################################
 
-# Make sure that the new status is valid for ALL bugs.
+# Make sure that the new status is allowed by the status workflow.
 sub check_status_transition {
-    my ($self, $new_status, $bug_ids) = @_;
-    my $dbh = Bugzilla->dbh;
+    my ($self, $new_status) = @_;
 
-    check_field('bug_status', $new_status);
-    trick_taint($new_status);
-
-    my $illegal_statuses =
-      $dbh->selectcol_arrayref('SELECT DISTINCT bug_status.value
-                                  FROM bug_status
-                            INNER JOIN bugs
-                                    ON bugs.bug_status = bug_status.value
-                                 WHERE bug_id IN (' . join (',', @$bug_ids). ')
-                                   AND bug_status.id NOT IN (SELECT old_status
-                                                               FROM status_workflow
-                                                         INNER JOIN bug_status b_s
-                                                                 ON b_s.id = status_workflow.new_status
-                                                              WHERE b_s.value = ?)',
-                                 undef, $new_status);
-
-    if (scalar(@$illegal_statuses)) {
-        ThrowUserError('illegal_bug_status_transition', {old => $illegal_statuses,
-                                                         new => $new_status})
+    if (!grep { $_->name eq $self->bug_status } @{$new_status->can_change_from}) {
+        ThrowUserError('illegal_bug_status_transition', {old => $self->bug_status,
+                                                         new => $new_status->name})
     }
 }
 

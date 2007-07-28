@@ -252,6 +252,14 @@
         </fieldset>
       </td>
 
+      [%# Force the layout to be displayed now, before drawing the second column of the table.
+        # This should prevent bug 370739 when using Firefox 2. %]
+      <script type="text/javascript">
+        <!--
+        var v = document.body.offsetHeight;
+        //-->
+      </script>
+
       <td valign="top">
         [%# *** Reporter, owner and QA contact *** %]
         <fieldset>

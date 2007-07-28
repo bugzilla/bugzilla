@@ -2003,8 +2003,13 @@ sub check_status_change_triggers {
         $vars->{DuplicateUserConfirm} = 1;
 
         # DUPLICATE bugs should have no time remaining.
-        $_->_zero_remaining_time() foreach @$bugs;
-        $vars->{'message'} = "remaining_time_zeroed";
+        foreach my $bug (@$bugs) {
+            # Note that 0.00 is *true* for Perl!
+            next unless ($bug->remaining_time > 0);
+            $bug->_zero_remaining_time;
+            $vars->{'message'} = "remaining_time_zeroed"
+              if Bugzilla->user->in_group(Bugzilla->params->{'timetrackinggroup'});
+        }
     }
     elsif ($action eq 'change_resolution' || !is_open_state($action)) {
         # don't resolve as fixed while still unresolved blocking bugs
@@ -2038,8 +2043,11 @@ sub check_status_change_triggers {
         if ($action ne 'change_resolution') {
             foreach my $b (@$bugs) {
                 if ($b->bug_status ne $action) {
+                    # Note that 0.00 is *true* for Perl!
+                    next unless ($b->remaining_time > 0);
                     $b->_zero_remaining_time;
-                    $vars->{'message'} = "remaining_time_zeroed";
+                    $vars->{'message'} = "remaining_time_zeroed"
+                      if Bugzilla->user->in_group(Bugzilla->params->{'timetrackinggroup'});
                 }
             }
         }

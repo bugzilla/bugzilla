@@ -501,8 +501,8 @@
     <para>
       Code hooks appear in Bugzilla source files as a single method call 
       in the format <literal role="code">Bugzilla::Hook->process("<varname>name</varname>");</literal>.
-      for instance, <filename>enter_bug.cgi</filename> may invoke the hook 
-      "<varname>enter_bug-defaultvars</varname>". Thus, a source file at 
+      For instance, <filename>enter_bug.cgi</filename> may invoke the hook 
+      "<varname>enter_bug-entrydefaultvars</varname>". Thus, a source file at 
       <filename>BUGZILLA_ROOT/extensions/EXTENSION_NAME/code/enter_bug-entrydefaultvars.pl</filename>
       will be automatically invoked when the code hook is reached. 
     </para>

@@ -853,6 +853,23 @@ password=mypassword
         </answer>
       </qandaentry>
 
+      <qandaentry>
+        <question id="faq-admin-makeadmin">
+          <para>
+            How do I make a new Bugzilla administrator?
+            The previous administrator is gone...
+          </para>
+        </question>
+        <answer>
+          <para>
+            Run <command>checksetup.pl</command> with
+            <option>--make-admin</option> option.
+            Its usage is <option>--make-admin=user@example.org</option>.
+            The user account must be exist in the Bugzilla database.
+          </para>
+        </answer>
+      </qandaentry>
+
     </qandadiv>
 
     <qandadiv id="faq-security">

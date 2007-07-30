@@ -54,11 +54,18 @@
   >
 
   <p>
-    [% terms.Bugzilla %] cannot make a conclusive match for one or more of the
-    names and/or email addresses you entered on the previous page.<br>
-    Please examine the lists of potential matches below and select the
-    one you want, or go back to the previous page to revise the names
-    you entered.
+    [% IF matchmultiple %]
+      [% terms.Bugzilla %] cannot make a conclusive match for one or more
+      of the names and/or email addresses you entered on the previous page.
+      <br>Please examine the lists of potential matches below and select the
+      ones you want,
+    [% ELSE %]
+      [% terms.Bugzilla %] is configured to require verification whenever
+      you enter a name or partial email address.
+      <br>Below are the names/addresses you entered and the matched accounts.
+      Please confirm that they are correct,
+    [% END %]
+    or go back to the previous page to revise the names you entered.
   </p>
 [% ELSE %]
   [% PROCESS global/header.html.tmpl title="Match Failed" %]

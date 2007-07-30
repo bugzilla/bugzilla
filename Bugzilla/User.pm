@@ -1344,6 +1344,7 @@ sub match_field {
     $vars->{'fields'}        = $fields; # fields being matched
     $vars->{'matches'}       = $matches; # matches that were made
     $vars->{'matchsuccess'}  = $matchsuccess; # continue or fail
+    $vars->{'matchmultiple'} = $match_multiple;
 
     print Bugzilla->cgi->header();
 

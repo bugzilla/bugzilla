@@ -86,6 +86,20 @@ sub init_page {
     # PATH is undefined.
     $ENV{'PATH'} = '';
 
+    # IIS prints out warnings to the webpage, so ignore them, or log them
+    # to a file if the file exists.
+    if ($ENV{SERVER_SOFTWARE} && $ENV{SERVER_SOFTWARE} =~ /microsoft-iis/i) {
+        $SIG{__WARN__} = sub {
+            my ($msg) = @_;
+            my $datadir = bz_locations()->{'datadir'};
+            if (-w "$datadir/errorlog") {
+                my $warning_log = new IO::File(">>$datadir/errorlog");
+                print $warning_log $msg;
+                $warning_log->close();
+            }
+        };
+    }
+
     # If Bugzilla is shut down, do not allow anything to run, just display a
     # message to the user about the downtime and log out.  Scripts listed in 
     # SHUTDOWNHTML_EXEMPT are exempt from this message.

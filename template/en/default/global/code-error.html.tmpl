@@ -132,9 +132,9 @@
       This means that the '[% Param("auth_env_email") FILTER html %]'
       environment variable was empty or did not exist.
     [% ELSE %]
-      You need to set the "auth_env_email" environment variable to
-      the name of the environment variable that will contain the
-      user's email address.
+      You need to set the "auth_env_email" parameter to the name of
+      the environment variable that will contain the user's email
+      address.
     [% END %]
 
   [% ELSIF error == "extension_invalid" %]

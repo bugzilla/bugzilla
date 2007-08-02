@@ -154,7 +154,7 @@ if (defined $cgi->param('work_time')
 
 if (Bugzilla->user->in_group(Bugzilla->params->{'timetrackinggroup'})) {
     my $wk_time = $cgi->param('work_time');
-    if ($cgi->param('comment') =~ /^\s*$/ && $wk_time && $wk_time != 0) {
+    if (!comment_exists() && $wk_time && $wk_time != 0) {
         ThrowUserError('comment_required');
     }
 }

@@ -1850,9 +1850,12 @@ Support: ENTRY, DEFAULT/MANDATORY, CANEDIT
         <literal>upgrade_notification</literal> parameter, see
         <xref linkend="parameters"/>. Administrators will see these
         notifications when they access the <filename>index.cgi</filename>
-        page, i.e. generally when logging in. Bugzilla will check once a
-        week for new releases, unless the parameter is set to
-        <quote>disabled</quote>.
+        page, i.e. generally when logging in. Bugzilla will check once per
+        day for new releases, unless the parameter is set to
+        <quote>disabled</quote>. If you are behind a proxy, you may have to set
+        the <literal>proxy_url</literal> parameter accordingly. If the proxy
+        requires authentication, use the
+        <literal>http://user:pass@proxy_url/</literal> syntax.
       </para>
     </section>
 

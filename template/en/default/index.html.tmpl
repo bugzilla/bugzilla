@@ -80,7 +80,9 @@ function addSidebar() {
       <a href="editparams.cgi?section=core#upgrade_notification">notify you about new releases</a>.</p>
     [% ELSIF release.error == "cannot_download" %]
       <p>The local XML file '[% release.xml_file FILTER html %]' cannot be created.
-      Please make sure the web server can write in this directory.</p>
+      Please make sure the web server can write in this directory and that you can access
+      the web. If you are behind a proxy, set the
+      <a href="editparams.cgi?section=core#proxy_url">proxy_url</a> parameter correctly.</p>
     [% ELSIF release.error == "no_update" %]
       <p>The local XML file '[% release.xml_file FILTER html %]' cannot be updated.
       Please make sure the web server can edit this file.</p>

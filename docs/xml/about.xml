@@ -1,6 +1,6 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook V4.1//EN" [
 <!ENTITY conventions SYSTEM "conventions.xml"> ] > -->
-<!-- $Id: about.xml,v 1.25 2007/07/22 22:25:12 timeless%mozdev.org Exp $ -->
+<!-- $Id: about.xml,v 1.26 2007/08/02 06:52:32 wurblzap%gmail.com Exp $ -->
 
 <chapter id="about">
 <title>About This Guide</title>
@@ -96,7 +96,7 @@
       <ulink url="http://sourceforge.net/projects/bugzilla-br/">Brazilian Portuguese</ulink>,
       <ulink url="http://sourceforge.net/projects/bugzilla-cn/">Chinese</ulink>,
       <ulink url="http://sourceforge.net/projects/bugzilla-fr/">French</ulink>,
-      <ulink url="http://germzilla.wurblzap.net/">German</ulink>,
+      <ulink url="http://germzilla.ganderbay.net/">German</ulink>,
       <ulink url="http://sourceforge.net/projects/bugzilla-it/">Italian</ulink>,
       <ulink url="http://www.bugzilla.jp/about/jp.html">Japanese</ulink>,
       <ulink url="http://sourceforge.net/projects/bugzilla-kr/">Korean</ulink>,

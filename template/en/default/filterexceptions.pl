@@ -463,6 +463,10 @@
   'link_uri'
 ],
 
+'admin/params/common.html.tmpl' => [
+  'sortlist_separator', 
+],
+
 'admin/products/groupcontrol/confirm-edit.html.tmpl' => [
   'group.count', 
 ],

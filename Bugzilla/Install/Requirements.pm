@@ -170,6 +170,12 @@ sub OPTIONAL_MODULES {
         feature => 'LDAP Authentication'
     },
     {
+        package => 'RadiusPerl',
+        module  => 'Authen::Radius',
+        version => 0,
+        feature => 'RADIUS Authentication'
+    },
+    {
         package => 'SOAP-Lite',
         module  => 'SOAP::Lite',
         version => 0,

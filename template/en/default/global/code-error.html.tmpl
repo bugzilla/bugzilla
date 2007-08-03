@@ -337,6 +337,9 @@
     outside the package. This function may only be called from
     a subclass of <code>[% superclass FILTER html %]</code>.
 
+  [% ELSIF error == "radius_preparation_error" %]
+    An error occurred while preparing for a RADIUS authentication request:
+    <code>[% errstr FILTER html %]</code>.
 
   [% ELSIF error == "unknown_comparison_type" %]
     Specified comparison type is not supported.

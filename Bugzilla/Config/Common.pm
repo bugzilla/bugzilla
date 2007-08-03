@@ -27,6 +27,7 @@
 #                 Joseph Heenan <joseph@heenan.me.uk>
 #                 Erik Stambaugh <erik@dasbistro.com>
 #                 Frédéric Buclin <LpSolit@gmail.com>
+#                 Marc Schumann <wurblzap@gmail.com>
 #
 
 package Bugzilla::Config::Common;
@@ -64,8 +65,8 @@ sub check_multi {
 
         return "";
     }
-    elsif ($param->{'type'} eq "m") {
-        foreach my $chkParam (@$value) {
+    elsif ($param->{'type'} eq 'm' || $param->{'type'} eq 'o') {
+        foreach my $chkParam (split(',', $value)) {
             unless (scalar(grep {$_ eq $chkParam} (@{$param->{'choices'}}))) {
                 return "Invalid choice '$chkParam' for multi-select list param '$param->{'name'}'";
             }
@@ -268,18 +269,27 @@ sub check_user_verify_class {
     # So don't do that.
 
     my ($list, $entry) = @_;
+    $list || return 'You need to specify at least one authentication mechanism';
     for my $class (split /,\s*/, $list) {
         my $res = check_multi($class, $entry);
         return $res if $res;
         if ($class eq 'DB') {
             # No params
-        } elsif ($class eq 'LDAP') {
+        }
+        elsif ($class eq 'RADIUS') {
+            eval "require Authen::Radius";
+            return "Error requiring Authen::Radius: '$@'" if $@;
+            return "RADIUS servername (RADIUS_server) is missing" unless Bugzilla->params->{"RADIUS_server"};
+            return "RADIUS_secret is empty" unless Bugzilla->params->{"RADIUS_secret"};
+        }
+        elsif ($class eq 'LDAP') {
             eval "require Net::LDAP";
             return "Error requiring Net::LDAP: '$@'" if $@;
-            return "LDAP servername is missing" unless Bugzilla->params->{"LDAPserver"};
+            return "LDAP servername (LDAPserver) is missing" unless Bugzilla->params->{"LDAPserver"};
             return "LDAPBaseDN is empty" unless Bugzilla->params->{"LDAPBaseDN"};
-        } else {
-                return "Unknown user_verify_class '$class' in check_user_verify_class";
+        }
+        else {
+            return "Unknown user_verify_class '$class' in check_user_verify_class";
         }
     }
     return "";
@@ -363,9 +373,8 @@ sub check_timezone {
 # b -- A boolean value (either 1 or 0)
 # m -- A list of values, with many selectable (shows up as a select box)
 #      To specify the list of values, make the 'choices' key be an array
-#      reference of the valid choices. The 'default' key should be an array
-#      reference for the list of selected values (which must appear in the
-#      first anonymous array), i.e.:
+#      reference of the valid choices. The 'default' key should be a string
+#      with a list of selected values (as a comma-separated list), i.e.:
 #       {
 #         name => 'multiselect',
 #         desc => 'A list of options, choose many',
@@ -380,6 +389,11 @@ sub check_timezone {
 #
 #      &check_multi should always be used as the param verification function
 #      for list (single and multiple) parameter types.
+#
+# o -- A list of values, orderable, and with many selectable (shows up as a
+#      JavaScript-enhanced select box if JavaScript is enabled, and a text
+#      entry field if not)
+#      Set up in the same way as type m.
 #
 # s -- A list of values, with one selectable (shows up as a select box)
 #      To specify the list of values, make the 'choices' key be an array
@@ -422,7 +436,7 @@ All parameter checking functions are called with two parameters:
 
 =item C<check_multi>
 
-Checks that a multi-valued parameter (ie type C<s> or type C<m>) satisfies
+Checks that a multi-valued parameter (ie types C<s>, C<o> or C<m>) satisfies
 its contraints.
 
 =item C<check_numeric>

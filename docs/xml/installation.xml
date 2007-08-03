@@ -1,5 +1,5 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"> -->
-<!-- $Id: installation.xml,v 1.139 2007/07/24 18:22:02 timeless%mozdev.org Exp $ -->
+<!-- $Id: installation.xml,v 1.140 2007/08/02 22:38:43 wurblzap%gmail.com Exp $ -->
 <chapter id="installing-bugzilla">
   <title>Installing Bugzilla</title>
 
@@ -415,6 +415,13 @@
           <para>
             Net::LDAP
             (&min-net-ldap-ver;) for LDAP Authentication
+          </para>
+        </listitem>
+
+        <listitem>
+          <para>
+            Authen::Radius
+            (&min-authen-radius-ver;) for RADIUS Authentication
           </para>
         </listitem>
 
@@ -1506,6 +1513,72 @@ c:\perl\bin\perl.exe -xc:\bugzilla -wT "%s" %s
 
     </section>
     
+    <section id="bzradius">
+      <title>RADIUS Authentication</title>
+
+      <para>RADIUS authentication is a module for Bugzilla's plugin 
+      authentication architecture.
+      Most caveats that apply to LDAP authentication apply to RADIUS
+      authentication as well.
+      </para>
+
+      <para>Parameters required to use RADIUS Authentication:</para>
+
+      <variablelist>
+        <varlistentry id="param-user_verify_class">
+          <term>user_verify_class</term>
+          <listitem>
+            <para>If you want to list <quote>RADIUS</quote> here,
+            make sure to have set up the other parameters listed below.
+            Unless you have other (working) authentication methods listed as
+            well, you may otherwise not be able to log back in to Bugzilla once
+            you log out.
+            If this happens to you, you will need to manually edit
+            <filename>data/params</filename> and set user_verify_class to
+            <quote>DB</quote>.
+            </para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry id="param-RADIUS_server">
+          <term>RADIUS_server</term>
+          <listitem>
+            <para>This parameter should be set to the name (and optionally the
+            port) of your RADIUS server.
+            </para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry id="param-RADIUS_secret">
+          <term>RADIUS_secret</term>
+          <listitem>
+            <para>This parameter should be set to the RADIUS server's secret.
+            </para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry id="param-RADIUS_email_suffix">
+          <term>RADIUS_email_suffix</term>
+          <listitem>
+            <para>Bugzilla needs an e-mail address for each user account.
+            Therefore, it needs to determine the e-mail address corresponding
+            to a RADIUS user.
+            Bugzilla offers only a simple way to do this: it can concatenate
+            a suffix to the RADIUS user name to convert it into an e-mail
+            address.
+            You can specify this suffix in the RADIUS_email_suffix parameter.
+            </para>
+            <para>If this simple solution does not work for you, you'll
+            probably need to modify
+            <filename>Bugzilla/Auth/Verify/RADIUS.pm</filename> to match your
+            requirements.
+            </para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+    </section>
+    
     <section id="bzldap">
       <title>LDAP Authentication</title>
 
@@ -1553,12 +1626,12 @@ c:\perl\bin\perl.exe -xc:\bugzilla -wT "%s" %s
         <varlistentry id="param-user_verify_class">
           <term>user_verify_class</term>
           <listitem>
-            <para>This parameter should be set to <quote>LDAP</quote>
-            <emphasis>only</emphasis> if you will be using an LDAP directory
-            for authentication. If you set this param to <quote>LDAP</quote> but
-            fail to set up the other parameters listed below you will not be
-            able to log back in to Bugzilla one you log out. If this happens
-            to you, you will need to manually edit
+            <para>If you want to list <quote>LDAP</quote> here,
+            make sure to have set up the other parameters listed below.
+            Unless you have other (working) authentication methods listed as
+            well, you may otherwise not be able to log back in to Bugzilla once
+            you log out.
+            If this happens to you, you will need to manually edit
             <filename>data/params</filename> and set user_verify_class to
             <quote>DB</quote>.
             </para>

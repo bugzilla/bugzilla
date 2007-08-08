@@ -41,7 +41,9 @@ sub _throw_error {
 
     # Make sure any locked tables are unlocked
     # and the transaction is rolled back (if supported)
-    Bugzilla->dbh->bz_unlock_tables(UNLOCK_ABORT);
+    # If we are within an eval(), do not unlock tables as we are
+    # eval'uating some test on purpose.
+    Bugzilla->dbh->bz_unlock_tables(UNLOCK_ABORT) unless $^S;
 
     my $datadir = bz_locations()->{'datadir'};
     # If a writable $datadir/errorlog exists, log error details there.

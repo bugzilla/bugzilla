@@ -37,27 +37,34 @@
       /* XXX this should really be updated to use the DOM Core's
        * createElement, but finding a container isn't trivial.
        */
-      document.write('[<a href="#add_comment" onclick="replyToComment(' + 
-                     id + ');">reply<' + '/a>]');
+      [% IF user.settings.quote_replies.value != 'off' %]
+        document.write('[<a href="#add_comment" onclick="replyToComment(' + 
+                       id + ');">reply<' + '/a>]');
+      [% END %]
   }
 
   /* Adds the reply text to the `comment' textarea */
   function replyToComment(id) {
-      /* pre id="comment_name_N" */
-      var text_elem = document.getElementById('comment_text_'+id);
-      var text = getText(text_elem);
-
-      /* make sure we split on all newlines -- IE or Moz use \r and \n
-       * respectively.
-       */
-      text = text.split(/\r|\n/);
-
+      var prefix = "(In reply to comment #" + id + ")\n";
       var replytext = "";
-      for (var i=0; i < text.length; i++) {
-          replytext += "> " + text[i] + "\n"; 
-      }
+      [% IF user.settings.quote_replies.value == 'quoted_reply' %]
+        /* pre id="comment_name_N" */
+        var text_elem = document.getElementById('comment_text_'+id);
+        var text = getText(text_elem);
 
-      replytext = "(In reply to comment #" + id + ")\n" + replytext + "\n";
+        /* make sure we split on all newlines -- IE or Moz use \r and \n
+         * respectively.
+         */
+        text = text.split(/\r|\n/);
+
+        for (var i=0; i < text.length; i++) {
+            replytext += "> " + text[i] + "\n"; 
+        }
+
+        replytext = prefix + replytext + "\n";
+      [% ELSIF user.settings.quote_replies.value == 'simple_reply' %]
+        replytext = prefix;
+      [% END %]
 
     [% IF Param("insidergroup") && user.in_group(Param("insidergroup")) %]
       if (document.getElementById('isprivate-'+id).checked) {

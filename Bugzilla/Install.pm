@@ -60,7 +60,9 @@ sub SETTINGS {
     skin               => { subclass => 'Skin', default => 'standard' },
     # 2006-12-10 LpSolit@gmail.com -- Bug 297186
     lang               => { options => \@languages,
-                            default => $languages[0] }
+                            default => $languages[0] },
+    # 2007-07-02 altlist@gmail.com -- Bug 225731
+    quote_replies      => { options => ['quoted_reply', 'simple_reply', 'off'], default => "quoted_reply" }
     }
 };
 

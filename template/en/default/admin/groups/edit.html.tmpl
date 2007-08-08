@@ -83,6 +83,19 @@
       </td>
     </tr>
 
+    <tr>
+      <th>
+        Icon URL:
+        [% IF group.icon_url %]
+          <img src="[% group.icon_url FILTER html %]" alt="[% group.name FILTER html %]">
+        [% END %]
+      </th>
+      <td>
+        <input type="text" name="icon_url" size="70" maxlength="255"
+               value="[% group.icon_url FILTER html %]">
+      </td>
+    </tr>
+
     [% IF group.is_bug_group %]
       <tr>
         <th>Use For [% terms.Bugs %]:</th>

@@ -227,8 +227,7 @@ sub Send {
         my $diffpart = {};
         if ($who ne $lastwho) {
             $lastwho = $who;
-            $fullwho = $whoname ? "$whoname <$who" . Bugzilla->params->{'emailsuffix'} . ">" :
-                                  "$who" . Bugzilla->params->{'emailsuffix'};
+            $fullwho = $whoname ? "$whoname <$who>" : $who;
             $diffheader = "\n$fullwho changed:\n\n";
             $diffheader .= FormatTriple("What    ", "Removed", "Added");
             $diffheader .= ('-' x 76) . "\n";
@@ -703,14 +702,8 @@ sub prepare_comments {
     my $result = "";
     foreach my $comment (@$raw_comments) {
         if ($count) {
-            my $author = $comment->{'author'};
-            $result .= "\n\n--- Comment #$count from ";
-            if ($author->name) {
-                $result .= $author->name . " <" . $author->email . ">";
-            } else {
-                $result .= $author->email;
-            }
-            $result .= "  " . format_time($comment->{'time'}) . " ---\n";
+            $result .= "\n\n--- Comment #$count from " . $comment->{'author'}->identity .
+                       "  " . format_time($comment->{'time'}) . " ---\n";
         }
         # Format language specific comments. We don't update $comment->{'body'}
         # directly, otherwise it would grow everytime you call format_comment()

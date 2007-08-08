@@ -209,7 +209,7 @@
 
   [% ELSIF message_tag == "group_updated" %]
     [% IF changes.keys.size %]
-      The following changes have been made to the '[% group.name FILTER html %]
+      The following changes have been made to the '[% group.name FILTER html %]'
       group:
       <ul>
       [% FOREACH field = changes.keys.sort %]
@@ -226,6 +226,8 @@
             [% ELSE %]
               <li>The group will no longer be used for [% terms.bugs %].</li>
             [% END %]
+          [% CASE 'icon_url' %]
+            <li>The group icon URL has been updated.</li>
           [% CASE 'members_add' %]
             <li>The following groups are now members of this group:
               [%+ changes.members_add.join(', ') FILTER html %]</li>

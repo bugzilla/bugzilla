@@ -42,6 +42,10 @@
     <td><input size="40" name="desc"></td>
     <td><input size="30" name="regexp"></td>
     <td><input type="checkbox" name="isactive" value="1" checked></td>
+  </tr>
+  <tr>
+    <th>Icon URL:</th>
+    <td colspan="3"><input type="text" size="70" maxlength="255" id="icon_url" name="icon_url"></td>
   </tr></table><hr>
 
   <input type="checkbox" name="insertnew" value="1"
@@ -74,6 +78,13 @@ case you should leave this checked.</b></p>
 <p><b>User RegExp</b> is optional, and if filled in, will 
 automatically grant membership to this group to anyone with an 
 email address that matches this regular expression.</p>
+
+<p>
+  <b>Icon URL</b> is optional, and is the URL pointing to the icon
+  used to identify the group. It may be either a relative URL to the base URL
+  of this installation or an absolute URL. This icon will be displayed
+  in comments in [% terms.bugs %] besides the name of the author of comments.
+</p>
 
 <p>By default, the new group will be associated with existing 
 products. Unchecking the "Insert new group into all existing 

@@ -172,10 +172,17 @@
           <a name="c[% count %]" href="show_bug.cgi?id=[% bug.bug_id %]#c[% count %]">
             #[% count %]</a> From 
           <span class="vcard">
-            <a class="fn email" href="mailto:[% comment.email FILTER html %]">
-              [% (comment.name || comment.email) FILTER html %]
+            <a class="fn email" href="mailto:[% comment.author.email FILTER html %]">
+              [% (comment.author.name || comment.author.login) FILTER html %]
             </a>
           </span>
+          [% FOREACH group = comment.author.direct_group_membership %]
+            [% NEXT UNLESS group.icon_url %]
+            <img src="[% group.icon_url FILTER html %]"
+                 alt="[% group.name FILTER html %]"
+                 title="[% group.name FILTER html %] - [% group.description FILTER html %]">
+          [% END %]
+
           [%+ comment.time FILTER time %] 
           </i>
           [% IF mode == "edit" %]

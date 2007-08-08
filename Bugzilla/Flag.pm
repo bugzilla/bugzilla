@@ -763,6 +763,14 @@ sub modify {
             notify($flag, $bug, $attachment);
         }
         elsif ($status eq '?') {
+            # If the one doing the change is the requestee, then this means he doesn't
+            # want to reply to the request and he simply reassigns the request to
+            # someone else. In this case, we keep the requester unaltered.
+            my $new_setter = $setter;
+            if ($flag->requestee && $flag->requestee->id == $setter->id) {
+                $new_setter = $flag->setter;
+            }
+
             # Get the requestee, if any.
             my $requestee_id;
             if ($requestee_email) {
@@ -782,11 +790,11 @@ sub modify {
                          SET setter_id = ?, requestee_id = ?,
                              status = ?, modification_date = ?
                        WHERE id = ?',
-                       undef, ($setter->id, $requestee_id, $status,
+                       undef, ($new_setter->id, $requestee_id, $status,
                                $timestamp, $flag->id));
 
             # Now update the flag object with its new values.
-            $flag->{'setter'} = $setter;
+            $flag->{'setter'} = $new_setter;
             $flag->{'status'} = $status;
 
             # Send an email notifying the relevant parties about the request.

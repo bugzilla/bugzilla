@@ -29,9 +29,15 @@
                 '?' => "asked" } %]
 
 [% to_identity = "" %]
+[% on_behalf_of = 0 %]
 [% IF flag.status == '?' %]
-  [% to_identity = flag.requestee.identity _ " for" %]
   [% subject_status = "requested" %]
+  [% IF flag.setter.id == user.id %]
+    [% to_identity = flag.requestee.identity _ " for" %]
+  [% ELSE %]
+    [% on_behalf_of = 1 %]
+    [% IF flag.requestee %][% to_identity = " to " _ flag.requestee.identity %][% END %]
+  [% END %]
 [% ELSE %]
   [% IF flag.requester %]
     [% to_identity = flag.requester.identity _ "'s request for" %]
@@ -48,7 +54,12 @@ X-Bugzilla-Type: request
 [%+ USE wrap -%]
 [%- FILTER bullet = wrap(80) -%]
 
+[% IF on_behalf_of %]
+[% user.identity %] has reassigned [% flag.setter.identity %]'s request for [% flag.type.name %]
+[% to_identity %]:
+[% ELSE %]
 [% user.identity %] has [% statuses.${flag.status} %] [%+ to_identity %] [%+ flag.type.name %]:
+[% END %]
 
 [% terms.Bug %] [%+ bugidsummary %]
 [% END %]

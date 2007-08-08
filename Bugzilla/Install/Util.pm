@@ -37,7 +37,6 @@ our @EXPORT_OK = qw(
     get_version_and_os
     indicate_progress
     install_string
-    is_web
     template_include_path
     vers_cmp
 );
@@ -79,8 +78,6 @@ sub install_string {
     # Find the first template that defines this string.
     foreach my $dir (@$path) {
         my $base = "$dir/setup/strings";
-        $string_template = _get_string_from_file($string_id, "$base.html.pl")
-            if is_web();
         $string_template = _get_string_from_file($string_id, "$base.txt.pl")
             if !defined $string_template;
         last if defined $string_template;
@@ -237,23 +234,6 @@ sub vers_cmp {
 # Helper Subroutines #
 ######################
 
-# Tells us if we're running in a web interface (Usually, this means
-# we're running in setup.cgi as opposed to checksetup.pl, but sometimes
-# this function *might* get called from within normal Bugzilla code.)
-sub is_web {
-    # When this is called, we may or may not have all of our required
-    # perl modules installed.
-    #
-    # The way this is written works for all of these circumstances:
-    #   * We're in checksetup.pl, before and after requirements-checking
-    #   * We're in setup.cgi, before and after requirements-checking
-    #   * We're in email_in.pl, the WebService interface, or something else
-    #     (That's primarily what the "return 0" check below is for.)
-    my $usage_mode = eval { Bugzilla->usage_mode };
-    return 0 if (defined $usage_mode && $usage_mode != USAGE_MODE_BROWSER);
-    return i_am_cgi();
-}
-
 # Used by install_string
 sub _get_string_from_file {
     my ($string_id, $file) = @_;
@@ -334,12 +314,6 @@ sub trick_taint {
 
 sub is_tainted {
     return not eval { my $foo = join('',@_), kill 0; 1; };
-}
-
-sub i_am_cgi {
-    # I use SERVER_SOFTWARE because it's required to be
-    # defined for all requests in the CGI spec.
-    return exists $ENV{'SERVER_SOFTWARE'} ? 1 : 0;
 }
 
 __END__

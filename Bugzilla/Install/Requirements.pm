@@ -25,7 +25,7 @@ package Bugzilla::Install::Requirements;
 
 use strict;
 
-use Bugzilla::Install::Util qw(vers_cmp install_string is_web);
+use Bugzilla::Install::Util qw(vers_cmp install_string);
 use List::Util qw(max);
 use Safe;
 
@@ -513,22 +513,9 @@ sub have_vers {
         my $black_string = $blacklisted ? install_string('blacklisted') : '';
         my $want_string  = $wanted ? "v$wanted" : install_string('any');
 
-        # It's impossible to do the printf formatting in the install_string
-        # system, so we do it manually below.
-        if (is_web()) {
-            print install_string('module_details',
-                { package => $package,
-                  wanted  => $want_string,
-                  found   => $vstr,
-                  ok      => $ok,
-                  blacklisted => $black_string,
-                  row_class => $vok ? 'mod_ok' : 'mod_not_ok' });
-        }
-        else {
-            $ok = "$ok:" if $ok;
-            printf "%s %19s %-9s $ok $vstr $black_string\n",
-                install_string('checking_for'), $package, "($want_string)";
-        }
+        $ok = "$ok:" if $ok;
+        printf "%s %19s %-9s $ok $vstr $black_string\n",
+            install_string('checking_for'), $package, "($want_string)";
     }
     
     return $vok ? 1 : 0;

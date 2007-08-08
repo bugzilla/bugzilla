@@ -44,16 +44,11 @@
   [% tbl_field FILTER url_quote %]=[% tbl FILTER url_quote %][% END %]
 [% END %]
 
+[% IF tbl_field %]
+  <h2>[% tbl_disp FILTER html %]</h2>
+[% END %]
+
 <table>
-  [% IF tbl_field %]
-    <tr>
-      <td>
-      </td>
-      <td align="center">        
-        <h2>[% tbl_disp FILTER html %]</h2>
-      </td>
-    </tr>
-  [% END %]  
   <tr>
     <td>
     </td>

@@ -2251,8 +2251,7 @@ sub GetComments {
     my @comments;
     my @args = ($id);
 
-    my $query = 'SELECT longdescs.comment_id AS id, profiles.realname AS name,
-                        profiles.login_name AS email, ' .
+    my $query = 'SELECT longdescs.comment_id AS id, profiles.userid, ' .
                         $dbh->sql_date_format('longdescs.bug_when', '%Y.%m.%d %H:%i:%s') .
                       ' AS time, longdescs.thetext AS body, longdescs.work_time,
                         isprivate, already_wrapped, type, extra_data
@@ -2271,8 +2270,7 @@ sub GetComments {
 
     while (my $comment_ref = $sth->fetchrow_hashref()) {
         my %comment = %$comment_ref;
-
-        $comment{'email'} .= Bugzilla->params->{'emailsuffix'};
+        $comment{'author'} = new Bugzilla::User($comment{'userid'});
 
         # If raw data is requested, do not format 'special' comments.
         $comment{'body'} = format_comment(\%comment) unless $raw;

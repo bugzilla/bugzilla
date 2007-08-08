@@ -43,6 +43,7 @@ use constant DB_COLUMNS => qw(
     groups.isbuggroup
     groups.userregexp
     groups.isactive
+    groups.icon_url
 );
 
 use constant DB_TABLE => 'groups';
@@ -55,6 +56,7 @@ use constant VALIDATORS => {
     userregexp  => \&_check_user_regexp,
     isactive    => \&_check_is_active,
     isbuggroup  => \&_check_is_bug_group,
+    icon_url    => \&_check_icon_url,
 };
 
 use constant REQUIRED_CREATE_FIELDS => qw(name description isbuggroup);
@@ -64,6 +66,7 @@ use constant UPDATE_COLUMNS => qw(
     description
     userregexp
     isactive
+    icon_url
 );
 
 # Parameters that are lists of groups.
@@ -78,6 +81,7 @@ sub description  { return $_[0]->{'description'};  }
 sub is_bug_group { return $_[0]->{'isbuggroup'};   }
 sub user_regexp  { return $_[0]->{'userregexp'};   }
 sub is_active    { return $_[0]->{'isactive'};     }
+sub icon_url     { return $_[0]->{'icon_url'};     }
 
 sub members_direct {
     my ($self) = @_;
@@ -134,6 +138,7 @@ sub set_description { $_[0]->set('description', $_[1]); }
 sub set_is_active   { $_[0]->set('isactive', $_[1]);    }
 sub set_name        { $_[0]->set('name', $_[1]);        }
 sub set_user_regexp { $_[0]->set('userregexp', $_[1]);  }
+sub set_icon_url    { $_[0]->set('icon_url', $_[1]);    }
 
 sub update {
     my $self = shift;
@@ -324,6 +329,8 @@ sub _check_is_bug_group {
     return $_[1] ? 1 : 0;
 }
 
+sub _check_icon_url { return $_[1] ? clean_text($_[1]) : undef; }
+
 1;
 
 __END__
@@ -344,6 +351,7 @@ Bugzilla::Group - Bugzilla group class.
     my $description  = $group->description;
     my $user_reg_exp = $group->user_reg_exp;
     my $is_active    = $group->is_active;
+    my $icon_url     = $group->icon_url;
     my $is_active_bug_group = $group->is_active_bug_group;
 
     my $group_id = Bugzilla::Group::ValidateGroupName('admin', @users);

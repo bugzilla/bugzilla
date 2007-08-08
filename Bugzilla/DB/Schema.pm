@@ -873,6 +873,7 @@ use constant ABSTRACT_SCHEMA => {
                              DEFAULT => "''"},
             isactive     => {TYPE => 'BOOLEAN', NOTNULL => 1,
                              DEFAULT => 'TRUE'},
+            icon_url     => {TYPE => 'TINYTEXT'},
         ],
         INDEXES => [
             groups_name_idx => {FIELDS => ['name'], TYPE => 'UNIQUE'},

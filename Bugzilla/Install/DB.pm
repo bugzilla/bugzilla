@@ -510,6 +510,9 @@ sub update_table_definitions {
     # 2007-05-17 LpSolit@gmail.com - Bug 344965
     _initialize_workflow($old_params);
 
+    # 2007-07-11 LpSolit@gmail.com - Bug 332149
+    $dbh->bz_add_column('groups', 'icon_url', {TYPE => 'TINYTEXT'});
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################

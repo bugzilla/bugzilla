@@ -800,6 +800,24 @@ sub can_set_flag {
             || $self->in_group_id($flag_type->grant_group->id)) ? 1 : 0;
 }
 
+sub direct_group_membership {
+    my $self = shift;
+    my $dbh = Bugzilla->dbh;
+
+    if (!$self->{'direct_group_membership'}) {
+        my $gid = $dbh->selectcol_arrayref('SELECT id
+                                              FROM groups
+                                        INNER JOIN user_group_map
+                                                ON groups.id = user_group_map.group_id
+                                             WHERE user_id = ?
+                                               AND isbless = 0',
+                                             undef, $self->id);
+        $self->{'direct_group_membership'} = Bugzilla::Group->new_from_list($gid);
+    }
+    return $self->{'direct_group_membership'};
+}
+
+
 # visible_groups_inherited returns a reference to a list of all the groups
 # whose members are visible to this user.
 sub visible_groups_inherited {
@@ -2025,6 +2043,11 @@ inherit membership in any group on the list.  So, we can determine if a user
 is in any of the groups input to flatten_group_membership by querying the
 user_group_map for any user with DIRECT or REGEXP membership IN() the list
 of groups returned.
+
+=item C<direct_group_membership>
+
+Returns a reference to an array of group objects. Groups the user belong to
+by group inheritance are excluded from the list.
 
 =item C<visible_groups_inherited>
 

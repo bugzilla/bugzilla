@@ -703,11 +703,12 @@ sub prepare_comments {
     my $result = "";
     foreach my $comment (@$raw_comments) {
         if ($count) {
+            my $author = $comment->{'author'};
             $result .= "\n\n--- Comment #$count from ";
-            if ($comment->{'name'}) {
-                $result .= $comment->{'name'} . " <" . $comment->{'email'} . ">";
+            if ($author->name) {
+                $result .= $author->name . " <" . $author->email . ">";
             } else {
-                $result .= $comment->{'email'};
+                $result .= $author->email;
             }
             $result .= "  " . format_time($comment->{'time'}) . " ---\n";
         }

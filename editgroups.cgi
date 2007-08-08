@@ -244,12 +244,18 @@ if ($action eq 'new') {
     my $desc = CheckGroupDesc($cgi->param('desc'));
     my $regexp = CheckGroupRegexp($cgi->param('regexp'));
     my $isactive = $cgi->param('isactive') ? 1 : 0;
+    # This is an admin page. The URL is considered safe.
+    my $icon_url;
+    if ($cgi->param('icon_url')) {
+        $icon_url = clean_text($cgi->param('icon_url'));
+        trick_taint($icon_url);
+    }
 
     # Add the new group
     $dbh->do('INSERT INTO groups
-              (name, description, isbuggroup, userregexp, isactive)
-              VALUES (?, ?, 1, ?, ?)',
-              undef, ($name, $desc, $regexp, $isactive));
+              (name, description, isbuggroup, userregexp, isactive, icon_url)
+              VALUES (?, ?, 1, ?, ?, ?)',
+              undef, ($name, $desc, $regexp, $isactive, $icon_url));
 
     my $gid = $dbh->bz_last_key('groups', 'id');
     my $admin = Bugzilla::Group->new({name => 'admin'})->id();
@@ -563,6 +569,10 @@ sub doGroupChanges {
         if (defined $cgi->param('regexp')) {
             $group->set_is_active($cgi->param('isactive'));
         }
+    }
+
+    if (defined $cgi->param('icon_url')) {
+        $group->set_icon_url($cgi->param('icon_url'));
     }
 
     my $changes = $group->update();

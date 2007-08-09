@@ -264,8 +264,6 @@ sub write_params {
     my $datadir    = bz_locations()->{'datadir'};
     my $param_file = "$datadir/params";
 
-    # This only has an affect for Data::Dumper >= 2.12 (ie perl >= 5.8.0)
-    # Its just cosmetic, though, so that doesn't matter
     local $Data::Dumper::Sortkeys = 1;
 
     my ($fh, $tmpname) = File::Temp::tempfile('params.XXXXX',

@@ -45,8 +45,7 @@
 <!ENTITY bzg-bugs "<ulink url='https://bugzilla.mozilla.org/enter_bug.cgi?product=Bugzilla&amp;component=Documentation'>Bugzilla Documentation</ulink>">
 <!ENTITY mysql "http://www.mysql.com/">
 
-<!ENTITY min-perl-ver "5.8.0">
-<!ENTITY min-perl-ver-win "5.8.1">
+<!ENTITY min-perl-ver "5.8.1">
 ]>
 
 

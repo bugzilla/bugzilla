@@ -833,7 +833,16 @@ foreach my $group (@$groups) {
     # for single bug changes because non-checked checkboxes aren't present.
     # All the checkboxes should be shown in that case, though, so it isn't
     # an issue there
-    if (defined $cgi->param('id') || defined $cgi->param("bit-$b")) {
+    #
+    # For bug updates that come from email_in.pl there will not be any
+    # bit-X fields defined unless the user is explicitly changing the
+    # state of the specified group (by including lines such as @bit-XX = 1
+    # or @bit-XX = 0 in the body of the email).  Therefore if we are in
+    # USAGE_MODE_EMAIL we will only change the group setting if bit-XX
+    # is defined.
+     if ((defined $cgi->param('id') && Bugzilla->usage_mode != USAGE_MODE_EMAIL)
+         || defined $cgi->param("bit-$b"))
+     {
         if (!$cgi->param("bit-$b")) {
             push(@groupDel, $b);
         } elsif ($cgi->param("bit-$b") == 1 && $isactive) {

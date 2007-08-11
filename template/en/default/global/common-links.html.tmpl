@@ -20,7 +20,7 @@
   #                 Svetlana Harisova <light@rathedg.com>
   #%]
 
-[% DEFAULT btn_id = "find" %]
+[% DEFAULT qs_suffix = "" %]
 
 <ul class="links">
   <li><a href="./">Home</a></li>
@@ -33,8 +33,8 @@
         onsubmit="if (this.quicksearch.value == '')
                   { alert('Please enter one or more search terms first.');
                     return false; } return true;">
-    <input class="txt" type="text" name="quicksearch">
-    <input class="btn" type="submit" value="Find" id="[% btn_id FILTER html %]">
+    <input class="txt" type="text" id="quicksearch[% qs_suffix FILTER html %]" name="quicksearch">
+    <input class="btn" type="submit" value="Find" id="find[% qs_suffix FILTER html %]">
     [%-# Work around FF bug: keep this on one line %]</form></li>
 
   <li><span class="separator">| </span><a href="report.cgi">Reports</a></li>

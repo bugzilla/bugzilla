@@ -1530,7 +1530,8 @@
 
   [% ELSIF error == "zero_length_file" %]
     [% title = "File Is Empty" %]
-    The file you are trying to attach is empty!
+    The file you are trying to attach is empty, does not exist, or you don't
+    have permission to read it.
 
   [% ELSIF error == "illegal_user_id" %]
     [% title = "Illegal User ID" %]

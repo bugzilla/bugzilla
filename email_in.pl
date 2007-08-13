@@ -340,6 +340,10 @@ sub die_handler {
     # the user-error or code-error template ended. So we don't really die.
     return if $msg->isa('Template::Exception') && $msg->type eq 'return';
 
+    # If this is inside an eval, then we should just act like...we're
+    # in an eval (instead of printing the error and exiting).
+    die(@_) if $^S;
+
     # We can't depend on the MTA to send an error message, so we have
     # to generate one properly.
     if ($input_email) {

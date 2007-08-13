@@ -244,7 +244,10 @@ div#docslinks {
     margin-bottom: 2em;
 }
 
-.bz_comment_head {
+.bz_first_comment {
+}
+
+.bz_comment_head, .bz_first_comment_head {
     background-color: #e0e0e0;
 }
 .bz_comment_hilite pre {

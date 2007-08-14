@@ -20,7 +20,7 @@
 
 [% PROCESS global/variables.none.tmpl %]
 [% INCLUDE global/header.html.tmpl 
-  title = "$terms.Bugzilla 3.0 Release Notes" 
+  title = "$terms.Bugzilla 3.0.1 Release Notes" 
   style_urls = ['skins/standard/release-notes.css'] 
 %]
 
@@ -28,9 +28,11 @@
 
 <ul class="bz_toc">
   <li><a href="#v30_introduction">Introduction</a></li>
+  <li><a href="#v30_point">Updates In This 3.0.x Release</a></li>
   <li><a href="#v30_req">Minimum Requirements</a></li>
   <li><a href="#v30_feat">New Features and Improvements</a></li>
-  <li><a href="#v30_issues">Outstanding Issues</a></li> 
+  <li><a href="#v30_issues">Outstanding Issues</a></li>
+  <li><a href="#v30_security">Security Fixes In This Release</a></li>
   <li><a href="#v30_upgrading">How to Upgrade From An Older Version</a></li>
   <li><a href="#v30_code_changes">Code Changes Which May Affect 
     Customizations</a></li>
@@ -50,6 +52,86 @@
   before 2.22, make sure to read the release notes for all the 
   <a href="#v30_previous">previous versions</a> in between your version 
   and [% terms.Bugzilla %] 3.0.</p>
+
+<h2><a name="v30_point">Updates in this 3.0.x Release</a></h2>
+
+<p>This section describes what's changed in the most recent b<!-- -->ug-fix
+  releases of [% terms.Bugzilla %] after 3.0. We only list the
+  most important fixes in each release. If you want a detailed list of
+  <em>everything</em> that's changed since 3.0, you should use our
+  <a href="http://www.bugzilla.org/status/changes.html">Change Log Page</a>.</p>
+
+<h3>3.0.1</h3>
+
+<ul>
+  <li>For users of Firefox 2, the <code>show_bug.cgi</code> user interface
+    should no longer "collapse" after you modify a [% terms.bug %].
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=370739">[% terms.Bug %] 370739</a>)</li>
+  <li>If you can bless a group, and you share a saved search with that
+    group, it will no longer automatically appear in all of that group's
+    footers unless you specifically request that it automatically appear
+    in their footers.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=365890">[% terms.Bug %] 365890</a>)</li>
+  <li>There is now a parameter to allow users to perform searches without
+    any search terms. (In other words, to search for just a Product
+    and Status on the Simple Search page.) The parameter is called
+    <code>specific_search_allow_empty_words</code>.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=385910">[% terms.Bug %] 385910</a>)</li>
+  <li>If you attach a file that has a MIME-type of <code>text/x-patch</code>
+    or <code>text/x-diff</code>, it will automaticaly be treated as a 
+    patch by [% terms.Bugzilla %].
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=365756">[% terms.Bug %] 365756</a>)</li>
+  <li>Dependency Graphs now work correctly on all mod_perl installations.
+    There should now be no remaining signficant problems with running
+    [% terms.Bugzilla %] under mod_perl.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=370398">[% terms.Bug %] 370398</a>)</li>
+  <li>If moving a [% terms.bug %] between products would remove groups
+    from the [% terms.bug %], you are now warned.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=303183">[% terms.Bug %] 303183</a>)</li>
+  <li>On IIS, whenever [% terms.Bugzilla %] threw a warning, it would
+    actually appear on the web page. Now warnings are suppressed,
+    unless you have a file in the <code>data</code> directory called
+    <code>errorlog</code>, in which case warnings will be printed there.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=390148">[% terms.Bug %] 390148</a>)</li>
+  <li>If you used <kbd>email_in.pl</kbd> to move a bug with groups to another
+    product, all of the groups would be cleared.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=385453">[% terms.Bug %] 385453</a>)</li>
+  <li>Some flag mails didn't specify who the requestee was. 
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=379787">[% terms.Bug %] 379787</a>)</li>
+  <li>Instead of throwing real errors, <kbd>collectstats.pl</kbd> would
+    just say that it couldn't find <code>ThrowUserError</code>.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=380709">[% terms.Bug %] 380709</a>)</li>
+  <li>Logging into [% terms.Bugzilla %] from the home page works again
+    with IIS5. 
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=364008">[% terms.Bug %] 364008</a>)</li>
+  <li>If you were using SMTP for sending email, sometimes emails would
+    be missing the <code>Date</code> header.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=304999">[% terms.Bug %] 304999</a>).</li>
+  <li>In the XML-RPC WebService, <code>B<!-- -->ug.legal_values</code> now
+    correctly returns values for custom fields if you request values 
+    for custom fields.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=381737">[% terms.Bug %] 381737</a>)</li>
+  <li>The "[% terms.Bug %]-Writing Guidelines" page has been shortened
+    and re-written.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=378590">[% terms.Bug %] 378590</a>)</li>
+  <li>If your <code>urlbase</code> parameter included a port number,
+    like <code>www.domain.com:8080</code>, SMTP might have failed.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=384501">[% terms.Bug %] 384501</a>)</li>
+  <li>For SMTP users, there is a new parameter, <code>smtp_debug</code>.
+    Turning on this parameter will log the full information about
+    every SMTP session to your web server's error log, to help with
+    debugging issues with SMTP.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=384497">[% terms.Bug %] 384497</a>)</li>
+  <li>If you are a "global watcher" (you get all mails from every 
+    [% terms.bug %]), you can now see that in your Email Preferences.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=365302">[% terms.Bug %] 365302</a>)</li>
+  <li>The Status and Resolution of [% terms.bugs %] are now correctly
+    localized in CSV search results.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=389517">[% terms.Bug %] 389517</a>)</li>
+  <li>The "Subject" line of an email was being mangled if it contained
+    non-Latin characters.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=387860">[% terms.Bug %] 387860</a>)</li>
+</ul>
 
 <h2><a name="v30_req"></a>Minimum Requirements</h2>
 
@@ -438,10 +520,6 @@
 <h2><a name="v30_issues"></a>Outstanding Issues</h2>
 
 <ul>
-  <li><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=370739">
-    [%- terms.Bug %] 370739</a>: There is a problem in Firefox 2.0 that
-    sometimes causes the [% terms.bug %] editing page to render incorrectly
-    after editing a [% terms.bug %].</li>
   <li><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=69621">
     [%- terms.Bug %] 69621</a>: If you rename or remove a keyword that is
     in use on [% terms.bugs %], you will need to rebuild the "keyword cache"
@@ -464,9 +542,8 @@
     groupings will not be updated if the group configuration
     for the Product changes.</li>
   <li><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=370370">
-    [%- terms.Bug %] 370370</a>: mod_perl support may currently not
-    be working on Windows machines. Also, even when it does work,
-    editparams.cgi seems to crash on certain versions of mod_perl.</li>
+    [%- terms.Bug %] 370370</a>: mod_perl support is currently not
+    working on Windows machines.</li>
   <li><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=361149">
     [%- terms.Bug %] 361149</a>: If you are using Perl 5.8.0, you may
     get a lot of warnings in your Apache error_log about "deprecated
@@ -479,6 +556,16 @@
     mixed-case in any Saved Search, you will have to re-create that Saved
     Search yourself.</li>
 </ul>
+
+<h2><a name="v30_security"></a>Security Updates in This Release</h2>
+
+<h3>3.0.1</h3>
+
+<p>[% terms.Bugzilla %] 3.0 had three security issues that have been
+  fixed in this release: one minor information leak, one hole only
+  exploitable by an admin or using <code>email_in.pl</code>, and one in an
+  uncommonly-used template. For details, see the 
+  <a href="http://www.bugzilla.org/security/2.20.4/">Security Advisory</a>.</p>
 
 <h2><a name="v30_upgrading"></a>How to Upgrade From An Older Version</h2>
 

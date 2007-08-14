@@ -286,7 +286,19 @@
 
       [% IF !attachment.datasize %]
         <td width="75%"><b>The content of this attachment has been deleted.</b></td>
-      [% ELSIF isviewable %]
+      [% ELSIF attachment.isurl %]
+        <td width="75%">
+          <a href="[% attachment.data FILTER html %]">
+            [% IF attachment.datasize < 120 %]
+              [% attachment.data FILTER html %]
+            [% ELSE %]
+              [% attachment.data FILTER truncate(80) FILTER html %]
+              &nbsp;...
+              [% attachment.data.match(".*(.{20})$").0 FILTER html %]
+            [% END %]
+          </a>
+        </td>
+      [% ELSIF attachment.is_viewable %]
         <td width="75%">
           [% INCLUDE global/textarea.html.tmpl
             id      = 'editFrame'
@@ -316,18 +328,6 @@
             }
             //-->
           </script>
-        </td>
-      [% ELSIF attachment.isurl %]
-        <td width="75%">
-          <a href="[% attachment.data FILTER html %]">
-            [% IF attachment.datasize < 120 %]
-              [% attachment.data FILTER html %]
-            [% ELSE %]
-              [% attachment.data FILTER truncate(80) FILTER html %]
-              &nbsp;...
-              [% attachment.data.match(".*(.{20})$").0 FILTER html %]
-            [% END %]
-          </a>
         </td>
       [% ELSE %]
         <td id="noview" width="50%">

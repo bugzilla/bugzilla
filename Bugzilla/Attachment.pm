@@ -283,6 +283,40 @@ sub isprivate {
 
 =over
 
+=item C<is_viewable>
+
+Returns 1 if the attachment has a content-type viewable in this browser.
+Note that we don't use $cgi->Accept()'s ability to check if a content-type
+matches, because this will return a value even if it's matched by the generic
+*/* which most browsers add to the end of their Accept: headers.
+
+=back
+
+=cut
+
+sub is_viewable {
+    my $self = shift;
+    my $contenttype = $self->contenttype;
+    my $cgi = Bugzilla->cgi;
+
+    # We assume we can view all text and image types.
+    return 1 if ($contenttype =~ /^(text|image)\//);
+
+    # Mozilla can view XUL. Note the trailing slash on the Gecko detection to
+    # avoid sending XUL to Safari.
+    return 1 if (($contenttype =~ /^application\/vnd\.mozilla\./)
+                 && ($cgi->user_agent() =~ /Gecko\//));
+
+    # If it's not one of the above types, we check the Accept: header for any
+    # types mentioned explicitly.
+    my $accept = join(",", $cgi->Accept());
+    return 1 if ($accept =~ /^(.*,)?\Q$contenttype\E(,.*)?$/);
+
+    return 0;
+}
+
+=over
+
 =item C<data>
 
 the content of the attachment
@@ -625,19 +659,12 @@ Returns:     1 on success. Else an error is thrown.
 
 sub validate_can_edit {
     my ($attachment, $product_id) = @_;
-    my $dbh = Bugzilla->dbh;
     my $user = Bugzilla->user;
 
-    # Bug 97729 - the submitter can edit their attachments.
-    return if ($attachment->attacher->id == $user->id);
-
-    # Only users in the insider group can view private attachments.
-    if ($attachment->isprivate && !$user->is_insider) {
-        ThrowUserError('illegal_attachment_edit', {attach_id => $attachment->id});
-    }
-
-    # Users with editbugs privs can edit all attachments.
-    return if $user->in_group('editbugs', $product_id);
+    # The submitter can edit their attachments.
+    return 1 if ($attachment->attacher->id == $user->id
+                 || ((!$attachment->isprivate || $user->is_insider)
+                      && $user->in_group('editbugs', $product_id)));
 
     # If we come here, then this attachment cannot be seen by the user.
     ThrowUserError('illegal_attachment_edit', { attach_id => $attachment->id });

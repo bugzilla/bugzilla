@@ -208,54 +208,6 @@ sub validateCanChangeBug
                         { bug_id => $bugid });
 }
 
-sub validateIsObsolete
-{
-    # Set the isobsolete flag to zero if it is undefined, since the UI uses
-    # an HTML checkbox to represent this flag, and unchecked HTML checkboxes
-    # do not get sent in HTML requests.
-    $cgi->param('isobsolete', $cgi->param('isobsolete') ? 1 : 0);
-}
-
-sub validatePrivate
-{
-    # Set the isprivate flag to zero if it is undefined, since the UI uses
-    # an HTML checkbox to represent this flag, and unchecked HTML checkboxes
-    # do not get sent in HTML requests.
-    $cgi->param('isprivate', $cgi->param('isprivate') ? 1 : 0);
-}
-
-# Returns 1 if the parameter is a content-type viewable in this browser
-# Note that we don't use $cgi->Accept()'s ability to check if a content-type
-# matches, because this will return a value even if it's matched by the generic
-# */* which most browsers add to the end of their Accept: headers.
-sub isViewable
-{
-  my $contenttype = trim(shift);
-    
-  # We assume we can view all text and image types  
-  if ($contenttype =~ /^(text|image)\//) {
-    return 1;
-  }
-  
-  # Mozilla can view XUL. Note the trailing slash on the Gecko detection to
-  # avoid sending XUL to Safari.
-  if (($contenttype =~ /^application\/vnd\.mozilla\./) &&
-      ($cgi->user_agent() =~ /Gecko\//))
-  {
-    return 1;
-  }
-
-  # If it's not one of the above types, we check the Accept: header for any 
-  # types mentioned explicitly.
-  my $accept = join(",", $cgi->Accept());
-  
-  if ($accept =~ /^(.*,)?\Q$contenttype\E(,.*)?$/) {
-    return 1;
-  }
-  
-  return 0;
-}
-
 ################################################################################
 # Functions
 ################################################################################
@@ -326,10 +278,6 @@ sub viewall {
     my $bug = new Bugzilla::Bug($bugid);
 
     my $attachments = Bugzilla::Attachment->get_attachments_by_bug($bugid);
-
-    foreach my $a (@$attachments) {
-        $a->{'isviewable'} = isViewable($a->contenttype);
-    }
 
     # Define the variables and functions that will be passed to the UI template.
     $vars->{'bug'} = $bug;
@@ -465,8 +413,6 @@ sub edit {
   my $attachment = validateID();
   my $dbh = Bugzilla->dbh;
 
-  my $isviewable = !$attachment->isurl && isViewable($attachment->contenttype);
-
   # Retrieve a list of attachments for this bug as well as a summary of the bug
   # to use in a navigation bar across the top of the screen.
   my $bugattachments =
@@ -491,8 +437,7 @@ sub edit {
   $vars->{'any_flags_requesteeble'} = grep($_->is_requesteeble, @$flag_types);
   $vars->{'attachment'} = $attachment;
   $vars->{'bugsummary'} = $bugsummary; 
-  $vars->{'isviewable'} = $isviewable; 
-  $vars->{'attachments'} = $bugattachments; 
+  $vars->{'attachments'} = $bugattachments;
 
   # Determine if PatchReader is installed
   eval {
@@ -524,8 +469,8 @@ sub update {
     Bugzilla::Attachment->validate_description(THROW_ERROR);
     Bugzilla::Attachment->validate_is_patch(THROW_ERROR);
     Bugzilla::Attachment->validate_content_type(THROW_ERROR) unless $cgi->param('ispatch');
-    validateIsObsolete();
-    validatePrivate();
+    $cgi->param('isobsolete', $cgi->param('isobsolete') ? 1 : 0);
+    $cgi->param('isprivate', $cgi->param('isprivate') ? 1 : 0);
 
     # If the submitter of the attachment is not in the insidergroup,
     # be sure that he cannot overwrite the private bit.

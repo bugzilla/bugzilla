@@ -57,7 +57,7 @@ sub SETTINGS {
     state_addselfcc    => { options => ['always', 'never',  'cc_unless_role'],
                             default => 'cc_unless_role' },
     # 2006-08-04 wurblzap@gmail.com -- Bug 322693
-    skin               => { subclass => 'Skin', default => 'standard' },
+    skin               => { subclass => 'Skin', default => 'Dusk' },
     # 2006-12-10 LpSolit@gmail.com -- Bug 297186
     lang               => { options => \@languages,
                             default => $languages[0] },

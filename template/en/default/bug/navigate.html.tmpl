@@ -21,6 +21,7 @@
 
 [% PROCESS global/variables.none.tmpl %]
 
+<div class="navigation">
 [% IF bug_list && bug_list.size > 0 %]
   [% this_bug_idx = lsearch(bug_list, bug.bug_id) %]
   <b>[% terms.Bug %] List:</b>
@@ -66,3 +67,4 @@
   &nbsp;&nbsp;
   <i><font color="#777777">No search results available</font></i>
 [% END %]
+</div>

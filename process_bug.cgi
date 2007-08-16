@@ -1204,7 +1204,8 @@ foreach my $id (@idlist) {
         # When editing several bugs at once, only consider groups which
         # have been displayed.
         elsif (($user->in_group_id($gid) || $product_change)
-               && (defined $cgi->param('id') || defined $cgi->param("bit-$gid")))
+               && ((defined $cgi->param('id') && Bugzilla->usage_mode != USAGE_MODE_EMAIL)
+                   || defined $cgi->param("bit-$gid")))
         {
             if (!$cgi->param("bit-$gid")) {
                 delete $updated_groups{$gid};

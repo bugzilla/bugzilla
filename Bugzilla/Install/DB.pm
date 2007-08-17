@@ -22,7 +22,6 @@ package Bugzilla::Install::DB;
 
 use strict;
 
-use Bugzilla::Bug qw(BUG_STATE_OPEN is_open_state);
 use Bugzilla::Constants;
 use Bugzilla::Hook;
 use Bugzilla::Install::Util qw(indicate_progress);
@@ -1967,7 +1966,7 @@ sub _copy_old_charts_into_database {
                         $data{$fields[$i]}{$numbers[0]} = $numbers[$i + 1];
 
                         # Keep a total of the number of open bugs for this day
-                        if (is_open_state($fields[$i])) {
+                        if (grep { $_ eq $fields[$i] } @openedstatuses) {
                             $data{$open_name}{$numbers[0]} += $numbers[$i + 1];
                         }
                     }
@@ -2441,7 +2440,8 @@ sub _fix_broken_all_closed_series {
             join("&", map { "bug_status=" . url_quote($_) }
                           ('UNCONFIRMED', 'NEW', 'ASSIGNED', 'REOPENED'));
         my $open_bugs_query_base_new =
-            join("&", map { "bug_status=" . url_quote($_) } BUG_STATE_OPEN);
+            join("&", map { "bug_status=" . url_quote($_) }
+                          ('NEW', 'REOPENED', 'ASSIGNED', 'UNCONFIRMED'));
         my $sth_openbugs_series =
             $dbh->prepare("SELECT series_id FROM series WHERE query IN (?, ?)");
         # Statement to find the series which has collected the most data.

@@ -19,6 +19,7 @@
 #
 # Contributor(s): Bradley Baetz <bbaetz@acm.org>
 #                 Marc Schumann <wurblzap@gmail.com>
+#                 Frédéric Buclin <LpSolit@gmail.com>
 
 package Bugzilla::Error;
 
@@ -32,6 +33,17 @@ use Bugzilla::WebService::Constants;
 use Bugzilla::Util;
 use Date::Format;
 
+# We cannot use $^S to detect if we are in an eval(), because mod_perl
+# already eval'uates everything, so $^S = 1 in all cases under mod_perl!
+sub _in_eval {
+    my $in_eval = 0;
+    for (my $stack = 1; my $sub = (caller($stack))[3]; $stack++) {
+        last if $sub =~ /^ModPerl/;
+        $in_eval = 1 if $sub =~ /^\(eval\)/;
+    }
+    return $in_eval;
+}
+
 sub _throw_error {
     my ($name, $error, $vars) = @_;
 
@@ -43,7 +55,7 @@ sub _throw_error {
     # and the transaction is rolled back (if supported)
     # If we are within an eval(), do not unlock tables as we are
     # eval'uating some test on purpose.
-    Bugzilla->dbh->bz_unlock_tables(UNLOCK_ABORT) unless $^S;
+    Bugzilla->dbh->bz_unlock_tables(UNLOCK_ABORT) unless _in_eval();
 
     my $datadir = bz_locations()->{'datadir'};
     # If a writable $datadir/errorlog exists, log error details there.

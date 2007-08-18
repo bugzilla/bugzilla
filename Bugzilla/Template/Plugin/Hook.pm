@@ -26,6 +26,7 @@ package Bugzilla::Template::Plugin::Hook;
 use strict;
 
 use Bugzilla::Constants;
+use Bugzilla::Install::Util;
 use Bugzilla::Template;
 use Bugzilla::Util;
 use Bugzilla::Error;
@@ -110,8 +111,11 @@ sub getLanguages() {
     if (not ($languages =~ /,/)) { # only one language
         return $languages;
     }
-    my @languages       = Bugzilla::Template::sortAcceptLanguage($languages);
-    my @accept_language = Bugzilla::Template::sortAcceptLanguage($ENV{'HTTP_ACCEPT_LANGUAGE'} || "" );
+    # XXX This should probably be re-worked so that we don't have to 
+    # reach into the internals of another module to get languages.
+    my @languages = Bugzilla::Install::Util::_sort_accept_language($languages);
+    my @accept_language = Bugzilla::Install::Util::_sort_accept_language(
+        $ENV{'HTTP_ACCEPT_LANGUAGE'} || "" );
     my @usedlanguages;
     foreach my $lang (@accept_language) {
         if(my @found = grep /^\Q$lang\E(-.+)?$/i, @languages) {

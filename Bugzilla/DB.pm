@@ -324,7 +324,7 @@ sub sql_group_by {
     my ($self, $needed_columns, $optional_columns) = @_;
 
     my $expression = "GROUP BY $needed_columns";
-    $expression .= ", " . $optional_columns if defined($optional_columns);
+    $expression .= ", " . $optional_columns if $optional_columns;
     
     return $expression;
 }

@@ -579,22 +579,19 @@ sub CollectSeriesData {
         # We set up the user for Search.pm's permission checking - each series
         # runs with the permissions of its creator.
         my $user = new Bugzilla::User($serieses->{$series_id}->{'creator'});
-
         my $cgi = new Bugzilla::CGI($serieses->{$series_id}->{'query'});
-        my $search = new Bugzilla::Search('params' => $cgi,
-                                          'fields' => ["bugs.bug_id"],
-                                          'user'   => $user);
-        my $sql = $search->getSQL();
-        
         my $data;
-        
-        # We can't die if we get dodgy SQL back for whatever reason, so we
-        # eval() this and, if it fails, just ignore it and carry on.
-        # One day we might even log an error.
-        eval { 
+
+        # Do not die if Search->new() detects invalid data, such as an obsolete
+        # login name or a renamed product or component, etc.
+        eval {
+            my $search = new Bugzilla::Search('params' => $cgi,
+                                              'fields' => ["bugs.bug_id"],
+                                              'user'   => $user);
+            my $sql = $search->getSQL();
             $data = $shadow_dbh->selectall_arrayref($sql);
         };
-        
+
         if (!$@) {
             # We need to count the returned rows. Without subselects, we can't
             # do this directly in the SQL for all queries. So we do it by hand.

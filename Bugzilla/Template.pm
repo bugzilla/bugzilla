@@ -87,7 +87,7 @@ sub getTemplateIncludePath {
     my $cache = Bugzilla->request_cache;
     my $lang  = $cache->{'language'} || "";
     $cache->{"template_include_path_$lang"} ||= template_include_path({
-        use_languages => trim(Bugzilla->params->{'languages'}),
+        use_languages => [split(/[\s,]+/, Bugzilla->params->{'languages'})],
         only_language => $lang });
     return $cache->{"template_include_path_$lang"};
 }

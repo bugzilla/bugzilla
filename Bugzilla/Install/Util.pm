@@ -127,7 +127,7 @@ sub template_include_path {
     
     my @supported;
     if (defined $params->{use_languages}) {
-        @supported = $params->{use_languages};
+        @supported = @{$params->{use_languages}};
     }
     else {
         my @dirs = glob(bz_locations()->{'templatedir'} . "/*");

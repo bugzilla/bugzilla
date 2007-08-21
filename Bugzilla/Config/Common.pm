@@ -285,17 +285,26 @@ sub check_image_converter {
 }
 
 sub check_languages {
-    my @languages = split /[,\s]+/, trim($_[0]);
+    my ($lang, $param) = @_;
+    my @languages = split(/[,\s]+/, trim($lang));
     if(!scalar(@languages)) {
        return "You need to specify a language tag."
     }
+    if (scalar(@languages) > 1 && $param && $param->{'name'} eq 'defaultlanguage') {
+        return "You can only specify one language tag";
+    }
     my $templatedir = bz_locations()->{'templatedir'};
+    my %lang_seen;
+    my @validated_languages;
     foreach my $language (@languages) {
        if(   ! -d "$templatedir/$language/custom" 
           && ! -d "$templatedir/$language/default") {
           return "The template directory for $language does not exist";
        }
+       push(@validated_languages, $language) unless $lang_seen{$language}++;
     }
+    # Rebuild the list of language tags, avoiding duplicates.
+    $_[0] = join(', ', @validated_languages);
     return "";
 }
 

@@ -118,7 +118,7 @@ sub template_include_path {
     # we support every language installed in the template/ directory.
     
     my @wanted;
-    if (defined $params->{only_language}) {
+    if ($params->{only_language}) {
         @wanted = ($params->{only_language});
     }
     else {

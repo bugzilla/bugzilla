@@ -85,11 +85,10 @@ sub _load_constants {
 # Templates may also be found in the extensions/ tree
 sub getTemplateIncludePath {
     my $cache = Bugzilla->request_cache;
-    my $lang  = $cache->{'language'} || undef;
+    my $lang  = $cache->{'language'} || '';
     $cache->{"template_include_path_$lang"} ||= template_include_path({
         use_languages => Bugzilla->languages,
         only_language => $lang });
-    $lang ||= '';
     return $cache->{"template_include_path_$lang"};
 }
 

@@ -87,7 +87,7 @@ sub getTemplateIncludePath {
     my $cache = Bugzilla->request_cache;
     my $lang  = $cache->{'language'} || "";
     $cache->{"template_include_path_$lang"} ||= template_include_path({
-        use_languages => [split(/[\s,]+/, Bugzilla->params->{'languages'})],
+        use_languages => Bugzilla->languages,
         only_language => $lang });
     return $cache->{"template_include_path_$lang"};
 }
@@ -767,9 +767,6 @@ sub precompile_templates {
         -d "$templatedir/$dir/default" || -d "$templatedir/$dir/custom" 
             || next;
         local $ENV{'HTTP_ACCEPT_LANGUAGE'} = $dir;
-        # We locally hack this parameter so that Bugzilla::Template
-        # accepts this language no matter what.
-        local Bugzilla->params->{'languages'} = "$dir,en";
         my $template = Bugzilla::Template->create(clean_cache => 1);
 
         # Precompile all the templates found in all the directories.

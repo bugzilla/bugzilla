@@ -107,7 +107,7 @@ sub process {
 # get a list of languages we accept so we can find the hook 
 # that corresponds to our desired languages:
 sub getLanguages() {
-    my $languages = trim(Bugzilla->params->{'languages'});
+    my $languages = join(',', @{Bugzilla->languages});
     if (not ($languages =~ /,/)) { # only one language
         return $languages;
     }

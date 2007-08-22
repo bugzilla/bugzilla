@@ -36,7 +36,6 @@ use Bugzilla::Util qw(get_text);
 use Bugzilla::Version;
 
 sub SETTINGS {
-    my @languages = split(/[\s,]+/, Bugzilla->params->{'languages'});
     return {
     # 2005-03-03 travis@sedsystems.ca -- Bug 41972
     display_quips      => { options => ["on", "off"], default => "on" },
@@ -59,10 +58,11 @@ sub SETTINGS {
     # 2006-08-04 wurblzap@gmail.com -- Bug 322693
     skin               => { subclass => 'Skin', default => 'Dusk' },
     # 2006-12-10 LpSolit@gmail.com -- Bug 297186
-    lang               => { options => \@languages,
-                            default => $languages[0] },
+    lang               => { subclass => 'Lang',
+                            default => ${Bugzilla->languages}[0] },
     # 2007-07-02 altlist@gmail.com -- Bug 225731
-    quote_replies      => { options => ['quoted_reply', 'simple_reply', 'off'], default => "quoted_reply" }
+    quote_replies      => { options => ['quoted_reply', 'simple_reply', 'off'],
+                            default => "quoted_reply" }
     }
 };
 

@@ -434,14 +434,6 @@
       url="http://www.bugzilla.org/download.html#localizations"/>. Instructions
       for submitting new languages are also available from that location.
       </para>
-
-      <para>After untarring the localizations (or creating your own) in the 
-      <filename class="directory">BUGZILLA_ROOT/template</filename> directory,
-      you must update the <option>languages</option> parameter to contain any
-      localizations you'd like to permit. You may also wish to re-order
-      the <option>languages</option> parameter so that <quote>en</quote> 
-      doesn't come first, if you don't want English to be the default language.
-      </para>
     </section>
       
   </section>

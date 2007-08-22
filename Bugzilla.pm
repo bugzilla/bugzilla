@@ -40,6 +40,7 @@ use Bugzilla::Util;
 use Bugzilla::Field;
 
 use File::Basename;
+use File::Spec::Functions;
 use Safe;
 
 # This creates the request cache for non-mod_perl installations.
@@ -306,6 +307,24 @@ sub dbh {
         = Bugzilla::DB::connect_main();
 
     return request_cache()->{dbh};
+}
+
+sub languages {
+    return request_cache()->{languages} if request_cache()->{languages};
+
+    my @files = glob(catdir(bz_locations->{'templatedir'}, '*'));
+    my @languages;
+    foreach my $dir_entry (@files) {
+        # It's a language directory only if it contains "default" or
+        # "custom". This auto-excludes CVS directories as well.
+        next unless (-d catdir($dir_entry, 'default')
+                  || -d catdir($dir_entry, 'custom'));
+        $dir_entry = basename($dir_entry);
+        # Check for language tag format conforming to RFC 1766.
+        next unless $dir_entry =~ /^[a-zA-Z]{1,8}(-[a-zA-Z]{1,8})?$/;
+        push(@languages, $dir_entry);
+    }
+    return request_cache()->{languages} = \@languages;
 }
 
 sub error_mode {
@@ -626,6 +645,11 @@ used to automatically answer or skip prompts.
 =item C<dbh>
 
 The current database handle. See L<DBI>.
+
+=item C<languages>
+
+Currently installed languages.
+Returns a reference to a list of RFC 1766 language tags of installed languages.
 
 =item C<switch_to_shadow_db>
 

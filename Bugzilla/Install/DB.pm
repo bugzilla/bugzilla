@@ -512,6 +512,9 @@ sub update_table_definitions {
     # 2007-08-08 LpSolit@gmail.com - Bug 332149
     $dbh->bz_add_column('groups', 'icon_url', {TYPE => 'TINYTEXT'});
 
+    # 2007-08-21 wurblzap@gmail.com - Bug 365378
+    _make_lang_setting_dynamic();
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################
@@ -2882,6 +2885,17 @@ sub _initialize_workflow {
     # Make sure the bug status used by the 'duplicate_or_move_bug_status'
     # parameter has all the required transitions set.
     Bugzilla::Status::add_missing_bug_status_transitions();
+}
+
+sub _make_lang_setting_dynamic {
+    my $dbh = Bugzilla->dbh;
+    my $count = $dbh->selectrow_array(q{SELECT 1 FROM setting
+                                         WHERE name = 'lang'
+                                           AND subclass IS NULL});
+    if ($count) {
+        $dbh->do(q{UPDATE setting SET subclass = 'Lang' WHERE name = 'lang'});
+        $dbh->do(q{DELETE FROM setting_value WHERE name = 'lang'});
+    }
 }
 
 1;

@@ -75,7 +75,6 @@ if ($action eq 'save' && $current_module) {
     my @changes = ();
     my @module_param_list = "Bugzilla::Config::${current_module}"->get_param_list(1);
 
-    my $update_lang_user_pref = 0;
     foreach my $i (@module_param_list) {
         my $name = $i->{'name'};
         my $value = $cgi->param($name);
@@ -135,21 +134,10 @@ if ($action eq 'save' && $current_module) {
             if (($name eq "shutdownhtml") && ($value ne "")) {
                 $vars->{'shutdown_is_active'} = 1;
             }
-            if ($name eq 'languages') {
-                $update_lang_user_pref = 1;
-            }
             if ($name eq 'duplicate_or_move_bug_status') {
                 Bugzilla::Status::add_missing_bug_status_transitions($value);
             }
         }
-    }
-    if ($update_lang_user_pref) {
-        # We have to update the list of languages users can choose.
-        # If some users have selected a language which is no longer available,
-        # then we delete it (the user pref is reset to the default one).
-        my @languages = split(/[\s,]+/, Bugzilla->params->{'languages'});
-        map {trick_taint($_)} @languages;
-        add_setting('lang', \@languages, $languages[0], undef, 1);
     }
 
     $vars->{'message'} = 'parameters_updated';

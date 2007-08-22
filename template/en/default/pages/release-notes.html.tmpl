@@ -77,7 +77,7 @@
     <code>specific_search_allow_empty_words</code>.
     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=385910">[% terms.Bug %] 385910</a>)</li>
   <li>If you attach a file that has a MIME-type of <code>text/x-patch</code>
-    or <code>text/x-diff</code>, it will automaticaly be treated as a 
+    or <code>text/x-diff</code>, it will automatically be treated as a 
     patch by [% terms.Bugzilla %].
     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=365756">[% terms.Bug %] 365756</a>)</li>
   <li>Dependency Graphs now work correctly on all mod_perl installations.
@@ -92,9 +92,12 @@
     unless you have a file in the <code>data</code> directory called
     <code>errorlog</code>, in which case warnings will be printed there.
     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=390148">[% terms.Bug %] 390148</a>)</li>
-  <li>If you used <kbd>email_in.pl</kbd> to move [% terms.abug %] with groups to another
-    product, all of the groups would be cleared.
+  <li>If you used <kbd>email_in.pl</kbd> to edit [% terms.abug %] that was
+    protected by groups, all of the groups would be cleared.
     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=385453">[% terms.Bug %] 385453</a>)</li>
+  <li>PostgreSQL users: New Charts were failing to collect data over time.
+    They will now start collecting data correctly.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=257351">[% terms.Bug %] 257351</a>)</li>
   <li>Some flag mails didn't specify who the requestee was. 
     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=379787">[% terms.Bug %] 379787</a>)</li>
   <li>Instead of throwing real errors, <kbd>collectstats.pl</kbd> would
@@ -130,6 +133,9 @@
   <li>The "Subject" line of an email was being mangled if it contained
     non-Latin characters.
     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=387860">[% terms.Bug %] 387860</a>)</li>
+  <li>Editing the "languages" parameter using <kbd>editparams.cgi</kbd> would
+    sometimes fail, causing [% terms.Bugzilla %] to throw an error.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=335354">[% terms.Bug %] 335354</a>)</li>
 </ul>
 
 <h2><a name="v30_req"></a>Minimum Requirements</h2>

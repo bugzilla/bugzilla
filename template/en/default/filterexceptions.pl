@@ -416,7 +416,6 @@
 'bug/create/create-guided.html.tmpl' => [
   'matches.0', 
   'tablecolour',
-  'buildid',
   'sel',
   'productstring', 
 ],

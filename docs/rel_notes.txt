@@ -66,7 +66,20 @@ Important Updates In This Point Release
 ***************************************
 
 This section describes bugs fixed in releases after the original 2.22
-release.
+release. This section only describes significant fixes. To see all
+fixes, look at the Change Logs at http://www.bugzilla.org/status/changes.html
+
+Version 2.22.3
+--------------
+
++ Bug lists in iCal format were cutting off bug summaries if they had
+  a comma in them. (bug 274408)
+
++ If collectstats.pl encountered an invalid series when collecting data for
+  New Charts, it would stop processing all series, silently. This means
+  that several series may not have been collecting data. On PostgreSQL,
+  all series were failing, thus meaning that New Charts were not working
+  at all on PostgreSQL. (bug 257351)
 
 Version 2.22.2
 --------------
@@ -584,6 +597,14 @@ TRUNCATE TABLE logincookies;
 This is actually safe to do at any time--it just forces a logout of
 every single user, even those with saved sessions. (It invalidates
 every login cookie Bugzilla has ever given out.)
+
+Version 2.22.3
+--------------
+
+This release fixes a Cross-Site Scripting vulnerability. You can read the 
+details of the security fix at:
+
+http://www.bugzilla.org/security/2.20.4/
 
 Version 2.22.2
 --------------

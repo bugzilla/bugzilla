@@ -44,6 +44,7 @@ use Bugzilla::Util;
 use Date::Format qw(time2str);
 
 use Encode qw(encode);
+use Email::Address;
 use Email::MIME;
 # Loading this gives us encoding_set.
 use Email::MIME::Modifier;
@@ -80,7 +81,14 @@ sub MessageToMTA {
             $Email::Send::Sendmail::SENDMAIL = SENDMAIL_EXE;
         }
         push @args, "-i";
-        push(@args, "-f$from") if $from;
+        # We want to make sure that we pass *only* an email address.
+        if ($from) {
+            my ($email_obj) = Email::Address->parse($from);
+            if ($email_obj) {
+                my $from_email = $email_obj->address;
+                push(@args, "-f$from_email") if $from_email;
+            }
+        }
         push(@args, "-ODeliveryMode=deferred")
             if !Bugzilla->params->{"sendmailnow"};
     }

@@ -34,12 +34,12 @@
      For a devel release, simple bump bz-ver and bz-date
 -->
 
-<!ENTITY bz-ver "3.0">
+<!ENTITY bz-ver "3.0.1">
 <!ENTITY bz-nextver "3.2">
-<!ENTITY bz-date "2007-05-09">
+<!ENTITY bz-date "2007-08-23">
 <!ENTITY current-year "2007">
 
-<!ENTITY landfillbase "http://landfill.bugzilla.org/bugzilla-tip/">
+<!ENTITY landfillbase "http://landfill.bugzilla.org/bugzilla-3.0-branch/">
 <!ENTITY bz "http://www.bugzilla.org/">
 <!ENTITY bzg-bugs "<ulink url='https://bugzilla.mozilla.org/enter_bug.cgi?product=Bugzilla&amp;component=Documentation'>Bugzilla Documentation</ulink>">
 <!ENTITY mysql "http://www.mysql.com/">

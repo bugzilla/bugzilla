@@ -542,12 +542,15 @@ elsif (($cgi->param('cmdtype') eq "doit") && defined $cgi->param('remtype')) {
                 $bug_ids{$bug_id} = $keep_bug;
                 $changes = 1;
             }
-            ThrowUserError('no_bug_ids', {'action' => $action}) unless $changes;
+            ThrowUserError('no_bug_ids',
+                           {'action' => $action,
+                            'tag' => $query_name})
+              unless $changes;
 
             # Only keep bug IDs we want to add/keep. Disregard deleted ones.
             my @bug_ids = grep { $bug_ids{$_} == 1 } keys %bug_ids;
             # If the list is now empty, we could as well delete it completely.
-            ThrowUserError('no_bugs_in_list', {'saved_search' => $query_name})
+            ThrowUserError('no_bugs_in_list', {'tag' => $query_name})
               unless scalar(@bug_ids);
 
             $new_query = "bug_id=" . join(',', sort {$a <=> $b} @bug_ids);

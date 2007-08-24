@@ -1013,26 +1013,25 @@
     You didn't define any axes to plot.
 
   [% ELSIF error == "no_bugs_chosen" %]
-    [% title = BLOCK %]No [% terms.Bugs %] Chosen[% END %]
+    [% title = BLOCK %]No [% terms.Bugs %] Selected[% END %]
     You apparently didn't choose any [% terms.bugs %] to modify.
 
   [% ELSIF error == "no_bug_ids" %]
-    [% title = BLOCK %]No [% terms.Bugs %] Chosen[% END %]
+    [% title = BLOCK %]No [% terms.Bugs %] Selected[% END %]
     You didn't choose any [% terms.bugs %] to
     [% IF action == "add" %] add to [% ELSE %] remove from [% END %]
-    the saved search.
+    the [% tag FILTER html %] tag.
 
   [% ELSIF error == "no_bugs_in_list" %]
-    [% title = "Delete Saved Search?" %]
-    You are going to remove all [% terms.bugs %] from the '[% saved_search FILTER html %]'
-    saved search. This will delete this saved search completely. Click
+    [% title = "Delete Tag?" %]
+    This will remove all [% terms.bugs %] from the
+    [% tag FILTER html %] tag. This will delete the tag completely. Click
     <a href="buglist.cgi?cmdtype=dorem&amp;remaction=forget&amp;namedcmd=
-    [%- saved_search FILTER url_quote %]">here</a> if you really want to
-    remove it.
+    [%- tag FILTER url_quote %]">here</a> if you really want to delete it.
 
   [% ELSIF error == "no_bugs_to_remove" %]
-    [% title = "No Saved Search Selected" %]
-    You didn't select any saved search to remove [% terms.bugs %] from.
+    [% title = "No Tag Selected" %]
+    You didn't select a tag from which to remove [% terms.bugs %].
 
   [% ELSIF error == "no_component_change_for_multiple_products" %]
     [% title = "Action Not Permitted" %]

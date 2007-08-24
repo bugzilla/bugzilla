@@ -32,8 +32,18 @@
 %]
 [% PROCESS bug/time.html.tmpl %]
 [% IF bugs.first %]
+  [% ids = [] %]
   [% FOREACH bug = bugs %]
     [% PROCESS bug_display %]
+    [% ids.push(bug.bug_id) %]
+  [% END %]
+  [% IF ids.size > 1 %]
+    <div class="bz_query_buttons">
+      <form method="post" action="buglist.cgi">
+        <input type="hidden" name="bug_id" value="[% ids.join(",") FILTER none %]">
+        <input type="submit" id="short_format" value="Short Format">
+      </form>
+    </div>
   [% END %]
 [% ELSE %]
   <p>

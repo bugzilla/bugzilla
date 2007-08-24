@@ -55,25 +55,19 @@ use base qw(Template);
 # Convert the constants in the Bugzilla::Constants module into a hash we can
 # pass to the template object for reflection into its "constants" namespace
 # (which is like its "variables" namespace, but for constants).  To do so, we
-# traverse the arrays of exported and exportable symbols, pulling out functions
-# (which is how Perl implements constants) and ignoring the rest (which, if
-# Constants.pm exports only constants, as it should, will be nothing else).
+# traverse the arrays of exported and exportable symbols and ignoring the rest
+# (which, if Constants.pm exports only constants, as it should, will be nothing else).
 sub _load_constants {
     my %constants;
     foreach my $constant (@Bugzilla::Constants::EXPORT,
                           @Bugzilla::Constants::EXPORT_OK)
     {
-        if (defined &{$Bugzilla::Constants::{$constant}}) {
-            # Constants can be lists, and we can't know whether we're
-            # getting a scalar or a list in advance, since they come to us
-            # as the return value of a function call, so we have to
-            # retrieve them all in list context into anonymous arrays,
-            # then extract the scalar ones (i.e. the ones whose arrays
-            # contain a single element) from their arrays.
-            $constants{$constant} = [&{$Bugzilla::Constants::{$constant}}];
-            if (scalar(@{$constants{$constant}}) == 1) {
-                $constants{$constant} = @{$constants{$constant}}[0];
-            }
+        if (ref Bugzilla::Constants->$constant) {
+            $constants{$constant} = Bugzilla::Constants->$constant;
+        }
+        else {
+            my @list = (Bugzilla::Constants->$constant);
+            $constants{$constant} = (scalar(@list) == 1) ? $list[0] : \@list;
         }
     }
     return \%constants;

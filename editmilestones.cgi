@@ -168,8 +168,8 @@ if ($action eq 'new') {
 #
 
 if ($action eq 'del') {
-    my $milestone = Bugzilla::Milestone::check_milestone($product,
-                                                         $milestone_name);
+    my $milestone = Bugzilla::Milestone->check({ product => $product,
+                                                 name    => $milestone_name });
     
     $vars->{'milestone'} = $milestone;
     $vars->{'product'} = $product;
@@ -193,9 +193,8 @@ if ($action eq 'del') {
 
 if ($action eq 'delete') {
     check_token_data($token, 'delete_milestone');
-    my $milestone =
-        Bugzilla::Milestone::check_milestone($product,
-                                             $milestone_name);
+    my $milestone = Bugzilla::Milestone->check({ product => $product,
+                                                 name    => $milestone_name });
     $vars->{'milestone'} = $milestone;
     $vars->{'product'} = $product;
 
@@ -245,9 +244,8 @@ if ($action eq 'delete') {
 
 if ($action eq 'edit') {
 
-    my $milestone =
-        Bugzilla::Milestone::check_milestone($product,
-                                             $milestone_name);
+    my $milestone = Bugzilla::Milestone->check({ product => $product,
+                                                 name    => $milestone_name });
 
     $vars->{'milestone'} = $milestone;
     $vars->{'product'} = $product;
@@ -269,9 +267,8 @@ if ($action eq 'edit') {
 if ($action eq 'update') {
     check_token_data($token, 'edit_milestone');
     my $milestone_old_name = trim($cgi->param('milestoneold') || '');
-    my $milestone_old =
-        Bugzilla::Milestone::check_milestone($product,
-                                             $milestone_old_name);
+    my $milestone_old = Bugzilla::Milestone->check(
+        { product => $product, name =>  $milestone_old_name });
 
     if (length($milestone_name) > 20) {
         ThrowUserError('milestone_name_too_long',
@@ -343,9 +340,8 @@ if ($action eq 'update') {
 
     $dbh->bz_unlock_tables();
 
-    my $milestone =
-        Bugzilla::Milestone::check_milestone($product,
-                                             $milestone_name);
+    my $milestone = Bugzilla::Milestone->check({ product => $product,
+                                                 name    => $milestone_name });
     delete_token($token);
 
     $vars->{'milestone'} = $milestone;

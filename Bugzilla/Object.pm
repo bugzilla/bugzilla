@@ -104,6 +104,24 @@ sub _init {
     return $object;
 }
 
+sub check {
+    my ($invocant, $param) = @_;
+    my $class = ref($invocant) || $invocant;
+    # If we were just passed a name, then just use the name.
+    if (!ref $param) {
+        $param = { name => $param };
+    }
+    # Don't allow empty names.
+    if (exists $param->{name}) {
+        $param->{name} = trim($param->{name});
+        $param->{name} || ThrowUserError('object_name_not_specified',
+                                          { class => $class });
+    }
+    my $obj = $class->new($param)
+        || ThrowUserError('object_does_not_exist', {%$param, class => $class});
+    return $obj;
+}
+
 sub new_from_list {
     my $invocant = shift;
     my $class = ref($invocant) || $invocant;
@@ -463,7 +481,7 @@ during these comparisons.
 
 =over
 
-=item C<new($param)>
+=item C<new>
 
 =over
 
@@ -478,7 +496,7 @@ If you pass an integer, the integer is the id of the object,
 from the database, that we  want to read in. (id is defined
 as the value in the L</ID_FIELD> column).
 
-If you pass in a hash, you can pass a C<name> key. The 
+If you pass in a hashref, you can pass a C<name> key. The 
 value of the C<name> key is the case-insensitive name of the object 
 (from L</NAME_FIELD>) in the DB.
 
@@ -503,7 +521,35 @@ are intended B<only> for use by subclasses.
 
 =item B<Returns>
 
-A fully-initialized object.
+A fully-initialized object, or C<undef> if there is no object in the
+database matching the parameters you passed in.
+
+=back
+
+=item C<check>
+
+=over
+
+=item B<Description>
+
+Checks if there is an object in the database with the specified name, and
+throws an error if you specified an empty name, or if there is no object
+in the database with that name.
+
+=item B<Params>
+
+The parameters are the same as for L</new>, except that if you don't pass
+a hashref, the single argument is the I<name> of the object, not the id.
+
+=item B<Returns>
+
+A fully initialized object, guaranteed.
+
+=item B<Notes For Implementors>
+
+If you implement this in your subclass, make sure that you also update
+the C<object_name> block at the bottom of the F<global/user-error.html.tmpl>
+template.
 
 =back
 

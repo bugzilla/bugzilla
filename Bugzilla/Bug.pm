@@ -1282,7 +1282,7 @@ sub add_cc {
     my ($self, $user_or_name, $product) = @_;
     return if !$user_or_name;
     my $user = ref $user_or_name ? $user_or_name
-                                 : Bugzilla::User::check($user_or_name);
+                                 : Bugzilla::User->check($user_or_name);
 
     my $product_id = $product ? $product->id : $self->{product_id};
     if (Bugzilla->params->{strict_isolation}
@@ -1301,7 +1301,7 @@ sub add_cc {
 sub remove_cc {
     my ($self, $user_or_name) = @_;
     my $user = ref $user_or_name ? $user_or_name
-                                 : Bugzilla::User::check($user_or_name);
+                                 : Bugzilla::User->check($user_or_name);
     my $cc_users = $self->cc_users;
     @$cc_users = grep { $_->id != $user->id } @$cc_users;
 }

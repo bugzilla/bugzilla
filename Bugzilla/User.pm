@@ -131,14 +131,6 @@ sub new {
     return $class->SUPER::new(@_);
 }
 
-sub check {
-    my ($username) = @_;
-    $username = trim($username);
-    my $user = new Bugzilla::User({ name => $username })
-        || ThrowUserError('invalid_username', { name => $username });
-    return $user;
-}
-
 sub update {
     my $self = shift;
     my $changes = $self->SUPER::update(@_);

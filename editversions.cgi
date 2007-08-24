@@ -147,9 +147,8 @@ if ($action eq 'new') {
 #
 
 if ($action eq 'del') {
-
-    my $version = Bugzilla::Version::check_version($product, $version_name);
-
+    my $version = Bugzilla::Version->check({ product => $product,
+                                             name    => $version_name });
     $vars->{'version'} = $version;
     $vars->{'product'} = $product;
     $vars->{'token'} = issue_session_token('delete_version');
@@ -167,7 +166,8 @@ if ($action eq 'del') {
 
 if ($action eq 'delete') {
     check_token_data($token, 'delete_version');
-    my $version = Bugzilla::Version::check_version($product, $version_name);
+    my $version = Bugzilla::Version->check({ product => $product, 
+                                             name    => $version_name });
     $version->remove_from_db;
     delete_token($token);
 
@@ -189,9 +189,8 @@ if ($action eq 'delete') {
 #
 
 if ($action eq 'edit') {
-
-    my $version = Bugzilla::Version::check_version($product, $version_name);
-
+    my $version = Bugzilla::Version->check({ product => $product,
+                                             name    => $version_name });
     $vars->{'version'} = $version;
     $vars->{'product'} = $product;
     $vars->{'token'} = issue_session_token('edit_version');
@@ -211,8 +210,8 @@ if ($action eq 'edit') {
 if ($action eq 'update') {
     check_token_data($token, 'edit_version');
     my $version_old_name = trim($cgi->param('versionold') || '');
-    my $version =
-        Bugzilla::Version::check_version($product, $version_old_name);
+    my $version = Bugzilla::Version->check({ product => $product,
+                                             name   => $version_old_name });
 
     $dbh->bz_lock_tables('bugs WRITE', 'versions WRITE');
 

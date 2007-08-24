@@ -96,23 +96,6 @@ sub sortkey    { return $_[0]->{'sortkey'};    }
 #####     Subroutines      #####
 ################################
 
-sub check_milestone {
-    my ($product, $milestone_name) = @_;
-
-    unless ($milestone_name) {
-        ThrowUserError('milestone_not_specified');
-    }
-
-    my $milestone = new Bugzilla::Milestone({ product => $product,
-                                              name    => $milestone_name });
-    unless ($milestone) {
-        ThrowUserError('milestone_not_valid',
-                       {'product' => $product->name,
-                        'milestone' => $milestone_name});
-    }
-    return $milestone;
-}
-
 sub check_sort_key {
     my ($milestone_name, $sortkey) = @_;
     # Keep a copy in case detaint_signed() clears the sortkey
@@ -174,21 +157,3 @@ Milestone.pm represents a Product Milestone object.
  Returns:     Integer with the number of bugs.
 
 =back
-
-=head1 SUBROUTINES
-
-=over
-
-=item C<check_milestone($product, $milestone_name)>
-
- Description: Checks if a milestone name was passed in
-              and if it is a valid milestone.
-
- Params:      $product - Bugzilla::Product object.
-              $milestone_name - String with a milestone name.
-
- Returns:     Bugzilla::Milestone object.
-
-=back
-
-=cut

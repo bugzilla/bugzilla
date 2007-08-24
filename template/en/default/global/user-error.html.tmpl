@@ -902,10 +902,6 @@
     The name of a milestone is limited to 20 characters. 
     '[% name FILTER html %]' is too long ([% name.length %] characters).
 
-  [% ELSIF error == "milestone_not_specified" %]
-    [% title = "No Milestone Specified" %]
-    No milestone specified when trying to edit milestones.
-
   [% ELSIF error == "milestone_not_valid" %]
     [% title = "Specified Milestone Does Not Exist" %]
     The milestone '[% milestone FILTER html %]' for product 
@@ -1138,6 +1134,24 @@
     The value '[% num FILTER html %]' 
     in the <em>[% field_descs.$field FILTER html %]</em> field 
     is less than the minimum allowable value of '[% min_num FILTER html %]'.
+
+  [% ELSIF error == "object_name_not_specified" %]
+    [% type = BLOCK %][% PROCESS object_name %][% END %]
+    [% title = BLOCK %][% type FILTER ucfirst FILTER html %] Not 
+    Specified[% END %]
+    You must select/enter a [% type FILTER html %].
+
+  [% ELSIF error == "object_does_not_exist" %]
+    [% type = BLOCK %][% PROCESS object_name %][% END %]
+    [% title = BLOCK %]Invalid [% type FILTER ucfirst FILTER html %][% END %]
+    There is no [% type FILTER html %] named '[% name FILTER html %]'
+    [% IF product.defined %]
+      in the '[% product.name FILTER html %]' product
+    [% END %].
+    [% IF class == "Bugzilla::User" %]
+      Either you mis-typed the name or that user has not yet registered
+      for a [% terms.Bugzilla %] account.
+    [% END %]
 
   [% ELSIF error == "old_password_incorrect" %]
     [% title = "Incorrect Old Password" %]
@@ -1611,3 +1625,13 @@
 [% END %]            
 
 [% PROCESS global/footer.html.tmpl %]
+
+[% BLOCK object_name %]
+  [% IF class == "Bugzilla::User" %]
+    user
+  [% ELSIF class == "Bugzilla::Version" %]
+    version
+  [% ELSIF class == "Bugzilla::Milestone" %]
+    milestone
+  [% END %]
+[% END %]

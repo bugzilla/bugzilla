@@ -51,8 +51,8 @@ use base qw(Exporter);
 # have to fix it here.
 use constant WS_ERROR_CODE => {
     # Bug errors usually occupy the 100-200 range.
-    invalid_bug_id_or_alias     => 100,
-    invalid_bug_id_non_existent => 101,
+    improper_bug_id_field_value => 100,
+    bug_id_does_not_exist       => 101,
     bug_access_denied           => 102,
     invalid_field_name          => 108,
     # These all mean "invalid alias"

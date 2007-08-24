@@ -2797,7 +2797,7 @@ sub ValidateBugID {
     my $alias = $id;
     if (!detaint_natural($id)) {
         $id = bug_alias_to_id($alias);
-        $id || ThrowUserError("invalid_bug_id_or_alias",
+        $id || ThrowUserError("improper_bug_id_field_value",
                               {'bug_id' => $alias,
                                'field'  => $field });
     }
@@ -2808,7 +2808,7 @@ sub ValidateBugID {
     
     # First check that the bug exists
     $dbh->selectrow_array("SELECT bug_id FROM bugs WHERE bug_id = ?", undef, $id)
-      || ThrowUserError("invalid_bug_id_non_existent", {'bug_id' => $id});
+      || ThrowUserError("bug_id_does_not_exist", {'bug_id' => $id});
 
     return if (defined $field && ($field eq "dependson" || $field eq "blocked"));
     

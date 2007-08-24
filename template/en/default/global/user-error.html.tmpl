@@ -902,6 +902,10 @@
     The name of a milestone is limited to 20 characters. 
     '[% name FILTER html %]' is too long ([% name.length %] characters).
 
+  [% ELSIF error == "milestone_not_specified" %]
+    [% title = "No Milestone Specified" %]
+    No milestone specified when trying to edit milestones.
+
   [% ELSIF error == "milestone_not_valid" %]
     [% title = "Specified Milestone Does Not Exist" %]
     The milestone '[% milestone FILTER html %]' for product 

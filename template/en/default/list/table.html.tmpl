@@ -104,7 +104,11 @@
           [% PROCESS columnheader %]
         [% END %]
 
-        </tr><tr align="left"><th>&nbsp;</th>
+        </tr><tr align="left">
+        [% IF dotweak %]
+          <th>&nbsp;</th>
+        [% END %]
+        <th>&nbsp;</th>
 
         [% FOREACH id = displaycolumns %]
           [% NEXT IF loop.count() % 2 == 0 %]

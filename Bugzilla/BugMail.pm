@@ -37,6 +37,7 @@ use Bugzilla::User;
 use Bugzilla::Constants;
 use Bugzilla::Util;
 use Bugzilla::Bug;
+use Bugzilla::Classification;
 use Bugzilla::Product;
 use Bugzilla::Component;
 use Bugzilla::Mailer;
@@ -117,6 +118,7 @@ sub Send {
 
     my $product = new Bugzilla::Product($values{product_id});
     $values{product} = $product->name;
+    $values{classification} = Bugzilla::Classification->new($product->classification_id)->name;
     my $component = new Bugzilla::Component($values{component_id});
     $values{component} = $component->name;
 
@@ -636,6 +638,8 @@ sub sendMail {
         neworchanged => $isnew ? 'New: ' : '',
         to => $user->email,
         bugid => $id,
+        alias => Bugzilla->params->{'usebugaliases'} ? $values{'alias'} : "",
+        classification => $values{'classification'},
         product => $values{'product'},
         comp => $values{'component'},
         keywords => $values{'keywords'},
@@ -643,6 +647,7 @@ sub sendMail {
         status => $values{'bug_status'},
         priority => $values{'priority'},
         assignedto => $values{'assigned_to'},
+        assignedtoname => Bugzilla::User->new({name => $values{'assigned_to'}})->name,
         targetmilestone => $values{'target_milestone'},
         changedfields => $values{'changed_fields'},
         summary => $values{'short_desc'},
@@ -652,6 +657,8 @@ sub sendMail {
         reasonswatchheader => join(" ", @watchingrel),
         changer => $values{'changer'},
         changername => $values{'changername'},
+        reporter => $values{'reporter'},
+        reportername => Bugzilla::User->new({name => $values{'reporter'}})->name,
         diffs => $diffs,
         threadingmarker => $threadingmarker
     };

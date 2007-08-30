@@ -41,9 +41,9 @@
 From: [% Param('mailfrom') %]
 To: [% to %]
 Subject: [% flag.type.name %] [%+ subject_status %]: [[% terms.Bug %] [%+ bug.bug_id %]] [% bug.short_desc %]
-X-Bugzilla-Type: request
 [%- IF attachment %] :
   [Attachment [% attachment.id %]] [% attachment.description %][% END %]
+X-Bugzilla-Type: request
 
 [%+ USE wrap -%]
 [%- FILTER bullet = wrap(80) -%]

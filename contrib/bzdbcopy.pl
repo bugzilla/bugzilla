@@ -53,6 +53,7 @@ print "Connecting to the '" . TARGET_DB_NAME . "' target database on "
       . TARGET_DB_TYPE . "...\n";
 my $target_db = Bugzilla::DB::_connect(TARGET_DB_TYPE, 'localhost', 
     TARGET_DB_NAME, undef, undef, TARGET_DB_USER, TARGET_DB_PASSWORD);
+my $ident_char = $target_db->get_info( 29 ); # SQL_IDENTIFIER_QUOTE_CHAR
 
 # We use the table list from the target DB, because if somebody
 # has customized their source DB, we still want the script to work,
@@ -74,6 +75,11 @@ foreach my $table (@table_list) {
     print "Reading data from the source '$table' table on " 
           . SOURCE_DB_TYPE . "...\n";
     my @table_columns = $target_db->bz_table_columns_real($table);
+    # The column names could be quoted using the quote identifier char
+    # Remove these chars as different databases use different quote chars
+    @table_columns = map { s/^\Q$ident_char\E?(.*?)\Q$ident_char\E?$/$1/; $_ }
+                         @table_columns;
+
     my $select_query = "SELECT " . join(',', @table_columns) . " FROM $table";
     my $data_in = $source_db->selectall_arrayref($select_query);
 

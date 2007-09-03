@@ -1,5 +1,5 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"> -->
-<!-- $Id: security.xml,v 1.16 2006/11/20 19:48:43 lpsolit%gmail.com Exp $ -->
+<!-- $Id: security.xml,v 1.16.2.1 2007/09/03 10:13:24 lpsolit%gmail.com Exp $ -->
 
 <chapter id="security">
 <title>Bugzilla Security</title>
@@ -308,33 +308,6 @@ skip-networking
         </para>
       </tip>
     
-    </section>
-
-
-    <section id="security-webserver-mod-throttle">
-      <title>Using <filename>mod_throttle</filename> to Prevent a DOS</title>
-
-      <note>
-        <para>This section only applies to people who have chosen the Apache
-        webserver. It may be possible to do similar things with other
-        webservers. Consult the documentation that came with your webserver
-        to find out.
-        </para>
-      </note>
-
-      <para>It is possible for a user, by mistake or on purpose, to access
-      the database many times in a row which can result in very slow access
-      speeds for other users (effectively, a
-      <glossterm linkend="gloss-dos">DOS</glossterm> attack). If your
-      Bugzilla installation is experiencing this problem, you may install
-      the Apache module <filename>mod_throttle</filename> which can limit
-      connections by IP address. You may download this module at 
-      <ulink url="http://www.snert.com/Software/mod_throttle/"/>.
-      Follow the instructions to install into your Apache install. 
-      The command you need is 
-      <command>ThrottleClientIP</command>. See the 
-      <ulink url="http://www.snert.com/Software/mod_throttle/">documentation</ulink>
-      for more information.</para>
     </section>
 
       

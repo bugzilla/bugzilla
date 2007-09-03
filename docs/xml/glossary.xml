@@ -215,9 +215,7 @@
       <glossdef>
         <para>A DOS, or Denial of Service attack, is when a user attempts to
         deny access to a web server by repeatedly accessing a page or sending
-        malformed requests to a webserver. This can be effectively prevented
-        by using <filename>mod_throttle</filename> as described in
-        <xref linkend="security-webserver-mod-throttle"/>. A D-DOS, or
+        malformed requests to a webserver. A D-DOS, or
         Distributed Denial of Service attack, is when these requests come
         from multiple sources at the same time. Unfortunately, these are much
         more difficult to defend against.

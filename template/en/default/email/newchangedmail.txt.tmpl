@@ -21,7 +21,7 @@
 [% PROCESS "global/variables.none.tmpl" %]
 From: [% Param('mailfrom') %]
 To: [% to %]
-Subject: [[% terms.Bug %] [%+ bugid %]] [% neworchanged %][%+ summary %]
+Subject: [[% terms.Bug %] [%+ bugid %]] [% 'New: ' IF isnew %][%+ summary %]
 X-Bugzilla-Reason: [% reasonsheader %]
 X-Bugzilla-Type: newchanged
 X-Bugzilla-Watch-Reason: [% reasonswatchheader %]

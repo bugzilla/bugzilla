@@ -500,7 +500,7 @@ sub Send {
                                       \@diffparts,
                                       $comments{$lang},
                                       $anyprivate, 
-                                      $start, 
+                                      ! $start, 
                                       $id,
                                       exists $watching{$user_id} ?
                                              $watching{$user_id} : undef);
@@ -522,8 +522,8 @@ sub Send {
 }
 
 sub sendMail {
-    my ($user, $hlRef, $relRef, $valueRef, $dmhRef, $fdRef,  
-        $diffRef, $newcomments, $anyprivate, $start, 
+    my ($user, $hlRef, $relRef, $valueRef, $dmhRef, $fdRef,
+        $diffRef, $newcomments, $anyprivate, $isnew,
         $id, $watchingRef) = @_;
 
     my %values = %$valueRef;
@@ -590,8 +590,6 @@ sub sendMail {
       return 0;
     }
     
-    my $isnew = !$start;
-    
     # If an attachment was created, then add an URL. (Note: the 'g'lobal
     # replace should work with comments with multiple attachments.)
 
@@ -629,13 +627,14 @@ sub sendMail {
     my $threadingmarker;
     if ($isnew) {
         $threadingmarker = "Message-ID: <bug-$id-" . $user->id . "$sitespec>";
-    } else {
+    }
+    else {
         $threadingmarker = "In-Reply-To: <bug-$id-" . $user->id . "$sitespec>";
     }
     
 
     my $vars = {
-        neworchanged => $isnew ? 'New: ' : '',
+        isnew => $isnew,
         to => $user->email,
         bugid => $id,
         alias => Bugzilla->params->{'usebugaliases'} ? $values{'alias'} : "",

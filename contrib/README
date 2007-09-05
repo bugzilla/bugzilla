@@ -29,13 +29,6 @@ This directory includes:
                          database into a Bugzilla database.  Contributed by
                          Tom Schutter <tom@platte.com>
  
-        bug_email.pl --  A perl script that can receive email containing
-                         bug reports (email-interface). Contributed by
-                         Klaas Freitag <freitag@SuSE.de>
- 	
-       README.Mailif --  Readme describing the mail interface.
-   bugmail_help.html --  User help page for the mail interface.
- 
         yp_nomail.sh --  Script you can run via cron that regularly updates
                          the nomail file for terminated employees 
 

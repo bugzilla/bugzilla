@@ -1025,15 +1025,18 @@ password=mypassword
       </qandaentry>
 
       <qandaentry>
-        <question id="faq-email-mailif">
+        <question id="faq-email-in">
           <para>
-            How do I set up the email interface to submit/change bugs via email?
+            How do I set up the email interface to submit or change bugs via email?
           </para>
         </question>
         <answer>
           <para>
-            You can find an updated README.mailif file in the contrib/ directory
-            of your Bugzilla distribution that walks you through the setup.
+            Bugzilla 3.0 and later offers the ability submit or change
+            bugs via email, using the <filename>email_in.pl</filename>
+            script within the root directory of the Bugzilla installation.
+            More information on the script can be found in
+            <ulink url="api/email_in.html">docs/html/api/email_in.html</ulink>.
           </para>
         </answer>
       </qandaentry>

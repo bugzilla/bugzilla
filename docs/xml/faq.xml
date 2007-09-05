@@ -327,23 +327,6 @@ perl runtests.pl 2 --verbose
       </qandaentry>
 
       <qandaentry>
-        <question id="faq-mod-perl">
-          <para>
-            Does bugzilla run under <filename>mod_perl</filename>?
-          </para>
-        </question>
-        <answer>
-          <para>
-            At present, no. Work is slowly taking place to remove global
-            variables, use $cgi, and use DBI. These are all necessary for
-            mod_perl (as well as being good for other reasons). Visit 
-            <ulink url="https://bugzilla.mozilla.org/show_bug.cgi?id=87406">
-            bug 87406</ulink> to view the discussion and progress.
-          </para>
-        </answer>
-      </qandaentry>
-
-      <qandaentry>
         <question id="faq-general-selinux">
           <para>
             How can Bugzilla be made to work under SELinux?

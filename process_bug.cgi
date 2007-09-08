@@ -571,11 +571,11 @@ foreach my $field ("version", "target_milestone") {
 # Add custom fields data to the query that will update the database.
 foreach my $field (Bugzilla->get_fields({custom => 1, obsolete => 0})) {
     my $fname = $field->name;
-    if (defined $cgi->param($fname)
-        && (!$cgi->param('dontchange')
-            || $cgi->param($fname) ne $cgi->param('dontchange')))
+    if ( (defined $cgi->param($fname) || defined $cgi->param("defined_$fname"))
+         && (!$cgi->param('dontchange')
+             || $cgi->param($fname) ne $cgi->param('dontchange')))
     {
-        $_->set_custom_field($field, $cgi->param($fname)) foreach @bug_objects;
+        $_->set_custom_field($field, [$cgi->param($fname)]) foreach @bug_objects;
     }
 }
 
@@ -1010,6 +1010,11 @@ foreach my $id (@idlist) {
     my $bug_changed = 0;
     my $write = "WRITE";        # Might want to make a param to control
                                 # whether we do LOW_PRIORITY ...
+
+    my @multi_select_locks  = map {'bug_' . $_->name . " $write"}
+        Bugzilla->get_fields({ custom => 1, type => FIELD_TYPE_MULTI_SELECT,
+                               obsolete => 0 });
+
     $dbh->bz_lock_tables("bugs $write", "bugs_activity $write", "cc $write",
             "profiles READ", "dependencies $write", "votes $write",
             "products READ", "components READ", "milestones READ",
@@ -1020,7 +1025,8 @@ foreach my $id (@idlist) {
             "keyworddefs READ", "groups READ", "attachments READ",
             "bug_status READ", "group_control_map AS oldcontrolmap READ",
             "group_control_map AS newcontrolmap READ",
-            "group_control_map READ", "email_setting READ", "classifications READ");
+            "group_control_map READ", "email_setting READ", 
+            "classifications READ", @multi_select_locks);
 
     # It may sound crazy to set %formhash for each bug as $cgi->param()
     # will not change, but %formhash is modified below and we prefer

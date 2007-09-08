@@ -119,6 +119,7 @@ use File::Basename;
     FIELD_TYPE_UNKNOWN
     FIELD_TYPE_FREETEXT
     FIELD_TYPE_SINGLE_SELECT
+    FIELD_TYPE_MULTI_SELECT
 
     USAGE_MODE_BROWSER
     USAGE_MODE_CMDLINE
@@ -340,6 +341,7 @@ use constant SENDMAIL_PATH => '/usr/lib:/usr/sbin:/usr/ucblib';
 use constant FIELD_TYPE_UNKNOWN   => 0;
 use constant FIELD_TYPE_FREETEXT  => 1;
 use constant FIELD_TYPE_SINGLE_SELECT => 2;
+use constant FIELD_TYPE_MULTI_SELECT => 3;
 
 # The maximum number of days a token will remain valid.
 use constant MAX_TOKEN_AGE => 3;

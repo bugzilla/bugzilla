@@ -642,9 +642,8 @@ sub _bz_add_table_raw {
     $self->do($_) foreach (@statements);
 }
 
-sub bz_add_field_table {
-    my ($self, $name) = @_;
-    my $table_schema = $self->_bz_schema->FIELD_TABLE_SCHEMA;
+sub _bz_add_field_table {
+    my ($self, $name, $table_schema) = @_;
     # We do nothing if the table already exists.
     return if $self->bz_table_info($name);
     my $indexes      = $table_schema->{INDEXES};
@@ -658,6 +657,19 @@ sub bz_add_field_table {
     $self->_bz_schema->add_table($name, $table_schema);
     $self->bz_add_table($name);
 }
+
+sub bz_add_field_tables {
+    my ($self, $field) = @_;
+    
+    $self->_bz_add_field_table($field->name,
+                                $self->_bz_schema->FIELD_TABLE_SCHEMA);
+    if ( $field->type == FIELD_TYPE_MULTI_SELECT ) {
+        $self->_bz_add_field_table('bug_' . $field->name,
+                $self->_bz_schema->MULTI_SELECT_VALUE_TABLE);
+    }
+
+}
+
 
 sub bz_drop_column {
     my ($self, $table, $column) = @_;

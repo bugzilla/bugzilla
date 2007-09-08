@@ -80,7 +80,9 @@ if (Bugzilla->user->in_group(Bugzilla->params->{"timetrackinggroup"})) {
 
 push(@masterlist, ("short_desc", "short_short_desc"));
 
-push(@masterlist, Bugzilla->custom_field_names);
+my @custom_fields = grep { $_->type != FIELD_TYPE_MULTI_SELECT }
+                         Bugzilla->get_fields({ custom => 1, obsolete => 0 });
+push(@masterlist, map { $_->name } @custom_fields);
 
 $vars->{'masterlist'} = \@masterlist;
 

@@ -253,10 +253,21 @@ $vars->{'priority'} = get_legal_field_values('priority');
 $vars->{'bug_severity'} = get_legal_field_values('bug_severity');
 
 # Boolean charts
-my @fields;
-push(@fields, { name => "noop", description => "---" });
-push(@fields, $dbh->bz_get_field_defs());
-@fields = sort {lc($a->{'description'}) cmp lc($b->{'description'})} @fields;
+my @fields = Bugzilla->get_fields({ obsolete => 0 });
+# Multi-selects aren't searchable, currently.
+@fields = grep($_->type != FIELD_TYPE_MULTI_SELECT, @fields);
+
+# If we're not in the time-tracking group, exclude time-tracking fields.
+if (!Bugzilla->user->in_group(Bugzilla->params->{'timetrackinggroup'})) {
+    foreach my $tt_field (qw(estimated_time remaining_time work_time
+                             percentage_complete deadline))
+    {
+        @fields = grep($_->name ne $tt_field, @fields);
+    }
+}
+
+@fields = sort {lc($a->description) cmp lc($b->description)} @fields;
+unshift(@fields, { name => "noop", description => "---" });
 $vars->{'fields'} = \@fields;
 
 # Creating new charts - if the cmd-add value is there, we define the field

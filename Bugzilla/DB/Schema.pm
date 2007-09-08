@@ -1254,6 +1254,18 @@ use constant FIELD_TABLE_SCHEMA => {
         sortkey_idx => ['sortkey', 'value'],
     ],
 };
+
+use constant MULTI_SELECT_VALUE_TABLE => {
+    FIELDS => [
+        bug_id => {TYPE => 'INT3', NOTNULL => 1},
+        value  => {TYPE => 'varchar(64)', NOTNULL => 1},
+    ],
+    INDEXES => [
+        bug_id_idx => {FIELDS => [qw( bug_id value)], TYPE => 'UNIQUE'},
+    ],
+};
+
+
 #--------------------------------------------------------------------------
 
 =head1 METHODS

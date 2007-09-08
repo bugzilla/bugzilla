@@ -41,6 +41,8 @@ our @valid_fields = ('op_sys', 'rep_platform', 'priority', 'bug_severity',
 # Add custom select fields.
 my @custom_fields = Bugzilla->get_fields({custom => 1,
                                           type => FIELD_TYPE_SINGLE_SELECT});
+push(@custom_fields, Bugzilla->get_fields({custom => 1,
+                                          type => FIELD_TYPE_MULTI_SELECT}));
 
 push(@valid_fields, map { $_->name } @custom_fields);
 

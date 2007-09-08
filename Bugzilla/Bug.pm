@@ -70,6 +70,9 @@ use constant LIST_ORDER => ID_FIELD;
 # This is a sub because it needs to call other subroutines.
 sub DB_COLUMNS {
     my $dbh = Bugzilla->dbh;
+    my @custom = Bugzilla->get_fields({ custom => 1, obsolete => 0});
+    @custom = grep {$_->type != FIELD_TYPE_MULTI_SELECT} @custom;
+    my @custom_names = map {$_->name} @custom;
     return qw(
         alias
         bug_file_loc
@@ -98,7 +101,7 @@ sub DB_COLUMNS {
     'qa_contact  AS qa_contact_id',
     $dbh->sql_date_format('creation_ts', '%Y.%m.%d %H:%i') . ' AS creation_ts',
     $dbh->sql_date_format('deadline', '%Y-%m-%d') . ' AS deadline',
-    Bugzilla->custom_field_names;
+    @custom_names;
 }
 
 use constant REQUIRED_CREATE_FIELDS => qw(
@@ -140,6 +143,9 @@ sub VALIDATORS {
         if ($field->type == FIELD_TYPE_SINGLE_SELECT) {
             $validator = \&_check_select_field;
         }
+        elsif ($field->type == FIELD_TYPE_MULTI_SELECT) {
+            $validator = \&_check_multi_select_field;
+        }
         else {
             $validator = \&_check_freetext_field;
         }
@@ -157,6 +163,9 @@ use constant UPDATE_VALIDATORS => {
 };
 
 sub UPDATE_COLUMNS {
+    my @custom = Bugzilla->get_fields({ custom => 1, obsolete => 0});
+    @custom = grep {$_->type != FIELD_TYPE_MULTI_SELECT} @custom;
+    my @custom_names = map {$_->name} @custom;
     my @columns = qw(
         alias
         cclist_accessible
@@ -175,7 +184,7 @@ sub UPDATE_COLUMNS {
         short_desc
         status_whiteboard
     );
-    push(@columns, Bugzilla->custom_field_names);
+    push(@columns, @custom_names);
     return @columns;
 };
 
@@ -303,14 +312,10 @@ sub create {
 
     # These are not a fields in the bugs table, so we don't pass them to
     # insert_create_data.
-    my $cc_ids = $params->{cc};
-    delete $params->{cc};
-    my $groups = $params->{groups};
-    delete $params->{groups};
-    my $depends_on = $params->{dependson};
-    delete $params->{dependson};
-    my $blocked = $params->{blocked};
-    delete $params->{blocked};
+    my $cc_ids     = delete $params->{cc};
+    my $groups     = delete $params->{groups};
+    my $depends_on = delete $params->{dependson};
+    my $blocked    = delete $params->{blocked};
     my ($comment, $privacy) = ($params->{comment}, $params->{commentprivacy});
     delete $params->{comment};
     delete $params->{commentprivacy};
@@ -322,9 +327,9 @@ sub create {
 
     # We don't want the bug to appear in the system until it's correctly
     # protected by groups.
-    my $timestamp = $params->{creation_ts}; 
-    delete $params->{creation_ts};
+    my $timestamp = delete $params->{creation_ts}; 
 
+    my $ms_values = $class->_extract_multi_selects($params);
     my $bug = $class->insert_create_data($params);
 
     # Add the group restrictions
@@ -370,6 +375,16 @@ sub create {
         LogActivityEntry($blocked_id, 'dependson', '', $bug->bug_id,
                          $bug->{reporter_id}, $timestamp);
         $sth_bug_time->execute($timestamp, $blocked_id);
+    }
+
+    # Insert the values into the multiselect value tables
+    foreach my $field (keys %$ms_values) {
+        $dbh->do("DELETE FROM bug_$field where bug_id = ?",
+                undef, $bug->bug_id);
+        foreach my $value ( @{$ms_values->{$field}} ) {
+            $dbh->do("INSERT INTO bug_$field (bug_id, value) VALUES (?,?)",
+                    undef, $bug->bug_id, $value);
+        }
     }
 
     $dbh->bz_commit_transaction();
@@ -469,6 +484,7 @@ sub update {
     my $delta_ts = shift || $dbh->selectrow_array("SELECT NOW()");
     $self->{delta_ts} = $delta_ts;
 
+    my $old_bug = $self->new($self->id);
     my $changes = $self->SUPER::update(@_);
 
     foreach my $comment (@{$self->{added_comments} || []}) {
@@ -478,6 +494,24 @@ sub update {
         $dbh->do("INSERT INTO longdescs (bug_id, who, bug_when, $columns)
                        VALUES (?,?,?,$qmarks)", undef,
                  $self->bug_id, Bugzilla->user->id, $delta_ts, @values);
+    }
+
+    # Insert the values into the multiselect value tables
+    my @multi_selects = Bugzilla->get_fields(
+        { custom => 1, type => FIELD_TYPE_MULTI_SELECT, obsolete => 0 });
+    foreach my $field (@multi_selects) {
+        my $name = $field->name;
+        my ($removed, $added) = diff_arrays($old_bug->$name, $self->$name);
+        if (scalar @$removed || scalar @$added) {
+            $changes->{$name} = [join(', ', @$removed), join(', ', @$added)];
+
+            $dbh->do("DELETE FROM bug_$name where bug_id = ?",
+                     undef, $self->id);
+            foreach my $value (@{$self->$name}) {
+                $dbh->do("INSERT INTO bug_$name (bug_id, value) VALUES (?,?)",
+                         undef, $self->id, $value);
+            }
+        }
     }
 
     # Log bugs_activity items
@@ -502,6 +536,25 @@ sub update {
     }
 
     return $changes;
+}
+
+# Used by create().
+# We need to handle multi-select fields differently than normal fields,
+# because they're arrays and don't go into the bugs table.
+sub _extract_multi_selects {
+    my ($invocant, $params) = @_;
+
+    my @multi_selects = Bugzilla->get_fields(
+        { custom => 1, type => FIELD_TYPE_MULTI_SELECT, obsolete => 0 });
+    my %ms_values;
+    foreach my $field (@multi_selects) {
+        my $name = $field->name;
+        if (exists $params->{$name}) {
+            my $array = delete($params->{$name}) || [];
+            $ms_values{$name} = $array;
+        }
+    }
+    return \%ms_values;
 }
 
 # XXX Temporary hack until all of process_bug uses update().
@@ -1171,6 +1224,19 @@ sub _check_work_time {
     return $_[0]->_check_time($_[1], 'work_time');
 }
 
+# Custom Field Validators
+
+sub _check_multi_select_field {
+    my ($invocant, $values, $field) = @_;
+    return [] if !$values;
+    foreach my $value (@$values) {
+        $value = trim($value);
+        check_field($field, $value);
+        trick_taint($value);
+    }
+    return $values;
+}
+
 sub _check_select_field {
     my ($invocant, $value, $field) = @_;
     $value = trim($value);
@@ -1233,6 +1299,9 @@ sub set_alias { $_[0]->set('alias', $_[1]); }
 sub set_cclist_accessible { $_[0]->set('cclist_accessible', $_[1]); }
 sub set_custom_field {
     my ($self, $field, $value) = @_;
+    if (ref $value eq 'ARRAY' && !$field->type == FIELD_TYPE_MULTI_SELECT) {
+        $value = $value->[0];
+    }
     ThrowCodeError('field_not_custom', { field => $field }) if !$field->custom;
     $self->set($field->name, $value);
 }
@@ -2670,6 +2739,9 @@ sub check_can_change_field {
     # Return true if they haven't changed this field at all.
     if ($oldvalue eq $newvalue) {
         return 1;
+    } elsif (ref($newvalue) eq 'ARRAY' && ref($oldvalue) eq 'ARRAY') {
+        my ($removed, $added) = diff_arrays($oldvalue, $newvalue);
+        return 1 if !scalar(@$removed) && !scalar(@$added);
     } elsif (trim($oldvalue) eq trim($newvalue)) {
         return 1;
     # numeric fields need to be compared using ==
@@ -2941,11 +3013,19 @@ sub AUTOLOAD {
   no strict 'refs';
   *$AUTOLOAD = sub {
       my $self = shift;
-      if (defined $self->{$attr}) {
+
+      return $self->{$attr} if defined $self->{$attr};
+
+      $self->{_multi_selects} ||= [Bugzilla->get_fields(
+          {custom => 1, type => FIELD_TYPE_MULTI_SELECT })];
+      if ( grep($_->name eq $attr, @{$self->{_multi_selects}}) ) {
+          $self->{$attr} ||= Bugzilla->dbh->selectcol_arrayref(
+              "SELECT value FROM bug_$attr WHERE bug_id = ? ORDER BY value",
+              undef, $self->id);
           return $self->{$attr};
-      } else {
-          return '';
       }
+
+      return '';
   };
 
   goto &$AUTOLOAD;

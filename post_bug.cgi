@@ -120,8 +120,8 @@ $template->process($format->{'template'}, $vars, \$comment)
     || ThrowTemplateError($template->error());
 
 # Include custom fields editable on bug creation.
-my @custom_bug_fields = Bugzilla->get_fields(
-    { custom => 1, obsolete => 0, enter_bug => 1 });
+my @custom_bug_fields = grep {$_->type != FIELD_TYPE_MULTI_SELECT}
+        Bugzilla->get_fields({ custom => 1, obsolete => 0, enter_bug => 1 });
 
 # Undefined custom fields are ignored to ensure they will get their default
 # value (e.g. "---" for custom single select fields).
@@ -166,6 +166,13 @@ $bug_params{'creation_ts'} = $timestamp;
 $bug_params{'cc'}          = [$cgi->param('cc')];
 $bug_params{'groups'}      = \@selected_groups;
 $bug_params{'comment'}     = $comment;
+
+my @multi_selects = Bugzilla->get_fields(
+        { type => FIELD_TYPE_MULTI_SELECT, custom => 1, obsolete => 0,
+            enter_bug => 1 });
+foreach my $field (@multi_selects) {
+    $bug_params{$field->name} = [$cgi->param($field->name)];
+}
 
 my $bug = Bugzilla::Bug->create(\%bug_params);
 

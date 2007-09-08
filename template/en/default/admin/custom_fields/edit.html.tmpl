@@ -84,7 +84,8 @@
       <th>&nbsp;</th>
       <td>&nbsp;</td>
     </tr>
-    [% IF field.type == constants.FIELD_TYPE_SINGLE_SELECT %]
+    [% IF field.type == constants.FIELD_TYPE_SINGLE_SELECT
+          || field.type == constants.FIELD_TYPE_MULTI_SELECT %]
       <tr>
         <th>&nbsp;</th>
         <td colspan="3">

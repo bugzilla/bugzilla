@@ -658,13 +658,13 @@
 
   [% ELSIF error == "illegal_change" %]
     [% title = "Not allowed" %]
-    You tried to change the 
+    You tried to change the
     <strong>[% field_descs.$field FILTER html %]</strong> field 
     [% IF oldvalue.defined %]
-      from <em>[% oldvalue FILTER html %]</em>
+      from <em>[% oldvalue.join(', ') FILTER html %]</em>
     [% END %]
     [% IF newvalue.defined %]
-      to <em>[% newvalue FILTER html %]</em>
+      to <em>[% newvalue.join(', ') FILTER html %]</em>
     [% END %]
     , but only
     [% IF privs < 3 %]

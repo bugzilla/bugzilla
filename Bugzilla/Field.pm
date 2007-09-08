@@ -252,9 +252,9 @@ sub _check_sortkey {
 sub _check_type {
     my ($invocant, $type) = @_;
     my $saved_type = $type;
-    # FIELD_TYPE_SINGLE_SELECT here should be updated every time a new,
+    # The constant here should be updated every time a new,
     # higher field type is added.
-    (detaint_natural($type) && $type <= FIELD_TYPE_SINGLE_SELECT)
+    (detaint_natural($type) && $type <= FIELD_TYPE_MULTI_SELECT)
       || ThrowCodeError('invalid_customfield_type', { type => $saved_type });
     return $type;
 }
@@ -454,13 +454,20 @@ sub create {
     if ($field->custom) {
         my $name = $field->name;
         my $type = $field->type;
-        # Create the database column that stores the data for this field.
-        $dbh->bz_add_column('bugs', $name, SQL_DEFINITIONS->{$type});
+        if (SQL_DEFINITIONS->{$type}) {
+            # Create the database column that stores the data for this field.
+            $dbh->bz_add_column('bugs', $name, SQL_DEFINITIONS->{$type});
+        }
+
+        if ($type == FIELD_TYPE_SINGLE_SELECT
+                || $type == FIELD_TYPE_MULTI_SELECT) 
+        {
+            # Create the table that holds the legal values for this field.
+            $dbh->bz_add_field_tables($field);
+        }
 
         if ($type == FIELD_TYPE_SINGLE_SELECT) {
-            # Create the table that holds the legal values for this field.
-            $dbh->bz_add_field_table($name);
-            # And insert a default value of "---" into it.
+            # Insert a default value of "---" into the legal values table.
             $dbh->do("INSERT INTO $name (value) VALUES ('---')");
         }
     }

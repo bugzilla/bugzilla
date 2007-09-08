@@ -819,7 +819,6 @@ C:\mysql\bin\replace "#!/usr/bin/perl" "#!C:\perl\bin\perl" -- *.cgi *.pl
             Please consult <xref linkend="security-mysql"/> of this guide
             and the MySQL documentation for better solutions.
             </para>
-          </warning>
         </answer>
       </qandaentry>
       

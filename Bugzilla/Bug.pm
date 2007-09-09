@@ -1299,7 +1299,7 @@ sub set_alias { $_[0]->set('alias', $_[1]); }
 sub set_cclist_accessible { $_[0]->set('cclist_accessible', $_[1]); }
 sub set_custom_field {
     my ($self, $field, $value) = @_;
-    if (ref $value eq 'ARRAY' && !$field->type == FIELD_TYPE_MULTI_SELECT) {
+    if (ref $value eq 'ARRAY' && $field->type != FIELD_TYPE_MULTI_SELECT) {
         $value = $value->[0];
     }
     ThrowCodeError('field_not_custom', { field => $field }) if !$field->custom;

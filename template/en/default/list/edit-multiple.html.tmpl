@@ -256,7 +256,7 @@
 
 [% IF groups.size > 0 %]
 
-  <b>Groupset:</b><br>
+  <b>Groups:</b><br>
   <table border="1">
     <tr>
       <th>Don't<br>change<br>this group<br>restriction</th>
@@ -273,7 +273,7 @@
       <td align="center">
         <input type="radio" name="bit-[% group.id %]" value="0">
       </td>
-      [% IF group.isactive %]
+      [% IF group.is_active %]
         <td align="center">
           <input type="radio" name="bit-[% group.id %]" value="1">
         </td>
@@ -283,7 +283,7 @@
       [% END %]
 
       <td>
-        [% SET inactive = !group.isactive %]
+        [% SET inactive = !group.is_active %]
         [% group.description FILTER html_light FILTER inactive(inactive) %]
       </td>
 

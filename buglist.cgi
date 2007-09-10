@@ -345,23 +345,31 @@ sub GetQuip {
     return $quip;
 }
 
+# Return groups available for at least one product of the buglist.
 sub GetGroups {
-    my $dbh = Bugzilla->dbh;
+    my $product_names = shift;
     my $user = Bugzilla->user;
+    my %legal_groups;
 
-    # Create an array where each item is a hash. The hash contains 
-    # as keys the name of the columns, which point to the value of 
-    # the columns for that row.
-    my $grouplist = $user->groups_as_string;
-    my $groups = $dbh->selectall_arrayref(
-                "SELECT  id, name, description, isactive
-                   FROM  groups
-                  WHERE  id IN ($grouplist)
-                    AND  isbuggroup = 1
-               ORDER BY  description "
-               , {Slice => {}});
+    foreach my $product_name (@$product_names) {
+        my $product = new Bugzilla::Product({name => $product_name});
 
-    return $groups;
+        foreach my $gid (keys %{$product->group_controls}) {
+            # The user can only edit groups he belongs to.
+            next unless $user->in_group_id($gid);
+
+            # The user has no control on groups marked as NA or MANDATORY.
+            my $group = $product->group_controls->{$gid};
+            next if ($group->{membercontrol} == CONTROLMAPMANDATORY
+                     || $group->{membercontrol} == CONTROLMAPNA);
+
+            # It's fine to include inactive groups. Those will be marked
+            # as "remove only" when editing several bugs at once.
+            $legal_groups{$gid} ||= $group->{group};
+        }
+    }
+    # Return a list of group objects.
+    return [values %legal_groups];
 }
 
 
@@ -1166,17 +1174,17 @@ if ($dotweak) {
 
     $vars->{'current_bug_statuses'} = [keys %$bugstatuses];
     $vars->{'new_bug_statuses'} = Bugzilla::Status->new_from_list($bug_status_ids);
-    # The groups to which the user belongs.
-    $vars->{'groups'} = GetGroups();
+
+    # The groups the user belongs to and which are editable for the given buglist.
+    my @products = keys %$bugproducts;
+    $vars->{'groups'} = GetGroups(\@products);
 
     # If all bugs being changed are in the same product, the user can change
     # their version and component, so generate a list of products, a list of
     # versions for the product (if there is only one product on the list of
     # products), and a list of components for the product.
-    $vars->{'bugproducts'} = [ keys %$bugproducts ];
-    if (scalar(@{$vars->{'bugproducts'}}) == 1) {
-        my $product = new Bugzilla::Product(
-            {name => $vars->{'bugproducts'}->[0]});
+    if (scalar(@products) == 1) {
+        my $product = new Bugzilla::Product({name => $products[0]});
         $vars->{'versions'} = [map($_->name ,@{$product->versions})];
         $vars->{'components'} = [map($_->name, @{$product->components})];
         $vars->{'targetmilestones'} = [map($_->name, @{$product->milestones})]

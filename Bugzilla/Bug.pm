@@ -1262,13 +1262,11 @@ sub fields {
            bug_file_loc status_whiteboard keywords
            priority bug_severity target_milestone
            dependson blocked votes everconfirmed
-           reporter assigned_to cc),
-    
+           reporter assigned_to cc estimated_time
+           remaining_time actual_time deadline),
+
         # Conditional Fields
         Bugzilla->params->{'useqacontact'} ? "qa_contact" : (),
-        Bugzilla->params->{'timetrackinggroup'} ? 
-            qw(estimated_time remaining_time actual_time deadline) : (),
-    
         # Custom Fields
         Bugzilla->custom_field_names
     );

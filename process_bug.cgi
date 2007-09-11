@@ -479,13 +479,17 @@ if ($action eq Bugzilla->params->{'move-button-text'}) {
     $user->is_mover || ThrowUserError("auth_failure", {action => 'move',
                                                        object => 'bugs'});
 
+    my @multi_select_locks  = map {'bug_' . $_->name . " WRITE"}
+        Bugzilla->get_fields({ custom => 1, type => FIELD_TYPE_MULTI_SELECT,
+                               obsolete => 0 });
+
     $dbh->bz_lock_tables('bugs WRITE', 'bugs_activity WRITE', 'duplicates WRITE',
                          'longdescs WRITE', 'profiles READ', 'groups READ',
                          'bug_group_map READ', 'group_group_map READ',
                          'user_group_map READ', 'classifications READ',
                          'products READ', 'components READ', 'votes READ',
                          'cc READ', 'fielddefs READ', 'bug_status READ',
-                         'status_workflow READ', 'resolution READ');
+                         'status_workflow READ', 'resolution READ', @multi_select_locks);
 
     # First update all moved bugs.
     foreach my $bug (@bug_objects) {

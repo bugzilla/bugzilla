@@ -104,7 +104,7 @@ use constant ERROR_GENERAL       => 999;
 use constant LOGIN_EXEMPT => {
     # Callers may have to know the Bugzilla version before logging in,
     # even on a requirelogin installation.
-    Bugzilla => ['version'],
+    Bugzilla => ['version', 'timezone'],
     User     => ['offer_account_by_email', 'login'],
 };
 

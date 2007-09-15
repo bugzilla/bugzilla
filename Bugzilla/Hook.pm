@@ -41,6 +41,7 @@ sub process {
         # If there's malicious data here, we have much bigger issues to 
         # worry about, so we can safely detaint them:
         trick_taint($extension);
+        next if -e "$extension/disabled";
         if (-e $extension.'/code/'.$name.'.pl') {
             Bugzilla->hook_args($args);
             do($extension.'/code/'.$name.'.pl');

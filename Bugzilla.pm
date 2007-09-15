@@ -79,6 +79,7 @@ use constant SHUTDOWNHTML_EXIT_SILENTLY => [
 #}
 #$::SIG{__DIE__} = \&Bugzilla::die_with_dignity;
 
+# Note that this is a raw subroutine, not a method, so $class isn't available.
 sub init_page {
 
     # Some environment variables are not taint safe
@@ -161,40 +162,42 @@ init_page() if !$ENV{MOD_PERL};
 
 sub template {
     my $class = shift;
-    request_cache()->{language} = "";
-    request_cache()->{template} ||= Bugzilla::Template->create();
-    return request_cache()->{template};
+    $class->request_cache->{language} = "";
+    $class->request_cache->{template} ||= Bugzilla::Template->create();
+    return $class->request_cache->{template};
 }
 
 sub template_inner {
     my ($class, $lang) = @_;
-    $lang = defined($lang) ? $lang : (request_cache()->{language} || "");
-    request_cache()->{language} = $lang;
-    request_cache()->{"template_inner_$lang"} ||= Bugzilla::Template->create();
-    return request_cache()->{"template_inner_$lang"};
+    $lang = defined($lang) ? $lang : ($class->request_cache->{language} || "");
+    $class->request_cache->{language} = $lang;
+    $class->request_cache->{"template_inner_$lang"}
+        ||= Bugzilla::Template->create();
+    return $class->request_cache->{"template_inner_$lang"};
 }
 
 sub cgi {
     my $class = shift;
-    request_cache()->{cgi} ||= new Bugzilla::CGI();
-    return request_cache()->{cgi};
+    $class->request_cache->{cgi} ||= new Bugzilla::CGI();
+    return $class->request_cache->{cgi};
 }
 
 sub localconfig {
-    request_cache()->{localconfig} ||= read_localconfig();
-    return request_cache()->{localconfig};
+    my $class = shift;
+    $class->request_cache->{localconfig} ||= read_localconfig();
+    return $class->request_cache->{localconfig};
 }
 
 sub params {
     my $class = shift;
-    request_cache()->{params} ||= Bugzilla::Config::read_param_file();
-    return request_cache()->{params};
+    $class->request_cache->{params} ||= Bugzilla::Config::read_param_file();
+    return $class->request_cache->{params};
 }
 
 sub user {
     my $class = shift;
-    request_cache()->{user} ||= new Bugzilla::User;
-    return request_cache()->{user};
+    $class->request_cache->{user} ||= new Bugzilla::User;
+    return $class->request_cache->{user};
 }
 
 sub set_user {
@@ -204,31 +207,25 @@ sub set_user {
 
 sub sudoer {
     my $class = shift;    
-    return request_cache()->{sudoer};
+    return $class->request_cache->{sudoer};
 }
 
 sub sudo_request {
-    my $class = shift;
-    my $new_user = shift;
-    my $new_sudoer = shift;
-
-    request_cache()->{user}   = $new_user;
-    request_cache()->{sudoer} = $new_sudoer;
-
+    my ($class, $new_user, $new_sudoer) = @_;
+    $class->request_cache->{user}   = $new_user;
+    $class->request_cache->{sudoer} = $new_sudoer;
     # NOTE: If you want to log the start of an sudo session, do it here.
-
-    return;
 }
 
 sub login {
     my ($class, $type) = @_;
 
-    return Bugzilla->user if Bugzilla->user->id;
+    return $class->user if $class->user->id;
 
     my $authorizer = new Bugzilla::Auth();
-    $type = LOGIN_REQUIRED if Bugzilla->cgi->param('GoAheadAndLogIn');
+    $type = LOGIN_REQUIRED if $class->cgi->param('GoAheadAndLogIn');
     if (!defined $type || $type == LOGIN_NORMAL) {
-        $type = Bugzilla->params->{'requirelogin'} ? LOGIN_REQUIRED : LOGIN_NORMAL;
+        $type = $class->params->{'requirelogin'} ? LOGIN_REQUIRED : LOGIN_NORMAL;
     }
     my $authenticated_user = $authorizer->login($type);
     
@@ -251,8 +248,8 @@ sub login {
         !($sudo_target->in_group('bz_sudo_protect'))
        )
     {
-        Bugzilla->set_user($sudo_target);
-        request_cache()->{sudoer} = $authenticated_user;
+        $class->set_user($sudo_target);
+        $class->request_cache->{sudoer} = $authenticated_user;
         # And make sure that both users have the same Auth object,
         # since we never call Auth::login for the sudo target.
         $sudo_target->set_authorizer($authenticated_user->authorizer);
@@ -260,10 +257,10 @@ sub login {
         # NOTE: If you want to do any special logging, do it here.
     }
     else {
-        Bugzilla->set_user($authenticated_user);
+        $class->set_user($authenticated_user);
     }
     
-    return Bugzilla->user;
+    return $class->user;
 }
 
 sub logout {
@@ -274,7 +271,7 @@ sub logout {
 
     $option = LOGOUT_CURRENT unless defined $option;
     Bugzilla::Auth::Persist::Cookie->logout({type => $option});
-    Bugzilla->logout_request() unless $option eq LOGOUT_KEEP_CURRENT;
+    $class->logout_request() unless $option eq LOGOUT_KEEP_CURRENT;
 }
 
 sub logout_user {
@@ -293,24 +290,26 @@ sub logout_user_by_id {
 
 # hack that invalidates credentials for a single request
 sub logout_request {
-    delete request_cache()->{user};
-    delete request_cache()->{sudoer};
+    my $class = shift;
+    delete $class->request_cache->{user};
+    delete $class->request_cache->{sudoer};
     # We can't delete from $cgi->cookie, so logincookie data will remain
     # there. Don't rely on it: use Bugzilla->user->login instead!
 }
 
 sub dbh {
     my $class = shift;
-
     # If we're not connected, then we must want the main db
-    request_cache()->{dbh} ||= request_cache()->{dbh_main} 
+    $class->request_cache->{dbh} ||= $class->request_cache->{dbh_main} 
         = Bugzilla::DB::connect_main();
 
-    return request_cache()->{dbh};
+    return $class->request_cache->{dbh};
 }
 
 sub languages {
-    return request_cache()->{languages} if request_cache()->{languages};
+    my $class = shift;
+    return $class->request_cache->{languages}
+        if $class->request_cache->{languages};
 
     my @files = glob(catdir(bz_locations->{'templatedir'}, '*'));
     my @languages;
@@ -324,22 +323,20 @@ sub languages {
         next unless $dir_entry =~ /^[a-zA-Z]{1,8}(-[a-zA-Z]{1,8})?$/;
         push(@languages, $dir_entry);
     }
-    return request_cache()->{languages} = \@languages;
+    return $class->request_cache->{languages} = \@languages;
 }
 
 sub error_mode {
-    my $class = shift;
-    my $newval = shift;
+    my ($class, $newval) = @_;
     if (defined $newval) {
-        request_cache()->{error_mode} = $newval;
+        $class->request_cache->{error_mode} = $newval;
     }
-    return request_cache()->{error_mode}
+    return $class->request_cache->{error_mode}
         || Bugzilla::Constants::ERROR_MODE_WEBPAGE;
 }
 
 sub usage_mode {
-    my $class = shift;
-    my $newval = shift;
+    my ($class, $newval) = @_;
     if (defined $newval) {
         if ($newval == USAGE_MODE_BROWSER) {
             $class->error_mode(ERROR_MODE_WEBPAGE);
@@ -357,9 +354,9 @@ sub usage_mode {
             ThrowCodeError('usage_mode_invalid',
                            {'invalid_usage_mode', $newval});
         }
-        request_cache()->{usage_mode} = $newval;
+        $class->request_cache->{usage_mode} = $newval;
     }
-    return request_cache()->{usage_mode}
+    return $class->request_cache->{usage_mode}
         || Bugzilla::Constants::USAGE_MODE_BROWSER;
 }
 
@@ -388,15 +385,15 @@ sub installation_answers {
 sub switch_to_shadow_db {
     my $class = shift;
 
-    if (!request_cache()->{dbh_shadow}) {
-        if (Bugzilla->params->{'shadowdb'}) {
-            request_cache()->{dbh_shadow} = Bugzilla::DB::connect_shadow();
+    if (!$class->request_cache->{dbh_shadow}) {
+        if ($class->params->{'shadowdb'}) {
+            $class->request_cache->{dbh_shadow} = Bugzilla::DB::connect_shadow();
         } else {
-            request_cache()->{dbh_shadow} = request_cache()->{dbh_main};
+            $class->request_cache->{dbh_shadow} = request_cache()->{dbh_main};
         }
     }
 
-    request_cache()->{dbh} = request_cache()->{dbh_shadow};
+    $class->request_cache->{dbh} = $class->request_cache->{dbh_shadow};
     # we have to return $class->dbh instead of {dbh} as
     # {dbh_shadow} may be undefined if no shadow DB is used
     # and no connection to the main DB has been established yet.
@@ -406,7 +403,7 @@ sub switch_to_shadow_db {
 sub switch_to_main_db {
     my $class = shift;
 
-    request_cache()->{dbh} = request_cache()->{dbh_main};
+    $class->request_cache->{dbh} = $class->request_cache->{dbh_main};
     # We have to return $class->dbh instead of {dbh} as
     # {dbh_main} may be undefined if no connection to the main DB
     # has been established yet.
@@ -445,10 +442,11 @@ sub request_cache {
 
 # Private methods
 
-# Per-process cleanup
+# Per-process cleanup. Note that this is a plain subroutine, not a method,
+# so we don't have $class available.
 sub _cleanup {
-    my $main   = request_cache()->{dbh_main};
-    my $shadow = request_cache()->{dbh_shadow};
+    my $main   = Bugzilla->request_cache->{dbh_main};
+    my $shadow = Bugzilla->request_cache->{dbh_shadow};
     foreach my $dbh ($main, $shadow) {
         next if !$dbh;
         $dbh->bz_rollback_transaction() if $dbh->bz_in_transaction;

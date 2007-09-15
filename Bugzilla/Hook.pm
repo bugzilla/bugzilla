@@ -44,6 +44,8 @@ sub process {
         next if -e "$extension/disabled";
         if (-e $extension.'/code/'.$name.'.pl') {
             Bugzilla->hook_args($args);
+            # Allow extensions to load their own libraries.
+            local @INC = ("$extension/lib", @INC);
             do($extension.'/code/'.$name.'.pl');
             ThrowCodeError('extension_invalid', 
                 { errstr => $@, name => $name, extension => $extension }) if $@;

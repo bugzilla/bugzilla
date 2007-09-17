@@ -665,7 +665,11 @@ sub create {
             },
 
             # Wrap a displayed comment to the appropriate length
-            wrap_comment => \&Bugzilla::Util::wrap_comment,
+            wrap_comment => [
+                sub {
+                    my ($context, $cols) = @_;
+                    return sub { wrap_comment($_[0], $cols) }
+                }, 1],
 
             # We force filtering of every variable in key security-critical
             # places; we have a none filter for people to use when they 

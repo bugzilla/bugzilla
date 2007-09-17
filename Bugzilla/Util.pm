@@ -312,11 +312,11 @@ sub diff_strings {
 }
 
 sub wrap_comment {
-    my ($comment) = @_;
+    my ($comment, $cols) = @_;
     my $wrappedcomment = "";
 
     # Use 'local', as recommended by Text::Wrap's perldoc.
-    local $Text::Wrap::columns = COMMENT_COLS;
+    local $Text::Wrap::columns = $cols || COMMENT_COLS;
     # Make words that are longer than COMMENT_COLS not wrap.
     local $Text::Wrap::huge    = 'overflow';
     # Don't mess with tabs.
@@ -332,6 +332,7 @@ sub wrap_comment {
       }
     }
 
+    chomp($wrappedcomment); # Text::Wrap adds an extra newline at the end.
     return $wrappedcomment;
 }
 

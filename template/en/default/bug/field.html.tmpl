@@ -76,7 +76,14 @@
         [% IF field.type == constants.FIELD_TYPE_MULTI_SELECT %]
           <input type="hidden" name="defined_[% field.name FILTER html %]">
         [% END %]
+     [% CASE constants.FIELD_TYPE_TEXTAREA %]
+       [% INCLUDE global/textarea.html.tmpl
+           id = field.name name = field.name minrows = 4 maxrows = 8
+           cols = 60 defaultcontent = value %]
   [% END %]
+[% ELSIF field.type == constants.FIELD_TYPE_TEXTAREA %]
+  <div class="uneditable_textarea">[% value FILTER wrap_comment(60)
+                                            FILTER html %]</div>
 [% ELSE %]
   [% value.join(', ') FILTER html %]
 [% END %]

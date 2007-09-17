@@ -317,6 +317,12 @@ dl dl > dt {
     padding-left: 1em;
 }
 
+/* For bug fields */
+.uneditable_textarea {
+    white-space: pre;
+    font-family: monospace;
+}
+
 div.user_match {
     margin-bottom: 1em;
 }

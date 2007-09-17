@@ -267,7 +267,7 @@ sub logout {
     my ($class, $option) = @_;
 
     # If we're not logged in, go away
-    return unless user->id;
+    return unless $class->user->id;
 
     $option = LOGOUT_CURRENT unless defined $option;
     Bugzilla::Auth::Persist::Cookie->logout({type => $option});

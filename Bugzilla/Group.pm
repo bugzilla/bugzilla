@@ -31,6 +31,7 @@ use base qw(Bugzilla::Object);
 use Bugzilla::Constants;
 use Bugzilla::Util;
 use Bugzilla::Error;
+use Bugzilla::Config qw(:admin);
 
 ###############################
 ##### Module Initialization ###

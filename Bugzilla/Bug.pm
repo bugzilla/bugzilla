@@ -156,10 +156,12 @@ sub VALIDATORS {
 };
 
 use constant UPDATE_VALIDATORS => {
-    bug_status => \&_check_bug_status,
+    bug_status          => \&_check_bug_status,
     cclist_accessible   => \&Bugzilla::Object::check_boolean,
     reporter_accessible => \&Bugzilla::Object::check_boolean,
-    resolution => \&_check_resolution,
+    resolution          => \&_check_resolution,
+    target_milestone    => \&_check_target_milestone,
+    version             => \&_check_version,
 };
 
 sub UPDATE_COLUMNS {
@@ -169,6 +171,7 @@ sub UPDATE_COLUMNS {
     my @columns = qw(
         alias
         cclist_accessible
+        component_id
         deadline
         estimated_time
         everconfirmed
@@ -177,12 +180,15 @@ sub UPDATE_COLUMNS {
         bug_status
         op_sys
         priority
+        product_id
         remaining_time
         rep_platform
         reporter_accessible
         resolution
         short_desc
         status_whiteboard
+        target_milestone
+        version
     );
     push(@columns, @custom_names);
     return @columns;
@@ -429,17 +435,17 @@ sub run_create_validators {
     $vars->{comment_exists} = ($params->{comment} =~ /\S+/) ? 1 : 0;
     Bugzilla::Bug->check_status_change_triggers($params->{bug_status}, [], $vars);
 
-    $params->{target_milestone} = $class->_check_target_milestone($product,
-        $params->{target_milestone});
+    $params->{target_milestone} = $class->_check_target_milestone(
+        $params->{target_milestone}, $product);
 
-    $params->{version} = $class->_check_version($product, $params->{version});
+    $params->{version} = $class->_check_version($params->{version}, $product);
 
     $params->{keywords} = $class->_check_keywords($params->{keywords}, $product);
 
     $params->{groups} = $class->_check_groups($product,
         $params->{groups});
 
-    my $component = $class->_check_component($product, $params->{component});
+    my $component = $class->_check_component($params->{component}, $product);
     $params->{component_id} = $component->id;
     delete $params->{component};
 
@@ -521,6 +527,12 @@ sub update {
         my $change = $changes->{$field};
         my $from = defined $change->[0] ? $change->[0] : '';
         my $to   = defined $change->[1] ? $change->[1] : '';
+        # Certain fields have their name stored in bugs_activity, not their id.
+        if ( grep($_ eq $field, qw(product_id component_id)) ) {
+            $field =~ s/_id$//;
+            $from  = $self->{"_old_${field}_name"};
+            $to    = $self->$field;
+        }
         LogActivityEntry($self->id, $field, $from, $to, Bugzilla->user->id,
                          $delta_ts);
     }
@@ -912,9 +924,10 @@ sub _check_comment_type {
 }
 
 sub _check_component {
-    my ($invocant, $product, $name) = @_;
+    my ($invocant, $name, $product) = @_;
     $name = trim($name);
     $name || ThrowUserError("require_component");
+    ($product = $invocant->product_obj) if ref $invocant;
     my $obj = Bugzilla::Component::check_component($product, $name);
     return $obj;
 }
@@ -1071,20 +1084,18 @@ sub _check_keywords {
 
 sub _check_product {
     my ($invocant, $name) = @_;
-    my $obj;
-    if (ref $invocant) {
-         $obj = Bugzilla::Product::check_product($name);
+    $name = trim($name);
+    # If we're updating the bug and they haven't changed the product,
+    # always allow it.
+    if (ref $invocant && lc($invocant->product_obj->name) eq lc($name)) {
+        return $invocant->product_obj;
     }
-    else {
-        # Check that the product exists and that the user
-        # is allowed to enter bugs into this product.
-        Bugzilla->user->can_enter_product($name, THROW_ERROR);
-        # can_enter_product already does everything that check_product
-        # would do for us, so we don't need to use it.
-        $obj = new Bugzilla::Product({ name => $name });
-    }
-
-    return $obj;
+    # Check that the product exists and that the user
+    # is allowed to enter bugs into this product.
+    Bugzilla->user->can_enter_product($name, THROW_ERROR);
+    # can_enter_product already does everything that check_product
+    # would do for us, so we don't need to use it.
+    return new Bugzilla::Product({ name => $name });
 }
 
 sub _check_op_sys {
@@ -1168,11 +1179,10 @@ sub _check_strict_isolation {
 }
 
 sub _check_target_milestone {
-    my ($invocant, $product, $target) = @_;
+    my ($invocant, $target, $product) = @_;
+    $product = $invocant->product_obj if ref $invocant;
+
     $target = trim($target);
-    if (ref $invocant) {
-        return undef if !Bugzilla->params->{'usetargetmilestone'};
-    }
     $target = $product->default_milestone if !defined $target;
     check_field('target_milestone', $target,
             [map($_->name, @{$product->milestones})]);
@@ -1214,8 +1224,9 @@ sub _check_qa_contact {
 }
 
 sub _check_version {
-    my ($invocant, $product, $version) = @_;
+    my ($invocant, $version, $product) = @_;
     $version = trim($version);
+    ($product = $invocant->product_obj) if ref $invocant;
     check_field('version', $version, [map($_->name, @{$product->versions})]);
     return $version;
 }
@@ -1295,6 +1306,22 @@ sub _set_global_validator {
 
 sub set_alias { $_[0]->set('alias', $_[1]); }
 sub set_cclist_accessible { $_[0]->set('cclist_accessible', $_[1]); }
+sub set_component  {
+    my ($self, $name) = @_;
+    my $old_comp  = $self->component_obj;
+    my $component = $self->_check_component($name);
+    if ($old_comp->id != $component->id) {
+        $self->{component_id}  = $component->id;
+        $self->{component}     = $component->name;
+        $self->{component_obj} = $component;
+        # For update()
+        $self->{_old_component_name} = $old_comp->name;
+        # Add in the Default CC of the new Component;
+        foreach my $cc (@{$component->initial_cc}) {
+            $self->add_cc($cc);
+        }
+    }
+}
 sub set_custom_field {
     my ($self, $field, $value) = @_;
     if (ref $value eq 'ARRAY' && $field->type != FIELD_TYPE_MULTI_SELECT) {
@@ -1319,6 +1346,111 @@ sub _set_everconfirmed { $_[0]->set('everconfirmed', $_[1]); }
 sub set_op_sys         { $_[0]->set('op_sys',        $_[1]); }
 sub set_platform       { $_[0]->set('rep_platform',  $_[1]); }
 sub set_priority       { $_[0]->set('priority',      $_[1]); }
+sub set_product {
+    my ($self, $name, $params) = @_;
+    my $old_product = $self->product_obj;
+    my $product = $self->_check_product($name);
+    
+    my $product_changed = 0;
+    if ($old_product->id != $product->id) {
+        $self->{product_id}  = $product->id;
+        $self->{product}     = $product->name;
+        $self->{product_obj} = $product;
+        # For update()
+        $self->{_old_product_name} = $old_product->name;
+        # Delete fields that depend upon the old Product value.
+        delete $self->{choices};
+        delete $self->{milestoneurl};
+        $product_changed = 1;
+    }
+
+    $params ||= {};
+    my $comp_name = $params->{component} || $self->component;
+    my $vers_name = $params->{version}   || $self->version;
+    my $tm_name   = $params->{target_milestone};
+    # This way, if usetargetmilestone is off and we've changed products,
+    # set_target_milestone will reset our target_milestone to
+    # $product->default_milestone. But if we haven't changed products,
+    # we don't reset anything.
+    if (!defined $tm_name
+        && (Bugzilla->params->{'usetargetmilestone'} || !$product_changed))
+    {
+        $tm_name = $self->target_milestone;
+    }
+
+    if ($product_changed && Bugzilla->usage_mode == USAGE_MODE_BROWSER) {
+        # Try to set each value with the new product.
+        # Have to set error_mode because Throw*Error calls exit() otherwise.
+        my $old_error_mode = Bugzilla->error_mode;
+        Bugzilla->error_mode(ERROR_MODE_DIE);
+        my $component_ok = eval { $self->set_component($comp_name);      1; };
+        my $version_ok   = eval { $self->set_version($vers_name);        1; };
+        my $milestone_ok = eval { $self->set_target_milestone($tm_name); 1; };
+        # If there were any errors thrown, make sure we don't mess up any
+        # other part of Bugzilla that checks $@.
+        undef $@;
+        Bugzilla->error_mode($old_error_mode);
+        
+        my $verified = $params->{change_confirmed};
+        my %vars;
+        if (!$verified || !$component_ok || !$version_ok || !$milestone_ok) {
+            $vars{defaults} = {
+                # Note that because of the eval { set } above, these are
+                # already set correctly if they're valid, otherwise they're
+                # set to some invalid value which the template will ignore.
+                component => $self->component,
+                version   => $self->version,
+                milestone => $milestone_ok ? $self->target_milestone
+                                           : $product->default_milestone
+            };
+            $vars{components} = [map { $_->name } @{$product->components}];
+            $vars{milestones} = [map { $_->name } @{$product->milestones}];
+            $vars{versions}   = [map { $_->name } @{$product->versions}];
+        }
+
+        if (!$verified) {
+            $vars{verify_bug_groups} = 1;
+            my $dbh = Bugzilla->dbh;
+            my @idlist = ($self->id);
+            push(@idlist, map {$_->id} @{ $params->{other_bugs} })
+                if $params->{other_bugs};
+            # Get the ID of groups which are no longer valid in the new product.
+            my $gids = $dbh->selectcol_arrayref(
+                'SELECT bgm.group_id
+                   FROM bug_group_map AS bgm
+                  WHERE bgm.bug_id IN (' . join(',', ('?' x @idlist)) . ')
+                    AND bgm.group_id NOT IN
+                        (SELECT gcm.group_id
+                           FROM group_control_map AS gcm
+                           WHERE gcm.product_id = ?
+                                 AND ( (gcm.membercontrol != ?
+                                        AND gcm.group_id IN ('
+                                        . Bugzilla->user->groups_as_string . '))
+                                       OR gcm.othercontrol != ?) )',
+                undef, (@idlist, $product->id, CONTROLMAPNA, CONTROLMAPNA));
+            $vars{'old_groups'} = Bugzilla::Group->new_from_list($gids);            
+        }
+        
+        if (%vars) {
+            $vars{product} = $product;
+            my $template = Bugzilla->template;
+            $template->process("bug/process/verify-new-product.html.tmpl",
+                \%vars) || ThrowTemplateError($template->error());
+            exit;
+        }
+    }
+    else {
+        # When we're not in the browser (or we didn't change the product), we
+        # just die if any of these are invalid.
+        $self->set_component($comp_name);
+        $self->set_version($vers_name);
+        $self->set_target_milestone($tm_name);
+    }
+    
+    # XXX This is temporary until all of process_bug uses update();
+    return $product_changed;
+}
+
 sub set_remaining_time { $_[0]->set('remaining_time', $_[1]); }
 # Used only when closing a bug or moving between closed states.
 sub _zero_remaining_time { $_[0]->{'remaining_time'} = 0; }
@@ -1332,8 +1464,10 @@ sub set_status {
     $self->_set_everconfirmed(1) if (is_open_state($status) && $status ne 'UNCONFIRMED');
 }
 sub set_status_whiteboard { $_[0]->set('status_whiteboard', $_[1]); }
-sub set_summary        { $_[0]->set('short_desc',    $_[1]); }
-sub set_url            { $_[0]->set('bug_file_loc',  $_[1]); }
+sub set_summary           { $_[0]->set('short_desc',        $_[1]); }
+sub set_target_milestone  { $_[0]->set('target_milestone',  $_[1]); }
+sub set_url               { $_[0]->set('bug_file_loc',      $_[1]); }
+sub set_version           { $_[0]->set('version',           $_[1]); }
 
 ########################
 # "Add/Remove" Methods #
@@ -1344,16 +1478,13 @@ sub set_url            { $_[0]->set('bug_file_loc',  $_[1]); }
 # Accepts a User object or a username. Adds the user only if they
 # don't already exist as a CC on the bug.
 sub add_cc {
-    # XXX $product is a temporary hack until all of process_bug uses Bug
-    # objects for updating.
-    my ($self, $user_or_name, $product) = @_;
+    my ($self, $user_or_name) = @_;
     return if !$user_or_name;
     my $user = ref $user_or_name ? $user_or_name
                                  : Bugzilla::User->check($user_or_name);
 
-    my $product_id = $product ? $product->id : $self->{product_id};
     if (Bugzilla->params->{strict_isolation}
-        && !$user->can_edit_product($product_id))
+        && !$user->can_edit_product($self->product_obj->id))
     {
         ThrowUserError('invalid_user_group', { users  => $user->login,
                                                bug_id => $self->id });
@@ -1598,6 +1729,15 @@ sub component {
     return $self->{component};
 }
 
+# XXX Eventually this will replace component()
+sub component_obj {
+    my ($self) = @_;
+    return $self->{component_obj} if defined $self->{component_obj};
+    return {} if $self->{error};
+    $self->{component_obj} = new Bugzilla::Component($self->{component_id});
+    return $self->{component_obj};
+}
+
 sub classification_id {
     my ($self) = @_;
     return $self->{classification_id} if exists $self->{classification_id};
@@ -1710,8 +1850,8 @@ sub product {
 sub product_obj {
     my $self = shift;
     return {} if $self->{error};
-    $self->{prod_obj} ||= new Bugzilla::Product($self->{product_id});
-    return $self->{prod_obj};
+    $self->{product_obj} ||= new Bugzilla::Product($self->{product_id});
+    return $self->{product_obj};
 }
 
 sub qa_contact {

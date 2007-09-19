@@ -17,6 +17,7 @@
   #
   # Contributor(s): Myk Melez <myk@mozilla.org>
   #                 Frédéric Buclin <LpSolit@gmail.com>
+  #                 Max Kanat-Alexander <mkanat@bugzilla.org>
   #%]
 
 [%# INTERFACE:
@@ -26,11 +27,9 @@
   # milestones: array; milestones for the new product.
   # defaults: hash; keys are names of fields, values are defaults for
   #   those fields
+  #
+  # verify_bug_groups: If groups need to be confirmed in addition to fields.
   #%]
-
-[%# The global Bugzilla->cgi object is used to obtain form variable values. %]
-[% USE Bugzilla %]
-[% cgi = Bugzilla.cgi %]
 
 [% PROCESS global/variables.none.tmpl %]
 
@@ -39,60 +38,77 @@
 
 <form action="process_bug.cgi" method="post">
 
+[% SET exclude_items = ['version', 'component', 'target_milestone'] %]
+[% IF verify_bug_groups %]
+  [% exclude_items.push('bit-\d+') %]
+[% END %]
+
 [% PROCESS "global/hidden-fields.html.tmpl"
-     exclude=("^version|component|target_milestone|bit-\\d+$") %]
+     exclude = '^' _ exclude_items.join('|') _ '$' %]
 
 <input type="hidden" name="confirm_product_change" value="1">
+    
 [%# Verify the version, component, and target milestone fields. %]
-  <h3>Verify Version, Component[% ", Target Milestone" IF Param("usetargetmilestone") %]</h3>
+<h3>Verify Version, Component[% ", Target Milestone" IF Param("usetargetmilestone") %]</h3>
 
-  <p>
-  [% IF Param("usetargetmilestone") %]
-    You are moving the [% terms.bug %](s) to the product 
-    <b>[% cgi.param("product") FILTER html %]</b>,
-    and the version, component, and/or target milestone fields are no longer
-    correct.  Please set the correct version, component, and target milestone now:
-  [% ELSE %]
-    You are moving the [% terms.bug %](s) to the product 
-    <b>[% cgi.param("product") FILTER html %]</b>,
-    and the version and component fields are no longer correct.
-    Please set the correct version and component now:
-  [% END %]
-  </p>
+<p>
+[% IF Param("usetargetmilestone") %]
+  You are moving the [% terms.bug %](s) to the product 
+  <b>[% product.name FILTER html %]</b>,
+  and the version, component, and/or target milestone fields are no longer
+  correct.  Please set the correct version, component, and target milestone now:
+[% ELSE %]
+  You are moving the [% terms.bug %](s) to the product 
+  <b>[% product.name FILTER html %]</b>,
+  and the version and component fields are no longer correct.
+  Please set the correct version and component now:
+[% END %]
+</p>
 
-  <table>
-    <tr>
-      <td>
-        <b>Version:</b><br>
-        [% PROCESS "global/select-menu.html.tmpl" 
-                   name="version"
-                   options=versions
-                   default=defaults.version
-                   size=10 %]
-      </td>
-      <td>
-        <b>Component:</b><br>
-        [% PROCESS "global/select-menu.html.tmpl"
-                   name="component"
-                   options=components
-                   default=defaults.component
-                   size=10 %]
-      </td>
-      [% IF Param("usetargetmilestone") %]
-        <td>
-          <b>Target Milestone:</b><br>
-        [% PROCESS "global/select-menu.html.tmpl"
-                   name="target_milestone"
-                   options=milestones
-                   default=defaults.target_milestone
-                   size=10 %]
-        </td>
+<table>
+  <tr>
+    <td>
+      <b>Version:</b><br>
+      [% IF versions.size == 1 %]
+        [% SET default_version = versions.0 %]
+      [% ELSE %]
+        [% SET default_version = defaults.version %]
       [% END %]
-    </tr>
-  </table>
+      [% PROCESS "global/select-menu.html.tmpl" 
+                 name="version"
+                 options=versions
+                 default=default_version
+                 size=10 %]
+    </td>
+    <td>
+      <b>Component:</b><br>
+      [% IF components.size == 1 %]
+        [% SET default_component = components.0 %]
+      [% ELSE %]
+        [% SET default_component = defaults.component %]
+      [% END %]
+      [% PROCESS "global/select-menu.html.tmpl"
+                 name="component"
+                 options=components
+                 default=default_component
+                 size=10 %]
+    </td>
+    [% IF Param("usetargetmilestone") %]
+      <td>
+        <b>Target Milestone:</b><br>
+      [% PROCESS "global/select-menu.html.tmpl"
+                 name="target_milestone"
+                 options=milestones
+                 default=defaults.milestone
+                 size=10 %]
+      </td>
+    [% END %]
+  </tr>
+</table>
 
+[% IF verify_bug_groups %]
   <h3>Verify [% terms.Bug %] Group</h3>
-
+  
   [% IF old_groups.size %]
     <p>These groups are not legal for the '[% product.name FILTER html %]'
     product or you are not allowed to restrict [% terms.bugs %] to these groups.
@@ -157,6 +173,7 @@
     [% END %]
     </p>
   [% END %]
+[% END %]
 
 <input type="submit" id="change_product" value="Commit">
 

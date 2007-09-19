@@ -95,6 +95,20 @@ sub send_results {
     $vars->{'header_done'} = 1;
 }
 
+# Tells us whether or not a field should be changed by process_bug, by
+# checking that it's defined and not set to dontchange.
+sub should_set {
+    my ($field) = @_;
+    my $cgi = Bugzilla->cgi;
+    if (defined $cgi->param($field)
+        && (!$cgi->param('dontchange') 
+            || $cgi->param($field) ne $cgi->param('dontchange')))
+    {
+        return 1;
+    }
+    return 0;
+}
+
 sub comment_exists {
     my $cgi = Bugzilla->cgi;
     return ($cgi->param('comment') && $cgi->param('comment') =~ /\S+/) ? 1 : 0;
@@ -223,166 +237,28 @@ if ($cgi->cookie("BUGLIST") && defined $cgi->param('id')) {
     $vars->{'bug_list'} = \@bug_list;
 }
 
-# Figure out whether or not the user is trying to change the product
-# (either the "product" variable is not set to "don't change" or the
-# user is changing a single bug and has changed the bug's product),
-# and make the user verify the version, component, target milestone,
-# and bug groups if so.
-# At this point, the product must be defined, even if set to "dontchange".
-defined($cgi->param('product'))
-  || ThrowCodeError('undefined_field', { field => 'product' });
-
-my $product_change = 0;
-if ((defined $cgi->param('id') && $cgi->param('product') ne $bug->product)
-     || (!$cgi->param('id')
-         && $cgi->param('product') ne $cgi->param('dontchange')))
-{
-    if (Bugzilla->params->{'commentonreassignbycomponent'} && !comment_exists()) {
-        ThrowUserError('comment_required');
-    }
-    # Check to make sure they actually have the right to change the product
-    my $oldproduct = (defined $cgi->param('id')) ? $bug->product : '';
-    if (!$bug->check_can_change_field('product', $oldproduct, $cgi->param('product'),
-                                      \$PrivilegesRequired))
-    {
-        $vars->{'oldvalue'} = $oldproduct;
-        $vars->{'newvalue'} = $cgi->param('product');
-        $vars->{'field'} = 'product';
-        $vars->{'privs'} = $PrivilegesRequired;
-        ThrowUserError("illegal_change", $vars);
-    }
-
-    my $product_name = $cgi->param('product');
-    my $product = new Bugzilla::Product({name => $product_name});
-
-    # If at least one bug does not belong to the product we are
-    # moving to, we have to check whether or not the user is
-    # allowed to enter bugs into that product.
-    # Note that this check must be done early to avoid the leakage
-    # of component, version and target milestone names.
-    my $check_can_enter = 1;
-    if ($product) {
-        $check_can_enter =
-          $dbh->selectrow_array("SELECT 1 FROM bugs
-                                 WHERE product_id != ?
-                                 AND bugs.bug_id IN
-                                 (" . join(',', @idlist) . ") " .
-                                 $dbh->sql_limit(1),
-                                 undef, $product->id);
-    }
-    if ($check_can_enter) { $user->can_enter_product($product_name, 1) }
-
-    # note that when this script is called from buglist.cgi (rather
-    # than show_bug.cgi), it's possible that the product will be changed
-    # but that the version and/or component will be set to 
-    # "--dont_change--" but still happen to be correct.  in this case,
-    # the if statement will incorrectly trigger anyway.  this is a 
-    # pretty weird case, and not terribly unreasonable behavior, but 
-    # worthy of a comment, perhaps.
-    #
-    my @version_names = map($_->name, @{$product->versions});
-    my @component_names = map($_->name, @{$product->components});
-    my $vok = 0;
-    if (defined $cgi->param('version')) {
-        $vok = lsearch(\@version_names, $cgi->param('version')) >= 0;
-    }
-    my $cok = 0;
-    if (defined $cgi->param('component')) {
-        $cok = lsearch(\@component_names, $cgi->param('component')) >= 0;
-    }
-
-    my $mok = 1;   # so it won't affect the 'if' statement if milestones aren't used
-    my @milestone_names = ();
-    if ( Bugzilla->params->{"usetargetmilestone"} ) {
-       @milestone_names = map($_->name, @{$product->milestones});
-       $mok = 0;
-       if (defined $cgi->param('target_milestone')) {
-           $mok = lsearch(\@milestone_names, $cgi->param('target_milestone')) >= 0;
-       }
-    }
-
-    # We cannot be sure if the component is the same by only checking $cok; the
-    # current component name could exist in the new product. So always display
-    # the form and use the confirm_product_change param to check if that was
-    # shown. Also show the verification form if the product-specific fields
-    # somehow still need to be verified, or if we need to verify whether or not
-    # to add the bugs to their new product's group.
-    if (!$vok || !$cok || !$mok || !defined $cgi->param('confirm_product_change')) {
-
-        if (Bugzilla->usage_mode == USAGE_MODE_EMAIL) {
-            if (!$vok) {
-                ThrowUserError('version_not_valid', {
-                    version => $cgi->param('version'),
-                    product => $product->name});
-            }
-            if (!$cok) {
-                ThrowUserError('component_not_valid', {
-                    product => $product->name,
-                    name    => $cgi->param('component')});
-            }
-            if (!$mok) {
-                ThrowUserError('milestone_not_valid', {
-                    product   => $product->name,
-                    milestone => $cgi->param('target_milestone')});
-            }
+my $product_change; # XXX Temporary until all of process_bug uses update()
+if (should_set('product')) {
+    # We only pass the fields if they're defined and not set to dontchange.
+    # This is because when you haven't changed the product, --do-not-change--
+    # isn't a valid component, version, or target_milestone. (When you're
+    # doing a mass-change, some bugs might already be in the new product.)
+    my %product_fields;
+    foreach my $field (qw(component version target_milestone)) {
+        if (should_set($field)) {
+            $product_fields{$field} = $cgi->param($field);
         }
-
-        $vars->{'product'} = $product;
-        my %defaults;
-        # We set the defaults to these fields to the old value,
-        # if it's a valid option, otherwise we use the default where
-        # that's appropriate
-        $vars->{'versions'} = \@version_names;
-        if ($vok) {
-            $defaults{'version'} = $cgi->param('version');
-        }
-        elsif (scalar(@version_names) == 1) {
-            $defaults{'version'} = $version_names[0];
-        }
-
-        $vars->{'components'} = \@component_names;
-        if ($cok) {
-            $defaults{'component'} = $cgi->param('component');
-        }
-        elsif (scalar(@component_names) == 1) {
-            $defaults{'component'} = $component_names[0];
-        }
-
-        if (Bugzilla->params->{"usetargetmilestone"}) {
-            $vars->{'milestones'} = \@milestone_names;
-            if ($mok) {
-                $defaults{'target_milestone'} = $cgi->param('target_milestone');
-            } else {
-                $defaults{'target_milestone'} = $product->default_milestone;
-            }
-        }
-        $vars->{'defaults'} = \%defaults;
-
-        # Get the ID of groups which are no longer valid in the new product.
-        my $gids =
-          $dbh->selectcol_arrayref('SELECT bgm.group_id
-                                      FROM bug_group_map AS bgm
-                                     WHERE bgm.bug_id IN (' . join(', ', @idlist) . ')
-                                       AND bgm.group_id NOT IN
-                                           (SELECT gcm.group_id
-                                              FROM group_control_map AS gcm
-                                             WHERE gcm.product_id = ?
-                                               AND ((gcm.membercontrol != ?
-                                                    AND gcm.group_id IN (' . $grouplist . '))
-                                                    OR gcm.othercontrol != ?))',
-                                     undef, ($product->id, CONTROLMAPNA, CONTROLMAPNA));
-        $vars->{'old_groups'} = Bugzilla::Group->new_from_list($gids);
-
-        $template->process("bug/process/verify-new-product.html.tmpl", $vars)
-          || ThrowTemplateError($template->error());
-        exit;
     }
-    $product_change = 1;
+
+    foreach my $b (@bug_objects) {
+        my $changed = $b->set_product(scalar $cgi->param('product'),
+            { %product_fields,
+              change_confirmed => scalar $cgi->param('confirm_product_change'),
+              other_bugs => \@bug_objects,
+            });
+        $product_change ||= $changed;
+    }
 }
-
-# At this point, the component must be defined, even if set to "dontchange".
-defined($cgi->param('component'))
-  || ThrowCodeError('undefined_field', { field => 'component' });
 
 # Confirm that the reporter of the current bug can access the bug we are duping to.
 sub DuplicateUserConfirm {
@@ -426,27 +302,6 @@ sub DuplicateUserConfirm {
     exit;
 }
 
-if (defined $cgi->param('id')) {
-    # since this means that we were called from show_bug.cgi, now is a good
-    # time to do a whole bunch of error checking that can't easily happen when
-    # we've been called from buglist.cgi, because buglist.cgi only tweaks
-    # values that have been changed instead of submitting all the new values.
-    # (XXX those error checks need to happen too, but implementing them 
-    # is more work in the current architecture of this script...)
-
-    my $prod = $bug->_check_product($cgi->param('product'));
-    $cgi->param('product', $prod->name);
-
-    my $comp = $bug->_check_component($prod, 
-                                      scalar $cgi->param('component'));
-    $cgi->param('component', $comp->name);
-
-    $cgi->param('version', $bug->_check_version($prod,
-                                                scalar $cgi->param('version')));
-    $cgi->param('target_milestone', $bug->_check_target_milestone($prod,
-        scalar $cgi->param('target_milestone')));
-}
-
 my %methods = (
     bug_severity => 'set_severity',
     rep_platform => 'set_platform',
@@ -454,7 +309,11 @@ my %methods = (
     bug_file_loc => 'set_url',
 );
 foreach my $b (@bug_objects) {
+    # Component, target_milestone, and version are in here just in case
+    # the 'product' field wasn't defined in the CGI. It doesn't hurt to set
+    # them twice.
     foreach my $field_name (qw(op_sys rep_platform priority bug_severity
+                               component target_milestone version
                                bug_file_loc status_whiteboard short_desc
                                deadline remaining_time estimated_time))
     {
@@ -559,19 +418,6 @@ sub DoComma {
     $::comma = ",";
 }
 
-foreach my $field ("version", "target_milestone") {
-    if (defined $cgi->param($field)) {
-        if (!$cgi->param('dontchange')
-            || $cgi->param($field) ne $cgi->param('dontchange')) {
-            DoComma();
-            $::query .= "$field = ?";
-            my $value = trim($cgi->param($field));
-            trick_taint($value);
-            push(@values, $value);
-        }
-    }
-}
-
 # Add custom fields data to the query that will update the database.
 foreach my $field (Bugzilla->get_fields({custom => 1, obsolete => 0})) {
     my $fname = $field->name;
@@ -583,24 +429,10 @@ foreach my $field (Bugzilla->get_fields({custom => 1, obsolete => 0})) {
     }
 }
 
-my $product;
-my $prod_changed = 0;
-my @newprod_ids;
+my ($product, @newprod_ids);
 if ($cgi->param('product') ne $cgi->param('dontchange')) {
     $product = Bugzilla::Product::check_product(scalar $cgi->param('product'));
-
-    DoComma();
-    $::query .= "product_id = ?";
-    push(@values, $product->id);
     @newprod_ids = ($product->id);
-    # If the bug remains in the same product, leave $prod_changed set to 0.
-    # Even with 'strict_isolation' turned on, we ignore users who already
-    # play a role for the bug; else you would never be able to edit it.
-    # If you want to move the bug to another product, then you first have to
-    # remove these users from the bug.
-    unless (defined $cgi->param('id') && $bug->product_id == $product->id) {
-        $prod_changed = 1;
-    }
 } else {
     @newprod_ids = @{$dbh->selectcol_arrayref("SELECT DISTINCT product_id
                                                FROM bugs 
@@ -612,32 +444,7 @@ if ($cgi->param('product') ne $cgi->param('dontchange')) {
     }
 }
 
-my $component;
 my (@cc_add, @cc_remove);
-
-if ($cgi->param('component') ne $cgi->param('dontchange')) {
-    if (scalar(@newprod_ids) > 1) {
-        ThrowUserError("no_component_change_for_multiple_products");
-    }
-    $component =
-        Bugzilla::Component::check_component($product, scalar $cgi->param('component'));
-
-    # This parameter is required later when checking fields the user can change.
-    $cgi->param('component_id', $component->id);
-    DoComma();
-    $::query .= "component_id = ?";
-    push(@values, $component->id);
-
-    # Add in the default CC list for the component if we are moving bugs.
-    if (!$cgi->param('id') || $component->id != $bug->component_id) {
-        foreach my $cc (@{$component->initial_cc}) {
-            # NewCC must be defined or the code below won't insert
-            # any CCs.
-            $cgi->param('newcc') || $cgi->param('newcc', "");
-            push(@cc_add, $cc->login);
-        }
-    }
-}
 
 # Certain changes can only happen on individual bugs, never on mass-changes.
 if (defined $cgi->param('id')) {
@@ -721,7 +528,7 @@ if (defined $cgi->param('newcc')
 
 foreach my $b (@bug_objects) {
     $b->remove_cc($_) foreach @cc_remove;
-    $b->add_cc($_, $product) foreach @cc_add;
+    $b->add_cc($_) foreach @cc_add;
 }
 
 # Store the new assignee and QA contact IDs (if any). This is the
@@ -891,7 +698,7 @@ sub SnapShotBug {
 
 my $timestamp;
 
-if ($prod_changed && Bugzilla->params->{"strict_isolation"}) {
+if ($product_change && Bugzilla->params->{"strict_isolation"}) {
     my $sth_cc = $dbh->prepare("SELECT who
                                 FROM cc
                                 WHERE bug_id = ?");
@@ -982,10 +789,9 @@ foreach my $id (@idlist) {
     }
 
     # We have to check whether the bug is moved to another product
-    # and/or component before reassigning. If $component is defined,
-    # use it; else use the product/component the bug is already in.
+    # and/or component before reassigning.
     if ($cgi->param('set_default_assignee')) {
-        my $new_comp_id = $component ? $component->id : $old_bug_obj->component_id;
+        my $new_comp_id = $bug_objects{$id}->component_id;
         $assignee = $dbh->selectrow_array('SELECT initialowner
                                            FROM components
                                            WHERE components.id = ?',
@@ -996,7 +802,7 @@ foreach my $id (@idlist) {
     }
 
     if (Bugzilla->params->{'useqacontact'} && $cgi->param('set_default_qa_contact')) {
-        my $new_comp_id = $component ? $component->id : $old_bug_obj->component_id;
+        my $new_comp_id = $bug_objects{$id}->component_id;
         $qacontact = $dbh->selectrow_array('SELECT initialqacontact
                                             FROM components
                                             WHERE components.id = ?',
@@ -1096,25 +902,16 @@ foreach my $id (@idlist) {
                       { product => $oldhash{'product'} });
     }
 
-    # If we are editing a single bug or if bugs are being moved into
-    # a specific product, $product is defined. If $product is undefined,
-    # then we don't move bugs, so we can use their current product.
-    my $new_product = $product || new Bugzilla::Product({name => $oldhash{'product'}});
-    if ($requiremilestone) {
-        # musthavemilestoneonaccept applies only if at least two
-        # target milestones are defined for the product.
-        if (scalar(@{$new_product->milestones}) > 1) {
-            my $value = $cgi->param('target_milestone');
-            if (!defined $value || $value eq $cgi->param('dontchange')) {
-                $value = $oldhash{'target_milestone'};
-            }
-            # if musthavemilestoneonaccept == 1, then the target
-            # milestone must be different from the default one.
-            if ($value eq $new_product->default_milestone) {
-                ThrowUserError("milestone_required", { bug_id => $id });
-            }
-        }
-    }   
+    my $new_product = $bug_objects{$id}->product_obj;
+    # musthavemilestoneonaccept applies only if at least two
+    # target milestones are defined for the product.
+    if ($requiremilestone
+        && scalar(@{ $new_product->milestones }) > 1
+        && $bug_objects{$id}->target_milestone
+           eq $new_product->default_milestone)
+    {
+        ThrowUserError("milestone_required", { bug_id => $id });
+    }
     if (defined $cgi->param('delta_ts') && $cgi->param('delta_ts') ne $delta_ts)
     {
         ($vars->{'operations'}) =
@@ -1301,19 +1098,6 @@ foreach my $id (@idlist) {
         my $new = shift @newvalues;
         if ($old ne $new) {
 
-            # Products and components are now stored in the DB using ID's
-            # We need to translate this to English before logging it
-            if ($col eq 'product_id') {
-                $old = $old_bug_obj->product;
-                $new = $new_bug_obj->product;
-                $col = 'product';
-            }
-            if ($col eq 'component_id') {
-                $old = $old_bug_obj->component;
-                $new = $new_bug_obj->component;
-                $col = 'component';
-            }
-
             # save off the old value for passing to Bugzilla::BugMail so
             # the old assignee can be notified
             #
@@ -1333,6 +1117,8 @@ foreach my $id (@idlist) {
 
             # Bugzilla::Bug does these for us already.
             next if grep($_ eq $col, qw(keywords op_sys rep_platform priority
+                                        product_id component_id version
+                                        target_milestone
                                         bug_severity short_desc alias
                                         deadline estimated_time remaining_time
                                         reporter_accessible cclist_accessible

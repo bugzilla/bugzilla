@@ -152,7 +152,7 @@ if (defined $cgi->param('id')) {
 }
 
 # Make sure there are bugs to process.
-scalar(@idlist) || ThrowUserError("no_bugs_chosen");
+scalar(@idlist) || ThrowUserError("no_bugs_chosen", {action => 'modify'});
 
 # Build a bug object using the first bug id, for validations.
 my $bug = $bug_objects[0];

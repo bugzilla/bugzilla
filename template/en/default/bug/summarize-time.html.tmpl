@@ -16,7 +16,7 @@
 
 [% USE date %]
 
-[% PROCESS global/variables.none.tmpl %]
+[% PROCESS "global/field-descs.none.tmpl" %]
 
 [% title = "Time Summary " %]
 [% IF do_depends %]
@@ -193,7 +193,7 @@
     <tr class="bug_header[% '2' IF cid % 2 %]">
         <td width="10" valign="top">
         [% INCLUDE buglink id=id %]</td>
-        <td width="10"><b>[% bug_status FILTER html %]</b></td>
+        <td width="10"><b>[% status_descs.${bug_status} FILTER html %]</b></td>
         <td colspan="2">[% short_desc FILTER html %]</td>
         [% extra FILTER none %]
     </tr>

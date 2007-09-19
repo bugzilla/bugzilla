@@ -98,11 +98,16 @@ sub send_results {
 # Tells us whether or not a field should be changed by process_bug, by
 # checking that it's defined and not set to dontchange.
 sub should_set {
-    my ($field) = @_;
+    # check_defined is used for custom fields, where there's another field
+    # whose name starts with "defined_" and then the field name--it's used
+    # to know when we did things like empty a multi-select or deselect
+    # a checkbox.
+    my ($field, $check_defined) = @_;
     my $cgi = Bugzilla->cgi;
-    if (defined $cgi->param($field)
-        && (!$cgi->param('dontchange') 
-            || $cgi->param($field) ne $cgi->param('dontchange')))
+    if (( defined $cgi->param($field) 
+          || ($check_defined && defined $cgi->param("defined_$field")) )
+        && ( !$cgi->param('dontchange') 
+             || $cgi->param($field) ne $cgi->param('dontchange')) )
     {
         return 1;
     }
@@ -317,12 +322,7 @@ foreach my $b (@bug_objects) {
                                bug_file_loc status_whiteboard short_desc
                                deadline remaining_time estimated_time))
     {
-        # We only update the field if it's defined and it's not set
-        # to dontchange.
-        if ( defined $cgi->param($field_name)
-             && (!$cgi->param('dontchange')
-                 || $cgi->param($field_name) ne $cgi->param('dontchange')) )
-        {
+        if (should_set($field_name)) {
             my $method = $methods{$field_name};
             $method ||= "set_" . $field_name;
             $b->$method($cgi->param($field_name));
@@ -421,10 +421,7 @@ sub DoComma {
 # Add custom fields data to the query that will update the database.
 foreach my $field (Bugzilla->get_fields({custom => 1, obsolete => 0})) {
     my $fname = $field->name;
-    if ( (defined $cgi->param($fname) || defined $cgi->param("defined_$fname"))
-         && (!$cgi->param('dontchange')
-             || $cgi->param($fname) ne $cgi->param('dontchange')))
-    {
+    if (should_set($fname, 1)) {
         $_->set_custom_field($field, [$cgi->param($fname)]) foreach @bug_objects;
     }
 }
@@ -546,10 +543,7 @@ my $assignee_checked = 0;
 
 my %usercache = ();
 
-if (defined $cgi->param('assigned_to')
-    && !$cgi->param('set_default_assignee')
-    && trim($cgi->param('assigned_to')) ne $cgi->param('dontchange'))
-{
+if (should_set('assigned_to') && !$cgi->param('set_default_assignee')) {
     my $name = trim($cgi->param('assigned_to'));
     if ($name ne "") {
         $assignee = login_to_id($name, THROW_ERROR);
@@ -577,38 +571,35 @@ if (defined $cgi->param('assigned_to')
     $assignee_checked = 1;
 };
 
-if (defined $cgi->param('qa_contact') && !$cgi->param('set_default_qa_contact')) {
+if (should_set('qa_contact') && !$cgi->param('set_default_qa_contact')) {
     my $name = trim($cgi->param('qa_contact'));
-    # The QA contact cannot be deleted from show_bug.cgi for a single bug!
-    if ($name ne $cgi->param('dontchange')) {
-        $qacontact = login_to_id($name, THROW_ERROR) if ($name ne "");
-        if ($qacontact && Bugzilla->params->{"strict_isolation"}
-            && !(defined $cgi->param('id') && $bug->qa_contact
-                 && $qacontact == $bug->qa_contact->id))
-        {
-                $usercache{$qacontact} ||= Bugzilla::User->new($qacontact);
-                my $qa_user = $usercache{$qacontact};
-                foreach my $product_id (@newprod_ids) {
-                    if (!$qa_user->can_edit_product($product_id)) {
-                        my $product_name = Bugzilla::Product->new($product_id)->name;
-                        ThrowUserError('invalid_user_group',
-                                          {'users'   => $qa_user->login,
-                                           'product' => $product_name,
-                                           'bug_id' => (scalar(@idlist) > 1)
-                                                         ? undef : $idlist[0]
-                                          });
-                    }
+    $qacontact = login_to_id($name, THROW_ERROR) if ($name ne "");
+    if ($qacontact && Bugzilla->params->{"strict_isolation"}
+        && !(defined $cgi->param('id') && $bug->qa_contact
+             && $qacontact == $bug->qa_contact->id))
+    {
+            $usercache{$qacontact} ||= Bugzilla::User->new($qacontact);
+            my $qa_user = $usercache{$qacontact};
+            foreach my $product_id (@newprod_ids) {
+                if (!$qa_user->can_edit_product($product_id)) {
+                    my $product_name = Bugzilla::Product->new($product_id)->name;
+                    ThrowUserError('invalid_user_group',
+                                      {'users'   => $qa_user->login,
+                                       'product' => $product_name,
+                                       'bug_id' => (scalar(@idlist) > 1)
+                                                     ? undef : $idlist[0]
+                                      });
                 }
-        }
-        $qacontact_checked = 1;
-        DoComma();
-        if($qacontact) {
-            $::query .= "qa_contact = ?";
-            push(@values, $qacontact);
-        }
-        else {
-            $::query .= "qa_contact = NULL";
-        }
+            }
+    }
+    $qacontact_checked = 1;
+    DoComma();
+    if($qacontact) {
+        $::query .= "qa_contact = ?";
+        push(@values, $qacontact);
+    }
+    else {
+        $::query .= "qa_contact = NULL";
     }
 }
 

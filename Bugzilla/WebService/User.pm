@@ -74,6 +74,11 @@ sub offer_account_by_email {
     my $email = trim($params->{email})
         || ThrowCodeError('param_required', { param => 'email' });
 
+    my $createexp = Bugzilla->params->{'createemailregexp'};
+    if (!$createexp || $email !~ /$createexp/) {
+        ThrowUserError("account_creation_disabled");
+    }
+
     $email = Bugzilla::User->check_login_name_for_creation($email);
 
     # Create and send a token for this new account.

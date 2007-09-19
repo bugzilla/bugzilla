@@ -4,7 +4,7 @@ linked from the index page.
 
 bugzilla.org links for release notes
 ------------------------------------
-3.0.1: http://www.bugzilla.org/releases/3.0.1/release-notes.html
+3.0.2: http://www.bugzilla.org/releases/3.0.2/release-notes.html
 
 ***************************************
 *** The Bugzilla 2.22 Release Notes ***

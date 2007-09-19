@@ -20,7 +20,7 @@
 
 [% PROCESS global/variables.none.tmpl %]
 [% INCLUDE global/header.html.tmpl 
-  title = "$terms.Bugzilla 3.0.1 Release Notes" 
+  title = "$terms.Bugzilla 3.0.2 Release Notes" 
   style_urls = ['skins/standard/release-notes.css'] 
 %]
 
@@ -58,8 +58,19 @@
 <p>This section describes what's changed in the most recent b<!-- -->ug-fix
   releases of [% terms.Bugzilla %] after 3.0. We only list the
   most important fixes in each release. If you want a detailed list of
-  <em>everything</em> that's changed since 3.0, you should use our
+  <em>everything</em> that's changed in each version, you should use our
   <a href="http://www.bugzilla.org/status/changes.html">Change Log Page</a>.</p>
+
+<h3>3.0.2</h3>
+
+<ul>
+  <li>[% terms.Bugzilla %] should now work on Perl 5.9.5 (and thus the
+    upcoming Perl 5.10.0).
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=390442">[% terms.Bug %] 390442</a>)</li>
+</ul>
+
+<p>See also the <a href="#v30_security">Security Advisory</a> section for
+  information about an important security issue fixed in this release.</p>
 
 <h3>3.0.1</h3>
 
@@ -564,6 +575,13 @@
 </ul>
 
 <h2><a name="v30_security"></a>Security Updates in This Release</h2>
+
+<h3>3.0.2</h3>
+
+<p>[% terms.Bugzilla %] 3.0.1 had an important security fix that is
+  critical for public installations with "requirelogin" turned on.
+  For details, see the
+  <a href="http://www.bugzilla.org/security/3.0.1/">Security Advisory</a></p>
 
 <h3>3.0.1</h3>
 

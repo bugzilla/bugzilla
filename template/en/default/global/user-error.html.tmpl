@@ -904,11 +904,6 @@
     The name of a milestone is limited to 20 characters. 
     '[% name FILTER html %]' is too long ([% name.length %] characters).
 
-  [% ELSIF error == "milestone_not_valid" %]
-    [% title = "Specified Milestone Does Not Exist" %]
-    The milestone '[% milestone FILTER html %]' for product 
-    '[% product FILTER html %]' does not exist.
-
   [% ELSIF error == "milestone_required" %]
     [% title = "Milestone Required" %]
     You must determine a target milestone for [% terms.bug %] 
@@ -1066,11 +1061,6 @@
   [% ELSIF error == "no_bugs_to_remove" %]
     [% title = "No Tag Selected" %]
     You didn't select a tag from which to remove [% terms.bugs %].
-
-  [% ELSIF error == "no_component_change_for_multiple_products" %]
-    [% title = "Action Not Permitted" %]
-    You cannot change the component for a list of [% terms.bugs %] covering more than
-    one product.
 
   [% ELSIF error == "no_dupe_stats" %]
     [% title = "Cannot Find Duplicate Statistics" %]
@@ -1494,11 +1484,6 @@
   [% ELSIF error == "version_not_specified" %]
     [% title = "No Version Specified" %]
     No version specified when trying to edit versions.
-
-  [% ELSIF error == "version_not_valid" %]
-    [% title = "Specified Version Does Not Exist" %]
-    The version '[% version FILTER html %]' for product 
-    '[% product FILTER html %]' does not exist.
 
   [% ELSIF error == "users_deletion_disabled" %]
     [% title = "Deletion not activated" %]

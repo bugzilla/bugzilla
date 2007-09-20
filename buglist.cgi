@@ -946,7 +946,7 @@ $db_order =~ s/$aggregate_search/percentage_complete/g;
 # Now put $db_order into a format that Bugzilla::Search can use.
 # (We create $db_order as a string first because that's the way
 # we did it before Bugzilla::Search took an "order" argument.)
-my @orderstrings = split(',', $db_order);
+my @orderstrings = split(/[,\s]+/, $db_order);
 
 # Generate the basic SQL query that will be used to generate the bug list.
 my $search = new Bugzilla::Search('fields' => \@selectnames, 

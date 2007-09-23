@@ -166,7 +166,7 @@ sub init {
     }
     
     if (grep($_ =~/AS (actual_time|percentage_complete)$/, @$fieldsref)) {
-        push(@supptables, "INNER JOIN longdescs AS ldtime " .
+        push(@supptables, "LEFT JOIN longdescs AS ldtime " .
                           "ON ldtime.bug_id = bugs.bug_id");
     }
 
@@ -534,20 +534,20 @@ sub init {
 
          "^long_?desc,changedby" => sub {
              my $table = "longdescs_$chartid";
-             push(@supptables, "INNER JOIN longdescs AS $table " .
+             push(@supptables, "LEFT JOIN longdescs AS $table " .
                                "ON $table.bug_id = bugs.bug_id");
              my $id = login_to_id($v, THROW_ERROR);
              $term = "$table.who = $id";
          },
          "^long_?desc,changedbefore" => sub {
              my $table = "longdescs_$chartid";
-             push(@supptables, "INNER JOIN longdescs AS $table " .
+             push(@supptables, "LEFT JOIN longdescs AS $table " .
                                "ON $table.bug_id = bugs.bug_id");
              $term = "$table.bug_when < " . $dbh->quote(SqlifyDate($v));
          },
          "^long_?desc,changedafter" => sub {
              my $table = "longdescs_$chartid";
-             push(@supptables, "INNER JOIN longdescs AS $table " .
+             push(@supptables, "LEFT JOIN longdescs AS $table " .
                                "ON $table.bug_id = bugs.bug_id");
              $term = "$table.bug_when > " . $dbh->quote(SqlifyDate($v));
          },
@@ -567,7 +567,7 @@ sub init {
              {
                  $extra = "AND $table.isprivate < 1";
              }
-             push(@supptables, "INNER JOIN longdescs AS $table " .
+             push(@supptables, "LEFT JOIN longdescs AS $table " .
                                "ON bugs.bug_id = $table.bug_id $extra");
 
              # Create search terms to add to the SELECT and WHERE clauses.
@@ -666,7 +666,7 @@ sub init {
              {
                  $extra = "AND $table.isprivate < 1";
              }
-             push(@supptables, "INNER JOIN longdescs AS $table " .
+             push(@supptables, "LEFT JOIN longdescs AS $table " .
                                "ON $table.bug_id = bugs.bug_id $extra");
              $f = "$table.thetext";
          },
@@ -678,13 +678,13 @@ sub init {
              {
                  $extra = "AND $table.isprivate < 1";
              }
-             push(@supptables, "INNER JOIN longdescs AS $table " .
+             push(@supptables, "LEFT JOIN longdescs AS $table " .
                                "ON $table.bug_id = bugs.bug_id $extra");
              $f = "$table.isprivate";
          },
          "^work_time,changedby" => sub {
              my $table = "longdescs_$chartid";
-             push(@supptables, "INNER JOIN longdescs AS $table " .
+             push(@supptables, "LEFT JOIN longdescs AS $table " .
                                "ON $table.bug_id = bugs.bug_id");
              my $id = login_to_id($v, THROW_ERROR);
              $term = "(($table.who = $id";
@@ -692,21 +692,21 @@ sub init {
          },
          "^work_time,changedbefore" => sub {
              my $table = "longdescs_$chartid";
-             push(@supptables, "INNER JOIN longdescs AS $table " .
+             push(@supptables, "LEFT JOIN longdescs AS $table " .
                                "ON $table.bug_id = bugs.bug_id");
              $term = "(($table.bug_when < " . $dbh->quote(SqlifyDate($v));
              $term .= ") AND ($table.work_time <> 0))";
          },
          "^work_time,changedafter" => sub {
              my $table = "longdescs_$chartid";
-             push(@supptables, "INNER JOIN longdescs AS $table " .
+             push(@supptables, "LEFT JOIN longdescs AS $table " .
                                "ON $table.bug_id = bugs.bug_id");
              $term = "(($table.bug_when > " . $dbh->quote(SqlifyDate($v));
              $term .= ") AND ($table.work_time <> 0))";
          },
          "^work_time," => sub {
              my $table = "longdescs_$chartid";
-             push(@supptables, "INNER JOIN longdescs AS $table " .
+             push(@supptables, "LEFT JOIN longdescs AS $table " .
                                "ON $table.bug_id = bugs.bug_id");
              $f = "$table.work_time";
          },
@@ -738,7 +738,7 @@ sub init {
                  if(lsearch(\@fields, "bugs.remaining_time") == -1) {
                      push(@fields, "bugs.remaining_time");                  
                  }
-                 push(@supptables, "INNER JOIN longdescs AS $table " .
+                 push(@supptables, "LEFT JOIN longdescs AS $table " .
                                    "ON $table.bug_id = bugs.bug_id");
                  my $expression = "(100 * ((SUM($table.work_time) *
                                              COUNT(DISTINCT $table.bug_when) /
@@ -1389,21 +1389,20 @@ sub init {
     my $suppstring = "bugs";
     my @supplist = (" ");
     foreach my $str (@supptables) {
-        if (!$suppseen{$str}) {
-            if ($str =~ /^(LEFT|INNER|RIGHT)\s+JOIN/i) {
-                $str =~ /^(.*?)\s+ON\s+(.*)$/i;
-                my ($leftside, $rightside) = ($1, $2);
-                if ($suppseen{$leftside}) {
-                    $supplist[$suppseen{$leftside}] .= " AND ($rightside)";
-                } else {
-                    $suppseen{$leftside} = scalar @supplist;
-                    push @supplist, " $leftside ON ($rightside)";
-                }
+
+        if ($str =~ /^(LEFT|INNER|RIGHT)\s+JOIN/i) {
+            $str =~ /^(.*?)\s+ON\s+(.*)$/i;
+            my ($leftside, $rightside) = ($1, $2);
+            if (defined $suppseen{$leftside}) {
+                $supplist[$suppseen{$leftside}] .= " AND ($rightside)";
             } else {
-                # Do not accept implicit joins using comma operator
-                # as they are not DB agnostic
-                ThrowCodeError("comma_operator_deprecated");
+                $suppseen{$leftside} = scalar @supplist;
+                push @supplist, " $leftside ON ($rightside)";
             }
+        } else {
+            # Do not accept implicit joins using comma operator
+            # as they are not DB agnostic
+            ThrowCodeError("comma_operator_deprecated");
         }
     }
     $suppstring .= join('', @supplist);

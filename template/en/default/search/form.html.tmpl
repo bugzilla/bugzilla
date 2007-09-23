@@ -513,6 +513,7 @@ function doOnSelectProduct(selectmode) {
       [% FOREACH qv = [
         { name => "substring", description => "contains" },
         { name => "exact", description => "is" },
+        { name => "notequals", description => "is not" },
         { name => "regexp", description => "matches regexp" },
         { name => "notregexp", description => "doesn't match regexp" } ] %]
 

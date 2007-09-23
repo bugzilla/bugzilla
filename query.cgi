@@ -136,17 +136,22 @@ sub PrefillForm {
         $default{$name} = [];
     }
  
+    # we won't prefill the boolean chart data from this query if
+    # there are any being submitted via params
+    my $prefillcharts = (grep(/^field-/, $cgi->param)) ? 0 : 1;
  
     # Iterate over the URL parameters
     foreach my $name ($buf->param()) {
         my @values = $buf->param($name);
 
-        # If the name begins with field, type, or value, then it is part of
-        # the boolean charts. Because these are built different than the rest
-        # of the form, we don't need to save a default value. We do, however,
-        # need to indicate that we found something so the default query isn't
-        # added in if all we have are boolean chart items.
-        if ($name =~ m/^(?:field|type|value)/) {
+        # If the name begins with the string 'field', 'type', 'value', or
+        # 'negate', then it is part of the boolean charts. Because
+        # these are built different than the rest of the form, we need
+        # to store these as parameters. We also need to indicate that
+        # we found something so the default query isn't added in if
+        # all we have are boolean chart items.
+        if ($name =~ m/^(?:field|type|value|negate)/) {
+            $cgi->param(-name => $name, -value => $values[0]) if ($prefillcharts);
             $foundone = 1;
         }
         # If the name ends in a number (which it does for the fields which

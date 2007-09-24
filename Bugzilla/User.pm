@@ -1413,8 +1413,8 @@ sub wants_bug_mail {
         
         if ($fieldName eq "CC") {
             my $login = $self->login;
-            my $inold = ($old =~ /^(.*,)?\Q$login\E(,.*)?$/);
-            my $innew = ($new =~ /^(.*,)?\Q$login\E(,.*)?$/);
+            my $inold = ($old =~ /^(.*,\s*)?\Q$login\E(,.*)?$/);
+            my $innew = ($new =~ /^(.*,\s*)?\Q$login\E(,.*)?$/);
             if ($inold != $innew)
             {
                 $events{+EVT_ADDED_REMOVED} = 1;

@@ -72,6 +72,12 @@ local our $vars = {};
 # Determine whether to use the action specified by the user or the default.
 my $action = $cgi->param('action') || 'view';
 
+# Determine if PatchReader is installed
+eval {
+    require PatchReader;
+    $vars->{'patchviewerinstalled'} = 1;
+};
+
 if ($action eq "view")  
 {
     view();
@@ -397,6 +403,10 @@ sub insert {
   $vars->{'mailrecipients'} =  { 'changer' => $user->login,
                                  'owner'   => $owner };
   $vars->{'attachment'} = $attachment;
+  # We cannot reuse the $bug object as delta_ts has eventually been updated
+  # since the object was created.
+  $vars->{'bugs'} = [new Bugzilla::Bug($bugid)];
+  $vars->{'header_done'} = 1;
   $vars->{'contenttypemethod'} = $cgi->param('contenttypemethod');
 
   print $cgi->header();
@@ -439,11 +449,6 @@ sub edit {
   $vars->{'bugsummary'} = $bugsummary; 
   $vars->{'attachments'} = $bugattachments;
 
-  # Determine if PatchReader is installed
-  eval {
-    require PatchReader;
-    $vars->{'patchviewerinstalled'} = 1;
-  };
   print $cgi->header();
 
   # Generate and return the UI (HTML page) from the appropriate template.
@@ -591,6 +596,10 @@ sub update {
   # Define the variables and functions that will be passed to the UI template.
   $vars->{'mailrecipients'} = { 'changer' => Bugzilla->user->login };
   $vars->{'attachment'} = $attachment;
+  # We cannot reuse the $bug object as delta_ts has eventually been updated
+  # since the object was created.
+  $vars->{'bugs'} = [new Bugzilla::Bug($bug->id)];
+  $vars->{'header_done'} = 1;
 
   print $cgi->header();
 

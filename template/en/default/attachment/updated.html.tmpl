@@ -26,7 +26,7 @@
 [% PROCESS global/variables.none.tmpl %]
 
 [% PROCESS global/header.html.tmpl
-  title = "Changes Submitted"
+  title = "Changes Submitted to Attachment $attachment.id of $terms.Bug $attachment.bug_id"
 %]
 
 <dl>
@@ -41,4 +41,4 @@
   </dd>
 </dl>
 
-[% PROCESS global/footer.html.tmpl %]
+[% PROCESS bug/show.html.tmpl %]

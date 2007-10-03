@@ -27,7 +27,7 @@
 [% PROCESS global/variables.none.tmpl %]
 
 [% PROCESS global/header.html.tmpl
-  title = "Changes Submitted"
+  title = "Attachment $attachment.id added to $terms.Bug $attachment.bug_id"
 %]
 
 <dl>
@@ -60,7 +60,7 @@
 
 <p>
 <a href="attachment.cgi?bugid=[% attachment.bug_id %]&amp;action=enter">Create
- Another Attachment to [% terms.Bug %] #[% attachment.bug_id %]</a>
+ Another Attachment to [% terms.Bug %] [%+ attachment.bug_id %]</a>
 </p>
 
-[% PROCESS global/footer.html.tmpl %]
+[% PROCESS bug/show.html.tmpl %]

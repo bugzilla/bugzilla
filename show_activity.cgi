@@ -53,7 +53,7 @@ ValidateBugID($bug_id);
 ($vars->{'operations'}, $vars->{'incomplete_data'}) = 
     Bugzilla::Bug::GetBugActivity($bug_id);
 
-$vars->{'bug_id'} = $bug_id;
+$vars->{'bug'} = new Bugzilla::Bug($bug_id);
 
 print $cgi->header();
 

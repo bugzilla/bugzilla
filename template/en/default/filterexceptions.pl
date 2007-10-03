@@ -389,10 +389,6 @@
   'productstring', 
 ],
 
-'bug/activity/show.html.tmpl' => [
-  'bug_id', 
-],
-
 'bug/activity/table.html.tmpl' => [
   'change.attachid', 
   'change.field', 

@@ -1175,7 +1175,8 @@ sub _check_strict_isolation {
     my @blocked_users;
     foreach my $pid (keys %unique_users) {
         my $related_user = Bugzilla::User->new($pid);
-        if (!$related_user->can_edit_product($product->id)) {
+        if (!$related_user->can_edit_product($product->id) ||
+            !$related_user->can_see_product($product->id)) {
             push (@blocked_users, $related_user->login);
         }
     }

@@ -547,6 +547,12 @@ sub update {
         $changes->{'dupe_of'} = [$dup_id, undef];
     }
 
+    # If any change occurred, refresh the timestamp of the bug.
+    if (scalar(keys %$changes) || $self->{added_comments}) {
+        $dbh->do('UPDATE bugs SET delta_ts = ? WHERE bug_id = ?',
+                 undef, ($delta_ts, $self->id));
+    }
+
     return $changes;
 }
 
@@ -689,6 +695,9 @@ sub update_keywords {
         my $added_names   = join(', ', (map {$_->name} @$added_keywords));
         LogActivityEntry($self->id, "keywords", $removed_names,
                          $added_names, Bugzilla->user->id, $delta_ts);
+
+        $dbh->do('UPDATE bugs SET delta_ts = ? WHERE bug_id = ?',
+                 undef, ($delta_ts, $self->id));
     }
 
     return [$removed_keywords, $added_keywords];

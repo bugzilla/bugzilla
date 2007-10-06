@@ -128,10 +128,6 @@ my @custom_bug_fields = grep {$_->type != FIELD_TYPE_MULTI_SELECT}
 my @bug_fields = grep { defined $cgi->param($_->name) } @custom_bug_fields;
 @bug_fields = map { $_->name } @bug_fields;
 
-# Custom tables must be locked (required when validating custom fields).
-my @custom_tables = grep { $_->type == FIELD_TYPE_SINGLE_SELECT } @custom_bug_fields;
-@custom_tables = map { $_->name . ' READ' } @custom_tables;
-
 push(@bug_fields, qw(
     product
     component

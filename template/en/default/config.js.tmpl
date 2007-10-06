@@ -58,6 +58,14 @@ var platform      = [ [% FOREACH x = platform %]'[% x FILTER js %]', [% END %] ]
 var severity      = [ [% FOREACH x = severity %]'[% x FILTER js %]', [% END %] ];
 
 
+// Custom Fields
+// =============
+
+[% FOREACH cf = custom_fields %]
+var [% cf.name FILTER js %] = [ [% FOREACH x = cf.legal_values %]'[% x FILTER js %]', [% END %] ];
+[% END %]
+
+
 // Products and Components
 // =======================
 //

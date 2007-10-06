@@ -55,6 +55,9 @@ $vars->{'op_sys'}    = get_legal_field_values('op_sys');
 $vars->{'keyword'}    = [map($_->name, Bugzilla::Keyword->get_all)];
 $vars->{'resolution'} = get_legal_field_values('resolution');
 $vars->{'status'}    = get_legal_field_values('bug_status');
+$vars->{'custom_fields'} =
+  [Bugzilla->get_fields({custom => 1, obsolete => 0, type => FIELD_TYPE_SINGLE_SELECT}),
+   Bugzilla->get_fields({custom => 1, obsolete => 0, type => FIELD_TYPE_MULTI_SELECT})];
 
 # Include a list of product objects.
 if ($cgi->param('product')) {

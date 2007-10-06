@@ -102,6 +102,17 @@
     </Seq>
   </bz:severity>
 
+[% FOREACH cf = custom_fields %]
+  <bz:[% cf.name FILTER html %]>
+    <Seq>
+      [% FOREACH item = cf.legal_values %]
+        <li>[% item FILTER html %]</li>
+      [% END %]
+    </Seq>
+  </bz:[% cf.name FILTER html %]>
+
+[% END %]
+
   <bz:products>
     <Seq>
       [% FOREACH product = products %]

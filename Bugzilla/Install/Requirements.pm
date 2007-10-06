@@ -530,7 +530,7 @@ sub install_command {
         $package = $module->{package};
     }
     else {
-        $command = "$^X -MCPAN -e 'install \%s'";
+        $command = "$^X -MCPAN -e 'install \"\%s\"'";
         # Non-Windows installations need to use module names, because
         # CPAN doesn't understand package names.
         $package = $module->{module};

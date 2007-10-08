@@ -609,6 +609,7 @@ sub doGroupChanges {
 
 sub _do_add {
     my ($group, $changes, $sth_insert, $field, $type, $reverse) = @_;
+    my $cgi = Bugzilla->cgi;
 
     my $current;
     # $reverse means we're doing a granted_by--that is, somebody else
@@ -639,6 +640,7 @@ sub _do_add {
 
 sub _do_remove {
     my ($group, $changes, $sth_delete, $field, $type, $reverse) = @_;
+    my $cgi = Bugzilla->cgi;
     my $remove_items = Bugzilla::Group->new_from_list([$cgi->param($field)]);
 
     foreach my $remove (@$remove_items) {

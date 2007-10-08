@@ -33,7 +33,7 @@ use strict;
 use base qw(Exporter);
 @Bugzilla::Util::EXPORT = qw(is_tainted trick_taint detaint_natural
                              detaint_signed
-                             html_quote url_quote value_quote xml_quote
+                             html_quote url_quote xml_quote
                              css_class_quote html_light_quote url_decode
                              i_am_cgi get_netaddr correct_urlbase
                              lsearch
@@ -193,22 +193,6 @@ sub css_class_quote {
     $toencode =~ s/ /_/g;
     $toencode =~ s/([^a-zA-Z0-9_\-.])/uc sprintf("&#x%x;",ord($1))/eg;
     return $toencode;
-}
-
-sub value_quote {
-    my ($var) = (@_);
-    $var =~ s/\&/\&amp;/g;
-    $var =~ s/</\&lt;/g;
-    $var =~ s/>/\&gt;/g;
-    $var =~ s/\"/\&quot;/g;
-    # See bug http://bugzilla.mozilla.org/show_bug.cgi?id=4928 for 
-    # explanation of why Bugzilla does this linebreak substitution. 
-    # This caused form submission problems in mozilla (bug 22983, 32000).
-    $var =~ s/\r\n/\&#013;/g;
-    $var =~ s/\n\r/\&#013;/g;
-    $var =~ s/\r/\&#013;/g;
-    $var =~ s/\n/\&#013;/g;
-    return $var;
 }
 
 sub xml_quote {
@@ -539,7 +523,6 @@ Bugzilla::Util - Generic utility functions for bugzilla
   # Functions for quoting
   html_quote($var);
   url_quote($var);
-  value_quote($var);
   xml_quote($var);
 
   # Functions for decoding
@@ -651,11 +634,6 @@ Quotes characters so that they may be included as part of a url.
 
 Quotes characters so that they may be used as CSS class names. Spaces
 are replaced by underscores.
-
-=item C<value_quote($val)>
-
-As well as escaping html like C<html_quote>, this routine converts newlines
-into &#013;, suitable for use in html attributes.
 
 =item C<xml_quote($val)>
 

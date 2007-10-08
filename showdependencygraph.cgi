@@ -71,7 +71,7 @@ sub CreateImagemap {
             # Pick up bugid from the mapdata label field. Getting the title from
             # bugtitle hash instead of mapdata allows us to get the summary even
             # when showsummary is off, and also gives us status and resolution.
-            my $bugtitle = value_quote($bugtitles{$bugid});
+            my $bugtitle = html_quote(clean_text($bugtitles{$bugid}));
             $map .= qq{<area alt="bug $bugid" name="bug$bugid" shape="rect" } .
                     qq{title="$bugtitle" href="$url" } .
                     qq{coords="$leftx,$topy,$rightx,$bottomy">\n};

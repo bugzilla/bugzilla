@@ -144,8 +144,6 @@ sub quoteUrls {
     # Do this by escaping \0 to \1\0, and replacing matches with \0\0$count\0\0
     # \0 is used because it's unlikely to occur in the text, so the cost of
     # doing this should be very small
-    # Also, \0 won't appear in the value_quote'd bug title, so we don't have
-    # to worry about bogus substitutions from there
 
     # escape the 2nd escape char we're using
     my $chr1 = chr(1);
@@ -265,7 +263,7 @@ sub get_attachment_link {
             $className = "bz_obsolete";
         }
         # Prevent code injection in the title.
-        $title = value_quote($title);
+        $title = html_quote(clean_text($title));
 
         $link_text =~ s/ \[details\]$//;
         my $linkval = "attachment.cgi?id=$attachid";
@@ -321,7 +319,7 @@ sub get_bug_link {
             $title .= " - $bug_desc";
         }
         # Prevent code injection in the title.
-        $title = value_quote($title);
+        $title = html_quote(clean_text($title));
 
         my $linkval = "show_bug.cgi?id=$bug_num";
         if (defined $comment_num) {

@@ -119,13 +119,13 @@
               [% "Unknown" IF NOT users.$userid %]
             </td>
             <td>
-              <a href="quips.cgi?action=delete&amp;quipid=[% quipid FILTER uri%]">
+              <a href="quips.cgi?action=delete&amp;quipid=[% quipid FILTER url_quote %]">
                 Delete
               </a>
             </td>
             <td>
-              <input type="checkbox" name="quipid_[% quipid FILTER uri%]"
-                     id="quipid_[% quipid FILTER uri%]"
+              <input type="checkbox" name="quipid_[% quipid FILTER html %]"
+                     id="quipid_[% quipid FILTER html %]"
                      [%- ' checked="checked"' IF quips.$quipid.approved %]>
             </td>
           </tr>

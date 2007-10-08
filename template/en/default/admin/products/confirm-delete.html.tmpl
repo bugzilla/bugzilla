@@ -89,7 +89,7 @@
       <td>Milestone URL:</td>
       <td>
         [% IF product.milestone_url %]
-          <a href="[% product.milestone_url FILTER uri %]">
+          <a href="[% product.milestone_url FILTER html %]">
             [%- product.milestone_url FILTER html %]
           </a>
         [% ELSE %]

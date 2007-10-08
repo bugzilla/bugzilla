@@ -73,6 +73,21 @@
               check the box below.</em><br>
           <input type="checkbox" id="takebug" name="takebug" value="1">
           <label for="takebug">take [% terms.bug %]</label>
+          [% bug_statuses = [] %]
+          [% FOREACH bug_status = bug.status.can_change_to %]
+            [% NEXT IF bug_status.name == "UNCONFIRMED" && !bug.product_obj.votes_to_confirm %]
+            [% bug_statuses.push(bug_status) IF bug_status.is_open %]
+          [% END %]
+          [% IF bug_statuses.size %]
+            <label for="takebug">and set the [% terms.bug %] status to</label>
+            <select id="bug_status" name="bug_status">
+              <option label="[% bug.status.name FILTER html %]">[% bug.status.name FILTER html %] (current)</option>
+              [% FOREACH bug_status = bug_statuses %]
+                [% NEXT IF bug_status.id == bug.status.id %]
+                <option label="[% bug_status.name FILTER html %]">[% bug_status.name FILTER html %]</option>
+              [% END %]
+            </select>
+          [% END %]
         </td>
       </tr>
     [% END %]

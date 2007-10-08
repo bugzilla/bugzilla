@@ -359,45 +359,28 @@ sub insert {
 
   # Assign the bug to the user, if they are allowed to take it
   my $owner = "";
-  
   if ($cgi->param('takebug') && $user->in_group('editbugs', $bug->product_id)) {
-      
-      my @fields = ("assigned_to", "bug_status", "resolution", "everconfirmed",
-                    "login_name");
-      
-      # Get the old values, for the bugs_activity table
-      my @oldvalues = $dbh->selectrow_array(
-              "SELECT " . join(", ", @fields) . " " .
-              "FROM bugs " .
-              "INNER JOIN profiles " .
-              "ON profiles.userid = bugs.assigned_to " .
-              "WHERE bugs.bug_id = ?", undef, $bugid);
-      
-      my @newvalues = ($user->id, "ASSIGNED", "", 1, $user->login);
-      
+      # When taking a bug, we have to follow the workflow.
+      my $bug_status = $cgi->param('bug_status') || '';
+      ($bug_status) = grep {$_->name eq $bug_status} @{$bug->status->can_change_to};
+
+      if ($bug_status && $bug_status->is_open
+          && ($bug_status->name ne 'UNCONFIRMED' || $bug->product_obj->votes_to_confirm))
+      {
+          $bug->set_status($bug_status->name);
+          $bug->clear_resolution();
+          $bug->update($timestamp);
+      }
       # Make sure the person we are taking the bug from gets mail.
-      $owner = $oldvalues[4];  
+      $owner = $bug->assigned_to->login;
 
-      # Update the bug record. Note that this doesn't involve login_name.
-      $dbh->do('UPDATE bugs SET delta_ts = ?, ' .
-               join(', ', map("$fields[$_] = ?", (0..3))) . ' WHERE bug_id = ?',
-               undef, ($timestamp, map($newvalues[$_], (0..3)) , $bugid));
+      # Ideally, the code below should be replaced by $bug->set_assignee().
+      $dbh->do('UPDATE bugs SET assigned_to = ?, delta_ts = ? WHERE bug_id = ?',
+               undef, ($user->id, $timestamp, $bugid));
 
-      # If the bug was a dupe, we have to remove its entry from the
-      # 'duplicates' table.
-      $dbh->do('DELETE FROM duplicates WHERE dupe = ?', undef, $bugid);
+      LogActivityEntry($bugid, 'assigned_to', $owner, $user->login, $user->id, $timestamp);
 
-      # We store email addresses in the bugs_activity table rather than IDs.
-      $oldvalues[0] = $oldvalues[4];
-      $newvalues[0] = $newvalues[4];
-
-      for (my $i = 0; $i < 4; $i++) {
-          if ($oldvalues[$i] ne $newvalues[$i]) {
-              LogActivityEntry($bugid, $fields[$i], $oldvalues[$i],
-                               $newvalues[$i], $user->id, $timestamp);
-          }
-      }      
-  }   
+  }
 
   # Define the variables and functions that will be passed to the UI template.
   $vars->{'mailrecipients'} =  { 'changer' => $user->login,

@@ -1466,6 +1466,7 @@ sub set_remaining_time { $_[0]->set('remaining_time', $_[1]); }
 sub _zero_remaining_time { $_[0]->{'remaining_time'} = 0; }
 sub set_reporter_accessible { $_[0]->set('reporter_accessible', $_[1]); }
 sub set_resolution     { $_[0]->set('resolution',    $_[1]); }
+sub clear_resolution   { $_[0]->{'resolution'} = '' }
 sub set_severity       { $_[0]->set('bug_severity',  $_[1]); }
 sub set_status { 
     my ($self, $status) = @_;

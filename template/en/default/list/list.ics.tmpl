@@ -58,11 +58,11 @@ END:VCALENDAR
 [% END %]
 
 [% BLOCK ics_uid %]
-  [% "${bug_id}@${base_url}" FILTER uri FILTER ics('UID') %]
+  [% "${bug_id}@${base_url}" FILTER url_quote FILTER ics('UID') %]
 [% END %]
 
 [% BLOCK ics_url %]
-  [% "${base_url}show_bug.cgi?id=${bug_id}" FILTER uri FILTER ics('URL;VALUE=URI') %]
+  [% "${base_url}show_bug.cgi?id=${bug_id}" FILTER url_quote FILTER ics('URL;VALUE=URI') %]
 [% END %]
 
 [% BLOCK ics_dtstart %]

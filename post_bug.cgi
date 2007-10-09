@@ -191,7 +191,7 @@ if (defined $cgi->param('version')) {
 if (defined($cgi->upload('data')) || $cgi->param('attachurl')) {
     $cgi->param('isprivate', $cgi->param('commentprivacy'));
     my $attachment = Bugzilla::Attachment->insert_attachment_for_bug(!THROW_ERROR,
-                                                  $bug, $user, $timestamp, \$vars);
+                                                  $bug, $user, $timestamp, $vars);
 
     if ($attachment) {
         # Update the comment to include the new attachment ID.
@@ -227,7 +227,7 @@ my $error_mode_cache = Bugzilla->error_mode;
 Bugzilla->error_mode(ERROR_MODE_DIE);
 eval {
     Bugzilla::Flag::validate($cgi, $id, undef, SKIP_REQUESTEE_ON_ERROR);
-    Bugzilla::Flag::process($bug, undef, $timestamp, $cgi);
+    Bugzilla::Flag::process($bug, undef, $timestamp, $cgi, $vars);
 };
 Bugzilla->error_mode($error_mode_cache);
 if ($@) {

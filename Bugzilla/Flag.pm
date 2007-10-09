@@ -502,7 +502,7 @@ sub snapshot {
 
 =over
 
-=item C<process($bug, $attachment, $timestamp, $cgi)>
+=item C<process($bug, $attachment, $timestamp, $cgi, $hr_vars)>
 
 Processes changes to flags.
 
@@ -516,7 +516,7 @@ object used to obtain the flag fields that the user submitted.
 =cut
 
 sub process {
-    my ($bug, $attachment, $timestamp, $cgi) = @_;
+    my ($bug, $attachment, $timestamp, $cgi, $hr_vars) = @_;
     my $dbh = Bugzilla->dbh;
 
     # Make sure the bug (and attachment, if given) exists and is accessible
@@ -540,7 +540,7 @@ sub process {
     }
 
     # Create new flags and update existing flags.
-    my $new_flags = FormToNewFlags($bug, $attachment, $cgi);
+    my $new_flags = FormToNewFlags($bug, $attachment, $cgi, $hr_vars);
     foreach my $flag (@$new_flags) { create($flag, $bug, $attachment, $timestamp) }
     modify($bug, $attachment, $cgi, $timestamp);
 
@@ -562,7 +562,10 @@ sub process {
     my $flags = Bugzilla::Flag->new_from_list($flag_ids);
     foreach my $flag (@$flags) {
         my $is_retargetted = retarget($flag, $bug);
-        clear($flag, $bug, $flag->attachment) unless $is_retargetted;
+        unless ($is_retargetted) {
+            clear($flag, $bug, $flag->attachment);
+            $hr_vars->{'message'} = 'flag_cleared';
+        }
     }
 
     $flag_ids = $dbh->selectcol_arrayref(
@@ -939,7 +942,7 @@ sub clear {
 
 =over
 
-=item C<FormToNewFlags($bug, $attachment, $cgi)>
+=item C<FormToNewFlags($bug, $attachment, $cgi, $hr_vars)>
 
 Checks whether or not there are new flags to create and returns an
 array of flag objects. This array is then passed to Flag::create().
@@ -949,7 +952,7 @@ array of flag objects. This array is then passed to Flag::create().
 =cut
 
 sub FormToNewFlags {
-    my ($bug, $attachment, $cgi) = @_;
+    my ($bug, $attachment, $cgi, $hr_vars) = @_;
     my $dbh = Bugzilla->dbh;
     my $setter = Bugzilla->user;
     
@@ -965,6 +968,14 @@ sub FormToNewFlags {
           'product_id'   => $bug->{'product_id'},
           'component_id' => $bug->{'component_id'},
           'is_active'    => 1 });
+
+    foreach my $type_id (@type_ids) {
+        # Checks if there are unexpected flags for the product/component.
+        if (!scalar(grep { $_->id == $type_id } @$flag_types)) {
+            $hr_vars->{'message'} = 'unexpected_flag_types';
+            last;
+        }
+    }
 
     my @flags;
     foreach my $flag_type (@$flag_types) {

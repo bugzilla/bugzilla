@@ -484,7 +484,7 @@ sub _validate_data {
         my $imgdata = $img->ImageToBlob();
         $data = $imgdata;
         $cgi->param('contenttype', 'image/png');
-        $$hr_vars->{'convertedbmp'} = 1;
+        $hr_vars->{'convertedbmp'} = 1;
     }
 
     # Make sure the attachment does not exceed the maximum permitted size
@@ -810,12 +810,12 @@ sub insert_attachment_for_bug {
         '^requestee(_type)?-(\d+)$' => { 'type' => 'multi' },
     }, MATCH_SKIP_CONFIRM);
 
-    $$hr_vars->{'match_field'} = 'requestee';
+    $hr_vars->{'match_field'} = 'requestee';
     if ($match_status == USER_MATCH_FAILED) {
-        $$hr_vars->{'message'} = 'user_match_failed';
+        $hr_vars->{'message'} = 'user_match_failed';
     }
     elsif ($match_status == USER_MATCH_MULTIPLE) {
-        $$hr_vars->{'message'} = 'user_match_multiple';
+        $hr_vars->{'message'} = 'user_match_multiple';
     }
 
     # Escape characters in strings that will be used in SQL statements.
@@ -902,12 +902,12 @@ sub insert_attachment_for_bug {
     Bugzilla->error_mode(ERROR_MODE_DIE);
     eval {
         Bugzilla::Flag::validate($cgi, $bug->bug_id, -1, SKIP_REQUESTEE_ON_ERROR);
-        Bugzilla::Flag::process($bug, $attachment, $timestamp, $cgi);
+        Bugzilla::Flag::process($bug, $attachment, $timestamp, $cgi, $hr_vars);
     };
     Bugzilla->error_mode($error_mode_cache);
     if ($@) {
-        $$hr_vars->{'message'} = 'flag_creation_failed';
-        $$hr_vars->{'flag_creation_error'} = $@;
+        $hr_vars->{'message'} = 'flag_creation_failed';
+        $hr_vars->{'flag_creation_error'} = $@;
     }
 
     # Return the new attachment object.

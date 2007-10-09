@@ -348,7 +348,7 @@ sub insert {
     my $bug = new Bugzilla::Bug($bugid);
     my $attachment =
         Bugzilla::Attachment->insert_attachment_for_bug(THROW_ERROR, $bug, $user,
-                                                        $timestamp, \$vars);
+                                                        $timestamp, $vars);
 
   # Insert a comment about the new attachment into the database.
   my $comment = "Created an attachment (id=" . $attachment->id . ")\n" .
@@ -508,7 +508,7 @@ sub update {
   # to attachments so that we can delete pending requests if the user
   # is obsoleting this attachment without deleting any requests
   # the user submits at the same time.
-  Bugzilla::Flag::process($bug, $attachment, $timestamp, $cgi);
+  Bugzilla::Flag::process($bug, $attachment, $timestamp, $cgi, $vars);
 
   # Update the attachment record in the database.
   $dbh->do("UPDATE  attachments 

@@ -1140,7 +1140,7 @@ foreach my $id (@idlist) {
         }
     }
     # Set and update flags.
-    Bugzilla::Flag::process($new_bug_obj, undef, $timestamp, $cgi);
+    Bugzilla::Flag::process($new_bug_obj, undef, $timestamp, $cgi, $vars);
 
     if ($bug_changed) {
         $dbh->do(q{UPDATE bugs SET delta_ts = ? WHERE bug_id = ?},

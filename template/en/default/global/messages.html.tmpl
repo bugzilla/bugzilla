@@ -201,6 +201,10 @@
     [%+ new_email FILTER html %] has been canceled.
    Your old account settings have been reinstated.
 
+  [% ELSIF message_tag == "flag_cleared" %]
+    Some flags didn't apply in the new product/component
+    and have been cleared.
+
   [% ELSIF message_tag == "flag_creation_failed" %]
     [% title = "Flag Creation Failure" %]
     An error occured while validating flags:
@@ -480,6 +484,9 @@
 
   [% ELSIF message_tag == "term" %]
     [% terms.$term FILTER html %]
+
+  [% ELSIF message_tag == "unexpected_flag_types" %]
+    Some flags could not be set. Please check your changes.
 
   [% ELSIF message_tag == "user_match_failed" %]
     You entered a username that did not match any known 

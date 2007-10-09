@@ -1421,7 +1421,7 @@ sub set_product {
             my $gids = $dbh->selectcol_arrayref(
                 'SELECT bgm.group_id
                    FROM bug_group_map AS bgm
-                  WHERE bgm.bug_id IN (' . join(',', ('?' x @idlist)) . ')
+                  WHERE bgm.bug_id IN (' . join(',', ('?') x @idlist) . ')
                     AND bgm.group_id NOT IN
                         (SELECT gcm.group_id
                            FROM group_control_map AS gcm

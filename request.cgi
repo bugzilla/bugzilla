@@ -42,6 +42,10 @@ use Bugzilla::Component;
 # Make sure the user is logged in.
 my $user = Bugzilla->login();
 my $cgi = Bugzilla->cgi;
+my $template = Bugzilla->template;
+my $action = $cgi->param('action') || '';
+
+print $cgi->header();
 
 ################################################################################
 # Main Body Execution
@@ -59,7 +63,13 @@ unless (defined $cgi->param('requestee')
 
 Bugzilla::User::match_field($cgi, $fields);
 
-queue();
+if ($action eq 'queue') {
+    queue();
+}
+else {
+    $template->process('request/queue.html.tmpl', {requests => {}})
+      || ThrowTemplateError($template->error());
+}
 exit;
 
 ################################################################################
@@ -287,9 +297,6 @@ sub queue {
     $vars->{'group_field'} = $form_group;
     $vars->{'requests'} = \@requests;
     $vars->{'types'} = \@types;
-
-    # Return the appropriate HTTP response headers.
-    print $cgi->header();
 
     # Generate and return the UI (HTML page) from the appropriate template.
     $template->process("request/queue.html.tmpl", $vars)

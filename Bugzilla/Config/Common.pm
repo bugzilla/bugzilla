@@ -170,7 +170,7 @@ sub check_opsys {
 
 sub check_bug_status {
     my $bug_status = shift;
-    my @closed_bug_statuses = map {$_->name} Bugzilla::Status::closed_bug_statuses();
+    my @closed_bug_statuses = map {$_->name} closed_bug_statuses();
     if (lsearch(\@closed_bug_statuses, $bug_status) < 0) {
         return "Must be a valid closed status: one of " . join(', ', @closed_bug_statuses);
     }

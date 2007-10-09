@@ -40,6 +40,7 @@ use Bugzilla::Bug;
 use Bugzilla::Classification;
 use Bugzilla::Product;
 use Bugzilla::Component;
+use Bugzilla::Status;
 use Bugzilla::Mailer;
 
 use Date::Parse;
@@ -308,7 +309,7 @@ sub Send {
             }
             $thisdiff .= FormatTriple($fielddescription{$what}, $old, $new);
             if ($what eq 'bug_status'
-                && Bugzilla::Bug::is_open_state($old) ne Bugzilla::Bug::is_open_state($new))
+                && is_open_state($old) ne is_open_state($new))
             {
                 $interestingchange = 1;
             }

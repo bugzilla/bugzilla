@@ -53,7 +53,6 @@ use base qw(Bugzilla::Object Exporter);
     bug_alias_to_id ValidateBugID
     RemoveVotes CheckIfVotedConfirmed
     LogActivityEntry
-    BUG_STATE_OPEN is_open_state
     editable_bug_fields
     SPECIAL_STATUS_WORKFLOW_ACTIONS
 );
@@ -222,12 +221,6 @@ use constant SPECIAL_STATUS_WORKFLOW_ACTIONS => qw(
     change_resolution
     clearresolution
 );
-
-sub BUG_STATE_OPEN {
-    # XXX - We should cache this list.
-    my $dbh = Bugzilla->dbh;
-    return @{$dbh->selectcol_arrayref('SELECT value FROM bug_status WHERE is_open = 1')};
-}
 
 #####################################################################
 
@@ -2426,12 +2419,6 @@ sub EmitDependList {
             WHERE $myfield = ? ORDER BY $targetfield",
             undef, $bug_id);
     return $list_ref;
-}
-
-# Tells you whether or not the argument is a valid "open" state.
-sub is_open_state {
-    my ($state) = @_;
-    return (grep($_ eq $state, BUG_STATE_OPEN) ? 1 : 0);
 }
 
 sub ValidateTime {

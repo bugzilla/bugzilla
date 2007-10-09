@@ -26,7 +26,7 @@ use strict;
 use Bugzilla::Error;
 use Bugzilla::Constants;
 use Bugzilla::Keyword;
-use Bugzilla::Bug;
+use Bugzilla::Status;
 use Bugzilla::Field;
 use Bugzilla::Util;
 

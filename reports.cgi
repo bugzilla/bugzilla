@@ -43,7 +43,7 @@ use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Util;
 use Bugzilla::Error;
-use Bugzilla::Bug;
+use Bugzilla::Status;
 
 eval "use GD";
 $@ && ThrowCodeError("gd_not_installed");

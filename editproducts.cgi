@@ -48,6 +48,7 @@ use Bugzilla::Group;
 use Bugzilla::User;
 use Bugzilla::Field;
 use Bugzilla::Token;
+use Bugzilla::Status;
 
 #
 # Preliminary checks:

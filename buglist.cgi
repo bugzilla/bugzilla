@@ -46,6 +46,7 @@ use Bugzilla::Bug;
 use Bugzilla::Product;
 use Bugzilla::Keyword;
 use Bugzilla::Field;
+use Bugzilla::Status;
 
 use Date::Parse;
 
@@ -1111,7 +1112,7 @@ $vars->{'columns'} = $columns;
 $vars->{'displaycolumns'} = \@displaycolumns;
 
 $vars->{'openstates'} = [BUG_STATE_OPEN];
-$vars->{'closedstates'} = [map {$_->name} Bugzilla::Status::closed_bug_statuses()];
+$vars->{'closedstates'} = [map {$_->name} closed_bug_statuses()];
 
 # The list of query fields in URL query string format, used when creating
 # URLs to the same query results page with different parameters (such as

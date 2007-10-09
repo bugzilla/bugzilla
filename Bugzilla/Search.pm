@@ -40,7 +40,7 @@ use Bugzilla::Constants;
 use Bugzilla::Group;
 use Bugzilla::User;
 use Bugzilla::Field;
-use Bugzilla::Bug;
+use Bugzilla::Status;
 use Bugzilla::Keyword;
 
 use Date::Format;

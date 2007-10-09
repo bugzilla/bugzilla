@@ -22,7 +22,8 @@ use strict;
 
 package Bugzilla::Status;
 
-use base qw(Bugzilla::Object);
+use base qw(Bugzilla::Object Exporter);
+@Bugzilla::Status::EXPORT = qw(BUG_STATE_OPEN is_open_state closed_bug_statuses);
 
 ################################
 #####   Initialization     #####
@@ -53,6 +54,18 @@ sub is_open   { return $_[0]->{'is_open'};  }
 ###############################
 #####       Methods        ####
 ###############################
+
+sub BUG_STATE_OPEN {
+    # XXX - We should cache this list.
+    my $dbh = Bugzilla->dbh;
+    return @{$dbh->selectcol_arrayref('SELECT value FROM bug_status WHERE is_open = 1')};
+}
+
+# Tells you whether or not the argument is a valid "open" state.
+sub is_open_state {
+    my ($state) = @_;
+    return (grep($_ eq $state, BUG_STATE_OPEN) ? 1 : 0);
+}
 
 sub closed_bug_statuses {
     my @bug_statuses = Bugzilla::Status->get_all;
@@ -154,7 +167,7 @@ Bugzilla::Status - Bug status class.
     my $bug_status = new Bugzilla::Status({name => 'ASSIGNED'});
     my $bug_status = new Bugzilla::Status(4);
 
-    my @closed_bug_statuses = Bugzilla::Status::closed_bug_statuses();
+    my @closed_bug_statuses = closed_bug_statuses();
 
     Bugzilla::Status::add_missing_bug_status_transitions($bug_status);
 

@@ -48,7 +48,7 @@ sub get_param_list {
   # and bug_status.is_open is not yet defined (hence the eval), so we use
   # the bug statuses above as they are still hardcoded.
   eval {
-      my @current_closed_states = map {$_->name} Bugzilla::Status::closed_bug_statuses();
+      my @current_closed_states = map {$_->name} closed_bug_statuses();
       # If no closed state was found, use the default list above.
       @closed_bug_statuses = @current_closed_states if scalar(@current_closed_states);
   };

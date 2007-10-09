@@ -58,6 +58,7 @@ use Bugzilla::Product;
 use Bugzilla::Component;
 use Bugzilla::Keyword;
 use Bugzilla::Flag;
+use Bugzilla::Status;
 
 use Storable qw(dclone);
 

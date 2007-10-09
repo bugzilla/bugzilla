@@ -34,7 +34,7 @@ use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Keyword;
-use Bugzilla::Bug;
+use Bugzilla::Status;
 use Bugzilla::Field;
 
 my $user = Bugzilla->login(LOGIN_OPTIONAL);

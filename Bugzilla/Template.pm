@@ -40,9 +40,9 @@ use Bugzilla::Install::Util qw(template_include_path);
 use Bugzilla::Util;
 use Bugzilla::User;
 use Bugzilla::Error;
-use MIME::Base64;
-use Bugzilla::Bug;
+use Bugzilla::Status;
 
+use MIME::Base64;
 # for time2str - replace by TT Date plugin??
 use Date::Format ();
 use File::Find;

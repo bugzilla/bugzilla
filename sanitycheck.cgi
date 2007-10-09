@@ -32,7 +32,7 @@ use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Util;
 use Bugzilla::Error;
-use Bugzilla::Bug;
+use Bugzilla::Status;
 
 ###########################################################################
 # General subs

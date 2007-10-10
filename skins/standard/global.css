@@ -356,8 +356,20 @@ div.user_match {
     vertical-align: top;
     font-weight: bold;
 }
-.field_value {
+.field_value, form#Create th, form#Create td {
     vertical-align: top;
+}
+
+form#Create th {
+    text-align: right;
+}
+
+form#Create .comment {
+    vertical-align: top;
+    overflow: auto;
+    color: green;
+    margin: 0 0.5em;
+    padding: 0.3em;
 }
 
 #keyword-chooser {

@@ -167,7 +167,8 @@ sub remove_from_db {
 sub _check_value {
     my ($invocant, $name, $product) = @_;
 
-    trim($name) || ThrowUserError('milestone_blank_name');
+    $name = trim($name);
+    $name || ThrowUserError('milestone_blank_name');
     if (length($name) > MAX_MILESTONE_SIZE) {
         ThrowUserError('milestone_name_too_long', {name => $name});
     }

@@ -191,7 +191,7 @@ if ($action eq 'new') {
     trick_taint($comp_name);
     trick_taint($description);
 
-    $dbh->bz_lock_tables('components WRITE', 'component_cc WRITE');
+    $dbh->bz_start_transaction();
 
     $dbh->do("INSERT INTO components
                 (product_id, name, description, initialowner,
@@ -209,7 +209,7 @@ if ($action eq 'new') {
         $sth->execute($user_id, $component->id);
     }
 
-    $dbh->bz_unlock_tables;
+    $dbh->bz_commit_transaction();
 
     # Insert default charting queries for this product.
     # If they aren't using charting, this won't do any harm.
@@ -301,8 +301,7 @@ if ($action eq 'delete') {
         }
     }
     
-    $dbh->bz_lock_tables('components WRITE', 'component_cc WRITE',
-                         'flaginclusions WRITE', 'flagexclusions WRITE');
+    $dbh->bz_start_transaction();
 
     $dbh->do("DELETE FROM flaginclusions WHERE component_id = ?",
              undef, $component->id);
@@ -313,7 +312,7 @@ if ($action eq 'delete') {
     $dbh->do("DELETE FROM components WHERE id = ?",
              undef, $component->id);
 
-    $dbh->bz_unlock_tables();
+    $dbh->bz_commit_transaction();
 
     $vars->{'comp'} = $component;
     $vars->{'product'} = $product;
@@ -402,8 +401,7 @@ if ($action eq 'update') {
 
     my $initial_cc_ids = check_initial_cc(\@initial_cc);
 
-    $dbh->bz_lock_tables('components WRITE', 'component_cc WRITE', 
-                         'profiles READ');
+    $dbh->bz_start_transaction();
 
     if ($comp_name ne $component_old->name) {
 
@@ -457,7 +455,7 @@ if ($action eq 'update') {
         $vars->{'updated_initialcc'} = 1;
     }
 
-    $dbh->bz_unlock_tables();
+    $dbh->bz_commit_transaction();
 
     my $component = new Bugzilla::Component($component_old->id);
     

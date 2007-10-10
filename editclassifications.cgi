@@ -172,7 +172,7 @@ if ($action eq 'delete') {
     }
 
     # lock the tables before we start to change everything:
-    $dbh->bz_lock_tables('classifications WRITE', 'products WRITE');
+    $dbh->bz_start_transaction();
 
     # delete
     $dbh->do("DELETE FROM classifications WHERE id = ?", undef,
@@ -182,7 +182,7 @@ if ($action eq 'delete') {
     $dbh->do("UPDATE products SET classification_id = 1
               WHERE classification_id = ?", undef, $classification->id);
 
-    $dbh->bz_unlock_tables();
+    $dbh->bz_commit_transaction();
 
     $vars->{'classification'} = $classification;
 
@@ -229,7 +229,7 @@ if ($action eq 'update') {
       || ThrowUserError('classification_invalid_sortkey', {'name' => $class_old->name,
                                                            'sortkey' => $stored_sortkey});
 
-    $dbh->bz_lock_tables('classifications WRITE');
+    $dbh->bz_start_transaction();
 
     if ($class_name ne $class_old->name) {
 
@@ -262,7 +262,7 @@ if ($action eq 'update') {
         $vars->{'updated_sortkey'} = 1;
     }
 
-    $dbh->bz_unlock_tables();
+    $dbh->bz_commit_transaction();
 
     delete_token($token);
     LoadTemplate($action);

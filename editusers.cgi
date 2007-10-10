@@ -227,18 +227,7 @@ if ($action eq 'search') {
     $otherUserID = $otherUser->id;
 
     # Lock tables during the check+update session.
-    $dbh->bz_lock_tables('profiles WRITE',
-                         'profiles_activity WRITE',
-                         'fielddefs READ',
-                         'tokens WRITE',
-                         'logincookies WRITE',
-                         'groups READ',
-                         'user_group_map WRITE',
-                         'group_group_map READ',
-                         'group_group_map AS ggm READ',
-                         'user_group_map AS directmember READ',
-                         'user_group_map AS regexpmember READ',
-                         'user_group_map AS directbless READ');
+    $dbh->bz_start_transaction();
  
     $editusers || $user->can_see_user($otherUser)
         || ThrowUserError('auth_failure', {reason => "not_visible",
@@ -338,7 +327,7 @@ if ($action eq 'search') {
     }
     # XXX: should create profiles_activity entries for blesser changes.
 
-    $dbh->bz_unlock_tables();
+    $dbh->bz_commit_transaction();
 
     # XXX: userDataToVars may be off when editing ourselves.
     userDataToVars($otherUserID);
@@ -454,33 +443,7 @@ if ($action eq 'search') {
     # XXX: if there was some change on these tables after the deletion
     #      confirmation checks, we may do something here we haven't warned
     #      about.
-    $dbh->bz_lock_tables('bugs WRITE',
-                         'bugs_activity WRITE',
-                         'attachments READ',
-                         'fielddefs READ',
-                         'products READ',
-                         'components READ',
-                         'logincookies WRITE',
-                         'profiles WRITE',
-                         'profiles_activity WRITE',
-                         'email_setting WRITE',
-                         'profile_setting WRITE',
-                         'bug_group_map READ',
-                         'user_group_map WRITE',
-                         'flags WRITE',
-                         'flagtypes READ',
-                         'cc WRITE',
-                         'namedqueries WRITE',
-                         'namedqueries_link_in_footer WRITE',
-                         'namedquery_group_map WRITE',
-                         'tokens WRITE',
-                         'votes WRITE',
-                         'watch WRITE',
-                         'series WRITE',
-                         'series_data WRITE',
-                         'whine_schedules WRITE',
-                         'whine_queries WRITE',
-                         'whine_events WRITE');
+    $dbh->bz_start_transaction();
 
     Bugzilla->params->{'allowuserdeletion'}
         || ThrowUserError('users_deletion_disabled');
@@ -664,7 +627,7 @@ if ($action eq 'search') {
     # Finally, remove the user account itself.
     $dbh->do('DELETE FROM profiles WHERE userid = ?', undef, $otherUserID);
 
-    $dbh->bz_unlock_tables();
+    $dbh->bz_commit_transaction();
     delete_token($token);
 
     $vars->{'message'} = 'account_deleted';

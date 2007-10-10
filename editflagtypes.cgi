@@ -309,9 +309,7 @@ sub insert {
 
     my $target_type = $cgi->param('target_type') eq "bug" ? "b" : "a";
 
-    $dbh->bz_lock_tables('flagtypes WRITE', 'products READ',
-                         'components READ', 'flaginclusions WRITE',
-                         'flagexclusions WRITE');
+    $dbh->bz_start_transaction();
 
     # Insert a record for the new flag type into the database.
     $dbh->do('INSERT INTO flagtypes
@@ -332,7 +330,7 @@ sub insert {
     # Populate the list of inclusions/exclusions for this flag type.
     validateAndSubmit($id);
 
-    $dbh->bz_unlock_tables();
+    $dbh->bz_commit_transaction();
 
     $vars->{'name'} = $cgi->param('name');
     $vars->{'message'} = "flag_type_created";
@@ -365,9 +363,7 @@ sub update {
 
     my $dbh = Bugzilla->dbh;
     my $user = Bugzilla->user;
-    $dbh->bz_lock_tables('flagtypes WRITE', 'products READ',
-                         'components READ', 'flaginclusions WRITE',
-                         'flagexclusions WRITE');
+    $dbh->bz_start_transaction();
     $dbh->do('UPDATE flagtypes
                  SET name = ?, description = ?, cc_list = ?,
                      sortkey = ?, is_active = ?, is_requestable = ?,
@@ -383,7 +379,7 @@ sub update {
     # Update the list of inclusions/exclusions for this flag type.
     validateAndSubmit($id);
 
-    $dbh->bz_unlock_tables();
+    $dbh->bz_commit_transaction();
 
     # Clear existing flags for bugs/attachments in categories no longer on 
     # the list of inclusions or that have been added to the list of exclusions.
@@ -473,8 +469,7 @@ sub deleteType {
     my $id = $flag_type->id;
     my $dbh = Bugzilla->dbh;
 
-    $dbh->bz_lock_tables('flagtypes WRITE', 'flags WRITE',
-                         'flaginclusions WRITE', 'flagexclusions WRITE');
+    $dbh->bz_start_transaction();
 
     # Get the name of the flag type so we can tell users
     # what was deleted.
@@ -484,7 +479,7 @@ sub deleteType {
     $dbh->do('DELETE FROM flaginclusions WHERE type_id = ?', undef, $id);
     $dbh->do('DELETE FROM flagexclusions WHERE type_id = ?', undef, $id);
     $dbh->do('DELETE FROM flagtypes WHERE id = ?', undef, $id);
-    $dbh->bz_unlock_tables();
+    $dbh->bz_commit_transaction();
 
     $vars->{'message'} = "flag_type_deleted";
     delete_token($token);
@@ -506,9 +501,9 @@ sub deactivate {
 
     my $dbh = Bugzilla->dbh;
 
-    $dbh->bz_lock_tables('flagtypes WRITE');
+    $dbh->bz_start_transaction();
     $dbh->do('UPDATE flagtypes SET is_active = 0 WHERE id = ?', undef, $flag_type->id);
-    $dbh->bz_unlock_tables();
+    $dbh->bz_commit_transaction();
 
     $vars->{'message'} = "flag_type_deactivated";
     $vars->{'flag_type'} = $flag_type;

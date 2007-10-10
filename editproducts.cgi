@@ -407,10 +407,7 @@ if ($action eq 'delete') {
         }
     }
 
-    $dbh->bz_lock_tables('products WRITE', 'components WRITE',
-                         'versions WRITE', 'milestones WRITE',
-                         'group_control_map WRITE', 'component_cc WRITE',
-                         'flaginclusions WRITE', 'flagexclusions WRITE');
+    $dbh->bz_start_transaction();
 
     my $comp_ids = $dbh->selectcol_arrayref('SELECT id FROM components
                                              WHERE product_id = ?',
@@ -440,7 +437,7 @@ if ($action eq 'delete') {
     $dbh->do("DELETE FROM products WHERE id = ?",
              undef, $product->id);
 
-    $dbh->bz_unlock_tables();
+    $dbh->bz_commit_transaction();
 
     delete_token($token);
 
@@ -587,12 +584,7 @@ if ($action eq 'updategroupcontrols') {
                             {groupname => $groupname});
         }
     }
-    $dbh->bz_lock_tables('groups READ',
-                         'group_control_map WRITE',
-                         'bugs WRITE',
-                         'bugs_activity WRITE',
-                         'bug_group_map WRITE',
-                         'fielddefs READ');
+    $dbh->bz_start_transaction();
 
     my $sth_Insert = $dbh->prepare('INSERT INTO group_control_map
                                     (group_id, product_id, entry, membercontrol,
@@ -771,7 +763,7 @@ if ($action eq 'updategroupcontrols') {
 
         push(@added_mandatory, \%group);
     }
-    $dbh->bz_unlock_tables();
+    $dbh->bz_commit_transaction();
 
     delete_token($token);
 
@@ -847,7 +839,7 @@ if ($action eq 'update') {
                        {votestoconfirm => $stored_votestoconfirm});
     }
 
-    $dbh->bz_lock_tables('products WRITE', 'milestones READ');
+    $dbh->bz_start_transaction();
 
     my $testproduct = 
         new Bugzilla::Product({name => $product_name});
@@ -917,7 +909,7 @@ if ($action eq 'update') {
                  undef, ($product_name, $product_old->id));
     }
 
-    $dbh->bz_unlock_tables();
+    $dbh->bz_commit_transaction();
 
     my $product = new Bugzilla::Product({name => $product_name});
 

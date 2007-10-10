@@ -312,9 +312,7 @@ if ($action eq 'delete') {
 
     trick_taint($value);
 
-    my @lock_tables = ('bugs READ', "$field WRITE");
-    push(@lock_tables, 'status_workflow WRITE') if ($field eq 'bug_status');
-    $dbh->bz_lock_tables(@lock_tables);
+    $dbh->bz_start_transaction();
 
     # Check if there are any bugs that still have this value.
     my $bug_ids = $dbh->selectcol_arrayref(
@@ -338,7 +336,7 @@ if ($action eq 'delete') {
 
     $dbh->do("DELETE FROM $field WHERE value = ?", undef, $value);
 
-    $dbh->bz_unlock_tables();
+    $dbh->bz_commit_transaction();
     delete_token($token);
 
     $template->process("admin/fieldvalues/deleted.html.tmpl",
@@ -396,7 +394,7 @@ if ($action eq 'update') {
         ThrowUserError('fieldvalue_name_too_long', $vars);
     }
 
-    $dbh->bz_lock_tables('bugs WRITE', "$field WRITE");
+    $dbh->bz_start_transaction();
 
     # Need to store because detaint_natural() will delete this if
     # invalid
@@ -442,7 +440,7 @@ if ($action eq 'update') {
         $vars->{'updated_value'} = 1;
     }
 
-    $dbh->bz_unlock_tables();
+    $dbh->bz_commit_transaction();
 
     # If the old value was the default value for the field,
     # update data/params accordingly.

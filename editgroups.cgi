@@ -502,8 +502,7 @@ if ($action eq 'remove_regexp') {
     my $group  = new Bugzilla::Group(CheckGroupID($cgi->param('group_id')));
     my $regexp = CheckGroupRegexp($cgi->param('regexp'));
 
-    $dbh->bz_lock_tables('groups WRITE', 'profiles READ',
-                         'user_group_map WRITE');
+    $dbh->bz_start_transaction();
 
     my $users = $group->members_direct();
     my $sth_delete = $dbh->prepare(
@@ -517,7 +516,7 @@ if ($action eq 'remove_regexp') {
             push(@deleted, $member);
         }
     }
-    $dbh->bz_unlock_tables();
+    $dbh->bz_commit_transaction();
 
     $vars->{'users'}  = \@deleted;
     $vars->{'regexp'} = $regexp;
@@ -543,13 +542,7 @@ sub doGroupChanges {
     my $cgi = Bugzilla->cgi;
     my $dbh = Bugzilla->dbh;
 
-    $dbh->bz_lock_tables('groups WRITE', 'group_group_map WRITE',
-                         'bug_group_map WRITE', 'user_group_map WRITE',
-                         'group_control_map READ', 'bugs READ', 'profiles READ',
-                         # Due to the way Bugzilla::Config::BugFields::get_param_list()
-                         # works, we need to lock these tables too.
-                         'priority READ', 'bug_severity READ', 'rep_platform READ',
-                         'op_sys READ');
+    $dbh->bz_start_transaction();
 
     # Check that the given group ID is valid and make a Group.
     my $group = new Bugzilla::Group(CheckGroupID($cgi->param('group_id')));
@@ -603,7 +596,7 @@ sub doGroupChanges {
                    $data->[0], $data->[1]);
     }
 
-    $dbh->bz_unlock_tables();
+    $dbh->bz_commit_transaction();
     return $changes;
 }
 

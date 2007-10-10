@@ -142,7 +142,11 @@ use File::Basename;
 
     SAFE_PROTOCOLS
 
+    MIN_SMALLINT
+    MAX_SMALLINT
+
     MAX_LEN_QUERY_NAME
+    MAX_MILESTONE_SIZE
 );
 
 @Bugzilla::Constants::EXPORT_OK = qw(contenttypes);
@@ -397,8 +401,14 @@ use constant ROOT_USER => $^O =~ /MSWin32/i ? 'Administrator' : 'root';
 # True if we're on Win32.
 use constant ON_WINDOWS => ($^O =~ /MSWin32/i);
 
+use constant MIN_SMALLINT => -32768;
+use constant MAX_SMALLINT => 32767;
+
 # The longest that a saved search name can be.
 use constant MAX_LEN_QUERY_NAME => 64;
+
+# The longest milestone name allowed.
+use constant MAX_MILESTONE_SIZE => 20;
 
 sub bz_locations {
     # We know that Bugzilla/Constants.pm must be in %INC at this point.

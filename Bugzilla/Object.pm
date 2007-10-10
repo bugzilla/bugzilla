@@ -215,6 +215,7 @@ sub set {
     if (exists $validators{$field}) {
         my $validator = $validators{$field};
         $value = $self->$validator($value, $field);
+        trick_taint($value) if (defined $value && !ref($value));
 
         if ($self->can('_set_global_validator')) {
             $self->_set_global_validator($value, $field);

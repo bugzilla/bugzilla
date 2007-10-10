@@ -895,9 +895,9 @@
     [% title = "Default milestone not deletable" %]
     [% admindocslinks = {'products.html' => 'Administering products',
                          'milestones.html' => 'About Milestones'} %]
-    Sorry, but [% milestone.name FILTER html %] is the default milestone 
-    for product '[% product.name FILTER html %]', and so it can not be 
-    deleted.
+    Sorry, but [% milestone.name FILTER html %] is the default milestone
+    for the '[% milestone.product.name FILTER html %]' product, and so
+    it cannot be deleted.
 
   [% ELSIF error == "milestone_name_too_long" %]
     [% title = "Milestone Name Is Too Long" %]
@@ -913,9 +913,9 @@
 
   [% ELSIF error == "milestone_sortkey_invalid" %]
     [% title = "Invalid Milestone Sortkey" %]
-    The sortkey '[% sortkey FILTER html %]' for milestone '
-    [% name FILTER html %]' is not in the range -32768 &le; sortkey
-    &le; 32767.
+    The sortkey '[% sortkey FILTER html %]' is not in the range
+    [%+ constants.MIN_SMALLINT FILTER html %] &le; sortkey &le;
+    [%+ constants.MAX_SMALLINT FILTER html %].
 
   [% ELSIF error == "misarranged_dates" %]
     [% title = "Misarranged Dates" %]

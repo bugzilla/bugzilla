@@ -15,7 +15,6 @@
 #                Frédéric Buclin <LpSolit@gmail.com>
 #
 
-
 use strict;
 use lib ".";
 
@@ -24,7 +23,6 @@ use Bugzilla::Constants;
 use Bugzilla::Util;
 use Bugzilla::Error;
 use Bugzilla::Milestone;
-use Bugzilla::Bug;
 use Bugzilla::Token;
 
 my $cgi = Bugzilla->cgi;
@@ -37,7 +35,6 @@ my $vars = {};
 #
 
 my $user = Bugzilla->login(LOGIN_REQUIRED);
-my $whoid = $user->id;
 
 print $cgi->header();
 
@@ -86,15 +83,10 @@ unless ($action) {
 
     $vars->{'showbugcounts'} = $showbugcounts;
     $vars->{'product'} = $product;
-    $template->process("admin/milestones/list.html.tmpl",
-                       $vars)
+    $template->process("admin/milestones/list.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
-
     exit;
 }
-
-
-
 
 #
 # action='add' -> present form for parameters for new milestone
@@ -105,14 +97,10 @@ unless ($action) {
 if ($action eq 'add') {
     $vars->{'token'} = issue_session_token('add_milestone');
     $vars->{'product'} = $product;
-    $template->process("admin/milestones/create.html.tmpl",
-                       $vars)
+    $template->process("admin/milestones/create.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
-
     exit;
 }
-
-
 
 #
 # action='new' -> add milestone entered in the 'action=add' screen
@@ -120,46 +108,17 @@ if ($action eq 'add') {
 
 if ($action eq 'new') {
     check_token_data($token, 'add_milestone');
-    $milestone_name || ThrowUserError('milestone_blank_name');
-
-    if (length($milestone_name) > 20) {
-        ThrowUserError('milestone_name_too_long',
-                       {'name' => $milestone_name});
-    }
-
-    $sortkey = Bugzilla::Milestone::check_sort_key($milestone_name,
-                                                   $sortkey);
-
-    my $milestone = new Bugzilla::Milestone(
-        { product => $product, name => $milestone_name });
-
-    if ($milestone) {
-        ThrowUserError('milestone_already_exists',
-                       {'name' => $milestone->name,
-                        'product' => $product->name});
-    }
-
-    # Add the new milestone
-    trick_taint($milestone_name);
-    $dbh->do('INSERT INTO milestones ( value, product_id, sortkey )
-              VALUES ( ?, ?, ? )',
-             undef, $milestone_name, $product->id, $sortkey);
-
-    $milestone = new Bugzilla::Milestone(
-        { product => $product, name => $milestone_name });
+    my $milestone = Bugzilla::Milestone->create({ name    => $milestone_name,
+                                                  product => $product,
+                                                  sortkey => $sortkey });
     delete_token($token);
 
     $vars->{'milestone'} = $milestone;
     $vars->{'product'} = $product;
-    $template->process("admin/milestones/created.html.tmpl",
-                       $vars)
+    $template->process("admin/milestones/created.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
-
     exit;
 }
-
-
-
 
 #
 # action='del' -> ask if user really wants to delete
@@ -176,7 +135,7 @@ if ($action eq 'del') {
 
     # The default milestone cannot be deleted.
     if ($product->default_milestone eq $milestone->name) {
-        ThrowUserError("milestone_is_default", $vars);
+        ThrowUserError("milestone_is_default", { milestone => $milestone });
     }
     $vars->{'token'} = issue_session_token('delete_milestone');
 
@@ -184,8 +143,6 @@ if ($action eq 'del') {
       || ThrowTemplateError($template->error());
     exit;
 }
-
-
 
 #
 # action='delete' -> really delete the milestone
@@ -195,46 +152,16 @@ if ($action eq 'delete') {
     check_token_data($token, 'delete_milestone');
     my $milestone = Bugzilla::Milestone->check({ product => $product,
                                                  name    => $milestone_name });
+    $milestone->remove_from_db;
+    delete_token($token);
+
     $vars->{'milestone'} = $milestone;
     $vars->{'product'} = $product;
-
-    # The default milestone cannot be deleted.
-    if ($milestone->name eq $product->default_milestone) {
-        ThrowUserError("milestone_is_default", $vars);
-    }
-
-    if ($milestone->bug_count) {
-        # We don't want to delete bugs when deleting a milestone.
-        # Bugs concerned are reassigned to the default milestone.
-        my $bug_ids =
-          $dbh->selectcol_arrayref("SELECT bug_id FROM bugs
-                                    WHERE product_id = ? AND target_milestone = ?",
-                                    undef, ($product->id, $milestone->name));
-        my $timestamp = $dbh->selectrow_array("SELECT NOW()");
-        foreach my $bug_id (@$bug_ids) {
-            $dbh->do("UPDATE bugs SET target_milestone = ?,
-                      delta_ts = ? WHERE bug_id = ?",
-                      undef, ($product->default_milestone, $timestamp,
-                              $bug_id));
-            # We have to update the 'bugs_activity' table too.
-            LogActivityEntry($bug_id, 'target_milestone',
-                             $milestone->name,
-                             $product->default_milestone,
-                             $whoid, $timestamp);
-        }
-    }
-
-    $dbh->do("DELETE FROM milestones WHERE product_id = ? AND value = ?",
-             undef, ($product->id, $milestone->name));
-
-    delete_token($token);
 
     $template->process("admin/milestones/deleted.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
     exit;
 }
-
-
 
 #
 # action='edit' -> present the edit milestone form
@@ -251,14 +178,10 @@ if ($action eq 'edit') {
     $vars->{'product'} = $product;
     $vars->{'token'} = issue_session_token('edit_milestone');
 
-    $template->process("admin/milestones/edit.html.tmpl",
-                       $vars)
+    $template->process("admin/milestones/edit.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
-
     exit;
 }
-
-
 
 #
 # action='update' -> update the milestone
@@ -267,92 +190,22 @@ if ($action eq 'edit') {
 if ($action eq 'update') {
     check_token_data($token, 'edit_milestone');
     my $milestone_old_name = trim($cgi->param('milestoneold') || '');
-    my $milestone_old = Bugzilla::Milestone->check(
-        { product => $product, name =>  $milestone_old_name });
-
-    if (length($milestone_name) > 20) {
-        ThrowUserError('milestone_name_too_long',
-                       {'name' => $milestone_name});
-    }
-
-    $dbh->bz_lock_tables('bugs WRITE',
-                         'milestones WRITE',
-                         'products WRITE');
-
-    if ($sortkey ne $milestone_old->sortkey) {
-        $sortkey = Bugzilla::Milestone::check_sort_key($milestone_name,
-                                                       $sortkey);
-
-        $dbh->do('UPDATE milestones SET sortkey = ?
-                  WHERE product_id = ?
-                  AND value = ?',
-                 undef,
-                 $sortkey,
-                 $product->id,
-                 $milestone_old->name);
-
-        $vars->{'updated_sortkey'} = 1;
-    }
-
-    if ($milestone_name ne $milestone_old->name) {
-        unless ($milestone_name) {
-            ThrowUserError('milestone_blank_name');
-        }
-        my $milestone = new Bugzilla::Milestone(
-            { product => $product, name => $milestone_name });
-        if ($milestone) {
-            ThrowUserError('milestone_already_exists',
-                           {'name' => $milestone->name,
-                            'product' => $product->name});
-        }
-
-        trick_taint($milestone_name);
-
-        $dbh->do('UPDATE bugs
-                  SET target_milestone = ?
-                  WHERE target_milestone = ?
-                  AND product_id = ?',
-                 undef,
-                 $milestone_name,
-                 $milestone_old->name,
-                 $product->id);
-
-        $dbh->do("UPDATE milestones
-                  SET value = ?
-                  WHERE product_id = ?
-                  AND value = ?",
-                 undef,
-                 $milestone_name,
-                 $product->id,
-                 $milestone_old->name);
-
-        $dbh->do("UPDATE products
-                  SET defaultmilestone = ?
-                  WHERE id = ?
-                  AND defaultmilestone = ?",
-                 undef,
-                 $milestone_name,
-                 $product->id,
-                 $milestone_old->name);
-
-        $vars->{'updated_name'} = 1;
-    }
-
-    $dbh->bz_unlock_tables();
-
     my $milestone = Bugzilla::Milestone->check({ product => $product,
-                                                 name    => $milestone_name });
+                                                 name    => $milestone_old_name });
+
+    $milestone->set_name($milestone_name);
+    $milestone->set_sortkey($sortkey);
+    my $changes = $milestone->update();
+
     delete_token($token);
 
     $vars->{'milestone'} = $milestone;
     $vars->{'product'} = $product;
-    $template->process("admin/milestones/updated.html.tmpl",
-                       $vars)
+    $vars->{'changes'} = $changes;
+    $template->process("admin/milestones/updated.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
-
     exit;
 }
-
 
 #
 # No valid action found

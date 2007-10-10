@@ -213,11 +213,11 @@ if ($action eq 'update') {
     my $version = Bugzilla::Version->check({ product => $product,
                                              name   => $version_old_name });
 
-    $dbh->bz_lock_tables('bugs WRITE', 'versions WRITE');
+    $dbh->bz_start_transaction();
 
     $vars->{'updated'} = $version->update($version_name, $product);
 
-    $dbh->bz_unlock_tables();
+    $dbh->bz_commit_transaction();
     delete_token($token);
 
     $vars->{'version'} = $version;

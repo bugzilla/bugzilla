@@ -1,5 +1,5 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"> -->
-<!-- $Id: installation.xml,v 1.142 2007/08/09 12:36:08 lpsolit%gmail.com Exp $ -->
+<!-- $Id: installation.xml,v 1.143 2007/10/11 12:41:53 lpsolit%gmail.com Exp $ -->
 <chapter id="installing-bugzilla">
   <title>Installing Bugzilla</title>
 
@@ -1796,7 +1796,10 @@ AddType application/rdf+xml .rdf</screen>
         work on Unix.  For that reason, we still recommend doing so on a Unix 
         based system such as GNU/Linux.  That said, if you do want to get
         Bugzilla running on Windows, you will need to make the following
-        adjustments.
+        adjustments. A detailed step-by-step
+        <ulink url="http://www.bugzilla.org/docs/win32install.html">
+        installation guide for Windows</ulink> is also available
+        if you need more help with your installation.
       </para>
 
       <section id="win32-perl">
@@ -1884,8 +1887,11 @@ C:\perl&gt; <command>ppm install &lt;module name&gt;</command>
             If using Apache on windows, you can set the <ulink
             url="http://httpd.apache.org/docs-2.0/mod/core.html#scriptinterpretersource">ScriptInterpreterSource</ulink>
             directive in your Apache config to avoid having to modify
-            the first line of every script to contain your path to perl 
-            perl instead of <filename>/usr/bin/perl</filename>.
+            the first line of every script to contain your path to Perl
+            instead of <filename>/usr/bin/perl</filename>. When setting
+            <filename>ScriptInterpreterSource</filename>, do not forget
+            to specify the <command>-T</command> flag to enable the taint
+            mode. For example: <command>C:\Perl\bin\perl.exe -T</command>.
           </para>
         </note>
 

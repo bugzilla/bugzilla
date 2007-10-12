@@ -930,7 +930,7 @@ sub _check_component {
     $name = trim($name);
     $name || ThrowUserError("require_component");
     ($product = $invocant->product_obj) if ref $invocant;
-    my $obj = Bugzilla::Component::check_component($product, $name);
+    my $obj = Bugzilla::Component->check({ product => $product, name => $name });
     return $obj;
 }
 

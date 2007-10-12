@@ -431,6 +431,10 @@ A hash with one element, C<id>. This is the id of the newly-filed bug.
 
 =over
 
+=item 51 (Invalid Object)
+
+The component you specified is not valid for this Product.
+
 =item 103 (Invalid Alias)
 
 The alias you specified is invalid for some reason. See the error message
@@ -443,8 +447,7 @@ have more detail.
 
 =item 105 (Invalid Component)
 
-Either you didn't specify a component, or the component you specified was
-invalid.
+You didn't specify a component.
 
 =item 106 (Invalid Product)
 

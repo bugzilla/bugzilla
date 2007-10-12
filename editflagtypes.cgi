@@ -600,7 +600,8 @@ sub validateComponent {
     ($product && $product->id)
       || ThrowUserError("flag_type_component_without_product");
 
-    my $component = Bugzilla::Component::check_component($product, $component_name);
+    my $component = Bugzilla::Component->check({ product => $product,
+                                                 name => $component_name });
     return $component;
 }
 

@@ -298,12 +298,13 @@
 
   [% ELSIF error == "component_already_exists" %]
     [% title = "Component Already Exists" %]
-    A component with the name '[% name FILTER html %]' already exists.
+    The <em>[% product.name FILTER html %]</em> product already has
+    a component named <em>[% name FILTER html %]</em>.
 
   [% ELSIF error == "component_blank_description" %]
     [% title = "Blank Component Description Not Allowed" %]
-    You must enter a non-blank description for component '[% name FILTER html %]'.
-     
+    You must enter a non-blank description for this component.
+
   [% ELSIF error == "component_blank_name" %]
     [% title = "Blank Component Name Not Allowed" %]
     You must enter a name for this new component.
@@ -317,16 +318,11 @@
   [% ELSIF error == "component_name_too_long" %]
     [% title = "Component Name Is Too Long" %]
     The name of a component is limited to 64 characters. 
-    '[% name FILTER html %]' is too long ([% name.size %] characters).
+    '[% name FILTER html %]' is too long ([% name.length %] characters).
 
   [% ELSIF error == "component_need_initialowner" %]
     [% title = "Component Requires Default Assignee" %]
-    You must enter a default assignee for component '[% name FILTER html %]'.
-
-  [% ELSIF error == "component_not_valid" %]
-    [% title = "Specified Component Does Not Exist" %]
-    Product [% product FILTER html %] does not have a component
-    named [% name FILTER html %].
+    A default assignee is required for this component.
 
   [% ELSIF error == "customfield_nonexistent" %]
     [% title = "Unknown Custom Field" %]
@@ -1620,6 +1616,8 @@
 [% BLOCK object_name %]
   [% IF class == "Bugzilla::User" %]
     user
+  [% ELSIF class == "Bugzilla::Component" %]
+    component
   [% ELSIF class == "Bugzilla::Version" %]
     version
   [% ELSIF class == "Bugzilla::Milestone" %]

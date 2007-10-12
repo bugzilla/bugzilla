@@ -50,6 +50,9 @@ use base qw(Exporter);
 # comment that it was retired. Also, if an error changes its name, you'll
 # have to fix it here.
 use constant WS_ERROR_CODE => {
+    # Generic Bugzilla::Object errors are 50-99.
+    object_name_not_specified   => 50,
+    object_does_not_exist       => 51,
     # Bug errors usually occupy the 100-200 range.
     improper_bug_id_field_value => 100,
     bug_id_does_not_exist       => 101,
@@ -65,7 +68,6 @@ use constant WS_ERROR_CODE => {
     # Component errors
     require_component       => 105,
     component_name_too_long => 105,
-    component_not_valid     => 105,
     # Invalid Product
     no_products         => 106,
     entry_access_denied => 106,

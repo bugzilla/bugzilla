@@ -451,6 +451,12 @@
       # we can still use get_text(). %]
     [% PROCESS "admin/sanitycheck/messages.html.tmpl" %]
 
+  [% ELSIF message_tag == "series_all_open" %]
+    All Open
+
+  [% ELSIF message_tag == "series_all_closed" %]
+    All Closed
+
   [% ELSIF message_tag == "sudo_started" %]
     [% title = "Sudo session started" %]
       The sudo session has been started.  For the next 6 hours, or until you 

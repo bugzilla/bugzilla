@@ -147,6 +147,7 @@ use File::Basename;
 
     MAX_LEN_QUERY_NAME
     MAX_MILESTONE_SIZE
+    MAX_COMPONENT_SIZE
 );
 
 @Bugzilla::Constants::EXPORT_OK = qw(contenttypes);
@@ -409,6 +410,9 @@ use constant MAX_LEN_QUERY_NAME => 64;
 
 # The longest milestone name allowed.
 use constant MAX_MILESTONE_SIZE => 20;
+
+# The longest component name allowed.
+use constant MAX_COMPONENT_SIZE => 64;
 
 sub bz_locations {
     # We know that Bugzilla/Constants.pm must be in %INC at this point.

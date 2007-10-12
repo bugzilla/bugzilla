@@ -196,8 +196,8 @@ sub queue {
         push(@criteria, "bugs.product_id = " . $product->id);
         push(@excluded_columns, 'product') unless $cgi->param('do_union');
         if (defined $cgi->param('component') && $cgi->param('component') ne "") {
-            my $component =
-                Bugzilla::Component::check_component($product, scalar $cgi->param('component'));
+            my $component = Bugzilla::Component->check({ product => $product,
+                                                         name => scalar $cgi->param('component') });
             push(@criteria, "bugs.component_id = " . $component->id);
             push(@excluded_columns, 'component') unless $cgi->param('do_union');
         }

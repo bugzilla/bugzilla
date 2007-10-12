@@ -49,6 +49,8 @@ sub process {
             do($extension.'/code/'.$name.'.pl');
             ThrowCodeError('extension_invalid', 
                 { errstr => $@, name => $name, extension => $extension }) if $@;
+            # Flush stored data.
+            Bugzilla->hook_args({});
         }
     }
     

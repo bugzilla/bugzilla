@@ -1,5 +1,5 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"> -->
-<!-- $Id: installation.xml,v 1.143 2007/10/11 12:41:53 lpsolit%gmail.com Exp $ -->
+<!-- $Id: installation.xml,v 1.144 2007/10/12 18:24:22 lpsolit%gmail.com Exp $ -->
 <chapter id="installing-bugzilla">
   <title>Installing Bugzilla</title>
 
@@ -1998,32 +1998,25 @@ C:\perl&gt; <command>ppm install &lt;module name&gt;</command>
       </section>
     </section>
 
-    <section id="os-mandrake">
-      <title>Linux-Mandrake 8.0</title>
-
-      <para>Linux-Mandrake 8.0 includes every required and optional library
-      for Bugzilla. The easiest way to install them is by using the
-      <command>urpmi</command>  utility. If you follow these commands, you
-      should have everything you need for Bugzilla, and
-      <command>./checksetup.pl</command>  should not complain about any
-      missing libraries. You may already have some of these installed.
-      </para>
-
-      <screen>
-<prompt>bash#</prompt> <command>urpmi perl-mysql</command>
-<prompt>bash#</prompt> <command>urpmi perl-chart</command>
-<prompt>bash#</prompt> <command>urpmi perl-gd</command>
-<prompt>bash#</prompt> <command>urpmi perl-MailTools</command>             <co id="test-mailtools"/>
-<prompt>bash#</prompt> <command>urpmi apache-modules</command>
-      </screen>
-      <calloutlist>
-        <callout arearefs="test-mailtools">
-          <para>for Bugzilla email integration</para>
-        </callout>
-      </calloutlist>
-
+    <section id="os-linux">
+      <title>Linux Distributions</title>
+            <para>Many Linux distributions include Bugzilla and its 
+            dependencies in their native package management systems. 
+            Installing Bugzilla with root access on any Linux system 
+            should be as simple as finding the Bugzilla package in the 
+            package management application and installing it using the 
+            normal command syntax. Several distributions also perform 
+            the proper web server configuration automatically on installation.
+            </para>
+            <para>Please consult the documentation of your Linux 
+            distribution for instructions on how to install packages, 
+            or for specific instructions on installing Bugzilla with 
+            native package management tools. There is also a 
+            <ulink url="http://wiki.mozilla.org/Bugzilla:Linux_Distro_Installation">
+            Bugzilla Wiki Page</ulink> for distro-specific installation
+            notes.
+            </para>
     </section>
-
   </section>
 
 

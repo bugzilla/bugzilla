@@ -42,11 +42,13 @@ use Bugzilla::User;
 use Bugzilla::Error;
 use Bugzilla::Status;
 
+use Cwd qw(abs_path);
 use MIME::Base64;
 # for time2str - replace by TT Date plugin??
 use Date::Format ();
+use File::Basename qw(dirname);
 use File::Find;
-use File::Path;
+use File::Path qw(rmtree mkpath);
 use File::Spec;
 use IO::Dir;
 
@@ -782,6 +784,23 @@ sub precompile_templates {
             $template->context->template($file);
         }
     }
+
+    # Under mod_perl, we look for templates using the absolute path of the
+    # template directory, which causes Template Toolkit to look for their 
+    # *compiled* versions using the full absolute path under the data/template
+    # directory. (Like data/template/var/www/html/mod_perl/.) To avoid
+    # re-compiling templates under mod_perl, we symlink to the
+    # already-compiled templates.
+    my $abs_root = dirname(abs_path($templatedir));
+    mkpath("$datadir/template$abs_root");
+    my $todir   = "$datadir/template$abs_root";
+    # We use abs2rel so that the symlink will look like "../../../../template"
+    # which works, while just "data/template/template/" doesn't work.
+    my $fromdir = File::Spec->abs2rel("$datadir/template/template", $todir);
+    # We eval for systems (like Windows) that can't symlink, where "symlink"
+    # throws a fatal error.
+    eval { symlink($fromdir, "$todir/template") 
+               or warn "Failed to symlink from $fromdir to $todir: $!" };
 
     # If anything created a Template object before now, clear it out.
     delete Bugzilla->request_cache->{template};

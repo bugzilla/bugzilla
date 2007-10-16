@@ -1,5 +1,5 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"> -->
-<!-- $Id: installation.xml,v 1.145 2007/10/14 19:01:01 mozilla%colinogilvie.co.uk Exp $ -->
+<!-- $Id: installation.xml,v 1.146 2007/10/16 09:56:07 justdave%bugzilla.org Exp $ -->
 <chapter id="installing-bugzilla">
   <title>Installing Bugzilla</title>
 
@@ -707,9 +707,18 @@
         hosting account), you will need to leave
         <emphasis>webservergroup</emphasis> empty, ignoring the warnings 
         that <filename>checksetup.pl</filename> will subsequently display 
-        every time it in run.
+        every time it is run.
       </para>
       
+      <caution>
+        <para>
+          If you are using suexec, you should use your own primary group
+          for <emphasis>webservergroup</emphasis> rather than leaving it
+          empty, and see the additional directions in the suexec section
+          <xref linkend="suexec" />.
+        </para>
+      </caution>
+
       <para>
         The other options in the <filename>localconfig</filename> file
         are documented by their accompanying comments. If you have a slightly
@@ -2363,6 +2372,26 @@ pid-file=/home/foo/mymysql/the.pid
         limited access to shell accounts may lessen the security risk,
         but use at your own risk.</para>
       </warning>
+
+      <section id="suexec">
+        <title>suexec or shared hosting</title>
+
+        <para>If you are running on a system that uses suexec (most shared
+        hosting environments do this), you will need to set the
+        <emphasis>webservergroup</emphasis> value in <filename>localconfig</filename>
+        to match <emphasis>your</emphasis> primary group, rather than the one
+        the web server runs under.  You will need to run the following
+        shell commands after running <command>./checksetup.pl</command>,
+        every time you run it (or modify <filename>checksetup.pl</filename>
+        to do them for you via the system() command).
+        <programlisting>        for i in docs graphs images js skins; do find $i -type d -exec chmod o+rx {} \; ; done
+        for i in jpg gif css js png html rdf xul; do find . -name \*.$i -exec chmod o+r {} \; ; done
+        find . -name .htaccess -exec chmod o+r {} \;
+        chmod o+x . data data/webdot</programlisting>
+        Pay particular attention to the number of semicolons and dots.
+        They are all important.  A future version of Bugzilla will
+        hopefully be able to do this for you out of the box.</para>
+      </section>
     </section>
   </section>
 

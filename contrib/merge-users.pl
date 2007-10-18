@@ -131,12 +131,14 @@ my $changes = {
     votes           => ['who'],
     # Tables affecting global behavior / other users.
     components      => ['initialowner', 'initialqacontact'],
+    component_cc    => ['user_id component_id'],
     quips           => ['userid'],
     series          => ['creator'],
     whine_events    => ['owner_userid'],
     watch           => ['watcher watched', 'watched watcher'],
     # Tables affecting the user directly.
     namedqueries    => ['userid name'],
+    namedqueries_link_in_footer => ['user_id namedquery_id'],
     user_group_map  => ['user_id group_id isbless grant_type'],
     email_setting   => ['user_id relationship event'],
     profile_setting => ['user_id setting_name'],

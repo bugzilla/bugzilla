@@ -26,7 +26,7 @@
 #                 Max Kanat-Alexander <mkanat@bugzilla.org>
 
 use strict;
-use lib ".";
+use lib qw(. lib);
 
 use Bugzilla;
 use Bugzilla::Bug;

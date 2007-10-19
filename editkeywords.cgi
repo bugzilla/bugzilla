@@ -21,7 +21,7 @@
 # Contributor(s): Terry Weissman <terry@mozilla.org>
 
 use strict;
-use lib ".";
+use lib qw(. lib);
 
 use Bugzilla;
 use Bugzilla::Constants;

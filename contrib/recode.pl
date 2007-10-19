@@ -20,8 +20,7 @@
 # Contributor(s): Max Kanat-Alexander <mkanat@bugzilla.org>
 
 use strict;
-# Allow the script to be run from contrib or as contrib/recode.pl
-use lib '..';
+use lib qw(. lib);
 
 use Bugzilla;
 use Bugzilla::Constants;

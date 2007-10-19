@@ -54,22 +54,16 @@ use strict;
 #
 #####################################################################
 
-# figure out which path this script lives in. Set the current path to
-# this and add it to @INC so this will work when run as part of mail
-# alias by the mailer daemon
-# since "use lib" is run at compile time, we need to enclose the
-# $::path declaration in a BEGIN block so that it is executed before
-# the rest of the file is compiled.
+use File::Basename qw(dirname);
+# MTAs may call this script from any directory, but it should always
+# run from this one so that it can find its modules.
 BEGIN {
-    $::path = $0;
-    $::path =~ m#(.*)/[^/]+#;
-    $::path = $1;
-    $::path ||= '.';    # $0 is empty at compile time.  This line will
-                        # have no effect on this script at runtime.
+    require File::Basename;
+    my $dir = $0; $dir =~ /(.*)/; $dir = $1; # trick taint
+    chdir(File::Basename::dirname($dir));
 }
 
-chdir $::path;
-use lib ($::path);
+use lib qw(. lib);
 # Data dumber is used for debugging, I got tired of copying it back in 
 # and then removing it. 
 #use Data::Dumper;

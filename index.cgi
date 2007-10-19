@@ -29,7 +29,7 @@
 use strict;
 
 # Include the Bugzilla CGI and general utility library.
-use lib ".";
+use lib qw(. lib);
 
 use Bugzilla;
 use Bugzilla::Constants;

@@ -24,7 +24,7 @@
 #                 Akamai Technologies <bugzilla-dev@akamai.com>
 
 use strict;
-use lib ".";
+use lib qw(. lib);
 
 use Bugzilla;
 use Bugzilla::Constants;

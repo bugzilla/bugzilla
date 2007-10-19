@@ -29,6 +29,8 @@ BEGIN {
     chdir(File::Basename::dirname($0)); 
 }
 
+use lib qw(. lib);
+
 use Data::Dumper;
 use Email::Address;
 use Email::Reply qw(reply);

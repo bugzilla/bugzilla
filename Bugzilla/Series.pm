@@ -21,7 +21,6 @@
 #                 Lance Larsh <lance.larsh@oracle.com>
 
 use strict;
-use lib ".";
 
 # This module implements a series - a set of data to be plotted on a chart.
 #

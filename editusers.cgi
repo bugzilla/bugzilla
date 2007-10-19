@@ -21,7 +21,7 @@
 #                 Gavin Shelley  <bugzilla@chimpychompy.org>
 
 use strict;
-use lib ".";
+use lib qw(. lib);
 
 use Bugzilla;
 use Bugzilla::Constants;

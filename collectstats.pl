@@ -34,7 +34,7 @@ use AnyDBM_File;
 use strict;
 use IO::Handle;
 
-use lib ".";
+use lib qw(. lib);
 
 use Bugzilla;
 use Bugzilla::Constants;

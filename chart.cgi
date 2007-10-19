@@ -43,7 +43,7 @@
 # Offer subscription when you get a "series already exists" error?
 
 use strict;
-use lib qw(.);
+use lib qw(. lib);
 
 use Bugzilla;
 use Bugzilla::Constants;

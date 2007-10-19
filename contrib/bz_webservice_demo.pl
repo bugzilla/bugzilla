@@ -29,6 +29,7 @@ C<bz_webservice_demo.pl --help> for detailed help
 =cut
 
 use strict;
+use lib qw(lib);
 use Getopt::Long;
 use Pod::Usage;
 use File::Basename qw(dirname);

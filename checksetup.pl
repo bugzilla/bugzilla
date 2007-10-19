@@ -51,7 +51,7 @@ use POSIX qw(setlocale LC_CTYPE);
 use Safe;
 
 BEGIN { chdir dirname($0); }
-use lib ".";
+use lib qw(. lib);
 use Bugzilla::Constants;
 use Bugzilla::Install::Requirements;
 use Bugzilla::Install::Util qw(install_string get_version_and_os);

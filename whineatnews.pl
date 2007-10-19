@@ -29,7 +29,7 @@
 # touched for more than the number of days specified in the whinedays param.
 
 use strict;
-use lib '.';
+use lib qw(. lib);
 
 use Bugzilla;
 use Bugzilla::Mailer;

@@ -62,6 +62,7 @@ sub FILESYSTEM {
     my $webdotdir     = bz_locations()->{'webdotdir'};
     my $templatedir   = bz_locations()->{'templatedir'};
     my $libdir        = bz_locations()->{'libpath'};
+    my $extlib        = bz_locations()->{'ext_libpath'};
     my $skinsdir      = bz_locations()->{'skinsdir'};
 
     my $ws_group      = Bugzilla->localconfig->{'webservergroup'};
@@ -151,6 +152,8 @@ sub FILESYSTEM {
          "$datadir/duplicates" => { files => $ws_readable,
                                      dirs => $ws_dir_readable },
          "$libdir/Bugzilla"    => { files => $ws_readable,
+                                     dirs => $ws_dir_readable },
+         $extlib               => { files => $ws_readable,
                                      dirs => $ws_dir_readable },
          $templatedir          => { files => $ws_readable,
                                      dirs => $ws_dir_readable },
@@ -250,6 +253,8 @@ EOT
         "$attachdir/.htaccess"       => { perms    => $ws_readable,
                                           contents => $ht_default_deny },
         "$libdir/Bugzilla/.htaccess" => { perms    => $ws_readable,
+                                          contents => $ht_default_deny },
+        "$extlib/.htaccess"          => { perms    => $ws_readable,
                                           contents => $ht_default_deny },
         "$templatedir/.htaccess"     => { perms    => $ws_readable,
                                           contents => $ht_default_deny },

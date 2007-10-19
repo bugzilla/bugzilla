@@ -19,7 +19,7 @@
 # issues as possible.
 
 use strict;
-use lib ".";
+use lib qw(. lib);
 
 BEGIN {
     my $envpath = $ENV{'PATH'};

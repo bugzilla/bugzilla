@@ -34,7 +34,7 @@ BEGIN {
     chdir dirname($0);
 }
 
-use lib qw(.. lib);
+use lib qw(.. ../lib lib);
 
 # We only compile our POD if Pod::Simple is installed. We do the checks
 # this way so that if there's a compile error in Pod::Simple::HTML::Bugzilla,

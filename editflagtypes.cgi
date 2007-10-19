@@ -27,7 +27,7 @@
 
 # Make it harder for us to do dangerous things in Perl.
 use strict;
-use lib ".";
+use lib qw(. lib);
 
 # Use Bugzilla's flag modules for handling flag types.
 use Bugzilla;

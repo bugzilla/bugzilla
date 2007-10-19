@@ -21,7 +21,7 @@
 # Direct any questions on this source code to mozilla.org
 
 use strict;
-use lib ".";
+use lib qw(. lib);
 
 use Bugzilla;
 use Bugzilla::Constants;

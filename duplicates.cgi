@@ -27,7 +27,7 @@ use strict;
 
 use AnyDBM_File;
 
-use lib qw(.);
+use lib qw(. lib);
 
 use Bugzilla;
 use Bugzilla::Constants;

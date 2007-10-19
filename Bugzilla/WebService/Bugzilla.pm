@@ -21,12 +21,21 @@ package Bugzilla::WebService::Bugzilla;
 use strict;
 use base qw(Bugzilla::WebService);
 use Bugzilla::Constants;
+use Bugzilla::Hook;
 import SOAP::Data qw(type);
 
 use Time::Zone;
 
 sub version {
     return { version => type('string')->value(BUGZILLA_VERSION) };
+}
+
+sub plugins {
+    my $plugins = Bugzilla::Hook::enabled_plugins();
+    foreach my $name (keys %$plugins) {
+        $plugins->{$name} = type('string')->value($plugins->{$name});
+    }
+    return { plugins => $plugins };
 }
 
 sub timezone {
@@ -71,6 +80,25 @@ A hash with a single item, C<version>, that is the version as a
 string.
 
 =item B<Errors> (none)
+
+=back
+
+=item C<plugins> B<EXPERIMENTAL>
+
+=over
+
+=item B<Description>
+
+Gets information about the plugins that are currently installed and enabled
+in this Bugzilla.
+
+=item B<Params> (none)
+
+=item B<Returns>
+
+A hash with a single item, C<plugins>. This points to a hash. I<That> hash
+contains the names of plugins as keys, and the versions of the plugin as
+values.
 
 =back
 

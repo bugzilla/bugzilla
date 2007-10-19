@@ -41,6 +41,8 @@ sub process {
         # If there's malicious data here, we have much bigger issues to 
         # worry about, so we can safely detaint them:
         trick_taint($extension);
+        # Skip CVS directories and any hidden files/dirs.
+        next if $extension =~ m{/CVS$} || $extension =~ m{/\.[^/]+$};
         next if -e "$extension/disabled";
         if (-e $extension.'/code/'.$name.'.pl') {
             Bugzilla->hook_args($args);
@@ -53,7 +55,28 @@ sub process {
             Bugzilla->hook_args({});
         }
     }
-    
+}
+
+sub enabled_plugins {
+    my $extdir = bz_locations()->{'extensionsdir'};
+    my @extensions = glob("$extdir/*");
+    my %enabled;
+    foreach my $extension (@extensions) {
+        trick_taint($extension);
+        my $extname = $extension;
+        $extname =~ s{^\Q$extdir\E/}{};
+        next if $extname eq 'CVS' || $extname =~ /^\./;
+        next if -e "$extension/disabled";
+        # Allow extensions to load their own libraries.
+        local @INC = ("$extension/lib", @INC);
+        $enabled{$extname} = do("$extension/version.pl");
+        ThrowCodeError('extension_invalid',
+                { errstr => $@, name => 'version',
+                  extension => $extension }) if $@;
+
+    }
+
+    return \%enabled;
 }
 
 1;
@@ -78,6 +101,10 @@ hooks. When a piece of standard Bugzilla code wants to allow an extension
 to perform additional functions, it uses Bugzilla::Hook's L</process>
 subroutine to invoke any extension code if installed. 
 
+There is a sample extension in F<extensions/example/> that demonstrates
+most of the things described in this document, as well as many of the
+hooks available.
+
 =head2 How Hooks Work
 
 When a hook named C<HOOK_NAME> is run, Bugzilla will attempt to invoke any 
@@ -95,6 +122,12 @@ Some L<hooks|/HOOKS> have params that are passed to them.
 These params are accessible through L<Bugzilla/hook_args>.
 That returns a hashref. Very frequently, if you want your
 hook to do anything, you have to modify these variables.
+
+=head2 Versioning Extensions
+
+Every extension must have a file in its root called F<version.pl>.
+This file should return a version number when called with C<do>.
+This represents the current version of this extension.
 
 =head1 SUBROUTINES
 

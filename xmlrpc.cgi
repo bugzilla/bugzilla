@@ -20,6 +20,7 @@ use lib qw(. lib);
 
 use Bugzilla;
 use Bugzilla::Constants;
+use Bugzilla::Hook;
 
 # Use an eval here so that runtests.pl accepts this script even if SOAP-Lite
 # is not installed.
@@ -29,11 +30,16 @@ $@ && ThrowCodeError('soap_not_installed');
 
 Bugzilla->usage_mode(Bugzilla::Constants::USAGE_MODE_WEBSERVICE);
 
+my %hook_dispatch;
+Bugzilla::Hook::process('webservice', { dispatch => \%hook_dispatch });
+local @INC = (bz_locations()->{extensionsdir}, @INC);
+
 my $response = Bugzilla::WebService::XMLRPC::Transport::HTTP::CGI
     ->dispatch_with({'Bugzilla' => 'Bugzilla::WebService::Bugzilla',
                      'Bug'      => 'Bugzilla::WebService::Bug',
                      'User'     => 'Bugzilla::WebService::User',
                      'Product'  => 'Bugzilla::WebService::Product',
+                     %hook_dispatch
                     })
     ->on_action(\&Bugzilla::WebService::handle_login)
     ->handle;

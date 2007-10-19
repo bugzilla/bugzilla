@@ -62,7 +62,7 @@ __END__
 
 =head1 NAME
 
-Bugzilla::Hook - Extendible extension hooks for Bugzilla code
+Bugzilla::Hook - Extendable extension hooks for Bugzilla code
 
 =head1 SYNOPSIS
 
@@ -191,5 +191,38 @@ Params:
 L<Bugzilla::DB::Schema/ABSTRACT_SCHEMA>. Add new hash keys to make new table
 definitions. F<checksetup.pl> will automatically add these tables to the
 database when run.
+
+=back
+
+=head2 webservice
+
+This hook allows you to add your own modules to the WebService. (See
+L<Bugzilla::WebService>.)
+
+Params:
+
+=over
+
+=item C<dispatch>
+
+A hashref that you can specify the names of your modules and what Perl
+module handles the functions for that module. (This is actually sent to 
+L<SOAP::Lite/dispatch_with>. You can see how that's used in F<xmlrpc.cgi>.)
+
+The Perl module name must start with C<extensions::yourextension::lib::>
+(replace C<yourextension> with the name of your extension). The C<package>
+declaration inside that module must also start with 
+C<extensions::yourextension::lib::> in that module's code.
+
+Example:
+
+  $dispatch->{Example} = "extensions::example::lib::Example";
+
+And then you'd have a module F<extensions/example/lib/Example.pm>
+
+It's recommended that all the keys you put in C<dispatch> start with the
+name of your extension, so that you don't conflict with the standard Bugzilla
+WebService functions (and so that you also don't conflict with other
+plugins).
 
 =back

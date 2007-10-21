@@ -2402,7 +2402,8 @@ sub editable_bug_fields {
     @obsolete_fields = map { $_->name } @obsolete_fields;
     foreach my $remove ("bug_id", "reporter", "creation_ts", "delta_ts", "lastdiffed", @obsolete_fields) {
         my $location = lsearch(\@fields, $remove);
-        splice(@fields, $location, 1);
+        # Custom multi-select fields are not stored in the bugs table.
+        splice(@fields, $location, 1) if ($location > -1);
     }
     # Sorted because the old @::log_columns variable, which this replaces,
     # was sorted.

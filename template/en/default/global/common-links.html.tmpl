@@ -61,6 +61,9 @@
           || user.get_products_by_permission("editcomponents").size %]
       <li><span class="separator">| </span><a href="admin.cgi">Administration</a></li>
     [% END %]
+
+    [% PROCESS link_to_documentation %]
+
     <li>
       <span class="separator">| </span>
       [% IF user.authorizer.can_logout %]
@@ -81,6 +84,9 @@
           && user.authorizer.user_can_create_account %]
       <li><span class="separator">| </span><a href="createaccount.cgi">New&nbsp;Account</a></li>
     [% END %]
+
+    [% PROCESS link_to_documentation %]
+
     [% IF user.authorizer.can_login %]
       [%# Use the current script name. If an empty name is returned,
         # then we are accessing the home page. %]
@@ -109,3 +115,12 @@
     [% END %]
   [% END %]
 </ul>
+
+[% BLOCK link_to_documentation %]
+    [% IF doc_section %]
+      <li>
+        <span class="separator">| </span>
+        <a href="[% Param("docs_urlbase") _ doc_section FILTER html %]" target="_blank">Help</a>
+      </li>
+    [% END %]
+[% END %]

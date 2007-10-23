@@ -39,6 +39,9 @@ sub LoadTemplate {
     my $action = shift;
     my $cgi = Bugzilla->cgi;
     my $template = Bugzilla->template;
+    # There is currently only one section about classifications,
+    # so all pages point to it. Let's define it here.
+    $vars->{'doc_section'} = 'classifications.html';
 
     $action =~ /(\w+)/;
     $action = $1;

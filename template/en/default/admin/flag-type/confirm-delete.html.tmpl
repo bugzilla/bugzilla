@@ -22,7 +22,10 @@
 
 [% title = BLOCK %]Confirm Deletion of Flag Type '[% flag_type.name FILTER html %]'[% END %]
 
-[% PROCESS global/header.html.tmpl title = title %]
+[% PROCESS global/header.html.tmpl
+  title = title
+  doc_section = "flags-overview.html#flags-delete"
+%]
 
 <p>
    There are [% flag_type.flag_count %] flags of type [% flag_type.name FILTER html %].

@@ -42,6 +42,9 @@ my $cgi = Bugzilla->cgi;
 my $dbh = Bugzilla->dbh;
 my $template = Bugzilla->template;
 my $vars = {};
+# There is only one section about versions in the documentation,
+# so all actions point to the same page.
+$vars->{'doc_section'} = 'versions.html';
 
 #
 # Preliminary checks:

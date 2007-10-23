@@ -37,6 +37,9 @@ use Bugzilla::Token;
 my $cgi = Bugzilla->cgi;
 my $template = Bugzilla->template;
 my $vars = {};
+# There is only one section about components in the documentation,
+# so all actions point to the same page.
+$vars->{'doc_section'} = 'components.html';
 
 #
 # Preliminary checks:

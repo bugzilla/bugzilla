@@ -61,6 +61,9 @@ my $dbh = Bugzilla->dbh;
 my $cgi = Bugzilla->cgi;
 my $template = Bugzilla->template;
 my $vars = {};
+# Remove this as soon as the documentation about products has been
+# improved and each action has its own section.
+$vars->{'doc_section'} = 'products.html';
 
 print $cgi->header();
 

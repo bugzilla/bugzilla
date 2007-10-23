@@ -28,9 +28,6 @@ see Section 4 of the Bugzilla Guide in the docs/ directory.
    $db_* variables. In particular, $db_name and $db_user will define
    your database setup in step 5.
 
-   If you want to change platforms, operating systems, severities and
-   priorities, this can also be done in localconfig at this time.
-
 5. Using the name you provided as $db_name above, create a MySQL database
    for Bugzilla. You should also create a user permission for the name
    supplied as $db_user with read/write access to that database.
@@ -67,7 +64,7 @@ see Section 4 of the Bugzilla Guide in the docs/ directory.
    account information you provided in step 6.
 
 9. Scroll to the bottom of the page after logging in, and select
-   "parameters". Set up the relevant parameters for your local setup. 
+   "Parameters". Set up the relevant parameters for your local setup. 
 
    See section 4.2 of the Bugzilla Guide for a in-depth description of
    some of the configuration parameters available.

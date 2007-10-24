@@ -41,7 +41,11 @@
 [% IF editable %]
   [% SWITCH field.type %]
     [% CASE constants.FIELD_TYPE_FREETEXT %]
-        <input name="[% field.name FILTER html %]" value="[% value FILTER html %]" size="60">
+        <input name="[% field.name FILTER html %]" 
+               value="[% value FILTER html %]" size="60">
+    [% CASE constants.FIELD_TYPE_DATETIME %]
+      <input name="[% field.name FILTER html %]" size="20"
+             value="[% value FILTER html %]">
     [% CASE [ constants.FIELD_TYPE_SINGLE_SELECT 
               constants.FIELD_TYPE_MULTI_SELECT ] %]
         <select id="[% field.name FILTER html %]" 

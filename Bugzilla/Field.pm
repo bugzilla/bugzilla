@@ -127,6 +127,7 @@ use constant SQL_DEFINITIONS => {
     FIELD_TYPE_SINGLE_SELECT, { TYPE => 'varchar(64)', NOTNULL => 1,
                                 DEFAULT => "'---'" },
     FIELD_TYPE_TEXTAREA,      { TYPE => 'MEDIUMTEXT' },
+    FIELD_TYPE_DATETIME,      { TYPE => 'DATETIME'   },
 };
 
 # Field definitions for the fields that ship with Bugzilla.
@@ -255,7 +256,7 @@ sub _check_type {
     my $saved_type = $type;
     # The constant here should be updated every time a new,
     # higher field type is added.
-    (detaint_natural($type) && $type <= FIELD_TYPE_TEXTAREA)
+    (detaint_natural($type) && $type <= FIELD_TYPE_DATETIME)
       || ThrowCodeError('invalid_customfield_type', { type => $saved_type });
     return $type;
 }

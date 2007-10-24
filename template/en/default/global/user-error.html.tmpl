@@ -733,6 +733,13 @@
     [% docslinks = {'reporting.html' => 'Reporting'} %]
     You are not authorized to edit this series. To do this, you must either
     be its creator, or an administrator.
+
+  [% ELSIF error == "illegal_time" %]
+    [% title = "Illegal Time" %]
+    '<tt>[% time FILTER html %]</tt>' is not a legal time.
+    [% IF format %]
+      Please use the format '<tt>[% format FILTER html %]</tt>'.
+    [% END %]
         
   [% ELSIF error == "insufficient_data_points" %]
     [% docslinks = {'reporting.html' => 'Reporting'} %]

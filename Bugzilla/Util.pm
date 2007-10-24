@@ -40,6 +40,7 @@ use base qw(Exporter);
                              diff_arrays diff_strings
                              trim wrap_comment find_wrap_point
                              format_time format_time_decimal validate_date
+                             validate_time
                              file_mod_time is_7bit_clean
                              bz_crypt generate_random_password
                              validate_email_syntax clean_text
@@ -454,6 +455,22 @@ sub validate_date {
         $date2 =~ s/(\d+)-0*(\d+?)-0*(\d+?)/$1-$2-$3/;
     }
     my $ret = ($ts && $date eq $date2);
+    return $ret ? 1 : 0;
+}
+
+sub validate_time {
+    my ($time) = @_;
+    my $time2;
+
+    # $ts is undefined if the parser fails.
+    my $ts = str2time($time);
+    if ($ts) {
+        $time2 = time2str("%H:%M:%S", $ts);
+
+        $time  =~ s/(\d+):(\d+?):(\d+?)/$1:$2:$3/;
+        $time2 =~ s/(\d+):(\d+?):(\d+?)/$1:$2:$3/;
+    }
+    my $ret = ($ts && $time eq $time2);
     return $ret ? 1 : 0;
 }
 

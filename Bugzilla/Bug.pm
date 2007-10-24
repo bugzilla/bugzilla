@@ -145,6 +145,9 @@ sub VALIDATORS {
         elsif ($field->type == FIELD_TYPE_MULTI_SELECT) {
             $validator = \&_check_multi_select_field;
         }
+        elsif ($field->type == FIELD_TYPE_DATETIME) {
+            $validator = \&_check_datetime_field;
+        }
         else {
             $validator = \&_check_freetext_field;
         }
@@ -1239,6 +1242,28 @@ sub _check_work_time {
 }
 
 # Custom Field Validators
+
+sub _check_datetime_field {
+    my ($invocant, $date_time) = @_;
+
+    # Empty datetimes are empty strings or strings only containing
+    # 0's, whitespace, and punctuation.
+    if ($date_time =~ /^[\s0[:punct:]]*$/) {
+        return undef;
+    }
+
+    $date_time = trim($date_time);
+    my ($date, $time) = split(' ', $date_time);
+    if ($date && !validate_date($date)) {
+        ThrowUserError('illegal_date', { date   => $date,
+                                         format => 'YYYY-MM-DD' });
+    }
+    if ($time && !validate_time($time)) {
+        ThrowUserError('illegal_time', { 'time' => $time,
+                                         format => 'HH:MM:SS' });
+    }
+    return $date_time
+}
 
 sub _check_multi_select_field {
     my ($invocant, $values, $field) = @_;

@@ -31,8 +31,10 @@ package Bugzilla::Install::Localconfig;
 use strict;
 
 use Bugzilla::Constants;
+use Bugzilla::Install::Util qw(bin_loc);
 
 use Data::Dumper;
+use File::Basename qw(dirname);
 use IO::File;
 use Safe;
 
@@ -349,44 +351,11 @@ EOT
     return { old_vars => \@old_vars, new_vars => \@new_vars };
 }
 
-sub _get_default_cvsbin {
-    return '' if ON_WINDOWS;
-
-    my $cvs_executable = `which cvs`;
-    if ($cvs_executable =~ /no cvs/ || $cvs_executable eq '') {
-        # If which didn't find it, just set to blank
-        $cvs_executable = "";
-    } else {
-        chomp $cvs_executable;
-    }
-    return $cvs_executable;
-}
-
-sub _get_default_interdiffbin {
-    return '' if ON_WINDOWS;
-
-    my $interdiff = `which interdiff`;
-    if ($interdiff =~ /no interdiff/ || $interdiff eq '') {
-        # If which didn't find it, just set to blank
-        $interdiff = '';
-    } else {
-        chomp $interdiff;
-    }
-    return $interdiff;
-}
-
+sub _get_default_cvsbin       { return bin_loc('cvs') }
+sub _get_default_interdiffbin { return bin_loc('interdiff') }
 sub _get_default_diffpath {
-    return '' if ON_WINDOWS;
-
-    my $diff_binaries;
-    $diff_binaries = `which diff`;
-    if ($diff_binaries =~ /no diff/ || $diff_binaries eq '') {
-        # If which didn't find it, set to blank
-        $diff_binaries = "";
-    } else {
-        $diff_binaries =~ s:/diff\n$::;
-    }
-    return $diff_binaries;
+    my $diff_bin = bin_loc('diff');
+    return dirname($diff_bin);
 }
 
 1;

@@ -434,6 +434,10 @@ EOT
             printf "%15s: $command\n", $module->{package};
         }
     }
+
+    if ($output && $check_results->{any_missing}) {
+        print install_string('install_all', { perl => $^X });
+    }
 }
 
 sub check_graphviz {
@@ -530,7 +534,7 @@ sub install_command {
         $package = $module->{package};
     }
     else {
-        $command = "$^X -MCPAN -e 'install \"\%s\"'";
+        $command = "$^X install-module.pl \%s";
         # Non-Windows installations need to use module names, because
         # CPAN doesn't understand package names.
         $package = $module->{module};

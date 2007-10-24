@@ -114,6 +114,7 @@ sub FILESYSTEM {
         'customfield.pl'  => { perms => $owner_executable },
         'email_in.pl'     => { perms => $ws_executable },
         'sanitycheck.pl'  => { perms => $ws_executable },
+        'install-module.pl' => { perms => $owner_executable },
 
         'docs/makedocs.pl'   => { perms => $owner_executable },
         'docs/rel_notes.txt' => { perms => $ws_readable },

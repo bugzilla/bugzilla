@@ -34,12 +34,28 @@ use Safe;
 
 use base qw(Exporter);
 our @EXPORT_OK = qw(
+    bin_loc
     get_version_and_os
     indicate_progress
     install_string
     template_include_path
     vers_cmp
 );
+
+sub bin_loc {
+    my ($bin) = @_;
+    return '' if ON_WINDOWS;
+    # Don't print any errors from "which"
+    open(my $saveerr, ">&STDERR");
+    open(STDERR, '>/dev/null');
+    my $loc = `which $bin`;
+    close(STDERR);
+    open(STDERR, ">&", $saveerr);
+    my $exit_code = $? >> 8; # See the perlvar manpage.
+    return '' if $exit_code > 0;
+    chomp($loc);
+    return $loc;
+}
 
 sub get_version_and_os {
     # Display version information
@@ -339,6 +355,11 @@ export them.
 =head1 SUBROUTINES
 
 =over
+
+=item C<bin_loc>
+
+On *nix systems, given the name of a binary, returns the path to that
+binary, if the binary is in the C<PATH>.
 
 =item C<get_version_and_os>
 

@@ -35,6 +35,15 @@
     checking_modules  => 'Checking perl modules...',
     header => "* This is Bugzilla ##bz_ver## on perl ##perl_ver##\n"
             . "* Running on ##os_name## ##os_ver##",
+    install_all => <<EOT,
+
+To attempt an automatic install of every required and optional module
+with one command, do:
+
+  ##perl## install-module.pl --all
+
+EOT
+    install_module => 'Installing ##module## version ##version##...',
     module_found => "found v##ver##",
     module_not_found => "not found",
     module_ok => 'ok',

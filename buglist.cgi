@@ -873,6 +873,7 @@ if ($order) {
             # A custom list of columns.  Make sure each column is valid.
             foreach my $fragment (split(/,/, $order)) {
                 $fragment = trim($fragment);
+                next unless $fragment;
                 # Accept an order fragment matching a column name, with
                 # asc|desc optionally following (to specify the direction)
                 if (grep($fragment =~ /^\Q$_\E(\s+(asc|desc))?$/, @columnnames, keys(%$columns))) {
@@ -893,11 +894,12 @@ if ($order) {
             $order = join(",", @order);
             # Now that we have checked that all columns in the order are valid,
             # detaint the order string.
-            trick_taint($order);
+            trick_taint($order) if $order;
         };
     }
 }
-else {
+
+if (!$order) {
     # DEFAULT
     $order = "bugs.bug_status, bugs.priority, map_assigned_to.login_name, bugs.bug_id";
 }

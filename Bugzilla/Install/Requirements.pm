@@ -78,7 +78,7 @@ sub REQUIRED_MODULES {
     {
         package => 'Template-Toolkit',
         module  => 'Template',
-        version => '2.12'
+        version => '2.15'
     },
     {
         package => 'Email-Send',

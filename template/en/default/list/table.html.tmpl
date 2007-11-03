@@ -88,8 +88,12 @@
         [% IF sorted_by_relevance %]
           ID
         [% ELSE %]
+          [% desc = '' %]
+          [% IF (om = order.match("^bugs\.bug_id( desc)?")) %]
+            [% desc = ' desc' IF NOT om.0 %]
+          [% END %]
           <a href="buglist.cgi?
-                    [% urlquerypart FILTER html %]&amp;order=bugs.bug_id
+                    [% urlquerypart FILTER html %]&amp;order=bugs.bug_id[% desc FILTER url_quote %]
                     [%-#%]&amp;query_based_on=
                     [% defaultsavename OR searchname FILTER url_quote %]">ID</a>
         [% END %]
@@ -139,8 +143,13 @@
         [%# Other columns may sort on their name directly. %]
         [% column.sortalias = column.name %]
       [% END %]
+      [% desc = '' %]
+      [% IF (om = order.match("$column.sortalias( desc)?")) %]
+        [% desc = ' desc' IF NOT om.0 %]
+      [% END %]
+      [% order = order.remove("$column.sortalias( desc)?,?") %]
       <a href="buglist.cgi?[% urlquerypart FILTER html %]&amp;order=
-        [% column.sortalias FILTER url_quote %]
+        [% column.sortalias FILTER url_quote %][% desc FILTER url_quote %]
         [% ",$order" FILTER url_quote IF order %]
         [%-#%]&amp;query_based_on=
         [% defaultsavename OR searchname FILTER url_quote %]">

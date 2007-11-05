@@ -946,7 +946,8 @@ sub _check_deadline {
     
     # Check time-tracking permissions.
     my $tt_group = Bugzilla->params->{"timetrackinggroup"};
-    my $current = ref $invocant ? $invocant->deadline : undef;
+    # deadline() returns '' instead of undef if no deadline is set.
+    my $current = ref $invocant ? ($invocant->deadline || undef) : undef;
     return $current unless $tt_group && Bugzilla->user->in_group($tt_group);
     
     # Validate entered deadline

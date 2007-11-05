@@ -790,17 +790,20 @@ sub precompile_templates {
     # *compiled* versions using the full absolute path under the data/template
     # directory. (Like data/template/var/www/html/mod_perl/.) To avoid
     # re-compiling templates under mod_perl, we symlink to the
-    # already-compiled templates.
-    my $abs_root = dirname(abs_path($templatedir));
-    mkpath("$datadir/template$abs_root");
-    my $todir   = "$datadir/template$abs_root";
-    # We use abs2rel so that the symlink will look like "../../../../template"
-    # which works, while just "data/template/template/" doesn't work.
-    my $fromdir = File::Spec->abs2rel("$datadir/template/template", $todir);
-    # We eval for systems (like Windows) that can't symlink, where "symlink"
-    # throws a fatal error.
-    eval { symlink($fromdir, "$todir/template") 
-               or warn "Failed to symlink from $fromdir to $todir: $!" };
+    # already-compiled templates. This doesn't work on Windows.
+    if (!ON_WINDOWS) {
+        my $abs_root = dirname(abs_path($templatedir));
+        my $todir    = "$datadir/template$abs_root";
+        mkpath($todir);
+        # We use abs2rel so that the symlink will look like 
+        # "../../../../template" which works, while just 
+        # "data/template/template/" doesn't work.
+        my $fromdir = File::Spec->abs2rel("$datadir/template/template", $todir);
+        # We eval for systems that can't symlink at all, where "symlink" 
+        # throws a fatal error.
+        eval { symlink($fromdir, "$todir/template") 
+                   or warn "Failed to symlink from $fromdir to $todir: $!" };
+    }
 
     # If anything created a Template object before now, clear it out.
     delete Bugzilla->request_cache->{template};

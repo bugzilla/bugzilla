@@ -496,6 +496,10 @@ sub update {
         $dbh->do("INSERT INTO longdescs (bug_id, who, bug_when, $columns)
                        VALUES (?,?,?,$qmarks)", undef,
                  $self->bug_id, Bugzilla->user->id, $delta_ts, @values);
+        if ($comment->{work_time}) {
+            LogActivityEntry($self->id, "work_time", "", $comment->{work_time},
+                Bugzilla->user->id, $delta_ts);
+        }
     }
 
     # Insert the values into the multiselect value tables
@@ -1547,6 +1551,8 @@ sub add_comment {
     $params ||= {};
     if (exists $params->{work_time}) {
         $params->{work_time} = $self->_check_work_time($params->{work_time});
+        ThrowUserError('comment_required')
+            if $comment eq '' && $params->{work_time} != 0;
     }
     if (exists $params->{type}) {
         $params->{type} = $self->_check_comment_type($params->{type});

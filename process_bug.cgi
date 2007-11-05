@@ -164,21 +164,6 @@ $cgi->param('dontchange','') unless defined $cgi->param('dontchange');
 # Make sure the 'knob' param is defined; else set it to 'none'.
 $cgi->param('knob', 'none') unless defined $cgi->param('knob');
 
-# Validate work_time
-if (defined $cgi->param('work_time') 
-    && $cgi->param('work_time') ne $cgi->param('dontchange')) 
-{
-    $cgi->param('work_time', $bug->_check_time($cgi->param('work_time'),
-                                               'work_time'));
-}
-
-if (Bugzilla->user->in_group(Bugzilla->params->{'timetrackinggroup'})) {
-    my $wk_time = $cgi->param('work_time');
-    if (!comment_exists() && $wk_time && $wk_time != 0) {
-        ThrowUserError('comment_required');
-    }
-}
-
 $cgi->param('comment', $bug->_check_comment($cgi->param('comment')));
 
 # If the bug(s) being modified have dependencies, validate them
@@ -927,17 +912,12 @@ foreach my $id (@idlist) {
         exit;
     }
 
-    my $work_time;
-    if (Bugzilla->user->in_group(Bugzilla->params->{'timetrackinggroup'})) {
-        $work_time = $cgi->param('work_time');
-    }
-
-    if ($cgi->param('comment') || $work_time || $duplicate) {
+    if ($cgi->param('comment') || $cgi->param('work_time') || $duplicate) {
         my $type = $duplicate ? CMT_DUPE_OF : CMT_NORMAL;
 
         $bug_objects{$id}->add_comment(scalar($cgi->param('comment')),
             { isprivate => scalar($cgi->param('commentprivacy')),
-              work_time => $work_time, type => $type, 
+              work_time => scalar $cgi->param('work_time'), type => $type, 
               extra_data => $duplicate});
         $bug_changed = 1;
     }
@@ -947,11 +927,6 @@ foreach my $id (@idlist) {
     #################################
     
     $timestamp = $dbh->selectrow_array(q{SELECT NOW()});
-
-    if ($work_time) {
-        LogActivityEntry($id, "work_time", "", $work_time,
-                         $whoid, $timestamp);
-    }
 
     $bug_objects{$id}->update($timestamp);
 

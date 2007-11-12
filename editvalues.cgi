@@ -112,6 +112,10 @@ my $cgi      = Bugzilla->cgi;
 my $template = Bugzilla->template;
 my $vars = {};
 
+# Replace this entry by separate entries in templates when
+# the documentation about legal values becomes bigger.
+$vars->{'doc_section'} = 'edit-values.html';
+
 print $cgi->header();
 
 exists Bugzilla->user->groups->{'admin'} ||

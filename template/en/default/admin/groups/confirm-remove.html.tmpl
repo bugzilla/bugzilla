@@ -33,7 +33,10 @@
   [% title = "Confirm: Remove All Explicit Members?" %]
 [% END %]
 
-[% PROCESS global/header.html.tmpl %]
+[% PROCESS global/header.html.tmpl
+  title = title
+  doc_section = "groups.html"
+%]
 
 [% IF regexp %]
   <p>This option will remove all users from '[% group.name FILTER html %]'

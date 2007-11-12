@@ -35,7 +35,10 @@
 [% PROCESS global/variables.none.tmpl %]
 
 [% title = "Set up whining" %]
-[% PROCESS global/header.html.tmpl %]
+[% PROCESS global/header.html.tmpl
+  title = title
+  doc_section = "whining.html"
+%]
 
 <p>
   "Whining" is when [% terms.Bugzilla %] executes a saved query at a regular interval

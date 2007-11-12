@@ -654,6 +654,10 @@ sub delete_attachment {
         # Paste the reason provided by the admin into a comment.
         AppendComment($attachment->bug_id, $user->id, $msg);
 
+        # Required to display the bug the deleted attachment belongs to.
+        $vars->{'bugs'} = [new Bugzilla::Bug($attachment->bug_id)];
+        $vars->{'header_done'} = 1;
+
         $template->process("attachment/updated.html.tmpl", $vars)
           || ThrowTemplateError($template->error());
     }

@@ -316,6 +316,9 @@ if ($cgi->param('debug')) {
     print Data::Dumper::Dumper(@image_data) . "\n\n</pre>";
 }
 
+# All formats point to the same section of the documentation.
+$vars->{'doc_section'} = 'reporting.html#reports';
+
 $template->process("$format->{'template'}", $vars)
   || ThrowTemplateError($template->error());
 

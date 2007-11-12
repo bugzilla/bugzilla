@@ -224,7 +224,7 @@ tbody.file pre:empty {
   [% subheader = BLOCK %]
     [% bugsummary FILTER html %]
   [% END %]
-  [% PROCESS global/header.html.tmpl %]
+  [% PROCESS global/header.html.tmpl doc_section = "attachments.html#patchviewer" %]
 [% ELSE %]
   <html>
   <head>

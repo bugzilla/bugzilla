@@ -45,6 +45,8 @@ my $cgi = Bugzilla->cgi;
 my $template = Bugzilla->template;
 my $vars = {};
 
+$vars->{'doc_section'} = 'myaccount.html';
+
 print $cgi->header();
 
 # If we're using LDAP for login, then we can't create a new account here.

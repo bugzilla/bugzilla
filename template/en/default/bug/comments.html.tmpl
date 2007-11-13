@@ -191,14 +191,14 @@
 
       [% IF mode == "edit" && isinsider %]
         <i>
-          <input type="hidden" name="oisprivate-[% count %]" 
-                 value="[% comment.isprivate %]">
-          <input type="hidden" name="when-[% count %]" value="[% comment.time %]">
-          <input type="checkbox" name="isprivate-[% count %]" value="1"
+          <input type="hidden" value="1"
+                 name="defined_isprivate_[% comment.id %]">
+          <input type="checkbox"
+                 name="isprivate_[% comment.id %]" value="1"
+                 id="isprivate_[% comment.id %]"
                  onClick="updateCommentPrivacy(this, [% count %])"
-                 id="isprivate-[% count %]"
                  [% " checked=\"checked\"" IF comment.isprivate %]>
-          <label for="isprivate-[% count %]">Private</label>
+          <label for="isprivate_[% comment.id %]">Private</label>
         </i>
       [% END %]
       [% IF user.in_group(Param('timetrackinggroup')) &&

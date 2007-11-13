@@ -275,8 +275,7 @@
 ],
 
 'bug/comments.html.tmpl' => [
-  'comment.isprivate', 
-  'comment.time', 
+  'comment.id',
   'bug.bug_id',
 ],
 

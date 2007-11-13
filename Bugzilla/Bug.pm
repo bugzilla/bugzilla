@@ -501,6 +501,12 @@ sub update {
                 Bugzilla->user->id, $delta_ts);
         }
     }
+    
+    foreach my $comment_id (keys %{$self->{comment_isprivate} || {}}) {
+        $dbh->do("UPDATE longdescs SET isprivate = ? WHERE comment_id = ?",
+                 undef, $self->{comment_isprivate}->{$comment_id}, $comment_id);
+        # XXX It'd be nice to track this in the bug activity.
+    }
 
     # Insert the values into the multiselect value tables
     my @multi_selects = Bugzilla->get_fields(
@@ -1339,6 +1345,19 @@ sub _set_global_validator {
 
 sub set_alias { $_[0]->set('alias', $_[1]); }
 sub set_cclist_accessible { $_[0]->set('cclist_accessible', $_[1]); }
+sub set_comment_is_private {
+    my ($self, $comment_id, $isprivate) = @_;
+    return unless Bugzilla->user->is_insider;
+    my ($comment) = grep($comment_id eq $_->{id}, @{$self->longdescs});
+    ThrowUserError('comment_invalid_isprivate', { id => $comment_id }) 
+        if !$comment;
+
+    $isprivate = $isprivate ? 1 : 0;
+    if ($isprivate != $comment->{isprivate}) {
+        $self->{comment_isprivate} ||= {};
+        $self->{comment_isprivate}->{$comment_id} = $isprivate;
+    }
+}
 sub set_component  {
     my ($self, $name) = @_;
     my $old_comp  = $self->component_obj;

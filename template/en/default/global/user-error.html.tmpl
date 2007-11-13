@@ -246,6 +246,10 @@
     [% title = "Chart Too Large" %]
     Sorry, but 2000 x 2000 is the maximum size for a chart.
 
+  [% ELSIF error == "comment_invalid_isprivate" %]
+    You tried to modify the privacy of comment id [% id FILTER html %],
+    but that is not a valid comment on this [% terms.bug %].
+
   [% ELSIF error == "comment_required" %]
     [% title = "Comment Required" %]
     You have to specify a <b>comment</b>

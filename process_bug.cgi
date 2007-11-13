@@ -451,28 +451,14 @@ if (defined $cgi->param('id')) {
         $bug->set_reporter_accessible($cgi->param('reporter_accessible'))
             if $bug->check_can_change_field('reporter_accessible', 0, 1);
     }
-}
-
-if ( defined $cgi->param('id') &&
-     (Bugzilla->params->{"insidergroup"} 
-      && Bugzilla->user->in_group(Bugzilla->params->{"insidergroup"})) ) 
-{
-
-    my $sth = $dbh->prepare('UPDATE longdescs SET isprivate = ?
-                             WHERE bug_id = ? AND bug_when = ?');
-
-    foreach my $field ($cgi->param()) {
-        if ($field =~ /when-([0-9]+)/) {
-            my $sequence = $1;
-            my $private = $cgi->param("isprivate-$sequence") ? 1 : 0 ;
-            if ($private != $cgi->param("oisprivate-$sequence")) {
-                my $field_data = $cgi->param("$field");
-                # Make sure a valid date is given.
-                $field_data = format_time($field_data, '%Y-%m-%d %T');
-                $sth->execute($private, $cgi->param('id'), $field_data);
-            }
-        }
-
+    
+    # You can only mark/unmark comments as private on single bugs. If
+    # you're not in the insider group, this code won't do anything.
+    foreach my $field (grep(/^defined_isprivate/, $cgi->param())) {
+        $field =~ /(\d+)$/;
+        my $comment_id = $1;
+        $bug->set_comment_is_private($comment_id,
+                                     $cgi->param("isprivate_$comment_id"));
     }
 }
 

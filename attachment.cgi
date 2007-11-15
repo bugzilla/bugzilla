@@ -479,18 +479,8 @@ sub update {
     });
     Bugzilla::Flag::validate($cgi, $bug->id, $attachment->id);
 
-    # Lock database tables in preparation for updating the attachment.
-    $dbh->bz_lock_tables('attachments WRITE', 'flags WRITE' ,
-          'flagtypes READ', 'fielddefs READ', 'bugs_activity WRITE',
-          'flaginclusions AS i READ', 'flagexclusions AS e READ',
-          # cc, bug_group_map, user_group_map, and groups are in here so we
-          # can check the permissions of flag requestees and email addresses
-          # on the flag type cc: lists via the CanSeeBug
-          # function call in Flag::notify. group_group_map is in here si
-          # Bugzilla::User can flatten groups.
-          'bugs WRITE', 'profiles READ', 'email_setting READ',
-          'cc READ', 'bug_group_map READ', 'user_group_map READ',
-          'group_group_map READ', 'groups READ', 'group_control_map READ');
+    # Start a transaction in preparation for updating the attachment.
+    $dbh->bz_start_transaction();
 
   # Quote the description and content type for use in the SQL UPDATE statement.
   my $description = $cgi->param('description');
@@ -560,8 +550,8 @@ sub update {
                   $attachment->isprivate, $updated_attachment->isprivate);
   }
   
-  # Unlock all database tables now that we are finished updating the database.
-  $dbh->bz_unlock_tables();
+  # Commit the transaction now that we are finished updating the database.
+  $dbh->bz_commit_transaction();
 
   # If the user submitted a comment while editing the attachment,
   # add the comment to the bug.
@@ -634,14 +624,14 @@ sub delete_attachment {
         $template->process("attachment/delete_reason.txt.tmpl", $vars, \$msg)
           || ThrowTemplateError($template->error());
 
-        $dbh->bz_lock_tables('attachments WRITE', 'attach_data WRITE', 'flags WRITE');
+        $dbh->bz_start_transaction();
         $dbh->do('DELETE FROM attach_data WHERE id = ?', undef, $attachment->id);
         $dbh->do('UPDATE attachments SET mimetype = ?, ispatch = ?, isurl = ?,
                          isobsolete = ?
                   WHERE attach_id = ?', undef,
                  ('text/plain', 0, 0, 1, $attachment->id));
         $dbh->do('DELETE FROM flags WHERE attach_id = ?', undef, $attachment->id);
-        $dbh->bz_unlock_tables;
+        $dbh->bz_commit_transaction();
 
         # If the attachment is stored locally, remove it.
         if (-e $attachment->_get_local_filename) {

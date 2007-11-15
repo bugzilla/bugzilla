@@ -255,7 +255,7 @@ sub SaveEmail {
     ###########################################################################
     # Role-based preferences
     ###########################################################################
-    $dbh->bz_lock_tables("email_setting WRITE");
+    $dbh->bz_start_transaction();
 
     # Delete all the user's current preferences
     $dbh->do("DELETE FROM email_setting WHERE user_id = ?", undef, $user->id);
@@ -302,7 +302,7 @@ sub SaveEmail {
         }
     }
 
-    $dbh->bz_unlock_tables();
+    $dbh->bz_commit_transaction();
 
     ###########################################################################
     # User watching
@@ -311,11 +311,7 @@ sub SaveEmail {
         && (defined $cgi->param('new_watchedusers')
             || defined $cgi->param('remove_watched_users'))) 
     {
-        # Just in case.  Note that this much locking is actually overkill:
-        # we don't really care if anyone reads the watch table.  So 
-        # some small amount of contention could be gotten rid of by
-        # using user-defined locks rather than table locking.
-        $dbh->bz_lock_tables('watch WRITE', 'profiles READ');
+        $dbh->bz_start_transaction();
 
         # Use this to protect error messages on duplicate submissions
         my $old_watch_ids =
@@ -356,7 +352,7 @@ sub SaveEmail {
             }
         }
 
-        $dbh->bz_unlock_tables();
+        $dbh->bz_commit_transaction();
     }
 }
 

@@ -130,9 +130,7 @@ sub show_user {
 
     my $canedit = (Bugzilla->params->{'usevotes'} && $userid == $who) ? 1 : 0;
 
-    $dbh->bz_lock_tables('bugs READ', 'products READ', 'votes WRITE',
-             'cc READ', 'bug_group_map READ', 'user_group_map READ',
-             'group_group_map READ', 'groups READ', 'group_control_map READ');
+    $dbh->bz_start_transaction();
 
     if ($canedit && $bug_id) {
         # Make sure there is an entry for this bug
@@ -197,7 +195,7 @@ sub show_user {
     }
 
     $dbh->do('DELETE FROM votes WHERE vote_count <= 0');
-    $dbh->bz_unlock_tables();
+    $dbh->bz_commit_transaction();
 
     $vars->{'canedit'} = $canedit;
     $vars->{'voting_user'} = { "login" => $name };

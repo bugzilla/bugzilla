@@ -154,9 +154,8 @@ my $changes = {
     profiles        => [], # ['userid'],
 };
 
-# Lock tables
-my @locked_tables = map {"$_ WRITE"} keys(%$changes);
-$dbh->bz_lock_tables(@locked_tables);
+# Start the transaction
+$dbh->bz_start_transaction();
 
 # Delete old records from logincookies and tokens tables.
 $dbh->do('DELETE FROM logincookies WHERE userid = ?', undef, $old_id);
@@ -230,7 +229,7 @@ print "OK, records in the 'mailto' column of the 'whine_schedules' table\n" .
 # Delete the old record from the profiles table.
 $dbh->do('DELETE FROM profiles WHERE userid = ?', undef, $old_id);
 
-# Unlock tables
-$dbh->bz_unlock_tables();
+# Commit the transaction
+$dbh->bz_commit_transaction();
 
 print "Done.\n";

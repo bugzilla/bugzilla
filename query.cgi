@@ -70,7 +70,7 @@ if ($userid) {
                 # If the query name contains invalid characters, don't import.
                 $name =~ /[<>&]/ && next;
                 trick_taint($name);
-                $dbh->bz_lock_tables('namedqueries WRITE');
+                $dbh->bz_start_transaction();
                 my $query = $dbh->selectrow_array(
                     "SELECT query FROM namedqueries " .
                      "WHERE userid = ? AND name = ?",
@@ -80,7 +80,7 @@ if ($userid) {
                             "(userid, name, query) VALUES " .
                             "(?, ?, ?)", undef, ($userid, $name, $value));
                 }
-                $dbh->bz_unlock_tables();
+                $dbh->bz_commit_transaction();
             }
             $cgi->remove_cookie($cookiename);
         }

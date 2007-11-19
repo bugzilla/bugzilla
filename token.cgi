@@ -215,13 +215,13 @@ sub changePassword {
     
     # Update the user's password in the profiles table and delete the token
     # from the tokens table.
-    $dbh->bz_lock_tables('profiles WRITE', 'tokens WRITE');
+    $dbh->bz_start_transaction();
     $dbh->do(q{UPDATE   profiles
                SET      cryptpassword = ?
                WHERE    userid = ?},
              undef, ($cryptedpassword, $userid) );
     $dbh->do('DELETE FROM tokens WHERE token = ?', undef, $::token);
-    $dbh->bz_unlock_tables();
+    $dbh->bz_commit_transaction();
 
     Bugzilla->logout_user_by_id($userid);
 
@@ -265,7 +265,7 @@ sub changeEmail {
 
     # Update the user's login name in the profiles table and delete the token
     # from the tokens table.
-    $dbh->bz_lock_tables('profiles WRITE', 'tokens WRITE');
+    $dbh->bz_start_transaction();
     $dbh->do(q{UPDATE   profiles
                SET      login_name = ?
                WHERE    userid = ?},
@@ -273,7 +273,7 @@ sub changeEmail {
     $dbh->do('DELETE FROM tokens WHERE token = ?', undef, $::token);
     $dbh->do(q{DELETE FROM tokens WHERE userid = ?
                AND tokentype = 'emailnew'}, undef, $userid);
-    $dbh->bz_unlock_tables();
+    $dbh->bz_commit_transaction();
 
     # The email address has been changed, so we need to rederive the groups
     my $user = new Bugzilla::User($userid);
@@ -308,12 +308,10 @@ sub cancelChangeEmail {
         
         # check to see if it has been altered
         if($actualemail ne $old_email) {
-            $dbh->bz_lock_tables('profiles WRITE');
             $dbh->do(q{UPDATE   profiles
                        SET      login_name = ?
                        WHERE    userid = ?},
                      undef, ($old_email, $userid));
-            $dbh->bz_unlock_tables();
 
             # email has changed, so rederive groups
             # Note that this is done _after_ the tables are unlocked
@@ -335,11 +333,9 @@ sub cancelChangeEmail {
     $vars->{'new_email'} = $new_email;
     Bugzilla::Token::Cancel($::token, $vars->{'message'}, $vars);
 
-    $dbh->bz_lock_tables('tokens WRITE');
     $dbh->do(q{DELETE FROM tokens WHERE userid = ?
                AND tokentype = 'emailold' OR tokentype = 'emailnew'},
              undef, $userid);
-    $dbh->bz_unlock_tables();
 
     # Return HTTP response headers.
     print $cgi->header();

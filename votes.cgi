@@ -294,9 +294,7 @@ sub record_votes {
     # for products that only allow one vote per bug).  In that case, we still
     # need to clear the user's votes from the database.
     my %affected;
-    $dbh->bz_lock_tables('bugs WRITE', 'bugs_activity WRITE',
-                         'votes WRITE', 'longdescs WRITE',
-                         'products READ', 'fielddefs READ');
+    $dbh->bz_start_transaction();
     
     # Take note of, and delete the user's old votes from the database.
     my $bug_list = $dbh->selectcol_arrayref('SELECT bug_id FROM votes
@@ -335,7 +333,7 @@ sub record_votes {
         my $confirmed = CheckIfVotedConfirmed($id, $who);
         push (@updated_bugs, $id) if $confirmed;
     }
-    $dbh->bz_unlock_tables();
+    $dbh->bz_commit_transaction();
 
     $vars->{'type'} = "votes";
     $vars->{'mailrecipients'} = { 'changer' => Bugzilla->user->login };

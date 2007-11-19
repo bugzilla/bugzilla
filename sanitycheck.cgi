@@ -106,7 +106,7 @@ unless ($user->in_group('editcomponents')) {
 
 if ($cgi->param('rebuildvotecache')) {
     Status('vote_cache_rebuild_start');
-    $dbh->bz_lock_tables('bugs WRITE', 'votes READ');
+    $dbh->bz_start_transaction();
     $dbh->do(q{UPDATE bugs SET votes = 0});
     my $sth_update = $dbh->prepare(q{UPDATE bugs 
                                         SET votes = ? 
@@ -117,7 +117,7 @@ if ($cgi->param('rebuildvotecache')) {
     while (my ($id, $v) = $sth->fetchrow_array) {
         $sth_update->execute($v, $id);
     }
-    $dbh->bz_unlock_tables();
+    $dbh->bz_commit_transaction();
     Status('vote_cache_rebuild_end');
 }
 
@@ -262,11 +262,7 @@ if ($cgi->param('rescanallBugMail')) {
 if ($cgi->param('remove_invalid_bug_references')) {
     Status('bug_reference_deletion_start');
 
-    $dbh->bz_lock_tables('attachments WRITE', 'bug_group_map WRITE',
-                         'bugs_activity WRITE', 'cc WRITE',
-                         'dependencies WRITE', 'duplicates WRITE',
-                         'flags WRITE', 'keywords WRITE',
-                         'longdescs WRITE', 'votes WRITE', 'bugs READ');
+    $dbh->bz_start_transaction();
 
     foreach my $pair ('attachments/', 'bug_group_map/', 'bugs_activity/', 'cc/',
                       'dependencies/blocked', 'dependencies/dependson',
@@ -286,7 +282,7 @@ if ($cgi->param('remove_invalid_bug_references')) {
         }
     }
 
-    $dbh->bz_unlock_tables();
+    $dbh->bz_commit_transaction();
     Status('bug_reference_deletion_end');
 }
 
@@ -297,7 +293,7 @@ if ($cgi->param('remove_invalid_bug_references')) {
 if ($cgi->param('remove_invalid_attach_references')) {
     Status('attachment_reference_deletion_start');
 
-    $dbh->bz_lock_tables('attachments WRITE', 'attach_data WRITE');
+    $dbh->bz_start_transaction();
 
     my $attach_ids =
         $dbh->selectcol_arrayref('SELECT attach_data.id
@@ -311,7 +307,7 @@ if ($cgi->param('remove_invalid_attach_references')) {
                  join(',', @$attach_ids) . ')');
     }
 
-    $dbh->bz_unlock_tables();
+    $dbh->bz_commit_transaction();
     Status('attachment_reference_deletion_end');
 }
 
@@ -698,7 +694,7 @@ sub _check_keywords {
     Status('keyword_cache_start');
 
     if ($cgi->param('rebuildkeywordcache')) {
-        $dbh->bz_lock_tables('bugs write', 'keywords read', 'keyworddefs read');
+        $dbh->bz_start_transaction();
     }
 
     my $query = q{SELECT keywords.bug_id, keyworddefs.name
@@ -765,7 +761,7 @@ sub _check_keywords {
     }
 
     if ($cgi->param('rebuildkeywordcache')) {
-        $dbh->bz_unlock_tables();
+        $dbh->bz_commit_transaction();
     }
 }
 
@@ -804,10 +800,8 @@ if (scalar(@invalid_flags)) {
     if ($cgi->param('remove_invalid_flags')) {
         Status('flag_deletion_start');
         my @flag_ids = map {$_->[0]} @invalid_flags;
-        $dbh->bz_lock_tables('flags WRITE');
         # Silently delete these flags, with no notification to requesters/setters.
         $dbh->do('DELETE FROM flags WHERE id IN (' . join(',', @flag_ids) .')');
-        $dbh->bz_unlock_tables();
         Status('flag_deletion_end');
     }
     else {

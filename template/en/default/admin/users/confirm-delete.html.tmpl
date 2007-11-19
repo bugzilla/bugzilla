@@ -372,32 +372,32 @@
             will cease along with the deletion of the user account.
           </li>
         [% END %]
-        [% IF whine_events || whine_schedules %]
+        [% IF whine_events %]
           <li>
-            [% otheruser.login FILTER html %]
-            [% IF whine_events %]
-              has scheduled
-              [% IF whine_events == 1 %]
-                a whine
-              [% ELSE %]
-                [%+ whine_events %] whines
-              [% END %]
-            [% END %]
-            [% IF whine_schedules %]
-              [%+ 'and' IF whine_events %]
-              is on the receiving end of
-              [% IF whine_schedules == 1 %]
-                a whine
-              [% ELSE %]
-                [%+ whine_schedules %] whines
-              [% END %]
+            [% otheruser.login FILTER html %] has scheduled
+            [% IF whine_events == 1 %]
+              a whine
+            [% ELSE %]
+              [%+ whine_events %] whines
             [% END %].
-            [% IF whine_events + whine_schedules == 1 %]
+            [% IF whine_events == 1 %]
               This whine
             [% ELSE %]
               These whines
             [% END %]
             will be deleted along with the user account.
+          </li>
+        [% END %]
+        [% IF whine_schedules %]
+          <li>
+            [% otheruser.login FILTER html %] is on the receiving end of
+            [% IF whine_schedules == 1 %]
+              a whine
+            [% ELSE %]
+              [%+ whine_schedules %] whines
+            [% END %].
+            The corresponding schedules will be deleted along with the user account,
+            but the whines themselves will be left unaltered.
           </li>
         [% END %]
       </ul>

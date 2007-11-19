@@ -551,9 +551,6 @@ if ($action eq 'search') {
     }
 
     # 2) Whines
-    my $sth_whineidFromSchedules = $dbh->prepare(
-           qq{SELECT eventid FROM whine_schedules
-              WHERE mailto = ? AND mailto_type = ?});
     my $sth_whineidFromEvents = $dbh->prepare(
            'SELECT id FROM whine_events WHERE owner_userid = ?');
     my $sth_deleteWhineEvent = $dbh->prepare(
@@ -563,12 +560,8 @@ if ($action eq 'search') {
     my $sth_deleteWhineSchedule = $dbh->prepare(
            'DELETE FROM whine_schedules WHERE eventid = ?');
 
-    $sth_whineidFromSchedules->execute($otherUserID, MAILTO_USER);
-    while ($id = $sth_whineidFromSchedules->fetchrow_array()) {
-        $sth_deleteWhineQuery->execute($id);
-        $sth_deleteWhineSchedule->execute($id);
-        $sth_deleteWhineEvent->execute($id);
-    }
+    $dbh->do('DELETE FROM whine_schedules WHERE mailto = ? AND mailto_type = ?',
+             undef, ($otherUserID, MAILTO_USER));
 
     $sth_whineidFromEvents->execute($otherUserID);
     while ($id = $sth_whineidFromEvents->fetchrow_array()) {

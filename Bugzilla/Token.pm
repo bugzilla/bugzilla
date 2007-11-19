@@ -171,12 +171,10 @@ sub issue_session_token {
 
 sub CleanTokenTable {
     my $dbh = Bugzilla->dbh;
-    $dbh->bz_lock_tables('tokens WRITE');
     $dbh->do('DELETE FROM tokens
               WHERE ' . $dbh->sql_to_days('NOW()') . ' - ' .
                         $dbh->sql_to_days('issuedate') . ' >= ?',
               undef, MAX_TOKEN_AGE);
-    $dbh->bz_unlock_tables();
 }
 
 sub GenerateUniqueToken {
@@ -301,9 +299,7 @@ sub delete_token {
     return unless defined $token;
     trick_taint($token);
 
-    $dbh->bz_lock_tables('tokens WRITE');
     $dbh->do("DELETE FROM tokens WHERE token = ?", undef, $token);
-    $dbh->bz_unlock_tables();
 }
 
 # Given a token, makes sure it comes from the currently logged in user
@@ -364,14 +360,14 @@ sub _create_token {
     trick_taint($tokentype);
     trick_taint($eventdata);
 
-    $dbh->bz_lock_tables('tokens WRITE');
+    $dbh->bz_start_transaction();
 
     my $token = GenerateUniqueToken();
 
     $dbh->do("INSERT INTO tokens (userid, issuedate, token, tokentype, eventdata)
         VALUES (?, NOW(), ?, ?, ?)", undef, ($userid, $token, $tokentype, $eventdata));
 
-    $dbh->bz_unlock_tables();
+    $dbh->bz_commit_transaction();
 
     if (wantarray) {
         my (undef, $token_ts, undef) = GetTokenData($token);

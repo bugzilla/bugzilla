@@ -1583,9 +1583,7 @@ sub create {
     my $class = ref($invocant) || $invocant;
     my $dbh = Bugzilla->dbh;
 
-    $dbh->bz_lock_tables('profiles WRITE', 'profiles_activity WRITE',
-        'user_group_map WRITE', 'email_setting WRITE', 'groups READ', 
-        'tokens READ', 'fielddefs READ');
+    $dbh->bz_start_transaction();
 
     my $user = $class->SUPER::create(@_);
 
@@ -1622,7 +1620,7 @@ sub create {
                    VALUES (?, ?, NOW(), ?, NOW())',
                    undef, ($user->id, $who, $creation_date_fieldid));
 
-    $dbh->bz_unlock_tables();
+    $dbh->bz_commit_transaction();
 
     # Return the newly created user account.
     return $user;

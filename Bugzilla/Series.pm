@@ -170,7 +170,7 @@ sub writeToDatabase {
     my $self = shift;
 
     my $dbh = Bugzilla->dbh;
-    $dbh->bz_lock_tables('series_categories WRITE', 'series WRITE');
+    $dbh->bz_start_transaction();
 
     my $category_id = getCategoryID($self->{'category'});
     my $subcategory_id = getCategoryID($self->{'subcategory'});
@@ -209,7 +209,7 @@ sub writeToDatabase {
           || ThrowCodeError("missing_series_id", { 'series' => $self });
     }
     
-    $dbh->bz_unlock_tables();
+    $dbh->bz_commit_transaction();
 }
 
 # Check whether a series with this name, category and subcategory exists in

@@ -97,13 +97,12 @@ sub create {
     Bugzilla->login(LOGIN_REQUIRED);
     my $dbh = Bugzilla->dbh;
     $class->check_required_create_fields(@_);
+    $dbh->bz_start_transaction();
     my $params = $class->run_create_validators(@_);
 
     # Right now you can only create a Saved Search for the current user.
     $params->{userid} = Bugzilla->user->id;
 
-    $dbh->bz_lock_tables('namedqueries WRITE',
-                         'namedqueries_link_in_footer WRITE');
     my $lif = delete $params->{link_in_footer};
     my $obj = $class->insert_create_data($params);
     if ($lif) {
@@ -111,7 +110,7 @@ sub create {
                   (user_id, namedquery_id) VALUES (?,?)',
                  undef, $params->{userid}, $obj->id);
     }
-    $dbh->bz_unlock_tables();
+    $dbh->bz_commit_transaction();
 
     return $obj;
 }

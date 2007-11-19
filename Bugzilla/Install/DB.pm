@@ -659,8 +659,9 @@ sub _populate_longdescs {
               " for each 50.\n\n";
         local $| = 1;
 
-        $dbh->bz_lock_tables('bugs write', 'longdescs write', 'profiles write',
-                             'bz_schema WRITE');
+        # On MySQL, longdescs doesn't benefit from transactions, but this
+        # doesn't hurt.
+        $dbh->bz_start_transaction();
 
         $dbh->do('DELETE FROM longdescs');
 
@@ -722,7 +723,7 @@ sub _populate_longdescs {
 
         print "\n\n";
         $dbh->bz_drop_column('bugs', 'long_desc');
-        $dbh->bz_unlock_tables();
+        $dbh->bz_commit_transaction();
     } # main if
 }
 
@@ -740,8 +741,7 @@ sub _update_bugs_activity_field_to_fieldid {
                            [qw(fieldid)]);
         print "Populating new bugs_activity.fieldid field...\n";
 
-        $dbh->bz_lock_tables('bugs_activity WRITE', 'fielddefs WRITE');
-
+        $dbh->bz_start_transaction();
 
         my $ids = $dbh->selectall_arrayref(
             'SELECT DISTINCT fielddefs.id, bugs_activity.field
@@ -760,7 +760,7 @@ sub _update_bugs_activity_field_to_fieldid {
             $dbh->do("UPDATE bugs_activity SET fieldid = ? WHERE field = ?",
                      undef, $id, $field);
         }
-        $dbh->bz_unlock_tables();
+        $dbh->bz_commit_transaction();
 
         $dbh->bz_drop_column('bugs_activity', 'field');
     }

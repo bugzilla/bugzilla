@@ -32,18 +32,18 @@
   <!--
 
   /* Outputs a link to call replyToComment(); used to reduce HTML output */
-  function addReplyLink(id) {
+  function addReplyLink(id, real_id) {
       /* XXX this should really be updated to use the DOM Core's
        * createElement, but finding a container isn't trivial.
        */
       [% IF user.settings.quote_replies.value != 'off' %]
         document.write('[<a href="#add_comment" onclick="replyToComment(' + 
-                       id + ');">reply<' + '/a>]');
+                       id + ',' + real_id + ');">reply<' + '/a>]');
       [% END %]
   }
 
   /* Adds the reply text to the `comment' textarea */
-  function replyToComment(id) {
+  function replyToComment(id, real_id) {
       var prefix = "(In reply to comment #" + id + ")\n";
       var replytext = "";
       [% IF user.settings.quote_replies.value == 'quoted_reply' %]
@@ -66,7 +66,7 @@
       [% END %]
 
     [% IF Param("insidergroup") && user.in_group(Param("insidergroup")) %]
-      if (document.getElementById('isprivate-'+id).checked) {
+      if (document.getElementById('isprivate_' + real_id).checked) {
           document.getElementById('newcommentprivacy').checked = 'checked';
       }
     [% END %]

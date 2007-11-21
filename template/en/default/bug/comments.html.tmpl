@@ -183,7 +183,7 @@
         [% IF mode == "edit" %]
           <script type="text/javascript"><!--
             addCollapseLink([% count %]);
-            addReplyLink([% count %]); //-->
+            addReplyLink([% count %], [% comment.id %]); //-->
           </script>
         [% END %]
         [%+ decoration FILTER none %]

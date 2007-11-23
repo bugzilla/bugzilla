@@ -58,8 +58,10 @@ sub new {
     my $dsn = "DBI:mysql:host=$host;database=$dbname";
     $dsn .= ";port=$port" if $port;
     $dsn .= ";mysql_socket=$sock" if $sock;
+
+    my $attrs = { mysql_enable_utf8 => Bugzilla->params->{'utf8'} };
     
-    my $self = $class->db_new($dsn, $user, $pass);
+    my $self = $class->db_new($dsn, $user, $pass, $attrs);
 
     # This makes sure that if the tables are encoded as UTF-8, we
     # return their data correctly.

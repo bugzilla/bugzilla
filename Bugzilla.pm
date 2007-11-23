@@ -81,6 +81,7 @@ use constant SHUTDOWNHTML_EXIT_SILENTLY => [
 
 # Note that this is a raw subroutine, not a method, so $class isn't available.
 sub init_page {
+    (binmode STDOUT, ':utf8') if Bugzilla->params->{'utf8'};
 
     # Some environment variables are not taint safe
     delete @::ENV{'PATH', 'IFS', 'CDPATH', 'ENV', 'BASH_ENV'};

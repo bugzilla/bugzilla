@@ -185,6 +185,8 @@ sub html_light_quote {
 # This originally came from CGI.pm, by Lincoln D. Stein
 sub url_quote {
     my ($toencode) = (@_);
+    utf8::encode($toencode) # The below regex works only on bytes
+        if Bugzilla->params->{'utf8'} && utf8::is_utf8($toencode);
     $toencode =~ s/([^a-zA-Z0-9_\-.])/uc sprintf("%%%02x",ord($1))/eg;
     return $toencode;
 }
@@ -206,6 +208,10 @@ sub xml_quote {
     return $var;
 }
 
+# This function must not be relied upon to return a valid string to pass to
+# the DB or the user in UTF-8 situations. The only thing you  can rely upon
+# it for is that if you url_decode a string, it will url_encode back to the 
+# exact same thing.
 sub url_decode {
     my ($todecode) = (@_);
     $todecode =~ tr/+/ /;       # pluses become spaces

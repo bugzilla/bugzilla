@@ -233,6 +233,27 @@ sub header {
     return $self->SUPER::header(@_) || "";
 }
 
+# CGI.pm is not utf8-aware and passes data as bytes instead of UTF-8 strings.
+sub param {
+    my $self = shift;
+    if (Bugzilla->params->{'utf8'} && scalar(@_) == 1) {
+        if (wantarray) {
+            return map { _fix_utf8($_) } $self->SUPER::param(@_);
+        }
+        else {
+            return _fix_utf8(scalar $self->SUPER::param(@_));
+        }
+    }
+    return $self->SUPER::param(@_);
+}
+
+sub _fix_utf8 {
+    my $input = shift;
+    # The is_utf8 is here in case CGI gets smart about utf8 someday.
+    utf8::decode($input) if defined $input && !utf8::is_utf8($input);
+    return $input;
+}
+
 # The various parts of Bugzilla which create cookies don't want to have to
 # pass them around to all of the callers. Instead, store them locally here,
 # and then output as required from |header|.

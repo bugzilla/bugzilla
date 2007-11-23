@@ -38,7 +38,7 @@ use Email::MIME;
 use Email::MIME::Attachment::Stripper;
 use Getopt::Long qw(:config bundling);
 use Pod::Usage;
-use Encode qw(encode decode);
+use Encode;
 
 use Bugzilla;
 use Bugzilla::Bug qw(ValidateBugID);
@@ -306,8 +306,8 @@ sub get_text_alternative {
         debug_print("Part Character Encoding: $charset", 2);
         if (!$ct || $ct =~ /^text\/plain/i) {
             $body = $part->body;
-            if (Bugzilla->params->{'utf8'}) {
-                $body = encode('UTF-8', decode($charset, $body));
+            if (Bugzilla->params->{'utf8'} && !utf8::is_utf8($body)) {
+                $body = Encode::decode($charset, $body);
             }
             last;
         }

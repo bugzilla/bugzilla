@@ -382,10 +382,10 @@ use constant DB_MODULE => {
                 dbd => { 
                     package => 'DBD-mysql',
                     module  => 'DBD::mysql',
-                    version => '2.9003',
-                    # Certain versions are broken, development versions are
-                    # always disallowed.
-                    blacklist => ['^3\.000[3-6]', '_'],
+                    # Disallow development versions
+                    blacklist => ['_'],
+                    # For UTF-8 support
+                    version => '4.00',
                 },
                 name => 'MySQL'},
     'pg'    => {db => 'Bugzilla::DB::Pg', db_version => '8.00.0000',

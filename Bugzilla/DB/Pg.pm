@@ -68,7 +68,9 @@ sub new {
     # creating tables.
     $dsn .= ";options='-c client_min_messages=warning'";
 
-    my $self = $class->db_new($dsn, $user, $pass);
+    my $attrs = { pg_enable_utf8 => Bugzilla->params->{'utf8'} };
+
+    my $self = $class->db_new($dsn, $user, $pass, $attrs);
 
     # all class local variables stored in DBI derived class needs to have
     # a prefix 'private_'. See DBI documentation.

@@ -67,7 +67,9 @@ sub MessageToMTA {
     # Encode the headers correctly in quoted-printable
     foreach my $header qw(From To Cc Reply-To Sender Errors-To Subject) {
         if (my $value = $email->header($header)) {
-            $value = Encode::decode("UTF-8", $value) if Bugzilla->params->{'utf8'};
+            if (Bugzilla->params->{'utf8'} && !utf8::is_utf8($value)) {
+                $value = utf8::decode($value);
+            }
             my $encoded = encode('MIME-Q', $value);
             $email->header_set($header, $encoded);
         }

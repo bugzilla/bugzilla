@@ -42,6 +42,7 @@ use Bugzilla::Component;
 # Make sure the user is logged in.
 my $user = Bugzilla->login();
 my $cgi = Bugzilla->cgi;
+my $dbh = Bugzilla->dbh;
 my $template = Bugzilla->template;
 my $action = $cgi->param('action') || '';
 
@@ -67,7 +68,15 @@ if ($action eq 'queue') {
     queue();
 }
 else {
-    $template->process('request/queue.html.tmpl', {requests => {}})
+    my $flagtypes = $dbh->selectcol_arrayref('SELECT DISTINCT(name) FROM flagtypes
+                                              ORDER BY name');
+    my @types = ('all', @$flagtypes);
+
+    my $vars = {};
+    $vars->{'products'} = $user->get_selectable_products;
+    $vars->{'types'} = \@types;
+    $vars->{'requests'} = {};
+    $template->process('request/queue.html.tmpl', $vars)
       || ThrowTemplateError($template->error());
 }
 exit;

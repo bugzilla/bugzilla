@@ -42,7 +42,7 @@
     <span class="separator">| </span>
     [% IF user.id %]
       <a href="request.cgi?requester=[% user.login FILTER url_quote %]&amp;requestee=
-               [% user.login FILTER url_quote %]&amp;do_union=1&amp;group=type">My Requests</a>
+               [% user.login FILTER url_quote %]&amp;do_union=1&amp;group=type&amp;action=queue">My Requests</a>
     [% ELSE %]
       <a href="request.cgi">Requests</a>
     [% END %]

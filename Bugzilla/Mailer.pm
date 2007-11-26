@@ -68,7 +68,7 @@ sub MessageToMTA {
     foreach my $header qw(From To Cc Reply-To Sender Errors-To Subject) {
         if (my $value = $email->header($header)) {
             if (Bugzilla->params->{'utf8'} && !utf8::is_utf8($value)) {
-                $value = utf8::decode($value);
+                utf8::decode($value);
             }
             my $encoded = encode('MIME-Q', $value);
             $email->header_set($header, $encoded);

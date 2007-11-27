@@ -69,6 +69,8 @@ sub MessageToMTA {
         if (my $value = $email->header($header)) {
             $value = Encode::decode("UTF-8", $value) if Bugzilla->params->{'utf8'};
             my $encoded = encode('MIME-Q', $value);
+            # Encode adds unnecessary line breaks, with two spaces after each.
+            $encoded =~ s/\n  / /g;
             $email->header_set($header, $encoded);
         }
     }

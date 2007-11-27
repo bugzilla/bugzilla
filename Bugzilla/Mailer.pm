@@ -71,6 +71,8 @@ sub MessageToMTA {
                 utf8::decode($value);
             }
             my $encoded = encode('MIME-Q', $value);
+            # Encode adds unnecessary line breaks, with two spaces after each.
+            $encoded =~ s/\n  / /g;
             $email->header_set($header, $encoded);
         }
     }

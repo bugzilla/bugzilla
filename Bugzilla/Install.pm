@@ -307,27 +307,9 @@ sub create_admin {
         chomp($full_name);
     }
 
-    while (!$password) {
-        # trap a few interrupts so we can fix the echo if we get aborted.
-        local $SIG{HUP}  = \&_create_admin_exit;
-        local $SIG{INT}  = \&_create_admin_exit;
-        local $SIG{QUIT} = \&_create_admin_exit;
-        local $SIG{TERM} = \&_create_admin_exit;
-
-        system("stty","-echo") unless ON_WINDOWS;  # disable input echoing
-
-        print get_text('install_admin_get_password') . ' ';
-        $password = <STDIN>;
-        chomp $password;
-        print "\n", get_text('install_admin_get_password2') . ' ';
-        my $pass2 = <STDIN>;
-        chomp $pass2;
-        eval { validate_password($password, $pass2); };
-        if ($@) {
-            print "\n$@\n";
-            undef $password;
-        }
-        system("stty","echo") unless ON_WINDOWS;
+    if (!$password) {
+        $password = _prompt_for_password(
+            get_text('install_admin_get_password'));
     }
 
     my $admin = Bugzilla::User->create({ login_name    => $login, 
@@ -370,11 +352,50 @@ sub make_admin {
     print "\n", get_text('install_admin_created', { user => $user }), "\n";
 }
 
-# This is just in case we get interrupted while getting the admin's password.
-sub _create_admin_exit {
+sub _prompt_for_password {
+    my $prompt = shift;
+
+    my $password;
+    while (!$password) {
+        # trap a few interrupts so we can fix the echo if we get aborted.
+        local $SIG{HUP}  = \&_password_prompt_exit;
+        local $SIG{INT}  = \&_password_prompt_exit;
+        local $SIG{QUIT} = \&_password_prompt_exit;
+        local $SIG{TERM} = \&_password_prompt_exit;
+
+        system("stty","-echo") unless ON_WINDOWS;  # disable input echoing
+
+        print $prompt, ' ';
+        $password = <STDIN>;
+        chomp $password;
+        print "\n", get_text('install_confirm_password'), ' ';
+        my $pass2 = <STDIN>;
+        chomp $pass2;
+        eval { validate_password($password, $pass2); };
+        if ($@) {
+            print "\n$@\n";
+            undef $password;
+        }
+        system("stty","echo") unless ON_WINDOWS;
+    }
+    return $password;
+}
+
+# This is just in case we get interrupted while getting a password.
+sub _password_prompt_exit {
     # re-enable input echoing
     system("stty","echo") unless ON_WINDOWS;
     exit 1;
+}
+
+sub reset_password {
+    my $login = shift;
+    my $user = Bugzilla::User->check($login);
+    my $prompt = "\n" . get_text('install_reset_password', { user => $user });
+    my $password = _prompt_for_password($prompt);
+    $user->set_password($password);
+    $user->update();
+    print "\n", get_text('install_reset_password_done'), "\n";
 }
 
 1;

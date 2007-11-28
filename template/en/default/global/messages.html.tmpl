@@ -356,9 +356,6 @@
   [% ELSIF message_tag == "install_admin_get_password" %]
     Enter a password for the administrator account:
 
-  [% ELSIF message_tag == "install_admin_get_password2" %]
-    Please retype the password to verify:
-
   [% ELSIF message_tag == "install_admin_created" %]
     [% user.login FILTER html %] is now set up as an administrator.
 
@@ -375,6 +372,9 @@
 
   [% ELSIF message_tag == "install_column_rename" %]
     Renaming column '[% old FILTER html %]' to '[% new FILTER html %]'...
+
+  [% ELSIF message_tag == "install_confirm_password" %]
+    Please retype the password to verify:
 
   [% ELSIF message_tag == "install_default_classification" %]
     Creating default classification '[% name FILTER html %]'...
@@ -405,6 +405,12 @@
     'Parameters' page (linked in the footer of the Administrator
     account) to ensure it is set up as you wish - this includes
     setting the 'urlbase' option to the correct URL.
+
+  [% ELSIF message_tag == "install_reset_password" %]
+    Enter a new password for [% user.login FILTER html %]:
+
+  [% ELSIF message_tag == "install_reset_password_done" %]
+    New password set.
 
   [% ELSIF message_tag == "install_webservergroup_empty" %]
     ****************************************************************************

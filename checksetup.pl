@@ -66,7 +66,8 @@ $ENV{'HTTP_ACCEPT_LANGUAGE'} ||= setlocale(LC_CTYPE);
 
 my %switch;
 GetOptions(\%switch, 'help|h|?', 'check-modules', 'no-templates|t',
-                     'verbose|v|no-silent', 'make-admin=s');
+                     'verbose|v|no-silent', 'make-admin=s', 
+                     'reset-password=s');
 
 # Print the help message if that switch was selected.
 pod2usage({-verbose => 1, -exitval => 1}) if $switch{'help'};
@@ -212,6 +213,9 @@ Bugzilla::Install::update_settings();
 Bugzilla::Install::make_admin($switch{'make-admin'}) if $switch{'make-admin'};
 Bugzilla::Install::create_admin();
 
+Bugzilla::Install::reset_password($switch{'reset-password'})
+    if $switch{'reset-password'};
+
 ###########################################################################
 # Create default Product and Classification
 ###########################################################################
@@ -240,6 +244,7 @@ checksetup.pl - A do-it-all upgrade and installation script for Bugzilla.
  ./checksetup.pl [--help|--check-modules]
  ./checksetup.pl [SCRIPT [--verbose]] [--no-templates|-t]
                  [--make-admin=user@domain.com]
+                 [--reset-password=user@domain.com]
 
 =head1 OPTIONS
 
@@ -266,6 +271,11 @@ Only check for correct module dependencies and quit afterward.
 Makes the specified user into a Bugzilla administrator. This is
 in case you accidentally lock yourself out of the Bugzilla administrative
 interface.
+
+=item B<--reset-password>=user@domain.com
+
+Resets the specified user's password. checksetup.pl will prompt you to 
+enter a new password for the user.
 
 =item B<--no-templates> (B<-t>)
 

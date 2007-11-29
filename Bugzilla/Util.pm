@@ -107,8 +107,7 @@ sub html_light_quote {
            require HTML::Parser;
     };
 
-    # We need utf8_mode() from HTML::Parser 3.40.
-    if ($@ || $HTML::Parser::VERSION < 3.40) { # Package(s) not installed.
+    if ($@) { # Package(s) not installed.
         my $safe = join('|', @allow);
         my $chr = chr(1);
 
@@ -172,12 +171,6 @@ sub html_light_quote {
                                            comment => 0,
                                            process => 0);
 
-        # Avoid filling the web server error log.
-        # In HTML::Scrubber 0.08, the HTML::Parser object is stored in
-        # the "_p" key, but this may change in future versions.
-        if (ref($scrubber->{_p}) eq 'HTML::Parser') {
-            $scrubber->{_p}->utf8_mode(1);
-        }
         return $scrubber->scrub($text);
     }
 }

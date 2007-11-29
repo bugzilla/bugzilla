@@ -766,7 +766,7 @@ sub check_can_admin_product {
 
     ($self->in_group('editcomponents', $product->id)
        && $self->can_see_product($product->name))
-         || ThrowUserError('product_access_denied', {product => $product->name});
+         || ThrowUserError('product_admin_denied', {product => $product->name});
 
     # Return the validated product object.
     return $product;

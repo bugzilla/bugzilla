@@ -111,6 +111,7 @@ local our %default;
 # and ignore any multiple values.
 sub PrefillForm {
     my ($buf) = (@_);
+    my $cgi = Bugzilla->cgi;
     $buf = new Bugzilla::CGI($buf);
     my $foundone = 0;
 

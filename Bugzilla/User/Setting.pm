@@ -142,10 +142,12 @@ sub add_setting {
         $dbh->do('DELETE FROM setting_value WHERE name = ?', undef, $name);
         $dbh->do('DELETE FROM setting WHERE name = ?', undef, $name);
         # Remove obsolete user preferences for this setting.
-        my $list = join(', ', map {$dbh->quote($_)} @$values);
-        $dbh->do("DELETE FROM profile_setting
-                  WHERE setting_name = ? AND setting_value NOT IN ($list)",
-                  undef, $name);
+        if (defined $values && scalar(@$values)) {
+            my $list = join(', ', map {$dbh->quote($_)} @$values);
+            $dbh->do("DELETE FROM profile_setting
+                      WHERE setting_name = ? AND setting_value NOT IN ($list)",
+                      undef, $name);
+        }
     }
     else {
         print get_text('install_setting_new', { name => $name }) . "\n";
@@ -335,7 +337,7 @@ $settings->{$setting_name} = new Bugzilla::User::Setting(
 
 =over 4
 
-=item C<add_setting($name, \@values, $default_value)>
+=item C<add_setting($name, \@values, $default_value, $subclass, $force_check)>
 
 Description: Checks for the existence of a setting, and adds it 
              to the database if it does not yet exist.
@@ -344,6 +346,11 @@ Params:      C<$name> - string - the name of the new setting
              C<$values> - arrayref - contains the new choices
                for the new Setting.
              C<$default_value> - string - the site default
+             C<$subclass> - string - name of the module returning
+               the list of valid values. This means legal values are
+               not stored in the DB.
+             C<$force_check> - boolean - when true, the existing setting
+               and all its values are deleted and replaced by new data.
 
 Returns:     a pointer to a hash of settings
 

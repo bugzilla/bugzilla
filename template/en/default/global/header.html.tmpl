@@ -74,10 +74,15 @@
         [% javascript %]
       </script>
     [% END %]
-    
+
     [% IF javascript_urls %]
       [% FOREACH javascript_url = javascript_urls %]
         <script src="[% javascript_url FILTER html %]" type="text/javascript"></script>
+      [% END %]
+      [% IF javascript_urls.grep('yui/').size %]
+        <script type="text/javascript">
+          YAHOO.namespace('bugzilla');
+        </script>
       [% END %]
     [% END %]
 

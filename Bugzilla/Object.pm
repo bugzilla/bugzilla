@@ -27,12 +27,15 @@ use Bugzilla::Constants;
 use Bugzilla::Util;
 use Bugzilla::Error;
 
+use Date::Parse;
+
 use constant NAME_FIELD => 'name';
 use constant ID_FIELD   => 'id';
 use constant LIST_ORDER => NAME_FIELD;
 
 use constant UPDATE_VALIDATORS => {};
 use constant NUMERIC_COLUMNS   => ();
+use constant DATE_COLUMNS      => ();
 
 ###############################
 ####    Initialization     ####
@@ -237,6 +240,7 @@ sub update {
     my $old_self = $self->new($self->id);
     
     my %numeric = map { $_ => 1 } $self->NUMERIC_COLUMNS;
+    my %date    = map { $_ => 1 } $self->DATE_COLUMNS;
     my (@update_columns, @values, %changes);
     foreach my $column ($self->UPDATE_COLUMNS) {
         my ($old, $new) = ($old_self->{$column}, $self->{$column});
@@ -246,7 +250,9 @@ sub update {
         if (!defined $new || !defined $old) {
             next if !defined $new && !defined $old;
         }
-        elsif ( ($numeric{$column} && $old == $new) || $old eq $new ) {
+        elsif ( ($numeric{$column} && $old == $new) 
+                || ($date{$column} && str2time($old) == str2time($new))
+                || $old eq $new ) {
             next;
         }
 
@@ -473,6 +479,12 @@ current value in the database. It only updates columns that have changed.
 
 Any column listed in NUMERIC_COLUMNS is treated as a number, not as a string,
 during these comparisons.
+
+=item C<DATE_COLUMNS>
+
+This is much like L</NUMERIC_COLUMNS>, except that it treats strings as
+dates when being compared. So, for example, C<2007-01-01> would be
+equal to C<2007-01-01 00:00:00>.
 
 =back
 

@@ -117,6 +117,24 @@ function bz_getFullWidth(fromObj)
 }
 
 /**
+ * Causes a block to appear directly underneath another block,
+ * overlaying anything below it.
+ * 
+ * @param item   The block that you want to move.
+ * @param parent The block that it goes on top of.
+ * @return nothing
+ */
+function bz_overlayBelow(item, parent) {
+    var elemY = bz_findPosY(parent);
+    var elemX = bz_findPosX(parent);
+    var elemH = parent.offsetHeight;
+
+    item.style.position = 'absolute';
+    item.style.left = elemX + "px";
+    item.style.top = elemY + elemH + 1 + "px";
+}
+
+/**
  * Create wanted options in a select form control.
  *
  * @param  aSelect        Select form control to manipulate.

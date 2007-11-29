@@ -65,17 +65,8 @@ KeywordChooser.prototype =
 
   positionChooser: function()
   {
-    if (this._positioned) {
-      return;
-    }
-
-    var elemY = bz_findPosY(this._parent);
-    var elemX = bz_findPosX(this._parent);
-    var elemH = this._parent.offsetHeight;
-
-    this._chooser.style.left = elemX + "px";
-    this._chooser.style.top = elemY + elemH + 1 + "px";
-
+    if (this._positioned) return;
+    bz_overlayBelow(this._chooser, this._parent);
     this._positioned = true;
   },
 

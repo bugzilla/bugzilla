@@ -211,16 +211,13 @@ sub FILESYSTEM {
     foreach my $skin_dir ("$skinsdir/custom", <$skinsdir/contrib/*>) {
         next unless -d $skin_dir;
         next if basename($skin_dir) =~ /^cvs$/i;
-        foreach (<$skinsdir/standard/*.css>) {
-            my $standard_css_file = basename($_);
-            my $custom_css_file = "$skin_dir/$standard_css_file";
-            $create_files{$custom_css_file} = { perms => $ws_readable, contents => <<EOT
-/*
- * Custom rules for $standard_css_file.
- * The rules you put here override rules in that stylesheet.
- */
-EOT
-            }
+        $create_dirs{"$skin_dir/yui"} = $ws_dir_readable;
+        foreach my $base_css (<$skinsdir/standard/*.css>) {
+            _add_custom_css($skin_dir, basename($base_css), \%create_files, $ws_readable);
+        }
+        foreach my $dir_css (<$skinsdir/standard/*/*.css>) {
+            $dir_css =~ s{.+?([^/]+/[^/]+)$}{$1};
+            _add_custom_css($skin_dir, $dir_css, \%create_files, $ws_readable);
         }
     }
 
@@ -376,6 +373,18 @@ EOT
         unlink "$datadir/versioncache";
     }
 
+}
+
+# A simple helper for creating "empty" CSS files.
+sub _add_custom_css {
+    my ($skin_dir, $path, $create_files, $perms) = @_;
+    $create_files->{"$skin_dir/$path"} = { perms => $perms, contents => <<EOT
+/*
+ * Custom rules for $path.
+ * The rules you put here override rules in that stylesheet.
+ */
+EOT
+    };
 }
 
 sub create_htaccess {

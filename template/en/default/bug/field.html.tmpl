@@ -45,7 +45,21 @@
                value="[% value FILTER html %]" size="60">
     [% CASE constants.FIELD_TYPE_DATETIME %]
       <input name="[% field.name FILTER html %]" size="20"
-             value="[% value FILTER html %]">
+             id="[% field.name FILTER html %]"
+             value="[% value FILTER html %]"
+             onchange="updateCalendarFromField(this)">
+      <button type="button" class="calendar_button"
+              id="button_calendar_[% field.name FILTER html %]"
+              onclick="showCalendar('[% field.name FILTER js %]')">
+        <span>Calendar</span>
+      </button>
+
+      <div id="con_calendar_[% field.name FILTER html %]"
+           class="yui-skin-sam"></div>
+
+      <script type="text/javascript">
+        createCalendar('[% field.name FILTER js %]')
+      </script>
     [% CASE [ constants.FIELD_TYPE_SINGLE_SELECT 
               constants.FIELD_TYPE_MULTI_SELECT ] %]
         <select id="[% field.name FILTER html %]" 

@@ -360,6 +360,21 @@ div.user_match {
     vertical-align: top;
 }
 
+.calendar_button {
+    background: transparent url("global/calendar.png") no-repeat;
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
+}
+.calendar_button span { display: none }
+/* These classes are set by YUI. */
+.yui-calcontainer {
+    display: none; 
+    background-color: white; 
+    padding: 10px;
+    border: 1px solid #404D6C;
+}
+
 form#Create th {
     text-align: right;
 }

@@ -42,5 +42,7 @@
 [% END %]
 
 [% PROCESS global/header.html.tmpl
-  javascript_urls = [ "js/util.js", "js/keyword-chooser.js" ]
+  javascript_urls = [ "js/util.js", "js/keyword-chooser.js", "js/field.js",
+                      "js/yui/yahoo-dom-event.js", "js/yui/calendar.js" ]
+    style_urls = [ "skins/standard/yui/calendar.css" ]
  %]

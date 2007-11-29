@@ -201,6 +201,12 @@ use constant NUMERIC_COLUMNS => qw(
     remaining_time
 );
 
+sub DATE_COLUMNS {
+    my @fields = Bugzilla->get_fields(
+        { custom => 1, type => FIELD_TYPE_DATETIME });
+    return map { $_->name } @fields;
+}
+
 # This is used by add_comment to know what we validate before putting in
 # the DB.
 use constant UPDATE_COMMENT_COLUMNS => qw(

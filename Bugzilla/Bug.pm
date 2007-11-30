@@ -1565,10 +1565,6 @@ sub add_comment {
     my ($self, $comment, $params) = @_;
 
     $comment = $self->_check_comment($comment);
-    # XXX At some point we need to refactor check_can_change_field
-    # so that custom installs can use PrivilegesRequired here.
-    $self->check_can_change_field('longdesc')
-        || ThrowUserError('illegal_change', { field => 'longdesc' });
 
     $params ||= {};
     if (exists $params->{work_time}) {
@@ -1588,6 +1584,11 @@ sub add_comment {
     if ($comment eq '' && !($params->{type} || $params->{work_time})) {
         return;
     }
+
+    # So we really want to comment. Make sure we are allowed to do so.
+    my $privs;
+    $self->check_can_change_field('longdesc', 0, 1, \$privs)
+        || ThrowUserError('illegal_change', { field => 'longdesc', privs => $privs });
 
     $self->{added_comments} ||= [];
     my $add_comment = dclone($params);

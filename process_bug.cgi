@@ -878,7 +878,7 @@ foreach my $id (@idlist) {
     if (defined $cgi->param('delta_ts') && $cgi->param('delta_ts') ne $delta_ts)
     {
         ($vars->{'operations'}) =
-            Bugzilla::Bug::GetBugActivity($id, $cgi->param('delta_ts'));
+            Bugzilla::Bug::GetBugActivity($id, undef, $cgi->param('delta_ts'));
 
         $vars->{'start_at'} = $cgi->param('longdesclength');
 

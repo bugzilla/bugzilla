@@ -91,6 +91,7 @@ sub _retrieve {
         'attachments.submitter_id AS _attacher_id',
         Bugzilla->dbh->sql_date_format('attachments.creation_ts',
                                        '%Y.%m.%d %H:%i') . " AS attached",
+        'attachments.modification_time',
         'attachments.filename AS filename',
         'attachments.ispatch AS ispatch',
         'attachments.isurl AS isurl',
@@ -204,6 +205,21 @@ the date and time on which the attacher attached the attachment
 sub attached {
     my $self = shift;
     return $self->{attached};
+}
+
+=over
+
+=item C<modification_time>
+
+the date and time on which the attachment was last modified.
+
+=back
+
+=cut
+
+sub modification_time {
+    my $self = shift;
+    return $self->{modification_time};
 }
 
 =over
@@ -826,10 +842,10 @@ sub insert_attachment_for_bug {
     # Insert the attachment into the database.
     my $sth = $dbh->do(
         "INSERT INTO attachments
-            (bug_id, creation_ts, filename, description,
+            (bug_id, creation_ts, modification_time, filename, description,
              mimetype, ispatch, isurl, isprivate, submitter_id)
-         VALUES (?,?,?,?,?,?,?,?,?)", undef, ($bug->bug_id, $timestamp, $filename,
-              $description, $contenttype, $cgi->param('ispatch'),
+         VALUES (?,?,?,?,?,?,?,?,?,?)", undef, ($bug->bug_id, $timestamp, $timestamp,
+              $filename, $description, $contenttype, $cgi->param('ispatch'),
               $isurl, $isprivate, $user->id));
     # Retrieve the ID of the newly created attachment record.
     my $attachid = $dbh->bz_last_key('attachments', 'attach_id');
@@ -877,8 +893,9 @@ sub insert_attachment_for_bug {
         # This call must be done before updating the 'attachments' table.
         Bugzilla::Flag::CancelRequests($bug, $obsolete_attachment, $timestamp);
 
-        $dbh->do('UPDATE attachments SET isobsolete = 1 WHERE attach_id = ?',
-                 undef, $obsolete_attachment->id);
+        $dbh->do('UPDATE attachments SET isobsolete = 1, modification_time = ?
+                  WHERE attach_id = ?',
+                 undef, ($timestamp, $obsolete_attachment->id));
 
         $dbh->do('INSERT INTO bugs_activity (bug_id, attach_id, who, bug_when,
                                              fieldid, removed, added)

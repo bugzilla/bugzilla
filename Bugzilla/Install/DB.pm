@@ -515,6 +515,9 @@ sub update_table_definitions {
     # 2007-08-21 wurblzap@gmail.com - Bug 365378
     _make_lang_setting_dynamic();
 
+    # 2007-09-09 LpSolit@gmail.com - Bug 99215
+    _fix_attachment_modification_date();
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################
@@ -2895,6 +2898,31 @@ sub _make_lang_setting_dynamic {
     if ($count) {
         $dbh->do(q{UPDATE setting SET subclass = 'Lang' WHERE name = 'lang'});
         $dbh->do(q{DELETE FROM setting_value WHERE name = 'lang'});
+    }
+}
+
+sub _fix_attachment_modification_date {
+    my $dbh = Bugzilla->dbh;
+    if (!$dbh->bz_column_info('attachments', 'modification_time')) {
+        # Allow NULL values till the modification time has been set.
+        $dbh->bz_add_column('attachments', 'modification_time', {TYPE => 'DATETIME'});
+
+        print "Setting the modification time for attachments...\n";
+        $dbh->do('UPDATE attachments SET modification_time = creation_ts');
+
+        # Now force values to be always defined.
+        $dbh->bz_alter_column('attachments', 'modification_time',
+                              {TYPE => 'DATETIME', NOTNULL => 1});
+
+        # Update the modification time for attachments which have been modified.
+        my $attachments =
+          $dbh->selectall_arrayref('SELECT attach_id, MAX(bug_when) FROM bugs_activity
+                                    WHERE attach_id IS NOT NULL ' .
+                                    $dbh->sql_group_by('attach_id'));
+
+        my $sth = $dbh->prepare('UPDATE attachments SET modification_time = ?
+                                 WHERE attach_id = ?');
+        $sth->execute($_->[1], $_->[0]) foreach (@$attachments);
     }
 }
 

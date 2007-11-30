@@ -372,6 +372,7 @@ use constant ABSTRACT_SCHEMA => {
                              PRIMARYKEY => 1},
             bug_id       => {TYPE => 'INT3', NOTNULL => 1},
             creation_ts  => {TYPE => 'DATETIME', NOTNULL => 1},
+            modification_time => {TYPE => 'DATETIME', NOTNULL => 1},
             description  => {TYPE => 'MEDIUMTEXT', NOTNULL => 1},
             mimetype     => {TYPE => 'MEDIUMTEXT', NOTNULL => 1},
             ispatch      => {TYPE => 'BOOLEAN'},
@@ -389,6 +390,7 @@ use constant ABSTRACT_SCHEMA => {
         INDEXES => [
             attachments_bug_id_idx => ['bug_id'],
             attachments_creation_ts_idx => ['creation_ts'],
+            attachments_modification_time_idx => ['modification_time'],
             attachments_submitter_id_idx => ['submitter_id', 'bug_id'],
         ],
     },

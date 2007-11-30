@@ -460,6 +460,27 @@ sub update {
     $cgi->param('isobsolete', $cgi->param('isobsolete') ? 1 : 0);
     $cgi->param('isprivate', $cgi->param('isprivate') ? 1 : 0);
 
+    # Now make sure the attachment has not been edited since we loaded the page.
+    if (defined $cgi->param('delta_ts')
+        && $cgi->param('delta_ts') ne $attachment->modification_time)
+    {
+        ($vars->{'operations'}) =
+            Bugzilla::Bug::GetBugActivity($bug->id, $attachment->id, $cgi->param('delta_ts'));
+
+        # If the modification date changed but there is no entry in
+        # the activity table, this means someone commented only.
+        # In this case, there is no reason to midair.
+        if (scalar(@{$vars->{'operations'}})) {
+            $cgi->param('delta_ts', $attachment->modification_time);
+            $vars->{'attachment'} = $attachment;
+
+            print $cgi->header();
+            # Warn the user about the mid-air collision and ask them what to do.
+            $template->process("attachment/midair.html.tmpl", $vars)
+              || ThrowTemplateError($template->error());
+            exit;
+        }
+    }
     # If the submitter of the attachment is not in the insidergroup,
     # be sure that he cannot overwrite the private bit.
     # This check must be done before calling Bugzilla::Flag*::validate(),
@@ -507,11 +528,12 @@ sub update {
                     filename    = ?,
                     ispatch     = ?,
                     isobsolete  = ?,
-                    isprivate   = ?
+                    isprivate   = ?,
+                    modification_time = ?
             WHERE   attach_id   = ?",
             undef, ($description, $contenttype, $filename,
             $cgi->param('ispatch'), $cgi->param('isobsolete'), 
-            $cgi->param('isprivate'), $attachment->id));
+            $cgi->param('isprivate'), $timestamp, $attachment->id));
 
   my $updated_attachment = Bugzilla::Attachment->get($attachment->id);
   # Record changes in the activity table.

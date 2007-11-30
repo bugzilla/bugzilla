@@ -416,6 +416,10 @@
   'obsolete_attachments',
 ],
 
+'attachment/midair.html.tmpl' => [
+  'attachment.id',
+],
+
 'attachment/show-multiple.html.tmpl' => [
   'a.id',
   'flag.status'

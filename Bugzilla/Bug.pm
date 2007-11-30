@@ -2573,11 +2573,11 @@ sub format_comment {
 # Get the activity of a bug, starting from $starttime (if given).
 # This routine assumes ValidateBugID has been previously called.
 sub GetBugActivity {
-    my ($id, $starttime) = @_;
+    my ($bug_id, $attach_id, $starttime) = @_;
     my $dbh = Bugzilla->dbh;
 
     # Arguments passed to the SQL query.
-    my @args = ($id);
+    my @args = ($bug_id);
 
     # Only consider changes since $starttime, if given.
     my $datepart = "";
@@ -2585,6 +2585,12 @@ sub GetBugActivity {
         trick_taint($starttime);
         push (@args, $starttime);
         $datepart = "AND bugs_activity.bug_when > ?";
+    }
+
+    my $attachpart = "";
+    if ($attach_id) {
+        push(@args, $attach_id);
+        $attachpart = "AND bugs_activity.attach_id = ?";
     }
 
     # Only includes attachments the user is allowed to see.
@@ -2616,6 +2622,7 @@ sub GetBugActivity {
             ON profiles.userid = bugs_activity.who
          WHERE bugs_activity.bug_id = ?
                $datepart
+               $attachpart
                $suppwhere
       ORDER BY bugs_activity.bug_when";
 

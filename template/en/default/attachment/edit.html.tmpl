@@ -202,6 +202,7 @@
   <input type="hidden" name="id" value="[% attachment.id %]">
   <input type="hidden" name="action" value="update">
   <input type="hidden" name="contenttypemethod" value="manual">
+  <input type="hidden" name="delta_ts" value="[% attachment.modification_time FILTER html %]">
 
   <table class="attachment_info" width="100%">
 

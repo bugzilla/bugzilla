@@ -2924,6 +2924,10 @@ sub _fix_attachment_modification_date {
                                  WHERE attach_id = ?');
         $sth->execute($_->[1], $_->[0]) foreach (@$attachments);
     }
+    # We add this here to be sure to have the index being added, due to the original
+    # patch omitting it.
+    $dbh->bz_add_index('attachments', 'attachments_modification_time_idx',
+                       [qw(modification_time)]);
 }
 
 1;

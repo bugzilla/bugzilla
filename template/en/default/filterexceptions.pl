@@ -315,6 +315,7 @@
   '" maxlength=\"$maxlength\"" IF maxlength',
   '" onfocus=\"$onfocus\"" IF onfocus',
   'flag.status',
+  '" spellcheck=\"$spellcheck\"" IF spellcheck',
 ],
 
 'bug/navigate.html.tmpl' => [

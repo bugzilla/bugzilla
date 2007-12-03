@@ -274,7 +274,7 @@ sub quicksearch {
                 foreach my $or_operand (split(/\|/, $qsword)) {
                     if ($or_operand =~ /^votes:([0-9]+)$/) {
                         # votes:xx ("at least xx votes")
-                        addChart('votes', 'greaterthan', $1, $negate);
+                        addChart('votes', 'greaterthan', $1 - 1, $negate);
                     }
                     elsif ($or_operand =~ /^([^\?]+\?)([^\?]*)$/) {
                         # Flag and requestee shortcut

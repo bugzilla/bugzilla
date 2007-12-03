@@ -157,7 +157,7 @@
                 <label for="short_desc" accesskey="s"><b><u>S</u>ummary</b></label>:
               </td>
               [% PROCESS input inputname => "short_desc" size => "60" colspan => 2
-                               maxlength => 255 %]
+                               maxlength => 255 spellcheck => "true" %]
             </tr>
 
             <tr>
@@ -850,7 +850,8 @@
        <input id="[% inputname %]" name="[% inputname %]"
               value="[% val FILTER html %]"[% " size=\"$size\"" IF size %]
               [% " maxlength=\"$maxlength\"" IF maxlength %]
-              [% " onfocus=\"$onfocus\"" IF onfocus %]>
+              [% " onfocus=\"$onfocus\"" IF onfocus %]
+              [% " spellcheck=\"$spellcheck\"" IF spellcheck %]>
     [% ELSE %]
        <input type="hidden" name="[% inputname %]" id="[% inputname %]"
               value="[% val FILTER html %]">
@@ -868,6 +869,7 @@
   [% size = 0 %]
   [% value = undef %]
   [% onfocus = undef %]
+  [% spellcheck = undef %]
 [% END %]
 
 [%############################################################################%]

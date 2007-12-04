@@ -612,11 +612,7 @@ sub create {
                     # |U+200e|Left-To-Right Mark        |0xe2 0x80 0x8e      |
                     # |U+200f|Right-To-Left Mark        |0xe2 0x80 0x8f      |
                     # --------------------------------------------------------
-                    #
-                    # Do the replacing in a loop so that we don't get tricked
-                    # by stuff like 0xe2 0xe2 0x80 0xae 0x80 0xae.
-                    while ($var =~ s/\xe2\x80(\xaa|\xab|\xac|\xad|\xae)//g) {
-                    }
+                    $var =~ s/[\x{202a}-\x{202e}]//g;
                 }
                 return $var;
             },

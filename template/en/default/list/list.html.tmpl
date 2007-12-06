@@ -35,7 +35,6 @@
   [% title = title _ ": " _ (searchname OR defaultsavename) FILTER html %]
 [% END %]
 
-[% style_urls = [ "skins/standard/buglist.css" ] %]
 [% qorder = order FILTER url_quote IF order %]
 [% message = "buglist_sorted_by_relevance" IF sorted_by_relevance %]
 
@@ -50,7 +49,7 @@
   atomlink = "buglist.cgi?$urlquerypart&title=$title&ctype=atom" 
   javascript_urls = [ "js/util.js", "js/keyword-chooser.js", "js/field.js",
                       "js/yui/yahoo-dom-event.js", "js/yui/calendar.js" ]
-  style_urls = [ "skins/standard/yui/calendar.css" ]
+  style_urls = [ "skins/standard/buglist.css", "skins/standard/yui/calendar.css" ]
   doc_section = "query.html#list"
 %]
 

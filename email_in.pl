@@ -444,9 +444,24 @@ The script expects to read an email with the following format:
  be included in the bug description.
 
 The C<@> labels can be any valid field name in Bugzilla that can be
-set on C<enter_bug.cgi>. For the list of field names, see the
-C<fielddefs> table in the database. The above example shows the
-minimum fields you B<must> specify.
+set on C<enter_bug.cgi>. For the list of required field names, see 
+L<Bugzilla::WebService::Bug/Create>. Note, that there is some difference
+in the names of the required input fields between web and email interfaces, 
+as listed below:
+
+=over
+
+=item *
+
+C<platform> in web is C<@rep_platform> in email
+
+=item *
+
+C<severity> in web is C<@bug_severity> in email
+
+=back
+
+For the list of all field names, see the C<fielddefs> table in the database. 
 
 The values for the fields can be split across multiple lines, but
 note that a newline will be parsed as a single space, for the value.

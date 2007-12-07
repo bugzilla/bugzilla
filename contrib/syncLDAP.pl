@@ -276,7 +276,7 @@ if($readonly == 0) {
         Bugzilla::User->create({
             login_name => $key, 
             realname   => @$value{'realname'},
-            password   => '*'});
+            cryptpassword   => '*'});
       }
       print "done!\n" unless $quiet;
    }

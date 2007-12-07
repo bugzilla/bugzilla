@@ -1112,7 +1112,7 @@ sub init {
          ",anyexact" => sub {
              my @list;
              foreach my $w (split(/,/, $v)) {
-                 if ($w eq "---" && $f !~ /milestone/) {
+                 if ($w eq "---" && $f =~ /resolution/) {
                      $w = "";
                  }
                  $q = $dbh->quote($w);

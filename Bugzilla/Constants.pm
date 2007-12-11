@@ -395,6 +395,13 @@ use constant DB_MODULE => {
                     version => '1.45',
                 },
                 name => 'PostgreSQL'},
+     'oracle'=> {db => 'Bugzilla::DB::Oracle', db_version => '10.01.0',
+                dbd => {
+                     package => 'DBD-Oracle',
+                     module  => 'DBD::Oracle',
+                     version => '1.19',
+                },
+                name => 'Oracle'},
 };
 
 # The user who should be considered "root" when we're giving

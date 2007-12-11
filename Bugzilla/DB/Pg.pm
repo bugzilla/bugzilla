@@ -158,62 +158,6 @@ sub sql_string_concat {
     return '(CAST(' . join(' AS text) || CAST(', @params) . ' AS text))';
 }
 
-sub bz_lock_tables {
-    my ($self, @tables) = @_;
-   
-    my $list = join(', ', @tables);
-    # Check first if there was no lock before
-    if ($self->{private_bz_tables_locked}) {
-        ThrowCodeError("already_locked", { current => $self->{private_bz_tables_locked},
-                                           new => $list });
-    } else {
-        my %read_tables;
-        my %write_tables;
-        foreach my $table (@tables) {
-            $table =~ /^([\d\w]+)([\s]+AS[\s]+[\d\w]+)?[\s]+(WRITE|READ)$/i;
-            my $table_name = $1;
-            if ($3 =~ /READ/i) {
-                if (!exists $read_tables{$table_name}) {
-                    $read_tables{$table_name} = undef;
-                }
-            }
-            else {
-                if (!exists $write_tables{$table_name}) {
-                    $write_tables{$table_name} = undef;
-                }
-            }
-        }
-    
-        # Begin Transaction
-        $self->bz_start_transaction();
-        
-        Bugzilla->dbh->do('LOCK TABLE ' . join(', ', keys %read_tables) .
-                          ' IN ROW SHARE MODE') if keys %read_tables;
-        Bugzilla->dbh->do('LOCK TABLE ' . join(', ', keys %write_tables) .
-                          ' IN ROW EXCLUSIVE MODE') if keys %write_tables;
-        $self->{private_bz_tables_locked} = $list;
-    }
-}
-
-sub bz_unlock_tables {
-    my ($self, $abort) = @_;
-    
-    # Check first if there was previous matching lock
-    if (!$self->{private_bz_tables_locked}) {
-        # Abort is allowed even without previous lock for error handling
-        return if $abort;
-        ThrowCodeError("no_matching_lock");
-    } else {
-        $self->{private_bz_tables_locked} = "";
-        # End transaction, tables will be unlocked automatically
-        if ($abort) {
-            $self->bz_rollback_transaction();
-        } else {
-            $self->bz_commit_transaction();
-        }
-    }
-}
-
 # Tell us whether or not a particular sequence exists in the DB.
 sub bz_sequence_exists {
     my ($self, $seq_name) = @_;

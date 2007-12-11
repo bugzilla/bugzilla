@@ -1751,7 +1751,7 @@ sub get_add_column_ddl {
 
     my ($self, $table, $column, $definition, $init_value) = @_;
     my @statements;
-    push(@statements, "ALTER TABLE $table". ADD_COLUMN ." $column " .
+    push(@statements, "ALTER TABLE $table ". ADD_COLUMN ." $column " .
         $self->get_type_ddl($definition));
 
     # XXX - Note that although this works for MySQL, most databases will fail

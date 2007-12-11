@@ -177,7 +177,7 @@ sub _get_notnull_trigger_ddl {
                         . " FOR EACH ROW"
                         . " BEGIN "
                         . " IF :NEW.". $column ." IS NULL THEN  "
-                        . " SELECT '" . Bugzilla::DB::Oracle::EMPTY_STRING
+                        . " SELECT '" . Bugzilla::DB::Oracle->EMPTY_STRING
                         . "' INTO :NEW.". $column ." FROM DUAL; "
                         . " END IF; "
                         . " END ".$table.";";

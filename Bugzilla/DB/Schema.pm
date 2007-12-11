@@ -218,7 +218,7 @@ use constant ABSTRACT_SCHEMA => {
             bug_id              => {TYPE => 'MEDIUMSERIAL', NOTNULL => 1,
                                     PRIMARYKEY => 1},
             assigned_to         => {TYPE => 'INT3', NOTNULL => 1},
-            bug_file_loc        => {TYPE => 'TEXT'},
+            bug_file_loc        => {TYPE => 'MEDIUMTEXT'},
             bug_severity        => {TYPE => 'varchar(64)', NOTNULL => 1},
             bug_status          => {TYPE => 'varchar(64)', NOTNULL => 1},
             creation_ts         => {TYPE => 'DATETIME'},
@@ -322,7 +322,7 @@ use constant ABSTRACT_SCHEMA => {
             bug_when        => {TYPE => 'DATETIME', NOTNULL => 1},
             work_time       => {TYPE => 'decimal(5,2)', NOTNULL => 1,
                                 DEFAULT => '0'},
-            thetext         => {TYPE => 'MEDIUMTEXT', NOTNULL => 1},
+            thetext         => {TYPE => 'LONGTEXT', NOTNULL => 1},
             isprivate       => {TYPE => 'BOOLEAN', NOTNULL => 1,
                                 DEFAULT => 'FALSE'},
             already_wrapped => {TYPE => 'BOOLEAN', NOTNULL => 1,
@@ -373,8 +373,8 @@ use constant ABSTRACT_SCHEMA => {
             bug_id       => {TYPE => 'INT3', NOTNULL => 1},
             creation_ts  => {TYPE => 'DATETIME', NOTNULL => 1},
             modification_time => {TYPE => 'DATETIME', NOTNULL => 1},
-            description  => {TYPE => 'MEDIUMTEXT', NOTNULL => 1},
-            mimetype     => {TYPE => 'MEDIUMTEXT', NOTNULL => 1},
+            description  => {TYPE => 'TINYTEXT', NOTNULL => 1},
+            mimetype     => {TYPE => 'TINYTEXT', NOTNULL => 1},
             ispatch      => {TYPE => 'BOOLEAN'},
             filename     => {TYPE => 'varchar(100)', NOTNULL => 1},
             submitter_id => {TYPE => 'INT3', NOTNULL => 1,
@@ -469,7 +469,7 @@ use constant ABSTRACT_SCHEMA => {
             id               => {TYPE => 'SMALLSERIAL', NOTNULL => 1,
                                  PRIMARYKEY => 1},
             name             => {TYPE => 'varchar(50)', NOTNULL => 1},
-            description      => {TYPE => 'TEXT'},
+            description      => {TYPE => 'MEDIUMTEXT'},
             cc_list          => {TYPE => 'varchar(200)'},
             target_type      => {TYPE => 'char(1)', NOTNULL => 1,
                                  DEFAULT => "'b'"},
@@ -527,7 +527,7 @@ use constant ABSTRACT_SCHEMA => {
                             DEFAULT => FIELD_TYPE_UNKNOWN},
             custom      => {TYPE => 'BOOLEAN', NOTNULL => 1,
                             DEFAULT => 'FALSE'},
-            description => {TYPE => 'MEDIUMTEXT', NOTNULL => 1},
+            description => {TYPE => 'TINYTEXT', NOTNULL => 1},
             mailhead    => {TYPE => 'BOOLEAN', NOTNULL => 1,
                             DEFAULT => 'FALSE'},
             sortkey     => {TYPE => 'INT2', NOTNULL => 1},
@@ -781,7 +781,7 @@ use constant ABSTRACT_SCHEMA => {
                                             COLUMN => 'userid',
                                             DELETE => 'CASCADE'}},
             name         => {TYPE => 'varchar(64)', NOTNULL => 1},
-            query        => {TYPE => 'MEDIUMTEXT', NOTNULL => 1},
+            query        => {TYPE => 'LONGTEXT', NOTNULL => 1},
             query_type   => {TYPE => 'BOOLEAN', NOTNULL => 1},
         ],
         INDEXES => [
@@ -869,7 +869,7 @@ use constant ABSTRACT_SCHEMA => {
             id           => {TYPE => 'MEDIUMSERIAL', NOTNULL => 1,
                              PRIMARYKEY => 1},
             name         => {TYPE => 'varchar(255)', NOTNULL => 1},
-            description  => {TYPE => 'TEXT', NOTNULL => 1},
+            description  => {TYPE => 'MEDIUMTEXT', NOTNULL => 1},
             isbuggroup   => {TYPE => 'BOOLEAN', NOTNULL => 1},
             userregexp   => {TYPE => 'TINYTEXT', NOTNULL => 1,
                              DEFAULT => "''"},
@@ -1067,7 +1067,7 @@ use constant ABSTRACT_SCHEMA => {
             name        => {TYPE => 'varchar(64)', NOTNULL => 1},
             frequency   => {TYPE => 'INT2', NOTNULL => 1},
             last_viewed => {TYPE => 'DATETIME'},
-            query       => {TYPE => 'MEDIUMTEXT', NOTNULL => 1},
+            query       => {TYPE => 'LONGTEXT', NOTNULL => 1},
             is_public   => {TYPE => 'BOOLEAN', NOTNULL => 1,
                             DEFAULT => 'FALSE'},
         ],
@@ -1169,7 +1169,7 @@ use constant ABSTRACT_SCHEMA => {
             quipid   => {TYPE => 'MEDIUMSERIAL', NOTNULL => 1,
                          PRIMARYKEY => 1},
             userid   => {TYPE => 'INT3'},
-            quip     => {TYPE => 'TEXT', NOTNULL => 1},
+            quip     => {TYPE => 'MEDIUMTEXT', NOTNULL => 1},
             approved => {TYPE => 'BOOLEAN', NOTNULL => 1,
                          DEFAULT => 'TRUE'},
         ],
@@ -2475,18 +2475,16 @@ An auto-increment L</INT4>
 
 =item C<TINYTEXT>
 
-Variable length string of characters up to 255 (2^8 - 1) characters wide 
-or more depending on the character set used.
+Variable length string of characters up to 255 (2^8 - 1) characters wide.
 
 =item C<MEDIUMTEXT>
 
-Variable length string of characters up to 16M (2^24 - 1) characters wide 
-or more depending on the character set used.
+Variable length string of characters up to 4000 characters wide.
+May be longer on some databases.
 
-=item C<TEXT>
+=item C<LONGTEXT>
 
-Variable length string of characters up to 64K (2^16 - 1) characters wide 
-or more depending on the character set used.
+Variable length string of characters up to 16M (2^24 - 1) characters wide.
 
 =item C<LONGBLOB>
 

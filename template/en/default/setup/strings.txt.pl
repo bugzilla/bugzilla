@@ -43,6 +43,13 @@ with one command, do:
   ##perl## install-module.pl --all
 
 EOT
+    install_data_length_too_long   => <<EOT,
+WARNING: Some of the data in the ##table##.##column## column is longer than
+its new length limit of ##max_length## characters. Please fix this data
+and then re-run checksetup.pl:
+
+##data##
+EOT
     install_module => 'Installing ##module## version ##version##...',
     module_found => "found v##ver##",
     module_not_found => "not found",

@@ -24,7 +24,7 @@ use strict;
 
 use Bugzilla::Constants;
 use Bugzilla::Hook;
-use Bugzilla::Install::Util qw(indicate_progress);
+use Bugzilla::Install::Util qw(indicate_progress install_string);
 use Bugzilla::Util;
 use Bugzilla::Series;
 
@@ -483,7 +483,7 @@ sub update_table_definitions {
     $dbh->bz_add_column('setting', 'subclass', {TYPE => 'varchar(32)'});
 
     $dbh->bz_alter_column('longdescs', 'thetext', 
-        { TYPE => 'MEDIUMTEXT', NOTNULL => 1 }, '');
+        {TYPE => 'LONGTEXT', NOTNULL => 1}, '');
 
     # 2006-10-20 LpSolit@gmail.com - Bug 189627
     $dbh->bz_add_column('group_control_map', 'editcomponents',
@@ -514,6 +514,9 @@ sub update_table_definitions {
 
     # 2007-08-21 wurblzap@gmail.com - Bug 365378
     _make_lang_setting_dynamic();
+    
+    # 2007-11-29 xiaoou.wu@oracle.com - Bug 153129
+    change_text_types();
 
     # 2007-09-09 LpSolit@gmail.com - Bug 99215
     _fix_attachment_modification_date();
@@ -2928,6 +2931,62 @@ sub _fix_attachment_modification_date {
     # patch omitting it.
     $dbh->bz_add_index('attachments', 'attachments_modification_time_idx',
                        [qw(modification_time)]);
+}
+
+sub change_text_types {
+    my $dbh = Bugzilla->dbh; 
+    return if $dbh->bz_column_info('series', 'query')->{TYPE} eq 'LONGTEXT';
+    _check_content_length('attachments', 'mimetype',    255);
+    _check_content_length('fielddefs',   'description', 255);
+    _check_content_length('attachments', 'description', 255);
+
+    $dbh->bz_alter_column('bugs', 'bug_file_loc',
+        { TYPE => 'MEDIUMTEXT'});
+    $dbh->bz_alter_column('longdescs', 'thetext',
+        { TYPE => 'LONGTEXT', NOTNULL => 1 });
+    $dbh->bz_alter_column('attachments', 'description',
+        { TYPE => 'TINYTEXT', NOTNULL => 1 });
+    $dbh->bz_alter_column('attachments', 'mimetype',
+        { TYPE => 'TINYTEXT', NOTNULL => 1 });
+    $dbh->bz_alter_column('flagtypes', 'description',
+        { TYPE => 'MEDIUMTEXT', NOTNULL => 1 });
+    $dbh->bz_alter_column('fielddefs', 'description',
+        { TYPE => 'TINYTEXT', NOTNULL => 1 });
+    $dbh->bz_alter_column('namedqueries', 'query',
+        { TYPE => 'LONGTEXT', NOTNULL => 1 });
+    $dbh->bz_alter_column('groups', 'description',
+        { TYPE => 'MEDIUMTEXT', NOTNULL => 1 });
+    $dbh->bz_alter_column('quips', 'quip',
+        { TYPE => 'MEDIUMTEXT', NOTNULL => 1 });
+    $dbh->bz_alter_column('series', 'query',
+        { TYPE => 'LONGTEXT', NOTNULL => 1 });
+} 
+
+sub _check_content_length {
+    my ($table_name, $field_name, $max_length) = @_;
+    my $dbh = Bugzilla->dbh;
+    my $contents = $dbh->selectcol_arrayref(
+        "SELECT $field_name FROM $table_name 
+          WHERE LENGTH($field_name) > ?", undef, $max_length);
+
+    if (@$contents) {
+        my @trimmed;
+        foreach my $item (@$contents) {
+            # Don't dump the whole string--it could be 16MB.
+            if (length($item) > 80) {
+                push(@trimmed,  substr($item, 0, 30) . "..." 
+                                . substr($item, -30) . "\n");
+            } else {
+                push(@trimmed, $item);
+            }
+        }
+        print install_string('install_data_too_long',
+                              { column => $field_name,
+                                table  => $table_name,
+                                max_length => $max_length,
+                                data => join("\n", @trimmed) });
+        exit 3;
+    }
 }
 
 1;

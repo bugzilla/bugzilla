@@ -81,6 +81,7 @@ use constant REVERSE_MAPPING => {
     SMALLINT  => 'INT2',
     MEDIUMINT => 'INT3',
     INTEGER   => 'INT4',
+
     # All the other types have the same name in their abstract version
     # as in their db-specific version, so no reverse mapping is needed.
 };
@@ -111,7 +112,7 @@ sub _initialize {
 
         TINYTEXT =>     'tinytext',
         MEDIUMTEXT =>   'mediumtext',
-        TEXT =>         'text',
+        LONGTEXT =>     'mediumtext',
 
         LONGBLOB =>     'longblob',
 

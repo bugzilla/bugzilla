@@ -88,7 +88,7 @@ sub _retrieve {
         'attachments.bug_id AS bug_id',
         'attachments.description AS description',
         'attachments.mimetype AS contenttype',
-        'attachments.submitter_id AS _attacher_id',
+        'attachments.submitter_id AS attacher_id',
         Bugzilla->dbh->sql_date_format('attachments.creation_ts',
                                        '%Y.%m.%d %H:%i') . " AS attached",
         'attachments.modification_time',
@@ -188,7 +188,7 @@ the user who attached the attachment
 sub attacher {
     my $self = shift;
     return $self->{attacher} if exists $self->{attacher};
-    $self->{attacher} = new Bugzilla::User($self->{_attacher_id});
+    $self->{attacher} = new Bugzilla::User($self->{attacher_id});
     return $self->{attacher};
 }
 

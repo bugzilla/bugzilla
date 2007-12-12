@@ -113,7 +113,7 @@ sub Send {
 
     my %values = %{$dbh->selectrow_hashref(
         'SELECT ' . join(',', editable_bug_fields()) . ', reporter,
-                lastdiffed AS start, LOCALTIMESTAMP(0) AS end
+                lastdiffed AS start_time, LOCALTIMESTAMP(0) AS end_time
            FROM bugs WHERE bug_id = ?',
         undef, $id)};
 
@@ -123,7 +123,7 @@ sub Send {
     my $component = new Bugzilla::Component($values{component_id});
     $values{component} = $component->name;
 
-    my ($start, $end) = ($values{start}, $values{end});
+    my ($start, $end) = ($values{start_time}, $values{end_time});
 
     # User IDs of people in various roles. More than one person can 'have' a 
     # role, if the person in that role has changed, or people are watching.

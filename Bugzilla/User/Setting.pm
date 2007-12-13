@@ -233,9 +233,8 @@ sub set_default {
 sub _setting_exists {
     my ($setting_name) = @_;
     my $dbh = Bugzilla->dbh;
-    my $sth = $dbh->prepare("SELECT name FROM setting WHERE name = ?");
-    $sth->execute($setting_name);
-    return ($sth->rows) ? 1 : 0;
+    return $dbh->selectrow_arrayref(
+        "SELECT 1 FROM setting WHERE name = ?", undef, $setting_name) || 0;
 }
 
 

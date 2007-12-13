@@ -421,8 +421,14 @@ sub bz_setup_database {
     $self->do("CREATE OR REPLACE FUNCTION NOW "
               . " RETURN DATE IS BEGIN RETURN SYSDATE; END;");
     # Create a WORLD_LEXER named BZ_LEX for multilingual fulltext search
-    $self->do("BEGIN CTX_DDL.CREATE_PREFERENCE
+    my $lexer = $self->selectcol_arrayref(
+       "SELECT pre_name FROM CTXSYS.CTX_PREFERENCES WHERE pre_name = ? AND
+          pre_owner = ?",
+          undef,'BZ_LEX',uc(Bugzilla->localconfig->{db_user}));
+    if(!@$lexer) {
+       $self->do("BEGIN CTX_DDL.CREATE_PREFERENCE
                         ('BZ_LEX', 'WORLD_LEXER'); END;");
+    }
 
     $self->SUPER::bz_setup_database(@_);
 }

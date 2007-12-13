@@ -193,9 +193,9 @@ sub get_alter_column_ddl {
     return @statements;
 }
 
-sub _get_drop_fk_sql {
-    my ($self, $table, $column, $old_def) = @_;
-    my $fk_name = $self->_get_fk_name($table, $column, $old_def->{REFERENCES});
+sub get_drop_fk_sql {
+    my ($self, $table, $column, $references) = @_;
+    my $fk_name = $self->_get_fk_name($table, $column, $references);
     my @sql = ("ALTER TABLE $table DROP FOREIGN KEY $fk_name");
     my $dbh = Bugzilla->dbh;
 

@@ -406,7 +406,30 @@ sub quote_identifier {
      return $id;
 }
 
+#####################################################################
+# Protected "Real Database" Schema Information Methods
+#####################################################################
 
+sub bz_table_columns_real {
+    my ($self, $table) = @_;
+    $table = uc($table);
+    my @cols = $self->SUPER::bz_table_columns_real($table);
+    return map { lc($_) } @cols;
+}
+
+sub bz_table_list_real {
+    my ($self) = @_;
+    # Oracle only accepts the username in uppercase.
+    my $db_user = uc(Bugzilla->localconfig->{db_user});
+    my $table_sth = $self->table_info(undef, $db_user, undef, "TABLE");
+    my @tables = @{$self->selectcol_arrayref($table_sth, { Columns => [3] })};
+    # Oracle returns uppercase table names, but Bugzilla expects lowercase
+    # names.
+    @tables = map { lc($_) } @tables;
+    # Oracle has certain tables that start with DR$_IDX.
+    @tables = grep { $_ !~ /^dr\$/ } @tables;
+    return @tables;
+}
 
 #####################################################################
 # Custom Database Setup

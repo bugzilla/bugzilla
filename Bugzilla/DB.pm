@@ -504,6 +504,19 @@ sub bz_setup_foreign_keys {
     }
 }
 
+# This is used by contrib/bzdbcopy.pl, mostly.
+sub bz_drop_foreign_keys {
+    my ($self) = @_;
+
+    my @tables = $self->_bz_real_schema->get_table_list();
+    foreach my $table (@tables) {
+        my @columns = $self->_bz_real_schema->get_table_columns($table);
+        foreach my $column (@columns) {
+            $self->bz_drop_fk($table, $column);
+        }
+    }
+}
+
 #####################################################################
 # Schema Modification Methods
 #####################################################################
@@ -747,6 +760,24 @@ sub bz_drop_column {
         $self->_bz_real_schema->delete_column($table, $column);
         $self->_bz_store_real_schema;
     }
+}
+
+sub bz_drop_fk {
+    my ($self, $table, $column) = @_;
+
+    my $col_def = $self->bz_column_info($table, $column);
+    if ($col_def && exists $col_def->{REFERENCES}) {
+        my $def = $col_def->{REFERENCES};
+        print get_text('install_fk_drop',
+                       { table => $table, column => $column, fk => $def })
+            . "\n" if Bugzilla->usage_mode == USAGE_MODE_CMDLINE;
+        my @sql = $self->_bz_real_schema->get_drop_fk_sql($table,$column,$def);
+        $self->do($_) foreach @sql;
+        delete $col_def->{REFERENCES};
+        $self->_bz_real_schema->set_column($table, $column, $col_def);
+        $self->_bz_store_real_schema;
+    }
+
 }
 
 sub bz_drop_index {

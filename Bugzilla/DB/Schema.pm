@@ -1533,9 +1533,9 @@ sub get_add_fk_sql {
     return ("ALTER TABLE $table ADD $fk_string");
 }
 
-sub _get_drop_fk_sql { 
-    my ($self, $table, $column, $old_def) = @_;
-    my $fk_name = $self->_get_fk_name($table, $column, $old_def->{REFERENCES});
+sub get_drop_fk_sql { 
+    my ($self, $table, $column, $references) = @_;
+    my $fk_name = $self->_get_fk_name($table, $column, $references);
 
     return ("ALTER TABLE $table DROP CONSTRAINT $fk_name");
 }

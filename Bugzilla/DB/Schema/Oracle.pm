@@ -93,7 +93,7 @@ sub get_table_ddl {
         }
         # Create sequences and triggers to emulate SERIAL datatypes.
         if ( $field_info->{TYPE} =~ /SERIAL/i ) {
-            push (@ddl, _get_create_seq_ddl($table, $field_name));
+            push (@ddl, $self->_get_create_seq_ddl($table, $field_name));
         }
     }
     return @ddl;
@@ -140,22 +140,34 @@ sub get_fk_ddl {
     $fk_string    = $fk_string . "     ON DELETE $delete" if $delete; 
     
     if ( $update =~ /CASCADE/i ){
-        my $tr_str = "CREATE OR REPLACE TRIGGER ". $table . "_uc"
+        my $tr_str = "CREATE OR REPLACE TRIGGER ${fk_name}_UC"
                      . " AFTER  UPDATE  ON ". $table
                      . " REFERENCING "
                      . " NEW AS NEW "
                      . " OLD AS OLD "
                      . " FOR EACH ROW "
                      . " BEGIN "
-                     . "     UPDATE ". $to_table
-                     . "     SET ". $to_column . " = :NEW.". $column
-                     . "     WHERE ". $to_column . " = :OLD.". $column . ";"
-                     . " END ". $table . "_uc;";
+                     . "     UPDATE $to_table"
+                     . "        SET $to_column = :NEW.$column"
+                     . "      WHERE $to_column = :OLD.$column;"
+                     . " END ${fk_name}_UC;";
         my $dbh = Bugzilla->dbh; 
         $dbh->do($tr_str);      
     }
 
     return $fk_string;
+}
+
+sub get_drop_fk_sql {
+    my $self = shift;
+    my ($table, $column, $references) = @_;
+    my $fk_name = $self->_get_fk_name(@_);
+    my @sql;
+    if (!$references->{UPDATE} || $references->{UPDATE} =~ /CASCADE/i) {
+        push(@sql, "DROP TRIGGER ${fk_name}_uc");
+    }
+    push(@sql, $self->SUPER::get_drop_fk_sql(@_));
+    return @sql;
 }
 
 sub _get_fk_name {
@@ -185,12 +197,13 @@ sub _get_notnull_trigger_ddl {
 }
 
 sub _get_create_seq_ddl {
-     my ($table, $column) = @_;
+     my ($self, $table, $column, $start_with) = @_;
+     $start_with ||= 1;
      my @ddl;
      my $seq_name = "${table}_${column}_SEQ";
      my $seq_sql = "CREATE SEQUENCE $seq_name "
                    . " INCREMENT BY 1 "
-                   . " START WITH 1 "
+                   . " START WITH $start_with "
                    . " NOMAXVALUE "
                    . " NOCYCLE "
                    . " NOCACHE";

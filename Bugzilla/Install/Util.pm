@@ -80,7 +80,7 @@ sub indicate_progress {
     my $every   = $params->{every} || 1;
 
     print "." if !($current % $every);
-    if ($current % ($every * 60) == 0) {
+    if ($current == $total || $current % ($every * 60) == 0) {
         print "$current/$total (" . int($current * 100 / $total) . "%)\n";
     }
 }

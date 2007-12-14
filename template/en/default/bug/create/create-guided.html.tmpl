@@ -209,6 +209,11 @@ function PutDescription() {
           <td valign="top">
             <select name="component" id="component"
                     size="5" onchange="PutDescription()">
+              [% IF NOT default.component_ %]
+                [%# Various b.m.o. products have a "General" component,
+                    which is a useful default. %]
+                [% default.component_ = "General" %]
+              [% END %]
               [% FOREACH c = product.components %]
                 <option value="[% c.name FILTER html %]"
                   [% " selected=\"selected\"" IF c.name == default.component_ %]>

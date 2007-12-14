@@ -57,7 +57,15 @@ sub MessageToMTA {
 
     my $email = ref($msg) ? $msg : Email::MIME->new($msg);
     foreach my $part ($email->parts) {
-        $part->charset_set('UTF-8') if Bugzilla->params->{'utf8'};
+        if (Bugzilla->params->{'utf8'}) {
+            $part->charset_set('UTF-8');
+            # encoding_set works only with bytes, not with utf8 strings.
+            my $raw = $part->body_raw;
+            if (utf8::is_utf8($raw)) {
+                utf8::encode($raw);
+                $part->body_set($raw);
+            }
+        }
         $part->encoding_set('quoted-printable') if !is_7bit_clean($part->body);
     }
 

@@ -33,6 +33,7 @@
     checking_dbd      => 'Checking available perl DBD modules...',
     checking_optional => 'The following Perl modules are optional:',
     checking_modules  => 'Checking perl modules...',
+    done => 'done.',
     header => "* This is Bugzilla ##bz_ver## on perl ##perl_ver##\n"
             . "* Running on ##os_name## ##os_ver##",
     install_all => <<EOT,
@@ -55,6 +56,8 @@ EOT
     module_not_found => "not found",
     module_ok => 'ok',
     module_unknown_version => "found unknown version",
+    template_precompile   => "Precompiling templates...",
+    template_removing_dir => "Removing existing compiled templates...",
 );
 
 1;

@@ -36,7 +36,7 @@ use strict;
 
 use Bugzilla::Constants;
 use Bugzilla::Install::Requirements;
-use Bugzilla::Install::Util qw(template_include_path);
+use Bugzilla::Install::Util qw(install_string template_include_path);
 use Bugzilla::Util;
 use Bugzilla::User;
 use Bugzilla::Error;
@@ -730,7 +730,7 @@ sub precompile_templates {
     # Remove the compiled templates.
     my $datadir = bz_locations()->{'datadir'};
     if (-e "$datadir/template") {
-        print "Removing existing compiled templates ...\n" if $output;
+        print install_string('template_removing_dir') . "\n" if $output;
 
         # XXX This frequently fails if the webserver made the files, because
         # then the webserver owns the directories. We could fix that by
@@ -746,7 +746,7 @@ sub precompile_templates {
         }
     }
 
-    print "Precompiling templates...\n" if $output;
+    print install_string('template_precompile') if $output;
 
     my $templatedir = bz_locations()->{'templatedir'};
     # Don't hang on templates which use the CGI library
@@ -803,6 +803,8 @@ sub precompile_templates {
 
     # If anything created a Template object before now, clear it out.
     delete Bugzilla->request_cache->{template};
+
+    print install_string('done') . "\n" if $output;
 }
 
 # Helper for precompile_templates

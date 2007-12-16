@@ -1628,7 +1628,7 @@ Abstract method, should be overridden by database specific code.
 
 =item C<$limit> - number of rows to return from query (scalar)
 
-=item C<$offset> - number of rows to skip prior counting (scalar)
+=item C<$offset> - number of rows to skip before counting (scalar)
 
 =back
 

@@ -38,7 +38,7 @@ use base qw(Exporter);
                              i_am_cgi get_netaddr correct_urlbase
                              lsearch
                              diff_arrays diff_strings
-                             trim wrap_comment find_wrap_point
+                             trim wrap_hard wrap_comment find_wrap_point
                              format_time format_time_decimal validate_date
                              validate_time
                              file_mod_time is_7bit_clean
@@ -337,6 +337,17 @@ sub find_wrap_point {
         }
     }
     return $wrappoint;
+}
+
+sub wrap_hard {
+    my ($string, $columns) = @_;
+    local $Text::Wrap::columns = $columns;
+    local $Text::Wrap::unexpand = 0;
+    local $Text::Wrap::huge = 'wrap';
+    
+    my $wrapped = wrap('', '', $string);
+    chomp($wrapped);
+    return $wrapped;
 }
 
 sub format_time {
@@ -738,6 +749,11 @@ and returns what items were removed from or added to the new one,
 compared to the old one. Returns a list, where the first entry is a scalar
 containing removed items, and the second entry is a scalar containing added
 items.
+
+=item C<wrap_hard($string, $size)>
+
+Wraps a string, so that a line is I<never> longer than C<$size>.
+Returns the string, wrapped.
 
 =item C<wrap_comment($comment)>
 

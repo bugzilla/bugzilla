@@ -46,6 +46,11 @@ use Bugzilla::Mailer;
 use Date::Parse;
 use Date::Format;
 
+use constant FORMAT_TRIPLE => "%19s|%-28s|%-28s";
+use constant FORMAT_3_SIZE => [19,28,28];
+use constant FORMAT_DOUBLE => "%19s %-55s";
+use constant FORMAT_2_SIZE => [19,55];
+
 use constant BIT_DIRECT    => 1;
 use constant BIT_WATCHING  => 2;
 
@@ -60,25 +65,34 @@ use constant REL_NAMES => {
     REL_GLOBAL_WATCHER, "GlobalWatcher"
 };
 
-sub FormatTriple {
-    my ($a, $b, $c) = (@_);
-    $^A = "";
-    my $temp = formline << 'END', $a, $b, $c;
-^>>>>>>>>>>>>>>>>>>|^<<<<<<<<<<<<<<<<<<<<<<<<<<<|^<<<<<<<<<<<<<<<<<<<<<<<<<<<~~
-END
-    ; # This semicolon appeases my emacs editor macros. :-)
-    return $^A;
+# We use this instead of format because format doesn't deal well with
+# multi-byte languages.
+sub multiline_sprintf {
+    my ($format, $args, $sizes) = @_;
+    my @parts;
+    my @my_sizes = @$sizes; # Copy this so we don't modify the input array.
+    while (my $string = shift @$args) {
+        my $size = shift @my_sizes;
+        my @pieces = split("\n", wrap_hard($string, $size));
+        push(@parts, \@pieces);
+    }
+
+    my $formatted;
+    while (1) {
+        # Get the first item of each part.
+        my @line = map { shift @$_ } @parts;
+        # If they're all undef, we're done.
+        last if !grep { defined $_ } @line;
+        # Make any single undef item into ''
+        @line = map { defined $_ ? $_ : '' } @line;
+        # And append a formatted line
+        $formatted .= sprintf("$format\n", @line);
+    }
+    return $formatted;
 }
-    
-sub FormatDouble {
-    my ($a, $b) = (@_);
-    $a .= ":";
-    $^A = "";
-    my $temp = formline << 'END', $a, $b;
-^>>>>>>>>>>>>>>>>>> ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<~~
-END
-    ; # This semicolon appeases my emacs editor macros. :-)
-    return $^A;
+
+sub three_columns {
+    return multiline_sprintf(FORMAT_TRIPLE, \@_, FORMAT_3_SIZE);
 }
 
 # This is a bit of a hack, basically keeping the old system()
@@ -232,7 +246,7 @@ sub Send {
             $lastwho = $who;
             $fullwho = $whoname ? "$whoname <$who>" : $who;
             $diffheader = "\n$fullwho changed:\n\n";
-            $diffheader .= FormatTriple("What    ", "Removed", "Added");
+            $diffheader .= three_columns("What    ", "Removed", "Added");
             $diffheader .= ('-' x 76) . "\n";
         }
         $what =~ s/^(Attachment )?/Attachment #$attachid / if $attachid;
@@ -249,7 +263,7 @@ sub Send {
                 'SELECT isprivate FROM attachments WHERE attach_id = ?',
                 undef, ($attachid));
         }
-        $difftext = FormatTriple($what, $old, $new);
+        $difftext = three_columns($what, $old, $new);
         $diffpart->{'header'} = $diffheader;
         $diffpart->{'fieldname'} = $fieldname;
         $diffpart->{'text'} = $difftext;
@@ -303,11 +317,11 @@ sub Send {
                   "\nBug $id depends on bug $depbug, which changed state.\n\n" .
                   "Bug $depbug Summary: $summary\n" .
                   "${urlbase}show_bug.cgi?id=$depbug\n\n";
-                $thisdiff .= FormatTriple("What    ", "Old Value", "New Value");
+                $thisdiff .= three_columns("What    ", "Old Value", "New Value");
                 $thisdiff .= ('-' x 76) . "\n";
                 $interestingchange = 0;
             }
-            $thisdiff .= FormatTriple($fielddescription{$what}, $old, $new);
+            $thisdiff .= three_columns($fielddescription{$what}, $old, $new);
             if ($what eq 'bug_status'
                 && is_open_state($old) ne is_open_state($new))
             {
@@ -546,7 +560,8 @@ sub sendMail {
              $user->groups->{Bugzilla->params->{'timetrackinggroup'}}) {
 
             my $desc = $fielddescription{$f};
-            $head .= FormatDouble($desc, $value);
+            $head .= multiline_sprintf(FORMAT_DOUBLE, ["$desc:", $value], 
+                                       FORMAT_2_SIZE);
         }
       }
     }

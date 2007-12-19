@@ -225,12 +225,6 @@ sub OPTIONAL_MODULES {
         version => '3.11',
         feature => 'mod_perl'
     },
-    {
-        package => 'Apache-DBI',
-        module  => 'Apache::DBI',
-        version => '0.96',
-        feature => 'mod_perl'
-    },
     );
 
     my $all_modules = _get_extension_requirements(

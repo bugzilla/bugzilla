@@ -28,7 +28,6 @@ use strict;
 # startup, so we always specify () after using any module in this
 # file.
 
-use Apache::DBI ();
 use Apache2::ServerUtil;
 use Apache2::SizeLimit;
 use ModPerl::RegistryLoader ();

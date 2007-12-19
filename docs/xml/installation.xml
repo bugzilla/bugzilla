@@ -1,5 +1,5 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"> -->
-<!-- $Id: installation.xml,v 1.136.2.6 2007/10/16 09:57:01 justdave%bugzilla.org Exp $ -->
+<!-- $Id: installation.xml,v 1.136.2.7 2007/12/19 00:43:20 mkanat%bugzilla.org Exp $ -->
 <chapter id="installing-bugzilla">
   <title>Installing Bugzilla</title>
 
@@ -468,12 +468,6 @@
           </para>
         </listitem>
 
-        <listitem>
-          <para>
-            Apache::DBI
-            (&min-apache-dbi-ver;) for mod_perl2
-          </para>
-        </listitem>
       </orderedlist>
       </para>
 
@@ -650,9 +644,6 @@
       <para>Bugzilla also requires a more up-to-date version of the CGI
       perl module to be installed, version &min-mp-cgi-ver; as opposed to &min-cgi-ver;
       </para>
-      
-      <para>Finally, Bugzilla also requires <literal>Apache::DBI</literal>
-      (&min-apache-dbi-ver;) to be installed as well.</para>
     </section>
   </section>
   

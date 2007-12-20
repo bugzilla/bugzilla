@@ -293,6 +293,13 @@ sub DuplicateUserConfirm {
     exit;
 }
 
+my @set_fields = qw(op_sys rep_platform priority bug_severity
+                    component target_milestone version
+                    bug_file_loc status_whiteboard short_desc
+                    deadline remaining_time estimated_time);
+push(@set_fields, 'assigned_to') if !$cgi->param('set_default_assignee');
+push(@set_fields, 'qa_contact')  if !$cgi->param('set_default_qa_contact');
+
 my %methods = (
     bug_severity => 'set_severity',
     rep_platform => 'set_platform',
@@ -303,96 +310,18 @@ foreach my $b (@bug_objects) {
     # Component, target_milestone, and version are in here just in case
     # the 'product' field wasn't defined in the CGI. It doesn't hurt to set
     # them twice.
-    foreach my $field_name (qw(op_sys rep_platform priority bug_severity
-                               component target_milestone version
-                               bug_file_loc status_whiteboard short_desc
-                               deadline remaining_time estimated_time))
-    {
+    foreach my $field_name (@set_fields) {
         if (should_set($field_name)) {
             my $method = $methods{$field_name};
             $method ||= "set_" . $field_name;
             $b->$method($cgi->param($field_name));
         }
     }
+    $b->reset_assigned_to if $cgi->param('set_default_assignee');
+    $b->reset_qa_contact  if $cgi->param('set_default_qa_contact');
 }
 
 my $action = trim($cgi->param('action') || '');
-
-if ($action eq Bugzilla->params->{'move-button-text'}) {
-    Bugzilla->params->{'move-enabled'} || ThrowUserError("move_bugs_disabled");
-
-    $user->is_mover || ThrowUserError("auth_failure", {action => 'move',
-                                                       object => 'bugs'});
-
-    my @multi_select_locks  = map {'bug_' . $_->name . " WRITE"}
-        Bugzilla->get_fields({ custom => 1, type => FIELD_TYPE_MULTI_SELECT,
-                               obsolete => 0 });
-
-    $dbh->bz_lock_tables('bugs WRITE', 'bugs_activity WRITE', 'duplicates WRITE',
-                         'longdescs WRITE', 'profiles READ', 'groups READ',
-                         'bug_group_map READ', 'group_group_map READ',
-                         'user_group_map READ', 'classifications READ',
-                         'products READ', 'components READ', 'votes READ',
-                         'cc READ', 'fielddefs READ', 'bug_status READ',
-                         'status_workflow READ', 'resolution READ', @multi_select_locks);
-
-    # First update all moved bugs.
-    foreach my $bug (@bug_objects) {
-        $bug->add_comment(scalar $cgi->param('comment'),
-                          { type => CMT_MOVED_TO, extra_data => $user->login });
-    }
-    # Don't export the new status and resolution. We want the current ones.
-    local $Storable::forgive_me = 1;
-    my $bugs = dclone(\@bug_objects);
-    foreach my $bug (@bug_objects) {
-        my ($status, $resolution) = $bug->get_new_status_and_resolution('move');
-        $bug->set_status($status);
-        $bug->set_resolution($resolution);
-    }
-    $_->update() foreach @bug_objects;
-    $dbh->bz_unlock_tables();
-
-    # Now send emails.
-    foreach my $id (@idlist) {
-        $vars->{'mailrecipients'} = { 'changer' => $user->login };
-        $vars->{'id'} = $id;
-        $vars->{'type'} = "move";
-        send_results($id, $vars);
-    }
-    # Prepare and send all data about these bugs to the new database
-    my $to = Bugzilla->params->{'move-to-address'};
-    $to =~ s/@/\@/;
-    my $from = Bugzilla->params->{'moved-from-address'};
-    $from =~ s/@/\@/;
-    my $msg = "To: $to\n";
-    $msg .= "From: Bugzilla <" . $from . ">\n";
-    $msg .= "Subject: Moving bug(s) " . join(', ', @idlist) . "\n\n";
-
-    my @fieldlist = (Bugzilla::Bug->fields, 'group', 'long_desc',
-                     'attachment', 'attachmentdata');
-    my %displayfields;
-    foreach (@fieldlist) {
-        $displayfields{$_} = 1;
-    }
-
-    $template->process("bug/show.xml.tmpl", { bugs => $bugs,
-                                              displayfields => \%displayfields,
-                                            }, \$msg)
-      || ThrowTemplateError($template->error());
-
-    $msg .= "\n";
-    MessageToMTA($msg);
-
-    # End the response page.
-    unless (Bugzilla->usage_mode == USAGE_MODE_EMAIL) {
-        $template->process("bug/navigate.html.tmpl", $vars)
-            || ThrowTemplateError($template->error());
-        $template->process("global/footer.html.tmpl", $vars)
-            || ThrowTemplateError($template->error());
-    }
-    exit;
-}
-
 
 $::query = "UPDATE bugs SET";
 $::comma = "";
@@ -498,82 +427,92 @@ if (defined $cgi->param('newcc')
 foreach my $b (@bug_objects) {
     $b->remove_cc($_) foreach @cc_remove;
     $b->add_cc($_) foreach @cc_add;
-}
-
-# Store the new assignee and QA contact IDs (if any). This is the
-# only way to keep these informations when bugs are reassigned by
-# component as $cgi->param('assigned_to') and $cgi->param('qa_contact')
-# are not the right fields to look at.
-# If the assignee or qacontact is changed, the new one is checked when
-# changed information is validated.  If not, then the unchanged assignee
-# or qacontact may have to be validated later.
-
-my $assignee;
-my $qacontact;
-my $qacontact_checked = 0;
-my $assignee_checked = 0;
-
-my %usercache = ();
-
-if (should_set('assigned_to') && !$cgi->param('set_default_assignee')) {
-    my $name = trim($cgi->param('assigned_to'));
-    if ($name ne "") {
-        $assignee = login_to_id($name, THROW_ERROR);
-        if (Bugzilla->params->{"strict_isolation"}) {
-            $usercache{$assignee} ||= Bugzilla::User->new($assignee);
-            my $assign_user = $usercache{$assignee};
-            foreach my $product_id (@newprod_ids) {
-                if (!$assign_user->can_edit_product($product_id)) {
-                    my $product_name = Bugzilla::Product->new($product_id)->name;
-                    ThrowUserError('invalid_user_group',
-                                      {'users'   => $assign_user->login,
-                                       'product' => $product_name,
-                                       'bug_id' => (scalar(@idlist) > 1)
-                                                     ? undef : $idlist[0]
-                                      });
-                }
-            }
-        }
-    } else {
-        ThrowUserError("reassign_to_empty");
-    }
-    DoComma();
-    $::query .= "assigned_to = ?";
-    push(@values, $assignee);
-    $assignee_checked = 1;
-};
-
-if (should_set('qa_contact') && !$cgi->param('set_default_qa_contact')) {
-    my $name = trim($cgi->param('qa_contact'));
-    $qacontact = login_to_id($name, THROW_ERROR) if ($name ne "");
-    if ($qacontact && Bugzilla->params->{"strict_isolation"}
-        && !(defined $cgi->param('id') && $bug->qa_contact
-             && $qacontact == $bug->qa_contact->id))
-    {
-            $usercache{$qacontact} ||= Bugzilla::User->new($qacontact);
-            my $qa_user = $usercache{$qacontact};
-            foreach my $product_id (@newprod_ids) {
-                if (!$qa_user->can_edit_product($product_id)) {
-                    my $product_name = Bugzilla::Product->new($product_id)->name;
-                    ThrowUserError('invalid_user_group',
-                                      {'users'   => $qa_user->login,
-                                       'product' => $product_name,
-                                       'bug_id' => (scalar(@idlist) > 1)
-                                                     ? undef : $idlist[0]
-                                      });
-                }
-            }
-    }
-    $qacontact_checked = 1;
-    DoComma();
-    if($qacontact) {
-        $::query .= "qa_contact = ?";
-        push(@values, $qacontact);
-    }
-    else {
-        $::query .= "qa_contact = NULL";
+    # Theoretically you could move a product without ever specifying
+    # a new assignee or qa_contact, or adding/removing any CCs. So,
+    # we have to check that the current assignee, qa, and CCs are still
+    # valid if we've switched products, under strict_isolation. We can only
+    # do that here. There ought to be some better way to do this,
+    # architecturally, but I haven't come up with it.
+    if ($product_change) {
+        $b->_check_strict_isolation();
     }
 }
+
+if ($action eq Bugzilla->params->{'move-button-text'}) {
+    Bugzilla->params->{'move-enabled'} || ThrowUserError("move_bugs_disabled");
+
+    $user->is_mover || ThrowUserError("auth_failure", {action => 'move',
+                                                       object => 'bugs'});
+
+    my @multi_select_locks  = map {'bug_' . $_->name . " WRITE"}
+        Bugzilla->get_fields({ custom => 1, type => FIELD_TYPE_MULTI_SELECT,
+                               obsolete => 0 });
+
+    $dbh->bz_lock_tables('bugs WRITE', 'bugs_activity WRITE', 'duplicates WRITE',
+                         'longdescs WRITE', 'profiles READ', 'groups READ',
+                         'bug_group_map READ', 'group_group_map READ',
+                         'user_group_map READ', 'classifications READ',
+                         'products READ', 'components READ', 'votes READ',
+                         'cc READ', 'fielddefs READ', 'bug_status READ',
+                         'status_workflow READ', 'resolution READ', @multi_select_locks);
+
+    # First update all moved bugs.
+    foreach my $bug (@bug_objects) {
+        $bug->add_comment(scalar $cgi->param('comment'),
+                          { type => CMT_MOVED_TO, extra_data => $user->login });
+    }
+    # Don't export the new status and resolution. We want the current ones.
+    local $Storable::forgive_me = 1;
+    my $bugs = dclone(\@bug_objects);
+    foreach my $bug (@bug_objects) {
+        my ($status, $resolution) = $bug->get_new_status_and_resolution('move');
+        $bug->set_status($status);
+        $bug->set_resolution($resolution);
+    }
+    $_->update() foreach @bug_objects;
+    $dbh->bz_unlock_tables();
+
+    # Now send emails.
+    foreach my $id (@idlist) {
+        $vars->{'mailrecipients'} = { 'changer' => $user->login };
+        $vars->{'id'} = $id;
+        $vars->{'type'} = "move";
+        send_results($id, $vars);
+    }
+    # Prepare and send all data about these bugs to the new database
+    my $to = Bugzilla->params->{'move-to-address'};
+    $to =~ s/@/\@/;
+    my $from = Bugzilla->params->{'moved-from-address'};
+    $from =~ s/@/\@/;
+    my $msg = "To: $to\n";
+    $msg .= "From: Bugzilla <" . $from . ">\n";
+    $msg .= "Subject: Moving bug(s) " . join(', ', @idlist) . "\n\n";
+
+    my @fieldlist = (Bugzilla::Bug->fields, 'group', 'long_desc',
+                     'attachment', 'attachmentdata');
+    my %displayfields;
+    foreach (@fieldlist) {
+        $displayfields{$_} = 1;
+    }
+
+    $template->process("bug/show.xml.tmpl", { bugs => $bugs,
+                                              displayfields => \%displayfields,
+                                            }, \$msg)
+      || ThrowTemplateError($template->error());
+
+    $msg .= "\n";
+    MessageToMTA($msg);
+
+    # End the response page.
+    unless (Bugzilla->usage_mode == USAGE_MODE_EMAIL) {
+        $template->process("bug/navigate.html.tmpl", $vars)
+            || ThrowTemplateError($template->error());
+        $template->process("global/footer.html.tmpl", $vars)
+            || ThrowTemplateError($template->error());
+    }
+    exit;
+}
+
 
 if (($cgi->param('set_default_assignee') || $cgi->param('set_default_qa_contact'))
     && Bugzilla->params->{'commentonreassignbycomponent'} && !comment_exists())
@@ -661,56 +600,6 @@ sub SnapShotBug {
 
 my $timestamp;
 
-if ($product_change && Bugzilla->params->{"strict_isolation"}) {
-    my $sth_cc = $dbh->prepare("SELECT who
-                                FROM cc
-                                WHERE bug_id = ?");
-    my $sth_bug = $dbh->prepare("SELECT assigned_to, qa_contact
-                                 FROM bugs
-                                 WHERE bug_id = ?");
-
-    foreach my $id (@idlist) {
-        $sth_cc->execute($id);
-        my @blocked_cc = ();
-        while (my ($pid) = $sth_cc->fetchrow_array) {
-            # Ignore deleted accounts. They will never get notification.
-            $usercache{$pid} ||= Bugzilla::User->new($pid) || next;
-            my $cc_user = $usercache{$pid};
-            if (!$cc_user->can_edit_product($product->id)) {
-                push (@blocked_cc, $cc_user->login);
-            }
-        }
-        if (scalar(@blocked_cc)) {
-            ThrowUserError('invalid_user_group',
-                              {'users'   => \@blocked_cc,
-                               'bug_id' => $id,
-                               'product' => $product->name});
-        }
-        $sth_bug->execute($id);
-        my ($assignee, $qacontact) = $sth_bug->fetchrow_array;
-        if (!$assignee_checked) {
-            $usercache{$assignee} ||= Bugzilla::User->new($assignee) || next;
-            my $assign_user = $usercache{$assignee};
-            if (!$assign_user->can_edit_product($product->id)) {
-                    ThrowUserError('invalid_user_group',
-                                      {'users'   => $assign_user->login,
-                                       'bug_id' => $id,
-                                       'product' => $product->name});
-            }
-        }
-        if (!$qacontact_checked && $qacontact) {
-            $usercache{$qacontact} ||= Bugzilla::User->new($qacontact) || next;
-            my $qa_user = $usercache{$qacontact};
-            if (!$qa_user->can_edit_product($product->id)) {
-                    ThrowUserError('invalid_user_group',
-                                      {'users'   => $qa_user->login,
-                                       'bug_id' => $id,
-                                       'product' => $product->name});
-            }
-        }
-    }
-}
-
 my %bug_objects = map {$_->id => $_} @bug_objects;
 
 # This loop iterates once for each bug to be processed (i.e. all the
@@ -748,35 +637,6 @@ foreach my $id (@idlist) {
     if ($everconfirmed ne $old_bug_obj->everconfirmed) {
         $query .= "$comma everconfirmed = ?";
         push(@bug_values, $everconfirmed);
-        $comma = ',';
-    }
-
-    # We have to check whether the bug is moved to another product
-    # and/or component before reassigning.
-    if ($cgi->param('set_default_assignee')) {
-        my $new_comp_id = $bug_objects{$id}->component_id;
-        $assignee = $dbh->selectrow_array('SELECT initialowner
-                                           FROM components
-                                           WHERE components.id = ?',
-                                           undef, $new_comp_id);
-        $query .= "$comma assigned_to = ?";
-        push(@bug_values, $assignee);
-        $comma = ',';
-    }
-
-    if (Bugzilla->params->{'useqacontact'} && $cgi->param('set_default_qa_contact')) {
-        my $new_comp_id = $bug_objects{$id}->component_id;
-        $qacontact = $dbh->selectrow_array('SELECT initialqacontact
-                                            FROM components
-                                            WHERE components.id = ?',
-                                            undef, $new_comp_id);
-        if ($qacontact) {
-            $query .= "$comma qa_contact = ?";
-            push(@bug_values, $qacontact);
-        }
-        else {
-            $query .= "$comma qa_contact = NULL";
-        }
         $comma = ',';
     }
 
@@ -826,14 +686,11 @@ foreach my $id (@idlist) {
     $formhash{'bug_status'} = $status;
     $formhash{'resolution'} = $resolution;
 
-    # We need to convert $newhash{'assigned_to'} and $newhash{'qa_contact'}
-    # email addresses into their corresponding IDs;
-    $formhash{'qa_contact'} = $qacontact if Bugzilla->params->{'useqacontact'};
-    $formhash{'assigned_to'} = $assignee;
-
     # This hash is required by Bug::check_can_change_field().
     my $cgi_hash = {'dontchange' => scalar $cgi->param('dontchange')};
     foreach my $col (@editable_bug_fields) {
+        # XXX - Ugly workaround which has to go away before 3.1.3.
+        next if ($col eq 'assigned_to' || $col eq 'qa_contact');
         if (exists $formhash{$col}
             && !$old_bug_obj->check_can_change_field($col, $oldhash{$col}, $formhash{$col},
                                                      \$PrivilegesRequired, $cgi_hash))
@@ -844,11 +701,6 @@ foreach my $id (@idlist) {
                 $vars->{'oldvalue'} = $old_bug_obj->component;
                 $vars->{'newvalue'} = $cgi->param('component');
                 $vars->{'field'} = 'component';
-            } elsif ($col eq 'assigned_to' || $col eq 'qa_contact') {
-                # Display the assignee or QA contact email address
-                $vars->{'oldvalue'} = user_id_to_login($oldhash{$col});
-                $vars->{'newvalue'} = user_id_to_login($formhash{$col});
-                $vars->{'field'} = $col;
             } else {
                 $vars->{'oldvalue'} = $oldhash{$col};
                 $vars->{'newvalue'} = $formhash{$col};
@@ -1034,11 +886,6 @@ foreach my $id (@idlist) {
         $newhash{$col} = $newvalues[$i];
         $i++;
     }
-    # for passing to Bugzilla::BugMail to ensure that when someone is removed
-    # from one of these fields, they get notified of that fact (if desired)
-    #
-    my $origOwner = "";
-    my $origQaContact = "";
 
     # $msgs will store emails which have to be sent to voters, if any.
     my $msgs;
@@ -1051,27 +898,10 @@ foreach my $id (@idlist) {
         my $new = shift @newvalues;
         if ($old ne $new) {
 
-            # save off the old value for passing to Bugzilla::BugMail so
-            # the old assignee can be notified
-            #
-            if ($col eq 'assigned_to') {
-                $old = ($old) ? user_id_to_login($old) : "";
-                $new = ($new) ? user_id_to_login($new) : "";
-                $origOwner = $old;
-            }
-
-            # ditto for the old qa contact
-            #
-            if ($col eq 'qa_contact') {
-                $old = ($old) ? user_id_to_login($old) : "";
-                $new = ($new) ? user_id_to_login($new) : "";
-                $origQaContact = $old;
-            }
-
             # Bugzilla::Bug does these for us already.
             next if grep($_ eq $col, qw(keywords op_sys rep_platform priority
                                         product_id component_id version
-                                        target_milestone
+                                        target_milestone assigned_to qa_contact
                                         bug_severity short_desc alias
                                         deadline estimated_time remaining_time
                                         reporter_accessible cclist_accessible
@@ -1147,10 +977,12 @@ foreach my $id (@idlist) {
     # all concerned users, including the bug itself, but also the
     # duplicated bug and dependent bugs, if any.
 
-    $vars->{'mailrecipients'} = { 'cc' => $cc_removed,
-                                  'owner' => $origOwner,
-                                  'qacontact' => $origQaContact,
-                                  'changer' => Bugzilla->user->login };
+    my $orig_qa = $old_bug_obj->qa_contact;
+    $vars->{'mailrecipients'} = {
+        cc        => $cc_removed,
+        owner     => $old_bug_obj->assigned_to->login,
+        qacontact => $orig_qa ? $orig_qa->login : '',
+        changer   => Bugzilla->user->login };
 
     $vars->{'id'} = $id;
     $vars->{'type'} = "bug";

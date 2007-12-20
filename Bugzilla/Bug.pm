@@ -74,6 +74,7 @@ sub DB_COLUMNS {
     my @custom_names = map {$_->name} @custom;
     return qw(
         alias
+        assigned_to
         bug_file_loc
         bug_id
         bug_severity
@@ -86,6 +87,7 @@ sub DB_COLUMNS {
         op_sys
         priority
         product_id
+        qa_contact
         remaining_time
         rep_platform
         reporter_accessible
@@ -95,9 +97,7 @@ sub DB_COLUMNS {
         target_milestone
         version
     ),
-    'assigned_to AS assigned_to_id',
     'reporter    AS reporter_id',
-    'qa_contact  AS qa_contact_id',
     $dbh->sql_date_format('creation_ts', '%Y.%m.%d %H:%i') . ' AS creation_ts',
     $dbh->sql_date_format('deadline', '%Y-%m-%d') . ' AS deadline',
     @custom_names;
@@ -158,8 +158,10 @@ sub VALIDATORS {
 };
 
 use constant UPDATE_VALIDATORS => {
+    assigned_to         => \&_check_assigned_to,
     bug_status          => \&_check_bug_status,
     cclist_accessible   => \&Bugzilla::Object::check_boolean,
+    qa_contact          => \&_check_qa_contact,
     reporter_accessible => \&Bugzilla::Object::check_boolean,
     resolution          => \&_check_resolution,
     target_milestone    => \&_check_target_milestone,
@@ -172,6 +174,7 @@ sub UPDATE_COLUMNS {
     my @custom_names = map {$_->name} @custom;
     my @columns = qw(
         alias
+        assigned_to
         cclist_accessible
         component_id
         deadline
@@ -183,6 +186,7 @@ sub UPDATE_COLUMNS {
         op_sys
         priority
         product_id
+        qa_contact
         remaining_time
         rep_platform
         reporter_accessible
@@ -452,9 +456,9 @@ sub run_create_validators {
     delete $params->{component};
 
     $params->{assigned_to} = 
-        $class->_check_assigned_to($component, $params->{assigned_to});
+        $class->_check_assigned_to($params->{assigned_to}, $component);
     $params->{qa_contact} =
-        $class->_check_qa_contact($component, $params->{qa_contact});
+        $class->_check_qa_contact($params->{qa_contact}, $component);
     $params->{cc} = $class->_check_cc($component, $params->{cc});
 
     # Callers cannot set Reporter, currently.
@@ -467,8 +471,8 @@ sub run_create_validators {
         $params->{remaining_time} = $params->{estimated_time};
     }
 
-    $class->_check_strict_isolation($product, $params->{cc},
-                                    $params->{assigned_to}, $params->{qa_contact});
+    $class->_check_strict_isolation($params->{cc}, $params->{assigned_to},
+                                    $params->{qa_contact}, $product);
 
     ($params->{dependson}, $params->{blocked}) = 
         $class->_check_dependencies($params->{dependson}, $params->{blocked},
@@ -544,6 +548,10 @@ sub update {
             $field =~ s/_id$//;
             $from  = $self->{"_old_${field}_name"};
             $to    = $self->$field;
+        }
+        if (grep ($_ eq $field, qw(qa_contact assigned_to))) {
+            $from = $old_bug->$field->login if $from;
+            $to   = $self->$field->login    if $to;
         }
         LogActivityEntry($self->id, $field, $from, $to, Bugzilla->user->id,
                          $delta_ts);
@@ -814,16 +822,28 @@ sub _check_alias {
 }
 
 sub _check_assigned_to {
-    my ($invocant, $component, $name) = @_;
+    my ($invocant, $assignee, $component) = @_;
     my $user = Bugzilla->user;
 
-    $name = trim($name);
     # Default assignee is the component owner.
     my $id;
-    if (!$user->in_group('editbugs', $component->product_id) || !$name) {
+    # If this is a new bug, you can only set the assignee if you have editbugs.
+    # If you didn't specify the assignee, we use the default assignee.
+    if (!ref $invocant
+        && (!$user->in_group('editbugs', $component->product_id) || !$assignee))
+    {
         $id = $component->default_assignee->id;
     } else {
-        $id = login_to_id($name, THROW_ERROR);
+        if (!ref $assignee) {
+            $assignee = trim($assignee);
+            # When updating a bug, assigned_to can't be empty.
+            ThrowUserError("reassign_to_empty") if ref $invocant && !$assignee;
+            $assignee = Bugzilla::User->check($assignee);
+        }
+        $id = $assignee->id;
+        # create() checks this another way, so we don't have to run this
+        # check during create().
+        $invocant->_check_strict_isolation_for_user($assignee) if ref $invocant;
     }
     return $id;
 }
@@ -1134,6 +1154,38 @@ sub _check_priority {
     return $priority;
 }
 
+sub _check_qa_contact {
+    my ($invocant, $qa_contact, $component) = @_;
+    $qa_contact = trim($qa_contact) if !ref $qa_contact;
+    
+    my $id;
+    if (!ref $invocant) {
+        # Bugs get no QA Contact on creation if useqacontact is off.
+        return undef if !Bugzilla->params->{useqacontact};
+        # Set the default QA Contact if one isn't specified or if the
+        # user doesn't have editbugs.
+        if (!Bugzilla->user->in_group('editbugs', $component->product_id)
+            || !$qa_contact)
+        {
+            $id = $component->default_qa_contact->id;
+        }
+    }
+    
+    # If a QA Contact was specified or if we're updating, check
+    # the QA Contact for validity.
+    if (!defined $id && $qa_contact) {
+        $qa_contact = Bugzilla::User->check($qa_contact) if !ref $qa_contact;
+        $id = $qa_contact->id;
+        # create() checks this another way, so we don't have to run this
+        # check during create().
+        $invocant->_check_strict_isolation_for_user($qa_contact)
+            if ref $invocant;
+    }
+
+    # "0" always means "undef", for QA Contact.
+    return $id || undef;
+}
+
 sub _check_remaining_time {
     return $_[0]->_check_time($_[1], 'remaining_time');
 }
@@ -1167,33 +1219,69 @@ sub _check_status_whiteboard { return defined $_[1] ? $_[1] : ''; }
 
 # Unlike other checkers, this one doesn't return anything.
 sub _check_strict_isolation {
-    my ($invocant, $product, $cc_ids, $assignee_id, $qa_contact_id) = @_;
-
+    my ($invocant, $ccs, $assignee, $qa_contact, $product) = @_;
     return unless Bugzilla->params->{'strict_isolation'};
 
-    my @related_users = @$cc_ids;
-    push(@related_users, $assignee_id);
+    if (ref $invocant) {
+        my $original = $invocant->new($invocant->id);
 
-    if (Bugzilla->params->{'useqacontact'} && $qa_contact_id) {
-        push(@related_users, $qa_contact_id);
+        # We only check people if they've been added. This way, if
+        # strict_isolation is turned on when there are invalid users
+        # on bugs, people can still add comments and so on.
+        my @old_cc = map { $_->id } @{$original->cc_users};
+        my @new_cc = map { $_->id } @{$invocant->cc_users};
+        my ($removed, $added) = diff_arrays(\@old_cc, \@new_cc);
+        $ccs = $added;
+        $assignee = $invocant->assigned_to
+            if $invocant->assigned_to->id != $original->assigned_to->id;
+        $qa_contact = $invocant->qa_contact
+            if $invocant->qa_contact->id != $original->qa_contact->id;
+        $product = $invocant->product;
     }
+
+    my @related_users = @$ccs;
+    push(@related_users, $assignee) if $assignee;
+
+    if (Bugzilla->params->{'useqacontact'} && $qa_contact) {
+        push(@related_users, $qa_contact);
+    }
+
+    @related_users = @{Bugzilla::User->new_from_list(\@related_users)}
+        if !ref $invocant;
 
     # For each unique user in @related_users...(assignee and qa_contact
     # could be duplicates of users in the CC list)
-    my %unique_users = map {$_ => 1} @related_users;
+    my %unique_users = map {$_->id => $_} @related_users;
     my @blocked_users;
-    foreach my $pid (keys %unique_users) {
-        my $related_user = Bugzilla::User->new($pid);
+    foreach my $id (keys %unique_users) {
+        my $related_user = $unique_users{$id};
         if (!$related_user->can_edit_product($product->id) ||
             !$related_user->can_see_product($product->id)) {
             push (@blocked_users, $related_user->login);
         }
     }
     if (scalar(@blocked_users)) {
-        ThrowUserError("invalid_user_group",
-            {'users' => \@blocked_users,
-             'new' => 1,
-             'product' => $product->name});
+        my %vars = ( users   => \@blocked_users,
+                     product => $product->name );
+        if (ref $invocant) {
+            $vars{'bug_id'} = $invocant->id;
+        }
+        else {
+            $vars{'new'} = 1;
+        }
+        ThrowUserError("invalid_user_group", \%vars);
+    }
+}
+
+# This is used by various set_ checkers, to make their code simpler.
+sub _check_strict_isolation_for_user {
+    my ($self, $user) = @_;
+    return unless Bugzilla->params->{"strict_isolation"};
+    if (!$user->can_edit_product($self->{product_id})) {
+        ThrowUserError('invalid_user_group',
+                       { users   => $user->login,
+                         product => $self->product,
+                         bug_id  => $self->id });
     }
 }
 
@@ -1221,25 +1309,6 @@ sub _check_time {
     $time = trim($time) || 0;
     ValidateTime($time, $field);
     return $time;
-}
-
-sub _check_qa_contact {
-    my ($invocant, $component, $name) = @_;
-    my $user = Bugzilla->user;
-
-    return undef unless Bugzilla->params->{'useqacontact'};
-
-    $name = trim($name);
-
-    my $id;
-    if (!$user->in_group('editbugs', $component->product_id) || !$name) {
-        # We want to insert NULL into the database if we get a 0.
-        $id = $component->default_qa_contact->id || undef;
-    } else {
-        $id = login_to_id($name, THROW_ERROR);
-    }
-
-    return $id;
 }
 
 sub _check_version {
@@ -1331,13 +1400,21 @@ sub fields {
 # To run check_can_change_field.
 sub _set_global_validator {
     my ($self, $value, $field) = @_;
-    my $current_value = $self->$field;
+    my $current = $self->$field;
     my $privs;
-    $self->check_can_change_field($field, $current_value, $value, \$privs)
-        || ThrowUserError('illegal_change', { field    => $field,
-                                              oldvalue => $current_value,
-                                              newvalue => $value,
-                                              privs    => $privs });
+    $current = $current->id if ref $current && $current->isa('Bugzilla::Object');
+    $value   = $value->id   if ref $value   && $value->isa('Bugzilla::Object');
+    my $can = $self->check_can_change_field($field, $current, $value, \$privs);
+    if (!$can) {
+        if ($field eq 'assigned_to' || $field eq 'qa_contact') {
+            $value   = user_id_to_login($value);
+            $current = user_id_to_login($current);
+        }
+        ThrowUserError('illegal_change', { field    => $field,
+                                           oldvalue => $current,
+                                           newvalue => $value,
+                                           privs    => $privs });
+    }
 }
 
 
@@ -1346,6 +1423,16 @@ sub _set_global_validator {
 #################
 
 sub set_alias { $_[0]->set('alias', $_[1]); }
+sub set_assigned_to {
+    my ($self, $value) = @_;
+    $self->set('assigned_to', $value);
+    delete $self->{'assigned_to_obj'};
+}
+sub reset_assigned_to {
+    my $self = shift;
+    my $comp = $self->component_obj;
+    $self->set_assigned_to($comp->default_assignee);
+}
 sub set_cclist_accessible { $_[0]->set('cclist_accessible', $_[1]); }
 sub set_comment_is_private {
     my ($self, $comment_id, $isprivate) = @_;
@@ -1505,6 +1592,16 @@ sub set_product {
     return $product_changed;
 }
 
+sub set_qa_contact {
+    my ($self, $value) = @_;
+    $self->set('qa_contact', $value);
+    delete $self->{'qa_contact_obj'};
+}
+sub reset_qa_contact {
+    my $self = shift;
+    my $comp = $self->component_obj;
+    $self->set_qa_contact($comp->default_qa_contact);
+}
 sub set_remaining_time { $_[0]->set('remaining_time', $_[1]); }
 # Used only when closing a bug or moving between closed states.
 sub _zero_remaining_time { $_[0]->{'remaining_time'} = 0; }
@@ -1512,9 +1609,9 @@ sub set_reporter_accessible { $_[0]->set('reporter_accessible', $_[1]); }
 sub set_resolution     { $_[0]->set('resolution',    $_[1]); }
 sub clear_resolution   { $_[0]->{'resolution'} = '' }
 sub set_severity       { $_[0]->set('bug_severity',  $_[1]); }
-sub set_status { 
+sub set_status {
     my ($self, $status) = @_;
-    $self->set('bug_status', $status); 
+    $self->set('bug_status', $status);
     # Check for the everconfirmed transition
     $self->_set_everconfirmed(1) if (is_open_state($status) && $status ne 'UNCONFIRMED');
 }
@@ -1537,14 +1634,7 @@ sub add_cc {
     return if !$user_or_name;
     my $user = ref $user_or_name ? $user_or_name
                                  : Bugzilla::User->check($user_or_name);
-
-    if (Bugzilla->params->{strict_isolation}
-        && !$user->can_edit_product($self->product_obj->id))
-    {
-        ThrowUserError('invalid_user_group', { users  => $user->login,
-                                               bug_id => $self->id });
-    }
-
+    $self->_check_strict_isolation_for_user($user);
     my $cc_users = $self->cc_users;
     push(@$cc_users, $user) if !grep($_->id == $user->id, @$cc_users);
 }
@@ -1729,10 +1819,10 @@ sub attachments {
 
 sub assigned_to {
     my ($self) = @_;
-    return $self->{'assigned_to'} if exists $self->{'assigned_to'};
-    $self->{'assigned_to_id'} = 0 if $self->{'error'};
-    $self->{'assigned_to'} = new Bugzilla::User($self->{'assigned_to_id'});
-    return $self->{'assigned_to'};
+    return $self->{'assigned_to_obj'} if exists $self->{'assigned_to_obj'};
+    $self->{'assigned_to'} = 0 if $self->{'error'};
+    $self->{'assigned_to_obj'} ||= new Bugzilla::User($self->{'assigned_to'});
+    return $self->{'assigned_to_obj'};
 }
 
 sub blocked {
@@ -1914,18 +2004,18 @@ sub product_obj {
 
 sub qa_contact {
     my ($self) = @_;
-    return $self->{'qa_contact'} if exists $self->{'qa_contact'};
+    return $self->{'qa_contact_obj'} if exists $self->{'qa_contact_obj'};
     return undef if $self->{'error'};
 
-    if (Bugzilla->params->{'useqacontact'} && $self->{'qa_contact_id'}) {
-        $self->{'qa_contact'} = new Bugzilla::User($self->{'qa_contact_id'});
+    if (Bugzilla->params->{'useqacontact'} && $self->{'qa_contact'}) {
+        $self->{'qa_contact_obj'} = new Bugzilla::User($self->{'qa_contact'});
     } else {
         # XXX - This is somewhat inconsistent with the assignee/reporter 
         # methods, which will return an empty User if they get a 0. 
         # However, we're keeping it this way now, for backwards-compatibility.
-        $self->{'qa_contact'} = undef;
+        $self->{'qa_contact_obj'} = undef;
     }
-    return $self->{'qa_contact'};
+    return $self->{'qa_contact_obj'};
 }
 
 sub reporter {
@@ -2065,10 +2155,10 @@ sub user {
 
     my $unknown_privileges = $user->in_group('editbugs', $prod_id);
     my $canedit = $unknown_privileges
-                  || $user->id == $self->{assigned_to_id}
+                  || $user->id == $self->{'assigned_to'}
                   || (Bugzilla->params->{'useqacontact'}
-                      && $self->{'qa_contact_id'}
-                      && $user->id == $self->{qa_contact_id});
+                      && $self->{'qa_contact'}
+                      && $user->id == $self->{'qa_contact'});
     my $canconfirm = $unknown_privileges
                      || $user->in_group('canconfirm', $prod_id);
     my $isreporter = $user->id
@@ -2991,14 +3081,14 @@ sub check_can_change_field {
     # Make sure that a valid bug ID has been given.
     if (!$self->{'error'}) {
         # Allow the assignee to change anything else.
-        if ($self->{'assigned_to_id'} == $user->id) {
+        if ($self->{'assigned_to'} == $user->id) {
             return 1;
         }
 
         # Allow the QA contact to change anything else.
         if (Bugzilla->params->{'useqacontact'}
-            && $self->{'qa_contact_id'}
-            && ($self->{'qa_contact_id'} == $user->id))
+            && $self->{'qa_contact'}
+            && ($self->{'qa_contact'} == $user->id))
         {
             return 1;
         }

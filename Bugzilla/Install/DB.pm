@@ -2948,8 +2948,9 @@ sub change_text_types {
         { TYPE => 'TINYTEXT', NOTNULL => 1 });
     $dbh->bz_alter_column('attachments', 'mimetype',
         { TYPE => 'TINYTEXT', NOTNULL => 1 });
+    # This also changes NULL to NOT NULL.
     $dbh->bz_alter_column('flagtypes', 'description',
-        { TYPE => 'MEDIUMTEXT', NOTNULL => 1 });
+        { TYPE => 'MEDIUMTEXT', NOTNULL => 1 }, '');
     $dbh->bz_alter_column('fielddefs', 'description',
         { TYPE => 'TINYTEXT', NOTNULL => 1 });
     $dbh->bz_alter_column('namedqueries', 'query',

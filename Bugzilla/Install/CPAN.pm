@@ -29,6 +29,7 @@ use Bugzilla::Install::Util qw(bin_loc install_string);
 use CPAN;
 use Cwd qw(abs_path);
 use File::Path qw(rmtree);
+use List::Util qw(shuffle);
 
 # We need the absolute path of ext_libpath, because CPAN chdirs around
 # and so we can't use a relative directory.
@@ -62,7 +63,7 @@ use constant CPAN_DEFAULTS => {
     unzip => bin_loc('unzip'),
     wget => bin_loc('wget'),
 
-    urllist => [qw(
+    urllist => [shuffle qw(
         http://cpan.pair.com/
         http://mirror.hiwaay.net/CPAN/
         ftp://ftp.dc.aleron.net/pub/CPAN/

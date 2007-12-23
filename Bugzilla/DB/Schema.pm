@@ -783,7 +783,7 @@ use constant ABSTRACT_SCHEMA => {
                                             DELETE => 'CASCADE'}},
             name         => {TYPE => 'varchar(64)', NOTNULL => 1},
             query        => {TYPE => 'LONGTEXT', NOTNULL => 1},
-            query_type   => {TYPE => 'BOOLEAN', NOTNULL => 1},
+            query_type   => {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 0},
         ],
         INDEXES => [
             namedqueries_userid_idx => {FIELDS => [qw(userid name)],

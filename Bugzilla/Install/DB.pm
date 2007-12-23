@@ -521,6 +521,10 @@ sub update_table_definitions {
     # 2007-09-09 LpSolit@gmail.com - Bug 99215
     _fix_attachment_modification_date();
 
+    # This had the wrong definition in DB::Schema.
+    $dbh->bz_alter_column('namedqueries', 'query_type',
+                          {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 0});
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################

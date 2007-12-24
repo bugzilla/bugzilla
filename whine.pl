@@ -469,7 +469,7 @@ sub run_queries {
                 push @{$thisquery->{'bugs'}}, $bug;
             }
         }
-        unless ($thisquery->{'onemailperbug'}) {
+        if (!$thisquery->{'onemailperbug'} && @{$thisquery->{'bugs'}}) {
             push @{$return_queries}, $thisquery;
         }
     }

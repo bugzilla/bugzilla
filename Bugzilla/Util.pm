@@ -476,8 +476,8 @@ sub validate_time {
     my $ts = str2time($time);
     if ($ts) {
         $time2 = time2str("%H:%M:%S", $ts);
-        if (trim($time) =~ /^\d\d:\d\d$/) {
-            $time .= ':00';
+        if ($time =~ /^(\d{1,2}):(\d\d)(?::(\d\d))?$/) {
+            $time = sprintf("%02d:%02d:%02d", $1, $2, $3 || 0);
         }
     }
     my $ret = ($ts && $time eq $time2);

@@ -85,7 +85,7 @@ function setFieldFromCalendar(type, args, date_field) {
 
     // We can't just write the date straight into the field, because there 
     // might already be a time there.
-    var timeRe = /(\d\d):(\d\d)(?::(\d\d))?/;
+    var timeRe = /\b(\d{1,2}):(\d\d)(?::(\d\d))?/;
     var currentTime = timeRe.exec(date_field.value);
     var d = new Date(setDate[0], setDate[1] - 1, setDate[2]);
     if (currentTime) {
@@ -104,9 +104,6 @@ function setFieldFromCalendar(type, args, date_field) {
     var dateStr = year + '-' + month  + '-' + day;
 
     if (currentTime) {
-        var hours = d.getHours();
-        if (hours < 10) hours = '0' + String(hours);
-        d.setHours(hours);
         var minutes = d.getMinutes();
         if (minutes < 10) minutes = '0' + String(minutes);
         var seconds = d.getSeconds();
@@ -114,7 +111,7 @@ function setFieldFromCalendar(type, args, date_field) {
             seconds = '0' + String(seconds);
         }
 
-        dateStr = dateStr + ' ' + hours + ':' + minutes;
+        dateStr = dateStr + ' ' + d.getHours() + ':' + minutes;
         if (seconds) dateStr = dateStr + ':' + seconds;
     }
 

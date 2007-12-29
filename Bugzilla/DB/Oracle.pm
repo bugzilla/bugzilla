@@ -79,6 +79,9 @@ sub new {
     $self->do("ALTER SESSION SET NLS_TIMESTAMP_FORMAT='YYYY-MM-DD HH24:MI:SS'");
     $self->do("ALTER SESSION SET NLS_LENGTH_SEMANTICS='CHAR'") 
         if Bugzilla->params->{'utf8'};
+    # To allow case insensitive query.
+    $self->do("ALTER SESSION SET NLS_COMP='LINGUISTIC'");
+    $self->do("ALTER SESSION SET NLS_SORT='BINARY_AI'");
     return $self;
 }
 

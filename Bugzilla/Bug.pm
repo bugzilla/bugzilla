@@ -1234,8 +1234,12 @@ sub _check_strict_isolation {
         $ccs = $added;
         $assignee = $invocant->assigned_to
             if $invocant->assigned_to->id != $original->assigned_to->id;
-        $qa_contact = $invocant->qa_contact
-            if $invocant->qa_contact->id != $original->qa_contact->id;
+        if ($invocant->qa_contact
+            && (!$original->qa_contact
+                || $invocant->qa_contact->id != $original->qa_contact->id))
+        {
+            $qa_contact = $invocant->qa_contact;
+        }
         $product = $invocant->product;
     }
 

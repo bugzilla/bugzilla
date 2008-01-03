@@ -1260,7 +1260,7 @@ sub _check_strict_isolation {
     foreach my $id (keys %unique_users) {
         my $related_user = $unique_users{$id};
         if (!$related_user->can_edit_product($product->id) ||
-            !$related_user->can_see_product($product->id)) {
+            !$related_user->can_see_product($product->name)) {
             push (@blocked_users, $related_user->login);
         }
     }

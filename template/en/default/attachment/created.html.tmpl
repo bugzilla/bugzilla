@@ -28,6 +28,9 @@
 
 [% PROCESS global/header.html.tmpl
   title = "Attachment $attachment.id added to $terms.Bug $attachment.bug_id"
+  javascript_urls = [ "js/util.js", "js/keyword-chooser.js", "js/field.js",
+                      "js/yui/yahoo-dom-event.js", "js/yui/calendar.js" ]
+  style_urls = [ "skins/standard/yui/calendar.css" ]
   doc_section = "bug_page.html"
 %]
 

@@ -140,6 +140,15 @@
                value="[% dontchange FILTER html %]"
                size="6">
       </td>
+      <th><label for="deadline">Deadline (YYYY-MM-DD):</label></th>
+      <td>
+        <input id="deadline"
+               name="deadline"
+               value="[% dontchange FILTER html %]"
+               size="10">
+      </td>
+    </tr>
+    <tr>
       <th><label for="remaining_time">Remaining Hours:</label></th>
       <td>
         <input id="remaining_time"
@@ -147,6 +156,8 @@
                value="[% dontchange FILTER html %]"
                size="6">
       </td>
+      <th>&nbsp;</th>
+      <td>&nbsp;</td>
     </tr>
   [% END %]
 

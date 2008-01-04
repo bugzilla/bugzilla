@@ -1406,8 +1406,15 @@ sub _set_global_validator {
     my ($self, $value, $field) = @_;
     my $current = $self->$field;
     my $privs;
-    $current = $current->id if ref $current && $current->isa('Bugzilla::Object');
-    $value   = $value->id   if ref $value   && $value->isa('Bugzilla::Object');
+
+    if (ref $current && ref($current) ne 'ARRAY'
+        && $current->isa('Bugzilla::Object')) {
+        $current = $current->id ;
+    }
+    if (ref $value && ref($value) ne 'ARRAY'
+        && $value->isa('Bugzilla::Object')) {
+        $value = $value->id ;
+    }
     my $can = $self->check_can_change_field($field, $current, $value, \$privs);
     if (!$can) {
         if ($field eq 'assigned_to' || $field eq 'qa_contact') {

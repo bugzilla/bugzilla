@@ -276,7 +276,7 @@ sub quicksearch {
                         # votes:xx ("at least xx votes")
                         addChart('votes', 'greaterthan', $1 - 1, $negate);
                     }
-                    elsif ($or_operand =~ /^([^\?]+\?)([^\?]*)$/) {
+                    elsif ($or_operand =~ /^(?:flag:)?([^\?]+\?)([^\?]*)$/) {
                         # Flag and requestee shortcut
                         addChart('flagtypes.name', 'substring', $1, $negate);
                         $chart++; $and = $or = 0; # Next chart for boolean AND

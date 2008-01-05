@@ -165,7 +165,8 @@ unless ($field) {
 }
 
 # At this point, the field is defined.
-$vars->{'field'} = FieldMustExist($field);
+my $field_obj = FieldMustExist($field);
+$vars->{'field'} = $field_obj;
 trick_taint($field);
 
 #
@@ -271,10 +272,18 @@ if ($action eq 'del') {
     trick_taint($value);
 
     # See if any bugs are still using this value.
-    $vars->{'bug_count'} = 
-        $dbh->selectrow_array("SELECT COUNT(*) FROM bugs WHERE $field = ?",
-                              undef, $value) || 0;
-    $vars->{'value_count'} = 
+    if ($field_obj->type != FIELD_TYPE_MULTI_SELECT) {
+        $vars->{'bug_count'} =
+            $dbh->selectrow_array("SELECT COUNT(*) FROM bugs WHERE $field = ?",
+                                  undef, $value);
+    }
+    else {
+        $vars->{'bug_count'} =
+            $dbh->selectrow_array("SELECT COUNT(*) FROM bug_$field WHERE value = ?",
+                                  undef, $value);
+    }
+
+    $vars->{'value_count'} =
         $dbh->selectrow_array("SELECT COUNT(*) FROM $field");
 
     $vars->{'value'} = $value;
@@ -319,15 +328,25 @@ if ($action eq 'delete') {
     $dbh->bz_start_transaction();
 
     # Check if there are any bugs that still have this value.
-    my $bug_ids = $dbh->selectcol_arrayref(
-        "SELECT bug_id FROM bugs WHERE $field = ?", undef, $value);
+    my $bug_count;
+    if ($field_obj->type != FIELD_TYPE_MULTI_SELECT) {
+        $bug_count =
+            $dbh->selectrow_array("SELECT COUNT(*) FROM bugs WHERE $field = ?",
+                                  undef, $value);
+    }
+    else {
+        $bug_count =
+            $dbh->selectrow_array("SELECT COUNT(*) FROM bug_$field WHERE value = ?",
+                                  undef, $value);
+    }
 
-    if (scalar(@$bug_ids)) {
+
+    if ($bug_count) {
         # You tried to delete a field that bugs are still using.
         # You can't just delete the bugs. That's ridiculous. 
         ThrowUserError("fieldvalue_still_has_bugs", 
                        { field => $field, value => $value,
-                         count => scalar(@$bug_ids) });
+                         count => $bug_count });
     }
 
     if ($field eq 'bug_status') {
@@ -435,8 +454,14 @@ if ($action eq 'update') {
         }
         trick_taint($value);
 
-        $dbh->do("UPDATE bugs SET $field = ? WHERE $field = ?",
-                 undef, $value, $valueold);
+        if ($field_obj->type != FIELD_TYPE_MULTI_SELECT) {
+            $dbh->do("UPDATE bugs SET $field = ? WHERE $field = ?",
+                     undef, $value, $valueold);
+        }
+        else {
+            $dbh->do("UPDATE bug_$field SET value = ? WHERE value = ?",
+                     undef, $value, $valueold);
+        }
 
         $dbh->do("UPDATE $field SET value = ? WHERE value = ?",
                  undef, $value, $valueold);

@@ -225,7 +225,7 @@ if ($action eq 'new') {
     }
     if (ValueExists($field, $value)) {
         ThrowUserError('fieldvalue_already_exists',
-                       {'field' => $field,
+                       {'field' => $field_obj,
                         'value' => $value});
     }
     if ($field eq 'bug_status'

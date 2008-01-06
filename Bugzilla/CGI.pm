@@ -62,13 +62,6 @@ sub new {
 
     my $self = $class->SUPER::new(@args);
 
-    if (Bugzilla->error_mode eq ERROR_MODE_WEBPAGE) {
-        # This happens here so that command-line scripts don't spit out
-        # their errors in HTML format.
-        require CGI::Carp;
-        import CGI::Carp qw(fatalsToBrowser);
-    }
-
     # Make sure our outgoing cookie list is empty on each invocation
     $self->{Bugzilla_cookie_list} = [];
 

@@ -92,6 +92,11 @@ sub handler : method {
     # $0 is broken under mod_perl before 2.0.2, so we have to set it
     # here explicitly or init_page's shutdownhtml code won't work right.
     $0 = $ENV{'SCRIPT_FILENAME'};
+
+    # Make all errors go to the browser, not the log.
+    require CGI::Carp;
+    CGI::Carp->import('fatalsToBrowser');
+
     Bugzilla::init_page();
     return $class->SUPER::handler(@_);
 }

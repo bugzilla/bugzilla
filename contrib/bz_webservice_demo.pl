@@ -51,6 +51,9 @@ my $bug_id;
 my $product_name;
 my $create_file_name;
 my $legal_field_values;
+my $add_comment;
+my $private;
+my $work_time;
 
 GetOptions('help|h|?'       => \$help,
            'uri=s'          => \$Bugzilla_uri,
@@ -60,7 +63,10 @@ GetOptions('help|h|?'       => \$help,
            'bug_id:s'       => \$bug_id,
            'product_name:s' => \$product_name,
            'create:s'       => \$create_file_name,
-           'field:s'        => \$legal_field_values
+           'field:s'        => \$legal_field_values,
+           'comment:s'      => \$add_comment,
+           'private:i'      => \$private,
+           'worktime:f'     => \$work_time
           ) or pod2usage({'-verbose' => 0, '-exitval' => 1});
 
 =head1 OPTIONS
@@ -88,7 +94,7 @@ Bugzilla password. Specify this together with B<--login> in order to log in.
 
 =item --rememberlogin
 
-Gives access to Bugzilla's “Bugzilla_remember” option.
+Gives access to Bugzilla's "Bugzilla_remember" option.
 Specify this option while logging in to do the same thing as ticking the
 C<Bugzilla_remember> box on Bugilla's log in form.
 Don't specify this option to do the same thing as unchecking the box.
@@ -113,6 +119,20 @@ Specify a file that contains settings for the creating of a new bug.
 Pass a field name to get legal values for this field. It must be either a
 global select field (such as bug_status, resolution, rep_platform, op_sys,
 priority, bug_severity) or a custom select field.
+
+=item --comment
+
+A comment to add to a bug identified by B<--bug_id>. You must also pass a B<--login>
+and B<--password> to log in to Bugzilla.
+
+=item --private
+
+An optional non-zero value to specify B<--comment> as private.
+
+=item --worktime
+
+An optional double precision number specifying the work time for B<--comment>.
+
 
 =back
 
@@ -302,6 +322,25 @@ if ($legal_field_values) {
     print join("\n", @{$result->{values}}) . "\n";
 }
 
+=head2 Adding a comment to a bug
+
+Call C<Bug.add_comment> with the bug id, the comment text, and optionally the number
+of hours you worked on the bug, and a boolean indicating if the comment is private
+or not.
+
+=cut
+
+if ($add_comment) {
+    if ($bug_id) {
+        $soapresult = $proxy->call('Bug.add_comment', {id => $bug_id,
+            comment => $add_comment, private => $private, work_time => $work_time});
+        _die_on_fault($soapresult);
+        print "Comment added.\n";
+    }
+    else {
+        print "A --bug_id must be supplied to add a comment.";
+    }
+}
 
 =head1 NOTES
 

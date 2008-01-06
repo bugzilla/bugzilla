@@ -75,6 +75,8 @@ use constant WS_ERROR_CODE => {
     product_disabled    => 106,
     # Invalid Summary
     require_summary => 107,
+    # Not authorized to edit the bug
+    product_edit_denied => 108,
 
     # Authentication errors are usually 300-400.
     invalid_username_or_password => 300,

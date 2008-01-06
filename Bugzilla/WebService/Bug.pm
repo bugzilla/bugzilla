@@ -14,6 +14,8 @@
 #
 # Contributor(s): Marc Schumann <wurblzap@gmail.com>
 #                 Max Kanat-Alexander <mkanat@bugzilla.org>
+#                 Mads Bondo Dydensborg <mbd@dbc.dk>
+#                 Tsahi Asher <tsahi_75@yahoo.com>
 
 package Bugzilla::WebService::Bug;
 
@@ -25,7 +27,6 @@ use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Field;
 use Bugzilla::WebService::Constants;
-use Bugzilla::Util qw(detaint_natural);
 use Bugzilla::Bug;
 use Bugzilla::BugMail;
 use Bugzilla::Constants;
@@ -175,6 +176,36 @@ sub legal_values {
     }
 
     return { values => \@result };
+}
+
+sub add_comment {
+    my ($self, $params) = @_;
+    
+    #The user must login in order add a comment
+    Bugzilla->login(LOGIN_REQUIRED);
+    
+    # Check parameters
+    defined $params->{id} 
+        || ThrowCodeError('param_required', { param => 'id' });
+    ValidateBugID($params->{id});
+    
+    my $comment = $params->{comment}; 
+    defined $comment
+        || ThrowCodeError('param_required', { param => 'comment' });
+    
+    my $bug = new Bugzilla::Bug($params->{id});
+    
+    Bugzilla->user->can_edit_product($bug->product_id)
+        || ThrowUserError("product_edit_denied", {product => $bug->product});
+        
+    # Append comment
+    $bug->add_comment($comment, { isprivate => $params->{private},
+                                  work_time => $params->{work_time} });
+    $bug->update();
+    
+    # Send mail.
+    Bugzilla::BugMail::Send($bug->bug_id, { changer => Bugzilla->user->login });
+    return undef;
 }
 
 1;
@@ -462,6 +493,54 @@ You didn't specify a summary for the bug.
 
 Either the QA Contact, Assignee, or CC lists have some invalid user
 in them. The error message will have more details.
+
+=back
+
+=back
+
+=item C<add_comment> B<EXPERIMENTAL>
+
+=over
+
+=item B<Description>
+
+This allows you to add a comment to a bug in Bugzilla.
+
+=item B<Params>
+
+=over
+
+=item C<id> (int) B<Required> - The id or alias of the bug to append a 
+comment to.
+
+=item C<comment> (string) B<Required> - The comment to append to the bug.
+
+=item C<private> (boolean) - If set to true, the comment is private, otherwise
+it is assumed to be public.
+
+=item C<work_time> (double) - Adds this many hours to the "Hours Worked"
+on the bug. If you are not in the time tracking group, this value will
+be ignored.
+
+
+=back
+
+=item B<Errors>
+
+=over
+
+=item 100 (Invalid Bug Alias) 
+
+If you specified an alias and either: (a) the Bugzilla you're querying
+doesn't support aliases or (b) there is no bug with that alias.
+
+=item 101 (Invalid Bug ID)
+
+The id you specified doesn't exist in the database.
+
+=item 108 (Bug Edit Denied)
+
+You did not have the necessary rights to edit the bug.
 
 =back
 

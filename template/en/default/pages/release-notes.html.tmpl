@@ -63,10 +63,10 @@
 <h3>3.0.3</h3>
 
 <ul>
-  <li>mod_perl no longer compiles templates once for each Apache process. 
-    It now compiles templates only once and share them among each Apache
-    processes. This greatly improves performance and highly decreases the
-    memory footprint.
+  <li>mod_perl no longer compiles [% terms.Bugzilla %]'s code for each Apache
+    process individually. It now compiles code only once and shares it among
+    each Apache process. This greatly improves performance and highly 
+    decreases the memory footprint.
    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=398241">[% terms.Bug %] 398241</a>)</li>
 
   <li>You can now search for '---' (without quotes) in versions and milestones.

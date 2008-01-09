@@ -20,7 +20,7 @@
 
 [% PROCESS global/variables.none.tmpl %]
 [% INCLUDE global/header.html.tmpl 
-  title = "$terms.Bugzilla 3.0.2 Release Notes" 
+  title = "$terms.Bugzilla 3.0.3 Release Notes" 
   style_urls = ['skins/standard/release-notes.css'] 
 %]
 
@@ -60,6 +60,42 @@
   most important fixes in each release. If you want a detailed list of
   <em>everything</em> that's changed in each version, you should use our
   <a href="http://www.bugzilla.org/status/changes.html">Change Log Page</a>.</p>
+
+<h3>3.0.3</h3>
+
+<ul>
+  <li>mod_perl no longer compiles templates once for each Apache process. 
+    It now compiles templates only once and share them among each Apache
+    processes. This greatly improves performance and highly decreases the
+    memory footprint.
+   (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=398241">[% terms.Bug %] 398241</a>)</li>
+
+  <li>You can now search for '---' (without quotes) in versions and milestones.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=362436">[% terms.Bug %] 362436</a>)</li>
+
+  <li>[% terms.Bugzilla %] should no longer break lines unnecessarily in 
+    email subjects. This was causing trouble with some email clients.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=374424">[% terms.Bug %] 374424</a>)</li>
+
+  <li>If you had selected "I'm added to or removed from this capacity" option
+    for the "CC" role in your email preferences, you wouldn't get mail when
+    more than one person was added to the CC list at once.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=394796">[% terms.Bug %] 394796</a>)</li>
+
+  <li>Deleting a user account no longer deletes whines from another user who
+    has the deleted account as addressee. The schedule is simply removed, 
+    but the whine itself is left intact.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=395924">[% terms.Bug %] 395924</a>)</li>
+
+  <li><kbd>contrib/merge-users.pl</kbd> now correctly merges all required
+    fields when merging two user accounts.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=400160">[% terms.Bug %] 400160</a>)</li>
+
+  <li>[% terms.Bugzilla %] no longer requires Apache::DBI to run under 
+    mod_perl. It caused troubles such as lost connections with the DB and
+    didn't give any important performance gain.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=408766">[% terms.Bug %] 408766</a>)</li>
+</ul>
 
 <h3>3.0.2</h3>
 
@@ -575,6 +611,10 @@
 </ul>
 
 <h2><a name="v30_security"></a>Security Updates in This Release</h2>
+
+<h3>3.0.3</h3>
+
+<p>No security fixes in this release.</p>
 
 <h3>3.0.2</h3>
 

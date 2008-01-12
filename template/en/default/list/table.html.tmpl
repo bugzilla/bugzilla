@@ -85,18 +85,14 @@
       <th>&nbsp;</th>
       [% END %]
       <th colspan="[% splitheader ? 2 : 1 %]" class="first-child">
-        [% IF sorted_by_relevance %]
-          ID
-        [% ELSE %]
-          [% desc = '' %]
-          [% IF (om = order.match("^bugs\.bug_id( desc)?")) %]
-            [% desc = ' desc' IF NOT om.0 %]
-          [% END %]
-          <a href="buglist.cgi?
-                    [% urlquerypart FILTER html %]&amp;order=bugs.bug_id[% desc FILTER url_quote %]
-                    [%-#%]&amp;query_based_on=
-                    [% defaultsavename OR searchname FILTER url_quote %]">ID</a>
+        [% desc = '' %]
+        [% IF (om = order.match("^bugs\.bug_id( desc)?")) %]
+          [% desc = ' desc' IF NOT om.0 %]
         [% END %]
+        <a href="buglist.cgi?
+                  [% urlquerypart FILTER html %]&amp;order=bugs.bug_id[% desc FILTER url_quote %]
+                  [%-#%]&amp;query_based_on=
+                  [% defaultsavename OR searchname FILTER url_quote %]">ID</a>
       </th>
 
       [% IF splitheader %]
@@ -133,28 +129,24 @@
 
 [% BLOCK columnheader %]
   <th colspan="[% splitheader ? 2 : 1 %]">
-    [% IF sorted_by_relevance %]
-      [%- abbrev.$id.title || field_descs.$id || column.title -%]
+    [% IF column.name.match('\s+AS\s+') %]
+      [%# For aliased columns, use their ID for sorting. %]
+      [% column.sortalias = id %]
     [% ELSE %]
-      [% IF column.name.match('\s+AS\s+') %]
-        [%# For aliased columns, use their ID for sorting. %]
-        [% column.sortalias = id %]
-      [% ELSE %]
-        [%# Other columns may sort on their name directly. %]
-        [% column.sortalias = column.name %]
-      [% END %]
-      [% desc = '' %]
-      [% IF (om = order.match("$column.sortalias( desc)?")) %]
-        [% desc = ' desc' IF NOT om.0 %]
-      [% END %]
-      [% order = order.remove("$column.sortalias( desc)?,?") %]
-      <a href="buglist.cgi?[% urlquerypart FILTER html %]&amp;order=
-        [% column.sortalias FILTER url_quote %][% desc FILTER url_quote %]
-        [% ",$order" FILTER url_quote IF order %]
-        [%-#%]&amp;query_based_on=
-        [% defaultsavename OR searchname FILTER url_quote %]">
-          [%- abbrev.$id.title || field_descs.$id || column.title -%]</a>
+      [%# Other columns may sort on their name directly. %]
+      [% column.sortalias = column.name %]
     [% END %]
+    [% desc = '' %]
+    [% IF (om = order.match("$column.sortalias( desc)?")) %]
+      [% desc = ' desc' IF NOT om.0 %]
+    [% END %]
+    [% order = order.remove("$column.sortalias( desc)?,?") %]
+    <a href="buglist.cgi?[% urlquerypart FILTER html %]&amp;order=
+      [% column.sortalias FILTER url_quote %][% desc FILTER url_quote %]
+      [% ",$order" FILTER url_quote IF order %]
+      [%-#%]&amp;query_based_on=
+      [% defaultsavename OR searchname FILTER url_quote %]">
+        [%- abbrev.$id.title || field_descs.$id || column.title -%]</a>
   </th>
 [% END %]
 

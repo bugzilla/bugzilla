@@ -21,6 +21,7 @@ package Bugzilla::Product;
 use Bugzilla::Version;
 use Bugzilla::Milestone;
 
+use Bugzilla::Constants;
 use Bugzilla::Util;
 use Bugzilla::Group;
 use Bugzilla::Error;
@@ -99,6 +100,39 @@ sub group_controls {
         }
     }
     return $self->{group_controls};
+}
+
+sub groups_mandatory_for {
+    my ($self, $user) = @_;
+    my $groups = $user->groups_as_string;
+    my $mandatory = CONTROLMAPMANDATORY;
+    # For membercontrol we don't check group_id IN, because if membercontrol
+    # is Mandatory, the group is Mandatory for everybody, regardless of their
+    # group membership.
+    my $ids = Bugzilla->dbh->selectcol_arrayref(
+        "SELECT group_id FROM group_control_map
+          WHERE product_id = ?
+                AND (membercontrol = $mandatory
+                     OR (othercontrol = $mandatory
+                         AND group_id NOT IN ($groups)))",
+        undef, $self->id);
+    return Bugzilla::Group->new_from_list($ids);
+}
+
+sub groups_valid {
+    my ($self) = @_;
+    return $self->{groups_valid} if defined $self->{groups_valid};
+    
+    # Note that we don't check OtherControl below, because there is no
+    # valid NA/* combination.
+    my $ids = Bugzilla->dbh->selectcol_arrayref(
+        "SELECT DISTINCT group_id
+          FROM group_control_map AS gcm
+               INNER JOIN groups ON gcm.group_id = groups.id
+         WHERE product_id = ? AND isbuggroup = 1
+               AND membercontrol != " . CONTROLMAPNA,  undef, $self->id);
+    $self->{groups_valid} = Bugzilla::Group->new_from_list($ids);
+    return $self->{groups_valid};
 }
 
 sub versions {
@@ -285,6 +319,42 @@ below.
  Returns:     A hash with group id as key and hash containing 
               a Bugzilla::Group object and the properties of group
               relative to the product.
+              
+=item C<groups_mandatory_for>
+
+=over
+
+=item B<Description>
+
+Tells you what groups are mandatory for bugs in this product.
+
+=item B<Params>
+
+C<$user> - The user who you want to check.
+
+=item B<Returns> An arrayref of C<Bugzilla::Group> objects.
+
+=back
+
+=item C<groups_valid>
+
+=over
+
+=item B<Description>
+
+Returns an arrayref of L<Bugzilla::Group> objects, representing groups
+that bugs could validly be restricted to within this product. Used mostly
+by L<Bugzilla::Bug> to assure that you're adding valid groups to a bug.
+
+B<Note>: This doesn't check whether or not the current user can add/remove
+bugs to/from these groups. It just tells you that bugs I<could be in> these
+groups, in this product.
+
+=item B<Params> (none)
+
+=item B<Returns> An arrayref of L<Bugzilla::Group> objects.
+
+=back
 
 =item C<versions()>
 

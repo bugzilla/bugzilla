@@ -99,7 +99,7 @@ sub send_results {
 # Tells us whether or not a field should be changed by process_bug, by
 # checking that it's defined and not set to dontchange.
 sub should_set {
-    # check_defined is used for custom fields, where there's another field
+    # check_defined is used for fields where there's another field
     # whose name starts with "defined_" and then the field name--it's used
     # to know when we did things like empty a multi-select or deselect
     # a checkbox.
@@ -248,6 +248,23 @@ if (should_set('product')) {
               other_bugs => \@bug_objects,
             });
         $product_change ||= $changed;
+        
+        # strict_isolation checks mean that we should set the groups
+        # immediately after changing the product.
+        foreach my $group (@{$b->product_obj->groups_valid}) {
+            my $gid = $group->id;
+            if (should_set("bit-$gid", 1)) {
+                # Check ! first to avoid having to check defined below.
+                if (!$cgi->param("bit-$gid")) {
+                    $b->remove_group($gid);
+                }
+                # "== 1" is important because mass-change uses -1 to mean
+                # "don't change this restriction"
+                elsif ($cgi->param("bit-$gid") == 1) {
+                    $b->add_group($gid);
+                }
+            }
+        }
     }
 }
 
@@ -369,16 +386,12 @@ if (defined $cgi->param('id')) {
     }
 
     # reporter_accessible and cclist_accessible--these are only set if
-    # the user can change them and there are groups on the bug.
-    # (If the user can't change the field, the checkboxes don't appear
-    #  on show_bug, thus it would look like the user was trying to
-    #  uncheck them, which would then be denied by the set_ functions,
-    #  throwing a confusing error.)
-    if (scalar @{$bug->groups_in}) {
+    # the user can change them and they appear on the page.
+    if (should_set('cclist_accessible', 1)) {
         $bug->set_cclist_accessible($cgi->param('cclist_accessible'))
-            if $bug->check_can_change_field('cclist_accessible', 0, 1);
+    }
+    if (should_set('reporter_accessible', 1)) {
         $bug->set_reporter_accessible($cgi->param('reporter_accessible'))
-            if $bug->check_can_change_field('reporter_accessible', 0, 1);
     }
     
     # You can only mark/unmark comments as private on single bugs. If
@@ -780,80 +793,6 @@ foreach my $id (@idlist) {
     # Check for duplicates if the bug is [re]open or its resolution is changed.
     if ($resolution ne 'DUPLICATE') {
         $dbh->do(q{DELETE FROM duplicates WHERE dupe = ?}, undef, $id);
-    }
-
-    # First of all, get all groups the bug is currently restricted to.
-    my $initial_groups =
-      $dbh->selectcol_arrayref('SELECT group_id, name
-                                  FROM bug_group_map
-                            INNER JOIN groups
-                                    ON groups.id = bug_group_map.group_id
-                                 WHERE bug_id = ?', {Columns=>[1,2]}, $id);
-    my %original_groups = @$initial_groups;
-    my %updated_groups = %original_groups;
-
-    # Now let's see which groups have to be added or removed.
-    foreach my $gid (keys %{$new_product->group_controls}) {
-        my $group = $new_product->group_controls->{$gid};
-        # Leave inactive groups alone.
-        next unless $group->{group}->is_active;
-
-        # Only members of a group can add/remove the bug to/from it,
-        # unless the bug is being moved to another product in which case
-        # non-members can also edit group restrictions.
-        if ($group->{membercontrol} == CONTROLMAPMANDATORY
-            || ($product_change && $group->{othercontrol} == CONTROLMAPMANDATORY
-                && !$user->in_group_id($gid)))
-        {
-            $updated_groups{$gid} = $group->{group}->name;
-        }
-        elsif ($group->{membercontrol} == CONTROLMAPNA
-               || ($product_change && $group->{othercontrol} == CONTROLMAPNA
-                   && !$user->in_group_id($gid)))
-        {
-            delete $updated_groups{$gid};
-        }
-        # When editing several bugs at once, only consider groups which
-        # have been displayed.
-        elsif (($user->in_group_id($gid) || $product_change)
-               && ((defined $cgi->param('id') && Bugzilla->usage_mode != USAGE_MODE_EMAIL)
-                   || defined $cgi->param("bit-$gid")))
-        {
-            if (!$cgi->param("bit-$gid")) {
-                delete $updated_groups{$gid};
-            }
-            # Note that == 1 is important, because == -1 means "ignore this group".
-            elsif ($cgi->param("bit-$gid") == 1) {
-                $updated_groups{$gid} = $group->{group}->name;
-            }
-        }
-    }
-    # We also have to remove groups which are not legal in the new product.
-    foreach my $gid (keys %updated_groups) {
-        delete $updated_groups{$gid}
-          unless exists $new_product->group_controls->{$gid};
-    }
-    my ($removed, $added) = diff_arrays([keys %original_groups], [keys %updated_groups]);
-
-    # We can now update the DB.
-    if (scalar(@$removed)) {
-        $dbh->do('DELETE FROM bug_group_map WHERE bug_id = ?
-                  AND group_id IN (' . join(', ', @$removed) . ')',
-                  undef, $id);
-    }
-    if (scalar(@$added)) {
-        my $sth = $dbh->prepare('INSERT INTO bug_group_map
-                                 (bug_id, group_id) VALUES (?, ?)');
-        $sth->execute($id, $_) foreach @$added;
-    }
-
-    # Add the changes to the bug_activity table.
-    if (scalar(@$removed) || scalar(@$added)) {
-        my @removed_names = map { $original_groups{$_} } @$removed;
-        my @added_names = map { $updated_groups{$_} } @$added;
-        LogActivityEntry($id, 'bug_group', join(',', @removed_names),
-                         join(',', @added_names), $whoid, $timestamp);
-        $bug_changed = 1;
     }
 
     my ($cc_removed) = $bug_objects{$id}->update_cc($timestamp);

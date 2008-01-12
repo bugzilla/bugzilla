@@ -498,7 +498,29 @@ sub update {
 
     my $old_bug = $self->new($self->id);
     my $changes = $self->SUPER::update(@_);
-
+    
+    my %old_groups = map {$_->id => $_} @{$old_bug->groups_in};
+    my %new_groups = map {$_->id => $_} @{$self->groups_in};
+    my ($removed_gr, $added_gr) = diff_arrays([keys %old_groups],
+                                              [keys %new_groups]);
+    if (scalar @$removed_gr || scalar @$added_gr) {
+        if (@$removed_gr) {
+            my $qmarks = join(',', ('?') x @$removed_gr);
+            $dbh->do("DELETE FROM bug_group_map
+                       WHERE bug_id = ? AND group_id IN ($qmarks)", undef,
+                     $self->id, @$removed_gr);
+        }
+        my $sth_insert = $dbh->prepare(
+            'INSERT INTO bug_group_map (bug_id, group_id) VALUES (?,?)');
+        foreach my $gid (@$added_gr) {
+            $sth_insert->execute($self->id, $gid);
+        }
+        my @removed_names = map { $old_groups{$_}->name } @$removed_gr;
+        my @added_names   = map { $new_groups{$_}->name } @$added_gr;
+        $changes->{'bug_group'} = [join(', ', @removed_names),
+                                   join(', ', @added_names)];
+    }
+    
     foreach my $comment (@{$self->{added_comments} || []}) {
         my $columns = join(',', keys %$comment);
         my @values  = values %$comment;
@@ -1599,6 +1621,26 @@ sub set_product {
         $self->set_target_milestone($tm_name);
     }
     
+    if ($product_changed) {
+        # Remove groups that aren't valid in the new product. This will also
+        # have the side effect of removing the bug from groups that aren't
+        # active anymore.
+        #
+        # We copy this array because the original array is modified while we're
+        # working, and that confuses "foreach".
+        my @current_groups = @{$self->groups_in};
+        foreach my $group (@current_groups) {
+            if (!grep($group->id == $_->id, @{$product->groups_valid})) {
+                $self->remove_group($group);
+            }
+        }
+    
+        # Make sure the bug is in all the mandatory groups for the new product.
+        foreach my $group (@{$product->groups_mandatory_for(Bugzilla->user)}) {
+            $self->add_group($group);
+        }
+    }
+    
     # XXX This is temporary until all of process_bug uses update();
     return $product_changed;
 }
@@ -1754,6 +1796,75 @@ sub modify_keywords {
 
     $self->{'keyword_objects'} = \@result;
     return $any_changes;
+}
+
+sub add_group {
+    my ($self, $group) = @_;
+    # Invalid ids are silently ignored. (We can't tell people whether
+    # or not a group exists.)
+    $group = new Bugzilla::Group($group) unless ref $group;
+    return unless $group;
+
+    # Make sure that bugs in this product can actually be restricted
+    # to this group.
+    grep($group->id == $_->id, @{$self->product_obj->groups_valid})
+         || ThrowUserError('group_invalid_restriction',
+                { product => $self->product, group_id => $group->id });
+
+    # OtherControl people can add groups only during a product change,
+    # and only when the group is not NA for them.
+    if (!Bugzilla->user->in_group($group->name)) {
+        my $controls = $self->product_obj->group_controls->{$group->id};
+        if (!$self->{_old_product_name}
+            || $controls->{othercontrol} == CONTROLMAPNA)
+        {
+            ThrowUserError('group_change_denied',
+                           { bug => $self, group_id => $group->id });
+        }
+    }
+
+    my $current_groups = $self->groups_in;
+    if (!grep($group->id == $_->id, @$current_groups)) {
+        push(@$current_groups, $group);
+    }
+}
+
+sub remove_group {
+    my ($self, $group) = @_;
+    $group = new Bugzilla::Group($group) unless ref $group;
+    return unless $group;
+    
+    # First, check if this is a valid group for this product.
+    # You can *always* remove a group that is not valid for this product, so
+    # we don't do any other checks if that's the case. (set_product does this.)
+    #
+    # This particularly happens when isbuggroup is no longer 1, and we're
+    # moving a bug to a new product.
+    if (grep($_->id == $group->id, @{$self->product_obj->groups_valid})) {   
+        my $controls = $self->product_obj->group_controls->{$group->id};
+
+        # Nobody can ever remove a Mandatory group.
+        if ($controls->{membercontrol} == CONTROLMAPMANDATORY) {
+            ThrowUserError('group_invalid_removal',
+                { product => $self->product, group_id => $group->id,
+                  bug => $self });
+        }
+
+        # OtherControl people can remove groups only during a product change,
+        # and only when they are non-Mandatory and non-NA.
+        if (!Bugzilla->user->in_group($group->name)) {
+            if (!$self->{_old_product_name}
+                || $controls->{othercontrol} == CONTROLMAPMANDATORY
+                || $controls->{othercontrol} == CONTROLMAPNA)
+            {
+                ThrowUserError('group_change_denied',
+                               { bug => $self, group_id => $group->id });
+            }
+        }
+    }
+    
+    my $current_groups = $self->groups_in;
+    @$current_groups = grep { $_->id != $group->id } @$current_groups;
 }
 
 #####################################################################

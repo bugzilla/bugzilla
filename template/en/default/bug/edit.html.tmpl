@@ -498,6 +498,9 @@
         [% END %]
 
       &nbsp;&nbsp;&nbsp;&nbsp;
+      [% IF group.ingroup %]
+        <input type="hidden" name="defined_bit-[% group.bit %]" value="1">
+      [% END %]
       <input type="checkbox" value="1"
              name="bit-[% group.bit %]" id="bit-[% group.bit %]"
              [% " checked=\"checked\"" IF group.ison %]
@@ -530,11 +533,13 @@
       </p>
 
       <p>
+        <input type="hidden" name="defined_reporter_accessible" value="1">
         <input type="checkbox" value="1"
                name="reporter_accessible" id="reporter_accessible"
                [% " checked" IF bug.reporter_accessible %]
                [% " disabled=\"disabled\"" UNLESS bug.check_can_change_field("reporter_accessible", 0, 1) %]>
         <label for="reporter_accessible">Reporter</label>
+        <input type="hidden" name="defined_cclist_accessible" value="1">
         <input type="checkbox" value="1"
                name="cclist_accessible" id="cclist_accessible"
                [% " checked" IF bug.cclist_accessible %]

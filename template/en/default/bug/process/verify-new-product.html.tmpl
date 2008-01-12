@@ -145,6 +145,8 @@
     <p>These groups are optional. You can decide to restrict [% terms.bugs %] to
     one or more of the following groups:<br>
     [% FOREACH group = optional_groups %]
+      <input type="hidden" name="defined_bit-[% group.group.id FILTER html %]"
+             value="1">
       <input type="checkbox" id="bit-[% group.group.id FILTER html %]"
              name="bit-[% group.group.id FILTER html %]"
              [% ((group.membercontrol == constants.CONTROLMAPDEFAULT && user.in_group(group.group.name))

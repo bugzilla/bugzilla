@@ -31,7 +31,7 @@
         [% IF !otheruser.groups.bz_sudo_protect %]
           <br />
           <a href="relogin.cgi?action=prepare-sudo&amp;target_login=
-          [%- otheruser.login FILTER html %]">Impersonate this user</a>
+          [%- otheruser.login FILTER url_quote %]">Impersonate this user</a>
         [% END %]
       [% END %]
     [% ELSE %]

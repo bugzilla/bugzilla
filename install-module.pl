@@ -85,12 +85,8 @@ if ($switch{'all'} || $switch{'upgrade-all'}) {
         # --all shouldn't include mod_perl2, because it can have some complex
         # configuration, and really should be installed on its own.
         next if $cpan_name eq 'mod_perl2';
+        next if $cpan_name eq 'DBD::Oracle' and !$ENV{ORACLE_HOME};
         install_module($cpan_name, $can_notest);
-    }
-    my $dbs = DB_MODULE;
-    foreach my $db (keys %$dbs) {
-        install_module($dbs->{$db}->{dbd}->{module}, $can_notest)
-            unless have_vers($dbs->{$db}->{dbd}, 0);
     }
 }
 

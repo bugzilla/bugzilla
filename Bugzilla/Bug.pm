@@ -148,8 +148,11 @@ sub VALIDATORS {
         elsif ($field->type == FIELD_TYPE_DATETIME) {
             $validator = \&_check_datetime_field;
         }
-        else {
+        elsif ($field->type == FIELD_TYPE_FREETEXT) {
             $validator = \&_check_freetext_field;
+        }
+        else {
+            $validator = \&_check_default_field;
         }
         $validators->{$field->name} = $validator;
     }
@@ -1074,8 +1077,6 @@ sub _check_estimated_time {
     return $_[0]->_check_time($_[1], 'estimated_time');
 }
 
-sub _check_freetext_field { return defined $_[1] ? trim($_[1]) : ''; }
-
 sub _check_groups {
     my ($invocant, $product, $group_ids) = @_;
 
@@ -1371,6 +1372,18 @@ sub _check_datetime_field {
                                          format => 'HH:MM:SS' });
     }
     return $date_time
+}
+
+sub _check_default_field { return defined $_[1] ? trim($_[1]) : ''; }
+
+sub _check_freetext_field {
+    my ($invocant, $text) = @_;
+
+    $text = (defined $text) ? trim($text) : '';
+    if (length($text) > MAX_FREETEXT_LENGTH) {
+        ThrowUserError('freetext_too_long', { text => $text });
+    }
+    return $text;
 }
 
 sub _check_multi_select_field {

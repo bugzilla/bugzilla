@@ -592,6 +592,13 @@
     The sort key must be an integer between 0 and 32767 inclusive.
     It cannot be <em>[% sortkey FILTER html %]</em>.
 
+  [% ELSIF error == "freetext_too_long" %]
+    [% title = "Text Too Long" %]
+    The text you entered is too long ([% text.length FILTER html %] characters,
+    above the maximum length allowed of [% constants.MAX_FREETEXT_LENGTH FILTER none %]
+    characters):
+    <p><em>[% text FILTER html %]</em></p>
+
   [% ELSIF error == "group_cannot_delete" %]
     [% title = "Cannot Delete Group" %]
     The <em>[% name FILTER html %]</em> group cannot be deleted because

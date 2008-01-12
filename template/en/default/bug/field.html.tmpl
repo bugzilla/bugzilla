@@ -41,8 +41,9 @@
 [% IF editable %]
   [% SWITCH field.type %]
     [% CASE constants.FIELD_TYPE_FREETEXT %]
-        <input name="[% field.name FILTER html %]" 
-               value="[% value FILTER html %]" size="60">
+        <input id="[% field.name FILTER html %]" name="[% field.name FILTER html %]"
+               value="[% value FILTER html %]" size="60"
+               maxlength="[% constants.MAX_FREETEXT_LENGTH FILTER none %]">
     [% CASE constants.FIELD_TYPE_DATETIME %]
       <input name="[% field.name FILTER html %]" size="20"
              id="[% field.name FILTER html %]"

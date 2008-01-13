@@ -130,11 +130,17 @@ sub VALIDATORS {
         status_whiteboard => \&_check_status_whiteboard,
     };
 
-    my @select_fields = Bugzilla->get_fields({custom => 1, obsolete => 0,
-                                              type => FIELD_TYPE_SINGLE_SELECT});
+    my @custom_fields = Bugzilla->get_fields({custom => 1, obsolete => 0});
 
-    foreach my $field (@select_fields) {
-        $validators->{$field->name} = \&_check_select_field;
+    foreach my $field (@custom_fields) {
+        my $validator;
+        if ($field->type == FIELD_TYPE_SINGLE_SELECT) {
+            $validator = \&_check_select_field;
+        }
+        elsif ($field->type == FIELD_TYPE_FREETEXT) {
+            $validator = \&_check_freetext_field;
+        }
+        $validators->{$field->name} = $validator if $validator;
     }
     return $validators;
 };
@@ -823,6 +829,18 @@ sub _check_version {
     $version = trim($version);
     check_field('version', $version, [map($_->name, @{$product->versions})]);
     return $version;
+}
+
+# Custom Field Validators
+
+sub _check_freetext_field {
+    my ($invocant, $text) = @_;
+
+    $text = (defined $text) ? trim($text) : '';
+    if (length($text) > MAX_FREETEXT_LENGTH) {
+        ThrowUserError('freetext_too_long', { text => $text });
+    }
+    return $text;
 }
 
 sub _check_select_field {

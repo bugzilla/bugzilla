@@ -438,8 +438,8 @@ for more details.
 
 =item 104 (Invalid Field)
 
-One of the drop-down fields has an invalid value. The error message will
-have more detail.
+One of the drop-down fields has an invalid value, or a value entered in a
+text field is too long. The error message will have more detail.
 
 =item 105 (Invalid Component)
 

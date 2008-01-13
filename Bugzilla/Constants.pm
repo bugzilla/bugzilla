@@ -139,6 +139,7 @@ use File::Basename;
     SAFE_PROTOCOLS
 
     MAX_LEN_QUERY_NAME
+    MAX_FREETEXT_LENGTH
 );
 
 @Bugzilla::Constants::EXPORT_OK = qw(contenttypes);
@@ -386,6 +387,9 @@ use constant ON_WINDOWS => ($^O =~ /MSWin32/i);
 
 # The longest that a saved search name can be.
 use constant MAX_LEN_QUERY_NAME => 64;
+
+# Maximum length allowed for free text fields.
+use constant MAX_FREETEXT_LENGTH => 255;
 
 sub bz_locations {
     # We know that Bugzilla/Constants.pm must be in %INC at this point.

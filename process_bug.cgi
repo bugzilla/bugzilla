@@ -877,6 +877,8 @@ foreach my $field (Bugzilla->get_fields({custom => 1, obsolete => 0})) {
         $::query .= "$fname = ?";
         my $value = $cgi->param($fname);
         check_field($fname, $value) if ($field->type == FIELD_TYPE_SINGLE_SELECT);
+        $value = Bugzilla::Bug->_check_freetext_field($value)
+          if ($field->type == FIELD_TYPE_FREETEXT);
         trick_taint($value);
         push(@values, $value);
     }

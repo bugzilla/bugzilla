@@ -42,7 +42,9 @@
 [% IF editable %]
   [% SWITCH field.type %]
     [% CASE constants.FIELD_TYPE_FREETEXT %]
-        <input name="[% field.name FILTER html %]" value="[% value FILTER html %]" size="60">
+        <input id="[% field.name FILTER html %]" name="[% field.name FILTER html %]"
+               value="[% value FILTER html %]" size="60"
+               maxlength="[% constants.MAX_FREETEXT_LENGTH FILTER none %]">
     [% CASE constants.FIELD_TYPE_SINGLE_SELECT %]
         <select id="[% field.name FILTER html %]" name="[% field.name FILTER html %]">
           [% IF allow_dont_change %]

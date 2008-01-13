@@ -63,6 +63,7 @@ use constant WS_ERROR_CODE => {
     alias_has_comma_or_space => 103,
     # Misc. bug field errors
     illegal_field => 104,
+    freetext_too_long => 104,
     # Component errors
     require_component       => 105,
     component_name_too_long => 105,

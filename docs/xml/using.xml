@@ -12,6 +12,12 @@
     installations there will necessarily have all Bugzilla features enabled,
     and different installations run different versions, so some things may not
     quite work as this document describes.</para>
+
+    <para>
+      Frequently Asked Questions (FAQ) are available and answered on
+      <ulink url="http://wiki.mozilla.org/Bugzilla:FAQ">wiki.mozilla.org</ulink>.
+      They may cover some questions you have which are left unanswered.
+    </para>
   </section>
       
   <section id="myaccount">

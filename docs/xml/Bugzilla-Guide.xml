@@ -8,7 +8,6 @@
 <!ENTITY about SYSTEM "about.xml">
 <!ENTITY conventions SYSTEM "conventions.xml">
 <!ENTITY doc-index SYSTEM "index.xml">
-<!ENTITY faq SYSTEM "faq.xml">
 <!ENTITY gfdl SYSTEM "gfdl.xml">
 <!ENTITY glossary SYSTEM "glossary.xml">
 <!ENTITY installation SYSTEM "installation.xml">
@@ -134,9 +133,6 @@
 
 <!-- Customizing Bugzilla -->
 &customization;
-
-<!-- Appendix: The Frequently Asked Questions -->
-&faq;
 
 <!-- Appendix: Troubleshooting -->
 &troubleshooting;

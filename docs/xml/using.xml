@@ -1020,6 +1020,15 @@
       </para>
     </section>
 
+    <section id="comment-wrapping">
+      <title>Server-Side Comment Wrapping</title>
+      <para>
+      Bugzilla stores comments unwrapped and wraps them at display time. This
+      ensures proper wrapping in all browsers. Lines beginning with the ">" 
+      character are assumed to be quotes, and are not wrapped.
+      </para>
+    </section>
+
     <section id="dependencytree">
       <title>Dependency Tree</title>
 

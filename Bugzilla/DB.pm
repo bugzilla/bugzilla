@@ -391,6 +391,11 @@ sub sql_string_concat {
     return '(' . join(' || ', @params) . ')';
 }
 
+sub sql_in {
+    my ($self, $column_name, $in_list_ref) = @_;
+    return " $column_name IN (" . join(',', @$in_list_ref) . ") ";
+}
+
 sub sql_fulltext_search {
     my ($self, $column, $text) = @_;
 
@@ -1915,6 +1920,32 @@ Formatted SQL making the string case insensitive.
 The default implementation simply calls LOWER on the parameter.
 If this is used to search on a text column with index, the index
 will not be usually used unless it was created as LOWER(column).
+
+=back
+
+=item C<sql_in>
+
+=over
+
+=item B<Description>
+
+Returns SQL syntax for the C<IN ()> operator. 
+
+Only necessary where an C<IN> clause can have more than 1000 items.
+
+=item B<Params>
+
+=over
+
+=item C<$column_name> - Column name (e.g. C<bug_id>)
+
+=item C<$in_list_ref> - an arrayref containing values for C<IN ()>
+
+=back
+
+=item B<Returns>
+
+Formatted SQL for the C<IN> operator.
 
 =back
 

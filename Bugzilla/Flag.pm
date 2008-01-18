@@ -295,11 +295,12 @@ sub validate {
         my $not = ($attach_id) ? "" : "NOT";
 
         my $invalid_data =
-            $dbh->selectrow_array("SELECT 1 FROM flags
-                                   WHERE id IN (" . join(',', @flag_ids) . ")
-                                   AND ($field != ? OR attach_id IS $not NULL) " .
-                                   $dbh->sql_limit(1),
-                                   undef, $field_id);
+            $dbh->selectrow_array(
+                      "SELECT 1 FROM flags
+                        WHERE " 
+                       . $dbh->sql_in('id', \@flag_ids) 
+                       . " AND ($field != ? OR attach_id IS $not NULL) "
+                       . $dbh->sql_limit(1), undef, $field_id);
 
         if ($invalid_data) {
             ThrowCodeError('invalid_flag_association',

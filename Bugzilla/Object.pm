@@ -145,8 +145,9 @@ sub new_from_list {
             push(@detainted_ids, $id);
         }
         $objects = $dbh->selectall_arrayref(
-            "SELECT $columns FROM $table WHERE $id_field IN (" 
-            . join(',', @detainted_ids) . ") ORDER BY $order", {Slice=>{}});
+            "SELECT $columns FROM $table WHERE " 
+            . $dbh->sql_in($id_field, \@detainted_ids) 
+            . "ORDER BY $order", {Slice=>{}});
     } else {
         return [];
     }

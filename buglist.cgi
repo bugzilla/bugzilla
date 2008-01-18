@@ -1084,7 +1084,7 @@ if (@bugidlist) {
      "LEFT JOIN group_control_map " .
             "ON group_control_map.product_id = bugs.product_id " .
            "AND group_control_map.group_id = bug_group_map.group_id " .
-         "WHERE bugs.bug_id IN (" . join(',',@bugidlist) . ") " .
+         "WHERE " . $dbh->sql_in('bugs.bug_id', \@bugidlist) . 
             $dbh->sql_group_by('bugs.bug_id'));
     $sth->execute();
     while (my ($bug_id, $min_membercontrol) = $sth->fetchrow_array()) {
@@ -1161,19 +1161,23 @@ if ($dotweak) {
     my @bug_statuses = map {$dbh->quote($_)} keys %$bugstatuses;
     my $bug_status_ids =
       $dbh->selectcol_arrayref('SELECT id FROM bug_status
-                                WHERE value IN (' . join(', ', @bug_statuses) .')');
+                               WHERE ' . $dbh->sql_in('value', \@bug_statuses));
 
     # This query collects new statuses which are common to all current bug statuses.
     # It also accepts transitions where the bug status doesn't change.
     $bug_status_ids =
-      $dbh->selectcol_arrayref('SELECT DISTINCT new_status
-                                FROM status_workflow sw1
-                                WHERE NOT EXISTS (SELECT * FROM status_workflow sw2
-                                                  WHERE sw2.old_status != sw1.new_status
-                                                  AND sw2.old_status IN (' . join(', ', @$bug_status_ids) . ')
-                                                  AND NOT EXISTS (SELECT * FROM status_workflow sw3
-                                                                  WHERE sw3.new_status = sw1.new_status
-                                                                  AND sw3.old_status = sw2.old_status))');
+      $dbh->selectcol_arrayref(
+            'SELECT DISTINCT new_status
+               FROM status_workflow sw1
+              WHERE NOT EXISTS 
+                   (SELECT * FROM status_workflow sw2
+                     WHERE sw2.old_status != sw1.new_status 
+                           AND '
+                         . $dbh->sql_in('sw2.old_status', $bug_status_ids)
+                         . ' AND NOT EXISTS 
+                           (SELECT * FROM status_workflow sw3
+                             WHERE sw3.new_status = sw1.new_status
+                                   AND sw3.old_status = sw2.old_status))');
 
     $vars->{'current_bug_statuses'} = [keys %$bugstatuses];
     $vars->{'new_bug_statuses'} = Bugzilla::Status->new_from_list($bug_status_ids);

@@ -635,8 +635,8 @@ sub update_cc {
     my ($removed, $added) = diff_arrays(\@old_cc, \@new_cc);
     
     if (scalar @$removed) {
-        $dbh->do('DELETE FROM cc WHERE bug_id = ? AND who IN (' .
-                  join(',', @$removed) . ')', undef, $self->id);
+        $dbh->do('DELETE FROM cc WHERE bug_id = ? AND ' 
+                 . $dbh->sql_in('who', $removed), undef, $self->id);
     }
     foreach my $user_id (@$added) {
         $dbh->do('INSERT INTO cc (bug_id, who) VALUES (?,?)',
@@ -722,8 +722,8 @@ sub update_keywords {
     my ($removed, $added) = diff_arrays(\@old_ids, \@new_ids);
 
     if (scalar @$removed) {
-        $dbh->do('DELETE FROM keywords WHERE bug_id = ? AND keywordid IN ('
-                 . join(',', @$removed) . ')', undef, $self->id);
+        $dbh->do('DELETE FROM keywords WHERE bug_id = ? AND ' 
+                 . $dbh->sql_in('keywordid', $removed), undef, $self->id);
     }
     foreach my $keyword_id (@$added) {
         $dbh->do('INSERT INTO keywords (bug_id, keywordid) VALUES (?,?)',
@@ -798,8 +798,8 @@ sub remove_from_db {
                                   WHERE bug_id = ?", undef, $bug_id);
 
     if (scalar(@$attach_ids)) {
-        $dbh->do("DELETE FROM attach_data WHERE id IN (" .
-                 join(",", @$attach_ids) . ")");
+        $dbh->do("DELETE FROM attach_data WHERE " 
+                 . $dbh->sql_in('id', $attach_ids));
     }
 
     # Several of the previous tables also depend on attach_id.
@@ -3018,7 +3018,7 @@ sub CountOpenDependencies {
     my $sth = $dbh->prepare(
           "SELECT blocked, COUNT(bug_status) " .
             "FROM bugs, dependencies " .
-           "WHERE blocked IN (" . (join "," , @bug_list) . ") " .
+           "WHERE " . $dbh->sql_in('blocked', \@bug_list) .
              "AND bug_id = dependson " .
              "AND bug_status IN (" . join(', ', map {$dbh->quote($_)} BUG_STATE_OPEN)  . ") " .
           $dbh->sql_group_by('blocked'));

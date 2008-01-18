@@ -352,8 +352,8 @@ sub init {
                     $extra .= " AND actcheck.added = $sql_chvalue";
                 }
                 push(@supptables, "LEFT JOIN bugs_activity AS actcheck " .
-                                  "ON $extra AND actcheck.fieldid IN (" .
-                                  join(",", @actlist) . ")");
+                                  "ON $extra AND " 
+                                 . $dbh->sql_in('actcheck.fieldid', \@actlist));
             }
 
             # Now that we're done using @list to determine if there are any
@@ -1082,7 +1082,7 @@ sub init {
                  push(@list, $q);
              }
              if (@list) {
-                 $term = "$ff IN (" . join (',', @list) . ")";
+                 $term = $dbh->sql_in($ff, \@list);
              }
          },
          ",anywordssubstr" => sub {
@@ -1519,7 +1519,7 @@ sub build_subselect {
     my $dbh = Bugzilla->dbh;
     my $list = $dbh->selectcol_arrayref($q);
     return "1=2" unless @$list; # Could use boolean type on dbs which support it
-    return "$outer IN (" . join(',', @$list) . ")";
+    return $dbh->sql_in($outer, $list);
 }
 
 sub GetByWordList {

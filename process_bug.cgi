@@ -327,11 +327,9 @@ if ($cgi->param('product') ne $cgi->param('dontchange')) {
     $product = Bugzilla::Product::check_product(scalar $cgi->param('product'));
     @newprod_ids = ($product->id);
 } else {
-    @newprod_ids = @{$dbh->selectcol_arrayref("SELECT DISTINCT product_id
-                                               FROM bugs 
-                                               WHERE bug_id IN (" .
-                                                   join(',', @idlist) . 
-                                               ")")};
+    @newprod_ids = @{$dbh->selectcol_arrayref(
+        "SELECT DISTINCT product_id FROM bugs WHERE " 
+        . $dbh->sql_in('bug_id', \@idlist))};
     if (scalar(@newprod_ids) == 1) {
         $product = new Bugzilla::Product($newprod_ids[0]);
     }

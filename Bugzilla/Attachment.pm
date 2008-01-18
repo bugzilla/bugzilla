@@ -99,13 +99,14 @@ sub _retrieve {
         'attachments.isprivate AS isprivate'
     );
     my $columns = join(", ", @columns);
-
-    my $records = Bugzilla->dbh->selectall_arrayref("SELECT $columns
-                                                     FROM attachments
-                                                     WHERE attach_id IN (" .
-                                                     join(",", @$ids) . ")
-                                                     ORDER BY attach_id",
-                                                    { Slice => {} });
+    my $dbh = Bugzilla->dbh;
+    my $records = $dbh->selectall_arrayref(
+                      "SELECT $columns
+                         FROM attachments
+                        WHERE " 
+                       . Bugzilla->dbh->sql_in('attach_id', $ids) 
+                 . " ORDER BY attach_id",
+                       { Slice => {} });
     return $records;
 }
 

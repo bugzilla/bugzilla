@@ -64,7 +64,6 @@ sub FILESYSTEM {
     my $libdir        = bz_locations()->{'libpath'};
     my $extlib        = bz_locations()->{'ext_libpath'};
     my $skinsdir      = bz_locations()->{'skinsdir'};
-    my $localconfig   = bz_locations()->{'localconfig'};
 
     my $ws_group      = Bugzilla->localconfig->{'webservergroup'};
 
@@ -116,8 +115,6 @@ sub FILESYSTEM {
         'email_in.pl'     => { perms => $ws_executable },
         'sanitycheck.pl'  => { perms => $ws_executable },
         'install-module.pl' => { perms => $owner_executable },
-
-        "$localconfig.old" => { perms => $owner_readable },
 
         'docs/makedocs.pl'   => { perms => $owner_executable },
         'docs/rel_notes.txt' => { perms => $ws_readable },

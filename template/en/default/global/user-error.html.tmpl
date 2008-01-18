@@ -1387,7 +1387,7 @@
     You must enter a summary for this [% terms.bug %].
 
   [% ELSIF error == "resolution_cant_clear" %]
-    [% terms.Bug %] [% bug_id FILTER bug_link(bug_id) FILTER none %] is 
+    [% terms.Bug %] [%+ bug_id FILTER bug_link(bug_id) FILTER none %] is 
     closed, so you cannot clear its resolution.
 
   [% ELSIF error == "resolution_not_allowed" %]

@@ -187,12 +187,10 @@ EOT
     },
 );
 
-use constant OLD_LOCALCONFIG_VARS => qw(
-    mysqlpath
-    contenttypes
-    pages
-    severities platforms opsys priorities
-);
+# When you read the symbol table of a package in Perl (like we do to
+# get the localconfig variables), there are some symbols that are always
+# there and should be ignored.
+use constant IGNORE_SYMBOLS => qw(_ INC __ANON__);
 
 sub read_localconfig {
     my ($include_deprecated) = @_;
@@ -221,10 +219,24 @@ Please fix the error in your 'localconfig' file. Alternately, rename your
 EOT
         }
 
-        my @vars = map($_->{name}, LOCALCONFIG_VARS);
-        push(@vars, OLD_LOCALCONFIG_VARS) if $include_deprecated;
-        foreach my $var (@vars) {
-            my $glob = $s->varglob($var);
+        # First we have to get the whole symbol table
+        my $safe_root = $s->root;
+        my %safe_package;
+        { no strict 'refs'; %safe_package = %{$safe_root . "::"}; }
+        # And now we read the contents of every var in the symbol table
+        # except those from IGNORE_SYMBOLS. If $include_deprecated is false,
+        # we also skip any vars that aren't specifically listed in
+        # LOCALCONFIG_VARS.
+        my @standard_vars = map($_->{name}, LOCALCONFIG_VARS);
+        foreach my $symbol (keys %safe_package) {
+            if (!$include_deprecated) {
+                next if !grep($_ eq $symbol, @standard_vars);
+            }
+            next if grep($_ eq $symbol, IGNORE_SYMBOLS);
+            # Perl 5.10 imports a lot of symbols that we want to ignore that
+            # all contain "::".
+            next if $symbol =~ /::/;
+            my $glob = $s->varglob($symbol);
             # We can't get the type of a variable out of a Safe automatically.
             # We can only get the glob itself. So we figure out its type this
             # way, by trying first a scalar, then an array, then a hash.
@@ -234,13 +246,13 @@ EOT
             # fine since as I write this all modern localconfig vars are 
             # actually scalars.
             if (defined $$glob) {
-                $localconfig{$var} = $$glob;
+                $localconfig{$symbol} = $$glob;
             }
             elsif (defined @$glob) {
-                $localconfig{$var} = \@$glob;
+                $localconfig{$symbol} = \@$glob;
             }
             elsif (defined %$glob) {
-                $localconfig{$var} = \%$glob;
+                $localconfig{$symbol} = \%$glob;
             }
         }
     }
@@ -290,11 +302,6 @@ sub update_localconfig {
         }
     }
 
-    my @old_vars;
-    foreach my $name (OLD_LOCALCONFIG_VARS) {
-        push(@old_vars, $name) if defined $localconfig->{$name};
-    }
-
     if (!$localconfig->{'interdiffbin'} && $output) {
         print <<EOT
 
@@ -307,30 +314,41 @@ as well), you should install patchutils from:
 EOT
     }
 
+    my @old_vars;
+    foreach my $var (keys %$localconfig) {
+        push(@old_vars, $var) if !grep($_->{name} eq $var, LOCALCONFIG_VARS);
+    }
+
     my $filename = bz_locations->{'localconfig'};
 
+    # Move any custom or old variables into a separate file.
     if (scalar @old_vars) {
+        my $filename_old = "$filename.old";
+        open(my $old_file, ">>$filename_old") || die "$filename_old: $!";
+        local $Data::Dumper::Purity = 1;
+        foreach my $var (@old_vars) {
+            print $old_file Data::Dumper->Dump([$localconfig->{$var}], 
+                                               ["*$var"]) . "\n\n";
+        }
+        close $old_file;
         my $oldstuff = join(', ', @old_vars);
         print <<EOT
 
 The following variables are no longer used in $filename, and
-should be removed: $oldstuff
+have been moved to $filename_old: $oldstuff
 
 EOT
     }
 
-    if (scalar @new_vars) {
-        my $filename = bz_locations->{'localconfig'};
-        my $fh = new IO::File($filename, '>>') || die "$filename: $!";
-        $fh->seek(0, SEEK_END);
-        foreach my $var (LOCALCONFIG_VARS) {
-            if (grep($_ eq $var->{name}, @new_vars)) {
-                print $fh "\n", $var->{desc},
-                      Data::Dumper->Dump([$localconfig->{$var->{name}}], 
-                                         ["*$var->{name}"]);
-            }
-        }
+    # Re-write localconfig
+    open(my $fh, ">$filename") || die "$filename: $!";
+    foreach my $var (LOCALCONFIG_VARS) {
+        print $fh "\n", $var->{desc},
+                  Data::Dumper->Dump([$localconfig->{$var->{name}}],
+                                     ["*$var->{name}"]);
+   }
 
+    if (@new_vars) {
         my $newstuff = join(', ', @new_vars);
         print <<EOT;
 

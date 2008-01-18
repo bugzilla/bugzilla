@@ -75,7 +75,6 @@ $vars->{'use_keywords'} = 1 if Bugzilla::Keyword::keyword_count();
 
 my @editable_bug_fields = editable_bug_fields();
 
-my $requiremilestone = 0;
 local our $PrivilegesRequired = 0;
 
 ######################################################################
@@ -268,48 +267,9 @@ if (should_set('product')) {
     }
 }
 
-# Confirm that the reporter of the current bug can access the bug we are duping to.
-sub DuplicateUserConfirm {
-    my ($dupe, $original) = @_;
-    my $cgi = Bugzilla->cgi;
-    my $dbh = Bugzilla->dbh;
-    my $template = Bugzilla->template;
-
-    # if we've already been through here, then exit
-    if (defined $cgi->param('confirm_add_duplicate')) {
-        return;
-    }
-
-    if ($dupe->reporter->can_see_bug($original)) {
-        $cgi->param('confirm_add_duplicate', '1');
-        return;
-    }
-    elsif (Bugzilla->usage_mode == USAGE_MODE_EMAIL) {
-        # The email interface defaults to the safe alternative, which is
-        # not CC'ing the user.
-        $cgi->param('confirm_add_duplicate', 0);
-        return;
-    }
-
-    $vars->{'cclist_accessible'} = $dbh->selectrow_array(
-        q{SELECT cclist_accessible FROM bugs WHERE bug_id = ?},
-        undef, $original);
-    
-    # Once in this part of the subroutine, the user has not been auto-validated
-    # and the duper has not chosen whether or not to add to CC list, so let's
-    # ask the duper what he/she wants to do.
-    
-    $vars->{'original_bug_id'} = $original;
-    $vars->{'duplicate_bug_id'} = $dupe->bug_id;
-    
-    # Confirm whether or not to add the reporter to the cc: list
-    # of the original bug (the one this bug is being duped against).
-    print Bugzilla->cgi->header();
-    $template->process("bug/process/confirm-duplicate.html.tmpl", $vars)
-      || ThrowTemplateError($template->error());
-    exit;
-}
-
+# Component, target_milestone, and version are in here just in case
+# the 'product' field wasn't defined in the CGI. It doesn't hurt to set
+# them twice.
 my @set_fields = qw(op_sys rep_platform priority bug_severity
                     component target_milestone version
                     bug_file_loc status_whiteboard short_desc
@@ -324,9 +284,13 @@ my %methods = (
     bug_file_loc => 'set_url',
 );
 foreach my $b (@bug_objects) {
-    # Component, target_milestone, and version are in here just in case
-    # the 'product' field wasn't defined in the CGI. It doesn't hurt to set
-    # them twice.
+    if (should_set('comment') || $cgi->param('work_time')) {
+        # Add a comment as needed to each bug. This is done early because
+        # there are lots of things that want to check if we added a comment.
+        $b->add_comment(scalar($cgi->param('comment')),
+            { isprivate => scalar $cgi->param('commentprivacy'),
+              work_time => scalar $cgi->param('work_time') });
+    }
     foreach my $field_name (@set_fields) {
         if (should_set($field_name)) {
             my $method = $methods{$field_name};
@@ -480,7 +444,13 @@ if ($action eq Bugzilla->params->{'move-button-text'}) {
     foreach my $bug (@bug_objects) {
         my ($status, $resolution) = $bug->get_new_status_and_resolution('move');
         $bug->set_status($status);
-        $bug->set_resolution($resolution);
+        # We don't use set_resolution here because the MOVED resolution is
+        # special and is normally rejected by set_resolution.
+        $bug->{resolution} = $resolution;
+        # That means that we need to clear dups manually. Eventually this
+        # bug-moving code will all be inside Bugzilla::Bug, so it's OK
+        # to call an internal function here.
+        $bug->_clear_dup_id;
     }
     $_->update() foreach @bug_objects;
     $dbh->bz_unlock_tables();
@@ -527,56 +497,34 @@ if ($action eq Bugzilla->params->{'move-button-text'}) {
 }
 
 
-if (($cgi->param('set_default_assignee') || $cgi->param('set_default_qa_contact'))
-    && Bugzilla->params->{'commentonreassignbycomponent'} && !comment_exists())
-{
-        ThrowUserError('comment_required');
+# You cannot mark bugs as duplicates when changing several bugs at once
+# (because currently there is no way to check for duplicate loops in that
+# situation).
+if (!$cgi->param('id') && $cgi->param('dup_id')) {
+    ThrowUserError('dupe_not_allowed');
 }
 
-my $duplicate; # It will store the ID of the bug we are pointing to, if any.
-
-# Make sure the bug status transition is legal for all bugs.
-my $knob = scalar $cgi->param('knob');
-# Special actions (duplicate, change_resolution and clearresolution) are outside
-# the workflow.
-if (!grep { $knob eq $_ } SPECIAL_STATUS_WORKFLOW_ACTIONS) {
-    # Make sure the bug status exists and is active.
-    check_field('bug_status', $knob);
-    my $bug_status = new Bugzilla::Status({name => $knob});
-    $_->check_status_transition($bug_status) foreach @bug_objects;
-
-    # Fill the resolution field with the correct value (e.g. in case the
-    # workflow allows several open -> closed transitions).
-    if ($bug_status->is_open) {
-        $cgi->delete('resolution');
+# Set the status, resolution, and dupe_of (if needed). This has to be done
+# down here, because the validity of status changes depends on other fields,
+# such as Target Milestone.
+foreach my $b (@bug_objects) {
+    if (should_set('knob')) {
+        # First, get the correct resolution <select>, in case there is more
+        # than one open -> closed transition allowed.
+        my $knob = $cgi->param('knob');
+        my $status = new Bugzilla::Status({name => $knob});
+        my $resolution;
+        if ($status) {
+            $resolution = $cgi->param('resolution_knob_' . $status->id);
+        }
+        else {
+            $resolution = $cgi->param('resolution_knob_change_resolution');
+        }
+        
+        # Translate the knob values into new status and resolution values.
+        $b->process_knob($knob, $resolution, scalar $cgi->param('dup_id'));
     }
-    else {
-        $cgi->param('resolution', $cgi->param('resolution_knob_' . $bug_status->id));
-    }
 }
-elsif ($knob eq 'change_resolution') {
-    # Fill the resolution field with the correct value.
-    $cgi->param('resolution', $cgi->param('resolution_knob_change_resolution'));
-}
-else {
-    # The resolution field is not in use.
-    $cgi->delete('resolution');
-}
-
-# The action is a valid one.
-trick_taint($knob);
-# Some information is required for checks.
-$vars->{comment_exists} = comment_exists();
-$vars->{bug_id} = $cgi->param('id');
-$vars->{dup_id} = $cgi->param('dup_id');
-$vars->{resolution} = $cgi->param('resolution') || '';
-Bugzilla::Bug->check_status_change_triggers($knob, \@bug_objects, $vars);
-
-# Some triggers require extra actions.
-$duplicate = $vars->{dup_id} if ($knob eq 'duplicate');
-$requiremilestone = $vars->{requiremilestone};
-# $vars->{DuplicateUserConfirm} is true only if a single bug is being edited.
-DuplicateUserConfirm($bug, $duplicate) if $vars->{DuplicateUserConfirm};
 
 my $any_keyword_changes;
 if (defined $cgi->param('keywords')) {
@@ -627,32 +575,6 @@ foreach my $id (@idlist) {
     my $comma = $::comma;
     my $old_bug_obj = new Bugzilla::Bug($id);
 
-    my ($status, $everconfirmed);
-    my $resolution = $old_bug_obj->resolution;
-    # We only care about the resolution field if the user explicitly edits it
-    # or if he closes the bug.
-    if ($knob eq 'change_resolution' || $cgi->param('resolution')) {
-        $resolution = $cgi->param('resolution');
-    }
-    ($status, $resolution, $everconfirmed) =
-      $old_bug_obj->get_new_status_and_resolution($knob, $resolution);
-
-    if ($status ne $old_bug_obj->bug_status) {
-        $query .= "$comma bug_status = ?";
-        push(@bug_values, $status);
-        $comma = ',';
-    }
-    if ($resolution ne $old_bug_obj->resolution) {
-        $query .= "$comma resolution = ?";
-        push(@bug_values, $resolution);
-        $comma = ',';
-    }
-    if ($everconfirmed ne $old_bug_obj->everconfirmed) {
-        $query .= "$comma everconfirmed = ?";
-        push(@bug_values, $everconfirmed);
-        $comma = ',';
-    }
-
     my $bug_changed = 0;
     my $write = "WRITE";        # Might want to make a param to control
                                 # whether we do LOW_PRIORITY ...
@@ -695,9 +617,6 @@ foreach my $id (@idlist) {
         $formhash{$col} = $cgi->param($col) if defined $cgi->param($col);
         $i++;
     }
-    # The status and resolution are defined by the workflow.
-    $formhash{'bug_status'} = $status;
-    $formhash{'resolution'} = $resolution;
 
     # This hash is required by Bug::check_can_change_field().
     my $cgi_hash = {'dontchange' => scalar $cgi->param('dontchange')};
@@ -731,15 +650,7 @@ foreach my $id (@idlist) {
     }
 
     my $new_product = $bug_objects{$id}->product_obj;
-    # musthavemilestoneonaccept applies only if at least two
-    # target milestones are defined for the product.
-    if ($requiremilestone
-        && scalar(@{ $new_product->milestones }) > 1
-        && $bug_objects{$id}->target_milestone
-           eq $new_product->default_milestone)
-    {
-        ThrowUserError("milestone_required", { bug_id => $id });
-    }
+
     if (defined $cgi->param('delta_ts') && $cgi->param('delta_ts') ne $delta_ts)
     {
         ($vars->{'operations'}) =
@@ -763,23 +674,32 @@ foreach my $id (@idlist) {
         exit;
     }
 
-    if ($cgi->param('comment') || $cgi->param('work_time') || $duplicate) {
-        my $type = $duplicate ? CMT_DUPE_OF : CMT_NORMAL;
-
-        $bug_objects{$id}->add_comment(scalar($cgi->param('comment')),
-            { isprivate => scalar($cgi->param('commentprivacy')),
-              work_time => scalar $cgi->param('work_time'), type => $type, 
-              extra_data => $duplicate});
-        $bug_changed = 1;
-    }
-    
+   
     #################################
     # Start Actual Database Updates #
     #################################
     
     $timestamp = $dbh->selectrow_array(q{SELECT NOW()});
 
-    $bug_objects{$id}->update($timestamp);
+    my $changes = $bug_objects{$id}->update($timestamp);
+
+    my %notify_deps;
+    if ($changes->{'bug_status'}) {
+        my ($old_status, $new_status) = @{ $changes->{'bug_status'} };
+        
+        # If this bug has changed from opened to closed or vice-versa,
+        # then all of the bugs we block need to be notified.
+        if (is_open_state($old_status) ne is_open_state($new_status)) {
+            $notify_deps{$_} = 1 foreach (@{$bug_objects{$id}->blocked});
+        }
+        
+        # We may have zeroed the remaining time, if we moved into a closed
+        # status, so we should inform the user about that.
+        if (!is_open_state($new_status) && $changes->{'remaining_time'}) {
+            $vars->{'message'} = "remaining_time_zeroed"
+              if Bugzilla->user->in_group(Bugzilla->params->{'timetrackinggroup'});
+        }
+    }
 
     $bug_objects{$id}->update_keywords($timestamp);
     
@@ -788,11 +708,6 @@ foreach my $id (@idlist) {
 
     if ($comma ne '') {
         $dbh->do($query, undef, @bug_values);
-    }
-
-    # Check for duplicates if the bug is [re]open or its resolution is changed.
-    if ($resolution ne 'DUPLICATE') {
-        $dbh->do(q{DELETE FROM duplicates WHERE dupe = ?}, undef, $id);
     }
 
     my ($cc_removed) = $bug_objects{$id}->update_cc($timestamp);
@@ -828,7 +743,6 @@ foreach my $id (@idlist) {
 
     # $msgs will store emails which have to be sent to voters, if any.
     my $msgs;
-    my %notify_deps;
     
     foreach my $c (@editable_bug_fields) {
         my $col = $c;           # We modify it, don't want to modify array
@@ -844,6 +758,7 @@ foreach my $id (@idlist) {
                                         bug_severity short_desc alias
                                         deadline estimated_time remaining_time
                                         reporter_accessible cclist_accessible
+                                        bug_status resolution
                                         status_whiteboard bug_file_loc),
                                      Bugzilla->custom_field_names);
 
@@ -855,14 +770,6 @@ foreach my $id (@idlist) {
                           "This bug has been moved to a different product");
 
                 CheckIfVotedConfirmed($id, $whoid);
-            }
-
-            # If this bug has changed from opened to closed or vice-versa,
-            # then all of the bugs we block need to be notified.
-            if ($col eq 'bug_status' 
-                && is_open_state($old) ne is_open_state($new))
-            {
-                $notify_deps{$_} = 1 foreach (@{$bug_objects{$id}->blocked});
             }
 
             LogActivityEntry($id,$col,$old,$new,$whoid,$timestamp);
@@ -883,35 +790,6 @@ foreach my $id (@idlist) {
         MessageToMTA($msg);
     }
 
-    if ($duplicate) {
-        # If the bug was already marked as a duplicate, remove
-        # the existing entry.
-        $dbh->do('DELETE FROM duplicates WHERE dupe = ?',
-                  undef, $cgi->param('id'));
-
-        my $dup = new Bugzilla::Bug($duplicate);
-        my $reporter = $new_bug_obj->reporter;
-        my $isoncc = $dbh->selectrow_array(q{SELECT who FROM cc
-                                           WHERE bug_id = ? AND who = ?},
-                                           undef, $duplicate, $reporter->id);
-        unless (($reporter->id == $dup->reporter->id) || $isoncc
-                || !$cgi->param('confirm_add_duplicate')) {
-            # The reporter is oblivious to the existence of the original bug
-            # and is permitted access. Add him to the cc (and record activity).
-            LogActivityEntry($duplicate,"cc","",$reporter->name,
-                             $whoid,$timestamp);
-            $dbh->do(q{INSERT INTO cc (who, bug_id) VALUES (?, ?)},
-                     undef, $reporter->id, $duplicate);
-        }
-        # Bug 171639 - Duplicate notifications do not need to be private.
-        $dup->add_comment("", { type => CMT_HAS_DUPE,
-                                extra_data => $new_bug_obj->bug_id });
-        $dup->update($timestamp);
-
-        $dbh->do(q{INSERT INTO duplicates VALUES (?, ?)}, undef,
-                 $duplicate, $cgi->param('id'));
-    }
-
     # Now all changes to the DB have been made. It's time to email
     # all concerned users, including the bug itself, but also the
     # duplicated bug and dependent bugs, if any.
@@ -930,15 +808,18 @@ foreach my $id (@idlist) {
     # receive email about the change.
     send_results($id, $vars);
  
-    if ($duplicate) {
+    # If the bug was marked as a duplicate, we need to notify users on the
+    # other bug of any changes to that bug.
+    my $new_dup_id = $changes->{'dup_id'} ? $changes->{'dup_id'}->[1] : undef;
+    if ($new_dup_id) {
         $vars->{'mailrecipients'} = { 'changer' => Bugzilla->user->login }; 
 
-        $vars->{'id'} = $duplicate;
+        $vars->{'id'} = $new_dup_id;
         $vars->{'type'} = "dupe";
         
         # Let the user know a duplication notation was added to the 
         # original bug.
-        send_results($duplicate, $vars);
+        send_results($new_dup_id, $vars);
     }
 
     my %all_dep_changes = (%notify_deps, %changed_deps);

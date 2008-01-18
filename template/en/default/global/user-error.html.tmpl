@@ -252,14 +252,15 @@
 
   [% ELSIF error == "comment_required" %]
     [% title = "Comment Required" %]
-    You have to specify a <b>comment</b>
-    [% IF old.size && new %]
-      to change the [% terms.bug %] status from [% old.join(", ") FILTER html %]
-      to [% new FILTER html %].
+    You have to specify a
+    [% IF old && new %]
+      <b>comment</b> when changing the status of [% terms.abug %] from
+      [%+ old.name FILTER html %] to [% new.name FILTER html %].
+    [% ELSIF new %]
+      description for this [% terms.bug %].
     [% ELSE %]
-      on this change.
+      <b>comment</b> on this change.
     [% END %]
-    Please explain your change.
 
   [% ELSIF error == "comment_too_long" %]
     [% title = "Comment Too Long" %]
@@ -346,9 +347,10 @@
     [% title = "Dependency Loop Detected" %]
     You can't make [% terms.abug %] block itself or depend on itself.
 
-  [% ELSIF error == "description_required" %]
-    [% title = "Description Required" %]
-    You must provide a description of the [% terms.bug %].
+  [% ELSIF error == "dupe_id_required" %]
+    [% title = "Duplicate Bug Id Required" %]
+    You must specify [% terms.abug %] id to mark this [% terms.bug %]
+    as a duplicate of.
 
   [% ELSIF error == "dupe_not_allowed" %]
     [% title = "Cannot mark $terms.bugs as duplicates" %]
@@ -679,8 +681,13 @@
 
   [% ELSIF error == "illegal_bug_status_transition" %]
     [% title = "Illegal $terms.Bug Status Change" %]
-    You are not allowed to change the [% terms.bug %] status from
-    [%+ old FILTER html %] to [% new FILTER html %].
+    [% IF old.defined %]
+      You are not allowed to change the [% terms.bug %] status from
+      [%+ old.name FILTER html %] to [% new.name FILTER html %].
+    [% ELSE %]
+      You are not allowed to file new [% terms.bugs %] with the
+      [%+ new.name FILTER html %] status. 
+    [% END %]
 
   [% ELSIF error == "illegal_change" %]
     [% title = "Not allowed" %]
@@ -940,7 +947,7 @@
   [% ELSIF error == "milestone_required" %]
     [% title = "Milestone Required" %]
     You must determine a target milestone for [% terms.bug %] 
-    [%+ bug_id FILTER html %]
+    [%+ bug.id FILTER html %]
     if you are going to accept it.  Part of accepting 
     [%+ terms.abug %] is giving an estimate of when it will be fixed.
 
@@ -1379,6 +1386,10 @@
     [% title = "Summary Needed" %]
     You must enter a summary for this [% terms.bug %].
 
+  [% ELSIF error == "resolution_cant_clear" %]
+    [% terms.Bug %] [% bug_id FILTER bug_link(bug_id) FILTER none %] is 
+    closed, so you cannot clear its resolution.
+
   [% ELSIF error == "resolution_not_allowed" %]
     [% title = "Resolution Not Allowed" %]
     You cannot set a resolution for open [% terms.bugs %].
@@ -1659,5 +1670,7 @@
     version
   [% ELSIF class == "Bugzilla::Milestone" %]
     milestone
+  [% ELSIF class == "Bugzilla::Status" %]
+    status
   [% END %]
 [% END %]

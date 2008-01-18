@@ -164,6 +164,7 @@ use constant UPDATE_VALIDATORS => {
     assigned_to         => \&_check_assigned_to,
     bug_status          => \&_check_bug_status,
     cclist_accessible   => \&Bugzilla::Object::check_boolean,
+    dup_id              => \&_check_dup_id,
     qa_contact          => \&_check_qa_contact,
     reporter_accessible => \&Bugzilla::Object::check_boolean,
     resolution          => \&_check_resolution,
@@ -178,14 +179,14 @@ sub UPDATE_COLUMNS {
     my @columns = qw(
         alias
         assigned_to
+        bug_file_loc
+        bug_severity
+        bug_status
         cclist_accessible
         component_id
         deadline
         estimated_time
         everconfirmed
-        bug_file_loc
-        bug_severity
-        bug_status
         op_sys
         priority
         product_id
@@ -437,12 +438,8 @@ sub run_create_validators {
     delete $params->{product};
 
     ($params->{bug_status}, $params->{everconfirmed})
-        = $class->_check_bug_status($params->{bug_status}, $product);
-
-    # Check whether a comment is required on bug creation.
-    my $vars = {};
-    $vars->{comment_exists} = ($params->{comment} =~ /\S+/) ? 1 : 0;
-    Bugzilla::Bug->check_status_change_triggers($params->{bug_status}, [], $vars);
+        = $class->_check_bug_status($params->{bug_status}, $product,
+                                    $params->{comment});
 
     $params->{target_milestone} = $class->_check_target_milestone(
         $params->{target_milestone}, $product);
@@ -582,14 +579,19 @@ sub update {
                          $delta_ts);
     }
 
-    # If this bug is no longer a duplicate, it no longer belongs in the
-    # dup table.
-    if (exists $changes->{'resolution'} 
-        && $changes->{'resolution'}->[0] eq 'DUPLICATE') 
-    {
-        my $dup_id = $self->dup_id;
+    # Check if we have to update the duplicates table and the other bug.
+    my ($old_dup, $cur_dup) = ($old_bug->dup_id || 0, $self->dup_id || 0);
+    if ($old_dup != $cur_dup) {
         $dbh->do("DELETE FROM duplicates WHERE dupe = ?", undef, $self->id);
-        $changes->{'dupe_of'} = [$dup_id, undef];
+        if ($cur_dup) {
+            $dbh->do('INSERT INTO duplicates (dupe, dupe_of) VALUES (?,?)',
+                     undef, $self->id, $cur_dup);
+            if (my $update_dup = delete $self->{_dup_for_update}) {
+                $update_dup->update();
+            }
+        }
+        
+        $changes->{'dup_id'} = [$old_dup || undef, $cur_dup || undef];
     }
 
     # If any change occurred, refresh the timestamp of the bug.
@@ -893,41 +895,62 @@ sub _check_bug_severity {
 }
 
 sub _check_bug_status {
-    my ($invocant, $status, $product) = @_;
+    my ($invocant, $status, $product, $comment) = @_;
     my $user = Bugzilla->user;
 
-    my @valid_statuses;
+    # Make sure this is a valid status.
+    my $new_status = ref $status ? $status : Bugzilla::Status->check($status);
+    
+    my $old_status; # Note that this is undef for new bugs.
     if (ref $invocant) {
         $product = $invocant->product_obj;
-        @valid_statuses = map { $_->name } @{$invocant->status->can_change_to};
+        $old_status = $invocant->status;
+        my $comments = $invocant->{added_comments} || [];
+        $comment = $comments->[-1];
     }
-    else {
-        @valid_statuses = map { $_->name } @{Bugzilla::Status->can_change_to()};
-    }
-
-    if (!$product->votes_to_confirm) {
-        # UNCONFIRMED becomes an invalid status if votes_to_confirm is 0,
-        # even if you are in editbugs.
-        @valid_statuses = grep {$_ ne 'UNCONFIRMED'} @valid_statuses;
-    }
-
-    if (!ref($invocant)) {
+    
+    # Check permissions for users filing new bugs.
+    if (!ref $invocant) {
+        my $default_status = Bugzilla::Status->can_change_to->[0];
+        
         if ($user->in_group('editbugs', $product->id)
             || $user->in_group('canconfirm', $product->id)) {
            # If the user with privs hasn't selected another status,
            # select the first one of the list.
-           $status ||= $valid_statuses[0];
+           $new_status ||= $default_status;
         }
         else {
             # A user with no privs cannot choose the initial status.
-            $status = $valid_statuses[0];
+            $new_status = $default_status;
         }
     }
 
-    # This check already takes the workflow into account.
-    check_field('bug_status', $status, \@valid_statuses);
+    # Make sure this is a valid transition.
+    if (!$new_status->allow_change_from($old_status, $product)) {
+         ThrowUserError('illegal_bug_status_transition',
+                        { old => $old_status, new => $new_status });
+    }
 
-    return $status if ref $invocant;
+    # Check if a comment is required for this change.
+    if ($new_status->comment_required_on_change_from($old_status) && !$comment)
+    {
+        ThrowUserError('comment_required', { old => $old_status,
+                                             new => $new_status });
+        
+    }
+    
+    if (ref $invocant && $new_status->name eq 'ASSIGNED'
+        && Bugzilla->params->{"usetargetmilestone"}
+        && Bugzilla->params->{"musthavemilestoneonaccept"}
+        # musthavemilestoneonaccept applies only if at least two
+        # target milestones are defined for the product.
+        && scalar(@{ $product->milestones }) > 1
+        && $invocant->target_milestone eq $product->default_milestone)
+    {
+        ThrowUserError("milestone_required", { bug => $invocant });
+    }
+
+    return $new_status->name if ref $invocant;
     return ($status, $status eq 'UNCONFIRMED' ? 0 : 1);
 }
 
@@ -1071,6 +1094,85 @@ sub _check_dependencies {
     my %deps = ValidateDependencies($deps_in{dependson}, $deps_in{blocked}, $bug_id);
 
     return ($deps{'dependson'}, $deps{'blocked'});
+}
+
+sub _check_dup_id {
+    my ($self, $dupe_of) = @_;
+    my $dbh = Bugzilla->dbh;
+    
+    $dupe_of = trim($dupe_of);
+    $dupe_of || ThrowCodeError('undefined_field', { field => 'dup_id' });
+    # Make sure we can change the original bug (issue A on bug 96085)
+    ValidateBugID($dupe_of, 'dup_id');
+    
+    # Make sure a loop isn't created when marking this bug
+    # as duplicate.
+    my %dupes;
+    my $this_dup = $dupe_of;
+    my $sth = $dbh->prepare('SELECT dupe_of FROM duplicates WHERE dupe = ?');
+
+    while ($this_dup) {
+        if ($this_dup == $self->id) {
+            ThrowUserError('dupe_loop_detected', { bug_id  => $self->id,
+                                                   dupe_of => $dupe_of });
+        }
+        # If $dupes{$this_dup} is already set to 1, then a loop
+        # already exists which does not involve this bug.
+        # As the user is not responsible for this loop, do not
+        # prevent him from marking this bug as a duplicate.
+        last if exists $dupes{$this_dup};
+        $dupes{$this_dup} = 1;
+        $this_dup = $dbh->selectrow_array($sth, undef, $this_dup);
+    }
+
+    my $cur_dup = $self->dup_id || 0;
+    if ($cur_dup != $dupe_of && Bugzilla->params->{'commentonduplicate'}
+        && !$self->{added_comments})
+    {
+        ThrowUserError('comment_required');
+    }
+
+    # Should we add the reporter to the CC list of the new bug?
+    # If he can see the bug...
+    if ($self->reporter->can_see_bug($dupe_of)) {
+        my $dupe_of_bug = new Bugzilla::Bug($dupe_of);
+        # We only add him if he's not the reporter of the other bug.
+        $self->{_add_dup_cc} = 1
+            if $dupe_of_bug->reporter->id != $self->reporter->id;
+    }
+    # What if the reporter currently can't see the new bug? In the browser 
+    # interface, we prompt the user. In other interfaces, we default to 
+    # not adding the user, as the safest option.
+    elsif (Bugzilla->params->usage_mode == USAGE_MODE_BROWSER) {
+        # If we've already confirmed whether the user should be added...
+        my $cgi = Bugzilla->cgi;
+        my $add_confirmed = $cgi->param('confirm_add_duplicate');
+        if (defined $add_confirmed) {
+            $self->{_add_dup_cc} = $add_confirmed;
+        }
+        else {
+            # Note that here we don't check if he user is already the reporter
+            # of the dupe_of bug, since we already checked if he can *see*
+            # the bug, above. People might have reporter_accessible turned
+            # off, but cclist_accessible turned on, so they might want to
+            # add the reporter even though he's already the reporter of the
+            # dup_of bug.
+            my $vars = {};
+            my $template = Bugzilla->template;
+            # Ask the user what they want to do about the reporter.
+            $vars->{'cclist_accessible'} = $dbh->selectrow_array(
+                q{SELECT cclist_accessible FROM bugs WHERE bug_id = ?},
+                undef, $dupe_of);
+            $vars->{'original_bug_id'} = $dupe_of;
+            $vars->{'duplicate_bug_id'} = $self->id;
+            print $cgi->header();
+            $template->process("bug/process/confirm-duplicate.html.tmpl", $vars)
+              || ThrowTemplateError($template->error());
+            exit;
+        }
+    }
+
+    return $dupe_of;
 }
 
 sub _check_estimated_time {
@@ -1221,9 +1323,45 @@ sub _check_rep_platform {
 }
 
 sub _check_resolution {
-    my ($invocant, $resolution) = @_;
+    my ($self, $resolution) = @_;
     $resolution = trim($resolution);
+    
+    # Throw a special error for resolving bugs without a resolution
+    # (or trying to change the resolution to '' on a closed bug without
+    # using clear_resolution).
+    ThrowUserError('missing_resolution', { status => $self->status->name })
+        if !$resolution && !$self->status->is_open;
+    
+    # Make sure this is a valid resolution.
     check_field('resolution', $resolution);
+
+    # The moving code doesn't use set_resolution. This check prevents
+    # people from hacking the URL variables (or using some other interface)
+    # and setting a bug to MOVED without moving it.
+    ThrowCodeError('no_manual_moved') if $resolution eq 'MOVED';
+    
+    # Don't allow open bugs to have resolutions.
+    ThrowUserError('resolution_not_allowed') if $self->status->is_open;
+    
+    # Check noresolveonopenblockers.
+    if (Bugzilla->params->{"noresolveonopenblockers"} && $resolution eq 'FIXED')
+    {
+        my @dependencies = CountOpenDependencies($self->id);
+        if (@dependencies) {
+            ThrowUserError("still_unresolved_bugs",
+                           { dependencies     => \@dependencies,
+                             dependency_count => scalar @dependencies });
+        }
+    }
+
+    # Check if they're changing the resolution and need to comment.
+    if (Bugzilla->params->{'commentonchange_resolution'} 
+        && $self->resolution && $resolution ne $self->resolution 
+        && !$self->{added_comments})
+    {
+        ThrowUserError('comment_required');
+    }
+    
     return $resolution;
 }
 
@@ -1476,6 +1614,11 @@ sub set_assigned_to {
 }
 sub reset_assigned_to {
     my $self = shift;
+    if (Bugzilla->params->{'commentonreassignbycomponent'} 
+        && !$self->{added_comments})
+    {
+        ThrowUserError('comment_required');
+    }
     my $comp = $self->component_obj;
     $self->set_assigned_to($comp->default_assignee);
 }
@@ -1527,6 +1670,38 @@ sub set_dependencies {
     detaint_natural($_) foreach (@$dependson, @$blocked);
     $self->{'dependson'} = $dependson;
     $self->{'blocked'}   = $blocked;
+}
+sub _clear_dup_id { $_[0]->{dup_id} = undef; }
+sub set_dup_id {
+    my ($self, $dup_id) = @_;
+    my $old = $self->dup_id || 0;
+    $self->set('dup_id', $dup_id);
+    my $new = $self->dup_id || 0;
+    return if $old == $new;
+    
+    # Update the other bug.
+    my $dupe_of = new Bugzilla::Bug($self->dup_id);
+    if (delete $self->{_add_dup_cc}) {
+        $dupe_of->add_cc($self->reporter);
+    }
+    $dupe_of->add_comment("", { type       => CMT_HAS_DUPE,
+                                extra_data => $self->id });
+    $self->{_dup_for_update} = $dupe_of;
+    
+    # Now make sure that we add a duplicate comment on *this* bug.
+    # (Change an existing comment into a dup comment, if there is one,
+    # or add an empty dup comment.)
+    if ($self->{added_comments}) {
+        my @normal = grep { !defined $_->{type} || $_->{type} == CMT_NORMAL }
+                          @{ $self->{added_comments} };
+        # Turn the last one into a dup comment.
+        $normal[-1]->{type} = CMT_DUPE_OF;
+        $normal[-1]->{extra_data} = $self->dup_id;
+    }
+    else {
+        $self->add_comment('', { type       => CMT_DUPE_OF,
+                                 extra_data => $self->dup_id });
+    }
 }
 sub set_estimated_time { $_[0]->set('estimated_time', $_[1]); }
 sub _set_everconfirmed { $_[0]->set('everconfirmed', $_[1]); }
@@ -1665,6 +1840,11 @@ sub set_qa_contact {
 }
 sub reset_qa_contact {
     my $self = shift;
+    if (Bugzilla->params->{'commentonreassignbycomponent'}
+        && !$self->{added_comments})
+    {
+        ThrowUserError('comment_required');
+    }
     my $comp = $self->component_obj;
     $self->set_qa_contact($comp->default_qa_contact);
 }
@@ -1672,14 +1852,73 @@ sub set_remaining_time { $_[0]->set('remaining_time', $_[1]); }
 # Used only when closing a bug or moving between closed states.
 sub _zero_remaining_time { $_[0]->{'remaining_time'} = 0; }
 sub set_reporter_accessible { $_[0]->set('reporter_accessible', $_[1]); }
-sub set_resolution     { $_[0]->set('resolution',    $_[1]); }
-sub clear_resolution   { $_[0]->{'resolution'} = '' }
+sub set_resolution {
+    my ($self, $value, $dupe_of) = @_;
+    
+    my $old_res = $self->resolution;
+    $self->set('resolution', $value);
+    my $new_res = $self->resolution;
+    
+    if ($new_res ne $old_res) {
+        # Clear the dup_id if we're leaving the dup resolution.
+        if ($old_res eq 'DUPLICATE') {
+            $self->_clear_dup_id();
+        }
+        # Duplicates should have no remaining time left.
+        elsif ($new_res eq 'DUPLICATE' && $self->remaining_time != 0) {
+            $self->_zero_remaining_time();
+        }
+    }
+    
+    # We don't check if we're entering or leaving the dup resolution here,
+    # because we could be moving from being a dup of one bug to being a dup
+    # of another, theoretically. Note that this code block will also run
+    # when going between different closed states.
+    if ($self->resolution eq 'DUPLICATE') {
+        if ($dupe_of) {
+            $self->set_dup_id($dupe_of);
+        }
+        elsif (!$self->dup_id) {
+            ThrowUserError('dupe_id_required');
+        }
+    }
+}
+sub clear_resolution {
+    my $self = shift;
+    if (!$self->status->is_open) {
+        ThrowUserError('resolution_cant_clear', { bug_id => $self->id });
+    }
+    if (Bugzilla->params->{'commentonclearresolution'}
+        && $self->resolution && !$self->{added_comments})
+    {
+        ThrowUserError('comment_required');
+    }
+    $self->{'resolution'} = ''; 
+    $self->_clear_dup_id; 
+}
 sub set_severity       { $_[0]->set('bug_severity',  $_[1]); }
 sub set_status {
-    my ($self, $status) = @_;
+    my ($self, $status, $resolution, $dupe_of) = @_;
+    my $old_status = $self->status;
     $self->set('bug_status', $status);
-    # Check for the everconfirmed transition
-    $self->_set_everconfirmed(1) if (is_open_state($status) && $status ne 'UNCONFIRMED');
+    delete $self->{'status'};
+    my $new_status = $self->status;
+    
+    if ($new_status->is_open) {
+        # Check for the everconfirmed transition
+        $self->_set_everconfirmed(1) if $new_status->name ne 'UNCONFIRMED';
+        $self->clear_resolution();
+    }
+    else {
+        # We do this here so that we can make sure closed statuses have
+        # resolutions.
+        $self->set_resolution($resolution || $self->resolution, $dupe_of);
+        
+        # Changing between closed statuses zeros the remaining time.
+        if ($new_status->id != $old_status->id && $self->remaining_time != 0) {
+            $self->_zero_remaining_time();
+        }
+    }
 }
 sub set_status_whiteboard { $_[0]->set('status_whiteboard', $_[1]); }
 sub set_summary           { $_[0]->set('short_desc',        $_[1]); }
@@ -2389,217 +2628,29 @@ sub bug_alias_to_id {
 # Workflow Control routines
 #####################################################################
 
-# Make sure that the new status is allowed by the status workflow.
-sub check_status_transition {
-    my ($self, $new_status) = @_;
-
-    if (!grep { $_->name eq $self->bug_status } @{$new_status->can_change_from}) {
-        ThrowUserError('illegal_bug_status_transition', {old => $self->bug_status,
-                                                         new => $new_status->name})
-    }
-}
-
-# Make sure all checks triggered by the workflow are successful.
-# Some are hardcoded and come from older versions of Bugzilla.
-sub check_status_change_triggers {
-    my ($self, $action, $bugs, $vars) = @_;
+sub process_knob {
+    my ($self, $action, $to_resolution, $dupe_of) = @_;
     my $dbh = Bugzilla->dbh;
-    $vars ||= {};
 
-    my @bug_ids = map {$_->id} @$bugs;
-    # First, make sure no comment is required if there is none.
-    # If a comment is given, then this check is useless.
-    if (!$vars->{comment_exists}) {
-        if (grep { $action eq $_ } SPECIAL_STATUS_WORKFLOW_ACTIONS) {
-            # 'commentonnone' doesn't exist, so this is safe.
-            ThrowUserError('comment_required') if Bugzilla->params->{"commenton$action"};
-        }
-        elsif (!scalar @bug_ids) {
-            # The bug is being created; that's why @bug_ids is undefined.
-            my $comment_required =
-              $dbh->selectrow_array('SELECT require_comment
-                                       FROM status_workflow
-                                 INNER JOIN bug_status
-                                         ON id = new_status
-                                      WHERE old_status IS NULL
-                                        AND value = ?',
-                                      undef, $action);
-
-            ThrowUserError('description_required') if $comment_required;
-        }
-        else {
-            my $required_for_transitions =
-              $dbh->selectcol_arrayref('SELECT DISTINCT bug_status.value
-                                          FROM bug_status
-                                    INNER JOIN bugs
-                                            ON bugs.bug_status = bug_status.value
-                                    INNER JOIN status_workflow
-                                            ON bug_status.id = old_status
-                                    INNER JOIN bug_status b_s
-                                            ON b_s.id = new_status
-                                         WHERE bug_id IN (' . join (',', @bug_ids). ')
-                                           AND b_s.value = ?
-                                           AND require_comment = 1',
-                                         undef, $action);
-
-            if (scalar(@$required_for_transitions)) {
-                ThrowUserError('comment_required', {old => $required_for_transitions,
-                                                    new => $action});
-            }
-        }
-    }
-
-    # Now run hardcoded checks.
-    # There is no checks for these actions.
-    return if ($action eq 'none' || $action eq 'clearresolution');
-
-    # Also leave now if we are creating a new bug (we only want to check
-    # if a comment is required on bug creation).
-    return unless scalar @bug_ids;
-
+    return if $action eq 'none';
+    
     if ($action eq 'duplicate') {
-        # You cannot mark bugs as duplicates when changing
-        # several bugs at once.
-        $vars->{bug_id} || ThrowUserError('dupe_not_allowed');
-
-        # Make sure we can change the original bug (issue A on bug 96085)
-        $vars->{dup_id} || ThrowCodeError('undefined_field', { field => 'dup_id' });
-        ValidateBugID($vars->{dup_id}, 'dup_id');
-
-        # Make sure a loop isn't created when marking this bug
-        # as duplicate.
-        my %dupes;
-        my $dupe_of = $vars->{dup_id};
-        my $sth = $dbh->prepare('SELECT dupe_of FROM duplicates
-                                 WHERE dupe = ?');
-
-        while ($dupe_of) {
-            if ($dupe_of == $vars->{bug_id}) {
-                ThrowUserError('dupe_loop_detected', { bug_id  => $vars->{bug_id},
-                                                       dupe_of => $vars->{dup_id} });
-            }
-            # If $dupes{$dupe_of} is already set to 1, then a loop
-            # already exists which does not involve this bug.
-            # As the user is not responsible for this loop, do not
-            # prevent him from marking this bug as a duplicate.
-            last if exists $dupes{"$dupe_of"};
-            $dupes{"$dupe_of"} = 1;
-            $sth->execute($dupe_of);
-            $dupe_of = $sth->fetchrow_array;
-        }
-
-        # Also, let's see if the reporter has authorization to see
-        # the bug to which we are duping. If not we need to prompt.
-        $vars->{DuplicateUserConfirm} = 1;
-
-        # DUPLICATE bugs should have no time remaining.
-        foreach my $bug (@$bugs) {
-            # Note that 0.00 is *true* for Perl!
-            next unless ($bug->remaining_time > 0);
-            $bug->_zero_remaining_time;
-            $vars->{'message'} = "remaining_time_zeroed"
-              if Bugzilla->user->in_group(Bugzilla->params->{'timetrackinggroup'});
-        }
+        $self->set_status(Bugzilla->params->{'duplicate_or_move_bug_status'},
+                          'DUPLICATE', $dupe_of);
     }
-    elsif ($action eq 'change_resolution' || !is_open_state($action)) {
-        # don't resolve as fixed while still unresolved blocking bugs
-        if (Bugzilla->params->{"noresolveonopenblockers"}
-            && $vars->{resolution} eq 'FIXED')
-        {
-            my @dependencies = Bugzilla::Bug::CountOpenDependencies(@bug_ids);
-            if (scalar @dependencies > 0) {
-                ThrowUserError("still_unresolved_bugs",
-                               { dependencies     => \@dependencies,
-                                 dependency_count => scalar @dependencies });
-            }
-        }
-
-        # You cannot use change_resolution if there is at least one open bug
-        # nor can you close open bugs if no resolution is given.
-        my $open_states = join(',', map {$dbh->quote($_)} BUG_STATE_OPEN);
-        my $idlist = join(',', @bug_ids);
-        my $is_open =
-          $dbh->selectrow_array("SELECT 1 FROM bugs WHERE bug_id IN ($idlist)
-                                 AND bug_status IN ($open_states)");
-
-        if ($is_open) {
-            ThrowUserError('resolution_not_allowed') if ($action eq 'change_resolution');
-            ThrowUserError('missing_resolution', {status => $action}) if !$vars->{resolution};
-        }
-        # Now is good time to validate the resolution, if any.
-        check_field('resolution', $vars->{resolution},
-                    Bugzilla::Bug->settable_resolutions) if $vars->{resolution};
-
-        if ($action ne 'change_resolution') {
-            foreach my $b (@$bugs) {
-                if ($b->bug_status ne $action) {
-                    # Note that 0.00 is *true* for Perl!
-                    next unless ($b->remaining_time > 0);
-                    $b->_zero_remaining_time;
-                    $vars->{'message'} = "remaining_time_zeroed"
-                      if Bugzilla->user->in_group(Bugzilla->params->{'timetrackinggroup'});
-                }
-            }
-        }
-    }
-    elsif ($action eq 'ASSIGNED'
-           && Bugzilla->params->{"usetargetmilestone"}
-           && Bugzilla->params->{"musthavemilestoneonaccept"})
-    {
-        $vars->{requiremilestone} = 1;
-    }
-}
-
-sub get_new_status_and_resolution {
-    my ($self, $action, $resolution) = @_;
-    my $dbh = Bugzilla->dbh;
-
-    my $status;
-    my $everconfirmed = $self->everconfirmed;
-    if ($action eq 'none') {
-        # Leaving the status unchanged doesn't need more investigation.
-        return ($self->bug_status, $self->resolution, $self->everconfirmed);
-    }
-    elsif ($action eq 'duplicate' || $action eq 'move') {
-        # Always change the bug status, even if the bug was already "closed".
-        $status = Bugzilla->params->{'duplicate_or_move_bug_status'};
-        $resolution = ($action eq 'duplicate') ? 'DUPLICATE' : 'MOVED';
+    elsif ($action eq 'move') {
+        $self->set_status(Bugzilla->params->{'duplicate_or_move_bug_status'},
+                          'MOVED');
     }
     elsif ($action eq 'change_resolution') {
-        $status = $self->bug_status;
-        # You cannot change the resolution of an open bug.
-        ThrowUserError('resolution_not_allowed') if is_open_state($status);
-        $resolution || ThrowUserError('missing_resolution', {status => $status});
+        $self->set_resolution($to_resolution);
     }
     elsif ($action eq 'clearresolution') {
-        $status = $self->bug_status;
-        is_open_state($status) || ThrowUserError('missing_resolution', {status => $status});
-        $resolution = '';
+        $self->clear_resolution();
     }
     else {
-        $status = $action;
-        if (is_open_state($status)) {
-            # Open bugs have no resolution.
-            $resolution = '';
-            $everconfirmed = ($status eq 'UNCONFIRMED') ? 0 : 1;
-        }
-        elsif (is_open_state($self->bug_status)) {
-            # A resolution is required to close bugs.
-            $resolution || ThrowUserError('missing_resolution', {status => $status});
-        }
-        else {
-            # Already closed bugs can only change their resolution
-            # using the change_resolution action.
-            $resolution = $self->resolution
-        }
+        $self->set_status($action, $to_resolution);
     }
-    # Now it's time to validate the bug resolution.
-    # Bug resolutions have no workflow specific rules, so any valid
-    # resolution will do it.
-    check_field('resolution', $resolution) if ($resolution ne '');
-    trick_taint($resolution);
-
-    return ($status, $resolution, $everconfirmed);
 }
 
 #####################################################################

@@ -106,6 +106,24 @@ sub can_change_to {
     return $self->{'can_change_to'};
 }
 
+sub allow_change_from {
+    my ($self, $old_status, $product) = @_;
+
+    # Always allow transitions from a status to itself.
+    return 1 if ($old_status && $old_status->id == $self->id);
+
+    if ($self->name eq 'UNCONFIRMED' && !$product->votes_to_confirm) {
+        # UNCONFIRMED is an invalid status transition if votes_to_confirm is 0
+        # in this product.
+        return 0;
+    }
+
+    my ($cond, $values) = $self->_status_condition($old_status);
+    my ($transition_allowed) = Bugzilla->dbh->selectrow_array(
+        "SELECT 1 FROM status_workflow WHERE $cond", undef, @$values);
+    return $transition_allowed ? 1 : 0;
+}
+
 sub can_change_from {
     my $self = shift;
     my $dbh = Bugzilla->dbh;
@@ -126,6 +144,32 @@ sub can_change_from {
     }
 
     return $self->{'can_change_from'};
+}
+
+sub comment_required_on_change_from {
+    my ($self, $old_status) = @_;
+    my ($cond, $values) = $self->_status_condition($old_status);
+    
+    my ($require_comment) = Bugzilla->dbh->selectrow_array(
+        "SELECT require_comment FROM status_workflow
+          WHERE $cond", undef, @$values);
+    return $require_comment;
+}
+
+# Used as a helper for various functions that have to deal with old_status
+# sometimes being NULL and sometimes having a value.
+sub _status_condition {
+    my ($self, $old_status) = @_;
+    my @values;
+    my $cond = 'old_status IS NULL';
+    # For newly-filed bugs
+    if ($old_status) {
+        $cond = 'old_status = ?';
+        push(@values, $old_status->id);
+    }
+    $cond .= " AND new_status = ?";
+    push(@values, $self->id);
+    return ($cond, \@values);
 }
 
 sub add_missing_bug_status_transitions {
@@ -214,6 +258,60 @@ below.
  Params:      none.
 
  Returns:     A list of Bugzilla::Status objects.
+
+=item C<allow_change_from>
+
+=over
+
+=item B<Description>
+
+Tells you whether or not a change to this status from another status is
+allowed.
+
+=item B<Params>
+
+=over
+
+=item C<$old_status> - The Bugzilla::Status you're changing from.
+
+=item C<$product> - A L<Bugzilla::Product> representing the product of
+the bug you're changing. Needed to check product-specific workflow
+issues (such as whether or not the C<UNCONFIRMED> status is enabled
+in this product).
+
+=back
+
+=item B<Returns>
+
+C<1> if you are allowed to change to this status from that status, or
+C<0> if you aren't allowed.
+
+Note that changing from a status to itself is always allowed.
+
+=back
+
+=item C<comment_required_on_change_from>
+
+=over
+
+=item B<Description>
+
+Checks if a comment is required to change to this status from another
+status, according to the current settings in the workflow.
+
+Note that this doesn't implement the checks enforced by the various
+C<commenton> parameters--those are checked by internal checks in
+L<Bugzilla::Bug>.
+
+=item B<Params>
+
+C<$old_status> - The status you're changing from.
+
+=item B<Returns>
+
+C<1> if a comment is required on this change, C<0> if not.
+
+=back
 
 =item C<add_missing_bug_status_transitions>
 

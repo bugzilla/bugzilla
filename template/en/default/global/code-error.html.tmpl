@@ -309,6 +309,10 @@
   [% ELSIF error == "need_quipid" %]
     A valid quipid is needed.
 
+  [% ELSIF error == "no_manual_moved" %]
+    You cannot set the resolution of [% terms.abug %] to MOVED without
+    moving the [% terms.bug %].
+
   [% ELSIF error == "param_must_be_numeric" %]
     [% title = "Invalid Parameter" %]
     Invalid parameter passed to [% function FILTER html %].

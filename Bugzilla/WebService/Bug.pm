@@ -57,11 +57,17 @@ use constant GLOBAL_SELECT_FIELDS => qw(
 
 use constant PRODUCT_SPECIFIC_FIELDS => qw(version target_milestone component);
 
+######################################################
+# Add aliases here for old method name compatibility #
+######################################################
+
+BEGIN { *get_bugs = \&get }
+
 ###########
 # Methods #
 ###########
 
-sub get_bugs {
+sub get {
     my ($self, $params) = @_;
     my $ids = $params->{ids};
     defined $ids || ThrowCodeError('param_required', { param => 'ids' });
@@ -280,13 +286,15 @@ You specified a field that doesn't exist or isn't a drop-down field.
 
 =over
 
-=item C<get_bugs> B<EXPERIMENTAL>
+=item C<get> B<EXPERIMENTAL>
 
 =over
 
 =item B<Description>
 
 Gets information about particular bugs in the database.
+
+Note: Can also be called as "get_bugs" for compatibilty with Bugzilla 3.0 API.
 
 =item B<Params>
 

@@ -235,13 +235,15 @@ if (defined($Bugzilla_login)) {
 
 =head2 Retrieving Bug Information
 
-Call C<Bug.get_bug> with the ID of the bug you want to know more of.
-The call will return a C<Bugzilla::Bug> object.
+Call C<Bug.get> with the ID of the bug you want to know more of.
+The call will return a C<Bugzilla::Bug> object. 
+
+Note: You can also use "Bug.get_bugs" for compatibility with Bugzilla 3.0 API.
 
 =cut
 
 if ($bug_id) {
-    $soapresult = $proxy->call('Bug.get_bugs', { ids => [$bug_id] });
+    $soapresult = $proxy->call('Bug.get', { ids => [$bug_id] });
     _die_on_fault($soapresult);
     $result = $soapresult->result;
     my $bug = $result->{bugs}->[0];

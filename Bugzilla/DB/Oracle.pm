@@ -50,7 +50,7 @@ use base qw(Bugzilla::DB);
 # Constants
 #####################################################################
 use constant EMPTY_STRING  => '__BZ_EMPTY_STR__';
-use constant ISOLATION_LEVEL => 'SERIALIZABLE';
+use constant ISOLATION_LEVEL => 'READ COMMITTED';
 use constant BLOB_TYPE => { ora_type => ORA_BLOB };
 
 sub new {

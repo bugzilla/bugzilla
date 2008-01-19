@@ -688,7 +688,7 @@
         versions, and you upgrade.
       </para>
     </warning>
-       
+      
     <para>
       Companies often have rules about which employees, or classes of employees,
       are allowed to change certain things in the bug system. For example, 
@@ -697,6 +697,16 @@
       designed to make it easy for you to write your own custom rules to define
       who is allowed to make what sorts of value transition.
     </para>
+
+    <para>
+     By default, assignees, QA owners and users
+     with <emphasis>editbugs</emphasis> privileges can edit all fields of bugs, 
+     except group restrictions (unless they are members of the groups they 
+     are trying to change). Bug reporters also have the ability to edit some 
+     fields, but in a more restrictive manner. Other users, without 
+     <emphasis>editbugs</emphasis> privileges, can not edit 
+     bugs, except to comment and add themselves to the CC list.
+    </para> 
     
     <para>
       For maximum flexibility, customizing this means editing Bugzilla's Perl 

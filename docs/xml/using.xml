@@ -572,7 +572,15 @@
         link which details how to use it.
       </para>
     </section>
-
+    <section id="casesensitivity">
+      <title>Case Sensitivity in Searches</title>
+      <para>
+      Bugzilla queries are case-insensitive and accent-insensitive, when
+      used with either MySQL or Oracle databases. When using Bugzilla with
+      PostgreSQL, however, some queries are case-sensitive. This is due to
+      the way PostgreSQL handles case and accent sensitivity. 
+      </para>
+    </section>
     <section id="list">
       <title>Bug Lists</title>
 

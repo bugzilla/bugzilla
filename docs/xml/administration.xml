@@ -355,25 +355,33 @@
         <para>
           If you have <quote>editusers</quote> privileges or if you are allowed
           to grant privileges for some groups, the <quote>Users</quote> link
-          appears in the footer.
+          will appear in the Administration page.
         </para>
 
         <para>
-          The first screen you get is a search form to search for existing user
-          accounts. You can run searches based either on the ID, real name or
-          login name (i.e. the email address in most cases) of users. You can
-          search in different ways the listbox to the right of the text entry
+          The first screen is a search form to search for existing user
+          accounts. You can run searches based either on the user ID, real
+          name or login name (i.e. the email address, or just the first part
+          of the email address if the "emailsuffix" parameter is set).
+          The search can be conducted
+          in different ways using the listbox to the right of the text entry
           box. You can match by case-insensitive substring (the default),
           regular expression, a <emphasis>reverse</emphasis> regular expression
-          match, which finds every user name which does NOT match the regular
-          expression, or the exact string if you know exactly who you are looking for.
+          match (which finds every user name which does NOT match the regular
+          expression), or the exact string if you know exactly who you are
+          looking for. The search can be restricted to users who are in a
+          specific group. By default, the restriction is turned off.
         </para>
 
         <para>
-          You can also restrict your search to users being in some specific group.
-          By default, the restriction is turned off. Then you get a list of
-          users matching your criteria, and clicking their login name lets you
-          edit their properties.
+          The search returns a list of
+          users matching your criteria. User properties can be edited by clicking
+          the login name. The Account History of a user can be viewed by clicking
+          the "View" link in the Account History column. The Account History
+          displays changes that have been made to the user account, the time of
+          the change and the user who made the change. For example, the Account
+          History page will display details of when a user was added or removed
+          from a group.
         </para>
       </section>
 

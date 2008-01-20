@@ -3211,11 +3211,10 @@ sub CheckIfVotedConfirmed {
 # $oldvalue - what they are changing it from
 # $newvalue - what they are changing it to
 # $PrivilegesRequired - return the reason of the failure, if any
-# $data     - hash containing relevant parameters, e.g. from the CGI object
 ################################################################################
 sub check_can_change_field {
     my $self = shift;
-    my ($field, $oldvalue, $newvalue, $PrivilegesRequired, $data) = (@_);
+    my ($field, $oldvalue, $newvalue, $PrivilegesRequired) = (@_);
     my $user = Bugzilla->user;
 
     $oldvalue = defined($oldvalue) ? $oldvalue : '';
@@ -3231,7 +3230,6 @@ sub check_can_change_field {
         return 1;
     # numeric fields need to be compared using ==
     } elsif (($field eq 'estimated_time' || $field eq 'remaining_time')
-             && (!$data || $newvalue ne $data->{'dontchange'})
              && $oldvalue == $newvalue)
     {
         return 1;

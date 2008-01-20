@@ -648,7 +648,7 @@
     </section>
   </section>
 
-  <section id="classifications">
+  <section id="classifications" xreflabel="Classifications">
     <title>Classifications</title>
 
     <para>Classifications tend to be used in order to group several related
@@ -667,18 +667,21 @@
     will also appear in the advanced search form.</para>
   </section>
 
-  <section id="products">
+  <section id="products" xreflabel="Products">
     <title>Products</title>
 
     <para>
     <glossterm linkend="gloss-product" baseform="product">
-    Products</glossterm>
-    tend to represent real-world
-    shipping products. E.g. if your company makes computer games, 
-    you should have one product per game, perhaps a 
+    Products</glossterm> typically represent real-world
+    shipping products. Products can be given 
+    <xref linkend="classifications"/>. 
+    For example, if a company makes computer games, 
+    they could have a classification of "Games", and a separate
+    product for each game. This company might also have a 
     <quote>Common</quote> product for units of technology used 
-    in multiple games, and maybe a few special products 
-    (Website, Administration...)
+    in multiple games, and perhaps a few special products that
+    represent items that are not actually shipping products 
+    (for example, "Website", or "Administration").
     </para>
 
     <para>
@@ -690,16 +693,143 @@
     </para>
 
     <para>
+    When creating or editing products the following options are
+    available: 
+    </para> 
+
+    <variablelist>
+
+      <varlistentry>
+        <term>
+          Product
+        </term>
+        <listitem>
+          <para> 
+            The name of the product
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>
+          Description
+        </term>
+        <listitem>
+          <para> 
+            A brief description of the product
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>
+          URL describing milestones for this product
+        </term>
+        <listitem>
+          <para> 
+            If there is reference URL, provide it here
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>
+          Default milestone
+        </term>
+        <listitem>
+          <para> 
+            Select the default milestone for this product.
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>
+          Closed for bug entry
+        </term>
+        <listitem>
+          <para> 
+            Select this box to prevent new bugs from being
+            entered against this product.
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>
+          Maximum votes per person
+        </term>
+        <listitem>
+          <para> 
+            Maximum votes a user is allowed to give for this 
+            product
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>
+          Maximum votes a person can put on a single bug
+        </term>
+        <listitem>
+          <para> 
+            Maximum votes a user is allowed to give for this 
+            product in a single bug
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>
+          Confirmation threshold
+        </term>
+        <listitem>
+          <para> 
+            Number of votes needed to automatically remove any
+            bug against this product from the UNCONFIRMED state
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>
+          Version
+        </term>
+        <listitem>
+          <para> 
+            Specify which version of the product bugs will be
+            entered against.
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>
+          Create chart datasets for this product
+        </term>
+        <listitem>
+          <para> 
+            Select to make chart datasets available for this product.
+          </para>
+        </listitem>
+      </varlistentry>
+
+    </variablelist>
+
+    <para>
+    When editing a product there is also a link to edit
+    <xref linkend="product-group-controls"/>.
+    </para>
+    <para>
     To create a new product:
     </para>
 
     <orderedlist>
       <listitem>
         <para> 
-        Select <quote>Adminstration</quote> from the footer and then
+        Select <quote>Administration</quote> from the footer and then
         choose <quote>Products</quote> from the main administration page.
         </para>
-
       </listitem>
 
       <listitem>
@@ -714,10 +844,20 @@
         Description field may contain HTML.
         </para>
       </listitem>
+
+      <listitem>
+        <para>
+        When the product is created, Bugzilla will give a message
+        stating that a component must be created before any bugs can
+        be entered against the new product. Follow the link to create
+        a new component. See <xref linkend="components"/> for more
+        information.
+        </para>
+      </listitem>
     </orderedlist>
 
 
-<section>
+    <section id="product-group-controls" xreflabel="Group Access Controls">
       <title>Assigning Group Controls to Products</title>
       <para> 
       On the <quote>Product Edit</quote> page, 
@@ -834,7 +974,7 @@ foo: ENTRY, MANDATORY/MANDATORY, CANEDIT
 
   </section>
 
-  <section id="components">
+  <section id="components" xreflabel="Components">
     <title>Components</title>
 
     <para>Components are subsections of a Product. E.g. the computer game 

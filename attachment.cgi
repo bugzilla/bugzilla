@@ -649,19 +649,11 @@ sub delete_attachment {
         $template->process("attachment/delete_reason.txt.tmpl", $vars, \$msg)
           || ThrowTemplateError($template->error());
 
-        $dbh->bz_start_transaction();
-        $dbh->do('DELETE FROM attach_data WHERE id = ?', undef, $attachment->id);
-        $dbh->do('UPDATE attachments SET mimetype = ?, ispatch = ?, isurl = ?,
-                         isobsolete = ?
-                  WHERE attach_id = ?', undef,
-                 ('text/plain', 0, 0, 1, $attachment->id));
-        $dbh->do('DELETE FROM flags WHERE attach_id = ?', undef, $attachment->id);
-        $dbh->bz_commit_transaction();
-
         # If the attachment is stored locally, remove it.
         if (-e $attachment->_get_local_filename) {
             unlink $attachment->_get_local_filename;
         }
+        $attachment->remove_from_db();
 
         # Now delete the token.
         delete_token($token);

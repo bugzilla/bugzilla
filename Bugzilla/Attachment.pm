@@ -758,8 +758,6 @@ Params:     C<$bug> - Bugzilla::Bug object - the bug for which to insert
 
 Returns:    the ID of the new attachment.
 
-=back
-
 =cut
 
 sub insert_attachment_for_bug {
@@ -930,6 +928,32 @@ sub insert_attachment_for_bug {
 
     # Return the new attachment object.
     return $attachment;
+}
+
+=pod
+
+=item C<remove_from_db()>
+
+Description: removes an attachment from the DB.
+
+Params:     none
+
+Returns:    nothing
+
+=back
+
+=cut
+
+sub remove_from_db {
+    my $self = shift;
+    my $dbh = Bugzilla->dbh;
+
+    $dbh->bz_start_transaction();
+    $dbh->do('DELETE FROM flags WHERE attach_id = ?', undef, $self->id);
+    $dbh->do('DELETE FROM attach_data WHERE id = ?', undef, $self->id);
+    $dbh->do('UPDATE attachments SET mimetype = ?, ispatch = ?, isurl = ?, isobsolete = ?
+              WHERE attach_id = ?', undef, ('text/plain', 0, 0, 1, $self->id));
+    $dbh->bz_commit_transaction();
 }
 
 1;

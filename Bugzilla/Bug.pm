@@ -494,11 +494,30 @@ sub update {
     # XXX This is just a temporary hack until all updating happens
     # inside this function.
     my $delta_ts = shift || $dbh->selectrow_array("SELECT NOW()");
-    $self->{delta_ts} = $delta_ts;
 
     my $old_bug = $self->new($self->id);
     my $changes = $self->SUPER::update(@_);
-    
+
+    # Certain items in $changes have to be fixed so that they hold
+    # a name instead of an ID.
+    foreach my $field (qw(product_id component_id)) {
+        my $change = delete $changes->{$field};
+        if ($change) {
+            my $new_field = $field;
+            $new_field =~ s/_id$//;
+            $changes->{$new_field} = 
+                [$self->{"_old_${new_field}_name"}, $self->$new_field];
+        }
+    }
+    foreach my $field (qw(qa_contact assigned_to)) {
+        if ($changes->{$field}) {
+            my ($from, $to) = @{ $changes->{$field} };
+            $from = $old_bug->$field->login if $from;
+            $to   = $self->$field->login    if $to;
+            $changes->{$field} = [$from, $to];
+        }
+    }
+
     my %old_groups = map {$_->id => $_} @{$old_bug->groups_in};
     my %new_groups = map {$_->id => $_} @{$self->groups_in};
     my ($removed_gr, $added_gr) = diff_arrays([keys %old_groups],
@@ -565,16 +584,6 @@ sub update {
         my $change = $changes->{$field};
         my $from = defined $change->[0] ? $change->[0] : '';
         my $to   = defined $change->[1] ? $change->[1] : '';
-        # Certain fields have their name stored in bugs_activity, not their id.
-        if ( grep($_ eq $field, qw(product_id component_id)) ) {
-            $field =~ s/_id$//;
-            $from  = $self->{"_old_${field}_name"};
-            $to    = $self->$field;
-        }
-        if (grep ($_ eq $field, qw(qa_contact assigned_to))) {
-            $from = $old_bug->$field->login if $from;
-            $to   = $self->$field->login    if $to;
-        }
         LogActivityEntry($self->id, $field, $from, $to, Bugzilla->user->id,
                          $delta_ts);
     }
@@ -598,6 +607,7 @@ sub update {
     if (scalar(keys %$changes) || $self->{added_comments}) {
         $dbh->do('UPDATE bugs SET delta_ts = ? WHERE bug_id = ?',
                  undef, ($delta_ts, $self->id));
+        $self->{delta_ts} = $delta_ts;
     }
 
     return $changes;
@@ -745,6 +755,7 @@ sub update_keywords {
 
         $dbh->do('UPDATE bugs SET delta_ts = ? WHERE bug_id = ?',
                  undef, ($delta_ts, $self->id));
+        $self->{delta_ts} = $delta_ts;
     }
 
     return [$removed_keywords, $added_keywords];

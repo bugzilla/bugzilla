@@ -63,19 +63,13 @@ use Bugzilla::Status;
 use Storable qw(dclone);
 
 my $user = Bugzilla->login(LOGIN_REQUIRED);
-local our $whoid = $user->id;
-my $grouplist = $user->groups_as_string;
 
 my $cgi = Bugzilla->cgi;
 my $dbh = Bugzilla->dbh;
 my $template = Bugzilla->template;
-local our $vars = {};
+my $vars = {};
 $vars->{'valid_keywords'} = [map($_->name, Bugzilla::Keyword->get_all)];
 $vars->{'use_keywords'} = 1 if Bugzilla::Keyword::keyword_count();
-
-my @editable_bug_fields = editable_bug_fields();
-
-local our $PrivilegesRequired = 0;
 
 ######################################################################
 # Subroutines
@@ -104,32 +98,20 @@ sub should_set {
     # a checkbox.
     my ($field, $check_defined) = @_;
     my $cgi = Bugzilla->cgi;
-    if (( defined $cgi->param($field) 
-          || ($check_defined && defined $cgi->param("defined_$field")) )
-        && ( !$cgi->param('dontchange') 
-             || $cgi->param($field) ne $cgi->param('dontchange')) )
+    if ( defined $cgi->param($field) 
+         || ($check_defined && defined $cgi->param("defined_$field")) )
     {
         return 1;
     }
     return 0;
 }
 
-sub comment_exists {
-    my $cgi = Bugzilla->cgi;
-    return ($cgi->param('comment') && $cgi->param('comment') =~ /\S+/) ? 1 : 0;
-}
-
 ######################################################################
 # Begin Data/Security Validation
 ######################################################################
 
-# Create a list of IDs of all bugs being modified in this request.
-# This list will either consist of a single bug number from the "id"
-# form/URL field or a series of numbers from multiple form/URL fields
-# named "id_x" where "x" is the bug number.
-# For each bug being modified, make sure its ID is a valid bug number 
-# representing an existing bug that the user is authorized to access.
-my (@idlist, @bug_objects);
+# Create a list of objects for all bugs being modified in this request.
+my @bug_objects;
 if (defined $cgi->param('id')) {
   my $id = $cgi->param('id');
   ValidateBugID($id);
@@ -137,50 +119,32 @@ if (defined $cgi->param('id')) {
   # Store the validated, and detainted id back in the cgi data, as
   # lots of later code will need it, and will obtain it from there
   $cgi->param('id', $id);
-  push @idlist, $id;
   push(@bug_objects, new Bugzilla::Bug($id));
 } else {
+    my @ids;
     foreach my $i ($cgi->param()) {
         if ($i =~ /^id_([1-9][0-9]*)/) {
             my $id = $1;
             ValidateBugID($id);
-            push @idlist, $id;
-            # We do this until we have Bugzilla::Bug->new_from_list.
-            push(@bug_objects, new Bugzilla::Bug($id));
+            push(@ids, $id);
         }
     }
+    @bug_objects = @{Bugzilla::Bug->new_from_list(\@ids)};
 }
 
 # Make sure there are bugs to process.
-scalar(@idlist) || ThrowUserError("no_bugs_chosen", {action => 'modify'});
+scalar(@bug_objects) || ThrowUserError("no_bugs_chosen", {action => 'modify'});
 
-# Build a bug object using the first bug id, for validations.
-my $bug = $bug_objects[0];
+my $first_bug = $bug_objects[0]; # Used when we're only updating a single bug.
 
-# Make sure form param 'dontchange' is defined so it can be compared to easily.
-$cgi->param('dontchange','') unless defined $cgi->param('dontchange');
-
-# Make sure the 'knob' param is defined; else set it to 'none'.
-$cgi->param('knob', 'none') unless defined $cgi->param('knob');
-
-$cgi->param('comment', $bug->_check_comment($cgi->param('comment')));
-
-# If the bug(s) being modified have dependencies, validate them
-# and rebuild the list with the validated values.  This is important
-# because there are situations where validation changes the value
-# instead of throwing an error, f.e. when one or more of the values
-# is a bug alias that gets converted to its corresponding bug ID
-# during validation.
-if ($cgi->param('id') && (defined $cgi->param('dependson')
-                          || defined $cgi->param('blocked')) )
-{
-    $bug->set_dependencies(scalar $cgi->param('dependson'),
-                           scalar $cgi->param('blocked'));
-}
-# Right now, you can't modify dependencies on a mass change.
-else {
-    $cgi->delete('dependson');
-    $cgi->delete('blocked');
+# Delete any parameter set to 'dontchange'.
+if (defined $cgi->param('dontchange')) {
+    foreach my $name ($cgi->param) {
+        next if $name eq 'dontchange'; # But don't delete dontchange itself!
+        if ($cgi->param($name) eq $cgi->param('dontchange')) {
+            $cgi->delete($name);
+        }
+    }
 }
 
 # do a match on the fields if applicable
@@ -205,20 +169,35 @@ Bugzilla::Flag::validate($cgi, $cgi->param('id'));
 ######################################################################
 
 print $cgi->header() unless Bugzilla->usage_mode == USAGE_MODE_EMAIL;
-$vars->{'title_tag'} = "bug_processed";
 
-# Set the title if we can see a mid-air coming. This test may have false
-# negatives, but never false positives, and should catch the majority of cases.
-# It only works at all in the single bug case.
-if (defined $cgi->param('id')) {
-    if (defined $cgi->param('delta_ts')
-        && $cgi->param('delta_ts') ne $bug->delta_ts)
-    {
-        $vars->{'title_tag'} = "mid_air";
-        ThrowCodeError('undefined_field', {field => 'longdesclength'})
-          if !defined $cgi->param('longdesclength');
-    }
+# Check for a mid-air collision. Currently this only works when updating
+# an individual bug.
+if (defined $cgi->param('delta_ts')
+    && $cgi->param('delta_ts') ne $first_bug->delta_ts)
+{
+    ($vars->{'operations'}) =
+        Bugzilla::Bug::GetBugActivity($first_bug->id, undef,
+                                      scalar $cgi->param('delta_ts'));
+
+    $vars->{'title_tag'} = "mid_air";
+    
+    ThrowCodeError('undefined_field', { field => 'longdesclength' })
+        if !defined $cgi->param('longdesclength');
+
+    $vars->{'start_at'} = $cgi->param('longdesclength');
+    # Always sort midair collision comments oldest to newest,
+    # regardless of the user's personal preference.
+    $vars->{'comments'} = Bugzilla::Bug::GetComments($first_bug->id,
+                                                     "oldest_to_newest");
+    $vars->{'bug'} = $first_bug;
+    
+    # Warn the user about the mid-air collision and ask them what to do.
+    $template->process("bug/process/midair.html.tmpl", $vars)
+      || ThrowTemplateError($template->error());
+    exit;
 }
+
+$vars->{'title_tag'} = "bug_processed";
 
 # Set up the vars for navigational <link> elements
 my @bug_list;
@@ -227,43 +206,69 @@ if ($cgi->cookie("BUGLIST") && defined $cgi->param('id')) {
     $vars->{'bug_list'} = \@bug_list;
 }
 
-my $product_change; # XXX Temporary until all of process_bug uses update()
-if (should_set('product')) {
-    # We only pass the fields if they're defined and not set to dontchange.
-    # This is because when you haven't changed the product, --do-not-change--
-    # isn't a valid component, version, or target_milestone. (When you're
-    # doing a mass-change, some bugs might already be in the new product.)
-    my %product_fields;
-    foreach my $field (qw(component version target_milestone)) {
-        if (should_set($field)) {
-            $product_fields{$field} = $cgi->param($field);
-        }
+# For each bug, we have to check if the user can edit the bug the product
+# is currently in, before we allow them to change anything.
+foreach my $bug (@bug_objects) {
+    if (!Bugzilla->user->can_edit_product($bug->product_obj->id) ) {
+        ThrowUserError("product_edit_denied",
+                      { product => $bug->product });
     }
+}
 
+# For security purposes, and because lots of other checks depend on it,
+# we set the product first before anything else.
+my $product_change; # Used only for strict_isolation checks, right now.
+if (should_set('product')) {
     foreach my $b (@bug_objects) {
         my $changed = $b->set_product(scalar $cgi->param('product'),
-            { %product_fields,
+            { component        => scalar $cgi->param('component'),
+              version          => scalar $cgi->param('version'),
+              target_milestone => scalar $cgi->param('target_milestone'),
               change_confirmed => scalar $cgi->param('confirm_product_change'),
               other_bugs => \@bug_objects,
             });
         $product_change ||= $changed;
+    }
+}
         
-        # strict_isolation checks mean that we should set the groups
-        # immediately after changing the product.
-        foreach my $group (@{$b->product_obj->groups_valid}) {
-            my $gid = $group->id;
-            if (should_set("bit-$gid", 1)) {
-                # Check ! first to avoid having to check defined below.
-                if (!$cgi->param("bit-$gid")) {
-                    $b->remove_group($gid);
-                }
-                # "== 1" is important because mass-change uses -1 to mean
-                # "don't change this restriction"
-                elsif ($cgi->param("bit-$gid") == 1) {
-                    $b->add_group($gid);
-                }
+# strict_isolation checks mean that we should set the groups
+# immediately after changing the product.
+foreach my $b (@bug_objects) {
+    foreach my $group (@{$b->product_obj->groups_valid}) {
+        my $gid = $group->id;
+        if (should_set("bit-$gid", 1)) {
+            # Check ! first to avoid having to check defined below.
+            if (!$cgi->param("bit-$gid")) {
+                $b->remove_group($gid);
+            }
+            # "== 1" is important because mass-change uses -1 to mean
+            # "don't change this restriction"
+            elsif ($cgi->param("bit-$gid") == 1) {
+                $b->add_group($gid);
             }
         }
+    }
+}
+
+if ($cgi->param('id') && (defined $cgi->param('dependson')
+                          || defined $cgi->param('blocked')) )
+{
+    $first_bug->set_dependencies(scalar $cgi->param('dependson'),
+                                 scalar $cgi->param('blocked'));
+}
+# Right now, you can't modify dependencies on a mass change.
+else {
+    $cgi->delete('dependson');
+    $cgi->delete('blocked');
+}
+
+my $any_keyword_changes;
+if (defined $cgi->param('keywords')) {
+    foreach my $b (@bug_objects) {
+        my $return =
+            $b->modify_keywords(scalar $cgi->param('keywords'),
+                                scalar $cgi->param('keywordaction'));
+        $any_keyword_changes ||= $return;
     }
 }
 
@@ -276,6 +281,7 @@ my @set_fields = qw(op_sys rep_platform priority bug_severity
                     deadline remaining_time estimated_time);
 push(@set_fields, 'assigned_to') if !$cgi->param('set_default_assignee');
 push(@set_fields, 'qa_contact')  if !$cgi->param('set_default_qa_contact');
+my @custom_fields = Bugzilla->get_fields({custom => 1, obsolete => 0});
 
 my %methods = (
     bug_severity => 'set_severity',
@@ -300,60 +306,31 @@ foreach my $b (@bug_objects) {
     }
     $b->reset_assigned_to if $cgi->param('set_default_assignee');
     $b->reset_qa_contact  if $cgi->param('set_default_qa_contact');
-}
 
-my $action = trim($cgi->param('action') || '');
-
-$::query = "UPDATE bugs SET";
-$::comma = "";
-local our @values;
-umask(0);
-
-sub DoComma {
-    $::query .= "$::comma\n    ";
-    $::comma = ",";
-}
-
-# Add custom fields data to the query that will update the database.
-foreach my $field (Bugzilla->get_fields({custom => 1, obsolete => 0})) {
-    my $fname = $field->name;
-    if (should_set($fname, 1)) {
-        $_->set_custom_field($field, [$cgi->param($fname)]) foreach @bug_objects;
+    # And set custom fields.
+    foreach my $field (@custom_fields) {
+        my $fname = $field->name;
+        if (should_set($fname, 1)) {
+            $b->set_custom_field($field, [$cgi->param($fname)]);
+        }
     }
 }
-
-my ($product, @newprod_ids);
-if ($cgi->param('product') ne $cgi->param('dontchange')) {
-    $product = Bugzilla::Product::check_product(scalar $cgi->param('product'));
-    @newprod_ids = ($product->id);
-} else {
-    @newprod_ids = @{$dbh->selectcol_arrayref(
-        "SELECT DISTINCT product_id FROM bugs WHERE " 
-        . $dbh->sql_in('bug_id', \@idlist))};
-    if (scalar(@newprod_ids) == 1) {
-        $product = new Bugzilla::Product($newprod_ids[0]);
-    }
-}
-
-my (@cc_add, @cc_remove);
 
 # Certain changes can only happen on individual bugs, never on mass-changes.
 if (defined $cgi->param('id')) {
-    my $bug = $bug_objects[0];
-    
     # Since aliases are unique (like bug numbers), they can only be changed
     # for one bug at a time.
     if (Bugzilla->params->{"usebugaliases"} && defined $cgi->param('alias')) {
-        $bug->set_alias($cgi->param('alias'));
+        $first_bug->set_alias($cgi->param('alias'));
     }
 
     # reporter_accessible and cclist_accessible--these are only set if
     # the user can change them and they appear on the page.
     if (should_set('cclist_accessible', 1)) {
-        $bug->set_cclist_accessible($cgi->param('cclist_accessible'))
+        $first_bug->set_cclist_accessible($cgi->param('cclist_accessible'))
     }
     if (should_set('reporter_accessible', 1)) {
-        $bug->set_reporter_accessible($cgi->param('reporter_accessible'))
+        $first_bug->set_reporter_accessible($cgi->param('reporter_accessible'))
     }
     
     # You can only mark/unmark comments as private on single bugs. If
@@ -361,8 +338,8 @@ if (defined $cgi->param('id')) {
     foreach my $field (grep(/^defined_isprivate/, $cgi->param())) {
         $field =~ /(\d+)$/;
         my $comment_id = $1;
-        $bug->set_comment_is_private($comment_id,
-                                     $cgi->param("isprivate_$comment_id"));
+        $first_bug->set_comment_is_private($comment_id,
+                                           $cgi->param("isprivate_$comment_id"));
     }
 }
 
@@ -370,6 +347,7 @@ if (defined $cgi->param('id')) {
 # any bugs. What we'll do here is formulate the CC data into two arrays of
 # users involved in this CC change.  Then those arrays can be used later 
 # on for the actual change.
+my (@cc_add, @cc_remove);
 if (defined $cgi->param('newcc')
     || defined $cgi->param('addselfcc')
     || defined $cgi->param('removecc')
@@ -413,7 +391,8 @@ foreach my $b (@bug_objects) {
     }
 }
 
-if ($action eq Bugzilla->params->{'move-button-text'}) {
+my $move_action = $cgi->param('action') || '';
+if ($move_action eq Bugzilla->params->{'move-button-text'}) {
     Bugzilla->params->{'move-enabled'} || ThrowUserError("move_bugs_disabled");
 
     $user->is_mover || ThrowUserError("auth_failure", {action => 'move',
@@ -454,11 +433,11 @@ if ($action eq Bugzilla->params->{'move-button-text'}) {
     $dbh->bz_unlock_tables();
 
     # Now send emails.
-    foreach my $id (@idlist) {
+    foreach my $bug (@bug_objects) {
         $vars->{'mailrecipients'} = { 'changer' => $user->login };
-        $vars->{'id'} = $id;
+        $vars->{'id'} = $bug->id;
         $vars->{'type'} = "move";
-        send_results($id, $vars);
+        send_results($bug->id, $vars);
     }
     # Prepare and send all data about these bugs to the new database
     my $to = Bugzilla->params->{'move-to-address'};
@@ -467,7 +446,8 @@ if ($action eq Bugzilla->params->{'move-button-text'}) {
     $from =~ s/@/\@/;
     my $msg = "To: $to\n";
     $msg .= "From: Bugzilla <" . $from . ">\n";
-    $msg .= "Subject: Moving bug(s) " . join(', ', @idlist) . "\n\n";
+    $msg .= "Subject: Moving bug(s) " . join(', ', map($_->id, @bug_objects))
+            . "\n\n";
 
     my @fieldlist = (Bugzilla::Bug->fields, 'group', 'long_desc',
                      'attachment', 'attachmentdata');
@@ -524,56 +504,10 @@ foreach my $b (@bug_objects) {
     }
 }
 
-my $any_keyword_changes;
-if (defined $cgi->param('keywords')) {
-    foreach my $b (@bug_objects) {
-        my $return =
-            $b->modify_keywords(scalar $cgi->param('keywords'),
-                                scalar $cgi->param('keywordaction'));
-        $any_keyword_changes ||= $return;
-    }
-}
-
-if ($::comma eq ""
-    && !$any_keyword_changes
-    && defined $cgi->param('masscc') && ! $cgi->param('masscc')
-    ) {
-    if (!defined $cgi->param('comment') || $cgi->param('comment') =~ /^\s*$/) {
-        ThrowUserError("bugs_not_changed");
-    }
-}
-
-my $basequery = $::query;
-
-local our $delta_ts;
-sub SnapShotBug {
-    my ($id) = (@_);
-    my $dbh = Bugzilla->dbh;
-    my @row = $dbh->selectrow_array(q{SELECT delta_ts, } .
-                join(',', editable_bug_fields()).q{ FROM bugs WHERE bug_id = ?},
-                undef, $id);
-    $delta_ts = shift @row;
-
-    return @row;
-}
-
-my $timestamp;
-
-my %bug_objects = map {$_->id => $_} @bug_objects;
-
-# This loop iterates once for each bug to be processed (i.e. all the
-# bugs selected when this script is called with multiple bugs selected
-# from buglist.cgi, or just the one bug when called from
-# show_bug.cgi).
-#
-foreach my $id (@idlist) {
-    my $query = $basequery;
-    my @bug_values = @values;
-    # XXX We really have to get rid of $::comma.
-    my $comma = $::comma;
-    my $old_bug_obj = new Bugzilla::Bug($id);
-
-    my $bug_changed = 0;
+##############################
+# Do Actual Database Updates #
+##############################
+foreach my $bug (@bug_objects) {
     my $write = "WRITE";        # Might want to make a param to control
                                 # whether we do LOW_PRIORITY ...
 
@@ -593,93 +527,10 @@ foreach my $id (@idlist) {
             "group_control_map AS newcontrolmap READ",
             "group_control_map READ", "email_setting READ", 
             "classifications READ", @multi_select_locks);
-
-    # It may sound crazy to set %formhash for each bug as $cgi->param()
-    # will not change, but %formhash is modified below and we prefer
-    # to set it again.
-    my $i = 0;
-    my @oldvalues = SnapShotBug($id);
-    my %oldhash;
-    my %formhash;
-    foreach my $col (@editable_bug_fields) {
-        # Consider NULL db entries to be equivalent to the empty string
-        $oldvalues[$i] = defined($oldvalues[$i]) ? $oldvalues[$i] : '';
-        # Convert the deadline taken from the DB into the YYYY-MM-DD format
-        # for consistency with the deadline provided by the user, if any.
-        # Else Bug::check_can_change_field() would see them as different
-        # in all cases.
-        if ($col eq 'deadline') {
-            $oldvalues[$i] = format_time($oldvalues[$i], "%Y-%m-%d");
-        }
-        $oldhash{$col} = $oldvalues[$i];
-        $formhash{$col} = $cgi->param($col) if defined $cgi->param($col);
-        $i++;
-    }
-
-    # This hash is required by Bug::check_can_change_field().
-    my $cgi_hash = {'dontchange' => scalar $cgi->param('dontchange')};
-    foreach my $col (@editable_bug_fields) {
-        # XXX - Ugly workaround which has to go away before 3.1.3.
-        next if ($col eq 'assigned_to' || $col eq 'qa_contact');
-        if (exists $formhash{$col}
-            && !$old_bug_obj->check_can_change_field($col, $oldhash{$col}, $formhash{$col},
-                                                     \$PrivilegesRequired, $cgi_hash))
-        {
-            my $vars;
-            if ($col eq 'component_id') {
-                # Display the component name
-                $vars->{'oldvalue'} = $old_bug_obj->component;
-                $vars->{'newvalue'} = $cgi->param('component');
-                $vars->{'field'} = 'component';
-            } else {
-                $vars->{'oldvalue'} = $oldhash{$col};
-                $vars->{'newvalue'} = $formhash{$col};
-                $vars->{'field'} = $col;
-            }
-            $vars->{'privs'} = $PrivilegesRequired;
-            ThrowUserError("illegal_change", $vars);
-        }
-    }
     
-    $oldhash{'product'} = $old_bug_obj->product;
-    if (!Bugzilla->user->can_edit_product($oldhash{'product_id'})) {
-        ThrowUserError("product_edit_denied",
-                      { product => $oldhash{'product'} });
-    }
+    my $timestamp = $dbh->selectrow_array(q{SELECT NOW()});
 
-    my $new_product = $bug_objects{$id}->product_obj;
-
-    if (defined $cgi->param('delta_ts') && $cgi->param('delta_ts') ne $delta_ts)
-    {
-        ($vars->{'operations'}) =
-            Bugzilla::Bug::GetBugActivity($id, undef, $cgi->param('delta_ts'));
-
-        $vars->{'start_at'} = $cgi->param('longdesclength');
-
-        # Always sort midair collision comments oldest to newest,
-        # regardless of the user's personal preference.
-        $vars->{'comments'} = Bugzilla::Bug::GetComments($id, "oldest_to_newest");
-
-        $cgi->param('delta_ts', $delta_ts);
-        
-        $vars->{'bug_id'} = $id;
-        
-        $dbh->bz_unlock_tables(UNLOCK_ABORT);
-        
-        # Warn the user about the mid-air collision and ask them what to do.
-        $template->process("bug/process/midair.html.tmpl", $vars)
-          || ThrowTemplateError($template->error());
-        exit;
-    }
-
-   
-    #################################
-    # Start Actual Database Updates #
-    #################################
-    
-    $timestamp = $dbh->selectrow_array(q{SELECT NOW()});
-
-    my $changes = $bug_objects{$id}->update($timestamp);
+    my $changes = $bug->update($timestamp);
 
     my %notify_deps;
     if ($changes->{'bug_status'}) {
@@ -688,7 +539,7 @@ foreach my $id (@idlist) {
         # If this bug has changed from opened to closed or vice-versa,
         # then all of the bugs we block need to be notified.
         if (is_open_state($old_status) ne is_open_state($new_status)) {
-            $notify_deps{$_} = 1 foreach (@{$bug_objects{$id}->blocked});
+            $notify_deps{$_} = 1 foreach (@{$bug->blocked});
         }
         
         # We may have zeroed the remaining time, if we moved into a closed
@@ -699,19 +550,12 @@ foreach my $id (@idlist) {
         }
     }
 
-    $bug_objects{$id}->update_keywords($timestamp);
+    $bug->update_keywords($timestamp);
     
-    $query .= " WHERE bug_id = ?";
-    push(@bug_values, $id);
-
-    if ($comma ne '') {
-        $dbh->do($query, undef, @bug_values);
-    }
-
-    my ($cc_removed) = $bug_objects{$id}->update_cc($timestamp);
+    my ($cc_removed) = $bug->update_cc($timestamp);
     $cc_removed = [map {$_->login} @$cc_removed];
 
-    my ($dep_changes) = $bug_objects{$id}->update_dependencies($timestamp);
+    my ($dep_changes) = $bug->update_dependencies($timestamp);
     
     # Convert the "changes" hash into a list of all the bug ids, then
     # convert that into a hash to eliminate duplicates. ("map {@$_}" collapses
@@ -720,91 +564,46 @@ foreach my $id (@idlist) {
     push(@all_changed_deps, map { @$_ } @{$dep_changes->{'blocked'}});
     my %changed_deps = map { $_ => 1 } @all_changed_deps;
 
-    # get a snapshot of the newly set values out of the database,
-    # and then generate any necessary bug activity entries by seeing 
-    # what has changed since before we wrote out the new values.
-    #
-    my $new_bug_obj = new Bugzilla::Bug($id);
-    my @newvalues = SnapShotBug($id);
-    my %newhash;
-    $i = 0;
-    foreach my $col (@editable_bug_fields) {
-        # Consider NULL db entries to be equivalent to the empty string
-        $newvalues[$i] = defined($newvalues[$i]) ? $newvalues[$i] : '';
-        # Convert the deadline to the YYYY-MM-DD format.
-        if ($col eq 'deadline') {
-            $newvalues[$i] = format_time($newvalues[$i], "%Y-%m-%d");
-        }
-        $newhash{$col} = $newvalues[$i];
-        $i++;
-    }
-
     # $msgs will store emails which have to be sent to voters, if any.
     my $msgs;
-    
-    foreach my $c (@editable_bug_fields) {
-        my $col = $c;           # We modify it, don't want to modify array
-                                # values in place.
-        my $old = shift @oldvalues;
-        my $new = shift @newvalues;
-        if ($old ne $new) {
+    if ($changes->{'product'}) {
+        # If some votes have been removed, RemoveVotes() returns
+        # a list of messages to send to voters.
+        # We delay the sending of these messages till tables are unlocked.
+        $msgs = RemoveVotes($bug->id, 0,
+                  "This bug has been moved to a different product");
 
-            # Bugzilla::Bug does these for us already.
-            next if grep($_ eq $col, qw(keywords op_sys rep_platform priority
-                                        product_id component_id version
-                                        target_milestone assigned_to qa_contact
-                                        bug_severity short_desc alias
-                                        deadline estimated_time remaining_time
-                                        reporter_accessible cclist_accessible
-                                        bug_status resolution
-                                        status_whiteboard bug_file_loc),
-                                     Bugzilla->custom_field_names);
-
-            if ($col eq 'product') {
-                # If some votes have been removed, RemoveVotes() returns
-                # a list of messages to send to voters.
-                # We delay the sending of these messages till tables are unlocked.
-                $msgs = RemoveVotes($id, 0,
-                          "This bug has been moved to a different product");
-
-                CheckIfVotedConfirmed($id, $whoid);
-            }
-
-            LogActivityEntry($id,$col,$old,$new,$whoid,$timestamp);
-            $bug_changed = 1;
-        }
+        CheckIfVotedConfirmed($bug->id, Bugzilla->user->id);
     }
+
     # Set and update flags.
-    Bugzilla::Flag::process($new_bug_obj, undef, $timestamp, $cgi, $vars);
+    Bugzilla::Flag::process($bug, undef, $timestamp, $cgi, $vars);
 
-    if ($bug_changed) {
-        $dbh->do(q{UPDATE bugs SET delta_ts = ? WHERE bug_id = ?},
-                 undef, $timestamp, $id);
-    }
     $dbh->bz_unlock_tables();
+
+    ###############
+    # Send Emails #
+    ###############
 
     # Now is a good time to send email to voters.
     foreach my $msg (@$msgs) {
         MessageToMTA($msg);
     }
 
-    # Now all changes to the DB have been made. It's time to email
-    # all concerned users, including the bug itself, but also the
-    # duplicated bug and dependent bugs, if any.
-
-    my $orig_qa = $old_bug_obj->qa_contact;
+    my $old_qa  = $changes->{'qa_contact'} ? $changes->{'qa_contact'}->[0] : '';
+    my $old_own =  $changes->{'assigned_to'} ? $changes->{'assigned_to'}->[0] : '';
     $vars->{'mailrecipients'} = {
         cc        => $cc_removed,
-        owner     => $old_bug_obj->assigned_to->login,
-        qacontact => $orig_qa ? $orig_qa->login : '',
+        owner     => $old_own,
+        qacontact => $old_qa,
         changer   => Bugzilla->user->login };
 
-    $vars->{'id'} = $id;
+    $vars->{'id'} = $bug->id;
     $vars->{'type'} = "bug";
     
     # Let the user know the bug was changed and who did and didn't
     # receive email about the change.
-    send_results($id, $vars);
+    send_results($bug->id, $vars);
  
     # If the bug was marked as a duplicate, we need to notify users on the
     # other bug of any changes to that bug.
@@ -841,6 +640,7 @@ eval {
     $vars->{'patchviewerinstalled'} = 1;
 };
 
+my $action;
 if (defined $cgi->param('id')) {
     $action = Bugzilla->user->settings->{'post_bug_submit_action'}->{'value'};
 } else {

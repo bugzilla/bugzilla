@@ -1151,9 +1151,6 @@ sub match_field {
 
     # prepare default form values
 
-    # What does a "--do_not_change--" field look like (if any)?
-    my $dontchange = $cgi->param('dontchange');
-
     # Fields can be regular expressions matching multiple form fields
     # (f.e. "requestee-(\d+)"), so expand each non-literal field
     # into the list of form fields it matches.
@@ -1211,9 +1208,6 @@ sub match_field {
         # quietly ignored rather than raising a code error.
 
         next if !defined $cgi->param($field);
-
-        # Skip it if this is a --do_not_change-- field
-        next if $dontchange && $dontchange eq $cgi->param($field);
 
         # We need to move the query to $raw_field, where it will be split up,
         # modified by the search, and put back into the CGI environment

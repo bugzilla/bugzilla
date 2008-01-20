@@ -237,11 +237,6 @@
                     'query.html#list' => "$terms.Bug lists"} %]
     You may not search, or create saved searches, without any search terms.
 
-  [% ELSIF error == "bugs_not_changed" %]
-    [% title = BLOCK %][% terms.Bugs %] Not Changed[% END %]
-    You do not seem to have made any changes in the selected [% terms.bugs %],
-    so there is nothing to Commit.
-
   [% ELSIF error == "chart_too_large" %]
     [% title = "Chart Too Large" %]
     Sorry, but 2000 x 2000 is the maximum size for a chart.

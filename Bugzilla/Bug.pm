@@ -49,7 +49,6 @@ use Storable qw(dclone);
 
 use base qw(Bugzilla::Object Exporter);
 @Bugzilla::Bug::EXPORT = qw(
-    AppendComment ValidateComment
     bug_alias_to_id ValidateBugID
     RemoveVotes CheckIfVotedConfirmed
     LogActivityEntry
@@ -229,7 +228,7 @@ use constant UPDATE_COMMENT_COLUMNS => qw(
 # activity table.
 use constant MAX_LINE_LENGTH => 254;
 
-# Used in ValidateComment(). Gives the max length allowed for a comment.
+# Used in _check_comment(). Gives the max length allowed for a comment.
 use constant MAX_COMMENT_LENGTH => 65535;
 
 use constant SPECIAL_STATUS_WORKFLOW_ACTIONS => qw(
@@ -992,7 +991,7 @@ sub _check_comment {
     $comment =~ s/\s*$//s;
     $comment =~ s/\r\n?/\n/g; # Get rid of \r.
 
-    ValidateComment($comment);
+    ThrowUserError('comment_too_long') if length($comment) > MAX_COMMENT_LENGTH;
 
     # Creation-only checks
     if (!ref $invocant) {
@@ -2668,43 +2667,6 @@ sub process_knob {
 # Subroutines
 #####################################################################
 
-sub AppendComment {
-    my ($bugid, $whoid, $comment, $isprivate, $timestamp, $work_time,
-        $type, $extra_data) = @_;
-    $work_time ||= 0;
-    $type ||= CMT_NORMAL;
-    my $dbh = Bugzilla->dbh;
-
-    ValidateTime($work_time, "work_time") if $work_time;
-    trick_taint($work_time);
-    detaint_natural($type)
-      || ThrowCodeError('bad_arg', {argument => 'type', function => 'AppendComment'});
-
-    # Use the date/time we were given if possible (allowing calling code
-    # to synchronize the comment's timestamp with those of other records).
-    $timestamp ||= $dbh->selectrow_array('SELECT NOW()');
-
-    $comment =~ s/\r\n/\n/g;     # Handle Windows-style line endings.
-    $comment =~ s/\r/\n/g;       # Handle Mac-style line endings.
-
-    if ($comment =~ /^\s*$/ && !$type) {  # Nothin' but whitespace
-        return;
-    }
-
-    # Comments are always safe, because we always display their raw contents,
-    # and we use them in a placeholder below.
-    trick_taint($comment); 
-    my $privacyval = $isprivate ? 1 : 0 ;
-    $dbh->do(q{INSERT INTO longdescs
-                      (bug_id, who, bug_when, thetext, isprivate, work_time,
-                       type, extra_data)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?)}, undef,
-             ($bugid, $whoid, $timestamp, $comment, $privacyval, $work_time,
-              $type, $extra_data));
-    $dbh->do("UPDATE bugs SET delta_ts = ? WHERE bug_id = ?",
-             undef, $timestamp, $bugid);
-}
-
 sub update_comment {
     my ($self, $comment_id, $new_comment) = @_;
 
@@ -2727,7 +2689,7 @@ sub update_comment {
     $new_comment =~ s/\r\n?/\n/g; # Handle Windows and Mac-style line endings.
     trick_taint($new_comment);
 
-    # We assume ValidateComment() has already been called earlier.
+    # We assume _check_comment() has already been called earlier.
     Bugzilla->dbh->do('UPDATE longdescs SET thetext = ? WHERE comment_id = ?',
                        undef, ($new_comment, $comment_id));
 
@@ -3043,14 +3005,6 @@ sub CountOpenDependencies {
     return @dependencies;
 }
 
-sub ValidateComment {
-    my ($comment) = @_;
-
-    if (defined($comment) && length($comment) > MAX_COMMENT_LENGTH) {
-        ThrowUserError("comment_too_long");
-    }
-}
-
 # If a bug is moved to a product which allows less votes per bug
 # compared to the previous product, extra votes need to be removed.
 sub RemoveVotes {
@@ -3158,6 +3112,9 @@ sub CheckIfVotedConfirmed {
     my ($id, $who) = (@_);
     my $dbh = Bugzilla->dbh;
 
+    # XXX - Use bug methods to update the bug status and everconfirmed.
+    my $bug = new Bugzilla::Bug($id);
+
     my ($votes, $status, $everconfirmed, $votestoconfirm, $timestamp) =
         $dbh->selectrow_array("SELECT votes, bug_status, everconfirmed, " .
                               "       votestoconfirm, NOW() " .
@@ -3168,6 +3125,9 @@ sub CheckIfVotedConfirmed {
 
     my $ret = 0;
     if ($votes >= $votestoconfirm && !$everconfirmed) {
+        $bug->add_comment('', { type => CMT_POPULAR_VOTES });
+        $bug->update();
+
         if ($status eq 'UNCONFIRMED') {
             my $fieldid = get_field_id("bug_status");
             $dbh->do("UPDATE bugs SET bug_status = 'NEW', everconfirmed = 1, " .
@@ -3188,8 +3148,6 @@ sub CheckIfVotedConfirmed {
                  "(bug_id, who, bug_when, fieldid, removed, added) " .
                  "VALUES (?, ?, ?, ?, ?, ?)",
                  undef, ($id, $who, $timestamp, $fieldid, '0', '1'));
-
-        AppendComment($id, $who, "", 0, $timestamp, 0, CMT_POPULAR_VOTES);
 
         $ret = 1;
     }

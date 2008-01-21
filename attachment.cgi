@@ -341,24 +341,25 @@ sub insert {
     my $dbh = Bugzilla->dbh;
     my $user = Bugzilla->user;
 
+    $dbh->bz_start_transaction;
+
     # Retrieve and validate parameters
     my $bugid = $cgi->param('bugid');
     ValidateBugID($bugid);
     validateCanChangeBug($bugid);
-    ValidateComment(scalar $cgi->param('comment'));
-    my ($timestamp) = Bugzilla->dbh->selectrow_array("SELECT NOW()"); 
+    my ($timestamp) = Bugzilla->dbh->selectrow_array("SELECT NOW()");
 
     my $bug = new Bugzilla::Bug($bugid);
     my $attachment =
         Bugzilla::Attachment->insert_attachment_for_bug(THROW_ERROR, $bug, $user,
                                                         $timestamp, $vars);
 
-  # Insert a comment about the new attachment into the database.
-  my $comment = "Created an attachment (id=" . $attachment->id . ")\n" .
-                $attachment->description . "\n";
-  $comment .= ("\n" . $cgi->param('comment')) if defined $cgi->param('comment');
+    # Insert a comment about the new attachment into the database.
+    my $comment = "Created an attachment (id=" . $attachment->id . ")\n" .
+                  $attachment->description . "\n";
+    $comment .= ("\n" . $cgi->param('comment')) if defined $cgi->param('comment');
 
-  AppendComment($bugid, $user->id, $comment, $attachment->isprivate, $timestamp);
+    $bug->add_comment($comment, { isprivate => $attachment->isprivate });
 
   # Assign the bug to the user, if they are allowed to take it
   my $owner = "";
@@ -372,18 +373,14 @@ sub insert {
       {
           $bug->set_status($bug_status->name);
           $bug->clear_resolution();
-          $bug->update($timestamp);
       }
       # Make sure the person we are taking the bug from gets mail.
       $owner = $bug->assigned_to->login;
-
-      # Ideally, the code below should be replaced by $bug->set_assignee().
-      $dbh->do('UPDATE bugs SET assigned_to = ?, delta_ts = ? WHERE bug_id = ?',
-               undef, ($user->id, $timestamp, $bugid));
-
-      LogActivityEntry($bugid, 'assigned_to', $owner, $user->login, $user->id, $timestamp);
-
+      $bug->set_assigned_to($user);
   }
+  $bug->update($timestamp);
+
+  $dbh->bz_commit_transaction;
 
   # Define the variables and functions that will be passed to the UI template.
   $vars->{'mailrecipients'} =  { 'changer' => $user->login,
@@ -452,7 +449,6 @@ sub update {
     my $dbh = Bugzilla->dbh;
 
     # Retrieve and validate parameters
-    ValidateComment(scalar $cgi->param('comment'));
     my $attachment = validateID();
     my $bug = new Bugzilla::Bug($attachment->bug_id);
     $attachment->validate_can_edit($bug->product_id);
@@ -493,6 +489,17 @@ sub update {
     # the less risky change.
     unless ($user->is_insider) {
         $cgi->param('isprivate', $attachment->isprivate);
+    }
+
+    # If the user submitted a comment while editing the attachment,
+    # add the comment to the bug. Do this after having validated isprivate!
+    if ($cgi->param('comment')) {
+        # Prepend a string to the comment to let users know that the comment came
+        # from the "edit attachment" screen.
+        my $comment = "(From update of attachment " . $attachment->id . ")\n" .
+                      $cgi->param('comment');
+
+        $bug->add_comment($comment, { isprivate => $cgi->param('isprivate') });
     }
 
     # The order of these function calls is important, as Flag::validate
@@ -578,19 +585,9 @@ sub update {
   # Commit the transaction now that we are finished updating the database.
   $dbh->bz_commit_transaction();
 
-  # If the user submitted a comment while editing the attachment,
-  # add the comment to the bug.
-  if ($cgi->param('comment'))
-  {
-    # Prepend a string to the comment to let users know that the comment came
-    # from the "edit attachment" screen.
-    my $comment = "(From update of attachment " . $attachment->id . ")\n" .
-                  $cgi->param('comment');
+  # Commit the comment, if any.
+  $bug->update();
 
-    # Append the comment to the list of comments in the database.
-    AppendComment($bug->id, $user->id, $comment, $updated_attachment->isprivate, $timestamp);
-  }
-  
   # Define the variables and functions that will be passed to the UI template.
   $vars->{'mailrecipients'} = { 'changer' => Bugzilla->user->login };
   $vars->{'attachment'} = $attachment;
@@ -639,6 +636,8 @@ sub delete_attachment {
             ThrowUserError('token_does_not_exist');
         }
 
+        my $bug = new Bugzilla::Bug($attachment->bug_id);
+
         # The token is valid. Delete the content of the attachment.
         my $msg;
         $vars->{'attachment'} = $attachment;
@@ -649,6 +648,9 @@ sub delete_attachment {
         $template->process("attachment/delete_reason.txt.tmpl", $vars, \$msg)
           || ThrowTemplateError($template->error());
 
+        # Paste the reason provided by the admin into a comment.
+        $bug->add_comment($msg);
+
         # If the attachment is stored locally, remove it.
         if (-e $attachment->_get_local_filename) {
             unlink $attachment->_get_local_filename;
@@ -658,11 +660,11 @@ sub delete_attachment {
         # Now delete the token.
         delete_token($token);
 
-        # Paste the reason provided by the admin into a comment.
-        AppendComment($attachment->bug_id, $user->id, $msg);
+        # Insert the comment.
+        $bug->update();
 
         # Required to display the bug the deleted attachment belongs to.
-        $vars->{'bugs'} = [new Bugzilla::Bug($attachment->bug_id)];
+        $vars->{'bugs'} = [$bug];
         $vars->{'header_done'} = 1;
 
         $template->process("attachment/updated.html.tmpl", $vars)

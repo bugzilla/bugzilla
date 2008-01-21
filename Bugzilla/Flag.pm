@@ -963,10 +963,9 @@ sub FormToNewFlags {
 
     return () unless scalar(@type_ids);
 
-    # Get a list of active flag types available for this target.
+    # Get a list of active flag types available for this product/component.
     my $flag_types = Bugzilla::FlagType::match(
-        { 'target_type'  => $attachment ? 'attachment' : 'bug',
-          'product_id'   => $bug->{'product_id'},
+        { 'product_id'   => $bug->{'product_id'},
           'component_id' => $bug->{'component_id'},
           'is_active'    => 1 });
 
@@ -981,6 +980,10 @@ sub FormToNewFlags {
     my @flags;
     foreach my $flag_type (@$flag_types) {
         my $type_id = $flag_type->id;
+
+        # Bug flags are only valid for bugs, and attachment flags are
+        # only valid for attachments. So don't mix both.
+        next unless ($flag_type->target_type eq 'bug' xor $attachment);
 
         # We are only interested in flags the user tries to create.
         next unless scalar(grep { $_ == $type_id } @type_ids);

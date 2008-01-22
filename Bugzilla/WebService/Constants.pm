@@ -57,6 +57,7 @@ use constant WS_ERROR_CODE => {
     improper_bug_id_field_value => 100,
     bug_id_does_not_exist       => 101,
     bug_access_denied           => 102,
+    bug_access_query            => 102,
     invalid_field_name          => 108,
     # These all mean "invalid alias"
     alias_too_long           => 103,

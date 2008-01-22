@@ -398,18 +398,10 @@
     values. If none is selected, then the field can take any value.</para>
 
     <para>
-      Once you've run a search, you can save it as a Saved Search, which
-      appears in the page footer.
-      On the Saved Searches tab of your User Preferences page (the Prefs link
-      in Bugzilla's footer), members of the group defined in the
-      querysharegroup parameter can share such Saved Searches with user groups
-      so that other users may use them.
-      At the same place, you can see Saved Searches other users are sharing, and
-      have them show up in your personal Bugzilla footer along with your own
-      Saved Searches.
-      If somebody is sharing a Search with a group she or he is allowed to
-      <link linkend="groups">assign users to</link>, the sharer may opt to have
-      the Search show up in the group's direct members' footers by default.
+      After a search is run, you can save it as a Saved Search, which
+      will appear in the page footer. If you are in the group defined 
+      by the "querysharegroup" parameter, you may share your queries 
+      with other users, see <xref linkend="savedsearches"/> for more details.
     </para>
 
     <section id="boolean">
@@ -1087,69 +1079,82 @@
   <section id="userpreferences">
     <title>User Preferences</title>
 
-    <para>Once you have logged in, you can customize various aspects of
-    Bugzilla via the "Edit prefs" link in the page footer.
-    The preferences are split into three tabs:</para>
-
-    <section id="accountpreferences" xreflabel="Account Preferences">
-      <title>Account Preferences</title>
-
-      <para>On this tab, you can change your basic account information,
-      including your password, email address and real name. For security
-      reasons, in order to change anything on this page you must type your
-      <emphasis>current</emphasis>
-      password into the
-      <quote>Password</quote>
-      field at the top of the page.
-      If you attempt to change your email address, a confirmation
-      email is sent to both the old and new addresses, with a link to use to
-      confirm the change. This helps to prevent account hijacking.</para>
-    </section>
+    <para>
+    Once logged in, you can customize various aspects of
+    Bugzilla via the "Preferences" link in the page footer.
+    The preferences are split into five tabs:</para>
 
     <section id="generalpreferences" xreflabel="General Preferences">
       <title>General Preferences</title>
 
       <para>
-        This tab allows you to change several Bugzilla behavior.
+        This tab allows you to change several default settings of Bugzilla.
       </para>
 
       <itemizedlist spacing="compact">
         <listitem>
           <para>
+            Bugzilla's general appearance (skin) - select which skin to use.
+            Bugzilla supports adding custom skins.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            Quote the associated comment when you click on its reply link - sets
+            the behavior of the comment "Reply" link. Options include quoting the
+            full comment, just reference the comment number, or turn the link off.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            Language used in email - select which language email will be sent in,
+            from the list of available languages.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            After changing a bug - This controls what page is displayed after
+            changes to a bug are submitted. The options include to show the bug
+            just modified, to show the next bug in your list, or to do nothing.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            Enable tags for bugs - turn bug tagging on or off.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            Zoom textareas large when in use (requires JavaScript) - enable or
+            disable the automatic expanding of text areas when  text is being
+            entered into them. 
+          </para>
+        </listitem>
+        <listitem>
+          <para>
             Field separator character for CSV files -
-            This controls separator character used in CSV formatted Bug List.
+            Select between a comma and semi-colon for exported CSV bug lists.
           </para>
         </listitem>
         <listitem>
           <para>
-            After changing bugs - This controls which bugs or no bugs
-            are shown in the page after you changed bugs.
-            You can select the bug you've changed this time, or the next
-            bug of the list.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            Add individual bugs to saved searches - this controls
-            whether you can add individual bugs to saved searches
-            or you can't.
+            Automatically add me to the CC list of bugs I change - set default
+            behavior of CC list. Options include "Always", "Never", and "Only
+            if I have no role on them". 
           </para>
         </listitem>
         <listitem>
           <para>
             When viewing a bug, show comments in this order -
-            This controls the order of comments, you can select below:
-            <simplelist>
-              <member>Initial description, comment 1, comment 2, ...</member>
-              <member>Initial description, last comment, ..., comment 2, comment 1.</member>
-              <member>Initial last comment, ..., comment 2, comment 1, description.</member>
-            </simplelist>
+            controls the order of comments. Options include "Oldest
+            to Newest", "Newest to Oldest" and "Newest to Oldest, but keep the
+            bug description at the top".
           </para>
         </listitem>
         <listitem>
           <para>
-            Show a quip at the top of each bug list - This controls
-            whether a quip will be shown on the Bug list page or not.
+            Show a quip at the top of each bug list - controls
+            whether a quip will be shown on the Bug list page.
           </para>
         </listitem>
       </itemizedlist>
@@ -1159,31 +1164,8 @@
       <title>Email Preferences</title>
 
       <para>
-        This tab controls the amount of email Bugzilla sends you.
-      </para>
-
-      <para>
-        The first item on this page is marked <quote>Users to watch</quote>.
-        When you enter one or more comma-delineated user accounts (usually email
-        addresses) into the text entry box, you will receive a copy of all the
-        bugmail those users are sent (security settings permitting).
-        This powerful functionality enables seamless transitions as developers
-        change projects or users go on holiday.
-      </para>
-
-      <note>
-        <para>
-          The ability to watch other users may not be available in all
-          Bugzilla installations. If you don't see this feature, and feel
-          that you need it, speak to your administrator.
-        </para>
-      </note>
-
-      <para>
-        Each user listed in the <quote>Users watching you</quote> field
-        has you listed in their <quote>Users to watch</quote> list
-        and can get bugmail according to your relationship to the bug and
-        their <quote>Field/recipient specific options</quote> setting.
+        This tab allows you to enable or disable email notification on
+        specific events.
       </para>
 
       <para>
@@ -1196,14 +1178,23 @@
 
       <note>
         <para>
-          Your Bugzilla administrator can stop a user from receiving
-          bugmail by adding the user's name to the 
-          <filename>data/nomail</filename> file. This is a drastic step
+          A Bugzilla administrator can stop a user from receiving
+          bugmail by clicking the <quote>Bugmail Disabled</quote> checkbox
+          when editing the user account. This is a drastic step
           best taken only for disabled accounts, as it overrides 
           the user's individual mail preferences.
         </para>
       </note>
   
+      <para>
+        There are two global options -- <quote>Email me when someone
+        asks me to set a flag</quote> and <quote>Email me when someone
+        sets a flag I asked for</quote>. These define how you want to
+        receive bugmail with regards to flags. Their use is quite
+        straightforward; enable the checkboxes if you want Bugzilla to
+        send you mail under either of the above conditions.
+      </para>
+
       <para>
         If you'd like to set your bugmail to something besides
         'Completely ON' and 'Completely OFF', the
@@ -1254,7 +1245,6 @@
         </listitem>
       </itemizedlist>
 
-
       <note>
         <para>
           Some columns may not be visible for your installation, depending
@@ -1287,22 +1277,55 @@
       </note>
 
       <para>
-        Two items not in the table (<quote>Email me when someone
-        asks me to set a flag</quote> and <quote>Email me when someone
-        sets a flag I asked for</quote>) define how you want to
-        receive bugmail with regards to flags. Their use is quite
-        straightforward; enable the checkboxes if you want Bugzilla to
-        send you mail under either of the above conditions.
+        Bugzilla has a feature called <quote>Users Watching</quote>.
+        When you enter one or more comma-delineated user accounts (usually email
+        addresses) into the text entry box, you will receive a copy of all the
+        bugmail those users are sent (security settings permitting).
+        This powerful functionality enables seamless transitions as developers
+        change projects or users go on holiday.
       </para>
+
+      <note>
+        <para>
+          The ability to watch other users may not be available in all
+          Bugzilla installations. If you don't see this feature, and feel
+          that you need it, speak to your administrator.
+        </para>
+      </note>
 
       <para>
-        By default, Bugzilla sends out email regardless of who made the
-        change... even if you were the one responsible for generating
-        the email in the first place. If you don't care to receive bugmail
-        from your own changes, check the box marked <quote>Only email me
-        reports of changes made by other people</quote>.
+        Each user listed in the <quote>Users watching you</quote> field
+        has you listed in their <quote>Users to watch</quote> list
+        and can get bugmail according to your relationship to the bug and
+        their <quote>Field/recipient specific options</quote> setting.
       </para>
 
+    </section>
+
+    <section id="savedsearches" xreflabel="Saved Searches">
+      <title>Saved Searches</title>
+      <para>
+      On this tab you can view and run any Saved Searches that you have
+      created, and also any Saved Searches that other members of the group
+      defined in the "querysharegroup" parameter have shared. 
+      Saved Searches can be added to the page footer from this screen. 
+      If somebody is sharing a Search with a group she or he is allowed to
+      <link linkend="groups">assign users to</link>, the sharer may opt to have
+      the Search show up in the footer of the group's direct members by default.
+      </para>
+    </section>
+
+    <section id="accountpreferences" xreflabel="Name and Password">
+      <title>Name and Password</title>
+
+      <para>On this tab, you can change your basic account information,
+      including your password, email address and real name. For security
+      reasons, in order to change anything on this page you must type your
+      <emphasis>current</emphasis> password into the <quote>Password</quote>
+      field at the top of the page.
+      If you attempt to change your email address, a confirmation
+      email is sent to both the old and new addresses, with a link to use to
+      confirm the change. This helps to prevent account hijacking.</para>
     </section>
 
     <section id="permissionsettings">

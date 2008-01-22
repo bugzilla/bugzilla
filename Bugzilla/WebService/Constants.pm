@@ -54,6 +54,7 @@ use constant WS_ERROR_CODE => {
     invalid_bug_id_or_alias     => 100,
     invalid_bug_id_non_existent => 101,
     bug_access_denied           => 102,
+    bug_access_query            => 102,
     invalid_field_name          => 108,
     # These all mean "invalid alias"
     alias_not_defined        => 103,

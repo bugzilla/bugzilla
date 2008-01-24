@@ -488,12 +488,14 @@ if (!$cgi->param('id') && $cgi->param('dup_id')) {
 foreach my $b (@bug_objects) {
     if (should_set('knob')) {
         # First, get the correct resolution <select>, in case there is more
-        # than one open -> closed transition allowed.
+        # than one open -> closed transition allowed. Allow to fallback to
+        # 'resolution' (useful when called from email_in.pl).
         my $knob = $cgi->param('knob');
         my $status = new Bugzilla::Status({name => $knob});
         my $resolution;
         if ($status) {
-            $resolution = $cgi->param('resolution_knob_' . $status->id);
+            $resolution = $cgi->param('resolution_knob_' . $status->id)
+                          || $cgi->param('resolution');
         }
         else {
             $resolution = $cgi->param('resolution_knob_change_resolution');

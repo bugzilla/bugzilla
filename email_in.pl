@@ -213,21 +213,16 @@ sub process_bug {
     ValidateBugID($bug_id);
     my $bug = new Bugzilla::Bug($bug_id);
 
-    if ($fields{'assigned_to'}) {
-        $fields{'knob'} = 'reassign';
+    if ($fields{'bug_status'}) {
+        $fields{'knob'} = $fields{'bug_status'};
     }
-    if (my $status = $fields{'bug_status'}) {
-        $fields{'knob'} = 'confirm' if $status =~ /NEW/i;
-        $fields{'knob'} = 'accept'  if $status =~ /ASSIGNED/i;
-        $fields{'knob'} = 'clearresolution' if $status =~ /REOPENED/i;
-        $fields{'knob'} = 'verify'  if $status =~ /VERIFIED/i;
-        $fields{'knob'} = 'close'   if $status =~ /CLOSED/i;
+    # If no status is given, then we only want to change the resolution.
+    elsif ($fields{'resolution'}) {
+        $fields{'knob'} = 'change_resolution';
+        $fields{'resolution_knob_change_resolution'} = $fields{'resolution'};
     }
     if ($fields{'dup_id'}) {
         $fields{'knob'} = 'duplicate';
-    }
-    if ($fields{'resolution'}) {
-        $fields{'knob'} = 'resolve';
     }
 
     # Make sure we don't get prompted if we have to change the default

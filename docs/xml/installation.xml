@@ -1,5 +1,5 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"> -->
-<!-- $Id: installation.xml,v 1.149 2008/01/16 20:40:15 mozilla%colinogilvie.co.uk Exp $ -->
+<!-- $Id: installation.xml,v 1.150 2008/01/24 20:59:55 lpsolit%gmail.com Exp $ -->
 <chapter id="installing-bugzilla">
   <title>Installing Bugzilla</title>
 
@@ -1812,6 +1812,15 @@ AddType application/rdf+xml .rdf</screen>
            The following instructions assume that you are using version
            5.8.1 of ActiveState.
           </para>
+
+          <note>
+            <para>
+             These instructions are for 32-bit versions of Windows. If you are
+             using a 64-bit version of Windows, you will need to install 32-bit
+             Perl in order to install the 32-bit modules as described below.
+            </para>
+          </note>
+
         </section>
   
       <section id="win32-perl-modules">

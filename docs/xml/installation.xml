@@ -1,5 +1,5 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"> -->
-<!-- $Id: installation.xml,v 1.150 2008/01/24 20:59:55 lpsolit%gmail.com Exp $ -->
+<!-- $Id: installation.xml,v 1.151 2008/01/24 22:06:10 lpsolit%gmail.com Exp $ -->
 <chapter id="installing-bugzilla">
   <title>Installing Bugzilla</title>
 
@@ -2152,10 +2152,12 @@ pid-file=/home/foo/mymysql/the.pid
     <section>
       <title>Perl</title>
 
-      <para>On the extremely rare chance that you don't have Perl on
+      <para>
+      On the extremely rare chance that you don't have Perl on
       the machine, you will have to build the sources
       yourself. The following commands should get your system
-      installed with your own personal version of Perl:</para>
+      installed with your own personal version of Perl:
+      </para>
 
       <screen>
         <prompt>bash$</prompt>
@@ -2170,139 +2172,23 @@ pid-file=/home/foo/mymysql/the.pid
         <command>make &amp;&amp; make test &amp;&amp; make install</command>
       </screen>
 
-      <para>Once you have Perl installed into a directory (probably
-      in <filename class="directory">~/perl/bin</filename>), you'll have to
-      change the locations on the scripts, which is detailed later on
-      this page.</para>
+      <para>
+      Once you have Perl installed into a directory (probably
+      in <filename class="directory">~/perl/bin</filename>), you will need to
+      install the Perl Modules, described below.
+      </para>
     </section>
 
     <section id="install-perlmodules-nonroot">
       <title>Perl Modules</title>
 
-      <para>Installing the Perl modules as a non-root user is probably the
-      hardest part of the process. There are two different methods: a
-      completely independant Perl with its own modules, or personal
-      modules using the current (root installed) version of Perl. The
-      independant method takes up quite a bit of disk space, but is
-      less complex, while the mixed method only uses as much space as the
-      modules themselves, but takes more work to setup.</para>
-
-      <section>
-        <title>The Independant Method</title>
-
-        <para>The independant method requires that you install your own
-        personal version of Perl, as detailed in the previous section. Once
-        installed, you can start the CPAN shell with the following
-        command:</para>
-
-        <para>
-          <screen>
-            <prompt>bash$</prompt>
-            <command>/home/foo/perl/bin/perl -MCPAN -e 'shell'</command>
-          </screen>
-        </para>
-
-        <para>And then:</para>
-
-        <para>
-          <screen>
-            <prompt>cpan&gt;</prompt>
-            <command>install Bundle::Bugzilla</command>
-          </screen>
-        </para>
-
-        <para>With this method, module installation will usually go a lot
-        smoother, but if you have any hang-ups, you can consult the next
-        section.</para>
-      </section>
-
-      <section>
-        <title>The Mixed Method</title>
-
-        <para>First, you'll need to configure CPAN to
-        install modules in your home directory. The CPAN FAQ says the
-        following on this issue:</para>
-
-        <para>
-          <programlisting>
-5)  I am not root, how can I install a module in a personal directory?
-
-    You will most probably like something like this:
-
-      o conf makepl_arg "LIB=~/myperl/lib \
-                         INSTALLMAN1DIR=~/myperl/man/man1 \
-                         INSTALLMAN3DIR=~/myperl/man/man3"
-    install Sybase::Sybperl
-
-    You can make this setting permanent like all "o conf" settings with "o conf commit".
-
-    You will have to add ~/myperl/man to the MANPATH environment variable and also tell your Perl programs to
-    look into ~/myperl/lib, e.g. by including
-
-      use lib "$ENV{HOME}/myperl/lib";
-
-    or setting the PERL5LIB environment variable.
-
-    Another thing you should bear in mind is that the UNINST parameter should never be set if you are not root.</programlisting>
-        </para>
-
-        <para>So, you will need to create a Perl directory in your home
-        directory, as well as the <filename class="directory">lib</filename>,
-        <filename class="directory">man</filename>,
-        <filename class="directory">man/man1</filename>, and
-        <filename class="directory">man/man3</filename> directories in that
-        Perl directory. Set the MANPATH variable and PERL5LIB variable, so
-        that the installation of the modules goes smoother. (Setting
-        UNINST=0 in your "make install" options, on the CPAN first-time
-        configuration, is also a good idea.)</para>
-
-        <para>After that, go into the CPAN shell:</para>
-
-        <para>
-          <screen>
-            <prompt>bash$</prompt>
-            <command>perl -MCPAN -e 'shell'</command>
-          </screen>
-        </para>
-
-        <para>From there, you will need to type in the above "o conf" command
-        and commit the changes. Then you can run through the installation:</para>
-
-        <para>
-          <screen>
-            <prompt>cpan&gt;</prompt>
-            <command>install Bundle::Bugzilla</command>
-          </screen>
-        </para>
-
-        <para>Most of the module installation process should go smoothly. However,
-        you may have some problems with Template. When you first start, you will
-        want to try to install Template with the XS Stash options on. If this
-        doesn't work, it may spit out C compiler error messages and croak back
-        to the CPAN shell prompt. So, redo the install, and turn it off. (In fact,
-        say no to all of the Template questions.) It may also start failing on a
-        few of the tests. If the total tests passed is a reasonable figure (90+%),
-        force the install with the following command:</para>
-
-        <para>
-          <screen>
-            <prompt>cpan&gt;</prompt>
-            <command>force install Template</command>
-          </screen>
-        </para>
-
-        <para>You may also want to install the other optional modules:</para>
-
-        <screen>
-          <prompt>cpan&gt;</prompt>
-          <command>install GD</command>
-          <prompt>cpan&gt;</prompt>
-          <command>install Chart::Base</command>
-          <prompt>cpan&gt;</prompt>
-          <command>install MIME::Parser</command>
-        </screen>
-
-      </section>
+      <para>
+      Installing the Perl modules as a non-root user is accomplished by
+      running the <filename>install-module.pl</filename>
+      script. For more details on this script, see 
+      <link linkend="api/install-module.html"/>.  
+      
+      </para>
     </section>
 
     <section>
@@ -2347,30 +2233,16 @@ pid-file=/home/foo/mymysql/the.pid
     <section>
       <title>Bugzilla</title>
 
-      <para>If you had to install Perl modules as a non-root user
-      (<xref linkend="install-perlmodules-nonroot" />) or to non-standard
-      directories, you will need to change the scripts, setting the correct
-      location of the Perl modules:</para>
-
       <para>
-        <programlisting>perl -pi -e
-        's@use strict\;@use strict\; use lib \"/home/foo/perl/lib\"\;@'
-        *cgi *pl Bug.pm processmail syncshadowdb</programlisting>
-
-        Change <filename class="directory">/home/foo/perl/lib</filename> to
-        your personal Perl library directory. You can probably skip this
-        step if you are using the independant method of Perl module
-        installation.
-      </para>
-
-      <para>When you run <command>./checksetup.pl</command> to create
+      When you run <command>./checksetup.pl</command> to create
       the <filename>localconfig</filename> file, it will list the Perl
       modules it finds. If one is missing, go back and double-check the
-      module installation from the CPAN shell, then delete the
-      <filename>localconfig</filename> file and try again.</para>
+      module installation from <xref linkend="install-perlmodules-nonroot"/>, 
+      then delete the <filename>localconfig</filename> file and try again.
+      </para>
 
       <warning>
-        <para>The one option in <filename>localconfig</filename> you
+        <para>One option in <filename>localconfig</filename> you
         might have problems with is the web server group. If you can't
         successfully browse to the <filename>index.cgi</filename> (like
         a Forbidden error), you may have to relax your permissions,

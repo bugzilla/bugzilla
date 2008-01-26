@@ -294,7 +294,8 @@ sub get_text_alternative {
     foreach my $part (@parts) {
         my $ct = $part->content_type || 'text/plain';
         my $charset = 'iso-8859-1';
-        if ($ct =~ /charset=([^;]+)/) {
+        # The charset may be quoted.
+        if ($ct =~ /charset="?([^;"]+)/) {
             $charset= $1;
         }
         debug_print("Part Content-Type: $ct", 2);

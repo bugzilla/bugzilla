@@ -71,7 +71,7 @@ sub multiline_sprintf {
     my ($format, $args, $sizes) = @_;
     my @parts;
     my @my_sizes = @$sizes; # Copy this so we don't modify the input array.
-    while (my $string = shift @$args) {
+    foreach my $string (@$args) {
         my $size = shift @my_sizes;
         my @pieces = split("\n", wrap_hard($string, $size));
         push(@parts, \@pieces);

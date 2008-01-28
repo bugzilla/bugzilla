@@ -1,19 +1,23 @@
 #!/usr/bin/perl -wT
 # -*- Mode: perl; indent-tabs-mode: nil -*-
-
 #
-# This is a script to edit the target milestones. It is largely a copy of
-# the editversions.cgi script, since the two fields were set up in a
-# very similar fashion.
+# The contents of this file are subject to the Mozilla Public
+# License Version 1.1 (the "License"); you may not use this file
+# except in compliance with the License. You may obtain a copy of
+# the License at http://www.mozilla.org/MPL/
 #
-# (basically replace each occurrence of 'milestone' with 'version', and
-# you'll have the original script)
+# Software distributed under the License is distributed on an "AS
+# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# rights and limitations under the License.
 #
-# Matt Masson <matthew@zeroknowledge.com>
+# The Initial Developer of the Original Code is Matt Masson.
+# Portions created by Matt Masson are Copyright (C) 2000 Matt Masson.
+# All Rights Reserved.
 #
-# Contributors : Gavin Shelley <bugzilla@chimpychompy.org>
+# Contributors : Matt Masson <matthew@zeroknowledge.com>
+#                Gavin Shelley <bugzilla@chimpychompy.org>
 #                Frédéric Buclin <LpSolit@gmail.com>
-#
 
 use strict;
 use lib qw(. lib);
@@ -116,9 +120,10 @@ if ($action eq 'new') {
                                                   sortkey => $sortkey });
     delete_token($token);
 
+    $vars->{'message'} = 'milestone_created';
     $vars->{'milestone'} = $milestone;
     $vars->{'product'} = $product;
-    $template->process("admin/milestones/created.html.tmpl", $vars)
+    $template->process("admin/milestones/list.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
     exit;
 }
@@ -158,10 +163,12 @@ if ($action eq 'delete') {
     $milestone->remove_from_db;
     delete_token($token);
 
+    $vars->{'message'} = 'milestone_deleted';
     $vars->{'milestone'} = $milestone;
     $vars->{'product'} = $product;
+    $vars->{'no_edit_milestone_link'} = 1;
 
-    $template->process("admin/milestones/deleted.html.tmpl", $vars)
+    $template->process("admin/milestones/list.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
     exit;
 }
@@ -202,10 +209,11 @@ if ($action eq 'update') {
 
     delete_token($token);
 
+    $vars->{'message'} = 'milestone_updated';
     $vars->{'milestone'} = $milestone;
     $vars->{'product'} = $product;
     $vars->{'changes'} = $changes;
-    $template->process("admin/milestones/updated.html.tmpl", $vars)
+    $template->process("admin/milestones/list.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
     exit;
 }

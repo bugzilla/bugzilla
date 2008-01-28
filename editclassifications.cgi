@@ -17,8 +17,8 @@
 #
 # Contributor(s): Albert Ting <alt@sonic.net>
 #                 Max Kanat-Alexander <mkanat@bugzilla.org>
-#
-# Direct any questions on this source code to mozilla.org
+#                 Frédéric Buclin <LpSolit@gmail.com>
+
 
 use strict;
 use lib qw(. lib);
@@ -39,6 +39,9 @@ sub LoadTemplate {
     my $action = shift;
     my $cgi = Bugzilla->cgi;
     my $template = Bugzilla->template;
+
+    $vars->{'classifications'} = [Bugzilla::Classification::get_all_classifications()]
+      if ($action eq 'select');
     # There is currently only one section about classifications,
     # so all pages point to it. Let's define it here.
     $vars->{'doc_section'} = 'classifications.html';
@@ -77,14 +80,7 @@ my $token      = $cgi->param('token');
 #
 # action='' -> Show nice list of classifications
 #
-
-unless ($action) {
-    my @classifications =
-        Bugzilla::Classification::get_all_classifications();
-
-    $vars->{'classifications'} = \@classifications;
-    LoadTemplate("select");
-}
+LoadTemplate('select') unless $action;
 
 #
 # action='add' -> present form for parameters for new classification
@@ -129,10 +125,13 @@ if ($action eq 'new') {
     $dbh->do("INSERT INTO classifications (name, description, sortkey)
               VALUES (?, ?, ?)", undef, ($class_name, $description, $sortkey));
 
-    $vars->{'classification'} = $class_name;
-
     delete_token($token);
-    LoadTemplate($action);
+
+    $vars->{'message'} = 'classification_created';
+    $vars->{'classification'} = new Bugzilla::Classification({name => $class_name});
+    $vars->{'classifications'} = [Bugzilla::Classification::get_all_classifications];
+    $vars->{'token'} = issue_session_token('reclassify_classifications');
+    LoadTemplate('reclassify');
 }
 
 #
@@ -177,20 +176,20 @@ if ($action eq 'delete') {
     # lock the tables before we start to change everything:
     $dbh->bz_start_transaction();
 
-    # delete
-    $dbh->do("DELETE FROM classifications WHERE id = ?", undef,
-             $classification->id);
-
     # update products just in case
     $dbh->do("UPDATE products SET classification_id = 1
               WHERE classification_id = ?", undef, $classification->id);
 
+    # delete
+    $dbh->do("DELETE FROM classifications WHERE id = ?", undef,
+             $classification->id);
+
     $dbh->bz_commit_transaction();
 
-    $vars->{'classification'} = $classification;
-
+    $vars->{'message'} = 'classification_deleted';
+    $vars->{'classification'} = $class_name;
     delete_token($token);
-    LoadTemplate($action);
+    LoadTemplate('select');
 }
 
 #
@@ -267,8 +266,10 @@ if ($action eq 'update') {
 
     $dbh->bz_commit_transaction();
 
+    $vars->{'message'} = 'classification_updated';
+    $vars->{'classification'} = $class_name;
     delete_token($token);
-    LoadTemplate($action);
+    LoadTemplate('select');
 }
 
 #

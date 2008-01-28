@@ -26,10 +26,6 @@
 #               Frédéric Buclin <LpSolit@gmail.com>
 #               Greg Hendricks <ghendricks@novell.com>
 #               Lance Larsh <lance.larsh@oracle.com>
-#
-# Direct any questions on this source code to
-#
-# Holger Schurig <holgerschurig@nikocity.de>
 
 use strict;
 use lib qw(. lib);
@@ -72,6 +68,28 @@ $user->in_group('editcomponents')
   || ThrowUserError("auth_failure", {group  => "editcomponents",
                                      action => "edit",
                                      object => "products"});
+
+sub get_group_controls {
+    my $product = shift;
+
+    my $group_controls = $product->group_controls;
+    # Convert Group Controls (membercontrol and othercontrol) from
+    # integer to string to display Membercontrol/Othercontrol names
+    # in the template.
+    my $constants = {
+        (CONTROLMAPNA) => 'NA',
+        (CONTROLMAPSHOWN) => 'Shown',
+        (CONTROLMAPDEFAULT) => 'Default',
+        (CONTROLMAPMANDATORY) => 'Mandatory'};
+
+    foreach my $group (keys %$group_controls) {
+        foreach my $control ('membercontrol', 'othercontrol') {
+            $group_controls->{$group}->{$control} =
+                $constants->{$group_controls->{$group}->{$control}};
+        }
+    }
+    return $group_controls;
+}
 
 #
 # often used variables
@@ -339,9 +357,14 @@ if ($action eq 'new') {
     }
     delete_token($token);
 
+    $vars->{'message'} = 'product_created';
     $vars->{'product'} = $product;
+    $vars->{'classification'} = new Bugzilla::Classification($product->classification_id)
+      if Bugzilla->params->{'useclassification'};
+    $vars->{'group_controls'} = get_group_controls($product);
+    $vars->{'token'} = issue_session_token('edit_product');
 
-    $template->process("admin/products/created.html.tmpl", $vars)
+    $template->process("admin/products/edit.html.tmpl", $vars)
         || ThrowTemplateError($template->error());
     exit;
 }
@@ -381,8 +404,6 @@ if ($action eq 'del') {
 if ($action eq 'delete') {
     my $product = $user->check_can_admin_product($product_name);
     check_token_data($token, 'delete_product');
-
-    $vars->{'product'} = $product;
 
     if (Bugzilla->params->{'useclassification'}) {
         my $classification = 
@@ -442,10 +463,35 @@ if ($action eq 'delete') {
 
     $dbh->bz_commit_transaction();
 
+    # We have to delete these internal variables, else we get
+    # the old lists of products and classifications again.
+    delete $user->{selectable_products};
+    delete $user->{selectable_classifications};
+
     delete_token($token);
 
-    $template->process("admin/products/deleted.html.tmpl", $vars)
-        || ThrowTemplateError($template->error());
+    $vars->{'message'} = 'product_deleted';
+    $vars->{'product'} = $product;
+    $vars->{'no_edit_product_link'} = 1;
+
+    if (Bugzilla->params->{'useclassification'}) {
+        $vars->{'classifications'} = $user->get_selectable_classifications;
+
+        $template->process("admin/products/list-classifications.html.tmpl", $vars)
+          || ThrowTemplateError($template->error());
+    }
+    else {
+        my $products = $user->get_selectable_products;
+        # If the user has editcomponents privs for some products only,
+        # we have to restrict the list of products to display.
+        unless ($user->in_group('editcomponents')) {
+            $products = $user->get_products_by_permission('editcomponents');
+        }
+        $vars->{'products'} = $products;
+
+        $template->process("admin/products/list.html.tmpl", $vars)
+          || ThrowTemplateError($template->error());
+    }
     exit;
 }
 
@@ -475,30 +521,12 @@ if ($action eq 'edit' || (!$action && $product_name)) {
         }
         $vars->{'classification'} = $classification;
     }
-    my $group_controls = $product->group_controls;
-        
-    # Convert Group Controls(membercontrol and othercontrol) from 
-    # integer to string to display Membercontrol/Othercontrol names
-    # at the template. <gabriel@async.com.br>
-    my $constants = {
-        (CONTROLMAPNA) => 'NA',
-        (CONTROLMAPSHOWN) => 'Shown',
-        (CONTROLMAPDEFAULT) => 'Default',
-        (CONTROLMAPMANDATORY) => 'Mandatory'};
-
-    foreach my $group (keys(%$group_controls)) {
-        foreach my $control ('membercontrol', 'othercontrol') {
-            $group_controls->{$group}->{$control} = 
-                $constants->{$group_controls->{$group}->{$control}};
-        }
-    }
-    $vars->{'group_controls'} = $group_controls;
+    $vars->{'group_controls'} = get_group_controls($product);
     $vars->{'product'} = $product;
     $vars->{'token'} = issue_session_token('edit_product');
 
     $template->process("admin/products/edit.html.tmpl", $vars)
         || ThrowTemplateError($template->error());
-
     exit;
 }
 

@@ -22,11 +22,6 @@
 #                 Terry Weissman <terry@mozilla.org>
 #                 Gavin Shelley <bugzilla@chimpychompy.org>
 #                 Frédéric Buclin <LpSolit@gmail.com>
-#
-#
-# Direct any questions on this source code to
-#
-# Holger Schurig <holgerschurig@nikocity.de>
 
 use strict;
 use lib qw(. lib);
@@ -103,9 +98,6 @@ unless ($action) {
     exit;
 }
 
-
-
-
 #
 # action='add' -> present form for parameters for new version
 #
@@ -121,8 +113,6 @@ if ($action eq 'add') {
     exit;
 }
 
-
-
 #
 # action='new' -> add version entered in the 'action=add' screen
 #
@@ -132,16 +122,14 @@ if ($action eq 'new') {
     my $version = Bugzilla::Version::create($version_name, $product);
     delete_token($token);
 
+    $vars->{'message'} = 'version_created';
     $vars->{'version'} = $version;
     $vars->{'product'} = $product;
-    $template->process("admin/versions/created.html.tmpl", $vars)
+    $template->process("admin/versions/list.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
 
     exit;
 }
-
-
-
 
 #
 # action='del' -> ask if user really wants to delete
@@ -161,8 +149,6 @@ if ($action eq 'del') {
     exit;
 }
 
-
-
 #
 # action='delete' -> really delete the version
 #
@@ -174,16 +160,16 @@ if ($action eq 'delete') {
     $version->remove_from_db;
     delete_token($token);
 
+    $vars->{'message'} = 'version_deleted';
     $vars->{'version'} = $version;
     $vars->{'product'} = $product;
+    $vars->{'no_edit_version_link'} = 1;
 
-    $template->process("admin/versions/deleted.html.tmpl", $vars)
+    $template->process("admin/versions/list.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
 
     exit;
 }
-
-
 
 #
 # action='edit' -> present the edit version form
@@ -204,8 +190,6 @@ if ($action eq 'edit') {
     exit;
 }
 
-
-
 #
 # action='update' -> update the version
 #
@@ -223,15 +207,14 @@ if ($action eq 'update') {
     $dbh->bz_commit_transaction();
     delete_token($token);
 
+    $vars->{'message'} = 'version_updated';
     $vars->{'version'} = $version;
     $vars->{'product'} = $product;
-    $template->process("admin/versions/updated.html.tmpl", $vars)
+    $template->process("admin/versions/list.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
 
     exit;
 }
-
-
 
 #
 # No valid action found

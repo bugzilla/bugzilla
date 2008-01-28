@@ -332,15 +332,17 @@ sub insert {
 
     $dbh->bz_commit_transaction();
 
-    $vars->{'name'} = $cgi->param('name');
+    $vars->{'name'} = $name;
     $vars->{'message'} = "flag_type_created";
     delete_token($token);
+
+    $vars->{'bug_types'} = Bugzilla::FlagType::match({'target_type' => 'bug'});
+    $vars->{'attachment_types'} = Bugzilla::FlagType::match({'target_type' => 'attachment'});
 
     # Return the appropriate HTTP response headers.
     print $cgi->header();
 
-    # Generate and return the UI (HTML page) from the appropriate template.
-    $template->process("global/message.html.tmpl", $vars)
+    $template->process("admin/flag-type/list.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
 }
 
@@ -427,15 +429,17 @@ sub update {
                  undef, $id);
     }
 
-    $vars->{'name'} = $cgi->param('name');
+    $vars->{'name'} = $name;
     $vars->{'message'} = "flag_type_changes_saved";
     delete_token($token);
+
+    $vars->{'bug_types'} = Bugzilla::FlagType::match({'target_type' => 'bug'});
+    $vars->{'attachment_types'} = Bugzilla::FlagType::match({'target_type' => 'attachment'});
 
     # Return the appropriate HTTP response headers.
     print $cgi->header();
 
-    # Generate and return the UI (HTML page) from the appropriate template.
-    $template->process("global/message.html.tmpl", $vars)
+    $template->process("admin/flag-type/list.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
 }
 
@@ -484,11 +488,13 @@ sub deleteType {
     $vars->{'message'} = "flag_type_deleted";
     delete_token($token);
 
+    $vars->{'bug_types'} = Bugzilla::FlagType::match({'target_type' => 'bug'});
+    $vars->{'attachment_types'} = Bugzilla::FlagType::match({'target_type' => 'attachment'});
+
     # Return the appropriate HTTP response headers.
     print $cgi->header();
 
-    # Generate and return the UI (HTML page) from the appropriate template.
-    $template->process("global/message.html.tmpl", $vars)
+    $template->process("admin/flag-type/list.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
 }
 
@@ -509,11 +515,14 @@ sub deactivate {
     $vars->{'flag_type'} = $flag_type;
     delete_token($token);
 
+    $vars->{'bug_types'} = Bugzilla::FlagType::match({'target_type' => 'bug'});
+    $vars->{'attachment_types'} = Bugzilla::FlagType::match({'target_type' => 'attachment'});
+
     # Return the appropriate HTTP response headers.
     print $cgi->header();
 
     # Generate and return the UI (HTML page) from the appropriate template.
-    $template->process("global/message.html.tmpl", $vars)
+    $template->process("admin/flag-type/list.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
 }
 

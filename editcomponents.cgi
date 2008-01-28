@@ -137,11 +137,12 @@ if ($action eq 'new') {
                                     initialqacontact => $default_qa_contact,
                                     initial_cc       => \@initial_cc });
 
+    $vars->{'message'} = 'component_created';
     $vars->{'comp'} = $component;
     $vars->{'product'} = $product;
     delete_token($token);
 
-    $template->process("admin/components/created.html.tmpl", $vars)
+    $template->process("admin/components/list.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
     exit;
 }
@@ -174,11 +175,13 @@ if ($action eq 'delete') {
 
     $component->remove_from_db;
 
+    $vars->{'message'} = 'component_deleted';
     $vars->{'comp'} = $component;
     $vars->{'product'} = $product;
+    $vars->{'no_edit_component_link'} = 1;
     delete_token($token);
 
-    $template->process("admin/components/deleted.html.tmpl", $vars)
+    $template->process("admin/components/list.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
     exit;
 }
@@ -234,12 +237,13 @@ if ($action eq 'update') {
     $component->set_cc_list(\@initial_cc);
     my $changes = $component->update();
 
+    $vars->{'message'} = 'component_updated';
     $vars->{'comp'} = $component;
     $vars->{'product'} = $product;
     $vars->{'changes'} = $changes;
     delete_token($token);
 
-    $template->process("admin/components/updated.html.tmpl", $vars)
+    $template->process("admin/components/list.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
     exit;
 }

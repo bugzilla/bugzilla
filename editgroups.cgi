@@ -257,7 +257,7 @@ if ($action eq 'new') {
               VALUES (?, ?, 1, ?, ?, ?)',
               undef, ($name, $desc, $regexp, $isactive, $icon_url));
 
-    my $gid = $dbh->bz_last_key('groups', 'id');
+    my $group = new Bugzilla::Group({name => $name});
     my $admin = Bugzilla::Group->new({name => 'admin'})->id();
     # Since we created a new group, give the "admin" group all privileges
     # initially.
@@ -265,9 +265,9 @@ if ($action eq 'new') {
                              (member_id, grantor_id, grant_type)
                              VALUES (?, ?, ?)');
 
-    $sth->execute($admin, $gid, GROUP_MEMBERSHIP);
-    $sth->execute($admin, $gid, GROUP_BLESS);
-    $sth->execute($admin, $gid, GROUP_VISIBLE);
+    $sth->execute($admin, $group->id, GROUP_MEMBERSHIP);
+    $sth->execute($admin, $group->id, GROUP_BLESS);
+    $sth->execute($admin, $group->id, GROUP_VISIBLE);
 
     # Permit all existing products to use the new group if makeproductgroups.
     if ($cgi->param('insertnew')) {
@@ -275,13 +275,18 @@ if ($action eq 'new') {
                   (group_id, product_id, entry, membercontrol,
                    othercontrol, canedit)
                   SELECT ?, products.id, 0, ?, ?, 0 FROM products',
-                  undef, ($gid, CONTROLMAPSHOWN, CONTROLMAPNA));
+                  undef, ($group->id, CONTROLMAPSHOWN, CONTROLMAPNA));
     }
-    Bugzilla::Group::RederiveRegexp($regexp, $gid);
+    Bugzilla::Group::RederiveRegexp($regexp, $group->id);
     delete_token($token);
 
+    $vars->{'message'} = 'group_created';
+    $vars->{'group'} = $group;
+    get_current_and_available($group, $vars);
+    $vars->{'token'} = issue_session_token('edit_group');
+
     print $cgi->header();
-    $template->process("admin/groups/created.html.tmpl", $vars)
+    $template->process("admin/groups/edit.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
     exit;
 }
@@ -454,10 +459,12 @@ if ($action eq 'delete') {
 
     delete_token($token);
 
-    print $cgi->header();
-    $template->process("admin/groups/deleted.html.tmpl", $vars)
-      || ThrowTemplateError($template->error());
+    $vars->{'message'} = 'group_deleted';
+    $vars->{'groups'} = [Bugzilla::Group->get_all];
 
+    print $cgi->header();
+    $template->process("admin/groups/list.html.tmpl", $vars)
+      || ThrowTemplateError($template->error());
     exit;
 }
 
@@ -521,9 +528,13 @@ if ($action eq 'remove_regexp') {
     $vars->{'users'}  = \@deleted;
     $vars->{'regexp'} = $regexp;
     delete_token($token);
-    
+
+    $vars->{'message'} = 'group_membership_removed';
+    $vars->{'group'} = $group->name;
+    $vars->{'groups'} = [Bugzilla::Group->get_all];
+
     print $cgi->header();
-    $template->process("admin/groups/remove.html.tmpl", $vars)
+    $template->process("admin/groups/list.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
 
     exit;

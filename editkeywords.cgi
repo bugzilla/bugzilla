@@ -92,14 +92,15 @@ if ($action eq 'new') {
 
     print $cgi->header();
 
+    $vars->{'message'} = 'keyword_created';
     $vars->{'name'} = $keyword->name;
-    $template->process("admin/keywords/created.html.tmpl", $vars)
-      || ThrowTemplateError($template->error());
+    $vars->{'keywords'} = Bugzilla::Keyword->get_all_with_bug_count();
 
+    $template->process("admin/keywords/list.html.tmpl", $vars)
+      || ThrowTemplateError($template->error());
     exit;
 }
 
-    
 
 #
 # action='edit' -> present the edit keywords from
@@ -132,16 +133,19 @@ if ($action eq 'update') {
 
     $keyword->set_name($cgi->param('name'));
     $keyword->set_description($cgi->param('description'));
-    $keyword->update();
+    my $changes = $keyword->update();
 
     delete_token($token);
 
     print $cgi->header();
 
+    $vars->{'message'} = 'keyword_updated';
     $vars->{'keyword'} = $keyword;
-    $template->process("admin/keywords/rebuild-cache.html.tmpl", $vars)
-      || ThrowTemplateError($template->error());
+    $vars->{'changes'} = $changes;
+    $vars->{'keywords'} = Bugzilla::Keyword->get_all_with_bug_count();
 
+    $template->process("admin/keywords/list.html.tmpl", $vars)
+      || ThrowTemplateError($template->error());
     exit;
 }
 
@@ -173,9 +177,11 @@ if ($action eq 'delete') {
 
     print $cgi->header();
 
-    $template->process("admin/keywords/rebuild-cache.html.tmpl", $vars)
-      || ThrowTemplateError($template->error());
+    $vars->{'message'} = 'keyword_deleted';
+    $vars->{'keywords'} = Bugzilla::Keyword->get_all_with_bug_count();
 
+    $template->process("admin/keywords/list.html.tmpl", $vars)
+      || ThrowTemplateError($template->error());
     exit;
 }
 

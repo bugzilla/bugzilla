@@ -110,7 +110,7 @@ Bugzilla->login(LOGIN_REQUIRED);
 my $dbh      = Bugzilla->dbh;
 my $cgi      = Bugzilla->cgi;
 my $template = Bugzilla->template;
-my $vars = {};
+local our $vars = {};
 
 # Replace this entry by separate entries in templates when
 # the documentation about legal values becomes bigger.
@@ -134,7 +134,7 @@ my $token   = $cgi->param('token');
 
 # Gives the name of the parameter associated with the field
 # and representing its default value.
-my %defaults;
+local our %defaults;
 $defaults{'op_sys'} = 'defaultopsys';
 $defaults{'rep_platform'} = 'defaultplatform';
 $defaults{'priority'} = 'defaultpriority';
@@ -142,7 +142,7 @@ $defaults{'bug_severity'} = 'defaultseverity';
 
 # Alternatively, a list of non-editable values can be specified.
 # In this case, only the sortkey can be altered.
-my %static;
+local our %static;
 $static{'bug_status'} = ['UNCONFIRMED', Bugzilla->params->{'duplicate_or_move_bug_status'}];
 $static{'resolution'} = ['', 'FIXED', 'MOVED', 'DUPLICATE'];
 $static{$_->name} = ['---'] foreach (@custom_fields);
@@ -169,10 +169,8 @@ my $field_obj = FieldMustExist($field);
 $vars->{'field'} = $field_obj;
 trick_taint($field);
 
-#
-# action='' -> Show nice list of values.
-#
-unless ($action) {
+sub display_field_values {
+    my $field = $vars->{'field'}->name;
     my $fieldvalues =
         $dbh->selectall_arrayref("SELECT value AS name, sortkey"
                                . "  FROM $field ORDER BY sortkey, value",
@@ -181,12 +179,16 @@ unless ($action) {
     $vars->{'values'} = $fieldvalues;
     $vars->{'default'} = Bugzilla->params->{$defaults{$field}} if defined $defaults{$field};
     $vars->{'static'} = $static{$field} if exists $static{$field};
+
     $template->process("admin/fieldvalues/list.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
-
     exit;
 }
 
+#
+# action='' -> Show nice list of values.
+#
+display_field_values() unless $action;
 
 #
 # action='add' -> show form for adding new field value.
@@ -254,12 +256,9 @@ if ($action eq 'new') {
 
     delete_token($token);
 
+    $vars->{'message'} = 'field_value_created';
     $vars->{'value'} = $value;
-    $template->process("admin/fieldvalues/created.html.tmpl",
-                       $vars)
-      || ThrowTemplateError($template->error());
-
-    exit;
+    display_field_values();
 }
 
 
@@ -362,10 +361,9 @@ if ($action eq 'delete') {
     $dbh->bz_commit_transaction();
     delete_token($token);
 
-    $template->process("admin/fieldvalues/deleted.html.tmpl",
-                       $vars)
-      || ThrowTemplateError($template->error());
-    exit;
+    $vars->{'message'} = 'field_value_deleted';
+    $vars->{'no_edit_link'} = 1;
+    display_field_values();
 }
 
 
@@ -485,11 +483,8 @@ if ($action eq 'update') {
     }
     delete_token($token);
 
-    $template->process("admin/fieldvalues/updated.html.tmpl",
-                       $vars)
-      || ThrowTemplateError($template->error());
-
-    exit;
+    $vars->{'message'} = 'field_value_updated';
+    display_field_values();
 }
 
 

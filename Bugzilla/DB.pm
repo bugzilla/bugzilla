@@ -273,8 +273,7 @@ EOT
 # List of abstract methods we are checking the derived class implements
 our @_abstract_methods = qw(REQUIRED_VERSION PROGRAM_NAME DBD_VERSION
                             new sql_regexp sql_not_regexp sql_limit sql_to_days
-                            sql_date_format sql_interval
-                            bz_lock_tables bz_unlock_tables);
+                            sql_date_format sql_interval);
 
 # This overridden import method will check implementation of inherited classes
 # for missing implementation of abstract methods
@@ -299,62 +298,6 @@ sub import {
     $Exporter::ExportLevel++ if $is_exporter;
     $pkg->SUPER::import(@_);
     $Exporter::ExportLevel-- if $is_exporter;
-}
-
-sub bz_lock_tables {
-    my ($self, @tables) = @_;
-
-    my $list = join(', ', @tables);
-    # Check first if there was no lock before
-    if ($self->{private_bz_tables_locked}) {
-        ThrowCodeError("already_locked", { current => $self->{private_bz_tables_locked},
-                                           new => $list });
-    } else {
-        my %read_tables;
-        my %write_tables;
-        foreach my $table (@tables) {
-            $table =~ /^([\d\w]+)([\s]+AS[\s]+[\d\w]+)?[\s]+(WRITE|READ)$/i;
-            my $table_name = $1;
-            if ($3 =~ /READ/i) {
-                if (!exists $read_tables{$table_name}) {
-                    $read_tables{$table_name} = undef;
-                }
-            }
-            else {
-                if (!exists $write_tables{$table_name}) {
-                    $write_tables{$table_name} = undef;
-                }
-            }
-        }
-
-        # Begin Transaction
-        $self->bz_start_transaction();
-
-        Bugzilla->dbh->do('LOCK TABLE ' . join(', ', keys %read_tables) .
-                          ' IN ROW SHARE MODE') if keys %read_tables;
-        Bugzilla->dbh->do('LOCK TABLE ' . join(', ', keys %write_tables) .
-                          ' IN ROW EXCLUSIVE MODE') if keys %write_tables;
-        $self->{private_bz_tables_locked} = $list;
-    }
-}
-
-sub bz_unlock_tables {
-    my ($self, $abort) = @_;
-
-    # Check first if there was previous matching lock
-    if (!$self->{private_bz_tables_locked}) {
-        # Abort is allowed even without previous lock for error handling
-        return if $abort;
-        ThrowCodeError("no_matching_lock");
-    } else {
-        $self->{private_bz_tables_locked} = "";
-        # End transaction, tables will be unlocked automatically
-        if ($abort) {
-            $self->bz_rollback_transaction();
-        } else {
-            $self->bz_commit_transaction();
-        }
-    }
 }
 
 sub sql_istrcmp {
@@ -1946,63 +1889,6 @@ Only necessary where an C<IN> clause can have more than 1000 items.
 =item B<Returns>
 
 Formatted SQL for the C<IN> operator.
-
-=back
-
-=item C<bz_lock_tables>
-
-=over
-
-=item B<Description>
-
-Performs a table lock operation on specified tables. If the underlying 
-database supports transactions, it should also implicitly start a new 
-transaction.
-
-Abstract method, should be overridden by database specific code.
-
-=item B<Params>
-
-=over
-
-=item C<@tables> - list of names of tables to lock in MySQL
-notation (ex. 'bugs AS bugs2 READ', 'logincookies WRITE')
-
-=back
-
-=item B<Returns> (nothing)
-
-=back
-
-=item C<bz_unlock_tables>
-
-=over
-
-=item B<Description>
-
-Performs a table unlock operation.
-
-If the underlying database supports transactions, it should also implicitly 
-commit or rollback the transaction.
-
-Also, this function should allow to be called with the abort flag
-set even without locking tables first without raising an error
-to simplify error handling.
-
-Abstract method, should be overridden by database specific code.
-
-=item B<Params>
-
-=over
-
-=item C<$abort> - C<UNLOCK_ABORT> if the operation on locked tables
-failed (if transactions are supported, the action will be rolled
-back). No param if the operation succeeded. This is only used by
-L<Bugzilla::Error/throw_error>.
-
-=back
-
-=item B<Returns> (none)
 
 =back
 

@@ -200,44 +200,6 @@ sub sql_group_by {
 }
 
 
-sub bz_lock_tables {
-    my ($self, @tables) = @_;
-
-    my $list = join(', ', @tables);
-    # Check first if there was no lock before
-    if ($self->{private_bz_tables_locked}) {
-        ThrowCodeError("already_locked", { current => $self->{private_bz_tables_locked},
-                                           new => $list });
-    } else {
-        $self->bz_start_transaction();
-        $self->do('LOCK TABLE ' . $list); 
-        $self->{private_bz_tables_locked} = $list;
-    }
-}
-
-sub bz_unlock_tables {
-    my ($self, $abort) = @_;
-
-    if ($self->bz_in_transaction) {
-        if ($abort) {
-            $self->bz_rollback_transaction();
-        }
-        else {
-            $self->bz_commit_transaction();
-        }
-    }
-    
-    # Check first if there was previous matching lock
-    if (!$self->{private_bz_tables_locked}) {
-        # Abort is allowed even without previous lock for error handling
-        return if $abort;
-        ThrowCodeError("no_matching_lock");
-    } else {
-        $self->do("UNLOCK TABLES");
-        $self->{private_bz_tables_locked} = "";
-    }
-}
-
 sub _bz_get_initial_schema {
     my ($self) = @_;
     return $self->_bz_build_schema_from_disk();

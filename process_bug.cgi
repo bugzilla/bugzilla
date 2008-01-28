@@ -398,17 +398,7 @@ if ($move_action eq Bugzilla->params->{'move-button-text'}) {
     $user->is_mover || ThrowUserError("auth_failure", {action => 'move',
                                                        object => 'bugs'});
 
-    my @multi_select_locks  = map {'bug_' . $_->name . " WRITE"}
-        Bugzilla->get_fields({ custom => 1, type => FIELD_TYPE_MULTI_SELECT,
-                               obsolete => 0 });
-
-    $dbh->bz_lock_tables('bugs WRITE', 'bugs_activity WRITE', 'duplicates WRITE',
-                         'longdescs WRITE', 'profiles READ', 'groups READ',
-                         'bug_group_map READ', 'group_group_map READ',
-                         'user_group_map READ', 'classifications READ',
-                         'products READ', 'components READ', 'votes READ',
-                         'cc READ', 'fielddefs READ', 'bug_status READ',
-                         'status_workflow READ', 'resolution READ', @multi_select_locks);
+    $dbh->bz_start_transaction();
 
     # First update all moved bugs.
     foreach my $bug (@bug_objects) {
@@ -430,7 +420,7 @@ if ($move_action eq Bugzilla->params->{'move-button-text'}) {
         $bug->_clear_dup_id;
     }
     $_->update() foreach @bug_objects;
-    $dbh->bz_unlock_tables();
+    $dbh->bz_commit_transaction();
 
     # Now send emails.
     foreach my $bug (@bug_objects) {
@@ -510,28 +500,9 @@ foreach my $b (@bug_objects) {
 # Do Actual Database Updates #
 ##############################
 foreach my $bug (@bug_objects) {
-    my $write = "WRITE";        # Might want to make a param to control
-                                # whether we do LOW_PRIORITY ...
+    $dbh->bz_start_transaction();
 
-    my @multi_select_locks  = map {'bug_' . $_->name . " $write"}
-        Bugzilla->get_fields({ custom => 1, type => FIELD_TYPE_MULTI_SELECT,
-                               obsolete => 0 });
-
-    $dbh->bz_lock_tables("bugs $write", "bugs_activity $write", "cc $write",
-            "profiles READ", "dependencies $write", "votes $write",
-            "products READ", "components READ", "milestones READ",
-            "keywords $write", "longdescs $write", "fielddefs READ",
-            "bug_group_map $write", "flags $write", "duplicates $write",
-            "user_group_map READ", "group_group_map READ", "flagtypes READ",
-            "flaginclusions AS i READ", "flagexclusions AS e READ",
-            "keyworddefs READ", "groups READ", "attachments READ",
-            "bug_status READ", "group_control_map AS oldcontrolmap READ",
-            "group_control_map AS newcontrolmap READ",
-            "group_control_map READ", "email_setting READ", 
-            "classifications READ", @multi_select_locks);
-    
     my $timestamp = $dbh->selectrow_array(q{SELECT NOW()});
-
     my $changes = $bug->update($timestamp);
 
     my %notify_deps;
@@ -581,7 +552,7 @@ foreach my $bug (@bug_objects) {
     # Set and update flags.
     Bugzilla::Flag::process($bug, undef, $timestamp, $cgi, $vars);
 
-    $dbh->bz_unlock_tables();
+    $dbh->bz_commit_transaction();
 
     ###############
     # Send Emails #

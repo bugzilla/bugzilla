@@ -416,14 +416,6 @@
   [% ELSIF error == "not_in_transaction" %]
     Attempted to end transaction without starting one first.
 
-  [% ELSIF error == "already_locked" %]
-    Attempted to lock a table without releasing previous lock first:
-    <p>Tables already locked:<br>[% current FILTER html %]
-    <p>Tables requesting locking:<br>[% new FILTER html %]
-
-  [% ELSIF error == "no_matching_lock" %]
-    Attempted to unlock tables without locking them first.
-
   [% ELSIF error == "comma_operator_deprecated" %]
     [% title = "SQL query generator internal error" %]
     There is an internal error in the SQL query generation code,

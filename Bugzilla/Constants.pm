@@ -91,7 +91,6 @@ use File::Basename;
     CMT_POPULAR_VOTES
     CMT_MOVED_TO
 
-    UNLOCK_ABORT
     THROW_ERROR
     
     RELATIONSHIPS
@@ -268,10 +267,6 @@ use constant CMT_DUPE_OF => 1;
 use constant CMT_HAS_DUPE => 2;
 use constant CMT_POPULAR_VOTES => 3;
 use constant CMT_MOVED_TO => 4;
-
-# used by Bugzilla::DB to indicate that tables are being unlocked
-# because of error
-use constant UNLOCK_ABORT => 1;
 
 # Determine whether a validation routine should return 0 or throw
 # an error when the validation fails.

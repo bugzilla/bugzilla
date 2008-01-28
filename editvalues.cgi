@@ -170,11 +170,12 @@ $vars->{'field'} = $field_obj;
 trick_taint($field);
 
 sub display_field_values {
+    my $template = Bugzilla->template;
     my $field = $vars->{'field'}->name;
     my $fieldvalues =
-        $dbh->selectall_arrayref("SELECT value AS name, sortkey"
-                               . "  FROM $field ORDER BY sortkey, value",
-                                 {Slice =>{}});
+      Bugzilla->dbh->selectall_arrayref("SELECT value AS name, sortkey"
+                                      . "  FROM $field ORDER BY sortkey, value",
+                                        {Slice =>{}});
 
     $vars->{'values'} = $fieldvalues;
     $vars->{'default'} = Bugzilla->params->{$defaults{$field}} if defined $defaults{$field};

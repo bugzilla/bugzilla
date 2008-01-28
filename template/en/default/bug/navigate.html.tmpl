@@ -19,6 +19,21 @@
   #%]
 
 [% PROCESS global/variables.none.tmpl %]
+[% IF bottom_navigator == 1 %]
+  <ul class="related_actions">
+    <li><a href="show_bug.cgi?format=multiple&amp;id=
+                [% bug.bug_id FILTER url_quote %]">Format For Printing</a></li>
+    <li>&nbsp;-&nbsp;<a href="show_bug.cgi?ctype=xml&amp;id=
+                        [% bug.bug_id  FILTER url_quote %]">XML</a></li>
+    <li>&nbsp;-&nbsp;<a href="enter_bug.cgi?cloned_bug_id=
+                        [% bug.bug_id  FILTER url_quote %]">Clone This 
+                        [% terms.Bug %]</a></li>
+    [%# Links to more things users can do with this bug. %]
+    [% Hook.process("links") %]
+    <li>&nbsp;-&nbsp;<a href="#">Top of page </a></li>
+    </ul>
+[% END %]        
+
 
 <div class="navigation">
 [% IF bug_list && bug_list.size > 0 %]

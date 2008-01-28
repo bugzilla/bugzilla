@@ -134,3 +134,60 @@ function updateCalendarFromField(date_field) {
         cal.render();
     }
 }
+
+
+/* Hide input fields and show the text with (edit) next to it */  
+function hideEditableField( container, input, action, field_id, original_value ) {
+    YAHOO.util.Dom.setStyle(container, 'display', 'inline');
+    YAHOO.util.Dom.setStyle(input, 'display', 'none');
+    YAHOO.util.Event.addListener(action, 'click', showEditableField, new Array(container, input) );
+    if(field_id != ""){
+      YAHOO.util.Event.addListener(window, 'load', checkForChangedFieldValues, new Array(container, input, field_id, original_value ));
+    }
+}
+
+/* showEditableField (e, ContainerInputArray)
+ * Function hides the (edit) link and the text and displays the input
+ *
+ * var e: the event
+ * var ContainerInputArray: An array containing the (edit) and text area and the input being displayed
+ * var ContainerInputArray[0]: the conainer that will be hidden usually shows the (edit) text
+ * var ContainerInputArray[1]: the input area and label that will be displayed
+ *
+ */
+function showEditableField (e, ContainerInputArray) {
+    YAHOO.util.Dom.setStyle(ContainerInputArray[0], 'display', 'none');
+    YAHOO.util.Dom.setStyle(ContainerInputArray[1], 'display', 'inline');
+    YAHOO.util.Event.preventDefault(e);
+}
+
+
+/* checkForChangedFieldValues(e, array )
+ * Function checks if after the autocomplete by the browser if the values match the originals.
+ *   If they don't match then hide the text and show the input so users don't get confused.
+ *
+ * var e: the event
+ * var ContainerInputArray: An array containing the (edit) and text area and the input being displayed
+ * var ContainerInputArray[0]: the conainer that will be hidden usually shows the (edit) text
+ * var ContainerInputArray[1]: the input area and label that will be displayed
+ * var ContainerInputArray[2]: the field that is on the page, might get changed by browser autocomplete 
+ * var ContainerInputArray[3]: the original value from the page loading.
+ *
+ */  
+function checkForChangedFieldValues(e, ContainerInputArray ) {
+    var el = document.getElementById(ContainerInputArray[2]);
+    if ( el ) {
+        if ( el.value != ContainerInputArray[3] || ( el.value == "" && el.id != "alias") ) {
+            YAHOO.util.Dom.setStyle(ContainerInputArray[0], 'display', 'none');
+            YAHOO.util.Dom.setStyle(ContainerInputArray[1], 'display', 'inline');
+        } 
+    }
+}
+
+function hideAliasAndSummary(short_desc_value, alias_value){
+  // check the short desc field
+  hideEditableField( 'summary_alias_container', 'summary_alias_input', 'editme_action', 'short_desc', short_desc_value);  
+  // check that the alias hasn't changed
+  bz_alias_check_array = new Array('summary_alias_container', 'summary_alias_input', 'alias', alias_value )
+  YAHOO.util.Event.addListener( window, 'load', checkForChangedFieldValues, bz_alias_check_array);
+}

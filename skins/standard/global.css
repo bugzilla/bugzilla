@@ -28,6 +28,10 @@
         color: #000;
         background: #fff url("global/body-back.gif") repeat-x;
     }
+    body, td, th, input {
+        font-family: Verdana, sans-serif;
+        font-size: small;
+    }    
 /* global (end) */
 
 /* header (begin) */
@@ -39,11 +43,6 @@
     #header form {
         font-size: 85%;
         display: inline;
-    }
-
-    #header .btn,
-    #header .txt {
-        font-size: 80%;
     }
 
     #header .links {
@@ -397,3 +396,5 @@ form#Create .comment {
     -moz-border-radius: 5px;
     background: white;
 }
+
+

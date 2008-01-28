@@ -46,10 +46,10 @@ with one command, do:
 EOT
     install_data_too_long => <<EOT,
 WARNING: Some of the data in the ##table##.##column## column is longer than
-its new length limit of ##max_length## characters. Please fix this data
-and then re-run checksetup.pl:
+its new length limit of ##max_length## characters. The data that needs to be
+fixed is printed below with the value of the ##id_column## column first and
+then the value of the ##column## column that needs to be fixed:
 
-##data##
 EOT
     install_module => 'Installing ##module## version ##version##...',
     module_found => "found v##ver##",

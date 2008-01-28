@@ -516,7 +516,7 @@ sub update_table_definitions {
     _make_lang_setting_dynamic();
     
     # 2007-11-29 xiaoou.wu@oracle.com - Bug 153129
-    change_text_types();
+    _change_text_types();
 
     # 2007-09-09 LpSolit@gmail.com - Bug 99215
     _fix_attachment_modification_date();
@@ -2937,12 +2937,12 @@ sub _fix_attachment_modification_date {
                        [qw(modification_time)]);
 }
 
-sub change_text_types {
+sub _change_text_types {
     my $dbh = Bugzilla->dbh; 
     return if $dbh->bz_column_info('series', 'query')->{TYPE} eq 'LONGTEXT';
-    _check_content_length('attachments', 'mimetype',    255);
-    _check_content_length('fielddefs',   'description', 255);
-    _check_content_length('attachments', 'description', 255);
+    _check_content_length('attachments', 'mimetype',    255, 'attach_id');
+    _check_content_length('fielddefs',   'description', 255, 'id');
+    _check_content_length('attachments', 'description', 255, 'attach_id');
 
     $dbh->bz_alter_column('bugs', 'bug_file_loc',
         { TYPE => 'MEDIUMTEXT'});
@@ -2968,28 +2968,27 @@ sub change_text_types {
 } 
 
 sub _check_content_length {
-    my ($table_name, $field_name, $max_length) = @_;
+    my ($table_name, $field_name, $max_length, $id_field) = @_;
     my $dbh = Bugzilla->dbh;
-    my $contents = $dbh->selectcol_arrayref(
-        "SELECT $field_name FROM $table_name 
-          WHERE LENGTH($field_name) > ?", undef, $max_length);
+    my %contents = @{ $dbh->selectcol_arrayref(
+        "SELECT $id_field, $field_name FROM $table_name 
+          WHERE LENGTH($field_name) > ?", {Columns=>[1,2]}, $max_length) };
 
-    if (@$contents) {
-        my @trimmed;
-        foreach my $item (@$contents) {
-            # Don't dump the whole string--it could be 16MB.
-            if (length($item) > 80) {
-                push(@trimmed,  substr($item, 0, 30) . "..." 
-                                . substr($item, -30) . "\n");
-            } else {
-                push(@trimmed, $item);
-            }
-        }
+    if (scalar keys %contents) {
         print install_string('install_data_too_long',
-                              { column => $field_name,
-                                table  => $table_name,
-                                max_length => $max_length,
-                                data => join("\n", @trimmed) });
+                             { column     => $field_name,
+                               id_column  => $id_field,
+                               table      => $table_name,
+                               max_length => $max_length });
+        foreach my $id (keys %contents) {
+            my $string = $contents{$id};
+            # Don't dump the whole string--it could be 16MB.
+            if (length($string) > 80) {
+                $string = substr($string, 0, 30) . "..." 
+                         . substr($string, -30) . "\n";
+            }
+            print "$id: $string\n";
+        }
         exit 3;
     }
 }

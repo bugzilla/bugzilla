@@ -1964,10 +1964,6 @@ sub _anyexact {
     my ($f, $ff, $v, $q, $term) = @func_args{qw(f ff v q term)};
     my $dbh = Bugzilla->dbh;
     
-    use Data::Dumper;
-    open DEBUG, ">/tmp/debug";
-    print DEBUG Dumper($self);
-    close DEBUG;
     my @list;
     foreach my $w (split(/,/, $$v)) {
         if ($w eq "---" && $$f !~ /resolution/) {

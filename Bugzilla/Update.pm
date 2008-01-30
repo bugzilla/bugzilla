@@ -42,8 +42,16 @@ sub get_notifications {
         # but we failed because we cannot modify its timestamp?
         my $can_alter = 1;
         if (-e $local_file) {
-            # Try to alter its last modification time.
+            # Try to alter its last modification time. We first save the
+            # access and modification times of the file to restore them
+            # right after our test.
+            my $atime = (stat($local_file))[8];
+            my $mtime = (stat($local_file))[9];
             $can_alter = utime(undef, undef, $local_file);
+            # Restore the access and modification times to their
+            # original values, else LWP::UserAgent will never see the
+            # updated file on the server as newer than our local one.
+            utime($atime, $mtime, $local_file);
         }
         if ($can_alter) {
             my $error = _synchronize_data();
@@ -148,6 +156,8 @@ sub _synchronize_data {
     else {
         $ua->env_proxy;
     }
+    # Download the file from the server if its modification time is newer
+    # than the local one.
     $ua->mirror(REMOTE_FILE, $local_file);
 
     # $ua->mirror() forces the modification time of the local XML file

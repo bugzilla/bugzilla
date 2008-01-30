@@ -54,7 +54,10 @@ $::SIG{PIPE} = 'IGNORE';
 # We need to do so, too, otherwise perl dies when the object is destroyed
 # and we don't have a DESTROY method (because CGI.pm's AUTOLOAD will |die|
 # on getting an unknown sub to try to call)
-sub DESTROY {};
+sub DESTROY {
+    my $self = shift;
+    $self->SUPER::DESTROY(@_);
+};
 
 sub new {
     my ($invocant, @args) = @_;

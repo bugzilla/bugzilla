@@ -241,7 +241,7 @@
                      maxrows   = 25
                      cols      = constants.COMMENT_COLS
           %]
-
+          [% PROCESS bug/knob.html.tmpl %]
         [% ELSE %]
           <fieldset>
             <legend>Note</legend>
@@ -264,7 +264,6 @@
       </td>
     </tr>
   </table>
-[% PROCESS bug/knob.html.tmpl IF user.id %]
 </form>
 
 [% IF use_keywords %]

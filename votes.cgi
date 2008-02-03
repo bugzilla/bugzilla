@@ -144,6 +144,7 @@ sub show_user {
         }
     }
 
+    my @all_bug_ids;
     my @products;
     my $products = $user->get_selectable_products;
     # Read the votes data for this user for each product.
@@ -151,6 +152,7 @@ sub show_user {
         next unless ($product->votes_per_user > 0);
 
         my @bugs;
+        my @bug_ids;
         my $total = 0;
         my $onevoteonly = 0;
 
@@ -178,6 +180,8 @@ sub show_user {
             push (@bugs, { id => $id, 
                            summary => $summary,
                            count => $count });
+            push (@bug_ids, $id);
+            push (@all_bug_ids, $id);
         }
 
         $onevoteonly = 1 if (min($product->votes_per_user,
@@ -187,6 +191,7 @@ sub show_user {
         if ($#bugs > -1) {
             push (@products, { name => $product->name,
                                bugs => \@bugs,
+                               bug_ids => \@bug_ids,
                                onevoteonly => $onevoteonly,
                                total => $total,
                                maxvotes => $product->votes_per_user,
@@ -201,6 +206,7 @@ sub show_user {
     $vars->{'voting_user'} = { "login" => $name };
     $vars->{'products'} = \@products;
     $vars->{'bug_id'} = $bug_id;
+    $vars->{'all_bug_ids'} = \@all_bug_ids;
 
     print $cgi->header();
     $template->process("bug/votes/list-for-user.html.tmpl", $vars)

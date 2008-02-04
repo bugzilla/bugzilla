@@ -645,7 +645,8 @@ sub sendMail {
         $threadingmarker = "Message-ID: <bug-$id-" . $user->id . "$sitespec>";
     }
     else {
-        $threadingmarker = "In-Reply-To: <bug-$id-" . $user->id . "$sitespec>";
+        $threadingmarker = "In-Reply-To: <bug-$id-" . $user->id . "$sitespec>" .
+                            "\nReferences: <bug-$id-" . $user->id . "$sitespec>";
     }
     
 

@@ -123,6 +123,9 @@ sub init {
 
     my @select_fields = Bugzilla->get_fields({ type => FIELD_TYPE_SINGLE_SELECT,
                                                obsolete => 0 });
+    
+    my @multi_select_fields = Bugzilla->get_fields({ type => FIELD_TYPE_MULTI_SELECT,
+                                                     obsolete => 0 });
     foreach my $field (@select_fields) {
         my $name = $field->name;
         $special_order{"bugs.$name"} = [ "$name.sortkey", "$name.value" ],
@@ -228,6 +231,7 @@ sub init {
 
     # Include custom select fields.
     push(@legal_fields, map { $_->name } @select_fields);
+    push(@legal_fields, map { $_->name } @multi_select_fields);
 
     foreach my $field ($params->param()) {
         if (lsearch(\@legal_fields, $field) != -1) {
@@ -412,6 +416,8 @@ sub init {
         push(@specialchart, ['content', 'matches', $params->param('content')]);
     }
 
+    my $multi_fields = join('|', map($_->name, @multi_select_fields));
+
     my $chartid;
     my $sequence = 0;
     # $type_id is used by the code that queries for attachment flags.
@@ -482,6 +488,9 @@ sub init {
         "^blocked,(?!changed)" => \&_blocked_nonchanged,
         "^alias,(?!changed)" => \&_alias_nonchanged,
         "^owner_idle_time,(greaterthan|lessthan)" => \&_owner_idle_time_greater_less,
+        "^($multi_fields),(?:notequals|notregexp|notsubstring|nowords|nowordssubstr)" => \&_multiselect_negative,
+        "^($multi_fields),(?:allwords|allwordssubstr|anyexact)" => \&_multiselect_multiple,
+        "^($multi_fields),(?!changed)" => \&_multiselect_nonchanged,
         ",equals" => \&_equals,
         ",notequals" => \&_notequals,
         ",casesubstring" => \&_casesubstring,
@@ -1879,6 +1888,64 @@ sub _owner_idle_time_greater_less {
                           "OR activity_$table.who IS NOT NULL)");
     }
     $$term = "0=0";
+}
+
+sub _multiselect_negative {
+    my $self = shift;
+    my %func_args = @_;
+    my ($f, $ff, $t, $funcsbykey, $term) = @func_args{qw(f ff t funcsbykey term)};
+    
+    my %map = (
+        notequals => 'equals',
+        notregexp => 'regexp',
+        notsubstring => 'substring',
+        nowords => 'anywords',
+        nowordssubstr => 'anywordssubstr',
+    );
+
+    my $table = "bug_$$f";
+    $$ff = "$table.value";
+    
+    $$funcsbykey{",".$map{$$t}}($self, %func_args);
+    $$term = "bugs.bug_id NOT IN (SELECT bug_id FROM $table WHERE $$term)";
+}
+
+sub _multiselect_multiple {
+    my $self = shift;
+    my %func_args = @_;
+    my ($f, $ff, $t, $v, $funcsbykey, $term) = @func_args{qw(f ff t v funcsbykey term)};
+    
+    my @terms;
+    my $table = "bug_$$f";
+    $$ff = "$table.value";
+    
+    foreach my $word (split(/[\s,]+/, $$v)) {
+        $$v = $word;
+        $$funcsbykey{",".$$t}($self, %func_args);
+        push(@terms, "bugs.bug_id IN
+                      (SELECT bug_id FROM $table WHERE $$term)");
+    }
+    
+    if ($$t eq 'anyexact') {
+        $$term = "(" . join(" OR ", @terms) . ")";
+    }
+    else {
+        $$term = "(" . join(" AND ", @terms) . ")";
+    }
+}
+
+sub _multiselect_nonchanged {
+    my $self = shift;
+    my %func_args = @_;
+    my ($chartid, $f, $ff, $t, $funcsbykey, $supptables) =
+        @func_args{qw(chartid f ff t funcsbykey supptables)};
+
+    my $table = $$f."_".$$chartid;
+    $$ff = "$table.value";
+    
+    $$funcsbykey{",$$t"}($self, %func_args);
+    push(@$supptables, "LEFT JOIN bug_$$f AS $table " .
+                       "ON $table.bug_id = bugs.bug_id ");
 }
 
 sub _equals {

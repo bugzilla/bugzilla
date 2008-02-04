@@ -260,8 +260,6 @@ $vars->{'bug_severity'} = get_legal_field_values('bug_severity');
 
 # Boolean charts
 my @fields = Bugzilla->get_fields({ obsolete => 0 });
-# Multi-selects aren't searchable, currently.
-@fields = grep($_->type != FIELD_TYPE_MULTI_SELECT, @fields);
 
 # If we're not in the time-tracking group, exclude time-tracking fields.
 if (!Bugzilla->user->in_group(Bugzilla->params->{'timetrackinggroup'})) {

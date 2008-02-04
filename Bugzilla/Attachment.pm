@@ -890,7 +890,7 @@ sub insert_attachment_for_bug {
     foreach my $obsolete_attachment (@obsolete_attachments) {
         # If the obsolete attachment has request flags, cancel them.
         # This call must be done before updating the 'attachments' table.
-        Bugzilla::Flag::CancelRequests($bug, $obsolete_attachment, $timestamp);
+        Bugzilla::Flag->CancelRequests($bug, $obsolete_attachment, $timestamp);
 
         $dbh->do('UPDATE attachments SET isobsolete = 1, modification_time = ?
                   WHERE attach_id = ?',
@@ -917,8 +917,8 @@ sub insert_attachment_for_bug {
     my $error_mode_cache = Bugzilla->error_mode;
     Bugzilla->error_mode(ERROR_MODE_DIE);
     eval {
-        Bugzilla::Flag::validate($cgi, $bug->bug_id, -1, SKIP_REQUESTEE_ON_ERROR);
-        Bugzilla::Flag->process($bug, $attachment, $timestamp, $cgi, $hr_vars);
+        Bugzilla::Flag::validate($bug->bug_id, -1, SKIP_REQUESTEE_ON_ERROR);
+        Bugzilla::Flag->process($bug, $attachment, $timestamp, $hr_vars);
     };
     Bugzilla->error_mode($error_mode_cache);
     if ($@) {

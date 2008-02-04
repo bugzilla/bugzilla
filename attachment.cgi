@@ -508,7 +508,7 @@ sub update {
     Bugzilla::User::match_field($cgi, {
         '^requestee(_type)?-(\d+)$' => { 'type' => 'multi' }
     });
-    Bugzilla::Flag::validate($cgi, $bug->id, $attachment->id);
+    Bugzilla::Flag::validate($bug->id, $attachment->id);
 
     # Start a transaction in preparation for updating the attachment.
     $dbh->bz_start_transaction();
@@ -529,7 +529,7 @@ sub update {
   # to attachments so that we can delete pending requests if the user
   # is obsoleting this attachment without deleting any requests
   # the user submits at the same time.
-  Bugzilla::Flag->process($bug, $attachment, $timestamp, $cgi, $vars);
+  Bugzilla::Flag->process($bug, $attachment, $timestamp, $vars);
 
   # Update the attachment record in the database.
   $dbh->do("UPDATE  attachments 

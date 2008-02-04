@@ -162,7 +162,7 @@ if (defined $cgi->param('dontchange')) {
 
 # Validate flags in all cases. validate() should not detect any
 # reference to flags if $cgi->param('id') is undefined.
-Bugzilla::Flag::validate($cgi, $cgi->param('id'));
+Bugzilla::Flag::validate($cgi->param('id'));
 
 ######################################################################
 # End Data/Security Validation
@@ -550,7 +550,7 @@ foreach my $bug (@bug_objects) {
     }
 
     # Set and update flags.
-    Bugzilla::Flag->process($bug, undef, $timestamp, $cgi, $vars);
+    Bugzilla::Flag->process($bug, undef, $timestamp, $vars);
 
     $dbh->bz_commit_transaction();
 

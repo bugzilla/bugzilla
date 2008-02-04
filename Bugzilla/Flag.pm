@@ -246,7 +246,7 @@ sub count {
 
 =over
 
-=item C<validate($cgi, $bug_id, $attach_id, $skip_requestee_on_error)>
+=item C<validate($bug_id, $attach_id, $skip_requestee_on_error)>
 
 Validates fields containing flag modifications.
 
@@ -258,8 +258,8 @@ to -1 to force its check anyway.
 =cut
 
 sub validate {
-    my ($cgi, $bug_id, $attach_id, $skip_requestee_on_error) = @_;
-
+    my ($bug_id, $attach_id, $skip_requestee_on_error) = @_;
+    my $cgi = Bugzilla->cgi;
     my $dbh = Bugzilla->dbh;
 
     # Get a list of flags to validate.  Uses the "map" function
@@ -501,22 +501,22 @@ sub snapshot {
 
 =over
 
-=item C<process($bug, $attachment, $timestamp, $cgi, $hr_vars)>
+=item C<process($bug, $attachment, $timestamp, $hr_vars)>
 
 Processes changes to flags.
 
 The bug and/or the attachment objects are the ones this flag is about,
 the timestamp is the date/time the bug was last touched (so that changes
-to the flag can be stamped with the same date/time), the cgi is the CGI
-object used to obtain the flag fields that the user submitted.
+to the flag can be stamped with the same date/time).
 
 =back
 
 =cut
 
 sub process {
-    my ($class, $bug, $attachment, $timestamp, $cgi, $hr_vars) = @_;
+    my ($class, $bug, $attachment, $timestamp, $hr_vars) = @_;
     my $dbh = Bugzilla->dbh;
+    my $cgi = Bugzilla->cgi;
 
     # Make sure the bug (and attachment, if given) exists and is accessible
     # to the current user. Moreover, if an attachment object is passed,
@@ -535,7 +535,7 @@ sub process {
 
     # Cancel pending requests if we are obsoleting an attachment.
     if ($attachment && $cgi->param('isobsolete')) {
-        CancelRequests($bug, $attachment);
+        $class->CancelRequests($bug, $attachment);
     }
 
     # Create new flags and update existing flags.
@@ -1094,7 +1094,7 @@ sub notify {
 
 # Cancel all request flags from the attachment being obsoleted.
 sub CancelRequests {
-    my ($bug, $attachment, $timestamp) = @_;
+    my ($class, $bug, $attachment, $timestamp) = @_;
     my $dbh = Bugzilla->dbh;
 
     my $request_ids =
@@ -1109,7 +1109,7 @@ sub CancelRequests {
     return if (!scalar(@$request_ids));
 
     # Take a snapshot of flags before any changes.
-    my @old_summaries = __PACKAGE__->snapshot($bug->bug_id, $attachment->id)
+    my @old_summaries = $class->snapshot($bug->bug_id, $attachment->id)
         if ($timestamp);
     my $flags = Bugzilla::Flag->new_from_list($request_ids);
     foreach my $flag (@$flags) { clear($flag, $bug, $attachment) }
@@ -1118,7 +1118,7 @@ sub CancelRequests {
     return unless ($timestamp);
 
     # Take a snapshot of flags after any changes.
-    my @new_summaries = __PACKAGE__->snapshot($bug->bug_id, $attachment->id);
+    my @new_summaries = $class->snapshot($bug->bug_id, $attachment->id);
     update_activity($bug->bug_id, $attachment->id, $timestamp,
                     \@old_summaries, \@new_summaries);
 }

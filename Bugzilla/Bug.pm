@@ -2312,7 +2312,7 @@ sub flag_types {
          'component_id' => $self->{'component_id'} });
 
     foreach my $flag_type (@$flag_types) {
-        $flag_type->{'flags'} = Bugzilla::Flag::match(
+        $flag_type->{'flags'} = Bugzilla::Flag->match(
             { 'bug_id'      => $self->bug_id,
               'type_id'     => $flag_type->{'id'},
               'target_type' => 'bug' });
@@ -2432,7 +2432,7 @@ sub show_attachment_flags {
         { 'target_type'  => 'attachment',
           'product_id'   => $self->{'product_id'},
           'component_id' => $self->{'component_id'} });
-    my $num_attachment_flags = Bugzilla::Flag::count(
+    my $num_attachment_flags = Bugzilla::Flag->count(
         { 'target_type'  => 'attachment',
           'bug_id'       => $self->bug_id });
 

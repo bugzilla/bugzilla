@@ -550,7 +550,7 @@ foreach my $bug (@bug_objects) {
     }
 
     # Set and update flags.
-    Bugzilla::Flag::process($bug, undef, $timestamp, $cgi, $vars);
+    Bugzilla::Flag->process($bug, undef, $timestamp, $cgi, $vars);
 
     $dbh->bz_commit_transaction();
 

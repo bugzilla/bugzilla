@@ -202,16 +202,21 @@ and returns an array of matching records.
 =cut
 
 sub match {
+    my $class = shift;
     my ($criteria) = @_;
-    my $dbh = Bugzilla->dbh;
 
-    my @criteria = sqlify_criteria($criteria);
-    $criteria = join(' AND ', @criteria);
+    # If the caller specified only bug or attachment flags,
+    # limit the query to those kinds of flags.
+    if (my $type = delete $criteria->{'target_type'}) {
+        if ($type eq 'attachment') {
+            $criteria->{'attach_id'} = NOT_NULL;
+        }
+        else {
+            $criteria->{'attach_id'} = IS_NULL;
+        }
+    }
 
-    my $flag_ids = $dbh->selectcol_arrayref("SELECT id FROM flags
-                                             WHERE $criteria");
-
-    return Bugzilla::Flag->new_from_list($flag_ids);
+    return $class->SUPER::match(@_);
 }
 
 =pod
@@ -229,15 +234,8 @@ and returns an array of matching records.
 =cut
 
 sub count {
-    my ($criteria) = @_;
-    my $dbh = Bugzilla->dbh;
-
-    my @criteria = sqlify_criteria($criteria);
-    $criteria = join(' AND ', @criteria);
-
-    my $count = $dbh->selectrow_array("SELECT COUNT(*) FROM flags WHERE $criteria");
-
-    return $count;
+    my $class = shift;
+    return scalar @{$class->match(@_)};
 }
 
 ######################################################################
@@ -485,10 +483,10 @@ sub _validate {
 }
 
 sub snapshot {
-    my ($bug_id, $attach_id) = @_;
+    my ($class, $bug_id, $attach_id) = @_;
 
-    my $flags = match({ 'bug_id'    => $bug_id,
-                        'attach_id' => $attach_id });
+    my $flags = $class->match({ 'bug_id'    => $bug_id,
+                                'attach_id' => $attach_id });
     my @summaries;
     foreach my $flag (@$flags) {
         my $summary = $flag->type->name . $flag->status;
@@ -517,7 +515,7 @@ object used to obtain the flag fields that the user submitted.
 =cut
 
 sub process {
-    my ($bug, $attachment, $timestamp, $cgi, $hr_vars) = @_;
+    my ($class, $bug, $attachment, $timestamp, $cgi, $hr_vars) = @_;
     my $dbh = Bugzilla->dbh;
 
     # Make sure the bug (and attachment, if given) exists and is accessible
@@ -533,7 +531,7 @@ sub process {
     $timestamp ||= $dbh->selectrow_array('SELECT NOW()');
 
     # Take a snapshot of flags before any changes.
-    my @old_summaries = snapshot($bug_id, $attach_id);
+    my @old_summaries = $class->snapshot($bug_id, $attach_id);
 
     # Cancel pending requests if we are obsoleting an attachment.
     if ($attachment && $cgi->param('isobsolete')) {
@@ -586,7 +584,7 @@ sub process {
     }
 
     # Take a snapshot of flags after changes.
-    my @new_summaries = snapshot($bug_id, $attach_id);
+    my @new_summaries = $class->snapshot($bug_id, $attach_id);
 
     update_activity($bug_id, $attach_id, $timestamp, \@old_summaries, \@new_summaries);
 }
@@ -865,7 +863,7 @@ sub retarget {
 
     foreach my $flagtype (@$flagtypes) {
         # Get the number of flags of this type already set for this target.
-        my $has_flags = count(
+        my $has_flags = __PACKAGE__->count(
             { 'type_id'     => $flagtype->id,
               'bug_id'      => $bug->bug_id,
               'attach_id'   => $flag->attach_id });
@@ -989,7 +987,7 @@ sub FormToNewFlags {
         next unless scalar(grep { $_ == $type_id } @type_ids);
 
         # Get the number of flags of this type already set for this target.
-        my $has_flags = count(
+        my $has_flags = __PACKAGE__->count(
             { 'type_id'     => $type_id,
               'target_type' => $attachment ? 'attachment' : 'bug',
               'bug_id'      => $bug->bug_id,
@@ -1111,7 +1109,8 @@ sub CancelRequests {
     return if (!scalar(@$request_ids));
 
     # Take a snapshot of flags before any changes.
-    my @old_summaries = snapshot($bug->bug_id, $attachment->id) if ($timestamp);
+    my @old_summaries = __PACKAGE__->snapshot($bug->bug_id, $attachment->id)
+        if ($timestamp);
     my $flags = Bugzilla::Flag->new_from_list($request_ids);
     foreach my $flag (@$flags) { clear($flag, $bug, $attachment) }
 
@@ -1119,58 +1118,9 @@ sub CancelRequests {
     return unless ($timestamp);
 
     # Take a snapshot of flags after any changes.
-    my @new_summaries = snapshot($bug->bug_id, $attachment->id);
+    my @new_summaries = __PACKAGE__->snapshot($bug->bug_id, $attachment->id);
     update_activity($bug->bug_id, $attachment->id, $timestamp,
                     \@old_summaries, \@new_summaries);
-}
-
-######################################################################
-# Private Functions
-######################################################################
-
-=begin private
-
-=head1 PRIVATE FUNCTIONS
-
-=over
-
-=item C<sqlify_criteria($criteria)>
-
-Converts a hash of criteria into a list of SQL criteria.
-
-=back
-
-=cut
-
-sub sqlify_criteria {
-    # a reference to a hash containing the criteria (field => value)
-    my ($criteria) = @_;
-
-    # the generated list of SQL criteria; "1=1" is a clever way of making sure
-    # there's something in the list so calling code doesn't have to check list
-    # size before building a WHERE clause out of it
-    my @criteria = ("1=1");
-    
-    # If the caller specified only bug or attachment flags,
-    # limit the query to those kinds of flags.
-    if (defined($criteria->{'target_type'})) {
-        if    ($criteria->{'target_type'} eq 'bug')        { push(@criteria, "attach_id IS NULL") }
-        elsif ($criteria->{'target_type'} eq 'attachment') { push(@criteria, "attach_id IS NOT NULL") }
-    }
-    
-    # Go through each criterion from the calling code and add it to the query.
-    foreach my $field (keys %$criteria) {
-        my $value = $criteria->{$field};
-        next unless defined($value);
-        if    ($field eq 'type_id')      { push(@criteria, "type_id      = $value") }
-        elsif ($field eq 'bug_id')       { push(@criteria, "bug_id       = $value") }
-        elsif ($field eq 'attach_id')    { push(@criteria, "attach_id    = $value") }
-        elsif ($field eq 'requestee_id') { push(@criteria, "requestee_id = $value") }
-        elsif ($field eq 'setter_id')    { push(@criteria, "setter_id    = $value") }
-        elsif ($field eq 'status')       { push(@criteria, "status       = '$value'") }
-    }
-    
-    return @criteria;
 }
 
 =head1 SEE ALSO

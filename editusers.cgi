@@ -484,14 +484,14 @@ if ($action eq 'search') {
 
     foreach (@$buglist) {
         my ($bug_id, $attach_id) = @$_;
-        my @old_summaries = Bugzilla::Flag::snapshot($bug_id, $attach_id);
+        my @old_summaries = Bugzilla::Flag->snapshot($bug_id, $attach_id);
         if ($attach_id) {
             $sth_flagupdate_attachment->execute($bug_id, $attach_id, $otherUserID);
         }
         else {
             $sth_flagupdate_bug->execute($bug_id, $otherUserID);
         }
-        my @new_summaries = Bugzilla::Flag::snapshot($bug_id, $attach_id);
+        my @new_summaries = Bugzilla::Flag->snapshot($bug_id, $attach_id);
         # Let update_activity do all the dirty work, including setting
         # the bug timestamp.
         Bugzilla::Flag::update_activity($bug_id, $attach_id, $timestamp,

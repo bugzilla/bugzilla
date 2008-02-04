@@ -426,7 +426,7 @@ sub flags {
     my $self = shift;
     return $self->{flags} if exists $self->{flags};
 
-    $self->{flags} = Bugzilla::Flag::match({ 'attach_id' => $self->id });
+    $self->{flags} = Bugzilla::Flag->match({ 'attach_id' => $self->id });
     return $self->{flags};
 }
 
@@ -918,7 +918,7 @@ sub insert_attachment_for_bug {
     Bugzilla->error_mode(ERROR_MODE_DIE);
     eval {
         Bugzilla::Flag::validate($cgi, $bug->bug_id, -1, SKIP_REQUESTEE_ON_ERROR);
-        Bugzilla::Flag::process($bug, $attachment, $timestamp, $cgi, $hr_vars);
+        Bugzilla::Flag->process($bug, $attachment, $timestamp, $cgi, $hr_vars);
     };
     Bugzilla->error_mode($error_mode_cache);
     if ($@) {

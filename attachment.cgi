@@ -423,7 +423,7 @@ sub edit {
                                                'product_id'   => $product_id ,
                                                'component_id' => $component_id });
   foreach my $flag_type (@$flag_types) {
-    $flag_type->{'flags'} = Bugzilla::Flag::match({ 'type_id'   => $flag_type->id,
+    $flag_type->{'flags'} = Bugzilla::Flag->match({ 'type_id'   => $flag_type->id,
                                                     'attach_id' => $attachment->id });
   }
   $vars->{'flag_types'} = $flag_types;
@@ -529,7 +529,7 @@ sub update {
   # to attachments so that we can delete pending requests if the user
   # is obsoleting this attachment without deleting any requests
   # the user submits at the same time.
-  Bugzilla::Flag::process($bug, $attachment, $timestamp, $cgi, $vars);
+  Bugzilla::Flag->process($bug, $attachment, $timestamp, $cgi, $vars);
 
   # Update the attachment record in the database.
   $dbh->do("UPDATE  attachments 

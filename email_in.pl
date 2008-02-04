@@ -91,6 +91,7 @@ use constant REQUIRED_PROCESS_FIELDS => qw(
     short_desc
     reporter_accessible
     cclist_accessible
+    qa_contact
 );
 
 # $input_email is a global so that it can be used in die_handler.
@@ -236,6 +237,7 @@ sub process_bug {
 
     foreach my $field (REQUIRED_PROCESS_FIELDS) {
         my $value = $bug->$field;
+        $value = $value->login if ($field eq 'qa_contact' && $value);
         if (ref $value) {
             $value = join(',', @$value);
         }

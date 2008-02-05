@@ -49,6 +49,7 @@ use Bugzilla::Field;
 use Bugzilla::Attachment;
 use Bugzilla::Attachment::PatchReader;
 use Bugzilla::Token;
+use Bugzilla::Keyword;
 
 Bugzilla->login();
 
@@ -391,6 +392,8 @@ sub insert {
   $vars->{'bugs'} = [new Bugzilla::Bug($bugid)];
   $vars->{'header_done'} = 1;
   $vars->{'contenttypemethod'} = $cgi->param('contenttypemethod');
+  $vars->{'valid_keywords'} = [map($_->name, Bugzilla::Keyword->get_all)];
+  $vars->{'use_keywords'} = 1 if Bugzilla::Keyword::keyword_count();
 
   print $cgi->header();
   # Generate and return the UI (HTML page) from the appropriate template.
@@ -595,6 +598,8 @@ sub update {
   # since the object was created.
   $vars->{'bugs'} = [new Bugzilla::Bug($bug->id)];
   $vars->{'header_done'} = 1;
+  $vars->{'valid_keywords'} = [map($_->name, Bugzilla::Keyword->get_all)];
+  $vars->{'use_keywords'} = 1 if Bugzilla::Keyword::keyword_count();
 
   print $cgi->header();
 
@@ -666,6 +671,8 @@ sub delete_attachment {
         # Required to display the bug the deleted attachment belongs to.
         $vars->{'bugs'} = [$bug];
         $vars->{'header_done'} = 1;
+        $vars->{'valid_keywords'} = [map($_->name, Bugzilla::Keyword->get_all)];
+        $vars->{'use_keywords'} = 1 if Bugzilla::Keyword::keyword_count();
 
         $template->process("attachment/updated.html.tmpl", $vars)
           || ThrowTemplateError($template->error());

@@ -215,6 +215,11 @@ sub match {
             $criteria->{'attach_id'} = IS_NULL;
         }
     }
+    # Flag->snapshot() calls Flag->match() with bug_id and attach_id
+    # as hash keys, even if attach_id is undefined.
+    if (exists $criteria->{'attach_id'} && !defined $criteria->{'attach_id'}) {
+        $criteria->{'attach_id'} = IS_NULL;
+    }
 
     return $class->SUPER::match(@_);
 }

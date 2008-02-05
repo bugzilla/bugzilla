@@ -287,19 +287,19 @@ dl dl > dt {
     border-top: none;
 }
 
-/* Style of the attachment table */
+/* Style of the attachment table and time tracking table */
 #attachment_table {
     border-collapse: collapse;
     width: 40em;
     border: 1px solid #333333;
 }
 
-#attachment_table th, .bz_attach_footer {
+#attachment_table th, .bz_attach_footer, .bz_time_tracking_table th {
     background-color: #E0E0E0;
     color: black;
 }
 
-#attachment_table td {
+#attachment_table td, .bz_time_tracking_table th, .bz_time_tracking_table td {
     border: 1px solid #333333;
 }
 

@@ -46,7 +46,6 @@
 
 .bz_time_tracking_table th {
     text-align: center;
-    background-color: #ccc;
 }
 
 .bz_time_tracking_table td {
@@ -56,8 +55,6 @@
 .bz_time_tracking_table th, 
 .bz_time_tracking_table td {
     padding: 4px;
-    border: 1px solid black;
-
 }
 
 .bz_time_tracking_table .bz_summarize_time {

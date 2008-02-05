@@ -89,8 +89,7 @@ sub send_results {
     $vars->{'header_done'} = 1;
 }
 
-# Tells us whether or not a field should be changed by process_bug, by
-# checking that it's defined and not set to dontchange.
+# Tells us whether or not a field should be changed by process_bug.
 sub should_set {
     # check_defined is used for fields where there's another field
     # whose name starts with "defined_" and then the field name--it's used
@@ -141,8 +140,11 @@ my $first_bug = $bug_objects[0]; # Used when we're only updating a single bug.
 if (defined $cgi->param('dontchange')) {
     foreach my $name ($cgi->param) {
         next if $name eq 'dontchange'; # But don't delete dontchange itself!
+        # Skip ones we've already deleted (such as "defined_$name").
+        next if !defined $cgi->param($name);
         if ($cgi->param($name) eq $cgi->param('dontchange')) {
             $cgi->delete($name);
+            $cgi->delete("defined_$name");
         }
     }
 }

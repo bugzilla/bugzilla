@@ -36,6 +36,7 @@ use Bugzilla::Error;
 use Bugzilla::Bug;
 use Bugzilla::User;
 use Bugzilla::Field;
+use Bugzilla::Hook;
 use Bugzilla::Product;
 use Bugzilla::Component;
 use Bugzilla::Keyword;
@@ -243,6 +244,8 @@ $vars->{'mailrecipients'} = {'changer' => $user->login};
 
 $vars->{'id'} = $id;
 $vars->{'bug'} = $bug;
+
+Bugzilla::Hook::process("post_bug-after_creation", { vars => $vars });
 
 ThrowCodeError("bug_error", { bug => $bug }) if $bug->error;
 

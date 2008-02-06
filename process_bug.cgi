@@ -203,9 +203,33 @@ $vars->{'title_tag'} = "bug_processed";
 
 # Set up the vars for navigational <link> elements
 my @bug_list;
-if ($cgi->cookie("BUGLIST") && defined $cgi->param('id')) {
+if ($cgi->cookie("BUGLIST")) {
     @bug_list = split(/:/, $cgi->cookie("BUGLIST"));
     $vars->{'bug_list'} = \@bug_list;
+}
+
+my ($action, $next_bug);
+if (defined $cgi->param('id')) {
+    $action = Bugzilla->user->settings->{'post_bug_submit_action'}->{'value'};
+
+    if ($action eq 'next_bug') {
+        my $cur = lsearch(\@bug_list, $cgi->param('id'));
+        if ($cur >= 0 && $cur < $#bug_list) {
+            $next_bug = $bug_list[$cur + 1];
+            # No need to check whether the user can see the bug or not.
+            # All we want is its ID. An error will be thrown later
+            # if the user cannot see it.
+            $vars->{'bug'} = {bug_id => $next_bug};
+        }
+    }
+    # Include both action = 'same_bug' and 'nothing'.
+    else {
+        $vars->{'bug'} = {bug_id => $cgi->param('id')};
+    }
+}
+else {
+    # param('id') is not defined when changing multiple bugs at once.
+    $action = 'nothing';
 }
 
 # For each bug, we have to check if the user can edit the bug the product
@@ -615,23 +639,10 @@ eval {
     $vars->{'patchviewerinstalled'} = 1;
 };
 
-my $action;
-if (defined $cgi->param('id')) {
-    $action = Bugzilla->user->settings->{'post_bug_submit_action'}->{'value'};
-} else {
-    # param('id') is not defined when changing multiple bugs
-    $action = 'nothing';
-}
-
 if (Bugzilla->usage_mode == USAGE_MODE_EMAIL) {
     # Do nothing.
 }
 elsif ($action eq 'next_bug') {
-    my $next_bug;
-    my $cur = lsearch(\@bug_list, $cgi->param("id"));
-    if ($cur >= 0 && $cur < $#bug_list) {
-        $next_bug = $bug_list[$cur + 1];
-    }
     if ($next_bug) {
         if (detaint_natural($next_bug) && Bugzilla->user->can_see_bug($next_bug)) {
             my $bug = new Bugzilla::Bug($next_bug);
@@ -664,9 +675,6 @@ elsif ($action eq 'next_bug') {
 
 # End the response page.
 unless (Bugzilla->usage_mode == USAGE_MODE_EMAIL) {
-    # The user pref is 'Do nothing', so all we need is the current bug ID.
-    $vars->{'bug'} = {bug_id => scalar $cgi->param('id')};
-
     $template->process("bug/navigate.html.tmpl", $vars)
         || ThrowTemplateError($template->error());
     $template->process("global/footer.html.tmpl", $vars)

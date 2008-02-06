@@ -415,6 +415,89 @@ sub set_in_new_bugmail { $_[0]->set('mailhead',    $_[1]); }
 
 =pod
 
+=head2 Instance Method
+
+=over
+
+=item C<remove_from_db>
+
+Attempts to remove the passed in field from the database.
+Deleting a field is only successful if the field is obsolete and
+there are no values specified (or EVER specified) for the field.
+
+=back
+
+=cut
+
+sub remove_from_db {
+    my $self = shift;
+    my $dbh = Bugzilla->dbh;
+
+    my $name = $self->name;
+
+    if (!$self->custom) {
+        ThrowCodeError('field_not_custom', {'name' => $name });
+    }
+
+    if (!$self->obsolete) {
+        ThrowUserError('customfield_not_obsolete', {'name' => $self->name });
+    }
+
+    $dbh->bz_start_transaction();
+
+    # Check to see if bug activity table has records (should be fast with index)
+    my $has_activity = $dbh->selectrow_array("SELECT COUNT(*) FROM bugs_activity
+                                      WHERE fieldid = ?", undef, $self->id);
+    if ($has_activity) {
+        ThrowUserError('customfield_has_activity', {'name' => $name });
+    }
+
+    # Check to see if bugs table has records (slow)
+    my $bugs_query = "";
+
+    if ($self->type == FIELD_TYPE_MULTI_SELECT) {
+        $bugs_query = "SELECT COUNT(*) FROM bug_$name";
+    }
+    else {
+        $bugs_query = "SELECT COUNT(*) FROM bugs WHERE $name IS NOT NULL
+                                AND $name != ''";
+        # Ignore the default single select value
+        if ($self->type == FIELD_TYPE_SINGLE_SELECT) {
+            $bugs_query .= " AND $name != '---'";
+        }
+        # Ignore blank dates.
+        if ($self->type == FIELD_TYPE_DATETIME) {
+            $bugs_query .= " AND $name != '00-00-00 00:00:00'";
+        }
+    }
+
+    my $has_bugs = $dbh->selectrow_array($bugs_query);
+    if ($has_bugs) {
+        ThrowUserError('customfield_has_contents', {'name' => $name });
+    }
+
+    # Once we reach here, we should be OK to delete.
+    $dbh->do('DELETE FROM fielddefs WHERE id = ?', undef, $self->id);
+
+    my $type = $self->type;
+
+    # the values for multi-select are stored in a seperate table
+    if ($type != FIELD_TYPE_MULTI_SELECT) {
+        $dbh->bz_drop_column('bugs', $name);
+    }
+
+    if ($type == FIELD_TYPE_SINGLE_SELECT
+        || $type == FIELD_TYPE_MULTI_SELECT)
+    {
+        # Delete the table that holds the legal values for this field.
+        $dbh->bz_drop_field_tables($self);
+    }
+
+    $dbh->bz_commit_transaction()
+}
+
+=pod
+
 =head2 Class Methods
 
 =over

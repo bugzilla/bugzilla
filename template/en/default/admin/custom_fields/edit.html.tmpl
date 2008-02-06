@@ -104,6 +104,15 @@
   <input type="submit" id="edit" value="Submit">
 </form>
 
+[% IF field.obsolete %]
+<p>
+  <a href="editfields.cgi?action=del&amp;name=[% field.name FILTER html %]">Remove
+    this custom field from the database.</a><br>
+  This action will only be successful if the custom field has never been used
+  in [% terms.abug %].<br>
+</p>
+[% END %]
+
 <p>
   <a href="editfields.cgi">Back to the list of existing custom fields</a>
 </p>

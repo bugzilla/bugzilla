@@ -1679,10 +1679,10 @@ foo: ENTRY, MANDATORY/MANDATORY, CANEDIT
       <title>Deleting Custom Fields</title>
 
       <para>
-        At this point, it is not possible to delete custom fields from
-        your web browser. If you don't want to make one available anymore,
-        mark it as obsolete. This way, you will preserve your DB
-        referential integrity.
+        It is only possible to delete obsolete custom fields 
+        if the field has never been used in the database.
+        If you want to remove a field which already has content,
+        mark it as obsolete.
       </para>
     </section>
   </section>

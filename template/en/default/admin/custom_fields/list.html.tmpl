@@ -24,6 +24,8 @@
   doc_section = "custom-fields.html"
 %]
 
+[% delete_contentlink = BLOCK %]editfields.cgi?action=del&amp;name=%%name%%[% END %]
+
 [% columns = [
      {
        name => "name"
@@ -53,6 +55,11 @@
      {
        name => "obsolete"
        heading => "Is Obsolete"
+     },
+     {
+       name => "action"
+       heading => "Action"
+       content => ""
      }
    ]
 %]
@@ -72,6 +79,17 @@
     })
   %]
 [% END %]
+
+
+[% overrides.action = [ {
+     match_value => 1
+     match_field => 'obsolete'
+     override_content => 1
+     content => "Delete"
+     override_contentlink => 1
+     contentlink => delete_contentlink
+   } ]
+%] 
 
 [% PROCESS admin/table.html.tmpl
      columns = columns

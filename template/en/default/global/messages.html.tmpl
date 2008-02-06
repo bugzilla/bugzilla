@@ -254,6 +254,11 @@
     The new custom field '[% field.name FILTER html %]' has been
     successfully created.
 
+  [% ELSIF message_tag == "custom_field_deleted" %]
+    [% title = "Custom Field Deleted" %]
+    The custom field '[% field.name FILTER html %]' has been
+    successfully deleted.
+
   [% ELSIF message_tag == "custom_field_updated" %]
     [% title = "Custom Field Updated" %]
     Properties of the '[% field.name FILTER html %]' field have been

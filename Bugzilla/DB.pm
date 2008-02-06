@@ -687,6 +687,13 @@ sub bz_add_field_tables {
 
 }
 
+sub bz_drop_field_tables {
+    my ($self, $field) = @_;
+    if ($field->type == FIELD_TYPE_MULTI_SELECT) {
+        $self->bz_drop_table('bug_' . $field->name);
+    }
+    $self->bz_drop_table($field->name);
+}
 
 sub bz_drop_column {
     my ($self, $table, $column) = @_;

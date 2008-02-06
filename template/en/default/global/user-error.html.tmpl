@@ -328,6 +328,21 @@
     [% title = "Unknown Custom Field" %]
     There is no custom field with the name '[% name FILTER html %]'.
 
+  [% ELSIF error == "customfield_not_obsolete" %]
+    [% title = "Custom Field Not Obsolete" %]
+    The custom field '[% name FILTER html %]' is not obsolete.
+    Please obsolete a custom field before attempting to delete it.
+
+  [% ELSIF error == "customfield_has_activity" %]
+    [% title = "Custom Field Has Activity" %]
+    The custom field '[% name FILTER html %]' cannot be deleted because
+    it has recorded activity.
+
+  [% ELSIF error == "customfield_has_contents" %]
+    [% title = "Custom Field Has Contents" %]
+    The custom field '[% name FILTER html %]' cannot be deleted because
+    at least one [% terms.bug %] has a non empty value for this field.
+
   [% ELSIF error == "dependency_loop_multi" %]
     [% title = "Dependency Loop Detected" %]
     The following [% terms.bug %](s) would appear on both the "depends on"

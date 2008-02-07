@@ -1,5 +1,5 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"> -->
-<!-- $Id: installation.xml,v 1.152 2008/01/24 22:35:16 lpsolit%gmail.com Exp $ -->
+<!-- $Id: installation.xml,v 1.153 2008/02/06 21:58:55 lpsolit%gmail.com Exp $ -->
 <chapter id="installing-bugzilla">
   <title>Installing Bugzilla</title>
 
@@ -651,7 +651,6 @@
       </para>
     </section>
   </section>
-  
   
   <section id="configuration">
     <title>Configuration</title>
@@ -1318,7 +1317,6 @@ c:\perl\bin\perl.exe -xc:\bugzilla -wT "%s" %s
     </section> 
   </section>
 
-
   <section id="extraconfig">
     <title>Optional Additional Configuration</title>
 
@@ -1372,54 +1370,6 @@ c:\perl\bin\perl.exe -xc:\bugzilla -wT "%s" %s
         </para>
       </note>
     </section>
-
-    <section>
-      <title>Dependency Charts</title>
-
-      <para>As well as the text-based dependency trees, Bugzilla also
-      supports a graphical view of dependency relationships, using a 
-      package called 'dot'.
-      Exactly how this works is controlled by the 'webdotbase' parameter,
-      which can have one of three values:
-      </para>
-
-      <para>
-        <orderedlist>
-          <listitem>
-            <para>
-            A complete file path to the command 'dot' (part of 
-            <ulink url="http://www.graphviz.org/">GraphViz</ulink>) 
-            will generate the graphs locally
-            </para>
-          </listitem>
-          <listitem>
-            <para>
-            A URL prefix pointing to an installation of the webdot package will
-            generate the graphs remotely
-            </para>
-          </listitem>
-          <listitem>
-            <para>
-            A blank value will disable dependency graphing.
-            </para>
-          </listitem>
-        </orderedlist>
-      </para>
-      
-      <para>The easiest way to get this working is to install
-      <ulink url="http://www.graphviz.org/">GraphViz</ulink>. If you
-      do that, you need to
-      <ulink url="http://httpd.apache.org/docs/mod/mod_imap.html">enable
-      server-side image maps</ulink> in Apache.
-      Alternatively, you could set up a webdot server, or use the AT&amp;T 
-      public webdot server. This is the default for the webdotbase param, 
-      but it's often overloaded and slow. Note that AT&amp;T's server 
-      won't work
-      if Bugzilla is only accessible using HARTS. 
-      <emphasis>Editor's note: What the heck is HARTS? Google doesn't know...
-      </emphasis>
-      </para>
-   </section>
 
     <section id="installation-whining-cron">
       <title>The Whining Cron</title>
@@ -1485,229 +1435,7 @@ c:\perl\bin\perl.exe -xc:\bugzilla -wT "%s" %s
         </para>
       </note>
     </section>
-
-    <section id="patch-viewer">
-      <title>Patch Viewer</title>
-      
-      <para>
-        Patch Viewer is the engine behind Bugzilla's graphical display of
-        code patches. You can integrate this with copies of the
-        <filename>cvs</filename>, <filename>lxr</filename> and
-        <filename>bonsai</filename> tools if you have them, by giving
-        the locations of your installation of these tools in
-        <filename>editparams.cgi</filename>.
-      </para>
         
-      <para>
-        Patch Viewer also optionally will use the 
-        <filename>cvs</filename>, <filename>diff</filename> and 
-        <filename>interdiff</filename>
-        command-line utilities if they exist on the system.
-        Interdiff can be obtained from 
-        <ulink url="http://cyberelk.net/tim/patchutils/"/>.
-        If these programs are not in the system path, you can configure
-        their locations in <filename>localconfig</filename>.
-      </para>
-      
-
-    </section>
-    
-    <section id="bzradius">
-      <title>RADIUS Authentication</title>
-
-      <para>RADIUS authentication is a module for Bugzilla's plugin 
-      authentication architecture.
-      Most caveats that apply to LDAP authentication apply to RADIUS
-      authentication as well.
-      </para>
-
-      <para>Parameters required to use RADIUS Authentication:</para>
-
-      <variablelist>
-        <varlistentry id="param-user_verify_class_for_radius">
-          <term>user_verify_class</term>
-          <listitem>
-            <para>If you want to list <quote>RADIUS</quote> here,
-            make sure to have set up the other parameters listed below.
-            Unless you have other (working) authentication methods listed as
-            well, you may otherwise not be able to log back in to Bugzilla once
-            you log out.
-            If this happens to you, you will need to manually edit
-            <filename>data/params</filename> and set user_verify_class to
-            <quote>DB</quote>.
-            </para>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry id="param-RADIUS_server">
-          <term>RADIUS_server</term>
-          <listitem>
-            <para>This parameter should be set to the name (and optionally the
-            port) of your RADIUS server.
-            </para>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry id="param-RADIUS_secret">
-          <term>RADIUS_secret</term>
-          <listitem>
-            <para>This parameter should be set to the RADIUS server's secret.
-            </para>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry id="param-RADIUS_email_suffix">
-          <term>RADIUS_email_suffix</term>
-          <listitem>
-            <para>Bugzilla needs an e-mail address for each user account.
-            Therefore, it needs to determine the e-mail address corresponding
-            to a RADIUS user.
-            Bugzilla offers only a simple way to do this: it can concatenate
-            a suffix to the RADIUS user name to convert it into an e-mail
-            address.
-            You can specify this suffix in the RADIUS_email_suffix parameter.
-            </para>
-            <para>If this simple solution does not work for you, you'll
-            probably need to modify
-            <filename>Bugzilla/Auth/Verify/RADIUS.pm</filename> to match your
-            requirements.
-            </para>
-          </listitem>
-        </varlistentry>
-      </variablelist>
-
-    </section>
-    
-    <section id="bzldap">
-      <title>LDAP Authentication</title>
-
-      <para>LDAP authentication is a module for Bugzilla's plugin 
-      authentication architecture.
-      </para>
-
-      <para>
-      The existing authentication
-      scheme for Bugzilla uses email addresses as the primary user ID, and a
-      password to authenticate that user. All places within Bugzilla where
-      you need to deal with user ID (e.g assigning a bug) use the email
-      address. The LDAP authentication builds on top of this scheme, rather
-      than replacing it. The initial log in is done with a username and
-      password for the LDAP directory. Bugzilla tries to bind to LDAP using
-      those credentials, and if successful, try to map this account to a
-      Bugzilla account. If a  LDAP mail attribute is defined, the value of this
-      attribute is used, otherwise emailsuffix parameter is appended to LDAP
-      username to form a full email address. If an account for this address
-      already exists in your Bugzilla system, it will log in to that account.
-      If no account for that email address exists, one is created at the time
-      of login. (In this case, Bugzilla will attempt to use the "displayName"
-      or "cn" attribute to determine the user's full name.) After
-      authentication, all other user-related tasks are still handled by email
-      address, not LDAP username. You still assign bugs by email address, query
-      on users by email address, etc.
-      </para>
-
-      <caution>
-        <para>Because the Bugzilla account is not created until the first time
-        a user logs in, a user who has not yet logged is unknown to Bugzilla.
-        This means they cannot be used as an assignee or QA contact (default or
-        otherwise), added to any cc list, or any other such operation. One
-        possible workaround is the <filename>bugzilla_ldapsync.rb</filename>
-        script in the
-        <glossterm linkend="gloss-contrib"><filename class="directory">contrib</filename></glossterm> directory. Another possible solution is fixing
-        <ulink url="http://bugzilla.mozilla.org/show_bug.cgi?id=201069">bug
-        201069</ulink>.
-        </para>
-      </caution>
-
-      <para>Parameters required to use LDAP Authentication:</para>
-
-      <variablelist>
-        <varlistentry id="param-user_verify_class_for_ldap">
-          <term>user_verify_class</term>
-          <listitem>
-            <para>If you want to list <quote>LDAP</quote> here,
-            make sure to have set up the other parameters listed below.
-            Unless you have other (working) authentication methods listed as
-            well, you may otherwise not be able to log back in to Bugzilla once
-            you log out.
-            If this happens to you, you will need to manually edit
-            <filename>data/params</filename> and set user_verify_class to
-            <quote>DB</quote>.
-            </para>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry id="param-LDAPserver">
-          <term>LDAPserver</term>
-          <listitem>
-            <para>This parameter should be set to the name (and optionally the
-            port) of your LDAP server. If no port is specified, it assumes
-            the default LDAP port of 389.
-            </para>
-            <para>Ex. <quote>ldap.company.com</quote>
-             or <quote>ldap.company.com:3268</quote>
-            </para>
-            <para>You can also specify a LDAP URI, so as to use other
-            protocols, such as LDAPS or LDAPI. If port was not specified in
-            the URI, the default is either 389 or 636 for 'LDAP' and 'LDAPS'
-            schemes respectively.
-            </para>
-            <para>Ex. <quote>ldap://ldap.company.com</quote>,
-            <quote>ldaps://ldap.company.com</quote> or
-            <quote>ldapi://%2fvar%2flib%2fldap_sock</quote>
-            </para>
-           </listitem>
-         </varlistentry>
-
-         <varlistentry id="param-LDAPbinddn">
-           <term>LDAPbinddn [Optional]</term>
-           <listitem>
-             <para>Some LDAP servers will not allow an anonymous bind to search
-             the directory. If this is the case with your configuration you
-             should set the LDAPbinddn parameter to the user account Bugzilla
-             should use instead of the anonymous bind.
-             </para>
-             <para>Ex. <quote>cn=default,cn=user:password</quote></para>
-           </listitem>
-         </varlistentry>
-
-         <varlistentry id="param-LDAPBaseDN">
-           <term>LDAPBaseDN</term>
-           <listitem>
-             <para>The LDAPBaseDN parameter should be set to the location in
-             your LDAP tree that you would like to search for email addresses.
-             Your uids should be unique under the DN specified here.
-             </para>
-             <para>Ex. <quote>ou=People,o=Company</quote></para>
-           </listitem>
-         </varlistentry>
-
-         <varlistentry id="param-LDAPuidattribute">
-           <term>LDAPuidattribute</term>
-           <listitem>
-             <para>The LDAPuidattribute parameter should be set to the attribute
-             which contains the unique UID of your users. The value retrieved
-             from this attribute will be used when attempting to bind as the
-             user to confirm their password.
-             </para>
-             <para>Ex. <quote>uid</quote></para>
-           </listitem>
-         </varlistentry>
-
-         <varlistentry id="param-LDAPmailattribute">
-           <term>LDAPmailattribute</term>
-           <listitem>
-             <para>The LDAPmailattribute parameter should be the name of the
-             attribute which contains the email address your users will enter
-             into the Bugzilla login boxes.
-             </para>
-             <para>Ex. <quote>mail</quote></para>
-           </listitem>
-          </varlistentry>
-      </variablelist>
-
-    </section>
-    
     <section id="apache-addtype">
       <title>Serving Alternate Formats with the right MIME type</title>
 

@@ -86,7 +86,11 @@ sub multiline_sprintf {
         # Make any single undef item into ''
         @line = map { defined $_ ? $_ : '' } @line;
         # And append a formatted line
-        $formatted .= sprintf("$format\n", @line);
+        $formatted .= sprintf($format, @line);
+        # Remove trailing spaces, or they become lots of =20's in 
+        # quoted-printable emails.
+        $formatted =~ s/\s+$//;
+        $formatted .= "\n";
     }
     return $formatted;
 }

@@ -176,18 +176,77 @@ function showEditableField (e, ContainerInputArray) {
  */  
 function checkForChangedFieldValues(e, ContainerInputArray ) {
     var el = document.getElementById(ContainerInputArray[2]);
+    var unhide = false;
     if ( el ) {
         if ( el.value != ContainerInputArray[3] || ( el.value == "" && el.id != "alias") ) {
-            YAHOO.util.Dom.setStyle(ContainerInputArray[0], 'display', 'none');
-            YAHOO.util.Dom.setStyle(ContainerInputArray[1], 'display', 'inline');
-        } 
+            unhide = true;
+        }
+        else {
+            var set_default = document.getElementById("set_default_" + ContainerInputArray[2]);
+            if ( set_default ) {
+                if(set_default.checked){
+                    unhide = true;
+                }              
+            }
+        }
+    }
+    if(unhide){
+        YAHOO.util.Dom.setStyle(ContainerInputArray[0], 'display', 'none');
+        YAHOO.util.Dom.setStyle(ContainerInputArray[1], 'display', 'inline');
+    }
+
+}
+
+function hideAliasAndSummary(short_desc_value, alias_value) {
+    // check the short desc field
+    hideEditableField( 'summary_alias_container', 'summary_alias_input', 'editme_action', 'short_desc', short_desc_value);  
+    // check that the alias hasn't changed
+    bz_alias_check_array = new Array('summary_alias_container', 'summary_alias_input', 'alias', alias_value )
+    YAHOO.util.Event.addListener( window, 'load', checkForChangedFieldValues, bz_alias_check_array);
+}
+
+function showPeopleOnChange( field_id_list ) {
+    for(var i = 0; i < field_id_list.length; i++) {
+        YAHOO.util.Event.addListener(field_id_list[i],'change', showEditableField, new Array('bz_qa_contact_edit_container', 'bz_qa_contact_input'));
+        YAHOO.util.Event.addListener(field_id_list[i],'change', showEditableField, new Array('bz_assignee_edit_container', 'bz_assignee_input'));
     }
 }
 
-function hideAliasAndSummary(short_desc_value, alias_value){
-  // check the short desc field
-  hideEditableField( 'summary_alias_container', 'summary_alias_input', 'editme_action', 'short_desc', short_desc_value);  
-  // check that the alias hasn't changed
-  bz_alias_check_array = new Array('summary_alias_container', 'summary_alias_input', 'alias', alias_value )
-  YAHOO.util.Event.addListener( window, 'load', checkForChangedFieldValues, bz_alias_check_array);
+function assignToDefaultOnChange(field_id_list) {
+    showPeopleOnChange( field_id_list );
+    for(var i = 0; i < field_id_list.length; i++) {
+        YAHOO.util.Event.addListener(field_id_list[i],'change', setDefaultCheckbox, 'set_default_assignee' );
+        YAHOO.util.Event.addListener(field_id_list[i],'change', setDefaultCheckbox, 'set_default_qa_contact' );    
+    }
+}
+
+function initAssignedQA(){
+    YAHOO.util.Event.addListener('set_default_qa_contact','change', boldOnChange, 'set_default_qa_contact');
+    YAHOO.util.Event.addListener('set_default_assignee','change', boldOnChange, 'set_default_assignee');
+    YAHOO.util.Event.addListener(window, 'load', checkForChangedFieldValues, new Array( 'bz_assignee_edit_container', 'bz_assignee_input', 'set_default_assignee', '' ) );
+    YAHOO.util.Event.addListener(window, 'load', checkForChangedFieldValues, new Array( 'bz_qa_contact_edit_container', 'bz_qa_contact_input', 'set_default_qa_contact', '' ) );
+    YAHOO.util.Event.addListener(window, 'load', boldOnChange, 'set_default_assignee');
+    YAHOO.util.Event.addListener(window, 'load', boldOnChange, 'set_default_qa_contact');
+}
+
+function setDefaultCheckbox(e, field_id ) { 
+    var el = document.getElementById(field_id);
+    var elLabel = document.getElementById(field_id + "_label");
+    if( el && elLabel ) {
+        el.checked = "true";
+        YAHOO.util.Dom.setStyle(elLabel, 'font-weight', 'bold');
+    }
+}
+
+function boldOnChange(e, field_id){
+    var el = document.getElementById(field_id);
+    var elLabel = document.getElementById(field_id + "_label");
+    if( el && elLabel ) {
+        if( el.checked ){
+            YAHOO.util.Dom.setStyle(elLabel, 'font-weight', 'bold');
+        }
+        else{
+            YAHOO.util.Dom.setStyle(elLabel, 'font-weight', 'normal');
+        }
+    }
 }

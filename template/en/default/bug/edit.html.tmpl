@@ -379,6 +379,9 @@
       <td>
        [% PROCESS select selname => "rep_platform" no_td=> 1 %]
        [%+ PROCESS select selname => "op_sys" no_td=> 1 %]
+       <script type="text/javascript">
+         assignToDefaultOnChange(['product', 'component']);
+       </script>
       </td>
     </tr>
 
@@ -482,7 +485,7 @@
             %]
             <br>
             <input type="checkbox" id="set_default_assignee" name="set_default_assignee" value="1">
-            <label for="set_default_assignee">Reset Assignee to default</label>
+            <label id="set_default_assignee_label" for="set_default_assignee">Reset Assignee to default</label>
           </div>
           <script type="text/javascript">
            hideEditableField('bz_assignee_edit_container', 
@@ -526,7 +529,10 @@
             %]
             <br>
             <input type="checkbox" id="set_default_qa_contact" name="set_default_qa_contact" value="1">
-            <label for="set_default_qa_contact">Reset QA Contact to default</label>
+            <label for="set_default_qa_contact" id="set_default_qa_contact_label">Reset QA Contact to default</label>
+            <script type="text/javascript">
+              initAssignedQA();
+            </script>
           </div>
           [% IF bug.qa_contact != "" %]
             <script type="text/javascript">

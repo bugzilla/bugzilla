@@ -244,6 +244,22 @@ div#docslinks {
     margin-bottom: 2em;
 }
 
+/* The rules for these classes make international text wrap correctly,
+   even for languages like Japanese that have no spaces. */
+.bz_comment_text {
+     font-family: monospace;
+    /* Note that these must all be on separate lines or they stop
+       working in Konqueror. */
+     white-space: pre-wrap;      /* CSS 3 & 2.1 */
+     white-space: -moz-pre-wrap; /* Gecko */
+     white-space: -pre-wrap;     /* Opera 4-6 */
+     white-space: -o-pre-wrap;   /* Opera 7 */
+}
+
+.bz_comment_text {
+     width: 50em;
+}
+
 .bz_comment_head {
     background-color: #e0e0e0;
 }
@@ -255,6 +271,8 @@ div#docslinks {
 
 span.quote {
     color: #65379c;
+    /* Make quoted text not wrap. */
+    white-space: pre;
 }
 
 table#flags th,

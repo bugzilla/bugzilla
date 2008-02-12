@@ -305,6 +305,17 @@ sub _check_missing {
     return \@missing;
 }
 
+# Returns the build ID of ActivePerl. If several versions of
+# ActivePerl are installed, it won't be able to know which one
+# you are currently running. But that's our best guess.
+sub _get_activestate_build_id {
+    eval 'use Win32::TieRegistry';
+    return 0 if $@;
+    my $key = Win32::TieRegistry->new('LMachine\Software\ActiveState\ActivePerl')
+      or return 0;
+    return $key->GetValue("CurrentVersion");
+}
+
 sub print_module_instructions {
     my ($check_results, $output) = @_;
 
@@ -316,14 +327,19 @@ sub print_module_instructions {
               . ROOT_USER . ".\n\n";
 
         if (ON_WINDOWS) {
-            print <<EOT;
-***********************************************************************
-* Note For Windows Users                                              *
-***********************************************************************
-* In order to install the modules listed below, you first have to run * 
-* the following command as an Administrator:                          *
-*                                                                     *
-*   ppm repo add theory58S http://theoryx5.uwinnipeg.ca/ppms          *
+            my $perl_ver = sprintf('%vd', $^V);
+            
+            # URL when running Perl 5.8.x.
+            my $url_to_theory58S = 'http://theoryx5.uwinnipeg.ca/ppms';
+            my $repo_up_cmd =
+'*                                                                     *';
+            # Packages for Perl 5.10 are not compatible with Perl 5.8.
+            if (vers_cmp($perl_ver, '5.10') > -1) {
+                $url_to_theory58S = 'http://cpan.uwinnipeg.ca/PPMPackages/10xx/';
+            }
+            # ActivePerl older than revision 819 require an additional command.
+            if (_get_activestate_build_id() < 819) {
+                $repo_up_cmd = <<EOT;
 *                                                                     *
 * Then you have to do (also as an Administrator):                     *
 *                                                                     *
@@ -331,6 +347,17 @@ sub print_module_instructions {
 *                                                                     *
 * Do that last command over and over until you see "theory58S" at the *
 * top of the displayed list.                                          *
+EOT
+            }
+            print <<EOT;
+***********************************************************************
+* Note For Windows Users                                              *
+***********************************************************************
+* In order to install the modules listed below, you first have to run * 
+* the following command as an Administrator:                          *
+*                                                                     *
+*   ppm repo add theory58S $url_to_theory58S
+$repo_up_cmd
 ***********************************************************************
 EOT
         }

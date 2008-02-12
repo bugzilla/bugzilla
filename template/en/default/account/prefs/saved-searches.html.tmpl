@@ -171,6 +171,9 @@
         Run
       </th>
       <th>
+        Edit
+      </th>
+      <th>
         Show in
         Footer
       </th>
@@ -187,6 +190,10 @@
                    [% q.name FILTER url_quote %]&amp;sharer_id=
                    [% q.user.id FILTER url_quote %]">Run</a>
         </td>
+        <td>
+          <a href="query.cgi?[% q.edit_link FILTER html %]&amp;known_name=
+                   [% q.name FILTER url_quote %]">Edit</a>
+        </td>
         <td align="center">
           <input type="checkbox" 
                  name="link_in_footer_[% q.id FILTER html %]"
@@ -198,7 +205,7 @@
     [% END %]
     [% IF !found_shared_query %]
       <tr>
-        <td colspan="4" style="text-align: center">
+        <td colspan="6" style="text-align: center">
           &lt;None&gt;
         </td>
       </tr>

@@ -336,6 +336,15 @@
     An error occured while validating flags:
     [%+ flag_creation_error FILTER none %]
 
+  [% ELSIF message_tag == "get_field_desc" %]
+    [% field_descs.$field_name FILTER html %]
+
+  [% ELSIF message_tag == "get_resolution" %]
+    [% get_resolution(resolution) FILTER html %]
+
+  [% ELSIF message_tag == "get_status" %]
+    [% get_status(status) FILTER html %]
+
   [% ELSIF message_tag == "group_created" %]
     [% title = "New Group Created" %]
     The group <em>[% group.name FILTER html %]</em> has been created.

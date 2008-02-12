@@ -307,14 +307,14 @@ sub get_bug_link {
         # if we don't change them below (which is highly likely).
         my ($pre, $title, $post) = ("", "", "");
 
-        $title = $bug_state;
+        $title = get_text('get_status', {status => $bug_state});
         if ($bug_state eq 'UNCONFIRMED') {
             $pre = "<i>";
             $post = "</i>";
         }
         elsif (!is_open_state($bug_state)) {
             $pre = '<span class="bz_closed">';
-            $title .= " $bug_res";
+            $title .= ' ' . get_text('get_resolution', {resolution => $bug_res});
             $post = '</span>';
         }
         if (Bugzilla->user->can_see_bug($bug_num)) {

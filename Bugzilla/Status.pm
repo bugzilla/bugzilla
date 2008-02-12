@@ -95,7 +95,8 @@ sub can_change_to {
                                                    INNER JOIN bug_status
                                                            ON id = new_status
                                                         WHERE isactive = 1
-                                                          AND old_status $cond",
+                                                          AND old_status $cond
+                                                     ORDER BY sortkey",
                                                         undef, @args);
 
         # Allow the bug status to remain unchanged.
@@ -104,24 +105,6 @@ sub can_change_to {
     }
 
     return $self->{'can_change_to'};
-}
-
-sub allow_change_from {
-    my ($self, $old_status, $product) = @_;
-
-    # Always allow transitions from a status to itself.
-    return 1 if ($old_status && $old_status->id == $self->id);
-
-    if ($self->name eq 'UNCONFIRMED' && !$product->votes_to_confirm) {
-        # UNCONFIRMED is an invalid status transition if votes_to_confirm is 0
-        # in this product.
-        return 0;
-    }
-
-    my ($cond, $values) = $self->_status_condition($old_status);
-    my ($transition_allowed) = Bugzilla->dbh->selectrow_array(
-        "SELECT 1 FROM status_workflow WHERE $cond", undef, @$values);
-    return $transition_allowed ? 1 : 0;
 }
 
 sub can_change_from {
@@ -258,37 +241,6 @@ below.
  Params:      none.
 
  Returns:     A list of Bugzilla::Status objects.
-
-=item C<allow_change_from>
-
-=over
-
-=item B<Description>
-
-Tells you whether or not a change to this status from another status is
-allowed.
-
-=item B<Params>
-
-=over
-
-=item C<$old_status> - The Bugzilla::Status you're changing from.
-
-=item C<$product> - A L<Bugzilla::Product> representing the product of
-the bug you're changing. Needed to check product-specific workflow
-issues (such as whether or not the C<UNCONFIRMED> status is enabled
-in this product).
-
-=back
-
-=item B<Returns>
-
-C<1> if you are allowed to change to this status from that status, or
-C<0> if you aren't allowed.
-
-Note that changing from a status to itself is always allowed.
-
-=back
 
 =item C<comment_required_on_change_from>
 

@@ -56,45 +56,6 @@ use Bugzilla::Util;
 # in a message. RFC-compliant mailers use this.
 use constant SIGNATURE_DELIMITER => '-- ';
 
-# These fields must all be defined or post_bug complains. They don't have
-# to have values--they just have to be defined. There's not yet any
-# way to require custom fields have values, for enter_bug, so we don't
-# have to worry about those yet.
-use constant REQUIRED_ENTRY_FIELDS => qw(
-    reporter
-    short_desc
-    product
-    component
-    version
-
-    assigned_to
-    rep_platform
-    op_sys
-    priority
-    bug_severity
-    bug_file_loc
-);
-
-# Fields that must be defined during process_bug. They *do* have to
-# have values. The script will grab their values from the current
-# bug object, if they're not specified.
-use constant REQUIRED_PROCESS_FIELDS => qw(
-    dependson
-    blocked
-    version
-    product
-    target_milestone
-    rep_platform
-    op_sys
-    priority
-    bug_severity
-    bug_file_loc
-    component
-    short_desc
-    reporter_accessible
-    cclist_accessible
-);
-
 # $input_email is a global so that it can be used in die_handler.
 our ($input_email, %switch);
 
@@ -180,15 +141,6 @@ sub post_bug {
 
     debug_print('Posting a new bug...');
 
-    $fields{'rep_platform'} ||= Bugzilla->params->{'defaultplatform'};
-    $fields{'op_sys'}   ||= Bugzilla->params->{'defaultopsys'};
-    $fields{'priority'} ||= Bugzilla->params->{'defaultpriority'};
-    $fields{'bug_severity'} ||= Bugzilla->params->{'defaultseverity'};
-
-    foreach my $field (REQUIRED_ENTRY_FIELDS) {
-        $fields{$field} ||= '';
-    }
-
     my $cgi = Bugzilla->cgi;
     foreach my $field (keys %fields) {
         $cgi->param(-name => $field, -value => $fields{$field});
@@ -229,14 +181,6 @@ sub process_bug {
     # groups.
     if ($fields{'product'}) {
         $fields{'addtonewgroup'} = 0;
-    }
-
-    foreach my $field (REQUIRED_PROCESS_FIELDS) {
-        my $value = $bug->$field;
-        if (ref $value) {
-            $value = join(',', @$value);
-        }
-        $fields{$field} ||= $value;
     }
 
     # Make it possible to remove CCs.

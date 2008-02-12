@@ -103,13 +103,8 @@ sub DB_COLUMNS {
 }
 
 use constant REQUIRED_CREATE_FIELDS => qw(
-    bug_severity
-    comment
     component
-    op_sys
-    priority
     product
-    rep_platform
     short_desc
     version
 );
@@ -317,13 +312,25 @@ sub new {
 # C<deadline>       - For time-tracking. Will be ignored for the same
 #                     reasons as C<estimated_time>.
 sub create {
-    my $class  = shift;
+    my ($class, $params) = @_;
     my $dbh = Bugzilla->dbh;
 
     $dbh->bz_start_transaction();
 
-    $class->check_required_create_fields(@_);
-    my $params = $class->run_create_validators(@_);
+    # These fields have default values which we can use if they are undefined.
+    $params->{bug_severity} = Bugzilla->params->{defaultseverity}
+      unless defined $params->{bug_severity};
+    $params->{priority} = Bugzilla->params->{defaultpriority}
+      unless defined $params->{priority};
+    $params->{op_sys} = Bugzilla->params->{defaultopsys}
+      unless defined $params->{op_sys};
+    $params->{rep_platform} = Bugzilla->params->{defaultplatform}
+      unless defined $params->{rep_platform};
+    # Make sure a comment is always defined.
+    $params->{comment} = '' unless defined $params->{comment};
+
+    $class->check_required_create_fields($params);
+    $params = $class->run_create_validators($params);
 
     # These are not a fields in the bugs table, so we don't pass them to
     # insert_create_data.
@@ -905,40 +912,46 @@ sub _check_bug_severity {
 }
 
 sub _check_bug_status {
-    my ($invocant, $status, $product, $comment) = @_;
+    my ($invocant, $new_status, $product, $comment) = @_;
     my $user = Bugzilla->user;
-
-    # Make sure this is a valid status.
-    my $new_status = ref $status ? $status : Bugzilla::Status->check($status);
-    
+    my @valid_statuses;
     my $old_status; # Note that this is undef for new bugs.
+
     if (ref $invocant) {
+        @valid_statuses = @{$invocant->status->can_change_to};
         $product = $invocant->product_obj;
         $old_status = $invocant->status;
         my $comments = $invocant->{added_comments} || [];
         $comment = $comments->[-1];
     }
-    
+    else {
+        @valid_statuses = @{Bugzilla::Status->can_change_to()};
+    }
+
+    if (!$product->votes_to_confirm) {
+        # UNCONFIRMED becomes an invalid status if votes_to_confirm is 0,
+        # even if you are in editbugs.
+        @valid_statuses = grep {$_->name ne 'UNCONFIRMED'} @valid_statuses;
+    }
+
     # Check permissions for users filing new bugs.
     if (!ref $invocant) {
-        my $default_status = Bugzilla::Status->can_change_to->[0];
-        
         if ($user->in_group('editbugs', $product->id)
             || $user->in_group('canconfirm', $product->id)) {
-           # If the user with privs hasn't selected another status,
-           # select the first one of the list.
-           $new_status ||= $default_status;
+            # If the user with privs hasn't selected another status,
+            # select the first one of the list.
+            $new_status ||= $valid_statuses[0];
         }
         else {
             # A user with no privs cannot choose the initial status.
-            $new_status = $default_status;
+            $new_status = $valid_statuses[0];
         }
     }
-
-    # Make sure this is a valid transition.
-    if (!$new_status->allow_change_from($old_status, $product)) {
-         ThrowUserError('illegal_bug_status_transition',
-                        { old => $old_status, new => $new_status });
+    # Time to validate the bug status.
+    $new_status = Bugzilla::Status->check($new_status) unless ref($new_status);
+    if (!grep {$_->name eq $new_status->name} @valid_statuses) {
+        ThrowUserError('illegal_bug_status_transition',
+                       { old => $old_status, new => $new_status });
     }
 
     # Check if a comment is required for this change.
@@ -961,7 +974,7 @@ sub _check_bug_status {
     }
 
     return $new_status->name if ref $invocant;
-    return ($status, $status eq 'UNCONFIRMED' ? 0 : 1);
+    return ($new_status->name, $new_status->name eq 'UNCONFIRMED' ? 0 : 1);
 }
 
 sub _check_cc {

@@ -123,11 +123,6 @@ sub create {
         $field_values{$field_name} = $params->{$field}; 
     }
 
-    # Make sure all the required fields are in the hash.
-    foreach my $field (Bugzilla::Bug::REQUIRED_CREATE_FIELDS) {
-        $field_values{$field} = undef unless exists $field_values{$field};
-    }
-
     # WebService users can't set the creation date of a bug.
     delete $field_values{'creation_ts'};
 
@@ -501,6 +496,15 @@ You didn't specify a summary for the bug.
 
 Either the QA Contact, Assignee, or CC lists have some invalid user
 in them. The error message will have more details.
+
+=back
+
+=item B<History>
+
+=over
+
+=item Before B<3.0.4>, parameters marked as B<Defaulted> were actually
+B<Required>, due to a bug in Bugzilla.
 
 =back
 

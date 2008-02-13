@@ -605,7 +605,7 @@ sub sendMail {
         }
     }
  
-    if ($difftext eq "" && $newcomments eq "") {
+    if ($difftext eq "" && $newcomments eq "" && !$isnew) {
       # Whoops, no differences!
       return 0;
     }

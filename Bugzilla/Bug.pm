@@ -1005,14 +1005,6 @@ sub _check_comment {
     $comment =~ s/\r\n?/\n/g; # Get rid of \r.
 
     ThrowUserError('comment_too_long') if length($comment) > MAX_COMMENT_LENGTH;
-
-    # Creation-only checks
-    if (!ref $invocant) {
-        # On creation only, there must be a single-space comment, or
-        # email will be supressed.
-        $comment = ' ' if $comment eq '';
-    }
-
     return $comment;
 }
 

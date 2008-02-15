@@ -2033,7 +2033,7 @@ sub _anyexact {
     
     my @list;
     foreach my $w (split(/,/, $$v)) {
-        if ($w eq "---" && $$f !~ /resolution/) {
+        if ($w eq "---" && $$f =~ /resolution/) {
             $w = "";
         }
         $$q = $dbh->quote($w);

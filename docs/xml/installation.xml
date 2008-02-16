@@ -1,5 +1,5 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"> -->
-<!-- $Id: installation.xml,v 1.136.2.9 2008/01/24 21:02:24 lpsolit%gmail.com Exp $ -->
+<!-- $Id: installation.xml,v 1.136.2.10 2008/02/16 17:58:12 lpsolit%gmail.com Exp $ -->
 <chapter id="installing-bugzilla">
   <title>Installing Bugzilla</title>
 
@@ -573,7 +573,8 @@
         <para>The PatchReader module is only required if you want to use
         Patch Viewer, a
         Bugzilla feature to show code patches in your web browser in a more
-        readable form.
+        readable form. For more information on Patch Viewer, see
+        <xref linkend="param-patchviewer"/>.
         </para>
       </section>
     </section>
@@ -646,7 +647,6 @@
       </para>
     </section>
   </section>
-  
   
   <section id="configuration">
     <title>Configuration</title>
@@ -1048,14 +1048,14 @@
                 <para>
                 <filename>checksetup.pl</filename> can set tighter permissions
                 on Bugzilla's files and directories if it knows what group the
-                webserver runs as. Find the <computeroutput>Group</computeroutput>
+                web server runs as. Find the <computeroutput>Group</computeroutput>
                 line in <filename>httpd.conf</filename>, place the value found
                 there in the <replaceable>$webservergroup</replaceable> variable
                 in <filename>localconfig</filename>, then rerun
                 <filename>checksetup.pl</filename>.
                 </para>
             </step>
-    
+
             <step>
                 <para>
                 Optional: If Bugzilla does not actually reside in the webspace
@@ -1118,7 +1118,7 @@
 				<para>
 					<filename>checksetup.pl</filename> can set tighter permissions
 					on Bugzilla's files and directories if it knows what group the
-					webserver runs as. Find the <computeroutput>Group</computeroutput>
+					web server runs as. Find the <computeroutput>Group</computeroutput>
 					line in <filename>httpd.conf</filename>, place the value found
 					there in the <replaceable>$webservergroup</replaceable> variable
 					in <filename>localconfig</filename>, then rerun
@@ -1241,7 +1241,7 @@ c:\perl\bin\perl.exe -xc:\bugzilla -wT "%s" %s
             The ActiveState install may have already created an entry for
             .pl files that is limited to <quote>GET,HEAD,POST</quote>. If
             so, this mapping should be <emphasis>removed</emphasis> as
-            Bugzilla's .pl files are not designed to be run via a webserver.
+            Bugzilla's .pl files are not designed to be run via a web server.
           </para>
         </note>
 
@@ -1312,8 +1312,7 @@ c:\perl\bin\perl.exe -xc:\bugzilla -wT "%s" %s
       </para>
     </section> 
   </section>
-
-
+  
   <section id="extraconfig">
     <title>Optional Additional Configuration</title>
 
@@ -1480,163 +1479,7 @@ c:\perl\bin\perl.exe -xc:\bugzilla -wT "%s" %s
         </para>
       </note>
     </section>
-
-    <section id="patch-viewer">
-      <title>Patch Viewer</title>
-      
-      <para>
-        Patch Viewer is the engine behind Bugzilla's graphical display of
-        code patches. You can integrate this with copies of the
-        <filename>cvs</filename>, <filename>lxr</filename> and
-        <filename>bonsai</filename> tools if you have them, by giving
-        the locations of your installation of these tools in
-        <filename>editparams.cgi</filename>.
-      </para>
         
-      <para>
-        Patch Viewer also optionally will use the 
-        <filename>cvs</filename>, <filename>diff</filename> and 
-        <filename>interdiff</filename>
-        command-line utilities if they exist on the system.
-        Interdiff can be obtained from 
-        <ulink url="http://cyberelk.net/tim/patchutils/"/>.
-        If these programs are not in the system path, you can configure
-        their locations in <filename>localconfig</filename>.
-      </para>
-      
-
-    </section>
-    
-    <section id="bzldap">
-      <title>LDAP Authentication</title>
-
-      <para>LDAP authentication is a module for Bugzilla's plugin 
-      authentication architecture.
-      </para>
-
-      <para>
-      The existing authentication
-      scheme for Bugzilla uses email addresses as the primary user ID, and a
-      password to authenticate that user. All places within Bugzilla where
-      you need to deal with user ID (e.g assigning a bug) use the email
-      address. The LDAP authentication builds on top of this scheme, rather
-      than replacing it. The initial log in is done with a username and
-      password for the LDAP directory. Bugzilla tries to bind to LDAP using
-      those credentials, and if successful, try to map this account to a
-      Bugzilla account. If a  LDAP mail attribute is defined, the value of this
-      attribute is used, otherwise emailsuffix parameter is appended to LDAP
-      username to form a full email address. If an account for this address
-      already exists in your Bugzilla system, it will log in to that account.
-      If no account for that email address exists, one is created at the time
-      of login. (In this case, Bugzilla will attempt to use the "displayName"
-      or "cn" attribute to determine the user's full name.) After
-      authentication, all other user-related tasks are still handled by email
-      address, not LDAP username. You still assign bugs by email address, query
-      on users by email address, etc.
-      </para>
-
-      <caution>
-        <para>Because the Bugzilla account is not created until the first time
-        a user logs in, a user who has not yet logged is unknown to Bugzilla.
-        This means they cannot be used as an assignee or QA contact (default or
-        otherwise), added to any cc list, or any other such operation. One
-        possible workaround is the <filename>bugzilla_ldapsync.rb</filename>
-        script in the
-        <glossterm linkend="gloss-contrib"><filename class="directory">contrib</filename></glossterm> directory. Another possible solution is fixing
-        <ulink url="http://bugzilla.mozilla.org/show_bug.cgi?id=201069">bug
-        201069</ulink>.
-        </para>
-      </caution>
-
-      <para>Parameters required to use LDAP Authentication:</para>
-
-      <variablelist>
-        <varlistentry id="param-user_verify_class">
-          <term>user_verify_class</term>
-          <listitem>
-            <para>This parameter should be set to <quote>LDAP</quote>
-            <emphasis>only</emphasis> if you will be using an LDAP directory
-            for authentication. If you set this param to <quote>LDAP</quote> but
-            fail to set up the other parameters listed below you will not be
-            able to log back in to Bugzilla one you log out. If this happens
-            to you, you will need to manually edit
-            <filename>data/params</filename> and set user_verify_class to
-            <quote>DB</quote>.
-            </para>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry id="param-LDAPserver">
-          <term>LDAPserver</term>
-          <listitem>
-            <para>This parameter should be set to the name (and optionally the
-            port) of your LDAP server. If no port is specified, it assumes
-            the default LDAP port of 389.
-            </para>
-            <para>Ex. <quote>ldap.company.com</quote>
-             or <quote>ldap.company.com:3268</quote>
-            </para>
-            <para>You can also specify a LDAP URI, so as to use other
-            protocols, such as LDAPS or LDAPI. If port was not specified in
-            the URI, the default is either 389 or 636 for 'LDAP' and 'LDAPS'
-            schemes respectively.
-            </para>
-            <para>Ex. <quote>ldap://ldap.company.com</quote>,
-            <quote>ldaps://ldap.company.com</quote> or
-            <quote>ldapi://%2fvar%2flib%2fldap_sock</quote>
-            </para>
-           </listitem>
-         </varlistentry>
-
-         <varlistentry id="param-LDAPbinddn">
-           <term>LDAPbinddn [Optional]</term>
-           <listitem>
-             <para>Some LDAP servers will not allow an anonymous bind to search
-             the directory. If this is the case with your configuration you
-             should set the LDAPbinddn parameter to the user account Bugzilla
-             should use instead of the anonymous bind.
-             </para>
-             <para>Ex. <quote>cn=default,cn=user:password</quote></para>
-           </listitem>
-         </varlistentry>
-
-         <varlistentry id="param-LDAPBaseDN">
-           <term>LDAPBaseDN</term>
-           <listitem>
-             <para>The LDAPBaseDN parameter should be set to the location in
-             your LDAP tree that you would like to search for email addresses.
-             Your uids should be unique under the DN specified here.
-             </para>
-             <para>Ex. <quote>ou=People,o=Company</quote></para>
-           </listitem>
-         </varlistentry>
-
-         <varlistentry id="param-LDAPuidattribute">
-           <term>LDAPuidattribute</term>
-           <listitem>
-             <para>The LDAPuidattribute parameter should be set to the attribute
-             which contains the unique UID of your users. The value retrieved
-             from this attribute will be used when attempting to bind as the
-             user to confirm their password.
-             </para>
-             <para>Ex. <quote>uid</quote></para>
-           </listitem>
-         </varlistentry>
-
-         <varlistentry id="param-LDAPmailattribute">
-           <term>LDAPmailattribute</term>
-           <listitem>
-             <para>The LDAPmailattribute parameter should be the name of the
-             attribute which contains the email address your users will enter
-             into the Bugzilla login boxes.
-             </para>
-             <para>Ex. <quote>mail</quote></para>
-           </listitem>
-          </varlistentry>
-      </variablelist>
-
-    </section>
-    
     <section id="apache-addtype">
       <title>Serving Alternate Formats with the right MIME type</title>
 

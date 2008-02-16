@@ -535,6 +535,22 @@
 
           <varlistentry>
             <term>
+              usevisibilitygroups
+            </term>
+            <listitem>
+              <para>
+                If selected, user visibility will be restricted to members of
+                groups, as selected in the group configuration settings. 
+                Each user-defined group can be allowed to see members of selected
+                other groups. 
+                For details on configuring groups (including the visibility 
+                restrictions) see <xref linkend="edit-groups"/>. 
+              </para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>
               querysharegroup
             </term>
             <listitem>
@@ -1400,9 +1416,13 @@
     </variablelist>
 
     <para>
-    When editing a product there is also a link to edit
-    <xref linkend="product-group-controls"/>.
+    When editing a product there is also a link to edit Group Access Controls,
+    see <xref linkend="product-group-controls"/>.
     </para>
+
+    <section id="create-product">
+      <title>Creating New Products</title>
+
     <para>
     To create a new product:
     </para>
@@ -1439,121 +1459,319 @@
       </listitem>
     </orderedlist>
 
-
-    <section id="product-group-controls" xreflabel="Group Access Controls">
-      <title>Assigning Group Controls to Products</title>
-      <para> 
-      On the <quote>Product Edit</quote> page, 
-      there is a link called 
-      <quote>Edit Group Access Controls</quote>. 
-      The settings on this page control the relationship 
-      of the groups to the product being edited.
-      </para> 
-      <para>
-      Groups may be applicable, default, and 
-      mandatory for each product. Groups can also control access 
-      to bugs for a given product, or be used to make bugs 
-      for a product totally read-only unless the group 
-      restrictions are met.
-      </para>
-      <para>
-      If any group has <emphasis>Entry</emphasis> selected, then the 
-      product will restrict bug entry to only those users 
-      who are members of all the groups with 
-      <emphasis>Entry</emphasis> selected.
-      </para>
-      <para>
-      If any group has <emphasis>Canedit</emphasis> selected, 
-      then the product will be read-only for any users 
-      who are not members of all of the groups with
-      <emphasis>Canedit</emphasis> selected. ONLY users who 
-      are members of all the <emphasis>Canedit</emphasis> groups 
-      will be able to edit. This is an 
-      additional restriction that further limits 
-      what can be edited by a user.
-      </para>
-      <para>
-      The following settings let you 
-      choose privileges on a <emphasis>per-product basis</emphasis>.
-      This is a convenient way to give privileges to 
-      some users for some products only, without having 
-      to give them global privileges which would affect 
-      all products.
-      </para>
-      <para>
-      Any group having <emphasis>editcomponents</emphasis> 
-      selected  allows users who are in this group to edit all 
-      aspects of this product, including components, milestones 
-      and versions.
-      </para>
-      <para>
-      Any group having <emphasis>canconfirm</emphasis> selected 
-      allows users who are in this group to confirm bugs 
-      in this product.
-      </para>
-      <para>
-      Any group having <emphasis>editbugs</emphasis> selected allows 
-      users who are in this group to edit all fields of 
-      bugs in this product.
-      </para>
-      <para>
-      The <emphasis>MemberControl</emphasis> and 
-      <emphasis>OtherControl</emphasis> fields indicate which 
-      bugs will be placed in this group according 
-      to the following definitions.
-      </para>
-      <para>
-      For each group, it is possible to specify if 
-      membership in that group is:
-      </para>
-      <orderedlist>
-        <listitem>
-          <para>
-          Required for bug entry. 
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-          Not applicable to this product(NA),
-          a possible restriction for a member of the 
-          group to place on a bug in this product(Shown),
-          a default restriction for a member of the 
-          group to place on a bug in this product(Default),
-          or a mandatory restriction to be placed on bugs 
-          in this product(Mandatory).
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-          Not applicable by non-members to this product(NA),
-          a possible restriction for a non-member of the 
-          group to place on a bug in this product(Shown),
-          a default restriction for a non-member of the 
-          group to place on a bug in this product(Default),
-          or a mandatory restriction to be placed on bugs 
-          in this product when entered by a non-member(Mandatory).
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-          Required in order to make <emphasis>any</emphasis> change
-          to bugs in this product <emphasis>including comments.</emphasis>
-          </para>
-        </listitem>
-      </orderedlist>
-      <para>These controls are often described in this order, so a 
-      product that requires a user to be a member of group "foo" 
-      to enter a bug and then requires that the bug stay restricted
-      to group "foo" at all times and that only members of group "foo"
-      can edit the bug even if they otherwise could see the bug would 
-      have its controls summarized by...</para>
-      <programlisting> 
-foo: ENTRY, MANDATORY/MANDATORY, CANEDIT
-      </programlisting>
-      
     </section>
 
+    <section id="edit-products">
+      <title>Editing Products</title>
 
+      <para>
+      To edit an existing product, click the "Products" link from the 
+      "Administration" page. If the 'useclassification' parameter is
+      turned on, a table of existing classifications is displayed,
+      including an "Unclassified" category. The table indicates how many products
+      are in each classification. Click on the classification name to see its
+      products. If the 'useclassification' parameter is not in use, the table 
+      lists all products directly. The product table summarizes the information 
+      about the product defined
+      when the product was created. Click on the product name to edit these
+      properties, and to access links to other product attributes such as the
+      product's components, versions, milestones, and group access controls.
+      </para>
+
+      </section>
+
+      <section id="comps-vers-miles-products">
+        <title>Adding or Editing Components, Versions and Target Milestones</title>
+        <para>
+          To edit existing, or add new, Components, Versions or Target Milestones 
+          to a Product, select the "Edit Components", "Edit Versions" or "Edit
+          Milestones" links from the "Edit Product" page. A table of existing 
+          Components, Versions or Milestones is displayed. Click on a item name 
+          to edit the properties of that item. Below the table is a link to add 
+          a new Component, Version or Milestone. 
+        </para>
+        <para>
+          For more information on components, see <xref linkend="components"/>.
+        </para>
+        <para>
+          For more information on versions, see <xref linkend="versions"/>.
+        </para>
+        <para>
+          For more information on milestones, see <xref linkend="milestones"/>.
+        </para>
+      </section>
+
+      <section id="product-group-controls">
+        <title>Assigning Group Controls to Products</title>
+
+        <para> 
+        On the <quote>Edit Product</quote> page, there is a link called 
+        <quote>Edit Group Access Controls</quote>. The settings on this page 
+        control the relationship of the groups to the product being edited.
+        </para> 
+
+        <para>
+        Group Access Controls are an important aspect of using groups for 
+        isolating products and restricting access to bugs filed against those
+        products. For more information on groups, including how to create, edit
+        add users to, and alter permission of, see <xref linkend="groups"/>.
+        </para>
+
+        <para>
+        After selecting the "Edit Group Access Controls" link from the "Edit
+        Product" page, a table containing all user-defined groups for this 
+        Bugzilla installation is displayed. The system groups that are created
+        when Bugzilla is installed are not applicable to Group Access Controls.
+        Below is description of what each of these fields means.
+        </para>
+
+        <para>
+        Groups may be applicable (e.g bugs in this product can be associated
+        with this group) , default (e.g. bugs in this product are in this group
+        by default), and mandatory (e.g. bugs in this product must be associated
+        with this group) for each product. Groups can also control access 
+        to bugs for a given product, or be used to make bugs for a product 
+        totally read-only unless the group restrictions are met. The best way to
+        understand these relationships is by example. See 
+        <xref linkend="group-control-examples"/> for examples of 
+        product and group relationships.
+        </para>
+  
+        <note>
+          <para>
+            Products and Groups are not limited to a one-to-one relationship. 
+            Multiple groups can be associated with the same product, and groups
+            can be associated with more than one product. 
+          </para>
+        </note> 
+
+        <para>
+        If any group has <emphasis>Entry</emphasis> selected, then the 
+        product will restrict bug entry to only those users 
+        who are members of <emphasis>all</emphasis> the groups with 
+        <emphasis>Entry</emphasis> selected.
+        </para>
+
+        <para>
+        If any group has <emphasis>Canedit</emphasis> selected, 
+        then the product will be read-only for any users 
+        who are not members of <emphasis>all</emphasis> of the groups with
+        <emphasis>Canedit</emphasis> selected. <emphasis>Only</emphasis> users who 
+        are members of all the <emphasis>Canedit</emphasis> groups 
+        will be able to edit bugs for this product. This is an additional 
+        restriction that enables finer-grained control over products rather 
+        than just all-or-nothing access levels.
+        </para>
+
+        <para>
+        The following settings let you 
+        choose privileges on a <emphasis>per-product basis</emphasis>.
+        This is a convenient way to give privileges to 
+        some users for some products only, without having 
+        to give them global privileges which would affect 
+        all products.
+        </para>
+
+        <para>
+        Any group having <emphasis>editcomponents</emphasis> 
+        selected  allows users who are in this group to edit all 
+        aspects of this product, including components, milestones 
+        and versions.
+        </para>
+
+        <para>
+        Any group having <emphasis>canconfirm</emphasis> selected 
+        allows users who are in this group to confirm bugs 
+        in this product.
+        </para>
+
+        <para>
+        Any group having <emphasis>editbugs</emphasis> selected allows 
+        users who are in this group to edit all fields of 
+        bugs in this product.
+        </para>
+
+        <para>
+        The <emphasis>MemberControl</emphasis> and 
+        <emphasis>OtherControl</emphasis> are used in tandem to determine which 
+        bugs will be placed in this group. The only allowable combinations of
+        these two parameters are listed in a table on the "Edit Group Access Controls"
+        page. Consult this table for details on how these fields can be used.
+        Examples of different uses are described below.
+        </para>
+
+      <section id="group-control-examples">
+      <title>Common Applications of Group Controls</title>
+
+      <para>
+        The use of groups is best explained by providing examples that illustrate
+        configurations for common use cases. The examples follow a common syntax:
+        <emphasis>Group: Entry, MemberControl, OtherControl, CanEdit,
+        EditComponents, CanConfirm, EditBugs</emphasis>. Where "Group" is the name
+        of the group being edited for this product. The other fields all
+        correspond to the table on the "Edit Group Access Controls" page. If any
+        of these options are not listed, it means they are not checked.      
+      </para>
+      
+          <para>
+            Basic Product/Group Restriction
+          </para>
+
+        <para>
+          Suppose there is a product called "Bar". The 
+          "Bar" product can only have bugs entered against it by users in the
+          group "Foo". Additionally, bugs filed against product "Bar" must stay
+          restricted to users to "Foo" at all times. Furthermore, only members
+          of group "Foo" can edit bugs filed against product "Bar", even if other
+          users could see the bug. This arrangement would achieved by the
+          following:
+        </para>
+
+        <programlisting>
+Product Bar: 
+foo: ENTRY, MANDATORY/MANDATORY, CANEDIT
+        </programlisting>
+
+        <para>
+          Perhaps such strict restrictions are not needed for product "Bar". A 
+          more lenient way to configure product "Bar" and group "Foo" would be:
+        </para>
+
+        <programlisting>
+Product Bar: 
+foo: ENTRY, SHOWN/SHOWN, EDITCOMPONENTS, CANCONFIRM, EDITBUGS
+        </programlisting>
+
+        <para>
+          The above indicates that for product "Bar", members of group "Foo" can
+          enter bugs. Any one with permission to edit a bug against product "Bar"
+          can put the bug
+          in group "Foo", even if they themselves are not in "Foo". Anyone in group
+          "Foo" can edit all aspects of the components of product "Bar", can confirm
+          bugs against product "Bar", and can edit all fields of any bug against
+          product "Bar".
+        </para>
+ 
+          <para>
+            General User Access With Security Group
+          </para>
+
+             <para>
+               To permit any user to file bugs against "Product A",
+               and to permit any user to submit those bugs into a
+               group called "Security":  
+            </para>
+
+      <programlisting> 
+Product A:
+security: SHOWN/SHOWN
+      </programlisting>
+
+          <para>
+            General User Access With A Security Product
+          </para>
+
+          <para>
+            To permit any user to file bugs against product called "Security"
+            while keeping those bugs from becoming visible to anyone
+            outside the group "SecurityWorkers" (unless a member of the
+            "SecurityWorkers" group removes that restriction):
+          </para>
+
+          <programlisting> 
+Product Security:
+securityworkers: DEFAULT/MANDATORY
+          </programlisting>
+
+          <para>
+            Product Isolation With a Common Group
+          </para>
+
+          <para>
+            To permit users of "Product A" to access the bugs for
+            "Product A", users of "Product B" to access the bugs for 
+            "Product B", and support staff, who are members of the "Support 
+            Group" to access both, three groups are needed:
+          </para>
+
+          <orderedlist>
+
+          <listitem>
+            <para>Support Group: Contains members of the support staff.</para>
+          </listitem>
+
+          <listitem>
+            <para>AccessA Group: Contains users of product A and the Support group.</para>
+          </listitem>
+
+          <listitem>
+            <para>AccessB Group: Contains users of product B and the Support group.</para>
+          </listitem>
+
+          </orderedlist>
+
+          <para>
+            Once these three groups are defined, the product group controls
+            can be set to:
+          </para>
+
+          <programlisting>
+Product A:
+AccessA: ENTRY, MANDATORY/MANDATORY
+Product B:
+AccessB: ENTRY, MANDATORY/MANDATORY
+        </programlisting>
+
+        <para>
+         Perhaps the "Support Group" wants more control. For example, 
+         the "Support Group"  could be permitted to make bugs inaccessible to 
+         users of both groups "AccessA" and "AccessB". 
+         Then, the "Support Group" could be permitted to publish
+         bugs relevant to all users in a third product (let's call it 
+         "Product Common") that is read-only
+         to anyone outside the "Support Group". In this way the "Support Group" 
+         could control bugs that should be seen by both groups. 
+         That configuration would be:
+        </para>
+
+      <programlisting>
+Product A:
+AccessA: ENTRY, MANDATORY/MANDATORY
+Support: SHOWN/NA
+Product B:
+AccessB: ENTRY, MANDATORY/MANDATORY
+Support: SHOWN/NA
+Product Common:
+Support: ENTRY, DEFAULT/MANDATORY, CANEDIT
+      </programlisting>
+
+          <para>
+            Make a Product Read Only
+          </para>
+
+          <para>
+            Sometimes a product is retired and should no longer have
+            new bugs filed against it (for example, an older version of a software
+            product that is no longer supported). A product can be made read-only
+            by creating a group called "readonly" and adding products to the
+            group as needed:
+          </para>
+
+         <programlisting>
+Product A:
+ReadOnly: ENTRY, NA/NA, CANEDIT
+         </programlisting>
+
+        <note>
+          <para>
+            For more information on Groups outside of how they relate to products
+            see <xref linkend="groups"/>.
+          </para>
+        </note>
+
+       </section>
+
+    </section>
 
   </section>
 
@@ -2431,28 +2649,70 @@ foo: ENTRY, MANDATORY/MANDATORY, CANEDIT
   <section id="groups">
     <title>Groups and Group Security</title>
 
-    <para>Groups allow the administrator
-    to isolate bugs or products that should only be seen by certain people.
-    The association between products and groups is controlled from
-    the product edit page under <quote>Edit Group Controls.</quote>
+    <para>
+    Groups allow for separating bugs into logical divisions.
+    Groups are typically used to
+    to isolate bugs that should only be seen by certain people. For
+    example, a company might create a different group for each one of its customers
+    or partners. Group permissions could be set so that each partner or customer would
+    only have access to their own bugs. Or, groups might be used to create
+    variable access controls for different departments within an organization.
+    Another common use of groups is to associate groups with products,
+    creating isolation and access control on a per-product basis.
     </para>
 
     <para>
-    If the makeproductgroups param is on, a new group will be automatically
-    created for every new product. It is primarily available for backward
-    compatibility with older sites. 
+    Groups and group behaviors are controlled in several places:
     </para>
+
+      <orderedlist>
+
+         <listitem>
+           <para>
+             The group configuration page. To view or edit existing groups, or to
+             create new groups, access the "Groups" link from the "Administration"
+             page. This section of the manual deals primarily with the aspect of
+             group controls accessed on this page.  
+           </para>
+         </listitem> 
+
+        <listitem>
+          <para>
+            Global configuration parameters. Bugzilla has several parameters 
+            that control the overall default group behavior and restriction
+            levels. For more information on the parameters that control 
+            group behavior globally, see <xref linkend="param-group-security"/>.
+          </para>
+
+         </listitem>
+
+         <listitem>
+          <para>
+            Product association with groups. Most of the functionality of groups
+            and group security is controlled at the product level. Some aspects
+            of group access controls for products are discussed in this section,
+            but for more detail see <xref linkend="product-group-controls"/>.
+          </para>
+         </listitem>
+
+         <listitem>
+          <para>
+            Group access for users. See <xref linkend="users-and-groups"/> for
+            details on how users are assigned group access.
+          </para>
+         </listitem>
+
+      </orderedlist>
+
     <para>
-      Note that group permissions are such that you need to be a member
-      of <emphasis>all</emphasis> the groups a bug is in, for whatever
-      reason, to see that bug. Similarly, you must be a member 
-      of <emphasis>all</emphasis> of the entry groups for a product 
-      to add bugs to a product and you must be a member 
-      of <emphasis>all</emphasis> of the canedit groups for a product
-      in order to make <emphasis>any</emphasis> change to bugs in that
-      product.
-    </para>    
-    <note>
+      Group permissions are such that if a bug belongs to a group, only members
+      of that group can see the bug. If a bug is in more than one group, only
+      members of <emphasis>all</emphasis> the groups that the bug is in can see
+      the bug. For information on granting read-only access to certain people and
+      full edit access to others, see <xref linkend="product-group-controls"/>.
+     </para> 
+
+     <note>
       <para>
         By default, bugs can also be seen by the Assignee, the Reporter, and 
         by everyone on the CC List, regardless of whether or not the bug would 
@@ -2461,158 +2721,276 @@ foo: ENTRY, MANDATORY/MANDATORY, CANEDIT
         section that starts with <quote>Users in the roles selected below...</quote>
         and un-checking the box next to either 'Reporter' or 'CC List' (or both).
       </para>
-    </note>
+    </note> 
+
     <section id="create-groups">
       <title>Creating Groups</title>
-      <para>To create Groups:</para>
+
+      <para>
+        To create a new group, follow the steps below:
+      </para>
   
       <orderedlist>
+
         <listitem>
-          <para>Select the <quote>groups</quote>
-          link in the footer.</para>
+          <para>
+            Select the <quote>Administration</quote> link in the page footer, 
+            and then select the <quote>Groups</quote> link from the 
+            Administration page.
+          </para>
         </listitem>
   
         <listitem>
-          <para>Take a moment to understand the instructions on the <quote>Edit
-          Groups</quote> screen, then select the <quote>Add Group</quote> link.</para>
+          <para>
+            A table of all the existing groups is displayed. Below the table is a
+            description of all the fields. To create a new group, select the 
+            <quote>Add Group</quote> link under the table of existing groups.
+          </para>
         </listitem>
   
         <listitem>
-          <para>Fill out the <quote>Group</quote>, <quote>Description</quote>, 
-           and <quote>User RegExp</quote> fields. 
-           <quote>User RegExp</quote> allows you to automatically
-           place all users who fulfill the Regular Expression into the new group. 
-           When you have finished, click <quote>Add</quote>.</para>
-           <para>Users whose email addresses match the regular expression
-           will automatically be members of the group as long as their 
-           email addresses continue to match the regular expression.</para>
-           <note>
-             <para>This is a change from 2.16 where the regular expression
-             resulted in a user acquiring permanent membership in a group.
-             To remove a user from a group the user was in due to a regular
-             expression in version 2.16 or earlier, the user must be explicitly
-             removed from the group. This can easily be done by pressing
-             buttons named 'Remove Memberships' or 'Remove Memberships
-             included in regular expression' under the table.</para>
-           </note>
-           <warning>
-             <para>If specifying a domain in the regexp, make sure you end
-             the regexp with a $. Otherwise, when granting access to 
-             "@mycompany\.com", you will allow access to 
-             'badperson@mycompany.com.cracker.net'. You need to use 
-             '@mycompany\.com$' as the regexp.</para>
-           </warning>
+          <para>
+            There are five fields to fill out. These fields are documented below
+            the form. Choose a name and description for the group. Decide whether
+            this group should be used for bugs (in all likelihood this should be
+            selected). Optionally, choose a regular expression that will
+            automatically add any matching users to the group, and choose an
+            icon that will help identify user comments for the group. The regular
+            expression can be useful, for example, to automatically put all users
+            from the same company into one group (if the group is for a specific
+            customer or partner). 
+          </para>
+            <note>
+             <para>
+               If <quote>User RegExp</quote> is filled out, users whose email 
+               addresses match the regular expression will automatically be 
+               members of the group as long as their email addresses continue 
+               to match the regular expression. If their email address changes
+               and no longer matches the regular expression, they will be removed
+               from the group. Versions 2.16 and older of Bugzilla did not automatically
+               remove users who's email addresses no longer matched the RegExp.
+             </para>
+            </note>
+            <warning>
+             <para>
+               If specifying a domain in the regular expression, end
+               the regexp with a "$". Otherwise, when granting access to 
+               "@mycompany\.com", access will also be granted to 
+               'badperson@mycompany.com.cracker.net'. Use the syntax,
+               '@mycompany\.com$' for the regular expression.
+             </para>
+            </warning>
         </listitem>
+
         <listitem>
-          <para>If you plan to use this group to directly control
-          access to bugs, check the "use for bugs" box. Groups
-          not used for bugs are still useful because other groups
-          can include the group as a whole.</para>
-        </listitem>
-        <listitem>
-          <para>After you add your new group, edit the new group.  On the
-          edit page, you can specify other groups that should be included
+          <para>
+          After the new group is created, it can be edited for additional options. 
+          The "Edit Group" page allows for specifying other groups that should be included
           in this group and which groups should be permitted to add and delete
-          users from this group.</para>
+          users from this group. For more details, see <xref linkend="edit-groups"/>.
+          </para>
         </listitem>
       </orderedlist>
   
     </section>
+ 
     <section id="edit-groups">
-      <title>Assigning Users to Groups</title>
-      <para>Users can become a member of a group in several ways.</para>
-      <orderedlist>
-        <listitem>
-          <para>The user can be explicitly placed in the group by editing
-          the user's own profile</para>
-        </listitem>
-        <listitem>
-          <para>The group can include another group of which the user is
-          a member.</para>
-        </listitem>
-        <listitem>
-          <para>The user's email address can match a regular expression
-          that the group specifies to automatically grant membership to
-          the group.</para>
-        </listitem>
-      </orderedlist>
+      <title>Editing Groups and Assigning Group Permissions</title>
+
+      <para>
+        To access the "Edit Groups" page, select the 
+        <quote>Administration</quote> link in the page footer, 
+        and then select the <quote>Groups</quote> link from the Administration page.
+        A table of all the existing groups is displayed. Click on a group name
+        you wish to edit or control permissions for.
+      </para>
+
+      <para>
+       The "Edit Groups" page contains the same five fields present when 
+       creating a new group. Below that are two additional sections, "Group
+       Permissions," and "Mass Remove". The "Mass Remove" option simply removes
+       all users from the group who match the regular expression entered. The
+       "Group Permissions" section requires further explanation.
+      </para>
+
+      <para>
+       The "Group Permissions" section on the "Edit Groups" page contains four sets
+       of permissions that control the relationship of this group to other
+       groups. If the 'usevisibilitygroups' parameter is in use (see
+       <xref linkend="parameters"/>) two additional sets of permissions are displayed. 
+       Each set consists of two select boxes. On the left, a select box
+       with a list of all existing groups. On the right, a select box listing
+       all groups currently selected for this permission setting (this box will
+       be empty for new groups). The way these controls allow groups to relate
+       to one another is called <emphasis>inheritance</emphasis>. 
+       Each of the six permissions is described below.
+      </para>
+
+      <variablelist>
+
+        <varlistentry>
+
+          <term>
+            <emphasis>Groups That Are a Member of This Group</emphasis>
+          </term>
+
+          <listitem>
+            <para> 
+              Members of any groups selected here will automatically have 
+              membership in this group. In other words, members of any selected 
+              group will inherit membership in this group. 
+            </para>
+          </listitem>
+
+        </varlistentry>
+
+        <varlistentry>
+
+          <term>
+            <emphasis>Groups That This Group Is a Member Of</emphasis>
+          </term>
+
+          <listitem>
+            <para>
+              Members of this group will inherit membership to any group 
+              selected here. For example, suppose the group being edited is
+              an Admin group. If there are two products  (Product1 and Product2) 
+              and each product has its
+              own group (Group1 and Group2), and the Admin group 
+              should have access to both products, 
+              simply select both Group1 and Group2 here. 
+           </para>
+          </listitem>
+
+        </varlistentry>
+
+        <varlistentry>
+
+          <term>
+            <emphasis>Groups That Can Grant Membership in This Group</emphasis>
+          </term>
+
+          <listitem>
+           <para>
+             The members of any group selected here will be able add users
+             to this group, even if they themselves are not in this group.
+           </para>
+          </listitem>
+
+        </varlistentry>
+
+        <varlistentry>
+
+          <term>
+            <emphasis>Groups That This Group Can Grant Membership In</emphasis>
+          </term>
+
+          <listitem>
+           <para>
+             Members of this group can add users to any group selected here,
+             even if they themselves are not in the selected groups.  
+           </para>
+          </listitem>
+
+        </varlistentry>
+
+        <varlistentry>
+
+          <term>
+            <emphasis>Groups That Can See This Group</emphasis>
+          </term>
+
+          <listitem>
+           <para>
+             Members of any selected group can see the users in this group.
+             This setting is only visible if the 'usevisibilitygroups' parameter
+             is enabled on the Bugzilla Configuration page. See
+             <xref linkend="parameters"/> for information on configuring Bugzilla.
+           </para>
+          </listitem>
+
+        </varlistentry>
+
+        <varlistentry>
+
+          <term>
+            <emphasis>Groups That This Group Can See</emphasis>
+          </term>
+
+          <listitem>
+           <para>
+             Members of this group can see members in any of the selected groups.
+             This setting is only visible if the 'usevisibilitygroups' parameter
+             is enabled on the the Bugzilla Configuration page. See
+             <xref linkend="parameters"/> for information on configuring Bugzilla.               
+           </para>
+          </listitem>
+
+        </varlistentry>
+
+    </variablelist>
+
     </section>
+
+    <section id="users-and-groups">
+      <title>Assigning Users to Groups</title>
+
+      <para>
+        A User can become a member of a group in several ways:
+      </para>
+
+      <orderedlist>
+
+        <listitem>
+          <para>
+            The user can be explicitly placed in the group by editing
+            the user's profile. This can be done by accessing the "Users" page
+            from the "Administration" page. Use the search form to find the user
+            you want to edit group membership for, and click on their email
+            address in the search results to edit their profile. The profile
+            page lists all the groups, and indicates if the user is a member of
+            the group either directly or indirectly. More information on indirect
+            group membership is below. For more details on User administration,
+            see <xref linkend="useradmin"/>.
+          </para>
+        </listitem>
+
+        <listitem>
+          <para>
+           The group can include another group of which the user is
+           a member. This is indicated by square brackets around the checkbox  
+           next to the group name in the user's profile. 
+           See <xref linkend="edit-groups"/> for details on group inheritance.
+          </para>
+        </listitem>
+
+        <listitem>
+          <para>
+            The user's email address can match the regular expression
+            that has been specified to automatically grant membership to
+            the group. This is indicated by "*" around the check box by the
+            group name in the user's profile.
+            See <xref linkend="create-groups"/> for details on 
+            the regular expression option when creating groups.
+           </para>
+        </listitem>
+
+      </orderedlist>
+
+    </section>
+
     <section>
      <title>Assigning Group Controls to Products</title>
+
      <para>
-     For information on assigning group controls to
-     products, see <xref linkend="products" />.
+     The primary functionality of groups is derived from the relationship of 
+     groups to products. The concepts around segregating access to bugs with
+     product group controls can be confusing. For details and examples on this
+     topic, see <xref linkend="product-group-controls" />.
      </para>
+
     </section>
-    
-    <section>
-    <title>Common Applications of Group Controls</title>
-      <section>
-      <title>General User Access With Security Group</title>
-      <para>To permit any user to file bugs in each product (A, B, C...) 
-      and to permit any user to submit those bugs into a security
-      group....</para>
-      <programlisting> 
-Product A...
-security: SHOWN/SHOWN
-Product B...
-security: SHOWN/SHOWN
-Product C...
-security: SHOWN/SHOWN
-      </programlisting>
-      </section>
-      <section>
-      <title>General User Access With A Security Product</title>
-      <para>To permit any user to file bugs in a Security product
-      while keeping those bugs from becoming visible to anyone
-      outside the securityworkers group unless a member of the
-      securityworkers group removes that restriction....</para>
-      <programlisting> 
-Product Security...
-securityworkers: DEFAULT/MANDATORY
-      </programlisting>
-      </section>
-      <section>
-      <title>Product Isolation With Common Group</title>
-      <para>To permit users of product A to access the bugs for
-      product A, users of product B to access product B, and support
-      staff to access both, 3 groups are needed</para>
-      <orderedlist>
-        <listitem>
-          <para>Support: Contains members of the support staff.</para>
-        </listitem>
-        <listitem>
-          <para>AccessA: Contains users of product A and the Support group.</para>
-        </listitem>
-        <listitem>
-          <para>AccessB: Contains users of product B and the Support group.</para>
-        </listitem>
-      </orderedlist>
-      <para>Once these 3 groups are defined, the products group controls
-      can be set to..</para>
-      <programlisting>
-Product A...
-AccessA: ENTRY, MANDATORY/MANDATORY
-Product B...
-AccessB: ENTRY, MANDATORY/MANDATORY
-      </programlisting>
-      <para>Optionally, the support group could be permitted to make
-      bugs inaccessible to the users and could be permitted to publish
-      bugs relevant to all users in a common product that is read-only
-      to anyone outside the support group. That configuration could
-      be...</para>
-      <programlisting>
-Product A...
-AccessA: ENTRY, MANDATORY/MANDATORY
-Support: SHOWN/NA
-Product B...
-AccessB: ENTRY, MANDATORY/MANDATORY
-Support: SHOWN/NA
-Product Common...
-Support: ENTRY, DEFAULT/MANDATORY, CANEDIT
-      </programlisting>
-      </section>
-    </section>
+
   </section>
 
   <section id="sanitycheck">
@@ -2996,6 +3374,7 @@ bash$ <command>./checksetup.pl</command>
 
     </section>
   </section>
+
 </chapter>
 
 <!-- Keep this comment at the end of the file

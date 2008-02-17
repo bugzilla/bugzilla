@@ -799,6 +799,20 @@
 
           <varlistentry>
             <term>
+              mailfrom
+            </term>
+            <listitem>
+              <para>
+                This is the email address that will appear in the "From" field
+                of all emails sent by this Bugzilla installation. Some email
+                servers require mail to be from a valid email address, therefore
+                it is recommended to choose a valid email address here.
+              </para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>
               sendmailnow
             </term>
             <listitem>

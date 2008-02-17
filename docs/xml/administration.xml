@@ -67,8 +67,8 @@
             </term>
             <listitem>
               <para>
-                Defines the fully qualified domain name and web 
-                server path to the Bugzilla documentation.
+                Defines path to the Bugzilla documentation. This can be a fully
+                qualified domain name, or a path relative to "urlbase".
               </para>
               <para>
                 For example, if the "Bugzilla Configuration" page 
@@ -348,7 +348,7 @@
           <para>
             This page allows for setting restrictions and other parameters
             regarding attachments to bugs. For example, control size limitations
-            and whether to allow uploading of remote files via a URI.
+            and whether to allow pointing to external files via a URI.
           </para>
         </section>
 

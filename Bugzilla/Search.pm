@@ -27,6 +27,7 @@
 #                 Max Kanat-Alexander <mkanat@bugzilla.org>
 #                 Joel Peshkin <bugreport@peshkin.net>
 #                 Lance Larsh <lance.larsh@oracle.com>
+#                 Jesse Clark <jjclark1982@gmail.com>
 
 use strict;
 
@@ -1771,7 +1772,7 @@ sub _keywords_nonchanged {
     my $self = shift;
     my %func_args = @_;
     my ($chartid, $v, $ff, $f, $t, $term, $supptables) =
-        @func_args{qw(chartid v ff f t term)};
+        @func_args{qw(chartid v ff f t term supptables)};
     
     my @list;
     my $table = "keywords_$$chartid";

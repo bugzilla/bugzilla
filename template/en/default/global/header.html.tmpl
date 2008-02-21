@@ -213,6 +213,8 @@
     [%# Required for the 'Autodiscovery' feature in Firefox 2 and IE 7. %]
     <link rel="search" type="application/opensearchdescription+xml"
                        title="[% terms.Bugzilla %]" href="./search_plugin.cgi">
+                       
+    [% Hook.process("additional_header") %]                   
   </head>
 
 [%# Migration note: contents of the old Param 'bodyhtml' go in the body tag,

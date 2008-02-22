@@ -458,8 +458,8 @@ sub init {
         "^cc,(?:notequals),(%\\w+%)" => \&_cc_notequals,
         "^cc,(?!changed)" => \&_cc_nonchanged,
         "^long_?desc,changedby" => \&_long_desc_changedby,
-        "^long_?desc,changedbefore" => \&_long_desc_changedbefore,
-        "^long_?desc,changedafter" => \&_long_desc_changedafter,
+        "^long_?desc,changedbefore" => \&_long_desc_changedbefore_after,
+        "^long_?desc,changedafter" => \&_long_desc_changedbefore_after,
         "^content,matches" => \&_content_matches,
         "^content," => sub { ThrowUserError("search_content_without_matches"); },
         "^(?:deadline|creation_ts|delta_ts),(?:lessthan|greaterthan|equals|notequals),(?:-|\\+)?(?:\\d+)(?:[dDwWmMyY])\$" => \&_timestamp_compare,
@@ -468,8 +468,8 @@ sub init {
         "^long_?desc," => \&_long_desc,
         "^longdescs\.isprivate," => \&_longdescs_isprivate,
         "^work_time,changedby" => \&_work_time_changedby,
-        "^work_time,changedbefore" => \&_work_time_changedbefore,
-        "^work_time,changedafter" => \&_work_time_changedafter,
+        "^work_time,changedbefore" => \&_work_time_changedbefore_after,
+        "^work_time,changedafter" => \&_work_time_changedbefore_after,
         "^work_time," => \&_work_time,
         "^percentage_complete," => \&_percentage_complete,
         "^bug_group,(?!changed)" => \&_bug_group_nonchanged,
@@ -1222,30 +1222,20 @@ sub _long_desc_changedby {
     $$term = "$table.who = $id";
 }
 
-sub _long_desc_changedbefore {
+sub _long_desc_changedbefore_after {
     my $self = shift;
     my %func_args = @_;
-    my ($chartid, $supptables, $term, $v) =
-        @func_args{qw(chartid supptables term v)};
+    my ($chartid, $t, $v, $supptables, $term) =
+        @func_args{qw(chartid v supptables term)};
     my $dbh = Bugzilla->dbh;
     
+    my $operator = ($$t =~ /before/) ? '<' : '>';
     my $table = "longdescs_$$chartid";
     push(@$supptables, "LEFT JOIN longdescs AS $table " .
-                       "ON $table.bug_id = bugs.bug_id");
-    $$term = "$table.bug_when < " . $dbh->quote(SqlifyDate($$v));
-}
-
-sub _long_desc_changedafter {
-    my $self = shift;
-    my %func_args = @_;
-    my ($chartid, $supptables, $term, $v) =
-        @func_args{qw(chartid supptables term v)};
-    my $dbh = Bugzilla->dbh;
-    
-    my $table = "longdescs_$$chartid";
-    push(@$supptables, "LEFT JOIN longdescs AS $table " .
-                       "ON $table.bug_id = bugs.bug_id");
-    $$term = "$table.bug_when > " . $dbh->quote(SqlifyDate($$v));
+                              "ON $table.bug_id = bugs.bug_id " .
+                             "AND $table.bug_when $operator " .
+                             $dbh->quote(SqlifyDate($$v)) );
+    $$term = "($table.bug_when IS NOT NULL)";
 }
 
 sub _content_matches {
@@ -1429,32 +1419,21 @@ sub _work_time_changedby {
     $$term .= ") AND ($table.work_time <> 0))";
 }
 
-sub _work_time_changedbefore {
+sub _work_time_changedbefore_after {
     my $self = shift;
     my %func_args = @_;
-    my ($chartid, $supptables, $v, $term) =
-        @func_args{qw(chartid supptables v term)};
-    my $dbh = Bugzilla->dbh;
-
-    my $table = "longdescs_$$chartid";
-    push(@$supptables, "LEFT JOIN longdescs AS $table " .
-                       "ON $table.bug_id = bugs.bug_id");
-    $$term = "(($table.bug_when < " . $dbh->quote(SqlifyDate($$v));
-    $$term .= ") AND ($table.work_time <> 0))";
-}
-
-sub _work_time_changedafter {
-    my $self = shift;
-    my %func_args = @_;
-    my ($chartid, $supptables, $v, $term) =
-        @func_args{qw(chartid supptables v term)};
+    my ($chartid, $t, $v, $supptables, $term) =
+        @func_args{qw(chartid v supptables term)};
     my $dbh = Bugzilla->dbh;
     
+    my $operator = ($$t =~ /before/) ? '<' : '>';
     my $table = "longdescs_$$chartid";
     push(@$supptables, "LEFT JOIN longdescs AS $table " .
-                       "ON $table.bug_id = bugs.bug_id");
-    $$term = "(($table.bug_when > " . $dbh->quote(SqlifyDate($$v));
-    $$term .= ") AND ($table.work_time <> 0))";
+                              "ON $table.bug_id = bugs.bug_id " .
+                             "AND $table.work_time <> 0" .
+                             "AND $table.bug_when $operator " .
+                             $dbh->quote(SqlifyDate($$v)) );
+    $$term = "($table.bug_when IS NOT NULL)";
 }
 
 sub _work_time {

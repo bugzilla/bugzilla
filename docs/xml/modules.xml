@@ -24,15 +24,13 @@
         a 'make' utility.  The <command>nmake</command> utility provided with
         Microsoft Visual C++ may be used.  As an alternative, there is a
         utility called <command>dmake</command> available from CPAN which is
-        written entirely in Perl. The majority of the links given below, however,
-        are to pre-compiled versions of the modules, which can be installed
-        on Windows simply by issuing the following command once you have
-        downloaded the PPD file (which may be packaged within a ZIP file):
+        written entirely in Perl.
       </para>
       <para>
-        <screen>
-          <prompt>&gt;</prompt> ppm install &lt;filename.ppd&gt;
-        </screen>
+        As described in <xref linkend="modules-manual-download" />, however, most
+        packages already exist and are available from ActiveState or theory58S.
+        We highly recommend that you install them using the ppm GUI available with
+        ActiveState and to add the theory58S repository to your list of repositories.
       </para>
     </note>
   </section>
@@ -43,9 +41,11 @@
     <note>
       <para>
         Running Bugzilla on Windows requires the use of ActiveState
-        Perl 5.8.1 or higher. Some modules already exist in the core
-        distribution of ActiveState Perl so no PPM link is given.
-        (This is noted where it occurs.)
+        Perl 5.8.1 or higher. Many modules already exist in the core
+        distribution of ActiveState Perl. Additional modules can be downloaded
+        from <ulink url="http://theoryx5.uwinnipeg.ca/ppms/" /> if you use
+        Perl 5.8.x or from <ulink url="http://cpan.uwinnipeg.ca/PPMPackages/10xx/" />
+        if you use Perl 5.10.x.
       </para>
     </note>
 
@@ -53,7 +53,6 @@
       CGI:
       <literallayout>
         CPAN Download Page: <ulink url="http://search.cpan.org/dist/CGI.pm/"/>
-        PPM Download Link: Part of core distribution.
         Documentation: <ulink url="http://perldoc.perl.org/CGI.html"/>
       </literallayout>
     </para>
@@ -62,7 +61,6 @@
       Data-Dumper:
       <literallayout>
         CPAN Download Page: <ulink url="http://search.cpan.org/dist/Data-Dumper/"/>
-        PPM Download Page: Part of core distribution.
         Documentation: <ulink url="http://search.cpan.org/dist/Data-Dumper/Dumper.pm"/>
       </literallayout>
     </para>
@@ -71,7 +69,6 @@
       Date::Format (part of TimeDate):
       <literallayout>
         CPAN Download Page: <ulink url="http://search.cpan.org/dist/TimeDate/"/>
-        PPM Download Link: <ulink url="http://landfill.bugzilla.org/ppm/TimeDate.ppd"/>
         Documentation: <ulink url="http://search.cpan.org/dist/TimeDate/lib/Date/Format.pm"/>
       </literallayout>
     </para>
@@ -80,7 +77,6 @@
       DBI:
       <literallayout>
         CPAN Download Page: <ulink url="http://search.cpan.org/dist/DBI/"/>
-        PPM Download Link: <ulink url="http://landfill.bugzilla.org/ppm/DBI.ppd"/>
         Documentation: <ulink url="http://dbi.perl.org/docs/"/>
       </literallayout>
     </para>
@@ -89,7 +85,6 @@
       DBD::mysql:
       <literallayout>
         CPAN Download Page: <ulink url="http://search.cpan.org/dist/DBD-mysql/"/>
-        PPM Download Link: <ulink url="http://landfill.bugzilla.org/ppm/DBD-mysql.ppd"/>
         Documentation: <ulink url="http://search.cpan.org/dist/DBD-mysql/lib/DBD/mysql.pm"/>
       </literallayout>
     </para>
@@ -98,7 +93,6 @@
       DBD::Pg:
       <literallayout>
         CPAN Download Page: <ulink url="http://search.cpan.org/dist/DBD-Pg/"/>
-        PPM Download Link: <ulink url="http://theoryx5.uwinnipeg.ca/ppms/x86/DBD-Pg.tar.gz"/>
         Documentation: <ulink url="http://search.cpan.org/dist/DBD-Pg/Pg.pm"/>
       </literallayout>
     </para>
@@ -107,7 +101,6 @@
       File::Spec:
       <literallayout>
         CPAN Download Page: <ulink url="http://search.cpan.org/dist/File-Spec/"/>
-        PPM Download Page: Part of core distribution.
         Documentation: <ulink url="http://perldoc.perl.org/File/Spec.html"/>
       </literallayout>
     </para>
@@ -116,7 +109,6 @@
       Template-Toolkit:
       <literallayout>
         CPAN Download Page: <ulink url="http://search.cpan.org/dist/Template-Toolkit/"/>
-        PPM Download Link: <ulink url="http://landfill.bugzilla.org/ppm/Template-Toolkit.ppd"/>
         Documentation: <ulink url="http://www.template-toolkit.org/docs.html"/>
       </literallayout>
     </para>
@@ -125,7 +117,6 @@
       GD:
       <literallayout>
         CPAN Download Page: <ulink url="http://search.cpan.org/dist/GD/"/>
-        PPM Download Link: <ulink url="http://landfill.bugzilla.org/ppm/GD.ppd"/>
         Documentation: <ulink url="http://search.cpan.org/dist/GD/GD.pm"/>
       </literallayout>
     </para>
@@ -134,7 +125,6 @@
       Template::Plugin::GD:
       <literallayout>
        CPAN Download Page: <ulink url="http://search.cpan.org/dist/Template-GD/" />
-       PPM Download Link:  (Just install Template-Toolkit using the instructions below)
        Documentation: <ulink url="http://www.template-toolkit.org/docs/aqua/Modules/index.html" />
       </literallayout>
     </para>
@@ -143,7 +133,6 @@
       MIME::Parser (part of MIME-tools):
       <literallayout>
         CPAN Download Page: <ulink url="http://search.cpan.org/dist/MIME-tools/"/>
-        PPM Download Link: <ulink url="http://ppm.activestate.com/PPMPackages/zips/8xx-builds-only/Windows/MIME-tools-5.411a.zip"/>
         Documentation: <ulink url="http://search.cpan.org/dist/MIME-tools/lib/MIME/Parser.pm"/>
       </literallayout>
     </para>
@@ -157,7 +146,6 @@
       Chart::Base:
       <literallayout>
         CPAN Download Page: <ulink url="http://search.cpan.org/dist/Chart/"/>
-        PPM Download Page: <ulink url="http://landfill.bugzilla.org/ppm/Chart.ppd"/>
         Documentation: <ulink url="http://search.cpan.org/dist/Chart/Chart.pod"/>
       </literallayout>
     </para>
@@ -166,7 +154,6 @@
       GD::Graph:
       <literallayout>
         CPAN Download Page: <ulink url="http://search.cpan.org/dist/GDGraph/"/>
-        PPM Download Link: <ulink url="http://landfill.bugzilla.org/ppm/GDGraph.ppd"/>
         Documentation: <ulink url="http://search.cpan.org/dist/GDGraph/Graph.pm"/>
       </literallayout>
     </para>
@@ -175,7 +162,6 @@
       GD::Text::Align (part of GD::Text::Util):
       <literallayout>
         CPAN Download Page: <ulink url="http://search.cpan.org/dist/GDTextUtil/"/>
-        PPM Download Page: <ulink url="http://landfill.bugzilla.org/ppm/GDTextUtil.ppd"/>
         Documentation: <ulink url="http://search.cpan.org/dist/GDTextUtil/Text/Align.pm"/>
       </literallayout>
     </para>
@@ -184,7 +170,6 @@
       XML::Twig:
       <literallayout>
         CPAN Download Page: <ulink url="http://search.cpan.org/dist/XML-Twig/"/>
-        PPM Download Link: <ulink url="http://ppm.activestate.com/PPMPackages/zips/8xx-builds-only/Windows/XML-Twig-3.22.zip"/>
         Documentation: <ulink url="http://standards.ieee.org/resources/spasystem/twig/twig_stable.html"/>
       </literallayout>
     </para>
@@ -193,7 +178,6 @@
       PatchReader:
       <literallayout>
         CPAN Download Page: <ulink url="http://search.cpan.org/author/JKEISER/PatchReader/"/>
-        PPM Download Link: <ulink url="http://landfill.bugzilla.org/ppm/PatchReader.ppd"/>
         Documentation: <ulink url="http://www.johnkeiser.com/mozilla/Patch_Viewer.html"/>
       </literallayout>
     </para>
@@ -202,7 +186,6 @@
       Image::Magick:
       <literallayout>
         CPAN Download Page: <ulink url="http://search.cpan.org/dist/PerlMagick/"/>
-        PPM Download Link: Included in Windows binary package.
         Documentation: <ulink url="http://www.imagemagick.org/script/resources.php"/>
       </literallayout>
     </para>

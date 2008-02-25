@@ -30,17 +30,14 @@ Bugzilla::Field - a particular piece of information about bugs
   print Dumper(Bugzilla->get_fields());
 
   # Display information about non-obsolete custom fields.
-  print Dumper(Bugzilla->get_fields({ obsolete => 1, custom => 1 }));
-
-  # Display a list of the names of non-obsolete custom fields.
-  print Bugzilla->custom_field_names;
+  print Dumper(Bugzilla->active_custom_fields);
 
   use Bugzilla::Field;
 
   # Display information about non-obsolete custom fields.
   # Bugzilla->get_fields() is a wrapper around Bugzilla::Field->match(),
   # so both methods take the same arguments.
-  print Dumper(Bugzilla::Field->match({ obsolete => 1, custom => 1 }));
+  print Dumper(Bugzilla::Field->match({ obsolete => 0, custom => 1 }));
 
   # Create or update a custom field or field definition.
   my $field = Bugzilla::Field->create(

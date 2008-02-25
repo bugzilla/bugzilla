@@ -307,7 +307,7 @@ my @set_fields = qw(op_sys rep_platform priority bug_severity
                     deadline remaining_time estimated_time);
 push(@set_fields, 'assigned_to') if !$cgi->param('set_default_assignee');
 push(@set_fields, 'qa_contact')  if !$cgi->param('set_default_qa_contact');
-my @custom_fields = Bugzilla->get_fields({custom => 1, obsolete => 0});
+my @custom_fields = Bugzilla->active_custom_fields;
 
 my %methods = (
     bug_severity => 'set_severity',

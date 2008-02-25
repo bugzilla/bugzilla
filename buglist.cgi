@@ -672,7 +672,7 @@ DefineColumn("percentage_complete",
 DefineColumn("relevance"         , "relevance"                  , "Relevance"        );
 DefineColumn("deadline"          , $dbh->sql_date_format('bugs.deadline', '%Y-%m-%d') . " AS deadline", "Deadline");
 
-foreach my $field (Bugzilla->get_fields({ custom => 1, obsolete => 0})) {
+foreach my $field (Bugzilla->active_custom_fields) {
     DefineColumn($field->name, 'bugs.' . $field->name, $field->description);
 }
 

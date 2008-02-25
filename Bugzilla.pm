@@ -430,10 +430,13 @@ sub get_fields {
     return @$fields;
 }
 
-sub custom_field_names {
-    # Get a list of custom fields and convert it into a list of their names.
-    return map($_->{name}, 
-               @{Bugzilla::Field->match({ custom=>1, obsolete=>0 })});
+sub active_custom_fields {
+    my $class = shift;
+    if (!exists $class->request_cache->{active_custom_fields}) {
+        $class->request_cache->{active_custom_fields} =
+          Bugzilla::Field->match({ custom => 1, obsolete => 0 });
+    }
+    return @{$class->request_cache->{active_custom_fields}};
 }
 
 sub hook_args {

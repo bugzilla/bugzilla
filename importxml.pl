@@ -1028,9 +1028,9 @@ sub process_bug {
     push( @values, $status );
 
     # Custom fields
-    foreach my $custom_field (Bugzilla->custom_field_names) {
+    foreach my $field (Bugzilla->active_custom_fields) {
+        my $custom_field = $field->name;
         next unless defined($bug_fields{$custom_field});
-        my $field = new Bugzilla::Field({name => $custom_field});
         if ($field->type == FIELD_TYPE_FREETEXT) {
             push(@query, $custom_field);
             push(@values, clean_text($bug_fields{$custom_field}));

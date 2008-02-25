@@ -383,8 +383,7 @@ $vars->{'cloned_bug_id'}         = $cloned_bug_id;
 $vars->{'token'}             = issue_session_token('createbug:');
 
 
-my @enter_bug_fields = Bugzilla->get_fields({ custom => 1, obsolete => 0, 
-                                              enter_bug => 1 });
+my @enter_bug_fields = grep { $_->enter_bug } Bugzilla->active_custom_fields;
 foreach my $field (@enter_bug_fields) {
     $vars->{$field->name} = formvalue($field->name);
 }

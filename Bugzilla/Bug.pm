@@ -68,8 +68,8 @@ use constant LIST_ORDER => ID_FIELD;
 # This is a sub because it needs to call other subroutines.
 sub DB_COLUMNS {
     my $dbh = Bugzilla->dbh;
-    my @custom = Bugzilla->get_fields({ custom => 1, obsolete => 0});
-    @custom = grep {$_->type != FIELD_TYPE_MULTI_SELECT} @custom;
+    my @custom = grep {$_->type != FIELD_TYPE_MULTI_SELECT}
+                      Bugzilla->active_custom_fields;
     my @custom_names = map {$_->name} @custom;
     return qw(
         alias
@@ -130,8 +130,7 @@ sub VALIDATORS {
     };
 
     # Set up validators for custom fields.    
-    my @custom_fields = Bugzilla->get_fields({custom => 1, obsolete => 0});
-    foreach my $field (@custom_fields) {
+    foreach my $field (Bugzilla->active_custom_fields) {
         my $validator;
         if ($field->type == FIELD_TYPE_SINGLE_SELECT) {
             $validator = \&_check_select_field;
@@ -167,8 +166,8 @@ use constant UPDATE_VALIDATORS => {
 };
 
 sub UPDATE_COLUMNS {
-    my @custom = Bugzilla->get_fields({ custom => 1, obsolete => 0});
-    @custom = grep {$_->type != FIELD_TYPE_MULTI_SELECT} @custom;
+    my @custom = grep {$_->type != FIELD_TYPE_MULTI_SELECT}
+                      Bugzilla->active_custom_fields;
     my @custom_names = map {$_->name} @custom;
     my @columns = qw(
         alias
@@ -566,8 +565,8 @@ sub update {
     }
 
     # Insert the values into the multiselect value tables
-    my @multi_selects = Bugzilla->get_fields(
-        { custom => 1, type => FIELD_TYPE_MULTI_SELECT, obsolete => 0 });
+    my @multi_selects = grep {$_->type == FIELD_TYPE_MULTI_SELECT}
+                             Bugzilla->active_custom_fields;
     foreach my $field (@multi_selects) {
         my $name = $field->name;
         my ($removed, $added) = diff_arrays($old_bug->$name, $self->$name);
@@ -625,8 +624,8 @@ sub update {
 sub _extract_multi_selects {
     my ($invocant, $params) = @_;
 
-    my @multi_selects = Bugzilla->get_fields(
-        { custom => 1, type => FIELD_TYPE_MULTI_SELECT, obsolete => 0 });
+    my @multi_selects = grep {$_->type == FIELD_TYPE_MULTI_SELECT}
+                             Bugzilla->active_custom_fields;
     my %ms_values;
     foreach my $field (@multi_selects) {
         my $name = $field->name;
@@ -1581,7 +1580,7 @@ sub fields {
         # Conditional Fields
         Bugzilla->params->{'useqacontact'} ? "qa_contact" : (),
         # Custom Fields
-        Bugzilla->custom_field_names
+        map { $_->name } Bugzilla->active_custom_fields
     );
 }
 

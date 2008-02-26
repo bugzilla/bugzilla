@@ -428,22 +428,15 @@ if ($move_action eq Bugzilla->params->{'move-button-text'}) {
 
     # First update all moved bugs.
     foreach my $bug (@bug_objects) {
-        $bug->add_comment(scalar $cgi->param('comment'),
-                          { type => CMT_MOVED_TO, extra_data => $user->login });
+        $bug->add_comment('', { type => CMT_MOVED_TO, extra_data => $user->login });
     }
     # Don't export the new status and resolution. We want the current ones.
     local $Storable::forgive_me = 1;
     my $bugs = dclone(\@bug_objects);
+
+    my $new_status = Bugzilla->params->{'duplicate_or_move_bug_status'};
     foreach my $bug (@bug_objects) {
-        my ($status, $resolution) = $bug->get_new_status_and_resolution('move');
-        $bug->set_status($status);
-        # We don't use set_resolution here because the MOVED resolution is
-        # special and is normally rejected by set_resolution.
-        $bug->{resolution} = $resolution;
-        # That means that we need to clear dups manually. Eventually this
-        # bug-moving code will all be inside Bugzilla::Bug, so it's OK
-        # to call an internal function here.
-        $bug->_clear_dup_id;
+        $bug->set_status($new_status, {resolution => 'MOVED', moving => 1});
     }
     $_->update() foreach @bug_objects;
     $dbh->bz_commit_transaction();

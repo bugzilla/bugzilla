@@ -1349,11 +1349,6 @@ sub _check_resolution {
     # Make sure this is a valid resolution.
     check_field('resolution', $resolution);
 
-    # The moving code doesn't use set_resolution. This check prevents
-    # people from hacking the URL variables (or using some other interface)
-    # and setting a bug to MOVED without moving it.
-    ThrowCodeError('no_manual_moved') if $resolution eq 'MOVED';
-    
     # Don't allow open bugs to have resolutions.
     ThrowUserError('resolution_not_allowed') if $self->status->is_open;
     
@@ -1867,12 +1862,16 @@ sub set_remaining_time { $_[0]->set('remaining_time', $_[1]); }
 sub _zero_remaining_time { $_[0]->{'remaining_time'} = 0; }
 sub set_reporter_accessible { $_[0]->set('reporter_accessible', $_[1]); }
 sub set_resolution {
-    my ($self, $value, $dupe_of) = @_;
+    my ($self, $value, $params) = @_;
     
     my $old_res = $self->resolution;
     $self->set('resolution', $value);
     my $new_res = $self->resolution;
-    
+
+    # MOVED has a special meaning and can only be used when
+    # really moving bugs to another installation.
+    ThrowCodeError('no_manual_moved') if ($new_res eq 'MOVED' && !$params->{moving});
+
     if ($new_res ne $old_res) {
         # Clear the dup_id if we're leaving the dup resolution.
         if ($old_res eq 'DUPLICATE') {
@@ -1889,8 +1888,8 @@ sub set_resolution {
     # of another, theoretically. Note that this code block will also run
     # when going between different closed states.
     if ($self->resolution eq 'DUPLICATE') {
-        if ($dupe_of) {
-            $self->set_dup_id($dupe_of);
+        if ($params->{dupe_of}) {
+            $self->set_dup_id($params->{dupe_of});
         }
         elsif (!$self->dup_id) {
             ThrowUserError('dupe_id_required');
@@ -1912,7 +1911,7 @@ sub clear_resolution {
 }
 sub set_severity       { $_[0]->set('bug_severity',  $_[1]); }
 sub set_status {
-    my ($self, $status, $resolution, $dupe_of) = @_;
+    my ($self, $status, $params) = @_;
     my $old_status = $self->status;
     $self->set('bug_status', $status);
     delete $self->{'status'};
@@ -1926,8 +1925,9 @@ sub set_status {
     else {
         # We do this here so that we can make sure closed statuses have
         # resolutions.
-        $self->set_resolution($resolution || $self->resolution, $dupe_of);
-        
+        my $resolution = delete $params->{resolution} || $self->resolution;
+        $self->set_resolution($resolution, $params);
+
         # Changing between closed statuses zeros the remaining time.
         if ($new_status->id != $old_status->id && $self->remaining_time != 0) {
             $self->_zero_remaining_time();
@@ -2647,14 +2647,14 @@ sub process_knob {
     my $dbh = Bugzilla->dbh;
 
     return if $action eq 'none';
-    
+
+    my $dupe_move_status = Bugzilla->params->{'duplicate_or_move_bug_status'};
     if ($action eq 'duplicate') {
-        $self->set_status(Bugzilla->params->{'duplicate_or_move_bug_status'},
-                          'DUPLICATE', $dupe_of);
+        $self->set_status($dupe_move_status,
+                          {resolution => 'DUPLICATE', dupe_of => $dupe_of});
     }
     elsif ($action eq 'move') {
-        $self->set_status(Bugzilla->params->{'duplicate_or_move_bug_status'},
-                          'MOVED');
+        $self->set_status($dupe_move_status, {resolution => 'MOVED'});
     }
     elsif ($action eq 'change_resolution') {
         $self->set_resolution($to_resolution);
@@ -2663,7 +2663,7 @@ sub process_knob {
         $self->clear_resolution();
     }
     else {
-        $self->set_status($action, $to_resolution);
+        $self->set_status($action, {resolution => $to_resolution});
     }
 }
 

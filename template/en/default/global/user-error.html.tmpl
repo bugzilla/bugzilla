@@ -250,6 +250,11 @@
     [% title = "Classification Not Enabled" %]
     Sorry, classification is not enabled.
 
+  [% ELSIF error == "bug_status_not_allowed" %]
+    [% title = "Bug Status Not Allowed" %]
+    You cannot mark open [% terms.bugs %] as [% status_descs.$status FILTER html %].
+    You have to mark them as [% status_descs.RESOLVED FILTER html %] first.
+
   [% ELSIF error == "classification_not_specified" %]
     [% title = "You Must Supply A Classification Name" %]
     You must enter a classification name.

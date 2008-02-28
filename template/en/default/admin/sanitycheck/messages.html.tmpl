@@ -281,7 +281,12 @@
 
 [% BLOCK bug_list %]
   [% FOREACH bug_id = badbugs %]
-    [%+ bug_id FILTER bug_link(bug_id) FILTER none %][% ", " IF !loop.last %]
+    [%# Do not use FILTER bug_link() here, because bug_link() calls get_text()
+     # which itself calls this template again, generating a recursion error.
+     # I doubt having a tooltip with the bug status and summary is so
+     # important here anyway, as you can click the "(as buglist)" link. %]
+    <a href="show_bug.cgi?id=[% bug_id FILTER url_quote %]">[% bug_id FILTER html %]</a>
+    [% ", " IF !loop.last %]
   [% END %]
   (<a href="buglist.cgi?bug_id=[% badbugs.join(",") FILTER url_quote %]">as buglist</a>).
 [% END %]

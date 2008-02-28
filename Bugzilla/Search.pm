@@ -1226,15 +1226,15 @@ sub _long_desc_changedbefore_after {
     my $self = shift;
     my %func_args = @_;
     my ($chartid, $t, $v, $supptables, $term) =
-        @func_args{qw(chartid v supptables term)};
+        @func_args{qw(chartid t v supptables term)};
     my $dbh = Bugzilla->dbh;
     
     my $operator = ($$t =~ /before/) ? '<' : '>';
     my $table = "longdescs_$$chartid";
     push(@$supptables, "LEFT JOIN longdescs AS $table " .
                               "ON $table.bug_id = bugs.bug_id " .
-                             "AND $table.bug_when $operator " .
-                             $dbh->quote(SqlifyDate($$v)) );
+                                 "AND $table.bug_when $operator " .
+                                  $dbh->quote(SqlifyDate($$v)) );
     $$term = "($table.bug_when IS NOT NULL)";
 }
 
@@ -1423,16 +1423,16 @@ sub _work_time_changedbefore_after {
     my $self = shift;
     my %func_args = @_;
     my ($chartid, $t, $v, $supptables, $term) =
-        @func_args{qw(chartid v supptables term)};
+        @func_args{qw(chartid t v supptables term)};
     my $dbh = Bugzilla->dbh;
     
     my $operator = ($$t =~ /before/) ? '<' : '>';
     my $table = "longdescs_$$chartid";
     push(@$supptables, "LEFT JOIN longdescs AS $table " .
                               "ON $table.bug_id = bugs.bug_id " .
-                             "AND $table.work_time <> 0" .
-                             "AND $table.bug_when $operator " .
-                             $dbh->quote(SqlifyDate($$v)) );
+                                 "AND $table.work_time <> 0" .
+                                 "AND $table.bug_when $operator " .
+                                  $dbh->quote(SqlifyDate($$v)) );
     $$term = "($table.bug_when IS NOT NULL)";
 }
 

@@ -20,6 +20,7 @@
   #                 Max Kanat-Alexander <mkanat@bugzilla.org>
   #                 Frédéric Buclin <LpSolit@gmail.com>
   #                 Olav Vitters <olav@bkor.dhs.org>
+  #                 Guy Pyrzak <guy.pyrzak@gmail.com>
   #%]
 
 [% PROCESS global/variables.none.tmpl %]
@@ -493,6 +494,7 @@
                              'bz_assignee_edit_action', 
                              'assigned_to', 
                              '[% bug.assigned_to.login FILTER js %]' );
+           initDefaultCheckbox('assignee');                  
           </script>
         [% ELSE %]
           <input type="hidden" name="assigned_to" id="assigned_to"
@@ -530,9 +532,6 @@
             <br>
             <input type="checkbox" id="set_default_qa_contact" name="set_default_qa_contact" value="1">
             <label for="set_default_qa_contact" id="set_default_qa_contact_label">Reset QA Contact to default</label>
-            <script type="text/javascript">
-              initAssignedQA();
-            </script>
           </div>
           [% IF bug.qa_contact != "" %]
             <script type="text/javascript">
@@ -541,6 +540,7 @@
                                'bz_qa_contact_edit_action', 
                                'qa_contact', 
                                '[% bug.qa_contact.login FILTER js %]');
+             initDefaultCheckbox('qa_contact');
             </script>
           [% END %]
         [% ELSE %]
@@ -551,9 +551,11 @@
       </td>
     </tr>
     [% END %]
-     
 [% END %]
 
+[%############################################################################%]
+[%# Block for URL Keyword and Whiteboard                                     #%]
+[%############################################################################%]
 [% BLOCK section_url_keyword_whiteboard %]
 [%# *** URL Whiteboard Keywords *** %]
   <tr>
@@ -621,6 +623,9 @@
   [% END %]
 [% END %]
 
+[%############################################################################%]
+[%# Block for Depends On / Blocks                                              #%]
+[%############################################################################%]
 [% BLOCK section_dependson_blocks %]
   <tr>
     [% PROCESS dependencies
@@ -906,7 +911,7 @@
 [% END %]
 
 [%############################################################################%]
-[%# Block for Section Spacer                                                 #%]
+[%# Block for Custom Fields                                                  #%]
 [%############################################################################%]
 
 [% BLOCK section_customfields %]

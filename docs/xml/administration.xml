@@ -2379,20 +2379,34 @@ ReadOnly: ENTRY, NA/NA, CANEDIT
     <title>Custom Fields</title>
 
     <para>
-      One of the most requested features was the ability to add your own custom
-      fields to bugs, based on your needs. With the release of Bugzilla 3.0, this
-      dream finally comes true. Administrators can manage these fields using the
-      <quote>Custom Fields</quote> link in the footer of pages. The first thing
-      they will see is the list of existing custom fields (which is empty by default).
+      The release of Bugzilla 3.0 added the ability to create Custom Fields. 
+      Custom Fields are treated like any other field - they can be set in bugs
+      and used for search queries. Administrators should keep in mind that
+      adding too many fields can make the user interface more complicated and
+      harder to use. Custom Fields should be added only when necessary and with 
+      careful consideration.
+    </para>
+    <tip>
+      <para>
+        Before adding a Custom Field, make sure that Bugzilla can not already
+        do the desired behavior. Many Bugzilla options are not enabled by 
+        default, and many times Administrators find that simply enabling
+        certain options that already exist is sufficient. 
+      </para>
+    </tip>
+    <para>
+      Administrators can manage Custom Fields using the
+      <quote>Custom Fields</quote> link on the Administration page. The Custom
+      Fields administration page displays a list of Custom Fields, if any exist,
+      and a link to "Add a new custom field". 
     </para>
 
     <section id="add-custom-fields">
       <title>Adding Custom Fields</title>
 
       <para>
-        The <quote>Add a new custom field</quote> link permits you to add a
-        new field which can be either a free text box or a drop down menu.
-        More field types will be available in future releases.
+        To add a new Custom Field, click the "Add a new custom field" link. This
+        page displays several options for the new field, described below.
       </para>
 
       <para>
@@ -2401,19 +2415,18 @@ ReadOnly: ENTRY, NA/NA, CANEDIT
           <listitem>
             <para>
               <emphasis>Name:</emphasis>
-              the name of the field, used internally. This name MUST begin
-              with <quote>cf_</quote>. If you omit this string, it will
-              be automatically added to the name you entered. This way, all
-              custom fields added to Bugzilla begin with <quote>cf_</quote>,
-              avoiding any conflict with default fields.
+              The name of the field in the database, used internally. This name 
+              MUST begin with <quote>cf_</quote> to prevent confusion with 
+              standard fields. If this string is omitted, it will
+              be automatically added to the name entered. 
             </para>
           </listitem>
 
           <listitem>
             <para>
               <emphasis>Description:</emphasis>
-              the string which is used as a label for this custom field.
-              That is the string that users will see, and so should be
+              A brief string which is used as the label for this Custom Field.
+              That is the string that users will see, and should be
               short and explicit.
             </para>
           </listitem>
@@ -2421,40 +2434,60 @@ ReadOnly: ENTRY, NA/NA, CANEDIT
           <listitem>
             <para>
               <emphasis>Type:</emphasis>
-              as mentioned above, only two types are implemented so far.
-              Free text boxes let you type any string, while drop down menus
-              only let you choose one value in the list provided. The list of
-              legal values for this field can be created and edited as soon as
-              this custom field is added to the DB. See
-              <xref linkend="edit-values-list" /> for information about editing
-              legal values.
+              The type of field to create. There are
+              several types available:
+               <simplelist>
+                 <member>
+                   Large Text Box: A multiple line box for entering free text.
+                 </member>
+                 <member>
+                   Free Text: A single line box for entering free text.
+                 </member>
+                 <member>
+                   Multiple-Selection Box: A list box where multiple options 
+                   can be selected. After creating this field, it must be edited
+                   to add the selection options. See 
+                   <xref linkend="edit-values-list" /> for information about 
+                   editing legal values.
+                 </member>
+                 <member>
+                   Drop Down: A list box where only one option can be selected.
+                   After creating this field, it must be edited to add the
+                   selection options. See 
+                   <xref linkend="edit-values-list" /> for information about 
+                   editing legal values.
+                 </member>
+                 <member>
+                   Date/Time: A date field. This field appears with a 
+                   calendar widget for choosing the date.
+                 </member>
+               </simplelist>
             </para>
           </listitem>
 
           <listitem>
             <para>
               <emphasis>Sortkey:</emphasis>
-              this integer determines in which order custom fields are
-              displayed in the UI, especially when viewing a bug. Fields
-              with lower values are displayed first.
+              Integer that determines in which order Custom Fields are
+              displayed in the User Interface, especially when viewing a bug. 
+              Fields with lower values are displayed first.
             </para>
           </listitem>
 
           <listitem>
             <para>
               <emphasis>Can be set on bug creation:</emphasis>
-              this boolean determines whether this field can be set on
-              bug creation or not. If not, then you have to create the
-              bug first before being able to set this field. Else you
-              can set its value at the same time you file a bug,
-              see <xref linkend="bugreports" /> about filing bugs.
+              Boolean that determines whether this field can be set on
+              bug creation. If not selected, then a bug must be created 
+              before this field can be set. See <xref linkend="bugreports" /> 
+              for information about filing bugs.
             </para>
           </listitem>
 
           <listitem>
             <para>
               <emphasis>Displayed in bugmail for new bugs:</emphasis>
-              this boolean determines whether the value set on this field
+              Boolean that determines whether the value set on this field
               should appear in bugmail when the bug is filed. This attribute
               has no effect if the field cannot be set on bug creation.
             </para>
@@ -2463,8 +2496,8 @@ ReadOnly: ENTRY, NA/NA, CANEDIT
           <listitem>
             <para>
               <emphasis>Is obsolete:</emphasis>
-              this boolean determines whether or not this field should
-              be displayed at all. Obsolete custom fields are hidden.
+              Boolean that determines whether this field should
+              be displayed at all. Obsolete Custom Fields are hidden.
             </para>
           </listitem>
         </itemizedlist>
@@ -2475,7 +2508,7 @@ ReadOnly: ENTRY, NA/NA, CANEDIT
       <title>Editing Custom Fields</title>
 
       <para>
-        As soon as a custom field is created, its name and type cannot be
+        As soon as a Custom Field is created, its name and type cannot be
         changed. If this field is a drop down menu, its legal values can
         be set as described in <xref linkend="edit-values-list" />. All
         other attributes can be edited as described above.
@@ -2486,9 +2519,9 @@ ReadOnly: ENTRY, NA/NA, CANEDIT
       <title>Deleting Custom Fields</title>
 
       <para>
-        It is only possible to delete obsolete custom fields 
+        It is only possible to delete obsolete Custom Fields 
         if the field has never been used in the database.
-        If you want to remove a field which already has content,
+        To remove a field which already has content,
         mark it as obsolete.
       </para>
     </section>
@@ -2501,9 +2534,9 @@ ReadOnly: ENTRY, NA/NA, CANEDIT
       Since Bugzilla 2.20 RC1, legal values for Operating Systems, platforms,
       bug priorities and severities can be edited from the User Interface
       directly. This means that it is no longer required to manually edit
-      <filename>localconfig</filename>. Starting with Bugzilla 2.23.3, you
-      can also customize the list of valid resolutions from the same interface,
-      and since Bugzilla 3.1.1 the list of valid bug statuses can be customized
+      <filename>localconfig</filename>. Starting with Bugzilla 2.23.3, 
+      the list of valid resolutions can be customized from the same interface.
+      Since Bugzilla 3.1.1 the list of valid bug statuses can be customized
       as well.
     </para>
 
@@ -2511,21 +2544,22 @@ ReadOnly: ENTRY, NA/NA, CANEDIT
       <title>Viewing/Editing legal values</title>
       <para>
         Editing legal values requires <quote>admin</quote> privileges.
-        A link named <quote>Field Values</quote> is visible in your footer and
-        clicking on it displays the list of fields whose values can be edited.
+        Select "Legal Values" from the Administration page. A list of all
+        fields, both system fields and Custom Fields, for which legal values
+        can be edited appears. Click a field name to edit its legal values.
       </para>
       <para>
-	You can add as many legal values as you want, and each value must be
-	unique (on a per field basis). The sortkey is important to display these
-	values in the desired order.
+        There is no limit to how many values a field can have, but each value 
+        must be unique to that field. The sortkey is important to display these
+        values in the desired order.
       </para>
     </section>
 
     <section id="edit-values-delete">
       <title>Deleting legal values</title>
       <para>
-        You can also delete legal values, but only if the two following conditions
-	are respected:
+        Legal values from Custom Fields can be deleted, but only if the 
+        following two conditions are respected:
       </para>
 
       <orderedlist>

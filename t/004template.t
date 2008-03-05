@@ -69,12 +69,12 @@ sub existOnce {
 foreach my $lang (@languages) {
     foreach my $file (@referenced_files) {
         my @path = map(File::Spec->catfile($_, $file),
-                       split(':', $include_path{$lang}));
+                       split(':', $include_path{$lang} . ":" . $include_path{"en"}));
         if (my $path = existOnce(@path)) {
             ok(1, "$path exists");
         } else {
             ok(0, "$file cannot be located --ERROR");
-            print $fh "Looked in:\n  " . join("\n  ", @path);
+            print $fh "Looked in:\n  " . join("\n  ", @path) . "\n";
         }
     }
 }

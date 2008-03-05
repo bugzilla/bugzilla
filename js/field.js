@@ -141,21 +141,11 @@ function updateCalendarFromField(date_field) {
 function hideEditableField( container, input, action, field_id, original_value ) {
     YAHOO.util.Dom.setStyle(container, 'display', 'inline');
     YAHOO.util.Dom.setStyle(input, 'display', 'none');
-    YAHOO.util.Event.addListener(action,
-                                 'click',
-                                 showEditableField,
-                                 new Array(container, input)
-                                 );
+    YAHOO.util.Event.addListener(action, 'click', showEditableField,
+                                 new Array(container, input));
     if(field_id != ""){
-        YAHOO.util.Event.addListener(window,
-                                     'load',
-                                     checkForChangedFieldValues,
-                                     new Array(container,
-                                               input,
-                                               field_id,
-                                               original_value
-                                               )
-                                     );
+        YAHOO.util.Event.addListener(window, 'load', checkForChangedFieldValues,
+                        new Array(container, input, field_id, original_value));
     }
 }
 
@@ -214,79 +204,46 @@ function checkForChangedFieldValues(e, ContainerInputArray ) {
 
 function hideAliasAndSummary(short_desc_value, alias_value) {
     // check the short desc field
-    hideEditableField( 'summary_alias_container',
-                       'summary_alias_input',
-                       'editme_action',
-                       'short_desc',
-                       short_desc_value);  
+    hideEditableField( 'summary_alias_container','summary_alias_input',
+                       'editme_action','short_desc', short_desc_value);  
     // check that the alias hasn't changed
     bz_alias_check_array = new Array('summary_alias_container',
-                                     'summary_alias_input',
-                                     'alias',
-                                     alias_value
-                                     );
-    YAHOO.util.Event.addListener( window,
-                                 'load',
-                                 checkForChangedFieldValues,
-                                 bz_alias_check_array
-                                 );
+                                     'summary_alias_input', 'alias', alias_value);
+    YAHOO.util.Event.addListener( window, 'load', checkForChangedFieldValues,
+                                 bz_alias_check_array);
 }
 
 function showPeopleOnChange( field_id_list ) {
     for(var i = 0; i < field_id_list.length; i++) {
-        YAHOO.util.Event.addListener( field_id_list[i],
-                                      'change',
-                                      showEditableField,
+        YAHOO.util.Event.addListener( field_id_list[i],'change', showEditableField,
                                       new Array('bz_qa_contact_edit_container',
-                                                'bz_qa_contact_input'
-                                                )
-                                      );
-        YAHOO.util.Event.addListener( field_id_list[i],
-                                      'change',
-                                      showEditableField,
+                                                'bz_qa_contact_input'));
+        YAHOO.util.Event.addListener( field_id_list[i],'change',showEditableField,
                                       new Array('bz_assignee_edit_container',
-                                                'bz_assignee_input'
-                                                )
-                                      );
+                                                'bz_assignee_input'));
     }
 }
 
 function assignToDefaultOnChange(field_id_list) {
     showPeopleOnChange( field_id_list );
     for(var i = 0; i < field_id_list.length; i++) {
-        YAHOO.util.Event.addListener( field_id_list[i],
-                                      'change',
-                                      setDefaultCheckbox,
-                                      'set_default_assignee'
-                                      );
-        YAHOO.util.Event.addListener( field_id_list[i],
-                                      'change',
-                                      setDefaultCheckbox,
-                                      'set_default_qa_contact'
-                                      );    
+        YAHOO.util.Event.addListener( field_id_list[i],'change', setDefaultCheckbox,
+                                      'set_default_assignee');
+        YAHOO.util.Event.addListener( field_id_list[i],'change',setDefaultCheckbox,
+                                      'set_default_qa_contact');    
     }
 }
 
 function initDefaultCheckbox(field_id){
-    YAHOO.util.Event.addListener( 'set_default_' + field_id,
-                                  'change', boldOnChange,
-                                  'set_default_' + field_id
-                                  );
-    YAHOO.util.Event.addListener( window,
-                                  'load',
-                                  checkForChangedFieldValues,
+    YAHOO.util.Event.addListener( 'set_default_' + field_id,'change', boldOnChange,
+                                  'set_default_' + field_id);
+    YAHOO.util.Event.addListener( window,'load', checkForChangedFieldValues,
                                   new Array( 'bz_' + field_id + '_edit_container',
                                              'bz_' + field_id + '_input',
-                                             'set_default_' + field_id ,
-                                             '1'
-                                             )
-                                  );
+                                             'set_default_' + field_id ,'1'));
     
-    YAHOO.util.Event.addListener( window,
-                                  'load',
-                                  boldOnChange,
-                                  'set_default_' + field_id
-                                  ); 
+    YAHOO.util.Event.addListener( window, 'load', boldOnChange,
+                                 'set_default_' + field_id ); 
 }
 
 function setDefaultCheckbox(e, field_id ) { 

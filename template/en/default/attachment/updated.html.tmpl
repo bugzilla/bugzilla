@@ -27,17 +27,22 @@
 [% bug = bugs.0 %]
 [% filtered_desc = bug.short_desc FILTER html %]
 [% filtered_timestamp = bug.delta_ts FILTER time %]
+[% bodyclasses = ['bz_bug',
+                 "bz_status_$bug.bug_status",
+                 "bz_component_$bug.component",
+                 "bz_bug_$bug.bug_id"
+                 ]
+%]
+[% FOREACH group = bug.groups_in %]
+  [% bodyclasses.push("bz_group_" _ group.name) %]
+[% END %]
 
 [% PROCESS global/header.html.tmpl
   title = "Changes Submitted to Attachment $attachment.id of $terms.Bug $attachment.bug_id"
   header = "$terms.Bug&nbsp;$attachment.bug_id"
   subheader = filtered_desc
   header_addl_info = "Last modified: $filtered_timestamp"
-  bodyclasses = ['bz_bug',
-                 "bz_status_$bug.bug_status",
-                 "bz_component_$bug.component",
-                 "bz_bug_$bug.bug_id"
-                ]
+  bodyclasses = bodyclasses
   javascript_urls = [ "js/util.js", "js/keyword-chooser.js", "js/field.js",
                       "js/yui/yahoo-dom-event.js", "js/yui/calendar.js" ]
   style_urls = [ "skins/standard/yui/calendar.css", "skins/standard/show_bug.css" ]

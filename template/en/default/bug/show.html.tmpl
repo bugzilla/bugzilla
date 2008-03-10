@@ -36,7 +36,7 @@
                    ]
   %]
   [% FOREACH group = bug.groups_in %]
-    [% bodyclasses.push("bz_group_" _ group.name) %]
+    [% bodyclasses.push("bz_group_$group.name") %]
   [% END %]
   [% PROCESS global/header.html.tmpl
     title = "$terms.Bug $bug.bug_id &ndash; $filtered_desc"

@@ -22,8 +22,6 @@
   #
   # classification: Bugzilla::Classification object; The classification 
   #                                                  the product is in
-  #
-  # groups_controls: a hash of group controls related to the product.
   #%]
 
 [% title = BLOCK %]Edit Product '[% product.name FILTER html %]'[% END %]
@@ -32,6 +30,12 @@
   title = title
   style_urls = ['skins/standard/admin.css']
 %]
+
+[% group_control = {${constants.CONTROLMAPNA}        => 'NA',
+                    ${constants.CONTROLMAPSHOWN}     => 'Shown',
+                    ${constants.CONTROLMAPDEFAULT}   => 'Default',
+                    ${constants.CONTROLMAPMANDATORY} => 'Mandatory'}
+ %]
 
 <form method="post" action="editproducts.cgi">
   <table border="0" cellpadding="4" cellspacing="0">
@@ -103,12 +107,12 @@ versions:</a>
         </a>
       </th>
       <td>
-        [% IF group_controls.size %]
-          [% FOREACH g = group_controls.values %]
+        [% IF product.group_controls.size %]
+          [% FOREACH g = product.group_controls.values %]
             <b>[% g.group.name FILTER html %]:</b>&nbsp;
             [% IF g.group.isactive %]
-              [% g.membercontrol FILTER html %]/
-              [% g.othercontrol FILTER html %]
+              [% group_control.${g.membercontrol} FILTER html %]/
+              [% group_control.${g.othercontrol} FILTER html %]
               [% IF g.entry %], ENTRY[% END %]
               [% IF g.canedit %], CANEDIT[% END %]
               [% IF g.editcomponents %], editcomponents[% END %]

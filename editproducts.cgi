@@ -69,28 +69,6 @@ $user->in_group('editcomponents')
                                      action => "edit",
                                      object => "products"});
 
-sub get_group_controls {
-    my $product = shift;
-
-    my $group_controls = $product->group_controls;
-    # Convert Group Controls (membercontrol and othercontrol) from
-    # integer to string to display Membercontrol/Othercontrol names
-    # in the template.
-    my $constants = {
-        (CONTROLMAPNA) => 'NA',
-        (CONTROLMAPSHOWN) => 'Shown',
-        (CONTROLMAPDEFAULT) => 'Default',
-        (CONTROLMAPMANDATORY) => 'Mandatory'};
-
-    foreach my $group (keys %$group_controls) {
-        foreach my $control ('membercontrol', 'othercontrol') {
-            $group_controls->{$group}->{$control} =
-                $constants->{$group_controls->{$group}->{$control}};
-        }
-    }
-    return $group_controls;
-}
-
 #
 # often used variables
 #
@@ -361,7 +339,6 @@ if ($action eq 'new') {
     $vars->{'product'} = $product;
     $vars->{'classification'} = new Bugzilla::Classification($product->classification_id)
       if Bugzilla->params->{'useclassification'};
-    $vars->{'group_controls'} = get_group_controls($product);
     $vars->{'token'} = issue_session_token('edit_product');
 
     $template->process("admin/products/edit.html.tmpl", $vars)
@@ -521,7 +498,6 @@ if ($action eq 'edit' || (!$action && $product_name)) {
         }
         $vars->{'classification'} = $classification;
     }
-    $vars->{'group_controls'} = get_group_controls($product);
     $vars->{'product'} = $product;
     $vars->{'token'} = issue_session_token('edit_product');
 

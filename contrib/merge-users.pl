@@ -49,6 +49,7 @@ use lib qw(. lib);
 use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Util;
+use Bugzilla::User;
 
 use Getopt::Long;
 use Pod::Usage;
@@ -228,6 +229,12 @@ print "OK, records in the 'mailto' column of the 'whine_schedules' table\n" .
 
 # Delete the old record from the profiles table.
 $dbh->do('DELETE FROM profiles WHERE userid = ?', undef, $old_id);
+
+# rederive regexp-based group memberships, because we merged all memberships
+# from all of the accounts, and since the email address isn't the same on
+# them, some of them may no longer match the regexps.
+my $user = new Bugzilla::User($new_id);
+$user->derive_regexp_groups();
 
 # Commit the transaction
 $dbh->bz_commit_transaction();

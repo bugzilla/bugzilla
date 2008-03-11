@@ -49,6 +49,7 @@ use lib qw(.);
 use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Util;
+use Bugzilla::User;
 
 use Getopt::Long;
 use Pod::Usage;
@@ -232,5 +233,8 @@ $dbh->do('DELETE FROM profiles WHERE userid = ?', undef, $old_id);
 
 # Unlock tables
 $dbh->bz_unlock_tables();
+
+my $user = new Bugzilla::User($new_id);
+$user->derive_regexp_groups();
 
 print "Done.\n";

@@ -124,6 +124,8 @@ sub MessageToMTA {
 
     if ($method eq "SMTP") {
         push @args, Host  => Bugzilla->params->{"smtpserver"},
+                    username => Bugzilla->params->{"smtp_username"},
+                    password => Bugzilla->params->{"smtp_password"},
                     Hello => $hostname, 
                     Debug => Bugzilla->params->{'smtp_debug'};
     }

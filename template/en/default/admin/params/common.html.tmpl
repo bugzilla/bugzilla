@@ -30,8 +30,11 @@
     <dd>[% panel.param_descs.${param.name} FILTER none %]
       <p>
       [% IF param.type == "t" %]
-        <input size="80" name="[% param.name FILTER html %]"
+        <input type="text" size="80" name="[% param.name FILTER html %]"
                value="[% Param(param.name) FILTER html %]">
+      [% ELSIF param.type == "p" %]
+        <input type="password" size="80" name="[% param.name FILTER html %]"
+               value="[% Param(param.name) FILTER html %]" autocomplete="off">
       [% ELSIF param.type == "l" %]
         <textarea name="[% param.name FILTER html %]" rows="10" cols="80">
             [% Param(param.name) FILTER html %]</textarea>

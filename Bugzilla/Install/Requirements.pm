@@ -170,6 +170,12 @@ sub OPTIONAL_MODULES {
         feature => 'LDAP Authentication'
     },
     {
+        package => 'SASL-Authen',
+        module  => 'Authen::SASL',
+        version => 0,
+        feature => 'SMTP Authentication'
+    },
+    {
         package => 'RadiusPerl',
         module  => 'Authen::Radius',
         version => 0,

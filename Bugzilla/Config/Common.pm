@@ -50,7 +50,7 @@ use base qw(Exporter);
        check_opsys check_shadowdb check_urlbase check_webdotbase
        check_netmask check_user_verify_class check_image_converter
        check_mail_delivery_method check_notification check_timezone check_utf8
-       check_bug_status
+       check_bug_status check_smtp_auth
 );
 
 # Checking functions for the various values
@@ -337,6 +337,14 @@ sub check_timezone {
     return "";
 }
 
+sub check_smtp_auth {
+    my $username = shift;
+    if ($username) {
+        eval "require Authen::SASL";
+        return "Error requiring Authen::SASL: '$@'" if $@;
+    }
+    return "";
+}
 
 # OK, here are the parameter definitions themselves.
 #
@@ -354,6 +362,8 @@ sub check_timezone {
 # The type value can be one of the following:
 #
 # t -- A short text entry field (suitable for a single line)
+# p -- A short text entry field (as with type = 't'), but the string is
+#      replaced by asterisks (appropriate for passwords)
 # l -- A long text field (suitable for many lines)
 # b -- A boolean value (either 1 or 0)
 # m -- A list of values, with many selectable (shows up as a select box)

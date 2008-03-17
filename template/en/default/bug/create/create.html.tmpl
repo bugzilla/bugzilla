@@ -277,10 +277,21 @@ function handleWantsAttachment(wants_attachment) {
     %]
     <td rowspan="[% num_rows FILTER html %]" valign="top">
       [% IF product.flag_types.bug.size > 0 %]
-        [% PROCESS "flag/list.html.tmpl" flag_types = product.flag_types.bug
-                                         any_flags_requesteeble = 1
-                                         flag_table_id = "bug_flags"
-        %]
+        [% display_flag_headers = 0 %]
+        [% any_flags_requesteeble = 0 %]
+
+        [% FOREACH flag_type = product.flag_types.bug %]
+          [% NEXT UNLESS flag_type.is_active %]
+          [% display_flag_headers = 1 %]
+          [% SET any_flags_requesteeble = 1 IF flag_type.is_requestable && flag_type.is_requesteeble %]
+        [% END %]
+
+        [% IF display_flag_headers %]
+          [% PROCESS "flag/list.html.tmpl" flag_types = product.flag_types.bug
+                                           any_flags_requesteeble = any_flags_requesteeble
+                                           flag_table_id = "bug_flags"
+          %]
+        [% END %]
       [% END %]
     </td>
   </tr>

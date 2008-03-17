@@ -1151,10 +1151,10 @@ sub process_bug {
             $att->{'isprivate'} = 0;
         }
         $dbh->do("INSERT INTO attachments 
-                 (bug_id, creation_ts, filename, description, mimetype, 
-                 ispatch, isprivate, isobsolete, submitter_id) 
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            undef, $id, $att->{'date'}, $att->{'filename'},
+                 (bug_id, creation_ts, modification_time, filename, description,
+                 mimetype, ispatch, isprivate, isobsolete, submitter_id) 
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            undef, $id, $att->{'date'}, $att->{'date'}, $att->{'filename'},
             $att->{'desc'}, $att->{'ctype'}, $att->{'ispatch'},
             $att->{'isprivate'}, $att->{'isobsolete'}, $exporterid);
         my $att_id   = $dbh->bz_last_key( 'attachments', 'attach_id' );

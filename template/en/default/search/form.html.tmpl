@@ -327,10 +327,10 @@ function doOnSelectProduct(selectmode) {
         <label for="deadlinefrom" accesskey="l">Dead<u>l</u>ine</label>:
       </th>
       <td>
-        from&nbsp;
-        <input name="deadlinefrom" id="deadlinefrom" size="10" maxlength="10">&nbsp;
-        to&nbsp;
-        <input name="deadlineto" size="10" maxlength="10">
+        from <input name="deadlinefrom" id="deadlinefrom" size="10" maxlength="10"
+                    value="[% default.deadlinefrom.0 FILTER html %]">
+        to <input name="deadlineto" size="10" maxlength="10"
+                  value="[% default.deadlineto.0 FILTER html %]">
       </td>
       <td>
         <small>(YYYY-MM-DD)</small>

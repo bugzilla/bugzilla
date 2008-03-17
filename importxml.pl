@@ -362,6 +362,7 @@ sub process_attachment() {
     $attachment{'isobsolete'} = $attach->{'att'}->{'isobsolete'} || 0;
     $attachment{'isprivate'}  = $attach->{'att'}->{'isprivate'} || 0;
     $attachment{'filename'}   = $attach->field('filename') || "file";
+    $attachment{'attacher'}   = $attach->field('attacher');
     # Attachment data is not exported in versions 2.20 and older.
     if (defined $attach->first_child('data') &&
             defined $attach->first_child('data')->{'att'}->{'encoding'}) {
@@ -1150,13 +1151,16 @@ sub process_bug {
             $err .= "   Marking attachment public\n";
             $att->{'isprivate'} = 0;
         }
+
+        my $attacher_id = $att->{'attacher'} ? login_to_id($att->{'attacher'}) : undef;
+
         $dbh->do("INSERT INTO attachments 
                  (bug_id, creation_ts, modification_time, filename, description,
                  mimetype, ispatch, isprivate, isobsolete, submitter_id) 
                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             undef, $id, $att->{'date'}, $att->{'date'}, $att->{'filename'},
             $att->{'desc'}, $att->{'ctype'}, $att->{'ispatch'},
-            $att->{'isprivate'}, $att->{'isobsolete'}, $exporterid);
+            $att->{'isprivate'}, $att->{'isobsolete'}, $attacher_id || $exporterid);
         my $att_id   = $dbh->bz_last_key( 'attachments', 'attach_id' );
         my $att_data = $att->{'data'};
         my $sth = $dbh->prepare("INSERT INTO attach_data (id, thedata) 
@@ -1164,7 +1168,18 @@ sub process_bug {
         trick_taint($att_data);
         $sth->bind_param( 1, $att_data, $dbh->BLOB_TYPE );
         $sth->execute();
+
         $comments .= "Imported an attachment (id=$att_id)\n";
+        if (!$attacher_id) {
+            if ($att->{'attacher'}) {
+                $err .= "The original submitter of attachment $att_id was\n   ";
+                $err .= $att->{'attacher'} . ", but he doesn't have an account here.\n";
+            }
+            else {
+                $err .= "The original submitter of attachment $att_id is unknown.\n";
+            }
+            $err .= "   Reassigning to the person who moved it here: $exporter_login.\n";
+        }
 
         # Process attachment flags
         foreach my $aflag (@{ $att->{'flags'} }) {

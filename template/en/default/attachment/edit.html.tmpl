@@ -36,13 +36,6 @@
   title = title
   header = header
   subheader = subheader
-  style = "
-    table.attachment_info th { text-align: right; vertical-align: top; }
-    table.attachment_info td { text-align: left; vertical-align: top; }
-    #noview { text-align: left; vertical-align: middle; }
-
-    table#flags th, table#flags td { font-size: small; vertical-align: baseline; text-align: left; }
-  "
 %]
 
 <script type="text/javascript">
@@ -254,6 +247,7 @@
             <label for="isprivate">private</label><br>
           [% END %]
           <br>
+        </small>
 
         [% IF flag_types.size > 0 %]
           [% PROCESS "flag/list.html.tmpl" bug_id = attachment.bug_id
@@ -261,8 +255,8 @@
         [% END %]
 
         <div id="smallCommentFrame">
-          <b><label for="comment">Comment</label> (on the
-          [%+ terms.bug %]):</b><br>
+          <b><small><label for="comment">Comment</label> (on the
+          [%+ terms.bug %]):</small></b><br>
             [% INCLUDE global/textarea.html.tmpl
               id      = 'comment'
               name    = 'comment'
@@ -283,7 +277,6 @@
               && attachment.datasize > 0 %]
           | <a href="attachment.cgi?id=[% attachment.id %]&amp;action=delete">Delete</a>
         [% END %]
-        </small>
       </td>
 
       [% IF !attachment.datasize %]
@@ -306,15 +299,15 @@
             <!--
             if (typeof document.getElementById == "function") {
 [% IF patchviewerinstalled %]
-              document.write('<iframe id="viewDiffFrame" style="height: 400px; width: 100%; display: none;"></iframe>');
+              document.write('<iframe id="viewDiffFrame" style="height: 400px; width: 100%; display: none;"><\/iframe>');
 [% END %]
-              document.write('<button type="button" id="editButton" onclick="editAsComment();">Edit Attachment As Comment</button>');
-              document.write('<button type="button" id="undoEditButton" onclick="undoEditAsComment();" style="display: none;">Undo Edit As Comment</button>');
-              document.write('<button type="button" id="redoEditButton" onclick="redoEditAsComment();" style="display: none;">Redo Edit As Comment</button>');
+              document.write('<button type="button" id="editButton" onclick="editAsComment();">Edit Attachment As Comment<\/button>');
+              document.write('<button type="button" id="undoEditButton" onclick="undoEditAsComment();" style="display: none;">Undo Edit As Comment<\/button>');
+              document.write('<button type="button" id="redoEditButton" onclick="redoEditAsComment();" style="display: none;">Redo Edit As Comment<\/button>');
 [% IF patchviewerinstalled %]
-              document.write('<button type="button" id="viewDiffButton" onclick="viewDiff();">View Attachment As Diff</button>');
+              document.write('<button type="button" id="viewDiffButton" onclick="viewDiff();">View Attachment As Diff<\/button>');
 [% END %]
-              document.write('<button type="button" id="viewRawButton" onclick="viewRaw();" style="display: none;">View Attachment As Raw</button>');
+              document.write('<button type="button" id="viewRawButton" onclick="viewRaw();" style="display: none;">View Attachment As Raw<\/button>');
             }
             //-->
           </script>

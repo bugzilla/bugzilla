@@ -332,6 +332,22 @@ dl dl > dt {
     padding-left: 1em;
 }
 
+table.attachment_info th {
+    text-align: right;
+    vertical-align: top;
+}
+
+table.attachment_info td {
+    text-align: left;
+    vertical-align: top;
+}
+
+/* Text displayed when the attachment is not viewable by the web browser */
+#noview {
+    text-align: left;
+    vertical-align: middle;
+}
+
 div.user_match {
     margin-bottom: 1em;
 }

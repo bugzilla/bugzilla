@@ -94,10 +94,6 @@ my $dotweak = $cgi->param('tweak') ? 1 : 0;
 # Log the user in
 if ($dotweak) {
     Bugzilla->login(LOGIN_REQUIRED);
-    Bugzilla->user->in_group("editbugs")
-      || ThrowUserError("auth_failure", {group  => "editbugs",
-                                         action => "modify",
-                                         object => "multiple_bugs"});
 }
 
 # Hack to support legacy applications that think the RDF ctype is at format=rdf.
@@ -371,6 +367,22 @@ sub GetGroups {
     }
     # Return a list of group objects.
     return [values %legal_groups];
+}
+
+sub _close_standby_message {
+    my ($contenttype, $disposition, $serverpush) = @_;
+    my $cgi = Bugzilla->cgi;
+
+    # Close the "please wait" page, then open the buglist page
+    if ($serverpush) {
+        print $cgi->multipart_end();
+        print $cgi->multipart_start(-type                => $contenttype,
+                                    -content_disposition => $disposition);
+    }
+    else {
+        print $cgi->header(-type                => $contenttype,
+                           -content_disposition => $disposition);
+    }
 }
 
 
@@ -1125,7 +1137,17 @@ $vars->{'urlquerypart'} = $params->canonicalise_query('order',
                                                       'cmdtype',
                                                       'query_based_on');
 $vars->{'order'} = $order;
-$vars->{'caneditbugs'} = Bugzilla->user->in_group('editbugs');
+$vars->{'caneditbugs'} = 1;
+
+if (!Bugzilla->user->in_group('editbugs')) {
+    foreach my $product (keys %$bugproducts) {
+        my $prod = new Bugzilla::Product({name => $product});
+        if (!Bugzilla->user->in_group('editbugs', $prod->id)) {
+            $vars->{'caneditbugs'} = 0;
+            last;
+        }
+    }
+}
 
 my @bugowners = keys %$bugowners;
 if (scalar(@bugowners) > 1 && Bugzilla->user->in_group('editbugs')) {
@@ -1144,6 +1166,12 @@ $vars->{'currenttime'} = time();
 
 # The following variables are used when the user is making changes to multiple bugs.
 if ($dotweak && scalar @bugs) {
+    if (!$vars->{'caneditbugs'}) {
+        _close_standby_message('text/html', 'inline', $serverpush);
+        ThrowUserError('auth_failure', {group  => 'editbugs',
+                                        action => 'modify',
+                                        object => 'multiple_bugs'});
+    }
     $vars->{'dotweak'} = 1;
     $vars->{'valid_keywords'} = [map($_->name, Bugzilla::Keyword->get_all)];
     $vars->{'use_keywords'} = 1 if Bugzilla::Keyword::keyword_count();
@@ -1249,17 +1277,7 @@ if ($format->{'extension'} eq "csv") {
 # Suggest a name for the bug list if the user wants to save it as a file.
 $disposition .= "; filename=\"$filename\"";
 
-if ($serverpush) {
-    # Close the "please wait" page, then open the buglist page
-    print $cgi->multipart_end();
-    print $cgi->multipart_start(-type                => $contenttype,
-                                -content_disposition => $disposition);
-}
-else {
-    print $cgi->header(-type                => $contenttype,
-                       -content_disposition => $disposition);
-}
-
+_close_standby_message($contenttype, $disposition, $serverpush);
 
 ################################################################################
 # Content Generation

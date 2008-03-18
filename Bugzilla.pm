@@ -47,6 +47,7 @@ use Bugzilla::User;
 use Bugzilla::Error;
 use Bugzilla::Util;
 use Bugzilla::Field;
+use Bugzilla::Flag;
 
 use File::Basename;
 use File::Spec::Functions;
@@ -437,6 +438,15 @@ sub active_custom_fields {
           Bugzilla::Field->match({ custom => 1, obsolete => 0 });
     }
     return @{$class->request_cache->{active_custom_fields}};
+}
+
+sub has_flags {
+    my $class = shift;
+
+    if (!defined $class->request_cache->{has_flags}) {
+        $class->request_cache->{has_flags} = Bugzilla::Flag::has_flags();
+    }
+    return $class->request_cache->{has_flags};
 }
 
 sub hook_args {

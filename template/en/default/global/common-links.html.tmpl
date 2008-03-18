@@ -39,12 +39,14 @@
   <li><span class="separator">| </span><a href="report.cgi">Reports</a></li>
 
   <li>
-    <span class="separator">| </span>
-    [% IF user.id %]
-      <a href="request.cgi?requester=[% user.login FILTER url_quote %]&amp;requestee=
-               [% user.login FILTER url_quote %]&amp;do_union=1&amp;group=type&amp;action=queue">My Requests</a>
-    [% ELSE %]
-      <a href="request.cgi">Requests</a>
+    [% IF Bugzilla.has_flags %]
+      <span class="separator">| </span>
+      [% IF user.id %]
+        <a href="request.cgi?requester=[% user.login FILTER url_quote %]&amp;requestee=
+                 [% user.login FILTER url_quote %]&amp;do_union=1&amp;group=type&amp;action=queue">My Requests</a>
+      [% ELSE %]
+        <a href="request.cgi">Requests</a>
+      [% END %]
     [% END %]
   [%-# Work around FF bug: keep this on one line %]</li>
 

@@ -91,13 +91,23 @@ foreach my $file (@testitems) {
     my $loginfo=`$command`;
     #print '@@'.$loginfo.'##';
     if ($loginfo =~ /syntax ok$/im) {
+        # Special hack due to CPAN.pm on Windows with Cygwin installed throwing
+        # strings of the form "Set up gcc environment - 3.4.4 (cygming special,
+        # gdc 0.12, using dmd 0.125)". See bug 416047 for details.
+        if ($^O =~ /MSWin32/i
+            && grep($_ eq $file, 'install-module.pl', 'Bugzilla/Install/CPAN.pm'))
+        {
+            $loginfo =~ s/^Set up gcc environment.*?\n//;
+        }
         if ($loginfo ne "$file syntax OK\n") {
             ok(0,$file." --WARNING");
             print $fh $loginfo;
-        } else {
+        }
+        else {
             ok(1,$file);
         }
-    } else {
+    }
+    else {
         ok(0,$file." --ERROR");
         print $fh $loginfo;
     }

@@ -462,8 +462,13 @@ sub process_bug {
     foreach my $bugchild ( $bug->children() ) {
         Debug( "Parsing field: " . $bugchild->name, DEBUG_LEVEL );
         if ( defined $all_fields{ $bugchild->name } ) {
-              $bug_fields{ $bugchild->name } =
-                  join( " ", $bug->children_text( $bugchild->name ) );
+            my @values = $bug->children_text($bugchild->name);
+            if (scalar @values > 1) {
+                $bug_fields{$bugchild->name} = \@values;
+            }
+            else {
+                $bug_fields{$bugchild->name} = $values[0];
+            }
         }
         else {
             $err .= "Unknown bug field \"" . $bugchild->name . "\"";
@@ -559,10 +564,12 @@ sub process_bug {
     $comments .= "This bug was previously known as _bug_ $bug_fields{'bug_id'} at ";
     $comments .= $urlbase . "show_bug.cgi?id=" . $bug_fields{'bug_id'} . "\n";
     if ( defined $bug_fields{'dependson'} ) {
-        $comments .= "This bug depended on bug(s) $bug_fields{'dependson'}.\n";
+        $comments .= "This bug depended on bug(s) " .
+                     join(' ', @{$bug_fields{'dependson'}}) . ".\n";
     }
     if ( defined $bug_fields{'blocked'} ) {
-        $comments .= "This bug blocked bug(s) $bug_fields{'blocked'}.\n";
+        $comments .= "This bug blocked bug(s) " .
+                     join(' ', @{$bug_fields{'blocked'}}) . ".\n";
     }
 
     # Now we process each of the fields in turn and make sure they contain
@@ -574,7 +581,7 @@ sub process_bug {
 
     # Each of these fields we will check for newlines and shove onto the array
     foreach my $field (qw(status_whiteboard bug_file_loc short_desc)) {
-        if (( defined $bug_fields{$field} ) && ( $bug_fields{$field} )) {
+        if ($bug_fields{$field}) {
             $bug_fields{$field} = clean_text( $bug_fields{$field} );
             push( @query,  $field );
             push( @values, $bug_fields{$field} );
@@ -1028,21 +1035,47 @@ sub process_bug {
     push( @query,  "bug_status" );
     push( @values, $status );
 
-    # Custom fields
+    # Custom fields - Multi-select fields have their own table.
+    my %multi_select_fields;
     foreach my $field (Bugzilla->active_custom_fields) {
         my $custom_field = $field->name;
-        next unless defined($bug_fields{$custom_field});
+        my $value = $bug_fields{$custom_field};
+        next unless defined $value;
         if ($field->type == FIELD_TYPE_FREETEXT) {
             push(@query, $custom_field);
-            push(@values, clean_text($bug_fields{$custom_field}));
+            push(@values, clean_text($value));
+        } elsif ($field->type == FIELD_TYPE_TEXTAREA) {
+            push(@query, $custom_field);
+            push(@values, $value);
         } elsif ($field->type == FIELD_TYPE_SINGLE_SELECT) {
-            my $is_well_formed = check_field($custom_field, scalar $bug_fields{$custom_field},
-                                             undef, ERR_LEVEL);
+            my $is_well_formed = check_field($custom_field, $value, undef, ERR_LEVEL);
             if ($is_well_formed) {
                 push(@query, $custom_field);
-                push(@values, $bug_fields{$custom_field});
+                push(@values, $value);
             } else {
-                $err .= "Skipping illegal value \"$bug_fields{$custom_field}\" in $custom_field.\n" ;
+                $err .= "Skipping illegal value \"$value\" in $custom_field.\n" ;
+            }
+        } elsif ($field->type == FIELD_TYPE_MULTI_SELECT) {
+            my @legal_values;
+            foreach my $item (@$value) {
+                my $is_well_formed = check_field($custom_field, $item, undef, ERR_LEVEL);
+                if ($is_well_formed) {
+                    push(@legal_values, $item);
+                } else {
+                    $err .= "Skipping illegal value \"$item\" in $custom_field.\n" ;
+                }
+            }
+            if (scalar @legal_values) {
+                $multi_select_fields{$custom_field} = \@legal_values;
+            }
+        } elsif ($field->type == FIELD_TYPE_DATETIME) {
+            eval { $value = Bugzilla::Bug->_check_datetime_field($value); };
+            if ($@) {
+                $err .= "Skipping illegal value \"$value\" in $custom_field.\n" ;
+            }
+            else {
+                push(@query, $custom_field);
+                push(@values, $value);
             }
         } else {
             $err .= "Type of custom field $custom_field is an unhandled FIELD_TYPE: " .
@@ -1083,7 +1116,7 @@ sub process_bug {
     if ( defined $bug_fields{'cc'} ) {
         my %ccseen;
         my $sth_cc = $dbh->prepare("INSERT INTO cc (bug_id, who) VALUES (?,?)");
-        foreach my $person ( split( /[\s,]+/, $bug_fields{'cc'} ) ) {
+        foreach my $person (@{$bug_fields{'cc'}}) {
             next unless $person;
             my $uid;
             if ($uid = login_to_id($person)) {
@@ -1126,6 +1159,16 @@ sub process_bug {
         my $keywordstring = join( ", ", @{$keywordarray} );
         $dbh->do( "UPDATE bugs SET keywords = ? WHERE bug_id = ?",
             undef, $keywordstring, $id )
+    }
+
+    # Insert values of custom multi-select fields. They have already
+    # been validated.
+    foreach my $custom_field (keys %multi_select_fields) {
+        my $sth = $dbh->prepare("INSERT INTO bug_$custom_field
+                                 (bug_id, value) VALUES (?, ?)");
+        foreach my $value (@{$multi_select_fields{$custom_field}}) {
+            $sth->execute($id, $value);
+        }
     }
 
     # Parse bug flags

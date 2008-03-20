@@ -305,6 +305,10 @@ dl dl > dt {
     border-top: none;
 }
 
+#admin_table th {
+    white-space: normal !important;
+}
+
 /* Style of the attachment table and time tracking table */
 #attachment_table {
     border-collapse: collapse;

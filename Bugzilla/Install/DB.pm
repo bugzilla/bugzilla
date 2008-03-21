@@ -1039,10 +1039,10 @@ installation has many users.
 ENDTEXT
 
         # Re-crypt everyone's password.
+        my $total = $dbh->selectrow_array('SELECT COUNT(*) FROM profiles');
         my $sth = $dbh->prepare("SELECT userid, password FROM profiles");
         $sth->execute();
 
-        my $total = $sth->rows;
         my $i = 1;
 
         print "Fixing passwords...\n";
@@ -1081,12 +1081,12 @@ sub _update_bugs_activity_to_only_record_changes {
 
         # Now we need to process the bugs_activity table and reformat the data
         print "Fixing activity log...\n";
+        my $total = $dbh->selectrow_array('SELECT COUNT(*) FROM bugs_activity');
         my $sth = $dbh->prepare("SELECT bug_id, who, bug_when, fieldid,
                                 oldvalue, newvalue FROM bugs_activity");
         $sth->execute;
         my $i = 0;
-        my $total = $sth->rows;
-        while (my ($bug_id, $who, $bug_when, $fieldid, $oldvalue, $newvalue) 
+        while (my ($bug_id, $who, $bug_when, $fieldid, $oldvalue, $newvalue)
                    = $sth->fetchrow_array()) 
         {
             $i++;
@@ -2145,20 +2145,19 @@ sub _fix_group_with_empty_name {
         # group_$gid and add _<n> if necessary.
         my $trycount = 0;
         my $trygroupname;
-        my $trygroupsth = $dbh->prepare("SELECT id FROM groups where name = ?");
-        do {
+        my $sth = $dbh->prepare("SELECT 1 FROM groups where name = ?");
+        my $name_exists = 1;
+
+        while ($name_exists) {
             $trygroupname = "group_$emptygroupid";
             if ($trycount > 0) {
                $trygroupname .= "_$trycount";
             }
-            $trygroupsth->execute($trygroupname);
-            if ($trygroupsth->rows > 0) {
-                $trycount ++;
-            }
-        } while ($trygroupsth->rows > 0);
-        my $sth = $dbh->prepare("UPDATE groups SET name = ? " .
-                                 "WHERE id = $emptygroupid");
-        $sth->execute($trygroupname);
+            $name_exists = $dbh->selectrow_array($sth, undef, $trygroupname);
+            $trycount++;
+        }
+        $dbh->do("UPDATE groups SET name = ? WHERE id = ?",
+                 undef, $trygroupname, $emptygroupid);
         print "Group $emptygroupid had an empty name; renamed as",
               " '$trygroupname'.\n";
     }
@@ -2215,10 +2214,10 @@ sub _migrate_email_prefs_to_new_table {
         $dbh->bz_start_transaction();
 
         # Select all emailflags flag strings
+        my $total = $dbh->selectrow_array('SELECT COUNT(*) FROM profiles');
         my $sth = $dbh->prepare("SELECT userid, emailflags FROM profiles");
         $sth->execute();
         my $i = 0;
-        my $total = $sth->rows;
 
         while (my ($userid, $flagstring) = $sth->fetchrow_array()) {
             $i++;

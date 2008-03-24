@@ -190,15 +190,22 @@ sub process_bug {
     if (my $status = $fields{'bug_status'}) {
         $fields{'knob'} = 'confirm' if $status =~ /NEW/i;
         $fields{'knob'} = 'accept'  if $status =~ /ASSIGNED/i;
-        $fields{'knob'} = 'clearresolution' if $status =~ /REOPENED/i;
+        $fields{'knob'} = 'reopen' if $status =~ /REOPENED/i;
+        $fields{'knob'} = 'resolve' if $status =~ /RESOLVED/i;
         $fields{'knob'} = 'verify'  if $status =~ /VERIFIED/i;
         $fields{'knob'} = 'close'   if $status =~ /CLOSED/i;
+        # Only @bug_status = RESOLVED can have a @resolution.
+        delete $fields{'resolution'} if $status !~ /RESOLVED/i;
     }
     if ($fields{'dup_id'}) {
         $fields{'knob'} = 'duplicate';
     }
     if ($fields{'resolution'}) {
-        $fields{'knob'} = 'resolve';
+        # If @bug_status is defined and we come here, then we know
+        # @bug_status = RESOLVED as the resolution would be ignored otherwise.
+        # If bug_status is undefined, then all we want to do is to change
+        # the resolution of the bug, leaving its status alone.
+        $fields{'knob'} = 'change_resolution' unless $fields{'bug_status'};
     }
 
     # Make sure we don't get prompted if we have to change the default

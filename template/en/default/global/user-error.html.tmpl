@@ -1311,6 +1311,10 @@
     [% title = "Summary Needed" %]
     You must enter a summary for this [% terms.bug %].
 
+  [% ELSIF error == "resolution_deletion_not_allowed" %]
+    [% title = "Resolution Change Not Allowed" %]
+    You cannot clear the resolution of open [% terms.bugs %].
+
   [% ELSIF error == "resolution_not_allowed" %]
     [% title = "Resolution Not Allowed" %]
     You cannot set a resolution for open [% terms.bugs %].

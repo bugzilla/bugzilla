@@ -1098,19 +1098,22 @@ if (defined $cgi->param('qa_contact')
     }
 }
 
+# By default, makes sure that all bugs are in a closed state.
+# If $all_open is true, makes sure that all bugs are open.
 sub check_bugs_resolution {
-    my $idlist = shift;
+    my ($idlist, $all_open) = @_;
     my $dbh = Bugzilla->dbh;
 
     my $open_states = join(',', map {$dbh->quote($_)} BUG_STATE_OPEN);
     # The list has already been validated.
     $idlist = join(',', @$idlist);
-    my $is_open =
+    my $sql_cond = $all_open ? 'NOT' : '';
+    my $has_unwanted_bugs =
       $dbh->selectrow_array("SELECT 1 FROM bugs WHERE bug_id IN ($idlist)
-                             AND bug_status IN ($open_states)");
+                             AND bug_status $sql_cond IN ($open_states)");
 
-    # If there is at least one open bug, then the test failed.
-    return !$is_open;
+    # If there are unwanted bugs, then the test fails.
+    return !$has_unwanted_bugs;
 }
 
 SWITCH: for ($cgi->param('knob')) {
@@ -1133,6 +1136,9 @@ SWITCH: for ($cgi->param('knob')) {
         last SWITCH;
     };
     /^clearresolution$/ && CheckonComment( "clearresolution" ) && do {
+        # All bugs must already be open.
+        check_bugs_resolution(\@idlist, 'all_open')
+          || ThrowUserError('resolution_deletion_not_allowed');
         ChangeResolution($bug, '');
         last SWITCH;
     };

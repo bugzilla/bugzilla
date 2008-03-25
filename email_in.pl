@@ -330,6 +330,11 @@ my $mail_text = join("", @mail_lines);
 my $mail_fields = parse_mail($mail_text);
 
 my $username = $mail_fields->{'reporter'};
+# If emailsuffix is in use, we have to remove it from the email address.
+if (my $suffix = Bugzilla->params->{'emailsuffix'}) {
+    $username =~ s/\Q$suffix\E$//i;
+}
+
 my $user = Bugzilla::User->new({ name => $username })
     || ThrowUserError('invalid_username', { name => $username });
 

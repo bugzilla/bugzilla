@@ -660,18 +660,23 @@ sub _bz_add_table_raw {
 }
 
 sub _bz_add_field_table {
-    my ($self, $name, $table_schema) = @_;
+    my ($self, $name, $schema_ref) = @_;
     # We do nothing if the table already exists.
     return if $self->bz_table_info($name);
-    my $indexes      = $table_schema->{INDEXES};
-    # $indexes is an arrayref, not a hash. In order to fix the keys,
-    # we have to fix every other item.
-    for (my $i = 0; $i < scalar @$indexes; $i++) {
-        next if ($i % 2 && $i != 0); # We skip 1, 3, 5, 7, etc.
-        $indexes->[$i] = $name . "_" . $indexes->[$i];
+
+    # Copy this so that we're not modifying the passed reference.
+    # (This avoids modifying a constant in Bugzilla::DB::Schema.)
+    my %table_schema = %$schema_ref;
+    my %indexes = @{ $table_schema{INDEXES} };
+    my %fixed_indexes;
+    foreach my $key (keys %indexes) {
+        $fixed_indexes{$name . "_" . $key} = $indexes{$key};
     }
+    # INDEXES is supposed to be an arrayref, so we have to convert back.
+    my @indexes_array = %fixed_indexes;
+    $table_schema{INDEXES} = \@indexes_array;
     # We add this to the abstract schema so that bz_add_table can find it.
-    $self->_bz_schema->add_table($name, $table_schema);
+    $self->_bz_schema->add_table($name, \%table_schema);
     $self->bz_add_table($name);
 }
 

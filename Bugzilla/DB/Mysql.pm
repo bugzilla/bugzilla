@@ -258,7 +258,7 @@ EOT
     my ($sd_index_deleted, $longdescs_index_deleted);
     my @tables = $self->bz_table_list_real();
     # We want to convert tables to InnoDB, but it's possible that they have 
-    # fulltext indexes on them, and conversation will fail unless we remove
+    # fulltext indexes on them, and conversion will fail unless we remove
     # the indexes.
     if (grep($_ eq 'bugs', @tables)) {
         if ($self->bz_index_info_real('bugs', 'short_desc')) {
@@ -268,6 +268,8 @@ EOT
             $self->bz_drop_index_raw('bugs', 'bugs_short_desc_idx');
             $sd_index_deleted = 1; # Used for later schema cleanup.
         }
+    }
+    if (grep($_ eq 'longdescs', @tables)) {
         if ($self->bz_index_info_real('longdescs', 'thetext')) {
             $self->bz_drop_index_raw('longdescs', 'thetext');
         }

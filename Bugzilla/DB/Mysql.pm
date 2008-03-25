@@ -255,11 +255,11 @@ EOT
         print "\nISAM->MyISAM table conversion done.\n\n";
     }
 
-    my $sd_index_deleted = 0;
+    my ($sd_index_deleted, $longdescs_index_deleted);
     my @tables = $self->bz_table_list_real();
-    # We want to convert the bugs table to MyISAM, but it's possible that
-    # it has a fulltext index on it and this will fail unless we remove
-    # the index.
+    # We want to convert tables to InnoDB, but it's possible that they have 
+    # fulltext indexes on them, and conversation will fail unless we remove
+    # the indexes.
     if (grep($_ eq 'bugs', @tables)) {
         if ($self->bz_index_info_real('bugs', 'short_desc')) {
             $self->bz_drop_index_raw('bugs', 'short_desc');
@@ -267,6 +267,13 @@ EOT
         if ($self->bz_index_info_real('bugs', 'bugs_short_desc_idx')) {
             $self->bz_drop_index_raw('bugs', 'bugs_short_desc_idx');
             $sd_index_deleted = 1; # Used for later schema cleanup.
+        }
+        if ($self->bz_index_info_real('longdescs', 'thetext')) {
+            $self->bz_drop_index_raw('longdescs', 'thetext');
+        }
+        if ($self->bz_index_info_real('longdescs', 'longdescs_thetext_idx')) {
+            $self->bz_drop_index_raw('longdescs', 'longdescs_thetext_idx');
+            $longdescs_index_deleted = 1; # For later schema cleanup.
         }
     }
 
@@ -478,6 +485,11 @@ EOT
 
     if ($sd_index_deleted) {
         $self->_bz_real_schema->delete_index('bugs', 'bugs_short_desc_idx');
+        $self->_bz_store_real_schema;
+    }
+    if ($longdescs_index_deleted) {
+        $self->_bz_real_schema->delete_index('longdescs', 
+                                             'longdescs_thetext_idx');
         $self->_bz_store_real_schema;
     }
 

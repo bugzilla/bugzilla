@@ -315,12 +315,6 @@ sub update_table_definitions {
         $dbh->do('UPDATE quips SET userid = NULL WHERE userid = 0');
     }
 
-    # Right now, we only create the "thetext" index on MySQL.
-    if ($dbh->isa('Bugzilla::DB::Mysql')) {
-        $dbh->bz_add_index('longdescs', 'longdescs_thetext_idx',
-                           {TYPE => 'FULLTEXT', FIELDS => [qw(thetext)]});
-    }
-
     _convert_attachments_filename_from_mediumtext();
 
     $dbh->bz_add_column('quips', 'approved',
@@ -524,6 +518,9 @@ sub update_table_definitions {
     # This had the wrong definition in DB::Schema.
     $dbh->bz_alter_column('namedqueries', 'query_type',
                           {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 0});
+
+    $dbh->bz_drop_index('longdescs', 'longdescs_thetext_idx');
+    _populate_bugs_fulltext();
 
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
@@ -2989,6 +2986,39 @@ sub _check_content_length {
             print "$id: $string\n";
         }
         exit 3;
+    }
+}
+
+sub _populate_bugs_fulltext {
+    my $dbh = Bugzilla->dbh;
+    my $fulltext = $dbh->selectrow_array('SELECT 1 FROM bugs_fulltext '
+                                         . $dbh->sql_limit(1));
+    # We only populate the table if it's empty...
+    if (!$fulltext) {
+        # ... and if there are bugs in the bugs table.
+        my $bug_ids = $dbh->selectcol_arrayref('SELECT bug_id FROM bugs');
+        return if !@$bug_ids;
+
+        print "Populating bugs_fulltext.short_desc...\n";
+        $dbh->do('INSERT INTO bugs_fulltext (bug_id, short_desc)
+                       SELECT bug_id, short_desc FROM bugs');
+        print "Populating bugs_fulltext comments fields...\n";
+        my $count = 1;
+        my $sth_all = $dbh->prepare('SELECT thetext FROM longdescs 
+                                      WHERE bug_id = ?');
+        my $sth_nopriv = $dbh->prepare('SELECT thetext FROM longdescs
+                                         WHERE bug_id = ? AND isprivate = 0');
+        my $sth_update = $dbh->prepare(
+            'UPDATE bugs_fulltext SET comments = ?, comments_noprivate = ?
+              WHERE bug_id = ?');
+        foreach my $id (@$bug_ids) { 
+            my $all = $dbh->selectcol_arrayref($sth_all, undef, $id);
+            my $nopriv = $dbh->selectcol_arrayref($sth_nopriv, undef, $id);
+            $sth_update->execute(join("\n", @$all), join("\n", @$nopriv), $id);
+            indicate_progress({ total   => scalar @$bug_ids, every => 100,
+                                current => $count++ });
+        }
+        print "\n";
     }
 }
 

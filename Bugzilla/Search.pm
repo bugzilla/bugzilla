@@ -47,11 +47,6 @@ use Bugzilla::Keyword;
 use Date::Format;
 use Date::Parse;
 
-# How much we should add to the relevance, for each word that matches
-# in bugs.short_desc, during fulltext search. This is high because
-# we want summary matches to be *very* relevant, by default.
-use constant SUMMARY_RELEVANCE_FACTOR => 7;
-
 # Some fields are not sorted on themselves, but on other fields. 
 # We need to have a list of these fields and what they map to.
 # Each field points to an array that contains the fields mapped 
@@ -1021,21 +1016,6 @@ sub BuildOrderBy {
     push(@$stringlist, trim($orderfield . ' ' . $orderdirection));
 }
 
-# This is a helper for fulltext search
-sub _split_words_into_like {
-    my ($field, $text) = @_;
-    my $dbh = Bugzilla->dbh;
-    # This code is very similar to Bugzilla::DB::sql_fulltext_search,
-    # so you can look there if you'd like an explanation of what it's
-    # doing.
-    my $lower_text = lc($text);
-    my @words = split(/\s+/, $lower_text);
-    @words = map($dbh->quote("%$_%"), @words);
-    map(trick_taint($_), @words);
-    @words = map($dbh->sql_istrcmp($field, $_, 'LIKE'), @words);
-    return @words;
-}
-
 #####################################################################
 # Search Functions
 #####################################################################
@@ -1252,44 +1232,24 @@ sub _content_matches {
     # accept the "matches" operator, which is specific to full-text
     # index searches.
 
-    # Add the longdescs table to the query so we can search comments.
-    my $table = "longdescs_$$chartid";
-    my $extra = "";
-    if (Bugzilla->params->{"insidergroup"} 
-        && !Bugzilla->user->in_group(Bugzilla->params->{"insidergroup"}))
-    {
-        $extra = "AND $table.isprivate < 1";
-    }
-    push(@$supptables, "LEFT JOIN longdescs AS $table " .
-                       "ON bugs.bug_id = $table.bug_id $extra");
-
+    # Add the fulltext table to the query so we can search on it.
+    my $table = "bugs_fulltext_$$chartid";
+    my $comments_col = "comments";
+    $comments_col = "comments_noprivate" unless $self->{'user'}->is_insider;
+    push(@$supptables, "LEFT JOIN bugs_fulltext AS $table " .
+                       "ON bugs.bug_id = $table.bug_id");
+    
     # Create search terms to add to the SELECT and WHERE clauses.
-    # $term1 searches comments.
-    my $term1 = $dbh->sql_fulltext_search("${table}.thetext", $$v);
-
-    # short_desc searching for the WHERE clause
-    my @words = _split_words_into_like('bugs.short_desc', $$v);
-    my $term2_where = join(' OR ', @words);
-
-    # short_desc relevance
-    my $factor = SUMMARY_RELEVANCE_FACTOR;
-    my @s_words = map("CASE WHEN $_ THEN $factor ELSE 0 END", @words);
-    my $term2_select = join(' + ', @s_words);
-
+    my $term1 = $dbh->sql_fulltext_search("$table.$comments_col", $$v);
+    my $term2 = $dbh->sql_fulltext_search("$table.short_desc", $$v);
+    
     # The term to use in the WHERE clause.
-    $$term = "$term1 > 0 OR ($term2_where)";
-
+    $$term = "$term1 > 0 OR $term2 > 0";
+    
     # In order to sort by relevance (in case the user requests it),
     # we SELECT the relevance value and give it an alias so we can
     # add it to the SORT BY clause when we build it in buglist.cgi.
-    #
-    # Note: We should be calculating the relevance based on all
-    # comments for a bug, not just matching comments, but that's hard
-    # (see http://bugzilla.mozilla.org/show_bug.cgi?id=145588#c35).
-    my $select_term = "(SUM($term1) + $term2_select) AS relevance";
-
-    # add the column not used in aggregate function explicitly
-    push(@$groupby, 'bugs.short_desc');
+    my $select_term = "($term1 + $term2) AS relevance";
 
     # Users can specify to display the relevance field, in which case
     # it'll show up in the list of fields being selected, and we need

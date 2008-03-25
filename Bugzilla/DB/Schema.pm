@@ -279,6 +279,29 @@ use constant ABSTRACT_SCHEMA => {
         ],
     },
 
+    bugs_fulltext => {
+        FIELDS => [
+            bug_id     => {TYPE => 'INT3', NOTNULL => 1, PRIMARYKEY => 1,
+                           REFERENCES => {TABLE  => 'bugs',
+                                          COLUMN => 'bug_id',
+                                          DELETE => 'CASCADE'}},
+            short_desc => {TYPE => 'varchar(255)', NOTNULL => 1},
+            # Comments are stored all together in one column for searching.
+            # This allows us to examine all comments together when deciding
+            # the relevance of a bug in fulltext search.
+            comments   => {TYPE => 'LONGTEXT'},
+            comments_noprivate => {TYPE => 'LONGTEXT'},
+        ],
+        INDEXES => [
+            bugs_fulltext_short_desc_idx => {FIELDS => ['short_desc'],
+                                               TYPE => 'FULLTEXT'},
+            bugs_fulltext_comments_idx   => {FIELDS => ['comments'],
+                                               TYPE => 'FULLTEXT'},
+            bugs_fulltext_comments_noprivate_idx => {
+                FIELDS => ['comments_noprivate'], TYPE => 'FULLTEXT'},
+        ],
+    },
+
     bugs_activity => {
         FIELDS => [
             bug_id    => {TYPE => 'INT3', NOTNULL => 1},
@@ -336,8 +359,6 @@ use constant ABSTRACT_SCHEMA => {
             longdescs_bug_id_idx   => ['bug_id'],
             longdescs_who_idx     => [qw(who bug_id)],
             longdescs_bug_when_idx => ['bug_when'],
-            longdescs_thetext_idx => {FIELDS => ['thetext'],
-                                      TYPE => 'FULLTEXT'},
         ],
     },
 

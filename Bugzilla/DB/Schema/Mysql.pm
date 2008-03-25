@@ -86,7 +86,7 @@ use constant REVERSE_MAPPING => {
     # as in their db-specific version, so no reverse mapping is needed.
 };
 
-use constant MYISAM_TABLES => qw(longdescs);
+use constant MYISAM_TABLES => qw(bugs_fulltext);
 
 #------------------------------------------------------------------------------
 sub _initialize {

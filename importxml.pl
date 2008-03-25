@@ -1253,6 +1253,7 @@ sub process_bug {
                      VALUES (?,?,?,?,?,?)", undef,
         $id, $exporterid, $timestamp, $worktime, $private, $long_description
     );
+    Bugzilla::Bug->new($id)->_sync_fulltext();
 
     # Add this bug to each group of which its product is a member.
     my $sth_group = $dbh->prepare("INSERT INTO bug_group_map (bug_id, group_id) 

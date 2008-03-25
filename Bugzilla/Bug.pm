@@ -408,12 +408,6 @@ sub create {
         }
     }
 
-    $dbh->bz_commit_transaction();
-
-    # Because MySQL doesn't support transactions on the longdescs table,
-    # we do this after we've committed the transaction. That way we're
-    # fairly sure we're inserting a good Bug ID.
-
     # And insert the comment. We always insert a comment on bug creation,
     # but sometimes it's blank.
     my @columns = qw(bug_id who bug_when thetext);
@@ -429,6 +423,12 @@ sub create {
     $dbh->do('INSERT INTO longdescs (' . join(',', @columns)  . ")
                    VALUES ($qmarks)", undef, @values);
 
+    $dbh->bz_commit_transaction();
+
+    # Because MySQL doesn't support transactions on the fulltext table,
+    # we do this after we've committed the transaction. That way we're
+    # sure we're inserting a good Bug ID.
+    $bug->_sync_fulltext('new bug');
 
     return $bug;
 }
@@ -615,6 +615,13 @@ sub update {
         $self->{delta_ts} = $delta_ts;
     }
 
+    # The only problem with this here is that update() is often called
+    # in the middle of a transaction, and if that transaction is rolled
+    # back, this change will *not* be rolled back. As we expect rollbacks
+    # to be extremely rare, that is OK for us.
+    $self->_sync_fulltext()
+        if $self->{added_comments} || $changes->{short_desc};
+
     return $changes;
 }
 
@@ -766,6 +773,30 @@ sub update_keywords {
     return [$removed_keywords, $added_keywords];
 }
 
+# Should be called any time you update short_desc or change a comment.
+sub _sync_fulltext {
+    my ($self, $new_bug) = @_;
+    my $dbh = Bugzilla->dbh;
+    if ($new_bug) {
+        $dbh->do('INSERT INTO bugs_fulltext (bug_id, short_desc)
+                  SELECT bug_id, short_desc FROM bugs WHERE bug_id = ?',
+                 undef, $self->id);
+    }
+    else {
+        $dbh->do('UPDATE bugs_fulltext SET short_desc = ? WHERE bug_id = ?',
+                 undef, $self->short_desc, $self->id);
+    }
+    my $comments = $dbh->selectall_arrayref(
+        'SELECT thetext, isprivate FROM longdescs WHERE bug_id = ?',
+        undef, $self->id);
+    my $all = join("\n", map { $_->[0] } @$comments);
+    my @no_private = grep { !$_->[1] } @$comments;
+    my $nopriv_string = join("\n", map { $_->[0] } @no_private);
+    $dbh->do('UPDATE bugs_fulltext SET comments = ?, comments_noprivate = ?
+               WHERE bug_id = ?', undef, $all, $nopriv_string, $self->id);
+}
+
+
 # This is the correct way to delete bugs from the DB.
 # No bug should be deleted from anywhere else except from here.
 #
@@ -821,10 +852,9 @@ sub remove_from_db {
     # Several of the previous tables also depend on attach_id.
     $dbh->do("DELETE FROM attachments WHERE bug_id = ?", undef, $bug_id);
     $dbh->do("DELETE FROM bugs WHERE bug_id = ?", undef, $bug_id);
+    $dbh->do("DELETE FROM longdescs WHERE bug_id = ?", undef, $bug_id);
 
     $dbh->bz_commit_transaction();
-
-    $dbh->do("DELETE FROM longdescs WHERE bug_id = ?", undef, $bug_id);
 
     # Now this bug no longer exists
     $self->DESTROY;
@@ -2696,6 +2726,7 @@ sub update_comment {
     # We assume _check_comment() has already been called earlier.
     Bugzilla->dbh->do('UPDATE longdescs SET thetext = ? WHERE comment_id = ?',
                        undef, ($new_comment, $comment_id));
+    $self->_sync_fulltext();
 
     # Update the comment object with this new text.
     $current_comment_obj[0]->{'body'} = $new_comment;

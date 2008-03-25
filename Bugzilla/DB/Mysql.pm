@@ -640,14 +640,21 @@ EOT
                     my $name = $column->{Field};
 
                     # The code below doesn't work on a field with a FULLTEXT
-                    # index. So we drop it. The upgrade code will re-create
-                    # it later.
+                    # index. So we drop it, which we'd do later anyway.
                     if ($table eq 'longdescs' && $name eq 'thetext') {
                         $self->bz_drop_index('longdescs', 
                                              'longdescs_thetext_idx');
                     }
                     if ($table eq 'bugs' && $name eq 'short_desc') {
                         $self->bz_drop_index('bugs', 'bugs_short_desc_idx');
+                    }
+                    my %ft_indexes;
+                    if ($table eq 'bugs_fulltext') {
+                        %ft_indexes = $self->_bz_real_schema->get_indexes_on_column_abstract(
+                            'bugs_fulltext', $name);
+                        foreach my $index (keys %ft_indexes) {
+                            $self->bz_drop_index('bugs_fulltext', $index);
+                        }
                     }
 
                     print "Converting $table.$name to be stored as UTF-8...\n";
@@ -672,6 +679,13 @@ EOT
                               $binary");
                     $self->do("ALTER TABLE $table CHANGE COLUMN $name $name 
                               $utf8");
+
+                    if ($table eq 'bugs_fulltext') {
+                        foreach my $index (keys %ft_indexes) {
+                            $self->bz_add_index('bugs_fulltext', $index,
+                                                $ft_indexes{$index});
+                        }
+                    }
                 }
             }
 

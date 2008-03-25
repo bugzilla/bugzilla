@@ -329,10 +329,12 @@ sub print_module_instructions {
     if ((!$output && @{$check_results->{missing}})
         || ($output && $check_results->{any_missing}))
     {
-        print "\n* NOTE: You must run any commands listed below as "
-              . ROOT_USER . ".\n\n";
-
+        
         if (ON_WINDOWS) {
+
+            print "\n* NOTE: You must run any commands listed below as "
+                  . ROOT_USER . ".\n\n";
+
             my $perl_ver = sprintf('%vd', $^V);
             
             # URL when running Perl 5.8.x.

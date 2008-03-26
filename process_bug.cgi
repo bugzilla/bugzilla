@@ -542,19 +542,17 @@ foreach my $bug (@bug_objects) {
         }
     }
 
-    $bug->update_keywords($timestamp);
-    
-    my ($cc_removed) = $bug->update_cc($timestamp);
-    $cc_removed = [map {$_->login} @$cc_removed];
-
-    my ($dep_changes) = $bug->update_dependencies($timestamp);
-    
-    # Convert the "changes" hash into a list of all the bug ids, then
-    # convert that into a hash to eliminate duplicates. ("map {@$_}" collapses
-    # an array of arrays.)
-    my @all_changed_deps = map { @$_ } @{$dep_changes->{'dependson'}};
-    push(@all_changed_deps, map { @$_ } @{$dep_changes->{'blocked'}});
-    my %changed_deps = map { $_ => 1 } @all_changed_deps;
+    # To get a list of all changed dependencies, convert the "changes" arrays
+    # into a long string, then collapse that string into unique numbers in
+    # a hash.
+    my $all_changed_deps = join(', ', @{ $changes->{'dependson'} || [] });
+    $all_changed_deps = join(', ', @{ $changes->{'blocked'} || [] },
+                                   $all_changed_deps);
+    my %changed_deps = map { $_ => 1 } split(', ', $all_changed_deps);
+    # When clearning one field (say, blocks) and filling in the other
+    # (say, dependson), an empty string can get into the hash and cause
+    # an error later.
+    delete $changed_deps{''};
 
     # $msgs will store emails which have to be sent to voters, if any.
     my $msgs;
@@ -582,10 +580,11 @@ foreach my $bug (@bug_objects) {
         MessageToMTA($msg);
     }
 
-    my $old_qa  = $changes->{'qa_contact'} ? $changes->{'qa_contact'}->[0] : '';
-    my $old_own =  $changes->{'assigned_to'} ? $changes->{'assigned_to'}->[0] : '';
+    my $old_qa  = $changes->{'qa_contact'}  ? $changes->{'qa_contact'}->[0] : '';
+    my $old_own = $changes->{'assigned_to'} ? $changes->{'assigned_to'}->[0] : '';
+    my $old_cc  = $changes->{cc}            ? $changes->{cc}->[0] : '';
     $vars->{'mailrecipients'} = {
-        cc        => $cc_removed,
+        cc        => [split(/[\s,]+/, $old_cc)],
         owner     => $old_own,
         qacontact => $old_qa,
         changer   => Bugzilla->user->login };

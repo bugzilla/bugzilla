@@ -523,6 +523,89 @@ sub update {
         }
     }
 
+    # CC
+    my @old_cc = map {$_->id} @{$old_bug->cc_users};
+    my @new_cc = map {$_->id} @{$self->cc_users};
+    my ($removed_cc, $added_cc) = diff_arrays(\@old_cc, \@new_cc);
+    
+    if (scalar @$removed_cc) {
+        $dbh->do('DELETE FROM cc WHERE bug_id = ? AND ' 
+                 . $dbh->sql_in('who', $removed_cc), undef, $self->id);
+    }
+    foreach my $user_id (@$added_cc) {
+        $dbh->do('INSERT INTO cc (bug_id, who) VALUES (?,?)',
+                 undef, $self->id, $user_id);
+    }
+    # If any changes were found, record it in the activity log
+    if (scalar @$removed_cc || scalar @$added_cc) {
+        my $removed_users = Bugzilla::User->new_from_list($removed_cc);
+        my $added_users   = Bugzilla::User->new_from_list($added_cc);
+        my $removed_names = join(', ', (map {$_->login} @$removed_users));
+        my $added_names   = join(', ', (map {$_->login} @$added_users));
+        $changes->{cc} = [$removed_names, $added_names];
+    }
+    
+    # Keywords
+    my @old_kw_ids = map { $_->id } @{$old_bug->keyword_objects};
+    my @new_kw_ids = map { $_->id } @{$self->keyword_objects};
+
+    my ($removed_kw, $added_kw) = diff_arrays(\@old_kw_ids, \@new_kw_ids);
+
+    if (scalar @$removed_kw) {
+        $dbh->do('DELETE FROM keywords WHERE bug_id = ? AND ' 
+                 . $dbh->sql_in('keywordid', $removed_kw), undef, $self->id);
+    }
+    foreach my $keyword_id (@$added_kw) {
+        $dbh->do('INSERT INTO keywords (bug_id, keywordid) VALUES (?,?)',
+                 undef, $self->id, $keyword_id);
+    }
+    $dbh->do('UPDATE bugs SET keywords = ? WHERE bug_id = ?', undef,
+             $self->keywords, $self->id);
+    # If any changes were found, record it in the activity log
+    if (scalar @$removed_kw || scalar @$added_kw) {
+        my $removed_keywords = Bugzilla::Keyword->new_from_list($removed_kw);
+        my $added_keywords   = Bugzilla::Keyword->new_from_list($added_kw);
+        my $removed_names = join(', ', (map {$_->name} @$removed_keywords));
+        my $added_names   = join(', ', (map {$_->name} @$added_keywords));
+        $changes->{keywords} = [$removed_names, $added_names];
+    }
+
+    # Dependencies
+    foreach my $pair ([qw(dependson blocked)], [qw(blocked dependson)]) {
+        my ($type, $other) = @$pair;
+        my $old = $old_bug->$type;
+        my $new = $self->$type;
+        
+        my ($removed, $added) = diff_arrays($old, $new);
+        foreach my $removed_id (@$removed) {
+            $dbh->do("DELETE FROM dependencies WHERE $type = ? AND $other = ?",
+                     undef, $removed_id, $self->id);
+            
+            # Add an activity entry for the other bug.
+            LogActivityEntry($removed_id, $other, $self->id, '',
+                             Bugzilla->user->id, $delta_ts);
+            # Update delta_ts on the other bug so that we trigger mid-airs.
+            $dbh->do('UPDATE bugs SET delta_ts = ? WHERE bug_id = ?',
+                     undef, $delta_ts, $removed_id);
+        }
+        foreach my $added_id (@$added) {
+            $dbh->do("INSERT INTO dependencies ($type, $other) VALUES (?,?)",
+                     undef, $added_id, $self->id);
+            
+            # Add an activity entry for the other bug.
+            LogActivityEntry($added_id, $other, '', $self->id,
+                             Bugzilla->user->id, $delta_ts);
+            # Update delta_ts on the other bug so that we trigger mid-airs.
+            $dbh->do('UPDATE bugs SET delta_ts = ? WHERE bug_id = ?',
+                     undef, $delta_ts, $added_id);
+        }
+        
+        if (scalar(@$removed) || scalar(@$added)) {
+            $changes->{$type} = [join(', ', @$removed), join(', ', @$added)];
+        }
+    }
+
+    # Groups
     my %old_groups = map {$_->id => $_} @{$old_bug->groups_in};
     my %new_groups = map {$_->id => $_} @{$self->groups_in};
     my ($removed_gr, $added_gr) = diff_arrays([keys %old_groups],
@@ -545,6 +628,7 @@ sub update {
                                    join(', ', @added_names)];
     }
     
+    # Comments
     foreach my $comment (@{$self->{added_comments} || []}) {
         my $columns = join(',', keys %$comment);
         my @values  = values %$comment;
@@ -642,135 +726,6 @@ sub _extract_multi_selects {
         }
     }
     return \%ms_values;
-}
-
-# XXX Temporary hack until all of process_bug uses update().
-sub update_cc {
-    my $self = shift;
-    
-    my $dbh = Bugzilla->dbh;
-    my $delta_ts = shift || $dbh->selectrow_array("SELECT NOW()");
-    
-    my $old_bug = $self->new($self->id);
-    my @old_cc = map {$_->id} @{$old_bug->cc_users};
-    my @new_cc = map {$_->id} @{$self->cc_users};
-    my ($removed, $added) = diff_arrays(\@old_cc, \@new_cc);
-    
-    if (scalar @$removed) {
-        $dbh->do('DELETE FROM cc WHERE bug_id = ? AND ' 
-                 . $dbh->sql_in('who', $removed), undef, $self->id);
-    }
-    foreach my $user_id (@$added) {
-        $dbh->do('INSERT INTO cc (bug_id, who) VALUES (?,?)',
-                 undef, $self->id, $user_id);
-    }
-    my $removed_users = Bugzilla::User->new_from_list($removed);
-    my $added_users   = Bugzilla::User->new_from_list($added);
-   
-    # If any changes were found, record it in the activity log
-    if (scalar @$removed || scalar @$added) {
-        my $removed_names = join(', ', (map {$_->login} @$removed_users));
-        my $added_names   = join(', ', (map {$_->login} @$added_users));
-        LogActivityEntry($self->id, "cc", $removed_names, $added_names,
-                         Bugzilla->user->id, $delta_ts);
-    }
-
-    return ($removed_users, $added_users);
-}
-
-# XXX Temporary hack until all of process_bug uses update()
-sub update_dependencies {
-    # We need to send mail for dependson/blocked bugs if the dependencies
-    # change or the status or resolution change. This var keeps track of that.
-    my $check_dep_bugs = 0;
-
-    my $self = shift;
-    
-    my $dbh = Bugzilla->dbh;
-    my $delta_ts = shift || $dbh->selectrow_array("SELECT NOW()");
-    
-    my $old_bug = $self->new($self->id);
-    
-    my %changes;
-    foreach my $pair ([qw(dependson blocked)], [qw(blocked dependson)]) {
-        my ($type, $other) = @$pair;
-        my $old = $old_bug->$type;
-        my $new = $self->$type;
-        
-        my ($removed, $added) = diff_arrays($old, $new);
-        foreach my $removed_id (@$removed) {
-            $dbh->do("DELETE FROM dependencies WHERE $type = ? AND $other = ?",
-                     undef, $removed_id, $self->id);
-            
-            # Add an activity entry for the other bug.
-            LogActivityEntry($removed_id, $other, $self->id, '',
-                             Bugzilla->user->id, $delta_ts);
-            # Update delta_ts on the other bug so that we trigger mid-airs.
-            $dbh->do('UPDATE bugs SET delta_ts = ? WHERE bug_id = ?',
-                     undef, $delta_ts, $removed_id);
-        }
-        foreach my $added_id (@$added) {
-            $dbh->do("INSERT INTO dependencies ($type, $other) VALUES (?,?)",
-                     undef, $added_id, $self->id);
-            
-            # Add an activity entry for the other bug.
-            LogActivityEntry($added_id, $other, '', $self->id,
-                             Bugzilla->user->id, $delta_ts);
-            # Update delta_ts on the other bug so that we trigger mid-airs.
-            $dbh->do('UPDATE bugs SET delta_ts = ? WHERE bug_id = ?',
-                     undef, $delta_ts, $added_id);
-        }
-        
-        LogActivityEntry($self->id, $type, join(', ', @$removed),
-                         join(', ', @$added), Bugzilla->user->id, $delta_ts);
-        
-        $changes{$type} = [$removed, $added];
-    }
-
-    return \%changes;
-}
-
-# XXX Temporary hack until all of process_bug uses update()
-sub update_keywords {
-    my $self = shift;
-    
-    my $dbh = Bugzilla->dbh;
-    my $delta_ts = shift || $dbh->selectrow_array("SELECT NOW()");
-    
-    my $old_bug = $self->new($self->id);
-    my @old_ids = map { $_->id } @{$old_bug->keyword_objects};
-    my @new_ids = map { $_->id } @{$self->keyword_objects};
-
-    my ($removed, $added) = diff_arrays(\@old_ids, \@new_ids);
-
-    if (scalar @$removed) {
-        $dbh->do('DELETE FROM keywords WHERE bug_id = ? AND ' 
-                 . $dbh->sql_in('keywordid', $removed), undef, $self->id);
-    }
-    foreach my $keyword_id (@$added) {
-        $dbh->do('INSERT INTO keywords (bug_id, keywordid) VALUES (?,?)',
-                 undef, $self->id, $keyword_id);
-    }
-    
-    $dbh->do('UPDATE bugs SET keywords = ? WHERE bug_id = ?', undef,
-             $self->keywords, $self->id);
-
-    my $removed_keywords = Bugzilla::Keyword->new_from_list($removed);
-    my $added_keywords   = Bugzilla::Keyword->new_from_list($added);
-
-    # If any changes were found, record it in the activity log
-    if (scalar @$removed || scalar @$added) {
-        my $removed_names = join(', ', (map {$_->name} @$removed_keywords));
-        my $added_names   = join(', ', (map {$_->name} @$added_keywords));
-        LogActivityEntry($self->id, "keywords", $removed_names,
-                         $added_names, Bugzilla->user->id, $delta_ts);
-
-        $dbh->do('UPDATE bugs SET delta_ts = ? WHERE bug_id = ?',
-                 undef, ($delta_ts, $self->id));
-        $self->{delta_ts} = $delta_ts;
-    }
-
-    return [$removed_keywords, $added_keywords];
 }
 
 # Should be called any time you update short_desc or change a comment.

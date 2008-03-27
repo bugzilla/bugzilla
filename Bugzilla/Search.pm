@@ -1390,7 +1390,7 @@ sub _work_time_changedbefore_after {
     my $table = "longdescs_$$chartid";
     push(@$supptables, "LEFT JOIN longdescs AS $table " .
                               "ON $table.bug_id = bugs.bug_id " .
-                                 "AND $table.work_time <> 0" .
+                                 "AND $table.work_time <> 0 " .
                                  "AND $table.bug_when $operator " .
                                   $dbh->quote(SqlifyDate($$v)) );
     $$term = "($table.bug_when IS NOT NULL)";

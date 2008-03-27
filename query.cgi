@@ -189,6 +189,7 @@ if (!scalar(@{$default{'chfieldto'}}) || $default{'chfieldto'}->[0] eq "") {
 # don't have access to. Remove them from the list.
 my @selectable_products = sort {lc($a->name) cmp lc($b->name)} 
                                @{$user->get_selectable_products};
+Bugzilla::Product::preload(\@selectable_products);
 
 # Create the component, version and milestone lists.
 my %components;

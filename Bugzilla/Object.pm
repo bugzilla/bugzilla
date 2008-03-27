@@ -129,52 +129,46 @@ sub new_from_list {
     my $invocant = shift;
     my $class = ref($invocant) || $invocant;
     my ($id_list) = @_;
-    my $dbh = Bugzilla->dbh;
-    my $columns = join(',', $class->DB_COLUMNS);
-    my $table   = $class->DB_TABLE;
-    my $order   = $class->LIST_ORDER;
     my $id_field = $class->ID_FIELD;
 
-    my $objects;
-    if (@$id_list) {
-        my @detainted_ids;
-        foreach my $id (@$id_list) {
-            detaint_natural($id) ||
-                ThrowCodeError('param_must_be_numeric',
-                              {function => $class . '::new_from_list'});
-            push(@detainted_ids, $id);
-        }
-        $objects = $dbh->selectall_arrayref(
-            "SELECT $columns FROM $table WHERE " 
-            . $dbh->sql_in($id_field, \@detainted_ids) 
-            . "ORDER BY $order", {Slice=>{}});
-    } else {
-        return [];
+    my @detainted_ids;
+    foreach my $id (@$id_list) {
+        detaint_natural($id) ||
+            ThrowCodeError('param_must_be_numeric',
+                          {function => $class . '::new_from_list'});
+        push(@detainted_ids, $id);
     }
-
-    foreach my $object (@$objects) {
-        bless($object, $class);
-    }
-    return $objects;
+    # We don't do $invocant->match because some classes have
+    # their own implementation of match which is not compatible
+    # with this one. However, match() still needs to have the right $invocant
+    # in order to do $class->DB_TABLE and so on.
+    return match($invocant, { $id_field => \@detainted_ids });
 }
 
 # Note: Future extensions to this could be:
-#  * Accept arrays for an IN clause
 #  * Add a MATCH_JOIN constant so that we can join against
 #    certain other tables for the WHERE criteria.
 sub match {
     my ($invocant, $criteria) = @_;
     my $class = ref($invocant) || $invocant;
     my $dbh   = Bugzilla->dbh;
-    my $id    = $class->ID_FIELD;
-    my $table = $class->DB_TABLE;
 
     return [$class->get_all] if !$criteria;
 
     my (@terms, @values);
     foreach my $field (keys %$criteria) {
         my $value = $criteria->{$field};
-        if ($value eq NOT_NULL) {
+        if (ref $value eq 'ARRAY') {
+            # IN () is invalid SQL, and if we have an empty list
+            # to match against, we're just returning an empty
+            # array anyhow.
+            return [] if !scalar @$value;
+
+            my @qmarks = ("?") x @$value;
+            push(@terms, $dbh->sql_in($field, \@qmarks));
+            push(@values, @$value);
+        }
+        elsif ($value eq NOT_NULL) {
             push(@terms, "$field IS NOT NULL");
         }
         elsif ($value eq IS_NULL) {
@@ -187,11 +181,25 @@ sub match {
     }
 
     my $where = join(' AND ', @terms);
-    my $ids   = $dbh->selectcol_arrayref(
-        "SELECT $id FROM $table WHERE $where", undef, @values)
-        || [];
+    return $class->_do_list_select($where, \@values);
+}
 
-    return $class->new_from_list($ids);
+sub _do_list_select {
+    my ($class, $where, $values) = @_;
+    my $table = $class->DB_TABLE;
+    my $cols  = join(',', $class->DB_COLUMNS);
+    my $order = $class->LIST_ORDER;
+
+    my $sql = "SELECT $cols FROM $table";
+    if (defined $where) {
+        $sql .= " WHERE $where ";
+    }
+    $sql .= " ORDER BY $order";
+
+    my $dbh = Bugzilla->dbh;
+    my $objects = $dbh->selectall_arrayref($sql, {Slice=>{}}, @$values);
+    bless ($_, $class) foreach @$objects;
+    return $objects
 }
 
 ###############################
@@ -349,16 +357,7 @@ sub insert_create_data {
 
 sub get_all {
     my $class = shift;
-    my $dbh = Bugzilla->dbh;
-    my $table = $class->DB_TABLE;
-    my $order = $class->LIST_ORDER;
-    my $id_field = $class->ID_FIELD;
-
-    my $ids = $dbh->selectcol_arrayref(qq{
-        SELECT $id_field FROM $table ORDER BY $order});
-
-    my $objects = $class->new_from_list($ids);
-    return @$objects;
+    return @{$class->_do_list_select()};
 }
 
 ###############################

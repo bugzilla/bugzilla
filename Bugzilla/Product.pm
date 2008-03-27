@@ -51,6 +51,32 @@ use constant DB_COLUMNS => qw(
    products.defaultmilestone
 );
 
+###############################
+####     Constructors     #####
+###############################
+
+# This is considerably faster than calling new_from_list three times
+# for each product in the list, particularly with hundreds or thousands
+# of products.
+sub preload {
+    my ($products) = @_;
+    my %prods = map { $_->id => $_ } @$products;
+    my @prod_ids = keys %prods;
+    return unless @prod_ids;
+
+    my $dbh = Bugzilla->dbh;
+    foreach my $field (qw(component version milestone)) {
+        my $classname = "Bugzilla::" . ucfirst($field);
+        my $objects = $classname->match({ product_id => \@prod_ids });
+
+        # Now populate the products with this set of objects.
+        foreach my $obj (@$objects) {
+            my $product_id = $obj->product_id;
+            $prods{$product_id}->{"${field}s"} ||= [];
+            push(@{$prods{$product_id}->{"${field}s"}}, $obj);
+        }
+    }
+}
 
 ###############################
 ####       Methods         ####
@@ -300,7 +326,7 @@ below.
 
 =over
 
-=item C<components()>
+=item C<components>
 
  Description: Returns an array of component objects belonging to
               the product.
@@ -319,7 +345,7 @@ below.
  Returns:     A hash with group id as key and hash containing 
               a Bugzilla::Group object and the properties of group
               relative to the product.
-              
+
 =item C<groups_mandatory_for>
 
 =over
@@ -356,7 +382,7 @@ groups, in this product.
 
 =back
 
-=item C<versions()>
+=item C<versions>
 
  Description: Returns all valid versions for that product.
 
@@ -364,7 +390,7 @@ groups, in this product.
 
  Returns:     An array of Bugzilla::Version objects.
 
-=item C<milestones()>
+=item C<milestones>
 
  Description: Returns all valid milestones for that product.
 
@@ -414,6 +440,15 @@ groups, in this product.
 =head1 SUBROUTINES
 
 =over
+
+=item C<preload>
+
+When passed an arrayref of C<Bugzilla::Product> objects, preloads their
+L</milestones>, L</components>, and L</versions>, which is much faster
+than calling those accessors on every item in the array individually.
+
+This function is not exported, so must be called like 
+C<Bugzilla::Product::preload($products)>.
 
 =item C<check_product($product_name)>
 

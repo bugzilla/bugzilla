@@ -312,6 +312,11 @@ sub wrap_comment {
         $wrappedcomment .= ($line . "\n");
       }
       else {
+        # Due to a segfault in Text::Tabs::expand() when processing tabs with
+        # Unicode (see http://rt.perl.org/rt3/Public/Bug/Display.html?id=52104),
+        # we have to remove tabs before processing the comment. This restriction
+        # can go away when we require Perl 5.8.9 or newer.
+        $line =~ s/\t/    /g;
         $wrappedcomment .= (wrap('', '', $line) . "\n");
       }
     }

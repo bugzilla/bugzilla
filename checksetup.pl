@@ -47,14 +47,13 @@ use 5.008001;
 use File::Basename;
 use Getopt::Long qw(:config bundling);
 use Pod::Usage;
-use POSIX qw(setlocale LC_CTYPE);
 use Safe;
 
 BEGIN { chdir dirname($0); }
 use lib qw(. lib);
 use Bugzilla::Constants;
 use Bugzilla::Install::Requirements;
-use Bugzilla::Install::Util qw(install_string get_version_and_os);
+use Bugzilla::Install::Util qw(install_string get_version_and_os get_console_locale);
 
 ######################################################################
 # Live Code
@@ -62,7 +61,7 @@ use Bugzilla::Install::Util qw(install_string get_version_and_os);
 
 # When we're running at the command line, we need to pick the right
 # language before ever displaying any string.
-$ENV{'HTTP_ACCEPT_LANGUAGE'} ||= setlocale(LC_CTYPE);
+$ENV{'HTTP_ACCEPT_LANGUAGE'} ||= get_console_locale();
 
 my %switch;
 GetOptions(\%switch, 'help|h|?', 'check-modules', 'no-templates|t',

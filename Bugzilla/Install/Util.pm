@@ -29,7 +29,7 @@ use strict;
 use Bugzilla::Constants;
 
 use File::Basename;
-use POSIX ();
+use POSIX qw(setlocale LC_CTYPE);
 use Safe;
 
 use base qw(Exporter);
@@ -40,6 +40,7 @@ our @EXPORT_OK = qw(
     install_string
     template_include_path
     vers_cmp
+    get_console_locale
 );
 
 sub bin_loc {
@@ -165,17 +166,6 @@ sub template_include_path {
         }
     }
 
-    # If we didn't want *any* of the languages we support, just use all
-    # of the languages we said we support, in the order they were specified.
-    # This is only done when you ask for a certain set of languages, because
-    # otherwise @supported just came off the disk in alphabetical order,
-    # and it could give you de (German) when you speak English.
-    # (If @supported came off the disk, we fall back on English if no language
-    # is available--that happens below.)
-    if (!@usedlanguages && $params->{use_languages}) {
-        @usedlanguages = @supported;
-    }
-    
     # We always include English at the bottom if it's not there, even if
     # somebody removed it from use_languages.
     if (!grep($_ eq 'en', @usedlanguages)) {
@@ -304,6 +294,21 @@ sub _sort_accept_language {
     return map($_->{'language'}, (sort sortQvalue @qlanguages));
 }
 
+sub get_console_locale {
+    my $locale = setlocale(LC_CTYPE);
+    # Some distros set e.g. LC_CTYPE = fr_CH.UTF-8. We clean it up.
+    if ($locale =~ /^([^\.]+)/) {
+        $locale = $1;
+    }
+    $locale =~ s/_/-/;
+    # It's pretty sure that there is no language pack of the form fr-CH
+    # installed, so we also include fr as a wanted language.
+    if ($locale =~ /^(\S+)\-/) {
+        $locale .= ",$1";
+    }
+    return $locale;
+}
+
 
 # This is like request_cache, but it's used only by installation code
 # for setup.cgi and things like that.
@@ -365,6 +370,11 @@ binary, if the binary is in the C<PATH>.
 
 Returns a hash containing information about what version of Bugzilla we're
 running, what perl version we're using, and what OS we're running on.
+
+=item C<get_console_locale>
+
+Returns the language to use based on the LC_CTYPE value returned by the OS.
+If LC_CTYPE is of the form fr-CH, then fr is appended to the list.
 
 =item C<indicate_progress>
 

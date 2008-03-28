@@ -647,13 +647,13 @@
   [% ELSIF error == "group_invalid_removal" %]
     You tried to remove [% terms.bug %] [%+ bug.id FILTER html %]
     from group id [% group_id FILTER html %], but [% terms.bugs %] in the 
-    '[% product.name FILTER html %]' product can not be removed from that
+    '[% product FILTER html %]' product can not be removed from that
     group.
     
   [% ELSIF error == "group_invalid_restriction" %]
     You tried to restrict [% terms.bug %] [%+ bug.id FILTER html %] to
     to group id [% group_id FILTER html %], but [% terms.bugs %] in the
-    '[% product.name FILTER html %]' product can not be restricted to
+    '[% product FILTER html %]' product can not be restricted to
     that group.
 
   [% ELSIF error == "group_not_specified" %]
@@ -1324,7 +1324,7 @@
     [% title = BLOCK %]Product has [% terms.Bugs %][% END %]
     [% admindocslinks = {'products.html' => 'Administering products'} %]
     There are [% nb FILTER html %] [%+ terms.bugs %] entered for this product!
-    You must reassign those [% terms.bugs %] to another product before you
+    You must move those [% terms.bugs %] to another product before you
     can delete this one.
 
   [% ELSIF error == "product_must_have_description" %]

@@ -922,6 +922,9 @@ sub precompile_templates {
 
     # If anything created a Template object before now, clear it out.
     delete Bugzilla->request_cache->{template};
+    # This is the single variable used to precompile templates,
+    # which needs to be cleared as well.
+    delete Bugzilla->request_cache->{template_include_path_};
 }
 
 # Helper for precompile_templates

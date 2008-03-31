@@ -295,7 +295,9 @@ sub _sort_accept_language {
 }
 
 sub get_console_locale {
+    require Locale::Language;
     my $locale = setlocale(LC_CTYPE);
+    my $language;
     # Some distros set e.g. LC_CTYPE = fr_CH.UTF-8. We clean it up.
     if ($locale =~ /^([^\.]+)/) {
         $locale = $1;
@@ -304,8 +306,21 @@ sub get_console_locale {
     # It's pretty sure that there is no language pack of the form fr-CH
     # installed, so we also include fr as a wanted language.
     if ($locale =~ /^(\S+)\-/) {
-        $locale .= ",$1";
+        $language = $1;
+        $locale .= ",$language";
     }
+    else {
+        $language = $locale;
+    }
+
+    # Some OSs or distributions may have setlocale return a string of the form
+    # German_Germany.1252 (this example taken from a Windows XP system), which
+    # is unsuitable for our needs because Bugzilla works on language codes.
+    # We try and convert them here.
+    if ($language = Locale::Language::language2code($language)) {
+        $locale .= ",$language";
+    }
+
     return $locale;
 }
 

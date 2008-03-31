@@ -71,13 +71,13 @@
           work with:</td>
       <td>
         <input type="radio" name="sortvisible" id="entirelist" value="0"
-          [% "checked" IF NOT sortvisible %]>
+          [%+ "checked" IF NOT sortvisible %]>
         <label for="entirelist">
           entire list
         </label>
         <br>
         <input type="radio" name="sortvisible" id="visiblelist" value="1"
-          [% "checked" IF sortvisible %]>
+          [%+ "checked" IF sortvisible %]>
         <label for="visiblelist">
           currently visible list
         </label>
@@ -116,7 +116,7 @@
       </td>
       <td>
         <input type="checkbox" name="openonly" id="openonly" value="1"
-          [% "checked" IF openonly %]>
+          [%+ "checked" IF openonly %]>
       </td>
     </tr>
 

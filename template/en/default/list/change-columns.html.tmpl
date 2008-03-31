@@ -40,7 +40,7 @@
   <input type="hidden" name="rememberedquery" value="[% buffer FILTER html %]">
   [% FOREACH column = masterlist %]
     <input type="checkbox" id="[% column %]" name="column_[% column %]"
-      [% "checked='checked'" IF lsearch(collist, column) != -1 %]>
+      [%+ "checked='checked'" IF lsearch(collist, column) != -1 %]>
     <label for="[% column %]">
       [% (field_descs.${column} || column) FILTER html %]
     </label>
@@ -49,14 +49,14 @@
 
   <p>
     <input id="nosplitheader" type="radio" name="splitheader" value="0"
-      [% "checked='checked'" IF NOT splitheader %]>
+      [%+ "checked='checked'" IF NOT splitheader %]>
     <label for="nosplitheader">
       Normal headers (prettier)
     </label>
     <br>
 
     <input id="splitheader" type="radio" name="splitheader" value="1"
-      [% "checked='checked'" IF splitheader %]>
+      [%+ "checked='checked'" IF splitheader %]>
     <label for="splitheader">
       Stagger headers (often makes list more compact)
     </label>

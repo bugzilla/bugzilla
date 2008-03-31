@@ -55,7 +55,7 @@
         <th>&nbsp;</th>
         <td>
           <input type="checkbox" id="Bugzilla_remember" name="Bugzilla_remember" value="on"
-                 [% "checked" IF Param('rememberlogin') == "defaulton" %]>
+                 [%+ "checked" IF Param('rememberlogin') == "defaulton" %]>
           <label for="Bugzilla_remember">Remember my Login</label>
         </td>
       </tr>

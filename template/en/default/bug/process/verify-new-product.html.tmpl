@@ -149,7 +149,7 @@
              value="1">
       <input type="checkbox" id="bit-[% group.group.id FILTER html %]"
              name="bit-[% group.group.id FILTER html %]"
-             [% ((group.membercontrol == constants.CONTROLMAPDEFAULT && user.in_group(group.group.name))
+             [%+ ((group.membercontrol == constants.CONTROLMAPDEFAULT && user.in_group(group.group.name))
                  || (group.othercontrol == constants.CONTROLMAPDEFAULT && !user.in_group(group.group.name))
                  || cgi.param("bit-$group.group.id") == 1) ?
                  'checked="checked"' : ''

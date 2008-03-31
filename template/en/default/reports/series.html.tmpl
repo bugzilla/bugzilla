@@ -69,7 +69,7 @@
             completely, if you want to change who can make series public. %]
         [% IF user.in_group('admin') %]      
           <input type="checkbox" name="public"
-                 [% "checked='checked'" IF default.public.0 %]>
+                 [%+ "checked='checked'" IF default.public.0 %]>
           <span style="font-weight: bold;">Visible to all<br>
           (within group restrictions)</span> 
         [% END %]

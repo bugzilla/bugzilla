@@ -236,11 +236,11 @@
                    value="[% attachment.contenttype FILTER html %]"><br>
 
           <input type="checkbox" id="ispatch" name="ispatch" value="1"
-                 [% 'checked="checked"' IF attachment.ispatch %]>
+                 [%+ 'checked="checked"' IF attachment.ispatch %]>
           <label for="ispatch">patch</label>
         [% END %]
           <input type="checkbox" id="isobsolete" name="isobsolete" value="1"
-                 [% 'checked="checked"' IF attachment.isobsolete %]>
+                 [%+ 'checked="checked"' IF attachment.isobsolete %]>
           <label for="isobsolete">obsolete</label>
           [% IF (Param("insidergroup") && user.in_group(Param("insidergroup"))) %]
             <input type="checkbox" id="isprivate" name="isprivate" value="1"

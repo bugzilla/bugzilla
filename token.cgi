@@ -101,11 +101,10 @@ if ($cgi->param('t')) {
 # If the user is requesting a password change, make sure they submitted
 # their login name and it exists in the database, and that the DB module is in
 # the list of allowed verification methods.
-my $login_name;
+my $user_account;
 if ( $::action eq 'reqpw' ) {
-    $login_name = $cgi->param('loginname');
-    defined $login_name
-      || ThrowUserError("login_needed_for_password_change");
+    my $login_name = $cgi->param('loginname')
+                       || ThrowUserError("login_needed_for_password_change");
 
     # check verification methods
     unless (Bugzilla->user->authorizer->can_change_password) {
@@ -115,10 +114,7 @@ if ( $::action eq 'reqpw' ) {
     validate_email_syntax($login_name)
         || ThrowUserError('illegal_email_address', {addr => $login_name});
 
-    my ($user_id) = $dbh->selectrow_array('SELECT userid FROM profiles WHERE ' .
-                                          $dbh->sql_istrcmp('login_name', '?'),
-                                          undef, $login_name);
-    $user_id || ThrowUserError("account_does_not_exist", {'email' => $login_name});
+    $user_account = Bugzilla::User->check($login_name);
 }
 
 # If the user is changing their password, make sure they submitted a new
@@ -142,7 +138,7 @@ if ( $::action eq 'chgpw' ) {
 # that variable and runs the appropriate code.
 
 if ($::action eq 'reqpw') { 
-    requestChangePassword($login_name);
+    requestChangePassword($user_account);
 } elsif ($::action eq 'cfmpw') { 
     confirmChangePassword(); 
 } elsif ($::action eq 'cxlpw') { 
@@ -175,8 +171,8 @@ exit;
 ################################################################################
 
 sub requestChangePassword {
-    my ($login_name) = @_;
-    Bugzilla::Token::IssuePasswordToken($login_name);
+    my ($user) = @_;
+    Bugzilla::Token::IssuePasswordToken($user);
 
     $vars->{'message'} = "password_change_request";
 

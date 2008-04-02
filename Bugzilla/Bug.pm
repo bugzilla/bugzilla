@@ -3024,7 +3024,6 @@ sub RemoveVotes {
     if (scalar(@list)) {
         foreach my $ref (@list) {
             my ($name, $userid, $oldvotes, $votesperuser, $maxvotesperbug) = (@$ref);
-            my $s;
 
             $maxvotesperbug = min($votesperuser, $maxvotesperbug);
 
@@ -3038,23 +3037,13 @@ sub RemoveVotes {
 
             my $removedvotes = $oldvotes - $newvotes;
 
-            $s = ($oldvotes == 1) ? "" : "s";
-            my $oldvotestext = "You had $oldvotes vote$s on this bug.";
-
-            $s = ($removedvotes == 1) ? "" : "s";
-            my $removedvotestext = "You had $removedvotes vote$s removed from this bug.";
-
-            my $newvotestext;
             if ($newvotes) {
                 $dbh->do("UPDATE votes SET vote_count = ? " .
                          "WHERE bug_id = ? AND who = ?",
                          undef, ($newvotes, $id, $userid));
-                $s = $newvotes == 1 ? "" : "s";
-                $newvotestext = "You still have $newvotes vote$s on this bug."
             } else {
                 $dbh->do("DELETE FROM votes WHERE bug_id = ? AND who = ?",
                          undef, ($id, $userid));
-                $newvotestext = "You have no more votes remaining on this bug.";
             }
 
             # Notice that we did not make sure that the user fit within the $votesperuser
@@ -3065,7 +3054,6 @@ sub RemoveVotes {
             # Now lets send the e-mail to alert the user to the fact that their votes have
             # been reduced or removed.
             my $vars = {
-
                 'to' => $name . Bugzilla->params->{'emailsuffix'},
                 'bugid' => $id,
                 'reason' => $reason,
@@ -3073,19 +3061,17 @@ sub RemoveVotes {
                 'votesremoved' => $removedvotes,
                 'votesold' => $oldvotes,
                 'votesnew' => $newvotes,
-
-                'votesremovedtext' => $removedvotestext,
-                'votesoldtext' => $oldvotestext,
-                'votesnewtext' => $newvotestext,
-
-                'count' => $removedvotes . "\n    " . $newvotestext
             };
 
+            my $voter = new Bugzilla::User($userid);
+            my $template = Bugzilla->template_inner($voter->settings->{'lang'}->{'value'});
+
             my $msg;
-            my $template = Bugzilla->template;
             $template->process("email/votes-removed.txt.tmpl", $vars, \$msg);
             push(@messages, $msg);
         }
+        Bugzilla->template_inner("");
+
         my $votes = $dbh->selectrow_array("SELECT SUM(vote_count) " .
                                           "FROM votes WHERE bug_id = ?",
                                           undef, $id) || 0;

@@ -560,9 +560,7 @@ foreach my $bug (@bug_objects) {
         # If some votes have been removed, RemoveVotes() returns
         # a list of messages to send to voters.
         # We delay the sending of these messages till tables are unlocked.
-        $msgs = RemoveVotes($bug->id, 0,
-                  "This bug has been moved to a different product");
-
+        $msgs = RemoveVotes($bug->id, 0, 'votes_bug_moved');
         CheckIfVotedConfirmed($bug->id, Bugzilla->user->id);
     }
 

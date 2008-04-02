@@ -85,9 +85,11 @@ foreach my $email (sort (keys %bugs)) {
     $vars->{'bugs'} = \@bugs;
 
     my $msg;
-    my $template = Bugzilla->template;
-    $template->process("email/whine.txt.tmpl", $vars, \$msg);
+    my $template = Bugzilla->template_inner($user->settings->{'lang'}->{'value'});
+    $template->process("email/whine.txt.tmpl", $vars, \$msg)
+      or die($template->error());
 
+    Bugzilla->template_inner("");
     MessageToMTA($msg);
 
     print "$email      " . join(" ", @{$bugs{$email}}) . "\n";

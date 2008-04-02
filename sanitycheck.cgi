@@ -69,7 +69,15 @@ my $user = Bugzilla->login(LOGIN_REQUIRED);
 
 my $cgi = Bugzilla->cgi;
 my $dbh = Bugzilla->dbh;
-my $template = Bugzilla->template;
+# If the result of the sanity check is sent per email, then we have to
+# take the user prefs into account rather than querying the web browser.
+my $template;
+if (Bugzilla->usage_mode == USAGE_MODE_CMDLINE) {
+    $template = Bugzilla->template_inner($user->settings->{'lang'}->{'value'});
+}
+else {
+    $template = Bugzilla->template;
+}
 my $vars = {};
 
 print $cgi->header() unless Bugzilla->usage_mode == USAGE_MODE_CMDLINE;

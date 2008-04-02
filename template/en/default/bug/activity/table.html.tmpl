@@ -74,7 +74,7 @@
                 <a href="attachment.cgi?id=[% change.attachid %]">
                 Attachment #[% change.attachid %]</a>
               [% END %]
-              [% change.field %]
+              [%+ change.field %]
             </td>
             <td>
               [% IF change.removed.defined %]

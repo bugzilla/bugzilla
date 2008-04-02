@@ -90,7 +90,7 @@ cycle of [% terms.abug %].
         </dt>
         <dd>
           This [% terms.bug %] was once resolved, but the resolution was 
-          deemed incorrect. For example, a <b>[% get_status("WORKSFORME") FILTER html %]</b> [% terms.bug %] is
+          deemed incorrect. For example, a <b>[% get_resolution("WORKSFORME") FILTER html %]</b> [% terms.bug %] is
           <b>[% get_status("REOPENED") FILTER html %]</b> when more information shows up and
           the [% terms.bug %] is now reproducible. From here [% terms.bugs %] are
           either marked <b>[% get_status("ASSIGNED") FILTER html %]</b> or

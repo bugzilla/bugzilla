@@ -939,10 +939,7 @@ if ($action eq 'update') {
                 my ($who, $id) = (@$vote);
                 # If some votes are removed, RemoveVotes() returns a list
                 # of messages to send to voters.
-                my $msgs =
-                    RemoveVotes($id, $who, "The rules for voting on this product " .
-                                           "has changed;\nyou had too many votes " .
-                                           "for a single bug.");
+                my $msgs = RemoveVotes($id, $who, 'votes_too_many_per_bug');
                 foreach my $msg (@$msgs) {
                     MessageToMTA($msg);
                 }
@@ -991,11 +988,7 @@ if ($action eq 'update') {
                 foreach my $bug_id (@$bug_ids) {
                     # RemoveVotes() returns a list of messages to send
                     # in case some voters had too many votes.
-                    my $msgs =
-                        RemoveVotes($bug_id, $who, "The rules for voting on this " .
-                                                   "product has changed; you had " .
-                                                   "too many\ntotal votes, so all " .
-                                                   "votes have been removed.");
+                    my $msgs = RemoveVotes($bug_id, $who, 'votes_too_many_per_user');
                     foreach my $msg (@$msgs) {
                         MessageToMTA($msg);
                     }

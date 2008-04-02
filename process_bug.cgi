@@ -1528,7 +1528,8 @@ foreach my $id (@idlist) {
             "keyworddefs READ", "groups READ", "attachments READ",
             "group_control_map AS oldcontrolmap READ",
             "group_control_map AS newcontrolmap READ",
-            "group_control_map READ", "email_setting READ", "classifications READ");
+            "group_control_map READ", "email_setting READ", "classifications READ",
+            "setting READ", "profile_setting READ");
 
     # It may sound crazy to set %formhash for each bug as $cgi->param()
     # will not change, but %formhash is modified below and we prefer
@@ -2105,9 +2106,7 @@ foreach my $id (@idlist) {
                 # If some votes have been removed, RemoveVotes() returns
                 # a list of messages to send to voters.
                 # We delay the sending of these messages till tables are unlocked.
-                $msgs = RemoveVotes($id, 0,
-                          "This bug has been moved to a different product");
-
+                $msgs = RemoveVotes($id, 0, 'votes_bug_moved');
                 CheckIfVotedConfirmed($id, $whoid);
             }
 

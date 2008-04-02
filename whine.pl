@@ -358,10 +358,11 @@ while (my $event = get_next_event) {
 #
 sub mail {
     my $args = shift;
+    my $addressee = $args->{recipient};
+    # Don't send mail to someone whose bugmail notification is disabled.
+    return if $addressee->email_disabled;
 
-    # Don't send mail to someone on the nomail list.
-    return if $args->{recipient}->email_disabled;
-
+    my $template = Bugzilla->template_inner($addressee->settings->{'lang'}->{'value'});
     my $msg = ''; # it's a temporary variable to hold the template output
     $args->{'alternatives'} ||= [];
 
@@ -392,6 +393,7 @@ sub mail {
     $template->process("whine/multipart-mime.txt.tmpl", $args, \$msg)
         or die($template->error());
 
+    Bugzilla->template_inner("");
     MessageToMTA($msg);
 
     delete $args->{'boundary'};

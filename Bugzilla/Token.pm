@@ -34,6 +34,7 @@ use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Mailer;
 use Bugzilla::Util;
+use Bugzilla::User;
 
 use Date::Format;
 use Date::Parse;
@@ -80,20 +81,24 @@ sub issue_new_user_account_token {
     $template->process('account/email/request-new.txt.tmpl', $vars, \$message)
       || ThrowTemplateError($template->error());
 
+    # In 99% of cases, the user getting the confirmation email is the same one
+    # who made the request, and so it is reasonable to send the email in the same
+    # language used to view the "Create a New Account" page (we cannot use his
+    # user prefs as the user has no account yet!).
     MessageToMTA($message);
 }
 
 sub IssueEmailChangeToken {
-    my ($userid, $old_email, $new_email) = @_;
+    my ($user, $old_email, $new_email) = @_;
     my $email_suffix = Bugzilla->params->{'emailsuffix'};
 
-    my ($token, $token_ts) = _create_token($userid, 'emailold', $old_email . ":" . $new_email);
+    my ($token, $token_ts) = _create_token($user->id, 'emailold', $old_email . ":" . $new_email);
 
-    my $newtoken = _create_token($userid, 'emailnew', $old_email . ":" . $new_email);
+    my $newtoken = _create_token($user->id, 'emailnew', $old_email . ":" . $new_email);
 
     # Mail the user the token along with instructions for using it.
 
-    my $template = Bugzilla->template;
+    my $template = Bugzilla->template_inner($user->settings->{'lang'}->{'value'});
     my $vars = {};
 
     $vars->{'oldemailaddress'} = $old_email . $email_suffix;
@@ -118,38 +123,34 @@ sub IssueEmailChangeToken {
     $template->process("account/email/change-new.txt.tmpl", $vars, \$message)
       || ThrowTemplateError($template->error());
 
+    Bugzilla->template_inner("");
     MessageToMTA($message);
 }
 
 # Generates a random token, adds it to the tokens table, and sends it
 # to the user with instructions for using it to change their password.
 sub IssuePasswordToken {
-    my $loginname = shift;
+    my $user = shift;
     my $dbh = Bugzilla->dbh;
-    my $template = Bugzilla->template;
-    my $vars = {};
 
-    # Retrieve the user's ID from the database.
-    trick_taint($loginname);
-    my ($userid, $too_soon) =
-        $dbh->selectrow_array('SELECT profiles.userid, tokens.issuedate
-                                 FROM profiles
-                            LEFT JOIN tokens
-                                   ON tokens.userid = profiles.userid
-                                  AND tokens.tokentype = ?
-                                  AND tokens.issuedate > NOW() - ' .
-                                      $dbh->sql_interval(10, 'MINUTE') . '
-                                WHERE ' . $dbh->sql_istrcmp('login_name', '?'),
-                                undef, ('password', $loginname));
+    my $too_soon =
+        $dbh->selectrow_array('SELECT 1 FROM tokens
+                                WHERE userid = ?
+                                  AND tokentype = ?
+                                  AND issuedate > NOW() - ' .
+                                      $dbh->sql_interval(10, 'MINUTE'),
+                                undef, ($user->id, 'password'));
 
     ThrowUserError('too_soon_for_new_token', {'type' => 'password'}) if $too_soon;
 
-    my ($token, $token_ts) = _create_token($userid, 'password', $::ENV{'REMOTE_ADDR'});
+    my ($token, $token_ts) = _create_token($user->id, 'password', $::ENV{'REMOTE_ADDR'});
 
     # Mail the user the token along with instructions for using it.
-    $vars->{'token'} = $token;
-    $vars->{'emailaddress'} = $loginname . Bugzilla->params->{'emailsuffix'};
+    my $template = Bugzilla->template_inner($user->settings->{'lang'}->{'value'});
+    my $vars = {};
 
+    $vars->{'token'} = $token;
+    $vars->{'emailaddress'} = $user->email;
     $vars->{'max_token_age'} = MAX_TOKEN_AGE;
     $vars->{'token_ts'} = $token_ts;
 
@@ -158,6 +159,7 @@ sub IssuePasswordToken {
                                                                $vars, \$message)
       || ThrowTemplateError($template->error());
 
+    Bugzilla->template_inner("");
     MessageToMTA($message);
 }
 
@@ -207,31 +209,28 @@ sub GenerateUniqueToken {
     return $token;
 }
 
-# Cancels a previously issued token and notifies the system administrator.
+# Cancels a previously issued token and notifies the user.
 # This should only happen when the user accidentally makes a token request
 # or when a malicious hacker makes a token request on behalf of a user.
 sub Cancel {
     my ($token, $cancelaction, $vars) = @_;
     my $dbh = Bugzilla->dbh;
-    my $template = Bugzilla->template;
     $vars ||= {};
 
     # Get information about the token being canceled.
     trick_taint($token);
-    my ($issuedate, $tokentype, $eventdata, $loginname) =
+    my ($issuedate, $tokentype, $eventdata, $userid) =
         $dbh->selectrow_array('SELECT ' . $dbh->sql_date_format('issuedate') . ',
-                                      tokentype, eventdata, login_name
+                                      tokentype, eventdata, userid
                                  FROM tokens
-                            LEFT JOIN profiles
-                                   ON tokens.userid = profiles.userid
                                 WHERE token = ?',
                                 undef, $token);
 
-    # If we are cancelling the creation of a new user account, then there
+    # If we are canceling the creation of a new user account, then there
     # is no entry in the 'profiles' table.
-    $loginname ||= $eventdata;
-    $vars->{'emailaddress'} = $loginname . Bugzilla->params->{'emailsuffix'};
-    $vars->{'maintainer'} = Bugzilla->params->{'maintainer'};
+    my $user = new Bugzilla::User($userid);
+
+    $vars->{'emailaddress'} = $userid ? $user->email : $eventdata;
     $vars->{'remoteaddress'} = $::ENV{'REMOTE_ADDR'};
     $vars->{'token'} = $token;
     $vars->{'tokentype'} = $tokentype;
@@ -240,11 +239,13 @@ sub Cancel {
     $vars->{'cancelaction'} = $cancelaction;
 
     # Notify the user via email about the cancellation.
+    my $template = Bugzilla->template_inner($user->settings->{'lang'}->{'value'});
 
     my $message;
     $template->process("account/cancel-token.txt.tmpl", $vars, \$message)
       || ThrowTemplateError($template->error());
 
+    Bugzilla->template_inner("");
     MessageToMTA($message);
 
     # Delete the token from the database.
@@ -395,8 +396,8 @@ Bugzilla::Token - Provides different routines to manage tokens.
     use Bugzilla::Token;
 
     Bugzilla::Token::issue_new_user_account_token($login_name);
-    Bugzilla::Token::IssueEmailChangeToken($user_id, $old_email, $new_email);
-    Bugzilla::Token::IssuePasswordToken($login_name);
+    Bugzilla::Token::IssueEmailChangeToken($user, $old_email, $new_email);
+    Bugzilla::Token::IssuePasswordToken($user);
     Bugzilla::Token::DeletePasswordTokens($user_id, $reason);
     Bugzilla::Token::Cancel($token, $cancelaction, $vars);
 
@@ -426,26 +427,26 @@ Bugzilla::Token - Provides different routines to manage tokens.
  Returns:     Nothing. It throws an error if the same user made the same
               request in the last few minutes.
 
-=item C<sub IssueEmailChangeToken($user_id, $old_email, $new_email)>
+=item C<sub IssueEmailChangeToken($user, $old_email, $new_email)>
 
  Description: Sends two distinct tokens per email to the old and new email
               addresses to confirm the email address change for the given
-              user ID. These tokens remain valid for the next MAX_TOKEN_AGE days.
+              user. These tokens remain valid for the next MAX_TOKEN_AGE days.
 
- Params:      $user_id - The user ID of the user account requesting a new
-                         email address.
+ Params:      $user      - User object of the user requesting a new
+                           email address.
               $old_email - The current (old) email address of the user.
               $new_email - The new email address of the user.
 
  Returns:     Nothing.
 
-=item C<IssuePasswordToken($login_name)>
+=item C<IssuePasswordToken($user)>
 
- Description: Sends a token per email to the given login name. This token
+ Description: Sends a token per email to the given user. This token
               can be used to change the password (e.g. in case the user
               cannot remember his password and wishes to enter a new one).
 
- Params:      $login_name - The login name of the user requesting a new password.
+ Params:      $user - User object of the user requesting a new password.
 
  Returns:     Nothing. It throws an error if the same user made the same
               request in the last few minutes.

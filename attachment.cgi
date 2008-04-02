@@ -638,6 +638,7 @@ sub update
           # function call in Flag::notify. group_group_map is in here si
           # Bugzilla::User can flatten groups.
           'bugs WRITE', 'profiles READ', 'email_setting READ',
+          'setting READ', 'profile_setting READ',
           'cc READ', 'bug_group_map READ', 'user_group_map READ',
           'group_group_map READ', 'groups READ', 'group_control_map READ');
 

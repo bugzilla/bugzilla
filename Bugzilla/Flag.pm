@@ -1017,56 +1017,54 @@ or deleted.
 sub notify {
     my ($flag, $bug, $attachment) = @_;
 
-    my $template = Bugzilla->template;
-
     # There is nobody to notify.
     return unless ($flag->{'addressee'} || $flag->type->cc_list);
-
-    my $attachment_is_private = $attachment ? $attachment->isprivate : undef;
 
     # If the target bug is restricted to one or more groups, then we need
     # to make sure we don't send email about it to unauthorized users
     # on the request type's CC: list, so we have to trawl the list for users
     # not in those groups or email addresses that don't have an account.
     my @bug_in_groups = grep {$_->{'ison'} || $_->{'mandatory'}} @{$bug->groups};
+    my $attachment_is_private = $attachment ? $attachment->isprivate : undef;
 
-    if (scalar(@bug_in_groups) || $attachment_is_private) {
-        my @new_cc_list;
-        foreach my $cc (split(/[, ]+/, $flag->type->cc_list)) {
-            my $ccuser = new Bugzilla::User({ name => $cc }) || next;
-
-            next if (scalar(@bug_in_groups) && !$ccuser->can_see_bug($bug->bug_id));
-            next if $attachment_is_private
-              && Bugzilla->params->{"insidergroup"}
-              && !$ccuser->in_group(Bugzilla->params->{"insidergroup"});
-            push(@new_cc_list, $cc);
-        }
-        $flag->type->{'cc_list'} = join(", ", @new_cc_list);
+    my %recipients;
+    foreach my $cc (split(/[, ]+/, $flag->type->cc_list)) {
+        my $ccuser = new Bugzilla::User({ name => $cc });
+        next if (scalar(@bug_in_groups) && (!$ccuser || !$ccuser->can_see_bug($bug->bug_id)));
+        next if $attachment_is_private && (!$ccuser || !$ccuser->is_insider);
+        # Prevent duplicated entries due to case sensitivity.
+        $cc = $ccuser ? $ccuser->email : $cc;
+        $recipients{$cc} = $ccuser;
     }
 
-    # If there is nobody left to notify, return.
-    return unless ($flag->{'addressee'} || $flag->type->cc_list);
-
-    my @recipients = split(/[, ]+/, $flag->type->cc_list);
     # Only notify if the addressee is allowed to receive the email.
     if ($flag->{'addressee'} && $flag->{'addressee'}->email_enabled) {
-        push @recipients, $flag->{'addressee'}->email;
+        $recipients{$flag->{'addressee'}->email} = $flag->{'addressee'};
     }
-    # Process and send notification for each recipient
-    foreach my $to (@recipients)
-    {
-        next unless $to;
+    # Process and send notification for each recipient.
+    # If there are users in the CC list who don't have an account,
+    # use the default language for email notifications.
+    my $default_lang;
+    if (grep { !$_ } values %recipients) {
+        my $default_user = new Bugzilla::User();
+        $default_lang = $default_user->settings->{'lang'}->{'value'};
+    }
+
+    foreach my $to (keys %recipients) {
         my $vars = { 'flag'       => $flag,
                      'to'         => $to,
                      'bug'        => $bug,
                      'attachment' => $attachment};
-        my $message;
-        my $rv = $template->process("request/email.txt.tmpl", $vars, \$message);
-        if (!$rv) {
-            Bugzilla->cgi->header();
-            ThrowTemplateError($template->error());
-        }
 
+        my $lang = $recipients{$to} ?
+          $recipients{$to}->settings->{'lang'}->{'value'} : $default_lang;
+
+        my $template = Bugzilla->template_inner($lang);
+        my $message;
+        $template->process("request/email.txt.tmpl", $vars, \$message)
+          || ThrowTemplateError($template->error());
+
+        Bugzilla->template_inner("");
         MessageToMTA($message);
     }
 }

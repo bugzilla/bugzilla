@@ -247,9 +247,7 @@ sub view {
     print $cgi->header(-type=>"$contenttype; name=\"$filename\"",
                        -content_disposition=> "inline; filename=\"$filename\"",
                        -content_length => $attachment->datasize);
-    if (Bugzilla->params->{'utf8'}) {
-        binmode STDOUT, ':raw'; # Turn off UTF8 encoding.
-    }
+    disable_utf8();
     print $attachment->data;
 }
 

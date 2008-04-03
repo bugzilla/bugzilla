@@ -44,7 +44,7 @@ use base qw(Exporter);
                              file_mod_time is_7bit_clean
                              bz_crypt generate_random_password
                              validate_email_syntax clean_text
-                             get_text);
+                             get_text disable_utf8);
 
 use Bugzilla::Constants;
 
@@ -534,6 +534,12 @@ sub get_netaddr {
     return join(".", unpack("CCCC", pack("N", $addr)));
 }
 
+sub disable_utf8 {
+    if (Bugzilla->params->{'utf8'}) {
+        binmode STDOUT, ':raw'; # Turn off UTF8 encoding.
+    }
+}
+
 1;
 
 __END__
@@ -780,6 +786,10 @@ The search starts at $maxpos and goes back to the beginning of the string.
 
 Returns true is the string contains only 7-bit characters (ASCII 32 through 126,
 ASCII 10 (LineFeed) and ASCII 13 (Carrage Return).
+
+=item C<disable_utf8()>
+
+Disable utf8 on STDOUT (and display raw data instead).
 
 =item C<clean_text($str)>
 Returns the parameter "cleaned" by exchanging non-printable characters with spaces.

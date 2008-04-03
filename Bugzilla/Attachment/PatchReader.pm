@@ -21,7 +21,9 @@ package Bugzilla::Attachment::PatchReader;
 
 use Bugzilla::Error;
 use Bugzilla::Attachment;
+use Bugzilla::Util;
 
+use Encode;
 
 sub process_diff {
     my ($attachment, $format, $context) = @_;
@@ -38,7 +40,7 @@ sub process_diff {
         # Actually print out the patch.
         print $cgi->header(-type => 'text/plain',
                            -expires => '+3M');
-
+        disable_utf8();
         $reader->iterate_string('Attachment ' . $attachment->id, $attachment->data);
     }
     else {
@@ -74,7 +76,12 @@ sub process_diff {
         $vars->{'other_patches'} = \@other_patches;
 
         setup_template_patch_reader($last_reader, $format, $context, $vars);
-        # Actually print out the patch.
+        # The patch is going to be displayed in a HTML page and if the utf8
+        # param is enabled, we have to encode attachment data as utf8.
+        # Encode::decode() knows what to do with invalid characters.
+        if (Bugzilla->params->{'utf8'}) {
+            $attachment->{data} = Encode::decode_utf8($attachment->data);
+        }
         $reader->iterate_string('Attachment ' . $attachment->id, $attachment->data);
     }
 }
@@ -85,10 +92,18 @@ sub process_interdiff {
     my $lc  = Bugzilla->localconfig;
     my $vars = {};
 
+    # Encode attachment data as utf8 if it's going to be displayed in a HTML
+    # page using the UTF-8 encoding.
+    # Encode::decode() knows what to do with invalid characters.
+    if ($format ne 'raw' && Bugzilla->params->{'utf8'}) {
+        $old_attachment->{data} = Encode::decode_utf8($old_attachment->data);
+        $new_attachment->{data} = Encode::decode_utf8($new_attachment->data);
+    }
+
     # Get old patch data.
-    my ($old_filename, $old_file_list) = get_unified_diff($old_attachment);
+    my ($old_filename, $old_file_list) = get_unified_diff($old_attachment, $format);
     # Get new patch data.
-    my ($new_filename, $new_file_list) = get_unified_diff($new_attachment);
+    my ($new_filename, $new_file_list) = get_unified_diff($new_attachment, $format);
 
     my $warning = warn_if_interdiff_might_fail($old_file_list, $new_file_list);
 
@@ -105,8 +120,12 @@ sub process_interdiff {
         # Actually print out the patch.
         print $cgi->header(-type => 'text/plain',
                            -expires => '+3M');
+        disable_utf8();
     }
     else {
+        # In case the HTML page is displayed with the UTF-8 encoding.
+        binmode $interdiff_fh, ':utf8' if Bugzilla->params->{'utf8'};
+
         $vars->{'warning'} = $warning if $warning;
         $vars->{'bugid'} = $new_attachment->bug_id;
         $vars->{'oldid'} = $old_attachment->id;
@@ -131,7 +150,7 @@ sub process_interdiff {
 ######################
 
 sub get_unified_diff {
-    my $attachment = shift;
+    my ($attachment, $format) = @_;
 
     # Bring in the modules we need.
     require PatchReader::Raw;
@@ -162,6 +181,10 @@ sub get_unified_diff {
 
     # Prints out to temporary file.
     my ($fh, $filename) = File::Temp::tempfile();
+    if ($format ne 'raw' && Bugzilla->params->{'utf8'}) {
+        # The HTML page will be displayed with the UTF-8 encoding.
+        binmode $fh, ':utf8';
+    }
     my $raw_printer = new PatchReader::DiffPrinter::raw($fh);
     $last_reader->sends_data_to($raw_printer);
     $last_reader = $raw_printer;
@@ -245,7 +268,7 @@ sub setup_template_patch_reader {
         $vars->{'headers'} = $cgi->param('headers');
     }
     else {
-        $vars->{'headers'} = 1 if !defined $cgi->param('headers');
+        $vars->{'headers'} = 1;
     }
 
     $vars->{'collapsed'} = $cgi->param('collapsed');

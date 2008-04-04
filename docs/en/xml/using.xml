@@ -72,7 +72,7 @@
         <para>
           By default, you have 3 days to confirm your registration. Past this
           timeframe, the token is invalidated and the registration is
-          automatically canceled. You can also cancel this registration sooner
+          automatically cancelled. You can also cancel this registration sooner
           by using the appropriate URL in the email you got.
         </para>
       </listitem>
@@ -243,7 +243,7 @@
       <listitem>
         <para>
         <emphasis>Priority:</emphasis>
-        The bug assignee uses this field to prioritize his or her bugs.
+        The bug assignee uses this field to prioritise his or her bugs.
         It's a good idea not to change this on other people's bugs.</para>
       </listitem>
 
@@ -402,8 +402,8 @@
       have them show up in your personal Bugzilla footer along with your own
       Saved Searches.
       If somebody is sharing a Search with a group she or he is allowed to
-      <link linkend="groups">assign users to</link>, the sharer may opt to have
-      the Search show up in the group's direct members' footers by default.
+      <link linkend="groups">assign users to</link>, it will show up in the
+      group's direct members' footers by default.
     </para>
 
     <section id="boolean">
@@ -1064,7 +1064,7 @@
   <section id="userpreferences">
     <title>User Preferences</title>
 
-    <para>Once you have logged in, you can customize various aspects of
+    <para>Once you have logged in, you can customise various aspects of
     Bugzilla via the "Edit prefs" link in the page footer.
     The preferences are split into three tabs:</para>
 

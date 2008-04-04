@@ -1,55 +1,93 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" [
 
 <!-- Include macros -->
-<!ENTITY about SYSTEM "about.sgml">
-<!ENTITY conventions SYSTEM "conventions.sgml">
-<!ENTITY doc-index SYSTEM "index.sgml">
-<!ENTITY faq SYSTEM "faq.sgml">
-<!ENTITY gfdl SYSTEM "gfdl.sgml">
-<!ENTITY glossary SYSTEM "glossary.sgml">
-<!ENTITY installation SYSTEM "installation.sgml">
-<!ENTITY administration SYSTEM "administration.sgml">
-<!ENTITY using SYSTEM "using.sgml">
-<!ENTITY integration SYSTEM "integration.sgml">
-<!ENTITY future SYSTEM "future.sgml">
-<!ENTITY index SYSTEM "index.sgml">
-<!ENTITY database SYSTEM "database.sgml">
-<!ENTITY patches SYSTEM "patches.sgml">
-<!ENTITY variants SYSTEM "variants.sgml">
-<!ENTITY requiredsoftware SYSTEM "requiredsoftware.sgml">
-<!ENTITY revhistory SYSTEM "revhistory.sgml">
+<!ENTITY about SYSTEM "about.xml">
+<!ENTITY conventions SYSTEM "conventions.xml">
+<!ENTITY doc-index SYSTEM "index.xml">
+<!ENTITY faq SYSTEM "faq.xml">
+<!ENTITY gfdl SYSTEM "gfdl.xml">
+<!ENTITY glossary SYSTEM "glossary.xml">
+<!ENTITY installation SYSTEM "installation.xml">
+<!ENTITY administration SYSTEM "administration.xml">
+<!ENTITY security SYSTEM "security.xml">
+<!ENTITY using SYSTEM "using.xml">
+<!ENTITY integration SYSTEM "integration.xml">
+<!ENTITY index SYSTEM "index.xml">
+<!ENTITY customization SYSTEM "customization.xml">
+<!ENTITY patches SYSTEM "patches.xml">
+<!ENTITY introduction SYSTEM "introduction.xml">
+<!ENTITY modules SYSTEM "modules.xml">
 
+<!-- Things to change for a stable release:
+     * bz-ver to current stable
+     * bz-nexver to next stable
+     * bz-date to the release date
+     * bz-devel to "IGNORE"
+     - COMPILE DOCS AND CHECKIN -
+       Also, tag and tarball before completing
+     * bz-ver to devel version
+     * bz-devel to "INCLUDE"
+ 
+     For a devel release, simple bump bz-ver and bz-date
+-->
+
+<!ENTITY bz-ver "2.19.1">
+<!ENTITY bz-nextver "2.20">
+<!ENTITY bz-date "2004-10-24">
+<!ENTITY % bz-devel "INCLUDE">
+<!ENTITY current-year "2004">
+
+<!ENTITY landfillbase "http://landfill.bugzilla.org/bugzilla-tip/">
 <!ENTITY bz "http://www.bugzilla.org/">
-<!ENTITY bz-ver "2.16">
-<!ENTITY bz-cvs-ver "2.17">
-<!ENTITY bzg-date "April 2nd, 2002">
-<!ENTITY bzg-ver "2.16">
-<!ENTITY bzg-cvs-ver "2.17.0">
-<!ENTITY bzg-auth "The Bugzilla Team">
-<!ENTITY bzg-bugs "<ulink url='http://bugzilla.mozilla.org/enter_bug.cgi?product=Bugzilla&amp;component=Documentation'>Bugzilla</ulink>">
+<!ENTITY bzg-bugs "<ulink url='http://bugzilla.mozilla.org/enter_bug.cgi?product=Bugzilla&amp;component=Documentation'>Bugzilla Documentation</ulink>">
 <!ENTITY mysql "http://www.mysql.com/">
-<!ENTITY perl-ver "5.6.1">
+<!ENTITY newest-perl-ver "5.8.3">
+
+<!-- For minimum versions -->
+<!ENTITY min-mysql-ver "3.23.41">
+<!ENTITY min-perl-ver "5.6.0">
+<!ENTITY min-perl-ver-win "5.8.1">
+<!ENTITY min-template-ver "2.08">
+<!ENTITY min-file-temp-ver "any">
+<!ENTITY min-appconfig-ver "1.52">
+<!ENTITY min-text-wrap-ver "2001.0131">
+<!ENTITY min-file-spec-ver "0.82">
+<!ENTITY min-data-dumper-ver "any">
+<!ENTITY min-dbd-mysql-ver "2.1010">
+<!ENTITY min-dbi-ver "1.36">
+<!ENTITY min-date-format-ver "2.21">
+<!ENTITY min-cgi-ver "2.93">
+<!-- Optional modules -->
+<!ENTITY min-gd-ver "1.20">
+<!ENTITY min-gd-graph-ver "any">
+<!ENTITY min-gd-text-align-ver "any">
+<!ENTITY min-chart-base-ver "1.0">
+<!ENTITY min-xml-parser-ver "any">
+<!ENTITY min-mime-parser-ver "any">
+<!ENTITY min-patchreader-ver "0.9.4">
 
 ]>
 
 
 <!-- Coding standards for this document 
 
-*  Other than the GFDL, please use the "section" tag instead of "sect1", "sect2", etc.
-*  Use Entities to include files for new chapters in Bugzilla-Guide.sgml.
+*  Other than the GFDL, please use the "section" tag instead of "sect1", 
+   "sect2", etc.
+*  Use Entities to include files for new chapters in Bugzilla-Guide.xml.
 *  Try to use Entities for frequently-used passages of text as well.
 *  Ensure all documents compile cleanly to HTML after modification.
-The warning, "DTDDECL catalog types not supported" is normal.
+   The warning, "DTDDECL catalog types not supported" is normal.
 *  Try to index important terms wherever possible.
 *  Use "glossterm" whenever you introduce a new term.
-*  Follow coding standards at http://www.linuxdoc.org, and
-check out the KDE guidelines (they are nice, too)
-http://i18n.kde.org/doc/markup.html
-*  All tags should be lowercase (needsfix)
+*  Follow coding standards at http://www.tldp.org, and
+   check out the KDE guidelines (they are nice, too)
+   http://i18n.kde.org/doc/markup.html
+*  All tags should be lowercase.
 *  Please use sensible spacing.  The comments at the very end of each
-file define reasonable defaults for PSGML mode in EMACS.
-Double-indent tags, use double spacing whenever possible, and
-try to avoid clutter and feel free to waste space in the code to make it more readable.
+   file define reasonable defaults for PSGML mode in EMACS.
+*  Double-indent tags, use double spacing whenever possible, and
+   try to avoid clutter and feel free to waste space in the code to make it 
+   more readable.
 
 -->
 
@@ -58,35 +96,31 @@ try to avoid clutter and feel free to waste space in the code to make it more re
 <!-- Header -->
 
   <bookinfo>
-    <title>The Bugzilla Guide</title>
+    <title>The Bugzilla Guide - &bz-ver; 
+    <![%bz-devel;[Development ]]>Release</title>
 
     <authorgroup>
-
-      <author>
-	<firstname>Matthew</firstname>
-	<othername>P.</othername>
-	<surname>Barnson</surname>
-	<affiliation>
-	  <address><email>mbarnson@sisna.com</email></address>
-	</affiliation>
-      </author>
+      <corpauthor>The Bugzilla Team</corpauthor>
     </authorgroup>
+
+    <pubdate>&bz-date;</pubdate>
 
     <abstract>
       <para>
-	This is the documentation for Bugzilla, the mozilla.org
-	bug-tracking system.
-	Bugzilla is an enterprise-class piece of software
-	that powers issue-tracking for hundreds of
-	organizations around the world, tracking millions of bugs.
+	      This is the documentation for Bugzilla, a 
+	      bug-tracking system from mozilla.org.
+	      Bugzilla is an enterprise-class piece of software
+	      that tracks millions of bugs and issues for hundreds of
+	      organizations around the world.
       </para>
-      <para>
-	This documentation is maintained in DocBook 4.1.2 XML format.
-  Changes are best submitted as plain text or SGML diffs, attached
-  to a Bugzilla bug.
-      </para>
-    </abstract>
 
+      <para>
+        The most current version of this document can always be found on the
+        <ulink url="http://www.bugzilla.org/documentation.html">Bugzilla 
+        Documentation Page</ulink>.
+      </para>
+
+    </abstract>
 
     <keywordset>
       <keyword>Bugzilla</keyword>
@@ -104,34 +138,31 @@ try to avoid clutter and feel free to waste space in the code to make it more re
 <!-- About This Guide -->
 &about;
 
-<!-- Using Bugzilla -->
-&using;
-
 <!-- Installing Bugzilla -->
 &installation;
 
 <!-- Administering Bugzilla -->
 &administration;
 
-<!-- Integrating Bugzilla with Third-Party Tools -->
-&integration;
+<!-- Securing Bugzilla -->
+&security;
 
-<!-- Major Bugzilla Variants -->
-&variants;
+<!-- Customizing Bugzilla -->
+&customization;
+
+<!-- Using Bugzilla -->
+&using;
 
 <!-- Appendix: The Frequently Asked Questions -->
 &faq;
 
-<!-- Appendix: Required Bugzilla Software Links -->
-&requiredsoftware;
-
-<!-- Appendix: The Database Schema -->
-&database;
-
 <!-- Appendix: Custom Patches -->
 &patches;
 
-<!-- Appendix: The GNU Free Documentation License -->
+<!-- Appendix: Manually Installing Perl Modules -->
+&modules;
+
+<!-- Appendix: GNU Free Documentation License -->
 &gfdl;
 
 <!-- Glossary -->
@@ -158,7 +189,7 @@ sgml-local-ecat-files:nil
 sgml-minimize-attributes:nil
 sgml-namecase-general:t
 sgml-omittag:t
-sgml-parent-document:("Bugzilla-Guide.sgml" "book" "chapter")
+sgml-parent-document:("Bugzilla-Guide.xml" "book" "chapter")
 sgml-shorttag:t
 sgml-tag-region-if-active:t
 End:

@@ -19,19 +19,32 @@
 <!ENTITY introduction SYSTEM "introduction.sgml">
 <!ENTITY revhistory SYSTEM "revhistory.sgml">
 
+<!-- Things to change for a stable release:
+     * bz-ver to current stable
+     * bz-nexver to next stable
+     * bz-date to the release date
+     * bz-devel to "IGNORE"
+     - COMPILE DOCS AND CHECKIN -
+       Also, tag and tarball before completing
+     * bz-ver to devel version
+     * bz-devel to "INCLUDE"
+ 
+     For a devel release, simple bump bz-ver and bz-date
+-->
+
+<!ENTITY bz-ver "2.17.4">
+<!ENTITY bz-nextver "2.18">
+<!ENTITY bz-date "2003-02-16">
+<!ENTITY % bz-devel "INCLUDE">
+
 <!ENTITY bz "http://www.bugzilla.org/">
-<!ENTITY bz-ver "2.16">
-<!ENTITY bz-cvs-ver "2.17">
-<!ENTITY bzg-date "April 2nd, 2002">
-<!ENTITY bzg-ver "2.16">
-<!ENTITY bzg-cvs-ver "2.17.0">
 <!ENTITY bzg-auth "The Bugzilla Team">
-<!ENTITY bzg-bugs "<ulink url='http://bugzilla.mozilla.org/enter_bug.cgi?product=Bugzilla&amp;component=Documentation'>Bugzilla</ulink>">
+<!ENTITY bzg-bugs "<ulink url='http://bugzilla.mozilla.org/enter_bug.cgi?product=Bugzilla&amp;component=Documentation'>Bugzilla Documentation</ulink>">
 <!ENTITY mysql "http://www.mysql.com/">
 <!ENTITY newest-perl-ver "5.8">
 
 <!-- For minimum versions -->
-<!ENTITY min-mysql-ver "3.23.6">
+<!ENTITY min-mysql-ver "3.23.41">
 <!ENTITY min-perl-ver "5.6">
 <!ENTITY min-template-ver "2.08">
 <!ENTITY min-file-temp-ver "1.804">
@@ -39,9 +52,9 @@
 <!ENTITY min-text-wrap-ver "2001.0131">
 <!ENTITY min-file-spec-ver "0.82">
 <!ENTITY min-data-dumper-ver "any">
-<!ENTITY min-dbd-mysql-ver "1.2209">
-<!ENTITY min-dbi-ver "1.13">
-<!ENTITY min-date-parse-ver "any">
+<!ENTITY min-dbd-mysql-ver "2.1010">
+<!ENTITY min-dbi-ver "1.32">
+<!ENTITY min-date-format-ver "2.21">
 <!ENTITY min-cgi-ver "2.88">
 <!-- Optional modules -->
 <!ENTITY min-gd-ver "1.20">
@@ -63,7 +76,7 @@
 The warning, "DTDDECL catalog types not supported" is normal.
 *  Try to index important terms wherever possible.
 *  Use "glossterm" whenever you introduce a new term.
-*  Follow coding standards at http://www.linuxdoc.org, and
+*  Follow coding standards at http://www.tldp.org, and
 check out the KDE guidelines (they are nice, too)
 http://i18n.kde.org/doc/markup.html
 *  All tags should be lowercase (needsfix)
@@ -79,7 +92,7 @@ try to avoid clutter and feel free to waste space in the code to make it more re
 <!-- Header -->
 
   <bookinfo>
-    <title>The Bugzilla Guide</title>
+    <title>The Bugzilla Guide - &bz-ver; <![%bz-devel;[Development ]]>Release</title>
 
     <authorgroup>
       <author>
@@ -88,11 +101,13 @@ try to avoid clutter and feel free to waste space in the code to make it more re
         <surname>Barnson</surname>
       </author>
       <author>
-        <firstname>The</firstname>
-        <othername>Bugzilla</othername>
-        <surname>Team</surname>
+        <firstname>Jacob</firstname>
+        <surname>Steenhagen</surname>
       </author>
+      <corpauthor>The Bugzilla Team</corpauthor>
     </authorgroup>
+
+    <pubdate>&bz-date;</pubdate>
 
     <abstract>
       <para>
@@ -106,9 +121,14 @@ try to avoid clutter and feel free to waste space in the code to make it more re
       <para>  
 	      This documentation is maintained in DocBook 4.1.2 XML format.
         Changes are best submitted as plain text or SGML diffs, attached
-        to a bug filed in
-        <ulink url="http://bugzilla.mozilla.org/enter_bug.cgi?product=Bugzilla&amp;component=Documentation">mozilla.org's Bugzilla</ulink>.
+        to a bug filed in the &bzg-bugs; compontent.
       </para>
+      <![%bz-devel;[
+        <para>This is a development version of this guide.  Information in it
+        is subject to change before the &bz-nextver; release of this guide
+        (which will correspond with the &bz-nextver; release of Bugzilla).
+        </para>
+      ]]>
     </abstract>
 
     <keywordset>
@@ -150,6 +170,9 @@ try to avoid clutter and feel free to waste space in the code to make it more re
 
 <!-- Appendix: Major Bugzilla Variants -->
 &variants;
+
+<!-- Appendix: GNU Free Documentation License -->
+&gfdl;
 
 <!-- Glossary -->
 &glossary;

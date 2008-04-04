@@ -1,5 +1,5 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"> -->
-<!-- $Id: troubleshooting.xml,v 1.10 2008/04/04 06:48:22 uid623 Exp $ -->
+<!-- $Id: troubleshooting.xml,v 1.5 2008/04/04 06:48:17 travis%sedsystems.ca Exp $ -->
 
 <appendix id="troubleshooting">
 <title>Troubleshooting</title>
@@ -15,7 +15,7 @@
     completion, it normally explains what's wrong and how to fix it.
     If you can't work it out, or if it's being uncommunicative, post 
     the errors in the 
-    <ulink url="news://news.mozilla.org/mozilla.support.bugzilla">mozilla.support.bugzilla</ulink>
+    <ulink url="news://news.mozilla.org/netscape.public.mozilla.webtools">netscape.public.mozilla.webtools</ulink>
     newsgroup.
     </para>
 
@@ -28,19 +28,6 @@
     you see may be self-explanatory enough to enable you to diagnose and
     fix the problem. If not, see below for some commonly-encountered 
     errors. If that doesn't help, post the errors to the newsgroup.
-    </para>
-
-    <para>
-      Bugzilla can also log all user-based errors (and many code-based errors)
-      that occur, without polluting the web server error log.  To enable
-      Bugzilla error logging, create a file that Bugzilla can write to, named
-      <filename>errorlog</filename>, in the Bugzilla <filename>data</filename>
-      directory.  Errors will be logged as they occur, and will include the type
-      of the error, the IP address and username (if available) of the user who
-      triggered the error, and the values of all environment variables; if a
-      form was being submitted, the data in the form will also be included.
-      To disable error logging, delete or rename the
-      <filename>errorlog</filename> file.
     </para>
   </section>
         
@@ -274,7 +261,7 @@ at /usr/lib/perl5/site_perl/5.6.0/File/Temp.pm line 233.</programlisting>
     </para>
   </section>
 
-  <section id="trbl-relogin-some">
+  <section>
   <title>Some users are constantly being forced to relogin</title>
 
     <para>First, make sure cookies are enabled in the user's browser.

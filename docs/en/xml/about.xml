@@ -1,6 +1,6 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook V4.1//EN" [
 <!ENTITY conventions SYSTEM "conventions.xml"> ] > -->
-<!-- $Id: about.xml,v 1.21 2008/04/04 06:48:13 mozilla%colinogilvie.co.uk Exp $ -->
+<!-- $Id: about.xml,v 1.19 2008/04/04 06:48:11 jake%bugzilla.org Exp $ -->
 
 <chapter id="about">
 <title>About This Guide</title>

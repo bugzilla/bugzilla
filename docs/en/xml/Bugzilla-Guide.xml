@@ -31,44 +31,39 @@
      For a devel release, simple bump bz-ver and bz-date
 -->
 
-<!ENTITY bz-ver "2.22rc1">
-<!ENTITY bz-nextver "2.24">
-<!ENTITY bz-date "2006-02-20">
-<!ENTITY current-year "2006">
+<!ENTITY bz-ver "2.19.1">
+<!ENTITY bz-nextver "2.20">
+<!ENTITY bz-date "2004-10-24">
+<!ENTITY current-year "2004">
 
 <!ENTITY landfillbase "http://landfill.bugzilla.org/bugzilla-tip/">
 <!ENTITY bz "http://www.bugzilla.org/">
 <!ENTITY bzg-bugs "<ulink url='http://bugzilla.mozilla.org/enter_bug.cgi?product=Bugzilla&amp;component=Documentation'>Bugzilla Documentation</ulink>">
 <!ENTITY mysql "http://www.mysql.com/">
+<!ENTITY newest-perl-ver "5.8.3">
 
 <!-- For minimum versions -->
-<!ENTITY min-mysql-ver "4.0.14">
-<!ENTITY min-pg-ver "7.3.x">
-<!ENTITY min-perl-ver "5.6.1">
+<!ENTITY min-mysql-ver "3.23.41">
+<!ENTITY min-perl-ver "5.6.0">
 <!ENTITY min-perl-ver-win "5.8.1">
 <!ENTITY min-template-ver "2.08">
 <!ENTITY min-file-temp-ver "any">
 <!ENTITY min-appconfig-ver "1.52">
 <!ENTITY min-text-wrap-ver "2001.0131">
-<!ENTITY min-file-spec-ver "0.84">
+<!ENTITY min-file-spec-ver "0.82">
 <!ENTITY min-data-dumper-ver "any">
-<!ENTITY min-dbd-mysql-ver "2.9003">
-<!ENTITY min-dbd-pg-ver "1.31">
-<!ENTITY min-dbi-ver "1.38">
+<!ENTITY min-dbd-mysql-ver "2.1010">
+<!ENTITY min-dbi-ver "1.36">
 <!ENTITY min-date-format-ver "2.21">
 <!ENTITY min-cgi-ver "2.93">
-<!ENTITY min-mail-mailer-ver "1.67">
-<!ENTITY min-mime-base64-ver "3.01">
-<!ENTITY min-mime-parser-ver "5.406">
-<!ENTITY min-storable-ver "any">
 <!-- Optional modules -->
 <!ENTITY min-gd-ver "1.20">
 <!ENTITY min-gd-graph-ver "any">
 <!ENTITY min-gd-text-align-ver "any">
 <!ENTITY min-chart-base-ver "1.0">
 <!ENTITY min-xml-parser-ver "any">
+<!ENTITY min-mime-parser-ver "any">
 <!ENTITY min-patchreader-ver "0.9.4">
-<!ENTITY min-image-magick-ver "any">
 
 ]>
 

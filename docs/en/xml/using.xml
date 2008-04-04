@@ -1300,10 +1300,181 @@
     <section id="permissionsettings">
       <title>Permissions</title>
       
-      <para>This is a purely informative page which outlines your current
-      permissions on this installation of Bugzilla - what product groups you
-      are in, and whether you can edit bugs or perform various administration
-      functions.</para>
+      <para>
+      This is a purely informative page which outlines your current
+      permissions on this installation of Bugzilla.
+      </para>
+
+      <para>
+      A complete list of permissions is below. Only users with 
+      <emphasis>editusers</emphasis> privileges can change the permissions 
+      of other users.
+      </para>
+
+      <variablelist>
+        <varlistentry>
+          <term>
+            admin
+          </term>
+          <listitem>
+            <para> 
+             Indicates user is an Administrator.
+            </para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>
+            bz_canusewhineatothers
+          </term>
+          <listitem>
+            <para> 
+             Indicates user can configure whine reports for other users.
+            </para>
+          </listitem>
+        </varlistentry>
+    	
+        <varlistentry>
+          <term>
+             bz_canusewhines
+          </term>
+          <listitem>
+            <para> 
+             Indicates user can configure whine reports for self.
+            </para>
+          </listitem>
+        </varlistentry>
+  
+        <varlistentry>
+          <term>
+             bz_canusewhines
+          </term>
+          <listitem>
+            <para> 
+             Indicates user can configure whine reports for self.
+            </para>
+          </listitem>
+        </varlistentry>	 	
+ 
+        <varlistentry>
+          <term>
+             bz_sudoers
+          </term>
+          <listitem>
+            <para> 
+             Indicates user can perform actions as other users.
+            </para>
+          </listitem>
+        </varlistentry>	
+
+        <varlistentry>
+          <term>
+             bz_sudo_protect
+          </term>
+          <listitem>
+            <para> 
+             Indicates user can not be impersonated by other users.
+            </para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>
+             canconfirm
+          </term>
+          <listitem>
+            <para> 
+             Indicates user can confirm a bug or mark it a duplicate.
+            </para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>
+             creategroups
+          </term>
+          <listitem>
+            <para> 
+             Indicates user can create and destroy groups.
+            </para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>
+             editbugs
+          </term>
+          <listitem>
+            <para> 
+             Indicates user can edit all bug fields.
+            </para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>
+             editclassifications
+          </term>
+          <listitem>
+            <para> 
+             Indicates user can create, destroy, and edit classifications.
+            </para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>
+             editcomponents
+          </term>
+          <listitem>
+            <para> 
+             Indicates user can create, destroy, and edit components.
+            </para>
+          </listitem>
+        </varlistentry>
+ 
+        <varlistentry>
+          <term>
+             editkeywords
+          </term>
+          <listitem>
+            <para> 
+             Indicates user can create, destroy, and edit keywords.
+            </para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>
+             editusers
+          </term>
+          <listitem>
+            <para> 
+             Indicates user can edit or disable users.
+            </para>
+          </listitem>
+        </varlistentry>
+	
+        <varlistentry>
+          <term>
+             tweakparams
+          </term>
+          <listitem>
+            <para> 
+             Indicates user can change Parameters.
+            </para>
+          </listitem>
+        </varlistentry>
+
+      </variablelist>
+
+       <note>
+        <para>
+        For more information on how permissions work in Bugzilla (i.e. who can
+        change what), see  <xref linkend="cust-change-permissions"/>. 
+        </para>
+       </note>
+
     </section>
   </section>
   

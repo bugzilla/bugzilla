@@ -6,7 +6,6 @@ html/		# The compiled HTML docs from XML sources (do not edit)
 txt/		# The compiled text docs from XML sources (do not edit)
 xml/		# The original XML doc sources (edit these)
 
-
 A note about the XML:
   The documentation is written in DocBook 4.1.2, and attempts to adhere
 to the LinuxDoc standards where applicable (http://www.tldp.org).

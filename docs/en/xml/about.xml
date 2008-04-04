@@ -1,26 +1,30 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook V4.1//EN" [
-<!ENTITY conventions SYSTEM "conventions.sgml"> ] > -->
+<!ENTITY conventions SYSTEM "conventions.xml"> ] > -->
+<!-- $Id: about.xml,v 1.17 2008/04/04 06:48:09 jake%bugzilla.org Exp $ -->
 
 <chapter id="about">
 <title>About This Guide</title>
 
   <section id="copyright">
     <title>Copyright Information</title>
+
+    <para>This document is copyright (c) 2000-&current-year; by the various
+    Bugzilla contributors who wrote it.</para>
+    
     <blockquote>
-      <attribution>Copyright (c) 2000-2003 Matthew P. Barnson and &bzg-auth;</attribution>
       <para>
 	Permission is granted to copy, distribute and/or modify this
 	document under the terms of the GNU Free Documentation
-	License, Version 1.1 or any later version published  by the
+	License, Version 1.1 or any later version published by the
 	Free Software Foundation; with no Invariant Sections, no
-	Front-Cover Texts, and  with no Back-Cover Texts.  A copy of
+	Front-Cover Texts, and with no Back-Cover Texts. A copy of
 	the license is included in <xref linkend="gfdl"/>.
       </para>
     </blockquote>
     <para>
       If you have any questions regarding this document, its
       copyright, or publishing this document in non-electronic form,
-      please contact &bzg-auth;. 
+      please contact the Bugzilla Team. 
     </para>
   </section>
 
@@ -28,7 +32,7 @@
     <title>Disclaimer</title>
     <para>
       No liability for the contents of this document can be accepted.
-      Use the concepts, examples, and other content at your own risk.
+      Follow the instructions herein at your own risk.
       This document may contain errors
       and inaccuracies that may damage your system, cause your partner 
       to leave you, your boss to fire you, your cats to
@@ -36,35 +40,20 @@
       war. Proceed with caution.
     </para>
     <para>
-      All copyrights are held by their respective owners, unless
-      specifically noted otherwise.  Use of a term in this document
-      should not be regarded as affecting the validity of any
-      trademark or service mark.
-    </para>
-    <para>
       Naming of particular products or brands should not be seen as
-      endorsements, with the exception of the term "GNU/Linux".  We
-      wholeheartedly endorse the use of GNU/Linux in every situation
-      where it is appropriate.  It is an extremely versatile, stable,
+      endorsements, with the exception of the term "GNU/Linux". We
+      wholeheartedly endorse the use of GNU/Linux; it is an extremely 
+      versatile, stable,
       and robust operating system that offers an ideal operating
       environment for Bugzilla.
     </para>
     <para>
-      You are strongly recommended to make a backup of your system
-      before installing Bugzilla and at regular intervals thereafter.
-      If you implement any suggestion in this Guide, implement this one!
-    </para>
-    <para>
       Although the Bugzilla development team has taken great care to
-      ensure that all easily-exploitable bugs or options are
-      documented or fixed in the code, security holes surely exist.
-      Great care should be taken both in the installation and usage of
-      this software. Carefully consider the implications of installing
-      other network services with Bugzilla.  The Bugzilla development
-      team members, Netscape Communications, America Online Inc., and
-      any affiliated developers or sponsors assume no liability for
-      your use of this product.  You have the source code to this
-      product, and are responsible for auditing it yourself to ensure
+      ensure that all exploitable bugs have been fixed, security holes surely 
+      exist in any piece of code. Great care should be taken both in 
+      the installation and usage of this software. The Bugzilla development
+      team members assume no liability for your use of Bugzilla. You have 
+      the source code, and are responsible for auditing it yourself to ensure
       your security needs are met.
     </para>
   </section>
@@ -77,35 +66,42 @@
       This is the &bz-ver; version of The Bugzilla Guide. It is so named 
       to match the current version of Bugzilla. 
       <![%bz-devel;[
-        This version of the guide, like its associated Bugzilla version is a
-        development version. Information is subject to change between now and
-        when &bz-nextver; is released.
+        This version of the guide, like its associated Bugzilla version, is a
+        development version. 
       ]]>
-      If you are
-      reading this from any source other than those below, please
-      check one of these mirrors to make sure you are reading an
-      up-to-date version of the Guide.
     </para>
     <para>
-      The newest version of this guide can always be found at <ulink
-      url="http://www.bugzilla.org">bugzilla.org</ulink>; including
-      documentation for past releases and the current development version.
+      The latest version of this guide can always be found at <ulink
+      url="http://www.bugzilla.org"/>, or checked out via CVS by
+      following the <ulink url="http://www.mozilla.org/cvs.html">Mozilla 
+      CVS</ulink> instructions and check out the 
+      <filename>mozilla/webtools/bugzilla/docs/</filename>
+      subtree. However, you should read the version
+      which came with the Bugzilla release you are using.
     </para>
     <para>
-      The documentation for the most recent stable release of Bugzilla can also
-      be found at
-      <ulink url="http://www.tldp.org">The Linux Documentation Project</ulink>.
+      The Bugzilla Guide, or a section of it, is also available in
+      the following languages:
+      <ulink url="http://bugzilla-de.sourceforge.net/docs/html/">German</ulink>.
     </para>
-    <para>
-      The latest version of this document can always be checked out via CVS.
-	    Please follow the instructions available at 
-      <ulink url="http://www.mozilla.org/cvs.html">the Mozilla CVS page</ulink>,
-      and check out the <filename>mozilla/webtools/bugzilla/docs/</filename>
-      subtree.
+    
+    <para>  
+      In addition, there are Bugzilla template localisation projects in
+      the following languages. They may have translated documentation 
+      available: 
+      <ulink url="http://sourceforge.net/projects/bugzilla-be/">Belarusian</ulink>,
+      <ulink url="http://sourceforge.net/projects/bugzilla-br/">Brazilian Portuguese</ulink>,
+      <ulink url="http://sourceforge.net/projects/bugzilla-cn/">Chinese</ulink>,
+      <ulink url="http://sourceforge.net/projects/bugzilla-fr/">French</ulink>,
+      <ulink url="http://sourceforge.net/projects/bugzilla-de/">German</ulink>,
+      <ulink url="http://sourceforge.net/projects/bugzilla-kr/">Korean</ulink>,
+      <ulink url="http://sourceforge.net/projects/bugzilla-ru/">Russian</ulink> and
+      <ulink url="http://sourceforge.net/projects/bugzilla-es/">Spanish</ulink>.
     </para>
-    <para>
-      The Bugzilla Guide is currently only available in English. 
-      If you would like to volunteer to translate it, please contact
+    
+    <para>  
+      If you would like to volunteer to translate the Guide into additional
+      languages, please contact
       <ulink url="mailto:justdave@syndicomm.com">Dave Miller</ulink>.
     </para>
   </section>
@@ -152,8 +148,7 @@
         <term>Dave Lawrence <email>dkl@redhat.com</email></term>
         <listitem>
           <para>for providing insight into the key differences between Red
-          Hat's customized Bugzilla, and being largely responsible for
-          <xref linkend="variant-redhat"/>.
+          Hat's customized Bugzilla.
           </para>
         </listitem>
       </varlistentry>
@@ -176,29 +171,42 @@
         </listitem>
       </varlistentry>
 
+      <varlistentry>
+	<term>Dave Miller <email>justdave@bugzilla.org</email></term>
+	<listitem>
+          <para>for taking over as project lead when Tara stepped down and
+	  continually pushing for the documentation to be the best it can be.
+          </para>
+        </listitem>
+      </varlistentry>
+
     </variablelist>
 
-    <para>
-      Last but not least, all the members of the 
-      <ulink url="news://news.mozilla.org/netscape/public/mozilla/webtools"/>
-      newsgroup.  Without your discussions, insight, suggestions, and patches,
-      this could never have happened.
-    </para>
+
     <para>
       Thanks also go to the following people for significant contributions 
-      to this documentation (in alphabetical order):
+      to this documentation:
       <simplelist type="inline">
-        <member>Andrew Pearson</member>
+        <member>Kevin Brannen</member>
         <member>Ben FrantzDale</member>
         <member>Eric Hanson</member>
+        <member>Zach Lipton</member>
         <member>Gervase Markham</member>
+        <member>Andrew Pearson</member>
         <member>Joe Robins</member>
-        <member>Kevin Brannen</member>
-        <member>Ron Teitelbaum</member>
         <member>Spencer Smith</member>
-        <member>Zach Liption</member>
-      </simplelist>
-      .
+        <member>Ron Teitelbaum</member>
+        <member>Shane Travis</member>
+        <member>Martin Wulffeld</member>
+      </simplelist>.
+    </para>
+    
+    <para>
+      Also, thanks are due to the members of the 
+      <ulink url="news://news.mozilla.org/netscape.public.mozilla.webtools">
+      netscape.public.mozilla.webtools</ulink>
+      newsgroup. Without your discussions, insight, suggestions, and patches,
+      this could never have happened.
     </para>
   </section>
 
@@ -221,7 +229,8 @@ sgml-local-ecat-files:nil
 sgml-minimize-attributes:nil
 sgml-namecase-general:t 
 sgml-omittag:t
-sgml-parent-document:("Bugzilla-Guide.sgml" "book" "chapter")
+sgml-parent-document:("Bugzilla-Guide.xml" "book" "chapter")
 sgml-shorttag:t 
 sgml-tag-region-if-active:t 
 End: -->
+

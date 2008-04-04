@@ -290,7 +290,7 @@
   <section id="query">
     <title>Searching for Bugs</title>
 
-    <para>The Bugzilla Search page is the interface where you can find
+    <para>The Bugzilla Search page is is the interface where you can find
     any bug report, comment, or patch currently in the Bugzilla system. You
     can play with it here: 
     <ulink url="&landfillbase;query.cgi"/>.</para>
@@ -796,76 +796,27 @@
   <section id="userpreferences">
     <title>User Preferences</title>
 
-    <para>Once you have logged in, you can customise various aspects of
+    <para>Once you have logged in, you can customise various aspects of 
     Bugzilla via the "Edit prefs" link in the page footer.
     The preferences are split into three tabs:</para>
 
-    <section id="accountpreferences" xreflabel="Account Preferences">
-      <title>Account Preferences</title>
+    <section id="accountsettings" xreflabel="Account Settings">
+      <title>Account Settings</title>
 
       <para>On this tab, you can change your basic account information,
       including your password, email address and real name. For security
-      reasons, in order to change anything on this page you must type your
+      reasons, in order to change anything on this page you must type your 
       <emphasis>current</emphasis>
-      password into the
+      password into the 
       <quote>Password</quote>
-      field at the top of the page.
+      field at the top of the page. 
       If you attempt to change your email address, a confirmation
       email is sent to both the old and new addresses, with a link to use to
       confirm the change. This helps to prevent account hijacking.</para>
     </section>
 
-    <section id="generalpreferences" xreflabel="General Preferences">
-      <title>General Preferences</title>
-
-      <para>
-        This tab allows you to change several Bugzilla behavior.
-      </para>
-
-      <itemizedlist spacing="compact">
-        <listitem>
-          <para>
-            Field separator character for CSV files -
-            This controls separator character used in CSV formatted Bug List.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            After changing bugs - This controls which bugs or no bugs
-            are shown in the page after you changed bugs.
-            You can select the bug you've changed this time, or the next
-            bug of the list.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            Add individual bugs to saved searches - this controls
-            whether you can add individual bugs to saved searches
-            or you can't.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            When viewing a bug, show comments in this order -
-            This controls the order of comments, you can select below:
-            <simplelist>
-              <member>Initial description, comment 1, comment 2, ...</member>
-              <member>Initial description, last comment, ..., comment 2, comment 1.</member>
-              <member>Initial last comment, ..., comment 2, comment 1, description.</member>
-            </simplelist>
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            Show a quip at the top of each bug list - This controls
-            whether a quip will be shown on the Bug list page or not.
-          </para>
-        </listitem>
-      </itemizedlist>
-    </section>
-
-    <section id="emailpreferences">
-      <title>Email Preferences</title>
+    <section id="emailsettings">
+      <title>Email Settings</title>
 
       <para>
         This tab controls the amount of email Bugzilla sends you.
@@ -901,7 +852,7 @@
           Your Bugzilla administrator can stop a user from receiving
           bugmail by adding the user's name to the 
           <filename>data/nomail</filename> file. This is a drastic step
-          best taken only for disabled accounts, as it overrides 
+          best taken only for disabled accounts, as it overrides the 
           the user's individual mail preferences.
         </para>
       </note>
@@ -1221,14 +1172,6 @@
       to the flag name and the user who has been requested to set the flag
       appended to the flag name within parentheses.  For example, if Jack
       asks Jill for review, it appears as Jack: review [ ? ] (Jill).
-    </para>
-
-    <para>
-      You can browse through open requests made of you and by you by selecting
-      'My Requests' from the footer. You can also look at open requests limited
-      by other requesters, requestees, products, components, and flag names from
-      this page. Note that you can use '-' for requestee to specify flags with
-      'no requestee' set.
     </para>
   </section>
 

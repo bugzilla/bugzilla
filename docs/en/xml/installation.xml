@@ -1,5 +1,5 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"> -->
-<!-- $Id: installation.xml,v 1.151 2008/04/04 06:48:21 lpsolit%gmail.com Exp $ -->
+<!-- $Id: installation.xml,v 1.152 2008/04/04 06:48:22 lpsolit%gmail.com Exp $ -->
 <chapter id="installing-bugzilla">
   <title>Installing Bugzilla</title>
 
@@ -2186,8 +2186,8 @@ pid-file=/home/foo/mymysql/the.pid
       Installing the Perl modules as a non-root user is accomplished by
       running the <filename>install-module.pl</filename>
       script. For more details on this script, see 
-      <link linkend="api/install-module.html"/>.  
-      
+      <ulink url="api/install-module.html"><filename>install-module.pl</filename>
+      documentation</ulink>
       </para>
     </section>
 

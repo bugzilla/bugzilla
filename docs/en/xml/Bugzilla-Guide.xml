@@ -1,91 +1,55 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" [
 
 <!-- Include macros -->
-<!ENTITY about SYSTEM "about.xml">
-<!ENTITY conventions SYSTEM "conventions.xml">
-<!ENTITY doc-index SYSTEM "index.xml">
-<!ENTITY faq SYSTEM "faq.xml">
-<!ENTITY gfdl SYSTEM "gfdl.xml">
-<!ENTITY glossary SYSTEM "glossary.xml">
-<!ENTITY installation SYSTEM "installation.xml">
-<!ENTITY administration SYSTEM "administration.xml">
-<!ENTITY using SYSTEM "using.xml">
-<!ENTITY integration SYSTEM "integration.xml">
-<!ENTITY index SYSTEM "index.xml">
-<!ENTITY customization SYSTEM "customization.xml">
-<!ENTITY patches SYSTEM "patches.xml">
-<!ENTITY introduction SYSTEM "introduction.xml">
-<!ENTITY modules SYSTEM "modules.xml">
+<!ENTITY about SYSTEM "about.sgml">
+<!ENTITY conventions SYSTEM "conventions.sgml">
+<!ENTITY doc-index SYSTEM "index.sgml">
+<!ENTITY faq SYSTEM "faq.sgml">
+<!ENTITY gfdl SYSTEM "gfdl.sgml">
+<!ENTITY glossary SYSTEM "glossary.sgml">
+<!ENTITY installation SYSTEM "installation.sgml">
+<!ENTITY administration SYSTEM "administration.sgml">
+<!ENTITY using SYSTEM "using.sgml">
+<!ENTITY integration SYSTEM "integration.sgml">
+<!ENTITY future SYSTEM "future.sgml">
+<!ENTITY index SYSTEM "index.sgml">
+<!ENTITY database SYSTEM "database.sgml">
+<!ENTITY patches SYSTEM "patches.sgml">
+<!ENTITY variants SYSTEM "variants.sgml">
+<!ENTITY requiredsoftware SYSTEM "requiredsoftware.sgml">
+<!ENTITY revhistory SYSTEM "revhistory.sgml">
 
-<!-- Things to change for a stable release:
-     * bz-ver to current stable
-     * bz-nexver to next stable
-     * bz-date to the release date
-     * bz-devel to "IGNORE"
-     - COMPILE DOCS AND CHECKIN -
-       Also, tag and tarball before completing
-     * bz-ver to devel version
-     * bz-devel to "INCLUDE"
- 
-     For a devel release, simple bump bz-ver and bz-date
--->
-
-<!ENTITY bz-ver "2.19">
-<!ENTITY bz-nextver "2.20">
-<!ENTITY bz-date "2004-07-10">
-<!ENTITY % bz-devel "INCLUDE">
-
-<!ENTITY landfillbase "http://landfill.bugzilla.org/bugzilla-tip/">
 <!ENTITY bz "http://www.bugzilla.org/">
-<!ENTITY bzg-bugs "<ulink url='http://bugzilla.mozilla.org/enter_bug.cgi?product=Bugzilla&amp;component=Documentation'>Bugzilla Documentation</ulink>">
+<!ENTITY bz-ver "2.14">
+<!ENTITY bz-cvs-ver "2.15">
+<!ENTITY bzg-date "August 10, 2001">
+<!ENTITY bzg-ver "2.14">
+<!ENTITY bzg-cvs-ver "2.15.0">
+<!ENTITY bzg-auth "Matthew P. Barnson">
+<!ENTITY bzg-auth-email "<email>barnboy@trilobyte.net</email>">
 <!ENTITY mysql "http://www.mysql.com/">
-<!ENTITY newest-perl-ver "5.8.3">
-
-<!-- For minimum versions -->
-<!ENTITY min-mysql-ver "3.23.41">
-<!ENTITY min-perl-ver "5.6.0">
-<!ENTITY min-perl-ver-win "5.8.1">
-<!ENTITY min-template-ver "2.08">
-<!ENTITY min-file-temp-ver "any">
-<!ENTITY min-appconfig-ver "1.52">
-<!ENTITY min-text-wrap-ver "2001.0131">
-<!ENTITY min-file-spec-ver "0.82">
-<!ENTITY min-data-dumper-ver "any">
-<!ENTITY min-dbd-mysql-ver "2.1010">
-<!ENTITY min-dbi-ver "1.36">
-<!ENTITY min-date-format-ver "2.21">
-<!ENTITY min-cgi-ver "2.93">
-<!-- Optional modules -->
-<!ENTITY min-gd-ver "1.20">
-<!ENTITY min-gd-graph-ver "any">
-<!ENTITY min-gd-text-align-ver "any">
-<!ENTITY min-chart-base-ver "1.0">
-<!ENTITY min-xml-parser-ver "any">
-<!ENTITY min-mime-parser-ver "any">
-<!ENTITY min-patchreader-ver "0.9.4">
+<!ENTITY perl-ver "5.6.1">
 
 ]>
 
 
 <!-- Coding standards for this document 
 
-*  Other than the GFDL, please use the "section" tag instead of "sect1", 
-   "sect2", etc.
-*  Use Entities to include files for new chapters in Bugzilla-Guide.xml.
+*  Other than the GFDL, please use the "section" tag instead of "sect1", "sect2", etc.
+*  Use Entities to include files for new chapters in Bugzilla-Guide.sgml.
 *  Try to use Entities for frequently-used passages of text as well.
 *  Ensure all documents compile cleanly to HTML after modification.
-   The warning, "DTDDECL catalog types not supported" is normal.
+The warning, "DTDDECL catalog types not supported" is normal.
 *  Try to index important terms wherever possible.
 *  Use "glossterm" whenever you introduce a new term.
-*  Follow coding standards at http://www.tldp.org, and
-   check out the KDE guidelines (they are nice, too)
-   http://i18n.kde.org/doc/markup.html
-*  All tags should be lowercase.
+*  Follow coding standards at http://www.linuxdoc.org, and
+check out the KDE guidelines (they are nice, too)
+http://i18n.kde.org/doc/markup.html
+*  All tags should be lowercase (needsfix)
 *  Please use sensible spacing.  The comments at the very end of each
-   file define reasonable defaults for PSGML mode in EMACS.
-*  Double-indent tags, use double spacing whenever possible, and
-   try to avoid clutter and feel free to waste space in the code to make it 
-   more readable.
+file define reasonable defaults for PSGML mode in EMACS.
+Double-indent tags, use double spacing whenever possible, and
+try to avoid clutter and feel free to waste space in the code to make it more readable.
 
 -->
 
@@ -94,31 +58,112 @@
 <!-- Header -->
 
   <bookinfo>
-    <title>The Bugzilla Guide - &bz-ver; 
-    <![%bz-devel;[Development ]]>Release</title>
+    <title>The Bugzilla Guide</title>
+    <pubdate>2001-04-25</pubdate>
+    <revhistory>
+      <revision>
+	<revnumber>v2.11</revnumber>
+	<date>20 December 2000</date>
+	<authorinitials>MPB</authorinitials>
+	<revremark>
+	  Converted the README, FAQ, and DATABASE information into
+	  SGML docbook format.
+	</revremark>
+      </revision>
+
+      <revision>
+	<revnumber>2.11.1</revnumber>
+	<date>06 March 2001</date>
+	<authorinitials>MPB</authorinitials>
+	<revremark>
+	  Took way too long to revise this for 2.12 release. Updated
+	  FAQ to use qandaset tags instead of literallayout, cleaned
+	  up administration section, added User Guide section,
+	  miscellaneous FAQ updates and third-party integration
+	  information. From this point on all new tags are lowercase
+	  in preparation for the 2.13 release of the Guide in XML
+	  format instead of SGML.
+	</revremark>
+      </revision>
+      
+      <revision>
+	<revnumber>2.12.0</revnumber>
+	<date>24 April 2001</date>
+	<authorinitials>MPB</authorinitials>
+	<revremark>
+	  Things fixed this release: Elaborated on queryhelp
+	  interface, added FAQ regarding moving bugs from one keyword
+	  to another, clarified possible problems with the Landfill
+	  tutorial, fixed a boatload of typos and unclear sentence
+	  structures.  Incorporated the README into the UNIX
+	  installation section, and changed the README to indicate the
+	  deprecated status.  Things I know need work:  Used
+	  "simplelist" a lot, where I should have used "procedure" to
+	  tag things.  Need to lowercase all tags to be XML compliant.
+	</revremark>
+      </revision>
+      
+      <revision>
+	<revnumber>2.14.0</revnumber>
+	<date>07 August 2001</date>
+	<authorinitials>MPB</authorinitials>
+	<revremark>
+	  Attempted to integrate relevant portions of the UNIX and
+	  Windows installation instructions, moved some data from FAQ
+	  to Install, removed references to README from text, added
+	  Mac OS X install instructions, fixed a bunch
+	  of tpyos (Mark Harig), linked text that referenced other
+	  parts of the Guide, and nuked the old MySQL permissions
+	  section.
+	</revremark>
+      </revision>
+    </revhistory>
 
     <authorgroup>
-      <corpauthor>The Bugzilla Team</corpauthor>
-    </authorgroup>
 
-    <pubdate>&bz-date;</pubdate>
+      <author>
+	<firstname>Matthew</firstname>
+	<othername>P.</othername>
+	<surname>Barnson</surname>
+	<affiliation>
+	  <address><email>barnboy@trilobyte.net</email></address>
+	</affiliation>
+      </author>
+
+      <collab>
+	<collabname>Zach Lipton</collabname>
+	<affiliation>
+	  <address><email>zach AT zachlipton DOT com</email></address>
+	</affiliation>
+      </collab>
+
+    </authorgroup>
 
     <abstract>
       <para>
-	      This is the documentation for Bugzilla, a 
-	      bug-tracking system from mozilla.org.
-	      Bugzilla is an enterprise-class piece of software
-	      that tracks millions of bugs and issues for hundreds of
-	      organizations around the world.
+	This is the documentation for Bugzilla, the Mozilla
+	bug-tracking system.
       </para>
-
       <para>
-        The most current version of this document can always be found on the
-        <ulink url="http://www.bugzilla.org/documentation.html">Bugzilla 
-        Documentation Page</ulink>.
+	Bugzilla is an enterprise-class set of software utilities
+	that, when used together, power issue-tracking for hundreds of
+	organizations around the world, tracking millions of bugs.
+	While it is easy to use and quite flexible, it is
+	difficult for a novice to install and maintain.  Although we
+	have provided step-by-step directions, Bugzilla is not always
+	easy to get working.  Please be sure the person responsible
+	for installing and maintaining this software is a qualified
+	professional for the operating system upon which you install
+	Bugzilla.
       </para>
-
+      <para>
+	THIS DOCUMENTATION IS MAINTAINED IN DOCBOOK 4.1.2 XML FORMAT.
+	IF YOU WISH TO MAKE CORRECTIONS, PLEASE MAKE THEM IN PLAIN
+	TEXT OR SGML DIFFS AGAINST THE SOURCE.  I CANNOT ACCEPT
+	ADDITIONS TO THE GUIDE WRITTEN IN HTML!
+      </para>
     </abstract>
+
 
     <keywordset>
       <keyword>Bugzilla</keyword>
@@ -136,28 +181,37 @@
 <!-- About This Guide -->
 &about;
 
+<!-- Using Bugzilla -->
+&using;
+
 <!-- Installing Bugzilla -->
 &installation;
 
 <!-- Administering Bugzilla -->
 &administration;
 
-<!-- Customizing Bugzilla -->
-&customization;
+<!-- Integrating Bugzilla with Third-Party Tools -->
+&integration;
 
-<!-- Using Bugzilla -->
-&using;
+<!-- The Future of Bugzilla -->
+&future;
+
+<!-- Major Bugzilla Variants -->
+&variants;
 
 <!-- Appendix: The Frequently Asked Questions -->
 &faq;
 
+<!-- Appendix: Required Bugzilla Software Links -->
+&requiredsoftware;
+
+<!-- Appendix: The Database Schema -->
+&database;
+
 <!-- Appendix: Custom Patches -->
 &patches;
 
-<!-- Appendix: Manually Installing Perl Modules -->
-&modules;
-
-<!-- Appendix: GNU Free Documentation License -->
+<!-- Appendix: The GNU Free Documentation License -->
 &gfdl;
 
 <!-- Glossary -->
@@ -184,7 +238,7 @@ sgml-local-ecat-files:nil
 sgml-minimize-attributes:nil
 sgml-namecase-general:t
 sgml-omittag:t
-sgml-parent-document:("Bugzilla-Guide.xml" "book" "chapter")
+sgml-parent-document:("Bugzilla-Guide.sgml" "book" "chapter")
 sgml-shorttag:t
 sgml-tag-region-if-active:t
 End:

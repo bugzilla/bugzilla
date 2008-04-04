@@ -1,5 +1,5 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"> -->
-<!-- $Id: installation.xml,v 1.47 2008/04/04 06:46:37 jake%bugzilla.org Exp $ -->
+<!-- $Id: installation.xml,v 1.48 2008/04/04 06:46:38 jake%bugzilla.org Exp $ -->
 <chapter id="installation">
   <title>Installation</title>
 
@@ -1245,7 +1245,7 @@ close SENDMAIL;
           <para>to</para>
           <programlisting>
 use Net::SMTP;
-$smtp_server = 'smtp.mycompany.com';  # change this
+my $smtp_server = 'smtp.mycompany.com';  # change this
 
 # Use die on error, so that the mail will be in the 'unsent mails' and
 # can be sent from the sanity check page.

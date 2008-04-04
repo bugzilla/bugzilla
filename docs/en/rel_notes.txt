@@ -32,7 +32,7 @@ Required Perl modules:
   CGI v2.93              (new since 2.16)    (changed from 2.17.7)
   Data::Dumper (any)
   Date::Format v2.21     (changed from 2.16)
-  DBI v1.32              (changed from 2.16)
+  DBI v1.36              (changed from 2.16)    (changed from 2.17.7)
   DBD::mysql v2.1010     (changed from 2.16)
   File::Spec v0.82
   File::Temp (any)
@@ -287,7 +287,7 @@ Code Changes Which May Affect Customizations
 - Use Bugzilla->user->login in place of $::COOKIE{Bugzilla_login}
 
 - You can tell if there's a user logged in or not by checking if
-  Bugzilla->user exists rather than looking for $::userid==0
+  Bugzilla->user->id != 0  rather than looking for $::userid != 0
 
 
 Recommended Practice for the Upgrade

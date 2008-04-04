@@ -38,27 +38,24 @@
 
       <step>
         <para>
-        <command>usebuggroups</command>:
-        This dictates whether or not to implement group-based security for
-        Bugzilla. If set, Bugzilla bugs can have an associated 'group',
-        defining which users are allowed to see and edit the
-        bug.</para>
-
-        <para>Set "usebuggroups" to "on" 
-        <emphasis>only</emphasis>
-        if you may wish to restrict access to particular bugs to certain
-        groups of users. I suggest leaving
-        this parameter <emphasis>off</emphasis>
-        while initially testing your Bugzilla.</para>
+        <command>makeproductgroups</command>:
+        This dictates whether or not to automatically create groups
+        when new products are created.
+        </para>
       </step>
 
       <step>
         <para>
-        <command>usebuggroupsentry</command>:
-        Bugzilla Products can have a group associated with them, so that
-        certain users can only see bugs in certain products. When this parameter
-        is set to <quote>on</quote>, this places all newly-created bugs in the
-        group for their product immediately.</para>
+        <command>useentrygroupdefault</command>:
+        Bugzilla products can have a group associated with them, so that
+        certain users can only see bugs in certain products. When this 
+        parameter is set to <quote>on</quote>, this 
+        causes the initial group controls on newly created products 
+        to place all newly-created bugs in the group 
+        having the same name as the product immediately.
+        After a product is initially created, the group controls
+        can be further adjusted without interference by 
+        this mechanism.</para>
       </step>
 
       <step>
@@ -648,44 +645,83 @@
 
     <para>Groups allow the administrator
     to isolate bugs or products that should only be seen by certain people.
-    There are two types of group - Generic Groups, and Product-Based Groups.
+    The association between products and groups is controlled from
+    the product edit page under <quote>Edit Group Controls.</quote>
+    </para>
+
+    <para>
+    If the makeproductgroups param is on, a new group will be automatically
+    created for every new product.
     </para>
     
     <para>
-    Product-Based Groups are matched with products, and allow you to restrict
-    access to bugs on a per-product basis. They are enabled using the 
-    usebuggroups Param. Turning on the usebuggroupsentry
-    Param will mean bugs automatically get added to their product group when 
-    filed.   
+    On the product edit page, there is a page to edit the 
+    <quote>Group Controls</quote> 
+    for a product and determine which groups are applicable, default, 
+    and mandatory for each product as well as controlling entry 
+    for each product and being able to set bugs in a product to be 
+    totally read-only unless some group restrictions are met. 
     </para>
     
     <para>
-    Generic Groups have no special relationship to products; 
-    you create them, and put bugs in them
-    as required. One example of the use of Generic Groups 
-    is Mozilla's "Security" group,
-    into which security-sensitive bugs are placed until fixed. Only the
-    Mozilla Security Team are members of this group.
+    For each group, it is possible to specify if membership in that
+    group is...
     </para>
+    <orderedlist>
+      <listitem>
+        <para>
+        required for bug entry, 
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+        Not applicable to this product(NA),
+        a possible restriction for a member of the 
+        group to place on a bug in this product(Shown),
+        a default restriction for a member of the 
+        group to place on a bug in this product(Default),
+        or a mandatory restriction to be placed on bugs 
+        in this product(Mandatory).
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+        Not applicable by non-members to this product(NA),
+        a possible restriction for a non-member of the 
+        group to place on a bug in this product(Shown),
+        a default restriction for a non-member of the 
+        group to place on a bug in this product(Default),
+        or a mandatory restriction to be placed on bugs 
+        in this product when entered by a non-member(Mandatory).
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+        required in order to make <emphasis>any</emphasis> change
+        to bugs in this product <emphasis>including comments.</emphasis>
+        </para>
+      </listitem>
+    </orderedlist>
     
-    <para>To create Generic Groups:</para>
+    <para>To create Groups:</para>
 
     <orderedlist>
       <listitem>
-        <para>Select the "groups"
+        <para>Select the <quote>groups</quote>
         link in the footer.</para>
       </listitem>
 
       <listitem>
-        <para>Take a moment to understand the instructions on the "Edit
-        Groups" screen, then select the "Add Group" link.</para>
+        <para>Take a moment to understand the instructions on the <quote>Edit
+        Groups</quote> screen, then select the <quote>Add Group</quote> link.</para>
       </listitem>
 
       <listitem>
-        <para>Fill out the "Group", "Description", and 
-        "User RegExp" fields. "New User RegExp" allows you to automatically
+        <para>Fill out the <quote>Group</quote>, <quote>Description</quote>, 
+         and <quote>User RegExp</quote> fields. 
+         <quote>User RegExp</quote> allows you to automatically
          place all users who fulfill the Regular Expression into the new group. 
-         When you have finished, click "Add".</para>
+         When you have finished, click <quote>Add</quote>.</para>
          <warning>
            <para>The User Regexp is a perl regexp and, if not anchored, will match 
            any part of an address.  So, if you do not want to grant access
@@ -701,28 +737,15 @@
       </listitem>
     </orderedlist>
 
-    <para>To use Product-Based Groups:</para>
-
-    <orderedlist>
-      <listitem>
-        <para>Turn on "usebuggroups" and "usebuggroupsentry" in the "Edit
-        Parameters" screen.</para>
-
-      </listitem>
-
-      <listitem>
-        <para>In future, when you create a Product, a matching group will be
-        automatically created. If you need to add a Product Group to
-        a Product which was created before you turned on usebuggroups,
-        then simply create a new group, as outlined above, with the
-        same name as the Product.</para>
-      </listitem>
-    </orderedlist>
-
     <para>
       Note that group permissions are such that you need to be a member
       of <emphasis>all</emphasis> the groups a bug is in, for whatever
-      reason, to see that bug.
+      reason, to see that bug. Similarly, you must be a member 
+      of <emphasis>all</emphasis> of the entry groups for a product 
+      to add bugs to a product and you must be a member 
+      of <emphasis>all</emphasis> of the canedit groups for a product
+      in order to make <emphasis>any</emphasis> change to bugs in that
+      product.
     </para>    
   </section>
 
@@ -751,12 +774,6 @@
      
     <orderedlist>
       <listitem>
-        <para>Ensure you are running at least MysQL version 3.22.32 or newer.
-        Earlier versions had notable security holes and (from a security
-        point of view) poor default configuration choices.</para>
-      </listitem>
-
-      <listitem>
         <para>
         <emphasis>There is no substitute for understanding the tools on your
         system!</emphasis>
@@ -768,9 +785,9 @@
       </listitem>
 
       <listitem>
-        <para>Lock down /etc/inetd.conf. Heck, disable inet entirely on this
-        box. It should only listen to port 25 for Sendmail and port 80 for
-        Apache.</para>
+        <para>Lock down <filename>/etc/inetd.conf</filename>. Heck, disable
+        inet entirely on this box. It should only listen to port 25 for
+        Sendmail and port 80 for Apache.</para>
       </listitem>
 
       <listitem>
@@ -798,27 +815,45 @@
 
       <listitem>
         <para>Ensure you have adequate access controls for the
-        $BUGZILLA_HOME/data/ directory, as well as the
-        $BUGZILLA_HOME/localconfig file.
+        <filename>$BUGZILLA_HOME/data/</filename> directory, as well as the
+        <filename>$BUGZILLA_HOME/localconfig</filename> file.
         The localconfig file stores your "bugs" database account password. 
         In addition, some
-        files under $BUGZILLA_HOME/data/ store sensitive information.
+        files under <filename>$BUGZILLA_HOME/data/</filename> store sensitive
+        information.
         </para>
 
-        <para>Bugzilla provides default .htaccess files to protect the most
-        common Apache installations. However, you should verify these are
-        adequate according to the site-wide security policy of your web
-        server, and ensure that the .htaccess files are allowed to
-        "override" default permissions set in your Apache configuration
-        files. Covering Apache security is beyond the scope of this Guide;
-        please consult the Apache documentation for details.</para>
+        <para>Also, beware that some text editors create backup files in the
+        current working directory so you need to also secure files like
+        <filename>localconfig~</filename>.
+        </para>
+
+        <note>
+          <para>Simply blocking <computeroutput>.*localconfig.*</computeroutput>
+          won't work because the QuickSearch feature requires the web browser
+          to be able to retrieve <filename>localconfig.js</filename> and
+          others may be introduced in the future (see 
+          <ulink url="http://bugzilla.mozilla.org/show_bug.cgi?id=186383">bug
+          186383</ulink> for more information.
+          </para>
+        </note>
+
+        <para>Bugzilla provides default <filename>.htaccess</filename> files
+        to protect the most common Apache installations. However, you should
+        verify these are adequate according to the site-wide security policy
+        of your web server, and ensure that the <filename>.htaccess</filename>
+        files are allowed to <quote>override</quote> default permissions set
+        in your Apache configuration files. Covering Apache security is beyond
+        the scope of this Guide; please consult the Apache documentation for
+        details.
+        </para>
 
         <para>If you are using a web server that does not support the
-        .htaccess control method, 
+        <filename>.htaccess</filename> control method, 
         <emphasis>you are at risk!</emphasis>
 
         After installing, check to see if you can view the file
-        "localconfig" in your web browser (e.g.: 
+        <filename>localconfig</filename> in your web browser (e.g.: 
         <ulink url="http://bugzilla.mozilla.org/localconfig">
         http://bugzilla.mozilla.org/localconfig</ulink>
 
@@ -827,11 +862,14 @@
         problem before deploying Bugzilla. If, however, it gives you a
         "Forbidden" error, then it probably respects the .htaccess
         conventions and you are good to go.</para>
+      </listitem>
 
+      <listitem>
         <para>When you run checksetup.pl, the script will attempt to modify
         various permissions on files which Bugzilla uses. If you do not have
-        a webservergroup set in the localconfig file, then Bugzilla will have
-        to make certain files world readable and/or writable. 
+        a webservergroup set in the <filename>localconfig</filename> file,
+        then Bugzilla will have to make certain files world readable and/or
+        writable. 
         <emphasis>THIS IS INSECURE!</emphasis>
 
         . This means that anyone who can get access to your system can do
@@ -844,33 +882,33 @@
           installation.</para>
         </note>
 
-        <para>On Apache, you can use .htaccess files to protect access to
-        these directories, as outlined in 
-        <ulink url="http://bugzilla.mozilla.org/show_bug.cgi?id=57161">Bug
-        57161</ulink>
+        <para>On Apache, you can use <filename>.htaccess</filename> files to
+        protect access to these directories, as outlined in Bugs 
+        <ulink url="http://bugzilla.mozilla.org/show_bug.cgi?id=57161">
+        57161</ulink> and
+        <ulink url="http://bugzilla.mozilla.org/show_bug.cgi?id=186383">
+        186383</ulink>
 
-        for the localconfig file, and 
+        for the <filename>localconfig</filename> file, and 
         <ulink url="http://bugzilla.mozilla.org/show_bug.cgi?id=65572">Bug
         65572</ulink>
 
-        for adequate protection in your data/ directory.</para>
+        for adequate protection in your <filename>data/</filename> directory.
+        Also, don't forget about the <filename>template/</filename> and
+        <filename>Bugzilla/</filename> directories and to allow access to the
+        <filename>data/webdot</filename> directory for the
+        <computeroutput>192.20.225.10</computeroutput> IP address if you are
+        using webdot from research.att.com.  The easiest way to
+        accomplish this is to set <function>$create_htaccess</function> to 1
+        in <filename>localconfig</filename>.  However, the information below
+        is provided for those that want to know exactly what is created.
+        </para>
 
-        <para>Note the instructions which follow are Apache-specific. If you
+        <para>FIX ME BEFORE RELEASE!!!!!
+        Note the instructions which follow are Apache-specific. If you
         use IIS, Netscape, or other non-Apache web servers, please consult
         your system documentation for how to secure these files from being
         transmitted to curious users.</para>
-
-        <para>Place the following text into a file named ".htaccess",
-        readable by your web server, in your $BUGZILLA_HOME/data directory. 
-        <literallayout>&lt;Files comments&gt; allow from all &lt;/Files&gt;
-        deny from all</literallayout>
-        </para>
-
-        <para>Place the following text into a file named ".htaccess",
-        readable by your web server, in your $BUGZILLA_HOME/ directory. 
-        <literallayout>&lt;Files localconfig&gt; deny from all &lt;/Files&gt;
-        allow from all</literallayout>
-        </para>
 
       </listitem>
     </orderedlist>
@@ -878,10 +916,10 @@
   </section>
 
   <section id="cust-templates">
-    <title>Template Customisation</title>
+    <title>Template Customization</title>
     
     <para>
-      One of the large changes for 2.16 was the templatisation of the
+      One of the large changes for 2.16 was the templatization of the
       entire user-facing UI, using the 
       <ulink url="http://www.template-toolkit.org">Template Toolkit</ulink>.
       Administrators can now configure the look and feel of Bugzilla without
@@ -890,9 +928,9 @@
     </para>
     
     <para>
-      Templatisation also makes localised versions of Bugzilla possible, 
+      Templatization also makes localized versions of Bugzilla possible, 
       for the first time. In the future, a Bugzilla installation may
-      have templates installed for multiple localisations, and select
+      have templates installed for multiple localizations, and select
       which ones to use based on the user's browser language setting.      
     </para>
     
@@ -903,7 +941,7 @@
         and which you use depends mainly on how you upgrade Bugzilla. The
         template directory structure is that there's a top level directory,
         <filename>template</filename>, which contains a directory for
-        each installed localisation. The default English templates are
+        each installed localization. The default English templates are
         therefore in <filename>en</filename>. Underneath that, there
         is the <filename>default</filename> directory and optionally the 
         <filename>custom</filename> directory. The <filename>default</filename>
@@ -913,7 +951,7 @@
       </para>
 
       <para>
-        The first method of making customisations is to directly edit the
+        The first method of making customizations is to directly edit the
         templates in <filename>template/en/default</filename>. This is
         probably the best method for small changes if you are going to use
         the CVS method of upgrading, because if you then execute a
@@ -1066,7 +1104,7 @@
       
       <para>
         There are a few templates you may be particularly interested in
-        customising for your installation.
+        customizing for your installation.
       </para>
       
       <para>
@@ -1087,7 +1125,7 @@
         <command>global/banner.html.tmpl</command>:
         This contains the "banner", the part of the header that appears
         at the top of all Bugzilla pages.  The default banner is reasonably
-        barren, so you'll probably want to customise this to give your
+        barren, so you'll probably want to customize this to give your
         installation a distinctive look and feel.  It is recommended you
         preserve the Bugzilla version number in some form so the version 
         you are running can be determined, and users know what docs to read.
@@ -1168,7 +1206,7 @@
   </section>
 
   <section id="cust-change-permissions">
-    <title>Change Permission Customisation</title>
+    <title>Change Permission Customization</title>
     
     <warning>
       <para>
@@ -1190,7 +1228,7 @@
     </para>
     
     <para>
-      For maximum flexibility, customising this means editing Bugzilla's Perl 
+      For maximum flexibility, customizing this means editing Bugzilla's Perl 
       code. This gives the administrator complete control over exactly who is
       allowed to do what. The relevant function is called 
       <filename>CheckCanChangeField()</filename>,
@@ -1222,7 +1260,7 @@
     </para>
     
     <para>
-      More complex customisations are not much harder. Basically, you add
+      More complex customizations are not much harder. Basically, you add
       a check in the right place in the function, i.e. after all the variables
       you are using have been set up. So, don't look at $ownerid before 
       $ownerid has been obtained from the database. You can either add a
@@ -1257,42 +1295,203 @@
       For a list of possible field names, look in 
       <filename>data/versioncache</filename> for the list called 
       <filename>@::log_columns</filename>. If you need help writing custom
-      rules for your organisation, ask in the newsgroup.
+      rules for your organization, ask in the newsgroup.
     </para>    
   </section>   
   
   <section id="upgrading">
     <title>Upgrading to New Releases</title>
 
-    <para>A plain Bugzilla is fairly easy to upgrade from one version to a
-    newer one. Always read the release notes to see if there are any issues
-    that you might need to take note of. It is recommended that you take a 
-    backup of your database and your entire Bugzilla installation before attempting an
-    upgrade. You can upgrade a 'clean' installation by untarring a new
-    tarball over the old installation. If you are upgrading from 2.12 or
-    later, and have cvs installed, you can type <filename>cvs -z3 update</filename>, 
-    and resolve conflicts if there are any.
+    <para>Upgrading Bugzilla is something we all want to do from time to time,
+    be it to get new features or pick up the latest security fix. How easy
+    it is to update depends on a few factors.
     </para>
-    
-    <para>However, things get a bit more complicated if you've made
-    changes to Bugzilla's code. In this case, you may have to re-make or
-    reapply those changes. One good method is to take a diff of your customised
-    version against the original, so you can survey all that you've changed.
-    Hopefully, templatisation will reduce the need for
-    this in the future.</para>
 
-    <para>From version 2.8 onwards, Bugzilla databases can be automatically
-    carried forward during an upgrade. However, because the developers of
-    Bugzilla are constantly adding new
-    tables, columns and fields, you'll probably get SQL errors if you just
-    update the code and attempt to use Bugzilla. Always run the
-    <filename>checksetup.pl</filename> 
-    script whenever you upgrade your installation.</para>
+    <itemizedlist>
+      <listitem>
+        <para>If the new version is a revision or a new point release</para>
+      </listitem>
+      <listitem>
+        <para>How many, if any, local changes have been made</para>
+      </listitem>
+    </itemizedlist>
 
-    <para>If you are running Bugzilla version 2.8 or lower, and wish to
-    upgrade to the latest version, please consult the file,
-    "UPGRADING-pre-2.8" in the Bugzilla root directory after untarring the
-    archive.</para>
+    <para>There are also three different methods to upgrade your installation.
+    </para>
+
+    <orderedlist>
+      <listitem>
+        <para>Using CVS (<xref linkend="upgrade-cvs"/>)</para>
+      </listitem>
+      <listitem>
+        <para>Downloading a new tarball (<xref linkend="upgrade-tarball"/>)</para>
+      </listitem>
+      <listitem>
+        <para>Applying the relevant patches (<xref linkend="upgrade-patches"/>)</para>
+      </listitem>
+    </orderedlist>
+
+    <para>Which options are available to you may depend on how large a jump
+    you are making and/or your network configuration.
+    </para>
+
+    <para>Revisions are normally released to fix security vulnerabilities
+    and are distinguished by an increase in the third number. For example,
+    when 2.16.2 was released, it was a revision to 2.16.1.
+    </para>
+
+    <para>Point releases are normally released when the Bugzilla team feels
+    that there has been a significant amount of progress made between the
+    last point release and the current time. These are often proceeded by a
+    stabilization period and release candidates, however the use of 
+    development versions or release candidates is beyond the scope of this
+    document. Point releases can be distinguished by an increase in the
+    second number, or minor version. For example, 2.16.2 is a newer point
+    release than 2.14.5.
+    </para>
+
+    <para>The examples in this section are written as if you were updating
+    to version 2.16.2.  The procedures are the same regardless if you are
+    updating to a new point release or a new revision.  However, the chance
+    of running into trouble increases when upgrading to a new point release,
+    escpecially if you've made local changes.
+    </para>
+
+    <para>These examples also assume that your Bugzilla installation is at
+    <filename>/var/www/html/bugzilla</filename>. If that is not the case,
+    simply substitute the proper paths where appropriate.
+    </para>
+
+    <example id="upgrade-cvs">
+      <title>Upgrading using CVS</title>
+
+      <para>Every release of Bugzilla, whether it is a revision or a point
+      release, is tagged in CVS.  Also, every tarball we have distributed
+      since version 2.12 has been primed for using CVS. This does, however,
+      require that you are able to access cvs-mirror.mozilla.org on port
+      2401.
+
+        <tip>
+          <para>If you can do this, updating using CVS is probably the most
+          painless method, especially if you have a lot of local changes.
+          </para>
+        </tip>
+      </para>
+
+      <programlisting>
+bash$ <command>cd /var/www/html/bugzilla</command>
+bash$ <command>cvs login</command>
+Logging in to :pserver:anonymous@cvs-mirror.mozilla.org:2401/cvsroot
+CVS password: <command>anonymous</command>
+bash$ <command>cvs -q update -r BUGZILLA-2_16_2 -dP</command>
+P checksetup.pl
+P collectstats.pl
+P globals.pl
+P docs/rel_notes.txt
+P template/en/default/list/quips.html.tmpl
+      </programlisting>
+
+      <para>
+        <caution>
+          <para>If a line in the output from <command>cvs update</command>
+          begins with a <computeroutput>C</computeroutput> that represents a
+          file with local changes that CVS was unable to properly merge. You
+          need to resolve these conflicts manually before Bugzilla (or at
+          least the portion using that file) will be usable.
+          </para>
+        </caution>
+
+        <note>
+          <para>You also need to run <command>./checksetup.pl</command>
+          before your Bugzilla upgrade will be complete.
+          </para>
+        </note>
+      </para>
+    </example>
+
+    <example id="upgrade-tarball">
+      <title>Upgrading using the tarball</title>
+
+      <para>If you are unable or unwilling to use CVS, another option that's
+      always available is to download the latest tarball. This is the most
+      difficult option to use, especially if you have local changes.
+      </para>
+
+      <programlisting>
+bash$ <command>cd /var/www/html</command>
+bash$ <command>wget ftp://ftp.mozilla.org/pub/webtools/bugzilla-2.16.2.tar.gz</command>
+<emphasis>Output omitted</emphasis>
+bash$ <command>tar xzvf bugzilla-2.16.2.tar.gz</command>
+bugzilla-2.16.2/
+bugzilla-2.16.2/.cvsignore
+bugzilla-2.16.2/1x1.gif
+<emphasis>Output truncated</emphasis>
+bash$ <command>cd bugzilla-2.16.2</command>
+bash$ <command>cp ../bugzilla/localconfig* .</command>
+bash$ <command>cp -r ../bugzilla/data .</command>
+bash$ <command>cd ..</command>
+bash$ <command>mv bugzilla bugzilla.old</command>
+bash$ <command>mv bugzilla-2.16.2 bugzilla</command>
+bash$ <command>cd bugzilla</command>
+bash$ <command>./checksetup.pl</command>
+<emphasis>Output omitted</emphasis>
+      </programlisting>
+
+      <para>
+        <warning>
+          <para>The <command>cp</command> commands both end with periods which
+          is a very important detail, it tells the shell that the destination
+          directory is the current working directory. Also, the period at the
+          beginning of the <command>./checksetup.pl</command> is important and
+          can not be omitted.
+          </para>
+        </warning>
+
+        <note>
+          <para>You will now have to reapply any changes you have made to your
+          local installation manually.
+          </para>
+        </note>
+      </para>
+    </example>
+
+    <example id="upgrade-patches">
+      <title>Upgrading using patches</title>
+
+      <para>The Bugzilla team will normally make a patch file available for
+      revisions to go from the most recent revision to the new one. You could
+      also read the release notes and grab the patches attached to the
+      mentioned bug, but it is safer to use the released patch file as
+      sometimes patches get changed before they get checked in (for minor
+      spelling fixes and the like). It is also theorectically possible to
+      scour the fixed bug list and pick and choose which patches to apply
+      from a point release, but this is not recommended either as what you'll
+      end up with is a hodge podge Bugzilla that isn't really any version.
+      This would also make it more difficult to upgrade in the future.
+      </para>
+
+      <programlisting>
+bash$ <command>cd /var/www/html/bugzilla</command>
+bash$ <command>wget ftp://ftp.mozilla.org/pub/webtools/bugzilla-2.16.1-to-2.16.2.diff.gz</command>
+<emphasis>Output omitted</emphasis>
+bash$ <command>gunzip bugzilla-2.16.1-to-2.16.2.diff.gz</command>
+bash$ <command>patch -p1 &lt; bugzilla-2.16.1-to-2.16.2.diff</command>
+patching file checksetup.pl
+patching file collectstats.pl
+patching file globals.pl
+      </programlisting>
+
+      <para>
+        <caution>
+          <para>If you do this, beware that this doesn't change the entires in
+          your <filename id="dir">CVS</filename> directory so it may make
+          updates using CVS (<xref linkend="upgrade-cvs"/>) more difficult in the
+          future.
+          </para>
+        </caution>
+      </para>
+    </example>
+
   </section>
 
   <!-- Integrating Bugzilla with Third-Party Tools -->

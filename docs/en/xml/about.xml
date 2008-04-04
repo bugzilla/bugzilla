@@ -1,6 +1,6 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook V4.1//EN" [
 <!ENTITY conventions SYSTEM "conventions.xml"> ] > -->
-<!-- $Id: about.xml,v 1.24 2008/04/04 06:48:16 uid623 Exp $ -->
+<!-- $Id: about.xml,v 1.26 2008/04/04 06:48:18 wurblzap%gmail.com Exp $ -->
 
 <chapter id="about">
 <title>About This Guide</title>
@@ -87,7 +87,7 @@
     </para>
     
     <para>  
-      In addition, there are Bugzilla template localisation projects in
+      In addition, there are Bugzilla template localization projects in
       the following languages. They may have translated documentation 
       available: 
       <ulink url="http://sourceforge.net/projects/bugzilla-ar/">Arabic</ulink>,
@@ -96,7 +96,7 @@
       <ulink url="http://sourceforge.net/projects/bugzilla-br/">Brazilian Portuguese</ulink>,
       <ulink url="http://sourceforge.net/projects/bugzilla-cn/">Chinese</ulink>,
       <ulink url="http://sourceforge.net/projects/bugzilla-fr/">French</ulink>,
-      <ulink url="http://germzilla.wurblzap.net/">German</ulink>,
+      <ulink url="http://germzilla.ganderbay.net/">German</ulink>,
       <ulink url="http://sourceforge.net/projects/bugzilla-it/">Italian</ulink>,
       <ulink url="http://www.bugzilla.jp/about/jp.html">Japanese</ulink>,
       <ulink url="http://sourceforge.net/projects/bugzilla-kr/">Korean</ulink>,

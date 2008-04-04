@@ -38,6 +38,7 @@ our @EXPORT_OK = qw(
     get_version_and_os
     indicate_progress
     install_string
+    include_languages
     template_include_path
     vers_cmp
     get_console_locale
@@ -123,7 +124,7 @@ sub install_string {
     return $string_template;
 }
 
-sub template_include_path {
+sub include_languages {
     my ($params) = @_;
     $params ||= {};
 
@@ -171,7 +172,12 @@ sub template_include_path {
     if (!grep($_ eq 'en', @usedlanguages)) {
         push(@usedlanguages, 'en');
     }
+
+    return @usedlanguages;
+}
     
+sub template_include_path {
+    my @usedlanguages = include_languages(@_);
     # Now, we add template directories in the order they will be searched:
     
     # First, we add extension template directories, because extension templates
@@ -515,6 +521,12 @@ Each extension has its own directory.
 
 Note that languages are sorted by the user's preference (as specified
 in their browser, usually), and extensions are sorted alphabetically.
+
+=item C<include_languages>
+
+Used by L<Bugzilla::Template> to determine the languages' list which 
+are compiled with the browser's I<Accept-Language> and the languages 
+of installed templates.
 
 =item C<vers_cmp>
 

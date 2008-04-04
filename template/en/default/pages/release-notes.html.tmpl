@@ -353,14 +353,14 @@
   to the <kbd>xmlrpc.cgi</kbd> on your installation.</p>
 
 <p>Documentation can be found in the 
-  <a href="[% Param('docs_urlbase') FILTER html %]api/">[% terms.Bugzilla %] 
+  <a href="[% docs_urlbase FILTER html %]api/">[% terms.Bugzilla %] 
   API Docs</a>, in the various <kbd>Bugzilla::WebService</kbd> modules.</p>
 
 <h3><a name="v30_feat_skin"></a>Skins</h3>
 
 <p>[% terms.Bugzilla %] can have multiple &quot;skins&quot; installed,
   and users can pick between them. To write a skin, you just have to
-  write several CSS files. See the <a href="[% Param('docs_urlbase') FILTER html %]cust-skins.html">Custom
+  write several CSS files. See the <a href="[% docs_urlbase FILTER html %]cust-skins.html">Custom
   Skins Documentation</a> for more details.</p>
 
 <p>We currently don't have any alternate skins shipping with
@@ -414,7 +414,7 @@
   unsupported add-on, but it is now an official interface to
   [%+ terms.Bugzilla %].</p>
 
-<p>For more details see the <a href="[% Param('docs_urlbase') FILTER html %]api/email_in.html">documentation
+<p>For more details see the <a href="[% docs_urlbase FILTER html %]api/email_in.html">documentation
   for email_in.pl</a>.</p>
 
 <h3><a name="v30_feat_gw"></a>Users Who Get All [% terms.Bug %] 
@@ -687,7 +687,7 @@
      <kbd>localconfig</kbd> file to the new installation.</p></li>
 
   <li>Now follow the standard 
-    <a href="[% Param('docs_urlbase') FILTER html %]installing-bugzilla.html">
+    <a href="[% docs_urlbase FILTER html %]installing-bugzilla.html">
     [%- terms.Bugzilla %] installation process</a>.</li>
 
   <li>Run <kbd>checksetup.pl</kbd> after you install the new version.</li>
@@ -739,7 +739,7 @@
 
 <p>[% terms.Bugzilla %] now supports a code hook mechanism. See the 
   documentation for 
-  <a href="[% Param('docs_urlbase') FILTER html %]api/Bugzilla/Hook.html">Bugzilla::Hook</a>
+  <a href="[% docs_urlbase FILTER html %]api/Bugzilla/Hook.html">Bugzilla::Hook</a>
   for more details.</p>
 
 <p>This gives [% terms.Bugzilla %] very advanced plugin support. You can
@@ -756,7 +756,7 @@
 
 <p>[% terms.Bugzilla %] now ships with all of its perldoc built
   as HTML. Go ahead and read the
-  <a href="[% Param('docs_urlbase') FILTER html %]api/">API Documentation</a>
+  <a href="[% docs_urlbase FILTER html %]api/">API Documentation</a>
   for all of the [% terms.Bugzilla %] modules now! Even scripts like
   <kbd>checksetup.pl</kbd> have HTML documentation.</p>
 
@@ -799,7 +799,7 @@ sub y { $var++ }</pre>
 <p>The <kbd>Bugzilla::Auth</kbd> family of modules have been completely
   re-written. For details on how the new structure of authentication,
   read the 
-  <a href="[% Param('docs_urlbase') FILTER html %]api/Bugzilla/Auth.html">Bugzilla::Auth
+  <a href="[% docs_urlbase FILTER html %]api/Bugzilla/Auth.html">Bugzilla::Auth
   API docs</a>.</p>
 
 <p>It should be very easy to write new authentication plugins, now.</p>
@@ -807,7 +807,7 @@ sub y { $var++ }</pre>
 <h3><a name="v30_code_obj"></a>Bugzilla::Object</h3>
 
 <p>There is a new base class for most of our objects, 
-  <a href="[% Param('docs_urlbase') FILTER html %]api/Bugzilla/Object.html">Bugzilla::Object</a>.
+  <a href="[% docs_urlbase FILTER html %]api/Bugzilla/Object.html">Bugzilla::Object</a>.
   It makes it really easy to create new objects based on things that are 
   in the database.</p>
 
@@ -832,7 +832,7 @@ sub y { $var++ }</pre>
   <li><code>checksetup.pl</code> has been completely re-written, and most
     of its code moved into modules in the <kbd>Bugzilla::Install</kbd>
     namespace. See the
-    <a href="[% Param('docs_urlbase') FILTER html %]api/checksetup.html">checksetup
+    <a href="[% docs_urlbase FILTER html %]api/checksetup.html">checksetup
     documentation</a> and <a href="https://bugzilla.mozilla.org/showdependencytree.cgi?id=277502&amp;hide_resolved=0">[% terms.Bugzilla %]
    [%+ terms.bug %] 277502</a> for details.</li>
   <li>Instead of <kbd>UserInGroup()</kbd>, all of [% terms.Bugzilla %] now 
@@ -866,7 +866,7 @@ sub y { $var++ }</pre>
 
 <p>Release notes for versions of [% terms.Bugzilla %] for versions
   prior to 3.0 are only available in text format: 
-  <a href="docs/rel_notes.txt">Release Notes for [% terms.Bugzilla %] 2.22
+  <a href="[% docs_urlbase FILTER remove('html/$') FILTER html %]rel_notes.txt">Release Notes for [% terms.Bugzilla %] 2.22
   and Earlier</a>.</p>
 
 [% INCLUDE global/footer.html.tmpl %]

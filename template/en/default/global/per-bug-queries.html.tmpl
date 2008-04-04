@@ -71,7 +71,7 @@
         </select>
 
         [% IF Param('docs_urlbase') %]
-          <a href="[% Param('docs_urlbase') %]query.html#individual-buglists">the named tag</a>
+          <a href="[% docs_urlbase FILTER html %]query.html#individual-buglists">the named tag</a>
         [% ELSE %]
           the named tag
         [% END %]

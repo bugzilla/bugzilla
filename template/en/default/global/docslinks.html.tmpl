@@ -45,7 +45,7 @@
 [% BLOCK docslinkslist %]
   [% FOREACH docslink = docstype.keys %]
     <li>
-      <a href="[% Param('docs_urlbase') %]
+      <a href="[% docs_urlbase FILTER html %]
                [% docslink FILTER none %]">[% docstype.$docslink FILTER html %]</a>
     </li>
   [% END %]

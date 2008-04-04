@@ -122,7 +122,7 @@
     [% IF doc_section %]
       <li>
         <span class="separator">| </span>
-        <a href="[% Param("docs_urlbase") _ doc_section FILTER html %]" target="_blank">Help</a>
+        <a href="[% docs_urlbase _ doc_section FILTER html %]" target="_blank">Help</a>
       </li>
     [% END %]
 [% END %]

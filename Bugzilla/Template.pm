@@ -36,7 +36,7 @@ use strict;
 
 use Bugzilla::Constants;
 use Bugzilla::Install::Requirements;
-use Bugzilla::Install::Util qw(install_string template_include_path);
+use Bugzilla::Install::Util qw(install_string template_include_path include_languages);
 use Bugzilla::Util;
 use Bugzilla::User;
 use Bugzilla::Error;
@@ -728,6 +728,14 @@ sub create {
 
             # Allow templates to access the "corect" URLBase value
             'urlbase' => sub { return Bugzilla::Util::correct_urlbase(); },
+
+            # Allow templates to access docs url with users' preferred language
+            'docs_urlbase' => sub { 
+                my ($language) = include_languages();
+                my $docs_urlbase = Bugzilla->params->{'docs_urlbase'};
+                $docs_urlbase =~ s/\%lang\%/$language/;
+                return $docs_urlbase;
+            },
 
             # These don't work as normal constants.
             DB_MODULE        => \&Bugzilla::Constants::DB_MODULE,

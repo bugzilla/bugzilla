@@ -1,5 +1,5 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"> -->
-<!-- $Id: installation.xml,v 1.148 2008/04/04 06:48:18 mkanat%bugzilla.org Exp $ -->
+<!-- $Id: installation.xml,v 1.149 2008/04/04 06:48:19 mozilla%colinogilvie.co.uk Exp $ -->
 <chapter id="installing-bugzilla">
   <title>Installing Bugzilla</title>
 
@@ -1835,9 +1835,16 @@ C:\perl&gt; <command>ppm install &lt;module name&gt;</command>
         </para>
 
         <programlisting>
-<command>ppm repository add landfill http://www.landfill.bugzilla.org/ppm/</command>
+<command>ppm repo add landfill http://www.landfill.bugzilla.org/ppm/</command>
         </programlisting>
-
+        <note>
+          <para>
+            In versions prior to 5.8.8 build 819 of PPM the command is 
+            <programlisting>
+<command>ppm repository add landfill http://www.landfill.bugzilla.org/ppm/</command>
+            </programlisting>
+          </para>
+        </note>
         <note>
           <para>
             The PPM repository stores modules in 'packages' that may have

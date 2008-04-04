@@ -40,10 +40,9 @@
 <!ENTITY bz "http://www.bugzilla.org/">
 <!ENTITY bzg-bugs "<ulink url='http://bugzilla.mozilla.org/enter_bug.cgi?product=Bugzilla&amp;component=Documentation'>Bugzilla Documentation</ulink>">
 <!ENTITY mysql "http://www.mysql.com/">
-<!ENTITY newest-perl-ver "5.8.3">
 
 <!-- For minimum versions -->
-<!ENTITY min-mysql-ver "3.23.41">
+<!ENTITY min-mysql-ver "4.0.14">
 <!ENTITY min-pg-ver "7.3.x">
 <!ENTITY min-perl-ver "5.6.1">
 <!ENTITY min-perl-ver-win "5.8.1">

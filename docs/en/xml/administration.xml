@@ -737,22 +737,24 @@
 
     <para>To create a new Component:</para>
 
-    <orderedlist>
+   <orderedlist>
       <listitem>
-        <para>Select the "Edit components" link from the "Edit product"
-        page</para>
+        <para>Select the <quote>Edit components</quote> link 
+        from the <quote>Edit product</quote> page</para>
       </listitem>
 
       <listitem>
-        <para>Select the "Add" link in the bottom right.</para>
+        <para>Select the <quote>Add</quote> link in the bottom right.</para>
       </listitem>
 
       <listitem>
-        <para>Fill out the "Component" field, a short "Description", 
-        the "Default Assignee" and "Default QA Contact" (if enabled). 
-        The Component and Description fields may contain HTML; 
-        the "Default Assignee" field must be a login name
-        already existing in the database. 
+        <para>Fill out the <quote>Component</quote> field, a 
+        short <quote>Description</quote>, the 
+        <quote>Default Assignee</quote>, <quote>Default CC List</quote> 
+        and <quote>Default QA Contact</quote> (if enabled). 
+        The <quote>Component Description</quote> field may contain a 
+        limited subset of HTML tags. The <quote>Default Assignee</quote> 
+        field must be a login name already existing in the Bugzilla database. 
         </para>
       </listitem>
     </orderedlist>

@@ -1,6 +1,6 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook V4.1//EN" [
 <!ENTITY conventions SYSTEM "conventions.xml"> ] > -->
-<!-- $Id: about.xml,v 1.17 2008/04/04 06:48:09 jake%bugzilla.org Exp $ -->
+<!-- $Id: about.xml,v 1.18 2008/04/04 06:48:10 jake%bugzilla.org Exp $ -->
 
 <chapter id="about">
 <title>About This Guide</title>
@@ -188,6 +188,7 @@
       to this documentation:
       <simplelist type="inline">
         <member>Kevin Brannen</member>
+        <member>Vlad Dascalu</member>
         <member>Ben FrantzDale</member>
         <member>Eric Hanson</member>
         <member>Zach Lipton</member>

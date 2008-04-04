@@ -5,13 +5,13 @@
 
   <section id="using-intro">
     <title>Introduction</title>
-    <para>This section contains information for end-users of Bugzilla. 
-    There is a Bugzilla test installation, called 
-    <ulink url="http://landfill.bugzilla.org/bugzilla-tip/">Landfill</ulink>, 
-    which you are welcome to play with (if it's up.) 
-    However, it does not necessarily
-    have all Bugzilla features enabled, and runs an up-to-the-minute version, 
-    so some things may not quite work as this document describes.</para>
+    <para>This section contains information for end-users of Bugzilla.  There
+    is a Bugzilla test installation, called
+    <ulink url="http://landfill.bugzilla.org/">Landfill</ulink>, which you are
+    welcome to play with (if it's up). However, not all of the Bugzilla
+    installations there will necessarily have all Bugzilla features enabled,
+    and different installations run different versions, so some things may not
+    quite work as this document describes.</para>
   </section>
       
   <section id="myaccount">
@@ -21,7 +21,7 @@
     Consult with the administrator responsible for your installation of
     Bugzilla for the URL you should use to access it. If you're
     test-driving Bugzilla, use this URL: 
-    <ulink url="http://landfill.bugzilla.org/bugzilla-tip/"/>.
+    <ulink url="&landfillbase;"/>.
     </para>
 
     <orderedlist>
@@ -67,7 +67,7 @@
     <para>The core of Bugzilla is the screen which displays a particular
     bug. It's a good place to explain some Bugzilla concepts. 
     <ulink
-    url="http://landfill.bugzilla.org/bugzilla-tip/show_bug.cgi?id=1">
+    url="&landfillbase;show_bug.cgi?id=1">
     Bug 1 on Landfill</ulink>
 
     is a good example. Note that the labels for most fields are hyperlinks;
@@ -261,13 +261,35 @@
     </orderedlist>
   </section>
 
+  <section id="lifecycle">
+    <title>Life Cycle of a Bug</title>
+
+    <para>
+      The life cycle, also known as work flow, of a bug is currently hardcoded
+      into Bugzilla. <xref linkend="lifecycle-image"/> contains a graphical
+      repsentation of this life cycle. If you wish to customize this image for
+      your site, the <ulink url="../images/bzLifecycle.xml">diagram file</ulink>
+      is available in <ulink url="http://www.gnome.org/projects/dia">Dia's</ulink>
+      native XML format.
+    </para>
+
+    <figure id="lifecycle-image">
+      <title>Lifecycle of a Bugzilla Bug</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="../images/bzLifecycle.png" scale="66" />
+        </imageobject>
+      </mediaobject>
+    </figure>
+  </section>
+
   <section id="query">
     <title>Searching for Bugs</title>
 
     <para>The Bugzilla Search page is is the interface where you can find
     any bug report, comment, or patch currently in the Bugzilla system. You
     can play with it here: 
-    <ulink url="http://landfill.bugzilla.org/bugzilla-tip/query.cgi"/>.</para>
+    <ulink url="&landfillbase;query.cgi"/>.</para>
 
     <para>The Search page has controls for selecting different possible
     values for all of the fields in a bug, as described above. For some
@@ -278,8 +300,144 @@
     <para>Once you've run a search, you can save it as a Saved Search, which 
     appears in the page footer.</para>
 
-    <para>Highly advanced querying is done using Boolean Charts. See the
-    Boolean Charts help link on the Search page for more information.</para>
+    <section id="boolean">
+      <title>Boolean Charts</title>
+      <para>
+        Highly advanced querying is done using Boolean Charts.
+      </para>
+      <para>
+        The boolean charts further restrict the set of results
+        returned by a query. It is possible to search for bugs
+        based on elaborate combinations of critera.
+      </para>
+      <para>
+        The simplest boolean searches have only one term. These searches
+        permit the selected left <emphasis>field</emphasis>
+        to be compared using a
+        selectable <emphasis>operator</emphasis> to a
+        specified <emphasis>value.</emphasis>
+        Using the "And," "Or," and "Add Another Boolean Chart" buttons, 
+        additonal terms can be included in the query, further
+        altering the list of bugs returned by the query.
+      </para>
+      <para>
+        There are three fields in each row of a boolean search. 
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <emphasis>Field:</emphasis>
+            the items being searched 
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <emphasis>Operator:</emphasis>
+            the comparison operator 
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <emphasis>Value:</emphasis>
+            the value to which the field is being compared
+          </para>
+        </listitem>
+      </itemizedlist>
+      <section id="pronouns">
+        <title>Pronoun Substitution</title>
+        <para>
+          Sometimes, a query needs to compare a field containing
+          a user's ID (such as ReportedBy) with 
+          a user's ID (such as the user running the query or the user
+          to whom each bug is assigned). When the operator is either 
+          "equals" or "notequals", the value can be "%reporter%", 
+          "%assignee%", "%qacontact%", or "%user%."  The user pronoun
+          referes to the user who is executing the query or, in the case
+          of whining reports, the user who will be the recipient
+          of the report. The reporter, assignee, and qacontact
+          pronouns refer to the corresponding fields in the bug.
+        </para>
+      </section>
+      <section id="negation">
+        <title>Negation</title>
+        <para>
+          At first glance, negation seems redundant. Rather than
+          searching for
+          <blockquote>
+            <para>
+              NOT("summary" "contains the string" "foo"),
+            </para>
+          </blockquote>
+          one could search for 
+          <blockquote>
+            <para>
+              ("summary" "does not contain the string" "foo").
+            </para>
+          </blockquote>
+          However, the search 
+          <blockquote>
+            <para>
+              ("CC" "does not contain the string" "@mozilla.org")
+            </para>
+          </blockquote>
+          would find every bug where anyone on the CC list did not contain 
+          "@mozilla.org" while
+          <blockquote>
+            <para>
+              NOT("CC" "contains the string" "@mozilla.org")
+            </para>
+          </blockquote>
+          would find every bug where there was nobody on the CC list who
+          did contain the string. Similarly, the use of negation also permits
+          complex expressions to be built using terms OR'd together and then
+          negated. Negation permits queries such as
+          <blockquote>
+            <para>
+              NOT(("product" "equals" "update") OR 
+            ("component" "equals" "Documentation"))
+            </para>
+          </blockquote>
+          to find bugs that are neither 
+          in the update product or in the documentation component or
+          <blockquote>
+            <para>
+              NOT(("commenter" "equals" "%assignee%") OR 
+              ("component" "equals" "Documentation"))
+            </para>
+          </blockquote>
+          to find non-documentation
+          bugs on which the assignee has never commented.
+        </para>
+      </section>
+      <section id="multiplecharts">
+        <title>Multiple Charts</title>
+        <para>
+          The terms within a single row of a boolean chart are all
+          constraints on a single piece of data. If you are looking for
+          a bug that has two different people cc'd on it, then you need 
+          to use two boolean charts. A search for
+          <blockquote>
+            <para>
+              ("cc" "contains the string" "foo@") AND
+              ("cc" "contains the string" "@mozilla.org")
+            </para>
+          </blockquote>
+          would return only bugs with "foo@mozilla.org" on the cc list.
+          If you wanted bugs where there is someone on the cc list
+          containing "foo@" and someone else containing "@mozilla.org",
+          then you would need two boolean charts.
+          <blockquote>
+            <para>
+              First chart: ("cc" "contains the string" "foo@")
+            </para>
+            <para>
+              Second chart: ("cc" "contains the string" "@mozilla.org")
+            </para>
+          </blockquote>
+          The bugs listed will be only the bugs where ALL the charts are true.
+        </para>
+      </section>
+    </section>
   </section>
 
   <section id="list">
@@ -303,7 +461,22 @@
 
       get the buglist as comma-separated values, for import into e.g.
       a spreadsheet.</member>
-      
+     
+      <member>
+      <emphasis>RSS</emphasis>
+
+      get the buglist as an RSS 1.0 feed.  Copy this link into your
+      favorite feed reader.  If you are using Firefox, you can also
+      save the list as a live bookmark by clicking the live bookmark
+      icon in the status bar.  To limit the number of bugs in the feed,
+      add a limit=n parameter to the URL.</member>
+
+      <member>
+      <emphasis>iCalendar</emphasis>
+
+      Get the buglist as an iCalendar file. Each bug is represented as a 
+      to-do item in the imported calendar.</member>
+     
       <member>
       <emphasis>Change Columns:</emphasis>
 
@@ -314,12 +487,12 @@
 
       If your account is sufficiently empowered, you can make the same
       change to all the bugs in the list - for example, changing their
-      owner.</member>
+      assignee.</member>
 
       <member>
-      <emphasis>Send mail to bug owners:</emphasis>
+      <emphasis>Send mail to bug assignees:</emphasis>
 
-      Sends mail to the owners of all bugs on the list.</member>
+      Sends mail to the assignees of all bugs on the list.</member>
 
       <member>
       <emphasis>Edit Search:</emphasis>
@@ -336,6 +509,17 @@
       </member>
     </simplelist>
     </para>
+
+    <para>
+      If you would like to access the bug list from another program 
+      it is often useful to have the list returned in something other
+      than HTML. By adding the ctype=type parameter into the bug list URL
+      you can specify several alternate formats. The supported formats
+      are: Comma Separated Values (ctype=csv), iCalendar (ctype=ics),
+      RDF Site Summary (RSS) 1.0 (ctype=rss), ECMAScript, also known
+      as JavaScript (ctype=js), and finally Resource Description Framework
+      RDF/XML (ctype=rdf).
+    </para>
   </section>
 
   <section id="bugreports">
@@ -344,7 +528,7 @@
     <para>Years of bug writing experience has been distilled for your
     reading pleasure into the 
     <ulink
-    url="http://landfill.bugzilla.org/bugzilla-tip/bugwritinghelp.html">
+    url="&landfillbase;page.cgi?id=bug-writing.html">
     Bug Writing Guidelines</ulink>. 
     While some of the advice is Mozilla-specific, the basic principles of
     reporting Reproducible, Specific bugs, isolating the Product you are
@@ -358,11 +542,11 @@
     <orderedlist>
       <listitem>
         <para>Go to 
-        <ulink url="http://landfill.bugzilla.org/bugzilla-tip/">
+        <ulink url="&landfillbase;">
         Landfill</ulink>
         in your browser and click 
         <ulink
-        url="http://landfill.bugzilla.org/bugzilla-tip/enter_bug.cgi">
+        url="&landfillbase;enter_bug.cgi">
         Enter a new bug report</ulink>.
         </para>
       </listitem>
@@ -619,30 +803,144 @@
     <section id="emailsettings">
       <title>Email Settings</title>
 
-      <para>On this tab you can reduce or increase the amount of email sent
-      you from Bugzilla, opting in our out depending on your relationship to
-      the bug and the change that was made to it. 
-      </para>
-      
       <para>
-      You can also do further filtering on the client side by 
-      using the X-Bugzilla-Reason mail header which Bugzilla
-      adds to all bugmail. This tells you what relationship you have to the
-      bug in question,
-      and can be any of Owner, Reporter, QAcontact, CClist, Voter and
-      WatchingComponent.</para>
+        This tab controls the amount of email Bugzilla sends you.
+      </para>
 
-      <para>By entering user email names, delineated by commas, into the
-      "Users to watch" text entry box you can receive a copy of all the
-      bugmail of other users (security settings permitting.) This powerful
-      functionality enables seamless transitions as developers change
-      projects or users go on holiday.</para>
+      <para>
+        The first item on this page is marked <quote>Users to watch</quote>.
+        When you enter one or more comma-delineated user accounts (usually email
+        addresses) into the text entry box, you will receive a copy of all the
+        bugmail those users are sent (security settings permitting).
+        This powerful functionality enables seamless transitions as developers
+        change projects or users go on holiday.
+      </para>
 
       <note>
-        <para>The ability to watch other users may not be available in all
-        Bugzilla installations. If you can't see it, ask your 
-        administrator.</para>
+        <para>
+          The ability to watch other users may not be available in all
+          Bugzilla installations. If you don't see this feature, and feel
+          that you need it, speak to your administrator.
+        </para>
       </note>
+
+      <para>
+        In general, users have almost complete control over how much (or
+        how little) email Bugzilla sends them. If you want to receive the
+        maximum amount of email possible, click the <quote>Enable All 
+        Mail</quote> button. If you don't want to receive any email from
+        Bugzilla at all, click the <quote>Disable All Mail</quote> button.
+      </para>
+
+      <note>
+        <para>
+          Your Bugzilla administrator can stop a user from receiving
+          bugmail by adding the user's name to the 
+          <filename>data/nomail</filename> file. This is a drastic step
+          best taken only for disabled accounts, as it overrides the 
+          the user's individual mail preferences.
+        </para>
+      </note>
+  
+      <para>
+        If you'd like to set your bugmail to something besides
+        'Completely ON' and 'Completely OFF', the
+        <quote>Field/recipient specific options</quote> table
+        allows you to do just that. The rows of the table
+        define events that can happen to a bug -- things like
+        attachments being added, new comments being made, the
+        priority changing, etc. The columns in the table define
+        your relationship with the bug:
+      </para>
+
+      <itemizedlist spacing="compact">
+        <listitem>
+          <para>
+            Reporter - Where you are the person who initially
+            reported the bug. Your name/account appears in the
+            <quote>Reporter:</quote> field.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            Assignee - Where you are the person who has been
+            designated as the one responsible for the bug. Your
+            name/account appears in the <quote>Assigned To:</quote>
+            field of the bug.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            QA Contact - You are one of the designated
+            QA Contacts for the bug. Your account appears in the 
+            <quote>QA Contact:</quote> text-box of the bug.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            CC - You are on the list CC List for the bug.
+            Your account appears in the <quote>CC:</quote> text box
+            of the bug.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            Voter - You have placed one or more votes for the bug.
+            Your account appears only if someone clicks on the 
+            <quote>Show votes for this bug</quote> link on the bug.
+          </para>
+        </listitem>
+      </itemizedlist>
+
+
+      <note>
+        <para>
+          Some columns may not be visible for your installation, depending
+          on your site's configuration.
+        </para>
+      </note>
+
+      <para>
+        To fine-tune your bugmail, decide the events for which you want
+        to receive bugmail; then decide if you want to receive it all
+        the time (enable the checkbox for every column), or only when
+        you have a certain relationship with a bug (enable the checkbox
+        only for those columns). For example: if you didn't want to
+        receive mail when someone added themselves to the CC list, you
+        could uncheck all the boxes in the <quote>CC Field Changes</quote>
+        line. As another example, if you never wanted to receive email
+        on bugs you reported unless the bug was resolved, you would
+        un-check all boxes in the <quote>Reporter</quote> column
+        except for the one on the <quote>The bug is resolved or
+        verified</quote> row.
+      </para>
+
+      <note>
+        <para>
+          Bugzilla adds the <quote>X-Bugzilla-Reason</quote> header to
+          all bugmail it sends, describing the recipient's relationship
+          (AssignedTo, Reporter, QAContact, CC, or Voter) to the bug.
+          This header can be used to do further client-side filtering.
+        </para>
+      </note>
+
+      <para>
+        Two items not in the table (<quote>Email me when someone
+        asks me to set a flag</quote> and <quote>Email me when someone
+        sets a flag I asked for</quote>) define how you want to
+        receive bugmail with regards to flags. Their use is quite
+        straightforward; enable the checkboxes if you want Bugzilla to
+        send you mail under either of the above conditions.
+      </para>
+
+      <para>
+        By default, Bugzilla sends out email regardless of who made the
+        change... even if you were the one responsible for generating
+        the email in the first place. If you don't care to receive bugmail
+        from your own changes, check the box marked <quote>Only email me
+        reports of changes made by other people</quote>.
+      </para>
+
     </section>
 
     <section id="permissionsettings">
@@ -741,10 +1039,8 @@
       
       <para>
         Data sets may be public or private. Everyone sees public data sets in
-        the list, plus any private data sets they are subscribed to. You are 
-        automatically subscribed to any data sets you create, but others may 
-        subscribe to them too if they know about them. Only administrators can 
-        make data sets public.
+        the list, but only their creator sees private data sets. Only 
+        administrators can make data sets public.
         No two data sets, even two private ones, can have the same set of 
         category, subcategory and name. So if you are creating private data 
         sets, one idea is to have the Category be your username.
@@ -780,11 +1076,7 @@
 
         <para>
           Once a data set is in the list, one can also perform certain 
-          actions on it.
-          For example, one can Subscribe to or Unsubscribe from a private 
-          data set. This is useful if someone else has shown you a chart,
-          and you want to make some of their data sets appear in your list,
-          so you can use them in your own charts. One can also edit the
+          actions on it. For example, one can edit the
           data set's parameters (name, frequency etc.) if it's one you
           created or if you are an administrator.
         </para>
@@ -818,6 +1110,256 @@
     
   </section>
   
+  <section id="flags">
+    <title>Flags</title>
+    
+    <para>
+      A flag is a kind of status that can be set on bugs or attachments
+      to indicate that the bugs/attachments are in a certain state.
+      Each installation can define its own set of flags that can be set
+      on bugs or attachments.
+    </para>
+    
+    <para>
+      If your installation has defined a flag, you can set or unset that flag,
+      and if your administrator has enabled requesting of flags, you can submit
+      a request for another user to set the flag.
+    </para>
+    
+    <para>
+      To set a flag, select either "+" or "-" from the drop-down menu next to
+      the name of the flag in the "Flags" list.  The meaning of these values are
+      flag-specific and thus cannot be described in this documentation,
+      but by way of example, setting a flag named "review" to "+" may indicate
+      that the bug/attachment has passed review, while setting it to "-"
+      may indicate that the bug/attachment has failed review.
+    </para>
+    
+    <para>
+      To unset a flag, click its drop-down menu and select the blank value.
+    </para>
+    
+    <para>
+      If your administrator has enabled requests for a flag, request a flag
+      by selecting "?" from the drop-down menu and then entering the username
+      of the user you want to set the flag in the text field next to the menu.
+    </para>
+    
+    <para>
+      A set flag appears in bug reports and on "edit attachment" pages with the
+      abbreviated username of the user who set the flag prepended to the
+      flag name. For example, if Jack sets a "review" flag to "+", it appears
+      as Jack: review [ + ]
+    </para>
+  
+    <para>
+      A requested flag appears with the user who requested the flag prepended
+      to the flag name and the user who has been requested to set the flag
+      appended to the flag name within parentheses.  For example, if Jack
+      asks Jill for review, it appears as Jack: review [ ? ] (Jill).
+    </para>
+  </section>
+
+  <section id="whining">
+    <title>Whining</title>
+
+    <para>
+      Whining is a feature in Bugzilla that can regularly annoy users at 
+      specified times.  Using this feature, users can execute saved searches 
+      at specific times (i.e. the 15th of the month at midnight) or at 
+      regular intervals (i.e. every 15 minutes on Sundays).  The results of the
+      searches are sent to the user, either as a single email or as one email 
+      per bug, along with some descriptive text.
+    </para>
+
+    <warning>
+      <para>
+        Throughout this section it will be assumed that all users are members 
+        of the bz_canusewhines group, membership in which is required in order 
+        to use the Whining system.  You can easily make all users members of 
+        the bz_canusewhines group by setting the User RegExp to ".*" (without 
+        the quotes).
+      </para>
+
+      <para>
+        Also worth noting is the bz_canusewhineatothers group.  Members of this
+        group can create whines for any user or group in Bugzilla using a 
+        extended form of the whining interface.  Features only available to 
+        members of the bz_canusewhineatothers group will be noted in the 
+        appropriate places.
+      </para>
+    </warning>
+
+    <note>
+      <para>
+        For whining to work, a special Perl script must be executed at regular
+        intervals.  More information on this is available in 
+        <xref linkend="installation-whining"/>.
+      </para>
+    </note>
+
+    <note>
+      <para>
+        This section does not cover the whineatnews.pl script.  See
+        <xref linkend="installation-whining-cron"/> for more information on 
+        The Whining Cron.
+      </para>
+    </note>
+
+    <section id="whining-overview">
+      <title>The Event</title>
+
+      <para>
+        The whining system defines an "Event" as one or more queries being 
+        executed at regular intervals, with the results of said queries (if
+        there are any) being emailed to the user.  Events are created by 
+        clicking on the "Add new event" button.
+      </para>
+
+      <para>
+        Once a new event is created, the first thing to set is the "Email 
+        subject line".  The contents of this field will be used in the subject
+        line of every email generated by this event.  In addition to setting a 
+        subject, space is provided to enter some descriptive text that will be 
+        included at the top of each message (to help you in understanding why 
+        you received the email in the first place).
+      </para>
+
+      <para>
+        The next step is to specify when the Event is to be run (the Schedule) 
+        and what searches are to be performed (the Queries).
+      </para>
+
+    </section>
+
+    <section id="whining-schedule">
+      <title>Whining Schedule</title>
+
+      <para>
+         Each whining event is associated with zero or more schedules.  A 
+         schedule is used to specify when the query (specified below) is to be
+         run.  A new event starts out with no schedules (which means it will 
+         never run, as it is not scheduled to run).  To add a schedule, press
+         the "Add a new schedule" button.
+      </para>
+
+      <para>
+         Each schedule includes an interval, which you use to tell Bugzilla 
+         when the event should be run.  An event can be run on certain days of
+         the week, certain days of the month, during weekdays (defined as 
+         Monday through Friday), or every day.
+      </para>
+
+      <important>
+        <para>
+          Be careful if you set your event to run on the 29th, 30th, or 31st of
+          the month, as your event may not run exactly when expected.  If you 
+          want your event to run on the last day of the month, select "Last day
+          of the month" as the interval.
+        </para>
+      </important>
+
+      <para>
+        Once you have specified the day(s) on which the event is to be run, you
+        should now specify the time at which the event is to be run.  You can 
+        have the event run at a certain hour on the specified day(s), or 
+        every hour, half-hour, or quarter-hour on the specified day(s).
+      </para>
+
+      <para>
+        If a single schedule does not execute an event as many times as you 
+        would want, you can create another schedule for the same event.  For 
+        example, if you want to run an event on days whose numbers are
+        divisible by seven, you would need to add four schedules to the event,
+        setting the schedules to run on the 7th, 14th, 21st, and 28th (one day 
+        per schedule) at whatever time (or times) you choose.
+      </para>
+
+      <note>
+        <para>
+          If you are a member of the bz_canusewhineatothers group, then you
+          will be presented with another option: "Mail to".  Using this you 
+          can control who will receive the emails generated by this event.  You
+          can choose to send the emails to a single user (identified by email 
+          address) or a single group (identified by group name).  To send to 
+          multiple users or groups, create a new schedule for each additional 
+          user/group.
+        </para>
+      </note>
+    </section>
+
+    <section id="whining-query">
+      <title>Whining Queries</title>
+
+      <para>
+        Each wining event is associated with zero or more queries.  A query is
+        a saved search that is executed on the schedule specified (see above).
+        You start out with zero queries attached to the event (which means that
+        the event will not run, as there will never be any results to return).
+        To add a query, press the "Add a new query" button.
+      </para>
+
+      <para>
+        The first field to examine in your new query is the Sort field.  Queries
+        are executed, and results returned, in the order specified by the Sort 
+        field.  Queries with lower Sort values will run before queries with 
+        higher Sort values.
+      </para>
+
+      <para>
+        The next field to examine is the Search field.  This is where you 
+        choose the actual search that is to be run.  Instead of defining search
+        parameters here, you are asked to choose from the list of saved 
+        searches (the same list that appears at the bottom of every Bugzilla 
+        page).  You are only allowed to choose from searches that you have 
+        saved yourself (the default saved search, "My Bugs", is not a valid 
+        choice).  If you do not have any saved searches, you can take this 
+        opportunity to create one (see <xref linkend="list"/>).
+      </para>
+
+      <note>
+        <para>
+          When running queries, the wining system acts as if you are the user
+          executing the query.  This means that the whining system will ignore
+          bugs that match your query, but that you can not access.
+        </para>
+      </note>
+
+      <para>
+        Once you have chosen the saved search to be executed, give the query a 
+        descriptive title.  This title will appear in the email, above the 
+        results of the query.  If you choose "One message per bug", the query 
+        title will appear at the top of each email that contains a bug matching
+        your query.
+      </para>
+
+      <para>
+        Finally, decide if the results of the query should be sent in a single
+        email, or if each bug should appear in its own email.
+      </para>
+
+      <warning>
+        <para>
+          Think carefully before checking the "One message per bug" box.  If
+          you create a query that matches thousands of bugs, you will receive 
+          thousands of emails!
+        </para>
+      </warning>
+    </section>
+
+    <para>
+      Once you have defined at least one schedule, and created at least one 
+      query, go ahead and "Update/Commit".  This will save your Event and make
+      it available for immediate execution.
+    </para>
+
+    <para>
+      If you ever feel like deleting your event, you may do so using the "Remove
+      Event" button in the upper-right corner of each Event.  You can also 
+      modify an existing event, so long as you "Update/Commit" after completing
+      your modifications.
+    </para>
+  </section>
 </chapter>
 
 <!-- Keep this comment at the end of the file

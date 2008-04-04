@@ -50,15 +50,6 @@
     </note>
 
     <para>
-      AppConfig:
-      <literallayout>
-        CPAN Download Page: <ulink url="http://search.cpan.org/src/ABW/AppConfig-1.56/lib/AppConfig.pm"/>
-        PPM Download Link: <ulink url="http://landfill.bugzilla.org/ppm/AppConfig.ppd"/>
-        Documentation: <ulink url="http://search.cpan.org/~abw/AppConfig-1.56/lib/AppConfig.pm"/>
-      </literallayout>
-    </para>
-    
-    <para>
       CGI:
       <literallayout>
         CPAN Download Page: <ulink url="http://search.cpan.org/dist/CGI.pm/"/>
@@ -145,6 +136,16 @@
         CPAN Download Page: <ulink url="http://search.cpan.org/dist/GD/"/>
         PPM Download Link: <ulink url="http://landfill.bugzilla.org/ppm/GD.ppd"/>
         Documentation: <ulink url="http://stein.cshl.org/WWW/software/GD/"/>
+      </literallayout>
+    </para>
+
+    <para>
+      Template::Plugin::GD:
+      <literallayout>
+       CPAN Download Page: <ulink url="http://search.cpan.org/dist/Template-GD/" />
+       PPM Download Link:  (Just install Template-Toolkit using the instructions below)
+
+       Documentation: <ulink url="http://www.template-toolkit.org/docs/aqua/Modules/index.html" />
       </literallayout>
     </para>
 

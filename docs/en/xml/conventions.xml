@@ -1,4 +1,10 @@
-<!-- <!DOCTYPE section PUBLIC "-//OASIS//DTD DocBook V4.1//EN"> -->
+<?xml version="1.0"?>
+<!DOCTYPE section PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+                         "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
+    <!ENTITY % myents SYSTEM "bugzilla.ent">
+    %myents;
+]>
+
 <section id="conventions">
   <title>Document Conventions</title>
 
@@ -6,7 +12,7 @@
     <primary>conventions</primary>
   </indexterm>
 
-  <para>This document uses the following conventions</para>
+  <para>This document uses the following conventions:</para>
 
   <informaltable frame="none">
     <tgroup cols="2">
@@ -20,7 +26,7 @@
 
       <tbody>
         <row>
-          <entry>Warnings</entry>
+          <entry>Warning</entry>
 
           <entry>
             <caution>
@@ -34,13 +40,13 @@
 
           <entry>
             <tip>
-              <para>Warm jar lids under the hot tap to loosen them.</para>
+              <para>Would you like a breath mint?</para>
             </tip>
           </entry>
         </row>
 
         <row>
-          <entry>Notes</entry>
+          <entry>Note</entry>
 
           <entry>
             <note>
@@ -60,23 +66,15 @@
         </row>
 
         <row>
-          <entry>File Names</entry>
+          <entry>File or directory name</entry>
 
           <entry>
-            <filename>file.extension</filename>
+            <filename>filename</filename>
           </entry>
         </row>
 
         <row>
-          <entry>Directory Names</entry>
-
-          <entry>
-            <filename class="directory">directory</filename>
-          </entry>
-        </row>
-
-        <row>
-          <entry>Commands to be typed</entry>
+          <entry>Command to be typed</entry>
 
           <entry>
             <command>command</command>
@@ -84,7 +82,7 @@
         </row>
 
         <row>
-          <entry>Applications Names</entry>
+          <entry>Application name</entry>
 
           <entry>
             <application>application</application>
@@ -93,33 +91,27 @@
 
         <row>
           <entry>
-          <foreignphrase>Prompt</foreignphrase>
-
-          of users command under bash shell</entry>
+          Normal user's prompt under bash shell</entry>
 
           <entry>bash$</entry>
         </row>
 
         <row>
           <entry>
-          <foreignphrase>Prompt</foreignphrase>
-
-          of root users command under bash shell</entry>
+          Root user's prompt under bash shell</entry>
 
           <entry>bash#</entry>
         </row>
 
         <row>
           <entry>
-          <foreignphrase>Prompt</foreignphrase>
-
-          of user command under tcsh shell</entry>
+          Normal user's prompt under tcsh shell</entry>
 
           <entry>tcsh$</entry>
         </row>
 
         <row>
-          <entry>Environment Variables</entry>
+          <entry>Environment variables</entry>
 
           <entry>
             <envar>VARIABLE</envar>
@@ -127,28 +119,32 @@
         </row>
 
         <row>
-          <entry>Emphasized word</entry>
+          <entry>Term found in the glossary</entry>
 
           <entry>
-            <emphasis>word</emphasis>
+            <glossterm linkend="gloss-bugzilla">Bugzilla</glossterm>
           </entry>
         </row>
 
         <row>
-          <entry>Code Example</entry>
+          <entry>Code example</entry>
 
           <entry>
-            <programlisting>
-            <sgmltag class="starttag">para</sgmltag>
-
-            Beginning and end of paragraph
-            <sgmltag class="endtag">para</sgmltag>
-            </programlisting>
+            <programlisting><sgmltag class="starttag">para</sgmltag>
+Beginning and end of paragraph
+<sgmltag class="endtag">para</sgmltag></programlisting>
           </entry>
         </row>
       </tbody>
     </tgroup>
   </informaltable>
+
+  <para>  
+	  This documentation is maintained in DocBook 4.1.2 XML format.
+    Changes are best submitted as plain text or XML diffs, attached
+    to a bug filed in the &bzg-bugs; component.
+  </para>
+  
 </section>
 
 <!-- Keep this comment at the end of the file
@@ -166,7 +162,7 @@ sgml-local-ecat-files:nil
 sgml-minimize-attributes:nil
 sgml-namecase-general:t
 sgml-omittag:t
-sgml-parent-document:("Bugzilla-Guide.sgml" "book" "chapter")
+sgml-parent-document:("Bugzilla-Guide.xml" "book" "chapter")
 sgml-shorttag:t
 sgml-tag-region-if-active:t
 End:

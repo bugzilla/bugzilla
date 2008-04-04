@@ -1,4 +1,10 @@
-<!-- <!DOCTYPE appendix PUBLIC "-//OASIS//DTD DocBook V4.1//EN"> -->
+<?xml version="1.0"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+                      "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
+    <!ENTITY % myents SYSTEM "bugzilla.ent">
+    %myents;
+]>
+
 <chapter id="customization">
   <title>Customising Bugzilla</title>
 
@@ -153,7 +159,7 @@
         to properly HTML filter data that has been passed into the template.
         This means that if the data can possibly contain special HTML characters
         such as &lt;, and the data was not intended to be HTML, they need to be
-        converted to entity form, ie &amp;lt;.  You use the 'html' filter in the
+        converted to entity form, i.e. &amp;lt;.  You use the 'html' filter in the
         Template Toolkit to do this.  If you forget, you may open up
         your installation to cross-site scripting attacks.
       </para>
@@ -162,7 +168,7 @@
         Also note that Bugzilla adds a few filters of its own, that are not
         in standard Template Toolkit.  In particular, the 'url_quote' filter
         can convert characters that are illegal or have special meaning in URLs,
-        such as &amp;, to the encoded form, ie %26.  This actually encodes most
+        such as &amp;, to the encoded form, i.e. %26.  This actually encodes most
         characters (but not the common ones such as letters and numbers and so
         on), including the HTML-special characters, so there's never a need to
         HTML filter afterwards.
@@ -202,7 +208,7 @@
       
       <para>
         To see if a CGI supports multiple output formats and types, grep the
-        CGI for <quote>GetFormat</quote>. If it's not present, adding
+        CGI for <quote>get_format</quote>. If it's not present, adding
         multiple format/type support isn't too hard - see how it's done in
         other CGIs, e.g. config.cgi.
       </para>
@@ -1093,8 +1099,8 @@ this. But you need to know this stuff anyway, right?
     </section>
   </section>
 
-  <!-- Integrating Bugzilla with Third-Party Tools -->
-  &integration;
+<!-- Integrating Bugzilla with Third-Party Tools -->
+<xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="integration.xml" />
 
 </chapter>
 

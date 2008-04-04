@@ -1,4 +1,10 @@
-<!-- <!DOCTYPE glossary PUBLIC "-//OASIS//DTD DocBook V4.1//EN" > -->
+<?xml version="1.0"?>
+<!DOCTYPE glossary PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+                         "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
+    <!ENTITY % myents SYSTEM "bugzilla.ent">
+    %myents;
+]>
+
 <glossary id="glossary">
   <glossdiv>
     <title>0-9, high ascii</title>
@@ -269,10 +275,11 @@
 
       <glossdef>
         <para>A Message Transport Agent is used to control the flow of email
-        on a system. Many unix based systems use
-        <ulink url="http://www.sendmail.org">sendmail</ulink> which is what
-        Bugzilla expects to find by default at <filename>/usr/sbin/sendmail</filename>.
-        Many other MTA's will work, but they all require that the
+        on a system. The <ulink url="http://search.cpan.org/dist/MailTools/Mail/Mailer.pm">Mail::Mailer</ulink>
+        Perl module, which Bugzilla uses to send email, can be configured to
+        use many different underlying implementations for actually sending the
+        mail using the <option>mail_delivery_method</option> parameter.
+        Implementations other than <literal>sendmail</literal> require that the
         <option>sendmailnow</option> param be set to <literal>on</literal>.
         </para>
       </glossdef>

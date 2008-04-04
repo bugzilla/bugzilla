@@ -1,4 +1,10 @@
-<!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook V4.1//EN"> -->
+<?xml version="1.0"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+                      "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
+    <!ENTITY % myents SYSTEM "bugzilla.ent">
+    %myents;
+]>
+
 <chapter id="administration">
   <title>Administering Bugzilla</title>
 
@@ -76,6 +82,22 @@
             After a product is initially created, the group controls
             can be further adjusted without interference by 
             this mechanism.
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>
+          maildeliverymethod
+        </term>
+        <listitem>
+          <para>
+            This is used to specify how email is sent, or if it is sent at 
+            all.  There are several options included for different MTAs, 
+            along with two additional options that disable email sending.  
+            "testfile" does not send mail, but instead saves it in 
+            <filename>data/mailer.testfile</filename> for later review.  
+            "none" disables email sending entirely.
           </para>
         </listitem>
       </varlistentry>
@@ -193,7 +215,7 @@
         <listitem>
           <para>
             This allows you to define an email address for each component, 
-            in addition to that of the default owner, who will be sent
+            in addition to that of the default assignee, who will be sent
             carbon copies of incoming bugs.
           </para>
         </listitem>
@@ -520,6 +542,46 @@
           </listitem>
         </itemizedlist>
       </section>
+      
+      <section id="impersonatingusers">
+        <title>Impersonating Users</title>
+        
+        <para>
+        There may be times when an administrator would like to do something as
+        another user.  The <command>sudo</command> feature may be used to do 
+        this.
+        </para>
+        
+        <note>
+          <para>
+          To use the sudo feature, you must be in the
+          <emphasis>bz_sudoers</emphasis> group.  By default, all
+          administrators are in this group.</para>
+        </note>
+        
+        <para>
+        If you have access to this feature, you may start a session by
+        going to the Edit Users page, Searching for a user and clicking on 
+        their login.  You should see a link below their login name titled 
+        "Impersonate this user".  Click on the link.  This will take you 
+        to a page where you will see a description of the feature and 
+        instructions for using it.  After reading the text, simply 
+        enter the login of the user you would like to impersonate, provide 
+        a short message explaining why you are doing this, and press the 
+        button.</para>
+        
+        <para>
+        As long as you are using this feature, everything you do will be done 
+        as if you were logged in as the user you are impersonating.</para>
+        
+        <warning>
+          <para>
+          The user you are impersonating will not be told about what you are 
+          doing.  If you do anything that results in mail being sent, that 
+          mail will appear to be from the user you are impersonating.  You 
+          should be extremely careful while using this feature.</para>
+        </warning>
+      </section>
     </section>
   </section>
 
@@ -580,12 +642,12 @@
     company.</para>
 
     <para>
-    Each component has a owner and (if you turned it on in the parameters),
-    a QA Contact. The owner should be the primary person who fixes bugs in
+    Each component has a default assignee and (if you turned it on in the parameters),
+    a QA Contact. The default assignee should be the primary person who fixes bugs in
     that component. The QA Contact should be the person who will ensure
-    these bugs are completely fixed. The Owner, QA Contact, and Reporter
+    these bugs are completely fixed. The Assignee, QA Contact, and Reporter
     will get email when new bugs are created in this Component and when
-    these bugs change. Default Owner and Default QA Contact fields only
+    these bugs change. Default Assignee and Default QA Contact fields only
     dictate the 
     <emphasis>default assignments</emphasis>; 
     these can be changed on bug submission, or at any later point in
@@ -605,9 +667,9 @@
 
       <listitem>
         <para>Fill out the "Component" field, a short "Description", 
-        the "Initial Owner" and "Initial QA Contact" (if enabled.) 
+        the "Default Assignee" and "Default QA Contact" (if enabled.) 
         The Component and Description fields may contain HTML; 
-        the "Initial Owner" field must be a login name
+        the "Default Assignee" field must be a login name
         already existing in the database. 
         </para>
       </listitem>
@@ -672,7 +734,7 @@
       <listitem>
         <para>Enter the name of the Milestone in the "Milestone" field. You
         can optionally set the "sortkey", which is a positive or negative
-        number (-255 to 255) that defines where in the list this particular
+        number (-32768 to 32767) that defines where in the list this particular
         milestone appears. This is because milestones often do not 
         occur in alphanumeric order For example, "Future" might be
         after "Release 1.2". Select "Add".</para>
@@ -874,7 +936,7 @@
        </para>
        <para>
          Only users with the ability to edit the bug may 
-         set flags on bugs. This includes the owner, reporter, and 
+         set flags on bugs. This includes the assignee, reporter, and 
          any user with the <computeroutput>editbugs</computeroutput> 
          permission.
        </para>
@@ -902,7 +964,7 @@
        
         <para>
           When you click on the <quote>Create a Flag Type for...</quote>
-          link, you will be presented with a form. Here is what the felds in 
+          link, you will be presented with a form. Here is what the fields in 
           the form mean:
         </para>
 
@@ -919,7 +981,7 @@
           <title>Description</title>
           <para>
             This describes the flag in more detail. At present, this doesn't
-            whos up anywhere helpful; ideally, it would be nice to have
+            show up anywhere helpful; ideally, it would be nice to have
             it show up as a tooltip. This field 
             can be as long as you like, and can contain any character you want.
           </para>
@@ -1255,7 +1317,9 @@
              resulted in a user acquiring permanent membership in a group.
              To remove a user from a group the user was in due to a regular
              expression in version 2.16 or earlier, the user must be explicitly
-             removed from the group.</para>
+             removed from the group. This can easily be done by pressing
+             buttons named 'Remove Memberships' or 'Remove Memberships
+             included in regular expression' under the table.</para>
            </note>
            <warning>
              <para>If specifying a domain in the regexp, make sure you end
@@ -1354,7 +1418,7 @@
       </orderedlist>
       <para>These controls are often described in this order, so a 
       product that requires a user to be a member of group "foo" 
-      to enter a bug and then requires that the bug stay resticted
+      to enter a bug and then requires that the bug stay restricted
       to group "foo" at all times and that only members of group "foo"
       can edit the bug even if they otherwise could see the bug would 
       have its controls summarized by...</para>

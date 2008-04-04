@@ -1333,18 +1333,7 @@
             </para>
           </listitem>
         </varlistentry>
-    	
-        <varlistentry>
-          <term>
-             bz_canusewhines
-          </term>
-          <listitem>
-            <para> 
-             Indicates user can configure whine reports for self.
-            </para>
-          </listitem>
-        </varlistentry>
-  
+
         <varlistentry>
           <term>
              bz_canusewhines

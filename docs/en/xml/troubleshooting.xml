@@ -1,5 +1,5 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"> -->
-<!-- $Id: troubleshooting.xml,v 1.13 2008/04/04 06:48:25 timeless%mozdev.org Exp $ -->
+<!-- $Id: troubleshooting.xml,v 1.2 2008/04/04 06:48:14 jake%bugzilla.org Exp $ -->
 
 <appendix id="troubleshooting">
 <title>Troubleshooting</title>
@@ -15,40 +15,27 @@
     completion, it normally explains what's wrong and how to fix it.
     If you can't work it out, or if it's being uncommunicative, post 
     the errors in the 
-    <ulink url="news://news.mozilla.org/mozilla.support.bugzilla">mozilla.support.bugzilla</ulink>
+    <ulink url="news://news.mozilla.org/netscape.public.mozilla.webtools">netscape.public.mozilla.webtools</ulink>
     newsgroup.
     </para>
 
     <para>If you have made it all the way through
     <xref linkend="installation"/> (Installation) and
     <xref linkend="configuration"/> (Configuration) but accessing the Bugzilla
-    URL doesn't work, the first thing to do is to check your web server error
+    URL doesn't work, the first thing to do is to check your webserver error
     log. For Apache, this is often located at
     <filename>/etc/logs/httpd/error_log</filename>. The error messages
     you see may be self-explanatory enough to enable you to diagnose and
     fix the problem. If not, see below for some commonly-encountered 
     errors. If that doesn't help, post the errors to the newsgroup.
     </para>
-
-    <para>
-      Bugzilla can also log all user-based errors (and many code-based errors)
-      that occur, without polluting the web server's error log.  To enable
-      Bugzilla error logging, create a file that Bugzilla can write to, named
-      <filename>errorlog</filename>, in the Bugzilla <filename>data</filename>
-      directory.  Errors will be logged as they occur, and will include the type
-      of the error, the IP address and username (if available) of the user who
-      triggered the error, and the values of all environment variables; if a
-      form was being submitted, the data in the form will also be included.
-      To disable error logging, delete or rename the
-      <filename>errorlog</filename> file.
-    </para>
   </section>
         
   <section id="trbl-testserver">
-  <title>The Apache web server is not serving Bugzilla pages</title>
+  <title>The Apache webserver is not serving Bugzilla pages</title>
     <para>After you have run <command>checksetup.pl</command> twice,
     run <command>testserver.pl http://yoursite.yourdomain/yoururl</command>
-    to confirm that your web server is configured properly for
+    to confirm that your webserver is configured properly for
     Bugzilla.
     </para>
     <programlisting>
@@ -75,13 +62,31 @@ TEST-OK Webserver is preventing fetch of http://landfill.bugzilla.org/bugzilla-t
         </para>
       </listitem>
       <listitem>
-        <para>The permissions on your library directories are set incorrectly.
-        They must, at the very least, be readable by the web server user or
-        group. It is recommended that they be world readable.
+	<para>The permissions on your library directories are set incorrectly.
+	They must, at the very least, be readable by the webserver user or
+	group. It is recommended that they be world readable.
         </para>
       </listitem>
     </orderedlist>
   </section>
+    
+  <section id="trbl-bundleBugzilla">
+  <title>Bundle::Bugzilla makes me upgrade to Perl 5.6.1</title>
+
+    <para>Try executing <command>perl -MCPAN -e 'install CPAN'</command>
+    and then continuing.
+    </para>
+      
+    <para>Certain older versions of the CPAN toolset were somewhat naive about
+    how to upgrade Perl modules. When a couple of modules got rolled into the
+    core Perl distribution for 5.6.1, CPAN thought that the best way to get
+    those modules up to date was to haul down the Perl distribution itself and
+    build it. Needless to say, this has caused headaches for just about
+    everybody. Upgrading to a newer version of CPAN with the
+    commandline above should fix things.
+    </para>
+  </section>
+
 
   <section id="trbl-dbdSponge">
   <title>DBD::Sponge::db prepare failed</title>
@@ -139,12 +144,55 @@ TEST-OK Webserver is preventing fetch of http://landfill.bugzilla.org/bugzilla-t
     </para>
   </section>    
 
+  <section id="trouble-filetemp">
+  <title>Your vendor has not defined Fcntl macro O_NOINHERIT</title>
+
+    <para>This is caused by a bug in the version of
+    <productname>File::Temp</productname> that is distributed with perl
+    5.6.0. Many minor variations of this error have been reported:
+    </para>
+
+    <programlisting>Your vendor has not defined Fcntl macro O_NOINHERIT, used 
+at /usr/lib/perl5/site_perl/5.6.0/File/Temp.pm line 208.
+
+Your vendor has not defined Fcntl macro O_EXLOCK, used 
+at /usr/lib/perl5/site_perl/5.6.0/File/Temp.pm line 210.
+
+Your vendor has not defined Fcntl macro O_TEMPORARY, used 
+at /usr/lib/perl5/site_perl/5.6.0/File/Temp.pm line 233.</programlisting>
+
+    <para>Numerous people have reported that upgrading to version 5.6.1
+    or higher solved the problem for them. A less involved fix is to apply
+    the following patch, which is also
+    available as a <ulink url="../xml/filetemp.patch">patch file</ulink>.
+    </para>
+
+    <programlisting><![CDATA[--- File/Temp.pm.orig   Thu Feb  6 16:26:00 2003
++++ File/Temp.pm        Thu Feb  6 16:26:23 2003
+@@ -205,6 +205,7 @@
+     # eg CGI::Carp
+     local $SIG{__DIE__} = sub {};
+     local $SIG{__WARN__} = sub {};
++    local *CORE::GLOBAL::die = sub {};
+     $bit = &$func();
+     1;
+   };
+@@ -226,6 +227,7 @@
+     # eg CGI::Carp
+     local $SIG{__DIE__} = sub {};
+     local $SIG{__WARN__} = sub {};
++    local *CORE::GLOBAL::die = sub {};
+     $bit = &$func();
+     1;
+   };]]></programlisting>
+  </section>
+
   <section id="trbl-relogin-everyone">
   <title>Everybody is constantly being forced to relogin</title>
   
   <para>The most-likely cause is that the <quote>cookiepath</quote> parameter
   is not set correctly in the Bugzilla configuration.  You can change this (if
-  you're a Bugzilla administrator) from the editparams.cgi page via the web interface.
+  you're a Bugzilla administrator) from the editparams.cgi page via the web.
   </para>
 
   <para>The value of the cookiepath parameter should be the actual directory
@@ -209,11 +257,13 @@ TEST-OK Webserver is preventing fetch of http://landfill.bugzilla.org/bugzilla-t
     past and need to set it to something more restrictive
     (i.e. <quote>/bugzilla/</quote>), you can safely do this without
     requiring users to delete their Bugzilla-related cookies in their
-    browser (this is true starting with Bugzilla 2.18 and Bugzilla 2.16.5).
+    browser (this is true starting with 
+    <!-- Need OR logic here for bz-devel logic here --> 
+    Bugzilla 2.18<![%bz-devel;[, Bugzilla 2.17.7,]]> and Bugzilla 2.16.5).
     </para>
   </section>
 
-  <section id="trbl-relogin-some">
+  <section>
   <title>Some users are constantly being forced to relogin</title>
 
     <para>First, make sure cookies are enabled in the user's browser.
@@ -227,7 +277,8 @@ TEST-OK Webserver is preventing fetch of http://landfill.bugzilla.org/bugzilla-t
      log in again.
      </para>
 
-     <para>If you are using 2.18 (or later), there is a
+     <para>If you are using 2.18
+     <![%bz-devel[(or 2.17.1 in the development series)]]>, there is a
      parameter called <quote>loginnetmask</quote>, which you can use to set
      the number of bits of the user's IP address to require to be matched when
      authenticating the cookies. If you set this to something less than 32,
@@ -241,46 +292,6 @@ TEST-OK Webserver is preventing fetch of http://landfill.bugzilla.org/bugzilla-t
      </para>
 
    </section>
-
-  <section id="trbl-index">
-  <title><filename>index.cgi</filename> doesn't show up unless specified in the URL</title>
-    <para>
-      You probably need to set up your web server in such a way that it
-      will serve the index.cgi page as an index page.
-    </para>
-    <para>
-      If you are using Apache, you can do this by adding 
-      <filename>index.cgi</filename> to the end of the 
-      <computeroutput>DirectoryIndex</computeroutput> line
-      as mentioned in <xref linkend="http-apache"/>.
-    </para>
-
-  </section>
-
-  <section id="trbl-passwd-encryption">
-    <title>
-      checksetup.pl reports "Client does not support authentication protocol
-      requested by server..."
-    </title>
-
-    <para>
-      This error is occurring because you are using the new password
-      encryption that comes with MySQL 4.1, while your
-      <filename>DBD::mysql</filename> module was compiled against an
-      older version of MySQL. If you recompile <filename>DBD::mysql</filename>
-      against the current MySQL libraries (or just obtain a newer version
-      of this module) then the error may go away.
-    </para>
-
-    <para>
-      If that does not fix the problem, or if you cannot recompile the
-      existing module (e.g. you're running Windows) and/or don't want to
-      replace it (e.g. you want to keep using a packaged version), then a
-      workaround is available from the MySQL docs:
-      <ulink url="http://dev.mysql.com/doc/mysql/en/Old_client.html"/>
-    </para>
-
-  </section>
 
 </appendix> 
 

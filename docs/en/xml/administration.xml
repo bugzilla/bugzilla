@@ -2270,7 +2270,9 @@ foo: ENTRY, MANDATORY/MANDATORY, CANEDIT
       bug priorities and severities can be edited from the User Interface
       directly. This means that it is no longer required to manually edit
       <filename>localconfig</filename>. Starting with Bugzilla 2.23.3, you
-      can also customize the list of valid resolutions from the same interface.
+      can also customize the list of valid resolutions from the same interface,
+      and since Bugzilla 3.1.1 the list of valid bug statuses can be customized
+      as well.
     </para>
 
     <section id="edit-values-list">
@@ -2310,6 +2312,27 @@ foo: ENTRY, MANDATORY/MANDATORY, CANEDIT
 	and to set another value as default for the field.
       </para>
     </section>
+  </section>
+
+  <section id="bug_status_workflow">
+    <title>Bug Status Workflow</title>
+
+    <para>
+      The bug status workflow is no longer hardcoded but can be freely customized
+      from the web interface. Only one bug status cannot be renamed nor deleted,
+      UNCONFIRMED, but the workflow involving it is free. The configuration
+      page displays all existing bug statuses twice, first on the left for bug
+      statuses we come from and on the top for bug statuses we move to.
+      If the checkbox is checked, then the transition between the two bug statuses
+      is legal, else it's forbidden independently of your privileges. The bug status
+      used for the "duplicate_or_move_bug_status" parameter must be part of the
+      workflow as that is the bug status which will be used when duplicating or
+      moving a bug, so it must be available from each bug status.
+    </para>
+    <para>
+      When the workflow is set, the "View Current Triggers" link below the table
+      lets you set which transitions require a comment from the user.
+    </para>
   </section>
 
   <section id="voting">

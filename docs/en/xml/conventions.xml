@@ -1,145 +1,98 @@
 <!-- <!DOCTYPE section PUBLIC "-//OASIS//DTD DocBook V4.1//EN"> -->
+
 <section id="conventions">
   <title>Document Conventions</title>
-
+  
   <indexterm zone="conventions">
     <primary>conventions</primary>
   </indexterm>
-
-  <para>This document uses the following conventions:</para>
-
+  
+  <para>
+    This document uses the following conventions
+  </para>
+  
   <informaltable frame="none">
     <tgroup cols="2">
       <thead>
         <row>
           <entry>Descriptions</entry>
-
           <entry>Appearance</entry>
         </row>
       </thead>
-
       <tbody>
         <row>
-          <entry>Warning</entry>
-
-          <entry>
-            <caution>
+          <entry>Warnings</entry>
+          <entry><caution>
               <para>Don't run with scissors!</para>
-            </caution>
-          </entry>
+            </caution></entry>
         </row>
-
         <row>
           <entry>Hint</entry>
-
-          <entry>
-            <tip>
-              <para>Would you like a breath mint?</para>
-            </tip>
-          </entry>
+          <entry><tip>
+              <para>Warm jar lids under the hot tap to loosen them.</para>
+            </tip></entry>
         </row>
-
         <row>
-          <entry>Note</entry>
-
-          <entry>
-            <note>
+          <entry>Notes</entry>
+          <entry><note>
               <para>Dear John...</para>
-            </note>
-          </entry>
+            </note></entry>
         </row>
-
         <row>
           <entry>Information requiring special attention</entry>
-
-          <entry>
-            <warning>
+          <entry><warning>
               <para>Read this or the cat gets it.</para>
-            </warning>
-          </entry>
+            </warning></entry>
         </row>
-
         <row>
-          <entry>File or directory name</entry>
-
-          <entry>
-            <filename>filename</filename>
-          </entry>
+          <entry>File Names</entry>
+          <entry><filename>file.extension</filename></entry>
         </row>
-
         <row>
-          <entry>Command to be typed</entry>
-
-          <entry>
-            <command>command</command>
-          </entry>
+          <entry>Directory Names</entry>
+          <entry><filename class="directory">directory</filename></entry>
         </row>
-
         <row>
-          <entry>Application name</entry>
-
-          <entry>
-            <application>application</application>
-          </entry>
+          <entry>Commands to be typed</entry>
+          <entry><command>command</command></entry>
         </row>
-
         <row>
-          <entry>
-          Normal user's prompt under bash shell</entry>
-
+          <entry>Applications Names</entry>
+          <entry><application>application</application></entry>
+        </row>
+        <row>
+          <entry><foreignphrase>Prompt</foreignphrase> of users command under bash shell</entry>
           <entry>bash$</entry>
         </row>
-
         <row>
-          <entry>
-          Root user's prompt under bash shell</entry>
-
+          <entry><foreignphrase>Prompt</foreignphrase> of root users command under bash shell</entry>
           <entry>bash#</entry>
         </row>
-
+	<row>
+	  <entry><foreignphrase>Prompt</foreignphrase> of user command under tcsh shell</entry>
+	  <entry>tcsh$</entry>
+	</row>
         <row>
-          <entry>
-          Normal user's prompt under tcsh shell</entry>
-
-          <entry>tcsh$</entry>
+          <entry>Environment Variables</entry>
+          <entry><envar>VARIABLE</envar></entry>
         </row>
-
         <row>
-          <entry>Environment variables</entry>
-
-          <entry>
-            <envar>VARIABLE</envar>
-          </entry>
+          <entry>Emphasized word</entry>
+          <entry><emphasis>word</emphasis></entry>
         </row>
-
         <row>
-          <entry>Term found in the glossary</entry>
-
-          <entry>
-            <glossterm linkend="gloss-bugzilla">Bugzilla</glossterm>
-          </entry>
-        </row>
-
-        <row>
-          <entry>Code example</entry>
-
-          <entry>
-            <programlisting><sgmltag class="starttag">para</sgmltag>
-Beginning and end of paragraph
-<sgmltag class="endtag">para</sgmltag></programlisting>
-          </entry>
+          <entry>Code Example</entry>
+          <entry><programlisting><sgmltag class="starttag">para</sgmltag>Beginning and end of paragraph<sgmltag class="endtag">para</sgmltag></programlisting></entry> 
         </row>
       </tbody>
     </tgroup>
   </informaltable>
-
-  <para>  
-	  This documentation is maintained in DocBook 4.1.2 XML format.
-    Changes are best submitted as plain text or XML diffs, attached
-    to a bug filed in the &bzg-bugs; component.
-  </para>
   
 </section>
+
+
+
+
 
 <!-- Keep this comment at the end of the file
 Local variables:
@@ -156,9 +109,8 @@ sgml-local-ecat-files:nil
 sgml-minimize-attributes:nil
 sgml-namecase-general:t
 sgml-omittag:t
-sgml-parent-document:("Bugzilla-Guide.xml" "book" "chapter")
+sgml-parent-document:("Bugzilla-Guide.sgml" "book" "chapter")
 sgml-shorttag:t
 sgml-tag-region-if-active:t
 End:
 -->
-

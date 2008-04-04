@@ -1692,7 +1692,7 @@ foo: ENTRY, MANDATORY/MANDATORY, CANEDIT
         and un-checking the box next to either 'Reporter' or 'CC List' (or both).
       </para>
     </note>
-    <section>
+    <section id="create-groups">
       <title>Creating Groups</title>
       <para>To create Groups:</para>
   
@@ -1748,7 +1748,7 @@ foo: ENTRY, MANDATORY/MANDATORY, CANEDIT
       </orderedlist>
   
     </section>
-    <section>
+    <section id="edit-groups">
       <title>Assigning Users to Groups</title>
       <para>Users can become a member of a group in several ways.</para>
       <orderedlist>

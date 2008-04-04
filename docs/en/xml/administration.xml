@@ -16,301 +16,244 @@
       <primary>checklist</primary>
     </indexterm>
 
-    <variablelist>
-      <varlistentry>
-        <term>
-          maintainer
-        </term>
-        <listitem>
-          <para> 
-            The maintainer parameter is the email address of the person 
-            responsible for maintaining this Bugzilla installation.
-            The address need not be that of a valid Bugzilla account.
-          </para>
-        </listitem>
-      </varlistentry>
+    <procedure>
+      <step>
+        <para> 
+          <command>maintainer</command>:
 
-      <varlistentry>
-        <term>
-          urlbase
-        </term>
-        <listitem>
-          <para>
-            This parameter defines the fully qualified domain name and web 
-            server path to your Bugzilla installation.
-          </para>
+          The maintainer parameter is the email address of the person 
+          responsible for maintaining this Bugzilla installation.
+          The address need not be that of a valid Bugzilla account.
+        </para>
+      </step>
 
-          <para>
-            For example, if your Bugzilla query page is
-            <filename>http://www.foo.com/bugzilla/query.cgi</filename>, 
-            set your <quote>urlbase</quote>
-            to <filename>http://www.foo.com/bugzilla/</filename>.
-          </para>
-        </listitem>
-      </varlistentry>
+      <step>
+        <para>
+          <command>urlbase</command>:
 
-      <varlistentry>
-        <term>
-          makeproductgroups
-        </term>
-        <listitem>
-          <para>
-            This dictates whether or not to automatically create groups
-            when new products are created.
-          </para>
-        </listitem>
-      </varlistentry>
+          This parameter defines the fully qualified domain name and web 
+          server path to your Bugzilla installation.
+        </para>
 
-      <varlistentry>
-        <term>
-          useentrygroupdefault
-        </term>
-        <listitem>
-          <para>
-            Bugzilla products can have a group associated with them, so that
-            certain users can only see bugs in certain products. When this 
-            parameter is set to <quote>on</quote>, this 
-            causes the initial group controls on newly created products 
-            to place all newly-created bugs in the group 
-            having the same name as the product immediately.
-            After a product is initially created, the group controls
-            can be further adjusted without interference by 
-            this mechanism.
-          </para>
-        </listitem>
-      </varlistentry>
+        <para>
+          For example, if your Bugzilla query page is
+          <filename>http://www.foo.com/bugzilla/query.cgi</filename>, 
+          set your <quote>urlbase</quote>
+          to <filename>http://www.foo.com/bugzilla/</filename>.
+        </para>
+      </step>
 
-      <varlistentry>
-        <term>
-          maildeliverymethod
-        </term>
-        <listitem>
-          <para>
-            This is used to specify how email is sent, or if it is sent at 
-            all.  There are several options included for different MTAs, 
-            along with two additional options that disable email sending.  
-            "testfile" does not send mail, but instead saves it in 
-            <filename>data/mailer.testfile</filename> for later review.  
-            "none" disables email sending entirely.
-          </para>
-        </listitem>
-      </varlistentry>
+      <step>
+        <para>
+          <command>makeproductgroups</command>:
 
-      <varlistentry>
-        <term>
-          shadowdb
-        </term>
-        <listitem>
-          <para>
-            You run into an interesting problem when Bugzilla reaches a
-            high level of continuous activity. MySQL supports only table-level
-            write locking. What this means is that if someone needs to make a
-            change to a bug, they will lock the entire table until the operation
-            is complete. Locking for write also blocks reads until the write is
-            complete. Note that more recent versions of mysql support row level
-            locking using different table types. These types are slower than the
-            standard type, and Bugzilla does not yet take advantage of features
-            such as transactions which would justify this speed decrease. The
-            Bugzilla team are, however, happy to hear about any experiences with
-            row level locking and Bugzilla.
-          </para>
+          This dictates whether or not to automatically create groups
+          when new products are created.
+        </para>
+      </step>
 
-          <para>
-            The <quote>shadowdb</quote> parameter was designed to get around
-            this limitation. While only a single user is allowed to write to
-            a table at a time, reads can continue unimpeded on a read-only
-            shadow copy of the database. Although your database size will
-            double, a shadow database can cause an enormous performance
-            improvement when implemented on extremely high-traffic Bugzilla
-            databases.
-          </para>
+      <step>
+        <para>
+          <command>useentrygroupdefault</command>:
+
+          Bugzilla products can have a group associated with them, so that
+          certain users can only see bugs in certain products. When this 
+          parameter is set to <quote>on</quote>, this 
+          causes the initial group controls on newly created products 
+          to place all newly-created bugs in the group 
+          having the same name as the product immediately.
+          After a product is initially created, the group controls
+          can be further adjusted without interference by 
+          this mechanism.
+        </para>
+      </step>
+
+      <step>
+        <para>
+          <command>shadowdb</command>:
+
+          You run into an interesting problem when Bugzilla reaches a
+          high level of continuous activity. MySQL supports only table-level
+          write locking. What this means is that if someone needs to make a
+          change to a bug, they will lock the entire table until the operation
+          is complete. Locking for write also blocks reads until the write is
+          complete. Note that more recent versions of mysql support row level
+          locking using different table types. These types are slower than the
+          standard type, and Bugzilla does not yet take advantage of features
+          such as transactions which would justify this speed decrease. The
+          Bugzilla team are, however, happy to hear about any experiences with
+          row level locking and Bugzilla.
+        </para>
+
+        <para>
+          The <quote>shadowdb</quote> parameter was designed to get around
+          this limitation. While only a single user is allowed to write to
+          a table at a time, reads can continue unimpeded on a read-only
+          shadow copy of the database. Although your database size will
+          double, a shadow database can cause an enormous performance
+          improvement when implemented on extremely high-traffic Bugzilla
+          databases.
+        </para>
         
+        <para>
+          As a guide, on reasonably old hardware, mozilla.org began needing 
+          <quote>shadowdb</quote> when they reached around 40,000 Bugzilla
+          users with several hundred Bugzilla bug changes and comments per day.
+        </para>
+
+        <para>
+          The value of the parameter defines the name of the shadow bug
+          database. You will need to set the host and port settings from
+          the params page, and set up replication in your database server
+          so that updates reach this readonly mirror. Consult your database
+          documentation for more detail.
+        </para>
+      </step>
+
+      <step>
+        <para>
+          <command>shutdownhtml</command>:
+
+          If you need to shut down Bugzilla to perform administration, enter
+          some descriptive text (with embedded HTML codes, if you'd like)
+          into this box. Anyone who tries to use Bugzilla (including admins)
+          will receive a page displaying this text. Users can neither log in
+          nor log out while shutdownhtml is enabled.
+        </para>
+
+        <note>
           <para>
-            As a guide, on reasonably old hardware, mozilla.org began needing 
-            <quote>shadowdb</quote> when they reached around 40,000 Bugzilla
-            users with several hundred Bugzilla bug changes and comments per day.
+            Although regular log-in capability is disabled while 'shutdownhtml'
+            is enabled, safeguards are in place to protect the unfortunate 
+            admin who loses connection to Bugzilla. Should this happen to you,
+            go directly to the <filename>editparams.cgi</filename> (by typing
+            the URL in manually, if necessary). Doing this will prompt you to
+            log in, and your name/password will be accepted here (but nowhere
+            else). 
           </para>
+        </note>
+      </step>
 
+      <step>
+        <para>
+          <command>passwordmail</command>:
+
+          Every time a user creates an account, the text of this parameter
+          (with substitutions) is sent to the new user along with their
+          password message.
+        </para>
+
+        <para>
+          Add any text you wish to the "passwordmail" parameter box. For
+          instance, many people choose to use this box to give a quick 
+          training blurb about how to use Bugzilla at your site.
+        </para>
+      </step>
+
+
+      <step>
+        <para>
+          <command>movebugs</command>:
+
+          This option is an undocumented feature to allow moving bugs
+          between separate Bugzilla installations.  You will need to understand
+          the source code in order to use this feature.  Please consult
+          <filename>movebugs.pl</filename> in your Bugzilla source tree for
+          further documentation, such as it is.
+        </para>
+      </step>
+
+      <step>
+        <para>
+          <command>useqacontact</command>:
+
+          This allows you to define an email address for each component, 
+          in addition to that of the default owner, who will be sent
+          carbon copies of incoming bugs.
+        </para>
+      </step>
+
+      <step>
+        <para>
+          <command>usestatuswhiteboard</command>:
+
+          This defines whether you wish to have a free-form, overwritable field
+          associated with each bug. The advantage of the Status Whiteboard is
+          that it can be deleted or modified with ease, and provides an
+          easily-searchable field for indexing some bugs that have some trait
+          in common.         
+        </para>
+      </step>
+
+      <step>
+        <para>
+          <command>whinedays</command>:
+
+          Set this to the number of days you want to let bugs go
+          in the NEW or REOPENED state before notifying people they have
+          untouched new bugs. If you do not plan to use this feature, simply 
+          do not set up the whining cron job described in the installation
+          instructions, or set this value to "0" (never whine).
+        </para>
+      </step>
+
+      <step>
+        <para>
+          <command>commenton*</command>:
+
+          All these fields allow you to dictate what changes can pass
+          without comment, and which must have a comment from the
+          person who changed them.  Often, administrators will allow
+          users to add themselves to the CC list, accept bugs, or
+          change the Status Whiteboard without adding a comment as to
+          their reasons for the change, yet require that most other
+          changes come with an explanation.
+        </para>
+
+        <para>
+          Set the "commenton" options according to your site policy. It
+          is a wise idea to require comments when users resolve, reassign, or
+          reopen bugs at the very least. 
+        </para>
+
+        <note>
           <para>
-            The value of the parameter defines the name of the shadow bug
-            database. You will need to set the host and port settings from
-            the params page, and set up replication in your database server
-            so that updates reach this readonly mirror. Consult your database
-            documentation for more detail.
+            It is generally far better to require a developer comment
+            when resolving bugs than not. Few things are more annoying to bug
+            database users than having a developer mark a bug "fixed" without
+            any comment as to what the fix was (or even that it was truly
+            fixed!)
           </para>
-        </listitem>
-      </varlistentry>
+        </note>
+      </step>
 
-      <varlistentry>
-        <term>
-          shutdownhtml
-        </term>
-        <listitem>
-          <para>
-            If you need to shut down Bugzilla to perform administration, enter
-            some descriptive text (with embedded HTML codes, if you'd like)
-            into this box. Anyone who tries to use Bugzilla (including admins)
-            will receive a page displaying this text. Users can neither log in
-            nor log out while shutdownhtml is enabled.
-          </para>
+      <step>
+        <para>
+          <command>supportwatchers</command>:
 
-          <note>
-            <para>
-              Although regular log-in capability is disabled while 'shutdownhtml'
-              is enabled, safeguards are in place to protect the unfortunate 
-              admin who loses connection to Bugzilla. Should this happen to you,
-              go directly to the <filename>editparams.cgi</filename> (by typing
-              the URL in manually, if necessary). Doing this will prompt you to
-              log in, and your name/password will be accepted here (but nowhere
-              else). 
-            </para>
-          </note>
-        </listitem>
-      </varlistentry>
-
-      <varlistentry>
-        <term>
-          passwordmail
-        </term>
-        <listitem>
-          <para>
-            Every time a user creates an account, the text of this parameter
-            (with substitutions) is sent to the new user along with their
-            password message.
-          </para>
-
-          <para>
-            Add any text you wish to the "passwordmail" parameter box. For
-            instance, many people choose to use this box to give a quick 
-            training blurb about how to use Bugzilla at your site.
-          </para>
-        </listitem>
-      </varlistentry>
-
-      <varlistentry>
-        <term>
-          movebugs
-        </term>
-        <listitem>
-          <para>
-            This option is an undocumented feature to allow moving bugs
-            between separate Bugzilla installations.  You will need to understand
-            the source code in order to use this feature.  Please consult
-            <filename>movebugs.pl</filename> in your Bugzilla source tree for
-            further documentation, such as it is.
-          </para>
-        </listitem>
-      </varlistentry>
-
-      <varlistentry>
-        <term>
-          useqacontact
-        </term>
-        <listitem>
-          <para>
-            This allows you to define an email address for each component, 
-            in addition to that of the default assignee, who will be sent
-            carbon copies of incoming bugs.
-          </para>
-        </listitem>
-      </varlistentry>
-
-      <varlistentry>
-        <term>
-          usestatuswhiteboard
-        </term>
-        <listitem>
-          <para>
-            This defines whether you wish to have a free-form, overwritable field
-            associated with each bug. The advantage of the Status Whiteboard is
-            that it can be deleted or modified with ease, and provides an
-            easily-searchable field for indexing some bugs that have some trait
-            in common.         
-          </para>
-        </listitem>
-      </varlistentry>
-
-      <varlistentry>
-        <term>
-          whinedays
-        </term>
-        <listitem>
-          <para>
-            Set this to the number of days you want to let bugs go
-            in the NEW or REOPENED state before notifying people they have
-            untouched new bugs. If you do not plan to use this feature, simply 
-            do not set up the whining cron job described in the installation
-            instructions, or set this value to "0" (never whine).
-          </para>
-        </listitem>
-      </varlistentry>
-
-      <varlistentry>
-        <term>
-          commenton*
-        </term>
-        <listitem>
-          <para>
-            All these fields allow you to dictate what changes can pass
-            without comment, and which must have a comment from the
-            person who changed them.  Often, administrators will allow
-            users to add themselves to the CC list, accept bugs, or
-            change the Status Whiteboard without adding a comment as to
-            their reasons for the change, yet require that most other
-            changes come with an explanation.
-          </para>
-
-          <para>
-            Set the "commenton" options according to your site policy. It
-            is a wise idea to require comments when users resolve, reassign, or
-            reopen bugs at the very least. 
-          </para>
-
-          <note>
-            <para>
-              It is generally far better to require a developer comment
-              when resolving bugs than not. Few things are more annoying to bug
-              database users than having a developer mark a bug "fixed" without
-              any comment as to what the fix was (or even that it was truly
-              fixed!)
-            </para>
-          </note>
-        </listitem>
-      </varlistentry>
-
-      <varlistentry>
-        <term>
-          supportwatchers
-        </term>
-        <listitem>
-          <para>
-            Turning on this option allows users to ask to receive copies 
-            of bug mail sent to another user.  Watching a user with
-            different group permissions is not a way to 'get around' the
-            system; copied emails are still subject to the normal groupset
-            permissions of a bug, and <quote>watchers</quote> will only be 
-            copied on emails from bugs they would normally be allowed to view. 
-          </para> 
-        </listitem>
-      </varlistentry>
+          Turning on this option allows users to ask to receive copies 
+          of bug mail sent to another user.  Watching a user with
+          different group permissions is not a way to 'get around' the
+          system; copied emails are still subject to the normal groupset
+          permissions of a bug, and <quote>watchers</quote> will only be 
+          copied on emails from bugs they would normally be allowed to view. 
+        </para> 
+      </step>
 
 
-      <varlistentry>
-        <term>
-          noresolveonopenblockers
-        </term>
-        <listitem>
-          <para>
-            This option will prevent users from resolving bugs as FIXED if
-            they have unresolved dependencies. Only the FIXED resolution
-            is affected. Users will be still able to resolve bugs to
-            resolutions other than FIXED if they have unresolved dependent
-            bugs.
-          </para>
-        </listitem>
-      </varlistentry>
+      <step>
+        <para>
+          <command>noresolveonopenblockers</command>:
 
-    </variablelist>
+          This option will prevent users from resolving bugs as FIXED if
+          they have unresolved dependencies. Only the FIXED resolution
+          is affected. Users will be still able to resolve bugs to
+          resolutions other than FIXED if they have unresolved dependent
+          bugs.
+        </para>
+      </step>
+
+    </procedure>
   </section>
 
   <section id="useradmin">
@@ -536,46 +479,6 @@
           </listitem>
         </itemizedlist>
       </section>
-      
-      <section id="impersonatingusers">
-        <title>Impersonating Users</title>
-        
-        <para>
-        There may be times when an administrator would like to do something as
-        another user.  The <command>sudo</command> feature may be used to do 
-        this.
-        </para>
-        
-        <note>
-          <para>
-          To use the sudo feature, you must be in the
-          <emphasis>bz_sudoers</emphasis> group.  By default, all
-          administrators are in this group.</para>
-        </note>
-        
-        <para>
-        If you have access to this feature, you may start a session by
-        going to the Edit Users page, Searching for a user and clicking on 
-        their login.  You should see a link below their login name titled 
-        "Impersonate this user".  Click on the link.  This will take you 
-        to a page where you will see a description of the feature and 
-        instructions for using it.  After reading the text, simply 
-        enter the login of the user you would like to impersonate, provide 
-        a short message explaining why you are doing this, and press the 
-        button.</para>
-        
-        <para>
-        As long as you are using this feature, everything you do will be done 
-        as if you were logged in as the user you are impersonating.</para>
-        
-        <warning>
-          <para>
-          The user you are impersonating will not be told about what you are 
-          doing.  If you do anything that results in mail being sent, that 
-          mail will appear to be from the user you are impersonating.  You 
-          should be extremely careful while using this feature.</para>
-        </warning>
-      </section>
     </section>
   </section>
 
@@ -636,12 +539,12 @@
     company.</para>
 
     <para>
-    Each component has a default assignee and (if you turned it on in the parameters),
-    a QA Contact. The default assignee should be the primary person who fixes bugs in
+    Each component has a owner and (if you turned it on in the parameters),
+    a QA Contact. The owner should be the primary person who fixes bugs in
     that component. The QA Contact should be the person who will ensure
-    these bugs are completely fixed. The Assignee, QA Contact, and Reporter
+    these bugs are completely fixed. The Owner, QA Contact, and Reporter
     will get email when new bugs are created in this Component and when
-    these bugs change. Default Assignee and Default QA Contact fields only
+    these bugs change. Default Owner and Default QA Contact fields only
     dictate the 
     <emphasis>default assignments</emphasis>; 
     these can be changed on bug submission, or at any later point in
@@ -661,9 +564,9 @@
 
       <listitem>
         <para>Fill out the "Component" field, a short "Description", 
-        the "Default Assignee" and "Default QA Contact" (if enabled.) 
+        the "Initial Owner" and "Initial QA Contact" (if enabled.) 
         The Component and Description fields may contain HTML; 
-        the "Default Assignee" field must be a login name
+        the "Initial Owner" field must be a login name
         already existing in the database. 
         </para>
       </listitem>
@@ -728,7 +631,7 @@
       <listitem>
         <para>Enter the name of the Milestone in the "Milestone" field. You
         can optionally set the "sortkey", which is a positive or negative
-        number (-32768 to 32767) that defines where in the list this particular
+        number (-255 to 255) that defines where in the list this particular
         milestone appears. This is because milestones often do not 
         occur in alphanumeric order For example, "Future" might be
         after "Release 1.2". Select "Add".</para>
@@ -930,7 +833,7 @@
        </para>
        <para>
          Only users with the ability to edit the bug may 
-         set flags on bugs. This includes the assignee, reporter, and 
+         set flags on bugs. This includes the owner, reporter, and 
          any user with the <computeroutput>editbugs</computeroutput> 
          permission.
        </para>
@@ -958,7 +861,7 @@
        
         <para>
           When you click on the <quote>Create a Flag Type for...</quote>
-          link, you will be presented with a form. Here is what the fields in 
+          link, you will be presented with a form. Here is what the felds in 
           the form mean:
         </para>
 
@@ -975,7 +878,7 @@
           <title>Description</title>
           <para>
             This describes the flag in more detail. At present, this doesn't
-            show up anywhere helpful; ideally, it would be nice to have
+            whos up anywhere helpful; ideally, it would be nice to have
             it show up as a tooltip. This field 
             can be as long as you like, and can contain any character you want.
           </para>
@@ -1410,7 +1313,7 @@
       </orderedlist>
       <para>These controls are often described in this order, so a 
       product that requires a user to be a member of group "foo" 
-      to enter a bug and then requires that the bug stay restricted
+      to enter a bug and then requires that the bug stay resticted
       to group "foo" at all times and that only members of group "foo"
       can edit the bug even if they otherwise could see the bug would 
       have its controls summarized by...</para>
@@ -1492,333 +1395,204 @@ Support: ENTRY, DEFAULT/MANDATORY, CANEDIT
   <section id="upgrading">
     <title>Upgrading to New Releases</title>
 
-    <para>
-      Upgrading Bugzilla is something we all want to do from time to time,
-      be it to get new features or pick up the latest security fix. How easy
-      it is to update depends on a few factors:
+    <warning>
+      <para>Upgrading is a one-way process. You should backup your database
+      and current Bugzilla directory before attempting the upgrade. If you wish
+      to revert to the old Bugzilla version for any reason, you will have to
+      restore from these backups.
+      </para>
+    </warning>
+
+    <para>Upgrading Bugzilla is something we all want to do from time to time,
+    be it to get new features or pick up the latest security fix. How easy
+    it is to update depends on a few factors.
     </para>
 
     <itemizedlist>
       <listitem>
-        <para>
-          If the new version is a revision or a new point release
-        </para>
+        <para>If the new version is a revision or a new point release</para>
       </listitem>
       <listitem>
-        <para>
-          How many local changes (if any) have been made
-        </para>
+        <para>How many, if any, local changes have been made</para>
       </listitem>
     </itemizedlist>
 
-    <section id="upgrading-version-defns">
-      <title>Version Definitions</title>
+    <para>There are also three different methods to upgrade your installation.
+    </para>
 
-      <para>
-        Bugzilla displays the version you are using at the top of most
-        pages you load. It will look something like '2.16.7' or '2.18rc3'
-        or '2.19.1+'. The first number in this series is the Major Version.
-        This does not change very often (that is to say, almost never);
-        Bugzilla was 1.x.x when it was first created, and went to 2.x.x
-        when it was re-written in perl in Sept 1998. If/When the major version
-        is changed to 3.x.x, it will signify a significant structural change
-        and will be accompanied by much fanfare and many instructions on
-        how to upgrade, including a revision to this page. :)
-      </para>
+    <orderedlist>
+      <listitem>
+        <para>Using CVS (<xref linkend="upgrade-cvs"/>)</para>
+      </listitem>
+      <listitem>
+        <para>Downloading a new tarball (<xref linkend="upgrade-tarball"/>)</para>
+      </listitem>
+      <listitem>
+        <para>Applying the relevant patches (<xref linkend="upgrade-patches"/>)</para>
+      </listitem>
+    </orderedlist>
 
-      <para>
-        The second number in the version is called the 'minor number', and
-        a release that changes the minor number is called a 'point release'.
-        An even number in this position (2.14, 2.16, 2.18, 2.20, etc.)
-        represents a stable version, while an odd number (2.17, 2.19, etc.)
-        represents a development version. In the past, stable point releases
-        were feature-based, coming when certain enhancements had been
-        completed, or the Bugzilla development team felt that enough
-        progress had been made overall. As of version 2.18, however,
-        Bugzilla has moved to a time-based release schedule; current plans
-        are to create a stable point release every 6 months or so after
-        2.18 is deployed.
-      </para>
+    <para>Which options are available to you may depend on how large a jump
+    you are making and/or your network configuration.
+    </para>
 
-      <para>
-        The third number in the Bugzilla version represents a bugfix version.
-        Bugfix Revisions are normally released only to address security
-        vulnerabilities; in the future, it is likely that the Bugzilla
-        development team will back-port bugfixes in a new point release to
-        the old point release for a limited period. Once enough of these
-        bugfixes have accumulated (or a new security vulnerability is
-        identified and closed), a bugfix release will be made. As an 
-        example, 2.16.6 was a bugfix release, and improved on 2.16.5.
-      </para>
+    <para>Revisions are normally released to fix security vulnerabilities
+    and are distinguished by an increase in the third number. For example,
+    when 2.16.6 was released, it was a revision to 2.16.5.
+    </para>
 
-      <note>
-        <para>
-          When reading version numbers, everything separated by a point ('.')
-          should be read as a single number. It is <emphasis>not</emphasis>
-          the same as decimal. 2.14 is newer than 2.8 because minor version
-          14 is greater than minor version 8. 2.24.11 would be newer than
-          2.24.9 (because bugfix 11 is greater than bugfix 9. This is
-          confusing to some people who aren't used to dealing with software.
-        </para>
-      </note>
-    </section>
+    <para>Point releases are normally released when the Bugzilla team feels
+    that there has been a significant amount of progress made between the
+    last point release and the current time. These are often proceeded by a
+    stabilization period and release candidates, however the use of 
+    development versions or release candidates is beyond the scope of this
+    document. Point releases can be distinguished by an increase in the
+    second number, or minor version. For example, 2.18.0 is a newer point
+    release than 2.16.5.
+    </para>
 
-    <section id="upgrading-methods">
-    <title>Upgrading - Methods and Procedure</title>
-      <para>
-        There are three different ways to upgrade your installation.
-      </para>
+    <para>The examples in this section are written as if you were updating
+    to version 2.18.1.  The procedures are the same regardless if you are
+    updating to a new point release or a new revision.  However, the chance
+    of running into trouble increases when upgrading to a new point release,
+    escpecially if you've made local changes.
+    </para>
 
-      <orderedlist>
-        <listitem>
-          <para>
-            Using CVS (<xref linkend="upgrade-cvs"/>)
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            Downloading a new tarball (<xref linkend="upgrade-tarball"/>)
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            Applying the relevant patches (<xref linkend="upgrade-patches"/>)
-          </para>
-        </listitem>
-      </orderedlist>
+    <para>These examples also assume that your Bugzilla installation is at
+    <filename>/var/www/html/bugzilla</filename>. If that is not the case,
+    simply substitute the proper paths where appropriate.
+    </para>
 
-      <para>
-        Each of these options has its own pros and cons; the one that's
-        right for you depends on how long it has been since you last
-        installed, the degree to which you have customized your installation,
-        and/or your network configuration. (Some discussion of the various
-        methods of updating compared with degree and methods of local
-        customization can be found in <xref linkend="template-method"/>.)
-      </para>
-
-      <para>
-        The larger the jump you are trying to make, the more difficult it
-        is going to be to upgrade if you have made local customizations.
-        Upgrading from 2.18 to 2.18.1 should be fairly painless even if
-        you are heavily customized, but going from 2.14 to 2.18 is going
-        to mean a fair bit of work re-writing your local changes to use
-        the new files, logic, templates, etc. If you have done no local
-        changes at all, however, then upgrading should be approximately
-        the same amount of work regardless of how long it has been since
-        your version was released.
-      </para>
-
-      <warning>
-        <para>
-          Upgrading is a one-way process. You should backup your database
-          and current Bugzilla directory before attempting the upgrade. If
-          you wish to revert to the old Bugzilla version for any reason, you
-          will have to restore from these backups.
-        </para>
-      </warning>
-
-      <para>
-        The examples in the following sections are written as though the
-        user were updating to version 2.18.1, but the procedures are the
-        same regardless of whether one is updating to a new point release
-        or simply trying to obtain a new bugfix release. Also, in the
-        examples the user's Bugzilla installation is found at
-        <filename>/var/www/html/bugzilla</filename>. If that is not the
-        same as the location of your Bugzilla installation, simply
-        substitute the proper paths where appropriate.
-      </para>
-
-      <section id="upgrade-cvs">
+    <example id="upgrade-cvs">
       <title>Upgrading using CVS</title>
 
-        <para>
-          Every release of Bugzilla, whether it is a point release or a bugfix,
-          is tagged in CVS.  Also, every tarball that has been distributed since
-          version 2.12 has been created in such a way that it can be used with
-          CVS once it is unpacked. Doing so, however, requires that you are able
-          to access cvs-mirror.mozilla.org on port 2401, which may not be an
-          option or a possibility for some users, especially those behind a
-          highly restrictive firewall.
-        </para>
+      <para>Every release of Bugzilla, whether it is a revision or a point
+      release, is tagged in CVS.  Also, every tarball we have distributed
+      since version 2.12 has been primed for using CVS. This does, however,
+      require that you are able to access cvs-mirror.mozilla.org on port
+      2401.
 
         <tip>
-          <para>
-            If you can, updating using CVS is probably the most painless
-            method, especially if you have a lot of local changes.
+          <para>If you can do this, updating using CVS is probably the most
+          painless method, especially if you have a lot of local changes.
           </para>
         </tip>
+      </para>
 
-        <para>
-          The following shows the sequence of commands needed to update a
-          Bugzilla installation via CVS, and a typical series of results.
-        </para>
-
-        <programlisting>
+      <programlisting>
 bash$ <command>cd /var/www/html/bugzilla</command>
 bash$ <command>cvs login</command>
 Logging in to :pserver:anonymous@cvs-mirror.mozilla.org:2401/cvsroot
-CVS password: <emphasis>('anonymous', or just leave it blank)</emphasis>
+CVS password: <command>anonymous</command>
 bash$ <command>cvs -q update -r BUGZILLA-2_18_1 -dP</command>
 P checksetup.pl
 P collectstats.pl
 P globals.pl
 P docs/rel_notes.txt
 P template/en/default/list/quips.html.tmpl
-<emphasis>(etc.)</emphasis>
-        </programlisting>
+      </programlisting>
 
+      <para>
         <caution>
-          <para>
-            If a line in the output from <command>cvs update</command> begins
-            with a <computeroutput>C</computeroutput>, then that represents a
-            file with local changes that CVS was unable to properly merge. You
-            need to resolve these conflicts manually before Bugzilla (or at
-            least the portion using that file) will be usable.
+          <para>If a line in the output from <command>cvs update</command>
+          begins with a <computeroutput>C</computeroutput> that represents a
+          file with local changes that CVS was unable to properly merge. You
+          need to resolve these conflicts manually before Bugzilla (or at
+          least the portion using that file) will be usable.
           </para>
         </caution>
-      </section>
 
-      <section id="upgrade-tarball">
-        <title>Upgrading using the tarball</title>
+        <note>
+          <para>You also need to run <command>./checksetup.pl</command>
+          before your Bugzilla upgrade will be complete.
+          </para>
+        </note>
+      </para>
+    </example>
 
-        <para>
-          If you are unable (or unwilling) to use CVS, another option that's
-          always available is to obtain the latest tarball from the <ulink
-          url="http://www.bugzilla.org/download/">Download Page</ulink> and 
-          create a new Bugzilla installation from that.
-        </para>
+    <example id="upgrade-tarball">
+      <title>Upgrading using the tarball</title>
 
-        <para>
-          This sequence of commands shows how to get the tarball from the
-          command-line; it is also possible to download it from the site
-          directly in a web browser. If you go that route, save the file
-          to the <filename class="directory">/var/www/html</filename>
-          directory (or its equivalent, if you use something else) and 
-          omit the first three lines of the example.
-        </para>
+      <para>If you are unable or unwilling to use CVS, another option that's
+      always available is to download the latest tarball. This is the most
+      difficult option to use, especially if you have local changes.
+      </para>
 
-        <programlisting>
+      <programlisting>
 bash$ <command>cd /var/www/html</command>
 bash$ <command>wget ftp://ftp.mozilla.org/pub/mozilla.org/webtools/bugzilla-2.18.1.tar.gz</command>
-<emphasis>(Output omitted)</emphasis>
+<emphasis>Output omitted</emphasis>
 bash$ <command>tar xzvf bugzilla-2.18.1.tar.gz</command>
 bugzilla-2.18.1/
 bugzilla-2.18.1/.cvsignore
 bugzilla-2.18.1/1x1.gif
-<emphasis>(Output truncated)</emphasis>
+<emphasis>Output truncated</emphasis>
 bash$ <command>cd bugzilla-2.18.1</command>
 bash$ <command>cp ../bugzilla/localconfig* .</command>
 bash$ <command>cp -r ../bugzilla/data .</command>
 bash$ <command>cd ..</command>
 bash$ <command>mv bugzilla bugzilla.old</command>
 bash$ <command>mv bugzilla-2.18.1 bugzilla</command>
-        </programlisting>
+bash$ <command>cd bugzilla</command>
+bash$ <command>./checksetup.pl</command>
+<emphasis>Output omitted</emphasis>
+      </programlisting>
 
+      <para>
         <warning>
-          <para>
-            The <command>cp</command> commands both end with periods which
-            is a very important detail, it tells the shell that the destination
-            directory is the current working directory. 
+          <para>The <command>cp</command> commands both end with periods which
+          is a very important detail, it tells the shell that the destination
+          directory is the current working directory. Also, the period at the
+          beginning of the <command>./checksetup.pl</command> is important and
+          can not be omitted.
           </para>
         </warning>
 
-        <para>
-          This upgrade method will give you a clean install of Bugzilla with the 
-          same version as the tarball. That's fine if you don't have any local
-          customizations that you want to maintain, but if you do then you will 
-          need to reapply them by hand to the appropriate files. 
-        </para>
+        <note>
+          <para>You will now have to reapply any changes you have made to your
+          local installation manually.
+          </para>
+        </note>
+      </para>
+    </example>
 
-        <para>
-          It's worth noting that since 2.12, the Bugzilla tarballs come
-          CVS-ready, so if you decide at a later date that you'd rather use
-          CVS as an upgrade method, your code will already be set up for it.
-        </para>
-      </section>
+    <example id="upgrade-patches">
+      <title>Upgrading using patches</title>
 
-      <section id="upgrade-patches">
-        <title>Upgrading using patches</title>
+      <para>The Bugzilla team will normally make a patch file available for
+      revisions to go from the most recent revision to the new one. You could
+      also read the release notes and grab the patches attached to the
+      mentioned bug, but it is safer to use the released patch file as
+      sometimes patches get changed before they get checked in. 
+      It is also theoretically possible to
+      scour the fixed bug list and pick and choose which patches to apply
+      from a point release, but this is not recommended either as what you'll
+      end up with is a hodge podge Bugzilla that isn't really any version.
+      This would also make it more difficult to upgrade in the future.
+      </para>
 
-        <para>
-          If you are doing a bugfix upgrade -- that is, one where only the 
-          last number of the revision changes, such as from 2.16.6 to 2.16.7
-          -- then you have the option of obtaining and applying a patch file
-          from the <ulink
-          url="http://www.bugzilla.org/download/">Download Page</ulink>.
-          This file is made available by the <ulink
-          url="http://www.bugzilla.org/developers/profiles.html">Bugzilla
-          Development Team</ulink>, and is a collection of all the bug fixes
-          and security patches that have been made since the last bugfix
-          release. If you are planning to upgrade via patches, it is safer
-          to grab this developer-made patch file than to read the patch
-          notes and apply all (or even just some of) the patches oneself,
-          as sometimes patches on bugs get changed before they get checked in.
-        </para>
-
-        <para>
-          As above, this example starts with obtaining the file via the 
-          command line. If you have already downloaded it, you can omit the
-          first two commands.
-        </para>
-
-        <programlisting>
+      <programlisting>
 bash$ <command>cd /var/www/html/bugzilla</command>
 bash$ <command>wget ftp://ftp.mozilla.org/pub/mozilla.org/webtools/bugzilla-2.18.0-to-2.18.1.diff.gz</command>
-<emphasis>(Output omitted)</emphasis>
+<emphasis>Output omitted</emphasis>
 bash$ <command>gunzip bugzilla-2.18.0-to-2.18.1.diff.gz</command>
 bash$ <command>patch -p1 &lt; bugzilla-2.18.0-to-2.18.1.diff</command>
 patching file checksetup.pl
 patching file collectstats.pl
 patching file globals.pl
-<emphasis>(etc.)</emphasis>
-        </programlisting>
-
-        <warning>
-          <para>
-            Be aware that upgrading from a patch file does not change the
-            entries in your <filename class="directory">CVS</filename> directory.
-            This could make it more difficult to upgrade using CVS
-            (<xref linkend="upgrade-cvs"/>) in the future.
-          </para>
-        </warning>
-
-      </section>
-    </section>
-
-    <section id="upgrading-completion">
-    <title>Completing Your Upgrade</title>
-
-      <para>
-        Regardless of which upgrade method you choose, you will need to
-        run <command>./checksetup.pl</command> before your Bugzilla
-        upgrade will be complete.
-      </para>
-
-      <programlisting>
-bash$ <command>cd bugzilla</command>
-bash$ <command>./checksetup.pl</command>
       </programlisting>
 
-      <warning>
-        <para>
-          The period at the beginning of the command
-          <command>./checksetup.pl</command> is important and can not
-          be omitted.
-        </para>
-      </warning>
-          
       <para>
-        If you have done a lot of local modifications, it wouldn't hurt
-        to run the Bugzilla Testing suite. This is not a required step,
-        but it isn't going to hurt anything, and might help point out
-        some areas that could be improved. (More information on the
-        test suite can be had by following this link to the appropriate
-        section in the <ulink
-        url="http://www.bugzilla.org/docs/developer.html#testsuite">Developers'
-        Guide</ulink>.)
+        <caution>
+          <para>If you do this, beware that this doesn't change the entires in
+          your <filename id="dir">CVS</filename> directory so it may make
+          updates using CVS (<xref linkend="upgrade-cvs"/>) more difficult in the
+          future.
+          </para>
+        </caution>
       </para>
+    </example>
 
-    </section>
   </section>
 </chapter>
 

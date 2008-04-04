@@ -1,5 +1,5 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"> -->
-<!-- $Id: installation.xml,v 1.154 2008/04/04 06:48:24 lpsolit%gmail.com Exp $ -->
+<!-- $Id: installation.xml,v 1.155 2008/04/04 06:48:25 lpsolit%gmail.com Exp $ -->
 <chapter id="installing-bugzilla">
   <title>Installing Bugzilla</title>
 
@@ -1558,7 +1558,9 @@ AddType application/rdf+xml .rdf</screen>
           Bugzilla on Windows requires the same perl modules found in
           <xref linkend="install-perlmodules"/>. The main difference is that
           windows uses <glossterm linkend="gloss-ppm">PPM</glossterm> instead
-          of CPAN.
+          of CPAN. ActiveState provides a GUI to manage Perl modules. We highly
+          recommend that you use it. If you prefer to use ppm from the
+          command-line, type:
         </para>
 
         <programlisting>
@@ -1567,18 +1569,28 @@ C:\perl&gt; <command>ppm install &lt;module name&gt;</command>
 
         <para>
           The best source for the Windows PPM modules needed for Bugzilla
-          is probably the Bugzilla Test Server (aka 'Landfill'), so 
-          you should add the Landfill package repository as follows:
+          is probably the theory58S website, which you can add to your list
+          of repositories as follows (for Perl 5.8.x):
         </para>
 
         <programlisting>
-<command>ppm repo add landfill http://www.landfill.bugzilla.org/ppm/</command>
+<command>ppm repo add theory58S http://theoryx5.uwinnipeg.ca/ppms/</command>
         </programlisting>
+
+        <para>
+          If you are using Perl 5.10.x, you cannot use the same PPM modules as Perl
+          5.8.x as they are incompatible. In this case, you should add the following
+          repository:
+        </para>
+        <programlisting>
+<command>ppm repo add theory58S http://cpan.uwinnipeg.ca/PPMPackages/10xx/</command>
+        </programlisting>
+
         <note>
           <para>
             In versions prior to 5.8.8 build 819 of PPM the command is 
             <programlisting>
-<command>ppm repository add landfill http://www.landfill.bugzilla.org/ppm/</command>
+<command>ppm repository add theory58S http://theoryx5.uwinnipeg.ca/ppms/</command>
             </programlisting>
           </para>
         </note>

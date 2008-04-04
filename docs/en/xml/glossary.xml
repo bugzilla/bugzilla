@@ -3,7 +3,7 @@
   <glossdiv>
     <title>0-9, high ascii</title>
 
-    <glossentry id="gloss-htaccess">
+    <glossentry>
       <glossterm>.htaccess</glossterm>
 
       <glossdef>
@@ -154,10 +154,10 @@
     </glossentry>
 
     <glossentry id="gloss-cpan">
-      <glossterm>Comprehensive Perl Archive Network</glossterm>
-      <acronym>CPAN</acronym>
+      <glossterm>
+        <acronym>CPAN</acronym>
+      </glossterm>
 
-      <!-- TODO: Rewrite def for CPAN -->
       <glossdef>
         <para>
         <acronym>CPAN</acronym>
@@ -170,32 +170,12 @@
         particular task.</para>
       </glossdef>
     </glossentry>
-
-    <glossentry id="gloss-contrib">
-      <glossterm><filename class="directory">contrib</filename></glossterm>
-
-      <glossdef>
-        <para>The <filename class="directory">contrib</filename> directory is
-        a location to put scripts that have been contributed to Bugzilla but
-        are not a part of the official distribution. These scripts are written
-        by third parties and may be in languages other than perl. For those
-        that are in perl, there may be additional modules or other requirements
-        than those of the offical distribution.
-        <note>
-          <para>Scripts in the <filename class="directory">contrib</filename>
-          directory are not offically supported by the Bugzilla team and may
-          break in between versions.
-          </para>
-        </note>
-        </para>
-      </glossdef>
-    </glossentry>
   </glossdiv>
 
   <glossdiv id="gloss-d">
     <title>D</title>
 
-    <glossentry id="gloss-daemon">
+    <glossentry>
       <glossterm>daemon</glossterm>
 
       <glossdef>
@@ -208,23 +188,6 @@
         a web server, are generally run as daemons.</para>
       </glossdef>
     </glossentry>
-    
-    <glossentry id="gloss-dos">
-      <glossterm>DOS Attack</glossterm>
-      
-      <glossdef>
-        <para>A DOS, or Denial of Service attack, is when a user attempts to
-        deny access to a web server by repeatadly accessing a page or sending
-        malformed requests to a webserver. This can be effectively prevented
-        by using <filename>mod_throttle</filename> as described in
-        <xref linkend="security-webserver-mod-throttle"/>. A D-DOS, or
-        Distributed Denial of Service attack, is when these requests come
-        from multiple sources at the same time. Unfortunately, these are much
-        more difficult to defend against.
-        </para>
-      </glossdef>
-    </glossentry>
-    
   </glossdiv>
 
   <glossdiv id="gloss-g">
@@ -269,11 +232,10 @@
 
       <glossdef>
         <para>A Message Transport Agent is used to control the flow of email
-        on a system. The <ulink url="http://search.cpan.org/dist/MailTools/Mail/Mailer.pm">Mail::Mailer</ulink>
-        Perl module, which Bugzilla uses to send email, can be configured to
-        use many different underlying implementations for actually sending the
-        mail using the <option>mail_delivery_method</option> parameter.
-        Implementations other than <literal>sendmail</literal> require that the
+        on a system. Many unix based systems use
+        <ulink url="http://www.sendmail.org">sendmail</ulink> which is what
+        Bugzilla expects to find by default at <filename>/usr/sbin/sendmail</filename>.
+        Many other MTA's will work, but they all require that the
         <option>sendmailnow</option> param be set to <literal>on</literal>.
         </para>
       </glossdef>
@@ -320,16 +282,6 @@
 
   <glossdiv id="gloss-p">
     <title>P</title>
-
-    <glossentry id="gloss-ppm">
-      <glossterm>Perl Package Manager</glossterm>
-      <acronym>PPM</acronym>
-
-      <glossdef>
-        <para><ulink url="http://aspn.activestate.com/ASPN/Downloads/ActivePerl/PPM/"/>
-        </para>
-      </glossdef>
-    </glossentry>
 
     <glossentry>
       <glossterm id="gloss-product">Product</glossterm>
@@ -395,34 +347,10 @@
         </para>
       </glossdef>
     </glossentry>
-
-    <glossentry id="gloss-regexp">
-      <glossterm>Regular Expression</glossterm>
-      <acronym>regexp</acronym>
-
-      <glossdef>
-          <para>A regular expression is an expression used for pattern matching.
-              <ulink url="http://perldoc.com/perl5.6/pod/perlre.html#Regular-Expressions">Documentation</ulink>
-        </para>
-      </glossdef>
-    </glossentry>
   </glossdiv>
 
   <glossdiv id="gloss-s">
     <title>S</title>
-
-    <glossentry id="gloss-service">
-      <glossterm>Service</glossterm>
-      
-      <glossdef>
-        <para>In Windows NT environment, a boot-time background application
-        is refered to as a service. These are generally managed through the
-        control pannel while logged in as an account with
-        <quote>Administrator</quote> level capabilities. For more
-        information, consult your Windows manual or the MSKB.
-        </para>
-      </glossdef>
-    </glossentry>
 
     <glossentry>
       <glossterm>
@@ -546,8 +474,9 @@ sgml-local-ecat-files:nil
 sgml-minimize-attributes:nil
 sgml-namecase-general:t
 sgml-omittag:t
-sgml-parent-document:("Bugzilla-Guide.xml" "book" "chapter")
+sgml-parent-document:("Bugzilla-Guide.sgml" "book" "chapter")
 sgml-shorttag:t
 sgml-tag-region-if-active:t
 End:
 -->
+

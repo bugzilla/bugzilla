@@ -15,7 +15,10 @@
         to keep secret files which would otherwise
         compromise your installation - e.g. the 
         <filename>localconfig</filename>
-        file contains the password to your database.
+
+        file contains the password to your database. If this information were
+        generally available, and remote access to your database turned on,
+        you risk corruption of your database by computer criminals or the
         curious.</para>
       </glossdef>
     </glossentry>
@@ -24,66 +27,23 @@
   <glossdiv id="gloss-a">
     <title>A</title>
 
-    <glossentry id="gloss-apache">
+    <glossentry>
       <glossterm>Apache</glossterm>
 
       <glossdef>
         <para>In this context, Apache is the web server most commonly used
-        for serving up Bugzilla 
+        for serving up 
+        <glossterm>Bugzilla</glossterm>
+
         pages. Contrary to popular belief, the apache web server has nothing
         to do with the ancient and noble Native American tribe, but instead
         derived its name from the fact that it was 
         <quote>a patchy</quote>
+
         version of the original 
         <acronym>NCSA</acronym>
+
         world-wide-web server.</para>
-
-        <variablelist>
-          <title>Useful Directives when configuring Bugzilla</title>
-
-          <varlistentry>
-            <term><computeroutput><ulink url="http://httpd.apache.org/docs-2.0/mod/core.html#addhandler">AddHandler</ulink></computeroutput></term>
-            <listitem>
-              <para>Tell Apache that it's OK to run CGI scripts.</para>
-            </listitem>
-          </varlistentry>
-          <varlistentry>
-            <term><computeroutput><ulink url="http://httpd.apache.org/docs-2.0/mod/core.html#allowoverride">AllowOverride</ulink></computeroutput></term>
-            <term><computeroutput><ulink url="http://httpd.apache.org/docs-2.0/mod/core.html#options">Options</ulink></computeroutput></term>
-            <listitem>
-              <para>These directives are used to tell Apache many things about
-              the directory they apply to. For Bugzilla's purposes, we need
-              them to allow script execution and <filename>.htaccess</filename>
-              overrides.
-              </para>
-            </listitem>
-          </varlistentry>
-          <varlistentry>
-            <term><computeroutput><ulink url="http://httpd.apache.org/docs-2.0/mod/mod_dir.html#directoryindex">DirectoryIndex</ulink></computeroutput></term>
-            <listitem>
-              <para>Used to tell Apache what files are indexes. If you can
-              not add <filename>index.cgi</filename> to the list of valid files,
-              you'll need to set <computeroutput>$index_html</computeroutput> to
-              1 in <filename>localconfig</filename> so
-              <command>./checksetup.pl</command> will create an
-              <filename>index.html</filename> that redirects to
-              <filename>index.cgi</filename>.
-              </para>
-            </listitem>
-          </varlistentry>
-          <varlistentry>
-            <term><computeroutput><ulink url="http://httpd.apache.org/docs-2.0/mod/core.html#scriptinterpretersource">ScriptInterpreterSource</ulink></computeroutput></term>
-            <listitem>
-              <para>Used when running Apache on windows so the shebang line
-              doesn't have to be changed in every Bugzilla script.
-              </para>
-            </listitem>
-          </varlistentry>
-        </variablelist>
-
-        <para>For more information about how to configure Apache for Bugzilla,
-        see <xref linkend="http-apache"/>.
-        </para>
       </glossdef>
     </glossentry>
   </glossdiv>
@@ -96,7 +56,7 @@
 
       <glossdef>
         <para>A 
-        <quote>bug</quote>
+        <quote>Bug</quote>
 
         in Bugzilla refers to an issue entered into the database which has an
         associated number, assignments, comments, etc. Some also refer to a 
@@ -111,36 +71,40 @@
       <glossterm>Bug Number</glossterm>
 
       <glossdef>
-        <para>Each Bugzilla bug is assigned a number that uniquely identifies
-        that bug. The bug associated with a bug number can be pulled up via a
+        <para>Each Bugzilla Bug is assigned a number that uniquely identifies
+        that Bug. The Bug associated with a Bug Number can be pulled up via a
         query, or easily from the very front page by typing the number in the
         "Find" box.</para>
       </glossdef>
     </glossentry>
 
-    <glossentry id="gloss-bugzilla">
+    <glossentry>
+      <glossterm>Bug Life Cycle</glossterm>
+
+      <glossdef>
+        <para>A Bug has stages through which it must pass before becoming a 
+        <quote>closed bug</quote>, 
+        including acceptance, resolution, and verification. The 
+        <quote>Bug Life Cycle</quote>
+
+        is moderately flexible according to the needs of the organization
+        using it, though.</para>
+      </glossdef>
+    </glossentry>
+
+    <glossentry>
       <glossterm>Bugzilla</glossterm>
 
       <glossdef>
-        <para>Bugzilla is the world-leading free software bug tracking system.
-        </para>
+        <para>Bugzilla is the industry-standard bug tracking system. It is
+        quite popular among Open Source enthusiasts.</para>
       </glossdef>
     </glossentry>
   </glossdiv>
 
   <glossdiv id="gloss-c">
-    <title>C</title>
-
-    <glossentry id="gloss-cgi">
-      <glossterm>Common Gateway Interface</glossterm>
-      <acronym>CGI</acronym>
-      <glossdef>
-        <para><acronym>CGI</acronym> is an acronym for Common Gateway Interface. This is
-        a standard for interfacing an external application with a web server. Bugzilla
-        is an example of a <acronym>CGI</acronym> application.
-        </para>
-      </glossdef>
-    </glossentry>
+    <title>
+    </title>
 
     <glossentry id="gloss-component">
       <glossterm>Component</glossterm>
@@ -154,40 +118,23 @@
     </glossentry>
 
     <glossentry id="gloss-cpan">
-      <glossterm>Comprehensive Perl Archive Network</glossterm>
-      <acronym>CPAN</acronym>
+      <glossterm>
+        <acronym>CPAN</acronym>
+      </glossterm>
 
-      <!-- TODO: Rewrite def for CPAN -->
       <glossdef>
         <para>
         <acronym>CPAN</acronym>
 
         stands for the 
-        <quote>Comprehensive Perl Archive Network</quote>. 
-        CPAN maintains a large number of extremely useful 
+        <quote>Comprehensive Perl Archive Network</quote>
+
+        . CPAN maintains a large number of extremely useful 
         <glossterm>Perl</glossterm>
-        modules - encapsulated chunks of code for performing a
-        particular task.</para>
-      </glossdef>
-    </glossentry>
 
-    <glossentry id="gloss-contrib">
-      <glossterm><filename class="directory">contrib</filename></glossterm>
-
-      <glossdef>
-        <para>The <filename class="directory">contrib</filename> directory is
-        a location to put scripts that have been contributed to Bugzilla but
-        are not a part of the official distribution. These scripts are written
-        by third parties and may be in languages other than perl. For those
-        that are in perl, there may be additional modules or other requirements
-        than those of the offical distribution.
-        <note>
-          <para>Scripts in the <filename class="directory">contrib</filename>
-          directory are not offically supported by the Bugzilla team and may
-          break in between versions.
-          </para>
-        </note>
-        </para>
+        modules. By themselves, Perl modules generally do nothing, but when
+        used as part of a larger program, they provide much-needed algorithms
+        and functionality.</para>
       </glossdef>
     </glossentry>
   </glossdiv>
@@ -211,9 +158,10 @@
   </glossdiv>
 
   <glossdiv id="gloss-g">
-    <title>G</title>
+    <title>
+    </title>
 
-    <glossentry id="gloss-groups">
+    <glossentry>
       <glossterm>Groups</glossterm>
 
       <glossdef>
@@ -221,24 +169,29 @@
         <quote>Groups</quote>
 
         has a very special meaning to Bugzilla. Bugzilla's main security
-        mechanism comes by placing users in groups, and assigning those
-        groups certain privileges to view bugs in particular
+        mechanism comes by lumping users into groups, and assigning those
+        groups certain privileges to 
         <glossterm>Products</glossterm>
+
+        and 
+        <glossterm>Components</glossterm>
+
         in the 
         <glossterm>Bugzilla</glossterm>
+
         database.</para>
       </glossdef>
     </glossentry>
   </glossdiv>
 
-  <glossdiv id="gloss-j">
-    <title>J</title>
+  <glossdiv id="gloss-i">
+    <title>I</title>
 
-    <glossentry id="gloss-javascript">
-      <glossterm>JavaScript</glossterm>
+    <glossentry id="gloss-infiniteloop">
+      <glossterm>Infinite Loop</glossterm>
+
       <glossdef>
-        <para>JavaScript is cool, we should talk about it.
-        </para>
+        <para>A loop of information that never ends; see recursion.</para>
       </glossdef>
     </glossentry>
   </glossdiv>
@@ -246,56 +199,17 @@
   <glossdiv id="gloss-m">
     <title>M</title>
 
-    <glossentry id="gloss-mta">
-      <glossterm>Message Transport Agent</glossterm>
-      <acronym>MTA</acronym>
+    <glossentry>
+      <glossterm>mysqld</glossterm>
 
       <glossdef>
-        <para>A Message Transport Agent is used to control the flow of email
-        on a system. Many unix based systems use
-        <ulink url="http://www.sendmail.org">sendmail</ulink> which is what
-        Bugzilla expects to find by default at <filename>/usr/sbin/sendmail</filename>.
-        Many other MTA's will work, but they all require that the
-        <option>sendmailnow</option> param be set to <literal>on</literal>.
-        </para>
-      </glossdef>
-    </glossentry>
+        <para>mysqld is the name of the 
+        <glossterm>daemon</glossterm>
 
-    <glossentry id="gloss-mysql">
-      <glossterm>MySQL</glossterm>
-
-      <glossdef>
-        <para>MySQL is currently the required
-        <glossterm linkend="gloss-rdbms">RDBMS</glossterm> for Bugzilla. MySQL
-        can be downloaded from <ulink url="http://www.mysql.com"/>. While you
-        should familiarize yourself with all of the documentation, some high
-        points are:
-        </para>
-        <variablelist>
-          <varlistentry>
-            <term><ulink url="http://www.mysql.com/doc/en/Backup.html">Backup</ulink></term>
-            <listitem>
-              <para>Methods for backing up your Bugzilla database.
-              </para>
-            </listitem>
-          </varlistentry>
-          <varlistentry>
-            <term><ulink url="http://www.mysql.com/doc/en/Option_files.html">Option Files</ulink></term>
-            <listitem>
-              <para>Information about how to configure MySQL using
-              <filename>my.cnf</filename>.
-              </para>
-            </listitem>
-          </varlistentry>
-          <varlistentry>
-            <term><ulink url="http://www.mysql.com/doc/en/Privilege_system.html">Privilege System</ulink></term>
-            <listitem>
-              <para>Much more detailed information about the suggestions in
-              <xref linkend="security-mysql"/>.
-              </para>
-            </listitem>
-          </varlistentry>
-        </variablelist>
+        for the MySQL database. In general, it is invoked automatically
+        through the use of the System V init scripts on GNU/Linux and
+        AT&amp;T System V-based systems, such as Solaris and HP/UX, or
+        through the RC scripts on BSD-based systems.</para>
       </glossdef>
     </glossentry>
   </glossdiv>
@@ -303,25 +217,14 @@
   <glossdiv id="gloss-p">
     <title>P</title>
 
-    <glossentry id="gloss-ppm">
-      <glossterm>Perl Package Manager</glossterm>
-      <acronym>PPM</acronym>
-
-      <glossdef>
-        <para><ulink url="http://aspn.activestate.com/ASPN/Downloads/ActivePerl/PPM/"/>
-        </para>
-      </glossdef>
-    </glossentry>
-
     <glossentry>
       <glossterm id="gloss-product">Product</glossterm>
 
       <glossdef>
-        <para>A Product is a broad category of types of bugs, normally
-        representing a single piece of software or entity. In general,
-        there are several Components to a Product. A Product may define a
+        <para>A Product is a broad category of types of bugs. In general,
+        there are several Components to a Product. A Product may also define a
         group (used for security) for all bugs entered into
-        its Components.</para>
+        components beneath it.</para>
       </glossdef>
     </glossentry>
 
@@ -359,7 +262,7 @@
         bugs over their life cycle, thus the need for the 
         <quote>QA Contact</quote>
 
-        field in a bug.</para>
+        field in a Bug.</para>
       </glossdef>
     </glossentry>
   </glossdiv>
@@ -367,25 +270,16 @@
   <glossdiv id="gloss-r">
     <title>R</title>
 
-    <glossentry id="gloss-rdbms">
-      <glossterm>Relational DataBase Managment System</glossterm>
-      <acronym>RDBMS</acronym>
+    <glossentry id="gloss-recursion" xreflabel="Recursion">
+      <glossterm>Recursion</glossterm>
 
       <glossdef>
-        <para>A relational database management system is a database system
-        that stores information in tables that are related to each other.
-        </para>
-      </glossdef>
-    </glossentry>
-
-    <glossentry id="gloss-regexp">
-      <glossterm>Regular Expression</glossterm>
-      <acronym>regexp</acronym>
-
-      <glossdef>
-          <para>A regular expression is an expression used for pattern matching.
-              <ulink url="http://perldoc.com/perl5.6/pod/perlre.html#Regular-Expressions">Documentation</ulink>
-        </para>
+        <para>The property of a function looking back at itself for
+        something. 
+        <quote>GNU</quote>, for instance, stands for 
+        <quote>GNU's Not UNIX</quote>, 
+        thus recursing upon itself for definition. For further clarity, see
+        Infinite Loop.</para>
       </glossdef>
     </glossentry>
   </glossdiv>
@@ -450,51 +344,18 @@
         fixed, or an enhancement will be implemented.</para>
       </glossdef>
     </glossentry>
-
-    <glossentry id="gloss-tcl">
-      <glossterm>Tool Command Language</glossterm>
-      <acronym>TCL</acronym>
-      <glossdef>
-        <para>TCL is an open source scripting language available for Windows,
-        Macintosh, and Unix based systems. Bugzilla 1.0 was written in TCL but
-        never released. The first release of Bugzilla was 2.0, which was when
-        it was ported to perl.
-        </para>
-      </glossdef>
-    </glossentry>
   </glossdiv>
 
   <glossdiv id="gloss-z">
     <title>Z</title>
 
-    <glossentry id="gloss-zarro">
+    <glossentry id="zarro-boogs-found" xreflabel="Zarro Boogs Found">
       <glossterm>Zarro Boogs Found</glossterm>
 
       <glossdef>
-        <para>This is just a goofy way of saying that there were no bugs
-        found matching your query. When asked to explain this message,
-        Terry had the following to say:
-        </para>
-
-        <blockquote>
-          <attribution>Terry Weissman</attribution>
-          <para>I've been asked to explain this ... way back when, when
-          Netscape released version 4.0 of its browser, we had a release
-          party.  Naturally, there had been a big push to try and fix every
-          known bug before the release. Naturally, that hadn't actually
-          happened.  (This is not unique to Netscape or to 4.0; the same thing
-          has happened with every software project I've ever seen.)  Anyway,
-          at the release party, T-shirts were handed out that said something
-          like "Netscape 4.0: Zarro Boogs". Just like the software, the
-          T-shirt had no known bugs.  Uh-huh.
-          </para>
-
-          <para>So, when you query for a list of bugs, and it gets no results,
-          you can think of this as a friendly reminder.  Of *course* there are
-          bugs matching your query, they just aren't in the bugsystem yet...
-          </para>
-        </blockquote>
-
+        <para>This is the cryptic response sent by Bugzilla when a query
+        returned no results. It is just a goofy way of saying "Zero Bugs
+        Found".</para>
       </glossdef>
     </glossentry>
   </glossdiv>
@@ -515,7 +376,7 @@ sgml-local-ecat-files:nil
 sgml-minimize-attributes:nil
 sgml-namecase-general:t
 sgml-omittag:t
-sgml-parent-document:("Bugzilla-Guide.xml" "book" "chapter")
+sgml-parent-document:("Bugzilla-Guide.sgml" "book" "chapter")
 sgml-shorttag:t
 sgml-tag-region-if-active:t
 End:

@@ -20,7 +20,7 @@
 
       <tbody>
         <row>
-          <entry>Warning</entry>
+          <entry>Caution</entry>
 
           <entry>
             <caution>
@@ -30,11 +30,11 @@
         </row>
 
         <row>
-          <entry>Hint</entry>
+          <entry>Hint or Tip</entry>
 
           <entry>
             <tip>
-              <para>Would you like a breath mint?</para>
+              <para>For best results... </para>
             </tip>
           </entry>
         </row>
@@ -50,7 +50,7 @@
         </row>
 
         <row>
-          <entry>Information requiring special attention</entry>
+          <entry>Warning</entry>
 
           <entry>
             <warning>

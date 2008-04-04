@@ -1036,9 +1036,9 @@
      <title>Administering Flags</title>
 
      <para>
-       If you have the <quote>editcomponents</quote> permission, you will
-       have <quote>Edit: ... | Flags | ...</quote> in your page footer.
-       Clicking on that link will bring you to the <quote>Administer 
+       If you have the <quote>editcomponents</quote> permission, you can
+       edit Flag Types from the main administration page. Clicking the
+       <quote>Flags</quote> link will bring you to the <quote>Administer
        Flag Types</quote> page. Here, you can select whether you want 
        to create (or edit) a Bug flag, or an Attachment flag.
      </para>
@@ -1046,6 +1046,15 @@
        No matter which you choose, the interface is the same, so we'll 
        just go over it once.
      </para>
+
+     <section id="flags-edit">
+       <title>Editing a Flag</title>
+       <para>
+         To edit a flag's properties, just click on the <quote>Edit</quote>
+         link next to the flag's description. That will take you to the same
+         form as described below (<xref linkend="flags-create"/>).
+       </para>
+     </section>
 
      <section id="flags-create">
        <title>Creating a Flag</title>
@@ -1255,15 +1264,6 @@
             unset <quote>active</quote> in the flag Edit form.
           </para>
         </warning>
-      </section>
-
-      <section id="flags-edit">
-        <title>Editing a Flag</title>
-        <para>
-          To edit a flag's properties, just click on the <quote>Edit</quote>
-          link next to the flag's description. That will take you to the same
-          form described in the <quote>Creating a Flag</quote> section.
-        </para>
       </section>
 
     </section> <!-- flags-admin -->

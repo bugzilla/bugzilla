@@ -4,67 +4,17 @@
 <chapter id="about">
 <title>About This Guide</title>
 
-  <section id="aboutthisguide">
-    <title>Purpose and Scope of this Guide</title>
-    <para>
-      This document was started on September 17, 2000 by Matthew P.
-      Barnson after a great deal of procrastination updating the
-      Bugzilla FAQ, which I left untouched for nearly half a year.
-      After numerous complete rewrites and reformatting, it is the
-      document you see today.
-    </para>
-    <para>
-      Bugzilla is simply the best piece of bug-tracking software the
-      world has ever seen.  This document is intended to be the
-      comprehensive guide to  the installation, administration,
-      maintenance, and use of the Bugzilla bug-tracking system.
-    </para>
-    <para>
-      This release of the Bugzilla Guide is the
-      <emphasis>&bzg-ver;</emphasis> release. It is so named that it
-      may match the current version of Bugzilla. The numbering
-      tradition stems from that used for many free software projects,
-      in which <emphasis>even-numbered</emphasis> point releases (1.2,
-      1.14, etc.) are considered "stable releases", intended for
-      public consumption; on the other  hand,
-      <emphasis>odd-numbered</emphasis> point releases (1.3, 2.09,
-      etc.) are considered unstable <emphasis>development</emphasis>
-      releases intended for advanced users, systems administrators,
-      developers, and those who enjoy a lot of pain. 
-    </para>
-    <para>
-      Newer revisions of the Bugzilla Guide follow the numbering
-      conventions of the main-tree Bugzilla releases, available at
-      <ulink url="&bz;">&bz;</ulink>.  Intermediate releases will have
-      a minor revision number following a period.  The current version
-      of Bugzilla, as of this writing (&bzg-date;) is &bz-ver;; if
-      something were seriously wrong with that edition of the Guide,
-      subsequent releases would receive an additional dotted-decimal
-      digit to indicate the update (&bzg-ver;.1, &bzg-ver;.2, etc.).
-      Got it?  Good.
-    </para>
-    <para>
-      I wrote this in response to the enormous demand for decent
-      Bugzilla documentation. I have incorporated instructions from
-      the Bugzilla README, Frequently Asked Questions, Database Schema
-      Document, and various mailing lists to create it. Chances are,
-      there are glaring errors in this documentation; please contact
-      &bzg-auth-email; to correct them.
-    </para>
-  </section>
-
   <section id="copyright">
     <title>Copyright Information</title>
     <blockquote>
-      <attribution>Copyright (c) 2000-2001 &bzg-auth;</attribution>
+      <attribution>Copyright (c) 2000-2002 Matthew P. Barnson and &bzg-auth;</attribution>
       <para>
 	Permission is granted to copy, distribute and/or modify this
 	document under the terms of the GNU Free Documentation
 	License, Version 1.1 or any later version published  by the
 	Free Software Foundation; with no Invariant Sections, no
 	Front-Cover Texts, and  with no Back-Cover Texts.  A copy of
-	the license is included in the section entitled  "GNU Free
-	Documentation LIcense".
+	the license is included below.
       </para>
     </blockquote>
     <para>
@@ -72,6 +22,11 @@
       copyright, or publishing this document in non-electronic form,
       please contact &bzg-auth;. 
     </para>
+
+
+    <!-- The GNU Free Documentation License -->
+    &gfdl;
+
   </section>
 
   <section id="disclaimer">
@@ -79,12 +34,11 @@
     <para>
       No liability for the contents of this document can be accepted.
       Use the concepts, examples, and other content at your own risk.
-      As this is a new edition of this document, there may be errors
-      and inaccuracies that may damage your system.  Use of this
-      document may cause your girlfriend to leave you, your cats to
-      pee on your furniture and clothing, your computer to cease
-      functioning, your boss to fire you, and global thermonuclear
-      war.  Proceed with caution.
+      This document may contain errors
+      and inaccuracies that may damage your system, cause your partner 
+      to leave you, your boss to fire you, your cats to
+      pee on your furniture and clothing, and global thermonuclear
+      war. Proceed with caution.
     </para>
     <para>
       All copyrights are held by their respective owners, unless
@@ -94,7 +48,7 @@
     </para>
     <para>
       Naming of particular products or brands should not be seen as
-      endorsements, with the exception of the term "GNU/Linux".  I
+      endorsements, with the exception of the term "GNU/Linux".  We
       wholeheartedly endorse the use of GNU/Linux in every situation
       where it is appropriate.  It is an extremely versatile, stable,
       and robust operating system that offers an ideal operating
@@ -103,8 +57,7 @@
     <para>
       You are strongly recommended to make a backup of your system
       before installing Bugzilla and at regular intervals thereafter.
-      Heaven knows it's saved my bacon time after time; if you
-      implement any suggestion in  this Guide, implement this one!
+      If you implement any suggestion in this Guide, implement this one!
     </para>
     <para>
       Although the Bugzilla development team has taken great care to
@@ -116,7 +69,7 @@
       team members, Netscape Communications, America Online Inc., and
       any affiliated developers or sponsors assume no liability for
       your use of this product.  You have the source code to this
-      product, and are responsible for auditing it yourself to insure
+      product, and are responsible for auditing it yourself to ensure
       your security needs are met.
     </para>
   </section>
@@ -126,7 +79,8 @@
   <section id="newversions">
     <title>New Versions</title>
     <para>
-      This is the &bzg-ver; version of The Bugzilla Guide.  If you are
+      This is the &bzg-ver; version of The Bugzilla Guide. It is so named 
+      to match the current version of Bugzilla. If you are
       reading this from any source other than those below, please
       check one of these mirrors to make sure you are reading an
       up-to-date version of the Guide.
@@ -138,12 +92,7 @@
       <itemizedlist>
 	<listitem>
 	  <para>
-	    <ulink url="http://www.trilobyte.net/barnsons/">TriloBYTE</ulink>
-	  </para>
-	</listitem>
-	<listitem>
-	  <para>
-	    <ulink url="http://www.mozilla.org/projects/bugzilla/">Mozilla.org</ulink>
+	    <ulink url="http://www.bugzilla.org/">bugzilla.org</ulink>
 	  </para>
 	</listitem>
 	<listitem>
@@ -155,9 +104,16 @@
       </itemizedlist>
     </para>
     <para>
-      The latest version of this document can be checked out via CVS.
-	Please follow the instructions available at <ulink
-							   url="http://www.mozilla.org/cvs.html">the Mozilla CVS page</ulink>, and check out the mozilla/webtools/bugzilla/docs/ branch.
+      The latest version of this document can always be checked out via CVS.
+	    Please follow the instructions available at 
+      <ulink url="http://www.mozilla.org/cvs.html">the Mozilla CVS page</ulink>,
+      and check out the <filename>mozilla/webtools/bugzilla/docs/</filename>
+      subtree.
+    </para>
+    <para>
+      The Bugzilla Guide is currently only available in English. 
+      If you would like to volunteer to translate it, please contact
+      <ulink url="mailto:justdave@syndicomm.com">Dave Miller</ulink>.
     </para>
   </section>
 
@@ -165,9 +121,14 @@
     <title>Credits</title>
     <para>
       The people listed below have made enormous contributions to the
-      creation of this Guide, through their dedicated hacking efforts,
+      creation of this Guide, through their writing, dedicated hacking efforts,
       numerous e-mail and IRC support sessions, and overall excellent
       contribution to the Bugzilla community:
+    </para>
+    <para>
+      <ulink url="mailto://mbarnson@sisna.com">Matthew P. Barnson</ulink>
+      for the Herculaean task of pulling together the Bugzilla Guide and
+      shepherding it to 2.14.
     </para>
     <para>
       <ulink url="mailto://terry@mozilla.org">Terry Weissman</ulink>
@@ -175,13 +136,13 @@
       README upon which the UNIX installation documentation is largely based.
     </para>
     <para>
-      <ulink url="mailto://tara@tequilarista.org">Tara
-	Hernandez</ulink>  for keeping Bugzilla development going
-      strong after Terry left Mozilla.org
+      <ulink url="mailto://tara@tequilarista.org">Tara Hernandez</ulink>  
+      for keeping Bugzilla development going
+      strong after Terry left mozilla.org
     </para>
     <para>
-      <ulink url="mailto://dkl@redhat.com">Dave Lawrence</ulink> for
-      providing insight into the key differences between Red Hat's
+      <ulink url="mailto://dkl@redhat.com">Dave Lawrence</ulink> 
+      for providing insight into the key differences between Red Hat's
       customized Bugzilla, and being largely responsible for the "Red
       Hat Bugzilla" appendix
     </para>
@@ -191,42 +152,16 @@
       questions and arguments on irc.mozilla.org in #mozwebtools
     </para>
     <para>
-      Last but not least, all the members of the <ulink
-							url="news://news.mozilla.org/netscape/public/mozilla/webtools"> netscape.public.mozilla.webtools</ulink> newsgroup.  Without your discussions, insight, suggestions, and patches, this could never have happened.
-    </para>
-  </section>
-
-  <section id="contributors">
-<title>Contributors</title>
-    <para>
-      Thanks go to these people for significant contributions to this
-      documentation (in no particular order):
+      Last but not least, all the members of the 
+      <ulink url="news://news.mozilla.org/netscape/public/mozilla/webtools"> netscape.public.mozilla.webtools</ulink> newsgroup.  Without your discussions, insight, suggestions, and patches, this could never have happened.
     </para>
     <para>
-      Andrew Pearson, Spencer Smith, Eric Hanson, Kevin Brannen, Ron
-      Teitelbaum, Jacob Steenhagen, Joe Robins
+      Thanks also go to the following people for significant contributions 
+      to this documentation (in no particular order):
     </para>
-  </section>
-  <section id="feedback">
-    <title>Feedback</title>
     <para>
-      I welcome feedback on this document.  Without your submissions
-      and input, this Guide cannot continue to exist.  Please mail
-      additions, comments, criticisms, etc. to
-      <email>barnboy@trilobyte.net</email>.  Please send flames to
-      <email>devnull@localhost</email>
-    </para>
-  </section>
-
-  <section id="translations">
-    <title>Translations</title>
-    <para>
-      The Bugzilla Guide needs translators! Please volunteer your
-      translation into the language of your choice. If you will
-      translate this Guide, please notify the members of the
-      mozilla-webtools mailing list at
-      <email>mozilla-webtools@mozilla.org</email>, and arrange with
-      Matt Barnson to check it into CVS.
+      Zach Liption, Andrew Pearson, Spencer Smith, Eric Hanson, Kevin Brannen,
+      Ron Teitelbaum, Jacob Steenhagen, Joe Robins, Gervase Markham.
     </para>
   </section>
 

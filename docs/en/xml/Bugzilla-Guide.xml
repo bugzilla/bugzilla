@@ -30,9 +30,9 @@
      For a devel release, simple bump bz-ver and bz-date
 -->
 
-<!ENTITY bz-ver "2.19">
+<!ENTITY bz-ver "2.19.1">
 <!ENTITY bz-nextver "2.20">
-<!ENTITY bz-date "2004-07-10">
+<!ENTITY bz-date "2004-10-24">
 <!ENTITY % bz-devel "INCLUDE">
 
 <!ENTITY landfillbase "http://landfill.bugzilla.org/bugzilla-tip/">
@@ -44,6 +44,7 @@
 <!-- For minimum versions -->
 <!ENTITY min-mysql-ver "3.23.41">
 <!ENTITY min-perl-ver "5.6.0">
+<!ENTITY min-perl-ver-win "5.8.1">
 <!ENTITY min-template-ver "2.08">
 <!ENTITY min-file-temp-ver "any">
 <!ENTITY min-appconfig-ver "1.52">

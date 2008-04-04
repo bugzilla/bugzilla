@@ -34,7 +34,7 @@
 
 <!ENTITY bz-ver "2.17.4">
 <!ENTITY bz-nextver "2.18">
-<!ENTITY bz-date "2003-02-16">
+<!ENTITY bz-date "2003-04-23">
 <!ENTITY % bz-devel "INCLUDE">
 
 <!ENTITY bz "http://www.bugzilla.org/">
@@ -47,7 +47,7 @@
 <!ENTITY min-mysql-ver "3.23.41">
 <!ENTITY min-perl-ver "5.6">
 <!ENTITY min-template-ver "2.08">
-<!ENTITY min-file-temp-ver "1.804">
+<!ENTITY min-file-temp-ver "any">
 <!ENTITY min-appconfig-ver "1.52">
 <!ENTITY min-text-wrap-ver "2001.0131">
 <!ENTITY min-file-spec-ver "0.82">
@@ -121,7 +121,7 @@ try to avoid clutter and feel free to waste space in the code to make it more re
       <para>  
 	      This documentation is maintained in DocBook 4.1.2 XML format.
         Changes are best submitted as plain text or XML diffs, attached
-        to a bug filed in the &bzg-bugs; compontent.
+        to a bug filed in the &bzg-bugs; component.
       </para>
       <![%bz-devel;[
         <para>This is a development version of this guide.  Information in it

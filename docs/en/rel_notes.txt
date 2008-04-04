@@ -2387,7 +2387,7 @@ See also next section.
   'letsubmitterchoosepriority' was off.
   (bug 63018)
 
-- Most CGIs are now templatised.  This helps to make it
+- Most CGIs are now templatized.  This helps to make it
   easier to remember to HTML filter values and easier to spot
   when they are not, preventing cross site scripting attacks.
   (bug 86168)
@@ -2398,17 +2398,17 @@ See also next section.
 
 *** IMPORTANT CHANGES ***
 
-- 2.16 introduces "templatisation", a new feature that allows
-  administrators to easily customise the HTML output (the "look and feel")
+- 2.16 introduces "templatization", a new feature that allows
+  administrators to easily customize the HTML output (the "look and feel")
   of Bugzilla without altering Perl code.  Bugzilla uses the
-  "Template Toolkit" for this.  Please see the "Template Customisation"
+  "Template Toolkit" for this.  Please see the "Template Customization"
   section of the Bugzilla Guide for more details.
 
-  Administrators who ran the 2.15 development version and customised
+  Administrators who ran the 2.15 development version with custom
   templates should check the templates are still valid, as file names
   and file paths have changed.
 
-  Most output is now templatised.  This process will be complete next
+  Most output is now templatized.  This process will be complete next
   milestone.
 
   For speed, compiled templates are cached on disk.  If you modify the
@@ -2462,7 +2462,7 @@ See also next section.
   lengthy delays in future if this problem reoccurs.
   (bug 106377)
 
-- In parallel with templatisation, a lot of changes have been made to the HTML
+- In parallel with templatization, a lot of changes have been made to the HTML
   output of the Bugzilla CGIs.  This could break code that attempts to parse
   such code.  For example, this breaks mozbot.
   (no bug number)
@@ -2739,8 +2739,8 @@ known to us after the Bugzilla 2.14 release.
 
 *** SECURITY ISSUES RESOLVED ***
 
-- Multiple instances of unauthorised access to confidential
-  bugs has been fixed.
+- Multiple instances of unauthorized access to confidential
+  bugs have been fixed.
   (bug 39524, 39526, 39527, 39531, 39533, 70189, 82781)
 
 - Multiple instances of untrusted parameters not being
@@ -2751,7 +2751,7 @@ known to us after the Bugzilla 2.14 release.
 - After logging in passwords no longer appear in the URL.
   (bug 15980)
 
-- Procedures to prevent unauthorised access to confidential
+- Procedures to prevent unauthorized access to confidential
   files are now simpler.  In particular the shadow directory
   no longer exists and the data/comments file no longer needs
   to be directly accessible, so the entire data directory can
@@ -2762,7 +2762,7 @@ known to us after the Bugzilla 2.14 release.
 
 - If they do not already exist, checksetup.pl will attempt to
   write Apache .htaccess files by default, to prevent
-  unauthorised access to confidential files.  You can turn this
+  unauthorized access to confidential files.  You can turn this
   off in the localconfig file.
   (bug 76154)
 

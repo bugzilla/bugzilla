@@ -1,6 +1,6 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook V4.1//EN" [
 <!ENTITY conventions SYSTEM "conventions.xml"> ] > -->
-<!-- $Id: about.xml,v 1.22 2008/04/04 06:48:14 jocuri%softhome.net Exp $ -->
+<!-- $Id: about.xml,v 1.23 2008/04/04 06:48:15 jocuri%softhome.net Exp $ -->
 
 <chapter id="about">
 <title>About This Guide</title>
@@ -125,7 +125,7 @@
       <varlistentry>
         <term>Matthew P. Barnson <email>mbarnson@sisna.com</email></term>
         <listitem>
-          <para>for the Herculaean task of pulling together the Bugzilla Guide
+          <para>for the Herculean task of pulling together the Bugzilla Guide
           and shepherding it to 2.14.
           </para>
         </listitem>

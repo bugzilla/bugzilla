@@ -438,9 +438,9 @@
       <para>After untarring the localizations (or creating your own) in the 
       <filename class="directory">BUGZILLA_ROOT/template</filename> directory,
       you must update the <option>languages</option> parameter to contain any
-      localizations you'd like to permit. You may also wish to set the
-      <option>defaultlanguage</option> parameter to something other than
-      <quote>en</quote> if you don't want English to be the default language.
+      localizations you'd like to permit. You may also wish to re-order
+      the <option>languages</option> parameter so that <quote>en</quote> 
+      doesn't come first, if you don't want English to be the default language.
       </para>
     </section>
       

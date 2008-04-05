@@ -497,8 +497,6 @@
            initDefaultCheckbox('assignee');                  
           </script>
         [% ELSE %]
-          <input type="hidden" name="assigned_to" id="assigned_to"
-                 value="[% bug.assigned_to.login FILTER html %]">
           [% INCLUDE user_identity user => bug.assigned_to %]
         [% END %]
       </td>
@@ -544,8 +542,6 @@
             </script>
           [% END %]
         [% ELSE %]
-          <input type="hidden" name="qa_contact" id="qa_contact"
-                 value="[% bug.qa_contact.login FILTER html %]">
           [% INCLUDE user_identity user => bug.qa_contact %]
         [% END %]
       </td>
@@ -840,8 +836,6 @@
             [%%]<label for="removecc">Remove selected CCs</label>
             <br>
           [% END %]
-        [% ELSE %]
-          <input type="hidden" name="cc" value="">
         [% END %]
         </div>
         <script type="text/javascript">
@@ -954,9 +948,6 @@
     <span id="[% dep.fieldname %]_input_area">
       [% IF bug.check_can_change_field(dep.fieldname, 0, 1) %]
         <input name="[% dep.fieldname %]" id="[% dep.fieldname %]"
-               value="[% bug.${dep.fieldname}.join(', ') %]">
-      [% ELSE %]
-        <input type="hidden" id="[% dep.fieldname %]" name="[% dep.fieldname %]"
                value="[% bug.${dep.fieldname}.join(', ') %]">
       [% END %]
     </span>
@@ -1074,7 +1065,6 @@
         [% END %]
       </select>
     [% ELSE %]
-      <input type="hidden" id="[% selname %]" name="[% selname %]" value="[% bug.${selname} FILTER html %]">
       [% bug.${selname} FILTER html %]
     [% END %]
   [% IF NOT no_td %]
@@ -1099,8 +1089,6 @@
               [% " onfocus=\"$onfocus\"" IF onfocus %]
               [% " spellcheck=\"$spellcheck\"" IF spellcheck %]>
     [% ELSE %]
-       <input type="hidden" name="[% inputname %]" id="[% inputname %]"
-              value="[% val FILTER html %]">
       [% IF size && val.length > size %]
         <span title="[% val FILTER html %]">
           [% val FILTER truncate(size) FILTER html %]

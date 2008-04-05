@@ -136,16 +136,23 @@
         </td>
         [% IF any_flags_requesteeble %]
           <td>
-            [% IF type.is_active && type.is_requesteeble %]
+            [% IF (type.is_active && type.is_requestable && type.is_requesteeble) || flag.requestee %]
               <span style="white-space: nowrap;">
                 [% IF Param('usemenuforusers') %]
+                  [% flag_custom_list = flag.type.grant_list %]
+                  [% IF !(type.is_active && type.is_requestable && type.is_requesteeble) %]
+                    [%# We are here only because there was already a requestee. In this case,
+                        the only valid action is to remove the requestee or leave it alone;
+                        nothing else. %]
+                    [% flag_custom_list = [flag.requestee] %]
+                  [% END %]
                   [% INCLUDE global/userselect.html.tmpl
                              name     => "requestee-$flag.id"
                              id       => "requestee-$flag.id"
                              value    => flag.requestee.login
                              multiple => 0
                              emptyok  => 1
-                             custom_userlist => flag.type.grant_list
+                             custom_userlist => flag_custom_list
                   %]
                 [% ELSE %]
                   (<input type="text" size="30" maxlength="255"
@@ -189,7 +196,7 @@
         </td>
         [% IF any_flags_requesteeble %]
           <td>
-            [% IF type.is_requesteeble %]
+            [% IF type.is_requestable && type.is_requesteeble %]
               <span style="white-space: nowrap;">
                 [% IF Param('usemenuforusers') %]
                   [% INCLUDE global/userselect.html.tmpl
@@ -243,7 +250,7 @@
       </td>
       [% IF any_flags_requesteeble %]
         <td>
-          [% IF type.is_requesteeble %]
+          [% IF type.is_requestable && type.is_requesteeble %]
             <span style="white-space: nowrap;">
               [% IF Param('usemenuforusers') %]
                 [% INCLUDE global/userselect.html.tmpl

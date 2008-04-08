@@ -54,11 +54,14 @@ use Bugzilla::Constants;
 # are 'blacklisted'--that is, even if the version is high enough, Bugzilla
 # will refuse to say that it's OK to run with that version.
 sub REQUIRED_MODULES {
+    my $perl_ver = sprintf('%vd', $^V);
     my @modules = (
     {
         package => 'CGI',
         module  => 'CGI',
-        version => '2.93'
+        # Perl 5.10 requires CGI 3.33 due to a taint issue when
+        # uploading attachments, see bug 416382.
+        version => (vers_cmp($perl_ver, '5.10') > -1) ? '3.33' : '2.93'
     },
     {
         package => 'TimeDate',
@@ -222,16 +225,20 @@ sub OPTIONAL_MODULES {
         version => '1.999022',
         feature => 'mod_perl'
     },
+    );
+
     # Even very new releases of perl (5.8.5) don't come with this version,
     # so I didn't want to make it a general requirement just for
     # running under mod_cgi.
-    {
-        package => 'CGI',
-        module  => 'CGI',
-        version => '3.11',
-        feature => 'mod_perl'
-    },
-    );
+    # If Perl 5.10 is installed, then CGI 3.33 is already required. So this
+    # check is only relevant with Perl 5.8.x.
+    my $perl_ver = sprintf('%vd', $^V);
+    if (vers_cmp($perl_ver, '5.10') < 0) {
+        push(@modules, { package => 'CGI',
+                         module  => 'CGI',
+                         version => '3.11',
+                         feature => 'mod_perl' });
+    }
 
     my $all_modules = _get_extension_requirements(
         'OPTIONAL_MODULES', \@modules);

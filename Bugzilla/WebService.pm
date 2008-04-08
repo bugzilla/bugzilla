@@ -48,10 +48,19 @@ sub handle_login {
     Bugzilla->login;
 }
 
-package Bugzilla::WebService::XMLRPC::Transport::HTTP::CGI;
+1;
 
+package Bugzilla::WebService::XMLRPC::Transport::HTTP::CGI;
 use strict;
-eval 'use base qw(XMLRPC::Transport::HTTP::CGI)';
+eval { require XMLRPC::Transport::HTTP; };
+our @ISA = qw(XMLRPC::Transport::HTTP::CGI);
+
+sub initialize {
+    my $self = shift;
+    my %retval = $self->SUPER::initialize(@_);
+    $retval{'serializer'} = Bugzilla::WebService::XMLRPC::Serializer->new;
+    return %retval;
+}
 
 sub make_response {
     my $self = shift;
@@ -63,6 +72,30 @@ sub make_response {
     foreach (@{Bugzilla->cgi->{'Bugzilla_cookie_list'}}) {
         $self->response->headers->push_header('Set-Cookie', $_);
     }
+}
+
+1;
+
+# This package exists to fix a UTF-8 bug in SOAP::Lite.
+# See http://rt.cpan.org/Public/Bug/Display.html?id=32952.
+package Bugzilla::WebService::XMLRPC::Serializer;
+use strict;
+# We can't use "use base" because XMLRPC::Serializer doesn't return
+# a true value.
+eval { require XMLRPC::Lite; };
+our @ISA = qw(XMLRPC::Serializer);
+
+sub new {
+    my $class = shift;
+    my $self = $class->SUPER::new(@_);
+    # This fixes UTF-8.
+    $self->{'_typelookup'}->{'base64'} =
+        [10, sub { !utf8::is_utf8($_[0]) && $_[0] =~ /[^\x09\x0a\x0d\x20-\x7f]/},
+        'as_base64'];
+    # This makes arrays work right even though we're a subclass.
+    # (See http://rt.cpan.org//Ticket/Display.html?id=34514)
+    $self->{'_encodingStyle'} = '';
+    return $self;
 }
 
 1;

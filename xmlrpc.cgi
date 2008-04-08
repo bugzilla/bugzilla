@@ -20,6 +20,7 @@ use lib qw(. lib);
 
 use Bugzilla;
 use Bugzilla::Constants;
+use Bugzilla::Error;
 use Bugzilla::Hook;
 
 # Use an eval here so that runtests.pl accepts this script even if SOAP-Lite

@@ -57,18 +57,24 @@ sub MessageToMTA {
     return if $method eq 'None';
 
     my $email = ref($msg) ? $msg : Email::MIME->new($msg);
-    foreach my $part ($email->parts) {
-        if (Bugzilla->params->{'utf8'}) {
-            $part->charset_set('UTF-8');
-            # encoding_set works only with bytes, not with utf8 strings.
-            my $raw = $part->body_raw;
-            if (utf8::is_utf8($raw)) {
-                utf8::encode($raw);
-                $part->body_set($raw);
+    $email->walk_parts(sub {
+        my ($part) = @_;
+        return if $part->parts > 1; # Top-level
+        my $content_type = $part->content_type || '';
+        if ($content_type !~ /;/) {
+            my $body = $part->body;
+            if (Bugzilla->params->{'utf8'}) {
+                $part->charset_set('UTF-8');
+                # encoding_set works only with bytes, not with utf8 strings.
+                my $raw = $part->body_raw;
+                if (utf8::is_utf8($raw)) {
+                    utf8::encode($raw);
+                    $part->body_set($raw);
+                }
             }
+            $part->encoding_set('quoted-printable') if !is_7bit_clean($body);
         }
-        $part->encoding_set('quoted-printable') if !is_7bit_clean($part->body);
-    }
+    });
 
     # MIME-Version must be set otherwise some mailsystems ignore the charset
     $email->header_set('MIME-Version', '1.0') if !$email->header('MIME-Version');

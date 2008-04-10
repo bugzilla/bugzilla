@@ -526,16 +526,16 @@
             <input type="checkbox" id="set_default_qa_contact" name="set_default_qa_contact" value="1">
             <label for="set_default_qa_contact" id="set_default_qa_contact_label">Reset QA Contact to default</label>
           </div>
-          [% IF bug.qa_contact != "" %]
-            <script type="text/javascript">
-             hideEditableField('bz_qa_contact_edit_container', 
-                               'bz_qa_contact_input', 
-                               'bz_qa_contact_edit_action', 
-                               'qa_contact', 
-                               '[% bug.qa_contact.login FILTER js %]');
-             initDefaultCheckbox('qa_contact');
-            </script>
-          [% END %]
+          <script type="text/javascript">
+            [% IF bug.qa_contact != "" %]
+              hideEditableField('bz_qa_contact_edit_container', 
+                                 'bz_qa_contact_input', 
+                                 'bz_qa_contact_edit_action', 
+                                 'qa_contact', 
+                                 '[% bug.qa_contact.login FILTER js %]');
+            [% END %]
+            initDefaultCheckbox('qa_contact');
+          </script>
         [% ELSE %]
           [% INCLUDE user_identity user => bug.qa_contact %]
         [% END %]

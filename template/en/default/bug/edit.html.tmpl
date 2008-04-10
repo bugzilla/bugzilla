@@ -428,8 +428,12 @@
           [% IF bug.votes %] 
             with 
             <a href="votes.cgi?action=show_bug&amp;bug_id=[% bug.bug_id %]">
-              [% bug.votes %] vote[%IF bug.votes > 1 %]s[% END %]
-            </a>. 
+              [% bug.votes %] 
+              [% IF bug.votes == 1 %]
+                vote
+              [% ELSE %]
+                votes
+              [% END %]</a> 
           [% END %]    
           (<a href="votes.cgi?action=show_user&amp;bug_id=
                   [% bug.bug_id %]#vote_[% bug.bug_id %]">vote</a>)
@@ -795,12 +799,17 @@
             <br> 
           [% END %]
         [% END %]
-        [% bug.cc.size || 0  FILTER html%]&nbsp;total users
+        [% bug.cc.size || 0  FILTER html %] 
+        [% IF bug.cc.size == 1 %]
+          user
+        [% ELSE %]
+          users
+        [% END %]
         [% IF user.id %]
           [% IF bug.cc.contains( user.email ) %]
             including you ([% INCLUDE user_identity user=> user FILTER collapse %])
           [% END %]
-        [% END %].
+        [% END %]
         <span id="cc_edit_area_showhide_container" class="bz_default_hidden">
           (<a href="#" id="cc_edit_area_showhide">edit</a>)
         </span>

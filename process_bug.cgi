@@ -495,23 +495,19 @@ if (!$cgi->param('id') && $cgi->param('dup_id')) {
 # down here, because the validity of status changes depends on other fields,
 # such as Target Milestone.
 foreach my $b (@bug_objects) {
-    if (should_set('knob')) {
-        # First, get the correct resolution <select>, in case there is more
-        # than one open -> closed transition allowed. Allow to fallback to
-        # 'resolution' (useful when called from email_in.pl).
-        my $knob = $cgi->param('knob');
-        my $status = new Bugzilla::Status({name => $knob});
-        my $resolution;
-        if ($status) {
-            $resolution = $cgi->param('resolution_knob_' . $status->id)
-                          || $cgi->param('resolution');
-        }
-        else {
-            $resolution = $cgi->param('resolution_knob_change_resolution');
-        }
-        
-        # Translate the knob values into new status and resolution values.
-        $b->process_knob($knob, $resolution, scalar $cgi->param('dup_id'));
+    if (should_set('bug_status')) {
+        $b->set_status(
+            scalar $cgi->param('bug_status'),
+            {resolution =>  scalar $cgi->param('resolution'),
+                dupe_of => scalar $cgi->param('dup_id')}
+            );
+    }
+    elsif (should_set('resolution')) {
+       $b->set_resolution(scalar $cgi->param('resolution'), 
+                          {dupe_of => scalar $cgi->param('dup_id')});
+    }
+    elsif (should_set('dup_id')) {
+        $b->set_dup_id(scalar $cgi->param('dup_id'));
     }
 }
 

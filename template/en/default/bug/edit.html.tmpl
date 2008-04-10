@@ -242,7 +242,13 @@
                      maxrows   = 25
                      cols      = constants.COMMENT_COLS
           %]
-          [% PROCESS bug/knob.html.tmpl %]
+          <br>
+          <div id="knob-buttons">
+            <input type="submit" value="Commit" id="commit">
+            [% IF bug.user.canmove %]
+              <input type="submit" name="action" id="action" value="[% Param("move-button-text") %]">
+            [% END %]
+          </div>
         [% ELSE %]
           <fieldset>
             <legend>Note</legend>
@@ -357,9 +363,9 @@
       <td class="field_label">
         <label for="component" accesskey="m">
           <b><a href="describecomponents.cgi?product=[% bug.product FILTER url_quote %]">
-            Co<u>m</u>ponent</a>
+            Co<u>m</u>ponent</a>:
           </b>
-        </label>:
+        </label>
       </td>
       [% PROCESS select selname => "component" %]
     </tr>
@@ -404,14 +410,7 @@
         <b><a href="page.cgi?id=fields.html#status">Status</a></b>:
       </td>
       <td id="bz_field_status">
-
-        [% get_status(bug.bug_status) FILTER html %]&nbsp;&nbsp;
-        [% get_resolution(bug.resolution) FILTER html %]
-     
-        [% IF bug.resolution == "DUPLICATE" %]
-          of [% terms.bug %] [%+ "${bug.dup_id}" FILTER bug_link(bug.dup_id) FILTER none %]
-        [% END %]
-      
+          [% PROCESS bug/knob.html.tmpl %]
       </td>
     </tr>
  [%###############################################################%]
@@ -422,24 +421,20 @@
         <label for="priority" accesskey="i"><b><u>I</u>mportance</b></label>:
       </td>
       <td>
-        <table>
-          <tr>
-            [% PROCESS select selname => "priority" %] 
-            [% PROCESS select selname = "bug_severity" %]
-            [% IF bug.use_votes %]
-            <td>
-              [% IF bug.votes %] 
-                with 
-                <a href="votes.cgi?action=show_bug&amp;bug_id=[% bug.bug_id %]">
-                  [% bug.votes %] vote[%IF bug.votes > 1 %]s[% END %]
-                </a>. 
-              [% END %]    
-            (<a href="votes.cgi?action=show_user&amp;bug_id=
-                      [% bug.bug_id %]#vote_[% bug.bug_id %]">vote</a>)
-            </td>
-            [% END %]
-          </tr>
-        </table>
+        [% PROCESS select selname => "priority" no_td=>1 %] 
+        [% PROCESS select selname = "bug_severity" no_td=>1 %]
+        [% IF bug.use_votes %]
+          <span id="votes_container">
+          [% IF bug.votes %] 
+            with 
+            <a href="votes.cgi?action=show_bug&amp;bug_id=[% bug.bug_id %]">
+              [% bug.votes %] vote[%IF bug.votes > 1 %]s[% END %]
+            </a>. 
+          [% END %]    
+          (<a href="votes.cgi?action=show_user&amp;bug_id=
+                  [% bug.bug_id %]#vote_[% bug.bug_id %]">vote</a>)
+          </span>  
+        [% END %]
       </td>
     </tr>
 

@@ -2560,7 +2560,7 @@ sub choices {
     }
 
     # Hack - this array contains "". See bug 106589.
-    my @res = grep ($_, @{settable_resolutions()});
+    my @res = grep ($_, @{get_legal_field_values('resolution')});
 
     $self->{'choices'} =
       {
@@ -2577,22 +2577,6 @@ sub choices {
       };
 
     return $self->{'choices'};
-}
-
-# List of resolutions that may be set directly by hand in the bug form.
-# 'MOVED' and 'DUPLICATE' are excluded from the list because setting
-# bugs to those resolutions requires a special process.
-sub settable_resolutions {
-    my $resolutions = get_legal_field_values('resolution');
-    my $pos = lsearch($resolutions, 'DUPLICATE');
-    if ($pos >= 0) {
-        splice(@$resolutions, $pos, 1);
-    }
-    $pos = lsearch($resolutions, 'MOVED');
-    if ($pos >= 0) {
-        splice(@$resolutions, $pos, 1);
-    }
-    return $resolutions;
 }
 
 sub votes {
@@ -2621,35 +2605,6 @@ sub bug_alias_to_id {
     trick_taint($alias);
     return $dbh->selectrow_array(
         "SELECT bug_id FROM bugs WHERE alias = ?", undef, $alias);
-}
-
-#####################################################################
-# Workflow Control routines
-#####################################################################
-
-sub process_knob {
-    my ($self, $action, $to_resolution, $dupe_of) = @_;
-    my $dbh = Bugzilla->dbh;
-
-    return if $action eq 'none';
-
-    my $dupe_move_status = Bugzilla->params->{'duplicate_or_move_bug_status'};
-    if ($action eq 'duplicate') {
-        $self->set_status($dupe_move_status,
-                          {resolution => 'DUPLICATE', dupe_of => $dupe_of});
-    }
-    elsif ($action eq 'move') {
-        $self->set_status($dupe_move_status, {resolution => 'MOVED'});
-    }
-    elsif ($action eq 'change_resolution') {
-        $self->set_resolution($to_resolution);
-    }
-    elsif ($action eq 'clearresolution') {
-        $self->clear_resolution();
-    }
-    else {
-        $self->set_status($action, {resolution => $to_resolution});
-    }
 }
 
 #####################################################################

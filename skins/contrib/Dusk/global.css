@@ -123,18 +123,7 @@ hr {
     border-top: 1px solid #c8c8ba;
 }
 
-/* knob */
-
-#knob {
-    background-color: #e6e6d8;
-    border: 1px solid #c8c8ba;
-    padding: 5px;
-    text-align: left;
-}
-
-#knob a {
-    color: #646456;
-}
+/* knob-buttons */
 
 #knob-buttons {
     margin-top: 10px;

@@ -246,6 +246,56 @@ function initDefaultCheckbox(field_id){
                                  'set_default_' + field_id ); 
 }
 
+function showHideStatusItems(e, dupArrayInfo) {
+    var el = document.getElementById('bug_status');
+    // finish doing stuff based on the selection.
+    if ( el ) {
+        showDuplicateItem(el);
+        YAHOO.util.Dom.setStyle('resolution_settings', 'display', 'none');
+        if (document.getElementById('resolution_settings_warning')) {
+            YAHOO.util.Dom.setStyle('resolution_settings_warning', 'display', 'none');
+        }
+        YAHOO.util.Dom.setStyle('duplicate_display', 'display', 'none');
+
+        if ( el.value == dupArrayInfo[1] && dupArrayInfo[0] == "is_duplicate" ) {
+            YAHOO.util.Dom.setStyle('resolution_settings', 'display', 'inline');
+            YAHOO.util.Dom.setStyle('resolution_settings_warning', 'display', 'block');  
+        }
+        else if (close_status_array.indexOf(el.value) > -1) {
+            // hide duplicate and show resolution
+            YAHOO.util.Dom.setStyle('resolution_settings', 'display', 'inline');
+            YAHOO.util.Dom.setStyle('resolution_settings_warning', 'display', 'block');
+        }
+    }
+}
+
+function showDuplicateItem(e) {
+    var resolution = document.getElementById('resolution');
+    var bug_status = document.getElementById('bug_status');
+    if (resolution) {
+        if (resolution.value == 'DUPLICATE' && close_status_array.indexOf(bug_status.value) > -1 ) {
+            // hide resolution show duplicate
+            YAHOO.util.Dom.setStyle('duplicate_settings', 'display', 'inline');
+            YAHOO.util.Dom.setStyle('dup_id_discoverable', 'display', 'none');
+        }
+        else {
+            YAHOO.util.Dom.setStyle('duplicate_settings', 'display', 'none');
+            YAHOO.util.Dom.setStyle('dup_id_discoverable', 'display', 'block');
+        }
+    }
+    YAHOO.util.Event.preventDefault(e); //prevents the hyperlink from going to the url in the href.
+}
+
+function setResolutionToDuplicate(e, duplicate_or_move_bug_status) {
+    var status = document.getElementById('bug_status');
+    var resolution = document.getElementById('resolution');
+    YAHOO.util.Dom.setStyle('dup_id_discoverable', 'display', 'none');
+    status.value = duplicate_or_move_bug_status;
+    resolution.value = "DUPLICATE";
+    showHideStatusItems("", ["",""]);
+    YAHOO.util.Event.preventDefault(e);
+}
+
 function setDefaultCheckbox(e, field_id ) { 
     var el = document.getElementById(field_id);
     var elLabel = document.getElementById(field_id + "_label");

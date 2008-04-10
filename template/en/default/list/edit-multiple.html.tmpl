@@ -18,6 +18,7 @@
   # Contributor(s): Myk Melez <myk@mozilla.org>
   #                 Max Kanat-Alexander <mkanat@bugzilla.org>
   #                 Frédéric Buclin <LpSolit@gmail.com>
+  #                 Guy Pyrzak <guy.pyrzak@gmail.com>
   #%]
 
 [% PROCESS global/variables.none.tmpl %]
@@ -130,7 +131,11 @@
       </td>
     [% END %]
   </tr>
-
+  
+  <tr>
+    <th><label for="bug_status">Status:</label></th>
+    <td colspan="3">[% PROCESS status_section %]</td>
+  </tr>
   [% IF user.in_group(Param("timetrackinggroup")) %]
     <tr>
       <th><label for="estimated_time">Estimated Hours:</label></th>
@@ -309,49 +314,6 @@
   [% END %]
 
 [% END %]
-
-[% all_open_bugs = !current_bug_statuses.containsany(closedstates) %]
-[% all_closed_bugs = !current_bug_statuses.containsany(openstates) %]
-[% display_warning = 0 %]
-
-<input id="knob-none" type="radio" name="knob" value="none" checked="checked">
-<label for="knob-none">Do nothing else</label><br>
-
-[% FOREACH bug_status = new_bug_statuses %]
-    <input type="radio" id="knob_[% bug_status.id FILTER html %]" name="knob"
-           value="[% bug_status.name FILTER html %]">
-    <label for="knob_[% bug_status.id FILTER html %]">
-      Change status to <b>[% get_status(bug_status.name) FILTER html %]</b>
-    </label>
-    [%# Closed bugs cannot have their resolution changed this way. %]
-    [% IF !bug_status.is_open && !all_closed_bugs %]
-      and set the resolution to [% PROCESS select_resolution id = bug_status.id %]
-      [%+ "(*)" UNLESS all_open_bugs %]
-      [% display_warning = 1 UNLESS all_open_bugs %]
-    [% END %]
-    <br>
-[% END %]
-
-[%# If all the bugs being changed are open, allow the user to clear their resolution. %]
-[% IF all_open_bugs %]
-  <input id="knob-clearresolution" type="radio" name="knob" value="clearresolution">
-  <label for="knob-clearresolution">Clear the resolution</label><br>
-[% END %]
-
-[%# If all the bugs being changed are closed, allow the user to change their resolution. %]
-[% IF all_closed_bugs %]
-  <input type="radio" id="knob_change_resolution" name="knob" value="change_resolution">
-  <label for="knob_change_resolution">Change resolution to</label>
-  [%+ PROCESS select_resolution id = "change_resolution" %]<br>
-[% END %]
-
-[% IF display_warning %]
-  <p class="box">
-    (*) Note that the resolution will only be applied to open [% terms.bugs %].
-    Already closed [% terms.bugs %] will keep their resolution unchanged.
-  </p>
-[% END %]
-
 <input type="submit" id="commit" value="Commit">
 
 [% IF Param('move-enabled') && user.is_mover %]
@@ -374,12 +336,50 @@
   </select>
 [% END %]
 
-[% BLOCK select_resolution %]
-  <select id="resolution_knob_[% id FILTER html %]" name="resolution_knob_[% id FILTER html %]"
-          onchange="document.forms['changeform'].[% "knob_$id" FILTER html %].checked=true">
+[%############################################################################%]
+[%# Status Block                                                             #%]
+[%############################################################################%]
+
+[% BLOCK status_section %]
+  [% all_open_bugs = !current_bug_statuses.containsany(closedstates) %]
+  [% all_closed_bugs = !current_bug_statuses.containsany(openstates) %]
+  [% closed_status_array = [] %]
+  
+  <select name="bug_status" id="bug_status"> 
+    <option value="[% dontchange FILTER html %]" selected="selected">[% dontchange FILTER html %]</option>
+  
+    [% FOREACH bug_status = new_bug_statuses %]
+      <option value="[% bug_status.name FILTER html %]">
+        [% get_status(bug_status.name) FILTER html %]
+      </option>
+      [% IF !bug_status.is_open %]
+        [% filtered_status =  bug_status.name FILTER js %]
+        [% closed_status_array.push( filtered_status ) %]
+      [% END %]
+    [% END %]
+  
+  [%# If all the bugs being changed are closed, allow the user to change their resolution. %]
+  [% IF all_closed_bugs %]
+    [% filtered_status = dontchange FILTER js %]
+    [% closed_status_array.push( filtered_status ) %]
+  [% END %]
+  </select>
+  
+  <span id="resolution_settings">
+  <select id="resolution" name="resolution">
+      <option value="[% dontchange FILTER html %]" selected >[% dontchange FILTER html %]</option>
     [% FOREACH r = resolutions %]
       [% NEXT IF !r %]
+      [% NEXT IF r == "DUPLICATE" || r == "MOVED" %]
       <option value="[% r FILTER html %]">[% get_resolution(r) FILTER html %]</option>
     [% END %]
   </select>
+  </span>
+
+  <script type="text/javascript">
+  var close_status_array = new Array("[% closed_status_array.join('", "') FILTER none %]");
+    YAHOO.util.Event.addListener('bug_status', "change", showHideStatusItems, '[% "is_duplicate" IF bug.dup_id %]');
+    YAHOO.util.Event.onDOMReady( showHideStatusItems );
+  </script>
+
 [% END %]

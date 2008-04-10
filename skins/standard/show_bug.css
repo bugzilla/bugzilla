@@ -36,8 +36,9 @@
     height: 1em;
 }
 
-#bz_field_status {
+#duplicate_settings, #votes_container {
     white-space: nowrap;
+    
 }
 
 .bz_time_tracking_table {

@@ -1181,7 +1181,7 @@ if ($dotweak && scalar @bugs) {
     $vars->{'op_sys'} = get_legal_field_values('op_sys');
     $vars->{'priorities'} = get_legal_field_values('priority');
     $vars->{'severities'} = get_legal_field_values('bug_severity');
-    $vars->{'resolutions'} = Bugzilla::Bug->settable_resolutions;
+    $vars->{'resolutions'} = get_legal_field_values('resolution');
 
     $vars->{'unconfirmedstate'} = 'UNCONFIRMED';
 

@@ -22,7 +22,7 @@
   #                 André Batosti <batosti@async.com.br>
   #%]
 
-[% PROCESS global/variables.none.tmpl %]
+[% PROCESS 'global/field-descs.none.tmpl' %]
 
 [% filtered_desc = blocked_tree.$bugid.short_desc FILTER html %]
 [% PROCESS global/header.html.tmpl
@@ -153,7 +153,7 @@
 [% END %]
 
 [% BLOCK buginfo %]
-  [% bug.bug_status FILTER html -%] [%+ bug.resolution FILTER html %];
+  [% status_descs.${bug.bug_status} FILTER html -%] [%+ get_resolution(bug.resolution) FILTER html %];
   [%-%] assigned to [% bug.assigned_to.login FILTER html %]
   [%-%][% "; Target: " _ bug.target_milestone IF bug.target_milestone %]
 [% END %]

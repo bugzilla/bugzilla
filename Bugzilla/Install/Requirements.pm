@@ -59,7 +59,7 @@ sub REQUIRED_MODULES {
     my $perl_ver = sprintf('%vd', $^V);
     my @modules = (
     {
-        package => 'CGI',
+        package => 'CGI.pm',
         module  => 'CGI',
         # Perl 5.10 requires CGI 3.33 due to a taint issue when
         # uploading attachments, see bug 416382.
@@ -224,7 +224,7 @@ sub OPTIONAL_MODULES {
     # check is only relevant with Perl 5.8.x.
     my $perl_ver = sprintf('%vd', $^V);
     if (vers_cmp($perl_ver, '5.10') < 0) {
-        push(@modules, { package => 'CGI',
+        push(@modules, { package => 'CGI.pm',
                          module  => 'CGI',
                          version => '3.11',
                          feature => 'mod_perl' });

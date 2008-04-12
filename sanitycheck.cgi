@@ -401,7 +401,9 @@ CrossCheck("fielddefs", "id",
            ['profiles_activity', 'fieldid']);
 
 CrossCheck("flagtypes", "id",
-           ["flags", "type_id"]);
+           ["flags", "type_id"],
+           ["flagexclusions", "type_id"],
+           ["flaginclusions", "type_id"]);
 
 CrossCheck("bugs", "bug_id",
            ["bugs_activity", "bug_id"],
@@ -424,7 +426,9 @@ CrossCheck("groups", "id",
            ["group_group_map", "member_id"],
            ["group_control_map", "group_id"],
            ["namedquery_group_map", "group_id"],
-           ["user_group_map", "group_id"]);
+           ["user_group_map", "group_id"],
+           ["flagtypes", "grant_group_id"],
+           ["flagtypes", "request_group_id"]);
 
 CrossCheck("namedqueries", "id",
            ["namedqueries_link_in_footer", "namedquery_id"],
@@ -470,7 +474,9 @@ CrossCheck("products", "id",
            ["flagexclusions", "product_id", "type_id"]);
 
 CrossCheck("components", "id",
-           ["component_cc", "component_id"]);
+           ["component_cc", "component_id"],
+           ["flagexclusions", "component_id", "type_id"],
+           ["flaginclusions", "component_id", "type_id"]);
 
 # Check the former enum types -mkanat@bugzilla.org
 CrossCheck("bug_status", "value",
@@ -495,14 +501,17 @@ CrossCheck('series', 'series_id',
            ['series_data', 'series_id']);
 
 CrossCheck('series_categories', 'id',
-           ['series', 'category']);
+           ['series', 'category'],
+           ["category_group_map", "category_id"],
+           ["series", "subcategory"]);
 
 CrossCheck('whine_events', 'id',
            ['whine_queries', 'eventid'],
            ['whine_schedules', 'eventid']);
 
 CrossCheck('attachments', 'attach_id',
-           ['attach_data', 'id']);
+           ['attach_data', 'id'],
+           ['bugs_activity', 'attach_id']);
 
 CrossCheck('bug_status', 'id',
            ['status_workflow', 'old_status'],

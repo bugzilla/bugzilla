@@ -72,9 +72,11 @@ foreach my $module (@$modules, @$opt_modules)
     print ENTITIES '<!ENTITY min-' . $name . '-ver "'.$version.'">' . "\n";
 }
 
-# CGI is a special case, because it has an optional version *and* a required
-# version.
-my ($cgi_opt) = grep($_->{package} eq 'CGI', @$opt_modules);
+# CGI is a special case, because for Perl versions below 5.10, it has an
+# optional version *and* a required version.
+# We check @opt_modules first, then @modules, and pick the first we get.
+# We'll get the optional one then, if it is given, otherwise the required one.
+my ($cgi_opt) = grep($_->{module} eq 'CGI', @$opt_modules, @$modules);
 print ENTITIES '<!ENTITY min-mp-cgi-ver "' . $cgi_opt->{version} . '">' . "\n";
 
 print ENTITIES "\n <!-- Database Versions --> \n";
@@ -82,7 +84,8 @@ print ENTITIES "\n <!-- Database Versions --> \n";
 my $db_modules = DB_MODULE;
 foreach my $db (keys %$db_modules) {
     my $dbd  = $db_modules->{$db}->{dbd};
-    my $name = $dbd->{package};
+    my $name = $dbd->{module};
+    $name =~ s/::/-/g;
     $name = lc($name);
     my $version    = $dbd->{version} || 'any';
     my $db_version = $db_modules->{$db}->{'db_version'};

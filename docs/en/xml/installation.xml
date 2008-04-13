@@ -1,5 +1,5 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"> -->
-<!-- $Id: installation.xml,v 1.155 2008/04/04 06:48:25 lpsolit%gmail.com Exp $ -->
+<!-- $Id: installation.xml,v 1.156 2008/04/12 22:24:23 wurblzap%gmail.com Exp $ -->
 <chapter id="installing-bugzilla">
   <title>Installing Bugzilla</title>
 
@@ -285,7 +285,7 @@
 
         <listitem>
           <para>
-            CGI &min-cgi-ver; or CGI &min-mp-cgi-ver; if using mod_perl
+            CGI &min-cgi-ver;
           </para>
         </listitem>
 
@@ -469,7 +469,7 @@
         <listitem>
           <para>
             CGI
-            (&min-cgi-ver;) for mod_perl
+            (&min-mp-cgi-ver;) for mod_perl
           </para>
         </listitem>
 

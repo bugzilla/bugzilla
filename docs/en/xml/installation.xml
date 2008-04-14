@@ -1,5 +1,5 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"> -->
-<!-- $Id: installation.xml,v 1.156 2008/04/12 22:24:23 wurblzap%gmail.com Exp $ -->
+<!-- $Id: installation.xml,v 1.157 2008/04/13 19:25:18 lpsolit%gmail.com Exp $ -->
 <chapter id="installing-bugzilla">
   <title>Installing Bugzilla</title>
 
@@ -178,7 +178,8 @@
       <title>Bugzilla</title>
 
       <para>
-        Download a Bugzilla tarball (or check it out from CVS) and place
+        <ulink url="http://www.bugzilla.org/download/">Download a Bugzilla tarball</ulink>
+        (or check it out from CVS) and place
         it in a suitable directory, accessible by the default web server user 
         (probably <quote>apache</quote> or <quote>www</quote>). 
         Good locations are either directly in the web server's document directories or

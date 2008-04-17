@@ -33,6 +33,7 @@
 use AnyDBM_File;
 use strict;
 use IO::Handle;
+use Cwd;
 
 use lib ".";
 
@@ -50,16 +51,19 @@ use Bugzilla::Field;
 $| = 1;
 
 # Tidy up after graphing module
+my $cwd = Cwd::getcwd();
 if (chdir("graphs")) {
     unlink <./*.gif>;
     unlink <./*.png>;
-    chdir("..");
+    # chdir("..") doesn't work if graphs is a symlink, see bug 429378
+    chdir($cwd);
 }
 
 # This is a pure command line script.
 Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
 
 my $dbh = Bugzilla->switch_to_shadow_db();
+
 
 # To recreate the daily statistics,  run "collectstats.pl --regenerate" .
 my $regenerate = 0;

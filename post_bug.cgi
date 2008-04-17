@@ -53,6 +53,9 @@ my $vars = {};
 # Main Script
 ######################################################################
 
+# redirect to enter_bug if no field is passed.
+print $cgi->redirect(correct_urlbase() . 'enter_bug.cgi') unless $cgi->param();
+
 # Detect if the user already used the same form to submit a bug
 my $token = trim($cgi->param('token'));
 if ($token) {

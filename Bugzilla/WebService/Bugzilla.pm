@@ -26,6 +26,12 @@ import SOAP::Data qw(type);
 
 use Time::Zone;
 
+# Basic info that is needed before logins
+use constant LOGIN_EXEMPT => {
+    timezone => 1,
+    version => 1,
+};
+
 sub version {
     return { version => type('string')->value(BUGZILLA_VERSION) };
 }

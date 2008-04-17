@@ -30,6 +30,12 @@ use Bugzilla::User;
 use Bugzilla::Util qw(trim);
 use Bugzilla::Token;
 
+# Don't need auth to login
+use constant LOGIN_EXEMPT => {
+    login => 1,
+    offer_account_by_email => 1,
+};
+
 ##############
 # User Login #
 ##############

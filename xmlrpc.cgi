@@ -35,12 +35,23 @@ my %hook_dispatch;
 Bugzilla::Hook::process('webservice', { dispatch => \%hook_dispatch });
 local @INC = (bz_locations()->{extensionsdir}, @INC);
 
+my $dispatch = {
+    'Bugzilla' => 'Bugzilla::WebService::Bugzilla',
+    'Bug'      => 'Bugzilla::WebService::Bug',
+    'User'     => 'Bugzilla::WebService::User',
+    'Product'  => 'Bugzilla::WebService::Product',
+    %hook_dispatch
+};
+
+# The on_action sub needs to be wrapped so that we can work out which
+# class to use; when the XMLRPC module calls it theres no indication
+# of which dispatch class will be handling it.
+# Note that using this to get code thats called before the actual routine
+# is a bit of a hack; its meant to be for modifying the SOAPAction
+# headers, which XMLRPC doesn't use; it relies on the XMLRPC modules
+# using SOAP::Lite internally....
+
 my $response = Bugzilla::WebService::XMLRPC::Transport::HTTP::CGI
-    ->dispatch_with({'Bugzilla' => 'Bugzilla::WebService::Bugzilla',
-                     'Bug'      => 'Bugzilla::WebService::Bug',
-                     'User'     => 'Bugzilla::WebService::User',
-                     'Product'  => 'Bugzilla::WebService::Product',
-                     %hook_dispatch
-                    })
-    ->on_action(\&Bugzilla::WebService::handle_login)
+    ->dispatch_with($dispatch)
+    ->on_action(sub { Bugzilla::WebService::handle_login($dispatch, @_) } )
     ->handle;

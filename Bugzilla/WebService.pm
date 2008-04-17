@@ -42,10 +42,24 @@ sub datetime_format {
 }
 
 sub handle_login {
-    my ($self, $module, $method) = @_;
-    my $exempt = LOGIN_EXEMPT->{$module};
-    return if $exempt && grep { $_ eq $method } @$exempt;
+    my ($classes, $action, $uri, $method) = @_;
+
+    my $class = $classes->{$uri};
+    eval "require $class";
+
+    return if $class->login_exempt($method);
     Bugzilla->login;
+
+    return;
+}
+
+# For some methods, we shouldn't call Bugzilla->login before we call them
+use constant LOGIN_EXEMPT => { };
+
+sub login_exempt {
+    my ($class, $method) = @_;
+
+    return $class->LOGIN_EXEMPT->{$method};
 }
 
 1;

@@ -328,9 +328,7 @@
                                   && bug.alias %]
         [% END %] 
         [%# *** Summary *** %]
-          [% IF bug.check_can_change_field('alias', 0, 1) %]
-            <label accesskey="s" for="short_desc"><u>S</u>ummary</label>:&nbsp;
-          [% END %]
+          <label accesskey="s" for="short_desc"><u>S</u>ummary</label>:&nbsp;
           [% PROCESS input inputname => "short_desc" size => "60" colspan => 2
                            maxlength => 255 spellcheck => "true" no_td => 1 %]
       </span>

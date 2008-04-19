@@ -874,15 +874,6 @@
     </tr>
     <tr>
       <td colspan="2">
-    [% show_bug_flags = 0 %]
-    [% FOREACH type = bug.flag_types %]
-      [% IF (type.flags && type.flags.size > 0) || (user.id && type.is_active) %]
-        [% show_bug_flags = 1 %]
-        [% LAST %]
-      [% END %]
-    [% END %]
-    [% IF show_bug_flags %]
-    
       [% IF user.id %]
         [% IF bug.flag_types.size > 0 %]
           [% PROCESS "flag/list.html.tmpl" flag_no_header = 1
@@ -900,7 +891,6 @@
           [% END %]
         [% END %]
       [% END %]         
-    [% END %]
       </td>
     </tr>
   [% END %]

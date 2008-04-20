@@ -383,26 +383,6 @@ sub bz_last_key {
                                  $table, $column);
 }
 
-sub bz_get_field_defs {
-    my ($self) = @_;
-
-    my $extra = "";
-    if (!Bugzilla->user->in_group(Bugzilla->params->{'timetrackinggroup'})) {
-        $extra = "AND name NOT IN ('estimated_time', 'remaining_time', " .
-                 "'work_time', 'percentage_complete', 'deadline')";
-    }
-
-    my @fields;
-    my $sth = $self->prepare("SELECT name, description FROM fielddefs
-                              WHERE obsolete = 0 $extra
-                              ORDER BY sortkey");
-    $sth->execute();
-    while (my $field_ref = $sth->fetchrow_hashref()) {
-        push(@fields, $field_ref);
-    }
-    return(@fields);
-}
-
 #####################################################################
 # Database Setup
 #####################################################################
@@ -1273,9 +1253,6 @@ Bugzilla::DB - Database access routines, using L<DBI>
   my $column = $dbh->bz_column_info($table, $column);
   my $index  = $dbh->bz_index_info($table, $index);
 
-  # General Information
-  my @fields    = $dbh->bz_get_field_defs();
-
 =head1 DESCRIPTION
 
 Functions in this module allows creation of a database handle to connect
@@ -1946,23 +1923,6 @@ needs to override this function.
 =item B<Returns>
 
 Last inserted ID (scalar)
-
-=back
-
-=item C<bz_get_field_defs>
-
-=over
-
-=item B<Description>
-
-Returns a list of all the "bug" fields in Bugzilla. The list
-contains hashes, with a C<name> key and a C<description> key.
-
-=item B<Params> (none)
-
-=item B<Returns>
-
-List of all the "bug" fields
 
 =back
 

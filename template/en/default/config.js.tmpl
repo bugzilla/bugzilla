@@ -113,7 +113,14 @@ var component_exceptions = new Array(
 var field = [
 [% FOREACH x = field %]
   { name:        '[% x.name FILTER js %]', 
-    description: '[% (field_descs.${x.name} OR x.description) FILTER js %]' },
+    description: '[% (field_descs.${x.name} OR x.description) FILTER js %]',
+    [%-# These values are meaningful for custom fields only. %]
+    [% IF x.custom %]
+    type:        '[% x.type FILTER js %]',
+    type_desc:   '[% field_types.${x.type} FILTER js %]',
+    enter_bug:   '[% x.enter_bug FILTER js %]',
+    [% END %]
+  },
 [% END %]
 ];
 

@@ -87,7 +87,12 @@ $vars->{'open_status'} = \@open_status;
 $vars->{'closed_status'} = \@closed_status;
 
 # Generate a list of fields that can be queried.
-$vars->{'field'} = [Bugzilla->dbh->bz_get_field_defs()];
+my @fields = @{Bugzilla::Field->match({obsolete => 0})};
+# Exclude fields the user cannot query.
+if (!Bugzilla->user->in_group(Bugzilla->params->{'timetrackinggroup'})) {
+    @fields = grep { $_->name !~ /^(estimated_time|remaining_time|work_time|percentage_complete|deadline)$/ } @fields;
+}
+$vars->{'field'} = \@fields;
 
 display_data($vars);
 

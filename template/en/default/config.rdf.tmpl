@@ -204,6 +204,12 @@
           <bz:field rdf:about="[% urlbase FILTER xml %]field.cgi?name=[% item.name FILTER url_quote %]">
             <bz:name>[% item.name FILTER html %]</bz:name>
             <bz:description>[% (field_descs.${item.name} OR item.description) FILTER html %]</bz:description>
+            [%-# These values are meaningful for custom fields only. %]
+            [% IF item.custom %]
+              <bz:type>[% item.type FILTER html %]</bz:type>
+              <bz:type_desc>[% field_types.${item.type} FILTER html %]</bz:type_desc>
+              <bz:enter_bug>[% item.enter_bug FILTER html %]</bz:enter_bug>
+            [% END %]
           </bz:field>
         </li>
       [% END %]

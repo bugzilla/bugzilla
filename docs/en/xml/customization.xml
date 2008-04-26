@@ -440,13 +440,11 @@
 
   <section id="cust-hooks">
     <title>The Bugzilla Extension Mechanism</title>
-        
+    
     <warning>
       <para>
-        Custom extensions require Template Toolkit version 2.12 or
-        above, or the application of a patch.  See <ulink
-        url="http://bugzilla.mozilla.org/show_bug.cgi?id=239112">bug
-        239112</ulink> for details.
+        Note that the below paths are inconsistent and confusing. They will
+        likely be changed in Bugzilla 4.0.
       </para>
     </warning>
        
@@ -590,7 +588,7 @@
 
     <para>
       The corresponding extension file for this hook is
-      <filename>BUGZILLA_ROOT/extensions/projman/template/en/hook/global/useful-links-edit.html.tmpl</filename>.
+      <filename>BUGZILLA_ROOT/extensions/projman/template/en/global/useful-links-edit.html.tmpl</filename>.
       You then create that template file and add the following constant:
     </para>
 

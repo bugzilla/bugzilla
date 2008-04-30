@@ -189,7 +189,6 @@ sub FILESYSTEM {
     # pointing at its default permissions.
     my %create_dirs = (
         $datadir                => $ws_dir_full_control,
-        "$datadir/mimedump-tmp" => $ws_dir_writeable,
         "$datadir/mining"       => $ws_dir_readable,
         "$datadir/duplicates"   => $ws_dir_readable,
         $attachdir              => $ws_dir_writeable,
@@ -202,9 +201,7 @@ sub FILESYSTEM {
 
     # The name of each file, pointing at its default permissions and
     # default contents.
-    my %create_files = (
-        "$datadir/mail"    => { perms => $ws_readable },
-    );
+    my %create_files = ();
 
     # Each standard stylesheet has an associated custom stylesheet that
     # we create. Also, we create placeholders for standard stylesheets

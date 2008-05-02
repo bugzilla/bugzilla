@@ -1853,11 +1853,11 @@ sub set_resolution {
     $self->set('resolution', $value);
     my $new_res = $self->resolution;
 
-    # MOVED has a special meaning and can only be used when
-    # really moving bugs to another installation.
-    ThrowCodeError('no_manual_moved') if ($new_res eq 'MOVED' && !$params->{moving});
-
     if ($new_res ne $old_res) {
+        # MOVED has a special meaning and can only be used when
+        # really moving bugs to another installation.
+        ThrowCodeError('no_manual_moved') if ($new_res eq 'MOVED' && !$params->{moving});
+
         # Clear the dup_id if we're leaving the dup resolution.
         if ($old_res eq 'DUPLICATE') {
             $self->_clear_dup_id();

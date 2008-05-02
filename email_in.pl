@@ -177,6 +177,10 @@ sub process_bug {
         $fields{'knob'} = 'duplicate';
     }
 
+    # Move @cc to @newcc as @cc is used by process_bug.cgi to remove
+    # users from the CC list when @removecc is set.
+    $fields{'newcc'} = delete $fields{'cc'} if $fields{'cc'};
+
     # Make it possible to remove CCs.
     if ($fields{'removecc'}) {
         $fields{'cc'} = [split(',', $fields{'removecc'})];
@@ -453,9 +457,9 @@ another email.
 
 =head3 Adding/Removing CCs
 
-You can't just add CCs to a bug by using the C<@cc> parameter like you
-can when you're filing a bug. To add CCs, you can specify them in a
-comma-separated list in C<@newcc>.
+To add CCs, you can specify them in a comma-separated list in C<@cc>.
+For backward compatibility, C<@newcc> can also be used. If both are
+present, C<@cc> takes precedence.
 
 To remove CCs, specify them as a comma-separated list in C<@removecc>.
 

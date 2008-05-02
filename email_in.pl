@@ -177,12 +177,6 @@ sub process_bug {
         $fields{'knob'} = 'duplicate';
     }
 
-    # Make sure we don't get prompted if we have to change the default
-    # groups.
-    if ($fields{'product'}) {
-        $fields{'addtonewgroup'} = 0;
-    }
-
     # Make it possible to remove CCs.
     if ($fields{'removecc'}) {
         $fields{'cc'} = [split(',', $fields{'removecc'})];

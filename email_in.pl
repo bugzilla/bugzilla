@@ -209,9 +209,10 @@ sub process_bug {
     }
 
     # Make sure we don't get prompted if we have to change the default
-    # groups.
+    # groups and if all other fields are already correctly set.
     if ($fields{'product'}) {
         $fields{'addtonewgroup'} = 0;
+        $fields{'confirm_product_change'} = 1;
     }
 
     foreach my $field (REQUIRED_PROCESS_FIELDS) {

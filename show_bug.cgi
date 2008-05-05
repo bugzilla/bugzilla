@@ -100,7 +100,7 @@ $vars->{'marks'} = \%marks;
 $vars->{'valid_keywords'} = [map($_->name, Bugzilla::Keyword->get_all)];
 $vars->{'use_keywords'} = 1 if Bugzilla::Keyword::keyword_count();
 
-my @bugids = map {$_->bug_id} @bugs;
+my @bugids = map {$_->bug_id} grep {!$_->error} @bugs;
 $vars->{'bugids'} = join(", ", @bugids);
 
 # Next bug in list (if there is one)

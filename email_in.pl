@@ -106,6 +106,16 @@ sub parse_mail {
             
             if ($line =~ /^@(\S+)\s*=\s*(.*)\s*/) {
                 $current_field = lc($1);
+                # It's illegal to pass the reporter field as you could
+                # override the "From:" field of the message and bypass
+                # authentication checks, such as PGP.
+                if ($current_field eq 'reporter') {
+                    # We reset the $current_field variable to something
+                    # post_bug and process_bug will ignore, in case the
+                    # attacker splits the reporter field on several lines.
+                    $current_field = 'illegal_field';
+                    next;
+                }
                 $fields{$current_field} = $2;
             }
             else {

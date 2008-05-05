@@ -48,7 +48,7 @@
 [% BLOCK bug_display %]
   <div align="center">
     <b>
-      <font size="+3">[% terms.Bug %] [%+ bug.bug_id %] - [% bug.short_desc FILTER html %]</font>
+      <font size="+3">[% terms.Bug %] [%+ bug.bug_id FILTER html %] - [% bug.short_desc FILTER html %]</font>
     </b>
   </div>
 
@@ -56,7 +56,7 @@
     <tr>
       <td>
         <b>[% terms.Bug %]#:</b>
-        <a href="show_bug.cgi?id=[% bug.bug_id %]">[% bug.bug_id %]</a>
+        <a href="show_bug.cgi?id=[% bug.bug_id FILTER html %]">[% bug.bug_id FILTER html %]</a>
         [% IF Param("usebugaliases") AND bug.alias %]  
           ([% bug.alias FILTER html %])
         [% END %]

@@ -349,7 +349,6 @@
 ],
 
 'bug/show-multiple.html.tmpl' => [
-  'bug.bug_id', 
   'bug.deadline',
 ],
 

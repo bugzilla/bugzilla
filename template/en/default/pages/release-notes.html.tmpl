@@ -20,7 +20,7 @@
 
 [% PROCESS global/variables.none.tmpl %]
 [% INCLUDE global/header.html.tmpl 
-  title = "$terms.Bugzilla 3.0.3 Release Notes" 
+  title = "$terms.Bugzilla 3.0.4 Release Notes" 
   style_urls = ['skins/standard/release-notes.css'] 
 %]
 
@@ -51,7 +51,7 @@
   Upgrade From An Older Version</a>. If you are upgrading from a release
   before 2.22, make sure to read the release notes for all the 
   <a href="#v30_previous">previous versions</a> in between your version 
-  and [% terms.Bugzilla %] 3.0.</p>
+  and this one.</p>
 
 <h2><a name="v30_point">Updates in this 3.0.x Release</a></h2>
 
@@ -60,6 +60,54 @@
   most important fixes in each release. If you want a detailed list of
   <em>everything</em> that's changed in each version, you should use our
   <a href="http://www.bugzilla.org/status/changes.html">Change Log Page</a>.</p>
+
+<h3>3.0.4</h3>
+
+<ul>
+  <li>Bugzilla administrators were not being correctly notified about new
+    releases.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=414726">[% terms.Bug %] 414726</a>)</li>
+
+  <li>There could be extra whitespace in email subject lines.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=411544">[% terms.Bug %] 411544</a>)</li>
+
+  <li>The priority, severity, OS, and platform fields were always required by
+    the <kbd>Bug.create</kbd> WebService function, even if they had
+    defaults specified.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=384009">[% terms.Bug %] 384009</a>)</li>
+
+  <li>Better threading of bugmail in some email clients.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=376453">[% terms.Bug %] 376453</a>)</li>
+
+  <li>There were many fixes to the Inbound Email Interface 
+    (<kbd>email_in.pl</kbd>).
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=92274">[% terms.Bug %] 92274</a>,
+     <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=377025">[% terms.Bug %] 377025</a>,
+     <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=412943">[% terms.Bug %] 412943</a>,
+     <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=413672">[% terms.Bug %] 413672</a>, and
+     <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=431721">[% terms.Bug %] 431721</a>)</li>
+
+  <li>checksetup.pl now handles UTF-8 conversion more reliably during upgrades.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=374951">[% terms.Bug %] 374951</a>)</li>
+
+  <li>Comments written in CJK languages are now correctly word-wrapped.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=388723">[% terms.Bug %] 388723</a>)</li>
+
+  <li>All emails will now be sent in the correct language, when the user
+    has chosen a language for emails.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=405946">[% terms.Bug %] 405946</a>)
+
+  <li>On Windows, temporary files created when uploading attachments are now
+    correctly deleted when the upload is complete.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=414002">[% terms.Bug %] 414002</a>)</li>
+
+  <li><kbd>checksetup.pl</kbd> now prints correct installation instructions
+    for Windows users using Perl 5.10.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=414430">[% terms.Bug %] 414430</a>)
+</ul>
+
+<p>See also the <a href="#v30_security">Security Advisory</a> section for
+  information about security issues fixed in this release.</p>
 
 <h3>3.0.3</h3>
 
@@ -611,6 +659,13 @@
 </ul>
 
 <h2><a name="v30_security"></a>Security Updates in This Release</h2>
+
+<h3>3.0.4</h3>
+
+<p>[% terms.Bugzilla %] 3.0.4 contains three security fixes.
+  For details, see the
+  <a href="http://www.bugzilla.org/security/2.20.5/">Security Advisory</a>.</p>
+</p>
 
 <h3>3.0.3</h3>
 

@@ -335,7 +335,6 @@
 ],
 
 'bug/show-multiple.html.tmpl' => [
-  'bug.bug_id', 
   'attachment.id', 
   'flag.status',
 ],

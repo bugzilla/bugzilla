@@ -53,7 +53,7 @@
 [% BLOCK bug_display %]
   <h1>
     [% terms.Bug %] 
-    <a href="show_bug.cgi?id=[% bug.bug_id %]">[% bug.bug_id %]</a>
+    <a href="show_bug.cgi?id=[% bug.bug_id FILTER html %]">[% bug.bug_id FILTER html %]</a>
     [% IF Param("usebugaliases") AND bug.alias AND NOT bug.error %]
       ([% bug.alias FILTER html %])
     [% END %]

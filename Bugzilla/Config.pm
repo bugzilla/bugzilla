@@ -53,9 +53,11 @@ use vars qw(@param_list);
 our %params;
 # Load in the param definitions
 sub _load_params {
-    foreach my $module (param_panels()) {
-        eval("require Bugzilla::Config::$module") || die $@;
-        my @new_param_list = "Bugzilla::Config::$module"->get_param_list();
+    my $panels = param_panels();
+    foreach my $panel (keys %$panels) {
+        my $module = $panels->{$panel};
+        eval("require $module") || die $@;
+        my @new_param_list = "$module"->get_param_list();
         foreach my $item (@new_param_list) {
             $params{$item->{'name'}} = $item;
         }
@@ -67,14 +69,16 @@ sub _load_params {
 # Subroutines go here
 
 sub param_panels {
-    my @param_panels;
+    my $param_panels = {};
     my $libpath = bz_locations()->{'libpath'};
     foreach my $item ((glob "$libpath/Bugzilla/Config/*.pm")) {
         $item =~ m#/([^/]+)\.pm$#;
         my $module = $1;
-        push(@param_panels, $module) unless $module eq 'Common';
+        $param_panels->{$module} = "Bugzilla::Config::$module" unless $module eq 'Common';
     }
-    return @param_panels;
+    # Now check for any hooked params
+    Bugzilla::Hook::process('config', { config => $param_panels });
+    return $param_panels;
 }
 
 sub SetParam {

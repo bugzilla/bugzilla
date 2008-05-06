@@ -29,6 +29,7 @@ use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Config qw(:admin);
 use Bugzilla::Config::Common;
+use Bugzilla::Hook;
 use Bugzilla::Util;
 use Bugzilla::Error;
 use Bugzilla::Token;
@@ -56,13 +57,15 @@ $current_panel = $1;
 
 my $current_module;
 my @panels = ();
-foreach my $panel (Bugzilla::Config::param_panels()) {
-    eval("require Bugzilla::Config::$panel") || die $@;
-    my @module_param_list = "Bugzilla::Config::${panel}"->get_param_list(1);
+my $param_panels = Bugzilla::Config::param_panels();
+foreach my $panel (keys %$param_panels) {
+    my $module = $param_panels->{$panel};
+    eval("require $module") || die $@;
+    my @module_param_list = "$module"->get_param_list(1);
     my $item = { name => lc($panel),
                  current => ($current_panel eq lc($panel)) ? 1 : 0,
                  param_list => \@module_param_list,
-                 sortkey => eval "\$Bugzilla::Config::${panel}::sortkey;"
+                 sortkey => eval "\$${module}::sortkey;"
                };
     push(@panels, $item);
     $current_module = $panel if ($current_panel eq lc($panel));
@@ -73,7 +76,7 @@ $vars->{panels} = \@panels;
 if ($action eq 'save' && $current_module) {
     check_token_data($token, 'edit_parameters');
     my @changes = ();
-    my @module_param_list = "Bugzilla::Config::${current_module}"->get_param_list(1);
+    my @module_param_list = "$param_panels->{$current_module}"->get_param_list(1);
 
     foreach my $i (@module_param_list) {
         my $name = $i->{'name'};

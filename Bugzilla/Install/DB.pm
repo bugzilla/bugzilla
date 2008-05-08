@@ -522,6 +522,10 @@ sub update_table_definitions {
     $dbh->bz_drop_index('longdescs', 'longdescs_thetext_idx');
     _populate_bugs_fulltext();
 
+    # 2008-01-18 xiaoou.wu@oracle.com - Bug 414292
+    $dbh->bz_alter_column('series', 'query',
+        { TYPE => 'MEDIUMTEXT', NOTNULL => 1 });
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################
@@ -2935,7 +2939,8 @@ sub _fix_attachment_modification_date {
 
 sub _change_text_types {
     my $dbh = Bugzilla->dbh; 
-    return if $dbh->bz_column_info('series', 'query')->{TYPE} eq 'LONGTEXT';
+    return if 
+        $dbh->bz_column_info('namedqueries', 'query')->{TYPE} eq 'LONGTEXT';
     _check_content_length('attachments', 'mimetype',    255, 'attach_id');
     _check_content_length('fielddefs',   'description', 255, 'id');
     _check_content_length('attachments', 'description', 255, 'attach_id');
@@ -2953,14 +2958,13 @@ sub _change_text_types {
         { TYPE => 'MEDIUMTEXT', NOTNULL => 1 }, '');
     $dbh->bz_alter_column('fielddefs', 'description',
         { TYPE => 'TINYTEXT', NOTNULL => 1 });
-    $dbh->bz_alter_column('namedqueries', 'query',
-        { TYPE => 'LONGTEXT', NOTNULL => 1 });
     $dbh->bz_alter_column('groups', 'description',
         { TYPE => 'MEDIUMTEXT', NOTNULL => 1 });
     $dbh->bz_alter_column('quips', 'quip',
         { TYPE => 'MEDIUMTEXT', NOTNULL => 1 });
-    $dbh->bz_alter_column('series', 'query',
+    $dbh->bz_alter_column('namedqueries', 'query',
         { TYPE => 'LONGTEXT', NOTNULL => 1 });
+
 } 
 
 sub _check_content_length {

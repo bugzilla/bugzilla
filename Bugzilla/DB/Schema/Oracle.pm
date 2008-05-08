@@ -180,6 +180,175 @@ sub _get_fk_name {
     return $fk_name;
 }
 
+sub get_alter_column_ddl {
+    my ($self, $table, $column, $new_def, $set_nulls_to) = @_;
+
+    my @statements;
+    my $old_def = $self->get_column_abstract($table, $column);
+    my $specific = $self->{db_specific};
+
+    # If the types have changed, we have to deal with that.
+    if (uc(trim($old_def->{TYPE})) ne uc(trim($new_def->{TYPE}))) {
+        push(@statements, $self->_get_alter_type_sql($table, $column, 
+                                                     $new_def, $old_def));
+    }
+
+    my $default = $new_def->{DEFAULT};
+    my $default_old = $old_def->{DEFAULT};
+    # This first condition prevents "uninitialized value" errors.
+    if (!defined $default && !defined $default_old) {
+        # Do Nothing
+    }
+    # If we went from having a default to not having one
+    elsif (!defined $default && defined $default_old) {
+        push(@statements, "ALTER TABLE $table MODIFY $column"
+                        . " DEFAULT NULL");
+    }
+    # If we went from no default to a default, or we changed the default.
+    elsif ( (defined $default && !defined $default_old) || 
+            ($default ne $default_old) ) 
+    {
+        $default = $specific->{$default} if exists $specific->{$default};
+        push(@statements, "ALTER TABLE $table MODIFY $column "
+                         . " DEFAULT $default");
+    }
+
+    # If we went from NULL to NOT NULL.
+    if (!$old_def->{NOTNULL} && $new_def->{NOTNULL}) {
+        my $setdefault;
+        # Handle any fields that were NULL before, if we have a default,
+        $setdefault = $new_def->{DEFAULT} if exists $new_def->{DEFAULT};
+        # But if we have a set_nulls_to, that overrides the DEFAULT 
+        # (although nobody would usually specify both a default and 
+        # a set_nulls_to.)
+        $setdefault = $set_nulls_to if defined $set_nulls_to;
+        if (defined $setdefault) {
+            push(@statements, "UPDATE $table SET $column = $setdefault"
+                            . "  WHERE $column IS NULL");
+        }
+        push(@statements, "ALTER TABLE $table MODIFY $column"
+                        . " NOT NULL");
+        push (@statements, _get_notnull_trigger_ddl($table, $column))
+                                   if $old_def->{TYPE} =~ /varchar|text/i
+                                     && $new_def->{TYPE} =~ /varchar|text/i;
+    }
+    # If we went from NOT NULL to NULL
+    elsif ($old_def->{NOTNULL} && !$new_def->{NOTNULL}) {
+        push(@statements, "ALTER TABLE $table MODIFY $column"
+                        . " NULL");
+        push(@statements, "DROP TRIGGER ${table}_${column}")
+                           if $new_def->{TYPE} =~ /varchar|text/i 
+                             && $old_def->{TYPE} =~ /varchar|text/i;
+    }
+
+    # If we went from not being a PRIMARY KEY to being a PRIMARY KEY.
+    if (!$old_def->{PRIMARYKEY} && $new_def->{PRIMARYKEY}) {
+        push(@statements, "ALTER TABLE $table ADD PRIMARY KEY ($column)");
+    }
+    # If we went from being a PK to not being a PK
+    elsif ( $old_def->{PRIMARYKEY} && !$new_def->{PRIMARYKEY} ) {
+        push(@statements, "ALTER TABLE $table DROP PRIMARY KEY");
+    }
+
+    return @statements;
+}
+
+sub _get_alter_type_sql {
+    my ($self, $table, $column, $new_def, $old_def) = @_;
+    my @statements;
+
+    my $type = $new_def->{TYPE};
+    $type = $self->{db_specific}->{$type} 
+        if exists $self->{db_specific}->{$type};
+
+    if ($type =~ /serial/i && $old_def->{TYPE} !~ /serial/i) {
+        die("You cannot specify a DEFAULT on a SERIAL-type column.") 
+            if $new_def->{DEFAULT};
+    }
+
+    if ( ($old_def->{TYPE} =~ /LONGTEXT/i && $new_def->{TYPE} !~ /LONGTEXT/i) 
+         || ($old_def->{TYPE} !~ /LONGTEXT/i && $new_def->{TYPE} =~ /LONGTEXT/i)
+       ) {
+        # LONG to VARCHAR or VARCHAR to LONG is not allowed in Oracle, 
+        # just a way to work around.
+        # Determine whether column_temp is already exist.
+        my $dbh=Bugzilla->dbh;
+        my $column_exist = $dbh->selectcol_arrayref(
+                          "SELECT CNAME FROM COL WHERE TNAME = UPPER(?) AND 
+                             CNAME = UPPER(?)", undef,$table,$column . "_temp");
+        if(!@$column_exist) {
+        push(@statements, 
+            "ALTER TABLE $table ADD ${column}_temp $type");  
+        }
+        push(@statements, "UPDATE $table SET ${column}_temp = $column");
+        push(@statements, "COMMIT");
+        push(@statements, "ALTER TABLE $table DROP COLUMN $column");
+        push(@statements, 
+            "ALTER TABLE $table RENAME COLUMN ${column}_temp TO $column");
+    } else {  
+        push(@statements, "ALTER TABLE $table MODIFY $column $type");
+    }
+
+    if ($new_def->{TYPE} =~ /serial/i && $old_def->{TYPE} !~ /serial/i) {
+         push(@statements, _get_create_seq_ddl($table, $column));
+    }
+
+    # If this column is no longer SERIAL, we need to drop the sequence
+    # that went along with it.
+    if ($old_def->{TYPE} =~ /serial/i && $new_def->{TYPE} !~ /serial/i) {
+        push(@statements, "DROP SEQUENCE ${table}_${column}_SEQ");
+        push(@statements, "DROP TRIGGER ${table}_${column}_TR");
+    }
+    
+    # If this column is changed to type TEXT/VARCHAR, we need to deal with
+    # empty string.
+    if ( $old_def->{TYPE} !~ /varchar|text/i 
+            && $new_def->{TYPE} =~ /varchar|text/i 
+            && $new_def->{NOTNULL} )
+    {
+             push (@statements, _get_notnull_trigger_ddl($table, $column));
+    } 
+    # If this column is no longer TEXT/VARCHAR, we need to drop the trigger
+    # that went along with it.
+    if ( $old_def->{TYPE} !~ /varchar|text/i
+            && $old_def->{NOTNULL}
+            && $new_def->{TYPE} !~ /varchar|text/i )
+    {
+        push(@statements, "DROP TRIGGER ${table}_${column}");
+    } 
+    return @statements;
+}
+
+sub get_rename_column_ddl {
+    my ($self, $table, $old_name, $new_name) = @_;
+    if (lc($old_name) eq lc($new_name)) {
+        # if the only change is a case change, return an empty list.
+        return ();
+    }
+    my @sql = ("ALTER TABLE $table RENAME COLUMN $old_name TO $new_name");
+    my $def = $self->get_column_abstract($table, $old_name);
+    if ($def->{TYPE} =~ /SERIAL/i) {
+        # We have to rename the series also, and fix the default of the series.
+        push(@sql, "RENAME ${table}_${old_name}_SEQ TO 
+                      ${table}_${new_name}_seq");
+        my $serial_sql =
+                       "CREATE OR REPLACE TRIGGER ${table}_${new_name}_TR "
+                     . " BEFORE INSERT ON ${table} "
+                     . " FOR EACH ROW "
+                     . " BEGIN "
+                     . "   SELECT ${table}_${new_name}_SEQ.NEXTVAL "
+                     . "   INTO :NEW.${new_name} FROM DUAL; "
+                     . " END;";
+        push(@sql, $serial_sql);
+        push(@sql, "DROP TRIGGER ${table}_${old_name}_TR");
+    }
+    if ($def->{TYPE} =~ /varchar|text/i && $def->{NOTNULL} ) {
+        push(@sql, _get_notnull_trigger_ddl($table,$new_name));
+        push(@sql, "DROP TRIGGER ${table}_${old_name}");
+    }
+    return @sql;
+}
+
 sub _get_notnull_trigger_ddl {
       my ($table, $column) = @_;
 

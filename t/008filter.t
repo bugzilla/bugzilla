@@ -190,7 +190,7 @@ sub directive_ok {
     return 1 if $directive =~ /^[0-9]+$/;
 
     # Simple assignments
-    return 1 if $directive =~ /^[\w\.\$]+\s+=\s+/;
+    return 1 if $directive =~ /^[\w\.\$\{\}]+\s+=\s+/;
 
     # Conditional literals with either sort of quotes 
     # There must be no $ in the string for it to be a literal

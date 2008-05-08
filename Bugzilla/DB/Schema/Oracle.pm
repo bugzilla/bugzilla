@@ -105,7 +105,7 @@ sub get_table_ddl {
 sub _get_create_index_ddl {
 
     my ($self, $table_name, $index_name, $index_fields, $index_type) = @_;
-    $index_name = "idx_" . substr(md5_hex($index_name),0,20);
+    $index_name = "idx_" . $self->_hash_index_name($index_name);
     if ($index_type eq 'FULLTEXT') {
         my $sql = "CREATE INDEX $index_name ON $table_name (" 
                   . join(',',@$index_fields)
@@ -117,7 +117,19 @@ sub _get_create_index_ddl {
     return($self->SUPER::_get_create_index_ddl($table_name, $index_name, 
                                                $index_fields, $index_type));
 
-} #eosub--_get_create_index_ddl
+}
+
+sub get_drop_index_ddl {
+    my $self = shift;
+    my ($table, $name) = @_;
+
+    $name = 'idx_' . $self->_hash_index_name($name);
+    return $self->SUPER::get_drop_index_ddl($table, $name);
+}
+
+sub _hash_index_name {
+    return substr(md5_hex($_[1]),0,20);
+}
 
 # Oracle supports the use of FOREIGN KEY integrity constraints 
 # to define the referential integrity actions, including:
@@ -175,7 +187,7 @@ sub _get_fk_name {
     my $to_table  = $references->{TABLE};
     my $to_column = $references->{COLUMN};
     my $fk_name   = "${table}_${column}_${to_table}_${to_column}";
-    $fk_name      = "fk_" . substr(md5_hex($fk_name),0,20);
+    $fk_name      = "fk_" . $self->_hash_index_name($fk_name);
     
     return $fk_name;
 }

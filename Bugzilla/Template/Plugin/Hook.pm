@@ -26,7 +26,7 @@ package Bugzilla::Template::Plugin::Hook;
 use strict;
 
 use Bugzilla::Constants;
-use Bugzilla::Install::Util;
+use Bugzilla::Install::Util qw(include_languages);
 use Bugzilla::Template;
 use Bugzilla::Util;
 use Bugzilla::Error;
@@ -66,7 +66,7 @@ sub process {
     # munge the filename to create the extension hook filename:
     my $extensiontemplate = $subpath.'/'.$templatename.'-'.$hook_name.'.'.$type.'.tmpl';
     my @extensions = glob(bz_locations()->{'extensionsdir'} . "/*");
-    my @usedlanguages = getLanguages();
+    my @usedlanguages = include_languages({use_languages => Bugzilla->languages});
     foreach my $extension (@extensions) {
         foreach my $language (@usedlanguages) {
             my $file = $extension.'/template/'.$language.'/'.$extensiontemplate;
@@ -102,27 +102,6 @@ sub process {
         $output .= $self->{_CONTEXT}->process($hook);
     }
     return $output;
-}
-
-# get a list of languages we accept so we can find the hook 
-# that corresponds to our desired languages:
-sub getLanguages() {
-    my $languages = join(',', @{Bugzilla->languages});
-    if (not ($languages =~ /,/)) { # only one language
-        return $languages;
-    }
-    # XXX This should probably be re-worked so that we don't have to 
-    # reach into the internals of another module to get languages.
-    my @languages = Bugzilla::Install::Util::_sort_accept_language($languages);
-    my @accept_language = Bugzilla::Install::Util::_sort_accept_language(
-        $ENV{'HTTP_ACCEPT_LANGUAGE'} || "" );
-    my @usedlanguages;
-    foreach my $lang (@accept_language) {
-        if(my @found = grep /^\Q$lang\E(-.+)?$/i, @languages) {
-            push (@usedlanguages, @found);
-        }
-    }
-    return @usedlanguages;
 }
 
 1;

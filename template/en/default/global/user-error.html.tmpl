@@ -587,7 +587,7 @@
     <code>[% name FILTER html %]
           [% IF status == "X" %][% old_status FILTER html %][% END %]</code>.
 
-    Only a sufficiently empowered user can make this change.
+    Only a user with the required permissions may make this change.
 
   [% ELSIF error == "format_not_found" %]
     [% title = "Format Not Found" %]
@@ -710,14 +710,14 @@
       [% IF privs < 2 %] or reporter [% END %]
       of the [% terms.bug %], or
     [% END %]
-    a sufficiently empowered user may change that field.
+    a user with the required permissions may change that field.
 
   [% ELSIF error == "illegal_change_deps" %]
     [% title = "Not allowed" %]
     You tried to change the 
     <strong>[% field_descs.$field FILTER html %]</strong> field 
-    but only a user empowered to edit 
-    both involved [% terms.bugs %] may change that field.
+    but only a user allowed to edit 
+    both related [% terms.bugs %] may change that field.
 
   [% ELSIF error == "illegal_changed_in_last_x_days" %]
     [% title = "Your Search Makes No Sense" %]
@@ -951,7 +951,7 @@
 
   [% ELSIF error == "milestone_required" %]
     [% title = "Milestone Required" %]
-    You must determine a target milestone for [% terms.bug %] 
+    You must select a target milestone for [% terms.bug %]
     [%+ bug.id FILTER html %]
     if you are going to accept it.  Part of accepting 
     [%+ terms.abug %] is giving an estimate of when it will be fixed.
@@ -1303,9 +1303,9 @@
     You must enter a name for the new product.
   
   [% ELSIF error == "product_disabled" %]
-    [% title = BLOCK %]Product closed for [% terms.Bugs %] Entry[% END %]
+    [% title = BLOCK %]Product closed for [% terms.Bug %] Entry[% END %]
     [% admindocslinks = {'products.html' => 'Administering products'} %]
-    Sorry, entering [% terms.bugs %] into the
+    Sorry, entering [% terms.abug %] into the
     product <em>[% product.name FILTER html %]</em> has been disabled.
 
   [% ELSIF error == "product_edit_denied" %]

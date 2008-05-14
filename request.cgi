@@ -76,6 +76,15 @@ else {
     $vars->{'products'} = $user->get_selectable_products;
     $vars->{'types'} = \@types;
     $vars->{'requests'} = {};
+
+    my %components;
+    foreach my $prod (@{$vars->{'products'}}) {
+        foreach my $comp (@{$prod->components}) {
+            $components{$comp->name} = 1;
+        }
+    }
+    $vars->{'components'} = [ sort { $a cmp $b } keys %components ];
+
     $template->process('request/queue.html.tmpl', $vars)
       || ThrowTemplateError($template->error());
 }
@@ -306,6 +315,14 @@ sub queue {
     $vars->{'group_field'} = $form_group;
     $vars->{'requests'} = \@requests;
     $vars->{'types'} = \@types;
+
+    my %components;
+    foreach my $prod (@{$vars->{'products'}}) {
+        foreach my $comp (@{$prod->components}) {
+            $components{$comp->name} = 1;
+        }
+    }
+    $vars->{'components'} = [ sort { $a cmp $b } keys %components ];
 
     # Generate and return the UI (HTML page) from the appropriate template.
     $template->process("request/queue.html.tmpl", $vars)

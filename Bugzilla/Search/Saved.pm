@@ -55,7 +55,7 @@ use constant VALIDATORS => {
     link_in_footer => \&_check_link_in_footer,
 };
 
-use constant UPDATE_COLUMNS => qw(query query_type);
+use constant UPDATE_COLUMNS => qw(name query query_type);
 
 ##############
 # Validators #
@@ -79,6 +79,8 @@ sub _check_query {
     $query || ThrowUserError("buglist_parameters_required");
     my $cgi = new Bugzilla::CGI($query);
     $cgi->clean_search_url;
+    # Don't store the query name as a parameter.
+    $cgi->delete('known_name');
     return $cgi->query_string;
 }
 
@@ -188,6 +190,7 @@ sub user {
 # Mutators #
 ############
 
+sub set_name       { $_[0]->set('name',       $_[1]); }
 sub set_url        { $_[0]->set('query',      $_[1]); }
 sub set_query_type { $_[0]->set('query_type', $_[1]); }
 

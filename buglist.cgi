@@ -301,9 +301,10 @@ sub InsertNamedQuery {
     my $dbh = Bugzilla->dbh;
 
     $query_name = trim($query_name);
-    my ($query_obj) = grep {$_->name eq $query_name} @{Bugzilla->user->queries};
+    my ($query_obj) = grep {lc($_->name) eq lc($query_name)} @{Bugzilla->user->queries};
 
     if ($query_obj) {
+        $query_obj->set_name($query_name);
         $query_obj->set_url($query);
         $query_obj->set_query_type($query_type);
         $query_obj->update();

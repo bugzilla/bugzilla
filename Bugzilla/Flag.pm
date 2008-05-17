@@ -228,11 +228,11 @@ sub match {
     # If the caller specified only bug or attachment flags,
     # limit the query to those kinds of flags.
     if (my $type = delete $criteria->{'target_type'}) {
-        if ($type eq 'attachment') {
-            $criteria->{'attach_id'} = NOT_NULL;
-        }
-        else {
+        if ($type eq 'bug') {
             $criteria->{'attach_id'} = IS_NULL;
+        }
+        elsif (!defined $criteria->{'attach_id'}) {
+            $criteria->{'attach_id'} = NOT_NULL;
         }
     }
     # Flag->snapshot() calls Flag->match() with bug_id and attach_id

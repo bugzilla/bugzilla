@@ -36,12 +36,16 @@ sub version {
     return { version => type('string')->value(BUGZILLA_VERSION) };
 }
 
-sub plugins {
-    my $plugins = Bugzilla::Hook::enabled_plugins();
-    foreach my $name (keys %$plugins) {
-        $plugins->{$name} = type('string')->value($plugins->{$name});
+sub extensions {
+    my $extensions = Bugzilla::Hook::enabled_plugins();
+    foreach my $name (keys %$extensions) {
+        my $info = $extensions->{$name};
+        foreach my $data (keys %$info)
+        {
+            $extensions->{$name}->{$data} = type('string')->value($info->{$data});
+        }
     }
-    return { plugins => $plugins };
+    return { extensions => $extensions };
 }
 
 sub timezone {
@@ -89,22 +93,23 @@ string.
 
 =back
 
-=item C<plugins> B<EXPERIMENTAL>
+=item C<extensions> B<EXPERIMENTAL>
 
 =over
 
 =item B<Description>
 
-Gets information about the plugins that are currently installed and enabled
+Gets information about the extensions that are currently installed and enabled
 in this Bugzilla.
 
 =item B<Params> (none)
 
 =item B<Returns>
 
-A hash with a single item, C<plugins>. This points to a hash. I<That> hash
-contains the names of plugins as keys, and the versions of the plugin as
-values.
+A hash with a single item, C<extesions>. This points to a hash. I<That> hash
+contains the names of extensions as keys, and information about the extension
+as values. One of the values that must be returned is the 'version' of the
+extension
 
 =back
 

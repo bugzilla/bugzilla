@@ -69,7 +69,7 @@ sub enabled_plugins {
         next if -e "$extension/disabled";
         # Allow extensions to load their own libraries.
         local @INC = ("$extension/lib", @INC);
-        $enabled{$extname} = do("$extension/version.pl");
+        $enabled{$extname} = do("$extension/info.pl");
         ThrowCodeError('extension_invalid',
                 { errstr => $@, name => 'version',
                   extension => $extension }) if $@;
@@ -125,9 +125,12 @@ hook to do anything, you have to modify these variables.
 
 =head2 Versioning Extensions
 
-Every extension must have a file in its root called F<version.pl>.
-This file should return a version number when called with C<do>.
-This represents the current version of this extension.
+Every extension must have a file in its root called F<info.pl>.
+This file must return a hash when called with C<do>.
+The hash must contain a 'version' key with the current version of the
+extension. Extension authors can also add any extra infomration to this hash if
+required, by adding a new key beginning with x_ which will not be used the
+core Bugzilla code. 
 
 =head1 SUBROUTINES
 

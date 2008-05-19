@@ -54,6 +54,7 @@ my $legal_field_values;
 my $add_comment;
 my $private;
 my $work_time;
+my $fetch_extension_info = 0;
 
 GetOptions('help|h|?'       => \$help,
            'uri=s'          => \$Bugzilla_uri,
@@ -66,7 +67,8 @@ GetOptions('help|h|?'       => \$help,
            'field:s'        => \$legal_field_values,
            'comment:s'      => \$add_comment,
            'private:i'      => \$private,
-           'worktime:f'     => \$work_time
+           'worktime:f'     => \$work_time,
+           'extension_info'    => \$fetch_extension_info
           ) or pod2usage({'-verbose' => 0, '-exitval' => 1});
 
 =head1 OPTIONS
@@ -133,6 +135,10 @@ An optional non-zero value to specify B<--comment> as private.
 
 An optional double precision number specifying the work time for B<--comment>.
 
+=item --extension_info
+
+If specified on the command line, the script returns the information about the
+extensions that are installed.
 
 =back
 
@@ -192,6 +198,25 @@ To make sure that you understand the dates and times that Bugzilla returns to yo
 $soapresult = $proxy->call('Bugzilla.timezone');
 _die_on_fault($soapresult);
 print 'Bugzilla\'s timezone is ' . $soapresult->result()->{timezone} . ".\n";
+
+=head2 Getting Extension Information
+
+Returns all the information any extensions have decided to provide to the webservice.
+
+=cut
+
+if ($fetch_extension_info) {
+    $soapresult = $proxy->call('Bugzilla.extensions');
+    _die_on_fault($soapresult);
+    my $extensions = $soapresult->result()->{extensions};
+    foreach my $extensionname (keys(%$extensions)) {
+        print "Extensionn '$extensionname' information\n";
+        my $extension = $extensions->{$extensionname};
+        foreach my $data (keys(%$extension)) {
+            print '  ' . $data . ' => ' . $extension->{$data} . "\n";
+        }
+    }
+}
 
 =head2 Logging In and Out
 

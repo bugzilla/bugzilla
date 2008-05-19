@@ -635,7 +635,7 @@
                 port) of your LDAP server. If no port is specified, it assumes
                 the default LDAP port of 389.
                 </para>
-                <para>Ex. <quote>ldap.company.com</quote>
+                <para>For example: <quote>ldap.company.com</quote>
                  or <quote>ldap.company.com:3268</quote>
                 </para>
                 <para>You can also specify a LDAP URI, so as to use other
@@ -643,9 +643,16 @@
                 the URI, the default is either 389 or 636 for 'LDAP' and 'LDAPS'
                 schemes respectively.
                 </para>
-                <para>Ex. <quote>ldap://ldap.company.com</quote>,
-                <quote>ldaps://ldap.company.com</quote> or
-                <quote>ldapi://%2fvar%2flib%2fldap_sock</quote>
+                <tip>
+                  <para>
+                    In order to use SSL with LDAP, specify a URI with "ldaps://".
+                    This will force the use of SSL over port 636.
+                  </para>
+                </tip>
+                <para>For example, normal LDAP: 
+                <quote>ldap://ldap.company.com</quote>, LDAP over SSL:
+                <quote>ldaps://ldap.company.com</quote> or LDAP over a UNIX 
+                domain socket <quote>ldapi://%2fvar%2flib%2fldap_sock</quote>.
                 </para>
                </listitem>
              </varlistentry>

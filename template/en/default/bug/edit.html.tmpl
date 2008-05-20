@@ -151,6 +151,10 @@
       <td id="bz_show_bug_column_1" class="bz_show_bug_column">     
         <table>
           [%# *** ID, product, component, status, resolution, Hardware, and  OS *** %]
+          [% PROCESS section_status %]
+          
+          [% PROCESS section_spacer %]
+          
           [% PROCESS section_details1 %]
           
           [% PROCESS section_spacer %]
@@ -395,22 +399,26 @@
 [% END %]
 
 [%############################################################################%]
+[%# Block for the status section                                             #%]
+[%############################################################################%]
+
+[% BLOCK section_status %]
+  <tr>
+    <td class="field_label">
+      <b><a href="page.cgi?id=fields.html#status">Status</a></b>:
+    </td>
+    <td id="bz_field_status">
+      [% PROCESS bug/knob.html.tmpl %]
+    </td>
+  </tr>
+[% END %]
+
+[%############################################################################%]
 [%# Block for the second table in the "Details" section                      #%]
 [%############################################################################%]
 
 [% BLOCK section_details2 %]
 
-[%############%]
-[%#  STATUS  #%]
-[%############%]
-    <tr>
-      <td class="field_label">
-        <b><a href="page.cgi?id=fields.html#status">Status</a></b>:
-      </td>
-      <td id="bz_field_status">
-          [% PROCESS bug/knob.html.tmpl %]
-      </td>
-    </tr>
  [%###############################################################%]
  [%# Importance (priority, severity and votes) #%]
  [%###############################################################%]

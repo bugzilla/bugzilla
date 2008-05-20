@@ -261,7 +261,7 @@ function showHideStatusItems(e, dupArrayInfo) {
             YAHOO.util.Dom.setStyle('resolution_settings', 'display', 'inline');
             YAHOO.util.Dom.setStyle('resolution_settings_warning', 'display', 'block');  
         }
-        else if (close_status_array.indexOf(el.value) > -1) {
+        else if ( bz_isValueInArray(close_status_array, el.value) ) {
             // hide duplicate and show resolution
             YAHOO.util.Dom.setStyle('resolution_settings', 'display', 'inline');
             YAHOO.util.Dom.setStyle('resolution_settings_warning', 'display', 'block');
@@ -273,7 +273,7 @@ function showDuplicateItem(e) {
     var resolution = document.getElementById('resolution');
     var bug_status = document.getElementById('bug_status');
     if (resolution) {
-        if (resolution.value == 'DUPLICATE' && close_status_array.indexOf(bug_status.value) > -1 ) {
+        if (resolution.value == 'DUPLICATE' && bz_isValueInArray( close_status_array, bug_status.value) ) {
             // hide resolution show duplicate
             YAHOO.util.Dom.setStyle('duplicate_settings', 'display', 'inline');
             YAHOO.util.Dom.setStyle('dup_id_discoverable', 'display', 'none');

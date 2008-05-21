@@ -304,13 +304,21 @@ use constant ABSTRACT_SCHEMA => {
 
     bugs_activity => {
         FIELDS => [
-            bug_id    => {TYPE => 'INT3', NOTNULL => 1},
-            attach_id => {TYPE => 'INT3'},
+            bug_id    => {TYPE => 'INT3', NOTNULL => 1,
+                          REFERENCES    =>  {TABLE  =>  'bugs',
+                                             COLUMN =>  'bug_id',
+                                             DELETE => 'CASCADE'}},
+            attach_id => {TYPE => 'INT3',
+                          REFERENCES    =>  {TABLE  =>  'attachments',
+                                            COLUMN  =>  'attach_id',
+                                            DELETE => 'CASCADE'}},
             who       => {TYPE => 'INT3', NOTNULL => 1,
                           REFERENCES => {TABLE  => 'profiles',
                                          COLUMN => 'userid'}},
             bug_when  => {TYPE => 'DATETIME', NOTNULL => 1},
-            fieldid   => {TYPE => 'INT3', NOTNULL => 1},
+            fieldid   => {TYPE => 'INT3', NOTNULL => 1,
+                          REFERENCES    =>  {TABLE  =>  'fielddefs',
+                                             COLUMN =>  'id'}},
             added     => {TYPE => 'TINYTEXT'},
             removed   => {TYPE => 'TINYTEXT'},
         ],
@@ -324,7 +332,10 @@ use constant ABSTRACT_SCHEMA => {
 
     cc => {
         FIELDS => [
-            bug_id => {TYPE => 'INT3', NOTNULL => 1},
+            bug_id => {TYPE => 'INT3', NOTNULL => 1,
+                       REFERENCES => {TABLE  => 'bugs',
+                                      COLUMN => 'bug_id',
+                                      DELETE => 'CASCADE'}},
             who    => {TYPE => 'INT3', NOTNULL => 1,
                        REFERENCES => {TABLE  => 'profiles',
                                       COLUMN => 'userid',
@@ -364,8 +375,14 @@ use constant ABSTRACT_SCHEMA => {
 
     dependencies => {
         FIELDS => [
-            blocked   => {TYPE => 'INT3', NOTNULL => 1},
-            dependson => {TYPE => 'INT3', NOTNULL => 1},
+            blocked   => {TYPE => 'INT3', NOTNULL => 1,
+                          REFERENCES    =>  {TABLE  =>   'bugs',
+                                            COLUMN  =>  'bug_id',
+                                            DELETE => 'CASCADE'}},
+            dependson => {TYPE => 'INT3', NOTNULL => 1,
+                          REFERENCES    =>  {TABLE  =>   'bugs',
+                                            COLUMN  =>  'bug_id',
+                                            DELETE => 'CASCADE'}},
         ],
         INDEXES => [
             dependencies_blocked_idx   => ['blocked'],
@@ -379,7 +396,10 @@ use constant ABSTRACT_SCHEMA => {
                            REFERENCES => {TABLE  => 'profiles',
                                           COLUMN => 'userid',
                                           DELETE => 'CASCADE'}},
-            bug_id     => {TYPE => 'INT3', NOTNULL => 1},
+            bug_id     => {TYPE => 'INT3', NOTNULL => 1,
+                          REFERENCES  => {TABLE  =>  'bugs',
+                                          COLUMN =>  'bug_id',
+                                          DELETE => 'CASCADE'}},
             vote_count => {TYPE => 'INT2', NOTNULL => 1},
         ],
         INDEXES => [
@@ -392,7 +412,10 @@ use constant ABSTRACT_SCHEMA => {
         FIELDS => [
             attach_id    => {TYPE => 'MEDIUMSERIAL', NOTNULL => 1,
                              PRIMARYKEY => 1},
-            bug_id       => {TYPE => 'INT3', NOTNULL => 1},
+            bug_id       => {TYPE => 'INT3', NOTNULL => 1,
+                             REFERENCES    =>  {TABLE  => 'bugs',
+                                                COLUMN => 'bug_id',
+                                                DELETE => 'CASCADE'}},
             creation_ts  => {TYPE => 'DATETIME', NOTNULL => 1},
             modification_time => {TYPE => 'DATETIME', NOTNULL => 1},
             description  => {TYPE => 'TINYTEXT', NOTNULL => 1},
@@ -419,16 +442,25 @@ use constant ABSTRACT_SCHEMA => {
     attach_data => {
         FIELDS => [
             id      => {TYPE => 'INT3', NOTNULL => 1,
-                        PRIMARYKEY => 1},
+                        PRIMARYKEY => 1,
+                        REFERENCES  =>  {TABLE  => 'attachments',
+                                         COLUMN => 'attach_id',
+                                         DELETE => 'CASCADE'}},
             thedata => {TYPE => 'LONGBLOB', NOTNULL => 1},
         ],
     },
 
     duplicates => {
         FIELDS => [
-            dupe_of => {TYPE => 'INT3', NOTNULL => 1},
+            dupe_of => {TYPE => 'INT3', NOTNULL => 1,
+                        REFERENCES => {TABLE  =>  'bugs',
+                                       COLUMN =>  'bug_id',
+                                       DELETE =>  'CASCADE'}},
             dupe    => {TYPE => 'INT3', NOTNULL => 1,
-                       PRIMARYKEY => 1},
+                        PRIMARYKEY => 1,
+                        REFERENCES => {TABLE  =>  'bugs',
+                                       COLUMN =>  'bug_id',
+                                       DELETE =>  'CASCADE'}},
         ],
     },
 
@@ -468,14 +500,27 @@ use constant ABSTRACT_SCHEMA => {
         FIELDS => [
             id                => {TYPE => 'MEDIUMSERIAL', NOTNULL => 1,
                                   PRIMARYKEY => 1},
-            type_id           => {TYPE => 'INT2', NOTNULL => 1},
+            type_id           => {TYPE => 'INT2', NOTNULL => 1,
+                                  REFERENCES => {TABLE  => 'flagtypes',
+                                                 COLUMN => 'id',
+                                                 DELETE => 'CASCADE'}},
             status            => {TYPE => 'char(1)', NOTNULL => 1},
-            bug_id            => {TYPE => 'INT3', NOTNULL => 1},
-            attach_id         => {TYPE => 'INT3'},
+            bug_id            => {TYPE => 'INT3', NOTNULL => 1,
+                                  REFERENCES => {TABLE  => 'bugs',
+                                                 COLUMN => 'bug_id',
+                                                 DELETE => 'CASCADE'}},
+            attach_id         => {TYPE => 'INT3',
+                                  REFERENCES => {TABLE  => 'attachments',
+                                                 COLUMN => 'attach_id',
+                                                 DELETE => 'CASCADE'}},
             creation_date     => {TYPE => 'DATETIME', NOTNULL => 1},
             modification_date => {TYPE => 'DATETIME'},
-            setter_id         => {TYPE => 'INT3'},
-            requestee_id      => {TYPE => 'INT3'},
+            setter_id         => {TYPE => 'INT3',
+                                  REFERENCES => {TABLE  => 'profiles',
+                                                 COLUMN => 'userid'}},
+            requestee_id      => {TYPE => 'INT3',
+                                  REFERENCES => {TABLE  => 'profiles',
+                                                 COLUMN => 'userid'}},
         ],
         INDEXES => [
             flags_bug_id_idx       => [qw(bug_id attach_id)],
@@ -505,8 +550,12 @@ use constant ABSTRACT_SCHEMA => {
                                  DEFAULT => 'FALSE'},
             sortkey          => {TYPE => 'INT2', NOTNULL => 1,
                                  DEFAULT => '0'},
-            grant_group_id   => {TYPE => 'INT3'},
-            request_group_id => {TYPE => 'INT3'},
+            grant_group_id   => {TYPE => 'INT3',
+                                 REFERENCES => {TABLE  => 'groups',
+                                                 COLUMN => 'id'}},
+            request_group_id => {TYPE => 'INT3',
+                                 REFERENCES => {TABLE  => 'groups',
+                                                 COLUMN => 'id'}},
         ],
     },
 
@@ -515,9 +564,18 @@ use constant ABSTRACT_SCHEMA => {
     #     to be set for them.
     flaginclusions => {
         FIELDS => [
-            type_id      => {TYPE => 'INT2', NOTNULL => 1},
-            product_id   => {TYPE => 'INT2'},
-            component_id => {TYPE => 'INT2'},
+            type_id      => {TYPE => 'INT2', NOTNULL => 1,
+                             REFERENCES => {TABLE  => 'flagtypes',
+                                            COLUMN => 'id',
+                                            DELETE => 'CASCADE'}},
+            product_id   => {TYPE => 'INT2',
+                             REFERENCES => {TABLE  => 'products',
+                                            COLUMN => 'id',
+                                            DELETE => 'CASCADE'}},
+            component_id => {TYPE => 'INT2',
+                             REFERENCES => {TABLE  => 'components',
+                                            COLUMN => 'id',
+                                            DELETE => 'CASCADE'}},
         ],
         INDEXES => [
             flaginclusions_type_id_idx =>
@@ -527,9 +585,18 @@ use constant ABSTRACT_SCHEMA => {
 
     flagexclusions => {
         FIELDS => [
-            type_id      => {TYPE => 'INT2', NOTNULL => 1},
-            product_id   => {TYPE => 'INT2'},
-            component_id => {TYPE => 'INT2'},
+            type_id      => {TYPE => 'INT2', NOTNULL => 1,
+                             REFERENCES => {TABLE  => 'flagtypes',
+                                            COLUMN => 'id',
+                                            DELETE => 'CASCADE'}},
+            product_id   => {TYPE => 'INT2',
+                             REFERENCES => {TABLE  => 'products',
+                                            COLUMN => 'id',
+                                            DELETE => 'CASCADE'}},
+            component_id => {TYPE => 'INT2',
+                             REFERENCES => {TABLE  => 'components',
+                                            COLUMN => 'id',
+                                            DELETE => 'CASCADE'}},
         ],
         INDEXES => [
             flagexclusions_type_id_idx =>

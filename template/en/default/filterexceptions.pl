@@ -148,13 +148,6 @@
   'cumulate',
 ],
 
-'reports/duplicates.rdf.tmpl' => [
-  'template_version', 
-  'bug.id', 
-  'bug.count', 
-  'bug.delta', 
-],
-
 'reports/chart.html.tmpl' => [
   'width', 
   'height', 

@@ -287,12 +287,8 @@ EOT
         # It's harmless if it isn't accessible...
         "$datadir/.htaccess" => { perms    => $ws_readable, contents => <<EOT
 # Nothing in this directory is retrievable unless overridden by an .htaccess
-# in a subdirectory; the only exception is duplicates.rdf, which is used by
-# duplicates.xul and must be accessible from the web server
+# in a subdirectory.
 deny from all
-<Files duplicates.rdf>
-  allow from all
-</Files>
 EOT
 
 
@@ -371,6 +367,11 @@ EOT
         unlink "$datadir/versioncache";
     }
 
+    if (-e "$datadir/duplicates.rdf") {
+        print "Removing duplicates.rdf...\n";
+        unlink "$datadir/duplicates.rdf";
+        unlink "$datadir/duplicates-old.rdf";
+    }
 }
 
 # A simple helper for creating "empty" CSS files.

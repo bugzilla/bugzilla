@@ -62,8 +62,7 @@
   '"value${chartnum}-${rownum}-${colnum}"', 
   '"type${chartnum}-${rownum}-${colnum}"', 
   'field.name', 
-  'field.description', 
-  'type.name', 
+  'type.name',
   'type.description', 
   '"${chartnum}-${rownum}-${newor}"', 
   '"${chartnum}-${newand}-0"', 
@@ -146,6 +145,13 @@
   'switchbase',
   'format',
   'cumulate',
+],
+
+'reports/duplicates.rdf.tmpl' => [
+  'template_version', 
+  'bug.id', 
+  'bug.count', 
+  'bug.delta', 
 ],
 
 'reports/chart.html.tmpl' => [

@@ -74,8 +74,9 @@
       <td>
         <select name="[% "field${chartnum}-${rownum}-${colnum}" %]">
           [% FOREACH field = fields %]
-            <option value="[% field.name %]"
-              [%- " selected" IF field.name == col.field %]>[% field.description %]</option>
+            <option value="[% field.name %]" [% "selected" IF field.name == col.field %]>
+              [% field_descs.${field.name} || field.description FILTER html %]
+            </option>
           [% END %]
         </select>
 

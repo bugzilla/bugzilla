@@ -642,7 +642,7 @@ if ($action eq 'search') {
     $vars->{'profile_changes'} = $dbh->selectall_arrayref(
         "SELECT profiles.login_name AS who, " .
                 $dbh->sql_date_format('profiles_activity.profiles_when') . " AS activity_when,
-                fielddefs.description AS what,
+                fielddefs.name AS what,
                 profiles_activity.oldvalue AS removed,
                 profiles_activity.newvalue AS added
          FROM profiles_activity

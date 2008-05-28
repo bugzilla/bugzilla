@@ -102,7 +102,12 @@ sub _throw_error {
             die("$message\n");
         }
         elsif (Bugzilla->error_mode == ERROR_MODE_DIE_SOAP_FAULT) {
-            my $code = WS_ERROR_CODE->{$error};
+            # Clone the hash so we aren't modifying the constant.
+            my %error_map = %{ WS_ERROR_CODE() };
+            require Bugzilla::Hook;
+            Bugzilla::Hook::process('webservice-error_codes', 
+                                    { error_map => \%error_map });
+            my $code = $error_map{$error};
             if (!$code) {
                 $code = ERROR_UNKNOWN_FATAL if $name =~ /code/i;
                 $code = ERROR_UNKNOWN_TRANSIENT if $name =~ /user/i;

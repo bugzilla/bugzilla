@@ -262,3 +262,22 @@ WebService functions (and so that you also don't conflict with other
 plugins).
 
 =back
+
+=head2 webservice-error_codes
+
+If your webservice extension throws custom errors, you can set numeric
+codes for those errors here.
+
+Extensions should use error codes above 10000, unless they are re-using
+an already-existing error code.
+
+Params:
+
+=over
+
+=item C<error_map>
+
+A hash that maps the names of errors (like C<invalid_param>) to numbers.
+See L<Bugzilla::WebService::Constants/WS_ERROR_CODE> for an example.
+
+=back

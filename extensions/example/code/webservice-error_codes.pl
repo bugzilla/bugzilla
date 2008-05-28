@@ -13,20 +13,13 @@
 # The Original Code is the Bugzilla Bug Tracking System.
 #
 # The Initial Developer of the Original Code is Everything Solved, Inc.
-# Portions created by Everything Solved, Inc. are Copyright (C) 2007 
+# Portions created by Everything Solved, Inc. are Copyright (C) 2008 
 # Everything Solved, Inc. All Rights Reserved.
 #
 # Contributor(s): Max Kanat-Alexander <mkanat@bugzilla.org>
 
-package extensions::example::lib::WSExample;
 use strict;
 use warnings;
-use base qw(Bugzilla::WebService);
-use Bugzilla::Error;
-
-# This can be called as Example.hello() from XML-RPC.
-sub hello { return 'Hello!'; }
-
-sub throw_an_error { ThrowUserError('example_my_error') }
-
-1;
+use Bugzilla;
+my $error_map = Bugzilla->hook_args->{error_map};
+$error_map->{'example_my_error'} = 10001;

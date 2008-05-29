@@ -84,6 +84,7 @@ use constant WS_ERROR_CODE => {
     account_disabled             => 301,
     auth_invalid_email           => 302,
     extern_id_conflict           => -303,
+    auth_failure                 => 304,
 
     # User errors are 500-600.
     account_exists        => 500,
@@ -96,6 +97,7 @@ use constant WS_ERROR_CODE => {
     # This is from strict_isolation, but it also basically means 
     # "invalid user."
     invalid_user_group    => 504,
+    user_access_by_id_denied    => 505,
 };
 
 # These are the fallback defaults for errors not in ERROR_CODE.

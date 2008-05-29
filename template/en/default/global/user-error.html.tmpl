@@ -192,8 +192,9 @@
       a sudo session
     [% ELSIF object == "timetracking_summaries" %]
       time-tracking summary reports
-    [% ELSIF object == "user" %]
-      the user you specified
+    [% ELSIF object == "user" %]  
+      the user [% IF userid %] with ID '[% userid FILTER html %]'
+      [% ELSE %]you specified [% END %]
     [% ELSIF object == "users" %]
       users
     [% ELSIF object == "versions" %]
@@ -1590,6 +1591,11 @@
     [% title = "Illegal User ID" %]
     User ID '[% userid FILTER html %]' is not valid integer.
 
+  [% ELSIF error == "user_access_by_id_denied" %]
+    [% title = "User Access By Id Denied" %]
+    Logged-out users cannot use the "ids" argument to this function
+    to access any user information.
+  
   [% ELSE %]
 
     [%# Try to find hooked error messages %]

@@ -15,6 +15,7 @@
 # Contributor(s): Marc Schumann <wurblzap@gmail.com>
 #                 Max Kanat-Alexander <mkanat@bugzilla.org>
 #                 Mads Bondo Dydensborg <mbd@dbc.dk>
+#                 Noura Elhawary <nelhawar@redhat.com>
 
 package Bugzilla::WebService::User;
 
@@ -117,6 +118,83 @@ sub create {
     });
 
     return { id => type('int')->value($user->id) };
+}
+
+
+# function to return user information by passing either user ids or 
+# login names or both together:
+# $call = $rpc->call( 'User.get', { ids => [1,2,3], 
+#         names => ['testusera@redhat.com', 'testuserb@redhat.com'] });
+sub get {
+    my ($self, $params) = @_;
+
+    my @user_objects;
+    @user_objects = map { Bugzilla::User->check($_) } @{ $params->{names} }
+                    if $params->{names};
+
+    # start filtering to remove duplicate user ids
+    my %unique_users = map { $_->id => $_ } @user_objects;
+    @user_objects = values %unique_users;
+      
+    my @users;
+
+    # If the user is not logged in: Return an error if they passed any user ids.
+    # Otherwise, return a limited amount of information based on login names.
+    if (!Bugzilla->user->id){
+        if ($params->{ids}){
+            ThrowUserError("user_access_by_id_denied");
+        }
+        @users = map {{ 
+                     id => type('int')->value($_->id),
+                     real_name => type('string')->value($_->name), 
+                     name => type('string')->value($_->login),
+                 }} @user_objects;
+
+        return { users => \@users };
+    }
+
+    my $obj_by_ids;
+    $obj_by_ids = Bugzilla::User->new_from_list($params->{ids}) if $params->{ids};
+
+    # obj_by_ids are only visible to the user if he can see 
+    # the otheruser, for non visible otheruser throw an error
+    foreach my $obj (@$obj_by_ids){
+        if (Bugzilla->user->can_see_user($obj)){
+            push (@user_objects, $obj) if !$unique_users{$obj->id};
+        }
+        else {
+            ThrowUserError('auth_failure', {reason => "not_visible",
+                                            action => "access",
+                                            object => "user",
+                                            userid => $obj->id});
+        }
+    }
+
+    if (Bugzilla->user->in_group('editusers')) {
+        @users =
+            map {{
+                id => type('int')->value($_->id),
+                real_name => type('string')->value($_->name),
+                name => type('string')->value($_->login),
+                email => type('string')->value($_->email),
+                can_login => type('boolean')->value(!($_->is_disabled)),
+                email_enabled => type('boolean')->value($_->email_enabled),
+                login_denied_text => type('string')->value($_->disabledtext),
+            }} @user_objects;
+
+    }    
+    else {
+        @users =
+            map {{
+                id => type('int')->value($_->id),
+                real_name => type('string')->value($_->name),
+                name => type('string')->value($_->login),
+                email => type('string')->value($_->email),
+                can_login => type('boolean')->value(!($_->is_disabled)),
+            }} @user_objects;
+    }
+
+    return { users => \@users };
 }
 
 1;
@@ -304,6 +382,104 @@ password is under three characters.)
 
 The password specified is too long. (Usually, this means the
 password is over ten characters.)
+
+=back
+
+=back
+
+=back
+
+=head2 User Info
+
+=over
+
+=item C<get> B<UNSTABLE>
+
+=over
+
+=item B<Description>
+
+Gets information about user accounts in Bugzilla.
+
+=item B<Params>
+
+At least one of the following two parameters must be specified:
+
+=over
+
+=item C<ids> (array) - An array of integers, representing user ids.
+Logged-out users cannot pass this parameter to this function. If they try,
+they will get an error. Logged-in users will get an error if they specify the
+id of a user they cannot see.
+
+=item C<names> (array) - An array of login names (strings).
+
+=back
+
+=item B<Returns> 
+
+A hash containing one item, C<users>, that is an array of
+hashes. Each hash describes a user, and has the following items:
+
+=over
+
+=item id
+
+C<int> The unique integer ID that Bugzilla uses to represent this user. 
+Even if the user's login name changes, this will not change.
+
+=item real_name
+
+C<string> The actual name of the user. May be blank.
+
+=item email
+
+C<string> The email address of the user.
+
+=item name
+
+C<string> The login name of the user. Note that in some situations this is 
+different than their email.
+
+=item can_login
+
+C<boolean> A boolean value to indicate if the user can login into bugzilla. 
+
+=item email_enabled
+
+C<boolean> A boolean value to indicate if bug-related mail will be sent
+to the user or not.
+
+=item login_denied_text
+
+C<string> A text field that holds the reason for disabling a user from logging
+into bugzilla, if empty then the user account is enabled. Otherwise it is 
+disabled/closed.
+
+B<Note>: If you are not logged in to Bugzilla when you call this function, you
+will only be returned the C<id>, C<name>, and C<real_name> items. If you are
+logged in and not in editusers group, you will only be returned the C<id>, C<name>, 
+C<real_name>, C<email>, and C<can_login> items.
+
+=back
+
+=item B<Errors>
+
+=over
+
+=item 51 (Bad Login Name)
+
+You passed an invalid login name in the "names" array.
+
+=item 304 (Authorization Required)
+
+You are logged in, but you are not authorized to see one of the users you
+wanted to get information about by user id.
+
+=item 505 (User Access By Id Denied)
+
+Logged-out users cannot use the "ids" argument to this function to access
+any user information.
 
 =back
 

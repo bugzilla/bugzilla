@@ -20,6 +20,7 @@
   #                 Toms Baugis <toms@myrealbox.com>
   #                 Olav Vitters <olav@bkor.dhs.org>
   #                 Max Kanat-Alexander <mkanat@bugzilla.org>
+  #                 Elliotte Martin <emartin@everythingsolved.com>
   #%]
 
 [% PROCESS "global/field-descs.none.tmpl" %]
@@ -279,6 +280,9 @@
       </tr>
     [% END %]
   [% END %]
+  
+  [% Hook.process("last_row", "bug/show-multiple.html.tmpl") %]
+   
   </table>
 
 

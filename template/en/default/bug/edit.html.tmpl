@@ -21,6 +21,7 @@
   #                 Frédéric Buclin <LpSolit@gmail.com>
   #                 Olav Vitters <olav@bkor.dhs.org>
   #                 Guy Pyrzak <guy.pyrzak@gmail.com>
+  #                 Elliotte Martin <emartin@everythingsolved.com>
   #%]
 
 [% PROCESS global/variables.none.tmpl %]
@@ -193,6 +194,8 @@
          
          [% PROCESS section_spacer %]
          
+         [% Hook.process("after_custom_fields") %]
+                
          [% PROCESS section_flags %]
 
         </table>

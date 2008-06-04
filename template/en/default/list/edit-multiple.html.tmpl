@@ -253,6 +253,8 @@
     </tr>
   [% END %]
 
+  [% Hook.process("after_custom_fields") %]
+
 </table>
 
 [% IF use_keywords %]

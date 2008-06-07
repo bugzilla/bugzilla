@@ -272,7 +272,8 @@ if ($cgi->param('remove_invalid_bug_references')) {
 
     $dbh->bz_start_transaction();
 
-    foreach my $pair ('attachments/', 'bug_group_map/', 'bugs_activity/', 'cc/',
+    foreach my $pair ('attachments/', 'bug_group_map/', 'bugs_activity/',
+                      'bugs_fulltext/', 'cc/',
                       'dependencies/blocked', 'dependencies/dependson',
                       'duplicates/dupe', 'duplicates/dupe_of',
                       'flags/', 'keywords/', 'longdescs/', 'votes/') {
@@ -408,6 +409,7 @@ CrossCheck("flagtypes", "id",
 CrossCheck("bugs", "bug_id",
            ["bugs_activity", "bug_id"],
            ["bug_group_map", "bug_id"],
+           ["bugs_fulltext", "bug_id"],
            ["attachments", "bug_id"],
            ["cc", "bug_id"],
            ["longdescs", "bug_id"],

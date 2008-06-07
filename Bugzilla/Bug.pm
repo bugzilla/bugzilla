@@ -770,6 +770,7 @@ sub remove_from_db {
     # - bug_group_map
     # - bugs
     # - bugs_activity
+    # - bugs_fulltext
     # - cc
     # - dependencies
     # - duplicates
@@ -810,6 +811,9 @@ sub remove_from_db {
     $dbh->do("DELETE FROM longdescs WHERE bug_id = ?", undef, $bug_id);
 
     $dbh->bz_commit_transaction();
+
+    # The bugs_fulltext table doesn't support transactions.
+    $dbh->do("DELETE FROM bugs_fulltext WHERE bug_id = ?", undef, $bug_id);
 
     # Now this bug no longer exists
     $self->DESTROY;

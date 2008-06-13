@@ -45,6 +45,15 @@
   [% ELSIF san_tag == "bug_check_creation_date_repair_text" %]
     Repair missing creation date for these [% terms.bugs %]
 
+  [% ELSIF san_tag == "bug_check_bugs_fulltext" %]
+    Checking for [% terms.bugs %] with no entry for full text searching.
+
+  [% ELSIF san_tag == "bug_check_bugs_fulltext_error_text" %]
+    [% terms.Bugs %] with no entry for full text searching
+
+  [% ELSIF san_tag == "bug_check_bugs_fulltext_repair_text" %]
+    Repair missing full text search entries for these [% terms.bugs %]
+
   [% ELSIF san_tag == "bug_check_res_dupl" %]
     Checking resolution/duplicates
 
@@ -101,6 +110,12 @@
     OK, now fixing missing [% terms.bug %] creation dates.
 
   [% ELSIF san_tag == "bug_creation_date_fixed" %]
+    [% bug_count FILTER html %] [%+ terms.bugs %] have been fixed.
+
+  [% ELSIF san_tag == "bugs_fulltext_start" %]
+    OK, now fixing [% terms.bug %] entries for full text searching.
+
+  [% ELSIF san_tag == "bugs_fulltext_fixed" %]
     [% bug_count FILTER html %] [%+ terms.bugs %] have been fixed.
 
   [% ELSIF san_tag == "bug_reference_deletion_start" %]

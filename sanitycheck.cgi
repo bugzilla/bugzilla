@@ -29,6 +29,7 @@ use strict;
 use lib qw(. lib);
 
 use Bugzilla;
+use Bugzilla::Bug;
 use Bugzilla::Constants;
 use Bugzilla::Util;
 use Bugzilla::Error;
@@ -219,6 +220,26 @@ if ($cgi->param('repair_creation_date')) {
         $sth_UpdateDate->execute($date, $bugid);
     }
     Status('bug_creation_date_fixed', {bug_count => scalar(@$bug_ids)});
+}
+
+###########################################################################
+# Fix entries in Bugs full_text
+###########################################################################
+
+if ($cgi->param('repair_bugs_fulltext')) {
+    Status('bugs_fulltext_start');
+
+    my $bug_ids = $dbh->selectcol_arrayref('SELECT bugs.bug_id
+                                            FROM bugs
+                                            LEFT JOIN bugs_fulltext
+                                            ON bugs_fulltext.bug_id = bugs.bug_id
+                                            WHERE bugs_fulltext.bug_id IS NULL');
+
+   foreach my $bugid (@$bug_ids) {
+       Bugzilla::Bug->new($bugid)->_sync_fulltext('new_bug');
+   }
+
+   Status('bugs_fulltext_fixed', {bug_count => scalar(@$bug_ids)});
 }
 
 ###########################################################################
@@ -863,6 +884,12 @@ Status('bug_check_creation_date');
 
 BugCheck("bugs WHERE creation_ts IS NULL", 'bug_check_creation_date_error_text',
          'repair_creation_date', 'bug_check_creation_date_repair_text');
+
+Status('bug_check_bugs_fulltext');
+
+BugCheck("bugs LEFT JOIN bugs_fulltext ON bugs_fulltext.bug_id = bugs.bug_id " .
+         "WHERE bugs_fulltext.bug_id IS NULL", 'bug_check_bugs_fulltext_error_text',
+         'repair_bugs_fulltext', 'bug_check_bugs_fulltext_repair_text');
 
 Status('bug_check_res_dupl');
 

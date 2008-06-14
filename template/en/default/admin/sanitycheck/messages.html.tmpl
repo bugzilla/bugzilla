@@ -289,13 +289,13 @@
     Bad vote sum for [% terms.bug %] [%+ id FILTER html %].
 
   [% ELSIF san_tag == "whines_obsolete_target_deletion_start" %]
-    OK, now removing non-existent targets from whines.
+    OK, now removing non-existent users/groups from whines.
 
   [% ELSIF san_tag == "whines_obsolete_target_deletion_end" %]
-    Non-existent targets have been removed from whines.
+    Non-existent users/groups have been removed from whines.
 
   [% ELSIF san_tag == "whines_obsolete_target_start" %]
-    Checking for whines with non-existent targets.
+    Checking for whines with non-existent users/groups.
 
   [% ELSIF san_tag == "whines_obsolete_target_alert" %]
     [% FOREACH schedule = schedules %]
@@ -305,7 +305,7 @@
 
   [% ELSIF san_tag == "whines_obsolete_target_fix" %]
     <a href="sanitycheck.cgi?remove_old_whine_targets=1">Click here to
-    remove old targets</a>
+    remove old users/groups</a>
 
   [% END %]
 [% END %]

@@ -153,6 +153,8 @@ sub FILESYSTEM {
                                      dirs => $ws_dir_readable },
          $templatedir          => { files => $ws_readable,
                                      dirs => $ws_dir_readable },
+         $extensionsdir        => { files => $ws_readable,
+                                     dirs => $ws_dir_readable },
          images                => { files => $ws_readable,
                                      dirs => $ws_dir_readable },
          css                   => { files => $ws_readable,

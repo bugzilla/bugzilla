@@ -341,6 +341,36 @@ if ($cgi->param('remove_invalid_attach_references')) {
     Status('attachment_reference_deletion_end');
 }
 
+###########################################################################
+# Remove all references to deleted users or groups from whines
+###########################################################################
+
+if ($cgi->param('remove_old_whine_targets')) {
+    Status('whines_obsolete_target_deletion_start');
+
+    $dbh->bz_start_transaction();
+
+    foreach my $target (['groups', 'id', MAILTO_GROUP],
+                        ['profiles', 'userid', MAILTO_USER])
+    {
+        my ($table, $col, $type) = @$target;
+        my $old_ids =
+          $dbh->selectcol_arrayref("SELECT DISTINCT mailto
+                                      FROM whine_schedules
+                                 LEFT JOIN $table
+                                        ON $table.$col = whine_schedules.mailto
+                                     WHERE mailto_type = $type AND $table.$col IS NULL");
+
+        if (scalar(@$old_ids)) {
+            $dbh->do("DELETE FROM whine_schedules
+                       WHERE mailto_type = $type AND mailto IN (" .
+                       join(',', @$old_ids) . ")");
+        }
+    }
+    $dbh->bz_commit_transaction();
+    Status('whines_obsolete_target_deletion_end');
+}
+
 Status('checks_start');
 
 ###########################################################################
@@ -994,6 +1024,30 @@ if (scalar(@$badbugs > 0)) {
     Status('unsent_bugmail_alert', {badbugs => $badbugs}, 'alert');
     Status('unsent_bugmail_fix');
 }
+
+###########################################################################
+# Whines
+###########################################################################
+
+Status('whines_obsolete_target_start');
+
+my $display_repair_whines_link = 0;
+foreach my $target (['groups', 'id', MAILTO_GROUP],
+                    ['profiles', 'userid', MAILTO_USER])
+{
+    my ($table, $col, $type) = @$target;
+    my $old = $dbh->selectall_arrayref("SELECT whine_schedules.id, mailto
+                                          FROM whine_schedules
+                                     LEFT JOIN $table
+                                            ON $table.$col = whine_schedules.mailto
+                                         WHERE mailto_type = $type AND $table.$col IS NULL");
+
+    if (scalar(@$old)) {
+        Status('whines_obsolete_target_alert', {schedules => $old, type => $type}, 'alert');
+        $display_repair_whines_link = 1;
+    }
+}
+Status('whines_obsolete_target_fix') if $display_repair_whines_link;
 
 ###########################################################################
 # End

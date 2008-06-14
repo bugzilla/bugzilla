@@ -281,6 +281,14 @@ sub flag_handler {
     return $err;
 }
 
+# Converts and returns the input data as an array.
+sub _to_array {
+    my $value = shift;
+
+    $value = [$value] if !ref($value);
+    return @$value;
+}
+
 ###############################################################################
 # XML Handlers                                                                #
 ###############################################################################
@@ -565,11 +573,11 @@ sub process_bug {
     $comments .= $urlbase . "show_bug.cgi?id=" . $bug_fields{'bug_id'} . "\n";
     if ( defined $bug_fields{'dependson'} ) {
         $comments .= "This bug depended on bug(s) " .
-                     join(' ', @{$bug_fields{'dependson'}}) . ".\n";
+                     join(' ', _to_array($bug_fields{'dependson'})) . ".\n";
     }
     if ( defined $bug_fields{'blocked'} ) {
         $comments .= "This bug blocked bug(s) " .
-                     join(' ', @{$bug_fields{'blocked'}}) . ".\n";
+                     join(' ', _to_array($bug_fields{'blocked'})) . ".\n";
     }
 
     # Now we process each of the fields in turn and make sure they contain
@@ -1057,7 +1065,7 @@ sub process_bug {
             }
         } elsif ($field->type == FIELD_TYPE_MULTI_SELECT) {
             my @legal_values;
-            foreach my $item (@$value) {
+            foreach my $item (_to_array($value)) {
                 my $is_well_formed = check_field($custom_field, $item, undef, ERR_LEVEL);
                 if ($is_well_formed) {
                     push(@legal_values, $item);
@@ -1116,7 +1124,7 @@ sub process_bug {
     if ( defined $bug_fields{'cc'} ) {
         my %ccseen;
         my $sth_cc = $dbh->prepare("INSERT INTO cc (bug_id, who) VALUES (?,?)");
-        foreach my $person (@{$bug_fields{'cc'}}) {
+        foreach my $person (_to_array($bug_fields{'cc'})) {
             next unless $person;
             my $uid;
             if ($uid = login_to_id($person)) {

@@ -93,13 +93,17 @@ sub bz_last_key {
 }
 
 sub sql_regexp {
-    my ($self, $expr, $pattern) = @_;
+    my ($self, $expr, $pattern, $nocheck) = @_;
+
+    $self->bz_check_regexp($pattern) if !$nocheck;
 
     return "$expr ~* $pattern";
 }
 
 sub sql_not_regexp {
-    my ($self, $expr, $pattern) = @_;
+    my ($self, $expr, $pattern, $nocheck) = @_;
+
+    $self->bz_check_regexp($pattern) if !$nocheck;
 
     return "$expr !~* $pattern" 
 }

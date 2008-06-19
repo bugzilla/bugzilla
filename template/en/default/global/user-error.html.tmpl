@@ -783,6 +783,11 @@
     [% IF format %]
       Please use the format '<tt>[% format FILTER html %]</tt>'.
     [% END %]
+
+  [% ELSIF error == "illegal_regexp" %]
+    [% title = "Illegal Regular Expression" %]
+    The regular expression you provided [% value FILTER html %] is not valid.
+    The error was: [% dberror FILTER html %].
         
   [% ELSIF error == "insufficient_data_points" %]
     [% docslinks = {'reporting.html' => 'Reporting'} %]

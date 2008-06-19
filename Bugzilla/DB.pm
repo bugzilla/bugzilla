@@ -383,6 +383,15 @@ sub bz_last_key {
                                  $table, $column);
 }
 
+sub bz_check_regexp {
+    my ($self, $pattern) = @_;
+
+    eval { $self->do("SELECT " . $self->sql_regexp($self->quote("a"), $pattern, 1)) };
+
+    $@ && ThrowUserError('illegal_regexp', 
+        { value => $pattern, dberror => $self->errstr }); 
+}
+
 #####################################################################
 # Database Setup
 #####################################################################

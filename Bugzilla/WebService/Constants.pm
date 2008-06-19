@@ -57,7 +57,6 @@ use constant WS_ERROR_CODE => {
     bug_id_does_not_exist       => 101,
     bug_access_denied           => 102,
     bug_access_query            => 102,
-    invalid_field_name          => 108,
     # These all mean "invalid alias"
     alias_too_long           => 103,
     alias_in_use             => 103,
@@ -76,8 +75,10 @@ use constant WS_ERROR_CODE => {
     product_disabled    => 106,
     # Invalid Summary
     require_summary => 107,
+    # Invalid field name
+    invalid_field_name => 108,
     # Not authorized to edit the bug
-    product_edit_denied => 108,
+    product_edit_denied => 109,
 
     # Authentication errors are usually 300-400.
     invalid_username_or_password => 300,

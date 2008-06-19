@@ -23,6 +23,12 @@ use Bugzilla::Product;
 use Bugzilla::User;
 import SOAP::Data qw(type);
 
+##################################################
+# Add aliases here for method name compatibility #
+##################################################
+
+BEGIN { *get_products = \&get }
+
 # Get the ids of the products the user can search
 sub get_selectable_products {
     return {ids => [map {$_->id} @{Bugzilla->user->get_selectable_products}]}; 
@@ -39,7 +45,7 @@ sub get_accessible_products {
 }
 
 # Get a list of actual products, based on list of ids
-sub get_products {
+sub get {
     my ($self, $params) = @_;
     
     # Only products that are in the users accessible products, 
@@ -147,13 +153,15 @@ ids.
 
 =back
 
-=item C<get_products> B<UNSTABLE>
+=item C<get> B<UNSTABLE>
 
 =over
 
 =item B<Description>
 
 Returns a list of information about the products passed to it.
+
+Note: Can also be called as "get_products" for compatibilty with Bugzilla 3.0 API.
 
 =item B<Params>
 

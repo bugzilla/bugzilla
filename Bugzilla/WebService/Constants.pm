@@ -99,6 +99,7 @@ use constant WS_ERROR_CODE => {
     # "invalid user."
     invalid_user_group    => 504,
     user_access_by_id_denied    => 505,
+    user_access_by_match_denied => 505,
 };
 
 # These are the fallback defaults for errors not in ERROR_CODE.

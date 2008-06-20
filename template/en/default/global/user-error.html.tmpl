@@ -1556,6 +1556,16 @@
     for at least one component.
     For this reason, you cannot delete the account at this time.
 
+  [% ELSIF error == "user_access_by_id_denied" %]
+    [% title = "User Access By Id Denied" %]
+    Logged-out users cannot use the "ids" argument to this function
+    to access any user information.
+
+  [% ELSIF error == "user_access_by_match_denied" %]
+    [% title = "User-Matching Denied" %]
+    Logged-out users cannot use the "match" argument to this function
+    to access any user information.
+
   [% ELSIF error == "user_login_required" %]
     [% title = "Login Name Required" %]
     [% admindocslinks = {'useradmin.html' => 'User administration'} %]
@@ -1596,11 +1606,6 @@
     [% title = "Illegal User ID" %]
     User ID '[% userid FILTER html %]' is not valid integer.
 
-  [% ELSIF error == "user_access_by_id_denied" %]
-    [% title = "User Access By Id Denied" %]
-    Logged-out users cannot use the "ids" argument to this function
-    to access any user information.
-  
   [% ELSE %]
 
     [%# Try to find hooked error messages %]

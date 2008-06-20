@@ -145,6 +145,9 @@ sub get {
         if ($params->{ids}){
             ThrowUserError("user_access_by_id_denied");
         }
+        if ($params->{match}) {
+            ThrowUserError('user_access_by_match_denied');
+        }
         @users = map {filter $params, {
                      id => type('int')->value($_->id),
                      real_name => type('string')->value($_->name), 
@@ -161,7 +164,10 @@ sub get {
     # the otheruser, for non visible otheruser throw an error
     foreach my $obj (@$obj_by_ids) {
         if (Bugzilla->user->can_see_user($obj)){
-            push (@user_objects, $obj) if !$unique_users{$obj->id};
+            if (!$unique_users{$obj->id}) {
+                push (@user_objects, $obj);
+                $unique_users{$obj->id} = $obj;
+            }
         }
         else {
             ThrowUserError('auth_failure', {reason => "not_visible",
@@ -170,7 +176,22 @@ sub get {
                                             userid => $obj->id});
         }
     }
-
+    
+    # User Matching
+    my $limit;
+    if ($params->{'maxusermatches'}) {
+        $limit = $params->{'maxusermatches'} + 1;
+    }
+    foreach my $match_string (@{ $params->{'match'} || [] }) {
+        my $matched = Bugzilla::User::match($match_string, $limit);
+        foreach my $user (@$matched) {
+            if (!$unique_users{$user->id}) {
+                push(@user_objects, $user);
+                $unique_users{$user->id} = $user;
+            }
+        }
+    }
+    
     if (Bugzilla->user->in_group('editusers')) {
         @users =
             map {filter $params, {
@@ -404,16 +425,39 @@ Gets information about user accounts in Bugzilla.
 
 =item B<Params>
 
-At least one of the following two parameters must be specified:
+B<Note>: At least one of C<ids>, C<names>, or C<match> must be specified.
+
+B<Note>: Users will not be returned more than once, so even if a user 
+is matched by more than one argument, only one user will be returned.
 
 =over
 
-=item C<ids> (array) - An array of integers, representing user ids.
+=item C<ids> (array) 
+
+An array of integers, representing user ids.
+
 Logged-out users cannot pass this parameter to this function. If they try,
-they will get an error. Logged-in users will get an error if they specify the
-id of a user they cannot see.
+they will get an error. Logged-in users will get an error if they specify
+the id of a user they cannot see.
 
 =item C<names> (array) - An array of login names (strings).
+
+=item C<match> (array)
+
+An array of strings. This works just like "user matching" in
+Bugzilla itself. Users will be returned whose real name or login name
+contains any one of the specified strings. Users that you cannot see will
+not be included in the returned list.
+
+Some Bugzilla installations have user-matching turned off, in which
+case you will only be returned exact matches.
+
+Most installations have a limit on how many matches are returned for
+each string, which defaults to 1000 but can be changed by the Bugzilla
+administrator.
+
+Logged-out users cannot use this argument, and an error will be thrown
+if they try.
 
 =item C<include_fields> (array)
 
@@ -505,10 +549,10 @@ You passed an invalid login name in the "names" array.
 You are logged in, but you are not authorized to see one of the users you
 wanted to get information about by user id.
 
-=item 505 (User Access By Id Denied)
+=item 505 (User Access By Id or User-Matching Denied)
 
-Logged-out users cannot use the "ids" argument to this function to access
-any user information.
+Logged-out users cannot use the "ids" or "match" arguments to this 
+function.
 
 =back
 

@@ -30,6 +30,7 @@ use Bugzilla::Error;
 use Bugzilla::User;
 use Bugzilla::Util qw(trim);
 use Bugzilla::Token;
+use Bugzilla::WebService::Util qw(filter);
 
 # Don't need auth to login
 use constant LOGIN_EXEMPT => {
@@ -144,7 +145,7 @@ sub get {
         if ($params->{ids}){
             ThrowUserError("user_access_by_id_denied");
         }
-        @users = map {{ 
+        @users = map {filter $params, {
                      id => type('int')->value($_->id),
                      real_name => type('string')->value($_->name), 
                      name => type('string')->value($_->login),
@@ -158,7 +159,7 @@ sub get {
 
     # obj_by_ids are only visible to the user if he can see 
     # the otheruser, for non visible otheruser throw an error
-    foreach my $obj (@$obj_by_ids){
+    foreach my $obj (@$obj_by_ids) {
         if (Bugzilla->user->can_see_user($obj)){
             push (@user_objects, $obj) if !$unique_users{$obj->id};
         }
@@ -172,7 +173,7 @@ sub get {
 
     if (Bugzilla->user->in_group('editusers')) {
         @users =
-            map {{
+            map {filter $params, {
                 id => type('int')->value($_->id),
                 real_name => type('string')->value($_->name),
                 name => type('string')->value($_->login),
@@ -185,7 +186,7 @@ sub get {
     }    
     else {
         @users =
-            map {{
+            map {filter $params, {
                 id => type('int')->value($_->id),
                 real_name => type('string')->value($_->name),
                 name => type('string')->value($_->login),
@@ -413,6 +414,34 @@ they will get an error. Logged-in users will get an error if they specify the
 id of a user they cannot see.
 
 =item C<names> (array) - An array of login names (strings).
+
+=item C<include_fields> (array)
+
+An array of strings, representing the names of keys in the hashes 
+this function returns. Only the fields specified in this hash will be 
+returned, the rest will not be included.
+
+Essentially, this is a way to make the return value smaller, for performance
+or bandwidth reasons.
+
+If you specify an empty array, then this function will return empty hashes.
+
+Invalid field names are ignored.
+
+=item C<exclude_fields> (array)
+
+An array of strings, representing the names of keys in the hashes this 
+function returns. The fields specified will not be excluded from the 
+returned hashes.
+
+Essentially, this is a way to exclude certain fields from the returned
+hashes, for performance or bandwidth reasons.
+
+If you specify all the fields, then this function will return empty hashes.
+
+Invalid field names are ignored.
+
+This overrides C<include_fields>.
 
 =back
 

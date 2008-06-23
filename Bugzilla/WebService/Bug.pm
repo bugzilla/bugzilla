@@ -16,6 +16,7 @@
 #                 Max Kanat-Alexander <mkanat@bugzilla.org>
 #                 Mads Bondo Dydensborg <mbd@dbc.dk>
 #                 Tsahi Asher <tsahi_75@yahoo.com>
+#                 Noura Elhawary <nelhawar@redhat.com>
 
 package Bugzilla::WebService::Bug;
 
@@ -111,6 +112,65 @@ sub get {
     return { bugs => \@return };
 }
 
+# this is a function that gets bug activity for list of bug ids 
+# it can be called as the following:
+# $call = $rpc->call( 'Bug.get_history', { ids => [1,2] });
+sub get_history {
+    my ($self, $params) = @_;
+
+    my $ids = $params->{ids};
+    defined $ids || ThrowCodeError('param_required', { param => 'ids' });
+
+    my @return;
+    foreach my $bug_id (@$ids) {
+        my %item;
+        ValidateBugID($bug_id);
+
+        my ($activity) = Bugzilla::Bug::GetBugActivity($bug_id);
+        $item{$bug_id} = [];
+
+        foreach my $changeset (@$activity) {
+            my %bug_history;
+            $bug_history{when} = type('dateTime')->value(
+                $self->datetime_format($changeset->{when}));
+            $bug_history{who}  = type('string')->value($changeset->{who});
+            $bug_history{changes} = [];
+            foreach my $change (@{ $changeset->{changes} }) {
+                my $attach_id = delete $change->{attachid};
+                if ($attach_id) {
+                    $change->{attachment_id} = type('int')->value($attach_id);
+                }
+                $change->{removed} = type('string')->value($change->{removed});
+                $change->{added}   = type('string')->value($change->{added});
+                $change->{field_name} = type('string')->value(
+                    delete $change->{fieldname});
+                # This is going to go away in the future from GetBugActivity
+                # so we shouldn't put it in the API.
+                delete $change->{field};
+                push (@{$bug_history{changes}}, $change);
+            }
+            
+            push (@{$item{$bug_id}}, \%bug_history);
+        }   
+
+        # alias is returned in case users passes a mixture of ids and aliases
+        # then they get to know which bug activity relates to which value  
+        # they passed
+        my $bug = new Bugzilla::Bug($bug_id);
+        if (Bugzilla->params->{'usebugaliases'}) {
+            $item{alias} = type('string')->value($bug->alias);
+        }
+        else {
+            # For API reasons, we always want the value to appear, we just
+            # don't want it to have a value if aliases are turned off.
+            $item{alias} = undef;
+        }
+
+        push(@return, \%item);
+    }
+
+    return { bugs => \@return };
+}
 
 sub create {
     my ($self, $params) = @_;
@@ -367,7 +427,94 @@ You do not have access to the bug_id you specified.
 
 =back
 
+=item C<get_history> B<UNSTABLE>
 
+=over
+
+=item B<Description>
+
+Gets the history of changes for particular bugs in the database.
+
+=item B<Params>
+
+=over
+
+=item C<ids>
+
+An array of numbers and strings.
+
+If an element in the array is entirely numeric, it represents a bug_id 
+from the Bugzilla database to fetch. If it contains any non-numeric 
+characters, it is considered to be a bug alias instead, and the data bug 
+with that alias will be loaded. 
+
+Note that it's possible for aliases to be disabled in Bugzilla, in which
+case you will be told that you have specified an invalid bug_id if you
+try to specify an alias. (It will be error 100.)
+
+=back
+
+=item B<Returns>
+
+A hash containing a single element, C<bugs>. This is a hash of hashes. 
+Each hash has the numeric bug id as a key, and contains the following
+items:
+
+=over
+
+=item alias
+
+C<string> The alias of this bug. If there is no alias or aliases are 
+disabled in this Bugzilla, this will be undef.
+
+=over
+
+=item when
+
+C<dateTime> The date the bug activity/change happened.
+
+=item who
+
+C<string> The login name of the user who performed the bug change.
+
+=item changes
+
+C<array> An array of hashes which contain all the changes that happened
+to the bug at this time (as specified by C<when>). Each hash contains 
+the following items:
+
+=over
+
+=item field_name
+
+C<string> The name of the bug field that has changed.
+
+=item removed
+
+C<string> The previous value of the bug field which has been deleted 
+by the change.
+
+=item added
+
+C<string> The new value of the bug field which has been added by the change.
+
+=item attachment_id
+
+C<int> The id of the attachment that was changed. This only appears if 
+the change was to an attachment, otherwise C<attachment_id> will not be
+present in this hash.
+
+=back
+
+=back
+
+=back
+
+=item B<Errors>
+
+The same as L</get>.
+
+=back
 
 =item C<create> B<EXPERIMENTAL>
 

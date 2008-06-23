@@ -94,6 +94,16 @@ sub bz_last_key {
     return $last_insert_id;
 }
 
+sub bz_check_regexp {
+    my ($self, $pattern) = @_;
+
+    eval { $self->do("SELECT 1 FROM DUAL WHERE "
+          . $self->sql_regexp($self->quote("a"), $self->quote($pattern), 1)) };
+
+    $@ && ThrowUserError('illegal_regexp',
+        { value => $pattern, dberror => $self->errstr });
+}
+
 sub sql_regexp {
     my ($self, $expr, $pattern, $nocheck) = @_;
 

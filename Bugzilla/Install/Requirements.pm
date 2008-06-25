@@ -91,10 +91,14 @@ sub REQUIRED_MODULES {
         version => ON_WINDOWS ? '2.16' : '2.00'
     },
     {
-        # This will pull in Email::MIME for us, also. 
+        package => 'Email-MIME',
+        module  => 'Email::MIME',
+        version => '1.861'
+    },
+    {
         package => 'Email-MIME-Modifier',
         module  => 'Email::MIME::Modifier',
-        version => 0
+        version => '1.442'
     },
     );
 

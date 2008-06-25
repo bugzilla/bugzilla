@@ -100,10 +100,12 @@ sub handler : method {
 package Bugzilla::ModPerl::CleanupHandler;
 use strict;
 use Apache2::Const -compile => qw(OK);
+use Bugzilla;
 
 sub handler {
     my $r = shift;
 
+    Bugzilla::_cleanup();
     # Sometimes mod_perl doesn't properly call DESTROY on all
     # the objects in pnotes()
     foreach my $key (keys %{$r->pnotes}) {

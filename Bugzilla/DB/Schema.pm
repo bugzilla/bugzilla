@@ -482,8 +482,15 @@ use constant ABSTRACT_SCHEMA => {
 
     keywords => {
         FIELDS => [
-            bug_id    => {TYPE => 'INT3', NOTNULL => 1},
-            keywordid => {TYPE => 'INT2', NOTNULL => 1},
+            bug_id    => {TYPE => 'INT3', NOTNULL => 1,
+                          REFERENCES => {TABLE  => 'bugs',
+                                         COLUMN => 'bug_id',
+                                         DELETE => 'CASCADE'}},
+            keywordid => {TYPE => 'INT2', NOTNULL => 1,
+                          REFERENCES => {TABLE  => 'keyworddefs',
+                                         COLUMN => 'id',
+                                         DELETE => 'CASCADE'}},
+
         ],
         INDEXES => [
             keywords_bug_id_idx    => {FIELDS => [qw(bug_id keywordid)],

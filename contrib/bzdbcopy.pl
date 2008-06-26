@@ -54,6 +54,14 @@ print "Connecting to the '" . SOURCE_DB_NAME . "' source database on "
       . SOURCE_DB_TYPE . "...\n";
 my $source_db = Bugzilla::DB::_connect(SOURCE_DB_TYPE, SOURCE_DB_HOST, 
     SOURCE_DB_NAME, undef, undef, SOURCE_DB_USER, SOURCE_DB_PASSWORD);
+# Don't read entire tables into memory.
+if (SOURCE_DB_TYPE eq 'Mysql') {
+    $source_db->{'mysql_use_result'}=1;
+
+    # MySQL cannot have two queries running at the same time. Ensure the schema
+    # is loaded from the database so bz_column_info will not execute a query
+    $source_db->_bz_real_schema;
+}
 
 print "Connecting to the '" . TARGET_DB_NAME . "' target database on "
       . TARGET_DB_TYPE . "...\n";
@@ -87,8 +95,10 @@ foreach my $table (@table_list) {
     @table_columns = map { s/^\Q$ident_char\E?(.*?)\Q$ident_char\E?$/$1/; $_ }
                          @table_columns;
 
+    my ($total) = $source_db->selectrow_array("SELECT COUNT(*) FROM $table");
     my $select_query = "SELECT " . join(',', @table_columns) . " FROM $table";
-    my $data_in = $source_db->selectall_arrayref($select_query);
+    my $select_sth = $source_db->prepare($select_query);
+    $select_sth->execute();
 
     my $insert_query = "INSERT INTO $table ( " . join(',', @table_columns) 
                        . " ) VALUES (";
@@ -119,8 +129,7 @@ foreach my $table (@table_list) {
     print "Writing data to the target '$table' table on " 
           . TARGET_DB_TYPE . "...\n";
     my $count = 0;
-    my $total = scalar @$data_in;
-    foreach my $row (@$data_in) {
+    while (my $row = $select_sth->fetchrow_arrayref) {
         # Each column needs to be bound separately, because
         # many columns need to be dealt with specially.
         my $colnum = 0;

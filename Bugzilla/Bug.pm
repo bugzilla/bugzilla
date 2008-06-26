@@ -272,6 +272,15 @@ sub new {
     return $self;
 }
 
+sub check {
+    my $class = shift;
+    # XXX At some point we will eliminate ValidateBugID and make this
+    #     method more efficient.
+    ValidateBugID(@_);
+    my $self = $class->new(@_);
+    return $self;
+}
+
 # Docs for create() (there's no POD in this file yet, but we very
 # much need this documented right now):
 #

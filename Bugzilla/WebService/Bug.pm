@@ -75,8 +75,7 @@ sub get {
 
     my @return;
     foreach my $bug_id (@$ids) {
-        ValidateBugID($bug_id);
-        my $bug = new Bugzilla::Bug($bug_id);
+        my $bug = Bugzilla::Bug->check($bug_id);
 
         # Timetracking fields are deleted if the user doesn't belong to
         # the corresponding group.
@@ -247,14 +246,12 @@ sub add_comment {
     
     # Check parameters
     defined $params->{id} 
-        || ThrowCodeError('param_required', { param => 'id' });
-    ValidateBugID($params->{id});
-    
+        || ThrowCodeError('param_required', { param => 'id' }); 
     my $comment = $params->{comment}; 
     defined $comment
         || ThrowCodeError('param_required', { param => 'comment' });
     
-    my $bug = new Bugzilla::Bug($params->{id});
+    my $bug = Bugzilla::Bug->check($params->{id});
     
     Bugzilla->user->can_edit_product($bug->product_id)
         || ThrowUserError("product_edit_denied", {product => $bug->product});

@@ -96,12 +96,19 @@ if ($LDAPserver eq "") {
    print "No LDAP server defined in bugzilla preferences.\n";
    exit;
 }
-my $LDAPport = "389";  # default LDAP port
-if($LDAPserver =~ /:/) {
-    ($LDAPserver, $LDAPport) = split(":",$LDAPserver);
+
+my $LDAPconn;
+if($LDAPserver =~ /\:\/\//) {
+    # if the "LDAPserver" parameter is in uri scheme
+    $LDAPconn = Net::LDAP->new($LDAPserver, version => 3);
+} else {
+    my $LDAPport = "389";  # default LDAP port
+    if($LDAPserver =~ /:/) {
+        ($LDAPserver, $LDAPport) = split(":",$LDAPserver);
+    }
+    $LDAPconn = Net::LDAP->new($LDAPserver, port => $LDAPport, version => 3);
 }
 
-my $LDAPconn = Net::LDAP->new($LDAPserver, port => $LDAPport, version => 3);
 if(!$LDAPconn) {
    print "Connecting to LDAP server failed. Check LDAPserver setting.\n";
    exit;

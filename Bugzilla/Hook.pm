@@ -166,7 +166,37 @@ They will be accessible to the hook via L<Bugzilla/hook_args>.
 
 =head1 HOOKS
 
-This describes what hooks exist in Bugzilla currently.
+This describes what hooks exist in Bugzilla currently. They are mostly
+in alphabetical order, but some related hooks are near each other instead
+of being alphabetical.
+
+=head2 buglist-columns
+
+This happens in buglist.cgi after the standard columns have been defined and
+right before the display column determination.  It gives you the opportunity
+to add additional display columns.
+
+Params:
+
+=over
+
+=item C<columns> - A hashref, where the keys are unique string identifiers
+for the column being defined and the values are hashrefs with the
+following fields:
+
+=over
+
+=item C<name> - The name of the column in the database.
+
+=item C<title> - The title of the column as displayed to users.
+
+=back
+
+The definition is structured as:
+
+ $columns->{$id} = { name => $name, title => $title };
+
+=back
 
 =head2 enter_bug-entrydefaultvars
 

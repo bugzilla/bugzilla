@@ -565,7 +565,7 @@ sub CollectSeriesData {
     my $serieses = $dbh->selectall_hashref("SELECT series_id, query, creator " .
                       "FROM series " .
                       "WHERE frequency != 0 AND " . 
-                      "($days_since_epoch + series_id) % frequency = 0",
+                      "MOD(($days_since_epoch + series_id), frequency) = 0",
                       "series_id");
 
     # We prepare the insertion into the data table, for efficiency.

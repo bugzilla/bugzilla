@@ -327,6 +327,7 @@ sub enter {
                                               'component_id' => $bug->component_id});
   $vars->{'flag_types'} = $flag_types;
   $vars->{'any_flags_requesteeble'} = grep($_->is_requesteeble, @$flag_types);
+  $vars->{'token'} = issue_session_token('createattachment:');
 
   print $cgi->header();
 
@@ -347,6 +348,30 @@ sub insert {
     ValidateBugID($bugid);
     validateCanChangeBug($bugid);
     my ($timestamp) = Bugzilla->dbh->selectrow_array("SELECT NOW()");
+
+    # Detect if the user already used the same form to submit an attachment
+    my $token = trim($cgi->param('token'));
+    if ($token) {
+        my ($creator_id, $date, $old_attach_id) = Bugzilla::Token::GetTokenData($token);
+        unless ($creator_id 
+            && ($creator_id == $user->id) 
+                && ($old_attach_id =~ "^createattachment:")) 
+        {
+            # The token is invalid.
+            ThrowUserError('token_does_not_exist');
+        }
+    
+        $old_attach_id =~ s/^createattachment://;
+   
+        if ($old_attach_id) {
+            $vars->{'bugid'} = $bugid;
+            $vars->{'attachid'} = $old_attach_id;
+            print $cgi->header();
+            $template->process("attachment/cancel-create-dupe.html.tmpl",  $vars)
+                || ThrowTemplateError($template->error());
+            exit;
+        }
+    }
 
     my $bug = new Bugzilla::Bug($bugid);
     my $attachment =
@@ -378,6 +403,12 @@ sub insert {
       $bug->set_assigned_to($user);
   }
   $bug->update($timestamp);
+
+  if ($token) {
+      trick_taint($token);
+      $dbh->do('UPDATE tokens SET eventdata = ? WHERE token = ?', undef,
+               ("createattachment:" . $attachment->id, $token));
+  }
 
   $dbh->bz_commit_transaction;
 

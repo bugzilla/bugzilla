@@ -42,6 +42,7 @@
 <form name="entryform" method="post" action="attachment.cgi" enctype="multipart/form-data">
   <input type="hidden" name="bugid" value="[% bug.bug_id %]">
   <input type="hidden" name="action" value="insert">
+  <input type="hidden" name="token" value="[% token FILTER html %]">
 
   <table class="attachment_entry">
     [% PROCESS attachment/createformcontents.html.tmpl %]

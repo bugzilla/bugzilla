@@ -647,7 +647,10 @@ use constant ABSTRACT_SCHEMA => {
             id         =>  {TYPE => 'MEDIUMSERIAL', NOTNULL => 1,
                             PRIMARYKEY => 1},
             value      =>  {TYPE => 'varchar(64)', NOTNULL => 1},
-            product_id =>  {TYPE => 'INT2', NOTNULL => 1},
+            product_id =>  {TYPE => 'INT2', NOTNULL => 1,
+                            REFERENCES => {TABLE  => 'products',
+                                           COLUMN => 'id',
+                                           DELETE => 'CASCADE'}},
         ],
         INDEXES => [
             versions_product_id_idx => {FIELDS => [qw(product_id value)],
@@ -659,7 +662,10 @@ use constant ABSTRACT_SCHEMA => {
         FIELDS => [
             id         => {TYPE => 'MEDIUMSERIAL', NOTNULL => 1, 
                            PRIMARYKEY => 1},
-            product_id => {TYPE => 'INT2', NOTNULL => 1},
+            product_id => {TYPE => 'INT2', NOTNULL => 1,
+                           REFERENCES => {TABLE  => 'products',
+                                          COLUMN => 'id',
+                                          DELETE => 'CASCADE'}},
             value      => {TYPE => 'varchar(20)', NOTNULL => 1},
             sortkey    => {TYPE => 'INT2', NOTNULL => 1,
                            DEFAULT => 0},
@@ -911,7 +917,10 @@ use constant ABSTRACT_SCHEMA => {
                              REFERENCES => {TABLE  => 'profiles',
                                             COLUMN => 'userid',
                                             DELETE => 'CASCADE'}},
-            component_id => {TYPE => 'INT2', NOTNULL => 1},
+            component_id => {TYPE => 'INT2', NOTNULL => 1,
+                             REFERENCES => {TABLE  => 'components',
+                                            COLUMN => 'id',
+                                            DELETE => 'CASCADE'}},
         ],
         INDEXES => [
             component_cc_user_id_idx => {FIELDS => [qw(component_id user_id)],
@@ -1048,8 +1057,14 @@ use constant ABSTRACT_SCHEMA => {
     # in order to see a bug.
     bug_group_map => {
         FIELDS => [
-            bug_id   => {TYPE => 'INT3', NOTNULL => 1},
-            group_id => {TYPE => 'INT3', NOTNULL => 1},
+            bug_id   => {TYPE => 'INT3', NOTNULL => 1,
+                         REFERENCES => {TABLE  => 'bugs',
+                                        COLUMN => 'bug_id',
+                                        DELETE => 'CASCADE'}},
+            group_id => {TYPE => 'INT3', NOTNULL => 1,
+                         REFERENCES => {TABLE  => 'groups',
+                                        COLUMN => 'id',
+                                        DELETE => 'CASCADE'}},
         ],
         INDEXES => [
             bug_group_map_bug_id_idx   =>
@@ -1062,8 +1077,14 @@ use constant ABSTRACT_SCHEMA => {
     # in order to see a named query somebody else shares.
     namedquery_group_map => {
         FIELDS => [
-            namedquery_id => {TYPE => 'INT3', NOTNULL => 1},
-            group_id      => {TYPE => 'INT3', NOTNULL => 1},
+            namedquery_id => {TYPE => 'INT3', NOTNULL => 1,
+                              REFERENCES => {TABLE  => 'namedqueries',
+                                             COLUMN => 'id',
+                                             DELETE => 'CASCADE'}},
+            group_id      => {TYPE => 'INT3', NOTNULL => 1,
+                              REFERENCES => {TABLE  => 'groups',
+                                             COLUMN => 'id',
+                                             DELETE => 'CASCADE'}},
         ],
         INDEXES => [
             namedquery_group_map_namedquery_id_idx   =>
@@ -1074,8 +1095,14 @@ use constant ABSTRACT_SCHEMA => {
 
     category_group_map => {
         FIELDS => [
-            category_id => {TYPE => 'INT2', NOTNULL => 1},
-            group_id    => {TYPE => 'INT3', NOTNULL => 1},
+            category_id => {TYPE => 'INT2', NOTNULL => 1,
+                            REFERENCES => {TABLE  => 'series_categories',
+                                           COLUMN =>  'id',
+                                           DELETE => 'CASCADE'}},
+            group_id    => {TYPE => 'INT3', NOTNULL => 1,
+                            REFERENCES => {TABLE  => 'groups',
+                                           COLUMN => 'id',
+                                           DELETE => 'CASCADE'}},
         ],
         INDEXES => [
             category_group_map_category_id_idx =>
@@ -1133,7 +1160,10 @@ use constant ABSTRACT_SCHEMA => {
             id               => {TYPE => 'SMALLSERIAL', NOTNULL => 1,
                                  PRIMARYKEY => 1},
             name             => {TYPE => 'varchar(64)', NOTNULL => 1},
-            product_id       => {TYPE => 'INT2', NOTNULL => 1},
+            product_id       => {TYPE => 'INT2', NOTNULL => 1,
+                                 REFERENCES => {TABLE  => 'products',
+                                                COLUMN => 'id',
+                                                DELETE => 'CASCADE'}},
             initialowner     => {TYPE => 'INT3', NOTNULL => 1,
                                  REFERENCES => {TABLE  => 'profiles',
                                                 COLUMN => 'userid'}},
@@ -1157,9 +1187,18 @@ use constant ABSTRACT_SCHEMA => {
         FIELDS => [
             series_id   => {TYPE => 'MEDIUMSERIAL', NOTNULL => 1,
                             PRIMARYKEY => 1},
-            creator     => {TYPE => 'INT3'},
-            category    => {TYPE => 'INT2', NOTNULL => 1},
-            subcategory => {TYPE => 'INT2', NOTNULL => 1},
+            creator     => {TYPE => 'INT3',
+                            REFERENCES => {TABLE  => 'profiles',
+                                           COLUMN => 'userid',
+                                           DELETE => 'SET NULL'}},
+            category    => {TYPE => 'INT2', NOTNULL => 1,
+                            REFERENCES => {TABLE  => 'series_categories',
+                                           COLUMN => 'id',
+                                           DELETE => 'CASCADE'}},
+            subcategory => {TYPE => 'INT2', NOTNULL => 1,
+                            REFERENCES => {TABLE  => 'series_categories',
+                                           COLUMN => 'id',
+                                           DELETE => 'CASCADE'}},
             name        => {TYPE => 'varchar(64)', NOTNULL => 1},
             frequency   => {TYPE => 'INT2', NOTNULL => 1},
             last_viewed => {TYPE => 'DATETIME'},
@@ -1176,7 +1215,10 @@ use constant ABSTRACT_SCHEMA => {
 
     series_data => {
         FIELDS => [
-            series_id    => {TYPE => 'INT3', NOTNULL => 1},
+            series_id    => {TYPE => 'INT3', NOTNULL => 1,
+                             REFERENCES => {TABLE  => 'series',
+                                            COLUMN => 'series_id',
+                                            DELETE => 'CASCADE'}},
             series_date  => {TYPE => 'DATETIME', NOTNULL => 1},
             series_value => {TYPE => 'INT3', NOTNULL => 1},
         ],
@@ -1264,7 +1306,10 @@ use constant ABSTRACT_SCHEMA => {
         FIELDS => [
             quipid   => {TYPE => 'MEDIUMSERIAL', NOTNULL => 1,
                          PRIMARYKEY => 1},
-            userid   => {TYPE => 'INT3'},
+            userid   => {TYPE => 'INT3',
+                         REFERENCES => {TABLE  => 'profiles', 
+                                        COLUMN => 'userid',
+                                        DELETE => 'SET NULL'}},
             quip     => {TYPE => 'MEDIUMTEXT', NOTNULL => 1},
             approved => {TYPE => 'BOOLEAN', NOTNULL => 1,
                          DEFAULT => 'TRUE'},
@@ -1297,7 +1342,10 @@ use constant ABSTRACT_SCHEMA => {
 
     setting_value => {
         FIELDS => [
-            name        => {TYPE => 'varchar(32)', NOTNULL => 1},
+            name        => {TYPE => 'varchar(32)', NOTNULL => 1,
+                            REFERENCES => {TABLE  => 'setting', 
+                                           COLUMN => 'name',
+                                           DELETE => 'CASCADE'}},
             value       => {TYPE => 'varchar(32)', NOTNULL => 1},
             sortindex   => {TYPE => 'INT2', NOTNULL => 1},
         ],

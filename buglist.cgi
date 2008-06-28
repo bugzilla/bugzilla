@@ -666,6 +666,8 @@ foreach my $field (Bugzilla->get_fields({ custom => 1, obsolete => 0})) {
     DefineColumn($field->name, 'bugs.' . $field->name, $field->description);
 }
 
+Bugzilla::Hook::process("buglist-columns", {'columns' => $columns} );
+
 ################################################################################
 # Display Column Determination
 ################################################################################

@@ -23,8 +23,6 @@ use Bugzilla::Error;
 use Bugzilla::Attachment;
 use Bugzilla::Util;
 
-use Encode;
-
 sub process_diff {
     my ($attachment, $format, $context) = @_;
     my $dbh = Bugzilla->dbh;
@@ -78,9 +76,9 @@ sub process_diff {
         setup_template_patch_reader($last_reader, $format, $context, $vars);
         # The patch is going to be displayed in a HTML page and if the utf8
         # param is enabled, we have to encode attachment data as utf8.
-        # Encode::decode() knows what to do with invalid characters.
         if (Bugzilla->params->{'utf8'}) {
-            $attachment->{data} = Encode::decode_utf8($attachment->data);
+            $attachment->data; # Populate ->{data}
+            utf8::decode($attachment->{data});
         }
         $reader->iterate_string('Attachment ' . $attachment->id, $attachment->data);
     }
@@ -94,10 +92,11 @@ sub process_interdiff {
 
     # Encode attachment data as utf8 if it's going to be displayed in a HTML
     # page using the UTF-8 encoding.
-    # Encode::decode() knows what to do with invalid characters.
     if ($format ne 'raw' && Bugzilla->params->{'utf8'}) {
-        $old_attachment->{data} = Encode::decode_utf8($old_attachment->data);
-        $new_attachment->{data} = Encode::decode_utf8($new_attachment->data);
+        $old_attachment->data; # Populate ->{data}
+        utf8::decode($old_attachment->{data});
+        $new_attachment->data; # Populate ->{data}
+        utf8::decode($new_attachment->{data});
     }
 
     # Get old patch data.

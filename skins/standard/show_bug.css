@@ -61,3 +61,6 @@
 .bz_time_tracking_table .bz_summarize_time {
     text-align: right;
 }
+#summary tr td { 
+    vertical-align:top;
+}

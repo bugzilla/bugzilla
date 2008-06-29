@@ -314,32 +314,44 @@
      </span>
   
        
-    <span id="summary_alias_input">
-      <span id="summary">                           
+    <div id="summary_alias_input">
+      <table id="summary"> 
         [% IF Param("usebugaliases") %]
-          [% IF bug.check_can_change_field('alias', 0, 1) %]
-            <label 
-              for="alias" 
-              title="a name for the 
-                     [% terms.bug %] that can be used in place of its ID number, 
-                     [%%] e.g. when adding it to a list of dependencies"
-              >Alias</label>:&nbsp;
+          <tr>
+          [% IF bug.check_can_change_field('alias', 0, 1) %]      
+            <td>
+              <label 
+                for="alias" 
+                title="a name for the 
+                       [% terms.bug %] that can be used in place of its ID number, 
+                       [%%] e.g. when adding it to a list of dependencies"
+                >Alias</label>:</td><td>
           [% ELSIF bug.alias %]
-            (
+            <td colspan="2">(
+          [% ELSE %]
+            <td colspan="2">
           [% END %]
           [% PROCESS input inputname => "alias" 
                      size => "20" 
                      maxlength => "20"  
                      no_td => 1 
-                     %][% ") " IF NOT bug.check_can_change_field('alias', 0, 1) 
+                     %][% ")" IF NOT bug.check_can_change_field('alias', 0, 1) 
                                   && bug.alias %]
+          </td>
+        </tr>
         [% END %] 
         [%# *** Summary *** %]
-          <label accesskey="s" for="short_desc"><u>S</u>ummary</label>:&nbsp;
-          [% PROCESS input inputname => "short_desc" size => "60" colspan => 2
-                           maxlength => 255 spellcheck => "true" no_td => 1 %]
-      </span>
-    </span>
+        <tr>
+          <td>
+            <label accesskey="s" for="short_desc"><u>S</u>ummary</label>:
+          </td>
+          <td>
+            [% PROCESS input inputname => "short_desc" size => "80" colspan => 2
+                             maxlength => 255 spellcheck => "true" no_td => 1 %]
+          </td>
+        </tr>
+      </table>
+    </div>
   </div>
   <script type="text/javascript">
     hideAliasAndSummary('[% bug.short_desc FILTER js %]', '[% bug.alias FILTER js %]');

@@ -1401,6 +1401,7 @@ use constant FIELD_TABLE_SCHEMA => {
     ],
 };
 
+# Foreign Keys are added in Bugzilla::DB::bz_add_field_tables
 use constant MULTI_SELECT_VALUE_TABLE => {
     FIELDS => [
         bug_id => {TYPE => 'INT3', NOTNULL => 1},

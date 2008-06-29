@@ -526,6 +526,9 @@ sub update_table_definitions {
     $dbh->bz_alter_column('series', 'query',
         { TYPE => 'MEDIUMTEXT', NOTNULL => 1 });
 
+    # Add FK to multi select field tables
+    _add_foreign_keys_to_multiselects();
+    
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################
@@ -2990,6 +2993,25 @@ sub _check_content_length {
             print "$id: $string\n";
         }
         exit 3;
+    }
+}
+
+sub _add_foreign_keys_to_multiselects {
+    my $dbh = Bugzilla->dbh;
+
+    my $names = $dbh->selectcol_arrayref(
+        'SELECT name 
+           FROM fielddefs 
+          WHERE type = ' . FIELD_TYPE_MULTI_SELECT);
+
+    foreach my $name (@$names) {
+        $dbh->bz_add_fk("bug_$name", "bug_id", {TABLE  => 'bugs',
+                                                COLUMN => 'bug_id',
+                                                DELETE => 'CASCADE',});
+                                                
+        $dbh->bz_add_fk("bug_$name", "value", {TABLE  => $name,
+                                               COLUMN => 'value',
+                                               DELETE => 'RESTRICT',});
     }
 }
 

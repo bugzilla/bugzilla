@@ -179,13 +179,14 @@ sub sql_interval {
     return "INTERVAL $interval $units";
 }
 
+sub sql_iposition {
+    my ($self, $fragment, $text) = @_;
+    return "INSTR($text, $fragment)";
+}
+
 sub sql_position {
     my ($self, $fragment, $text) = @_;
 
-    # mysql 4.0.1 and lower do not support CAST
-    # (checksetup has a check for unsupported versions)
-
-    my $server_version = $self->bz_server_version;
     return "INSTR(CAST($text AS BINARY), CAST($fragment AS BINARY))";
 }
 

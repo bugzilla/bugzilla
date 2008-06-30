@@ -112,23 +112,16 @@ sub should_set {
 # Create a list of objects for all bugs being modified in this request.
 my @bug_objects;
 if (defined $cgi->param('id')) {
-  my $id = $cgi->param('id');
-  ValidateBugID($id);
-
-  # Store the validated, and detainted id back in the cgi data, as
-  # lots of later code will need it, and will obtain it from there
-  $cgi->param('id', $id);
-  push(@bug_objects, new Bugzilla::Bug($id));
+  my $bug = Bugzilla::Bug->check(scalar $cgi->param('id'));
+  $cgi->param('id', $bug->id);
+  push(@bug_objects, $bug);
 } else {
-    my @ids;
     foreach my $i ($cgi->param()) {
         if ($i =~ /^id_([1-9][0-9]*)/) {
             my $id = $1;
-            ValidateBugID($id);
-            push(@ids, $id);
+            push(@bug_objects, Bugzilla::Bug->check($id));
         }
     }
-    @bug_objects = @{Bugzilla::Bug->new_from_list(\@ids)};
 }
 
 # Make sure there are bugs to process.

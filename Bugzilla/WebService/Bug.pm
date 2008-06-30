@@ -123,7 +123,8 @@ sub get_history {
     my @return;
     foreach my $bug_id (@$ids) {
         my %item;
-        ValidateBugID($bug_id);
+        my $bug = Bugzilla::Bug->check($bug_id);
+        $bug_id = $bug->id;
 
         my ($activity) = Bugzilla::Bug::GetBugActivity($bug_id);
         $item{$bug_id} = [];
@@ -155,7 +156,6 @@ sub get_history {
         # alias is returned in case users passes a mixture of ids and aliases
         # then they get to know which bug activity relates to which value  
         # they passed
-        my $bug = new Bugzilla::Bug($bug_id);
         if (Bugzilla->params->{'usebugaliases'}) {
             $item{alias} = type('string')->value($bug->alias);
         }

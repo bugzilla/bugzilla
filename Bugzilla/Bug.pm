@@ -49,7 +49,7 @@ use Storable qw(dclone);
 
 use base qw(Bugzilla::Object Exporter);
 @Bugzilla::Bug::EXPORT = qw(
-    bug_alias_to_id ValidateBugID
+    bug_alias_to_id
     RemoveVotes CheckIfVotedConfirmed
     LogActivityEntry
     editable_bug_fields
@@ -1091,8 +1091,8 @@ sub _check_dependencies {
         my @bug_ids = split(/[\s,]+/, $deps_in{$type});
         # Eliminate nulls.
         @bug_ids = grep {$_} @bug_ids;
-        # We do Validate up here to make sure all aliases are converted to IDs.
-        ValidateBugID($_, $type) foreach @bug_ids;
+        # We do this up here to make sure all aliases are converted to IDs.
+        @bug_ids = map { $invocant->check($_, $type)->id } @bug_ids;
        
         my @check_access = @bug_ids;
         # When we're updating a bug, only added or removed bug_ids are 
@@ -1114,11 +1114,10 @@ sub _check_dependencies {
 
         my $user = Bugzilla->user;
         foreach my $modified_id (@check_access) {
-            ValidateBugID($modified_id);
+            my $delta_bug = $invocant->check($modified_id);
             # Under strict isolation, you can't modify a bug if you can't
             # edit it, even if you can see it.
             if (Bugzilla->params->{"strict_isolation"}) {
-                my $delta_bug = new Bugzilla::Bug($modified_id);
                 if (!$user->can_edit_product($delta_bug->{'product_id'})) {
                     ThrowUserError("illegal_change_deps", {field => $type});
                 }
@@ -1142,7 +1141,7 @@ sub _check_dup_id {
     $dupe_of = trim($dupe_of);
     $dupe_of || ThrowCodeError('undefined_field', { field => 'dup_id' });
     # Make sure we can change the original bug (issue A on bug 96085)
-    ValidateBugID($dupe_of, 'dup_id');
+    my $dupe_of_bug = $self->check($dupe_of, 'dup_id');
     
     # Make sure a loop isn't created when marking this bug
     # as duplicate.
@@ -1174,7 +1173,6 @@ sub _check_dup_id {
     # Should we add the reporter to the CC list of the new bug?
     # If he can see the bug...
     if ($self->reporter->can_see_bug($dupe_of)) {
-        my $dupe_of_bug = new Bugzilla::Bug($dupe_of);
         # We only add him if he's not the reporter of the other bug.
         $self->{_add_dup_cc} = 1
             if $dupe_of_bug->reporter->id != $self->reporter->id;
@@ -1199,9 +1197,7 @@ sub _check_dup_id {
             my $vars = {};
             my $template = Bugzilla->template;
             # Ask the user what they want to do about the reporter.
-            $vars->{'cclist_accessible'} = $dbh->selectrow_array(
-                q{SELECT cclist_accessible FROM bugs WHERE bug_id = ?},
-                undef, $dupe_of);
+            $vars->{'cclist_accessible'} = $dupe_of_bug->cclist_accessible;
             $vars->{'original_bug_id'} = $dupe_of;
             $vars->{'duplicate_bug_id'} = $self->id;
             print $cgi->header();

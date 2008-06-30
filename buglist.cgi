@@ -562,8 +562,8 @@ elsif (($cgi->param('cmdtype') eq "doit") && defined $cgi->param('remtype')) {
             my $changes = 0;
             foreach my $bug_id (split(/[\s,]+/, $cgi->param('bug_ids'))) {
                 next unless $bug_id;
-                ValidateBugID($bug_id);
-                $bug_ids{$bug_id} = $keep_bug;
+                my $bug = Bugzilla::Bug->check($bug_id);
+                $bug_ids{$bug->id} = $keep_bug;
                 $changes = 1;
             }
             ThrowUserError('no_bug_ids',

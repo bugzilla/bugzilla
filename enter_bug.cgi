@@ -350,8 +350,8 @@ my $has_canconfirm = $user->in_group('canconfirm', $product->id);
 $cloned_bug_id = $cgi->param('cloned_bug_id');
 
 if ($cloned_bug_id) {
-    ValidateBugID($cloned_bug_id);
-    $cloned_bug = new Bugzilla::Bug($cloned_bug_id);
+    $cloned_bug = Bugzilla::Bug->check($cloned_bug_id);
+    $cloned_bug_id = $cloned_bug->id;
 }
 
 if (scalar(@{$product->components}) == 1) {

@@ -135,8 +135,8 @@ if ($display eq 'doall') {
     }
 } else {
     foreach my $i (split('[\s,]+', $cgi->param('id'))) {
-        ValidateBugID($i);
-        $baselist{$i} = 1;
+        my $bug = Bugzilla::Bug->check($i);
+        $baselist{$bug->id} = 1;
     }
 
     my @stack = keys(%baselist);

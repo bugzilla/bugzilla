@@ -41,7 +41,7 @@ use Pod::Usage;
 use Encode;
 
 use Bugzilla;
-use Bugzilla::Bug qw(ValidateBugID);
+use Bugzilla::Bug;
 use Bugzilla::Constants qw(USAGE_MODE_EMAIL);
 use Bugzilla::Error;
 use Bugzilla::Mailer;
@@ -172,8 +172,7 @@ sub process_bug {
 
     debug_print("Updating Bug $fields{id}...");
 
-    ValidateBugID($bug_id);
-    my $bug = new Bugzilla::Bug($bug_id);
+    my $bug = Bugzilla::Bug->check($bug_id);
 
     if ($fields{'bug_status'}) {
         $fields{'knob'} = $fields{'bug_status'};

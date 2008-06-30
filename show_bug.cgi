@@ -57,10 +57,7 @@ my %marks;
 
 if ($single) {
     my $id = $cgi->param('id');
-    # Its a bit silly to do the validation twice - that functionality should
-    # probably move into Bug.pm at some point
-    ValidateBugID($id);
-    push @bugs, new Bugzilla::Bug($id);
+    push @bugs, Bugzilla::Bug->check($id);
     if (defined $cgi->param('mark')) {
         foreach my $range (split ',', $cgi->param('mark')) {
             if ($range =~ /^(\d+)-(\d+)$/) {

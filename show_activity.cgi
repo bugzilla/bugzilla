@@ -43,17 +43,17 @@ Bugzilla->login();
 
 # Make sure the bug ID is a positive integer representing an existing
 # bug that the user is authorized to access.
-my $bug_id = $cgi->param('id');
-ValidateBugID($bug_id);
+my $id = $cgi->param('id');
+my $bug = Bugzilla::Bug->check($id);
 
 ###############################################################################
 # End Data/Security Validation
 ###############################################################################
 
 ($vars->{'operations'}, $vars->{'incomplete_data'}) = 
-    Bugzilla::Bug::GetBugActivity($bug_id);
+    Bugzilla::Bug::GetBugActivity($bug->id);
 
-$vars->{'bug'} = new Bugzilla::Bug($bug_id);
+$vars->{'bug'} = $bug;
 
 print $cgi->header();
 

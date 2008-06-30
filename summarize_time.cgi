@@ -251,7 +251,7 @@ $user->in_group(Bugzilla->params->{"timetrackinggroup"})
                                        object => "timetracking_summaries"});
 
 my @ids = split(",", $cgi->param('id'));
-map { ValidateBugID($_) } @ids;
+@ids = map { Bugzilla::Bug->check($_)->id } @ids;
 scalar(@ids) || ThrowUserError('no_bugs_chosen', {action => 'view'});
 
 my $group_by = $cgi->param('group_by') || "number";

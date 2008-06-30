@@ -165,8 +165,10 @@ sub validateID {
       || ThrowUserError("invalid_attach_id", { attach_id => $attach_id });
 
     # Make sure the user is authorized to access this attachment's bug.
-    ValidateBugID($attachment->bug_id);
-    if ($attachment->isprivate && $user->id != $attachment->attacher->id && !$user->is_insider) {
+    Bugzilla::Bug->check($attachment->bug_id);
+    if ($attachment->isprivate && $user->id != $attachment->attacher->id 
+        && !$user->is_insider) 
+    {
         ThrowUserError('auth_failure', {action => 'access',
                                         object => 'attachment'});
     }
@@ -281,9 +283,8 @@ sub diff {
 # HTML page.
 sub viewall {
     # Retrieve and validate parameters
-    my $bugid = $cgi->param('bugid');
-    ValidateBugID($bugid);
-    my $bug = new Bugzilla::Bug($bugid);
+    my $bug = Bugzilla::Bug->check(scalar $cgi->param('bugid'));
+    my $bugid = $bug->id;
 
     my $attachments = Bugzilla::Attachment->get_attachments_by_bug($bugid);
 
@@ -301,13 +302,12 @@ sub viewall {
 # Display a form for entering a new attachment.
 sub enter {
   # Retrieve and validate parameters
-  my $bugid = $cgi->param('bugid');
-  ValidateBugID($bugid);
+  my $bug = Bugzilla::Bug->check(scalar $cgi->param('bugid'));
+  my $bugid = $bug->id;
   validateCanChangeBug($bugid);
   my $dbh = Bugzilla->dbh;
   my $user = Bugzilla->user;
 
-  my $bug = new Bugzilla::Bug($bugid, $user->id);
   # Retrieve the attachments the user can edit from the database and write
   # them into an array of hashes where each hash represents one attachment.
   my $canEdit = "";
@@ -344,8 +344,8 @@ sub insert {
     $dbh->bz_start_transaction;
 
     # Retrieve and validate parameters
-    my $bugid = $cgi->param('bugid');
-    ValidateBugID($bugid);
+    my $bug = Bugzilla::Bug->check(scalar $cgi->param('bugid'));
+    my $bugid = $bug->id;
     validateCanChangeBug($bugid);
     my ($timestamp) = Bugzilla->dbh->selectrow_array("SELECT NOW()");
 
@@ -373,7 +373,6 @@ sub insert {
         }
     }
 
-    my $bug = new Bugzilla::Bug($bugid);
     my $attachment =
         Bugzilla::Attachment->insert_attachment_for_bug(THROW_ERROR, $bug, $user,
                                                         $timestamp, $vars);

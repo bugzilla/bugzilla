@@ -67,7 +67,10 @@ else {
 # Make sure the bug ID is a positive integer representing an existing
 # bug that the user is authorized to access.
 
-ValidateBugID($bug_id) if defined $bug_id;
+if (defined $bug_id) {
+    my $bug = Bugzilla::Bug->check($bug_id);
+    $bug_id = $bug->id;
+}
 
 ################################################################################
 # End Data/Security Validation
@@ -244,14 +247,15 @@ sub record_votes {
         }
     }
 
-    # Call ValidateBugID on each bug ID to make sure it is a positive
+    # Call check() on each bug ID to make sure it is a positive
     # integer representing an existing bug that the user is authorized 
     # to access, and make sure the number of votes submitted is also
     # a non-negative integer (a series of digits not preceded by a
     # minus sign).
     my %votes;
     foreach my $id (@buglist) {
-      ValidateBugID($id);
+      my $bug = Bugzilla::Bug->check($id);
+      $id = $bug->id;
       $votes{$id} = $cgi->param($id);
       detaint_natural($votes{$id}) 
         || ThrowUserError("votes_must_be_nonnegative");

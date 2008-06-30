@@ -171,8 +171,11 @@ sub sql_date_format {
 
 sub sql_interval {
     my ($self, $interval, $units) = @_;
-
-    return "INTERVAL " . $self->quote($interval) . " $units";
+    if ($units =~ /YEAR|MONTH/i) {
+        return "NUMTOYMINTERVAL($interval,'$units')";
+    } else{
+        return "NUMTODSINTERVAL($interval,'$units')";
+    }
 }
 
 sub sql_position {
@@ -490,7 +493,7 @@ sub bz_setup_database {
 }
 
 package Bugzilla::DB::Oracle::st;
-use base qw(DBD::Oracle::st);
+use base qw(DBI::st);
  
 sub fetchrow_arrayref {
     my $self = shift;
@@ -545,5 +548,13 @@ sub fetchall_hashref {
     }
      return $ref;
 }
-    
+
+sub fetch {
+    my $self = shift;
+    my $row = $self->SUPER::fetch(@_);
+    if ($row) {
+      Bugzilla::DB::Oracle::_fix_arrayref($row);
+    }
+   return $row;
+}
 1;

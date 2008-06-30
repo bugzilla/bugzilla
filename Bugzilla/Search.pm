@@ -912,8 +912,7 @@ sub GetByWordListSubstr {
         if ($word ne "") {
             $sql_word = $dbh->quote($word);
             trick_taint($sql_word);
-            push(@list, $dbh->sql_position(lc($sql_word),
-                                           "LOWER($field)") . " > 0");
+            push(@list, $dbh->sql_iposition($sql_word, $field) . " > 0");
         }
     }
 
@@ -1919,7 +1918,7 @@ sub _substring {
     my ($ff, $q, $term) = @func_args{qw(ff q term)};
     my $dbh = Bugzilla->dbh;
     
-    $$term = $dbh->sql_position(lc($$q), "LOWER($$ff)") . " > 0";
+    $$term = $dbh->sql_iposition($$q, $$ff) . " > 0";
 }
 
 sub _notsubstring {
@@ -1928,7 +1927,7 @@ sub _notsubstring {
     my ($ff, $q, $term) = @func_args{qw(ff q term)};
     my $dbh = Bugzilla->dbh;
     
-    $$term = $dbh->sql_position(lc($$q), "LOWER($$ff)") . " = 0";
+    $$term = $dbh->sql_iposition($$q, $$ff) . " = 0";
 }
 
 sub _regexp {

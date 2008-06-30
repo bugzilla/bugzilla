@@ -313,6 +313,13 @@ sub sql_istring {
     return "LOWER($string)";
 }
 
+sub sql_iposition {
+    my ($self, $fragment, $text) = @_;
+    $fragment = $self->sql_istring($fragment);
+    $text = $self->sql_istring($text);
+    return $self->sql_position($fragment, $text);
+}
+
 sub sql_position {
     my ($self, $fragment, $text) = @_;
 
@@ -1699,9 +1706,12 @@ Formatted SQL for interval function (scalar)
 
 =item B<Description>
 
-Outputs proper SQL syntax determinig position of a substring
+Outputs proper SQL syntax determining position of a substring
 (fragment) withing a string (text). Note: if the substring or
 text are string constants, they must be properly quoted (e.g. "'pattern'").
+
+It searches for the string in a case-sensitive manner. If you want to do
+a case-insensitive search, use L</sql_iposition>.
 
 =item B<Params>
 
@@ -1718,6 +1728,10 @@ text are string constants, they must be properly quoted (e.g. "'pattern'").
 Formatted SQL for substring search (scalar)
 
 =back
+
+=item C<sql_iposition>
+
+Just like L</sql_position>, but case-insensitive.
 
 =item C<sql_group_by>
 

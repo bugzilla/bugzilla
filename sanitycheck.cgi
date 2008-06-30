@@ -293,12 +293,17 @@ if ($cgi->param('remove_invalid_bug_references')) {
 
     $dbh->bz_start_transaction();
 
+    # Include custom multi-select fields to the list.
+    my @multi_selects = Bugzilla->get_fields({custom => 1, type => FIELD_TYPE_MULTI_SELECT});
+    my @addl_fields = map { 'bug_' . $_->name . '/' } @multi_selects;
+
     foreach my $pair ('attachments/', 'bug_group_map/', 'bugs_activity/',
                       'bugs_fulltext/', 'cc/',
                       'dependencies/blocked', 'dependencies/dependson',
                       'duplicates/dupe', 'duplicates/dupe_of',
-                      'flags/', 'keywords/', 'longdescs/', 'votes/') {
-
+                      'flags/', 'keywords/', 'longdescs/', 'votes/',
+                      @addl_fields)
+    {
         my ($table, $field) = split('/', $pair);
         $field ||= "bug_id";
 
@@ -457,6 +462,10 @@ CrossCheck("flagtypes", "id",
            ["flagexclusions", "type_id"],
            ["flaginclusions", "type_id"]);
 
+# Include custom multi-select fields to the list.
+my @multi_selects = Bugzilla->get_fields({custom => 1, type => FIELD_TYPE_MULTI_SELECT});
+my @addl_fields = map { ['bug_' . $_->name, 'bug_id'] } @multi_selects;
+
 CrossCheck("bugs", "bug_id",
            ["bugs_activity", "bug_id"],
            ["bug_group_map", "bug_id"],
@@ -470,7 +479,8 @@ CrossCheck("bugs", "bug_id",
            ["votes", "bug_id"],
            ["keywords", "bug_id"],
            ["duplicates", "dupe_of", "dupe"],
-           ["duplicates", "dupe", "dupe_of"]);
+           ["duplicates", "dupe", "dupe_of"],
+           @addl_fields);
 
 CrossCheck("groups", "id",
            ["bug_group_map", "group_id"],

@@ -778,6 +778,7 @@ sub remove_from_db {
     # - keywords
     # - longdescs
     # - votes
+    # Also included are custom multi-select fields.
 
     # Also, the attach_data table uses attachments.attach_id as a foreign
     # key, and so indirectly depends on a bug deletion too.
@@ -809,6 +810,13 @@ sub remove_from_db {
     $dbh->do("DELETE FROM attachments WHERE bug_id = ?", undef, $bug_id);
     $dbh->do("DELETE FROM bugs WHERE bug_id = ?", undef, $bug_id);
     $dbh->do("DELETE FROM longdescs WHERE bug_id = ?", undef, $bug_id);
+
+    # Delete entries from custom multi-select fields.
+    my @multi_selects = Bugzilla->get_fields({custom => 1, type => FIELD_TYPE_MULTI_SELECT});
+
+    foreach my $field (@multi_selects) {
+        $dbh->do("DELETE FROM bug_" . $field->name . " WHERE bug_id = ?", undef, $bug_id);
+    }
 
     $dbh->bz_commit_transaction();
 

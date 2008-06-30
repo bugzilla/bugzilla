@@ -1067,7 +1067,6 @@ sub match {
         && (Bugzilla->params->{'usermatchmode'} eq 'search')
         && (length($str) >= 3))
     {
-        $str = lc($str);
         trick_taint($str);
 
         my $query   = "SELECT DISTINCT login_name FROM profiles ";
@@ -1076,8 +1075,8 @@ sub match {
                                ON user_group_map.user_id = profiles.userid ";
         }
         $query     .= " WHERE (" .
-                $dbh->sql_position('?', 'LOWER(login_name)') . " > 0" . " OR " .
-                $dbh->sql_position('?', 'LOWER(realname)') . " > 0) ";
+                $dbh->sql_iposition('?', 'login_name') . " > 0" . " OR " .
+                $dbh->sql_iposition('?', 'realname') . " > 0) ";
         if (Bugzilla->params->{'usevisibilitygroups'}) {
             $query .= " AND isbless = 0" .
                       " AND group_id IN(" .

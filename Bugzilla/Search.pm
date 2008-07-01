@@ -1239,16 +1239,20 @@ sub _content_matches {
                        "ON bugs.bug_id = $table.bug_id");
     
     # Create search terms to add to the SELECT and WHERE clauses.
-    my $term1 = $dbh->sql_fulltext_search("$table.$comments_col", $$v);
-    my $term2 = $dbh->sql_fulltext_search("$table.short_desc", $$v);
-    
+    my ($term1, $rterm1) = $dbh->sql_fulltext_search("$table.$comments_col", 
+                                                        $$v, 1);
+    my ($term2, $rterm2) = $dbh->sql_fulltext_search("$table.short_desc", 
+                                                        $$v, 2);
+    $rterm1 = $term1 if !$rterm1;
+    $rterm2 = $term2 if !$rterm2;
+
     # The term to use in the WHERE clause.
     $$term = "$term1 > 0 OR $term2 > 0";
     
     # In order to sort by relevance (in case the user requests it),
     # we SELECT the relevance value and give it an alias so we can
     # add it to the SORT BY clause when we build it in buglist.cgi.
-    my $select_term = "($term1 + $term2) AS relevance";
+    my $select_term = "($rterm1 + $rterm2) AS relevance";
 
     # Users can specify to display the relevance field, in which case
     # it'll show up in the list of fields being selected, and we need

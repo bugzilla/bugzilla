@@ -391,7 +391,7 @@ use constant DB_MODULE => {
                     version => '1.45',
                 },
                 name => 'PostgreSQL'},
-     'oracle'=> {db => 'Bugzilla::DB::Oracle', db_version => '10.01.0',
+     'oracle'=> {db => 'Bugzilla::DB::Oracle', db_version => '10.02.0',
                 dbd => {
                      package => 'DBD-Oracle',
                      module  => 'DBD::Oracle',

@@ -319,8 +319,8 @@ sub adjust_statement {
              if ($new_sql =~ /(.*\s+)FROM(\s+.*)/i) { 
                  my ($before_from,$after_from) = ($1,$2);
                  $before_where = "$before_from FROM ($before_from,"
-                              . " ROW_NUMBER() OVER (ORDER BY quipid) R "
-                              . " FROM $after_from ) "; 
+                             . " ROW_NUMBER() OVER (ORDER BY 1) R "
+                             . " FROM $after_from ) "; 
                  $after_where = " R BETWEEN $offset+1 AND $limit+$offset";
              }
          } else {

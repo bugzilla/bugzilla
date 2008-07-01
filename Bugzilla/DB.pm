@@ -501,8 +501,7 @@ sub bz_add_fk {
 
     my $col_def = $self->bz_column_info($table, $column);
     if (!$col_def->{REFERENCES}) {
-        $self->_check_references($table, $column, $def->{TABLE},
-                                 $def->{COLUMN});
+        $self->_check_references($table, $column, $def);
         print get_text('install_fk_add',
                        { table => $table, column => $column, fk => $def }) 
             . "\n" if Bugzilla->usage_mode == USAGE_MODE_CMDLINE;
@@ -1205,7 +1204,9 @@ sub _bz_populate_enum_table {
 # This is used before adding a foreign key to a column, to make sure
 # that the database won't fail adding the key.
 sub _check_references {
-    my ($self, $table, $column, $foreign_table, $foreign_column) = @_;
+    my ($self, $table, $column, $fk) = @_;
+    my $foreign_table = $fk->{TABLE};
+    my $foreign_column = $fk->{COLUMN};
 
     my $bad_values = $self->selectcol_arrayref(
         "SELECT DISTINCT $table.$column 
@@ -1215,23 +1216,41 @@ sub _check_references {
                 AND $table.$column IS NOT NULL");
 
     if (@$bad_values) {
-        my $values = join(', ', @$bad_values);
-        print <<EOT;
-
-ERROR: There are invalid values for the $column column in the $table 
-table. (These values do not exist in the $foreign_table table, in the 
-$foreign_column column.)
-
-Before continuing with checksetup, you will need to fix these values,
-either by deleting these rows from the database, or changing the values
-of $column in $table to point to valid values in $foreign_table.$foreign_column.
-
-The bad values from the $table.$column column are:
-$values
-
-EOT
-        # I just picked a number above 2, to be considered "abnormal exit."
-        exit 3;
+        my $delete_action = $fk->{DELETE} || '';
+        if ($delete_action eq 'CASCADE') {
+            $self->do("DELETE FROM $table WHERE $column IN (" 
+                      . join(',', ('?') x @$bad_values)  . ")",
+                      undef, @$bad_values);
+            if (Bugzilla->usage_mode == USAGE_MODE_CMDLINE) {
+                print "\n", get_text('install_fk_invalid_fixed',
+                    { table => $table, column => $column,
+                      foreign_table => $foreign_table,
+                      foreign_column => $foreign_column,
+                      'values' => $bad_values, action => 'delete' }), "\n";
+            }
+        }
+        elsif ($delete_action eq 'SET NULL') {
+            $self->do("UPDATE $table SET $column = NULL
+                        WHERE $column IN ("
+                      . join(',', ('?') x @$bad_values)  . ")",
+                      undef, @$bad_values);
+            if (Bugzilla->usage_mode == USAGE_MODE_CMDLINE) {
+                print "\n", get_text('install_fk_invalid_fixed',
+                    { table => $table, column => $column,
+                      foreign_table => $foreign_table, 
+                      foreign_column => $foreign_column,
+                      'values' => $bad_values, action => 'null' }), "\n";
+            }
+        }
+        else {
+            print "\n", get_text('install_fk_invalid',
+                { table => $table, column => $column,
+                  foreign_table => $foreign_table,
+                  foreign_column => $foreign_column,
+                 'values' => $bad_values }), "\n";
+            # I just picked a number above 2, to be considered "abnormal exit"
+            exit 3
+        }
     }
 }
 

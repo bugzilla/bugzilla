@@ -22,7 +22,6 @@ package Bugzilla::WebService::Bug;
 
 use strict;
 use base qw(Bugzilla::WebService);
-import SOAP::Data qw(type);
 
 use Bugzilla::Constants;
 use Bugzilla::Error;
@@ -87,17 +86,15 @@ sub get {
         # This is done in this fashion in order to produce a stable API.
         # The internals of Bugzilla::Bug are not stable enough to just
         # return them directly.
-        my $creation_ts = $self->datetime_format($bug->creation_ts);
-        my $delta_ts    = $self->datetime_format($bug->delta_ts);
         my %item;
-        $item{'creation_time'}    = type('dateTime')->value($creation_ts);
-        $item{'last_change_time'} = type('dateTime')->value($delta_ts);
+        $item{'creation_time'}    = $self->type('dateTime', $bug->creation_ts);
+        $item{'last_change_time'} = $self->type('dateTime', $bug->delta_ts);
         $item{'internals'}        = $bug;
-        $item{'id'}               = type('int')->value($bug->bug_id);
-        $item{'summary'}          = type('string')->value($bug->short_desc);
+        $item{'id'}               = $self->type('int', $bug->bug_id);
+        $item{'summary'}          = $self->type('string', $bug->short_desc);
 
         if (Bugzilla->params->{'usebugaliases'}) {
-            $item{'alias'} = type('string')->value($bug->alias);
+            $item{'alias'} = $self->type('string', $bug->alias);
         }
         else {
             # For API reasons, we always want the value to appear, we just
@@ -131,18 +128,18 @@ sub get_history {
 
         foreach my $changeset (@$activity) {
             my %bug_history;
-            $bug_history{when} = type('dateTime')->value(
+            $bug_history{when} = $self->type('dateTime',
                 $self->datetime_format($changeset->{when}));
-            $bug_history{who}  = type('string')->value($changeset->{who});
+            $bug_history{who}  = $self->type('string', $changeset->{who});
             $bug_history{changes} = [];
             foreach my $change (@{ $changeset->{changes} }) {
                 my $attach_id = delete $change->{attachid};
                 if ($attach_id) {
-                    $change->{attachment_id} = type('int')->value($attach_id);
+                    $change->{attachment_id} = $self->type('int', $attach_id);
                 }
-                $change->{removed} = type('string')->value($change->{removed});
-                $change->{added}   = type('string')->value($change->{added});
-                $change->{field_name} = type('string')->value(
+                $change->{removed} = $self->type('string', $change->{removed});
+                $change->{added}   = $self->type('string', $change->{added});
+                $change->{field_name} = $self->type('string',
                     delete $change->{fieldname});
                 # This is going to go away in the future from GetBugActivity
                 # so we shouldn't put it in the API.
@@ -157,7 +154,7 @@ sub get_history {
         # then they get to know which bug activity relates to which value  
         # they passed
         if (Bugzilla->params->{'usebugaliases'}) {
-            $item{alias} = type('string')->value($bug->alias);
+            $item{alias} = $self->type('string', $bug->alias);
         }
         else {
             # For API reasons, we always want the value to appear, we just
@@ -189,7 +186,7 @@ sub create {
 
     Bugzilla::BugMail::Send($bug->bug_id, { changer => $bug->reporter->login });
 
-    return { id => type('int')->value($bug->bug_id) };
+    return { id => $self->type('int', $bug->bug_id) };
 }
 
 sub legal_values {
@@ -232,7 +229,7 @@ sub legal_values {
 
     my @result;
     foreach my $val (@$values) {
-        push(@result, type('string')->value($val));
+        push(@result, $self->type('string', $val));
     }
 
     return { values => \@result };

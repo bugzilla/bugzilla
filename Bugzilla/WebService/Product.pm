@@ -21,7 +21,6 @@ use strict;
 use base qw(Bugzilla::WebService);
 use Bugzilla::Product;
 use Bugzilla::User;
-import SOAP::Data qw(type);
 
 ##################################################
 # Add aliases here for method name compatibility #
@@ -63,9 +62,9 @@ sub get {
     my @products = 
         map {{
                internals   => $_,
-               id          => type('int')->value($_->id),
-               name        => type('string')->value($_->name),
-               description => type('string')->value($_->description), 
+               id          => $self->type('int', $_->id),
+               name        => $self->type('string', $_->name),
+               description => $self->type('string', $_->description),
              }
         } @requested_accessible;
 

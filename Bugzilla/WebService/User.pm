@@ -22,8 +22,6 @@ package Bugzilla::WebService::User;
 use strict;
 use base qw(Bugzilla::WebService);
 
-import SOAP::Data qw(type); 
-
 use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Error;
@@ -63,7 +61,7 @@ sub login {
     $cgi->param('Bugzilla_remember', $remember);
 
     Bugzilla->login;
-    return { id => type('int')->value(Bugzilla->user->id) };
+    return { id => $self->type('int', Bugzilla->user->id) };
 }
 
 sub logout {
@@ -118,7 +116,7 @@ sub create {
         cryptpassword => $password
     });
 
-    return { id => type('int')->value($user->id) };
+    return { id => $self->type('int', $user->id) };
 }
 
 
@@ -149,9 +147,9 @@ sub get {
             ThrowUserError('user_access_by_match_denied');
         }
         @users = map {filter $params, {
-                     id => type('int')->value($_->id),
-                     real_name => type('string')->value($_->name), 
-                     name => type('string')->value($_->login),
+                     id        => $self->type('int', $_->id),
+                     real_name => $self->type('string', $_->name), 
+                     name      => $self->type('string', $_->login),
                  }} @user_objects;
 
         return { users => \@users };
@@ -195,24 +193,24 @@ sub get {
     if (Bugzilla->user->in_group('editusers')) {
         @users =
             map {filter $params, {
-                id => type('int')->value($_->id),
-                real_name => type('string')->value($_->name),
-                name => type('string')->value($_->login),
-                email => type('string')->value($_->email),
-                can_login => type('boolean')->value(!($_->is_disabled)),
-                email_enabled => type('boolean')->value($_->email_enabled),
-                login_denied_text => type('string')->value($_->disabledtext),
+                id        => $self->type('int', $_->id),
+                real_name => $self->type('string', $_->name),
+                name      => $self->type('string', $_->login),
+                email     => $self->type('string', $_->email),
+                can_login => $self->type('boolean', $_->is_disabled ? 0 : 1),
+                email_enabled     => $self->type('boolean', $_->email_enabled),
+                login_denied_text => $self->type('string', $_->disabledtext),
             }} @user_objects;
 
     }    
     else {
         @users =
             map {filter $params, {
-                id => type('int')->value($_->id),
-                real_name => type('string')->value($_->name),
-                name => type('string')->value($_->login),
-                email => type('string')->value($_->email),
-                can_login => type('boolean')->value(!($_->is_disabled)),
+                id        => $self->type('int', $_->id),
+                real_name => $self->type('string', $_->name),
+                name      => $self->type('string', $_->login),
+                email     => $self->type('string', $_->email),
+                can_login => $self->type('boolean', $_->is_disabled ? 0 : 1),
             }} @user_objects;
     }
 

@@ -20,6 +20,7 @@ package Bugzilla::WebService;
 use strict;
 use Bugzilla::WebService::Constants;
 use Date::Parse;
+use XMLRPC::Lite;
 
 sub fail_unimplemented {
     my $this = shift;
@@ -60,6 +61,14 @@ sub login_exempt {
     my ($class, $method) = @_;
 
     return $class->LOGIN_EXEMPT->{$method};
+}
+
+sub type {
+    my ($self, $type, $value) = @_;
+    if ($type eq 'dateTime') {
+        $value = $self->datetime_format($value);
+    }
+    return XMLRPC::Data->type($type)->value($value);
 }
 
 1;

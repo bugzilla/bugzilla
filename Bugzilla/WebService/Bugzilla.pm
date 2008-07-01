@@ -22,7 +22,6 @@ use strict;
 use base qw(Bugzilla::WebService);
 use Bugzilla::Constants;
 use Bugzilla::Hook;
-import SOAP::Data qw(type);
 
 use Time::Zone;
 
@@ -33,26 +32,29 @@ use constant LOGIN_EXEMPT => {
 };
 
 sub version {
-    return { version => type('string')->value(BUGZILLA_VERSION) };
+    my $self = shift;
+    return { version => $self->type('string', BUGZILLA_VERSION) };
 }
 
 sub extensions {
+    my $self = shift;
     my $extensions = Bugzilla::Hook::enabled_plugins();
     foreach my $name (keys %$extensions) {
         my $info = $extensions->{$name};
-        foreach my $data (keys %$info)
-        {
-            $extensions->{$name}->{$data} = type('string')->value($info->{$data});
+        foreach my $data (keys %$info) {
+            $extensions->{$name}->{$data} = 
+                $self->type('string', $info->{$data});
         }
     }
     return { extensions => $extensions };
 }
 
 sub timezone {
+    my $self = shift;
     my $offset = tz_offset();
     $offset = (($offset / 60) / 60) * 100;
     $offset = sprintf('%+05d', $offset);
-    return { timezone => type('string')->value($offset) };
+    return { timezone => $self->type('string', $offset) };
 }
 
 1;

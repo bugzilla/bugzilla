@@ -294,8 +294,13 @@ sub adjust_statement {
         # Look for a LIMIT clause
         ($limit) = ($nonstring =~ m(/\* LIMIT (\d*) \*/)o);
 
-        push @result, $string;
-        push @result, $nonstring;
+        if(!length($string)){
+           push @result, EMPTY_STRING;
+           push @result, $nonstring;
+        } else {
+           push @result, $string;
+           push @result, $nonstring;
+        }
     }
 
     my $new_sql = join "'", @result;

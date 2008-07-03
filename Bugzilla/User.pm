@@ -682,7 +682,7 @@ sub can_enter_product {
     }
     trick_taint($product_name);
     my $can_enter =
-        grep($_->name eq $product_name, @{$self->get_enterable_products});
+        grep(lc($_->name) eq lc($product_name), @{$self->get_enterable_products});
 
     return 1 if $can_enter;
 

@@ -680,9 +680,10 @@ sub can_enter_product {
         return unless $warn == THROW_ERROR;
         ThrowUserError('no_products');
     }
-    trick_taint($product_name);
+    my $product = new Bugzilla::Product({name => $product_name});
+
     my $can_enter =
-        grep($_->name eq $product_name, @{$self->get_enterable_products});
+      $product && grep($_->name eq $product->name, @{$self->get_enterable_products});
 
     return 1 if $can_enter;
 
@@ -690,8 +691,6 @@ sub can_enter_product {
 
     # Check why access was denied. These checks are slow,
     # but that's fine, because they only happen if we fail.
-
-    my $product = new Bugzilla::Product({name => $product_name});
 
     # The product could not exist or you could be denied...
     if (!$product || !$product->user_has_access($self)) {

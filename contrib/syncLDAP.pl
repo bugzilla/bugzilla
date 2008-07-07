@@ -98,7 +98,7 @@ if ($LDAPserver eq "") {
 }
 
 my $LDAPconn;
-if($LDAPserver =~ /\:\/\//) {
+if($LDAPserver =~ /:\/\//) {
     # if the "LDAPserver" parameter is in uri scheme
     $LDAPconn = Net::LDAP->new($LDAPserver, version => 3);
 } else {

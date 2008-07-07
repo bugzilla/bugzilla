@@ -1398,7 +1398,8 @@ sub _check_strict_isolation {
         my @old_cc = map { $_->id } @{$original->cc_users};
         my @new_cc = map { $_->id } @{$invocant->cc_users};
         my ($removed, $added) = diff_arrays(\@old_cc, \@new_cc);
-        $ccs = $added;
+        $ccs = Bugzilla::User->new_from_list($added);
+
         $assignee = $invocant->assigned_to
             if $invocant->assigned_to->id != $original->assigned_to->id;
         if ($invocant->qa_contact
@@ -1407,7 +1408,7 @@ sub _check_strict_isolation {
         {
             $qa_contact = $invocant->qa_contact;
         }
-        $product = $invocant->product;
+        $product = $invocant->product_obj;
     }
 
     my @related_users = @$ccs;

@@ -35,6 +35,7 @@ use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Update;
+use Bugzilla::Util;
 
 # Check whether or not the user is logged in
 my $user = Bugzilla->login(LOGIN_OPTIONAL);
@@ -46,9 +47,8 @@ my $user = Bugzilla->login(LOGIN_OPTIONAL);
 my $cgi = Bugzilla->cgi;
 # Force to use HTTPS unless Bugzilla->params->{'ssl'} equals 'never'.
 # This is required because the user may want to log in from here.
-if (Bugzilla->params->{'sslbase'} ne '' and Bugzilla->params->{'ssl'} ne 'never') {
-    $cgi->require_https(Bugzilla->params->{'sslbase'});
-}
+$cgi->require_https(Bugzilla->params->{'sslbase'}) 
+    if ssl_require_redirect();
 
 my $template = Bugzilla->template;
 my $vars = {};

@@ -347,11 +347,9 @@ sub request_create_account {
     $vars->{'date'} = str2time($date);
 
     # We require a HTTPS connection if possible.
-    if (Bugzilla->params->{'sslbase'} ne ''
-        && Bugzilla->params->{'ssl'} ne 'never')
-    {
-        $cgi->require_https(Bugzilla->params->{'sslbase'});
-    }
+    Bugzilla->cgi->require_https(Bugzilla->params->{'sslbase'}) 
+        if ssl_require_redirect();
+
     print $cgi->header();
 
     $template->process('account/email/confirm-new.html.tmpl', $vars)

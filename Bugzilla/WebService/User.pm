@@ -43,7 +43,13 @@ use constant LOGIN_EXEMPT => {
 sub login {
     my ($self, $params) = @_;
     my $remember = $params->{remember};
-    
+
+    # Username and password params are required 
+    foreach my $param ("login", "password") {
+        defined $params->{$param} 
+            || ThrowCodeError('param_required', { param => $param });
+    }
+
     # Convert $remember from a boolean 0/1 value to a CGI-compatible one.
     if (defined($remember)) {
         $remember = $remember? 'on': '';
@@ -286,6 +292,10 @@ The username does not exist, or the password is wrong.
 
 The account has been disabled.  A reason may be specified with the
 error.
+
+=item 50 (Param Required)
+
+A login or password parameter was not provided.
 
 =back
 

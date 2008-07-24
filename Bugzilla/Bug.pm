@@ -1314,8 +1314,9 @@ sub _check_qa_contact {
         $id = $qa_contact->id;
         # create() checks this another way, so we don't have to run this
         # check during create().
+        # If there is no QA contact, this check is not required.
         $invocant->_check_strict_isolation_for_user($qa_contact)
-            if ref $invocant;
+            if (ref $invocant && $id);
     }
 
     # "0" always means "undef", for QA Contact.

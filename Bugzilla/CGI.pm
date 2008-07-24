@@ -307,7 +307,11 @@ sub require_https {
         $url = $self->self_url;
         $url =~ s/^http:/https:/i;
     }
-    print $self->redirect(-location => $url, -status => $status). "\n";
+    print $self->redirect(-location => $url, -status => $status);
+    # When using XML-RPC with mod_perl, we need the headers sent immediately.
+    # We used to do this by appending a newline to $self->redirect, but
+    # that breaks normal web browser redirects.
+    $self->r->rflush if $ENV{MOD_PERL};
     exit;
 }
 

@@ -50,6 +50,8 @@ use base qw(Exporter);
 # comment that it was retired. Also, if an error changes its name, you'll
 # have to fix it here.
 use constant WS_ERROR_CODE => {
+    # Generic Bugzilla::Object errors are 50-99.
+    param_required              => 50,
     # Bug errors usually occupy the 100-200 range.
     invalid_bug_id_or_alias     => 100,
     invalid_bug_id_non_existent => 101,

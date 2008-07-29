@@ -990,7 +990,7 @@ use constant ABSTRACT_SCHEMA => {
     group_control_map => {
         FIELDS => [
             group_id      => {TYPE => 'INT3', NOTNULL => 1},
-            product_id    => {TYPE => 'INT3', NOTNULL => 1},
+            product_id    => {TYPE => 'INT2', NOTNULL => 1},
             entry         => {TYPE => 'BOOLEAN', NOTNULL => 1},
             membercontrol => {TYPE => 'BOOLEAN', NOTNULL => 1},
             othercontrol  => {TYPE => 'BOOLEAN', NOTNULL => 1},

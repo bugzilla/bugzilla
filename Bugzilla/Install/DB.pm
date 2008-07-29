@@ -528,6 +528,10 @@ sub update_table_definitions {
 
     # Add FK to multi select field tables
     _add_foreign_keys_to_multiselects();
+
+    # 2008-07-28 tfu@redhat.com - Bug 431669
+    $dbh->bz_alter_column('group_control_map', 'product_id',
+        { TYPE => 'INT2', NOTNULL => 1 });
     
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #

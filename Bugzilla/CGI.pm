@@ -72,8 +72,9 @@ sub new {
     $self->charset(Bugzilla->params->{'utf8'} ? 'UTF-8' : '');
 
     # Redirect to SSL if required
-    if (i_am_cgi() && Bugzilla->usage_mode != USAGE_MODE_WEBSERVICE 
-        && ssl_require_redirect()) 
+    if (Bugzilla->params->{'sslbase'} ne ''
+        && Bugzilla->params->{'ssl'} eq 'always'
+        && i_am_cgi())
     {
         $self->require_https(Bugzilla->params->{'sslbase'});
     }
@@ -296,23 +297,18 @@ sub remove_cookie {
 
 # Redirect to https if required
 sub require_https {
-    my ($self, $url) = @_;
-    # Do not create query string if data submitted via XMLRPC
-    my $query = Bugzilla->usage_mode == USAGE_MODE_WEBSERVICE ? 0 : 1;
-    # XMLRPC clients (SOAP::Lite at least) requires 301 to redirect properly
-    my $status = Bugzilla->usage_mode == USAGE_MODE_WEBSERVICE ? 301 : 302;
-    if (defined $url) {
-        $url .= $self->url('-path_info' => 1, '-query' => $query, '-relative' => 1);
-    } else {
-        $url = $self->self_url;
-        $url =~ s/^http:/https:/i;
+    my $self = shift;
+    if ($self->protocol ne 'https') {
+        my $url = shift;
+        if (defined $url) {
+            $url .= $self->url('-path_info' => 1, '-query' => 1, '-relative' => 1);
+        } else {
+            $url = $self->self_url;
+            $url =~ s/^http:/https:/i;
+        }
+        print $self->redirect(-location => $url);
+        exit;
     }
-    print $self->redirect(-location => $url, -status => $status);
-    # When using XML-RPC with mod_perl, we need the headers sent immediately.
-    # We used to do this by appending a newline to $self->redirect, but
-    # that breaks normal web browser redirects.
-    $self->r->rflush if $ENV{MOD_PERL};
-    exit;
 }
 
 1;
@@ -382,7 +378,7 @@ As its only argument, it takes the name of the cookie to expire.
 This routine checks if the current page is being served over https, and
 redirects to the https protocol if required, retaining QUERY_STRING.
 
-It takes an optional argument which will be used as the base URL.  If $baseurl
+It takes an option argument which will be used as the base URL.  If $baseurl
 is not provided, the current URL is used.
 
 =back

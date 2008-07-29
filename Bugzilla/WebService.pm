@@ -19,7 +19,6 @@ package Bugzilla::WebService;
 
 use strict;
 use Bugzilla::WebService::Constants;
-use Bugzilla::Util;
 use Date::Parse;
 use XMLRPC::Lite;
 
@@ -53,15 +52,6 @@ sub handle_login {
     Bugzilla->login;
 
     return;
-}
-
-sub handle_redirect {
-    my ($action, $uri, $method) = @_;
-    my $full_method = $uri . "." . $method;
-
-    # Redirect to SSL if required.
-    Bugzilla->cgi->require_https(Bugzilla->params->{'sslbase'})
-        if ssl_require_redirect($full_method);
 }
 
 # For some methods, we shouldn't call Bugzilla->login before we call them

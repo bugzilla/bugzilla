@@ -53,9 +53,5 @@ my $dispatch = {
 
 my $response = Bugzilla::WebService::XMLRPC::Transport::HTTP::CGI
     ->dispatch_with($dispatch)
-    ->on_action(sub { 
-                    my ($action, $uri, $method) = @_;
-                    Bugzilla::WebService::handle_login($dispatch, @_);
-                    Bugzilla::WebService::handle_redirect(@_);
-                } )
+    ->on_action(sub { Bugzilla::WebService::handle_login($dispatch, @_) } )
     ->handle;

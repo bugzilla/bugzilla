@@ -66,9 +66,11 @@ sub fail_nodata {
     }
 
     # Redirect to SSL if required
-    Bugzilla->cgi->require_https(Bugzilla->params->{'sslbase'})
-        if ssl_require_redirect();
-
+    if (Bugzilla->params->{'sslbase'} ne '' 
+        and Bugzilla->params->{'ssl'} ne 'never') 
+    {
+        $cgi->require_https(Bugzilla->params->{'sslbase'});
+    }
     print $cgi->header();
     $template->process("account/auth/login.html.tmpl",
                        { 'target' => $cgi->url(-relative=>1) }) 

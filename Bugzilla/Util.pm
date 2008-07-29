@@ -36,7 +36,7 @@ use base qw(Exporter);
                              html_quote url_quote xml_quote
                              css_class_quote html_light_quote url_decode
                              i_am_cgi get_netaddr correct_urlbase
-                             lsearch ssl_require_redirect
+                             lsearch
                              diff_arrays diff_strings
                              trim wrap_hard wrap_comment find_wrap_point
                              format_time format_time_decimal validate_date
@@ -216,26 +216,6 @@ sub i_am_cgi {
     # I use SERVER_SOFTWARE because it's required to be
     # defined for all requests in the CGI spec.
     return exists $ENV{'SERVER_SOFTWARE'} ? 1 : 0;
-}
-
-sub ssl_require_redirect {
-    my $method = shift;
-
-    # Redirect to SSL if required.
-    if (!(uc($ENV{HTTPS}) eq 'ON' || $ENV{'SERVER_PORT'} == 443)
-        && Bugzilla->params->{'sslbase'} ne '') 
-    {
-        if (Bugzilla->params->{'ssl'} eq 'always'
-            || (Bugzilla->params->{'ssl'} eq 'authenticated sessions'
-                && Bugzilla->user->id)
-            || (Bugzilla->params->{'ssl'} eq 'authenticated sessions'
-                && !Bugzilla->user->id && $method eq 'User.login')) 
-        {
-            return 1;
-        }
-    }
-
-    return 0;
 }
 
 sub correct_urlbase {

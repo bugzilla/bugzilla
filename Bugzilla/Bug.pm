@@ -476,7 +476,7 @@ sub run_create_validators {
     $params->{cc} = $class->_check_cc($component, $params->{cc});
 
     # Callers cannot set Reporter, currently.
-    $params->{reporter} = Bugzilla->user->id;
+    $params->{reporter} = $class->_check_reporter();
 
     $params->{creation_ts} ||= Bugzilla->dbh->selectrow_array('SELECT NOW()');
     $params->{delta_ts} = $params->{creation_ts};
@@ -1356,6 +1356,22 @@ sub _check_rep_platform {
     $platform = trim($platform);
     check_field('rep_platform', $platform);
     return $platform;
+}
+
+sub _check_reporter {
+    my $invocant = shift;
+    my $reporter;
+    if (ref $invocant) {
+        # You cannot change the reporter of a bug.
+        $reporter = $invocant->reporter->id;
+    }
+    else {
+        # On bug creation, the reporter is the logged in user
+        # (meaning that he must be logged in first!).
+        $reporter = Bugzilla->user->id;
+        $reporter || ThrowCodeError('invalid_user');
+    }
+    return $reporter;
 }
 
 sub _check_resolution {

@@ -540,13 +540,13 @@ foreach my $bug (@bug_objects) {
     # an error later.
     delete $changed_deps{''};
 
-    # $msgs will store emails which have to be sent to voters, if any.
-    my $msgs;
+    # @msgs will store emails which have to be sent to voters, if any.
+    my @msgs;
     if ($changes->{'product'}) {
         # If some votes have been removed, RemoveVotes() returns
         # a list of messages to send to voters.
-        # We delay the sending of these messages till tables are unlocked.
-        $msgs = RemoveVotes($bug->id, 0, 'votes_bug_moved');
+        # We delay the sending of these messages till changes are committed.
+        @msgs = RemoveVotes($bug->id, 0, 'votes_bug_moved');
         CheckIfVotedConfirmed($bug->id, Bugzilla->user->id);
     }
 
@@ -560,7 +560,7 @@ foreach my $bug (@bug_objects) {
     ###############
 
     # Now is a good time to send email to voters.
-    foreach my $msg (@$msgs) {
+    foreach my $msg (@msgs) {
         MessageToMTA($msg);
     }
 

@@ -273,11 +273,6 @@
     [% title = "Classification Does Not Exist" %]
     The classification '[% name FILTER html %]' does not exist.
 
-  [% ELSIF error == "classification_doesnt_exist_for_product" %]
-    [% title = "Classification Does Not Exist For Product" %]
-    The classification '[% classification FILTER html %]' does not exist
-    for product '[% product FILTER html %]'.
-
   [% ELSIF error == "classification_invalid_sortkey" %]
     [% title = "Invalid Sortkey for Classification" %]
     The sortkey <em>[% sortkey FILTER html %]</em> for the '[% name FILTER html %]'
@@ -313,8 +308,8 @@
 
   [% ELSIF error == "component_name_too_long" %]
     [% title = "Component Name Is Too Long" %]
-    The name of a component is limited to 64 characters. 
-    '[% name FILTER html %]' is too long ([% name.length %] characters).
+    The name of a component is limited to [% constants.MAX_COMPONENT_SIZE FILTER html %]
+    characters. '[% name FILTER html %]' is too long ([% name.length %] characters).
 
   [% ELSIF error == "component_need_initialowner" %]
     [% title = "Component Requires Default Assignee" %]
@@ -952,8 +947,8 @@
 
   [% ELSIF error == "milestone_name_too_long" %]
     [% title = "Milestone Name Is Too Long" %]
-    The name of a milestone is limited to 20 characters. 
-    '[% name FILTER html %]' is too long ([% name.length %] characters).
+    The name of a milestone is limited to [% constants.MAX_MILESTONE_SIZE FILTER html %]
+    characters. '[% name FILTER html %]' is too long ([% name.length %] characters).
 
   [% ELSIF error == "milestone_required" %]
     [% title = "Milestone Required" %]
@@ -1241,37 +1236,19 @@
     [% title = "Specified Product Does Not Exist" %]
     The product '[% product FILTER html %]' does not exist.
 
-  [% ELSIF error == "product_votes_per_bug_must_be_nonnegative" %]
-    [% title = "Maximum Votes Must Be Non-negative" %]
+  [% ELSIF error == "product_illegal_votes" %]
+    [% title = "Votes Must Be Non-negative" %]
     [% admindocslinks = {'voting.html' => 'Setting up the voting feature'} %]
-    '[% maxvotesperbug FILTER html %]' is an invalid value for the 
-    <em>'Maximum Votes Per [% terms.Bug %]'</em> field, which should
-    contain a non-negative number.
-
-  [% ELSIF error == "product_votes_per_user_must_be_nonnegative" %]
-    [% title = "Votes Per User Must Be Non-negative" %]
-    [% admindocslinks = {'voting.html' => 'Setting up the voting feature'} %]
-    '[% votesperuser FILTER html %]' is an invalid value for the 
-    <em>'Votes Per User'</em> field, which should contain a
-    non-negative number.
-
-  [% ELSIF error == "product_votes_to_confirm_must_be_nonnegative" %]
-    [% title = "Votes To Confirm Must Be Non-negative" %]
-    [% admindocslinks = {'voting.html' => 'Setting up the voting feature'} %]
-    '[% votestoconfirm FILTER html %]' is an invalid value for the 
-    <em>'Votes To Confirm'</em> field, which should contain a
-    non-negative number.
-
-  [% ELSIF error == "product_cant_delete_description" %]
-    [% title = "Cannot delete product description" %]
-    [% admindocslinks = {'products.html' => 'Administering products'} %]
-    Cannot delete the description for product
-    '[% product FILTER html %]'.
-
-  [% ELSIF error == "product_cant_delete_name" %]
-    [% title = "Cannot delete product name" %]
-    [% admindocslinks = {'products.html' => 'Administering products'} %]
-    Cannot delete the product name for product '[% product FILTER html %]'.
+    '[% votes FILTER html %]' is an invalid value for the
+    <em>
+    [% IF field == "votesperuser" %]
+      Votes Per User
+    [% ELSIF field == "maxvotesperbug" %]
+      Maximum Votes Per [% terms.Bug %]
+    [% ELSIF field == "votestoconfirm" %]
+      Votes To Confirm
+    [% END %]
+    </em> field, which should contain a non-negative number.
 
   [% ELSIF error == "product_name_already_in_use" %]
     [% title = "Product name already in use" %]
@@ -1284,19 +1261,17 @@
     The product name '[% product FILTER html %]' differs from existing 
     product '[% existing_product FILTER html %]' only in case.
 
+  [% ELSIF error == "product_name_too_long" %]
+    [% title = "Product name too long" %]
+    The name of a product is limited to [% constants.MAX_PRODUCT_SIZE FILTER html %]
+    characters. '[% name FILTER html %]' is too long ([% name.length %] characters).
+
   [% ELSIF error == "product_must_define_defaultmilestone" %]
     [% title = "Must define new default milestone" %]
     [% admindocslinks = {'products.html' => 'Administering products',
                          'milestones.html' => 'About Milestones'} %]
-    [% IF classification %]
-      [% classification_url_part = BLOCK %]&amp;classification=
-        [%- classification FILTER url_quote %]
-      [% END %]
-    [% END %]
-    You must <a href="editmilestones.cgi?action=add&amp;product=
-    [%- product FILTER url_quote %]
-    [%- classification_url_part FILTER none %]">
-    create the milestone '[% defaultmilestone FILTER html %]'</a> before
+    You must <a href="editmilestones.cgi?action=add&amp;product=[% product FILTER url_quote %]">
+    create the milestone '[% milestone FILTER html %]'</a> before
     it can be made the default milestone for product '[% product FILTER html %]'.
 
   [% ELSIF error == "product_admin_denied" %]
@@ -1306,7 +1281,7 @@
   [% ELSIF error == "product_blank_name" %]
     [% title = "Blank Product Name Not Allowed" %]
     [% admindocslinks = {'products.html' => 'Administering products'} %]
-    You must enter a name for the new product.
+    You must enter a name for the product.
   
   [% ELSIF error == "product_disabled" %]
     [% title = BLOCK %]Product closed for [% terms.Bug %] Entry[% END %]
@@ -1331,13 +1306,13 @@
   [% ELSIF error == "product_must_have_description" %]
     [% title = "Product needs Description" %]
     [% admindocslinks = {'products.html' => 'Administering products'} %]
-    You must enter a description for product '[% product FILTER html %]'.
+    You must enter a description for this product.
 
   [% ELSIF error == "product_must_have_version" %]
     [% title = "Product needs Version" %]
     [% admindocslinks = {'products.html' => 'Administering products',
                          'versions.html' => 'Administering versions'} %]
-    You must enter a version for product '[% product FILTER html %]'.
+    You must enter a valid version to create a new product.
 
   [% ELSIF error == "product_not_specified" %]
     [% title = "No Product Specified" %]
@@ -1363,7 +1338,8 @@
 
   [% ELSIF error == "query_name_too_long" %]
     [% title = "Query Name Too Long" %]
-    The name of the query must be less than 64 characters long.
+    The name of the query must be less than [% constants.MAX_LEN_QUERY_NAME FILTER html %]
+    characters long.
 
   [% ELSIF error == "quicksearch_unknown_field" %]
     [% title = "Unknown QuickSearch Field" %]

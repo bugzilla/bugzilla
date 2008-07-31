@@ -16,38 +16,18 @@
   # Rights Reserved.
   #
   # Contributor(s): Gavin Shelley <bugzilla@chimpychompy.org>
+  #                 Frédéric Buclin <LpSolit@gmail.com>
   #%]
 
 [%# INTERFACE:
-  #
-  # old_product : Bugzilla::Product Object; old product.
   # product : Bugzilla::Product Object; new product.
-  #
   # classification: Bugzilla::Classification Object; The product classification (may be empty or missing)
-  #
-  # checkvotes: boolean; is true if vote related fields have changed. If so, 
-  #             then the following parameters will be specified:
-  #
-  # toomanyvotes: list of hashes, each one with an 'id' and a 'name' hash key
-  #               detailing the bug id and the username of users who had too
-  #               many votes for a bug
-  #
-  # toomanytotalvotes: list of hashes, each one with an 'id' and a 'name' hash key
-  #                    detailing the bug id and the username of users who had
-  #                    too many total votes
-  #
-  # confirmedbugs: list of bug ids, which were confirmed by votes
-  #
-  # changer: string; login of the user making the changes, used for mailing
-  #          bug changes if necessary
-  #
+  # changes: hashref with all changes made to the product. Each key is an edited field,
+  #          and its value is an arrayref of the form [old values, new values].
   #%]
 
 [% IF classification %]
-  [% classification_url_part = BLOCK %]&amp;classification=
-     [%- classification.name FILTER url_quote %]
-  [% END %]
-  [% classification_text = BLOCK %] 
+  [% classification_text = BLOCK %]
     of classification '[% classification.name FILTER html %]'
   [% END %]
 [% END %]
@@ -58,28 +38,24 @@
   title = title
   style_urls = ['skins/standard/admin.css']
 %]
-[% updated = 0 %]
 
-[% IF product.name != old_product.name %]
+[% IF changes.name.defined %]
   <p>
-  Updated product name from '[% old_product.name FILTER html %]' to 
-  <a href="editproducts.cgi?action=edit&amp;product=
-  [%- product.name FILTER url_quote %]
-  [%- classification_url_part FILTER none %]">[% product.name FILTER html %]</a>.
+  Updated product name from '[% changes.name.0 FILTER html %]' to
+  '<a href="editproducts.cgi?action=edit&amp;product=
+  [%- product.name FILTER url_quote %]">[% product.name FILTER html %]</a>'.
   </p>
-  [% updated = 1 %]
 [% END %]
 
 
-[% IF product.description != old_product.description %]
+[% IF changes.description.defined %]
   <p>
     Updated description to:
   </p>
   <p style="margin: 1em 3em 1em 3em">[% product.description FILTER html_light %]</p>
-  [% updated = 1 %]
 [% END %]
 
-[% IF product.disallow_new != old_product.disallow_new %]
+[% IF changes.disallownew.defined %]
   <p>
   Product is now
   [% IF product.disallow_new %]
@@ -89,15 +65,14 @@
   [% END %]
   new [% terms.bugs %].
   </p>
-  [% updated = 1 %]
 [% END %]
 
-[% IF product.milestone_url != old_product.milestone_url %]
+[% IF changes.milestoneurl.defined %]
   <p>
   Updated milestone URL 
-  [% IF old_product.milestone_url != '' %]
-    from<br> <a href="[%- old_product.milestone_url FILTER html %]">
-    [%- old_product.milestone_url FILTER html %]</a>
+  [% IF changes.milestoneurl.0 != '' %]
+    from<br> <a href="[%- changes.milestoneurl.0 FILTER html %]">
+    [%- changes.milestoneurl.0 FILTER html %]</a>
   [% END %]
   to
   [% IF product.milestone_url != '' %]
@@ -107,45 +82,43 @@
     be empty.
   [% END %]
   </p>
-  [% updated = 1 %]
 [% END %]
 
-[% IF product.default_milestone != old_product.default_milestone %]
+[% IF changes.defaultmilestone.defined %]
   <p>
-  Updated default milestone from '[% old_product.default_milestone FILTER html %]' to
+  Updated default milestone from '[% changes.defaultmilestone.0 FILTER html %]' to
   '[% product.default_milestone FILTER html %]'.
   </p>
-  [% updated = 1 %]
 [% END %]
   
-[% IF product.votes_per_user != old_product.votes_per_user %]
+[% IF changes.votesperuser.defined %]
   <p>
   Updated votes per user from
-  [%+ old_product.votes_per_user FILTER html %] to 
+  [%+ changes.votesperuser.0 FILTER html %] to
   [%+ product.votes_per_user FILTER html %].
   </p>
-  [% updated = 1 %]
+  [% checkvotes = 1 %]
 [% END %]
 
-[% IF product.max_votes_per_bug != old_product.max_votes_per_bug %]
+[% IF changes.maxvotesperbug.defined %]
   <p>
   Updated maximum votes per [% terms.bug %] from 
-  [%+ old_product.max_votes_per_bug FILTER html %] to 
+  [%+ changes.maxvotesperbug.0 FILTER html %] to
   [%+ product.max_votes_per_bug FILTER html %].
   </p>
-  [% updated = 1 %]
+  [% checkvotes = 1 %]
 [% END %]
 
-[% IF product.votes_to_confirm != old_product.votes_to_confirm %]
+[% IF changes.votestoconfirm.defined %]
   <p>
   Updated number of votes needed to confirm a [% terms.bug %] from
-  [%+ old_product.votes_to_confirm FILTER html %] to 
+  [%+ changes.votestoconfirm.0 FILTER html %] to
   [%+ product.votes_to_confirm FILTER html %].
   </p>
-  [% updated = 1 %]
+  [% checkvotes = 1 %]
 [% END %]
 
-[% UNLESS updated %]
+[% IF !changes.keys.size %]
   <p>Nothing changed for product '[% product.name FILTER html %]'.</p>
 [% END %]
 
@@ -159,8 +132,8 @@
 
   <p>Checking existing votes in this product for anybody who now
   has too many votes for [% terms.abug %]...<br>
-  [% IF toomanyvotes.size > 0 %]
-    [% FOREACH detail = toomanyvotes %]
+  [% IF changes.too_many_votes.size %]
+    [% FOREACH detail = changes.too_many_votes %]
       &rarr;removed votes for [% terms.bug %] <a href="show_bug.cgi?id=
      [%- detail.id FILTER url_quote %]">
      [%- detail.id FILTER html %]</a> from [% detail.name FILTER html %]<br>
@@ -172,8 +145,8 @@
 
   <p>Checking existing votes in this product for anybody
   who now has too many total votes...<br>
-  [% IF toomanytotalvotes.size > 0 %]
-    [% FOREACH detail = toomanytotalvotes %]
+  [% IF changes.too_many_total_votes.size %]
+    [% FOREACH detail = changes.too_many_total_votes %]
       &rarr;removed votes for [% terms.bug %] <a href="show_bug.cgi?id=
      [%- detail.id FILTER url_quote %]">
      [%- detail.id FILTER html %]</a> from [% detail.name FILTER html %]<br>
@@ -185,14 +158,14 @@
 
   <p>Checking unconfirmed [% terms.bugs %] in this product for any which now have
   sufficient votes...<br>
-  [% IF confirmedbugs.size > 0 %]
-    [% FOREACH id = confirmedbugs %]
+  [% IF changes.confirmed_bugs.size %]
+    [% FOREACH id = changes.confirmed_bugs %]
 
       [%# This is INCLUDED instead of PROCESSED to avoid variables getting
           overwritten, which happens otherwise %]
       [% INCLUDE bug/process/results.html.tmpl
         type = 'votes'
-        mailrecipients = { 'changer' => changer }
+        mailrecipients = { 'changer' => user.login }
         header_done = 1
         id = id
       %]

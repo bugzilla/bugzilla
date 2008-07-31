@@ -36,16 +36,9 @@ use Bugzilla::Constants;
 use Bugzilla::Util;
 use Bugzilla::Error;
 use Bugzilla::Bug;
-use Bugzilla::Series;
-use Bugzilla::Mailer;
 use Bugzilla::Product;
 use Bugzilla::Classification;
-use Bugzilla::Milestone;
-use Bugzilla::Group;
-use Bugzilla::User;
-use Bugzilla::Field;
 use Bugzilla::Token;
-use Bugzilla::Status;
 
 #
 # Preliminary checks:
@@ -76,7 +69,6 @@ $user->in_group('editcomponents')
 my $classification_name = trim($cgi->param('classification') || '');
 my $product_name = trim($cgi->param('product') || '');
 my $action  = trim($cgi->param('action')  || '');
-my $showbugcounts = (defined $cgi->param('showbugcounts'));
 my $token = $cgi->param('token');
 
 #
@@ -124,7 +116,7 @@ if (!$action && !$product_name) {
         }
     }
     $vars->{'products'} = $products;
-    $vars->{'showbugcounts'} = $showbugcounts;
+    $vars->{'showbugcounts'} = $cgi->param('showbugcounts') ? 1 : 0;
 
     $template->process("admin/products/list.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
@@ -175,171 +167,27 @@ if ($action eq 'new') {
                                          object => "products"});
 
     check_token_data($token, 'add_product');
-    # Cleanups and validity checks
 
-    my $classification_id = 1;
-    if (Bugzilla->params->{'useclassification'}) {
-        my $classification = 
-            Bugzilla::Classification::check_classification($classification_name);
-        $classification_id = $classification->id;
-        $vars->{'classification'} = $classification;
-    }
+    my $product =
+      Bugzilla::Product->create({classification   => $classification_name,
+                                 name             => $product_name,
+                                 description      => scalar $cgi->param('description'),
+                                 version          => scalar $cgi->param('version'),
+                                 defaultmilestone => scalar $cgi->param('defaultmilestone'),
+                                 milestoneurl     => scalar $cgi->param('milestoneurl'),
+                                 disallownew      => scalar $cgi->param('disallownew'),
+                                 votesperuser     => scalar $cgi->param('votesperuser'),
+                                 maxvotesperbug   => scalar $cgi->param('maxvotesperbug'),
+                                 votestoconfirm   => scalar $cgi->param('votestoconfirm'),
+                                 create_series    => scalar $cgi->param('createseries')});
 
-    unless ($product_name) {
-        ThrowUserError("product_blank_name");  
-    }
-
-    my $product = new Bugzilla::Product({name => $product_name});
-
-    if ($product) {
-
-        # Check for exact case sensitive match:
-        if ($product->name eq $product_name) {
-            ThrowUserError("product_name_already_in_use",
-                           {'product' => $product->name});
-        }
-
-        # Next check for a case-insensitive match:
-        if (lc($product->name) eq lc($product_name)) {
-            ThrowUserError("product_name_diff_in_case",
-                           {'product' => $product_name,
-                            'existing_product' => $product->name}); 
-        }
-    }
-
-    my $version = trim($cgi->param('version') || '');
-
-    if ($version eq '') {
-        ThrowUserError("product_must_have_version",
-                       {'product' => $product_name});
-    }
-
-    my $description  = trim($cgi->param('description')  || '');
-
-    if ($description eq '') {
-        ThrowUserError('product_must_have_description',
-                       {'product' => $product_name});
-    }
-
-    my $milestoneurl = trim($cgi->param('milestoneurl') || '');
-    my $disallownew = $cgi->param('disallownew') ? 1 : 0;
-    my $votesperuser = $cgi->param('votesperuser') || 0;
-    my $maxvotesperbug = defined($cgi->param('maxvotesperbug')) ?
-        $cgi->param('maxvotesperbug') : 10000;
-    my $votestoconfirm = $cgi->param('votestoconfirm') || 0;
-    my $defaultmilestone = $cgi->param('defaultmilestone') || "---";
-
-    # The following variables are used in placeholders only.
-    trick_taint($product_name);
-    trick_taint($version);
-    trick_taint($description);
-    trick_taint($milestoneurl);
-    trick_taint($defaultmilestone);
-    detaint_natural($disallownew);
-    detaint_natural($votesperuser);
-    detaint_natural($maxvotesperbug);
-    detaint_natural($votestoconfirm);
-
-    # Add the new product.
-    $dbh->do('INSERT INTO products
-              (name, description, milestoneurl, disallownew, votesperuser,
-               maxvotesperbug, votestoconfirm, defaultmilestone, classification_id)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-             undef, ($product_name, $description, $milestoneurl, $disallownew,
-             $votesperuser, $maxvotesperbug, $votestoconfirm, $defaultmilestone,
-             $classification_id));
-
-    $product = new Bugzilla::Product({name => $product_name});
-    
-    $dbh->do('INSERT INTO versions (value, product_id) VALUES (?, ?)',
-             undef, ($version, $product->id));
-
-    $dbh->do('INSERT INTO milestones (product_id, value) VALUES (?, ?)',
-             undef, ($product->id, $defaultmilestone));
-
-    # If we're using bug groups, then we need to create a group for this
-    # product as well.  -JMR, 2/16/00
-    if (Bugzilla->params->{"makeproductgroups"}) {
-        # Next we insert into the groups table
-        my $productgroup = $product->name;
-        while (new Bugzilla::Group({name => $productgroup})) {
-            $productgroup .= '_';
-        }
-        my $group_description = "Access to bugs in the " .
-                                $product->name . " product";
-
-        $dbh->do('INSERT INTO groups (name, description, isbuggroup)
-                  VALUES (?, ?, ?)',
-                  undef, ($productgroup, $group_description, 1));
-
-        my $gid = $dbh->bz_last_key('groups', 'id');
-
-        # If we created a new group, give the "admin" group privileges
-        # initially.
-        my $admin = Bugzilla::Group->new({name => 'admin'})->id();
-        
-        my $sth = $dbh->prepare('INSERT INTO group_group_map
-                                 (member_id, grantor_id, grant_type)
-                                 VALUES (?, ?, ?)');
-
-        $sth->execute($admin, $gid, GROUP_MEMBERSHIP);
-        $sth->execute($admin, $gid, GROUP_BLESS);
-        $sth->execute($admin, $gid, GROUP_VISIBLE);
-
-        # Associate the new group and new product.
-        $dbh->do('INSERT INTO group_control_map
-                  (group_id, product_id, entry, membercontrol,
-                   othercontrol, canedit)
-                  VALUES (?, ?, ?, ?, ?, ?)',
-                 undef, ($gid, $product->id, 
-                         Bugzilla->params->{'useentrygroupdefault'},
-                 CONTROLMAPDEFAULT, CONTROLMAPNA, 0));
-    }
-
-    if ($cgi->param('createseries')) {
-        # Insert default charting queries for this product.
-        # If they aren't using charting, this won't do any harm.
-        #
-        # $open_name and $product are sqlquoted by the series code 
-        # and never used again here, so we can trick_taint them.
-        my $open_name = $cgi->param('open_name');
-        trick_taint($open_name);
-    
-        my @series;
-    
-        # We do every status, every resolution, and an "opened" one as well.
-        foreach my $bug_status (@{get_legal_field_values('bug_status')}) {
-            push(@series, [$bug_status, 
-                           "bug_status=" . url_quote($bug_status)]);
-        }
-
-        foreach my $resolution (@{get_legal_field_values('resolution')}) {
-            next if !$resolution;
-            push(@series, [$resolution, "resolution=" .url_quote($resolution)]);
-        }
-
-        # For localization reasons, we get the name of the "global" subcategory
-        # and the title of the "open" query from the submitted form.
-        my @openedstatuses = BUG_STATE_OPEN;
-        my $query = 
-               join("&", map { "bug_status=" . url_quote($_) } @openedstatuses);
-        push(@series, [$open_name, $query]);
-    
-        foreach my $sdata (@series) {
-            my $series = new Bugzilla::Series(undef, $product->name, 
-                            scalar $cgi->param('subcategory'),
-                            $sdata->[0], $whoid, 1,
-                            $sdata->[1] . "&product=" .
-                            url_quote($product->name), 1);
-            $series->writeToDatabase();
-        }
-    }
     delete_token($token);
 
     $vars->{'message'} = 'product_created';
     $vars->{'product'} = $product;
-    $vars->{'classification'} = new Bugzilla::Classification($product->classification_id)
-      if Bugzilla->params->{'useclassification'};
+    if (Bugzilla->params->{'useclassification'}) {
+        $vars->{'classification'} = new Bugzilla::Classification($product->classification_id);
+    }
     $vars->{'token'} = issue_session_token('edit_product');
 
     $template->process("admin/products/edit.html.tmpl", $vars)
@@ -357,16 +205,8 @@ if ($action eq 'del') {
     my $product = $user->check_can_admin_product($product_name);
 
     if (Bugzilla->params->{'useclassification'}) {
-        my $classification = 
-            Bugzilla::Classification::check_classification($classification_name);
-        if ($classification->id != $product->classification_id) {
-            ThrowUserError('classification_doesnt_exist_for_product',
-                           { product => $product->name,
-                             classification => $classification->name });
-        }
-        $vars->{'classification'} = $classification;
+        $vars->{'classification'} = new Bugzilla::Classification($product->classification_id);
     }
-
     $vars->{'product'} = $product;
     $vars->{'token'} = issue_session_token('delete_product');
 
@@ -383,69 +223,7 @@ if ($action eq 'delete') {
     my $product = $user->check_can_admin_product($product_name);
     check_token_data($token, 'delete_product');
 
-    if (Bugzilla->params->{'useclassification'}) {
-        my $classification = 
-            Bugzilla::Classification::check_classification($classification_name);
-        if ($classification->id != $product->classification_id) {
-            ThrowUserError('classification_doesnt_exist_for_product',
-                           { product => $product->name,
-                             classification => $classification->name });
-        }
-        $vars->{'classification'} = $classification;
-    }
-
-    if ($product->bug_count) {
-        if (Bugzilla->params->{"allowbugdeletion"}) {
-            foreach my $bug_id (@{$product->bug_ids}) {
-                # Note that we allow the user to delete bugs he can't see,
-                # which is okay, because he's deleting the whole Product.
-                my $bug = new Bugzilla::Bug($bug_id);
-                $bug->remove_from_db();
-            }
-        }
-        else {
-            ThrowUserError("product_has_bugs", 
-                           { nb => $product->bug_count });
-        }
-    }
-
-    $dbh->bz_start_transaction();
-
-    my $comp_ids = $dbh->selectcol_arrayref('SELECT id FROM components
-                                             WHERE product_id = ?',
-                                             undef, $product->id);
-
-    $dbh->do('DELETE FROM component_cc WHERE component_id IN
-              (' . join(',', @$comp_ids) . ')') if scalar(@$comp_ids);
-
-    $dbh->do("DELETE FROM components WHERE product_id = ?",
-             undef, $product->id);
-
-    $dbh->do("DELETE FROM versions WHERE product_id = ?",
-             undef, $product->id);
-
-    $dbh->do("DELETE FROM milestones WHERE product_id = ?",
-             undef, $product->id);
-
-    $dbh->do("DELETE FROM group_control_map WHERE product_id = ?",
-             undef, $product->id);
-
-    $dbh->do("DELETE FROM flaginclusions WHERE product_id = ?",
-             undef, $product->id);
-             
-    $dbh->do("DELETE FROM flagexclusions WHERE product_id = ?",
-             undef, $product->id);
-             
-    $dbh->do("DELETE FROM products WHERE id = ?",
-             undef, $product->id);
-
-    $dbh->bz_commit_transaction();
-
-    # We have to delete these internal variables, else we get
-    # the old lists of products and classifications again.
-    delete $user->{selectable_products};
-    delete $user->{selectable_classifications};
-
+    $product->remove_from_db;
     delete_token($token);
 
     $vars->{'message'} = 'product_deleted';
@@ -484,20 +262,7 @@ if ($action eq 'edit' || (!$action && $product_name)) {
     my $product = $user->check_can_admin_product($product_name);
 
     if (Bugzilla->params->{'useclassification'}) {
-        my $classification; 
-        if (!$classification_name) {
-            $classification = 
-                new Bugzilla::Classification($product->classification_id);
-        } else {
-            $classification = 
-                Bugzilla::Classification::check_classification($classification_name);
-            if ($classification->id != $product->classification_id) {
-                ThrowUserError('classification_doesnt_exist_for_product',
-                               { product => $product->name,
-                                 classification => $classification->name });
-            }
-        }
-        $vars->{'classification'} = $classification;
+        $vars->{'classification'} = new Bugzilla::Classification($product->classification_id);
     }
     $vars->{'product'} = $product;
     $vars->{'token'} = issue_session_token('edit_product');
@@ -797,240 +562,27 @@ if ($action eq 'updategroupcontrols') {
 #
 if ($action eq 'update') {
     check_token_data($token, 'edit_product');
-    my $product_old_name    = trim($cgi->param('product_old_name')    || '');
-    my $description         = trim($cgi->param('description')         || '');
-    my $disallownew         = trim($cgi->param('disallownew')         || '');
-    my $milestoneurl        = trim($cgi->param('milestoneurl')        || '');
-    my $votesperuser        = trim($cgi->param('votesperuser')        || 0);
-    my $maxvotesperbug      = trim($cgi->param('maxvotesperbug')      || 0);
-    my $votestoconfirm      = trim($cgi->param('votestoconfirm')      || 0);
-    my $defaultmilestone    = trim($cgi->param('defaultmilestone')    || '---');
+    my $product_old_name = trim($cgi->param('product_old_name') || '');
+    my $product = $user->check_can_admin_product($product_old_name);
 
-    my $checkvotes = 0;
+    $product->set_name($product_name);
+    $product->set_description(scalar $cgi->param('description'));
+    $product->set_default_milestone(scalar $cgi->param('defaultmilestone'));
+    $product->set_milestone_url(scalar $cgi->param('milestoneurl'));
+    $product->set_disallow_new(scalar $cgi->param('disallownew'));
+    $product->set_votes_per_user(scalar $cgi->param('votesperuser'));
+    $product->set_votes_per_bug(scalar $cgi->param('maxvotesperbug'));
+    $product->set_votes_to_confirm(scalar $cgi->param('votestoconfirm'));
 
-    my $product_old = $user->check_can_admin_product($product_old_name);
+    my $changes = $product->update();
 
-    if (Bugzilla->params->{'useclassification'}) {
-        my $classification; 
-        if (!$classification_name) {
-            $classification = 
-                new Bugzilla::Classification($product_old->classification_id);
-        } else {
-            $classification = 
-                Bugzilla::Classification::check_classification($classification_name);
-            if ($classification->id != $product_old->classification_id) {
-                ThrowUserError('classification_doesnt_exist_for_product',
-                               { product => $product_old->name,
-                                 classification => $classification->name });
-            }
-        }
-        $vars->{'classification'} = $classification;
-    }
-
-    unless ($product_name) {
-        ThrowUserError('product_cant_delete_name',
-                       {product => $product_old->name});
-    }
-
-    unless ($description) {
-        ThrowUserError('product_cant_delete_description',
-                       {product => $product_old->name});
-    }
-
-    my $stored_maxvotesperbug = $maxvotesperbug;
-    if (!detaint_natural($maxvotesperbug)) {
-        ThrowUserError('product_votes_per_bug_must_be_nonnegative',
-                       {maxvotesperbug => $stored_maxvotesperbug});
-    }
-
-    my $stored_votesperuser = $votesperuser;
-    if (!detaint_natural($votesperuser)) {
-        ThrowUserError('product_votes_per_user_must_be_nonnegative',
-                       {votesperuser => $stored_votesperuser});
-    }
-
-    my $stored_votestoconfirm = $votestoconfirm;
-    if (!detaint_natural($votestoconfirm)) {
-        ThrowUserError('product_votes_to_confirm_must_be_nonnegative',
-                       {votestoconfirm => $stored_votestoconfirm});
-    }
-
-    $dbh->bz_start_transaction();
-
-    my $testproduct = 
-        new Bugzilla::Product({name => $product_name});
-    if (lc($product_name) ne lc($product_old->name) &&
-        $testproduct) {
-        ThrowUserError('product_name_already_in_use',
-                       {product => $product_name});
-    }
-
-    # Only update milestone related stuff if 'usetargetmilestone' is on.
-    if (Bugzilla->params->{'usetargetmilestone'}) {
-        my $milestone = new Bugzilla::Milestone(
-            { product => $product_old, name => $defaultmilestone });
-
-        unless ($milestone) {
-            ThrowUserError('product_must_define_defaultmilestone',
-                           {product          => $product_old->name,
-                            defaultmilestone => $defaultmilestone,
-                            classification   => $classification_name});
-        }
-
-        if ($milestoneurl ne $product_old->milestone_url) {
-            trick_taint($milestoneurl);
-            $dbh->do('UPDATE products SET milestoneurl = ? WHERE id = ?',
-                     undef, ($milestoneurl, $product_old->id));
-        }
-
-        if ($milestone->name ne $product_old->default_milestone) {
-            $dbh->do('UPDATE products SET defaultmilestone = ? WHERE id = ?',
-                     undef, ($milestone->name, $product_old->id));
-        }
-    }
-
-    $disallownew = $disallownew ? 1 : 0;
-    if ($disallownew ne $product_old->disallow_new) {
-        $dbh->do('UPDATE products SET disallownew = ? WHERE id = ?',
-                 undef, ($disallownew, $product_old->id));
-    }
-
-    if ($description ne $product_old->description) {
-        trick_taint($description);
-        $dbh->do('UPDATE products SET description = ? WHERE id = ?',
-                 undef, ($description, $product_old->id));
-    }
-
-    if ($votesperuser ne $product_old->votes_per_user) {
-        $dbh->do('UPDATE products SET votesperuser = ? WHERE id = ?',
-                 undef, ($votesperuser, $product_old->id));
-        $checkvotes = 1;
-    }
-
-    if ($maxvotesperbug ne $product_old->max_votes_per_bug) {
-        $dbh->do('UPDATE products SET maxvotesperbug = ? WHERE id = ?',
-                 undef, ($maxvotesperbug, $product_old->id));
-        $checkvotes = 1;
-    }
-
-    if ($votestoconfirm ne $product_old->votes_to_confirm) {
-        $dbh->do('UPDATE products SET votestoconfirm = ? WHERE id = ?',
-                 undef, ($votestoconfirm, $product_old->id));
-        $checkvotes = 1;
-    }
-
-    if ($product_name ne $product_old->name) {
-        trick_taint($product_name);
-        $dbh->do('UPDATE products SET name = ? WHERE id = ?',
-                 undef, ($product_name, $product_old->id));
-    }
-
-    $dbh->bz_commit_transaction();
-
-    my $product = new Bugzilla::Product({name => $product_name});
-
-    if ($checkvotes) {
-        $vars->{'checkvotes'} = 1;
-
-        # 1. too many votes for a single user on a single bug.
-        my @toomanyvotes_list = ();
-        if ($maxvotesperbug < $votesperuser) {
-            my $votes = $dbh->selectall_arrayref(
-                        'SELECT votes.who, votes.bug_id
-                           FROM votes
-                     INNER JOIN bugs
-                             ON bugs.bug_id = votes.bug_id
-                          WHERE bugs.product_id = ?
-                            AND votes.vote_count > ?',
-                         undef, ($product->id, $maxvotesperbug));
-
-            foreach my $vote (@$votes) {
-                my ($who, $id) = (@$vote);
-                # If some votes are removed, RemoveVotes() returns a list
-                # of messages to send to voters.
-                my $msgs = RemoveVotes($id, $who, 'votes_too_many_per_bug');
-                foreach my $msg (@$msgs) {
-                    MessageToMTA($msg);
-                }
-                my $name = user_id_to_login($who);
-
-                push(@toomanyvotes_list,
-                     {id => $id, name => $name});
-            }
-        }
-        $vars->{'toomanyvotes'} = \@toomanyvotes_list;
-
-        # 2. too many total votes for a single user.
-        # This part doesn't work in the general case because RemoveVotes
-        # doesn't enforce votesperuser (except per-bug when it's less
-        # than maxvotesperbug).  See Bugzilla::Bug::RemoveVotes().
-
-        my $votes = $dbh->selectall_arrayref(
-                    'SELECT votes.who, votes.vote_count
-                       FROM votes
-                 INNER JOIN bugs
-                         ON bugs.bug_id = votes.bug_id
-                      WHERE bugs.product_id = ?',
-                     undef, $product->id);
-
-        my %counts;
-        foreach my $vote (@$votes) {
-            my ($who, $count) = @$vote;
-            if (!defined $counts{$who}) {
-                $counts{$who} = $count;
-            } else {
-                $counts{$who} += $count;
-            }
-        }
-        my @toomanytotalvotes_list = ();
-        foreach my $who (keys(%counts)) {
-            if ($counts{$who} > $votesperuser) {
-                my $bug_ids = $dbh->selectcol_arrayref(
-                              'SELECT votes.bug_id
-                                 FROM votes
-                           INNER JOIN bugs
-                                   ON bugs.bug_id = votes.bug_id
-                                WHERE bugs.product_id = ?
-                                  AND votes.who = ?',
-                               undef, ($product->id, $who));
-
-                foreach my $bug_id (@$bug_ids) {
-                    # RemoveVotes() returns a list of messages to send
-                    # in case some voters had too many votes.
-                    my $msgs = RemoveVotes($bug_id, $who, 'votes_too_many_per_user');
-                    foreach my $msg (@$msgs) {
-                        MessageToMTA($msg);
-                    }
-                    my $name = user_id_to_login($who);
-
-                    push(@toomanytotalvotes_list,
-                         {id => $bug_id, name => $name});
-                }
-            }
-        }
-        $vars->{'toomanytotalvotes'} = \@toomanytotalvotes_list;
-
-        # 3. enough votes to confirm
-        my $bug_list = $dbh->selectcol_arrayref(
-                       "SELECT bug_id FROM bugs
-                         WHERE product_id = ?
-                           AND bug_status = 'UNCONFIRMED'
-                           AND votes >= ?",
-                        undef, ($product->id, $votestoconfirm));
-
-        my @updated_bugs = ();
-        foreach my $bug_id (@$bug_list) {
-            my $confirmed = CheckIfVotedConfirmed($bug_id, $whoid);
-            push (@updated_bugs, $bug_id) if $confirmed;
-        }
-
-        $vars->{'confirmedbugs'} = \@updated_bugs;
-        $vars->{'changer'} = $user->login;
-    }
     delete_token($token);
 
-    $vars->{'old_product'} = $product_old;
+    if (Bugzilla->params->{'useclassification'}) {
+        $vars->{'classification'} = new Bugzilla::Classification($product->classification_id);
+    }
     $vars->{'product'} = $product;
+    $vars->{'changes'} = $changes;
 
     $template->process("admin/products/updated.html.tmpl", $vars)
         || ThrowTemplateError($template->error());

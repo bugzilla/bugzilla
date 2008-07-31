@@ -101,8 +101,7 @@ versions:</a>
     <tr>
       <th align="right" valign="top">
         <a href="editproducts.cgi?action=editgroupcontrols&product=
-          [%- product.name FILTER url_quote %]&classification=
-          [%- classification.name FILTER url_quote %]">
+          [%- product.name FILTER url_quote %]">
           Edit Group Access Controls:
         </a>
       </th>
@@ -139,8 +138,6 @@ versions:</a>
         value="[% product.name FILTER html %]">
   <input type="hidden" name="action" value="update">
   <input type="hidden" name="token" value="[% token FILTER html %]">
-  <input type="hidden" name="classification"
-         value="[% classification.name FILTER html %]">
   <input type="submit" name="submit" value="Save Changes">
 </form>
   

@@ -474,10 +474,6 @@
   'classification_url_part', 
 ],
 
-'admin/products/confirm-delete.html.tmpl' => [
-  'classification_url_part', 
-],
-
 'admin/products/footer.html.tmpl' => [
   'classification_url_part', 
   'classification_text', 

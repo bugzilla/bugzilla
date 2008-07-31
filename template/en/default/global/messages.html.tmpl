@@ -129,6 +129,9 @@
   [% ELSIF message_tag == "bug_has_duplicate" %]
     *** [% terms.Bug %] [%+ dupe FILTER html %] has been marked as a duplicate of this [% terms.bug %]. ***
 
+  [% ELSIF message_tag == "bug_group_description" %]
+    Access to [% terms.bugs %] in the [% product.name FILTER html %] product
+
   [% ELSIF message_tag == "bug_moved_to" %]
     <p>[% terms.Bug %] moved to [% Param("move-to-url") FILTER html %].</p>
     <p>If the move succeeded, [% login FILTER html %] will receive a mail
@@ -705,6 +708,9 @@
 
   [% ELSIF message_tag == "series_all_closed" %]
     All Closed
+
+  [% ELSIF message_tag == "series_subcategory" %]
+    -All-
 
   [% ELSIF message_tag == "sudo_started" %]
     [% title = "Sudo session started" %]

@@ -33,7 +33,6 @@ package Bugzilla::Series;
 
 use Bugzilla::Error;
 use Bugzilla::Util;
-use Bugzilla::User;
 
 sub new {
     my $invocant = shift;

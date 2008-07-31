@@ -39,14 +39,13 @@
 
 [% edit_contentlink = BLOCK %]
   editproducts.cgi?action=edit&amp;product=%%name%%
-  [%- classification_url_part %]
 [% END %]
 [% delete_contentlink = BLOCK %]
   editproducts.cgi?action=del&amp;product=%%name%%
-  [%- classification_url_part %]
 [% END %]
-[% bug_count_contentlink = BLOCK %]buglist.cgi?product=%%name%%
-  [%- classification_url_part %][% END %]
+[% bug_count_contentlink = BLOCK %]
+  buglist.cgi?product=%%name%%
+[% END %]
 
 
 [% columns = [

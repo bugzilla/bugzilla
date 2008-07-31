@@ -3088,7 +3088,7 @@ sub RemoveVotes {
                  undef, ($votes, $id));
     }
     # Now return the array containing emails to be sent.
-    return \@messages;
+    return @messages;
 }
 
 # If a user votes for a bug, or the number of votes required to

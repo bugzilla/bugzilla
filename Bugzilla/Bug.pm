@@ -239,6 +239,11 @@ sub new {
     my $class = ref($invocant) || $invocant;
     my $param = shift;
 
+    # Remove leading "#" mark if we've just been passed an id.
+    if (!ref $param && $param =~ /^#(\d+)$/) {
+        $param = $1;
+    }
+
     # If we get something that looks like a word (not a number),
     # make it the "name" param.
     if (!defined $param || (!ref($param) && $param !~ /^\d+$/)) {
@@ -263,9 +268,15 @@ sub new {
     # if the bug wasn't found in the database.
     if (!$self) {
         my $error_self = {};
+        if (ref $param) {
+            $error_self->{bug_id} = $param->{name};
+            $error_self->{error}  = 'InvalidBugId';
+        }
+        else {
+            $error_self->{bug_id} = $param;
+            $error_self->{error}  = 'NotFound';
+        }
         bless $error_self, $class;
-        $error_self->{'bug_id'} = ref($param) ? $param->{name} : $param;
-        $error_self->{'error'}  = 'NotFound';
         return $error_self;
     }
 
@@ -274,10 +285,41 @@ sub new {
 
 sub check {
     my $class = shift;
-    # XXX At some point we will eliminate ValidateBugID and make this
-    #     method more efficient.
-    ValidateBugID(@_);
-    my $self = $class->new(@_);
+    my ($id, $field) = @_;
+
+    # Bugzilla::Bug throws lots of special errors, so we don't call
+    # SUPER::check, we just call our new and do our own checks.
+    my $self = $class->new(trim($id));
+    # For error messages, use the id that was returned by new(), because
+    # it's cleaned up.
+    $id = $self->id;
+
+    if ($self->{error}) {
+        if ($self->{error} eq 'NotFound') {
+             ThrowUserError("bug_id_does_not_exist", { bug_id => $id });
+        }
+        if ($self->{error} eq 'InvalidBugId') {
+            ThrowUserError("improper_bug_id_field_value",
+                              { bug_id => $id,
+                                field  => $field });
+        }
+    }
+
+    # XXX This hack needs to go away.
+    return $self if (defined $field 
+                     && ($field eq "dependson" || $field eq "blocked"));
+
+    my $user = Bugzilla->user;
+    if (!$user->can_see_bug($id)) {
+        # The error the user sees depends on whether or not they are
+        # logged in (i.e. $user->id contains the user's positive integer ID).
+        if ($user->id) {
+            ThrowUserError("bug_access_denied", { bug_id => $id });
+        } else {
+            ThrowUserError("bug_access_query", { bug_id => $id });
+        }
+    }
+
     return $self;
 }
 
@@ -2820,7 +2862,7 @@ sub format_comment {
 }
 
 # Get the activity of a bug, starting from $starttime (if given).
-# This routine assumes ValidateBugID has been previously called.
+# This routine assumes Bugzilla::Bug->check has been previously called.
 sub GetBugActivity {
     my ($bug_id, $attach_id, $starttime) = @_;
     my $dbh = Bugzilla->dbh;
@@ -3276,52 +3318,6 @@ sub check_can_change_field {
 #
 # Field Validation
 #
-
-# Validates and verifies a bug ID, making sure the number is a 
-# positive integer, that it represents an existing bug in the
-# database, and that the user is authorized to access that bug.
-# We detaint the number here, too.
-sub ValidateBugID {
-    my ($id, $field) = @_;
-    my $dbh = Bugzilla->dbh;
-    my $user = Bugzilla->user;
-
-    # Get rid of leading '#' (number) mark, if present.
-    $id =~ s/^\s*#//;
-    # Remove whitespace
-    $id = trim($id);
-
-    # If the ID isn't a number, it might be an alias, so try to convert it.
-    my $alias = $id;
-    if (!detaint_natural($id)) {
-        $id = bug_alias_to_id($alias);
-        $id || ThrowUserError("improper_bug_id_field_value",
-                              {'bug_id' => $alias,
-                               'field'  => $field });
-    }
-    
-    # Modify the calling code's original variable to contain the trimmed,
-    # converted-from-alias ID.
-    $_[0] = $id;
-    
-    # First check that the bug exists
-    $dbh->selectrow_array("SELECT bug_id FROM bugs WHERE bug_id = ?", undef, $id)
-      || ThrowUserError("bug_id_does_not_exist", {'bug_id' => $id});
-
-    return if (defined $field && ($field eq "dependson" || $field eq "blocked"));
-    
-    return if $user->can_see_bug($id);
-
-    # The user did not pass any of the authorization tests, which means they
-    # are not authorized to see the bug.  Display an error and stop execution.
-    # The error the user sees depends on whether or not they are logged in
-    # (i.e. $user->id contains the user's positive integer ID).
-    if ($user->id) {
-        ThrowUserError("bug_access_denied", {'bug_id' => $id});
-    } else {
-        ThrowUserError("bug_access_query", {'bug_id' => $id});
-    }
-}
 
 # Validate and return a hash of dependencies
 sub ValidateDependencies {

@@ -994,6 +994,13 @@ elsif ($fulltext) {
 if ($cgi->param('debug')) {
     $vars->{'debug'} = 1;
     $vars->{'query'} = $query;
+    # Explains are limited to admins because you could use them to figure
+    # out how many hidden bugs are in a particular product (by doing
+    # searches and looking at the number of rows the explain says it's
+    # examining).
+    if (Bugzilla->user->in_group('admin')) {
+        $vars->{'query_explain'} = $dbh->bz_explain($query);
+    }
     $vars->{'debugdata'} = $search->getDebugData();
 }
 

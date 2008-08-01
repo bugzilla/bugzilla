@@ -48,6 +48,8 @@ use Bugzilla::Util;
 use Bugzilla::Error;
 use Bugzilla::DB::Schema::Mysql;
 
+use List::Util qw(max);
+
 # This module extends the DB interface via inheritance
 use base qw(Bugzilla::DB);
 
@@ -204,6 +206,30 @@ sub sql_group_by {
     return "GROUP BY $needed_columns";
 }
 
+sub bz_explain {
+    my ($self, $sql) = @_;
+    my $sth  = $self->prepare("EXPLAIN $sql");
+    $sth->execute();
+    my $columns = $sth->{'NAME'};
+    my $lengths = $sth->{'mysql_max_length'};
+    my $format_string = '|';
+    my $i = 0;
+    foreach my $column (@$columns) {
+        # Sometimes the column name is longer than the contents.
+        my $length = max($lengths->[$i], length($column));
+        $format_string .= ' %-' . $length . 's |';
+        $i++;
+    }
+
+    my $first_row = sprintf($format_string, @$columns);
+    my @explain_rows = ($first_row, '-' x length($first_row));
+    while (my $row = $sth->fetchrow_arrayref) {
+        my @fixed = map { defined $_ ? $_ : 'NULL' } @$row;
+        push(@explain_rows, sprintf($format_string, @fixed));
+    }
+
+    return join("\n", @explain_rows);
+}
 
 sub _bz_get_initial_schema {
     my ($self) = @_;

@@ -171,6 +171,12 @@ sub bz_sequence_exists {
     return $exists || 0;
 }
 
+sub bz_explain {
+    my ($self, $sql) = @_;
+    my $explain = $self->selectcol_arrayref("EXPLAIN ANALYZE $sql");
+    return join("\n", @$explain);
+}
+
 #####################################################################
 # Custom Database Setup
 #####################################################################

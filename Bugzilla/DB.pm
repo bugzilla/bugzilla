@@ -273,7 +273,7 @@ EOT
 # List of abstract methods we are checking the derived class implements
 our @_abstract_methods = qw(REQUIRED_VERSION PROGRAM_NAME DBD_VERSION
                             new sql_regexp sql_not_regexp sql_limit sql_to_days
-                            sql_date_format sql_interval);
+                            sql_date_format sql_interval bz_explain);
 
 # This overridden import method will check implementation of inherited classes
 # for missing implementation of abstract methods

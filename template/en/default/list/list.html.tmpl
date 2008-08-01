@@ -68,6 +68,9 @@
       [% END %]
     </p>
     <p class="bz_query">[% query FILTER html %]</p>
+    [% IF query_explain.defined %]
+      <pre class="bz_query_explain">[% query_explain FILTER html %]</pre>
+    [% END %]
   [% END %]
 
   [% IF user.settings.display_quips.value == 'on' %]

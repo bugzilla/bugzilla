@@ -104,6 +104,15 @@ sub bz_check_regexp {
         { value => $pattern, dberror => $self->errstr });
 }
 
+sub bz_explain { 
+     my ($self, $sql) = @_; 
+     my $sth = $self->prepare("EXPLAIN PLAN FOR $sql"); 
+     $sth->execute();
+     my $explain = $self->selectcol_arrayref(
+         "SELECT PLAN_TABLE_OUTPUT FROM TABLE(DBMS_XPLAN.DISPLAY)");
+     return join("\n", @$explain); 
+} 
+
 sub sql_regexp {
     my ($self, $expr, $pattern, $nocheck) = @_;
 

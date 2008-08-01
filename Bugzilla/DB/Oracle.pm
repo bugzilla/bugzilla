@@ -454,22 +454,18 @@ sub quote_identifier {
 sub bz_table_columns_real {
     my ($self, $table) = @_;
     $table = uc($table);
-    my @cols = $self->SUPER::bz_table_columns_real($table);
-    return map { lc($_) } @cols;
+    my $cols = $self->selectcol_arrayref(
+        "SELECT LOWER(COLUMN_NAME) FROM USER_TAB_COLUMNS WHERE 
+         TABLE_NAME = ?  ORDER BY COLUMN_NAME", undef, $table);
+    return @$cols;
 }
 
 sub bz_table_list_real {
     my ($self) = @_;
-    # Oracle only accepts the username in uppercase.
-    my $db_user = uc(Bugzilla->localconfig->{db_user});
-    my $table_sth = $self->table_info(undef, $db_user, undef, "TABLE");
-    my @tables = @{$self->selectcol_arrayref($table_sth, { Columns => [3] })};
-    # Oracle returns uppercase table names, but Bugzilla expects lowercase
-    # names.
-    @tables = map { lc($_) } @tables;
-    # Oracle has certain tables that start with DR$_IDX.
-    @tables = grep { $_ !~ /^dr\$/ } @tables;
-    return @tables;
+    my $tables = $self->selectcol_arrayref(
+        "SELECT LOWER(TABLE_NAME) FROM USER_TABLES WHERE 
+        TABLE_NAME NOT LIKE ?  ORDER BY TABLE_NAME", undef, 'DR$%');
+    return @$tables;
 }
 
 #####################################################################
@@ -495,6 +491,46 @@ sub bz_setup_database {
     }
 
     $self->SUPER::bz_setup_database(@_);
+
+    my @tables = $self->bz_table_list_real();
+    foreach my $table (@tables) {
+        my @columns = $self->bz_table_columns_real($table);
+        foreach my $column (@columns) {
+            my $def = $self->bz_column_info($table, $column);
+            if ($def->{REFERENCES}) {
+                my $references = $def->{REFERENCES};
+                my $update = $references->{UPDATE} || 'CASCADE';
+                my $to_table  = $references->{TABLE};
+                my $to_column = $references->{COLUMN};
+                my $fk_name = $self->_bz_schema->_get_fk_name($table,
+                                                              $column,
+                                                              $references);
+                if ( $update =~ /CASCADE/i ){
+                     my $trigger_name = uc($fk_name . "_UC");
+                     my $exist_trigger = $self->selectcol_arrayref(
+                         "SELECT OBJECT_NAME FROM USER_OBJECTS 
+                          WHERE OBJECT_NAME = ?", undef, $trigger_name);
+                    if(@$exist_trigger) {
+                        $self->do("DROP TRIGGER $trigger_name");
+                    }
+  
+                     my $tr_str = "CREATE OR REPLACE TRIGGER $trigger_name"
+                         . " AFTER  UPDATE  ON ". $to_table
+                         . " REFERENCING "
+                         . " NEW AS NEW "
+                         . " OLD AS OLD "
+                         . " FOR EACH ROW "
+                         . " BEGIN "
+                         . "     UPDATE $table"
+                         . "        SET $column = :NEW.$to_column"
+                         . "      WHERE $column = :OLD.$to_column;"
+                         . " END $trigger_name;";
+                         $self->do($tr_str);
+               }
+         }
+     }
+   }
+
 }
 
 package Bugzilla::DB::Oracle::st;

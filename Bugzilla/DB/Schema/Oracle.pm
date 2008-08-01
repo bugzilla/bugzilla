@@ -153,15 +153,15 @@ sub get_fk_ddl {
     
     if ( $update =~ /CASCADE/i ){
         my $tr_str = "CREATE OR REPLACE TRIGGER ${fk_name}_UC"
-                     . " AFTER  UPDATE  ON ". $table
+                     . " AFTER  UPDATE  ON ". $to_table
                      . " REFERENCING "
                      . " NEW AS NEW "
                      . " OLD AS OLD "
                      . " FOR EACH ROW "
                      . " BEGIN "
-                     . "     UPDATE $to_table"
-                     . "        SET $to_column = :NEW.$column"
-                     . "      WHERE $to_column = :OLD.$column;"
+                     . "     UPDATE $table"
+                     . "        SET $column = :NEW.$to_column"
+                     . "      WHERE $column = :OLD.$to_column;"
                      . " END ${fk_name}_UC;";
         my $dbh = Bugzilla->dbh; 
         $dbh->do($tr_str);      

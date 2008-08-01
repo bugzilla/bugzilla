@@ -322,7 +322,7 @@ sub _get_alter_type_sql {
     } 
     # If this column is no longer TEXT/VARCHAR, we need to drop the trigger
     # that went along with it.
-    if ( $old_def->{TYPE} !~ /varchar|text/i
+    if ( $old_def->{TYPE} =~ /varchar|text/i
             && $old_def->{NOTNULL}
             && $new_def->{TYPE} !~ /varchar|text/i )
     {

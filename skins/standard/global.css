@@ -287,6 +287,10 @@ table#flags td {
     min-width: 3em;
 }
 
+#error_msg {
+    font-size: x-large;
+}
+
 .throw_error {
     background-color: #ff0000;
     color: black;

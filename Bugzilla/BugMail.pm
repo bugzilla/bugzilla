@@ -137,7 +137,9 @@ sub Send {
 
     my $product = new Bugzilla::Product($values{product_id});
     $values{product} = $product->name;
-    $values{classification} = Bugzilla::Classification->new($product->classification_id)->name;
+    if (Bugzilla->params->{'useclassification'}) {
+        $values{classification} = Bugzilla::Classification->new($product->classification_id)->name;
+    }
     my $component = new Bugzilla::Component($values{component_id});
     $values{component} = $component->name;
 

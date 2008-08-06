@@ -21,7 +21,7 @@
 [% PROCESS "global/field-descs.none.tmpl" %]
 From: [% Param("mailfrom") %]
 To: [% email %][% Param("emailsuffix") %]
-Subject: Your [% terms.Bugzilla %] buglist needs attention.
+Subject: Your [% terms.Bugzilla %] [%+ terms.bug %] list needs attention.
 X-Bugzilla-Type: whine
 
 [This e-mail has been automatically generated.]
@@ -55,7 +55,7 @@ Or, you can use the general query page, at
 [%+ urlbase %]query.cgi
 
 Appended below are the individual URLs to get to all of your [% get_status("NEW") %] [%+ terms.bugs %]
-that haven't been touched for a week or more.
+that haven't been touched for [% Param("whinedays") %] days or more.
 
 You will get this message once a day until you've dealt with these [% terms.bugs %]!
 

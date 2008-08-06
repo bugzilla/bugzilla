@@ -322,7 +322,7 @@
     <a href="show_bug.cgi?id=[% bug_id FILTER url_quote %]">[% bug_id FILTER html %]</a>
     [% ", " IF !loop.last %]
   [% END %]
-  (<a href="buglist.cgi?bug_id=[% badbugs.join(",") FILTER url_quote %]">as buglist</a>).
+  (<a href="buglist.cgi?bug_id=[% badbugs.join(",") FILTER url_quote %]">as [% terms.bug %] list</a>).
 [% END %]
 
 [% BLOCK bug_link %]

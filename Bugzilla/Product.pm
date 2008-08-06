@@ -509,10 +509,11 @@ sub group_controls {
                   ORDER BY groups.name};
         $self->{group_controls} = 
             $dbh->selectall_hashref($query, 'id', undef, $self->id);
-        foreach my $group (keys(%{$self->{group_controls}})) {
-            $self->{group_controls}->{$group}->{'group'} = 
-                new Bugzilla::Group($group);
-        }
+
+        # For each group ID listed above, create and store its group object.
+        my @gids = keys %{$self->{group_controls}};
+        my $groups = Bugzilla::Group->new_from_list(\@gids);
+        $self->{group_controls}->{$_->id}->{group} = $_ foreach @$groups;
     }
     return $self->{group_controls};
 }

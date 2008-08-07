@@ -416,48 +416,9 @@
 
 <h3>Steps For Upgrading</h3>
 
-<ol>
-  <li>Read these entire Release Notes, particularly the &quot;Notes for
-    Upgraders&quot; section above.</li>
-
-  <li>View the <a href="sanitycheck.cgi">Sanity Check</a> page on your
-   installation before upgrading. Attempt to fix all warnings that 
-   the page produces before you go any further, or you may experience 
-   problems during your upgrade.</li>
-
-  <li>Make a backup of the [% terms.Bugzilla %] database before you upgrade,
-   perhaps by using <kbd>mysqldump</kbd>. <strong>THIS IS VERY 
-   IMPORTANT</strong>. If anything goes wrong during the upgrade, your
-   installation can be corrupted beyond recovery. Having a backup keeps you
-   safe.
-
-    <p>Example: <kbd>mysqldump -u root -p bu[%# trick filter %]gs &gt; 
-      bu[%# trick filter %]gs-db.sql</kbd></p></li>
-
-  <li>Replace the files in your installation with the new version of 
-   [% terms.Bugzilla %], or you can try to use CVS to upgrade.
-
-   <p>You can also use a brand-new [% terms.Bugzilla %] directory, as long 
-     as you copy over the old <kbd>data/</kbd> directory and the 
-     <kbd>localconfig</kbd> file to the new installation.</p></li>
-
-  <li>Now follow the standard 
-    <a href="[% docs_urlbase FILTER html %]installing-bugzilla.html">
-    [%- terms.Bugzilla %] installation process</a>.</li>
-
-  <li>Run <kbd>checksetup.pl</kbd> after you install the new version.</li>
-
-  <li>View the <a href="sanitycheck.cgi">Sanity Check</a> page again after 
-    you run <kbd>checksetup.pl</kbd>.</li>
-
-  <li>It is recommended that, if possible, you fix any problems you find
-   immediately. Failure to do this may mean that [% terms.Bugzilla %] will 
-   not work correctly. Be aware that if the sanity check page contains more
-   errors after an upgrade, it doesn't necessarily mean there are more 
-   errors in your database than there were before, as additional tests 
-   are added to the sanity check over time, and it is possible that those
-   errors weren't being checked for in the old version.</li>
-</ol>
+<p>Once you have read the notes above, see the
+  <a href="[% docs_urlbase FILTER html %]upgrade.html">Upgrading 
+  documentation</a> for instructions on how to upgrade.</p>
 
 <h2><a name="v32_code_changes"></a>Code Changes Which May Affect 
   Customizations</h2>
@@ -1325,48 +1286,9 @@
 
 <h3>Steps For Upgrading</h3>
 
-<ol>
-  <li>Read these entire Release Notes, particularly the &quot;Notes for
-    Upgraders&quot; section above.</li>
-
-  <li>View the <a href="sanitycheck.cgi">Sanity Check</a> page on your
-   installation before upgrading. Attempt to fix all warnings that 
-   the page produces before you go any further, or you may experience 
-   problems during your upgrade.</li>
-
-  <li>Make a backup of the [% terms.Bugzilla %] database before you upgrade,
-   perhaps by using <kbd>mysqldump</kbd>. <strong>THIS IS VERY 
-   IMPORTANT</strong>. If anything goes wrong during the upgrade, your
-   installation can be corrupted beyond recovery. Having a backup keeps you
-   safe.
-
-    <p>Example: <kbd>mysqldump -u root -p bu[%# trick filter %]gs &gt; 
-      bu[%# trick filter %]gs-db.sql</kbd></p></li>
-
-  <li>Replace the files in your installation with the new version of 
-   [% terms.Bugzilla %], or you can try to use CVS to upgrade.
-
-   <p>You can also use a brand-new [% terms.Bugzilla %] directory, as long 
-     as you copy over the old <kbd>data/</kbd> directory and the 
-     <kbd>localconfig</kbd> file to the new installation.</p></li>
-
-  <li>Now follow the standard 
-    <a href="[% docs_urlbase FILTER html %]installing-bugzilla.html">
-    [%- terms.Bugzilla %] installation process</a>.</li>
-
-  <li>Run <kbd>checksetup.pl</kbd> after you install the new version.</li>
-
-  <li>View the <a href="sanitycheck.cgi">Sanity Check</a> page again after 
-    you run <kbd>checksetup.pl</kbd>.</li>
-
-  <li>It is recommended that, if possible, you fix any problems you find
-   immediately. Failure to do this may mean that [% terms.Bugzilla %] will 
-   not work correctly. Be aware that if the sanity check page contains more
-   errors after an upgrade, it doesn't necessarily mean there are more 
-   errors in your database than there were before, as additional tests 
-   are added to the sanity check over time, and it is possible that those
-   errors weren't being checked for in the old version.</li>
-</ol>
+<p>Once you have read the notes above, see the 
+  <a href="[% docs_urlbase FILTER html %]upgrade.html">Upgrading 
+  documentation</a> for instructions on how to upgrade.</p>
 
 <h2><a name="v30_code_changes"></a>Code Changes Which May Affect 
   Customizations</h2>

@@ -347,7 +347,7 @@ sub _check_default_milestone {
 
     # Do nothing if target milestones are not in use.
     unless (Bugzilla->params->{'usetargetmilestone'}) {
-        return (ref $invocant) ? $invocant->default_milestone : undef;
+        return (ref $invocant) ? $invocant->default_milestone : '---';
     }
 
     $milestone = trim($milestone);
@@ -371,10 +371,10 @@ sub _check_milestone_url {
 
     # Do nothing if target milestones are not in use.
     unless (Bugzilla->params->{'usetargetmilestone'}) {
-        return (ref $invocant) ? $invocant->milestone_url : undef;
+        return (ref $invocant) ? $invocant->milestone_url : '';
     }
 
-    $url = trim($url);
+    $url = trim($url || '');
     return $url;
 }
 

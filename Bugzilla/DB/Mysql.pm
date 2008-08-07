@@ -49,6 +49,7 @@ use Bugzilla::Error;
 use Bugzilla::DB::Schema::Mysql;
 
 use List::Util qw(max);
+use Text::ParseWords;
 
 # This module extends the DB interface via inheritance
 use base qw(Bugzilla::DB);
@@ -141,8 +142,21 @@ sub sql_fulltext_search {
     my ($self, $column, $text) = @_;
 
     # Add the boolean mode modifier if the search string contains
-    # boolean operators.
-    my $mode = ($text =~ /[+-<>()~*"]/ ? "IN BOOLEAN MODE" : "");
+    # boolean operators at the start or end of a word.
+    my $mode = '';
+    if ($text =~ /(?:^|\W)[+\-<>~"()]/ || $text =~ /[()"*](?:$|\W)/) {
+        $mode = 'IN BOOLEAN MODE';
+
+        # quote un-quoted compound words
+        my @words = quotewords('[\s()]+', 'delimiter', $text);
+        foreach my $word (@words) {
+            # match words that have word chars, non-word chars, and no quotes
+            if ($word =~ /\w/ && $word =~ m/\W/ && $word !~ m/"/) {
+                $word = '"' . $word . '"';
+            }
+        }
+        $text = join('', @words);
+    }
 
     # quote the text for use in the MATCH AGAINST expression
     $text = $self->quote($text);

@@ -198,6 +198,88 @@ The definition is structured as:
 
 =back
 
+=head2 auth-login_methods
+
+This allows you to add new login types to Bugzilla.
+(See L<Bugzilla::Auth::Login>.)
+
+Params:
+
+=over
+
+=item C<modules>
+
+This is a hash--a mapping from login-type "names" to the actual module on
+disk. The keys will be all the values that were passed to 
+L<Bugzilla::Auth/login> for the C<Login> parameter. The values are the
+actual path to the module on disk. (For example, if the key is C<DB>, the
+value is F<Bugzilla/Auth/Login/DB.pm>.)
+
+For your extension, the path will start with 
+F<extensions/yourextension/lib/>. (See the code in the example extension.)
+
+If your login type is in the hash as a key, you should set that key to the
+right path to your module. That module's C<new> method will be called,
+probably with empty parameters. If your login type is I<not> in the hash,
+you should not set it.
+
+You will be prevented from adding new keys to the hash, so make sure your
+key is in there before you modify it. (In other words, you can't add in
+login methods that weren't passed to L<Bugzilla::Auth/login>.)
+
+=back
+
+=head2 auth-verify_methods
+
+This works just like L</auth-login_methods> except it's for
+login verification methods (See L<Bugzilla::Auth::Verify>.) It also
+takes a C<modules> parameter, just like L</auth-login_methods>.
+
+=head2 config-add_panels
+
+If you want to add new panels to the Parameters administrative interface,
+this is where you do it.
+
+Params:
+
+=over
+
+=item C<panel_modules>
+
+A hashref, where the keys are the "name" of the module and the value
+is the Perl module containing that config module. For example, if
+the name is C<Auth>, the value would be C<Bugzilla::Config::Auth>.
+
+For your extension, the Perl module name must start with 
+C<extensions::yourextension::lib>. (See the code in the example
+extension.)
+
+=back
+
+=head2 config-modify_panels
+
+This is how you modify already-existing panels in the Parameters
+administrative interface. For example, if you wanted to add a new
+Auth method (modifying Bugzilla::Config::Auth) this is how you'd
+do it.
+
+Params:
+
+=over
+
+=item C<panels>
+
+A hashref, where the keys are lower-case panel "names" (like C<auth>, 
+C<admin>, etc.) and the values are hashrefs. The hashref contains a
+single key, C<params>. C<params> is an arrayref--the return value from
+C<get_param_list> for that module. You can modify C<params> and
+your changes will be reflected in the interface.
+
+Adding new keys to C<panels> will have no effect. You should use
+L</config-add_panels> if you want to add new panels.
+
+=back
+
 =head2 enter_bug-entrydefaultvars
 
 This happens right before the template is loaded on enter_bug.cgi.

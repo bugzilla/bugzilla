@@ -34,6 +34,7 @@ use strict;
 
 use base qw(Exporter);
 use Bugzilla::Constants;
+use Bugzilla::Hook;
 use Data::Dumper;
 use File::Temp;
 
@@ -54,15 +55,21 @@ our %params;
 # Load in the param definitions
 sub _load_params {
     my $panels = param_panels();
+    my %hook_panels;
     foreach my $panel (keys %$panels) {
         my $module = $panels->{$panel};
         eval("require $module") || die $@;
-        my @new_param_list = "$module"->get_param_list();
+        my @new_param_list = $module->get_param_list();
+        $hook_panels{lc($panel)} = { params => \@new_param_list };
         foreach my $item (@new_param_list) {
             $params{$item->{'name'}} = $item;
         }
         push(@param_list, @new_param_list);
     }
+    # This hook is also called in editparams.cgi. This call here is required
+    # to make SetParam work.
+    Bugzilla::Hook::process('config-modify_panels', 
+                            { panels => \%hook_panels });
 }
 # END INIT CODE
 
@@ -77,7 +84,8 @@ sub param_panels {
         $param_panels->{$module} = "Bugzilla::Config::$module" unless $module eq 'Common';
     }
     # Now check for any hooked params
-    Bugzilla::Hook::process('config', { config => $param_panels });
+    Bugzilla::Hook::process('config-add_panels', 
+                            { panel_modules => $param_panels });
     return $param_panels;
 }
 

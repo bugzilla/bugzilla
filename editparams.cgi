@@ -71,12 +71,17 @@ foreach my $panel (keys %$param_panels) {
     $current_module = $panel if ($current_panel eq lc($panel));
 }
 
+my %hook_panels = map { $_->{name} => { params => $_->{param_list} } }
+                      @panels;
+# Note that this hook is also called in Bugzilla::Config.
+Bugzilla::Hook::process('config-modify_panels', { panels => \%hook_panels });
+
 $vars->{panels} = \@panels;
 
 if ($action eq 'save' && $current_module) {
     check_token_data($token, 'edit_parameters');
     my @changes = ();
-    my @module_param_list = "$param_panels->{$current_module}"->get_param_list(1);
+    my @module_param_list = @{ $hook_panels{lc($current_module)}->{params} };
 
     foreach my $i (@module_param_list) {
         my $name = $i->{'name'};

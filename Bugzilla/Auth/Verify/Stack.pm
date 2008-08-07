@@ -21,16 +21,24 @@ use fields qw(
     _stack
     successful
 );
+use Hash::Util qw(lock_keys);
+use Bugzilla::Hook;
 
 sub new {
     my $class = shift;
     my $list = shift;
     my $self = $class->SUPER::new(@_);
+    my %methods = map { $_ => "Bugzilla/Auth/Verify/$_.pm" } split(',', $list);
+    lock_keys(%methods);
+    Bugzilla::Hook::process('auth-verify_methods', { modules => \%methods });
+
     $self->{_stack} = [];
-    foreach my $verify_method (split(',', $list)) {
-        require "Bugzilla/Auth/Verify/${verify_method}.pm";
-        push(@{$self->{_stack}}, 
-             "Bugzilla::Auth::Verify::$verify_method"->new(@_));
+    foreach my $verify_method (keys %methods) {
+        my $module = $methods{$verify_method};
+        require $module;
+        $module =~ s|/|::|g;
+        $module =~ s/.pm$//;
+        push(@{$self->{_stack}}, $module->new(@_));
     }
     return $self;
 }

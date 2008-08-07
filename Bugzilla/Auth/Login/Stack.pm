@@ -26,16 +26,24 @@ use fields qw(
     _stack
     successful
 );
+use Hash::Util qw(lock_keys);
+use Bugzilla::Hook;
 
 sub new {
     my $class = shift;
     my $self = $class->SUPER::new(@_);
     my $list = shift;
+    my %methods = map { $_ => "Bugzilla/Auth/Login/$_.pm" } split(',', $list);
+    lock_keys(%methods);
+    Bugzilla::Hook::process('auth-login_methods', { modules => \%methods });
+
     $self->{_stack} = [];
-    foreach my $login_method (split(',', $list)) {
-        require "Bugzilla/Auth/Login/${login_method}.pm";
-        push(@{$self->{_stack}}, 
-             "Bugzilla::Auth::Login::$login_method"->new(@_));
+    foreach my $login_method (keys %methods) {
+        my $module = $methods{$login_method};
+        require $module;
+        $module =~ s|/|::|g;
+        $module =~ s/.pm$//;
+        push(@{$self->{_stack}}, $module->new(@_));
     }
     return $self;
 }

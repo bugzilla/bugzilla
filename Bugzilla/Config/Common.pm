@@ -277,10 +277,7 @@ sub check_user_verify_class {
     for my $class (split /,\s*/, $list) {
         my $res = check_multi($class, $entry);
         return $res if $res;
-        if ($class eq 'DB') {
-            # No params
-        }
-        elsif ($class eq 'RADIUS') {
+        if ($class eq 'RADIUS') {
             eval "require Authen::Radius";
             return "Error requiring Authen::Radius: '$@'" if $@;
             return "RADIUS servername (RADIUS_server) is missing" unless Bugzilla->params->{"RADIUS_server"};
@@ -291,9 +288,6 @@ sub check_user_verify_class {
             return "Error requiring Net::LDAP: '$@'" if $@;
             return "LDAP servername (LDAPserver) is missing" unless Bugzilla->params->{"LDAPserver"};
             return "LDAPBaseDN is empty" unless Bugzilla->params->{"LDAPBaseDN"};
-        }
-        else {
-            return "Unknown user_verify_class '$class' in check_user_verify_class";
         }
     }
     return "";

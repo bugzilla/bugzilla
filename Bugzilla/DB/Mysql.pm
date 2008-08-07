@@ -136,7 +136,7 @@ sub sql_fulltext_search {
 
     # Add the boolean mode modifier if the search string contains
     # boolean operators.
-    my $mode = ($text =~ /[+-<>()~*"]/ ? "IN BOOLEAN MODE" : "");
+    my $mode = ($text =~ /[+\-<>()~*"]/ ? "IN BOOLEAN MODE" : "");
 
     # quote the text for use in the MATCH AGAINST expression
     $text = $self->quote($text);

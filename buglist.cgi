@@ -695,6 +695,8 @@ DefineColumn("relevance"         , "relevance"                  , "Relevance"   
 DefineColumn("deadline"          , $dbh->sql_date_format('bugs.deadline', '%Y-%m-%d') . " AS deadline", "Deadline");
 
 foreach my $field (Bugzilla->active_custom_fields) {
+    # Multi-select fields are not (yet) supported in buglists.
+    next if $field->type == FIELD_TYPE_MULTI_SELECT;
     DefineColumn($field->name, 'bugs.' . $field->name, $field->description);
 }
 

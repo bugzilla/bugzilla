@@ -1222,7 +1222,7 @@ sub _check_dup_id {
     # What if the reporter currently can't see the new bug? In the browser 
     # interface, we prompt the user. In other interfaces, we default to 
     # not adding the user, as the safest option.
-    elsif (Bugzilla->params->usage_mode == USAGE_MODE_BROWSER) {
+    elsif (Bugzilla->usage_mode == USAGE_MODE_BROWSER) {
         # If we've already confirmed whether the user should be added...
         my $cgi = Bugzilla->cgi;
         my $add_confirmed = $cgi->param('confirm_add_duplicate');

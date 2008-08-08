@@ -582,7 +582,7 @@
 
     <programlisting><![CDATA[...
     [% ', <a href="editkeywords.cgi">keywords</a>' 
-                                              IF user.groups.editkeywords %]
+       IF user.in_group('editkeywords') %]
     [% Hook.process("edit") %]
 ...]]></programlisting>
 
@@ -592,7 +592,7 @@
       You then create that template file and add the following constant:
     </para>
 
-    <programlisting><![CDATA[...[% ', <a href="edit-projects.cgi">projects</a>' IF user.groups.projman_admins %]]]></programlisting>
+    <programlisting><![CDATA[...[% ', <a href="edit-projects.cgi">projects</a>' IF user.in_group('projman_admins') %]]]></programlisting>
 
     <para>
       Voila!  The link now appears after the other administration links in the
@@ -746,7 +746,7 @@
       positive check, which returns 1 (allow) if certain conditions are true,
       or a negative check, which returns 0 (deny.) E.g.:
       <programlisting>    if ($field eq "qacontact") {
-        if (Bugzilla->user->groups("quality_assurance")) {
+        if (Bugzilla->user->in_group("quality_assurance")) {
             return 1;
         } 
         else {

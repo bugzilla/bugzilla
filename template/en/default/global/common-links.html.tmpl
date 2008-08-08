@@ -56,10 +56,10 @@
 
   [% IF user.login %]
     <li><span class="separator">| </span><a href="userprefs.cgi">Preferences</a></li>
-    [% IF user.groups.tweakparams || user.groups.editusers || user.can_bless
-          || (Param('useclassification') && user.groups.editclassifications)
-          || user.groups.editcomponents || user.groups.admin || user.groups.creategroups
-          || user.groups.editkeywords || user.groups.bz_canusewhines
+    [% IF user.in_group('tweakparams') || user.in_group('editusers') || user.can_bless
+          || (Param('useclassification') && user.in_group('editclassifications'))
+          || user.in_group('editcomponents') || user.in_group('admin') || user.in_group('creategroups')
+          || user.in_group('editkeywords') || user.in_group('bz_canusewhines')
           || user.get_products_by_permission("editcomponents").size %]
       <li><span class="separator">| </span><a href="admin.cgi">Administration</a></li>
     [% END %]

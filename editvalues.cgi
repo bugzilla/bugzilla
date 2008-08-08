@@ -118,7 +118,7 @@ $vars->{'doc_section'} = 'edit-values.html';
 
 print $cgi->header();
 
-exists Bugzilla->user->groups->{'admin'} ||
+Bugzilla->user->in_group('admin') ||
     ThrowUserError('auth_failure', {group  => "admin",
                                     action => "edit",
                                     object => "field_values"});

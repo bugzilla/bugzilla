@@ -142,7 +142,7 @@ sub queue {
            LEFT JOIN bug_group_map AS bgmap
                   ON bgmap.bug_id = bugs.bug_id
                  AND bgmap.group_id NOT IN (" .
-                     join(', ', (-1, values(%{$user->groups}))) . ")
+                     $user->groups_as_string . ")
            LEFT JOIN cc AS ccmap
                   ON ccmap.who = $userid
                  AND ccmap.bug_id = bugs.bug_id

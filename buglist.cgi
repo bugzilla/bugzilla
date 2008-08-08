@@ -264,7 +264,7 @@ sub LookupNamedQuery {
                                              FROM namedquery_group_map
                                             WHERE namedquery_id = ?',
                                           undef, $id);
-        if (!grep {$_ == $group} values(%{$user->groups()})) {
+        if (!grep { $_->id == $group } @{ $user->groups }) {
             ThrowUserError("missing_query", {'queryname' => $name,
                                              'sharer_id' => $sharer_id});
         }

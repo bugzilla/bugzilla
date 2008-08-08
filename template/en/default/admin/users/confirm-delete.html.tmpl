@@ -69,8 +69,8 @@
     <td>
       [% IF otheruser.groups.size %]
         <ul>
-          [% FOREACH group = otheruser.groups.keys %]
-            <li>[% group FILTER html %]</li>
+          [% FOREACH group = otheruser.groups %]
+            <li>[% group.name FILTER html %]</li>
           [% END %]
         </ul>
       [% ELSE %]

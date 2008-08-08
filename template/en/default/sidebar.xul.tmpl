@@ -69,31 +69,31 @@ function normal_keypress_handler( aEvent ) {
 
 [% IF user.id %]
       <text class="text-link" onclick="load_relative_url('userprefs.cgi')" value="edit prefs"/>
-  [%- IF user.groups.tweakparams %]
+  [%- IF user.in_group('tweakparams') %]
       <text class="text-link" onclick="load_relative_url('editparams.cgi')" value="edit params"/>
       <text class="text-link" onclick="load_relative_url('editsettings.cgi')" value="edit default preferences"/>
   [%- END %]
-  [%- IF user.groups.editusers || user.can_bless %]
+  [%- IF user.in_group('editusers') || user.can_bless %]
       <text class="text-link" onclick="load_relative_url('editusers.cgi')" value="edit users"/>
   [%- END %]
-  [%- IF Param('useclassification') && user.groups.editclassifications %]
+  [%- IF Param('useclassification') && user.in_group('editclassifications') %]
       <text class="text-link" onclick="load_relative_url('editclassifications.cgi')" value="edit classifications"/>
   [%- END %]
-  [%- IF user.groups.editcomponents %]
+  [%- IF user.in_group('editcomponents') %]
       <text class="text-link" onclick="load_relative_url('editcomponents.cgi')" value="edit components"/>
       <text class="text-link" onclick="load_relative_url('editflagtypes.cgi')" value="edit flags"/>
       <text class="text-link" onclick="load_relative_url('editvalues.cgi')" value="edit field values"/>
   [%- END %]
-  [%- IF user.groups.creategroups %]
+  [%- IF user.in_group('creategroups') %]
       <text class="text-link" onclick="load_relative_url('editgroups.cgi')" value="edit groups"/>
   [%- END %]
-  [%- IF user.groups.editkeywords %]
+  [%- IF user.in_group('editkeywords') %]
       <text class="text-link" onclick="load_relative_url('editkeywords.cgi')" value="edit keywords"/>
   [%- END %]
-  [%- IF user.groups.bz_canusewhines %]
+  [%- IF user.in_group('bz_canusewhines') %]
       <text class="text-link" onclick="load_relative_url('editwhines.cgi')" value="edit whining"/>
   [%- END %]
-  [%- IF user.groups.editcomponents %]
+  [%- IF user.in_group('editcomponents') %]
       <text class="text-link" onclick="load_relative_url('sanitycheck.cgi')" value="sanity check"/>
   [%- END %]
   [%- IF user.authorizer.can_logout %]

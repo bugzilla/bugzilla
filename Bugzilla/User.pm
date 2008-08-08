@@ -359,75 +359,62 @@ sub groups {
     my $self = shift;
 
     return $self->{groups} if defined $self->{groups};
-    return {} unless $self->id;
+    return [] unless $self->id;
 
     my $dbh = Bugzilla->dbh;
-    my $groups = $dbh->selectcol_arrayref(q{SELECT DISTINCT groups.name, group_id
-                                              FROM groups, user_group_map
-                                             WHERE groups.id=user_group_map.group_id
-                                               AND user_id=?
-                                               AND isbless=0},
-                                          { Columns=>[1,2] },
-                                          $self->id);
+    my $groups_to_check = $dbh->selectcol_arrayref(
+        q{SELECT DISTINCT group_id
+            FROM user_group_map
+           WHERE user_id = ? AND isbless = 0}, undef, $self->id);
 
-    # The above gives us an arrayref [name, id, name, id, ...]
-    # Convert that into a hashref
-    my %groups = @$groups;
-    my @groupidstocheck = values(%groups);
-    my %groupidschecked = ();
     my $rows = $dbh->selectall_arrayref(
-                "SELECT DISTINCT groups.name, groups.id, member_id
-                            FROM group_group_map
-                      INNER JOIN groups
-                              ON groups.id = grantor_id
-                           WHERE grant_type = " . GROUP_MEMBERSHIP);
-    my %group_names = ();
-    my %group_membership = ();
+        "SELECT DISTINCT grantor_id, member_id
+           FROM group_group_map
+          WHERE grant_type = " . GROUP_MEMBERSHIP);
+
+    my %group_membership;
     foreach my $row (@$rows) {
-        my ($member_name, $grantor_id, $member_id) = @$row; 
-        # Just save the group names
-        $group_names{$grantor_id} = $member_name;
-        
-        # And group membership
-        push (@{$group_membership{$member_id}}, $grantor_id);
+        my ($grantor_id, $member_id) = @$row; 
+        push (@{ $group_membership{$member_id} }, $grantor_id);
     }
     
     # Let's walk the groups hierarchy tree (using FIFO)
     # On the first iteration it's pre-filled with direct groups 
     # membership. Later on, each group can add its own members into the
     # FIFO. Circular dependencies are eliminated by checking
-    # $groupidschecked{$member_id} hash values.
+    # $checked_groups{$member_id} hash values.
     # As a result, %groups will have all the groups we are the member of.
-    while ($#groupidstocheck >= 0) {
+    my %checked_groups;
+    my %groups;
+    while (scalar(@$groups_to_check) > 0) {
         # Pop the head group from FIFO
-        my $member_id = shift @groupidstocheck;
+        my $member_id = shift @$groups_to_check;
         
         # Skip the group if we have already checked it
-        if (!$groupidschecked{$member_id}) {
+        if (!$checked_groups{$member_id}) {
             # Mark group as checked
-            $groupidschecked{$member_id} = 1;
+            $checked_groups{$member_id} = 1;
             
             # Add all its members to the FIFO check list
             # %group_membership contains arrays of group members 
             # for all groups. Accessible by group number.
-            foreach my $newgroupid (@{$group_membership{$member_id}}) {
-                push @groupidstocheck, $newgroupid 
-                    if (!$groupidschecked{$newgroupid});
-            }
-            # Note on if clause: we could have group in %groups from 1st
-            # query and do not have it in second one
-            $groups{$group_names{$member_id}} = $member_id 
-                if $group_names{$member_id} && $member_id;
+            my $members = $group_membership{$member_id};
+            my @new_to_check = grep(!$checked_groups{$_}, @$members);
+            push(@$groups_to_check, @new_to_check);
+
+            $groups{$member_id} = 1;
         }
     }
-    $self->{groups} = \%groups;
+
+    $self->{groups} = Bugzilla::Group->new_from_list([keys %groups]);
 
     return $self->{groups};
 }
 
 sub groups_as_string {
     my $self = shift;
-    return (join(',',values(%{$self->groups})) || '-1');
+    my @ids = map { $_->id } @{ $self->groups };
+    return scalar(@ids) ? join(',', @ids) : '-1';
 }
 
 sub bless_groups {
@@ -483,7 +470,7 @@ sub bless_groups {
 
 sub in_group {
     my ($self, $group, $product_id) = @_;
-    if (exists $self->groups->{$group}) {
+    if (scalar grep($_->name eq $group, @{ $self->groups })) {
         return 1;
     }
     elsif ($product_id && detaint_natural($product_id)) {
@@ -512,8 +499,7 @@ sub in_group {
 
 sub in_group_id {
     my ($self, $id) = @_;
-    my %j = reverse(%{$self->groups});
-    return exists $j{$id} ? 1 : 0;
+    return grep($_->id == $id, @{ $self->groups }) ? 1 : 0;
 }
 
 sub get_products_by_permission {
@@ -828,7 +814,7 @@ sub visible_groups_direct {
     my $sth;
    
     if (Bugzilla->params->{'usevisibilitygroups'}) {
-        my $glist = join(',',(-1,values(%{$self->groups})));
+        my $glist = $self->groups_as_string;
         $sth = $dbh->prepare("SELECT DISTINCT grantor_id
                                  FROM group_group_map
                                 WHERE member_id IN($glist)
@@ -873,7 +859,7 @@ sub queryshare_groups {
             }
         }
         else {
-            @queryshare_groups = values(%{$self->groups});
+            @queryshare_groups = map { $_->id } @{ $self->groups };
         }
     }
 
@@ -1531,6 +1517,17 @@ sub is_global_watcher {
     return  $self->{'is_global_watcher'};
 }
 
+sub is_timetracker {
+    my $self = shift;
+
+    if (!defined $self->{'is_timetracker'}) {
+        my $tt_group = Bugzilla->params->{'timetrackinggroup'};
+        $self->{'is_timetracker'} =
+            ($tt_group && $self->in_group($tt_group)) ? 1 : 0;
+    }
+    return $self->{'is_timetracker'};
+}
+
 sub get_userlist {
     my $self = shift;
 
@@ -1871,10 +1868,8 @@ is_default     - a boolean to indicate whether the user has chosen to make
 
 =item C<groups>
 
-Returns a hashref of group names for groups the user is a member of. The keys
-are the names of the groups, whilst the values are the respective group ids.
-(This is so that a set of all groupids for groups the user is in can be
-obtained by C<values(%{$user-E<gt>groups})>.)
+Returns an arrayref of L<Bugzilla::Group> objects representing
+groups that this user is a member of.
 
 =item C<groups_as_string>
 

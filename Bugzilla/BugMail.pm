@@ -489,9 +489,7 @@ sub Send {
             # If we are using insiders, and the comment is private, only send 
             # to insiders
             my $insider_ok = 1;
-            $insider_ok = 0 if (Bugzilla->params->{"insidergroup"} && 
-                                ($anyprivate != 0) && 
-                                (!$user->groups->{Bugzilla->params->{"insidergroup"}}));
+            $insider_ok = 0 if $anyprivate && !$user->is_insider;
 
             # We shouldn't send mail if this is a dependency mail (i.e. there 
             # is something in @depbugs), and any of the depending bugs are not 
@@ -562,9 +560,9 @@ sub sendMail {
           next;
         }
         # Only send estimated_time if it is enabled and the user is in the group
-        if (($f ne 'estimated_time' && $f ne 'deadline') ||
-             $user->groups->{Bugzilla->params->{'timetrackinggroup'}}) {
-
+        if (($f ne 'estimated_time' && $f ne 'deadline') 
+            || $user->is_timetracker)
+        {
             my $desc = $fielddescription{$f};
             $head .= multiline_sprintf(FORMAT_DOUBLE, ["$desc:", $value], 
                                        FORMAT_2_SIZE);
@@ -584,14 +582,12 @@ sub sendMail {
             ($diff->{'fieldname'} eq 'estimated_time' ||
              $diff->{'fieldname'} eq 'remaining_time' ||
              $diff->{'fieldname'} eq 'work_time' ||
-             $diff->{'fieldname'} eq 'deadline')){
-            if ($user->groups->{Bugzilla->params->{"timetrackinggroup"}}) {
-                $add_diff = 1;
-            }
-        } elsif (($diff->{'isprivate'}) 
-                 && Bugzilla->params->{'insidergroup'}
-                 && !($user->groups->{Bugzilla->params->{'insidergroup'}})
-                ) {
+             $diff->{'fieldname'} eq 'deadline'))
+        {
+            $add_diff = 1 if $user->is_timetracker;
+        } elsif ($diff->{'isprivate'} 
+                 && !$user->is_insider)
+        {
             $add_diff = 0;
         } else {
             $add_diff = 1;

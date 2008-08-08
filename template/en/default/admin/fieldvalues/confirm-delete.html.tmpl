@@ -71,7 +71,7 @@
     [% IF param_name.defined && Param(param_name) == value %]
       <li>'[% value FILTER html %]' is the default value for
           the '[% field.description FILTER html %]' field.
-          [% IF user.groups.tweakparams %]
+          [% IF user.in_group('tweakparams') %]
             You first have to <a href="editparams.cgi?section=bugfields#
             [%- param_name FILTER url_quote %]">change the default value</a> for
             this field before you can delete this value.

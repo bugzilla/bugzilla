@@ -775,8 +775,9 @@ sub init {
                 " ON bug_group_map.bug_id = bugs.bug_id ";
 
     if ($user->id) {
-        if (%{$user->groups}) {
-            $query .= " AND bug_group_map.group_id NOT IN (" . join(',', values(%{$user->groups})) . ") ";
+        if (scalar @{ $user->groups }) {
+            $query .= " AND bug_group_map.group_id NOT IN (" 
+                   . $user->groups_as_string . ") ";
         }
 
         $query .= " LEFT JOIN cc ON cc.bug_id = bugs.bug_id AND cc.who = " . $user->id;

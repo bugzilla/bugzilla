@@ -443,7 +443,7 @@
     [% title = "Specified Field Value Is Default" %]
     '[% value FILTER html %]' is the default value for
     the '[% field.description FILTER html %]' field and cannot be deleted.
-    [% IF user.groups.tweakparams %]
+    [% IF user.in_group('tweakparams') %]
       You have to <a href="editparams.cgi?section=bugfields#
       [%- param_name FILTER url_quote %]">change</a> the default value first.
     [% END %]

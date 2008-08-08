@@ -108,20 +108,20 @@
   [%# *** Bugzilla Administration Tools *** %]
   [% IF user.login %] 
     [% '<link rel="Administration" title="Parameters"    
-              href="editparams.cgi">' IF user.groups.tweakparams %]
+              href="editparams.cgi">' IF user.in_group('tweakparams') %]
     [% '<link rel="Administration" title="Users"    
-              href="editusers.cgi">' IF user.groups.editusers %]
+              href="editusers.cgi">' IF user.in_group('editusers') %]
     [% '<link rel="Administration" title="Products" href="editproducts.cgi">'
-       IF user.groups.editcomponents || user.get_products_by_permission("editcomponents").size %]
+       IF user.in_group('editcomponents') || user.get_products_by_permission("editcomponents").size %]
     [% '<link rel="Administration" title="Flag Types"   
-              href="editflagtypes.cgi">' IF user.groups.editcomponents %]
+              href="editflagtypes.cgi">' IF user.in_group('editcomponents') %]
     [% '<link rel="Administration" title="Groups"        
-              href="editgroups.cgi">' IF user.groups.creategroups %]
+              href="editgroups.cgi">' IF user.in_group('creategroups') %]
     [% '<link rel="Administration" title="Keywords"      
-              href="editkeywords.cgi">' IF user.groups.editkeywords %]
+              href="editkeywords.cgi">' IF user.in_group('editkeywords') %]
     [% '<link rel="Administration" title="Whining"       
-              href="editwhines.cgi">' IF user.groups.bz_canusewhines %]
+              href="editwhines.cgi">' IF user.in_group('bz_canusewhines') %]
     [% '<link rel="Administration" title="Sanity Check"  
-              href="sanitycheck.cgi">' IF user.groups.editcomponents %]
+              href="sanitycheck.cgi">' IF user.in_group('editcomponents') %]
   [% END %]  
 [% END %]

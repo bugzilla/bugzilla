@@ -83,7 +83,7 @@
   [% IF ids.size %]
     ([% IF maxdepth -%]Up to [% maxdepth %] level[% "s" IF maxdepth > 1 %] deep | [% END -%]
     <a href="buglist.cgi?bug_id=[% ids.join(",") %]">view as [% terms.bug %] list</a>
-    [% IF user.groups.editbugs && ids.size > 1 %]
+    [% IF user.in_group('editbugs') && ids.size > 1 %]
       | <a href="buglist.cgi?bug_id=[% ids.join(",") %]&amp;tweak=1">change several</a>
     [% END %])
     <ul class="tree">

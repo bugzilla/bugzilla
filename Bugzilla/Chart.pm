@@ -382,8 +382,7 @@ sub getSeriesIDs {
 sub getVisibleSeries {
     my %cats;
 
-    # List of groups the user is in; use -1 to make sure it's not empty.
-    my $grouplist = join(", ", (-1, values(%{Bugzilla->user->groups})));
+    my $grouplist = Bugzilla->user->groups_as_string;
     
     # Get all visible series
     my $dbh = Bugzilla->dbh;

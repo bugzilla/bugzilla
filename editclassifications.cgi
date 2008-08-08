@@ -62,7 +62,7 @@ Bugzilla->login(LOGIN_REQUIRED);
 
 print $cgi->header();
 
-exists Bugzilla->user->groups->{'editclassifications'}
+Bugzilla->user->in_group('editclassifications')
   || ThrowUserError("auth_failure", {group  => "editclassifications",
                                      action => "edit",
                                      object => "classifications"});

@@ -102,7 +102,6 @@ if (defined $cgi->param('rememberedquery')) {
         }
     }
     my $list = join(" ", @collist);
-    my $urlbase = Bugzilla->params->{"urlbase"};
 
     if ($list) {
         # Only set the cookie if this is not a saved search.
@@ -182,8 +181,7 @@ if (defined $cgi->param('query_based_on')) {
     my $searches = Bugzilla->user->queries;
     my ($search) = grep($_->name eq $cgi->param('query_based_on'), @$searches);
 
-    # Only allow users to edit their own queries.
-    if ($search && $search->user->id == Bugzilla->user->id) {
+    if ($search) {
         $vars->{'saved_search'} = $search;
         $vars->{'buffer'} = "cmdtype=runnamed&namedcmd=".$search->name;
 

@@ -76,12 +76,8 @@
   <p>
     <input type="submit" id="change" value="Change Columns">
   </p>
-</form>
 
-<form action="colchange.cgi">
-  <input type="hidden" name="rememberedquery" value="[% buffer FILTER html %]">
-  <input type="hidden" name="resetit" value="1">
-  <input type="submit" id="reset" 
+  <input type="submit" id="resetit" name="resetit" 
          value="Reset to [% terms.Bugzilla %] default">
 </form>
 

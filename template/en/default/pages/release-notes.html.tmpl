@@ -501,6 +501,29 @@
   <em>everything</em> that's changed in each version, you should use our
   <a href="http://www.bugzilla.org/status/changes.html">Change Log Page</a>.</p>
 
+<h3>3.0.5</h3>
+
+<ul>
+  <li>If you don't have permission to set a flag, it will now appear
+    unchangeable in the UI.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=433851">[% terms.Bug %] 433851</a>)</li>
+  <li>If you were running mod_perl, [% terms.Bugzilla %] was not correctly
+    closing its connections to the database since 3.0.3, and so sometimes
+    the DB would run out of connections.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=441592">[% terms.Bug %] 441592</a>)</li>
+  <li>The installation script is now clear about exactly which 
+    <code>Email::</code> modules are required in Perl, thus avoiding the
+    problem where emails show up with a body like 
+    <samp>SCALAR(0xBF126795)</samp>.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=441541">[% terms.Bug %] 441541</a>)</li>
+  <li><a href="[% docs_urlbase FILTER html %]api/email_in.html">email_in.pl</a>
+    is no longer case-sensitive for values of <kbd>@product</kbd>.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=365697">[% terms.Bug %] 365697</a>)</li>
+</ul>
+
+<p>See also the <a href="#v30_security">Security Advisory</a> section for
+  information about security issues fixed in this release.</p>
+
 <h3>3.0.4</h3>
 
 <ul>
@@ -1228,6 +1251,13 @@
 </ul>
 
 <h2><a name="v30_security"></a>Security Updates in This Release</h2>
+
+<h3>3.0.5</h3>
+
+<p>[% terms.Bugzilla %] contains one security fix for 
+  <a href="[% docs_urlbase FILTER html %]api/importxml.html">importxml.pl</a>.
+  For details, see the 
+  <a href="http://www.bugzilla.org/security/2.22.4/">Security Advisory</a>.</p>
 
 <h3>3.0.4</h3>
 

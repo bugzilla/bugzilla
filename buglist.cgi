@@ -253,6 +253,12 @@ sub LookupNamedQuery {
                                                 WHERE userid = ? AND name = ?
                                                       $extra",
                                                undef, @args);
+
+    # Some DBs (read: Oracle) incorrectly mark this string as UTF-8
+    # even though it has no UTF-8 characters in it, which prevents
+    # Bugzilla::CGI from later reading it correctly.
+    utf8::downgrade($result) if utf8::is_utf8($result);
+
     if (!defined($result)) {
         return 0 unless $throw_error;
         ThrowUserError("missing_query", {'queryname' => $name,

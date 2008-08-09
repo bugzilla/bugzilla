@@ -48,9 +48,10 @@
     <td colspan="3"><input type="text" size="70" maxlength="255" id="icon_url" name="icon_url"></td>
   </tr></table><hr>
 
-  <input type="checkbox" name="insertnew" value="1"
+  <input type="checkbox" id="insertnew" name="insertnew" value="1"
     [% IF Param("makeproductgroups") %] checked[% END %]>
-    Insert new group into all existing products.<p>
+  <label for="insertnew">Insert new group into all existing products.</label>
+  <p>
   <input type="submit" id="create" value="Add">
   <input type="hidden" name="action" value="new">
   <input type="hidden" name="token" value="[% token FILTER html %]">

@@ -2033,7 +2033,7 @@ Returns a list of groups that the user is aware of.
 
 =item C<visible_groups_as_string>
 
-Returns the result of C<visible_groups_direct> as a string (a comma-separated
+Returns the result of C<visible_groups_inherited> as a string (a comma-separated
 list).
 
 =item C<product_responsibilities>

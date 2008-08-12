@@ -401,7 +401,7 @@ function handleWantsAttachment(wants_attachment) {
   [% USE Bugzilla %]
   [% FOREACH field = Bugzilla.get_fields({ obsolete => 0, custom => 1, 
                                            enter_bug => 1 }) %]
-    [% SET value = ${field.name} IF ${field.name}.defined %]
+    [% SET value = ${field.name}.defined ? ${field.name} : "" %]
     <tr>
       [% PROCESS bug/field.html.tmpl editable=1 value_span=2 %]
     </tr>

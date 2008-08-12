@@ -384,8 +384,13 @@ sub process_attachment() {
         elsif ($encoding =~ /filename/) {
             # read the attachment file
             Error("attach_path is required", undef) unless ($attach_path);
-            my $attach_filename = $attach_path . "/" . $attach->field('data');
-            open(ATTACH_FH, $attach_filename) or
+            
+            my $filename = $attach->field('data');
+            # Remove any leading path data from the filename
+            $filename =~ s/(.*\/|.*\\)//gs;
+            
+            my $attach_filename = $attach_path . "/" . $filename;
+            open(ATTACH_FH, "<", $attach_filename) or
                 Error("cannot open $attach_filename", undef);
             $attachment{'data'} = do { local $/; <ATTACH_FH> };
             close ATTACH_FH;

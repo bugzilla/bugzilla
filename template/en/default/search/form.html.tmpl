@@ -147,7 +147,7 @@ function doOnSelectProduct(selectmode) {
     </td>
     <td>
       [% IF button_name %]
-        <input type="submit" id="[% button_name.replace (' ' , '_') FILTER html %]"
+        <input type="submit" id="[% button_name FILTER css_class_quote %]_top"
                value="[% button_name FILTER html %]">
       [% END %]
     </td>

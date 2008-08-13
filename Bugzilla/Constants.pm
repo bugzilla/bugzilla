@@ -147,7 +147,7 @@ use File::Basename;
 # CONSTANTS
 #
 # Bugzilla version
-use constant BUGZILLA_VERSION => "3.0.5";
+use constant BUGZILLA_VERSION => "3.0.5+";
 
 #
 # ControlMap constants for group_control_map.

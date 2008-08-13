@@ -3003,26 +3003,57 @@ sub _populate_bugs_fulltext {
         my $bug_ids = $dbh->selectcol_arrayref('SELECT bug_id FROM bugs');
         return if !@$bug_ids;
 
-        print "Populating bugs_fulltext.short_desc...\n";
-        $dbh->do('INSERT INTO bugs_fulltext (bug_id, short_desc)
-                       SELECT bug_id, short_desc FROM bugs');
-        print "Populating bugs_fulltext comments fields...\n";
-        my $count = 1;
-        my $sth_all = $dbh->prepare('SELECT thetext FROM longdescs 
-                                      WHERE bug_id = ?');
-        my $sth_nopriv = $dbh->prepare('SELECT thetext FROM longdescs
-                                         WHERE bug_id = ? AND isprivate = 0');
-        my $sth_update = $dbh->prepare(
-            'UPDATE bugs_fulltext SET comments = ?, comments_noprivate = ?
-              WHERE bug_id = ?');
-        foreach my $id (@$bug_ids) { 
-            my $all = $dbh->selectcol_arrayref($sth_all, undef, $id);
-            my $nopriv = $dbh->selectcol_arrayref($sth_nopriv, undef, $id);
-            $sth_update->execute(join("\n", @$all), join("\n", @$nopriv), $id);
-            indicate_progress({ total   => scalar @$bug_ids, every => 100,
-                                current => $count++ });
+        # Populating bugs_fulltext can be very slow for large installs,
+        # so we special-case any DB that supports GROUP_CONCAT, which is
+        # a much faster way to do things.
+        if (UNIVERSAL::can($dbh, 'sql_group_concat')) {
+            print "Populating bugs_fulltext...";
+            print " (this can take a long time.)\n";
+            # XXX This hack should probably be moved elsewhere.
+            if ($dbh->isa('Bugzilla::DB::Mysql')) {
+                $dbh->do('SET SESSION group_concat_max_len = 128000000');
+                $dbh->do('SET SESSION max_allowed_packet =   128000000');
+            }
+            $dbh->do(
+                q{INSERT INTO bugs_fulltext (bug_id, short_desc, comments, 
+                                             comments_noprivate)
+                       SELECT bugs.bug_id, bugs.short_desc, }
+                     . $dbh->sql_group_concat('longdescs.thetext', '\'\n\'')
+              . ', ' . $dbh->sql_group_concat('nopriv.thetext',    '\'\n\'') .
+                      q{ FROM bugs 
+                              LEFT JOIN longdescs
+                                     ON bugs.bug_id = longdescs.bug_id
+                              LEFT JOIN longdescs AS nopriv
+                                     ON longdescs.comment_id = nopriv.comment_id
+                                        AND nopriv.isprivate = 0 }
+                     . $dbh->sql_group_by('bugs.bug_id', 'bugs.short_desc'));
         }
-        print "\n";
+        # The slow way, without group_concat.
+        else {
+            print "Populating bugs_fulltext.short_desc...\n";
+            $dbh->do('INSERT INTO bugs_fulltext (bug_id, short_desc)
+                           SELECT bug_id, short_desc FROM bugs');
+
+            my $count = 1;
+            my $sth_all = $dbh->prepare('SELECT thetext FROM longdescs 
+                                          WHERE bug_id = ?');
+            my $sth_nopriv = $dbh->prepare(
+                'SELECT thetext FROM longdescs
+                  WHERE bug_id = ? AND isprivate = 0');
+            my $sth_update = $dbh->prepare(
+                'UPDATE bugs_fulltext SET comments = ?, comments_noprivate = ?
+                  WHERE bug_id = ?');
+
+            print "Populating bugs_fulltext comment fields...\n";
+            foreach my $id (@$bug_ids) { 
+                my $all = $dbh->selectcol_arrayref($sth_all, undef, $id);
+                my $nopriv = $dbh->selectcol_arrayref($sth_nopriv, undef, $id);
+                $sth_update->execute(join("\n", @$all), join("\n", @$nopriv), $id);
+                indicate_progress({ total   => scalar @$bug_ids, every => 100,
+                                    current => $count++ });
+            }
+            print "\n";
+        }
     }
 }
 

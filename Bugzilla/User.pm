@@ -49,6 +49,8 @@ use Bugzilla::Product;
 use Bugzilla::Classification;
 use Bugzilla::Field;
 
+use Scalar::Util qw(blessed);
+
 use base qw(Bugzilla::Object Exporter);
 @Bugzilla::User::EXPORT = qw(is_available_username
     login_to_id user_id_to_login validate_password
@@ -561,44 +563,70 @@ sub can_edit_product {
 }
 
 sub can_see_bug {
-    my ($self, $bugid) = @_;
-    my $dbh = Bugzilla->dbh;
-    my $sth  = $self->{sthCanSeeBug};
-    my $userid  = $self->id;
-    # Get fields from bug, presence of user on cclist, and determine if
-    # the user is missing any groups required by the bug. The prepared query
-    # is cached because this may be called for every row in buglists or
-    # every bug in a dependency list.
-    unless ($sth) {
-        $sth = $dbh->prepare("SELECT 1, reporter, assigned_to, qa_contact,
-                             reporter_accessible, cclist_accessible,
-                             COUNT(cc.who), COUNT(bug_group_map.bug_id)
-                             FROM bugs
-                             LEFT JOIN cc 
-                               ON cc.bug_id = bugs.bug_id
-                               AND cc.who = $userid
-                             LEFT JOIN bug_group_map 
-                               ON bugs.bug_id = bug_group_map.bug_id
-                               AND bug_group_map.group_ID NOT IN(" .
-                               $self->groups_as_string .
-                               ") WHERE bugs.bug_id = ? 
-                               AND creation_ts IS NOT NULL " .
-                             $dbh->sql_group_by('bugs.bug_id', 'reporter, ' .
-                             'assigned_to, qa_contact, reporter_accessible, ' .
-                             'cclist_accessible'));
+    my ($self, $bug_id) = @_;
+    return @{ $self->visible_bugs([$bug_id]) } ? 1 : 0;
+}
+
+sub visible_bugs {
+    my ($self, $bugs) = @_;
+    # Allow users to pass in Bug objects and bug ids both.
+    my @bug_ids = map { blessed $_ ? $_->id : $_ } @$bugs;
+
+    # We only check the visibility of bugs that we haven't
+    # checked yet.
+    my $visible_cache = $self->{_visible_bugs_cache} ||= {};
+    my @check_ids = grep(!exists $visible_cache->{$_}, @bug_ids);
+
+    if (@check_ids) {
+        my $dbh = Bugzilla->dbh;
+        my $user_id = $self->id;
+        my $sth;
+        # Speed up the can_see_bug case.
+        if (scalar(@check_ids) == 1) {
+            $sth = $self->{_sth_one_visible_bug};
+        }
+        $sth ||= $dbh->prepare(
+            # This checks for groups that the bug is in that the user
+            # *isn't* in. Then, in the Perl code below, we check if
+            # the user can otherwise access the bug (for example, by being
+            # the assignee or QA Contact).
+            #
+            # The DISTINCT exists because the bug could be in *several*
+            # groups that the user isn't in, but they will all return the
+            # same result for bug_group_map.bug_id (so DISTINCT filters
+            # out duplicate rows).
+            "SELECT DISTINCT bugs.bug_id, reporter, assigned_to, qa_contact,
+                    reporter_accessible, cclist_accessible, cc.who,
+                    bug_group_map.bug_id
+               FROM bugs
+                    LEFT JOIN cc
+                              ON cc.bug_id = bugs.bug_id
+                                 AND cc.who = $user_id
+                    LEFT JOIN bug_group_map 
+                              ON bugs.bug_id = bug_group_map.bug_id
+                                 AND bug_group_map.group_id NOT IN ("
+                                     . $self->groups_as_string . ')
+              WHERE bugs.bug_id IN (' . join(',', ('?') x @check_ids) . ')
+                    AND creation_ts IS NOT NULL ');
+        if (scalar(@check_ids) == 1) {
+            $self->{_sth_one_visible_bug} = $sth;
+        }
+
+        $sth->execute(@check_ids);
+        while (my $row = $sth->fetchrow_arrayref) {
+            my ($bug_id, $reporter, $owner, $qacontact, $reporter_access, 
+                $cclist_access, $isoncclist, $missinggroup) = @$row;
+            $visible_cache->{$bug_id} ||= 
+                ((($reporter == $user_id) && $reporter_access)
+                 || (Bugzilla->params->{'useqacontact'}
+                     && $qacontact && ($qacontact == $user_id))
+                 || ($owner == $user_id)
+                 || ($isoncclist && $cclist_access)
+                 || !$missinggroup) ? 1 : 0;
+        }
     }
-    $sth->execute($bugid);
-    my ($ready, $reporter, $owner, $qacontact, $reporter_access, $cclist_access,
-        $isoncclist, $missinggroup) = $sth->fetchrow_array();
-    $sth->finish;
-    $self->{sthCanSeeBug} = $sth;
-    return ($ready
-            && ((($reporter == $userid) && $reporter_access)
-                || (Bugzilla->params->{'useqacontact'} 
-                    && $qacontact && ($qacontact == $userid))
-                || ($owner == $userid)
-                || ($isoncclist && $cclist_access)
-                || (!$missinggroup)));
+
+    return [grep { $visible_cache->{blessed $_ ? $_->id : $_} } @$bugs];
 }
 
 sub can_see_product {

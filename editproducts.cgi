@@ -35,7 +35,7 @@ use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Util;
 use Bugzilla::Error;
-use Bugzilla::Bug;
+use Bugzilla::Group;
 use Bugzilla::Product;
 use Bugzilla::Classification;
 use Bugzilla::Token;
@@ -273,7 +273,54 @@ if ($action eq 'edit' || (!$action && $product_name)) {
 }
 
 #
-# action='updategroupcontrols' -> update the product
+# action='update' -> update the product
+#
+if ($action eq 'update') {
+    check_token_data($token, 'edit_product');
+    my $product_old_name = trim($cgi->param('product_old_name') || '');
+    my $product = $user->check_can_admin_product($product_old_name);
+
+    $product->set_name($product_name);
+    $product->set_description(scalar $cgi->param('description'));
+    $product->set_default_milestone(scalar $cgi->param('defaultmilestone'));
+    $product->set_milestone_url(scalar $cgi->param('milestoneurl'));
+    $product->set_disallow_new(scalar $cgi->param('disallownew'));
+    $product->set_votes_per_user(scalar $cgi->param('votesperuser'));
+    $product->set_votes_per_bug(scalar $cgi->param('maxvotesperbug'));
+    $product->set_votes_to_confirm(scalar $cgi->param('votestoconfirm'));
+
+    my $changes = $product->update();
+
+    delete_token($token);
+
+    if (Bugzilla->params->{'useclassification'}) {
+        $vars->{'classification'} = new Bugzilla::Classification($product->classification_id);
+    }
+    $vars->{'product'} = $product;
+    $vars->{'changes'} = $changes;
+
+    $template->process("admin/products/updated.html.tmpl", $vars)
+        || ThrowTemplateError($template->error());
+    exit;
+}
+
+#
+# action='editgroupcontrols' -> display product group controls
+#
+
+if ($action eq 'editgroupcontrols') {
+    my $product = $user->check_can_admin_product($product_name);
+
+    $vars->{'product'} = $product;
+    $vars->{'token'} = issue_session_token('edit_group_controls');
+
+    $template->process("admin/products/groupcontrol/edit.html.tmpl", $vars)
+        || ThrowTemplateError($template->error());
+    exit;
+}
+
+#
+# action='updategroupcontrols' -> update product group controls
 #
 
 if ($action eq 'updategroupcontrols') {
@@ -308,10 +355,9 @@ if ($action eq 'updategroupcontrols') {
                    {'Slice' => {}}, $product->id);
         }
 
-#
-# return the mandatory groups which need to have bug entries added to the bug_group_map
-# and the corresponding bug count
-#
+        # return the mandatory groups which need to have bug entries
+        # added to the bug_group_map and the corresponding bug count
+
         my $mandatory_groups;
         if (@now_mandatory) {
             $mandatory_groups = $dbh->selectall_arrayref(
@@ -339,300 +385,33 @@ if ($action eq 'updategroupcontrols') {
             $vars->{'mandatory_groups'} = $mandatory_groups;
             $template->process("admin/products/groupcontrol/confirm-edit.html.tmpl", $vars)
                 || ThrowTemplateError($template->error());
-            exit;                
+            exit;
         }
     }
 
-    my $groups = $dbh->selectall_arrayref('SELECT id, name FROM groups
-                                           WHERE isbuggroup != 0
-                                           AND isactive != 0');
+    my $groups = Bugzilla::Group->match({isactive => 1, isbuggroup => 1});
     foreach my $group (@$groups) {
-        my ($groupid, $groupname) = @$group;
-        my $newmembercontrol = $cgi->param("membercontrol_$groupid") || 0;
-        my $newothercontrol = $cgi->param("othercontrol_$groupid") || 0;
-        #  Legality of control combination is a function of
-        #  membercontrol\othercontrol
-        #                 NA SH DE MA
-        #              NA  +  -  -  -
-        #              SH  +  +  +  +
-        #              DE  +  -  +  +
-        #              MA  -  -  -  +
-        unless (($newmembercontrol == $newothercontrol)
-              || ($newmembercontrol == CONTROLMAPSHOWN)
-              || (($newmembercontrol == CONTROLMAPDEFAULT)
-               && ($newothercontrol != CONTROLMAPSHOWN))) {
-            ThrowUserError('illegal_group_control_combination',
-                            {groupname => $groupname});
-        }
+        my $group_id = $group->id;
+        $product->set_group_controls($group,
+                                     {entry          => scalar $cgi->param("entry_$group_id") || 0,
+                                      membercontrol  => scalar $cgi->param("membercontrol_$group_id") || CONTROLMAPNA,
+                                      othercontrol   => scalar $cgi->param("othercontrol_$group_id") || CONTROLMAPNA,
+                                      canedit        => scalar $cgi->param("canedit_$group_id") || 0,
+                                      editcomponents => scalar $cgi->param("editcomponents_$group_id") || 0,
+                                      editbugs       => scalar $cgi->param("editbugs_$group_id") || 0,
+                                      canconfirm     => scalar $cgi->param("canconfirm_$group_id") || 0});
     }
-    $dbh->bz_start_transaction();
-
-    my $sth_Insert = $dbh->prepare('INSERT INTO group_control_map
-                                    (group_id, product_id, entry, membercontrol,
-                                     othercontrol, canedit, editcomponents,
-                                     canconfirm, editbugs)
-                                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
-
-    my $sth_Update = $dbh->prepare('UPDATE group_control_map
-                                       SET entry = ?, membercontrol = ?,
-                                           othercontrol = ?, canedit = ?,
-                                           editcomponents = ?, canconfirm = ?,
-                                           editbugs = ?
-                                     WHERE group_id = ? AND product_id = ?');
-
-    my $sth_Delete = $dbh->prepare('DELETE FROM group_control_map
-                                     WHERE group_id = ? AND product_id = ?');
-
-    $groups = $dbh->selectall_arrayref('SELECT id, name, entry, membercontrol,
-                                               othercontrol, canedit,
-                                               editcomponents, canconfirm, editbugs
-                                          FROM groups
-                                     LEFT JOIN group_control_map
-                                            ON group_control_map.group_id = id
-                                           AND product_id = ?
-                                         WHERE isbuggroup != 0
-                                           AND isactive != 0',
-                                         undef, $product->id);
-
-    foreach my $group (@$groups) {
-        my ($groupid, $groupname, $entry, $membercontrol, $othercontrol,
-            $canedit, $editcomponents, $canconfirm, $editbugs) = @$group;
-        my $newentry = $cgi->param("entry_$groupid") || 0;
-        my $newmembercontrol = $cgi->param("membercontrol_$groupid") || 0;
-        my $newothercontrol = $cgi->param("othercontrol_$groupid") || 0;
-        my $newcanedit = $cgi->param("canedit_$groupid") || 0;
-        my $new_editcomponents = $cgi->param("editcomponents_$groupid") || 0;
-        my $new_canconfirm = $cgi->param("canconfirm_$groupid") || 0;
-        my $new_editbugs = $cgi->param("editbugs_$groupid") || 0;
-
-        my $oldentry = $entry;
-        # Set undefined values to 0.
-        $entry ||= 0;
-        $membercontrol ||= 0;
-        $othercontrol ||= 0;
-        $canedit ||= 0;
-        $editcomponents ||= 0;
-        $canconfirm ||= 0;
-        $editbugs ||= 0;
-
-        # We use them in placeholders only. So it's safe to detaint them.
-        detaint_natural($newentry);
-        detaint_natural($newothercontrol);
-        detaint_natural($newmembercontrol);
-        detaint_natural($newcanedit);
-        detaint_natural($new_editcomponents);
-        detaint_natural($new_canconfirm);
-        detaint_natural($new_editbugs);
-
-        if (!defined($oldentry)
-            && ($newentry || $newmembercontrol || $newcanedit
-                || $new_editcomponents || $new_canconfirm || $new_editbugs))
-        {
-            $sth_Insert->execute($groupid, $product->id, $newentry,
-                                 $newmembercontrol, $newothercontrol, $newcanedit,
-                                 $new_editcomponents, $new_canconfirm, $new_editbugs);
-        }
-        elsif (($newentry != $entry)
-               || ($newmembercontrol != $membercontrol)
-               || ($newothercontrol != $othercontrol)
-               || ($newcanedit != $canedit)
-               || ($new_editcomponents != $editcomponents)
-               || ($new_canconfirm != $canconfirm)
-               || ($new_editbugs != $editbugs))
-        {
-            $sth_Update->execute($newentry, $newmembercontrol, $newothercontrol,
-                                 $newcanedit, $new_editcomponents, $new_canconfirm,
-                                 $new_editbugs, $groupid, $product->id);
-        }
-
-        if (!$newentry && !$newmembercontrol && !$newothercontrol
-            && !$newcanedit && !$new_editcomponents && !$new_canconfirm
-            && !$new_editbugs)
-        {
-            $sth_Delete->execute($groupid, $product->id);
-        }
-    }
-
-    my $sth_Select = $dbh->prepare(
-                     'SELECT bugs.bug_id,
-                   CASE WHEN (lastdiffed >= delta_ts) THEN 1 ELSE 0 END
-                        FROM bugs
-                  INNER JOIN bug_group_map
-                          ON bug_group_map.bug_id = bugs.bug_id
-                       WHERE group_id = ?
-                         AND bugs.product_id = ?
-                    ORDER BY bugs.bug_id');
-
-    my $sth_Select2 = $dbh->prepare('SELECT name, NOW() FROM groups WHERE id = ?');
-
-    $sth_Update = $dbh->prepare('UPDATE bugs SET delta_ts = ? WHERE bug_id = ?');
-
-    my $sth_Update2 = $dbh->prepare('UPDATE bugs SET delta_ts = ?, lastdiffed = ?
-                                     WHERE bug_id = ?');
-
-    $sth_Delete = $dbh->prepare('DELETE FROM bug_group_map
-                                 WHERE bug_id = ? AND group_id = ?');
-
-    my @removed_na;
-    foreach my $groupid (@now_na) {
-        my $count = 0;
-        my $bugs = $dbh->selectall_arrayref($sth_Select, undef,
-                                            ($groupid, $product->id));
-
-        my ($removed, $timestamp) =
-            $dbh->selectrow_array($sth_Select2, undef, $groupid);
-
-        foreach my $bug (@$bugs) {
-            my ($bugid, $mailiscurrent) = @$bug;
-            $sth_Delete->execute($bugid, $groupid);
-
-            LogActivityEntry($bugid, "bug_group", $removed, "",
-                             $whoid, $timestamp);
-
-            if ($mailiscurrent) {
-                $sth_Update2->execute($timestamp, $timestamp, $bugid);
-            }
-            else {
-                $sth_Update->execute($timestamp, $bugid);
-            }
-            $count++;
-        }
-        my %group = (name => $removed, bug_count => $count);
-
-        push(@removed_na, \%group);
-    }
-
-    $sth_Select = $dbh->prepare(
-                  'SELECT bugs.bug_id,
-                CASE WHEN (lastdiffed >= delta_ts) THEN 1 ELSE 0 END
-                     FROM bugs
-                LEFT JOIN bug_group_map
-                       ON bug_group_map.bug_id = bugs.bug_id
-                      AND group_id = ?
-                    WHERE bugs.product_id = ?
-                      AND bug_group_map.bug_id IS NULL
-                 ORDER BY bugs.bug_id');
-
-    $sth_Insert = $dbh->prepare('INSERT INTO bug_group_map
-                                 (bug_id, group_id) VALUES (?, ?)');
-
-    my @added_mandatory;
-    foreach my $groupid (@now_mandatory) {
-        my $count = 0;
-        my $bugs = $dbh->selectall_arrayref($sth_Select, undef,
-                                            ($groupid, $product->id));
-
-        my ($added, $timestamp) =
-            $dbh->selectrow_array($sth_Select2, undef, $groupid);
-
-        foreach my $bug (@$bugs) {
-            my ($bugid, $mailiscurrent) = @$bug;
-            $sth_Insert->execute($bugid, $groupid);
-
-            LogActivityEntry($bugid, "bug_group", "", $added,
-                             $whoid, $timestamp);
-
-            if ($mailiscurrent) {
-                $sth_Update2->execute($timestamp, $timestamp, $bugid);
-            }
-            else {
-                $sth_Update->execute($timestamp, $bugid);
-            }
-            $count++;
-        }
-        my %group = (name => $added, bug_count => $count);
-
-        push(@added_mandatory, \%group);
-    }
-    $dbh->bz_commit_transaction();
+    my $changes = $product->update;
 
     delete_token($token);
 
-    $vars->{'removed_na'} = \@removed_na;
-    $vars->{'added_mandatory'} = \@added_mandatory;
     $vars->{'product'} = $product;
+    $vars->{'changes'} = $changes;
 
     $template->process("admin/products/groupcontrol/updated.html.tmpl", $vars)
         || ThrowTemplateError($template->error());
     exit;
 }
-
-#
-# action='update' -> update the product
-#
-if ($action eq 'update') {
-    check_token_data($token, 'edit_product');
-    my $product_old_name = trim($cgi->param('product_old_name') || '');
-    my $product = $user->check_can_admin_product($product_old_name);
-
-    $product->set_name($product_name);
-    $product->set_description(scalar $cgi->param('description'));
-    $product->set_default_milestone(scalar $cgi->param('defaultmilestone'));
-    $product->set_milestone_url(scalar $cgi->param('milestoneurl'));
-    $product->set_disallow_new(scalar $cgi->param('disallownew'));
-    $product->set_votes_per_user(scalar $cgi->param('votesperuser'));
-    $product->set_votes_per_bug(scalar $cgi->param('maxvotesperbug'));
-    $product->set_votes_to_confirm(scalar $cgi->param('votestoconfirm'));
-
-    my $changes = $product->update();
-
-    delete_token($token);
-
-    if (Bugzilla->params->{'useclassification'}) {
-        $vars->{'classification'} = new Bugzilla::Classification($product->classification_id);
-    }
-    $vars->{'product'} = $product;
-    $vars->{'changes'} = $changes;
-
-    $template->process("admin/products/updated.html.tmpl", $vars)
-        || ThrowTemplateError($template->error());
-    exit;
-}
-
-#
-# action='editgroupcontrols' -> update product group controls
-#
-
-if ($action eq 'editgroupcontrols') {
-    my $product = $user->check_can_admin_product($product_name);
-
-    # Display a group if it is either enabled or has bugs for this product.
-    my $groups = $dbh->selectall_arrayref(
-        'SELECT id, name, entry, membercontrol, othercontrol, canedit,
-                editcomponents, editbugs, canconfirm,
-                isactive, COUNT(bugs.bug_id) AS bugcount
-           FROM groups
-      LEFT JOIN group_control_map
-             ON group_control_map.group_id = groups.id
-            AND group_control_map.product_id = ?
-      LEFT JOIN bug_group_map
-             ON bug_group_map.group_id = groups.id
-      LEFT JOIN bugs
-             ON bugs.bug_id = bug_group_map.bug_id
-            AND bugs.product_id = ?
-          WHERE isbuggroup != 0
-            AND (isactive != 0 OR entry IS NOT NULL OR bugs.bug_id IS NOT NULL) ' .
-           $dbh->sql_group_by('name', 'id, entry, membercontrol,
-                              othercontrol, canedit, isactive,
-                              editcomponents, canconfirm, editbugs'),
-        {'Slice' => {}}, ($product->id, $product->id));
-
-    $vars->{'product'} = $product;
-    $vars->{'groups'} = $groups;
-    $vars->{'token'} = issue_session_token('edit_group_controls');
-
-    $vars->{'const'} = {
-        'CONTROLMAPNA' => CONTROLMAPNA,
-        'CONTROLMAPSHOWN' => CONTROLMAPSHOWN,
-        'CONTROLMAPDEFAULT' => CONTROLMAPDEFAULT,
-        'CONTROLMAPMANDATORY' => CONTROLMAPMANDATORY,
-    };
-
-    $template->process("admin/products/groupcontrol/edit.html.tmpl", $vars)
-        || ThrowTemplateError($template->error());
-    exit;                
-}
-
 
 #
 # No valid action found

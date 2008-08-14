@@ -324,6 +324,16 @@
     a <code>[% param FILTER html %]</code> argument, and that
     argument was not set.
 
+  [% ELSIF error == "product_empty_group_controls" %]
+    [% title = "Missing Group Controls" %]
+    New settings must be defined to edit group controls for
+    the [% group.name FILTER html %] group.
+
+  [% ELSIF error == "product_illegal_group_control" %]
+    [% title = "Illegal Group Control" %]
+    '[% value FILTER html %]' is not a legal value for
+    the '[% field FILTER html %]' field.
+
   [% ELSIF error == "protection_violation" %]
     The function <code>[% function FILTER html %]</code> was called
 

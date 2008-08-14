@@ -1236,6 +1236,11 @@
     [% title = "Specified Product Does Not Exist" %]
     The product '[% product FILTER html %]' does not exist.
 
+  [% ELSIF error == "product_illegal_group" %]
+    [% title = "Illegal Group" %]
+    [% group.name FILTER html %] is not an active [% terms.bug %] group
+    and so you cannot edit group controls for it.
+
   [% ELSIF error == "product_illegal_votes" %]
     [% title = "Votes Must Be Non-negative" %]
     [% admindocslinks = {'voting.html' => 'Setting up the voting feature'} %]

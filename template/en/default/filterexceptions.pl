@@ -462,12 +462,11 @@
 ],
 
 'admin/products/groupcontrol/edit.html.tmpl' => [
-  'group.bugcount', 
-  'group.id', 
-  'const.CONTROLMAPNA', 
-  'const.CONTROLMAPSHOWN', 
-  'const.CONTROLMAPDEFAULT', 
-  'const.CONTROLMAPMANDATORY', 
+  'group.id',
+  'constants.CONTROLMAPNA', 
+  'constants.CONTROLMAPSHOWN',
+  'constants.CONTROLMAPDEFAULT',
+  'constants.CONTROLMAPMANDATORY',
 ],
 
 'admin/products/list.html.tmpl' => [

@@ -241,7 +241,121 @@ sub update {
         }
         $changes->{'confirmed_bugs'} = \@updated_bugs;
     }
+
+    # Also update group settings.
+    if ($self->{check_group_controls}) {
+        require Bugzilla::Bug;
+        import Bugzilla::Bug qw(LogActivityEntry);
+
+        my $old_settings = $self->new($self->id)->group_controls;
+        my $new_settings = $self->group_controls;
+        my $timestamp = $dbh->selectrow_array('SELECT NOW()');
+
+        foreach my $gid (keys %$new_settings) {
+            my $old_setting = $old_settings->{$gid} || {};
+            my $new_setting = $new_settings->{$gid};
+            # If all new settings are 0 for a given group, we delete the entry
+            # from group_control_map, so we have to track it here.
+            my $all_zero = 1;
+            my @fields;
+            my @values;
+
+            foreach my $field ('entry', 'membercontrol', 'othercontrol', 'canedit',
+                               'editcomponents', 'editbugs', 'canconfirm')
+            {
+                my $old_value = $old_setting->{$field};
+                my $new_value = $new_setting->{$field};
+                $all_zero = 0 if $new_value;
+                next if (defined $old_value && $old_value == $new_value);
+                push(@fields, $field);
+                # The value has already been validated.
+                detaint_natural($new_value);
+                push(@values, $new_value);
+            }
+            # Is there anything to update?
+            next unless scalar @fields;
+
+            if ($all_zero) {
+                $dbh->do('DELETE FROM group_control_map
+                          WHERE product_id = ? AND group_id = ?',
+                          undef, $self->id, $gid);
+            }
+            else {
+                if (exists $old_setting->{group}) {
+                    # There is already an entry in the DB.
+                    my $set_fields = join(', ', map {"$_ = ?"} @fields);
+                    $dbh->do("UPDATE group_control_map SET $set_fields
+                              WHERE product_id = ? AND group_id = ?",
+                              undef, (@values, $self->id, $gid));
+                }
+                else {
+                    # No entry yet.
+                    my $fields = join(', ', @fields);
+                    # +2 because of the product and group IDs.
+                    my $qmarks = join(',', ('?') x (scalar @fields + 2));
+                    $dbh->do("INSERT INTO group_control_map (product_id, group_id, $fields)
+                              VALUES ($qmarks)", undef, ($self->id, $gid, @values));
+                }
+            }
+
+            # If the group is mandatory, restrict all bugs to it.
+            if ($new_setting->{membercontrol} == CONTROLMAPMANDATORY) {
+                my $bug_ids =
+                  $dbh->selectcol_arrayref('SELECT bugs.bug_id
+                                              FROM bugs
+                                                   LEFT JOIN bug_group_map
+                                                   ON bug_group_map.bug_id = bugs.bug_id
+                                                   AND group_id = ?
+                                             WHERE product_id = ?
+                                                   AND bug_group_map.bug_id IS NULL',
+                                             undef, $gid, $self->id);
+
+                if (scalar @$bug_ids) {
+                    my $sth = $dbh->prepare('INSERT INTO bug_group_map (bug_id, group_id)
+                                             VALUES (?, ?)');
+
+                    foreach my $bug_id (@$bug_ids) {
+                        $sth->execute($bug_id, $gid);
+                        # Add this change to the bug history.
+                        LogActivityEntry($bug_id, 'bug_group', '',
+                                         $new_setting->{group}->name,
+                                         Bugzilla->user->id, $timestamp);
+                    }
+                    push(@{$changes->{'group_controls'}->{'now_mandatory'}},
+                         {name      => $new_setting->{group}->name,
+                          bug_count => scalar @$bug_ids});
+                }
+            }
+            # If the group can no longer be used to restrict bugs, remove them.
+            elsif ($new_setting->{membercontrol} == CONTROLMAPNA) {
+                my $bug_ids =
+                  $dbh->selectcol_arrayref('SELECT bugs.bug_id
+                                              FROM bugs
+                                                   INNER JOIN bug_group_map
+                                                   ON bug_group_map.bug_id = bugs.bug_id
+                                             WHERE product_id = ? AND group_id = ?',
+                                             undef, $self->id, $gid);
+
+                if (scalar @$bug_ids) {
+                    $dbh->do('DELETE FROM bug_group_map WHERE group_id = ? AND ' .
+                              $dbh->sql_in('bug_id', $bug_ids), undef, $gid);
+
+                    # Add this change to the bug history.
+                    foreach my $bug_id (@$bug_ids) {
+                        LogActivityEntry($bug_id, 'bug_group',
+                                         $old_setting->{group}->name, '',
+                                         Bugzilla->user->id, $timestamp);
+                    }
+                    push(@{$changes->{'group_controls'}->{'now_na'}},
+                         {name => $old_setting->{group}->name,
+                          bug_count => scalar @$bug_ids});
+                }
+            }
+        }
+    }
     $dbh->bz_commit_transaction();
+    # Changes have been committed.
+    delete $self->{check_group_controls};
 
     # Now that changes have been committed, we can send emails to voters.
     foreach my $msg (@msgs) {
@@ -471,6 +585,63 @@ sub set_votes_per_user { $_[0]->set('votesperuser', $_[1]); }
 sub set_votes_per_bug { $_[0]->set('maxvotesperbug', $_[1]); }
 sub set_votes_to_confirm { $_[0]->set('votestoconfirm', $_[1]); }
 
+sub set_group_controls {
+    my ($self, $group, $settings) = @_;
+
+    $group->is_active_bug_group
+      || ThrowUserError('product_illegal_group', {group => $group});
+
+    scalar(keys %$settings)
+      || ThrowCodeError('product_empty_group_controls', {group => $group});
+
+    # We store current settings for this group.
+    my $gs = $self->group_controls->{$group->id};
+    # If there is no entry for this group yet, create a default hash.
+    unless (defined $gs) {
+        $gs = { entry          => 0,
+                membercontrol  => CONTROLMAPNA,
+                othercontrol   => CONTROLMAPNA,
+                canedit        => 0,
+                editcomponents => 0,
+                editbugs       => 0,
+                canconfirm     => 0,
+                group          => $group };
+    }
+
+    # Both settings must be defined, or none of them can be updated.
+    if (defined $settings->{membercontrol} && defined $settings->{othercontrol}) {
+        #  Legality of control combination is a function of
+        #  membercontrol\othercontrol
+        #                 NA SH DE MA
+        #              NA  +  -  -  -
+        #              SH  +  +  +  +
+        #              DE  +  -  +  +
+        #              MA  -  -  -  +
+        foreach my $field ('membercontrol', 'othercontrol') {
+            my ($is_legal) = grep { $settings->{$field} == $_ }
+              (CONTROLMAPNA, CONTROLMAPSHOWN, CONTROLMAPDEFAULT, CONTROLMAPMANDATORY);
+            defined $is_legal || ThrowCodeError('product_illegal_group_control',
+                                   { field => $field, value => $settings->{$field} });
+        }
+        unless ($settings->{membercontrol} == $settings->{othercontrol}
+                || $settings->{membercontrol} == CONTROLMAPSHOWN
+                || ($settings->{membercontrol} == CONTROLMAPDEFAULT
+                    && $settings->{othercontrol} != CONTROLMAPSHOWN))
+        {
+            ThrowUserError('illegal_group_control_combination', {groupname => $group->name});
+        }
+        $gs->{membercontrol} = $settings->{membercontrol};
+        $gs->{othercontrol} = $settings->{othercontrol};
+    }
+
+    foreach my $field ('entry', 'canedit', 'editcomponents', 'editbugs', 'canconfirm') {
+        next unless defined $settings->{$field};
+        $gs->{$field} = $settings->{$field} ? 1 : 0;
+    }
+    $self->{group_controls}->{$group->id} = $gs;
+    $self->{check_group_controls} = 1;
+}
+
 sub components {
     my $self = shift;
     my $dbh = Bugzilla->dbh;
@@ -488,25 +659,33 @@ sub components {
 }
 
 sub group_controls {
-    my $self = shift;
+    my ($self, $full_data) = @_;
     my $dbh = Bugzilla->dbh;
 
-    if (!defined $self->{group_controls}) {
-        my $query = qq{SELECT
-                       groups.id,
-                       group_control_map.entry,
-                       group_control_map.membercontrol,
-                       group_control_map.othercontrol,
-                       group_control_map.canedit,
-                       group_control_map.editcomponents,
-                       group_control_map.editbugs,
-                       group_control_map.canconfirm
-                  FROM groups
-                  LEFT JOIN group_control_map
-                        ON groups.id = group_control_map.group_id
-                  WHERE group_control_map.product_id = ?
-                  AND   groups.isbuggroup != 0
-                  ORDER BY groups.name};
+    # By default, we don't return groups which are not listed in
+    # group_control_map. If $full_data is true, then we also
+    # return groups whose settings could be set for the product.
+    my $where_or_and = 'WHERE';
+    my $and_or_where = 'AND';
+    if ($full_data) {
+        $where_or_and = 'AND';
+        $and_or_where = 'WHERE';
+    }
+
+    # If $full_data is true, we collect all the data in all cases,
+    # even if the cache is already populated.
+    # $full_data is never used except in the very special case where
+    # all configurable bug groups are displayed to administrators,
+    # so we don't care about collecting all the data again in this case.
+    if (!defined $self->{group_controls} || $full_data) {
+        # Include name to the list, to allow us sorting data more easily.
+        my $query = qq{SELECT id, name, entry, membercontrol, othercontrol,
+                              canedit, editcomponents, editbugs, canconfirm
+                         FROM groups
+                              LEFT JOIN group_control_map
+                              ON id = group_id 
+                $where_or_and product_id = ?
+                $and_or_where isbuggroup = 1};
         $self->{group_controls} = 
             $dbh->selectall_hashref($query, 'id', undef, $self->id);
 
@@ -514,6 +693,21 @@ sub group_controls {
         my @gids = keys %{$self->{group_controls}};
         my $groups = Bugzilla::Group->new_from_list(\@gids);
         $self->{group_controls}->{$_->id}->{group} = $_ foreach @$groups;
+    }
+
+    # We never cache bug counts, for the same reason as above.
+    if ($full_data) {
+        my $counts =
+          $dbh->selectall_arrayref('SELECT group_id, COUNT(bugs.bug_id) AS bug_count
+                                      FROM bug_group_map
+                                INNER JOIN bugs
+                                        ON bugs.bug_id = bug_group_map.bug_id
+                                     WHERE bugs.product_id = ? ' .
+                                     $dbh->sql_group_by('group_id'),
+                          {'Slice' => {}}, $self->id);
+        foreach my $data (@$counts) {
+            $self->{group_controls}->{$data->{group_id}}->{bug_count} = $data->{bug_count};
+        }
     }
     return $self->{group_controls};
 }
@@ -730,7 +924,10 @@ below.
  Description: Returns a hash (group id as key) with all product
               group controls.
 
- Params:      none.
+ Params:      $full_data (optional, false by default) - when true,
+              the number of bugs per group applicable to the product
+              is also returned. Moreover, bug groups which have no
+              special settings for the product are also returned.
 
  Returns:     A hash with group id as key and hash containing 
               a Bugzilla::Group object and the properties of group

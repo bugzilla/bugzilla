@@ -107,7 +107,7 @@ versions:</a>
       </th>
       <td>
         [% IF product.group_controls.size %]
-          [% FOREACH g = product.group_controls.values %]
+          [% FOREACH g = product.group_controls.values.sort("name") %]
             <b>[% g.group.name FILTER html %]:</b>&nbsp;
             [% IF g.group.isactive %]
               [% group_control.${g.membercontrol} FILTER html %]/

@@ -71,14 +71,6 @@ sub new {
     # Send appropriate charset
     $self->charset(Bugzilla->params->{'utf8'} ? 'UTF-8' : '');
 
-    # Redirect to SSL if required
-    if (Bugzilla->params->{'sslbase'} ne ''
-        && Bugzilla->params->{'ssl'} eq 'always'
-        && i_am_cgi())
-    {
-        $self->require_https(Bugzilla->params->{'sslbase'});
-    }
-
     # Check for errors
     # All of the Bugzilla code wants to do this, so do it here instead of
     # in each script
@@ -297,18 +289,23 @@ sub remove_cookie {
 
 # Redirect to https if required
 sub require_https {
-    my $self = shift;
-    if ($self->protocol ne 'https') {
-        my $url = shift;
-        if (defined $url) {
-            $url .= $self->url('-path_info' => 1, '-query' => 1, '-relative' => 1);
-        } else {
-            $url = $self->self_url;
-            $url =~ s/^http:/https:/i;
-        }
-        print $self->redirect(-location => $url);
-        exit;
+    my ($self, $url) = @_;
+    # Do not create query string if data submitted via XMLRPC
+    # since we want the data to be resubmitted over POST method.
+    my $query = Bugzilla->usage_mode == USAGE_MODE_WEBSERVICE ? 0 : 1;
+    # XMLRPC clients (SOAP::Lite at least) requires 301 to redirect properly
+    # and do not work with 302.
+    my $status = Bugzilla->usage_mode == USAGE_MODE_WEBSERVICE ? 301 : 302;
+    if (defined $url) {
+        $url .= $self->url('-path_info' => 1, '-query' => $query, '-relative' => 1);
+    } else {
+        $url = $self->self_url;
+        $url =~ s/^http:/https:/i;
     }
+    print $self->redirect(-location => $url, -status => $status);
+    # When using XML-RPC with mod_perl, we need the headers sent immediately.
+    $self->r->rflush if $ENV{MOD_PERL};
+    exit;
 }
 
 1;
@@ -375,10 +372,10 @@ As its only argument, it takes the name of the cookie to expire.
 
 =item C<require_https($baseurl)>
 
-This routine checks if the current page is being served over https, and
-redirects to the https protocol if required, retaining QUERY_STRING.
+This routine redirects the client to a different location using the https protocol. 
+If the client is using XMLRPC, it will not retain the QUERY_STRING since XMLRPC uses POST.
 
-It takes an option argument which will be used as the base URL.  If $baseurl
+It takes an optional argument which will be used as the base URL.  If $baseurl
 is not provided, the current URL is used.
 
 =back

@@ -36,7 +36,7 @@ use base qw(Exporter);
                              html_quote url_quote xml_quote
                              css_class_quote html_light_quote url_decode
                              i_am_cgi get_netaddr correct_urlbase
-                             lsearch
+                             lsearch ssl_require_redirect
                              diff_arrays diff_strings
                              trim wrap_hard wrap_comment find_wrap_point
                              format_time format_time_decimal validate_date
@@ -216,6 +216,46 @@ sub i_am_cgi {
     # I use SERVER_SOFTWARE because it's required to be
     # defined for all requests in the CGI spec.
     return exists $ENV{'SERVER_SOFTWARE'} ? 1 : 0;
+}
+
+sub ssl_require_redirect {
+    my $method = shift;
+
+    # If currently not in a protected SSL 
+    # connection, determine if a redirection is 
+    # needed based on value in Bugzilla->params->{ssl}.
+    # If we are already in a protected connection or
+    # sslbase is not set then no action is required.
+    if (uc($ENV{'HTTPS'}) ne 'ON' 
+        && $ENV{'SERVER_PORT'} != 443 
+        && Bugzilla->params->{'sslbase'} ne '')
+    {
+        # System is configured to never require SSL 
+        # so no redirection is needed.
+        return 0 
+            if Bugzilla->params->{'ssl'} eq 'never';
+            
+        # System is configured to always require a SSL
+        # connection so we need to redirect.
+        return 1
+            if Bugzilla->params->{'ssl'} eq 'always';
+
+        # System is configured such that if we are inside
+        # of an authenticated session, then we need to make
+        # sure that all of the connections are over SSL. Non
+        # authenticated sessions SSL is not mandatory.
+        # For XMLRPC requests, if the method is User.login
+        # then we always want the connection to be over SSL
+        # if the system is configured for authenticated
+        # sessions since the user's username and password
+        # will be passed before the user is logged in.
+        return 1 
+            if Bugzilla->params->{'ssl'} eq 'authenticated sessions'
+                && (Bugzilla->user->id 
+                    || (defined $method && $method eq 'User.login'));
+    }
+
+    return 0;
 }
 
 sub correct_urlbase {

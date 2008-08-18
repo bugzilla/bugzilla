@@ -270,6 +270,14 @@ sub login {
     else {
         $class->set_user($authenticated_user);
     }
+
+    # We run after the login has completed since
+    # some of the checks in ssl_require_redirect
+    # look for Bugzilla->user->id to determine 
+    # if redirection is required.
+    if (i_am_cgi() && ssl_require_redirect()) {
+        $class->cgi->require_https($class->params->{'sslbase'});
+    }
     
     return $class->user;
 }

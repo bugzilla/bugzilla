@@ -19,6 +19,7 @@ package Bugzilla::WebService;
 
 use strict;
 use Bugzilla::WebService::Constants;
+use Bugzilla::Util;
 use Date::Parse;
 
 sub fail_unimplemented {
@@ -48,7 +49,21 @@ sub handle_login {
     eval "require $class";
 
     return if $class->login_exempt($method);
-    Bugzilla->login;
+    Bugzilla->login();
+
+    # Even though we check for the need to redirect in
+    # Bugzilla->login() we check here again since Bugzilla->login()
+    # does not know what the current XMLRPC method is. Therefore
+    # ssl_require_redirect in Bugzilla->login() will have returned 
+    # false if system was configured to redirect for authenticated 
+    # sessions and the user was not yet logged in.
+    # So here we pass in the method name to ssl_require_redirect so
+    # it can then check for the extra case where the method equals
+    # User.login, which we would then need to redirect if not
+    # over a secure connection. 
+    my $full_method = $uri . "." . $method;
+    Bugzilla->cgi->require_https(Bugzilla->params->{'sslbase'})
+        if ssl_require_redirect($full_method);
 
     return;
 }

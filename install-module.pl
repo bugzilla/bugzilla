@@ -46,6 +46,13 @@ GetOptions(\%switch, 'all|a', 'upgrade-all|u', 'show-config|s', 'global|g',
                      'help|h');
 
 pod2usage({ -verbose => 1 }) if $switch{'help'};
+
+if (ON_WINDOWS) {
+    print "\nYou cannot run this script on Windows. Please follow instructions\n";
+    print "given by checksetup.pl to install missing Perl modules.\n\n";
+    exit;
+}
+
 pod2usage({ -verbose => 0 }) if (!%switch && !@ARGV);
 
 set_cpan_config($switch{'global'});
@@ -98,7 +105,8 @@ __END__
 
 =head1 NAME
 
-install-module.pl - Installs or upgrades modules from CPAN
+install-module.pl - Installs or upgrades modules from CPAN.
+This script does not run on Windows.
 
 =head1 SYNOPSIS
 

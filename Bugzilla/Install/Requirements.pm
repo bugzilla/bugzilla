@@ -475,7 +475,7 @@ EOT
         }
     }
 
-    if ($output && $check_results->{any_missing}) {
+    if ($output && $check_results->{any_missing} && !ON_WINDOWS) {
         print install_string('install_all', { perl => $^X });
     }
 }

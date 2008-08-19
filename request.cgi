@@ -42,7 +42,6 @@ use Bugzilla::Component;
 # Make sure the user is logged in.
 my $user = Bugzilla->login();
 my $cgi = Bugzilla->cgi;
-my $dbh = Bugzilla->dbh;
 my $template = Bugzilla->template;
 my $action = $cgi->param('action') || '';
 
@@ -68,8 +67,7 @@ if ($action eq 'queue') {
     queue();
 }
 else {
-    my $flagtypes = $dbh->selectcol_arrayref('SELECT DISTINCT(name) FROM flagtypes
-                                              ORDER BY name');
+    my $flagtypes = get_flag_types();
     my @types = ('all', @$flagtypes);
 
     my $vars = {};
@@ -303,8 +301,7 @@ sub queue {
 
     # Get a list of request type names to use in the filter form.
     my @types = ("all");
-    my $flagtypes = $dbh->selectcol_arrayref(
-                         "SELECT DISTINCT(name) FROM flagtypes ORDER BY name");
+    my $flagtypes = get_flag_types();
     push(@types, @$flagtypes);
 
     # We move back to the main DB to get the list of products the user can see.
@@ -355,3 +352,14 @@ sub validateGroup {
     return $group;
 }
 
+# Returns all flag types which have at least one flag of this type.
+# If a flag type is inactive but still has flags, we want it.
+sub get_flag_types {
+    my $dbh = Bugzilla->dbh;
+    my $flag_types = $dbh->selectcol_arrayref('SELECT DISTINCT name
+                                                 FROM flagtypes
+                                                WHERE flagtypes.id IN
+                                                      (SELECT DISTINCT type_id FROM flags)
+                                             ORDER BY name');
+    return $flag_types;
+}

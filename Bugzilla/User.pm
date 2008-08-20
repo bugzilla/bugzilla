@@ -425,49 +425,39 @@ sub bless_groups {
     return $self->{'bless_groups'} if defined $self->{'bless_groups'};
     return [] unless $self->id;
 
-    my $dbh = Bugzilla->dbh;
-    my $query;
-    my $connector;
-    my @bindValues;
-
     if ($self->in_group('editusers')) {
         # Users having editusers permissions may bless all groups.
-        $query = 'SELECT DISTINCT id, name, description FROM groups';
-        $connector = 'WHERE';
+        $self->{'bless_groups'} = [Bugzilla::Group->get_all];
+        return $self->{'bless_groups'};
     }
-    else {
-        # Get all groups for the user where:
-        #    + They have direct bless privileges
-        #    + They are a member of a group that inherits bless privs.
-        $query = q{
-            SELECT DISTINCT groups.id, groups.name, groups.description
-                       FROM groups, user_group_map, group_group_map AS ggm
-                      WHERE user_group_map.user_id = ?
-                        AND ((user_group_map.isbless = 1
-                              AND groups.id=user_group_map.group_id)
-                             OR (groups.id = ggm.grantor_id
-                                 AND ggm.grant_type = ?
-                                 AND ggm.member_id IN(} .
-                                 $self->groups_as_string . 
-                               q{)))};
-        $connector = 'AND';
-        @bindValues = ($self->id, GROUP_BLESS);
-    }
+
+    my $dbh = Bugzilla->dbh;
+
+    # Get all groups for the user where:
+    #    + They have direct bless privileges
+    #    + They are a member of a group that inherits bless privs.
+    my @group_ids = (map {$_->id} @{ $self->groups }) || (-1);
+    my $query =
+        'SELECT DISTINCT groups.id
+           FROM groups, user_group_map, group_group_map AS ggm
+          WHERE user_group_map.user_id = ?
+                AND ( (user_group_map.isbless = 1
+                       AND groups.id=user_group_map.group_id)
+                     OR (groups.id = ggm.grantor_id
+                         AND ggm.grant_type = ' . GROUP_BLESS . '
+                         AND ggm.member_id ' . $dbh->sql_in(\@group_ids)
+                     . ') )';
 
     # If visibilitygroups are used, restrict the set of groups.
-    if (!$self->in_group('editusers')
-        && Bugzilla->params->{'usevisibilitygroups'}) 
-    {
+    if (Bugzilla->params->{'usevisibilitygroups'}) {
+        return [] if !$self->visible_groups_as_string;
         # Users need to see a group in order to bless it.
-        my $visibleGroups = join(', ', @{$self->visible_groups_direct()})
-            || return $self->{'bless_groups'} = [];
-        $query .= " $connector id in ($visibleGroups)";
+        $query .= " AND groups.id "
+                  . $dbh->sql_in($self->visible_groups_inherited);
     }
 
-    $query .= ' ORDER BY name';
-
-    return $self->{'bless_groups'} =
-        $dbh->selectall_arrayref($query, {'Slice' => {}}, @bindValues);
+    my $ids = $dbh->selectcol_arrayref($query, undef, $self->id);
+    return $self->{'bless_groups'} = Bugzilla::Group->new_from_list($ids);
 }
 
 sub in_group {
@@ -979,12 +969,12 @@ sub can_bless {
     if (!scalar(@_)) {
         # If we're called without an argument, just return 
         # whether or not we can bless at all.
-        return scalar(@{$self->bless_groups}) ? 1 : 0;
+        return scalar(@{ $self->bless_groups }) ? 1 : 0;
     }
 
     # Otherwise, we're checking a specific group
     my $group_id = shift;
-    return (grep {$$_{'id'} eq $group_id} (@{$self->bless_groups})) ? 1 : 0;
+    return grep($_->id == $group_id, @{ $self->bless_groups }) ? 1 : 0;
 }
 
 sub flatten_group_membership {
@@ -1917,12 +1907,11 @@ Determines whether or not a user is in the given group by id.
 
 =item C<bless_groups>
 
-Returns an arrayref of hashes of C<groups> entries, where the keys of each hash
-are the names of C<id>, C<name> and C<description> columns of the C<groups>
-table.
+Returns an arrayref of L<Bugzilla::Group> objects.
+
 The arrayref consists of the groups the user can bless, taking into account
 that having editusers permissions means that you can bless all groups, and
-that you need to be aware of a group in order to bless a group.
+that you need to be able to see a group in order to bless it.
 
 =item C<get_products_by_permission($group)>
 

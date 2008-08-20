@@ -400,7 +400,7 @@ sub DoSavedSearches {
         $vars->{'queryshare_groups'} =
             Bugzilla::Group->new_from_list($user->queryshare_groups);
     }
-    $vars->{'bless_group_ids'} = [map {$_->{'id'}} @{$user->bless_groups}];
+    $vars->{'bless_group_ids'} = [map { $_->id } @{$user->bless_groups}];
 }
 
 sub SaveSavedSearches {

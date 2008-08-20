@@ -276,9 +276,9 @@ if ($action eq 'search') {
     #      would allow to display a friendlier error message on page reloads.
     userDataToVars($otherUserID);
     my $permissions = $vars->{'permissions'};
-    foreach (@{$user->bless_groups()}) {
-        my $id = $$_{'id'};
-        my $name = $$_{'name'};
+    foreach my $blessable (@{$user->bless_groups()}) {
+        my $id = $blessable->id;
+        my $name = $blessable->name;
 
         # Change memberships.
         my $groupid = $cgi->param("group_$id") || 0;

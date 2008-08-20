@@ -54,6 +54,7 @@ whose names start with _ or a re specifically noted as being private.
 =cut
 
 use Bugzilla::FlagType;
+use Bugzilla::Hook;
 use Bugzilla::User;
 use Bugzilla::Util;
 use Bugzilla::Error;
@@ -612,6 +613,12 @@ sub process {
     my @new_summaries = $class->snapshot($bug_id, $attach_id);
 
     update_activity($bug_id, $attach_id, $timestamp, \@old_summaries, \@new_summaries);
+
+    Bugzilla::Hook::process('flag-end_of_update', { bug       => $bug,
+                                                    timestamp => $timestamp,
+                                                    old_flags => \@old_summaries,
+                                                    new_flags => \@new_summaries,
+                                                  });
 }
 
 sub update_activity {

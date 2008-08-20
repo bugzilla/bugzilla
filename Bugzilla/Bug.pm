@@ -35,6 +35,7 @@ use Bugzilla::Constants;
 use Bugzilla::Field;
 use Bugzilla::Flag;
 use Bugzilla::FlagType;
+use Bugzilla::Hook;
 use Bugzilla::Keyword;
 use Bugzilla::User;
 use Bugzilla::Util;
@@ -691,6 +692,11 @@ sub update {
         
         $changes->{'dup_id'} = [$old_dup || undef, $cur_dup || undef];
     }
+
+    Bugzilla::Hook::process('bug-end_of_update', { bug       => $self,
+                                                   timestamp => $delta_ts,
+                                                   changes   => $changes,
+                                                 });
 
     # If any change occurred, refresh the timestamp of the bug.
     if (scalar(keys %$changes) || $self->{added_comments}) {

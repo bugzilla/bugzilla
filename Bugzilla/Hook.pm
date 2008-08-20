@@ -170,34 +170,6 @@ This describes what hooks exist in Bugzilla currently. They are mostly
 in alphabetical order, but some related hooks are near each other instead
 of being alphabetical.
 
-=head2 buglist-columns
-
-This happens in buglist.cgi after the standard columns have been defined and
-right before the display column determination.  It gives you the opportunity
-to add additional display columns.
-
-Params:
-
-=over
-
-=item C<columns> - A hashref, where the keys are unique string identifiers
-for the column being defined and the values are hashrefs with the
-following fields:
-
-=over
-
-=item C<name> - The name of the column in the database.
-
-=item C<title> - The title of the column as displayed to users.
-
-=back
-
-The definition is structured as:
-
- $columns->{$id} = { name => $name, title => $title };
-
-=back
-
 =head2 auth-login_methods
 
 This allows you to add new login types to Bugzilla.
@@ -234,6 +206,50 @@ login methods that weren't passed to L<Bugzilla::Auth/login>.)
 This works just like L</auth-login_methods> except it's for
 login verification methods (See L<Bugzilla::Auth::Verify>.) It also
 takes a C<modules> parameter, just like L</auth-login_methods>.
+
+=head2 buglist-columns
+
+This happens in buglist.cgi after the standard columns have been defined and
+right before the display column determination.  It gives you the opportunity
+to add additional display columns.
+
+Params:
+
+=over
+
+=item C<columns> - A hashref, where the keys are unique string identifiers
+for the column being defined and the values are hashrefs with the
+following fields:
+
+=over
+
+=item C<name> - The name of the column in the database.
+
+=item C<title> - The title of the column as displayed to users.
+
+=back
+
+The definition is structured as:
+
+ $columns->{$id} = { name => $name, title => $title };
+
+=back
+
+=head2 colchange-columns
+
+This happens in F<colchange.cgi> right after the list of possible display
+columns have been defined and gives you the opportunity to add additional
+display columns to the list of selectable columns.
+
+Params:
+
+=over
+
+=item C<columns> - An arrayref containing an array of column IDs.  Any IDs
+added by this hook must have been defined in the the buglist-columns hook.
+See L</buglist-columns>.
+
+=back
 
 =head2 config-add_panels
 
@@ -391,21 +407,5 @@ Params:
 
 A hash that maps the names of errors (like C<invalid_param>) to numbers.
 See L<Bugzilla::WebService::Constants/WS_ERROR_CODE> for an example.
-
-=back
-
-=head2 colchange-columns
-
-This happens in F<colchange.cgi> right after the list of possible display
-columns have been defined and gives you the opportunity to add additional
-display columns to the list of selectable columns.
-
-Params:
-
-=over
-
-=item C<columns> - An arrayref containing an array of column IDs.  Any IDs
-added by this hook must have been defined in the the buglist-columns hook.
-See L</buglist-columns>.
 
 =back

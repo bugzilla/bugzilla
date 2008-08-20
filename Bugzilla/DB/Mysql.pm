@@ -157,10 +157,10 @@ sub sql_fulltext_search {
         $mode = 'IN BOOLEAN MODE';
 
         # quote un-quoted compound words
-        my @words = quotewords('[\s()]+', 'delimiter', $text);
+        my @words = quotewords('[\s()]+', 'delimiters', $text);
         foreach my $word (@words) {
-            # match words that have word chars, non-word chars, and no quotes
-            if ($word =~ /\w/ && $word =~ m/\W/ && $word !~ m/"/) {
+            # match words that have non-word chars in the middle of them
+            if ($word =~ /\w\W+\w/ && $word !~ m/"/) {
                 $word = '"' . $word . '"';
             }
         }

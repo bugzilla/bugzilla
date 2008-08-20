@@ -207,6 +207,25 @@ This works just like L</auth-login_methods> except it's for
 login verification methods (See L<Bugzilla::Auth::Verify>.) It also
 takes a C<modules> parameter, just like L</auth-login_methods>.
 
+=head2 bug-end_of_update
+
+This happens at the end of L<Bugzilla::Bug/update>, after all other changes are
+made to the database. This generally occurs inside a database transaction.
+
+Params:
+
+=over
+
+=item C<bug> - The changed bug object, with all fields set to their updated
+values.
+
+=item C<timestamp> - The timestamp used for all updates in this transaction.
+
+=item C<changes> - The hash of changed fields. 
+C<$changes-E<gt>{field} = [old, new]>
+
+=back
+
 =head2 buglist-columns
 
 This happens in buglist.cgi after the standard columns have been defined and
@@ -305,6 +324,32 @@ Params:
 =over
 
 =item C<vars> - A hashref. The variables that will be passed into the template.
+
+=back
+
+=head2 flag-end_of_update
+
+This happens at the end of L<Bugzilla::Flag/process>, after all other changes
+are made to the database and after emails are sent. It gives you a before/after
+snapshot of flags so you can react to specific flag changes.
+This generally occurs inside a database transaction.
+
+Note that the interface to this hook is B<UNSTABLE> and it may change in the
+future.
+
+Params:
+
+=over
+
+=item C<bug> - The changed bug object.
+
+=item C<timestamp> - The timestamp used for all updates in this transaction.
+
+=item C<old_flags> - The snapshot of flag summaries from before the change.
+
+=item C<new_flags> - The snapshot of flag summaries after the change. Call
+C<my ($removed, $added) = diff_arrays(old_flags, new_flags)> to get the list of
+changed flags, and search for a specific condition like C<added eq 'review-'>.
 
 =back
 

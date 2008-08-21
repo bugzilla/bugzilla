@@ -445,15 +445,15 @@ sub bless_groups {
                        AND groups.id=user_group_map.group_id)
                      OR (groups.id = ggm.grantor_id
                          AND ggm.grant_type = ' . GROUP_BLESS . '
-                         AND ggm.member_id ' . $dbh->sql_in(\@group_ids)
+                         AND ' . $dbh->sql_in('ggm.member_id', \@group_ids)
                      . ') )';
 
     # If visibilitygroups are used, restrict the set of groups.
     if (Bugzilla->params->{'usevisibilitygroups'}) {
         return [] if !$self->visible_groups_as_string;
         # Users need to see a group in order to bless it.
-        $query .= " AND groups.id "
-                  . $dbh->sql_in($self->visible_groups_inherited);
+        $query .= " AND "
+            . $dbh->sql_in('groups.id', $self->visible_groups_inherited);
     }
 
     my $ids = $dbh->selectcol_arrayref($query, undef, $self->id);

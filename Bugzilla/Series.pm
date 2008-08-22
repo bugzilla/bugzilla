@@ -124,6 +124,10 @@ sub initFromParameters {
     ($self->{'series_id'}, $self->{'category'},  $self->{'subcategory'},
      $self->{'name'}, $self->{'creator'}, $self->{'frequency'},
      $self->{'query'}, $self->{'public'}) = @_;
+
+    # If the first parameter is undefined, check if this series already
+    # exists and update it series_id accordingly
+    $self->{'series_id'} ||= $self->existsInDatabase();
 }
 
 sub initFromCGI {

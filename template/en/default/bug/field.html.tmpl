@@ -75,11 +75,11 @@
           (<a href="#" id="[% field.name FILTER html %]_edit_action">edit</a>)
         </span>
         <script type="text/javascript">
-        hideEditableField('[% field.name FILTER html %]_edit_container', 
-                          '[% field.name FILTER html %]_input_area', 
-                          '[% field.name FILTER html %]_edit_action', 
-                          '[% field.name FILTER html %]', 
-                          "[% bug.${field.name} %]");
+        hideEditableField('[% field.name FILTER js %]_edit_container',
+                          '[% field.name FILTER js %]_input_area',
+                          '[% field.name FILTER js %]_edit_action',
+                          '[% field.name FILTER js %]',
+                          "[% bug.${field.name} FILTER js %]");
         </script>
     [% CASE [ constants.FIELD_TYPE_SINGLE_SELECT 
               constants.FIELD_TYPE_MULTI_SELECT ] %]

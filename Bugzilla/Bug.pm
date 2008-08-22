@@ -73,8 +73,7 @@ sub DB_COLUMNS {
                       Bugzilla->active_custom_fields;
     my @custom_names = map {$_->name} @custom;
 
-	my @columns = 
-     qw(
+    my @columns = (qw(
         alias
         assigned_to
         bug_file_loc
@@ -102,9 +101,9 @@ sub DB_COLUMNS {
     'reporter    AS reporter_id',
     $dbh->sql_date_format('creation_ts', '%Y.%m.%d %H:%i') . ' AS creation_ts',
     $dbh->sql_date_format('deadline', '%Y-%m-%d') . ' AS deadline',
-    @custom_names;
+    @custom_names);
     
-    Bugzilla::Hook::process("bug-columns", {'columns' => \@columns} );
+    Bugzilla::Hook::process("bug-columns", { columns => \@columns });
     
     return @columns;
 }

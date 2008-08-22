@@ -207,6 +207,21 @@ This works just like L</auth-login_methods> except it's for
 login verification methods (See L<Bugzilla::Auth::Verify>.) It also
 takes a C<modules> parameter, just like L</auth-login_methods>.
 
+=head2 bug-columns
+
+This allows you to add new fields that will show up in every L<Bugzilla::Bug>
+object. Note that you will also need to use the L</bug-fields> hook in
+conjunction with this hook to make this work.
+
+Params:
+
+=over
+
+=item C<columns> - An arrayref containing an array of column names. Push
+your column name(s) onto the array.
+
+=back
+
 =head2 bug-end_of_update
 
 This happens at the end of L<Bugzilla::Bug/update>, after all other changes are
@@ -223,6 +238,23 @@ values.
 
 =item C<changes> - The hash of changed fields. 
 C<$changes-E<gt>{field} = [old, new]>
+
+=back
+
+=head2 bug-fields
+
+Allows the addition of database fields from the bugs table to the standard
+list of allowable fields in a L<Bugzilla::Bug> object, so that
+you can call the field as a method.
+
+Note: You should add here the names of any fields you added in L</bug-columns>.
+
+Params:
+
+=over
+
+=item C<columns> - A arrayref containing an array of column names. Push
+your column name(s) onto the array.
 
 =back
 

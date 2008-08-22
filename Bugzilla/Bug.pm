@@ -72,7 +72,9 @@ sub DB_COLUMNS {
     my @custom = grep {$_->type != FIELD_TYPE_MULTI_SELECT}
                       Bugzilla->active_custom_fields;
     my @custom_names = map {$_->name} @custom;
-    return qw(
+
+	my @columns = 
+     qw(
         alias
         assigned_to
         bug_file_loc
@@ -101,6 +103,10 @@ sub DB_COLUMNS {
     $dbh->sql_date_format('creation_ts', '%Y.%m.%d %H:%i') . ' AS creation_ts',
     $dbh->sql_date_format('deadline', '%Y-%m-%d') . ' AS deadline',
     @custom_names;
+    
+    Bugzilla::Hook::process("bug-columns", {'columns' => \@columns} );
+    
+    return @columns;
 }
 
 use constant REQUIRED_CREATE_FIELDS => qw(
@@ -1645,7 +1651,8 @@ sub _check_select_field {
 sub fields {
     my $class = shift;
 
-    return (
+   my @fields =
+   (
         # Standard Fields
         # Keep this ordering in sync with bugzilla.dtd.
         qw(bug_id alias creation_ts short_desc delta_ts
@@ -1664,6 +1671,9 @@ sub fields {
         # Custom Fields
         map { $_->name } Bugzilla->active_custom_fields
     );
+    Bugzilla::Hook::process("bug-fields", {'fields' => \@fields} );
+    
+    return @fields;
 }
 
 #####################################################################

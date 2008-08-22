@@ -271,6 +271,21 @@ changed flags, and search for a specific condition like C<added eq 'review-'>.
 
 =back
 
+=head2 install-before_final_checks
+
+Allows execution of custom code before the final checks are done in 
+checksetup.pl.
+
+Params:
+
+=over
+
+=item C<silent>
+
+A flag that indicates whether or not checksetup is running in silent mode.
+
+=back
+
 =head2 install-requirements
 
 Because of the way Bugzilla installation works, there can't be a normal

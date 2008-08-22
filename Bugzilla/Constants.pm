@@ -121,6 +121,7 @@ use File::Basename;
     FIELD_TYPE_MULTI_SELECT
     FIELD_TYPE_TEXTAREA
     FIELD_TYPE_DATETIME
+    FIELD_TYPE_BUG_ID
 
     USAGE_MODE_BROWSER
     USAGE_MODE_CMDLINE
@@ -348,6 +349,7 @@ use constant FIELD_TYPE_SINGLE_SELECT => 2;
 use constant FIELD_TYPE_MULTI_SELECT => 3;
 use constant FIELD_TYPE_TEXTAREA  => 4;
 use constant FIELD_TYPE_DATETIME  => 5;
+use constant FIELD_TYPE_BUG_ID  => 6;
 
 # The maximum number of days a token will remain valid.
 use constant MAX_TOKEN_AGE => 3;

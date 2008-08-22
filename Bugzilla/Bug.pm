@@ -150,6 +150,9 @@ sub VALIDATORS {
         elsif ($field->type == FIELD_TYPE_FREETEXT) {
             $validator = \&_check_freetext_field;
         }
+        elsif ($field->type == FIELD_TYPE_BUG_ID) {
+            $validator = \&_check_bugid_field;
+        }
         else {
             $validator = \&_check_default_field;
         }
@@ -1641,6 +1644,12 @@ sub _check_select_field {
     $value = trim($value);
     check_field($field, $value);
     return $value;
+}
+
+sub _check_bugid_field {
+    my ($invocant, $value, $field) = @_;
+    return undef if !$value;
+    return $invocant->check($value, $field)->id;
 }
 
 #####################################################################

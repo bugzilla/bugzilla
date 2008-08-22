@@ -61,7 +61,7 @@ my $param_panels = Bugzilla::Config::param_panels();
 foreach my $panel (keys %$param_panels) {
     my $module = $param_panels->{$panel};
     eval("require $module") || die $@;
-    my @module_param_list = "$module"->get_param_list(1);
+    my @module_param_list = "$module"->get_param_list();
     my $item = { name => lc($panel),
                  current => ($current_panel eq lc($panel)) ? 1 : 0,
                  param_list => \@module_param_list,

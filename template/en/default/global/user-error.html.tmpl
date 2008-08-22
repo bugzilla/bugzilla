@@ -1258,7 +1258,7 @@
   [% ELSIF error == "product_name_already_in_use" %]
     [% title = "Product name already in use" %]
     [% admindocslinks = {'products.html' => 'Administering products'} %]
-    The product name '[% product FILTER html %]' is already in use.
+    The product name '[% product FILTER html %]' already exists.
   
   [% ELSIF error == "product_name_diff_in_case" %]
     [% title = "Product name differs only in case" %]

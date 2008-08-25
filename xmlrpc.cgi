@@ -21,6 +21,7 @@ use lib qw(.);
 use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Hook;
+use Bugzilla::WebService::Constants;
 
 # Use an eval here so that runtests.pl accepts this script even if SOAP-Lite
 # is not installed.
@@ -29,6 +30,10 @@ eval 'use XMLRPC::Transport::HTTP;
 $@ && ThrowCodeError('soap_not_installed');
 
 Bugzilla->usage_mode(Bugzilla::Constants::USAGE_MODE_WEBSERVICE);
+local $SOAP::Constants::FAULT_SERVER = ERROR_UNKNOWN_FATAL;
+# The line above is used, this one is ignored, but SOAP::Lite
+# might start using this constant (the correct one) for XML-RPC someday.
+local $XMLRPC::Constants::FAULT_SERVER = ERROR_UNKNOWN_FATAL;
 
 my %hook_dispatch;
 Bugzilla::Hook::process('webservice', { dispatch => \%hook_dispatch });

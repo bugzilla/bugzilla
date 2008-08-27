@@ -54,11 +54,7 @@
 
 <div class="bz_query_head" align="center">
   <span class="bz_query_timestamp">
-    [% IF Param('timezone') %]
-      <b>[% time2str("%a %b %e %Y %T %Z", currenttime, Param('timezone')) %]</b><br>
-    [% ELSE %]
-      <b>[% time2str("%a %b %e %Y %T", currenttime) %]</b><br>
-    [% END %]
+    <b>[% currenttime FILTER time('%a %b %e %Y %T %Z') FILTER html %]</b><br>
   </span>
 
   [% IF debug %]

@@ -51,6 +51,7 @@ use Bugzilla::Flag;
 
 use File::Basename;
 use File::Spec::Functions;
+use DateTime::TimeZone;
 use Safe;
 
 # This creates the request cache for non-mod_perl installations.
@@ -463,6 +464,16 @@ sub hook_args {
     return $class->request_cache->{hook_args};
 }
 
+sub local_timezone {
+    my $class = shift;
+
+    if (!defined $class->request_cache->{local_timezone}) {
+        $class->request_cache->{local_timezone} =
+          DateTime::TimeZone->new(name => 'local');
+    }
+    return $class->request_cache->{local_timezone};
+}
+
 sub request_cache {
     if ($ENV{MOD_PERL}) {
         require Apache2::RequestUtil;
@@ -698,5 +709,11 @@ is unreadable or is not valid perl, we C<die>.
 
 If you are running inside a code hook (see L<Bugzilla::Hook>) this
 is how you get the arguments passed to the hook.
+
+=item C<local_timezone>
+
+Returns the local timezone of the Bugzilla installation,
+as a DateTime::TimeZone object. This detection is very time
+consuming, so we cache this information for future references.
 
 =back

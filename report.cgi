@@ -226,7 +226,7 @@ foreach my $tbl (@tbl_names) {
 $vars->{'col_field'} = $col_field;
 $vars->{'row_field'} = $row_field;
 $vars->{'tbl_field'} = $tbl_field;
-$vars->{'time'} = time();
+$vars->{'time'} = localtime(time());
 
 $vars->{'col_names'} = \@col_names;
 $vars->{'row_names'} = \@row_names;

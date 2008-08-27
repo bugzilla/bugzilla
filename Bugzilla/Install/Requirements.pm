@@ -69,6 +69,12 @@ sub REQUIRED_MODULES {
         module  => 'Date::Format',
         version => '2.21'
     },
+    # 0.28 fixed some important bugs in DateTime.
+    {
+        package => 'DateTime',
+        module  => 'DateTime',
+        version => '0.28'
+    },
     {
         package => 'PathTools',
         module  => 'File::Spec',

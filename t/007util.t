@@ -33,11 +33,13 @@ BEGIN {
         use_ok(Bugzilla::Util);
 }
 
-# We need to override Bugzilla->params so we can get an expected value when
-# Bugzilla::Util::format_time() calls ask for the 'timezone' parameter.
-# This will also prevent the tests from failing on site that do not have a
-# data/params file containing 'timezone' yet.
-Bugzilla->params->{'timezone'} = "TEST";
+# We need to override user preferences so we can get an expected value when
+# Bugzilla::Util::format_time() calls ask for the 'timezone' user preference.
+Bugzilla->user->settings->{'timezone'}->{'value'} = "local";
+
+# We need to know the local timezone for the date chosen in our tests.
+# Below, tests are run against Nov. 24, 2002.
+my $tz = Bugzilla->local_timezone->short_name_for_datetime(DateTime->new(year => 2002, month => 11, day => 24));
 
 # we don't test the taint functions since that's going to take some more work.
 # XXX: test taint functions
@@ -58,7 +60,7 @@ is(lsearch(\@list,'kiwi'),-1,'lsearch 3 (missing item)');
 is(trim(" fg<*\$%>+=~~ "),'fg<*$%>+=~~','trim()');
 
 #format_time();
-is(format_time("2002.11.24 00:05"),'2002-11-24 00:05 TEST','format_time("2002.11.24 00:05")');
-is(format_time("2002.11.24 00:05:56"),'2002-11-24 00:05:56 TEST','format_time("2002.11.24 00:05:56")');
+is(format_time("2002.11.24 00:05"), "2002-11-24 00:05 $tz",'format_time("2002.11.24 00:05") is ' . format_time("2002.11.24 00:05"));
+is(format_time("2002.11.24 00:05:56"), "2002-11-24 00:05:56 $tz",'format_time("2002.11.24 00:05:56")');
 is(format_time("2002.11.24 00:05:56", "%Y-%m-%d %R"), '2002-11-24 00:05', 'format_time("2002.11.24 00:05:56", "%Y-%m-%d %R") (with no timezone)');
-is(format_time("2002.11.24 00:05:56", "%Y-%m-%d %R %Z"), '2002-11-24 00:05 TEST', 'format_time("2002.11.24 00:05:56", "%Y-%m-%d %R %Z") (with timezone)');
+is(format_time("2002.11.24 00:05:56", "%Y-%m-%d %R %Z"), "2002-11-24 00:05 $tz", 'format_time("2002.11.24 00:05:56", "%Y-%m-%d %R %Z") (with timezone)');

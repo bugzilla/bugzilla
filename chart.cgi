@@ -292,7 +292,7 @@ sub wrap {
     # We create a Chart object so we can validate the parameters
     my $chart = new Bugzilla::Chart($cgi);
     
-    $vars->{'time'} = time();
+    $vars->{'time'} = localtime(time());
 
     $vars->{'imagebase'} = $cgi->canonicalise_query(
                 "action", "action-wrap", "ctype", "format", "width", "height");

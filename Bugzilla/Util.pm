@@ -50,6 +50,7 @@ use Bugzilla::Constants;
 
 use Date::Parse;
 use Date::Format;
+use DateTime;
 use Text::Wrap;
 
 # This is from the perlsec page, slightly modified to remove a warning
@@ -398,36 +399,39 @@ sub wrap_hard {
 sub format_time {
     my ($date, $format) = @_;
 
-    # If $format is undefined, try to guess the correct date format.    
-    my $show_timezone;
+    # If $format is undefined, try to guess the correct date format.
     if (!defined($format)) {
         if ($date =~ m/^(\d{4})[-\.](\d{2})[-\.](\d{2}) (\d{2}):(\d{2})(:(\d{2}))?$/) {
             my $sec = $7;
             if (defined $sec) {
-                $format = "%Y-%m-%d %T";
+                $format = "%Y-%m-%d %T %Z";
             } else {
-                $format = "%Y-%m-%d %R";
+                $format = "%Y-%m-%d %R %Z";
             }
         } else {
-            # Default date format. See Date::Format for other formats available.
-            $format = "%Y-%m-%d %R";
+            # Default date format. See DateTime for other formats available.
+            $format = "%Y-%m-%d %R %Z";
         }
-        # By default, we want the timezone to be displayed.
-        $show_timezone = 1;
-    }
-    else {
-        # Search for %Z or %z, meaning we want the timezone to be displayed.
-        # Till bug 182238 gets fixed, we assume Bugzilla->params->{'timezone'}
-        # is used.
-        $show_timezone = ($format =~ s/\s?%Z$//i);
     }
 
-    # str2time($date) is undefined if $date has an invalid date format.
-    my $time = str2time($date);
+    # strptime($date) returns an empty array if $date has an invalid date format.
+    my @time = strptime($date);
 
-    if (defined $time) {
-        $date = time2str($format, $time);
-        $date .= " " . Bugzilla->params->{'timezone'} if $show_timezone;
+    if (scalar @time) {
+        # strptime() counts years from 1900, and months from 0 (January).
+        # We have to fix both values.
+        my $dt = DateTime->new({year   => 1900 + $time[5],
+                                month  => ++$time[4],
+                                day    => $time[3],
+                                hour   => $time[2],
+                                minute => $time[1],
+                                second => $time[0],
+                                # Use the timezone specified by the server.
+                                time_zone => Bugzilla->local_timezone});
+
+        # Now display the date using the user's timezone.
+        $dt->set_time_zone(Bugzilla->user->timezone);
+        $date = $dt->strftime($format);
     }
     else {
         # Don't let invalid (time) strings to be passed to templates!

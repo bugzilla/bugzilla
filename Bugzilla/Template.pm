@@ -604,7 +604,15 @@ sub create {
             },
 
             # Format a time for display (more info in Bugzilla::Util)
-            time => \&Bugzilla::Util::format_time,
+            time => [ sub {
+                          my ($context, $format) = @_;
+                          return sub {
+                              my $time = shift;
+                              return format_time($time, $format);
+                          };
+                      },
+                      1
+                    ],
 
             # Bug 120030: Override html filter to obscure the '@' in user
             #             visible strings.

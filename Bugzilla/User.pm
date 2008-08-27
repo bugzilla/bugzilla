@@ -50,6 +50,7 @@ use Bugzilla::Classification;
 use Bugzilla::Field;
 
 use Scalar::Util qw(blessed);
+use DateTime::TimeZone;
 
 use base qw(Bugzilla::Object Exporter);
 @Bugzilla::User::EXPORT = qw(is_available_username
@@ -347,6 +348,22 @@ sub settings {
     }
 
     return $self->{'settings'};
+}
+
+sub timezone {
+    my $self = shift;
+
+    if (!defined $self->{timezone}) {
+        my $tz = $self->settings->{timezone}->{value};
+        if ($tz eq 'local') {
+            # The user wants the local timezone of the server.
+            $self->{timezone} = Bugzilla->local_timezone;
+        }
+        else {
+            $self->{timezone} = DateTime::TimeZone->new(name => $tz);
+        }
+    }
+    return $self->{timezone};
 }
 
 sub flush_queries_cache {
@@ -1883,6 +1900,11 @@ value          - the value of this setting for this user. Will be the same
                  is_default is true.
 is_default     - a boolean to indicate whether the user has chosen to make
                  a preference for themself or use the site default.
+
+=item C<timezone>
+
+Returns the timezone used to display dates and times to the user,
+as a DateTime::TimeZone object.
 
 =item C<groups>
 

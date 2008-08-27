@@ -1183,7 +1183,7 @@ if (scalar(@bugowners) > 1 && Bugzilla->user->in_group('editbugs')) {
 $vars->{'splitheader'} = $cgi->cookie('SPLITHEADER') ? 1 : 0;
 
 $vars->{'quip'} = GetQuip();
-$vars->{'currenttime'} = time();
+$vars->{'currenttime'} = localtime(time());
 
 # The following variables are used when the user is making changes to multiple bugs.
 if ($dotweak && scalar @bugs) {

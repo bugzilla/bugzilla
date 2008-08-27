@@ -66,6 +66,8 @@
   [% col_field_disp FILTER html %]
 [% END %]
 
+[% time = time FILTER time('%Y-%m-%d %H:%M:%S') FILTER html %]
+
 [% PROCESS global/header.html.tmpl 
   style = "
     .t1     { background-color: #ffffff } /* white       */
@@ -74,7 +76,7 @@
     .t4     { background-color: #c3d3ed } /* darker blue */
     .ttotal { background-color: #cfffdf } /* light green */
   "
-  header_addl_info = time2str("%Y-%m-%d %H:%M:%S", time)
+  header_addl_info = time
 %]
 
 [% IF debug %]

@@ -62,7 +62,9 @@ sub SETTINGS {
                             default => ${Bugzilla->languages}[0] },
     # 2007-07-02 altlist@gmail.com -- Bug 225731
     quote_replies      => { options => ['quoted_reply', 'simple_reply', 'off'],
-                            default => "quoted_reply" }
+                            default => "quoted_reply" },
+    # 2008-08-27 LpSolit@gmail.com -- Bug 182238
+    timezone           => { subclass => 'Timezone', default => 'local' },
     }
 };
 

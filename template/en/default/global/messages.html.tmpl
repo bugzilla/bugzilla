@@ -542,20 +542,20 @@
     Your password has been changed.
 
   [% ELSIF message_tag == "flag_type_created" %]
-    [% title = "Flag Type Created" %]
+    [% title = BLOCK %]Flag Type '[% name FILTER html %]' Created[% END %]
     The flag type <em>[% name FILTER html %]</em> has been created.
 
   [% ELSIF message_tag == "flag_type_changes_saved" %]
-    [% title = "Flag Type Changes Saved" %]
+    [% title = BLOCK %]Flag Type '[% name FILTER html %]' Changes Saved[% END %]
     Your changes to the flag type <em>[% name FILTER html %]</em>
     have been saved.
 
   [% ELSIF message_tag == "flag_type_deleted" %]
-    [% title = "Flag Type Deleted" %]
+    [% title = BLOCK %]Flag Type '[% name FILTER html %]' Deleted[% END %]
     The flag type <em>[% name FILTER html %]</em> has been deleted.
 
   [% ELSIF message_tag == "flag_type_deactivated" %]
-    [% title = "Flag Type Deactivated" %]
+    [% title = BLOCK %]Flag Type '[% flag_type.name FILTER html %]' Deactivated[% END %]
     The flag type <em>[% flag_type.name FILTER html %]</em> has been deactivated.
 
   [% ELSIF message_tag == "install_admin_get_email" %]

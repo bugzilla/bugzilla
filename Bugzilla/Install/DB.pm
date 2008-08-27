@@ -2616,7 +2616,7 @@ sub _change_short_desc_from_mediumtext_to_varchar {
         # and then truncate the summary.
         my $long_summary_bugs = $dbh->selectall_arrayref(
             'SELECT bug_id, short_desc, reporter
-               FROM bugs WHERE LENGTH(short_desc) > 255');
+               FROM bugs WHERE CHAR_LENGTH(short_desc) > 255');
 
         if (@$long_summary_bugs) {
             print <<EOT;
@@ -2972,7 +2972,7 @@ sub _check_content_length {
     my $dbh = Bugzilla->dbh;
     my %contents = @{ $dbh->selectcol_arrayref(
         "SELECT $id_field, $field_name FROM $table_name 
-          WHERE LENGTH($field_name) > ?", {Columns=>[1,2]}, $max_length) };
+          WHERE CHAR_LENGTH($field_name) > ?", {Columns=>[1,2]}, $max_length) };
 
     if (scalar keys %contents) {
         print install_string('install_data_too_long',

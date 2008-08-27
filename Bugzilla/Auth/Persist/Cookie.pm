@@ -67,6 +67,9 @@ sub persist_login {
               VALUES (?, ?, ?, NOW())",
               undef, $login_cookie, $user->id, $ip_addr);
 
+    # Prevent JavaScript from accessing login cookies.
+    my %cookieargs = ('-httponly' => 1);
+
     # Remember cookie only if admin has told so
     # or admin didn't forbid it and user told to remember.
     if ( Bugzilla->params->{'rememberlogin'} eq 'on' ||
@@ -74,23 +77,23 @@ sub persist_login {
           $cgi->param('Bugzilla_remember') &&
           $cgi->param('Bugzilla_remember') eq 'on') ) 
     {
-        $cgi->send_cookie(-name => 'Bugzilla_login',
-                          -value => $user->id,
-                          -httponly => 1,
-                          -expires => 'Fri, 01-Jan-2038 00:00:00 GMT');
-        $cgi->send_cookie(-name => 'Bugzilla_logincookie',
-                          -value => $login_cookie,
-                          -httponly => 1,
-                          -expires => 'Fri, 01-Jan-2038 00:00:00 GMT');
+        # Not a session cookie, so set an infinite expiry
+        $cookieargs{'-expires'} = 'Fri, 01-Jan-2038 00:00:00 GMT';
     }
-    else {
-        $cgi->send_cookie(-name => 'Bugzilla_login',
-                          -value => $user->id,
-                          -httponly => 1);
-        $cgi->send_cookie(-name => 'Bugzilla_logincookie',
-                          -value => $login_cookie,
-                          -httponly => 1);
+    if (Bugzilla->params->{'ssl'} ne 'never'
+        && Bugzilla->params->{'sslbase'} ne '')
+    {
+        # Bugzilla->login will automatically redirect to https://,
+        # so it's safe to turn on the 'secure' bit.
+        $cookieargs{'-secure'} = 1;
     }
+
+    $cgi->send_cookie(-name => 'Bugzilla_login',
+                      -value => $user->id,
+                      %cookieargs);
+    $cgi->send_cookie(-name => 'Bugzilla_logincookie',
+                      -value => $login_cookie,
+                      %cookieargs);
 }
 
 sub logout {

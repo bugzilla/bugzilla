@@ -489,6 +489,8 @@ sub bz_setup_database {
     # have that function, So we have to create one ourself. 
     $self->do("CREATE OR REPLACE FUNCTION NOW "
               . " RETURN DATE IS BEGIN RETURN SYSDATE; END;");
+    $self->do("CREATE OR REPLACE FUNCTION CHAR_LENGTH(COLUMN_NAME VARCHAR2)" 
+              . " RETURN NUMBER IS BEGIN RETURN LENGTH(COLUMN_NAME); END;");
     # Create a WORLD_LEXER named BZ_LEX for multilingual fulltext search
     my $lexer = $self->selectcol_arrayref(
        "SELECT pre_name FROM CTXSYS.CTX_PREFERENCES WHERE pre_name = ? AND

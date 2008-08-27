@@ -30,10 +30,12 @@ eval 'use XMLRPC::Transport::HTTP;
 $@ && ThrowCodeError('soap_not_installed');
 
 Bugzilla->usage_mode(Bugzilla::Constants::USAGE_MODE_WEBSERVICE);
-local $SOAP::Constants::FAULT_SERVER = ERROR_UNKNOWN_FATAL;
+local $SOAP::Constants::FAULT_SERVER;
+$SOAP::Constants::FAULT_SERVER = ERROR_UNKNOWN_FATAL;
 # The line above is used, this one is ignored, but SOAP::Lite
 # might start using this constant (the correct one) for XML-RPC someday.
-local $XMLRPC::Constants::FAULT_SERVER = ERROR_UNKNOWN_FATAL;
+local $XMLRPC::Constants::FAULT_SERVER;
+$XMLRPC::Constants::FAULT_SERVER = ERROR_UNKNOWN_FATAL;
 
 my %hook_dispatch;
 Bugzilla::Hook::process('webservice', { dispatch => \%hook_dispatch });

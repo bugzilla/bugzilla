@@ -35,7 +35,7 @@ BEGIN {
 
 # We need to override user preferences so we can get an expected value when
 # Bugzilla::Util::format_time() calls ask for the 'timezone' user preference.
-Bugzilla->user->settings->{'timezone'}->{'value'} = "local";
+Bugzilla->user->{'settings'}->{'timezone'}->{'value'} = "local";
 
 # We need to know the local timezone for the date chosen in our tests.
 # Below, tests are run against Nov. 24, 2002.

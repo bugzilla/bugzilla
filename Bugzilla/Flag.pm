@@ -1104,10 +1104,15 @@ sub notify {
     }
 
     foreach my $to (keys %recipients) {
-        my $vars = { 'flag'       => $flag,
-                     'to'         => $to,
-                     'bug'        => $bug,
-                     'attachment' => $attachment};
+        # Add threadingmarker to allow flag notification emails to be the
+        # threaded similar to normal bug change emails.
+        my $thread_user_id = $recipients{$to} ? $recipients{$to}->id : 0;
+    
+        my $vars = { 'flag'            => $flag,
+                     'to'              => $to,
+                     'bug'             => $bug,
+                     'attachment'      => $attachment,
+                     'threadingmarker' => build_thread_marker($bug->id, $thread_user_id) };
 
         my $lang = $recipients{$to} ?
           $recipients{$to}->settings->{'lang'}->{'value'} : $default_lang;

@@ -35,7 +35,7 @@ package Bugzilla::Mailer;
 use strict;
 
 use base qw(Exporter);
-@Bugzilla::Mailer::EXPORT = qw(MessageToMTA);
+@Bugzilla::Mailer::EXPORT = qw(MessageToMTA build_thread_marker);
 
 use Bugzilla::Constants;
 use Bugzilla::Error;
@@ -152,6 +152,33 @@ sub MessageToMTA {
         ThrowCodeError('mail_send_error', { msg => $retval, mail => $email })
             if !$retval;
     }
+}
+
+# Builds header suitable for use as a threading marker in email notifications
+sub build_thread_marker {
+    my ($bug_id, $user_id, $is_new) = @_;
+
+    if (!defined $user_id) {
+        $user_id = Bugzilla->user->id;
+    }
+
+    my $sitespec = '@' . Bugzilla->params->{'urlbase'};
+    $sitespec =~ s/:\/\//\./; # Make the protocol look like part of the domain
+    $sitespec =~ s/^([^:\/]+):(\d+)/$1/; # Remove a port number, to relocate
+    if ($2) {
+        $sitespec = "-$2$sitespec"; # Put the port number back in, before the '@'
+    }
+
+    my $threadingmarker;
+    if ($is_new) {
+        $threadingmarker = "Message-ID: <bug-$bug_id-$user_id$sitespec>";
+    }
+    else {
+        $threadingmarker = "In-Reply-To: <bug-$bug_id-$user_id$sitespec>" .
+                           "\nReferences: <bug-$bug_id-$user_id$sitespec>";
+    }
+
+    return $threadingmarker;
 }
 
 1;

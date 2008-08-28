@@ -636,22 +636,6 @@ sub sendMail {
     push(@watchingrel, 'None') unless @watchingrel;
     push @watchingrel, map { user_id_to_login($_) } @$watchingRef;
 
-    my $sitespec = '@' . Bugzilla->params->{'urlbase'};
-    $sitespec =~ s/:\/\//\./; # Make the protocol look like part of the domain
-    $sitespec =~ s/^([^:\/]+):(\d+)/$1/; # Remove a port number, to relocate
-    if ($2) {
-        $sitespec = "-$2$sitespec"; # Put the port number back in, before the '@'
-    }
-    my $threadingmarker;
-    if ($isnew) {
-        $threadingmarker = "Message-ID: <bug-$id-" . $user->id . "$sitespec>";
-    }
-    else {
-        $threadingmarker = "In-Reply-To: <bug-$id-" . $user->id . "$sitespec>" .
-                            "\nReferences: <bug-$id-" . $user->id . "$sitespec>";
-    }
-    
-
     my $vars = {
         isnew => $isnew,
         to => $user->email,
@@ -678,7 +662,7 @@ sub sendMail {
         reporter => $values{'reporter'},
         reportername => Bugzilla::User->new({name => $values{'reporter'}})->name,
         diffs => $diffs,
-        threadingmarker => $threadingmarker
+        threadingmarker => build_thread_marker($id, $user->id, $isnew),
     };
 
     my $msg;

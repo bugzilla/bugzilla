@@ -20,7 +20,6 @@
   #%]
 
 [% PROCESS "global/field-descs.none.tmpl" %]
-[% USE date %]
 
 [% colsepchar = user.settings.csv_colsepchar.value %]
 
@@ -35,7 +34,7 @@ bug_id
       [% colsepchar %]
       [% IF column == "opendate" OR column == "changeddate" %]
         [% rawcolumn = column.replace("date", "time") %]
-        [% bug.$column = date.format(bug.$rawcolumn, "%Y-%m-%d %H:%M:%S") %]
+        [% bug.$column = bug.$rawcolumn FILTER time("%Y-%m-%d %H:%M:%S") %]
       [% ELSIF column == 'bug_status' %]
         [% bug.$column = get_status(bug.$column) %]
       [% ELSIF column == 'resolution' %]

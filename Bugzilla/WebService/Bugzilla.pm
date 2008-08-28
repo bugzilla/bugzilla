@@ -23,7 +23,7 @@ use base qw(Bugzilla::WebService);
 use Bugzilla::Constants;
 use Bugzilla::Hook;
 
-use Time::Zone;
+use DateTime;
 
 # Basic info that is needed before logins
 use constant LOGIN_EXEMPT => {
@@ -51,7 +51,7 @@ sub extensions {
 
 sub timezone {
     my $self = shift;
-    my $offset = tz_offset();
+    my $offset = Bugzilla->local_timezone->offset_for_datetime(DateTime->now());
     $offset = (($offset / 60) / 60) * 100;
     $offset = sprintf('%+05d', $offset);
     return { timezone => $self->type('string', $offset) };

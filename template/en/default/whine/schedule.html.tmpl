@@ -71,11 +71,7 @@
 </p>
 
 <p>
-  [% IF Param("timezone") %]
-    All times are server local time ([% Param("timezone") FILTER upper %]).
-  [% ELSE %]
-    All times are server local time.
-  [% END %]
+  All times are server local time ([% local_timezone FILTER html %]).
 </p>
 
 <form method="post" action="editwhines.cgi">

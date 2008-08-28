@@ -426,6 +426,7 @@ while (my ($query) = $sth->fetchrow_array) {
     push @{$vars->{'available_queries'}}, $query;
 }
 $vars->{'token'} = issue_session_token('edit_whine');
+$vars->{'local_timezone'} = Bugzilla->local_timezone->short_name_for_datetime(DateTime->now());
 
 $template->process("whine/schedule.html.tmpl", $vars)
   || ThrowTemplateError($template->error());

@@ -88,13 +88,6 @@ sub get_param_list {
   },
 
   {
-   name => 'timezone',
-   type => 't',
-   default => '',
-   checker => \&check_timezone
-  },
-
-  {
    name => 'utf8',
    type => 'b',
    default => '0',

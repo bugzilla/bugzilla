@@ -35,7 +35,6 @@ package Bugzilla::Config::Common;
 use strict;
 
 use Socket;
-use Time::Zone;
 
 use Bugzilla::Util;
 use Bugzilla::Constants;
@@ -49,7 +48,7 @@ use base qw(Exporter);
        check_sslbase check_priority check_severity check_platform
        check_opsys check_shadowdb check_urlbase check_webdotbase
        check_netmask check_user_verify_class check_image_converter
-       check_mail_delivery_method check_notification check_timezone check_utf8
+       check_mail_delivery_method check_notification check_utf8
        check_bug_status check_smtp_auth
 );
 
@@ -323,14 +322,6 @@ sub check_notification {
                "installation is not based on a branch. If you want to be notified " .
                "about the next stable release, you should select " .
                "'latest_stable_release' instead";
-    }
-    return "";
-}
-
-sub check_timezone {
-    my $tz = shift;
-    unless (defined(tz_offset($tz))) {
-        return "must be empty or a legal timezone name, such as PDT or JST";
     }
     return "";
 }

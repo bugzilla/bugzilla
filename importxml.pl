@@ -571,8 +571,7 @@ sub process_bug {
     my $comments;
 
     $comments .= "\n\n--- Bug imported by $exporter_login ";
-    $comments .= time2str( "%Y-%m-%d %H:%M", time ) . " ";
-    $comments .= $params->{'timezone'};
+    $comments .= format_time(localtime(time()), '%Y-%m-%d %H:%M %Z') . " ";
     $comments .= " ---\n\n";
     $comments .= "This bug was previously known as _bug_ $bug_fields{'bug_id'} at ";
     $comments .= $urlbase . "show_bug.cgi?id=" . $bug_fields{'bug_id'} . "\n";

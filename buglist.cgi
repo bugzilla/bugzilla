@@ -204,18 +204,17 @@ foreach my $chart (@charts) {
 # Utilities
 ################################################################################
 
-local our @weekday= qw( Sun Mon Tue Wed Thu Fri Sat );
 sub DiffDate {
     my ($datestr) = @_;
     my $date = str2time($datestr);
     my $age = time() - $date;
-    my ($s,$m,$h,$d,$mo,$y,$wd)= localtime $date;
+
     if( $age < 18*60*60 ) {
-        $date = sprintf "%02d:%02d:%02d", $h,$m,$s;
+        $date = format_time($datestr, '%H:%M:%S');
     } elsif( $age < 6*24*60*60 ) {
-        $date = sprintf "%s %02d:%02d", $weekday[$wd],$h,$m;
+        $date = format_time($datestr, '%a %H:%M');
     } else {
-        $date = sprintf "%04d-%02d-%02d", 1900+$y,$mo+1,$d;
+        $date = format_time($datestr, '%Y-%m-%d');
     }
     return $date;
 }
@@ -1077,16 +1076,12 @@ while (my @row = $buglist_sth->fetchrow_array()) {
         $bug->{'changeddate'} =~ 
             s/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/$1-$2-$3 $4:$5:$6/;
 
-        # Put in the change date as a time, so that the template date plugin
-        # can format the date in any way needed by the template. ICS and Atom
-        # have specific, and different, date and time formatting.
-        $bug->{'changedtime'} = str2time($bug->{'changeddate'}, Bugzilla->params->{'timezone'});
-        $bug->{'changeddate'} = DiffDate($bug->{'changeddate'});        
+        $bug->{'changedtime'} = $bug->{'changeddate'}; # for iCalendar and Atom
+        $bug->{'changeddate'} = DiffDate($bug->{'changeddate'});
     }
 
     if ($bug->{'opendate'}) {
-        # Put in the open date as a time for the template date plugin.
-        $bug->{'opentime'} = str2time($bug->{'opendate'}, Bugzilla->params->{'timezone'});
+        $bug->{'opentime'} = $bug->{'opendate'}; # for iCalendar
         $bug->{'opendate'} = DiffDate($bug->{'opendate'});
     }
 

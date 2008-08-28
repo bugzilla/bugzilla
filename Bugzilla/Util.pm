@@ -51,6 +51,7 @@ use Bugzilla::Constants;
 use Date::Parse;
 use Date::Format;
 use DateTime;
+use DateTime::TimeZone;
 use Text::Wrap;
 
 # This is from the perlsec page, slightly modified to remove a warning
@@ -397,7 +398,7 @@ sub wrap_hard {
 }
 
 sub format_time {
-    my ($date, $format) = @_;
+    my ($date, $format, $timezone) = @_;
 
     # If $format is undefined, try to guess the correct date format.
     if (!defined($format)) {
@@ -429,8 +430,9 @@ sub format_time {
                                 # Use the timezone specified by the server.
                                 time_zone => Bugzilla->local_timezone});
 
-        # Now display the date using the user's timezone.
-        $dt->set_time_zone(Bugzilla->user->timezone);
+        # Now display the date using the given timezone,
+        # or the user's timezone if none is given.
+        $dt->set_time_zone($timezone || Bugzilla->user->timezone);
         $date = $dt->strftime($format);
     }
     else {
@@ -875,15 +877,13 @@ A string.
 
 =item C<format_time($time)>
 
-Takes a time, converts it to the desired format and appends the timezone
-as defined in editparams.cgi, if desired. This routine will be expanded
-in the future to adjust for user preferences regarding what timezone to
-display times in.
+Takes a time and converts it to the desired format and timezone.
+If no format is given, the routine guesses the correct one and returns
+an empty array if it cannot. If no timezone is given, the user's timezone
+is used, as defined in his preferences.
 
 This routine is mainly called from templates to filter dates, see
-"FILTER time" in Templates.pm. In this case, $format is undefined and
-the routine has to "guess" the date format that was passed to $dbh->sql_date_format().
-
+"FILTER time" in L<Bugzilla::Template>.
 
 =item C<format_time_decimal($time)>
 

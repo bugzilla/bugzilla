@@ -147,18 +147,6 @@
 
           <varlistentry>
             <term>
-              timezone
-            </term>
-            <listitem>
-              <para>
-                Timezone of server. The timezone is displayed with timestamps. If 
-                this parameter is left blank, the timezone is not displayed.
-              </para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>
               utf8
             </term>
             <listitem>

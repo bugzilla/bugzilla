@@ -45,7 +45,6 @@ use Bugzilla::Template::Parser;
 
 use Cwd qw(abs_path);
 use MIME::Base64;
-# for time2str - replace by TT Date plugin??
 use Date::Format ();
 use File::Basename qw(dirname);
 use File::Find;
@@ -605,10 +604,10 @@ sub create {
 
             # Format a time for display (more info in Bugzilla::Util)
             time => [ sub {
-                          my ($context, $format) = @_;
+                          my ($context, $format, $timezone) = @_;
                           return sub {
                               my $time = shift;
-                              return format_time($time, $format);
+                              return format_time($time, $format, $timezone);
                           };
                       },
                       1

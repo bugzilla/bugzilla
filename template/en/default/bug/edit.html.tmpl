@@ -814,9 +814,7 @@
                    IF user.settings.state_addselfcc.value == 'always'
                       || (!has_role
                           && user.settings.state_addselfcc.value == 'cc_unless_role') %]>
-            <label for="addselfcc">
-              Myself ([% INCLUDE user_identity user=> user FILTER collapse %])
-            </label>
+            <label for="addselfcc">Add me to CC list</label>
             <br> 
           [% END %]
         [% END %]
@@ -828,7 +826,7 @@
         [% END %]
         [% IF user.id %]
           [% IF bug.cc.contains( user.email ) %]
-            including you ([% INCLUDE user_identity user=> user FILTER collapse %])
+            including you
           [% END %]
         [% END %]
         <span id="cc_edit_area_showhide_container" class="bz_default_hidden">

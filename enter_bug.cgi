@@ -517,14 +517,18 @@ unless ($has_editbugs || $has_canconfirm) {
 $vars->{'bug_status'} = \@status;
 
 # Get the default from a template value if it is legitimate.
-# Otherwise, set the default to the first item on the list.
+# Otherwise, and only if the user has privs, set the default
+# to the first confirmed bug status on the list, if available.
 
 if (formvalue('bug_status') && (lsearch(\@status, formvalue('bug_status')) >= 0)) {
     $default{'bug_status'} = formvalue('bug_status');
-} else {
+} elsif (scalar @status == 1) {
     $default{'bug_status'} = $status[0];
 }
- 
+else {
+    $default{'bug_status'} = ($status[0] ne 'UNCONFIRMED') ? $status[0] : $status[1];
+}
+
 my $grouplist = $dbh->selectall_arrayref(
                   q{SELECT DISTINCT groups.id, groups.name, groups.description,
                                     membercontrol, othercontrol

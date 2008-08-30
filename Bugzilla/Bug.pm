@@ -948,7 +948,12 @@ sub _check_bug_status {
             # A user with no privs cannot choose the initial status.
             # If UNCONFIRMED is valid for this product, use it; else
             # use the first bug status available.
-            $new_status = $product->votes_to_confirm ? 'UNCONFIRMED' : $valid_statuses[0];
+            if (grep {$_->name eq 'UNCONFIRMED'} @valid_statuses) {
+                $new_status = 'UNCONFIRMED';
+            }
+            else {
+                $new_status = $valid_statuses[0];
+            }
         }
     }
     # Time to validate the bug status.

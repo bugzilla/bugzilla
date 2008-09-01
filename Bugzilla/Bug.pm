@@ -1205,6 +1205,7 @@ sub _check_dup_id {
     $dupe_of || ThrowCodeError('undefined_field', { field => 'dup_id' });
     # Make sure we can change the original bug (issue A on bug 96085)
     my $dupe_of_bug = $self->check($dupe_of, 'dup_id');
+    $dupe_of = $dupe_of_bug->id;
     
     # Make sure a loop isn't created when marking this bug
     # as duplicate.

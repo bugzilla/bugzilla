@@ -66,7 +66,7 @@ $ENV{'HTTP_ACCEPT_LANGUAGE'} ||= get_console_locale();
 my %switch;
 GetOptions(\%switch, 'help|h|?', 'check-modules', 'no-templates|t',
                      'verbose|v|no-silent', 'make-admin=s', 
-                     'reset-password=s');
+                     'reset-password=s', 'version|V');
 
 # Print the help message if that switch was selected.
 pod2usage({-verbose => 1, -exitval => 1}) if $switch{'help'};
@@ -77,6 +77,7 @@ my $answers_file = $ARGV[0];
 my $silent = $answers_file && !$switch{'verbose'};
 
 print(install_string('header', get_version_and_os()) . "\n") unless $silent;
+exit if $switch{'version'};
 # Check required --MODULES--
 my $module_results = check_requirements(!$silent);
 Bugzilla::Install::Requirements::print_module_instructions(
@@ -242,7 +243,7 @@ checksetup.pl - A do-it-all upgrade and installation script for Bugzilla.
 
 =head1 SYNOPSIS
 
- ./checksetup.pl [--help|--check-modules]
+ ./checksetup.pl [--help|--check-modules|--version]
  ./checksetup.pl [SCRIPT [--verbose]] [--no-templates|-t]
                  [--make-admin=user@domain.com]
                  [--reset-password=user@domain.com]
@@ -287,6 +288,11 @@ by developers to speed up checksetup.) Use this switch at your own risk.
 =item B<--verbose>
 
 Output results of SCRIPT being processed.
+
+=item B<--version>
+
+Display the version of Bugzilla, Perl, and some info about the
+system that Bugzilla is being installed on, and then exit.
 
 =back
 

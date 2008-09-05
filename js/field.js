@@ -161,6 +161,12 @@ function hideEditableField( container, input, action, field_id, original_value )
 function showEditableField (e, ContainerInputArray) {
     YAHOO.util.Dom.setStyle(ContainerInputArray[0], 'display', 'none');
     YAHOO.util.Dom.setStyle(ContainerInputArray[1], 'display', 'inline');
+    var inputs = YAHOO.util.Dom.get(ContainerInputArray[1]).getElementsByTagName('input')
+    if( inputs.length > 0) {
+        // focus on the first field, this makes it easier to edit
+        inputs[0].focus();
+        inputs[0].select();
+    }
     YAHOO.util.Event.preventDefault(e);
 }
 

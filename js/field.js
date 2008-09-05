@@ -213,7 +213,7 @@ function hideAliasAndSummary(short_desc_value, alias_value) {
     hideEditableField( 'summary_alias_container','summary_alias_input',
                        'editme_action','short_desc', short_desc_value);  
     // check that the alias hasn't changed
-    bz_alias_check_array = new Array('summary_alias_container',
+    var bz_alias_check_array = new Array('summary_alias_container',
                                      'summary_alias_input', 'alias', alias_value);
     YAHOO.util.Event.addListener( window, 'load', checkForChangedFieldValues,
                                  bz_alias_check_array);

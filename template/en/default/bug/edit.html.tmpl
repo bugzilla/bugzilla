@@ -586,8 +586,9 @@
         <span id="bz_url_edit_container" class="bz_default_hidden"> 
         [% IF bug.bug_file_loc 
            AND NOT bug.bug_file_loc.match("^(javascript|data)") %]
-           <a href="[% bug.bug_file_loc FILTER html %]" target="_blank">
-             [% bug.bug_file_loc FILTER html%]</a>
+           <a href="[% bug.bug_file_loc FILTER html %]" target="_blank"
+              title="[% bug.bug_file_loc FILTER html %]">
+             [% bug.bug_file_loc FILTER truncate(40) FILTER html %]</a>
         [% ELSE %]
           [% bug.bug_file_loc FILTER html %]
         [% END %]

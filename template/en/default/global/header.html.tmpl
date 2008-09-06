@@ -69,23 +69,6 @@
 
     [% PROCESS 'global/setting-descs.none.tmpl' %]
 
-    [% IF javascript %]
-      <script type="text/javascript">
-        [% javascript %]
-      </script>
-    [% END %]
-
-    [% IF javascript_urls %]
-      [% FOREACH javascript_url = javascript_urls %]
-        <script src="[% javascript_url FILTER html %]" type="text/javascript"></script>
-      [% END %]
-      [% IF javascript_urls.grep('yui/').size %]
-        <script type="text/javascript">
-          YAHOO.namespace('bugzilla');
-        </script>
-      [% END %]
-    [% END %]
-
     [%# Set up the skin CSS cascade:
       #  1. Standard Bugzilla stylesheet set (persistent)
       #  2. Standard Bugzilla stylesheet set (selectable)
@@ -204,6 +187,24 @@
             rel="stylesheet"
             type="text/css">
     <![endif]-->
+
+
+    [% IF javascript %]
+      <script type="text/javascript">
+        [% javascript %]
+      </script>
+    [% END %]
+
+    [% IF javascript_urls %]
+      [% FOREACH javascript_url = javascript_urls %]
+        <script src="[% javascript_url FILTER html %]" type="text/javascript"></script>
+      [% END %]
+      [% IF javascript_urls.grep('yui/').size %]
+        <script type="text/javascript">
+          YAHOO.namespace('bugzilla');
+        </script>
+      [% END %]
+    [% END %]
 
     [%# this puts the live bookmark up on firefox for the Atom feed %]
     [% IF atomlink %]

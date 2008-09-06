@@ -99,15 +99,12 @@ sub new {
         }
     }
     else {
-        ($subclass) = $dbh->selectrow_array(
-            q{SELECT subclass FROM setting WHERE name = ?},
-            undef,
-            $setting_name);
         # If the values were passed in, simply assign them and return.
         $self->{'is_enabled'}    = shift;
         $self->{'default_value'} = shift;
         $self->{'value'}         = shift;
         $self->{'is_default'}    = shift;
+        $subclass                = shift;
     }
     if ($subclass) {
         eval('require ' . $class . '::' . $subclass);
@@ -172,7 +169,7 @@ sub get_all_settings {
     my $dbh = Bugzilla->dbh;
 
     my $sth = $dbh->prepare(
-           q{SELECT name, default_value, is_enabled, setting_value
+           q{SELECT name, default_value, is_enabled, setting_value, subclass
                FROM setting
           LEFT JOIN profile_setting
                  ON setting.name = profile_setting.setting_name
@@ -180,8 +177,9 @@ sub get_all_settings {
            ORDER BY name});
 
     $sth->execute($user_id);
-    while (my ($name, $default_value, $is_enabled, $value) 
-               = $sth->fetchrow_array()) {
+    while (my ($name, $default_value, $is_enabled, $value, $subclass) 
+               = $sth->fetchrow_array()) 
+    {
 
         my $is_default;
 
@@ -194,7 +192,7 @@ sub get_all_settings {
 
         $settings->{$name} = new Bugzilla::User::Setting(
            $name, $user_id, $is_enabled, 
-           $default_value, $value, $is_default);
+           $default_value, $value, $is_default, $subclass);
     }
 
     return $settings;
@@ -207,14 +205,17 @@ sub get_defaults {
 
     $user_id ||= 0;
 
-    my $sth = $dbh->prepare(q{SELECT name, default_value, is_enabled
+    my $sth = $dbh->prepare(q{SELECT name, default_value, is_enabled, subclass
                                 FROM setting
                             ORDER BY name});
     $sth->execute();
-    while (my ($name, $default_value, $is_enabled) = $sth->fetchrow_array()) {
+    while (my ($name, $default_value, $is_enabled, $subclass) 
+           = $sth->fetchrow_array()) 
+    {
 
         $default_settings->{$name} = new Bugzilla::User::Setting(
-            $name, $user_id, $is_enabled, $default_value, $default_value, 1);
+            $name, $user_id, $is_enabled, $default_value, $default_value, 1,
+            $subclass);
     }
 
     return $default_settings;

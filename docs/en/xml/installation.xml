@@ -1,5 +1,5 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"> -->
-<!-- $Id: installation.xml,v 1.159 2008/09/05 21:58:55 lpsolit%gmail.com Exp $ -->
+<!-- $Id: installation.xml,v 1.160 2008/09/05 22:08:15 lpsolit%gmail.com Exp $ -->
 <chapter id="installing-bugzilla">
   <title>Installing Bugzilla</title>
 
@@ -1281,18 +1281,6 @@ c:\perl\bin\perl.exe -xc:\bugzilla -wT "%s" %s
         <xref linkend="troubleshooting"/>.
       </para>
 
-      <para>
-        When upgrading Bugzilla, this format may change.
-        To create new status data, (re)move old data and run following commands:
-      </para>
-
-      <screen>
-        <prompt>bash$</prompt>
-        <command>cd &lt;your-bugzilla-directory&gt;</command>
-        <prompt>bash$</prompt>
-        <command>./collectstats.pl --regenerate</command>
-      </screen>
-
       <note>
         <para>
           The URL above may be incorrect if you installed Bugzilla into a 
@@ -1360,19 +1348,6 @@ c:\perl\bin\perl.exe -xc:\bugzilla -wT "%s" %s
         After two days have passed you'll be able to view bug graphs from
         the Reports page.
       </para>
-
-      <para>
-        When upgrading Bugzilla, this format may change.
-        To create new status data, (re)move old data and run the following 
-        commands:
-      </para>
-
-      <screen>
-        <prompt>bash$</prompt>
-        <command>cd &lt;your-bugzilla-directory&gt;</command>
-        <prompt>bash$</prompt>
-        <command>./collectstats.pl --regenerate</command>
-      </screen>
 
       <note>
         <para>

@@ -391,17 +391,17 @@ foreach my $field (@enter_bug_fields) {
 if ($cloned_bug_id) {
 
     $default{'component_'}    = $cloned_bug->component;
-    $default{'priority'}      = $cloned_bug->{'priority'};
-    $default{'bug_severity'}  = $cloned_bug->{'bug_severity'};
-    $default{'rep_platform'}  = $cloned_bug->{'rep_platform'};
-    $default{'op_sys'}        = $cloned_bug->{'op_sys'};
+    $default{'priority'}      = $cloned_bug->priority;
+    $default{'bug_severity'}  = $cloned_bug->bug_severity;
+    $default{'rep_platform'}  = $cloned_bug->rep_platform;
+    $default{'op_sys'}        = $cloned_bug->op_sys;
 
-    $vars->{'short_desc'}     = $cloned_bug->{'short_desc'};
-    $vars->{'bug_file_loc'}   = $cloned_bug->{'bug_file_loc'};
+    $vars->{'short_desc'}     = $cloned_bug->short_desc;
+    $vars->{'bug_file_loc'}   = $cloned_bug->bug_file_loc;
     $vars->{'keywords'}       = $cloned_bug->keywords;
     $vars->{'dependson'}      = $cloned_bug_id;
     $vars->{'blocked'}        = "";
-    $vars->{'deadline'}       = $cloned_bug->{'deadline'};
+    $vars->{'deadline'}       = $cloned_bug->deadline;
 
     if (defined $cloned_bug->cc) {
         $vars->{'cc'}         = join (" ", @{$cloned_bug->cc});
@@ -410,29 +410,23 @@ if ($cloned_bug_id) {
     }
 
     foreach my $field (@enter_bug_fields) {
-        $vars->{$field->name} = $cloned_bug->{$field->name};
+        my $field_name = $field->name;
+        $vars->{$field_name} = $cloned_bug->$field_name;
     }
 
-# We need to ensure that we respect the 'insider' status of
-# the first comment, if it has one. Either way, make a note
-# that this bug was cloned from another bug.
+    # We need to ensure that we respect the 'insider' status of
+    # the first comment, if it has one. Either way, make a note
+    # that this bug was cloned from another bug.
 
-    $cloned_bug->longdescs();
-    my $isprivate             = $cloned_bug->{'longdescs'}->[0]->{'isprivate'};
+    my $isprivate             = $cloned_bug->longdescs->[0]->{'isprivate'};
 
     $vars->{'comment'}        = "";
     $vars->{'commentprivacy'} = 0;
 
-    if ( !($isprivate) ||
-         ( ( Bugzilla->params->{"insidergroup"} ) && 
-           ( Bugzilla->user->in_group(Bugzilla->params->{"insidergroup"}) ) ) 
-       ) {
-        $vars->{'comment'}        = $cloned_bug->{'longdescs'}->[0]->{'body'};
+    if ( !($isprivate) || Bugzilla->user->is_insider ) {
+        $vars->{'comment'}        = $cloned_bug->longdescs->[0]->{'body'};
         $vars->{'commentprivacy'} = $isprivate;
     }
-
-# Ensure that the groupset information is set up for later use.
-    $cloned_bug->groups();
 
 } # end of cloned bug entry form
 
@@ -476,7 +470,7 @@ $vars->{'version'} = [map($_->name, @{$product->versions})];
 
 if ( ($cloned_bug_id) &&
      ($product->name eq $cloned_bug->product ) ) {
-    $default{'version'} = $cloned_bug->{'version'};
+    $default{'version'} = $cloned_bug->version;
 } elsif (formvalue('version')) {
     $default{'version'} = formvalue('version');
 } elsif (defined $cgi->cookie("VERSION-" . $product->name) &&
@@ -562,9 +556,9 @@ foreach my $row (@$grouplist) {
     #
     if ( ($cloned_bug_id) &&
          ($product->name eq $cloned_bug->product ) ) {
-        foreach my $i (0..(@{$cloned_bug->{'groups'}}-1) ) {
-            if ($cloned_bug->{'groups'}->[$i]->{'bit'} == $id) {
-                $check = $cloned_bug->{'groups'}->[$i]->{'ison'};
+        foreach my $i (0..(@{$cloned_bug->groups} - 1) ) {
+            if ($cloned_bug->groups->[$i]->{'bit'} == $id) {
+                $check = $cloned_bug->groups->[$i]->{'ison'};
             }
         }
     }

@@ -1158,6 +1158,44 @@ sub CancelRequests {
                     \@old_summaries, \@new_summaries);
 }
 
+# This is an internal function used by $bug->flag_types
+# and $attachment->flag_types to collect data about available
+# flag types and existing flags set on them. You should never
+# call this function directly.
+sub _flag_types {
+    my $vars = shift;
+
+    my $target_type = $vars->{target_type};
+    my $flags;
+
+    # Retrieve all existing flags for this bug/attachment.
+    if ($target_type eq 'bug') {
+        my $bug_id = delete $vars->{bug_id};
+        $flags = Bugzilla::Flag->match({target_type => 'bug', bug_id => $bug_id});
+    }
+    elsif ($target_type eq 'attachment') {
+        my $attach_id = delete $vars->{attach_id};
+        $flags = Bugzilla::Flag->match({attach_id => $attach_id});
+    }
+    else {
+        ThrowCodeError('bad_arg', {argument => 'target_type',
+                                   function => 'Bugzilla::Flag::_flag_types'});
+    }
+
+    # Get all available flag types for the given product and component.
+    my $flag_types = Bugzilla::FlagType::match($vars);
+
+    $_->{flags} = [] foreach @$flag_types;
+    my %flagtypes = map { $_->id => $_ } @$flag_types;
+
+    # Group existing flags per type.
+    # Call the internal 'type_id' variable instead of the method
+    # to not create a flagtype object.
+    push(@{$flagtypes{$_->{type_id}}->{flags}}, $_) foreach @$flags;
+
+    return [sort {$a->sortkey <=> $b->sortkey || $a->name cmp $b->name} values %flagtypes];
+}
+
 =head1 SEE ALSO
 
 =over

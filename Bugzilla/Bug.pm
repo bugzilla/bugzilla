@@ -2314,7 +2314,7 @@ sub attachments {
     return [] if $self->{'error'};
 
     $self->{'attachments'} =
-        Bugzilla::Attachment->get_attachments_by_bug($self->bug_id);
+        Bugzilla::Attachment->get_attachments_by_bug($self->bug_id, {preload => 1});
     return $self->{'attachments'};
 }
 
@@ -2421,22 +2421,12 @@ sub flag_types {
     return $self->{'flag_types'} if exists $self->{'flag_types'};
     return [] if $self->{'error'};
 
-    # The types of flags that can be set on this bug.
-    # If none, no UI for setting flags will be displayed.
-    my $flag_types = Bugzilla::FlagType::match(
-        {'target_type'  => 'bug',
-         'product_id'   => $self->{'product_id'}, 
-         'component_id' => $self->{'component_id'} });
+    my $vars = { target_type  => 'bug',
+                 product_id   => $self->{product_id},
+                 component_id => $self->{component_id},
+                 bug_id       => $self->bug_id };
 
-    foreach my $flag_type (@$flag_types) {
-        $flag_type->{'flags'} = Bugzilla::Flag->match(
-            { 'bug_id'      => $self->bug_id,
-              'type_id'     => $flag_type->{'id'},
-              'target_type' => 'bug' });
-    }
-
-    $self->{'flag_types'} = $flag_types;
-
+    $self->{'flag_types'} = Bugzilla::Flag::_flag_types($vars);
     return $self->{'flag_types'};
 }
 

@@ -435,32 +435,14 @@ sub insert {
 # Validations are done later when the user submits changes.
 sub edit {
   my $attachment = validateID();
-  my $dbh = Bugzilla->dbh;
 
-  # Retrieve a list of attachments for this bug as well as a summary of the bug
-  # to use in a navigation bar across the top of the screen.
   my $bugattachments =
       Bugzilla::Attachment->get_attachments_by_bug($attachment->bug_id);
   # We only want attachment IDs.
   @$bugattachments = map { $_->id } @$bugattachments;
 
-  my ($bugsummary, $product_id, $component_id) =
-      $dbh->selectrow_array('SELECT short_desc, product_id, component_id
-                               FROM bugs
-                              WHERE bug_id = ?', undef, $attachment->bug_id);
-
-  # Get a list of flag types that can be set for this attachment.
-  my $flag_types = Bugzilla::FlagType::match({ 'target_type'  => 'attachment' ,
-                                               'product_id'   => $product_id ,
-                                               'component_id' => $component_id });
-  foreach my $flag_type (@$flag_types) {
-    $flag_type->{'flags'} = Bugzilla::Flag->match({ 'type_id'   => $flag_type->id,
-                                                    'attach_id' => $attachment->id });
-  }
-  $vars->{'flag_types'} = $flag_types;
-  $vars->{'any_flags_requesteeble'} = grep($_->is_requesteeble, @$flag_types);
+  $vars->{'any_flags_requesteeble'} = grep($_->is_requesteeble, @{$attachment->flag_types});
   $vars->{'attachment'} = $attachment;
-  $vars->{'bugsummary'} = $bugsummary; 
   $vars->{'attachments'} = $bugattachments;
 
   print $cgi->header();

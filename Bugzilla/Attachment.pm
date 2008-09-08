@@ -139,11 +139,27 @@ the ID of the bug to which the attachment is attached
 
 =cut
 
-# XXX Once Bug.pm slims down sufficiently this should become a reference
-# to a bug object.
 sub bug_id {
     my $self = shift;
     return $self->{bug_id};
+}
+
+=over
+
+=item C<bug>
+
+the bug object to which the attachment is attached
+
+=back
+
+=cut
+
+sub bug {
+    my $self = shift;
+
+    require Bugzilla::Bug;
+    $self->{bug} = Bugzilla::Bug->new($self->bug_id);
+    return $self->{bug};
 }
 
 =over
@@ -430,6 +446,30 @@ sub flags {
     return $self->{flags};
 }
 
+=over
+
+=item C<flag_types>
+
+Return all flag types available for this attachment as well as flags
+already set, grouped by flag type.
+
+=back
+
+=cut
+
+sub flag_types {
+    my $self = shift;
+    return $self->{flag_types} if exists $self->{flag_types};
+
+    my $vars = { target_type  => 'attachment',
+                 product_id   => $self->bug->product_id,
+                 component_id => $self->bug->component_id,
+                 attach_id    => $self->id };
+
+    $self->{flag_types} = Bugzilla::Flag::_flag_types($vars);
+    return $self->{flag_types};
+}
+
 # Instance methods; no POD documentation here yet because the only ones so far
 # are private.
 
@@ -538,7 +578,7 @@ Returns:    a reference to an array of attachment objects.
 =cut
 
 sub get_attachments_by_bug {
-    my ($class, $bug_id) = @_;
+    my ($class, $bug_id, $vars) = @_;
     my $user = Bugzilla->user;
     my $dbh = Bugzilla->dbh;
 
@@ -556,6 +596,20 @@ sub get_attachments_by_bug {
                                                WHERE bug_id = ? $and_restriction",
                                                undef, @values);
     my $attachments = Bugzilla::Attachment->get_list($attach_ids);
+
+    # To avoid $attachment->flags to run SQL queries itself for each
+    # attachment listed here, we collect all the data at once and
+    # populate $attachment->{flags} ourselves.
+    if ($vars->{preload}) {
+        $_->{flags} = [] foreach @$attachments;
+        my %att = map { $_->id => $_ } @$attachments;
+
+        my $flags = Bugzilla::Flag->match({ bug_id      => $bug_id,
+                                            target_type => 'attachment' });
+
+        push(@{$att{$_->attach_id}->{flags}}, $_) foreach @$flags;
+        $attachments = [sort {$a->id <=> $b->id} values %att];
+    }
     return $attachments;
 }
 

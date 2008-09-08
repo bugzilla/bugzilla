@@ -28,23 +28,26 @@ package Bugzilla::Attachment;
 
 =head1 NAME
 
-Bugzilla::Attachment - a file related to a bug that a user has uploaded
-                       to the Bugzilla server
+Bugzilla::Attachment - Bugzilla attachment class.
 
 =head1 SYNOPSIS
 
   use Bugzilla::Attachment;
 
   # Get the attachment with the given ID.
-  my $attachment = Bugzilla::Attachment->get($attach_id);
+  my $attachment = new Bugzilla::Attachment($attach_id);
 
   # Get the attachments with the given IDs.
-  my $attachments = Bugzilla::Attachment->get_list($attach_ids);
+  my $attachments = Bugzilla::Attachment->new_from_list($attach_ids);
 
 =head1 DESCRIPTION
 
-This module defines attachment objects, which represent files related to bugs
-that users upload to the Bugzilla server.
+Attachment.pm represents an attachment object. It is an implementation
+of L<Bugzilla::Object>, and thus provides all methods that
+L<Bugzilla::Object> provides.
+
+The methods that are specific to C<Bugzilla::Attachment> are listed
+below.
 
 =cut
 
@@ -55,79 +58,41 @@ use Bugzilla::User;
 use Bugzilla::Util;
 use Bugzilla::Field;
 
-sub get {
-    my $invocant = shift;
-    my $id = shift;
+use base qw(Bugzilla::Object);
 
-    my $attachments = _retrieve([$id]);
-    my $self = $attachments->[0];
-    bless($self, ref($invocant) || $invocant) if $self;
+###############################
+####    Initialization     ####
+###############################
 
-    return $self;
-}
+use constant DB_TABLE   => 'attachments';
+use constant ID_FIELD   => 'attach_id';
+use constant LIST_ORDER => ID_FIELD;
 
-sub get_list {
-    my $invocant = shift;
-    my $ids = shift;
-
-    my $attachments = _retrieve($ids);
-    foreach my $attachment (@$attachments) {
-        bless($attachment, ref($invocant) || $invocant);
-    }
-
-    return $attachments;
-}
-
-sub _retrieve {
-    my ($ids) = @_;
-
-    return [] if scalar(@$ids) == 0;
-
-    my @columns = (
-        'attachments.attach_id AS id',
-        'attachments.bug_id AS bug_id',
-        'attachments.description AS description',
-        'attachments.mimetype AS contenttype',
-        'attachments.submitter_id AS attacher_id',
-        Bugzilla->dbh->sql_date_format('attachments.creation_ts',
-                                       '%Y.%m.%d %H:%i') . " AS attached",
-        'attachments.modification_time',
-        'attachments.filename AS filename',
-        'attachments.ispatch AS ispatch',
-        'attachments.isurl AS isurl',
-        'attachments.isobsolete AS isobsolete',
-        'attachments.isprivate AS isprivate'
-    );
-    my $columns = join(", ", @columns);
+sub DB_COLUMNS {
     my $dbh = Bugzilla->dbh;
-    my $records = $dbh->selectall_arrayref(
-                      "SELECT $columns
-                         FROM attachments
-                        WHERE " 
-                       . Bugzilla->dbh->sql_in('attach_id', $ids) 
-                 . " ORDER BY attach_id",
-                       { Slice => {} });
-    return $records;
+
+    return qw(
+        attach_id
+        bug_id
+        description
+        filename
+        isobsolete
+        ispatch
+        isprivate
+        isurl
+        mimetype
+        modification_time
+        submitter_id),
+        $dbh->sql_date_format('attachments.creation_ts', '%Y.%m.%d %H:%i') . ' AS creation_ts';
 }
+
+###############################
+####      Accessors      ######
+###############################
 
 =pod
 
 =head2 Instance Properties
-
-=over
-
-=item C<id>
-
-the unique identifier for the attachment
-
-=back
-
-=cut
-
-sub id {
-    my $self = shift;
-    return $self->{id};
-}
 
 =over
 
@@ -189,7 +154,7 @@ the attachment's MIME media type
 
 sub contenttype {
     my $self = shift;
-    return $self->{contenttype};
+    return $self->{mimetype};
 }
 
 =over
@@ -205,7 +170,7 @@ the user who attached the attachment
 sub attacher {
     my $self = shift;
     return $self->{attacher} if exists $self->{attacher};
-    $self->{attacher} = new Bugzilla::User($self->{attacher_id});
+    $self->{attacher} = new Bugzilla::User($self->{submitter_id});
     return $self->{attacher};
 }
 
@@ -221,7 +186,7 @@ the date and time on which the attacher attached the attachment
 
 sub attached {
     my $self = shift;
-    return $self->{attached};
+    return $self->{creation_ts};
 }
 
 =over
@@ -367,7 +332,7 @@ sub data {
                                                       FROM attach_data
                                                       WHERE id = ?",
                                                      undef,
-                                                     $self->{id});
+                                                     $self->id);
 
     # If there's no attachment data in the database, the attachment is stored
     # in a local file, so retrieve it from there.
@@ -412,7 +377,7 @@ sub datasize {
         Bugzilla->dbh->selectrow_array("SELECT LENGTH(thedata)
                                         FROM attach_data
                                         WHERE id = ?",
-                                       undef, $self->{id}) || 0;
+                                       undef, $self->id) || 0;
 
     # If there's no attachment data in the database, either the attachment
     # is stored in a local file, and so retrieve its size from the file,
@@ -469,6 +434,10 @@ sub flag_types {
     $self->{flag_types} = Bugzilla::Flag::_flag_types($vars);
     return $self->{flag_types};
 }
+
+###############################
+####      Validators     ######
+###############################
 
 # Instance methods; no POD documentation here yet because the only ones so far
 # are private.
@@ -595,7 +564,8 @@ sub get_attachments_by_bug {
     my $attach_ids = $dbh->selectcol_arrayref("SELECT attach_id FROM attachments
                                                WHERE bug_id = ? $and_restriction",
                                                undef, @values);
-    my $attachments = Bugzilla::Attachment->get_list($attach_ids);
+
+    my $attachments = Bugzilla::Attachment->new_from_list($attach_ids);
 
     # To avoid $attachment->flags to run SQL queries itself for each
     # attachment listed here, we collect all the data at once and
@@ -769,10 +739,9 @@ sub validate_obsolete {
         detaint_natural($attachid)
           || ThrowCodeError('invalid_attach_id_to_obsolete', $vars);
 
-        my $attachment = Bugzilla::Attachment->get($attachid);
-
         # Make sure the attachment exists in the database.
-        ThrowUserError('invalid_attach_id', $vars) unless $attachment;
+        my $attachment = new Bugzilla::Attachment($attachid)
+          || ThrowUserError('invalid_attach_id', $vars);
 
         # Check that the user can view and edit this attachment.
         $attachment->validate_can_edit($bug->product_id);
@@ -794,10 +763,13 @@ sub validate_obsolete {
     return @obsolete_attachments;
 }
 
+###############################
+####     Constructors     #####
+###############################
 
 =pod
 
-=item C<insert_attachment_for_bug($throw_error, $bug, $user, $timestamp, $hr_vars)>
+=item C<create($throw_error, $bug, $user, $timestamp, $hr_vars)>
 
 Description: inserts an attachment from CGI input for the given bug.
 
@@ -814,7 +786,8 @@ Returns:    the ID of the new attachment.
 
 =cut
 
-sub insert_attachment_for_bug {
+# FIXME: needs to follow the way Object->create() works.
+sub create {
     my ($class, $throw_error, $bug, $user, $timestamp, $hr_vars) = @_;
 
     my $cgi = Bugzilla->cgi;
@@ -957,7 +930,7 @@ sub insert_attachment_for_bug {
                           $timestamp, $fieldid, 0, 1));
     }
 
-    my $attachment = Bugzilla::Attachment->get($attachid);
+    my $attachment = new Bugzilla::Attachment($attachid);
 
     # 1. Add flags, if any. To avoid dying if something goes wrong
     # while processing flags, we will eval() flag validation.

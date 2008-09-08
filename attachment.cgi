@@ -161,7 +161,7 @@ sub validateID {
      || ThrowUserError("invalid_attach_id", { attach_id => $cgi->param($param) });
   
     # Make sure the attachment exists in the database.
-    my $attachment = Bugzilla::Attachment->get($attach_id)
+    my $attachment = new Bugzilla::Attachment($attach_id)
       || ThrowUserError("invalid_attach_id", { attach_id => $attach_id });
 
     # Make sure the user is authorized to access this attachment's bug.
@@ -320,7 +320,7 @@ sub enter {
 
   # Define the variables and functions that will be passed to the UI template.
   $vars->{'bug'} = $bug;
-  $vars->{'attachments'} = Bugzilla::Attachment->get_list($attach_ids);
+  $vars->{'attachments'} = Bugzilla::Attachment->new_from_list($attach_ids);
 
   my $flag_types = Bugzilla::FlagType::match({'target_type'  => 'attachment',
                                               'product_id'   => $bug->product_id,
@@ -374,8 +374,7 @@ sub insert {
     }
 
     my $attachment =
-        Bugzilla::Attachment->insert_attachment_for_bug(THROW_ERROR, $bug, $user,
-                                                        $timestamp, $vars);
+        Bugzilla::Attachment->create(THROW_ERROR, $bug, $user, $timestamp, $vars);
 
     # Insert a comment about the new attachment into the database.
     my $comment = "Created an attachment (id=" . $attachment->id . ")\n" .
@@ -558,7 +557,7 @@ sub update {
             $cgi->param('ispatch'), $cgi->param('isobsolete'), 
             $cgi->param('isprivate'), $timestamp, $attachment->id));
 
-  my $updated_attachment = Bugzilla::Attachment->get($attachment->id);
+  my $updated_attachment = new Bugzilla::Attachment($attachment->id);
   # Record changes in the activity table.
   my $sth = $dbh->prepare('INSERT INTO bugs_activity (bug_id, attach_id, who, bug_when,
                                                       fieldid, removed, added)

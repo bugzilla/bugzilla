@@ -180,7 +180,7 @@ sub attachment {
     return undef unless $self->attach_id;
 
     require Bugzilla::Attachment;
-    $self->{'attachment'} ||= Bugzilla::Attachment->get($self->attach_id);
+    $self->{'attachment'} ||= new Bugzilla::Attachment($self->attach_id);
     return $self->{'attachment'};
 }
 

@@ -194,7 +194,7 @@ if (defined $cgi->param('version')) {
 # Add an attachment if requested.
 if (defined($cgi->upload('data')) || $cgi->param('attachurl')) {
     $cgi->param('isprivate', $cgi->param('commentprivacy'));
-    my $attachment = Bugzilla::Attachment->insert_attachment_for_bug(!THROW_ERROR,
+    my $attachment = Bugzilla::Attachment->create(!THROW_ERROR,
                                                   $bug, $user, $timestamp, $vars);
 
     if ($attachment) {

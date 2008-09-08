@@ -2228,8 +2228,19 @@ sub attachments {
     return $self->{'attachments'} if exists $self->{'attachments'};
     return [] if $self->{'error'};
 
-    $self->{'attachments'} =
-        Bugzilla::Attachment->get_attachments_by_bug($self->bug_id);
+    my $attachments = Bugzilla::Attachment->get_attachments_by_bug($self->bug_id);
+    $_->{'flags'} = [] foreach @$attachments;
+    my %att = map { $_->id => $_ } @$attachments;
+
+    # Retrieve all attachment flags at once for this bug, and group them
+    # by attachment. We populate attachment flags here to avoid querying
+    # the DB for each attachment individually later.
+    my $flags = Bugzilla::Flag->match({ 'bug_id'      => $self->bug_id,
+                                        'target_type' => 'attachment' });
+
+    push(@{$att{$_->attach_id}->{'flags'}}, $_) foreach @$flags;
+
+    $self->{'attachments'} = [sort {$a->id <=> $b->id} values %att];
     return $self->{'attachments'};
 }
 
@@ -2343,14 +2354,20 @@ sub flag_types {
          'product_id'   => $self->{'product_id'}, 
          'component_id' => $self->{'component_id'} });
 
-    foreach my $flag_type (@$flag_types) {
-        $flag_type->{'flags'} = Bugzilla::Flag->match(
-            { 'bug_id'      => $self->bug_id,
-              'type_id'     => $flag_type->{'id'},
-              'target_type' => 'bug' });
-    }
+    $_->{'flags'} = [] foreach @$flag_types;
+    my %flagtypes = map { $_->id => $_ } @$flag_types;
 
-    $self->{'flag_types'} = $flag_types;
+    # Retrieve all bug flags at once for this bug and group them
+    # by flag types.
+    my $flags = Bugzilla::Flag->match({ 'bug_id'      => $self->bug_id,
+                                        'target_type' => 'bug' });
+
+    # Call the internal 'type_id' variable instead of the method
+    # to not create a flagtype object.
+    push(@{$flagtypes{$_->{'type_id'}}->{'flags'}}, $_) foreach @$flags;
+
+    $self->{'flag_types'} =
+      [sort {$a->sortkey <=> $b->sortkey || $a->name cmp $b->name} values %flagtypes];
 
     return $self->{'flag_types'};
 }

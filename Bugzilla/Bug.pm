@@ -2238,6 +2238,9 @@ sub attachments {
     my $flags = Bugzilla::Flag->match({ 'bug_id'      => $self->bug_id,
                                         'target_type' => 'attachment' });
 
+    # Exclude flags for private attachments you cannot see.
+    @$flags = grep {exists $att{$_->attach_id}} @$flags;
+
     push(@{$att{$_->attach_id}->{'flags'}}, $_) foreach @$flags;
 
     $self->{'attachments'} = [sort {$a->id <=> $b->id} values %att];

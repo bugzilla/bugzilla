@@ -94,6 +94,16 @@ td.forbidden {
     background-color: #811;
 }
 
+/* Light green color */
+td.set {
+    background-color: #efe;
+}
+
+/* Light red color */
+td.unset {
+    background-color: #fee;
+}
+
 tr.highlight:hover {
     background-color: yellow;
 }

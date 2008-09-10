@@ -532,7 +532,10 @@ sub update_table_definitions {
     # 2008-07-28 tfu@redhat.com - Bug 431669
     $dbh->bz_alter_column('group_control_map', 'product_id',
         { TYPE => 'INT2', NOTNULL => 1 });
-    
+
+    # 2008-09-07 LpSolit@gmail.com - Bug 452893
+    _fix_illegal_flag_modification_dates();
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################
@@ -3081,6 +3084,15 @@ sub _populate_bugs_fulltext {
             print "\n";
         }
     }
+}
+
+sub _fix_illegal_flag_modification_dates {
+    my $dbh = Bugzilla->dbh;
+
+    my $rows = $dbh->do('UPDATE flags SET modification_date = creation_date
+                         WHERE modification_date < creation_date');
+    # If no rows are affected, $dbh->do returns 0E0 instead of 0.
+    print "$rows flags had an illegal modification date. Fixed!\n" if ($rows =~ /^\d+$/);
 }
 
 1;

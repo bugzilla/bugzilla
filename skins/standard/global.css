@@ -20,6 +20,7 @@
   *                 Vitaly Harisov <vitaly@rathedg.com>
   *                 Svetlana Harisova <light@rathedg.com>
   *                 Marc Schumann <wurblzap@gmail.com>
+  *                 Pascal Held <paheld@gmail.com>
   */
 
 /* global (begin) */
@@ -271,6 +272,10 @@ div#docslinks {
     padding: 1em 0;
 }
 
+.bz_default_hidden {
+    display: none;
+}
+
 span.quote {
     color: #65379c;
     /* Make quoted text not wrap. */
@@ -439,4 +444,25 @@ form#Create .comment {
     background: white;
 }
 
+.image_button {
+    background-repeat: no-repeat;
+    background-position: center center;
+    width: 30px;
+    display: none;
+}
 
+#select_button {
+    background-image: url(global/right.png);
+}
+
+#deselect_button {
+    background-image: url(global/left.png);
+}
+
+#up_button {
+    background-image: url(global/up.png);
+}
+
+#down_button {
+    background-image: url(global/down.png);
+}

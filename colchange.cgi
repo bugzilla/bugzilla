@@ -21,6 +21,7 @@
 # Contributor(s): Terry Weissman <terry@mozilla.org>
 #                 Gervase Markham <gerv@gerv.net>
 #                 Max Kanat-Alexander <mkanat@bugzilla.org>
+#                 Pascal Held <paheld@gmail.com>
 
 use strict;
 
@@ -94,10 +95,9 @@ if (defined $cgi->param('rememberedquery')) {
     if (defined $cgi->param('resetit')) {
         @collist = DEFAULT_COLUMN_LIST;
     } else {
-        foreach my $i (@masterlist) {
-            if (defined $cgi->param("column_$i")) {
-                push @collist, $i;
-            }
+        if (defined $cgi->param("selected_columns")) {
+            my %legal_list = map { $_ => 1 } @masterlist;
+            @collist = grep { exists $legal_list{$_} } $cgi->param("selected_columns");
         }
         if (defined $cgi->param('splitheader')) {
             $splitheader = $cgi->param('splitheader')? 1: 0;

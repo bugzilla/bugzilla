@@ -177,10 +177,6 @@
   'default.series_id', 
 ],
 
-'list/change-columns.html.tmpl' => [
-  'column', 
-],
-
 'list/edit-multiple.html.tmpl' => [
   'group.id', 
   'menuname',

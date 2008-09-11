@@ -1020,7 +1020,15 @@ sub _check_bug_status {
             || $user->in_group('canconfirm', $product->id)) {
             # If the user with privs hasn't selected another status,
             # select the first one of the list.
-            $new_status ||= $valid_statuses[0];
+            unless ($new_status) {
+                if (scalar(@valid_statuses) == 1) {
+                    $new_status = $valid_statuses[0];
+                }
+                else {
+                    $new_status = ($valid_statuses[0]->name ne 'UNCONFIRMED') ?
+                                  $valid_statuses[0] : $valid_statuses[1];
+                }
+            }
         }
         else {
             # A user with no privs cannot choose the initial status.

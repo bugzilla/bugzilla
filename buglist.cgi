@@ -66,6 +66,17 @@ if (length($buffer) == 0) {
     ThrowUserError("buglist_parameters_required");
 }
 
+#
+# If query was POSTed, clean the URL from empty parameters and redirect back to
+# itself. This will make advanced search URLs more tolerable.
+#
+if ($cgi->request_method() eq 'POST') {
+    $cgi->clean_search_url();
+
+    print $cgi->redirect(-url => $cgi->self_url());
+    exit;
+}
+
 # Determine whether this is a quicksearch query.
 my $searchstring = $cgi->param('quicksearch');
 if (defined($searchstring)) {

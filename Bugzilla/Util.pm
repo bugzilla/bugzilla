@@ -474,6 +474,11 @@ sub bz_crypt {
         $salt .= $saltchars[rand(64)];
     }
 
+    # Wide characters cause crypt to die
+    if (Bugzilla->params->{'utf8'}) {
+        utf8::encode($password) if utf8::is_utf8($password);
+    }
+    
     # Crypt the password.
     my $cryptedpassword = crypt($password, $salt);
 

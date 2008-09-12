@@ -90,8 +90,14 @@ sub SaveAccount {
                         undef, $user->id);
         $oldcryptedpwd || ThrowCodeError("unable_to_retrieve_password");
 
-        if (crypt(scalar($cgi->param('Bugzilla_password')), $oldcryptedpwd) ne 
-                  $oldcryptedpwd) 
+        my $oldpassword = $cgi->param('Bugzilla_password');
+
+        # Wide characters cause crypt to die
+        if (Bugzilla->params->{'utf8'}) {
+            utf8::encode($oldpassword) if utf8::is_utf8($oldpassword);
+        } 
+
+        if (crypt($oldpassword, $oldcryptedpwd) ne $oldcryptedpwd) 
         {
             ThrowUserError("old_password_incorrect");
         }

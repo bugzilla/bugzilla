@@ -369,7 +369,7 @@ sub init {
 
     my $sql_deadlinefrom;
     my $sql_deadlineto;
-    if (Bugzilla->user->in_group(Bugzilla->params->{'timetrackinggroup'})){
+    if ($user->in_group(Bugzilla->params->{'timetrackinggroup'})) {
       my $deadlinefrom;
       my $deadlineto;
             
@@ -1291,12 +1291,7 @@ sub _commenter_exact {
         $$sequence++;
     }
     my $table = "longdescs_$chartseq";
-    my $extra = "";
-    if (Bugzilla->params->{"insidergroup"} 
-        && !Bugzilla->user->in_group(Bugzilla->params->{"insidergroup"})) 
-    {
-        $extra = "AND $table.isprivate < 1";
-    }
+    my $extra = $user->is_insider ? "" : "AND $table.isprivate < 1";
     push(@$supptables, "LEFT JOIN longdescs AS $table " .
                        "ON $table.bug_id = bugs.bug_id $extra " .
                        "AND $table.who IN ($match)");
@@ -1315,12 +1310,7 @@ sub _commenter {
         $$sequence++;
     }
     my $table = "longdescs_$chartseq";
-    my $extra = "";
-    if (Bugzilla->params->{"insidergroup"} 
-        && !Bugzilla->user->in_group(Bugzilla->params->{"insidergroup"})) 
-    {
-        $extra = "AND $table.isprivate < 1";
-    }
+    my $extra = $self->{'user'}->is_insider ? "" : "AND $table.isprivate < 1";
     $$f = "login_name";
     $$ff = "profiles.login_name";
     $$funcsbykey{",$$t"}($self, %func_args);
@@ -1339,12 +1329,7 @@ sub _long_desc {
         @func_args{qw(chartid supptables f)};
     
     my $table = "longdescs_$$chartid";
-    my $extra = "";
-    if (Bugzilla->params->{"insidergroup"} 
-        && !Bugzilla->user->in_group(Bugzilla->params->{"insidergroup"})) 
-    {
-        $extra = "AND $table.isprivate < 1";
-    }
+    my $extra = $self->{'user'}->is_insider ? "" : "AND $table.isprivate < 1";
     push(@$supptables, "LEFT JOIN longdescs AS $table " .
                        "ON $table.bug_id = bugs.bug_id $extra");
     $$f = "$table.thetext";
@@ -1357,12 +1342,7 @@ sub _longdescs_isprivate {
         @func_args{qw(chartid supptables f)};
     
     my $table = "longdescs_$$chartid";
-    my $extra = "";
-    if (Bugzilla->params->{"insidergroup"}
-        && !Bugzilla->user->in_group(Bugzilla->params->{"insidergroup"}))
-    {
-        $extra = "AND $table.isprivate < 1";
-    }
+    my $extra = $self->{'user'}->is_insider ? "" : "AND $table.isprivate < 1";
     push(@$supptables, "LEFT JOIN longdescs AS $table " .
                       "ON $table.bug_id = bugs.bug_id $extra");
     $$f = "$table.isprivate";
@@ -1504,12 +1484,7 @@ sub _attach_data_thedata {
     
     my $atable = "attachments_$$chartid";
     my $dtable = "attachdata_$$chartid";
-    my $extra = "";
-    if (Bugzilla->params->{"insidergroup"} 
-        && !Bugzilla->user->in_group(Bugzilla->params->{"insidergroup"})) 
-    {
-        $extra = "AND $atable.isprivate = 0";
-    }
+    my $extra = $self->{'user'}->is_insider ? "" : "AND $atable.isprivate = 0";
     push(@$supptables, "INNER JOIN attachments AS $atable " .
                        "ON bugs.bug_id = $atable.bug_id $extra");
     push(@$supptables, "INNER JOIN attach_data AS $dtable " .
@@ -1524,12 +1499,7 @@ sub _attachments_submitter {
         @func_args{qw(chartid supptables f)};
     
     my $atable = "map_attachment_submitter_$$chartid";
-    my $extra = "";
-    if (Bugzilla->params->{"insidergroup"}
-        && !Bugzilla->user->in_group(Bugzilla->params->{"insidergroup"}))
-    {
-        $extra = "AND $atable.isprivate = 0";
-    }
+    my $extra = $self->{'user'}->is_insider ? "" : "AND $atable.isprivate = 0";
     push(@$supptables, "INNER JOIN attachments AS $atable " .
                        "ON bugs.bug_id = $atable.bug_id $extra");
     push(@$supptables, "LEFT JOIN profiles AS attachers_$$chartid " .
@@ -1545,12 +1515,7 @@ sub _attachments {
     my $dbh = Bugzilla->dbh;
     
     my $table = "attachments_$$chartid";
-    my $extra = "";
-    if (Bugzilla->params->{"insidergroup"} 
-        && !Bugzilla->user->in_group(Bugzilla->params->{"insidergroup"})) 
-    {
-        $extra = "AND $table.isprivate = 0";
-    }
+    my $extra = $self->{'user'}->is_insider ? "" : "AND $table.isprivate = 0";
     push(@$supptables, "INNER JOIN attachments AS $table " .
                        "ON bugs.bug_id = $table.bug_id $extra");
     $$f =~ m/^attachments\.(.*)$/;

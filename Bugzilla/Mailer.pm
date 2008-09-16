@@ -57,6 +57,18 @@ sub MessageToMTA {
     return if $method eq 'None';
 
     my $email = ref($msg) ? $msg : Email::MIME->new($msg);
+
+    # We add this header to uniquely identify all email that we
+    # send as coming from this Bugzilla installation.
+    #
+    # We don't use correct_urlbase, because we want this URL to
+    # *always* be the same for this Bugzilla, in every email,
+    # and some emails we send when we're logged out (in which case
+    # some emails might get urlbase while the logged-in emails might 
+    # get sslbase). Also, we want this to stay the same even if
+    # the admin changes the "ssl" parameter.
+    $email->header_set('X-Bugzilla-URL', Bugzilla->params->{'urlbase'});
+
     $email->walk_parts(sub {
         my ($part) = @_;
         return if $part->parts > 1; # Top-level

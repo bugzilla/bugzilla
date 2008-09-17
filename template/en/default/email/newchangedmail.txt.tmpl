@@ -23,7 +23,7 @@ From: [% Param('mailfrom') %]
 To: [% to %]
 Subject: [[% terms.Bug %] [%+ bugid %]] [% 'New: ' IF isnew %][%+ summary %]
 X-Bugzilla-Reason: [% reasonsheader %]
-X-Bugzilla-Type: newchanged
+X-Bugzilla-Type: [% isnew ? 'new' : 'changed' %]
 X-Bugzilla-Watch-Reason: [% reasonswatchheader %]
 [% IF Param('useclassification') %]
 X-Bugzilla-Classification: [% classification %]

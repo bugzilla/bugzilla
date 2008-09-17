@@ -1430,14 +1430,18 @@ sub wants_bug_mail {
         }
     }
 
-    # You role is new if the bug itself is.
-    # Only makes sense for the assignee, QA contact and the CC list.
-    if ($bug_is_new
-        && ($relationship == REL_ASSIGNEE
+    if ($bug_is_new) {
+        # Notify about new bugs.
+        $events{+EVT_BUG_CREATED} = 1;
+
+        # You role is new if the bug itself is.
+        # Only makes sense for the assignee, QA contact and the CC list.
+        if ($relationship == REL_ASSIGNEE
             || $relationship == REL_QA
-            || $relationship == REL_CC))
-    {
-        $events{+EVT_ADDED_REMOVED} = 1;
+            || $relationship == REL_CC)
+        {
+            $events{+EVT_ADDED_REMOVED} = 1;
+        }
     }
 
     if ($commentField =~ /Created an attachment \(/) {

@@ -119,6 +119,8 @@ document.write('<input type="button" value="Disable All Mail" onclick="SetCheckb
 [% events = [
     { id = constants.EVT_ADDED_REMOVED,
       description = "I'm added to or removed from this capacity" },
+    { id = constants.EVT_BUG_CREATED,
+      description = "A new $terms.bug is created" },
     { id = constants.EVT_OPENED_CLOSED,
       description = "The $terms.bug is resolved or reopened" },
     { id = constants.EVT_PROJ_MANAGEMENT,

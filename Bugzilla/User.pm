@@ -775,15 +775,15 @@ sub can_request_flag {
     my ($self, $flag_type) = @_;
 
     return ($self->can_set_flag($flag_type)
-            || !$flag_type->request_group
-            || $self->in_group_id($flag_type->request_group->id)) ? 1 : 0;
+            || !$flag_type->request_group_id
+            || $self->in_group_id($flag_type->request_group_id)) ? 1 : 0;
 }
 
 sub can_set_flag {
     my ($self, $flag_type) = @_;
 
-    return (!$flag_type->grant_group
-            || $self->in_group_id($flag_type->grant_group->id)) ? 1 : 0;
+    return (!$flag_type->grant_group_id
+            || $self->in_group_id($flag_type->grant_group_id)) ? 1 : 0;
 }
 
 sub direct_group_membership {

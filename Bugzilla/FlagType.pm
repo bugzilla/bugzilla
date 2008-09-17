@@ -177,6 +177,8 @@ sub is_requestable   { return $_[0]->{'is_requestable'};   }
 sub is_requesteeble  { return $_[0]->{'is_requesteeble'};  }
 sub is_multiplicable { return $_[0]->{'is_multiplicable'}; }
 sub sortkey          { return $_[0]->{'sortkey'};          }
+sub request_group_id { return $_[0]->{'request_group_id'}; }
+sub grant_group_id   { return $_[0]->{'grant_group_id'};   }
 
 ###############################
 ####       Methods         ####

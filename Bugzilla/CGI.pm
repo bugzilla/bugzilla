@@ -144,8 +144,47 @@ sub clean_search_url {
 
     # Delete certain parameters if the associated parameter is empty.
     $self->delete('bugidtype')  if !$self->param('bug_id');
-    $self->delete('emailtype1') if !$self->param('email1');
-    $self->delete('emailtype2') if !$self->param('email2');
+
+    foreach my $num (1,2) {
+        # If there's no value in the email field, delete the related fields.
+        if (!$self->param("email$num")) {
+            foreach my $field qw(type assigned_to reporter qa_contact
+                                 cc longdesc) 
+            {
+                $self->delete("email$field$num");
+            }
+        }
+    }
+
+    # chfieldto is set to "Now" by default in query.cgi. But if none
+    # of the other chfield parameters are set, it's meaningless.
+    if (!defined $self->param('chfieldfrom') && !$self->param('chfield')
+        && !defined $self->param('chfieldvalue'))
+    {
+        $self->delete('chfieldto');
+    }
+
+    # cmdtype "doit" is the default from query.cgi, but it's only meaningful
+    # if there's a remtype parameter.
+    if (defined $self->param('cmdtype') && $self->param('cmdtype') eq 'doit'
+        && !defined $self->param('remtype'))
+    {
+        $self->delete('cmdtype');
+    }
+
+    # "Reuse same sort as last time" is actually the default, so we don't
+    # need it in the URL.
+    if ($self->param('order') 
+        && $self->param('order') eq 'Reuse same sort as last time')
+    {
+        $self->delete('order');
+    }
+
+    # And now finally, if query_format is our only parameter, that
+    # really means we have no parameters, so we should delete query_format.
+    if ($self->param('query_format') && scalar($self->param()) == 1) {
+        $self->delete('query_format');
+    }
 }
 
 # Overwrite to ensure nph doesn't get set, and unset HEADERS_ONCE

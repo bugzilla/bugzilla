@@ -340,7 +340,7 @@ function handleWantsAttachment(wants_attachment) {
          name => "assigned_to"
          value => assigned_to
          disabled => assigned_to_disabled
-         size => 32
+         size => 30
          emptyok => 1
        %]
       <noscript>(Leave blank to assign to component's default assignee)</noscript>
@@ -355,7 +355,7 @@ function handleWantsAttachment(wants_attachment) {
          name => "qa_contact"
          value => qa_contact
          disabled => qa_contact_disabled
-         size => 32
+         size => 30
          emptyok => 1
        %]
         <noscript>(Leave blank to assign to default qa contact)</noscript>
@@ -370,7 +370,7 @@ function handleWantsAttachment(wants_attachment) {
          name => "cc"
          value => cc
          disabled => cc_disabled
-         size => 45
+         size => 30
          multiple => 5
        %]
     </td>
@@ -424,7 +424,7 @@ function handleWantsAttachment(wants_attachment) {
   <tr>
     <th>URL:</th>
     <td colspan="2">
-      <input name="bug_file_loc" size="60"
+      <input name="bug_file_loc" size="40"
              value="[% bug_file_loc FILTER html %]">
     </td>
   </tr>
@@ -443,11 +443,10 @@ function handleWantsAttachment(wants_attachment) {
 
   <tr>
     <th>Summary:</th>
-    <td colspan="2">
-      <input name="short_desc" size="60" value="[% short_desc FILTER html %]"
+    <td colspan="3">
+      <input name="short_desc" size="70" value="[% short_desc FILTER html %]"
              maxlength="255" spellcheck="true">
     </td>
-    <td>&nbsp;</td>
   </tr>
 
   <tr>
@@ -531,7 +530,7 @@ function handleWantsAttachment(wants_attachment) {
       <tr>
         <th><a href="describekeywords.cgi">Keywords</a>:</th>
         <td colspan="3">
-          <input id="keywords" name="keywords" size="60" 
+          <input id="keywords" name="keywords" size="40"
                  value="[% keywords FILTER html %]"> (optional)
         </td>
       </tr>

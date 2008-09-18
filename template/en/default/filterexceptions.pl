@@ -301,7 +301,6 @@
   '" colspan=\"$colspan\"" IF colspan',
   '" size=\"$size\"" IF size',
   '" maxlength=\"$maxlength\"" IF maxlength',
-  '" onfocus=\"$onfocus\"" IF onfocus',
   'flag.status',
   '" spellcheck=\"$spellcheck\"" IF spellcheck',
 ],

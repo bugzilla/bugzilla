@@ -1200,7 +1200,6 @@ if ($dotweak && scalar @bugs) {
                                         object => 'multiple_bugs'});
     }
     $vars->{'dotweak'} = 1;
-    $vars->{'valid_keywords'} = [map($_->name, Bugzilla::Keyword->get_all)];
     $vars->{'use_keywords'} = 1 if Bugzilla::Keyword::keyword_count();
 
     $vars->{'products'} = Bugzilla->user->get_enterable_products;

@@ -1,5 +1,5 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"> -->
-<!-- $Id: installation.xml,v 1.160 2008/09/05 22:08:15 lpsolit%gmail.com Exp $ -->
+<!-- $Id: installation.xml,v 1.161 2008/09/18 22:31:55 lpsolit%gmail.com Exp $ -->
 <chapter id="installing-bugzilla">
   <title>Installing Bugzilla</title>
 
@@ -88,7 +88,7 @@
     <section id="install-perl">
       <title>Perl</title>
 
-      <para>Installed Version Test: <filename>perl -v</filename></para>
+      <para>Installed Version Test: <programlisting>perl -v</programlisting></para>
       
       <para>Any machine that doesn't have Perl on it is a sad machine indeed.
       If you don't have it and your OS doesn't provide official packages, 
@@ -101,13 +101,14 @@
     <section id="install-database">
       <title>Database Engine</title>
       
-      <para>From Bugzilla 2.20, support is included for using both the MySQL and
-      PostgreSQL database servers. You only require one of these systems to make
-      use of Bugzilla.</para>
+      <para>
+        Bugzilla supports MySQL, PostgreSQL and Oracle as database servers.
+        You only require one of these systems to make use of Bugzilla.
+      </para>
 
       <section id="install-mysql">
           <title>MySQL</title>
-          <para>Installed Version Test: <filename>mysql -V</filename></para>
+          <para>Installed Version Test: <programlisting>mysql -V</programlisting></para>
       
           <para>
           If you don't have it and your OS doesn't provide official packages, 
@@ -134,7 +135,7 @@
       
       <section id="install-pg">
           <title>PostgreSQL</title>
-          <para>Installed Version Test: <filename>psql -V</filename></para>
+          <para>Installed Version Test: <programlisting>psql -V</programlisting></para>
       
           <para>
           If you don't have it and your OS doesn't provide official packages, 
@@ -148,7 +149,27 @@
           PostgreSQL server is started when the machine boots.
           </para>
       </section>
-      
+
+      <section id="install-oracle">
+        <title>Oracle</title>
+        <para>
+          Installed Version Test: <programlisting>select * from v$version</programlisting>
+          (you first have to log in into your DB)
+        </para>
+
+        <para>
+          If you don't have it and your OS doesn't provide official packages,
+          visit <ulink url="http://www.oracle.com/"/>. You need Oracle
+          version &min-oracle-ver; or higher.
+        </para>
+
+        <para>
+          If you install from something other than a packaging/installation
+          system, such as .rpm (Redhat Package), .deb (Debian Package), .exe
+          (Windows Executable), or .msi (Microsoft Installer), make sure the
+          Oracle server is started when the machine boots.
+        </para>
+      </section>
     </section>
     
     <section id="install-webserver">
@@ -312,6 +333,12 @@
         <listitem>
           <para>
             DBD::Pg (&min-dbd-pg-ver;) if using PostgreSQL
+          </para>
+        </listitem>
+
+        <listitem>
+          <para>
+            DBD::Oracle (&min-dbd-oracle-ver;) if using Oracle
           </para>
         </listitem>
 
@@ -682,12 +709,21 @@
       </para>
       
       <para>
-        Load this file in your editor. The only value you 
-        <emphasis>need</emphasis> to change is $db_pass, the password for
+        Load this file in your editor. The only two values you
+        <emphasis>need</emphasis> to change are $db_driver and $db_pass,
+        respectively the type of the database and the password for
         the user you will create for your database. Pick a strong
         password (for simplicity, it should not contain single quote
-        characters) and put it here.
+        characters) and put it here. $db_driver can be either 'mysql',
+        'Pg' or 'oracle'.
       </para>
+
+      <note>
+        <para>
+          In Oracle, <literal>$db_name</literal> should actually be 
+          the SID name of your database (e.g. "XE" if you are using Oracle XE).
+        </para>
+      </note>
 
       <para>
         You may need to change the value of 
@@ -713,16 +749,8 @@
       <para>
         The other options in the <filename>localconfig</filename> file
         are documented by their accompanying comments. If you have a slightly
-        non-standard MySQL setup, you may wish to change one or more of
-        the other "$db_*" parameters. 
-      </para>
-      
-      <para>
-        You may also wish to change the names of 
-        the priorities, severities, operating systems and platforms for your
-        installation. However, you can always change these after installation
-        has finished; if you then re-run <filename>checksetup.pl</filename>,
-        the changes will get picked up.
+        non-standard database setup, you may wish to change one or more of
+        the other "$db_*" parameters.
       </para>
     </section>
     
@@ -730,8 +758,9 @@
       <title>Database Server</title>
       <para>
         This section deals with configuring your database server for use
-        with Bugzilla. Currently, MySQL (<xref linkend="mysql"/>) and
-        PostgreSQL (<xref linkend="postgresql"/>) are available.
+        with Bugzilla. Currently, MySQL (<xref linkend="mysql"/>),
+        PostgreSQL (<xref linkend="postgresql"/>) and Oracle (<xref linkend="oracle"/>)
+        are available.
       </para>
 
       <section id="database-schema">
@@ -838,14 +867,15 @@
             Run the <filename>mysql</filename> command-line client and enter:
           </para>
 
-          <screen>  <prompt>mysql&gt;</prompt> GRANT SELECT, INSERT,
+          <screen>
+    <prompt>mysql&gt;</prompt> GRANT SELECT, INSERT,
            UPDATE, DELETE, INDEX, ALTER, CREATE, LOCK TABLES,
            CREATE TEMPORARY TABLES, DROP, REFERENCES ON bugs.*
            TO bugs@localhost IDENTIFIED BY '<replaceable>$db_pass</replaceable>';
-           <prompt>mysql&gt;</prompt> FLUSH PRIVILEGES;</screen>
+    <prompt>mysql&gt;</prompt> FLUSH PRIVILEGES;
+          </screen>
+        </section>
 
-        </section>      
-        
         <section>
           <title>Permit attachments table to grow beyond 4GB</title>
 
@@ -864,9 +894,9 @@
           </para>
 
           <screen>
-            <prompt>mysql&gt;</prompt> use <replaceable>$bugs_db</replaceable>
-            <prompt>mysql&gt;</prompt> ALTER TABLE attachments 
-            AVG_ROW_LENGTH=1000000, MAX_ROWS=20000;
+    <prompt>mysql&gt;</prompt> use <replaceable>$bugs_db</replaceable>
+    <prompt>mysql&gt;</prompt> ALTER TABLE attachments
+           AVG_ROW_LENGTH=1000000, MAX_ROWS=20000;
           </screen>
 
           <para>
@@ -934,6 +964,77 @@
           the <literal>$db_driver</literal> variable and setting it to
           <literal>Pg</literal> and changing the password in <literal>$db_pass</literal>
           to the one you picked previously, while setting up the account.</para> 
+        </section>
+      </section>
+
+      <section id="oracle">
+        <title>Oracle</title>
+        <section>
+          <title>Create a New Tablespace</title>
+
+          <para>
+            You can use the existing tablespace or create a new one for Bugzilla.
+            To create a new tablespace, run the following command:
+          </para>
+
+          <programlisting>
+    CREATE TABLESPACE bugs
+    DATAFILE '<replaceable>$path_to_datafile</replaceable>' SIZE 500M
+    AUTOEXTEND ON NEXT 30M MAXSIZE UNLIMITED
+          </programlisting>
+
+          <para>
+            Here, the name of the tablespace is 'bugs', but you can
+            choose another name. <replaceable>$path_to_datafile</replaceable> is
+            the path to the file containing your database, for instance
+            <filename>/u01/oradata/bugzilla.dbf</filename>.
+            The initial size of the database file is set in this example to 500 Mb,
+            with an increment of 30 Mb everytime we reach the size limit of the file.
+          </para>
+        </section>
+
+        <section>
+          <title>Add a User to Oracle</title>
+
+          <para>
+            The user name and password must match what you set in
+            <filename>localconfig</filename> (<literal>$db_user</literal>
+            and <literal>$db_pass</literal>, respectively). Here, we assume that
+            the user name is 'bugs' and the tablespace name is the same
+            as above. 
+          </para>
+
+          <programlisting>
+    CREATE USER bugs
+    IDENTIFIED BY "<replaceable>$db_pass</replaceable>"
+    DEFAULT TABLESPACE bugs
+    TEMPORARY TABLESPACE TEMP
+    PROFILE DEFAULT;
+    -- GRANT/REVOKE ROLE PRIVILEGES
+    GRANT CONNECT TO bugs;
+    GRANT RESOURCE TO bugs;
+    -- GRANT/REVOKE SYSTEM PRIVILEGES
+    GRANT UNLIMITED TABLESPACE TO bugs;
+    GRANT EXECUTE ON CTXSYS.CTX_DDL TO bugs;
+          </programlisting>
+        </section>
+
+        <section>
+          <title>Configure the Web Server</title>
+
+          <para>
+            If you use Apache, append these lines to <filename>httpd.conf</filename>
+            to set ORACLE_HOME and LD_LIBRARY_PATH. For instance:
+          </para>
+
+          <programlisting>
+    SetEnv ORACLE_HOME /u01/app/oracle/product/10.2.0/
+    SetEnv LD_LIBRARY_PATH /u01/app/oracle/product/10.2.0/lib/
+          </programlisting>
+
+          <para>
+            When this is done, restart your web server.
+          </para>
         </section>
       </section>
     </section>  

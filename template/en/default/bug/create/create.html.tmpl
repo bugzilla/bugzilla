@@ -197,7 +197,7 @@ function handleWantsAttachment(wants_attachment) {
       Component</a>:
     </th>
     <td>
-      <select name="component" onchange="set_assign_to();" size="5">
+      <select name="component" onchange="set_assign_to();" size="7">
         [%- FOREACH c = product.components %]
           <option value="[% c.name FILTER html %]"
             [% " selected=\"selected\"" IF c.name == default.component_ %]>

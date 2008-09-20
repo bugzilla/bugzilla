@@ -114,6 +114,10 @@
     The user account [% otheruser.login FILTER html %] has been deleted
     successfully.
 
+  [% ELSIF message_tag == "account_disabled" %]
+    The user account [% account FILTER html %] is disabled, so you
+    cannot change its password.
+
   [% ELSIF message_tag == "attachment_creation_failed" %]
     The [% terms.bug %] was created successfully, but attachment creation
     failed.

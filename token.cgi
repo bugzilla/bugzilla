@@ -111,6 +111,12 @@ if ( $action eq 'reqpw' ) {
         || ThrowUserError('illegal_email_address', {addr => $login_name});
 
     $user_account = Bugzilla::User->check($login_name);
+
+    # Make sure the user account is active.
+    if ($user_account->is_disabled) {
+        ThrowUserError('account_disabled',
+                       {disabled_reason => get_text('account_disabled', {account => $login_name})});
+    }
 }
 
 # If the user is changing their password, make sure they submitted a new

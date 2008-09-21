@@ -138,7 +138,13 @@ sub init_page {
 
         # For security reasons, log out users when Bugzilla is down.
         # Bugzilla->login() is required to catch the logincookie, if any.
-        my $user = Bugzilla->login(LOGIN_OPTIONAL);
+        my $user;
+        eval { $user = Bugzilla->login(LOGIN_OPTIONAL); };
+        if ($@) {
+            # The DB is not accessible. Use the default user object.
+            $user = Bugzilla->user;
+            $user->{settings} = {};
+        }
         my $userid = $user->id;
         Bugzilla->logout();
 

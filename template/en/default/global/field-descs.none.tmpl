@@ -91,10 +91,12 @@
     database. If you want to override this for your language
     or your installation, just use a hook. %]
 
-[% USE Bugzilla %]
-[% FOREACH bz_field = Bugzilla.get_fields() %]
-  [% SET field_descs.${bz_field.name} = bz_field.description
-     IF !field_descs.${bz_field.name}.defined %]
+[% UNLESS Param('shutdownhtml') %]
+  [% USE Bugzilla %]
+  [% FOREACH bz_field = Bugzilla.get_fields() %]
+    [% SET field_descs.${bz_field.name} = bz_field.description
+       IF !field_descs.${bz_field.name}.defined %]
+  [% END %]
 [% END %]
 
 [% field_types = { ${constants.FIELD_TYPE_UNKNOWN}       => "Unknown Type",

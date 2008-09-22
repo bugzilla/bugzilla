@@ -296,6 +296,8 @@ sub check {
     my $class = shift;
     my ($id, $field) = @_;
 
+    ThrowUserError('improper_bug_id_field_value', { field => $field }) unless defined $id;
+
     # Bugzilla::Bug throws lots of special errors, so we don't call
     # SUPER::check, we just call our new and do our own checks.
     my $self = $class->new(trim($id));

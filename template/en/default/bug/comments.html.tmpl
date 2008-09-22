@@ -168,8 +168,7 @@
           [% comment_link FILTER html %]</a> From
         <span class="vcard">
           <a class="fn email" href="mailto:[% comment.author.email FILTER html %]">
-            [% (comment.author.name || comment.author.login) FILTER html %]
-          </a>
+            [% (comment.author.name || comment.author.login) FILTER html %]</a>
         </span>
         [% FOREACH group = comment.author.direct_group_membership %]
           [% NEXT UNLESS group.icon_url %]

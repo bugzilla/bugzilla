@@ -68,6 +68,10 @@ sub MessageToMTA {
     # get sslbase). Also, we want this to stay the same even if
     # the admin changes the "ssl" parameter.
     $email->header_set('X-Bugzilla-URL', Bugzilla->params->{'urlbase'});
+    
+    # We add this header to mark the mail as "auto-generated" and
+    # thus to hopefully avoid auto replies.
+    $email->header_set('Auto-Submitted', 'auto-generated');
 
     $email->walk_parts(sub {
         my ($part) = @_;

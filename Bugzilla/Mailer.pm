@@ -57,6 +57,11 @@ sub MessageToMTA {
     return if $method eq 'None';
 
     my $email = ref($msg) ? $msg : Email::MIME->new($msg);
+
+    # We add this header to mark the mail as "auto-generated" and
+    # thus to hopefully avoid auto replies.
+    $email->header_set('Auto-Submitted', 'auto-generated');
+
     $email->walk_parts(sub {
         my ($part) = @_;
         return if $part->parts > 1; # Top-level

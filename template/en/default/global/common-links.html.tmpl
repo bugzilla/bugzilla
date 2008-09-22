@@ -119,7 +119,7 @@
 </ul>
 
 [% BLOCK link_to_documentation %]
-    [% IF doc_section %]
+    [% IF doc_section && Param('docs_urlbase') %]
       <li>
         <span class="separator">| </span>
         <a href="[% docs_urlbase _ doc_section FILTER html %]" target="_blank">Help</a>

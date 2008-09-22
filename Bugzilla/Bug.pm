@@ -2003,6 +2003,8 @@ sub ValidateBugID {
     my $dbh = Bugzilla->dbh;
     my $user = Bugzilla->user;
 
+    ThrowUserError('invalid_bug_id_or_alias', { field => $field }) unless defined $id;
+
     # Get rid of leading '#' (number) mark, if present.
     $id =~ s/^\s*#//;
     # Remove whitespace

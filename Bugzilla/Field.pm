@@ -73,9 +73,10 @@ use strict;
 use base qw(Exporter Bugzilla::Object);
 @Bugzilla::Field::EXPORT = qw(check_field get_field_id get_legal_field_values);
 
-use Bugzilla::Util;
 use Bugzilla::Constants;
 use Bugzilla::Error;
+use Bugzilla::Field::Choice;
+use Bugzilla::Util;
 
 ###############################
 ####    Initialization     ####
@@ -364,7 +365,8 @@ sub enter_bug { return $_[0]->{enter_bug} }
 
 =item C<legal_values>
 
-A reference to an array with valid active values for this field.
+Valid values for this field, as an array of L<Bugzilla::Field::Choice>
+objects.
 
 =back
 
@@ -374,7 +376,8 @@ sub legal_values {
     my $self = shift;
 
     if (!defined $self->{'legal_values'}) {
-        $self->{'legal_values'} = get_legal_field_values($self->name);
+        my @values = Bugzilla::Field::Choice->get_all({ field => $self });
+        $self->{'legal_values'} = \@values;
     }
     return $self->{'legal_values'};
 }

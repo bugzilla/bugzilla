@@ -100,9 +100,10 @@
             </option>
           [% END %]
           [% FOREACH legal_value = field.legal_values %]
-            <option value="[% legal_value FILTER html %]"
-                [%- " selected=\"selected\"" IF value.contains(legal_value).size %]>
-                [%- legal_value FILTER html %]</option>
+            <option value="[% legal_value.name FILTER html %]"
+                [%- " selected=\"selected\"" 
+                    IF value.contains(legal_value.name).size %]>
+                [%- legal_value.name FILTER html %]</option>
           [% END %]
         </select>
         [%# When you pass an empty multi-select in the web interface,

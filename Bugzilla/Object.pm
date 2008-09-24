@@ -63,7 +63,10 @@ sub _init {
     my $name_field = $class->NAME_FIELD;
     my $id_field   = $class->ID_FIELD;
 
-    my $id = $param unless (ref $param eq 'HASH');
+    my $id = $param;
+    if (ref $param eq 'HASH') {
+        $id = $param->{id};
+    }
     my $object;
 
     if (defined $id) {
@@ -511,7 +514,9 @@ as the value in the L</ID_FIELD> column).
 
 If you pass in a hashref, you can pass a C<name> key. The 
 value of the C<name> key is the case-insensitive name of the object 
-(from L</NAME_FIELD>) in the DB.
+(from L</NAME_FIELD>) in the DB. You can also pass in an C<id> key
+which will be interpreted as the id of the object you want (overriding the 
+C<name> key).
 
 B<Additional Parameters Available for Subclasses>
 

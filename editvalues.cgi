@@ -265,58 +265,10 @@ if ($action eq 'del') {
 #
 if ($action eq 'delete') {
     check_token_data($token, 'delete_field_value');
-    ValueMustExist($field, $value);
+    my $value_obj = Bugzilla::Field::Choice->type($field)->check($value);
+    $vars->{'value'} = $value_obj->name;
+    $value_obj->remove_from_db();
 
-    $vars->{'value'} = $value;
-    $vars->{'param_name'} = $defaults{$field};
-
-    if (defined $defaults{$field}
-        && ($value eq Bugzilla->params->{$defaults{$field}}))
-    {
-        ThrowUserError('fieldvalue_is_default', $vars);
-    }
-    # If the value cannot be deleted, throw an error.
-    if (lsearch($static{$field}, $value) >= 0) {
-        ThrowUserError('fieldvalue_not_deletable', $vars);
-    }
-
-    trick_taint($value);
-
-    $dbh->bz_start_transaction();
-
-    # Check if there are any bugs that still have this value.
-    my $bug_count;
-    if ($field_obj->type != FIELD_TYPE_MULTI_SELECT) {
-        $bug_count =
-            $dbh->selectrow_array("SELECT COUNT(*) FROM bugs WHERE $field = ?",
-                                  undef, $value);
-    }
-    else {
-        $bug_count =
-            $dbh->selectrow_array("SELECT COUNT(*) FROM bug_$field WHERE value = ?",
-                                  undef, $value);
-    }
-
-
-    if ($bug_count) {
-        # You tried to delete a field that bugs are still using.
-        # You can't just delete the bugs. That's ridiculous. 
-        ThrowUserError("fieldvalue_still_has_bugs", 
-                       { field => $field, value => $value,
-                         count => $bug_count });
-    }
-
-    if ($field eq 'bug_status') {
-        my $status_id = $dbh->selectrow_arrayref('SELECT id FROM bug_status
-                                                  WHERE value = ?', undef, $value);
-        $dbh->do('DELETE FROM status_workflow
-                  WHERE old_status = ? OR new_status = ?',
-                  undef, ($status_id, $status_id));
-    }
-
-    $dbh->do("DELETE FROM $field WHERE value = ?", undef, $value);
-
-    $dbh->bz_commit_transaction();
     delete_token($token);
 
     $vars->{'message'} = 'field_value_deleted';

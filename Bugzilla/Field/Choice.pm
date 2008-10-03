@@ -170,12 +170,52 @@ sub update {
     return $changes;
 }
 
+sub remove_from_db {
+    my $self = shift;
+    if ($self->is_default) {
+        ThrowUserError('fieldvalue_is_default',
+                       { field => $self->field, value => $self->name,
+                         param_name => $self->DEFAULT_MAP->{$self->field->name},
+                       });
+    }
+    if ($self->is_static) {
+        ThrowUserError('fieldvalue_not_deletable', 
+                       { field => $self->field, value => $self->name });
+    }
+    if ($self->bug_count) {
+        ThrowUserError("fieldvalue_still_has_bugs",
+                       { field => $self->field, value => $self->name,
+                         count => $self->bug_count });
+    }
+    $self->SUPER::remove_from_db();
+}
+
 
 #############
 # Accessors #
 #############
 
 sub sortkey { return $_[0]->{'sortkey'}; }
+
+sub bug_count {
+    my $self = shift;
+    return $self->{bug_count} if defined $self->{bug_count};
+    my $dbh = Bugzilla->dbh;
+    my $fname = $self->field->name;
+    my $count;
+    if ($self->field->type == FIELD_TYPE_MULTI_SELECT) {
+        $count = $dbh->selectrow_array("SELECT COUNT(*) FROM bug_$fname
+                                         WHERE value = ?", undef, $self->name);
+    }
+    else {
+        $count = $dbh->selectrow_array("SELECT COUNT(*) FROM bugs 
+                                         WHERE $fname = ?",
+                                       undef, $self->name);
+    }
+    $self->{bug_count} = $count;
+    return $count;
+}
+
 sub field {
     my $invocant = shift;
     my $class = ref $invocant || $invocant;

@@ -290,6 +290,15 @@ sub update {
     return \%changes;
 }
 
+sub remove_from_db {
+    my $self = shift;
+    my $table = $self->DB_TABLE;
+    my $id_field = $self->ID_FIELD;
+    Bugzilla->dbh->do("DELETE FROM $table WHERE $id_field = ?",
+                      undef, $self->id);
+    undef $self;
+}
+
 ###############################
 ####      Subroutines    ######
 ###############################
@@ -725,6 +734,12 @@ is mostly useful to subclasses of C<Bugzilla::Object> that are implementing
 C<update>.)
 
 =back
+
+=item C<remove_from_db>
+
+Removes this object from the database. Will throw an error if you can't
+remove it for some reason. The object will then be destroyed, as it is
+not safe to use the object after it has been removed from the database.
 
 =back
 

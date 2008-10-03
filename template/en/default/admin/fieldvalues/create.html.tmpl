@@ -34,8 +34,10 @@
   <table border="0" cellpadding="4" cellspacing="0">
     <tr>
       <th align="right"><label for="value">Value:</label></th>
-      <td><input id="value" name="value" size="30"
-                  maxlength="[% constants.MAX_FIELD_VALUE_SIZE %]"></td>
+      <td>
+        <input id="value" name="value" size="30"
+               maxlength="[% constants.MAX_FIELD_VALUE_SIZE FILTER none %]">
+      </td>
     </tr>
     <tr>
       <th align="right"><label for="sortkey">Sortkey:</label></th>

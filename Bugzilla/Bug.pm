@@ -581,8 +581,7 @@ sub update {
     # inside this function.
     my $delta_ts = shift || $dbh->selectrow_array("SELECT NOW()");
 
-    my $old_bug = $self->new($self->id);
-    my $changes = $self->SUPER::update(@_);
+    my ($changes, $old_bug) = $self->SUPER::update(@_);
 
     # Certain items in $changes have to be fixed so that they hold
     # a name instead of an ID.

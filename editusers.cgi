@@ -238,7 +238,7 @@ if ($action eq 'search') {
 
     # Update profiles table entry; silently skip doing this if the user
     # is not authorized.
-    my %changes;
+    my $changes = {};
     if ($editusers) {
         $otherUser->set_login($cgi->param('login'));
         $otherUser->set_name($cgi->param('name'));
@@ -246,7 +246,7 @@ if ($action eq 'search') {
             if $cgi->param('password');
         $otherUser->set_disabledtext($cgi->param('disabledtext'));
         $otherUser->set_disable_mail($cgi->param('disable_mail'));
-        %changes = %{$otherUser->update()};
+        $changes = $otherUser->update();
     }
 
     # Update group settings.
@@ -334,7 +334,7 @@ if ($action eq 'search') {
     delete_token($token);
 
     $vars->{'message'} = 'account_updated';
-    $vars->{'changed_fields'} = [keys %changes];
+    $vars->{'changed_fields'} = [keys %$changes];
     $vars->{'groups_added_to'} = \@groupsAddedTo;
     $vars->{'groups_removed_from'} = \@groupsRemovedFrom;
     $vars->{'groups_granted_rights_to_bless'} = \@groupsGrantedRightsToBless;

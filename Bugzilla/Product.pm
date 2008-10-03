@@ -147,7 +147,7 @@ sub update {
 
     # Don't update the DB if something goes wrong below -> transaction.
     $dbh->bz_start_transaction();
-    my $changes = $self->SUPER::update(@_);
+    my ($changes, $old_self) = $self->SUPER::update(@_);
 
     # We also have to fix votes.
     my @msgs; # Will store emails to send to voters.
@@ -247,7 +247,7 @@ sub update {
         require Bugzilla::Bug;
         import Bugzilla::Bug qw(LogActivityEntry);
 
-        my $old_settings = $self->new($self->id)->group_controls;
+        my $old_settings = $old_self->group_controls;
         my $new_settings = $self->group_controls;
         my $timestamp = $dbh->selectrow_array('SELECT NOW()');
 

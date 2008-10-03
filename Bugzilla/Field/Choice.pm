@@ -24,6 +24,7 @@ package Bugzilla::Field::Choice;
 
 use base qw(Bugzilla::Object);
 
+use Bugzilla::Config qw(SetParam write_params);
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Field;
@@ -41,6 +42,11 @@ use constant DB_COLUMNS => qw(
     sortkey
 );
 
+use constant UPDATE_COLUMNS => qw(
+    value
+    sortkey
+);
+
 use constant NAME_FIELD => 'value';
 use constant LIST_ORDER => 'sortkey, value';
 
@@ -53,6 +59,13 @@ use constant VALIDATORS => {
 
 use constant CLASS_MAP => {
     bug_status => 'Bugzilla::Status',
+};
+
+use constant DEFAULT_MAP => {
+    op_sys       => 'defaultopsys',
+    rep_platform => 'defaultplatform',
+    priority     => 'defaultpriority',
+    bug_severity => 'defaultseverity',
 };
 
 #################
@@ -127,6 +140,37 @@ sub create {
     return $class->SUPER::create(@_);
 }
 
+sub update {
+    my $self = shift;
+    my $dbh = Bugzilla->dbh;
+    my $fname = $self->field->name;
+
+    $dbh->bz_start_transaction();
+
+    my ($changes, $old_self) = $self->SUPER::update(@_);
+    if (exists $changes->{value}) {
+        my ($old, $new) = @{ $changes->{value} };
+        if ($self->field->type == FIELD_TYPE_MULTI_SELECT) {
+            $dbh->do("UPDATE bug_$fname SET value = ? WHERE value = ?",
+                     undef, $new, $old);
+        }
+        else {
+            $dbh->do("UPDATE bugs SET $fname = ? WHERE $fname = ?",
+                     undef, $new, $old);
+        }
+
+        if ($old_self->is_default) {
+            my $param = $self->DEFAULT_MAP->{$self->field->name};
+            SetParam($param, $self->name);
+            write_params();
+        }
+    }
+
+    $dbh->bz_commit_transaction();
+    return $changes;
+}
+
+
 #############
 # Accessors #
 #############
@@ -143,6 +187,35 @@ sub field {
     return $cache->{"field_$class"};
 }
 
+sub is_default {
+    my $self = shift;
+    my $param_value = 
+        Bugzilla->params->{ $self->DEFAULT_MAP->{$self->field->name} };
+    return 0 if !defined $param_value;
+    return $self->name eq $param_value ? 1 : 0;
+}
+
+sub is_static {
+    my $self = shift;
+    # If we need to special-case Resolution for *anything* else, it should
+    # get its own subclass.
+    if ($self->field->name eq 'resolution') {
+        return grep($_ eq $self->name, ('', 'FIXED', 'MOVED', 'DUPLICATE'))
+               ? 1 : 0;
+    }
+    elsif ($self->field->custom) {
+        return $self->name eq '---' ? 1 : 0;
+    }
+    return 0;
+}
+
+############
+# Mutators #
+############
+
+sub set_name    { $_[0]->set('value', $_[1]);   }
+sub set_sortkey { $_[0]->set('sortkey', $_[1]); }
+
 ##############
 # Validators #
 ##############
@@ -153,12 +226,21 @@ sub _check_value {
     my $field = $invocant->field;
 
     $value = trim($value);
+
+    # Make sure people don't rename static values
+    if (blessed($invocant) && $value ne $invocant->name 
+        && $invocant->is_static) 
+    {
+        ThrowUserError('fieldvalue_not_editable',
+                       { field => $field, old_value => $invocant->name });
+    }
+
     ThrowUserError('fieldvalue_undefined') if !defined $value || $value eq "";
     ThrowUserError('fieldvalue_name_too_long', { value => $value })
         if length($value) > MAX_FIELD_VALUE_SIZE;
 
     my $exists = $invocant->type($field)->new({ name => $value });
-    if ($exists) {
+    if ($exists && (!blessed($invocant) || $invocant->id != $exists->id)) {
         ThrowUserError('fieldvalue_already_exists', 
                        { field => $field, value => $value });
     }

@@ -77,10 +77,18 @@ sub create {
 #####     Accessors        ####
 ###############################
 
-sub name      { return $_[0]->{'value'};    }
-sub sortkey   { return $_[0]->{'sortkey'};  }
 sub is_active { return $_[0]->{'isactive'}; }
 sub is_open   { return $_[0]->{'is_open'};  }
+
+sub is_static {
+    my $self = shift;
+    if ($self->name eq 'UNCONFIRMED'
+        || $self->name eq Bugzilla->params->{'duplicate_or_move_bug_status'}) 
+    {
+        return 1;
+    }
+    return 0;
+}
 
 ##############
 # Validators #

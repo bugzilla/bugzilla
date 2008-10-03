@@ -283,6 +283,10 @@ sub update {
 
     $dbh->bz_commit_transaction();
 
+    if (wantarray) {
+        return (\%changes, $old_self);
+    }
+
     return \%changes;
 }
 
@@ -703,6 +707,8 @@ updated, and they will only be updated if their values have changed.
 
 =item B<Returns>
 
+B<In scalar context:>
+
 A hashref showing what changed during the update. The keys are the column
 names from L</UPDATE_COLUMNS>. If a field was not changed, it will not be
 in the hash at all. If the field was changed, the key will point to an arrayref.
@@ -710,6 +716,13 @@ The first item of the arrayref will be the old value, and the second item
 will be the new value.
 
 If there were no changes, we return a reference to an empty hash.
+
+B<In array context:>
+
+Returns a list, where the first item is the above hashref. The second item
+is the object as it was in the database before update() was called. (This
+is mostly useful to subclasses of C<Bugzilla::Object> that are implementing
+C<update>.)
 
 =back
 

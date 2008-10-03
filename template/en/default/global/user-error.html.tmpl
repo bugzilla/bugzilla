@@ -457,7 +457,8 @@
   [% ELSIF error == "fieldvalue_not_editable" %]
     [% title = "Field Value Not Editable" %]
     The value '[% old_value FILTER html %]' cannot be renamed because
-    it plays some special role for the '[% field.description FILTER html %]' field.
+    it plays some special role for the '[% field.description FILTER html %]'
+    field.
 
   [% ELSIF error == "fieldvalue_not_deletable" %]
     [% title = "Field Value Not Deletable" %]
@@ -470,7 +471,7 @@
 
   [% ELSIF error == "fieldvalue_reserved_word" %]
     [% title = "Reserved Word Not Allowed" %]
-    You cannot use the '[% value FILTER html %]' value for the
+    You cannot use the value '[% value FILTER html %]' for the
     '[% field.description FILTER html %]' field. This value is used internally.
     Please choose another one.
 

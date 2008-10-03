@@ -314,20 +314,23 @@
 
   [% ELSIF message_tag == "field_value_updated" %]
     [% title = "Field Value Updated" %]
-    [% IF updated_value || updated_sortkey %]
-      Changes to the <em>[% value FILTER html %]</em> value of the
+    [% IF changes.keys.size %]
+      The <em>[% value FILTER html %]</em> value of the
       <em>[% field.description FILTER html %]</em>
-      (<em>[% field.name FILTER html %]</em>) field have been changed:
+      (<em>[% field.name FILTER html %]</em>) field has been changed:
       <ul>
-        [% IF updated_value %]
-          <li>Field value updated to <em>[% value FILTER html %]</em></li>
-          [% IF default_value_updated %]
-            (note that this value is the default for this field. All
-            references to the default value will now point to this new value)
-          [% END %]
+        [% IF changes.value %]
+          <li>Field value updated to 
+            <em>[% changes.value.1 FILTER html %]</em>.
+            [% IF value_obj.is_default %]
+              (Note that this value is the default for this field. All
+              references to the default value will now point to this new value.)
+            [% END %]
+          </li>
         [% END %]
-        [% IF updated_sortkey %]
-          <li>Field value sortkey updated to <em>[% sortkey FILTER html %]</em></li>
+        [% IF changes.sortkey %]
+          <li>Sortkey updated to 
+            <em>[% changes.sortkey.1 FILTER html %]</em>.</li>
         [% END %]
       </ul>
     [% ELSE %]

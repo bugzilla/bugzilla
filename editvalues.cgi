@@ -356,91 +356,15 @@ if ($action eq 'edit') {
 #
 if ($action eq 'update') {
     check_token_data($token, 'edit_field_value');
-    my $valueold   = trim($cgi->param('valueold')   || '');
-    my $sortkeyold = trim($cgi->param('sortkeyold') || '0');
-
-    ValueMustExist($field, $valueold);
-    trick_taint($valueold);
-
-    $vars->{'value'} = $value;
-    # If the value cannot be renamed, throw an error.
-    if (lsearch($static{$field}, $valueold) >= 0 && $value ne $valueold) {
-        $vars->{'old_value'} = $valueold;
-        ThrowUserError('fieldvalue_not_editable', $vars);
-    }
-
-    if (length($value) > 60) {
-        ThrowUserError('fieldvalue_name_too_long', $vars);
-    }
-
-    $dbh->bz_start_transaction();
-
-    # Need to store because detaint_natural() will delete this if
-    # invalid
-    my $stored_sortkey = $sortkey;
-    if ($sortkey != $sortkeyold) {
-
-        if (!detaint_natural($sortkey)) {
-            ThrowUserError('fieldvalue_sortkey_invalid',
-                           {'name' => $field,
-                            'sortkey' => $stored_sortkey});
-
-        }
-
-        $dbh->do("UPDATE $field SET sortkey = ? WHERE value = ?",
-                 undef, $sortkey, $valueold);
-
-        $vars->{'updated_sortkey'} = 1;
-        $vars->{'sortkey'} = $sortkey;
-    }
-
-    if ($value ne $valueold) {
-
-        unless ($value) {
-            ThrowUserError('fieldvalue_undefined');
-        }
-        if (ValueExists($field, $value)) {
-            ThrowUserError('fieldvalue_already_exists', $vars);
-        }
-        if ($field eq 'bug_status'
-            && (grep { lc($value) eq $_ } SPECIAL_STATUS_WORKFLOW_ACTIONS))
-        {
-            $vars->{'value'} = $value;
-            ThrowUserError('fieldvalue_reserved_word', $vars);
-        }
-        trick_taint($value);
-
-        if ($field_obj->type != FIELD_TYPE_MULTI_SELECT) {
-            $dbh->do("UPDATE bugs SET $field = ? WHERE $field = ?",
-                     undef, $value, $valueold);
-        }
-        else {
-            $dbh->do("UPDATE bug_$field SET value = ? WHERE value = ?",
-                     undef, $value, $valueold);
-        }
-
-        $dbh->do("UPDATE $field SET value = ? WHERE value = ?",
-                 undef, $value, $valueold);
-
-        $vars->{'updated_value'} = 1;
-    }
-
-    $dbh->bz_commit_transaction();
-
-    # If the old value was the default value for the field,
-    # update data/params accordingly.
-    # This update is done while tables are unlocked due to the
-    # annoying calls in Bugzilla/Config/Common.pm.
-    if (defined $defaults{$field}
-        && $value ne $valueold
-        && $valueold eq Bugzilla->params->{$defaults{$field}})
-    {
-        SetParam($defaults{$field}, $value);
-        write_params();
-        $vars->{'default_value_updated'} = 1;
-    }
+    $vars->{'value'} = $cgi->param('valueold');
+    my $value_obj = Bugzilla::Field::Choice->type($field_obj)
+                    ->check($cgi->param('valueold'));
+    $value_obj->set_name($value);
+    $value_obj->set_sortkey($sortkey);
+    $vars->{'changes'} = $value_obj->update();
     delete_token($token);
 
+    $vars->{'value_obj'} = $value_obj;
     $vars->{'message'} = 'field_value_updated';
     display_field_values();
 }

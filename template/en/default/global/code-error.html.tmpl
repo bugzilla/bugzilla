@@ -145,6 +145,12 @@
     in the database for '[% username FILTER html %]', but your
     account source says that '[% extern_user FILTER html %]' has that ID.
 
+  [% ELSIF error == "field_choice_must_use_type" %]
+    When you call a class method on <code>Bugzilla::Field::Choice</code>,
+    you must call <code>Bugzilla::Field::Choice-&gt;type('some_field')</code>
+    to generate the right class (you can't call class methods directly
+    on Bugzilla::Field::Choice).
+
   [% ELSIF error == "field_type_mismatch" %]
     Cannot seem to handle <code>[% field FILTER html %]</code>
     and <code>[% type FILTER html %]</code> together.

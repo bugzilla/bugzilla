@@ -22,12 +22,27 @@ use strict;
 
 package Bugzilla::Status;
 
-use base qw(Bugzilla::Object Exporter);
-@Bugzilla::Status::EXPORT = qw(BUG_STATE_OPEN is_open_state closed_bug_statuses);
+use Bugzilla::Error;
+
+use base qw(Bugzilla::Field::Choice Exporter);
+@Bugzilla::Status::EXPORT = qw(
+    BUG_STATE_OPEN
+    SPECIAL_STATUS_WORKFLOW_ACTIONS
+
+    is_open_state 
+    closed_bug_statuses
+);
 
 ################################
 #####   Initialization     #####
 ################################
+
+use constant SPECIAL_STATUS_WORKFLOW_ACTIONS => qw(
+    none
+    duplicate
+    change_resolution
+    clearresolution
+);
 
 use constant DB_TABLE => 'bug_status';
 
@@ -39,8 +54,24 @@ use constant DB_COLUMNS => qw(
     is_open
 );
 
-use constant NAME_FIELD => 'value';
-use constant LIST_ORDER => 'sortkey, value';
+sub VALIDATORS {
+    my $invocant = shift;
+    my $validators = $invocant->SUPER::VALIDATORS;
+    $validators->{is_open} = \&Bugzilla::Object::check_boolean;
+    $validators->{value} = \&_check_value;
+    return $validators;
+}
+
+#########################
+# Database Manipulation #
+#########################
+
+sub create {
+    my $class = shift;
+    my $self = $class->SUPER::create(@_);
+    add_missing_bug_status_transitions();
+    return $self;
+}
 
 ###############################
 #####     Accessors        ####
@@ -50,6 +81,22 @@ sub name      { return $_[0]->{'value'};    }
 sub sortkey   { return $_[0]->{'sortkey'};  }
 sub is_active { return $_[0]->{'isactive'}; }
 sub is_open   { return $_[0]->{'is_open'};  }
+
+##############
+# Validators #
+##############
+
+sub _check_value {
+    my $invocant = shift;
+    my $value = $invocant->SUPER::_check_value(@_);
+
+    if (grep { lc($value) eq lc($_) } SPECIAL_STATUS_WORKFLOW_ACTIONS) {
+        ThrowUserError('fieldvalue_reserved_word',
+                       { field => $invocant->field, value => $value });
+    }
+    return $value;
+}
+
 
 ###############################
 #####       Methods        ####

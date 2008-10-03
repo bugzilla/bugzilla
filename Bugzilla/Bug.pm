@@ -54,7 +54,6 @@ use base qw(Bugzilla::Object Exporter);
     RemoveVotes CheckIfVotedConfirmed
     LogActivityEntry
     editable_bug_fields
-    SPECIAL_STATUS_WORKFLOW_ACTIONS
 );
 
 #####################################################################
@@ -233,13 +232,6 @@ use constant MAX_LINE_LENGTH => 254;
 
 # Used in _check_comment(). Gives the max length allowed for a comment.
 use constant MAX_COMMENT_LENGTH => 65535;
-
-use constant SPECIAL_STATUS_WORKFLOW_ACTIONS => qw(
-    none
-    duplicate
-    change_resolution
-    clearresolution
-);
 
 #####################################################################
 

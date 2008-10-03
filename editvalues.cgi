@@ -29,7 +29,7 @@ use Bugzilla::Config qw(:admin);
 use Bugzilla::Token;
 use Bugzilla::Field;
 use Bugzilla::Bug;
-use Bugzilla::Status;
+use Bugzilla::Status qw(SPECIAL_STATUS_WORKFLOW_ACTIONS);
 
 # List of different tables that contain the changeable field values
 # (the old "enums.") Keep them in alphabetical order by their 
@@ -172,12 +172,8 @@ trick_taint($field);
 sub display_field_values {
     my $template = Bugzilla->template;
     my $field = $vars->{'field'}->name;
-    my $fieldvalues =
-      Bugzilla->dbh->selectall_arrayref("SELECT value AS name, sortkey"
-                                      . "  FROM $field ORDER BY sortkey, value",
-                                        {Slice =>{}});
 
-    $vars->{'values'} = $fieldvalues;
+    $vars->{'values'} = $vars->{'field'}->legal_values;
     $vars->{'default'} = Bugzilla->params->{$defaults{$field}} if defined $defaults{$field};
     $vars->{'static'} = $static{$field} if exists $static{$field};
 
@@ -212,53 +208,14 @@ if ($action eq 'add') {
 if ($action eq 'new') {
     check_token_data($token, 'add_field_value');
 
-    # Cleanups and validity checks
-    $value || ThrowUserError('fieldvalue_undefined');
-
-    if (length($value) > 60) {
-        ThrowUserError('fieldvalue_name_too_long',
-                       {'value' => $value});
-    }
-    # Need to store in case detaint_natural() clears the sortkey
-    my $stored_sortkey = $sortkey;
-    if (!detaint_natural($sortkey)) {
-        ThrowUserError('fieldvalue_sortkey_invalid',
-                       {'name' => $field,
-                        'sortkey' => $stored_sortkey});
-    }
-    if (ValueExists($field, $value)) {
-        ThrowUserError('fieldvalue_already_exists',
-                       {'field' => $field_obj,
-                        'value' => $value});
-    }
-    if ($field eq 'bug_status'
-        && (grep { lc($value) eq $_ } SPECIAL_STATUS_WORKFLOW_ACTIONS))
-    {
-        $vars->{'value'} = $value;
-        ThrowUserError('fieldvalue_reserved_word', $vars);
-    }
-
-    # Value is only used in a SELECT placeholder and through the HTML filter.
-    trick_taint($value);
-
-    # Add the new field value.
-    $dbh->do("INSERT INTO $field (value, sortkey) VALUES (?, ?)",
-             undef, ($value, $sortkey));
-
-    if ($field eq 'bug_status') {
-        unless ($cgi->param('is_open')) {
-            # The bug status is a closed state, but they are open by default.
-            $dbh->do('UPDATE bug_status SET is_open = 0 WHERE value = ?', undef, $value);
-        }
-        # Allow the transition from this new bug status to the one used
-        # by the 'duplicate_or_move_bug_status' parameter.
-        Bugzilla::Status::add_missing_bug_status_transitions();
-    }
+    my $created_value = Bugzilla::Field::Choice->type($field_obj)->create(
+        { value => $value, sortkey => $sortkey, 
+          is_open => scalar $cgi->param('is_open') });
 
     delete_token($token);
 
     $vars->{'message'} = 'field_value_created';
-    $vars->{'value'} = $value;
+    $vars->{'value'} = $created_value->name;
     display_field_values();
 }
 

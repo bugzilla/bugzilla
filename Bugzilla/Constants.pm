@@ -151,6 +151,7 @@ use File::Basename;
     MAX_PRODUCT_SIZE
     MAX_MILESTONE_SIZE
     MAX_COMPONENT_SIZE
+    MAX_FIELD_VALUE_SIZE
     MAX_FREETEXT_LENGTH
 );
 
@@ -426,6 +427,9 @@ use constant MAX_MILESTONE_SIZE => 20;
 
 # The longest component name allowed.
 use constant MAX_COMPONENT_SIZE => 64;
+
+# The maximum length for values of <select> fields.
+use constant MAX_FIELD_VALUE_SIZE => 64;
 
 # Maximum length allowed for free text fields.
 use constant MAX_FREETEXT_LENGTH => 255;

@@ -75,7 +75,6 @@ use base qw(Exporter Bugzilla::Object);
 
 use Bugzilla::Constants;
 use Bugzilla::Error;
-use Bugzilla::Field::Choice;
 use Bugzilla::Util;
 
 ###############################
@@ -376,7 +375,8 @@ sub legal_values {
     my $self = shift;
 
     if (!defined $self->{'legal_values'}) {
-        my @values = Bugzilla::Field::Choice->get_all({ field => $self });
+        require Bugzilla::Field::Choice;
+        my @values = Bugzilla::Field::Choice->type($self)->get_all();
         $self->{'legal_values'} = \@values;
     }
     return $self->{'legal_values'};

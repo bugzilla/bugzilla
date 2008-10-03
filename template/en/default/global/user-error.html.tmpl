@@ -432,7 +432,7 @@
   [% ELSIF error == "fieldvalue_already_exists" %]
     [% title = "Field Value Already Exists" %]
     The value '[% value FILTER html %]' already exists for the
-    '[%- field.description FILTER html %]' field.
+    [%+ field.description FILTER html %] field.
 
   [% ELSIF error == "fieldvalue_doesnt_exist" %]
     [% title = "Specified Field Value Does Not Exist" %]
@@ -450,8 +450,9 @@
 
   [% ELSIF error == "fieldvalue_name_too_long" %]
     [% title = "Field Value Is Too Long" %]
-    The value of a field is limited to 60 characters.
-    '[% value FILTER html %]' is too long ([% value.length %] characters).
+    The value of a field is limited to [% constants.FIELD_VALUE_MAX_SIZE %]
+    characters. '[% value FILTER html %]' is too long ([% value.length %]
+    characters).
 
   [% ELSIF error == "fieldvalue_not_editable" %]
     [% title = "Field Value Not Editable" %]
@@ -475,8 +476,9 @@
 
   [% ELSIF error == "fieldvalue_sortkey_invalid" %]
     [% title = "Invalid Field Value Sortkey" %]
-    The sortkey '[% sortkey FILTER html %]' for the '[% name FILTER html %]'
-    field is not a valid (positive) number.
+    The sortkey '[% sortkey FILTER html %]' for the 
+    [%+ field.description FILTER html %] field is not a valid 
+    (positive) number.
 
   [% ELSIF error == "fieldvalue_still_has_bugs" %]
     [% title = "You Cannot Delete This Field Value" %]
@@ -1178,13 +1180,13 @@
     is less than the minimum allowable value of '[% min_num FILTER html %]'.
 
   [% ELSIF error == "object_name_not_specified" %]
-    [% type = BLOCK %][% PROCESS object_name %][% END %]
+    [% type = BLOCK %][% INCLUDE object_name class = class %][% END %]
     [% title = BLOCK %][% type FILTER ucfirst FILTER html %] Not 
     Specified[% END %]
     You must select/enter a [% type FILTER html %].
 
   [% ELSIF error == "object_does_not_exist" %]
-    [% type = BLOCK %][% PROCESS object_name %][% END %]
+    [% type = BLOCK %][% INCLUDE object_name class = class %][% END %]
     [% title = BLOCK %]Invalid [% type FILTER ucfirst FILTER html %][% END %]
     There is no [% type FILTER html %] named '[% name FILTER html %]'
     [% IF product.defined %]
@@ -1672,5 +1674,10 @@
     milestone
   [% ELSIF class == "Bugzilla::Status" %]
     status
+  [% ELSIF class == "Bugzilla::Field" %]
+    field
+  [% ELSIF ( matches = class.match('^Bugzilla::Field::Choice::(.+)') ) %]
+    [% SET field_name = matches.0 %]
+    [% field_descs.$field_name %]
   [% END %]
 [% END %]

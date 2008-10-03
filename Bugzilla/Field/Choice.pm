@@ -174,18 +174,17 @@ sub remove_from_db {
     my $self = shift;
     if ($self->is_default) {
         ThrowUserError('fieldvalue_is_default',
-                       { field => $self->field, value => $self->name,
+                       { field => $self->field, value => $self,
                          param_name => $self->DEFAULT_MAP->{$self->field->name},
                        });
     }
     if ($self->is_static) {
         ThrowUserError('fieldvalue_not_deletable', 
-                       { field => $self->field, value => $self->name });
+                       { field => $self->field, value => $self });
     }
     if ($self->bug_count) {
         ThrowUserError("fieldvalue_still_has_bugs",
-                       { field => $self->field, value => $self->name,
-                         count => $self->bug_count });
+                       { field => $self->field, value => $self });
     }
     $self->SUPER::remove_from_db();
 }
@@ -272,7 +271,7 @@ sub _check_value {
         && $invocant->is_static) 
     {
         ThrowUserError('fieldvalue_not_editable',
-                       { field => $field, old_value => $invocant->name });
+                       { field => $field, old_value => $invocant });
     }
 
     ThrowUserError('fieldvalue_undefined') if !defined $value || $value eq "";
@@ -282,7 +281,7 @@ sub _check_value {
     my $exists = $invocant->type($field)->new({ name => $value });
     if ($exists && (!blessed($invocant) || $invocant->id != $exists->id)) {
         ThrowUserError('fieldvalue_already_exists', 
-                       { field => $field, value => $value });
+                       { field => $field, value => $exists });
     }
 
     return $value;

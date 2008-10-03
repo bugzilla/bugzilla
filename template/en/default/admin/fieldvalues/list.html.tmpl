@@ -58,26 +58,13 @@
      } ]
 %]
 
-[% IF default.defined %]
-  [% overrides.action = [ {
-       match_value => "$default"
-       match_field => 'name'
-       override_content => 1
-       content => "(Default value)"
-       override_contentlink => 1
-       contentlink => undef
-     } ]
-  %]
-[% END %]
 
-[% IF static.size %]
-  [% UNLESS overrides.action.size %]
-    [% overrides.action = [] %]
-  [% END %]
+[% SET overrides.action = [] %]
+[% FOREACH check_value = values %]
 
-  [% FOREACH static_value = static %]
+  [% IF check_value.is_static %]
     [% overrides.action.push({
-         match_value => "$static_value"
+         match_value => check_value.name
          match_field => 'name'
          override_content => 1
          content => "(Non-deletable value)"
@@ -85,7 +72,17 @@
          contentlink => undef
        })
     %]
+  [% ELSIF check_value.is_default %]
+    [% overrides.action.push({
+      match_value => check_value.name
+      match_field => 'name'
+      override_content => 1
+      content => "(Default value)"
+      override_contentlink => 1
+      contentlink => undef })
+    %]
   [% END %]
+
 [% END %]
 
 [% PROCESS admin/table.html.tmpl

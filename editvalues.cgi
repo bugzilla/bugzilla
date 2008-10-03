@@ -25,79 +25,33 @@ use Bugzilla;
 use Bugzilla::Util;
 use Bugzilla::Error;
 use Bugzilla::Constants;
-use Bugzilla::Config qw(:admin);
 use Bugzilla::Token;
 use Bugzilla::Field;
-use Bugzilla::Bug;
-use Bugzilla::Status qw(SPECIAL_STATUS_WORKFLOW_ACTIONS);
+use Bugzilla::Field::Choice;
 
 # List of different tables that contain the changeable field values
 # (the old "enums.") Keep them in alphabetical order by their 
 # English name from field-descs.html.tmpl.
 # Format: Array of valid field names.
-our @valid_fields = ('op_sys', 'rep_platform', 'priority', 'bug_severity',
+my @valid_fields = ('op_sys', 'rep_platform', 'priority', 'bug_severity',
                      'bug_status', 'resolution');
 
 # Add custom select fields.
-my @custom_fields = Bugzilla->get_fields({custom => 1,
-                                          type => FIELD_TYPE_SINGLE_SELECT});
-push(@custom_fields, Bugzilla->get_fields({custom => 1,
-                                          type => FIELD_TYPE_MULTI_SELECT}));
-
+my @custom_fields = Bugzilla->get_fields(
+    {custom => 1, type => [FIELD_TYPE_SINGLE_SELECT, FIELD_TYPE_MULTI_SELECT]});
 push(@valid_fields, map { $_->name } @custom_fields);
 
-######################################################################
-# Subroutines
-######################################################################
+###############
+# Subroutines #
+###############
 
-# Returns whether or not the specified table exists in the @tables array.
-sub FieldExists {
-  my ($field) = @_;
-
-  return lsearch(\@valid_fields, $field) >= 0;
-}
-
-# Same as FieldExists, but emits and error and dies if it fails.
-sub FieldMustExist {
-    my ($field)= @_;
-
-    $field ||
-        ThrowUserError('fieldname_not_specified');
-
-    # Is it a valid field to be editing?
-    FieldExists($field) ||
-        ThrowUserError('fieldname_invalid', {'field' => $field});
-
-    return new Bugzilla::Field({name => $field});
-}
-
-# Returns if the specified value exists for the field specified.
-sub ValueExists {
-    my ($field, $value) = @_;
-    # Value is safe because it's being passed only to a SELECT
-    # statement via a placeholder.
-    trick_taint($value);
-
-    my $dbh = Bugzilla->dbh;
-    my $value_count = 
-        $dbh->selectrow_array("SELECT COUNT(*) FROM $field "
-                           .  " WHERE value = ?", undef, $value);
-
-    return $value_count;
-}
-
-# Same check as ValueExists, emits an error text and dies if it fails.
-sub ValueMustExist {
-    my ($field, $value)= @_;
-
-    # Values may not be empty (it's very difficult to deal 
-    # with empty values in the admin interface).
-    trim($value) || ThrowUserError('fieldvalue_not_specified');
-
-    # Does it exist in the DB?
-    ValueExists($field, $value) ||
-        ThrowUserError('fieldvalue_doesnt_exist', {'value' => $value,
-                                                   'field' => $field});
+sub display_field_values {
+    my $vars = shift;
+    my $template = Bugzilla->template;
+    $vars->{'values'} = $vars->{'field'}->legal_values;
+    $template->process("admin/fieldvalues/list.html.tmpl", $vars)
+      || ThrowTemplateError($template->error());
+    exit;
 }
 
 ######################################################################
@@ -110,7 +64,7 @@ Bugzilla->login(LOGIN_REQUIRED);
 my $dbh      = Bugzilla->dbh;
 my $cgi      = Bugzilla->cgi;
 my $template = Bugzilla->template;
-local our $vars = {};
+my $vars = {};
 
 # Replace this entry by separate entries in templates when
 # the documentation about legal values becomes bigger.
@@ -126,81 +80,44 @@ Bugzilla->user->in_group('admin') ||
 #
 # often-used variables
 #
-my $field   = trim($cgi->param('field')   || '');
-my $value   = trim($cgi->param('value')   || '');
-my $sortkey = trim($cgi->param('sortkey') || '0');
-my $action  = trim($cgi->param('action')  || '');
-my $token   = $cgi->param('token');
-
-# Gives the name of the parameter associated with the field
-# and representing its default value.
-local our %defaults;
-$defaults{'op_sys'} = 'defaultopsys';
-$defaults{'rep_platform'} = 'defaultplatform';
-$defaults{'priority'} = 'defaultpriority';
-$defaults{'bug_severity'} = 'defaultseverity';
-
-# Alternatively, a list of non-editable values can be specified.
-# In this case, only the sortkey can be altered.
-local our %static;
-$static{'bug_status'} = ['UNCONFIRMED', Bugzilla->params->{'duplicate_or_move_bug_status'}];
-$static{'resolution'} = ['', 'FIXED', 'MOVED', 'DUPLICATE'];
-$static{$_->name} = ['---'] foreach (@custom_fields);
+my $action = trim($cgi->param('action')  || '');
+my $token  = $cgi->param('token');
 
 #
 # field = '' -> Show nice list of fields
 #
-unless ($field) {
+if (!$cgi->param('field')) {
     # Convert @valid_fields into the format that select-field wants.
-    my @field_list = ();
-    foreach my $field_name (@valid_fields) {
-        push(@field_list, {name => $field_name});
-    }
+    my @field_list = map({ name => $_ }, @valid_fields);
 
     $vars->{'fields'} = \@field_list;
-    $template->process("admin/fieldvalues/select-field.html.tmpl",
-                       $vars)
+    $template->process("admin/fieldvalues/select-field.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
     exit;
 }
 
-# At this point, the field is defined.
-my $field_obj = FieldMustExist($field);
-$vars->{'field'} = $field_obj;
-trick_taint($field);
-
-sub display_field_values {
-    my $template = Bugzilla->template;
-    my $field = $vars->{'field'}->name;
-
-    $vars->{'values'} = $vars->{'field'}->legal_values;
-    $vars->{'default'} = Bugzilla->params->{$defaults{$field}} if defined $defaults{$field};
-    $vars->{'static'} = $static{$field} if exists $static{$field};
-
-    $template->process("admin/fieldvalues/list.html.tmpl", $vars)
-      || ThrowTemplateError($template->error());
-    exit;
+# At this point, the field must be defined.
+my $field = Bugzilla::Field->check($cgi->param('field'));
+if (!grep($_ eq $field->name, @valid_fields)) {
+    ThrowUserError('fieldname_invalid', { field => $field });
 }
+$vars->{'field'} = $field;
 
 #
 # action='' -> Show nice list of values.
 #
-display_field_values() unless $action;
+display_field_values($vars) unless $action;
 
 #
 # action='add' -> show form for adding new field value.
 # (next action will be 'new')
 #
 if ($action eq 'add') {
-    $vars->{'value'} = $value;
     $vars->{'token'} = issue_session_token('add_field_value');
-    $template->process("admin/fieldvalues/create.html.tmpl",
-                       $vars)
+    $template->process("admin/fieldvalues/create.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
-
     exit;
 }
-
 
 #
 # action='new' -> add field value entered in the 'action=add' screen
@@ -208,52 +125,34 @@ if ($action eq 'add') {
 if ($action eq 'new') {
     check_token_data($token, 'add_field_value');
 
-    my $created_value = Bugzilla::Field::Choice->type($field_obj)->create(
-        { value => $value, sortkey => $sortkey, 
+    my $created_value = Bugzilla::Field::Choice->type($field)->create(
+        { value   => scalar $cgi->param('value'), 
+          sortkey => scalar $cgi->param('sortkey'),
           is_open => scalar $cgi->param('is_open') });
 
     delete_token($token);
 
     $vars->{'message'} = 'field_value_created';
-    $vars->{'value'} = $created_value->name;
-    display_field_values();
+    $vars->{'value'} = $created_value;
+    display_field_values($vars);
 }
 
+# After this, we always have a value
+my $value = Bugzilla::Field::Choice->type($field)->check($cgi->param('value'));
+$vars->{'value'} = $value;
 
 #
 # action='del' -> ask if user really wants to delete
 # (next action would be 'delete')
 #
 if ($action eq 'del') {
-    ValueMustExist($field, $value);
-    trick_taint($value);
-
-    # See if any bugs are still using this value.
-    if ($field_obj->type != FIELD_TYPE_MULTI_SELECT) {
-        $vars->{'bug_count'} =
-            $dbh->selectrow_array("SELECT COUNT(*) FROM bugs WHERE $field = ?",
-                                  undef, $value);
-    }
-    else {
-        $vars->{'bug_count'} =
-            $dbh->selectrow_array("SELECT COUNT(*) FROM bug_$field WHERE value = ?",
-                                  undef, $value);
-    }
-
-    $vars->{'value_count'} =
-        $dbh->selectrow_array("SELECT COUNT(*) FROM $field");
-
-    $vars->{'value'} = $value;
-    $vars->{'param_name'} = $defaults{$field};
-
     # If the value cannot be deleted, throw an error.
-    if (lsearch($static{$field}, $value) >= 0) {
+    if ($value->is_static) {
         ThrowUserError('fieldvalue_not_deletable', $vars);
     }
     $vars->{'token'} = issue_session_token('delete_field_value');
 
-    $template->process("admin/fieldvalues/confirm-delete.html.tmpl",
-                       $vars)
+    $template->process("admin/fieldvalues/confirm-delete.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
 
     exit;
@@ -265,15 +164,11 @@ if ($action eq 'del') {
 #
 if ($action eq 'delete') {
     check_token_data($token, 'delete_field_value');
-    my $value_obj = Bugzilla::Field::Choice->type($field)->check($value);
-    $vars->{'value'} = $value_obj->name;
-    $value_obj->remove_from_db();
-
+    $value->remove_from_db();
     delete_token($token);
-
     $vars->{'message'} = 'field_value_deleted';
     $vars->{'no_edit_link'} = 1;
-    display_field_values();
+    display_field_values($vars);
 }
 
 
@@ -282,20 +177,7 @@ if ($action eq 'delete') {
 # (next action would be 'update')
 #
 if ($action eq 'edit') {
-    ValueMustExist($field, $value);
-    trick_taint($value);
-
-    $vars->{'sortkey'} = $dbh->selectrow_array(
-        "SELECT sortkey FROM $field WHERE value = ?", undef, $value) || 0;
-
-    $vars->{'value'} = $value;
-    $vars->{'is_static'} = (lsearch($static{$field}, $value) >= 0) ? 1 : 0;
     $vars->{'token'} = issue_session_token('edit_field_value');
-    if ($field eq 'bug_status') {
-        $vars->{'is_open'} = $dbh->selectrow_array('SELECT is_open FROM bug_status
-                                                    WHERE value = ?', undef, $value);
-    }
-
     $template->process("admin/fieldvalues/edit.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
 
@@ -308,17 +190,13 @@ if ($action eq 'edit') {
 #
 if ($action eq 'update') {
     check_token_data($token, 'edit_field_value');
-    $vars->{'value'} = $cgi->param('valueold');
-    my $value_obj = Bugzilla::Field::Choice->type($field_obj)
-                    ->check($cgi->param('valueold'));
-    $value_obj->set_name($value);
-    $value_obj->set_sortkey($sortkey);
-    $vars->{'changes'} = $value_obj->update();
+    $vars->{'value_old'} = $value->name;
+    $value->set_name($cgi->param('value_new'));
+    $value->set_sortkey($cgi->param('sortkey'));
+    $vars->{'changes'} = $value->update();
     delete_token($token);
-
-    $vars->{'value_obj'} = $value_obj;
     $vars->{'message'} = 'field_value_updated';
-    display_field_values();
+    display_field_values($vars);
 }
 
 

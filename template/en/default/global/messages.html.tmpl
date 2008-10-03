@@ -298,31 +298,31 @@
 
   [% ELSIF message_tag == "field_value_created" %]
     [% title = "New Field Value Created" %]
-    The value <em>[% value FILTER html %]</em> has been added as a valid choice
-    for the <em>[% field.description FILTER html %]</em>
+    The value <em>[% value.name FILTER html %]</em> has been added as a 
+    valid choice for the <em>[% field.description FILTER html %]</em>
     (<em>[% field.name FILTER html %]</em>) field.
     [% IF field.name == "bug_status" %]
-      You should now visit the <a href="editworkflow.cgi">status workflow page</a>
-      to include your new [% terms.bug %] status.
+      You should now visit the <a href="editworkflow.cgi">status workflow 
+      page</a> to include your new [% terms.bug %] status.
     [% END %]
 
   [% ELSIF message_tag == "field_value_deleted" %]
     [% title = "Field Value Deleted" %]
-    The value <em>[% value FILTER html %]</em> of the
+    The value <em>[% value.name FILTER html %]</em> of the
     <em>[% field.description FILTER html %]</em>
     (<em>[% field.name FILTER html %]</em>) field has been deleted.
 
   [% ELSIF message_tag == "field_value_updated" %]
     [% title = "Field Value Updated" %]
     [% IF changes.keys.size %]
-      The <em>[% value FILTER html %]</em> value of the
+      The <em>[% value_old FILTER html %]</em> value of the
       <em>[% field.description FILTER html %]</em>
       (<em>[% field.name FILTER html %]</em>) field has been changed:
       <ul>
         [% IF changes.value %]
           <li>Field value updated to 
             <em>[% changes.value.1 FILTER html %]</em>.
-            [% IF value_obj.is_default %]
+            [% IF value.is_default %]
               (Note that this value is the default for this field. All
               references to the default value will now point to this new value.)
             [% END %]
@@ -334,7 +334,7 @@
         [% END %]
       </ul>
     [% ELSE %]
-      No changes made to the field value <em>[% value FILTER html %]</em>.
+      No changes made to the field value <em>[% value_old FILTER html %]</em>.
     [% END %]
 
   [% ELSIF message_tag == "flag_cleared" %]

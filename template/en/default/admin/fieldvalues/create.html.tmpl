@@ -26,26 +26,27 @@
 %]
 
 <p>
-  This page allows you to add a new value for the '[% field.description FILTER html %]' field.
+  This page allows you to add a new value for the 
+  '[% field.description FILTER html %]' field.
 </p>
 
 <form method="post" action="editvalues.cgi">
   <table border="0" cellpadding="4" cellspacing="0">
     <tr>
       <th align="right"><label for="value">Value:</label></th>
-      <td><input id="value" size="30" maxlength="60" name="value"
-                 value=""></td>
+      <td><input id="value" name="value" size="30"
+                  maxlength="[% constants.MAX_FIELD_VALUE_SIZE %]"></td>
     </tr>
     <tr>
       <th align="right"><label for="sortkey">Sortkey:</label></th>
-      <td><input id="sortkey" size="10" maxlength="20" name="sortkey"
-                 value=""></td>
+      <td><input id="sortkey" name="sortkey" size="6" maxlength="6"></td>
     </tr>
     [% IF field.name == "bug_status" %]
       <tr>
         <th align="right"><label for="is_open">Status Type:</label></th>
         <td>
-          <input type="radio" id="open_status" name="is_open" value="1" checked="checked">
+          <input type="radio" id="open_status" name="is_open" value="1" 
+                 checked="checked">
           <label for="open_status">Open</label><br>
           <input type="radio" id="closed_status" name="is_open" value="0">
           <label for="closed_status">Closed (requires a Resolution)</label>

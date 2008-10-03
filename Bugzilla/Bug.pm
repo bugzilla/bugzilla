@@ -1870,7 +1870,15 @@ sub set_product {
         Bugzilla->error_mode(ERROR_MODE_DIE);
         my $component_ok = eval { $self->set_component($comp_name);      1; };
         my $version_ok   = eval { $self->set_version($vers_name);        1; };
-        my $milestone_ok = eval { $self->set_target_milestone($tm_name); 1; };
+        my $milestone_ok = 1;
+        # Reporters can move bugs between products but not set the TM.
+        if ($self->check_can_change_field('target_milestone', 0, 1)) {
+            $milestone_ok = eval { $self->set_target_milestone($tm_name); 1; };
+        }
+        else {
+            # Have to set this directly to bypass the validators.
+            $self->{target_milestone} = $product->default_milestone;
+        }
         # If there were any errors thrown, make sure we don't mess up any
         # other part of Bugzilla that checks $@.
         undef $@;
@@ -1918,6 +1926,7 @@ sub set_product {
         
         if (%vars) {
             $vars{product} = $product;
+            $vars{bug} = $self;
             my $template = Bugzilla->template;
             $template->process("bug/process/verify-new-product.html.tmpl",
                 \%vars) || ThrowTemplateError($template->error());
@@ -1929,7 +1938,13 @@ sub set_product {
         # just die if any of these are invalid.
         $self->set_component($comp_name);
         $self->set_version($vers_name);
-        $self->set_target_milestone($tm_name);
+        if ($self->check_can_change_field('target_milestone', 0, 1)) {
+            $self->set_target_milestone($tm_name);
+        }
+        else {
+            # Have to set this directly to bypass the validators.
+            $self->{target_milestone} = $product->default_milestone;
+        }
     }
     
     if ($product_changed) {

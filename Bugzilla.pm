@@ -77,18 +77,7 @@ use constant SHUTDOWNHTML_EXIT_SILENTLY => [
 # Global Code
 #####################################################################
 
-# The following subroutine is for debugging purposes only.
-# Uncommenting this sub and the $::SIG{__DIE__} trap underneath it will
-# cause any fatal errors to result in a call stack trace to help track
-# down weird errors.
-#
-#sub die_with_dignity {
-#    use Carp ();
-#    my ($err_msg) = @_;
-#    print $err_msg;
-#    Carp::confess($err_msg);
-#}
-#$::SIG{__DIE__} = \&Bugzilla::die_with_dignity;
+# $::SIG{__DIE__} = i_am_cgi() ? \&CGI::Carp::confess : \&Carp::confess;
 
 # Note that this is a raw subroutine, not a method, so $class isn't available.
 sub init_page {

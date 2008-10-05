@@ -261,7 +261,7 @@
             <legend>Note</legend>
             <p>
               You need to
-              <a href="show_bug.cgi?id=[% bug.bug_id %]&amp;GoAheadAndLogIn=1">log in</a>
+              <a href="[% IF Param('ssl') != 'never' %][% Param('sslbase') %][% END %]show_bug.cgi?id=[% bug.bug_id %]&amp;GoAheadAndLogIn=1">log in</a>
               before you can comment on or make changes to this [% terms.bug %].
             </p>
           </fieldset>

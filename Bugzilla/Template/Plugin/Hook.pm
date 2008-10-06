@@ -68,6 +68,7 @@ sub process {
     my @extensions = glob(bz_locations()->{'extensionsdir'} . "/*");
     my @usedlanguages = include_languages({use_languages => Bugzilla->languages});
     foreach my $extension (@extensions) {
+        next if -e "$extension/disabled";
         foreach my $language (@usedlanguages) {
             my $file = $extension.'/template/'.$language.'/'.$extensiontemplate;
             if (-e $file) {

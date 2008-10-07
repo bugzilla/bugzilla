@@ -366,6 +366,7 @@ table.attachment_info td {
 /* For bug fields */
 .uneditable_textarea {
     width: 30em;
+    font-size: medium;
 }
 
 div.user_match {

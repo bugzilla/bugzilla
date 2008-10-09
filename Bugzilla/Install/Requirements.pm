@@ -184,7 +184,7 @@ sub OPTIONAL_MODULES {
         feature => 'LDAP Authentication'
     },
     {
-        package => 'SASL-Authen',
+        package => 'Authen-SASL',
         module  => 'Authen::SASL',
         version => 0,
         feature => 'SMTP Authentication'

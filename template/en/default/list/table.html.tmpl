@@ -188,6 +188,16 @@
 
     [% FOREACH column = displaycolumns %]
     <td [% 'style="white-space: nowrap"' IF NOT abbrev.$column.wrap %]>
+      [% IF abbrev.$column.maxlength %]
+        <span title="
+          [%- IF column == 'bug_status' %]
+            [%- get_status(bug.$column) FILTER html %]
+          [% ELSIF column == 'resolution' %]
+            [%- get_resolution(bug.$column) FILTER html %]
+          [% ELSE %]
+            [%- bug.$column FILTER html %]
+          [% END %]">
+      [% END %]
       [% IF abbrev.$column.format_value %] 
         [%- bug.$column FILTER format(abbrev.$column.format_value) FILTER html -%] 
       [% ELSIF column == 'actual_time' ||
@@ -200,6 +210,9 @@
         [%- get_resolution(bug.$column).truncate(abbrev.$column.maxlength, abbrev.$column.ellipsis) FILTER html %]
       [% ELSE %]
         [%- bug.$column.truncate(abbrev.$column.maxlength, abbrev.$column.ellipsis) FILTER html -%]
+      [% END %]
+      [% IF abbrev.$column.maxlength %]
+        </span>
       [% END %]
     </td>
     [% END %]

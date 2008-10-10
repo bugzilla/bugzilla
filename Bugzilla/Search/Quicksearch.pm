@@ -446,12 +446,14 @@ sub splitString {
     # Now split on unescaped whitespace
     @parts = split(/\s+/, $string);
     foreach (@parts) {
+        # Protect plus signs from becoming a blank.
+        # If "+" appears as the first character, leave it alone
+        # as it has a special meaning. Strings which start with
+        # "+" must be quoted.
+        s/(?<!^)\+/%2B/g;
         # Remove quotes
         s/"//g;
-        # Protect plus signs from becoming a blank
-        s/\+/%2B/g;
     }
-                        
     return @parts;
 }
 

@@ -100,7 +100,8 @@ sub html_light_quote {
 
     # List of allowed HTML elements having no attributes.
     my @allow = qw(b strong em i u p br abbr acronym ins del cite code var
-                   dfn samp kbd big small sub sup tt dd dt dl ul li ol);
+                   dfn samp kbd big small sub sup tt dd dt dl ul li ol
+                   fieldset legend);
 
     # Are HTML::Scrubber and HTML::Parser installed?
     eval { require HTML::Scrubber;

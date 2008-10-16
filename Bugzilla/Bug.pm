@@ -308,22 +308,25 @@ sub check {
         }
     }
 
-    # XXX This hack needs to go away.
-    return $self if (defined $field 
-                     && ($field eq "dependson" || $field eq "blocked"));
+    unless ($field && $field =~ /^(dependson|blocked|dup_id)$/) {
+        $self->check_is_visible;
+    }
+    return $self;
+}
 
+sub check_is_visible {
+    my $self = shift;
     my $user = Bugzilla->user;
-    if (!$user->can_see_bug($id)) {
+
+    if (!$user->can_see_bug($self->id)) {
         # The error the user sees depends on whether or not they are
         # logged in (i.e. $user->id contains the user's positive integer ID).
         if ($user->id) {
-            ThrowUserError("bug_access_denied", { bug_id => $id });
+            ThrowUserError("bug_access_denied", { bug_id => $self->id });
         } else {
-            ThrowUserError("bug_access_query", { bug_id => $id });
+            ThrowUserError("bug_access_query", { bug_id => $self->id });
         }
     }
-
-    return $self;
 }
 
 # Docs for create() (there's no POD in this file yet, but we very
@@ -1204,10 +1207,19 @@ sub _check_dup_id {
     
     $dupe_of = trim($dupe_of);
     $dupe_of || ThrowCodeError('undefined_field', { field => 'dup_id' });
-    # Make sure we can change the original bug (issue A on bug 96085)
+    # Validate the bug ID. The second argument will force check() to only
+    # make sure that the bug exists, and convert the alias to the bug ID
+    # if a string is passed. Group restrictions are checked below.
     my $dupe_of_bug = $self->check($dupe_of, 'dup_id');
     $dupe_of = $dupe_of_bug->id;
-    
+
+    # If the dupe is unchanged, we have nothing more to check.
+    return $dupe_of if ($self->dup_id && $self->dup_id == $dupe_of);
+
+    # If we come here, then the duplicate is new. We have to make sure
+    # that we can view/change it (issue A on bug 96085).
+    $dupe_of_bug->check_is_visible;
+
     # Make sure a loop isn't created when marking this bug
     # as duplicate.
     my %dupes;
@@ -1799,7 +1811,7 @@ sub set_dup_id {
     my ($self, $dup_id) = @_;
     my $old = $self->dup_id || 0;
     $self->set('dup_id', $dup_id);
-    my $new = $self->dup_id || 0;
+    my $new = $self->dup_id;
     return if $old == $new;
     
     # Update the other bug.

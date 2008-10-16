@@ -31,13 +31,14 @@
       <p>
       [% IF param.type == "t" %]
         <input type="text" size="80" name="[% param.name FILTER html %]"
-               value="[% Param(param.name) FILTER html %]">
+               id="[% param.name FILTER html %]" value="[% Param(param.name) FILTER html %]">
       [% ELSIF param.type == "p" %]
         <input type="password" size="80" name="[% param.name FILTER html %]"
-               value="[% Param(param.name) FILTER html %]" autocomplete="off">
+               id="[% param.name FILTER html %]" value="[% Param(param.name) FILTER html %]"
+               autocomplete="off">
       [% ELSIF param.type == "l" %]
-        <textarea name="[% param.name FILTER html %]" rows="10" cols="80">
-            [% Param(param.name) FILTER html %]</textarea>
+        <textarea name="[% param.name FILTER html %]" id="[% param.name FILTER html %]"
+                  rows="10" cols="80">[% Param(param.name) FILTER html %]</textarea>
       [% ELSIF param.type == "b" %]
         <input type="radio" name="[% param.name FILTER html %]" id="[% param.name FILTER html %]-on"
                value=1 [% "checked=\"checked\"" IF Param(param.name) %]>
@@ -50,7 +51,7 @@
         [% boxSize = param.choices.size IF param.choices.size < 5 %]
 
         <select multiple="multiple" size="[% boxSize FILTER html %]"
-                name="[% param.name FILTER html %]">
+                name="[% param.name FILTER html %]" id="[% param.name FILTER html %]">
           [% FOREACH item = param.choices %]
             <option value="[% item FILTER html %]"
                     [% " selected=\"selected\"" IF lsearch(Param(param.name), item) != -1 %]>
@@ -110,7 +111,7 @@
         // -->
         </script>
       [% ELSIF param.type == "s" %]
-        <select name="[% param.name FILTER html %]">
+        <select name="[% param.name FILTER html %]" id="[% param.name FILTER html %]">
           [% FOREACH item = param.choices %]
             <option value="[% item FILTER html %]"
                     [% " selected=\"selected\"" IF item == Param(param.name) %]>

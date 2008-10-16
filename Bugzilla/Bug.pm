@@ -1134,9 +1134,18 @@ sub _check_dup_id {
     
     $dupe_of = trim($dupe_of);
     $dupe_of || ThrowCodeError('undefined_field', { field => 'dup_id' });
-    # Make sure we can change the original bug (issue A on bug 96085)
+    # Validate the bug ID. The second argument will force ValidateBugID() to
+    # only make sure that the bug exists, and convert the alias to the bug ID
+    # if a string is passed. Group restrictions are checked below.
     ValidateBugID($dupe_of, 'dup_id');
-    
+
+    # If the dupe is unchanged, we have nothing more to check.
+    return $dupe_of if ($self->dup_id && $self->dup_id == $dupe_of);
+
+    # If we come here, then the duplicate is new. We have to make sure
+    # that we can view/change it (issue A on bug 96085).
+    check_is_visible($dupe_of);
+
     # Make sure a loop isn't created when marking this bug
     # as duplicate.
     my %dupes;
@@ -1721,7 +1730,7 @@ sub set_dup_id {
     my ($self, $dup_id) = @_;
     my $old = $self->dup_id || 0;
     $self->set('dup_id', $dup_id);
-    my $new = $self->dup_id || 0;
+    my $new = $self->dup_id;
     return if $old == $new;
     
     # Update the other bug.
@@ -3342,12 +3351,17 @@ sub ValidateBugID {
     $dbh->selectrow_array("SELECT bug_id FROM bugs WHERE bug_id = ?", undef, $id)
       || ThrowUserError("bug_id_does_not_exist", {'bug_id' => $id});
 
-    return if (defined $field && ($field eq "dependson" || $field eq "blocked"));
-    
+    unless ($field && $field =~ /^(dependson|blocked|dup_id)$/) {
+        check_is_visible($id);
+    }
+}
+
+sub check_is_visible {
+    my $id = shift;
+    my $user = Bugzilla->user;
+
     return if $user->can_see_bug($id);
 
-    # The user did not pass any of the authorization tests, which means they
-    # are not authorized to see the bug.  Display an error and stop execution.
     # The error the user sees depends on whether or not they are logged in
     # (i.e. $user->id contains the user's positive integer ID).
     if ($user->id) {

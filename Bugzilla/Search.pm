@@ -802,8 +802,10 @@ sub init {
                  $field =~ /^(relevance|actual_time|percentage_complete)/);
         # The structure of fields is of the form:
         # [foo AS] {bar | bar.baz} [ASC | DESC]
-        # Only the mandatory part bar OR bar.baz is of interest
-        if ($field =~ /(?:.*\s+AS\s+)?(\w+(\.\w+)?)(?:\s+(ASC|DESC))?$/i) {
+        # Only the mandatory part bar OR bar.baz is of interest.
+        # But for Oracle, it needs the real name part instead.
+        my $regexp = $dbh->GROUPBY_REGEXP;
+        if ($field =~ /$regexp/i) {
             push(@groupby, $1) if !grep($_ eq $1, @groupby);
         }
     }

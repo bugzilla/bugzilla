@@ -52,6 +52,7 @@ use base qw(Bugzilla::DB);
 use constant EMPTY_STRING  => '__BZ_EMPTY_STR__';
 use constant ISOLATION_LEVEL => 'READ COMMITTED';
 use constant BLOB_TYPE => { ora_type => ORA_BLOB };
+use constant GROUPBY_REGEXP => '((CASE\s+WHEN.+END)|(TO_CHAR\(.+\))|(\(SCORE.+\))|(\(MATCH.+\))|(\w+(\.\w+)?))(\s+AS\s+)?(.*)?$';
 
 sub new {
     my ($class, $user, $pass, $host, $dbname, $port) = @_;
@@ -80,7 +81,7 @@ sub new {
     $self->do("ALTER SESSION SET NLS_LENGTH_SEMANTICS='CHAR'") 
         if Bugzilla->params->{'utf8'};
     # To allow case insensitive query.
-    $self->do("ALTER SESSION SET NLS_COMP='LINGUISTIC'");
+    $self->do("ALTER SESSION SET NLS_COMP='ANSI'");
     $self->do("ALTER SESSION SET NLS_SORT='BINARY_AI'");
     return $self;
 }

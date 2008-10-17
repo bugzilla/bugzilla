@@ -453,7 +453,8 @@ sub bless_groups {
     # Get all groups for the user where:
     #    + They have direct bless privileges
     #    + They are a member of a group that inherits bless privs.
-    my @group_ids = (map {$_->id} @{ $self->groups }) || (-1);
+    my @group_ids = map {$_->id} @{ $self->groups };
+    @group_ids = (-1) if !@group_ids;
     my $query =
         'SELECT DISTINCT groups.id
            FROM groups, user_group_map, group_group_map AS ggm

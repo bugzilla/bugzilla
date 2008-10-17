@@ -56,7 +56,7 @@ my %constants;
 foreach my $constant (@Bugzilla::Constants::EXPORT,
                       @Bugzilla::Constants::EXPORT_OK)
 {
-    if (defined &{$Bugzilla::Constants::{$constant}}) {
+    if (defined Bugzilla::Constants->$constant) {
         # Constants can be lists, and we can't know whether we're getting
         # a scalar or a list in advance, since they come to us as the return
         # value of a function call, so we have to retrieve them all in list

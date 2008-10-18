@@ -72,41 +72,6 @@ sub CheckGroupID {
     return $group_id;
 }
 
-# This subroutine is called when:
-# - a new group is created. CheckGroupName checks that its name
-#   is not empty and is not already used by any existing group.
-# - an existing group is edited. CheckGroupName checks that its
-#   name has not been deleted or renamed to another existing
-#   group name (whose group ID is different from $group_id).
-# In both cases, an error message is returned to the user if any
-# test fails! Else, the trimmed group name is returned.
-
-sub CheckGroupName {
-    my ($name, $group_id) = @_;
-    $name = trim($name || '');
-    trick_taint($name);
-    ThrowUserError("empty_group_name") unless $name;
-    my $excludeself = (defined $group_id) ? " AND id != $group_id" : "";
-    my $name_exists = Bugzilla->dbh->selectrow_array("SELECT name FROM groups " .
-                                                     "WHERE name = ? $excludeself",
-                                                     undef, $name);
-    if ($name_exists) {
-        ThrowUserError("group_exists", { name => $name });
-    }
-    return $name;
-}
-
-# CheckGroupDesc checks that a non empty description is given. The
-# trimmed description is returned.
-
-sub CheckGroupDesc {
-    my ($desc) = @_;
-    $desc = trim($desc || '');
-    trick_taint($desc);
-    ThrowUserError("empty_group_description") unless $desc;
-    return $desc;
-}
-
 # CheckGroupRegexp checks that the regular expression is valid
 # (the regular expression being optional, the test is successful
 # if none is given, as expected). The trimmed regular expression
@@ -237,37 +202,14 @@ if ($action eq 'add') {
 
 if ($action eq 'new') {
     check_token_data($token, 'add_group');
-    # Check that a not already used group name is given, that
-    # a description is also given and check if the regular
-    # expression is valid (if any).
-    my $name = CheckGroupName($cgi->param('name'));
-    my $desc = CheckGroupDesc($cgi->param('desc'));
-    my $regexp = CheckGroupRegexp($cgi->param('regexp'));
-    my $isactive = $cgi->param('isactive') ? 1 : 0;
-    # This is an admin page. The URL is considered safe.
-    my $icon_url;
-    if ($cgi->param('icon_url')) {
-        $icon_url = clean_text($cgi->param('icon_url'));
-        trick_taint($icon_url);
-    }
-
-    # Add the new group
-    $dbh->do('INSERT INTO groups
-              (name, description, isbuggroup, userregexp, isactive, icon_url)
-              VALUES (?, ?, 1, ?, ?, ?)',
-              undef, ($name, $desc, $regexp, $isactive, $icon_url));
-
-    my $group = new Bugzilla::Group({name => $name});
-    my $admin = Bugzilla::Group->new({name => 'admin'})->id();
-    # Since we created a new group, give the "admin" group all privileges
-    # initially.
-    my $sth = $dbh->prepare('INSERT INTO group_group_map
-                             (member_id, grantor_id, grant_type)
-                             VALUES (?, ?, ?)');
-
-    $sth->execute($admin, $group->id, GROUP_MEMBERSHIP);
-    $sth->execute($admin, $group->id, GROUP_BLESS);
-    $sth->execute($admin, $group->id, GROUP_VISIBLE);
+    my $group = Bugzilla::Group->create({
+        name        => scalar $cgi->param('name'),
+        description => scalar $cgi->param('desc'),
+        userregexp  => scalar $cgi->param('regexp'),
+        isactive    => scalar $cgi->param('isactive'),
+        icon_url    => scalar $cgi->param('icon_url'),
+        isbuggroup  => 1,
+    });
 
     # Permit all existing products to use the new group if makeproductgroups.
     if ($cgi->param('insertnew')) {
@@ -277,7 +219,6 @@ if ($action eq 'new') {
                   SELECT ?, products.id, 0, ?, ?, 0 FROM products',
                   undef, ($group->id, CONTROLMAPSHOWN, CONTROLMAPNA));
     }
-    Bugzilla::Group::RederiveRegexp($regexp, $group->id);
     delete_token($token);
 
     $vars->{'message'} = 'group_created';

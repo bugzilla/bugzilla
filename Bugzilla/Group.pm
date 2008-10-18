@@ -198,7 +198,30 @@ sub is_active_bug_group {
 
 sub _rederive_regexp {
     my ($self) = @_;
-    RederiveRegexp($self->user_regexp, $self->id);
+
+    my $dbh = Bugzilla->dbh;
+    my $sth = $dbh->prepare("SELECT userid, login_name, group_id
+                               FROM profiles
+                          LEFT JOIN user_group_map
+                                 ON user_group_map.user_id = profiles.userid
+                                    AND group_id = ?
+                                    AND grant_type = ?
+                                    AND isbless = 0");
+    my $sthadd = $dbh->prepare("INSERT INTO user_group_map
+                                 (user_id, group_id, grant_type, isbless)
+                                 VALUES (?, ?, ?, 0)");
+    my $sthdel = $dbh->prepare("DELETE FROM user_group_map
+                                 WHERE user_id = ? AND group_id = ?
+                                 AND grant_type = ? and isbless = 0");
+    $sth->execute($self->id, GRANT_REGEXP);
+    my $regexp = $self->user_regexp;
+    while (my ($uid, $login, $present) = $sth->fetchrow_array) {
+        if ($regexp ne '' and $login =~ /$regexp/i) {
+            $sthadd->execute($uid, $self->id, GRANT_REGEXP) unless $present;
+        } else {
+            $sthdel->execute($uid, $self->id, GRANT_REGEXP) if $present;
+        }
+    }
 }
 
 sub members_non_inherited {
@@ -264,35 +287,6 @@ sub ValidateGroupName {
     $sth->execute($name);
     my ($ret) = $sth->fetchrow_array();
     return $ret;
-}
-
-# This sub is not perldoc'ed because we expect it to go away and
-# just become the _rederive_regexp private method.
-sub RederiveRegexp {
-    my ($regexp, $gid) = @_;
-    my $dbh = Bugzilla->dbh;
-    my $sth = $dbh->prepare("SELECT userid, login_name, group_id
-                               FROM profiles
-                          LEFT JOIN user_group_map
-                                 ON user_group_map.user_id = profiles.userid
-                                AND group_id = ?
-                                AND grant_type = ?
-                                AND isbless = 0");
-    my $sthadd = $dbh->prepare("INSERT INTO user_group_map
-                                 (user_id, group_id, grant_type, isbless)
-                                 VALUES (?, ?, ?, 0)");
-    my $sthdel = $dbh->prepare("DELETE FROM user_group_map
-                                 WHERE user_id = ? AND group_id = ?
-                                 AND grant_type = ? and isbless = 0");
-    $sth->execute($gid, GRANT_REGEXP);
-    while (my ($uid, $login, $present) = $sth->fetchrow_array()) {
-        if (($regexp =~ /\S+/) && ($login =~ m/$regexp/i))
-        {
-            $sthadd->execute($uid, $gid, GRANT_REGEXP) unless $present;
-        } else {
-            $sthdel->execute($uid, $gid, GRANT_REGEXP) if $present;
-        }
-    }
 }
 
 ###############################

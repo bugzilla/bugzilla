@@ -131,8 +131,10 @@ if ($action eq 'update') {
     my $keyword = new Bugzilla::Keyword($key_id)
         || ThrowCodeError('invalid_keyword_id', { id => $key_id });
 
-    $keyword->set_name($cgi->param('name'));
-    $keyword->set_description($cgi->param('description'));
+    $keyword->set_all({
+        name        => scalar $cgi->param('name'),
+        description => scalar $cgi->param('description'),
+    });
     my $changes = $keyword->update();
 
     delete_token($token);

@@ -240,6 +240,14 @@ sub set {
     $self->{$field} = $value;
 }
 
+sub set_all {
+    my ($self, $params) = @_;
+    foreach my $key (keys %$params) {
+        my $method = "set_$key";
+        $self->$method($params->{$key});
+    }
+}
+
 sub update {
     my $self = shift;
 
@@ -743,10 +751,10 @@ not safe to use the object after it has been removed from the database.
 
 =back
 
-=head2 Subclass Helpers
+=head2 Mutators
 
-These functions are intended only for use by subclasses. If
-you call them from anywhere else, they will throw a C<CodeError>.
+These are used for updating the values in objects, before calling
+C<update>.
 
 =over
 
@@ -767,8 +775,10 @@ C<set> will call it with C<($value, $field)> as arguments, after running
 the validator for this particular field. C<_set_global_validator> does not
 return anything.
 
-
 See L</VALIDATORS> for more information.
+
+B<NOTE>: This function is intended only for use by subclasses. If
+you call it from anywhere else, it will throw a C<CodeError>.
 
 =item B<Params>
 
@@ -784,6 +794,27 @@ be the same as the name of the field in L</VALIDATORS>, if it exists there.
 =item B<Returns> (nothing)
 
 =back
+
+
+=item C<set_all>
+
+=over
+
+=item B<Description>
+
+This is a convenience function which is simpler than calling many different
+C<set_> functions in a row. You pass a hashref of parameters and it calls
+C<set_$key($value)> for every item in the hashref.
+
+=item B<Params>
+
+Takes a hashref of the fields that need to be set, pointing to the value
+that should be passed to the C<set_> function that is called.
+
+=item B<Returns> (nothing)
+
+=back
+
 
 =back
 

@@ -46,7 +46,11 @@
   <tr>
     <th>Icon URL:</th>
     <td colspan="3"><input type="text" size="70" maxlength="255" id="icon_url" name="icon_url"></td>
-  </tr></table><hr>
+  </tr>
+  [% Hook.process('field') %]
+  </table>
+
+  <hr>
 
   <input type="checkbox" id="insertnew" name="insertnew" value="1"
     [% IF Param("makeproductgroups") %] checked[% END %]>

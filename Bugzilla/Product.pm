@@ -374,6 +374,7 @@ sub remove_from_db {
 
     if ($self->bug_count) {
         if (Bugzilla->params->{'allowbugdeletion'}) {
+            require Bugzilla::Bug;
             foreach my $bug_id (@{$self->bug_ids}) {
                 # Note that we allow the user to delete bugs he can't see,
                 # which is okay, because he's deleting the whole Product.

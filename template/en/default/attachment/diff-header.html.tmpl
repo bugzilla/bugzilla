@@ -75,7 +75,9 @@ tbody.file td {
 
 tbody.file pre {
   display: inline;
-  white-space: -moz-pre-wrap;
+  white-space: pre-wrap; /* CSS 3 & CSS 2.1 */
+  white-space: -moz-pre-wrap; /* Gecko < 1.9.1 */
+  white-space: -o-pre-wrap; /* Opera 7 */
   font-size: 0.9em;
 }
 

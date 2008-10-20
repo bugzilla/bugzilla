@@ -153,7 +153,7 @@ sub ldap {
     my ($self) = @_;
     return $self->{ldap} if $self->{ldap};
 
-    my @servers = split(/[\s,]+]/, Bugzilla->params->{"LDAPserver"});
+    my @servers = split(/[\s,]+/, Bugzilla->params->{"LDAPserver"});
     ThrowCodeError("ldap_server_not_defined") unless @servers;
 
     foreach (@servers) {

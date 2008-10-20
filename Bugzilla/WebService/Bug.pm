@@ -29,7 +29,6 @@ use Bugzilla::Field;
 use Bugzilla::WebService::Constants;
 use Bugzilla::Bug;
 use Bugzilla::BugMail;
-use Bugzilla::Constants;
 
 #############
 # Constants #
@@ -193,8 +192,8 @@ sub legal_values {
     my ($self, $params) = @_;
     my $field = FIELD_MAP->{$params->{field}} || $params->{field};
 
-    my @custom_select =
-        Bugzilla->get_fields({ type => FIELD_TYPE_SINGLE_SELECT });
+    my @custom_select = Bugzilla->get_fields(
+        {custom => 1, type => [FIELD_TYPE_SINGLE_SELECT, FIELD_TYPE_MULTI_SELECT]});
     # We only want field names.
     @custom_select = map {$_->name} @custom_select;
 

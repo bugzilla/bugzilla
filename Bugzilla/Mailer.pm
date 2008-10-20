@@ -39,6 +39,7 @@ use base qw(Exporter);
 
 use Bugzilla::Constants;
 use Bugzilla::Error;
+use Bugzilla::Hook;
 use Bugzilla::Util;
 
 use Date::Format qw(time2str);
@@ -154,6 +155,8 @@ sub MessageToMTA {
                     Hello => $hostname, 
                     Debug => Bugzilla->params->{'smtp_debug'};
     }
+
+    Bugzilla::Hook::process('mailer-before_send', { email => $email });
 
     if ($method eq "Test") {
         my $filename = bz_locations()->{'datadir'} . '/mailer.testfile';

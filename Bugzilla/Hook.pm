@@ -450,6 +450,18 @@ database when run.
 
 =back
 
+=head2 mailer-before_send
+
+Called right before L<Bugzilla::Mailer> sends a message to the MTA.
+
+Params:
+
+=over
+
+=item C<email> - The C<Email::MIME> object that's about to be sent.
+
+=back
+
 =head2 webservice
 
 This hook allows you to add your own modules to the WebService. (See

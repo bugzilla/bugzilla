@@ -423,7 +423,6 @@
   'oldid',
   'newid',
   'style',
-  'javascript',
   'patch.id',
 ],
 

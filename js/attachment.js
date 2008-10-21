@@ -104,3 +104,102 @@ function clearAttachmentFields() {
     if ((element = document.getElementById('isprivate')))
         element.checked = '';
 }
+
+/* Functions used when viewing patches in Diff mode. */
+
+function collapse_all() {
+  var elem = document.checkboxform.firstChild;
+  while (elem != null) {
+    if (elem.firstChild != null) {
+      var tbody = elem.firstChild.nextSibling;
+      if (tbody.className == 'file') {
+        tbody.className = 'file_collapse';
+        twisty = get_twisty_from_tbody(tbody);
+        twisty.firstChild.nodeValue = '(+)';
+        twisty.nextSibling.checked = false;
+      }
+    }
+    elem = elem.nextSibling;
+  }
+  return false;
+}
+
+function expand_all() {
+  var elem = document.checkboxform.firstChild;
+  while (elem != null) {
+    if (elem.firstChild != null) {
+      var tbody = elem.firstChild.nextSibling;
+      if (tbody.className == 'file_collapse') {
+        tbody.className = 'file';
+        twisty = get_twisty_from_tbody(tbody);
+        twisty.firstChild.nodeValue = '(-)';
+        twisty.nextSibling.checked = true;
+      }
+    }
+    elem = elem.nextSibling;
+  }
+  return false;
+}
+
+var current_restore_elem;
+
+function restore_all() {
+  current_restore_elem = null;
+  incremental_restore();
+}
+
+function incremental_restore() {
+  if (!document.checkboxform.restore_indicator.checked) {
+    return;
+  }
+  var next_restore_elem;
+  if (current_restore_elem) {
+    next_restore_elem = current_restore_elem.nextSibling;
+  } else {
+    next_restore_elem = document.checkboxform.firstChild;
+  }
+  while (next_restore_elem != null) {
+    current_restore_elem = next_restore_elem;
+    if (current_restore_elem.firstChild != null) {
+      restore_elem(current_restore_elem.firstChild.nextSibling);
+    }
+    next_restore_elem = current_restore_elem.nextSibling;
+  }
+}
+
+function restore_elem(elem, alertme) {
+  if (elem.className == 'file_collapse') {
+    twisty = get_twisty_from_tbody(elem);
+    if (twisty.nextSibling.checked) {
+      elem.className = 'file';
+      twisty.firstChild.nodeValue = '(-)';
+    }
+  } else if (elem.className == 'file') {
+    twisty = get_twisty_from_tbody(elem);
+    if (!twisty.nextSibling.checked) {
+      elem.className = 'file_collapse';
+      twisty.firstChild.nodeValue = '(+)';
+    }
+  }
+}
+
+function twisty_click(twisty) {
+  tbody = get_tbody_from_twisty(twisty);
+  if (tbody.className == 'file') {
+    tbody.className = 'file_collapse';
+    twisty.firstChild.nodeValue = '(+)';
+    twisty.nextSibling.checked = false;
+  } else {
+    tbody.className = 'file';
+    twisty.firstChild.nodeValue = '(-)';
+    twisty.nextSibling.checked = true;
+  }
+  return false;
+}
+
+function get_tbody_from_twisty(twisty) {
+  return twisty.parentNode.parentNode.parentNode.nextSibling;
+}
+function get_twisty_from_tbody(tbody) {
+  return tbody.previousSibling.firstChild.nextSibling.firstChild.firstChild;
+}

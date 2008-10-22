@@ -185,6 +185,24 @@ sub sql_in {
     return "( " . join(" OR ", @in_str) . " )";
 }
 
+sub bz_drop_table {
+     my ($self, $name) = @_;
+     my $table_exists = $self->bz_table_info($name);
+     if ($table_exists) {
+         $self->_bz_drop_fks($name);
+         $self->SUPER::bz_drop_table($name);
+     }
+}
+
+# Dropping all FKs for a specified table. 
+sub _bz_drop_fks {
+    my ($self, $table) = @_;
+    my @columns = $self->_bz_real_schema->get_table_columns($table);
+    foreach my $column (@columns) {
+        $self->bz_drop_fk($table, $column);
+    }
+}
+
 sub _fix_empty {
     my ($string) = @_;
     $string = '' if $string eq EMPTY_STRING;

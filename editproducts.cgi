@@ -88,8 +88,9 @@ if (Bugzilla->params->{'useclassification'}
     && !$classification_name
     && !$product_name)
 {
-    $vars->{'classifications'} = $user->get_selectable_classifications;
-    
+    $vars->{'classifications'} = $user->in_group('editcomponents') ?
+      [Bugzilla::Classification::get_all_classifications] : $user->get_selectable_classifications;
+
     $template->process("admin/products/list-classifications.html.tmpl", $vars)
         || ThrowTemplateError($template->error());
     exit;
@@ -453,7 +454,8 @@ if ($action eq 'delete') {
     $vars->{'no_edit_product_link'} = 1;
 
     if (Bugzilla->params->{'useclassification'}) {
-        $vars->{'classifications'} = $user->get_selectable_classifications;
+        $vars->{'classifications'} = $user->in_group('editcomponents') ?
+          [Bugzilla::Classification::get_all_classifications] : $user->get_selectable_classifications;
 
         $template->process("admin/products/list-classifications.html.tmpl", $vars)
           || ThrowTemplateError($template->error());

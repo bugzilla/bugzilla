@@ -92,12 +92,7 @@ sub SaveAccount {
 
         my $oldpassword = $cgi->param('Bugzilla_password');
 
-        # Wide characters cause crypt to die
-        if (Bugzilla->params->{'utf8'}) {
-            utf8::encode($oldpassword) if utf8::is_utf8($oldpassword);
-        } 
-
-        if (crypt($oldpassword, $oldcryptedpwd) ne $oldcryptedpwd) 
+        if (bz_crypt($oldpassword, $oldcryptedpwd) ne $oldcryptedpwd) 
         {
             ThrowUserError("old_password_incorrect");
         }

@@ -464,21 +464,23 @@ sub file_mod_time {
 }
 
 sub bz_crypt {
-    my ($password) = @_;
+    my ($password, $salt) = @_;
 
-    # The list of characters that can appear in a salt.  Salts and hashes
-    # are both encoded as a sequence of characters from a set containing
-    # 64 characters, each one of which represents 6 bits of the salt/hash.
-    # The encoding is similar to BASE64, the difference being that the
-    # BASE64 plus sign (+) is replaced with a forward slash (/).
-    my @saltchars = (0..9, 'A'..'Z', 'a'..'z', '.', '/');
+    if (!defined $salt) {
+        # The list of characters that can appear in a salt.  Salts and hashes
+        # are both encoded as a sequence of characters from a set containing
+        # 64 characters, each one of which represents 6 bits of the salt/hash.
+        # The encoding is similar to BASE64, the difference being that the
+        # BASE64 plus sign (+) is replaced with a forward slash (/).
+        my @saltchars = (0..9, 'A'..'Z', 'a'..'z', '.', '/');
 
-    # Generate the salt.  We use an 8 character (48 bit) salt for maximum
-    # security on systems whose crypt uses MD5.  Systems with older
-    # versions of crypt will just use the first two characters of the salt.
-    my $salt = '';
-    for ( my $i=0 ; $i < 8 ; ++$i ) {
-        $salt .= $saltchars[rand(64)];
+        # Generate the salt.  We use an 8 character (48 bit) salt for maximum
+        # security on systems whose crypt uses MD5.  Systems with older
+        # versions of crypt will just use the first two characters of the salt.
+        $salt = '';
+        for ( my $i=0 ; $i < 8 ; ++$i ) {
+            $salt .= $saltchars[rand(64)];
+        }
     }
 
     # Wide characters cause crypt to die
@@ -488,6 +490,10 @@ sub bz_crypt {
     
     # Crypt the password.
     my $cryptedpassword = crypt($password, $salt);
+
+    # HACK: Perl has bug where returned crypted password is considered tainted
+    # Upstream Bug: http://rt.perl.org/rt3/Public/Bug/Display.html?id=59998
+    trick_taint($cryptedpassword) unless (is_tainted($password) || is_tainted($salt));
 
     # Return the crypted password.
     return $cryptedpassword;
@@ -914,9 +920,10 @@ of the "mtime" parameter of the perl "stat" function.
 
 =over 4
 
-=item C<bz_crypt($password)>
+=item C<bz_crypt($password, $salt)>
 
 Takes a string and returns a C<crypt>ed value for it, using a random salt.
+An optional salt string may also be passed in.
 
 Please always use this function instead of the built-in perl "crypt"
 when initially encrypting a password.

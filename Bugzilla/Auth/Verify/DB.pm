@@ -53,14 +53,9 @@ sub check_credentials {
         "SELECT cryptpassword FROM profiles WHERE userid = ?",
         undef, $user_id);
 
-    # Wide characters cause crypt to die
-    if (Bugzilla->params->{'utf8'}) {
-        utf8::encode($password) if utf8::is_utf8($password);
-    }
-
     # Using the internal crypted password as the salt,
     # crypt the password the user entered.
-    my $entered_password_crypted = crypt($password, $real_password_crypted);
+    my $entered_password_crypted = bz_crypt($password, $real_password_crypted);
  
     return { failure => AUTH_LOGINFAILED }
         if $entered_password_crypted ne $real_password_crypted;

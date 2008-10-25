@@ -45,15 +45,6 @@ use constant FIELD_MAP => {
     platform    => 'rep_platform',
 };
 
-use constant GLOBAL_SELECT_FIELDS => qw(
-    bug_severity
-    bug_status
-    op_sys
-    priority
-    rep_platform
-    resolution
-);
-
 use constant PRODUCT_SPECIFIC_FIELDS => qw(version target_milestone component);
 
 ######################################################
@@ -192,13 +183,11 @@ sub legal_values {
     my ($self, $params) = @_;
     my $field = FIELD_MAP->{$params->{field}} || $params->{field};
 
-    my @custom_select = Bugzilla->get_fields(
-        {custom => 1, type => [FIELD_TYPE_SINGLE_SELECT, FIELD_TYPE_MULTI_SELECT]});
-    # We only want field names.
-    @custom_select = map {$_->name} @custom_select;
+    my @global_selects = Bugzilla->get_fields(
+        {type => [FIELD_TYPE_SINGLE_SELECT, FIELD_TYPE_MULTI_SELECT]});
 
     my $values;
-    if (grep($_ eq $field, GLOBAL_SELECT_FIELDS, @custom_select)) {
+    if (grep($_->name eq $field, @global_selects)) {
         $values = get_legal_field_values($field);
     }
     elsif (grep($_ eq $field, PRODUCT_SPECIFIC_FIELDS)) {

@@ -53,12 +53,6 @@ use Date::Parse;
 # to, in order.
 use constant SPECIAL_ORDER => {
     'bugs.target_milestone' => [ 'ms_order.sortkey','ms_order.value' ],
-    'bugs.bug_status' => [ 'bug_status.sortkey','bug_status.value' ],
-    'bugs.rep_platform' => [ 'rep_platform.sortkey','rep_platform.value' ],
-    'bugs.priority' => [ 'priority.sortkey','priority.value' ],
-    'bugs.op_sys' => [ 'op_sys.sortkey','op_sys.value' ],
-    'bugs.resolution' => [ 'resolution.sortkey', 'resolution.value' ],
-    'bugs.bug_severity' => [ 'bug_severity.sortkey','bug_severity.value' ]
 };
 
 # When we add certain fields to the ORDER BY, we need to then add a
@@ -66,12 +60,6 @@ use constant SPECIAL_ORDER => {
 # the join statements that need to be added.
 use constant SPECIAL_ORDER_JOIN => {
     'bugs.target_milestone' => 'LEFT JOIN milestones AS ms_order ON ms_order.value = bugs.target_milestone AND ms_order.product_id = bugs.product_id',
-    'bugs.bug_status' => 'LEFT JOIN bug_status ON bug_status.value = bugs.bug_status',
-    'bugs.rep_platform' => 'LEFT JOIN rep_platform ON rep_platform.value = bugs.rep_platform',
-    'bugs.priority' => 'LEFT JOIN priority ON priority.value = bugs.priority',
-    'bugs.op_sys' => 'LEFT JOIN op_sys ON op_sys.value = bugs.op_sys',
-    'bugs.resolution' => 'LEFT JOIN resolution ON resolution.value = bugs.resolution',
-    'bugs.bug_severity' => 'LEFT JOIN bug_severity ON bug_severity.value = bugs.bug_severity'
 };
 
 # Create a new Search
@@ -117,8 +105,8 @@ sub init {
     my %special_order      = %{SPECIAL_ORDER()};
     my %special_order_join = %{SPECIAL_ORDER_JOIN()};
 
-    my @select_fields = Bugzilla->get_fields({ type => FIELD_TYPE_SINGLE_SELECT,
-                                               obsolete => 0 });
+    my @select_fields = 
+        Bugzilla->get_fields({ type => FIELD_TYPE_SINGLE_SELECT });
     
     my @multi_select_fields = Bugzilla->get_fields({ type => FIELD_TYPE_MULTI_SELECT,
                                                      obsolete => 0 });
@@ -220,10 +208,9 @@ sub init {
         }
     }
     
-    my @legal_fields = ("product", "version", "rep_platform", "op_sys",
-                        "bug_status", "resolution", "priority", "bug_severity",
-                        "assigned_to", "reporter", "component", "classification",
-                        "target_milestone", "bug_group");
+    my @legal_fields = ("product", "version", "assigned_to", "reporter", 
+                        "component", "classification", "target_milestone",
+                        "bug_group");
 
     # Include custom select fields.
     push(@legal_fields, map { $_->name } @select_fields);

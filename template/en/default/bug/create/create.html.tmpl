@@ -162,6 +162,14 @@ function handleWantsAttachment(wants_attachment) {
 -->
 </script>
 
+[% USE Bugzilla %]
+[% SET select_fields = {} %]
+[% FOREACH field = Bugzilla.get_fields(
+  { type => constants.FIELD_TYPE_SINGLE_SELECT, custom => 0 })
+%]
+  [% select_fields.${field.name} = field %]
+[% END %]
+
 <form name="Create" id="Create" method="post" action="post_bug.cgi"
       enctype="multipart/form-data">
 <input type="hidden" name="product" value="[% product.name FILTER html %]">
@@ -235,18 +243,21 @@ function handleWantsAttachment(wants_attachment) {
       </select>
     </td>
 
-    [% sel = { description => 'Severity', name => 'bug_severity' } %]
-    [% INCLUDE select %]
+    [% INCLUDE bug/field.html.tmpl
+      bug = default, field = select_fields.bug_severity, editable = 1, 
+      value = default.bug_severity %]
   </tr>
 
   <tr>
-    [% sel = { description => 'Platform', name => 'rep_platform' } %]
-    [% INCLUDE select %]
+    [% INCLUDE bug/field.html.tmpl
+      bug = default, field = select_fields.rep_platform, editable = 1,
+      value = default.rep_platform %]
   </tr>
 
   <tr>
-    [% sel = { description => 'OS', name => 'op_sys' } %]
-    [% INCLUDE select %]
+    [% INCLUDE bug/field.html.tmpl 
+       bug = default, field = select_fields.op_sys, editable = 1, 
+       value = default.op_sys %]
   </tr>
 </tbody>
 
@@ -260,12 +271,11 @@ function handleWantsAttachment(wants_attachment) {
     [% END %]
 
     [% IF Param('letsubmitterchoosepriority') %]
-      [% sel = { description => 'Priority', name => 'priority' } %]
-      [% INCLUDE select %]
+      [% INCLUDE bug/field.html.tmpl
+        bug = default, field = select_fields.priority, editable = 1, 
+        value = default.priority %]
     [% ELSE %]
-      <td colspan="2">
-        <input type="hidden" name="priority" value="[% default.priority FILTER html %]">
-      </td>
+      <td colspan="2">&nbsp;</td>
     [% END %]
   </tr>
 </tbody>
@@ -437,7 +447,9 @@ function handleWantsAttachment(wants_attachment) {
     [% NEXT UNLESS field.enter_bug %]
     [% SET value = ${field.name}.defined ? ${field.name} : "" %]
     <tr>
-      [% PROCESS bug/field.html.tmpl editable=1 value_span=3 %]
+      [% INCLUDE bug/field.html.tmpl 
+        bug = default, field = field, value = value, editable = 1, 
+        value_span = 3 %]
     </tr>
   [% END %]
 
@@ -617,7 +629,7 @@ function handleWantsAttachment(wants_attachment) {
   [% END %]
 
   <td>
-    <select name="[% sel.name %]">
+    <select name="[% sel.name %]" id="[% sel.name %]">
     [%- FOREACH x = ${sel.name} %]
       <option value="[% x FILTER html %]"
         [% " selected=\"selected\"" IF x == default.${sel.name} %]>
@@ -628,5 +640,15 @@ function handleWantsAttachment(wants_attachment) {
         [% END %]</option>
     [% END %]
     </select>
+
+    [% IF sel.name == "bug_status" %]
+      [% FOREACH controlled = select_fields.bug_status.controls_visibility_of %]
+        <script type="text/javascript">
+          showFieldWhen('[% controlled.name FILTER js %]',
+                        'bug_status',
+                        '[% controlled.visibility_value.name FILTER js %]');
+        </script>
+      [% END %]
+    [% END %]
   </td>
 [% END %]

@@ -84,8 +84,8 @@
         <select name="visibility_field_id" id="visibility_field_id"
                 onchange="onChangeVisibilityField()">
           <option></option>
-          [% FOREACH sel_field = Bugzilla.active_custom_fields %]
-            [% NEXT IF !sel_field.is_select || sel_field.id == field.id %]
+          [% FOREACH sel_field = Bugzilla.get_fields({ is_select => 1 }) %]
+            [% NEXT IF sel_field.id == field.id %]
             <option value="[% sel_field.id FILTER html %]"
              [% ' selected="selected"' 
                 IF sel_field.id == field.visibility_field.id %]>

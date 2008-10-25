@@ -29,18 +29,6 @@ use Bugzilla::Token;
 use Bugzilla::Field;
 use Bugzilla::Field::Choice;
 
-# List of different tables that contain the changeable field values
-# (the old "enums.") Keep them in alphabetical order by their 
-# English name from field-descs.html.tmpl.
-# Format: Array of valid field names.
-my @valid_fields = ('op_sys', 'rep_platform', 'priority', 'bug_severity',
-                     'bug_status', 'resolution');
-
-# Add custom select fields.
-my @custom_fields = Bugzilla->get_fields(
-    {custom => 1, type => [FIELD_TYPE_SINGLE_SELECT, FIELD_TYPE_MULTI_SELECT]});
-push(@valid_fields, map { $_->name } @custom_fields);
-
 ###############
 # Subroutines #
 ###############
@@ -87,8 +75,7 @@ my $token  = $cgi->param('token');
 # field = '' -> Show nice list of fields
 #
 if (!$cgi->param('field')) {
-    # Convert @valid_fields into the format that select-field wants.
-    my @field_list = map({ name => $_ }, @valid_fields);
+    my @field_list = Bugzilla->get_fields({ is_select => 1 });
 
     $vars->{'fields'} = \@field_list;
     $template->process("admin/fieldvalues/select-field.html.tmpl", $vars)
@@ -98,7 +85,7 @@ if (!$cgi->param('field')) {
 
 # At this point, the field must be defined.
 my $field = Bugzilla::Field->check($cgi->param('field'));
-if (!grep($_ eq $field->name, @valid_fields)) {
+if (!$field->is_select) {
     ThrowUserError('fieldname_invalid', { field => $field });
 }
 $vars->{'field'} = $field;

@@ -28,6 +28,8 @@
   #   allow_dont_change: display the --do_not_change-- option for select fields.
   #   value_span: A colspan for the table cell containing
   #               the field value.
+  #   no_tds: boolean; if true, don't display the label <th> or the 
+  #           wrapping <td> for the field.
   #   bug (optional): The current Bugzilla::Bug being displayed, or a hash 
   #                   with default field values being displayed on a page.
   #%]
@@ -41,18 +43,28 @@
   [% END %]
 [% END %]
 
-<th class="field_label [% ' bz_hidden_field' IF hidden %]"
-    id="field_label_[% field.name FILTER html %]">
-  [% IF editable %]
-    <label for="[% field.name FILTER html %]">
-  [% END %]
-    [% field_descs.${field.name} FILTER html %]:
-  [% '</label>' IF editable %]
-</th>
+[% IF NOT no_tds %]
+  <th class="field_label [% ' bz_hidden_field' IF hidden %]"
+      id="field_label_[% field.name FILTER html %]">
+    [% IF editable %]
+      <label for="[% field.name FILTER html %]">
+    [% END %]
+      [% IF !field.custom %]
+        <a href="page.cgi?id=fields.html#[% field.name FILTER url_quote %]">
+      [% END -%]
+        [% field_descs.${field.name} FILTER html %]:
+      [%- IF !field.custom %]
+        </a>
+      [% END %]
+    [% '</label>' IF editable %]
+  </th>
+[% END %]
 
+[% IF NOT no_tds %]
 <td class="field_value [% ' bz_hidden_field' IF hidden %]"
     id="field_container_[% field.name FILTER html %]" 
     [% " colspan=\"$value_span\"" FILTER none IF value_span %]>
+[% END %]
 [% IF editable %]
   [% SWITCH field.type %]
     [% CASE constants.FIELD_TYPE_FREETEXT %]
@@ -153,4 +165,4 @@
 [% ELSE %]
   [% value.join(', ') FILTER html %]
 [% END %]
-</td>
+[% '</td>' IF NOT no_tds %]

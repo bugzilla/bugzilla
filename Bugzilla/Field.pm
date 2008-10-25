@@ -125,6 +125,8 @@ use constant UPDATE_COLUMNS => qw(
     enter_bug
     visibility_field_id
     visibility_value_id
+
+    type
 );
 
 # How various field types translate into SQL data definitions.
@@ -148,16 +150,22 @@ use constant DEFAULT_FIELDS => (
     {name => 'classification', desc => 'Classification', in_new_bugmail => 1},
     {name => 'product',      desc => 'Product',    in_new_bugmail => 1},
     {name => 'version',      desc => 'Version',    in_new_bugmail => 1},
-    {name => 'rep_platform', desc => 'Platform',   in_new_bugmail => 1},
+    {name => 'rep_platform', desc => 'Platform',   in_new_bugmail => 1,
+     type => FIELD_TYPE_SINGLE_SELECT},
     {name => 'bug_file_loc', desc => 'URL',        in_new_bugmail => 1},
-    {name => 'op_sys',       desc => 'OS/Version', in_new_bugmail => 1},
-    {name => 'bug_status',   desc => 'Status',     in_new_bugmail => 1},
+    {name => 'op_sys',       desc => 'OS/Version', in_new_bugmail => 1,
+     type => FIELD_TYPE_SINGLE_SELECT},
+    {name => 'bug_status',   desc => 'Status',     in_new_bugmail => 1,
+     type => FIELD_TYPE_SINGLE_SELECT},
     {name => 'status_whiteboard', desc => 'Status Whiteboard',
      in_new_bugmail => 1},
     {name => 'keywords',     desc => 'Keywords',   in_new_bugmail => 1},
-    {name => 'resolution',   desc => 'Resolution'},
-    {name => 'bug_severity', desc => 'Severity',   in_new_bugmail => 1},
-    {name => 'priority',     desc => 'Priority',   in_new_bugmail => 1},
+    {name => 'resolution',   desc => 'Resolution',
+     type => FIELD_TYPE_SINGLE_SELECT},
+    {name => 'bug_severity', desc => 'Severity',   in_new_bugmail => 1,
+     type => FIELD_TYPE_SINGLE_SELECT},
+    {name => 'priority',     desc => 'Priority',   in_new_bugmail => 1,
+     type => FIELD_TYPE_SINGLE_SELECT},
     {name => 'component',    desc => 'Component',  in_new_bugmail => 1},
     {name => 'assigned_to',  desc => 'AssignedTo', in_new_bugmail => 1},
     {name => 'reporter',     desc => 'ReportedBy', in_new_bugmail => 1},
@@ -199,6 +207,20 @@ use constant DEFAULT_FIELDS => (
     {name => 'attachments.isurl',     desc => 'Attachment is a URL'},
     {name => "owner_idle_time",       desc => "Time Since Assignee Touched"},
 );
+
+################
+# Constructors #
+################
+
+# Override match to add is_select.
+sub match {
+    my $self = shift;
+    my ($params) = @_;
+    if (delete $params->{is_select}) {
+        $params->{type} = [FIELD_TYPE_SINGLE_SELECT, FIELD_TYPE_MULTI_SELECT];
+    }
+    return $self->SUPER::match(@_);
+}
 
 ##############
 # Validators #
@@ -551,6 +573,9 @@ sub set_visibility_value {
     delete $self->{visibility_value};
 }
 
+# This is only used internally by upgrade code in Bugzilla::Field.
+sub _set_type { $_[0]->set('type', $_[1]); }
+
 =pod
 
 =head2 Instance Method
@@ -766,6 +791,7 @@ sub populate_field_definitions {
         if ($field) {
             $field->set_description($def->{desc});
             $field->set_in_new_bugmail($def->{in_new_bugmail});
+            $field->_set_type($def->{type}) if $def->{type};
             $field->update();
         }
         else {
@@ -773,8 +799,7 @@ sub populate_field_definitions {
                 $def->{mailhead} = $def->{in_new_bugmail};
                 delete $def->{in_new_bugmail};
             }
-            $def->{description} = $def->{desc};
-            delete $def->{desc};
+            $def->{description} = delete $def->{desc};
             Bugzilla::Field->create($def);
         }
     }

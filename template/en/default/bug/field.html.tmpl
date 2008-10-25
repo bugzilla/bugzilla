@@ -28,9 +28,21 @@
   #   allow_dont_change: display the --do_not_change-- option for select fields.
   #   value_span: A colspan for the table cell containing
   #               the field value.
+  #   bug (optional): The current Bugzilla::Bug being displayed, or a hash 
+  #                   with default field values being displayed on a page.
   #%]
 
-<th class="field_label">
+[% SET hidden = 0 %]
+[% IF field.visibility_field.defined %]
+  [% IF !bug.${field.visibility_field.name}
+         .contains(field.visibility_value.name) 
+  %]
+    [% SET hidden = 1 %]
+  [% END %]
+[% END %]
+
+<th class="field_label [% ' bz_hidden_field' IF hidden %]"
+    id="field_label_[% field.name FILTER html %]">
   [% IF editable %]
     <label for="[% field.name FILTER html %]">
   [% END %]
@@ -38,7 +50,9 @@
   [% '</label>' IF editable %]
 </th>
 
-<td class="field_value" [% "colspan=\"$value_span\"" FILTER none IF value_span %]>
+<td class="field_value [% ' bz_hidden_field' IF hidden %]"
+    id="field_container_[% field.name FILTER html %]" 
+    [% " colspan=\"$value_span\"" FILTER none IF value_span %]>
 [% IF editable %]
   [% SWITCH field.type %]
     [% CASE constants.FIELD_TYPE_FREETEXT %]
@@ -120,6 +134,14 @@
        [% INCLUDE global/textarea.html.tmpl
            id = field.name name = field.name minrows = 4 maxrows = 8
            cols = 60 defaultcontent = value %]
+  [% END %]
+
+  [% FOREACH controlled_field = field.controls_visibility_of %]
+    <script type="text/javascript">
+      showFieldWhen('[% controlled_field.name FILTER js %]',
+                    '[% field.name FILTER js %]',
+                    '[% controlled_field.visibility_value.name FILTER js %]');
+    </script>
   [% END %]
 [% ELSIF field.type == constants.FIELD_TYPE_TEXTAREA %]
   <div class="uneditable_textarea">[% value FILTER wrap_comment(60)

@@ -61,7 +61,9 @@
 
 <h2>Confirmation</h2>
 
-[% IF value.is_default || value.bug_count || (value_count == 1) %]
+[% IF value.is_default || value.bug_count || (value_count == 1)
+      || value.controls_visibility_of_fields.size 
+%]
 
   <p>Sorry, but the '[% value.name FILTER html %]' value cannot be deleted
     from the '[% field.description FILTER html %]' field for the following 
@@ -106,6 +108,17 @@
     [% IF value_count == 1 %]
       <li>'[% value.name FILTER html %]' is the last value for
         '[%- field.description FILTER html %]', and so it can not be deleted.
+      </li>
+    [% END %]
+
+    [% IF value.controls_visibility_of_fields.size %]
+      <li>This value controls the visibility of the following fields:<br>
+        [% FOREACH field = value.controls_visibility_of_fields %]
+          <a href="editfields.cgi?action=edit&name=
+                   [%- field.name FILTER url_quote %]">
+            [%- field.description FILTER html %] 
+            ([% field.name FILTER html %])</a><br>
+        [% END %]
       </li>
     [% END %]
   </ul>

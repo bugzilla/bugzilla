@@ -117,12 +117,10 @@ sub check {
     if (!ref $param) {
         $param = { name => $param };
     }
-    # Don't allow empty names.
-    if (exists $param->{name}) {
-        $param->{name} = trim($param->{name});
-        $param->{name} || ThrowUserError('object_name_not_specified',
-                                          { class => $class });
-    }
+    # Don't allow empty names or ids.
+    my $check_param = exists $param->{id} ? $param->{id} : $param->{name};
+    $check_param = trim($check_param);
+    $check_param || ThrowUserError('object_not_specified', { class => $class });
     my $obj = $class->new($param)
         || ThrowUserError('object_does_not_exist', {%$param, class => $class});
     return $obj;

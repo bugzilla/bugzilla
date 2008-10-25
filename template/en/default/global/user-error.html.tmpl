@@ -402,6 +402,17 @@
     ([% field.description FILTER html %]) already exists. Please
     choose another name.
 
+  [% ELSIF error == "field_cant_control_self" %]
+    [% title = "Field Can't Control Itself" %]
+    The [% field.description FILTER html %] field can't be set to control 
+    itself.
+
+  [% ELSIF error == "field_control_must_be_select" %]
+    [% title = "Invalid Field Type Selected" %]
+    Only drop-down and multi-select fields can be used to control
+    the visibility of other fields. [% field.description FILTER html %]
+    is not the right type of field.
+
   [% ELSIF error == "field_invalid_name" %]
     [% title = "Invalid Field Name" %]
     '[% name FILTER html %]' is not a valid name for a field.
@@ -429,6 +440,12 @@
     [% title = "Field Value Already Exists" %]
     The value '[% value.name FILTER html %]' already exists for the
     [%+ field.description FILTER html %] field.
+
+  [% ELSIF error == "fieldvalue_is_controller" %]
+    [% title = "Value Controls Other Fields" %]
+    You cannot delete the '[% value.name FILTER html %]' value for this
+    field because it controls the visibility of the following other fields:
+    [%+ fields.join(', ') FILTER html %].
 
   [% ELSIF error == "fieldvalue_is_default" %]
     [% title = "Specified Field Value Is Default" %]
@@ -1168,7 +1185,7 @@
     in the <em>[% field_descs.$field FILTER html %]</em> field 
     is less than the minimum allowable value of '[% min_num FILTER html %]'.
 
-  [% ELSIF error == "object_name_not_specified" %]
+  [% ELSIF error == "object_not_specified" %]
     [% type = BLOCK %][% INCLUDE object_name class = class %][% END %]
     [% title = BLOCK %][% type FILTER ucfirst FILTER html %] Not 
     Specified[% END %]
@@ -1177,7 +1194,12 @@
   [% ELSIF error == "object_does_not_exist" %]
     [% type = BLOCK %][% INCLUDE object_name class = class %][% END %]
     [% title = BLOCK %]Invalid [% type FILTER ucfirst FILTER html %][% END %]
-    There is no [% type FILTER html %] named '[% name FILTER html %]'
+    There is no [% type FILTER html %] 
+    [% IF id.defined %]
+      with the id '[% id FILTER html %]'
+    [% ELSE %]
+      named '[% name FILTER html %]'
+    [% END %]
     [% IF product.defined %]
       in the '[% product.name FILTER html %]' product
     [% END %].

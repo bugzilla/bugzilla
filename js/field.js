@@ -323,3 +323,39 @@ function boldOnChange(e, field_id){
         }
     }
 }
+
+/**
+ * Says that a field should only be displayed when another field has
+ * a certain value. May only be called after the controller has already
+ * been added to the DOM.
+ */
+function showFieldWhen(controlled_id, controller_id, value) {
+    var controller = document.getElementById(controller_id);
+    // Note that we don't get an object for "controlled" here, because it
+    // might not yet exist in the DOM. We just pass along its id.
+    YAHOO.util.Event.addListener(controller, 'change', 
+        handleVisControllerValueChange, [controlled_id, controller, value]);
+}
+
+/**
+ * Called by showFieldWhen when a field's visibility controller 
+ * changes values. 
+ */
+function handleVisControllerValueChange(e, args) {
+    var controlled_id = args[0];
+    var controller = args[1];
+    var value = args[2];
+
+    var label_container = 
+        document.getElementById('field_label_' + controlled_id);
+    var field_container =
+        document.getElementById('field_container_' + controlled_id);
+    if (bz_valueSelected(controller, value)) {
+        YAHOO.util.Dom.removeClass(label_container, 'bz_hidden_field');
+        YAHOO.util.Dom.removeClass(field_container, 'bz_hidden_field');
+    }
+    else {
+        YAHOO.util.Dom.addClass(label_container, 'bz_hidden_field');
+        YAHOO.util.Dom.addClass(field_container, 'bz_hidden_field');
+    }
+}

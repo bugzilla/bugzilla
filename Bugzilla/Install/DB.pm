@@ -86,6 +86,9 @@ sub update_fielddefs_definition {
         }
     }
 
+    $dbh->bz_add_column('fielddefs', 'visibility_field_id', {TYPE => 'INT3'});
+    $dbh->bz_add_column('fielddefs', 'visibility_value_id', {TYPE => 'INT2'});
+
     # Remember, this is not the function for adding general table changes.
     # That is below. Add new changes to the fielddefs table above this
     # comment.

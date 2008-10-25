@@ -1209,12 +1209,16 @@ sub _check_references {
     my $foreign_table = $fk->{TABLE};
     my $foreign_column = $fk->{COLUMN};
 
+    # We use table aliases because sometimes we join a table to itself,
+    # and we can't use the same table name on both sides of the join.
+    # We also can't use the words "table" or "foreign" because those are
+    # reserved words.
     my $bad_values = $self->selectcol_arrayref(
-        "SELECT DISTINCT $table.$column 
-           FROM $table LEFT JOIN $foreign_table
-                ON $table.$column = $foreign_table.$foreign_column
-          WHERE $foreign_table.$foreign_column IS NULL
-                AND $table.$column IS NOT NULL");
+        "SELECT DISTINCT tabl.$column 
+           FROM $table AS tabl LEFT JOIN $foreign_table AS forn
+                ON tabl.$column = forn.$foreign_column
+          WHERE forn.$foreign_column IS NULL
+                AND tabl.$column IS NOT NULL");
 
     if (@$bad_values) {
         my $delete_action = $fk->{DELETE} || '';

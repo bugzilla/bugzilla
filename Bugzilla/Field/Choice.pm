@@ -186,6 +186,10 @@ sub remove_from_db {
         ThrowUserError("fieldvalue_still_has_bugs",
                        { field => $self->field, value => $self });
     }
+    if (my @vis_fields = @{ $self->controls_visibility_of_fields }) {
+        ThrowUserError('fieldvalue_is_controller',
+            { value => $self, fields => [map($_->name, @vis_fields)] });
+    }
     $self->SUPER::remove_from_db();
 }
 
@@ -246,6 +250,14 @@ sub is_static {
         return $self->name eq '---' ? 1 : 0;
     }
     return 0;
+}
+
+sub controls_visibility_of_fields {
+    my $self = shift;
+    $self->{controls_visibility_of_fields} ||= Bugzilla::Field->match(
+        { visibility_field_id => $self->field->id, 
+          visibility_value_id => $self->id });
+    return $self->{controls_visibility_of_fields};
 }
 
 ############

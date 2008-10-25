@@ -154,3 +154,68 @@ function bz_isValueInArray(aArray, aValue)
 
   return false;
 }
+
+/**
+ * Create wanted options in a select form control.
+ *
+ * @param  aSelect        Select form control to manipulate.
+ * @param  aValue         Value attribute of the new option element.
+ * @param  aTextValue     Value of a text node appended to the new option
+ *                        element.
+ * @return                Created option element.
+ */
+function bz_createOptionInSelect(aSelect, aTextValue, aValue) {
+  var myOption = new Option(aTextValue, aValue);
+  aSelect.appendChild(myOption);
+  return myOption;
+}
+
+/**
+ * Clears all options from a select form control.
+ *
+ * @param  aSelect    Select form control of which options to clear.
+ */
+function bz_clearOptions(aSelect) {
+
+  var length = aSelect.options.length;
+
+  for (var i = 0; i < length; i++) {
+    aSelect.removeChild(aSelect.options[0]);
+  }
+}
+
+/**
+ * Takes an array and moves all the values to an select.
+ *
+ * @param aSelect         Select form control to populate. Will be cleared
+ *                        before array values are created in it.
+ * @param aArray          Array with values to populate select with.
+ */
+function bz_populateSelectFromArray(aSelect, aArray) {
+  // Clear the field
+  bz_clearOptions(aSelect);
+
+  for (var i = 0; i < aArray.length; i++) {
+    var item = aArray[i];
+    bz_createOptionInSelect(aSelect, item[1], item[0]);
+  }
+}
+
+/**
+ * Tells you whether or not a particular value is selected in a select,
+ * whether it's a multi-select or a single-select. The check is 
+ * case-sensitive.
+ *
+ * @param aSelect        The select you're checking.
+ * @param aValue         The value that you want to know about.
+ */
+function bz_valueSelected(aSelect, aValue) {
+    var options = aSelect.options;
+    for (var i = 0; i < options.length; i++) {
+        if (options[i].selected && options[i].value == aValue) {
+            return true;
+        }
+    }
+    return false;
+}
+

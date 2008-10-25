@@ -77,6 +77,8 @@ use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Util;
 
+use Scalar::Util qw(blessed);
+
 ###############################
 ####    Initialization     ####
 ###############################
@@ -84,16 +86,18 @@ use Bugzilla::Util;
 use constant DB_TABLE   => 'fielddefs';
 use constant LIST_ORDER => 'sortkey, name';
 
-use constant DB_COLUMNS => (
-    'id',
-    'name',
-    'description',
-    'type',
-    'custom',
-    'mailhead',
-    'sortkey',
-    'obsolete',
-    'enter_bug',
+use constant DB_COLUMNS => qw(
+    id
+    name
+    description
+    type
+    custom
+    mailhead
+    sortkey
+    obsolete
+    enter_bug
+    visibility_field_id
+    visibility_value_id
 );
 
 use constant REQUIRED_CREATE_FIELDS => qw(name description);
@@ -106,6 +110,11 @@ use constant VALIDATORS => {
     obsolete    => \&_check_obsolete,
     sortkey     => \&_check_sortkey,
     type        => \&_check_type,
+    visibility_field_id => \&_check_control_field,
+};
+
+use constant UPDATE_VALIDATORS => {
+    visibility_value_id => \&_check_control_value,
 };
 
 use constant UPDATE_COLUMNS => qw(
@@ -114,6 +123,8 @@ use constant UPDATE_COLUMNS => qw(
     sortkey
     obsolete
     enter_bug
+    visibility_field_id
+    visibility_value_id
 );
 
 # How various field types translate into SQL data definitions.
@@ -259,6 +270,37 @@ sub _check_type {
     return $type;
 }
 
+sub _check_control_field {
+    my ($invocant, $field_id) = @_;
+    $field_id = trim($field_id);
+    return undef if !$field_id;
+    my $field = Bugzilla::Field->check({ id => $field_id });
+    if (blessed($invocant) && $field->id == $invocant->id) {
+        ThrowUserError('field_cant_control_self', { field => $field });
+    }
+    if (!$field->is_select) {
+        ThrowUserError('field_control_must_be_select',
+                       { field => $field });
+    }
+    return $field->id;
+}
+
+sub _check_control_value {
+    my ($invocant, $value_id, $field_id) = @_;
+    my $field;
+    if (blessed($invocant)) {
+        $field = $invocant->visibility_field;
+    }
+    elsif ($field_id) {
+        $field = $invocant->new($field_id);
+    }
+    # When no field is set, no value is set.
+    return undef if !$field;
+    my $value_obj = Bugzilla::Field::Choice->type($field)
+                    ->check({ id => $value_id });
+    return $value_obj->id;
+}
+
 =pod
 
 =head2 Instance Properties
@@ -362,6 +404,11 @@ sub enter_bug { return $_[0]->{enter_bug} }
 
 =over
 
+=item C<is_select>
+
+True if this is a C<FIELD_TYPE_SINGLE_SELECT> or C<FIELD_TYPE_MULTI_SELECT>
+field. It is only safe to call L</legal_values> if this is true.
+
 =item C<legal_values>
 
 Valid values for this field, as an array of L<Bugzilla::Field::Choice>
@@ -370,6 +417,11 @@ objects.
 =back
 
 =cut
+
+sub is_select { 
+    return ($_[0]->type == FIELD_TYPE_SINGLE_SELECT 
+            || $_[0]->type == FIELD_TYPE_MULTI_SELECT) ? 1 : 0 
+}
 
 sub legal_values {
     my $self = shift;
@@ -380,6 +432,76 @@ sub legal_values {
         $self->{'legal_values'} = \@values;
     }
     return $self->{'legal_values'};
+}
+
+=pod
+
+=over
+
+=item C<visibility_field>
+
+What field controls this field's visibility? Returns a C<Bugzilla::Field>
+object representing the field that controls this field's visibility.
+
+Returns undef if there is no field that controls this field's visibility.
+
+=back
+
+=cut
+
+sub visibility_field {
+    my $self = shift;
+    if ($self->{visibility_field_id}) {
+        $self->{visibility_field} ||= 
+            $self->new($self->{visibility_field_id});
+    }
+    return $self->{visibility_field};
+}
+
+=pod
+
+=over
+
+=item C<visibility_value>
+
+If we have a L</visibility_field>, then what value does that field have to
+be set to in order to show this field? Returns a L<Bugzilla::Field::Choice>
+or undef if there is no C<visibility_field> set.
+
+=back
+
+=cut
+
+
+sub visibility_value {
+    my $self = shift;
+    if ($self->{visibility_field_id}) {
+        require Bugzilla::Field::Choice;
+        $self->{visibility_value} ||=
+            Bugzilla::Field::Choice->type($self->visibility_field)->new(
+                $self->{visibility_value_id});
+    }
+    return $self->{visibility_value};
+}
+
+=pod
+
+=over
+
+=item C<controls_visibility_of>
+
+An arrayref of C<Bugzilla::Field> objects, representing fields that this
+field controls the visibility of.
+
+=back
+
+=cut
+
+sub controls_visibility_of {
+    my $self = shift;
+    $self->{controls_visibility_of} ||= 
+        Bugzilla::Field->match({ visibility_field_id => $self->id });
+    return $self->{controls_visibility_of};
 }
 
 =pod
@@ -404,6 +526,10 @@ They will throw an error if you try to set the values to something invalid.
 
 =item C<set_in_new_bugmail>
 
+=item C<set_visibility_field>
+
+=item C<set_visibility_value>
+
 =back
 
 =cut
@@ -413,6 +539,17 @@ sub set_enter_bug      { $_[0]->set('enter_bug',   $_[1]); }
 sub set_obsolete       { $_[0]->set('obsolete',    $_[1]); }
 sub set_sortkey        { $_[0]->set('sortkey',     $_[1]); }
 sub set_in_new_bugmail { $_[0]->set('mailhead',    $_[1]); }
+sub set_visibility_field {
+    my ($self, $value) = @_;
+    $self->set('visibility_field_id', $value);
+    delete $self->{visibility_field};
+    delete $self->{visibility_value};
+}
+sub set_visibility_value {
+    my ($self, $value) = @_;
+    $self->set('visibility_value_id', $value);
+    delete $self->{visibility_value};
+}
 
 =pod
 
@@ -487,9 +624,7 @@ sub remove_from_db {
         $dbh->bz_drop_column('bugs', $name);
     }
 
-    if ($type == FIELD_TYPE_SINGLE_SELECT
-        || $type == FIELD_TYPE_MULTI_SELECT)
-    {
+    if ($self->is_select) {
         # Delete the table that holds the legal values for this field.
         $dbh->bz_drop_field_tables($self);
     }
@@ -545,9 +680,7 @@ sub create {
             $dbh->bz_add_column('bugs', $name, SQL_DEFINITIONS->{$type});
         }
 
-        if ($type == FIELD_TYPE_SINGLE_SELECT
-                || $type == FIELD_TYPE_MULTI_SELECT) 
-        {
+        if ($field->is_select) {
             # Create the table that holds the legal values for this field.
             $dbh->bz_add_field_tables($field);
         }
@@ -571,6 +704,10 @@ sub run_create_validators {
         $params->{sortkey} = $dbh->selectrow_array(
             "SELECT MAX(sortkey) + 100 FROM fielddefs") || 100;
     }
+
+    $params->{visibility_value_id} = 
+        $class->_check_control_value($params->{visibility_value_id},
+                                     $params->{visibility_field_id});
 
     return $params;
 }

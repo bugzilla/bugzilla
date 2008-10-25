@@ -406,6 +406,10 @@ div.user_match {
     vertical-align: top;
 }
 
+.bz_hidden_field {
+    display: none;
+}
+
 .calendar_button {
     background: transparent url("global/calendar.png") no-repeat;
     width: 20px;

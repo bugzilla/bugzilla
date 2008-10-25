@@ -631,6 +631,10 @@ use constant ABSTRACT_SCHEMA => {
                             DEFAULT => 'FALSE'},
             enter_bug   => {TYPE => 'BOOLEAN', NOTNULL => 1,
                             DEFAULT => 'FALSE'},
+            visibility_field_id => {TYPE => 'INT3', 
+                                    REFERENCES => {TABLE  => 'fielddefs',
+                                                   COLUMN => 'id'}},
+            visibility_value_id => {TYPE => 'INT2'},
         ],
         INDEXES => [
             fielddefs_name_idx    => {FIELDS => ['name'],

@@ -19,21 +19,16 @@
 
 [% PROCESS "global/field-descs.none.tmpl" %]
 
+[% javascript = BLOCK %]
+  [% INCLUDE "admin/custom_fields/cf-js.js.tmpl" %]
+[% END %]
+
 [% PROCESS global/header.html.tmpl
            title = "Add a new Custom Field"
            onload = "document.getElementById('new_bugmail').disabled = true;"
+           javascript_urls = [ 'js/util.js' ]
            doc_section = "custom-fields.html#add-custom-fields"
 %]
-
-<script type="text/javascript">
-  <!--
-  // Disable a checkbox based on the state of another one.
-  function toggleCheckbox(this_checkbox, other_checkbox_id) {
-    var other_checkbox = document.getElementById(other_checkbox_id);
-    other_checkbox.disabled = !this_checkbox.checked;
-  }
-  //-->
-</script>
 
 <p>
   Adding custom fields can make the interface of [% terms.Bugzilla %] very
@@ -97,8 +92,26 @@
         <input type="text" id="sortkey" name="sortkey" size="6" maxlength="6">
       </td>
 
-      <th>&nbsp;</th>
-      <td>&nbsp;</td>
+      <th align="right">
+        <label for="visibility_field_id">Field only appears when:</label>
+      </th>
+      <td>
+        <select name="visibility_field_id" id="visibility_field_id"
+                onchange="onChangeVisibilityField()">
+          <option></option>
+          [% FOREACH sel_field = Bugzilla.active_custom_fields %]
+            [% NEXT IF !sel_field.is_select %]
+            <option value="[% sel_field.id FILTER html %]">
+              [% sel_field.description FILTER html %]
+              ([% sel_field.name FILTER html %])
+            </option>
+          [% END %]
+        </select>
+        <label for="visibility_value_id"><strong>is set to:</strong></label>
+        <select name="visibility_value_id" id="visibility_value_id">
+          <option value=""></option>
+        </select>
+      </td>
     </tr>
   </table>
   <p>

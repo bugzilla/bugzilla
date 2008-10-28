@@ -402,13 +402,13 @@ sub regenerate_stats {
     # database was created, and the end date from the current day.
     # If there were no bugs in the search, return early.
     my $query = q{SELECT } .
-                $dbh->sql_to_days('creation_ts') . q{ AS start, } . 
-                $dbh->sql_to_days('current_date') . q{ AS end, } . 
+                $dbh->sql_to_days('creation_ts') . q{ AS start_day, } . 
+                $dbh->sql_to_days('current_date') . q{ AS end_day, } . 
                 $dbh->sql_to_days("'1970-01-01'") . 
                  qq{ FROM bugs $from_product 
                    WHERE } . $dbh->sql_to_days('creation_ts') . 
                          qq{ IS NOT NULL $and_product 
-                ORDER BY start } . $dbh->sql_limit(1);
+                ORDER BY start_day } . $dbh->sql_limit(1);
     my ($start, $end, $base) = $dbh->selectrow_array($query, undef, @values);
 
     if (!defined $start) {

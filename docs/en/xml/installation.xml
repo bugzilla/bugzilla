@@ -1,5 +1,5 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"> -->
-<!-- $Id: installation.xml,v 1.157.2.3 2008/09/18 22:33:33 lpsolit%gmail.com Exp $ -->
+<!-- $Id: installation.xml,v 1.157.2.4 2008/10/28 01:02:17 mkanat%bugzilla.org Exp $ -->
 <chapter id="installing-bugzilla">
   <title>Installing Bugzilla</title>
 
@@ -786,36 +786,6 @@
             improving your installation's security.
           </para>
         </caution>
-        
-        <section id="install-setupdatabase">
-          <title>Allow large attachments</title>
-        
-          <para>
-            By default, MySQL will only accept packets up to 64Kb in size.
-            If you want to have attachments larger than this, you will need
-            to modify your <filename>/etc/my.cnf</filename> as below.
-          </para>
-
-          <screen>  [mysqld]
-  # Allow packets up to 1M
-  max_allowed_packet=1M</screen>
-
-          <para>
-            There is also a parameter in Bugzilla called 'maxattachmentsize'
-            (default = 1000 Kb) that controls the maximum allowable attachment
-            size. Attachments larger than <emphasis>either</emphasis> the 
-            'max_allowed_packet' or 'maxattachmentsize' value will not be
-            accepted by Bugzilla.
-          </para>
-
-          <note>
-            <para>
-              This does not affect Big Files, attachments that are stored directly
-              on disk instead of in the database.  Their maximum size is
-              controlled using the 'maxlocalattachment' parameter.
-            </para>
-          </note>
-        </section>
         
         <section>
           <title>Allow small words in full-text indexes</title>

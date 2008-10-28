@@ -84,6 +84,7 @@ use File::Basename;
     LIST_OF_BUGS
 
     COMMENT_COLS
+    MAX_COMMENT_LENGTH
 
     CMT_NORMAL
     CMT_DUPE_OF
@@ -260,6 +261,8 @@ use constant LIST_OF_BUGS => 1;
 
 # The column length for displayed (and wrapped) bug comments.
 use constant COMMENT_COLS => 80;
+# Used in _check_comment(). Gives the max length allowed for a comment.
+use constant MAX_COMMENT_LENGTH => 65535;
 
 # The type of bug comments.
 use constant CMT_NORMAL => 0;

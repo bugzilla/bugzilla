@@ -51,6 +51,11 @@ use Bugzilla::DB::Schema::Mysql;
 use List::Util qw(max);
 use Text::ParseWords;
 
+# This is how many comments of MAX_COMMENT_LENGTH we expect on a single bug.
+# In reality, you could have a LOT more comments than this, because 
+# MAX_COMMENT_LENGTH is big.
+use constant MAX_COMMENTS => 50;
+
 # This module extends the DB interface via inheritance
 use base qw(Bugzilla::DB);
 
@@ -92,6 +97,19 @@ sub new {
             $self->do("SET SESSION sql_mode = ?", undef, $new_sql_mode);
         }
     }
+
+    # The "comments" field of the bugs_fulltext table could easily exceed
+    # MySQL's default max_allowed_packet. Also, MySQL should never have
+    # a max_allowed_packet smaller than our max_attachment_size. However,
+    # if we've already set a max_allowed_packet in MySQL bigger than all
+    # of those, we should keep it.
+    my (undef, $current_max_allowed) = $self->selectrow_array(
+        q{SHOW VARIABLES LIKE 'max\_allowed\_packet'});
+    my $min_max_allowed_packet = MAX_COMMENTS * MAX_COMMENT_LENGTH;
+    my $max_allowed_packet = max($min_max_allowed_packet,
+                                 $current_max_allowed,
+                                 Bugzilla->params->{'maxattachmentsize'});
+    $self->do("SET SESSION max_allowed_packet = $max_allowed_packet");
 
     return $self;
 }

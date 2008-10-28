@@ -48,6 +48,8 @@ use Bugzilla::Util;
 use Bugzilla::Error;
 use Bugzilla::DB::Schema::Mysql;
 
+use Scalar::Util qw(max);
+
 # This is how many comments of MAX_COMMENT_LENGTH we expect on a single bug.
 # In reality, you could have a LOT more comments than this, because 
 # MAX_COMMENT_LENGTH is big.

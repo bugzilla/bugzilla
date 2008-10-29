@@ -993,8 +993,14 @@ use constant ABSTRACT_SCHEMA => {
 
     group_control_map => {
         FIELDS => [
-            group_id      => {TYPE => 'INT3', NOTNULL => 1},
-            product_id    => {TYPE => 'INT2', NOTNULL => 1},
+            group_id      => {TYPE => 'INT3', NOTNULL => 1,
+                              REFERENCES => {TABLE  => 'groups',
+                                             COLUMN => 'id',
+                                             DELETE => 'CASCADE'}},
+            product_id    => {TYPE => 'INT2', NOTNULL => 1,
+                              REFERENCES => {TABLE  =>  'products',
+                                             COLUMN =>  'id',
+                                             DELETE =>  'CASCADE'}},
             entry         => {TYPE => 'BOOLEAN', NOTNULL => 1},
             membercontrol => {TYPE => 'BOOLEAN', NOTNULL => 1},
             othercontrol  => {TYPE => 'BOOLEAN', NOTNULL => 1},
@@ -1022,8 +1028,14 @@ use constant ABSTRACT_SCHEMA => {
     # if GRANT_REGEXP - record was created by evaluating a regexp
     user_group_map => {
         FIELDS => [
-            user_id    => {TYPE => 'INT3', NOTNULL => 1},
-            group_id   => {TYPE => 'INT3', NOTNULL => 1},
+            user_id    => {TYPE => 'INT3', NOTNULL => 1,
+                           REFERENCES => {TABLE  => 'profiles',
+                                          COLUMN => 'userid',
+                                          DELETE => 'CASCADE'}},
+            group_id   => {TYPE => 'INT3', NOTNULL => 1,
+                           REFERENCES => {TABLE  => 'groups',
+                                          COLUMN => 'id',
+                                          DELETE => 'CASCADE'}},
             isbless    => {TYPE => 'BOOLEAN', NOTNULL => 1,
                            DEFAULT => 'FALSE'},
             grant_type => {TYPE => 'INT1', NOTNULL => 1,
@@ -1045,8 +1057,14 @@ use constant ABSTRACT_SCHEMA => {
     # if GROUP_VISIBLE - member groups may see grantor group
     group_group_map => {
         FIELDS => [
-            member_id  => {TYPE => 'INT3', NOTNULL => 1},
-            grantor_id => {TYPE => 'INT3', NOTNULL => 1},
+            member_id  => {TYPE => 'INT3', NOTNULL => 1,
+                           REFERENCES => {TABLE  => 'groups',
+                                          COLUMN => 'id',
+                                          DELETE => 'CASCADE'}},
+            grantor_id => {TYPE => 'INT3', NOTNULL => 1,
+                           REFERENCES => {TABLE  => 'groups',
+                                          COLUMN => 'id',
+                                          DELETE => 'CASCADE'}},
             grant_type => {TYPE => 'INT1', NOTNULL => 1,
                            DEFAULT => GROUP_MEMBERSHIP},
         ],

@@ -1622,12 +1622,9 @@ sub GetByWordList {
         my $word = $w;
         if ($word ne "") {
             $word =~ tr/A-Z/a-z/;
-            $word = $dbh->quote(quotemeta($word));
+            $word = $dbh->quote('(^|[^a-z0-9])' . quotemeta($word) . '($|[^a-z0-9])');
             trick_taint($word);
-            $word =~ s/^'//;
-            $word =~ s/'$//;
-            $word = '(^|[^a-z0-9])' . $word . '($|[^a-z0-9])';
-            push(@list, $dbh->sql_regexp($field, "'$word'"));
+            push(@list, $dbh->sql_regexp($field, $word));
         }
     }
 

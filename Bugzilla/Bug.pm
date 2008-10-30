@@ -791,6 +791,10 @@ sub update {
     $self->_sync_fulltext()
         if $self->{added_comments} || $changes->{short_desc};
 
+    # Remove obsolete internal variables.
+    delete $self->{'_old_assigned_to'};
+    delete $self->{'_old_qa_contact'};
+
     return $changes;
 }
 
@@ -1742,6 +1746,8 @@ sub set_alias { $_[0]->set('alias', $_[1]); }
 sub set_assigned_to {
     my ($self, $value) = @_;
     $self->set('assigned_to', $value);
+    # Store the old assignee. check_can_change_field() needs it.
+    $self->{'_old_assigned_to'} = $self->{'assigned_to_obj'}->id;
     delete $self->{'assigned_to_obj'};
 }
 sub reset_assigned_to {
@@ -1983,6 +1989,10 @@ sub set_product {
 sub set_qa_contact {
     my ($self, $value) = @_;
     $self->set('qa_contact', $value);
+    # Store the old QA contact. check_can_change_field() needs it.
+    if ($self->{'qa_contact_obj'}) {
+        $self->{'_old_qa_contact'} = $self->{'qa_contact_obj'}->id;
+    }
     delete $self->{'qa_contact_obj'};
 }
 sub reset_qa_contact {
@@ -3308,14 +3318,16 @@ sub check_can_change_field {
     # Make sure that a valid bug ID has been given.
     if (!$self->{'error'}) {
         # Allow the assignee to change anything else.
-        if ($self->{'assigned_to'} == $user->id) {
+        if ($self->{'assigned_to'} == $user->id
+            || $self->{'_old_assigned_to'} && $self->{'_old_assigned_to'} == $user->id)
+        {
             return 1;
         }
 
         # Allow the QA contact to change anything else.
         if (Bugzilla->params->{'useqacontact'}
-            && $self->{'qa_contact'}
-            && ($self->{'qa_contact'} == $user->id))
+            && (($self->{'qa_contact'} && $self->{'qa_contact'} == $user->id)
+                || ($self->{'_old_qa_contact'} && $self->{'_old_qa_contact'} == $user->id)))
         {
             return 1;
         }

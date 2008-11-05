@@ -208,6 +208,15 @@ sub sql_in {
     return "( " . join(" OR ", @in_str) . " )";
 }
 
+sub _bz_add_field_table {
+    my ($self, $name, $schema_ref, $type) = @_;
+    $self->SUPER::_bz_add_field_table($name, $schema_ref);
+    if (defined($type) && $type == FIELD_TYPE_MULTI_SELECT) {
+        my $uk_name = "UK_" . $self->_bz_schema->_hash_identifier($name . '_value');
+        $self->do("ALTER TABLE $name ADD CONSTRAINT $uk_name UNIQUE(value)");
+    }
+}
+
 sub bz_drop_table {
      my ($self, $name) = @_;
      my $table_exists = $self->bz_table_info($name);

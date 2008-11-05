@@ -117,7 +117,7 @@
     [% END %]
   [% END %]
 </ul>
-
+[% Hook.process("link-row") %]
 [% BLOCK link_to_documentation %]
     [% IF doc_section && Param('docs_urlbase') %]
       <li>

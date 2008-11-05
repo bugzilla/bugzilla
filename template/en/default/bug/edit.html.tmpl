@@ -250,6 +250,8 @@
                      cols      = constants.COMMENT_COLS
           %]
           <br>
+          <a name="bug_status_bottom"></a>
+          [% PROCESS bug/knob.html.tmpl %]
           <div id="knob-buttons">
             <input type="submit" value="Commit" id="commit">
             [% IF bug.user.canmove %]
@@ -413,7 +415,20 @@
       <b><a href="page.cgi?id=fields.html#status">Status</a></b>:
     </td>
     <td id="bz_field_status">
-      [% PROCESS bug/knob.html.tmpl %]
+      <span id="static_bug_status">
+        [% get_status(bug.bug_status) FILTER html %]
+        [% IF bug.resolution %]
+          [%+ get_resolution(bug.resolution) FILTER html %]
+          [% IF bug.dup_id %]
+            <span id="duplicate_display">of 
+            [% "${terms.bug} ${bug.dup_id}" FILTER bug_link(bug.dup_id) FILTER none %]</span>
+          [% END %]
+        [% END %]
+        [% IF bug.user.canedit || bug.user.isreporter %]
+          (<a href="#bug_status_bottom" 
+              onclick="document.getElementById('bug_status').focus();return false;">edit</a>)
+        [% END %]
+      </span>
     </td>
   </tr>
 [% END %]

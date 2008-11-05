@@ -680,11 +680,11 @@ sub bz_add_field_tables {
     my ($self, $field) = @_;
     
     $self->_bz_add_field_table($field->name,
-                                $self->_bz_schema->FIELD_TABLE_SCHEMA);
+                               $self->_bz_schema->FIELD_TABLE_SCHEMA, $field->type);
     if ($field->type == FIELD_TYPE_MULTI_SELECT) {
         my $ms_table = "bug_" . $field->name;
         $self->_bz_add_field_table($ms_table,
-            $self->_bz_schema->MULTI_SELECT_VALUE_TABLE, $field->type);
+            $self->_bz_schema->MULTI_SELECT_VALUE_TABLE);
 
         $self->bz_add_fk($ms_table, 'bug_id', {TABLE => 'bugs',
                                                COLUMN => 'bug_id',

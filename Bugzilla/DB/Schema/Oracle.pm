@@ -32,10 +32,13 @@ use strict;
 
 use base qw(Bugzilla::DB::Schema);
 use Carp qw(confess);
-use Digest::MD5  qw(md5_hex);
 use Bugzilla::Util;
 
-use constant ADD_COLUMN      => 'ADD';
+use constant ADD_COLUMN => 'ADD';
+# Whether this is true or not, this is what it needs to be in order for
+# hash_identifier to maintain backwards compatibility with versions before
+# 3.2rc2.
+use constant MAX_IDENTIFIER_LEN => 27;
 
 #------------------------------------------------------------------------------
 sub _initialize {
@@ -105,7 +108,7 @@ sub get_table_ddl {
 sub _get_create_index_ddl {
 
     my ($self, $table_name, $index_name, $index_fields, $index_type) = @_;
-    $index_name = "idx_" . $self->_hash_index_name($index_name);
+    $index_name = "idx_" . $self->_hash_identifier($index_name);
     if ($index_type eq 'FULLTEXT') {
         my $sql = "CREATE INDEX $index_name ON $table_name (" 
                   . join(',',@$index_fields)
@@ -123,12 +126,8 @@ sub get_drop_index_ddl {
     my $self = shift;
     my ($table, $name) = @_;
 
-    $name = 'idx_' . $self->_hash_index_name($name);
+    $name = 'idx_' . $self->_hash_identifier($name);
     return $self->SUPER::get_drop_index_ddl($table, $name);
-}
-
-sub _hash_index_name {
-    return substr(md5_hex($_[1]),0,20);
 }
 
 # Oracle supports the use of FOREIGN KEY integrity constraints 
@@ -187,7 +186,7 @@ sub _get_fk_name {
     my $to_table  = $references->{TABLE};
     my $to_column = $references->{COLUMN};
     my $fk_name   = "${table}_${column}_${to_table}_${to_column}";
-    $fk_name      = "fk_" . $self->_hash_index_name($fk_name);
+    $fk_name      = "fk_" . $self->_hash_identifier($fk_name);
     
     return $fk_name;
 }

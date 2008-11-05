@@ -41,6 +41,7 @@ use Bugzilla::Util;
 use Bugzilla::Constants;
 
 use Carp qw(confess);
+use Digest::MD5 qw(md5_hex);
 use Hash::Util qw(lock_value unlock_hash lock_keys unlock_keys);
 use Safe;
 # Historical, needed for SCHEMA_VERSION = '1.00'
@@ -207,6 +208,8 @@ update this column in this table."
 
 use constant SCHEMA_VERSION  => '2.00';
 use constant ADD_COLUMN      => 'ADD COLUMN';
+# This is a reasonable default that's true for both PostgreSQL and MySQL.
+use constant MAX_IDENTIFIER_LEN => 63;
 use constant ABSTRACT_SCHEMA => {
 
     # BUG-RELATED TABLES
@@ -1544,8 +1547,22 @@ sub _get_fk_name {
     my ($self, $table, $column, $references) = @_;
     my $to_table  = $references->{TABLE}; 
     my $to_column = $references->{COLUMN};
-    return "fk_${table}_${column}_${to_table}_${to_column}";
+    my $name = "fk_${table}_${column}_${to_table}_${to_column}";
+
+    if (length($name) > $self->MAX_IDENTIFIER_LEN) {
+        $name = 'fk_' . $self->_hash_identifier($name);
+    }
+
+    return $name;
 }
+
+sub _hash_identifier {
+    my ($invocant, $value) = @_;
+    # We do -7 to allow prefixes like "idx_" or "fk_", or perhaps something
+    # longer in the future.
+    return substr(md5_hex($value), 0, $invocant->MAX_IDENTIFIER_LEN - 7);
+}
+
 
 sub get_add_fk_sql {
     my ($self, $table, $column, $def) = @_;

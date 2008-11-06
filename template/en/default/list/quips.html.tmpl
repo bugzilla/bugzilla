@@ -125,6 +125,9 @@
               </a>
             </td>
             <td>
+              <input type="hidden" name="defined_quipid_[% quipid FILTER html %]"
+                     id="defined_quipid_[% quipid FILTER html %]"
+                     value="1">
               <input type="checkbox" name="quipid_[% quipid FILTER html %]"
                      id="quipid_[% quipid FILTER html %]"
                      [%- ' checked="checked"' IF quips.$quipid.approved %]>

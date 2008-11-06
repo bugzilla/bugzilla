@@ -207,9 +207,6 @@
     [%+ terms.abug %] at the same time as you are changing its status.</li>
   <li><strong>[% terms.Bugs %]</strong>: When entering [% terms.abug %], 
     you will now see the description of a component when you select it.</li>
-  <li><strong>[% terms.Bugs %]</strong>: When adding or removing keywords
-    from [% terms.abug %], there is now a very nice JavaScript popup that
-    will help you, which lists available keywords.</li>
   <li><strong>[% terms.Bugs %]</strong>: The [% terms.bug %] view now 
     contains some <a href="http://microformats.org/about/">Microformats</a>,
     most notably for users' names and email addresses.</li>
@@ -262,6 +259,8 @@
     change the requestee to somebody else, the requester is no longer set
     to you. In other words, you can "redirect" requests and maintain the
     original requester.</li>
+  <li><strong>Flags</strong>: Emails about flags now will thread properly
+    in email clients to be a part of [% terms.abug %]'s thread.</li>
   <li>When using <kbd>email_in.pl</kbd>, you can now add users to the CC
     list by just using <kbd>@cc</kbd> as the field name.</li>
   <li>Many pages (particularly administrative pages) now contain links to
@@ -306,11 +305,24 @@
   <li><strong>Authentication</strong>: [% terms.Bugzilla %] now supports 
     RADIUS authentication.</li>
 
-  <li>[% terms.Bugzilla %] now uses transactions in the database instead of
-    table locks. This should generally improve [% terms.Bugzilla %]'s
+  <li><strong>Security</strong>: The login cookies is now created as 
+    "HTTPOnly" so that it can't be read by possibly malicious scripts. 
+    Also, if SSL is enabled on your installation, the login cookie is
+    now only sent over SSL connections.</li>
+  <li><strong>Security</strong>: The <code>ssl</code> parameter now protects
+    every page a logged-in user accesses, when set to "authenticated sessions."
+    Also, SSL is now enforced appropriately in the WebServices interface when
+    the parameter is set.</li>
+
+  <li><strong>Database</strong>: [% terms.Bugzilla %] now uses transactions in 
+    the database instead of table locks. This should generally improve
     performance with many concurrent users. It also means if there is
     an unexpected error in the middle of a page, all database changes made
     during that page will be rolled back.</li>
+  <li><strong>Database</strong>: You no longer have to set 
+    <code>max_packet_size</code> in MySQL to add large attachments. However,
+    you may need to set it manually if you restore a mysqldump into your
+    database.</li>
 
   <li>New WebService functions:
     <a href="[% docs_urlbase FILTER html %]api/Bugzilla/WebService/Bug.html">B<!-- -->ug.add_comment</a>
@@ -342,6 +354,8 @@
   <li>The voting system is off by default in new installs. This is to
     prepare for the fact that it will be moved into an extension at
     some point in the future.</li>
+  <li>The <code>shutdownhtml</code> parameter now works even when 
+    [% terms.Bugzilla %]'s database server is down.</li>
 </ul>
 
 <h3>Enhancements for Localizers (or Localized Installations)</h3>

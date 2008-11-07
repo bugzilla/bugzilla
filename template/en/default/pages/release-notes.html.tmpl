@@ -61,6 +61,20 @@
   <em>everything</em> that's changed in each version, you should use our
   <a href="http://www.bugzilla.org/status/changes.html">Change Log Page</a>.</p>
 
+<h3>3.0.6</h3>
+
+<ul>
+  <li>Before 3.0.6, unexpected fatal WebService errors would result in
+    a <code>faultCode</code> that was a string instead of a number.
+   (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=446327">[% terms.Bug %] 446327</a>)</li>
+  <li>If you created a product or component with the same name as one you
+    previously deleted, it would fail with an error about the series table.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=247936">[% terms.Bug %] 247936</a>)</li>
+</ul>
+
+<p>See also the <a href="#v30_security">Security Advisory</a> section for
+  information about a security issue fixed in this release.</p>
+
 <h3>3.0.5</h3>
 
 <ul>
@@ -682,6 +696,11 @@
 </ul>
 
 <h2><a name="v30_security"></a>Security Updates in This Release</h2>
+
+<h3>3.0.6</h3>
+
+<p>[% terms.Bugzilla %] contains a minor security fix. For details, see the
+  <a href="http://www.bugzilla.org/security/2.20.6/">Security Advisory</a>.</p>
 
 <h3>3.0.5</h3>
 

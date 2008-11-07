@@ -107,7 +107,9 @@ sub new {
     my $min_max_allowed_packet = MAX_COMMENTS * MAX_COMMENT_LENGTH;
     my $max_allowed_packet = max($min_max_allowed_packet,
                                  $current_max_allowed,
-                                 Bugzilla->params->{'maxattachmentsize'});
+                                 # This parameter is not yet defined when the DB
+                                 # is being built for the very first time.
+                                 Bugzilla->params->{'maxattachmentsize'} || 0);
     $self->do("SET SESSION max_allowed_packet = $max_allowed_packet");
 
     return $self;

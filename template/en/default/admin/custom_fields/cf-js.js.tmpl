@@ -32,6 +32,18 @@ var select_values = new Array();
   ];
 [% END %]
 
+function onChangeType(type_field) {
+    var value_field = document.getElementById('value_field_id');
+    if (type_field.value == [% constants.FIELD_TYPE_SINGLE_SELECT %]
+        || type_field.value == [% constants.FIELD_TYPE_MULTI_SELECT %])
+    {
+        value_field.disabled = false;
+    }
+    else {
+        value_field.disabled = true;
+    }
+}
+
 function onChangeVisibilityField() {
     var vis_field = document.getElementById('visibility_field_id');
     var vis_value = document.getElementById('visibility_value_id');

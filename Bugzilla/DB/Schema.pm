@@ -210,6 +210,26 @@ use constant SCHEMA_VERSION  => '2.00';
 use constant ADD_COLUMN      => 'ADD COLUMN';
 # This is a reasonable default that's true for both PostgreSQL and MySQL.
 use constant MAX_IDENTIFIER_LEN => 63;
+
+use constant FIELD_TABLE_SCHEMA => {
+    FIELDS => [
+        id       => {TYPE => 'SMALLSERIAL', NOTNULL => 1,
+                     PRIMARYKEY => 1},
+        value    => {TYPE => 'varchar(64)', NOTNULL => 1},
+        sortkey  => {TYPE => 'INT2', NOTNULL => 1, DEFAULT => 0},
+        isactive => {TYPE => 'BOOLEAN', NOTNULL => 1,
+                     DEFAULT => 'TRUE'},
+        visibility_value_id => {TYPE => 'INT2'},
+    ],
+    # Note that bz_add_field_table should prepend the table name
+    # to these index names.
+    INDEXES => [
+        value_idx   => {FIELDS => ['value'], TYPE => 'UNIQUE'},
+        sortkey_idx => ['sortkey', 'value'],
+        visibility_value_id_idx => ['visibility_value_id'],
+    ],
+};
+
 use constant ABSTRACT_SCHEMA => {
 
     # BUG-RELATED TABLES
@@ -638,11 +658,15 @@ use constant ABSTRACT_SCHEMA => {
                                     REFERENCES => {TABLE  => 'fielddefs',
                                                    COLUMN => 'id'}},
             visibility_value_id => {TYPE => 'INT2'},
+            value_field_id => {TYPE => 'INT3',
+                               REFERENCES => {TABLE  => 'fielddefs',
+                                              COLUMN => 'id'}},
         ],
         INDEXES => [
             fielddefs_name_idx    => {FIELDS => ['name'],
                                       TYPE => 'UNIQUE'},
             fielddefs_sortkey_idx => ['sortkey'],
+            fielddefs_value_field_id_idx => ['value_field_id'],
         ],
     },
 
@@ -688,98 +712,65 @@ use constant ABSTRACT_SCHEMA => {
 
     bug_status => {
         FIELDS => [
-            id       => {TYPE => 'SMALLSERIAL', NOTNULL => 1,
-                         PRIMARYKEY => 1},
-            value    => {TYPE => 'varchar(64)', NOTNULL => 1},
-            sortkey  => {TYPE => 'INT2', NOTNULL => 1, DEFAULT => 0},
-            isactive => {TYPE => 'BOOLEAN', NOTNULL => 1, 
-                         DEFAULT => 'TRUE'},
+            @{ dclone(FIELD_TABLE_SCHEMA->{FIELDS}) },
             is_open  => {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'TRUE'},
+
         ],
         INDEXES => [
             bug_status_value_idx  => {FIELDS => ['value'],
                                        TYPE => 'UNIQUE'},
             bug_status_sortkey_idx => ['sortkey', 'value'],
+            bug_status_visibility_value_id_idx => ['visibility_value_id'],
         ],
     },
 
     resolution => {
-        FIELDS => [
-            id       => {TYPE => 'SMALLSERIAL', NOTNULL => 1,
-                         PRIMARYKEY => 1},
-            value    => {TYPE => 'varchar(64)', NOTNULL => 1},
-            sortkey  => {TYPE => 'INT2', NOTNULL => 1, DEFAULT => 0},
-            isactive => {TYPE => 'BOOLEAN', NOTNULL => 1, 
-                         DEFAULT => 'TRUE'},
-        ],
+        FIELDS => dclone(FIELD_TABLE_SCHEMA->{FIELDS}),
         INDEXES => [
             resolution_value_idx   => {FIELDS => ['value'],
                                        TYPE => 'UNIQUE'},
             resolution_sortkey_idx => ['sortkey', 'value'],
+            resolution_visibility_value_id_idx => ['visibility_value_id'],
         ],
     },
 
     bug_severity => {
-        FIELDS => [
-            id       => {TYPE => 'SMALLSERIAL', NOTNULL => 1, 
-                         PRIMARYKEY => 1},
-            value    => {TYPE => 'varchar(64)', NOTNULL => 1},
-            sortkey  => {TYPE => 'INT2', NOTNULL => 1, DEFAULT => 0},
-            isactive => {TYPE => 'BOOLEAN', NOTNULL => 1, 
-                         DEFAULT => 'TRUE'},
-        ],
+        FIELDS => dclone(FIELD_TABLE_SCHEMA->{FIELDS}),
         INDEXES => [
             bug_severity_value_idx   => {FIELDS => ['value'],
                                          TYPE => 'UNIQUE'},
             bug_severity_sortkey_idx => ['sortkey', 'value'],
+            bug_severity_visibility_value_id_idx => ['visibility_value_id'],
         ],
     },
 
     priority => {
-        FIELDS => [
-            id       => {TYPE => 'SMALLSERIAL', NOTNULL => 1,
-                         PRIMARYKEY => 1},
-            value    => {TYPE => 'varchar(64)', NOTNULL => 1},
-            sortkey  => {TYPE => 'INT2', NOTNULL => 1, DEFAULT => 0},
-            isactive => {TYPE => 'BOOLEAN', NOTNULL => 1, 
-                         DEFAULT => 'TRUE'},
-        ],
+        FIELDS => dclone(FIELD_TABLE_SCHEMA->{FIELDS}),
         INDEXES => [
             priority_value_idx   => {FIELDS => ['value'],
                                      TYPE => 'UNIQUE'},
             priority_sortkey_idx => ['sortkey', 'value'],
+            priority_visibility_value_id_idx => ['visibility_value_id'],
         ],
     },
 
     rep_platform => {
-        FIELDS => [
-            id       => {TYPE => 'SMALLSERIAL', NOTNULL => 1,
-                         PRIMARYKEY => 1},
-            value    => {TYPE => 'varchar(64)', NOTNULL => 1},
-            sortkey  => {TYPE => 'INT2', NOTNULL => 1, DEFAULT => 0},
-            isactive => {TYPE => 'BOOLEAN', NOTNULL => 1, 
-                         DEFAULT => 'TRUE'},
-        ],
+        FIELDS => dclone(FIELD_TABLE_SCHEMA->{FIELDS}),
         INDEXES => [
             rep_platform_value_idx   => {FIELDS => ['value'],
                                          TYPE => 'UNIQUE'},
             rep_platform_sortkey_idx => ['sortkey', 'value'],
+            rep_platform_visibility_value_id_idx => ['visibility_value_id'],
         ],
     },
 
     op_sys => {
-        FIELDS => [
-            id       => {TYPE => 'SMALLSERIAL', NOTNULL => 1,
-                         PRIMARYKEY => 1},
-            value    => {TYPE => 'varchar(64)', NOTNULL => 1},
-            sortkey  => {TYPE => 'INT2', NOTNULL => 1, DEFAULT => 0},
-            isactive => {TYPE => 'BOOLEAN', NOTNULL => 1, 
-                         DEFAULT => 'TRUE'},
-        ],
+        FIELDS => dclone(FIELD_TABLE_SCHEMA->{FIELDS}),
         INDEXES => [
             op_sys_value_idx   => {FIELDS => ['value'],
                                    TYPE => 'UNIQUE'},
             op_sys_sortkey_idx => ['sortkey', 'value'],
+            op_sys_visibility_value_id_idx => ['visibility_value_id'],
         ],
     },
 
@@ -1407,23 +1398,6 @@ use constant ABSTRACT_SCHEMA => {
         ],
     },
 
-};
-
-use constant FIELD_TABLE_SCHEMA => {
-    FIELDS => [
-        id       => {TYPE => 'SMALLSERIAL', NOTNULL => 1,
-                     PRIMARYKEY => 1},
-        value    => {TYPE => 'varchar(64)', NOTNULL => 1},
-        sortkey  => {TYPE => 'INT2', NOTNULL => 1, DEFAULT => 0},
-        isactive => {TYPE => 'BOOLEAN', NOTNULL => 1,
-                     DEFAULT => 'TRUE'},
-    ],
-    # Note that bz_add_field_table should prepend the table name
-    # to these index names.
-    INDEXES => [
-        value_idx   => {FIELDS => ['value'], TYPE => 'UNIQUE'},
-        sortkey_idx => ['sortkey', 'value'],
-    ],
 };
 
 # Foreign Keys are added in Bugzilla::DB::bz_add_field_tables

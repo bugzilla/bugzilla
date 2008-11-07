@@ -219,3 +219,37 @@ function bz_valueSelected(aSelect, aValue) {
     return false;
 }
 
+/**
+ * Tells you where (what index) in a <select> a particular option is.
+ * Returns -1 if the value is not in the <select>
+ *
+ * @param aSelect       The select you're checking.
+ * @param aValue        The value you want to know the index of.
+ */
+function bz_optionIndex(aSelect, aValue) {
+    for (var i = 0; i < aSelect.options.length; i++) {
+        if (aSelect.options[i].value == aValue) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+/**
+ * Used to fire an event programmatically.
+ * 
+ * @param anElement      The element you want to fire the event of.
+ * @param anEvent        The name of the event you want to fire, 
+ *                       without the word "on" in front of it.
+ */
+function bz_fireEvent(anElement, anEvent) {
+    // IE
+    if (document.createEventObject) {
+        var evt = document.createEventObject();
+        return anElement.fireEvent('on' + anEvent, evt);
+    }
+    // Firefox, etc.
+    var evt = document.createEvent("HTMLEvents");
+    evt.initEvent(anEvent, true, true); // event type, bubbling, cancelable
+    return !anElement.dispatchEvent(evt);
+}

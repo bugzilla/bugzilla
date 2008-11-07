@@ -122,16 +122,8 @@
                               ['[% "is_duplicate" IF bug.dup_id %]',
                                '[% bug.bug_status FILTER js %]'] );
 
-  [% FOREACH controlled = select_fields.bug_status.controls_visibility_of %]
-    showFieldWhen('[% controlled.name FILTER js %]',
-                  'bug_status',
-                  '[% controlled.visibility_value.name FILTER js %]');
-  [% END %]
-  [% FOREACH controlled = select_fields.resolution.controls_visibility_of %]
-    showFieldWhen('[% controlled.name FILTER js %]',
-                  'resolution',
-                  '[% controlled.visibility_value.name FILTER js %]');
-  [% END %]
+  [% INCLUDE "bug/field-events.js.tmpl" field = select_fields.bug_status %]
+  [% INCLUDE "bug/field-events.js.tmpl" field = select_fields.resolution %]
 </script>
 
 [%# Common actions %]

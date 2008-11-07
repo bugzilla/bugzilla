@@ -109,9 +109,31 @@
     [% IF field.is_select %]
       <tr>
         <th>&nbsp;</th>
-        <td colspan="3">
+        <td>
           <a href="editvalues.cgi?field=[% field.name FILTER url_quote %]">Edit
             legal values for this field</a>.
+        </td>
+
+        <th>
+          <label for="value_field_id">
+            Field that controls the values<br>
+            that appear in this field:
+          </label>
+        </th>
+
+        <td>
+          <select name="value_field_id" id="value_field_id">
+            <option></option>
+            [% FOREACH sel_field = Bugzilla.get_fields({ is_select => 1 }) %]
+              [% NEXT IF sel_field.id == field.id %]
+              <option value="[% sel_field.id FILTER html %]"
+               [% ' selected="selected"' 
+                  IF sel_field.id == field.value_field.id %]>
+                [% sel_field.description FILTER html %]
+                ([% sel_field.name FILTER html %])
+              </option>
+            [% END %]
+          </select>
         </td>
       </tr>
     [% END %]

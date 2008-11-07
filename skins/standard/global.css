@@ -406,8 +406,11 @@ div.user_match {
     vertical-align: top;
 }
 
-.bz_hidden_field {
+.bz_hidden_field, .bz_hidden_option {
     display: none;
+}
+.bz_hidden_option {
+    visibility: hidden;
 }
 
 .calendar_button {

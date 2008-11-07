@@ -88,6 +88,9 @@ sub update_fielddefs_definition {
 
     $dbh->bz_add_column('fielddefs', 'visibility_field_id', {TYPE => 'INT3'});
     $dbh->bz_add_column('fielddefs', 'visibility_value_id', {TYPE => 'INT2'});
+    $dbh->bz_add_column('fielddefs', 'value_field_id', {TYPE => 'INT3'});
+    $dbh->bz_add_index('fielddefs', 'fielddefs_value_field_id_idx',
+                       ['value_field_id']);
 
     # Remember, this is not the function for adding general table changes.
     # That is below. Add new changes to the fielddefs table above this
@@ -538,6 +541,8 @@ sub update_table_definitions {
 
     # 2008-09-07 LpSolit@gmail.com - Bug 452893
     _fix_illegal_flag_modification_dates();
+
+    _add_visiblity_value_to_value_tables();
 
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
@@ -2907,7 +2912,25 @@ sub _initialize_workflow {
 
     # Make sure the bug status used by the 'duplicate_or_move_bug_status'
     # parameter has all the required transitions set.
-    Bugzilla::Status::add_missing_bug_status_transitions();
+    my $dup_status = Bugzilla->params->{'duplicate_or_move_bug_status'};
+    my $status_id = $dbh->selectrow_array(
+        'SELECT id FROM bug_status WHERE value = ?', undef, $dup_status);
+    # There's a minor chance that this status isn't in the DB.
+    $status_id || return;
+
+    my $missing_statuses = $dbh->selectcol_arrayref(
+        'SELECT id FROM bug_status
+                        LEFT JOIN status_workflow ON old_status = id
+                                                     AND new_status = ?
+          WHERE old_status IS NULL', undef, $status_id);
+
+    my $sth = $dbh->prepare('INSERT INTO status_workflow
+                             (old_status, new_status) VALUES (?, ?)');
+
+    foreach my $old_status_id (@$missing_statuses) {
+        next if ($old_status_id == $status_id);
+        $sth->execute($old_status_id, $status_id);
+    }
 }
 
 sub _make_lang_setting_dynamic {
@@ -3096,6 +3119,20 @@ sub _fix_illegal_flag_modification_dates {
                          WHERE modification_date < creation_date');
     # If no rows are affected, $dbh->do returns 0E0 instead of 0.
     print "$rows flags had an illegal modification date. Fixed!\n" if ($rows =~ /^\d+$/);
+}
+
+sub _add_visiblity_value_to_value_tables {
+    my $dbh = Bugzilla->dbh;
+    my @standard_fields = 
+        qw(bug_status resolution priority bug_severity op_sys rep_platform);
+    my $custom_fields = $dbh->selectcol_arrayref(
+        'SELECT name FROM fielddefs WHERE custom = 1 AND type IN(?,?)',
+        undef, FIELD_TYPE_SINGLE_SELECT, FIELD_TYPE_MULTI_SELECT);
+    foreach my $field (@standard_fields, @$custom_fields) {
+        $dbh->bz_add_column($field, 'visibility_value_id', {TYPE => 'INT2'});
+        $dbh->bz_add_index($field, "${field}_visibility_value_id_idx", 
+                           ['visibility_value_id']);
+    }
 }
 
 1;

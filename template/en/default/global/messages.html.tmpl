@@ -332,6 +332,17 @@
           <li>Sortkey updated to 
             <em>[% changes.sortkey.1 FILTER html %]</em>.</li>
         [% END %]
+        [% IF changes.visibility_value_id %]
+          [% IF value.visibility_value.defined %]
+            <li>It only appears when 
+              [%+ value.field.value_field.description FILTER html %] is set to
+              '[%+ value.visibility_value.name FILTER html %]'.</li>
+          [% ELSE %]
+            <li>It now always appears, no matter what 
+              [%+ value.field.value_field.description FILTER html %] is set to.
+            </li>
+          [% END %]
+        [% END %]
       </ul>
     [% ELSE %]
       No changes made to the field value <em>[% value_old FILTER html %]</em>.

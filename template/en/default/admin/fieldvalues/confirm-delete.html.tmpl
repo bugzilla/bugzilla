@@ -62,7 +62,8 @@
 <h2>Confirmation</h2>
 
 [% IF value.is_default || value.bug_count || (value_count == 1)
-      || value.controls_visibility_of_fields.size 
+      || value.controls_visibility_of_fields.size
+      || value.controlled_values.size 
 %]
 
   <p>Sorry, but the '[% value.name FILTER html %]' value cannot be deleted
@@ -119,6 +120,20 @@
             [%- field.description FILTER html %] 
             ([% field.name FILTER html %])</a><br>
         [% END %]
+      </li>
+    [% END %]
+
+    [% IF value.controlled_values.size %]
+      <li>This value controls the visibility of the following values in
+        other fields:<br>
+       [% FOREACH controlled = value.controlled_values %]
+         <a href="editvalues.cgi?action=edit&field=
+                  [%- controlled.field.name FILTER url_quote %]&value=
+                  [%- controlled.name FILTER url_quote %]">
+           [% controlled.field.description FILTER html %]
+           ([% controlled.field.name FILTER html %]):
+           [%+ controlled.name FILTER html %]</a><br>
+       [% END %]
       </li>
     [% END %]
   </ul>

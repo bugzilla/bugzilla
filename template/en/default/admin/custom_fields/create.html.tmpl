@@ -75,7 +75,7 @@
     <tr>
       <th align="right"><label for="type">Type:</label></th>
       <td>
-        <select id="type" name="type">
+        <select id="type" name="type" onchange="onChangeType(this)">
           [% FOREACH type = field_types.keys %]
             [% NEXT IF type == constants.FIELD_TYPE_UNKNOWN %]
             <option value="[% type FILTER html %]">[% field_types.$type FILTER html %]</option>
@@ -109,6 +109,28 @@
         <label for="visibility_value_id"><strong>is set to:</strong></label>
         <select name="visibility_value_id" id="visibility_value_id">
           <option value=""></option>
+        </select>
+      </td>
+    </tr>
+
+    <tr>
+      <td colspan="2">&nbsp;</td>
+      <th>
+        <label for="value_field_id">
+          Field that controls the values<br>
+          that appear in this field:
+        </label>
+      </th>
+
+      <td>
+        <select disabled="disabled" name="value_field_id" id="value_field_id">
+          <option></option>
+          [% FOREACH sel_field = Bugzilla.get_fields({ is_select => 1 }) %]
+            <option value="[% sel_field.id FILTER html %]">
+              [% sel_field.description FILTER html %]
+              ([% sel_field.name FILTER html %])
+            </option>
+          [% END %]
         </select>
       </td>
     </tr>

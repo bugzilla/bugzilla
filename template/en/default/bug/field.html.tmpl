@@ -126,10 +126,20 @@
             </option>
           [% END %]
           [% FOREACH legal_value = field.legal_values %]
+            [% SET control_value = legal_value.visibility_value %]
+            [% SET control_field = field.value_field %]
             <option value="[% legal_value.name FILTER html %]"
-                [%- " selected=\"selected\"" 
-                    IF value.contains(legal_value.name).size %]>
-                [%- legal_value.name FILTER html %]</option>
+              [%# We always show selected values, even if they should be
+                # hidden %]
+              [% IF value.contains(legal_value.name).size %]
+                selected="selected"
+              [% ELSIF control_field && control_value
+                       && !bug.${control_field.name}.contains(control_value.name)
+              %]
+                class="bz_hidden_option" disabled="disabled"
+              [% END %]>
+              [%- legal_value.name FILTER html -%]
+            </option>
           [% END %]
         </select>
         [%# When you pass an empty multi-select in the web interface,
@@ -142,18 +152,18 @@
         [% IF field.type == constants.FIELD_TYPE_MULTI_SELECT %]
           <input type="hidden" name="defined_[% field.name FILTER html %]">
         [% END %]
+
+        <script type="text/javascript">
+        <!--
+          initHidingOptionsForIE('[% field.name FILTER js %]');
+          [%+ INCLUDE "bug/field-events.js.tmpl" field = field %]
+        //-->
+        </script>
+
      [% CASE constants.FIELD_TYPE_TEXTAREA %]
        [% INCLUDE global/textarea.html.tmpl
            id = field.name name = field.name minrows = 4 maxrows = 8
            cols = 60 defaultcontent = value %]
-  [% END %]
-
-  [% FOREACH controlled_field = field.controls_visibility_of %]
-    <script type="text/javascript">
-      showFieldWhen('[% controlled_field.name FILTER js %]',
-                    '[% field.name FILTER js %]',
-                    '[% controlled_field.visibility_value.name FILTER js %]');
-    </script>
   [% END %]
 [% ELSIF field.type == constants.FIELD_TYPE_TEXTAREA %]
   <div class="uneditable_textarea">[% value FILTER wrap_comment(60)

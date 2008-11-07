@@ -642,13 +642,12 @@ function handleWantsAttachment(wants_attachment) {
     </select>
 
     [% IF sel.name == "bug_status" %]
-      [% FOREACH controlled = select_fields.bug_status.controls_visibility_of %]
-        <script type="text/javascript">
-          showFieldWhen('[% controlled.name FILTER js %]',
-                        'bug_status',
-                        '[% controlled.visibility_value.name FILTER js %]');
+       <script type="text/javascript">
+        <!--
+          [%+ INCLUDE "bug/field-events.js.tmpl" 
+                     field = select_fields.bug_status %]
+        //-->
         </script>
-      [% END %]
     [% END %]
   </td>
 [% END %]

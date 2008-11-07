@@ -98,6 +98,7 @@ use constant DB_COLUMNS => qw(
     enter_bug
     visibility_field_id
     visibility_value_id
+    value_field_id
 );
 
 use constant REQUIRED_CREATE_FIELDS => qw(name description);
@@ -110,10 +111,11 @@ use constant VALIDATORS => {
     obsolete    => \&_check_obsolete,
     sortkey     => \&_check_sortkey,
     type        => \&_check_type,
-    visibility_field_id => \&_check_control_field,
+    visibility_field_id => \&_check_visibility_field_id,
 };
 
 use constant UPDATE_VALIDATORS => {
+    value_field_id      => \&_check_value_field_id,
     visibility_value_id => \&_check_control_value,
 };
 
@@ -125,6 +127,7 @@ use constant UPDATE_COLUMNS => qw(
     enter_bug
     visibility_field_id
     visibility_value_id
+    value_field_id
 
     type
 );
@@ -292,7 +295,16 @@ sub _check_type {
     return $type;
 }
 
-sub _check_control_field {
+sub _check_value_field_id {
+    my ($invocant, $field_id, $is_select) = @_;
+    $is_select = $invocant->is_select if !defined $is_select;
+    if ($field_id && !$is_select) {
+        ThrowUserError('field_value_control_select_only');
+    }
+    return $invocant->_check_visibility_field_id($field_id);
+}
+
+sub _check_visibility_field_id {
     my ($invocant, $field_id) = @_;
     $field_id = trim($field_id);
     return undef if !$field_id;
@@ -310,7 +322,7 @@ sub _check_control_field {
 sub _check_control_value {
     my ($invocant, $value_id, $field_id) = @_;
     my $field;
-    if (blessed($invocant)) {
+    if (blessed $invocant) {
         $field = $invocant->visibility_field;
     }
     elsif ($field_id) {
@@ -528,6 +540,48 @@ sub controls_visibility_of {
 
 =pod
 
+=over
+
+=item C<value_field>
+
+The Bugzilla::Field that controls the list of values for this field.
+
+Returns undef if there is no field that controls this field's visibility.
+
+=back
+
+=cut
+
+sub value_field {
+    my $self = shift;
+    if ($self->{value_field_id}) {
+        $self->{value_field} ||= $self->new($self->{value_field_id});
+    }
+    return $self->{value_field};
+}
+
+=pod
+
+=over
+
+=item C<controls_values_of>
+
+An arrayref of C<Bugzilla::Field> objects, representing fields that this
+field controls the values of.
+
+=back
+
+=cut
+
+sub controls_values_of {
+    my $self = shift;
+    $self->{controls_values_of} ||=
+        Bugzilla::Field->match({ value_field_id => $self->id });
+    return $self->{controls_values_of};
+}
+
+=pod
+
 =head2 Instance Mutators
 
 These set the particular field that they are named after.
@@ -552,6 +606,8 @@ They will throw an error if you try to set the values to something invalid.
 
 =item C<set_visibility_value>
 
+=item C<set_value_field>
+
 =back
 
 =cut
@@ -571,6 +627,11 @@ sub set_visibility_value {
     my ($self, $value) = @_;
     $self->set('visibility_value_id', $value);
     delete $self->{visibility_value};
+}
+sub set_value_field {
+    my ($self, $value) = @_;
+    $self->set('value_field_id', $value);
+    delete $self->{value_field};
 }
 
 # This is only used internally by upgrade code in Bugzilla::Field.
@@ -734,7 +795,22 @@ sub run_create_validators {
         $class->_check_control_value($params->{visibility_value_id},
                                      $params->{visibility_field_id});
 
+    my $type = $params->{type};
+    $params->{value_field_id} = 
+        $class->_check_value_field_id($params->{value_field_id},
+            ($type == FIELD_TYPE_SINGLE_SELECT 
+             || $type == FIELD_TYPE_MULTI_SELECT) ? 1 : 0);
     return $params;
+}
+
+sub update {
+    my $self = shift;
+    my $changes = $self->SUPER::update(@_);
+    my $dbh = Bugzilla->dbh;
+    if ($changes->{value_field_id} && $self->is_select) {
+        $dbh->do("UPDATE " . $self->name . " SET visibility_value_id = NULL");
+    }
+    return $changes;
 }
 
 

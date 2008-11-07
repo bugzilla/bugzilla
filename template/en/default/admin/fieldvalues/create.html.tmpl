@@ -62,6 +62,27 @@
         </td>
       </tr>
     [% END %]
+    [% IF field.value_field %]
+      <tr>
+        <th align="right">
+          <label for="visibility_value_id">Only appears when 
+           [%+ field.value_field.description FILTER html %] is set to:
+          </label>
+        </th>
+        <td>
+          <select name="visibility_value_id" id="visibility_value_id">
+            <option></option>
+            [% FOREACH field_value = field.value_field.legal_values %]
+              [% NEXT IF field_value.name == '' %]
+              <option value="[% field_value.id FILTER none %]">
+                [%- field_value.name FILTER html -%]
+              </option>
+            [% END %]
+          </select>
+          <small>(Leave unset to have this value always appear.)</small>
+        </td>
+      </tr>
+    [% END %]
   </table>
   <input type="submit" id="create" value="Add">
   <input type="hidden" name="action" value="new">

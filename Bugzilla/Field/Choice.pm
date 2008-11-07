@@ -40,11 +40,13 @@ use constant DB_COLUMNS => qw(
     id
     value
     sortkey
+    visibility_value_id
 );
 
 use constant UPDATE_COLUMNS => qw(
     value
     sortkey
+    visibility_value_id
 );
 
 use constant NAME_FIELD => 'value';
@@ -55,6 +57,7 @@ use constant REQUIRED_CREATE_FIELDS => qw(value);
 use constant VALIDATORS => {
     value   => \&_check_value,
     sortkey => \&_check_sortkey,
+    visibility_value_id => \&_check_visibility_value_id,
 };
 
 use constant CLASS_MAP => {
@@ -186,9 +189,12 @@ sub remove_from_db {
         ThrowUserError("fieldvalue_still_has_bugs",
                        { field => $self->field, value => $self });
     }
-    if (my @vis_fields = @{ $self->controls_visibility_of_fields }) {
+    my $vis_fields = $self->controls_visibility_of_fields;
+    my $values     = $self->controlled_values;
+    if (@$vis_fields || @$values) {
         ThrowUserError('fieldvalue_is_controller',
-            { value => $self, fields => [map($_->name, @vis_fields)] });
+            { value => $self, fields => [map($_->name, @$vis_fields)],
+              vals => $values });
     }
     $self->SUPER::remove_from_db();
 }
@@ -260,12 +266,41 @@ sub controls_visibility_of_fields {
     return $self->{controls_visibility_of_fields};
 }
 
+sub visibility_value {
+    my $self = shift;
+    if ($self->{visibility_value_id}) {
+        $self->{visibility_value} ||=
+            Bugzilla::Field::Choice->type($self->field->value_field)->new(
+                $self->{visibility_value_id});
+    }
+    return $self->{visibility_value};
+}
+
+sub controlled_values {
+    my $self = shift;
+    return $self->{controlled_values} if defined $self->{controlled_values};
+    my $fields = $self->field->controls_values_of;
+    my @controlled_values;
+    foreach my $field (@$fields) {
+        my $controlled = Bugzilla::Field::Choice->type($field)
+                         ->match({ visibility_value_id => $self->id });
+        push(@controlled_values, @$controlled);
+    }
+    $self->{controlled_values} = \@controlled_values;
+    return $self->{controlled_values};
+}
+
 ############
 # Mutators #
 ############
 
 sub set_name    { $_[0]->set('value', $_[1]);   }
 sub set_sortkey { $_[0]->set('sortkey', $_[1]); }
+sub set_visibility_value {
+    my ($self, $value) = @_;
+    $self->set('visibility_value_id', $value);
+    delete $self->{visibility_value};
+}
 
 ##############
 # Validators #
@@ -312,6 +347,15 @@ sub _check_sortkey {
     return $value;
 }
 
+sub _check_visibility_value_id {
+    my ($invocant, $value_id) = @_;
+    $value_id = trim($value_id);
+    my $field = $invocant->field->value_field;
+    return undef if !$field || !$value_id;
+    my $value_obj = Bugzilla::Field::Choice->type($field)
+                    ->check({ id => $value_id });
+    return $value_obj->id;
+}
 
 1;
 

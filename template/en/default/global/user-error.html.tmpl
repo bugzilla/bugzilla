@@ -412,7 +412,7 @@
   [% ELSIF error == "field_control_must_be_select" %]
     [% title = "Invalid Field Type Selected" %]
     Only drop-down and multi-select fields can be used to control
-    the visibility of other fields. [% field.description FILTER html %]
+    the visibility/values of other fields. [% field.description FILTER html %]
     is not the right type of field.
 
   [% ELSIF error == "field_invalid_name" %]
@@ -433,6 +433,11 @@
     [% title = "Missing Name for Field" %]
     You must enter a name for this field.
 
+  [% ELSIF error == "field_value_control_select_only" %]
+    [% title = "Invalid Value Control Field" %]
+    Only Drop-Down or Multi-Select fields can have a field that
+    controls their values.
+
   [% ELSIF error == "fieldname_invalid" %]
     [% title = "Specified Field Does Not Exist" %]
     The field '[% field.name FILTER html %]' does not exist or 
@@ -446,8 +451,21 @@
   [% ELSIF error == "fieldvalue_is_controller" %]
     [% title = "Value Controls Other Fields" %]
     You cannot delete the '[% value.name FILTER html %]' value for this
-    field because it controls the visibility of the following other fields:
-    [%+ fields.join(', ') FILTER html %].
+    field because 
+    [% IF fields.size %]
+      it controls the visibility of the following fields:
+      [%+ fields.join(', ') FILTER html %].
+    [% END %]
+    [% ' and ' IF fields.size AND vals.size %]
+    [% IF vals.size %]
+      it controls the visibility of the following field values:
+      <ul>
+        [% FOREACH val = vals %]
+          <li>[% val.field.name FILTER html %]:
+            '[% val.name FILTER html %]'</li>
+        [% END %]
+      </ul>
+    [% END %]
 
   [% ELSIF error == "fieldvalue_is_default" %]
     [% title = "Specified Field Value Is Default" %]

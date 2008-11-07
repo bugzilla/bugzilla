@@ -359,3 +359,124 @@ function handleVisControllerValueChange(e, args) {
         YAHOO.util.Dom.addClass(field_container, 'bz_hidden_field');
     }
 }
+
+function showValueWhen(controlled_field_id, controlled_value, 
+                       controller_field_id, controller_value)
+{
+    var controller_field = document.getElementById(controller_field_id);
+    // Note that we don't get an object for the controlled field here, 
+    // because it might not yet exist in the DOM. We just pass along its id.
+    YAHOO.util.Event.addListener(controller_field, 'change',
+        handleValControllerChange, [controlled_field_id, controlled_value,
+                                    controller_field, controller_value]);
+}
+
+function handleValControllerChange(e, args) {
+    var controlled_field = document.getElementById(args[0]);
+    var controlled_value = args[1];
+    var controller_field = args[2];
+    var controller_value = args[3];
+
+    var item = getPossiblyHiddenOption(controlled_field, controlled_value);
+    if (bz_valueSelected(controller_field, controller_value)) {
+        showOptionInIE(item, controlled_field);
+        YAHOO.util.Dom.removeClass(item, 'bz_hidden_option');
+        item.disabled = false;
+    }
+    else if (!item.disabled) {
+        YAHOO.util.Dom.addClass(item, 'bz_hidden_option');
+        if (item.selected) {
+            item.selected = false;
+            bz_fireEvent(controlled_field, 'change');
+        }
+        item.disabled = true;
+        hideOptionInIE(item, controlled_field);
+    }
+}
+
+/*********************************/
+/* Code for Hiding Options in IE */
+/*********************************/
+
+/* IE 7 and below (and some other browsers) don't respond to "display: none"
+ * on <option> tags. However, you *can* insert a Comment Node as a
+ * child of a <select> tag. So we just insert a Comment where the <option>
+ * used to be. */
+function hideOptionInIE(anOption, aSelect) {
+    if (browserCanHideOptions(aSelect)) return;
+
+    var commentNode = document.createComment(anOption.value);
+    aSelect.replaceChild(commentNode, anOption);
+}
+
+function showOptionInIE(aNode, aSelect) {
+    if (browserCanHideOptions(aSelect)) return;
+    // If aNode is an Option
+    if (typeof(aNode.value) != 'undefined') return;
+
+    // We do this crazy thing with innerHTML and createElement because
+    // this is the ONLY WAY that this works properly in IE.
+    var optionNode = document.createElement('option');
+    optionNode.innerHTML = aNode.data;
+    optionNode.value = aNode.data;
+    var old_node = aSelect.replaceChild(optionNode, aNode);
+}
+
+function initHidingOptionsForIE(select_name) {
+    var aSelect = document.getElementById(select_name);
+    if (browserCanHideOptions(aSelect)) return;
+
+    for (var i = 0; ;i++) {
+        var item = aSelect.options[i];
+        if (!item) break;
+        if (item.disabled) {
+          hideOptionInIE(item, aSelect);
+          i--; // Hiding an option means that the options array has changed.
+        }
+    }
+}
+
+function getPossiblyHiddenOption(aSelect, aValue) {
+    var val_index = bz_optionIndex(aSelect, aValue);
+
+    /* We have to go fishing for one of our comment nodes if we
+     * don't find the <option>. */
+    if (val_index < 0 && !browserCanHideOptions(aSelect)) {
+        var children = aSelect.childNodes;
+        for (var i = 0; i < children.length; i++) {
+            var item = children[i];
+            if (item.data == aValue) {
+                // Set this for handleValControllerChange, so that both options
+                // and commentNodes have this.
+                children[i].disabled = true;
+                return children[i];
+            }
+        }
+    }
+
+    /* Otherwise we just return the Option we found. */
+    return aSelect.options[val_index];
+}
+
+var browser_can_hide_options;
+function browserCanHideOptions(aSelect) {
+    /* As far as I can tell, browsers that don't hide <option> tags
+     * also never have a X position for <option> tags, even if
+     * they're visible. This is the only reliable way I found to
+     * differentiate browsers. So we create a visible option, see
+     * if it has a position, and then remove it. */
+    if (typeof(browser_can_hide_options) == "undefined") {
+        var new_opt = bz_createOptionInSelect(aSelect, '', '');
+        var opt_pos = YAHOO.util.Dom.getX(new_opt);
+        aSelect.removeChild(new_opt);
+        if (opt_pos) {
+            browser_can_hide_options = true;
+        }
+        else {
+            browser_can_hide_options = false;
+        }
+    }
+    return browser_can_hide_options;
+}
+
+/* (end) option hiding code */

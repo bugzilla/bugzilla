@@ -795,7 +795,7 @@ sub run_create_validators {
         $class->_check_control_value($params->{visibility_value_id},
                                      $params->{visibility_field_id});
 
-    my $type = $params->{type};
+    my $type = $params->{type} || 0;
     $params->{value_field_id} = 
         $class->_check_value_field_id($params->{value_field_id},
             ($type == FIELD_TYPE_SINGLE_SELECT 

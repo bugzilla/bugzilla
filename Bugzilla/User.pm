@@ -281,6 +281,11 @@ sub queries {
         'SELECT id FROM namedqueries WHERE userid = ?', undef, $self->id);
     require Bugzilla::Search::Saved;
     $self->{queries} = Bugzilla::Search::Saved->new_from_list($query_ids);
+
+    # We preload link_in_footer from here as this information is always requested.
+    # This only works if the user object represents the current logged in user.
+    Bugzilla::Search::Saved::preload($self->{queries}) if $self->id == Bugzilla->user->id;
+
     return $self->{queries};
 }
 

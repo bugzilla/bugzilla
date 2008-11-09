@@ -117,6 +117,24 @@ sub create {
     return $obj;
 }
 
+sub preload {
+    my ($searches) = @_;
+    my $dbh = Bugzilla->dbh;
+
+    return unless scalar @$searches;
+
+    my @query_ids = map { $_->id } @$searches;
+    my $queries_in_footer = $dbh->selectcol_arrayref(
+        'SELECT namedquery_id
+           FROM namedqueries_link_in_footer
+          WHERE ' . $dbh->sql_in('namedquery_id', \@query_ids) . ' AND user_id = ?',
+          undef, Bugzilla->user->id);
+
+    my %links_in_footer = map { $_ => 1 } @$queries_in_footer;
+    foreach my $query (@$searches) {
+        $query->{link_in_footer} = ($links_in_footer{$query->id}) ? 1 : 0;
+    }
+}
 #####################
 # Complex Accessors #
 #####################
@@ -249,6 +267,12 @@ documented below.
 Does not accept a bare C<name> argument. Instead, accepts only an id.
 
 See also: L<Bugzilla::Object/new>.
+
+=item C<preload>
+
+Sets C<link_in_footer> for all given saved searches at once, for the
+currently logged in user. This is much faster than calling this method
+for each saved search individually.
 
 =back
 

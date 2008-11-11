@@ -170,7 +170,7 @@ if ($action eq 'search') {
 
     }
 
-    if ($matchtype eq 'exact' && scalar(@{$vars->{'users'}}) == 1) {
+    if ($matchtype && $matchtype eq 'exact' && scalar(@{$vars->{'users'}}) == 1) {
         my $match_user_id = $vars->{'users'}[0]->{'userid'};
         my $match_user = check_user($match_user_id);
         edit_processing($match_user);

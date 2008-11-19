@@ -240,6 +240,10 @@ div#docslinks {
     color: #a0a0a0;
 }
 
+/************/
+/* Comments */
+/************/
+
 .bz_comment {
     margin-bottom: 2em;
 }
@@ -260,17 +264,43 @@ div#docslinks {
      width: 50em;
 }
 
-.bz_first_comment {
+.bz_comment_user, .bz_comment_time, .bz_comment_number, 
+.bz_private_checkbox, .bz_comment_actions
+{
+    margin: 0 .5em;
+}
+
+.bz_comment_actions, .bz_comment_number, .bz_private_checkbox {
+    float: right;
+}
+
+.bz_collapse_comment {
+    text-decoration: none;
+}
+
+.bz_private_checkbox input { 
+    margin: 0;
+    vertical-align: middle;
 }
 
 .bz_comment_head, .bz_first_comment_head {
+    padding-top: .1em;
+    padding-bottom: .1em;
+    padding-left: .5em;
     background-color: #e0e0e0;
 }
+
+.bz_comment_user_images img {
+    vertical-align: bottom;
+}
+
 .bz_comment_hilite pre {
     background-color: lightgreen;
     margin: 0;
     padding: 1em 0;
 }
+
+/** End Comments **/
 
 .bz_default_hidden {
     display: none;

@@ -69,13 +69,13 @@
   }
 
   function collapse_comment(link, comment) {
-    link.innerHTML = "(+)";
+    link.innerHTML = "[+]";
     link.title = "Expand the comment.";
     comment.className = "collapsed";
   }
 
   function expand_comment(link, comment) {
-    link.innerHTML = "(-)";
+    link.innerHTML = "[-]";
     link.title = "Collapse the comment";
     comment.className = "";
   }
@@ -84,9 +84,10 @@
    * won't display this link  */
 
   function addCollapseLink(count) {
-    document.write(' <a href="#" id="comment_link_' + count +
+    document.write(' <a href="#" class="bz_collapse_comment"' +
+                   ' id="comment_link_' + count +
                    '" onclick="toggle_comment_display(this, ' +  count +
-                   '); return false;" title="Collapse the comment.">(-)</a> ');
+                   '); return false;" title="Collapse the comment.">[-]<\/a> ');
   }
   //-->
   </script>
@@ -150,56 +151,64 @@
                 [% " bz_first_comment" IF count == description %]">
       [% IF count == description %]
         [% class_name = "bz_first_comment_head" %]
-        [% comment_label = "" %]
-        [% comment_link = "Description" %]
-        [% decoration = "" %]
+        [% comment_label = "Description" %]
       [% ELSE %]
         [% class_name = "bz_comment_head" %]
-        [% comment_label = "Comment" %]
-        [% comment_link = "#" _ count %]
-        [% decoration = '<span class="comment_rule">-------</span>' %]
+        [% comment_label = "Comment " _ count %]
       [% END %]
 
-      <span class="[% class_name FILTER html %]">
-        [%# Do not filter decoration as it's a real HTML tag. No XSS risk. %]
-        [% decoration FILTER none %]
-        <i>[% comment_label FILTER html %]
-        <a name="c[% count %]" href="show_bug.cgi?id=[% bug.bug_id %]#c[% count %]">
-          [% comment_link FILTER html %]</a> From
-        <span class="vcard">
-          <a class="fn email" href="mailto:[% comment.author.email FILTER html %]">
-            [% (comment.author.name || comment.author.login) FILTER html %]</a>
-        </span>
-        [% FOREACH group = comment.author.direct_group_membership %]
-          [% NEXT UNLESS group.icon_url %]
-          <img src="[% group.icon_url FILTER html %]"
-               alt="[% group.name FILTER html %]"
-               title="[% group.name FILTER html %] - [% group.description FILTER html %]">
-        [% END %]
-
-        [%+ comment.time FILTER time %]</i>
+      <div class="[% class_name FILTER html %]">
 
         [% IF mode == "edit" %]
-          <script type="text/javascript"><!--
-            addCollapseLink([% count %]);
-            addReplyLink([% count %], [% comment.id %]); //-->
-          </script>
+          <span class="bz_comment_actions">
+            <script type="text/javascript"><!--
+              addReplyLink([% count %], [% comment.id %]);
+              addCollapseLink([% count %]); // -->
+            </script>
+          </span>
         [% END %]
-        [%+ decoration FILTER none %]
-      </span>
 
-      [% IF mode == "edit" && isinsider %]
-        <i>
-          <input type="hidden" value="1"
-                 name="defined_isprivate_[% comment.id %]">
-          <input type="checkbox"
-                 name="isprivate_[% comment.id %]" value="1"
-                 id="isprivate_[% comment.id %]"
-                 onClick="updateCommentPrivacy(this, [% count %])"
-                 [% " checked=\"checked\"" IF comment.isprivate %]>
-          <label for="isprivate_[% comment.id %]">Private</label>
-        </i>
-      [% END %]
+        [% IF mode == "edit" && isinsider %]
+          <div class="bz_private_checkbox">
+            <input type="hidden" value="1"
+                   name="defined_isprivate_[% comment.id %]">
+            <input type="checkbox"
+                   name="isprivate_[% comment.id %]" value="1"
+                   id="isprivate_[% comment.id %]"
+                   onClick="updateCommentPrivacy(this, [% count %])"
+                   [% " checked=\"checked\"" IF comment.isprivate %]>
+            <label for="isprivate_[% comment.id %]">Private</label>
+          </div>
+        [% END %]
+
+        <span class="bz_comment_number">
+          <a name="c[% count %]" 
+             href="show_bug.cgi?id=[% bug.bug_id %]#c[% count %]">
+            [%- comment_label FILTER html %]</a>
+        </span>
+
+        <span class="bz_comment_user">
+          <span class="vcard">
+            <a class="fn email" 
+               href="mailto:[% comment.author.email FILTER html %]">
+              [% (comment.author.name || comment.author.login) FILTER html %]</a>
+          </span>
+        </span>
+
+        <span class="bz_comment_user_images">
+          [% FOREACH group = comment.author.direct_group_membership %]
+            [% NEXT UNLESS group.icon_url %]
+            <img src="[% group.icon_url FILTER html %]"
+                 alt="[% group.name FILTER html %]"
+                 title="[% group.name FILTER html %] - [% group.description FILTER html %]">
+          [% END %]
+        </span>
+
+        <span class="bz_comment_time">
+          [%+ comment.time FILTER time %]
+        </span>
+      </div>
+
       [% IF user.in_group(Param('timetrackinggroup')) &&
             (comment.work_time > 0 || comment.work_time < 0) %]
          <br>

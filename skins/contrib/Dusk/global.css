@@ -139,7 +139,9 @@ hr {
     font-size: 10pt;
 }
 
-/* comments */
+/************/
+/* Comments */
+/************/
 
 #comments th {
     font-size: 9pt;
@@ -171,24 +173,19 @@ hr {
     font-size: 9pt;
 }
 
-.bz_first_comment {
-}
-
-.bz_comment_head,
-.bz_first_comment_head {
+.bz_comment_head, .bz_first_comment_head {
     margin: 0; padding: 0;
     background-color: transparent;
     font-weight: bold;
 }
 
+.bz_comment_user {
+    margin-left: 0;
+}
+
 .bz_comment.bz_private {
     background-color: #f0e8e8;
     border-color: #f8c8ba;
-}
-
-.bz_comment_head i,
-.bz_first_comment_head i {
-    font-style: normal;
 }
 
 .comment_rule {

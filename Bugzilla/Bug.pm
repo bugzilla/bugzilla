@@ -1872,12 +1872,12 @@ sub set_product {
         # just die if any of these are invalid.
         $self->set_component($comp_name);
         $self->set_version($vers_name);
-        if ($self->check_can_change_field('target_milestone', 0, 1)) {
-            $self->set_target_milestone($tm_name);
-        }
-        else {
+        if ($product_changed && !$self->check_can_change_field('target_milestone', 0, 1)) {
             # Have to set this directly to bypass the validators.
             $self->{target_milestone} = $product->default_milestone;
+        }
+        else {
+            $self->set_target_milestone($tm_name);
         }
     }
     

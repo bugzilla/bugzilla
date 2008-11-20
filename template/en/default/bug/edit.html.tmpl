@@ -420,8 +420,7 @@
         [% IF bug.resolution %]
           [%+ get_resolution(bug.resolution) FILTER html %]
           [% IF bug.dup_id %]
-            <span id="duplicate_display">of 
-            [% "${terms.bug} ${bug.dup_id}" FILTER bug_link(bug.dup_id) FILTER none %]</span>
+            of [% "${terms.bug} ${bug.dup_id}" FILTER bug_link(bug.dup_id) FILTER none %]
           [% END %]
         [% END %]
         [% IF bug.user.canedit || bug.user.isreporter %]

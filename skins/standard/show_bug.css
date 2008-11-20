@@ -65,3 +65,7 @@
 #status { 
     margin-bottom: 3ex;
 }
+
+#knob-buttons {
+    float: right;
+}

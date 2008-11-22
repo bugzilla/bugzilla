@@ -506,7 +506,7 @@
 ],
 
 'admin/users/confirm-delete.html.tmpl' => [
-  'attachments'
+  'attachments',
   'reporter',
   'assignee_or_qa',
   'cc',

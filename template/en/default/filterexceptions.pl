@@ -518,12 +518,15 @@
 ],
 
 'admin/users/confirm-delete.html.tmpl' => [
+  'attachments',
   'reporter',
   'assignee_or_qa',
   'cc',
+  'component_cc',
   'flags.requestee',
   'flags.setter',
   'longdescs',
+  'quips',
   'votes',
   'series',
   'watch.watched',

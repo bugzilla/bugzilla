@@ -358,6 +358,9 @@ if ($action eq 'search') {
     $vars->{'otheruser'}      = $otherUser;
 
     # Find other cross references.
+    $vars->{'attachments'} = $dbh->selectrow_array(
+        'SELECT COUNT(*) FROM attachments WHERE submitter_id = ?',
+        undef, $otherUserID);
     $vars->{'assignee_or_qa'} = $dbh->selectrow_array(
         qq{SELECT COUNT(*)
            FROM bugs
@@ -371,6 +374,9 @@ if ($action eq 'search') {
         undef, $otherUserID);
     $vars->{'bugs_activity'} = $dbh->selectrow_array(
         'SELECT COUNT(*) FROM bugs_activity WHERE who = ?',
+        undef, $otherUserID);
+    $vars->{'component_cc'} = $dbh->selectrow_array(
+        'SELECT COUNT(*) FROM component_cc WHERE user_id = ?',
         undef, $otherUserID);
     $vars->{'email_setting'} = $dbh->selectrow_array(
         'SELECT COUNT(*) FROM email_setting WHERE user_id = ?',
@@ -402,6 +408,9 @@ if ($action eq 'search') {
     $vars->{'profiles_activity'} = $dbh->selectrow_array(
         'SELECT COUNT(*) FROM profiles_activity WHERE who = ? AND userid != ?',
         undef, ($otherUserID, $otherUserID));
+    $vars->{'quips'} = $dbh->selectrow_array(
+        'SELECT COUNT(*) FROM quips WHERE userid = ?',
+        undef, $otherUserID);
     $vars->{'series'} = $dbh->selectrow_array(
         'SELECT COUNT(*) FROM series WHERE creator = ?',
         undef, $otherUserID);
@@ -514,6 +523,7 @@ if ($action eq 'search') {
              $otherUserID);
     $dbh->do('DELETE FROM profiles_activity WHERE userid = ? OR who = ?', undef,
              ($otherUserID, $otherUserID));
+    $dbh->do('UPDATE quips SET userid = NULL where userid = ?', undef, $otherUserID);
     $dbh->do('DELETE FROM tokens WHERE userid = ?', undef, $otherUserID);
     $dbh->do('DELETE FROM user_group_map WHERE user_id = ?', undef,
              $otherUserID);

@@ -240,6 +240,7 @@
   <table cellpadding="1" cellspacing="1">
     <tr>
       <td id="comment_status_commit">
+        <a name="add_comment"></a>
         [% IF user.id %]
           <label for="comment" accesskey="c"><b>Additional <u>C</u>omments</b></label>:
           [% IF Param("insidergroup") && user.in_group(Param("insidergroup")) %]
@@ -249,7 +250,6 @@
             <label for="newcommentprivacy">Private</label>
           [% END %]
           <br>
-          <a name="add_comment"></a>
           [% INCLUDE global/textarea.html.tmpl
                      name      = 'comment'
                      id        = 'comment'
@@ -447,8 +447,8 @@
           [% END %]
         [% END %]
         [% IF bug.user.canedit || bug.user.isreporter %]
-          (<a href="#bug_status_bottom" 
-              onclick="document.getElementById('bug_status').focus();return false;">edit</a>)
+          (<a href="#add_comment" 
+              onclick="window.setTimeout(function() { document.getElementById('bug_status').focus(); }, 10)">edit</a>)
         [% END %]
       </span>
     </td>

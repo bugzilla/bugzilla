@@ -140,14 +140,16 @@ log in/out using an existing account.
 
 =head1 METHODS
 
-See L<Bugzilla::WebService> for a description of what B<STABLE>, B<UNSTABLE>,
-and B<EXPERIMENTAL> mean, and for more information about error codes.
+See L<Bugzilla::WebService> for a description of how parameters are passed,
+and what B<STABLE>, B<UNSTABLE>, and B<EXPERIMENTAL> mean.
 
 =head2 Logging In and Out
 
 =over
 
-=item C<login> B<EXPERIMENTAL>
+=item C<login> 
+
+B<STABLE>
 
 =over
 
@@ -203,7 +205,9 @@ A login or password parameter was not provided.
 
 =back
 
-=item C<logout> B<EXPERIMENTAL>
+=item C<logout> 
+
+B<STABLE>
 
 =over
 
@@ -225,7 +229,9 @@ Log out the user. Does nothing if there is no user logged in.
 
 =over
 
-=item C<offer_account_by_email> B<EXPERIMENTAL>
+=item C<offer_account_by_email> 
+
+B<STABLE>
 
 =over
 
@@ -264,7 +270,9 @@ An account with that email address already exists in Bugzilla.
 
 =back
 
-=item C<create> B<EXPERIMENTAL>
+=item C<create> 
+
+B<EXPERIMENTAL>
 
 =over
 
@@ -274,6 +282,9 @@ Creates a user account directly in Bugzilla, password and all.
 Instead of this, you should use L</offer_account_by_email> when
 possible, because that makes sure that the email address specified can
 actually receive an email. This function does not check that.
+
+You must be logged in and have the C<editusers> privilege in order to
+call this function.
 
 =item B<Params>
 
@@ -314,6 +325,14 @@ password is under three characters.)
 
 The password specified is too long. (Usually, this means the
 password is over ten characters.)
+
+=back
+
+=item B<History>
+
+=over
+
+=item Added in Bugzilla B<3.4>.
 
 =back
 

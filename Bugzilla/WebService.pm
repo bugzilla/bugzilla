@@ -150,6 +150,87 @@ Bugzilla::WebService - The Web Service interface to Bugzilla
 This is the standard API for external programs that want to interact
 with Bugzilla. It provides various methods in various modules.
 
+Currently the only method of accessing the API is via XML-RPC. The XML-RPC
+standard is described here: L<http://www.xmlrpc.com/spec>
+
+The endpoint for Bugzilla WebServices is the C<xmlrpc.cgi> script in
+your Bugzilla installation. For example, if your Bugzilla is at
+C<bugzilla.yourdomain.com>, then your XML-RPC client would access the
+API via: C<http://bugzilla.yourdomain.com/xmlrpc.cgi>
+
+=head1 CALLING METHODS
+
+Methods are called in the normal XML-RPC fashion. Bugzilla does not currently
+implement any extensions to the standard method of XML-RPC method calling.
+
+Methods are grouped into "packages", like C<Bug> for 
+L<Bugzilla::WebService::Bug>. So, for example,
+L<Bugzilla::WebService::Bug/get>, is called as C<Bug.get> in XML-RPC.
+
+=head1 PARAMETERS
+
+In addition to the standard parameter types like C<int>, C<string>, etc.,
+XML-RPC has two data structures, a C<< <struct> >> and an C<< <array> >>.
+
+=head2 Structs
+
+In Perl, we call a C<< <struct> >> a "hash" or a "hashref". You may see
+us refer to it that way in the API documentation.
+
+In example code, you will see the characters C<{> and C<}> used to represent
+the beginning and end of structs.
+
+For example, here's a struct in XML-RPC:
+
+ <struct>
+   <member>
+     <name>fruit</name>
+     <value><string>oranges</string></value>
+   </member>
+   <member>
+     <name>vegetable</name>
+     <value><string>lettuce</string></value>
+   </member>
+ </struct>
+
+In our example code in these API docs, that would look like:
+
+ { fruit => 'oranges', vegetable => 'lettuce' }
+
+=head2 Arrays
+
+In example code, you will see the characters C<[> and C<]> used to
+represent the beginning and end of arrays.
+
+For example, here's an array in XML-RPC:
+
+ <array>
+   <data>
+     <value><i4>1</i4></value>
+     <value><i4>2</i4></value>
+     <value><i4>3</i4></value>
+   </data>
+ </array>
+
+In our example code in these API docs, that would look like:
+
+ [1, 2, 3]
+
+=head2 How Bugzilla WebService Methods Take Parameters
+
+B<All> Bugzilla WebServices functions take their parameters in
+a C<< <struct> >>. Another way of saying this would be: All functions
+take a single argument, a C<< <struct> >> that contains all parameters.
+The names of the parameters listed in the API docs for each function are
+the C<name> element for the struct C<member>s.
+
+=head1 LOGGING IN
+
+You can use L<Bugzilla::WebService::User/login> to log in as a Bugzilla 
+user. This issues standard HTTP cookies that you must then use in future
+calls, so your XML-RPC client must be capable of receiving and transmitting
+cookies.
+
 =head1 STABLE, EXPERIMENTAL, and UNSTABLE
 
 Methods are marked B<STABLE> if you can expect their parameters and

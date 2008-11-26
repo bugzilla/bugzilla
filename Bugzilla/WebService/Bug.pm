@@ -268,14 +268,16 @@ or get information about bugs that have already been filed.
 
 =head1 METHODS
 
-See L<Bugzilla::WebService> for a description of B<STABLE>, B<UNSTABLE>,
-and B<EXPERIMENTAL>.
+See L<Bugzilla::WebService> for a description of how parameters are passed,
+and what B<STABLE>, B<UNSTABLE>, and B<EXPERIMENTAL> mean.
 
 =head2 Utility Functions
 
 =over
 
-=item C<legal_values> B<EXPERIMENTAL>
+=item C<legal_values> 
+
+B<EXPERIMENTAL>
 
 =over
 
@@ -320,11 +322,13 @@ You specified a field that doesn't exist or isn't a drop-down field.
 
 =back
 
-=head2 Bug Creation and Modification
+=head2 Bug Information
 
 =over
 
-=item C<get> B<EXPERIMENTAL>
+=item C<get> 
+
+B<EXPERIMENTAL>
 
 =over
 
@@ -410,7 +414,9 @@ You do not have access to the bug_id you specified.
 
 =back
 
-=item C<get_history> B<UNSTABLE>
+=item C<get_history> 
+
+B<UNSTABLE>
 
 =over
 
@@ -497,9 +503,25 @@ present in this hash.
 
 The same as L</get>.
 
+=item B<History>
+
+=over
+
+=item Added in Bugzilla B<3.4>.
+
 =back
 
-=item C<create> B<EXPERIMENTAL>
+=back
+
+=back
+
+=head2 Bug Creation and Modification
+
+=over
+
+=item C<create> 
+
+B<EXPERIMENTAL>
 
 =over
 
@@ -640,7 +662,9 @@ B<Required>, due to a bug in Bugzilla.
 
 =back
 
-=item C<add_comment> B<EXPERIMENTAL>
+=item C<add_comment> 
+
+B<EXPERIMENTAL>
 
 =over
 
@@ -685,6 +709,14 @@ The id you specified doesn't exist in the database.
 =item 108 (Bug Edit Denied)
 
 You did not have the necessary rights to edit the bug.
+
+=back
+
+=item B<History>
+
+=over
+
+=item Added in Bugzilla B<3.2>.
 
 =back
 

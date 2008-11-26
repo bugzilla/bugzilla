@@ -12,11 +12,12 @@
 #
 # The Original Code is the Bugzilla Bug Tracking System.
 #
-# The Initial Developer of the Original Code is Everything Solved.
-# Portions created by Everything Solved are Copyright (C) 2008
-# Everything Solved. All Rights Reserved.
+# The Initial Developer of the Original Code is Everything Solved, Inc.
+# Portions created by the Initial Developer are Copyright (C) 2008
+# the Initial Developer. All Rights Reserved.
 #
-# Contributor(s): Max Kanat-Alexander <mkanat@bugzilla.org>
+# Contributor(s): 
+#   Max Kanat-Alexander <mkanat@bugzilla.org>
 
 package Bugzilla::WebService::Util;
 use strict;
@@ -48,7 +49,7 @@ __END__
 =head1 NAME
 
 Bugzilla::WebService::Util - Utility functions used inside of the WebService
-code.
+code. These are B<not> functions that can be called via the WebService.
 
 =head1 DESCRIPTION
 

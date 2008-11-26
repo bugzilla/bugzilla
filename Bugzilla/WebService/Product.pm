@@ -86,14 +86,16 @@ get information about them.
 
 =head1 METHODS
 
-See L<Bugzilla::WebService> for a description of what B<STABLE>, B<UNSTABLE>,
-and B<EXPERIMENTAL> mean, and for more information about error codes.
+See L<Bugzilla::WebService> for a description of how parameters are passed,
+and what B<STABLE>, B<UNSTABLE>, and B<EXPERIMENTAL> mean.
 
 =head2 List Products
 
 =over
 
-=item C<get_selectable_products> B<UNSTABLE>
+=item C<get_selectable_products> 
+
+B<EXPERIMENTAL>
 
 =over
 
@@ -112,7 +114,9 @@ ids.
 
 =back
 
-=item C<get_enterable_products> B<UNSTABLE>
+=item C<get_enterable_products> 
+
+B<EXPERIMENTAL>
 
 =over
 
@@ -132,7 +136,9 @@ ids.
 
 =back
 
-=item C<get_accessible_products> B<UNSTABLE>
+=item C<get_accessible_products> 
+
+B<UNSTABLE>
 
 =over
 
@@ -152,7 +158,9 @@ ids.
 
 =back
 
-=item C<get> B<UNSTABLE>
+=item C<get> 
+
+B<EXPERIMENTAL>
 
 =over
 

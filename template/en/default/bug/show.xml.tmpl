@@ -56,6 +56,7 @@
       [% FOREACH type = bug.flag_types %]
         [% FOREACH flag = type.flags %]
           <flag name="[% type.name FILTER xml %]"
+                id="[% flag.id FILTER xml %]"
                 status="[% flag.status FILTER xml %]"
                 setter="[% flag.setter.login FILTER xml %]"
           [% IF flag.requestee %]
@@ -99,6 +100,7 @@
 
             [% FOREACH flag = a.flags %]
               <flag name="[% flag.type.name FILTER xml %]"
+                    id="[% flag.id FILTER xml %]"
                     status="[% flag.status FILTER xml %]"
                     setter="[% flag.setter.email FILTER xml %]"
                     [% IF flag.status == "?" && flag.requestee %]

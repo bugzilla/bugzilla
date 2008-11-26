@@ -70,6 +70,7 @@ sub _write_contents_middle {
             my $path = join( "/", '.', esc(@{$e->[3]}) )
                . $Pod::Simple::HTML::HTML_EXTENSION;
             my $description = $self->{bugzilla_desc}->{$name} || '';
+            $description = esc($description);
             my $html = <<END_HTML;
 <tr class="$even_or_odd">
   <th><a href="$path">$name</a></th>

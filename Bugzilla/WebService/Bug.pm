@@ -29,6 +29,7 @@ use Bugzilla::Field;
 use Bugzilla::WebService::Constants;
 use Bugzilla::Bug;
 use Bugzilla::BugMail;
+use Bugzilla::Util qw(trim);
 
 #############
 # Constants #
@@ -233,7 +234,7 @@ sub add_comment {
     defined $params->{id} 
         || ThrowCodeError('param_required', { param => 'id' }); 
     my $comment = $params->{comment}; 
-    defined $comment
+    (defined $comment && trim($comment) ne '')
         || ThrowCodeError('param_required', { param => 'comment' });
     
     my $bug = Bugzilla::Bug->check($params->{id});
@@ -655,6 +656,8 @@ This allows you to add a comment to a bug in Bugzilla.
 comment to.
 
 =item C<comment> (string) B<Required> - The comment to append to the bug.
+If this is empty or all whitespace, an error will be thrown saying that
+you did not set the C<comment> parameter.
 
 =item C<private> (boolean) - If set to true, the comment is private, otherwise
 it is assumed to be public.

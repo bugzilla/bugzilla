@@ -240,6 +240,8 @@
   <table cellpadding="1" cellspacing="1">
     <tr>
       <td id="comment_status_commit">
+        <!-- The table keeps the commit button aligned with the box. -->
+        <table><tr><td>
         <a name="add_comment"></a>
         [% IF user.id %]
           <label for="comment" accesskey="c"><b>Additional <u>C</u>omments</b></label>:
@@ -275,6 +277,7 @@
               </td>
             </tr>
           </table>
+          </td></tr></table>
         [% ELSE %]
           <fieldset>
             <legend>Note</legend>

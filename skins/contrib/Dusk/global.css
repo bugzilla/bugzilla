@@ -123,22 +123,6 @@ hr {
     border-top: 1px solid #c8c8ba;
 }
 
-/* knob-buttons */
-
-#knob-buttons {
-    margin-top: 10px;
-    margin-bottom: 5px;
-}
-
-#knob-buttons p {
-    display: inline;
-    padding-left: 10px;
-}
-
-#knob-buttons a {
-    font-size: 10pt;
-}
-
 /* comments */
 
 #comments th {

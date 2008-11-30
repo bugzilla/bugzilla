@@ -233,9 +233,9 @@
     <tr>
       <td id="comment_status_commit">
         <!-- The table keeps the commit button aligned with the box. -->
-        <table><tr><td>
         <a name="add_comment"></a>
         [% IF user.id %]
+        <table><tr><td>
           <label for="comment" accesskey="c"><b>Additional <u>C</u>omments</b></label>:
           [% IF Param("insidergroup") && user.in_group(Param("insidergroup")) %]
             <input type="checkbox" name="commentprivacy" value="1"
@@ -269,7 +269,7 @@
               </td>
             </tr>
           </table>
-          </td></tr></table>
+        </td></tr></table>
         [% ELSE %]
           <fieldset>
             <legend>Note</legend>

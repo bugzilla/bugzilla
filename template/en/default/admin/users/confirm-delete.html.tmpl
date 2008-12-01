@@ -358,13 +358,13 @@
         [% IF quips %]
           <li>
             [% otheruser.login FILTER html %] has submitted
-            [% IF quip == 1 %]
-              one quip
+            [% IF quips == 1 %]
+              a quip
             [% ELSE %]
               [%+ quips %] quips
             [% END %].
             If you delete the user account,
-            [% IF votes == 1 %]
+            [% IF quips == 1 %]
               this quip
             [% ELSE %]
               these quips

@@ -136,23 +136,28 @@ if ($action eq 'search') {
             } else {
                 $expr = "profiles.login_name";
             }
+
+            if ($matchstr =~ /^(regexp|notregexp|exact)$/) {
+                $matchstr ||= '.';
+            }
+            else {
+                $matchstr = '' unless defined $matchstr;
+            }
+            # We can trick_taint because we use the value in a SELECT only,
+            # using a placeholder.
+            trick_taint($matchstr);
+
             if ($matchtype eq 'regexp') {
-                $query .= $dbh->sql_regexp($expr, '?');
-                $matchstr = '.' unless $matchstr;
+                $query .= $dbh->sql_regexp($expr, '?', 0, $dbh->quote($matchstr));
             } elsif ($matchtype eq 'notregexp') {
-                $query .= $dbh->sql_not_regexp($expr, '?');
-                $matchstr = '.' unless $matchstr;
+                $query .= $dbh->sql_not_regexp($expr, '?', 0, $dbh->quote($matchstr));
             } elsif ($matchtype eq 'exact') {
                 $query .= $expr . ' = ?';
-                $matchstr = '.' unless $matchstr;
             } else { # substr or unknown
                 $query .= $dbh->sql_istrcmp($expr, '?', 'LIKE');
                 $matchstr = "%$matchstr%";
             }
             $nextCondition = 'AND';
-            # We can trick_taint because we use the value in a SELECT only,
-            # using a placeholder.
-            trick_taint($matchstr);
             push(@bindValues, $matchstr);
         }
 

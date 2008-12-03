@@ -99,7 +99,7 @@ sub bz_check_regexp {
     my ($self, $pattern) = @_;
 
     eval { $self->do("SELECT 1 FROM DUAL WHERE "
-          . $self->sql_regexp($self->quote("a"), $self->quote($pattern), 1)) };
+          . $self->sql_regexp($self->quote("a"), $pattern, 1)) };
 
     $@ && ThrowUserError('illegal_regexp',
         { value => $pattern, dberror => $self->errstr });
@@ -115,17 +115,19 @@ sub bz_explain {
 } 
 
 sub sql_regexp {
-    my ($self, $expr, $pattern, $nocheck) = @_;
+    my ($self, $expr, $pattern, $nocheck, $real_pattern) = @_;
+    $real_pattern ||= $pattern;
 
-    $self->bz_check_regexp($pattern) if !$nocheck;
+    $self->bz_check_regexp($real_pattern) if !$nocheck;
 
     return "REGEXP_LIKE($expr, $pattern)";
 }
 
 sub sql_not_regexp {
-    my ($self, $expr, $pattern, $nocheck) = @_;
+    my ($self, $expr, $pattern, $nocheck, $real_pattern) = @_;
+    $real_pattern ||= $pattern;
 
-    $self->bz_check_regexp($pattern) if !$nocheck;
+    $self->bz_check_regexp($real_pattern) if !$nocheck;
 
     return "NOT REGEXP_LIKE($expr, $pattern)" 
 }

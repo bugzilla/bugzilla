@@ -1556,6 +1556,11 @@ Abstract method, should be overridden by database specific code.
 
 =item C<$pattern> - the regular expression to search for (scalar)
 
+=item C<$nocheck> - true if the pattern should not be tested; false otherwise (boolean)
+
+=item C<$real_pattern> - the real regular expression to search for.
+This argument is used when C<$pattern> is a placeholder ('?').
+
 =back
 
 =item B<Returns>
@@ -1578,13 +1583,7 @@ Abstract method, should be overridden by database specific code.
 
 =item B<Params>
 
-=over
-
-=item C<$expr> - SQL expression for the text to be searched (scalar)
-
-=item C<$pattern> - the regular expression to search for (scalar)
-
-=back
+Same as L</sql_regexp>.
 
 =item B<Returns>
 

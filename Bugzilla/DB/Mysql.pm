@@ -136,17 +136,19 @@ sub sql_group_concat {
 }
 
 sub sql_regexp {
-    my ($self, $expr, $pattern, $nocheck) = @_;
+    my ($self, $expr, $pattern, $nocheck, $real_pattern) = @_;
+    $real_pattern ||= $pattern;
 
-    $self->bz_check_regexp($pattern) if !$nocheck;
+    $self->bz_check_regexp($real_pattern) if !$nocheck;
 
     return "$expr REGEXP $pattern";
 }
 
 sub sql_not_regexp {
-    my ($self, $expr, $pattern, $nocheck) = @_;
+    my ($self, $expr, $pattern, $nocheck, $real_pattern) = @_;
+    $real_pattern ||= $pattern;
 
-    $self->bz_check_regexp($pattern) if !$nocheck;
+    $self->bz_check_regexp($real_pattern) if !$nocheck;
 
     return "$expr NOT REGEXP $pattern";
 }

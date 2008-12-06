@@ -169,7 +169,7 @@
                   [% FOREACH flag_type = flag_types %]
                     [% NEXT UNLESS flag_type.is_active %]
                     [% all_visible_flag_types.${flag_type.id} = flag_type %]
-                    <li resource="[% urlbase FILTER xml %]flags.cgi?id=[% flag_type.id FILTER url_quote
+                    <li resource="[% urlbase FILTER xml %]flag.cgi?id=[% flag_type.id FILTER url_quote
                         %]&amp;name=[% flag_type.name FILTER url_quote %]" />
                   [% END %]
                 </Seq>

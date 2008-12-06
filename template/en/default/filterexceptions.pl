@@ -60,10 +60,7 @@
 'search/boolean-charts.html.tmpl' => [
   '"field${chartnum}-${rownum}-${colnum}"', 
   '"value${chartnum}-${rownum}-${colnum}"', 
-  '"type${chartnum}-${rownum}-${colnum}"', 
   'field.name', 
-  'type.name',
-  'type.description', 
   '"${chartnum}-${rownum}-${newor}"', 
   '"${chartnum}-${newand}-0"', 
   'newchart',
@@ -71,7 +68,6 @@
 ],
 
 'search/form.html.tmpl' => [
-  'qv.value',
   'qv.name',
   'qv.description',
   'field.name',

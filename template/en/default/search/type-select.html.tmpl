@@ -24,6 +24,6 @@
   [% FOREACH type = types %]
     <option value="[% type FILTER html %]"
             [%- ' selected="selected"' IF type == selected %]>
-        [%- search_descs.$type %]</option>
+        [%- search_descs.$type FILTER html %]</option>
   [% END %]
 </select>

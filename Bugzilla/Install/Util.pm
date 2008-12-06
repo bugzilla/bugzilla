@@ -268,10 +268,10 @@ sub _add_language_set {
     unshift(@add, "$templatedir/$lang/$project") if $project;
     
     foreach my $dir (@add) {
-        #if (-d $dir) {
+        if (-d $dir) {
             trick_taint($dir);
             push(@$array, $dir);
-        #}
+        }
     }
 }
 

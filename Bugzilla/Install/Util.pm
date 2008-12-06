@@ -265,7 +265,7 @@ sub _add_language_set {
     my @add = ("$templatedir/$lang/custom", "$templatedir/$lang/default");
     
     my $project = bz_locations->{'project'};
-    push(@add, "$templatedir/$lang/$project") if $project;
+    unshift(@add, "$templatedir/$lang/$project") if $project;
     
     foreach my $dir (@add) {
         #if (-d $dir) {

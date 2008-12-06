@@ -28,7 +28,7 @@
 [%# Template Initialization                                                  #%]
 [%############################################################################%]
 
-[% PROCESS global/variables.none.tmpl %]
+[% PROCESS "global/field-descs.none.tmpl" %]
 
 [% title = "$terms.Bug List" %]
 [% IF searchname || defaultsavename %]
@@ -58,11 +58,6 @@
   </span>
 
   [% IF debug %]
-    <p class="bz_query_debug">
-      [% FOREACH debugline = debugdata %]
-        [% debugline FILTER html %]<br>
-      [% END %]
-    </p>
     <p class="bz_query">[% query FILTER html %]</p>
     [% IF query_explain.defined %]
       <pre class="bz_query_explain">[% query_explain FILTER html %]</pre>
@@ -84,6 +79,26 @@
     Next/Prev/First/Last buttons won't appear on individual [% terms.bugs %].
   </h2>
 [% END %]
+
+[% SET shown_types = [
+  'notequal', 'regexp', 'notregexp', 'lessthan', 'lessthaneq', 
+  'greaterthan', 'greaterthaneq', 'changedbefore', 'changedafter', 
+  'changedfrom', 'changedto', 'changedby',
+] %]
+<ul class="search_description">
+[% FOREACH desc_item = search_description %]
+  <li>
+    <strong>[% field_descs.${desc_item.field} FILTER html %]:</strong>
+    [% IF shown_types.contains(desc_item.type) || debug %]
+      ([% search_descs.${desc_item.type} FILTER html %])
+    [% END %]
+    [%+ desc_item.value FILTER html %]
+    [% IF debug %]
+      (<code>[% desc_item.term FILTER html %]</code>)
+   [% END %]
+  </li>
+[% END %]
+</ul>
 
 <hr>
 

@@ -18,6 +18,16 @@
   * Contributor(s): Myk Melez <myk@mozilla.org>
   */
 
+.search_description {
+  margin: .5em 0;
+  padding: 0;
+}
+.search_description li {
+  list-style-type: none;
+  display: inline;
+  margin-right: 2em;
+}
+
 .bz_id_column {
 }
 

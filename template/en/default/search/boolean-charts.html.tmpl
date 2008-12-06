@@ -17,31 +17,34 @@
   #
   # Contributor(s): Gervase Markham <gerv@gerv.net>
   #%]
+
+[% PROCESS "global/field-descs.none.tmpl" %]
   
 [% types = [
-  { name => "noop", description => "---" },
-  { name => "equals", description => "is equal to" },
-  { name => "notequals", description => "is not equal to" },
-  { name => "anyexact", description => "is equal to any of the strings" },
-  { name => "substring", description => "contains the string" },
-  { name => "casesubstring", description => "contains the string (exact case)" },
-  { name => "notsubstring", description => "does not contain the string" },
-  { name => "anywordssubstr", description => "contains any of the strings" },
-  { name => "allwordssubstr", description => "contains all of the strings" },
-  { name => "nowordssubstr", description => "contains none of the strings" },
-  { name => "regexp", description => "contains regexp" },
-  { name => "notregexp", description => "does not contain regexp" },
-  { name => "lessthan", description => "is less than" },
-  { name => "greaterthan", description => "is greater than" },
-  { name => "anywords", description => "contains any of the words" },
-  { name => "allwords", description => "contains all of the words" },
-  { name => "nowords", description => "contains none of the words" },
-  { name => "changedbefore", description => "changed before" },
-  { name => "changedafter", description => "changed after" },
-  { name => "changedfrom", description => "changed from" },
-  { name => "changedto", description => "changed to" },
-  { name => "changedby", description => "changed by" },
-  { name => "matches", description => "matches" } ] %]
+  "noop",
+  "equals",
+  "notequals",
+  "anyexact",
+  "substring",
+  "casesubstring",
+  "notsubstring",
+  "anywordssubstr",
+  "allwordssubstr",
+  "nowordssubstr",
+  "regexp",
+  "notregexp",
+  "lessthan",
+  "greaterthan",
+  "anywords",
+  "allwords",
+  "nowords",
+  "changedbefore",
+  "changedafter",
+  "changedfrom",
+  "changedto",
+  "changedby",
+  "matches",
+] %]
 
   <p>
     <strong>
@@ -80,12 +83,9 @@
           [% END %]
         </select>
 
-        <select name="[% "type${chartnum}-${rownum}-${colnum}" %]">
-          [% FOREACH type = types %]
-            <option value="[% type.name %]"
-              [%- " selected" IF type.name == col.type %]>[% type.description %]</option>
-          [% END %]
-        </select>
+        [% INCLUDE "search/type-select.html.tmpl"
+           name = "type${chartnum}-${rownum}-${colnum}",
+           types = types, selected = col.type %]
 
         <input name="[% "value${chartnum}-${rownum}-${colnum}" %]" 
                value="[% col.value FILTER html %]"> 

@@ -992,6 +992,7 @@ my $search = new Bugzilla::Search('fields' => \@selectnames,
                                   'params' => $params,
                                   'order' => \@orderstrings);
 my $query = $search->getSQL();
+$vars->{'search_description'} = $search->search_description;
 
 if (defined $cgi->param('limit')) {
     my $limit = $cgi->param('limit');
@@ -1019,7 +1020,6 @@ if ($cgi->param('debug')) {
     if (Bugzilla->user->in_group('admin')) {
         $vars->{'query_explain'} = $dbh->bz_explain($query);
     }
-    $vars->{'debugdata'} = $search->getDebugData();
 }
 
 # Time to use server push to display an interim message to the user until

@@ -99,6 +99,34 @@
   [% END %]
 [% END %]
 
+[% SET search_descs = {
+  "noop"           => "---",
+  "equals"         => "is equal to",
+  "notequals"      => "is not equal to",
+  "anyexact"       => "is equal to any of the strings",
+  "substring"      => "contains the string",
+  "casesubstring"  => "contains the string (exact case)",
+  "notsubstring"   => "does not contain the string",
+  "anywordssubstr" => "contains any of the strings",
+  "allwordssubstr" => "contains all of the strings",
+  "nowordssubstr"  => "contains none of the strings",
+  "regexp"         => "matches regular expression",
+  "notregexp"      => "does not match regular expression",
+  "lessthan"       => "is less than",
+  "lessthaneq"     => "is less than or equal to",
+  "greaterthan"    => "is greater than",
+  "greaterthaneq"  => "is greater than or equal to",
+  "anywords"       => "contains any of the words",
+  "allwords"       => "contains all of the words",
+  "nowords"        => "contains none of the words",
+  "changedbefore"  => "changed before",
+  "changedafter"   => "changed after",
+  "changedfrom"    => "changed from",
+  "changedto"      => "changed to",
+  "changedby"      => "changed by",
+  "matches"        => "matches",
+} %]
+
 [% field_types = { ${constants.FIELD_TYPE_UNKNOWN}       => "Unknown Type",
                    ${constants.FIELD_TYPE_FREETEXT}      => "Free Text",
                    ${constants.FIELD_TYPE_SINGLE_SELECT} => "Drop Down",

@@ -88,10 +88,6 @@ sub init {
     @inputorder = @$orderref if $orderref;
     my @orderby;
 
-    my $debug = 0;
-    my @debugdata;
-    if ($params->param('debug')) { $debug = 1; }
-
     my @fields;
     my @supptables;
     my @wherepart;
@@ -306,8 +302,22 @@ sub init {
         my $sql_chvalue = $chvalue ne '' ? $dbh->quote($chvalue) : '';
         trick_taint($sql_chvalue);
         if(!@chfield) {
-            push(@wherepart, "bugs.delta_ts >= $sql_chfrom") if ($sql_chfrom);
-            push(@wherepart, "bugs.delta_ts <= $sql_chto") if ($sql_chto);
+            if ($sql_chfrom) {
+                my $term = "bugs.delta_ts >= $sql_chfrom";
+                push(@wherepart, $term);
+                $self->search_description({
+                    field => 'delta_ts', type => 'greaterthaneq',
+                    value => $chfieldfrom, term => $term,
+                });
+            }
+            if ($sql_chto) {
+                my $term = "bugs.delta_ts <= $sql_chto";
+                push(@wherepart, $term);
+                $self->search_description({
+                    field => 'delta_ts', type => 'lessthaneq',
+                    value => $chfieldto, term => $term,
+                });
+            }
         } else {
             my $bug_creation_clause;
             my @list;
@@ -317,8 +327,22 @@ sub init {
                     # Treat [Bug creation] differently because we need to look
                     # at bugs.creation_ts rather than the bugs_activity table.
                     my @l;
-                    push(@l, "bugs.creation_ts >= $sql_chfrom") if($sql_chfrom);
-                    push(@l, "bugs.creation_ts <= $sql_chto") if($sql_chto);
+                    if ($sql_chfrom) {
+                        my $term = "bugs.creation_ts >= $sql_chfrom";
+                        push(@l, $term);
+                        $self->search_description({
+                            field => 'creation_ts', type => 'greaterthaneq',
+                            value => $chfieldfrom, term => $term,
+                        });
+                    }
+                    if ($sql_chto) {
+                        my $term = "bugs.creation_ts <= $sql_chto";
+                        push(@l, $term);
+                        $self->search_description({
+                            field => 'creation_ts', type => 'lessthaneq',
+                            value => $chfieldto, term => $term,
+                        });
+                    }
                     $bug_creation_clause = "(" . join(' AND ', @l) . ")";
                 } else {
                     push(@actlist, get_field_id($f));
@@ -330,18 +354,39 @@ sub init {
             if(@actlist) {
                 my $extra = " actcheck.bug_id = bugs.bug_id";
                 push(@list, "(actcheck.bug_when IS NOT NULL)");
-                if($sql_chfrom) {
-                    $extra .= " AND actcheck.bug_when >= $sql_chfrom";
-                }
-                if($sql_chto) {
-                    $extra .= " AND actcheck.bug_when <= $sql_chto";
-                }
-                if($sql_chvalue) {
-                    $extra .= " AND actcheck.added = $sql_chvalue";
-                }
+
+                my $from_term = " AND actcheck.bug_when >= $sql_chfrom";
+                $extra .= $from_term if $sql_chfrom;
+                my $to_term = " AND actcheck.bug_when <= $sql_chto";
+                $extra .= $to_term if $sql_chto;
+                my $value_term = " AND actcheck.added = $sql_chvalue";
+                $extra .= $value_term if $sql_chvalue;
+
                 push(@supptables, "LEFT JOIN bugs_activity AS actcheck " .
                                   "ON $extra AND " 
                                  . $dbh->sql_in('actcheck.fieldid', \@actlist));
+
+                foreach my $field (@chfield) {
+                    next if $field eq "[Bug creation]";
+                    if ($sql_chvalue) {
+                        $self->search_description({
+                            field => $field, type => 'changedto',
+                            value => $chvalue, term  => $value_term,
+                        });
+                    }
+                    if ($sql_chfrom) {
+                        $self->search_description({
+                            field => $field, type => 'changedafter',
+                            value => $chfieldfrom, term => $from_term,
+                        });
+                    }
+                    if ($sql_chvalue) {
+                        $self->search_description({
+                            field => $field, type => 'changedbefore',
+                            value => $chfieldto, term => $to_term,
+                        });
+                    }
+                }
             }
 
             # Now that we're done using @list to determine if there are any
@@ -367,7 +412,12 @@ sub init {
                                              format => 'YYYY-MM-DD'});
         $sql_deadlinefrom = $dbh->quote($deadlinefrom);
         trick_taint($sql_deadlinefrom);
-        push(@wherepart, "bugs.deadline >= $sql_deadlinefrom");
+        my $term = "bugs.deadline >= $sql_deadlinefrom";
+        push(@wherepart, $term);
+        $self->search_description({
+            field => 'deadline', type => 'greaterthaneq',
+            value => $deadlinefrom, term => $term,
+        });
       }
       
       if ($params->param('deadlineto')){
@@ -377,11 +427,16 @@ sub init {
                                              format => 'YYYY-MM-DD'});
         $sql_deadlineto = $dbh->quote($deadlineto);
         trick_taint($sql_deadlineto);
-        push(@wherepart, "bugs.deadline <= $sql_deadlineto");
+        my $term = "bugs.deadline <= $sql_deadlineto";
+        push(@wherepart, $term);
+        $self->search_description({
+            field => 'deadline', type => 'lessthaneq',
+            value => $deadlineto, term => $term,
+        });
       }
     }  
 
-    foreach my $f ("short_desc", "long_desc", "bug_file_loc",
+    foreach my $f ("short_desc", "longdesc", "bug_file_loc",
                    "status_whiteboard") {
         if (defined $params->param($f)) {
             my $s = trim($params->param($f));
@@ -447,6 +502,7 @@ sub init {
         "^(?:deadline|creation_ts|delta_ts),(?:lessthan|greaterthan|equals|notequals),(?:-|\\+)?(?:\\d+)(?:[dDwWmMyY])\$" => \&_timestamp_compare,
         "^commenter,(?:equals|anyexact),(%\\w+%)" => \&_commenter_exact,
         "^commenter," => \&_commenter,
+        # The _ is allowed for backwards-compatibility with 3.2 and lower.
         "^long_?desc," => \&_long_desc,
         "^longdescs\.isprivate," => \&_longdescs_isprivate,
         "^work_time,changedby" => \&_work_time_changedby,
@@ -526,12 +582,6 @@ sub init {
             $params->param("field$chart-$row-$col", shift(@$ref));
             $params->param("type$chart-$row-$col", shift(@$ref));
             $params->param("value$chart-$row-$col", shift(@$ref));
-            if ($debug) {
-                push(@debugdata, "$row-$col = " .
-                               $params->param("field$chart-$row-$col") . ' | ' .
-                               $params->param("type$chart-$row-$col") . ' | ' .
-                               $params->param("value$chart-$row-$col") . ' *');
-            }
             $col++;
 
         }
@@ -639,6 +689,7 @@ sub init {
                  $params->param("field$chart-$row-$col") ;
                  $col++) {
                 $f = $params->param("field$chart-$row-$col") || "noop";
+                my $original_f = $f; # Saved for search_description
                 $t = $params->param("type$chart-$row-$col") || "noop";
                 $v = $params->param("value$chart-$row-$col");
                 $v = "" if !defined $v;
@@ -665,24 +716,21 @@ sub init {
                 foreach my $key (@funcnames) {
                     if ("$f,$t,$rhs" =~ m/$key/) {
                         my $ref = $funcsbykey{$key};
-                        if ($debug) {
-                            push(@debugdata, "$key ($f / $t / $rhs) =>");
-                        }
                         $ff = $f;
                         if ($f !~ /\./) {
                             $ff = "bugs.$f";
                         }
                         $self->$ref(%func_args);
-                        if ($debug) {
-                            push(@debugdata, "$f / $t / $v / " .
-                                             ($term || "undef") . " *");
-                        }
                         if ($term) {
                             last;
                         }
                     }
                 }
                 if ($term) {
+                    $self->search_description({
+                        field => $original_f, type  => $t, value => $v,
+                        term  => $term,
+                    });
                     push(@orlist, $term);
                 }
                 else {
@@ -808,7 +856,6 @@ sub init {
     }
 
     $self->{'sql'} = $query;
-    $self->{'debugdata'} = \@debugdata;
 }
 
 ###############################################################################
@@ -911,9 +958,13 @@ sub getSQL {
     return $self->{'sql'};
 }
 
-sub getDebugData {
-    my $self = shift;
-    return $self->{'debugdata'};
+sub search_description {
+    my ($self, $params) = @_;
+    my $desc = $self->{'search_description'} ||= [];
+    if ($params) {
+        push(@$desc, $params);
+    }
+    return $self->{'search_description'};
 }
 
 sub pronoun {

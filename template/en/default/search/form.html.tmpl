@@ -20,6 +20,8 @@
   #                 Gervase Markham <gerv@gerv.net>
   #%]
 
+[% PROCESS "global/field-descs.none.tmpl" %]
+
 <script type="text/javascript">
 
 var first_load = true;         [%# is this the first time we load the page? %]
@@ -103,20 +105,16 @@ function doOnSelectProduct(selectmode) {
 
 </script>
 
-
-[% PROCESS global/variables.none.tmpl %]
-
-[% query_variants = [
-  { value => "allwordssubstr", description => "contains all of the words/strings" },
-  { value => "anywordssubstr", description => "contains any of the words/strings" },
-  { value => "substring", description => "contains the string" },
-  { value => "casesubstring", description => "contains the string (exact case)" },
-  { value => "allwords", description => "contains all of the words" },
-  { value => "anywords", description => "contains any of the words" },
-  { value => "regexp", description => "matches the regexp" },
-  { value => "notregexp", description => "doesn't match the regexp" } ] %]
-
-[% PROCESS "global/field-descs.none.tmpl" %]
+[% query_types = [
+  "allwordssubstr",
+  "anywordssubstr",
+  "substring",
+  "casesubstring",
+  "allwords",
+  "anywords",
+  "regexp",
+  "notregexp",
+] %]
 
 [%# If we resubmit to ourselves, we need to know if we are using a format. %]
 [% thisformat = query_format != '' ? query_format : format %]
@@ -130,12 +128,9 @@ function doOnSelectProduct(selectmode) {
       <label for="short_desc" accesskey="s"><u>S</u>ummary</label>:
     </th>
     <td>
-      <select name="short_desc_type">
-      [% FOREACH qv = query_variants %]
-        <option value="[% qv.value %]"
-          [% " selected" IF default.short_desc_type.0 == qv.value %]>[% qv.description %]</option>
-      [% END %]
-      </select>
+      [% INCLUDE "search/type-select.html.tmpl"
+         name = "short_desc_type",
+         types = query_types, selected = default.short_desc_type.0 %]
     </td>
     <td>
       <input name="short_desc" id="short_desc" size="40"
@@ -265,7 +260,7 @@ function doOnSelectProduct(selectmode) {
 [%# *** Comment URL Whiteboard Keywords *** %]
 
   [% FOREACH field = [
-    { name => "long_desc", description => "A&nbsp;<u>C</u>omment",
+    { name => "longdesc", description => "A&nbsp;<u>C</u>omment",
       accesskey => 'c' },
     { name => "bug_file_loc", description => "The&nbsp;<u>U</u>RL",
       accesskey => 'u' },
@@ -278,13 +273,9 @@ function doOnSelectProduct(selectmode) {
         <label for="[% field.name %]" accesskey="[% field.accesskey %]">[% field.description %]</label>:
       </th>
       <td>
-        <select name="[% field.name %]_type">
-        [% FOREACH qv = query_variants %]
-          [% type = "${field.name}_type" %]
-          <option value="[% qv.value %]"
-            [% " selected" IF default.$type.0 == qv.value %]>[% qv.description %]</option>
-        [% END %]
-        </select>
+        [% INCLUDE "search/type-select.html.tmpl"
+           name = field.name _ "_type",
+           types = query_types, selected = default.$type.0 %]
       </td>
       <td><input name="[% field.name %]" id="[% field.name %]" size="40"
                  value="[% default.${field.name}.0 FILTER html %]">
@@ -300,17 +291,10 @@ function doOnSelectProduct(selectmode) {
         <label for="keywords" accesskey="k"><a href="describekeywords.cgi"><u>K</u>eywords</a></label>:
       </th>
       <td>
-        <select name="keywords_type">
-        [% FOREACH qv = [
-          { name => "allwords", description => "contains all of the keywords" },
-          { name => "anywords", description => "contains any of the keywords" },
-          { name => "nowords",  description => "contains none of the keywords" } ] %]
-
-          <option value="[% qv.name %]"
-            [% " selected" IF default.keywords_type.0 == qv.name %]>
-            [% qv.description %]</option>
-        [% END %]
-        </select>
+        [% INCLUDE "search/type-select.html.tmpl"
+           name = "keywords_type",
+           types = ['allwords', 'anywords', 'nowords'], 
+           selected = default.keywords_type.0 %]
       </td>
       <td>
         <input name="keywords" id="keywords" size="40"

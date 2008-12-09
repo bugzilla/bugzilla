@@ -418,7 +418,6 @@
   'bugid',
   'oldid',
   'newid',
-  'style',
   'patch.id',
 ],
 

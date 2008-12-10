@@ -87,12 +87,6 @@ sub get_param_list {
   },
 
   {
-   name => 'commentonreassignbycomponent',
-   type => 'b',
-   default => 0
-  },
-
-  {
    name => 'commentonduplicate',
    type => 'b',
    default => 0

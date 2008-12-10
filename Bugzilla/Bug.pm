@@ -1752,11 +1752,6 @@ sub set_assigned_to {
 }
 sub reset_assigned_to {
     my $self = shift;
-    if (Bugzilla->params->{'commentonreassignbycomponent'} 
-        && !$self->{added_comments})
-    {
-        ThrowUserError('comment_required');
-    }
     my $comp = $self->component_obj;
     $self->set_assigned_to($comp->default_assignee);
 }
@@ -1997,11 +1992,6 @@ sub set_qa_contact {
 }
 sub reset_qa_contact {
     my $self = shift;
-    if (Bugzilla->params->{'commentonreassignbycomponent'}
-        && !$self->{added_comments})
-    {
-        ThrowUserError('comment_required');
-    }
     my $comp = $self->component_obj;
     $self->set_qa_contact($comp->default_qa_contact);
 }

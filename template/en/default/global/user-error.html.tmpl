@@ -1258,7 +1258,7 @@
     [% title = "File Too Large" %]
     The file you are trying to attach is [% filesize FILTER html %] 
     kilobytes (KB) in size.
-    Patches cannot be more than [% Param('maxpatchsize') %] KB in size.
+    Patches cannot be more than [% Param('maxattachmentsize') %] KB in size.
     Try splitting your patch into several pieces.
 
   [% ELSIF error == "product_access_denied" %]

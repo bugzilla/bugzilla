@@ -474,9 +474,7 @@ sub _validate_filename {
 sub _validate_data {
     my ($throw_error, $hr_vars) = @_;
     my $cgi = Bugzilla->cgi;
-    my $maxsize = $cgi->param('ispatch') ? Bugzilla->params->{'maxpatchsize'} 
-                  : Bugzilla->params->{'maxattachmentsize'};
-    $maxsize *= 1024; # Convert from K
+
     my $fh;
     # Skip uploading into a local variable if the user wants to upload huge
     # attachments into local files.
@@ -514,6 +512,7 @@ sub _validate_data {
     }
 
     # Make sure the attachment does not exceed the maximum permitted size
+    my $maxsize = Bugzilla->params->{'maxattachmentsize'} * 1024; # Convert from K
     my $len = $data ? length($data) : 0;
     if ($maxsize && $len > $maxsize) {
         my $vars = { filesize => sprintf("%.0f", $len/1024) };

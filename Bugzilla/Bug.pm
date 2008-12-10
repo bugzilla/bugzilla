@@ -2049,11 +2049,6 @@ sub clear_resolution {
     if (!$self->status->is_open) {
         ThrowUserError('resolution_cant_clear', { bug_id => $self->id });
     }
-    if (Bugzilla->params->{'commentonclearresolution'}
-        && $self->resolution && !$self->{added_comments})
-    {
-        ThrowUserError('comment_required');
-    }
     $self->{'resolution'} = ''; 
     $self->_clear_dup_id; 
 }

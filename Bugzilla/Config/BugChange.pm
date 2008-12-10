@@ -81,12 +81,6 @@ sub get_param_list {
   },
 
   {
-   name => 'commentonclearresolution',
-   type => 'b',
-   default => 0
-  },
-
-  {
    name => 'commentonchange_resolution',
    type => 'b',
    default => 0

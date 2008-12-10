@@ -56,13 +56,7 @@ sub get_param_list {
    name => 'allowuserdeletion',
    type => 'b',
    default => 0
-  },
-
-  {
-   name => 'supportwatchers',
-   type => 'b',
-   default => 0
-  } );
+  });
   return @param_list;
 }
 

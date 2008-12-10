@@ -205,28 +205,26 @@ sub DoEmail {
     ###########################################################################
     # User watching
     ###########################################################################
-    if (Bugzilla->params->{"supportwatchers"}) {
-        my $watched_ref = $dbh->selectcol_arrayref(
-            "SELECT profiles.login_name FROM watch INNER JOIN profiles" .
-            " ON watch.watched = profiles.userid" .
-            " WHERE watcher = ?" .
-            " ORDER BY profiles.login_name",
-            undef, $user->id);
-        $vars->{'watchedusers'} = $watched_ref;
+    my $watched_ref = $dbh->selectcol_arrayref(
+        "SELECT profiles.login_name FROM watch INNER JOIN profiles" .
+        " ON watch.watched = profiles.userid" .
+        " WHERE watcher = ?" .
+        " ORDER BY profiles.login_name",
+        undef, $user->id);
+    $vars->{'watchedusers'} = $watched_ref;
 
-        my $watcher_ids = $dbh->selectcol_arrayref(
-            "SELECT watcher FROM watch WHERE watched = ?",
-            undef, $user->id);
+    my $watcher_ids = $dbh->selectcol_arrayref(
+        "SELECT watcher FROM watch WHERE watched = ?",
+        undef, $user->id);
 
-        my @watchers;
-        foreach my $watcher_id (@$watcher_ids) {
-            my $watcher = new Bugzilla::User($watcher_id);
-            push (@watchers, Bugzilla::User::identity($watcher));
-        }
-
-        @watchers = sort { lc($a) cmp lc($b) } @watchers;
-        $vars->{'watchers'} = \@watchers;
+    my @watchers;
+    foreach my $watcher_id (@$watcher_ids) {
+        my $watcher = new Bugzilla::User($watcher_id);
+        push(@watchers, Bugzilla::User::identity($watcher));
     }
+
+    @watchers = sort { lc($a) cmp lc($b) } @watchers;
+    $vars->{'watchers'} = \@watchers;
 
     ###########################################################################
     # Role-based preferences
@@ -249,9 +247,7 @@ sub SaveEmail {
     my $cgi = Bugzilla->cgi;
     my $user = Bugzilla->user;
 
-    if (Bugzilla->params->{"supportwatchers"}) {
-        Bugzilla::User::match_field($cgi, { 'new_watchedusers' => {'type' => 'multi'} });
-    }
+    Bugzilla::User::match_field($cgi, { 'new_watchedusers' => {'type' => 'multi'} });
 
     ###########################################################################
     # Role-based preferences
@@ -308,9 +304,8 @@ sub SaveEmail {
     ###########################################################################
     # User watching
     ###########################################################################
-    if (Bugzilla->params->{"supportwatchers"} 
-        && (defined $cgi->param('new_watchedusers')
-            || defined $cgi->param('remove_watched_users'))) 
+    if (defined $cgi->param('new_watchedusers')
+        || defined $cgi->param('remove_watched_users'))
     {
         $dbh->bz_start_transaction();
 

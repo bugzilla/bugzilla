@@ -29,8 +29,6 @@
 [% PROCESS global/header.html.tmpl %]
 
 <table>
-        
-[% IF Param('showallproducts') %]
   <tr>
     <th align="right">
       <a href="[% target FILTER url_quote %]?classification=__all
@@ -44,7 +42,6 @@
   <tr>
     <th colspan="2">&nbsp;</th>
   </tr>
-[% END %]
 
 [% FOREACH class = classifications %]
   <tr>

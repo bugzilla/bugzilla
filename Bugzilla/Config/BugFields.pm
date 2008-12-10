@@ -54,12 +54,6 @@ sub get_param_list {
   },
 
   {
-   name => 'showallproducts',
-   type => 'b',
-   default => 0
-  },
-
-  {
    name => 'usetargetmilestone',
    type => 'b',
    default => 0

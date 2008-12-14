@@ -215,6 +215,7 @@ sub generate_chart {
         if (/^#/) {
             if (/^# fields?: (.*)\s*$/) {
                 @fields = split /\||\r/, $1;
+                $data{$_} ||= [] foreach @fields;
                 unless ($fields[0] =~ /date/i) {
                     ThrowCodeError('chart_datafile_corrupt', {'file' => $data_file});
                 }

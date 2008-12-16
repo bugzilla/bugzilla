@@ -92,10 +92,6 @@ use Getopt::Long;
 use Pod::Usage;
 use XML::Twig;
 
-# We want to capture errors and handle them here rather than have the Template
-# code barf all over the place.
-Bugzilla->usage_mode(Bugzilla::Constants::USAGE_MODE_CMDLINE);
-
 my $debug = 0;
 my $mail  = '';
 my $attach_path = '';

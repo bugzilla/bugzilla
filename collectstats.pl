@@ -59,9 +59,6 @@ if (chdir("graphs")) {
     chdir($cwd);
 }
 
-# This is a pure command line script.
-Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
-
 my $dbh = Bugzilla->switch_to_shadow_db();
 
 

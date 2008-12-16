@@ -48,8 +48,6 @@ use constant TARGET_DB_HOST => 'localhost';
 # MAIN SCRIPT
 #####################################################################
 
-Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
-
 print "Connecting to the '" . SOURCE_DB_NAME . "' source database on " 
       . SOURCE_DB_TYPE . "...\n";
 my $source_db = Bugzilla::DB::_connect(SOURCE_DB_TYPE, SOURCE_DB_HOST, 

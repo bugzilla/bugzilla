@@ -372,7 +372,7 @@ sub usage_mode {
         $class->request_cache->{usage_mode} = $newval;
     }
     return $class->request_cache->{usage_mode}
-        || Bugzilla::Constants::USAGE_MODE_BROWSER;
+        || (i_am_cgi()? USAGE_MODE_BROWSER : USAGE_MODE_CMDLINE);
 }
 
 sub installation_mode {

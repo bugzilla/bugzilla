@@ -42,8 +42,6 @@ my $result = GetOptions('verbose'  => \$verbose,
 
 pod2usage({-verbose => 1, -exitval => 1}) if $help;
 
-Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
-
 # Be sure a login name if given.
 $login || ThrowUserError('invalid_username');
 

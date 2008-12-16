@@ -350,8 +350,8 @@ if ($action eq 'delete') {
     }
 
     if ($field eq 'bug_status') {
-        my $status_id = $dbh->selectrow_arrayref('SELECT id FROM bug_status
-                                                  WHERE value = ?', undef, $value);
+        my ($status_id) = $dbh->selectrow_array(
+            'SELECT id FROM bug_status WHERE value = ?', undef, $value);
         $dbh->do('DELETE FROM status_workflow
                   WHERE old_status = ? OR new_status = ?',
                   undef, ($status_id, $status_id));

@@ -779,6 +779,46 @@ EOT
     if (Bugzilla->params->{'utf8'} && !$self->bz_db_is_utf8) {
         $self->_alter_db_charset_to_utf8();
     }
+
+     $self->_fix_defaults();
+}
+
+# When you import a MySQL 3/4 mysqldump into MySQL 5, columns that
+# aren't supposed to have defaults will have defaults. This is only
+# a minor issue, but it makes our tests fail, and it's good to keep
+# the DB actually consistent with what DB::Schema thinks the database
+# looks like. So we remove defaults from columns that aren't supposed
+# to have them
+sub _fix_defaults {
+    my $self = shift;
+    my $maj_version = substr($self->bz_server_version, 0, 1);
+    return if $maj_version < 5;
+
+    # The oldest column that could have this problem is bugs.assigned_to,
+    # so if it doesn't have the problem, we just skip doing this entirely.
+    my $assi_def = $self->_bz_raw_column_info('bugs', 'assigned_to');
+    my $assi_default = $assi_def->{COLUMN_DEF};
+    # This "ne ''" thing is necessary because _raw_column_info seems to
+    # return COLUMN_DEF as an empty string for columns that don't have
+    # a default.
+    return unless (defined $assi_default && $assi_default ne '');
+
+    foreach my $table ($self->_bz_real_schema->get_table_list()) {
+        foreach my $column ($self->bz_table_columns($table)) {
+        my $abs_def = $self->bz_column_info($table, $column);
+            if (!defined $abs_def->{DEFAULT}) {
+                # Get the exact default from the database without any
+                # "fixing" by bz_column_info_real.
+                my $raw_info = $self->_bz_raw_column_info($table, $column);
+                my $raw_default = $raw_info->{COLUMN_DEF};
+                if (defined $raw_default) {
+                    $self->bz_alter_column_raw($table, $column, $abs_def);
+                    $raw_default = "''" if $raw_default eq '';
+                    print "Removed incorrect DB default: $raw_default\n";
+                }
+            }
+        } # foreach $column
+    } # foreach $table
 }
 
 # There is a bug in MySQL 4.1.0 - 4.1.15 that makes certain SELECT
@@ -870,6 +910,12 @@ backwards-compatibility anyway, for versions of Bugzilla before 2.20.
 
 sub bz_column_info_real {
     my ($self, $table, $column) = @_;
+    my $col_data = $self->_bz_raw_column_info($table, $column);
+    return $self->_bz_schema->column_info_to_column($col_data);
+}
+
+sub _bz_raw_column_info {
+    my ($self, $table, $column) = @_;
 
     # DBD::mysql does not support selecting a specific column,
     # so we have to get all the columns on the table and find 
@@ -885,7 +931,7 @@ sub bz_column_info_real {
     if (!defined $col_data) {
         return undef;
     }
-    return $self->_bz_schema->column_info_to_column($col_data);
+    return $col_data;
 }
 
 =item C<bz_index_info_real($table, $index)>

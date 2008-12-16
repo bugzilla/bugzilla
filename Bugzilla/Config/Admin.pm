@@ -49,7 +49,7 @@ sub get_param_list {
   {
    name => 'allowemailchange',
    type => 'b',
-   default => 0
+   default => 1
   },
 
   {

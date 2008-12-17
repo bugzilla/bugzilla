@@ -324,6 +324,14 @@ function boldOnChange(e, field_id){
     }
 }
 
+function updateCommentTagControl(checkbox, form) {
+    if (checkbox.checked) {
+        form.comment.className='bz_private';
+    } else {
+        form.comment.className='';
+    }
+}
+
 /**
  * Says that a field should only be displayed when another field has
  * a certain value. May only be called after the controller has already

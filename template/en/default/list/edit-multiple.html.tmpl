@@ -256,7 +256,14 @@
 
 </table>
 
-<b><label for="comment">Additional Comments:</label></b><br>
+<b><label for="comment">Additional Comments:</label></b>
+[% IF user.is_insider %]
+  <input type="checkbox" name="commentprivacy" value="1"
+         id="newcommentprivacy"
+         onClick="updateCommentTagControl(this, form)"/>
+  <label for="newcommentprivacy">Private</label>
+[% END %]
+<br>
 [% INCLUDE global/textarea.html.tmpl
   name    = 'comment'
   id      = 'comment'

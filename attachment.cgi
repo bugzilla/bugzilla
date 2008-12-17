@@ -561,36 +561,49 @@ sub update {
   my $sth = $dbh->prepare('INSERT INTO bugs_activity (bug_id, attach_id, who, bug_when,
                                                       fieldid, removed, added)
                            VALUES (?, ?, ?, ?, ?, ?, ?)');
+  # Flag for updating Last-Modified timestamp if record changed
+  my $updated = 0;
 
   if ($attachment->description ne $updated_attachment->description) {
     my $fieldid = get_field_id('attachments.description');
     $sth->execute($bug->id, $attachment->id, $user->id, $timestamp, $fieldid,
                   $attachment->description, $updated_attachment->description);
+    $updated = 1;
   }
   if ($attachment->contenttype ne $updated_attachment->contenttype) {
     my $fieldid = get_field_id('attachments.mimetype');
     $sth->execute($bug->id, $attachment->id, $user->id, $timestamp, $fieldid,
                   $attachment->contenttype, $updated_attachment->contenttype);
+    $updated = 1;
   }
   if ($attachment->filename ne $updated_attachment->filename) {
     my $fieldid = get_field_id('attachments.filename');
     $sth->execute($bug->id, $attachment->id, $user->id, $timestamp, $fieldid,
                   $attachment->filename, $updated_attachment->filename);
+    $updated = 1;
   }
   if ($attachment->ispatch != $updated_attachment->ispatch) {
     my $fieldid = get_field_id('attachments.ispatch');
     $sth->execute($bug->id, $attachment->id, $user->id, $timestamp, $fieldid,
                   $attachment->ispatch, $updated_attachment->ispatch);
+    $updated = 1;
   }
   if ($attachment->isobsolete != $updated_attachment->isobsolete) {
     my $fieldid = get_field_id('attachments.isobsolete');
     $sth->execute($bug->id, $attachment->id, $user->id, $timestamp, $fieldid,
                   $attachment->isobsolete, $updated_attachment->isobsolete);
+    $updated = 1;
   }
   if ($attachment->isprivate != $updated_attachment->isprivate) {
     my $fieldid = get_field_id('attachments.isprivate');
     $sth->execute($bug->id, $attachment->id, $user->id, $timestamp, $fieldid,
                   $attachment->isprivate, $updated_attachment->isprivate);
+    $updated = 1;
+  }
+
+  if ($updated) {
+    $dbh->do("UPDATE bugs SET delta_ts = ? WHERE bug_id = ?", undef,
+             $timestamp, $bug->id);
   }
   
   # Commit the transaction now that we are finished updating the database.

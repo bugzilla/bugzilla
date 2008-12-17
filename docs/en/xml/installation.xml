@@ -1,5 +1,5 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"> -->
-<!-- $Id: installation.xml,v 1.162 2008/10/28 00:59:02 mkanat%bugzilla.org Exp $ -->
+<!-- $Id: installation.xml,v 1.163 2008/12/17 16:19:23 lpsolit%gmail.com Exp $ -->
 <chapter id="installing-bugzilla">
   <title>Installing Bugzilla</title>
 
@@ -19,14 +19,6 @@
     If you are installing on another OS, check <xref linkend="os-specific"/>
     before you start your installation to see if there are any special
     instructions.
-    </para>
-
-    <para>
-      As an alternative to following these instructions, you may wish to
-      try Arne Schirmacher's unofficial and unsupported 
-      <ulink url="http://www.softwaretesting.de/article/view/33/1/8/">Bugzilla
-      Installer</ulink>, which installs Bugzilla and all its prerequisites
-      on Linux or Solaris systems.
     </para>
 
     <para>This guide assumes that you have administrative access to the

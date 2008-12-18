@@ -96,7 +96,8 @@
       <tr>
         <td>[% q.name FILTER html %]</td>
         <td>
-          <a href="buglist.cgi?cmdtype=runnamed&amp;namedcmd=[% q.name FILTER url_quote %]">Run</a>
+          <a href="buglist.cgi?cmdtype=dorem&amp;remaction=run&amp;namedcmd=[% q.name FILTER url_quote %]
+                   [% IF q.shared_with_group.id %]&amp;sharer_id=[% user.id FILTER url_quote %][% END %]">Run</a>
         </td>
         <td>
           <a href="query.cgi?[% q.edit_link FILTER html %]&amp;known_name=

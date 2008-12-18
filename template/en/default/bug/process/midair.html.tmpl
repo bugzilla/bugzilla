@@ -88,6 +88,17 @@ You have the following choices:
         [% ", except for the added comment(s)" IF comments.size > start_at %].
     </form>
   </li>
+  [% IF cgi.param("comment") %]
+    <li>
+      <form method="post" action="process_bug.cgi">
+        <input type="hidden" name="id" value="[% cgi.param("id") FILTER html %]">
+        <input type="hidden" name="delta_ts" value="[% bug.delta_ts FILTER html %]">
+        <input type="hidden" name="comment" value="[% cgi.param("comment") FILTER html %]">
+        <input type="hidden" name="commentprivacy" value="[% cgi.param("commentprivacy") FILTER html %]">
+        <input type="submit" id="process_comment" value="Submit only my new comment">
+      </form>
+    </li>
+  [% END %]
   <li>
     Throw away my changes, and
     [%+ "revisit $terms.bug $bug.id" FILTER bug_link(bug.id) FILTER none %]

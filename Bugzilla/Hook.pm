@@ -336,6 +336,18 @@ database when run.
 
 =back
 
+=head2 product-confirm_delete
+
+Called before displaying the confirmation message when deleting a product.
+
+Params:
+
+=over
+
+=item C<vars> - The template vars hashref.
+
+=back
+
 =head2 webservice
 
 This hook allows you to add your own modules to the WebService. (See

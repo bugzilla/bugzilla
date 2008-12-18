@@ -370,7 +370,9 @@ if ($action eq 'del') {
 
     $vars->{'product'} = $product;
     $vars->{'token'} = issue_session_token('delete_product');
-
+    
+    Bugzilla::Hook::process("product-confirm_delete", { vars => $vars });
+    
     $template->process("admin/products/confirm-delete.html.tmpl", $vars)
         || ThrowTemplateError($template->error());
     exit;

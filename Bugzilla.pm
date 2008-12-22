@@ -83,11 +83,14 @@ use constant SHUTDOWNHTML_EXIT_SILENTLY => [
 sub init_page {
     (binmode STDOUT, ':utf8') if Bugzilla->params->{'utf8'};
 
-    # Some environment variables are not taint safe
-    delete @::ENV{'PATH', 'IFS', 'CDPATH', 'ENV', 'BASH_ENV'};
-    # Some modules throw undefined errors (notably File::Spec::Win32) if
-    # PATH is undefined.
-    $ENV{'PATH'} = '';
+
+    if (${^TAINT}) {
+        # Some environment variables are not taint safe
+        delete @::ENV{'PATH', 'IFS', 'CDPATH', 'ENV', 'BASH_ENV'};
+        # Some modules throw undefined errors (notably File::Spec::Win32) if
+        # PATH is undefined.
+        $ENV{'PATH'} = '';
+    }
 
     # IIS prints out warnings to the webpage, so ignore them, or log them
     # to a file if the file exists.

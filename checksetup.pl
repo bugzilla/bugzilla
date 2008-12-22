@@ -95,10 +95,7 @@ exit if $switch{'check-modules'};
 # then instead of our nice normal checksetup message, the user would
 # get a cryptic perl error about the missing module.
 
-# We need $::ENV{'PATH'} to remain defined.
-my $env = $::ENV{'PATH'};
 require Bugzilla;
-$::ENV{'PATH'} = $env;
 
 require Bugzilla::Config;
 import Bugzilla::Config qw(:admin);

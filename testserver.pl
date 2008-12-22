@@ -21,13 +21,7 @@
 use strict;
 use lib qw(. lib);
 
-BEGIN {
-    my $envpath = $ENV{'PATH'};
-    require Bugzilla;
-    # $ENV{'PATH'} is required by the 'ps' command to run correctly.
-    $ENV{'PATH'} = $envpath;
-}
-
+use Bugzilla;
 use Bugzilla::Constants;
 
 use Socket;

@@ -21,6 +21,7 @@
 #   Max Kanat-Alexander <mkanat@bugzilla.org>
 
 package Bugzilla::Job::Mailer;
+use strict;
 use Bugzilla::Mailer;
 BEGIN { eval "use base qw(TheSchwartz::Worker)"; }
 

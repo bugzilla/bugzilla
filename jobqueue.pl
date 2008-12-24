@@ -42,11 +42,11 @@ jobqueue.pl - Runs jobs in the background for Bugzilla.
    -f        Run in the foreground (don't detach)
    -d        Output a lot of debugging information
    start     Starts a new jobqueue daemon if there isn't one running already
-   stop	     Stops a running jobqueue daemon
+   stop      Stops a running jobqueue daemon
    restart   Stops a running jobqueue if one is running, and then
              starts a new one.
    check     Report the current status of the daemon.
-   help	     Display this usage info
+   help      Display this usage info
    version   Display the version of jobqueue.pl
 
 =head1 DESCRIPTION

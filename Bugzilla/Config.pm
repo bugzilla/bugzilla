@@ -287,7 +287,7 @@ sub write_params {
     close $fh;
 
     rename $tmpname, $param_file
-      || die "Can't rename $tmpname to $param_file: $!";
+      or die "Can't rename $tmpname to $param_file: $!";
 
     ChmodDataFile($param_file, 0666);
 

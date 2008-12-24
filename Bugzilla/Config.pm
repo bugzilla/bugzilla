@@ -319,7 +319,7 @@ sub WriteParams {
     close $fh;
 
     rename $tmpname, "$datadir/params"
-      || die "Can't rename $tmpname to $datadir/params: $!";
+      or die "Can't rename $tmpname to $datadir/params: $!";
 
     ChmodDataFile("$datadir/params", 0666);
 }

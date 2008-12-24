@@ -451,6 +451,9 @@
       group.
     [% END %]
 
+  [% ELSIF message_tag == "job_queue_depth" %]
+    [% count FILTER html %] jobs in the queue.
+
   [% ELSIF message_tag == "keyword_created" %]
     [% title = "New Keyword Created" %]
     The keyword <em>[% name FILTER html %]</em> has been created.

@@ -63,7 +63,7 @@ sub new {
     my ($class, $user, $pass, $host, $dbname, $port, $sock) = @_;
 
     # construct the DSN from the parameters we got
-    my $dsn = "DBI:mysql:host=$host;database=$dbname";
+    my $dsn = "dbi:mysql:host=$host;database=$dbname";
     $dsn .= ";port=$port" if $port;
     $dsn .= ";mysql_socket=$sock" if $sock;
 
@@ -78,6 +78,9 @@ sub new {
     # all class local variables stored in DBI derived class needs to have
     # a prefix 'private_'. See DBI documentation.
     $self->{private_bz_tables_locked} = "";
+
+    # Needed by TheSchwartz
+    $self->{private_bz_dsn} = $dsn;
 
     bless ($self, $class);
     

@@ -231,6 +231,20 @@ sub OPTIONAL_MODULES {
         feature => 'Inbound Email'
     },
 
+    # Mail Queueing
+    {
+        package => 'TheSchwartz',
+        module  => 'TheSchwartz',
+        version => 0,
+        feature => 'Mail Queueing',
+    },
+    {
+        package => 'Daemon-Generic',
+        module  => 'Daemon::Generic',
+        version => 0,
+        feature => 'Mail Queueing',
+    },
+
     # mod_perl
     {
         package => 'mod_perl',

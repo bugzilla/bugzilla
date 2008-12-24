@@ -1388,6 +1388,93 @@ use constant ABSTRACT_SCHEMA => {
         ],
      },
 
+    # THESCHWARTZ TABLES
+    # ------------------
+    # Note: In the standard TheSchwartz schema, most integers are unsigned,
+    # but we didn't implement unsigned ints for Bugzilla schemas, so we
+    # just create signed ints, which should be fine.
+
+    ts_funcmap => {
+        FIELDS => [
+            funcid   => {TYPE => 'INTSERIAL', PRIMARYKEY => 1, NOTNULL => 1},
+            funcname => {TYPE => 'varchar(255)', NOTNULL => 1},
+        ],
+        INDEXES => [
+            ts_funcmap_funcname_idx => {FIELDS => ['funcname'], 
+                                          TYPE => 'UNIQUE'},
+        ],
+    },
+
+    ts_job => {
+        FIELDS => [
+            # In a standard TheSchwartz schema, this is a BIGINT, but we
+            # don't have those and I didn't want to add them just for this.
+            jobid         => {TYPE => 'INTSERIAL', PRIMARYKEY => 1, 
+                              NOTNULL => 1},
+            funcid        => {TYPE => 'INT4', NOTNULL => 1},
+            # In standard TheSchwartz, this is a MEDIUMBLOB.
+            arg           => {TYPE => 'LONGBLOB'},
+            uniqkey       => {TYPE => 'varchar(255)'},
+            insert_time   => {TYPE => 'INT4'},
+            run_after     => {TYPE => 'INT4', NOTNULL => 1},
+            grabbed_until => {TYPE => 'INT4', NOTNULL => 1},
+            priority      => {TYPE => 'INT2'},
+            coalesce      => {TYPE => 'varchar(255)'},
+        ],
+        INDEXES => [
+            ts_job_funcid_idx => {FIELDS => [qw(funcid uniqkey)],
+                                  TYPE   => 'UNIQUE'},
+            # In a standard TheSchewartz schema, these both go in the other
+            # direction, but there's no reason to have three indexes that
+            # all start with the same column, and our naming scheme doesn't
+            # allow it anyhow.
+            ts_job_run_after_idx => [qw(run_after funcid)],
+            ts_job_coalesce_idx  => [qw(coalesce funcid)],
+        ],
+    },
+
+    ts_note => {
+        FIELDS => [
+            # This is a BIGINT in standard TheSchwartz schemas.
+            jobid   => {TYPE => 'INT4', NOTNULL => 1},
+            notekey => {TYPE => 'varchar(255)'},
+            value   => {TYPE => 'LONGBLOB'},
+        ],
+        INDEXES => [
+            ts_note_jobid_idx => {FIELDS => [qw(jobid notekey)], 
+                                    TYPE => 'UNIQUE'},
+        ],
+    },
+
+    ts_error => {
+        FIELDS => [
+            error_time => {TYPE => 'INT4', NOTNULL => 1},
+            jobid      => {TYPE => 'INT4', NOTNULL => 1},
+            message    => {TYPE => 'varchar(255)', NOTNULL => 1},
+            funcid     => {TYPE => 'INT4', NOTNULL => 1, DEFAULT => 0},
+        ],
+        INDEXES => [
+            ts_error_funcid_idx     => [qw(funcid error_time)],
+            ts_error_error_time_idx => ['error_time'],
+            ts_error_jobid_idx      => ['jobid'],
+        ],
+    },
+
+    ts_exitstatus => {
+        FIELDS => [
+            jobid           => {TYPE => 'INTSERIAL', PRIMARYKEY => 1,
+                                NOTNULL => 1},
+            funcid          => {TYPE => 'INT4', NOTNULL => 1, DEFAULT => 0},
+            status          => {TYPE => 'INT2'},
+            completion_time => {TYPE => 'INT4'},
+            delete_after    => {TYPE => 'INT4'},
+        ],
+        INDEXES => [
+            ts_exitstatus_funcid_idx       => ['funcid'],
+            ts_exitstatus_delete_after_idx => ['delete_after'],
+        ],
+    },
+
     # SCHEMA STORAGE
     # --------------
 

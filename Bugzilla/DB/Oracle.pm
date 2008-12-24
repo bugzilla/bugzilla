@@ -65,13 +65,15 @@ sub new {
     $ENV{'NLS_LANG'} = '.AL32UTF8' if Bugzilla->params->{'utf8'};
 
     # construct the DSN from the parameters we got
-    my $dsn = "DBI:Oracle:host=$host;sid=$dbname";
+    my $dsn = "dbi:Oracle:host=$host;sid=$dbname";
     $dsn .= ";port=$port" if $port;
     my $attrs = { FetchHashKeyName => 'NAME_lc',  
                   LongReadLen => ( Bugzilla->params->{'maxattachmentsize'}
                                      || 1000 ) * 1024, 
                 };
     my $self = $class->db_new($dsn, $user, $pass, $attrs);
+    # Needed by TheSchwartz
+    $self->{private_bz_dsn} = $dsn;
 
     bless ($self, $class);
 

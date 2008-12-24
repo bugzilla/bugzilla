@@ -60,7 +60,7 @@ sub new {
     $dbname ||= 'template1';
 
     # construct the DSN from the parameters we got
-    my $dsn = "DBI:Pg:dbname=$dbname";
+    my $dsn = "dbi:Pg:dbname=$dbname";
     $dsn .= ";host=$host" if $host;
     $dsn .= ";port=$port" if $port;
 
@@ -75,6 +75,8 @@ sub new {
     # all class local variables stored in DBI derived class needs to have
     # a prefix 'private_'. See DBI documentation.
     $self->{private_bz_tables_locked} = "";
+    # Needed by TheSchwartz
+    $self->{private_bz_dsn} = $dsn;
 
     bless ($self, $class);
 

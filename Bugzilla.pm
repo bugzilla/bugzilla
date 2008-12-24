@@ -42,6 +42,7 @@ use Bugzilla::Auth::Persist::Cookie;
 use Bugzilla::CGI;
 use Bugzilla::DB;
 use Bugzilla::Install::Localconfig qw(read_localconfig);
+use Bugzilla::JobQueue;
 use Bugzilla::Template;
 use Bugzilla::User;
 use Bugzilla::Error;
@@ -313,6 +314,12 @@ sub logout_request {
     delete $class->request_cache->{sudoer};
     # We can't delete from $cgi->cookie, so logincookie data will remain
     # there. Don't rely on it: use Bugzilla->user->login instead!
+}
+
+sub job_queue {
+    my $class = shift;
+    $class->request_cache->{job_queue} ||= Bugzilla::JobQueue->new();
+    return $class->request_cache->{job_queue};
 }
 
 sub dbh {
@@ -713,5 +720,11 @@ is how you get the arguments passed to the hook.
 Returns the local timezone of the Bugzilla installation,
 as a DateTime::TimeZone object. This detection is very time
 consuming, so we cache this information for future references.
+
+=item C<job_queue>
+
+Returns a L<Bugzilla::JobQueue> that you can use for queueing jobs.
+Will throw an error if job queueing is not correctly configured on
+this Bugzilla installation.
 
 =back

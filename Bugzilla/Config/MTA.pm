@@ -58,6 +58,13 @@ sub get_param_list {
   },
 
   {
+   name => 'use_mailer_queue',
+   type => 'b',
+   default => 0,
+   checker => \&check_theschwartz_available,
+  },
+
+  {
    name => 'sendmailnow',
    type => 'b',
    default => 1
@@ -90,7 +97,6 @@ sub get_param_list {
    default => 7,
    checker => \&check_numeric
   },
-  
   {
    name => 'globalwatchers',
    type => 't',

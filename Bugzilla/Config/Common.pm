@@ -49,7 +49,7 @@ use base qw(Exporter);
        check_opsys check_shadowdb check_urlbase check_webdotbase
        check_netmask check_user_verify_class check_image_converter
        check_mail_delivery_method check_notification check_utf8
-       check_bug_status check_smtp_auth
+       check_bug_status check_smtp_auth check_theschwartz_available
 );
 
 # Checking functions for the various values
@@ -331,6 +331,15 @@ sub check_smtp_auth {
     if ($username) {
         eval "require Authen::SASL";
         return "Error requiring Authen::SASL: '$@'" if $@;
+    }
+    return "";
+}
+
+sub check_theschwartz_available {
+    if (!eval { require TheSchwartz; require Daemon::Generic; }) {
+        return "Using the job queue requires that you have certain Perl"
+               . " modules installed. See the output of checksetup.pl"
+               . " for more information";
     }
     return "";
 }

@@ -88,6 +88,8 @@ __END__
 Bugzilla::JobQueue::Runner - A class representing the daemon that runs the
 job queue.
 
+=head1 SYNOPSIS
+
  use Bugzilla::JobQueue::Runner;
  Bugzilla::JobQueue::Runner->new();
 

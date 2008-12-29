@@ -206,11 +206,23 @@ function handleWantsAttachment(wants_attachment) {
     </th>
     <td>
       <select name="component" onchange="set_assign_to();" size="7">
+        [%# Build the lists of assignees and QA contacts if "usemenuforusers" is enabled. %]
+        [% IF Param("usemenuforusers") %]
+          [% assignees_list = user.get_userlist.clone %]
+          [% qa_contacts_list = user.get_userlist.clone %]
+        [% END %]
+
         [%- FOREACH c = product.components %]
           <option value="[% c.name FILTER html %]"
             [% " selected=\"selected\"" IF c.name == default.component_ %]>
             [% c.name FILTER html -%]
           </option>
+          [% IF Param("usemenuforusers") %]
+            [% INCLUDE build_userlist default_user = c.default_assignee,
+                                      userlist = assignees_list %]
+            [% INCLUDE build_userlist default_user = c.default_qa_contact,
+                                      userlist = qa_contacts_list %]
+          [% END %]
         [%- END %]
       </select>
     </td>
@@ -352,6 +364,7 @@ function handleWantsAttachment(wants_attachment) {
          disabled => assigned_to_disabled
          size => 30
          emptyok => 1
+         custom_userlist => assignees_list
        %]
       <noscript>(Leave blank to assign to component's default assignee)</noscript>
     </td>
@@ -367,6 +380,7 @@ function handleWantsAttachment(wants_attachment) {
          disabled => qa_contact_disabled
          size => 30
          emptyok => 1
+         custom_userlist => qa_contacts_list
        %]
         <noscript>(Leave blank to assign to default qa contact)</noscript>
       </td>
@@ -650,4 +664,22 @@ function handleWantsAttachment(wants_attachment) {
         </script>
     [% END %]
   </td>
+[% END %]
+
+[% BLOCK build_userlist %]
+  [% user_found = 0 %]
+  [% default_login = default_user.login %]
+  [% RETURN UNLESS default_login %]
+
+  [% FOREACH user = userlist %]
+    [% IF user.login == default_login %]
+      [% user_found = 1 %]
+      [% LAST %]
+    [% END %]
+  [% END %]
+
+  [% userlist.push({login    => default_login,
+                    identity => default_user.identity,
+                    visible  => 1})
+     UNLESS user_found %]
 [% END %]

@@ -548,26 +548,7 @@ sub sendMail {
     my %mailhead = %$dmhRef;
     my %fielddescription = %$fdRef;
     my @diffparts = @$diffRef;    
-    my $head = "";
     
-    foreach my $f (@headerlist) {
-      if ($mailhead{$f}) {
-        my $value = $values{$f};
-        # If there isn't anything to show, don't include this header
-        if (! $value) {
-          next;
-        }
-        # Only send estimated_time if it is enabled and the user is in the group
-        if (($f ne 'estimated_time' && $f ne 'deadline') 
-            || $user->is_timetracker)
-        {
-            my $desc = $fielddescription{$f};
-            $head .= multiline_sprintf(FORMAT_DOUBLE, ["$desc:", $value], 
-                                       FORMAT_2_SIZE);
-        }
-      }
-    }
-
     # Build difftext (the actions) by verifying the user should see them
     my $difftext = "";
     my $diffheader = "";
@@ -619,6 +600,19 @@ sub sendMail {
 
     my $diffs = $difftext . "\n\n" . $newcomments;
     if ($isnew) {
+        my $head = "";
+        foreach my $f (@headerlist) {
+            next unless $mailhead{$f};
+            my $value = $values{$f};
+            # If there isn't anything to show, don't include this header.
+            next unless $value;
+            # Only send estimated_time if it is enabled and the user is in the group.
+            if (($f ne 'estimated_time' && $f ne 'deadline') || $user->is_timetracker) {
+                my $desc = $fielddescription{$f};
+                $head .= multiline_sprintf(FORMAT_DOUBLE, ["$desc:", $value],
+                                           FORMAT_2_SIZE);
+            }
+        }
         $diffs = $head . ($difftext ? "\n\n" : "") . $diffs;
     }
 

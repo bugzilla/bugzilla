@@ -11,6 +11,7 @@
   # The Original Code is the Bugzilla Bug Tracking System.
   #
   # Contributor(s): Byron Jones <bugzilla@glob.com.au>
+  #                 Frédéric Buclin <LpSolit@gmail.com>
   #%]
 
 [%# INTERFACE:
@@ -23,7 +24,6 @@
   # size: optional, input only; size attribute value
   # emptyok: optional, select only;  if true, prepend menu option to start of select
   # multiple: optional, do multiselect box, value is size (height) of box
-  # do_not_change: optional, contains the string meaning "do not alter this role"
   # custom_userlist: optional, specify a limited list of users to use
   #%]
 
@@ -39,26 +39,33 @@
     <option value=""></option>
   [% END %]
 
-  [% IF do_not_change %]
-    <option value="[% do_not_change FILTER html %]">
-      [% do_not_change FILTER html %]
-    </option>
-  [% END %]
-
   [% UNLESS custom_userlist %]
     [% custom_userlist = user.get_userlist %]
   [% END %]
 
   [% SET selected = {} %]
-  [% FOREACH selected_value IN value.split(', ') %]
-    [% SET selected.$selected_value = 1 %]
+  [% IF value.defined %]
+    [% FOREACH selected_value IN value.split(', ') %]
+      [% SET selected.$selected_value = 1 %]
+    [% END %]
   [% END %]
+
   [% FOREACH tmpuser = custom_userlist %]
     [% IF tmpuser.visible OR selected.${tmpuser.login} == 1 %]
       <option value="[% tmpuser.login FILTER html %]"
-        [% " selected=\"selected\"" IF selected.${tmpuser.login} == 1 %]
+        [% IF selected.${tmpuser.login} == 1 %]
+          selected="selected"
+          [%# A user account appears only once. Remove it from the list, so that
+            # we know if there are some selected accounts which have not been listed. %]
+          [% selected.delete(tmpuser.login) %]
+        [% END %]
       >[% tmpuser.identity FILTER html %]</option>
     [% END %]
+  [% END %]
+
+  [%# If the list is not empty, this means some accounts have not been mentioned yet. %]
+  [% FOREACH selected_user = selected.keys %]
+    <option value="[% selected_user FILTER html %]" selected="selected">[% selected_user FILTER html %]</option>
   [% END %]
 </select>
 [% ELSE %]

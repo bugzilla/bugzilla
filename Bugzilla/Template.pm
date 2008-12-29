@@ -388,6 +388,13 @@ $Template::Stash::LIST_OPS->{ containsany } =
       return 0;
   };
 
+# Clone the array reference to leave the original one unaltered.
+$Template::Stash::LIST_OPS->{ clone } =
+  sub {
+      my $list = shift;
+      return [@$list];
+  };
+
 # Allow us to still get the scalar if we use the list operation ".0" on it,
 # as we often do for defaults in query.cgi and other places.
 $Template::Stash::SCALAR_OPS->{ 0 } = 

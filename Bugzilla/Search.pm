@@ -458,8 +458,6 @@ sub init {
 
     my $chartid;
     my $sequence = 0;
-    # $type_id is used by the code that queries for attachment flags.
-    my $type_id = 0;
     my $f;
     my $ff;
     my $t;

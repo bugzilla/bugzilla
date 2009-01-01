@@ -159,10 +159,20 @@ function hideEditableField( container, input, action, field_id, original_value )
  *
  */
 function showEditableField (e, ContainerInputArray) {
+    var inputs = new Array();
+    var inputArea = YAHOO.util.Dom.get(ContainerInputArray[1]);    
+    if ( ! inputArea ){
+        YAHOO.util.Event.preventDefault(e);
+        return;
+    }
     YAHOO.util.Dom.setStyle(ContainerInputArray[0], 'display', 'none');
-    YAHOO.util.Dom.setStyle(ContainerInputArray[1], 'display', 'inline');
-    var inputs = YAHOO.util.Dom.get(ContainerInputArray[1]).getElementsByTagName('input')
-    if( inputs.length > 0) {
+    YAHOO.util.Dom.setStyle(inputArea, 'display', 'inline');
+    if ( inputArea.tagName.toLowerCase() == "input" ) {
+        inputs.push(inputArea);
+    } else {
+        inputs = inputArea.getElementsByTagName('input');
+    }
+    if ( inputs.length > 0 ) {
         // focus on the first field, this makes it easier to edit
         inputs[0].focus();
         inputs[0].select();
@@ -278,15 +288,19 @@ function showHideStatusItems(e, dupArrayInfo) {
 function showDuplicateItem(e) {
     var resolution = document.getElementById('resolution');
     var bug_status = document.getElementById('bug_status');
+    var dup_id = document.getElementById('dup_id');
     if (resolution) {
         if (resolution.value == 'DUPLICATE' && bz_isValueInArray( close_status_array, bug_status.value) ) {
             // hide resolution show duplicate
             YAHOO.util.Dom.setStyle('duplicate_settings', 'display', 'inline');
             YAHOO.util.Dom.setStyle('dup_id_discoverable', 'display', 'none');
+            dup_id.focus();
+            dup_id.select();
         }
         else {
             YAHOO.util.Dom.setStyle('duplicate_settings', 'display', 'none');
             YAHOO.util.Dom.setStyle('dup_id_discoverable', 'display', 'block');
+            dup_id.blur();
         }
     }
     YAHOO.util.Event.preventDefault(e); //prevents the hyperlink from going to the url in the href.

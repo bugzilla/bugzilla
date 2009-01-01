@@ -100,6 +100,7 @@ sub list {
     my $component = validateComponent($product, scalar $cgi->param('component'));
     my $product_id = $product ? $product->id : 0;
     my $component_id = $component ? $component->id : 0;
+    my $show_flag_counts = (defined $cgi->param('show_flag_counts')) ? 1 : 0;
 
     # Define the variables and functions that will be passed to the UI template.
     $vars->{'selected_product'} = $cgi->param('product');
@@ -138,6 +139,20 @@ sub list {
         $attach_flagtypes =
             Bugzilla::FlagType::match({'target_type' => 'attachment',
                                          'group' => scalar $cgi->param('group')});
+    }
+
+    if ($show_flag_counts) {
+        my %bug_lists;
+        my %map = ('+' => 'granted', '-' => 'denied', '?' => 'pending');
+
+        foreach my $flagtype (@$bug_flagtypes, @$attach_flagtypes) {
+            $bug_lists{$flagtype->id} = {};
+            my $flags = Bugzilla::Flag->match({type_id => $flagtype->id});
+            # Build lists of bugs, triaged by flag status.
+            map { push(@{$bug_lists{$flagtype->id}->{$map{$_->status}}}, $_->bug_id) } @$flags;
+        }
+        $vars->{'bug_lists'} = \%bug_lists;
+        $vars->{'show_flag_counts'} = 1;
     }
 
     $vars->{'bug_types'} = $bug_flagtypes;

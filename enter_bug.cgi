@@ -399,8 +399,8 @@ if ($cloned_bug_id) {
     $vars->{'short_desc'}     = $cloned_bug->short_desc;
     $vars->{'bug_file_loc'}   = $cloned_bug->bug_file_loc;
     $vars->{'keywords'}       = $cloned_bug->keywords;
-    $vars->{'dependson'}      = $cloned_bug_id;
-    $vars->{'blocked'}        = "";
+    $vars->{'dependson'}      = join (", ", $cloned_bug_id, @{$cloned_bug->dependson});
+    $vars->{'blocked'}        = join (", ", @{$cloned_bug->blocked});
     $vars->{'deadline'}       = $cloned_bug->deadline;
 
     if (defined $cloned_bug->cc) {

@@ -34,8 +34,11 @@
 
 [% PROCESS global/variables.none.tmpl %]
 
+[% filtered_desc = bug.short_desc FILTER html %]
 [% PROCESS global/header.html.tmpl
-  title = "$terms.Bug $id Submitted"
+  title = "$terms.Bug $id Submitted &ndash; $filtered_desc"
+  header = "$terms.Bug&nbsp;$id Submitted"
+  subheader = filtered_desc
   javascript_urls = [ "js/util.js", "js/field.js",
                         "js/yui/yahoo-dom-event.js", "js/yui/calendar.js" ]
   style_urls = [ "skins/standard/yui/calendar.css", "skins/standard/show_bug.css" ]

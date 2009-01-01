@@ -216,6 +216,15 @@ sub Send {
 
     $values{'blocked'} = join(",", @$blockedlist);
 
+    my $grouplist = $dbh->selectcol_arrayref(
+        '    SELECT name FROM groups
+         INNER JOIN bug_group_map
+                 ON groups.id = bug_group_map.group_id
+                    AND bug_group_map.bug_id = ?',
+        undef, ($id));
+
+    $values{'bug_group'} = join(', ', @$grouplist);
+ 
     my @args = ($id);
 
     # If lastdiffed is NULL, then we don't limit the search on time.

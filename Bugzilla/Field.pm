@@ -195,7 +195,7 @@ use constant DEFAULT_FIELDS => (
     {name => 'everconfirmed',         desc => 'Ever Confirmed'},
     {name => 'reporter_accessible',   desc => 'Reporter Accessible'},
     {name => 'cclist_accessible',     desc => 'CC Accessible'},
-    {name => 'bug_group',             desc => 'Group'},
+    {name => 'bug_group',             desc => 'Group', in_new_bugmail => 1},
     {name => 'estimated_time', desc => 'Estimated Hours', in_new_bugmail => 1},
     {name => 'remaining_time',        desc => 'Remaining Hours'},
     {name => 'deadline',              desc => 'Deadline', in_new_bugmail => 1},

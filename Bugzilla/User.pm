@@ -682,20 +682,12 @@ sub get_selectable_products {
 sub get_selectable_classifications {
     my ($self) = @_;
 
-    if (defined $self->{selectable_classifications}) {
-        return $self->{selectable_classifications};
-    }
+    if (!defined $self->{selectable_classifications}) {
+        my $products = $self->get_selectable_products;
+        my %class_ids = map { $_->classification_id => 1 } @$products;
 
-    my $products = $self->get_selectable_products;
-
-    my $class;
-    foreach my $product (@$products) {
-        $class->{$product->classification_id} ||= 
-            new Bugzilla::Classification($product->classification_id);
+        $self->{selectable_classifications} = Bugzilla::Classification->new_from_list([keys %class_ids]);
     }
-    my @sorted_class = sort {$a->sortkey <=> $b->sortkey 
-                             || lc($a->name) cmp lc($b->name)} (values %$class);
-    $self->{selectable_classifications} = \@sorted_class;
     return $self->{selectable_classifications};
 }
 

@@ -30,6 +30,7 @@ use base qw(Bugzilla::Object);
 ###############################
 
 use constant DB_TABLE => 'classifications';
+use constant LIST_ORDER => 'sortkey, name';
 
 use constant DB_COLUMNS => qw(
     id
@@ -53,6 +54,26 @@ use constant VALIDATORS => {
     description => \&_check_description,
     sortkey     => \&_check_sortkey,
 };
+
+###############################
+####     Constructors     #####
+###############################
+sub remove_from_db {
+    my $self = shift;
+    my $dbh = Bugzilla->dbh;
+
+    ThrowUserError("classification_not_deletable") if ($self->id == 1);
+
+    $dbh->bz_start_transaction();
+    # Reclassify products to the default classification, if needed.
+    $dbh->do("UPDATE products SET classification_id = 1
+              WHERE classification_id = ?", undef, $self->id);
+
+    $dbh->do("DELETE FROM classifications WHERE id = ?", undef, $self->id);
+
+    $dbh->bz_commit_transaction();
+
+}
 
 ###############################
 ####      Validators       ####
@@ -92,6 +113,10 @@ sub _check_sortkey {
 ###############################
 ####       Methods         ####
 ###############################
+
+sub set_name        { $_[0]->set('name', $_[1]); }
+sub set_description { $_[0]->set('description', $_[1]); }
+sub set_sortkey     { $_[0]->set('sortkey', $_[1]); }
 
 sub product_count {
     my $self = shift;

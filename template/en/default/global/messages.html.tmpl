@@ -186,26 +186,26 @@
 
   [% ELSIF message_tag == "classification_deleted" %]
     [% title = "Classification Deleted" %]
-    The <em>[% classification FILTER html %]</em> classification has been deleted.
+    The <em>[% classification.name FILTER html %]</em> classification has been deleted.
 
   [% ELSIF message_tag == "classification_updated" %]
-    [% IF updated_classification || updated_description || updated_sortkey %]
-      [% title = "Classification Updated" %]
-      Changes to the <em>[% classification FILTER html %]</em> classification
+    [% title = "Classification Updated" %]
+    [% IF changes.keys.size %]
+      Changes to the <em>[% classification.name FILTER html %]</em> classification
       have been saved:
       <ul>
-        [% IF updated_classification %]
-          <li>Classification name updated</li>
+        [% IF changes.name.defined %]
+          <li>Name updated to '[% classification.name FILTER html %]'</li>
         [% END %]
-        [% IF updated_description %]
-          <li>Description updated</li>
+        [% IF changes.description.defined %]
+          <li>Description updated to '[% classification.description FILTER html %]'</li>
         [% END %]
-        [% IF updated_sortkey %]
-          <li>Sortkey updated</li>
+        [% IF changes.sortkey.defined %]
+          <li>Sortkey updated to '[% classification.sortkey FILTER html %]'</li>
         [% END %]
       </ul>
     [% ELSE %]
-      No changes made to <em>[% classification FILTER html %]</em>.
+      No changes made to <em>[% classification.name FILTER html %]</em>.
     [% END %]
 
   [% ELSIF message_tag == "component_created" %]

@@ -198,7 +198,11 @@
           <li>Name updated to '[% classification.name FILTER html %]'</li>
         [% END %]
         [% IF changes.description.defined %]
-          <li>Description updated to '[% classification.description FILTER html %]'</li>
+          [% IF classification.description %]
+            <li>Description updated to '[% classification.description FILTER html %]'</li>
+          [% ELSE %]
+            <li>Description removed</li>
+          [% END %]
         [% END %]
         [% IF changes.sortkey.defined %]
           <li>Sortkey updated to '[% classification.sortkey FILTER html %]'</li>

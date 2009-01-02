@@ -154,6 +154,9 @@ use File::Basename;
     MAX_COMPONENT_SIZE
     MAX_FIELD_VALUE_SIZE
     MAX_FREETEXT_LENGTH
+
+    PASSWORD_DIGEST_ALGORITHM
+    PASSWORD_SALT_LENGTH
 );
 
 @Bugzilla::Constants::EXPORT_OK = qw(contenttypes);
@@ -436,6 +439,15 @@ use constant MAX_FIELD_VALUE_SIZE => 64;
 
 # Maximum length allowed for free text fields.
 use constant MAX_FREETEXT_LENGTH => 255;
+
+# This is the name of the algorithm used to hash passwords before storing
+# them in the database. This can be any string that is valid to pass to
+# Perl's "Digest" module. Note that if you change this, it won't take
+# effect until a user changes his password.
+use constant PASSWORD_DIGEST_ALGORITHM => 'SHA-256';
+# How long of a salt should we use? Note that if you change this, none
+# of your users will be able to log in until they reset their passwords.
+use constant PASSWORD_SALT_LENGTH => 8;
 
 sub bz_locations {
     # We know that Bugzilla/Constants.pm must be in %INC at this point.

@@ -64,6 +64,16 @@ sub check_credentials {
     # password tokens they may have generated.
     Bugzilla::Token::DeletePasswordTokens($user_id, "user_logged_in");
 
+    # If their old password was using crypt() or some different hash
+    # than we're using now, convert the stored password to using
+    # whatever hashing system we're using now.
+    my $current_algorithm = PASSWORD_DIGEST_ALGORITHM;
+    if ($real_password_crypted !~ /{\Q$current_algorithm\E}$/) {
+        my $new_crypted = bz_crypt($password);
+        $dbh->do('UPDATE profiles SET cryptpassword = ? WHERE userid = ?',
+                 undef, $new_crypted, $user_id);
+    }
+
     return $login_data;
 }
 

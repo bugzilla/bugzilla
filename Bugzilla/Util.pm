@@ -52,6 +52,8 @@ use Date::Parse;
 use Date::Format;
 use DateTime;
 use DateTime::TimeZone;
+use Digest;
+use Scalar::Util qw(tainted);
 use Text::Wrap;
 
 # This is from the perlsec page, slightly modified to remove a warning
@@ -476,37 +478,54 @@ sub file_mod_time {
 sub bz_crypt {
     my ($password, $salt) = @_;
 
+    my $algorithm;
     if (!defined $salt) {
-        # The list of characters that can appear in a salt.  Salts and hashes
-        # are both encoded as a sequence of characters from a set containing
-        # 64 characters, each one of which represents 6 bits of the salt/hash.
-        # The encoding is similar to BASE64, the difference being that the
-        # BASE64 plus sign (+) is replaced with a forward slash (/).
-        my @saltchars = (0..9, 'A'..'Z', 'a'..'z', '.', '/');
+        # If you don't use a salt, then people can create tables of
+        # hashes that map to particular passwords, and then break your
+        # hashing very easily if they have a large-enough table of common
+        # (or even uncommon) passwords. So we generate a unique salt for
+        # each password in the database, and then just prepend it to
+        # the hash.
+        $salt = generate_random_password(PASSWORD_SALT_LENGTH);
+        $algorithm = PASSWORD_DIGEST_ALGORITHM;
+    }
 
-        # Generate the salt.  We use an 8 character (48 bit) salt for maximum
-        # security on systems whose crypt uses MD5.  Systems with older
-        # versions of crypt will just use the first two characters of the salt.
-        $salt = '';
-        for ( my $i=0 ; $i < 8 ; ++$i ) {
-            $salt .= $saltchars[rand(64)];
+    # We append the algorithm used to the string. This is good because then
+    # we can change the algorithm being used, in the future, without 
+    # disrupting the validation of existing passwords. Also, this tells
+    # us if a password is using the old "crypt" method of hashing passwords,
+    # because the algorithm will be missing from the string.
+    if ($salt =~ /{([^}]+)}$/) {
+        $algorithm = $1;
+    }
+
+    my $crypted_password;
+    if (!$algorithm) {
+        # Wide characters cause crypt to die
+        if (Bugzilla->params->{'utf8'}) {
+            utf8::encode($password) if utf8::is_utf8($password);
         }
-    }
-
-    # Wide characters cause crypt to die
-    if (Bugzilla->params->{'utf8'}) {
-        utf8::encode($password) if utf8::is_utf8($password);
-    }
     
-    # Crypt the password.
-    my $cryptedpassword = crypt($password, $salt);
+        # Crypt the password.
+        $crypted_password = crypt($password, $salt);
 
-    # HACK: Perl has bug where returned crypted password is considered tainted
-    # Upstream Bug: http://rt.perl.org/rt3/Public/Bug/Display.html?id=59998
-    trick_taint($cryptedpassword) unless (is_tainted($password) || is_tainted($salt));
+        # HACK: Perl has bug where returned crypted password is considered
+        # tainted. See http://rt.perl.org/rt3/Public/Bug/Display.html?id=59998
+        unless(tainted($password) || tainted($salt)) {
+            trick_taint($crypted_password);
+        } 
+    }
+    else {
+        my $hasher = Digest->new($algorithm);
+        # We only want to use the first characters of the salt, no
+        # matter how long of a salt we may have been passed.
+        $salt = substr($salt, 0, PASSWORD_SALT_LENGTH);
+        $hasher->add($password, $salt);
+        $crypted_password = $salt . $hasher->b64digest . "{$algorithm}";
+    }
 
     # Return the crypted password.
-    return $cryptedpassword;
+    return $crypted_password;
 }
 
 sub generate_random_password {
@@ -932,11 +951,12 @@ of the "mtime" parameter of the perl "stat" function.
 
 =item C<bz_crypt($password, $salt)>
 
-Takes a string and returns a C<crypt>ed value for it, using a random salt.
-An optional salt string may also be passed in.
+Takes a string and returns a hashed (encrypted) value for it, using a
+random salt. An optional salt string may also be passed in.
 
-Please always use this function instead of the built-in perl "crypt"
-when initially encrypting a password.
+Please always use this function instead of the built-in perl C<crypt>
+function, when checking or setting a password. Bugzilla does not use
+C<crypt>.
 
 =begin undocumented
 

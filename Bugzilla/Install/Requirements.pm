@@ -65,6 +65,11 @@ sub REQUIRED_MODULES {
         version => (vers_cmp($perl_ver, '5.10') > -1) ? '3.33' : '3.21'
     },
     {
+        package => 'Digest-SHA',
+        module  => 'Digest::SHA',
+        version => 0
+    },
+    {
         package => 'TimeDate',
         module  => 'Date::Format',
         version => '2.21'

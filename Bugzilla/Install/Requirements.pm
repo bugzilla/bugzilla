@@ -259,19 +259,6 @@ sub OPTIONAL_MODULES {
     },
     );
 
-    # Even very new releases of perl (5.8.5) don't come with this version,
-    # so I didn't want to make it a general requirement just for
-    # running under mod_cgi.
-    # If Perl 5.10 is installed, then CGI 3.33 is already required. So this
-    # check is only relevant with Perl 5.8.x.
-    my $perl_ver = sprintf('%vd', $^V);
-    if (vers_cmp($perl_ver, '5.10') < 0) {
-        push(@modules, { package => 'CGI.pm',
-                         module  => 'CGI',
-                         version => '3.11',
-                         feature => 'mod_perl' });
-    }
-
     my $all_modules = _get_extension_requirements(
         'OPTIONAL_MODULES', \@modules);
     return $all_modules;

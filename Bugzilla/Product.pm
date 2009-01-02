@@ -409,8 +409,7 @@ sub _check_classification {
 
     my $classification_id = 1;
     if (Bugzilla->params->{'useclassification'}) {
-        my $classification =
-            Bugzilla::Classification::check_classification($classification_name);
+        my $classification = Bugzilla::Classification->check($classification_name);
         $classification_id = $classification->id;
     }
     return $classification_id;

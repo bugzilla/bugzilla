@@ -81,7 +81,7 @@ if (Bugzilla->params->{'useclassification'}
     && !$product_name)
 {
     $vars->{'classifications'} = $user->in_group('editcomponents') ?
-      [Bugzilla::Classification::get_all_classifications] : $user->get_selectable_classifications;
+      [Bugzilla::Classification->get_all] : $user->get_selectable_classifications;
 
     $template->process("admin/products/list-classifications.html.tmpl", $vars)
         || ThrowTemplateError($template->error());
@@ -99,9 +99,7 @@ if (!$action && !$product_name) {
     my $products;
 
     if (Bugzilla->params->{'useclassification'}) {
-        $classification =
-            Bugzilla::Classification::check_classification($classification_name);
-
+        $classification = Bugzilla::Classification->check($classification_name);
         $products = $user->get_selectable_products($classification->id);
         $vars->{'classification'} = $classification;
     } else {
@@ -142,8 +140,7 @@ if ($action eq 'add') {
                                          object => "products"});
 
     if (Bugzilla->params->{'useclassification'}) {
-        my $classification = 
-            Bugzilla::Classification::check_classification($classification_name);
+        my $classification = Bugzilla::Classification->check($classification_name);
         $vars->{'classification'} = $classification;
     }
     $vars->{'token'} = issue_session_token('add_product');
@@ -235,7 +232,7 @@ if ($action eq 'delete') {
 
     if (Bugzilla->params->{'useclassification'}) {
         $vars->{'classifications'} = $user->in_group('editcomponents') ?
-          [Bugzilla::Classification::get_all_classifications] : $user->get_selectable_classifications;
+          [Bugzilla::Classification->get_all] : $user->get_selectable_classifications;
 
         $template->process("admin/products/list-classifications.html.tmpl", $vars)
           || ThrowTemplateError($template->error());

@@ -40,7 +40,7 @@ sub LoadTemplate {
     my $cgi = Bugzilla->cgi;
     my $template = Bugzilla->template;
 
-    $vars->{'classifications'} = [Bugzilla::Classification::get_all_classifications()]
+    $vars->{'classifications'} = [Bugzilla::Classification->get_all]
       if ($action eq 'select');
     # There is currently only one section about classifications,
     # so all pages point to it. Let's define it here.
@@ -115,8 +115,7 @@ if ($action eq 'new') {
     my $sortkey = trim($cgi->param('sortkey') || 0);
     my $stored_sortkey = $sortkey;
     detaint_natural($sortkey)
-      || ThrowUserError('classification_invalid_sortkey', {'name' => $class_name,
-                                                           'sortkey' => $stored_sortkey});
+      || ThrowUserError('classification_invalid_sortkey', {'sortkey' => $stored_sortkey});
 
     trick_taint($description);
     trick_taint($class_name);
@@ -129,7 +128,7 @@ if ($action eq 'new') {
 
     $vars->{'message'} = 'classification_created';
     $vars->{'classification'} = new Bugzilla::Classification({name => $class_name});
-    $vars->{'classifications'} = [Bugzilla::Classification::get_all_classifications];
+    $vars->{'classifications'} = [Bugzilla::Classification->get_all];
     $vars->{'token'} = issue_session_token('reclassify_classifications');
     LoadTemplate('reclassify');
 }
@@ -142,8 +141,7 @@ if ($action eq 'new') {
 
 if ($action eq 'del') {
 
-    my $classification =
-        Bugzilla::Classification::check_classification($class_name);
+    my $classification = Bugzilla::Classification->check($class_name);
 
     if ($classification->id == 1) {
         ThrowUserError("classification_not_deletable");
@@ -166,8 +164,7 @@ if ($action eq 'del') {
 if ($action eq 'delete') {
     check_token_data($token, 'delete_classification');
 
-    my $classification =
-        Bugzilla::Classification::check_classification($class_name);
+    my $classification = Bugzilla::Classification->check($class_name);
 
     if ($classification->id == 1) {
         ThrowUserError("classification_not_deletable");
@@ -200,8 +197,7 @@ if ($action eq 'delete') {
 
 if ($action eq 'edit') {
 
-    my $classification =
-        Bugzilla::Classification::check_classification($class_name);
+    my $classification = Bugzilla::Classification->check($class_name);
 
     $vars->{'classification'} = $classification;
     $vars->{'token'} = issue_session_token('edit_classification');
@@ -220,16 +216,14 @@ if ($action eq 'update') {
 
     my $class_old_name = trim($cgi->param('classificationold') || '');
 
-    my $class_old =
-        Bugzilla::Classification::check_classification($class_old_name);
+    my $class_old = Bugzilla::Classification->check($class_old_name);
 
     my $description = trim($cgi->param('description') || '');
 
     my $sortkey = trim($cgi->param('sortkey') || 0);
     my $stored_sortkey = $sortkey;
     detaint_natural($sortkey)
-      || ThrowUserError('classification_invalid_sortkey', {'name' => $class_old->name,
-                                                           'sortkey' => $stored_sortkey});
+      || ThrowUserError('classification_invalid_sortkey', {'sortkey' => $stored_sortkey});
 
     $dbh->bz_start_transaction();
 
@@ -277,9 +271,7 @@ if ($action eq 'update') {
 #
 
 if ($action eq 'reclassify') {
-
-    my $classification =
-        Bugzilla::Classification::check_classification($class_name);
+    my $classification = Bugzilla::Classification->check($class_name);
    
     my $sth = $dbh->prepare("UPDATE products SET classification_id = ?
                              WHERE name = ?");
@@ -304,9 +296,7 @@ if ($action eq 'reclassify') {
         delete_token($token);
     }
 
-    my @classifications = 
-        Bugzilla::Classification::get_all_classifications;
-    $vars->{'classifications'} = \@classifications;
+    $vars->{'classifications'} = [Bugzilla::Classification->get_all];
     $vars->{'classification'} = $classification;
     $vars->{'token'} = issue_session_token('reclassify_classifications');
 

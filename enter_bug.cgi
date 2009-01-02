@@ -22,6 +22,7 @@
 #                 Joe Robins <jmrobins@tgix.com>
 #                 Gervase Markham <gerv@gerv.net>
 #                 Shane H. W. Travis <travis@sedsystems.ca>
+#                 Nitish Bezzala <nbezzala@yahoo.com>
 
 ##############################################################################
 #
@@ -404,9 +405,13 @@ if ($cloned_bug_id) {
     $vars->{'deadline'}       = $cloned_bug->deadline;
 
     if (defined $cloned_bug->cc) {
-        $vars->{'cc'}         = join (" ", @{$cloned_bug->cc});
+        $vars->{'cc'}         = join (", ", @{$cloned_bug->cc});
     } else {
         $vars->{'cc'}         = formvalue('cc');
+    }
+    
+    if ($cloned_bug->reporter->id != $user->id) {
+        $vars->{'cc'} = join (", ", $cloned_bug->reporter->login, $vars->{'cc'}); 
     }
 
     foreach my $field (@enter_bug_fields) {

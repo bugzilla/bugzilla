@@ -119,6 +119,15 @@ $columns{'op_sys'}           = "bugs.op_sys";
 $columns{'votes'}            = "bugs.votes";
 $columns{'keywords'}         = "bugs.keywords";
 $columns{'target_milestone'} = "bugs.target_milestone";
+# Single-select fields are also accepted as valid column names.
+my @single_select_fields =
+  grep { $_->type == FIELD_TYPE_SINGLE_SELECT } Bugzilla->active_custom_fields;
+
+foreach my $custom_field (@single_select_fields) {
+    my $field_name = $custom_field->name;
+    $columns{$field_name} = "bugs.$field_name";
+}
+
 # One which means "nothing". Any number would do, really. It just gets SELECTed
 # so that we always select 3 items in the query.
 $columns{''}                 = "42217354";

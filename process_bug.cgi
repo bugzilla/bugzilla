@@ -271,10 +271,24 @@ if ($cgi->param('id') && (defined $cgi->param('dependson')
     $first_bug->set_dependencies(scalar $cgi->param('dependson'),
                                  scalar $cgi->param('blocked'));
 }
-# Right now, you can't modify dependencies on a mass change.
-else {
-    $cgi->delete('dependson');
-    $cgi->delete('blocked');
+elsif (should_set('dependson') || should_set('blocked')) {
+    foreach my $bug (@bug_objects) {
+        my %temp_deps;
+        foreach my $type (qw(dependson blocked)) {
+            $temp_deps{$type} = { map { $_ => 1 } @{$bug->$type} };
+            if (should_set($type) && $cgi->param($type . '_action') =~ /^(add|remove)$/) {
+                foreach my $id (split(/[,\s]+/, $cgi->param($type))) {
+                    if ($cgi->param($type . '_action') eq 'remove') {
+                        delete $temp_deps{$type}{$id};
+                    }
+                    else {
+                        $temp_deps{$type}{$id} = 1;
+                    }
+                }
+            }
+        }
+        $bug->set_dependencies([ keys %{$temp_deps{'dependson'}} ], [ keys %{$temp_deps{'blocked'}} ]);
+    }
 }
 
 my $any_keyword_changes;

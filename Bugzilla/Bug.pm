@@ -1156,7 +1156,9 @@ sub _check_dependencies {
     my %deps_in = (dependson => $depends_on || '', blocked => $blocks || '');
 
     foreach my $type qw(dependson blocked) {
-        my @bug_ids = split(/[\s,]+/, $deps_in{$type});
+        my @bug_ids = ref($deps_in{$type}) 
+            ? @{$deps_in{$type}} 
+            : split(/[\s,]+/, $deps_in{$type});
         # Eliminate nulls.
         @bug_ids = grep {$_} @bug_ids;
         # We do this up here to make sure all aliases are converted to IDs.

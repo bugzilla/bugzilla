@@ -229,6 +229,36 @@
     </tr>
   [% END %]
 
+  <tr>
+    <th>
+      <label for="dependson">
+          Depends On:
+      </label>
+    </th>
+    <td colspan="3">
+      <input id="dependson" name="dependson" size="32">
+      <select name="dependson_action">
+          <option value="add">Add these IDs</option>
+          <option value="remove">Delete these IDs</option>
+      </select>
+    </td>
+  </tr>
+
+  <tr>
+    <th>
+      <label for="blocked">
+          Blocks:
+      </label>
+    </th>
+    <td colspan="3">
+      <input id="blocked" name="blocked" size="32">
+      <select name="blocked_action">
+          <option value="add">Add these IDs</option>
+          <option value="remove">Delete these IDs</option>
+      </select>
+    </td>
+  </tr>
+
   [% IF Param('usestatuswhiteboard') %]
     <tr>
       <td align="right">

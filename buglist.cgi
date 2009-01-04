@@ -1065,6 +1065,22 @@ $buglist_sth->execute();
 # Retrieve the query results one row at a time and write the data into a list
 # of Perl records.
 
+# If we're doing time tracking, then keep totals for all bugs.
+my $percentage_complete = lsearch(\@displaycolumns, 'percentage_complete') >= 0;
+my $estimated_time      = lsearch(\@displaycolumns, 'estimated_time') >= 0;
+my $remaining_time    = ((lsearch(\@displaycolumns, 'remaining_time') >= 0)
+                         || $percentage_complete);
+my $actual_time       = ((lsearch(\@displaycolumns, 'actual_time') >= 0)
+                         || $percentage_complete);
+
+my $time_info = { 'estimated_time' => 0,
+                  'remaining_time' => 0,
+                  'actual_time' => 0,
+                  'percentage_complete' => 0,
+                  'time_present' => ($estimated_time || $remaining_time ||
+                                     $actual_time || $percentage_complete),
+                };
+    
 my $bugowners = {};
 my $bugproducts = {};
 my $bugstatuses = {};
@@ -1108,6 +1124,11 @@ while (my @row = $buglist_sth->fetchrow_array()) {
 
     # Add id to list for checking for bug privacy later
     push(@bugidlist, $bug->{'bug_id'});
+
+    # Compute time tracking info.
+    $time_info->{'estimated_time'} += $bug->{'estimated_time'} if ($estimated_time);
+    $time_info->{'remaining_time'} += $bug->{'remaining_time'} if ($remaining_time);
+    $time_info->{'actual_time'}    += $bug->{'actual_time'}    if ($actual_time);
 }
 
 # Check for bug privacy and set $bug->{'secure_mode'} to 'implied' or 'manual'
@@ -1140,6 +1161,15 @@ if (@bugidlist) {
     }
 }
 
+# Compute percentage complete without rounding.
+my $sum = $time_info->{'actual_time'}+$time_info->{'remaining_time'};
+if ($sum > 0) {
+    $time_info->{'percentage_complete'} = 100*$time_info->{'actual_time'}/$sum;
+}
+else { # remaining_time <= 0 
+    $time_info->{'percentage_complete'} = 0
+}                             
+
 ################################################################################
 # Template Variable Definition
 ################################################################################
@@ -1165,6 +1195,7 @@ $vars->{'urlquerypart'} = $params->canonicalise_query('order',
                                                       'query_based_on');
 $vars->{'order'} = $order;
 $vars->{'caneditbugs'} = 1;
+$vars->{'time_info'} = $time_info;
 
 if (!Bugzilla->user->in_group('editbugs')) {
     foreach my $product (keys %$bugproducts) {

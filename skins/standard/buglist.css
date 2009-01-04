@@ -71,6 +71,23 @@ tr.bz_secure_mode_implied td.first-child {
 tr.bz_secure_mode_manual td.first-child {
 }
 
+td.bz_estimated_time_column,
+td.bz_remaining_time_column,
+td.bz_actual_time_column,
+td.bz_percentage_complete_column {
+    text-align: right;
+}
+
+tr.bz_time_summary_line {
+    background: black;
+    color: white;
+}
+
+td.bz_total_label {
+    font-weight: bold;
+    text-align: right;
+}
+
 #commit, #action {
   margin-top: .25em;
 }

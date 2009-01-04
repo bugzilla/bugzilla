@@ -187,13 +187,6 @@ EOT
     },
 );
 
-use constant OLD_LOCALCONFIG_VARS => qw(
-    mysqlpath
-    contenttypes
-    pages
-    severities platforms opsys priorities
-);
-
 sub read_localconfig {
     my ($include_deprecated) = @_;
     my $filename = bz_locations()->{'localconfig'};
@@ -221,9 +214,27 @@ Please fix the error in your 'localconfig' file. Alternately, rename your
 EOT
         }
 
-        my @vars = map($_->{name}, LOCALCONFIG_VARS);
-        push(@vars, OLD_LOCALCONFIG_VARS) if $include_deprecated;
-        foreach my $var (@vars) {
+        my @read_symbols;
+        if ($include_deprecated) {
+            # First we have to get the whole symbol table
+            my $safe_root = $s->root;
+            my %safe_package;
+            { no strict 'refs'; %safe_package = %{$safe_root . "::"}; }
+            # And now we read the contents of every var in the symbol table.
+            # However:
+            # * We only include symbols that start with an alphanumeric
+            #   character. This excludes symbols like "_<./localconfig"
+            #   that show up in some perls.
+            # * We ignore the INC symbol, which exists in every package.
+            # * Perl 5.10 imports a lot of random symbols that all
+            #   contain "::", and we want to ignore those.
+            @read_symbols = grep { /^[A-Za-z0-1]/ and !/^INC$/ and !/::/ }
+                                 (keys %safe_package);
+        }
+        else {
+            @read_symbols = map($_->{name}, LOCALCONFIG_VARS);
+        }
+        foreach my $var (@read_symbols) {
             my $glob = $s->varglob($var);
             # We can't get the type of a variable out of a Safe automatically.
             # We can only get the glob itself. So we figure out its type this
@@ -290,11 +301,6 @@ sub update_localconfig {
         }
     }
 
-    my @old_vars;
-    foreach my $name (OLD_LOCALCONFIG_VARS) {
-        push(@old_vars, $name) if defined $localconfig->{$name};
-    }
-
     if (!$localconfig->{'interdiffbin'} && $output) {
         print <<EOT
 
@@ -307,30 +313,41 @@ as well), you should install patchutils from:
 EOT
     }
 
+    my @old_vars;
+    foreach my $var (keys %$localconfig) {
+        push(@old_vars, $var) if !grep($_->{name} eq $var, LOCALCONFIG_VARS);
+    }
+
     my $filename = bz_locations->{'localconfig'};
 
+    # Move any custom or old variables into a separate file.
     if (scalar @old_vars) {
+        my $filename_old = "$filename.old";
+        open(my $old_file, ">>$filename_old") || die "$filename_old: $!";
+        local $Data::Dumper::Purity = 1;
+        foreach my $var (@old_vars) {
+            print $old_file Data::Dumper->Dump([$localconfig->{$var}], 
+                                               ["*$var"]) . "\n\n";
+        }
+        close $old_file;
         my $oldstuff = join(', ', @old_vars);
         print <<EOT
 
 The following variables are no longer used in $filename, and
-should be removed: $oldstuff
+have been moved to $filename_old: $oldstuff
 
 EOT
     }
 
-    if (scalar @new_vars) {
-        my $filename = bz_locations->{'localconfig'};
-        my $fh = new IO::File($filename, '>>') || die "$filename: $!";
-        $fh->seek(0, SEEK_END);
-        foreach my $var (LOCALCONFIG_VARS) {
-            if (grep($_ eq $var->{name}, @new_vars)) {
-                print $fh "\n", $var->{desc},
-                      Data::Dumper->Dump([$localconfig->{$var->{name}}], 
-                                         ["*$var->{name}"]);
-            }
-        }
+    # Re-write localconfig
+    open(my $fh, ">$filename") || die "$filename: $!";
+    foreach my $var (LOCALCONFIG_VARS) {
+        print $fh "\n", $var->{desc},
+                  Data::Dumper->Dump([$localconfig->{$var->{name}}],
+                                     ["*$var->{name}"]);
+   }
 
+    if (@new_vars) {
         my $newstuff = join(', ', @new_vars);
         print <<EOT;
 
@@ -405,31 +422,46 @@ variables defined in localconfig, it will print out a warning.
 
 =over
 
-=item C<read_localconfig($include_deprecated)>
+=item C<read_localconfig>
 
-Description: Reads the localconfig file and returns all valid
-             values in a hashref.
+=over
 
-Params:      C<$include_deprecated> - C<true> if you want the returned
-                 hashref to also include variables listed in 
-                 C<OLD_LOCALCONFIG_VARS>, if they exist. Generally
-                 this is only for use by C<update_localconfig>.
+=item B<Description>
 
-Returns:     A hashref of the localconfig variables. If an array
-             is defined, it will be an arrayref in the returned hash. If a
-             hash is defined, it will be a hashref in the returned hash.
-             Only includes variables specified in C<LOCALCONFIG_VARS>
-             (and C<OLD_LOCALCONFIG_VARS> if C<$include_deprecated> is
-             specified).
+Reads the localconfig file and returns all valid values in a hashref.
 
-=item C<update_localconfig({ output =E<gt> 1 })>
+=item B<Params>
+
+=over
+
+=item C<$include_deprecated> 
+
+C<true> if you want the returned hashref to include *any* variable
+currently defined in localconfig, even if it doesn't exist in 
+C<LOCALCONFIG_VARS>. Generally this is is only for use 
+by L</update_localconfig>.
+
+=back
+
+=item B<Returns>
+
+A hashref of the localconfig variables. If an array is defined in
+localconfig, it will be an arrayref in the returned hash. If a
+hash is defined, it will be a hashref in the returned hash.
+Only includes variables specified in C<LOCALCONFIG_VARS>, unless
+C<$include_deprecated> is true.
+
+=back
+
+
+=item C<update_localconfig>
 
 Description: Adds any new variables to localconfig that aren't
              currently defined there. Also optionally prints out
              a message about vars that *should* be there and aren't.
              Exits the program if it adds any new vars.
 
-Params:      C<output> - C<true> if the function should display informational
+Params:      C<$output> - C<true> if the function should display informational
                  output and warnings. It will always display errors or
                  any message which would cause program execution to halt.
 

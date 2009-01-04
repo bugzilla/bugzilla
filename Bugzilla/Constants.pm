@@ -149,6 +149,7 @@ use File::Basename;
     MAX_SMALLINT
 
     MAX_LEN_QUERY_NAME
+    MAX_CLASSIFICATION_SIZE
     MAX_PRODUCT_SIZE
     MAX_MILESTONE_SIZE
     MAX_COMPONENT_SIZE
@@ -424,6 +425,9 @@ use constant MAX_SMALLINT => 32767;
 
 # The longest that a saved search name can be.
 use constant MAX_LEN_QUERY_NAME => 64;
+
+# The longest classification name allowed.
+use constant MAX_CLASSIFICATION_SIZE => 64;
 
 # The longest product name allowed.
 use constant MAX_PRODUCT_SIZE => 64;

@@ -263,7 +263,12 @@
     [% title = "Classification Not Enabled" %]
     Sorry, classification is not enabled.
 
-  [% ELSIF error == "classification_not_specified" %]
+  [% ELSIF error == "classification_name_too_long" %]
+    [% title = "Classification Name Too Long" %]
+    The name of a classification is limited to [% constants.MAX_CLASSIFICATION_SIZE FILTER html %]
+    characters. '[% name FILTER html %]' is too long ([% name.length %] characters).
+
+[% ELSIF error == "classification_not_specified" %]
     [% title = "You Must Supply A Classification Name" %]
     You must enter a classification name.
 
@@ -273,8 +278,8 @@
 
   [% ELSIF error == "classification_invalid_sortkey" %]
     [% title = "Invalid Sortkey for Classification" %]
-    The sortkey <em>[% sortkey FILTER html %]</em> is invalid.
-    It must be a positive integer.
+    The sortkey '[% sortkey FILTER html %]' is invalid. It must be an
+    integer between 0 and [% constants.MAX_SMALLINT FILTER html %].
 
   [% ELSIF error == "classification_not_deletable" %]
     [% title = "Default Classification Can Not Be Deleted" %]

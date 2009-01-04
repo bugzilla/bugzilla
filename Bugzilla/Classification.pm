@@ -19,6 +19,7 @@ use strict;
 
 package Bugzilla::Classification;
 
+use Bugzilla::Constants;
 use Bugzilla::Util;
 use Bugzilla::Error;
 use Bugzilla::Product;
@@ -85,6 +86,10 @@ sub _check_name {
     $name = trim($name);
     $name || ThrowUserError('classification_not_specified');
 
+    if (length($name) > MAX_CLASSIFICATION_SIZE) {
+        ThrowUserError('classification_name_too_long', {'name' => $name});
+    }
+
     my $classification = new Bugzilla::Classification({name => $name});
     if ($classification && (!ref $invocant || $classification->id != $invocant->id)) {
         ThrowUserError("classification_already_exists", { name => $classification->name });
@@ -104,9 +109,9 @@ sub _check_sortkey {
 
     $sortkey ||= 0;
     my $stored_sortkey = $sortkey;
-    detaint_natural($sortkey)
-      || ThrowUserError('classification_invalid_sortkey', { 'sortkey' => $stored_sortkey });
-
+    if (!detaint_natural($sortkey) || $sortkey > MAX_SMALLINT) {
+        ThrowUserError('classification_invalid_sortkey', { 'sortkey' => $stored_sortkey });
+    }
     return $sortkey;
 }
 

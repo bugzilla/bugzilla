@@ -152,7 +152,7 @@ sub get_fk_ddl {
     
     if ( $update =~ /CASCADE/i ){
         my $tr_str = "CREATE OR REPLACE TRIGGER ${fk_name}_UC"
-                     . " AFTER  UPDATE  ON ". $to_table
+                     . " AFTER UPDATE OF $to_column ON $to_table "
                      . " REFERENCING "
                      . " NEW AS NEW "
                      . " OLD AS OLD "

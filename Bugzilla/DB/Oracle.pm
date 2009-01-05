@@ -558,7 +558,7 @@ sub bz_setup_database {
                     }
   
                      my $tr_str = "CREATE OR REPLACE TRIGGER $trigger_name"
-                         . " AFTER  UPDATE  ON ". $to_table
+                         . " AFTER UPDATE OF $to_column ON $to_table "
                          . " REFERENCING "
                          . " NEW AS NEW "
                          . " OLD AS OLD "

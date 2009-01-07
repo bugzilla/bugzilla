@@ -294,3 +294,65 @@ an error 302, there won't be an error -302.
 Sometimes a function will throw an error that doesn't have a specific
 error code. In this case, the code will be C<-32000> if it's a "fatal"
 error, and C<32000> if it's a "transient" error.
+
+=head1 COMMON PARAMETERS
+
+Many Webservice methods take similar arguments. Instead of re-writing
+the documentation for each method, we document the parameters here, once,
+and then refer back to this documentation from the individual methods
+where these parameters are used.
+
+=head2 Limiting What Fields Are Returned
+
+Many WebService methods return an array of structs with various
+fields in the structs. (For example, L<Bugzilla::WebService::Bug/get>
+returns a list of C<bugs> that have fields like C<id>, C<summary>, 
+C<creation_time>, etc.)
+
+These parameters allow you to limit what fields are present in
+the structs, to possibly improve performance or save some bandwidth.
+
+=over
+
+=item C<include_fields> (array)
+
+An array of strings, representing the (case-sensitive) names of fields.
+Only the fields specified in this hash will be returned, the rest will
+not be included.
+
+If you specify an empty array, then this function will return empty
+hashes.
+
+Invalid field names are ignored.
+
+Example:
+
+  User.get( ids => [1], include_fields => ['id', 'name'] )
+
+would return something like:
+
+  { users => [{ id => 1, name => 'user@domain.com' }] }
+
+=item C<exclude_fields> (array)
+
+An array of strings, representing the (case-sensitive) names of fields.
+The fields specified will not be included in the returned hashes.
+
+If you specify all the fields, then this function will return empty
+hashes.
+
+Invalid field names are ignored.
+
+Specifying fields here overrides C<include_fields>, so if you specify a
+field in both, it will be excluded, not included.
+
+Example:
+
+  User.get( ids => [1], exclude_fields => ['name'] )
+
+would return something like:
+
+  { users => [{ id => 1, real_name => 'John Smith' }] }
+
+=back
+

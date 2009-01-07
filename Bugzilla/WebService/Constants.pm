@@ -51,6 +51,7 @@ use constant WS_ERROR_CODE => {
     # Generic Bugzilla::Object errors are 50-99.
     object_not_specified        => 50,
     param_required              => 50,
+    params_required             => 50,
     object_does_not_exist       => 51,
     # Bug errors usually occupy the 100-200 range.
     improper_bug_id_field_value => 100,
@@ -79,6 +80,9 @@ use constant WS_ERROR_CODE => {
     invalid_field_name => 108,
     # Not authorized to edit the bug
     product_edit_denied => 109,
+    # Comment-related errors
+    comment_is_private => 110,
+    comment_id_invalid => 111,
 
     # Authentication errors are usually 300-400.
     invalid_username_or_password => 300,

@@ -451,6 +451,10 @@ B<Note>: At least one of C<ids>, C<names>, or C<match> must be specified.
 B<Note>: Users will not be returned more than once, so even if a user 
 is matched by more than one argument, only one user will be returned.
 
+In addition to the parameters below, this method also accepts the
+standard L<include_fields|Bugzilla::WebService/include_fields> and
+L<exclude_fields|Bugzilla::WebService/exclude_fields> arguments.
+
 =over
 
 =item C<ids> (array) 
@@ -481,34 +485,6 @@ Logged-out users cannot use this argument, and an error will be thrown
 if they try. (This is to make it harder for spammers to harvest email
 addresses from Bugzilla, and also to enforce the user visibility
 restrictions that are implemented on some Bugzillas.)
-
-=item C<include_fields> (array)
-
-An array of strings, representing the names of keys in the hashes 
-this function returns. Only the fields specified in this hash will be 
-returned, the rest will not be included.
-
-Essentially, this is a way to make the return value smaller, for performance
-or bandwidth reasons.
-
-If you specify an empty array, then this function will return empty hashes.
-
-Invalid field names are ignored.
-
-=item C<exclude_fields> (array)
-
-An array of strings, representing the names of keys in the hashes this 
-function returns. The fields specified will not be excluded from the 
-returned hashes.
-
-Essentially, this is a way to exclude certain fields from the returned
-hashes, for performance or bandwidth reasons.
-
-If you specify all the fields, then this function will return empty hashes.
-
-Invalid field names are ignored.
-
-This overrides C<include_fields>.
 
 =back
 

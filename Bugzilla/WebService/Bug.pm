@@ -27,6 +27,7 @@ use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Field;
 use Bugzilla::WebService::Constants;
+use Bugzilla::WebService::Util qw(filter);
 use Bugzilla::Bug;
 use Bugzilla::BugMail;
 use Bugzilla::Util qw(trim);
@@ -57,6 +58,84 @@ BEGIN { *get_bugs = \&get }
 ###########
 # Methods #
 ###########
+
+sub comments {
+    my ($self, $params) = @_;
+    if (!(defined $params->{bug_ids} || defined $params->{comment_ids})) {
+        ThrowCodeError('params_required',
+                       { function => 'Bug.comments',
+                         params   => ['bug_ids', 'comment_ids'] });
+    }
+
+    my $bug_ids = $params->{bug_ids} || [];
+    my $comment_ids = $params->{comment_ids} || [];
+
+    my $dbh  = Bugzilla->dbh;
+    my $user = Bugzilla->user;
+
+    my %bugs;
+    foreach my $bug_id (@$bug_ids) {
+        my $bug = Bugzilla::Bug->check($bug_id);
+        # We want the API to always return comments in the same order.
+        my $comments = Bugzilla::Bug::GetComments(
+            $bug->id, 'oldest_to_newest');
+        my @result;
+        foreach my $comment (@$comments) {
+            next if $comment->{isprivate} && !$user->is_insider;
+            $comment->{bug_id} = $bug->id;
+            push(@result, $self->_translate_comment($comment, $params));
+        }
+        $bugs{$bug->id}{'comments'} = \@result;
+    }
+
+    my %comments;
+    if (scalar @$comment_ids) {
+        my @ids = map { trim($_) } @$comment_ids;
+        my @sql_ids = map { $dbh->quote($_) } @ids;
+        my $comment_data = $dbh->selectall_arrayref(
+            'SELECT comment_id AS id, bug_id, who, bug_when AS time,
+                    isprivate, thetext AS body, type, extra_data
+               FROM longdescs WHERE ' . $dbh->sql_in('comment_id', \@sql_ids),
+            {Slice=>{}});
+
+        # See if we were passed any invalid comment ids.
+        my %got_ids = map { $_->{id} => 1 } @$comment_data;
+        foreach my $comment_id (@ids) {
+            if (!$got_ids{$comment_id}) {
+                ThrowUserError('comment_id_invalid', { id => $comment_id });
+            }
+        }
+ 
+        # Now make sure that we can see all the associated bugs.
+        my %got_bug_ids = map { $_->{bug_id} => 1 } @$comment_data;
+        Bugzilla::Bug->check($_) foreach (keys %got_bug_ids);
+
+        foreach my $comment (@$comment_data) {
+            if ($comment->{isprivate} && !$user->is_insider) {
+                ThrowUserError('comment_is_private', { id => $comment->{id} });
+            }
+            $comment->{author} = new Bugzilla::User($comment->{who});
+            $comment->{body} = Bugzilla::Bug::format_comment($comment);
+            $comments{$comment->{id}} =
+                $self->_translate_comment($comment, $params);
+        }
+    }
+
+    return { bugs => \%bugs, comments => \%comments };
+}
+
+# Helper for Bug.comments
+sub _translate_comment {
+    my ($self, $comment, $filters) = @_;
+    return filter $filters, {
+        id         => $self->type('int', $comment->{id}),
+        bug_id     => $self->type('int', $comment->{bug_id}),
+        author     => $self->type('string', $comment->{author}->login),
+        time       => $self->type('dateTime', $comment->{'time'}),
+        is_private => $self->type('boolean', $comment->{isprivate}),
+        text       => $self->type('string', $comment->{body}),
+    };
+}
 
 sub get {
     my ($self, $params) = @_;
@@ -325,6 +404,123 @@ You specified a field that doesn't exist or isn't a drop-down field.
 =head2 Bug Information
 
 =over
+
+
+=item C<comments>
+
+B<UNSTABLE>
+
+=over
+
+=item B<Description>
+
+This allows you to get data about comments, given a list of bugs 
+and/or comment ids.
+
+=item B<Params>
+
+B<Note>: At least one of C<bug_ids> or C<comment_ids> is required.
+
+In addition to the parameters below, this method also accepts the
+standard L<include_fields|Bugzilla::WebService/include_fields> and
+L<exclude_fields|Bugzilla::WebService/exclude_fields> arguments.
+
+=over
+
+=item C<bug_ids> 
+
+C<array> An array that can contain both bug IDs and bug aliases.
+All of the comments (that are visible to you) will be returned for the
+specified bugs.
+
+=item C<comment_ids> 
+
+C<array> An array of integer comment_ids. These comments will be
+returned individually, separate from any other comments in their
+respective bugs.
+
+=back
+
+=item B<Returns>
+
+Two items are returned:
+
+=over
+
+=item C<bugs>
+
+This is used for bugs specified in C<bug_ids>. This is a hash,
+where the keys are the numeric ids of the bugs, and the value is
+a hash with a single key, C<comments>, which is an array of comments.
+(The format of comments is described below.)
+
+Note that any individual bug will only be returned once, so if you
+specify an id multiple times in C<bug_ids>, it will still only be
+returned once.
+
+=item C<comments>
+
+Each individual comment requested in C<comment_ids> is returned here,
+in a hash where the numeric comment id is the key, and the value
+is the comment. (The format of comments is described below.) 
+
+=back
+
+A "comment" as described above is a hash that contains the following
+keys:
+
+=over
+
+=item id
+
+C<int> The globally unique ID for the comment.
+
+=item bug_id
+
+C<int> The ID of the bug that this comment is on.
+
+=item text
+
+C<string> The actual text of the comment.
+
+=item author
+
+C<string> The login name of the comment's author.
+
+=item time
+
+C<dateTime> The time (in Bugzilla's timezone) that the comment was added.
+
+=item is_private
+
+C<boolean> True if this comment is private (only visible to a certain
+group called the "insidergroup"), False otherwise.
+
+=back
+
+=item B<Errors>
+
+This method can throw all the same errors as L</get>. In addition,
+it can also throw the following errors:
+
+=over
+
+=item 110 (Comment Is Private)
+
+You specified the id of a private comment in the C<comment_ids>
+argument, and you are not in the "insider group" that can see
+private comments.
+
+=item 111 (Invalid Comment ID)
+
+You specified an id in the C<comment_ids> argument that is invalid--either
+you specified something that wasn't a number, or there is no comment with
+that id.
+
+=back
+
+=back
+
 
 =item C<get> 
 

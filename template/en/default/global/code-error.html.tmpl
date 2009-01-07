@@ -345,6 +345,12 @@
     a <code>[% param FILTER html %]</code> argument, and that
     argument was not set.
 
+  [% ELSIF error == "params_required" %]
+    [% title = "Missing Parameter" %]
+    The function <code>[% function FILTER html %]</code> requires
+    that you set one of the following parameters:
+    <code>[% params.join(', ') FILTER html %]</code>
+
   [% ELSIF error == "product_empty_group_controls" %]
     [% title = "Missing Group Controls" %]
     New settings must be defined to edit group controls for

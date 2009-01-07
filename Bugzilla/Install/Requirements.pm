@@ -80,6 +80,15 @@ sub REQUIRED_MODULES {
         module  => 'DateTime',
         version => '0.28'
     },
+    # 0.79 is required to work on Windows Vista and Windows Server 2008.
+    # As correctly detecting the flavor of Windows is not easy,
+    # we require this version for all Windows installations.
+    # 0.71 fixes a major bug affecting all platforms.
+    {
+        package => 'DateTime-TimeZone',
+        module  => 'DateTime::TimeZone',
+        version => ON_WINDOWS ? '0.79' : '0.71'
+    },
     {
         package => 'PathTools',
         module  => 'File::Spec',

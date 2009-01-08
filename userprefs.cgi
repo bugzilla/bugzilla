@@ -127,7 +127,6 @@ sub SaveAccount {
             $cgi->param('Bugzilla_password') 
               || ThrowUserError("old_password_required");
 
-            use Bugzilla::Token;
             # Block multiple email changes for the same user.
             if (Bugzilla::Token::HasEmailChangeToken($user->id)) {
                 ThrowUserError("email_change_in_progress");
@@ -183,6 +182,7 @@ sub SaveSettings {
     foreach my $name (@setting_list) {
         next if ! ($settings->{$name}->{'is_enabled'});
         my $value = $cgi->param($name);
+        next unless defined $value;
         my $setting = new Bugzilla::User::Setting($name);
 
         if ($value eq "${name}-isdefault" ) {

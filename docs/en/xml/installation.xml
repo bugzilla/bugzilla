@@ -1,5 +1,5 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"> -->
-<!-- $Id: installation.xml,v 1.157.2.5 2008/12/17 16:20:39 lpsolit%gmail.com Exp $ -->
+<!-- $Id: installation.xml,v 1.157.2.6 2009/01/08 23:44:22 lpsolit%gmail.com Exp $ -->
 <chapter id="installing-bugzilla">
   <title>Installing Bugzilla</title>
 
@@ -1576,7 +1576,7 @@ AddType application/rdf+xml .rdf</screen>
         based system such as GNU/Linux.  That said, if you do want to get
         Bugzilla running on Windows, you will need to make the following
         adjustments. A detailed step-by-step
-        <ulink url="http://www.bugzilla.org/docs/win32install.html">
+        <ulink url="https://wiki.mozilla.org/Bugzilla:Win32Install">
         installation guide for Windows</ulink> is also available
         if you need more help with your installation.
       </para>

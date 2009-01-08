@@ -16,7 +16,7 @@
 [%# INTERFACE:
   # token: string. The token to be used in the user account creation.
   # email: email address of the user account.
-  # date: creation date of the token.
+  # expiration_ts: expiration date of the token.
   #%]
 
 [% title = BLOCK %]Create a new user account for '[% email FILTER html %]'[% END %]
@@ -24,7 +24,6 @@
            title = title
            onload = "document.forms['confirm_account_form'].realname.focus();" %]
 
-[% expiration_ts = date + (constants.MAX_TOKEN_AGE * 86400) %]
 <div>
   To create your account, you must enter a password in the form below.
   Your email address and Real Name (if provided) will be shown with
@@ -60,7 +59,7 @@
 
 <p>
   This account will not be created if this form is not completed by
-  <u>[%+ time2str("%B %o, %Y at %H:%M %Z", expiration_ts) %]</u>.
+  <u>[% expiration_ts FILTER time("%B %e, %Y at %H:%M %Z") %]</u>.
 </p>
 
 <p>

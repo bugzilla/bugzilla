@@ -37,6 +37,7 @@ use Bugzilla::Error;
 use Bugzilla::Token;
 use Bugzilla::User;
 
+use Date::Format;
 use Date::Parse;
 
 my $dbh = Bugzilla->dbh;
@@ -351,7 +352,7 @@ sub request_create_account {
     my (undef, $date, $login_name) = Bugzilla::Token::GetTokenData($token);
     $vars->{'token'} = $token;
     $vars->{'email'} = $login_name . Bugzilla->params->{'emailsuffix'};
-    $vars->{'date'} = str2time($date);
+    $vars->{'expiration_ts'} = ctime(str2time($date) + MAX_TOKEN_AGE * 86400);
 
     # When 'ssl' equals 'always' or 'authenticated sessions', 
     # we want this form to always be over SSL.

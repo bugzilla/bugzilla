@@ -74,7 +74,7 @@ sub issue_new_user_account_token {
     my ($token, $token_ts) = _create_token(undef, 'account', $login_name);
 
     $vars->{'email'} = $login_name . Bugzilla->params->{'emailsuffix'};
-    $vars->{'token_ts'} = $token_ts;
+    $vars->{'expiration_ts'} = ctime($token_ts + MAX_TOKEN_AGE * 86400);
     $vars->{'token'} = $token;
 
     my $message;
@@ -103,10 +103,7 @@ sub IssueEmailChangeToken {
 
     $vars->{'oldemailaddress'} = $old_email . $email_suffix;
     $vars->{'newemailaddress'} = $new_email . $email_suffix;
-    
-    $vars->{'max_token_age'} = MAX_TOKEN_AGE;
-    $vars->{'token_ts'} = $token_ts;
-
+    $vars->{'expiration_ts'} = ctime($token_ts + MAX_TOKEN_AGE * 86400);
     $vars->{'token'} = $token;
     $vars->{'emailaddress'} = $old_email . $email_suffix;
 
@@ -151,8 +148,10 @@ sub IssuePasswordToken {
 
     $vars->{'token'} = $token;
     $vars->{'emailaddress'} = $user->email;
-    $vars->{'max_token_age'} = MAX_TOKEN_AGE;
-    $vars->{'token_ts'} = $token_ts;
+    $vars->{'expiration_ts'} = ctime($token_ts + MAX_TOKEN_AGE * 86400);
+    # The user is not logged in (else he wouldn't request a new password).
+    # So we have to pass this information to the template.
+    $vars->{'timezone'} = $user->timezone;
 
     my $message = "";
     $template->process("account/password/forgotten-password.txt.tmpl", 
@@ -233,6 +232,9 @@ sub Cancel {
     $vars->{'token'} = $token;
     $vars->{'tokentype'} = $tokentype;
     $vars->{'issuedate'} = $issuedate;
+    # The user is probably not logged in.
+    # So we have to pass this information to the template.
+    $vars->{'timezone'} = $user->timezone;
     $vars->{'eventdata'} = $eventdata;
     $vars->{'cancelaction'} = $cancelaction;
 

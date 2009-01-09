@@ -1618,6 +1618,11 @@
     [% title = "Wrong Token" %]
     That token cannot be used to create a user account.
 
+  [% ELSIF error == "xmlrpc_invalid_value" %]
+    "[% value FILTER html %]" is not a valid value for a
+    &lt;[% type FILTER html %]&gt; field. (See the XML-RPC specification
+    for details.)
+
   [% ELSIF error == "zero_length_file" %]
     [% title = "File Is Empty" %]
     The file you are trying to attach is empty, does not exist, or you don't

@@ -48,11 +48,12 @@ use base qw(Exporter);
 # comment that it was retired. Also, if an error changes its name, you'll
 # have to fix it here.
 use constant WS_ERROR_CODE => {
-    # Generic Bugzilla::Object errors are 50-99.
+    # Generic errors (Bugzilla::Object and others) are 50-99.    
     object_not_specified        => 50,
     param_required              => 50,
     params_required             => 50,
     object_does_not_exist       => 51,
+    xmlrpc_invalid_value        => 52,
     # Bug errors usually occupy the 100-200 range.
     improper_bug_id_field_value => 100,
     bug_id_does_not_exist       => 101,

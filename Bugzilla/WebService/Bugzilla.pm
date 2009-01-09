@@ -57,6 +57,29 @@ sub timezone {
     return { timezone => $self->type('string', $offset) };
 }
 
+sub time {
+    my ($self) = @_;
+    my $dbh = Bugzilla->dbh;
+
+    my $db_time = $dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
+    my $now_utc = DateTime->now();
+
+    my $tz = Bugzilla->local_timezone;
+    my $now_local = $now_utc->clone->set_time_zone($tz);
+    my $tz_offset = $tz->offset_for_datetime($now_local);
+
+    return {
+        db_time       => $self->type('dateTime', $db_time),
+        web_time      => $self->type('dateTime', $now_local),
+        web_time_utc  => $self->type('dateTime', $now_utc),
+        tz_name       => $self->type('string', $tz->name),
+        tz_offset     => $self->type('string', 
+                                     $tz->offset_as_string($tz_offset)),
+        tz_short_name => $self->type('string', 
+                                     $now_local->time_zone_short_name),
+    };
+}
+
 1;
 
 __END__
@@ -129,7 +152,8 @@ extension
 
 =item C<timezone>
 
-B<STABLE>
+B<DEPRECATED> This method may be removed in a future version of Bugzilla.
+Use L</time> instead.
 
 =over
 
@@ -147,5 +171,81 @@ A hash with a single item, C<timezone>, that is the timezone offset as a
 string in (+/-)XXXX (RFC 2822) format.
 
 =back
+
+
+=item C<time>
+
+B<UNSTABLE>
+
+=over
+
+=item B<Description>
+
+Gets information about what time the Bugzilla server thinks it is, and
+what timezone it's running in.
+
+=item B<Params> (none)
+
+=item B<Returns>
+
+A struct with the following items:
+
+=over
+
+=item C<db_time>
+
+C<dateTime> The current time in Bugzilla's B<local time zone>, according 
+to the Bugzilla I<database server>.
+
+Note that Bugzilla assumes that the database and the webserver are running
+in the same time zone. However, if the web server and the database server
+aren't synchronized for some reason, I<this> is the time that you should
+rely on for doing searches and other input to the WebService.
+
+=item C<web_time>
+
+C<dateTime> This is the current time in Bugzilla's B<local time zone>, 
+according to Bugzilla's I<web server>.
+
+This might be different by a second from C<db_time> since this comes from
+a different source. If it's any more different than a second, then there is
+likely some problem with this Bugzilla instance. In this case you should
+rely on the C<db_time>, not the C<web_time>.
+
+=item C<web_time_utc>
+
+The same as C<web_time>, but in the B<UTC> time zone instead of the local
+time zone.
+
+=item C<tz_name>
+
+C<string> The long name of the time zone that the Bugzilla web server is 
+in. Will usually look something like: C<America/Los Angeles>
+
+=item C<tz_short_name>
+
+C<string> The "short name" of the time zone that the Bugzilla web server
+is in. This should only be used for display, and not relied on for your
+programs, because different time zones can have the same short name.
+(For example, there are two C<EST>s.)
+
+This will look something like: C<PST>.
+
+=item C<tz_offset>
+
+C<string> The timezone offset as a string in (+/-)XXXX (RFC 2822) format.
+
+=back
+
+=item B<History>
+
+=over
+
+=item Added in Bugzilla B<3.4>.
+
+=back
+
+=back
+
 
 =back

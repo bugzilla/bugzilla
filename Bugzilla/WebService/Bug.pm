@@ -78,7 +78,7 @@ sub comments {
         my $bug = Bugzilla::Bug->check($bug_id);
         # We want the API to always return comments in the same order.
         my $comments = Bugzilla::Bug::GetComments(
-            $bug->id, 'oldest_to_newest');
+            $bug->id, 'oldest_to_newest', $params->{new_since});
         my @result;
         foreach my $comment (@$comments) {
             next if $comment->{isprivate} && !$user->is_insider;
@@ -438,6 +438,13 @@ specified bugs.
 C<array> An array of integer comment_ids. These comments will be
 returned individually, separate from any other comments in their
 respective bugs.
+
+=item C<new_since>
+
+C<dateTime> If specified, the method will only return comments I<newer>
+than this time. This only affects comments returned from the C<bug_ids>
+argument. You will always be returned all comments you request in the
+C<comment_ids> argument, even if they are older than this date.
 
 =back
 

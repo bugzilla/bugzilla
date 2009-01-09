@@ -2853,11 +2853,16 @@ sub GetComments {
              INNER JOIN profiles
                      ON profiles.userid = longdescs.who
                   WHERE longdescs.bug_id = ?';
+
     if ($start) {
-        $query .= ' AND longdescs.bug_when > ?
-                    AND longdescs.bug_when <= ?';
-        push(@args, ($start, $end));
+        $query .= ' AND longdescs.bug_when > ?';
+        push(@args, $start);
     }
+    if ($end) {
+        $query .= ' AND longdescs.bug_when <= ?';
+        push(@args, $end);
+    }
+
     $query .= " ORDER BY longdescs.bug_when $sort_order";
     my $sth = $dbh->prepare($query);
     $sth->execute(@args);

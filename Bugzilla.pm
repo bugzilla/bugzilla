@@ -357,7 +357,7 @@ sub error_mode {
         $class->request_cache->{error_mode} = $newval;
     }
     return $class->request_cache->{error_mode}
-        || Bugzilla::Constants::ERROR_MODE_WEBPAGE;
+        || (i_am_cgi() ? ERROR_MODE_WEBPAGE : ERROR_MODE_DIE);
 }
 
 sub usage_mode {

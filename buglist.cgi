@@ -652,62 +652,58 @@ if (!$params->param('query_format')) {
 # Note: For column names using aliasing (SQL "<field> AS <alias>"), the column
 #       ID needs to be identical to the field ID for list ordering to work.
 
-local our $columns = {};
-sub DefineColumn {
-    my ($id, $name, $title) = @_;
-    $columns->{$id} = { 'name' => $name , 'title' => $title };
-}
+my $columns = { relevance => {name => 'relevance', title => 'Relevance'},
+                short_short_desc => {name => 'bugs.short_desc', title => 'Summary'} };
 
-# Column:     ID                    Name                           Title
-DefineColumn("bug_id"            , "bugs.bug_id"                , "ID"               );
-DefineColumn("alias"             , "bugs.alias"                 , "Alias"            );
-DefineColumn("opendate"          , "bugs.creation_ts"           , "Opened"           );
-DefineColumn("changeddate"       , "bugs.delta_ts"              , "Changed"          );
-DefineColumn("bug_severity"      , "bugs.bug_severity"          , "Severity"         );
-DefineColumn("priority"          , "bugs.priority"              , "Priority"         );
-DefineColumn("rep_platform"      , "bugs.rep_platform"          , "Hardware"         );
-DefineColumn("assigned_to"       , "map_assigned_to.login_name" , "Assignee"         );
-DefineColumn("reporter"          , "map_reporter.login_name"    , "Reporter"         );
-DefineColumn("qa_contact"        , "map_qa_contact.login_name"  , "QA Contact"       );
-if ($format->{'extension'} eq 'html') {
-    DefineColumn("assigned_to_realname", "CASE WHEN map_assigned_to.realname = '' THEN map_assigned_to.login_name ELSE map_assigned_to.realname END AS assigned_to_realname", "Assignee"  );
-    DefineColumn("reporter_realname"   , "CASE WHEN map_reporter.realname    = '' THEN map_reporter.login_name    ELSE map_reporter.realname    END AS reporter_realname"   , "Reporter"  );
-    DefineColumn("qa_contact_realname" , "CASE WHEN map_qa_contact.realname  = '' THEN map_qa_contact.login_name  ELSE map_qa_contact.realname  END AS qa_contact_realname" , "QA Contact");
-} else {
-    DefineColumn("assigned_to_realname", "map_assigned_to.realname AS assigned_to_realname", "Assignee"  );
-    DefineColumn("reporter_realname"   , "map_reporter.realname AS reporter_realname"      , "Reporter"  );
-    DefineColumn("qa_contact_realname" , "map_qa_contact.realname AS qa_contact_realname"  , "QA Contact");
-}
-DefineColumn("bug_status"        , "bugs.bug_status"            , "Status"           );
-DefineColumn("resolution"        , "bugs.resolution"            , "Resolution"       );
-DefineColumn("short_short_desc"  , "bugs.short_desc"            , "Summary"          );
-DefineColumn("short_desc"        , "bugs.short_desc"            , "Summary"          );
-DefineColumn("status_whiteboard" , "bugs.status_whiteboard"     , "Whiteboard"       );
-DefineColumn("component"         , "map_components.name"        , "Component"        );
-DefineColumn("product"           , "map_products.name"          , "Product"          );
-DefineColumn("classification"    , "map_classifications.name"   , "Classification"   );
-DefineColumn("version"           , "bugs.version"               , "Version"          );
-DefineColumn("op_sys"            , "bugs.op_sys"                , "OS"               );
-DefineColumn("target_milestone"  , "bugs.target_milestone"      , "Target Milestone" );
-DefineColumn("votes"             , "bugs.votes"                 , "Votes"            );
-DefineColumn("keywords"          , "bugs.keywords"              , "Keywords"         );
-DefineColumn("estimated_time"    , "bugs.estimated_time"        , "Estimated Hours"  );
-DefineColumn("remaining_time"    , "bugs.remaining_time"        , "Remaining Hours"  );
-DefineColumn("actual_time"       , "(SUM(ldtime.work_time)*COUNT(DISTINCT ldtime.bug_when)/COUNT(bugs.bug_id)) AS actual_time", "Actual Hours");
-DefineColumn("percentage_complete",
+foreach my $field (Bugzilla->get_fields({ obsolete => 0, buglist => 1 })) {
+    # Rename some field names for backward compatibility
+    my $id = $field->name;
+    if ($id eq 'creation_ts') {
+        $id = 'opendate';
+    }
+    elsif ($id eq 'delta_ts') {
+        $id = 'changeddate';
+    }
+    elsif ($id eq 'work_time') {
+        $id = 'actual_time';
+    }
+
+    # Database column names and expressions
+    # XXX Move these to fielddefs/Field.pm or Search.pm?
+    my $name = 'bugs.' . $field->name;
+    if ($id eq 'assigned_to' || $id eq 'reporter' || $id eq 'qa_contact') {
+        $name = 'map_' . $field->name . '.login_name';
+    }
+    elsif ($id eq 'product' || $id eq 'component' || $id eq 'classification') {
+        $name = 'map_' . $field->name . 's.name';
+    }
+    elsif ($id eq 'deadline') {
+        $name = $dbh->sql_date_format('bugs.deadline', '%Y-%m-%d') . " AS deadline";
+    }
+    elsif ($id eq 'actual_time') {
+        $name = '(SUM(ldtime.work_time)*COUNT(DISTINCT ldtime.bug_when)/COUNT(bugs.bug_id)) AS actual_time';
+    }
+    elsif ($id eq 'percentage_complete') {
+        $name = 
     "(CASE WHEN (SUM(ldtime.work_time)*COUNT(DISTINCT ldtime.bug_when)/COUNT(bugs.bug_id)) " .
     "            + bugs.remaining_time = 0.0 " .
     "THEN 0.0 " .
     "ELSE 100*((SUM(ldtime.work_time)*COUNT(DISTINCT ldtime.bug_when)/COUNT(bugs.bug_id)) " .
     "     /((SUM(ldtime.work_time)*COUNT(DISTINCT ldtime.bug_when)/COUNT(bugs.bug_id)) + bugs.remaining_time)) " .
-    "END) AS percentage_complete"                               , "% Complete"); 
-DefineColumn("relevance"         , "relevance"                  , "Relevance"        );
-DefineColumn("deadline"          , $dbh->sql_date_format('bugs.deadline', '%Y-%m-%d') . " AS deadline", "Deadline");
+    "END) AS percentage_complete"
+    }
 
-foreach my $field (Bugzilla->active_custom_fields) {
-    # Multi-select fields are not (yet) supported in buglists.
-    next if $field->type == FIELD_TYPE_MULTI_SELECT;
-    DefineColumn($field->name, 'bugs.' . $field->name, $field->description);
+    $columns->{$id} = { 'name' => $name, 'title' => $field->description };
+}
+
+if ($format->{'extension'} eq 'html') {
+    $columns->{assigned_to_realname} = { name => "CASE WHEN map_assigned_to.realname = '' THEN map_assigned_to.login_name ELSE map_assigned_to.realname END AS assigned_to_realname", title => "Assignee" };
+    $columns->{reporter_realname} = { name => "CASE WHEN map_reporter.realname    = '' THEN map_reporter.login_name    ELSE map_reporter.realname    END AS reporter_realname", title => "Reporter" };
+    $columns->{qa_contact_realname} = { name => "CASE WHEN map_qa_contact.realname  = '' THEN map_qa_contact.login_name  ELSE map_qa_contact.realname  END AS qa_contact_realname", title => "QA Contact" };
+} else {
+    $columns->{assigned_to_realname} = { name => "map_assigned_to.realname AS assigned_to_realname", title => "Assignee" };
+    $columns->{reporter_realname} = { name => "map_reporter.realname AS reporter_realname", title => "Reporter" };
+    $columns->{qa_contact_realname} = { name => "map_qa_contact.realname AS qa_contact_realname", title => "QA Contact" };
 }
 
 Bugzilla::Hook::process("buglist-columns", {'columns' => $columns} );

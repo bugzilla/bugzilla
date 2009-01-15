@@ -92,6 +92,16 @@ sub update_fielddefs_definition {
     $dbh->bz_add_index('fielddefs', 'fielddefs_value_field_id_idx',
                        ['value_field_id']);
 
+    # Bug 344878
+    if (!$dbh->bz_column_info('fielddefs', 'buglist')) {
+        $dbh->bz_add_column('fielddefs', 'buglist',
+            {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'FALSE'});
+        # Set non-multiselect custom fields as valid buglist fields
+        # Note that default fields will be handled in Field.pm
+        $dbh->do('UPDATE fielddefs SET buglist = 1 WHERE custom = 1 AND type != ' . FIELD_TYPE_MULTI_SELECT);
+    }
+
+
     # Remember, this is not the function for adding general table changes.
     # That is below. Add new changes to the fielddefs table above this
     # comment.

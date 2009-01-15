@@ -96,6 +96,7 @@ use constant DB_COLUMNS => qw(
     sortkey
     obsolete
     enter_bug
+    buglist
     visibility_field_id
     visibility_value_id
     value_field_id
@@ -107,6 +108,7 @@ use constant VALIDATORS => {
     custom      => \&_check_custom,
     description => \&_check_description,
     enter_bug   => \&_check_enter_bug,
+    buglist     => \&Bugzilla::Object::check_boolean,
     mailhead    => \&_check_mailhead,
     obsolete    => \&_check_obsolete,
     sortkey     => \&_check_sortkey,
@@ -125,6 +127,7 @@ use constant UPDATE_COLUMNS => qw(
     sortkey
     obsolete
     enter_bug
+    buglist
     visibility_field_id
     visibility_value_id
     value_field_id
@@ -148,32 +151,42 @@ use constant SQL_DEFINITIONS => {
 # These are used by populate_field_definitions to populate
 # the fielddefs table.
 use constant DEFAULT_FIELDS => (
-    {name => 'bug_id',       desc => 'Bug #',      in_new_bugmail => 1},
-    {name => 'short_desc',   desc => 'Summary',    in_new_bugmail => 1},
-    {name => 'classification', desc => 'Classification', in_new_bugmail => 1},
-    {name => 'product',      desc => 'Product',    in_new_bugmail => 1},
-    {name => 'version',      desc => 'Version',    in_new_bugmail => 1},
+    {name => 'bug_id',       desc => 'Bug #',      in_new_bugmail => 1,
+     buglist => 1},
+    {name => 'short_desc',   desc => 'Summary',    in_new_bugmail => 1,
+     buglist => 1},
+    {name => 'classification', desc => 'Classification', in_new_bugmail => 1,
+     buglist => 1},
+    {name => 'product',      desc => 'Product',    in_new_bugmail => 1,
+     buglist => 1},
+    {name => 'version',      desc => 'Version',    in_new_bugmail => 1,
+     buglist => 1},
     {name => 'rep_platform', desc => 'Platform',   in_new_bugmail => 1,
-     type => FIELD_TYPE_SINGLE_SELECT},
+     type => FIELD_TYPE_SINGLE_SELECT, buglist => 1},
     {name => 'bug_file_loc', desc => 'URL',        in_new_bugmail => 1},
     {name => 'op_sys',       desc => 'OS/Version', in_new_bugmail => 1,
-     type => FIELD_TYPE_SINGLE_SELECT},
+     type => FIELD_TYPE_SINGLE_SELECT, buglist => 1},
     {name => 'bug_status',   desc => 'Status',     in_new_bugmail => 1,
-     type => FIELD_TYPE_SINGLE_SELECT},
+     type => FIELD_TYPE_SINGLE_SELECT, buglist => 1},
     {name => 'status_whiteboard', desc => 'Status Whiteboard',
-     in_new_bugmail => 1},
-    {name => 'keywords',     desc => 'Keywords',   in_new_bugmail => 1},
+     in_new_bugmail => 1, buglist => 1},
+    {name => 'keywords',     desc => 'Keywords',   in_new_bugmail => 1,
+     buglist => 1},
     {name => 'resolution',   desc => 'Resolution',
-     type => FIELD_TYPE_SINGLE_SELECT},
+     type => FIELD_TYPE_SINGLE_SELECT, buglist => 1},
     {name => 'bug_severity', desc => 'Severity',   in_new_bugmail => 1,
-     type => FIELD_TYPE_SINGLE_SELECT},
+     type => FIELD_TYPE_SINGLE_SELECT, buglist => 1},
     {name => 'priority',     desc => 'Priority',   in_new_bugmail => 1,
-     type => FIELD_TYPE_SINGLE_SELECT},
-    {name => 'component',    desc => 'Component',  in_new_bugmail => 1},
-    {name => 'assigned_to',  desc => 'AssignedTo', in_new_bugmail => 1},
-    {name => 'reporter',     desc => 'ReportedBy', in_new_bugmail => 1},
-    {name => 'votes',        desc => 'Votes'},
-    {name => 'qa_contact',   desc => 'QAContact',  in_new_bugmail => 1},
+     type => FIELD_TYPE_SINGLE_SELECT, buglist => 1},
+    {name => 'component',    desc => 'Component',  in_new_bugmail => 1,
+     buglist => 1},
+    {name => 'assigned_to',  desc => 'AssignedTo', in_new_bugmail => 1,
+     buglist => 1},
+    {name => 'reporter',     desc => 'ReportedBy', in_new_bugmail => 1,
+     buglist => 1},
+    {name => 'votes',        desc => 'Votes',      buglist => 1},
+    {name => 'qa_contact',   desc => 'QAContact',  in_new_bugmail => 1,
+     buglist => 1},
     {name => 'cc',           desc => 'CC',         in_new_bugmail => 1},
     {name => 'dependson',    desc => 'Depends on', in_new_bugmail => 1},
     {name => 'blocked',      desc => 'Blocks',     in_new_bugmail => 1},
@@ -186,25 +199,31 @@ use constant DEFAULT_FIELDS => (
     {name => 'attachments.isprivate',   desc => 'Attachment is private'},
     {name => 'attachments.submitter',   desc => 'Attachment creator'},
 
-    {name => 'target_milestone',      desc => 'Target Milestone'},
-    {name => 'creation_ts', desc => 'Creation date', in_new_bugmail => 1},
-    {name => 'delta_ts', desc => 'Last changed date', in_new_bugmail => 1},
+    {name => 'target_milestone',      desc => 'Target Milestone',
+     buglist => 1},
+    {name => 'creation_ts',           desc => 'Creation date',
+     in_new_bugmail => 1, buglist => 1},
+    {name => 'delta_ts',              desc => 'Last changed date',
+     in_new_bugmail => 1, buglist => 1},
     {name => 'longdesc',              desc => 'Comment'},
     {name => 'longdescs.isprivate',   desc => 'Comment is private'},
-    {name => 'alias',                 desc => 'Alias'},
+    {name => 'alias',                 desc => 'Alias', buglist => 1},
     {name => 'everconfirmed',         desc => 'Ever Confirmed'},
     {name => 'reporter_accessible',   desc => 'Reporter Accessible'},
     {name => 'cclist_accessible',     desc => 'CC Accessible'},
     {name => 'bug_group',             desc => 'Group', in_new_bugmail => 1},
-    {name => 'estimated_time', desc => 'Estimated Hours', in_new_bugmail => 1},
-    {name => 'remaining_time',        desc => 'Remaining Hours'},
-    {name => 'deadline',              desc => 'Deadline', in_new_bugmail => 1},
+    {name => 'estimated_time',        desc => 'Estimated Hours',
+     in_new_bugmail => 1, buglist => 1},
+    {name => 'remaining_time',        desc => 'Remaining Hours', buglist => 1},
+    {name => 'deadline',              desc => 'Deadline',
+     in_new_bugmail => 1, buglist => 1},
     {name => 'commenter',             desc => 'Commenter'},
     {name => 'flagtypes.name',        desc => 'Flag'},
     {name => 'requestees.login_name', desc => 'Flag Requestee'},
     {name => 'setters.login_name',    desc => 'Flag Setter'},
-    {name => 'work_time',             desc => 'Hours Worked'},
-    {name => 'percentage_complete',   desc => 'Percentage Complete'},
+    {name => 'work_time',             desc => 'Hours Worked', buglist => 1},
+    {name => 'percentage_complete',   desc => 'Percentage Complete',
+     buglist => 1},
     {name => 'content',               desc => 'Content'},
     {name => 'attach_data.thedata',   desc => 'Attachment data'},
     {name => 'attachments.isurl',     desc => 'Attachment is a URL'},
@@ -438,6 +457,19 @@ sub enter_bug { return $_[0]->{enter_bug} }
 
 =over
 
+=item C<buglist>
+
+A boolean specifying whether or not this field is selectable
+as a display or order column in buglist.cgi
+
+=back
+
+=cut
+
+sub buglist { return $_[0]->{buglist} }
+
+=over
+
 =item C<is_select>
 
 True if this is a C<FIELD_TYPE_SINGLE_SELECT> or C<FIELD_TYPE_MULTI_SELECT>
@@ -602,6 +634,8 @@ They will throw an error if you try to set the values to something invalid.
 
 =item C<set_in_new_bugmail>
 
+=item C<set_buglist>
+
 =item C<set_visibility_field>
 
 =item C<set_visibility_value>
@@ -617,6 +651,7 @@ sub set_enter_bug      { $_[0]->set('enter_bug',   $_[1]); }
 sub set_obsolete       { $_[0]->set('obsolete',    $_[1]); }
 sub set_sortkey        { $_[0]->set('sortkey',     $_[1]); }
 sub set_in_new_bugmail { $_[0]->set('mailhead',    $_[1]); }
+sub set_buglist        { $_[0]->set('buglist',     $_[1]); }
 sub set_visibility_field {
     my ($self, $value) = @_;
     $self->set('visibility_field_id', $value);
@@ -745,6 +780,9 @@ will be added to the C<bugs> table if it does not exist. Defaults to 0.
 =item C<enter_bug> - boolean - Whether this field is
 editable on the bug creation form. Defaults to 0.
 
+=item C<buglist> - boolean - Whether this field is
+selectable as a display or order column in bug lists. Defaults to 0.
+
 C<obsolete> - boolean - Whether this field is obsolete. Defaults to 0.
 
 =back
@@ -867,6 +905,7 @@ sub populate_field_definitions {
         if ($field) {
             $field->set_description($def->{desc});
             $field->set_in_new_bugmail($def->{in_new_bugmail});
+            $field->set_buglist($def->{buglist});
             $field->_set_type($def->{type}) if $def->{type};
             $field->update();
         }

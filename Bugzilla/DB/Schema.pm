@@ -654,6 +654,8 @@ use constant ABSTRACT_SCHEMA => {
                             DEFAULT => 'FALSE'},
             enter_bug   => {TYPE => 'BOOLEAN', NOTNULL => 1,
                             DEFAULT => 'FALSE'},
+            buglist     => {TYPE => 'BOOLEAN', NOTNULL => 1,
+                            DEFAULT => 'FALSE'},
             visibility_field_id => {TYPE => 'INT3', 
                                     REFERENCES => {TABLE  => 'fielddefs',
                                                    COLUMN => 'id'}},

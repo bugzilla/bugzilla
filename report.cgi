@@ -319,6 +319,8 @@ if ($cgi->param('debug')) {
 # All formats point to the same section of the documentation.
 $vars->{'doc_section'} = 'reporting.html#reports';
 
+disable_utf8() if ($format->{'ctype'} =~ /^image\//);
+
 $template->process("$format->{'template'}", $vars)
   || ThrowTemplateError($template->error());
 

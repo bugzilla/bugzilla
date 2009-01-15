@@ -282,6 +282,8 @@ sub plot {
     }
 
     print $cgi->header($format->{'ctype'});
+    disable_utf8() if ($format->{'ctype'} =~ /^image\//);
+
     $template->process($format->{'template'}, $vars)
       || ThrowTemplateError($template->error());
 }

@@ -328,6 +328,10 @@
   'subtotal FILTER format("%.2f")',
   'work_time FILTER format("%.2f")',
   'global.total FILTER format("%.2f")',
+  'global.remaining FILTER format("%.2f")',
+  'global.estimated FILTER format("%.2f")',
+  'bugs.$id.remaining_time FILTER format("%.2f")',
+  'bugs.$id.estimated_time FILTER format("%.2f")',
 ],
 
 

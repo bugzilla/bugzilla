@@ -623,7 +623,7 @@ sub get_netaddr {
 
 sub disable_utf8 {
     if (Bugzilla->params->{'utf8'}) {
-        binmode STDOUT, ':raw'; # Turn off UTF8 encoding.
+        binmode STDOUT, ':bytes'; # Turn off UTF8 encoding.
     }
 }
 

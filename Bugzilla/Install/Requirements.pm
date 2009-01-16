@@ -25,6 +25,7 @@ package Bugzilla::Install::Requirements;
 
 use strict;
 
+use Bugzilla::Constants;
 use Bugzilla::Install::Util qw(vers_cmp install_string);
 use List::Util qw(max);
 use Safe;
@@ -40,7 +41,9 @@ our @EXPORT = qw(
     install_command
 );
 
-use Bugzilla::Constants;
+# This is how many *'s are in the top of each "box" message printed
+# by checksetup.pl.
+use constant TABLE_WIDTH => 71;
 
 # The below two constants are subroutines so that they can implement
 # a hook. Other than that they are actually constants.
@@ -366,61 +369,30 @@ sub print_module_instructions {
     {
         
         if (ON_WINDOWS) {
-
-            print "\n* NOTE: You must run any commands listed below as "
-                  . ROOT_USER . ".\n\n";
+            print "\n", install_string('run_as_root', { root => ROOT_USER }),
+                  "\n\n";
 
             my $perl_ver = sprintf('%vd', $^V);
             
             # URL when running Perl 5.8.x.
             my $url_to_theory58S = 'http://theoryx5.uwinnipeg.ca/ppms';
-            my $repo_up_cmd =
-'*                                                                     *';
             # Packages for Perl 5.10 are not compatible with Perl 5.8.
             if (vers_cmp($perl_ver, '5.10') > -1) {
                 $url_to_theory58S = 'http://cpan.uwinnipeg.ca/PPMPackages/10xx/';
             }
-            # ActivePerl older than revision 819 require an additional command.
+            print install_string('ppm_repo_add', 
+                                 { theory_url => $url_to_theory58S });
+            # ActivePerls older than revision 819 require an additional command.
             if (_get_activestate_build_id() < 819) {
-                $repo_up_cmd = <<EOT;
-*                                                                     *
-* Then you have to do (also as an Administrator):                     *
-*                                                                     *
-*   ppm repo up theory58S                                             *
-*                                                                     *
-* Do that last command over and over until you see "theory58S" at the *
-* top of the displayed list.                                          *
-EOT
+                print install_string('ppm_repo_up');
             }
-            print <<EOT;
-***********************************************************************
-* Note For Windows Users                                              *
-***********************************************************************
-* In order to install the modules listed below, you first have to run * 
-* the following command as an Administrator:                          *
-*                                                                     *
-*   ppm repo add theory58S $url_to_theory58S
-$repo_up_cmd
-***********************************************************************
-EOT
+            print "*" x TABLE_WIDTH . "\n";
         }
     }
 
     # Required Modules
     if (my @missing = @{$check_results->{missing}}) {
-        print <<EOT;
-***********************************************************************
-* REQUIRED MODULES                                                    *
-***********************************************************************
-* Bugzilla requires you to install some Perl modules which are either *
-* missing from your system, or the version on your system is too old. *
-*                                                                     *
-* The latest versions of each module can be installed by running the  *
-* commands below.                                                     *
-***********************************************************************
-EOT
-
-        print "COMMANDS:\n\n";
+        print install_string('modules_message_required') . "\n";
         foreach my $package (@missing) {
             my $command = install_command($package);
             print "    $command\n";
@@ -429,27 +401,14 @@ EOT
     }
 
     if (!$check_results->{one_dbd}) {
-        print <<EOT;
-***********************************************************************
-* DATABASE ACCESS                                                     *
-***********************************************************************
-* In order to access your database, Bugzilla requires that the        *
-* correct "DBD" module be installed for the database that you are     *
-* running.                                                            *
-*                                                                     *
-* Pick and run the correct command below for the database that you    *
-* plan to use with Bugzilla.                                          *
-***********************************************************************
-COMMANDS:
-
-EOT
+        print install_string('modules_message_db') . "\n";
 
         my %db_modules = %{DB_MODULE()};
         foreach my $db (keys %db_modules) {
             my $command = install_command($db_modules{$db}->{dbd});
             printf "%10s: \%s\n", $db_modules{$db}->{name}, $command;
-            print ' ' x 12 . "Minimum version required: "
-                  . $db_modules{$db}->{dbd}->{version} . "\n";
+            print ' ' x 12, install_string('min_version_required'),
+                  $db_modules{$db}->{dbd}->{version}, "\n";
         }
         print "\n";
     }
@@ -457,42 +416,27 @@ EOT
     return unless $output;
 
     if (my @missing = @{$check_results->{optional}}) {
-        print <<EOT;
-**********************************************************************
-* OPTIONAL MODULES                                                   *
-**********************************************************************
-* Certain Perl modules are not required by Bugzilla, but by          *
-* installing the latest version you gain access to additional        *
-* features.                                                          *
-*                                                                    *
-* The optional modules you do not have installed are listed below,   *
-* with the name of the feature they enable. If you want to install   *
-* one of these modules, just run the appropriate command in the      *
-* "COMMANDS TO INSTALL" section.                                     *
-**********************************************************************
-
-EOT
+        print install_string('modules_message_optional');
         # Now we have to determine how large the table cols will be.
         my $longest_name = max(map(length($_->{package}), @missing));
 
         # The first column header is at least 11 characters long.
         $longest_name = 11 if $longest_name < 11;
 
-        # The table is 71 characters long. There are seven mandatory
+        # The table is TABLE_WIDTH characters long. There are seven mandatory
         # characters (* and space) in the string. So, we have a total
-        # of 64 characters to work with.
-        my $remaining_space = 64 - $longest_name;
-        print '*' x 71 . "\n";
+        # of TABLE_WIDTH - 7 characters to work with.
+        my $remaining_space = (TABLE_WIDTH - 7) - $longest_name;
         printf "* \%${longest_name}s * %-${remaining_space}s *\n",
                'MODULE NAME', 'ENABLES FEATURE(S)';
-        print '*' x 71 . "\n";
+        print '*' x TABLE_WIDTH . "\n";
         foreach my $package (@missing) {
             printf "* \%${longest_name}s * %-${remaining_space}s *\n",
                    $package->{package}, $package->{feature};
         }
-        print '*' x 71 . "\n";
+        print '*' x TABLE_WIDTH . "\n";
 
-        print "COMMANDS TO INSTALL:\n\n";
+        print install_string('commands_to_install') . "\n\n";
         foreach my $module (@missing) {
             my $command = install_command($module);
             printf "%15s: $command\n", $module->{package};

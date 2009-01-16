@@ -363,15 +363,43 @@ sub _get_activestate_build_id {
 sub print_module_instructions {
     my ($check_results, $output) = @_;
 
-    # We only print these notes if we have to.
+    # First we print the long explanatory messages.
+
+    if (scalar @{$check_results->{missing}}) {
+        print install_string('modules_message_required');
+    }
+
+    if (!$check_results->{one_dbd}) {
+        print install_string('modules_message_db');
+    }
+
+    if (my @missing = @{$check_results->{optional}} and $output) {
+        print install_string('modules_message_optional');
+        # Now we have to determine how large the table cols will be.
+        my $longest_name = max(map(length($_->{package}), @missing));
+
+        # The first column header is at least 11 characters long.
+        $longest_name = 11 if $longest_name < 11;
+
+        # The table is TABLE_WIDTH characters long. There are seven mandatory
+        # characters (* and space) in the string. So, we have a total
+        # of TABLE_WIDTH - 7 characters to work with.
+        my $remaining_space = (TABLE_WIDTH - 7) - $longest_name;
+        print '*' x TABLE_WIDTH . "\n";
+        printf "* \%${longest_name}s * %-${remaining_space}s *\n",
+               'MODULE NAME', 'ENABLES FEATURE(S)';
+        print '*' x TABLE_WIDTH . "\n";
+        foreach my $package (@missing) {
+            printf "* \%${longest_name}s * %-${remaining_space}s *\n",
+                   $package->{package}, $package->{feature};
+        }
+    }
+
+    # We only print the PPM repository note if we have to.
     if ((!$output && @{$check_results->{missing}})
         || ($output && $check_results->{any_missing}))
     {
-        
         if (ON_WINDOWS) {
-            print "\n", install_string('run_as_root', { root => ROOT_USER }),
-                  "\n\n";
-
             my $perl_ver = sprintf('%vd', $^V);
             
             # URL when running Perl 5.8.x.
@@ -386,60 +414,38 @@ sub print_module_instructions {
             if (_get_activestate_build_id() < 819) {
                 print install_string('ppm_repo_up');
             }
-            print "*" x TABLE_WIDTH . "\n";
         }
+
+        # If any output was required, we want to close the "table"
+        print "*" x TABLE_WIDTH . "\n";
     }
 
-    # Required Modules
-    if (my @missing = @{$check_results->{missing}}) {
-        print install_string('modules_message_required') . "\n";
-        foreach my $package (@missing) {
-            my $command = install_command($package);
-            print "    $command\n";
+    # And now we print the actual installation commands.
+
+    if (my @missing = @{$check_results->{optional}} and $output) {
+        print install_string('commands_optional') . "\n\n";
+        foreach my $module (@missing) {
+            my $command = install_command($module);
+            printf "%15s: $command\n", $module->{package};
         }
         print "\n";
     }
 
     if (!$check_results->{one_dbd}) {
-        print install_string('modules_message_db') . "\n";
-
+        print install_string('commands_dbd') . "\n";
         my %db_modules = %{DB_MODULE()};
         foreach my $db (keys %db_modules) {
             my $command = install_command($db_modules{$db}->{dbd});
             printf "%10s: \%s\n", $db_modules{$db}->{name}, $command;
-            print ' ' x 12, install_string('min_version_required'),
-                  $db_modules{$db}->{dbd}->{version}, "\n";
         }
         print "\n";
     }
 
-    return unless $output;
-
-    if (my @missing = @{$check_results->{optional}}) {
-        print install_string('modules_message_optional');
-        # Now we have to determine how large the table cols will be.
-        my $longest_name = max(map(length($_->{package}), @missing));
-
-        # The first column header is at least 11 characters long.
-        $longest_name = 11 if $longest_name < 11;
-
-        # The table is TABLE_WIDTH characters long. There are seven mandatory
-        # characters (* and space) in the string. So, we have a total
-        # of TABLE_WIDTH - 7 characters to work with.
-        my $remaining_space = (TABLE_WIDTH - 7) - $longest_name;
-        printf "* \%${longest_name}s * %-${remaining_space}s *\n",
-               'MODULE NAME', 'ENABLES FEATURE(S)';
-        print '*' x TABLE_WIDTH . "\n";
+    if (my @missing = @{$check_results->{missing}}) {
+        print install_string('commands_required') . "\n";
         foreach my $package (@missing) {
-            printf "* \%${longest_name}s * %-${remaining_space}s *\n",
-                   $package->{package}, $package->{feature};
-        }
-        print '*' x TABLE_WIDTH . "\n";
-
-        print install_string('commands_to_install') . "\n\n";
-        foreach my $module (@missing) {
-            my $command = install_command($module);
-            printf "%15s: $command\n", $module->{package};
+            my $command = install_command($package);
+            print "    $command\n";
         }
     }
 

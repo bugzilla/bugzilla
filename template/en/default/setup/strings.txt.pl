@@ -33,7 +33,15 @@
     checking_dbd      => 'Checking available perl DBD modules...',
     checking_optional => 'The following Perl modules are optional:',
     checking_modules  => 'Checking perl modules...',
-    commands_to_install => 'COMMANDS TO INSTALL:',
+    commands_dbd      => <<EOT,
+YOU MUST RUN ONE OF THE FOLLOWING COMMANDS (depending on which database
+you use):
+EOT
+    commands_optional => 'COMMANDS TO INSTALL OPTIONAL MODULES:',
+    commands_required => <<EOT,
+COMMANDS TO INSTALL REQUIRED MODULES (You *must* run all these commands
+and then re-run checksetup.pl):
+EOT
     done => 'done.',
     header => "* This is Bugzilla ##bz_ver## on perl ##perl_ver##\n"
             . "* Running on ##os_name## ##os_ver##",
@@ -64,12 +72,8 @@ EOT
 ***********************************************************************
 * In order to access your database, Bugzilla requires that the        *
 * correct "DBD" module be installed for the database that you are     *
-* running.                                                            *
-*                                                                     *
-* Pick and run the correct command below for the database that you    *
-* plan to use with Bugzilla.                                          *
-***********************************************************************
-COMMANDS:
+* running. See below for the correct command to run to install the    *
+* appropriate module for your database.                               *
 EOT
     modules_message_optional => <<EOT,
 ***********************************************************************
@@ -80,10 +84,8 @@ EOT
 * features.                                                           *
 *                                                                     *
 * The optional modules you do not have installed are listed below,    *
-* with the name of the feature they enable. If you want to install    *
-* one of these modules, just run the appropriate command in the       *
-* "COMMANDS TO INSTALL" section.                                      *
-***********************************************************************
+* with the name of the feature they enable. Below that table are the  *
+* commands to install each module.                                    *
 EOT
     modules_message_required => <<EOT,
 ***********************************************************************
@@ -91,11 +93,7 @@ EOT
 ***********************************************************************
 * Bugzilla requires you to install some Perl modules which are either *
 * missing from your system, or the version on your system is too old. *
-*                                                                     *
-* The latest versions of each module can be installed by running the  *
-* commands below.                                                     *
-***********************************************************************
-COMMANDS:
+* See below for commands to install these modules.                    *
 EOT
 
     module_found => "found v##ver##",
@@ -120,7 +118,6 @@ EOT
 * Do that last command over and over until you see "theory58S" at the *
 * top of the displayed list.                                          *
 EOT
-    run_as_root => '* NOTE: You must run any commands listed below as ##root##',
     template_precompile   => "Precompiling templates...",
     template_removing_dir => "Removing existing compiled templates...",
 );

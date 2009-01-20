@@ -162,7 +162,20 @@ sub get {
         $item{'internals'}        = $bug;
         $item{'id'}               = $self->type('int', $bug->bug_id);
         $item{'summary'}          = $self->type('string', $bug->short_desc);
-
+        $item{'assigned_to'}      = $self->type('string', $bug->assigned_to->login );
+        $item{'resolution'}       = $self->type('string', $bug->resolution);
+        $item{'status'}           = $self->type('string', $bug->bug_status);
+        $item{'is_open'}          = $self->type('boolean', $bug->status->is_open);
+        $item{'severity'}         = $self->type('string', $bug->bug_severity);
+        $item{'priority'}         = $self->type('string', $bug->priority);
+        $item{'product'}          = $self->type('string', $bug->product);
+        $item{'component'}        = $self->type('string', $bug->component);
+        $item{'dupe_of'}          = $self->type('int', $bug->dup_id);
+        
+        # if we do not delete this key, additional user info, including their
+        # real name, etc, will wind up in the 'internals' hashref
+        delete $item{internals}->{assigned_to_obj};
+        
         if (Bugzilla->params->{'usebugaliases'}) {
             $item{'alias'} = $self->type('string', $bug->alias);
         }
@@ -171,7 +184,7 @@ sub get {
             # don't want it to have a value if aliases are turned off.
             $item{'alias'} = undef;
         }
-
+        
         push(@return, \%item);
     }
 
@@ -567,32 +580,69 @@ Each hash contains the following items:
 
 =over
 
-=item id
-
-C<int> The numeric bug_id of this bug.
-
 =item alias
 
 C<string> The alias of this bug. If there is no alias or aliases are 
 disabled in this Bugzilla, this will be an empty string.
 
-=item summary
+=item assigned_to 
 
-C<string> The summary of this bug.
+C<string> The login name of the user to whom the bug is assigned.
+
+=item component
+
+C<string> The name of the current component of this bug.
 
 =item creation_time
 
 C<dateTime> When the bug was created.
 
-=item last_change_time
+=item dupe_of
 
-C<dateTime> When the bug was last changed.
+C<int> The bug ID of the bug that this bug is a duplicate of. If this bug 
+isn't a duplicate of any bug, this will be an empty int.
+
+=item id
+
+C<int> The numeric bug_id of this bug.
 
 =item internals B<UNSTABLE>
 
 A hash. The internals of a L<Bugzilla::Bug> object. This is extremely
 unstable, and you should only rely on this if you absolutely have to. The
 structure of the hash may even change between point releases of Bugzilla.
+
+=item is_open 
+
+C<boolean> Returns true (1) if this bug is open, false (0) if it is closed.
+
+=item last_change_time
+
+C<dateTime> When the bug was last changed.
+
+=item priority
+
+C<string> The priority of the bug.
+
+=item product
+
+C<string> The name of the product this bug is in.
+
+=item resolution
+
+C<string> The current resolution of the bug, or an empty string if the bug is open. 
+
+=item severity
+
+C<string> The current severity of the bug.
+
+=item status 
+
+C<string> The current status of the bug.
+
+=item summary
+
+C<string> The summary of this bug.
 
 =back
 
@@ -612,6 +662,37 @@ The bug_id you specified doesn't exist in the database.
 =item 102 (Access Denied)
 
 You do not have access to the bug_id you specified.
+
+=back
+
+=item B<History>
+
+=over
+
+=item The following properties were added to this method's return value
+in Bugzilla B<3.4>:
+
+=over
+
+=item assigned_to
+
+=item component 
+
+=item dupe_of
+
+=item is_open
+
+=item priority
+
+=item product
+
+=item resolution
+
+=item severity
+
+=item status
+
+=back
 
 =back
 

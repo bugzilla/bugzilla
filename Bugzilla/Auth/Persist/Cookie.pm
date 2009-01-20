@@ -60,12 +60,21 @@ sub persist_login {
     # subsequent login
     trick_taint($ip_addr);
 
+    $dbh->bz_start_transaction();
+
     my $login_cookie = 
         Bugzilla::Token::GenerateUniqueToken('logincookies', 'cookie');
 
     $dbh->do("INSERT INTO logincookies (cookie, userid, ipaddr, lastused)
               VALUES (?, ?, ?, NOW())",
               undef, $login_cookie, $user->id, $ip_addr);
+
+    # Issuing a new cookie is a good time to clean up the old
+    # cookies.
+    $dbh->do("DELETE FROM logincookies WHERE lastused < LOCALTIMESTAMP(0) - "
+             . $dbh->sql_interval(MAX_LOGINCOOKIE_AGE, 'DAY'));
+
+    $dbh->bz_commit_transaction();
 
     # Prevent JavaScript from accessing login cookies.
     my %cookieargs = ('-httponly' => 1);

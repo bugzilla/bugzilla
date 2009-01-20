@@ -337,11 +337,23 @@ sub add_comment {
     # Append comment
     $bug->add_comment($comment, { isprivate => $params->{private},
                                   work_time => $params->{work_time} });
+    
+    # Capture the call to bug->update (which creates the new comment) in 
+    # a transaction so we're sure to get the correct comment_id.
+    
+    my $dbh = Bugzilla->dbh;
+    $dbh->bz_start_transaction();
+    
     $bug->update();
+    
+    my $new_comment_id = $dbh->bz_last_key('longdescs', 'comment_id');
+    
+    $dbh->bz_commit_transaction();
     
     # Send mail.
     Bugzilla::BugMail::Send($bug->bug_id, { changer => Bugzilla->user->login });
-    return undef;
+    
+    return { id => $self->type('int', $new_comment_id) };
 }
 
 1;
@@ -977,6 +989,10 @@ be ignored.
 
 =back
 
+=item B<Returns>
+
+A hash with one element, C<id> whose value is the id of the newly-created comment.
+
 =item B<Errors>
 
 =over
@@ -1001,6 +1017,8 @@ You did not have the necessary rights to edit the bug.
 =over
 
 =item Added in Bugzilla B<3.2>.
+
+=item Modified to return the new comment's id in Bugzilla B<3.4>
 
 =back
 

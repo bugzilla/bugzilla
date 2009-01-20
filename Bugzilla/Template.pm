@@ -698,6 +698,10 @@ sub create {
                 $var =~ s/\&gt;/>/g;
                 $var =~ s/\&quot;/\"/g;
                 $var =~ s/\&amp;/\&/g;
+                # Now remove extra whitespace, and wrap it to 72 characters.
+                my $collapse_filter = $Template::Filters::FILTERS->{collapse};
+                $var = $collapse_filter->($var);
+                $var = wrap_comment($var, 72);
                 return $var;
             },
 

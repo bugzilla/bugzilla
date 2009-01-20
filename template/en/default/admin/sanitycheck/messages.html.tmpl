@@ -310,8 +310,13 @@
   [% END %]
 [% END %]
 
-[% san_message FILTER html %]
-
+[% USE Bugzilla %]
+[% IF Bugzilla.usage_mode == constants.USAGE_MODE_CMDLINE %]
+  [% san_message FILTER none %]
+[% ELSE %]
+  [%# Avoid the txt filter in message.txt.tmpl. %]
+  [% san_message FILTER html %]
+[% END %]
 
 [% BLOCK bug_list %]
   [% FOREACH bug_id = badbugs %]

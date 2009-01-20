@@ -109,6 +109,10 @@ sub canonicalise_query {
         # Leave this key out if it's in the exclude list
         next if lsearch(\@exclude, $key) != -1;
 
+        # Remove the Boolean Charts for standard query.cgi fields
+        # They are listed in the query URL already
+        next if $key =~ /^(field|type|value)(-\d+){3}$/;
+
         my $esc_key = url_quote($key);
 
         foreach my $value ($self->param($key)) {

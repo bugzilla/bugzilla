@@ -2800,12 +2800,18 @@ sub editable_bug_fields {
 
 # XXX - When Bug::update() will be implemented, we should make this routine
 #       a private method.
+# Join with bug_status and bugs tables to show bugs with open statuses first,
+# and then the others
 sub EmitDependList {
     my ($myfield, $targetfield, $bug_id) = (@_);
     my $dbh = Bugzilla->dbh;
     my $list_ref = $dbh->selectcol_arrayref(
-          "SELECT $targetfield FROM dependencies
-            WHERE $myfield = ? ORDER BY $targetfield",
+          "SELECT $targetfield
+             FROM dependencies
+                  INNER JOIN bugs ON dependencies.$targetfield = bugs.bug_id
+                  INNER JOIN bug_status ON bugs.bug_status = bug_status.value
+            WHERE $myfield = ?
+            ORDER BY is_open DESC, $targetfield",
             undef, $bug_id);
     return $list_ref;
 }

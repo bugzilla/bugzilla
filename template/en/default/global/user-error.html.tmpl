@@ -229,6 +229,24 @@
                    [% bug_id FILTER url_quote %]&amp;GoAheadAndLogIn=1">log
     in to an account</a> with the appropriate permissions.
 
+  [% ELSIF error == "bug_url_invalid" %]
+    [% title = "Invalid Bug URL" %]
+    <code>[% url FILTER html %]</code> is not a valid URL to [% terms.abug %].
+    [% IF reason == 'http' %]
+      URLs must start with "http" or "https".
+    [% ELSIF reason == 'show_bug' %]
+      [%+ terms.Bug %] URLs should point to <code>show_bug.cgi</code>
+      in a [% terms.Bugzilla %] installation.
+    [% ELSIF reason == 'id' %]
+      There is no valid [% terms.bug %] id in that URL.
+    [% END %]
+
+  [% ELSIF error == "bug_url_too_long" %]
+    [% title = "Invalid Bug URL" %]
+    [% terms.Bug %] URLs can not be longer than 
+    [%+ constants.MAX_BUG_URL_LENGTH FILTER none %] characters long.
+    <code>[% url FILTER html %]</code> is too long.
+
   [% ELSIF error == "buglist_parameters_required" %]
     [% title = "Parameters Required" %]
     [% docslinks = {'query.html' => "Searching for $terms.bugs",

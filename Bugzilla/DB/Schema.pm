@@ -487,6 +487,17 @@ use constant ABSTRACT_SCHEMA => {
         ],
     },
 
+    bug_see_also => {
+        FIELDS => [
+            bug_id => {TYPE => 'INT3', NOTNULL => 1},
+            value  => {TYPE => 'varchar(255)', NOTNULL => 1},
+        ],
+        INDEXES => [
+            bug_see_also_bug_id_idx => {FIELDS => [qw(bug_id value)], 
+                                        TYPE   => 'UNIQUE'},
+        ],
+    },
+
     # Keywords
     # --------
 
@@ -1499,7 +1510,6 @@ use constant MULTI_SELECT_VALUE_TABLE => {
         bug_id_idx => {FIELDS => [qw( bug_id value)], TYPE => 'UNIQUE'},
     ],
 };
-
 
 #--------------------------------------------------------------------------
 

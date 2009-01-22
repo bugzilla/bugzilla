@@ -124,6 +124,7 @@ use File::Basename;
     FIELD_TYPE_TEXTAREA
     FIELD_TYPE_DATETIME
     FIELD_TYPE_BUG_ID
+    FIELD_TYPE_BUG_URLS
 
     USAGE_MODE_BROWSER
     USAGE_MODE_CMDLINE
@@ -156,6 +157,7 @@ use File::Basename;
     MAX_COMPONENT_SIZE
     MAX_FIELD_VALUE_SIZE
     MAX_FREETEXT_LENGTH
+    MAX_BUG_URL_LENGTH
 
     PASSWORD_DIGEST_ALGORITHM
     PASSWORD_SALT_LENGTH
@@ -361,6 +363,7 @@ use constant FIELD_TYPE_MULTI_SELECT => 3;
 use constant FIELD_TYPE_TEXTAREA  => 4;
 use constant FIELD_TYPE_DATETIME  => 5;
 use constant FIELD_TYPE_BUG_ID  => 6;
+use constant FIELD_TYPE_BUG_URLS => 7;
 
 # The maximum number of days a token will remain valid.
 use constant MAX_TOKEN_AGE => 3;
@@ -446,6 +449,9 @@ use constant MAX_FIELD_VALUE_SIZE => 64;
 
 # Maximum length allowed for free text fields.
 use constant MAX_FREETEXT_LENGTH => 255;
+
+# The longest a bug URL in a BUG_URLS field can be.
+use constant MAX_BUG_URL_LENGTH => 255;
 
 # This is the name of the algorithm used to hash passwords before storing
 # them in the database. This can be any string that is valid to pass to

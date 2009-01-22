@@ -122,6 +122,11 @@ sub REQUIRED_MODULES {
         module  => 'Email::MIME::Modifier',
         version => '1.442'
     },
+    {
+        package => 'URI',
+        module  => 'URI',
+        version => 0
+    },
     );
 
     my $all_modules = _get_extension_requirements(

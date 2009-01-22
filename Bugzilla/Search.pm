@@ -104,8 +104,9 @@ sub init {
     my @select_fields = 
         Bugzilla->get_fields({ type => FIELD_TYPE_SINGLE_SELECT });
     
-    my @multi_select_fields = Bugzilla->get_fields({ type => FIELD_TYPE_MULTI_SELECT,
-                                                     obsolete => 0 });
+    my @multi_select_fields = Bugzilla->get_fields({
+        type     => [FIELD_TYPE_MULTI_SELECT, FIELD_TYPE_BUG_URLS],
+        obsolete => 0 });
     foreach my $field (@select_fields) {
         my $name = $field->name;
         $special_order{"bugs.$name"} = [ "$name.sortkey", "$name.value" ],

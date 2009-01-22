@@ -76,6 +76,7 @@
                    "reporter_accessible"     => "Reporter accessible",
                    "requestees.login_name"   => "Flag Requestee",
                    "resolution"              => "Resolution",
+                   "see_also"                => "See Also",
                    "setters.login_name"      => "Flag Setter",
                    "setting"                 => "Setting",
                    "settings"                => "Settings",
@@ -90,12 +91,14 @@
     Description here, by copying their Description from the
     database. If you want to override this for your language
     or your installation, just use a hook. %]
-
+[%# Also create the bug_fields hash. %]
 [% UNLESS Param('shutdownhtml') %]
   [% USE Bugzilla %]
+  [% SET bug_fields = {} %]
   [% FOREACH bz_field = Bugzilla.get_fields() %]
     [% SET field_descs.${bz_field.name} = bz_field.description
        IF !field_descs.${bz_field.name}.defined %]
+    [% SET bug_fields.${bz_field.name} = bz_field %]
   [% END %]
 [% END %]
 

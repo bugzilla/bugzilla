@@ -462,6 +462,12 @@ div.user_match {
     border: 1px solid #404D6C;
 }
 
+.bug_urls {
+    margin: 0 0 1em 0;
+    padding: 0;
+    list-style-type: none;
+}
+
 form#Create th {
     text-align: right;
 }

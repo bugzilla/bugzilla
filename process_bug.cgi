@@ -336,6 +336,14 @@ foreach my $b (@bug_objects) {
     $b->reset_assigned_to if $cgi->param('set_default_assignee');
     $b->reset_qa_contact  if $cgi->param('set_default_qa_contact');
 
+    if (should_set('see_also')) {
+        my @see_also = split(',', $cgi->param('see_also'));
+        $b->add_see_also($_) foreach @see_also;
+    }
+    if (should_set('remove_see_also')) {
+        $b->remove_see_also($_) foreach $cgi->param('remove_see_also')
+    }
+
     # And set custom fields.
     foreach my $field (@custom_fields) {
         my $fname = $field->name;

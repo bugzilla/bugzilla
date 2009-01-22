@@ -164,6 +164,23 @@
        [% INCLUDE global/textarea.html.tmpl
            id = field.name name = field.name minrows = 4 maxrows = 8
            cols = 60 defaultcontent = value %]
+     [% CASE constants.FIELD_TYPE_BUG_URLS %]
+       [% '<ul class="bug_urls">' IF value.size %]
+       [% FOREACH url = value %]
+         <li>
+           <a href="[% url FILTER html %]">[% url FILTER html %]</a>
+           <label><input type="checkbox" value="[% url FILTER html %]"
+                         name="remove_[% field.name FILTER html %]">
+             Remove</label>
+         </li>
+       [% END %]
+       [% '</ul>' IF value.size %]
+
+       <label for="[% field.name FILTER html %]">
+         <strong>Add [% terms.Bug %] URLs:</strong>
+       </label><br>
+       <input type="text" id="[% field.name FILTER html %]" 
+              name="[% field.name FILTER html %]" size="40">
   [% END %]
 [% ELSIF field.type == constants.FIELD_TYPE_TEXTAREA %]
   <div class="uneditable_textarea">[% value FILTER wrap_comment(60)

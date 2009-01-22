@@ -47,6 +47,8 @@ use Bugzilla::Status;
 
 use List::Util qw(min);
 use Storable qw(dclone);
+use URI;
+use URI::QueryParam;
 
 use base qw(Bugzilla::Object Exporter);
 @Bugzilla::Bug::EXPORT = qw(
@@ -744,6 +746,25 @@ sub update {
                          undef, $self->id, $value);
             }
         }
+    }
+
+    # See Also
+    my ($removed_see, $added_see) = 
+        diff_arrays($old_bug->see_also, $self->see_also);
+
+    if (scalar @$removed_see) {
+        $dbh->do('DELETE FROM bug_see_also WHERE bug_id = ? AND '
+                 . $dbh->sql_in('value', [('?') x @$removed_see]),
+                  undef, $self->id, @$removed_see);
+    }
+    foreach my $url (@$added_see) {
+        $dbh->do('INSERT INTO bug_see_also (bug_id, value) VALUES (?,?)',
+                 undef, $self->id, $url);
+    }
+    # If any changes were found, record it in the activity log
+    if (scalar @$removed_see || scalar @$added_see) {
+        $changes->{see_also} = [join(', ', @$removed_see),
+                                join(', ', @$added_see)];
     }
 
     # Log bugs_activity items
@@ -1691,7 +1712,7 @@ sub fields {
            reporter_accessible cclist_accessible
            classification_id classification
            product component version rep_platform op_sys
-           bug_status resolution dup_id
+           bug_status resolution dup_id see_also
            bug_file_loc status_whiteboard keywords
            priority bug_severity target_milestone
            dependson blocked votes everconfirmed
@@ -2268,6 +2289,61 @@ sub remove_group {
     @$current_groups = grep { $_->id != $group->id } @$current_groups;
 }
 
+sub add_see_also {
+    my ($self, $input) = @_;
+    $input = trim($input);
+
+    # We assume that the URL is an HTTP URL if there is no (something):// 
+    # in front.
+    my $uri = new URI($input);
+    if (!$uri->scheme) {
+        # This works better than setting $uri->scheme('http'), because
+        # that creates URLs like "http:domain.com" and doesn't properly
+        # differentiate the path from the domain.
+        $uri = new URI("http://$input");
+    }
+    elsif ($uri->scheme ne 'http' && $uri->scheme ne 'https') {
+        ThrowUserError('bug_url_invalid', { url => $input, reason => 'http' });
+    }
+
+    if ($uri->path !~ /show_bug\.cgi$/) {
+        ThrowUserError('bug_url_invalid', 
+                       { url => $input, reason => 'show_bug' });
+    }
+    my $bug_id = $uri->query_param('id');
+    # We don't currently allow aliases, because we can't check to see
+    # if somebody's putting both an alias link and a numeric ID link.
+    # When we start validating the URL by accessing the other Bugzilla,
+    # we can allow aliases.
+    detaint_natural($bug_id);
+    if (!$bug_id) {
+        ThrowUserError('bug_url_invalid', { url => $input, reason => 'id' });
+    }
+
+    # Make sure that "id" is the only query parameter.
+    $uri->query("id=$bug_id");
+    # And remove any # part if there is one.
+    $uri->fragment(undef);
+    my $result = $uri->canonical->as_string;
+
+    if (length($result) > MAX_BUG_URL_LENGTH) {
+        ThrowUserError('bug_url_too_long', { url => $result });
+    }
+
+    # We only add the new URI if it hasn't been added yet. URIs are
+    # case-sensitive, but most of our DBs are case-insensitive, so we do
+    # this check case-insensitively.
+    if (!grep { lc($_) eq lc($result) } @{ $self->see_also }) {
+        push(@{ $self->see_also }, $result);
+    }
+}
+
+sub remove_see_also {
+    my ($self, $url) = @_;
+    my $see_also = $self->see_also;
+    @$see_also = grep { lc($_) ne lc($url) } @$see_also;
+}
+
 #####################################################################
 # Instance Accessors
 #####################################################################
@@ -2537,6 +2613,14 @@ sub reporter {
     $self->{'reporter_id'} = 0 if $self->{'error'};
     $self->{'reporter'} = new Bugzilla::User($self->{'reporter_id'});
     return $self->{'reporter'};
+}
+
+sub see_also {
+    my ($self) = @_;
+    return [] if $self->{'error'};
+    $self->{'see_also'} ||= Bugzilla->dbh->selectcol_arrayref(
+        'SELECT value FROM bug_see_also WHERE bug_id = ?', undef, $self->id);
+    return $self->{'see_also'};
 }
 
 sub status {

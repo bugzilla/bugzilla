@@ -188,7 +188,9 @@
          
          [% PROCESS section_cclist %]
          
-         [% PROCESS section_spacer %] 
+         [% PROCESS section_spacer %]
+
+         [% PROCESS section_see_also %] 
          
          [% PROCESS section_customfields %]
          
@@ -899,6 +901,19 @@
       </td>
     </tr>
   [% END %]
+[% END %]
+
+[%############################################################################%]
+[%# Block for See Also                                                       #%]
+[%############################################################################%]
+[% BLOCK section_see_also %]
+  <tr>
+    [% INCLUDE bug/field.html.tmpl 
+         field    = bug_fields.see_also
+         value    = bug.see_also
+         editable = bug.check_can_change_field('see_also', 0, 1)
+    %]
+  </tr>
 [% END %]
 
 [%############################################################################%]

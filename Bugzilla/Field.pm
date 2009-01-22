@@ -228,6 +228,8 @@ use constant DEFAULT_FIELDS => (
     {name => 'attach_data.thedata',   desc => 'Attachment data'},
     {name => 'attachments.isurl',     desc => 'Attachment is a URL'},
     {name => "owner_idle_time",       desc => "Time Since Assignee Touched"},
+    {name => 'see_also',              desc => "See Also",
+     type => FIELD_TYPE_BUG_URLS},
 );
 
 ################
@@ -309,7 +311,7 @@ sub _check_type {
     my $saved_type = $type;
     # The constant here should be updated every time a new,
     # higher field type is added.
-    (detaint_natural($type) && $type <= FIELD_TYPE_BUG_ID)
+    (detaint_natural($type) && $type <= FIELD_TYPE_BUG_URLS)
       || ThrowCodeError('invalid_customfield_type', { type => $saved_type });
     return $type;
 }

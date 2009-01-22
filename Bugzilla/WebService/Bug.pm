@@ -356,6 +356,53 @@ sub add_comment {
     return { id => $self->type('int', $new_comment_id) };
 }
 
+sub update_see_also {
+    my ($self, $params) = @_;
+
+    my $user = Bugzilla->login(LOGIN_REQUIRED);
+
+    # Check parameters
+    $params->{ids}
+        || ThrowCodeError('param_required', { param => 'id' });
+    my ($add, $remove) = @$params{qw(add remove)};
+    ($add || $remove)
+        or ThrowCodeError('params_required', { params => ['add', 'remove'] });
+
+    my @bugs;
+    foreach my $id (@{ $params->{ids} }) {
+        my $bug = Bugzilla::Bug->check($id);
+        $user->can_edit_product($bug->product_id)
+            || ThrowUserError("product_edit_denied", 
+                              { product => $bug->product });
+        push(@bugs, $bug);
+        if ($remove) {
+            $bug->remove_see_also($_) foreach @$remove;
+        }
+        if ($add) {
+            $bug->add_see_also($_) foreach @$add;
+        }
+    }
+    
+    my %changes;
+    foreach my $bug (@bugs) {
+        my $change = $bug->update();
+        if (my $see_also = $change->{see_also}) {
+            $changes{$bug->id} = {
+                removed => [split(', ', $see_also->[0])],
+                added   => [split(', ', $see_also->[1])],
+            };
+        }
+        else {
+            # We still want a changes entry, for API consistency.
+            $changes{$bug->id} = { added => [], removed => [] };
+        }
+
+        Bugzilla::BugMail::Send($bug->id, { changer => $user->login });
+    }
+
+    return { changes => \%changes };
+}
+
 1;
 
 __END__
@@ -1019,6 +1066,107 @@ You did not have the necessary rights to edit the bug.
 =item Added in Bugzilla B<3.2>.
 
 =item Modified to return the new comment's id in Bugzilla B<3.4>
+
+=back
+
+=back
+
+
+=item C<update_see_also>
+
+B<UNSTABLE>
+
+=over
+
+=item B<Description>
+
+Adds or removes URLs for the "See Also" field on bugs. These URLs must
+point to some valid bug in some Bugzilla installation.
+
+=item B<Params>
+
+=over
+
+=item C<ids>
+
+Array of C<int>s or C<string>s. The ids or aliases of bugs that you want
+to modify.
+
+=item C<add>
+
+Array of C<string>s. URLs to Bugzilla bugs. These URLs will be added to
+the See Also field. They must be valid URLs to C<show_bug.cgi> in a 
+Bugzilla installation. If they don't start with C<http://> or C<https://>,
+it will be assumed that C<http://> should be added to the beginning of the
+string.
+
+It is safe to specify URLs that are already in the "See Also" field on
+a bug--they will just be silently ignored.
+
+=item C<remove>
+
+Array of C<string>s. These URLs will be removed from the See Also field.
+You must specify the full URL that you want removed. However, matching
+is done case-insensitively, so you don't have to specify the URL in
+exact case, if you don't want to.
+
+If you specify a URL that is not in the See Also field of a particular bug,
+it will just be silently ignored. Invaild URLs are currently silently ignored,
+though this may change in some future version of Bugzilla.
+
+=back
+
+NOTE: If you specify the same URL in both C<add> and C<remove>, it will
+be I<added>. (That is, C<add> overrides C<remove>.)
+
+=item B<Returns>
+
+C<changes>, a hash where the keys are numeric bug ids and the contents
+are a hash with one key, C<see_also>. C<see_also> points to a hash, which
+contains two keys, C<added> and C<removed>. These are arrays of strings,
+representing the actual changes that were made to the bug.
+
+Here's a diagram of what the return value looks like for updating
+bug ids 1 and 2:
+
+ {
+   changes => {
+       1 => {
+           added   => (an array of bug URLs),
+           removed => (an array of bug URLs),
+       },
+       2 => {
+           added   => (an array of bug URLs),
+           removed => (an array of bug URLs),
+       }
+   }
+ }
+
+This return value allows you to tell what this method actually did. It is in
+this format to be compatible with the return value of a future C<Bug.update>
+method.
+
+=item B<Errors>
+
+This method can throw all of the errors that L</get> throws, plus:
+
+=over
+
+=item 108 (Bug Edit Denied)
+
+You did not have the necessary rights to edit the bug.
+
+=item 112 (Invalid Bug URL)
+
+One of the URLs you provided did not look like a valid bug URL.
+
+=back
+
+=item B<History>
+
+=over
+
+=item Added in Bugzilla B<3.4>.
 
 =back
 

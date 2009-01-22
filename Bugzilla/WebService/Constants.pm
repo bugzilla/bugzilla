@@ -84,6 +84,9 @@ use constant WS_ERROR_CODE => {
     # Comment-related errors
     comment_is_private => 110,
     comment_id_invalid => 111,
+    # See Also errors
+    bug_url_invalid => 112,
+    bug_url_too_long => 112,
 
     # Authentication errors are usually 300-400.
     invalid_username_or_password => 300,

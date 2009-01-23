@@ -50,6 +50,8 @@ use constant FIELD_MAP => {
     summary          => 'short_desc',
     url              => 'bug_file_loc',
     whiteboard       => 'status_whiteboard',
+    limit            => 'LIMIT',
+    offset           => 'OFFSET',
 };
 
 use constant PRODUCT_SPECIFIC_FIELDS => qw(version target_milestone component);
@@ -218,7 +220,21 @@ sub get_history {
 
 sub search {
     my ($self, $params) = @_;
+    
+    if ( $params->{offset} and !$params->{limit} ) {
+        ThrowCodeError( 'param_required', { param => 'limit', function => 'Bug.search()'});
+    }
+    
     $params = _map_fields($params);
+    
+    # If the user set the 'last_change_time' param (translated into delta_ts
+    # by the field map), use a custom WHERE to constrain the query to only 
+    # those bugs that have a delta_ts greater than or equal to 
+    # the specified time.
+    if ( my $bug_when = delete $params->{delta_ts} ) {
+        $params->{WHERE} = {'delta_ts >= ?' => $bug_when};
+    }
+    
     my $bugs = Bugzilla::Bug->match($params);
     my $visible = Bugzilla->user->visible_bugs($bugs);
     my @hashes = map { $self->_bug_to_hash($_) } @$visible;
@@ -960,7 +976,21 @@ C<int> The numeric id of the bug.
 
 =item C<last_change_time>
 
-C<dateTime> The last time the bug was updated.
+C<dateTime> Limit the search to only those bugs which have changed 
+in some way since the specified time. It includes all bugs changed 
+between the specified time and the present. Note: only a single 
+C<dateTime> will accepted, not an array.
+
+=item C<limit>
+
+C<int> Limit the number of results returned to C<int> records.
+
+=item C<offset>
+
+C<int> Used in conjunction with the C<limit> argument, C<offset> defines 
+the starting position for the search. For example, given a search that 
+would return 100 bugs, setting C<limit> to 10 and C<offset> to 10 would return 
+bugs 11 through 20 from the set of 100.
 
 =item C<op_sys>
 

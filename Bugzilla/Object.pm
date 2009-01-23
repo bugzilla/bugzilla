@@ -156,9 +156,29 @@ sub match {
 
     return [$class->get_all] if !$criteria;
 
-    my (@terms, @values);
+    my (@terms, @values, $postamble);
     foreach my $field (keys %$criteria) {
         my $value = $criteria->{$field};
+        
+        # allow for LIMIT and OFFSET expressions via the criteria.
+        next if $field eq 'OFFSET';
+        if ( $field eq 'LIMIT' ) {
+            next unless defined $value;
+            $postamble = $dbh->sql_limit( $value, $criteria->{OFFSET} );
+            next;
+        }
+        elsif ( $field eq 'WHERE' ) {
+            next unless $value;
+            # the WHERE value is a hashref where the keys are
+            # "column_name operator ?" and values are the placeholder's
+            # value.
+            foreach my $k (keys( %$value )) {
+                push( @terms, $k );
+                push( @values, $value->{$k} );
+            }            
+            next;
+        }
+                
         if (ref $value eq 'ARRAY') {
             # IN () is invalid SQL, and if we have an empty list
             # to match against, we're just returning an empty
@@ -181,12 +201,12 @@ sub match {
         }
     }
 
-    my $where = join(' AND ', @terms);
-    return $class->_do_list_select($where, \@values);
+    my $where = join(' AND ', @terms) if scalar @terms;
+    return $class->_do_list_select($where, \@values, $postamble);
 }
 
 sub _do_list_select {
-    my ($class, $where, $values) = @_;
+    my ($class, $where, $values, $postamble) = @_;
     my $table = $class->DB_TABLE;
     my $cols  = join(',', $class->DB_COLUMNS);
     my $order = $class->LIST_ORDER;
@@ -196,7 +216,9 @@ sub _do_list_select {
         $sql .= " WHERE $where ";
     }
     $sql .= " ORDER BY $order";
-
+    
+    $sql .= " $postamble" if $postamble;
+        
     my $dbh = Bugzilla->dbh;
     my $objects = $dbh->selectall_arrayref($sql, {Slice=>{}}, @$values);
     bless ($_, $class) foreach @$objects;
@@ -624,6 +646,26 @@ value that you want to match against for that column.
 There are two special values, the constants C<NULL> and C<NOT_NULL>,
 which means "give me objects where this field is NULL or NOT NULL,
 respectively."
+
+In addition to the column keys, there are a few special keys that
+can be used to rig the underlying database queries. These are 
+C<LIMIT>, C<OFFSET>, and C<WHERE>.
+
+The value for the C<LIMIT> key is expected to be an integer defining 
+the number of objects to return, while the value for C<OFFSET> defines
+the position, relative to the number of objects the query would normally 
+return, at which to begin the result set. If C<OFFSET> is defined without 
+a corresponding C<LIMIT> it is silently ignored.
+
+The C<WHERE> key provides a mechanism for adding arbitrary WHERE
+clauses to the underlying query. Its value is expected to a hash 
+reference whose keys are the columns, operators and placeholders, and the 
+values are the placeholders' bind value. For example:
+
+ WHERE => {'some_column >= ?' => $some_value }
+    
+would constrain the query to only those objects in the table whose
+'some_column' column has a value greater than or equal to $some_value.
 
 If you don't specify any criteria, calling this function is the same
 as doing C<[$class-E<gt>get_all]>.

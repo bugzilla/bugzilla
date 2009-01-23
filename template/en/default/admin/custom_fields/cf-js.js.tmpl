@@ -27,7 +27,7 @@ var select_values = new Array();
 [% FOREACH sel_field = Bugzilla.get_fields({ is_select => 1 }) %]
   select_values[[% sel_field.id FILTER js %]] = [
   [% FOREACH legal_value = sel_field.legal_values %]
-    [[% legal_value.id FILTER js %], '[% legal_value.name FILTER html %]'],
+    [[% legal_value.id FILTER js %], '[% legal_value.name FILTER html %]'][% ',' UNLESS loop.last %]
   [% END %]
   ];
 [% END %]

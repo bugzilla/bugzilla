@@ -166,7 +166,7 @@ function bz_isValueInArray(aArray, aValue)
  */
 function bz_createOptionInSelect(aSelect, aTextValue, aValue) {
   var myOption = new Option(aTextValue, aValue);
-  aSelect.appendChild(myOption);
+  aSelect.options[aSelect.length] = myOption;
   return myOption;
 }
 

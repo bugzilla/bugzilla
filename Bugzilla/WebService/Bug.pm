@@ -221,8 +221,9 @@ sub get_history {
 sub search {
     my ($self, $params) = @_;
     
-    if ( $params->{offset} and !$params->{limit} ) {
-        ThrowCodeError( 'param_required', { param => 'limit', function => 'Bug.search()'});
+    if ( defined($params->{offset}) and !defined($params->{limit}) ) {
+        ThrowCodeError('param_required', 
+                       { param => 'limit', function => 'Bug.search()' });
     }
     
     $params = _map_fields($params);

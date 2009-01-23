@@ -168,7 +168,6 @@ sub match {
             next;
         }
         elsif ( $field eq 'WHERE' ) {
-            next unless $value;
             # the WHERE value is a hashref where the keys are
             # "column_name operator ?" and values are the placeholder's
             # value.
@@ -662,7 +661,7 @@ clauses to the underlying query. Its value is expected to a hash
 reference whose keys are the columns, operators and placeholders, and the 
 values are the placeholders' bind value. For example:
 
- WHERE => {'some_column >= ?' => $some_value }
+ WHERE => { 'some_column >= ?' => $some_value }
     
 would constrain the query to only those objects in the table whose
 'some_column' column has a value greater than or equal to $some_value.

@@ -40,11 +40,16 @@ use Bugzilla::Util qw(trim);
 # make sense to somebody who's not intimately familiar with the inner workings
 # of Bugzilla. (These are the field names that the WebService uses.)
 use constant FIELD_MAP => {
-    status      => 'bug_status',
-    severity    => 'bug_severity',
-    description => 'comment',
-    summary     => 'short_desc',
-    platform    => 'rep_platform',
+    creation_time    => 'creation_ts',
+    description      => 'comment',
+    id               => 'bug_id',
+    last_change_time => 'delta_ts',
+    platform         => 'rep_platform',
+    severity         => 'bug_severity',
+    status           => 'bug_status',
+    summary          => 'short_desc',
+    url              => 'bug_file_loc',
+    whiteboard       => 'status_whiteboard',
 };
 
 use constant PRODUCT_SPECIFIC_FIELDS => qw(version target_milestone component);
@@ -145,47 +150,7 @@ sub get {
     my @return;
     foreach my $bug_id (@$ids) {
         my $bug = Bugzilla::Bug->check($bug_id);
-
-        # Timetracking fields are deleted if the user doesn't belong to
-        # the corresponding group.
-        unless (Bugzilla->user->in_group(Bugzilla->params->{'timetrackinggroup'})) {
-            delete $bug->{'estimated_time'};
-            delete $bug->{'remaining_time'};
-            delete $bug->{'deadline'};
-        }
-        # This is done in this fashion in order to produce a stable API.
-        # The internals of Bugzilla::Bug are not stable enough to just
-        # return them directly.
-        my %item;
-        $item{'creation_time'}    = $self->type('dateTime', $bug->creation_ts);
-        $item{'last_change_time'} = $self->type('dateTime', $bug->delta_ts);
-        $item{'internals'}        = $bug;
-        $item{'id'}               = $self->type('int', $bug->bug_id);
-        $item{'summary'}          = $self->type('string', $bug->short_desc);
-        $item{'assigned_to'}      = $self->type('string', $bug->assigned_to->login );
-        $item{'resolution'}       = $self->type('string', $bug->resolution);
-        $item{'status'}           = $self->type('string', $bug->bug_status);
-        $item{'is_open'}          = $self->type('boolean', $bug->status->is_open);
-        $item{'severity'}         = $self->type('string', $bug->bug_severity);
-        $item{'priority'}         = $self->type('string', $bug->priority);
-        $item{'product'}          = $self->type('string', $bug->product);
-        $item{'component'}        = $self->type('string', $bug->component);
-        $item{'dupe_of'}          = $self->type('int', $bug->dup_id);
-        
-        # if we do not delete this key, additional user info, including their
-        # real name, etc, will wind up in the 'internals' hashref
-        delete $item{internals}->{assigned_to_obj};
-        
-        if (Bugzilla->params->{'usebugaliases'}) {
-            $item{'alias'} = $self->type('string', $bug->alias);
-        }
-        else {
-            # For API reasons, we always want the value to appear, we just
-            # don't want it to have a value if aliases are turned off.
-            $item{'alias'} = undef;
-        }
-        
-        push(@return, \%item);
+        push(@return, $self->_bug_to_hash($bug))
     }
 
     return { bugs => \@return };
@@ -251,21 +216,25 @@ sub get_history {
     return { bugs => \@return };
 }
 
+sub search {
+    my ($self, $params) = @_;
+    $params = _map_fields($params);
+    my $bugs = Bugzilla::Bug->match($params);
+    my $visible = Bugzilla->user->visible_bugs($bugs);
+    my @hashes = map { $self->_bug_to_hash($_) } @$visible;
+    return { bugs => \@hashes };
+}
+
 sub create {
     my ($self, $params) = @_;
 
     Bugzilla->login(LOGIN_REQUIRED);
 
-    my %field_values;
-    foreach my $field (keys %$params) {
-        my $field_name = FIELD_MAP->{$field} || $field;
-        $field_values{$field_name} = $params->{$field}; 
-    }
-
+    $params = _map_fields($params);
     # WebService users can't set the creation date of a bug.
-    delete $field_values{'creation_ts'};
+    delete $params->{'creation_ts'};
 
-    my $bug = Bugzilla::Bug->create(\%field_values);
+    my $bug = Bugzilla::Bug->create($params);
 
     Bugzilla::BugMail::Send($bug->bug_id, { changer => $bug->reporter->login });
 
@@ -401,6 +370,75 @@ sub update_see_also {
     }
 
     return { changes => \%changes };
+}
+
+##############################
+# Private Helper Subroutines #
+##############################
+
+# A helper for get() and search().
+sub _bug_to_hash {
+    my ($self, $bug) = @_;
+
+    # Timetracking fields are deleted if the user doesn't belong to
+    # the corresponding group.
+    unless (Bugzilla->user->is_timetracker) {
+        delete $bug->{'estimated_time'};
+        delete $bug->{'remaining_time'};
+        delete $bug->{'deadline'};
+    }
+
+    # This is done in this fashion in order to produce a stable API.
+    # The internals of Bugzilla::Bug are not stable enough to just
+    # return them directly.
+    my %item;
+    $item{'internals'}        = $bug;
+    $item{'creation_time'}    = $self->type('dateTime', $bug->creation_ts);
+    $item{'last_change_time'} = $self->type('dateTime', $bug->delta_ts);
+    $item{'id'}               = $self->type('int', $bug->bug_id);
+    $item{'summary'}          = $self->type('string', $bug->short_desc);
+    $item{'assigned_to'}      = $self->type('string', $bug->assigned_to->login);
+    $item{'resolution'}       = $self->type('string', $bug->resolution);
+    $item{'status'}           = $self->type('string', $bug->bug_status);
+    $item{'is_open'}          = $self->type('boolean', $bug->status->is_open);
+    $item{'severity'}         = $self->type('string', $bug->bug_severity);
+    $item{'priority'}         = $self->type('string', $bug->priority);
+    $item{'product'}          = $self->type('string', $bug->product);
+    $item{'component'}        = $self->type('string', $bug->component);
+    $item{'dupe_of'}          = $self->type('int', $bug->dup_id);
+
+    # if we do not delete this key, additional user info, including their
+    # real name, etc, will wind up in the 'internals' hashref
+    delete $item{internals}->{assigned_to_obj};
+
+    if (Bugzilla->params->{'usebugaliases'}) {
+        $item{'alias'} = $self->type('string', $bug->alias);
+    }
+    else {
+        # For API reasons, we always want the value to appear, we just
+        # don't want it to have a value if aliases are turned off.
+        $item{'alias'} = undef;
+    }
+
+    return \%item;
+}
+
+# Convert WebService API field names to internal DB field names.
+# Used by create() and search().
+sub _map_fields {
+    my ($params) = @_;
+    
+    my %field_values;
+    foreach my $field (keys %$params) {
+        my $field_name = FIELD_MAP->{$field} || $field;
+        $field_values{$field_name} = $params->{$field};
+    }
+
+    unless (Bugzilla->user->is_timetracker) {
+        delete @field_values{qw(estimated_time remaining_time deadline)};
+    }
+    
+    return \%field_values;
 }
 
 1;
@@ -856,11 +894,180 @@ The same as L</get>.
 
 =back
 
+
+=item C<search>
+
+B<UNSTABLE>
+
+=over
+
+=item B<Description>
+
+Allows you to search for bugs based on particular criteria.
+
+=item B<Params>
+
+Bugs are returned if they match I<exactly> the criteria you specify
+in these parameters. That is, we don't match against 
+substrings--if a bug is in the "Widgets" product and you ask for bugs in
+the "Widg" product, you won't get anything.
+
+Criteria are joined in a logical AND. That is, you will be returned
+bugs that match I<all> of the criteria, not bugs that match I<any> of
+the criteria.
+
+Each parameter can be either the type it says, or an array of the types
+it says. If you pass an array, it means "Give me bugs with I<any> of
+these values." For example, if you wanted bugs that were in either
+the "Foo" or "Bar" products, you'd pass:
+
+ product => ['Foo', 'Bar']
+
+Fields below only have descriptions if it's not clear what bug field
+they match up to, or if they have some special behavior.
+
+Some Bugzillas may treat your arguments case-sensitively, depending
+on what database system they are using. Most commonly, though, Bugzilla is 
+not case-sensitive with the arguments passed (because MySQL is the 
+most-common database to use with Bugzilla, and MySQL is not case sensitive).
+
+=over
+
+=item C<alias>
+
+C<string> The unique alias for this bug. Note that you can search
+by alias even if the alias field is disabled in this Bugzilla, but
+it's likely that there won't be any aliases set on bugs, in that case.
+
+=item C<assigned_to>
+
+C<string> The login name of a user that a bug is assigned to.
+
+=item C<component>
+
+C<string> The name of the Component that the bug is in. Note that
+if there are multiple Compoonents with the same name, and you search
+for that name, bugs in I<all> those Components will be returned. If you
+don't want this, be sure to also specify the C<product> argument.
+
+=item C<creation_time>
+
+C<dateTime> When the bug was created.
+
+=item C<id>
+
+C<int> The numeric id of the bug.
+
+=item C<last_change_time>
+
+C<dateTime> The last time the bug was updated.
+
+=item C<op_sys>
+
+C<string> The "Operating System" field of a bug.
+
+=item C<platform>
+
+C<string> The Platform (sometimes called "Hardware") field of a bug.
+
+=item C<priority>
+
+C<string> The Priority field on a bug.
+
+=item C<product>
+
+C<string> The name of the Product that the bug is in.
+
+=item C<reporter>
+
+C<string> The login name of the user who reported the bug.
+
+=item C<resolution>
+
+C<string> The current resolution--only set if a bug is closed. You can
+find open bugs by searching for bugs with an empty resolution.
+
+=item C<severity>
+
+C<string> The Severity field on a bug.
+
+=item C<status>
+
+C<string> The current status of a bug (not including its resolution,
+if it has one, which is a separate field above).
+
+=item C<summary>
+
+C<string> The single-line summary field of a bug. (This isn't very
+useful to search on, since we don't do substring matches, only exact
+matches.)
+
+=item C<target_milestone>
+
+C<string> The Target Milestone field of a bug. Note that even if this
+Bugzilla does not have the Target Milestone field enabled, you can
+still search for bugs by Target Milestone. However, it is likely that
+in that case, most bugs will not have a Target Milestone set (it
+defaults to "---" when the field isn't enabled).
+
+=item C<qa_contact>
+
+C<string> The login name of the bug's QA Contact. Note that even if
+this Bugzilla does not have the QA Contact field enabled, you can
+still search for bugs by QA Contact (though it is likely that no bug
+will have a QA Contact set, if the field is disabled).
+
+=item C<url>
+
+C<string> The "URL" field of a bug.
+
+=item C<version>
+
+C<string> The Version field of a bug.
+
+=item C<votes>
+
+C<int> How many votes this bug has, total.
+
+=item C<whiteboard>
+
+C<string> The "Status Whiteboard" field of a bug.
+
+=back
+
+=item B<Returns>
+
+The same as L</get>.
+
+Note that you will only be returned information about bugs that you
+can see. Bugs that you can't see will be entirely excluded from the
+results. So, if you want to see private bugs, you will have to first 
+log in and I<then> call this method.
+
+=item B<Errors>
+
+Currently, this function doesn't throw any special errors (other than
+the ones that all webservice functions can throw). If you specify
+an invalid value for a particular field, you just won't get any results
+for that value.
+
+=item B<History>
+
+=over
+
+=item Added in Bugzilla B<3.4>.
+
+=back
+
+=back
+
+
 =back
 
 =head2 Bug Creation and Modification
 
 =over
+
 
 =item C<create> 
 

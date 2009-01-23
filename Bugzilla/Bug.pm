@@ -328,6 +328,66 @@ sub check_is_visible {
     }
 }
 
+sub match {
+    my $class = shift;
+    my ($params) = @_;
+
+    # Allow matching certain fields by name (in addition to matching by ID).
+    my %translate_fields = (
+        assigned_to => 'Bugzilla::User',
+        qa_contact  => 'Bugzilla::User',
+        reporter    => 'Bugzilla::User',
+        product     => 'Bugzilla::Product',
+        component   => 'Bugzilla::Component',
+    );
+    my %translated;
+
+    foreach my $field (keys %translate_fields) {
+        my @ids;
+        # Convert names to ids. We use "exists" everywhere since people can
+        # legally specify "undef" to mean IS NULL (even though most of these
+        # fields can't be NULL, people can still specify it...).
+        if (exists $params->{$field}) {
+            my $names = $params->{$field};
+            my $type = $translate_fields{$field};
+            my $param = $type eq 'Bugzilla::User' ? 'login_name' : 'name';
+            # We call Bugzilla::Object::match directly to avoid the
+            # Bugzilla::User::match implementation which is different.
+            my $objects = Bugzilla::Object::match($type, { $param => $names });
+            push(@ids, map { $_->id } @$objects);
+        }
+        # You can also specify ids directly as arguments to this function,
+        # so include them in the list if they have been specified.
+        if (exists $params->{"${field}_id"}) {
+            my $current_ids = $params->{"${field}_id"};
+            my @id_array = ref $current_ids ? @$current_ids : ($current_ids);
+            push(@ids, @id_array);
+        }
+        # We do this "or" instead of a "scalar(@ids)" to handle the case
+        # when people passed only invalid object names. Otherwise we'd
+        # end up with a SUPER::match call with zero criteria (which dies).
+        if (exists $params->{$field} or exists $params->{"${field}_id"}) {
+            $translated{$field} = scalar(@ids) == 1 ? $ids[0] : \@ids;
+        }
+    }
+
+    # The user fields don't have an _id on the end of them in the database,
+    # but the product & component fields do, so we have to have separate
+    # code to deal with the different sets of fields here.
+    foreach my $field (qw(assigned_to qa_contact reporter)) {
+        delete $params->{"${field}_id"};
+        $params->{$field} = $translated{$field} 
+            if exists $translated{$field};
+    }
+    foreach my $field (qw(product component)) {
+        delete $params->{$field};
+        $params->{"${field}_id"} = $translated{$field} 
+            if exists $translated{$field};
+    }
+
+    return $class->SUPER::match(@_);
+}
+
 # Docs for create() (there's no POD in this file yet, but we very
 # much need this documented right now):
 #

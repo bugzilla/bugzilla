@@ -171,7 +171,7 @@ sub FILESYSTEM {
                                      dirs => $ws_dir_readable },
          js                    => { files => $ws_readable,
                                      dirs => $ws_dir_readable },
-         skins                 => { files => $ws_readable,
+         $skinsdir             => { files => $ws_readable,
                                      dirs => $ws_dir_readable },
          t                     => { files => $owner_readable,
                                      dirs => $owner_dir_readable },
@@ -201,8 +201,8 @@ sub FILESYSTEM {
         $extensionsdir          => $ws_dir_readable,
         graphs                  => $ws_dir_writeable,
         $webdotdir              => $ws_dir_writeable,
-        'skins/custom'          => $ws_dir_readable,
-        'skins/contrib'         => $ws_dir_readable,
+        "$skinsdir/custom"      => $ws_dir_readable,
+        "$skinsdir/contrib"     => $ws_dir_readable,
     );
 
     # The name of each file, pointing at its default permissions and
@@ -213,7 +213,6 @@ sub FILESYSTEM {
     # we create. Also, we create placeholders for standard stylesheets
     # for contrib skins which don't provide them themselves.
     foreach my $skin_dir ("$skinsdir/custom", <$skinsdir/contrib/*>) {
-        next unless -d $skin_dir;
         next if basename($skin_dir) =~ /^cvs$/i;
         $create_dirs{"$skin_dir/yui"} = $ws_dir_readable;
         foreach my $base_css (<$skinsdir/standard/*.css>) {

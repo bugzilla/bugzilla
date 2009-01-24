@@ -31,7 +31,7 @@ package Bugzilla::Util;
 use strict;
 
 use base qw(Exporter);
-@Bugzilla::Util::EXPORT = qw(is_tainted trick_taint detaint_natural
+@Bugzilla::Util::EXPORT = qw(trick_taint detaint_natural
                              detaint_signed
                              html_quote url_quote xml_quote
                              css_class_quote html_light_quote url_decode
@@ -55,16 +55,6 @@ use DateTime::TimeZone;
 use Digest;
 use Scalar::Util qw(tainted);
 use Text::Wrap;
-
-# This is from the perlsec page, slightly modified to remove a warning
-# From that page:
-#      This function makes use of the fact that the presence of
-#      tainted data anywhere within an expression renders the
-#      entire expression tainted.
-# Don't ask me how it works...
-sub is_tainted {
-    return not eval { my $foo = join('',@_), kill 0; 1; };
-}
 
 sub trick_taint {
     require Carp;
@@ -640,7 +630,6 @@ Bugzilla::Util - Generic utility functions for bugzilla
   use Bugzilla::Util;
 
   # Functions for dealing with variable tainting
-  $rv = is_tainted($var);
   trick_taint($var);
   detaint_natural($var);
   detaint_signed($var);
@@ -703,10 +692,6 @@ Several functions are available to deal with tainted variables. B<Use these
 with care> to avoid security holes.
 
 =over 4
-
-=item C<is_tainted>
-
-Determines whether a particular variable is tainted
 
 =item C<trick_taint($val)>
 

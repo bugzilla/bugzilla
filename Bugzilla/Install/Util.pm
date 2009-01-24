@@ -31,6 +31,7 @@ use Bugzilla::Constants;
 use File::Basename;
 use POSIX qw(setlocale LC_CTYPE);
 use Safe;
+use Scalar::Util qw(tainted);
 
 use base qw(Exporter);
 our @EXPORT_OK = qw(
@@ -109,7 +110,7 @@ sub install_string {
     foreach my $key (@replace_keys) {
         my $replacement = $vars->{$key};
         die "'$key' in '$string_id' is tainted: '$replacement'"
-            if is_tainted($replacement);
+            if tainted($replacement);
         # We don't want people to start getting clever and inserting
         # ##variable## into their values. So we check if any other
         # key is listed in the *replacement* string, before doing
@@ -352,10 +353,6 @@ sub trick_taint {
     my $match = $_[0] =~ /^(.*)$/s;
     $_[0] = $match ? $1 : undef;
     return (defined($_[0]));
-}
-
-sub is_tainted {
-    return not eval { my $foo = join('',@_), kill 0; 1; };
 }
 
 __END__

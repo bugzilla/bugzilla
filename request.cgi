@@ -42,6 +42,8 @@ use Bugzilla::Component;
 # Make sure the user is logged in.
 my $user = Bugzilla->login();
 my $cgi = Bugzilla->cgi;
+# Force the script to run against the shadow DB. We already validated credentials.
+Bugzilla->switch_to_shadow_db;
 my $template = Bugzilla->template;
 my $action = $cgi->param('action') || '';
 
@@ -94,7 +96,6 @@ exit;
 
 sub queue {
     my $cgi = Bugzilla->cgi;
-    # There are some user privilege checks to do. We do them against the main DB.
     my $dbh = Bugzilla->dbh;
     my $template = Bugzilla->template;
     my $user = Bugzilla->user;
@@ -164,9 +165,7 @@ sub queue {
     $query .= " AND flags.status = '?' " unless $status;
 
     # The set of criteria by which we filter records to display in the queue.
-    # We now move to the shadow DB to query the DB.
     my @criteria = ();
-    $dbh = Bugzilla->switch_to_shadow_db;
 
     # A list of columns to exclude from the report because the report conditions
     # limit the data being displayed to exact matches for those columns.
@@ -303,9 +302,6 @@ sub queue {
     my @types = ("all");
     my $flagtypes = get_flag_types();
     push(@types, @$flagtypes);
-
-    # We move back to the main DB to get the list of products the user can see.
-    $dbh = Bugzilla->switch_to_main_db;
 
     $vars->{'products'} = $user->get_selectable_products;
     $vars->{'excluded_columns'} = \@excluded_columns;

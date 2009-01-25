@@ -32,13 +32,14 @@ use Bugzilla::Error;
 use Bugzilla::Product;
 
 my $user = Bugzilla->login();
-
 my $cgi = Bugzilla->cgi;
-my $dbh = Bugzilla->dbh;
 my $template = Bugzilla->template;
 my $vars = {};
 
 print $cgi->header();
+
+# This script does nothing but displaying mostly static data.
+Bugzilla->switch_to_shadow_db;
 
 my $product_name = trim($cgi->param('product') || '');
 my $product = new Bugzilla::Product({'name' => $product_name});

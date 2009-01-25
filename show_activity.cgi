@@ -50,6 +50,10 @@ my $bug = Bugzilla::Bug->check($id);
 # End Data/Security Validation
 ###############################################################################
 
+# Run queries against the shadow DB. In the worst case, new changes are not
+# visible immediately due to replication lag.
+Bugzilla->switch_to_shadow_db;
+
 ($vars->{'operations'}, $vars->{'incomplete_data'}) = 
     Bugzilla::Bug::GetBugActivity($bug->id);
 

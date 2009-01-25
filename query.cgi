@@ -96,6 +96,9 @@ if ($cgi->param('nukedefaultquery')) {
     $buffer = "";
 }
 
+# We are done with changes committed to the DB.
+$dbh = Bugzilla->switch_to_shadow_db;
+
 my $userdefaultquery;
 if ($userid) {
     $userdefaultquery = $dbh->selectrow_array(

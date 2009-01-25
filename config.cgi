@@ -46,6 +46,9 @@ if (Bugzilla->params->{'requirelogin'} && !$user->id) {
     display_data();
 }
 
+# Get data from the shadow DB as they don't change very often.
+Bugzilla->switch_to_shadow_db;
+
 # Pass a bunch of Bugzilla configuration to the templates.
 my $vars = {};
 $vars->{'priority'}  = get_legal_field_values('priority');

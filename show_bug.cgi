@@ -55,6 +55,11 @@ my $format = $template->get_format("bug/show", scalar $cgi->param('format'),
 my @bugs = ();
 my %marks;
 
+# If the user isn't logged in, we use data from the shadow DB. If he plans
+# to edit the bug(s), he will have to log in first, meaning that the data
+# will be reloaded anyway, from the main DB.
+Bugzilla->switch_to_shadow_db unless $user->id;
+
 if ($single) {
     my $id = $cgi->param('id');
     push @bugs, Bugzilla::Bug->check($id);

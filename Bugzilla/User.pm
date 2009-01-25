@@ -48,6 +48,7 @@ use Bugzilla::User::Setting;
 use Bugzilla::Product;
 use Bugzilla::Classification;
 use Bugzilla::Field;
+use Bugzilla::Group;
 
 use Scalar::Util qw(blessed);
 use DateTime::TimeZone;
@@ -830,7 +831,7 @@ sub visible_groups_inherited {
     return $self->{visible_groups_inherited} if defined $self->{visible_groups_inherited};
     return [] unless $self->id;
     my @visgroups = @{$self->visible_groups_direct};
-    @visgroups = @{$self->flatten_group_membership(@visgroups)};
+    @visgroups = @{Bugzilla::Group->flatten_group_membership(@visgroups)};
     $self->{visible_groups_inherited} = \@visgroups;
     return $self->{visible_groups_inherited};
 }
@@ -990,30 +991,6 @@ sub can_bless {
     # Otherwise, we're checking a specific group
     my $group_id = shift;
     return grep($_->id == $group_id, @{ $self->bless_groups }) ? 1 : 0;
-}
-
-sub flatten_group_membership {
-    my ($self, @groups) = @_;
-
-    my $dbh = Bugzilla->dbh;
-    my $sth;
-    my @groupidstocheck = @groups;
-    my %groupidschecked = ();
-    $sth = $dbh->prepare("SELECT member_id FROM group_group_map
-                             WHERE grantor_id = ? 
-                               AND grant_type = " . GROUP_MEMBERSHIP);
-    while (my $node = shift @groupidstocheck) {
-        $sth->execute($node);
-        my $member;
-        while (($member) = $sth->fetchrow_array) {
-            if (!$groupidschecked{$member}) {
-                $groupidschecked{$member} = 1;
-                push @groupidstocheck, $member;
-                push @groups, $member unless grep $_ == $member, @groups;
-            }
-        }
-    }
-    return \@groups;
 }
 
 sub match {
@@ -2048,14 +2025,6 @@ method should be called in such a case to force reresolution of these groups.
 Returns a reference to an array of users.  The array is populated with hashrefs
 containing the login, identity and visibility.  Users that are not visible to this
 user will have 'visible' set to zero.
-
-=item C<flatten_group_membership>
-
-Accepts a list of groups and returns a list of all the groups whose members 
-inherit membership in any group on the list.  So, we can determine if a user
-is in any of the groups input to flatten_group_membership by querying the
-user_group_map for any user with DIRECT or REGEXP membership IN() the list
-of groups returned.
 
 =item C<direct_group_membership>
 

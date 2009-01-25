@@ -34,6 +34,7 @@ use Bugzilla::Search;
 use Bugzilla::User;
 use Bugzilla::Mailer;
 use Bugzilla::Util;
+use Bugzilla::Group;
 
 # create some handles that we'll need
 my $template = Bugzilla->template;
@@ -250,7 +251,7 @@ sub get_next_event {
                         $groupname, $owner);
                     if ($group_id) {
                         my $glist = join(',',
-                            @{Bugzilla::User->flatten_group_membership(
+                            @{Bugzilla::Group->flatten_group_membership(
                             $group_id)});
                         $sth = $dbh->prepare("SELECT user_id FROM " .
                                              "user_group_map " .

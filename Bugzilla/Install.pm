@@ -274,7 +274,7 @@ sub create_admin {
 
     my $admin_group = new Bugzilla::Group({ name => 'admin' });
     my $admin_inheritors = 
-        Bugzilla::User->flatten_group_membership($admin_group->id);
+        Bugzilla::Group->flatten_group_membership($admin_group->id);
     my $admin_group_ids = join(',', @$admin_inheritors);
 
     my ($admin_count) = $dbh->selectrow_array(

@@ -238,6 +238,33 @@ sub members_non_inherited {
     return $self->{members_non_inherited};
 }
 
+sub flatten_group_membership {
+    my ($self, @groups) = @_;
+
+    my $dbh = Bugzilla->dbh;
+    my $sth;
+    my @groupidstocheck = @groups;
+    my %groupidschecked = ();
+    $sth = $dbh->prepare("SELECT member_id FROM group_group_map
+                             WHERE grantor_id = ? 
+                               AND grant_type = " . GROUP_MEMBERSHIP);
+    while (my $node = shift @groupidstocheck) {
+        $sth->execute($node);
+        my $member;
+        while (($member) = $sth->fetchrow_array) {
+            if (!$groupidschecked{$member}) {
+                $groupidschecked{$member} = 1;
+                push @groupidstocheck, $member;
+                push @groups, $member unless grep $_ == $member, @groups;
+            }
+        }
+    }
+    return \@groups;
+}
+
+
+
+
 ################################
 #####  Module Subroutines    ###
 ################################
@@ -393,5 +420,13 @@ Returns an arrayref of L<Bugzilla::User> objects representing people who are
 "directly" in this group, meaning that they're in it because they match
 the group regular expression, or they have been actually added to the
 group manually.
+
+=item C<flatten_group_membership>
+
+Accepts a list of groups and returns a list of all the groups whose members 
+inherit membership in any group on the list.  So, we can determine if a user
+is in any of the groups input to flatten_group_membership by querying the
+user_group_map for any user with DIRECT or REGEXP membership IN() the list
+of groups returned.
 
 =back

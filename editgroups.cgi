@@ -262,7 +262,7 @@ if ($action eq 'del') {
     }
 
     # Group inheritance no longer appears in user_group_map.
-    my $grouplist = join(',', @{Bugzilla::User->flatten_group_membership($gid)});
+    my $grouplist = join(',', @{Bugzilla::Group->flatten_group_membership($gid)});
     my $hasusers =
         $dbh->selectrow_array("SELECT 1 FROM user_group_map
                                WHERE group_id IN ($grouplist) AND isbless = 0 " .
@@ -337,7 +337,7 @@ if ($action eq 'delete') {
     my $cantdelete = 0;
 
     # Group inheritance no longer appears in user_group_map.
-    my $grouplist = join(',', @{Bugzilla::User->flatten_group_membership($gid)});
+    my $grouplist = join(',', @{Bugzilla::Group->flatten_group_membership($gid)});
     my $hasusers =
         $dbh->selectrow_array("SELECT 1 FROM user_group_map
                                WHERE group_id IN ($grouplist) AND isbless = 0 " .

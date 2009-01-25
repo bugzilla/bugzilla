@@ -164,7 +164,7 @@ if ($action eq 'search') {
         # Handle selection by group.
         if ($grouprestrict eq '1') {
             my $grouplist = join(',',
-                @{Bugzilla::User->flatten_group_membership($group->id)});
+                @{Bugzilla::Group->flatten_group_membership($group->id)});
             $query .= " $nextCondition ugm.group_id IN($grouplist) ";
         }
         $query .= ' ORDER BY profiles.login_name';

@@ -2366,25 +2366,47 @@ sub add_see_also {
         ThrowUserError('bug_url_invalid', { url => $input, reason => 'http' });
     }
 
-    if ($uri->path !~ /show_bug\.cgi$/) {
-        ThrowUserError('bug_url_invalid', 
-                       { url => $input, reason => 'show_bug' });
+    my $result;
+    # Launchpad URLs
+    if ($uri->authority =~ /launchpad.net$/) {
+        # Launchpad bug URLs can look like various things:
+        #   https://bugs.launchpad.net/ubuntu/+bug/1234
+        #   https://launchpad.net/bugs/1234
+        # All variations end with either "/bugs/1234" or "/+bug/1234"
+        if ($uri->path =~ m|bugs?/(\d+)$|) {
+            # This is the shortest standard URL form for Launchpad bugs,
+            # and so we reduce all URLs to this.
+            $result = "https://launchpad.net/bugs/$1";
+        }
+        else {
+            ThrowUserError('bug_url_invalid',
+                           { url => $input, reason => 'id' });
+        }
     }
-    my $bug_id = $uri->query_param('id');
-    # We don't currently allow aliases, because we can't check to see
-    # if somebody's putting both an alias link and a numeric ID link.
-    # When we start validating the URL by accessing the other Bugzilla,
-    # we can allow aliases.
-    detaint_natural($bug_id);
-    if (!$bug_id) {
-        ThrowUserError('bug_url_invalid', { url => $input, reason => 'id' });
-    }
+    # Bugzilla URLs
+    else {
+        if ($uri->path !~ /show_bug\.cgi$/) {
+            ThrowUserError('bug_url_invalid', 
+                           { url => $input, reason => 'show_bug' });
+        }
 
-    # Make sure that "id" is the only query parameter.
-    $uri->query("id=$bug_id");
-    # And remove any # part if there is one.
-    $uri->fragment(undef);
-    my $result = $uri->canonical->as_string;
+        my $bug_id = $uri->query_param('id');
+        # We don't currently allow aliases, because we can't check to see
+        # if somebody's putting both an alias link and a numeric ID link.
+        # When we start validating the URL by accessing the other Bugzilla,
+        # we can allow aliases.
+        detaint_natural($bug_id);
+        if (!$bug_id) {
+            ThrowUserError('bug_url_invalid', 
+                           { url => $input, reason => 'id' });
+        }
+
+        # Make sure that "id" is the only query parameter.
+        $uri->query("id=$bug_id");
+        # And remove any # part if there is one.
+        $uri->fragment(undef);
+        $result = $uri->canonical->as_string;
+    }
 
     if (length($result) > MAX_BUG_URL_LENGTH) {
         ThrowUserError('bug_url_too_long', { url => $result });

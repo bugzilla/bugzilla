@@ -1321,7 +1321,7 @@ B<UNSTABLE>
 =item B<Description>
 
 Adds or removes URLs for the "See Also" field on bugs. These URLs must
-point to some valid bug in some Bugzilla installation.
+point to some valid bug in some Bugzilla installation or in Launchpad.
 
 =item B<Params>
 
@@ -1335,10 +1335,11 @@ to modify.
 =item C<add>
 
 Array of C<string>s. URLs to Bugzilla bugs. These URLs will be added to
-the See Also field. They must be valid URLs to C<show_bug.cgi> in a 
-Bugzilla installation. If they don't start with C<http://> or C<https://>,
-it will be assumed that C<http://> should be added to the beginning of the
-string.
+the See Also field. They must be valid URLs to C<show_bug.cgi> in a
+Bugzilla installation or to a bug filed at launchpad.net.
+
+If the URLs don't start with C<http://> or C<https://>, it will be assumed
+that C<http://> should be added to the beginning of the string.
 
 It is safe to specify URLs that are already in the "See Also" field on
 a bug--they will just be silently ignored.

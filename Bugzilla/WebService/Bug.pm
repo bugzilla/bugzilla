@@ -375,14 +375,14 @@ sub update_see_also {
     foreach my $bug (@bugs) {
         my $change = $bug->update();
         if (my $see_also = $change->{see_also}) {
-            $changes{$bug->id} = {
+            $changes{$bug->id}->{see_also} = {
                 removed => [split(', ', $see_also->[0])],
                 added   => [split(', ', $see_also->[1])],
             };
         }
         else {
             # We still want a changes entry, for API consistency.
-            $changes{$bug->id} = { added => [], removed => [] };
+            $changes{$bug->id}->{see_also} = { added => [], removed => [] };
         }
 
         Bugzilla::BugMail::Send($bug->id, { changer => $user->login });
@@ -1372,12 +1372,16 @@ bug ids 1 and 2:
  {
    changes => {
        1 => {
-           added   => (an array of bug URLs),
-           removed => (an array of bug URLs),
+           see_also => {
+               added   => (an array of bug URLs),
+               removed => (an array of bug URLs),
+           }
        },
        2 => {
-           added   => (an array of bug URLs),
-           removed => (an array of bug URLs),
+           see_also => {
+               added   => (an array of bug URLs),
+               removed => (an array of bug URLs),
+           }
        }
    }
  }

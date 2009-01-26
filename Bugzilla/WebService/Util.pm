@@ -24,7 +24,7 @@ use strict;
 
 use base qw(Exporter);
 
-our @EXPORT_OK = qw(filter);
+our @EXPORT_OK = qw(filter validate);
 
 sub filter ($$) {
     my ($params, $hash) = @_;
@@ -44,6 +44,23 @@ sub filter ($$) {
     return \%newhash;
 }
 
+sub validate  {
+    my ($self, $params, @keys) = @_;
+    
+    # If @keys is not empty then we convert any named 
+    # parameters that have scalar values to arrayrefs
+    # that match.
+    foreach my $key (@keys) {
+        if (exists $params->{$key}) {
+            $params->{$key} = ref $params->{$key} 
+                              ? $params->{$key} 
+                              : [ $params->{$key} ];
+        }
+    }
+
+    return ($self, $params);
+}
+
 __END__
 
 =head1 NAME
@@ -61,6 +78,8 @@ internally in the WebService code.
  filter({ include_fields => ['id', 'name'], 
           exclude_fields => ['name'] }, $hash);
 
+ validate(@_, 'ids');
+
 =head1 METHODS
 
 =over
@@ -71,5 +90,12 @@ This helps implement the C<include_fields> and C<exclude_fields> arguments
 of WebService methods. Given a hash (the second argument to this subroutine),
 this will remove any keys that are I<not> in C<include_fields> and then remove
 any keys that I<are> in C<exclude_fields>.
+
+=item C<validate>
+
+This helps in the validation of parameters passed into the WebSerice
+methods. Currently it converts listed parameters into an array reference
+if the client only passed a single scalar value. It modifies the parameters
+hash in place so other parameters should be unaltered.
 
 =back

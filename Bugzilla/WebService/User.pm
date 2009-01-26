@@ -28,7 +28,7 @@ use Bugzilla::Error;
 use Bugzilla::User;
 use Bugzilla::Util qw(trim);
 use Bugzilla::Token;
-use Bugzilla::WebService::Util qw(filter);
+use Bugzilla::WebService::Util qw(filter validate);
 
 # Don't need auth to login
 use constant LOGIN_EXEMPT => {
@@ -131,7 +131,7 @@ sub create {
 # $call = $rpc->call( 'User.get', { ids => [1,2,3], 
 #         names => ['testusera@redhat.com', 'testuserb@redhat.com'] });
 sub get {
-    my ($self, $params) = @_;
+    my ($self, $params) = validate(@_, 'names', 'ids');
 
     my @user_objects;
     @user_objects = map { Bugzilla::User->check($_) } @{ $params->{names} }

@@ -27,7 +27,7 @@ use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Field;
 use Bugzilla::WebService::Constants;
-use Bugzilla::WebService::Util qw(filter);
+use Bugzilla::WebService::Util qw(filter validate);
 use Bugzilla::Bug;
 use Bugzilla::BugMail;
 use Bugzilla::Util qw(trim);
@@ -67,7 +67,8 @@ BEGIN { *get_bugs = \&get }
 ###########
 
 sub comments {
-    my ($self, $params) = @_;
+    my ($self, $params) = validate(@_, 'bug_ids', 'comment_ids');
+
     if (!(defined $params->{bug_ids} || defined $params->{comment_ids})) {
         ThrowCodeError('params_required',
                        { function => 'Bug.comments',
@@ -145,7 +146,8 @@ sub _translate_comment {
 }
 
 sub get {
-    my ($self, $params) = @_;
+    my ($self, $params) = validate(@_, 'ids');
+
     my $ids = $params->{ids};
     defined $ids || ThrowCodeError('param_required', { param => 'ids' });
 
@@ -162,7 +164,7 @@ sub get {
 # it can be called as the following:
 # $call = $rpc->call( 'Bug.get_history', { ids => [1,2] });
 sub get_history {
-    my ($self, $params) = @_;
+    my ($self, $params) = validate(@_, 'ids');
 
     my $ids = $params->{ids};
     defined $ids || ThrowCodeError('param_required', { param => 'ids' });

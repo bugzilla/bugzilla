@@ -77,7 +77,7 @@ sub get_param_list {
   {
    name => 'specific_search_allow_empty_words',
    type => 'b',
-   default => 0
+   default => 1
   }
   
   );

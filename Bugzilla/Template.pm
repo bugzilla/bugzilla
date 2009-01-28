@@ -323,13 +323,13 @@ sub get_bug_link {
     my $quote_bug_num = html_quote($bug_num);
     detaint_natural($bug_num) || return "&lt;invalid bug number: $quote_bug_num&gt;";
 
-    my $bug       = Bugzilla::Bug->new($bug_num);
-    my $bug_state = $bug->bug_status;
-    my $bug_res   = $bug->resolution;
-    my $bug_desc  = $bug->short_desc;
+    my ($bug_alias, $bug_state, $bug_res, $bug_desc) =
+        $dbh->selectrow_array('SELECT bugs.alias, bugs.bug_status, bugs.resolution, bugs.short_desc
+                               FROM bugs WHERE bugs.bug_id = ?',
+                               undef, $bug_num);
 
-    if ($options->{use_alias} && $bug->alias) {
-        $link_text = $bug->alias;
+    if ($options->{use_alias} && $link_text =~ /^\d+$/ && $bug_alias) {
+        $link_text = $bug_alias;
     }
 
     if ($bug_state) {

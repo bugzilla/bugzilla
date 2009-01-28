@@ -195,7 +195,7 @@ sub quoteUrls {
         map { qr/$_/ } grep($_, Bugzilla->params->{'urlbase'}, 
                             Bugzilla->params->{'sslbase'})) . ')';
     $text =~ s~\b(${urlbase_re}\Qshow_bug.cgi?id=\E([0-9]+)(\#c([0-9]+))?)\b
-              ~($things[$count++] = get_bug_link($3, $1, $5)) &&
+              ~($things[$count++] = get_bug_link($3, $1, { comment_num => $5 })) &&
                ("\0\0" . ($count-1) . "\0\0")
               ~egox;
 
@@ -249,7 +249,7 @@ sub quoteUrls {
     $text =~ s~\b($bug_re(?:$s*,?$s*$comment_re)?|$comment_re)
               ~ # We have several choices. $1 here is the link, and $2-4 are set
                 # depending on which part matched
-               (defined($2) ? get_bug_link($2,$1,$3) :
+               (defined($2) ? get_bug_link($2, $1, { comment_num => $3 }) :
                               "<a href=\"$current_bugurl#c$4\">$1</a>")
               ~egox;
 
@@ -314,7 +314,7 @@ sub get_attachment_link {
 #    comment in the bug
 
 sub get_bug_link {
-    my ($bug_num, $link_text, $comment_num) = @_;
+    my ($bug_num, $link_text, $options) = @_;
     my $dbh = Bugzilla->dbh;
 
     if (!defined($bug_num) || ($bug_num eq "")) {
@@ -323,10 +323,14 @@ sub get_bug_link {
     my $quote_bug_num = html_quote($bug_num);
     detaint_natural($bug_num) || return "&lt;invalid bug number: $quote_bug_num&gt;";
 
-    my ($bug_state, $bug_res, $bug_desc) =
-        $dbh->selectrow_array('SELECT bugs.bug_status, resolution, short_desc
-                               FROM bugs WHERE bugs.bug_id = ?',
-                               undef, $bug_num);
+    my $bug       = Bugzilla::Bug->new($bug_num);
+    my $bug_state = $bug->bug_status;
+    my $bug_res   = $bug->resolution;
+    my $bug_desc  = $bug->short_desc;
+
+    if ($options->{use_alias} && $bug->alias) {
+        $link_text = $bug->alias;
+    }
 
     if ($bug_state) {
         # Initialize these variables to be "" so that we don't get warnings
@@ -350,8 +354,8 @@ sub get_bug_link {
         $title = html_quote(clean_text($title));
 
         my $linkval = "show_bug.cgi?id=$bug_num";
-        if (defined $comment_num) {
-            $linkval .= "#c$comment_num";
+        if ($options->{comment_num}) {
+            $linkval .= "#c" . $options->{comment_num};
         }
         return qq{$pre<a href="$linkval" title="$title">$link_text</a>$post};
     }
@@ -562,10 +566,10 @@ sub create {
                          ],
 
             bug_link => [ sub {
-                              my ($context, $bug) = @_;
+                              my ($context, $bug, $options) = @_;
                               return sub {
                                   my $text = shift;
-                                  return get_bug_link($bug, $text);
+                                  return get_bug_link($bug, $text, $options);
                               };
                           },
                           1

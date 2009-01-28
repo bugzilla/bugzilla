@@ -1014,7 +1014,7 @@
     </span>
     
     [% FOREACH depbug = bug.${dep.fieldname} %]
-      [% depbug FILTER bug_link(depbug) FILTER none %][% " " %]
+      [% depbug FILTER bug_link(depbug, use_alias => 1) FILTER none %][% " " %]
     [% END %]
     [% IF bug.check_can_change_field(dep.fieldname, 0, 1) %]
       <span id="[% dep.fieldname %]_edit_container" class="edit_me bz_default_hidden" >

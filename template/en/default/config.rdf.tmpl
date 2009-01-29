@@ -224,6 +224,10 @@
             <bz:requestable>[% flag_type.is_requestable FILTER html %]</bz:requestable>
             <bz:specifically_requestable>[% flag_type.is_requesteeble FILTER html %]</bz:specifically_requestable>
             <bz:multiplicable>[% flag_type.is_multiplicable FILTER html %]</bz:multiplicable>
+            [% IF user.in_group("editcomponents") %]
+              <bz:grant_group>[% flag_type.grant_group.name FILTER html %]</bz:grant_group>
+              <bz:request_group>[% flag_type.request_group.name FILTER html %]</bz:request_group>
+            [% END %]
           </bz:flag_type>
         </li>
       [% END %]

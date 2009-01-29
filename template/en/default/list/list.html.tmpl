@@ -206,7 +206,7 @@
           |
         [% END %]
 
-        [% IF bugowners %]
+        [% IF bugowners && user.id %]
           <a href="mailto:
             [% bugowners FILTER html %]">Send&nbsp;Mail&nbsp;to&nbsp;[% terms.Bug %]&nbsp;Assignees</a> |
         [% END %]

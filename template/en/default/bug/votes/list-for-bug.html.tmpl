@@ -43,8 +43,9 @@
     [% total = total + voter.vote_count %]
     <tr>
       <td>
-        <a href="votes.cgi?action=show_user&amp;user=[% voter.login_name FILTER url_quote %]">
-          [% voter.login_name FILTER html %]
+          <a href="votes.cgi?action=show_user&amp;user_id=
+                  [%- voter.id FILTER url_quote %]">
+          [% voter.login_name FILTER email FILTER html %]
         </a>
       </td>
       <td align="right">

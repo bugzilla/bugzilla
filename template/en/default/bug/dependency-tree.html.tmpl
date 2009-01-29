@@ -154,7 +154,7 @@
 
 [% BLOCK buginfo %]
   [% get_status(bug.bug_status) FILTER html -%] [%+ get_resolution(bug.resolution) FILTER html %];
-  [%-%] assigned to [% bug.assigned_to.login FILTER html %]
+  [%-%] assigned to [% bug.assigned_to.login FILTER email FILTER html %]
   [%-%][% "; Target: " _ bug.target_milestone IF bug.target_milestone %]
 [% END %]
 

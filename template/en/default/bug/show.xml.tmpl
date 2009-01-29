@@ -25,9 +25,13 @@
 
 <bugzilla version="[% constants.BUGZILLA_VERSION %]"
           urlbase="[% urlbase FILTER xml %]"
+          [%# Note that the maintainer's email is not filtered, 
+            # intentionally. Even logged-out users should be able
+            # to see that, since it will be in error messages anyway. 
+          %]
           maintainer="[% Param('maintainer') FILTER xml %]"
 [% IF user.id %]
-          exporter="[% user.email FILTER xml %]"
+          exporter="[% user.email FILTER email FILTER xml %]"
 [% END %]
 >
 
@@ -58,9 +62,9 @@
           <flag name="[% type.name FILTER xml %]"
                 id="[% flag.id FILTER xml %]"
                 status="[% flag.status FILTER xml %]"
-                setter="[% flag.setter.login FILTER xml %]"
+                setter="[% flag.setter.login FILTER email FILTER xml %]"
           [% IF flag.requestee %]
-              requestee="[% flag.requestee.login FILTER xml %]"
+              requestee="[% flag.requestee.login FILTER email FILTER xml %]"
           [% END %]
           />
         [% END %]
@@ -69,12 +73,12 @@
         [% FOREACH c = bug.longdescs %]
           [% NEXT IF c.isprivate && !user.in_group(Param("insidergroup")) %]
           <long_desc isprivate="[% c.isprivate FILTER xml %]">
-            <who name="[% c.author.name FILTER xml %]">[% c.author.email FILTER xml %]</who>
+            <who name="[% c.author.name FILTER xml %]">[% c.author.email FILTER email FILTER xml %]</who>
             <bug_when>[% c.time FILTER time FILTER xml %]</bug_when>
             [% IF user.in_group(Param('timetrackinggroup')) && (c.work_time - 0 != 0) %]
               <work_time>[% PROCESS formattimeunit time_unit = c.work_time FILTER xml %]</work_time>
             [% END %]
-            <thetext>[% c.body FILTER xml %]</thetext>
+            <thetext>[% c.body FILTER email FILTER xml %]</thetext>
           </long_desc>
         [% END %]
       [% END %]
@@ -93,7 +97,7 @@
             <filename>[% a.filename FILTER xml %]</filename>
             <type>[% a.contenttype FILTER xml %]</type>
             <size>[% a.datasize FILTER xml %]</size>
-            <attacher>[% a.attacher.email FILTER xml %]</attacher>
+            <attacher>[% a.attacher.email FILTER email FILTER xml %]</attacher>
         [% IF displayfields.attachmentdata %]
             <data encoding="base64">[% a.data FILTER base64 %]</data>
         [% END %]        
@@ -102,9 +106,9 @@
               <flag name="[% flag.type.name FILTER xml %]"
                     id="[% flag.id FILTER xml %]"
                     status="[% flag.status FILTER xml %]"
-                    setter="[% flag.setter.email FILTER xml %]"
+                    setter="[% flag.setter.email FILTER email FILTER xml %]"
                     [% IF flag.status == "?" && flag.requestee %]
-                      requestee="[% flag.requestee.email FILTER xml %]"
+                      requestee="[% flag.requestee.email FILTER email FILTER xml %]"
                     [% END %]
                />
             [% END %]
@@ -129,10 +133,13 @@
     [% IF field == 'reporter' OR field == 'assigned_to' OR
           field == 'qa_contact' %]
       [% name = val.name %]
-      [% val = val.email %]
+      [% val = val.email FILTER email %]
+    [% ELSIF field == 'cc' %]
+        [% val = val FILTER email %]
     [% ELSIF field == 'creation_ts' OR field == 'delta_ts' %]
       [% val = val FILTER time %]
     [% END %]
-    <[% field %][% IF name != '' %] name="[% name FILTER xml %]"[% END -%]>[% val FILTER xml %]</[% field %]>
+    <[% field %][% IF name != '' %] name="[% name FILTER xml %]"[% END -%]>
+      [%- val FILTER xml %]</[% field %]>
   [% END %]
 [% END %]

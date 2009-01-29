@@ -95,10 +95,7 @@
                title="Go to the comment associated with the attachment">
               [%- attachment.attached FILTER time %]</a>,
 
-            <a href="mailto:[% attachment.attacher.email FILTER html %]"
-               title="Write an email to the creator of the attachment">
-              [% attachment.attacher.name || attachment.attacher.login FILTER html %]
-            </a>
+            [% INCLUDE global/user.html.tmpl who = attachment.attacher %]
           </span>
         </td>
 

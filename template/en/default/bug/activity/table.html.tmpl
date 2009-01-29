@@ -61,7 +61,7 @@
     [% FOREACH operation = operations %]
       <tr>
         <td rowspan="[% operation.changes.size %]" valign="top">
-          [% operation.who FILTER html %]
+          [% operation.who FILTER email FILTER html %]
         </td>
         <td rowspan="[% operation.changes.size %]" valign="top">
           [% operation.when FILTER time %]
@@ -89,7 +89,7 @@
                          change.fieldname == 'dependson' %]
                   [% change.removed FILTER bug_list_link FILTER none %]
                 [% ELSE %]
-                  [% change.removed FILTER html %]
+                  [% change.removed FILTER email FILTER html %]
                 [% END %]
               [% ELSE %]
                 &nbsp;
@@ -109,7 +109,7 @@
                          change.fieldname == 'dependson' %]
                   [% change.added FILTER bug_list_link FILTER none %]
                 [% ELSE %]
-                  [% change.added FILTER html %]
+                  [% change.added FILTER email FILTER html %]
                 [% END %]
               [% ELSE %]
                 &nbsp;

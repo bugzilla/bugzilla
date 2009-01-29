@@ -524,7 +524,7 @@
         [% IF bug.check_can_change_field("assigned_to", 0, 1) %]
           <div id="bz_assignee_edit_container" class="bz_default_hidden">
             <span>
-              [% INCLUDE user_identity user=> bug.assigned_to %]
+              [% INCLUDE global/user.html.tmpl who = bug.assigned_to %]
               (<a href="#" id="bz_assignee_edit_action">edit</a>)
             </span>
           </div>
@@ -548,7 +548,7 @@
            initDefaultCheckbox('assignee');                  
           </script>
         [% ELSE %]
-          [% INCLUDE user_identity user => bug.assigned_to %]
+          [% INCLUDE global/user.html.tmpl who = bug.assigned_to %]
         [% END %]
       </td>
     </tr>
@@ -559,13 +559,12 @@
         <label for="qa_contact" accesskey="q"><b><u>Q</u>A Contact</b></label>:
       </td>
       <td>
-
         [% IF bug.check_can_change_field("qa_contact", 0, 1) %]
           [% IF bug.qa_contact != "" %]
            <div id="bz_qa_contact_edit_container" class="bz_default_hidden">
             <span>
               <span id="bz_qa_contact_edit_display">
-              [% INCLUDE user_identity user=> bug.qa_contact %]</span>
+              [% INCLUDE global/user.html.tmpl who = bug.qa_contact %]</span>
               (<a href="#" id="bz_qa_contact_edit_action">edit</a>)
             </span>
           </div>
@@ -593,7 +592,7 @@
             initDefaultCheckbox('qa_contact');
           </script>
         [% ELSE %]
-          [% INCLUDE user_identity user => bug.qa_contact %]
+          [% INCLUDE global/user.html.tmpl who = bug.qa_contact %]
         [% END %]
       </td>
     </tr>
@@ -813,7 +812,7 @@
       <b>Reported</b>:
     </td>
     <td>
-     [% bug.creation_ts FILTER time %] by [% INCLUDE user_identity user => bug.reporter %]
+     [% bug.creation_ts FILTER time %] by [% INCLUDE global/user.html.tmpl who = bug.reporter %]
     </td>
   </tr>
   
@@ -833,11 +832,10 @@
 [%# Block for CC LIST                                                        #%]
 [%############################################################################%]
 [% BLOCK section_cclist %]
-  [% IF user.id %]
     <tr>
-        <td class="field_label">
-          <label for="newcc" accesskey="a"><b>CC List</b>:</label>
-        </td>
+      <td class="field_label">
+        <label for="newcc" accesskey="a"><b>CC List</b>:</label>
+      </td>
       <td>
         [% IF user.id %]
           [% IF NOT bug.cc || NOT bug.cc.contains(user.login) %]
@@ -867,35 +865,35 @@
           [% END %]
         [% END %]
         <span id="cc_edit_area_showhide_container" class="bz_default_hidden">
-          (<a href="#" id="cc_edit_area_showhide">edit</a>)
+          (<a href="#" id="cc_edit_area_showhide">[% IF user.id %]edit[% ELSE %]show[% END %]</a>)
         </span>
         <div id="cc_edit_area">
-          <div>
-            <div>
-              <label for="cc">
-                <b>Add</b>
-              </label>
-            </div>
-            [% INCLUDE global/userselect.html.tmpl
-                id => "newcc"
-                name => "newcc"
-                size => 30
-                multiple => 5
-              %]
-          </div>
-        [% IF bug.cc %]
-          <select id="cc" name="cc" multiple="multiple" size="5">
-          [% FOREACH c = bug.cc %]
-            <option value="[% c FILTER html %]">[% c FILTER html %]</option>
-          [% END %]
-          </select>
+          <br>
           [% IF user.id %]
-            <br>
-            <input type="checkbox" id="removecc" name="removecc">
-            [%%]<label for="removecc">Remove selected CCs</label>
-            <br>
+            <div>
+              <div><label for="cc"><b>Add</b></label></div>
+              [% INCLUDE global/userselect.html.tmpl
+                  id => "newcc"
+                  name => "newcc"
+                  size => 30
+                  multiple => 5
+                %]
+            </div>
           [% END %]
-        [% END %]
+          [% IF bug.cc %]
+            <select id="cc" name="cc" multiple="multiple" size="5">
+              [% FOREACH c = bug.cc %]
+                <option value="[% c FILTER email FILTER html %]">
+                  [% c FILTER email FILTER html %]</option>
+              [% END %]
+            </select>
+            [% IF user.id %]
+              <br>
+              <input type="checkbox" id="removecc" name="removecc">
+              [%%]<label for="removecc">Remove selected CCs</label>
+              <br>
+            [% END %]
+          [% END %]
         </div>
         <script type="text/javascript">
           hideEditableField( 'cc_edit_area_showhide_container', 
@@ -906,7 +904,6 @@
         </script>
       </td>
     </tr>
-  [% END %]
 [% END %]
 
 [%############################################################################%]
@@ -1167,23 +1164,3 @@
   [% value = undef %]
   [% spellcheck = undef %]
 [% END %]
-
-[%############################################################################%]
-[%# Block for user identities. Wraps the information inside of an hCard.     #%]
-[%############################################################################%]
-
-[% BLOCK user_identity %]
-  <span class="vcard">
-    [% FILTER collapse %]
-      [% IF user.name %]
-        <a class="email" href="mailto:[% user.email FILTER html %]" 
-           title="[% user.email FILTER html %]"
-          ><span class="fn">[% user.name FILTER html %]</span
-        ></a>
-      [% ELSE %]
-        <a class="fn email" href="mailto:[% user.email FILTER html %]">
-          [% user.email FILTER html %]</a>
-      [% END %]
-    [% END %]</span>
-[% END %]
-

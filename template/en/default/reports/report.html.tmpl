@@ -96,7 +96,7 @@
       [% PROCESS "reports/report-table.html.tmpl" %]
     [% ELSE %]
       [% IF tbl %]
-        <h2>[% tbl_disp FILTER html %]</h2>
+        <h2>[% tbl_disp FILTER email FILTER html %]</h2>
       [% END %]
       
       [% imageurl = BLOCK %]report.cgi?[% imagebase FILTER html %]&amp;format=

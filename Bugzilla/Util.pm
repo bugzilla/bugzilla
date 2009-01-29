@@ -53,6 +53,7 @@ use Date::Format;
 use DateTime;
 use DateTime::TimeZone;
 use Digest;
+use Email::Address;
 use Scalar::Util qw(tainted);
 use Text::Wrap;
 
@@ -168,6 +169,20 @@ sub html_light_quote {
 
         return $scrubber->scrub($text);
     }
+}
+
+sub email_filter {
+    my ($toencode) = @_;
+    if (!Bugzilla->user->id) {
+        my @emails = Email::Address->parse($toencode);
+        if (scalar @emails) {
+            my @hosts = map { quotemeta($_->host) } @emails;
+            my $hosts_re = join('|', @hosts);
+            $toencode =~ s/\@(?:$hosts_re)//g;
+            return $toencode;
+        }
+    }
+    return $toencode;
 }
 
 # This originally came from CGI.pm, by Lincoln D. Stein
@@ -638,6 +653,7 @@ Bugzilla::Util - Generic utility functions for bugzilla
   html_quote($var);
   url_quote($var);
   xml_quote($var);
+  email_filter($var);
 
   # Functions for decoding
   $rv = url_decode($var);
@@ -754,6 +770,12 @@ is kept separate from html_quote partly for compatibility with previous code
 =item C<url_decode($val)>
 
 Converts the %xx encoding from the given URL back to its original form.
+
+=item C<email_filter>
+
+Removes the hostname from email addresses in the string, if the user
+currently viewing Bugzilla is logged out. If the user is logged-in,
+this filter just returns the input string.
 
 =back
 

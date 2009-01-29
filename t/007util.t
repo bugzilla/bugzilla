@@ -13,11 +13,11 @@
 # The Original Code are the Bugzilla Tests.
 # 
 # The Initial Developer of the Original Code is Zach Lipton
-# Portions created by Zach Lipton are 
-# Copyright (C) 2002 Zach Lipton.  All
-# Rights Reserved.
+# Portions created by Zach Lipton are Copyright (C) 2002 Zach Lipton.
+# All Rights Reserved.
 # 
 # Contributor(s): Zach Lipton <zach@zachlipton.com>
+#                 Max Kanat-Alexander <mkanat@bugzilla.org>
 
 
 #################
@@ -26,11 +26,11 @@
 
 use lib 't';
 use Support::Files;
+use Test::More tests => 16;
 
 BEGIN { 
-        use Test::More tests => 12;
-        use_ok(Bugzilla);
-        use_ok(Bugzilla::Util);
+    use_ok(Bugzilla);
+    use_ok(Bugzilla::Util);
 }
 
 # We need to override user preferences so we can get an expected value when
@@ -64,3 +64,17 @@ is(format_time("2002.11.24 00:05"), "2002-11-24 00:05 $tz",'format_time("2002.11
 is(format_time("2002.11.24 00:05:56"), "2002-11-24 00:05:56 $tz",'format_time("2002.11.24 00:05:56")');
 is(format_time("2002.11.24 00:05:56", "%Y-%m-%d %R"), '2002-11-24 00:05', 'format_time("2002.11.24 00:05:56", "%Y-%m-%d %R") (with no timezone)');
 is(format_time("2002.11.24 00:05:56", "%Y-%m-%d %R %Z"), "2002-11-24 00:05 $tz", 'format_time("2002.11.24 00:05:56", "%Y-%m-%d %R %Z") (with timezone)');
+
+# email_filter
+my %email_strings = (
+    'somebody@somewhere.com' => 'somebody',
+    'Somebody <somebody@somewhere.com>' => 'Somebody <somebody>',
+    'One Person <one@person.com>, Two Person <two@person.com>' 
+        => 'One Person <one>, Two Person <two>',
+    'This string contains somebody@somewhere.com and also this@that.com'
+        => 'This string contains somebody and also this',
+);
+foreach my $input (keys %email_strings) {
+    is(Bugzilla::Util::email_filter($input), $email_strings{$input}, 
+       "email_filter('$input')");
+}

@@ -673,6 +673,9 @@ foreach my $field (Bugzilla->get_fields({ obsolete => 0, buglist => 1 })) {
     my $name = 'bugs.' . $field->name;
     if ($id eq 'assigned_to' || $id eq 'reporter' || $id eq 'qa_contact') {
         $name = 'map_' . $field->name . '.login_name';
+        if (!Bugzilla->user->id) {
+            $name = $dbh->sql_string_until($name, $dbh->quote('@'));
+        }
     }
     elsif ($id eq 'product' || $id eq 'component' || $id eq 'classification') {
         $name = 'map_' . $field->name . 's.name';
@@ -696,15 +699,25 @@ foreach my $field (Bugzilla->get_fields({ obsolete => 0, buglist => 1 })) {
     $columns->{$id} = { 'name' => $name, 'title' => $field->description };
 }
 
-if ($format->{'extension'} eq 'html') {
-    $columns->{assigned_to_realname} = { name => "CASE WHEN map_assigned_to.realname = '' THEN map_assigned_to.login_name ELSE map_assigned_to.realname END AS assigned_to_realname", title => "Assignee" };
-    $columns->{reporter_realname} = { name => "CASE WHEN map_reporter.realname    = '' THEN map_reporter.login_name    ELSE map_reporter.realname    END AS reporter_realname", title => "Reporter" };
-    $columns->{qa_contact_realname} = { name => "CASE WHEN map_qa_contact.realname  = '' THEN map_qa_contact.login_name  ELSE map_qa_contact.realname  END AS qa_contact_realname", title => "QA Contact" };
-} else {
-    $columns->{assigned_to_realname} = { name => "map_assigned_to.realname AS assigned_to_realname", title => "Assignee" };
-    $columns->{reporter_realname} = { name => "map_reporter.realname AS reporter_realname", title => "Reporter" };
-    $columns->{qa_contact_realname} = { name => "map_qa_contact.realname AS qa_contact_realname", title => "QA Contact" };
+foreach my $col (qw(assigned_to reporter qa_contact)) {
+    my $colname = "${col}_realname";
+    if ($format->{'extension'} eq 'html') {
+        my $login = "map_${col}.login_name";
+        if (!Bugzilla->user->id) {
+            $login = $dbh->sql_string_until($login, $dbh->quote('@'));
+        }
+        $columns->{$colname}->{name} =
+            "CASE WHEN map_${col}.realname = '' 
+                  THEN $login ELSE map_${col}.realname 
+                   END AS $colname";
+    }
+    else {
+        $columns->{$colname}->{name} = "map_${col}.realname AS $colname";
+    }
 }
+$columns->{assigned_to_realname}->{title} = "Assignee";
+$columns->{reporter_realname}->{title} = "Reporter";
+$columns->{qa_contact_realname}->{title} = "QA Contact";
 
 Bugzilla::Hook::process("buglist-columns", {'columns' => $columns} );
 

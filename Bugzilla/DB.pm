@@ -342,6 +342,12 @@ sub sql_string_concat {
     return '(' . join(' || ', @params) . ')';
 }
 
+sub sql_string_until {
+    my ($self, $string, $substring) = @_;
+    return "SUBSTRING($string FROM 1 FOR " .
+                      $self->sql_position($substring, $string) . " - 1)";
+}
+
 sub sql_in {
     my ($self, $column_name, $in_list_ref) = @_;
     return " $column_name IN (" . join(',', @$in_list_ref) . ") ";
@@ -1808,6 +1814,25 @@ or values from table columns) together.
 =item B<Returns>
 
 Formatted SQL for concatenating specified strings
+
+=back
+
+=item C<sql_string_until>
+
+=over
+
+=item B<Description>
+
+Returns SQL for truncating a string at the first occurrence of a certain
+substring.
+
+=item B<Params>
+
+Note that both parameters need to be sql-quoted.
+
+=item C<$string> The string we're truncating
+
+=item C<$substring> The substring we're truncating at.
 
 =back
 

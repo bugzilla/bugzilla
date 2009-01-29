@@ -336,12 +336,12 @@
       <th class="rightcell">[% field_descs.cc FILTER html %]:</th>
       <td>
         [% FOREACH c = bug.cc %]
-          [% c FILTER html %][% ", " IF not loop.last() %]
+          [% c FILTER email FILTER html %][% ", " IF not loop.last() %]
         [% END %]
     [% ELSIF name == "reporter" || name == "assigned_to" 
              || name == "qa_contact" %]
       <th class="rightcell">[% field_descs.${name} FILTER html %]:</th>
-      <td>[% bug.${name}.identity FILTER html %]</td>
+      <td>[% bug.${name}.identity FILTER email FILTER html %]</td>
     [% ELSIF name == "flags" %]
         <th class="rightcell">Flags:</th>
         <td>

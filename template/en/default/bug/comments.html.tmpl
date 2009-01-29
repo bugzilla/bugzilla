@@ -188,11 +188,7 @@
         </span>
 
         <span class="bz_comment_user">
-          <span class="vcard">
-            <a class="fn email" 
-               href="mailto:[% comment.author.email FILTER html %]">
-              [% (comment.author.name || comment.author.login) FILTER html %]</a>
-          </span>
+          [% INCLUDE global/user.html.tmpl who = comment.author %]
         </span>
 
         <span class="bz_comment_user_images">
@@ -226,7 +222,8 @@
 [% END %]
 <pre class="bz_comment_text" 
      [% ' id="comment_text_' _ count _ '"' IF mode == "edit" %]>
-  [%- wrapped_comment FILTER quoteUrls(bug.bug_id, comment.already_wrapped) -%]
+  [%- wrapped_comment FILTER email 
+                      FILTER quoteUrls(bug.bug_id, comment.already_wrapped) -%]
 </pre>
     </div>
   [% END %]

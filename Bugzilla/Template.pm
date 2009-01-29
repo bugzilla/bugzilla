@@ -664,6 +664,8 @@ sub create {
 
             html_light => \&Bugzilla::Util::html_light_quote,
 
+            email => \&Bugzilla::Util::email_filter,
+
             # iCalendar contentline filter
             ics => [ sub {
                          my ($context, @args) = @_;

@@ -230,7 +230,7 @@
     in to an account</a> with the appropriate permissions.
 
   [% ELSIF error == "bug_url_invalid" %]
-    [% title = "Invalid Bug URL" %]
+    [% title = "Invalid $terms.Bug URL" %]
     <code>[% url FILTER html %]</code> is not a valid URL to [% terms.abug %].
     [% IF reason == 'http' %]
       URLs must start with "http" or "https".
@@ -242,7 +242,7 @@
     [% END %]
 
   [% ELSIF error == "bug_url_too_long" %]
-    [% title = "Invalid Bug URL" %]
+    [% title = "Invalid $terms.Bug URL" %]
     [% terms.Bug %] URLs can not be longer than 
     [%+ constants.MAX_BUG_URL_LENGTH FILTER none %] characters long.
     <code>[% url FILTER html %]</code> is too long.

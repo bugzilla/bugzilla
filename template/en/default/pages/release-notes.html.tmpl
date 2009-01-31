@@ -19,7 +19,7 @@
 
 [% PROCESS global/variables.none.tmpl %]
 [% INCLUDE global/header.html.tmpl 
-  title = "$terms.Bugzilla 3.2 Release Notes" 
+  title = "$terms.Bugzilla 3.2.1 Release Notes" 
   style_urls = ['skins/standard/release-notes.css'] 
 %]
 
@@ -27,6 +27,8 @@
 
 <ul class="bz_toc">
   <li><a href="#v32_introduction">Introduction</a></li>
+  <li><a href="#v32_point">Updates In This 3.2.x Release</a></li>
+  <li><a href="#v32_security">Security Fixes In This 3.2.x Release</a></li>
   <li><a href="#v32_req">Minimum Requirements</a></li>
   <li><a href="#v32_feat">New Features and Improvements</a></li>
   <li><a href="#v32_issues">Outstanding Issues</a></li>
@@ -48,6 +50,59 @@
   <a href="#v32_previous">previous versions</a> in between your version
   and this one, <strong>particularly the "Notes For Upgraders" section of each
   version's release notes</strong>.</p>
+
+<h2><a name="v32_point">Updates in this 3.2.x Release</a></h2>
+
+<p>This section describes what's changed in the most recent b<!-- -->ug-fix
+  releases of [% terms.Bugzilla %] after 3.2. We only list the
+  most important fixes in each release. If you want a detailed list of
+  <em>everything</em> that's changed in each version, you should use our
+  <a href="http://www.bugzilla.org/status/changes.html">Change Log 
+  Page</a>.</p>
+
+<h3>3.2.1</h3>
+
+<ul>
+  <li>Attachments, charts, and graphs would sometimes be garbled on Windows.
+  (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=464992">[% terms.Bug %] 464992</a>)</li>
+
+  <li>Saving changes to parameters would sometimes fail silently (particularly
+    on Windows when the web server didn't have the right permissions to
+    update the <code>params</code> file). [% terms.Bugzilla %] will now
+    throw an error in this case, telling you what is wrong.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=347707">[% terms.Bug %] 347707</a>)</li>
+
+  <li>If you were using the <code>usemenuforusers</code> parameter,
+    and [% terms.abug %] was assigned to (or had a QA Contact of) a disabled
+    user, that field would be reset to the first user in the list when
+    updating [% terms.abug %].
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=465589">[% terms.Bug %] 465589</a>)</li>
+
+  <li>If you were using the <code>PROJECT</code> environment variable
+    to have multiple [% terms.Bugzilla %] installations using one codebase,
+    project-specific templates were being ignored. 
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=467324">[% terms.Bug %] 467324</a>)</li>
+
+  <li>Some versions of the SOAP::Lite Perl module had a b[% %]ug that caused
+    [%+ terms.Bugzilla %]'s XML-RPC service to break. 
+    <code>checksetup.pl</code> now checks for these bad versions and 
+    will reject them.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=468009">[% terms.Bug %] 468009</a>)</li>
+
+  <li>The font sizes in various places were too small, when using the
+    Classic skin.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=469136">[% terms.Bug %] 469136</a>)</li>
+</ul>
+
+<h2><a name="v32_security">Security Fixes In This 3.2.x Release</a></h2>
+
+<h3>3.2.1</h3>
+
+<p>This release contains several security fixes. One fix may break any
+  automated scripts you have that are loading <kbd>process_bug.cgi</kbd>
+  directly. We recommend that you read the entire 
+  <a href="http://www.bugzilla.org/security/2.22.7/">Security Advisory</a>
+  for this release.</p>
 
 <h2><a name="v32_req"></a>Minimum Requirements</h2>
 
@@ -87,7 +142,7 @@
   features of [% terms.Bugzilla %]:</p>
 
 [% INCLUDE req_table reqs = OPTIONAL_MODULES
-                     new  = ['SASL-Authen', 'RadiusPerl']
+                     new  = ['Authen-SASL', 'RadiusPerl']
                      updated = []
                      include_feature = 1 %]
 
@@ -305,7 +360,7 @@
   <li><strong>Authentication</strong>: [% terms.Bugzilla %] now supports 
     RADIUS authentication.</li>
 
-  <li><strong>Security</strong>: The login cookies is now created as 
+  <li><strong>Security</strong>: The login cookie is now created as 
     "HTTPOnly" so that it can't be read by possibly malicious scripts. 
     Also, if SSL is enabled on your installation, the login cookie is
     now only sent over SSL connections.</li>

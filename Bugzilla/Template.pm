@@ -39,12 +39,13 @@ use Bugzilla::Install::Requirements;
 use Bugzilla::Util;
 use Bugzilla::User;
 use Bugzilla::Error;
-use MIME::Base64;
+use Bugzilla::Token;
 use Bugzilla::Bug;
 
 use Cwd qw(abs_path);
 # for time2str - replace by TT Date plugin??
 use Date::Format ();
+use MIME::Base64;
 use File::Basename qw(dirname);
 use File::Find;
 use File::Path qw(rmtree mkpath);
@@ -821,6 +822,9 @@ sub create {
                 require Bugzilla::BugMail;
                 Bugzilla::BugMail::Send($id, $mailrecipients);
             },
+
+            # Allow templates to generate a token themselves.
+            'issue_hash_token' => \&Bugzilla::Token::issue_hash_token,
 
             # These don't work as normal constants.
             DB_MODULE        => \&Bugzilla::Constants::DB_MODULE,

@@ -85,6 +85,7 @@
 [% IF current_tab.saveable %]
   <form name="userprefsform" method="post" action="userprefs.cgi">
     <input type="hidden" name="tab" value="[% current_tab.name %]">
+    <input type="hidden" name="token" value="[% token FILTER html %]">
 [% END %]
 
 [% PROCESS "account/prefs/${current_tab.name}.html.tmpl" 

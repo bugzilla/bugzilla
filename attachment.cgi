@@ -523,8 +523,10 @@ sub view
     $filename =~ s/\\/\\\\/g; # escape backslashes
     $filename =~ s/"/\\"/g; # escape quotes
 
+    my $disposition = Param('allow_attachment_display') ? 'inline' : 'attachment';
+
     print $cgi->header(-type=>"$contenttype; name=\"$filename\"",
-                       -content_disposition=> "inline; filename=\"$filename\"",
+                       -content_disposition=> "$disposition; filename=\"$filename\"",
                        -content_length => $filesize);
 
     if ($thedata) {

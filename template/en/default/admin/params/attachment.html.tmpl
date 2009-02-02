@@ -25,6 +25,15 @@
 %]
 
 [% param_descs = {
+  allow_attachment_display =>
+                  "If this option is on, users will be able to view attachments " _
+                  "from their browser, if their browser supports the attachment's " _
+                  "MIME type. If this option is off, users are forced to download " _
+                  "attachments, even if the browser is able to display them." _
+                  "<p>This is a security restriction for installations where " _
+                  "untrusted users may upload attachments that could be potentially " _
+                  "damaging if viewed directly in the browser.</p>",
+
   allow_attach_url => "If this option is on, it will be possible to " _
                       "specify a URL when creating an attachment and " _
                       "treat the URL itself as if it were an attachment.",

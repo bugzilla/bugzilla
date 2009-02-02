@@ -262,7 +262,30 @@
         </small>
       </td>
 
-      [% IF isviewable %]
+      [% IF attachment.isurl %]
+        <td width="75%">
+          <a href="[% attachment.data FILTER html %]">
+            [% IF attachment.datasize < 120 %]
+              [% attachment.data FILTER html %]
+            [% ELSE %]
+              [% attachment.data FILTER truncate(80) FILTER html %]
+              &nbsp;...
+              [% attachment.data.match(".*(.{20})$").0 FILTER html %]
+            [% END %]
+          </a>
+        </td>
+      [% ELSIF !Param("allow_attachment_display") %]
+        <td id="view_disabled" width="50%">
+          <p><b>
+            The attachment is not viewable in your browser due to security
+            restrictions enabled by [% terms.Bugzilla %].
+          </b></p>
+          <p><b>
+            In order to view the attachment, you first have to
+            <a href="attachment.cgi?id=[% attachment.id %]">download it</a>.
+          </b></p>
+        </td>
+      [% ELSIF isviewable %]
         <td width="75%">
           <textarea id="editFrame" name="comment" wrap="soft" cols="80"
                     style="height: 400px; width: 100%; display: none;"></textarea>
@@ -286,18 +309,6 @@
             }
             //-->
           </script>
-        </td>
-      [% ELSIF attachment.isurl %]
-        <td width="75%">
-          <a href="[% attachment.data FILTER html %]">
-            [% IF attachment.datasize < 120 %]
-              [% attachment.data FILTER html %]
-            [% ELSE %]
-              [% attachment.data FILTER truncate(80) FILTER html %]
-              &nbsp;...
-              [% attachment.data.match(".*(.{20})$").0 FILTER html %]
-            [% END %]
-          </a>
         </td>
       [% ELSE %]
         <td id="noview" width="50%">

@@ -47,6 +47,7 @@ use Bugzilla::Error;
 use Bugzilla::Mailer;
 use Bugzilla::User;
 use Bugzilla::Util;
+use Bugzilla::Token;
 
 #############
 # Constants #
@@ -201,6 +202,7 @@ sub process_bug {
         $cgi->param(-name => $field, -value => $fields{$field});
     }
     $cgi->param('longdesclength', scalar $bug->longdescs);
+    $cgi->param('token', issue_hash_token([$bug->id, $bug->delta_ts]));
 
     require 'process_bug.cgi';
 }

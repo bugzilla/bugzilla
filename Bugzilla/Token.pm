@@ -39,10 +39,12 @@ use Bugzilla::User;
 use Date::Format;
 use Date::Parse;
 use File::Basename;
+use Digest::MD5 qw(md5_hex);
 
 use base qw(Exporter);
 
-@Bugzilla::Token::EXPORT = qw(issue_session_token check_token_data delete_token);
+@Bugzilla::Token::EXPORT = qw(issue_session_token check_token_data delete_token
+                              issue_hash_token check_hash_token);
 
 ################################################################################
 # Public Functions
@@ -168,6 +170,53 @@ sub issue_session_token {
 
     my $data = shift;
     return _create_token(Bugzilla->user->id, 'session', $data);
+}
+
+sub issue_hash_token {
+    my ($data, $time) = @_;
+    $data ||= [];
+    $time ||= time();
+
+    # The concatenated string is of the form
+    # token creation time + site-wide secret + user ID + data
+    my @args = ($time, Bugzilla->localconfig->{'site_wide_secret'}, Bugzilla->user->id, @$data);
+    my $token = md5_hex(join('*', @args));
+
+    # Prepend the token creation time, unencrypted, so that the token
+    # lifetime can be validated.
+    return $time . '-' . $token;
+}
+
+sub check_hash_token {
+    my ($token, $data) = @_;
+    $data ||= [];
+    my ($time, $expected_token);
+
+    if ($token) {
+        ($time, undef) = split(/-/, $token);
+        # Regenerate the token based on the information we have.
+        $expected_token = issue_hash_token($data, $time);
+    }
+
+    if (!$token
+        || $expected_token ne $token
+        || time() - $time > MAX_TOKEN_AGE * 86400)
+    {
+        my $template = Bugzilla->template;
+        my $vars = {};
+        $vars->{'script_name'} = basename($0);
+        $vars->{'token'} = issue_hash_token($data);
+        $vars->{'reason'} = (!$token) ?                   'missing_token' :
+                            ($expected_token ne $token) ? 'invalid_token' :
+                                                          'expired_token';
+        print Bugzilla->cgi->header();
+        $template->process('global/confirm-action.html.tmpl', $vars)
+          || ThrowTemplateError($template->error());
+        exit;
+    }
+
+    # If we come here, then the token is valid and not too old.
+    return 1;
 }
 
 sub CleanTokenTable {
@@ -310,7 +359,7 @@ sub delete_token {
 # Note: this routine must not be called while tables are locked as it will try
 # to lock some tables itself, see CleanTokenTable().
 sub check_token_data {
-    my ($token, $expected_action) = @_;
+    my ($token, $expected_action, $alternate_script) = @_;
     my $user = Bugzilla->user;
     my $template = Bugzilla->template;
     my $cgi = Bugzilla->cgi;
@@ -330,6 +379,7 @@ sub check_token_data {
         $vars->{'token_action'} = $token_action;
         $vars->{'expected_action'} = $expected_action;
         $vars->{'script_name'} = basename($0);
+        $vars->{'alternate_script'} = $alternate_script || basename($0);
 
         # Now is a good time to remove old tokens from the DB.
         CleanTokenTable();

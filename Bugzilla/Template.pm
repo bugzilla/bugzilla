@@ -41,6 +41,7 @@ use Bugzilla::Util;
 use Bugzilla::User;
 use Bugzilla::Error;
 use Bugzilla::Status;
+use Bugzilla::Token;
 use Bugzilla::Template::Parser;
 
 use Cwd qw(abs_path);
@@ -764,6 +765,9 @@ sub create {
                 $docs_urlbase =~ s/\%lang\%/$language/;
                 return $docs_urlbase;
             },
+
+            # Allow templates to generate a token themselves.
+            'issue_hash_token' => \&Bugzilla::Token::issue_hash_token,
 
             # These don't work as normal constants.
             DB_MODULE        => \&Bugzilla::Constants::DB_MODULE,

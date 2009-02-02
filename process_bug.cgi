@@ -59,6 +59,7 @@ use Bugzilla::Component;
 use Bugzilla::Keyword;
 use Bugzilla::Flag;
 use Bugzilla::Status;
+use Bugzilla::Token;
 
 use Storable qw(dclone);
 
@@ -158,10 +159,6 @@ if (defined $cgi->param('dontchange')) {
 # reference to flags if $cgi->param('id') is undefined.
 Bugzilla::Flag::validate($cgi->param('id'));
 
-######################################################################
-# End Data/Security Validation
-######################################################################
-
 print $cgi->header() unless Bugzilla->usage_mode == USAGE_MODE_EMAIL;
 
 # Check for a mid-air collision. Currently this only works when updating
@@ -184,12 +181,30 @@ if (defined $cgi->param('delta_ts')
     $vars->{'comments'} = Bugzilla::Bug::GetComments($first_bug->id,
                                                      "oldest_to_newest");
     $vars->{'bug'} = $first_bug;
+    # The token contains the old delta_ts. We need a new one.
+    $cgi->param('token', issue_hash_token([$first_bug->id, $first_bug->delta_ts]));
     
     # Warn the user about the mid-air collision and ask them what to do.
     $template->process("bug/process/midair.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
     exit;
 }
+
+# We couldn't do this check earlier as we first had to validate bug IDs
+# and display the mid-air collision page if delta_ts changed.
+# If we do a mass-change, we use session tokens.
+my $token = $cgi->param('token');
+
+if ($cgi->param('id')) {
+    check_hash_token($token, [$first_bug->id, $first_bug->delta_ts]);
+}
+else {
+    check_token_data($token, 'buglist_mass_change', 'query.cgi');
+}
+
+######################################################################
+# End Data/Security Validation
+######################################################################
 
 $vars->{'title_tag'} = "bug_processed";
 

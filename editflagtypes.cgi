@@ -80,7 +80,7 @@ elsif ($action eq 'edit')           { edit($action);    }
 elsif ($action eq 'insert')         { insert($token);   }
 elsif ($action eq 'update')         { update($token);   }
 elsif ($action eq 'confirmdelete')  { confirmDelete();  } 
-elsif ($action eq 'delete')         { deleteType(undef, $token); }
+elsif ($action eq 'delete')         { deleteType($token); }
 elsif ($action eq 'deactivate')     { deactivate($token); }
 else { 
     ThrowCodeError("action_unrecognized", { action => $action });
@@ -445,9 +445,8 @@ sub update {
 
 
 sub confirmDelete {
-  my $flag_type = validateID();
+    my $flag_type = validateID();
 
-  if ($flag_type->flag_count) {
     $vars->{'flag_type'} = $flag_type;
     $vars->{'token'} = issue_session_token('delete_flagtype');
     # Return the appropriate HTTP response headers.
@@ -456,20 +455,13 @@ sub confirmDelete {
     # Generate and return the UI (HTML page) from the appropriate template.
     $template->process("admin/flag-type/confirm-delete.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
-  } 
-  else {
-    # We should *always* ask if the admin really wants to delete
-    # a flagtype, even if there is no flag belonging to this type.
-    my $token = issue_session_token('delete_flagtype');
-    deleteType($flag_type, $token);
-  }
 }
 
 
 sub deleteType {
-    my $flag_type = shift || validateID();
     my $token = shift;
     check_token_data($token, 'delete_flagtype');
+    my $flag_type = validateID();
     my $id = $flag_type->id;
     my $dbh = Bugzilla->dbh;
 

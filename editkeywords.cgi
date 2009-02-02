@@ -149,26 +149,23 @@ if ($action eq 'update') {
     exit;
 }
 
-
-if ($action eq 'delete') {
+if ($action eq 'del') {
     my $keyword =  new Bugzilla::Keyword($key_id)
         || ThrowCodeError('invalid_keyword_id', { id => $key_id });
 
     $vars->{'keyword'} = $keyword;
+    $vars->{'token'} = issue_session_token('delete_keyword');
 
-    # We need this token even if there is no bug using this keyword.
-    $token = issue_session_token('delete_keyword');
+    print $cgi->header();
+    $template->process("admin/keywords/confirm-delete.html.tmpl", $vars)
+      || ThrowTemplateError($template->error());
+    exit;
+}
 
-    if (!$cgi->param('reallydelete') && $keyword->bug_count) {
-        $vars->{'token'} = $token;
-
-        print $cgi->header();
-        $template->process("admin/keywords/confirm-delete.html.tmpl", $vars)
-            || ThrowTemplateError($template->error());
-        exit;
-    }
-    # We cannot do this check earlier as we have to check 'reallydelete' first.
+if ($action eq 'delete') {
     check_token_data($token, 'delete_keyword');
+    my $keyword =  new Bugzilla::Keyword($key_id)
+        || ThrowCodeError('invalid_keyword_id', { id => $key_id });
 
     $dbh->do('DELETE FROM keywords WHERE keywordid = ?', undef, $keyword->id);
     $dbh->do('DELETE FROM keyworddefs WHERE id = ?', undef, $keyword->id);

@@ -27,6 +27,7 @@
 #                 Greg Hendricks <ghendricks@novell.com>
 #                 Frédéric Buclin <LpSolit@gmail.com>
 #                 Marc Schumann <wurblzap@gmail.com>
+#                 Byron Jones <bugzilla@glob.com.au>
 
 ################################################################################
 # Script Initialization
@@ -51,8 +52,6 @@ use Bugzilla::Attachment::PatchReader;
 use Bugzilla::Token;
 use Bugzilla::Keyword;
 
-Bugzilla->login();
-
 # For most scripts we don't make $cgi and $template global variables. But
 # when preparing Bugzilla for mod_perl, this script used these
 # variables in so many subroutines that it was easier to just
@@ -73,13 +72,27 @@ local our $vars = {};
 # Determine whether to use the action specified by the user or the default.
 my $action = $cgi->param('action') || 'view';
 
+# You must use the appropriate urlbase/sslbase param when doing anything
+# but viewing an attachment.
+if ($action ne 'view') {
+    my $urlbase = Bugzilla->params->{'urlbase'};
+    my $sslbase = Bugzilla->params->{'sslbase'};
+    my $path_regexp = $sslbase ? qr/^(\Q$urlbase\E|\Q$sslbase\E)/ : qr/^\Q$urlbase\E/;
+    if (use_attachbase() && $cgi->self_url !~ /$path_regexp/) {
+        $cgi->redirect_to_urlbase;
+    }
+    Bugzilla->login();
+}
+
 # Determine if PatchReader is installed
 eval {
     require PatchReader;
     $vars->{'patchviewerinstalled'} = 1;
 };
 
-if ($action eq "view")  
+# When viewing an attachment, do not request credentials if we are on
+# the alternate host. Let view() decide when to call Bugzilla->login.
+if ($action eq "view")
 {
     view();
 }
@@ -131,7 +144,8 @@ exit;
 # Validates an attachment ID. Optionally takes a parameter of a form
 # variable name that contains the ID to be validated. If not specified,
 # uses 'id'.
-# 
+# If the second parameter is true, the attachment ID will be validated,
+# however the current user's access to the attachment will not be checked.
 # Will throw an error if 1) attachment ID is not a valid number,
 # 2) attachment does not exist, or 3) user isn't allowed to access the
 # attachment.
@@ -139,8 +153,8 @@ exit;
 # Returns an attachment object.
 
 sub validateID {
-    my $param = @_ ? $_[0] : 'id';
-    my $user = Bugzilla->user;
+    my($param, $dont_validate_access) = @_;
+    $param ||= 'id';
 
     # If we're not doing interdiffs, check if id wasn't specified and
     # prompt them with a page that allows them to choose an attachment.
@@ -164,13 +178,33 @@ sub validateID {
     my $attachment = Bugzilla::Attachment->get($attach_id)
       || ThrowUserError("invalid_attach_id", { attach_id => $attach_id });
 
+    return $attachment if ($dont_validate_access || check_can_access($attachment));
+}
+
+# Make sure the current user has access to the specified attachment.
+sub check_can_access {
+    my $attachment = shift;
+    my $user = Bugzilla->user;
+
     # Make sure the user is authorized to access this attachment's bug.
     ValidateBugID($attachment->bug_id);
     if ($attachment->isprivate && $user->id != $attachment->attacher->id && !$user->is_insider) {
         ThrowUserError('auth_failure', {action => 'access',
                                         object => 'attachment'});
     }
-    return $attachment;
+    return 1;
+}
+
+# Determines if the attachment is public -- that is, if users who are
+# not logged in have access to the attachment
+sub attachmentIsPublic {
+    my $attachment = shift;
+
+    return 0 if Bugzilla->params->{'requirelogin'};
+    return 0 if $attachment->isprivate;
+
+    my $anon_user = new Bugzilla::User;
+    return $anon_user->can_see_bug($attachment->bug_id);
 }
 
 # Validates format of a diff/interdiff. Takes a list as an parameter, which
@@ -221,8 +255,60 @@ sub validateCanChangeBug
 
 # Display an attachment.
 sub view {
-    # Retrieve and validate parameters
-    my $attachment = validateID();
+    my $attachment;
+
+    if (use_attachbase()) {
+        $attachment = validateID(undef, 1);
+        # Replace %bugid% by the ID of the bug the attachment belongs to, if present.
+        my $attachbase = Bugzilla->params->{'attachment_base'};
+        my $bug_id = $attachment->bug_id;
+        $attachbase =~ s/%bugid%/$bug_id/;
+        my $path = 'attachment.cgi?id=' . $attachment->id;
+
+        # Make sure the attachment is served from the correct server.
+        if ($cgi->self_url !~ /^\Q$attachbase\E/) {
+            # We couldn't call Bugzilla->login earlier as we first had to make sure
+            # we were not going to request credentials on the alternate host.
+            Bugzilla->login();
+            if (attachmentIsPublic($attachment)) {
+                # No need for a token; redirect to attachment base.
+                print $cgi->redirect(-location => $attachbase . $path);
+                exit;
+            } else {
+                # Make sure the user can view the attachment.
+                check_can_access($attachment);
+                # Create a token and redirect.
+                my $token = url_quote(issue_session_token($attachment->id));
+                print $cgi->redirect(-location => $attachbase . "$path&t=$token");
+                exit;
+            }
+        } else {
+            # No need to validate the token for public attachments. We cannot request
+            # credentials as we are on the alternate host.
+            if (!attachmentIsPublic($attachment)) {
+                my $token = $cgi->param('t');
+                my ($userid, undef, $token_attach_id) = Bugzilla::Token::GetTokenData($token);
+                unless ($userid
+                        && detaint_natural($token_attach_id)
+                        && ($token_attach_id == $attachment->id))
+                {
+                    # Not a valid token.
+                    print $cgi->redirect('-location' => correct_urlbase() . $path);
+                    exit;
+                }
+                # Change current user without creating cookies.
+                Bugzilla->set_user(new Bugzilla::User($userid));
+                # Tokens are single use only, delete it.
+                delete_token($token);
+            }
+        }
+    } else {
+        # No alternate host is used. Request credentials if required.
+        Bugzilla->login();
+        $attachment = validateID();
+    }
+
+    # At this point, Bugzilla->login has been called if it had to.
     my $contenttype = $attachment->contenttype;
     my $filename = $attachment->filename;
 

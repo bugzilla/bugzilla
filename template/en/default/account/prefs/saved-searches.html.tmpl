@@ -108,7 +108,8 @@
             Remove from <a href="editwhines.cgi">whining</a> first
           [% ELSE %]
             <a href="buglist.cgi?cmdtype=dorem&amp;remaction=forget&amp;namedcmd=
-                     [% q.name FILTER url_quote %]">Forget</a>
+                     [% q.name FILTER url_quote %]&amp;token=
+                     [% issue_hash_token([q.id, q.name]) FILTER url_quote %]">Forget</a>
           [% END %]
         </td>
         <td align="center">

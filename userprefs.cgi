@@ -443,6 +443,9 @@ trick_taint($current_tab_name);
 
 $vars->{'current_tab_name'} = $current_tab_name;
 
+my $token = $cgi->param('token');
+check_token_data($token, 'edit_user_prefs') if $cgi->param('dosave');
+
 # Do any saving, and then display the current tab.
 SWITCH: for ($current_tab_name) {
     /^account$/ && do {
@@ -471,6 +474,11 @@ SWITCH: for ($current_tab_name) {
     };
     ThrowUserError("unknown_tab",
                    { current_tab_name => $current_tab_name });
+}
+
+delete_token($token) if $cgi->param('dosave');
+if ($current_tab_name ne 'permissions') {
+    $vars->{'token'} = issue_session_token('edit_user_prefs');
 }
 
 # Generate and return the UI (HTML page) from the appropriate template.

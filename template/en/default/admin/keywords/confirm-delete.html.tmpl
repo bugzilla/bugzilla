@@ -31,7 +31,7 @@
 <p>
   [% IF keyword.bug_count == 1 %]
     There is one [% terms.bug %] with this keyword set.
-  [% ELSE %]
+  [% ELSIF keyword.bug_count > 1 %]
     There are [% keyword.bug_count FILTER html %] [%+ terms.bugs %] with
     this keyword set.
   [% END %]
@@ -43,7 +43,6 @@
 <form method="post" action="editkeywords.cgi">
   <input type="hidden" name="id" value="[% keyword.id FILTER html %]">
   <input type="hidden" name="action" value="delete">
-  <input type="hidden" name="reallydelete" value="1">
   <input type="hidden" name="token" value="[% token FILTER html %]">
   <input type="submit" id="delete"
          value="Yes, really delete the keyword">

@@ -27,6 +27,7 @@
 #                 Greg Hendricks <ghendricks@novell.com>
 #                 Frédéric Buclin <LpSolit@gmail.com>
 #                 Marc Schumann <wurblzap@gmail.com>
+#                 Byron Jones <bugzilla@glob.com.au>
 
 ################################################################################
 # Script Initialization
@@ -50,8 +51,6 @@ use Bugzilla::Attachment;
 use Bugzilla::Attachment::PatchReader;
 use Bugzilla::Token;
 
-Bugzilla->login();
-
 # For most scripts we don't make $cgi and $template global variables. But
 # when preparing Bugzilla for mod_perl, this script used these
 # variables in so many subroutines that it was easier to just
@@ -72,7 +71,21 @@ local our $vars = {};
 # Determine whether to use the action specified by the user or the default.
 my $action = $cgi->param('action') || 'view';
 
-if ($action eq "view")  
+# You must use the appropriate urlbase/sslbase param when doing anything
+# but viewing an attachment.
+if ($action ne 'view') {
+    my $urlbase = Bugzilla->params->{'urlbase'};
+    my $sslbase = Bugzilla->params->{'sslbase'};
+    my $path_regexp = $sslbase ? qr/^(\Q$urlbase\E|\Q$sslbase\E)/ : qr/^\Q$urlbase\E/;
+    if (use_attachbase() && $cgi->self_url !~ /$path_regexp/) {
+        $cgi->redirect_to_urlbase;
+    }
+    Bugzilla->login();
+}
+
+# When viewing an attachment, do not request credentials if we are on
+# the alternate host. Let view() decide when to call Bugzilla->login.
+if ($action eq "view")
 {
     view();
 }
@@ -124,7 +137,8 @@ exit;
 # Validates an attachment ID. Optionally takes a parameter of a form
 # variable name that contains the ID to be validated. If not specified,
 # uses 'id'.
-# 
+# If the second parameter is true, the attachment ID will be validated,
+# however the current user's access to the attachment will not be checked.
 # Will throw an error if 1) attachment ID is not a valid number,
 # 2) attachment does not exist, or 3) user isn't allowed to access the
 # attachment.
@@ -133,17 +147,14 @@ exit;
 # attachment id, and the 2nd item is the bug id corresponding to the
 # attachment.
 # 
-sub validateID
-{
-    my $param = @_ ? $_[0] : 'id';
-    my $dbh = Bugzilla->dbh;
-    my $user = Bugzilla->user;
+sub validateID {
+    my($param, $dont_validate_access) = @_;
+    $param ||= 'id';
 
     # If we're not doing interdiffs, check if id wasn't specified and
     # prompt them with a page that allows them to choose an attachment.
     # Happens when calling plain attachment.cgi from the urlbar directly
     if ($param eq 'id' && !$cgi->param('id')) {
-
         print $cgi->header();
         $template->process("attachment/choose.html.tmpl", $vars) ||
             ThrowTemplateError($template->error());
@@ -159,22 +170,37 @@ sub validateID
      || ThrowUserError("invalid_attach_id", { attach_id => $cgi->param($param) });
   
     # Make sure the attachment exists in the database.
-    my ($bugid, $isprivate, $submitter_id) = $dbh->selectrow_array(
-                                    "SELECT bug_id, isprivate, submitter_id
-                                     FROM attachments 
-                                     WHERE attach_id = ?",
-                                     undef, $attach_id);
-    ThrowUserError("invalid_attach_id", { attach_id => $attach_id }) 
-        unless $bugid;
+    my $attachment = Bugzilla::Attachment->get($attach_id)
+      || ThrowUserError("invalid_attach_id", { attach_id => $attach_id });
+
+    return $attachment if ($dont_validate_access || check_can_access($attachment));
+}
+
+# Make sure the current user has access to the specified attachment.
+sub check_can_access {
+    my $attachment = shift;
+    my $user = Bugzilla->user;
 
     # Make sure the user is authorized to access this attachment's bug.
-    ValidateBugID($bugid);
-    if ($isprivate && $user->id != $submitter_id && !$user->is_insider) {
+    ValidateBugID($attachment->bug_id);
+    if ($attachment->isprivate && $user->id != $attachment->attacher->id
+        && !$user->is_insider) {
         ThrowUserError('auth_failure', {action => 'access',
                                         object => 'attachment'});
     }
+    return 1;
+}
 
-    return ($attach_id, $bugid);
+# Determines if the attachment is public -- that is, if users who are
+# not logged in have access to the attachment
+sub attachmentIsPublic {
+    my $attachment = shift;
+
+    return 0 if Bugzilla->params->{'requirelogin'};
+    return 0 if $attachment->isprivate;
+
+    my $anon_user = new Bugzilla::User;
+    return $anon_user->can_see_bug($attachment->bug_id);
 }
 
 # Validates format of a diff/interdiff. Takes a list as an parameter, which
@@ -288,17 +314,63 @@ sub isViewable
 ################################################################################
 
 # Display an attachment.
-sub view
-{
-    # Retrieve and validate parameters
-    my ($attach_id) = validateID();
-    my $dbh = Bugzilla->dbh;
-    
-    # Retrieve the attachment content and its content type from the database.
-    my ($contenttype, $filename, $thedata) = $dbh->selectrow_array(
-            "SELECT mimetype, filename, thedata FROM attachments " .
-            "INNER JOIN attach_data ON id = attach_id " .
-            "WHERE attach_id = ?", undef, $attach_id);
+sub view {
+    my $attachment;
+
+    if (use_attachbase()) {
+        $attachment = validateID(undef, 1);
+        # Replace %bugid% by the ID of the bug the attachment belongs to, if present.
+        my $attachbase = Bugzilla->params->{'attachment_base'};
+        my $bug_id = $attachment->bug_id;
+        $attachbase =~ s/%bugid%/$bug_id/;
+        my $path = 'attachment.cgi?id=' . $attachment->id;
+
+        # Make sure the attachment is served from the correct server.
+        if ($cgi->self_url !~ /^\Q$attachbase\E/) {
+            # We couldn't call Bugzilla->login earlier as we first had to make sure
+            # we were not going to request credentials on the alternate host.
+            Bugzilla->login();
+            if (attachmentIsPublic($attachment)) {
+                # No need for a token; redirect to attachment base.
+                print $cgi->redirect(-location => $attachbase . $path);
+                exit;
+            } else {
+                # Make sure the user can view the attachment.
+                check_can_access($attachment);
+                # Create a token and redirect.
+                my $token = url_quote(issue_session_token($attachment->id));
+                print $cgi->redirect(-location => $attachbase . "$path&t=$token");
+                exit;
+            }
+        } else {
+            # No need to validate the token for public attachments. We cannot request
+            # credentials as we are on the alternate host.
+            if (!attachmentIsPublic($attachment)) {
+                my $token = $cgi->param('t');
+                my ($userid, undef, $token_attach_id) = Bugzilla::Token::GetTokenData($token);
+                unless ($userid
+                        && detaint_natural($token_attach_id)
+                        && ($token_attach_id == $attachment->id))
+                {
+                    # Not a valid token.
+                    print $cgi->redirect('-location' => correct_urlbase() . $path);
+                    exit;
+                }
+                # Change current user without creating cookies.
+                Bugzilla->set_user(new Bugzilla::User($userid));
+                # Tokens are single use only, delete it.
+                delete_token($token);
+            }
+        }
+    } else {
+        # No alternate host is used. Request credentials if required.
+        Bugzilla->login();
+        $attachment = validateID();
+    }
+
+    # At this point, Bugzilla->login has been called if it had to.
+    my $contenttype = $attachment->contenttype;
+    my $filename = $attachment->filename;
    
     # Bug 111522: allow overriding content-type manually in the posted form
     # params.
@@ -311,56 +383,26 @@ sub view
     }
 
     # Return the appropriate HTTP response headers.
+    $attachment->datasize || ThrowUserError("attachment_removed");
+
     $filename =~ s/^.*[\/\\]//;
-    my $filesize = length($thedata);
-    # A zero length attachment in the database means the attachment is 
-    # stored in a local file
-    if ($filesize == 0)
-    {
-        my $hash = ($attach_id % 100) + 100;
-        $hash =~ s/.*(\d\d)$/group.$1/;
-        if (open(AH, bz_locations()->{'attachdir'} . "/$hash/attachment.$attach_id")) {
-            binmode AH;
-            $filesize = (stat(AH))[7];
-        }
-    }
-    if ($filesize == 0)
-    {
-        ThrowUserError("attachment_removed");
-    }
-
-
     # escape quotes and backslashes in the filename, per RFCs 2045/822
     $filename =~ s/\\/\\\\/g; # escape backslashes
     $filename =~ s/"/\\"/g; # escape quotes
 
     print $cgi->header(-type=>"$contenttype; name=\"$filename\"",
                        -content_disposition=> "inline; filename=\"$filename\"",
-                       -content_length => $filesize);
+                       -content_length => $attachment->datasize);
 
-    if ($thedata) {
-        print $thedata;
-    } else {
-        while (<AH>) {
-            print $_;
-        }
-        close(AH);
-    }
-
+    print $attachment->data;
 }
 
 sub interdiff {
     # Retrieve and validate parameters
-    my ($old_id) = validateID('oldid');
-    my ($new_id) = validateID('newid');
+    my $old_attachment = validateID('oldid');
+    my $new_attachment = validateID('newid');
     my $format = validateFormat('html', 'raw');
     my $context = validateContext();
-
-    # XXX - validateID should be replaced by Attachment::check_attachment()
-    # and should return an attachment object. This would save us a lot of
-    # trouble.
-    my $old_attachment = Bugzilla::Attachment->get($old_id);
-    my $new_attachment = Bugzilla::Attachment->get($new_id);
 
     Bugzilla::Attachment::PatchReader::process_interdiff(
         $old_attachment, $new_attachment, $format, $context);
@@ -368,11 +410,9 @@ sub interdiff {
 
 sub diff {
     # Retrieve and validate parameters
-    my ($attach_id) = validateID();
+    my $attachment = validateID();
     my $format = validateFormat('html', 'raw');
     my $context = validateContext();
-
-    my $attachment = Bugzilla::Attachment->get($attach_id);
 
     # If it is not a patch, view normally.
     if (!$attachment->ispatch) {
@@ -538,10 +578,8 @@ sub insert
 # is private and the user does not belong to the insider group.
 # Validations are done later when the user submits changes.
 sub edit {
-  my ($attach_id) = validateID();
-  my $dbh = Bugzilla->dbh;
+  my $attachment = validateID();
 
-  my $attachment = Bugzilla::Attachment->get($attach_id);
   my $isviewable = !$attachment->isurl && isViewable($attachment->contenttype);
 
   # Retrieve a list of attachments for this bug as well as a summary of the bug
@@ -551,6 +589,7 @@ sub edit {
   # We only want attachment IDs.
   @$bugattachments = map { $_->id } @$bugattachments;
 
+  my $dbh = Bugzilla->dbh;
   my ($bugsummary, $product_id, $component_id) =
       $dbh->selectrow_array('SELECT short_desc, product_id, component_id
                                FROM bugs
@@ -596,9 +635,11 @@ sub update
 
     # Retrieve and validate parameters
     ValidateComment(scalar $cgi->param('comment'));
-    my ($attach_id, $bugid) = validateID();
+    my $attachment = validateID();
+    my $attach_id = $attachment->id;
+    my $bugid = $attachment->bug_id;
     my $bug = new Bugzilla::Bug($bugid);
-    my $attachment = Bugzilla::Attachment->get($attach_id);
+
     $attachment->validate_can_edit($bug->product_id);
     validateCanChangeAttachment($attach_id);
     Bugzilla::Attachment->validate_description(THROW_ERROR);
@@ -774,8 +815,9 @@ sub delete_attachment {
       || ThrowUserError('attachment_deletion_disabled');
 
     # Make sure the administrator is allowed to edit this attachment.
-    my ($attach_id, $bug_id) = validateID();
-    my $attachment = Bugzilla::Attachment->get($attach_id);
+    my $attachment = validateID();
+    my $attach_id = $attachment->id;
+    my $bug_id = $attachment->bug_id;
     validateCanChangeAttachment($attach_id);
 
     $attachment->datasize || ThrowUserError('attachment_removed');

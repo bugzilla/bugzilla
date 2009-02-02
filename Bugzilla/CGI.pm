@@ -78,6 +78,19 @@ sub new {
     # Send appropriate charset
     $self->charset(Bugzilla->params->{'utf8'} ? 'UTF-8' : '');
 
+    # Redirect to urlbase/sslbase if we are not viewing an attachment.
+    # We do this check before the SSL redirect below to avoid two redirects.
+    if (use_attachbase() && i_am_cgi()) {
+        my $cgi_file = $self->url('-path_info' => 0, '-query' => 0, '-relative' => 1);
+        $cgi_file =~ s/\?$//;
+        my $urlbase = Bugzilla->params->{'urlbase'};
+        my $sslbase = Bugzilla->params->{'sslbase'};
+        my $path_regexp = $sslbase ? qr/^(\Q$urlbase\E|\Q$sslbase\E)/ : qr/^\Q$urlbase\E/;
+        if ($cgi_file ne 'attachment.cgi' && $self->self_url !~ /$path_regexp/) {
+            $self->redirect_to_urlbase;
+        }
+    }
+
     # Redirect to SSL if required
     if (Bugzilla->params->{'sslbase'} ne ''
         && Bugzilla->params->{'ssl'} eq 'always'
@@ -297,6 +310,14 @@ sub require_https {
     }
 }
 
+# Redirect to the urlbase version of the current URL.
+sub redirect_to_urlbase {
+    my $self = shift;
+    my $path = $self->url('-path_info' => 1, '-query' => 1, '-relative' => 1);
+    print $self->redirect('-location' => correct_urlbase() . $path);
+    exit;
+}
+
 1;
 
 __END__
@@ -366,6 +387,10 @@ redirects to the https protocol if required, retaining QUERY_STRING.
 
 It takes an option argument which will be used as the base URL.  If $baseurl
 is not provided, the current URL is used.
+
+=item C<redirect_to_urlbase>
+
+Redirects from the current URL to one prefixed by the urlbase parameter.
 
 =back
 

@@ -25,6 +25,24 @@
 %]
 
 [% param_descs = {
+  attachment_base => "It is possible for a malicious attachment to steal your " _
+                     "cookies or access other attachments to perform an attack " _
+                     "on the user.<p>" _
+                     "If you would like additional security on attachments " _
+                     "to avoid this, set this parameter to an alternate URL " _
+                     "for your $terms.Bugzilla that is not the same as " _
+                     "<tt>urlbase</tt> or <tt>sslbase</tt>. That is, a different " _
+                     "domain name that resolves to this exact same $terms.Bugzilla " _
+                     "installation.<p>" _
+                     "For added security, you can insert <tt>%bugid%</tt> into " _
+                     "the URL, which will be replaced with the ID of the current " _
+                     "$terms.bug that the attachment is on, when you access " _
+                     "an attachment. This will limit attachments to accessing " _
+                     "only other attachments on the same ${terms.bug}. " _
+                     "Remember, though, that all those possible domain names " _
+                     "(such as <tt>1234.your.domain.com</tt>) must point to " _
+                     "this same $terms.Bugzilla instance."
+
   allow_attachment_deletion => "If this option is on, administrators will be able to delete " _
                                "the content of attachments.",
 

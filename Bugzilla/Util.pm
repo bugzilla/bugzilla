@@ -36,7 +36,7 @@ use base qw(Exporter);
                              html_quote url_quote value_quote xml_quote
                              css_class_quote html_light_quote url_decode
                              i_am_cgi get_netaddr correct_urlbase
-                             lsearch
+                             lsearch use_attachbase
                              diff_arrays diff_strings
                              trim wrap_comment find_wrap_point
                              perform_substs
@@ -249,6 +249,13 @@ sub correct_urlbase {
     # Set to "authenticated sessions" but nobody's logged in, or
     # sslbase isn't set.
     return Bugzilla->params->{'urlbase'};
+}
+
+sub use_attachbase {
+    my $attachbase = Bugzilla->params->{'attachment_base'};
+    return ($attachbase ne ''
+            && $attachbase ne Bugzilla->params->{'urlbase'}
+            && $attachbase ne Bugzilla->params->{'sslbase'}) ? 1 : 0;
 }
 
 sub lsearch {
@@ -699,6 +706,11 @@ cookies) to only some addresses.
 
 Returns either the C<sslbase> or C<urlbase> parameter, depending on the
 current setting for the C<ssl> parameter.
+
+=item C<use_attachbase()>
+
+Returns true if an alternate host is used to display attachments; false
+otherwise.
 
 =back
 

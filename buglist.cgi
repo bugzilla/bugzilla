@@ -47,6 +47,7 @@ use Bugzilla::Product;
 use Bugzilla::Keyword;
 use Bugzilla::Field;
 use Bugzilla::Status;
+use Bugzilla::Token;
 
 use Date::Parse;
 
@@ -1185,6 +1186,7 @@ if ($dotweak && scalar @bugs) {
     }
     $vars->{'dotweak'} = 1;
     $vars->{'use_keywords'} = 1 if Bugzilla::Keyword::keyword_count();
+    $vars->{'token'} = issue_session_token('buglist_mass_change');
 
     $vars->{'products'} = Bugzilla->user->get_enterable_products;
     $vars->{'platforms'} = get_legal_field_values('rep_platform');

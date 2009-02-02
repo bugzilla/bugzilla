@@ -389,16 +389,13 @@ sub update {
 }
 
 
-sub confirmDelete 
-{
-  my $id = validateID();
+sub confirmDelete {
+    my $id = validateID();
 
-  # check if we need confirmation to delete:
-  
-  my $count = Bugzilla::Flag::count({ 'type_id' => $id,
-                                      'is_active' => 1 });
-  
-  if ($count > 0) {
+    # check if we need confirmation to delete:
+    my $count = Bugzilla::Flag::count({ 'type_id' => $id,
+                                        'is_active' => 1 });
+
     $vars->{'flag_type'} = Bugzilla::FlagType::get($id);
     $vars->{'flag_count'} = scalar($count);
     $vars->{'token'} = issue_session_token('delete_flagtype');
@@ -408,11 +405,6 @@ sub confirmDelete
     # Generate and return the UI (HTML page) from the appropriate template.
     $template->process("admin/flag-type/confirm-delete.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
-  } 
-  else {
-    my $token = issue_session_token('delete_flagtype');
-    deleteType($token);
-  }
 }
 
 

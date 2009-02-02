@@ -247,36 +247,34 @@ if ($action eq 'update') {
 }
 
 
-if ($action eq 'delete') {
+if ($action eq 'del') {
     my $id = ValidateKeyID(scalar $cgi->param('id'));
 
     my $name = $dbh->selectrow_array('SELECT name FROM keyworddefs
                                       WHERE id= ?', undef, $id);
 
-    if (!$cgi->param('reallydelete')) {
-        my $bugs = $dbh->selectrow_array('SELECT COUNT(*) FROM keywords
-                                          WHERE keywordid = ?',
-                                          undef, $id);
+    my $bugs = $dbh->selectrow_array('SELECT COUNT(*) FROM keywords
+                                      WHERE keywordid = ?',
+                                      undef, $id);
 
-        # We need this token even if there is no bug using this keyword.
-        $token = issue_session_token('delete_keyword');
+    $vars->{'bug_count'} = $bugs;
+    $vars->{'keyword_id'} = $id;
+    $vars->{'name'} = $name;
+    $vars->{'token'} = issue_session_token('delete_keyword');
 
-        if ($bugs) {
-            $vars->{'bug_count'} = $bugs;
-            $vars->{'keyword_id'} = $id;
-            $vars->{'name'} = $name;
-            $vars->{'token'} = $token;
+    print $cgi->header();
 
-            print $cgi->header();
+    $template->process("admin/keywords/confirm-delete.html.tmpl", $vars)
+      || ThrowTemplateError($template->error());
+    exit;
+}
 
-            $template->process("admin/keywords/confirm-delete.html.tmpl", $vars)
-              || ThrowTemplateError($template->error());
-
-            exit;
-        }
-    }
-    # We cannot do this check earlier as we have to check 'reallydelete' first.
+if ($action eq 'delete') {
     check_token_data($token, 'delete_keyword');
+    my $id = ValidateKeyID(scalar $cgi->param('id'));
+
+    my $name = $dbh->selectrow_array('SELECT name FROM keyworddefs
+                                      WHERE id= ?', undef, $id);
 
     $dbh->do('DELETE FROM keywords WHERE keywordid = ?', undef, $id);
     $dbh->do('DELETE FROM keyworddefs WHERE id = ?', undef, $id);

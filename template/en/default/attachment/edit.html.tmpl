@@ -39,6 +39,9 @@
   doc_section = "attachments.html"
 %]
 
+[%# No need to display the Diff button and iframe if the attachment is not a patch. %]
+[% patchviewerinstalled = (patchviewerinstalled && attachment.ispatch) %]
+
 <script type="text/javascript">
   <!--
   var prev_mode = 'raw';
@@ -47,37 +50,7 @@
   var has_viewed_as_diff = 0;
   function editAsComment()
     {
-      // Get the content of the document as a string.
-      var viewFrame = document.getElementById('viewFrame');
-      var aSerializer = new XMLSerializer();
-      var contentDocument = viewFrame.contentDocument;
-      var theContent = aSerializer.serializeToString(contentDocument);
-
-      // If this is a plaintext document, remove cruft that Mozilla adds
-      // because it treats it as an HTML document with a big PRE section.
-      // http://bugzilla.mozilla.org/show_bug.cgi?id=86012
-      var contentType = '[% attachment.contenttype FILTER js %]';
-      if ( contentType == 'text/plain' )
-        {
-          theContent = theContent.replace( /^<html><head\/?><body><pre>/i , "" );
-          theContent = theContent.replace( /<\/pre><\/body><\/html>$/i , "" );
-          theContent = theContent.replace( /&lt;/gi , "<" );
-          theContent = theContent.replace( /&gt;/gi , ">" );
-          theContent = theContent.replace( /&amp;/gi , "&" );
-        }
-
-      // Add mail-style quote indicators (>) to the beginning of each line.
-      // ".*\n" matches lines that end with a newline, while ".+" matches
-      // the rare situation in which the last line of a file does not end
-      // with a newline.
-      theContent = theContent.replace( /(.*\n|.+)/g , ">$1" );
-
       switchToMode('edit');
-
-      // Copy the contents of the diff into the textarea
-      var editFrame = document.getElementById('editFrame');
-      editFrame.value = theContent + "\n\n";
-
       has_edited = 1;
     }
   function undoEditAsComment()
@@ -306,6 +279,8 @@
             minrows = 10
             cols    = 80
             wrap    = 'soft'
+            defaultcontent = (attachment.contenttype.match('^text\/')) ?
+                               attachment.data.replace('(.*\n|.+)', '>$1') : undef
           %]
           <iframe id="viewFrame" src="attachment.cgi?id=[% attachment.id %]" style="height: 400px; width: 100%;">
             <b>You cannot view the attachment while viewing its details because your browser does not support IFRAMEs.

@@ -40,6 +40,13 @@ $Bugzilla::Config::Attachment::sortkey = "025";
 sub get_param_list {
   my $class = shift;
   my @param_list = (
+   {
+   name => 'attachment_base',
+   type => 't',
+   default => '',
+   checker => \&check_urlbase
+  },
+
   {
   name => 'allow_attachment_deletion',
   type => 'b',

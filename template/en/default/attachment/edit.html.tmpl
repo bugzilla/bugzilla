@@ -267,6 +267,17 @@
             [% END %]
           </a>
         </td>
+      [% ELSIF !Param("allow_attachment_display") %]
+        <td id="view_disabled" width="50%">
+          <p><b>
+            The attachment is not viewable in your browser due to security
+            restrictions enabled by [% terms.Bugzilla %].
+          </b></p>
+          <p><b>
+            In order to view the attachment, you first have to
+            <a href="attachment.cgi?id=[% attachment.id %]">download it</a>.
+          </b></p>
+        </td>
       [% ELSIF attachment.is_viewable %]
         <td width="75%">
           [% INCLUDE global/textarea.html.tmpl

@@ -186,7 +186,7 @@ EOT
     },
     {
         name    => 'site_wide_secret',
-        default => generate_random_password(256),
+        default => sub { generate_random_password(256) },
         desc    => <<EOT
 # This secret key is used by your installation for the creation and
 # validation of encrypted tokens to prevent unsolicited changes,

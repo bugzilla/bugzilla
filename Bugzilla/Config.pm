@@ -102,7 +102,7 @@ our @parampanels = ();
 Exporter::export_ok_tags('admin', 'db', 'locations', 'params');
 
 # Bugzilla version
-$Bugzilla::Config::VERSION = "2.22.7";
+$Bugzilla::Config::VERSION = "2.22.7+";
 
 use Safe;
 

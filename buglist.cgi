@@ -1195,7 +1195,11 @@ if ($dotweak && scalar @bugs) {
     }
     $vars->{'dotweak'} = 1;
     $vars->{'use_keywords'} = 1 if Bugzilla::Keyword::keyword_count();
+  
+    # issue_session_token needs to write to the master DB.
+    Bugzilla->switch_to_main_db();
     $vars->{'token'} = issue_session_token('buglist_mass_change');
+    Bugzilla->switch_to_shadow_db();
 
     $vars->{'products'} = Bugzilla->user->get_enterable_products;
     $vars->{'platforms'} = get_legal_field_values('rep_platform');

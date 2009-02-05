@@ -151,13 +151,29 @@ sub get {
     my $ids = $params->{ids};
     defined $ids || ThrowCodeError('param_required', { param => 'ids' });
 
-    my @return;
+    my @bugs;
+    my @faults;
     foreach my $bug_id (@$ids) {
-        my $bug = Bugzilla::Bug->check($bug_id);
-        push(@return, $self->_bug_to_hash($bug))
+        my $bug;
+        if ($params->{permissive}) {
+            eval { $bug = Bugzilla::Bug->check($bug_id); };
+            if ($@) {
+                push(@faults, {id => $bug_id,
+                               faultString => $@->faultstring,
+                               faultCode => $@->faultcode,
+                              }
+                    );
+                undef $@;
+                next;
+            }
+        }
+        else {
+            $bug = Bugzilla::Bug->check($bug_id);
+        }
+        push(@bugs, $self->_bug_to_hash($bug));
     }
 
-    return { bugs => \@return };
+    return { bugs => \@bugs, faults => \@faults };
 }
 
 # this is a function that gets bug activity for list of bug ids 
@@ -687,12 +703,26 @@ Note that it's possible for aliases to be disabled in Bugzilla, in which
 case you will be told that you have specified an invalid bug_id if you
 try to specify an alias. (It will be error 100.)
 
+=item C<permissive> B<UNSTABLE>
+
+C<boolean> Normally, if you request any inaccessible or invalid bug ids,
+Bug.get will throw an error. If this parameter is True, instead of throwing an
+error we return an array of hashes with a C<id>, C<faultString> and C<faultCode> 
+for each bug that fails, and return normal information for the other bugs that 
+were accessible.
+
 =back
 
 =item B<Returns>
 
-A hash containing a single element, C<bugs>. This is an array of hashes. 
-Each hash contains the following items:
+Two items are returned:
+
+=over
+
+=item C<bugs>
+
+An array of hashes that contains information about the bugs with 
+the valid ids. Each hash contains the following items:
 
 =over
 
@@ -759,6 +789,33 @@ C<string> The current status of the bug.
 =item summary
 
 C<string> The summary of this bug.
+
+=back
+
+=item C<faults> B<UNSTABLE>
+
+An array of hashes that contains invalid bug ids with error messages
+returned for them. Each hash contains the following items:
+
+=over
+
+=item id
+
+C<int> The numeric bug_id of this bug.
+
+=item faultString 
+
+c<string> This will only be returned for invalid bugs if the C<permissive>
+argument was set when calling Bug.get, and it is an error indicating that 
+the bug id was invalid.
+
+=item faultCode
+
+c<int> This will only be returned for invalid bugs if the C<permissive>
+argument was set when calling Bug.get, and it is the error code for the 
+invalid bug error.
+
+=back
 
 =back
 

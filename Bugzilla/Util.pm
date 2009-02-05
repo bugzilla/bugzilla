@@ -444,6 +444,9 @@ sub format_time {
     my @time = strptime($date);
 
     if (scalar @time) {
+        # Fix a bug in strptime() where seconds can be undefined in some cases.
+        $time[0] ||= 0;
+
         # strptime() counts years from 1900, and months from 0 (January).
         # We have to fix both values.
         my $dt = DateTime->new({year   => 1900 + $time[5],

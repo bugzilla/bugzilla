@@ -470,6 +470,11 @@ sub process_bug {
    # append it to the log, which will go into the comments when we are done.
     foreach my $bugchild ( $bug->children() ) {
         Debug( "Parsing field: " . $bugchild->name, DEBUG_LEVEL );
+
+        # Skip the token if one is included. We don't want it included in
+        # the comments, and it is not used by the importer.
+        next if $bugchild->name eq 'token';
+
         if ( defined $all_fields{ $bugchild->name } ) {
             my @values = $bug->children_text($bugchild->name);
             if (scalar @values > 1) {

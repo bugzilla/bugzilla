@@ -117,7 +117,7 @@ $vars->{'bug_list'} = \@bug_list;
 # on the exclusion list. This is so you can say e.g. "Everything except 
 # attachments" without listing almost all the fields.
 my @fieldlist = (Bugzilla::Bug->fields, 'group', 'long_desc', 
-                 'attachment', 'attachmentdata');
+                 'attachment', 'attachmentdata', 'token');
 my %displayfields;
 
 if ($cgi->param("field")) {

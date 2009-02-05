@@ -48,6 +48,11 @@
         [% END %]
       [% END %]
 
+      [%# This is here so automated clients can still use process_bug.cgi %]
+      [% IF displayfields.token && user.id %]
+          <token>[% issue_hash_token([bug.id, bug.delta_ts]) FILTER xml %]</token>
+      [% END %]
+
       [%# Now handle 'special' fields #%]
       [% IF displayfields.group %]
         [% FOREACH g = bug.groups %]

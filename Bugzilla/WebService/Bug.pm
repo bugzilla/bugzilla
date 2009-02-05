@@ -879,7 +879,6 @@ in Bugzilla B<3.4>:
 
 =back
 
-=back
 
 =back
 

@@ -842,8 +842,14 @@ You do not have access to the bug_id you specified.
 
 =over
 
-=item The following properties were added to this method's return value
+=item C<permissive> argument added to this method's params in Bugzilla B<3.4>. 
+
+=item The following properties were added to this method's return values
 in Bugzilla B<3.4>:
+
+=over
+
+=item For C<bugs>
 
 =over
 
@@ -864,6 +870,12 @@ in Bugzilla B<3.4>:
 =item severity
 
 =item status
+
+=back 
+
+=item C<faults>
+
+=back 
 
 =back
 

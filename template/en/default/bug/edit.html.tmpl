@@ -369,11 +369,12 @@
     [%#############%]
     [%#  PRODUCT  #%]
     [%#############%]
+    
     <tr>
-      <td class="field_label">
-        <label for="product" accesskey="p"><b><u>P</u>roduct</b></label>:
-      </td>
-      [% PROCESS select selname => "product" %]
+       [% INCLUDE bug/field.html.tmpl
+            bug = bug, field = select_fields.product,
+            desc_url = 'describecomponents.cgi', value = bug.product
+            editable = bug.check_can_change_field('product', 0, 1) %]
     </tr>
     [%###############%]    
     [%#  Component  #%]

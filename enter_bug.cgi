@@ -389,6 +389,10 @@ foreach my $field (@enter_bug_fields) {
     $vars->{$field->name} = formvalue($field->name);
 }
 
+# This allows the Field visibility and value controls to work with the
+# Product field as a parent.
+$default{'product'} = $product->name;
+
 if ($cloned_bug_id) {
 
     $default{'component_'}    = $cloned_bug->component;

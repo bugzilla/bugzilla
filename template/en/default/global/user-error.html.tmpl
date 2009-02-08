@@ -475,8 +475,8 @@
 
   [% ELSIF error == "fieldvalue_is_controller" %]
     [% title = "Value Controls Other Fields" %]
-    You cannot delete the '[% value.name FILTER html %]' value for this
-    field because 
+    You cannot delete the [% value.field.description FILTER html %]
+    '[% value.name FILTER html %]' because
     [% IF fields.size %]
       it controls the visibility of the following fields:
       [%+ fields.join(', ') FILTER html %].

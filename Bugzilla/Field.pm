@@ -158,7 +158,7 @@ use constant DEFAULT_FIELDS => (
     {name => 'classification', desc => 'Classification', in_new_bugmail => 1,
      buglist => 1},
     {name => 'product',      desc => 'Product',    in_new_bugmail => 1,
-     buglist => 1},
+     type => FIELD_TYPE_SINGLE_SELECT, buglist => 1},
     {name => 'version',      desc => 'Version',    in_new_bugmail => 1,
      buglist => 1},
     {name => 'rep_platform', desc => 'Platform',   in_new_bugmail => 1,

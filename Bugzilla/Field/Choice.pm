@@ -62,6 +62,7 @@ use constant VALIDATORS => {
 
 use constant CLASS_MAP => {
     bug_status => 'Bugzilla::Status',
+    product    => 'Bugzilla::Product',
 };
 
 use constant DEFAULT_MAP => {
@@ -189,6 +190,13 @@ sub remove_from_db {
         ThrowUserError("fieldvalue_still_has_bugs",
                        { field => $self->field, value => $self });
     }
+    $self->_check_if_controller();
+    $self->SUPER::remove_from_db();
+}
+
+# Factored out to make life easier for subclasses.
+sub _check_if_controller {
+    my $self = shift;
     my $vis_fields = $self->controls_visibility_of_fields;
     my $values     = $self->controlled_values;
     if (@$vis_fields || @$values) {
@@ -196,7 +204,6 @@ sub remove_from_db {
             { value => $self, fields => [map($_->name, @$vis_fields)],
               vals => $values });
     }
-    $self->SUPER::remove_from_db();
 }
 
 

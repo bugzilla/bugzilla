@@ -31,7 +31,9 @@ use Bugzilla::Install::Requirements;
 use Bugzilla::Mailer;
 use Bugzilla::Series;
 
-use base qw(Bugzilla::Object);
+# Currently, we only implement enough of the Bugzilla::Field::Choice
+# interface to control the visibility of other fields.
+use base qw(Bugzilla::Field::Choice);
 
 use constant DEFAULT_CLASSIFICATION_ID => 1;
 
@@ -40,6 +42,10 @@ use constant DEFAULT_CLASSIFICATION_ID => 1;
 ###############################
 
 use constant DB_TABLE => 'products';
+# Reset these back to the Bugzilla::Object defaults, instead of the
+# Bugzilla::Field::Choice defaults.
+use constant NAME_FIELD => 'name';
+use constant LIST_ORDER => 'name';
 
 use constant DB_COLUMNS => qw(
    id
@@ -372,6 +378,8 @@ sub remove_from_db {
 
     $dbh->bz_start_transaction();
 
+    $self->_check_if_controller();
+
     if ($self->bug_count) {
         if (Bugzilla->params->{'allowbugdeletion'}) {
             require Bugzilla::Bug;
@@ -522,6 +530,20 @@ sub _check_votes {
     }
     return $votes;
 }
+
+#####################################
+# Implement Bugzilla::Field::Choice #
+#####################################
+
+sub field {
+    my $invocant = shift;
+    my $class = ref $invocant || $invocant;
+    my $cache = Bugzilla->request_cache;
+    $cache->{"field_$class"} ||= new Bugzilla::Field({ name => 'product' });
+    return $cache->{"field_$class"};
+}
+
+use constant is_default => 0;
 
 ###############################
 ####       Methods         ####

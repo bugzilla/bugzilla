@@ -297,7 +297,6 @@
   '" colspan=\"$colspan\"" IF colspan',
   '" size=\"$size\"" IF size',
   '" maxlength=\"$maxlength\"" IF maxlength',
-  'flag.status',
   '" spellcheck=\"$spellcheck\"" IF spellcheck',
 ],
 

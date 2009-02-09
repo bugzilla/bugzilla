@@ -181,7 +181,13 @@ sub issue_hash_token {
     # The concatenated string is of the form
     # token creation time + site-wide secret + user ID + data
     my @args = ($time, Bugzilla->localconfig->{'site_wide_secret'}, Bugzilla->user->id, @$data);
-    my $token = md5_hex(join('*', @args));
+
+    my $token = join('*', @args);
+    # Wide characters cause md5_hex() to die.
+    if (Bugzilla->params->{'utf8'}) {
+        utf8::encode($token) if utf8::is_utf8($token);
+    }
+    $token = md5_hex($token);
 
     # Prepend the token creation time, unencrypted, so that the token
     # lifetime can be validated.

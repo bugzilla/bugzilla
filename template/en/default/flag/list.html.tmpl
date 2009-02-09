@@ -72,6 +72,8 @@
 // -->
 </script>
 
+[% IF user.id %]
+
 [%# We list flags by looping twice over the flag types relevant for the bug.
   # In the first loop, we display existing flags and then, for active types,
   # we display UI for adding new flags.  In the second loop, we display UI 
@@ -273,3 +275,16 @@
   [% END %]
 
 </table>
+
+[% ELSE %]
+  [%# The user is logged out. Display flags as read-only. %]
+  [% FOREACH type = flag_types %]
+    [% FOREACH flag = type.flags %]
+      [% flag.setter.nick FILTER html %]:
+      [%+ type.name FILTER html FILTER no_break %][% flag.status %]
+      [% IF flag.requestee %]
+        ([% flag.requestee.nick FILTER html %])
+      [% END %]<br>
+    [% END %]
+  [% END %]
+[% END %]

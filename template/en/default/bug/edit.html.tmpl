@@ -1,4 +1,4 @@
-﻿[%# The contents of this file are subject to the Mozilla Public
+[%# The contents of this file are subject to the Mozilla Public
   # License Version 1.1 (the "License"); you may not use this file
   # except in compliance with the License. You may obtain a copy of
   # the License at http://www.mozilla.org/MPL/
@@ -938,23 +938,11 @@
     </tr>
     <tr>
       <td colspan="2">
-      [% IF user.id %]
         [% IF bug.flag_types.size > 0 %]
           [% PROCESS "flag/list.html.tmpl" flag_no_header = 1
                                            flag_types = bug.flag_types
                                            any_flags_requesteeble = bug.any_flags_requesteeble %]
         [% END %]
-      [% ELSE %]
-        [% FOREACH type = bug.flag_types %]
-          [% FOREACH flag = type.flags %]
-              [% flag.setter.nick FILTER html %]:
-              [%+ type.name FILTER html FILTER no_break %][% flag.status %]
-              [%+ IF flag.requestee %]
-                ([% flag.requestee.nick FILTER html %])
-              [% END %]<br>
-          [% END %]
-        [% END %]
-      [% END %]         
       </td>
     </tr>
   [% END %]

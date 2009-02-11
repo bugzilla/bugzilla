@@ -188,12 +188,23 @@
             type="text/css">
     <![endif]-->
 
+    <script type="text/javascript">
+    <!--
+        [%# Make some Bugzilla information available to all scripts. 
+          # We don't import every parameter and constant because we
+          # don't want to add a lot of uncached JS to every page. 
+          #%]
+        var BUGZILLA = {
+            param: {
+                cookiepath: '[% Param('cookiepath') FILTER js %]'
+            }
+        };
 
-    [% IF javascript %]
-      <script type="text/javascript">
-        [% javascript %]
-      </script>
-    [% END %]
+        [% IF javascript %]
+          [% javascript %]
+        [% END %]
+    // -->
+    </script>
 
     [% IF javascript_urls %]
       [% FOREACH javascript_url = javascript_urls %]

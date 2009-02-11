@@ -33,7 +33,7 @@
   </td>
 </tr>
 [% IF Param("maxlocalattachment") %]
-<tr>
+<tr class="expert_fields">
   <th>BigFile:</th>
   <td>
     <input type="checkbox" id="bigfile"
@@ -45,7 +45,7 @@
 </tr>
 [% END %]
 [% IF Param("allow_attach_url") %]
-<tr>
+<tr class="expert_fields">
   <th><label for="attachurl">AttachURL</label>:</th>
   <td>
     <em>URL to be attached instead.</em><br>
@@ -54,6 +54,7 @@
            onkeyup="URLFieldHandler()" onblur="URLFieldHandler()">
   </td>
 </tr>
+</tbody>
 [% END %]
 <tr>
   <th><label for="description">Description</label>:</th>
@@ -62,7 +63,7 @@
     <input type="text" id="description" name="description" size="60" maxlength="200">
   </td>
 </tr>
-<tr>
+<tr class="expert_fields">
   <th>Content Type:</th>
   <td>
     <em>If the attachment is a patch, check the box below.</em><br>
@@ -89,7 +90,7 @@
              onchange="if (this.value) this.form.contenttypemethod[2].checked = true;">
   </td>
 </tr>
-<tr>
+<tr class="expert_fields">
   <td> </td>
   <td>
     [% IF flag_types && flag_types.size > 0 %]

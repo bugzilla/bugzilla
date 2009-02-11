@@ -215,6 +215,11 @@
     }
 /* generic (end) */
 
+/* Links that control whether or not something is visible. */
+a.controller {
+    font-size: 115%;
+}
+
 div#docslinks {
     float: right;
     border: 1px solid black;
@@ -306,7 +311,7 @@ div#docslinks {
 
 /** End Comments **/
 
-.bz_default_hidden {
+.bz_default_hidden, .bz_tui_hidden {
     display: none;
 }
 

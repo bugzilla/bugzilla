@@ -253,3 +253,21 @@ function bz_fireEvent(anElement, anEvent) {
     evt.initEvent(anEvent, true, true); // event type, bubbling, cancelable
     return !anElement.dispatchEvent(evt);
 }
+
+/**
+ * Adds a CSS class to an element if it doesn't have it. Removes the
+ * CSS class from the element if the element does have the class.
+ *
+ * Requires YUI's Dom library.
+ *
+ * @param anElement  The element to toggle the class on
+ * @param aClass     The name of the CSS class to toggle.
+ */
+function bz_toggleClass(anElement, aClass) {
+    if (YAHOO.util.Dom.hasClass(anElement, aClass)) {
+        YAHOO.util.Dom.removeClass(anElement, aClass);
+    }
+    else {
+        YAHOO.util.Dom.addClass(anElement, aClass);
+    }
+}

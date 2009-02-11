@@ -34,7 +34,7 @@
                  'skins/standard/yui/calendar.css' ]
   javascript_urls = [ "js/attachment.js", "js/util.js",
                       "js/yui/yahoo-dom-event.js", "js/yui/calendar.js",
-                      "js/field.js" ]
+                      "js/field.js", "js/yui/cookie.js", "js/TUI.js" ]
 %]
 
 <script type="text/javascript">
@@ -159,6 +159,12 @@ function handleWantsAttachment(wants_attachment) {
     }
 }
 
+
+TUI_alternates['expert_fields'] = 'Show Advanced Fields';
+// Hide the Advanced Fields by default, unless the user has a cookie
+// that specifies otherwise.
+TUI_hide_default('expert_fields');
+
 -->
 </script>
 
@@ -187,7 +193,16 @@ function handleWantsAttachment(wants_attachment) {
   </tr>
 
   <tr>
-    <td colspan="4">&nbsp;</td>
+    <td colspan="4">
+        <a id="expert_fields_controller" class="controller bz_default_hidden"
+            href="javascript:TUI_toggle_class('expert_fields')">Hide
+        Advanced Fields</a>
+      [%# Show the link if the browser supports JS %]
+      <script type="text/javascript">
+          YAHOO.util.Dom.removeClass('expert_fields_controller', 
+                                     'bz_default_hidden');
+      </script>
+    </td>
   </tr>
 
   <tr>
@@ -454,7 +469,7 @@ function handleWantsAttachment(wants_attachment) {
   </tr>
 </tbody>
 
-<tbody>
+<tbody class="expert_fields">
   [% USE Bugzilla %]
 
   [% FOREACH field = Bugzilla.active_custom_fields %]
@@ -466,6 +481,9 @@ function handleWantsAttachment(wants_attachment) {
         value_span = 3 %]
     </tr>
   [% END %]
+</tbody>
+
+<tbody>
 
   <tr>
     <th>Summary:</th>
@@ -501,7 +519,7 @@ function handleWantsAttachment(wants_attachment) {
   </tr>
 
   [% IF Param("insidergroup") && user.in_group(Param("insidergroup")) %]
-    <tr>
+    <tr class="expert_fields">
       <th>&nbsp;</th>
       <td colspan="3">
         &nbsp;&nbsp;
@@ -513,9 +531,7 @@ function handleWantsAttachment(wants_attachment) {
       </td>
     </tr>
   [% END %]
-</tbody>
 
-<tbody class="expert_fields">
   <tr>
     <th>Attachment:</th>
     <td colspan="3">
@@ -550,7 +566,9 @@ function handleWantsAttachment(wants_attachment) {
       </script>
     </td>
   </tr>
+</tbody>
 
+<tbody class="expert_fields">
   [% IF user.in_group('editbugs', product.id) %]
     [% IF use_keywords %]
       <tr>
@@ -577,7 +595,7 @@ function handleWantsAttachment(wants_attachment) {
   [% END %]
 </tbody>
 
-<tbody>
+<tbody class="expert_fields">
   [% IF group.size %]
   <tr>
     <th>&nbsp;</th>
@@ -604,7 +622,9 @@ function handleWantsAttachment(wants_attachment) {
     </td>
   </tr>
   [% END %]
+</tbody>
 
+<tbody>
   [%# Form controls for entering additional data about the bug being created. %]
   [% Hook.process("form") %]
 

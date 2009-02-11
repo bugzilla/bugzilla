@@ -20,33 +20,32 @@
   #%]
 
 <script type="text/javascript">
-  <!--
-  function toggle_display(link) {
+<!--
+function toggle_display(link) {
     var table = document.getElementById("attachment_table");
-    var rows = table.getElementsByTagName("tr");
-    var originalHeight = table.offsetHeight; // Store current height for scrolling
-
-    var toggle;
-    if (link.innerHTML == "Show Obsolete") {
-      toggle = ""; // This should be 'table-row', but IE 6 doesn't understand it.
-      link.innerHTML = "Hide Obsolete";
-    }
-    else {
-      toggle = "none";
-      link.innerHTML = "Show Obsolete";
-    }
+    // Store current height for scrolling later
+    var originalHeight = table.offsetHeight;
+    var rows = YAHOO.util.Dom.getElementsByClassName(
+        'bz_tr_obsolete', 'tr', table);
 
     for (var i = 0; i < rows.length; i++) {
-      if (rows[i].className.match('bz_tr_obsolete'))
-        rows[i].style.display = toggle;
+        bz_toggleClass(rows[i], 'bz_default_hidden');
+    }
+
+    if (YAHOO.util.Dom.hasClass(rows[0], 'bz_default_hidden')) {
+        link.innerHTML = "Show Obsolete";
+    }
+    else {
+        link.innerHTML = "Hide Obsolete";
     }
 
     var newHeight = table.offsetHeight;
+    // This scrolling makes the window appear to not move at all.
     window.scrollBy(0, newHeight - originalHeight);
 
     return false;
-  }
-  //-->
+}
+//-->
 </script>
 
 <br>
@@ -66,8 +65,9 @@
       [% IF attachment.isobsolete %]
         [% obsolete_attachments = obsolete_attachments + 1 %]
       [% END %]
-      <tr class="[% "bz_private" IF attachment.isprivate %][%-%]
-                 [%+ "bz_tr_obsolete" IF attachment.isobsolete %]">
+      <tr class="[% "bz_private" IF attachment.isprivate %]
+                 [% " bz_tr_obsolete bz_default_hidden" 
+                     IF attachment.isobsolete %]">
         <td valign="top">
           [% IF attachment.datasize %]
             <a name="a[% count %]" href="attachment.cgi?id=[% attachment.id %]"
@@ -131,7 +131,8 @@
       [% IF attachments.size %]
         <span class="bz_attach_view_hide">
           [% IF obsolete_attachments %]
-            <a href="#a0" onClick="return toggle_display(this);">Hide Obsolete</a> ([% obsolete_attachments %])
+            <a href="#a0" onclick="return toggle_display(this);">Show
+              Obsolete</a> ([% obsolete_attachments %])
           [% END %]
           [% IF Param("allow_attachment_display") %]
             <a href="attachment.cgi?bugid=[% bugid %]&amp;action=viewall">View All</a>

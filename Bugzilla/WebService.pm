@@ -15,21 +15,12 @@
 # Contributor(s): Marc Schumann <wurblzap@gmail.com>
 #                 Max Kanat-Alexander <mkanat@bugzilla.org>
 
+# This is the base class for $self in WebService method calls. For the 
+# actual RPC server, see Bugzilla::WebService::Server and its subclasses.
 package Bugzilla::WebService;
-
 use strict;
-use Bugzilla::WebService::Constants;
-use Bugzilla::Util;
 use Date::Parse;
 use XMLRPC::Lite;
-
-sub fail_unimplemented {
-    my $this = shift;
-
-    die SOAP::Fault
-        ->faultcode(ERROR_UNIMPLEMENTED)
-        ->faultstring('Service Unimplemented');
-}
 
 sub datetime_format {
     my ($self, $date_string) = @_;
@@ -43,38 +34,11 @@ sub datetime_format {
     return $iso_datetime;
 }
 
-sub handle_login {
-    my ($classes, $action, $uri, $method) = @_;
-
-    my $class = $classes->{$uri};
-    eval "require $class";
-
-    return if $class->login_exempt($method);
-    Bugzilla->login();
-
-    # Even though we check for the need to redirect in
-    # Bugzilla->login() we check here again since Bugzilla->login()
-    # does not know what the current XMLRPC method is. Therefore
-    # ssl_require_redirect in Bugzilla->login() will have returned 
-    # false if system was configured to redirect for authenticated 
-    # sessions and the user was not yet logged in.
-    # So here we pass in the method name to ssl_require_redirect so
-    # it can then check for the extra case where the method equals
-    # User.login, which we would then need to redirect if not
-    # over a secure connection. 
-    my $full_method = $uri . "." . $method;
-    Bugzilla->cgi->require_https(Bugzilla->params->{'sslbase'})
-        if ssl_require_redirect($full_method);
-
-    return;
-}
-
 # For some methods, we shouldn't call Bugzilla->login before we call them
 use constant LOGIN_EXEMPT => { };
 
 sub login_exempt {
     my ($class, $method) = @_;
-
     return $class->LOGIN_EXEMPT->{$method};
 }
 
@@ -84,135 +48,6 @@ sub type {
         $value = $self->datetime_format($value);
     }
     return XMLRPC::Data->type($type)->value($value);
-}
-
-1;
-
-package Bugzilla::WebService::XMLRPC::Transport::HTTP::CGI;
-use strict;
-eval { require XMLRPC::Transport::HTTP; };
-our @ISA = qw(XMLRPC::Transport::HTTP::CGI);
-
-sub initialize {
-    my $self = shift;
-    my %retval = $self->SUPER::initialize(@_);
-    $retval{'serializer'} = Bugzilla::WebService::XMLRPC::Serializer->new;
-    $retval{'deserializer'} = Bugzilla::WebService::XMLRPC::Deserializer->new;
-    return %retval;
-}
-
-sub make_response {
-    my $self = shift;
-
-    $self->SUPER::make_response(@_);
-
-    # XMLRPC::Transport::HTTP::CGI doesn't know about Bugzilla carrying around
-    # its cookies in Bugzilla::CGI, so we need to copy them over.
-    foreach (@{Bugzilla->cgi->{'Bugzilla_cookie_list'}}) {
-        $self->response->headers->push_header('Set-Cookie', $_);
-    }
-}
-
-1;
-
-# This exists to validate input parameters (which XMLRPC::Lite doesn't do)
-# and also, in some cases, to more-usefully decode them.
-package Bugzilla::WebService::XMLRPC::Deserializer;
-use strict;
-# We can't use "use base" because XMLRPC::Serializer doesn't return
-# a true value.
-eval { require XMLRPC::Lite; };
-our @ISA = qw(XMLRPC::Deserializer);
-
-use Bugzilla::Error;
-
-# Some method arguments need to be converted in some way, when they are input.
-sub decode_value {
-    my $self = shift;
-    my ($type) = @{ $_[0] };
-    my $value = $self->SUPER::decode_value(@_);
-    
-    # We only validate/convert certain types here.
-    return $value if $type !~ /^(?:int|i4|boolean|double|dateTime\.iso8601)$/;
-    
-    # Though the XML-RPC standard doesn't allow an empty <int>,
-    # <double>,or <dateTime.iso8601>,  we do, and we just say
-    # "that's undef".
-    if (grep($type eq $_, qw(int double dateTime))) {
-        return undef if $value eq '';
-    }
-    
-    my $validator = $self->_validation_subs->{$type};
-    if (!$validator->($value)) {
-        ThrowUserError('xmlrpc_invalid_value',
-                       { type => $type, value => $value });
-    }
-    
-    # We convert dateTimes to a DB-friendly date format.
-    if ($type eq 'dateTime.iso8601') {
-        # We leave off the $ from the end of this regex to allow for possible
-        # extensions to the XML-RPC date standard.
-        $value =~ /^(\d{4})(\d{2})(\d{2})T(\d{2}):(\d{2}):(\d{2})/;
-        $value = "$1-$2-$3 $4:$5:$6";
-    }
-
-    return $value;
-}
-
-sub _validation_subs {
-    my $self = shift;
-    return $self->{_validation_subs} if $self->{_validation_subs};
-    # The only place that XMLRPC::Lite stores any sort of validation
-    # regex is in XMLRPC::Serializer. We want to re-use those regexes here.
-    my $lookup = Bugzilla::WebService::XMLRPC::Serializer->new->typelookup;
-    
-    # $lookup is a hash whose values are arrayrefs, and whose keys are the
-    # names of types. The second item of each arrayref is a subroutine
-    # that will do our validation for us.
-    my %validators = map { $_ => $lookup->{$_}->[1] } (keys %$lookup);
-    # Add a boolean validator
-    $validators{'boolean'} = sub {$_[0] =~ /^[01]$/};
-    # Some types have multiple names, or have a different name in
-    # XMLRPC::Serializer than their standard XML-RPC name.
-    $validators{'dateTime.iso8601'} = $validators{'dateTime'};
-    $validators{'i4'} = $validators{'int'};
-    
-    $self->{_validation_subs} = \%validators;
-    return \%validators;
-}
-
-1;
-
-# This package exists to fix a UTF-8 bug in SOAP::Lite.
-# See http://rt.cpan.org/Public/Bug/Display.html?id=32952.
-package Bugzilla::WebService::XMLRPC::Serializer;
-use strict;
-# We can't use "use base" because XMLRPC::Serializer doesn't return
-# a true value.
-eval { require XMLRPC::Lite; };
-our @ISA = qw(XMLRPC::Serializer);
-
-sub new {
-    my $class = shift;
-    my $self = $class->SUPER::new(@_);
-    # This fixes UTF-8.
-    $self->{'_typelookup'}->{'base64'} =
-        [10, sub { !utf8::is_utf8($_[0]) && $_[0] =~ /[^\x09\x0a\x0d\x20-\x7f]/},
-        'as_base64'];
-    # This makes arrays work right even though we're a subclass.
-    # (See http://rt.cpan.org//Ticket/Display.html?id=34514)
-    $self->{'_encodingStyle'} = '';
-    return $self;
-}
-
-sub as_string {
-    my $self = shift;
-    my ($value) = @_;
-    # Something weird happens with XML::Parser when we have upper-ASCII 
-    # characters encoded as UTF-8, and this fixes it.
-    utf8::encode($value) if utf8::is_utf8($value) 
-                            && $value =~ /^[\x00-\xff]+$/;
-    return $self->SUPER::as_string($value);
 }
 
 1;

@@ -20,13 +20,13 @@ package Bugzilla::WebService::Constants;
 use strict;
 use base qw(Exporter);
 
-@Bugzilla::WebService::Constants::EXPORT = qw(
+our @EXPORT = qw(
     WS_ERROR_CODE
     ERROR_UNKNOWN_FATAL
     ERROR_UNKNOWN_TRANSIENT
-
     ERROR_AUTH_NODATA
-    ERROR_UNIMPLEMENTED
+
+    WS_DISPATCH
 );
 
 # This maps the error names in global/*-error.html.tmpl to numbers.
@@ -115,7 +115,23 @@ use constant ERROR_UNKNOWN_FATAL     => -32000;
 use constant ERROR_UNKNOWN_TRANSIENT => 32000;
 
 use constant ERROR_AUTH_NODATA   => 410;
-use constant ERROR_UNIMPLEMENTED => 910;
 use constant ERROR_GENERAL       => 999;
+
+sub WS_DISPATCH {
+    # We "require" here instead of "use" above to avoid a dependency loop.
+    require Bugzilla::Hook;
+    my %hook_dispatch;
+    Bugzilla::Hook::process('webservice', { dispatch => \%hook_dispatch });
+
+    my $dispatch = {
+        'Bugzilla' => 'Bugzilla::WebService::Bugzilla',
+        'Bug'      => 'Bugzilla::WebService::Bug',
+        'User'     => 'Bugzilla::WebService::User',
+        'Product'  => 'Bugzilla::WebService::Product',
+        %hook_dispatch
+    };
+    return $dispatch;
+};
+
 
 1;

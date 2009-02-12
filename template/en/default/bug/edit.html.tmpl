@@ -1150,10 +1150,12 @@
   [% spellcheck = undef %]
 [% END %]
 [% BLOCK commit_button %]
-  <div class="knob-buttons">
-    <input type="submit" value="Commit" id="commit[% id FILTER css_class_quote %]">
-    [% IF bug.user.canmove %]
-      <input type="submit" name="action" id="action[% id FILTER css_class_quote %]" value="[% Param("move-button-text") %]">
-    [% END %]
-  </div>
+  [% IF user.id %]
+    <div class="knob-buttons">
+      <input type="submit" value="Commit" id="commit[% id FILTER css_class_quote %]">
+      [% IF bug.user.canmove %]
+        <input type="submit" name="action" id="action[% id FILTER css_class_quote %]" value="[% Param("move-button-text") %]">
+      [% END %]
+    </div>
+  [% END %]
 [% END %]

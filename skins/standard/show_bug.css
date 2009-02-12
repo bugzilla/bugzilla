@@ -7,8 +7,30 @@
     font-weight: bold;
 }
 
+.bz_bug .edit_form {
+  width: 100%;
+}
+.bz_bug .edit_form table {
+  width: 100%;
+}
+.bz_bug .edit_form .text_input {
+  width: 100%;
+  min-width: 25em;
+}
+.bz_bug #alias {
+    min-width: 0;
+    width: 10em;
+}
+
+.flags_label {
+    text-align: left;
+}
+table#flags {
+    width: auto;
+}
+
 .bz_column_spacer {
-    width: 2em;
+    width: 0.5em;
 }
 
 .related_actions {

@@ -147,7 +147,7 @@
   <input type="hidden" name="token" value="[% issue_hash_token([bug.id, bug.delta_ts]) FILTER html %]">
 
   [% PROCESS section_title %]
-  <table>
+  <table class="edit_form">
     <tr>
       [%# 1st Column %]
       <td id="bz_show_bug_column_1" class="bz_show_bug_column">     
@@ -298,7 +298,7 @@
 
 [% BLOCK section_title %]
   [%# That's the main table, which contains all editable fields. %]
-  <div class="bz_alias_short_desc_container">
+  <div class="bz_alias_short_desc_container edit_form">
       [% PROCESS commit_button id="_top"%]
      <a href="show_bug.cgi?id=[% bug.bug_id %]">
         <b>[% terms.Bug %]&nbsp;[% bug.bug_id FILTER html %]</b></a> - 
@@ -931,7 +931,7 @@
   [% END %]
   [% IF show_bug_flags %]
     <tr>
-      <td class="field_label">
+      <td class="field_label flags_label">
         <label><b>Flags:</b></label>
       </td>
       <td></td>
@@ -991,6 +991,7 @@
     <span id="[% dep.fieldname %]_input_area">
       [% IF bug.check_can_change_field(dep.fieldname, 0, 1) %]
         <input name="[% dep.fieldname %]" id="[% dep.fieldname %]"
+               class="text_input"
                value="[% bug.${dep.fieldname}.join(', ') %]">
       [% END %]
     </span>
@@ -1126,7 +1127,7 @@
   [% END %]
     [% val = value ? value : bug.$inputname %]
     [% IF bug.check_can_change_field(inputname, 0, 1) %]
-       <input id="[% inputname %]" name="[% inputname %]"
+       <input id="[% inputname %]" name="[% inputname %]" class="text_input"
               value="[% val FILTER html %]"[% " size=\"$size\"" IF size %]
               [% " maxlength=\"$maxlength\"" IF maxlength %]
               [% " spellcheck=\"$spellcheck\"" IF spellcheck %]>

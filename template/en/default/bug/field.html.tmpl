@@ -72,7 +72,8 @@
 [% IF editable %]
   [% SWITCH field.type %]
     [% CASE constants.FIELD_TYPE_FREETEXT %]
-        <input id="[% field.name FILTER html %]" name="[% field.name FILTER html %]"
+        <input id="[% field.name FILTER html %]" class="text_input"
+               name="[% field.name FILTER html %]"
                value="[% value FILTER html %]" size="40"
                maxlength="[% constants.MAX_FREETEXT_LENGTH FILTER none %]">
     [% CASE constants.FIELD_TYPE_DATETIME %]
@@ -184,7 +185,7 @@
          <strong>Add [% terms.Bug %] URLs:</strong>
        </label><br>
        <input type="text" id="[% field.name FILTER html %]" 
-              name="[% field.name FILTER html %]" size="40">
+              class="text_input" name="[% field.name FILTER html %]" size="40">
   [% END %]
 [% ELSIF field.type == constants.FIELD_TYPE_TEXTAREA %]
   <div class="uneditable_textarea">[% value FILTER wrap_comment(60)

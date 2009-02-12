@@ -189,6 +189,7 @@
     <![endif]-->
 
     <script src="js/yui/yahoo-dom-event.js" type="text/javascript"></script>
+    <script src="js/global.js" type="text/javascript"></script>
     <script type="text/javascript">
     <!--
         YAHOO.namespace('bugzilla');
@@ -205,7 +206,6 @@
                 cookiepath: '[% Param('cookiepath') FILTER js %]'
             }
         };
-
         [% IF javascript %]
           [% javascript %]
         [% END %]

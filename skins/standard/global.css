@@ -508,3 +508,19 @@ form#Create .comment {
 #down_button {
     background-image: url(global/down.png);
 }
+
+.mini_login, .mini_login input, .mini_login button {
+    font-size: small;
+}
+
+form.mini_login input.bz_password, form.mini_login input.bz_login  {
+    width: 10em;
+}
+
+form .bz_remember, form .bz_restrict {
+    margin: 0.4em 0;
+}
+
+.bz_mini_login_help {
+    color: #ccc;
+}

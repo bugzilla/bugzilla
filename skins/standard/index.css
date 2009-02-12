@@ -11,6 +11,7 @@
   * The Original Code is the Bugzilla Bug Tracking System.
   *
   * Contributor(s): Vitaly Harisov <vitaly@rathedg.com>
+  *                 Guy Pyrzak <guy.pyrzak@gmail.com> 
   */
 
 /* index page (begin) */
@@ -20,49 +21,7 @@
         padding: 0.2em 0.2em 0.15em 0.2em;
     }
 
-    #page-index ul, #page-index li,
-    #page-index p, #page-index form p
-    {
-        margin: 0;
-        padding: 0;
-    }
-
-    #page-index ul
-    {
-        padding-bottom: 1em;
-    }
-
-    #page-index li
-    {
-        list-style: none;
-    }
-
-    #page-index p
-    {
-        padding-bottom: 0.5em;
-    }
-
     /* Hide from NN4 */
-    div#page-index .intro
-    {
-        width: 250px;
-        height: 200px;
-
-        margin-top: 2.3em;
-        margin-right: 2.3em;
-        float: right;
-        background: transparent no-repeat url(index/front.png);
-    }
-
-    #page-index #report
-    {
-        padding-bottom: 1em;
-    }
-
-    #page-index #sidebar
-    {
-        padding-top: 1em;
-    }
 
     #new_release
     {
@@ -81,5 +40,106 @@
     #welcome-admin a
     {
         font-weight: bold;
+    }
+    
+    div.bz_common_actions
+    {
+        height: 190px;
+        width: 195px;
+        background-color: blue;
+        float: left;
+        margin: 0 3ex;
+        text-align: center;
+        margin-bottom: 3em;
+    }
+    div.bz_common_actions span 
+    {
+        position: relative;
+        top: 95%;
+        font-weight: bold;
+    }
+    
+    div.bz_common_actions,
+    div.bz_common_actions a,
+    div.bz_common_actions a div,
+    div.bz_common_actions a:visited,
+    div.bz_common_actions a:hover {
+        text-decoration: none;
+    }
+    
+    a.bz_common_actions {
+        text-decoration: none;
+    }
+    
+    #quicksearchForm
+    {
+        clear: both;
+        text-align: center;
+        margin-bottom: 2em;
+    }
+    
+    #quicksearchForm #quicksearch
+    {
+        width: 25em;
+    }
+    
+    #quicksearchForm
+    {
+        margin: 0;
+        padding: 0;
+    }
+    
+    #page-index table{
+        border-collapse: collapse;
+    }
+    
+    #welcome
+    {
+        font-size: x-large;
+        font-weight: bold;
+        text-align: center;
+        margin: 0 0 0.8em 0;
+        padding: 0;
+    }
+    
+    #enter_bug 
+    {
+        background: url(index/bug.gif) no-repeat;
+    }
+    
+    #query
+    {
+        background: url(index/search.gif) no-repeat;
+    }
+    
+    #account
+    {
+        background: url(index/account.gif) no-repeat;
+    }
+    
+    ul.additional_links 
+    {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    
+    ul#quicksearch_links{
+        margin-bottom: 1em;
+    }
+    
+    ul.additional_links li
+    {
+        display: inline;
+    }
+    
+    ul.additional_links li.bz_default_hidden
+    {
+        display: none;
+    }
+    
+    input.quicksearch_help_text
+    {
+        color: #ccc;
     }
 /* index page (end) */

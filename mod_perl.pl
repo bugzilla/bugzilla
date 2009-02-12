@@ -53,6 +53,8 @@ my $cgi_path = Bugzilla::Constants::bz_locations()->{'cgi_path'};
 # Set up the configuration for the web server
 my $server = Apache2::ServerUtil->server;
 my $conf = <<EOT;
+# Make sure each httpd child receives a different random seed (bug 476622)
+PerlChildInitHandler "sub { srand(); }"
 <Directory "$cgi_path">
     AddHandler perl-script .cgi
     # No need to PerlModule these because they're already defined in mod_perl.pl

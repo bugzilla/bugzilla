@@ -515,7 +515,7 @@ sub snapshot {
                                 'attach_id' => $attach_id });
     my @summaries;
     foreach my $flag (@$flags) {
-        my $summary = $flag->type->name . $flag->status;
+        my $summary = $flag->setter->nick . ':' . $flag->type->name . $flag->status;
         $summary .= "(" . $flag->requestee->login . ")" if $flag->requestee;
         push(@summaries, $summary);
     }
@@ -625,10 +625,13 @@ sub update_activity {
     my ($bug_id, $attach_id, $timestamp, $old_summaries, $new_summaries) = @_;
     my $dbh = Bugzilla->dbh;
 
-    $old_summaries = join(", ", @$old_summaries);
-    $new_summaries = join(", ", @$new_summaries);
-    my ($removed, $added) = diff_strings($old_summaries, $new_summaries);
-    if ($removed ne $added) {
+    my ($removed, $added) = diff_arrays($old_summaries, $new_summaries);
+    if (scalar @$removed || scalar @$added) {
+        # Remove flag requester/setter information
+        foreach (@$removed, @$added) { s/^\S+:// }
+
+        $removed = join(", ", @$removed);
+        $added = join(", ", @$added);
         my $field_id = get_field_id('flagtypes.name');
         $dbh->do('INSERT INTO bugs_activity
                   (bug_id, attach_id, who, bug_when, fieldid, removed, added)

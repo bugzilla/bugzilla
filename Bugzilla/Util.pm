@@ -37,7 +37,7 @@ use base qw(Exporter);
                              css_class_quote html_light_quote url_decode
                              i_am_cgi get_netaddr correct_urlbase
                              lsearch ssl_require_redirect use_attachbase
-                             diff_arrays diff_strings
+                             diff_arrays
                              trim wrap_hard wrap_comment find_wrap_point
                              format_time format_time_decimal validate_date
                              validate_time
@@ -343,23 +343,6 @@ sub trim {
       $str =~ s/\s+$//g;
     }
     return $str;
-}
-
-sub diff_strings {
-    my ($oldstr, $newstr) = @_;
-
-    # Split the old and new strings into arrays containing their values.
-    $oldstr =~ s/[\s,]+/ /g;
-    $newstr =~ s/[\s,]+/ /g;
-    my @old = split(" ", $oldstr);
-    my @new = split(" ", $newstr);
-
-    my ($rem, $add) = diff_arrays(\@old, \@new);
-
-    my $removed = join (", ", @$rem);
-    my $added = join (", ", @$add);
-
-    return ($removed, $added);
 }
 
 sub wrap_comment {
@@ -681,7 +664,6 @@ Bugzilla::Util - Generic utility functions for bugzilla
 
   # Functions for manipulating strings
   $val = trim(" abc ");
-  ($removed, $added) = diff_strings($old, $new);
   $wrapped = wrap_comment($comment);
 
   # Functions for formatting time
@@ -861,14 +843,6 @@ If the item is not in the list, returns -1.
 
 Removes any leading or trailing whitespace from a string. This routine does not
 modify the existing string.
-
-=item C<diff_strings($oldstr, $newstr)>
-
-Takes two strings containing a list of comma- or space-separated items
-and returns what items were removed from or added to the new one, 
-compared to the old one. Returns a list, where the first entry is a scalar
-containing removed items, and the second entry is a scalar containing added
-items.
 
 =item C<wrap_hard($string, $size)>
 

@@ -326,19 +326,17 @@ sub init() {
     Error( "no urlbase set", "REOPEN", $exporter ) unless ($urlbase);
     my $def_product =
         new Bugzilla::Product( { name => $params->{"moved-default-product"} } )
-        || Error("Cannot import these bugs because an invalid default 
-                  product was defined for the target db."
-                  . $params->{"maintainer"} . " needs to fix the definitions of
-                  moved-default-product. \n", "REOPEN", $exporter);
+        || Error("an invalid default product was defined for the target DB. " .
+                  $params->{"maintainer"} . " needs to fix the definitions of " .
+                 "moved-default-product. \n", "REOPEN", $exporter);
     my $def_component = new Bugzilla::Component(
         {
             product => $def_product,
             name    => $params->{"moved-default-component"}
         })
-    || Error("Cannot import these bugs because an invalid default 
-              component was defined for the target db."
-              . $params->{"maintainer"} . " needs to fix the definitions of
-              moved-default-component.\n", "REOPEN", $exporter);
+    || Error("an invalid default component was defined for the target DB. " .
+             $params->{"maintainer"} . " needs to fix the definitions of " .
+             "moved-default-component.\n", "REOPEN", $exporter);
 }
     
 
@@ -1359,7 +1357,7 @@ importxml - Import bugzilla bug data from xml.
  Options:
        -? --help        brief help message
        -v --verbose     print error and debug information. 
-                        Mulltiple -v increases verbosity
+                        Multiple -v increases verbosity
        -m --sendmail    send mail to recipients with log of bugs imported
        --attach_path    The path to the attachment files.
                         (Required if encoding="filename" is used for attachments.)

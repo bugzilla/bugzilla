@@ -52,7 +52,7 @@ use Storable qw(dclone);
 
 use constant BLOB_TYPE => DBI::SQL_BLOB;
 use constant ISOLATION_LEVEL => 'REPEATABLE READ';
-use constant GROUPBY_REGEXP => '(?:.*\s+AS\s+)?(\w+(\.\w+)?)(?:\s+(ASC|DESC))?$';
+use constant GROUPBY_REGEXP => '(?:.*\s+AS\s+|SUBSTRING\()?(\w+(\.\w+)?)(?:\s+(ASC|DESC|FROM\s+.+))?$';
 
 # Set default values for what used to be the enum types.  These values
 # are no longer stored in localconfig.  If we are upgrading from a

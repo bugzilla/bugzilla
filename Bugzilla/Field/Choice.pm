@@ -171,7 +171,7 @@ sub update {
     }
 
     $dbh->bz_commit_transaction();
-    return $changes;
+    return wantarray ? ($changes, $old_self) : $changes;
 }
 
 sub remove_from_db {

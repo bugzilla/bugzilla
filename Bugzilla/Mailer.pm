@@ -62,7 +62,20 @@ sub MessageToMTA {
         return;
     }
 
-    my $email = ref($msg) ? $msg : Email::MIME->new($msg);
+    my $email;
+    if (ref $msg) {
+        $email = $msg;
+    }
+    else {
+        # RFC 2822 requires us to have CRLF for our line endings and
+        # Email::MIME doesn't do this for us. We use \015 (CR) and \012 (LF)
+        # directly because Perl translates "\n" depending on what platform
+        # you're running on. See http://perldoc.perl.org/perlport.html#Newlines
+        # We check for multiple CRs because of this Template-Toolkit bug:
+        # https://rt.cpan.org/Ticket/Display.html?id=43345
+        $msg =~ s/(?:\015+)?\012/\015\012/msg;
+        $email = new Email::MIME($msg);
+    }
 
     # We add this header to uniquely identify all email that we
     # send as coming from this Bugzilla installation.

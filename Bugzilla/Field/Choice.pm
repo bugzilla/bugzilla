@@ -93,18 +93,18 @@ sub type {
     # For generic classes, we use a lowercase class name, so as
     # not to interfere with any real subclasses we might make some day.
     my $package = "Bugzilla::Field::Choice::$field_name";
+    Bugzilla->request_cache->{"field_$package"} = $field_obj;
 
-    # We check defined so that the package and the stored field are only
-    # created once globally (at least per request). We prefix it with
-    # field_ (instead of suffixing it) so that we don't somehow conflict
-    # with the names of custom fields.
-    if (!defined Bugzilla->request_cache->{"field_$package"}) {
+    # This package only needs to be created once. We check if the DB_TABLE
+    # glob for this package already exists, which tells us whether or not
+    # we need to create the package (this works even under mod_perl, where
+    # this package definition will persist across requests)).
+    if (!defined *{"${package}::DB_TABLE"}) {
         eval <<EOC;
             package $package;
             use base qw(Bugzilla::Field::Choice);
             use constant DB_TABLE => '$field_name';
 EOC
-        Bugzilla->request_cache->{"field_$package"} = $field_obj;
     }
 
     return $package;

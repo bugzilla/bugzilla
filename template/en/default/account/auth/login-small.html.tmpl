@@ -47,11 +47,18 @@
            type="password"
            onfocus="mini_login_on_focus( this )"
     >
+    [% IF Param('rememberlogin') == 'defaulton' ||
+          Param('rememberlogin') == 'defaultoff' 
+    %]
+      <input type="checkbox" id="Bugzilla_remember[% qs_suffix %]" 
+             name="Bugzilla_remember" value="on" class="bz_remember"
+                 [%+ "checked" IF Param('rememberlogin') == "defaulton" %]>
+      <label for="Bugzilla_remember[% qs_suffix %]">Remember</label>
+    [% END %]
     <input type="submit" name="GoAheadAndLogIn" value="Log in" id="log_in">
-    [<a href="[% target FILTER html %]?GoAheadAndLogIn=1">options</a>]
     <div class="bz_default_hidden">
       [% PROCESS "global/hidden-fields.html.tmpl"
-                exclude="^Bugzilla_(login|password|restrictlogin)$" %]
+                exclude="^Bugzilla_(login|password|restrictlogin|remember)$" %]
     </div>
     <script type="text/javascript">
       mini_login_constants = {
@@ -59,9 +66,9 @@
           "password" : "password",
           "warning" : "You must set the login and password before logging in."
       }
-      YAHOO.util.Event.onDOMReady(function() { 
+      YAHOO.util.Event.onDOMReady(function() {
         init_mini_login_form('[% qs_suffix FILTER html %]');
-      } );      
+      } );
     </script>    
   </form>
 </li>

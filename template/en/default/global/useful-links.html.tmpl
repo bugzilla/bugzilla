@@ -27,7 +27,6 @@
 
 <ul id="useful-links">
   <li id="links-actions">
-    <div class="label">Actions: </div>
       [% PROCESS "global/common-links.html.tmpl" qs_suffix = "_bottom" %]
   </li>
 
@@ -38,9 +37,6 @@
   %]
     [% print_pipe = 0 %]
     <li id="links-saved">
-      <div class="label">
-        Saved Searches:
-      </div>
       <ul class="links">
         [% IF user.showmybugslink %]
           [% filtered_username = user.login FILTER url_quote %]

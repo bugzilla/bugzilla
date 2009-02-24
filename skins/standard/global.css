@@ -45,13 +45,14 @@
         padding-bottom: 2px;
     }
 
-    #header form {
-        font-size: 85%;
+    #header form, #header form input,
+    #footer form, #footer form input
+    {
+        font-size: 95%;
         display: inline;
     }
 
     #header .links {
-        font-size: 85%;
         border-left: 1px solid silver;
         border-right: 1px solid silver;
         border-bottom: 1px solid silver;
@@ -65,6 +66,19 @@
         margin: 0.3em 0em;
         padding: 0.3em;
         color: green;
+    }
+
+    form.mini_login input.bz_login  {
+        width: 10em;
+    }
+    form.mini_login input.bz_password {
+        width: 6em;
+    }
+    form.mini_login input.bz_remember {
+        margin: 0;
+    }
+    .bz_mini_login_help {
+        color: #777;
     }
 
 /* header (end)   */
@@ -117,7 +131,10 @@
 
 /* titles (end) */
 
-/* footer (begin) */
+/* footer (begin)
+ * See also the "header" section for styles that apply
+ * to both the header and footer. 
+ */
     #footer {
         clear: both;
         margin-top: 5px;
@@ -127,36 +144,27 @@
         border-bottom: 1px solid #ddd;
     }
 
-    #footer form {
-        display: inline;
-    }
-
-    #footer .btn,
-    #footer .txt {
-        font-size: 80%;
-    }
-
     #footer #useful-links {
-        display: table;
         padding-left: 1ex;
         padding-right: 1ex;
     }
 
-    #footer #links-actions,
-    #footer #links-saved,
-    #footer #links-special {
-        display: table-row;
+    #footer ul {
         list-style-type: none;
+    }
+    #links-saved ul {
+        display: inline;
+    }
+    #links-saved th {
+        vertical-align: top;
     }
 
     #footer .label {
-        display: table-cell;
         white-space: nowrap;
         vertical-align: top;
     }
 
     #footer .links {
-        display: table-cell;
         vertical-align: top;
     }
 /* footer (end) */
@@ -507,20 +515,4 @@ form#Create .comment {
 
 #down_button {
     background-image: url(global/down.png);
-}
-
-.mini_login, .mini_login input, .mini_login button {
-    font-size: small;
-}
-
-form.mini_login input.bz_password, form.mini_login input.bz_login  {
-    width: 10em;
-}
-
-form .bz_remember, form .bz_restrict {
-    margin: 0.4em 0;
-}
-
-.bz_mini_login_help {
-    color: #ccc;
 }

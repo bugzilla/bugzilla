@@ -34,9 +34,12 @@ body {
     -moz-border-radius-topright: 5px;
 }
 
-#header .links {
+#header .links, #footer {
     background-color: #929bb1;
-    color: #f1dbc7;
+    color: #ddd;
+}
+
+#header {
     -moz-border-radius-bottomleft: 5px;
     -moz-border-radius-bottomright: 5px;
     border: none;
@@ -179,11 +182,8 @@ hr {
 /* footer */
 
 #footer {
-    background: #929bb1;
-    color: #f1dbc7;
     border: 1px solid #747e93;
     width: 100%;
-    font-size: 9pt;
     -moz-border-radius: 5px;
 }
 
@@ -198,22 +198,13 @@ hr {
     margin-top: 2ex;
 }
 
-#footer .label {
-    font-weight: bold;
-    color: #dddddd;
-}
-
 #footer .links {
     border-spacing: 30px;
-    padding-bottom: 2ex;
+    margin-bottom: 2ex;
 }
 
 .separator {
     color: #cccccc;
-}
-
-#footer li.form {
-    background-color: transparent;
 }
 
 /* tabs */

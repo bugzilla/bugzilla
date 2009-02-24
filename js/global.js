@@ -19,38 +19,41 @@ var mini_login_constants;
 function init_mini_login_form( suffix ) {
     var mini_login = document.getElementById('Bugzilla_login' +  suffix );
     var mini_password = document.getElementById('Bugzilla_password' +  suffix );
-    // check if the login and password are blank and if they are
-    //    put in the text login and password and make them slightly greyed out
-    if( mini_login.value == "" && mini_password.value == "" ) {
+    var mini_dummy = document.getElementById(
+        'Bugzilla_password_dummy' + suffix);
+    // If the login and password are blank when the page loads, we display
+    // "login" and "password" in the boxes
+    if (mini_login.value == "" && mini_password.value == "") {
         mini_login.value = mini_login_constants.login;
-        mini_password.value = mini_login_constants.password;
-        mini_password.type = "text";
-
         YAHOO.util.Dom.addClass(mini_login, "bz_mini_login_help");
-        YAHOO.util.Dom.addClass(mini_password, "bz_mini_login_help");        
+        YAHOO.util.Dom.addClass(mini_password, 'bz_default_hidden');
+        YAHOO.util.Dom.removeClass(mini_dummy, 'bz_default_hidden');
     }
 }
 
-function mini_login_on_focus( el ) {
-    if( el.name == "Bugzilla_password" ){
-        if( el.type != "password" ) {
-            el.value = "";
-            el.type = "password";
-        }
-    } else if ( el.value == mini_login_constants.login ) {
-        if( el.value == mini_login_constants.login ) {
-            el.value = "";
-        }  
+// Clear the words "login" and "password" from the form when you click
+// in one of the boxes. We clear them both when you click in either box
+// so that the browser's password-autocomplete can work.
+function mini_login_on_focus( suffix ) {
+    var mini_login = document.getElementById('Bugzilla_login' +  suffix );
+    var mini_password = document.getElementById('Bugzilla_password' +  suffix );
+    var mini_dummy = document.getElementById(
+        'Bugzilla_password_dummy' + suffix);
+
+    YAHOO.util.Dom.removeClass(mini_login, "bz_mini_login_help");
+    if (mini_login.value == mini_login_constants.login) {
+        mini_login.value = '';
     }
-    YAHOO.util.Dom.removeClass(el, "bz_mini_login_help");
+    YAHOO.util.Dom.removeClass(mini_password, 'bz_default_hidden');
+    YAHOO.util.Dom.addClass(mini_dummy, 'bz_default_hidden');
 }
 
 function check_mini_login_fields( suffix ) {
     var mini_login = document.getElementById('Bugzilla_login' +  suffix );
     var mini_password = document.getElementById('Bugzilla_password' +  suffix );
-    if(( mini_login.value != "" && mini_password.value != "" ) && 
-       (  mini_login.value != mini_login_constants.login  && 
-          mini_password.value != mini_login_constants.password )) {
+    if( ( mini_login.value != "" && mini_password.value != "" ) && 
+         mini_login.value != mini_login_constants.login) 
+    {
       return true;
     }
     window.alert( mini_login_constants.warning );

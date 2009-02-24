@@ -320,7 +320,10 @@ div#docslinks {
 /** End Comments **/
 
 .bz_default_hidden, .bz_tui_hidden {
-    display: none;
+    /* We have !important because we want elements with these classes to always
+     * be hidden, even if there is some CSS that overrides it (we use these
+     * classes inside JavaScript to hide things). */
+    display: none !important;
 }
 
 span.quote {

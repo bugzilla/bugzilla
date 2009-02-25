@@ -20,12 +20,9 @@ function initChangeColumns() {
     window.onunload = unload;
     var av_select = document.getElementById("available_columns");
     var sel_select = document.getElementById("selected_columns");
-    document.getElementById("avail_header").style.display = "inline";
-    document.getElementById("available_columns").style.display = "inline";
-    document.getElementById("select_button").style.display = "inline";
-    document.getElementById("deselect_button").style.display = "inline";
-    document.getElementById("up_button").style.display = "inline";
-    document.getElementById("down_button").style.display = "inline";
+    YAHOO.util.Dom.removeClass(
+        ['avail_header', av_select, 'select_button', 
+         'deselect_button', 'up_button', 'down_button'], 'bz_default_hidden');
     switch_options(sel_select, av_select, false);
     sel_select.selectedIndex = -1;
     updateView();

@@ -103,7 +103,7 @@
 <script type="text/javascript">
   var close_status_array = new Array("[% closed_status_array.join('", "') FILTER replace(',$', '')
                                                                 FILTER none %]");
-  YAHOO.util.Dom.setStyle('dup_id_discoverable', 'display', 'block');
+  YAHOO.util.Dom.removeClass('dup_id_discoverable', 'bz_default_hidden');
   hideEditableField( "dup_id_container", "dup_id", 'dup_id_edit_action',
                      'dup_id', '[% bug.dup_id FILTER js %]' )
   showHideStatusItems( "",  ['[% "is_duplicate" IF bug.dup_id %]',

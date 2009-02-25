@@ -139,8 +139,8 @@ function updateCalendarFromField(date_field) {
 
 /* Hide input fields and show the text with (edit) next to it */  
 function hideEditableField( container, input, action, field_id, original_value ) {
-    YAHOO.util.Dom.setStyle(container, 'display', 'inline');
-    YAHOO.util.Dom.setStyle(input, 'display', 'none');
+    YAHOO.util.Dom.removeClass(container, 'bz_default_hidden');
+    YAHOO.util.Dom.addClass(input, 'bz_default_hidden');
     YAHOO.util.Event.addListener(action, 'click', showEditableField,
                                  new Array(container, input));
     if(field_id != ""){
@@ -165,8 +165,8 @@ function showEditableField (e, ContainerInputArray) {
         YAHOO.util.Event.preventDefault(e);
         return;
     }
-    YAHOO.util.Dom.setStyle(ContainerInputArray[0], 'display', 'none');
-    YAHOO.util.Dom.setStyle(inputArea, 'display', 'inline');
+    YAHOO.util.Dom.addClass(ContainerInputArray[0], 'bz_default_hidden');
+    YAHOO.util.Dom.removeClass(inputArea, 'bz_default_hidden');
     if ( inputArea.tagName.toLowerCase() == "input" ) {
         inputs.push(inputArea);
     } else {
@@ -212,8 +212,8 @@ function checkForChangedFieldValues(e, ContainerInputArray ) {
         }
     }
     if(unhide){
-        YAHOO.util.Dom.setStyle(ContainerInputArray[0], 'display', 'none');
-        YAHOO.util.Dom.setStyle(ContainerInputArray[1], 'display', 'inline');
+        YAHOO.util.Dom.addClass(ContainerInputArray[0], 'bz_default_hidden');
+        YAHOO.util.Dom.removeClass(ContainerInputArray[1], 'bz_default_hidden');
     }
 
 }
@@ -267,20 +267,25 @@ function showHideStatusItems(e, dupArrayInfo) {
     // finish doing stuff based on the selection.
     if ( el ) {
         showDuplicateItem(el);
-        YAHOO.util.Dom.setStyle('resolution_settings', 'display', 'none');
+        YAHOO.util.Dom.addClass('resolution_settings', 'bz_default_hidden');
         if (document.getElementById('resolution_settings_warning')) {
-            YAHOO.util.Dom.setStyle('resolution_settings_warning', 'display', 'none');
+            YAHOO.util.Dom.addClass('resolution_settings_warning',
+                                    'bz_default_hidden');
         }
-        YAHOO.util.Dom.setStyle('duplicate_display', 'display', 'none');
+        YAHOO.util.Dom.addClass('duplicate_display', 'bz_default_hidden');
 
         if ( el.value == dupArrayInfo[1] && dupArrayInfo[0] == "is_duplicate" ) {
-            YAHOO.util.Dom.setStyle('resolution_settings', 'display', 'inline');
-            YAHOO.util.Dom.setStyle('resolution_settings_warning', 'display', 'block');  
+            YAHOO.util.Dom.removeClass('resolution_settings', 
+                                       'bz_default_hidden');
+            YAHOO.util.Dom.removeClass('resolution_settings_warning', 
+                                       'bz_default_hidden');  
         }
         else if ( bz_isValueInArray(close_status_array, el.value) ) {
             // hide duplicate and show resolution
-            YAHOO.util.Dom.setStyle('resolution_settings', 'display', 'inline');
-            YAHOO.util.Dom.setStyle('resolution_settings_warning', 'display', 'block');
+            YAHOO.util.Dom.removeClass('resolution_settings', 
+                                       'bz_default_hidden');
+            YAHOO.util.Dom.removeClass('resolution_settings_warning', 
+                                       'bz_default_hidden');
         }
     }
 }
@@ -292,14 +297,16 @@ function showDuplicateItem(e) {
     if (resolution) {
         if (resolution.value == 'DUPLICATE' && bz_isValueInArray( close_status_array, bug_status.value) ) {
             // hide resolution show duplicate
-            YAHOO.util.Dom.setStyle('duplicate_settings', 'display', 'inline');
-            YAHOO.util.Dom.setStyle('dup_id_discoverable', 'display', 'none');
+            YAHOO.util.Dom.removeClass('duplicate_settings', 
+                                       'bz_default_hidden');
+            YAHOO.util.Dom.addClass('dup_id_discoverable', 'bz_default_hidden');
             dup_id.focus();
             dup_id.select();
         }
         else {
-            YAHOO.util.Dom.setStyle('duplicate_settings', 'display', 'none');
-            YAHOO.util.Dom.setStyle('dup_id_discoverable', 'display', 'block');
+            YAHOO.util.Dom.addClass('duplicate_settings', 'bz_default_hidden');
+            YAHOO.util.Dom.removeClass('dup_id_discoverable', 
+                                       'bz_default_hidden');
             dup_id.blur();
         }
     }
@@ -309,7 +316,7 @@ function showDuplicateItem(e) {
 function setResolutionToDuplicate(e, duplicate_or_move_bug_status) {
     var status = document.getElementById('bug_status');
     var resolution = document.getElementById('resolution');
-    YAHOO.util.Dom.setStyle('dup_id_discoverable', 'display', 'none');
+    YAHOO.util.Dom.addClass('dup_id_discoverable', 'bz_default_hidden');
     status.value = duplicate_or_move_bug_status;
     resolution.value = "DUPLICATE";
     showHideStatusItems("", ["",""]);

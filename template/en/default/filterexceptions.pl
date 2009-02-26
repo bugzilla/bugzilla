@@ -540,8 +540,8 @@
   'new_status.id',
 ],
 
-'account/login.html.tmpl' => [
-  'target', 
+'account/auth/login-small.html.tmpl' => [
+  'qs_suffix',
 ],
 
 'account/prefs/email.html.tmpl' => [

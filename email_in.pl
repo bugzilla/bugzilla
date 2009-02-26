@@ -88,7 +88,7 @@ sub parse_mail {
     debug_print("Body:\n" . $body, 3);
 
     $body = remove_leading_blank_lines($body);
-    my @body_lines = split("\n", $body);
+    my @body_lines = split(/\r?\n/s, $body);
 
     # If there are fields specified.
     if ($body =~ /^\s*@/s) {

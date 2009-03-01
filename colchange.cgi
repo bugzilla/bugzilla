@@ -29,6 +29,7 @@ use lib qw(. lib);
 
 use Bugzilla;
 use Bugzilla::Constants;
+use Bugzilla::Util;
 use Bugzilla::CGI;
 use Bugzilla::Search::Saved;
 use Bugzilla::Error;
@@ -185,7 +186,7 @@ if (defined $cgi->param('query_based_on')) {
 
     if ($search) {
         $vars->{'saved_search'} = $search;
-        $vars->{'buffer'} = "cmdtype=runnamed&namedcmd=".$search->name;
+        $vars->{'buffer'} = "cmdtype=runnamed&namedcmd=". url_quote($search->name);
 
         my $params = new Bugzilla::CGI($search->url);
         if ($params->param('columnlist')) {

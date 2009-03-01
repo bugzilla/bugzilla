@@ -62,8 +62,7 @@ body {
     -moz-border-radius: 5px;
 }
 
-a:link,
-a:link:hover {
+a, a:hover {
     color: #6169c0;
 }
 
@@ -71,13 +70,11 @@ a:visited {
     color: #3d4a68;
 }
 
-a:link,
-a:visited {
+a, a:visited {
     text-decoration: none;
 }
 
-a:link:hover,
-a:visited:hover {
+a:hover {
     text-decoration: underline;
 }
 

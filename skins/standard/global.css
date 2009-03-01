@@ -202,19 +202,19 @@
 /* tabs (end) */
 
 /* generic (begin) */
-    :link {
+    a {
         color: #039;
     }
 
-    :visited {
+    a:visited {
         color: #636;
     }
 
-    :link:hover, :visited:hover {
+    a:hover {
         color: #333;
     }
 
-    :link:active, :link:active {
+    a:active {
         color: #000;
     }
 

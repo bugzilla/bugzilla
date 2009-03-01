@@ -30,9 +30,8 @@
 
 [% target = urlbase _ target %]
 <li>
-  <form name="login" action="[% target FILTER html %]" 
-        class="mini_login"
-        method="POST" id="mini_login[% qs_suffix FILTER html %]"
+  <form action="[% target FILTER html %]" method="POST" class="mini_login"
+        id="mini_login[% qs_suffix FILTER html %]"
         onsubmit="return check_mini_login_fields( '[% qs_suffix FILTER html %]' );"
   >
     <span class="separator">| </span>
@@ -58,7 +57,8 @@
                  [%+ "checked" IF Param('rememberlogin') == "defaulton" %]>
       <label for="Bugzilla_remember[% qs_suffix %]">Remember</label>
     [% END %]
-    <input type="submit" name="GoAheadAndLogIn" value="Log in" id="log_in">
+    <input type="submit" name="GoAheadAndLogIn" value="Log in" 
+            id="log_in[% qs_suffix %]">
     <div class="bz_default_hidden">
       [% PROCESS "global/hidden-fields.html.tmpl"
                 exclude="^Bugzilla_(login|password|restrictlogin|remember)$" %]

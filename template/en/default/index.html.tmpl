@@ -128,37 +128,22 @@ YAHOO.util.Event.onDOMReady(onLoadActions);
     <tr>
       <td>
         <h1 id="welcome"> Welcome to [% terms.Bugzilla %]</h1>
-        <a href="enter_bug.cgi" class="bz_common_actions">
-          <div class="bz_common_actions" id="enter_bug">
-            <span>File [% terms.aBug %]</span>
-          </div>
-        </a>
-        
-        <a href="query.cgi" class="bz_common_actions">
-          <div class="bz_common_actions" id="query">
-            <span>Search</span>
-          </div>
-        </a>
-        
-          <a class="bz_common_actions quicksearch_help_text" href="
-            [% IF user.id %]
-              userprefs.cgi
-            [% ELSIF Param('createemailregexp') && user.authorizer.user_can_create_account %]
-              createaccount.cgi
-            [% ELSE %]
-              ?GoAheadAndLogIn=1
-            [% END %]">
-            <div class="bz_common_actions" id="account">
-              <span>
-                [% IF user.id %]
-                  User Preferences
-                [% ELSIF Param('createemailregexp') && user.authorizer.user_can_create_account %]
-                  Open a New Account
-                [% ELSE %]
-                  Log In
-                [% END%]</span>
-            </div>
-          </a>
+        <a id="enter_bug" class="bz_common_actions"
+           href="enter_bug.cgi"><span>File [% terms.aBug %]</span></a>
+      
+        <a id="query" class="bz_common_actions" 
+           href="query.cgi"><span>Search</span></a>
+      
+        <a id="account" class="bz_common_actions quicksearch_help_text"
+          [% IF user.id %]
+            href="userprefs.cgi"><span>User Preferences</span></a>
+          [% ELSIF Param('createemailregexp')
+                   && user.authorizer.user_can_create_account 
+          %]
+            href="createaccount.cgi"><span>Open a New Account</span></a>
+          [% ELSE %]
+            href="?GoAheadAndLogIn=1"><span>Log In</span></a>
+          [% END %]
         <form id="quicksearchForm" name="quicksearchForm" action="buglist.cgi"
               onsubmit="return checkQuicksearch(this);">
           <div>
@@ -188,7 +173,7 @@ YAHOO.util.Event.onDOMReady(onLoadActions);
               <li>
                 <a href="page.cgi?id=release-notes.html" > Release Notes</a>
               </li>
-            </div>
+            </ul>
           </div>
         </form>
       </td>

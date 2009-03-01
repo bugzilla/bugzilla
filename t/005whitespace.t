@@ -19,6 +19,8 @@
 #
 # Contributor(s): Jacob Steenhagen <jake@bugzilla.org>
 #                 David D. Kilzer <ddkilzer@kilzer.net>
+#                 Colin Ogilvie <mozilla@colinogilvie.co.uk>
+#                 Marc Schumann <wurblzap@gmail.com>
 #
 
 #################
@@ -34,7 +36,7 @@ use Support::Templates;
 
 use File::Spec;
 use Test::More tests => (  scalar(@Support::Files::testitems)
-                         + $Support::Templates::num_actual_files);
+                         + $Support::Templates::num_actual_files) * 2;
 
 my @testitems = @Support::Files::testitems;
 for my $path (@Support::Templates::include_paths) {
@@ -42,12 +44,26 @@ for my $path (@Support::Templates::include_paths) {
                         Support::Templates::find_actual_files($path)));
 }
 
+my %results;
+
 foreach my $file (@testitems) {
     open (FILE, "$file");
-    if (grep /\t/, <FILE>) {
+    my @contents = <FILE>;
+    if (grep /\t/, @contents) {
         ok(0, "$file contains tabs --WARNING");
     } else {
         ok(1, "$file has no tabs");
+    }
+    close (FILE);
+}
+
+foreach my $file (@testitems) {
+    open (FILE, "$file");
+    my @contents = <FILE>;
+    if (grep /\r/, @contents) {
+        ok(0, "$file contains non-OS-conformant line endings --WARNING");
+    } else {
+        ok(1, "All line endings of $file are OS conformant");
     }
     close (FILE);
 }

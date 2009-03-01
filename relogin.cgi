@@ -37,7 +37,7 @@ use Date::Format;
 my $template = Bugzilla->template;
 my $cgi = Bugzilla->cgi;
 
-my $action = $cgi->param('action') || 'logout';
+my $action = $cgi->param('action');
 
 my $vars = {};
 my $target;
@@ -182,20 +182,6 @@ elsif ($action eq 'end-sudo') {
     # NOTE: If you want to log the end of an sudo session, so it here.
     
     $vars->{'message'} = 'sudo_ended';
-    $target = 'global/message.html.tmpl';
-}
-# Log out the currently logged-in user (this used to be the only thing this did)
-elsif ($action eq 'logout') {
-    # We don't want to remove a random logincookie from the db, so
-    # call Bugzilla->login(). If we're logged in after this, then
-    # the logincookie must be correct
-    Bugzilla->login(LOGIN_OPTIONAL);
-
-    $cgi->remove_cookie('sudo');
-
-    Bugzilla->logout();
-
-    $vars->{'message'} = "logged_out";
     $target = 'global/message.html.tmpl';
 }
 # No valid action found

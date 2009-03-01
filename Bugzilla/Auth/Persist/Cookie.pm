@@ -161,6 +161,7 @@ sub clear_browser_cookies {
     my $cgi = Bugzilla->cgi;
     $cgi->remove_cookie('Bugzilla_login');
     $cgi->remove_cookie('Bugzilla_logincookie');
+    $cgi->remove_cookie('sudo');
 }
 
 1;

@@ -36,7 +36,7 @@ use Support::Templates;
 
 use File::Spec;
 use Test::More tests => (  scalar(@Support::Files::testitems)
-                         + $Support::Templates::num_actual_files) * 2;
+                         + $Support::Templates::num_actual_files) * 3;
 
 my @testitems = @Support::Files::testitems;
 for my $path (@Support::Templates::include_paths) {
@@ -64,6 +64,17 @@ foreach my $file (@testitems) {
         ok(0, "$file contains non-OS-conformant line endings --WARNING");
     } else {
         ok(1, "All line endings of $file are OS conformant");
+    }
+    close (FILE);
+}
+
+foreach my $file (@testitems) {
+    open (FILE, "$file");
+    my $first_line = <FILE>;
+    if ($first_line =~ /\xef\xbb\xbf/) {
+        ok(0, "$file contains Byte Order Mark --WARNING");
+    } else {
+        ok(1, "$file is free of a Byte Order Mark");
     }
     close (FILE);
 }

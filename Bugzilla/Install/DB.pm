@@ -3074,11 +3074,6 @@ sub _populate_bugs_fulltext {
         if (UNIVERSAL::can($dbh, 'sql_group_concat')) {
             print "Populating bugs_fulltext...";
             print " (this can take a long time.)\n";
-            # XXX This hack should probably be moved elsewhere.
-            if ($dbh->isa('Bugzilla::DB::Mysql')) {
-                $dbh->do('SET SESSION group_concat_max_len = 128000000');
-                $dbh->do('SET SESSION max_allowed_packet =   128000000');
-            }
             $dbh->do(
                 q{INSERT INTO bugs_fulltext (bug_id, short_desc, comments, 
                                              comments_noprivate)

@@ -44,6 +44,7 @@ package Bugzilla::DB::Mysql;
 use strict;
 
 use Bugzilla::Constants;
+use Bugzilla::Install::Util qw(install_string);
 use Bugzilla::Util;
 use Bugzilla::Error;
 use Bugzilla::DB::Schema::Mysql;
@@ -101,20 +102,9 @@ sub new {
         }
     }
 
-    # The "comments" field of the bugs_fulltext table could easily exceed
-    # MySQL's default max_allowed_packet. Also, MySQL should never have
-    # a max_allowed_packet smaller than our max_attachment_size. However,
-    # if we've already set a max_allowed_packet in MySQL bigger than all
-    # of those, we should keep it.
-    my (undef, $current_max_allowed) = $self->selectrow_array(
-        q{SHOW VARIABLES LIKE 'max\_allowed\_packet'});
-    my $min_max_allowed_packet = MAX_COMMENTS * MAX_COMMENT_LENGTH;
-    my $max_allowed_packet = max($min_max_allowed_packet,
-                                 $current_max_allowed,
-                                 # This parameter is not yet defined when the DB
-                                 # is being built for the very first time.
-                                 Bugzilla->params->{'maxattachmentsize'} || 0);
-    $self->do("SET SESSION max_allowed_packet = $max_allowed_packet");
+    # Allow large GROUP_CONCATs (largely for inserting comments 
+    # into bugs_fulltext).
+    $self->do('SET SESSION group_concat_max_len = 128000000');
 
     return $self;
 }
@@ -290,6 +280,24 @@ sub _bz_get_initial_schema {
 
 sub bz_setup_database {
     my ($self) = @_;
+
+    # The "comments" field of the bugs_fulltext table could easily exceed
+    # MySQL's default max_allowed_packet. Also, MySQL should never have
+    # a max_allowed_packet smaller than our max_attachment_size. So, we
+    # warn the user here if max_allowed_packet is too small.
+    my $min_max_allowed = MAX_COMMENTS * MAX_COMMENT_LENGTH;
+    my (undef, $current_max_allowed) = $self->selectrow_array(
+        q{SHOW VARIABLES LIKE 'max\_allowed\_packet'});
+    # This parameter is not yet defined when the DB is being built for
+    # the very first time. The code below still works properly, however,
+    # because the default maxattachmentsize is smaller than $min_max_allowed.
+    my $max_attachment = (Bugzilla->params->{'maxattachmentsize'} || 0) * 1024;
+    my $needed_max_allowed = max($min_max_allowed, $max_attachment);
+    if ($current_max_allowed < $needed_max_allowed) {
+        warn install_string('max_allowed_packet',
+                            { current => $current_max_allowed,
+                              needed  => $needed_max_allowed }) . "\n";
+    }
 
     # Make sure the installation has InnoDB turned on, or we're going to be
     # doing silly things like making foreign keys on MyISAM tables, which is

@@ -68,7 +68,7 @@ sub get_param_list {
    name => 'maxattachmentsize',
    type => 't',
    default => '1000',
-   checker => \&check_numeric
+   checker => \&check_maxattachmentsize
   },
 
   # The maximum size (in bytes) for patches and non-patch attachments.

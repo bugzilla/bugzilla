@@ -1,5 +1,5 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"> -->
-<!-- $Id: installation.xml,v 1.164 2009/01/08 23:42:53 lpsolit%gmail.com Exp $ -->
+<!-- $Id: installation.xml,v 1.165 2009/03/02 01:21:57 mkanat%bugzilla.org Exp $ -->
 <chapter id="installing-bugzilla">
   <title>Installing Bugzilla</title>
 
@@ -778,6 +778,28 @@
             improving your installation's security.
           </para>
         </caution>
+ 
+        <section id="mysql-max-allowed-packet">
+          <title>Allow large attachments and many comments</title>
+          
+          <para>By default, MySQL will only allow you to insert things
+          into the database that are smaller than 64KB. Attachments
+          may be larger than this. Also, Bugzilla combines all comments
+          on a single bug into one field for full-text searching, and the
+          combination of all comments on a single bug are very likely to
+          be larger than 64KB.</para>
+          
+          <para>To change MySQL's default, you need to edit your MySQL
+          configuration file, which is usually <filename>/etc/my.cnf</filename>
+          on Linux. We recommend that you allow at least 4MB packets by
+          adding the "max_allowed_packet" parameter to your MySQL 
+          configuration in the "[mysqld]" section, like this:</para>
+
+          <screen>[mysqld]
+# Allow packets up to 4MB
+max_allowed_packet=4M
+          </screen>
+        </section>
         
         <section>
           <title>Allow small words in full-text indexes</title>

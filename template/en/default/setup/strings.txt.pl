@@ -61,6 +61,12 @@ then the value of the ##column## column that needs to be fixed:
 
 EOT
     install_module => 'Installing ##module## version ##version##...',
+    max_allowed_packet => <<EOT,
+WARNING: You need to set the max_allowed_packet parameter in your MySQL
+configuration to at least ##needed##. Currently it is set to ##current##.
+You can set this parameter in the [mysqld] section of your MySQL
+configuration file.
+EOT
     min_version_required => "Minimum version required: ",
 
 # Note: When translating these "modules" messages, don't change the formatting

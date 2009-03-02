@@ -258,9 +258,6 @@ sub init {
         }
         if (@clist) {
             push(@specialchart, \@clist);
-        } else {
-            ThrowUserError("missing_email_type",
-                           { email => $email });
         }
     }
 

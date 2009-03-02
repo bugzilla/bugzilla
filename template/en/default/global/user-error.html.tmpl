@@ -1067,11 +1067,6 @@
     [% docslinks = {'reporting.html' => 'Reporting'} %]
     You must specify one or more datasets to plot.
     
-  [% ELSIF error == "missing_email_type" %]
-    [% title = "Your Search Makes No Sense" %]
-    You must specify one or more fields in which to search for
-    <tt>[% email FILTER html %]</tt>.
-    
   [% ELSIF error == "missing_frequency" %]
     [% title = "Missing Frequency" %]
     [% docslinks = {'reporting.html' => 'Reporting'} %]

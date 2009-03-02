@@ -237,15 +237,7 @@ sub init {
             next;
         }
         my $type = $params->param("emailtype$id");
-        if ($type eq "exact") {
-            $type = "anyexact";
-            foreach my $name (split(',', $email)) {
-                $name = trim($name);
-                if ($name) {
-                    login_to_id($name, THROW_ERROR);
-                }
-            }
-        }
+        $type = "anyexact" if ($type eq "exact");
 
         my @clist;
         foreach my $field ("assigned_to", "reporter", "cc", "qa_contact") {
@@ -258,6 +250,17 @@ sub init {
         }
         if (@clist) {
             push(@specialchart, \@clist);
+        }
+        else {
+            # No field is selected. Nothing to see here.
+            next;
+        }
+
+        if ($type eq "anyexact") {
+            foreach my $name (split(',', $email)) {
+                $name = trim($name);
+                login_to_id($name, THROW_ERROR) if $name;
+            }
         }
     }
 

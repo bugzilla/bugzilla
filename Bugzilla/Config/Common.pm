@@ -50,7 +50,8 @@ use base qw(Exporter);
        check_opsys check_shadowdb check_urlbase check_webdotbase
        check_netmask check_user_verify_class check_image_converter
        check_mail_delivery_method check_notification check_timezone check_utf8
-       check_bug_status check_smtp_auth
+       check_bug_status check_smtp_auth 
+       check_maxattachmentsize
 );
 
 # Checking functions for the various values
@@ -316,6 +317,24 @@ sub check_mail_delivery_method {
         # look for sendmail.exe 
         return "Failed to locate " . SENDMAIL_EXE
             unless -e SENDMAIL_EXE;
+    }
+    return "";
+}
+
+sub check_maxattachmentsize {
+    my $check = check_numeric(@_);
+    return $check if $check;
+    my $size = shift;
+    my $dbh = Bugzilla->dbh;
+    if ($dbh->isa('Bugzilla::DB::Mysql')) {
+        my (undef, $max_packet) = $dbh->selectrow_array(
+            q{SHOW VARIABLES LIKE 'max\_allowed\_packet'});
+        my $byte_size = $size * 1024;
+        if ($max_packet < $byte_size) {
+            return "You asked for a maxattachmentsize of $byte_size bytes,"
+                   . " but the max_allowed_packet setting in MySQL currently"
+                   . " only allows packets up to $max_packet bytes";
+        }
     }
     return "";
 }

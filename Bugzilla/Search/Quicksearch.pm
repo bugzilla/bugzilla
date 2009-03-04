@@ -350,7 +350,7 @@ sub quicksearch {
                                     addChart('component', 'substring',
                                              $word, $negate);
                                 }
-                                if (grep({lc($word) eq $_}
+                                if (grep({lc($word) eq lc($_)}
                                          map($_->name, Bugzilla::Keyword->get_all))) {
                                     addChart('keywords', 'substring',
                                              $word, $negate);

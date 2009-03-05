@@ -83,7 +83,7 @@
             [% IF user.in_group(Param('timetrackinggroup')) && (c.work_time - 0 != 0) %]
               <work_time>[% PROCESS formattimeunit time_unit = c.work_time FILTER xml %]</work_time>
             [% END %]
-            <thetext>[% c.body FILTER email FILTER xml %]</thetext>
+            <thetext>[% c.body FILTER xml %]</thetext>
           </long_desc>
         [% END %]
       [% END %]

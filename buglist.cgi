@@ -1264,8 +1264,6 @@ if ($dotweak && scalar @bugs) {
     $vars->{'severities'} = get_legal_field_values('bug_severity');
     $vars->{'resolutions'} = get_legal_field_values('resolution');
 
-    $vars->{'unconfirmedstate'} = 'UNCONFIRMED';
-
     # Convert bug statuses to their ID.
     my @bug_statuses = map {$dbh->quote($_)} keys %$bugstatuses;
     my $bug_status_ids =

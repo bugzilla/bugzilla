@@ -28,7 +28,13 @@
  [% target = "index.cgi" %]
 [% END %]
 
-[% target = urlbase _ target %]
+[%# If SSL is in use, use 'sslbase', else use 'urlbase'. %]
+[% IF Param("sslbase") != "" && Param("ssl") != "never" %]
+  [% target = Param("sslbase") _ target %]
+[% ELSE %]
+  [% target = Param("urlbase") _ target %]
+[% END %]
+
 <li>
   <form action="[% target FILTER html %]" method="POST" class="mini_login"
         id="mini_login[% qs_suffix FILTER html %]"

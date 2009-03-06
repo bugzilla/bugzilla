@@ -206,7 +206,7 @@ sub xml_quote {
     # (#x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF])
     $var =~ s/([\x{0001}-\x{0008}]|
                [\x{000B}-\x{000C}]|
-               [\x{000E}-\x{0019}]|
+               [\x{000E}-\x{001F}]|
                [\x{D800}-\x{DFFF}]|
                [\x{FFFE}-\x{FFFF}])//gx;
     return $var;

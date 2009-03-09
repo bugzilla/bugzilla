@@ -21,8 +21,7 @@
 [% PROCESS global/variables.none.tmpl %]
 
 [% title = BLOCK %]
-  Delete Attachment [% a.id FILTER html %] of
-  [%+ "$terms.Bug " _ a.bug_id FILTER bug_link(a.bug_id) FILTER none %]
+  Delete Attachment [% a.id FILTER html %] of [% terms.Bug %] [%+ a.bug_id FILTER html %]
 [% END %]
 
 [% PROCESS global/header.html.tmpl

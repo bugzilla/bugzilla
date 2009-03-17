@@ -206,6 +206,7 @@
                              id       => "requestee_type-$type.id"
                              multiple => type.is_multiplicable * 3
                              emptyok  => !type.is_multiplicable
+                             value    => ""
                              custom_userlist => type.grant_list
                   %]
                 [% ELSE %]
@@ -260,6 +261,7 @@
                            id       => "requestee_type-$type.id"
                            multiple => type.is_multiplicable * 3
                            emptyok  => !type.is_multiplicable
+                           value    => ""
                            custom_userlist => type.grant_list
                 %]
               [% ELSE %]

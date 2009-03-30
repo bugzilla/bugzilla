@@ -554,6 +554,10 @@ sub update_table_definitions {
 
     _add_visiblity_value_to_value_tables();
 
+    # 2009-03-02 arbingersys@gmail.com - Bug 423613
+    $dbh->bz_add_index('profiles', 'profiles_extern_id_idx',
+                       {TYPE => 'UNIQUE', FIELDS => [qw(extern_id)]});
+ 
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################

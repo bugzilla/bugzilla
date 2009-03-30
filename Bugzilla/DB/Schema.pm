@@ -825,6 +825,8 @@ use constant ABSTRACT_SCHEMA => {
         INDEXES => [
             profiles_login_name_idx => {FIELDS => ['login_name'],
                                         TYPE => 'UNIQUE'},
+            profiles_extern_id_idx => {FIELDS => ['extern_id'],
+                                       TYPE   => 'UNIQUE'}
         ],
     },
 

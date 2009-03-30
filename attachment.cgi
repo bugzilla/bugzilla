@@ -565,6 +565,9 @@ sub update {
         ($vars->{'operations'}) =
             Bugzilla::Bug::GetBugActivity($bug->id, $attachment->id, $cgi->param('delta_ts'));
 
+        # The token contains the old modification_time. We need a new one.
+        $cgi->param('token', issue_hash_token([$attachment->id, $attachment->modification_time]));
+
         # If the modification date changed but there is no entry in
         # the activity table, this means someone commented only.
         # In this case, there is no reason to midair.
@@ -579,6 +582,12 @@ sub update {
             exit;
         }
     }
+
+    # We couldn't do this check earlier as we first had to validate attachment ID
+    # and display the mid-air collision page if modification_time changed.
+    my $token = $cgi->param('token');
+    check_hash_token($token, [$attachment->id, $attachment->modification_time]);
+
     # If the submitter of the attachment is not in the insidergroup,
     # be sure that he cannot overwrite the private bit.
     # This check must be done before calling Bugzilla::Flag*::validate(),

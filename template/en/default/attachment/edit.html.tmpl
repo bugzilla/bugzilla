@@ -171,6 +171,9 @@
   <input type="hidden" name="action" value="update">
   <input type="hidden" name="contenttypemethod" value="manual">
   <input type="hidden" name="delta_ts" value="[% attachment.modification_time FILTER html %]">
+  [% IF user.id %]
+    <input type="hidden" name="token" value="[% issue_hash_token([attachment.id, attachment.modification_time]) FILTER html %]">
+  [% END %]
 
   <table class="attachment_info" width="100%">
 

@@ -226,6 +226,12 @@ sub OPTIONAL_MODULES {
         feature => 'XML-RPC Interface'
     },
     {
+        package => 'JSON-RPC',
+        module  => 'JSON::RPC',
+        version => 0,
+        feature => 'JSON-RPC Interface'
+    },
+    {
         # We need the 'utf8_mode' method of HTML::Parser, for HTML::Scrubber.
         package => 'HTML-Parser',
         module  => 'HTML::Parser',

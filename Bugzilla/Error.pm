@@ -101,7 +101,9 @@ sub _throw_error {
         if (Bugzilla->error_mode == ERROR_MODE_DIE) {
             die("$message\n");
         }
-        elsif (Bugzilla->error_mode == ERROR_MODE_DIE_SOAP_FAULT) {
+        elsif (Bugzilla->error_mode == ERROR_MODE_DIE_SOAP_FAULT
+               || Bugzilla->error_mode == ERROR_MODE_JSON_RPC)
+        {
             # Clone the hash so we aren't modifying the constant.
             my %error_map = %{ WS_ERROR_CODE() };
             require Bugzilla::Hook;
@@ -112,7 +114,19 @@ sub _throw_error {
                 $code = ERROR_UNKNOWN_FATAL if $name =~ /code/i;
                 $code = ERROR_UNKNOWN_TRANSIENT if $name =~ /user/i;
             }
-            die SOAP::Fault->faultcode($code)->faultstring($message);
+
+            if (Bugzilla->error_mode == ERROR_MODE_DIE_SOAP_FAULT) {
+                die SOAP::Fault->faultcode($code)->faultstring($message);
+            }
+            else {
+                my $server = Bugzilla->_json_server;
+                # Technically JSON-RPC isn't allowed to have error numbers
+                # higher than 999, but we do this to avoid conflicts with
+                # the internal JSON::RPC error codes.
+                $server->raise_error(code    => 100000 + $code,
+                                     message => $message);
+                $server->response($server->error_response_header);
+            }
         }
     }
     exit;

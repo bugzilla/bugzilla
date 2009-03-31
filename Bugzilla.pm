@@ -360,6 +360,15 @@ sub error_mode {
         || (i_am_cgi() ? ERROR_MODE_WEBPAGE : ERROR_MODE_DIE);
 }
 
+# This is used only by Bugzilla::Error to throw errors.
+sub _json_server {
+    my ($class, $newval) = @_;
+    if (defined $newval) {
+        $class->request_cache->{_json_server} = $newval;
+    }
+    return $class->request_cache->{_json_server};
+}
+
 sub usage_mode {
     my ($class, $newval) = @_;
     if (defined $newval) {
@@ -369,8 +378,11 @@ sub usage_mode {
         elsif ($newval == USAGE_MODE_CMDLINE) {
             $class->error_mode(ERROR_MODE_DIE);
         }
-        elsif ($newval == USAGE_MODE_WEBSERVICE) {
+        elsif ($newval == USAGE_MODE_XMLRPC) {
             $class->error_mode(ERROR_MODE_DIE_SOAP_FAULT);
+        }
+        elsif ($newval == USAGE_MODE_JSON) {
+            $class->error_mode(ERROR_MODE_JSON_RPC);
         }
         elsif ($newval == USAGE_MODE_EMAIL) {
             $class->error_mode(ERROR_MODE_DIE);
@@ -667,10 +679,11 @@ usage mode changes.
 =item C<usage_mode>
 
 Call either C<Bugzilla->usage_mode(Bugzilla::Constants::USAGE_MODE_CMDLINE)>
-or C<Bugzilla->usage_mode(Bugzilla::Constants::USAGE_MODE_WEBSERVICE)> near the
+or C<Bugzilla->usage_mode(Bugzilla::Constants::USAGE_MODE_XMLRPC)> near the
 beginning of your script to change this flag's default of
 C<Bugzilla::Constants::USAGE_MODE_BROWSER> and to indicate that Bugzilla is
 being called in a non-interactive manner.
+
 This influences error handling because on usage mode changes, C<usage_mode>
 calls C<Bugzilla->error_mode> to set an error mode which makes sense for the
 usage mode.

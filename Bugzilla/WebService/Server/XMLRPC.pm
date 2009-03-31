@@ -168,3 +168,56 @@ sub as_string {
 }
 
 1;
+
+__END__
+
+=head1 NAME
+
+Bugzilla::WebService::Server::XMLRPC - The XML-RPC Interface to Bugzilla
+
+=head1 DESCRIPTION
+
+This documentation describes things about the Bugzilla WebService that
+are specific to XML-RPC. For a general overview of the Bugzilla WebServices,
+see L<Bugzilla::WebService>.
+
+=head1 XML-RPC
+
+The XML-RPC standard is described here: L<http://www.xmlrpc.com/spec>
+
+=head1 CONNECTING
+
+The endpoint for the XML-RPC interface is the C<xmlrpc.cgi> script in
+your Bugzilla installation. For example, if your Bugzilla is at
+C<bugzilla.yourdomain.com>, then your XML-RPC client would access the
+API via: C<http://bugzilla.yourdomain.com/xmlrpc.cgi>
+
+=head1 PARAMETERS
+
+C<dateTime> fields are the standard C<dateTime.iso8601> XML-RPC field. They
+should be in C<YYYY-MM-DDTHH:MM:SS> format (where C<T> is a literal T).
+
+All other fields are standard XML-RPC types.
+
+=head2 How XML-RPC WebService Methods Take Parameters
+
+All functions take a single argument, a C<< <struct> >> that contains all parameters.
+The names of the parameters listed in the API docs for each function are the
+C<< <name> >> element for the struct C<< <member> >>s.
+
+=head1 EXTENSIONS TO THE XML-RPC STANDARD
+
+=head2 Undefined Values
+
+Normally, XML-RPC does not allow empty values for C<int>, C<double>, or
+C<dateTime.iso8601> fields. Bugzilla does--it treats empty values as
+C<undef> (called C<NULL> or C<None> in some programming languages).
+
+Bugzilla also accepts a type called C<< <nil> >>, which is always considered
+to be C<undef>, no matter what it contains.
+
+=begin private
+
+nil is implemented by XMLRPC::Lite, in XMLRPC::Deserializer::decode_value.
+
+=end private

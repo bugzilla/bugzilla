@@ -56,6 +56,11 @@ use constant FIELD_MAP => {
 
 use constant PRODUCT_SPECIFIC_FIELDS => qw(version target_milestone component);
 
+use constant DATE_FIELDS => {
+    comments => ['new_since'],
+    search   => ['last_change_time', 'creation_time'],
+};
+
 ######################################################
 # Add aliases here for old method name compatibility #
 ######################################################

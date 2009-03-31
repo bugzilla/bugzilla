@@ -949,6 +949,10 @@
     [% title = "Invalid Username Or Password" %]
     The username or password you entered is not valid.
 
+  [% ELSIF error == "json_rpc_post_only" %]
+    For security reasons, you may only use JSON-RPC with the POST
+    HTTP method.
+
   [% ELSIF error == "keyword_already_exists" %]
     [% title = "Keyword Already Exists" %]
     A keyword with the name [% name FILTER html %] already exists.

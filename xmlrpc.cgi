@@ -28,7 +28,7 @@ use Bugzilla::WebService::Constants;
 eval { require Bugzilla::WebService::Server::XMLRPC; };
 $@ && ThrowCodeError('soap_not_installed');
 
-Bugzilla->usage_mode(USAGE_MODE_WEBSERVICE);
+Bugzilla->usage_mode(USAGE_MODE_XMLRPC);
 
 # Fix the error code that SOAP::Lite uses for Perl errors.
 local $SOAP::Constants::FAULT_SERVER;

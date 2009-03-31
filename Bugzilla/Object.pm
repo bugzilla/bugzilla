@@ -219,7 +219,12 @@ sub _do_list_select {
     $sql .= " $postamble" if $postamble;
         
     my $dbh = Bugzilla->dbh;
-    my $objects = $dbh->selectall_arrayref($sql, {Slice=>{}}, @$values);
+    # Sometimes the values are tainted, but we don't want to untaint them
+    # for the caller. So we copy the array. It's safe to untaint because
+    # they're only used in placeholders here.
+    my @untainted = @{ $values || [] };
+    trick_taint($_) foreach @untainted;
+    my $objects = $dbh->selectall_arrayref($sql, {Slice=>{}}, @untainted);
     bless ($_, $class) foreach @$objects;
     return $objects
 }

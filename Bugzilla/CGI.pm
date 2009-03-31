@@ -347,10 +347,10 @@ sub require_https {
     my ($self, $url) = @_;
     # Do not create query string if data submitted via XMLRPC
     # since we want the data to be resubmitted over POST method.
-    my $query = Bugzilla->usage_mode == USAGE_MODE_WEBSERVICE ? 0 : 1;
+    my $query = Bugzilla->usage_mode == USAGE_MODE_XMLRPC ? 0 : 1;
     # XMLRPC clients (SOAP::Lite at least) requires 301 to redirect properly
     # and do not work with 302.
-    my $status = Bugzilla->usage_mode == USAGE_MODE_WEBSERVICE ? 301 : 302;
+    my $status = Bugzilla->usage_mode == USAGE_MODE_XMLRPC ? 301 : 302;
     if (defined $url) {
         $url .= $self->url('-path_info' => 1, '-query' => $query, '-relative' => 1);
     } else {

@@ -128,12 +128,14 @@ use File::Basename;
 
     USAGE_MODE_BROWSER
     USAGE_MODE_CMDLINE
-    USAGE_MODE_WEBSERVICE
+    USAGE_MODE_XMLRPC
     USAGE_MODE_EMAIL
+    USAGE_MODE_JSON
 
     ERROR_MODE_WEBPAGE
     ERROR_MODE_DIE
     ERROR_MODE_DIE_SOAP_FAULT
+    ERROR_MODE_JSON_RPC
 
     INSTALLATION_MODE_INTERACTIVE
     INSTALLATION_MODE_NON_INTERACTIVE
@@ -378,14 +380,16 @@ use constant SAFE_PROTOCOLS => ('afs', 'cid', 'ftp', 'gopher', 'http', 'https',
 # Usage modes. Default USAGE_MODE_BROWSER. Use with Bugzilla->usage_mode.
 use constant USAGE_MODE_BROWSER    => 0;
 use constant USAGE_MODE_CMDLINE    => 1;
-use constant USAGE_MODE_WEBSERVICE => 2;
+use constant USAGE_MODE_XMLRPC     => 2;
 use constant USAGE_MODE_EMAIL      => 3;
+use constant USAGE_MODE_JSON       => 4;
 
 # Error modes. Default set by Bugzilla->usage_mode (so ERROR_MODE_WEBPAGE
 # usually). Use with Bugzilla->error_mode.
 use constant ERROR_MODE_WEBPAGE        => 0;
 use constant ERROR_MODE_DIE            => 1;
 use constant ERROR_MODE_DIE_SOAP_FAULT => 2;
+use constant ERROR_MODE_JSON_RPC       => 3;
 
 # The various modes that checksetup.pl can run in.
 use constant INSTALLATION_MODE_INTERACTIVE => 0;

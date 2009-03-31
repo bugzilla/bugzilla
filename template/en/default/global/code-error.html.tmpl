@@ -292,6 +292,13 @@
     the job "[% job FILTER html %]".  You need to add this job type
     to the <code>JOB_MAP</code> constant in <code>Bugzilla::JobQueue</code>.
 
+  [% ELSIF error == "json_rpc_not_installed" %]
+   [% admindocslinks = { 'installation.html#install-perlmodules' 
+                         => 'Installing Perl modules' } %]
+    The JSON-RPC interface will not work without the <code>JSON::RPC</code>
+    Perl module being installed. Run <code>checksetup.pl</code> for
+    installation instructions. 
+
   [% ELSIF error == "ldap_bind_failed" %]
     Failed to bind to the LDAP server. The error message was: 
     <code>[% errstr FILTER html %]</code>

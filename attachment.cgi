@@ -415,7 +415,7 @@ sub enter {
                                               'component_id' => $bug->component_id});
   $vars->{'flag_types'} = $flag_types;
   $vars->{'any_flags_requesteeble'} = grep($_->is_requesteeble, @$flag_types);
-  $vars->{'token'} = issue_session_token('createattachment:');
+  $vars->{'token'} = issue_session_token('create_attachment:');
 
   print $cgi->header();
 
@@ -443,13 +443,13 @@ sub insert {
         my ($creator_id, $date, $old_attach_id) = Bugzilla::Token::GetTokenData($token);
         unless ($creator_id 
             && ($creator_id == $user->id) 
-                && ($old_attach_id =~ "^createattachment:")) 
+                && ($old_attach_id =~ "^create_attachment:")) 
         {
             # The token is invalid.
             ThrowUserError('token_does_not_exist');
         }
     
-        $old_attach_id =~ s/^createattachment://;
+        $old_attach_id =~ s/^create_attachment://;
    
         if ($old_attach_id) {
             $vars->{'bugid'} = $bugid;
@@ -493,7 +493,7 @@ sub insert {
   if ($token) {
       trick_taint($token);
       $dbh->do('UPDATE tokens SET eventdata = ? WHERE token = ?', undef,
-               ("createattachment:" . $attachment->id, $token));
+               ("create_attachment:" . $attachment->id, $token));
   }
 
   $dbh->bz_commit_transaction;
@@ -752,7 +752,7 @@ sub delete_attachment {
         my ($creator_id, $date, $event) = Bugzilla::Token::GetTokenData($token);
         unless ($creator_id
                   && ($creator_id == $user->id)
-                  && ($event eq 'attachment' . $attachment->id))
+                  && ($event eq 'delete_attachment' . $attachment->id))
         {
             # The token is invalid.
             ThrowUserError('token_does_not_exist');
@@ -795,7 +795,7 @@ sub delete_attachment {
     }
     else {
         # Create a token.
-        $token = issue_session_token('attachment' . $attachment->id);
+        $token = issue_session_token('delete_attachment' . $attachment->id);
 
         $vars->{'a'} = $attachment;
         $vars->{'token'} = $token;

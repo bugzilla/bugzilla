@@ -565,10 +565,9 @@ sub _create_bug_group {
 
     # Associate the new group and new product.
     $dbh->do('INSERT INTO group_control_map
-              (group_id, product_id, entry, membercontrol, othercontrol, canedit)
-              VALUES (?, ?, ?, ?, ?, ?)',
-              undef, ($group->id, $self->id, Bugzilla->params->{'useentrygroupdefault'},
-                      CONTROLMAPDEFAULT, CONTROLMAPNA, 0));
+              (group_id, product_id, membercontrol, othercontrol)
+              VALUES (?, ?, ?, ?)',
+              undef, ($group->id, $self->id, CONTROLMAPDEFAULT, CONTROLMAPNA));
 }
 
 sub _create_series {

@@ -481,25 +481,6 @@
 
           <varlistentry>
             <term>
-              useentrygroupdefault
-            </term>
-            <listitem>
-              <para>
-                Bugzilla products can have a group associated with them, so that
-                certain users can only see bugs in certain products. When this 
-                parameter is set to <quote>on</quote>, this 
-                causes the initial group controls on newly created products 
-                to place all newly-created bugs in the group 
-                having the same name as the product immediately.
-                After a product is initially created, the group controls
-                can be further adjusted without interference by 
-                this mechanism.
-              </para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>
               usevisibilitygroups
             </term>
             <listitem>

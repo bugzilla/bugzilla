@@ -140,14 +140,10 @@ if ($cgi->param('createmissinggroupcontrolmapentries')) {
     my $na    = CONTROLMAPNA;
     my $shown = CONTROLMAPSHOWN;
     my $insertsth = $dbh->prepare(
-        qq{INSERT INTO group_control_map (
-                       group_id, product_id, entry,
-                       membercontrol, othercontrol, canedit
-                      )
-               VALUES (
-                       ?, ?, 0,
-                       $shown, $na, 0
-                      )});
+        qq{INSERT INTO group_control_map
+                       (group_id, product_id, membercontrol, othercontrol)
+                VALUES (?, ?, $shown, $na)});
+
     my $updatesth = $dbh->prepare(qq{UPDATE group_control_map
                                         SET membercontrol = $shown
                                       WHERE group_id   = ?

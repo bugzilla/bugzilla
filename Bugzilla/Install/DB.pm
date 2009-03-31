@@ -557,7 +557,13 @@ sub update_table_definitions {
     # 2009-03-02 arbingersys@gmail.com - Bug 423613
     $dbh->bz_add_index('profiles', 'profiles_extern_id_idx',
                        {TYPE => 'UNIQUE', FIELDS => [qw(extern_id)]});
- 
+
+    # 2009-03-31 LpSolit@gmail.com - Bug 478972
+    $dbh->bz_alter_column('group_control_map', 'entry',
+                          {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'FALSE'});
+    $dbh->bz_alter_column('group_control_map', 'canedit',
+                          {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'FALSE'});
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################
@@ -1840,7 +1846,6 @@ sub _setup_usebuggroups_backward_compatibility {
     #
     # If group_control_map is empty, backward-compatibility
     # usebuggroups-equivalent records should be created.
-    my $entry = Bugzilla->params->{'useentrygroupdefault'};
     my ($maps_exist) = $dbh->selectrow_array(
         "SELECT DISTINCT 1 FROM group_control_map");
     if (!$maps_exist) {
@@ -1857,11 +1862,9 @@ sub _setup_usebuggroups_backward_compatibility {
             if ($groupname eq $productname) {
                 # Product and group have same name.
                 $dbh->do("INSERT INTO group_control_map " .
-                         "(group_id, product_id, entry, membercontrol, " .
-                         "othercontrol, canedit) " .
-                         "VALUES ($groupid, $productid, $entry, " .
-                         CONTROLMAPDEFAULT . ", " .
-                         CONTROLMAPNA . ", 0)");
+                         "(group_id, product_id, membercontrol, othercontrol) " .
+                         "VALUES (?, ?, ?, ?)", undef,
+                         ($groupid, $productid, CONTROLMAPDEFAULT, CONTROLMAPNA));
             } else {
                 # See if this group is a product group at all.
                 my $sth2 = $dbh->prepare("SELECT id FROM products 
@@ -1872,11 +1875,9 @@ sub _setup_usebuggroups_backward_compatibility {
                     # If there is no product with the same name as this
                     # group, then it is permitted for all products.
                     $dbh->do("INSERT INTO group_control_map " .
-                             "(group_id, product_id, entry, membercontrol, " .
-                             "othercontrol, canedit) " .
-                             "VALUES ($groupid, $productid, 0, " .
-                             CONTROLMAPSHOWN . ", " .
-                             CONTROLMAPNA . ", 0)");
+                             "(group_id, product_id, membercontrol, othercontrol) " .
+                             "VALUES (?, ?, ?, ?)", undef,
+                             ($groupid, $productid, CONTROLMAPSHOWN, CONTROLMAPNA));
                 }
             }
         }

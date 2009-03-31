@@ -49,12 +49,6 @@ sub get_param_list {
   },
 
   {
-   name => 'useentrygroupdefault',
-   type => 'b',
-   default => 0
-  },
-
-  {
    name => 'chartgroup',
    type => 's',
    choices => \&_get_all_group_names,

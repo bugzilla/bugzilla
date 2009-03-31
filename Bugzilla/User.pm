@@ -658,13 +658,9 @@ sub get_selectable_products {
         my $query = "SELECT id " .
                     "  FROM products " .
                  "LEFT JOIN group_control_map " .
-                    "    ON group_control_map.product_id = products.id ";
-        if (Bugzilla->params->{'useentrygroupdefault'}) {
-            $query .= " AND group_control_map.entry != 0 ";
-        } else {
-            $query .= " AND group_control_map.membercontrol = " . CONTROLMAPMANDATORY;
-        }
-        $query .= "     AND group_id NOT IN(" . $self->groups_as_string . ") " .
+                        "ON group_control_map.product_id = products.id " .
+                      " AND group_control_map.membercontrol = " . CONTROLMAPMANDATORY .
+                      " AND group_id NOT IN(" . $self->groups_as_string . ") " .
                   "   WHERE group_id IS NULL " .
                   "ORDER BY name";
 

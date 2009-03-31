@@ -214,9 +214,8 @@ if ($action eq 'new') {
     # Permit all existing products to use the new group if makeproductgroups.
     if ($cgi->param('insertnew')) {
         $dbh->do('INSERT INTO group_control_map
-                  (group_id, product_id, entry, membercontrol,
-                   othercontrol, canedit)
-                  SELECT ?, products.id, 0, ?, ?, 0 FROM products',
+                  (group_id, product_id, membercontrol, othercontrol)
+                  SELECT ?, products.id, ?, ? FROM products',
                   undef, ($group->id, CONTROLMAPSHOWN, CONTROLMAPNA));
     }
     delete_token($token);

@@ -151,10 +151,6 @@ sub update_params {
     {
         $param->{'makeproductgroups'} = $param->{'usebuggroups'};
     }
-    if (exists $param->{'usebuggroupsentry'} 
-       && !exists $param->{'useentrygroupdefault'}) {
-        $param->{'useentrygroupdefault'} = $param->{'usebuggroupsentry'};
-    }
 
     # Modularise auth code
     if (exists $param->{'useLDAP'} && !exists $param->{'loginmethod'}) {

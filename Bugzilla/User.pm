@@ -1012,11 +1012,7 @@ sub match {
     # first try wildcards
     my $wildstr = $str;
 
-    if ($wildstr =~ s/\*/\%/g # don't do wildcards if no '*' in the string
-        # or if we only want exact matches
-        && Bugzilla->params->{'usermatchmode'} ne 'off') 
-    {
-
+    if ($wildstr =~ s/\*/\%/g) { # don't do wildcards if no '*' in the string
         # Build the query.
         trick_taint($wildstr);
         my $query  = "SELECT DISTINCT login_name FROM profiles ";
@@ -1054,10 +1050,7 @@ sub match {
     }
 
     # then try substring search
-    if ((scalar(@users) == 0)
-        && (Bugzilla->params->{'usermatchmode'} eq 'search')
-        && (length($str) >= 3))
-    {
+    if (!scalar(@users) && length($str) >= 3) {
         trick_taint($str);
 
         my $query   = "SELECT DISTINCT login_name FROM profiles ";

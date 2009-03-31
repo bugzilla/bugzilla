@@ -132,8 +132,7 @@
                   <b>[% query.value.users.0.identity FILTER html %]</b>
                 [% END %]
             [% ELSE %]
-                [% IF (query.key.length < 3) && !(Param('emailsuffix'))
-                    && (Param('usermatchmode') == 'search') %]
+                [% IF (query.key.length < 3) && !Param('emailsuffix') %]
                   <font color="#FF0000">was too short for substring match
                   (minimum 3 characters)</font>
                 [% ELSE %]

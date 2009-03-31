@@ -47,13 +47,6 @@ sub get_param_list {
   },
 
   {
-   name => 'usermatchmode',
-   type => 's',
-   choices => ['off', 'wildcard', 'search'],
-   default => 'off'
-  },
-
-  {
    name    => 'maxusermatches',
    type    => 't',
    default => '1000',

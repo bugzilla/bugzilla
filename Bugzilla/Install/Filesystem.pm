@@ -51,10 +51,10 @@ our @EXPORT = qw(
 # a perldoc. However, look at the various hashes defined inside this 
 # function to understand what it returns. (There are comments throughout.)
 #
-# The rationale for the file permissions is that the web server generally 
-# runs as apache, so the cgi scripts should not be writable for apache,
-# otherwise someone may find it possible to change the cgis when exploiting
-# some security flaw somewhere (not necessarily in Bugzilla!)
+# The rationale for the file permissions is that there is a group the
+# web server executes the scripts as, so the cgi scripts should not be writable
+# by this group. Otherwise someone may find it possible to change the cgis
+# when exploiting some security flaw somewhere (not necessarily in Bugzilla!)
 sub FILESYSTEM {
     my $datadir       = bz_locations()->{'datadir'};
     my $attachdir     = bz_locations()->{'attachdir'};
@@ -67,6 +67,7 @@ sub FILESYSTEM {
     my $localconfig   = bz_locations()->{'localconfig'};
 
     my $ws_group      = Bugzilla->localconfig->{'webservergroup'};
+    my $use_suexec    = Bugzilla->localconfig->{'use_suexec'};
 
     # The set of permissions that we use:
 
@@ -76,7 +77,7 @@ sub FILESYSTEM {
     # Executable by the owner only.
     my $owner_executable = 0700;
     # Readable by the web server.
-    my $ws_readable = $ws_group ? 0640 : 0644;
+    my $ws_readable = ($ws_group && !$use_suexec) ? 0640 : 0644;
     # Readable by the owner only.
     my $owner_readable = 0600;
     # Writeable by the web server.
@@ -84,7 +85,7 @@ sub FILESYSTEM {
 
     # DIRECTORIES
     # Readable by the web server.
-    my $ws_dir_readable  = $ws_group ? 0750 : 0755;
+    my $ws_dir_readable  = ($ws_group && !$use_suexec) ? 0750 : 0755;
     # Readable only by the owner.
     my $owner_dir_readable = 0700;
     # Writeable by the web server.

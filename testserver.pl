@@ -59,7 +59,8 @@ my $webgroupnum = 0;
 my $webservergroup = Bugzilla->localconfig->{webservergroup};
 if ($webservergroup =~ /^(\d+)$/) {
     $webgroupnum = $1;
-} else {
+}
+else {
     eval { $webgroupnum = (getgrnam $webservergroup) || 0; };
 }
 
@@ -70,16 +71,19 @@ if ($sgid > 0) {
 "WARNING \$webservergroup is set to an empty string.
 That is a very insecure practice. Please refer to the
 Bugzilla documentation.\n";
-    } elsif ($webgroupnum == $sgid) {
+    }
+    elsif ($webgroupnum == $sgid || Bugzilla->localconfig->{use_suexec}) {
         print "TEST-OK Webserver is running under group id in \$webservergroup.\n";
-    } else {
+    }
+    else {
         print 
 "TEST-WARNING Webserver is running under group id not matching \$webservergroup.
 This if the tests below fail, this is probably the problem.
 Please refer to the web server configuration section of the Bugzilla guide. 
 If you are using virtual hosts or suexec, this warning may not apply.\n";
     }
-} elsif ($^O !~ /MSWin32/i) {
+}
+elsif ($^O !~ /MSWin32/i) {
    print
 "TEST-WARNING Failed to find the GID for the 'httpd' process, unable
 to validate webservergroup.\n";

@@ -225,7 +225,7 @@ sub get_body_and_attachments {
 
     my $body;
     my $attachments = [];
-    if ($ct =~ /^multipart\/alternative/i) {
+    if ($ct =~ /^multipart\/(alternative|signed)/i) {
         $body = get_text_alternative($email);
     }
     else {

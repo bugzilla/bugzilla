@@ -588,6 +588,8 @@ sub visible_bugs {
 
     # We only check the visibility of bugs that we haven't
     # checked yet.
+    # Bugzilla::Bug->update automatically removes updated bugs
+    # from the cache to force them to be checked again.
     my $visible_cache = $self->{_visible_bugs_cache} ||= {};
     my @check_ids = grep(!exists $visible_cache->{$_}, @bug_ids);
 

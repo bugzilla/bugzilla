@@ -876,6 +876,10 @@ sub update {
     delete $self->{'_old_assigned_to'};
     delete $self->{'_old_qa_contact'};
 
+    # Also flush the visible_bugs cache for this bug as the user's
+    # relationship with this bug may have changed.
+    delete Bugzilla->user->{_visible_bugs_cache}->{$self->id};
+
     return $changes;
 }
 

@@ -124,6 +124,16 @@
     </td>
   </tr>
 
+  <tr>
+    <td valign="top" align="right">
+      Send a message even if there are no [% terms.bugs %] in the search result:
+    </td>
+    <td colspan="2">
+      <input type="checkbox" name="event_[% event.key %]_mailifnobugs"
+        [%- IF event.value.mailifnobugs == 1 %] checked [% END %]>
+    </td>
+  </tr>
+
   [% IF event.value.schedule.size == 0 %]
 
     <tr>

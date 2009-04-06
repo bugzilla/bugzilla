@@ -143,20 +143,22 @@ if ($cgi->param('update')) {
                 $sth->execute($eventid, $userid);
             }
             else {
-                # check the subject and body for changes
+                # check the subject, body and mailifnobugs for changes
                 my $subject = ($cgi->param("event_${eventid}_subject") or '');
                 my $body    = ($cgi->param("event_${eventid}_body")    or '');
+                my $mailifnobugs = $cgi->param("event_${eventid}_mailifnobugs") ? 1 : 0;
 
                 trick_taint($subject) if $subject;
                 trick_taint($body)    if $body;
 
                 if ( ($subject ne $events->{$eventid}->{'subject'})
+                  || ($mailifnobugs != $events->{$eventid}->{'mailifnobugs'})
                   || ($body    ne $events->{$eventid}->{'body'}) ) {
 
                     $sth = $dbh->prepare("UPDATE whine_events " .
-                                         "SET subject=?, body=? " .
+                                         "SET subject=?, body=?, mailifnobugs=? " .
                                          "WHERE id=?");
-                    $sth->execute($subject, $body, $eventid);
+                    $sth->execute($subject, $body, $mailifnobugs, $eventid);
                 }
 
                 # add a schedule
@@ -438,14 +440,15 @@ sub get_events {
     my $dbh = Bugzilla->dbh;
     my $events = {};
 
-    my $sth = $dbh->prepare("SELECT DISTINCT id, subject, body " .
+    my $sth = $dbh->prepare("SELECT DISTINCT id, subject, body, mailifnobugs " .
                             "FROM whine_events " .
                             "WHERE owner_userid=?");
     $sth->execute($userid);
-    while (my ($ev, $sub, $bod) = $sth->fetchrow_array) {
+    while (my ($ev, $sub, $bod, $mno) = $sth->fetchrow_array) {
         $events->{$ev} = {
             'subject' => $sub || '',
             'body' => $bod || '',
+            'mailifnobugs' => $mno || 0,
         };
     }
     return $events;

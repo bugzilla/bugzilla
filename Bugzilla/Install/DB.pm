@@ -564,6 +564,10 @@ sub update_table_definitions {
     $dbh->bz_alter_column('group_control_map', 'canedit',
                           {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'FALSE'});
 
+    # 2009-01-16 oreomike@gmail.com - Bug 302420
+    $dbh->bz_add_column('whine_events', 'mailifnobugs',
+        { TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'FALSE'});
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################

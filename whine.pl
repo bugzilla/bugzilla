@@ -65,7 +65,8 @@ my $sth_next_scheduled_event = $dbh->prepare(
     " whine_schedules.eventid, " .
     " whine_events.owner_userid, " .
     " whine_events.subject, " .
-    " whine_events.body " .
+    " whine_events.body, " .
+    " whine_events.mailifnobugs " .
     "FROM whine_schedules " .
     "LEFT JOIN whine_events " .
     " ON whine_events.id = whine_schedules.eventid " .
@@ -200,6 +201,7 @@ $sched_h->finish();
 #   users   - array of user objects for recipients
 #   subject - Subject line for the email
 #   body    - the text inserted above the bug lists
+#   mailifnobugs - send message even if there are no query or query results
 
 sub get_next_event {
     my $event = {};
@@ -214,7 +216,7 @@ sub get_next_event {
         my $fetched = $sth_next_scheduled_event->fetch;
         $sth_next_scheduled_event->finish;
         return undef unless $fetched;
-        my ($eventid, $owner_id, $subject, $body) = @{$fetched};
+        my ($eventid, $owner_id, $subject, $body, $mailifnobugs) = @{$fetched};
 
         my $owner = Bugzilla::User->new($owner_id);
 
@@ -282,6 +284,7 @@ sub get_next_event {
                     'mailto'  => \@users,
                     'subject' => $subject,
                     'body'    => $body,
+                    'mailifnobugs' => $mailifnobugs,
             };
         }
     }
@@ -296,6 +299,7 @@ sub get_next_event {
 #   mailto  (array of user objects for mail targets)
 #   subject (subject line for message)
 #   body    (text blurb at top of message)
+#   mailifnobugs (send message even if there are no query or query results)
 while (my $event = get_next_event) {
 
     my $eventid = $event->{'eventid'};
@@ -316,12 +320,14 @@ while (my $event = get_next_event) {
         # run the queries for this schedule
         my $queries = run_queries($args);
 
-        # check to make sure there is something to output
-        my $there_are_bugs = 0;
-        for my $query (@{$queries}) {
-            $there_are_bugs = 1 if scalar @{$query->{'bugs'}};
+        # If mailifnobugs is false, make sure there is something to output
+        if (!$event->{'mailifnobugs'}) {
+            my $there_are_bugs = 0;
+            for my $query (@{$queries}) {
+                $there_are_bugs = 1 if scalar @{$query->{'bugs'}};
+            }
+            next unless $there_are_bugs;
         }
-        next unless $there_are_bugs;
 
         $args->{'queries'} = $queries;
 

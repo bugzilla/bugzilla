@@ -1334,6 +1334,8 @@ use constant ABSTRACT_SCHEMA => {
                                             DELETE => 'CASCADE'}},
             subject      => {TYPE => 'varchar(128)'},
             body         => {TYPE => 'MEDIUMTEXT'},
+            mailifnobugs => {TYPE => 'BOOLEAN', NOTNULL => 1,
+                             DEFAULT => 'FALSE'},
         ],
     },
 

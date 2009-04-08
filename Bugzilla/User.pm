@@ -1017,7 +1017,7 @@ sub match {
     if ($wildstr =~ s/\*/\%/g) { # don't do wildcards if no '*' in the string
         # Build the query.
         trick_taint($wildstr);
-        my $query  = "SELECT DISTINCT userid FROM profiles ";
+        my $query  = "SELECT DISTINCT login_name FROM profiles ";
         if (Bugzilla->params->{'usevisibilitygroups'}) {
             $query .= "INNER JOIN user_group_map
                                ON user_group_map.user_id = profiles.userid ";
@@ -1036,8 +1036,10 @@ sub match {
 
         # Execute the query, retrieve the results, and make them into
         # User objects.
-        my $user_ids = $dbh->selectcol_arrayref($query, undef, ($wildstr, $wildstr));
-        @users = @{Bugzilla::User->new_from_list($user_ids)};
+        my $user_logins = $dbh->selectcol_arrayref($query, undef, ($wildstr, $wildstr));
+        foreach my $login_name (@$user_logins) {
+            push(@users, new Bugzilla::User({ name => $login_name }));
+        }
     }
     else {    # try an exact match
         # Exact matches don't care if a user is disabled.
@@ -1053,7 +1055,7 @@ sub match {
     if (!scalar(@users) && length($str) >= 3) {
         trick_taint($str);
 
-        my $query   = "SELECT DISTINCT userid FROM profiles ";
+        my $query   = "SELECT DISTINCT login_name FROM profiles ";
         if (Bugzilla->params->{'usevisibilitygroups'}) {
             $query .= "INNER JOIN user_group_map
                                ON user_group_map.user_id = profiles.userid ";
@@ -1070,8 +1072,10 @@ sub match {
         $query    .= " ORDER BY login_name ";
         $query     .= $dbh->sql_limit($limit) if $limit;
 
-        my $user_ids = $dbh->selectcol_arrayref($query, undef, ($str, $str));
-        @users = @{Bugzilla::User->new_from_list($user_ids)};
+        my $user_logins = $dbh->selectcol_arrayref($query, undef, ($str, $str));
+        foreach my $login_name (@$user_logins) {
+            push(@users, new Bugzilla::User({ name => $login_name }));
+        }
     }
     return \@users;
 }

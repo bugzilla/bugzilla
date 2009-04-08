@@ -662,7 +662,7 @@ reference whose keys are the columns, operators and placeholders, and the
 values are the placeholders' bind value. For example:
 
  WHERE => { 'some_column >= ?' => $some_value }
-    
+
 would constrain the query to only those objects in the table whose
 'some_column' column has a value greater than or equal to $some_value.
 

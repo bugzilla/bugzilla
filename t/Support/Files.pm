@@ -34,7 +34,8 @@ use File::Find;
     'Net::LDAP' => ['Bugzilla/Auth/Verify/LDAP.pm'],
     'Authen::Radius' => ['Bugzilla/Auth/Verify/RADIUS.pm'],
     'Email::Reply' => ['email_in.pl'],
-    'Email::MIME::Attachment::Stripper' => ['email_in.pl']
+    'Email::MIME::Attachment::Stripper' => ['email_in.pl'],
+    'JSON::RPC' => ['Bugzilla/WebService/Server/JSONRPC.pm']
 );
 
 

@@ -628,7 +628,7 @@ sub update_activity {
     my ($removed, $added) = diff_arrays($old_summaries, $new_summaries);
     if (scalar @$removed || scalar @$added) {
         # Remove flag requester/setter information
-        foreach (@$removed, @$added) { s/^\S+:// }
+        foreach (@$removed, @$added) { s/^[^:]+:// }
 
         $removed = join(", ", @$removed);
         $added = join(", ", @$added);

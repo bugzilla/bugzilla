@@ -47,6 +47,14 @@
     Attachment #[% attach_id FILTER html %] ([% description FILTER html %]) 
     is already obsolete.
 
+  [% ELSIF error == "attachment_local_storage_disabled" %]
+    [% title = "Local Storage Disabled" %]
+    You cannot store attachments locally. This feature is disabled.
+
+  [% ELSIF error == "attachment_url_disabled" %]
+    [% title = "Attachment URL Disabled" %]
+    You cannot attach a URL. This feature is currently disabled.
+
   [% ELSIF error == "auth_invalid_email" %]
     [% title = "Invalid Email Address" %]
     We received an email address (<b>[% addr FILTER html %]</b>)

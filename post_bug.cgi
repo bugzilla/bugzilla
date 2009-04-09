@@ -85,12 +85,10 @@ if ($token) {
 }    
 
 # do a match on the fields if applicable
-
-&Bugzilla::User::match_field ($cgi, {
+Bugzilla::User::match_field ($cgi, {
     'cc'            => { 'type' => 'multi'  },
     'assigned_to'   => { 'type' => 'single' },
     'qa_contact'    => { 'type' => 'single' },
-    '^requestee_type-(\d+)$' => { 'type' => 'multi' },
 });
 
 if (defined $cgi->param('maketemplate')) {
@@ -194,10 +192,35 @@ if (defined $cgi->param('version')) {
 # Add an attachment if requested.
 if (defined($cgi->upload('data')) || $cgi->param('attachurl')) {
     $cgi->param('isprivate', $cgi->param('commentprivacy'));
-    my $attachment = Bugzilla::Attachment->create(!THROW_ERROR,
-                                                  $bug, $user, $timestamp, $vars);
+
+    # Must be called before create() as it may alter $cgi->param('ispatch').
+    my $content_type = Bugzilla::Attachment::get_content_type();
+    my $attachment;
+
+    # If the attachment cannot be successfully added to the bug,
+    # we notify the user, but we don't interrupt the bug creation process.
+    my $error_mode_cache = Bugzilla->error_mode;
+    Bugzilla->error_mode(ERROR_MODE_DIE);
+    eval {
+        $attachment = Bugzilla::Attachment->create(
+            {bug           => $bug,
+             creation_ts   => $timestamp,
+             data          => scalar $cgi->param('attachurl') || $cgi->upload('data'),
+             description   => scalar $cgi->param('description'),
+             filename      => $cgi->param('attachurl') ? '' : scalar $cgi->upload('data'),
+             ispatch       => scalar $cgi->param('ispatch'),
+             isprivate     => scalar $cgi->param('isprivate'),
+             isurl         => scalar $cgi->param('attachurl'),
+             mimetype      => $content_type,
+             store_in_file => scalar $cgi->param('bigfile'),
+            });
+    };
+    Bugzilla->error_mode($error_mode_cache);
 
     if ($attachment) {
+        # Set attachment flags.
+        Bugzilla::Flag->set_flags($bug, $attachment, $timestamp, $vars);
+
         # Update the comment to include the new attachment ID.
         # This string is hardcoded here because Template::quoteUrls()
         # expects to find this exact string.
@@ -222,22 +245,8 @@ if (defined($cgi->upload('data')) || $cgi->param('attachurl')) {
     };
 }
 
-# Add flags, if any. To avoid dying if something goes wrong
-# while processing flags, we will eval() flag validation.
-# This requires errors to die().
-# XXX: this can go away as soon as flag validation is able to
-#      fail without dying.
-my $error_mode_cache = Bugzilla->error_mode;
-Bugzilla->error_mode(ERROR_MODE_DIE);
-eval {
-    Bugzilla::Flag::validate($id, undef, SKIP_REQUESTEE_ON_ERROR);
-    Bugzilla::Flag->process($bug, undef, $timestamp, $vars);
-};
-Bugzilla->error_mode($error_mode_cache);
-if ($@) {
-    $vars->{'message'} = 'flag_creation_failed';
-    $vars->{'flag_creation_error'} = $@;
-}
+# Set bug flags.
+Bugzilla::Flag->set_flags($bug, undef, $timestamp, $vars);
 
 # Email everyone the details of the new bug 
 $vars->{'mailrecipients'} = {'changer' => $user->login};

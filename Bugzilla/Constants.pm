@@ -148,6 +148,7 @@ use File::Basename;
     MAX_LOGINCOOKIE_AGE
 
     SAFE_PROTOCOLS
+    LEGAL_CONTENT_TYPES
 
     MIN_SMALLINT
     MAX_SMALLINT
@@ -235,18 +236,6 @@ use constant LOGIN_REQUIRED => 2;
 use constant LOGOUT_ALL => 0;
 use constant LOGOUT_CURRENT => 1;
 use constant LOGOUT_KEEP_CURRENT => 2;
-
-use constant contenttypes =>
-  {
-   "html"=> "text/html" , 
-   "rdf" => "application/rdf+xml" , 
-   "atom"=> "application/atom+xml" ,
-   "xml" => "application/xml" , 
-   "js"  => "application/x-javascript" , 
-   "csv" => "text/csv" ,
-   "png" => "image/png" ,
-   "ics" => "text/calendar" ,
-  };
 
 use constant GRANT_DIRECT => 0;
 use constant GRANT_REGEXP => 2;
@@ -376,6 +365,22 @@ use constant MAX_LOGINCOOKIE_AGE => 30;
 use constant SAFE_PROTOCOLS => ('afs', 'cid', 'ftp', 'gopher', 'http', 'https',
                                 'irc', 'mid', 'news', 'nntp', 'prospero', 'telnet',
                                 'view-source', 'wais');
+
+# Valid MIME types for attachments.
+use constant LEGAL_CONTENT_TYPES => ('application', 'audio', 'image', 'message',
+                                     'model', 'multipart', 'text', 'video');
+
+use constant contenttypes =>
+  {
+   "html"=> "text/html" ,
+   "rdf" => "application/rdf+xml" ,
+   "atom"=> "application/atom+xml" ,
+   "xml" => "application/xml" ,
+   "js"  => "application/x-javascript" ,
+   "csv" => "text/csv" ,
+   "png" => "image/png" ,
+   "ics" => "text/calendar" ,
+  };
 
 # Usage modes. Default USAGE_MODE_BROWSER. Use with Bugzilla->usage_mode.
 use constant USAGE_MODE_BROWSER    => 0;

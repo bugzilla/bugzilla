@@ -211,6 +211,11 @@
     [% title = "Attachment Deletion Disabled" %]
     Attachment deletion is disabled on this installation.
 
+  [% ELSIF error == "attachment_illegal_url" %]
+    [% title = "Illegal Attachment URL" %]
+    <em>[% url FILTER html %]</em> is not a legal URL for attachments.
+    It must start either with http://, https:// or ftp://.
+
   [% ELSIF error == "attachment_removed" %]
     [% title = "Attachment Removed" %]
     The attachment you are attempting to access has been removed.
@@ -875,8 +880,7 @@
     [% title = "Invalid Content-Type" %]
     The content type <em>[% contenttype FILTER html %]</em> is invalid.
     Valid types must be of the form <em>foo/bar</em> where <em>foo</em>
-    is either <em>application, audio, image, message, model, multipart,
-    text,</em> or <em>video</em>.
+    is one of <em>[% constants.LEGAL_CONTENT_TYPES.join(', ') FILTER html %]</em>.
     
   [% ELSIF error == "invalid_context" %]
     [% title = "Invalid Context" %]
@@ -1614,6 +1618,11 @@
     [% title = "Match Failed" %]
     <tt>[% name FILTER html %]</tt> does not exist or you are not allowed 
     to see that user.
+
+  [% ELSIF error == "user_not_insider" %]
+    [% title = "User Not In Insidergroup" %]
+    Sorry, but you are not allowed to (un)mark comments or attachments
+    as private.
 
   [% ELSIF error == "votes_must_be_nonnegative" %]
     [% title = "Votes Must Be Non-negative" %]

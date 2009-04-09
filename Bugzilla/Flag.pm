@@ -1057,6 +1057,46 @@ sub FormToNewFlags {
     return \@flags;
 }
 
+# This is a helper to set flags on a new bug or attachment.
+# For existing bugs and attachments, errors must be reported.
+sub set_flags {
+    my ($class, $bug, $attachment, $timestamp, $vars) = @_;
+    my $cgi = Bugzilla->cgi;
+
+    # The order of these function calls is important, as Flag::validate
+    # assumes User::match_field has ensured that the
+    # values in the requestee fields are legitimate user email addresses.
+    my $match_status = Bugzilla::User::match_field($cgi, {
+        '^requestee(_type)?-(\d+)$' => { 'type' => 'multi' },
+    }, MATCH_SKIP_CONFIRM);
+
+    $vars->{'match_field'} = 'requestee';
+    if ($match_status == USER_MATCH_FAILED) {
+        $vars->{'message'} = 'user_match_failed';
+    }
+    elsif ($match_status == USER_MATCH_MULTIPLE) {
+        $vars->{'message'} = 'user_match_multiple';
+    }
+
+    # 1. Add flags, if any. To avoid dying if something goes wrong
+    # while processing flags, we will eval() flag validation.
+    #
+    # 2. Flag::validate() should not detect any reference to existing flags
+    # when creating a new attachment. Setting the third param to -1 will
+    # force this function to check this point.
+    my $error_mode_cache = Bugzilla->error_mode;
+    Bugzilla->error_mode(ERROR_MODE_DIE);
+    eval {
+        validate($bug->bug_id, $attachment ? -1 : undef, SKIP_REQUESTEE_ON_ERROR);
+        $class->process($bug, $attachment, $timestamp, $vars);
+    };
+    Bugzilla->error_mode($error_mode_cache);
+    if ($@) {
+        $vars->{'message'} = 'flag_creation_failed';
+        $vars->{'flag_creation_error'} = $@;
+    }
+}
+
 =pod
 
 =over

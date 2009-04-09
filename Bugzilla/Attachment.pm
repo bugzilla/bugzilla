@@ -613,12 +613,13 @@ sub _check_filename {
 sub _check_is_private {
     my ($invocant, $is_private) = @_;
 
+    $is_private = $is_private ? 1 : 0;
     if (((!ref $invocant && $is_private)
          || (ref $invocant && $invocant->isprivate != $is_private))
         && !Bugzilla->user->is_insider) {
         ThrowUserError('user_not_insider');
     }
-    return $is_private ? 1 : 0;
+    return $is_private;
 }
 
 sub _check_is_url {

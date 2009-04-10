@@ -445,8 +445,10 @@ sub format_time {
                                 hour   => $time[2],
                                 minute => $time[1],
                                 second => $time[0],
-                                # Use the timezone specified by the server.
-                                time_zone => Bugzilla->local_timezone});
+                                # If importing, use the specified timezone, otherwise 
+                                # use the timezone specified by the server.
+                                time_zone => Bugzilla->local_timezone->offset_as_string($time[6]) 
+                                          || Bugzilla->local_timezone});
 
         # Now display the date using the given timezone,
         # or the user's timezone if none is given.

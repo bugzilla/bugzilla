@@ -426,6 +426,13 @@ sub format_time {
     # strptime($date) returns an empty array if $date has an invalid date format.
     my @time = strptime($date);
 
+    unless (scalar @time) {
+        # If an unknown timezone is passed (such as MSK, for Moskow), strptime() is
+        # unable to parse the date. We try again, but we first remove the timezone.
+        $date =~ s/\s+\S+$//;
+        @time = strptime($date);
+    }
+
     if (scalar @time) {
         # Fix a bug in strptime() where seconds can be undefined in some cases.
         $time[0] ||= 0;

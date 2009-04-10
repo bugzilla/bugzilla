@@ -119,7 +119,8 @@ if ($action eq 'add') {
 
 if ($action eq 'new') {
     check_token_data($token, 'add_version');
-    my $version = Bugzilla::Version::create($version_name, $product);
+    my $version = Bugzilla::Version->create(
+        {name => $version_name, product => $product});
     delete_token($token);
 
     $vars->{'message'} = 'version_created';
@@ -202,7 +203,8 @@ if ($action eq 'update') {
 
     $dbh->bz_start_transaction();
 
-    $vars->{'updated'} = $version->update($version_name, $product);
+    $version->set_name($version_name);
+    my $changes = $version->update();
 
     $dbh->bz_commit_transaction();
     delete_token($token);
@@ -210,6 +212,7 @@ if ($action eq 'update') {
     $vars->{'message'} = 'version_updated';
     $vars->{'version'} = $version;
     $vars->{'product'} = $product;
+    $vars->{'changes'} = $changes;
     $template->process("admin/versions/list.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
 

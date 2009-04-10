@@ -1579,10 +1579,6 @@
     version! You must reassign those [% terms.bugs %] to another version
     before you can delete this one.
 
-  [% ELSIF error == "version_not_specified" %]
-    [% title = "No Version Specified" %]
-    No version specified when trying to edit versions.
-
   [% ELSIF error == "users_deletion_disabled" %]
     [% title = "Deletion not activated" %]
     [% admindocslinks = {'useradmin.html' => 'User administration'} %]

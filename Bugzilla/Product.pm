@@ -112,7 +112,7 @@ sub create {
     my $product = $class->insert_create_data($params);
 
     # Add the new version and milestone into the DB as valid values.
-    Bugzilla::Version::create($version, $product);
+    Bugzilla::Version->create({name => $version, product => $product});
     Bugzilla::Milestone->create({name => $params->{defaultmilestone}, product => $product});
 
     # Create groups and series for the new product, if requested.

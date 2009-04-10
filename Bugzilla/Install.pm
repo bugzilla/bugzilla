@@ -240,7 +240,8 @@ sub create_default_product {
         my $product = new Bugzilla::Product({name => $default_prod->{name}});
 
         # The default version.
-        Bugzilla::Version::create(Bugzilla::Version::DEFAULT_VERSION, $product);
+        Bugzilla::Version->create({name => Bugzilla::Version::DEFAULT_VERSION,
+                                   product => $product});
 
         # And we automatically insert the default milestone.
         $dbh->do(q{INSERT INTO milestones (product_id, value, sortkey)

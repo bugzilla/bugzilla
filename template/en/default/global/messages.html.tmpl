@@ -796,7 +796,13 @@
 
   [% ELSIF message_tag == "version_updated" %]
     [% title = "Version Updated" %]
-    Version renamed as <em>[% version.name FILTER html %]</em>.
+    [% IF changes.size %]
+      [% IF changes.value.defined %]
+        Version renamed to <em>[% version.name FILTER html %]</em>.
+      [% END %]
+    [% ELSE %]
+      No changes made to version <em>[% version.name FILTER html %]</em>.
+    [% END %]
 
   [% ELSIF message_tag == "workflow_updated" %]
     The workflow has been updated.

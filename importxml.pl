@@ -87,7 +87,6 @@ use Bugzilla::Status;
 
 use MIME::Base64;
 use MIME::Parser;
-use Date::Format;
 use Getopt::Long;
 use Pod::Usage;
 use XML::Twig;
@@ -803,8 +802,7 @@ sub process_bug {
 
     # Process time fields
     if ( $params->{"timetrackinggroup"} ) {
-        my $date = format_time( $bug_fields{'deadline'}, "%Y-%m-%d" )
-          || undef;
+        my $date = validate_date( $bug_fields{'deadline'} ) ? $bug_fields{'deadline'} : undef;
         push( @values, $date );
         push( @query,  "deadline" );
         if ( defined $bug_fields{'estimated_time'} ) {

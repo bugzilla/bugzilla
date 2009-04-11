@@ -129,13 +129,17 @@ if ($action eq 'new') {
     my $description        = trim($cgi->param('description')      || '');
     my @initial_cc         = $cgi->param('initialcc');
 
-    my $component =
-      Bugzilla::Component->create({ name             => $comp_name,
-                                    product          => $product,
-                                    description      => $description,
-                                    initialowner     => $default_assignee,
-                                    initialqacontact => $default_qa_contact,
-                                    initial_cc       => \@initial_cc });
+    my $component = Bugzilla::Component->create({
+        name             => $comp_name,
+        product          => $product,
+        description      => $description,
+        initialowner     => $default_assignee,
+        initialqacontact => $default_qa_contact,
+        initial_cc       => \@initial_cc,
+        # XXX We should not be creating series for products that we
+        # didn't create series for.
+        create_series    => 1,
+   });
 
     $vars->{'message'} = 'component_created';
     $vars->{'comp'} = $component;

@@ -96,6 +96,7 @@ exit if $switch{'check-modules'};
 # get a cryptic perl error about the missing module.
 
 require Bugzilla;
+require Bugzilla::User;
 
 require Bugzilla::Config;
 import Bugzilla::Config qw(:admin);
@@ -195,6 +196,9 @@ Bugzilla::Install::DB::update_table_definitions(\%old_params);
 ###########################################################################
 
 Bugzilla::Install::update_system_groups();
+
+# "Log In" as the fake superuser who can do everything.
+Bugzilla->set_user(Bugzilla::User->super_user);
 
 ###########################################################################
 # Create --SETTINGS-- users can adjust

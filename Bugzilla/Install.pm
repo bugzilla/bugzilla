@@ -26,6 +26,7 @@ package Bugzilla::Install;
 
 use strict;
 
+use Bugzilla::Component;
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Group;
@@ -126,7 +127,10 @@ use constant DEFAULT_PRODUCT => {
     name => 'TestProduct',
     description => 'This is a test product.'
         . ' This ought to be blown away and replaced with real stuff in a'
-        . ' finished installation of bugzilla.'
+        . ' finished installation of bugzilla.',
+    version => Bugzilla::Version::DEFAULT_VERSION,
+    classification => 'Unclassified',
+    defaultmilestone => DEFAULT_MILESTONE,
 };
 
 use constant DEFAULT_COMPONENT => {
@@ -216,54 +220,33 @@ sub update_system_groups {
 # This function should be called only after creating the admin user.
 sub create_default_product {
     my $dbh = Bugzilla->dbh;
-
     # Make the default Classification if it doesn't already exist.
     if (!$dbh->selectrow_array('SELECT 1 FROM classifications')) {
-        my $class = DEFAULT_CLASSIFICATION;
         print get_text('install_default_classification', 
-                       { name => $class->{name} }) . "\n";
-        $dbh->do('INSERT INTO classifications (name, description)
-                       VALUES (?, ?)',
-                 undef, $class->{name}, $class->{description});
+                       { name => DEFAULT_CLASSIFICATION->{name} }) . "\n";
+        Bugzilla::Classification->create(DEFAULT_CLASSIFICATION);
     }
 
     # And same for the default product/component.
     if (!$dbh->selectrow_array('SELECT 1 FROM products')) {
-        my $default_prod = DEFAULT_PRODUCT;
         print get_text('install_default_product', 
-                       { name => $default_prod->{name} }) . "\n";
+                       { name => DEFAULT_PRODUCT->{name} }) . "\n";
 
-        $dbh->do(q{INSERT INTO products (name, description)
-                        VALUES (?,?)}, 
-                 undef, $default_prod->{name}, $default_prod->{description});
+        my $product = Bugzilla::Product->create(DEFAULT_PRODUCT);
 
-        my $product = new Bugzilla::Product({name => $default_prod->{name}});
-
-        # The default version.
-        Bugzilla::Version->create({name => Bugzilla::Version::DEFAULT_VERSION,
-                                   product => $product});
-
-        # And we automatically insert the default milestone.
-        $dbh->do(q{INSERT INTO milestones (product_id, value, sortkey)
-                        SELECT id, defaultmilestone, 0
-                          FROM products});
-
-        # Get the user who will be the owner of the Product.
-        # We pick the admin with the lowest id, or we insert
-        # an invalid "0" into the database, just so that we can
-        # create the component.
+        # Get the user who will be the owner of the Component.
+        # We pick the admin with the lowest id, which is probably the
+        # admin checksetup.pl just created.
         my $admin_group = new Bugzilla::Group({name => 'admin'});
         my ($admin_id)  = $dbh->selectrow_array(
             'SELECT user_id FROM user_group_map WHERE group_id = ?
            ORDER BY user_id ' . $dbh->sql_limit(1),
-            undef, $admin_group->id) || 0;
- 
-        my $default_comp = DEFAULT_COMPONENT;
+            undef, $admin_group->id);
+        my $admin = Bugzilla::User->new($admin_id);
 
-        $dbh->do("INSERT INTO components (name, product_id, description,
-                                          initialowner)
-                       VALUES (?, ?, ?, ?)", undef, $default_comp->{name},
-                 $product->id, $default_comp->{description}, $admin_id);
+        Bugzilla::Component->create({
+            %{ DEFAULT_COMPONENT() }, product => $product,
+            initialowner => $admin->login });
     }
 
 }

@@ -232,6 +232,20 @@ sub get_inactive_bugs {
     return $bugs;
 }
 
+# Return 1st day of the month of the earliest activity date for a given list of bugs.
+sub get_earliest_activity_date {
+    my ($bugids) = @_;
+    my $dbh = Bugzilla->dbh;
+
+    my ($date) = $dbh->selectrow_array(
+        'SELECT ' . $dbh->sql_date_format('MIN(bug_when)', '%Y-%m-01')
+       . ' FROM longdescs
+          WHERE ' . $dbh->sql_in('bug_id', $bugids)
+                  . ' AND work_time > 0');
+
+    return $date;
+}
+
 #
 # Template code starts here
 #
@@ -301,16 +315,14 @@ if ($do_report) {
     # Break dates apart into months if necessary; if not, we use the
     # same @parts list to allow us to use a common codepath.
     if ($monthly) {
-        # unfortunately it's not too easy to guess a start date, since
-        # it depends on what bugs we're looking at. We risk bothering
-        # the user here. XXX: perhaps run a query to see what the
-        # earliest activity in longdescs for all bugs and use that as a
-        # start date.
-        $start_date || ThrowUserError("illegal_date", {'date' => $start_date});
-        # we can, however, provide a default end date. Note that this
-        # differs in semantics from the open-ended queries we use when
-        # start/end_date aren't provided -- and clock skews will make
-        # this evident!
+        # Calculate the earliest activity date if the user doesn't
+        # specify a start date.
+        if (!$start_date) {
+            $start_date = get_earliest_activity_date(\@bugs);
+        }
+        # Provide a default end date. Note that this differs in semantics
+        # from the open-ended queries we use when start/end_date aren't
+        # provided -- and clock skews will make this evident!
         @parts = split_by_month($start_date, 
                                 $end_date || format_time(scalar localtime(time()), '%Y-%m-%d'));
     } else {

@@ -324,6 +324,10 @@ sub view {
         my $bug_id = $attachment->bug_id;
         $attachbase =~ s/%bugid%/$bug_id/;
         my $path = 'attachment.cgi?id=' . $attachment->id;
+        # The user is allowed to override the content type of the attachment.
+        if (defined $cgi->param('content_type')) {
+            $path .= '&content_type=' . url_quote($cgi->param('content_type'));
+        }
 
         # Make sure the attachment is served from the correct server.
         if ($cgi->self_url !~ /^\Q$attachbase\E/) {

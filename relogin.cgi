@@ -37,13 +37,17 @@ use Date::Format;
 my $template = Bugzilla->template;
 my $cgi = Bugzilla->cgi;
 
-my $action = $cgi->param('action');
+my $action = $cgi->param('action') || '';
 
 my $vars = {};
 my $target;
 
+if (!$action) {
+    # redirect to index.cgi if no action is defined.
+    print $cgi->redirect(correct_urlbase() . 'index.cgi');
+}
 # prepare-sudo: Display the sudo information & login page
-if ($action eq 'prepare-sudo') {
+elsif ($action eq 'prepare-sudo') {
     # We must have a logged-in user to do this
     # That user must be in the 'bz_sudoers' group
     my $user = Bugzilla->login(LOGIN_REQUIRED);

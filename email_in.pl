@@ -75,7 +75,7 @@ sub parse_mail {
     my ($reporter) = Email::Address->parse($input_email->header('From'));
     $fields{'reporter'} = $reporter->address;
     my $summary = $input_email->header('Subject');
-    if ($summary =~ /\[Bug (\d+)\](.*)/i) {
+    if ($summary =~ /\[\S+ (\d+)\](.*)/i) {
         $fields{'bug_id'} = $1;
         $summary = trim($2);
     }

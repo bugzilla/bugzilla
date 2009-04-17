@@ -84,6 +84,12 @@ sub get_param_list {
   },
 
   {
+   name => 'use_see_also',
+   type => 'b',
+   default => 1
+  },
+
+  {
    name => 'defaultpriority',
    type => 's',
    choices => \@legal_priorities,

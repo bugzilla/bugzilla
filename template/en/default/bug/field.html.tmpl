@@ -174,18 +174,22 @@
        [% FOREACH url = value %]
          <li>
            <a href="[% url FILTER html %]">[% url FILTER html %]</a>
-           <label><input type="checkbox" value="[% url FILTER html %]"
-                         name="remove_[% field.name FILTER html %]">
-             Remove</label>
+           [% IF editable %]
+             <label><input type="checkbox" value="[% url FILTER html %]"
+                           name="remove_[% field.name FILTER html %]">
+               Remove</label>
+           [% END %]
          </li>
        [% END %]
        [% '</ul>' IF value.size %]
 
-       <label for="[% field.name FILTER html %]">
-         <strong>Add [% terms.Bug %] URLs:</strong>
-       </label><br>
-       <input type="text" id="[% field.name FILTER html %]" 
-              class="text_input" name="[% field.name FILTER html %]" size="40">
+       [% IF editable && Param('use_see_also') %]
+         <label for="[% field.name FILTER html %]">
+           <strong>Add [% terms.Bug %] URLs:</strong>
+         </label><br>
+         <input type="text" id="[% field.name FILTER html %]" size="40"
+                class="text_input" name="[% field.name FILTER html %]">
+       [% END %]
   [% END %]
 [% ELSIF field.type == constants.FIELD_TYPE_TEXTAREA %]
   <div class="uneditable_textarea">[% value FILTER wrap_comment(60)

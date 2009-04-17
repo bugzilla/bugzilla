@@ -908,13 +908,15 @@
 [%# Block for See Also                                                       #%]
 [%############################################################################%]
 [% BLOCK section_see_also %]
-  <tr>
-    [% INCLUDE bug/field.html.tmpl 
-         field    = bug_fields.see_also
-         value    = bug.see_also
-         editable = bug.check_can_change_field('see_also', 0, 1)
-    %]
-  </tr>
+  [% IF Param('use_see_also') || bug.see_also.size %]
+    <tr>
+      [% INCLUDE bug/field.html.tmpl 
+           field    = bug_fields.see_also
+           value    = bug.see_also
+           editable = bug.check_can_change_field('see_also', 0, 1)
+      %]
+    </tr>
+  [% END %]
 [% END %]
 
 [%############################################################################%]

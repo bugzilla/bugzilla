@@ -33,7 +33,7 @@ sub new {
     Bugzilla::Hook::process('auth-verify_methods', { modules => \%methods });
 
     $self->{_stack} = [];
-    foreach my $verify_method (keys %methods) {
+    foreach my $verify_method (split(',', $list)) {
         my $module = $methods{$verify_method};
         require $module;
         $module =~ s|/|::|g;

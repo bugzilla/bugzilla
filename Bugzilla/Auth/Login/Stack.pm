@@ -38,7 +38,7 @@ sub new {
     Bugzilla::Hook::process('auth-login_methods', { modules => \%methods });
 
     $self->{_stack} = [];
-    foreach my $login_method (keys %methods) {
+    foreach my $login_method (split(',', $list)) {
         my $module = $methods{$login_method};
         require $module;
         $module =~ s|/|::|g;

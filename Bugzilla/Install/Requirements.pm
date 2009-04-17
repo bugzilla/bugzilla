@@ -118,6 +118,12 @@ sub REQUIRED_MODULES {
         version => '1.861'
     },
     {
+        package => 'Email-MIME-Encodings',
+        module  => 'Email::MIME::Encodings',
+        # Fixes bug 486206
+        version => '1.313',
+    },
+    {
         package => 'Email-MIME-Modifier',
         module  => 'Email::MIME::Modifier',
         version => '1.442'

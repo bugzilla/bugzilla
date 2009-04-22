@@ -221,7 +221,8 @@
   [% IF !global.bug_count.$id %]
     [% global.estimated = global.estimated + bugs.$id.estimated_time %]
     [% global.remaining = global.remaining + bugs.$id.remaining_time %]
-    [% IF bugs.$id.deadline && global.deadline < bugs.$id.deadline %]
+    [% IF !global.deadline || bugs.$id.deadline &&
+          global.deadline.replace("-", "") < bugs.$id.deadline.replace("-", "") %]
       [% SET global.deadline = bugs.$id.deadline %]
     [% END %]
   [% END %]

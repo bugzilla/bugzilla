@@ -24,10 +24,9 @@ use warnings;
 
 # MTAs may call this script from any directory, but it should always
 # run from this one so that it can find its modules.
-BEGIN {
-    require File::Basename;
-    chdir(File::Basename::dirname($0)); 
-}
+use Cwd qw(abs_path);
+use File::Basename qw(dirname);
+BEGIN { chdir dirname(abs_path($0)); }
 
 use lib qw(. lib);
 

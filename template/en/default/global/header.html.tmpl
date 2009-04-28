@@ -91,9 +91,10 @@
             rel="stylesheet"
             type="text/css">
     [% END %]
-    <!--[if IE]>
+    <!--[if lte IE 7]>
       [%# Internet Explorer treats [if IE] HTML comments as uncommented.
-        # Use it to import CSS fixes so that Bugzilla looks decent on IE, too.
+        # Use it to import CSS fixes so that Bugzilla looks decent on IE 7
+        # and below.
         #%]
       <link href="skins/standard/IE-fixes.css"
             rel="stylesheet"
@@ -110,11 +111,11 @@
               title="[% setting_descs.standard FILTER html %]"
               type="text/css">
       [% END %]
-      <!--[if IE]>
-        [%# Internet Explorer treats [if IE] HTML comments as uncommented.
-          # Use it to import CSS fixes so that Bugzilla looks decent on IE,
-          # too.
-          #%]
+      <!--[if lte IE 7]>
+      [%# Internet Explorer treats [if IE] HTML comments as uncommented.
+        # Use it to import CSS fixes so that Bugzilla looks decent on IE 7
+        # and below.
+        #%]
         <link href="skins/standard/IE-fixes.css"
               rel="[% 'alternate ' IF user_skin %]stylesheet"
               title="[% setting_descs.standard FILTER html %]"
@@ -148,10 +149,10 @@
                   type="text/css">
           [% END %]
         [% END %]
-        <!--[if IE]>
+        <!--[if lte IE 7]>
           [%# Internet Explorer treats [if IE] HTML comments as uncommented.
-            # Use it to import CSS fixes so that Bugzilla looks decent on IE,
-            # too.
+            # Use it to import CSS fixes so that Bugzilla looks decent on IE 7
+            # and below.
             #%]
           <link href="skins/contrib/[% contrib_skin FILTER html %]/IE-fixes.css"
                 rel="[% 'alternate ' UNLESS contrib_skin == user_skin %]stylesheet"
@@ -179,9 +180,10 @@
                        FILTER html %]" rel="stylesheet" type="text/css">
       [% END %]
     [% END %]
-    <!--[if IE]>
+    <!--[if lte IE 7]>
       [%# Internet Explorer treats [if IE] HTML comments as uncommented.
-        # Use it to import CSS fixes so that Bugzilla looks decent on IE, too.
+        # Use it to import CSS fixes so that Bugzilla looks decent on IE 7
+        # and below.
         #%]
       <link href="skins/custom/IE-fixes.css"
             rel="stylesheet"

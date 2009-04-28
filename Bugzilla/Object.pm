@@ -170,14 +170,16 @@ sub match {
         elsif ( $field eq 'WHERE' ) {
             # the WHERE value is a hashref where the keys are
             # "column_name operator ?" and values are the placeholder's
-            # value.
-            foreach my $k (keys( %$value )) {
-                push( @terms, $k );
-                push( @values, $value->{$k} );
+            # value (either a scalar or an array of values).
+            foreach my $k (keys %$value) {
+                push(@terms, $k);
+                my @this_value = ref($value->{$k}) ? @{ $value->{$k} } 
+                                                   : ($value->{$k});
+                push(@values, @this_value);
             }            
             next;
         }
-                
+        
         if (ref $value eq 'ARRAY') {
             # IN () is invalid SQL, and if we have an empty list
             # to match against, we're just returning an empty

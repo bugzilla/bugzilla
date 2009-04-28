@@ -156,14 +156,10 @@
 [%# Bug Table                                                                #%]
 [%############################################################################%]
 
+[% tableheader %]
+
 [% FOREACH bug = bugs %]
   [% count = loop.count() %]
-  [% FLUSH IF count % 10 == 1 %]
-
-  [%# At the beginning of every hundred bugs in the list, start a new table. %]
-  [% IF count % 100 == 1 %]
-    [% tableheader %]
-  [% END %]
 
   <tr class="bz_bugitem
              bz_[% bug.bug_severity FILTER css_class_quote -%]
@@ -219,18 +215,13 @@
 
   </tr>
 
-  [%# At the end of every hundred bugs in the list, or at the end of the list,
-    # end the current table. 
-    #%]
-  [% IF loop.last() || loop.count() % 100 == 0 %]
-    [% IF loop.last() && time_info.time_present == 1 %]
-      [% PROCESS time_summary_line %]
-    [% END %]
-    </table>
+  [% IF loop.last() && time_info.time_present == 1 %]
+    [% PROCESS time_summary_line %]
   [% END %]
 
 [% END %]
 
+</table>
 
 [% BLOCK time_summary_line %]
   <tr class="bz_time_summary_line">

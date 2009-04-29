@@ -240,7 +240,7 @@ sub quicksearch {
             my @subWords = split(/[\|,]/, $baseWord);
             if ($firstChar eq '+') {
                 foreach (@subWords) {
-                    addChart('short_desc', 'substring', $qsword, $negate);
+                    addChart('short_desc', 'substring', $_, $negate);
                 }
             }
             elsif ($firstChar eq '#') {

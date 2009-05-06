@@ -1270,7 +1270,7 @@ my $contenttype;
 my $disposition = "inline";
 
 if ($format->{'extension'} eq "html" && !$agent) {
-    if ($order) {
+    if ($order && !$cgi->param('sharer_id')) {
         $cgi->send_cookie(-name => 'LASTORDER',
                           -value => $order,
                           -expires => 'Fri, 01-Jan-2038 00:00:00 GMT');

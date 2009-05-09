@@ -45,18 +45,6 @@ sub make_response {
     }
 }
 
-sub datetime_format {
-    my ($self, $date_string) = @_;
-
-    my $time = str2time($date_string);
-    my ($sec, $min, $hour, $mday, $mon, $year) = localtime $time;
-    # This format string was stolen from SOAP::Utils->format_datetime,
-    # which doesn't work but which has almost the right format string.
-    my $iso_datetime = sprintf('%d%02d%02dT%02d:%02d:%02d',
-        $year + 1900, $mon + 1, $mday, $hour, $min, $sec);
-    return $iso_datetime;
-}
-
 sub handle_login {
     my ($self, $classes, $action, $uri, $method) = @_;
     my $class = $classes->{$uri};

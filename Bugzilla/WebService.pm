@@ -36,10 +36,23 @@ sub login_exempt {
 sub type {
     my ($self, $type, $value) = @_;
     if ($type eq 'dateTime') {
-        $value = $self->datetime_format($value);
+        $value = datetime_format($value);
     }
     return XMLRPC::Data->type($type)->value($value);
 }
+
+sub datetime_format {
+    my ($date_string) = @_;
+
+    my $time = str2time($date_string);
+    my ($sec, $min, $hour, $mday, $mon, $year) = localtime $time;
+    # This format string was stolen from SOAP::Utils->format_datetime,
+    # which doesn't work but which has almost the right format string.
+    my $iso_datetime = sprintf('%d%02d%02dT%02d:%02d:%02d',
+        $year + 1900, $mon + 1, $mday, $hour, $min, $sec);
+    return $iso_datetime;
+}
+
 
 1;
 

@@ -201,8 +201,7 @@ sub get_history {
 
         foreach my $changeset (@$activity) {
             my %bug_history;
-            $bug_history{when} = $self->type('dateTime',
-                $self->datetime_format($changeset->{when}));
+            $bug_history{when} = $self->type('dateTime', $changeset->{when});
             $bug_history{who}  = $self->type('string', $changeset->{who});
             $bug_history{changes} = [];
             foreach my $change (@{ $changeset->{changes} }) {
@@ -251,12 +250,27 @@ sub search {
     
     $params = _map_fields($params);
     
-    # If the user set the 'last_change_time' param (translated into delta_ts
-    # by the field map), use a custom WHERE to constrain the query to only 
-    # those bugs that have a delta_ts greater than or equal to 
-    # the specified time.
+    # Do special search types for certain fields.
     if ( my $bug_when = delete $params->{delta_ts} ) {
-        $params->{WHERE} = {'delta_ts >= ?' => $bug_when};
+        $params->{WHERE}->{'delta_ts >= ?'} = $bug_when;
+    }
+    if (my $when = delete $params->{creation_ts}) {
+        $params->{WHERE}->{'creation_ts >= ?'} = $when;
+    }
+    if (my $votes = delete $params->{votes}) { 
+        $params->{WHERE}->{'votes >= ?'} = $votes;
+    }
+    if (my $summary = delete $params->{short_desc}) {
+        my @strings = ref $summary ? @$summary : ($summary);
+        my @likes = ("short_desc LIKE ?") x @strings;
+        my $clause = join(' OR ', @likes);
+        $params->{WHERE}->{"($clause)"} = [map { "\%$_\%" } @strings];
+    }
+    if (my $whiteboard = delete $params->{status_whiteboard}) {
+        my @strings = ref $whiteboard ? @$whiteboard : ($whiteboard);
+        my @likes = ("status_whiteboard LIKE ?") x @strings;
+        my $clause = join(' OR ', @likes);
+        $params->{WHERE}->{"($clause)"} = [map { "\%$_\%" } @strings];
     }
     
     my $bugs = Bugzilla::Bug->match($params);
@@ -999,10 +1013,11 @@ Allows you to search for bugs based on particular criteria.
 
 =item B<Params>
 
-Bugs are returned if they match I<exactly> the criteria you specify
-in these parameters. That is, we don't match against 
-substrings--if a bug is in the "Widgets" product and you ask for bugs in
-the "Widg" product, you won't get anything.
+Unless otherwise specified in the description of a parameter, bugs are
+returned if they match I<exactly> the criteria you specify in these 
+parameters. That is, we don't match against substrings--if a bug is in
+the "Widgets" product and you ask for bugs in the "Widg" product, you
+won't get anything.
 
 Criteria are joined in a logical AND. That is, you will be returned
 bugs that match I<all> of the criteria, not bugs that match I<any> of
@@ -1014,9 +1029,6 @@ these values." For example, if you wanted bugs that were in either
 the "Foo" or "Bar" products, you'd pass:
 
  product => ['Foo', 'Bar']
-
-Fields below only have descriptions if it's not clear what bug field
-they match up to, or if they have some special behavior.
 
 Some Bugzillas may treat your arguments case-sensitively, depending
 on what database system they are using. Most commonly, though, Bugzilla is 
@@ -1044,7 +1056,8 @@ don't want this, be sure to also specify the C<product> argument.
 
 =item C<creation_time>
 
-C<dateTime> When the bug was created.
+C<dateTime> Searches for bugs that were created at this time or later.
+May not be an array.
 
 =item C<id>
 
@@ -1052,10 +1065,8 @@ C<int> The numeric id of the bug.
 
 =item C<last_change_time>
 
-C<dateTime> Limit the search to only those bugs which have changed 
-in some way since the specified time. It includes all bugs changed 
-between the specified time and the present. Note: only a single 
-C<dateTime> will accepted, not an array.
+C<dateTime> Searches for bugs that were modified at this time or later.
+May not be an array.
 
 =item C<limit>
 
@@ -1104,9 +1115,14 @@ if it has one, which is a separate field above).
 
 =item C<summary>
 
-C<string> The single-line summary field of a bug. (This isn't very
-useful to search on, since we don't do substring matches, only exact
-matches.)
+C<string> Searches for substrings in the single-line Summary field on
+bugs. If you specify an array, then bugs whose summaries match I<any> of the
+passed substrings will be returned.
+
+Note that unlike searching in the Bugzilla UI, substrings are not split
+on spaces. So searching for C<foo bar> will match "This is a foo bar"
+but not "This foo is a bar". C<['foo', 'bar']>, would, however, match
+the second item.
 
 =item C<target_milestone>
 
@@ -1133,11 +1149,14 @@ C<string> The Version field of a bug.
 
 =item C<votes>
 
-C<int> How many votes this bug has, total.
+C<int> Searches for bugs with this many votes or greater. May not
+be an array.
 
 =item C<whiteboard>
 
-C<string> The "Status Whiteboard" field of a bug.
+C<string> Search the "Status Whiteboard" field on bugs for a substring.
+Works the same as the C<summary> field described above, but searches the
+Status Whiteboard field.
 
 =back
 

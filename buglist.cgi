@@ -1204,6 +1204,17 @@ $vars->{'displaycolumns'} = \@displaycolumns;
 $vars->{'openstates'} = [BUG_STATE_OPEN];
 $vars->{'closedstates'} = [map {$_->name} closed_bug_statuses()];
 
+# The iCal file needs priorities ordered from 1 to 9 (highest to lowest)
+# If there are more than 9 values, just make all the lower ones 9
+if ($format->{'extension'} eq 'ics') {
+    my $n = 1;
+    $vars->{'ics_priorities'} = {};
+    my $priorities = get_legal_field_values('priority');
+    foreach my $p (@$priorities) {
+        $vars->{'ics_priorities'}->{$p} = ($n > 9) ? 9 : $n++;
+    }
+}
+
 # The list of query fields in URL query string format, used when creating
 # URLs to the same query results page with different parameters (such as
 # a different sort order or when taking some action on the set of query

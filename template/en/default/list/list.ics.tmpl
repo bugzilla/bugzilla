@@ -30,6 +30,7 @@ BEGIN:VTODO
 [%+ PROCESS ics_url base_url=urlbase bug_id=bug.bug_id +%]
 [%+ PROCESS ics_status bug_status = bug.bug_status +%]
 [%+ PROCESS ics_dtstamp +%]
+[%+ ics_priorities.${bug.priority} FILTER ics('PRIORITY') +%]
 [% IF bug.changeddate %]
 [%+ bug.changedtime FILTER time("%Y%m%dT%H%M%SZ", "UTC") FILTER ics('LAST-MODIFIED') +%]
 [% END %]

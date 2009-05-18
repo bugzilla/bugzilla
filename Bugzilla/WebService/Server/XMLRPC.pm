@@ -14,6 +14,9 @@
 #
 # Contributor(s): Marc Schumann <wurblzap@gmail.com>
 #                 Max Kanat-Alexander <mkanat@bugzilla.org>
+#                 Rosie Clarkson <rosie.clarkson@planningportal.gov.uk>
+#                 
+# Portions © Crown copyright 2009 - Rosie Clarkson (development@planningportal.gov.uk) for the Planning Portal
 
 package Bugzilla::WebService::Server::XMLRPC;
 
@@ -155,6 +158,37 @@ sub as_string {
     return $self->SUPER::as_string($value);
 }
 
+# Here the XMLRPC::Serializer is extended to use the XMLRPC nil extension.
+sub encode_object {
+    my $self = shift;
+    my @encoded = $self->SUPER::encode_object(@_);
+
+    return $encoded[0]->[0] eq 'nil'
+        ? ['value', {}, [@encoded]]
+        : @encoded;
+}
+
+sub BEGIN {
+    no strict 'refs';
+    for my $type (qw(double i4 int dateTime)) {
+        my $method = 'as_' . $type;
+        *$method = sub {
+            my ($self, $value) = @_;
+            if (!defined($value)) {
+                return as_nil();
+            }
+            else {
+                my $super_method = "SUPER::$method"; 
+                return $self->$super_method($value);
+            }
+        }
+    }
+}
+
+sub as_nil {
+    return ['nil', {}];
+}
+
 1;
 
 __END__
@@ -201,11 +235,18 @@ Normally, XML-RPC does not allow empty values for C<int>, C<double>, or
 C<dateTime.iso8601> fields. Bugzilla does--it treats empty values as
 C<undef> (called C<NULL> or C<None> in some programming languages).
 
-Bugzilla also accepts a type called C<< <nil> >>, which is always considered
-to be C<undef>, no matter what it contains.
+Bugzilla also accepts an element called C<< <nil> >>, as specified by the
+XML-RPC extension here: L<http://ontosys.com/xml-rpc/extensions.php>, which
+is always considered to be C<undef>, no matter what it contains.
+
+Bugzilla uses C<< <nil/> >> values to return C<int>, C<double>, or 
+C<dateTime.iso8601> values which are undefined.
 
 =begin private
 
-nil is implemented by XMLRPC::Lite, in XMLRPC::Deserializer::decode_value.
+nil is implemented by XMLRPC::Lite, in XMLRPC::Deserializer::decode_value
+in the CPAN SVN since 14th Dec 2008
+L<http://rt.cpan.org/Public/Bug/Display.html?id=20569> and in Fedora's
+perl-SOAP-Lite package in versions 0.68-1 and above.
 
 =end private

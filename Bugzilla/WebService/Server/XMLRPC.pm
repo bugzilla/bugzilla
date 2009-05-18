@@ -14,6 +14,9 @@
 #
 # Contributor(s): Marc Schumann <wurblzap@gmail.com>
 #                 Max Kanat-Alexander <mkanat@bugzilla.org>
+#                 Rosie Clarkson <rosie.clarkson@planningportal.gov.uk>
+#                 
+# Portions © Crown copyright 2009 - Rosie Clarkson (development@planningportal.gov.uk) for the Planning Portal
 
 package Bugzilla::WebService::Server::XMLRPC;
 
@@ -165,6 +168,37 @@ sub as_string {
     utf8::encode($value) if utf8::is_utf8($value) 
                             && $value =~ /^[\x00-\xff]+$/;
     return $self->SUPER::as_string($value);
+}
+
+# Here the XMLRPC::Serializer is extended to use the XMLRPC nil extension.
+sub encode_object {
+    my $self = shift;
+    my @encoded = $self->SUPER::encode_object(@_);
+
+    return $encoded[0]->[0] eq 'nil'
+        ? ['value', {}, [@encoded]]
+        : @encoded;
+}
+
+sub BEGIN {
+    no strict 'refs';
+    for my $type (qw(double i4 int dateTime)) {
+        my $method = 'as_' . $type;
+        *$method = sub {
+            my ($self, $value) = @_;
+            if (!defined($value)) {
+                return as_nil();
+            }
+            else {
+                my $super_method = "SUPER::$method";
+                return $self->$super_method($value);
+            }
+        }
+    }
+}
+
+sub as_nil {
+    return ['nil', {}];
 }
 
 1;

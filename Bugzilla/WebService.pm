@@ -269,11 +269,18 @@ Normally, XML-RPC does not allow empty values for C<int>, C<double>, or
 C<dateTime.iso8601> fields. Bugzilla does--it treats empty values as
 C<undef> (called C<NULL> or C<None> in some programming languages).
 
-Bugzilla also accepts a type called C<< <nil> >>, which is always considered
-to be C<undef>, no matter what it contains.
+Bugzilla also accepts an element called C<< <nil> >>, as specified by 
+the XML-RPC extension here: L<http://ontosys.com/xml-rpc/extensions.php>, 
+which is always considered to be C<undef>, no matter what it contains.
+
+Bugzilla uses C<< <nil/> >> values to return C<int>, C<double>, or 
+C<dateTime.iso8601> values which are undefined.
 
 =begin private
 
-nil is implemented by XMLRPC::Lite, in XMLRPC::Deserializer::decode_value.
+nil is implemented by XMLRPC::Lite, in XMLRPC::Deserializer::decode_value
+in the CPAN SVN since 14th Dec 2008 
+L<http://rt.cpan.org/Public/Bug/Display.html?id=20569> and in Fedora's 
+perl-SOAP-Lite package in versions 0.68-1 and above.
 
 =end private

@@ -159,6 +159,7 @@ sub quicksearch {
         # It's no alias either, so it's a more complex query.
         my $legal_statuses = get_legal_field_values('bug_status');
         my $legal_resolutions = get_legal_field_values('resolution');
+        my $legal_priorities = get_legal_field_values('priority');
 
         # Globally translate " AND ", " OR ", " NOT " to space, pipe, dash.
         $searchstring =~ s/\s+AND\s+/ /g;
@@ -313,9 +314,24 @@ sub quicksearch {
                                          $word, $negate);
                             }
                             # Priority
-                            elsif ($word =~ m/^[pP]([1-5](-[1-5])?)$/) {
-                                addChart('priority', 'regexp',
-                                         "[$1]", $negate);
+                            elsif (grep { lc($_) eq lc($word) } 
+                                        @$legal_priorities) 
+                            {
+                                addChart('priority', 'equals', $word, $negate);
+                            }
+                            # P1-5 Syntax
+                            elsif ($word =~ m/^P(\d+)(?:-(\d+))?$/i) {
+                                my $start = $1 - 1;
+                                $start = 0 if $start < 0;
+                                my $end = $2 - 1;
+                                $end = scalar(@$legal_priorities) - 1
+                                    if $end > (scalar @$legal_priorities - 1);
+                                my $prios = $legal_priorities->[$start];
+                                if ($end) {
+                                    $prios = join(',', @$legal_priorities[$start..$end])
+                                }
+                                addChart('priority', 'anyexact', $prios, 
+                                         $negate);
                             }
                             # Severity
                             elsif (grep({lc($word) eq substr($_, 0, 3)}

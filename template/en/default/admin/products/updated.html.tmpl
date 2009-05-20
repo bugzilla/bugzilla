@@ -55,13 +55,13 @@
   <p style="margin: 1em 3em 1em 3em">[% product.description FILTER html_light %]</p>
 [% END %]
 
-[% IF changes.disallownew.defined %]
+[% IF changes.isactive.defined %]
   <p>
   Product is now
-  [% IF product.disallow_new %]
-    closed to
+  [% IF product.is_active %]
+    open for
   [% ELSE %]
-    open for 
+    closed to 
   [% END %]
   new [% terms.bugs %].
   </p>

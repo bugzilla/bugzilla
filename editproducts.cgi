@@ -173,7 +173,7 @@ if ($action eq 'new') {
                                  version          => scalar $cgi->param('version'),
                                  defaultmilestone => scalar $cgi->param('defaultmilestone'),
                                  milestoneurl     => scalar $cgi->param('milestoneurl'),
-                                 disallownew      => scalar $cgi->param('disallownew'),
+                                 isactive         => scalar $cgi->param('isactive'),
                                  votesperuser     => scalar $cgi->param('votesperuser'),
                                  maxvotesperbug   => scalar $cgi->param('maxvotesperbug'),
                                  votestoconfirm   => scalar $cgi->param('votestoconfirm'),
@@ -285,7 +285,7 @@ if ($action eq 'update') {
     $product->set_description(scalar $cgi->param('description'));
     $product->set_default_milestone(scalar $cgi->param('defaultmilestone'));
     $product->set_milestone_url(scalar $cgi->param('milestoneurl'));
-    $product->set_disallow_new(scalar $cgi->param('disallownew'));
+    $product->set_is_active(scalar $cgi->param('is_active'));
     $product->set_votes_per_user(scalar $cgi->param('votesperuser'));
     $product->set_votes_per_bug(scalar $cgi->param('maxvotesperbug'));
     $product->set_votes_to_confirm(scalar $cgi->param('votestoconfirm'));

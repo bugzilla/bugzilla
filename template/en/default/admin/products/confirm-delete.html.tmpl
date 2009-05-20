@@ -93,10 +93,10 @@
   <tr>
     <td>Closed for [% terms.bugs %]:</td>
     <td>
-      [% IF product.disallownew %]
-        closed
-      [% ELSE %]
+      [% IF product.is_active %]
         open
+      [% ELSE %]
+        closed
       [% END %]
     </td>
   </tr>

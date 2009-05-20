@@ -780,10 +780,10 @@ sub write_non_bugs_tables {
 
         print DATA "\ninsert into products (\n";
         print DATA
-            "  product, description, milestoneurl, disallownew\n";
+            "  product, description, milestoneurl, isactive\n";
         print DATA ") values (\n";
         print DATA
-            "  $product, $description, '', 0\n";
+            "  $product, $description, '', 1\n";
         print DATA ");\n";
 
         print DATA "\ninsert into components (\n";

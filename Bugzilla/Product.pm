@@ -53,7 +53,7 @@ use constant DB_COLUMNS => qw(
    classification_id
    description
    milestoneurl
-   disallownew
+   isactive
    votesperuser
    maxvotesperbug
    votestoconfirm
@@ -71,7 +71,7 @@ use constant UPDATE_COLUMNS => qw(
     description
     defaultmilestone
     milestoneurl
-    disallownew
+    isactive
     votesperuser
     maxvotesperbug
     votestoconfirm
@@ -84,7 +84,7 @@ use constant VALIDATORS => {
     version          => \&_check_version,
     defaultmilestone => \&_check_default_milestone,
     milestoneurl     => \&_check_milestone_url,
-    disallownew      => \&Bugzilla::Object::check_boolean,
+    isactive         => \&Bugzilla::Object::check_boolean,
     votesperuser     => \&_check_votes_per_user,
     maxvotesperbug   => \&_check_votes_per_bug,
     votestoconfirm   => \&_check_votes_to_confirm,
@@ -601,7 +601,7 @@ sub set_name { $_[0]->set('name', $_[1]); }
 sub set_description { $_[0]->set('description', $_[1]); }
 sub set_default_milestone { $_[0]->set('defaultmilestone', $_[1]); }
 sub set_milestone_url { $_[0]->set('milestoneurl', $_[1]); }
-sub set_disallow_new { $_[0]->set('disallownew', $_[1]); }
+sub set_is_active { $_[0]->set('isactive', $_[1]); }
 sub set_votes_per_user { $_[0]->set('votesperuser', $_[1]); }
 sub set_votes_per_bug { $_[0]->set('maxvotesperbug', $_[1]); }
 sub set_votes_to_confirm { $_[0]->set('votestoconfirm', $_[1]); }
@@ -858,7 +858,7 @@ sub flag_types {
 
 sub description       { return $_[0]->{'description'};       }
 sub milestone_url     { return $_[0]->{'milestoneurl'};      }
-sub disallow_new      { return $_[0]->{'disallownew'};       }
+sub is_active         { return $_[0]->{'isactive'};       }
 sub votes_per_user    { return $_[0]->{'votesperuser'};      }
 sub max_votes_per_bug { return $_[0]->{'maxvotesperbug'};    }
 sub votes_to_confirm  { return $_[0]->{'votestoconfirm'};    }
@@ -911,7 +911,7 @@ Bugzilla::Product - Bugzilla product class.
     my $name             = $product->name;
     my $description      = $product->description;
     my $milestoneurl     = $product->milestone_url;
-    my disallownew       = $product->disallow_new;
+    my isactive          = $product->is_active;
     my votesperuser      = $product->votes_per_user;
     my maxvotesperbug    = $product->max_votes_per_bug;
     my votestoconfirm    = $product->votes_to_confirm;

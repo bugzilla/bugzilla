@@ -144,9 +144,9 @@ def write_non_bug_tables():
     
     # Insert the products
     print >>outfile, "\ninsert into products ("
-    print >>outfile, "  product, description, milestoneurl, disallownew,"
+    print >>outfile, "  product, description, milestoneurl, isactive,"
     print >>outfile, "  defaultmilestone, votestoconfirm) values ("
-    print >>outfile, "  '%s', '%s', '%s', 0, '%s', 1);" % (product,
+    print >>outfile, "  '%s', '%s', '%s', 1, '%s', 1);" % (product,
                                                            productdesc,
                                                            milestoneurl,
                                                            defaultmilestone)

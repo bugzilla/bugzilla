@@ -459,8 +459,10 @@ sub update_table_definitions {
     # The products table lacked sensible defaults.
     $dbh->bz_alter_column('products', 'milestoneurl',
                           {TYPE => 'TINYTEXT', NOTNULL => 1, DEFAULT => "''"});
-    $dbh->bz_alter_column('products', 'disallownew',
-                          {TYPE => 'BOOLEAN', NOTNULL => 1,  DEFAULT => 0});
+    if ($dbh->bz_column_info('products', 'disallownew')){
+        $dbh->bz_alter_column('products', 'disallownew',
+                              {TYPE => 'BOOLEAN', NOTNULL => 1,  DEFAULT => 0});
+    }
     $dbh->bz_alter_column('products', 'votesperuser', 
                           {TYPE => 'INT2', NOTNULL => 1, DEFAULT => 0});
     $dbh->bz_alter_column('products', 'votestoconfirm',
@@ -567,6 +569,8 @@ sub update_table_definitions {
     # 2009-01-16 oreomike@gmail.com - Bug 302420
     $dbh->bz_add_column('whine_events', 'mailifnobugs',
         { TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'FALSE'});
+        
+    _convert_disallownew_to_isactive();
 
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
@@ -591,8 +595,11 @@ sub _update_pre_checksetup_bugzillas {
     $dbh->bz_add_column('bugs', 'qa_contact', {TYPE => 'INT3'});
     $dbh->bz_add_column('bugs', 'status_whiteboard',
                        {TYPE => 'MEDIUMTEXT', NOTNULL => 1, DEFAULT => "''"});
-    $dbh->bz_add_column('products', 'disallownew',
-                        {TYPE => 'BOOLEAN', NOTNULL => 1}, 0);
+    if (!$dbh->bz_column_info('products', 'isactive')){
+        $dbh->bz_add_column('products', 'disallownew',
+                            {TYPE => 'BOOLEAN', NOTNULL => 1}, 0);
+    }
+
     $dbh->bz_add_column('products', 'milestoneurl',
                         {TYPE => 'TINYTEXT', NOTNULL => 1}, '');
     $dbh->bz_add_column('components', 'initialqacontact',
@@ -3146,6 +3153,20 @@ sub _add_visiblity_value_to_value_tables {
         $dbh->bz_add_column($field, 'visibility_value_id', {TYPE => 'INT2'});
         $dbh->bz_add_index($field, "${field}_visibility_value_id_idx", 
                            ['visibility_value_id']);
+    }
+}
+
+sub _convert_disallownew_to_isactive {
+    my $dbh = Bugzilla->dbh;
+    if ($dbh->bz_column_info('products', 'disallownew')){
+        $dbh->bz_add_column('products', 'isactive', 
+                            { TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'TRUE'});
+        
+        # isactive is the boolean reverse of disallownew.
+        $dbh->do('UPDATE products SET isactive = 0 WHERE disallownew = 1');
+        $dbh->do('UPDATE products SET isactive = 1 WHERE disallownew = 0');
+        
+        $dbh->bz_drop_column('products','disallownew');
     }
 }
 

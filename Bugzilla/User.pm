@@ -759,7 +759,7 @@ sub get_enterable_products {
                       AND group_control_map.entry != 0
                       AND group_id NOT IN (' . $self->groups_as_string . ')
             WHERE group_id IS NULL
-                  AND products.disallownew = 0') || []};
+                  AND products.isactive = 1') || []};
 
     if (@enterable_ids) {
         # And all of these products must have at least one component

@@ -70,10 +70,9 @@
 [% END %]
     
 <tr>
-  <th align="right">Closed for [% terms.bug %] entry:</th>
-  <td><input type="checkbox" name="disallownew" value="1"
-       [% IF product.disallownew == "1" %]
-             checked="checked"[% END %]>
+  <th align="right">Open for [% terms.bug %] entry:</th>
+  <td><input type="checkbox" name="is_active" value="1"
+       [% ' checked="checked"' IF product.is_active %]>
   </td>
 </tr>
 

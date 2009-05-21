@@ -43,7 +43,7 @@ print $cgi->header();
 my $product_name = trim($cgi->param('product') || '');
 my $product = new Bugzilla::Product({'name' => $product_name});
 
-unless ($product && $user->can_enter_product($product->name)) {
+unless ($product && $user->can_access_product($product->name)) {
     # Products which the user is allowed to see.
     my @products = @{$user->get_enterable_products};
 

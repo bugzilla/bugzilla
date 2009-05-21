@@ -751,6 +751,12 @@ sub get_enterable_products {
     return $self->{enterable_products};
 }
 
+sub can_access_product {
+    my ($self, $product_name) = @_;
+
+    return scalar(grep {$_->name eq $product_name} @{$self->get_accessible_products});
+}
+
 sub get_accessible_products {
     my $self = shift;
     
@@ -1982,6 +1988,20 @@ method should be called in such a case to force reresolution of these groups.
 
  Description: Returns an array of product objects into which the user is
               allowed to enter bugs.
+
+ Params:      none
+
+ Returns:     an array of product objects.
+
+=item C<can_access_product(product_name)>
+
+Returns 1 if the user can search or enter bugs into the specified product,
+and 0 if the user should not be aware of the existence of the product.
+
+=item C<get_accessible_products>
+
+ Description: Returns an array of product objects the user can search
+              or enter bugs against.
 
  Params:      none
 

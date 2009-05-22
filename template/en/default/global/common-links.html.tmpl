@@ -86,7 +86,10 @@
     
     [% IF Param('createemailregexp')
           && user.authorizer.user_can_create_account %]
-      <li><span class="separator">| </span><a href="createaccount.cgi">New&nbsp;Account</a></li>
+      <li id="new_account_container[% qs_suffix FILTER html %]">
+        <span class="separator">| </span>
+        <a href="createaccount.cgi">New&nbsp;Account</a>
+      </li>
     [% END %]
 
     [% IF user.authorizer.can_login %]        

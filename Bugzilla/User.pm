@@ -1657,7 +1657,7 @@ sub is_available_username {
                     $dbh->sql_position(q{':'}, 'eventdata') . "-  1)) = ?)
              OR (tokentype = 'emailnew'
                 AND SUBSTRING(eventdata, (" .
-                    $dbh->sql_position(q{':'}, 'eventdata') . "+ 1)) = ?)",
+                    $dbh->sql_position(q{':'}, 'eventdata') . "+ 1), LENGTH(eventdata)) = ?)",
          undef, ($username, $username));
 
     if ($eventdata) {

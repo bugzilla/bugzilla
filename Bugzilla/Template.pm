@@ -277,8 +277,8 @@ sub get_attachment_link {
     detaint_natural($attachid)
       || die "get_attachment_link() called with non-integer attachment number";
 
-    my ($bugid, $isobsolete, $desc) =
-        $dbh->selectrow_array('SELECT bug_id, isobsolete, description
+    my ($bugid, $isobsolete, $desc, $is_patch) =
+        $dbh->selectrow_array('SELECT bug_id, isobsolete, description, ispatch
                                FROM attachments WHERE attach_id = ?',
                                undef, $attachid);
 
@@ -296,9 +296,21 @@ sub get_attachment_link {
 
         $link_text =~ s/ \[details\]$//;
         my $linkval = "attachment.cgi?id=$attachid";
+
+        # If the attachment is a patch, try to link to the diff rather
+        # than the text, by default.
+        my $patchlink = "";
+        if ($is_patch) {
+            # Determine if PatchReader is installed
+            my $patchviewer_installed = eval { require PatchReader; };
+            if ($patchviewer_installed) {
+                $patchlink = '&amp;action=diff';
+            }
+        }
+
         # Whitespace matters here because these links are in <pre> tags.
         return qq|<span class="$className">|
-               . qq|<a href="${linkval}" name="attach_${attachid}" title="$title">$link_text</a>|
+               . qq|<a href="${linkval}${patchlink}" name="attach_${attachid}" title="$title">$link_text</a>|
                . qq| <a href="${linkval}&amp;action=edit" title="$title">[details]</a>|
                . qq|</span>|;
     }

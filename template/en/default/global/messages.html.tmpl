@@ -455,6 +455,11 @@
       group.
     [% END %]
 
+  [% ELSIF message_tag == "invalid_column_name" %]
+    The custom sort order specified contains one or more invalid
+    column names: <em>[% invalid_fragments.join(', ') FILTER html %]</em>.
+    They have been removed from the sort list.
+
   [% ELSIF message_tag == "job_queue_depth" %]
     [% count FILTER html %] jobs in the queue.
 

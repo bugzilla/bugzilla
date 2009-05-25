@@ -165,7 +165,6 @@ my $serverpush =
                 || $cgi->param('serverpush');
 
 my $order = $cgi->param('order') || "";
-my $order_from_cookie = 0;  # True if $order set using the LASTORDER cookie
 
 # The params object to use for the actual query itself
 my $params;
@@ -890,8 +889,6 @@ if (!$order || $order =~ /^reuse/i) {
         # Cookies from early versions of Specific Search included this text,
         # which is now invalid.
         $order =~ s/ LIMIT 200//;
-        
-        $order_from_cookie = 1;
     }
     else {
         $order = '';  # Remove possible "reuse" identifier as unnecessary
@@ -920,7 +917,7 @@ if ($order) {
             last ORDER;
         };
         do {
-            my @order;
+            my (@order, @invalid_fragments);
             my @columnnames = map($columns->{lc($_)}->{'name'}, keys(%$columns));
             # A custom list of columns.  Make sure each column is valid.
             foreach my $fragment (split(/,/, $order)) {
@@ -933,16 +930,14 @@ if ($order) {
                     push(@order, $fragment);
                 }
                 else {
-                    my $vars = { fragment => $fragment };
-                    if ($order_from_cookie) {
-                        $cgi->remove_cookie('LASTORDER');
-                        ThrowCodeError("invalid_column_name_cookie", $vars);
-                    }
-                    else {
-                        ThrowCodeError("invalid_column_name_form", $vars);
-                    }
+                    push(@invalid_fragments, $fragment);
                 }
             }
+            if (scalar @invalid_fragments) {
+                $vars->{'message'} = 'invalid_column_name';
+                $vars->{'invalid_fragments'} = \@invalid_fragments;
+            }
+
             $order = join(",", @order);
             # Now that we have checked that all columns in the order are valid,
             # detaint the order string.

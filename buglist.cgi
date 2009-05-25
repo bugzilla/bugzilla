@@ -824,7 +824,9 @@ if (lsearch(\@displaycolumns, "percentage_complete") >= 0) {
 }
 
 # Display columns are selected because otherwise we could not display them.
-push (@selectcolumns, @displaycolumns);
+foreach my $col (@displaycolumns) {
+    push (@selectcolumns, $col) if !grep($_ eq $col, @selectcolumns);
+}
 
 # If the user is editing multiple bugs, we also make sure to select the product
 # and status because the values of those fields determine what options the user
@@ -974,7 +976,7 @@ foreach my $fragment (split(/,/, $order)) {
             $fragment = $columns->{$fragment}->{'name'};
         }
 
-        push @selectnames, $fragment;
+        push(@selectnames, $fragment) unless (grep { $fragment eq $_ } @selectnames);
     }
 }
 

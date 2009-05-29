@@ -70,6 +70,12 @@
     <input type="checkbox" id="ispatch" name="ispatch" value="1"
            onchange="setContentTypeDisabledState(this.form);">
     <label for="ispatch">patch</label><br><br>
+    [%# Reset this whenever the page loads so that the JS state is up to date %]
+    <script type="text/javascript">
+      YAHOO.util.Event.onDOMReady(function() {
+          bz_fireEvent(document.getElementById('ispatch'), 'change');
+      });
+    </script>
 
     <em>Otherwise, choose a method for determining the content type.</em><br>
     <input type="radio" id="autodetect"

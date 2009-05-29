@@ -100,7 +100,12 @@ function clearAttachmentFields() {
         URLFieldHandler();
     }
     document.getElementById('description').value = '';
-    document.getElementById('ispatch').checked = '';
+    /* Fire onchange so that the disabled state of the content-type
+     * radio buttons are also reset 
+     */
+    element = document.getElementById('ispatch');
+    element.checked = '';
+    bz_fireEvent(element, 'change');
     if ((element = document.getElementById('isprivate')))
         element.checked = '';
 }

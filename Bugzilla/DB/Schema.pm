@@ -1422,7 +1422,10 @@ use constant ABSTRACT_SCHEMA => {
                               REFERENCES => {TABLE  => 'profiles',
                                              COLUMN => 'userid',
                                              DELETE => 'CASCADE'}},
-            setting_name  => {TYPE => 'varchar(32)', NOTNULL => 1},
+            setting_name  => {TYPE => 'varchar(32)', NOTNULL => 1,
+                              REFERENCES => {TABLE  => 'setting',
+                                             COLUMN => 'name',
+                                             DELETE => 'CASCADE'}},
             setting_value => {TYPE => 'varchar(32)', NOTNULL => 1},
         ],
         INDEXES => [

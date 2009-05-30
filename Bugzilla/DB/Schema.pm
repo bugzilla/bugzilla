@@ -805,8 +805,14 @@ use constant ABSTRACT_SCHEMA => {
     status_workflow => {
         FIELDS => [
             # On bug creation, there is no old value.
-            old_status      => {TYPE => 'INT2'},
-            new_status      => {TYPE => 'INT2', NOTNULL => 1},
+            old_status      => {TYPE => 'INT2',
+                                REFERENCES => {TABLE  => 'bug_status', 
+                                               COLUMN => 'id',
+                                               DELETE => 'CASCADE'}},
+            new_status      => {TYPE => 'INT2', NOTNULL => 1,
+                                REFERENCES => {TABLE  => 'bug_status', 
+                                               COLUMN => 'id',
+                                               DELETE => 'CASCADE'}},
             require_comment => {TYPE => 'INT1', NOTNULL => 1, DEFAULT => 0},
         ],
         INDEXES => [

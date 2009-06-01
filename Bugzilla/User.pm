@@ -728,7 +728,7 @@ sub can_enter_product {
         ThrowUserError('entry_access_denied', {product => $product_name});
     }
     # It could be closed for bug entry...
-    elsif ($product->disallow_new) {
+    elsif (!$product->is_active) {
         ThrowUserError('product_disabled', {product => $product});
     }
     # It could have no components...

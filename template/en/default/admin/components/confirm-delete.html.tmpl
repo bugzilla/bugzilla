@@ -82,8 +82,8 @@ from '[% product.name FILTER html %]' product
 
 </tr>
 <tr>
-  <TD VALIGN="top">Closed for [% terms.bugs %]:</TD>
-  <TD VALIGN="top">[% IF product.disallow_new %]Yes[% ELSE %]No[% END %]</td>
+  <TD VALIGN="top">Open for [% terms.bugs %]:</TD>
+  <TD VALIGN="top">[% IF product.is_active %]Yes[% ELSE %]No[% END %]</td>
 </tr>
 <tr>
   <td valign="top">[% terms.Bugs %]:</td>

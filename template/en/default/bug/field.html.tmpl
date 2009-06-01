@@ -140,7 +140,7 @@
                 selected="selected"
               [% ELSIF (control_field && control_value
                         && !bug.${control_field.name}.contains(control_value.name))
-                       || (field.name == "product" && legal_value.disallow_new)
+                       || (field.name == "product" && !legal_value.is_active)
               %]
                 class="bz_hidden_option" disabled="disabled"
               [% END %]>

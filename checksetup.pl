@@ -217,7 +217,7 @@ Bugzilla::Install::reset_password($switch{'reset-password'})
     if $switch{'reset-password'};
 
 ###########################################################################
-# Create default Product and Classification
+# Create default Product
 ###########################################################################
 
 Bugzilla::Install::create_default_product();
@@ -406,6 +406,10 @@ from one version of Bugzilla to another.
 
 The code for this is in L<Bugzilla::Install::DB/update_table_definitions>.
 
+This includes creating the default Classification (using 
+L<Bugzilla::Install/create_default_classification>) and setting up all
+the foreign keys for all tables, using L<Bugzilla::DB/bz_setup_foreign_keys>.
+
 =item 14
 
 Creates the system groups--the ones like C<editbugs>, C<admin>, and so on.
@@ -426,7 +430,7 @@ the C<--make-admin> switch.
 
 =item 17
 
-Creates the default Classification, Product, and Component, using
+Creates the default Product and Component, using
 L<Bugzilla::Install/create_default_product>.
 
 =back

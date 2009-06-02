@@ -24,6 +24,7 @@ use strict;
 
 use Bugzilla::Constants;
 use Bugzilla::Hook;
+use Bugzilla::Install ();
 use Bugzilla::Install::Util qw(indicate_progress install_string);
 use Bugzilla::Util;
 use Bugzilla::Series;
@@ -577,6 +578,13 @@ sub update_table_definitions {
     ################################################################
 
     Bugzilla::Hook::process('install-update_db');
+
+    # We do this here because otherwise the foreign key from 
+    # products.classification_id to classifications.id will fail
+    # (because products.classification_id defaults to "1", so on upgraded
+    # installations it's already been set before the first Classification
+    # exists).
+    Bugzilla::Install::create_default_classification();
 
     $dbh->bz_setup_foreign_keys();
 }

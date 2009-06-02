@@ -217,15 +217,20 @@ sub update_system_groups {
 
 }
 
-# This function should be called only after creating the admin user.
-sub create_default_product {
+sub create_default_classification {
     my $dbh = Bugzilla->dbh;
+
     # Make the default Classification if it doesn't already exist.
     if (!$dbh->selectrow_array('SELECT 1 FROM classifications')) {
-        print get_text('install_default_classification', 
+        print get_text('install_default_classification',
                        { name => DEFAULT_CLASSIFICATION->{name} }) . "\n";
         Bugzilla::Classification->create(DEFAULT_CLASSIFICATION);
     }
+}
+
+# This function should be called only after creating the admin user.
+sub create_default_product {
+    my $dbh = Bugzilla->dbh;
 
     # And same for the default product/component.
     if (!$dbh->selectrow_array('SELECT 1 FROM products')) {
@@ -426,9 +431,14 @@ Params:      none
 
 Returns:     nothing.
 
+=item C<create_default_classification>
+
+Creates the default "Unclassified" L<Classification|Bugzilla::Classification>
+if it doesn't already exist
+
 =item C<create_default_product()>
 
-Description: Creates the default product and classification if
+Description: Creates the default product and component if
              they don't exist.
 
 Params:      none

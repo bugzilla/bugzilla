@@ -444,7 +444,8 @@ sub format_time {
                                 day    => $time[3],
                                 hour   => $time[2],
                                 minute => $time[1],
-                                second => $time[0],
+                                # DateTime doesn't like fractional seconds.
+                                second => int($time[0]),
                                 # If importing, use the specified timezone, otherwise 
                                 # use the timezone specified by the server.
                                 time_zone => Bugzilla->local_timezone->offset_as_string($time[6]) 

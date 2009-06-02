@@ -23,6 +23,7 @@
 <ul class="links">
   <li><a href="./">Home</a></li>
   <li><span class="separator">| </span><a href="enter_bug.cgi">New</a></li>
+  <li><span class="separator">| </span><a href="describecomponents.cgi">Browse</a></li>
   <li><span class="separator">| </span><a href="query.cgi">Search</a></li>
 
   <li class="form">
@@ -48,10 +49,6 @@
       [% END %]
     [% END %]
   [%-# Work around FF bug: keep this on one line %]</li>
-
-  [% IF user.id && Param('usevotes') %]
-    <li><span class="separator">| </span><a href="votes.cgi?action=show_user">My&nbsp;Votes</a></li>
-  [% END %]
 
   [% IF user.login %]
     <li><span class="separator">| </span><a href="userprefs.cgi">Preferences</a></li>

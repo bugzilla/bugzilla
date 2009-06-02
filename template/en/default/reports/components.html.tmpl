@@ -19,7 +19,8 @@
   #%]
 
 [%# INTERFACE:
-  # product: object. The product for which we want to display component descriptions.
+  # product: object. The product for which we want to display component
+  # descriptions.
   #%]
 
 [% title = BLOCK %]
@@ -34,9 +35,12 @@
   [% numcols = 2 %]
 [% END %]
 
-<p>
-  [% product.description FILTER html_light %]
-</p>
+
+<p><strong>[% product.name FILTER html %]</strong>: 
+  [% product.description FILTER html_light %]</p>
+
+<p><em>Select a component to view open [% terms.bugs %] in that 
+  component:</em></p>
 
 <table>
   <tr>
@@ -71,7 +75,11 @@
   </tr>
   <tr>
     <td rowspan="2">
-      <a name="[% comp.name FILTER html %]">[% comp.name FILTER html %]</a>
+      <a name="[% comp.name FILTER html %]"
+         href="buglist.cgi?product=
+               [%- product.name FILTER url_quote %]&amp;component=
+               [%- comp.name FILTER url_quote %]&amp;resolution=---">
+      [% comp.name FILTER html %]</a>
     </td>
     <td>
       [% INCLUDE global/user.html.tmpl who = comp.default_assignee %]

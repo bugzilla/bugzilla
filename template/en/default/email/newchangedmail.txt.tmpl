@@ -43,8 +43,13 @@ X-Bugzilla-Changed-Fields: [% changedfields %]
 [%+ urlbase %]show_bug.cgi?id=[% bugid %]
 
 [%+ diffs %]
+[% FOREACH comment = new_comments %]
 
--- 
+--- Comment #[% comment.count %] from [% comment.author.identity %] [%+ comment.time FILTER time %] ---
+[%+ PROCESS bug/format_comment.txt.tmpl comment = comment %]
+[% END %]
+
+-- [%# Protect the trailing space of the signature marker %]
 Configure [% terms.bug %]mail: [% urlbase %]userprefs.cgi?tab=email
 ------- You are receiving this mail because: -------
 [% FOREACH relationship = reasons %]

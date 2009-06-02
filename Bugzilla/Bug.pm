@@ -3060,29 +3060,15 @@ sub GetComments {
     return \@comments;
 }
 
-# Format language specific comments. This routine must not update
-# $comment{'body'} itself, see BugMail::prepare_comments().
+# Format language specific comments.
 sub format_comment {
     my $comment = shift;
+    my $template = Bugzilla->template_inner;
+    my $vars = {comment => $comment};
     my $body;
 
-    if ($comment->{'type'} == CMT_DUPE_OF) {
-        $body = $comment->{'body'} . "\n\n" .
-                get_text('bug_duplicate_of', { dupe_of => $comment->{'extra_data'} });
-    }
-    elsif ($comment->{'type'} == CMT_HAS_DUPE) {
-        $body = get_text('bug_has_duplicate', { dupe => $comment->{'extra_data'} });
-    }
-    elsif ($comment->{'type'} == CMT_POPULAR_VOTES) {
-        $body = get_text('bug_confirmed_by_votes');
-    }
-    elsif ($comment->{'type'} == CMT_MOVED_TO) {
-        $body = $comment->{'body'} . "\n\n" .
-                get_text('bug_moved_to', { login => $comment->{'extra_data'} });
-    }
-    else {
-        $body = $comment->{'body'};
-    }
+    $template->process("bug/format_comment.txt.tmpl", $vars, \$body)
+        || ThrowTemplateError($template->error());
     return $body;
 }
 

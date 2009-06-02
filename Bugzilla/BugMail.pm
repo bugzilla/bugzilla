@@ -357,7 +357,7 @@ sub Send {
         }
     }
 
-    my ($raw_comments, $anyprivate, $count) = get_comments_by_bug($id, $start, $end);
+    my ($comments, $anyprivate) = get_comments_by_bug($id, $start, $end);
 
     ###########################################################################
     # Start of email filtering code
@@ -450,9 +450,6 @@ sub Send {
     my @sent;
     my @excluded;
 
-    # Some comments are language specific. We cache them here.
-    my %comments;
-
     foreach my $user_id (keys %recipients) {
         my %rels_which_want;
         my $sent_mail = 0;
@@ -461,24 +458,14 @@ sub Send {
         # Deleted users must be excluded.
         next unless $user;
 
-        # What's the language chosen by this user for email?
-        my $lang = $user->settings->{'lang'}->{'value'};
-
         if ($user->can_see_bug($id)) {
-            # It's time to format language specific comments.
-            unless (exists $comments{$lang}) {
-                Bugzilla->template_inner($lang);
-                $comments{$lang} = prepare_comments($raw_comments, $count);
-                Bugzilla->template_inner("");
-            }
-
             # Go through each role the user has and see if they want mail in
             # that role.
             foreach my $relationship (keys %{$recipients{$user_id}}) {
                 if ($user->wants_bug_mail($id,
                                           $relationship, 
                                           $diffs, 
-                                          $comments{$lang},
+                                          $comments,
                                           $deptext,
                                           $changer,
                                           !$start))
@@ -524,7 +511,7 @@ sub Send {
                                       \%defmailhead, 
                                       \%fielddescription, 
                                       \@diffparts,
-                                      $comments{$lang},
+                                      $comments,
                                       $anyprivate, 
                                       ! $start, 
                                       $id,
@@ -607,7 +594,7 @@ sub sendMail {
         $newcomments =~ s/(Created an attachment \(id=([0-9]+)\))/$1\n --> \(${showattachurlbase}$2\)/g;
     }
 
-    my $diffs = $difftext . "\n\n" . $newcomments;
+    my $diffs = $difftext;
     if ($isnew) {
         my $head = "";
         foreach my $f (@headerlist) {
@@ -663,6 +650,7 @@ sub sendMail {
         reporter => $values{'reporter'},
         reportername => Bugzilla::User->new({name => $values{'reporter'}})->name,
         diffs => $diffs,
+        new_comments => $newcomments,
         threadingmarker => build_thread_marker($id, $user->id, $isnew),
     };
 
@@ -698,31 +686,15 @@ sub get_comments_by_bug {
     my $raw = 1; # Do not format comments which are not of type CMT_NORMAL.
     my $comments = Bugzilla::Bug::GetComments($id, "oldest_to_newest", $start, $end, $raw);
 
+    foreach my $comment (@$comments) {
+        $comment->{count} = $count++;
+    }
+
     if (Bugzilla->params->{'insidergroup'}) {
         $anyprivate = 1 if scalar(grep {$_->{'isprivate'} > 0} @$comments);
     }
 
-    return ($comments, $anyprivate, $count);
-}
-
-# Prepare comments for the given language.
-sub prepare_comments {
-    my ($raw_comments, $count) = @_;
-
-    my $result = "";
-    foreach my $comment (@$raw_comments) {
-        if ($count) {
-            $result .= "\n\n--- Comment #$count from " . $comment->{'author'}->identity .
-                       "  " . format_time($comment->{'time'}) . " ---\n";
-        }
-        # Format language specific comments. We don't update $comment->{'body'}
-        # directly, otherwise it would grow everytime you call format_comment()
-        # with a different language as some text may be appended to the existing one.
-        my $body = Bugzilla::Bug::format_comment($comment);
-        $result .= ($comment->{'already_wrapped'} ? $body : wrap_comment($body));
-        $count++;
-    }
-    return $result;
+    return ($comments, $anyprivate);
 }
 
 1;

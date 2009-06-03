@@ -501,6 +501,7 @@ form#Create .comment {
     background-repeat: no-repeat;
     background-position: center center;
     width: 30px;
+    height: 20px;
 }
 
 #select_button {

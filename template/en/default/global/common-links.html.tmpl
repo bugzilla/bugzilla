@@ -92,7 +92,14 @@
       </li>
     [% END %]
 
-    [% IF user.authorizer.can_login %]        
+    [%# Only display one login form when we're on a LOGIN_REQUIRED page. That
+      # way, we're guaranteed that the user will use the form that has 
+      # hidden_fields in it (the center form) instead of this one. Also, it's
+      # less confusing to have one form (as opposed to  three) when you're 
+      # required to log in.
+      #%]
+    [% USE Bugzilla %]
+    [% IF user.authorizer.can_login && !Bugzilla.page_requires_login %]
       [% PROCESS "account/auth/login-small.html.tmpl" %]
     [% END %]
   [% END %]

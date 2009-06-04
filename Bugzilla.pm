@@ -228,6 +228,10 @@ sub sudo_request {
     # NOTE: If you want to log the start of an sudo session, do it here.
 }
 
+sub page_requires_login {
+    return $_[0]->request_cache->{page_requires_login};
+}
+
 sub login {
     my ($class, $type) = @_;
 
@@ -235,6 +239,13 @@ sub login {
 
     my $authorizer = new Bugzilla::Auth();
     $type = LOGIN_REQUIRED if $class->cgi->param('GoAheadAndLogIn');
+
+    # Allow templates to know that we're in a page that always requires
+    # login.
+    if ($type == LOGIN_REQUIRED) {
+        $class->request_cache->{page_requires_login} = 1;
+    }
+
     if (!defined $type || $type == LOGIN_NORMAL) {
         $type = $class->params->{'requirelogin'} ? LOGIN_REQUIRED : LOGIN_NORMAL;
     }
@@ -622,6 +633,13 @@ normally be set at login time.
 Logs in a user, returning a C<Bugzilla::User> object, or C<undef> if there is
 no logged in user. See L<Bugzilla::Auth|Bugzilla::Auth>, and
 L<Bugzilla::User|Bugzilla::User>.
+
+=item C<page_requires_login>
+
+If the current page always requires the user to log in (for example,
+C<enter_bug.cgi> or any page called with C<?GoAheadAndLogIn=1>) then
+this will return something true. Otherwise it will return false. (This is
+set when you call L</login>.)
 
 =item C<logout($option)>
 

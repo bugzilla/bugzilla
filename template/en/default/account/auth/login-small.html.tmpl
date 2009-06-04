@@ -68,10 +68,6 @@
     [% END %]
     <input type="submit" name="GoAheadAndLogIn" value="Log in" 
             id="log_in[% qs_suffix %]">
-    <div class="bz_default_hidden">
-      [% PROCESS "global/hidden-fields.html.tmpl"
-                exclude="^Bugzilla_(login|password|restrictlogin|remember)$" %]
-    </div>
     <script type="text/javascript">
       mini_login_constants = {
           "login" : "login",

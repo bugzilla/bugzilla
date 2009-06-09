@@ -173,7 +173,7 @@ if ($action eq 'new') {
                                  version          => scalar $cgi->param('version'),
                                  defaultmilestone => scalar $cgi->param('defaultmilestone'),
                                  milestoneurl     => scalar $cgi->param('milestoneurl'),
-                                 isactive         => scalar $cgi->param('isactive'),
+                                 isactive         => scalar $cgi->param('is_active'),
                                  votesperuser     => scalar $cgi->param('votesperuser'),
                                  maxvotesperbug   => scalar $cgi->param('maxvotesperbug'),
                                  votestoconfirm   => scalar $cgi->param('votestoconfirm'),

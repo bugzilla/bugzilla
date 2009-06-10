@@ -274,11 +274,12 @@ sub changeEmail {
     $dbh->do('DELETE FROM tokens WHERE token = ?', undef, $token);
     $dbh->do(q{DELETE FROM tokens WHERE userid = ?
                AND tokentype = 'emailnew'}, undef, $userid);
-    $dbh->bz_commit_transaction();
 
     # The email address has been changed, so we need to rederive the groups
     my $user = new Bugzilla::User($userid);
     $user->derive_regexp_groups;
+
+    $dbh->bz_commit_transaction();
 
     # Return HTTP response headers.
     print $cgi->header();
@@ -295,6 +296,8 @@ sub cancelChangeEmail {
     my $token = shift;
     my $dbh = Bugzilla->dbh;
 
+    $dbh->bz_begin_transaction();
+
     # Get the user's ID from the tokens table.
     my ($userid, $tokentype, $eventdata) = $dbh->selectrow_array(
                               q{SELECT userid, tokentype, eventdata FROM tokens
@@ -310,16 +313,15 @@ sub cancelChangeEmail {
         
         # check to see if it has been altered
         if($actualemail ne $old_email) {
+            # XXX - This is NOT safe - if A has change to B, another profile
+            # could have grabbed A's username in the meantime.
+            # The DB constraint will catch this, though
             $dbh->do(q{UPDATE   profiles
                        SET      login_name = ?
                        WHERE    userid = ?},
                      undef, ($old_email, $userid));
 
             # email has changed, so rederive groups
-            # Note that this is done _after_ the tables are unlocked
-            # This is sort of a race condition (given the lack of transactions)
-            # but the user had access to it just now, so it's not a security
-            # issue
 
             my $user = new Bugzilla::User($userid);
             $user->derive_regexp_groups;
@@ -338,6 +340,8 @@ sub cancelChangeEmail {
     $dbh->do(q{DELETE FROM tokens WHERE userid = ?
                AND tokentype = 'emailold' OR tokentype = 'emailnew'},
              undef, $userid);
+
+    $dbh->bz_commit_transaction();
 
     # Return HTTP response headers.
     print $cgi->header();

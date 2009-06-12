@@ -296,7 +296,7 @@ sub cancelChangeEmail {
     my $token = shift;
     my $dbh = Bugzilla->dbh;
 
-    $dbh->bz_begin_transaction();
+    $dbh->bz_start_transaction();
 
     # Get the user's ID from the tokens table.
     my ($userid, $tokentype, $eventdata) = $dbh->selectrow_array(

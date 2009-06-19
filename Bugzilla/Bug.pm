@@ -3043,9 +3043,13 @@ sub GetComments {
     my $sth = $dbh->prepare($query);
     $sth->execute(@args);
 
+    # Cache the users we look up
+    my %users;
+
     while (my $comment_ref = $sth->fetchrow_hashref()) {
         my %comment = %$comment_ref;
-        $comment{'author'} = new Bugzilla::User($comment{'userid'});
+        $users{$comment{'userid'}} ||= new Bugzilla::User($comment{'userid'});
+        $comment{'author'} = $users{$comment{'userid'}};
 
         # If raw data is requested, do not format 'special' comments.
         $comment{'body'} = format_comment(\%comment) unless $raw;

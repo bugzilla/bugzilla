@@ -781,6 +781,14 @@ sub create {
             # Allow templates to generate a token themselves.
             'issue_hash_token' => \&Bugzilla::Token::issue_hash_token,
 
+            # A way for all templates to get at Field data, cached.
+            'bug_fields' => sub {
+                my $cache = Bugzilla->request_cache;
+                $cache->{template_bug_fields} ||= 
+                    { map { $_->name => $_ } Bugzilla->get_fields() };
+                return $cache->{template_bug_fields};
+            },
+
             # These don't work as normal constants.
             DB_MODULE        => \&Bugzilla::Constants::DB_MODULE,
             REQUIRED_MODULES => 

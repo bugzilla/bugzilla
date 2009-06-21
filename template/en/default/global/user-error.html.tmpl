@@ -490,9 +490,11 @@
     [% IF vals.size %]
       it controls the visibility of the following field values:
       <ul>
-        [% FOREACH val = vals %]
-          <li>[% val.field.name FILTER html %]:
-            '[% val.name FILTER html %]'</li>
+        [% FOREACH field_name = vals.keys %]
+          [% FOREACH val = vals.${field_name} %]
+            <li>[% val.field.name FILTER html %]:
+              '[% val.name FILTER html %]'</li>
+          [% END %]
         [% END %]
       </ul>
     [% END %]

@@ -389,38 +389,50 @@ function handleVisControllerValueChange(e, args) {
     }
 }
 
-function showValueWhen(controlled_field_id, controlled_value, 
-                       controller_field_id, controller_value)
+function showValueWhen(controlled_field_id, controlled_value_ids, 
+                       controller_field_id, controller_value_id)
 {
     var controller_field = document.getElementById(controller_field_id);
     // Note that we don't get an object for the controlled field here, 
     // because it might not yet exist in the DOM. We just pass along its id.
     YAHOO.util.Event.addListener(controller_field, 'change',
-        handleValControllerChange, [controlled_field_id, controlled_value,
-                                    controller_field, controller_value]);
+        handleValControllerChange, [controlled_field_id, controlled_value_ids,
+                                    controller_field, controller_value_id]);
 }
 
 function handleValControllerChange(e, args) {
     var controlled_field = document.getElementById(args[0]);
-    var controlled_value = args[1];
+    var controlled_value_ids = args[1];
     var controller_field = args[2];
-    var controller_value = args[3];
+    var controller_value_id = args[3];
 
-    var item = getPossiblyHiddenOption(controlled_field, controlled_value);
-    if (bz_valueSelected(controller_field, controller_value)) {
-        showOptionInIE(item, controlled_field);
-        YAHOO.util.Dom.removeClass(item, 'bz_hidden_option');
-        item.disabled = false;
-    }
-    else if (!item.disabled) {
-        YAHOO.util.Dom.addClass(item, 'bz_hidden_option');
-        if (item.selected) {
-            item.selected = false;
-            bz_fireEvent(controlled_field, 'change');
+    var controller_item = document.getElementById(
+        _value_id(controller_field.id, controller_value_id));
+
+    for (var i = 0; i < controlled_value_ids.length; i++) {
+        var item = getPossiblyHiddenOption(controlled_field,
+                                           controlled_value_ids[i]);
+        if (item.disabled && controller_item && controller_item.selected) {
+            item = showOptionInIE(item, controlled_field);
+            YAHOO.util.Dom.removeClass(item, 'bz_hidden_option');
+            item.disabled = false;
         }
-        item.disabled = true;
-        hideOptionInIE(item, controlled_field);
+        else if (!item.disabled) {
+            YAHOO.util.Dom.addClass(item, 'bz_hidden_option');
+            if (item.selected) {
+                item.selected = false;
+                bz_fireEvent(controlled_field, 'change');
+            }
+            item.disabled = true;
+            hideOptionInIE(item, controlled_field);
+        }
     }
+}
+
+// A convenience function to generate the "id" tag of an <option>
+// based on the numeric id that Bugzilla uses for that value.
+function _value_id(field_name, id) {
+    return 'v' + id + '_' + field_name;
 }
 
 /*********************************/
@@ -431,24 +443,50 @@ function handleValControllerChange(e, args) {
  * on <option> tags. However, you *can* insert a Comment Node as a
  * child of a <select> tag. So we just insert a Comment where the <option>
  * used to be. */
+var ie_hidden_options = new Array();
 function hideOptionInIE(anOption, aSelect) {
     if (browserCanHideOptions(aSelect)) return;
 
     var commentNode = document.createComment(anOption.value);
-    aSelect.replaceChild(commentNode, anOption);
+    commentNode.id = anOption.id;
+    // This keeps the interface of Comments and Options the same for
+    // our other functions.
+    commentNode.disabled = true;
+    // replaceChild is very slow on IE in a <select> that has a lot of
+    // options, so we use replaceNode when we can.
+    if (anOption.replaceNode) {
+        anOption.replaceNode(commentNode);
+    }
+    else {
+        aSelect.replaceChild(commentNode, anOption);
+    }
+
+    // Store the comment node for quick access for getPossiblyHiddenOption
+    if (!ie_hidden_options[aSelect.id]) {
+        ie_hidden_options[aSelect.id] = new Array();
+    }
+    ie_hidden_options[aSelect.id][anOption.id] = commentNode;
 }
 
 function showOptionInIE(aNode, aSelect) {
-    if (browserCanHideOptions(aSelect)) return;
-    // If aNode is an Option
-    if (typeof(aNode.value) != 'undefined') return;
+    if (browserCanHideOptions(aSelect)) return aNode;
 
     // We do this crazy thing with innerHTML and createElement because
     // this is the ONLY WAY that this works properly in IE.
     var optionNode = document.createElement('option');
     optionNode.innerHTML = aNode.data;
     optionNode.value = aNode.data;
-    var old_node = aSelect.replaceChild(optionNode, aNode);
+    optionNode.id = aNode.id;
+    // replaceChild is very slow on IE in a <select> that has a lot of
+    // options, so we use replaceNode when we can.
+    if (aNode.replaceNode) {
+        aNode.replaceNode(optionNode);
+    }
+    else {
+        aSelect.replaceChild(optionNode, aNode);
+    }
+    delete ie_hidden_options[aSelect.id][optionNode.id];
+    return optionNode;
 }
 
 function initHidingOptionsForIE(select_name) {
@@ -465,26 +503,19 @@ function initHidingOptionsForIE(select_name) {
     }
 }
 
-function getPossiblyHiddenOption(aSelect, aValue) {
-    var val_index = bz_optionIndex(aSelect, aValue);
+function getPossiblyHiddenOption(aSelect, optionId) {
+    // Works always for <option> tags, and works for commentNodes
+    // in IE (but not in Webkit).
+    var id = _value_id(aSelect.id, optionId);
+    var val = document.getElementById(id);
 
-    /* We have to go fishing for one of our comment nodes if we
-     * don't find the <option>. */
-    if (val_index < 0 && !browserCanHideOptions(aSelect)) {
-        var children = aSelect.childNodes;
-        for (var i = 0; i < children.length; i++) {
-            var item = children[i];
-            if (item.data == aValue) {
-                // Set this for handleValControllerChange, so that both options
-                // and commentNodes have this.
-                children[i].disabled = true;
-                return children[i];
-            }
-        }
+    // This is for WebKit and other browsers that can't "display: none"
+    // an <option> and also can't getElementById for a commentNode.
+    if (!val && ie_hidden_options[aSelect.id]) {
+        val = ie_hidden_options[aSelect.id][id];
     }
 
-    /* Otherwise we just return the Option we found. */
-    return aSelect.options[val_index];
+    return val;
 }
 
 var browser_can_hide_options;

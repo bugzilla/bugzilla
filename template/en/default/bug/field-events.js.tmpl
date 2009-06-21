@@ -27,10 +27,14 @@
                 '[% controlled_field.visibility_value.name FILTER js %]');
 [% END %]
 [% FOREACH legal_value = field.legal_values %]
-  [% FOREACH controlled_value = legal_value.controlled_values %]
-    showValueWhen('[% controlled_value.field.name FILTER js %]',
-                  '[% controlled_value.name FILTER js %]',
+  [% FOREACH controlled_field = legal_value.controlled_values.keys %]
+    [% SET cont_ids = [] %]
+    [% FOREACH val = legal_value.controlled_values.$controlled_field %]
+      [% cont_ids.push(val.id) %]
+    [% END %]
+    showValueWhen('[% controlled_field FILTER js %]',
+                  [[% cont_ids.join(',') FILTER js %]],
                   '[% field.name FILTER js %]',
-                  '[% legal_value.name FILTER js %]');
+                  [% legal_value.id FILTER js %]);
   [% END %]
 [% END %]

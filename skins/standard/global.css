@@ -319,7 +319,7 @@ div#docslinks {
 
 /** End Comments **/
 
-.bz_default_hidden, .bz_tui_hidden {
+.bz_default_hidden, .bz_tui_hidden, .bz_hidden_field, .bz_hidden_option {
     /* We have !important because we want elements with these classes to always
      * be hidden, even if there is some CSS that overrides it (we use these
      * classes inside JavaScript to hide things). */
@@ -454,13 +454,6 @@ div.user_match {
 }
 .field_value, form#Create th, form#Create td {
     vertical-align: top;
-}
-
-.bz_hidden_field, .bz_hidden_option {
-    display: none;
-}
-.bz_hidden_option {
-    visibility: hidden;
 }
 
 .calendar_button {

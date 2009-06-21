@@ -92,7 +92,7 @@
 
 [% UNLESS Param('shutdownhtml') %]
   [% USE Bugzilla %]
-  [% FOREACH bz_field = Bugzilla.get_fields() %]
+  [% FOREACH bz_field = bug_fields.values %]
     [% SET field_descs.${bz_field.name} = bz_field.description
        IF !field_descs.${bz_field.name}.defined %]
   [% END %]

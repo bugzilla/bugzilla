@@ -126,13 +126,15 @@
     [% IF value.controlled_values.size %]
       <li>This value controls the visibility of the following values in
         other fields:<br>
-       [% FOREACH controlled = value.controlled_values %]
-         <a href="editvalues.cgi?action=edit&field=
-                  [%- controlled.field.name FILTER url_quote %]&value=
-                  [%- controlled.name FILTER url_quote %]">
-           [% controlled.field.description FILTER html %]
-           ([% controlled.field.name FILTER html %]):
-           [%+ controlled.name FILTER html %]</a><br>
+       [% FOREACH field_name = value.controlled_values.keys %]
+         [% FOREACH controlled = value.controlled_values.${field_name} %]
+           <a href="editvalues.cgi?action=edit&field=
+                    [%- controlled.field.name FILTER url_quote %]&value=
+                    [%- controlled.name FILTER url_quote %]">
+             [% controlled.field.description FILTER html %]
+             ([% controlled.field.name FILTER html %]):
+             [%+ controlled.name FILTER html %]</a><br>
+         [% END %]
        [% END %]
       </li>
     [% END %]

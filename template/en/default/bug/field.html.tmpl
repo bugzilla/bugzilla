@@ -134,6 +134,8 @@
             [% SET control_value = legal_value.visibility_value %]
             [% SET control_field = field.value_field %]
             <option value="[% legal_value.name FILTER html %]"
+                    id="v[% legal_value.id FILTER html %]_
+                        [%- field.name FILTER html %]"
               [%# We always show selected values, even if they should be
                 # hidden %]
               [% IF value.contains(legal_value.name).size %]
@@ -144,8 +146,7 @@
               %]
                 class="bz_hidden_option" disabled="disabled"
               [% END %]>
-              [%- legal_value.name FILTER html -%]
-            </option>
+              [%- legal_value.name FILTER html %]</option>
           [% END %]
         </select>
         [%# When you pass an empty multi-select in the web interface,

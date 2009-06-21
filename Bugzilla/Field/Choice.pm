@@ -199,7 +199,7 @@ sub _check_if_controller {
     my $self = shift;
     my $vis_fields = $self->controls_visibility_of_fields;
     my $values     = $self->controlled_values;
-    if (@$vis_fields || @$values) {
+    if (@$vis_fields || scalar(keys %$values)) {
         ThrowUserError('fieldvalue_is_controller',
             { value => $self, fields => [map($_->name, @$vis_fields)],
               vals => $values });
@@ -287,13 +287,13 @@ sub controlled_values {
     my $self = shift;
     return $self->{controlled_values} if defined $self->{controlled_values};
     my $fields = $self->field->controls_values_of;
-    my @controlled_values;
+    my %controlled_values;
     foreach my $field (@$fields) {
-        my $controlled = Bugzilla::Field::Choice->type($field)
-                         ->match({ visibility_value_id => $self->id });
-        push(@controlled_values, @$controlled);
+        $controlled_values{$field->name} = 
+            Bugzilla::Field::Choice->type($field)
+            ->match({ visibility_value_id => $self->id });
     }
-    $self->{controlled_values} = \@controlled_values;
+    $self->{controlled_values} = \%controlled_values;
     return $self->{controlled_values};
 }
 
@@ -430,5 +430,15 @@ The key that determines the sort order of this item.
 =item C<field>
 
 The L<Bugzilla::Field> object that this field value belongs to.
+
+=item C<controlled_values>
+
+Tells you which values in B<other> fields appear (become visible) when this
+value is set in its field.
+
+Returns a hashref of arrayrefs. The hash keys are the names of fields,
+and the values are arrays of C<Bugzilla::Field::Choice> objects,
+representing values that this value controls the visibility of, for
+that field.
 
 =back

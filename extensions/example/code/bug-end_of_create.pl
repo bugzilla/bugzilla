@@ -12,9 +12,9 @@
 #
 # The Original Code is the Bugzilla Example Plugin.
 #
-# The Initial Developer of the Original Code is Canonical Ltd.
-# Portions created by Canonical Ltd are Copyright (C) 2009 
-# Canonical Ltd. All Rights Reserved.
+# The Initial Developer of the Original Code is ITA Software
+# Portions created by the Initial Developer are Copyright (C) 2009 
+# the Initial Developer. All Rights Reserved.
 #
 # Contributor(s): Max Kanat-Alexander <mkanat@bugzilla.org>
 #                 Bradley Baetz <bbaetz@acm.org>

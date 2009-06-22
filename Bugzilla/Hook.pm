@@ -222,6 +222,22 @@ your column name(s) onto the array.
 
 =back
 
+=head2 bug-end_of_create
+
+This happens at the end of L<Bugzilla::Bug/create>, after all other changes are
+made to the database. This occurs inside a database transaction.
+
+Params:
+
+=over
+
+=item C<bug> - The changed bug object, with all fields set to their updated
+values.
+
+=item C<timestamp> - The timestamp used for all updates in this transaction.
+
+=back
+
 =head2 bug-end_of_update
 
 This happens at the end of L<Bugzilla::Bug/update>, after all other changes are

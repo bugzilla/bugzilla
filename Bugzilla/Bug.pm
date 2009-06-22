@@ -539,6 +539,10 @@ sub create {
     $dbh->do('INSERT INTO longdescs (' . join(',', @columns)  . ")
                    VALUES ($qmarks)", undef, @values);
 
+    Bugzilla::Hook::process('bug-end_of_create', { bug => $bug,
+                                                   timestamp => $timestamp,
+                                                 });
+
     $dbh->bz_commit_transaction();
 
     # Because MySQL doesn't support transactions on the fulltext table,

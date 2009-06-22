@@ -208,3 +208,122 @@ function get_tbody_from_twisty(twisty) {
 function get_twisty_from_tbody(tbody) {
   return tbody.previousSibling.firstChild.nextSibling.firstChild.firstChild;
 }
+
+var prev_mode = 'raw';
+var current_mode = 'raw';
+var has_edited = 0;
+var has_viewed_as_diff = 0;
+function editAsComment(patchviewerinstalled)
+{
+    switchToMode('edit', patchviewerinstalled);
+    has_edited = 1;
+}
+function undoEditAsComment(patchviewerinstalled)
+{
+    switchToMode(prev_mode, patchviewerinstalled);
+}
+function redoEditAsComment(patchviewerinstalled)
+{
+    switchToMode('edit', patchviewerinstalled);
+}
+
+function viewDiff(attachment_id, patchviewerinstalled)
+{
+    switchToMode('diff', patchviewerinstalled);
+
+    // If we have not viewed as diff before, set the view diff frame URL
+    if (!has_viewed_as_diff) {
+      var viewDiffFrame = document.getElementById('viewDiffFrame');
+      viewDiffFrame.src =
+          'attachment.cgi?id=' + attachment_id + '&action=diff&headers=0';
+      has_viewed_as_diff = 1;
+    }
+}
+
+function viewRaw(patchviewerinstalled)
+{
+    switchToMode('raw', patchviewerinstalled);
+}
+
+function switchToMode(mode, patchviewerinstalled)
+{
+    if (mode == current_mode) {
+      alert('switched to same mode!  This should not happen.');
+      return;
+    }
+
+    // Switch out of current mode
+    if (current_mode == 'edit') {
+      hideElementById('editFrame');
+      hideElementById('undoEditButton');
+    } else if (current_mode == 'raw') {
+      hideElementById('viewFrame');
+      if (patchviewerinstalled)
+          hideElementById('viewDiffButton');
+      hideElementById(has_edited ? 'redoEditButton' : 'editButton');
+      hideElementById('smallCommentFrame');
+    } else if (current_mode == 'diff') {
+      if (patchviewerinstalled)
+          hideElementById('viewDiffFrame');
+      hideElementById('viewRawButton');
+      hideElementById(has_edited ? 'redoEditButton' : 'editButton');
+      hideElementById('smallCommentFrame');
+    }
+
+    // Switch into new mode
+    if (mode == 'edit') {
+      showElementById('editFrame');
+      showElementById('undoEditButton');
+    } else if (mode == 'raw') {
+      showElementById('viewFrame');
+      if (patchviewerinstalled) 
+          showElementById('viewDiffButton');
+
+      showElementById(has_edited ? 'redoEditButton' : 'editButton');
+      showElementById('smallCommentFrame');
+    } else if (mode == 'diff') {
+      if (patchviewerinstalled) 
+        showElementById('viewDiffFrame');
+
+      showElementById('viewRawButton');
+      showElementById(has_edited ? 'redoEditButton' : 'editButton');
+      showElementById('smallCommentFrame');
+    }
+
+    prev_mode = current_mode;
+    current_mode = mode;
+}
+
+function hideElementById(id)
+{
+  var elm = document.getElementById(id);
+  if (elm) {
+    elm.style.display = 'none';
+  }
+}
+
+function showElementById(id, val)
+{
+  var elm = document.getElementById(id);
+  if (elm) {
+    if (!val) val = 'inline';
+    elm.style.display = val;
+  }
+}
+
+function normalizeComments()
+{
+  // Remove the unused comment field from the document so its contents
+  // do not get transmitted back to the server.
+
+  var small = document.getElementById('smallCommentFrame');
+  var big = document.getElementById('editFrame');
+  if ( (small) && (small.style.display == 'none') )
+  {
+    small.parentNode.removeChild(small);
+  }
+  if ( (big) && (big.style.display == 'none') )
+  {
+    big.parentNode.removeChild(big);
+  }
+}

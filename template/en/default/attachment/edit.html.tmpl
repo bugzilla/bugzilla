@@ -36,135 +36,11 @@
   header = header
   subheader = subheader
   doc_section = "attachments.html"
+  javascript_urls = ['js/attachment.js'];
 %]
 
 [%# No need to display the Diff button and iframe if the attachment is not a patch. %]
 [% patchviewerinstalled = (patchviewerinstalled && attachment.ispatch) %]
-
-<script type="text/javascript">
-  <!--
-  var prev_mode = 'raw';
-  var current_mode = 'raw';
-  var has_edited = 0;
-  var has_viewed_as_diff = 0;
-  function editAsComment()
-    {
-      switchToMode('edit');
-      has_edited = 1;
-    }
-  function undoEditAsComment()
-    {
-      switchToMode(prev_mode);
-    }
-  function redoEditAsComment()
-    {
-      switchToMode('edit');
-    }
-[% IF patchviewerinstalled %]
-  function viewDiff()
-    {
-      switchToMode('diff');
-
-      // If we have not viewed as diff before, set the view diff frame URL
-      if (!has_viewed_as_diff) {
-        var viewDiffFrame = document.getElementById('viewDiffFrame');
-        viewDiffFrame.src =
-            'attachment.cgi?id=[% attachment.id %]&action=diff&headers=0';
-        has_viewed_as_diff = 1;
-      }
-    }
-[% END %]
-  function viewRaw()
-    {
-      switchToMode('raw');
-    }
-
-  function switchToMode(mode)
-    {
-      if (mode == current_mode) {
-        alert('switched to same mode!  This should not happen.');
-        return;
-      }
-
-      // Switch out of current mode
-      if (current_mode == 'edit') {
-        hideElementById('editFrame');
-        hideElementById('undoEditButton');
-      } else if (current_mode == 'raw') {
-        hideElementById('viewFrame');
-[% IF patchviewerinstalled %]
-        hideElementById('viewDiffButton');
-[% END %]
-        hideElementById(has_edited ? 'redoEditButton' : 'editButton');
-        hideElementById('smallCommentFrame');
-      } else if (current_mode == 'diff') {
-[% IF patchviewerinstalled %]
-        hideElementById('viewDiffFrame');
-[% END %]
-        hideElementById('viewRawButton');
-        hideElementById(has_edited ? 'redoEditButton' : 'editButton');
-        hideElementById('smallCommentFrame');
-      }
-
-      // Switch into new mode
-      if (mode == 'edit') {
-        showElementById('editFrame');
-        showElementById('undoEditButton');
-      } else if (mode == 'raw') {
-        showElementById('viewFrame');
-[% IF patchviewerinstalled %]
-        showElementById('viewDiffButton');
-[% END %]
-        showElementById(has_edited ? 'redoEditButton' : 'editButton');
-        showElementById('smallCommentFrame');
-      } else if (mode == 'diff') {
-[% IF patchviewerinstalled %]
-        showElementById('viewDiffFrame');
-[% END %]
-        showElementById('viewRawButton');
-        showElementById(has_edited ? 'redoEditButton' : 'editButton');
-        showElementById('smallCommentFrame');
-      }
-
-      prev_mode = current_mode;
-      current_mode = mode;
-    }
-
-  function hideElementById(id)
-  {
-    var elm = document.getElementById(id);
-    if (elm) {
-      elm.style.display = 'none';
-    }
-  }
-
-  function showElementById(id, val)
-  {
-    var elm = document.getElementById(id);
-    if (elm) {
-      if (!val) val = 'inline';
-      elm.style.display = val;
-    }
-  }
-
-  function normalizeComments()
-  {
-    // Remove the unused comment field from the document so its contents
-    // do not get transmitted back to the server.
-
-    var small = document.getElementById('smallCommentFrame');
-    var big = document.getElementById('editFrame');
-    if ( (small) && (small.style.display == 'none') )
-    {
-      small.parentNode.removeChild(small);
-    }
-    if ( (big) && (big.style.display == 'none') )
-    {
-      big.parentNode.removeChild(big);
-    }
-  }
-  //-->
-</script>
 
 <form method="post" action="attachment.cgi" onsubmit="normalizeComments();">
   <input type="hidden" name="id" value="[% attachment.id %]">
@@ -301,17 +177,20 @@
           </iframe>
           <script type="text/javascript">
             <!--
+            var patchviewerinstalled = 0;
+            var attachment_id = [% attachment.id %];
             if (typeof document.getElementById == "function") {
 [% IF patchviewerinstalled %]
+              var patchviewerinstalled = 1;
               document.write('<iframe id="viewDiffFrame" style="height: 400px; width: 100%; display: none;"><\/iframe>');
 [% END %]
-              document.write('<button type="button" id="editButton" onclick="editAsComment();">Edit Attachment As Comment<\/button>');
-              document.write('<button type="button" id="undoEditButton" onclick="undoEditAsComment();" style="display: none;">Undo Edit As Comment<\/button>');
-              document.write('<button type="button" id="redoEditButton" onclick="redoEditAsComment();" style="display: none;">Redo Edit As Comment<\/button>');
+              document.write('<button type="button" id="editButton" onclick="editAsComment(patchviewerinstalled);">Edit Attachment As Comment<\/button>');
+              document.write('<button type="button" id="undoEditButton" onclick="undoEditAsComment(patchviewerinstalled);" style="display: none;">Undo Edit As Comment<\/button>');
+              document.write('<button type="button" id="redoEditButton" onclick="redoEditAsComment(patchviewerinstalled);" style="display: none;">Redo Edit As Comment<\/button>');
 [% IF patchviewerinstalled %]
-              document.write('<button type="button" id="viewDiffButton" onclick="viewDiff();">View Attachment As Diff<\/button>');
+              document.write('<button type="button" id="viewDiffButton" onclick="viewDiff(attachment_id, patchviewerinstalled);">View Attachment As Diff<\/button>');
 [% END %]
-              document.write('<button type="button" id="viewRawButton" onclick="viewRaw();" style="display: none;">View Attachment As Raw<\/button>');
+              document.write('<button type="button" id="viewRawButton" onclick="viewRaw(patchviewerinstalled);" style="display: none;">View Attachment As Raw<\/button>');
             }
             //-->
           </script>

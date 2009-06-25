@@ -59,27 +59,23 @@
 %]
 
 
-[% SET overrides.action = [] %]
+[% SET overrides.action = {} %]
 [% FOREACH check_value = values %]
-
   [% IF check_value.is_static %]
-    [% overrides.action.push({
-         match_value => check_value.name
-         match_field => 'name'
+    [% overrides.action.name.${check_value.name} = {
          override_content => 1
          content => "(Non-deletable value)"
          override_contentlink => 1
          contentlink => undef
-       })
+       }
     %]
   [% ELSIF check_value.is_default %]
-    [% overrides.action.push({
-      match_value => check_value.name
-      match_field => 'name'
-      override_content => 1
-      content => "(Default value)"
-      override_contentlink => 1
-      contentlink => undef })
+    [% overrides.action.name.${check_value.name} = {
+         override_content => 1
+         content => "(Default value)"
+         override_contentlink => 1
+         contentlink => undef
+       }
     %]
   [% END %]
 

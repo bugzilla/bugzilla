@@ -77,16 +77,13 @@
      })
 %]
 
-[%# We want to override the usual 'Delete' link for the default
-    milestone %]
-[% overrides.action = [ {
-     match_value => product.default_milestone
-     match_field => 'name'
+[%# We want to override the usual 'Delete' link for the default milestone %]
+[% overrides.action.name.${product.default_milestone} = {
      override_content => 1
      content => "(Default milestone)"
      override_contentlink => 1
      contentlink => undef
-   } ]
+   } 
 %] 
 
 [% PROCESS admin/table.html.tmpl

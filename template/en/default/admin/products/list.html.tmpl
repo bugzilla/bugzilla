@@ -99,18 +99,16 @@
      })
 %]
 
-[% overrides.disallow_new = [ {
-     match_value => "1"
-     match_field => 'disallow_new'
-     override_content => 1
-     content => "No"
-   },
-   {
-     match_value => 0
-     match_field => 'disallow_new'
-     override_content => 1
-     content => "Yes"
-   }]
+[% overrides.disallow_new.disallow_new = {
+     "1" => {
+       override_content => 1
+       content => "No"
+     },
+     "0" => {
+       override_content => 1
+       content => "Yes"
+     }
+   }
 %] 
 
 [% PROCESS admin/table.html.tmpl

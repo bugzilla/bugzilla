@@ -86,23 +86,19 @@
    }) %]
 
 [%# Overrides the initialowner and the initialqacontact with right values %]
-[% overrides.initialowner = [] %]
-[% overrides.initialqacontact = [] %]
+[% overrides.initialowner = {} %]
+[% overrides.initialqacontact = {} %]
 
 [% FOREACH component = product.components %]
-  [% overrides.initialowner.push({
-       match_value => component.name
-       match_field => 'name'
+  [% overrides.initialowner.name.${component.name} = {
        override_content => 1
        content => component.default_assignee.login
-     })
+     }
   %]
-  [% overrides.initialqacontact.push({
-       match_value => component.name
-       match_field => 'name'
+  [% overrides.initialqacontact.name.${component.name} = {
        override_content => 1
        content => component.default_qa_contact.login
-     })
+     }
   %]
 [% END %]
 

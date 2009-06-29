@@ -240,15 +240,16 @@ sub login {
     my $authorizer = new Bugzilla::Auth();
     $type = LOGIN_REQUIRED if $class->cgi->param('GoAheadAndLogIn');
 
+    if (!defined $type || $type == LOGIN_NORMAL) {
+        $type = $class->params->{'requirelogin'} ? LOGIN_REQUIRED : LOGIN_NORMAL;
+    }
+
     # Allow templates to know that we're in a page that always requires
     # login.
     if ($type == LOGIN_REQUIRED) {
         $class->request_cache->{page_requires_login} = 1;
     }
 
-    if (!defined $type || $type == LOGIN_NORMAL) {
-        $type = $class->params->{'requirelogin'} ? LOGIN_REQUIRED : LOGIN_NORMAL;
-    }
     my $authenticated_user = $authorizer->login($type);
     
     # At this point, we now know if a real person is logged in.

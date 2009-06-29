@@ -146,7 +146,7 @@ sub get_fk_ddl {
     my $fk_name   = $self->_get_fk_name($table, $column, $references);
 
     # 'ON DELETE RESTRICT' is enabled by default   
-    $delete = "" if ($delete =~ /RESTRICT/i);
+    $delete = "" if ( defined $delete && $delete =~ /RESTRICT/i);
 
     my $fk_string = "\n     CONSTRAINT $fk_name FOREIGN KEY ($column)\n"
                     . "     REFERENCES $to_table($to_column)\n";

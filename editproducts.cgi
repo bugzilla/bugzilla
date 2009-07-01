@@ -1024,7 +1024,7 @@ if ($action eq 'update') {
 
         my @updated_bugs = ();
         foreach my $bug_id (@$bug_list) {
-            my $confirmed = CheckIfVotedConfirmed($bug_id, $whoid);
+            my $confirmed = CheckIfVotedConfirmed($bug_id);
             push (@updated_bugs, $bug_id) if $confirmed;
         }
 

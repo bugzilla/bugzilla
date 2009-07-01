@@ -426,6 +426,24 @@ sub update_see_also {
     return { changes => \%changes };
 }
 
+sub attachments {
+    my ($self, $params) = validate(@_, 'bug_ids');
+
+    my $ids = $params->{bug_ids};
+    defined $ids || ThrowCodeError('param_required', { param => 'bug_ids' });
+
+    my %attachments;
+    foreach my $bug_id (@$ids) {
+        my $bug = Bugzilla::Bug->check($bug_id);
+        $attachments{$bug->id} = [];
+        foreach my $attach (@{$bug->attachments}) {
+            push @{$attachments{$bug->id}},
+                $self->_attachment_to_hash($attach, $params);
+        }
+    }
+    return { bugs => \%attachments };
+}
+
 ##############################
 # Private Helper Subroutines #
 ##############################
@@ -475,6 +493,30 @@ sub _bug_to_hash {
     }
 
     return \%item;
+}
+
+sub _attachment_to_hash {
+    my ($self, $attach, $filters) = @_;
+
+    # Skipping attachment flags for now.
+    delete $attach->{flags};
+
+    my $attacher = new Bugzilla::User($attach->attacher->id);
+
+    return filter $filters, {
+        creation_time    => $self->type('dateTime', $attach->attached),
+        last_change_time => $self->type('dateTime', $attach->modification_time),
+        id               => $self->type('int', $attach->id),
+        bug_id           => $self->type('int', $attach->bug->id),
+        file_name        => $self->type('string', $attach->filename),
+        description      => $self->type('string', $attach->description),
+        content_type     => $self->type('string', $attach->contenttype),
+        is_private       => $self->type('int', $attach->isprivate),
+        is_obsolete      => $self->type('int', $attach->isobsolete),
+        is_url           => $self->type('int', $attach->isurl),
+        is_patch         => $self->type('int', $attach->ispatch),
+        attacher         => $self->type('string', $attacher->login)
+    };
 }
 
 # Convert WebService API field names to internal DB field names.
@@ -568,6 +610,106 @@ You specified a field that doesn't exist or isn't a drop-down field.
 =head2 Bug Information
 
 =over
+
+
+=item C<attachments>
+
+B<EXPERIMENTAL>
+
+=over
+
+=item B<Description>
+
+Gets information about all attachments from a bug.
+
+B<Note>: Private attachments will only be returned if you are in the 
+insidergroup or if you are the submitter of the attachment.
+
+=item B<Params>
+
+=over
+
+=item C<bug_ids>
+
+See the description of the C<bug_ids> parameter in the L</get> method.
+
+=back
+
+=item B<Returns>
+
+A hash containing a single element, C<bugs>. This is a hash of hashes. 
+Each hash has the numeric bug id as a key, and contains the following
+items:
+
+=over
+
+=item C<creation_time>
+
+C<dateTime> The time the attachment was created.
+
+=item C<last_change_time>
+
+C<dateTime> The last time the attachment was modified.
+
+=item C<id>
+
+C<int> The numeric id of the attachment.
+
+=item C<bug_id>
+
+C<int> The numeric id of the bug that the attachment is attached to.
+
+=item C<file_name>
+
+C<string> The file name of the attachment.
+
+=item C<description>
+
+C<string> The description for the attachment.
+
+=item C<content_type>
+
+C<string> The MIME type of the attachment.
+
+=item C<is_private>
+
+C<boolean> True if the attachment is private (only visible to a certain
+group called the "insidergroup"), False otherwise.
+
+=item C<is_obsolete>
+
+C<boolean> True if the attachment is obsolete, False otherwise.
+
+=item C<is_url>
+
+C<boolean> True if the attachment is a URL instead of actual data,
+False otherwise. Note that such attachments only happen when the 
+Bugzilla installation has at some point had the C<allow_attach_url>
+parameter enabled.
+
+=item C<is_patch>
+
+C<boolean> True if the attachment is a patch, False otherwise.
+
+=item C<attacher>
+
+C<string> The login name of the user that created the attachment.
+
+=back
+
+=item B<Errors>
+
+This method can throw all the same errors as L</get>.
+
+=item B<History>
+
+=over
+
+=item Added in Bugzilla B<3.6>.
+
+=back
+
+=back
 
 
 =item C<comments>

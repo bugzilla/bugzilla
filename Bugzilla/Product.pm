@@ -149,7 +149,6 @@ sub preload {
 sub update {
     my $self = shift;
     my $dbh = Bugzilla->dbh;
-    my $user = Bugzilla->user;
 
     # Don't update the DB if something goes wrong below -> transaction.
     $dbh->bz_start_transaction();
@@ -242,7 +241,7 @@ sub update {
 
         my @updated_bugs = ();
         foreach my $bug_id (@$bug_list) {
-            my $confirmed = CheckIfVotedConfirmed($bug_id, $user->id);
+            my $confirmed = CheckIfVotedConfirmed($bug_id);
             push (@updated_bugs, $bug_id) if $confirmed;
         }
         $changes->{'confirmed_bugs'} = \@updated_bugs;

@@ -583,7 +583,7 @@ foreach my $bug (@bug_objects) {
         # a list of messages to send to voters.
         # We delay the sending of these messages till changes are committed.
         @msgs = RemoveVotes($bug->id, 0, 'votes_bug_moved');
-        CheckIfVotedConfirmed($bug->id, Bugzilla->user->id);
+        CheckIfVotedConfirmed($bug->id);
     }
 
     # Set and update flags.

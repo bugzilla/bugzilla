@@ -141,6 +141,7 @@ sub _validation_subs {
 # This package exists to fix a UTF-8 bug in SOAP::Lite.
 # See http://rt.cpan.org/Public/Bug/Display.html?id=32952.
 package Bugzilla::XMLRPC::Serializer;
+use Scalar::Util qw(blessed);
 use strict;
 # We can't use "use base" because XMLRPC::Serializer doesn't return
 # a true value.
@@ -179,6 +180,55 @@ sub encode_object {
         ? ['value', {}, [@encoded]]
         : @encoded;
 }
+
+# Removes undefined values so they do not produce invalid XMLRPC.
+sub envelope {
+    my $self = shift;
+    my ($type, $method, $data) = @_;
+    # If the type isn't a successful response we don't want to change the values.
+    if ($type eq 'response'){
+        $data = _strip_undefs($data);
+    }
+    return $self->SUPER::envelope($type, $method, $data);
+}
+
+# In an XMLRPC response we have to handle hashes of arrays, hashes, scalars,
+# Bugzilla objects (reftype = 'HASH') and XMLRPC::Data objects.
+# The whole XMLRPC::Data object must be removed if its value key is undefined
+# so it cannot be recursed like the other hash type objects.
+sub _strip_undefs {
+    my ($initial) = @_;
+    if (ref $initial eq "HASH" || (blessed $initial && $initial->isa("HASH"))) {
+        while (my ($key, $value) = each(%$initial)) {
+            if ( !defined $value
+                 || (blessed $value && $value->isa('XMLRPC::Data') && !defined $value->value) )
+            {
+                # If the value is undefined remove it from the hash.
+                delete $initial->{$key};
+            }
+            else {
+                $initial->{$key} = _strip_undefs($value);
+            }
+        }
+    }
+    if (ref $initial eq "ARRAY" || (blessed $initial && $initial->isa("ARRAY"))) {
+        for (my $count = 0; $count < scalar @{$initial}; $count++) {
+            my $value = $initial->[$count];
+            if ( !defined $value
+                 || (blessed $value && $value->isa('XMLRPC::Data') && !defined $value->value) )
+            {
+                # If the value is undefined remove it from the array.
+                splice(@$initial, $count, 1);
+                $count--;
+            }
+            else {
+                $initial->[$count] = _strip_undefs($value);
+            }
+        }
+    }
+    return $initial;
+}
+
 
 sub BEGIN {
     no strict 'refs';

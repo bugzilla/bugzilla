@@ -14,6 +14,9 @@
 #
 # Contributor(s): Marc Schumann <wurblzap@gmail.com>
 #                 Max Kanat-Alexander <mkanat@bugzilla.org>
+#                 Rosie Clarkson <rosie.clarkson@planningportal.gov.uk>
+#                 
+# Portions © Crown copyright 2009 - Rosie Clarkson (development@planningportal.gov.uk) for the Planning Portal
 
 # This is the base class for $self in WebService method calls. For the 
 # actual RPC server, see Bugzilla::WebService::Server and its subclasses.
@@ -273,8 +276,11 @@ Bugzilla also accepts an element called C<< <nil> >>, as specified by
 the XML-RPC extension here: L<http://ontosys.com/xml-rpc/extensions.php>, 
 which is always considered to be C<undef>, no matter what it contains.
 
-Bugzilla uses C<< <nil/> >> values to return C<int>, C<double>, or 
-C<dateTime.iso8601> values which are undefined.
+Bugzilla does not use C<< <nil> >> values in returned data, because currently
+most clients do not support C<< <nil> >>. Instead, any fields with C<undef>
+values will be stripped from the response completely. Therefore
+B<the client must handle the fact that some expected fields may not be 
+returned>.
 
 =begin private
 

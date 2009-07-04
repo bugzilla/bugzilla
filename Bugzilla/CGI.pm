@@ -276,17 +276,28 @@ sub header {
     return $self->SUPER::header(@_) || "";
 }
 
-# CGI.pm is not utf8-aware and passes data as bytes instead of UTF-8 strings.
 sub param {
     my $self = shift;
-    if (Bugzilla->params->{'utf8'} && scalar(@_) == 1) {
-        if (wantarray) {
-            return map { _fix_utf8($_) } $self->SUPER::param(@_);
+
+    # When we are just requesting the value of a parameter...
+    if (scalar(@_) == 1) {
+        my @result = $self->SUPER::param(@_); 
+
+        # Also look at the URL parameters, after we look at the POST 
+        # parameters. This is to allow things like login-form submissions
+        # with URL parameters in the form's "target" attribute.
+        if (!scalar(@result) && $self->request_method eq 'POST') {
+            @result = $self->SUPER::url_param(@_);
         }
-        else {
-            return _fix_utf8(scalar $self->SUPER::param(@_));
+
+        # Fix UTF-8-ness of input parameters.
+        if (Bugzilla->params->{'utf8'}) {
+            @result = map { _fix_utf8($_) } @result;
         }
+
+        return wantarray ? @result : $result[0];
     }
+
     return $self->SUPER::param(@_);
 }
 

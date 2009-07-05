@@ -286,7 +286,9 @@ sub param {
         # Also look at the URL parameters, after we look at the POST 
         # parameters. This is to allow things like login-form submissions
         # with URL parameters in the form's "target" attribute.
-        if (!scalar(@result) && $self->request_method eq 'POST') {
+        if (!scalar(@result)
+            && $self->request_method && $self->request_method eq 'POST')
+        {
             @result = $self->SUPER::url_param(@_);
         }
 

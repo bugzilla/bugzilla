@@ -3373,11 +3373,17 @@ sub CheckIfVotedConfirmed {
             }
             ThrowCodeError('no_open_bug_status') unless $new_status;
 
-            $bug->set_status($new_status);
+            # We cannot call $bug->set_status() here, because a user without
+            # canconfirm privs should still be able to confirm a bug by
+            # popular vote. We already know the new status is valid, so it's safe.
+            $bug->{bug_status} = $new_status;
+            $bug->{everconfirmed} = 1;
+            delete $bug->{'status'}; # Contains the status object.
         }
         else {
             # If the bug is in a closed state, only set everconfirmed to 1.
-            $bug->_set_everconfirmed(1);
+            # Do not call $bug->_set_everconfirmed(), for the same reason as above.
+            $bug->{everconfirmed} = 1;
         }
         $bug->update();
 

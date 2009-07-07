@@ -33,7 +33,13 @@ use strict;
 
 package Bugzilla::Search;
 use base qw(Exporter);
-@Bugzilla::Search::EXPORT = qw(IsValidQueryType);
+@Bugzilla::Search::EXPORT = qw(
+    EMPTY_COLUMN
+
+    IsValidQueryType
+    split_order_term
+    translate_old_column
+);
 
 use Bugzilla::Error;
 use Bugzilla::Util;
@@ -47,20 +53,125 @@ use Bugzilla::Keyword;
 use Date::Format;
 use Date::Parse;
 
+# A SELECTed expression that we use as a placeholder if somebody selects
+# <none> for the X, Y, or Z axis in report.cgi.
+use constant EMPTY_COLUMN => '-1';
+
 # Some fields are not sorted on themselves, but on other fields. 
 # We need to have a list of these fields and what they map to.
 # Each field points to an array that contains the fields mapped 
 # to, in order.
 use constant SPECIAL_ORDER => {
-    'bugs.target_milestone' => [ 'ms_order.sortkey','ms_order.value' ],
+    'target_milestone' => [ 'ms_order.sortkey','ms_order.value' ],
 };
 
 # When we add certain fields to the ORDER BY, we need to then add a
 # table join to the FROM statement. This hash maps input fields to 
 # the join statements that need to be added.
 use constant SPECIAL_ORDER_JOIN => {
-    'bugs.target_milestone' => 'LEFT JOIN milestones AS ms_order ON ms_order.value = bugs.target_milestone AND ms_order.product_id = bugs.product_id',
+    'target_milestone' => 'LEFT JOIN milestones AS ms_order ON ms_order.value = bugs.target_milestone AND ms_order.product_id = bugs.product_id',
 };
+
+# This constant defines the columns that can be selected in a query 
+# and/or displayed in a bug list.  Column records include the following
+# fields:
+#
+# 1. id: a unique identifier by which the column is referred in code;
+#
+# 2. name: The name of the column in the database (may also be an expression
+#          that returns the value of the column);
+#
+# 3. title: The title of the column as displayed to users.
+# 
+# Note: There are a few hacks in the code that deviate from these definitions.
+#       In particular, when the list is sorted by the "votes" field the word 
+#       "DESC" is added to the end of the field to sort in descending order, 
+#       and the redundant short_desc column is removed when the client
+#       requests "all" columns.
+#
+# This is really a constant--that is, once it's been called once, the value
+# will always be the same unless somebody adds a new custom field. But
+# we have to do a lot of work inside the subroutine to get the data,
+# and we don't want it to happen at compile time, so we have it as a
+# subroutine.
+sub COLUMNS {
+    my $dbh = Bugzilla->dbh;
+    my $cache = Bugzilla->request_cache;
+    return $cache->{search_columns} if defined $cache->{search_columns};
+
+    # These are columns that don't exist in fielddefs, but are valid buglist
+    # columns. (Also see near the bottom of this function for the definition
+    # of short_short_desc.)
+    my %columns = (
+        relevance            => { title => 'Relevance'  },
+        assigned_to_realname => { title => 'Assignee'   },
+        reporter_realname    => { title => 'Reporter'   },
+        qa_contact_realname  => { title => 'QA Contact' },
+    );
+
+    # Next we define columns that have special SQL instead of just something
+    # like "bugs.bug_id".
+    my $actual_time = '(SUM(ldtime.work_time)'
+        . ' * COUNT(DISTINCT ldtime.bug_when)/COUNT(bugs.bug_id))';
+    my %special_sql = (
+        deadline    => $dbh->sql_date_format('bugs.deadline', '%Y-%m-%d'),
+        actual_time => $actual_time,
+
+        percentage_complete =>
+            "(CASE WHEN $actual_time + bugs.remaining_time = 0.0"
+              . " THEN 0.0"
+              . " ELSE 100"
+                   . " * ($actual_time / ($actual_time + bugs.remaining_time))"
+              . " END)",
+    );
+
+    # Backward-compatibility for old field names. Goes new_name => old_name.
+    # These are here and not in translate_old_column because the rest of the
+    # code actually still uses the old names, while the fielddefs table uses
+    # the new names (which is not the case for the fields handled by 
+    # translate_old_column).
+    my %old_names = (
+        creation_ts => 'opendate',
+        delta_ts    => 'changeddate',
+        work_time   => 'actual_time',
+    );
+
+    # Fields that are email addresses
+    my @email_fields = qw(assigned_to reporter qa_contact);
+    # Other fields that are stored in the bugs table as an id, but
+    # should be displayed using their name.
+    my @id_fields = qw(product component classification);
+
+    foreach my $col (@email_fields) {
+        my $sql = "map_${col}.login_name";
+        if (!Bugzilla->user->id) {
+             $sql = $dbh->sql_string_until($sql, $dbh->quote('@'));
+        }
+        $special_sql{$col} = $sql;
+        $columns{"${col}_realname"}->{name} = "map_${col}.realname";
+    }
+
+    foreach my $col (@id_fields) {
+        $special_sql{$col} = "map_${col}s.name";
+    }
+
+    # Do the actual column-getting from fielddefs, now.
+    foreach my $field (Bugzilla->get_fields({ obsolete => 0, buglist => 1 })) {
+        my $id = $field->name;
+        $id = $old_names{$id} if exists $old_names{$id};
+        my $sql = 'bugs.' . $field->name;
+        $sql = $special_sql{$id} if exists $special_sql{$id};
+        $columns{$id} = { name => $sql, title => $field->description };
+    }
+
+    # The short_short_desc column is identical to short_desc
+    $columns{'short_short_desc'} = $columns{'short_desc'};
+
+    Bugzilla::Hook::process("buglist-columns", { columns => \%columns });
+
+    $cache->{search_columns} = \%columns;
+    return $cache->{search_columns};
+}
 
 # Create a new Search
 # Note that the param argument may be modified by Bugzilla::Search
@@ -78,22 +189,18 @@ sub new {
 
 sub init {
     my $self = shift;
-    my $fieldsref = $self->{'fields'};
+    my @fields = @{ $self->{'fields'} || [] };
     my $params = $self->{'params'};
     $self->{'user'} ||= Bugzilla->user;
     my $user = $self->{'user'};
 
-    my $orderref = $self->{'order'} || 0;
-    my @inputorder;
-    @inputorder = @$orderref if $orderref;
+    my @inputorder = @{ $self->{'order'} || [] };
     my @orderby;
 
-    my @fields;
     my @supptables;
     my @wherepart;
     my @having;
     my @groupby;
-    @fields = @$fieldsref if $fieldsref;
     my @specialchart;
     my @andlist;
     my %chartfields;
@@ -109,48 +216,56 @@ sub init {
         obsolete => 0 });
     foreach my $field (@select_fields) {
         my $name = $field->name;
-        $special_order{"bugs.$name"} = [ "$name.sortkey", "$name.value" ],
-        $special_order_join{"bugs.$name"} =
-            "LEFT JOIN $name ON $name.value = bugs.$name";
+        next if $name eq 'product'; # products don't have sortkeys.
+        $special_order{$name} = [ "$name.sortkey", "$name.value" ],
+        $special_order_join{$name} =
+           "LEFT JOIN $name ON $name.value = bugs.$name";
     }
 
     my $dbh = Bugzilla->dbh;
-
+   
+    # All items that are in the ORDER BY must be in the SELECT.
+    foreach my $orderitem (@inputorder) {
+        my $column_name = split_order_term($orderitem);
+        if (!grep($_ eq $column_name, @fields)) {
+            push(@fields, $column_name);
+        }
+    }
+ 
     # First, deal with all the old hard-coded non-chart-based poop.
-    if (grep(/map_assigned_to/, @$fieldsref)) {
+    if (grep(/^assigned_to/, @fields)) {
         push @supptables, "INNER JOIN profiles AS map_assigned_to " .
                           "ON bugs.assigned_to = map_assigned_to.userid";
     }
 
-    if (grep(/map_reporter/, @$fieldsref)) {
+    if (grep(/^reporter/, @fields)) {
         push @supptables, "INNER JOIN profiles AS map_reporter " .
                           "ON bugs.reporter = map_reporter.userid";
     }
 
-    if (grep(/map_qa_contact/, @$fieldsref)) {
+    if (grep(/^qa_contact/, @fields)) {
         push @supptables, "LEFT JOIN profiles AS map_qa_contact " .
                           "ON bugs.qa_contact = map_qa_contact.userid";
     }
 
-    if (lsearch($fieldsref, 'map_products.name') >= 0) {
+    if (grep($_ eq 'product' || $_ eq 'classification', @fields)) 
+    {
         push @supptables, "INNER JOIN products AS map_products " .
                           "ON bugs.product_id = map_products.id";
     }
 
-    if (lsearch($fieldsref, 'map_classifications.name') >= 0) {
-        push @supptables, "INNER JOIN products AS map_products " .
-                          "ON bugs.product_id = map_products.id";
+    if (grep($_ eq 'classification', @fields)) {
         push @supptables,
                 "INNER JOIN classifications AS map_classifications " .
                 "ON map_products.classification_id = map_classifications.id";
     }
 
-    if (lsearch($fieldsref, 'map_components.name') >= 0) {
+    if (grep($_ eq 'component', @fields)) {
         push @supptables, "INNER JOIN components AS map_components " .
                           "ON bugs.component_id = map_components.id";
     }
     
-    if (grep($_ =~/AS (actual_time|percentage_complete)$/, @$fieldsref)) {
+    if (grep($_ eq 'actual_time' || $_ eq 'percentage_complete', @fields)) {
         push(@supptables, "LEFT JOIN longdescs AS ldtime " .
                           "ON ldtime.bug_id = bugs.bug_id");
     }
@@ -758,13 +873,6 @@ sub init {
     # to other parts of the query, so we want to create it before we
     # write the FROM clause.
     foreach my $orderitem (@inputorder) {
-        # Some fields have 'AS' aliases. The aliases go in the ORDER BY,
-        # not the whole fields.
-        # XXX - Ideally, we would get just the aliases in @inputorder,
-        # and we'd never have to deal with this.
-        if ($orderitem =~ /\s+AS\s+(.+)$/i) {
-            $orderitem = $1;
-        }
         BuildOrderBy(\%special_order, $orderitem, \@orderby);
     }
     # Now JOIN the correct tables in the FROM clause.
@@ -772,9 +880,9 @@ sub init {
     # cleaner to do it this way.
     foreach my $orderitem (@inputorder) {
         # Grab the part without ASC or DESC.
-        my @splitfield = split(/\s+/, $orderitem);
-        if ($special_order_join{$splitfield[0]}) {
-            push(@supptables, $special_order_join{$splitfield[0]});
+        my $column_name = split_order_term($orderitem);
+        if ($special_order_join{$column_name}) {
+            push(@supptables, $special_order_join{$column_name});
         }
     }
 
@@ -803,7 +911,9 @@ sub init {
     # Make sure we create a legal SQL query.
     @andlist = ("1 = 1") if !@andlist;
 
-    my $query = "SELECT " . join(', ', @fields) .
+    my @sql_fields = map { $_ eq EMPTY_COLUMN ? EMPTY_COLUMN 
+                           : COLUMNS->{$_}->{name} . ' AS ' . $_ } @fields;
+    my $query = "SELECT " . join(', ', @sql_fields) .
                 " FROM $suppstring" .
                 " LEFT JOIN bug_group_map " .
                 " ON bug_group_map.bug_id = bugs.bug_id ";
@@ -830,17 +940,21 @@ sub init {
         }
     }
 
-    foreach my $field (@fields, @orderby) {
-        next if ($field =~ /(AVG|SUM|COUNT|MAX|MIN|VARIANCE)\s*\(/i ||
-                 $field =~ /^\d+$/ || $field eq "bugs.bug_id" ||
-                 $field =~ /^(relevance|actual_time|percentage_complete)/);
-        # The structure of fields is of the form:
-        # [foo AS] {bar | bar.baz} [ASC | DESC]
-        # Only the mandatory part bar OR bar.baz is of interest.
-        # But for Oracle, it needs the real name part instead.
-        my $regexp = $dbh->GROUPBY_REGEXP;
-        if ($field =~ /$regexp/i) {
-            push(@groupby, $1) if !grep($_ eq $1, @groupby);
+    # For some DBs, every field in the SELECT must be in the GROUP BY.
+    foreach my $field (@fields) {
+        # These fields never go into the GROUP BY (bug_id goes in
+        # explicitly, below).
+        next if (grep($_ eq $field, EMPTY_COLUMN, 
+                      qw(bug_id actual_time percentage_complete)));
+        my $col = COLUMNS->{$field}->{name};
+        push(@groupby, $col) if !grep($_ eq $col, @groupby);
+    }
+    # And all items from ORDER BY must be in the GROUP BY. The above loop 
+    # doesn't catch items that were put into the ORDER BY from SPECIAL_ORDER.
+    foreach my $item (@inputorder) {
+        my $column_name = split_order_term($item);
+        if ($special_order{$column_name}) {
+            push(@groupby, @{ $special_order{$column_name} });
         }
     }
     $query .= ") " . $dbh->sql_group_by("bugs.bug_id", join(', ', @groupby));
@@ -1023,9 +1137,7 @@ sub IsValidQueryType
 sub BuildOrderBy {
     my ($special_order, $orderitem, $stringlist, $reverseorder) = (@_);
 
-    my @twopart = split(/\s+/, $orderitem);
-    my $orderfield = $twopart[0];
-    my $orderdirection = $twopart[1] || "";
+    my ($orderfield, $orderdirection) = split_order_term($orderitem);
 
     if ($reverseorder) {
         # If orderdirection is empty or ASC...
@@ -1050,6 +1162,40 @@ sub BuildOrderBy {
     }
 
     push(@$stringlist, trim($orderfield . ' ' . $orderdirection));
+}
+
+# Splits out "asc|desc" from a sort order item.
+sub split_order_term {
+    my $fragment = shift;
+    $fragment =~ /^(.+?)(?:\s+(ASC|DESC))?$/i;
+    my ($column_name, $direction) = (lc($1), uc($2));
+    $direction ||= "";
+    return wantarray ? ($column_name, $direction) : $column_name;
+}
+
+# Used to translate old SQL fragments from buglist.cgi's "order" argument
+# into our modern field IDs.
+sub translate_old_column {
+    my ($column) = @_;
+    # All old SQL fragments have a period in them somewhere.
+    return $column if $column !~ /\./;
+
+    if ($column =~ /\bAS\s+(\w+)$/i) {
+        return $1;
+    }
+    # product, component, classification, assigned_to, qa_contact, reporter
+    elsif ($column =~ /map_(\w+?)s?\.(login_)?name/i) {
+        return $1;
+    }
+    
+    # If it doesn't match the regexps above, check to see if the old 
+    # SQL fragment matches the SQL of an existing column
+    foreach my $key (%{ COLUMNS() }) {
+        next unless exists COLUMNS->{$key}->{name};
+        return $key if COLUMNS->{$key}->{name} eq $column;
+    }
+
+    return $column;
 }
 
 #####################################################################
@@ -1276,9 +1422,9 @@ sub _content_matches {
                        "ON bugs.bug_id = $table.bug_id");
     
     # Create search terms to add to the SELECT and WHERE clauses.
-    my ($term1, $rterm1) = $dbh->sql_fulltext_search("$table.$comments_col", 
+    my ($term1, $rterm1) = $dbh->sql_fulltext_search("$table.$comments_col",
                                                         $$v, 1);
-    my ($term2, $rterm2) = $dbh->sql_fulltext_search("$table.short_desc", 
+    my ($term2, $rterm2) = $dbh->sql_fulltext_search("$table.short_desc",
                                                         $$v, 2);
     $rterm1 = $term1 if !$rterm1;
     $rterm2 = $term2 if !$rterm2;
@@ -1287,20 +1433,18 @@ sub _content_matches {
     $$term = "$term1 > 0 OR $term2 > 0";
     
     # In order to sort by relevance (in case the user requests it),
-    # we SELECT the relevance value and give it an alias so we can
-    # add it to the SORT BY clause when we build it in buglist.cgi.
-    my $select_term = "($rterm1 + $rterm2) AS relevance";
-
-    # Users can specify to display the relevance field, in which case
-    # it'll show up in the list of fields being selected, and we need
-    # to replace that occurrence with our select term.  Otherwise
-    # we can just add the term to the list of fields being selected.
-    if (grep($_ eq "relevance", @$fields)) {
-        @$fields = map($_ eq "relevance" ? $select_term : $_ , @$fields);
-    }
-    else {
-        push(@$fields, $select_term);
-    }
+    # we SELECT the relevance value so we can add it to the ORDER BY
+    # clause. Every time a new fulltext chart isadded, this adds more 
+    # terms to the relevance sql. (That doesn't make sense in
+    # "NOT" charts, but Bugzilla never uses those with fulltext
+    # by default.)
+    #
+    # We build the relevance SQL by modifying the COLUMNS list directly,
+    # which is kind of a hack but works.
+    my $current = COLUMNS->{'relevance'}->{name};
+    $current = $current ? "$current + " : '';
+    my $select_term = "($current$rterm1 + $rterm2)";
+    COLUMNS->{'relevance'}->{name} = $select_term;
 }
 
 sub _timestamp_compare {
@@ -1459,8 +1603,8 @@ sub _percentage_complete {
     }
     if ($oper ne "noop") {
         my $table = "longdescs_$$chartid";
-        if(lsearch($fields, "bugs.remaining_time") == -1) {
-            push(@$fields, "bugs.remaining_time");                  
+        if (!grep($_ eq 'remaining_time', @$fields)) {
+            push(@$fields, "remaining_time");
         }
         push(@$supptables, "LEFT JOIN longdescs AS $table " .
                            "ON $table.bug_id = bugs.bug_id");

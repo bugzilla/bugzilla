@@ -407,14 +407,14 @@ sub _close_standby_message {
 # Command Execution
 ################################################################################
 
-$cgi->param('cmdtype', "") if !defined $cgi->param('cmdtype');
-$cgi->param('remaction', "") if !defined $cgi->param('remaction');
+my $cmdtype   = $cgi->param('cmdtype')   || '';
+my $remaction = $cgi->param('remaction') || '';
 
 # Backwards-compatibility - the old interface had cmdtype="runnamed" to run
 # a named command, and we can't break this because it's in bookmarks.
-if ($cgi->param('cmdtype') eq "runnamed") {  
-    $cgi->param('cmdtype', "dorem");
-    $cgi->param('remaction', "run");
+if ($cmdtype eq "runnamed") {  
+    $cmdtype = "dorem";
+    $remaction = "run";
 }
 
 # Now we're going to be running, so ensure that the params object is set up,
@@ -432,7 +432,7 @@ $params ||= new Bugzilla::CGI($cgi);
 my @time = localtime(time());
 my $date = sprintf "%04d-%02d-%02d", 1900+$time[5],$time[4]+1,$time[3];
 my $filename = "bugs-$date.$format->{extension}";
-if ($cgi->param('cmdtype') eq "dorem" && $cgi->param('remaction') =~ /^run/) {
+if ($cmdtype eq "dorem" && $remaction =~ /^run/) {
     $filename = $cgi->param('namedcmd') . "-$date.$format->{extension}";
     # Remove white-space from the filename so the user cannot tamper
     # with the HTTP headers.
@@ -442,8 +442,8 @@ $filename =~ s/\\/\\\\/g; # escape backslashes
 $filename =~ s/"/\\"/g; # escape quotes
 
 # Take appropriate action based on user's request.
-if ($cgi->param('cmdtype') eq "dorem") {  
-    if ($cgi->param('remaction') eq "run") {
+if ($cmdtype eq "dorem") {  
+    if ($remaction eq "run") {
         my $query_id;
         ($buffer, $query_id) = LookupNamedQuery(scalar $cgi->param("namedcmd"),
                                                 scalar $cgi->param('sharer_id'));
@@ -459,14 +459,14 @@ if ($cgi->param('cmdtype') eq "dorem") {
         $order = $params->param('order') || $order;
 
     }
-    elsif ($cgi->param('remaction') eq "runseries") {
+    elsif ($remaction eq "runseries") {
         $buffer = LookupSeries(scalar $cgi->param("series_id"));
         $vars->{'searchname'} = $cgi->param('namedcmd');
         $vars->{'searchtype'} = "series";
         $params = new Bugzilla::CGI($buffer);
         $order = $params->param('order') || $order;
     }
-    elsif ($cgi->param('remaction') eq "forget") {
+    elsif ($remaction eq "forget") {
         my $user = Bugzilla->login(LOGIN_REQUIRED);
         # Copy the name into a variable, so that we can trick_taint it for
         # the DB. We know it's safe, because we're using placeholders in 
@@ -530,7 +530,7 @@ if ($cgi->param('cmdtype') eq "dorem") {
         exit;
     }
 }
-elsif (($cgi->param('cmdtype') eq "doit") && defined $cgi->param('remtype')) {
+elsif (($cmdtype eq "doit") && defined $cgi->param('remtype')) {
     if ($cgi->param('remtype') eq "asdefault") {
         my $user = Bugzilla->login(LOGIN_REQUIRED);
         InsertNamedQuery(DEFAULT_QUERY_NAME, $buffer);

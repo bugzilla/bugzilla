@@ -65,7 +65,12 @@ use constant DATE_FIELDS => {
 # Add aliases here for old method name compatibility #
 ######################################################
 
-BEGIN { *get_bugs = \&get }
+BEGIN { 
+  # In 3.0, get was called get_bugs
+  *get_bugs = \&get;
+  # Before 3.4rc1, "history" was get_history.
+  *get_history = \&history;
+}
 
 ###########
 # Methods #
@@ -183,8 +188,8 @@ sub get {
 
 # this is a function that gets bug activity for list of bug ids 
 # it can be called as the following:
-# $call = $rpc->call( 'Bug.get_history', { ids => [1,2] });
-sub get_history {
+# $call = $rpc->call( 'Bug.history', { ids => [1,2] });
+sub history {
     my ($self, $params) = validate(@_, 'ids');
 
     my $ids = $params->{ids};
@@ -1043,7 +1048,7 @@ in Bugzilla B<3.4>:
 
 =back
 
-=item C<get_history> 
+=item C<history> 
 
 B<UNSTABLE>
 

@@ -25,6 +25,7 @@ use lib qw(. lib);
 
 use Bugzilla;
 use Bugzilla::Constants;
+use Bugzilla::Error;
 use Bugzilla::WebService::Constants;
 # This eval allows runtests to pass even if JSON::RPC isn't
 # installed.

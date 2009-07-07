@@ -141,7 +141,7 @@ sub canonicalise_query {
 
 sub clean_search_url {
     my $self = shift;
-    # Delete any empty URL parameter
+    # Delete any empty URL parameter.
     my @cgi_params = $self->param;
 
     foreach my $param (@cgi_params) {
@@ -160,6 +160,9 @@ sub clean_search_url {
 
     # Delete certain parameters if the associated parameter is empty.
     $self->delete('bugidtype')  if !$self->param('bug_id');
+
+    # Delete leftovers from the login form
+    $self->delete('Bugzilla_remember', 'GoAheadAndLogIn');
 
     foreach my $num (1,2) {
         # If there's no value in the email field, delete the related fields.
@@ -298,6 +301,17 @@ sub param {
         }
 
         return wantarray ? @result : $result[0];
+    }
+    # And for various other functions in CGI.pm, we need to correctly
+    # return the URL parameters in addition to the POST parameters when
+    # asked for the list of parameters.
+    elsif (!scalar(@_) && $self->request_method 
+           && $self->request_method eq 'POST') 
+    {
+        my @post_params = $self->SUPER::param;
+        my @url_params  = $self->url_param;
+        my %params = map { $_ => 1 } (@post_params, @url_params);
+        return keys %params;
     }
 
     return $self->SUPER::param(@_);

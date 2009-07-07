@@ -2143,7 +2143,7 @@ sub set_status {
     
     if ($new_status->is_open) {
         # Check for the everconfirmed transition
-        $self->_set_everconfirmed(1) if $new_status->name ne 'UNCONFIRMED';
+        $self->_set_everconfirmed($new_status->name eq 'UNCONFIRMED' ? 0 : 1);
         $self->clear_resolution();
     }
     else {

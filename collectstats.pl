@@ -561,7 +561,7 @@ sub CollectSeriesData {
         # login name or a renamed product or component, etc.
         eval {
             my $search = new Bugzilla::Search('params' => $cgi,
-                                              'fields' => ["bugs.bug_id"],
+                                              'fields' => ["bug_id"],
                                               'user'   => $user);
             my $sql = $search->getSQL();
             $data = $shadow_dbh->selectall_arrayref($sql);

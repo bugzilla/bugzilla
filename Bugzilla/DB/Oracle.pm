@@ -52,7 +52,6 @@ use base qw(Bugzilla::DB);
 use constant EMPTY_STRING  => '__BZ_EMPTY_STR__';
 use constant ISOLATION_LEVEL => 'READ COMMITTED';
 use constant BLOB_TYPE => { ora_type => ORA_BLOB };
-use constant GROUPBY_REGEXP => '((CASE\s+WHEN.+END)|(SUBSTR.+\))|(TO_CHAR\(.+\))|(\(SCORE.+\))|(\(MATCH.+\))|(\w+(\.\w+)?))(\s+AS\s+)?(.*)?$';
 
 sub new {
     my ($class, $user, $pass, $host, $dbname, $port) = @_;

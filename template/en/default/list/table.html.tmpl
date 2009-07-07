@@ -87,11 +87,11 @@
       [% END %]
       <th colspan="[% splitheader ? 2 : 1 %]" class="first-child">
         [% desc = '' %]
-        [% IF (om = order.match("^bugs\.bug_id( desc)?")) %]
-          [% desc = ' desc' IF NOT om.0 %]
+        [% IF (om = order.match("^bug_id( DESC)?")) %]
+          [% desc = ' DESC' IF NOT om.0 %]
         [% END %]
         <a href="buglist.cgi?
-                  [% urlquerypart FILTER html %]&amp;order=bugs.bug_id[% desc FILTER url_quote %]
+                  [% urlquerypart FILTER html %]&amp;order=bug_id[% desc FILTER url_quote %]
                   [%-#%]&amp;query_based_on=
                   [% defaultsavename OR searchname FILTER url_quote %]">ID</a>
       </th>
@@ -130,20 +130,13 @@
 
 [% BLOCK columnheader %]
   <th colspan="[% splitheader ? 2 : 1 %]">
-    [% IF column.name.match('\s+AS\s+') %]
-      [%# For aliased columns, use their ID for sorting. %]
-      [% column.sortalias = id %]
-    [% ELSE %]
-      [%# Other columns may sort on their name directly. %]
-      [% column.sortalias = column.name %]
-    [% END %]
     [% desc = '' %]
-    [% IF (om = order.match("$column.sortalias( desc)?")) %]
-      [% desc = ' desc' IF NOT om.0 %]
+    [% IF (om = order.match("$id( DESC)?")) %]
+      [% desc = ' DESC' IF NOT om.0 %]
     [% END %]
-    [% order = order.remove("$column.sortalias( desc)?,?") %]
+    [% order = order.remove("$id( DESC)?,?") %]
     <a href="buglist.cgi?[% urlquerypart FILTER html %]&amp;order=
-      [% column.sortalias FILTER url_quote %][% desc FILTER url_quote %]
+      [% id FILTER url_quote %][% desc FILTER url_quote %]
       [% ",$order" FILTER url_quote IF order %]
       [%-#%]&amp;query_based_on=
       [% defaultsavename OR searchname FILTER url_quote %]">
@@ -208,6 +201,13 @@
         [%- get_status(bug.$column).truncate(abbrev.$column.maxlength, abbrev.$column.ellipsis) FILTER html %]
       [% ELSIF column == 'resolution' %]
         [%- get_resolution(bug.$column).truncate(abbrev.$column.maxlength, abbrev.$column.ellipsis) FILTER html %]
+
+      [%# Display the login name of the user if their real name is empty. %]
+      [% ELSIF column.match('_realname$') && bug.$column == '' %]
+        [% SET login_column = column.remove('_realname$') %]
+        [% bug.${login_column}.truncate(abbrev.$column.maxlength, 
+                                        abbrev.$column.ellipsis) FILTER html %]
+
       [% ELSE %]
         [%- bug.$column.truncate(abbrev.$column.maxlength, abbrev.$column.ellipsis) FILTER html -%]
       [% END %]

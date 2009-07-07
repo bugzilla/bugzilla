@@ -641,92 +641,7 @@ if (!$params->param('query_format')) {
 # Column Definition
 ################################################################################
 
-# Define the columns that can be selected in a query and/or displayed in a bug
-# list.  Column records include the following fields:
-#
-# 1. ID: a unique identifier by which the column is referred in code;
-#
-# 2. Name: The name of the column in the database (may also be an expression
-#          that returns the value of the column);
-#
-# 3. Title: The title of the column as displayed to users.
-# 
-# Note: There are a few hacks in the code that deviate from these definitions.
-#       In particular, when the list is sorted by the "votes" field the word 
-#       "DESC" is added to the end of the field to sort in descending order, 
-#       and the redundant short_desc column is removed when the client
-#       requests "all" columns.
-# Note: For column names using aliasing (SQL "<field> AS <alias>"), the column
-#       ID needs to be identical to the field ID for list ordering to work.
-
-my $columns = { relevance => {name => 'relevance', title => 'Relevance'},
-                short_short_desc => {name => 'bugs.short_desc', title => 'Summary'} };
-
-foreach my $field (Bugzilla->get_fields({ obsolete => 0, buglist => 1 })) {
-    # Rename some field names for backward compatibility
-    my $id = $field->name;
-    if ($id eq 'creation_ts') {
-        $id = 'opendate';
-    }
-    elsif ($id eq 'delta_ts') {
-        $id = 'changeddate';
-    }
-    elsif ($id eq 'work_time') {
-        $id = 'actual_time';
-    }
-
-    # Database column names and expressions
-    # XXX Move these to fielddefs/Field.pm or Search.pm?
-    my $name = 'bugs.' . $field->name;
-    if ($id eq 'assigned_to' || $id eq 'reporter' || $id eq 'qa_contact') {
-        $name = 'map_' . $field->name . '.login_name';
-        if (!Bugzilla->user->id) {
-            $name = $dbh->sql_string_until($name, $dbh->quote('@'));
-        }
-    }
-    elsif ($id eq 'product' || $id eq 'component' || $id eq 'classification') {
-        $name = 'map_' . $field->name . 's.name';
-    }
-    elsif ($id eq 'deadline') {
-        $name = $dbh->sql_date_format('bugs.deadline', '%Y-%m-%d') . " AS deadline";
-    }
-    elsif ($id eq 'actual_time') {
-        $name = '(SUM(ldtime.work_time)*COUNT(DISTINCT ldtime.bug_when)/COUNT(bugs.bug_id)) AS actual_time';
-    }
-    elsif ($id eq 'percentage_complete') {
-        $name = 
-    "(CASE WHEN (SUM(ldtime.work_time)*COUNT(DISTINCT ldtime.bug_when)/COUNT(bugs.bug_id)) " .
-    "            + bugs.remaining_time = 0.0 " .
-    "THEN 0.0 " .
-    "ELSE 100*((SUM(ldtime.work_time)*COUNT(DISTINCT ldtime.bug_when)/COUNT(bugs.bug_id)) " .
-    "     /((SUM(ldtime.work_time)*COUNT(DISTINCT ldtime.bug_when)/COUNT(bugs.bug_id)) + bugs.remaining_time)) " .
-    "END) AS percentage_complete"
-    }
-
-    $columns->{$id} = { 'name' => $name, 'title' => $field->description };
-}
-
-foreach my $col (qw(assigned_to reporter qa_contact)) {
-    my $colname = "${col}_realname";
-    if ($format->{'extension'} eq 'html') {
-        my $login = "map_${col}.login_name";
-        if (!Bugzilla->user->id) {
-            $login = $dbh->sql_string_until($login, $dbh->quote('@'));
-        }
-        $columns->{$colname}->{name} =
-            "CASE WHEN map_${col}.realname = '' 
-                  THEN $login ELSE map_${col}.realname 
-                   END AS $colname";
-    }
-    else {
-        $columns->{$colname}->{name} = "map_${col}.realname AS $colname";
-    }
-}
-$columns->{assigned_to_realname}->{title} = "Assignee";
-$columns->{reporter_realname}->{title} = "Reporter";
-$columns->{qa_contact_realname}->{title} = "QA Contact";
-
-Bugzilla::Hook::process("buglist-columns", {'columns' => $columns} );
+my $columns = Bugzilla::Search::COLUMNS;
 
 ################################################################################
 # Display Column Determination
@@ -824,6 +739,18 @@ if (lsearch(\@displaycolumns, "percentage_complete") >= 0) {
     push (@selectcolumns, "actual_time");
 }
 
+# Make sure that the login_name version of a field is always also
+# requested if the realname version is requested, so that we can
+# display the login name when the realname is empty.
+my @realname_fields = grep(/_realname$/, @displaycolumns);
+foreach my $item (@realname_fields) {
+    my $login_field = $item;
+    $login_field =~ s/_realname$//;
+    if (!grep($_ eq $login_field, @selectcolumns)) {
+        push(@selectcolumns, $login_field);
+    }
+}
+
 # Display columns are selected because otherwise we could not display them.
 push (@selectcolumns, @displaycolumns);
 
@@ -865,17 +792,6 @@ if ($format->{'extension'} eq 'atom') {
 }
 
 ################################################################################
-# Query Generation
-################################################################################
-
-# Convert the list of columns being selected into a list of column names.
-my @selectnames = map($columns->{$_}->{'name'}, @selectcolumns);
-
-# Remove columns with no names, such as percentage_complete
-#  (or a removed *_time column due to permissions)
-@selectnames = grep($_ ne '', @selectnames);
-
-################################################################################
 # Sort Order Determination
 ################################################################################
 
@@ -898,39 +814,47 @@ if (!$order || $order =~ /^reuse/i) {
     }
 }
 
-my $db_order = "";  # Modified version of $order for use with SQL query
 if ($order) {
     # Convert the value of the "order" form field into a list of columns
     # by which to sort the results.
     ORDER: for ($order) {
         /^Bug Number$/ && do {
-            $order = "bugs.bug_id";
+            $order = "bug_id";
             last ORDER;
         };
         /^Importance$/ && do {
-            $order = "bugs.priority, bugs.bug_severity";
+            $order = "priority,bug_severity";
             last ORDER;
         };
         /^Assignee$/ && do {
-            $order = "map_assigned_to.login_name, bugs.bug_status, bugs.priority, bugs.bug_id";
+            $order = "assigned_to,bug_status,priority,bug_id";
             last ORDER;
         };
         /^Last Changed$/ && do {
-            $order = "bugs.delta_ts, bugs.bug_status, bugs.priority, map_assigned_to.login_name, bugs.bug_id";
+            $order = "changeddate,bug_status,priority,assigned_to,bug_id";
             last ORDER;
         };
         do {
             my @order;
-            my @columnnames = map($columns->{lc($_)}->{'name'}, keys(%$columns));
             # A custom list of columns.  Make sure each column is valid.
             foreach my $fragment (split(/,/, $order)) {
                 $fragment = trim($fragment);
                 next unless $fragment;
-                # Accept an order fragment matching a column name, with
-                # asc|desc optionally following (to specify the direction)
-                if (grep($fragment =~ /^\Q$_\E(\s+(asc|desc))?$/, @columnnames, keys(%$columns))) {
-                    next if $fragment =~ /\brelevance\b/ && !$fulltext;
-                    push(@order, $fragment);
+                my ($column_name, $direction) = split_order_term($fragment);
+                $column_name = translate_old_column($column_name);
+
+                # Special handlings for certain columns
+                next if $column_name eq 'relevance' && !$fulltext;
+                                
+                # If we are sorting by votes, sort in descending order if
+                # no explicit sort order was given.
+                if ($column_name eq 'votes' && !$direction) {
+                    $direction = "DESC";
+                }
+
+                if (exists $columns->{$column_name}) {
+                    $direction = " $direction" if $direction;
+                    push(@order, "$column_name$direction");
                 }
                 else {
                     my $vars = { fragment => $fragment };
@@ -953,58 +877,13 @@ if ($order) {
 
 if (!$order) {
     # DEFAULT
-    $order = "bugs.bug_status, bugs.priority, map_assigned_to.login_name, bugs.bug_id";
+    $order = "bug_status,priority,assigned_to,bug_id";
 }
 
-# Make sure ORDER BY columns are included in the field list.
-foreach my $fragment (split(/,/, $order)) {
-    $fragment = trim($fragment);
-    if (!grep($fragment =~ /^\Q$_\E(\s+(asc|desc))?$/, @selectnames)) {
-        # Add order columns to selectnames
-        # The fragment has already been validated
-        $fragment =~ s/\s+(asc|desc)$//;
-
-        # While newer fragments contain IDs for aliased columns, older
-        # LASTORDER cookies (or bookmarks) may contain full names.
-        # Convert them to an ID here.
-        if ($fragment =~ / AS (\w+)/) {
-            $fragment = $1;
-        }
-
-        $fragment =~ tr/a-zA-Z\.0-9\-_//cd;
-
-        # If the order fragment is an ID, we need its corresponding name
-        # to be in the field list.
-        if (exists($columns->{$fragment})) {
-            $fragment = $columns->{$fragment}->{'name'};
-        }
-
-        push @selectnames, $fragment;
-    }
-}
-
-$db_order = $order;  # Copy $order into $db_order for use with SQL query
-
-# If we are sorting by votes, sort in descending order if no explicit
-# sort order was given
-$db_order =~ s/bugs.votes\s*(,|$)/bugs.votes desc$1/i;
-                             
-# the 'actual_time' field is defined as an aggregate function, but 
-# for order we just need the column name 'actual_time'
-my $aggregate_search = quotemeta($columns->{'actual_time'}->{'name'});
-$db_order =~ s/$aggregate_search/actual_time/g;
-
-# the 'percentage_complete' field is defined as an aggregate too
-$aggregate_search = quotemeta($columns->{'percentage_complete'}->{'name'});
-$db_order =~ s/$aggregate_search/percentage_complete/g;
-
-# Now put $db_order into a format that Bugzilla::Search can use.
-# (We create $db_order as a string first because that's the way
-# we did it before Bugzilla::Search took an "order" argument.)
-my @orderstrings = split(/,\s*/, $db_order);
+my @orderstrings = split(/,\s*/, $order);
 
 # Generate the basic SQL query that will be used to generate the bug list.
-my $search = new Bugzilla::Search('fields' => \@selectnames, 
+my $search = new Bugzilla::Search('fields' => \@selectcolumns, 
                                   'params' => $params,
                                   'order' => \@orderstrings);
 my $query = $search->getSQL();

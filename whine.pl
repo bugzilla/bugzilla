@@ -425,16 +425,16 @@ sub run_queries {
         next unless $savedquery;    # silently ignore missing queries
 
         # Execute the saved query
-        my @searchfields = (
-            'bugs.bug_id',
-            'bugs.bug_severity',
-            'bugs.priority',
-            'bugs.rep_platform',
-            'bugs.assigned_to',
-            'bugs.bug_status',
-            'bugs.resolution',
-            'bugs.short_desc',
-            'map_assigned_to.login_name',
+        my @searchfields = qw(
+            bug_id
+            bug_severity
+            priority
+            rep_platform
+            assigned_to
+            bug_status
+            resolution
+            short_desc
+            assigned_to
         );
         # A new Bugzilla::CGI object needs to be created to allow
         # Bugzilla::Search to execute a saved query.  It's exceedingly weird,

@@ -168,6 +168,7 @@ use constant UPDATE_VALIDATORS => {
     bug_status          => \&_check_bug_status,
     cclist_accessible   => \&Bugzilla::Object::check_boolean,
     dup_id              => \&_check_dup_id,
+    everconfirmed       => \&Bugzilla::Object::check_boolean,
     qa_contact          => \&_check_qa_contact,
     reporter_accessible => \&Bugzilla::Object::check_boolean,
     resolution          => \&_check_resolution,
@@ -3461,6 +3462,7 @@ sub check_can_change_field {
 
     # *Only* users with (product-specific) "canconfirm" privs can confirm bugs.
     if ($field eq 'canconfirm'
+        || ($field eq 'everconfirmed' && $newvalue)
         || ($field eq 'bug_status'
             && $oldvalue eq 'UNCONFIRMED'
             && is_open_state($newvalue)))
@@ -3515,6 +3517,18 @@ sub check_can_change_field {
     {
         $$PrivilegesRequired = 2;
         return 0;
+    }
+    # - unconfirm bugs (confirming them is handled above)
+    if ($field eq 'everconfirmed') {
+        $$PrivilegesRequired = 2;
+        return 0;
+    }
+    # - change the status from one open state to another
+    if ($field eq 'bug_status'
+        && is_open_state($oldvalue) && is_open_state($newvalue)) 
+    {
+       $$PrivilegesRequired = 2;
+       return 0;
     }
 
     # The reporter is allowed to change anything else.

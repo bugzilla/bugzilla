@@ -432,8 +432,6 @@
   'section_num',
   'current_line_old',
   'current_line_new',
-  'curr_old',
-  'curr_new'
 ],
 
 'admin/admin.html.tmpl' => [

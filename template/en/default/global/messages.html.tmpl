@@ -141,6 +141,7 @@
     [% link  = "Click here if the page does not redisplay automatically." %]
 
   [% ELSIF message_tag == "buglist_updated_named_query" %]
+    [% title = "Search updated" %]
     Your search named <code><a 
      href="buglist.cgi?cmdtype=runnamed&amp;namedcmd=[% queryname FILTER url_quote %]"
     >[% queryname FILTER html %]</a></code> has been updated.
@@ -150,6 +151,7 @@
     also bookmark the result of any individual search.
 
   [% ELSIF message_tag == "buglist_new_named_query" %]
+    [% title = "Search created" %]
     OK, you have a new search named <code><a
      href="buglist.cgi?cmdtype=runnamed&amp;namedcmd=[% queryname FILTER url_quote %]"
     >[% queryname FILTER html %]</a></code>.

@@ -359,6 +359,7 @@ if ($cgi->param('format') && $cgi->param('format') =~ /^report-(table|graph)$/) 
 }
 
 $vars->{'known_name'} = $cgi->param('known_name');
+$vars->{'columnlist'} = $cgi->param('columnlist');
 
 
 # Add in the defaults.

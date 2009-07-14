@@ -142,13 +142,11 @@ if (defined $cgi->param('rememberedquery')) {
         $params->param('columnlist', join(",", @collist));
         $search->set_url($params->query_string());
         $search->update();
-        $vars->{'redirect_url'} = "buglist.cgi?".$cgi->param('rememberedquery');
     }
-    else {
-        my $params = new Bugzilla::CGI($cgi->param('rememberedquery'));
-        $params->param('columnlist', join(",", @collist));
-        $vars->{'redirect_url'} = "buglist.cgi?".$params->query_string();
-    }
+
+    my $params = new Bugzilla::CGI($cgi->param('rememberedquery'));
+    $params->param('columnlist', join(",", @collist));
+    $vars->{'redirect_url'} = "buglist.cgi?".$params->query_string();
 
 
     # If we're running on Microsoft IIS, using cgi->redirect discards
@@ -169,7 +167,9 @@ if (defined $cgi->param('rememberedquery')) {
     exit;
 }
 
-if (defined $cgi->cookie('COLUMNLIST')) {
+if (defined $cgi->param('columnlist')) {
+    @collist = split(/[ ,]+/, $cgi->param('columnlist'));
+} elsif (defined $cgi->cookie('COLUMNLIST')) {
     @collist = split(/ /, $cgi->cookie('COLUMNLIST'));
 } else {
     @collist = DEFAULT_COLUMN_LIST;
@@ -188,13 +188,6 @@ if (defined $cgi->param('query_based_on')) {
     # Only allow users to edit their own queries.
     if ($search && $search->user->id == Bugzilla->user->id) {
         $vars->{'saved_search'} = $search;
-        $vars->{'buffer'} = "cmdtype=runnamed&namedcmd=". url_quote($search->name);
-
-        my $params = new Bugzilla::CGI($search->url);
-        if ($params->param('columnlist')) {
-            my @collist = split(',', $params->param('columnlist'));
-            $vars->{'collist'} = \@collist if scalar (@collist);
-        }
     }
 }
 

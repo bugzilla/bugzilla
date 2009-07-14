@@ -344,6 +344,7 @@ if (($cgi->param('query_format') || $cgi->param('format') || "")
 }
 
 $vars->{'known_name'} = $cgi->param('known_name');
+$vars->{'columnlist'} = $cgi->param('columnlist');
 
 
 # Add in the defaults.

@@ -55,6 +55,7 @@ use DateTime::TimeZone;
 use Digest;
 use Email::Address;
 use Scalar::Util qw(tainted);
+use Template::Filters;
 use Text::Wrap;
 
 sub trick_taint {
@@ -81,12 +82,37 @@ sub detaint_signed {
     return (defined($_[0]));
 }
 
+# Bug 120030: Override html filter to obscure the '@' in user
+#             visible strings.
+# Bug 319331: Handle BiDi disruptions.
 sub html_quote {
-    my ($var) = (@_);
-    $var =~ s/\&/\&amp;/g;
-    $var =~ s/</\&lt;/g;
-    $var =~ s/>/\&gt;/g;
-    $var =~ s/\"/\&quot;/g;
+    my ($var) = Template::Filters::html_filter(@_);
+    # Obscure '@'.
+    $var =~ s/\@/\&#64;/g;
+    if (Bugzilla->params->{'utf8'}) {
+        # Remove the following characters because they're
+        # influencing BiDi:
+        # --------------------------------------------------------
+        # |Code  |Name                      |UTF-8 representation|
+        # |------|--------------------------|--------------------|
+        # |U+202a|Left-To-Right Embedding   |0xe2 0x80 0xaa      |
+        # |U+202b|Right-To-Left Embedding   |0xe2 0x80 0xab      |
+        # |U+202c|Pop Directional Formatting|0xe2 0x80 0xac      |
+        # |U+202d|Left-To-Right Override    |0xe2 0x80 0xad      |
+        # |U+202e|Right-To-Left Override    |0xe2 0x80 0xae      |
+        # --------------------------------------------------------
+        #
+        # The following are characters influencing BiDi, too, but
+        # they can be spared from filtering because they don't
+        # influence more than one character right or left:
+        # --------------------------------------------------------
+        # |Code  |Name                      |UTF-8 representation|
+        # |------|--------------------------|--------------------|
+        # |U+200e|Left-To-Right Mark        |0xe2 0x80 0x8e      |
+        # |U+200f|Right-To-Left Mark        |0xe2 0x80 0x8f      |
+        # --------------------------------------------------------
+        $var =~ s/[\x{202a}-\x{202e}]//g;
+    }
     return $var;
 }
 
@@ -745,8 +771,9 @@ be done in the template where possible.
 
 =item C<html_quote($val)>
 
-Returns a value quoted for use in HTML, with &, E<lt>, E<gt>, and E<34> being
-replaced with their appropriate HTML entities.
+Returns a value quoted for use in HTML, with &, E<lt>, E<gt>, E<34> and @ being
+replaced with their appropriate HTML entities.  Also, Unicode BiDi controls are
+deleted.
 
 =item C<html_light_quote($val)>
 

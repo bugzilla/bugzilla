@@ -1,5 +1,5 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"> -->
-<!-- $Id: installation.xml,v 1.165 2009/03/02 01:21:57 mkanat%bugzilla.org Exp $ -->
+<!-- $Id: installation.xml,v 1.165.2.1 2009/07/16 01:17:53 lpsolit%gmail.com Exp $ -->
 <chapter id="installing-bugzilla">
   <title>Installing Bugzilla</title>
 
@@ -485,14 +485,6 @@
             (&min-mod_perl2-ver;) for mod_perl
           </para>
         </listitem>
-
-        <listitem>
-          <para>
-            CGI
-            (&min-mp-cgi-ver;) for mod_perl
-          </para>
-        </listitem>
-
       </orderedlist>
       </para>
 
@@ -665,10 +657,6 @@
       <para>Bugzilla requires <literal>mod_perl</literal> to be installed, which can be
       obtained from <ulink url="http://perl.apache.org"/> - Bugzilla requires
       version &min-mod_perl2-ver; (AKA 2.0.0-RC5) to be installed.</para>
-      
-      <para>Bugzilla also requires a more up-to-date version of the CGI
-      perl module to be installed, version &min-mp-cgi-ver; as opposed to &min-cgi-ver;
-      </para>
     </section>
   </section>
   

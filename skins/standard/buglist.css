@@ -78,13 +78,14 @@ td.bz_percentage_complete_column {
     text-align: right;
 }
 
-tr.bz_time_summary_line {
-    background: black;
-    color: white;
-}
-
 td.bz_total_label {
     font-weight: bold;
+}
+
+td.bz_total {
+    border-top-style: solid;
+    border-top-color: #929bb1;
+    border-top-width: 3px;
     text-align: right;
 }
 

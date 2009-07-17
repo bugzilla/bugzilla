@@ -244,16 +244,19 @@
             column == 'estimated_time' ||
             column == 'percentage_complete' %]
         [% IF columns_to_span > 0 %]
-          <td class="bz_total_label" colspan="[% columns_to_span FILTER html %]"><b>Totals</b></td>
+          <td class="bz_total bz_total_label" colspan="
+              [%- columns_to_span FILTER html %]"><b>Totals</b></td>
           [% columns_to_span = 0 %]
         [% END %]
         [% IF column == 'percentage_complete' %]
-          <td>[% time_info.percentage_complete FILTER format(abbrev.$column.format_value) FILTER html -%]</td>
+          <td class="bz_total">[% time_info.percentage_complete
+              FILTER format(abbrev.$column.format_value) FILTER html %]</td>
         [% ELSE %]
-          <td>[% PROCESS formattimeunit time_unit=time_info.$column %]</td>
+          <td class="bz_total">
+            [%- PROCESS formattimeunit time_unit=time_info.$column %]</td>
         [% END %]
       [% ELSIF columns_to_span == 0 %] [%# A column following the first total %]
-        <td>&nbsp;</td>
+        <td class="bz_total">&nbsp;</td>
       [% ELSE %] [%# We haven't gotten to a time column yet, keep computing span %]
         [% columns_to_span = columns_to_span + 1 %]
       [% END %]

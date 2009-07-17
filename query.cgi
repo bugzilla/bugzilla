@@ -232,11 +232,6 @@ if (Bugzilla->params->{'usetargetmilestone'}) {
 
 $vars->{'have_keywords'} = Bugzilla::Keyword::keyword_count();
 
-my $legal_resolutions = get_legal_field_values('resolution');
-push(@$legal_resolutions, "---"); # Oy, what a hack.
-# Another hack - this array contains "" for some reason. See bug 106589.
-$vars->{'resolution'} = [grep ($_, @$legal_resolutions)];
-
 my @chfields;
 
 push @chfields, "[Bug creation]";
@@ -262,11 +257,12 @@ if (Bugzilla->user->in_group(Bugzilla->params->{'timetrackinggroup'})) {
 }
 @chfields = (sort(@chfields));
 $vars->{'chfield'} = \@chfields;
-$vars->{'bug_status'} = get_legal_field_values('bug_status');
-$vars->{'rep_platform'} = get_legal_field_values('rep_platform');
-$vars->{'op_sys'} = get_legal_field_values('op_sys');
-$vars->{'priority'} = get_legal_field_values('priority');
-$vars->{'bug_severity'} = get_legal_field_values('bug_severity');
+$vars->{'bug_status'} = Bugzilla::Field->new({name => 'bug_status'})->legal_values;
+$vars->{'rep_platform'} = Bugzilla::Field->new({name => 'rep_platform'})->legal_values;
+$vars->{'op_sys'} = Bugzilla::Field->new({name => 'op_sys'})->legal_values;
+$vars->{'priority'} = Bugzilla::Field->new({name => 'priority'})->legal_values;
+$vars->{'bug_severity'} = Bugzilla::Field->new({name => 'bug_severity'})->legal_values;
+$vars->{'resolution'} = Bugzilla::Field->new({name => 'resolution'})->legal_values;
 
 # Boolean charts
 my @fields = Bugzilla->get_fields({ obsolete => 0 });

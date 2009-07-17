@@ -15,6 +15,7 @@
 # Contributor(s): Dan Mosedale <dmose@mozilla.org>
 #                 Frédéric Buclin <LpSolit@gmail.com>
 #                 Myk Melez <myk@mozilla.org>
+#                 Greg Hendricks <ghendricks@novell.com>
 
 =head1 NAME
 
@@ -1033,8 +1034,14 @@ sub check_field {
     my $dbh = Bugzilla->dbh;
 
     # If $legalsRef is undefined, we use the default valid values.
+    # Valid values for this check are all possible values. 
+    # Using get_legal_values would only return active values, but since
+    # some bugs may have inactive values set, we want to check them too. 
     unless (defined $legalsRef) {
-        $legalsRef = get_legal_field_values($name);
+        $legalsRef = Bugzilla::Field->new({name => $name})->legal_values;
+        my @values = map($_->name, @$legalsRef);
+        $legalsRef = \@values;
+
     }
 
     if (!defined($value)

@@ -188,6 +188,9 @@ if ($action eq 'update') {
     $value->set_name($cgi->param('value_new'));
     $value->set_sortkey($cgi->param('sortkey'));
     $value->set_visibility_value($cgi->param('visibility_value_id'));
+    if (!($value->is_static || $value->is_default)) {
+        $value->set_is_active($cgi->param('is_active'));
+    }
     $vars->{'changes'} = $value->update();
     delete_token($token);
     $vars->{'message'} = 'field_value_updated';

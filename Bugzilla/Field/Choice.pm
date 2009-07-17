@@ -17,6 +17,7 @@
 # The Original Code is the Bugzilla Bug Tracking System.
 #
 # Contributor(s): Max Kanat-Alexander <mkanat@bugzilla.org>
+#                 Greg Hendricks <ghendricks@novell.com>
 
 use strict;
 
@@ -40,12 +41,14 @@ use constant DB_COLUMNS => qw(
     id
     value
     sortkey
+    isactive
     visibility_value_id
 );
 
 use constant UPDATE_COLUMNS => qw(
     value
     sortkey
+    isactive
     visibility_value_id
 );
 
@@ -58,6 +61,7 @@ use constant VALIDATORS => {
     value   => \&_check_value,
     sortkey => \&_check_sortkey,
     visibility_value_id => \&_check_visibility_value_id,
+    isactive => \&Bugzilla::Object::check_boolean,
 };
 
 use constant CLASS_MAP => {
@@ -211,7 +215,8 @@ sub _check_if_controller {
 # Accessors #
 #############
 
-sub sortkey { return $_[0]->{'sortkey'}; }
+sub is_active { return $_[0]->{'isactive'}; }
+sub sortkey   { return $_[0]->{'sortkey'};  }
 
 sub bug_count {
     my $self = shift;
@@ -301,8 +306,9 @@ sub controlled_values {
 # Mutators #
 ############
 
-sub set_name    { $_[0]->set('value', $_[1]);   }
-sub set_sortkey { $_[0]->set('sortkey', $_[1]); }
+sub set_is_active { $_[0]->set('isactive', $_[1]); }
+sub set_name      { $_[0]->set('value', $_[1]);    }
+sub set_sortkey   { $_[0]->set('sortkey', $_[1]);  }
 sub set_visibility_value {
     my ($self, $value) = @_;
     $self->set('visibility_value_id', $value);

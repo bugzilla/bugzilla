@@ -611,15 +611,17 @@ function doOnSelectProduct(selectmode) {
   <td align="left">
     <select name="[% sel.name %]" id="[% sel.name %]"
             multiple="multiple" size="[% sel.size %]">
-      [% FOREACH name = ${sel.name} %]
-        <option value="[% name FILTER html %]"
-          [% " selected" IF lsearch(default.${sel.name}, name) != -1 %]>
+      [% FOREACH value = ${sel.name} %]
+      [%# This only applies for Resolution really %]
+        <option value="[% value.name OR '---' FILTER html %]"
+          [% " selected" IF lsearch(default.${sel.name}, value.name) != -1 %]>
           [% IF sel.name == "bug_status" %]
-            [% get_status(name) FILTER html %]
+            [% get_status(value.name) FILTER html %]
           [% ELSIF sel.name == "resolution" %]
-            [% get_resolution(name) FILTER html %]
+            [%# Again, resolution has that odd empty value. Replace it with '---' %]
+            [% get_resolution(value.name) OR '---' FILTER html %]
           [% ELSE %]
-            [% name FILTER html %]
+            [% value.name FILTER html %]
           [% END %]
         </option>
       [% END %]

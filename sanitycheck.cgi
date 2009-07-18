@@ -223,6 +223,22 @@ if ($cgi->param('repair_creation_date')) {
 }
 
 ###########################################################################
+# Fix everconfirmed
+###########################################################################
+
+if ($cgi->param('repair_everconfirmed')) {
+    Status('everconfirmed_start');
+
+    my @confirmed_open_states = grep {$_ ne 'UNCONFIRMED'} BUG_STATE_OPEN;
+    my $confirmed_open_states = join(', ', map {$dbh->quote($_)} @confirmed_open_states);
+
+    $dbh->do("UPDATE bugs SET everconfirmed = 0 WHERE bug_status = 'UNCONFIRMED'");
+    $dbh->do("UPDATE bugs SET everconfirmed = 1 WHERE bug_status IN ($confirmed_open_states)");
+
+    Status('everconfirmed_end');
+}
+
+###########################################################################
 # Fix entries in Bugs full_text
 ###########################################################################
 
@@ -953,13 +969,13 @@ BugCheck("bugs WHERE bug_status NOT IN ($open_states) AND resolution = ''",
 Status('bug_check_status_everconfirmed');
 
 BugCheck("bugs WHERE bug_status = 'UNCONFIRMED' AND everconfirmed = 1",
-         'bug_check_status_everconfirmed_error_text');
+         'bug_check_status_everconfirmed_error_text', 'repair_everconfirmed');
 
 my @confirmed_open_states = grep {$_ ne 'UNCONFIRMED'} BUG_STATE_OPEN;
 my $confirmed_open_states = join(', ', map {$dbh->quote($_)} @confirmed_open_states);
 
 BugCheck("bugs WHERE bug_status IN ($confirmed_open_states) AND everconfirmed = 0",
-         'bug_check_status_everconfirmed_error_text2');
+         'bug_check_status_everconfirmed_error_text2', 'repair_everconfirmed');
 
 Status('bug_check_votes_everconfirmed');
 

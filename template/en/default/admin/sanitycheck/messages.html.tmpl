@@ -169,6 +169,12 @@
       [% END %]
     [% END %]
 
+  [% ELSIF san_tag == "everconfirmed_start" %]
+    OK, now fixing everconfirmed.
+
+  [% ELSIF san_tag == "everconfirmed_end" %]
+    everconfirmed fixed.
+
   [% ELSIF san_tag == "flag_check_start" %]
     Checking for flags being in the wrong product/component.
 

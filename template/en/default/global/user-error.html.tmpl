@@ -1101,9 +1101,11 @@
   [% ELSIF error == "no_bugs_in_list" %]
     [% title = "Delete Tag?" %]
     This will remove all [% terms.bugs %] from the
-    [% tag FILTER html %] tag. This will delete the tag completely. Click
+    <em>[% name FILTER html %]</em> tag. This will delete the tag completely. Click
     <a href="buglist.cgi?cmdtype=dorem&amp;remaction=forget&amp;namedcmd=
-    [%- tag FILTER url_quote %]">here</a> if you really want to delete it.
+    [%- name FILTER url_quote %]&amp;token=
+    [%- issue_hash_token([query_id, name]) FILTER url_quote %]">here</a>
+    if you really want to delete it.
 
   [% ELSIF error == "no_bugs_to_remove" %]
     [% title = "No Tag Selected" %]

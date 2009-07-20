@@ -68,13 +68,6 @@ sub get_param_list {
   },
 
   {
-   name    => 'quicksearch_comment_cutoff',
-   type    => 't',
-   default => '4',
-   checker => \&check_numeric
-  },
-  
-  {
    name => 'specific_search_allow_empty_words',
    type => 'b',
    default => 1

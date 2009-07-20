@@ -167,8 +167,6 @@ sub quicksearch {
         $searchstring =~ s/\s+NOT\s+/ -/g;
 
         my @words = splitString($searchstring);
-        my $searchComments = 
-            $#words < Bugzilla->params->{'quicksearch_comment_cutoff'};
         my @openStates = BUG_STATE_OPEN;
         my @closedStates;
         my @unknownFields;
@@ -245,10 +243,8 @@ sub quicksearch {
                 }
             }
             elsif ($firstChar eq '#') {
-                addChart('short_desc', 'anywords', $baseWord, $negate);
-                if ($searchComments) {
-                    addChart('longdesc', 'anywords', $baseWord, $negate);
-                }
+                addChart('short_desc', 'substring', $baseWord, $negate);
+                addChart('content', 'matches', $baseWord, $negate);
             }
             elsif ($firstChar eq ':') {
                 foreach (@subWords) {
@@ -386,10 +382,7 @@ sub quicksearch {
                                     addChart('status_whiteboard', 'substring',
                                              $word, $negate);
                                 }
-                                if ($searchComments) {
-                                    addChart('longdesc', 'substring',
-                                             $word, $negate);
-                                }
+                                addChart('content', 'matches', $word, $negate);
                             }
                             # URL field (for IP addrs, host.names,
                             # scheme://urls)

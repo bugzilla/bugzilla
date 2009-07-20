@@ -290,7 +290,10 @@
   <input type="checkbox" name="commentprivacy" value="1"
          id="newcommentprivacy"
          onClick="updateCommentTagControl(this, form)"/>
-  <label for="newcommentprivacy">Private</label>
+   <label for="newcommentprivacy">
+     Make comment private (visible only to members of the
+     <strong>[% Param('insidergroup') FILTER html %]</strong> group)
+   </label>
 [% END %]
 <br>
 [% INCLUDE global/textarea.html.tmpl

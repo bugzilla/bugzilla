@@ -517,7 +517,7 @@ TUI_hide_default('expert_fields');
     </td>
   </tr>
 
-  [% IF Param("insidergroup") && user.in_group(Param("insidergroup")) %]
+  [% IF user.is_insider %]
     <tr class="expert_fields">
       <th>&nbsp;</th>
       <td colspan="3">
@@ -525,7 +525,8 @@ TUI_hide_default('expert_fields');
         <input type="checkbox" id="commentprivacy" name="commentprivacy"
           [% " checked=\"checked\"" IF commentprivacy %]>
         <label for="commentprivacy">
-          Initial Description is Private
+          Make description private (visible only to members of the 
+          <strong>[% Param('insidergroup') FILTER html %]</strong> group)
         </label>
       </td>
     </tr>

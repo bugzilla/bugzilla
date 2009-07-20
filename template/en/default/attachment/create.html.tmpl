@@ -110,10 +110,13 @@
       <tr>
         <th>Privacy:</th>
         <td>
-          <em>If the attachment is private, check the box below.</em><br>
           <input type="checkbox" name="isprivate" id="isprivate"
           value="1" onClick="updateCommentPrivacy(this)">
-        <label for="isprivate">Private</label>
+          <label for="isprivate">
+            Make attachment and comment private (visible only to members of
+            the <strong>[% Param('insidergroup') FILTER html %]</strong>
+            group)
+          </label>
         </td>
       </tr>
     [% END %]

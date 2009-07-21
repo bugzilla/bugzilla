@@ -1390,6 +1390,10 @@ The id you specified doesn't exist in the database.
 
 You did not have the necessary rights to edit the bug.
 
+=item 113 (Can't Make Private Comments)
+
+You tried to add a private comment, but don't have the necessary rights.
+
 =back
 
 =item B<History>
@@ -1399,6 +1403,9 @@ You did not have the necessary rights to edit the bug.
 =item Added in Bugzilla B<3.2>.
 
 =item Modified to return the new comment's id in Bugzilla B<3.4>
+
+=item Modified to throw an error if you try to add a private comment
+but can't, in Bugzilla B<3.4>.
 
 =back
 

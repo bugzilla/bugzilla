@@ -87,6 +87,8 @@ use constant WS_ERROR_CODE => {
     # See Also errors
     bug_url_invalid => 112,
     bug_url_too_long => 112,
+    # Insidergroup Errors
+    user_not_insider => 113,
 
     # Authentication errors are usually 300-400.
     invalid_username_or_password => 300,

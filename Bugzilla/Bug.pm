@@ -1192,9 +1192,10 @@ sub _check_comment {
 
 sub _check_commentprivacy {
     my ($invocant, $comment_privacy) = @_;
-    my $insider_group = Bugzilla->params->{"insidergroup"};
-    return ($insider_group && Bugzilla->user->in_group($insider_group) 
-            && $comment_privacy) ? 1 : 0;
+    if ($comment_privacy && !Bugzilla->user->is_insider) {
+        ThrowUserError('user_not_insider');
+    }
+    return $comment_privacy ? 1 : 0;
 }
 
 sub _check_comment_type {

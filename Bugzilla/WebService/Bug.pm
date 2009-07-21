@@ -1090,8 +1090,6 @@ items:
 C<string> The alias of this bug. If there is no alias or aliases are 
 disabled in this Bugzilla, this will be undef.
 
-=over
-
 =item when
 
 C<dateTime> The date the bug activity/change happened.
@@ -1126,8 +1124,6 @@ C<string> The new value of the bug field which has been added by the change.
 C<int> The id of the attachment that was changed. This only appears if 
 the change was to an attachment, otherwise C<attachment_id> will not be
 present in this hash.
-
-=back
 
 =back
 

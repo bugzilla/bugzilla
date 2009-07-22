@@ -103,7 +103,7 @@ sub grant_direct {
     my ($self, $type) = @_;
     $self->{grant_direct} ||= {};
     return $self->{grant_direct}->{$type} 
-        if defined $self->{members_direct}->{$type};
+        if defined $self->{grant_direct}->{$type};
     my $dbh = Bugzilla->dbh;
 
     my $ids = $dbh->selectcol_arrayref(

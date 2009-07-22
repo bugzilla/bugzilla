@@ -191,14 +191,16 @@ sub history {
     defined $ids || ThrowCodeError('param_required', { param => 'ids' });
 
     my @return;
+
     foreach my $bug_id (@$ids) {
         my %item;
         my $bug = Bugzilla::Bug->check($bug_id);
         $bug_id = $bug->id;
+        $item{id} = $self->type('int', $bug_id);
 
         my ($activity) = Bugzilla::Bug::GetBugActivity($bug_id);
-        $item{$bug_id} = [];
 
+        my @history;
         foreach my $changeset (@$activity) {
             my %bug_history;
             $bug_history{when} = $self->type('dateTime',
@@ -220,8 +222,10 @@ sub history {
                 push (@{$bug_history{changes}}, $change);
             }
             
-            push (@{$item{$bug_id}}, \%bug_history);
-        }   
+            push (@history, \%bug_history);
+        }
+
+        $item{history} = \@history;
 
         # alias is returned in case users passes a mixture of ids and aliases
         # then they get to know which bug activity relates to which value  
@@ -933,16 +937,25 @@ try to specify an alias. (It will be error 100.)
 
 =item B<Returns>
 
-A hash containing a single element, C<bugs>. This is a hash of hashes. 
-Each hash has the numeric bug id as a key, and contains the following
-items:
+A hash containing a single element, C<bugs>. This is an array of hashes,
+containing the following keys:
 
 =over
+
+=item id
+
+C<int> The numeric id of the bug.
 
 =item alias
 
 C<string> The alias of this bug. If there is no alias or aliases are 
 disabled in this Bugzilla, this will be undef.
+
+=item history
+
+C<array> An array of hashes, each hash having the following keys:
+
+=over
 
 =item when
 
@@ -978,6 +991,8 @@ C<string> The new value of the bug field which has been added by the change.
 C<int> The id of the attachment that was changed. This only appears if 
 the change was to an attachment, otherwise C<attachment_id> will not be
 present in this hash.
+
+=back
 
 =back
 

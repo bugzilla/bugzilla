@@ -250,10 +250,11 @@ sub field {
 
 sub is_default {
     my $self = shift;
-    my $param_value = 
-        Bugzilla->params->{ $self->DEFAULT_MAP->{$self->field->name} };
-    return 0 if !defined $param_value;
-    return $self->name eq $param_value ? 1 : 0;
+    my $name = $self->DEFAULT_MAP->{$self->field->name};
+    # If it doesn't exist in DEFAULT_MAP, then there is no parameter
+    # related to this field.
+    return 0 unless $name;
+    return ($self->name eq Bugzilla->params->{$name}) ? 1 : 0;
 }
 
 sub is_static {

@@ -102,10 +102,12 @@ sub REQUIRED_MODULES {
         module  => 'DBI',
         version => '1.41'
     },
+    # 2.22 fixes various problems related to UTF8 strings in hash keys,
+    # as well as line endings on Windows.
     {
         package => 'Template-Toolkit',
         module  => 'Template',
-        version => '2.15'
+        version => '2.22'
     },
     {
         package => 'Email-Send',

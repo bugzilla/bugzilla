@@ -112,7 +112,7 @@ This script does not run on Windows.
 
   ./install-module.pl Module::Name [--global]
   ./install-module.pl --all [--global]
-  ./install-module.pl --all-upgrade [--global]
+  ./install-module.pl --upgrade-all [--global]
   ./install-module.pl --show-config
 
   Do "./install-module.pl --help" for more information.

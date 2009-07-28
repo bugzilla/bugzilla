@@ -18,7 +18,6 @@
 <!ENTITY customization SYSTEM "customization.xml">
 <!ENTITY troubleshooting SYSTEM "troubleshooting.xml">
 <!ENTITY patches SYSTEM "patches.xml">
-<!ENTITY introduction SYSTEM "introduction.xml">
 <!ENTITY modules SYSTEM "modules.xml">
 
 <!-- Things to change for a stable release:

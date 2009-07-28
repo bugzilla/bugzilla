@@ -13,7 +13,6 @@
 <!ENTITY administration SYSTEM "administration.xml">
 <!ENTITY security SYSTEM "security.xml">
 <!ENTITY using SYSTEM "using.xml">
-<!ENTITY integration SYSTEM "integration.xml">
 <!ENTITY index SYSTEM "index.xml">
 <!ENTITY customization SYSTEM "customization.xml">
 <!ENTITY troubleshooting SYSTEM "troubleshooting.xml">

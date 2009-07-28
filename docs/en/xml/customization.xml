@@ -790,8 +790,17 @@
     </para>    
   </section>   
 
-  <!-- Integrating Bugzilla with Third-Party Tools -->
-  &integration;
+  <section id="integration">
+    <title>Integrating Bugzilla with Third-Party Tools</title>
+
+    <para>
+      Many utilities and applications can integrate with Bugzilla,
+      either on the client- or server-side. None of them is maintained
+      by the Bugzilla community, nor are they being tested during our
+      QA tests, so use them at your own risk. They are listed at
+      <ulink url="https://wiki.mozilla.org/Bugzilla:Addons" />.
+    </para>
+  </section>
 
 </chapter>
 

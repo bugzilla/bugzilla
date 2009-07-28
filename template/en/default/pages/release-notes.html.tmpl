@@ -320,9 +320,9 @@
   <li>Perl v<strong>5.8.1</strong> (Windows platforms)</li>
 </ul>
 
-[% PROCESS db_req db='mysql' %]
+[% INCLUDE db_req db='mysql' db_new = 1 %]
 
-[% PROCESS db_req db='pg' %]
+[% INCLUDE db_req db='pg' %]
 
 <h3><a name="v30_req_modules"></a>Required Perl Modules</h3>
 
@@ -982,7 +982,10 @@ sub y { $var++ }</pre>
     Users</h3>
 
   <ul>
-    <li>[% m.name FILTER html %] v[% m.db_version FILTER html %]</li>
+    <li>[% m.name FILTER html %]
+       [%+ '<span class="req_new">' IF db_new %]v[% m.db_version FILTER html %]
+       [% '</span>' IF db_new %]
+    </li>
     <li><strong>perl module:</strong>
       [%+ m.dbd.module FILTER html %] v[% m.dbd.version FILTER html %]</li>
   </ul>

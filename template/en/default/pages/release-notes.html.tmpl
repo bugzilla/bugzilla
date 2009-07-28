@@ -85,7 +85,7 @@
 [% INCLUDE req_table reqs = REQUIRED_MODULES
                      new = ['URI', 'DateTime', 'DateTime-TimeZone', 
                             'Digest-SHA']
-                     updated = [] %]
+                     updated = ['Template-Toolkit'] %]
 
 <h3><a name="v34_req_optional_mod"></a>Optional Perl Modules</h3>
 
@@ -348,12 +348,13 @@
 
 <ul>
   <li>Various functions have been added to the WebService:
+    <a href="[% docs_urlbase FILTER html %]api/Bugzilla/WebService/Bug.html#history">B[% %]ug.history</a>,
     <a href="[% docs_urlbase FILTER html %]api/Bugzilla/WebService/Bug.html#search">B[% %]ug.search</a>,
-    <a href="[% docs_urlbase FILTER html %]api/Bugzilla/WebService/User.html#get">User.get</a>,
     <a href="[% docs_urlbase FILTER html %]api/Bugzilla/WebService/Bug.html#comments">B[% %]ug.comments</a>,
-    <a href="[% docs_urlbase FILTER html %]api/Bugzilla/WebService/Bugzilla.html#time">B[% %]ugzilla.time</a>
-    (<kbd>B[% %]ugzilla.timezone</kbd> is now deprecated),
-    and <a href="[% docs_urlbase FILTER html %]api/Bugzilla/WebService/Bug.html#update_see_also">B[% %]ug.update_see_also</a>.
+    <a href="[% docs_urlbase FILTER html %]api/Bugzilla/WebService/Bug.html#update_see_also">B[% %]ug.update_see_also</a>,
+    <a href="[% docs_urlbase FILTER html %]api/Bugzilla/WebService/User.html#get">User.get</a>,
+    and <a href="[% docs_urlbase FILTER html %]api/Bugzilla/WebService/Bugzilla.html#time">B[% %]ugzilla.time</a>
+    (<kbd>B[% %]ugzilla.timezone</kbd> is now deprecated).
   </li>
   <li>For network efficiency, you can now limit which fields are returned 
     from certain WebService functions, like <kbd>User.get</kbd>.</li>
@@ -364,6 +365,10 @@
   <li>The <kbd>B[% %]ug.get</kbd> method now returns many more fields.</li>
   <li>The <kbd>B[% %]ug.add_comment</kbd> method now returns the ID of the comment
     that was just added.</li>
+  <li>The <kbd>B[% %]ug.add_comment</kbd> method will now throw an error if you
+    try to add a private comment but do not have the correct permissions.
+    (In previous versions, it would just silently ignore the <kbd>private</kbd>
+    argument if you didn't have the correct permissions.)</li>
   <li>Many WebService function parameters now take individual values in
     addition to arrays.</li>
   <li>The WebService now validates input types--it makes sure that dates

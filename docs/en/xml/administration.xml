@@ -1847,7 +1847,8 @@ ReadOnly: ENTRY, NA/NA, CANEDIT
 
     <note>
       <para>Milestone options will only appear for a Product if you turned
-      on the "usetargetmilestone" Param in the "Edit Parameters" screen.
+      on the "usetargetmilestone" parameter in the "Bug Fields" tab of the
+      "Parameters" page.
       </para>
     </note>
 

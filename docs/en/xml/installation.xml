@@ -1,5 +1,5 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"> -->
-<!-- $Id: installation.xml,v 1.167 2009/07/28 17:57:35 lpsolit%gmail.com Exp $ -->
+<!-- $Id: installation.xml,v 1.168 2009/07/29 12:29:36 lpsolit%gmail.com Exp $ -->
 <chapter id="installing-bugzilla">
   <title>Installing Bugzilla</title>
 
@@ -1106,6 +1106,14 @@ max_allowed_packet=4M
                     when granting extra access.
                 </para>
                 </note>
+
+                <note>
+                <para>
+                    On Windows, you may have to also add the
+                    <computeroutput>ScriptInterpreterSource Registry-Strict</computeroutput>
+                    line, see <link linkend="win32-http">Windows specific notes</link>.
+                </para>
+                </note>
             </step>                    
     
             <step>
@@ -1662,16 +1670,6 @@ C:\perl&gt; <command>ppm install &lt;module name&gt;</command>
         </tip>
       </section>
   
-      <section id="win32-code-changes">
-        <title>Code changes required to run on Win32</title>
-
-        <para>
-          Bugzilla on Win32 is supported out of the box from version 2.20; this
-          means that no code changes are required to get Bugzilla running.
-        </para>
-        
-      </section>
-
       <section id="win32-http">
         <title>Serving the web pages</title>
 
@@ -1687,14 +1685,16 @@ C:\perl&gt; <command>ppm install &lt;module name&gt;</command>
 
         <note>
           <para>
-            If using Apache on windows, you can set the <ulink
-            url="http://httpd.apache.org/docs-2.0/mod/core.html#scriptinterpretersource">ScriptInterpreterSource</ulink>
-            directive in your Apache config to avoid having to modify
-            the first line of every script to contain your path to Perl
-            instead of <filename>/usr/bin/perl</filename>. When setting
-            <filename>ScriptInterpreterSource</filename>, do not forget
-            to specify the <command>-T</command> flag to enable the taint
-            mode. For example: <command>C:\Perl\bin\perl.exe -T</command>.
+            The web server looks at <filename>/usr/bin/perl</filename> to
+            call Perl. If you are using Apache on windows, you can set the
+            <ulink url="http://httpd.apache.org/docs-2.0/mod/core.html#scriptinterpretersource">ScriptInterpreterSource</ulink>
+            directive in your Apache config file to make it look at the
+            right place: insert the line
+            <programlisting>ScriptInterpreterSource Registry-Strict</programlisting>
+            into your <filename>httpd.conf</filename> file, and create the key
+            <programlisting>HKEY_CLASSES_ROOT\.cgi\Shell\ExecCGI\Command</programlisting>
+            with <option>C:\Perl\bin\perl.exe -T</option> as value (adapt to your
+            path if needed) in the registry. When this is done, restart Apache.
           </para>
         </note>
 

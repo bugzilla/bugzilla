@@ -31,7 +31,7 @@
     table.requests th { text-align: left; }
     table#filtering th { text-align: right; }
   "
-  onload="var f = document.forms[0]; selectProduct(f.product, f.component, null, null, 'Any');"
+  onload="var f = document.request_form; selectProduct(f.product, f.component, null, null, 'Any');"
   javascript_urls=["js/productform.js"]
 %]
 
@@ -42,7 +42,7 @@ When you are logged out, all pending requests that are not restricted
 to some group are shown by default.
 </p>
 
-<form action="request.cgi" method="get">
+<form id="request_form" name="request_form" action="request.cgi" method="get">
   <input type="hidden" name="action" value="queue">
 
   <table id="filtering">

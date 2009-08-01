@@ -23,6 +23,7 @@
 [%# INTERFACE:
   #   field: a Bugzilla::Field object
   #   value: The value of the field for this bug.
+  #   override_legal_values (optional): The list of legal values, for select fields.
   #   editable: Whether the field should be displayed as an editable
   #             <input> or as just the plain text of its value.
   #   allow_dont_change: display the --do_not_change-- option for select fields.
@@ -130,7 +131,10 @@
               [% dontchange FILTER html %]
             </option>
           [% END %]
-          [% FOREACH legal_value = field.legal_values %]
+          [% IF NOT override_legal_values %]
+            [% override_legal_values = field.legal_values %]
+          [% END %]
+          [% FOREACH legal_value = override_legal_values %]
             [% SET control_value = legal_value.visibility_value %]
             [% SET control_field = field.value_field %]
             <option value="[% legal_value.name FILTER html %]"

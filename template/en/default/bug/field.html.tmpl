@@ -131,10 +131,12 @@
               [% dontchange FILTER html %]
             </option>
           [% END %]
-          [% IF NOT override_legal_values %]
-            [% override_legal_values = field.legal_values %]
+          [% IF override_legal_values %]
+            [% legal_values = override_legal_values %]
+          [% ELSE %]
+            [% legal_values = field.legal_values %]
           [% END %]
-          [% FOREACH legal_value = override_legal_values %]
+          [% FOREACH legal_value = legal_values %]
             [% SET control_value = legal_value.visibility_value %]
             [% SET control_field = field.value_field %]
             <option value="[% legal_value.name FILTER html %]"

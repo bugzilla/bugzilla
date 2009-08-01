@@ -23,23 +23,23 @@
 [%# Use the current script name. If an empty name is returned,
   # then we are accessing the home page. %]
 
-[% target = cgi.url("-relative" => 1, "-query" => 1) %]
-[% IF !target %]
- [% target = "index.cgi" %]
+[% login_target = cgi.url("-relative" => 1, "-query" => 1) %]
+[% IF !login_target %]
+ [% login_target = "index.cgi" %]
 [% END %]
 
 [%# If SSL is in use, use 'sslbase', else use 'urlbase'. %]
 [% IF Param("sslbase") != "" && Param("ssl") != "never" %]
-  [% target = Param("sslbase") _ target %]
+  [% login_target = Param("sslbase") _ login_target %]
 [% ELSE %]
-  [% target = Param("urlbase") _ target %]
+  [% login_target = Param("urlbase") _ login_target %]
 [% END %]
 
 <li id="mini_login_container[% qs_suffix %]">
   <span class="separator">| </span>
   <a id="login_link[% qs_suffix %]" href="?GoAheadAndLogIn=1"
      onclick="return show_mini_login_form('[% qs_suffix %]')">Log In</a>
-  <form action="[% target FILTER html %]" method="POST" 
+  <form action="[% login_target FILTER html %]" method="POST" 
         class="mini_login bz_default_hidden"
         id="mini_login[% qs_suffix FILTER html %]"
         onsubmit="return check_mini_login_fields( '[% qs_suffix FILTER html %]' );"

@@ -2222,17 +2222,9 @@ sub _clone_email_event {
     my ($source, $target) = @_;
     my $dbh = Bugzilla->dbh;
 
-    my $sth1 = $dbh->prepare("SELECT user_id, relationship FROM email_setting
-                              WHERE event = $source");
-    my $sth2 = $dbh->prepare("INSERT into email_setting " .
-                             "(user_id, relationship, event) VALUES (" .
-                             "?, ?, $target)");
-
-    $sth1->execute();
-
-    while (my ($userid, $relationship) = $sth1->fetchrow_array()) {
-        $sth2->execute($userid, $relationship);
-    }
+    $dbh->do("INSERT INTO email_setting (user_id, relationship, event)
+                   SELECT user_id, relationship, $target FROM email_setting
+                    WHERE event = $source");
 }
 
 sub _migrate_email_prefs_to_new_table {

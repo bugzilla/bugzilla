@@ -178,13 +178,33 @@ sub get_alter_column_ddl {
         delete $new_def_copy{PRIMARYKEY};
     }
 
-    my $new_ddl = $self->get_type_ddl(\%new_def_copy);
     my @statements;
 
     push(@statements, "UPDATE $table SET $column = $set_nulls_to
                         WHERE $column IS NULL") if defined $set_nulls_to;
-    push(@statements, "ALTER TABLE $table CHANGE COLUMN 
+
+    # Calling SET DEFAULT or DROP DEFAULT is *way* faster than calling
+    # CHANGE COLUMN, so just do that if we're just changing the default.
+    my %old_defaultless = %$old_def;
+    my %new_defaultless = %$new_def;
+    delete $old_defaultless{DEFAULT};
+    delete $new_defaultless{DEFAULT};
+    if ($self->columns_equal(\%new_defaultless, \%old_defaultless)) {
+        if (defined $old_def->{DEFAULT} and !defined $new_def->{DEFAULT}) {
+            push(@statements,
+                 "ALTER TABLE $table ALTER COLUMN $column DROP DEFAULT");
+        }
+        else {
+            push(@statements, "ALTER TABLE $table ALTER COLUMN $column 
+                               SET DEFAULT " . $new_def->{DEFAULT});
+        }
+    }
+    else {
+        my $new_ddl = $self->get_type_ddl(\%new_def_copy);
+        push(@statements, "ALTER TABLE $table CHANGE COLUMN 
                        $column $column $new_ddl");
+    }
+
     if ($old_def->{PRIMARYKEY} && !$new_def->{PRIMARYKEY}) {
         # Dropping a PRIMARY KEY needs an explicit DROP PRIMARY KEY
         push(@statements, "ALTER TABLE $table DROP PRIMARY KEY");

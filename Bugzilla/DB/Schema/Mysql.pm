@@ -189,13 +189,15 @@ sub get_alter_column_ddl {
     my %new_defaultless = %$new_def;
     delete $old_defaultless{DEFAULT};
     delete $new_defaultless{DEFAULT};
-    if ($self->columns_equal(\%new_defaultless, \%old_defaultless)) {
-        if (defined $old_def->{DEFAULT} and !defined $new_def->{DEFAULT}) {
+    if (!$self->columns_equal($old_def, $new_def)
+        && $self->columns_equal(\%new_defaultless, \%old_defaultless)) 
+    {
+        if (!defined $new_def->{DEFAULT}) {
             push(@statements,
                  "ALTER TABLE $table ALTER COLUMN $column DROP DEFAULT");
         }
         else {
-            push(@statements, "ALTER TABLE $table ALTER COLUMN $column 
+            push(@statements, "ALTER TABLE $table ALTER COLUMN $column
                                SET DEFAULT " . $new_def->{DEFAULT});
         }
     }

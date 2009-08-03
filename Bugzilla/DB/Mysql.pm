@@ -814,22 +814,40 @@ sub _fix_defaults {
     # a default.
     return unless (defined $assi_default && $assi_default ne '');
 
+    my %fix_columns;
     foreach my $table ($self->_bz_real_schema->get_table_list()) {
         foreach my $column ($self->bz_table_columns($table)) {
-        my $abs_def = $self->bz_column_info($table, $column);
+            my $abs_def = $self->bz_column_info($table, $column);
+            # BLOB/TEXT columns never have defaults
+            next if $abs_def->{TYPE} =~ /BLOB|TEXT/i;
             if (!defined $abs_def->{DEFAULT}) {
                 # Get the exact default from the database without any
                 # "fixing" by bz_column_info_real.
                 my $raw_info = $self->_bz_raw_column_info($table, $column);
                 my $raw_default = $raw_info->{COLUMN_DEF};
                 if (defined $raw_default) {
-                    $self->bz_alter_column_raw($table, $column, $abs_def);
-                    $raw_default = "''" if $raw_default eq '';
-                    print "Removed incorrect DB default: $raw_default\n";
+                    if ($raw_default eq '') {
+                        # Only (var)char columns can have empty strings as 
+                        # defaults, so if we got an empty string for some
+                        # other default type, then it's bogus.
+                        next unless $abs_def->{TYPE} =~ /char/i;
+                        $raw_default = "''";
+                    }
+                    $fix_columns{$table} ||= [];
+                    push(@{ $fix_columns{$table} }, $column);
+                    print "$table.$column has incorrect DB default: $raw_default\n";
                 }
             }
         } # foreach $column
     } # foreach $table
+
+    print "Fixing defaults...\n";
+    foreach my $table (reverse sort keys %fix_columns) {
+        my @alters = map("ALTER COLUMN $_ DROP DEFAULT", 
+                         @{ $fix_columns{$table} });
+        my $sql = "ALTER TABLE $table " . join(',', @alters);
+        $self->do($sql);
+    }
 }
 
 # There is a bug in MySQL 4.1.0 - 4.1.15 that makes certain SELECT

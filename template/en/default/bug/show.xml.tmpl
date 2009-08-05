@@ -62,18 +62,21 @@
       [% END %]
 
       [%# Bug Flags %]
-      [% FOREACH type = bug.flag_types %]
-        [% FOREACH flag = type.flags %]
-          <flag name="[% type.name FILTER xml %]"
-                id="[% flag.id FILTER xml %]"
-                status="[% flag.status FILTER xml %]"
-                setter="[% flag.setter.login FILTER email FILTER xml %]"
-          [% IF flag.requestee %]
-              requestee="[% flag.requestee.login FILTER email FILTER xml %]"
+      [% IF displayfields.flag %]
+        [% FOREACH type = bug.flag_types %]
+          [% FOREACH flag = type.flags %]
+            <flag name="[% type.name FILTER xml %]"
+                  id="[% flag.id FILTER xml %]"
+                  status="[% flag.status FILTER xml %]"
+                  setter="[% flag.setter.login FILTER email FILTER xml %]"
+              [% IF flag.requestee %]
+                  requestee="[% flag.requestee.login FILTER email FILTER xml %]"
+              [% END %]
+            />
           [% END %]
-          />
         [% END %]
       [% END %]
+
       [% IF displayfields.long_desc %]
         [% FOREACH c = bug.longdescs %]
           [% NEXT IF c.isprivate && !user.in_group(Param("insidergroup")) %]

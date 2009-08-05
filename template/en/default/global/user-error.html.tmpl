@@ -568,12 +568,6 @@
     <br>Alternately, if your attachment is an image, you could convert
     it to a compressible format like JPG or PNG and try again.
 
-  [% ELSIF error == "flag_not_multiplicable" %]
-    [% docslinks = {'flags-overview.html' => 'An overview on Flags',
-                    'flags.html' => 'Using Flags'} %]
-    You can't ask more than one person at a time for
-    <em>[% type.name FILTER html %]</em>.
-
   [% ELSIF error == "flag_requestee_needs_privs" %]
     [% title = "Flag Requestee Needs Privileges" %]
     [% requestee.identity FILTER html %] does not have permission to set the
@@ -631,6 +625,12 @@
     [% admindocslinks = {'flags-overview.html#flags-admin'  => 'Administering Flags'} %]
     The name <em>[% name FILTER html %]</em> must be 1-50 characters long
     and must not contain any spaces or commas.
+
+  [% ELSIF error == "flag_type_not_multiplicable" %]
+    [% docslinks = {'flags-overview.html' => 'An overview on Flags',
+                    'flags.html' => 'Using Flags'} %]
+    You cannot have several <em>[% type.name FILTER html %]</em> flags
+    for this [% IF attachment %] attachment [% ELSE %] [%+ terms.bug %] [% END %].
 
   [% ELSIF error == "flag_update_denied" %]
     [% title = "Flag Modification Denied" %]
@@ -1158,9 +1158,11 @@
   [% ELSIF error == "no_bugs_in_list" %]
     [% title = "Delete Tag?" %]
     This will remove all [% terms.bugs %] from the
-    [% tag FILTER html %] tag. This will delete the tag completely. Click
+    <em>[% name FILTER html %]</em> tag. This will delete the tag completely. Click
     <a href="buglist.cgi?cmdtype=dorem&amp;remaction=forget&amp;namedcmd=
-    [%- tag FILTER url_quote %]">here</a> if you really want to delete it.
+    [%- name FILTER url_quote %]&amp;token=
+    [%- issue_hash_token([query_id, name]) FILTER url_quote %]">here</a>
+    if you really want to delete it.
 
   [% ELSIF error == "no_bugs_to_remove" %]
     [% title = "No Tag Selected" %]
@@ -1742,6 +1744,10 @@
     milestone
   [% ELSIF class == "Bugzilla::Status" %]
     status
+  [% ELSIF class == "Bugzilla::Flag" %]
+    flag
+  [% ELSIF class == "Bugzilla::FlagType" %]
+    flagtype
   [% ELSIF class == "Bugzilla::Field" %]
     field
   [% ELSIF ( matches = class.match('^Bugzilla::Field::Choice::(.+)') ) %]

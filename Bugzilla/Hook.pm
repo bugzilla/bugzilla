@@ -377,7 +377,7 @@ Params:
 
 =head2 flag-end_of_update
 
-This happens at the end of L<Bugzilla::Flag/process>, after all other changes
+This happens at the end of L<Bugzilla::Flag/update_flags>, after all other changes
 are made to the database and after emails are sent. It gives you a before/after
 snapshot of flags so you can react to specific flag changes.
 This generally occurs inside a database transaction.
@@ -389,7 +389,7 @@ Params:
 
 =over
 
-=item C<bug> - The changed bug object.
+=item C<object> - The changed bug or attachment object.
 
 =item C<timestamp> - The timestamp used for all updates in this transaction.
 

@@ -26,15 +26,15 @@ use Bugzilla::Util qw(diff_arrays);
 # This code doesn't actually *do* anything, it's just here to show you
 # how to use this hook.
 my $args = Bugzilla->hook_args;
-my ($bug, $timestamp, $old_flags, $new_flags) = 
-    @$args{qw(bug timestamp old_flags new_flags)};
+my ($object, $timestamp, $old_flags, $new_flags) =
+    @$args{qw(object timestamp old_flags new_flags)};
 my ($removed, $added) = diff_arrays($old_flags, $new_flags);
 my ($granted, $denied) = (0, 0);
 foreach my $new_flag (@$added) {
     $granted++ if $new_flag =~ /\+$/;
     $denied++ if $new_flag =~ /-$/;
 }
-my $bug_id = $bug->id;
+my $bug_id = (ref $object eq 'Bugzilla::Bug') ? $object->id : $object->bug_id;
 my $result = "$granted flags were granted and $denied flags were denied"
              . " on bug $bug_id at $timestamp.";
 # Uncomment this line to see $result in your webserver's error log whenever

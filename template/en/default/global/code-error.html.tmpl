@@ -222,15 +222,10 @@
     but you tried to flag it as obsolete while creating a new attachment to 
     [% terms.bug %] [%+ my_bug_id FILTER html %].
 
-  [% ELSIF error == "flags_not_available" %]
-    [% title = "Flag Editing not Allowed" %]
-    [% IF type == "b" %]
-      Flags cannot be set or changed when
-      changing several [% terms.bugs %] at once.
-    [% ELSE %]
-      References to existing flags when creating
-      a new attachment are invalid.
-    [% END %] 
+  [% ELSIF error == "flag_unexpected_object" %]
+    [% title = "Object Not Recognized" %]
+    Flags cannot be set for objects of type [% caller FILTER html %].
+    They can only be set for [% terms.bugs %] and attachments.
 
   [% ELSIF error == "flag_requestee_disabled" %]
     [% title = "Flag not Requestable from Specific Person" %]

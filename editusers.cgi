@@ -481,35 +481,36 @@ if ($action eq 'search') {
     my $sth_set_bug_timestamp =
         $dbh->prepare('UPDATE bugs SET delta_ts = ? WHERE bug_id = ?');
 
-    # Reference removals which need LogActivityEntry.
-    my $statement_flagupdate = 'UPDATE flags set requestee_id = NULL
-                                 WHERE bug_id = ?
-                                   AND attach_id %s
-                                   AND requestee_id = ?';
-    my $sth_flagupdate_attachment =
-        $dbh->prepare(sprintf($statement_flagupdate, '= ?'));
-    my $sth_flagupdate_bug =
-        $dbh->prepare(sprintf($statement_flagupdate, 'IS NULL'));
+    my $sth_updateFlag = $dbh->prepare('INSERT INTO bugs_activity
+                  (bug_id, attach_id, who, bug_when, fieldid, removed, added)
+                  VALUES (?, ?, ?, ?, ?, ?, ?)');
 
-    my $buglist = $dbh->selectall_arrayref('SELECT DISTINCT bug_id, attach_id
-                                              FROM flags
-                                             WHERE requestee_id = ?',
-                                           undef, $otherUserID);
+    # Flags
+    my $flag_ids =
+      $dbh->selectcol_arrayref('SELECT id FROM flags WHERE requestee_id = ?',
+                                undef, $otherUserID);
 
-    foreach (@$buglist) {
-        my ($bug_id, $attach_id) = @$_;
-        my @old_summaries = Bugzilla::Flag->snapshot($bug_id, $attach_id);
-        if ($attach_id) {
-            $sth_flagupdate_attachment->execute($bug_id, $attach_id, $otherUserID);
+    my $flags = Bugzilla::Flag->new_from_list($flag_ids);
+
+    $dbh->do('UPDATE flags SET requestee_id = NULL, modification_date = ?
+              WHERE requestee_id = ?', undef, ($timestamp, $otherUserID));
+
+    # We want to remove the requestee but leave the requester alone,
+    # so we have to log these changes manually.
+    my %bugs;
+    push(@{$bugs{$_->bug_id}->{$_->attach_id || 0}}, $_) foreach @$flags;
+    my $fieldid = get_field_id('flagtypes.name');
+    foreach my $bug_id (keys %bugs) {
+        foreach my $attach_id (keys %{$bugs{$bug_id}}) {
+            my @old_summaries = Bugzilla::Flag->snapshot($bugs{$bug_id}->{$attach_id});
+            $_->_set_requestee() foreach @{$bugs{$bug_id}->{$attach_id}};
+            my @new_summaries = Bugzilla::Flag->snapshot($bugs{$bug_id}->{$attach_id});
+            my ($removed, $added) =
+              Bugzilla::Flag->update_activity(\@old_summaries, \@new_summaries);
+            $sth_updateFlag->execute($bug_id, $attach_id || undef, $userid,
+                                     $timestamp, $fieldid, $removed, $added);
         }
-        else {
-            $sth_flagupdate_bug->execute($bug_id, $otherUserID);
-        }
-        my @new_summaries = Bugzilla::Flag->snapshot($bug_id, $attach_id);
-        # Let update_activity do all the dirty work, including setting
-        # the bug timestamp.
-        Bugzilla::Flag::update_activity($bug_id, $attach_id, $timestamp,
-                                        \@old_summaries, \@new_summaries);
+        $sth_set_bug_timestamp->execute($timestamp, $bug_id);
         $updatedbugs{$bug_id} = 1;
     }
 
@@ -536,9 +537,8 @@ if ($action eq 'search') {
              ($otherUserID, $otherUserID));
 
     # Deletions in referred tables which need LogActivityEntry.
-    $buglist = $dbh->selectcol_arrayref('SELECT bug_id FROM cc
-                                          WHERE who = ?',
-                                        undef, $otherUserID);
+    my $buglist = $dbh->selectcol_arrayref('SELECT bug_id FROM cc WHERE who = ?',
+                                            undef, $otherUserID);
     $dbh->do('DELETE FROM cc WHERE who = ?', undef, $otherUserID);
     foreach my $bug_id (@$buglist) {
         LogActivityEntry($bug_id, 'cc', $otherUser->login, '', $userid,

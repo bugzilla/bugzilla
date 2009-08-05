@@ -469,25 +469,15 @@ sub insert {
          store_in_file => scalar $cgi->param('bigfile'),
          });
 
-    Bugzilla::Flag->set_flags($bug, $attachment, $timestamp, $vars);
-
-    my $fieldid = get_field_id('attachments.isobsolete');
-
     foreach my $obsolete_attachment (@obsolete_attachments) {
-        # If the obsolete attachment has request flags, cancel them.
-        # This call must be done before updating the 'attachments' table.
-        Bugzilla::Flag->CancelRequests($bug, $obsolete_attachment, $timestamp);
-
-        $dbh->do('UPDATE attachments SET isobsolete = 1, modification_time = ?
-                  WHERE attach_id = ?',
-                 undef, ($timestamp, $obsolete_attachment->id));
-
-        $dbh->do('INSERT INTO bugs_activity (bug_id, attach_id, who, bug_when,
-                                             fieldid, removed, added)
-                  VALUES (?,?,?,?,?,?,?)',
-                  undef, ($bug->bug_id, $obsolete_attachment->id, $user->id,
-                          $timestamp, $fieldid, 0, 1));
+        $obsolete_attachment->set_is_obsolete(1);
+        $obsolete_attachment->update($timestamp);
     }
+
+    my ($flags, $new_flags) = Bugzilla::Flag->extract_flags_from_cgi(
+                                  $bug, $attachment, $vars, SKIP_REQUESTEE_ON_ERROR);
+    $attachment->set_flags($flags, $new_flags);
+    $attachment->update($timestamp);
 
     # Insert a comment about the new attachment into the database.
     my $comment = "Created an attachment (id=" . $attachment->id . ")\n" .
@@ -627,27 +617,18 @@ sub update {
         $bug->add_comment($comment, { isprivate => $attachment->isprivate });
     }
 
-    # The order of these function calls is important, as Flag::validate
-    # assumes User::match_field has ensured that the values in the
-    # requestee fields are legitimate user email addresses.
-    Bugzilla::User::match_field($cgi, {
-        '^requestee(_type)?-(\d+)$' => { 'type' => 'multi' }
-    });
-    Bugzilla::Flag::validate($bug->id, $attachment->id);
-
+    my ($flags, $new_flags) = Bugzilla::Flag->extract_flags_from_cgi($bug, $attachment, $vars);
+    $attachment->set_flags($flags, $new_flags);
 
     # Figure out when the changes were made.
-    my ($timestamp) = $dbh->selectrow_array("SELECT NOW()");
-    
-    # Update flags.  We have to do this before committing changes
-    # to attachments so that we can delete pending requests if the user
-    # is obsoleting this attachment without deleting any requests
-    # the user submits at the same time.
-    Bugzilla::Flag->process($bug, $attachment, $timestamp, $vars);
+    my $timestamp = $dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
 
-    $attachment->update($timestamp);
+    my $changes = $attachment->update($timestamp);
+    # If there are changes, we updated delta_ts in the DB. We have to
+    # reflect this change in the bug object.
+    $bug->{delta_ts} = $timestamp if scalar(keys %$changes);
     # Commit the comment, if any.
-    $bug->update();
+    $bug->update($timestamp);
 
     # Commit the transaction now that we are finished updating the database.
     $dbh->bz_commit_transaction();

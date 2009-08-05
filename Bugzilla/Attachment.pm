@@ -101,7 +101,6 @@ use constant UPDATE_COLUMNS => qw(
     ispatch
     isprivate
     mimetype
-    modification_time
 );
 
 use constant VALIDATORS => {
@@ -445,9 +444,9 @@ flags that have been set on the attachment
 
 sub flags {
     my $self = shift;
-    return $self->{flags} if exists $self->{flags};
 
-    $self->{flags} = Bugzilla::Flag->match({ 'attach_id' => $self->id });
+    # Don't cache it as it must be in sync with ->flag_types.
+    $self->{flags} = [map { @{$_->{flags}} } @{$self->flag_types}];
     return $self->{flags};
 }
 
@@ -471,7 +470,7 @@ sub flag_types {
                  component_id => $self->bug->component_id,
                  attach_id    => $self->id };
 
-    $self->{flag_types} = Bugzilla::Flag::_flag_types($vars);
+    $self->{flag_types} = Bugzilla::Flag->_flag_types($vars);
     return $self->{flag_types};
 }
 
@@ -482,9 +481,33 @@ sub flag_types {
 sub set_content_type { $_[0]->set('mimetype', $_[1]); }
 sub set_description  { $_[0]->set('description', $_[1]); }
 sub set_filename     { $_[0]->set('filename', $_[1]); }
-sub set_is_obsolete  { $_[0]->set('isobsolete', $_[1]); }
 sub set_is_patch     { $_[0]->set('ispatch', $_[1]); }
 sub set_is_private   { $_[0]->set('isprivate', $_[1]); }
+
+sub set_is_obsolete  {
+    my ($self, $obsolete) = @_;
+
+    my $old = $self->isobsolete;
+    $self->set('isobsolete', $obsolete);
+    my $new = $self->isobsolete;
+
+    # If the attachment is being marked as obsolete, cancel pending requests.
+    if ($new && $old != $new) {
+        my @requests = grep { $_->status eq '?' } @{$self->flags};
+        return unless scalar @requests;
+
+        my %flag_ids = map { $_->id => 1 } @requests;
+        foreach my $flagtype (@{$self->flag_types}) {
+            @{$flagtype->{flags}} = grep { !$flag_ids{$_->id} } @{$flagtype->{flags}};
+        }
+    }
+}
+
+sub set_flags {
+    my ($self, $flags, $new_flags) = @_;
+
+    Bugzilla::Flag->set_flag($self, $_) foreach (@$flags, @$new_flags);
+}
 
 sub _check_bug {
     my ($invocant, $bug) = @_;
@@ -799,7 +822,7 @@ Params:     takes a hashref with the following keys:
             parameter has no effect.
             C<mimetype> - string - a valid MIME type.
             C<creation_ts> - string (optional) - timestamp of the insert
-            as returned by SELECT NOW().
+            as returned by SELECT LOCALTIMESTAMP(0).
             C<ispatch> - boolean (optional, default false) - true if the
             attachment is a patch.
             C<isprivate> - boolean (optional, default false) - true if
@@ -887,7 +910,7 @@ sub run_create_validators {
     $params->{ispatch} = $params->{ispatch} ? 1 : 0;
     $params->{filename} = $class->_check_filename($params->{filename}, $params->{isurl});
     $params->{mimetype} = $class->_check_content_type($params->{mimetype});
-    $params->{creation_ts} ||= Bugzilla->dbh->selectrow_array('SELECT NOW()');
+    $params->{creation_ts} ||= Bugzilla->dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
     $params->{modification_time} = $params->{creation_ts};
     $params->{submitter_id} = Bugzilla->user->id || ThrowCodeError('invalid_user');
 
@@ -898,14 +921,14 @@ sub update {
     my $self = shift;
     my $dbh = Bugzilla->dbh;
     my $user = Bugzilla->user;
-    my $bug = $self->bug;
-
-    my $timestamp = shift || $dbh->selectrow_array('SELECT NOW()');
-    $self->{modification_time} = $timestamp;
+    my $timestamp = shift || $dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
 
     my ($changes, $old_self) = $self->SUPER::update(@_);
-    # Ignore this change.
-    delete $changes->{modification_time};
+
+    my ($removed, $added) = Bugzilla::Flag->update_flags($self, $old_self, $timestamp);
+    if ($removed || $added) {
+        $changes->{'flagtypes.name'} = [$removed, $added];
+    }
 
     # Record changes in the activity table.
     my $sth = $dbh->prepare('INSERT INTO bugs_activity (bug_id, attach_id, who, bug_when,
@@ -914,14 +937,17 @@ sub update {
 
     foreach my $field (keys %$changes) {
         my $change = $changes->{$field};
-        my $fieldid = get_field_id("attachments.$field");
-        $sth->execute($bug->id, $self->id, $user->id, $timestamp,
+        $field = "attachments.$field" unless $field eq "flagtypes.name";
+        my $fieldid = get_field_id($field);
+        $sth->execute($self->bug_id, $self->id, $user->id, $timestamp,
                       $fieldid, $change->[0], $change->[1]);
     }
 
     if (scalar(keys %$changes)) {
+      $dbh->do('UPDATE attachments SET modification_time = ? WHERE attach_id = ?',
+               undef, ($timestamp, $self->id));
       $dbh->do('UPDATE bugs SET delta_ts = ? WHERE bug_id = ?',
-               undef, $timestamp, $bug->id);
+               undef, ($timestamp, $self->bug_id));
     }
 
     return $changes;

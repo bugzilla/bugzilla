@@ -590,7 +590,7 @@ sub run_create_validators {
     # Callers cannot set Reporter, currently.
     $params->{reporter} = $class->_check_reporter();
 
-    $params->{creation_ts} ||= Bugzilla->dbh->selectrow_array('SELECT NOW()');
+    $params->{creation_ts} ||= Bugzilla->dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
     $params->{delta_ts} = $params->{creation_ts};
 
     if ($params->{estimated_time}) {
@@ -646,7 +646,7 @@ sub update {
     my $dbh = Bugzilla->dbh;
     # XXX This is just a temporary hack until all updating happens
     # inside this function.
-    my $delta_ts = shift || $dbh->selectrow_array("SELECT NOW()");
+    my $delta_ts = shift || $dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
 
     my ($changes, $old_bug) = $self->SUPER::update(@_);
 
@@ -774,7 +774,13 @@ sub update {
         $changes->{'bug_group'} = [join(', ', @removed_names),
                                    join(', ', @added_names)];
     }
-    
+
+    # Flags
+    my ($removed, $added) = Bugzilla::Flag->update_flags($self, $old_bug, $delta_ts);
+    if ($removed || $added) {
+        $changes->{'flagtypes.name'} = [$removed, $added];
+    }
+
     # Comments
     foreach my $comment (@{$self->{added_comments} || []}) {
         my $columns = join(',', keys %$comment);
@@ -1931,6 +1937,11 @@ sub set_dup_id {
 }
 sub set_estimated_time { $_[0]->set('estimated_time', $_[1]); }
 sub _set_everconfirmed { $_[0]->set('everconfirmed', $_[1]); }
+sub set_flags {
+    my ($self, $flags, $new_flags) = @_;
+
+    Bugzilla::Flag->set_flag($self, $_) foreach (@$flags, @$new_flags);
+}
 sub set_op_sys         { $_[0]->set('op_sys',        $_[1]); }
 sub set_platform       { $_[0]->set('rep_platform',  $_[1]); }
 sub set_priority       { $_[0]->set('priority',      $_[1]); }
@@ -2632,8 +2643,16 @@ sub flag_types {
                  component_id => $self->{component_id},
                  bug_id       => $self->bug_id };
 
-    $self->{'flag_types'} = Bugzilla::Flag::_flag_types($vars);
+    $self->{'flag_types'} = Bugzilla::Flag->_flag_types($vars);
     return $self->{'flag_types'};
+}
+
+sub flags {
+    my $self = shift;
+
+    # Don't cache it as it must be in sync with ->flag_types.
+    $self->{flags} = [map { @{$_->{flags}} } @{$self->flag_types}];
+    return $self->{flags};
 }
 
 sub isopened {

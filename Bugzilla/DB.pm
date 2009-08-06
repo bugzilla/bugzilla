@@ -747,6 +747,28 @@ sub bz_drop_fk {
 
 }
 
+sub bz_drop_related_fks {
+    my ($self, $table, $column) = @_;
+    my @tables = $self->_bz_real_schema->get_table_list();
+    my @dropped;
+    foreach my $check_table (@tables) {
+        my @columns = $self->bz_table_columns($check_table);
+        foreach my $check_column (@columns) {
+            my $def = $self->bz_column_info($check_table, $check_column);
+            my $fk = $def->{REFERENCES};
+            if ($fk 
+                and (($fk->{TABLE} eq $table and $fk->{COLUMN} eq $column)
+                     or ($check_column eq $column and $check_table eq $table)))
+            {
+                $self->bz_drop_fk($check_table, $check_column);
+                push(@dropped, [$check_table, $check_column, $fk]); 
+            }
+        } # foreach $column
+    } # foreach $table
+
+    return \@dropped;
+}
+
 sub bz_drop_index {
     my ($self, $table, $name) = @_;
 

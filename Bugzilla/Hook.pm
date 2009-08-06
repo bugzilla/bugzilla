@@ -478,6 +478,33 @@ Params:
 
 =back
 
+=head2 page-before_template
+
+This is a simple way to add your own pages to Bugzilla. This hooks C<page.cgi>,
+which loads templates from F<template/en/default/pages>. For example,
+C<page.cgi?id=fields.html> loads F<template/en/default/pages/fields.html.tmpl>.
+
+This hook is called right before the template is loaded, so that you can
+pass your own variables to your own pages.
+
+Params:
+
+=over
+
+=item C<page_id>
+
+This is the name of the page being loaded, like C<fields.html>.
+
+Note that if two extensions use the same name, it is uncertain which will
+override the others, so you should be careful with how you name your pages.
+
+=item C<vars>
+
+This is a hashref--put variables into here if you want them passed to
+your template.
+
+=back
+
 =head2 product-confirm_delete
 
 Called before displaying the confirmation message when deleting a product.

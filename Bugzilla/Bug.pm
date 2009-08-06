@@ -2519,8 +2519,12 @@ sub any_flags_requesteeble {
         if exists $self->{'any_flags_requesteeble'};
     return 0 if $self->{'error'};
 
-    $self->{'any_flags_requesteeble'} = 
-        grep($_->{'is_requesteeble'}, @{$self->flag_types});
+    my $any_flags_requesteeble =
+      grep { $_->is_requestable && $_->is_requesteeble } @{$self->flag_types};
+    # Useful in case a flagtype is no longer requestable but a requestee
+    # has been set before we turned off that bit.
+    $any_flags_requesteeble ||= grep { $_->requestee_id } @{$self->flags};
+    $self->{'any_flags_requesteeble'} = $any_flags_requesteeble;
 
     return $self->{'any_flags_requesteeble'};
 }

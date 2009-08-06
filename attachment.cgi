@@ -400,7 +400,8 @@ sub enter {
                                               'product_id'   => $bug->product_id,
                                               'component_id' => $bug->component_id});
   $vars->{'flag_types'} = $flag_types;
-  $vars->{'any_flags_requesteeble'} = grep($_->is_requesteeble, @$flag_types);
+  $vars->{'any_flags_requesteeble'} =
+    grep { $_->is_requestable && $_->is_requesteeble } @$flag_types;
   $vars->{'token'} = issue_session_token('create_attachment:');
 
   print $cgi->header();
@@ -542,7 +543,12 @@ sub edit {
   # We only want attachment IDs.
   @$bugattachments = map { $_->id } @$bugattachments;
 
-  $vars->{'any_flags_requesteeble'} = grep($_->is_requesteeble, @{$attachment->flag_types});
+  my $any_flags_requesteeble =
+    grep { $_->is_requestable && $_->is_requesteeble } @{$attachment->flag_types};
+  # Useful in case a flagtype is no longer requestable but a requestee
+  # has been set before we turned off that bit.
+  $any_flags_requesteeble ||= grep { $_->requestee_id } @{$attachment->flags};
+  $vars->{'any_flags_requesteeble'} = $any_flags_requesteeble;
   $vars->{'attachment'} = $attachment;
   $vars->{'attachments'} = $bugattachments;
 

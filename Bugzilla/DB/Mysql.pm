@@ -713,6 +713,7 @@ EOT
 
         print "Converting table storage format to UTF-8. This may take a",
               " while.\n";
+        my @dropped_fks;
         foreach my $table ($self->bz_table_list_real) {
             my $info_sth = $self->prepare("SHOW FULL COLUMNS FROM $table");
             $info_sth->execute();
@@ -746,13 +747,15 @@ EOT
                         }
                     }
 
+                    my $dropped = $self->bz_drop_related_fks($table, $name);
+                    push(@dropped_fks, @$dropped);
+
                     print "Converting $table.$name to be stored as UTF-8...\n";
                     my $col_info = 
                         $self->bz_column_info_real($table, $name);
 
                     # CHANGE COLUMN doesn't take PRIMARY KEY
                     delete $col_info->{PRIMARYKEY};
-
                     my $sql_def = $self->_bz_schema->get_type_ddl($col_info);
                     # We don't want MySQL to actually try to *convert*
                     # from our current charset to UTF-8, we just want to
@@ -779,7 +782,12 @@ EOT
             }
 
             $self->do("ALTER TABLE $table DEFAULT CHARACTER SET utf8");
+
         } # foreach my $table (@tables)
+
+        foreach my $fk_args (@dropped_fks) {
+            $self->bz_add_fk(@$fk_args);
+        }
     }
 
     # Sometimes you can have a situation where all the tables are utf8,

@@ -717,6 +717,7 @@ EOT
         foreach my $table ($self->bz_table_list_real) {
             my $info_sth = $self->prepare("SHOW FULL COLUMNS FROM $table");
             $info_sth->execute();
+            my (@binary_sql, @utf8_sql);
             while (my $column = $info_sth->fetchrow_hashref) {
                 # Our conversion code doesn't work on enum fields, but they
                 # all go away later in checksetup anyway.
@@ -729,31 +730,13 @@ EOT
                 {
                     my $name = $column->{Field};
 
-                    # The code below doesn't work on a field with a FULLTEXT
-                    # index. So we drop it, which we'd do later anyway.
-                    if ($table eq 'longdescs' && $name eq 'thetext') {
-                        $self->bz_drop_index('longdescs', 
-                                             'longdescs_thetext_idx');
-                    }
-                    if ($table eq 'bugs' && $name eq 'short_desc') {
-                        $self->bz_drop_index('bugs', 'bugs_short_desc_idx');
-                    }
-                    my %ft_indexes;
-                    if ($table eq 'bugs_fulltext') {
-                        %ft_indexes = $self->_bz_real_schema->get_indexes_on_column_abstract(
-                            'bugs_fulltext', $name);
-                        foreach my $index (keys %ft_indexes) {
-                            $self->bz_drop_index('bugs_fulltext', $index);
-                        }
-                    }
+                    print "$table.$name needs to be converted to UTF-8...\n";
 
                     my $dropped = $self->bz_drop_related_fks($table, $name);
                     push(@dropped_fks, @$dropped);
 
-                    print "Converting $table.$name to be stored as UTF-8...\n";
-                    my $col_info = 
+                    my $col_info =
                         $self->bz_column_info_real($table, $name);
-
                     # CHANGE COLUMN doesn't take PRIMARY KEY
                     delete $col_info->{PRIMARYKEY};
                     my $sql_def = $self->_bz_schema->get_type_ddl($col_info);
@@ -765,19 +748,32 @@ EOT
                     # right after the type, which will always come first.
                     my ($binary, $utf8) = ($sql_def, $sql_def);
                     my $type = $self->_bz_schema->convert_type($col_info->{TYPE});
-                    $binary =~ s/(\Q$type\E)/$1 CHARACTER SET binary/;
-                    $utf8   =~ s/(\Q$type\E)/$1 CHARACTER SET utf8/;
-                    $self->do("ALTER TABLE $table CHANGE COLUMN $name $name 
-                              $binary");
-                    $self->do("ALTER TABLE $table CHANGE COLUMN $name $name 
-                              $utf8");
+                    push(@binary_sql, "MODIFY COLUMN $name $binary");
+                    push(@utf8_sql, "MODIFY COLUMN $name $utf8");
+                }
+            } # foreach column
 
-                    if ($table eq 'bugs_fulltext') {
-                        foreach my $index (keys %ft_indexes) {
-                            $self->bz_add_index('bugs_fulltext', $index,
-                                                $ft_indexes{$index});
-                        }
+            if (@binary_sql) {
+                my %indexes = %{ $self->bz_table_indexes($table) };
+                foreach my $index_name (keys %indexes) {
+                    my $index = $indexes{$index_name};
+                    if ($index->{TYPE} and $index->{TYPE} eq 'FULLTEXT') {
+                        $self->bz_drop_index($table, $index_name);
                     }
+                    else {
+                        delete $indexes{$index_name};
+                    }
+                }
+
+                print "Converting the $table table to UTF-8...\n";
+                my $bin = "ALTER TABLE $table " . join(', ', @binary_sql);
+                my $utf = "ALTER TABLE $table " . join(', ', @utf8_sql);
+                $self->do($bin);
+                $self->do($utf);
+
+                # Re-add any removed FULLTEXT indexes.
+                foreach my $index (keys %indexes) {
+                    $self->bz_add_index($table, $index, $indexes{$index});
                 }
             }
 

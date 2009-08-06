@@ -45,7 +45,7 @@
 
 <p>
   Someone else has made changes to
-  [%+ "$terms.bug $bug.id" FILTER bug_link(bug.id) FILTER none %]
+  [%+ "$terms.bug $bug.id" FILTER bug_link(bug) FILTER none %]
   at the same time you were trying to.
   The changes made were:
 </p>
@@ -101,7 +101,7 @@ You have the following choices:
   [% END %]
   <li>
     Throw away my changes, and
-    [%+ "revisit $terms.bug $bug.id" FILTER bug_link(bug.id) FILTER none %]
+    [%+ "revisit $terms.bug $bug.id" FILTER bug_link(bug) FILTER none %]
   </li>
 </ul>
 

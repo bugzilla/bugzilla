@@ -21,7 +21,7 @@
 [% PROCESS global/variables.none.tmpl %]
 [% filtered_summary = bugsummary FILTER html %]
 [% header = BLOCK %]View All Attachments for
-  [%+ "$terms.Bug $bug.bug_id" FILTER bug_link(bug.bug_id) FILTER none %][% END %]
+  [%+ "$terms.Bug $bug.id" FILTER bug_link(bug) FILTER none %][% END %]
 
 [% title = BLOCK %]
   View All Attachments for [% terms.Bug %] [%+ bug.bug_id FILTER html %]

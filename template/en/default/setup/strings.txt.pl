@@ -43,6 +43,24 @@ COMMANDS TO INSTALL REQUIRED MODULES (You *must* run all these commands
 and then re-run checksetup.pl):
 EOT
     done => 'done.',
+
+    feature_auth_ldap         => 'LDAP Authentication',
+    feature_auth_radius       => 'RADIUS Authentication',
+    feature_compress_bmps     => 'Convert BMP Attachments to PNG',
+    feature_graphical_reports => 'Graphical Reports',
+    feature_html_desc         => 'More HTML in Product/Group Descriptions',
+    feature_inbound_email     => 'Inbound Email',
+    feature_jobqueue          => 'Mail Queueing',
+    feature_jsonrpc           => 'JSON-RPC Interface',
+    feature_new_charts        => 'New Charts',
+    feature_old_charts        => 'Old Charts',
+    feature_mod_perl          => 'mod_perl',
+    feature_moving            => 'Move Bugs Between Installations',
+    feature_patch_viewer      => 'Patch Viewer',
+    feature_smtp_auth         => 'SMTP Authentication',
+    feature_updates           => 'Automatic Update Notifications',
+    feature_xmlrpc            => 'XML-RPC Interface',
+
     header => "* This is Bugzilla ##bz_ver## on perl ##perl_ver##\n"
             . "* Running on ##os_name## ##os_ver##",
     install_all => <<EOT,

@@ -748,6 +748,8 @@ EOT
                     # right after the type, which will always come first.
                     my ($binary, $utf8) = ($sql_def, $sql_def);
                     my $type = $self->_bz_schema->convert_type($col_info->{TYPE});
+                    $binary =~ s/(\Q$type\E)/$1 CHARACTER SET binary/;
+                    $utf8   =~ s/(\Q$type\E)/$1 CHARACTER SET utf8/;
                     push(@binary_sql, "MODIFY COLUMN $name $binary");
                     push(@utf8_sql, "MODIFY COLUMN $name $utf8");
                 }
@@ -767,7 +769,8 @@ EOT
 
                 print "Converting the $table table to UTF-8...\n";
                 my $bin = "ALTER TABLE $table " . join(', ', @binary_sql);
-                my $utf = "ALTER TABLE $table " . join(', ', @utf8_sql);
+                my $utf = "ALTER TABLE $table " . join(', ', @utf8_sql,
+                          'DEFAULT CHARACTER SET utf8');
                 $self->do($bin);
                 $self->do($utf);
 
@@ -776,8 +779,9 @@ EOT
                     $self->bz_add_index($table, $index, $indexes{$index});
                 }
             }
-
-            $self->do("ALTER TABLE $table DEFAULT CHARACTER SET utf8");
+            else {
+                $self->do("ALTER TABLE $table DEFAULT CHARACTER SET utf8");
+            }
 
         } # foreach my $table (@tables)
 

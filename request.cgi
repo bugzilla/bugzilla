@@ -73,12 +73,11 @@ else {
     my @types = ('all', @$flagtypes);
 
     my $vars = {};
-    $vars->{'products'} = $user->get_selectable_products;
     $vars->{'types'} = \@types;
     $vars->{'requests'} = {};
 
     my %components;
-    foreach my $prod (@{$vars->{'products'}}) {
+    foreach my $prod (@{$user->get_selectable_products}) {
         foreach my $comp (@{$prod->components}) {
             $components{$comp->name} = 1;
         }
@@ -303,14 +302,13 @@ sub queue {
     my $flagtypes = get_flag_types();
     push(@types, @$flagtypes);
 
-    $vars->{'products'} = $user->get_selectable_products;
     $vars->{'excluded_columns'} = \@excluded_columns;
     $vars->{'group_field'} = $form_group;
     $vars->{'requests'} = \@requests;
     $vars->{'types'} = \@types;
 
     my %components;
-    foreach my $prod (@{$vars->{'products'}}) {
+    foreach my $prod (@{$user->get_selectable_products}) {
         foreach my $comp (@{$prod->components}) {
             $components{$comp->name} = 1;
         }

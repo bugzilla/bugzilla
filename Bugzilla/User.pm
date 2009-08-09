@@ -1706,8 +1706,6 @@ sub validate_password {
 
     if (length($password) < USER_PASSWORD_MIN_LENGTH) {
         ThrowUserError('password_too_short');
-    } elsif (length($password) > USER_PASSWORD_MAX_LENGTH) {
-        ThrowUserError('password_too_long');
     } elsif ((defined $matchpassword) && ($password ne $matchpassword)) {
         ThrowUserError('passwords_dont_match');
     }

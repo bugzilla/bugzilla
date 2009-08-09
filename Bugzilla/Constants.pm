@@ -57,7 +57,6 @@ use File::Basename;
     AUTH_NO_SUCH_USER
 
     USER_PASSWORD_MIN_LENGTH
-    USER_PASSWORD_MAX_LENGTH
 
     LOGIN_OPTIONAL
     LOGIN_NORMAL
@@ -226,9 +225,8 @@ use constant AUTH_LOGINFAILED => 3;
 use constant AUTH_DISABLED => 4;
 use constant AUTH_NO_SUCH_USER  => 5;
 
-# The minimum and maximum lengths a password must have.
+# The minimum length a password must have.
 use constant USER_PASSWORD_MIN_LENGTH => 3;
-use constant USER_PASSWORD_MAX_LENGTH => 16;
 
 use constant LOGIN_OPTIONAL => 0;
 use constant LOGIN_NORMAL => 1;

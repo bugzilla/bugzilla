@@ -1276,11 +1276,6 @@
     [% title = "Passwords Don't Match" %]
     The two passwords you entered did not match.
 
-  [% ELSIF error == "password_too_long" %]
-    [% title = "Password Too Long" %]
-    The password must be no more than
-    [%+ constants.USER_PASSWORD_MAX_LENGTH FILTER html %] characters long.
-
   [% ELSIF error == "password_too_short" %]
     [% title = "Password Too Short" %]
     The password must be at least

@@ -67,6 +67,12 @@ sub gd_check {
     print get_text('job_queue_depth', { count => $count }) . "\n";
 }
 
+sub gd_setup_signals {
+    my $self = shift;
+    $self->SUPER::gd_setup_signals();
+    $SIG{TERM} = sub { $self->gd_quit_event(); }
+}
+
 sub gd_run {
     my $self = shift;
 

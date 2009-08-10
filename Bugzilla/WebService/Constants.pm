@@ -103,6 +103,7 @@ use constant WS_ERROR_CODE => {
     account_creation_disabled   => 501,
     account_creation_restricted => 501,
     password_too_short    => 502,
+    # Error 503 password_too_long no longer exists.
     invalid_username      => 504,
     # This is from strict_isolation, but it also basically means 
     # "invalid user."

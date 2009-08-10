@@ -419,10 +419,13 @@ the function may also throw:
 The password specified is too short. (Usually, this means the
 password is under three characters.)
 
-=item 503 (Password Too Long)
+=back
 
-The password specified is too long. (Usually, this means the
-password is over ten characters.)
+=item B<History>
+
+=over
+
+=item Error 503 (Password Too Long) removed in Bugzilla B<3.6>.
 
 =back
 

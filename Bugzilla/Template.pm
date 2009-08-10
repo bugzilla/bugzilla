@@ -520,6 +520,7 @@ sub create {
                 $var =~ s/\n/\\n/g;
                 $var =~ s/\r/\\r/g;
                 $var =~ s/\@/\\x40/g; # anti-spam for email addresses
+                $var =~ s/</\\x3c/g;
                 return $var;
             },
             

@@ -146,9 +146,9 @@
       <note>
         <para>
           Regardless of which method you choose, it is recommended that
-          you run <command>./checksetup.pl</command> after creating or
+          you run <command>./checksetup.pl</command> after 
           editing any templates in the <filename>template/en/default</filename>
-          directory, and after editing any templates in the 
+          directory, and after creating or editing any templates in the 
           <filename>custom</filename> directory.
         </para>
       </note>

@@ -390,11 +390,15 @@ sub confirm_create_account {
     # Let the user know that his user account has been successfully created.
     $vars->{'message'} = 'account_created';
     $vars->{'otheruser'} = $otheruser;
-    $vars->{'login_info'} = 1;
+
+    # Log in the new user using credentials he just gave.
+    $cgi->param('Bugzilla_login', $otheruser->login);
+    $cgi->param('Bugzilla_password', $password);
+    Bugzilla->login(LOGIN_OPTIONAL);
 
     print $cgi->header();
 
-    $template->process('global/message.html.tmpl', $vars)
+    $template->process('index.html.tmpl', $vars)
       || ThrowTemplateError($template->error());
 }
 

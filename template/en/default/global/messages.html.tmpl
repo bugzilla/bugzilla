@@ -31,15 +31,10 @@
 
 [% message = BLOCK %]
   [% IF    message_tag == "account_created" %]
-    [% title = "User $otheruser.login created" %]
-    A new user account [% otheruser.login FILTER html %] has been created
+    The user account [% otheruser.login FILTER html %] has been created
     successfully.
     [% IF groups.size %]
       You may want to edit the group settings now, using the form below.
-    [% END %]
-    [% IF login_info %]
-      You can now go to the <a href="index.cgi">Log In</a> page to enter
-      this [% terms.Bugzilla %] installation.
     [% END %]
 
   [% ELSIF message_tag == "account_creation_canceled" %]

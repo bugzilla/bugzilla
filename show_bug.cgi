@@ -99,7 +99,6 @@ eval {
 
 $vars->{'bugs'} = \@bugs;
 $vars->{'marks'} = \%marks;
-$vars->{'use_keywords'} = 1 if Bugzilla::Keyword::keyword_count();
 
 my @bugids = map {$_->bug_id} grep {!$_->error} @bugs;
 $vars->{'bugids'} = join(", ", @bugids);

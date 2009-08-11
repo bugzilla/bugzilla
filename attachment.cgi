@@ -523,7 +523,6 @@ sub insert {
   $vars->{'bugs'} = [new Bugzilla::Bug($bugid)];
   $vars->{'header_done'} = 1;
   $vars->{'contenttypemethod'} = $cgi->param('contenttypemethod');
-  $vars->{'use_keywords'} = 1 if Bugzilla::Keyword::keyword_count();
 
   print $cgi->header();
   # Generate and return the UI (HTML page) from the appropriate template.
@@ -644,7 +643,6 @@ sub update {
     $vars->{'attachment'} = $attachment;
     $vars->{'bugs'} = [$bug];
     $vars->{'header_done'} = 1;
-    $vars->{'use_keywords'} = 1 if Bugzilla::Keyword::keyword_count();
 
     print $cgi->header();
 
@@ -716,7 +714,6 @@ sub delete_attachment {
         # Required to display the bug the deleted attachment belongs to.
         $vars->{'bugs'} = [$bug];
         $vars->{'header_done'} = 1;
-        $vars->{'use_keywords'} = 1 if Bugzilla::Keyword::keyword_count();
 
         $template->process("attachment/updated.html.tmpl", $vars)
           || ThrowTemplateError($template->error());

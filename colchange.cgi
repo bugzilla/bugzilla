@@ -71,7 +71,7 @@ if (Bugzilla->params->{"useqacontact"}) {
 if (Bugzilla->params->{"usestatuswhiteboard"}) {
     push(@masterlist, "status_whiteboard");
 }
-if (Bugzilla::Keyword::keyword_count()) {
+if (Bugzilla::Keyword->any_exist) {
     push(@masterlist, "keywords");
 }
 

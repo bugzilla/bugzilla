@@ -230,8 +230,6 @@ if (Bugzilla->params->{'usetargetmilestone'}) {
     $vars->{'target_milestone'} = \@milestones;
 }
 
-$vars->{'have_keywords'} = Bugzilla::Keyword::keyword_count();
-
 my @chfields;
 
 push @chfields, "[Bug creation]";

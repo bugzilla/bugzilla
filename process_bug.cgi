@@ -69,7 +69,6 @@ my $cgi = Bugzilla->cgi;
 my $dbh = Bugzilla->dbh;
 my $template = Bugzilla->template;
 my $vars = {};
-$vars->{'use_keywords'} = 1 if Bugzilla::Keyword::keyword_count();
 
 ######################################################################
 # Subroutines

@@ -37,7 +37,9 @@ use strict;
 use Bugzilla::Bug;
 use Bugzilla::Constants;
 use Bugzilla::Install::Requirements;
-use Bugzilla::Install::Util qw(install_string template_include_path include_languages);
+use Bugzilla::Install::Util qw(install_string template_include_path 
+                               include_languages);
+use Bugzilla::Keyword;
 use Bugzilla::Util;
 use Bugzilla::User;
 use Bugzilla::Error;
@@ -751,6 +753,10 @@ sub create {
                     { map { $_->name => $_ } Bugzilla->get_fields() };
                 return $cache->{template_bug_fields};
             },
+
+            # Whether or not keywords are enabled, in this Bugzilla.
+            'use_keywords' => sub { return Bugzilla::Keyword->any_exist; },
+                
 
             # These don't work as normal constants.
             DB_MODULE        => \&Bugzilla::Constants::DB_MODULE,

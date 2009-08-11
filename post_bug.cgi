@@ -279,7 +279,6 @@ if ($cgi->cookie("BUGLIST")) {
     @bug_list = split(/:/, $cgi->cookie("BUGLIST"));
 }
 $vars->{'bug_list'} = \@bug_list;
-$vars->{'use_keywords'} = 1 if Bugzilla::Keyword::keyword_count();
 
 if ($token) {
     trick_taint($token);

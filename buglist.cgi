@@ -575,7 +575,10 @@ elsif (($cmdtype eq "doit") && defined $cgi->param('remtype')) {
             # exists, add/remove bugs to it, else create it. But if we are
             # considering an existing tag, then it has to exist and we throw
             # an error if it doesn't (hence the usage of !$is_new_name).
-            if (my $old_query = LookupNamedQuery($query_name, undef, LIST_OF_BUGS, !$is_new_name)) {
+            my ($old_query, $query_id) =
+              LookupNamedQuery($query_name, undef, LIST_OF_BUGS, !$is_new_name);
+
+            if ($old_query) {
                 # We get the encoded query. We need to decode it.
                 my $old_cgi = new Bugzilla::CGI($old_query);
                 foreach my $bug_id (split /[\s,]+/, scalar $old_cgi->param('bug_id')) {
@@ -599,9 +602,10 @@ elsif (($cmdtype eq "doit") && defined $cgi->param('remtype')) {
             # Only keep bug IDs we want to add/keep. Disregard deleted ones.
             my @bug_ids = grep { $bug_ids{$_} == 1 } keys %bug_ids;
             # If the list is now empty, we could as well delete it completely.
-            ThrowUserError('no_bugs_in_list', {'tag' => $query_name})
-              unless scalar(@bug_ids);
-
+            if (!scalar @bug_ids) {
+                ThrowUserError('no_bugs_in_list', {name     => $query_name,
+                                                   query_id => $query_id});
+            }
             $new_query = "bug_id=" . join(',', sort {$a <=> $b} @bug_ids);
             $query_type = LIST_OF_BUGS;
         }
@@ -1135,7 +1139,6 @@ if ($dotweak && scalar @bugs) {
                                         object => 'multiple_bugs'});
     }
     $vars->{'dotweak'} = 1;
-    $vars->{'use_keywords'} = 1 if Bugzilla::Keyword::keyword_count();
   
     # issue_session_token needs to write to the master DB.
     Bugzilla->switch_to_main_db();

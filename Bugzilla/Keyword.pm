@@ -74,12 +74,6 @@ sub set_description { $_[0]->set('description', $_[1]); }
 ####      Subroutines    ######
 ###############################
 
-sub keyword_count {
-    my ($count) = 
-        Bugzilla->dbh->selectrow_array('SELECT COUNT(*) FROM keyworddefs');
-    return $count;
-}
-
 sub get_all_with_bug_count {
     my $class = shift;
     my $dbh = Bugzilla->dbh;
@@ -145,8 +139,6 @@ Bugzilla::Keyword - A Keyword that can be added to a bug.
 
  use Bugzilla::Keyword;
 
- my $count = Bugzilla::Keyword::keyword_count;
-
  my $description = $keyword->description;
 
  my $keywords = Bugzilla::Keyword->get_all_with_bug_count();
@@ -165,14 +157,6 @@ See L<Bugzilla::Object> for more subroutines that this object
 implements.
 
 =over
-
-=item C<keyword_count()> 
-
- Description: A utility function to get the total number
-              of keywords defined. Mostly used to see
-              if there are any keywords defined at all.
- Params:      none
- Returns:     An integer, the count of keywords.
 
 =item C<get_all_with_bug_count()> 
 

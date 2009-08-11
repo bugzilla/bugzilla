@@ -170,14 +170,16 @@ sub match {
         elsif ( $field eq 'WHERE' ) {
             # the WHERE value is a hashref where the keys are
             # "column_name operator ?" and values are the placeholder's
-            # value.
-            foreach my $k (keys( %$value )) {
-                push( @terms, $k );
-                push( @values, $value->{$k} );
+            # value (either a scalar or an array of values).
+            foreach my $k (keys %$value) {
+                push(@terms, $k);
+                my @this_value = ref($value->{$k}) ? @{ $value->{$k} } 
+                                                   : ($value->{$k});
+                push(@values, @this_value);
             }            
             next;
         }
-                
+        
         if (ref $value eq 'ARRAY') {
             # IN () is invalid SQL, and if we have an empty list
             # to match against, we're just returning an empty
@@ -334,6 +336,15 @@ sub remove_from_db {
 ###############################
 ####      Subroutines    ######
 ###############################
+
+sub any_exist {
+    my $class = shift;
+    my $table = $class->DB_TABLE;
+    my $dbh = Bugzilla->dbh;
+    my $any_exist = $dbh->selectrow_array(
+        "SELECT 1 FROM $table " . $dbh->sql_limit(1));
+    return $any_exist ? 1 : 0;
+}
 
 sub create {
     my ($class, $params) = @_;
@@ -879,6 +890,11 @@ Returns C<1> if the passed-in value is true, C<0> otherwise.
 =head1 CLASS FUNCTIONS
 
 =over
+
+=item C<any_exist>
+
+Returns C<1> if there are any of these objects in the database,
+C<0> otherwise.
 
 =item C<get_all>
 

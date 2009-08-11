@@ -187,6 +187,7 @@ sub template_include_path {
     my @include_path;
     my @extensions = glob(bz_locations()->{'extensionsdir'} . "/*");
     foreach my $extension (@extensions) {
+        next if -e "$extension/disabled";
         foreach my $lang (@usedlanguages) {
             _add_language_set(\@include_path, $lang, "$extension/template");
         }

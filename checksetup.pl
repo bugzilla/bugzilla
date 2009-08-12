@@ -53,7 +53,7 @@ BEGIN { chdir dirname($0); }
 use lib qw(. lib);
 use Bugzilla::Constants;
 use Bugzilla::Install::Requirements;
-use Bugzilla::Install::Util qw(install_string get_version_and_os get_console_locale);
+use Bugzilla::Install::Util qw(install_string get_version_and_os init_console);
 
 ######################################################################
 # Live Code
@@ -61,7 +61,7 @@ use Bugzilla::Install::Util qw(install_string get_version_and_os get_console_loc
 
 # When we're running at the command line, we need to pick the right
 # language before ever displaying any string.
-$ENV{'HTTP_ACCEPT_LANGUAGE'} ||= get_console_locale();
+init_console();
 
 my %switch;
 GetOptions(\%switch, 'help|h|?', 'check-modules', 'no-templates|t',

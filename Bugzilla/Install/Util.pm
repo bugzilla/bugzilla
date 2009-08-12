@@ -43,6 +43,7 @@ our @EXPORT_OK = qw(
     template_include_path
     vers_cmp
     get_console_locale
+    init_console
 );
 
 sub bin_loc {
@@ -332,6 +333,11 @@ sub get_console_locale {
     return $locale;
 }
 
+sub init_console {
+    eval { ON_WINDOWS && require Win32::Console::ANSI; };
+    $ENV{'ANSI_COLORS_DISABLED'} = 1 if ($@ || !-t *STDOUT);
+    $ENV{'HTTP_ACCEPT_LANGUAGE'} ||= get_console_locale();
+}
 
 # This is like request_cache, but it's used only by installation code
 # for setup.cgi and things like that.
@@ -394,6 +400,10 @@ running, what perl version we're using, and what OS we're running on.
 
 Returns the language to use based on the LC_CTYPE value returned by the OS.
 If LC_CTYPE is of the form fr-CH, then fr is appended to the list.
+
+=item C<init_console>
+
+Sets the C<ANSI_COLORS_DISABLED> and C<HTTP_ACCEPT_LANGUAGE> environment variables.
 
 =item C<indicate_progress>
 

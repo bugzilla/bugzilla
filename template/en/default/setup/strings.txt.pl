@@ -79,6 +79,7 @@ then the value of the ##column## column that needs to be fixed:
 
 EOT
     install_module => 'Installing ##module## version ##version##...',
+    installation_failed => '*** Installation aborted. Read the messages above. ***',
     max_allowed_packet => <<EOT,
 WARNING: You need to set the max_allowed_packet parameter in your MySQL
 configuration to at least ##needed##. Currently it is set to ##current##.

@@ -43,10 +43,12 @@
     ([% this_bug_idx + 1 %] of [% last_bug_list.size %])
   [% END %]
 
-[% IF this_bug_idx != -1 %]
-  <a href="show_bug.cgi?id=[% last_bug_list.first FILTER url_quote %]">First</a>
-  <a href="show_bug.cgi?id=[% last_bug_list.last FILTER url_quote %]">Last</a>
-[% END %]
+  [% IF this_bug_idx != -1 %]
+    <a href="show_bug.cgi?id=
+             [%- last_bug_list.first FILTER url_quote %]">First</a>
+    <a href="show_bug.cgi?id=
+             [%- last_bug_list.last FILTER url_quote %]">Last</a>
+  [% END %]
 
   [% IF bug.bug_id %]
     [% IF this_bug_idx != -1 %]

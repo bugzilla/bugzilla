@@ -198,17 +198,15 @@ else {
 
 $vars->{'title_tag'} = "bug_processed";
 
-# Set up the vars for navigational <link> elements
-my @bug_list;
-if ($cgi->cookie("BUGLIST")) {
-    @bug_list = split(/:/, $cgi->cookie("BUGLIST"));
-}
-
 my ($action, $next_bug);
 if (defined $cgi->param('id')) {
     $action = Bugzilla->user->settings->{'post_bug_submit_action'}->{'value'};
 
     if ($action eq 'next_bug') {
+        my @bug_list;
+        if ($cgi->cookie("BUGLIST")) {
+            @bug_list = split(/:/, $cgi->cookie("BUGLIST"));
+        }
         my $cur = lsearch(\@bug_list, $cgi->param('id'));
         if ($cur >= 0 && $cur < $#bug_list) {
             $next_bug = $bug_list[$cur + 1];

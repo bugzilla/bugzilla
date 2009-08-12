@@ -202,7 +202,6 @@ $vars->{'title_tag'} = "bug_processed";
 my @bug_list;
 if ($cgi->cookie("BUGLIST")) {
     @bug_list = split(/:/, $cgi->cookie("BUGLIST"));
-    $vars->{'bug_list'} = \@bug_list;
 }
 
 my ($action, $next_bug);

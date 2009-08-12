@@ -103,14 +103,6 @@ $vars->{'marks'} = \%marks;
 my @bugids = map {$_->bug_id} grep {!$_->error} @bugs;
 $vars->{'bugids'} = join(", ", @bugids);
 
-# Next bug in list (if there is one)
-my @bug_list;
-if ($cgi->cookie("BUGLIST")) {
-    @bug_list = split(/:/, $cgi->cookie("BUGLIST"));
-}
-
-$vars->{'bug_list'} = \@bug_list;
-
 # Work out which fields we are displaying (currently XML only.)
 # If no explicit list is defined, we show all fields. We then exclude any
 # on the exclusion list. This is so you can say e.g. "Everything except 

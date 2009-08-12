@@ -36,30 +36,32 @@
 
 
 <div class="navigation">
-[% IF bug_list && bug_list.size > 0 %]
-  [% this_bug_idx = lsearch(bug_list, bug.bug_id) %]
+[% IF last_bug_list.size > 0 %]
+  [% this_bug_idx = lsearch(last_bug_list, bug.id) %]
   <b>[% terms.Bug %] List:</b>
   [% IF this_bug_idx != -1 %]
-    ([% this_bug_idx + 1 %] of [% bug_list.size %])
+    ([% this_bug_idx + 1 %] of [% last_bug_list.size %])
   [% END %]
 
 [% IF this_bug_idx != -1 %]
-  <a href="show_bug.cgi?id=[% bug_list.first %]">First</a>
-  <a href="show_bug.cgi?id=[% bug_list.last %]">Last</a>
+  <a href="show_bug.cgi?id=[% last_bug_list.first FILTER url_quote %]">First</a>
+  <a href="show_bug.cgi?id=[% last_bug_list.last FILTER url_quote %]">Last</a>
 [% END %]
 
   [% IF bug.bug_id %]
     [% IF this_bug_idx != -1 %]
       [% IF this_bug_idx > 0 %]
         [% prev_bug = this_bug_idx - 1 %]
-        <a href="show_bug.cgi?id=[% bug_list.$prev_bug %]">Prev</a>
+        <a href="show_bug.cgi?id=
+                 [%- last_bug_list.$prev_bug FILTER url_quote %]">Prev</a>
       [% ELSE %]
         <i><font color="#777777">Prev</font></i>
       [% END %]
 
-      [% IF this_bug_idx + 1 < bug_list.size %]
+      [% IF this_bug_idx + 1 < last_bug_list.size %]
         [% next_bug = this_bug_idx + 1 %]
-        <a href="show_bug.cgi?id=[% bug_list.$next_bug %]">Next</a>
+        <a href="show_bug.cgi?id=
+                 [%- last_bug_list.$next_bug FILTER url_quote %]">Next</a>
       [% ELSE %]
         <i><font color="#777777">Next</font></i>
       [% END %]
@@ -72,7 +74,6 @@
 
   &nbsp;&nbsp;<a href="buglist.cgi?regetlastlist=1">Show last search results</a>
 [% ELSE %]
-  [%# Either !bug_list || bug_list.size <= 0 %]
   [%# With no list, don't show link to search results %]
   <i><font color="#777777">First</font></i>
   <i><font color="#777777">Last</font></i>

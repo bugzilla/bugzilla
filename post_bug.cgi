@@ -274,12 +274,6 @@ foreach my $i (@{$bug->dependson || []}, @{$bug->blocked || []}) {
     push (@{$vars->{'sentmail'}}, { type => 'dep', id => $i, });
 }
 
-my @bug_list;
-if ($cgi->cookie("BUGLIST")) {
-    @bug_list = split(/:/, $cgi->cookie("BUGLIST"));
-}
-$vars->{'bug_list'} = \@bug_list;
-
 if ($token) {
     trick_taint($token);
     $dbh->do('UPDATE tokens SET eventdata = ? WHERE token = ?', undef, 

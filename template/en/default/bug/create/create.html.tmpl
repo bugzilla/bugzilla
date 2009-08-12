@@ -34,6 +34,7 @@
                  'skins/standard/yui/calendar.css' ]
   javascript_urls = [ "js/attachment.js", "js/util.js", "js/yui/calendar.js",
                       "js/field.js", "js/yui/cookie.js", "js/TUI.js" ]
+  onload = 'set_assign_to();'
 %]
 
 <script type="text/javascript">
@@ -418,10 +419,6 @@ TUI_hide_default('expert_fields');
     <th>Default CC:</th>
     <td colspan="2">
       <div id="initial_cc">
-          <!-- This has to happen after everything above renders,
-               and onload doesn't work. So this is as good a place
-               as any to put it. -->
-          <script type="text/javascript">set_assign_to();</script>
       </div>
    </td>
   </tr>

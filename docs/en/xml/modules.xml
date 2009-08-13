@@ -98,14 +98,6 @@
     </para>
 
     <para>
-      File::Spec:
-      <literallayout>
-        CPAN Download Page: <ulink url="http://search.cpan.org/dist/File-Spec/"/>
-        Documentation: <ulink url="http://perldoc.perl.org/File/Spec.html"/>
-      </literallayout>
-    </para>
-
-    <para>
       Template-Toolkit:
       <literallayout>
         CPAN Download Page: <ulink url="http://search.cpan.org/dist/Template-Toolkit/"/>

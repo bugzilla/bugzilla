@@ -93,11 +93,6 @@ sub REQUIRED_MODULES {
         version => ON_WINDOWS ? '0.79' : '0.71'
     },
     {
-        package => 'PathTools',
-        module  => 'File::Spec',
-        version => '0.84'
-    },
-    {
         package => 'DBI',
         module  => 'DBI',
         version => '1.41'

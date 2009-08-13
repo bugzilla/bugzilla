@@ -20,6 +20,8 @@
   #%]
 
 [% DEFAULT qs_suffix = "" %]
+[% USE Bugzilla %]
+
 <ul class="links">
   <li><a href="./">Home</a></li>
   <li><span class="separator">| </span><a href="enter_bug.cgi">New</a></li>
@@ -98,7 +100,6 @@
       # less confusing to have one form (as opposed to  three) when you're 
       # required to log in.
       #%]
-    [% USE Bugzilla %]
     [% IF user.authorizer.can_login && !Bugzilla.page_requires_login %]
       [% PROCESS "account/auth/login-small.html.tmpl" %]
     [% END %]

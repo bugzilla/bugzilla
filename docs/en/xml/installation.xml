@@ -1,5 +1,5 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"> -->
-<!-- $Id: installation.xml,v 1.168 2009/07/29 12:29:36 lpsolit%gmail.com Exp $ -->
+<!-- $Id: installation.xml,v 1.169 2009/08/13 21:32:19 lpsolit%gmail.com Exp $ -->
 <chapter id="installing-bugzilla">
   <title>Installing Bugzilla</title>
 
@@ -407,12 +407,6 @@
           <para>
             <link linkend="install-modules-patchreader">PatchReader</link>
             (&min-patchreader-ver;) for pretty HTML view of patches
-          </para>
-        </listitem>
-
-        <listitem>
-          <para>
-            Image::Magick (&min-image-magick-ver;) for converting BMP image attachments to PNG
           </para>
         </listitem>
 

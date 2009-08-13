@@ -204,12 +204,6 @@ sub OPTIONAL_MODULES {
         feature => ['patch_viewer'],
     },
     {
-        package => 'PerlMagick',
-        module  => 'Image::Magick',
-        version => 0,
-        feature => ['compress_bmps'],
-    },
-    {
         package => 'perl-ldap',
         module  => 'Net::LDAP',
         version => 0,

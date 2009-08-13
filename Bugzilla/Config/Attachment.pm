@@ -84,13 +84,6 @@ sub get_param_list {
    type => 't',
    default => '0',
    checker => \&check_numeric
-  },
-  
-  {
-   name => 'convert_uncompressed_images',
-   type => 'b',
-   default => 0,
-   checker => \&check_image_converter
   } );
   return @param_list;
 }

@@ -568,24 +568,6 @@ sub _check_data {
     return $data if ref $data;
 
     $data || ThrowUserError('zero_length_file');
-
-    # This should go away, see bug 480986.
-    # Windows screenshots are usually uncompressed BMP files which
-    # makes for a quick way to eat up disk space. Let's compress them.
-    # We do this before we check the size since the uncompressed version
-    # could easily be greater than maxattachmentsize.
-    if (Bugzilla->params->{'convert_uncompressed_images'}
-        && $params->{mimetype} eq 'image/bmp')
-    {
-        require Image::Magick;
-        my $img = Image::Magick->new(magick=>'bmp');
-        $img->BlobToImage($data);
-        $img->set(magick=>'png');
-        my $imgdata = $img->ImageToBlob();
-        $data = $imgdata;
-        $params->{mimetype} = 'image/png';
-    }
-
     # Make sure the attachment does not exceed the maximum permitted size.
     my $len = length($data);
     my $max_size = $params->{store_in_file} ? Bugzilla->params->{'maxlocalattachment'} * 1048576

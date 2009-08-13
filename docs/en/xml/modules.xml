@@ -181,13 +181,5 @@
         Documentation: <ulink url="http://www.johnkeiser.com/mozilla/Patch_Viewer.html"/>
       </literallayout>
     </para>
-
-   <para>
-      Image::Magick:
-      <literallayout>
-        CPAN Download Page: <ulink url="http://search.cpan.org/dist/PerlMagick/"/>
-        Documentation: <ulink url="http://www.imagemagick.org/script/resources.php"/>
-      </literallayout>
-    </para>
    </section>
 </appendix>

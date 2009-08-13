@@ -47,7 +47,7 @@ use base qw(Exporter);
     qw(check_multi check_numeric check_regexp check_url check_group
        check_sslbase check_priority check_severity check_platform
        check_opsys check_shadowdb check_urlbase check_webdotbase
-       check_netmask check_user_verify_class check_image_converter
+       check_netmask check_user_verify_class
        check_mail_delivery_method check_notification check_utf8
        check_bug_status check_smtp_auth check_theschwartz_available
        check_maxattachmentsize
@@ -290,15 +290,6 @@ sub check_user_verify_class {
             return "LDAPBaseDN is empty" unless Bugzilla->params->{"LDAPBaseDN"};
         }
     }
-    return "";
-}
-
-sub check_image_converter {
-    my ($value, $hash) = @_;
-    if ($value == 1){
-       eval "require Image::Magick";
-       return "Error requiring Image::Magick: '$@'" if $@;
-    } 
     return "";
 }
 

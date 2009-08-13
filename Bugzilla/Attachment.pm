@@ -57,6 +57,7 @@ use Bugzilla::Flag;
 use Bugzilla::User;
 use Bugzilla::Util;
 use Bugzilla::Field;
+use Bugzilla::Hook;
 
 use base qw(Bugzilla::Object);
 
@@ -106,16 +107,16 @@ use constant UPDATE_COLUMNS => qw(
 use constant VALIDATORS => {
     bug           => \&_check_bug,
     description   => \&_check_description,
+    ispatch       => \&Bugzilla::Object::check_boolean,
     isprivate     => \&_check_is_private,
     isurl         => \&_check_is_url,
+    mimetype      => \&_check_content_type,
     store_in_file => \&_check_store_in_file,
 };
 
 use constant UPDATE_VALIDATORS => {
     filename   => \&_check_filename,
     isobsolete => \&Bugzilla::Object::check_boolean,
-    ispatch    => \&Bugzilla::Object::check_boolean,
-    mimetype   => \&_check_content_type,
 };
 
 ###############################
@@ -552,10 +553,6 @@ sub _check_data {
             # itself as the file may be quite large. If it's not a filehandle,
             # it already contains the content of the file.
             $data = $params->{data};
-
-            # We don't compress BMP images stored locally, nor do we check
-            # their size. No need to go further.
-            return $data if $params->{store_in_file};
         }
         else {
             # The file will be stored in the DB. We need the content of the file.
@@ -563,38 +560,46 @@ sub _check_data {
             my $fh = $params->{data};
             $data = <$fh>;
         }
+    }
+    Bugzilla::Hook::process('attachment-process_data', { data       => \$data,
+                                                         attributes => $params });
 
-        $data || ThrowUserError('zero_length_file');
+    # Do not validate the size if we have a filehandle. It will be checked later.
+    return $data if ref $data;
 
-        # This should go away, see bug 480986.
-        # Windows screenshots are usually uncompressed BMP files which
-        # makes for a quick way to eat up disk space. Let's compress them.
-        # We do this before we check the size since the uncompressed version
-        # could easily be greater than maxattachmentsize.
-        if (Bugzilla->params->{'convert_uncompressed_images'}
-            && $params->{mimetype} eq 'image/bmp')
-        {
-            require Image::Magick;
-            my $img = Image::Magick->new(magick=>'bmp');
-            $img->BlobToImage($data);
-            $img->set(magick=>'png');
-            my $imgdata = $img->ImageToBlob();
-            $data = $imgdata;
-            $params->{mimetype} = 'image/png';
-           # $hr_vars->{'convertedbmp'} = 1;
+    $data || ThrowUserError('zero_length_file');
+
+    # This should go away, see bug 480986.
+    # Windows screenshots are usually uncompressed BMP files which
+    # makes for a quick way to eat up disk space. Let's compress them.
+    # We do this before we check the size since the uncompressed version
+    # could easily be greater than maxattachmentsize.
+    if (Bugzilla->params->{'convert_uncompressed_images'}
+        && $params->{mimetype} eq 'image/bmp')
+    {
+        require Image::Magick;
+        my $img = Image::Magick->new(magick=>'bmp');
+        $img->BlobToImage($data);
+        $img->set(magick=>'png');
+        my $imgdata = $img->ImageToBlob();
+        $data = $imgdata;
+        $params->{mimetype} = 'image/png';
+    }
+
+    # Make sure the attachment does not exceed the maximum permitted size.
+    my $len = length($data);
+    my $max_size = $params->{store_in_file} ? Bugzilla->params->{'maxlocalattachment'} * 1048576
+                                            : Bugzilla->params->{'maxattachmentsize'} * 1024;
+    if ($len > $max_size) {
+        my $vars = { filesize => sprintf("%.0f", $len/1024) };
+        if ($params->{ispatch}) {
+            ThrowUserError('patch_too_large', $vars);
         }
-
-        # Make sure the attachment does not exceed the maximum permitted size.
-        my $max_size = Bugzilla->params->{'maxattachmentsize'} * 1024; # Convert from K
-        my $len = length($data);
-        if ($len > $max_size) {
-            my $vars = { filesize => sprintf("%.0f", $len/1024) };
-            if ($params->{ispatch}) {
-                ThrowUserError('patch_too_large', $vars);
-            }
-            else {
-                ThrowUserError('file_too_large', $vars);
-            }
+        elsif ($params->{store_in_file}) {
+            ThrowUserError('local_file_too_large');
+        }
+        else {
+            ThrowUserError('file_too_large', $vars);
         }
     }
     return $data;
@@ -866,18 +871,15 @@ sub create {
     # If the file is to be stored locally, stream the file from the web server
     # to the local file without reading it into a local variable.
     if ($store_in_file) {
-        my $limit = Bugzilla->params->{"maxlocalattachment"} * 1048576;
-        # If $fh is not a filehandle, we already know its size.
-        ThrowUserError("local_file_too_large") if (!ref($fh) && length($fh) > $limit);
-
         my $attachdir = bz_locations()->{'attachdir'};
         my $hash = ($attachid % 100) + 100;
         $hash =~ s/.*(\d\d)$/group.$1/;
         mkdir "$attachdir/$hash", 0770;
         chmod 0770, "$attachdir/$hash";
-        open(AH, ">$attachdir/$hash/attachment.$attachid");
+        open(AH, '>', "$attachdir/$hash/attachment.$attachid");
         binmode AH;
         if (ref $fh) {
+            my $limit = Bugzilla->params->{"maxlocalattachment"} * 1048576;
             my $sizecount = 0;
             while (<$fh>) {
                 print AH $_;
@@ -902,14 +904,14 @@ sub create {
 }
 
 sub run_create_validators {
-    my $class  = shift;
-    my $params = $class->SUPER::run_create_validators(@_);
+    my ($class, $params) = @_;
 
+    # Let's validate the attachment content first as it may
+    # alter some other attachment attributes.
     $params->{data} = $class->_check_data($params);
-    # We couldn't call these checkers earlier as _check_data() could alter values.
-    $params->{ispatch} = $params->{ispatch} ? 1 : 0;
+    $params = $class->SUPER::run_create_validators($params);
+
     $params->{filename} = $class->_check_filename($params->{filename}, $params->{isurl});
-    $params->{mimetype} = $class->_check_content_type($params->{mimetype});
     $params->{creation_ts} ||= Bugzilla->dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
     $params->{modification_time} = $params->{creation_ts};
     $params->{submitter_id} = Bugzilla->user->id || ThrowCodeError('invalid_user');

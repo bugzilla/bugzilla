@@ -170,6 +170,24 @@ This describes what hooks exist in Bugzilla currently. They are mostly
 in alphabetical order, but some related hooks are near each other instead
 of being alphabetical.
 
+=head2 attachment-process_data
+
+This happens at the very beginning process of the attachment creation.
+You can edit the attachment content itself as well as all attributes
+of the attachment, before they are validated and inserted into the DB.
+
+Params:
+
+=over
+
+=item C<data> - A reference pointing either to the content of the file
+being uploaded or pointing to the filehandle associated with the file.
+
+=item C<attributes> - A hashref whose keys are the same as
+L<Bugzilla::Attachment/create>. The data it contains hasn't been checked yet.
+
+=back
+
 =head2 auth-login_methods
 
 This allows you to add new login types to Bugzilla.

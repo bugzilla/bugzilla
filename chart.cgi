@@ -47,6 +47,7 @@ use lib qw(. lib);
 
 use Bugzilla;
 use Bugzilla::Constants;
+use Bugzilla::CGI;
 use Bugzilla::Error;
 use Bugzilla::Util;
 use Bugzilla::Chart;
@@ -185,6 +186,18 @@ elsif ($action eq "alter") {
     $vars->{'changes_saved'} = 1;
     
     edit($series);
+}
+elsif ($action eq "convert_search") {
+    my $saved_search = $cgi->param('series_from_search') || '';
+    my ($query) = grep { $_->name eq $saved_search } @{ $user->queries };
+    my $url = '';
+    if ($query) {
+        my $params = new Bugzilla::CGI($query->edit_link);
+        # These two parameters conflict with the one below.
+        $url = $params->canonicalise_query('format', 'query_format');
+        $url = '&amp;' . html_quote($url);
+    }
+    print $cgi->redirect(-location => correct_urlbase() . "query.cgi?format=create-series$url");
 }
 else {
     ThrowCodeError("unknown_action");

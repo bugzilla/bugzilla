@@ -396,10 +396,10 @@ sub getVisibleSeries {
                         "LEFT JOIN category_group_map AS cgm " .
                         "    ON series.category = cgm.category_id " .
                         "    AND cgm.group_id NOT IN($grouplist) " .
-                        "WHERE creator = " . Bugzilla->user->id . " OR " .
-                        "      cgm.category_id IS NULL " . 
+                        "WHERE creator = ? OR (is_public = 1 AND cgm.category_id IS NULL) " .
                    $dbh->sql_group_by('series.series_id', 'cc1.name, cc2.name, ' .
-                                      'series.name'));
+                                      'series.name'),
+                        undef, Bugzilla->user->id);
     foreach my $series (@$serieses) {
         my ($cat, $subcat, $name, $series_id) = @$series;
         $cats{$cat}{$subcat}{$name} = $series_id;

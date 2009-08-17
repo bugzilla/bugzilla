@@ -94,6 +94,12 @@ sub bz_last_key {
     return $last_insert_id;
 }
 
+sub sql_group_concat {
+    my ($self, $text, $separator) = @_;
+    $separator ||= "','";
+    return "array_to_string(array_accum($text), $separator)";
+}
+
 sub sql_regexp {
     my ($self, $expr, $pattern, $nocheck, $real_pattern) = @_;
     $real_pattern ||= $pattern;
@@ -188,6 +194,20 @@ sub bz_explain {
 sub bz_setup_database {
     my $self = shift;
     $self->SUPER::bz_setup_database(@_);
+
+    # Custom Functions
+    my $function = 'array_accum';
+    my $array_accum = $self->selectrow_array(
+        'SELECT 1 FROM pg_proc WHERE proname = ?', undef, $function);
+    if (!$array_accum) {
+        print "Creating function $function...\n";
+        $self->do("CREATE AGGREGATE array_accum (
+                       SFUNC = array_append,
+                       BASETYPE = anyelement,
+                       STYPE = anyarray,
+                       INITCOND = '{}' 
+                   )");
+    }
 
     # PostgreSQL doesn't like having *any* index on the thetext
     # field, because it can't have index data longer than 2770

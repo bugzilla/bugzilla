@@ -115,6 +115,12 @@ sub bz_explain {
      return join("\n", @$explain); 
 } 
 
+sub sql_group_concat {
+    my ($self, $text, $separator) = @_;
+    $separator ||= "','";
+    return "group_concat(T_CLOB_DELIM($text, $separator))";
+}
+
 sub sql_regexp {
     my ($self, $expr, $pattern, $nocheck, $real_pattern) = @_;
     $real_pattern ||= $pattern;
@@ -271,6 +277,10 @@ sub _fix_hashref {
 
 sub adjust_statement {
     my ($sql) = @_;
+    
+    if ($sql =~ /^CREATE OR REPLACE.*/i){
+        return $sql;
+    } 
 
     # We can't just assume any occurrence of "''" in $sql is an empty
     # string, since "''" can occur inside a string literal as a way of
@@ -529,6 +539,88 @@ sub bz_setup_database {
               . " RETURN DATE IS BEGIN RETURN SYSDATE; END;");
     $self->do("CREATE OR REPLACE FUNCTION CHAR_LENGTH(COLUMN_NAME VARCHAR2)" 
               . " RETURN NUMBER IS BEGIN RETURN LENGTH(COLUMN_NAME); END;");
+    
+    # Create types for group_concat
+    my $t_clob_delim = $self->selectcol_arrayref("
+        SELECT TYPE_NAME FROM USER_TYPES WHERE TYPE_NAME=?",
+        undef, 'T_CLOB_DELIM'); 
+
+    if ( !@$t_clob_delim ) {
+        $self->do("CREATE OR REPLACE TYPE T_CLOB_DELIM AS OBJECT "
+              . "( p_CONTENT CLOB, p_DELIMITER VARCHAR2(256));");
+    }
+
+    $self->do("CREATE OR REPLACE TYPE T_GROUP_CONCAT AS OBJECT 
+               (  CLOB_CONTENT CLOB,
+                  DELIMITER    VARCHAR2(256),
+                  STATIC FUNCTION ODCIAGGREGATEINITIALIZE(
+                      SCTX IN OUT NOCOPY T_GROUP_CONCAT)
+                  RETURN NUMBER,
+                  MEMBER FUNCTION ODCIAGGREGATEITERATE(
+                      SELF IN OUT NOCOPY T_GROUP_CONCAT,
+                      VALUE IN T_CLOB_DELIM) 
+                  RETURN NUMBER,
+                  MEMBER FUNCTION ODCIAGGREGATETERMINATE(
+                      SELF IN T_GROUP_CONCAT,
+                      RETURNVALUE OUT NOCOPY CLOB,
+                      FLAGS       IN NUMBER)
+                  RETURN NUMBER,
+                  MEMBER FUNCTION ODCIAGGREGATEMERGE(
+                      SELF IN OUT NOCOPY T_GROUP_CONCAT,
+                      CTX2 IN T_GROUP_CONCAT) 
+                  RETURN NUMBER);");
+
+    $self->do("CREATE OR REPLACE TYPE BODY T_GROUP_CONCAT IS
+                  STATIC FUNCTION ODCIAGGREGATEINITIALIZE(
+                  SCTX IN OUT NOCOPY T_GROUP_CONCAT)
+                  RETURN NUMBER IS
+                  BEGIN
+                      SCTX := T_GROUP_CONCAT(EMPTY_CLOB(), NULL);
+                      DBMS_LOB.CREATETEMPORARY(SCTX.CLOB_CONTENT, TRUE);
+                      RETURN ODCICONST.SUCCESS;
+                  END;
+                  MEMBER FUNCTION ODCIAGGREGATEITERATE(
+                      SELF IN OUT NOCOPY T_GROUP_CONCAT,
+                      VALUE IN T_CLOB_DELIM) 
+                  RETURN NUMBER IS
+                  BEGIN
+                      SELF.DELIMITER := VALUE.P_DELIMITER;
+                      DBMS_LOB.WRITEAPPEND(SELF.CLOB_CONTENT, 
+                                           LENGTH(SELF.DELIMITER),
+                                           SELF.DELIMITER);
+                      DBMS_LOB.APPEND(SELF.CLOB_CONTENT, VALUE.P_CONTENT);
+  
+                      RETURN ODCICONST.SUCCESS;
+                  END;
+                  MEMBER FUNCTION ODCIAGGREGATETERMINATE(
+                      SELF IN T_GROUP_CONCAT,
+                      RETURNVALUE OUT NOCOPY CLOB,
+                      FLAGS IN NUMBER) 
+                  RETURN NUMBER IS
+                  BEGIN
+                      RETURNVALUE := RTRIM(LTRIM(SELF.CLOB_CONTENT, 
+                                     SELF.DELIMITER), 
+                                     SELF.DELIMITER);
+                      RETURN ODCICONST.SUCCESS;
+                  END;
+                  MEMBER FUNCTION ODCIAGGREGATEMERGE(
+                      SELF IN OUT NOCOPY T_GROUP_CONCAT,
+                      CTX2 IN T_GROUP_CONCAT) 
+                  RETURN NUMBER IS
+                  BEGIN
+                      DBMS_LOB.WRITEAPPEND(SELF.CLOB_CONTENT, 
+                                           LENGTH(SELF.DELIMITER), 
+                                           SELF.DELIMITER);
+                      DBMS_LOB.APPEND(SELF.CLOB_CONTENT, CTX2.CLOB_CONTENT);
+                      RETURN ODCICONST.SUCCESS;
+                  END;
+               END;");
+
+    # Create user-defined aggregate function group_concat
+    $self->do("CREATE OR REPLACE FUNCTION GROUP_CONCAT(P_INPUT T_CLOB_DELIM) 
+               RETURN CLOB 
+               DETERMINISTIC PARALLEL_ENABLE AGGREGATE USING T_GROUP_CONCAT;");
+
     # Create a WORLD_LEXER named BZ_LEX for multilingual fulltext search
     my $lexer = $self->selectcol_arrayref(
        "SELECT pre_name FROM CTXSYS.CTX_PREFERENCES WHERE pre_name = ? AND

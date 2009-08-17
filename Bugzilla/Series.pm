@@ -79,34 +79,30 @@ sub new {
 }
 
 sub initFromDatabase {
-    my $self = shift;
-    my $series_id = shift;
-    
+    my ($self, $series_id) = @_;
+    my $dbh = Bugzilla->dbh;
+    my $user = Bugzilla->user;
+
     detaint_natural($series_id) 
       || ThrowCodeError("invalid_series_id", { 'series_id' => $series_id });
-    
-    my $dbh = Bugzilla->dbh;
+
+    my $grouplist = $user->groups_as_string;
+
     my @series = $dbh->selectrow_array("SELECT series.series_id, cc1.name, " .
         "cc2.name, series.name, series.creator, series.frequency, " .
         "series.query, series.is_public " .
         "FROM series " .
-        "LEFT JOIN series_categories AS cc1 " .
+        "INNER JOIN series_categories AS cc1 " .
         "    ON series.category = cc1.id " .
-        "LEFT JOIN series_categories AS cc2 " .
+        "INNER JOIN series_categories AS cc2 " .
         "    ON series.subcategory = cc2.id " .
         "LEFT JOIN category_group_map AS cgm " .
         "    ON series.category = cgm.category_id " .
-        "LEFT JOIN user_group_map AS ugm " .
-        "    ON cgm.group_id = ugm.group_id " .
-        "    AND ugm.user_id = " . Bugzilla->user->id .
-        "    AND isbless = 0 " .
-        "WHERE series.series_id = $series_id AND " .
-        "(is_public = 1 OR creator = " . Bugzilla->user->id . " OR " .
-        "(ugm.group_id IS NOT NULL)) " . 
-        $dbh->sql_group_by('series.series_id', 'cc1.name, cc2.name, ' .
-                           'series.name, series.creator, series.frequency, ' .
-                           'series.query, series.is_public'));
-    
+        "    AND cgm.group_id NOT IN($grouplist) " .
+        "WHERE series.series_id = ? " .
+        "    AND (creator = ? OR (is_public = 1 AND cgm.category_id IS NULL))",
+        undef, ($series_id, $user->id));
+
     if (@series) {
         $self->initFromParameters(@series);
         return $self;

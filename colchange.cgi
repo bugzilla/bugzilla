@@ -74,7 +74,9 @@ if (Bugzilla->params->{"usestatuswhiteboard"}) {
 if (Bugzilla::Keyword->any_exist) {
     push(@masterlist, "keywords");
 }
-
+if (Bugzilla->has_flags) {
+    push(@masterlist, "flagtypes.name");
+}
 if (Bugzilla->user->in_group(Bugzilla->params->{"timetrackinggroup"})) {
     push(@masterlist, ("estimated_time", "remaining_time", "actual_time",
                        "percentage_complete", "deadline")); 

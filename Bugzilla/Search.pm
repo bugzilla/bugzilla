@@ -123,6 +123,9 @@ sub COLUMNS {
               . " ELSE 100"
                    . " * ($actual_time / ($actual_time + bugs.remaining_time))"
               . " END)",
+
+        'flagtypes.name' => $dbh->sql_group_concat('DISTINCT '
+                            . $dbh->sql_string_concat('flagtypes.name', 'flags.status'), "', '"),
     );
 
     # Backward-compatibility for old field names. Goes new_name => old_name.
@@ -268,6 +271,11 @@ sub init {
     if (grep($_ eq 'actual_time' || $_ eq 'percentage_complete', @fields)) {
         push(@supptables, "LEFT JOIN longdescs AS ldtime " .
                           "ON ldtime.bug_id = bugs.bug_id");
+    }
+
+    if (grep($_ eq 'flagtypes.name', @fields)) {
+        push(@supptables, "LEFT JOIN flags ON flags.bug_id = bugs.bug_id AND attach_id IS NULL");
+        push(@supptables, "LEFT JOIN flagtypes ON flagtypes.id = flags.type_id");
     }
 
     my $minvotes;
@@ -911,8 +919,15 @@ sub init {
     # Make sure we create a legal SQL query.
     @andlist = ("1 = 1") if !@andlist;
 
-    my @sql_fields = map { $_ eq EMPTY_COLUMN ? EMPTY_COLUMN 
-                           : COLUMNS->{$_}->{name} . ' AS ' . $_ } @fields;
+    my @sql_fields;
+    foreach my $field (@fields) {
+        my $alias = $field;
+        # Aliases cannot contain dots in them. We convert them to underscores.
+        $alias =~ s/\./_/g;
+        my $sql_field = ($field eq EMPTY_COLUMN) ? EMPTY_COLUMN
+                                                 : COLUMNS->{$field}->{name} . " AS $alias";
+        push(@sql_fields, $sql_field);
+    }
     my $query = "SELECT " . join(', ', @sql_fields) .
                 " FROM $suppstring" .
                 " LEFT JOIN bug_group_map " .
@@ -945,7 +960,7 @@ sub init {
         # These fields never go into the GROUP BY (bug_id goes in
         # explicitly, below).
         next if (grep($_ eq $field, EMPTY_COLUMN, 
-                      qw(bug_id actual_time percentage_complete)));
+                      qw(bug_id actual_time percentage_complete flagtypes.name)));
         my $col = COLUMNS->{$field}->{name};
         push(@groupby, $col) if !grep($_ eq $col, @groupby);
     }
@@ -1160,6 +1175,8 @@ sub BuildOrderBy {
         }
         return;
     }
+    # Aliases cannot contain dots in them. We convert them to underscores.
+    $orderfield =~ s/\./_/g if exists COLUMNS->{$orderfield};
 
     push(@$stringlist, trim($orderfield . ' ' . $orderdirection));
 }

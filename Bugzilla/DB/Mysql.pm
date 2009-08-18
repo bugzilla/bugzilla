@@ -317,15 +317,11 @@ EOT
     }
 
 
-    # Figure out if any existing tables are of type ISAM and convert them
-    # to type MyISAM if so.  ISAM tables are deprecated in MySQL 3.23,
-    # which Bugzilla now requires, and they don't support more than 16
-    # indexes per table, which Bugzilla needs.
-    my $table_status = $self->selectall_arrayref("SHOW TABLE STATUS");
+    my %table_status = @{ $self->selectcol_arrayref("SHOW TABLE STATUS", 
+                                                    {Columns=>[1,2]}) };
     my @isam_tables;
-    foreach my $row (@$table_status) {
-        my ($name, $type) = @$row;
-        push(@isam_tables, $name) if $type eq "ISAM";
+    foreach my $name (keys %table_status) {
+        push(@isam_tables, $name) if $table_status{$name} eq "ISAM";
     }
 
     if(scalar(@isam_tables)) {
@@ -347,7 +343,9 @@ EOT
     # We want to convert tables to InnoDB, but it's possible that they have 
     # fulltext indexes on them, and conversion will fail unless we remove
     # the indexes.
-    if (grep($_ eq 'bugs', @tables)) {
+    if (grep($_ eq 'bugs', @tables)
+        and !grep($_ eq 'bugs_fulltext', @tables))
+    {
         if ($self->bz_index_info_real('bugs', 'short_desc')) {
             $self->bz_drop_index_raw('bugs', 'short_desc');
         }
@@ -356,7 +354,9 @@ EOT
             $sd_index_deleted = 1; # Used for later schema cleanup.
         }
     }
-    if (grep($_ eq 'longdescs', @tables)) {
+    if (grep($_ eq 'longdescs', @tables)
+        and !grep($_ eq 'bugs_fulltext', @tables))
+    {
         if ($self->bz_index_info_real('longdescs', 'thetext')) {
             $self->bz_drop_index_raw('longdescs', 'thetext');
         }
@@ -368,9 +368,8 @@ EOT
 
     # Upgrade tables from MyISAM to InnoDB
     my @myisam_tables;
-    foreach my $row (@$table_status) {
-        my ($name, $type) = @$row;
-        if ($type =~ /^MYISAM$/i 
+    foreach my $name (keys %table_status) {
+        if ($table_status{$name} =~ /^MYISAM$/i 
             && !grep($_ eq $name, Bugzilla::DB::Schema::Mysql::MYISAM_TABLES))
         {
             push(@myisam_tables, $name) ;

@@ -2340,10 +2340,11 @@ sub _initialize_dependency_tree_changes_email_pref {
 
     foreach my $desc (keys %events) {
         my $event = $events{$desc};
-        my $sth = $dbh->prepare("SELECT COUNT(*) FROM email_setting 
-                                  WHERE event = $event");
-        $sth->execute();
-        if (!($sth->fetchrow_arrayref()->[0])) {
+        my $have_events = $dbh->selectrow_array(
+            "SELECT 1 FROM email_setting WHERE event = $event "
+            . $dbh->sql_limit(1));
+
+        if (!$have_events) {
             # No settings in the table yet, so we assume that this is the
             # first time it's being set.
             print "Initializing \"$desc\" email_setting ...\n";
@@ -2901,11 +2902,8 @@ sub _initialize_workflow {
     # and mark these statuses as 'closed', even if some of these statuses are
     # expected to be open statuses. Bug statuses we have no information about
     # are left as 'open'.
-    my @closed_statuses =
-      @{$dbh->selectcol_arrayref('SELECT DISTINCT bug_status FROM bugs
-                                  WHERE resolution != ?', undef, '')};
-
-    # Append the default list of closed statuses *unless* we detect at least
+    #
+    # We append the default list of closed statuses *unless* we detect at least
     # one closed state in the DB (i.e. with is_open = 0). This would mean that
     # the DB has already been updated at least once and maybe the admin decided
     # that e.g. 'RESOLVED' is now an open state, in which case we don't want to
@@ -2916,6 +2914,9 @@ sub _initialize_workflow {
                                                    WHERE is_open = 0');
 
     if (!$num_closed_states) {
+        my @closed_statuses =
+            @{$dbh->selectcol_arrayref('SELECT DISTINCT bug_status FROM bugs
+                                         WHERE resolution != ?', undef, '')};
         @closed_statuses =
           map {$dbh->quote($_)} (@closed_statuses, qw(RESOLVED VERIFIED CLOSED));
 

@@ -306,8 +306,7 @@
           <varlistentry>
             <term><ulink url="http://www.mysql.com/doc/en/Privilege_system.html">Privilege System</ulink></term>
             <listitem>
-              <para>Much more detailed information about the suggestions in
-              <xref linkend="security-mysql"/>.
+              <para>Information about how to protect your MySQL server.
               </para>
             </listitem>
           </varlistentry>

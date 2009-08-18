@@ -1,5 +1,5 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"> -->
-<!-- $Id: installation.xml,v 1.165.2.4 2009/08/13 21:45:34 lpsolit%gmail.com Exp $ -->
+<!-- $Id: installation.xml,v 1.165.2.5 2009/08/18 11:03:25 lpsolit%gmail.com Exp $ -->
 <chapter id="installing-bugzilla">
   <title>Installing Bugzilla</title>
 
@@ -741,9 +741,23 @@
 
         <caution>
           <para>
-            MySQL's default configuration is very insecure.
-            <xref linkend="security-mysql"/> has some good information for
-            improving your installation's security.
+            MySQL's default configuration is insecure.
+            We highly recommend to run <filename>mysql_secure_installation</filename>
+            on Linux or the MySQL installer on Windows, and follow the instructions.
+            Important points to note are:
+            <orderedlist>
+              <listitem>
+                <para>Be sure that the root account has a secure password set.</para>
+              </listitem>
+              <listitem>
+                <para>Do not create an anonymous account, and if it exists, say "yes"
+                to remove it.</para>
+              </listitem>
+              <listitem>
+                <para>If your web server and MySQL server are on the same machine,
+                you should disable the network access.</para>
+              </listitem>
+            </orderedlist>
           </para>
         </caution>
  
@@ -751,11 +765,11 @@
           <title>Allow large attachments and many comments</title>
           
           <para>By default, MySQL will only allow you to insert things
-          into the database that are smaller than 64KB. Attachments
+          into the database that are smaller than 1MB. Attachments
           may be larger than this. Also, Bugzilla combines all comments
           on a single bug into one field for full-text searching, and the
-          combination of all comments on a single bug are very likely to
-          be larger than 64KB.</para>
+          combination of all comments on a single bug could in some cases
+          be larger than 1MB.</para>
           
           <para>To change MySQL's default, you need to edit your MySQL
           configuration file, which is usually <filename>/etc/my.cnf</filename>

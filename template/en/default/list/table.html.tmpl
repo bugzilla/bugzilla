@@ -134,7 +134,7 @@
     [% IF (om = order.match("$id( DESC)?")) %]
       [% desc = ' DESC' IF NOT om.0 %]
     [% END %]
-    [% order = order.remove("$id( DESC)?,?") %]
+    [% order = order.remove("\\b$id( DESC)?(,\\s*|\$)") %]
     <a href="buglist.cgi?[% urlquerypart FILTER html %]&amp;order=
       [% id FILTER url_quote %][% desc FILTER url_quote %]
       [% ",$order" FILTER url_quote IF order %]

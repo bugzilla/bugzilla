@@ -35,18 +35,56 @@ use Bugzilla::JobQueue;
 use Bugzilla::Util qw(get_text);
 BEGIN { eval "use base qw(Daemon::Generic)"; }
 
-# Required because of a bug in Daemon::Generic where it won't use the
-# "version" key from DAEMON_CONFIG.
 our $VERSION = BUGZILLA_VERSION;
 
-use constant DAEMON_CONFIG => (
-    progname => basename($0),
-    pidfile  => bz_locations()->{datadir} . '/' . basename($0) . '.pid',
-    version  => BUGZILLA_VERSION,
-);
-
+# The Daemon::Generic docs say that it uses all sorts of
+# things from gd_preconfig, but in fact it does not. The
+# only thing it uses from gd_preconfig is the "pidfile"
+# config parameter.
 sub gd_preconfig {
-    return DAEMON_CONFIG;
+    my $self = shift;
+
+    my $pidfile = $self->{gd_args}{pidfile};
+    if (!$pidfile) {
+        $pidfile = bz_locations()->{datadir} . '/' . $self->{gd_progname} 
+                   . ".pid";
+    }
+    return (pidfile => $pidfile);
+}
+
+# All config other than the pidfile has to be done in gd_getopt
+# in order for it to be set up early enough.
+sub gd_getopt {
+    my $self = shift;
+
+    $self->SUPER::gd_getopt();
+
+    if ($self->{gd_args}{progname}) {
+        $self->{gd_progname} = $self->{gd_args}{progname};
+    }
+    else {
+        $self->{gd_progname} = basename($0);
+    }
+
+    # There are places that Daemon Generic's new() uses $0 instead of
+    # gd_progname, which it really shouldn't, but this hack fixes it.
+    $self->{_original_zero} = $0;
+    $0 = $self->{gd_progname};
+}
+
+sub gd_postconfig {
+    my $self = shift;
+    # See the hack above in gd_getopt. This just reverses it
+    # in case anything else needs the accurate $0.
+    $0 = delete $self->{_original_zero};
+}
+
+sub gd_more_opt {
+    my $self = shift;
+    return (
+        'pidfile=s' => \$self->{gd_args}{pidfile},
+        'n=s'       => \$self->{gd_args}{progname},
+    );
 }
 
 sub gd_usage {

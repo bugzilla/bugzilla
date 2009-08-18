@@ -89,7 +89,7 @@ sub AddLink {
     my $key = "$blocked,$dependson";
     if (!exists $edgesdone{$key}) {
         $edgesdone{$key} = 1;
-        print $fh "$blocked -> $dependson\n";
+        print $fh "$dependson -> $blocked\n";
         $seen{$blocked} = 1;
         $seen{$dependson} = 1;
     }

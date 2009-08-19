@@ -352,7 +352,7 @@ sub Send {
 
         if ($deptext) {
             my $diffpart = {};
-            $diffpart->{'text'} = "\n" . trim("\n\n" . $deptext);
+            $diffpart->{'text'} = "\n" . trim($deptext);
             push(@diffparts, $diffpart);
         }
     }
@@ -595,6 +595,8 @@ sub sendMail {
     }
 
     my $diffs = $difftext;
+    # Remove extra newlines.
+    $diffs =~ s/^\n+//s; $diffs =~ s/\n+$//s;
     if ($isnew) {
         my $head = "";
         foreach my $f (@headerlist) {

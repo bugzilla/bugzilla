@@ -30,6 +30,7 @@ use strict;
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Install::Localconfig;
+use Bugzilla::Install::Util qw(install_string);
 use Bugzilla::Util;
 
 use File::Find;
@@ -600,10 +601,12 @@ sub _fix_cvs_dirs {
 sub _fix_perms {
     my ($name, $owner, $group, $perms) = @_;
     #printf ("Changing $name to %o\n", $perms);
-    chown $owner, $group, $name 
-        || warn "Failed to change ownership of $name: $!";
+    chown $owner, $group, $name
+        or warn install_string('chown_failed', { path => $name, 
+                                                 error => $! }) . "\n";
     chmod $perms, $name
-        || warn "Failed to change permissions of $name: $!";
+        or warn install_string('chmod_failed', { path => $name, 
+                                                 error => $! }) . "\n";
 }
 
 sub _check_web_server_group {

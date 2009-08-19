@@ -33,6 +33,8 @@
     checking_dbd      => 'Checking available perl DBD modules...',
     checking_optional => 'The following Perl modules are optional:',
     checking_modules  => 'Checking perl modules...',
+    chmod_failed      => '##path##: Failed to change permissions: ##error##',
+    chown_failed      => '##path##: Failed to change ownership: ##error##',
     commands_dbd      => <<EOT,
 YOU MUST RUN ONE OF THE FOLLOWING COMMANDS (depending on which database
 you use):

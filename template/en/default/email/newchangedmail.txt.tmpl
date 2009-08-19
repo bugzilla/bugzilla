@@ -41,8 +41,10 @@ X-Bugzilla-Changed-Fields: [% changedfields %]
 [%+ threadingmarker %]
 
 [%+ urlbase %]show_bug.cgi?id=[% bugid %]
+[%- IF diffs %]
 
 [%+ diffs %]
+[% END -%]
 [% FOREACH comment = new_comments %]
 
 --- Comment #[% comment.count %] from [% comment.author.identity %] [%+ comment.time FILTER time %] ---

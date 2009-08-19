@@ -50,6 +50,7 @@ function subcatSelected() {
     i++;
   }
 
+  namewidget.disabled = false;
   namewidget.options[0].selected = true;
   
   checkNewState();
@@ -98,23 +99,16 @@ function subcatSelected() {
         <td>
           <noscript>
             <input type="submit" name="action-assemble" value="Update --&gt;"
-                   id="action-assemble">
+                   id="action-assemble2">
           </noscript>
         </td>
         
-        <td align="left">
-          <select name="name" id="name" style="width: 15em"
-                  size="5" multiple="multiple"
-                  [%+ "disabled=\"disabled\"" UNLESS name.keys.size %]>
-            [% FOREACH x = name.keys.sort %]
-              <option value="[% name.$x FILTER html %]">
-                [% x FILTER html %]</option>
-            [% END %]
-            [% UNLESS name.keys.size %]
-              <option value="" disabled="disabled"></option>
-            [% END %]
-          </select>
-        </td>
+        [% PROCESS series_select sel = { name => 'name',
+                                         size => 5,
+                                         multiple => 1,
+                                         # We want to use the series ID as value,
+                                         # not its name.
+                                         value_in_hash => 1 } %]
 
         <td align="center" valign="middle"> 
           <input type="submit" name="action-add" value="Add To List"
@@ -123,14 +117,6 @@ function subcatSelected() {
       </tr>
     [% END %]
   </table>
-
-  <script type="text/javascript">
-    document.chartform.category[0].selected = true;
-    document.chartform.subcategory.disabled = '';
-    document.chartform.name.disabled = '';
-    catSelected();
-    subcatSelected();
-  </script>
 
   <h3>List Of Data Sets To Plot</h3>
 

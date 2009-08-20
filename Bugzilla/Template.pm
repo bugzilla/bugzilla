@@ -792,17 +792,20 @@ sub precompile_templates {
     if (-e "$datadir/template") {
         print install_string('template_removing_dir') . "\n" if $output;
 
-        # XXX This frequently fails if the webserver made the files, because
-        # then the webserver owns the directories. We could fix that by
-        # doing a chmod/chown on all the directories here.
+        # This frequently fails if the webserver made the files, because
+        # then the webserver owns the directories.
         rmtree("$datadir/template");
 
-        # Check that the directory was really removed
-        if(-e "$datadir/template") {
-            print "\n\n";
-            print "The directory '$datadir/template' could not be removed.\n";
-            print "Please remove it manually and rerun checksetup.pl.\n\n";
-            exit;
+        # Check that the directory was really removed, and if not, move it
+        # into data/deleteme/.
+        if (-e "$datadir/template") {
+            print STDERR "\n\n",
+                install_string('template_removal_failed', 
+                               { datadir => $datadir }), "\n\n";
+            mkpath("$datadir/deleteme");
+            my $random = generate_random_password();
+            rename("$datadir/template", "$datadir/deleteme/$random")
+              or die "move failed: $!";
         }
     }
 

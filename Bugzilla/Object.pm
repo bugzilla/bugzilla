@@ -121,8 +121,13 @@ sub check {
     my $check_param = exists $param->{id} ? $param->{id} : $param->{name};
     $check_param = trim($check_param);
     $check_param || ThrowUserError('object_not_specified', { class => $class });
-    my $obj = $class->new($param)
-        || ThrowUserError('object_does_not_exist', {%$param, class => $class});
+    my $obj = $class->new($param);
+    if (!$obj) {
+        # We don't want to override the normal template "user" object if
+        # "user" is one of the params.
+        delete $param->{user};
+        ThrowUserError('object_does_not_exist', { %$param, class => $class });
+    }
     return $obj;
 }
 

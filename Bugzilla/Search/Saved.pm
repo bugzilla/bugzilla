@@ -32,6 +32,8 @@ use Bugzilla::Search qw(IsValidQueryType);
 use Bugzilla::User;
 use Bugzilla::Util;
 
+use Scalar::Util qw(blessed);
+
 #############
 # Constants #
 #############
@@ -56,6 +58,63 @@ use constant VALIDATORS => {
 };
 
 use constant UPDATE_COLUMNS => qw(name query query_type);
+
+###############
+# Constructor #
+###############
+
+sub new {
+    my $class = shift;
+    my $param = shift;
+    my $dbh = Bugzilla->dbh;
+
+    my $user;
+    if (ref $param) {
+        $user = $param->{user} || Bugzilla->user;
+        my $name = $param->{name};
+        if (!defined $name) {
+            ThrowCodeError('bad_arg',
+                {argument => 'name',
+                 function => "${class}::new"});
+        }
+        my $condition = 'userid = ? AND name = ?';
+        my $user_id = blessed $user ? $user->id : $user;
+        detaint_natural($user_id)
+          || ThrowCodeError('param_must_be_numeric',
+                            {function => $class . '::_init', param => 'user'});
+        my @values = ($user_id, $name);
+        $param = { condition => $condition, values => \@values };
+    }
+
+    unshift @_, $param;
+    my $self = $class->SUPER::new(@_);
+    if ($self) {
+        $self->{user} = $user if blessed $user;
+
+        # Some DBs (read: Oracle) incorrectly mark the query string as UTF-8
+        # when it's coming out of the database, even though it has no UTF-8
+        # characters in it, which prevents Bugzilla::CGI from later reading
+        # it correctly.
+        utf8::downgrade($self->{query}) if utf8::is_utf8($self->{query});
+    }
+    return $self;
+}
+
+sub check {
+    my $class = shift;
+    my $search = $class->SUPER::check(@_);
+    my $user = Bugzilla->user;
+    return $search if $search->user->id == $user->id;
+
+    if (!$search->shared_with_group
+        or !$user->in_group($search->shared_with_group)) 
+    {
+        ThrowUserError('missing_query', { queryname => $search->name, 
+                                          sharer_id => $search->user->id });
+    }
+
+    return $search;
+}
 
 ##############
 # Validators #
@@ -210,8 +269,8 @@ sub shared_with_users {
 # Simple Accessors #
 ####################
 
-sub bug_ids_only { return ($_[0]->{'query_type'} == LIST_OF_BUGS) ? 1 : 0; }
-sub url          { return $_[0]->{'query'}; }
+sub type { return $_[0]->{'query_type'}; }
+sub url  { return $_[0]->{'query'}; }
 
 sub user {
     my ($self) = @_;
@@ -264,7 +323,8 @@ documented below.
 
 =item C<new>
 
-Does not accept a bare C<name> argument. Instead, accepts only an id.
+Takes either an id, or the named parameters C<user> and C<name>.
+C<user> can be either a L<Bugzilla::User> object or a numeric user id.
 
 See also: L<Bugzilla::Object/new>.
 
@@ -297,9 +357,9 @@ Whether or not this search should be displayed in the footer for the
 I<current user> (not the owner of the search, but the person actually
 using Bugzilla right now).
 
-=item C<bug_ids_only>
+=item C<type>
 
-True if the search contains only a list of Bug IDs.
+The numeric id of the type of search this is (from L<Bugzilla::Constants>).
 
 =item C<shared_with_group>
 

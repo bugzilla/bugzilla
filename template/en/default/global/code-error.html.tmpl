@@ -340,8 +340,8 @@
 
   [% ELSIF error == "param_must_be_numeric" %]
     [% title = "Invalid Parameter" %]
-    Invalid parameter passed to [% function FILTER html %].
-    It must be numeric.
+    Invalid parameter <code>[% param FILTER html %]</code> passed to 
+    <code>[% function FILTER html %]</code>: It must be numeric.
 
   [% ELSIF error == "param_required" %]
     [% title = "Missing Parameter" %]

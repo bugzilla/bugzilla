@@ -229,64 +229,25 @@ sub DiffDate {
 
 sub LookupNamedQuery {
     my ($name, $sharer_id, $query_type, $throw_error) = @_;
-    my $user = Bugzilla->login(LOGIN_REQUIRED);
-    my $dbh = Bugzilla->dbh;
-    my $owner_id;
     $throw_error = 1 unless defined $throw_error;
 
-    # $name and $sharer_id are safe -- we only use them below in SELECT
-    # placeholders and then in error messages (which are always HTML-filtered).
-    $name || ThrowUserError("query_name_missing");
-    trick_taint($name);
-    if ($sharer_id) {
-        $owner_id = $sharer_id;
-        detaint_natural($owner_id);
-        $owner_id || ThrowUserError('illegal_user_id', {'userid' => $sharer_id});
-    }
-    else {
-        $owner_id = $user->id;
-    }
+    Bugzilla->login(LOGIN_REQUIRED);
 
-    my @args = ($owner_id, $name);
-    my $extra = '';
-    # If $query_type is defined, then we restrict our search.
-    if (defined $query_type) {
-        $extra = ' AND query_type = ? ';
-        detaint_natural($query_type);
-        push(@args, $query_type);
-    }
-    my ($id, $result) = $dbh->selectrow_array("SELECT id, query
-                                                 FROM namedqueries
-                                                WHERE userid = ? AND name = ?
-                                                      $extra",
-                                               undef, @args);
+    my $constructor = $throw_error ? 'check' : 'new';
+    my $query = Bugzilla::Search::Saved->$constructor(
+        { user => $sharer_id, name => $name });
 
-    # Some DBs (read: Oracle) incorrectly mark this string as UTF-8
-    # even though it has no UTF-8 characters in it, which prevents
-    # Bugzilla::CGI from later reading it correctly.
-    utf8::downgrade($result) if utf8::is_utf8($result);
+    return $query if (!$query and !$throw_error);
 
-    if (!defined($result)) {
-        return 0 unless $throw_error;
-        ThrowUserError("missing_query", {'queryname' => $name,
-                                         'sharer_id' => $sharer_id});
+    if (defined $query_type and $query->type != $query_type) {
+        ThrowUserError("missing_query", { queryname => $name,
+                                          sharer_id => $sharer_id });
     }
 
-    if ($sharer_id) {
-        my $group = $dbh->selectrow_array('SELECT group_id
-                                             FROM namedquery_group_map
-                                            WHERE namedquery_id = ?',
-                                          undef, $id);
-        if (!grep { $_->id == $group } @{ $user->groups }) {
-            ThrowUserError("missing_query", {'queryname' => $name,
-                                             'sharer_id' => $sharer_id});
-        }
-    }
-    
-    $result
-       || ThrowUserError("buglist_parameters_required", {'queryname' => $name});
+    $query->url
+       || ThrowUserError("buglist_parameters_required", { queryname  => $name });
 
-    return wantarray ? ($result, $id) : $result;
+    return wantarray ? ($query->url, $query->id) : $query->url;
 }
 
 # Inserts a Named Query (a "Saved Search") into the database, or

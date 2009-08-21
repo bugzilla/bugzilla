@@ -54,7 +54,7 @@
     [%# Get existing lists of bugs for this user %]
     [% lists_of_bugs = [] %]
     [% FOREACH q = user.queries %]
-      [% NEXT UNLESS q.bug_ids_only %]
+      [% NEXT UNLESS q.type == constants.LIST_OF_BUGS %]
       [% lists_of_bugs.push(q.name) %]
     [% END %]
     <div class="label"></div>

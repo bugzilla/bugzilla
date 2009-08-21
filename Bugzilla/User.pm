@@ -499,6 +499,7 @@ sub bless_groups {
 
 sub in_group {
     my ($self, $group, $product_id) = @_;
+    $group = $group->name if blessed $group;
     if (scalar grep($_->name eq $group, @{ $self->groups })) {
         return 1;
     }

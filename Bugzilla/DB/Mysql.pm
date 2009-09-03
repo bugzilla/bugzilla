@@ -321,7 +321,7 @@ EOT
                                                     {Columns=>[1,2]}) };
     my @isam_tables;
     foreach my $name (keys %table_status) {
-        push(@isam_tables, $name) if $table_status{$name} eq "ISAM";
+        push(@isam_tables, $name) if (defined($table_status{$name}) && $table_status{$name} eq "ISAM");
     }
 
     if(scalar(@isam_tables)) {
@@ -369,7 +369,8 @@ EOT
     # Upgrade tables from MyISAM to InnoDB
     my @myisam_tables;
     foreach my $name (keys %table_status) {
-        if ($table_status{$name} =~ /^MYISAM$/i 
+        if (defined($table_status{$name})
+            && $table_status{$name} =~ /^MYISAM$/i 
             && !grep($_ eq $name, Bugzilla::DB::Schema::Mysql::MYISAM_TABLES))
         {
             push(@myisam_tables, $name) ;
@@ -673,7 +674,7 @@ EOT
     my $utf_table_status =
         $self->selectall_arrayref("SHOW TABLE STATUS", {Slice=>{}});
     $self->_after_table_status([map($_->{Name}, @$utf_table_status)]);
-    my @non_utf8_tables = grep($_->{Collation} !~ /^utf8/, @$utf_table_status);
+    my @non_utf8_tables = grep(defined($_->{Collation}) && $_->{Collation} !~ /^utf8/, @$utf_table_status);
     
     if (Bugzilla->params->{'utf8'} && scalar @non_utf8_tables) {
         print <<EOT;

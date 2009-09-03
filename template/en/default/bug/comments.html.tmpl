@@ -71,13 +71,13 @@
   function collapse_comment(link, comment) {
     link.innerHTML = "[+]";
     link.title = "Expand the comment.";
-    comment.className = "collapsed";
+    YAHOO.util.Dom.addClass(comment, 'collapsed');
   }
 
   function expand_comment(link, comment) {
     link.innerHTML = "[-]";
     link.title = "Collapse the comment";
-    comment.className = "";
+    YAHOO.util.Dom.removeClass(comment, 'collapsed');
   }
 
   /* This way, we are sure that browsers which do not support JS

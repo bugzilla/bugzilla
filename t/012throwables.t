@@ -28,9 +28,9 @@
 ######Errors######
 
 use strict;
+use lib qw(. lib t);
 
-use lib 't';
-
+use Bugzilla::Constants;
 use Bugzilla::WebService::Constants;
 
 use File::Spec;
@@ -60,7 +60,7 @@ foreach my $include_path (@include_paths) {
     foreach my $path (@{$actual_files{$include_path}}) {
         my $file = File::Spec->catfile($include_path, $path);
         $file =~ s/\s.*$//; # nuke everything after the first space
-        $file =~ s|\\|/|g if $^O eq 'MSWin32';  # convert \ to / in path if on windows
+        $file =~ s|\\|/|g if ON_WINDOWS;  # convert \ to / in path if on windows
         $test_templates{$file} = () 
             if $file =~ m#global/(code|user)-error\.html\.tmpl#;
     }

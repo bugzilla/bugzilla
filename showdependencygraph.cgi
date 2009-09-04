@@ -267,7 +267,7 @@ if ($webdotbase =~ /^https?:/) {
     close $pngfh;
     
     # On Windows $pngfilename will contain \ instead of /
-    $pngfilename =~ s|\\|/|g if $^O eq 'MSWin32';
+    $pngfilename =~ s|\\|/|g if ON_WINDOWS;
 
     # Under mod_perl, pngfilename will have an absolute path, and we
     # need to make that into a relative path.

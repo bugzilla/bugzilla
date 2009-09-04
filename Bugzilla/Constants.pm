@@ -430,12 +430,12 @@ use constant DB_MODULE => {
                 name => 'Oracle'},
 };
 
-# The user who should be considered "root" when we're giving
-# instructions to Bugzilla administrators.
-use constant ROOT_USER => $^O =~ /MSWin32/i ? 'Administrator' : 'root';
-
 # True if we're on Win32.
 use constant ON_WINDOWS => ($^O =~ /MSWin32/i);
+
+# The user who should be considered "root" when we're giving
+# instructions to Bugzilla administrators.
+use constant ROOT_USER => ON_WINDOWS ? 'Administrator' : 'root';
 
 use constant MIN_SMALLINT => -32768;
 use constant MAX_SMALLINT => 32767;

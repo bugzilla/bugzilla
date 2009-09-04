@@ -42,7 +42,7 @@ if ((@ARGV != 1) || ($ARGV[0] !~ /^https?:/))
 # Try to determine the GID used by the web server.
 my @pscmds = ('ps -eo comm,gid', 'ps -acxo command,gid', 'ps -acxo command,rgid');
 my $sgid = 0;
-if ($^O !~ /MSWin32/i) {
+if (!ON_WINDOWS) {
     foreach my $pscmd (@pscmds) {
         open PH, "$pscmd 2>/dev/null |";
         while (my $line = <PH>) {
@@ -83,7 +83,7 @@ Please refer to the web server configuration section of the Bugzilla guide.
 If you are using virtual hosts or suexec, this warning may not apply.\n";
     }
 }
-elsif ($^O !~ /MSWin32/i) {
+elsif (!ON_WINDOWS) {
    print
 "TEST-WARNING Failed to find the GID for the 'httpd' process, unable
 to validate webservergroup.\n";
@@ -138,7 +138,7 @@ if ($@ eq '') {
 
     # Ensure major versions of GD and libgd match
     # Windows's GD module include libgd.dll, guaranteed to match
-    if ($^O !~ /MSWin32/i) {
+    if (!ON_WINDOWS) {
         my $gdlib = `gdlib-config --version 2>&1` || "";
         $gdlib =~ s/\n$//;
         if (!$gdlib) {

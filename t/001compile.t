@@ -25,9 +25,8 @@
 ###Compilation###
 
 use strict;
-
-use lib 't';
-
+use lib qw(. lib t);
+use Bugzilla::Constants;
 use Support::Files;
 
 use Test::More tests => scalar(@Support::Files::testitems);
@@ -94,7 +93,7 @@ foreach my $file (@testitems) {
         # Special hack due to CPAN.pm on Windows with Cygwin installed throwing
         # strings of the form "Set up gcc environment - 3.4.4 (cygming special,
         # gdc 0.12, using dmd 0.125)". See bug 416047 for details.
-        if ($^O =~ /MSWin32/i
+        if (ON_WINDOWS
             && grep($_ eq $file, 'install-module.pl', 'Bugzilla/Install/CPAN.pm'))
         {
             $loginfo =~ s/^Set up gcc environment.*?\n//;

@@ -30,10 +30,11 @@
 # Sample exploit code: '>"><script>alert('Oh dear...')</script>
 
 use strict;
-use lib 't';
+use lib qw(. lib t);
 
 use vars qw(%safe);
 
+use Bugzilla::Constants;
 use Support::Templates;
 use File::Spec;
 use Test::More tests => $Support::Templates::num_actual_files;
@@ -45,7 +46,7 @@ my $topdir = cwd;
 $/ = undef;
 
 foreach my $path (@Support::Templates::include_paths) {
-    $path =~ s|\\|/|g if $^O eq 'MSWin32';  # convert \ to / in path if on windows
+    $path =~ s|\\|/|g if ON_WINDOWS;  # convert \ to / in path if on windows
     $path =~ m|template/([^/]+)/([^/]+)|;
     my $lang = $1;
     my $flavor = $2;
@@ -66,7 +67,7 @@ foreach my $path (@Support::Templates::include_paths) {
     }
     else {
         do "filterexceptions.pl";
-        if ($^O eq 'MSWin32') {
+        if (ON_WINDOWS) {
           # filterexceptions.pl uses / separated paths, while 
           # find_actual_files returns \ separated ones on Windows.
           # Here, we convert the filter exception hash to use \.

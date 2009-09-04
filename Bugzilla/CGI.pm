@@ -21,25 +21,24 @@
 #                 Byron Jones <bugzilla@glob.com.au>
 #                 Marc Schumann <wurblzap@gmail.com>
 
+package Bugzilla::CGI;
 use strict;
 
-package Bugzilla::CGI;
+use Bugzilla::Constants;
+use Bugzilla::Error;
+use Bugzilla::Util;
 
 BEGIN {
-    if ($^O =~ /MSWin32/i) {
+    if (ON_WINDOWS) {
         # Help CGI find the correct temp directory as the default list
         # isn't Windows friendly (Bug 248988)
         $ENV{'TMPDIR'} = $ENV{'TEMP'} || $ENV{'TMP'} || "$ENV{'WINDIR'}\\TEMP";
     }
 }
 
-use CGI qw(-no_xhtml -oldstyle_urls :private_tempfiles :unique_headers SERVER_PUSH);
-
+use CGI qw(-no_xhtml -oldstyle_urls :private_tempfiles
+           :unique_headers SERVER_PUSH);
 use base qw(CGI);
-
-use Bugzilla::Constants;
-use Bugzilla::Error;
-use Bugzilla::Util;
 
 # We need to disable output buffering - see bug 179174
 $| = 1;

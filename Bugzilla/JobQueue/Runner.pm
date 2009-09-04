@@ -27,7 +27,9 @@
 package Bugzilla::JobQueue::Runner;
 
 use strict;
+use Cwd qw(abs_path);
 use File::Basename;
+use File::Copy;
 use Pod::Usage;
 
 use Bugzilla::Constants;
@@ -36,6 +38,11 @@ use Bugzilla::Util qw(get_text);
 BEGIN { eval "use base qw(Daemon::Generic)"; }
 
 our $VERSION = BUGZILLA_VERSION;
+
+# Info we need to install/uninstall the daemon on RHEL/Fedora.
+our $chkconfig = "/sbin/chkconfig";
+our $initd = "/etc/init.d";
+our $initscript = "bugzilla-queue";
 
 # The Daemon::Generic docs say that it uses all sorts of
 # things from gd_preconfig, but in fact it does not. The
@@ -90,6 +97,79 @@ sub gd_more_opt {
 sub gd_usage {
     pod2usage({ -verbose => 0, -exitval => 'NOEXIT' });
     return 0
+}
+
+sub gd_can_install {
+    my $self = shift;
+
+    my $source_file = "contrib/$initscript";
+    my $dest_file = "$initd/$initscript";
+    my $sysconfig = '/etc/sysconfig';
+    my $config_file = "$sysconfig/$initscript";
+
+    if (!-x $chkconfig  or !-d $initd) {
+        return $self->SUPER::gd_can_install(@_);
+    }
+
+    return sub {
+        if (!-w $initd) {
+            print "You must run the 'install' command as root.\n";
+            return;
+        }
+        if (-e $dest_file) {
+            print "$initscript already in $initd.\n";
+        }
+        else {
+            copy($source_file, $dest_file)
+                or die "Could not copy $source_file to $dest_file: $!";
+            chmod(0755, $dest_file)
+                or die "Could not change permissions on $dest_file: $!";
+        }
+
+        system($chkconfig, '--add', $initscript);
+        print "$initscript installed.",
+              " To start the daemon, do \"$dest_file start\" as root.\n";
+
+        if (-d $sysconfig and -w $sysconfig) {
+            if (-e $config_file) {
+                print "$config_file already exists.\n";
+                return;
+            }
+
+            open(my $config_fh, ">", $config_file)
+                or die "Could not write to $config_file: $!";
+            my $directory = abs_path(dirname($self->{_original_zero}));
+            my $owner_id = (stat $self->{_original_zero})[4];
+            my $owner = getpwuid($owner_id);
+            print $config_fh <<END;
+#!/bin/sh
+BUGZILLA="$directory"
+USER=$owner
+END
+            close($config_fh);
+        }
+        else {
+            print "Please edit $dest_file to configure the daemon.\n";
+        }
+    }
+}
+
+sub gd_can_uninstall {
+    my $self = shift;
+
+    if (-x $chkconfig and -d $initd) {
+        return sub {
+            if (!-e "$initd/$initscript") {
+                print "$initscript not installed.\n";
+                return;
+            }
+            system($chkconfig, '--del', $initscript);
+            print "$initscript disabled.",
+                  " To stop it, run: $initd/$initscript stop\n";
+        }
+    }
+
+    return $self->SUPER::gd_can_install(@_);
 }
 
 sub gd_check {

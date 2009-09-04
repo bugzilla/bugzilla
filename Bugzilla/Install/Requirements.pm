@@ -224,9 +224,9 @@ sub OPTIONAL_MODULES {
     {
         package => 'SOAP-Lite',
         module  => 'SOAP::Lite',
-        version => 0,
-        # These versions (0.70 -> 0.710.05) are affected by bug 468009
-        blacklist => ['^0\.70', '^0\.710?\.0[1-5]$'],
+        # 0.710.04 is required for correct UTF-8 handling, but .04 and .05 are
+        # affected by bug 468009.
+        version => '0.710.06',
         feature => 'XML-RPC Interface'
     },
     {

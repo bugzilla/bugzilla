@@ -149,16 +149,6 @@ sub new {
     return $self;
 }
 
-sub as_string {
-    my $self = shift;
-    my ($value) = @_;
-    # Something weird happens with XML::Parser when we have upper-ASCII 
-    # characters encoded as UTF-8, and this fixes it.
-    utf8::encode($value) if utf8::is_utf8($value) 
-                            && $value =~ /^[\x00-\xff]+$/;
-    return $self->SUPER::as_string($value);
-}
-
 # Here the XMLRPC::Serializer is extended to use the XMLRPC nil extension.
 sub encode_object {
     my $self = shift;

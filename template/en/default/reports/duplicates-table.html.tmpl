@@ -61,9 +61,6 @@
                               { name => "short_desc", description => "Summary" } ]
          %]
 
-          [%# Small hack to keep delta column out if we don't need it %]
-          [% NEXT IF column.name == "delta" AND NOT dobefore %]
-
           <th>
             [% bug_ids_string = bug_ids.join(',') %]
             <a href="duplicates.cgi?sortby=[% column.name %]
@@ -127,9 +124,7 @@
             </center>
           </td>
 
-          [% IF dobefore %]
-            <td><center>[% bug.delta %]</center></td>
-          [% END %]
+          <td><center>[% bug.delta %]</center></td>
 
           <td>[% bug.component FILTER html %]</td>
           <td><center>[% bug.bug_severity FILTER html %]</center></td>

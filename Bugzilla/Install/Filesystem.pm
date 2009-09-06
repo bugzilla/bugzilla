@@ -157,8 +157,6 @@ sub FILESYSTEM {
          # Readable directories
          "$datadir/mining"     => { files => $ws_readable,
                                      dirs => $ws_dir_readable },
-         "$datadir/duplicates" => { files => $ws_readable,
-                                     dirs => $ws_dir_readable },
          "$libdir/Bugzilla"    => { files => $ws_readable,
                                      dirs => $ws_dir_readable },
          $extlib               => { files => $ws_readable,
@@ -378,6 +376,11 @@ EOT
         print "Removing duplicates.rdf...\n";
         unlink "$datadir/duplicates.rdf";
         unlink "$datadir/duplicates-old.rdf";
+    }
+
+    if (-e "$datadir/duplicates") {
+        print "Removing duplicates directory...\n";
+        rmtree("$datadir/duplicates");
     }
 }
 

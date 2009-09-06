@@ -574,6 +574,10 @@ sub update_table_definitions {
         
     _convert_disallownew_to_isactive();
 
+    $dbh->bz_alter_column('bugs_activity', 'added', 
+        { TYPE => 'varchar(255)' });
+    $dbh->bz_add_index('bugs_activity', 'bugs_activity_added_idx', ['added']);
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################

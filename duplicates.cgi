@@ -18,15 +18,11 @@
 # Copyright (C) 1998 Netscape Communications Corporation. All
 # Rights Reserved.
 #
-# Contributor(s): Gervase Markham <gerv@gerv.net>
-#
-# Generates mostfreq list from data collected by collectstats.pl.
-
+# Contributor(s): 
+#   Gervase Markham <gerv@gerv.net>
+#   Max Kanat-Alexander <mkanat@bugzilla.org>
 
 use strict;
-
-use AnyDBM_File;
-
 use lib qw(. lib);
 
 use Bugzilla;
@@ -34,27 +30,51 @@ use Bugzilla::Constants;
 use Bugzilla::Util;
 use Bugzilla::Error;
 use Bugzilla::Search;
+use Bugzilla::Field;
 use Bugzilla::Product;
+
+###############
+# Subroutines #
+###############
+
+# $counts is a count of exactly how many direct duplicates there are for
+# each bug we're considering. $dups is a map of duplicates, from one
+# bug_id to another. We go through the duplicates map ($dups) and if one bug
+# in $count is a duplicate of another bug in $count, we add their counts
+# together under the target bug.
+sub add_indirect_dups {
+    my ($counts, $dups) = @_;
+
+    foreach my $add_from (keys %$dups) {
+        my $add_to     = walk_dup_chain($dups, $add_from);
+        my $add_amount = delete $counts->{$add_from} || 0;
+        $counts->{$add_to} += $add_amount;
+    }
+}
+
+sub walk_dup_chain {
+    my ($dups, $from_id) = @_;
+    my $to_id = $dups->{$from_id};
+    while (my $bug_id = $dups->{$to_id}) {
+        last if $bug_id == $from_id; # avoid duplicate loops
+        $to_id = $bug_id;
+    }
+    # Optimize for future calls to add_indirect_dups.
+    $dups->{$from_id} = $to_id;
+    return $to_id;
+}
+
+###############
+# Main Script #
+###############
 
 my $cgi = Bugzilla->cgi;
 my $template = Bugzilla->template;
 my $vars = {};
 
-# collectstats.pl uses duplicates.cgi to generate the RDF duplicates stats.
-# However, this conflicts with requirelogin if it's enabled; so we make
-# logging-in optional if we are running from the command line.
-if ($::ENV{'GATEWAY_INTERFACE'} eq "cmdline") {
-    Bugzilla->login(LOGIN_OPTIONAL);
-}
-else {
-    Bugzilla->login();
-}
+Bugzilla->login();
 
 my $dbh = Bugzilla->switch_to_shadow_db();
-
-my %dbmcount;
-my %count;
-my %before;
 
 # Get params from URL
 sub formvalue {
@@ -70,6 +90,10 @@ my $reverse = formvalue("reverse") ? 1 : 0;
 my @query_products = $cgi->param('product');
 my $sortvisible = formvalue("sortvisible");
 my @buglist = (split(/[:,]/, formvalue("bug_id")));
+detaint_natural($_) foreach @buglist;
+# If we got any non-numeric items, they will now be undef. Remove them from
+# the list.
+@buglist = grep($_, @buglist);
 
 # Make sure all products are valid.
 foreach my $p (@query_products) {
@@ -78,54 +102,6 @@ foreach my $p (@query_products) {
 
 # Small backwards-compatibility hack, dated 2002-04-10.
 $sortby = "count" if $sortby eq "dup_count";
-
-# Open today's record of dupes
-my $today = days_ago(0);
-my $yesterday = days_ago(1);
-
-# We don't know the exact file name, because the extension depends on the
-# underlying dbm library, which could be anything. We can't glob, because
-# perl < 5.6 considers if (<*>) { ... } to be tainted
-# Instead, just check the return value for today's data and yesterday's,
-# and ignore file not found errors
-
-use Errno;
-use Fcntl;
-
-my $datadir = bz_locations()->{'datadir'};
-
-if (!tie(%dbmcount, 'AnyDBM_File', "$datadir/duplicates/dupes$today",
-         O_RDONLY, 0644)) {
-    if ($!{ENOENT}) {
-        if (!tie(%dbmcount, 'AnyDBM_File', "$datadir/duplicates/dupes$yesterday",
-                 O_RDONLY, 0644)) {
-            my $vars = { today => $today };
-            if ($!{ENOENT}) {
-                ThrowUserError("no_dupe_stats", $vars);
-            } else {
-                $vars->{'error_msg'} = $!;
-                ThrowUserError("no_dupe_stats_error_yesterday", $vars);
-            }
-        }
-    } else {
-        ThrowUserError("no_dupe_stats_error_today",
-                       { error_msg => $! });
-    }
-}
-
-# Copy hash (so we don't mess up the on-disk file when we remove entries)
-%count = %dbmcount;
-
-# Remove all those dupes under the threshold parameter. 
-# We do this, before the sorting, for performance reasons.
-my $threshold = Bugzilla->params->{"mostfreqthreshold"};
-
-while (my ($key, $value) = each %count) {
-    delete $count{$key} if ($value < $threshold);
-    
-    # If there's a buglist, restrict the bugs to that list.
-    delete $count{$key} if $sortvisible && (lsearch(\@buglist, $key) == -1);
-}
 
 my $origmaxrows = $maxrows;
 detaint_natural($maxrows)
@@ -136,34 +112,45 @@ detaint_natural($changedsince)
   || ThrowUserError("invalid_changedsince", 
                     { changedsince => $origchangedsince });
 
-# Try and open the database from "changedsince" days ago
-my $dobefore = 0;
-my %delta;
-my $whenever = days_ago($changedsince);    
 
-if (!tie(%before, 'AnyDBM_File', "$datadir/duplicates/dupes$whenever",
-         O_RDONLY, 0644)) {
-    # Ignore file not found errors
-    if (!$!{ENOENT}) {
-        ThrowUserError("no_dupe_stats_error_whenever",
-                       { error_msg => $!,
-                         changedsince => $changedsince,
-                         whenever => $whenever,
-                       });
+my %total_dups = @{$dbh->selectcol_arrayref(
+    "SELECT dupe_of, COUNT(dupe)
+       FROM duplicates
+   GROUP BY dupe_of", {Columns => [1,2]})};
+
+my %dupe_relation = @{$dbh->selectcol_arrayref(
+    "SELECT dupe, dupe_of FROM duplicates
+      WHERE dupe IN (SELECT dupe_of FROM duplicates)",
+    {Columns => [1,2]})};
+add_indirect_dups(\%total_dups, \%dupe_relation);
+
+my $reso_field_id = get_field_id('resolution');
+my %since_dups = @{$dbh->selectcol_arrayref(
+    "SELECT dupe_of, COUNT(dupe)
+       FROM duplicates INNER JOIN bugs_activity 
+                       ON bugs_activity.bug_id = duplicates.dupe 
+      WHERE added = 'DUPLICATE' AND fieldid = ? AND " 
+            . $dbh->sql_to_days('bug_when') . " >= (" 
+            . $dbh->sql_to_days('NOW()') . " - ?)
+   GROUP BY dupe_of", {Columns=>[1,2]},
+    $reso_field_id, $changedsince)};
+add_indirect_dups(\%since_dups, \%dupe_relation);
+
+my (@bugs, @bug_ids);
+
+foreach my $id (keys %total_dups) {
+    if ($total_dups{$id} < Bugzilla->params->{'mostfreqthreshold'}) {
+        delete $total_dups{$id};
+        next;
     }
-} else {
-    # Calculate the deltas
-    ($delta{$_} = $count{$_} - ($before{$_} || 0)) foreach (keys(%count));
-
-    $dobefore = 1;
+    if ($sortvisible and @buglist and !grep($_ == $id, @buglist)) {
+        delete $total_dups{$id};
+    }
 }
 
-my @bugs;
-my @bug_ids; 
-
-if (scalar(%count)) {
+if (scalar %total_dups) {
     # use Bugzilla::Search so that we get the security checking
-    my $params = new Bugzilla::CGI({ 'bug_id' => [keys %count] });
+    my $params = new Bugzilla::CGI({ 'bug_id' => [keys %total_dups] });
 
     if ($openonly) {
         $params->param('resolution', '---');
@@ -221,8 +208,8 @@ if (scalar(%count)) {
             $short_desc, $bug_status, $resolution) = @$result;
 
         push (@bugs, { id => $id,
-                       count => $count{$id},
-                       delta => $delta{$id}, 
+                       count => $total_dups{$id},
+                       delta => $since_dups{$id} || 0, 
                        component => $component,
                        bug_severity => $bug_severity,
                        op_sys => $op_sys,
@@ -237,7 +224,6 @@ if (scalar(%count)) {
 $vars->{'bugs'} = \@bugs;
 $vars->{'bug_ids'} = \@bug_ids;
 
-$vars->{'dobefore'} = $dobefore;
 $vars->{'sortby'} = $sortby;
 $vars->{'sortvisible'} = $sortvisible;
 $vars->{'changedsince'} = $changedsince;
@@ -264,9 +250,3 @@ print $cgi->header(
 # Generate and return the UI (HTML page) from the appropriate template.
 $template->process($format->{'template'}, $vars)
   || ThrowTemplateError($template->error());
-
-
-sub days_ago {
-    my ($dom, $mon, $year) = (localtime(time - ($_[0]*24*60*60)))[3, 4, 5];
-    return sprintf "%04d-%02d-%02d", 1900 + $year, ++$mon, $dom;
-}

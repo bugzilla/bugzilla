@@ -1168,31 +1168,6 @@
     [% title = "No Tag Selected" %]
     You didn't select a tag from which to remove [% terms.bugs %].
 
-  [% ELSIF error == "no_dupe_stats" %]
-    [% title = "Cannot Find Duplicate Statistics" %]
-    [% admindocslinks = {'extraconfig.html' => 'Setting up the collecstats.pl job'} %]
-    There are no duplicate statistics for today ([% today FILTER html %]) 
-    or yesterday.
-
-  [% ELSIF error == "no_dupe_stats_error_today" %]
-    [% title = "Error Reading Today's Dupes File" %]
-    [% admindocslinks = {'extraconfig.html' => 'Setting up the collecstats.pl job'} %]
-    An error occurred opening today's dupes file: [% error_msg FILTER html %].
-
-  [% ELSIF error == "no_dupe_stats_error_whenever" %]
-    [% title = "Error Reading Previous Dupes File" %]
-    [% admindocslinks = {'extraconfig.html' => 'Setting up the collecstats.pl job'} %]
-    An error occurred opening [% changedsince FILTER html %] days ago
-    ([% whenever FILTER html %])'s dupes file:
-    [% error_msg FILTER html %].
-
-  [% ELSIF error == "no_dupe_stats_error_yesterday" %]
-    [% title = "Error Reading Yesterday's Dupes File" %]
-    [% admindocslinks = {'extraconfig.html' => 'Setting up the collecstats.pl job'} %]
-    There are no duplicate statistics for today ([% today FILTER html %]), 
-    and an error
-    occurred opening yesterday's dupes file: [% error_msg FILTER html %].
-
   [% ELSIF error == "no_initial_bug_status" %]
     [% title = "No Initial $terms.Bug Status" %]
     No [% terms.bug %] status is available on [% terms.bug %] creation.

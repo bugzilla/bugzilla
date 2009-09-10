@@ -33,7 +33,7 @@ use constant max_retries => 725;
 # The first few retries happen quickly, but after that we wait an hour for
 # each retry.
 sub retry_delay {
-    my $num_retries = shift;
+    my ($class, $num_retries) = @_;
     if ($num_retries < 5) {
         return (10, 30, 60, 300, 600)[$num_retries];
     }

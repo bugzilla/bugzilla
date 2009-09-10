@@ -59,6 +59,58 @@
 
 <h2><a name="v34_point"></a>Updates In This 3.4.x Release</h2>
 
+<h3>3.4.2</h3>
+
+<p>This release contains fixes for multiple security issues, one of which
+  is highly critical. See the 
+  <a href="http://www.bugzilla.org/security/3.0.8/">Security Advisory</a>
+  for details.</p>
+
+<p>In addition, the following important fixes/changes have been made in
+  this release:</p>
+
+<ul>
+  <li>Upgrades from older releases were sometimes failing during UTF-8 
+    conversion with a foreign key error. 
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=508181">[% terms.Bug %] 508181</a>)
+  </li>
+  <li>Sorting [% terms.bug %] lists on certain fields would result in an error.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=510944">[% terms.Bug %] 510944</a>)
+  </li>
+  <li>[% terms.Bug %] update emails had two or three blank lines at the top
+    and between the various sections of the email. There is now only one
+    blank line in each of those places, making these emails more compact.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=73330">[% terms.Bug %] 73330</a>)
+  </li>
+  <li>[% terms.Bug %] email notifications for new [% terms.bugs %] incorrectly
+    had a line saying that the description was "Comment 0".
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=510798">[% terms.Bug %] 510798</a>)
+  </li>
+  <li>Running <kbd>./collectstats.pl --regenerate</kbd> is now much faster,
+    on the order of 20x or 100x faster.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=286625">[% terms.Bug %] 286625</a>)
+  </li>
+  <li>For users of RHEL, CentOS, Fedora, etc. jobqueue.pl can now automatically
+    be installed as a daemon by running <kbd>./jobqueue.pl install</kbd>
+    as root. 
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=475403">[% terms.Bug %] 475403</a>)
+  </li>
+  <li>XML-RPC interface responses had an incorrect Content-Length header
+    and would sometimes be truncated, if they contained certain UTF-8
+    characters.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=486306">[% terms.Bug %] 486306</a>)
+  </li>
+  <li>Users who didn't have access to the time-tracking fields would get an
+    empty [% terms.bug %] update email when the time-tracking fields were
+    changed.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=509035">[% terms.Bug %] 509035</a>)
+  </li>
+  <li>In the New Charts, non-public series now no longer show up as selectable
+    if you cannot access them.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=389396">[% terms.Bug %] 389396</a>)
+  </li>
+</ul>
+
 <h3>3.4.1</h3>
 
 <p>This release contains an important security fix. See the

@@ -65,7 +65,9 @@ sub REQUIRED_MODULES {
         # Perl 5.10 requires CGI 3.33 due to a taint issue when
         # uploading attachments, see bug 416382.
         # Require CGI 3.21 for -httponly support, see bug 368502.
-        version => (vers_cmp($perl_ver, '5.10') > -1) ? '3.33' : '3.21'
+        version => (vers_cmp($perl_ver, '5.10') > -1) ? '3.33' : '3.21',
+        # CGI::Carp in 3.46 and 3.47 breaks Template Toolkit
+        blacklist => ['^3\.46$', '^3\.47$'],
     },
     {
         package => 'Digest-SHA',

@@ -113,6 +113,8 @@ sub create {
     my %field_values;
     foreach my $field (keys %$params) {
         my $field_name = FIELD_MAP->{$field} || $field;
+        # Prevent SQL Injection via key names.
+        _check_valid_field($field);
         $field_values{$field_name} = $params->{$field}; 
     }
 
@@ -170,6 +172,17 @@ sub legal_values {
     }
 
     return { values => \@result };
+}
+
+sub _check_valid_field {
+    my $field = shift;
+    # We add qa_contact in manually because it should always be available in
+    # the API even if useqacontact is off.
+    my @valid_fields = (Bugzilla::Bug->fields, values %{ FIELD_MAP() }, 
+                        'qa_contact');
+    if (!grep($_ eq $field, @valid_fields)) {
+        ThrowCodeError('invalid_field_name', { field => $field });
+    }
 }
 
 1;
@@ -450,6 +463,10 @@ you don't have permission to enter bugs in this product.
 
 You didn't specify a summary for the bug.
 
+=item 108 (Invalid Field Name)
+
+You specified a field that doesn't exist as an argument to this function.
+
 =item 504 (Invalid User)
 
 Either the QA Contact, Assignee, or CC lists have some invalid user
@@ -460,6 +477,9 @@ in them. The error message will have more details.
 =item B<History>
 
 =over
+
+=item Error 108 is only thrown by this function in the 3.0 branch, starting
+with B<3.0.9>.
 
 =item Before B<3.0.4>, parameters marked as B<Defaulted> were actually
 B<Required>, due to a bug in Bugzilla.

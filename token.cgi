@@ -130,6 +130,8 @@ if ( $action eq 'chgpw' ) {
       || ThrowUserError("require_new_password");
 
     validate_password($password, $cgi->param('matchpassword'));
+    # Make sure that these never show up in the UI under any circumstances.
+    $cgi->delete('password', 'matchpassword');
 }
 
 ################################################################################
@@ -378,6 +380,8 @@ sub confirm_create_account {
 
     my $password = $cgi->param('passwd1') || '';
     validate_password($password, $cgi->param('passwd2') || '');
+    # Make sure that these never show up anywhere in the UI.
+    $cgi->delete('passwd1', 'passwd2');
 
     my $otheruser = Bugzilla::User->create({
         login_name => $login_name, 

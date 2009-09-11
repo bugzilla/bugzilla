@@ -339,6 +339,11 @@
     There is no valid transition from
     [%+ get_status("UNCONFIRMED") FILTER html %] to an open state.
 
+  [% ELSIF error == "param_invalid" %]
+    [% title = "Invalid Parameter" %]
+    <code>[% param FILTER html %]</code> is not a valid parameter
+    for the [% function FILTER html %] function.
+
   [% ELSIF error == "param_must_be_numeric" %]
     [% title = "Invalid Parameter" %]
     Invalid parameter passed to [% function FILTER html %].

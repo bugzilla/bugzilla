@@ -164,7 +164,19 @@ sub match {
         next if $field eq 'OFFSET';
         if ( $field eq 'LIMIT' ) {
             next unless defined $value;
-            $postamble = $dbh->sql_limit( $value, $criteria->{OFFSET} );
+            detaint_natural($value)
+              or ThrowCodeError('param_must_be_numeric', 
+                                { param    => 'LIMIT', 
+                                  function => "${class}::match" });
+            my $offset;
+            if (defined $criteria->{OFFSET}) {
+                $offset = $criteria->{OFFSET};
+                detaint_signed($offset)
+                  or ThrowCodeError('param_must_be_numeric', 
+                                    { param    => 'OFFSET',
+                                      function => "${class}::match" });
+            }
+            $postamble = $dbh->sql_limit($value, $offset);
             next;
         }
         elsif ( $field eq 'WHERE' ) {
@@ -180,6 +192,8 @@ sub match {
             next;
         }
         
+        $class->_check_field($field, 'match');
+
         if (ref $value eq 'ARRAY') {
             # IN () is invalid SQL, and if we have an empty list
             # to match against, we're just returning an empty
@@ -345,6 +359,17 @@ sub create {
     return $object;
 }
 
+# Used to validate that a field name is in fact a valid column in the
+# current table before inserting it into SQL.
+sub _check_field {
+    my ($invocant, $field, $function) = @_;
+    my $class = ref($invocant) || $invocant;
+    if (!Bugzilla->dbh->bz_column_info($class->DB_TABLE, $field)) {
+        ThrowCodeError('param_invalid', { param    => $field,
+                                          function => "${class}::$function" });
+    }
+}
+
 sub check_required_create_fields {
     my ($class, $params) = @_;
 
@@ -387,6 +412,7 @@ sub insert_create_data {
 
     my (@field_names, @values);
     while (my ($field, $value) = each %$field_values) {
+        $class->_check_field($field, 'create');
         push(@field_names, $field);
         push(@values, $value);
     }

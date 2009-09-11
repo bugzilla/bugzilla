@@ -258,6 +258,7 @@ sub search {
     }
     
     $params = _map_fields($params);
+    delete $params->{WHERE};
     
     # Do special search types for certain fields.
     if ( my $bug_when = delete $params->{delta_ts} ) {

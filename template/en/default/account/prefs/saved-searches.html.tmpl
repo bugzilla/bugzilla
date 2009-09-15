@@ -155,9 +155,9 @@
 [% END %]
 </blockquote>
 
-<p>You may use these searches saved and shared by others:</p>
+[% IF user.queries_available.size %]
+  <p>You may use these searches saved and shared by others:</p>
 
-<blockquote>
   <table border="1" cellpadding="3">  
     <tr>
       <th>
@@ -180,9 +180,7 @@
         Footer
       </th>
     </tr>
-    [% found_shared_query = 0 %]
     [% FOREACH q = user.queries_available %]
-      [% found_shared_query = 1 %]
       <tr>
         <td>[% q.name FILTER html %]</td>
         <td>[% q.user.identity FILTER html %]</td>
@@ -205,12 +203,7 @@
         </td>
       </tr>
     [% END %]
-    [% IF !found_shared_query %]
-      <tr>
-        <td colspan="6" style="text-align: center">
-          &lt;None&gt;
-        </td>
-      </tr>
-    [% END %]
   </table>
-</blockquote>
+[% ELSE %]
+  <p>No searches are shared with you by other users.</p>
+[% END %]

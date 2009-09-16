@@ -43,7 +43,7 @@ use Pod::Usage;
 our %switch;
 
 GetOptions(\%switch, 'all|a', 'upgrade-all|u', 'show-config|s', 'global|g',
-                     'help|h');
+                     'shell', 'help|h');
 
 pod2usage({ -verbose => 1 }) if $switch{'help'};
 
@@ -58,8 +58,8 @@ pod2usage({ -verbose => 0 }) if (!%switch && !@ARGV);
 set_cpan_config($switch{'global'});
 
 if ($switch{'show-config'}) {
-  print Dumper($CPAN::Config);
-  exit;
+    print Dumper($CPAN::Config);
+    exit;
 }
 
 my $can_notest = 1;
@@ -67,6 +67,11 @@ if (substr(CPAN->VERSION, 0, 3) < 1.8) {
     $can_notest = 0;
     print "* Note: If you upgrade your CPAN module, installs will be faster.\n";
     print "* You can upgrade CPAN by doing: $^X install-module.pl CPAN\n";
+}
+
+if ($switch{'shell'}) {
+    CPAN::shell();
+    exit;
 }
 
 if ($switch{'all'} || $switch{'upgrade-all'}) {
@@ -114,6 +119,7 @@ This script does not run on Windows.
   ./install-module.pl --all [--global]
   ./install-module.pl --upgrade-all [--global]
   ./install-module.pl --show-config
+  ./install-module.pl --shell
 
   Do "./install-module.pl --help" for more information.
 
@@ -153,6 +159,10 @@ have them installed.
 =item B<--show-config>
 
 Prints out the CPAN configuration in raw Perl format. Useful for debugging.
+
+=item B<--shell>
+
+Starts a CPAN shell using the configuration of F<install-module.pl>.
 
 =item B<--help>
 

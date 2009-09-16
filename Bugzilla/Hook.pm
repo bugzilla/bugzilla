@@ -21,12 +21,25 @@
 #
 
 package Bugzilla::Hook;
+use strict;
 
 use Bugzilla::Constants;
 use Bugzilla::Util;
 use Bugzilla::Error;
 
-use strict;
+use Scalar::Util qw(blessed);
+
+BEGIN {
+    if ($ENV{MOD_PERL}) {
+        require ModPerl::Const;
+        import ModPerl::Const -compile => 'EXIT';
+     }
+    else {
+        # Create a fake constant. We have to do this in a string eval,
+        # otherwise this will always be defined.
+        eval('sub ModPerl::EXIT;');
+    }
+}
 
 sub process {
     my ($name, $args) = @_;
@@ -49,8 +62,16 @@ sub process {
             # Allow extensions to load their own libraries.
             local @INC = ("$extension/lib", @INC);
             do($extension.'/code/'.$name.'.pl');
-            ThrowCodeError('extension_invalid', 
-                { errstr => $@, name => $name, extension => $extension }) if $@;
+            if ($@) {
+                if ($ENV{MOD_PERL} and blessed $@ and $@ == ModPerl::EXIT) {
+                    exit;
+                }
+                else {
+                    ThrowCodeError('extension_invalid', 
+                        { errstr => $@, name => $name,
+                          extension => $extension });
+                }
+            }
             # Flush stored data.
             Bugzilla->hook_args({});
         }

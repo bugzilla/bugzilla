@@ -254,6 +254,7 @@
                      maxrows   = 25
                      cols      = constants.COMMENT_COLS
           %]
+          [% Hook.process("after_comment_textarea") %]
           <br>
           [% PROCESS commit_button id=""%]
           <table class="status" cellspacing="0" cellpadding="0">

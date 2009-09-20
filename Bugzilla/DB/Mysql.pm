@@ -381,7 +381,7 @@ EOT
               " most tables.\nConverting tables to InnoDB:\n";
         foreach my $table (@myisam_tables) {
             print "Converting table $table... ";
-            $self->do("ALTER TABLE $table TYPE = InnoDB");
+            $self->do("ALTER TABLE $table ENGINE = InnoDB");
             print "done.\n";
         }
     }

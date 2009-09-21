@@ -21,6 +21,15 @@
  *                 Marc Schumann <wurblzap@gmail.com>
  */
 
+function validateAttachmentForm(theform) {
+    var desc_value = YAHOO.lang.trim(theform.description.value);
+    if (desc_value == '') {
+        alert(BUGZILLA.string.attach_desc_required);
+        return false;
+    }
+    return true;
+}
+
 function updateCommentPrivacy(checkbox) {
     var text_elem = document.getElementById('comment');
     if (checkbox.checked) {

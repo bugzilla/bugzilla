@@ -556,6 +556,34 @@ Params:
 
 =back
 
+=head2 sanitycheck-check
+
+This hook allows for extra sanity checks to be added, for use by
+F<sanitycheck.cgi>.
+
+Params:
+
+=over
+
+=item C<status> - a CODEREF that allows status messages to be displayed
+to the user. (F<sanitycheck.cgi>'s C<Status>)
+
+=back
+
+=head2 sanitycheck-repair
+
+This hook allows for extra sanity check repairs to be made, for use by
+F<sanitycheck.cgi>.
+
+Params:
+
+=over
+
+=item C<status> - a CODEREF that allows status messages to be displayed
+to the user. (F<sanitycheck.cgi>'s C<Status>)
+
+=back
+
 =head2 webservice
 
 This hook allows you to add your own modules to the WebService. (See

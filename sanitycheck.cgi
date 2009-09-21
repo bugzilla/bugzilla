@@ -31,8 +31,9 @@ use lib qw(. lib);
 use Bugzilla;
 use Bugzilla::Bug;
 use Bugzilla::Constants;
-use Bugzilla::Util;
 use Bugzilla::Error;
+use Bugzilla::Hook;
+use Bugzilla::Util;
 use Bugzilla::Status;
 
 ###########################################################################
@@ -383,6 +384,15 @@ if ($cgi->param('remove_old_whine_targets')) {
     Status('whines_obsolete_target_deletion_end');
 }
 
+###########################################################################
+# Repair hook
+###########################################################################
+
+Bugzilla::Hook::process("sanitycheck-repair", { status => \&Status });
+
+###########################################################################
+# Checks
+###########################################################################
 Status('checks_start');
 
 ###########################################################################
@@ -1060,6 +1070,12 @@ foreach my $target (['groups', 'id', MAILTO_GROUP],
     }
 }
 Status('whines_obsolete_target_fix') if $display_repair_whines_link;
+
+###########################################################################
+# Check hook
+###########################################################################
+
+Bugzilla::Hook::process("sanitycheck-check", { status => \&Status });
 
 ###########################################################################
 # End

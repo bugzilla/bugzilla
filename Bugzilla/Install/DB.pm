@@ -555,8 +555,7 @@ sub update_table_definitions {
     _add_visiblity_value_to_value_tables();
 
     # 2009-03-02 arbingersys@gmail.com - Bug 423613
-    $dbh->bz_add_index('profiles', 'profiles_extern_id_idx',
-                       {TYPE => 'UNIQUE', FIELDS => [qw(extern_id)]});
+    _add_extern_id_index();
  
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
@@ -3141,6 +3140,17 @@ sub _add_visiblity_value_to_value_tables {
         $dbh->bz_add_column($field, 'visibility_value_id', {TYPE => 'INT2'});
         $dbh->bz_add_index($field, "${field}_visibility_value_id_idx", 
                            ['visibility_value_id']);
+    }
+}
+
+sub _add_extern_id_index {
+    my $dbh = Bugzilla->dbh;
+    if (!$dbh->bz_index_info('profiles', 'profiles_extern_id_idx')) {
+        # Some Bugzillas have a multiple empty strings in extern_id,
+        # which need to be converted to NULLs before we add the index.
+        $dbh->do("UPDATE profiles SET extern_id = NULL WHERE extern_id = ''");
+        $dbh->bz_add_index('profiles', 'profiles_extern_id_idx',
+                           {TYPE => 'UNIQUE', FIELDS => [qw(extern_id)]});
     }
 }
 

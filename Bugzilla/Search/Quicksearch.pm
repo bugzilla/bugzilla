@@ -114,7 +114,6 @@ our ($chart, $and, $or);
 sub quicksearch {
     my ($searchstring) = (@_);
     my $cgi = Bugzilla->cgi;
-    my $urlbase = correct_urlbase();
 
     $chart = 0;
     $and   = 0;
@@ -125,41 +124,10 @@ sub quicksearch {
     ThrowUserError('buglist_parameters_required') unless ($searchstring);
 
     if ($searchstring =~ m/^[0-9,\s]*$/) {
-        # Bug number(s) only.
-
-        # Allow separation by comma or whitespace.
-        $searchstring =~ s/[,\s]+/,/g;
-
-        if (index($searchstring, ',') < $[) {
-            # Single bug number; shortcut to show_bug.cgi.
-            print $cgi->redirect(-uri => "${urlbase}show_bug.cgi?id=$searchstring");
-            exit;
-        }
-        else {
-            # List of bug numbers.
-            $cgi->param('bug_id', $searchstring);
-            $cgi->param('order', 'bugs.bug_id');
-            $cgi->param('bugidtype', 'include');
-        }
+        _bug_numbers_only($searchstring);
     }
     else {
-        # It's not just a bug number or a list of bug numbers.
-        # Maybe it's an alias?
-        if ($searchstring =~ /^([^,\s]+)$/) {
-            if (Bugzilla->dbh->selectrow_array(q{SELECT COUNT(*)
-                                                   FROM bugs
-                                                  WHERE alias = ?},
-                                               undef,
-                                               $1)) {
-                print $cgi->redirect(-uri => "${urlbase}show_bug.cgi?id=$1");
-                exit;
-            }
-        }
-
-        # It's no alias either, so it's a more complex query.
-        my $legal_statuses = get_legal_field_values('bug_status');
-        my $legal_resolutions = get_legal_field_values('resolution');
-        my $legal_priorities = get_legal_field_values('priority');
+        _handle_alias($searchstring);
 
         # Globally translate " AND ", " OR ", " NOT " to space, pipe, dash.
         $searchstring =~ s/\s+AND\s+/ /g;
@@ -167,65 +135,9 @@ sub quicksearch {
         $searchstring =~ s/\s+NOT\s+/ -/g;
 
         my @words = splitString($searchstring);
-        my @openStates = BUG_STATE_OPEN;
-        my @closedStates;
+        _handle_status_and_resolution(\@words);
+
         my @unknownFields;
-        my (%states, %resolutions);
-
-        foreach (@$legal_statuses) {
-            push(@closedStates, $_) unless is_open_state($_);
-        }
-        foreach (@openStates) { $states{$_} = 1 }
-        if ($words[0] eq 'ALL') {
-            foreach (@$legal_statuses) { $states{$_} = 1 }
-            shift @words;
-        }
-        elsif ($words[0] eq 'OPEN') {
-            shift @words;
-        }
-        elsif ($words[0] =~ /^\+[A-Z]+(,[A-Z]+)*$/) {
-            # e.g. +DUP,FIX
-            if (matchPrefixes(\%states,
-                              \%resolutions,
-                              [split(/,/, substr($words[0], 1))],
-                              \@closedStates,
-                              $legal_resolutions)) {
-                shift @words;
-                # Allowing additional resolutions means we need to keep
-                # the "no resolution" resolution.
-                $resolutions{'---'} = 1;
-            }
-            else {
-                # Carry on if no match found.
-            }
-        }
-        elsif ($words[0] =~ /^[A-Z]+(,[A-Z]+)*$/) {
-            # e.g. NEW,ASSI,REOP,FIX
-            undef %states;
-            if (matchPrefixes(\%states,
-                              \%resolutions,
-                              [split(/,/, $words[0])],
-                              $legal_statuses,
-                              $legal_resolutions)) {
-                shift @words;
-            }
-            else {
-                # Carry on if no match found
-                foreach (@openStates) { $states{$_} = 1 }
-            }
-        }
-        else {
-            # Default: search for unresolved bugs only.
-            # Put custom code here if you would like to change this behaviour.
-        }
-
-        # If we have wanted resolutions, allow closed states
-        if (keys(%resolutions)) {
-            foreach (@closedStates) { $states{$_} = 1 }
-        }
-
-        $cgi->param('bug_status', keys(%states));
-        $cgi->param('resolution', keys(%resolutions));
 
         # Loop over all main-level QuickSearch words.
         foreach my $qsword (@words) {
@@ -234,172 +146,24 @@ sub quicksearch {
                 $qsword = substr($qsword, 1);
             }
 
-            my $firstChar = substr($qsword, 0, 1);
-            my $baseWord = substr($qsword, 1);
-            my @subWords = split(/[\|,]/, $baseWord);
-            if ($firstChar eq '+') {
-                foreach (@subWords) {
-                    addChart('short_desc', 'substring', $_, $negate);
-                }
-            }
-            elsif ($firstChar eq '#') {
-                addChart('short_desc', 'substring', $baseWord, $negate);
-                addChart('content', 'matches', $baseWord, $negate);
-            }
-            elsif ($firstChar eq ':') {
-                foreach (@subWords) {
-                    addChart('product', 'substring', $_, $negate);
-                    addChart('component', 'substring', $_, $negate);
-                }
-            }
-            elsif ($firstChar eq '@') {
-                foreach (@subWords) {
-                    addChart('assigned_to', 'substring', $_, $negate);
-                }
-            }
-            elsif ($firstChar eq '[') {
-                addChart('short_desc', 'substring', $baseWord, $negate);
-                addChart('status_whiteboard', 'substring', $baseWord, $negate);
-            }
-            elsif ($firstChar eq '!') {
-                addChart('keywords', 'anywords', $baseWord, $negate);
-
-            }
-            else { # No special first char
-
+            # No special first char
+            if (!_handle_special_first_chars($qsword, $negate)) {
                 # Split by '|' to get all operands for a boolean OR.
                 foreach my $or_operand (split(/\|/, $qsword)) {
-                    if ($or_operand =~ /^votes:([0-9]+)$/) {
-                        # votes:xx ("at least xx votes")
-                        addChart('votes', 'greaterthan', $1 - 1, $negate);
-                    }
-                    elsif ($or_operand =~ /^(?:flag:)?([^\?]+\?)([^\?]*)$/) {
-                        # Flag and requestee shortcut
-                        addChart('flagtypes.name', 'substring', $1, $negate);
-                        $chart++; $and = $or = 0; # Next chart for boolean AND
-                        addChart('requestees.login_name', 'substring', $2, $negate);
-                    }
-                    elsif ($or_operand =~ /^([^:]+):([^:]+)$/) {
-                        # generic field1,field2,field3:value1,value2 notation
-                        my @fields = split(/,/, $1);
-                        my @values = split(/,/, $2);
-                        foreach my $field (@fields) {
-                            # Skip and record any unknown fields
-                            if (!defined(MAPPINGS->{$field})) {
-                                push(@unknownFields, $field);
-                                next;
-                            }
-                            $field = MAPPINGS->{$field};
-                            foreach (@values) {
-                                addChart($field, 'substring', $_, $negate);
-                            }
-                        }
-
-                    }
-                    else {
-
+                    if (!_handle_field_names($or_operand, $negate,
+                                             \@unknownFields))
+                    {
                         # Having ruled out the special cases, we may now split
                         # by comma, which is another legal boolean OR indicator.
                         foreach my $word (split(/,/, $or_operand)) {
-                            # Platform and operating system
-                            if (grep({lc($word) eq $_} PLATFORMS)
-                                || grep({lc($word) eq $_} OPSYSTEMS)) {
-                                addChart('rep_platform', 'substring',
-                                         $word, $negate);
-                                addChart('op_sys', 'substring',
-                                         $word, $negate);
+                            if (!_special_field_syntax($word, $negate)) {
+                                _default_quicksearch_word($word, $negate);
                             }
-                            # Priority
-                            elsif (grep { lc($_) eq lc($word) } 
-                                        @$legal_priorities) 
-                            {
-                                addChart('priority', 'equals', $word, $negate);
-                            }
-                            # P1-5 Syntax
-                            elsif ($word =~ m/^P(\d+)(?:-(\d+))?$/i) {
-                                my $start = $1 - 1;
-                                $start = 0 if $start < 0;
-                                my $end = $2 - 1;
-                                $end = scalar(@$legal_priorities) - 1
-                                    if $end > (scalar @$legal_priorities - 1);
-                                my $prios = $legal_priorities->[$start];
-                                if ($end) {
-                                    $prios = join(',', @$legal_priorities[$start..$end])
-                                }
-                                addChart('priority', 'anyexact', $prios, 
-                                         $negate);
-                            }
-                            # Severity
-                            elsif (grep({lc($word) eq substr($_, 0, 3)}
-                                        @{get_legal_field_values('bug_severity')})) {
-                                addChart('bug_severity', 'substring',
-                                         $word, $negate);
-                            }
-                            # Votes (votes>xx)
-                            elsif ($word =~ m/^votes>([0-9]+)$/) {
-                                addChart('votes', 'greaterthan',
-                                         $1, $negate);
-                            }
-                            # Votes (votes>=xx, votes=>xx)
-                            elsif ($word =~ m/^votes(>=|=>)([0-9]+)$/) {
-                                addChart('votes', 'greaterthan',
-                                         $2-1, $negate);
-
-                            }
-                            else { # Default QuickSearch word
-
-                                if (!grep({lc($word) eq $_}
-                                          PRODUCT_EXCEPTIONS) &&
-                                    length($word)>2
-                                   ) {
-                                    addChart('product', 'substring',
-                                             $word, $negate);
-                                }
-                                if (!grep({lc($word) eq $_}
-                                          COMPONENT_EXCEPTIONS) &&
-                                    length($word)>2
-                                   ) {
-                                    addChart('component', 'substring',
-                                             $word, $negate);
-                                }
-                                if (grep({lc($word) eq lc($_)}
-                                         map($_->name, Bugzilla::Keyword->get_all))) {
-                                    addChart('keywords', 'substring',
-                                             $word, $negate);
-                                    if (length($word)>2) {
-                                        addChart('short_desc', 'substring',
-                                                 $word, $negate);
-                                        addChart('status_whiteboard',
-                                                 'substring',
-                                                 $word, $negate);
-                                    }
-
-                                }
-                                else {
-
-                                    addChart('short_desc', 'substring',
-                                             $word, $negate);
-                                    addChart('status_whiteboard', 'substring',
-                                             $word, $negate);
-                                }
-                                addChart('content', 'matches', $word, $negate);
-                            }
-                            # URL field (for IP addrs, host.names,
-                            # scheme://urls)
-                            if ($word =~ m/[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/
-                                  || $word =~ /^[A-Za-z]+(\.[A-Za-z]+)+/
-                                  || $word =~ /:[\\\/][\\\/]/
-                                  || $word =~ /localhost/
-                                  || $word =~ /mailto[:]?/
-                                  # || $word =~ /[A-Za-z]+[:][0-9]+/ #host:port
-                                  ) {
-                                addChart('bug_file_loc', 'substring',
-                                         $word, $negate);
-                            }
-                        } # foreach my $word (split(/,/, $qsword))
-                    } # votes and generic field detection
-                } # foreach (split(/\|/, $_))
-            } # "switch" $firstChar
+                            _handle_urls($word, $negate);
+                        }
+                    }
+                }
+            }
             $chart++;
             $and = 0;
             $or = 0;
@@ -420,6 +184,7 @@ sub quicksearch {
     my $modified_query_string = $cgi->canonicalise_query(@params_to_strip);
 
     if ($cgi->param('load')) {
+        my $urlbase = correct_urlbase();
         # Param 'load' asks us to display the query in the advanced search form.
         print $cgi->redirect(-uri => "${urlbase}query.cgi?format=advanced&amp;"
                              . $modified_query_string);
@@ -430,6 +195,279 @@ sub quicksearch {
     # and disregard the return value.
     $cgi->delete(@params_to_strip);
     return $modified_query_string;
+}
+
+##########################
+# Parts of quicksearch() #
+##########################
+
+sub _bug_numbers_only {
+    my $searchstring = shift;
+    my $cgi = Bugzilla->cgi;
+    # Allow separation by comma or whitespace.
+    $searchstring =~ s/[,\s]+/,/g;
+
+    if ($searchstring !~ /,/) {
+        # Single bug number; shortcut to show_bug.cgi.
+        print $cgi->redirect(
+            -uri => correct_urlbase() . "show_bug.cgi?id=$searchstring");
+        exit;
+    }
+    else {
+        # List of bug numbers.
+        $cgi->param('bug_id', $searchstring);
+        $cgi->param('order', 'bugs.bug_id');
+        $cgi->param('bugidtype', 'include');
+    }
+}
+
+sub _handle_alias {
+    my $searchstring = shift;
+    if ($searchstring =~ /^([^,\s]+)$/) {
+        my $alias = $1;
+        # We use this direct SQL because we want quicksearch to be VERY fast.
+        my $is_alias = Bugzilla->dbh->selectrow_array(
+            q{SELECT 1 FROM bugs WHERE alias = ?}, undef, $alias);
+        if ($is_alias) {
+            print Bugzilla->cgi->redirect(
+                -uri => correct_urlbase() . "show_bug.cgi?id=$alias");
+            exit;
+        }
+    }
+}
+
+sub _handle_status_and_resolution {
+    my ($words) = @_;
+    my $legal_statuses = get_legal_field_values('bug_status');
+    my $legal_resolutions = get_legal_field_values('resolution');
+
+    my @openStates = BUG_STATE_OPEN;
+    my @closedStates;
+    my (%states, %resolutions);
+
+    foreach (@$legal_statuses) {
+        push(@closedStates, $_) unless is_open_state($_);
+    }
+    foreach (@openStates) { $states{$_} = 1 }
+    if ($words->[0] eq 'ALL') {
+        foreach (@$legal_statuses) { $states{$_} = 1 }
+        shift @$words;
+    }
+    elsif ($words->[0] eq 'OPEN') {
+        shift @$words;
+    }
+    elsif ($words->[0] =~ /^\+[A-Z]+(,[A-Z]+)*$/) {
+        # e.g. +DUP,FIX
+        if (matchPrefixes(\%states,
+                          \%resolutions,
+                          [split(/,/, substr($words->[0], 1))],
+                          \@closedStates,
+                          $legal_resolutions)) {
+            shift @$words;
+            # Allowing additional resolutions means we need to keep
+            # the "no resolution" resolution.
+            $resolutions{'---'} = 1;
+        }
+        else {
+            # Carry on if no match found.
+        }
+    }
+    elsif ($words->[0] =~ /^[A-Z]+(,[A-Z]+)*$/) {
+        # e.g. NEW,ASSI,REOP,FIX
+        undef %states;
+        if (matchPrefixes(\%states,
+                          \%resolutions,
+                          [split(/,/, $words->[0])],
+                          $legal_statuses,
+                          $legal_resolutions)) {
+            shift @$words;
+        }
+        else {
+            # Carry on if no match found
+            foreach (@openStates) { $states{$_} = 1 }
+        }
+    }
+    else {
+        # Default: search for unresolved bugs only.
+        # Put custom code here if you would like to change this behaviour.
+    }
+
+    # If we have wanted resolutions, allow closed states
+    if (keys(%resolutions)) {
+        foreach (@closedStates) { $states{$_} = 1 }
+    }
+
+    Bugzilla->cgi->param('bug_status', keys(%states));
+    Bugzilla->cgi->param('resolution', keys(%resolutions));
+}
+
+
+sub _handle_special_first_chars {
+    my ($qsword, $negate) = @_;
+
+    my $firstChar = substr($qsword, 0, 1);
+    my $baseWord = substr($qsword, 1);
+    my @subWords = split(/[\|,]/, $baseWord);
+
+    if ($firstChar eq '+') {
+        addChart('short_desc', 'substring', $_, $negate) foreach (@subWords);
+        return 1;
+    }
+    if ($firstChar eq '#') {
+        addChart('short_desc', 'substring', $baseWord, $negate);
+        addChart('content', 'matches', $baseWord, $negate);
+        return 1;
+    }
+    if ($firstChar eq ':') {
+        foreach (@subWords) {
+            addChart('product', 'substring', $_, $negate);
+            addChart('component', 'substring', $_, $negate);
+        }
+        return 1;
+    }
+    if ($firstChar eq '@') {
+        addChart('assigned_to', 'substring', $_, $negate) foreach (@subWords);
+        return 1;
+    }
+    if ($firstChar eq '[') {
+        addChart('short_desc', 'substring', $baseWord, $negate);
+        addChart('status_whiteboard', 'substring', $baseWord, $negate);
+        return 1;
+    }
+    if ($firstChar eq '!') {
+        addChart('keywords', 'anywords', $baseWord, $negate);
+        return 1;
+    }
+    return 0;
+}
+
+sub _handle_field_names {
+    my ($or_operand, $negate, $unknownFields) = @_;
+    
+    # votes:xx ("at least xx votes")
+    if ($or_operand =~ /^votes:([0-9]+)$/) {
+        addChart('votes', 'greaterthan', $1 - 1, $negate);
+        return 1;
+    }
+    
+    # Flag and requestee shortcut
+    if ($or_operand =~ /^(?:flag:)?([^\?]+\?)([^\?]*)$/) {
+        addChart('flagtypes.name', 'substring', $1, $negate);
+        $chart++; $and = $or = 0; # Next chart for boolean AND
+        addChart('requestees.login_name', 'substring', $2, $negate);
+        return 1;
+    }
+    
+    # generic field1,field2,field3:value1,value2 notation
+    if ($or_operand =~ /^([^:]+):([^:]+)$/) {
+        my @fields = split(/,/, $1);
+        my @values = split(/,/, $2);
+        foreach my $field (@fields) {
+            # Skip and record any unknown fields
+            if (!defined(MAPPINGS->{$field})) {
+                push(@$unknownFields, $field);
+                next;
+            }
+            $field = MAPPINGS->{$field};
+            foreach (@values) {
+                addChart($field, 'substring', $_, $negate);
+            }
+        }
+        return 1;
+    }
+    
+    return 0;
+}
+
+sub _special_field_syntax {
+    my ($word, $negate) = @_;
+    # Platform and operating system
+    if (grep { lc($word) eq $_ } PLATFORMS
+        or grep { lc($word) eq $_ } OPSYSTEMS)
+    {
+        addChart('rep_platform', 'substring', $word, $negate);
+        addChart('op_sys', 'substring', $word, $negate);
+        return 1;
+    }
+    
+    # Priority
+    my $legal_priorities = get_legal_field_values('priority');
+    if (grep { lc($_) eq lc($word) } @$legal_priorities) {
+        addChart('priority', 'equals', $word, $negate);
+        return 1;
+    }
+
+    # P1-5 Syntax
+    if ($word =~ m/^P(\d+)(?:-(\d+))?$/i) {
+        my $start = $1 - 1;
+        $start = 0 if $start < 0;
+        my $end = $2 - 1;
+        $end = scalar(@$legal_priorities) - 1
+            if $end > (scalar @$legal_priorities - 1);
+        my $prios = $legal_priorities->[$start];
+        if ($end) {
+            $prios = join(',', @$legal_priorities[$start..$end])
+        }
+        addChart('priority', 'anyexact', $prios, $negate);
+        return 1;
+    }
+
+    # Severity
+    my $legal_severities = get_legal_field_values('bug_severity');
+    if (grep { lc($word) eq substr($_, 0, 3)} @$legal_severities) {
+        addChart('bug_severity', 'substring', $word, $negate);
+        return 1;
+    }
+    
+    # Votes (votes>xx)
+    if ($word =~ m/^votes>([0-9]+)$/) {
+        addChart('votes', 'greaterthan', $1, $negate);
+        return 1;
+    }
+    
+    # Votes (votes>=xx, votes=>xx)
+    if ($word =~ m/^votes(>=|=>)([0-9]+)$/) {
+        addChart('votes', 'greaterthan', $2-1, $negate);
+        return 1;
+    }
+
+    return 0;    
+}
+
+sub _default_quicksearch_word {
+    my ($word, $negate) = @_;
+    
+    if (!grep { lc($word) eq $_ } PRODUCT_EXCEPTIONS and length($word) > 2) {
+        addChart('product', 'substring', $word, $negate);
+    }
+    
+    if (!grep { lc($word) eq $_ } COMPONENT_EXCEPTIONS and length($word) > 2) {
+        addChart('component', 'substring', $word, $negate);
+    }
+    
+    my @legal_keywords = map($_->name, Bugzilla::Keyword->get_all);
+    if (grep { lc($word) eq lc($_) } @legal_keywords) {
+        addChart('keywords', 'substring', $word, $negate);
+    }
+    
+    addChart('short_desc', 'substring', $word, $negate);
+    addChart('status_whiteboard', 'substring', $word, $negate);
+    addChart('content', 'matches', $word, $negate);
+}
+
+sub _handle_urls {
+    my ($word, $negate) = @_;
+    # URL field (for IP addrs, host.names,
+    # scheme://urls)
+    if ($word =~ m/[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/
+        || $word =~ /^[A-Za-z]+(\.[A-Za-z]+)+/
+        || $word =~ /:[\\\/][\\\/]/
+        || $word =~ /localhost/
+        || $word =~ /mailto[:]?/)
+        # || $word =~ /[A-Za-z]+[:][0-9]+/ #host:port
+    {
+        addChart('bug_file_loc', 'substring', $word, $negate);
+    }
 }
 
 ###########################################################################

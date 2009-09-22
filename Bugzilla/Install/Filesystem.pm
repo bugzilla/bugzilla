@@ -335,10 +335,10 @@ sub update_filesystem {
     foreach my $dir (sort keys %dirs) {
         unless (-d $dir) {
             print "Creating $dir directory...\n";
-            mkdir $dir || die $!;
+            mkdir $dir or die "mkdir $dir failed: $!";
             # For some reason, passing in the permissions to "mkdir"
             # doesn't work right, but doing a "chmod" does.
-            chmod $dirs{$dir}, $dir || die $!;
+            chmod $dirs{$dir}, $dir or warn "Cannot chmod $dir: $!";
         }
     }
 

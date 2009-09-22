@@ -196,7 +196,6 @@ sub FILESYSTEM {
     my %create_dirs = (
         $datadir                => $ws_dir_full_control,
         "$datadir/mining"       => $ws_dir_readable,
-        "$datadir/duplicates"   => $ws_dir_readable,
         $attachdir              => $ws_dir_writeable,
         $extensionsdir          => $ws_dir_readable,
         graphs                  => $ws_dir_writeable,

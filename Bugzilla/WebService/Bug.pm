@@ -114,7 +114,7 @@ sub create {
     foreach my $field (keys %$params) {
         my $field_name = FIELD_MAP->{$field} || $field;
         # Prevent SQL Injection via key names.
-        _check_valid_field($field);
+        _check_valid_field($field_name);
         $field_values{$field_name} = $params->{$field}; 
     }
 

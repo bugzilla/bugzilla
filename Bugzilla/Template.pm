@@ -45,7 +45,6 @@ use Bugzilla::User;
 use Bugzilla::Error;
 use Bugzilla::Status;
 use Bugzilla::Token;
-use Bugzilla::Template::Parser;
 
 use Cwd qw(abs_path);
 use MIME::Base64;
@@ -58,28 +57,6 @@ use IO::Dir;
 use Scalar::Util qw(blessed);
 
 use base qw(Template);
-
-# As per the Template::Base documentation, the _init() method is being called 
-# by the new() constructor. We take advantage of this in order to plug our
-# UTF-8-aware Parser object in neatly after the original _init() method has
-# happened, in particular, after having set up the constants namespace.
-# See bug 413121 for details.
-sub _init {
-    my $self = shift;
-    my $config = $_[0];
-
-    $self->SUPER::_init(@_) || return undef;
-
-    $self->{PARSER} = $config->{PARSER}
-        = new Bugzilla::Template::Parser($config);
-
-    # Now we need to re-create the default Service object, making it aware
-    # of our Parser object.
-    $self->{SERVICE} = $config->{SERVICE}
-        = Template::Config->service($config);
-
-    return $self;
-}
 
 # Convert the constants in the Bugzilla::Constants module into a hash we can
 # pass to the template object for reflection into its "constants" namespace
@@ -479,6 +456,8 @@ sub create {
 
         # Initialize templates (f.e. by loading plugins like Hook).
         PRE_PROCESS => "global/initialize.none.tmpl",
+
+        ENCODING => Bugzilla->params->{'utf8'} ? 'UTF-8' : undef,
 
         # Functions for processing text within templates in various ways.
         # IMPORTANT!  When adding a filter here that does not override a

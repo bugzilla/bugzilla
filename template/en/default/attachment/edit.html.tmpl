@@ -215,7 +215,7 @@
 
   </table>
 
-  Attachments on this [% terms.Bug %]:
+  Attachments on [% "$terms.bug ${attachment.bug_id}" FILTER bug_link(attachment.bug_id) FILTER none %]:
   [% FOREACH a = attachments %]
     [% IF a == attachment.id %]
       [%+ a %]

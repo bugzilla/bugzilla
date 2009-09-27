@@ -96,3 +96,7 @@ td.bz_total {
 .bz_query_explain {
     text-align: left;
 }
+
+.bz_sort_order_secondary {
+    color: gray;
+}

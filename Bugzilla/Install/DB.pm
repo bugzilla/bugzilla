@@ -577,6 +577,9 @@ sub update_table_definitions {
         { TYPE => 'varchar(255)' });
     $dbh->bz_add_index('bugs_activity', 'bugs_activity_added_idx', ['added']);
 
+    # 2009-09-28 LpSolit@gmail.com - Bug 519032
+    $dbh->bz_drop_column('series', 'last_viewed');
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################

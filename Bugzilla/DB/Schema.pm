@@ -1259,7 +1259,6 @@ use constant ABSTRACT_SCHEMA => {
                                            DELETE => 'CASCADE'}},
             name        => {TYPE => 'varchar(64)', NOTNULL => 1},
             frequency   => {TYPE => 'INT2', NOTNULL => 1},
-            last_viewed => {TYPE => 'DATETIME'},
             query       => {TYPE => 'MEDIUMTEXT', NOTNULL => 1},
             is_public   => {TYPE => 'BOOLEAN', NOTNULL => 1,
                             DEFAULT => 'FALSE'},

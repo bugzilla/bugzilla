@@ -720,7 +720,7 @@ Description: validates if the user is allowed to view and edit the attachment.
 Params:      $attachment - the attachment object being edited.
              $product_id - the product ID the attachment belongs to.
 
-Returns:     1 on success. Else an error is thrown.
+Returns:     1 on success, 0 otherwise.
 
 =cut
 
@@ -729,12 +729,9 @@ sub validate_can_edit {
     my $user = Bugzilla->user;
 
     # The submitter can edit their attachments.
-    return 1 if ($attachment->attacher->id == $user->id
-                 || ((!$attachment->isprivate || $user->is_insider)
-                      && $user->in_group('editbugs', $product_id)));
-
-    # If we come here, then this attachment cannot be edited by the user.
-    ThrowUserError('illegal_attachment_edit', { attach_id => $attachment->id });
+    return ($attachment->attacher->id == $user->id
+            || ((!$attachment->isprivate || $user->is_insider)
+                 && $user->in_group('editbugs', $product_id))) ? 1 : 0;
 }
 
 =item C<validate_obsolete($bug)>
@@ -769,7 +766,8 @@ sub validate_obsolete {
           || ThrowUserError('invalid_attach_id', $vars);
 
         # Check that the user can view and edit this attachment.
-        $attachment->validate_can_edit($bug->product_id);
+        $attachment->validate_can_edit($bug->product_id)
+          || ThrowUserError('illegal_attachment_edit', { attach_id => $attachment->id });
 
         $vars->{'description'} = $attachment->description;
 

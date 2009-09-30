@@ -45,8 +45,12 @@ body {
     border: none;
 }
 
-#header a {
+#header a, #footer a {
     color: white;
+    text-decoration: none;
+}
+#header a:hover, #footer a:hover {
+    text-decoration: underline;
 }
 
 /* body */
@@ -62,20 +66,11 @@ body {
     -moz-border-radius: 5px;
 }
 
-a, a:hover {
-    color: #6169c0;
+a {
+    color: #6070cf;
 }
-
-a:visited {
-    color: #3d4a68;
-}
-
-a, a:visited {
-    text-decoration: none;
-}
-
 a:hover {
-    text-decoration: underline;
+    color: #8090ef;
 }
 
 hr {
@@ -182,10 +177,6 @@ hr {
     border: 1px solid #747e93;
     width: 100%;
     -moz-border-radius: 5px;
-}
-
-#footer a {
-    color: white;
 }
 
 #footer #links-actions,

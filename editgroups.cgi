@@ -113,16 +113,19 @@ sub get_current_and_available {
                 if !grep($_->id == $group_option->id, @visible_to_me_current);
         }
 
-        # The group itself should never show up in the bless or 
-        # membership lists.
+        push(@bless_from_available, $group_option)
+            if !grep($_->id == $group_option->id, @bless_from_current);
+
+        # The group itself should never show up in the membership lists,
+        # and should show up in only one of the bless lists (otherwise
+        # you can try to allow it to bless itself twice, leading to a
+        # database unique constraint error).
         next if $group_option->id == $group->id;
 
         push(@members_available, $group_option)
             if !grep($_->id == $group_option->id, @members_current);
         push(@member_of_available, $group_option)
             if !grep($_->id == $group_option->id, @member_of_current);
-        push(@bless_from_available, $group_option)
-            if !grep($_->id == $group_option->id, @bless_from_current);
         push(@bless_to_available, $group_option)
            if !grep($_->id == $group_option->id, @bless_to_current);
     }

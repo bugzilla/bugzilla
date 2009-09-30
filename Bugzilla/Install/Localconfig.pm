@@ -326,7 +326,12 @@ sub update_localconfig {
         if (!defined $localconfig->{$name}) {
             push(@new_vars, $name);
             $var->{default} = &{$var->{default}} if ref($var->{default}) eq 'CODE';
-            $localconfig->{$name} = $answer->{$name} || $var->{default};
+            if (exists $answer->{$name}) {
+                $localconfig->{$name} = $answer->{$name};
+            }
+            else {
+                $localconfig->{$name} = $var->{default};
+            }
         }
     }
 

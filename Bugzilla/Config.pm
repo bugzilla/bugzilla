@@ -199,7 +199,12 @@ sub update_params {
         my $name = $item->{'name'};
         unless (exists $param->{$name}) {
             print "New parameter: $name\n" unless $new_install;
-            $param->{$name} = $answer->{$name} || $item->{'default'};
+            if (exists $answer->{$name}) {
+                $param->{$name} = $answer->{$name};
+            }
+            else {
+                $param->{$name} = $item->{'default'};
+            }
         }
     }
 

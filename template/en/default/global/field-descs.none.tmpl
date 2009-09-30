@@ -135,25 +135,31 @@
                    ${constants.FIELD_TYPE_BUG_ID}        => "$terms.Bug ID",
                 } %]
 
-[% status_descs = { "UNCONFIRMED" => "UNCONFIRMED",
-                    "NEW"         => "NEW",
-                    "ASSIGNED"    => "ASSIGNED",
-                    "REOPENED"    => "REOPENED",
-                    "RESOLVED"    => "RESOLVED",
-                    "VERIFIED"    => "VERIFIED",
-                    "CLOSED"      => "CLOSED" } %]
+[%# You can use this hash to localize (translate) the values displayed
+  # for drop-down and multiple-select fields. Lines starting with "#"
+  # are comments.
+  #%]
+[% value_descs = {
+  "bug_status" => {
+    # "UNCONFIRMED" => "UNCO",
+    # "NEW"         => "NEWISH",
+  },
 
-[% MACRO get_status(status) GET status_descs.$status || status %]
+  "resolution" => {
+    # "FIXED" => "NO LONGER AN ISSUE",
+    # "MOVED" => "BYE-BYE",
+  },
+} %]
 
-[% resolution_descs = { "FIXED"      => "FIXED",
-                        "INVALID"    => "INVALID",
-                        "WONTFIX"    => "WONTFIX",
-                        "DUPLICATE"  => "DUPLICATE",
-                        "WORKSFORME" => "WORKSFORME",
-                        "MOVED"      => "MOVED",
-                        "---"        => "---",
-                        " "          => " " } %]
-
-[% MACRO get_resolution(res) GET resolution_descs.$res || res %]
+[%# We use "FILTER none" here because only the caller can know how to
+  # filter the result appropriately. 
+  #%]
+[% MACRO display_value(field_name, value_name) BLOCK %][% FILTER trim %]
+  [% IF value_descs.${field_name}.${value_name}.defined %]
+    [% value_descs.${field_name}.${value_name} FILTER none %]
+  [% ELSE %]
+    [% value_name FILTER none %]
+  [% END %]
+[% END %][% END %]
 
 [% Hook.process("end") %]

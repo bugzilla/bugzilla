@@ -152,7 +152,8 @@
               %]
                 class="bz_hidden_option" disabled="disabled"
               [% END %]>
-              [%- legal_value.name FILTER html %]</option>
+              [%- display_value(field.name, legal_value.name) FILTER html ~%]
+            </option>
           [% END %]
         </select>
         [%# When you pass an empty multi-select in the web interface,

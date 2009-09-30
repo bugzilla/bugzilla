@@ -312,7 +312,7 @@
           (<span id="alias_nonedit_display">[% bug.alias FILTER html %]</span>) 
         [% END %]
       [% END %]
-      <span id="short_desc_nonedit_display">[% bug.short_desc FILTER quoteUrls(bug.bug_id) %]</span>
+      <span id="short_desc_nonedit_display">[% bug.short_desc FILTER quoteUrls(bug) %]</span>
       [% IF bug.check_can_change_field('short_desc', 0, 1) || 
             bug.check_can_change_field('alias', 0, 1)  %]
         <small class="editme">(<a href="#" id="editme_action">edit</a>)</small>

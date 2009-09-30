@@ -140,7 +140,7 @@ sub get_format {
 # If you want to modify this routine, read the comments carefully
 
 sub quoteUrls {
-    my ($text, $curr_bugid, $already_wrapped) = (@_);
+    my ($text, $bug, $comment) = (@_);
     return $text unless $text;
 
     # We use /g for speed, but uris can have other things inside them
@@ -157,7 +157,8 @@ sub quoteUrls {
 
     # If the comment is already wrapped, we should ignore newlines when
     # looking for matching regexps. Else we should take them into account.
-    my $s = $already_wrapped ? qr/\s/ : qr/[[:blank:]]/;
+    my $s = ($comment && $comment->{already_wrapped}) 
+            ? qr/\s/ : qr/[[:blank:]]/;
 
     # However, note that adding the title (for buglinks) can affect things
     # In particular, attachment matches go before bug titles, so that titles
@@ -171,6 +172,26 @@ sub quoteUrls {
     my @things;
     my $count = 0;
     my $tmp;
+
+    my @hook_regexes;
+    Bugzilla::Hook::process('bug-format_comment',
+        { text => \$text, bug => $bug, regexes => \@hook_regexes,
+          comment => $comment });
+
+    foreach my $re (@hook_regexes) {
+        my ($match, $replace) = @$re{qw(match replace)};
+        if (ref($replace) eq 'CODE') {
+            $text =~ s/$match/($things[$count++] = $replace->({matches => [
+                                                               $1, $2, $3, $4,
+                                                               $5, $6, $7, $8, 
+                                                               $9, $10]}))
+                               && ("\0\0" . ($count-1) . "\0\0")/egx;
+        }
+        else {
+            $text =~ s/$match/($things[$count++] = $replace) 
+                              && ("\0\0" . ($count-1) . "\0\0")/egx;
+        }
+    }
 
     # Provide tooltips for full bug links (Bug 74355)
     my $urlbase_re = '(' . join('|',
@@ -219,7 +240,7 @@ sub quoteUrls {
               ~egmxi;
 
     # Current bug ID this comment belongs to
-    my $current_bugurl = $curr_bugid ? "show_bug.cgi?id=$curr_bugid" : "";
+    my $current_bugurl = $bug ? ("show_bug.cgi?id=" . $bug->id) : "";
 
     # This handles bug a, comment b type stuff. Because we're using /g
     # we have to do this in one pattern, and so this is semi-messy.
@@ -541,10 +562,10 @@ sub create {
             css_class_quote => \&Bugzilla::Util::css_class_quote ,
 
             quoteUrls => [ sub {
-                               my ($context, $bug, $already_wrapped) = @_;
+                               my ($context, $bug, $comment) = @_;
                                return sub {
                                    my $text = shift;
-                                   return quoteUrls($text, $bug, $already_wrapped);
+                                   return quoteUrls($text, $bug, $comment);
                                };
                            },
                            1

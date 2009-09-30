@@ -313,6 +313,71 @@ your column name(s) onto the array.
 
 =back
 
+=head2 bug-format_comment
+
+Allows you to do custom parsing on comments before they are displayed. You do
+this by returning two regular expressions: one that matches the section you
+want to replace, and then another that says what you want to replace that
+match with.
+
+The matching and replacement will be run with the C</g> switch on the regex.
+
+Params:
+
+=over
+
+=item C<regexes>
+
+An arrayref of hashrefs.
+
+You should push a hashref containing two keys (C<match> and C<replace>)
+in to this array. C<match> is the regular expression that matches the
+text you want to replace, C<replace> is what you want to replace that
+text with. (This gets passed into a regular expression like 
+C<s/$match/$replace/>.)
+
+Instead of specifying a regular expression for C<replace> you can also
+return a coderef (a reference to a subroutine). If you want to use
+backreferences (using C<$1>, C<$2>, etc. in your C<replace>), you have to use
+this method--it won't work if you specify C<$1>, C<$2> in a regular expression
+for C<replace>. Your subroutine will get a hashref as its only argument. This
+hashref contains a single key, C<matches>. C<matches> is an arrayref that
+contains C<$1>, C<$2>, C<$3>, etc. in order, up to C<$10>. Your subroutine
+should return what you want to replace the full C<match> with. (See the code
+example for this hook if you want to see how this actually all works in code.
+It's simpler than it sounds.)
+
+B<You are responsible for HTML-escaping your returned data.> Failing to
+do so could open a security hole in Bugzilla.
+
+=item C<text>
+
+A B<reference> to the exact text that you are parsing.
+
+Generally you should not modify this yourself. Instead you should be 
+returning regular expressions using the C<regexes> array.
+
+The text has already been word-wrapped, but has not been parsed in any way
+otherwise. (So, for example, it is not HTML-escaped. You get "&", not 
+"&amp;".)
+
+=item C<bug>
+
+The L<Bugzilla::Bug> object that this comment is on. Sometimes this is
+C<undef>, meaning that we are parsing text that is not on a bug.
+
+=item C<comment>
+
+A hashref representing the comment you are about to parse, including
+all of the fields that comments contain when they are returned by
+by L<Bugzilla::Bug/longdescs>.
+
+Sometimes this is C<undef>, meaning that we are parsing text that is
+not a bug comment (but could still be some other part of a bug, like
+the summary line).
+
+=back
+
 =head2 buglist-columns
 
 This happens in buglist.cgi after the standard columns have been defined and

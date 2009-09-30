@@ -198,6 +198,12 @@
     [% title = "Invalid Dimensions" %]
     The width or height specified is not a positive integer.
 
+  [% ELSIF error == "invalid_feature" %]
+    [% title = "Invalid Feature Name" %]
+    [% feature FILTER html %] is not a valid feature name. See
+    <code>OPTIONAL_MODULES</code> in 
+    <code>Bugzilla::Install::Requirements</code> for valid names.
+
   [% ELSIF error == "invalid_flag_association" %]
     [% title = "Invalid Flag Association" %]
     Some flags do not belong to

@@ -42,6 +42,7 @@ use Bugzilla::Auth::Persist::Cookie;
 use Bugzilla::CGI;
 use Bugzilla::DB;
 use Bugzilla::Install::Localconfig qw(read_localconfig);
+use Bugzilla::Install::Requirements qw(OPTIONAL_MODULES);
 use Bugzilla::JobQueue;
 use Bugzilla::Template;
 use Bugzilla::User;
@@ -185,6 +186,40 @@ sub template_inner {
     $class->request_cache->{"template_inner_$lang"}
         ||= Bugzilla::Template->create();
     return $class->request_cache->{"template_inner_$lang"};
+}
+
+sub feature {
+    my ($class, $feature) = @_;
+    my $cache = $class->request_cache;
+    return $cache->{feature}->{$feature}
+        if exists $cache->{feature}->{$feature};
+
+    my $feature_map = $cache->{feature_map};
+    if (!$feature_map) {
+        foreach my $package (@{ OPTIONAL_MODULES() }) {
+            foreach my $f (@{ $package->{feature} }) {
+                $feature_map->{$f} ||= [];
+                push(@{ $feature_map->{$f} }, $package->{module});
+            }
+        }
+        $cache->{feature_map} = $feature_map;
+    }
+
+    if (!$feature_map->{$feature}) {
+        ThrowCodeError('invalid_feature', { feature => $feature });
+    }
+
+    my $success = 1;
+    foreach my $module (@{ $feature_map->{$feature} }) {
+        # We can't use a string eval and "use" here (it kills Template-Toolkit,
+        # see https://rt.cpan.org/Public/Bug/Display.html?id=47929), so we have
+        # to do a block eval.
+        $module =~ s{::}{/}g;
+        $module .= ".pm";
+        eval { require $module; 1; } or $success = 0;
+    }
+    $cache->{feature}->{$feature} = $success;
+    return $success;
 }
 
 sub cgi {
@@ -758,5 +793,10 @@ consuming, so we cache this information for future references.
 Returns a L<Bugzilla::JobQueue> that you can use for queueing jobs.
 Will throw an error if job queueing is not correctly configured on
 this Bugzilla installation.
+
+=item C<feature>
+
+Tells you whether or not a specific feature is enabled. For names
+of features, see C<OPTIONAL_MODULES> in C<Bugzilla::Install::Requirements>.
 
 =back

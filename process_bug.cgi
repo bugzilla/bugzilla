@@ -634,13 +634,6 @@ foreach my $bug (@bug_objects) {
     }
 }
 
-# Determine if Patch Viewer is installed, for Diff link
-# (NB: Duplicate code with show_bug.cgi.)
-eval {
-    require PatchReader;
-    $vars->{'patchviewerinstalled'} = 1;
-};
-
 if (Bugzilla->usage_mode == USAGE_MODE_EMAIL) {
     # Do nothing.
 }

@@ -40,7 +40,7 @@
 %]
 
 [%# No need to display the Diff button and iframe if the attachment is not a patch. %]
-[% patchviewerinstalled = (patchviewerinstalled && attachment.ispatch) %]
+[% use_patchviewer = (feature_enabled('patch_viewer') && attachment.ispatch) %]
 
 <form method="post" action="attachment.cgi" onsubmit="normalizeComments();">
   <input type="hidden" name="id" value="[% attachment.id %]">
@@ -127,7 +127,7 @@
         <input type="submit" value="Submit" id="update"><br><br>
         <strong>Actions:</strong>
         <a href="attachment.cgi?id=[% attachment.id %]">View</a>
-        [% IF attachment.ispatch && patchviewerinstalled %]
+        [% IF use_patchviewer %]
          | <a href="attachment.cgi?id=[% attachment.id %]&amp;action=diff">Diff</a>
         [% END %]
         [% IF Param("allow_attachment_deletion")
@@ -183,14 +183,14 @@
             var patchviewerinstalled = 0;
             var attachment_id = [% attachment.id %];
             if (typeof document.getElementById == "function") {
-[% IF patchviewerinstalled %]
+[% IF use_patchviewer %]
               var patchviewerinstalled = 1;
               document.write('<iframe id="viewDiffFrame" style="height: 400px; width: 100%; display: none;"><\/iframe>');
 [% END %]
               document.write('<button type="button" id="editButton" onclick="editAsComment(patchviewerinstalled);">Edit Attachment As Comment<\/button>');
               document.write('<button type="button" id="undoEditButton" onclick="undoEditAsComment(patchviewerinstalled);" style="display: none;">Undo Edit As Comment<\/button>');
               document.write('<button type="button" id="redoEditButton" onclick="redoEditAsComment(patchviewerinstalled);" style="display: none;">Redo Edit As Comment<\/button>');
-[% IF patchviewerinstalled %]
+[% IF use_patchviewer %]
               document.write('<button type="button" id="viewDiffButton" onclick="viewDiff(attachment_id, patchviewerinstalled);">View Attachment As Diff<\/button>');
 [% END %]
               document.write('<button type="button" id="viewRawButton" onclick="viewRaw(patchviewerinstalled);" style="display: none;">View Attachment As Raw<\/button>');

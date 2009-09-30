@@ -240,12 +240,6 @@ if (defined($cgi->upload('data')) || $cgi->param('attachurl')) {
     else {
         $vars->{'message'} = 'attachment_creation_failed';
     }
-
-    # Determine if Patch Viewer is installed, for Diff link
-    eval {
-        require PatchReader;
-        $vars->{'patchviewerinstalled'} = 1;
-    };
 }
 
 # Set bug flags.

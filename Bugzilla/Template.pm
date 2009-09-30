@@ -281,12 +281,8 @@ sub get_attachment_link {
         # If the attachment is a patch, try to link to the diff rather
         # than the text, by default.
         my $patchlink = "";
-        if ($is_patch) {
-            # Determine if PatchReader is installed
-            my $patchviewer_installed = eval { require PatchReader; };
-            if ($patchviewer_installed) {
-                $patchlink = '&amp;action=diff';
-            }
+        if ($is_patch and Bugzilla->feature('patch_viewer')) {
+            $patchlink = '&amp;action=diff';
         }
 
         # Whitespace matters here because these links are in <pre> tags.
@@ -744,6 +740,8 @@ sub create {
                 }
                 return \@bug_list;
             },
+
+            'feature_enabled' => sub { return Bugzilla->feature(@_); },
 
             # These don't work as normal constants.
             DB_MODULE        => \&Bugzilla::Constants::DB_MODULE,

@@ -86,12 +86,6 @@ if ($action ne 'view') {
     Bugzilla->login();
 }
 
-# Determine if PatchReader is installed
-eval {
-    require PatchReader;
-    $vars->{'patchviewerinstalled'} = 1;
-};
-
 # When viewing an attachment, do not request credentials if we are on
 # the alternate host. Let view() decide when to call Bugzilla->login.
 if ($action eq "view")

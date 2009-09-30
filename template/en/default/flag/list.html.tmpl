@@ -157,8 +157,8 @@
                              custom_userlist => flag_custom_list
                   %]
                 [% ELSE %]
-                  (<input type="text" size="30" maxlength="255"
-                          id="requestee-[% flag.id %]" 
+                  (<input type="text" class="requestee" maxlength="255"
+                          id="requestee-[% flag.id %]"
                           name="requestee-[% flag.id %]"
                           [% IF flag.status == "?" && flag.requestee %]
                             value="[% flag.requestee.login FILTER html %]"
@@ -248,7 +248,7 @@
                          custom_userlist => type.grant_list
               %]
             [% ELSE %]
-              (<input type="text" size="30" maxlength="255"
+              (<input type="text" class="requestee" maxlength="255"
                       id="requestee_type-[% type.id %]"
                       name="requestee_type-[% type.id %]">)
             [% END %]

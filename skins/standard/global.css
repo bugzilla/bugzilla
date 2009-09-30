@@ -342,6 +342,10 @@ table#flags td {
     min-width: 3em;
 }
 
+input.requestee {
+    width: 15em;
+}
+
 #error_msg {
     font-size: x-large;
 }

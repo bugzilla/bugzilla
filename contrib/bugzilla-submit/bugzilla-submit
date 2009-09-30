@@ -158,7 +158,7 @@ def ensure_defaults(data):
     if 'bug_file_loc' not in data:
         data['bug_file_loc'] = 'http://'        # Yes, Bugzilla needs this
     if 'priority' not in data:
-        data['priority'] = 'P2'
+        data['priority'] = 'Normal'
 
 def validate_fields(data):
     # Fields for validation

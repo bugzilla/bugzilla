@@ -606,25 +606,25 @@ sub write_bugs {
     # Mapping from Severity,Priority to priority
     # At our site, the Severity,Priority fields have degenerated
     # into a 9-level priority field.
-    my($priority) = "P1";
+    my($priority) = "Highest";
     if (defined($pr_data{"Severity"}) && defined($pr_data{"Severity"})) {
         if ($pr_data{"Severity"} eq "critical") {
             if ($pr_data{"Priority"} eq "high") {
-                $priority = "P1";
+                $priority = "Highest";
             } else {
-                $priority = "P2";
+                $priority = "High";
             }
         } elsif ($pr_data{"Severity"} eq "serious") {
             if ($pr_data{"Priority"} eq "low") {
-                $priority = "P4";
+                $priority = "Low";
             } else {
-                $priority = "P3";
+                $priority = "Normal";
             }
         } else {
             if ($pr_data{"Priority"} eq "high") {
-                $priority = "P4";
+                $priority = "Low";
             } else {
-                $priority = "P5";
+                $priority = "Lowest";
             }
         }
     }

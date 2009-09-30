@@ -552,19 +552,19 @@ class Bugzillabug(object):
             priority = self.fields["Priority"]
             if severity == "critical":
                 if priority == "high":
-                    self.fields["priority"] = "P1"
+                    self.fields["priority"] = "Highest"
                 else:
-                    self.fields["priority"] = "P2"
+                    self.fields["priority"] = "High"
             elif severity == "serious":
                 if priority == "low":
-                    self.fields["priority"] = "P4"
+                    self.fields["priority"] = "Low"
                 else:
-                    self.fields["priority"] = "P3"
+                    self.fields["priority"] = "Normal"
             else:
                 if priority == "high":
-                    self.fields["priority"] = "P4"
+                    self.fields["priority"] = "Low"
                 else:
-                    self.fields["priority"] = "P5"
+                    self.fields["priority"] = "Lowest"
         self.fields["priority"] = SqlQuote(self.fields["priority"])
         state = self.fields["State"]
         if (state == "open" or state == "analyzed") and self.fields["userid"] != 3:

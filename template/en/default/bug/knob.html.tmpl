@@ -44,7 +44,7 @@
     [% PROCESS initial_action %]
     [% NEXT IF bug_status.name == bug.bug_status %]
     <option value="[% bug_status.name FILTER html %]">
-      [% get_status(bug_status.name) FILTER html %]
+      [% display_value("bug_status", bug_status.name) FILTER html %]
     </option>
     [% IF  !bug_status.is_open  %]
       [% show_resolution = 1 %]
@@ -71,9 +71,9 @@
   [% IF bug_status_select_displayed %]
     </select>
   [% ELSE %]
-      [% get_status(bug.bug_status) FILTER html %]
+      [% display_value("bug_status", bug.bug_status) FILTER html %]
       [% IF bug.resolution %]
-        [%+ get_resolution(bug.resolution) FILTER html %]
+        [%+ display_value("resolution", bug.resolution) FILTER html %]
         [% IF bug.dup_id %]
           <span id="duplicate_display">of 
           [% "${terms.bug} ${bug.dup_id}" FILTER bug_link(bug.dup_id) FILTER none %]</span>
@@ -133,7 +133,7 @@
 [% BLOCK initial_action %]
   [% IF !initial_action_shown %]
     <option selected value="[% bug.bug_status FILTER html %]">
-      [% get_status(bug.bug_status) FILTER html %]
+      [% display_value("bug_status", bug.bug_status) FILTER html %]
     </option>
     [% IF !bug.isopened  %] 
       [% show_resolution = 1 %]
@@ -150,7 +150,7 @@
       [% NEXT IF r == "MOVED" && bug.resolution != "MOVED" %]
       <option value="[% r FILTER html %]"
       [% "selected" IF r == bug.resolution %]>
-        [% get_resolution(r) FILTER html %]</option>
+        [% display_value("resolution", r) FILTER html %]</option>
     [% END %]
   </select>
 [% END %]

@@ -69,9 +69,9 @@
 [% BLOCK value_display %]
   [% SET disp_value = value %]
   [% IF field == 'bug_status' %]
-    [% SET disp_value = get_status(value) %]
+    [% SET disp_value = display_value("bug_status", value) %]
   [% ELSIF field == 'resolution' %]
-    [% SET disp_value = get_resolution(value) %]
+    [% SET disp_value = display_value("resolution", value) %]
   [% ELSIF field == 'assigned_to' OR field == 'reporter'
            OR field == 'qa_contact'
   %]

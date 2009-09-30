@@ -384,7 +384,7 @@
   
     [% FOREACH bug_status = new_bug_statuses %]
       <option value="[% bug_status.name FILTER html %]">
-        [% get_status(bug_status.name) FILTER html %]
+        [% display_value("bug_status", bug_status.name) FILTER html %]
       </option>
       [% IF !bug_status.is_open %]
         [% filtered_status =  bug_status.name FILTER js %]
@@ -405,7 +405,7 @@
     [% FOREACH r = resolutions %]
       [% NEXT IF !r %]
       [% NEXT IF r == "DUPLICATE" || r == "MOVED" %]
-      <option value="[% r FILTER html %]">[% get_resolution(r) FILTER html %]</option>
+      <option value="[% r FILTER html %]">[% display_value("resolution", r) FILTER html %]</option>
     [% END %]
   </select>
   </span>

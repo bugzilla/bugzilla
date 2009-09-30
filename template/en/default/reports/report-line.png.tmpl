@@ -28,25 +28,25 @@
 
 [% IF col_field == 'bug_status' %]
   [% FOR i IN [ 0 .. data.0.0.max ] %]
-    [% data.0.0.$i = get_status(data.0.0.$i) %]
+    [% data.0.0.$i = display_value("bug_status", data.0.0.$i) %]
   [% END %]
 [% END %]
 
 [% IF col_field == 'resolution' %]
   [% FOR i IN [ 0 .. data.0.0.max ] %]
-    [% data.0.0.$i = get_resolution(data.0.0.$i) %]
+    [% data.0.0.$i = display_value("resolution", data.0.0.$i) %]
   [% END %]
 [% END %]
 
 [% IF row_field == 'bug_status' %]
   [% FOR i IN [ 0 .. row_names.max ] %]
-    [% row_names.$i = get_status(row_names.$i) %]
+    [% row_names.$i = display_value("bug_status", row_names.$i) %]
   [% END %]
 [% END %]
 
 [% IF row_field == 'resolution' %]
   [% FOR i IN [ 0 .. row_names.max ] %]
-    [% row_names.$i = get_resolution(row_names.$i) %]
+    [% row_names.$i = display_value("resolution", row_names.$i) %]
   [% END %]
 [% END %]
 

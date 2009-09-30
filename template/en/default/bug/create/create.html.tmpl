@@ -336,7 +336,7 @@ TUI_hide_default('expert_fields');
   <input type="hidden" name="bug_status" 
          value="[% default.bug_status FILTER html %]">
     <th>Initial State:</th>
-    <td>[% get_status(default.bug_status) FILTER html %]</td>
+    <td>[% display_value("bug_status", default.bug_status) FILTER html %]</td>
 [% ELSE %]
     [% sel = { description => 'Initial State', name => 'bug_status' } %]
     [% INCLUDE select %]
@@ -665,7 +665,7 @@ TUI_hide_default('expert_fields');
       <option value="[% x FILTER html %]"
         [% " selected=\"selected\"" IF x == default.${sel.name} %]>
         [% IF sel.name == "bug_status" %]
-          [% get_status(x) FILTER html %]
+          [% display_value("bug_status", x) FILTER html %]
         [% ELSE %]
           [% x FILTER html %]
         [% END %]</option>

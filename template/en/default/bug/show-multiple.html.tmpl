@@ -129,8 +129,8 @@
     <tr>
       <th>[% field_descs.bug_status  FILTER html %]:</th>
       <td>
-        [% get_status(bug.bug_status) FILTER html %]
-        [%+ get_resolution(bug.resolution) FILTER html %]
+        [% display_value("bug_status", bug.bug_status) FILTER html %]
+        [%+ display_value("resolution", bug.resolution) FILTER html %]
       </td>
 
       [% PROCESS rightcell %]

@@ -24,13 +24,13 @@
 
 [% IF col_field == 'bug_status' %]
   [% FOR i IN [ 0 .. data.0.0.max ] %]
-    [% data.0.0.$i = get_status(data.0.0.$i) %]
+    [% data.0.0.$i = display_value("bug_status", data.0.0.$i) %]
   [% END %]
 [% END %]
 
 [% IF col_field == 'resolution' %]
   [% FOR i IN [ 0 .. data.0.0.max ] %]
-    [% data.0.0.$i = get_resolution(data.0.0.$i) %]
+    [% data.0.0.$i = display_value("resolution", data.0.0.$i) %]
   [% END %]
 [% END %]
 

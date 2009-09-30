@@ -445,9 +445,9 @@
     </td>
     <td id="bz_field_status">
       <span id="static_bug_status">
-        [% get_status(bug.bug_status) FILTER html %]
+        [% display_value("bug_status", bug.bug_status) FILTER html %]
         [% IF bug.resolution %]
-          [%+ get_resolution(bug.resolution) FILTER html %]
+          [%+ display_value("resolution", bug.resolution) FILTER html %]
           [% IF bug.dup_id %]
             of [% "${terms.bug} ${bug.dup_id}" FILTER bug_link(bug.dup_id) FILTER none %]
           [% END %]

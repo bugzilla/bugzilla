@@ -35,8 +35,8 @@
 <p>
   This page allows you to define which status transitions are valid in your workflow.
   For compatibility with older versions of [% terms.Bugzilla %], reopening [% terms.abug %]
-  will only display either [% get_status("UNCONFIRMED") FILTER html %] or
-  [%+ get_status("REOPENED") FILTER html %] (if allowed by your workflow) but not
+  will only display either [% display_value("bug_status", "UNCONFIRMED") FILTER html %] or
+  [%+ display_value("bug_status", "REOPENED") FILTER html %] (if allowed by your workflow) but not
   both. The decision depends on whether the [% terms.bug %] has ever been confirmed or not.
   So it is a good idea to allow both transitions and let [% terms.Bugzilla %] select the
   correct one.

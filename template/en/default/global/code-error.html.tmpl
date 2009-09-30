@@ -336,7 +336,7 @@
   [% ELSIF error == "no_open_bug_status" %]
     [% title = "$terms.Bug Cannot Be Confirmed" %]
     There is no valid transition from
-    [%+ get_status("UNCONFIRMED") FILTER html %] to an open state.
+    [%+ display_value("bug_status", "UNCONFIRMED") FILTER html %] to an open state.
 
   [% ELSIF error == "param_invalid" %]
     [% title = "Invalid Parameter" %]

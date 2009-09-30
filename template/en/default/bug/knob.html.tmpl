@@ -95,6 +95,9 @@
       ><input id="dup_id" name="dup_id" size="6"
               value="[% bug.dup_id FILTER html %]">
     </span>
+    [% IF bug.dup_id %]
+        <noscript>[% bug.dup_id FILTER bug_link(bug.dup_id) FILTER none %]</noscript>
+    [% END %]
     <div id="dup_id_discoverable" class="bz_default_hidden">
       <a href="#" id="dup_id_discoverable_action">Mark as Duplicate</a>
     </div>

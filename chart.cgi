@@ -142,19 +142,15 @@ elsif ($action eq "create") {
     
     my $series = new Bugzilla::Series($cgi);
 
-    if (!$series->existsInDatabase()) {
-        $series->writeToDatabase();
-        $vars->{'message'} = "series_created";
-    }
-    else {
-        ThrowUserError("series_already_exists", {'series' => $series});
-    }
+    ThrowUserError("series_already_exists", {'series' => $series})
+      if $series->existsInDatabase;
 
+    $series->writeToDatabase();
+    $vars->{'message'} = "series_created";
     $vars->{'series'} = $series;
 
-    print $cgi->header();
-    $template->process("global/message.html.tmpl", $vars)
-      || ThrowTemplateError($template->error());
+    my $chart = new Bugzilla::Chart($cgi);
+    view($chart);
 }
 elsif ($action eq "edit") {
     detaint_natural($series_id) || ThrowCodeError("invalid_series_id");

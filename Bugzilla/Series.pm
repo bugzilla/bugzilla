@@ -68,7 +68,8 @@ sub new {
     elsif ($arg_count >= 6 && $arg_count <= 8) {
         # We've been given a load of parameters to create a new Series from.
         # Currently, undef is always passed as the first parameter; this allows
-        # you to call writeToDatabase() unconditionally. 
+        # you to call writeToDatabase() unconditionally.
+        # XXX - You cannot set category_id and subcategory_id from here.
         $self->initFromParameters(@_);
     }
     else {
@@ -90,7 +91,7 @@ sub initFromDatabase {
 
     my @series = $dbh->selectrow_array("SELECT series.series_id, cc1.name, " .
         "cc2.name, series.name, series.creator, series.frequency, " .
-        "series.query, series.is_public " .
+        "series.query, series.is_public, series.category, series.subcategory " .
         "FROM series " .
         "INNER JOIN series_categories AS cc1 " .
         "    ON series.category = cc1.id " .
@@ -117,8 +118,9 @@ sub initFromParameters {
     my $self = shift;
 
     ($self->{'series_id'}, $self->{'category'},  $self->{'subcategory'},
-     $self->{'name'}, $self->{'creator'}, $self->{'frequency'},
-     $self->{'query'}, $self->{'public'}) = @_;
+     $self->{'name'}, $self->{'creator_id'}, $self->{'frequency'},
+     $self->{'query'}, $self->{'public'}, $self->{'category_id'},
+     $self->{'subcategory_id'}) = @_;
 
     # If the first parameter is undefined, check if this series already
     # exists and update it series_id accordingly
@@ -147,7 +149,7 @@ sub initFromCGI {
     $self->{'name'} = $cgi->param('name')
       || ThrowUserError("missing_name");
 
-    $self->{'creator'} = Bugzilla->user->id;
+    $self->{'creator_id'} = Bugzilla->user->id;
 
     $self->{'frequency'} = $cgi->param('frequency');
     detaint_natural($self->{'frequency'})
@@ -198,7 +200,7 @@ sub writeToDatabase {
         $dbh->do("INSERT INTO series (creator, category, subcategory, " .
                  "name, frequency, query, is_public) VALUES " . 
                  "(?, ?, ?, ?, ?, ?, ?)", undef,
-                 $self->{'creator'}, $category_id, $subcategory_id, $self->{'name'},
+                 $self->{'creator_id'}, $category_id, $subcategory_id, $self->{'name'},
                  $self->{'frequency'}, $self->{'query'}, $self->{'public'});
 
         # Retrieve series_id
@@ -251,6 +253,29 @@ sub getCategoryID {
     }
 
     return $category_id;
+}
+
+##########
+# Methods
+##########
+sub id   { return $_[0]->{'series_id'}; }
+sub name { return $_[0]->{'name'}; }
+
+sub creator {
+    my $self = shift;
+
+    if (!$self->{creator} && $self->{creator_id}) {
+        require Bugzilla::User;
+        $self->{creator} = new Bugzilla::User($self->{creator_id});
+    }
+    return $self->{creator};
+}
+
+sub remove_from_db {
+    my $self = shift;
+    my $dbh = Bugzilla->dbh;
+
+    $dbh->do('DELETE FROM series WHERE series_id = ?', undef, $self->id);
 }
 
 1;

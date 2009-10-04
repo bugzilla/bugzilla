@@ -20,6 +20,7 @@
 #
 # Contributor(s): Gervase Markham <gerv@gerv.net>
 #                 Lance Larsh <lance.larsh@oracle.com>
+#                 Frédéric Buclin <LpSolit@gmail.com>
 
 # Glossary:
 # series:   An individual, defined set of data plotted over time.
@@ -53,6 +54,7 @@ use Bugzilla::Util;
 use Bugzilla::Chart;
 use Bugzilla::Series;
 use Bugzilla::User;
+use Bugzilla::Token;
 
 # For most scripts we don't make $cgi and $template global variables. But
 # when preparing Bugzilla for mod_perl, this script used these
@@ -61,6 +63,7 @@ use Bugzilla::User;
 local our $cgi = Bugzilla->cgi;
 local our $template = Bugzilla->template;
 local our $vars = {};
+my $dbh = Bugzilla->dbh;
 
 # Go back to query.cgi if we are adding a boolean chart parameter.
 if (grep(/^cmd-/, $cgi->param())) {
@@ -95,13 +98,13 @@ if ($action eq "search") {
 
 my $user = Bugzilla->login(LOGIN_REQUIRED);
 
-Bugzilla->user->in_group(Bugzilla->params->{"chartgroup"})
+$user->in_group(Bugzilla->params->{"chartgroup"})
   || ThrowUserError("auth_failure", {group  => Bugzilla->params->{"chartgroup"},
                                      action => "use",
                                      object => "charts"});
 
 # Only admins may create public queries
-Bugzilla->user->in_group('admin') || $cgi->delete('public');
+$user->in_group('admin') || $cgi->delete('public');
 
 # All these actions relate to chart construction.
 if ($action =~ /^(assemble|add|remove|sum|subscribe|unsubscribe)$/) {
@@ -153,18 +156,12 @@ elsif ($action eq "create") {
     view($chart);
 }
 elsif ($action eq "edit") {
-    detaint_natural($series_id) || ThrowCodeError("invalid_series_id");
-    assertCanEdit($series_id);
-
-    my $series = new Bugzilla::Series($series_id);
-    
+    my $series = assertCanEdit($series_id);
     edit($series);
 }
 elsif ($action eq "alter") {
-    # This is the "commit" action for editing a series
-    detaint_natural($series_id) || ThrowCodeError("invalid_series_id");
     assertCanEdit($series_id);
-
+    # XXX - This should be replaced by $series->set_foo() methods.
     my $series = new Bugzilla::Series($cgi);
 
     # We need to check if there is _another_ series in the database with
@@ -182,6 +179,36 @@ elsif ($action eq "alter") {
     $vars->{'changes_saved'} = 1;
     
     edit($series);
+}
+elsif ($action eq "confirm-delete") {
+    $vars->{'series'} = assertCanEdit($series_id);
+
+    print $cgi->header();
+    $template->process("reports/delete-series.html.tmpl", $vars)
+      || ThrowTemplateError($template->error());
+}
+elsif ($action eq "delete") {
+    my $series = assertCanEdit($series_id);
+    my $token = $cgi->param('token');
+    check_hash_token($token, [$series->id, $series->name]);
+
+    $dbh->bz_start_transaction();
+
+    $series->remove_from_db();
+    # Remove (sub)categories which no longer have any series.
+    foreach my $cat qw(category subcategory) {
+        my $is_used = $dbh->selectrow_array("SELECT COUNT(*) FROM series WHERE $cat = ?",
+                                             undef, $series->{"${cat}_id"});
+        if (!$is_used) {
+            $dbh->do('DELETE FROM series_categories WHERE id = ?',
+                      undef, $series->{"${cat}_id"});
+        }
+    }
+    $dbh->bz_commit_transaction();
+
+    $vars->{'message'} = "series_deleted";
+    $vars->{'series'} = $series;
+    view();
 }
 elsif ($action eq "convert_search") {
     my $saved_search = $cgi->param('series_from_search') || '';
@@ -217,30 +244,31 @@ sub getSelectedLines {
 
 # Check if the user is the owner of series_id or is an admin. 
 sub assertCanEdit {
-    my ($series_id) = @_;
+    my $series_id = shift;
     my $user = Bugzilla->user;
 
-    return if $user->in_group('admin');
+    my $series = new Bugzilla::Series($series_id)
+      || ThrowCodeError('invalid_series_id');
 
-    my $dbh = Bugzilla->dbh;
-    my $iscreator = $dbh->selectrow_array("SELECT CASE WHEN creator = ? " .
-                                          "THEN 1 ELSE 0 END FROM series " .
-                                          "WHERE series_id = ?", undef,
-                                          $user->id, $series_id);
-    $iscreator || ThrowUserError("illegal_series_edit");
+    if (!$user->in_group('admin') && $series->{creator_id} != $user->id) {
+        ThrowUserError('illegal_series_edit');
+    }
+
+    return $series;
 }
 
 # Check if the user is permitted to create this series with these parameters.
 sub assertCanCreate {
     my ($cgi) = shift;
-    
-    Bugzilla->user->in_group("editbugs") || ThrowUserError("illegal_series_creation");
+    my $user = Bugzilla->user;
+
+    $user->in_group("editbugs") || ThrowUserError("illegal_series_creation");
 
     # Check permission for frequency
     my $min_freq = 7;
-    if ($cgi->param('frequency') < $min_freq && !Bugzilla->user->in_group("admin")) {
+    if ($cgi->param('frequency') < $min_freq && !$user->in_group("admin")) {
         ThrowUserError("illegal_frequency", { 'minimum' => $min_freq });
-    }    
+    }
 }
 
 sub validateWidthAndHeight {
@@ -270,7 +298,6 @@ sub edit {
     my $series = shift;
 
     $vars->{'category'} = Bugzilla::Chart::getVisibleSeries();
-    $vars->{'creator'} = new Bugzilla::User($series->{'creator'});
     $vars->{'default'} = $series;
 
     print $cgi->header();

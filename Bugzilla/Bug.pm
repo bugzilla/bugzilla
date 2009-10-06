@@ -2108,6 +2108,7 @@ sub set_resolution {
     
     my $old_res = $self->resolution;
     $self->set('resolution', $value);
+    delete $self->{choices};
     my $new_res = $self->resolution;
 
     if ($new_res ne $old_res) {
@@ -2899,38 +2900,38 @@ sub user {
     return $self->{'user'};
 }
 
+# This is intended to get values that can be selected by the user in the
+# UI. It should not be used for security or validation purposes.
 sub choices {
     my $self = shift;
     return $self->{'choices'} if exists $self->{'choices'};
     return {} if $self->{'error'};
+    my $user = Bugzilla->user;
 
-    $self->{'choices'} = {};
-
-    my @prodlist = map {$_->name} @{Bugzilla->user->get_enterable_products};
+    my @products = @{ $user->get_enterable_products };
     # The current product is part of the popup, even if new bugs are no longer
     # allowed for that product
-    if (lsearch(\@prodlist, $self->product) < 0) {
-        push(@prodlist, $self->product);
-        @prodlist = sort @prodlist;
+    if (!grep($_->name eq $self->product_obj->name, @products)) {
+        unshift(@products, $self->product_obj);
     }
 
-    # Hack - this array contains "". See bug 106589.
-    my @res = grep ($_, @{get_legal_field_values('resolution')});
+    my %choices = (
+        product   => \@products,
+        component => $self->product_obj->components,
+        version   => $self->product_obj->versions,
+        target_milestone => $self->product_obj->milestones,
+    );
 
-    $self->{'choices'} =
-      {
-       'product' => \@prodlist,
-       'rep_platform' => get_legal_field_values('rep_platform'),
-       'priority'     => get_legal_field_values('priority'),
-       'bug_severity' => get_legal_field_values('bug_severity'),
-       'op_sys'       => get_legal_field_values('op_sys'),
-       'bug_status'   => get_legal_field_values('bug_status'),
-       'resolution'   => \@res,
-       'component'    => [map($_->name, @{$self->product_obj->components})],
-       'version'      => [map($_->name, @{$self->product_obj->versions})],
-       'target_milestone' => [map($_->name, @{$self->product_obj->milestones})],
-      };
+    my $resolution_field = new Bugzilla::Field({ name => 'resolution' });
+    # Don't include the empty resolution in drop-downs.
+    my @resolutions = grep($_->name, @{ $resolution_field->legal_values });
+    # And don't include MOVED in the list unless the bug is already MOVED.
+    if ($self->resolution ne 'MOVED') {
+        @resolutions= grep { $_->name ne 'MOVED' } @resolutions;
+    }
+    $choices{'resolution'} = \@resolutions;
 
+    $self->{'choices'} = \%choices;
     return $self->{'choices'};
 }
 

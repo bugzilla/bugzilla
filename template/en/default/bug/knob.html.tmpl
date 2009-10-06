@@ -147,10 +147,9 @@
 [% BLOCK select_resolution %]
   <select name="resolution" id="resolution">
     [% FOREACH r = bug.choices.resolution %]
-      [% NEXT IF r == "MOVED" && bug.resolution != "MOVED" %]
-      <option value="[% r FILTER html %]"
-      [% "selected" IF r == bug.resolution %]>
-        [% display_value("resolution", r) FILTER html %]</option>
+      <option value="[% r.name FILTER html %]"
+      [% ' selected="selected"' IF r.name == bug.resolution %]>
+        [% display_value("resolution", r.name) FILTER html %]</option>
     [% END %]
   </select>
 [% END %]

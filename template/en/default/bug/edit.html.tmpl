@@ -375,16 +375,9 @@
     [%#############%]
     
     <tr>
-       [% IF bug.check_can_change_field('product', 0, 1) %]
-         [% prod_list = user.get_enterable_products %]
-         [% IF NOT user.can_enter_product(bug.product) %]
-           [% prod_list.unshift(bug.product_obj) %]
-         [% END %]
-       [% END %]
-
        [% INCLUDE bug/field.html.tmpl
             bug = bug, field = select_fields.product,
-            override_legal_values = prod_list
+            override_legal_values = bug.choices.product
             desc_url = 'describecomponents.cgi', value = bug.product
             editable = bug.check_can_change_field('product', 0, 1) %]
     </tr>
@@ -1112,24 +1105,21 @@
 [%############################################################################%]
 
 [% BLOCK select %]
-  [% IF NOT no_td %]
   <td>
-  [% END %]
-    [% IF bug.check_can_change_field(selname, 0, 1) AND bug.choices.${selname}.size > 1 %]
+    [% IF bug.check_can_change_field(selname, 0, 1) 
+          AND bug.choices.${selname}.size > 1 %]
       <select id="[% selname %]" name="[% selname %]">
         [% FOREACH x = bug.choices.${selname} %]
-          <option value="[% x FILTER html %]"
-            [% " selected" IF x == bug.${selname} %]>[% x FILTER html %]
+          <option value="[% x.name FILTER html %]"
+            [% " selected" IF x.name == bug.${selname} %]>
+            [%- x.name FILTER html %]
           </option>
         [% END %]
       </select>
     [% ELSE %]
       [% bug.${selname} FILTER html %]
     [% END %]
-  [% IF NOT no_td %]
   </td>
-  [% END %]
-  [% no_td = 0 %]
 [% END %]
 
 [%############################################################################%]

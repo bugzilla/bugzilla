@@ -123,11 +123,11 @@ YAHOO.util.Event.onDOMReady(onLoadActions);
 [% END %]
 
 <div id="page-index">
-  <div class="intro"></div>
   <table>
     <tr>
       <td>
         <h1 id="welcome"> Welcome to [% terms.Bugzilla %]</h1>
+        <div class="intro">[% Hook.process('intro') %]</div>
         <a id="enter_bug" class="bz_common_actions"
            href="enter_bug.cgi"><span>File [% terms.aBug %]</span></a>
       
@@ -177,10 +177,10 @@ YAHOO.util.Event.onDOMReady(onLoadActions);
             </ul>
           </div>
         </form>
+        <div class="outro">[% Hook.process('outro') %]</div>
       </td>
     </tr>
   </table>
-  <div class="outro"></div>
 </div>
 
 [% PROCESS global/footer.html.tmpl %]

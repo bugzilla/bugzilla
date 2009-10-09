@@ -195,7 +195,9 @@ sub update_params {
     # Convert the old "ssl" parameter to the new "ssl_redirect" parameter.
     # Both "authenticated sessions" and "always" turn on "ssl_redirect"
     # when upgrading.
-    $param->{'ssl_redirect'} = 1 if $param->{'ssl'} ne 'never';
+    if (exists $param->{'ssl'} and $param->{'ssl'} ne 'never') {
+        $param->{'ssl_redirect'} = 1;
+    }
 
     # --- DEFAULTS FOR NEW PARAMS ---
 

@@ -21,6 +21,13 @@
         padding: 0.2em 0.2em 0.15em 0.2em;
     }
 
+    /* By default these contain nothing, but these CSS rules make things
+       easier on customizers. */
+    .intro, .outro {
+        text-align: center;
+        width: 50em;
+    }
+
     /* Hide from NN4 */
 
     #new_release

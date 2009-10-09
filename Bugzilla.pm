@@ -85,7 +85,6 @@ use constant SHUTDOWNHTML_EXIT_SILENTLY => [
 sub init_page {
     (binmode STDOUT, ':utf8') if Bugzilla->params->{'utf8'};
 
-
     if (${^TAINT}) {
         # Some environment variables are not taint safe
         delete @::ENV{'PATH', 'IFS', 'CDPATH', 'ENV', 'BASH_ENV'};
@@ -93,6 +92,12 @@ sub init_page {
         # PATH is undefined.
         $ENV{'PATH'} = '';
     }
+
+    # Because this function is run live from perl "use" commands of
+    # other scripts, we're skipping the rest of this function if we get here
+    # during a perl syntax check (perl -c, like we do during the
+    # 001compile.t test).
+    return if $^C;
 
     # IIS prints out warnings to the webpage, so ignore them, or log them
     # to a file if the file exists.
@@ -108,18 +113,15 @@ sub init_page {
         };
     }
 
+    do_ssl_redirect_if_required();
+
     # If Bugzilla is shut down, do not allow anything to run, just display a
     # message to the user about the downtime and log out.  Scripts listed in 
     # SHUTDOWNHTML_EXEMPT are exempt from this message.
     #
-    # Because this is code which is run live from perl "use" commands of other
-    # scripts, we're skipping this part if we get here during a perl syntax 
-    # check -- runtests.pl compiles scripts without running them, so we 
-    # need to make sure that this check doesn't apply to 'perl -c' calls.
-    #
     # This code must go here. It cannot go anywhere in Bugzilla::CGI, because
     # it uses Template, and that causes various dependency loops.
-    if (!$^C && Bugzilla->params->{"shutdownhtml"} 
+    if (Bugzilla->params->{"shutdownhtml"} 
         && lsearch(SHUTDOWNHTML_EXEMPT, basename($0)) == -1)
     {
         # Allow non-cgi scripts to exit silently (without displaying any
@@ -318,14 +320,6 @@ sub login {
         $class->set_user($authenticated_user);
     }
 
-    # We run after the login has completed since
-    # some of the checks in ssl_require_redirect
-    # look for Bugzilla->user->id to determine 
-    # if redirection is required.
-    if (i_am_cgi() && ssl_require_redirect()) {
-        $class->cgi->require_https($class->params->{'sslbase'});
-    }
-    
     return $class->user;
 }
 

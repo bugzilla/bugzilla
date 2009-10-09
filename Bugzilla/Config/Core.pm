@@ -68,10 +68,9 @@ sub get_param_list {
   },
 
   {
-   name => 'ssl',
-   type => 's',
-   choices => ['never', 'authenticated sessions', 'always'],
-   default => 'never'
+   name => 'ssl_redirect',
+   type => 'b',
+   default => 0
   },
 
 

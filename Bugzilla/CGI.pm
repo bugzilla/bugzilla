@@ -368,22 +368,23 @@ sub remove_cookie {
                        '-value'   => 'X');
 }
 
-# Redirect to https if required
-sub require_https {
-    my ($self, $url) = @_;
-    # Do not create query string if data submitted via XMLRPC
-    # since we want the data to be resubmitted over POST method.
-    my $query = Bugzilla->usage_mode == USAGE_MODE_XMLRPC ? 0 : 1;
-    # XMLRPC clients (SOAP::Lite at least) requires 301 to redirect properly
-    # and do not work with 302.
-    my $status = Bugzilla->usage_mode == USAGE_MODE_XMLRPC ? 301 : 302;
-    if (defined $url) {
-        $url .= $self->url('-path_info' => 1, '-query' => $query, '-relative' => 1);
-    } else {
-        $url = $self->self_url;
-        $url =~ s/^http:/https:/i;
-    }
-    print $self->redirect(-location => $url, -status => $status);
+sub redirect_to_https {
+    my $self = shift;
+    my $sslbase = Bugzilla->params->{'sslbase'};
+    # If this is a POST, we don't want ?POSTDATA in the query string.
+    # We expect the client to re-POST, which may be a violation of
+    # the HTTP spec, but the only time we're expecting it often is
+    # in the WebService, and WebService clients usually handle this
+    # correctly.
+    $self->delete('POSTDATA');
+    my $url = $sslbase . $self->url('-path_info' => 1, '-query' => 1, 
+                                    '-relative' => 1);
+
+    # XML-RPC clients (SOAP::Lite at least) require a 301 to redirect properly
+    # and do not work with 302. Our redirect really is permanent anyhow, so
+    # it doesn't hurt to make it a 301.
+    print $self->redirect(-location => $url, -status => 301);
+
     # When using XML-RPC with mod_perl, we need the headers sent immediately.
     $self->r->rflush if $ENV{MOD_PERL};
     exit;
@@ -459,13 +460,13 @@ effectively removing the cookie.
 
 As its only argument, it takes the name of the cookie to expire.
 
-=item C<require_https($baseurl)>
+=item C<redirect_to_https>
 
-This routine redirects the client to a different location using the https protocol. 
-If the client is using XMLRPC, it will not retain the QUERY_STRING since XMLRPC uses POST.
+This routine redirects the client to the https version of the page that
+they're looking at, using the C<sslbase> parameter for the redirection.
 
-It takes an optional argument which will be used as the base URL.  If $baseurl
-is not provided, the current URL is used.
+Generally you should use L<Bugzilla::Util/do_ssl_redirect_if_required>
+instead of calling this directly.
 
 =item C<redirect_to_urlbase>
 

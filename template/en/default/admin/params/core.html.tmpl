@@ -42,8 +42,12 @@
   sslbase => "The URL that is the common initial leading part of all HTTPS " _
              "(SSL) $terms.Bugzilla URLs.",
 
-  ssl => "Controls when $terms.Bugzilla should enforce sessions to use HTTPS by " _
-         "using <tt>sslbase</tt>.",
+  ssl_redirect => 
+    "When this is enabled, $terms.Bugzilla will ensure that every page is"
+    _ " accessed over SSL, by redirecting any plain HTTP requests to HTTPS"
+    _ " using the <tt>sslbase</tt> parameter. Also, when this is enabled,"
+    _ " $terms.Bugzilla will send out links using <tt>sslbase</tt> in emails"
+    _ " instead of <tt>urlbase</tt>.",
 
   cookiedomain => "The domain for $terms.Bugzilla cookies. Normally blank. " _
                   "If your website is at 'www.foo.com', setting this to " _

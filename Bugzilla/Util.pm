@@ -36,7 +36,7 @@ use base qw(Exporter);
                              html_quote url_quote xml_quote
                              css_class_quote html_light_quote url_decode
                              i_am_cgi get_netaddr correct_urlbase
-                             lsearch ssl_require_redirect use_attachbase
+                             lsearch do_ssl_redirect_if_required use_attachbase
                              diff_arrays
                              trim wrap_hard wrap_comment find_wrap_point
                              format_time format_time_decimal validate_date
@@ -264,60 +264,28 @@ sub i_am_cgi {
     return exists $ENV{'SERVER_SOFTWARE'} ? 1 : 0;
 }
 
-sub ssl_require_redirect {
-    my $method = shift;
+# This exists as a separate function from Bugzilla::CGI::redirect_to_https
+# because we don't want to create a CGI object during XML-RPC calls
+# (doing so can mess up XML-RPC).
+sub do_ssl_redirect_if_required {
+    return if !i_am_cgi();
+    return if !Bugzilla->params->{'ssl_redirect'};
 
-    # If currently not in a protected SSL 
-    # connection, determine if a redirection is 
-    # needed based on value in Bugzilla->params->{ssl}.
-    # If we are already in a protected connection or
-    # sslbase is not set then no action is required.
-    if (uc($ENV{'HTTPS'}) ne 'ON' 
-        && $ENV{'SERVER_PORT'} != 443 
-        && Bugzilla->params->{'sslbase'} ne '')
-    {
-        # System is configured to never require SSL 
-        # so no redirection is needed.
-        return 0 
-            if Bugzilla->params->{'ssl'} eq 'never';
-            
-        # System is configured to always require a SSL
-        # connection so we need to redirect.
-        return 1
-            if Bugzilla->params->{'ssl'} eq 'always';
-
-        # System is configured such that if we are inside
-        # of an authenticated session, then we need to make
-        # sure that all of the connections are over SSL. Non
-        # authenticated sessions SSL is not mandatory.
-        # For XMLRPC requests, if the method is User.login
-        # then we always want the connection to be over SSL
-        # if the system is configured for authenticated
-        # sessions since the user's username and password
-        # will be passed before the user is logged in.
-        return 1 
-            if Bugzilla->params->{'ssl'} eq 'authenticated sessions'
-                && (Bugzilla->user->id 
-                    || (defined $method && $method eq 'User.login'));
-    }
-
-    return 0;
+    my $sslbase = Bugzilla->params->{'sslbase'};
+    
+    # If we're already running under SSL, never redirect.
+    return if uc($ENV{HTTPS} || '') eq 'ON';
+    # Never redirect if there isn't an sslbase.
+    return if !$sslbase;
+    Bugzilla->cgi->redirect_to_https();
 }
 
 sub correct_urlbase {
-    my $ssl = Bugzilla->params->{'ssl'};
-    return Bugzilla->params->{'urlbase'} if $ssl eq 'never';
-
+    my $ssl = Bugzilla->params->{'ssl_redirect'};
+    my $urlbase = Bugzilla->params->{'urlbase'};
     my $sslbase = Bugzilla->params->{'sslbase'};
-    if ($sslbase) {
-        return $sslbase if $ssl eq 'always';
-        # Authenticated Sessions
-        return $sslbase if Bugzilla->user->id;
-    }
 
-    # Set to "authenticated sessions" but nobody's logged in, or
-    # sslbase isn't set.
-    return Bugzilla->params->{'urlbase'};
+    return ($ssl && $sslbase) ? $sslbase : $urlbase;
 }
 
 sub use_attachbase {
@@ -830,7 +798,7 @@ cookies) to only some addresses.
 =item C<correct_urlbase()>
 
 Returns either the C<sslbase> or C<urlbase> parameter, depending on the
-current setting for the C<ssl> parameter.
+current setting for the C<ssl_redirect> parameter.
 
 =item C<use_attachbase()>
 

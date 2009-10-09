@@ -28,12 +28,7 @@
  [% login_target = "index.cgi" %]
 [% END %]
 
-[%# If SSL is in use, use 'sslbase', else use 'urlbase'. %]
-[% IF Param("sslbase") != "" && Param("ssl") != "never" %]
-  [% login_target = Param("sslbase") _ login_target %]
-[% ELSE %]
-  [% login_target = Param("urlbase") _ login_target %]
-[% END %]
+[% login_target = urlbase _ login_target %]
 
 <li id="mini_login_container[% qs_suffix %]">
   <span class="separator">| </span>

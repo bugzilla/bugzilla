@@ -89,11 +89,9 @@ sub persist_login {
         # Not a session cookie, so set an infinite expiry
         $cookieargs{'-expires'} = 'Fri, 01-Jan-2038 00:00:00 GMT';
     }
-    if (Bugzilla->params->{'ssl'} ne 'never'
-        && Bugzilla->params->{'sslbase'} ne '')
-    {
-        # Bugzilla->login will automatically redirect to https://,
-        # so it's safe to turn on the 'secure' bit.
+    if (Bugzilla->params->{'ssl_redirect'}) {
+        # Make these cookies only be sent to us by the browser during 
+        # HTTPS sessions, if we're using SSL.
         $cookieargs{'-secure'} = 1;
     }
 

@@ -56,14 +56,6 @@ if ($cgi->param('logout')) {
 # Main Body Execution
 ###############################################################################
 
-# Force to use HTTPS unless Bugzilla->params->{'ssl'} equals 'never'.
-# This is required because the user may want to log in from here.
-if ($cgi->protocol ne 'https' && Bugzilla->params->{'sslbase'} ne ''
-    && Bugzilla->params->{'ssl'} ne 'never')
-{
-    $cgi->require_https(Bugzilla->params->{'sslbase'});
-}
-
 # Return the appropriate HTTP response headers.
 print $cgi->header();
 

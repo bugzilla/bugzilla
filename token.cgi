@@ -360,15 +360,7 @@ sub request_create_account {
     $vars->{'email'} = $login_name . Bugzilla->params->{'emailsuffix'};
     $vars->{'expiration_ts'} = ctime(str2time($date) + MAX_TOKEN_AGE * 86400);
 
-    # When 'ssl' equals 'always' or 'authenticated sessions', 
-    # we want this form to always be over SSL.
-    if ($cgi->protocol ne 'https' && Bugzilla->params->{'sslbase'} ne ''
-        && Bugzilla->params->{'ssl'} ne 'never')
-    {
-        $cgi->require_https(Bugzilla->params->{'sslbase'});
-    }
     print $cgi->header();
-
     $template->process('account/email/confirm-new.html.tmpl', $vars)
       || ThrowTemplateError($template->error());
 }

@@ -100,13 +100,13 @@
 
           <varlistentry>
             <term>
-              ssl
+              ssl_redirect
             </term>
             <listitem>
               <para>
-                Determines when Bugzilla will force HTTPS (SSL) connections, using
-                the URL defined in <command>sslbase</command>. 
-                Options include "always", "never", and "authenticated sessions". 
+                If enabled, Bugzilla will force HTTPS (SSL) connections, by
+                automatically redirecting any users who try to use a non-SSL
+                connection.
               </para>
             </listitem>
           </varlistentry>

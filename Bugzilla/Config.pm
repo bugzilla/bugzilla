@@ -192,6 +192,11 @@ sub update_params {
         $param->{'mail_delivery_method'} = $translation{$method};
     }
 
+    # Convert the old "ssl" parameter to the new "ssl_redirect" parameter.
+    # Both "authenticated sessions" and "always" turn on "ssl_redirect"
+    # when upgrading.
+    $param->{'ssl_redirect'} = 1 if $param->{'ssl'} ne 'never';
+
     # --- DEFAULTS FOR NEW PARAMS ---
 
     _load_params unless %params;

@@ -69,17 +69,15 @@
       </tr>
     [% END %]
 
-    [% IF Param('loginnetmask') < 32 %]
-      <tr>
-        <th>&nbsp;</th>
-        <td>
-          <input type="checkbox" id="Bugzilla_restrictlogin" name="Bugzilla_restrictlogin"
-                 checked="checked">
-          <label for="Bugzilla_restrictlogin">Restrict this session to this IP address
-          (using this option improves security)</label>
-        </td>
-      </tr>
-    [% END %]
+    <tr>
+      <th>&nbsp;</th>
+      <td>
+        <input type="checkbox" id="Bugzilla_restrictlogin" name="Bugzilla_restrictlogin"
+               checked="checked">
+        <label for="Bugzilla_restrictlogin">Restrict this session to this IP address
+        (using this option improves security)</label>
+      </td>
+    </tr>
   </table>
 
   [% PROCESS "global/hidden-fields.html.tmpl"

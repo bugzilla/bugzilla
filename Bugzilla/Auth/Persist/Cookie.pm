@@ -49,16 +49,13 @@ sub persist_login {
     my $dbh = Bugzilla->dbh;
     my $cgi = Bugzilla->cgi;
 
-    my $ip_addr = $cgi->remote_addr;
-    unless ($cgi->param('Bugzilla_restrictlogin') ||
-            Bugzilla->params->{'loginnetmask'} == 32) 
-    {
-        $ip_addr = get_netaddr($ip_addr);
+    my $ip_addr;
+    if ($cgi->param('Bugzilla_restrictlogin')) {
+        $ip_addr = $cgi->remote_addr;
+        # The IP address is valid, at least for comparing with itself in a
+        # subsequent login
+        trick_taint($ip_addr);
     }
-
-    # The IP address is valid, at least for comparing with itself in a
-    # subsequent login
-    trick_taint($ip_addr);
 
     $dbh->bz_start_transaction();
 

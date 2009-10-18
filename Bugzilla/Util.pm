@@ -35,7 +35,7 @@ use base qw(Exporter);
                              detaint_signed
                              html_quote url_quote xml_quote
                              css_class_quote html_light_quote url_decode
-                             i_am_cgi get_netaddr correct_urlbase
+                             i_am_cgi correct_urlbase
                              lsearch do_ssl_redirect_if_required use_attachbase
                              diff_arrays
                              trim wrap_hard wrap_comment find_wrap_point
@@ -601,28 +601,6 @@ sub get_text {
     return $message;
 }
 
-
-sub get_netaddr {
-    my $ipaddr = shift;
-
-    # Check for a valid IPv4 addr which we know how to parse
-    if (!$ipaddr || $ipaddr !~ /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/) {
-        return undef;
-    }
-
-    my $addr = unpack("N", pack("CCCC", split(/\./, $ipaddr)));
-
-    my $maskbits = Bugzilla->params->{'loginnetmask'};
-
-    # Make Bugzilla ignore the IP address if loginnetmask is set to 0
-    return "0.0.0.0" if ($maskbits == 0);
-
-    $addr >>= (32-$maskbits);
-
-    $addr <<= (32-$maskbits);
-    return join(".", unpack("CCCC", pack("N", $addr)));
-}
-
 sub disable_utf8 {
     if (Bugzilla->params->{'utf8'}) {
         binmode STDOUT, ':bytes'; # Turn off UTF8 encoding.
@@ -657,7 +635,6 @@ Bugzilla::Util - Generic utility functions for bugzilla
 
   # Functions that tell you about your environment
   my $is_cgi   = i_am_cgi();
-  my $net_addr = get_netaddr($ip_addr);
   my $urlbase  = correct_urlbase();
 
   # Functions for searching
@@ -787,13 +764,6 @@ Functions returning information about your environment or location.
 Tells you whether or not you are being run as a CGI script in a web
 server. For example, it would return false if the caller is running
 in a command-line script.
-
-=item C<get_netaddr($ipaddr)>
-
-Given an IP address, this returns the associated network address, using
-C<Bugzilla->params->{'loginnetmask'}> as the netmask. This can be used
-to obtain data in order to restrict weak authentication methods (such as
-cookies) to only some addresses.
 
 =item C<correct_urlbase()>
 

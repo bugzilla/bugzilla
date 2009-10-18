@@ -580,6 +580,9 @@ sub update_table_definitions {
     # 2009-09-28 LpSolit@gmail.com - Bug 519032
     $dbh->bz_drop_column('series', 'last_viewed');
 
+    # 2009-09-28 LpSolit@gmail.com - Bug 399073
+    _fix_logincookies_ipaddr();
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################
@@ -1249,7 +1252,7 @@ sub _use_ip_instead_of_hostname_in_logincookies {
         # Now update the logincookies schema
         $dbh->bz_drop_column("logincookies", "hostname");
         $dbh->bz_add_column("logincookies", "ipaddr",
-                            {TYPE => 'varchar(40)', NOTNULL => 1}, '');
+                            {TYPE => 'varchar(40)'});
     }
 }
 
@@ -3205,6 +3208,15 @@ sub _convert_disallownew_to_isactive {
         
         $dbh->bz_drop_column('products','disallownew');
     }
+}
+
+sub _fix_logincookies_ipaddr {
+    my $dbh = Bugzilla->dbh;
+    return if !$dbh->bz_column_info('logincookies', 'ipaddr')->{NOTNULL};
+
+    $dbh->bz_alter_column('logincookies', 'ipaddr', {TYPE => 'varchar(40)'});
+    $dbh->do('UPDATE logincookies SET ipaddr = NULL WHERE ipaddr = ?',
+             undef, '0.0.0.0');
 }
 
 1;

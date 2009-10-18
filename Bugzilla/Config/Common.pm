@@ -47,7 +47,7 @@ use base qw(Exporter);
     qw(check_multi check_numeric check_regexp check_url check_group
        check_sslbase check_priority check_severity check_platform
        check_opsys check_shadowdb check_urlbase check_webdotbase
-       check_netmask check_user_verify_class
+       check_user_verify_class
        check_mail_delivery_method check_notification check_utf8
        check_bug_status check_smtp_auth check_theschwartz_available
        check_maxattachmentsize
@@ -245,21 +245,6 @@ sub check_webdotbase {
             close HTACCESS;
         }
     }
-    return "";
-}
-
-sub check_netmask {
-    my ($mask) = @_;
-    my $res = check_numeric($mask);
-    return $res if $res;
-    if ($mask < 0 || $mask > 32) {
-        return "an IPv4 netmask must be between 0 and 32 bits";
-    }
-    # Note that if we changed the netmask from anything apart from 32, then
-    # existing logincookies which aren't for a single IP won't work
-    # any more. We can't know which ones they are, though, so they'll just
-    # take space until they're periodically cleared, later.
-
     return "";
 }
 

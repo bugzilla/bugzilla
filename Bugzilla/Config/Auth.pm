@@ -91,13 +91,6 @@ sub get_param_list {
   },
 
   {
-   name => 'loginnetmask',
-   type => 't',
-   default => '0',
-   checker => \&check_netmask
-  },
-
-  {
    name => 'requirelogin',
    type => 'b',
    default => '0'

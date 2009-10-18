@@ -974,7 +974,7 @@ use constant ABSTRACT_SCHEMA => {
                          REFERENCES => {TABLE  => 'profiles',
                                         COLUMN => 'userid',
                                         DELETE => 'CASCADE'}},
-            ipaddr   => {TYPE => 'varchar(40)', NOTNULL => 1},
+            ipaddr   => {TYPE => 'varchar(40)'},
             lastused => {TYPE => 'DATETIME', NOTNULL => 1},
         ],
         INDEXES => [

@@ -41,17 +41,7 @@
   [% title = "Change Votes" %]
 [% END %]
 
-[% bodyclasses = ['bz_bug',
-                 "bz_status_$bug.bug_status",
-                 "bz_component_$bug.component",
-                 "bz_bug_$bug.bug_id"
-                 ]
-%]
-[% FOREACH group = bug.groups_in %]
-  [% bodyclasses.push("bz_group_$group.name") %]
-[% END %]
 [% PROCESS global/header.html.tmpl
-  bodyclasses = bodyclasses
   javascript_urls = [ "js/util.js", "js/field.js", "js/yui/calendar.js" ]
   style_urls = [ "skins/standard/yui/calendar.css", "skins/standard/show_bug.css" ]
   doc_section = "bug_page.html"

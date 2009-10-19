@@ -57,7 +57,7 @@
       [% IF displayfields.group %]
         [% FOREACH g = bug.groups %]
           [% NEXT UNLESS g.ison %]
-          <group>[% g.name FILTER xml %]</group>
+          <group id="[% g.bit FILTER xml %]">[% g.name FILTER xml %]</group>
         [% END %]
       [% END %]
 

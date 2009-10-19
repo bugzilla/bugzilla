@@ -684,6 +684,7 @@ sub get_comments_by_bug {
         if ($comment->{body} =~ /Created an attachment \(/) {
             $comment->{body} =~ s/(Created an attachment \(id=([0-9]+)\))/$1\n --> \($attach_base$2\)/g;
         }
+        $comment->{body} = $comment->{'already_wrapped'} ? $comment->{body} : wrap_comment($comment->{body});
     }
 
     if (Bugzilla->params->{'insidergroup'}) {

@@ -649,6 +649,37 @@ to the user. (F<sanitycheck.cgi>'s C<Status>)
 
 =back
 
+=head2 template-before_process
+
+This hook allows you to define additional variables that will be available to
+the template being processed. You probably want to restrict your hook
+to operating only if a certain file is being loaded (which is why you
+get a C<file> argument below). Otherwise, modifying the C<vars> argument
+will affect every single template in Bugzilla.
+
+Params:
+
+=over
+
+=item C<vars>
+
+The template vars hashref--these are the values that get passed to the
+template. Adding new keys to this hashref will cause those new values
+to also get passed to the template.
+
+=item C<file> 
+
+The name of the template being processed. This is relative
+to the main template directory for the language (i.e. for
+F<template/en/default/bug/show.html.tmpl>, this variable will contain
+C<bug/show.html.tmpl>).
+
+=item C<template>
+
+The L<Bugzilla::Template> object that C<process> was called on.
+
+=back
+
 =head2 webservice
 
 This hook allows you to add your own modules to the WebService. (See

@@ -79,6 +79,19 @@ sub _load_constants {
     return \%constants;
 }
 
+# Overload Template::Process in order to add a hook to allow additional
+# variables to be made available by an extension
+sub process {
+    my $self = shift;
+    my ($file, $vars) = @_;
+
+    Bugzilla::Hook::process("template-before_process", 
+                            { vars => $vars, file => $file, 
+                              template => $self });
+
+    return $self->SUPER::process(@_);
+}
+
 # Returns the path to the templates based on the Accept-Language
 # settings of the user and of the available languages
 # If no Accept-Language is present it uses the defined default

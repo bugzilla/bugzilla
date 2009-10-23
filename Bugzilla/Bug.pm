@@ -3709,6 +3709,11 @@ sub AUTOLOAD {
       $self->{_multi_selects} ||= [Bugzilla->get_fields(
           {custom => 1, type => FIELD_TYPE_MULTI_SELECT })];
       if ( grep($_->name eq $attr, @{$self->{_multi_selects}}) ) {
+          # There is a bug in Perl 5.10.0, which is fixed in 5.10.1,
+          # which taints $attr at this point. trick_taint() can go
+          # away once we require 5.10.1 or newer.
+          trick_taint($attr);
+
           $self->{$attr} ||= Bugzilla->dbh->selectcol_arrayref(
               "SELECT value FROM bug_$attr WHERE bug_id = ? ORDER BY value",
               undef, $self->id);

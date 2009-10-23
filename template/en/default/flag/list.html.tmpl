@@ -192,8 +192,13 @@
 
 [% ELSE %]
   [%# The user is logged out. Display flags as read-only. %]
+  [% header_displayed = 0 %]
   [% FOREACH type = flag_types %]
     [% FOREACH flag = type.flags %]
+      [% IF !flag_no_header AND !header_displayed %]
+        <p><b>Flags:</b></p>
+        [% header_displayed = 1 %]
+      [% END %]
       [% flag.setter.nick FILTER html %]:
       [%+ type.name FILTER html FILTER no_break %][% flag.status %]
       [% IF flag.requestee %]

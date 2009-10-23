@@ -19,6 +19,7 @@
   # name:           (optional) The "name"-attribute of the textarea.
   # accesskey:      (optional) The "accesskey"-attribute of the textarea.
   # style:          (optional) The "style"-attribute of the textarea.
+  # classes:        (optional) The "class"-attribute of the textarea.
   # wrap:           (deprecated; optional) The "wrap"-attribute of the textarea.
   # minrows:        (required) Number of rows the textarea shall have initially
   #                 and when not having focus.
@@ -36,6 +37,7 @@
           [% IF id %] id="[% id FILTER html %]"[% END %]
           [% IF accesskey %] accesskey="[% accesskey FILTER html %]"[% END %]
           [% IF style %] style="[% style FILTER html %]"[% END %]
+          [% IF classes %]class="[% classes FILTER html %]"[% END %]
           [% IF wrap %] wrap="[% wrap FILTER html %]"[% END %]
           [% IF defaultrows && user.settings.zoom_textareas.value == 'off' %]
             rows="[% defaultrows FILTER html %]"

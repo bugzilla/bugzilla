@@ -36,11 +36,14 @@
   header = header
   subheader = subheader
   doc_section = "attachments.html"
-  javascript_urls = ['js/attachment.js'];
+  javascript_urls = ['js/attachment.js']
+  style_urls = ['skins/standard/create_attachment.css']
 %]
 
 [%# No need to display the Diff button and iframe if the attachment is not a patch. %]
 [% use_patchviewer = (feature_enabled('patch_viewer') && attachment.ispatch) %]
+[% can_edit = attachment.validate_can_edit %]
+[% editable_or_hide = can_edit ? "" : " bz_hidden_option" %]
 
 <form method="post" action="attachment.cgi" onsubmit="normalizeComments();">
   <input type="hidden" name="id" value="[% attachment.id %]">
@@ -54,17 +57,22 @@
   <table class="attachment_info" width="100%">
 
     <tr>
-      <td width="25%">
-        <small>
-        <b><label for="description">Description</label>:</b><br>
+      <td id="attachment_attributes">
+        <div id="attachment_description">
+          <label for="description">Description:</label>
           [% INCLUDE global/textarea.html.tmpl
             id             = 'description'
             name           = 'description'
             minrows        = 3
             cols           = 25
             wrap           = 'soft'
+            classes        = 'block' _ editable_or_hide
             defaultcontent = attachment.description
-          %]<br>
+          %]
+          [% IF !can_edit %]
+            [%+ attachment.description FILTER wrap_comment(25) FILTER html %]
+          [% END %]
+        </div>
 
         [% IF attachment.isurl %]
             <input type="hidden" name="filename"
@@ -72,68 +80,104 @@
             <input type="hidden" name="contenttypeentry"
                    value="[% attachment.contenttype FILTER html %]">
         [% ELSE %]
-          <b><label for="filename">Filename</label>:</b><br>
-            <input type="text" size="20" id="filename" name="filename"
-                   value="[% attachment.filename FILTER html %]"><br>
-          <b>Size:</b>
-          [% IF attachment.datasize %]
-            [%+ attachment.datasize FILTER unitconvert %]
-          [% ELSE %]
-            <em>deleted</em>
-          [% END %]<br>
+          <div id="attachment_filename">
+            <label for="filename">Filename:</label>
+            <input type="text" size="20"  class="block[% editable_or_hide %]"
+                   id="filename" name="filename"
+                   value="[% attachment.filename FILTER html %]">
+            [% IF !can_edit %]
+              [%+ attachment.filename FILTER truncate(25) FILTER html %]
+            [% END %]
+          </div>
 
-          <b><label for="contenttypeentry">MIME Type</label>:</b><br>
-            <input type="text" size="20"
+          <div id="attachment_mimetype">
+            <label for="contenttypeentry">MIME Type:</label>
+            <input type="text" size="20" class="block[% editable_or_hide %]"
                    id="contenttypeentry" name="contenttypeentry"
-                   value="[% attachment.contenttype FILTER html %]"><br>
+                   value="[% attachment.contenttype FILTER html %]">
+            [% IF !can_edit %]
+              [%+ attachment.contenttype FILTER truncate(25) FILTER html %]
+            [% END %]
+          </div>
 
-          <input type="checkbox" id="ispatch" name="ispatch" value="1"
-                 [%+ 'checked="checked"' IF attachment.ispatch %]>
-          <label for="ispatch">patch</label>
+          <div id="attachment_size">
+            <span class="label">Size:</span>
+            [% IF attachment.datasize %]
+              [%+ attachment.datasize FILTER unitconvert %]
+            [% ELSE %]
+              <em>deleted</em>
+            [% END %]
+          </div>
+
+          <div id="attachment_creator">
+            <span class="label">Creator:</span>
+            [%+ INCLUDE global/user.html.tmpl who = attachment.attacher %]
+          </div>
+
+          <div id="attachment_ispatch">
+            <input type="checkbox" id="ispatch" name="ispatch" value="1"
+                   [%+ IF !can_edit %]class="bz_hidden_option"[% END %]
+                   [%+ 'checked="checked"' IF attachment.ispatch %]>
+            [% IF can_edit %]
+              <label for="ispatch">patch</label>
+            [% ELSE %]
+              <span class="label">Is Patch:</span>
+              [%+ attachment.ispatch ? "yes" : "no" %]
+            [% END %]
+          </div>
         [% END %]
+
+        <div id="attachment_isobsolete">
           <input type="checkbox" id="isobsolete" name="isobsolete" value="1"
+                 [%+ IF !can_edit %]class="bz_hidden_option"[% END %]
                  [%+ 'checked="checked"' IF attachment.isobsolete %]>
-          <label for="isobsolete">obsolete</label>
-          [% IF user.is_insider %]
-            <br>
-            <input type="checkbox" id="isprivate" name="isprivate" value="1"
-                   [% " checked" IF attachment.isprivate %]>
-            <label for="isprivate">private (only visible to 
-              <strong>[% Param('insidergroup') FILTER html %]</strong>)
-            </label>
+          [% IF can_edit %]
+            <label for="isobsolete">obsolete</label>
+          [% ELSE %]
+            <span class="label">Is Obsolete:</span>
+            [%+ attachment.isobsolete ? "yes" : "no" %]
           [% END %]
-          <br>
-        </small>
+        </div>
+
+        [% IF user.is_insider %]
+          <div id="attachment_isprivate">
+            <input type="checkbox" id="isprivate" name="isprivate" value="1"
+                   [%+ IF !can_edit %]class="bz_hidden_option"[% END %]
+                   [%+ 'checked="checked"' IF attachment.isprivate %]>
+            [% IF can_edit %]
+              <label for="isprivate">private (only visible to
+                <strong>[% Param('insidergroup') FILTER html %]</strong>)
+              </label>
+            [% ELSE %]
+              <span class="label">Is Private:</span>
+              [%+ attachment.isprivate ? "yes" : "no" %]
+            [% END %]
+          </div>
+        [% END %]
 
         [% IF attachment.flag_types.size > 0 %]
-          [% PROCESS "flag/list.html.tmpl" bug_id = attachment.bug_id
-                                           attach_id = attachment.id
-                                           flag_types = attachment.flag_types
-          %]<br>
+          <div id="attachment_flags">
+            [% PROCESS "flag/list.html.tmpl" bug_id = attachment.bug_id
+                                             attach_id = attachment.id
+                                             flag_types = attachment.flag_types
+            %]
+          </div>
         [% END %]
 
-        <div id="smallCommentFrame">
-          <b><small><label for="comment">Comment</label> (on the
-          [%+ terms.bug %]):</small></b><br>
+        [% IF user.id %]
+          <div id="smallCommentFrame">
+            <label for="comment">Comment (on the [% terms.bug %]):</label>
             [% INCLUDE global/textarea.html.tmpl
               id      = 'comment'
               name    = 'comment'
               minrows = 5
               cols    = 25
               wrap    = 'soft'
-            %]<br>
-        </div>
+              classes = 'block'
+            %]
+          </div>
 
-        <input type="submit" value="Submit" id="update"><br><br>
-        <strong>Actions:</strong>
-        <a href="attachment.cgi?id=[% attachment.id %]">View</a>
-        [% IF use_patchviewer %]
-         | <a href="attachment.cgi?id=[% attachment.id %]&amp;action=diff">Diff</a>
-        [% END %]
-        [% IF Param("allow_attachment_deletion")
-              && user.in_group('admin')
-              && attachment.datasize > 0 %]
-          | <a href="attachment.cgi?id=[% attachment.id %]&amp;action=delete">Delete</a>
+          <input type="submit" value="Submit" id="update"><br><br>
         [% END %]
       </td>
 
@@ -210,11 +254,24 @@
           </b></p>
         </td>
       [% END %]
-
     </tr>
-
   </table>
+</form>
 
+<div id="attachment_actions">
+  <span class="label">Actions:</span>
+  <a href="attachment.cgi?id=[% attachment.id %]">View</a>
+  [% IF use_patchviewer %]
+    | <a href="attachment.cgi?id=[% attachment.id %]&amp;action=diff">Diff</a>
+  [% END %]
+  [% IF Param("allow_attachment_deletion")
+        && user.in_group('admin')
+        && attachment.datasize > 0 %]
+    | <a href="attachment.cgi?id=[% attachment.id %]&amp;action=delete">Delete</a>
+  [% END %]
+</div>
+
+<div id="attachment_list">
   Attachments on [% "$terms.bug ${attachment.bug_id}" FILTER bug_link(attachment.bug_id) FILTER none %]:
   [% FOREACH a = attachments %]
     [% IF a == attachment.id %]
@@ -224,9 +281,6 @@
     [% END %]
     [% " |" UNLESS loop.last() %]
   [% END %]
-
-</form>
-
-<br>
+</div>
 
 [% PROCESS global/footer.html.tmpl %]

@@ -104,3 +104,42 @@ tbody.file pre:empty {
 .warning {
   color: red
 }
+
+table.attachment_info th {
+    text-align: right;
+    vertical-align: top;
+}
+
+table.attachment_info td {
+    text-align: left;
+    vertical-align: top;
+}
+
+/* Text displayed when the attachment is not viewable by the web browser */
+#noview {
+    text-align: left;
+    vertical-align: middle;
+}
+
+#attachment_attributes {
+    width: 25%;
+}
+
+#attachment_attributes div {
+    padding-bottom: 0.4em;
+}
+
+#attachment_attributes label,
+#attachment_attributes span.label,
+#attachment_actions span.label
+{
+    font-weight: bold;
+}
+
+#attachment_attributes .block {
+    display: block;
+}
+
+#attachment_attributes table#flags {
+    padding-top: 1em;
+}

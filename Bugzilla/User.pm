@@ -659,6 +659,13 @@ sub visible_bugs {
     return [grep { $visible_cache->{blessed $_ ? $_->id : $_} } @$bugs];
 }
 
+sub clear_product_cache {
+    my $self = shift;
+    delete $self->{enterable_products};
+    delete $self->{selectable_products};
+    delete $self->{selectable_classifications};
+}
+
 sub can_see_product {
     my ($self, $product_name) = @_;
 
@@ -1961,6 +1968,12 @@ groups) changes, the database must be updated. Handling updated groups is taken
 care of by the constructor. However, when updating the email address, the
 user may be placed into different groups, based on a new email regexp. This
 method should be called in such a case to force reresolution of these groups.
+
+=item C<clear_product_cache>
+
+Clears the stored values for L</get_selectable_products>, 
+L</get_enterable_products>, etc. so that their data will be read from
+the database again. Used mostly by L<Bugzilla::Product>.
 
 =item C<get_selectable_products>
 

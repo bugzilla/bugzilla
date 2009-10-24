@@ -151,7 +151,7 @@ sub OPTIONAL_MODULES {
     },
     {
         package => 'Chart',
-        module  => 'Chart::Base',
+        module  => 'Chart::Lines',
         version => '1.0',
         feature => [qw(new_charts old_charts)],
     },
@@ -179,7 +179,7 @@ sub OPTIONAL_MODULES {
         package => 'XML-Twig',
         module  => 'XML::Twig',
         version => 0,
-        feature => ['moving'],
+        feature => ['moving', 'updates'],
     },
     {
         package => 'MIME-tools',

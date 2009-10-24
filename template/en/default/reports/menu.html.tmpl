@@ -48,28 +48,34 @@
     </strong> -
     tables of [% terms.bug %] counts in 1, 2 or 3 dimensions, as HTML or CSV.
   </li>
-  <li>
-    <strong>
-      <a href="query.cgi?format=report-graph">Graphical reports</a>
-    </strong> -
-    line graphs, bar and pie charts.
-  </li>
-</ul>
-
-<h2>Change Over Time</h2>
-
-<ul>
-  <li>
-    <strong><a href="reports.cgi">Old Charts</a></strong> - 
-    plot the status and/or resolution of [% terms.bugs %] against
-    time, for each product in your database.
-  </li>
-  [% IF user.in_group(Param("chartgroup")) %]
+  [% IF feature_enabled('graphical_reports') %]
     <li>
-      <strong><a href="chart.cgi">New Charts</a></strong> - 
-      plot any arbitrary search against time. Far more powerful.
+      <strong>
+        <a href="query.cgi?format=report-graph">Graphical reports</a>
+      </strong> -
+      line graphs, bar and pie charts.
     </li>
   [% END %]
 </ul>
+
+[% IF feature_enabled('new_charts') OR feature_enabled('old_charts') %]
+  <h2>Change Over Time</h2>
+
+  <ul>
+    [% IF feature_enabled('old_charts') %]
+      <li>
+        <strong><a href="reports.cgi">Old Charts</a></strong> - 
+        plot the status and/or resolution of [% terms.bugs %] against
+        time, for each product in your database.
+      </li>
+    [% END %]
+    [% IF feature_enabled('new_charts') AND user.in_group(Param("chartgroup")) %]
+      <li>
+        <strong><a href="chart.cgi">New Charts</a></strong> - 
+        plot any arbitrary search against time. Far more powerful.
+      </li>
+    [% END %]
+  </ul>
+[% END %]
 
 [% PROCESS global/footer.html.tmpl %]

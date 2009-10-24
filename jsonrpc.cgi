@@ -27,10 +27,12 @@ use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::WebService::Constants;
-# This eval allows runtests to pass even if JSON::RPC isn't
-# installed.
+if (!Bugzilla->feature('jsonrpc')) {
+    ThrowCodeError('feature_disabled', { feature => 'jsonrpc' });
+}
+
+# This eval allows runtests.pl to pass.
 eval { require Bugzilla::WebService::Server::JSONRPC; };
-$@ && ThrowCodeError('json_rpc_not_installed');
 
 Bugzilla->usage_mode(USAGE_MODE_JSON);
 

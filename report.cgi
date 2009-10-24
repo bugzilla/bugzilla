@@ -95,6 +95,10 @@ if (defined $cgi->param('format') && $cgi->param('format') eq "table") {
     }
 }
 else {
+    if (!Bugzilla->feature('graphical_reports')) {
+        ThrowCodeError('feature_disabled', { feature => 'graphical_reports' });
+    }
+
     if ($row_field && !$col_field) {
         # 1D *charts* should be displayed horizontally (with an col_field only)
         $col_field = $row_field;

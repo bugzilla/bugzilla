@@ -257,22 +257,29 @@ sub check_user_verify_class {
     # the login method as LDAP, we won't notice, but all logins will fail.
     # So don't do that.
 
+    my $params = Bugzilla->params;
     my ($list, $entry) = @_;
     $list || return 'You need to specify at least one authentication mechanism';
     for my $class (split /,\s*/, $list) {
         my $res = check_multi($class, $entry);
         return $res if $res;
         if ($class eq 'RADIUS') {
-            eval "require Authen::Radius";
-            return "Error requiring Authen::Radius: '$@'" if $@;
-            return "RADIUS servername (RADIUS_server) is missing" unless Bugzilla->params->{"RADIUS_server"};
-            return "RADIUS_secret is empty" unless Bugzilla->params->{"RADIUS_secret"};
+            if (!Bugzilla->feature('auth_radius')) {
+                return "RADIUS support is not available. Run checksetup.pl"
+                       . " for more details";
+            }
+            return "RADIUS servername (RADIUS_server) is missing"
+                if !$params->{"RADIUS_server"};
+            return "RADIUS_secret is empty" if !$params->{"RADIUS_secret"};
         }
         elsif ($class eq 'LDAP') {
-            eval "require Net::LDAP";
-            return "Error requiring Net::LDAP: '$@'" if $@;
-            return "LDAP servername (LDAPserver) is missing" unless Bugzilla->params->{"LDAPserver"};
-            return "LDAPBaseDN is empty" unless Bugzilla->params->{"LDAPBaseDN"};
+            if (!Bugzilla->feature('auth_ldap')) {
+                return "LDAP support is not available. Run checksetup.pl"
+                       . " for more details";
+            }
+            return "LDAP servername (LDAPserver) is missing" 
+                if !$params->{"LDAPserver"};
+            return "LDAPBaseDN is empty" if !$params->{"LDAPBaseDN"};
         }
     }
     return "";
@@ -323,9 +330,9 @@ sub check_notification {
 
 sub check_smtp_auth {
     my $username = shift;
-    if ($username) {
-        eval "require Authen::SASL";
-        return "Error requiring Authen::SASL: '$@'" if $@;
+    if ($username and !Bugzilla->feature('smtp_auth')) {
+        return "SMTP Authentication is not available. Run checksetup.pl for"
+               . " more details";
     }
     return "";
 }

@@ -45,18 +45,17 @@ use Bugzilla::Util;
 use Bugzilla::Error;
 use Bugzilla::Status;
 
-eval "use GD";
-$@ && ThrowCodeError("gd_not_installed");
-eval "use Chart::Lines";
-$@ && ThrowCodeError("chart_lines_not_installed");
+# If we're using bug groups for products, we should apply those restrictions
+# to viewing reports, as well.  Time to check the login in that case.
+my $user = Bugzilla->login();
+
+if (!Bugzilla->feature('old_charts')) {
+    ThrowCodeError('feature_disabled', { feature => 'old_charts' });
+}
 
 my $dir       = bz_locations()->{'datadir'} . "/mining";
 my $graph_url = 'graphs';
 my $graph_dir = bz_locations()->{'libpath'} . '/' .$graph_url;
-
-# If we're using bug groups for products, we should apply those restrictions
-# to viewing reports, as well.  Time to check the login in that case.
-my $user = Bugzilla->login();
 
 Bugzilla->switch_to_shadow_db();
 

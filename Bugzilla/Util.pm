@@ -124,12 +124,7 @@ sub html_light_quote {
                    dfn samp kbd big small sub sup tt dd dt dl ul li ol
                    fieldset legend);
 
-    # Are HTML::Scrubber and HTML::Parser installed?
-    eval { require HTML::Scrubber;
-           require HTML::Parser;
-    };
-
-    if ($@) { # Package(s) not installed.
+    if (!Bugzilla->feature('html_desc')) {
         my $safe = join('|', @allow);
         my $chr = chr(1);
 
@@ -144,7 +139,7 @@ sub html_light_quote {
         $text =~ s#$chr($safe)$chr#<$1>#go;
         return $text;
     }
-    else { # Packages installed.
+    else {
         # We can be less restrictive. We can accept elements with attributes.
         push(@allow, qw(a blockquote q span));
 

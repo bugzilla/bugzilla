@@ -110,11 +110,6 @@
   [% ELSIF error == "chart_file_open_fail" %]
     Unable to open the chart datafile <tt>[% filename FILTER html %]</tt>.
   
-  [% ELSIF error == "chart_lines_not_installed" %]
-    [% admindocslinks = {'installation.html#install-perlmodules' => 'Installing Perl modules necessary for Charting'} %]
-    Charts will not work without the Chart::Lines Perl module being installed.
-    Run checksetup.pl for installation instructions.
-
   [% ELSIF error == "column_not_null_without_default" %]
     Failed adding the column [% name FILTER html %]:
     You cannot add a NOT NULL column with no default to an existing table
@@ -166,11 +161,6 @@
   [% ELSIF error == "field_not_custom" %]
     '[% field.description FILTER html %]' ([% field.name FILTER html %])
     is not a custom field.
-
-  [% ELSIF error == "gd_not_installed" %]
-    [% admindocslinks = {'installation.html#install-perlmodules' => 'Installing Perl modules necessary for Charting'} %]
-    Charts will not work without the GD Perl module being installed.
-    Run checksetup.pl for installation instructions.
 
   [% ELSIF error == "illegal_content_type_method" %]
     Your form submission got corrupted somehow.  The <em>content
@@ -228,6 +218,15 @@
     but you tried to flag it as obsolete while creating a new attachment to 
     [% terms.bug %] [%+ my_bug_id FILTER html %].
 
+  [% ELSIF error == "feature_disabled" %]
+    The [% install_string("feature_$feature") FILTER html %] feature is not
+    available in this [% terms.Bugzilla %]. 
+    [% IF user.in_group('admin') %]
+      If you would like to enable this feature, please run 
+      <kbd>checksetup.pl</kbd> to see how to install the necessary
+      requirements for this feature.
+    [% END %]
+
   [% ELSIF error == "flag_unexpected_object" %]
     [% title = "Object Not Recognized" %]
     Flags cannot be set for objects of type [% caller FILTER html %].
@@ -280,22 +279,10 @@
     Inserting a <code>[% job FILTER html %]</code> job into the Job 
     Queue failed with the following error: [% errmsg FILTER html %]
 
-  [% ELSIF error == "jobqueue_not_configured" %]
-    Using the job queue system requires that certain Perl modules
-    be installed. Run <code>checksetup.pl</code> to see what modules
-    you are missing.
-
   [% ELSIF error == "jobqueue_no_job_mapping" %]
     <code>Bugzilla::JobQueue</code> has not been configured to handle
     the job "[% job FILTER html %]".  You need to add this job type
     to the <code>JOB_MAP</code> constant in <code>Bugzilla::JobQueue</code>.
-
-  [% ELSIF error == "json_rpc_not_installed" %]
-   [% admindocslinks = { 'installation.html#install-perlmodules' 
-                         => 'Installing Perl modules' } %]
-    The JSON-RPC interface will not work without the <code>JSON::RPC</code>
-    Perl module being installed. Run <code>checksetup.pl</code> for
-    installation instructions. 
 
   [% ELSIF error == "ldap_bind_failed" %]
     Failed to bind to the LDAP server. The error message was: 
@@ -425,12 +412,6 @@
   [% ELSIF error == "setting_value_invalid" %]
     The value "<code>[% value FILTER html %]</code>" is not in the list of
     legal values for the <em>[% name FILTER html %]</em> setting.
-
-  [% ELSIF error == "soap_not_installed" %]
-    [% admindocslinks = {'installation.html#install-perlmodules' => 'Installing Perl modules'} %]
-    The XMLRPC interface will not work without the SOAP::Lite Perl module being
-    installed.
-    Run checksetup.pl for installation instructions.
 
   [% ELSIF error == "token_generation_error" %]
     Something is seriously wrong with the token generation system.

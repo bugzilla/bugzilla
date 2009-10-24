@@ -65,6 +65,12 @@ local our $template = Bugzilla->template;
 local our $vars = {};
 my $dbh = Bugzilla->dbh;
 
+my $user = Bugzilla->login(LOGIN_REQUIRED);
+
+if (!Bugzilla->feature('new_charts')) {
+    ThrowCodeError('feature_disabled', { feature => 'new_charts' });
+}
+
 # Go back to query.cgi if we are adding a boolean chart parameter.
 if (grep(/^cmd-/, $cgi->param())) {
     my $params = $cgi->canonicalise_query("format", "ctype", "action");
@@ -95,8 +101,6 @@ if ($action eq "search") {
     print "Location: buglist.cgi" . ($params ? "?$params" : "") . "\n\n";
     exit;
 }
-
-my $user = Bugzilla->login(LOGIN_REQUIRED);
 
 $user->in_group(Bugzilla->params->{"chartgroup"})
   || ThrowUserError("auth_failure", {group  => Bugzilla->params->{"chartgroup"},

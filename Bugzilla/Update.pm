@@ -27,12 +27,8 @@ use constant TIMEOUT       => 5; # Number of seconds before timeout.
 
 # Look for new releases and notify logged in administrators about them.
 sub get_notifications {
+    return if !Bugzilla->feature('updates');
     return if (Bugzilla->params->{'upgrade_notification'} eq 'disabled');
-
-    # If the XML::Twig module is missing, we won't be able to parse
-    # the XML file. So there is no need to go further.
-    eval("require XML::Twig");
-    return if $@;
 
     my $local_file = bz_locations()->{'datadir'} . LOCAL_FILE;
     # Update the local XML file if this one doesn't exist or if
@@ -128,9 +124,6 @@ sub get_notifications {
 }
 
 sub _synchronize_data {
-    eval("require LWP::UserAgent");
-    return {'error' => 'missing_package', 'package' => 'LWP::UserAgent'} if $@;
-
     my $local_file = bz_locations()->{'datadir'} . LOCAL_FILE;
 
     my $ua = LWP::UserAgent->new();

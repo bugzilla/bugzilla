@@ -777,6 +777,8 @@ sub create {
 
             'feature_enabled' => sub { return Bugzilla->feature(@_); },
 
+            'install_string' => \&Bugzilla::Install::Util::install_string,
+
             # These don't work as normal constants.
             DB_MODULE        => \&Bugzilla::Constants::DB_MODULE,
             REQUIRED_MODULES => 

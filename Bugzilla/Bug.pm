@@ -122,16 +122,16 @@ sub VALIDATORS {
     my $validators = {
         alias          => \&_check_alias,
         bug_file_loc   => \&_check_bug_file_loc,
-        bug_severity   => \&_check_bug_severity,
+        bug_severity   => \&_check_select_field,
         comment        => \&_check_comment,
         commentprivacy => \&_check_commentprivacy,
         deadline       => \&_check_deadline,
         estimated_time => \&_check_estimated_time,
-        op_sys         => \&_check_op_sys,
+        op_sys         => \&_check_select_field,
         priority       => \&_check_priority,
         product        => \&_check_product,
         remaining_time => \&_check_remaining_time,
-        rep_platform   => \&_check_rep_platform,
+        rep_platform   => \&_check_select_field,
         short_desc     => \&_check_short_desc,
         status_whiteboard => \&_check_status_whiteboard,
     };
@@ -1077,13 +1077,6 @@ sub _check_bug_file_loc {
     return $url;
 }
 
-sub _check_bug_severity {
-    my ($invocant, $severity) = @_;
-    $severity = trim($severity);
-    check_field('bug_severity', $severity);
-    return $severity;
-}
-
 sub _check_bug_status {
     my ($invocant, $new_status, $product, $comment) = @_;
     my $user = Bugzilla->user;
@@ -1473,22 +1466,12 @@ sub _check_product {
     return new Bugzilla::Product({ name => $name });
 }
 
-sub _check_op_sys {
-    my ($invocant, $op_sys) = @_;
-    $op_sys = trim($op_sys);
-    check_field('op_sys', $op_sys);
-    return $op_sys;
-}
-
 sub _check_priority {
     my ($invocant, $priority) = @_;
     if (!ref $invocant && !Bugzilla->params->{'letsubmitterchoosepriority'}) {
         $priority = Bugzilla->params->{'defaultpriority'};
     }
-    $priority = trim($priority);
-    check_field('priority', $priority);
-
-    return $priority;
+    return $invocant->_check_select_field($priority, 'priority');
 }
 
 sub _check_qa_contact {
@@ -1528,13 +1511,6 @@ sub _check_remaining_time {
     return $_[0]->_check_time($_[1], 'remaining_time');
 }
 
-sub _check_rep_platform {
-    my ($invocant, $platform) = @_;
-    $platform = trim($platform);
-    check_field('rep_platform', $platform);
-    return $platform;
-}
-
 sub _check_reporter {
     my $invocant = shift;
     my $reporter;
@@ -1562,7 +1538,7 @@ sub _check_resolution {
         if !$resolution && !$self->status->is_open;
     
     # Make sure this is a valid resolution.
-    check_field('resolution', $resolution);
+    $resolution = $self->_check_select_field($resolution, 'resolution');
 
     # Don't allow open bugs to have resolutions.
     ThrowUserError('resolution_not_allowed') if $self->status->is_open;
@@ -1752,19 +1728,17 @@ sub _check_freetext_field {
 sub _check_multi_select_field {
     my ($invocant, $values, $field) = @_;
     return [] if !$values;
+    my @checked_values;
     foreach my $value (@$values) {
-        $value = trim($value);
-        check_field($field, $value);
-        trick_taint($value);
+        push(@checked_values, $invocant->_check_select_field($value, $field));
     }
-    return $values;
+    return \@checked_values;
 }
 
 sub _check_select_field {
     my ($invocant, $value, $field) = @_;
-    $value = trim($value);
-    check_field($field, $value);
-    return $value;
+    my $object = Bugzilla::Field::Choice->type($field)->check($value);
+    return $object->name;
 }
 
 sub _check_bugid_field {

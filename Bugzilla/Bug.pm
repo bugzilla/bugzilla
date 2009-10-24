@@ -37,8 +37,10 @@ use Bugzilla::Flag;
 use Bugzilla::FlagType;
 use Bugzilla::Hook;
 use Bugzilla::Keyword;
+use Bugzilla::Milestone;
 use Bugzilla::User;
 use Bugzilla::Util;
+use Bugzilla::Version;
 use Bugzilla::Error;
 use Bugzilla::Product;
 use Bugzilla::Component;
@@ -1657,9 +1659,9 @@ sub _check_target_milestone {
 
     $target = trim($target);
     $target = $product->default_milestone if !defined $target;
-    check_field('target_milestone', $target,
-            [map($_->name, @{$product->milestones})]);
-    return $target;
+    my $object = Bugzilla::Milestone->check(
+        { product => $product, name => $target });
+    return $object->name;
 }
 
 sub _check_time {
@@ -1681,8 +1683,9 @@ sub _check_version {
     my ($invocant, $version, $product) = @_;
     $version = trim($version);
     ($product = $invocant->product_obj) if ref $invocant;
-    check_field('version', $version, [map($_->name, @{$product->versions})]);
-    return $version;
+    my $object = 
+        Bugzilla::Version->check({ product => $product, name => $version });
+    return $object->name;
 }
 
 sub _check_work_time {

@@ -68,17 +68,14 @@ sub trick_taint {
 
 sub detaint_natural {
     my $match = $_[0] =~ /^(\d+)$/;
-    $_[0] = $match ? $1 : undef;
+    $_[0] = $match ? int($1) : undef;
     return (defined($_[0]));
 }
 
 sub detaint_signed {
     my $match = $_[0] =~ /^([-+]?\d+)$/;
-    $_[0] = $match ? $1 : undef;
-    # Remove any leading plus sign.
-    if (defined($_[0]) && $_[0] =~ /^\+(\d+)$/) {
-        $_[0] = $1;
-    }
+    # The "int()" call removes any leading plus sign.
+    $_[0] = $match ? int($1) : undef;
     return (defined($_[0]));
 }
 

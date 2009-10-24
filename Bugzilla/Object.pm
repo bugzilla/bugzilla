@@ -117,10 +117,17 @@ sub check {
     if (!ref $param) {
         $param = { name => $param };
     }
+
     # Don't allow empty names or ids.
-    my $check_param = exists $param->{id} ? $param->{id} : $param->{name};
-    $check_param = trim($check_param);
-    $check_param || ThrowUserError('object_not_specified', { class => $class });
+    my $check_param = exists $param->{id} ? 'id' : 'name';
+    $param->{$check_param} = trim($param->{$check_param});
+    # If somebody passes us "0", we want to throw an error like
+    # "there is no X with the name 0". This is true even for ids. So here,
+    # we only check if the parameter is undefined or empty.
+    if (!defined $param->{$check_param} or $param->{$check_param} eq '') {
+        ThrowUserError('object_not_specified', { class => $class });
+    }
+
     my $obj = $class->new($param);
     if (!$obj) {
         # We don't want to override the normal template "user" object if

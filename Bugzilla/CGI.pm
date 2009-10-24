@@ -28,6 +28,8 @@ use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Util;
 
+use File::Basename;
+
 BEGIN {
     if (ON_WINDOWS) {
         # Help CGI find the correct temp directory as the default list
@@ -71,15 +73,9 @@ sub new {
     $self->charset(Bugzilla->params->{'utf8'} ? 'UTF-8' : '');
 
     # Redirect to urlbase/sslbase if we are not viewing an attachment.
-    if (use_attachbase() && i_am_cgi()) {
-        my $cgi_file = $self->url('-path_info' => 0, '-query' => 0, '-relative' => 1);
-        $cgi_file =~ s/\?$//;
-        my $urlbase = Bugzilla->params->{'urlbase'};
-        my $sslbase = Bugzilla->params->{'sslbase'};
-        my $path_regexp = $sslbase ? qr/^(\Q$urlbase\E|\Q$sslbase\E)/ : qr/^\Q$urlbase\E/;
-        if ($cgi_file ne 'attachment.cgi' && $self->self_url !~ /$path_regexp/) {
-            $self->redirect_to_urlbase;
-        }
+    my $script = basename($0);
+    if ($self->url_is_attachment_base and $script ne 'attachment.cgi') {
+        $self->redirect_to_urlbase();
     }
 
     # Check for errors
@@ -396,6 +392,28 @@ sub redirect_to_urlbase {
     my $path = $self->url('-path_info' => 1, '-query' => 1, '-relative' => 1);
     print $self->redirect('-location' => correct_urlbase() . $path);
     exit;
+}
+
+sub url_is_attachment_base {
+    my ($self, $id) = @_;
+    return 0 if !use_attachbase() or !i_am_cgi();
+    my $attach_base = Bugzilla->params->{'attachment_base'};
+    # If we're passed an id, we only want one specific attachment base
+    # for a particular bug. If we're not passed an ID, we just want to
+    # know if our current URL matches the attachment_base *pattern*.
+    my $regex;
+    if ($id) {
+        $attach_base =~ s/\%bugid\%/$id/;
+        $regex = quotemeta($attach_base);
+    }
+    else {
+        # In this circumstance we run quotemeta first because we need to
+        # insert an active regex meta-character afterward.
+        $regex = quotemeta($attach_base);
+        $regex =~ s/\\\%bugid\\\%/\\d+/;
+    }
+    $regex = "^$regex";
+    return ($self->self_url =~ $regex) ? 1 : 0;
 }
 
 1;

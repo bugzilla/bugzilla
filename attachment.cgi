@@ -77,10 +77,8 @@ my $action = $cgi->param('action') || 'view';
 # You must use the appropriate urlbase/sslbase param when doing anything
 # but viewing an attachment.
 if ($action ne 'view') {
-    my $urlbase = Bugzilla->params->{'urlbase'};
-    my $sslbase = Bugzilla->params->{'sslbase'};
-    my $path_regexp = $sslbase ? qr/^(\Q$urlbase\E|\Q$sslbase\E)/ : qr/^\Q$urlbase\E/;
-    if (use_attachbase() && $cgi->self_url !~ /$path_regexp/) {
+    do_ssl_redirect_if_required();
+    if ($cgi->url_is_attachment_base) {
         $cgi->redirect_to_urlbase;
     }
     Bugzilla->login();
@@ -243,10 +241,6 @@ sub view {
 
     if (use_attachbase()) {
         $attachment = validateID(undef, 1);
-        # Replace %bugid% by the ID of the bug the attachment belongs to, if present.
-        my $attachbase = Bugzilla->params->{'attachment_base'};
-        my $bug_id = $attachment->bug_id;
-        $attachbase =~ s/%bugid%/$bug_id/;
         my $path = 'attachment.cgi?id=' . $attachment->id;
         # The user is allowed to override the content type of the attachment.
         if (defined $cgi->param('content_type')) {
@@ -254,10 +248,16 @@ sub view {
         }
 
         # Make sure the attachment is served from the correct server.
-        if ($cgi->self_url !~ /^\Q$attachbase\E/) {
-            # We couldn't call Bugzilla->login earlier as we first had to make sure
-            # we were not going to request credentials on the alternate host.
+        my $bug_id = $attachment->bug_id;
+        if (!$cgi->url_is_attachment_base($bug_id)) {
+            # We couldn't call Bugzilla->login earlier as we first had to 
+            # make sure we were not going to request credentials on the
+            # alternate host.
             Bugzilla->login();
+            my $attachbase = Bugzilla->params->{'attachment_base'};
+            # Replace %bugid% by the ID of the bug the attachment 
+            # belongs to, if present.
+            $attachbase =~ s/\%bugid\%/$bug_id/;
             if (attachmentIsPublic($attachment)) {
                 # No need for a token; redirect to attachment base.
                 print $cgi->redirect(-location => $attachbase . $path);
@@ -291,6 +291,7 @@ sub view {
             }
         }
     } else {
+        do_ssl_redirect_if_required();
         # No alternate host is used. Request credentials if required.
         Bugzilla->login();
         $attachment = validateID();

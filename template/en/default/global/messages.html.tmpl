@@ -491,6 +491,44 @@
     [% title = "$terms.Bugzilla Login Changed" %]
     Your [% terms.Bugzilla %] login has been changed.
 
+  [% ELSIF message_tag == "migrate_component_created" %]
+    Component created: [% comp.name FILTER html %]
+    (in [% product.name FILTER html %])
+
+  [% ELSIF message_tag == "migrate_creating_bugs" %]
+    Creating [% terms.bugs %]...
+
+  [% ELSIF message_tag == "migrate_field_created" %]
+    New custom field: [% field.description FILTER html %]
+    ([% field.name FILTER html %])
+
+  [% ELSIF message_tag == "migrate_product_created" %]
+    Product created: [% created.name FILTER html %]
+
+  [% ELSIF message_tag == "migrate_reading_bugs" %]
+    Reading [% terms.bugs %]...
+
+  [% ELSIF message_tag == "migrate_reading_products" %]
+    Reading products...
+
+  [% ELSIF message_tag == "migrate_reading_users" %]
+    Reading users...
+
+  [% ELSIF message_tag == "migrate_translating_bugs" %]
+    Converting [% terms.bug %] values to be appropriate for 
+    [%+ terms.Bugzilla %]...
+
+  [% ELSIF message_tag == "migrate_user_created" %]
+    User created: [% created.email FILTER html %]
+    [% IF password %] Password: [% password FILTER html %][% END %]
+
+  [% ELSIF message_tag == "migrate_value_created" %]
+    [% IF product.defined %]
+      [% product.name FILTER html %]
+    [% END %]
+    [%+ field_descs.${field.name} FILTER html %] value
+    created: [% value FILTER html %]
+
   [% ELSIF message_tag == "milestone_created" %]
     [% title = "Milestone Created" %]
     The milestone <em>[% milestone.name FILTER html %]</em> has been created.

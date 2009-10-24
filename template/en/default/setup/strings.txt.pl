@@ -42,7 +42,7 @@ EOT
     commands_optional => 'COMMANDS TO INSTALL OPTIONAL MODULES:',
     commands_required => <<EOT,
 COMMANDS TO INSTALL REQUIRED MODULES (You *must* run all these commands
-and then re-run checksetup.pl):
+and then re-run this script):
 EOT
     done => 'done.',
 

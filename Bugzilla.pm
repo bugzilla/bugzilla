@@ -67,6 +67,7 @@ our $_request_cache = {};
 use constant SHUTDOWNHTML_EXEMPT => [
     'editparams.cgi',
     'checksetup.pl',
+    'migrate.pl',
     'recode.pl',
 ];
 

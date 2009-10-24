@@ -989,6 +989,15 @@
     You can't use %user% without being logged in, because %user% refers
     to your login name, which we don't know.
 
+  [% ELSIF error == "migrate_config_created" %]
+    The file <kbd>[% file FILTER html %]</kbd> contains configuration
+    variables that must be set before continuing with the migration.
+
+  [% ELSIF error == "migrate_from_invalid" %]
+    '[% from FILTER html %]' is not a valid type of [% terms.bug %]-tracker
+    to migrate from. See the contents of the <kbd>B[% %]ugzilla/Migrate/</kbd>
+    directory for a list of valid [% terms.bug %]-trackers.
+
   [% ELSIF error == "milestone_already_exists" %]
     [% title = "Milestone Already Exists" %]
     [% admindocslinks = {'products.html' => 'Administering products',

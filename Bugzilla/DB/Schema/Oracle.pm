@@ -403,4 +403,13 @@ sub _get_create_seq_ddl {
     return @ddl;
 }
 
+sub get_set_serial_sql { 
+    my ($self, $table, $column, $value) = @_; 
+    my @sql;
+    my $seq_name = "${table}_${column}_SEQ";
+    push(@sql, "DROP SEQUENCE ${seq_name}");
+    push(@sql, $self->_get_create_seq_ddl($table, $column, $value));       
+    return @sql;
+} 
+
 1;

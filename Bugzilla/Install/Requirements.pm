@@ -462,7 +462,9 @@ sub print_module_instructions {
         }
     }
 
-    if ($output && $check_results->{any_missing} && !ON_WINDOWS) {
+    if ($output && $check_results->{any_missing} && !ON_WINDOWS
+        && !$check_results->{hide_all}) 
+    {
         print install_string('install_all', { perl => $^X });
     }
     if (!$check_results->{pass}) {

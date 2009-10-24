@@ -263,6 +263,11 @@ sub get_rename_indexes_ddl {
     return ($sql);
 }
 
+sub get_set_serial_sql {
+    my ($self, $table, $column, $value) = @_;
+    return ("ALTER TABLE $table AUTO_INCREMENT = $value");
+}
+
 # Converts a DBI column_info output to an abstract column definition.
 # Expects to only be called by Bugzila::DB::Mysql::_bz_build_schema_from_disk,
 # although there's a chance that it will also work properly if called

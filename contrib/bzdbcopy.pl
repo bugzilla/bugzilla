@@ -193,8 +193,7 @@ foreach my $table (@table_list) {
                 # PostgreSQL doesn't like it when you insert values into
                 # a serial field; it doesn't increment the counter 
                 # automatically.
-                $target_db->do("SELECT pg_catalog.setval 
-                                ('${table}_${column}_seq', $max_val, false)");
+                $target_db->bz_set_next_serial_value($table, $column);
             }
             elsif ($target_db->isa('Bugzilla::DB::Oracle')) {
                 # Oracle increments the counter on every insert, and *always*

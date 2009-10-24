@@ -118,6 +118,7 @@ sub FILESYSTEM {
         'email_in.pl'     => { perms => $ws_executable },
         'sanitycheck.pl'  => { perms => $ws_executable },
         'jobqueue.pl'     => { perms => $owner_executable },
+        'migrate.pl'      => { perms => $owner_executable },
         'install-module.pl' => { perms => $owner_executable },
 
         "$localconfig.old" => { perms => $owner_readable },

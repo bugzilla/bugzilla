@@ -119,6 +119,12 @@ sub get_rename_table_sql {
     return ("ALTER TABLE $old_name RENAME TO $new_name");
 }
 
+sub get_set_serial_sql {
+    my ($self, $table, $column, $value) = @_;
+    return ("SELECT setval('${table}_${column}_seq', $value, false)
+               FROM $table");
+}
+
 sub _get_alter_type_sql {
     my ($self, $table, $column, $new_def, $old_def) = @_;
     my @statements;

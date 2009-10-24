@@ -873,6 +873,16 @@ sub bz_rename_table {
     $self->_bz_store_real_schema;
 }
 
+sub bz_set_next_serial_value {
+    my ($self, $table, $column, $value) = @_;
+    if (!$value) {
+        $value = $self->selectrow_array("SELECT MAX($column) FROM $table") || 0;
+        $value++;
+    }
+    my @sql = $self->_bz_real_schema->get_set_serial_sql($table, $column, $value);
+    $self->do($_) foreach @sql;
+}
+
 #####################################################################
 # Schema Information Methods
 #####################################################################

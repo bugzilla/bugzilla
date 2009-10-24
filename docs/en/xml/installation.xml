@@ -1,5 +1,5 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"> -->
-<!-- $Id: installation.xml,v 1.171 2009/08/18 11:01:17 lpsolit%gmail.com Exp $ -->
+<!-- $Id: installation.xml,v 1.172 2009/10/24 05:53:12 mkanat%bugzilla.org Exp $ -->
 <chapter id="installing-bugzilla">
   <title>Installing Bugzilla</title>
 
@@ -358,8 +358,8 @@
 
         <listitem>
           <para>
-            <link linkend="install-modules-chart-base">Chart::Base</link>
-            (&min-chart-base-ver;) for bug charting
+            <link linkend="install-modules-chart-lines">Chart::Lines</link>
+            (&min-chart-lines-ver;) for bug charting
           </para>
         </listitem>
 
@@ -515,10 +515,10 @@
        </tip>
       </section>
 
-      <section id="install-modules-chart-base">
-        <title>Chart::Base (&min-chart-base-ver;)</title>
+      <section id="install-modules-chart-lines">
+        <title>Chart::Lines (&min-chart-lines-ver;)</title>
 
-        <para>The Chart::Base module is only required if you want graphical 
+        <para>The Chart::Lines module is only required if you want graphical 
         reports. 
         Note that earlier versions that 0.99c used GIFs, which are no longer
         supported by the latest versions of GD.</para>

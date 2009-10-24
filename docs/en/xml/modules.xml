@@ -135,7 +135,7 @@
     <title>Optional Modules</title>
 
     <para>
-      Chart::Base:
+      Chart::Lines:
       <literallayout>
         CPAN Download Page: <ulink url="http://search.cpan.org/dist/Chart/"/>
         Documentation: <ulink url="http://search.cpan.org/dist/Chart/Chart.pod"/>

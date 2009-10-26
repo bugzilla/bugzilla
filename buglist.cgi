@@ -67,7 +67,19 @@ if (length($buffer) == 0) {
     ThrowUserError("buglist_parameters_required");
 }
 
-#
+# If a parameter starts with cmd-, this means the And or Or button has been
+# pressed in the advanced search page with JS turned off.
+if (grep { $_ =~ /^cmd\-/ } $cgi->param()) {
+    my $url = "query.cgi?$buffer#chart";
+    print $cgi->redirect(-location => $url);
+    # Generate and return the UI (HTML page) from the appropriate template.
+    $vars->{'message'} = "buglist_adding_field";
+    $vars->{'url'} = $url;
+    $template->process("global/message.html.tmpl", $vars)
+      || ThrowTemplateError($template->error());
+    exit;
+}
+
 # If query was POSTed, clean the URL from empty parameters and redirect back to
 # itself. This will make advanced search URLs more tolerable.
 #
@@ -182,17 +194,6 @@ if (defined $cgi->param('regetlastlist')) {
                                  bug_id => $bug_id,
                                  order => $order,
                                 });
-}
-
-if ($buffer =~ /&cmd-/) {
-    my $url = "query.cgi?$buffer#chart";
-    print $cgi->redirect(-location => $url);
-    # Generate and return the UI (HTML page) from the appropriate template.
-    $vars->{'message'} = "buglist_adding_field";
-    $vars->{'url'} = $url;
-    $template->process("global/message.html.tmpl", $vars)
-      || ThrowTemplateError($template->error());
-    exit;
 }
 
 # Figure out whether or not the user is doing a fulltext search.  If not,

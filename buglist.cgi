@@ -67,7 +67,19 @@ if (length($buffer) == 0) {
     ThrowUserError("buglist_parameters_required");
 }
 
-#
+# If a parameter starts with cmd-, this means the And or Or button has been
+# pressed in the advanced search page with JS turned off.
+if (grep { $_ =~ /^cmd\-/ } $cgi->param()) {
+    my $url = "query.cgi?$buffer#chart";
+    print $cgi->redirect(-location => $url);
+    # Generate and return the UI (HTML page) from the appropriate template.
+    $vars->{'message'} = "buglist_adding_field";
+    $vars->{'url'} = $url;
+    $template->process("global/message.html.tmpl", $vars)
+      || ThrowTemplateError($template->error());
+    exit;
+}
+
 # If query was POSTed, clean the URL from empty parameters and redirect back to
 # itself. This will make advanced search URLs more tolerable.
 #
@@ -183,17 +195,6 @@ if (defined $cgi->param('regetlastlist')) {
                                  bug_id => $bug_id,
                                  order => $order,
                                 });
-}
-
-if ($buffer =~ /&cmd-/) {
-    my $url = "query.cgi?$buffer#chart";
-    print $cgi->redirect(-location => $url);
-    # Generate and return the UI (HTML page) from the appropriate template.
-    $vars->{'message'} = "buglist_adding_field";
-    $vars->{'url'} = $url;
-    $template->process("global/message.html.tmpl", $vars)
-      || ThrowTemplateError($template->error());
-    exit;
 }
 
 # Figure out whether or not the user is doing a fulltext search.  If not,
@@ -576,7 +577,10 @@ elsif (($cmdtype eq "doit") && defined $cgi->param('remtype')) {
             # exists, add/remove bugs to it, else create it. But if we are
             # considering an existing tag, then it has to exist and we throw
             # an error if it doesn't (hence the usage of !$is_new_name).
-            if (my $old_query = LookupNamedQuery($query_name, undef, LIST_OF_BUGS, !$is_new_name)) {
+            my ($old_query, $query_id) =
+              LookupNamedQuery($query_name, undef, LIST_OF_BUGS, !$is_new_name);
+
+            if ($old_query) {
                 # We get the encoded query. We need to decode it.
                 my $old_cgi = new Bugzilla::CGI($old_query);
                 foreach my $bug_id (split /[\s,]+/, scalar $old_cgi->param('bug_id')) {
@@ -600,9 +604,10 @@ elsif (($cmdtype eq "doit") && defined $cgi->param('remtype')) {
             # Only keep bug IDs we want to add/keep. Disregard deleted ones.
             my @bug_ids = grep { $bug_ids{$_} == 1 } keys %bug_ids;
             # If the list is now empty, we could as well delete it completely.
-            ThrowUserError('no_bugs_in_list', {'tag' => $query_name})
-              unless scalar(@bug_ids);
-
+            if (!scalar @bug_ids) {
+                ThrowUserError('no_bugs_in_list', {name     => $query_name,
+                                                   query_id => $query_id});
+            }
             $new_query = "bug_id=" . join(',', sort {$a <=> $b} @bug_ids);
             $query_type = LIST_OF_BUGS;
         }

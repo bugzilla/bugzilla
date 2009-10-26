@@ -20,7 +20,7 @@
 
 [% PROCESS global/variables.none.tmpl %]
 [% INCLUDE global/header.html.tmpl 
-  title = "$terms.Bugzilla 3.0.9 Release Notes" 
+  title = "$terms.Bugzilla 3.0.10 Release Notes" 
   style_urls = ['skins/standard/release-notes.css'] 
 %]
 
@@ -60,6 +60,12 @@
   most important fixes in each release. If you want a detailed list of
   <em>everything</em> that's changed in each version, you should use our
   <a href="http://www.bugzilla.org/status/changes.html">Change Log Page</a>.</p>
+
+<h3>3.0.10</h3>
+
+<p>The security fix in 3.0.9 broke the <code>B[% %]ug.create</code> WebService
+  function for certain input parameters. It is fixed in this release.
+  (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=517502">[% terms.Bug %] 517502</a>)</p>
 
 <h3>3.0.9</h3>
 

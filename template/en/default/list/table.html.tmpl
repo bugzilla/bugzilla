@@ -23,6 +23,10 @@
 [%# Initialization                                                           #%]
 [%############################################################################%]
 
+[%# Don't display the table or do any processing if there are no bugs 
+  # to display %]
+[% RETURN IF !bugs.size %]
+
 [%# Columns whose titles or values should be abbreviated to make the list
   # more compact.  For columns whose titles should be abbreviated,
   # the shortened title is included.  For columns whose values should be

@@ -59,6 +59,33 @@
 
 <h2><a name="v34_point"></a>Updates In This 3.4.x Release</h2>
 
+<h3>3.4.3</h3>
+
+<ul>
+  <li>[% terms.Bugzilla %] installations running under mod_perl were leaking
+    about 512K of RAM per page load.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=517793">[% terms.Bug %] 517793</a>)
+  </li>
+  <li>Attachments with Unicode characters in their names were being downloaded
+    with mangled names. 
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=328628">[% terms.Bug %] 328628</a>)
+  </li>
+  <li>Clicking "submit only my comment" on the "mid-air collisions" page
+    was leading to a "Suspicious Action" warning.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=514378">[% terms.Bug %] 514378</a>)
+  </li>
+  <li>The XML format of [% terms.abug %] accidentally contained the
+    word-wrapped content of comments instead of the unwrapped content.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=509152">[% terms.Bug %] 509152</a>)
+  </li>
+  <li>You can now do <kbd>./install-module.pl --shell</kbd> to get a CPAN
+    shell using the configuration of 
+    <a href="[% docs_urlbase FILTER html %]api/install-module.html">install-module.pl</a>,
+    which allows you to do more advanced Perl module installation tasks.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=445875">[% terms.Bug %] 445875</a>)
+  </li>
+</ul>
+
 <h3>3.4.2</h3>
 
 <p>This release contains fixes for multiple security issues, one of which

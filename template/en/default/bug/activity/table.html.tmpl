@@ -33,7 +33,6 @@
   #                  it was affected by an old Bugzilla bug.)
   #%]
 
-[% PROCESS global/variables.none.tmpl %]
 [% PROCESS "global/field-descs.none.tmpl" %]
 
 [% PROCESS bug/time.html.tmpl %]
@@ -73,7 +72,7 @@
                 <a href="attachment.cgi?id=[% change.attachid %]">
                 Attachment #[% change.attachid %]</a>
               [% END %]
-              [%+ change.field %]
+              [%+ field_descs.${change.fieldname} FILTER html %]
             </td>
             <td>
               [% IF change.removed.defined %]

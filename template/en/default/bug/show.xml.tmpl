@@ -62,25 +62,13 @@
       [% END %]
 
       [%# Bug Flags %]
-      [% IF displayfields.flag %]
-        [% FOREACH type = bug.flag_types %]
-          [% FOREACH flag = type.flags %]
-            <flag name="[% type.name FILTER xml %]"
-                  id="[% flag.id FILTER xml %]"
-                  status="[% flag.status FILTER xml %]"
-                  setter="[% flag.setter.login FILTER email FILTER xml %]"
-              [% IF flag.requestee %]
-                  requestee="[% flag.requestee.login FILTER email FILTER xml %]"
-              [% END %]
-            />
-          [% END %]
-        [% END %]
-      [% END %]
+      [% PROCESS section_flags obj => bug %]
 
       [% IF displayfields.long_desc %]
         [% FOREACH c = bug.longdescs %]
           [% NEXT IF c.isprivate && !user.in_group(Param("insidergroup")) %]
           <long_desc isprivate="[% c.isprivate FILTER xml %]">
+            <commentid>[% c.id FILTER xml %]</commentid>
             <who name="[% c.author.name FILTER xml %]">[% c.author.email FILTER email FILTER xml %]</who>
             <bug_when>[% c.time FILTER time("%Y-%m-%d %T %z") FILTER xml %]</bug_when>
             [% IF user.in_group(Param('timetrackinggroup')) && (c.work_time - 0 != 0) %]
@@ -98,9 +86,11 @@
               isobsolete="[% a.isobsolete FILTER xml %]"
               ispatch="[% a.ispatch FILTER xml %]"
               isprivate="[% a.isprivate FILTER xml %]"
+              isurl="[% a.isurl FILTER xml %]"
           >
             <attachid>[% a.id %]</attachid>
-            <date>[% a.attached FILTER time("%Y-%m-%d %R %z") FILTER xml %]</date>
+            <date>[% a.attached FILTER time("%Y-%m-%d %T %z") FILTER xml %]</date>
+            <delta_ts>[% a.modification_time FILTER time("%Y-%m-%d %T %z") FILTER xml %]</delta_ts>
             <desc>[% a.description FILTER xml %]</desc>
             <filename>[% a.filename FILTER xml %]</filename>
             <type>[% a.contenttype FILTER xml %]</type>
@@ -114,16 +104,7 @@
               <data encoding="base64">[% a.data FILTER base64 %]</data>
             [% END %]
 
-            [% FOREACH flag = a.flags %]
-              <flag name="[% flag.type.name FILTER xml %]"
-                    id="[% flag.id FILTER xml %]"
-                    status="[% flag.status FILTER xml %]"
-                    setter="[% flag.setter.email FILTER email FILTER xml %]"
-                    [% IF flag.status == "?" && flag.requestee %]
-                      requestee="[% flag.requestee.email FILTER email FILTER xml %]"
-                    [% END %]
-               />
-            [% END %]
+            [% PROCESS section_flags obj => a %]
           </attachment>
         [% END %]
       [% END %]
@@ -153,5 +134,21 @@
     [% END %]
     <[% field %][% IF name != '' %] name="[% name FILTER xml %]"[% END -%]>
       [%- val FILTER xml %]</[% field %]>
+  [% END %]
+[% END %]
+
+[% BLOCK section_flags %]
+  [% RETURN UNLESS displayfields.flag %]
+  
+  [% FOREACH flag = obj.flags %]
+    <flag name="[% flag.type.name FILTER xml %]"
+          id="[% flag.id FILTER xml %]"
+          type_id="[% flag.type_id FILTER xml %]"
+          status="[% flag.status FILTER xml %]"
+          setter="[% flag.setter.email FILTER email FILTER xml %]"
+      [% IF flag.status == "?" && flag.requestee %]
+          requestee="[% flag.requestee.email FILTER email FILTER xml %]"
+      [% END %]
+    />
   [% END %]
 [% END %]

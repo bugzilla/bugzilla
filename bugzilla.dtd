@@ -43,6 +43,9 @@
 <!ELEMENT everconfirmed (#PCDATA)>
 <!ELEMENT cc (#PCDATA)>
 <!ELEMENT group (#PCDATA)>
+<!ATTLIST group
+          id CDATA #REQUIRED
+ >
 <!ELEMENT estimated_time (#PCDATA)>
 <!ELEMENT remaining_time (#PCDATA)>
 <!ELEMENT actual_time (#PCDATA)>
@@ -52,6 +55,7 @@
           encoding (base64) #IMPLIED
           isprivate (0|1) #IMPLIED
  >
+<!ELEMENT commentid (#PCDATA)>
 <!ELEMENT who (#PCDATA)>
 <!ELEMENT bug_when (#PCDATA)>
 <!ELEMENT work_time (#PCDATA)>
@@ -61,9 +65,11 @@
           isobsolete (0|1) #IMPLIED
           ispatch (0|1) #IMPLIED
           isprivate (0|1) #IMPLIED
+          isurl (0|1) #IMPLIED
 >
 <!ELEMENT attachid (#PCDATA)>
 <!ELEMENT date (#PCDATA)>
+<!ELEMENT delta_ts (#PCDATA)>
 <!ELEMENT desc (#PCDATA)>
 <!ELEMENT filename (#PCDATA)>
 <!ELEMENT type (#PCDATA)>
@@ -75,6 +81,8 @@
 <!ELEMENT flag EMPTY>
 <!ATTLIST flag
           name CDATA #REQUIRED
+          id CDATA #REQUIRED
+          type_id CDATA
           status CDATA #REQUIRED
           setter CDATA #IMPLIED
           requestee CDATA #IMPLIED

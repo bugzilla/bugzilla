@@ -3133,14 +3133,7 @@ sub GetBugActivity {
         $suppwhere = "AND COALESCE(attachments.isprivate, 0) = 0";
     }
 
-    my $query = "
-        SELECT COALESCE(fielddefs.description, " 
-               # This is a hack - PostgreSQL requires both COALESCE
-               # arguments to be of the same type, and this is the only
-               # way supported by both MySQL 3 and PostgreSQL to convert
-               # an integer to a string. MySQL 4 supports CAST.
-               . $dbh->sql_string_concat('bugs_activity.fieldid', q{''}) .
-               "), fielddefs.name, bugs_activity.attach_id, " .
+    my $query = "SELECT fielddefs.name, bugs_activity.attach_id, " .
         $dbh->sql_date_format('bugs_activity.bug_when', '%Y.%m.%d %H:%i:%s') .
             ", bugs_activity.removed, bugs_activity.added, profiles.login_name
           FROM bugs_activity
@@ -3163,7 +3156,7 @@ sub GetBugActivity {
     my $incomplete_data = 0;
 
     foreach my $entry (@$list) {
-        my ($field, $fieldname, $attachid, $when, $removed, $added, $who) = @$entry;
+        my ($fieldname, $attachid, $when, $removed, $added, $who) = @$entry;
         my %change;
         my $activity_visible = 1;
 
@@ -3180,9 +3173,6 @@ sub GetBugActivity {
         }
 
         if ($activity_visible) {
-            # This gets replaced with a hyperlink in the template.
-            $field =~ s/^Attachment\s*// if $attachid;
-
             # Check for the results of an old Bugzilla data corruption bug
             $incomplete_data = 1 if ($added =~ /^\?/ || $removed =~ /^\?/);
 
@@ -3205,7 +3195,6 @@ sub GetBugActivity {
             $operation->{'who'} = $who;
             $operation->{'when'} = $when;
 
-            $change{'field'} = $field;
             $change{'fieldname'} = $fieldname;
             $change{'attachid'} = $attachid;
             $change{'removed'} = $removed;

@@ -364,7 +364,6 @@
 
 'bug/activity/table.html.tmpl' => [
   'change.attachid', 
-  'change.field', 
 ],
 
 'attachment/create.html.tmpl' => [

@@ -220,9 +220,6 @@ sub history {
                 $change->{added}   = $self->type('string', $change->{added});
                 $change->{field_name} = $self->type('string',
                     delete $change->{fieldname});
-                # This is going to go away in the future from GetBugActivity
-                # so we shouldn't put it in the API.
-                delete $change->{field};
                 push (@{$bug_history{changes}}, $change);
             }
             

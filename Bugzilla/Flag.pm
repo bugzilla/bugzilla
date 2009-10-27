@@ -507,8 +507,10 @@ sub update_flags {
             $class->notify($new_flag, undef, $self);
         }
         else {
-            $new_flag->update($timestamp);
-            $class->notify($new_flag, $old_flags{$new_flag->id}, $self);
+            my $changes = $new_flag->update($timestamp);
+            if (scalar(keys %$changes)) {
+                $class->notify($new_flag, $old_flags{$new_flag->id}, $self);
+            }
             delete $old_flags{$new_flag->id};
         }
     }

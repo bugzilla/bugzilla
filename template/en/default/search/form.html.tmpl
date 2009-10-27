@@ -273,8 +273,9 @@ function doOnSelectProduct(selectmode) {
         <label for="[% field.name %]" accesskey="[% field.accesskey %]">[% field.description %]</label>:
       </th>
       <td>
+        [% type = field.name _ "_type" %]
         [% INCLUDE "search/type-select.html.tmpl"
-           name = field.name _ "_type",
+           name = type,
            types = query_types, selected = default.$type.0 %]
       </td>
       <td><input name="[% field.name %]" id="[% field.name %]" size="40"

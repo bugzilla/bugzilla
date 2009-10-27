@@ -106,4 +106,14 @@ sub note_for_contents_file {
     return $retval;
 }
 
+# Exclude modules being in lib/.
+sub find_all_pods {
+    my($self, $dirs) = @_;
+    my $mod2path = $self->SUPER::find_all_pods($dirs);
+    foreach my $mod (keys %$mod2path) {
+        delete $mod2path->{$mod} if $mod =~ /^lib::/;
+    }
+    return $mod2path;
+}
+
 1;

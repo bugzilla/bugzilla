@@ -28,6 +28,11 @@
   margin-right: 2em;
 }
 
+.zero_results, .zero_result_links {
+  font-size: 120%;
+  font-weight: bold;
+}
+
 .bz_id_column {
 }
 

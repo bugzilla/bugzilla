@@ -691,12 +691,7 @@ if (grep('relevance', @displaycolumns) && !$fulltext) {
 # Severity, priority, resolution and status are required for buglist
 # CSS classes.
 my @selectcolumns = ("bug_id", "bug_severity", "priority", "bug_status",
-                     "resolution");
-
-# if using classification, we also need to look in product.classification_id
-if (Bugzilla->params->{"useclassification"}) {
-    push (@selectcolumns,"product");
-}
+                     "resolution", "product");
 
 # remaining and actual_time are required for percentage_complete calculation:
 if (lsearch(\@displaycolumns, "percentage_complete") >= 0) {
@@ -721,11 +716,10 @@ foreach my $col (@displaycolumns) {
     push (@selectcolumns, $col) if !grep($_ eq $col, @selectcolumns);
 }
 
-# If the user is editing multiple bugs, we also make sure to select the product
-# and status because the values of those fields determine what options the user
+# If the user is editing multiple bugs, we also make sure to select the 
+# status, because the values of that field determines what options the user
 # has for modifying the bugs.
 if ($dotweak) {
-    push(@selectcolumns, "product") if !grep($_ eq 'product', @selectcolumns);
     push(@selectcolumns, "bug_status") if !grep($_ eq 'bug_status', @selectcolumns);
 }
 
@@ -1092,6 +1086,25 @@ $vars->{'splitheader'} = $cgi->cookie('SPLITHEADER') ? 1 : 0;
 $vars->{'quip'} = GetQuip();
 $vars->{'currenttime'} = localtime(time());
 
+# See if there's only one product in all the results (or only one product
+# that we searched for), which allows us to provide more helpful links.
+my @products = keys %$bugproducts;
+my $one_product;
+if (scalar(@products) == 1) {
+    $one_product = new Bugzilla::Product({ name => $products[0] });
+}
+# This is used in the "Zarroo Boogs" case.
+elsif (my @product_input = $cgi->param('product')) {
+    if (scalar(@product_input) == 1 and $product_input[0] ne '') {
+        $one_product = new Bugzilla::Product({ name => $cgi->param('product') });
+    }
+}
+# We only want the template to use it if the user can actually 
+# enter bugs against it.
+if (Bugzilla->user->can_enter_product($one_product)) {
+    $vars->{'one_product'} = $one_product;
+}
+
 # The following variables are used when the user is making changes to multiple bugs.
 if ($dotweak && scalar @bugs) {
     if (!$vars->{'caneditbugs'}) {
@@ -1143,19 +1156,19 @@ if ($dotweak && scalar @bugs) {
     $vars->{'new_bug_statuses'} = Bugzilla::Status->new_from_list($bug_status_ids);
 
     # The groups the user belongs to and which are editable for the given buglist.
-    my @products = keys %$bugproducts;
     $vars->{'groups'} = GetGroups(\@products);
 
     # If all bugs being changed are in the same product, the user can change
     # their version and component, so generate a list of products, a list of
     # versions for the product (if there is only one product on the list of
     # products), and a list of components for the product.
-    if (scalar(@products) == 1) {
-        my $product = new Bugzilla::Product({name => $products[0]});
-        $vars->{'versions'} = [map($_->name ,@{$product->versions})];
-        $vars->{'components'} = [map($_->name, @{$product->components})];
-        $vars->{'targetmilestones'} = [map($_->name, @{$product->milestones})]
-            if Bugzilla->params->{'usetargetmilestone'};
+    if ($one_product) {
+        $vars->{'versions'} = [map($_->name ,@{ $one_product->versions })];
+        $vars->{'components'} = [map($_->name, @{ $one_product->components })];
+        if (Bugzilla->params->{'usetargetmilestone'}) {
+            $vars->{'targetmilestones'} = [map($_->name, 
+                                               @{ $one_product->milestones })];
+        }
     }
 }
 

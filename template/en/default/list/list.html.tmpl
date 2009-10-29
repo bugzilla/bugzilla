@@ -142,13 +142,25 @@
 
 <span class="bz_result_count">
   [% IF bugs.size == 0 %]
-    [% terms.zeroSearchResults %].
+    <span class="zero_results">[% terms.zeroSearchResults %].</span>
   [% ELSIF bugs.size == 1 %]
     One [% terms.bug %] found.
   [% ELSE %]
     [% bugs.size %] [%+ terms.bugs %] found.
   [% END %]
 </span>
+
+[% IF bugs.size == 0 %]
+  <ul class="zero_result_links">
+    <li>[% PROCESS enter_bug_link %]</li>
+    [% IF one_product.defined %]
+      <li><a href="enter_bug.cgi">File a new [% terms.bug %] in a
+        different product</a></li>
+    [% END %]
+    <li><a href="[% PROCESS edit_search_url %]">Edit this search</a></li>
+    <li><a href="query.cgi">Start a new search</a></li>
+  </ul>
+[% END %]
 
 <br>
 
@@ -226,11 +238,7 @@
     [% END %]
     
     <td valign="middle" class="bz_query_edit">
-      [% editqueryname = searchname OR defaultsavename OR '' %]
-      <a href="query.cgi?[% urlquerypart FILTER html %]
-      [% IF editqueryname != '' %]&amp;known_name=
-        [% editqueryname FILTER url_quote %]
-      [% END %]">Edit&nbsp;Search</a>
+      <a href="[% PROCESS edit_search_url %]">Edit&nbsp;Search</a>
     </td>
       
     [% IF searchtype == "saved" %]
@@ -259,10 +267,9 @@
   </tr>
 </table>
 
-[% IF cgi.param('product').size == 1 && cgi.param('product') != "" %]
+[% IF one_product.defined %]
   <p class="bz_query_single_product">
-    <a href="enter_bug.cgi?product=[% cgi.param('product') FILTER url_quote %]">File
-      a new [% terms.bug %] in the "[% cgi.param('product') FILTER html %]" product</a>
+    [% PROCESS enter_bug_link %]
   </p>
 [% END %]
 
@@ -271,3 +278,21 @@
 [%############################################################################%]
 
 [% PROCESS global/footer.html.tmpl %]
+
+[% BLOCK edit_search_url %]
+  [% editqueryname = searchname OR defaultsavename OR '' %]
+  query.cgi?[% urlquerypart FILTER html %]
+    [%- IF editqueryname != '' %]&amp;known_name=
+      [%- editqueryname FILTER url_quote %]
+    [% END %]
+[% END %]
+
+[% BLOCK enter_bug_link %]
+  <a href="enter_bug.cgi
+           [%- IF one_product.defined %]?product=
+             [%- one_product.name FILTER url_quote %][% END %]">File
+    a new [% terms.bug %]
+   [% IF one_product.defined %]
+     in the "[% one_product.name FILTER html %]" product
+   [% END %]</a>
+[% END %]

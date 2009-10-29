@@ -712,17 +712,19 @@ sub get_selectable_classifications {
 }
 
 sub can_enter_product {
-    my ($self, $product_name, $warn) = @_;
+    my ($self, $input, $warn) = @_;
     my $dbh = Bugzilla->dbh;
 
-    if (!defined($product_name)) {
+    if (!defined $input) {
         return unless $warn == THROW_ERROR;
         ThrowUserError('no_products');
     }
-    my $product = new Bugzilla::Product({name => $product_name});
 
+    my $product = blessed($input) ? $input 
+                                  : new Bugzilla::Product({ name => $input });
     my $can_enter =
-      $product && grep($_->name eq $product->name, @{$self->get_enterable_products});
+      $product && grep($_->name eq $product->name,
+                       @{ $self->get_enterable_products });
 
     return 1 if $can_enter;
 
@@ -731,21 +733,26 @@ sub can_enter_product {
     # Check why access was denied. These checks are slow,
     # but that's fine, because they only happen if we fail.
 
+    # We don't just use $product->name for error messages, because if it
+    # changes case from $input, then that's a clue that the product does
+    # exist but is hidden.
+    my $name = blessed($input) ? $input->name : $input;
+
     # The product could not exist or you could be denied...
     if (!$product || !$product->user_has_access($self)) {
-        ThrowUserError('entry_access_denied', {product => $product_name});
+        ThrowUserError('entry_access_denied', { product => $name });
     }
     # It could be closed for bug entry...
     elsif (!$product->is_active) {
-        ThrowUserError('product_disabled', {product => $product});
+        ThrowUserError('product_disabled', { product => $product });
     }
     # It could have no components...
     elsif (!@{$product->components}) {
-        ThrowUserError('missing_component', {product => $product});
+        ThrowUserError('missing_component', { product => $product });
     }
     # It could have no versions...
     elsif (!@{$product->versions}) {
-        ThrowUserError ('missing_version', {product => $product});
+        ThrowUserError ('missing_version', { product => $product });
     }
 
     die "can_enter_product reached an unreachable location.";

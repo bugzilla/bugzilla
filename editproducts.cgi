@@ -80,8 +80,18 @@ if (Bugzilla->params->{'useclassification'}
     && !$classification_name
     && !$product_name)
 {
-    $vars->{'classifications'} = $user->in_group('editcomponents') ?
-      [Bugzilla::Classification->get_all] : $user->get_selectable_classifications;
+    my $class;
+    if ($user->in_group('editcomponents')) {
+        $class = [Bugzilla::Classification->get_all];
+    }
+    else {
+        # Only keep classifications containing at least one product
+        # which you can administer.
+        my $products = $user->get_products_by_permission('editcomponents');
+        my %class_ids = map { $_->classification_id => 1 } @$products;
+        $class = Bugzilla::Classification->new_from_list([keys %class_ids]);
+    }
+    $vars->{'classifications'} = $class;
 
     $template->process("admin/products/list-classifications.html.tmpl", $vars)
         || ThrowTemplateError($template->error());

@@ -154,13 +154,17 @@
     to generate the right class (you can't call class methods directly
     on Bugzilla::Field::Choice).
 
+  [% ELSIF error == "field_not_custom" %]
+    '[% field.description FILTER html %]' ([% field.name FILTER html %])
+    is not a custom field.
+
   [% ELSIF error == "field_type_mismatch" %]
     Cannot seem to handle <code>[% field FILTER html %]</code>
     and <code>[% type FILTER html %]</code> together.
 
-  [% ELSIF error == "field_not_custom" %]
-    '[% field.description FILTER html %]' ([% field.name FILTER html %])
-    is not a custom field.
+  [% ELSIF error == "field_type_not_specified" %]
+    [% title = "Field Type Not Specified" %]
+    You must specify a type when creating a custom field.
 
   [% ELSIF error == "illegal_content_type_method" %]
     Your form submission got corrupted somehow.  The <em>content

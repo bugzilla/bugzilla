@@ -837,6 +837,11 @@ sub run_create_validators {
                                      $params->{visibility_field_id});
 
     my $type = $params->{type} || 0;
+    
+    if ($params->{custom} && !$type) {
+        ThrowCodeError('field_type_not_specified');
+    }
+    
     $params->{value_field_id} = 
         $class->_check_value_field_id($params->{value_field_id},
             ($type == FIELD_TYPE_SINGLE_SELECT 

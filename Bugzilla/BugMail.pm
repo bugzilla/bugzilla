@@ -356,7 +356,7 @@ sub Send {
         }
     }
 
-    my ($comments, $anyprivate) = get_comments_by_bug($id, $start, $end);
+    my $comments = get_comments_by_bug($id, $start, $end);
 
     ###########################################################################
     # Start of email filtering code
@@ -479,11 +479,6 @@ sub Send {
             # So the user exists, can see the bug, and wants mail in at least
             # one role. But do we want to send it to them?
 
-            # If we are using insiders, and the comment is private, only send 
-            # to insiders
-            my $insider_ok = 1;
-            $insider_ok = 0 if $anyprivate && !$user->is_insider;
-
             # We shouldn't send mail if this is a dependency mail (i.e. there 
             # is something in @depbugs), and any of the depending bugs are not 
             # visible to the user. This is to avoid leaking the summaries of 
@@ -498,10 +493,7 @@ sub Send {
 
             # Make sure the user isn't in the nomail list, and the insider and 
             # dep checks passed.
-            if ($user->email_enabled &&
-                $insider_ok &&
-                $dep_ok)
-            {
+            if ($user->email_enabled && $dep_ok) {
                 # OK, OK, if we must. Email the user.
                 $sent_mail = sendMail($user, 
                                       \@headerlist,
@@ -511,7 +503,6 @@ sub Send {
                                       \%fielddescription, 
                                       \@diffparts,
                                       $comments,
-                                      $anyprivate, 
                                       ! $start, 
                                       $id,
                                       exists $watching{$user_id} ?
@@ -535,9 +526,9 @@ sub Send {
 
 sub sendMail {
     my ($user, $hlRef, $relRef, $valueRef, $dmhRef, $fdRef,
-        $diffRef, $newcomments, $anyprivate, $isnew,
-        $id, $watchingRef) = @_;
+        $diffRef, $comments_in, $isnew, $id, $watchingRef) = @_;
 
+    my @send_comments = @$comments_in;
     my %values = %$valueRef;
     my @headerlist = @$hlRef;
     my %mailhead = %$dmhRef;
@@ -577,7 +568,11 @@ sub sendMail {
         }
     }
 
-    if ($difftext eq "" && !scalar(@$newcomments) && !$isnew) {
+    if (!$user->is_insider) {
+        @send_comments = grep { !$_->{isprivate} } @send_comments;
+    }
+
+    if ($difftext eq "" && !scalar(@send_comments) && !$isnew) {
       # Whoops, no differences!
       return 0;
     }
@@ -640,7 +635,7 @@ sub sendMail {
         reporter => $values{'reporter'},
         reportername => Bugzilla::User->new({name => $values{'reporter'}})->name,
         diffs => $diffs,
-        new_comments => $newcomments,
+        new_comments => \@send_comments,
         threadingmarker => build_thread_marker($id, $user->id, $isnew),
     };
 
@@ -662,7 +657,6 @@ sub get_comments_by_bug {
 
     my $result = "";
     my $count = 0;
-    my $anyprivate = 0;
 
     # $start will be undef for new bugs, and defined for pre-existing bugs.
     if ($start) {
@@ -684,13 +678,10 @@ sub get_comments_by_bug {
         if ($comment->{body} =~ /Created an attachment \(/) {
             $comment->{body} =~ s/(Created an attachment \(id=([0-9]+)\))/$1\n --> \($attach_base$2\)/g;
         }
+        $comment->{body} = $comment->{'already_wrapped'} ? $comment->{body} : wrap_comment($comment->{body});
     }
 
-    if (Bugzilla->params->{'insidergroup'}) {
-        $anyprivate = 1 if scalar(grep {$_->{'isprivate'} > 0} @$comments);
-    }
-
-    return ($comments, $anyprivate);
+    return $comments;
 }
 
 1;

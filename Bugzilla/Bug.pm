@@ -3095,6 +3095,7 @@ sub format_comment {
 
     $template->process("bug/format_comment.txt.tmpl", $vars, \$body)
         || ThrowTemplateError($template->error());
+    $body =~ s/^X//;
     return $body;
 }
 

@@ -17,6 +17,11 @@
   # Contributor(s): Marc Schumann <wurblzap@gmail.com>
   #%]
 
+[%# NOTE: Everywhere you use this template, you must call 
+  # "FILTER remove('^X')" on the result. This is unfortunately the only way
+  # to preserve leading whitespace in comments.
+  #%]
+
 [%# INTERFACE:
   #   comment: A hash containing comment information.
   #              count:           The comment number (on the bug it belongs to)
@@ -34,7 +39,7 @@
 [% PROCESS 'global/field-descs.none.tmpl' %]
 
 [%- IF comment.type == constants.CMT_DUPE_OF -%]
-[% comment.body %]
+X[% comment.body %]
 
 *** This [% terms.bug %] has been marked as a duplicate of [% terms.bug %] [%+ comment.extra_data %] ***
 [% ELSIF comment.type == constants.CMT_HAS_DUPE %]
@@ -42,7 +47,7 @@
 [% ELSIF comment.type == constants.CMT_POPULAR_VOTES %]
 *** This [% terms.bug %] has been confirmed by popular vote. ***
 [% ELSIF comment.type == constants.CMT_MOVED_TO %]
-[% comment.body %]
+X[% comment.body %]
 
 [%+ terms.Bug %] moved to [% Param("move-to-url") %].
 If the move succeeded, [% comment.extra_data %] will receive a mail containing
@@ -51,5 +56,5 @@ If all went well, please mark this [% terms.bug %]
 [%+ get_status('VERIFIED') %], and paste in a link to the new [% terms.bug %].
 Otherwise, reopen this [% terms.bug %].
 [%- ELSE -%]
-[%- comment.body %]
+X[%- comment.body %]
 [% END %]

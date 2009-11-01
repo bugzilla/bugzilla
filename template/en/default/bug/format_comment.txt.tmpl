@@ -17,6 +17,11 @@
   # Contributor(s): Marc Schumann <wurblzap@gmail.com>
   #%]
 
+[%# NOTE: Everywhere you use this template, you must call 
+  # "FILTER remove('^X')" on the result. This is unfortunately the only way
+  # to preserve leading whitespace in comments.
+  #%]
+
 [%# INTERFACE:
   #   comment: A hash containing comment information.
   #              count:           The comment number (on the bug it belongs to)
@@ -33,14 +38,8 @@
 
 [% PROCESS 'global/field-descs.none.tmpl' %]
 
-[% IF comment.already_wrapped %]
-  [% wrapped_comment = comment.body %]
-[% ELSE %]
-  [% wrapped_comment = comment.body FILTER wrap_comment %]
-[% END %]
-
-[%- IF comment.type == constants.CMT_DUPE_OF -%]
-[% wrapped_comment %]
+[% IF comment.type == constants.CMT_DUPE_OF %]
+X[% comment.body %]
 
 *** This [% terms.bug %] has been marked as a duplicate of [% terms.bug %] [%+ comment.extra_data %] ***
 [% ELSIF comment.type == constants.CMT_HAS_DUPE %]
@@ -48,7 +47,7 @@
 [% ELSIF comment.type == constants.CMT_POPULAR_VOTES %]
 *** This [% terms.bug %] has been confirmed by popular vote. ***
 [% ELSIF comment.type == constants.CMT_MOVED_TO %]
-[% wrapped_comment %]
+X[% comment.body %]
 
 [%+ terms.Bug %] moved to [% Param("move-to-url") %].
 If the move succeeded, [% comment.extra_data %] will receive a mail containing
@@ -56,6 +55,6 @@ the number of the new [% terms.bug %] in the other database.
 If all went well, please mark this [% terms.bug %]
 [%+ display_value("bug_status", 'VERIFIED') %], and paste in a link to the new [% terms.bug %].
 Otherwise, reopen this [% terms.bug %].
-[%- ELSE -%]
-[%- wrapped_comment %]
+[% ELSE %]
+X[% comment.body %]
 [% END %]

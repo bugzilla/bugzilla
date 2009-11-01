@@ -273,7 +273,7 @@ sub _check_name {
     my $name_regex = qr/^[\w\.]+$/;
     # Custom fields have more restrictive name requirements than
     # standard fields.
-    $name_regex = qr/^\w+$/ if $is_custom;
+    $name_regex = qr/^[a-zA-Z0-9_]+$/ if $is_custom;
     # Custom fields can't be named just "cf_", and there is no normal
     # field named just "cf_".
     ($name =~ $name_regex && $name ne "cf_")

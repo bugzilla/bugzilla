@@ -583,6 +583,9 @@ sub update_table_definitions {
     # 2009-09-28 LpSolit@gmail.com - Bug 399073
     _fix_logincookies_ipaddr();
 
+    # 2009-11-01 LpSolit@gmail.com - Bug 525025
+    _fix_invalid_custom_field_names();
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################
@@ -3217,6 +3220,19 @@ sub _fix_logincookies_ipaddr {
     $dbh->bz_alter_column('logincookies', 'ipaddr', {TYPE => 'varchar(40)'});
     $dbh->do('UPDATE logincookies SET ipaddr = NULL WHERE ipaddr = ?',
              undef, '0.0.0.0');
+}
+
+sub _fix_invalid_custom_field_names {
+    my @fields = Bugzilla->get_fields({ custom => 1 });
+
+    foreach my $field (@fields) {
+        next if $field->name =~ /^[a-zA-Z0-9_]+$/;
+        # The field name is illegal and can break the DB. Kill the field!
+        $field->set_obsolete(1);
+        eval { $field->remove_from_db(); };
+        print "Removing custom field '" . $field->name . "' (illegal name)... ";
+        print $@ ? "failed\n$@\n" : "succeeded\n";
+    }
 }
 
 1;

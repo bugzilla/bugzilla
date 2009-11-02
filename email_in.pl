@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl -wT
 # -*- Mode: perl; indent-tabs-mode: nil -*-
 #
 # The contents of this file are subject to the Mozilla Public
@@ -26,7 +26,11 @@ use warnings;
 # run from this one so that it can find its modules.
 use Cwd qw(abs_path);
 use File::Basename qw(dirname);
-BEGIN { chdir dirname(abs_path($0)); }
+BEGIN {
+    # Untaint the abs_path.
+    my ($a) = abs_path($0) =~ /^(.*)$/;
+    chdir dirname($a);
+}
 
 use lib qw(. lib);
 
@@ -503,7 +507,7 @@ normal Bugzilla interface. So, for example, you cannot reassign
 a bug and change its status at the same time.
 
 The email interface only accepts emails that are correctly formatted
-perl RFC2822. If you send it an incorrectly formatted message, it
+per RFC2822. If you send it an incorrectly formatted message, it
 may behave in an unpredictable fashion.
 
 You cannot send an HTML mail along with attachments. If you do, Bugzilla

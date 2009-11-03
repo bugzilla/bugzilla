@@ -75,7 +75,8 @@
 
 [% END %]
 
-[% IF Param('useclassification') && classification %]
+[% IF Param('useclassification') && classification
+      && user.in_group('editclassifications') %]
   Edit classification <a href="editclassifications.cgi?action=edit
     [%- classification_url_part %]">'
     [%- classification.name FILTER html %]'</a>.

@@ -714,6 +714,7 @@ sub get_selectable_classifications {
 sub can_enter_product {
     my ($self, $input, $warn) = @_;
     my $dbh = Bugzilla->dbh;
+    $warn ||= 0;
 
     if (!defined $input) {
         return unless $warn == THROW_ERROR;

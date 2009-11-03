@@ -1101,7 +1101,7 @@ elsif (my @product_input = $cgi->param('product')) {
 }
 # We only want the template to use it if the user can actually 
 # enter bugs against it.
-if (Bugzilla->user->can_enter_product($one_product)) {
+if ($one_product && Bugzilla->user->can_enter_product($one_product)) {
     $vars->{'one_product'} = $one_product;
 }
 

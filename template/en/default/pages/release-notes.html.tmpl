@@ -70,6 +70,12 @@
     with mangled names. 
     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=328628">[% terms.Bug %] 328628</a>)
   </li>
+  <li>Creating custom fields with Unicode in their database column name
+    is now no longer allowed, as it would break Bugzilla. If you created 
+    such a custom field, you should delete it by first marking it obsolete
+    and then clicking "Delete" in the custom field list, using editfields.cgi.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=525025">[% terms.Bug %] 525025</a>)
+  </li>
   <li>Clicking "submit only my comment" on the "mid-air collisions" page
     was leading to a "Suspicious Action" warning.
     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=514378">[% terms.Bug %] 514378</a>)

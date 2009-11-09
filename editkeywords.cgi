@@ -169,8 +169,7 @@ if ($action eq 'delete') {
     my $keyword =  new Bugzilla::Keyword($key_id)
         || ThrowCodeError('invalid_keyword_id', { id => $key_id });
 
-    $dbh->do('DELETE FROM keywords WHERE keywordid = ?', undef, $keyword->id);
-    $dbh->do('DELETE FROM keyworddefs WHERE id = ?', undef, $keyword->id);
+    $keyword->remove_from_db();
 
     delete_token($token);
 

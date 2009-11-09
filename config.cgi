@@ -20,6 +20,7 @@
 #
 # Contributor(s): Terry Weissman <terry@mozilla.org>
 #                 Myk Melez <myk@mozilla.org>
+#                 Frank Becker <Frank@Frank-Becker.de>
 
 ################################################################################
 # Script Initialization
@@ -36,6 +37,7 @@ use Bugzilla::Error;
 use Bugzilla::Keyword;
 use Bugzilla::Status;
 use Bugzilla::Field;
+use Digest::MD5 qw(md5_base64);
 
 my $user = Bugzilla->login(LOGIN_OPTIONAL);
 my $cgi  = Bugzilla->cgi;
@@ -110,11 +112,41 @@ sub display_data {
     my $format = $template->get_format("config", scalar($cgi->param('format')),
                                        scalar($cgi->param('ctype')) || "js");
 
-    # Return HTTP headers.
-    print "Content-Type: $format->{'ctype'}\n\n";
-
-    # Generate the configuration file and return it to the user.
-    $template->process($format->{'template'}, $vars)
+    # Generate the configuration data.
+    my $output;
+    $template->process($format->{'template'}, $vars, \$output)
       || ThrowTemplateError($template->error());
+
+    # Wide characters cause md5_base64() to die.
+    my $digest_data = $output;
+    utf8::encode($digest_data) if utf8::is_utf8($digest_data);
+    my $digest = md5_base64($digest_data);
+
+    # ETag support.
+    my $if_none_match = $cgi->http('If-None-Match') || "";
+    my $found304;
+    my @if_none = split(/[\s,]+/, $if_none_match);
+    foreach my $if_none (@if_none) {
+        # remove quotes from begin and end of the string
+        $if_none =~ s/^\"//g;
+        $if_none =~ s/\"$//g;
+        if ($if_none eq $digest or $if_none eq '*') {
+            # leave the loop after the first match
+            $found304 = $if_none;
+            last;
+        }
+    }
+ 
+   if ($found304) {
+        print $cgi->header(-type => 'text/html',
+                           -ETag => $found304,
+                           -status => '304 Not Modified');
+    }
+    else {
+        # Return HTTP headers.
+        print $cgi->header (-ETag => $digest,
+                            -type => $format->{'ctype'});
+        print $output;
+    }
     exit;
 }

@@ -266,10 +266,8 @@ $vars->{'resolution'} = Bugzilla::Field->new({name => 'resolution'})->legal_valu
 my @fields = Bugzilla->get_fields({ obsolete => 0 });
 
 # If we're not in the time-tracking group, exclude time-tracking fields.
-if (!Bugzilla->user->in_group(Bugzilla->params->{'timetrackinggroup'})) {
-    foreach my $tt_field (qw(estimated_time remaining_time work_time
-                             percentage_complete deadline))
-    {
+if (!Bugzilla->user->is_timetracker) {
+    foreach my $tt_field (TIMETRACKING_FIELDS) {
         @fields = grep($_->name ne $tt_field, @fields);
     }
 }

@@ -328,27 +328,30 @@ sub init {
         }
     }
     
-    my @legal_fields = ("product", "version", "assigned_to", "reporter", 
-                        "component", "classification", "target_milestone",
-                        "bug_group");
-
-    # Include custom select fields.
-    push(@legal_fields, map { $_->name } @select_fields);
-    push(@legal_fields, map { $_->name } @multi_select_fields);
-
-    foreach my $field ($params->param()) {
-        if (lsearch(\@legal_fields, $field) != -1) {
-            push(@specialchart, [$field, "anyexact",
-                                 join(',', $params->param($field))]);
+    # All fields that don't have a . in their name should be specifyable
+    # in the URL directly.
+    my @legal_fields = grep { $_->name !~ /\./ } Bugzilla->get_fields;
+    if (!$user->is_timetracker) {
+        foreach my $field (TIMETRACKING_FIELDS) {
+            @legal_fields = grep { $_->name ne $field } @legal_fields;
         }
     }
 
-    if ($params->param('keywords')) {
-        my $t = $params->param('keywords_type');
-        if (!$t || $t eq "or") {
-            $t = "anywords";
+    foreach my $field ($params->param()) {
+        if (grep { $_->name eq $field } @legal_fields) {
+            my $type = $params->param("${field}_type");
+            if (!$type) {
+                if ($field eq 'keywords') {
+                    $type = 'anywords';
+                }
+                else {
+                    $type = 'anyexact';
+                }
+            }
+            $type = 'matches' if $field eq 'content';
+            push(@specialchart, [$field, $type,
+                                 join(',', $params->param($field))]);
         }
-        push(@specialchart, ["keywords", $t, $params->param('keywords')]);
     }
 
     foreach my $id ("1", "2") {
@@ -572,10 +575,6 @@ sub init {
                 push(@specialchart, [$f, $type, $s]);
             }
         }
-    }
-
-    if (defined $params->param('content')) {
-        push(@specialchart, ['content', 'matches', $params->param('content')]);
     }
 
     my $multi_fields = join('|', map($_->name, @multi_select_fields));

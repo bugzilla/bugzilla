@@ -533,10 +533,8 @@ sub init {
       my $deadlineto;
             
       if ($params->param('deadlinefrom')){
-        $deadlinefrom = $params->param('deadlinefrom');
-        validate_date($deadlinefrom)
-          || ThrowUserError('illegal_date', {date => $deadlinefrom,
-                                             format => 'YYYY-MM-DD'});
+        $params->param('deadlinefrom', '') if lc($params->param('deadlinefrom')) eq 'now';
+        $deadlinefrom = SqlifyDate($params->param('deadlinefrom'));
         $sql_deadlinefrom = $dbh->quote($deadlinefrom);
         trick_taint($sql_deadlinefrom);
         my $term = "bugs.deadline >= $sql_deadlinefrom";
@@ -548,10 +546,8 @@ sub init {
       }
       
       if ($params->param('deadlineto')){
-        $deadlineto = $params->param('deadlineto');
-        validate_date($deadlineto)
-          || ThrowUserError('illegal_date', {date => $deadlineto,
-                                             format => 'YYYY-MM-DD'});
+        $params->param('deadlineto', '') if lc($params->param('deadlineto')) eq 'now';
+        $deadlineto = SqlifyDate($params->param('deadlineto'));
         $sql_deadlineto = $dbh->quote($deadlineto);
         trick_taint($sql_deadlineto);
         my $term = "bugs.deadline <= $sql_deadlineto";

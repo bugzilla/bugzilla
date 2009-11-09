@@ -36,6 +36,7 @@ use Bugzilla::Error;
 use Bugzilla::User;
 use Bugzilla::Group;
 use Bugzilla::Token;
+use Bugzilla::Whine::Schedule;
 
 # require the user to have logged in
 my $user = Bugzilla->login(LOGIN_REQUIRED);
@@ -104,20 +105,11 @@ if ($cgi->param('update')) {
                 # otherwise we could simply delete whatever matched that ID.
                 #
                 # schedules
-                $sth = $dbh->prepare("SELECT whine_schedules.id " .
-                                     "FROM whine_schedules " .
-                                     "LEFT JOIN whine_events " .
-                                     "ON whine_events.id = " .
-                                     "whine_schedules.eventid " .
-                                     "WHERE whine_events.id = ? " .
-                                     "AND whine_events.owner_userid = ?");
-                $sth->execute($eventid, $userid);
-                my @ids = @{$sth->fetchall_arrayref};
+                my $schedules = Bugzilla::Whine::Schedule->match({ eventid => $eventid });
                 $sth = $dbh->prepare("DELETE FROM whine_schedules "
                     . "WHERE id=?");
-                for (@ids) {
-                    my $delete_id = $_->[0];
-                    $sth->execute($delete_id);
+                foreach my $schedule (@$schedules) {                    
+                    $sth->execute($schedule->id);
                 }
 
                 # queries
@@ -129,7 +121,7 @@ if ($cgi->param('update')) {
                                      "WHERE whine_events.id = ? " .
                                      "AND whine_events.owner_userid = ?");
                 $sth->execute($eventid, $userid);
-                @ids = @{$sth->fetchall_arrayref};
+                my @ids = @{$sth->fetchall_arrayref};
                 $sth = $dbh->prepare("DELETE FROM whine_queries " .
                                      "WHERE id=?");
                 for (@ids) {
@@ -183,13 +175,10 @@ if ($cgi->param('update')) {
             # to be altered or deleted
 
             # Check schedules for changes
-            $sth = $dbh->prepare("SELECT id " .
-                                 "FROM whine_schedules " .
-                                 "WHERE eventid=?");
-            $sth->execute($eventid);
+            my $schedules = Bugzilla::Whine::Schedule->match({ eventid => $eventid });
             my @scheduleids = ();
-            while (my ($sid) = $sth->fetchrow_array) {
-                push @scheduleids, $sid;
+            foreach my $schedule (@$schedules) {
+                push @scheduleids, $schedule->id;
             }
 
             # we need to double-check all of the user IDs in mailto to make
@@ -370,30 +359,24 @@ for my $event_id (keys %{$events}) {
     $events->{$event_id}->{'queries'} = [];
 
     # schedules
-    $sth = $dbh->prepare("SELECT run_day, run_time, mailto_type, mailto, id " .
-                         "FROM whine_schedules " .
-                         "WHERE eventid=?");
-    $sth->execute($event_id);
-    for my $row (@{$sth->fetchall_arrayref}) {
-        my $mailto_type = $row->[2];
+    my $schedules = Bugzilla::Whine::Schedule->match({ eventid => $event_id });
+    foreach my $schedule (@$schedules) {
+        my $mailto_type = $schedule->mailto_is_group ? MAILTO_GROUP 
+                                                     : MAILTO_USER;
         my $mailto = '';
         if ($mailto_type == MAILTO_USER) {
-            my $mailto_user = new Bugzilla::User($row->[3]);
-            $mailto = $mailto_user->login;
+            $mailto = $schedule->mailto->login;
         }
         elsif ($mailto_type == MAILTO_GROUP) {
-            $sth = $dbh->prepare("SELECT name FROM groups WHERE id=?");
-            $sth->execute($row->[3]);
-            $mailto = $sth->fetch->[0];
-            $mailto = "" unless Bugzilla::Group::ValidateGroupName(
-                                $mailto, ($user));
+            $mailto = $schedule->mailto->name;
         }
+
         my $this_schedule = {
-            'day'         => $row->[0],
-            'time'        => $row->[1],
+            'day'         => $schedule->run_day,
+            'time'        => $schedule->run_time,
             'mailto_type' => $mailto_type,
             'mailto'      => $mailto,
-            'id'          => $row->[4],
+            'id'          => $schedule->id,
         };
         push @{$events->{$event_id}->{'schedule'}}, $this_schedule;
     }

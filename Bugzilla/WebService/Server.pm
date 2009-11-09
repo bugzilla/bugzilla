@@ -21,7 +21,8 @@ use strict;
 sub handle_login {
     my ($self, $class, $method, $full_method) = @_;
     eval "require $class";
-    return if $class->login_exempt($method);
+    return if ($class->login_exempt($method) 
+               and !defined Bugzilla->input_params->{Bugzilla_login});
     Bugzilla->login();
 }
 

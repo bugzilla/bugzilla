@@ -61,12 +61,12 @@ sub login {
     }
 
     # Make sure the CGI user info class works if necessary.
-    my $cgi = Bugzilla->cgi;
-    $cgi->param('Bugzilla_login', $params->{login});
-    $cgi->param('Bugzilla_password', $params->{password});
-    $cgi->param('Bugzilla_remember', $remember);
+    my $input_params = Bugzilla->input_params;
+    $input_params->{'Bugzilla_login'} =  $params->{login};
+    $input_params->{'Bugzilla_password'} = $params->{password};
+    $input_params->{'Bugzilla_remember'} = $remember;
 
-    Bugzilla->login;
+    Bugzilla->login();
     return { id => $self->type('int', Bugzilla->user->id) };
 }
 

@@ -112,12 +112,6 @@ sub _argument_type_check {
     my $self = shift;
     my $params = $self->SUPER::_argument_type_check(@_);
 
-    # This is the best time to do login checks.
-    $self->handle_login();
-
-    # If there are no parameters, we don't need to parse them.
-    return $params if !ref $params;
-
     # JSON-RPC 1.0 requires all parameters to be passed as an array, so
     # we just pull out the first item and assume it's an object.
     if (ref $params eq 'ARRAY') {
@@ -143,6 +137,11 @@ sub _argument_type_check {
             }
         }
     }
+
+    Bugzilla->input_params($params);
+
+    # This is the best time to do login checks.
+    $self->handle_login();
 
     # Bugzilla::WebService packages call internal methods like
     # $self->_some_private_method. So we have to inherit from 

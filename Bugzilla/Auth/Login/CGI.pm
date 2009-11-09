@@ -40,12 +40,10 @@ use Bugzilla::Error;
 
 sub get_login_info {
     my ($self) = @_;
-    my $cgi = Bugzilla->cgi;
+    my $params = Bugzilla->input_params;
 
-    my $username = trim($cgi->param("Bugzilla_login"));
-    my $password = $cgi->param("Bugzilla_password");
-
-    $cgi->delete('Bugzilla_login', 'Bugzilla_password');
+    my $username = trim(delete $params->{"Bugzilla_login"});
+    my $password = delete $params->{"Bugzilla_password"};
 
     if (!defined $username || !defined $password) {
         return { failure => AUTH_NODATA };

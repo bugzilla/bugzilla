@@ -48,9 +48,10 @@ sub persist_login {
     my ($self, $user) = @_;
     my $dbh = Bugzilla->dbh;
     my $cgi = Bugzilla->cgi;
+    my $input_params = Bugzilla->input_params;
 
     my $ip_addr;
-    if ($cgi->param('Bugzilla_restrictlogin')) {
+    if ($input_params->{'Bugzilla_restrictlogin'}) {
         $ip_addr = $cgi->remote_addr;
         # The IP address is valid, at least for comparing with itself in a
         # subsequent login
@@ -80,8 +81,8 @@ sub persist_login {
     # or admin didn't forbid it and user told to remember.
     if ( Bugzilla->params->{'rememberlogin'} eq 'on' ||
          (Bugzilla->params->{'rememberlogin'} ne 'off' &&
-          $cgi->param('Bugzilla_remember') &&
-          $cgi->param('Bugzilla_remember') eq 'on') ) 
+          $input_params->{'Bugzilla_remember'} &&
+          $input_params->{'Bugzilla_remember'} eq 'on') ) 
     {
         # Not a session cookie, so set an infinite expiry
         $cookieargs{'-expires'} = 'Fri, 01-Jan-2038 00:00:00 GMT';

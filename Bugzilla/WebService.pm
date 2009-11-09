@@ -142,10 +142,50 @@ how this is implemented for those frontends.
 
 =head1 LOGGING IN
 
+There are various ways to log in:
+
+=over
+
+=item C<User.login>
+
 You can use L<Bugzilla::WebService::User/login> to log in as a Bugzilla 
 user. This issues standard HTTP cookies that you must then use in future
 calls, so your client must be capable of receiving and transmitting
 cookies.
+
+=item C<Bugzilla_login> and C<Bugzilla_password>
+
+B<Added in Bugzilla 3.6>
+
+You can specify C<Bugzilla_login> and C<Bugzilla_password> as arguments
+to any WebService method, and you will be logged in as that user if your
+credentials are correct. Here are the arguments you can specify to any
+WebService method to perform a login:
+
+=over
+
+=item C<Bugzilla_login> (string) - A user's login name.
+
+=item C<Bugzilla_password> (string) - That user's password.
+
+=item C<Bugzilla_restrictlogin> (boolean) - Optional. If true,
+then your login will only be valid for your IP address.
+
+=item C<Bugzilla_rememberlogin> (boolean) - Optional. If true,
+then the cookie sent back to you with the method response will
+not expire.
+
+=back
+
+The C<Bugzilla_restrictlogin> and C<Bugzilla_rememberlogin> options
+are only used when you have also specified C<Bugzilla_login> and 
+C<Bugzilla_password>.
+
+Note that Bugzilla will return HTTP cookies along with the method
+response when you use these arguments (just like the C<User.login> method
+above).
+
+=back
 
 =head1 STABLE, EXPERIMENTAL, and UNSTABLE
 

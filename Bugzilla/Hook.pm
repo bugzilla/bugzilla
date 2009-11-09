@@ -144,6 +144,9 @@ These params are accessible through L<Bugzilla/hook_args>.
 That returns a hashref. Very frequently, if you want your
 hook to do anything, you have to modify these variables.
 
+You may also want to use L<Bugzilla/input_params> to get parameters
+that were passed to the current CGI script or WebService method.
+
 =head2 Versioning Extensions
 
 Every extension must have a file in its root called F<info.pl>.

@@ -21,10 +21,17 @@
 
 package Bugzilla::WebService::Util;
 use strict;
-
 use base qw(Exporter);
 
-our @EXPORT_OK = qw(filter validate);
+# We have to "require", not "use" this, because otherwise it tries to
+# use features of Test::More during import().
+require Test::Taint;
+
+our @EXPORT_OK = qw(
+    filter 
+    taint_data
+    validate
+);
 
 sub filter ($$) {
     my ($params, $hash) = @_;
@@ -42,6 +49,32 @@ sub filter ($$) {
     }
 
     return \%newhash;
+}
+
+sub taint_data {
+    my $params = shift;
+    return if !$params;
+    # Though this is a private function, it hasn't changed since 2004 and
+    # should be safe to use, and prevents us from having to write it ourselves
+    # or require another module to do it.
+    Test::Taint::_deeply_traverse(\&_delete_bad_keys, $params);
+    Test::Taint::taint_deeply($params);
+}
+
+sub _delete_bad_keys {
+    foreach my $item (@_) {
+        next if ref $item ne 'HASH';
+        foreach my $key (keys %$item) {
+            # Making something a hash key always untaints it, in Perl.
+            # However, we need to validate our argument names in some way.
+            # We know that all hash keys passed in to the WebService will 
+            # match \w+, so we delete any key that doesn't match that.
+            if ($key !~ /^\w+$/) {
+                delete $item->{$key};
+            }
+        }
+    }
+    return @_;
 }
 
 sub validate  {

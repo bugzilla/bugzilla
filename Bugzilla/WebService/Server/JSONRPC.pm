@@ -26,6 +26,7 @@ use base qw(JSON::RPC::Server::CGI Bugzilla::WebService::Server);
 
 use Bugzilla::Error;
 use Bugzilla::WebService::Constants;
+use Bugzilla::WebService::Util qw(taint_data);
 use Date::Parse;
 use DateTime;
 
@@ -122,6 +123,8 @@ sub _argument_type_check {
     if (ref $params eq 'ARRAY') {
         $params = $params->[0];
     }
+
+    taint_data($params);
 
     # Now, convert dateTime fields on input.
     $self->_bz_method_name =~ /^(\S+)\.(\S+)$/;

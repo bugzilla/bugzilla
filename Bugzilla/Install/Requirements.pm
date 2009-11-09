@@ -233,6 +233,12 @@ sub OPTIONAL_MODULES {
         feature => ['jsonrpc'],
     },
     {
+        package => 'Test-Taint',
+        module  => 'Test::Taint',
+        version => 0,
+        feature => ['jsonrpc', 'xmlrpc'],
+    },
+    {
         # We need the 'utf8_mode' method of HTML::Parser, for HTML::Scrubber.
         package => 'HTML-Parser',
         module  => 'HTML::Parser',

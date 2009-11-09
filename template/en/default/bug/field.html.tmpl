@@ -70,6 +70,7 @@
     id="field_container_[% field.name FILTER html %]" 
     [% " colspan=\"$value_span\"" FILTER none IF value_span %]>
 [% END %]
+[% Hook.process('start_field_column') %]
 [% IF editable %]
   [% SWITCH field.type %]
     [% CASE constants.FIELD_TYPE_FREETEXT %]
@@ -210,4 +211,5 @@
 [% ELSE %]
   [% value.join(', ') FILTER html %]
 [% END %]
+[% Hook.process('end_field_column') %]
 [% '</td>' IF NOT no_tds %]

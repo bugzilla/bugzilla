@@ -28,12 +28,15 @@
 <input type="hidden" name="token" value="[% token FILTER html %]">
 
 <script type="text/javascript">
-  var numelements = document.forms.changeform.elements.length;
   function SetCheckboxes(value) {
-      var item;
-      for (var i=0 ; i<numelements ; i++) {
-          item = document.forms.changeform.elements[i];
-          item.checked = value;
+      var elements = document.forms.changeform.getElementsByTagName('input'),
+          numelements = elements.length,
+          item, i;
+      for (i = 0; i < numelements; i++) {
+          item = elements[i];
+          if (item.type === 'checkbox' && item.name.match(/^id_/)) {
+            item.checked = value;
+          }
       }
   }
   document.write(' <input type="button" name="uncheck_all" value="Uncheck All" onclick="SetCheckboxes(false);">');

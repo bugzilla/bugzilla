@@ -64,7 +64,7 @@ package Bugzilla::XMLRPC::Deserializer;
 use strict;
 # We can't use "use base" because XMLRPC::Serializer doesn't return
 # a true value.
-eval { require XMLRPC::Lite; };
+use XMLRPC::Lite;
 our @ISA = qw(XMLRPC::Deserializer);
 
 use Bugzilla::Error;
@@ -141,7 +141,7 @@ sub _validation_subs {
 
 package Bugzilla::XMLRPC::SOM;
 use strict;
-eval { require XMLRPC::Lite; };
+use XMLRPC::Lite;
 our @ISA = qw(XMLRPC::SOM);
 use Bugzilla::WebService::Util qw(taint_data);
 
@@ -165,7 +165,7 @@ use Scalar::Util qw(blessed);
 use strict;
 # We can't use "use base" because XMLRPC::Serializer doesn't return
 # a true value.
-eval { require XMLRPC::Lite; };
+use XMLRPC::Lite;
 our @ISA = qw(XMLRPC::Serializer);
 
 sub new {

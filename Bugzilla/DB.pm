@@ -271,8 +271,7 @@ EOT
 }
 
 # List of abstract methods we are checking the derived class implements
-our @_abstract_methods = qw(REQUIRED_VERSION PROGRAM_NAME DBD_VERSION
-                            new sql_regexp sql_not_regexp sql_limit sql_to_days
+our @_abstract_methods = qw(new sql_regexp sql_not_regexp sql_limit sql_to_days
                             sql_date_format sql_interval bz_explain
                             sql_group_concat);
 
@@ -287,7 +286,7 @@ sub import {
         # make sure all abstract methods are implemented
         foreach my $meth (@_abstract_methods) {
             $pkg->can($meth)
-                or croak("Class $pkg does not define method $meth");
+                or die("Class $pkg does not define method $meth");
         }
     }
 

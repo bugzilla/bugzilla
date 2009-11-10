@@ -27,12 +27,12 @@ use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::WebService::Constants;
-if (!Bugzilla->feature('jsonrpc')) {
-    ThrowCodeError('feature_disabled', { feature => 'jsonrpc' });
+BEGIN {
+    if (!Bugzilla->feature('jsonrpc')) {
+        ThrowCodeError('feature_disabled', { feature => 'jsonrpc' });
+    }
 }
-
-# This eval allows runtests.pl to pass.
-eval { require Bugzilla::WebService::Server::JSONRPC; };
+use Bugzilla::WebService::Server::JSONRPC;
 
 Bugzilla->usage_mode(USAGE_MODE_JSON);
 

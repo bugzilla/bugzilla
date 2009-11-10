@@ -13,11 +13,11 @@
 # The Original Code are the Bugzilla Tests.
 # 
 # The Initial Developer of the Original Code is Zach Lipton
-# Portions created by Zach Lipton are 
-# Copyright (C) 2001 Zach Lipton.  All
-# Rights Reserved.
+# Portions created by Zach Lipton are Copyright (C) 2001 Zach Lipton.
+# All Rights Reserved.
 # 
 # Contributor(s): Zach Lipton <zach@zachlipton.com>
+#                 Max Kanat-Alexander <mkanat@bugzilla.org>
 
 
 #################
@@ -25,91 +25,97 @@
 ###Compilation###
 
 use strict;
+use 5.008001;
 use lib qw(. lib t);
-use Bugzilla::Constants;
 use Support::Files;
-
 use Test::More tests => scalar(@Support::Files::testitems);
 
-# Need this to get the available driver information
-use DBI;
-my @DBI_drivers = DBI->available_drivers;
-
-# Bugzilla requires Perl 5.8.1 now.  Checksetup will tell you this if you run it, but
-# it tests it in a polite/passive way that won't make it fail at compile time.  We'll
-# slip in a compile-time failure if it's missing here so a tinderbox on < 5.8.1 won't
-# pass and mistakenly let people think Bugzilla works on any perl below 5.8.1.
-require 5.008001;
-
-# Capture the TESTOUT from Test::More or Test::Builder for printing errors.
-# This will handle verbosity for us automatically.
-my $fh;
-{
-    local $^W = 0;  # Don't complain about non-existent filehandles
-    if (-e \*Test::More::TESTOUT) {
-        $fh = \*Test::More::TESTOUT;
-    } elsif (-e \*Test::Builder::TESTOUT) {
-        $fh = \*Test::Builder::TESTOUT;
-    } else {
-        $fh = \*STDOUT;
-    }
+BEGIN { 
+    use_ok('Bugzilla::Constants');
+    use_ok('Bugzilla');
 }
 
-my @testitems = @Support::Files::testitems;
-my $perlapp = "\"$^X\"";
+use constant FEATURE_FILES => (
+    jsonrpc       => ['Bugzilla/WebService/Server/JSONRPC.pm', 'jsonrpc.cgi'],
+    xmlrpc        => ['Bugzilla/WebService/Server/XMLRPC.pm', 'xmlrpc.cgi',
+                      'Bugzilla/WebService.pm', 'Bugzilla/WebService/*.pm'],
+    moving        => ['importxml.pl'],
+    auth_ldap     => ['Bugzilla/Auth/Verify/LDAP.pm'],
+    auth_radius   => ['Bugzilla/Auth/Verify/RADIUS.pm'],
+    inbound_email => ['email_in.pl'],
+    jobqueue      => ['Bugzilla/Job/*', 'Bugzilla/JobQueue.pm',
+                      'Bugzilla/JobQueue/*', 'jobqueue.pl'],
+    patch_viewer  => ['Bugzilla/Attachment/PatchReader.pm'],
+    updates       => ['Bugzilla/Update.pm'],
+);
 
-# Test the scripts by compiling them
-
-foreach my $file (@testitems) {
-    $file =~ s/\s.*$//; # nuke everything after the first space (#comment)
-    next if (!$file); # skip null entries
-
-    # Skip mod_perl.pl in all cases. It doesn't compile correctly from the command line.
-    if ($file eq 'mod_perl.pl') {
-        ok(1, "Skipping mod_perl.pl");
-        next;
-    }
-
-    # Check that we have a DBI module to support the DB, if this is a database
-    # module (but not Schema)
-    if ($file =~ m#Bugzilla/DB/([^/]+)\.pm$# && $file ne "Bugzilla/DB/Schema.pm") {
-        if (!grep(lc($_) =~ /$1/i, @DBI_drivers)) {
-            ok(1,$file." - Skipping, as the DBD module not installed");
-            next;
+sub map_files_to_feature {
+    my %features = FEATURE_FILES;
+    my %files;
+    foreach my $feature (keys %features) {
+        my @my_files = @{ $features{$feature} };
+        foreach my $pattern (@my_files) {
+            foreach my $file (glob $pattern) {
+                $files{$file} = $feature;
+            }
         }
     }
+    return \%files;
+}
 
-    open (FILE,$file);
-    my $bang = <FILE>;
-    close (FILE);
+sub compile_file {
+    my ($file) = @_;
+
+    if ($file =~ s/\.pm$//) {
+        $file =~ s{/}{::}g;
+        use_ok($file);
+        return;
+    }
+
+    open(my $fh, $file);
+    my $bang = <$fh>;
+    close $fh;
+
     my $T = "";
     if ($bang =~ m/#!\S*perl\s+-.*T/) {
         $T = "T";
     }
-    my $command = "$perlapp -c$T $file 2>&1";
-    my $loginfo=`$command`;
-    #print '@@'.$loginfo.'##';
-    if ($loginfo =~ /syntax ok$/im) {
-        # Special hack due to CPAN.pm on Windows with Cygwin installed throwing
-        # strings of the form "Set up gcc environment - 3.4.4 (cygming special,
-        # gdc 0.12, using dmd 0.125)". See bug 416047 for details.
-        if (ON_WINDOWS
-            && grep($_ eq $file, 'install-module.pl', 'Bugzilla/Install/CPAN.pm'))
+
+    my $perl = qq{"$^X"};
+    my $output = `$perl -wc$T $file 2>&1`;
+    chomp($output);
+    my $return_val = $?;
+    $output =~ s/^\Q$file\E syntax OK$//ms;
+    diag($output) if $output;
+    ok(!$return_val, $file) or diag('--ERROR');
+}
+
+my @testitems = @Support::Files::testitems;
+my $file_features = map_files_to_feature();
+
+# Test the scripts by compiling them
+foreach my $file (@testitems) {
+    # These were already compiled, above.
+    next if ($file eq 'Bugzilla.pm' or $file eq 'Bugzilla/Constants.pm');
+    SKIP: {
+        if ($file eq 'mod_perl.pl') {
+            skip 'mod_perl.pl cannot be compiled from the command line', 1;
+        }
+        my $feature = $file_features->{$file};
+        if ($feature and !Bugzilla->feature($feature)) {
+            skip "$file: $feature not enabled", 1;
+        }
+
+        # Check that we have a DBI module to support the DB, if this 
+        # is a database module (but not Schema)
+        if ($file =~ m{Bugzilla/DB/([^/]+)\.pm$}
+            and $file ne "Bugzilla/DB/Schema.pm") 
         {
-            $loginfo =~ s/^Set up gcc environment.*?\n//;
+            my $module = lc($1);
+            my $dbd = DB_MODULE->{$module}->{dbd}->{module};
+            eval("use $dbd; 1") or skip "$file: $dbd not installed", 1;
         }
-        if ($loginfo ne "$file syntax OK\n") {
-            ok(0,$file." --WARNING");
-            print $fh $loginfo;
-        }
-        else {
-            ok(1,$file);
-        }
-    }
-    else {
-        ok(0,$file." --ERROR");
-        print $fh $loginfo;
+
+        compile_file($file);
     }
 }      
-
-exit 0;

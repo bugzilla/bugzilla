@@ -43,7 +43,6 @@ use Bugzilla::CGI;
 use Bugzilla::DB;
 use Bugzilla::Install::Localconfig qw(read_localconfig);
 use Bugzilla::Install::Requirements qw(OPTIONAL_MODULES);
-use Bugzilla::JobQueue;
 use Bugzilla::Template;
 use Bugzilla::User;
 use Bugzilla::Error;
@@ -379,6 +378,7 @@ sub logout_request {
 
 sub job_queue {
     my $class = shift;
+    require Bugzilla::JobQueue;
     $class->request_cache->{job_queue} ||= Bugzilla::JobQueue->new();
     return $class->request_cache->{job_queue};
 }

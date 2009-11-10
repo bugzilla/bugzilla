@@ -22,12 +22,12 @@ use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::WebService::Constants;
-if (!Bugzilla->feature('xmlrpc')) {
-    ThrowCodeError('feature_disabled', { feature => 'xmlrpc' });
+BEGIN {
+    if (!Bugzilla->feature('xmlrpc')) {
+        ThrowCodeError('feature_disabled', { feature => 'xmlrpc' });
+    }
 }
-# Use an eval here so that runtests.pl accepts this script even if SOAP-Lite
-# is not installed.
-eval { require Bugzilla::WebService::Server::XMLRPC; };
+use Bugzilla::WebService::Server::XMLRPC;
 
 Bugzilla->usage_mode(USAGE_MODE_XMLRPC);
 

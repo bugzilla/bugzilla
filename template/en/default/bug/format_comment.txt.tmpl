@@ -23,23 +23,23 @@
   #%]
 
 [%# INTERFACE:
-  #   comment: A hash containing comment information.
-  #              count:           The comment number (on the bug it belongs to)
-  #              author:          The Bugzilla::User object of the comment's
-  #                               author
-  #              time:            The time at which the comment has been
-  #                               committed
-  #              body:            The comment text
-  #              type:            One of the CMT_* constants (not given if none
-  #                               applies)
-  #              extra_data:      Extra data (type specific)
-  #              already_wrapped: Determines whether the comment is pre-wrapped
+  #   comment: A Bugzilla::Comment object.
+  #   is_bugmail: boolean; True if this comment is going into a plain-text
+  #               bugmail.
   #%]
 
-[% PROCESS 'global/field-descs.none.tmpl' %]
+[%# Please don't use field-descs here. It can slow down Bugzilla. %]
+[% PROCESS 'global/variables.none.tmpl' %]
+
+[% SET comment_body = comment.body %]
+[% IF is_bugmail %]
+  [% comment_body = comment_body.replace( '(Created an attachment \(id=([0-9]+)\))',
+                                          '$1' _ "\n" _ ' --> (' _ urlbase 
+                                          _ 'attachment.cgi?id=$2)' ) %]
+[% END %]
 
 [% IF comment.type == constants.CMT_DUPE_OF %]
-X[% comment.body %]
+X[% comment_body %]
 
 *** This [% terms.bug %] has been marked as a duplicate of [% terms.bug %] [%+ comment.extra_data %] ***
 [% ELSIF comment.type == constants.CMT_HAS_DUPE %]
@@ -47,14 +47,13 @@ X[% comment.body %]
 [% ELSIF comment.type == constants.CMT_POPULAR_VOTES %]
 *** This [% terms.bug %] has been confirmed by popular vote. ***
 [% ELSIF comment.type == constants.CMT_MOVED_TO %]
-X[% comment.body %]
+X[% comment_body %]
 
 [%+ terms.Bug %] moved to [% Param("move-to-url") %].
 If the move succeeded, [% comment.extra_data %] will receive a mail containing
 the number of the new [% terms.bug %] in the other database.
-If all went well, please mark this [% terms.bug %]
-[%+ display_value("bug_status", 'VERIFIED') %], and paste in a link to the new [% terms.bug %].
+If all went well, please paste in a link to the new [% terms.bug %].
 Otherwise, reopen this [% terms.bug %].
 [% ELSE %]
-X[% comment.body %]
+X[% comment_body %]
 [% END %]

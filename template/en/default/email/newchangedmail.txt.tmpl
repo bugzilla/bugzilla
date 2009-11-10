@@ -50,7 +50,7 @@ X-Bugzilla-Changed-Fields: [% changedfields %]
 [%- IF comment.count %]
 --- Comment #[% comment.count %] from [% comment.author.identity %] [%+ comment.time FILTER time %] ---
 [% END %]
-[%+ FILTER remove('^X') %][% PROCESS bug/format_comment.txt.tmpl %][% END %]
+[%+ comment.body_full({ is_bugmail => 1, wrap => 1 }) %]
 [% END %]
 
 -- [%# Protect the trailing space of the signature marker %]

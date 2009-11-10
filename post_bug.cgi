@@ -229,13 +229,13 @@ if (defined($cgi->upload('data')) || $cgi->param('attachurl')) {
         # expects to find this exact string.
         my $new_comment = "Created an attachment (id=" . $attachment->id . ")\n" .
                           $attachment->description . "\n";
-        # We can use $bug->longdescs here because we are sure that the bug
+        # We can use $bug->comments here because we are sure that the bug
         # description is of type CMT_NORMAL. No need to include it if it's
         # empty, though.
-        if ($bug->longdescs->[0]->{'body'} !~ /^\s+$/) {
-            $new_comment .= "\n" . $bug->longdescs->[0]->{'body'};
+        if ($bug->comments->[0]->body !~ /^\s+$/) {
+            $new_comment .= "\n" . $bug->comments->[0]->body;
         }
-        $bug->update_comment($bug->longdescs->[0]->{'id'}, $new_comment);
+        $bug->update_comment($bug->comments->[0]->id, $new_comment);
     }
     else {
         $vars->{'message'} = 'attachment_creation_failed';

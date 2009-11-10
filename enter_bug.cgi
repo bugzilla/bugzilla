@@ -434,17 +434,16 @@ if ($cloned_bug_id) {
     # We need to ensure that we respect the 'insider' status of
     # the first comment, if it has one. Either way, make a note
     # that this bug was cloned from another bug.
-    # We cannot use $cloned_bug->longdescs because this method
-    # depends on the "comment_sort_order" user pref, and we
-    # really want the first comment of the bug.
-    my $bug_desc = Bugzilla::Bug::GetComments($cloned_bug_id, 'oldest_to_newest');
-    my $isprivate = $bug_desc->[0]->{'isprivate'};
+    my $bug_desc = $cloned_bug->comments({ order => 'oldest_to_newest' })->[0];
+    my $isprivate = $bug_desc->is_private;
 
     $vars->{'comment'}        = "";
     $vars->{'commentprivacy'} = 0;
 
     if (!$isprivate || Bugzilla->user->is_insider) {
-        $vars->{'comment'}        = $bug_desc->[0]->{'body'};
+        # We use "body" to avoid any format_comment text, which would be
+        # pointless to clone.
+        $vars->{'comment'}        = $bug_desc->body;
         $vars->{'commentprivacy'} = $isprivate;
     }
 

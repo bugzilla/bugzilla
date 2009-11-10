@@ -170,7 +170,7 @@ sub quoteUrls {
 
     # If the comment is already wrapped, we should ignore newlines when
     # looking for matching regexps. Else we should take them into account.
-    my $s = ($comment && $comment->{already_wrapped}) 
+    my $s = ($comment && $comment->already_wrapped) 
             ? qr/\s/ : qr/[[:blank:]]/;
 
     # However, note that adding the title (for buglinks) can affect things

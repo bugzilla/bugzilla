@@ -168,8 +168,7 @@ if (defined $cgi->param('delta_ts')
     $vars->{'start_at'} = $cgi->param('longdesclength');
     # Always sort midair collision comments oldest to newest,
     # regardless of the user's personal preference.
-    $vars->{'comments'} = Bugzilla::Bug::GetComments($first_bug->id,
-                                                     "oldest_to_newest");
+    $vars->{'comments'} = $first_bug->comments({ order => "oldest_to_newest" });
     $vars->{'bug'} = $first_bug;
     # The token contains the old delta_ts. We need a new one.
     $cgi->param('token', issue_hash_token([$first_bug->id, $first_bug->delta_ts]));

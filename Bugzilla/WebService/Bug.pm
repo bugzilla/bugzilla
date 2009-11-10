@@ -23,6 +23,7 @@ package Bugzilla::WebService::Bug;
 use strict;
 use base qw(Bugzilla::WebService);
 
+use Bugzilla::Comment;
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Field;
@@ -95,12 +96,12 @@ sub comments {
     foreach my $bug_id (@$bug_ids) {
         my $bug = Bugzilla::Bug->check($bug_id);
         # We want the API to always return comments in the same order.
-        my $comments = Bugzilla::Bug::GetComments(
-            $bug->id, 'oldest_to_newest', $params->{new_since});
+   
+        my $comments = $bug->comments({ order => 'oldest_to_newest',
+                                        after => $params->{new_since} });
         my @result;
         foreach my $comment (@$comments) {
-            next if $comment->{isprivate} && !$user->is_insider;
-            $comment->{bug_id} = $bug->id;
+            next if $comment->is_private && !$user->is_insider;
             push(@result, $self->_translate_comment($comment, $params));
         }
         $bugs{$bug->id}{'comments'} = \@result;
@@ -109,15 +110,10 @@ sub comments {
     my %comments;
     if (scalar @$comment_ids) {
         my @ids = map { trim($_) } @$comment_ids;
-        my @sql_ids = map { $dbh->quote($_) } @ids;
-        my $comment_data = $dbh->selectall_arrayref(
-            'SELECT comment_id AS id, bug_id, who, bug_when AS time,
-                    isprivate, thetext AS body, type, extra_data
-               FROM longdescs WHERE ' . $dbh->sql_in('comment_id', \@sql_ids),
-            {Slice=>{}});
+        my $comment_data = Bugzilla::Comment->new_from_list(\@ids);
 
         # See if we were passed any invalid comment ids.
-        my %got_ids = map { $_->{id} => 1 } @$comment_data;
+        my %got_ids = map { $_->id => 1 } @$comment_data;
         foreach my $comment_id (@ids) {
             if (!$got_ids{$comment_id}) {
                 ThrowUserError('comment_id_invalid', { id => $comment_id });
@@ -125,16 +121,14 @@ sub comments {
         }
  
         # Now make sure that we can see all the associated bugs.
-        my %got_bug_ids = map { $_->{bug_id} => 1 } @$comment_data;
+        my %got_bug_ids = map { $_->bug_id => 1 } @$comment_data;
         Bugzilla::Bug->check($_) foreach (keys %got_bug_ids);
 
         foreach my $comment (@$comment_data) {
-            if ($comment->{isprivate} && !$user->is_insider) {
-                ThrowUserError('comment_is_private', { id => $comment->{id} });
+            if ($comment->is_private && !$user->is_insider) {
+                ThrowUserError('comment_is_private', { id => $comment->id });
             }
-            $comment->{author} = new Bugzilla::User($comment->{who});
-            $comment->{body} = Bugzilla::Bug::format_comment($comment);
-            $comments{$comment->{id}} =
+            $comments{$comment->id} =
                 $self->_translate_comment($comment, $params);
         }
     }
@@ -146,12 +140,12 @@ sub comments {
 sub _translate_comment {
     my ($self, $comment, $filters) = @_;
     return filter $filters, {
-        id         => $self->type('int', $comment->{id}),
-        bug_id     => $self->type('int', $comment->{bug_id}),
-        author     => $self->type('string', $comment->{author}->login),
-        time       => $self->type('dateTime', $comment->{'time'}),
-        is_private => $self->type('boolean', $comment->{isprivate}),
-        text       => $self->type('string', $comment->{body}),
+        id         => $self->type('int', $comment->id),
+        bug_id     => $self->type('int', $comment->bug_id),
+        author     => $self->type('string', $comment->author->login),
+        time       => $self->type('dateTime', $comment->creation_ts),
+        is_private => $self->type('boolean', $comment->is_private),
+        text       => $self->type('string', $comment->body_full),
     };
 }
 

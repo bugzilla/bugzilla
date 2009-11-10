@@ -119,6 +119,7 @@ sub Send {
     my $msg = "";
 
     my $dbh = Bugzilla->dbh;
+    my $bug = new Bugzilla::Bug($id);
 
     # XXX - These variables below are useless. We could use field object
     # methods directly. But we first have to implement a cache in
@@ -356,7 +357,7 @@ sub Send {
         }
     }
 
-    my $comments = get_comments_by_bug($id, $start, $end);
+    my $comments = $bug->comments({ after => $start, to => $end });
 
     ###########################################################################
     # Start of email filtering code
@@ -569,7 +570,7 @@ sub sendMail {
     }
 
     if (!$user->is_insider) {
-        @send_comments = grep { !$_->{isprivate} } @send_comments;
+        @send_comments = grep { !$_->is_private } @send_comments;
     }
 
     if ($difftext eq "" && !scalar(@send_comments) && !$isnew) {
@@ -648,40 +649,6 @@ sub sendMail {
     MessageToMTA($msg);
 
     return 1;
-}
-
-# Get bug comments for the given period.
-sub get_comments_by_bug {
-    my ($id, $start, $end) = @_;
-    my $dbh = Bugzilla->dbh;
-
-    my $result = "";
-    my $count = 0;
-
-    # $start will be undef for new bugs, and defined for pre-existing bugs.
-    if ($start) {
-        # If $start is not NULL, obtain the count-index
-        # of this comment for the leading "Comment #xxx" line.
-        $count = $dbh->selectrow_array('SELECT COUNT(*) FROM longdescs
-                                        WHERE bug_id = ? AND bug_when <= ?',
-                                        undef, ($id, $start));
-    }
-
-    my $raw = 1; # Do not format comments which are not of type CMT_NORMAL.
-    my $comments = Bugzilla::Bug::GetComments($id, "oldest_to_newest", $start, $end, $raw);
-    my $attach_base = correct_urlbase() . 'attachment.cgi?id=';
-
-    foreach my $comment (@$comments) {
-        $comment->{count} = $count++;
-        # If an attachment was created, then add an URL. (Note: the 'g'lobal
-        # replace should work with comments with multiple attachments.)
-        if ($comment->{body} =~ /Created an attachment \(/) {
-            $comment->{body} =~ s/(Created an attachment \(id=([0-9]+)\))/$1\n --> \($attach_base$2\)/g;
-        }
-        $comment->{body} = $comment->{'already_wrapped'} ? $comment->{body} : wrap_comment($comment->{body});
-    }
-
-    return $comments;
 }
 
 1;

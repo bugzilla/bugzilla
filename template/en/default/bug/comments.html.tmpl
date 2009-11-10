@@ -94,7 +94,6 @@
 
 
 [% DEFAULT start_at = 0 mode = "show" %]
-[% isinsider = Param("insidergroup") && user.in_group(Param("insidergroup")) %]
 [% sort_order = user.settings.comment_sort_order.value %]
 
 [%# NOTE: (start_at > 0) means we came here from a midair collision,
@@ -145,8 +144,9 @@
 [%############################################################################%]
 
 [% BLOCK a_comment %]
-  [% IF NOT comment.isprivate || isinsider %]
-    <div class="bz_comment[% " bz_private" IF comment.isprivate %]
+  [% RETURN IF comment.is_private AND ! user.is_insider %]
+
+    <div class="bz_comment[% " bz_private" IF comment.is_private %]
                 [% " bz_comment_hilite" IF marks.$count %]
                 [% " bz_first_comment" IF count == description %]">
       [% IF count == description %]
@@ -168,7 +168,7 @@
           </span>
         [% END %]
 
-        [% IF mode == "edit" && isinsider %]
+        [% IF mode == "edit" && user.is_insider %]
           <div class="bz_private_checkbox">
             <input type="hidden" value="1"
                    name="defined_isprivate_[% comment.id %]">
@@ -176,7 +176,7 @@
                    name="isprivate_[% comment.id %]" value="1"
                    id="isprivate_[% comment.id %]"
                    onClick="updateCommentPrivacy(this, [% count %])"
-                   [% " checked=\"checked\"" IF comment.isprivate %]>
+                   [% " checked=\"checked\"" IF comment.is_private %]>
             <label for="isprivate_[% comment.id %]">Private</label>
           </div>
         [% END %]
@@ -201,7 +201,7 @@
         </span>
 
         <span class="bz_comment_time">
-          [%+ comment.time FILTER time %]
+          [%+ comment.creation_ts FILTER time %]
         </span>
       </div>
 
@@ -215,15 +215,9 @@
 [%# Don't indent the <pre> block, since then the spaces are displayed in the
   # generated HTML
   #%]
-[% IF comment.already_wrapped %]
-    [% wrapped_comment = comment.body %]
-[% ELSE %]
-    [% wrapped_comment = comment.body FILTER wrap_comment %]
-[% END %]
 <pre class="bz_comment_text" 
      [% ' id="comment_text_' _ count _ '"' IF mode == "edit" %]>
-  [%- wrapped_comment FILTER quoteUrls(bug, comment) -%]
+  [%- comment.body_full({ wrap => 1 }) FILTER quoteUrls(bug, comment) -%]
 </pre>
     </div>
-  [% END %]
 [% END %]

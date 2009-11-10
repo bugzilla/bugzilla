@@ -46,6 +46,7 @@ use Bugzilla::Product;
 use Bugzilla::Component;
 use Bugzilla::Group;
 use Bugzilla::Status;
+use Bugzilla::Comment;
 
 use List::Util qw(min);
 use Storable qw(dclone);
@@ -1835,12 +1836,12 @@ sub set_cclist_accessible { $_[0]->set('cclist_accessible', $_[1]); }
 sub set_comment_is_private {
     my ($self, $comment_id, $isprivate) = @_;
     return unless Bugzilla->user->is_insider;
-    my ($comment) = grep($comment_id eq $_->{id}, @{$self->longdescs});
+    my ($comment) = grep($comment_id == $_->id, @{ $self->comments });
     ThrowUserError('comment_invalid_isprivate', { id => $comment_id }) 
         if !$comment;
 
     $isprivate = $isprivate ? 1 : 0;
-    if ($isprivate != $comment->{isprivate}) {
+    if ($isprivate != $comment->is_private) {
         $self->{comment_isprivate} ||= {};
         $self->{comment_isprivate}->{$comment_id} = $isprivate;
     }
@@ -2665,12 +2666,38 @@ sub keyword_objects {
     return $self->{'keyword_objects'};
 }
 
-sub longdescs {
-    my ($self) = @_;
-    return $self->{'longdescs'} if exists $self->{'longdescs'};
+sub comments {
+    my ($self, $params) = @_;
     return [] if $self->{'error'};
-    $self->{'longdescs'} = GetComments($self->{bug_id});
-    return $self->{'longdescs'};
+    $params ||= {};
+
+    if (!defined $self->{'comments'}) {
+        $self->{'comments'} = Bugzilla::Comment->match({ bug_id => $self->id });
+        my $count = 0;
+        foreach my $comment (@{ $self->{'comments'} }) {
+            $comment->{count} = $count++;
+        }
+    }
+    my @comments = @{ $self->{'comments'} };
+
+    my $order = $params->{order} 
+        || Bugzilla->user->settings->{'comment_sort_order'}->{'value'};
+    if ($order ne 'oldest_to_newest') {
+        @comments = reverse @comments;
+        if ($order eq 'newest_to_oldest_desc_first') {
+            unshift(@comments, pop @comments);
+        }
+    }
+
+    if ($params->{after}) {
+        my $from = datetime_from($params->{after});
+        @comments = grep { datetime_from($_->creation_ts) > $from } @comments;
+    }
+    if ($params->{to}) {
+        my $to = datetime_from($params->{to});
+        @comments = grep { datetime_from($_->creation_ts) <= $to } @comments;
+    }
+    return \@comments;
 }
 
 sub milestoneurl {
@@ -2955,7 +2982,7 @@ sub update_comment {
       || ThrowCodeError('bad_arg', {argument => 'comment_id', function => 'update_comment'});
 
     # The comment ID must belong to this bug.
-    my @current_comment_obj = grep {$_->{'id'} == $comment_id} @{$self->longdescs};
+    my @current_comment_obj = grep {$_->id == $comment_id} @{$self->comments};
     scalar(@current_comment_obj)
       || ThrowCodeError('bad_arg', {argument => 'comment_id', function => 'update_comment'});
 
@@ -2972,7 +2999,7 @@ sub update_comment {
     $self->_sync_fulltext();
 
     # Update the comment object with this new text.
-    $current_comment_obj[0]->{'body'} = $new_comment;
+    $current_comment_obj[0]->{'thetext'} = $new_comment;
 }
 
 # Represents which fields from the bugs table are handled by process_bug.cgi.
@@ -3030,74 +3057,6 @@ sub ValidateTime {
         ThrowUserError("number_too_large",
                        {field => "$field", num => "$time", max_num => "99999.99"});
     }
-}
-
-sub GetComments {
-    my ($id, $comment_sort_order, $start, $end, $raw) = @_;
-    my $dbh = Bugzilla->dbh;
-
-    $comment_sort_order = $comment_sort_order ||
-        Bugzilla->user->settings->{'comment_sort_order'}->{'value'};
-
-    my $sort_order = ($comment_sort_order eq "oldest_to_newest") ? 'asc' : 'desc';
-
-    my @comments;
-    my @args = ($id);
-
-    my $query = 'SELECT longdescs.comment_id AS id, profiles.userid, ' .
-                        $dbh->sql_date_format('longdescs.bug_when', '%Y.%m.%d %H:%i:%s') .
-                      ' AS time, longdescs.thetext AS body, longdescs.work_time,
-                        isprivate, already_wrapped, type, extra_data
-                   FROM longdescs
-             INNER JOIN profiles
-                     ON profiles.userid = longdescs.who
-                  WHERE longdescs.bug_id = ?';
-
-    if ($start) {
-        $query .= ' AND longdescs.bug_when > ?';
-        push(@args, $start);
-    }
-    if ($end) {
-        $query .= ' AND longdescs.bug_when <= ?';
-        push(@args, $end);
-    }
-
-    $query .= " ORDER BY longdescs.bug_when $sort_order";
-    my $sth = $dbh->prepare($query);
-    $sth->execute(@args);
-
-    # Cache the users we look up
-    my %users;
-
-    while (my $comment_ref = $sth->fetchrow_hashref()) {
-        my %comment = %$comment_ref;
-        $users{$comment{'userid'}} ||= new Bugzilla::User($comment{'userid'});
-        $comment{'author'} = $users{$comment{'userid'}};
-
-        # If raw data is requested, do not format 'special' comments.
-        $comment{'body'} = format_comment(\%comment) unless $raw;
-
-        push (@comments, \%comment);
-    }
-   
-    if ($comment_sort_order eq "newest_to_oldest_desc_first") {
-        unshift(@comments, pop @comments);
-    }
-
-    return \@comments;
-}
-
-# Format language specific comments.
-sub format_comment {
-    my $comment = shift;
-    my $template = Bugzilla->template_inner;
-    my $vars = {comment => $comment};
-    my $body;
-
-    $template->process("bug/format_comment.txt.tmpl", $vars, \$body)
-        || ThrowTemplateError($template->error());
-    $body =~ s/^X//;
-    return $body;
 }
 
 # Get the activity of a bug, starting from $starttime (if given).
@@ -3644,7 +3603,7 @@ sub _validate_attribute {
     my @valid_attributes = (
         # Miscellaneous properties and methods.
         qw(error groups product_id component_id
-           longdescs milestoneurl attachments
+           comments milestoneurl attachments
            isopened isunconfirmed
            flag_types num_attachment_flag_types
            show_attachment_flags any_flags_requesteeble),

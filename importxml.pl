@@ -512,7 +512,7 @@ sub process_bug {
         $long_desc{'isprivate'} = $comment->{'att'}->{'isprivate'} || 0;
 
         # if one of the comments is private we need to set this flag
-        if ( $long_desc{'isprivate'} && $exporter->in_group($params->{'insidergroup'})) {
+        if ( $long_desc{'isprivate'} && $exporter->is_insider) {
             $private = 1;
         }
         my $data = $comment->field('thetext');
@@ -1198,7 +1198,7 @@ sub process_bug {
             $err .= "No attachment ID specified, dropping attachment\n";
             next;
         }
-        if (!$exporter->in_group($params->{'insidergroup'}) && $att->{'isprivate'}){
+        if (!$exporter->is_insider) && $att->{'isprivate'}){
             $err .= "Exporter not in insidergroup and attachment marked private.\n";
             $err .= "   Marking attachment public\n";
             $att->{'isprivate'} = 0;

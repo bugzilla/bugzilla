@@ -66,7 +66,7 @@
 
       [% IF displayfields.long_desc %]
         [% FOREACH c = bug.comments %]
-          [% NEXT IF c.is_private && !user.in_group(Param("insidergroup")) %]
+          [% NEXT IF c.is_private && !user.is_insider %]
           <long_desc isprivate="[% c.is_private FILTER xml %]">
             <commentid>[% c.id FILTER xml %]</commentid>
             <who name="[% c.author.name FILTER xml %]">[% c.author.email FILTER email FILTER xml %]</who>
@@ -81,7 +81,7 @@
       
       [% IF displayfields.attachment %]
         [% FOREACH a = bug.attachments %]
-          [% NEXT IF a.isprivate && !user.in_group(Param("insidergroup")) %]
+          [% NEXT IF a.isprivate && !user.is_insider %]
           <attachment
               isobsolete="[% a.isobsolete FILTER xml %]"
               ispatch="[% a.ispatch FILTER xml %]"

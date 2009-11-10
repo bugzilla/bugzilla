@@ -75,7 +75,7 @@
         replytext = prefix;
       [% END %]
 
-    [% IF Param("insidergroup") && user.in_group(Param("insidergroup")) %]
+    [% IF user.is_insider %]
       if (document.getElementById('isprivate_' + real_id).checked) {
           document.getElementById('newcommentprivacy').checked = 'checked';
       }

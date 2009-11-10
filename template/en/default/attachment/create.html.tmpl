@@ -55,8 +55,7 @@
         <em>(optional) Check each existing attachment made obsolete by your new attachment.</em><br>
         [% IF attachments.size %]
           [% FOREACH attachment = attachments %]
-            [% IF ((attachment.isprivate == 0) || (Param("insidergroup")
-              && user.in_group(Param("insidergroup")))) %]
+            [% IF ((attachment.isprivate == 0) || user.is_insider) %]
               <input type="checkbox" id="[% attachment.id %]"
                    name="obsolete" value="[% attachment.id %]">
               <a href="attachment.cgi?id=[% attachment.id %]&amp;action=edit">[% attachment.id %]: [% attachment.description FILTER html %]</a><br>
@@ -108,7 +107,7 @@
         %]
       </td>
     </tr>
-    [% IF (Param("insidergroup") && user.in_group(Param("insidergroup"))) %]
+    [% IF user.is_insider %]
       <tr>
         <th>Privacy:</th>
         <td>

@@ -345,7 +345,7 @@ TUI_hide_default('expert_fields');
     <td>&nbsp;</td>
     [%# Calculate the number of rows we can use for flags %]
     [% num_rows = 6 + (Param("useqacontact") ? 1 : 0) +
-                      (user.in_group(Param('timetrackinggroup')) ? 3 : 0) +
+                      (user.is_timetracker ? 3 : 0) +
                       (Param("usebugaliases") ? 1 : 0)
     %]
 
@@ -427,7 +427,7 @@ TUI_hide_default('expert_fields');
     <td colspan="3">&nbsp;</td>
   </tr>
 
-[% IF user.in_group(Param('timetrackinggroup')) %]
+[% IF user.is_timetracker %]
   <tr>
     <th>Estimated Hours:</th>
     <td colspan="2">

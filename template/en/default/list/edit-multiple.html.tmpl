@@ -140,7 +140,7 @@
     <th><label for="bug_status">Status:</label></th>
     <td colspan="3">[% PROCESS status_section %]</td>
   </tr>
-  [% IF user.in_group(Param("timetrackinggroup")) %]
+  [% IF user.is_timetracker %]
     <tr>
       <th><label for="estimated_time">Estimated Hours:</label></th>
       <td>

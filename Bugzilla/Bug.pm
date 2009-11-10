@@ -1221,10 +1221,9 @@ sub _check_deadline {
     my ($invocant, $date) = @_;
     
     # Check time-tracking permissions.
-    my $tt_group = Bugzilla->params->{"timetrackinggroup"};
     # deadline() returns '' instead of undef if no deadline is set.
     my $current = ref $invocant ? ($invocant->deadline || undef) : undef;
-    return $current unless $tt_group && Bugzilla->user->in_group($tt_group);
+    return $current unless Bugzilla->user->is_timetracker;
     
     # Validate entered deadline
     $date = trim($date);
@@ -1672,8 +1671,7 @@ sub _check_time {
     if (ref $invocant && $field ne 'work_time') {
         $current = $invocant->$field;
     }
-    my $tt_group = Bugzilla->params->{"timetrackinggroup"};
-    return $current unless $tt_group && Bugzilla->user->in_group($tt_group);
+    return $current unless Bugzilla->user->is_timetracker;
     
     $time = trim($time) || 0;
     ValidateTime($time, $field);
@@ -2478,8 +2476,7 @@ sub actual_time {
     my ($self) = @_;
     return $self->{'actual_time'} if exists $self->{'actual_time'};
 
-    if ( $self->{'error'} || 
-         !Bugzilla->user->in_group(Bugzilla->params->{"timetrackinggroup"}) ) {
+    if ( $self->{'error'} || !Bugzilla->user->is_timetracker ) {
         $self->{'actual_time'} = undef;
         return $self->{'actual_time'};
     }
@@ -3125,8 +3122,7 @@ sub GetBugActivity {
             || $fieldname eq 'work_time'
             || $fieldname eq 'deadline')
         {
-            $activity_visible = 
-                Bugzilla->user->in_group(Bugzilla->params->{'timetrackinggroup'}) ? 1 : 0;
+            $activity_visible = Bugzilla->user->is_timetracker;
         } else {
             $activity_visible = 1;
         }
@@ -3414,8 +3410,7 @@ sub check_can_change_field {
     
     # Only users in the time-tracking group can change time-tracking fields.
     if ( grep($_ eq $field, qw(deadline estimated_time remaining_time)) ) {
-        my $tt_group = Bugzilla->params->{timetrackinggroup};
-        if (!$tt_group || !$user->in_group($tt_group)) {
+        if (!$user->is_timetracker) {
             $$PrivilegesRequired = 3;
             return 0;
         }

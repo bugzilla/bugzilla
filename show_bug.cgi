@@ -109,7 +109,7 @@ if ($cgi->param("field")) {
     @fieldlist = $cgi->param("field");
 }
 
-unless (Bugzilla->user->in_group(Bugzilla->params->{"timetrackinggroup"})) {
+unless (Bugzilla->user->is_timetracker) {
     @fieldlist = grep($_ !~ /(^deadline|_time)$/, @fieldlist);
 }
 

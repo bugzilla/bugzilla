@@ -247,7 +247,7 @@ foreach my $val (editable_bug_fields()) {
     push @chfields, $val;
 }
 
-if (Bugzilla->user->in_group(Bugzilla->params->{'timetrackinggroup'})) {
+if (Bugzilla->user->is_timetracker) {
     push @chfields, "work_time";
 } else {
     @chfields = grep($_ ne "estimated_time", @chfields);

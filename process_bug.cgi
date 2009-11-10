@@ -552,7 +552,7 @@ foreach my $bug (@bug_objects) {
         # status, so we should inform the user about that.
         if (!is_open_state($new_status) && $changes->{'remaining_time'}) {
             $vars->{'message'} = "remaining_time_zeroed"
-              if Bugzilla->user->in_group(Bugzilla->params->{'timetrackinggroup'});
+              if Bugzilla->user->is_timetracker;
         }
     }
 

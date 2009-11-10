@@ -1198,7 +1198,7 @@ sub process_bug {
             $err .= "No attachment ID specified, dropping attachment\n";
             next;
         }
-        if (!$exporter->is_insider) && $att->{'isprivate'}){
+        if (!$exporter->is_insider && $att->{'isprivate'}) {
             $err .= "Exporter not in insidergroup and attachment marked private.\n";
             $err .= "   Marking attachment public\n";
             $att->{'isprivate'} = 0;
@@ -1251,7 +1251,7 @@ sub process_bug {
 
     # Insert longdesc and append any errors
     my $worktime = $bug_fields{'actual_time'} || 0.0;
-    $worktime = 0.0 if (!$exporter->in_group($params->{'timetrackinggroup'}));
+    $worktime = 0.0 if (!$exporter->is_timetracker);
     $long_description .= "\n" . $comments;
     if ($err) {
         $long_description .= "\n$err\n";

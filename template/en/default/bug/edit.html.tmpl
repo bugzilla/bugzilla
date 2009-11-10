@@ -115,7 +115,7 @@
       return text;
   }
 
-[% IF user.in_group(Param('timetrackinggroup')) %]
+[% IF user.is_timetracker %]
   var fRemainingTime = [% bug.remaining_time %]; // holds the original value
   function adjustRemainingTime() {
       // subtracts time spent from remaining time
@@ -213,7 +213,7 @@
 
   
   [% PROCESS section_restrict_visibility %]
-  [% IF user.in_group(Param('timetrackinggroup')) %]
+  [% IF user.is_timetracker %]
     <br>
     [% PROCESS section_timetracking %]
   [% END %]

@@ -77,7 +77,7 @@ if (Bugzilla::Keyword->any_exist) {
 if (Bugzilla->has_flags) {
     push(@masterlist, "flagtypes.name");
 }
-if (Bugzilla->user->in_group(Bugzilla->params->{"timetrackinggroup"})) {
+if (Bugzilla->user->is_timetracker) {
     push(@masterlist, ("estimated_time", "remaining_time", "actual_time",
                        "percentage_complete", "deadline")); 
 }

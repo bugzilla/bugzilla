@@ -195,7 +195,7 @@
       [% PROCESS dependencies name = "blocked"  %]
     [% END %]
 
-    [% IF user.in_group(Param("timetrackinggroup")) %]
+    [% IF user.is_timetracker %]
       <tr>
         <th>Time tracking:</th>
         <td colspan="3">

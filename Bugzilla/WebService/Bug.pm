@@ -282,17 +282,10 @@ sub search {
 
 sub create {
     my ($self, $params) = @_;
-
     Bugzilla->login(LOGIN_REQUIRED);
-
     $params = _map_fields($params);
-    # WebService users can't set the creation date of a bug.
-    delete $params->{'creation_ts'};
-
     my $bug = Bugzilla::Bug->create($params);
-
     Bugzilla::BugMail::Send($bug->bug_id, { changer => $bug->reporter->login });
-
     return { id => $self->type('int', $bug->bug_id) };
 }
 

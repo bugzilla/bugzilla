@@ -590,10 +590,10 @@ sub run_create_validators {
         $class->_check_qa_contact($params->{qa_contact}, $component);
     $params->{cc} = $class->_check_cc($component, $params->{cc});
 
-    # Callers cannot set Reporter, currently.
+    # Callers cannot set reporter, creation_ts, or delta_ts.
     $params->{reporter} = $class->_check_reporter();
-
-    $params->{creation_ts} ||= Bugzilla->dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
+    $params->{creation_ts} = 
+        Bugzilla->dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
     $params->{delta_ts} = $params->{creation_ts};
 
     if ($params->{estimated_time}) {

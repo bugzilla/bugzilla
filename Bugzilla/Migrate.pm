@@ -767,7 +767,12 @@ sub insert_bugs {
         my $created = Bugzilla::Bug->create($bug);
         $self->debug('Created bug ' . $created->id);
         Bugzilla->set_user($super_user);
-        
+
+        if (defined $bug->{creation_ts}) {
+            $dbh->do('UPDATE bugs SET creation_ts = ?, delta_ts = ? 
+                       WHERE bug_id = ?', undef, $bug->{creation_ts},
+                     $bug->{creation_ts}, $created->id);
+        }
         if (defined $bug->{delta_ts}) {
             $dbh->do('UPDATE bugs SET delta_ts = ? WHERE bug_id = ?',
                      undef, $bug->{delta_ts}, $created->id);

@@ -103,9 +103,6 @@ if (defined $cgi->param('maketemplate')) {
 
 umask 0;
 
-# get current time
-my $timestamp = $dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
-
 # Group Validation
 my @selected_groups;
 foreach my $group (grep(/^bit-\d+$/, $cgi->param())) {
@@ -160,7 +157,6 @@ my %bug_params;
 foreach my $field (@bug_fields) {
     $bug_params{$field} = $cgi->param($field);
 }
-$bug_params{'creation_ts'} = $timestamp;
 $bug_params{'cc'}          = [$cgi->param('cc')];
 $bug_params{'groups'}      = \@selected_groups;
 $bug_params{'comment'}     = $comment;
@@ -176,6 +172,10 @@ my $bug = Bugzilla::Bug->create(\%bug_params);
 
 # Get the bug ID back.
 my $id = $bug->bug_id;
+# We do this directly from the DB because $bug->creation_ts has the seconds
+# formatted out of it (which should be fixed some day).
+my $timestamp = $dbh->selectrow_array(
+    'SELECT creation_ts FROM bugs WHERE bug_id = ?', undef, $id);
 
 # Set Version cookie, but only if the user actually selected
 # a version on the page.

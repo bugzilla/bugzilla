@@ -331,15 +331,14 @@ exit;
 
 sub get_names {
     my ($names, $isnumeric, $field) = @_;
-  
-    # These are all the fields we want to preserve the order of in reports.
-    my %fields = ('priority'     => get_legal_field_values('priority'),
-                  'bug_severity' => get_legal_field_values('bug_severity'),
-                  'rep_platform' => get_legal_field_values('rep_platform'),
-                  'op_sys'       => get_legal_field_values('op_sys'),
-                  'bug_status'   => get_legal_field_values('bug_status'),
-                  'resolution'   => [' ', @{get_legal_field_values('resolution')}]);
     
+    # These are all the fields we want to preserve the order of in reports.
+    my %fields;
+    my @select_fields = Bugzilla->get_fields({ is_select => 1 });
+    foreach my $field (@select_fields) {
+        my @names =  map($_->name, @{$field->legal_values});
+        $fields{$field->name} = \@names;
+    } 
     my $field_list = $fields{$field};
     my @sorted;
     
@@ -362,6 +361,6 @@ sub get_names {
         # ...or alphabetically, as appropriate.
         @sorted = sort(keys(%{$names}));
     }
-  
+    
     return \@sorted;
 }

@@ -214,7 +214,7 @@ sub url_quote {
 
 sub css_class_quote {
     my ($toencode) = (@_);
-    $toencode =~ s/ /_/g;
+    $toencode =~ s#[ /]#_#g;
     $toencode =~ s/([^a-zA-Z0-9_\-.])/uc sprintf("&#x%x;",ord($1))/eg;
     return $toencode;
 }
@@ -733,7 +733,7 @@ Quotes characters so that they may be included as part of a url.
 =item C<css_class_quote($val)>
 
 Quotes characters so that they may be used as CSS class names. Spaces
-are replaced by underscores.
+and forward slashes are replaced by underscores.
 
 =item C<xml_quote($val)>
 

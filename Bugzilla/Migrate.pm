@@ -1007,13 +1007,19 @@ user specified C<--verbose> at least that many times on the command line.
 
 =head2 parse_date
 
+(Note: Usually you don't need to call this, because L</translate_bug>
+handles date translations for you, for bug data.)
+
 Parses a date string and returns a formatted date string that can be inserted
 into the database. If the input date is missing a timezone, the "timezone"
 configuration parameter will be used as the timezone of the date.
 
 =head2 translate_bug
 
-Uses the C<$translate_fields> and <$translate_values> configuration variables
+(Note: Normally you don't have to call this yourself, as 
+C<Bugzilla::Migrate> does it for you.)
+
+Uses the C<$translate_fields> and C<$translate_values> configuration variables
 to convert a hashref of "other bug-tracker" fields into Bugzilla fields.
 It takes one argument, the hashref to convert. Any unrecognized fields will
 have their value prepended to the C<comment> element in the returned
@@ -1028,9 +1034,11 @@ B<Note:> To save memory, the hashref that you pass in will be destroyed
 
 =head2 translate_value
 
-(Note: Normally you will want to use L</translate_bug> instead of this.)
+(Note: Generally you only need to use this during L</_read_products>
+and L</_read_users> if necessary, because the data returned from
+L</_read_bugs> will be put through L</translate_bug>.)
 
-Uses the C<translate_values> configuration variable to convert
+Uses the C<$translate_values> configuration variable to convert
 field values from your bug-tracker to Bugzilla. Takes two arguments,
 the first being a field name and the second being a value. If the value
 is an arrayref, C<translate_value> will be called recursively on all
@@ -1039,13 +1047,10 @@ the array elements.
 Also, any date field will be converted into ISO 8601 format, for
 inserting into the database.
 
-You must use this to translate any bug field values that you return
-during L</_read_bugs>, so that they are valid values for
-L<Bugzilla::Bug/create>.
-
 =head2 translate_field
 
-(Note: Normally you will want to use L</translate_bug> instead of this.)
+(Note: Normally you don't need to use this, because L</translate_bug> 
+handles it for you.)
 
 Translates a field name in your bug-tracker to a field name in Bugzilla,
 using the rules described in the description of the C<$translate_fields>
@@ -1063,7 +1068,7 @@ These are methods that subclasses must implement:
 
 Should return an arrayref of hashes. The hashes will be passed to
 L<Bugzilla::Bug/create> to create bugs in Bugzilla. In addition to
-the normal C<create> fields, the hashes can contain two additional
+the normal C<create> fields, the hashes can contain three additional
 items:
 
 =over
@@ -1075,7 +1080,7 @@ database. The keys should be the names of columns in the longdescs
 table that you want to set for each comment. C<who> must be a
 username instead of a user id, though.
 
-You don't need to specify a value for C<bug_id> column.
+You don't need to specify a value for the C<bug_id> column.
 
 =item history
 
@@ -1085,7 +1090,7 @@ bugs_activity table to set for each change. C<who> must be a username
 instead of a user id, though, and C<field> (containing the name of some field)
 is taken instead of C<fieldid>.
 
-You don't need to specify a value for C<bug_id> column.
+You don't need to specify a value for the C<bug_id> column.
 
 =item attachments
 
@@ -1095,7 +1100,7 @@ must be a file handle--we recommend using L<IO::File/new_tmpfile> to create
 anonymous temporary files for this purpose.) You should specify a
 C<submitter> argument containing the username of the attachment's submitter.
 
-You don't need to specify a value for the C<bug> argument.
+You don't need to specify a value for the the C<bug> argument.
 
 =back
 
@@ -1140,11 +1145,6 @@ configuration variables for migrating from your bug-tracker. You should
 always include the default C<CONFIG_VARS> (by calling
 $self->SUPER::CONFIG_VARS) as part of your return value, if you
 override this method.
-
-In addition to the normal fields from C<LOCALCONFIG_VARS>, you can also
-specify a C<check> key for each item, which should be a subroutine
-reference. When the configuration file is read, this subroutine will be
-called (as a method) to make sure that the value is valid.
 
 =head2 NON_COMMENT_FIELDS
 

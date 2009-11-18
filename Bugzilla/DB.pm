@@ -537,6 +537,13 @@ sub bz_alter_column {
             ThrowCodeError('column_not_null_no_default_alter', 
                            { name => "$table.$name" }) if ($any_nulls);
         }
+        # Preserve foreign key definitions in the Schema object when altering
+        # types.
+        if (defined $current_def->{REFERENCES}) {
+            # Make sure we don't modify the caller's $new_def.
+            $new_def = dclone($new_def);
+            $new_def->{REFERENCES} = $current_def->{REFERENCES};
+        }
         $self->bz_alter_column_raw($table, $name, $new_def, $current_def,
                                    $set_nulls_to);
         $self->_bz_real_schema->set_column($table, $name, $new_def);

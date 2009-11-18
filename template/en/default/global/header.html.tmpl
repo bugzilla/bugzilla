@@ -191,6 +191,7 @@
     <![endif]-->
 
     <script src="js/yui/yahoo-dom-event.js" type="text/javascript"></script>
+    <script src="js/yui/cookie.js" type="text/javascript"></script>
     <script src="js/global.js" type="text/javascript"></script>
     <script type="text/javascript">
     <!--
@@ -199,6 +200,18 @@
             YAHOO.util.Event._simpleRemove(window, "unload", 
                                            YAHOO.util.Event._unload);
         }
+        [%# The language selector needs javascript to set its cookie,
+          # so it is hidden in HTML/CSS by the "bz_default_hidden" class.
+          # If the browser can run javascript, it will then "unhide"
+          # the language selector using the following code.
+          #%]
+        function unhide_language_selector() { 
+            YAHOO.util.Dom.removeClass(
+                'lang_links_container', 'bz_default_hidden'
+            ); 
+        } 
+        YAHOO.util.Event.onDOMReady(unhide_language_selector);
+
         [%# Make some Bugzilla information available to all scripts. 
           # We don't import every parameter and constant because we
           # don't want to add a lot of uncached JS to every page. 
@@ -278,9 +291,26 @@
 </tr>
 </table>
 
-[% PROCESS "global/common-links.html.tmpl" qs_suffix = "_top" %]
+<table id="lang_links_container" cellpadding="0" cellspacing="0"
+       class="bz_default_hidden"><tr><td>
+[% IF Bugzilla.languages.size > 1 %]
+  <ul class="links">
+  [% FOREACH lang = Bugzilla.languages.sort %]
+    <li>[% IF NOT loop.first %]<span class="separator"> | </span>[% END %]
+    [% IF lang == current_language %]
+      <span class="lang_current">[% lang FILTER html FILTER upper %]</span>
+    [% ELSE %]
+      <a href="#" onclick="set_language('[% lang FILTER none %]');">
+       [%- lang FILTER html FILTER upper %]</a>
+    [% END %]
+    </li>
+  [% END %]
+  </ul>
+[% END %]
+</td></tr></table>
 
-</div>
+[% PROCESS "global/common-links.html.tmpl" qs_suffix = "_top" %]
+</div> [%# header %]
 
 <div id="bugzilla-body">
 

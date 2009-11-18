@@ -127,15 +127,28 @@ sub install_string {
 }
 
 sub include_languages {
+    # If we are in CGI mode (not in checksetup.pl) and if the function has
+    # been called without any parameter, then we cache the result of this
+    # function in Bugzilla->request_cache. This is done to improve the
+    # performance of the template processing.
+    my $to_be_cached = 0;
+    if (exists $ENV{'SERVER_SOFTWARE'} and not @_) {
+        my $cache = Bugzilla->request_cache;
+        if (exists $cache->{include_languages}) {
+            return @{$cache->{include_languages}}
+        }
+        $to_be_cached = 1;
+    }
     my ($params) = @_;
     $params ||= {};
 
     # Basically, the way this works is that we have a list of languages
     # that we *want*, and a list of languages that Bugzilla actually
     # supports. The caller tells us what languages they want, by setting
-    # $ENV{HTTP_ACCEPT_LANGUAGE} or $params->{only_language}. The languages
-    # we support are those specified in $params->{use_languages}. Otherwise
-    # we support every language installed in the template/ directory.
+    # $ENV{HTTP_ACCEPT_LANGUAGE}, using the "LANG" cookie or  setting
+    # $params->{only_language}. The languages we support are those
+    # specified in $params->{use_languages}. Otherwise we support every
+    # language installed in the template/ directory.
     
     my @wanted;
     if ($params->{only_language}) {
@@ -143,6 +156,15 @@ sub include_languages {
     }
     else {
         @wanted = _sort_accept_language($ENV{'HTTP_ACCEPT_LANGUAGE'} || '');
+        # Don't use the cookie if we are in "checksetup.pl". The test
+        # with $ENV{'SERVER_SOFTWARE'} is the same as in
+        # Bugzilla:Util::i_am_cgi.
+        if (exists $ENV{'SERVER_SOFTWARE'}) {
+            my $cgi = Bugzilla->cgi;
+            if (defined (my $lang = $cgi->cookie('LANG'))) {
+                unshift @wanted, $lang;
+            }
+        }
     }
     
     my @supported;
@@ -173,6 +195,13 @@ sub include_languages {
     # somebody removed it from use_languages.
     if (!grep($_ eq 'en', @usedlanguages)) {
         push(@usedlanguages, 'en');
+    }
+
+    # Cache the result if we are in CGI mode and called without parameter
+    # (see the comment at the top of this function).
+    if ($to_be_cached) {
+        my $cache = Bugzilla->request_cache;
+        $cache->{include_languages} = \@usedlanguages;
     }
 
     return @usedlanguages;

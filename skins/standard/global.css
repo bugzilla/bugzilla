@@ -61,6 +61,18 @@
         padding: 0.5em;
     }
 
+    #lang_links_container {
+        float: right;
+    }
+    #lang_links_container .links {
+        border: none;
+        padding: .5em;
+    }
+
+    .lang_current {
+        font-weight: bold;
+    }
+
     #message {
         border: 1px solid red;
         margin: 0.3em 0em;

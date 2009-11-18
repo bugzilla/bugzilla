@@ -279,6 +279,10 @@ sub set {
                             superclass => __PACKAGE__,
                             function   => 'Bugzilla::Object->set' });
 
+    Bugzilla::Hook::process('object-before_set',
+                            { object => $self, field => $field,
+                              value => $value });
+
     my %validators = (%{$self->VALIDATORS}, %{$self->UPDATE_VALIDATORS});
     if (exists $validators{$field}) {
         my $validator = $validators{$field};

@@ -620,6 +620,32 @@ A hashref. The set of named parameters passed to C<create>.
 
 =back
 
+=head2 object-before_set
+
+Called during L<Bugzilla::Object/set>, before any actual work is done.
+You can use this to perform actions before a value is changed for
+specific fields on certain types of objects.
+
+Params:
+
+=over
+
+=item C<object>
+
+The object that C<set> was called on. You will probably want to
+do something like C<< if ($object->isa('Some::Class')) >> in your code to
+limit your changes to only certain subclasses of Bugzilla::Object.
+
+=item C<field>
+
+The name of the field being updated in the object.
+
+=item C<value> 
+
+The value being set on the object.
+
+=back
+
 =head2 object-end_of_create_validators
 
 Called at the end of L<Bugzilla::Object/run_create_validators>. You can

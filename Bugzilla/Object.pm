@@ -435,6 +435,9 @@ sub run_create_validators {
         $field_values{$field} = $value;
     }
 
+    Bugzilla::Hook::process('object-end_of_create_validators',
+                            { class => $class, params => \%field_values });
+
     return \%field_values;
 }
 

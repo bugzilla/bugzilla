@@ -605,6 +605,31 @@ A hashref. The set of named parameters passed to C<create>.
 
 =back
 
+=head2 object-end_of_create_validators
+
+Called at the end of L<Bugzilla::Object/run_create_validators>. You can
+use this to run additional validation when creating an object.
+
+If a subclass has overridden C<run_create_validators>, then this usually
+happens I<before> the subclass does its custom validation.
+
+Params:
+
+=over
+
+=item C<class>
+
+The name of the class that C<create> was called on. You can check this 
+like C<< if ($class->isa('Some::Class')) >> in your code, to perform specific
+tasks for only certain classes.
+
+=item C<params>
+
+A hashref. The set of named parameters passed to C<create>, modified and
+validated by the C<VALIDATORS> specified for the object.
+
+=back
+
 =head2 page-before_template
 
 This is a simple way to add your own pages to Bugzilla. This hooks C<page.cgi>,

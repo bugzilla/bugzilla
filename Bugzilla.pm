@@ -555,7 +555,11 @@ sub local_timezone {
 sub request_cache {
     if ($ENV{MOD_PERL}) {
         require Apache2::RequestUtil;
-        return Apache2::RequestUtil->request->pnotes();
+        # Sometimes (for example, during mod_perl.pl), the request
+        # object isn't available, and we should use $_request_cache instead.
+        my $request = eval { Apache2::RequestUtil->request };
+        return $_request_cache if !$request;
+        return $request->pnotes();
     }
     return $_request_cache;
 }

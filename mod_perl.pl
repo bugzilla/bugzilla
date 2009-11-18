@@ -34,12 +34,14 @@ use ModPerl::RegistryLoader ();
 use CGI ();
 CGI->compile(qw(:cgi -no_xhtml -oldstyle_urls :private_tempfiles
                 :unique_headers SERVER_PUSH :push));
+use File::Basename ();
 use Template::Config ();
 Template::Config->preload();
 
 use Bugzilla ();
 use Bugzilla::Constants ();
 use Bugzilla::CGI ();
+use Bugzilla::Install::Requirements ();
 use Bugzilla::Mailer ();
 use Bugzilla::Template ();
 use Bugzilla::Util ();
@@ -75,9 +77,12 @@ my $rl = new ModPerl::RegistryLoader();
 # If we try to do this in "new" it fails because it looks for a 
 # Bugzilla/ModPerl/ResponseHandler.pm
 $rl->{package} = 'Bugzilla::ModPerl::ResponseHandler';
-# Note that $cgi_path will be wrong if somebody puts the libraries
-# in a different place than the CGIs.
+my $feature_files = Bugzilla::Install::Requirements::map_files_to_features();
 foreach my $file (glob "$cgi_path/*.cgi") {
+    my $base_filename = File::Basename::basename($file);
+    if (my $feature = $feature_files->{$base_filename}) {
+        next if !Bugzilla->feature($feature);
+    }
     Bugzilla::Util::trick_taint($file);
     $rl->handler($file, $file);
 }

@@ -35,11 +35,13 @@ use base qw(Exporter);
 our @EXPORT = qw(
     REQUIRED_MODULES
     OPTIONAL_MODULES
+    FEATURE_FILES
 
     check_requirements
     check_graphviz
     have_vers
     install_command
+    map_files_to_features
 );
 
 # This is how many *'s are in the top of each "box" message printed
@@ -293,6 +295,22 @@ sub OPTIONAL_MODULES {
         'OPTIONAL_MODULES', \@modules);
     return $all_modules;
 };
+
+# This maps features to the files that require that feature in order
+# to compile. It is used by t/001compile.t and mod_perl.pl.
+use constant FEATURE_FILES => (
+    jsonrpc       => ['Bugzilla/WebService/Server/JSONRPC.pm', 'jsonrpc.cgi'],
+    xmlrpc        => ['Bugzilla/WebService/Server/XMLRPC.pm', 'xmlrpc.cgi',
+                      'Bugzilla/WebService.pm', 'Bugzilla/WebService/*.pm'],
+    moving        => ['importxml.pl'],
+    auth_ldap     => ['Bugzilla/Auth/Verify/LDAP.pm'],
+    auth_radius   => ['Bugzilla/Auth/Verify/RADIUS.pm'],
+    inbound_email => ['email_in.pl'],
+    jobqueue      => ['Bugzilla/Job/*', 'Bugzilla/JobQueue.pm',
+                      'Bugzilla/JobQueue/*', 'jobqueue.pl'],
+    patch_viewer  => ['Bugzilla/Attachment/PatchReader.pm'],
+    updates       => ['Bugzilla/Update.pm'],
+);
 
 # This implements the install-requirements hook described in Bugzilla::Hook.
 sub _get_extension_requirements {
@@ -590,6 +608,21 @@ sub install_command {
     return sprintf $command, $package;
 }
 
+# This does a reverse mapping for FEATURE_FILES.
+sub map_files_to_features {
+    my %features = FEATURE_FILES;
+    my %files;
+    foreach my $feature (keys %features) {
+        my @my_files = @{ $features{$feature} };
+        foreach my $pattern (@my_files) {
+            foreach my $file (glob $pattern) {
+                $files{$file} = $feature;
+            }
+        }
+    }
+    return \%files;
+}
+
 1;
 
 __END__
@@ -607,15 +640,41 @@ perl modules it requires.)
 
 =head1 CONSTANTS
 
-=over 4
+=over
 
 =item C<REQUIRED_MODULES>
 
 An arrayref of hashrefs that describes the perl modules required by 
-Bugzilla. The hashes have two keys, C<name> and C<version>, which
-represent the name of the module and the version that we require.
+Bugzilla. The hashes have three keys: 
+
+=over
+
+=item C<package> - The name of the Perl package that you'd find on
+CPAN for this requirement. 
+
+=item C<module> - The name of a module that can be passed to the
+C<install> command in C<CPAN.pm> to install this module.
+
+=item C<version> - The version of this module that we require, or C<0>
+if any version is acceptable.
 
 =back
+
+=item C<OPTIONAL_MODULES>
+
+An arrayref of hashrefs that describes the perl modules that add
+additional features to Bugzilla if installed. Its hashes have all
+the fields of L</REQUIRED_MODULES>, plus a C<feature> item--an arrayref
+of strings that describe what features require this module.
+
+=item C<FEATURE_FILES>
+
+A hashref that describes what files should only be compiled if a certain
+feature is enabled. The feature is the key, and the values are arrayrefs
+of file names (which are passed to C<glob>, so shell patterns work).
+
+=back
+
 
 =head1 SUBROUTINES
 
@@ -698,5 +757,10 @@ Returns:     C<1> if the check was successful, C<0> otherwise.
                            L</REQUIRED_MODULES>.
 
  Returns:     nothing
+
+=item C<map_files_to_features>
+
+Returns a hashref where file names are the keys and the value is the feature
+that must be enabled in order to compile that file.
 
 =back

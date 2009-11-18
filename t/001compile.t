@@ -32,39 +32,17 @@ use Test::More tests => scalar(@Support::Files::testitems);
 
 BEGIN { 
     use_ok('Bugzilla::Constants');
+    use_ok('Bugzilla::Install::Requirements');
     use_ok('Bugzilla');
-}
-
-use constant FEATURE_FILES => (
-    jsonrpc       => ['Bugzilla/WebService/Server/JSONRPC.pm', 'jsonrpc.cgi'],
-    xmlrpc        => ['Bugzilla/WebService/Server/XMLRPC.pm', 'xmlrpc.cgi',
-                      'Bugzilla/WebService.pm', 'Bugzilla/WebService/*.pm'],
-    moving        => ['importxml.pl'],
-    auth_ldap     => ['Bugzilla/Auth/Verify/LDAP.pm'],
-    auth_radius   => ['Bugzilla/Auth/Verify/RADIUS.pm'],
-    inbound_email => ['email_in.pl'],
-    jobqueue      => ['Bugzilla/Job/*', 'Bugzilla/JobQueue.pm',
-                      'Bugzilla/JobQueue/*', 'jobqueue.pl'],
-    patch_viewer  => ['Bugzilla/Attachment/PatchReader.pm'],
-    updates       => ['Bugzilla/Update.pm'],
-);
-
-sub map_files_to_feature {
-    my %features = FEATURE_FILES;
-    my %files;
-    foreach my $feature (keys %features) {
-        my @my_files = @{ $features{$feature} };
-        foreach my $pattern (@my_files) {
-            foreach my $file (glob $pattern) {
-                $files{$file} = $feature;
-            }
-        }
-    }
-    return \%files;
 }
 
 sub compile_file {
     my ($file) = @_;
+
+    # Don't allow CPAN.pm to modify the global @INC, which the version
+    # shipped with Perl 5.8.8 does. (It gets loaded by 
+    # Bugzilla::Install::CPAN.)
+    local @INC = @INC;
 
     if ($file =~ s/\.pm$//) {
         $file =~ s{/}{::}g;
@@ -91,12 +69,14 @@ sub compile_file {
 }
 
 my @testitems = @Support::Files::testitems;
-my $file_features = map_files_to_feature();
+my $file_features = map_files_to_features();
 
 # Test the scripts by compiling them
 foreach my $file (@testitems) {
     # These were already compiled, above.
-    next if ($file eq 'Bugzilla.pm' or $file eq 'Bugzilla/Constants.pm');
+    next if ($file eq 'Bugzilla.pm' 
+             or $file eq 'Bugzilla/Constants.pm'
+             or $file eq 'Bugzilla/Install/Requirements.pm');
     SKIP: {
         if ($file eq 'mod_perl.pl') {
             skip 'mod_perl.pl cannot be compiled from the command line', 1;

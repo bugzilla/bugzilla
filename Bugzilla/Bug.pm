@@ -2297,6 +2297,8 @@ sub add_group {
     $group = new Bugzilla::Group($group) unless ref $group;
     return unless $group;
 
+    return if !$group->is_active or !$group->is_bug_group;
+
     # Make sure that bugs in this product can actually be restricted
     # to this group.
     grep($group->id == $_->id, @{$self->product_obj->groups_valid})

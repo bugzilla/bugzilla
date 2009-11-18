@@ -327,7 +327,7 @@
     A valid quipid is needed.
 
   [% ELSIF error == "no_manual_moved" %]
-    You cannot set the resolution of [% terms.abug %] to display_value("resolution", "MOVED") FILTER html %] without
+    You cannot set the resolution of [% terms.abug %] to [% display_value("resolution", "MOVED") FILTER html %] without
     moving the [% terms.bug %].
 
   [% ELSIF error == "no_open_bug_status" %]

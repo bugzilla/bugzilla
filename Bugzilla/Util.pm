@@ -600,8 +600,10 @@ sub get_text {
     $vars ||= {};
     $vars->{'message'} = $name;
     my $message;
-    $template->process('global/message.txt.tmpl', $vars, \$message)
-        || ThrowTemplateError($template->error());
+    if (!$template->process('global/message.txt.tmpl', $vars, \$message)) {
+        require Bugzilla::Error;
+        Bugzilla::Error::ThrowTemplateError($template->error());
+    }
     # Remove the indenting that exists in messages.html.tmpl.
     $message =~ s/^    //gm;
     return $message;

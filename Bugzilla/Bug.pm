@@ -613,6 +613,9 @@ sub run_create_validators {
     delete $params->{lastdiffed};
     delete $params->{bug_id};
 
+    Bugzilla::Hook::process('bug-end_of_create_validators',
+                            { params => $params });
+
     return $params;
 }
 

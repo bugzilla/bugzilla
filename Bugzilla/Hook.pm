@@ -280,6 +280,21 @@ values.
 
 =back
 
+=head2 bug-end_of_create_validators
+
+This happens during L<Bugzilla::Bug/create>, after all parameters have
+been validated, but before anything has been inserted into the database.
+
+Params:
+
+=over
+
+=item C<params>
+
+A hashref. The validated parameters passed to C<create>.
+
+=back
+
 =head2 bug-end_of_update
 
 This happens at the end of L<Bugzilla::Bug/update>, after all other changes are

@@ -24,6 +24,7 @@ use strict;
 package Bugzilla::Object;
 
 use Bugzilla::Constants;
+use Bugzilla::Hook;
 use Bugzilla::Util;
 use Bugzilla::Error;
 
@@ -398,6 +399,11 @@ sub _check_field {
 
 sub check_required_create_fields {
     my ($class, $params) = @_;
+
+    # This hook happens here so that even subclasses that don't call
+    # SUPER::create are still affected by the hook.
+    Bugzilla::Hook::process('object-before_create', { class => $class,
+                                                      params => $params });
 
     foreach my $field ($class->REQUIRED_CREATE_FIELDS) {
         ThrowCodeError('param_required',

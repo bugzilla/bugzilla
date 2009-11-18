@@ -585,6 +585,26 @@ Params:
 
 =back
 
+=head2 object-before_create
+
+This happens at the beginning of L<Bugzilla::Object/create>.
+
+Params:
+
+=over
+
+=item C<class>
+
+The name of the class that C<create> was called on. You can check this 
+like C<< if ($class->isa('Some::Class')) >> in your code, to perform specific
+tasks before C<create> for only certain classes.
+
+=item C<params>
+
+A hashref. The set of named parameters passed to C<create>.
+
+=back
+
 =head2 page-before_template
 
 This is a simple way to add your own pages to Bugzilla. This hooks C<page.cgi>,

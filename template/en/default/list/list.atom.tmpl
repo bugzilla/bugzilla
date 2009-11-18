@@ -23,7 +23,7 @@
   # This is a template for generating an Atom representation of a buglist. 
   #%]
 
-[% PROCESS global/variables.none.tmpl %]
+[% PROCESS "global/field-descs.none.tmpl" %]
 
 [% DEFAULT title = "$terms.Bugzilla $terms.Bugs" %]
 
@@ -71,16 +71,16 @@
         <td>[% bug.reporter_realname FILTER html %]</td>
       </tr><tr class="bz_feed_bug_status">
         <td>[% columns.bug_status.title FILTER html %]</td>
-        <td>[% bug.bug_status FILTER html %]</td>
+        <td>[% display_value("bug_status", bug.bug_status) FILTER html %]</td>
       </tr><tr class="bz_feed_resolution">
         <td>[% columns.resolution.title FILTER html %] </td>
-        <td>[% bug.resolution FILTER html %]</td>
+        <td>[% display_value("resolution", bug.resolution) FILTER html %]</td>
       </tr><tr class="bz_feed_priority">
         <td>[% columns.priority.title FILTER html %]</td>
-        <td>[% bug.priority FILTER html %]</td>
+        <td>[% display_value("priority", bug.priority) FILTER html %]</td>
       </tr><tr class="bz_feed_severity">
         <td>[% columns.bug_severity.title FILTER html %] </td>
-        <td>[% bug.bug_severity FILTER html %]</td>
+        <td>[% display_value("bug_severity", bug.bug_severity) FILTER html %]</td>
       [% IF Param("usetargetmilestone") %]
       </tr><tr class="bz_feed_target_milestone">
         <td>[% columns.target_milestone.title FILTER html %]</td>

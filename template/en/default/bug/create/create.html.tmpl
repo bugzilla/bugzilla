@@ -664,11 +664,8 @@ TUI_hide_default('expert_fields');
     [%- FOREACH x = ${sel.name} %]
       <option value="[% x FILTER html %]"
         [% " selected=\"selected\"" IF x == default.${sel.name} %]>
-        [% IF sel.name == "bug_status" %]
-          [% display_value("bug_status", x) FILTER html %]
-        [% ELSE %]
-          [% x FILTER html %]
-        [% END %]</option>
+        [% display_value(sel.name, x) FILTER html %]
+      </option>
     [% END %]
     </select>
 

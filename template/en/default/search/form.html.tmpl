@@ -617,19 +617,11 @@ function doOnSelectProduct(selectmode) {
         [%# This only applies for Resolution really %]
           <option value="[% value.name OR '---' FILTER html %]"
             [% " selected" IF lsearch(default.${sel.name}, value.name) != -1 %]>
-            [% IF sel.name == "bug_status" %]
-              [% display_value("bug_status", value.name) FILTER html %]
-            [% ELSIF sel.name == "resolution" %]
-              [%# Again, resolution has that odd empty value. Replace it with '---' %]
-              [% display_value("resolution", value.name) OR '---' FILTER html %]
-            [% ELSE %]
-              [% value.name FILTER html %]
-            [% END %]
-          </option>
+            [% display_value(sel.name, value.name) FILTER html %]
         [% ELSE %]
           <option value="[% value OR '---' FILTER html %]"
             [% " selected" IF lsearch(default.${sel.name}, value) != -1 %]>
-              [% value FILTER html %]
+            [% display_value(sel.name, value) FILTER html %]
           </option>
         [% END %]
       [% END %]

@@ -54,7 +54,7 @@
     <th>&nbsp;</th>
     [% FOREACH status = statuses %]
       <th class="col-header[% status.is_open ? " open-status" : " closed-status" %]">
-        [% status.name FILTER html %]
+        [% display_value("bug_status", status.name) FILTER html %]
       </th>
     [% END %]
   </tr>
@@ -64,7 +64,7 @@
   [% FOREACH status = p.merge(statuses) %]
     <tr class="highlight">
       <th align="right" class="[% status.is_open ? "open-status" : "closed-status" %]">
-        [% status.name FILTER html %]
+        [% display_value("bug_status", status.name) FILTER html %]
       </th>
 
       [% FOREACH new_status = statuses %]
@@ -89,7 +89,7 @@
 <p>
   When [% terms.abug %] is marked as a duplicate of another one or is moved
   to another installation, the [% terms.bug %] status is automatically set to
-  <b>[% Param("duplicate_or_move_bug_status") FILTER html %]</b>. All transitions to
+  <b>[% display_value("bug_status", Param("duplicate_or_move_bug_status")) FILTER html %]</b>. All transitions to
   this [% terms.bug %] status must then be valid (this is the reason why you cannot edit
   them above).<br>
   Note: you can change this setting by visiting the

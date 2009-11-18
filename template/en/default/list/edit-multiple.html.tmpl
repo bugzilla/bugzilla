@@ -368,7 +368,7 @@
     </option>
     [% FOREACH menuitem = menuitems %]
       [% IF property %][% menuitem = menuitem.$property %][% END %]
-      <option value="[% menuitem FILTER html %]">[% menuitem FILTER html %]</option>
+      <option value="[% menuitem FILTER html %]">[% display_value(menuname, menuitem) FILTER html %]</option>
     [% END %]
   </select>
 [% END %]

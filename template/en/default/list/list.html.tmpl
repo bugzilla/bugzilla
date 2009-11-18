@@ -91,16 +91,8 @@
     [% IF shown_types.contains(desc_item.type) || debug %]
       ([% search_descs.${desc_item.type} FILTER html %])
     [% END %]
-    [% IF desc_item.field == 'bug_status' %]
-      [% FOREACH status IN desc_item.value.split(',') %]
-        [%+ display_value("bug_status", status) FILTER html %][% ',' UNLESS loop.last %]
-      [% END %]
-    [% ELSIF desc_item.field == 'resolution' %]
-      [% FOREACH resolution IN desc_item.value.split(',') %]
-        [%+ display_value("resolution", resolution) FILTER html %][% ',' UNLESS loop.last %]
-      [% END %]
-    [% ELSE %]
-      [%+ desc_item.value FILTER html %]
+    [% FOREACH val IN desc_item.value.split(',') %]
+      [%+ display_value(desc_item.field, val) FILTER html %][% ',' UNLESS loop.last %]
     [% END %]
     [% IF debug %]
       (<code>[% desc_item.term FILTER html %]</code>)

@@ -19,7 +19,6 @@
   #                 Gervase Markham <gerv@gerv.net>
   #%]
 
-[% PROCESS global/variables.none.tmpl %]
 [% PROCESS "global/field-descs.none.tmpl" %]
 [% INCLUDE global/header.html.tmpl title = "A $terms.Bug's Life Cycle" %]
 
@@ -221,46 +220,46 @@ This field describes the impact of [% terms.abug %].
 
 <table>
   <tr>
-    <th>Blocker</th>
+    <th>[% display_value("bug_severity", "blocker") FILTER html %]</th>
 
     <td>Blocks development and/or testing work</td>
   </tr>
 
   <tr>
-    <th>Critical</th>
+    <th>[% display_value("bug_severity", "critical") FILTER html %]</th>
 
     <td>crashes, loss of data, severe memory leak</td>
   </tr>
 
   <tr>
-    <th>Major</th>
+    <th>[% display_value("bug_severity", "major") FILTER html %]</th>
 
     <td>major loss of function</td>
   </tr>
 
   <tr>
-    <th>Normal</th>
+    <th>[% display_value("bug_severity", "normal") FILTER html %]</th>
 
     <td>regular issue, some loss of functionality under specific circumstances</td>
   </tr>
 
 
   <tr>
-    <th>Minor</th>
+    <th>[% display_value("bug_severity", "minor") FILTER html %]</th>
 
     <td>minor loss of function, or other problem where easy
     workaround is present</td>
   </tr>
 
   <tr>
-    <th>Trivial</th>
+    <th>[% display_value("bug_severity", "trivial") FILTER html %]</th>
 
     <td>cosmetic problem like misspelled words or misaligned
     text</td>
   </tr>
 
   <tr>
-    <th>Enhancement</th>
+    <th>[% display_value("bug_severity", "enhancement") FILTER html %]</th>
 
     <td>Request for enhancement</td>
 </table>
@@ -270,23 +269,25 @@ This is the hardware platform against which the [% terms.bug %] was
 reported. Legal platforms include: 
 
 <ul>
-  <li>All (happens on all platforms; cross-platform [% terms.bug %])</li>
+  <li>[% display_value("rep_platform", "All") FILTER html %] (happens on all platforms; cross-platform [% terms.bug %])</li>
 
-  <li>Macintosh</li>
+  <li>[% display_value("rep_platform", "Macintosh") FILTER html %]</li>
 
-  <li>PC</li>
+  <li>[% display_value("rep_platform", "PC") FILTER html %]</li>
 </ul>
-<b>Note:</b> When searching, selecting the option "All" does not 
+<b>Note:</b> When searching, selecting the option 
+<em>[% display_value("rep_platform", "All") FILTER html %]</em> does not 
 select [% terms.bugs %]
 assigned against any platform. It merely selects [% terms.bugs %] that are
-marked as occurring on all platforms, i.e. are designated "All". 
+marked as occurring on all platforms, i.e. are designated 
+<em>[% display_value("rep_platform", "All") FILTER html %]</em>. 
 
 <h2><a name="op_sys">Operating System</a></h2>
 This is the operating system against which the [% terms.bug %] was
 reported. Legal operating systems include: 
 
 <ul>
-  <li>All (happens on all operating systems; cross-platform
+  <li>[% display_value("op_sys", "All") FILTER html %] (happens on all operating systems; cross-platform
   [% terms.bug %])</li>
 
   <li>Windows</li>

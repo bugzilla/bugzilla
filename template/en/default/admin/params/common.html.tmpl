@@ -22,6 +22,8 @@
   # panel: hash representing the current panel.
   #%]
 
+[% PROCESS "global/field-descs.none.tmpl" %]
+
 [% sortlist_separator = '---' %]
 
 <dl>
@@ -115,7 +117,17 @@
           [% FOREACH item = param.choices %]
             <option value="[% item FILTER html %]"
                     [% " selected=\"selected\"" IF item == Param(param.name) %]>
-              [% item FILTER html %]
+              [% IF param.name == "defaultseverity" %]
+                [% display_value("bug_severity", item) FILTER html %]
+              [% ELSIF param.name == "defaultplatform" %]
+                [% display_value("rep_platform", item) FILTER html %]
+              [% ELSIF param.name == "defaultopsys" %]
+                [% display_value("op_sys", item) FILTER html %]
+              [% ELSIF param.name == "duplicate_or_move_bug_status" %]
+                [% display_value("bug_status", item) FILTER html %]
+              [% ELSE %]
+                [% item FILTER html %]
+              [% END %]
             </option>
           [% END %]
         </select>

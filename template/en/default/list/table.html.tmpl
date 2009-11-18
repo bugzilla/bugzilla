@@ -201,14 +201,7 @@
     [% FOREACH column = displaycolumns %]
     <td [% 'style="white-space: nowrap"' IF NOT abbrev.$column.wrap %]>
       [% IF abbrev.$column.maxlength %]
-        <span title="
-          [%- IF column == 'bug_status' %]
-            [%- display_value("bug_status", bug.$column) FILTER html %]
-          [% ELSIF column == 'resolution' %]
-            [%- display_value("resolution", bug.$column) FILTER html %]
-          [% ELSE %]
-            [%- bug.$column FILTER html %]
-          [% END %]">
+        <span title="[%- display_value(column, bug.$column) FILTER html %]">
       [% END %]
       [% IF abbrev.$column.format_value %] 
         [%- bug.$column FILTER format(abbrev.$column.format_value) FILTER html -%] 
@@ -216,11 +209,6 @@
                column == 'remaining_time' ||
                column == 'estimated_time' %]
         [% PROCESS formattimeunit time_unit=bug.$column %] 
-      [% ELSIF column == 'bug_status' %]
-        [%- display_value("bug_status", bug.$column).truncate(abbrev.$column.maxlength, abbrev.$column.ellipsis) FILTER html %]
-      [% ELSIF column == 'resolution' %]
-        [%- display_value("resolution", bug.$column).truncate(abbrev.$column.maxlength, abbrev.$column.ellipsis) FILTER html %]
-
       [%# Display the login name of the user if their real name is empty. %]
       [% ELSIF column.match('_realname$') && bug.$column == '' %]
         [% SET login_column = column.remove('_realname$') %]
@@ -228,7 +216,7 @@
                                         abbrev.$column.ellipsis) FILTER html %]
 
       [% ELSE %]
-        [%- bug.$column.truncate(abbrev.$column.maxlength, abbrev.$column.ellipsis) FILTER html -%]
+        [%- display_value(column, bug.$column).truncate(abbrev.$column.maxlength, abbrev.$column.ellipsis) FILTER html -%]
       [% END %]
       [% IF abbrev.$column.maxlength %]
         </span>

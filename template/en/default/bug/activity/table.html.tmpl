@@ -80,15 +80,11 @@
                       change.fieldname == 'remaining_time' ||
                       change.fieldname == 'work_time' %]
                   [% PROCESS formattimeunit time_unit=change.removed %]
-                [% ELSIF change.fieldname == 'bug_status' %]
-                  [% display_value("bug_status", change.removed) FILTER html %]
-                [% ELSIF change.fieldname == 'resolution' %]
-                  [% display_value("resolution", change.removed) FILTER html %]
                 [% ELSIF change.fieldname == 'blocked' ||
                          change.fieldname == 'dependson' %]
                   [% change.removed FILTER bug_list_link FILTER none %]
                 [% ELSE %]
-                  [% change.removed FILTER email FILTER html %]
+                  [% display_value(change.fieldname, change.removed) FILTER email FILTER html %]
                 [% END %]
               [% ELSE %]
                 &nbsp;
@@ -100,15 +96,11 @@
                       change.fieldname == 'remaining_time' ||
                       change.fieldname == 'work_time' %]
                   [% PROCESS formattimeunit time_unit=change.added %]
-                [% ELSIF change.fieldname == 'bug_status' %]
-                  [% display_value("bug_status", change.added) FILTER html %]
-                [% ELSIF change.fieldname == 'resolution' %]
-                  [% display_value("resolution", change.added) FILTER html %]
                 [% ELSIF change.fieldname == 'blocked' ||
                          change.fieldname == 'dependson' %]
                   [% change.added FILTER bug_list_link FILTER none %]
                 [% ELSE %]
-                  [% change.added FILTER email FILTER html %]
+                  [% display_value(change.fieldname, change.added) FILTER email FILTER html %]
                 [% END %]
               [% ELSE %]
                 &nbsp;

@@ -139,7 +139,7 @@
     <tr>
       <th>[% field_descs.bug_severity FILTER html %]:</th>
       <td class="bz_[% bug.bug_severity FILTER css_class_quote -%]">
-        [% bug.bug_severity FILTER html %]
+        [% display_value("bug_severity", bug.bug_severity) FILTER html %]
       </td>
 
       [% PROCESS rightcell %]
@@ -301,7 +301,7 @@
 [% BLOCK row %]
   <tr>
     <th>[% field_descs.${cell} FILTER html %]:</th>
-    <td[% " colspan=3" IF fullrow %]>[% bug.${cell} FILTER html %]</td>
+    <td[% " colspan=3" IF fullrow %]>[% display_value(cell, bug.${cell}) FILTER html %]</td>
     [% PROCESS rightcell IF !fullrow %]
   </tr>
   [% fullrow = 0 %]
@@ -357,7 +357,7 @@
         </td>
     [% ELSIF name != "" %]
       <th class="rightcell">[% field_descs.${name} FILTER html %]:</th>
-      <td>[% bug.${name} FILTER html %]</td>
+      <td>[% display_value(name, bug.${name}) FILTER html %]</td>
     [% ELSE %]
       <td>&nbsp;</td>
       <td>&nbsp;</td>

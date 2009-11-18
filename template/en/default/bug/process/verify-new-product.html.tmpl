@@ -42,6 +42,7 @@
 [% IF verify_bug_groups %]
   [% exclude_items.push('bit-\d+') %]
 [% END %]
+[% Hook.process('exclude') %]
 
 [% PROCESS "global/hidden-fields.html.tmpl"
      exclude = '^' _ exclude_items.join('|') _ '$' %]
@@ -110,6 +111,7 @@
                  size=10 %]
       </td>
     [% END %]
+    [% Hook.process('field') %]
   </tr>
 </table>
 

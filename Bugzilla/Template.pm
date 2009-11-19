@@ -348,10 +348,6 @@ sub get_bug_link {
     $bug = blessed($bug) ? $bug : new Bugzilla::Bug($bug);
     return $link_text if $bug->{error};
     
-    if ($options->{use_alias} && $link_text =~ /^\d+$/ && $bug->alias) {
-        $link_text = $bug->alias;
-    }
-
     # Initialize these variables to be "" so that we don't get warnings
     # if we don't change them below (which is highly likely).
     my ($pre, $title, $post) = ("", "", "");
@@ -369,6 +365,9 @@ sub get_bug_link {
     }
     if (Bugzilla->user->can_see_bug($bug)) {
         $title .= " - " . $bug->short_desc;
+        if ($options->{use_alias} && $link_text =~ /^\d+$/ && $bug->alias) {
+            $link_text = $bug->alias;
+        }
     }
     # Prevent code injection in the title.
     $title = html_quote(clean_text($title));

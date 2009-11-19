@@ -306,10 +306,6 @@ sub get_bug_link {
                                FROM bugs WHERE bugs.bug_id = ?',
                                undef, $bug_num);
 
-    if ($options->{use_alias} && $link_text =~ /^\d+$/ && $bug_alias) {
-        $link_text = $bug_alias;
-    }
-
     if ($bug_state) {
         # Initialize these variables to be "" so that we don't get warnings
         # if we don't change them below (which is highly likely).
@@ -327,6 +323,9 @@ sub get_bug_link {
         }
         if (Bugzilla->user->can_see_bug($bug_num)) {
             $title .= " - $bug_desc";
+            if ($options->{use_alias} && $link_text =~ /^\d+$/ && $bug_alias) {
+                $link_text = $bug_alias;
+            }
         }
         # Prevent code injection in the title.
         $title = html_quote(clean_text($title));

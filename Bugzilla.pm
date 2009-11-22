@@ -386,10 +386,15 @@ sub job_queue {
 sub dbh {
     my $class = shift;
     # If we're not connected, then we must want the main db
-    $class->request_cache->{dbh} ||= $class->request_cache->{dbh_main} 
-        = Bugzilla::DB::connect_main();
+    $class->request_cache->{dbh} ||= $class->dbh_main;
 
     return $class->request_cache->{dbh};
+}
+
+sub dbh_main {
+    my $class = shift;
+    $class->request_cache->{dbh_main} ||= Bugzilla::DB::connect_main();
+    return $class->request_cache->{dbh_main};
 }
 
 sub languages {
@@ -487,7 +492,7 @@ sub switch_to_shadow_db {
         if ($class->params->{'shadowdb'}) {
             $class->request_cache->{dbh_shadow} = Bugzilla::DB::connect_shadow();
         } else {
-            $class->request_cache->{dbh_shadow} = request_cache()->{dbh_main};
+            $class->request_cache->{dbh_shadow} = $class->dbh_main;
         }
     }
 
@@ -501,11 +506,8 @@ sub switch_to_shadow_db {
 sub switch_to_main_db {
     my $class = shift;
 
-    $class->request_cache->{dbh} = $class->request_cache->{dbh_main};
-    # We have to return $class->dbh instead of {dbh} as
-    # {dbh_main} may be undefined if no connection to the main DB
-    # has been established yet.
-    return $class->dbh;
+    $class->request_cache->{dbh} = $class->dbh_main;
+    return $class->dbh_main;
 }
 
 sub get_fields {
@@ -795,6 +797,10 @@ used to automatically answer or skip prompts.
 =item C<dbh>
 
 The current database handle. See L<DBI>.
+
+=item C<dbh_main>
+
+The main database handle. See L<DBI>.
 
 =item C<languages>
 

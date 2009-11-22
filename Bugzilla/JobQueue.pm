@@ -43,9 +43,11 @@ sub new {
     }
 
     my $lc = Bugzilla->localconfig;
+    # We need to use the main DB as TheSchwartz module is going
+    # to write to it.
     my $self = $class->SUPER::new(
         databases => [{
-            dsn    => Bugzilla->dbh->{private_bz_dsn},
+            dsn    => Bugzilla->dbh_main->{private_bz_dsn},
             user   => $lc->{db_user},
             pass   => $lc->{db_pass},
             prefix => 'ts_',

@@ -786,6 +786,25 @@ to the user. (F<sanitycheck.cgi>'s C<Status>)
 
 =back
 
+=head2 template-before_create
+
+This hook allows you to modify the configuration of L<Bugzilla::Template>
+objects before they are created. For example, you could add a new
+global template variable this way.
+
+Params:
+
+=over
+
+=item C<config>
+
+A hashref--the configuration that will be passed to L<Template/new>.
+See L<http://template-toolkit.org/docs/modules/Template.html#section_CONFIGURATION_SUMMARY>
+for information on how this configuration variable is structured (or just
+look at the code for C<create> in L<Bugzilla::Template>.)
+
+=back
+
 =head2 template-before_process
 
 This hook allows you to define additional variables that will be available to

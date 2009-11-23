@@ -36,6 +36,7 @@ use strict;
 
 use Bugzilla::Bug;
 use Bugzilla::Constants;
+use Bugzilla::Hook;
 use Bugzilla::Install::Requirements;
 use Bugzilla::Install::Util qw(install_string template_include_path 
                                include_languages);
@@ -470,7 +471,7 @@ sub create {
     # IMPORTANT - If you make any configuration changes here, make sure to
     # make them in t/004.template.t and checksetup.pl.
 
-    return $class->new({
+    my $config = {
         # Colon-separated list of directories containing templates.
         INCLUDE_PATH => [\&getTemplateIncludePath],
 
@@ -797,8 +798,12 @@ sub create {
                 return \@optional;
             },
         },
+    };
 
-   }) || die("Template creation failed: " . $class->error());
+    Bugzilla::Hook::process('template-before_create', { config => $config });
+    my $template = $class->new($config) 
+        || die("Template creation failed: " . $class->error());
+    return $template;
 }
 
 # Used as part of the two subroutines below.

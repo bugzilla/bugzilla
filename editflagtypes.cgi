@@ -47,6 +47,9 @@ local our $cgi = Bugzilla->cgi;
 local our $template = Bugzilla->template;
 local our $vars = {};
 
+# We need this everywhere.
+$vars = get_products_and_components($vars);
+
 # Make sure the user is logged in and is an administrator.
 my $user = Bugzilla->login(LOGIN_REQUIRED);
 $user->in_group('editcomponents')
@@ -93,9 +96,6 @@ exit;
 ################################################################################
 
 sub list {
-    # Restrict the list to the given product and component, if given.
-    $vars = get_products_and_components($vars);
-
     my $product = validateProduct(scalar $cgi->param('product'));
     my $component = validateComponent($product, scalar $cgi->param('component'));
     my $product_id = $product ? $product->id : 0;
@@ -178,9 +178,6 @@ sub edit {
         $flag_type = validateID();
     }
 
-    # Fill $vars with products and components data.
-    $vars = get_products_and_components($vars);
-
     $vars->{'last_action'} = $cgi->param('action');
     if ($cgi->param('action') eq 'enter' || $cgi->param('action') eq 'copy') {
         $vars->{'action'} = "insert";
@@ -251,9 +248,6 @@ sub processCategoryChange {
     # the form %clusions{'prod_name:comp_name'} = 'prod_ID:comp_ID'
     my %inclusions = clusion_array_to_hash(\@inclusions);
     my %exclusions = clusion_array_to_hash(\@exclusions);
-
-    # Fill $vars with products and components data.
-    $vars = get_products_and_components($vars);
 
     my @groups = Bugzilla::Group->get_all;
     $vars->{'groups'} = \@groups;

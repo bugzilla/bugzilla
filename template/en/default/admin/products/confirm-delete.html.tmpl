@@ -248,6 +248,11 @@
   <p>Do you really want to delete this product?</p>
 
   <form method="post" action="editproducts.cgi">
+    <input type="checkbox" id="delete_series" name="delete_series" value=1>
+    <label for="delete_series">
+      Delete all related series (you can also delete them later, by visiting
+      the <a href="chart.cgi?category=[% product.name FILTER html %]">New Charts page</a>.)
+    </label><p>
     <input type="submit" id="delete" value="Yes, delete">
     <input type="hidden" name="action" value="delete">
     <input type="hidden" name="product" value="[% product.name FILTER html %]">

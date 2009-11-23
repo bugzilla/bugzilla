@@ -233,7 +233,7 @@ if ($action eq 'delete') {
     my $product = $user->check_can_admin_product($product_name);
     check_token_data($token, 'delete_product');
 
-    $product->remove_from_db;
+    $product->remove_from_db({ delete_series => scalar $cgi->param('delete_series')});
     delete_token($token);
 
     $vars->{'message'} = 'product_deleted';

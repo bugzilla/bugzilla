@@ -31,8 +31,8 @@ use Bugzilla::Install::Util qw(include_languages template_base_directories
                                template_lang_directories);
 use Bugzilla::Util;
 use Bugzilla::Error;
-use File::Spec;
 
+use File::Spec;
 
 sub new {
     my ($class, $context) = @_;
@@ -57,33 +57,48 @@ sub process {
     my $template_name = $1;
     my $type = $2;
 
-    # Munge the filename to create the extension hook filename
+    # Hooks are named like this:
     my $extension_template = "$path/$template_name-$hook_name.$type.tmpl";
 
-    my $template_sets = _template_hook_include_path();
+    # Get the hooks out of the cache if they exist. Otherwise, read them
+    # from the disk.
+    my $cache = Bugzilla->request_cache->{template_plugin_hook_cache} ||= {};
+    $cache->{$extension_template} ||= $self->_get_hooks($extension_template);
 
+    # process() accepts an arrayref of templates, so we just pass the whole
+    # arrayref.
+    return $context->process($cache->{$extension_template});
+}
+
+sub _get_hooks {
+    my ($self, $extension_template) = @_;
+
+    my $template_sets = _template_hook_include_path();
     my @hooks;
     foreach my $dir_set (@$template_sets) {
         foreach my $lang_dir (@$dir_set) {
             my $file = File::Spec->catdir($lang_dir, $extension_template);
             if (-e $file) {
-                # TT won't take a template file not in its include path,
-                # so we open a filehandle and give it to process()
-                # instead of the file name.
-                open (my $fh, '<', $file) or die "$file: $!";
-                push(@hooks, $fh);
+                # TT won't accept a file that isn't in its include path. 
+                # So we open a file handle, compile it to a template, and 
+                # then pass the compiled template to process().
+                #
+                # This doesn't cache the hook template on disk
+                # (which is nearly impossible for us to do, with TT's
+                # architecture), but we do cache this compiled template
+                # per-request (in process() above) so that it doesn't have
+                # to be recompiled over and over within one request.
+                open(my $fh, '<', $file) or die "$file: $!";
+                my $template = $self->_context->template($fh);
+                close($fh);
+                push(@hooks, $template);
                 # Don't run the hook for more than one language.
                 last;
             }
         }
     }
 
-    my $output;
-    foreach my $hook_fh (@hooks) {
-        $output .= $context->process($hook_fh);
-        close($hook_fh);
-    }
-    return $output;
+    return \@hooks;
 }
 
 sub _template_hook_include_path {

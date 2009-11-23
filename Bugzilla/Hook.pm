@@ -671,6 +671,28 @@ validated by the C<VALIDATORS> specified for the object.
 
 =back
 
+=head2 object-end_of_set_all
+
+This happens at the end of L<Bugzilla::Object/set_all>. This is a
+good place to call custom set_ functions on objects, or to make changes
+to an object before C<update()> is called.
+
+Params:
+
+=over
+
+=item C<object>
+
+The L<Bugzilla::Object> which is being updated. You will probably want to
+do something like C<< if ($object->isa('Some::Class')) >> in your code to
+limit your changes to only certain subclasses of Bugzilla::Object.
+
+=item C<params>
+
+A hashref. The set of named parameters passed to C<set_all>.
+
+=back
+
 =head2 page-before_template
 
 This is a simple way to add your own pages to Bugzilla. This hooks C<page.cgi>,

@@ -303,6 +303,8 @@ sub set_all {
         my $method = "set_$key";
         $self->$method($params->{$key});
     }
+    Bugzilla::Hook::process('object-end_of_set_all', { object => $self,
+                                                       params => $params });
 }
 
 sub update {

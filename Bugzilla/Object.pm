@@ -348,6 +348,10 @@ sub update {
     $dbh->do("UPDATE $table SET $columns WHERE $id_field = ?", undef, 
              @values, $self->id) if @values;
 
+    Bugzilla::Hook('object-end_of_update',
+                   { object => $self, old_object => $old_self,
+                     changes => \%changes });
+
     $dbh->bz_commit_transaction();
 
     if (wantarray) {

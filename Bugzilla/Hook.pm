@@ -693,6 +693,32 @@ A hashref. The set of named parameters passed to C<set_all>.
 
 =back
 
+=head2 object-end_of_update
+
+Called during L<Bugzilla::Object/update>, after changes are made
+to the database, but while still inside a transaction.
+
+Params:
+
+=over
+
+=item C<object>
+
+The object that C<update> was called on. You will probably want to
+do something like C<< if ($object->isa('Some::Class')) >> in your code to
+limit your changes to only certain subclasses of Bugzilla::Object.
+
+=item C<old_object>
+
+The object as it was before it was updated.
+
+=item C<changes>
+
+The fields that have been changed, in the same format that
+L<Bugzilla::Object/update> returns.
+
+=back
+
 =head2 page-before_template
 
 This is a simple way to add your own pages to Bugzilla. This hooks C<page.cgi>,

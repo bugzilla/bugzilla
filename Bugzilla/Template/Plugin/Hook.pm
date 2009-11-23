@@ -20,91 +20,96 @@
 # Contributor(s): Myk Melez <myk@mozilla.org>
 #                 Zach Lipton <zach@zachlipton.com>
 #                 Elliotte Martin <everythingsolved.com>
-#
+#                 Max Kanat-Alexander <mkanat@bugzilla.org>
 
 package Bugzilla::Template::Plugin::Hook;
-
 use strict;
+use base qw(Template::Plugin);
 
 use Bugzilla::Constants;
-use Bugzilla::Install::Util qw(include_languages);
-use Bugzilla::Template;
+use Bugzilla::Install::Util qw(include_languages template_base_directories
+                               template_lang_directories);
 use Bugzilla::Util;
 use Bugzilla::Error;
 use File::Spec;
 
-use base qw(Template::Plugin);
-
-sub load {
-    my ($class, $context) = @_;
-    return $class;
-}
 
 sub new {
     my ($class, $context) = @_;
     return bless { _CONTEXT => $context }, $class;
 }
 
+sub _context { return $_[0]->{_CONTEXT} }
+
 sub process {
     my ($self, $hook_name, $template) = @_;
-    $template ||= $self->{_CONTEXT}->stash->{component}->{name};
-
-    my @hooks;
+    my $context = $self->_context();
+    $template ||= $context->stash->{component}->{name};
 
     # sanity check:
     if (!$template =~ /[\w\.\/\-_\\]+/) {
-        ThrowCodeError('template_invalid', { name => $template});
+        ThrowCodeError('template_invalid', { name => $template });
     }
 
-    # also get extension hook files that live in extensions/:
-    # parse out the parts of the template name
-    my ($vol, $subpath, $filename) = File::Spec->splitpath($template);
-    $subpath = $subpath || '';
-    $filename =~ m/(.*)\.(.*)\.tmpl/;
-    my $templatename = $1;
+    my (undef, $path, $filename) = File::Spec->splitpath($template);
+    $path ||= '';
+    $filename =~ m/(.+)\.(.+)\.tmpl$/;
+    my $template_name = $1;
     my $type = $2;
-    # munge the filename to create the extension hook filename:
-    my $extensiontemplate = $subpath.'/'.$templatename.'-'.$hook_name.'.'.$type.'.tmpl';
-    my @extensions = glob(bz_locations()->{'extensionsdir'} . "/*");
-    my @usedlanguages = include_languages({use_languages => Bugzilla->languages});
-    foreach my $extension (@extensions) {
-        next if -e "$extension/disabled";
-        foreach my $language (@usedlanguages) {
-            my $file = $extension.'/template/'.$language.'/'.$extensiontemplate;
+
+    # Munge the filename to create the extension hook filename
+    my $extension_template = "$path/$template_name-$hook_name.$type.tmpl";
+
+    my $template_sets = _template_hook_include_path();
+
+    my @hooks;
+    foreach my $dir_set (@$template_sets) {
+        foreach my $lang_dir (@$dir_set) {
+            my $file = File::Spec->catdir($lang_dir, $extension_template);
             if (-e $file) {
-                # tt is stubborn and won't take a template file not in its
-                # include path, so we open a filehandle and give it to process()
-                # so the hook gets invoked:
-                open (my $fh, $file);
+                # TT won't take a template file not in its include path,
+                # so we open a filehandle and give it to process()
+                # instead of the file name.
+                open (my $fh, '<', $file) or die "$file: $!";
                 push(@hooks, $fh);
+                # Don't run the hook for more than one language.
+                last;
             }
         }
     }
 
-    my $paths = $self->{_CONTEXT}->{LOAD_TEMPLATES}->[0]->paths;
-    
-    # we keep this too since you can still put hook templates in 
-    # template/en/custom/hook
-    foreach my $path (@$paths) {
-        my @files = glob("$path/hook/$template/$hook_name/*.tmpl");
-
-        # Have to remove the templates path (INCLUDE_PATH) from the
-        # file path since the template processor auto-adds it back.
-        @files = map($_ =~ /^$path\/(.*)$/ ? $1 : {}, @files);
-
-        # Add found files to the list of hooks, but removing duplicates,
-        # which can happen when there are identical hooks or duplicate
-        # directories in the INCLUDE_PATH (the latter probably being a TT bug).
-        foreach my $file (@files) {
-            push(@hooks, $file) unless grep($file eq $_, @hooks);
-        }
-    }
-
     my $output;
-    foreach my $hook (@hooks) {
-        $output .= $self->{_CONTEXT}->process($hook);
+    foreach my $hook_fh (@hooks) {
+        $output .= $context->process($hook_fh);
+        close($hook_fh);
     }
     return $output;
+}
+
+sub _template_hook_include_path {
+    my $cache = Bugzilla->request_cache;
+    my $language = $cache->{language} || '';
+    my $cache_key = "template_plugin_hook_include_path_$language";
+    return $cache->{$cache_key} if defined $cache->{$cache_key};
+    
+    my @used_languages = include_languages({
+        use_languages => Bugzilla->languages,
+        only_language => $language });
+    my $template_dirs = template_base_directories();
+
+    # We create an array of arrayrefs, with each arrayref being a single
+    # extension's "language" directories. In addition to the extensions/
+    # directory, this also includes a set for the base template/ directory. 
+    my @template_sets;
+    foreach my $template_dir (@$template_dirs) {
+        my @language_dirs = template_lang_directories(\@used_languages, 
+                                                      $template_dir, 'hook');
+        if (scalar @language_dirs) {
+            push(@template_sets, \@language_dirs);
+        }
+    }
+    $cache->{$cache_key} = \@template_sets;
+    return $cache->{$cache_key};
 }
 
 1;
@@ -165,8 +170,4 @@ Output from processing template extension.
 
 L<Template::Plugin>
 
-L<http://www.bugzilla.org/docs/tip/html/customization.html>
-
-L<http://bugzilla.mozilla.org/show_bug.cgi?id=229658>
-
-L<http://bugzilla.mozilla.org/show_bug.cgi?id=298341>
+L<http://wiki.mozilla.org/Bugzilla:Writing_Extensions>

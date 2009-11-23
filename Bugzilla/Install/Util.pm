@@ -41,6 +41,8 @@ our @EXPORT_OK = qw(
     install_string
     include_languages
     template_include_path
+    template_base_directories
+    template_lang_directories
     vers_cmp
     get_console_locale
     init_console
@@ -206,28 +208,59 @@ sub include_languages {
 
     return @usedlanguages;
 }
+
+# Used by template_include_path and Bugzilla::Template::Plugin::Hook.
+sub template_lang_directories {
+    my ($languages, $templatedir, $subdir_name) = @_;
     
-sub template_include_path {
-    my @usedlanguages = include_languages(@_);
-    # Now, we add template directories in the order they will be searched:
-    
+    my @add;
+    my $project = bz_locations->{'project'};
+    if ($subdir_name) {
+        @add = ("$subdir_name.custom", $subdir_name);
+        unshift(@add, "$subdir_name.$project") if $project;
+    }
+    else {
+        @add = ("custom", "default");
+        unshift(@add, $project) if $project;
+    }
+    my @result;
+    foreach my $lang (@$languages) {
+        foreach my $dir (@add) {
+            my $full_dir = "$templatedir/$lang/$dir";
+            if (-d $full_dir) {
+                trick_taint($full_dir);
+                push(@result, $full_dir);
+            }
+        }
+    }
+    return @result;
+}
+
+# Used by template_include_path and Bugzilla::Template::Plugin::Hook.
+sub template_base_directories {
     # First, we add extension template directories, because extension templates
     # override standard templates. Extensions may be localized in the same way
     # that Bugzilla templates are localized.
-    my @include_path;
+    my @template_dirs;
     my @extensions = glob(bz_locations()->{'extensionsdir'} . "/*");
     foreach my $extension (@extensions) {
-        next if -e "$extension/disabled";
-        foreach my $lang (@usedlanguages) {
-            _add_language_set(\@include_path, $lang, "$extension/template");
-        }
+        next if (-e "$extension/disabled" or !-d "$extension/template");
+        push(@template_dirs, "$extension/template");
     }
-    
-    # Then, we add normal template directories, sorted by language.
-    foreach my $lang (@usedlanguages) {
-        _add_language_set(\@include_path, $lang);
+    push(@template_dirs, bz_locations()->{'templatedir'});
+    return \@template_dirs;
+}
+
+sub template_include_path {
+    my @used_languages = include_languages(@_);
+    # Now, we add template directories in the order they will be searched:
+    my $template_dirs = template_base_directories(); 
+
+    my @include_path;
+    foreach my $template_dir (@$template_dirs) {
+        push(@include_path,
+             template_lang_directories(\@used_languages, $template_dir));
     }
-    
     return \@include_path;
 }
 
@@ -287,24 +320,6 @@ sub _get_string_from_file {
     $safe->rdo($file);
     my %strings = %{$safe->varglob('strings')};
     return $strings{$string_id};
-}
-
-# Used by template_include_path.
-sub _add_language_set {
-    my ($array, $lang, $templatedir) = @_;
-    
-    $templatedir ||= bz_locations()->{'templatedir'};
-    my @add = ("$templatedir/$lang/custom", "$templatedir/$lang/default");
-    
-    my $project = bz_locations->{'project'};
-    unshift(@add, "$templatedir/$lang/$project") if $project;
-    
-    foreach my $dir (@add) {
-        if (-d $dir) {
-            trick_taint($dir);
-            push(@$array, $dir);
-        }
-    }
 }
 
 # Make an ordered list out of a HTTP Accept-Language header (see RFC 2616, 14.4)

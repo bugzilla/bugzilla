@@ -159,14 +159,14 @@ login methods that weren't passed to L<Bugzilla::Auth/login>.)
 
 =head2 auth_verify_methods
 
-This works just like L</auth-login_methods> except it's for
+This works just like L</auth_login_methods> except it's for
 login verification methods (See L<Bugzilla::Auth::Verify>.) It also
-takes a C<modules> parameter, just like L</auth-login_methods>.
+takes a C<modules> parameter, just like L</auth_login_methods>.
 
 =head2 bug_columns
 
 This allows you to add new fields that will show up in every L<Bugzilla::Bug>
-object. Note that you will also need to use the L</bug-fields> hook in
+object. Note that you will also need to use the L</bug_fields> hook in
 conjunction with this hook to make this work.
 
 Params:
@@ -234,7 +234,7 @@ Allows the addition of database fields from the bugs table to the standard
 list of allowable fields in a L<Bugzilla::Bug> object, so that
 you can call the field as a method.
 
-Note: You should add here the names of any fields you added in L</bug-columns>.
+Note: You should add here the names of any fields you added in L</bug_columns>.
 
 Params:
 
@@ -349,8 +349,7 @@ Params:
 =over
 
 =item C<columns> - An arrayref containing an array of column IDs.  Any IDs
-added by this hook must have been defined in the the buglist-columns hook.
-See L</buglist-columns>.
+added by this hook must have been defined in the the L</buglist_columns> hook.
 
 =back
 
@@ -395,7 +394,7 @@ C<get_param_list> for that module. You can modify C<params> and
 your changes will be reflected in the interface.
 
 Adding new keys to C<panels> will have no effect. You should use
-L</config-add_panels> if you want to add new panels.
+L</config_add_panels> if you want to add new panels.
 
 =back
 
@@ -465,7 +464,7 @@ prefix the names of your tables with some word, so that they don't conflict
 with any future Bugzilla tables.
 
 If you wish to add new I<columns> to existing Bugzilla tables, do that
-in L</install-update_db>.
+in L</install_update_db>.
 
 Params:
 

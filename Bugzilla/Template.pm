@@ -50,7 +50,7 @@ use Bugzilla::Token;
 use Cwd qw(abs_path);
 use MIME::Base64;
 use Date::Format ();
-use File::Basename qw(dirname);
+use File::Basename qw(basename dirname);
 use File::Find;
 use File::Path qw(rmtree mkpath);
 use File::Spec;
@@ -461,19 +461,12 @@ sub create {
     my $class = shift;
     my %opts = @_;
 
-    # checksetup.pl will call us once for any template/lang directory.
-    # We need a possibility to reset the cache, so that no files from
-    # the previous language pollute the action.
-    if ($opts{'clean_cache'}) {
-        delete Bugzilla->request_cache->{template_include_path_};
-    }
-
-    # IMPORTANT - If you make any configuration changes here, make sure to
-    # make them in t/004.template.t and checksetup.pl.
+    # IMPORTANT - If you make any FILTER changes here, make sure to
+    # make them in t/004.template.t also, if required.
 
     my $config = {
         # Colon-separated list of directories containing templates.
-        INCLUDE_PATH => [\&getTemplateIncludePath],
+        INCLUDE_PATH => $opts{'include_path'} || getTemplateIncludePath(),
 
         # Remove white-space before template directives (PRE_CHOMP) and at the
         # beginning and end of templates and template blocks (TRIM) for better
@@ -807,8 +800,7 @@ sub create {
 }
 
 # Used as part of the two subroutines below.
-our (%_templates_to_precompile, $_current_path);
-
+our %_templates_to_precompile;
 sub precompile_templates {
     my ($output) = @_;
 
@@ -836,33 +828,18 @@ sub precompile_templates {
 
     print install_string('template_precompile') if $output;
 
-    my $templatedir = bz_locations()->{'templatedir'};
-    # Don't hang on templates which use the CGI library
-    eval("use CGI qw(-no_debug)");
-    
-    my $dir_reader    = new IO::Dir($templatedir) || die "$templatedir: $!";
-    my @language_dirs = grep { /^[a-z-]+$/i } $dir_reader->read;
-    $dir_reader->close;
+    my $paths = template_include_path({ use_languages => Bugzilla->languages });
 
-    foreach my $dir (@language_dirs) {
-        next if ($dir eq 'CVS');
-        -d "$templatedir/$dir/default" || -d "$templatedir/$dir/custom" 
-            || next;
-        local $ENV{'HTTP_ACCEPT_LANGUAGE'} = $dir;
-        my $template = Bugzilla::Template->create(clean_cache => 1);
+    foreach my $dir (@$paths) {
+        my $template = Bugzilla::Template->create(include_path => [$dir]);
 
-        # Precompile all the templates found in all the directories.
         %_templates_to_precompile = ();
-        foreach my $subdir (qw(custom extension default), bz_locations()->{'project'}) {
-            next unless $subdir; # If 'project' is empty.
-            $_current_path = File::Spec->catdir($templatedir, $dir, $subdir);
-            next unless -d $_current_path;
-            # Traverse the template hierarchy.
-            find({ wanted => \&_precompile_push, no_chdir => 1 }, $_current_path);
-        }
+        # Traverse the template hierarchy.
+        find({ wanted => \&_precompile_push, no_chdir => 1 }, $dir);
         # The sort isn't totally necessary, but it makes debugging easier
         # by making the templates always be compiled in the same order.
         foreach my $file (sort keys %_templates_to_precompile) {
+            $file =~ s{^\Q$dir\E/}{};
             # Compile the template but throw away the result. This has the side-
             # effect of writing the compiled version to disk.
             $template->context->template($file);
@@ -872,28 +849,17 @@ sub precompile_templates {
     # Under mod_perl, we look for templates using the absolute path of the
     # template directory, which causes Template Toolkit to look for their 
     # *compiled* versions using the full absolute path under the data/template
-    # directory. (Like data/template/var/www/html/mod_perl/.) To avoid
+    # directory. (Like data/template/var/www/html/bugzilla/.) To avoid
     # re-compiling templates under mod_perl, we symlink to the
     # already-compiled templates. This doesn't work on Windows.
     if (!ON_WINDOWS) {
-        my $abs_root = dirname(abs_path($templatedir));
-        my $todir    = "$datadir/template$abs_root";
-        mkpath($todir);
-        # We use abs2rel so that the symlink will look like 
-        # "../../../../template" which works, while just 
-        # "data/template/template/" doesn't work.
-        my $fromdir = File::Spec->abs2rel("$datadir/template/template", $todir);
-        # We eval for systems that can't symlink at all, where "symlink" 
-        # throws a fatal error.
-        eval { symlink($fromdir, "$todir/template") 
-                   or warn "Failed to symlink from $fromdir to $todir: $!" };
+        # We do these separately in case they're in different locations.
+        _do_template_symlink(bz_locations()->{'templatedir'});
+        _do_template_symlink(bz_locations()->{'extensionsdir'});
     }
 
     # If anything created a Template object before now, clear it out.
     delete Bugzilla->request_cache->{template};
-    # This is the single variable used to precompile templates,
-    # which needs to be cleared as well.
-    delete Bugzilla->request_cache->{template_include_path_};
 
     print install_string('done') . "\n" if $output;
 }
@@ -904,9 +870,35 @@ sub _precompile_push {
     return if (-d $name);
     return if ($name =~ /\/CVS\//);
     return if ($name !~ /\.tmpl$/);
-   
-    $name =~ s/\Q$_current_path\E\///;
     $_templates_to_precompile{$name} = 1;
+}
+
+# Helper for precompile_templates
+sub _do_template_symlink {
+    my $dir_to_symlink = shift;
+
+    my $abs_path = abs_path($dir_to_symlink);
+
+    # If $dir_to_symlink is already an absolute path (as might happen
+    # with packagers who set $libpath to an absolute path), then we don't
+    # need to do this symlink.
+    return if ($abs_path eq $dir_to_symlink);
+
+    my $abs_root = dirname($abs_path);
+    my $dir_name = basename($abs_path);
+    my $datadir = bz_locations()->{'datadir'};
+    my $todir    = "$datadir/template$abs_root";
+    mkpath($todir);
+    # We use abs2rel so that the symlink will look like 
+    # "../../../../template" which works, while just 
+    # "data/template/template/" doesn't work.
+    my $fromdir = File::Spec->abs2rel("$datadir/template/$dir_name", $todir);
+
+    my $target = "$todir/$dir_name";
+    # We eval for systems that can't symlink at all, where "symlink" 
+    # throws a fatal error.
+    eval { symlink($fromdir, $target) }
+      or warn "Failed to symlink from $fromdir to $target: $!";
 }
 
 1;

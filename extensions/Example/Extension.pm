@@ -24,10 +24,11 @@ package Bugzilla::Extension::Example;
 use strict;
 use base qw(Bugzilla::Extension);
 
-use Bugzilla::Util qw(
-    diff_arrays
-    html_quote
-);
+use Bugzilla::Util qw(diff_arrays html_quote);
+
+# This is extensions/Example/lib/Util.pm. I can load this here in my
+# Extension.pm only because I have a Config.pm.
+use Bugzilla::Extension::Example::Util;
 
 use Data::Dumper;
 
@@ -57,7 +58,7 @@ sub auth_login_methods {
     my ($self, $params) = @_;
     my $modules = $params->{modules};
     if (exists $modules->{Example}) {
-        $modules->{Example} = 'extensions/Example/lib/AuthLogin.pm';
+        $modules->{Example} = 'Bugzilla/Extension/Example/Auth/Login.pm';
     }
 }
 
@@ -65,7 +66,7 @@ sub auth_verify_methods {
     my ($self, $params) = @_;
     my $modules = $params->{modules};
     if (exists $modules->{Example}) {
-        $modules->{Example} = 'extensions/Example/lib/AuthVerify.pm';
+        $modules->{Example} = 'Bugzilla/Extension/Example/Auth/Verify.pm';
     }
 }
 
@@ -195,14 +196,14 @@ sub config {
     my ($self, $params) = @_;
 
     my $config = $params->{config};
-    $config->{Example} = "extensions::Example::lib::ConfigExample";
+    $config->{Example} = "Bugzilla::Extension::Example::Config";
 }
 
 sub config_add_panels {
     my ($self, $params) = @_;
     
     my $modules = $params->{panel_modules};
-    $modules->{Example} = "extensions::Example::lib::ConfigExample";
+    $modules->{Example} = "Bugzilla::Extension::Example::Config";
 }
 
 sub config_modify_panels {
@@ -417,7 +418,7 @@ sub webservice {
     my ($self, $params) = @_;
 
     my $dispatch = $params->{dispatch};
-    $dispatch->{Example} = "extensions::Example::lib::WSExample";
+    $dispatch->{Example} = "Bugzilla::Extension::Example::WebService";
 }
 
 sub webservice_error_codes {

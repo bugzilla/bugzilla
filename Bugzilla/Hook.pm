@@ -22,15 +22,10 @@
 
 package Bugzilla::Hook;
 use strict;
-use Bugzilla::Constants;
 
 sub process {
     my ($name, $args) = @_;
     foreach my $extension (@{ Bugzilla->extensions }) {
-        local @INC = @INC;
-        my $ext_dir = bz_locations()->{'extensionsdir'};
-        my $ext_name = $extension->NAME;
-        unshift(@INC, "$ext_dir/$ext_name/lib");
         if ($extension->can($name)) {
             $extension->$name($args);
         }

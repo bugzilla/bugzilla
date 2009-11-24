@@ -26,7 +26,8 @@ use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Install::Util qw(extension_code_files);
 
-use File::Basename qw(basename);
+use File::Basename;
+use File::Spec;
 
 ####################
 # Subclass Methods #
@@ -45,18 +46,42 @@ sub new {
 
 sub load {
     my ($class, $extension_file, $config_file) = @_;
-    require $config_file if $config_file;
-
     my $package;
+
     # This is needed during checksetup.pl, because Extension packages can 
     # only be loaded once (they return "1" the second time they're loaded,
-    # instead of their name). If an extension has only an Extension.pm,
-    # and no Config.pm, the Extension.pm gets loaded by 
-    # Bugzilla::Install::Requirements before this load() method is ever
-    # called.
+    # instead of their name). During checksetup.pl, extensions are loaded
+    # once by Bugzilla::Install::Requirements, and then later again via
+    # Bugzilla->extensions (because of hooks).
     my $map = Bugzilla->request_cache->{extension_requirement_package_map};
+
+    if ($config_file) {
+        if ($map and defined $map->{$config_file}) {
+            $package = $map->{$config_file};
+        }
+        else {
+            my $name = require $config_file;
+            if ($name =~ /^\d+$/) {
+                ThrowCodeError('extension_must_return_name',
+                               { extension => $config_file, 
+                                 returned  => $name });
+            }
+            $package = "${class}::$name";
+        }
+
+        # This allows people to override modify_inc in Config.pm, if they
+        # want to.
+        if ($package->can('modify_inc')) {
+            $package->modify_inc($config_file);
+        }
+        else {
+            modify_inc($package, $config_file);
+        }
+    }
+
     if ($map and defined $map->{$extension_file}) {
         $package = $map->{$extension_file};
+        $package->modify_inc($extension_file) if !$config_file;
     }
     else {
         my $name = require $extension_file;
@@ -65,6 +90,7 @@ sub load {
                            { extension => $extension_file, returned => $name });
         }
         $package = "${class}::$name";
+        $package->modify_inc($extension_file) if !$config_file;
     }
 
     if (!eval { $package->NAME }) {
@@ -92,6 +118,45 @@ sub load_all {
     }
 
     return \@packages;
+}
+
+# Modifies @INC so that extensions can use modules like
+# "use Bugzilla::Extension::Foo::Bar", when Bar.pm is in the lib/
+# directory of the extension.
+sub modify_inc {
+    my ($class, $file) = @_;
+    my $lib_dir = File::Spec->catdir(dirname($file), 'lib');
+    # Allow Config.pm to override my_inc, if it wants to.
+    if ($class->can('my_inc')) {
+        unshift(@INC, sub { $class->my_inc($lib_dir, @_); });
+    }
+    else {
+        unshift(@INC, sub { my_inc($class, $lib_dir, @_); });
+    }
+}
+
+# This is what gets put into @INC by modify_inc.
+sub my_inc {
+    my ($class, $lib_dir, undef, $file) = @_;
+    my @class_parts = split('::', $class);
+    my ($vol, $dir, $file_name) = File::Spec->splitpath($file);
+    my @dir_parts = File::Spec->splitdir($dir);
+    # Validate that this is a sub-package of Bugzilla::Extension::Foo ($class).
+    for (my $i = 0; $i < scalar(@class_parts); $i++) {
+        return if !@dir_parts;
+        if (File::Spec->case_tolerant) {
+            return if lc($class_parts[$i]) ne lc($dir_parts[0]);
+        }
+        else {
+            return if $class_parts[$i] ne $dir_parts[0];
+        }
+        shift(@dir_parts);
+    }
+    # For Bugzilla::Extension::Foo::Bar, this would look something like
+    # extensions/Example/lib/Bar.pm
+    my $resolved_path = File::Spec->catfile($lib_dir, @dir_parts, $file_name);
+    open(my $fh, '<', $resolved_path);
+    return $fh;
 }
 
 ####################
@@ -297,6 +362,30 @@ your extension is a single file named C<Foo.pm>.
 
 If any of this is confusing, just look at the code of the Example extension.
 It uses this method to specify requirements.
+
+=head2 Libraries
+
+Extensions often want to have their own Perl modules. Your extension
+can load any Perl module in its F<lib/> directory. (So, if your extension is 
+F<extensions/Foo/>, then your Perl modules go into F<extensions/Foo/lib/>.)
+
+However, the C<package> name of your libraries will not work quite
+like normal Perl modules do. F<extensions/Foo/lib/Bar.pm> is
+loaded as C<Bugzilla::Extension::Foo::Bar>. Or, to say it another way,
+C<use Bugzilla::Extension::Foo::Bar;> loads F<extensions/Foo/lib/Bar.pm>,
+which should have C<package Bugzilla::Extension::Foo::Bar;> as its package
+name.
+
+This allows any place in Bugzilla to load your modules, which is important
+for some hooks. It even allows other extensions to load your modules. It
+even allows you to install your modules into the global Perl install
+as F<Bugzilla/Extension/Foo/Bar.pm>, if you'd like, which helps allow CPAN
+distribution of Bugzilla extensions.
+
+B<Note:> If you want to C<use> or C<require> a module that's in 
+F<extensions/Foo/lib/> at the top level of your F<Extension.pm>,
+you must have a F<Config.pm> (see above) with at least the C<NAME>
+constant defined in it.
 
 =head2 Disabling Your Extension
 

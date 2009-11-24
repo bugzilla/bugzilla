@@ -279,7 +279,7 @@ sub set {
                             superclass => __PACKAGE__,
                             function   => 'Bugzilla::Object->set' });
 
-    Bugzilla::Hook::process('object-before_set',
+    Bugzilla::Hook::process('object_before_set',
                             { object => $self, field => $field,
                               value => $value });
 
@@ -303,7 +303,7 @@ sub set_all {
         my $method = "set_$key";
         $self->$method($params->{$key});
     }
-    Bugzilla::Hook::process('object-end_of_set_all', { object => $self,
+    Bugzilla::Hook::process('object_end_of_set_all', { object => $self,
                                                        params => $params });
 }
 
@@ -348,7 +348,7 @@ sub update {
     $dbh->do("UPDATE $table SET $columns WHERE $id_field = ?", undef, 
              @values, $self->id) if @values;
 
-    Bugzilla::Hook::process('object-end_of_update',
+    Bugzilla::Hook::process('object_end_of_update',
                             { object => $self, old_object => $old_self,
                               changes => \%changes });
 
@@ -412,7 +412,7 @@ sub check_required_create_fields {
 
     # This hook happens here so that even subclasses that don't call
     # SUPER::create are still affected by the hook.
-    Bugzilla::Hook::process('object-before_create', { class => $class,
+    Bugzilla::Hook::process('object_before_create', { class => $class,
                                                       params => $params });
 
     foreach my $field ($class->REQUIRED_CREATE_FIELDS) {
@@ -445,7 +445,7 @@ sub run_create_validators {
         $field_values{$field} = $value;
     }
 
-    Bugzilla::Hook::process('object-end_of_create_validators',
+    Bugzilla::Hook::process('object_end_of_create_validators',
                             { class => $class, params => \%field_values });
 
     return \%field_values;

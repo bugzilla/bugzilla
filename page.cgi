@@ -52,7 +52,7 @@ if ($id) {
     }
 
     my %vars;
-    Bugzilla::Hook::process('page-before_template', 
+    Bugzilla::Hook::process('page_before_template', 
                             { page_id => $id, vars => \%vars });
 
     my $format = $template->get_format("pages/$1", undef, $2);

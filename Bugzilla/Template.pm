@@ -86,9 +86,9 @@ sub process {
     my $self = shift;
     my ($file, $vars) = @_;
 
-    Bugzilla::Hook::process("template-before_process", 
-                            { vars => $vars, file => $file, 
-                              template => $self });
+    #Bugzilla::Hook::process('template_before_process', 
+    #                        { vars => $vars, file => $file, 
+    #                          template => $self });
 
     return $self->SUPER::process(@_);
 }
@@ -188,7 +188,7 @@ sub quoteUrls {
     my $tmp;
 
     my @hook_regexes;
-    Bugzilla::Hook::process('bug-format_comment',
+    Bugzilla::Hook::process('bug_format_comment',
         { text => \$text, bug => $bug, regexes => \@hook_regexes,
           comment => $comment });
 
@@ -793,7 +793,7 @@ sub create {
         },
     };
 
-    Bugzilla::Hook::process('template-before_create', { config => $config });
+    Bugzilla::Hook::process('template_before_create', { config => $config });
     my $template = $class->new($config) 
         || die("Template creation failed: " . $class->error());
     return $template;

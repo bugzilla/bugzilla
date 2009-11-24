@@ -222,7 +222,7 @@ Bugzilla::Install::reset_password($switch{'reset-password'})
 
 Bugzilla::Install::create_default_product();
 
-Bugzilla::Hook::process('install-before_final_checks', {'silent' => $silent });
+Bugzilla::Hook::process('install_before_final_checks', { silent => $silent });
 
 ###########################################################################
 # Final checks

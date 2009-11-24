@@ -1635,7 +1635,7 @@ sub _initialize {
                 if exists $abstract_schema->{$table};
         }
         unlock_keys(%$abstract_schema);
-        Bugzilla::Hook::process('db_schema-abstract_schema', 
+        Bugzilla::Hook::process('db_schema_abstract_schema', 
                                 { schema => $abstract_schema });
         unlock_hash(%$abstract_schema);
     }

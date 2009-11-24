@@ -26,7 +26,8 @@ package Bugzilla::Install::Requirements;
 use strict;
 
 use Bugzilla::Constants;
-use Bugzilla::Install::Util qw(vers_cmp install_string);
+use Bugzilla::Install::Util qw(vers_cmp install_string 
+                               extension_requirement_packages);
 use List::Util qw(max);
 use Safe;
 use Term::ANSIColor;
@@ -138,9 +139,9 @@ sub REQUIRED_MODULES {
     },
     );
 
-    my $all_modules = _get_extension_requirements(
-        'REQUIRED_MODULES', \@modules);
-    return $all_modules;
+    my $extra_modules = _get_extension_requirements('REQUIRED_MODULES');
+    push(@modules, @$extra_modules);
+    return \@modules;
 };
 
 sub OPTIONAL_MODULES {
@@ -291,9 +292,9 @@ sub OPTIONAL_MODULES {
     },
     );
 
-    my $all_modules = _get_extension_requirements(
-        'OPTIONAL_MODULES', \@modules);
-    return $all_modules;
+    my $extra_modules = _get_extension_requirements('OPTIONAL_MODULES');
+    push(@modules, @$extra_modules);
+    return \@modules;
 };
 
 # This maps features to the files that require that feature in order
@@ -312,31 +313,20 @@ use constant FEATURE_FILES => (
     updates       => ['Bugzilla/Update.pm'],
 );
 
-# This implements the install-requirements hook described in Bugzilla::Hook.
+# This implements the REQUIRED_MODULES and OPTIONAL_MODULES stuff
+# described in in Bugzilla::Extension.
 sub _get_extension_requirements {
-    my ($function, $base_modules) = @_;
-    my @all_modules;
-    # get a list of all extensions
-    my @extensions = glob(bz_locations()->{'extensionsdir'} . "/*");
-    foreach my $extension (@extensions) {
-        my $file = "$extension/code/install-requirements.pl";
-        if (-e $file) {
-            my $safe = new Safe;
-            # This is a very liberal Safe.
-            $safe->permit(qw(:browse require entereval caller));
-            $safe->rdo($file);
-            if ($@) {
-                warn $@;
-                next;
-            }
-            my $modules = eval { &{$safe->varglob($function)}($base_modules) };
-            next unless $modules;
-            push(@all_modules, @$modules);
+    my ($function) = @_;
+
+    my $packages = extension_requirement_packages();
+    my @modules;
+    foreach my $package (@$packages) {
+        if ($package->can($function)) {
+            my $extra_modules = $package->$function;
+            push(@modules, @$extra_modules);
         }
     }
-
-    unshift(@all_modules, @$base_modules);
-    return \@all_modules;
+    return \@modules;
 };
 
 sub check_requirements {

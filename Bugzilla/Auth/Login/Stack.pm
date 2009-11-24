@@ -35,7 +35,7 @@ sub new {
     my $list = shift;
     my %methods = map { $_ => "Bugzilla/Auth/Login/$_.pm" } split(',', $list);
     lock_keys(%methods);
-    Bugzilla::Hook::process('auth-login_methods', { modules => \%methods });
+    Bugzilla::Hook::process('auth_login_methods', { modules => \%methods });
 
     $self->{_stack} = [];
     foreach my $login_method (split(',', $list)) {

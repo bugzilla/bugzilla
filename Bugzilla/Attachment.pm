@@ -561,7 +561,7 @@ sub _check_data {
             $data = <$fh>;
         }
     }
-    Bugzilla::Hook::process('attachment-process_data', { data       => \$data,
+    Bugzilla::Hook::process('attachment_process_data', { data       => \$data,
                                                          attributes => $params });
 
     # Do not validate the size if we have a filehandle. It will be checked later.

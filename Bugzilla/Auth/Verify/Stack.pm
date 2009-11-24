@@ -30,7 +30,7 @@ sub new {
     my $self = $class->SUPER::new(@_);
     my %methods = map { $_ => "Bugzilla/Auth/Verify/$_.pm" } split(',', $list);
     lock_keys(%methods);
-    Bugzilla::Hook::process('auth-verify_methods', { modules => \%methods });
+    Bugzilla::Hook::process('auth_verify_methods', { modules => \%methods });
 
     $self->{_stack} = [];
     foreach my $verify_method (split(',', $list)) {

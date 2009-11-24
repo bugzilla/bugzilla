@@ -107,7 +107,7 @@ sub DB_COLUMNS {
     $dbh->sql_date_format('deadline', '%Y-%m-%d') . ' AS deadline',
     @custom_names);
     
-    Bugzilla::Hook::process("bug-columns", { columns => \@columns });
+    Bugzilla::Hook::process("bug_columns", { columns => \@columns });
     
     return @columns;
 }
@@ -543,7 +543,7 @@ sub create {
     $dbh->do('INSERT INTO longdescs (' . join(',', @columns)  . ")
                    VALUES ($qmarks)", undef, @values);
 
-    Bugzilla::Hook::process('bug-end_of_create', { bug => $bug,
+    Bugzilla::Hook::process('bug_end_of_create', { bug => $bug,
                                                    timestamp => $timestamp,
                                                  });
 
@@ -613,7 +613,7 @@ sub run_create_validators {
     delete $params->{lastdiffed};
     delete $params->{bug_id};
 
-    Bugzilla::Hook::process('bug-end_of_create_validators',
+    Bugzilla::Hook::process('bug_end_of_create_validators',
                             { params => $params });
 
     return $params;
@@ -870,7 +870,7 @@ sub update {
         $changes->{'dup_id'} = [$old_dup || undef, $cur_dup || undef];
     }
 
-    Bugzilla::Hook::process('bug-end_of_update', { bug       => $self,
+    Bugzilla::Hook::process('bug_end_of_update', { bug       => $self,
                                                    timestamp => $delta_ts,
                                                    changes   => $changes,
                                                  });
@@ -1779,7 +1779,7 @@ sub fields {
         # Custom Fields
         map { $_->name } Bugzilla->active_custom_fields
     );
-    Bugzilla::Hook::process("bug-fields", {'fields' => \@fields} );
+    Bugzilla::Hook::process('bug_fields', {'fields' => \@fields} );
     
     return @fields;
 }

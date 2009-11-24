@@ -45,7 +45,11 @@ COMMANDS TO INSTALL REQUIRED MODULES (You *must* run all these commands
 and then re-run this script):
 EOT
     done => 'done.',
-
+    extension_must_return_name => <<END,
+##file## returned ##returned##, which is not a valid name for an extension.
+Extensions must return their name, not <code>1</code> or a number. See
+the documentation of Bugzilla::Extension for details.
+END
     feature_auth_ldap         => 'LDAP Authentication',
     feature_auth_radius       => 'RADIUS Authentication',
     feature_graphical_reports => 'Graphical Reports',

@@ -20,8 +20,8 @@ package Bugzilla::ModPerl;
 use strict;
 
 # If you have an Apache2::Status handler in your Apache configuration,
-# you need to load Apache2::Status *here*, so that Apache::DBI can
-# report information to Apache2::Status.
+# you need to load Apache2::Status *here*, so that any later-loaded modules
+# can report information to Apache2::Status.
 #use Apache2::Status ();
 
 # We don't want to import anything into the global scope during
@@ -41,6 +41,7 @@ Template::Config->preload();
 use Bugzilla ();
 use Bugzilla::Constants ();
 use Bugzilla::CGI ();
+use Bugzilla::Extension ();
 use Bugzilla::Install::Requirements ();
 use Bugzilla::Mailer ();
 use Bugzilla::Template ();
@@ -87,6 +88,8 @@ foreach my $file (glob "$cgi_path/*.cgi") {
     $rl->handler($file, $file);
 }
 
+# And now pre-load all extensions
+$Bugzilla::extension_packages = Bugzilla::Extension->load_all();
 
 package Bugzilla::ModPerl::ResponseHandler;
 use strict;

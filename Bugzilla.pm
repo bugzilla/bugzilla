@@ -40,9 +40,11 @@ use Bugzilla::Constants;
 use Bugzilla::Auth;
 use Bugzilla::Auth::Persist::Cookie;
 use Bugzilla::CGI;
+use Bugzilla::Extension;
 use Bugzilla::DB;
 use Bugzilla::Install::Localconfig qw(read_localconfig);
 use Bugzilla::Install::Requirements qw(OPTIONAL_MODULES);
+use Bugzilla::Install::Util;
 use Bugzilla::Template;
 use Bugzilla::User;
 use Bugzilla::Error;
@@ -54,9 +56,6 @@ use File::Basename;
 use File::Spec::Functions;
 use DateTime::TimeZone;
 use Safe;
-
-# This creates the request cache for non-mod_perl installations.
-our $_request_cache = {};
 
 #####################################################################
 # Constants
@@ -171,8 +170,6 @@ sub init_page {
     }
 }
 
-init_page() if !$ENV{MOD_PERL};
-
 #####################################################################
 # Subroutines and Methods
 #####################################################################
@@ -191,6 +188,27 @@ sub template_inner {
     $class->request_cache->{"template_inner_$lang"}
         ||= Bugzilla::Template->create();
     return $class->request_cache->{"template_inner_$lang"};
+}
+
+our $extension_packages;
+sub extensions {
+    my ($class) = @_;
+    my $cache = $class->request_cache;
+    if (!$cache->{extensions}) {
+        # Under mod_perl, mod_perl.pl populates $extension_packages for us.
+        if (!$extension_packages) {
+            $extension_packages = Bugzilla::Extension->load_all();
+        }
+        my @extensions;
+        foreach my $package (@$extension_packages) {
+            my $extension = $package->new();
+            if ($extension->enabled) {
+                push(@extensions, $extension);
+            }        
+        }
+        $cache->{extensions} = \@extensions;
+    }
+    return $cache->{extensions};
 }
 
 sub feature {
@@ -538,12 +556,6 @@ sub has_flags {
     return $class->request_cache->{has_flags};
 }
 
-sub hook_args {
-    my ($class, $args) = @_;
-    $class->request_cache->{hook_args} = $args if $args;
-    return $class->request_cache->{hook_args};
-}
-
 sub local_timezone {
     my $class = shift;
 
@@ -553,6 +565,12 @@ sub local_timezone {
     }
     return $class->request_cache->{local_timezone};
 }
+
+# This creates the request cache for non-mod_perl installations.
+# This is identical to Install::Util::_cache so that things loaded
+# into Install::Util::_cache during installation can be read out
+# of request_cache later in installation.
+our $_request_cache = $Bugzilla::Install::Util::_cache;
 
 sub request_cache {
     if ($ENV{MOD_PERL}) {
@@ -585,6 +603,8 @@ sub END {
     # Bugzilla.pm cannot compile in mod_perl.pl if this runs.
     _cleanup() unless $ENV{MOD_PERL};
 }
+
+init_page() if !$ENV{MOD_PERL};
 
 1;
 
@@ -820,11 +840,6 @@ Change the database object to refer to the main database.
 The current Parameters of Bugzilla, as a hashref. If C<data/params>
 does not exist, then we return an empty hashref. If C<data/params>
 is unreadable or is not valid perl, we C<die>.
-
-=item C<hook_args>
-
-If you are running inside a code hook (see L<Bugzilla::Hook>) this
-is how you get the arguments passed to the hook.
 
 =item C<local_timezone>
 

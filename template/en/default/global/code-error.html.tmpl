@@ -143,6 +143,33 @@
     An error occurred processing hook [% name FILTER html %] in
     extension [% extension FILTER html %]: [% errstr FILTER html %]
 
+  [% ELSIF error == "extension_must_be_subclass" %]
+    <code>[% package FILTER html %]</code> from 
+    <code>[% filename FILTER html %]</code> is not a subclass of
+    <code>[% class FILTER html %]</code>.
+
+  [% ELSIF error == "extension_must_return_name" %]
+    <code>[% extension FILTER html %]</code> returned
+    <code>[% returned FILTER html %]</code>, which is not a valid name
+    for an extension. Extensions must return their name, not <code>1</code>
+    or a number. See the documentation of
+    <a href="[% docs_urlbase %]api/Bugzilla/Extension.html">Bugzilla::Extension</a>
+    for details.
+
+  [% ELSIF error == "extension_no_name" %]
+    We did not find a <code>NAME</code> method in 
+    <code>[% package FILTER html %]</code> (loaded from
+    <code>[% filename FILTER html %]</code>). This means that
+    the extension has one or more of the following problems:
+
+    <ul>
+      <li><code>[% filename FILTER html %]</code> did not define a
+        <code>[% package FILTER html %]</code> package.</li>
+      <li><code>[% package FILTER html %]</code> did not define a
+        <code>NAME</code> method (or the <code>NAME</code> method
+        returned an empty string).</li>
+    </ul>
+
   [% ELSIF error == "extern_id_conflict" %]
     The external ID '[% extern_id FILTER html %]' already exists
     in the database for '[% username FILTER html %]', but your

@@ -107,7 +107,7 @@ sub _throw_error {
             # Clone the hash so we aren't modifying the constant.
             my %error_map = %{ WS_ERROR_CODE() };
             require Bugzilla::Hook;
-            Bugzilla::Hook::process('webservice-error_codes', 
+            Bugzilla::Hook::process('webservice_error_codes', 
                                     { error_map => \%error_map });
             my $code = $error_map{$error};
             if (!$code) {

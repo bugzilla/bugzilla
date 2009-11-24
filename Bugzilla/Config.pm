@@ -68,7 +68,7 @@ sub _load_params {
     }
     # This hook is also called in editparams.cgi. This call here is required
     # to make SetParam work.
-    Bugzilla::Hook::process('config-modify_panels', 
+    Bugzilla::Hook::process('config_modify_panels', 
                             { panels => \%hook_panels });
 }
 # END INIT CODE
@@ -84,7 +84,7 @@ sub param_panels {
         $param_panels->{$module} = "Bugzilla::Config::$module" unless $module eq 'Common';
     }
     # Now check for any hooked params
-    Bugzilla::Hook::process('config-add_panels', 
+    Bugzilla::Hook::process('config_add_panels', 
                             { panel_modules => $param_panels });
     return $param_panels;
 }

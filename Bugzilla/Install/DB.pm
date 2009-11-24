@@ -590,7 +590,7 @@ sub update_table_definitions {
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################
 
-    Bugzilla::Hook::process('install-update_db');
+    Bugzilla::Hook::process('install_update_db');
 
     # We do this here because otherwise the foreign key from 
     # products.classification_id to classifications.id will fail

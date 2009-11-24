@@ -533,7 +533,7 @@ sub update_flags {
     my @new_summaries = $class->snapshot($self->flags);
     my @changes = $class->update_activity(\@old_summaries, \@new_summaries);
 
-    Bugzilla::Hook::process('flag-end_of_update', { object    => $self,
+    Bugzilla::Hook::process('flag_end_of_update', { object    => $self,
                                                     timestamp => $timestamp,
                                                     old_flags => \@old_summaries,
                                                     new_flags => \@new_summaries,

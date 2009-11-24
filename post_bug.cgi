@@ -254,7 +254,7 @@ $vars->{'mailrecipients'} = {'changer' => $user->login};
 $vars->{'id'} = $id;
 $vars->{'bug'} = $bug;
 
-Bugzilla::Hook::process("post_bug-after_creation", { vars => $vars });
+Bugzilla::Hook::process('post_bug_after_creation', { vars => $vars });
 
 ThrowCodeError("bug_error", { bug => $bug }) if $bug->error;
 

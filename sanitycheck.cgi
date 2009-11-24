@@ -388,7 +388,7 @@ if ($cgi->param('remove_old_whine_targets')) {
 # Repair hook
 ###########################################################################
 
-Bugzilla::Hook::process("sanitycheck-repair", { status => \&Status });
+Bugzilla::Hook::process('sanitycheck_repair', { status => \&Status });
 
 ###########################################################################
 # Checks
@@ -1075,7 +1075,7 @@ Status('whines_obsolete_target_fix') if $display_repair_whines_link;
 # Check hook
 ###########################################################################
 
-Bugzilla::Hook::process("sanitycheck-check", { status => \&Status });
+Bugzilla::Hook::process('sanitycheck_check', { status => \&Status });
 
 ###########################################################################
 # End

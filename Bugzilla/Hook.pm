@@ -18,86 +18,23 @@
 # Rights Reserved.
 #
 # Contributor(s): Zach Lipton <zach@zachlipton.com>
-#
+#                 Max Kanat-Alexander <mkanat@bugzilla.org>
 
 package Bugzilla::Hook;
 use strict;
-
 use Bugzilla::Constants;
-use Bugzilla::Util;
-use Bugzilla::Error;
-
-use Scalar::Util qw(blessed);
-
-BEGIN {
-    if ($ENV{MOD_PERL}) {
-        require ModPerl::Const;
-        import ModPerl::Const -compile => 'EXIT';
-     }
-    else {
-        # Create a fake constant. We have to do this in a string eval,
-        # otherwise this will always be defined.
-        eval('sub ModPerl::EXIT;');
-    }
-}
 
 sub process {
     my ($name, $args) = @_;
-    
-    # get a list of all extensions
-    my @extensions = glob(bz_locations()->{'extensionsdir'} . "/*");
-    
-    # check each extension to see if it uses the hook
-    # if so, invoke the extension source file:
-    foreach my $extension (@extensions) {
-        # all of these variables come directly from code or directory names. 
-        # If there's malicious data here, we have much bigger issues to 
-        # worry about, so we can safely detaint them:
-        trick_taint($extension);
-        # Skip CVS directories and any hidden files/dirs.
-        next if $extension =~ m{/CVS$} || $extension =~ m{/\.[^/]+$};
-        next if -e "$extension/disabled";
-        if (-e $extension.'/code/'.$name.'.pl') {
-            Bugzilla->hook_args($args);
-            # Allow extensions to load their own libraries.
-            local @INC = ("$extension/lib", @INC);
-            do($extension.'/code/'.$name.'.pl');
-            if ($@) {
-                if ($ENV{MOD_PERL} and blessed $@ and $@ == ModPerl::EXIT) {
-                    exit;
-                }
-                else {
-                    ThrowCodeError('extension_invalid', 
-                        { errstr => $@, name => $name,
-                          extension => $extension });
-                }
-            }
-            # Flush stored data.
-            Bugzilla->hook_args({});
+    foreach my $extension (@{ Bugzilla->extensions }) {
+        local @INC = @INC;
+        my $ext_dir = bz_locations()->{'extensionsdir'};
+        my $ext_name = $extension->NAME;
+        unshift(@INC, "$ext_dir/$ext_name/lib");
+        if ($extension->can($name)) {
+            $extension->$name($args);
         }
     }
-}
-
-sub enabled_plugins {
-    my $extdir = bz_locations()->{'extensionsdir'};
-    my @extensions = glob("$extdir/*");
-    my %enabled;
-    foreach my $extension (@extensions) {
-        trick_taint($extension);
-        my $extname = $extension;
-        $extname =~ s{^\Q$extdir\E/}{};
-        next if $extname eq 'CVS' || $extname =~ /^\./;
-        next if -e "$extension/disabled";
-        # Allow extensions to load their own libraries.
-        local @INC = ("$extension/lib", @INC);
-        $enabled{$extname} = do("$extension/info.pl");
-        ThrowCodeError('extension_invalid',
-                { errstr => $@, name => 'version',
-                  extension => $extension }) if $@;
-
-    }
-
-    return \%enabled;
 }
 
 1;
@@ -122,39 +59,16 @@ hooks. When a piece of standard Bugzilla code wants to allow an extension
 to perform additional functions, it uses Bugzilla::Hook's L</process>
 subroutine to invoke any extension code if installed. 
 
-There is a sample extension in F<extensions/example/> that demonstrates
-most of the things described in this document, as well as many of the
-hooks available.
+The implementation of extensions is described in L<Bugzilla::Extension>.
 
 =head2 How Hooks Work
 
-When a hook named C<HOOK_NAME> is run, Bugzilla will attempt to invoke any 
-source files named F<extensions/*/code/HOOK_NAME.pl>.
+When a hook named C<HOOK_NAME> is run, Bugzilla looks through all
+enabled L<extensions|Bugzilla::Extension> for extensions that implement
+a subroutined named C<HOOK_NAME>.
 
-So, for example, if your extension is called "testopia", and you
-want to have code run during the L</install-update_db> hook, you
-would have a file called F<extensions/testopia/code/install-update_db.pl>
-that contained perl code to run during that hook.
-
-=head2 Arguments Passed to Hooks
-
-Some L<hooks|/HOOKS> have params that are passed to them.
-
-These params are accessible through L<Bugzilla/hook_args>.
-That returns a hashref. Very frequently, if you want your
-hook to do anything, you have to modify these variables.
-
-You may also want to use L<Bugzilla/input_params> to get parameters
-that were passed to the current CGI script or WebService method.
-
-=head2 Versioning Extensions
-
-Every extension must have a file in its root called F<info.pl>.
-This file must return a hash when called with C<do>.
-The hash must contain a 'version' key with the current version of the
-extension. Extension authors can also add any extra infomration to this hash if
-required, by adding a new key beginning with x_ which will not be used the
-core Bugzilla code. 
+See L<Bugzilla::Extension> for more details about how an extension
+can run code during a hook.
 
 =head1 SUBROUTINES
 
@@ -194,7 +108,7 @@ This describes what hooks exist in Bugzilla currently. They are mostly
 in alphabetical order, but some related hooks are near each other instead
 of being alphabetical.
 
-=head2 attachment-process_data
+=head2 attachment_process_data
 
 This happens at the very beginning process of the attachment creation.
 You can edit the attachment content itself as well as all attributes
@@ -212,7 +126,7 @@ L<Bugzilla::Attachment/create>. The data it contains hasn't been checked yet.
 
 =back
 
-=head2 auth-login_methods
+=head2 auth_login_methods
 
 This allows you to add new login types to Bugzilla.
 (See L<Bugzilla::Auth::Login>.)
@@ -243,13 +157,13 @@ login methods that weren't passed to L<Bugzilla::Auth/login>.)
 
 =back
 
-=head2 auth-verify_methods
+=head2 auth_verify_methods
 
 This works just like L</auth-login_methods> except it's for
 login verification methods (See L<Bugzilla::Auth::Verify>.) It also
 takes a C<modules> parameter, just like L</auth-login_methods>.
 
-=head2 bug-columns
+=head2 bug_columns
 
 This allows you to add new fields that will show up in every L<Bugzilla::Bug>
 object. Note that you will also need to use the L</bug-fields> hook in
@@ -264,7 +178,7 @@ your column name(s) onto the array.
 
 =back
 
-=head2 bug-end_of_create
+=head2 bug_end_of_create
 
 This happens at the end of L<Bugzilla::Bug/create>, after all other changes are
 made to the database. This occurs inside a database transaction.
@@ -280,7 +194,7 @@ values.
 
 =back
 
-=head2 bug-end_of_create_validators
+=head2 bug_end_of_create_validators
 
 This happens during L<Bugzilla::Bug/create>, after all parameters have
 been validated, but before anything has been inserted into the database.
@@ -295,7 +209,7 @@ A hashref. The validated parameters passed to C<create>.
 
 =back
 
-=head2 bug-end_of_update
+=head2 bug_end_of_update
 
 This happens at the end of L<Bugzilla::Bug/update>, after all other changes are
 made to the database. This generally occurs inside a database transaction.
@@ -314,7 +228,7 @@ C<$changes-E<gt>{field} = [old, new]>
 
 =back
 
-=head2 bug-fields
+=head2 bug_fields
 
 Allows the addition of database fields from the bugs table to the standard
 list of allowable fields in a L<Bugzilla::Bug> object, so that
@@ -331,7 +245,7 @@ your column name(s) onto the array.
 
 =back
 
-=head2 bug-format_comment
+=head2 bug_format_comment
 
 Allows you to do custom parsing on comments before they are displayed. You do
 this by returning two regular expressions: one that matches the section you
@@ -396,7 +310,7 @@ the summary line).
 
 =back
 
-=head2 buglist-columns
+=head2 buglist_columns
 
 This happens in buglist.cgi after the standard columns have been defined and
 right before the display column determination.  It gives you the opportunity
@@ -424,7 +338,7 @@ The definition is structured as:
 
 =back
 
-=head2 colchange-columns
+=head2 colchange_columns
 
 This happens in F<colchange.cgi> right after the list of possible display
 columns have been defined and gives you the opportunity to add additional
@@ -440,7 +354,7 @@ See L</buglist-columns>.
 
 =back
 
-=head2 config-add_panels
+=head2 config_add_panels
 
 If you want to add new panels to the Parameters administrative interface,
 this is where you do it.
@@ -461,7 +375,7 @@ extension.)
 
 =back
 
-=head2 config-modify_panels
+=head2 config_modify_panels
 
 This is how you modify already-existing panels in the Parameters
 administrative interface. For example, if you wanted to add a new
@@ -485,7 +399,7 @@ L</config-add_panels> if you want to add new panels.
 
 =back
 
-=head2 enter_bug-entrydefaultvars
+=head2 enter_bug_entrydefaultvars
 
 This happens right before the template is loaded on enter_bug.cgi.
 
@@ -497,7 +411,7 @@ Params:
 
 =back
 
-=head2 flag-end_of_update
+=head2 flag_end_of_update
 
 This happens at the end of L<Bugzilla::Flag/update_flags>, after all other changes
 are made to the database and after emails are sent. It gives you a before/after
@@ -523,7 +437,7 @@ changed flags, and search for a specific condition like C<added eq 'review-'>.
 
 =back
 
-=head2 install-before_final_checks
+=head2 install_before_final_checks
 
 Allows execution of custom code before the final checks are done in 
 checksetup.pl.
@@ -538,37 +452,13 @@ A flag that indicates whether or not checksetup is running in silent mode.
 
 =back
 
-=head2 install-requirements
-
-Because of the way Bugzilla installation works, there can't be a normal
-hook during the time that F<checksetup.pl> checks what modules are
-installed. (C<Bugzilla::Hook> needs to have those modules installed--it's
-a chicken-and-egg problem.)
-
-So instead of the way hooks normally work, this hook just looks for two 
-subroutines (or constants, since all constants are just subroutines) in 
-your file, called C<OPTIONAL_MODULES> and C<REQUIRED_MODULES>,
-which should return arrayrefs in the same format as C<OPTIONAL_MODULES> and
-C<REQUIRED_MODULES> in L<Bugzilla::Install::Requirements>.
-
-These subroutines will be passed an arrayref that contains the current
-Bugzilla requirements of the same type, in case you want to modify
-Bugzilla's requirements somehow. (Probably the most common would be to
-alter a version number or the "feature" element of C<OPTIONAL_MODULES>.)
-
-F<checksetup.pl> will add these requirements to its own.
-
-Please remember--if you put something in C<REQUIRED_MODULES>, then
-F<checksetup.pl> B<cannot complete> unless the user has that module
-installed! So use C<OPTIONAL_MODULES> whenever you can.
-
-=head2 install-update_db
+=head2 install_update_db
 
 This happens at the very end of all the tables being updated
 during an installation or upgrade. If you need to modify your custom
 schema, do it here. No params are passed.
 
-=head2 db_schema-abstract_schema
+=head2 db_schema_abstract_schema
 
 This allows you to add tables to Bugzilla. Note that we recommend that you 
 prefix the names of your tables with some word, so that they don't conflict 
@@ -588,7 +478,7 @@ database when run.
 
 =back
 
-=head2 mailer-before_send
+=head2 mailer_before_send
 
 Called right before L<Bugzilla::Mailer> sends a message to the MTA.
 
@@ -600,7 +490,7 @@ Params:
 
 =back
 
-=head2 object-before_create
+=head2 object_before_create
 
 This happens at the beginning of L<Bugzilla::Object/create>.
 
@@ -620,7 +510,7 @@ A hashref. The set of named parameters passed to C<create>.
 
 =back
 
-=head2 object-before_set
+=head2 object_before_set
 
 Called during L<Bugzilla::Object/set>, before any actual work is done.
 You can use this to perform actions before a value is changed for
@@ -646,7 +536,7 @@ The value being set on the object.
 
 =back
 
-=head2 object-end_of_create_validators
+=head2 object_end_of_create_validators
 
 Called at the end of L<Bugzilla::Object/run_create_validators>. You can
 use this to run additional validation when creating an object.
@@ -671,7 +561,7 @@ validated by the C<VALIDATORS> specified for the object.
 
 =back
 
-=head2 object-end_of_set_all
+=head2 object_end_of_set_all
 
 This happens at the end of L<Bugzilla::Object/set_all>. This is a
 good place to call custom set_ functions on objects, or to make changes
@@ -693,7 +583,7 @@ A hashref. The set of named parameters passed to C<set_all>.
 
 =back
 
-=head2 object-end_of_update
+=head2 object_end_of_update
 
 Called during L<Bugzilla::Object/update>, after changes are made
 to the database, but while still inside a transaction.
@@ -719,7 +609,7 @@ L<Bugzilla::Object/update> returns.
 
 =back
 
-=head2 page-before_template
+=head2 page_before_template
 
 This is a simple way to add your own pages to Bugzilla. This hooks C<page.cgi>,
 which loads templates from F<template/en/default/pages>. For example,
@@ -746,7 +636,7 @@ your template.
 
 =back
 
-=head2 product-confirm_delete
+=head2 product_confirm_delete
 
 Called before displaying the confirmation message when deleting a product.
 
@@ -758,7 +648,7 @@ Params:
 
 =back
 
-=head2 sanitycheck-check
+=head2 sanitycheck_check
 
 This hook allows for extra sanity checks to be added, for use by
 F<sanitycheck.cgi>.
@@ -772,7 +662,7 @@ to the user. (F<sanitycheck.cgi>'s C<Status>)
 
 =back
 
-=head2 sanitycheck-repair
+=head2 sanitycheck_repair
 
 This hook allows for extra sanity check repairs to be made, for use by
 F<sanitycheck.cgi>.
@@ -786,7 +676,7 @@ to the user. (F<sanitycheck.cgi>'s C<Status>)
 
 =back
 
-=head2 template-before_create
+=head2 template_before_create
 
 This hook allows you to modify the configuration of L<Bugzilla::Template>
 objects before they are created. For example, you could add a new
@@ -805,7 +695,7 @@ look at the code for C<create> in L<Bugzilla::Template>.)
 
 =back
 
-=head2 template-before_process
+=head2 template_before_process
 
 This hook allows you to define additional variables that will be available to
 the template being processed. You probably want to restrict your hook
@@ -869,7 +759,7 @@ plugins).
 
 =back
 
-=head2 webservice-error_codes
+=head2 webservice_error_codes
 
 If your webservice extension throws custom errors, you can set numeric
 codes for those errors here.
@@ -887,3 +777,7 @@ A hash that maps the names of errors (like C<invalid_param>) to numbers.
 See L<Bugzilla::WebService::Constants/WS_ERROR_CODE> for an example.
 
 =back
+
+=head1 SEE ALSO
+
+L<Bugzilla::Extension>

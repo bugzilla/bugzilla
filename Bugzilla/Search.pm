@@ -170,7 +170,7 @@ sub COLUMNS {
     # The short_short_desc column is identical to short_desc
     $columns{'short_short_desc'} = $columns{'short_desc'};
 
-    Bugzilla::Hook::process("buglist-columns", { columns => \%columns });
+    Bugzilla::Hook::process('buglist_columns', { columns => \%columns });
 
     $cache->{search_columns} = \%columns;
     return $cache->{search_columns};

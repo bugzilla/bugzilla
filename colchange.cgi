@@ -88,7 +88,7 @@ my @custom_fields = grep { $_->type != FIELD_TYPE_MULTI_SELECT }
                          Bugzilla->active_custom_fields;
 push(@masterlist, map { $_->name } @custom_fields);
 
-Bugzilla::Hook::process("colchange-columns", {'columns' => \@masterlist} );
+Bugzilla::Hook::process('colchange_columns', {'columns' => \@masterlist} );
 
 $vars->{'masterlist'} = \@masterlist;
 

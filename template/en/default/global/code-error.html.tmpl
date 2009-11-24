@@ -139,10 +139,6 @@
       address.
     [% END %]
 
-  [% ELSIF error == "extension_invalid" %]
-    An error occurred processing hook [% name FILTER html %] in
-    extension [% extension FILTER html %]: [% errstr FILTER html %]
-
   [% ELSIF error == "extension_must_be_subclass" %]
     <code>[% package FILTER html %]</code> from 
     <code>[% filename FILTER html %]</code> is not a subclass of

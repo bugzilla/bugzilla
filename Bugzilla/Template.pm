@@ -884,21 +884,24 @@ sub _do_template_symlink {
     # need to do this symlink.
     return if ($abs_path eq $dir_to_symlink);
 
-    my $abs_root = dirname($abs_path);
-    my $dir_name = basename($abs_path);
-    my $datadir = bz_locations()->{'datadir'};
-    my $todir    = "$datadir/template$abs_root";
-    mkpath($todir);
-    # We use abs2rel so that the symlink will look like 
-    # "../../../../template" which works, while just 
-    # "data/template/template/" doesn't work.
-    my $fromdir = File::Spec->abs2rel("$datadir/template/$dir_name", $todir);
+    my $abs_root  = dirname($abs_path);
+    my $dir_name  = basename($abs_path);
+    my $datadir   = bz_locations()->{'datadir'};
+    my $container = "$datadir/template$abs_root";
+    mkpath($container);
+    my $target = "$datadir/template/$dir_name";
+    # Check if the directory exists, because if there are no extensions,
+    # there won't be an "data/template/extensions" directory to link to.
+    if (-d $target) {
+        # We use abs2rel so that the symlink will look like 
+        # "../../../../template" which works, while just 
+        # "data/template/template/" doesn't work.
+        my $relative_target = File::Spec->abs2rel($target, $container);
 
-    my $target = "$todir/$dir_name";
-    # We eval for systems that can't symlink at all, where "symlink" 
-    # throws a fatal error.
-    eval { symlink($fromdir, $target) }
-      or warn "Failed to symlink from $fromdir to $target: $!";
+        my $link_name = "$container/$dir_name";
+        symlink($relative_target, $link_name)
+          or warn "Could not make $link_name a symlink to $relative_target: $!";
+    }
 }
 
 1;

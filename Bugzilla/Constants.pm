@@ -228,7 +228,7 @@ use constant AUTH_DISABLED => 4;
 use constant AUTH_NO_SUCH_USER  => 5;
 
 # The minimum length a password must have.
-use constant USER_PASSWORD_MIN_LENGTH => 3;
+use constant USER_PASSWORD_MIN_LENGTH => 6;
 
 use constant LOGIN_OPTIONAL => 0;
 use constant LOGIN_NORMAL => 1;

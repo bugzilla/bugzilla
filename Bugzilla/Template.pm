@@ -475,6 +475,14 @@ sub create {
         PRE_CHOMP => 1,
         TRIM => 1,
 
+        # Bugzilla::Template::Plugin::Hook uses the absolute (in mod_perl)
+        # or relative (in mod_cgi) paths of hook files to explicitly compile
+        # a specific file. Also, these paths may be absolute at any time
+        # if a packager has modified bz_locations() to contain absolute
+        # paths.
+        ABSOLUTE => 1,
+        RELATIVE => $ENV{MOD_PERL} ? 0 : 1,
+
         COMPILE_DIR => bz_locations()->{'datadir'} . "/template",
 
         # Initialize templates (f.e. by loading plugins like Hook).

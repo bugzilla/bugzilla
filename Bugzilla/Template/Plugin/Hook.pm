@@ -27,8 +27,7 @@ use strict;
 use base qw(Template::Plugin);
 
 use Bugzilla::Constants;
-use Bugzilla::Install::Util qw(include_languages template_base_directories
-                               template_lang_directories);
+use Bugzilla::Install::Util qw(include_languages template_include_path); 
 use Bugzilla::Util;
 use Bugzilla::Error;
 
@@ -58,16 +57,18 @@ sub process {
     my $type = $2;
 
     # Hooks are named like this:
-    my $extension_template = "$path/$template_name-$hook_name.$type.tmpl";
+    my $extension_template = "$path$template_name-$hook_name.$type.tmpl";
 
     # Get the hooks out of the cache if they exist. Otherwise, read them
     # from the disk.
     my $cache = Bugzilla->request_cache->{template_plugin_hook_cache} ||= {};
-    $cache->{$extension_template} ||= $self->_get_hooks($extension_template);
+    my $lang = $cache->{language} || '';
+    $cache->{"${lang}__$extension_template"} 
+        ||= $self->_get_hooks($extension_template);
 
     # process() accepts an arrayref of templates, so we just pass the whole
     # arrayref.
-    return $context->process($cache->{$extension_template});
+    return $context->process($cache->{"${lang}__$extension_template"});
 }
 
 sub _get_hooks {
@@ -76,21 +77,10 @@ sub _get_hooks {
     my $template_sets = _template_hook_include_path();
     my @hooks;
     foreach my $dir_set (@$template_sets) {
-        foreach my $lang_dir (@$dir_set) {
-            my $file = File::Spec->catdir($lang_dir, $extension_template);
+        foreach my $template_dir (@$dir_set) {
+            my $file = "$template_dir/hook/$extension_template";
             if (-e $file) {
-                # TT won't accept a file that isn't in its include path. 
-                # So we open a file handle, compile it to a template, and 
-                # then pass the compiled template to process().
-                #
-                # This doesn't cache the hook template on disk
-                # (which is nearly impossible for us to do, with TT's
-                # architecture), but we do cache this compiled template
-                # per-request (in process() above) so that it doesn't have
-                # to be recompiled over and over within one request.
-                open(my $fh, '<', $file) or die "$file: $!";
-                my $template = $self->_context->template($fh);
-                close($fh);
+                my $template = $self->_context->template($file);
                 push(@hooks, $template);
                 # Don't run the hook for more than one language.
                 last;
@@ -105,25 +95,11 @@ sub _template_hook_include_path {
     my $cache = Bugzilla->request_cache;
     my $language = $cache->{language} || '';
     my $cache_key = "template_plugin_hook_include_path_$language";
-    return $cache->{$cache_key} if defined $cache->{$cache_key};
-    
-    my @used_languages = include_languages({
+    $cache->{$cache_key} ||= template_include_path({
         use_languages => Bugzilla->languages,
-        only_language => $language });
-    my $template_dirs = template_base_directories();
-
-    # We create an array of arrayrefs, with each arrayref being a single
-    # extension's "language" directories. In addition to the extensions/
-    # directory, this also includes a set for the base template/ directory. 
-    my @template_sets;
-    foreach my $template_dir (@$template_dirs) {
-        my @language_dirs = template_lang_directories(\@used_languages, 
-                                                      $template_dir, 'hook');
-        if (scalar @language_dirs) {
-            push(@template_sets, \@language_dirs);
-        }
-    }
-    $cache->{$cache_key} = \@template_sets;
+        only_language => $language,
+        hook          => 1,
+    });
     return $cache->{$cache_key};
 }
 

@@ -43,8 +43,6 @@ our @EXPORT_OK = qw(
     install_string
     include_languages
     template_include_path
-    template_base_directories
-    template_lang_directories
     vers_cmp
     get_console_locale
     init_console
@@ -300,20 +298,14 @@ sub include_languages {
     return @usedlanguages;
 }
 
-# Used by template_include_path and Bugzilla::Template::Plugin::Hook.
-sub template_lang_directories {
-    my ($languages, $templatedir, $subdir_name) = @_;
+# Used by template_include_path
+sub _template_lang_directories {
+    my ($languages, $templatedir) = @_;
     
-    my @add;
+    my @add = qw(custom default);
     my $project = bz_locations->{'project'};
-    if ($subdir_name) {
-        @add = ("$subdir_name.custom", $subdir_name);
-        unshift(@add, "$subdir_name.$project") if $project;
-    }
-    else {
-        @add = ("custom", "default");
-        unshift(@add, $project) if $project;
-    }
+    unshift(@add, $project) if $project;
+
     my @result;
     foreach my $lang (@$languages) {
         foreach my $dir (@add) {
@@ -327,8 +319,8 @@ sub template_lang_directories {
     return @result;
 }
 
-# Used by template_include_path and Bugzilla::Template::Plugin::Hook.
-sub template_base_directories {
+# Used by template_include_path.
+sub _template_base_directories {
     # First, we add extension template directories, because extension templates
     # override standard templates. Extensions may be localized in the same way
     # that Bugzilla templates are localized.
@@ -339,14 +331,23 @@ sub template_base_directories {
 }
 
 sub template_include_path {
+    my ($params) = @_;
     my @used_languages = include_languages(@_);
     # Now, we add template directories in the order they will be searched:
-    my $template_dirs = template_base_directories(); 
+    my $template_dirs = _template_base_directories(); 
 
     my @include_path;
     foreach my $template_dir (@$template_dirs) {
-        push(@include_path,
-             template_lang_directories(\@used_languages, $template_dir));
+        my @lang_dirs = _template_lang_directories(\@used_languages, 
+                                                   $template_dir);
+        # Hooks get each set of extension directories separately.
+        if ($params->{hook}) {
+            push(@include_path, \@lang_dirs);
+        }
+        # Whereas everything else just gets a whole INCLUDE_PATH.
+        else {
+            push(@include_path, @lang_dirs);
+        }
     }
     return \@include_path;
 }

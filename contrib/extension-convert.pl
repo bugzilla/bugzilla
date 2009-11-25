@@ -261,23 +261,22 @@ sub move_template_hooks {
     my ($dir) = @_;
     foreach my $lang (glob("$dir/template/*")) {
         next if !_file_matters($lang);
-        mkpath("$lang/hook") || die "$lang/hook: $!";
+        my $hook_container = "$lang/default/hook";
+        mkpath($hook_container) || warn "$hook_container: $!";
         # Hooks can be in all sorts of weird places, including
         # template/default/hook.
-        foreach my $hooks_container ($lang, "$lang/default/hook") {
-            foreach my $file (glob("$hooks_container/*")) {
-                next if !_file_matters($file, 1);
-                my $dirname = basename($file);
-                print "Moving $file to $lang/hook/$dirname...\n";
-                rename($file, "$lang/hook/$dirname") || die "move failed: $!";
-            }
+        foreach my $file (glob("$lang/*")) {
+            next if !_file_matters($file, 1);
+            my $dirname = basename($file);
+            print "Moving $file to $hook_container/$dirname...\n";
+            rename($file, "$hook_container/$dirname") || die "move failed: $!";
         }
     }
 }
 
 sub _file_matters {
      my ($path, $tmpl) = @_;
-     my @ignore = qw(default custom CVS hook);
+     my @ignore = qw(default custom CVS);
      my $file = basename($path);
      return 0 if grep(lc($_) eq lc($file), @ignore);
       # Hidden files

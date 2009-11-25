@@ -130,7 +130,16 @@ sub extension_code_files {
         trick_taint($_) foreach @load_files;
         push(@files, \@load_files);
     }
-    return \@files;
+
+    my @additional;
+    my $datadir = bz_locations()->{'datadir'};
+    my $addl_file = "$datadir/extensions/additional";
+    if (-e $addl_file) {
+        open(my $fh, '<', $addl_file) || die "$addl_file: $!";
+        @additional = map { trim($_) } <$fh>;
+        close($fh);
+    }
+    return (\@files, \@additional);
 }
 
 # Used by _get_extension_requirements in Bugzilla::Install::Requirements.
@@ -150,8 +159,8 @@ sub extension_requirement_packages {
     $packages = [];
     my %package_map;
     
-    my $extension_files = extension_code_files('requirements only');
-    foreach my $file_set (@$extension_files) {
+    my ($file_sets, $extra_packages) = extension_code_files('requirements only');
+    foreach my $file_set (@$file_sets) {
         my $file = shift @$file_set;
         my $name = require $file;
         if ($name =~ /^\d+$/) {
@@ -162,6 +171,11 @@ sub extension_requirement_packages {
         $package_map{$file} = $package;
         push(@$packages, $package);
     }
+    foreach my $package (@$extra_packages) {
+        eval("require $package") || die $@;
+        push(@$packages, $package);
+    }
+
     _cache()->{extension_requirement_packages} = $packages;
     # Used by Bugzilla::Extension->load if it's called after this method
     # (which only happens during checksetup.pl, currently).
@@ -493,6 +507,15 @@ sub trick_taint {
     my $match = $_[0] =~ /^(.*)$/s;
     $_[0] = $match ? $1 : undef;
     return (defined($_[0]));
+}
+
+sub trim {
+    my ($str) = @_;
+    if ($str) {
+      $str =~ s/^\s+//g;
+      $str =~ s/\s+$//g;
+    }
+    return $str;
 }
 
 __END__

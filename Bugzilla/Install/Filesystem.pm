@@ -198,6 +198,7 @@ sub FILESYSTEM {
     my %create_dirs = (
         $datadir                => $ws_dir_full_control,
         "$datadir/mining"       => $ws_dir_readable,
+        "$datadir/extensions"   => $ws_dir_readable,
         $attachdir              => $ws_dir_writeable,
         $extensionsdir          => $ws_dir_readable,
         graphs                  => $ws_dir_writeable,
@@ -208,7 +209,10 @@ sub FILESYSTEM {
 
     # The name of each file, pointing at its default permissions and
     # default contents.
-    my %create_files = ();
+    my %create_files = (
+        "$datadir/extensions/additional" => { perms    => $ws_readable, 
+                                              contents => '' },
+    );
 
     # Each standard stylesheet has an associated custom stylesheet that
     # we create. Also, we create placeholders for standard stylesheets

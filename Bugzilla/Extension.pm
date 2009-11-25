@@ -93,6 +93,21 @@ sub load {
         $package->modify_inc($extension_file) if !$config_file;
     }
 
+    $class->_validate_package($package, $extension_file);
+    return $package;
+}
+
+sub _validate_package {
+    my ($class, $package, $extension_file) = @_;
+
+    # For extensions from data/extensions/additional, we don't have a file
+    # name, so we fake it.
+    if (!$extension_file) {
+        $extension_file = $package;
+        $extension_file =~ s/::/\//g;
+        $extension_file .= '.pm';
+    }
+
     if (!eval { $package->NAME }) {
         ThrowCodeError('extension_no_name', 
                        { filename => $extension_file, package => $package });
@@ -104,16 +119,27 @@ sub load {
                          package  => $package,
                          class    => $class });
     }
-
-    return $package;
 }
 
 sub load_all {
     my $class = shift;
-    my $file_sets = extension_code_files();
+    my ($file_sets, $extra_packages) = extension_code_files();
     my @packages;
     foreach my $file_set (@$file_sets) {
         my $package = $class->load(@$file_set);
+        push(@packages, $package);
+    }
+
+    # Extensions from data/extensions/additional
+    foreach my $package (@$extra_packages) {
+        # Don't load an "additional" extension if we already have an extension
+        # loaded with that name.
+        next if grep($_ eq $package, @packages);
+        # Untaint the package name
+        $package =~ /([\w:]+)/;
+        $package = $1;
+        eval("require $package") || die $@;
+        $package->_validate_package($package);
         push(@packages, $package);
     }
 
@@ -401,6 +427,39 @@ If you want your extension to be compiled and have L<checksetup> check
 for its module pre-requisites, but you don't want the module to be used
 by Bugzilla, then you should make your extension's L</enabled> method
 return C<0> or some false value.
+
+=head1 DISTRIBUTING EXTENSIONS
+
+If you've made an extension and you want to publish it, the first
+thing you'll want to do is package up your extension's code and
+then put a link to it in the appropriate section of 
+L<http://wiki.mozilla.org/Bugzilla:Addons>.
+
+=head2 Distributing on CPAN
+
+If you want a centralized distribution point that makes it easy
+for Bugzilla users to install your extension, it is possible to 
+distribute your Bugzilla Extension through CPAN.
+
+The details of making a standard CPAN module are too much to
+go into here, but a lot of it is covered in L<perlmodlib>
+and on L<http://www.cpan.org/> among other places.
+
+When you distribute your extension via CPAN, your F<Extension.pm>
+should simply install itself as F<Bugzilla/Extension/Foo.pm>, 
+where C<Foo> is the name of your module. You do not need a separate
+F<Config.pm> file, because CPAN itself will handle installing
+the prerequisites of your module, so Bugzilla doesn't have to
+worry about it.
+
+=head3 Using a module distributed on CPAN
+
+There is a file named F<data/extensions/additional> in Bugzilla.
+This is a plain-text file. Each line is the name of a module,
+like C<Bugzilla::Extension::Foo>. In addition to the extensions
+in the F<extensions/> directory, each module listed in this file
+will be loaded as a Bugzilla Extension whenever Bugzilla loads or
+uses extensions.
 
 =head1 ADDITIONAL CONSTANTS
 

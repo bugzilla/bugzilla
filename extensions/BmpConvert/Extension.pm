@@ -29,10 +29,10 @@ use Image::Magick;
 our $VERSION = '1.0';
 
 sub attachment_process_data {
-    my ($self, $params) = @_;
-    return unless $params->{attributes}->{mimetype} eq 'image/bmp';
+    my ($self, $args) = @_;
+    return unless $args->{attributes}->{mimetype} eq 'image/bmp';
 
-    my $data = ${$params->{data}};
+    my $data = ${$args->{data}};
     my $img = Image::Magick->new(magick => 'bmp');
 
     # $data is a filehandle.
@@ -49,9 +49,9 @@ sub attachment_process_data {
     }
     undef $img;
 
-    ${$params->{data}} = $data;
-    $params->{attributes}->{mimetype} = 'image/png';
-    $params->{attributes}->{filename} =~ s/^(.+)\.bmp$/$1.png/i;
+    ${$args->{data}} = $data;
+    $args->{attributes}->{mimetype} = 'image/png';
+    $args->{attributes}->{filename} =~ s/^(.+)\.bmp$/$1.png/i;
 }
 
  __PACKAGE__->NAME;

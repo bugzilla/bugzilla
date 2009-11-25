@@ -35,9 +35,9 @@ use Data::Dumper;
 our $VERSION = '1.0';
 
 sub attachment_process_data {
-    my ($self, $params) = @_;
-    my $type     = $params->{attributes}->{mimetype};
-    my $filename = $params->{attributes}->{filename};
+    my ($self, $args) = @_;
+    my $type     = $args->{attributes}->{mimetype};
+    my $filename = $args->{attributes}->{filename};
 
     # Make sure images have the correct extension.
     # Uncomment the two lines below to make this check effective.
@@ -45,44 +45,44 @@ sub attachment_process_data {
         my $format = $1;
         if ($filename =~ /^(.+)(:?\.[^\.]+)$/) {
             my $name = $1;
-            #$params->{attributes}->{filename} = "${name}.$format";
+            #$args->{attributes}->{filename} = "${name}.$format";
         }
         else {
             # The file has no extension. We append it.
-            #$params->{attributes}->{filename} .= ".$format";
+            #$args->{attributes}->{filename} .= ".$format";
         }
     }
 }
 
 sub auth_login_methods {
-    my ($self, $params) = @_;
-    my $modules = $params->{modules};
+    my ($self, $args) = @_;
+    my $modules = $args->{modules};
     if (exists $modules->{Example}) {
         $modules->{Example} = 'Bugzilla/Extension/Example/Auth/Login.pm';
     }
 }
 
 sub auth_verify_methods {
-    my ($self, $params) = @_;
-    my $modules = $params->{modules};
+    my ($self, $args) = @_;
+    my $modules = $args->{modules};
     if (exists $modules->{Example}) {
         $modules->{Example} = 'Bugzilla/Extension/Example/Auth/Verify.pm';
     }
 }
 
 sub bug_columns {
-    my ($self, $params) = @_;
-    my $columns = $params->{'columns'};
+    my ($self, $args) = @_;
+    my $columns = $args->{'columns'};
     push (@$columns, "delta_ts AS example")
 }
 
 sub bug_end_of_create {
-    my ($self, $params) = @_;
+    my ($self, $args) = @_;
 
     # This code doesn't actually *do* anything, it's just here to show you
     # how to use this hook.
-    my $bug = $params->{'bug'};
-    my $timestamp = $params->{'timestamp'};
+    my $bug = $args->{'bug'};
+    my $timestamp = $args->{'timestamp'};
     
     my $bug_id = $bug->id;
     # Uncomment this line to see a line in your webserver's error log whenever
@@ -91,11 +91,11 @@ sub bug_end_of_create {
 }
 
 sub bug_end_of_create_validators {
-    my ($self, $params) = @_;
+    my ($self, $args) = @_;
     
     # This code doesn't actually *do* anything, it's just here to show you
     # how to use this hook.
-    my $bug_params = $params->{'params'};
+    my $bug_params = $args->{'params'};
     
     # Uncomment this line below to see a line in your webserver's error log
     # containing all validated bug field values every time you file a bug.
@@ -107,11 +107,11 @@ sub bug_end_of_create_validators {
 }
 
 sub bug_end_of_update {
-    my ($self, $params) = @_;
+    my ($self, $args) = @_;
     
     # This code doesn't actually *do* anything, it's just here to show you
     # how to use this hook.
-    my ($bug, $timestamp, $changes) = @$params{qw(bug timestamp changes)};
+    my ($bug, $timestamp, $changes) = @$args{qw(bug timestamp changes)};
     
     foreach my $field (keys %$changes) {
         my $used_to_be = $changes->{$field}->[0];
@@ -140,19 +140,19 @@ sub bug_end_of_update {
 }
 
 sub bug_fields {
-    my ($self, $params) = @_;
+    my ($self, $args) = @_;
 
-    my $fields = $params->{'fields'};
+    my $fields = $args->{'fields'};
     push (@$fields, "example")
 }
 
 sub bug_format_comment {
-    my ($self, $params) = @_;
+    my ($self, $args) = @_;
     
     # This replaces every occurrence of the word "foo" with the word
     # "bar"
     
-    my $regexes = $params->{'regexes'};
+    my $regexes = $args->{'regexes'};
     push(@$regexes, { match => qr/\bfoo\b/, replace => 'bar' });
     
     # And this links every occurrence of the word "bar" to example.com,
@@ -168,48 +168,48 @@ sub bug_format_comment {
 
 # Used by bug_format_comment--see its code for an explanation.
 sub _replace_bar {
-    my $params = shift;
+    my $args = shift;
     # $match is the first parentheses match in the $bar_match regex 
     # in bug-format_comment.pl. We get up to 10 regex matches as 
     # arguments to this function.
-    my $match = $params->{matches}->[0];
+    my $match = $args->{matches}->[0];
     # Remember, you have to HTML-escape any data that you are returning!
     $match = html_quote($match);
     return qq{<a href="http://example.com/">$match</a>};
 };
 
 sub buglist_columns {
-    my ($self, $params) = @_;
+    my ($self, $args) = @_;
     
-    my $columns = $params->{'columns'};
+    my $columns = $args->{'columns'};
     $columns->{'example'} = { 'name' => 'bugs.delta_ts' , 'title' => 'Example' };
 }
 
 sub colchange_columns {
-    my ($self, $params) = @_;
+    my ($self, $args) = @_;
     
-    my $columns = $params->{'columns'};
+    my $columns = $args->{'columns'};
     push (@$columns, "example")
 }
 
 sub config {
-    my ($self, $params) = @_;
+    my ($self, $args) = @_;
 
-    my $config = $params->{config};
+    my $config = $args->{config};
     $config->{Example} = "Bugzilla::Extension::Example::Config";
 }
 
 sub config_add_panels {
-    my ($self, $params) = @_;
+    my ($self, $args) = @_;
     
-    my $modules = $params->{panel_modules};
+    my $modules = $args->{panel_modules};
     $modules->{Example} = "Bugzilla::Extension::Example::Config";
 }
 
 sub config_modify_panels {
-    my ($self, $params) = @_;
+    my ($self, $args) = @_;
     
-    my $panels = $params->{panels};
+    my $panels = $args->{panels};
     
     # Add the "Example" auth methods.
     my $auth_params = $panels->{'auth'}->{params};
@@ -221,11 +221,11 @@ sub config_modify_panels {
 }
 
 sub flag_end_of_update {
-    my ($self, $params) = @_;
+    my ($self, $args) = @_;
     
     # This code doesn't actually *do* anything, it's just here to show you
     # how to use this hook.
-    my $flag_params = $params;
+    my $flag_params = $args;
     my ($object, $timestamp, $old_flags, $new_flags) =
         @$flag_params{qw(object timestamp old_flags new_flags)};
     my ($removed, $added) = diff_arrays($old_flags, $new_flags);
@@ -244,14 +244,14 @@ sub flag_end_of_update {
 }
 
 sub install_before_final_checks {
-    my ($self, $params) = @_;
-    print "Install-before_final_checks hook\n" unless $params->{silent};
+    my ($self, $args) = @_;
+    print "Install-before_final_checks hook\n" unless $args->{silent};
 }
 
 sub mailer_before_send {
-    my ($self, $params) = @_;
+    my ($self, $args) = @_;
     
-    my $email = $params->{email};
+    my $email = $args->{email};
     # If you add a header to an email, it's best to start it with
     # 'X-Bugzilla-<Extension>' so that you don't conflict with
     # other extensions.
@@ -259,10 +259,10 @@ sub mailer_before_send {
 }
 
 sub object_before_create {
-    my ($self, $params) = @_;
+    my ($self, $args) = @_;
     
-    my $class = $params->{'class'};
-    my $object_params = $params->{'params'};
+    my $class = $args->{'class'};
+    my $object_params = $args->{'params'};
     
     # Note that this is a made-up class, for this example.
     if ($class->isa('Bugzilla::ExampleObject')) {
@@ -273,9 +273,9 @@ sub object_before_create {
 }
 
 sub object_before_set {
-    my ($self, $params) = @_;
+    my ($self, $args) = @_;
     
-    my ($object, $field, $value) = @$params{qw(object field value)};
+    my ($object, $field, $value) = @$args{qw(object field value)};
     
     # Note that this is a made-up class, for this example.
     if ($object->isa('Bugzilla::ExampleObject')) {
@@ -285,10 +285,10 @@ sub object_before_set {
 }
 
 sub object_end_of_create_validators {
-    my ($self, $params) = @_;
+    my ($self, $args) = @_;
     
-    my $class = $params->{'class'};
-    my $object_params = $params->{'params'};
+    my $class = $args->{'class'};
+    my $object_params = $args->{'params'};
     
     # Note that this is a made-up class, for this example.
     if ($class->isa('Bugzilla::ExampleObject')) {
@@ -299,10 +299,10 @@ sub object_end_of_create_validators {
 }
 
 sub object_end_of_set_all {
-    my ($self, $params) = @_;
+    my ($self, $args) = @_;
     
-    my $object = $params->{'class'};
-    my $object_params = $params->{'params'};
+    my $object = $args->{'class'};
+    my $object_params = $args->{'params'};
     
     # Note that this is a made-up class, for this example.
     if ($object->isa('Bugzilla::ExampleObject')) {
@@ -314,10 +314,10 @@ sub object_end_of_set_all {
 }
 
 sub object_end_of_update {
-    my ($self, $params) = @_;
+    my ($self, $args) = @_;
     
     my ($object, $old_object, $changes) = 
-        @$params{qw(object old_object changes)};
+        @$args{qw(object old_object changes)};
     
     # Note that this is a made-up class, for this example.
     if ($object->isa('Bugzilla::ExampleObject')) {
@@ -329,9 +329,9 @@ sub object_end_of_update {
 }
 
 sub page_before_template {
-    my ($self, $params) = @_;
+    my ($self, $args) = @_;
     
-    my ($vars, $page) = @$params{qw(vars page_id)};
+    my ($vars, $page) = @$args{qw(vars page_id)};
     
     # You can see this hook in action by loading page.cgi?id=example.html
     if ($page eq 'example.html') {
@@ -340,19 +340,19 @@ sub page_before_template {
 }
 
 sub product_confirm_delete {
-    my ($self, $params) = @_;
+    my ($self, $args) = @_;
     
-    my $vars = $params->{vars};
+    my $vars = $args->{vars};
     $vars->{'example'} = 1;
 }
 
 sub sanitycheck_check {
-    my ($self, $params) = @_;
+    my ($self, $args) = @_;
     
     my $dbh = Bugzilla->dbh;
     my $sth;
     
-    my $status = $params->{'status'};
+    my $status = $args->{'status'};
     
     # Check that all users are Australian
     $status->('example_check_au_user');
@@ -374,12 +374,12 @@ sub sanitycheck_check {
 }
 
 sub sanitycheck_repair {
-    my ($self, $params) = @_;
+    my ($self, $args) = @_;
     
     my $cgi = Bugzilla->cgi;
     my $dbh = Bugzilla->dbh;
     
-    my $status = $params->{'status'};
+    my $status = $args->{'status'};
     
     if ($cgi->param('example_repair_au_user')) {
         $status->('example_repair_au_user_start');
@@ -393,9 +393,9 @@ sub sanitycheck_repair {
 }
 
 sub template_before_create {
-    my ($self, $params) = @_;
+    my ($self, $args) = @_;
     
-    my $config = $params->{'config'};
+    my $config = $args->{'config'};
     # This will be accessible as "example_global_variable" in every
     # template in Bugzilla. See Bugzilla/Template.pm's create() function
     # for more things that you can set.
@@ -403,9 +403,9 @@ sub template_before_create {
 }
 
 sub template_before_process {
-    my ($self, $params) = @_;
+    my ($self, $args) = @_;
     
-    my ($vars, $file, $template) = @$params{qw(vars file template)};
+    my ($vars, $file, $template) = @$args{qw(vars file template)};
     
     $vars->{'example'} = 1;
     
@@ -415,16 +415,16 @@ sub template_before_process {
 }
 
 sub webservice {
-    my ($self, $params) = @_;
+    my ($self, $args) = @_;
 
-    my $dispatch = $params->{dispatch};
+    my $dispatch = $args->{dispatch};
     $dispatch->{Example} = "Bugzilla::Extension::Example::WebService";
 }
 
 sub webservice_error_codes {
-    my ($self, $params) = @_;
+    my ($self, $args) = @_;
     
-    my $error_map = $params->{error_map};
+    my $error_map = $args->{error_map};
     $error_map->{'example_my_error'} = 10001;
 }
 

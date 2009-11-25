@@ -281,8 +281,8 @@ For example, here's an implementation of a hook named C<foo_start>
 that gets an argument named C<bar>:
 
  sub foo_start {
-     my ($self, $params) = @_;
-     my $bar = $params->{bar};
+     my ($self, $args) = @_;
+     my $bar = $args->{bar};
      print "I got $bar!\n";
  }
 

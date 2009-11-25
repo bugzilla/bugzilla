@@ -24,7 +24,9 @@ use strict;
 
 use Bugzilla::Constants;
 use Bugzilla::Error;
-use Bugzilla::Install::Util qw(extension_code_files);
+use Bugzilla::Install::Util qw(
+    extension_code_files extension_template_directory 
+    extension_package_directory);
 
 use File::Basename;
 use File::Spec;
@@ -69,14 +71,7 @@ sub load {
             $package = "${class}::$name";
         }
 
-        # This allows people to override modify_inc in Config.pm, if they
-        # want to.
-        if ($package->can('modify_inc')) {
-            $package->modify_inc($config_file);
-        }
-        else {
-            modify_inc($package, $config_file);
-        }
+        __do_call($package, 'modify_inc', $config_file);
     }
 
     if ($map and defined $map->{$extension_file}) {
@@ -151,19 +146,15 @@ sub load_all {
 # directory of the extension.
 sub modify_inc {
     my ($class, $file) = @_;
-    my $lib_dir = File::Spec->catdir(dirname($file), 'lib');
-    # Allow Config.pm to override my_inc, if it wants to.
-    if ($class->can('my_inc')) {
-        unshift(@INC, sub { $class->my_inc($lib_dir, @_); });
-    }
-    else {
-        unshift(@INC, sub { my_inc($class, $lib_dir, @_); });
-    }
+
+    __do_call($class, 'package_dir', $file);
+    unshift(@INC, sub { __do_call($class, 'my_inc', @_) });
 }
 
 # This is what gets put into @INC by modify_inc.
 sub my_inc {
-    my ($class, $lib_dir, undef, $file) = @_;
+    my ($class, undef, $file) = @_;
+    my $lib_dir = __do_call($class, 'lib_dir');
     my @class_parts = split('::', $class);
     my ($vol, $dir, $file_name) = File::Spec->splitpath($file);
     my @dir_parts = File::Spec->splitdir($dir);
@@ -190,6 +181,36 @@ sub my_inc {
 ####################
 
 use constant enabled => 1;
+
+sub lib_dir {
+    my $invocant = shift;
+    my $package_dir = __do_call($invocant, 'package_dir');
+    return File::Spec->catdir($package_dir, 'lib');
+}
+
+sub template_dir { return extension_template_directory(@_); }
+sub package_dir  { return extension_package_directory(@_);  }
+
+######################
+# Helper Subroutines #
+######################
+
+# In order to not conflict with extensions' private subroutines, any helpers
+# here should start with a double underscore.
+
+# This is for methods that can optionally be overridden in Config.pm.
+# It falls back to the local implementation if $class cannot do
+# the method. This is necessary because Config.pm is not a subclass of
+# Bugzilla::Extension.
+sub __do_call {
+    my ($class, $method, @args) = @_;
+    if ($class->can($method)) {
+        return $class->$method(@args);
+    }
+    my $function_ref;
+    { no strict 'refs'; $function_ref = \&{$method}; }
+    return $function_ref->($class, @args);
+}
 
 1;
 
@@ -389,6 +410,16 @@ your extension is a single file named C<Foo.pm>.
 If any of this is confusing, just look at the code of the Example extension.
 It uses this method to specify requirements.
 
+=head2 Templates
+
+Extensions store templates in a C<template> subdirectory of the extension.
+(Obviously, this isn't available for extensions that aren't a directory.)
+
+The format of this directory is exactly like the normal layout of Bugzilla's
+C<template> directory--in fact, your extension's C<template> directory
+becomes part of Bugzilla's template "search path" as described in
+L<Bugzilla::Install::Util/template_include_path>.
+
 =head2 Libraries
 
 Extensions often want to have their own Perl modules. Your extension
@@ -452,7 +483,16 @@ F<Config.pm> file, because CPAN itself will handle installing
 the prerequisites of your module, so Bugzilla doesn't have to
 worry about it.
 
-=head3 Using a module distributed on CPAN
+=head3 Templates in extensions distributed on CPAN
+
+If your extension is F</usr/lib/perl5/Bugzilla/Extension/Foo.pm>,
+then Bugzilla will look for templates in the directory
+F</usr/lib/perl5/Bugzilla/Extension/Foo/template/>.
+
+You can change this behavior by overriding the L</template_dir>
+or L</package_dir> methods described lower down in this document.
+
+=head3 Using an extension distributed on CPAN
 
 There is a file named F<data/extensions/additional> in Bugzilla.
 This is a plain-text file. Each line is the name of a module,
@@ -482,17 +522,55 @@ By default, this will be C<undef> if you don't define it.
 In addition to hooks, there are a few methods that your extension can
 define to modify its behavior, if you want:
 
-=head2 C<enabled>
+=head2 Class Methods
 
-This should return C<1> if this extension's hook code should be run
-by Bugzilla, and C<0> otherwise.
+These methods are called on your extension's class. (Like
+C<< Bugzilla::Extension::Foo->some_method >>).
 
-=head2 C<new>
+=head3 C<new>
 
 Once every request, this method is called on your extension in order
 to create an "instance" of it. (Extensions are treated like objects--they
 are instantiated once per request in Bugzilla, and then methods are
 called on the object.)
+
+=head2 Instance Methods
+
+These are called on an instantiated Extension object.
+
+=head3 C<enabled>
+
+This should return C<1> if this extension's hook code should be run
+by Bugzilla, and C<0> otherwise.
+
+=head3 C<package_dir>
+
+This returns the directory that your extension is located in. 
+
+If this is an extension that was installed via CPAN, the directory will 
+be the path to F<Bugzilla/Extension/Foo/>, if C<Foo.pm> is the name of your
+extension.
+
+If you want to override this method, and you have a F<Config.pm>, you must
+override this method in F<Config.pm>.
+
+=head3 C<template_dir>
+
+The directory that your package's templates are in.
+
+This defaults to the C<template> subdirectory of the L</package_dir>.
+
+If you want to override this method, and you have a F<Config.pm>, you must
+override this method in F<Config.pm>.
+
+=head3 C<lib_dir>
+
+The directory where your extension's libraries are.
+
+This defaults to the C<lib> subdirectory of the L</package_dir>.
+
+If you want to override this method, and you have a F<Config.pm>, you must
+override this method in F<Config.pm>.
 
 =head1 BUGZILLA::EXTENSION CLASS METHODS
 

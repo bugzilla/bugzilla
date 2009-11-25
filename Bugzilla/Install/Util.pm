@@ -38,7 +38,9 @@ our @EXPORT_OK = qw(
     bin_loc
     get_version_and_os
     extension_code_files
+    extension_package_directory
     extension_requirement_packages
+    extension_template_directory
     indicate_progress
     install_string
     include_languages
@@ -168,6 +170,12 @@ sub extension_requirement_packages {
                                { file => $file, returned => $name });
         }
         my $package = "Bugzilla::Extension::$name";
+        if ($package->can('package_dir')) {
+            $package->package_dir($file);
+        }
+        else {
+            extension_package_directory($package, $file);
+        }
         $package_map{$file} = $package;
         push(@$packages, $package);
     }
@@ -181,6 +189,42 @@ sub extension_requirement_packages {
     # (which only happens during checksetup.pl, currently).
     _cache()->{extension_requirement_package_map} = \%package_map;
     return $packages;
+}
+
+# Used in this file and in Bugzilla::Extension.
+sub extension_template_directory {
+    my $extension = shift;
+    my $class = ref($extension) || $extension;
+    my $base_dir = extension_package_directory($class);
+    return "$base_dir/template";
+}
+
+# For extensions that are in the extensions/ dir, this both sets and fetches
+# the name of the directory that stores an extension's "stuff". We need this
+# when determining the template directory for extensions (or other things
+# that are relative to the extension's base directory).
+sub extension_package_directory {
+    my ($invocant, $file) = @_;
+    my $class = ref($invocant) || $invocant;
+
+    my $var;
+    { no strict 'refs'; $var = \${"${class}::EXTENSION_PACKAGE_DIR"}; }
+    if ($file) {
+        $$var = dirname($file);
+    }
+    my $value = $$var;
+
+    # This is for extensions loaded from data/extensions/additional.
+    if (!$value) {
+        my $short_path = $class;
+        $short_path =~ s/::/\//g;
+        $short_path .= ".pm";
+        my $long_path = $INC{$short_path};
+        die "$short_path is not in \%INC" if !$long_path;
+        $value = $long_path;
+        $value =~ s/\.pm//;
+    }
+    return $value;
 }
 
 sub indicate_progress {
@@ -338,8 +382,29 @@ sub _template_base_directories {
     # First, we add extension template directories, because extension templates
     # override standard templates. Extensions may be localized in the same way
     # that Bugzilla templates are localized.
-    my @extensions = grep { -d "$_/template" } _extension_paths();
-    my @template_dirs = map { "$_/template" } @extensions;
+    #
+    # We use extension_requirement_packages instead of Bugzilla->extensions
+    # because this fucntion is called during the requirements phase of 
+    # installation (so Bugzilla->extensions isn't available).
+    my $extensions = extension_requirement_packages();
+    my @template_dirs;
+    foreach my $extension (@$extensions) {
+        my $dir;
+        # If there's a template_dir method available in the extension
+        # package, then call it. Note that this has to be defined in
+        # Config.pm for extensions that have a Config.pm, to be effective
+        # during the Requirements phase of checksetup.pl.
+        if ($extension->can('template_dir')) {
+            $dir = $extension->template_dir;
+        }
+        else {
+            $dir = extension_template_directory($extension);
+        }
+        if (-d $dir) {
+            push(@template_dirs, $dir);
+        }
+    }
+
     push(@template_dirs, bz_locations()->{'templatedir'});
     return \@template_dirs;
 }

@@ -130,6 +130,7 @@ sub FILESYSTEM {
         "$datadir/bugzilla-update.xml" => { perms => $ws_writeable },
         "$datadir/params" => { perms => $ws_writeable },
         "$datadir/mailer.testfile" => { perms => $ws_writeable },
+        "$extensionsdir/create.pl" => { perms => $owner_executable },
     );
 
     # Directories that we want to set the perms on, but not

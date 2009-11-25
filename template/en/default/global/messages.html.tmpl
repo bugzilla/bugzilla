@@ -279,7 +279,12 @@
     The request to change the email address for the
     account [%+ old_email FILTER html %] to 
     [%+ new_email FILTER html %] has been canceled.
-   Your old account settings have been reinstated.
+    Your old account settings have been reinstated.
+
+  [% ELSIF message_tag == "extension_created" %]
+    An extension named [% name FILTER html %] has been created
+    in [% path FILTER html %]. Make sure you change "YOUR NAME" and 
+    "YOUR EMAIL ADDRESS" in the code to your name and your email address.
 
   [% ELSIF message_tag == "field_value_created" %]
     [% title = "New Field Value Created" %]

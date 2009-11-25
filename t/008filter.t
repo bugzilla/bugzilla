@@ -96,7 +96,7 @@ foreach my $path (@Support::Templates::include_paths) {
     foreach my $file (@testitems) {
         # There are some files we don't check, because there is no need to
         # filter their contents due to their content-type.
-        if ($file =~ /\.(txt|png)\.tmpl$/) {
+        if ($file =~ /\.(pm|txt|png)\.tmpl$/) {
             ok(1, "($lang/$flavor) $file is filter-safe");
             next;
         }

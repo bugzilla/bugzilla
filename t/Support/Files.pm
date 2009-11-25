@@ -29,6 +29,7 @@ use File::Find;
 
 @files = glob('*');
 find(sub { push(@files, $File::Find::name) if $_ =~ /\.pm$/;}, 'Bugzilla');
+push(@files, 'extensions/create.pl');
 
 sub isTestingFile {
     my ($file) = @_;

@@ -277,7 +277,16 @@ sub correct_urlbase {
     my $urlbase = Bugzilla->params->{'urlbase'};
     my $sslbase = Bugzilla->params->{'sslbase'};
 
-    return ($ssl && $sslbase) ? $sslbase : $urlbase;
+    if (!$sslbase) {
+        return $urlbase;
+    }
+    elsif ($ssl) {
+        return $sslbase;
+    }
+    else {
+        # Return what the user currently uses.
+        return (uc($ENV{HTTPS} || '') eq 'ON') ? $sslbase : $urlbase;
+    }
 }
 
 sub use_attachbase {

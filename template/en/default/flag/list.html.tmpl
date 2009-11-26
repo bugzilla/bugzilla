@@ -18,60 +18,6 @@
   # Contributor(s): Myk Melez <myk@mozilla.org>
   #%]
 
-<script type="text/javascript">
-<!-- 
-  // Enables or disables a requestee field depending on whether or not
-  // the user is requesting the corresponding flag.
-  function toggleRequesteeField(flagField, no_focus)
-  {
-    // Convert the ID of the flag field into the ID of its corresponding
-    // requestee field and then use the ID to get the field.
-    var id = flagField.name.replace(/flag(_type)?-(\d+)/, "requestee$1-$2");
-    var requesteeField = document.getElementById(id);
-    if (!requesteeField) return;
-    
-    // Enable or disable the requestee field based on the value
-    // of the flag field.
-    if (flagField.value == "?") {
-        requesteeField.disabled = false;
-        if (!no_focus) requesteeField.focus();
-    } else                         
-        requesteeField.disabled = true;
-  }
-  
-  // Disables requestee fields when the window is loaded since they shouldn't
-  // be enabled until the user requests that flag type.
-  function disableRequesteeFields()
-  {
-    var inputElements = document.getElementsByTagName("input");
-    var selectElements = document.getElementsByTagName("select");
-    //You cannot update Node lists, so you must create an array to combine the NodeLists
-    var allElements = [];
-    for( var i=0; i < inputElements.length; i++ ) {
-        allElements[allElements.length] = inputElements.item(i);
-    }
-    for( var i=0; i < selectElements.length; i++ ) { //Combine inputs with selects
-        allElements[allElements.length] = selectElements.item(i);
-    }
-    var inputElement, id, flagField;
-    for ( var i=0 ; i<allElements.length ; i++ )
-    {
-      inputElement = allElements[i];
-      if (inputElement.name.search(/^requestee(_type)?-(\d+)$/) != -1)
-      {
-        // Convert the ID of the requestee field into the ID of its corresponding
-        // flag field and then use the ID to get the field.
-        id = inputElement.name.replace(/requestee(_type)?-(\d+)/, "flag$1-$2");
-        flagField = document.getElementById(id);
-        if (flagField && flagField.value != "?")
-            inputElement.disabled = true;
-      }
-    }
-  }
-  YAHOO.util.Event.addListener(window, "load", disableRequesteeFields);
-// -->
-</script>
-
 [% IF user.id %]
 
 [%# We list flags by looping twice over the flag types relevant for the bug.
@@ -83,6 +29,8 @@
   #%]
 
 [% DEFAULT flag_table_id = "flags" %]
+
+<script type="text/javascript" src="js/flag.js"></script>
 
 <table id="[% flag_table_id FILTER html %]">
   [% UNLESS flag_no_header %]

@@ -155,7 +155,8 @@ sub OPTIONAL_MODULES {
     {
         package => 'Chart',
         module  => 'Chart::Lines',
-        version => '1.0',
+        # Versions below 2.1 cannot be detected accurately.
+        version => '2.1',
         feature => [qw(new_charts old_charts)],
     },
     {

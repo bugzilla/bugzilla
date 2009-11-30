@@ -30,6 +30,7 @@ use Bugzilla::Status;
 use Bugzilla::Install::Requirements;
 use Bugzilla::Mailer;
 use Bugzilla::Series;
+use Bugzilla::Hook;
 
 # Currently, we only implement enough of the Bugzilla::Field::Choice
 # interface to control the visibility of other fields.
@@ -122,6 +123,8 @@ sub create {
     # Create groups and series for the new product, if requested.
     $product->_create_bug_group() if Bugzilla->params->{'makeproductgroups'};
     $product->_create_series() if $create_series;
+
+    Bugzilla::Hook::process('product_end_of_create', { product => $product });
 
     $dbh->bz_commit_transaction();
     return $product;

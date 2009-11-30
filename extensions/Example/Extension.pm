@@ -24,6 +24,9 @@ package Bugzilla::Extension::Example;
 use strict;
 use base qw(Bugzilla::Extension);
 
+use Bugzilla::Constants;
+use Bugzilla::Group;
+use Bugzilla::User;
 use Bugzilla::Util qw(diff_arrays html_quote);
 
 # This is extensions/Example/lib/Util.pm. I can load this here in my
@@ -344,6 +347,46 @@ sub product_confirm_delete {
     
     my $vars = $args->{vars};
     $vars->{'example'} = 1;
+}
+
+
+sub product_end_of_create {
+    my ($self, $args) = @_;
+
+    my $product = $args->{product};
+
+    # For this example, any lines of code that actually make changes to your
+    # database have been commented out.
+
+    # This section will take a group that exists in your installation
+    # (possible called test_group) and automatically makes the new
+    # product hidden to only members of the group. Just remove
+    # the restriction if you want the new product to be public.
+
+    my $example_group = new Bugzilla::Group({ name => 'example_group' });
+
+    if ($example_group) {
+        $product->set_group_controls($example_group, 
+                { entry          => 1,
+                  membercontrol  => CONTROLMAPMANDATORY,
+                  othercontrol   => CONTROLMAPMANDATORY });
+#        $product->update();
+    }
+
+    # This section will automatically add a default component
+    # to the new product called 'No Component'.
+
+    my $default_assignee = new Bugzilla::User(
+        { name => Bugzilla->params->{maintainer} });
+
+    if ($default_assignee) {
+#        Bugzilla::Component->create(
+#            { name             => 'No Component',
+#              product          => $product,
+#              description      => 'Select this component if one does not ' . 
+#                                  'exist in the current list of components',
+#              initialowner     => $default_assignee });
+    }
 }
 
 sub sanitycheck_check {

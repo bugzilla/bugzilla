@@ -656,6 +656,21 @@ to the user. (F<sanitycheck.cgi>'s C<Status>)
 
 =back
 
+=head2 product_end_of_create
+
+Called right after a new product has been created, allowing additional
+changes to be made to the new product's attributes. This occurs inside of
+a database transaction, so if the hook throws an error all previous
+changes will be rolled back including the creation of the new product.
+
+Params:
+
+=over
+
+=item C<product> - The new L<Bugzilla::Product> object that was just created.
+
+=back
+
 =head2 sanitycheck_repair
 
 This hook allows for extra sanity check repairs to be made, for use by

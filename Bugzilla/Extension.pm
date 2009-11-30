@@ -246,6 +246,20 @@ The L</SYNOPSIS> above gives a pretty good overview of what's basically
 required to write an extension. This section gives more information
 on exactly how extensions work and how you write them.
 
+=head2 Using F<extensions/create.pl>
+
+There is a script, L<extensions::create>, that will set up the framework
+of a new extension for you. To use it, pick a name for your extension
+and, in the base bugzilla directory, do:
+
+C<extensions/create.pl NAME>
+
+But replace C<NAME> with the name you picked for your extension. That
+will create a new directory in the F<extensions/> directory with the name
+of your extension. The directory will contain a full framework for
+a new extension, with helpful comments in each file describing things
+about them.
+
 =head2 Example Extension
 
 There is a sample extension in F<extensions/Example/> that demonstrates
@@ -341,6 +355,23 @@ as CGI arguments  to the current script, or what arguments were passed to
 the current WebService method. You can get that data via 
 <Bugzilla/input_params>.
 
+=head3 Adding New Hooks To Bugzilla
+
+If you need a new hook for your extension and you want that hook to be
+added to Bugzilla itself, see our development process at 
+L<http://wiki.mozilla.org/Bugzilla:Developers>.
+
+In order for a new hook to be accepted into Bugzilla, it has to work,
+it must have documentation in L<Bugzilla::Hook>, and it must have example
+code in F<extensions/Example/Extension.pm>.
+
+One question that is often asked about new hooks is, "Is this the most
+flexible way to implement this hook?" That is, the more power extension
+authors get from a hook, the more likely it is to be accepted into Bugzilla.
+Hooks that only hook a very specific part of Bugzilla will not be accepted
+if their functionality can be accomplished equally well with a more generic
+hook.
+
 =head2 If Your Extension Requires Certain Perl Modules
 
 If there are certain Perl modules that your extension requires in order
@@ -410,16 +441,6 @@ your extension is a single file named C<Foo.pm>.
 If any of this is confusing, just look at the code of the Example extension.
 It uses this method to specify requirements.
 
-=head2 Templates
-
-Extensions store templates in a C<template> subdirectory of the extension.
-(Obviously, this isn't available for extensions that aren't a directory.)
-
-The format of this directory is exactly like the normal layout of Bugzilla's
-C<template> directory--in fact, your extension's C<template> directory
-becomes part of Bugzilla's template "search path" as described in
-L<Bugzilla::Install::Util/template_include_path>.
-
 =head2 Libraries
 
 Extensions often want to have their own Perl modules. Your extension
@@ -443,6 +464,162 @@ B<Note:> If you want to C<use> or C<require> a module that's in
 F<extensions/Foo/lib/> at the top level of your F<Extension.pm>,
 you must have a F<Config.pm> (see above) with at least the C<NAME>
 constant defined in it.
+
+=head2 Templates
+
+Extensions store templates in a C<template> subdirectory of the extension.
+(Obviously, this isn't available for extensions that aren't a directory.)
+
+The format of this directory is exactly like the normal layout of Bugzilla's
+C<template> directory--in fact, your extension's C<template> directory
+becomes part of Bugzilla's template "search path" as described in
+L<Bugzilla::Install::Util/template_include_path>.
+
+You can actually include templates in your extension without having any
+C<.pm> files in your extension at all, if you want. (That is, it's entirely
+valid to have an extension that's just template files and no code files.)
+
+Bugzilla's templates are written in a language called Template Toolkit.
+You can find out more about Template Toolkit at L<http://template-toolkit.org>.
+
+There are two ways to extend or modify Bugzilla's templates: you can use
+template hooks (described below) or you can override existing templates
+entirely (described further down).
+
+=head2 Template Hooks
+
+Templates can be extended using a system of "hooks" that add new UI elements
+to a particular area of Bugzilla without modifying the code of the existing
+templates. This is the recommended way for extensions to modify the user
+interface of Bugzilla.
+
+=head3 Which Templates Can Be Hooked
+
+There is no list of template hooks like there is for standard code hooks.
+To find what places in the user interface can be hooked, search for the 
+string C<Hook.process> in Bugzilla's templates (in the 
+F<template/en/default/> directory). That will also give you the name of 
+the hooks--the first argument to C<Hook.process> is the name of the hook.
+(A later section in this document explains how to use that name).
+
+For example, if you see C<Hook.process("additional_header")>, that means 
+the name of the hook is C<additional_header>.
+
+=head3 Where Template Hooks Go
+
+To extend templates in your extension using template hooks, you put files into
+the F<template/en/default/hook> directory of your extension. So, if you had an
+extension called "Foo", your template extensions would go into
+F<extensions/Foo/template/en/default/hook/>.
+
+(Note that the base F<template/en/default/hook> directory in Bugzilla itself
+also works, although you would never use that for an extension that you
+intended to distribute.)
+
+The files that go into this directory have a certain name, based on the
+name of the template that is being hooked, and the name of the hook.
+For example, let's imagine that you have an extension named "Foo",
+and you want to use the C<additional_header> hook in 
+F<template/en/default/global/header.html.tmpl>. Your code would go into
+F<extensions/Foo/template/en/default/hook/global/header-additional_header.html.tmpl>. Any code you put into that file will happen at the point that 
+C<Hook.process("additional_header")> is called in 
+F<template/en/default/global/header.html.tmpl>.
+
+As you can see, template extension file names follow a pattern. The
+pattern looks like:
+
+ <templates>/hook/<template path>/<template name>-<hook name>.<template type>.tmpl
+
+=over
+
+=item <templates>
+
+This is the full path to the template directory, like 
+F<extensions/Foo/template/en/default>. This works much like normal templates
+do, in the sense that template extensions in C<custom> override template
+extensions in C<default> for your extension, templates for different languages
+can be supplied, etc. Template extensions are searched for and run in the
+order described in L<Bugzilla::Install::Util/template_include_path>.
+
+The difference between normal templates and template hooks is that hooks
+will be run for I<every> extension, whereas for normal templates, Bugzilla
+just takes the first one it finds and stops searching. So while a template
+extension in the C<custom> directory may override the same-named template
+extension in the  C<default> directory I<within your Bugzilla extension>,
+it will not override the same-named template extension in the C<default> 
+directory of another Bugzilla extension.
+
+=item <template path>
+
+This is the part of the path (excluding the filename) that comes after 
+F<template/en/default/> in a template's path. So, for 
+F<template/en/default/global/header.html.tmpl>, this would simply be
+C<global>.
+
+=item <template name>
+
+This is the file name of the template, before the C<.html.tmpl> part.
+So, for F<template/en/default/global/header.html.tmpl>, this would be
+C<header>.
+
+=item <hook name>
+
+This is the name of the hook--what you saw in C<Hook.process> inside
+of the template you want to hook. In our example, this is 
+C<additioanl_header>.
+
+=item <template type>
+
+This is what comes after the template name but before C<.tmpl> in the
+template's path. In most cases this is C<html>, but sometimes it's
+C<none>, C<txt>, C<js>, or various other formats, indicating what
+type of output the template has.
+
+=back
+
+=head3 Adding New Template Hooks to Bugzilla
+
+Adding new template hooks is just like adding code hooks (see 
+L</Adding New Hooks To Bugzilla>) except that you don't have to
+document them, and including example code is optional.
+
+=head2 Overriding Existing Templates
+
+Sometimes you don't want to extend a template, you just want to replace
+it entirely with your extension's template, or you want to add an entirely
+new template to Bugzilla for your extension to use.
+
+To replace the F<template/en/default/global/banner.html.tmpl> template
+in an extension named "Foo", create a file called 
+F<extensions/Foo/template/en/default/global/banner.html.tmpl>. Note that this
+is very similar to the path for a template hook, except that it excludes
+F<hook/>, and the template is named I<exactly> like the standard Bugzilla
+template. 
+
+You can also use this method to add entirely new templates. If you have
+an extension named "Foo", and you add a file named
+F<extensions/Foo/template/en/default/foo/bar.html.tmpl>, you can load
+that in your code using C<< $template->process('foo/bar.html.tmpl') >>.
+
+=head3 A Warning About Extensions That You Want To Distribute
+
+You should never override an existing Bugzilla template in an
+extension that you plan to distribute to others, because only one extension
+can override any given template, and which extension will "win" that war
+if there are multiple extensions installed is totally undefined.
+
+However, adding new templates in an extension that you want to distribute
+is fine, though you have to be careful about how you name them, because
+any templates with an identical path and name (say, both called
+F<global/stuff.html.tmpl>) will conflict. The usual way to work around
+this is to put all your custom templates into a template path that's
+named after your extension (since the name of your extension has to be
+unique anyway). So if your extension was named Foo, your custom templates
+would go into F<extensions/Foo/template/en/default/foo/>. The only
+time that doesn't work is with the C<page_before_template> extension, in which
+case your templates should probably be in a directory like
+F<extensions/Foo/template/en/default/page/foo/> so as not to conflict with
+other pages that other extensions might add.
 
 =head2 Disabling Your Extension
 
@@ -500,6 +677,12 @@ like C<Bugzilla::Extension::Foo>. In addition to the extensions
 in the F<extensions/> directory, each module listed in this file
 will be loaded as a Bugzilla Extension whenever Bugzilla loads or
 uses extensions.
+
+=head1 GETTING HELP WITH WRITING EXTENSIONS
+
+If you are an extension author and you'd like some assistance from other
+extension authors or the Bugzilla development team, you can use the
+normal support channels described at L<http://www.bugzilla.org/support/>.
 
 =head1 ADDITIONAL CONSTANTS
 

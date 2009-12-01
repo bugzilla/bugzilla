@@ -73,6 +73,9 @@ EOT
 
 $server->add_config([split("\n", $conf)]);
 
+# Pre-load all extensions
+$Bugzilla::extension_packages = Bugzilla::Extension->load_all();
+
 # Have ModPerl::RegistryLoader pre-compile all CGI scripts.
 my $rl = new ModPerl::RegistryLoader();
 # If we try to do this in "new" it fails because it looks for a 
@@ -87,9 +90,6 @@ foreach my $file (glob "$cgi_path/*.cgi") {
     Bugzilla::Util::trick_taint($file);
     $rl->handler($file, $file);
 }
-
-# And now pre-load all extensions
-$Bugzilla::extension_packages = Bugzilla::Extension->load_all();
 
 package Bugzilla::ModPerl::ResponseHandler;
 use strict;

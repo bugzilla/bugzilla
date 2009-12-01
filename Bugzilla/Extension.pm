@@ -154,10 +154,19 @@ sub modify_inc {
 # This is what gets put into @INC by modify_inc.
 sub my_inc {
     my ($class, undef, $file) = @_;
+    
+    # This avoids infinite recursion in case anything inside of this function
+    # does a "require". (I know for sure that File::Spec->case_tolerant does
+    # a "require" on Windows, for example.)
+    return if $file !~ /^Bugzilla/;
+
     my $lib_dir = __do_call($class, 'lib_dir');
     my @class_parts = split('::', $class);
     my ($vol, $dir, $file_name) = File::Spec->splitpath($file);
     my @dir_parts = File::Spec->splitdir($dir);
+    # File::Spec::Win32 (any maybe other OSes) add an empty directory at the
+    # end of @dir_parts.
+    @dir_parts = grep { $_ ne '' } @dir_parts;
     # Validate that this is a sub-package of Bugzilla::Extension::Foo ($class).
     for (my $i = 0; $i < scalar(@class_parts); $i++) {
         return if !@dir_parts;

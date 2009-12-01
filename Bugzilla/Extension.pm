@@ -236,6 +236,10 @@ F<extensions/Foo.pm>:
 
  __PACKAGE__->NAME;
 
+Custom templates would go into F<extensions/Foo/template/en/default/>.
+L<Template hooks|/Template Hooks> would go into 
+F<extensions/Foo/template/en/default/hook/>.
+
 =head1 DESCRIPTION
 
 This is the base class for all Bugzilla extensions.

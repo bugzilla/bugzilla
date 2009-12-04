@@ -482,6 +482,9 @@ Params:
 
 =item C<email> - The C<Email::MIME> object that's about to be sent.
 
+=item C<mailer_args> - An arrayref that's passed as C<mailer_args> to
+L<Email::Send/new>.
+
 =back
 
 =head2 object_before_create

@@ -171,7 +171,8 @@ sub MessageToMTA {
                     Debug => Bugzilla->params->{'smtp_debug'};
     }
 
-    Bugzilla::Hook::process('mailer_before_send', { email => $email });
+    Bugzilla::Hook::process('mailer_before_send', 
+                            { email => $email, mailer_args => \@args });
 
     if ($method eq "Test") {
         my $filename = bz_locations()->{'datadir'} . '/mailer.testfile';

@@ -2817,13 +2817,13 @@ sub _move_data_nomail_into_db {
                                       SET disable_mail = 1
                                     WHERE userid = ?');
         foreach my $user_to_check (keys %nomail) {
-            my $uid;
-            if ($uid = Bugzilla::User::login_to_id($user_to_check)) {
-                my $user = new Bugzilla::User($uid);
-                print "\tDisabling email for user ", $user->email, "\n";
-                $query->execute($user->id);
-                delete $nomail{$user->email};
-            }
+            my $uid = $dbh->selectrow_array(
+                'SELECT userid FROM profiles WHERE login_name = ?',
+                undef, $user_to_check);
+            next if !$uid;
+            print "\tDisabling email for user $user_to_check\n";
+            $query->execute($uid);
+            delete $nomail{$user_to_check};
         }
 
         # If there are any nomail entries remaining, move them to nomail.bad

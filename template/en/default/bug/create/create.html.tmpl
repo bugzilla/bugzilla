@@ -193,16 +193,20 @@ TUI_hide_default('expert_fields');
   </tr>
 
   <tr>
-    <td colspan="4">
-        <a id="expert_fields_controller" class="controller bz_default_hidden"
-            href="javascript:TUI_toggle_class('expert_fields')">Hide
+    <td colspan="2">
+      <a id="expert_fields_controller" class="controller bz_default_hidden"
+         href="javascript:TUI_toggle_class('expert_fields')">Hide
         Advanced Fields</a>
       [%# Show the link if the browser supports JS %]
       <script type="text/javascript">
-          YAHOO.util.Dom.removeClass('expert_fields_controller', 
-                                     'bz_default_hidden');
+        YAHOO.util.Dom.removeClass('expert_fields_controller', 
+                                   'bz_default_hidden');
       </script>
     </td>
+    <td colspan="2">
+      (<span class="required_star">*</span> =
+      <span class="required_explanation">Required Field</span>)
+   </td>
   </tr>
 
   <tr>
@@ -215,12 +219,13 @@ TUI_hide_default('expert_fields');
 
   [%# We can't use the select block in these two cases for various reasons. %]
   <tr>
-    <th>
+    <th class="required">
       <a href="describecomponents.cgi?product=[% product.name FILTER url_quote %]">
       Component</a>:
     </th>
     <td>
-      <select name="component" onchange="set_assign_to();" size="7">
+      <select name="component" onchange="set_assign_to();" size="7"
+              aria-required="true" class="required">
         [%# Build the lists of assignees and QA contacts if "usemenuforusers" is enabled. %]
         [% IF Param("usemenuforusers") %]
           [% assignees_list = user.get_userlist.clone %]
@@ -482,10 +487,11 @@ TUI_hide_default('expert_fields');
 <tbody>
 
   <tr>
-    <th>Summary:</th>
+    <th class="required">Summary:</th>
     <td colspan="3">
       <input name="short_desc" size="70" value="[% short_desc FILTER html %]"
-             maxlength="255" spellcheck="true">
+             maxlength="255" spellcheck="true" aria-required="true"
+             class="required">
     </td>
   </tr>
 

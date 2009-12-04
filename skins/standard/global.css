@@ -455,6 +455,15 @@ div.user_match {
 .field_value, form#Create th, form#Create td {
     vertical-align: top;
 }
+th.required:before {
+    content: "* ";
+}
+th.required:before, span.required_star {
+    color: red;
+}
+input.required, select.required, span.required_explanation {
+    background-color: #fff7cd;
+}
 
 .calendar_button {
     background: transparent url("global/calendar.png") no-repeat;

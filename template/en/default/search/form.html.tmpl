@@ -153,6 +153,7 @@ function doOnSelectProduct(selectmode) {
     <td colspan="4">
       <table>
         <tr>
+        [% Hook.process('before_selects_top') %]
         [% IF Param('useclassification') %]
           <td valign="top">
             <table>
@@ -252,6 +253,7 @@ function doOnSelectProduct(selectmode) {
             </table>
           </td>
         [% END %]
+        [% Hook.process('after_selects_top') %]
         </tr>
       </table>
     </td>
@@ -259,18 +261,24 @@ function doOnSelectProduct(selectmode) {
 
 [%# *** Comment URL Whiteboard Keywords *** %]
 
-  [% FOREACH field = [
+  [% SET freetext_fields = [
     { name => "longdesc", description => "A&nbsp;<u>C</u>omment",
       accesskey => 'c' },
     { name => "bug_file_loc", description => "The&nbsp;<u>U</u>RL",
       accesskey => 'u' },
     { name => "status_whiteboard", description => "<u>W</u>hiteboard",
-      accesskey => 'w' } ] %]
+      accesskey => 'w' } 
+  ] %]
 
-    [% UNLESS field.name == 'status_whiteboard' AND NOT Param('usestatuswhiteboard') %]
+  [% Hook.process('before_freetext_fields') %]
+  [% FOREACH field = freetext_fields %]
+    [% NEXT IF field.name == 'status_whiteboard' 
+               AND NOT Param('usestatuswhiteboard') 
+    %]
     <tr>
       <th align="right">
-        <label for="[% field.name %]" accesskey="[% field.accesskey %]">[% field.description %]</label>:
+        <label for="[% field.name %]" 
+               accesskey="[% field.accesskey %]">[% field.description %]</label>:
       </th>
       <td>
         [% type = field.name _ "_type" %]
@@ -283,7 +291,6 @@ function doOnSelectProduct(selectmode) {
       </td>
       <td></td>
     </tr>
-    [% END %]
   [% END %]
 
   [% IF use_keywords %]
@@ -321,6 +328,8 @@ function doOnSelectProduct(selectmode) {
       </td>
     </tr>
   [% END %]
+
+  [% Hook.process('after_freetext_fields') %]
   
 </table>
 
@@ -330,6 +339,7 @@ function doOnSelectProduct(selectmode) {
 
 <table>
   <tr>
+    [% Hook.process('before_selects_bottom') %]
     <td>
       <table>
         <tr>
@@ -408,6 +418,7 @@ function doOnSelectProduct(selectmode) {
         </tr>
       </table>
     </td>
+    [% Hook.process('after_selects_bottom') %]
   </tr>
 </table>
 

@@ -307,6 +307,8 @@
   cols    = constants.COMMENT_COLS
 %]<br>
 
+[% Hook.process('before_groups') %]
+
 [% IF groups.size > 0 %]
 
   <b>Groups:</b><br>

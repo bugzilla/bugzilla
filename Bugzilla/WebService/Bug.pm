@@ -139,6 +139,8 @@ sub comments {
 # Helper for Bug.comments
 sub _translate_comment {
     my ($self, $comment, $filters) = @_;
+    my $attach_id = $comment->is_about_attachment ? $comment->extra_data
+                                                  : undef;
     return filter $filters, {
         id         => $self->type('int', $comment->id),
         bug_id     => $self->type('int', $comment->bug_id),
@@ -146,6 +148,7 @@ sub _translate_comment {
         time       => $self->type('dateTime', $comment->creation_ts),
         is_private => $self->type('boolean', $comment->is_private),
         text       => $self->type('string', $comment->body_full),
+        attachment_id => $self->type('int', $attach_id),
     };
 }
 
@@ -786,6 +789,11 @@ C<int> The globally unique ID for the comment.
 
 C<int> The ID of the bug that this comment is on.
 
+=item attachment_id
+
+C<int> If the comment was made on an attachment, this will be the
+ID of that attachment. Otherwise it will be null.
+
 =item text
 
 C<string> The actual text of the comment.
@@ -823,6 +831,16 @@ private comments.
 You specified an id in the C<comment_ids> argument that is invalid--either
 you specified something that wasn't a number, or there is no comment with
 that id.
+
+=back
+
+=item B<History>
+
+=over
+
+=item Added in Bugzilla B<3.4>.
+
+=item C<attachment_id> was added to the return value in Bugzilla B<3.6>.
 
 =back
 

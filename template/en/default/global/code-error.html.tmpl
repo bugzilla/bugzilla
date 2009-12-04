@@ -120,6 +120,23 @@
     without specifying a default or something for $set_nulls_to, because
     there are NULL values currently in it.
 
+  [% ELSIF error == "comment_extra_data_not_allowed" %]
+    You tried to set the <code>extra_data</code> field to 
+    '[% extra_data FILTER html %]' but comments of type [% type FILTER html %]
+    do not accept an <code>extra_data</code> argument.
+
+  [% ELSIF error == "comment_extra_data_required" %]
+    Comments of type [% type FILTER html %] require an <code>extra_data</code>
+    argument to be set.
+
+  [% ELSIF error == "comment_extra_data_not_numeric" %]
+    You tried to set the <code>extra_data</code> field to
+    '[% extra_data FILTER html %]' but comments of type [% type FILTER html %]
+    require a numeric <code>extra_data</code> argument.
+
+  [% ELSIF error == "comment_type_invalid" %]
+    '[% type FILTER html %]' is not a valid comment type.
+
   [% ELSIF error == "db_rename_conflict" %]
     Name conflict: Cannot rename [% old FILTER html %] to
     [% new FILTER html %] because [% new FILTER html %] already exists.

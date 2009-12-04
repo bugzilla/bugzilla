@@ -24,6 +24,7 @@ package Bugzilla::Comment;
 
 use base qw(Bugzilla::Object);
 
+use Bugzilla::Attachment;
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Util;
@@ -45,20 +46,66 @@ use constant DB_COLUMNS => qw(
     extra_data
 );
 
+use constant UPDATE_COLUMNS => qw(
+    type
+    extra_data
+);
+
 use constant DB_TABLE => 'longdescs';
 use constant ID_FIELD => 'comment_id';
 use constant LIST_ORDER => 'bug_when';
+
+use constant VALIDATORS => {
+    type => \&_check_type,
+};
+
+use constant UPDATE_VALIDATORS => {
+    extra_data => \&_check_extra_data,
+};
+
+#########################
+# Database Manipulation #
+#########################
+
+sub update {
+    my $self = shift;
+    my $changes = $self->SUPER::update(@_);
+    $self->bug->_sync_fulltext();
+    return $changes;
+}
 
 ###############################
 ####      Accessors      ######
 ###############################
 
 sub already_wrapped { return $_[0]->{'already_wrapped'}; }
-sub body        { return $_[0]->{'thetext'}; }
-sub bug_id      { return $_[0]->{'bug_id'}; }
-sub creation_ts { return $_[0]->{'bug_when'}; }
+sub body        { return $_[0]->{'thetext'};   }
+sub bug_id      { return $_[0]->{'bug_id'};    }
+sub creation_ts { return $_[0]->{'bug_when'};  }
 sub is_private  { return $_[0]->{'isprivate'}; }
 sub work_time   { return $_[0]->{'work_time'}; }
+sub type        { return $_[0]->{'type'};      }
+sub extra_data  { return $_[0]->{'extra_data'} }
+
+sub bug {
+    my $self = shift;
+    require Bugzilla::Bug;
+    $self->{bug} ||= new Bugzilla::Bug($self->bug_id);
+    return $self->{bug};
+}
+
+sub is_about_attachment {
+    my ($self) = @_;
+    return 1 if $self->type == CMT_ATTACHMENT_CREATED;
+    return 0;
+}
+
+sub attachment {
+    my ($self) = @_;
+    return undef if not $self->is_about_attachment;
+    $self->{attachment} ||= new Bugzilla::Attachment($self->extra_data);
+    return $self->{attachment};
+}
 
 sub author { 
     my $self = shift;
@@ -79,6 +126,63 @@ sub body_full {
         $body = wrap_comment($body);
     }
     return $body;
+}
+
+############
+# Mutators #
+############
+
+sub set_extra_data { $_[0]->set('extra_data', $_[1]); }
+
+sub set_type {
+    my ($self, $type, $extra_data) = @_;
+    $self->set('type', $type);
+    $self->set_extra_data($extra_data);
+}
+
+##############
+# Validators #
+##############
+
+sub _check_extra_data {
+    my ($invocant, $extra_data, $type) = @_;
+    $type = $invocant->type if ref $invocant;
+    if ($type == CMT_NORMAL or $type == CMT_POPULAR_VOTES) {
+        if (defined $extra_data) {
+            ThrowCodeError('comment_extra_data_not_allowed',
+                           { type => $type, extra_data => $extra_data });
+        }
+    }
+    else {
+        if (!defined $extra_data) {
+            ThrowCodeError('comment_extra_data_required', { type => $type });
+        }
+        if ($type == CMT_MOVED_TO) {
+            $extra_data = Bugzilla::User->check($extra_data)->login;
+        }
+        elsif ($type == CMT_ATTACHMENT_CREATED) {
+             my $attachment = Bugzilla::Attachment->check({ 
+                 id => $extra_data });
+             $extra_data = $attachment->id;
+        }
+        else {
+            my $original = $extra_data;
+            detaint_natural($extra_data) 
+              or ThrowCodeError('comment_extra_data_not_numeric',
+                                { type => $type, extra_data => $original });
+        }
+    }
+
+    return $extra_data;
+}
+
+sub _check_type {
+    my ($invocant, $type) = @_;
+    $type ||= CMT_NORMAL;
+    my $original = $type;
+    detaint_natural($type)
+        or ThrowCodeError('comment_type_invalid', { type => $original });
+    return $type;
 }
 
 1;

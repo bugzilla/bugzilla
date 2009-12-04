@@ -483,11 +483,10 @@ sub insert {
     $attachment->update($timestamp);
 
     # Insert a comment about the new attachment into the database.
-    my $comment = "Created an attachment (id=" . $attachment->id . ")\n" .
-                  $attachment->description . "\n";
-    $comment .= ("\n" . $cgi->param('comment')) if defined $cgi->param('comment');
-
-    $bug->add_comment($comment, { isprivate => $attachment->isprivate });
+    my $comment = $cgi->param('comment');
+    $bug->add_comment($comment, { isprivate => $attachment->isprivate,
+                                  type => CMT_ATTACHMENT_CREATED,
+                                  extra_data => $attachment->id });
 
   # Assign the bug to the user, if they are allowed to take it
   my $owner = "";

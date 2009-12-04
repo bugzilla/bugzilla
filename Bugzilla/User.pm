@@ -1390,7 +1390,6 @@ sub wants_bug_mail {
     my $self = shift;
     my ($bug_id, $relationship, $fieldDiffs, $comments, $dependencyText,
         $changer, $bug_is_new) = @_;
-    my $comments_concatenated = join("\n", map { $_->body } @$comments);
 
     # Make a list of the events which have happened during this bug change,
     # from the point of view of this user.    
@@ -1439,7 +1438,7 @@ sub wants_bug_mail {
         }
     }
 
-    if ($comments_concatenated =~ /Created an attachment \(/) {
+    if (grep { $_->type == CMT_ATTACHMENT_CREATED } @$comments) {
         $events{+EVT_ATTACHMENT} = 1;
     }
     elsif (defined($$comments[0])) {

@@ -223,19 +223,9 @@ if (defined($cgi->upload('data')) || $cgi->param('attachurl')) {
                                       $bug, $attachment, $vars, SKIP_REQUESTEE_ON_ERROR);
         $attachment->set_flags($flags, $new_flags);
         $attachment->update($timestamp);
-
-        # Update the comment to include the new attachment ID.
-        # This string is hardcoded here because Template::quoteUrls()
-        # expects to find this exact string.
-        my $new_comment = "Created an attachment (id=" . $attachment->id . ")\n" .
-                          $attachment->description . "\n";
-        # We can use $bug->comments here because we are sure that the bug
-        # description is of type CMT_NORMAL. No need to include it if it's
-        # empty, though.
-        if ($bug->comments->[0]->body !~ /^\s+$/) {
-            $new_comment .= "\n" . $bug->comments->[0]->body;
-        }
-        $bug->update_comment($bug->comments->[0]->id, $new_comment);
+        my $comment = $bug->comments->[0];
+        $comment->set_type(CMT_ATTACHMENT_CREATED, $attachment->id);
+        $comment->update();
     }
     else {
         $vars->{'message'} = 'attachment_creation_failed';

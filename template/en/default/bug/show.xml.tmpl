@@ -69,6 +69,9 @@
           [% NEXT IF c.is_private && !user.is_insider %]
           <long_desc isprivate="[% c.is_private FILTER xml %]">
             <commentid>[% c.id FILTER xml %]</commentid>
+            [% IF c.is_about_attachment %]
+              <attachid>[% c.extra_data FILTER xml %]</attachid>
+            [% END %]
             <who name="[% c.author.name FILTER xml %]">[% c.author.email FILTER email FILTER xml %]</who>
             <bug_when>[% c.creation_ts FILTER time("%Y-%m-%d %T %z") FILTER xml %]</bug_when>
             [% IF user.is_timetracker && (c.work_time - 0 != 0) %]

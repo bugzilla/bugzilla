@@ -32,11 +32,6 @@
 [% PROCESS 'global/variables.none.tmpl' %]
 
 [% SET comment_body = comment.body %]
-[% IF is_bugmail %]
-  [% comment_body = comment_body.replace( '(Created an attachment \(id=([0-9]+)\))',
-                                          '$1' _ "\n" _ ' --> (' _ urlbase 
-                                          _ 'attachment.cgi?id=$2)' ) %]
-[% END %]
 
 [% IF comment.type == constants.CMT_DUPE_OF %]
 X[% comment_body %]
@@ -54,6 +49,14 @@ If the move succeeded, [% comment.extra_data %] will receive a mail containing
 the number of the new [% terms.bug %] in the other database.
 If all went well, please paste in a link to the new [% terms.bug %].
 Otherwise, reopen this [% terms.bug %].
+[% ELSIF comment.type == constants.CMT_ATTACHMENT_CREATED %]
+Created attachment [% comment.extra_data %]
+[% IF is_bugmail %]
+  --> [% urlbase _ "attachment.cgi?id=" _ comment.extra_data %]
+[% END %]
+[%+ comment.attachment.description %]
+
+[%+ comment.body %]
 [% ELSE %]
 X[% comment_body %]
 [% END %]

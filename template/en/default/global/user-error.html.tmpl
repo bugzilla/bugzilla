@@ -1721,7 +1721,9 @@
 [% PROCESS global/footer.html.tmpl %]
 
 [% BLOCK object_name %]
-  [% IF class == "Bugzilla::User" %]
+  [% IF class == "Bugzilla::Attachment" %]
+    attachment
+  [% ELSIF class == "Bugzilla::User" %]
     user
   [% ELSIF class == "Bugzilla::Component" %]
     component

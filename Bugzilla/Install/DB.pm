@@ -586,6 +586,8 @@ sub update_table_definitions {
     # 2009-11-01 LpSolit@gmail.com - Bug 525025
     _fix_invalid_custom_field_names();
 
+    _move_attachment_creation_comments_into_comment_type();
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################
@@ -3136,18 +3138,33 @@ sub _add_foreign_keys_to_multiselects {
     }
 }
 
+# This subroutine is used in multiple places (for times when we update
+# the text of comments), so it takes an argument, $bug_ids, which causes
+# it to update bugs_fulltext for those bug_ids instead of populating the
+# whole table.
 sub _populate_bugs_fulltext {
+    my $bug_ids = shift;
     my $dbh = Bugzilla->dbh;
     my $fulltext = $dbh->selectrow_array('SELECT 1 FROM bugs_fulltext '
                                          . $dbh->sql_limit(1));
-    # We only populate the table if it's empty...
-    if (!$fulltext) {
-        # ... and if there are bugs in the bugs table.
-        my $bug_ids = $dbh->selectcol_arrayref('SELECT bug_id FROM bugs');
+    # We only populate the table if it's empty or if we've been given a
+    # set of bug ids.
+    if ($bug_ids or !$fulltext) {
+        $bug_ids ||= $dbh->selectcol_arrayref('SELECT bug_id FROM bugs');
+        # If there are no bugs in the bugs table, there's nothing to populate.
         return if !@$bug_ids;
 
-        print "Populating bugs_fulltext...";
-        print " (this can take a long time.)\n";
+        my $where = "";
+        if ($fulltext) {
+            print "Updating bugs_fulltext...\n";
+            $where = "WHERE " . $dbh->sql_in('bugs.bug_id', $bug_ids);
+            $dbh->do("DELETE FROM bugs_fulltext WHERE " 
+                     . $dbh->sql_in('bug_id', $bug_ids));
+        }
+        else {
+            print "Populating bugs_fulltext...";
+            print " (this can take a long time.)\n";
+        }
         my $newline = $dbh->quote("\n");
         $dbh->do(
             q{INSERT INTO bugs_fulltext (bug_id, short_desc, comments, 
@@ -3155,12 +3172,13 @@ sub _populate_bugs_fulltext {
                    SELECT bugs.bug_id, bugs.short_desc, }
                  . $dbh->sql_group_concat('longdescs.thetext', $newline)
           . ', ' . $dbh->sql_group_concat('nopriv.thetext',    $newline) .
-                  q{ FROM bugs 
+                 qq{ FROM bugs 
                           LEFT JOIN longdescs
                                  ON bugs.bug_id = longdescs.bug_id
                           LEFT JOIN longdescs AS nopriv
                                  ON longdescs.comment_id = nopriv.comment_id
-                                    AND nopriv.isprivate = 0 }
+                                    AND nopriv.isprivate = 0 
+                     $where }
                  . $dbh->sql_group_by('bugs.bug_id', 'bugs.short_desc'));
     }
 }
@@ -3233,6 +3251,55 @@ sub _fix_invalid_custom_field_names {
         print "Removing custom field '" . $field->name . "' (illegal name)... ";
         print $@ ? "failed\n$@\n" : "succeeded\n";
     }
+}
+
+sub _move_attachment_creation_comments_into_comment_type {
+    my $dbh = Bugzilla->dbh;
+    # We check if there are any CMT_ATTACHMENT_CREATED comments already,
+    # first, because this is faster than a full LIKE search on the comments,
+    # and currently this will run every time we run checksetup.
+    my $test = $dbh->selectrow_array(
+        'SELECT 1 FROM longdescs WHERE type = ' . CMT_ATTACHMENT_CREATED
+        . ' ' . $dbh->sql_limit(1));
+    return if $test;
+    my %comments = @{ $dbh->selectcol_arrayref(
+        "SELECT comment_id, thetext FROM longdescs
+          WHERE thetext LIKE 'Created an attachment (id=%'", 
+        {Columns=>[1,2]}) };
+    my @comment_ids = keys %comments;
+    return if !scalar @comment_ids;
+    print "Setting the type field on attachment creation comments...\n";
+    my $sth = $dbh->prepare(
+        'UPDATE longdescs SET thetext = ?, type = ?, extra_data = ?
+          WHERE comment_id = ?');
+    my $count = 0;
+    my $total = scalar @comment_ids;
+    $dbh->bz_start_transaction();
+    foreach my $id (@comment_ids) {
+        $count++;
+        my $text = $comments{$id};
+        next if $text !~ /attachment \(id=(\d+)/;
+        my $attachment_id = $1;
+        # Now we have to remove the text up until we find a line that's
+        # just a single newline, because the old "Created an attachment"
+        # text included the attachment description underneath it, and in
+        # Bugzillas before 2.20, that could be wrapped into multiple lines,
+        # in the database.
+        my @lines = split("\n", $text);
+        while (1) {
+            my $line = shift @lines;
+            last if (!defined $line or trim($line) eq '');
+        }
+        $text = join("\n", @lines);
+        $sth->execute($text, CMT_ATTACHMENT_CREATED, $attachment_id, $id);
+        indicate_progress({ total => $total, current => $count, 
+                            every => 25 });
+    }
+    my $bug_ids = $dbh->selectcol_arrayref(
+        'SELECT DISTINCT bug_id FROM longdescs WHERE '
+        . $dbh->sql_in('comment_id', \@comment_ids));
+    _populate_bugs_fulltext($bug_ids);
+    $dbh->bz_commit_transaction();
 }
 
 1;

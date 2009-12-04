@@ -242,12 +242,7 @@ sub quoteUrls {
     $text =~ s~\b(mailto:|)?([\w\.\-\+\=]+\@[\w\-]+(?:\.[\w\-]+)+)\b
               ~<a href=\"mailto:$2\">$1$2</a>~igx;
 
-    # attachment links - handle both cases separately for simplicity
-    $text =~ s~((?:^Created\ an\ |\b)attachment\s*\(id=(\d+)\)(\s\[edit\])?)
-              ~($things[$count++] = get_attachment_link($2, $1)) &&
-               ("\0\0" . ($count-1) . "\0\0")
-              ~egmx;
-
+    # attachment links
     $text =~ s~\b(attachment$s*\#?$s*(\d+))
               ~($things[$count++] = get_attachment_link($2, $1)) &&
                ("\0\0" . ($count-1) . "\0\0")

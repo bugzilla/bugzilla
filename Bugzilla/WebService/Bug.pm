@@ -353,9 +353,13 @@ sub add_comment {
     
     Bugzilla->user->can_edit_product($bug->product_id)
         || ThrowUserError("product_edit_denied", {product => $bug->product});
-        
+    
+    # Backwards-compatibility for versions before 3.6    
+    if (defined $params->{private}) {
+        $params->{is_private} = delete $params->{private};
+    }
     # Append comment
-    $bug->add_comment($comment, { isprivate => $params->{private},
+    $bug->add_comment($comment, { isprivate => $params->{is_private},
                                   work_time => $params->{work_time} });
     
     # Capture the call to bug->update (which creates the new comment) in 
@@ -1519,8 +1523,8 @@ comment to.
 If this is empty or all whitespace, an error will be thrown saying that
 you did not set the C<comment> parameter.
 
-=item C<private> (boolean) - If set to true, the comment is private, otherwise
-it is assumed to be public.
+=item C<is_private> (boolean) - If set to true, the comment is private, 
+otherwise it is assumed to be public.
 
 =item C<work_time> (double) - Adds this many hours to the "Hours Worked"
 on the bug. If you are not in the time tracking group, this value will
@@ -1566,6 +1570,10 @@ You tried to add a private comment, but don't have the necessary rights.
 
 =item Modified to throw an error if you try to add a private comment
 but can't, in Bugzilla B<3.4>.
+
+=item Before Bugzilla B<3.6>, the C<is_private> argument was called
+C<private>, and you can still call it C<private> for backwards-compatibility
+purposes if you wish.
 
 =back
 

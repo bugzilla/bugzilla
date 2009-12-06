@@ -1256,7 +1256,7 @@ sub match_field {
         # multi-field
         }
         elsif ($fields->{$field}->{'type'} eq 'multi') {
-            @queries =  split(/[\s,]+/, $raw_field);
+            @queries =  split(/[\s,;]+/, $raw_field);
 
         }
         else {

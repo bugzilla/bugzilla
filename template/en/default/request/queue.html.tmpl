@@ -173,14 +173,12 @@ to some group are shown by default.
   </p>
 [% ELSE %]
   [% FOREACH request = requests %]
-    [% IF loop.first %] [% PROCESS start_new_table %] [% END %]
     [% IF request.$group_field != group_value %]
       [% group_value = request.$group_field %]
-      [% UNLESS loop.first %]
-        </table>
-        [% PROCESS start_new_table %]
-      [% END %]
+      [% PROCESS display_buglist UNLESS loop.first %]
+      [% PROCESS start_new_table %]
     [% END %]
+    [% buglist.${request.bug_id} = 1 %]
     <tr>
       [% FOREACH column = display_columns %]
         [% NEXT IF column == group_field || excluded_columns.contains(column) %]
@@ -188,12 +186,14 @@ to some group are shown by default.
       [% END %]
     </tr>
   [% END %]
-  </table>
+  [% PROCESS display_buglist %]
 [% END %]
 
 [% PROCESS global/footer.html.tmpl %]
 
 [% BLOCK start_new_table %]
+  [% buglist = {} %]
+
   <h3>[% column_headers.$group_field %]: 
     [%+ (request.$group_field || "None") FILTER email FILTER html %]</h3>
   <table class="requests" cellspacing="0" cellpadding="4" border="1">
@@ -239,3 +239,8 @@ to some group are shown by default.
   [% request.created FILTER time %]
 [% END %]
 
+[% BLOCK display_buglist %]
+  </table>
+  [% NEXT UNLESS buglist.keys.size %]
+  <a href="buglist.cgi?bug_id=[% buglist.keys.nsort.join(",") FILTER html %]">(view as buglist)</a>
+[% END %]

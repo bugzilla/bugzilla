@@ -26,6 +26,8 @@
 
 [% USE Bugzilla %]
 
+[% PROCESS "bug/show-header.html.tmpl" %]
+
 [% IF    title_tag == "bug_processed" %]
   [% title = BLOCK %]
     [% IF Bugzilla.cgi.param('id') %]
@@ -41,8 +43,8 @@
   [% title = "Change Votes" %]
 [% END %]
 
-[% PROCESS global/header.html.tmpl
-  javascript_urls = [ "js/util.js", "js/field.js", "js/yui/calendar.js" ]
-  style_urls = [ "skins/standard/yui/calendar.css", "skins/standard/show_bug.css" ]
-  doc_section = "bug_page.html"
+[% PROCESS global/header.html.tmpl 
+  # We don't have a bug object at this point, unfortunately, so we can't
+  # actually display all the proper header info.
+  header_addl_info = '' 
 %]

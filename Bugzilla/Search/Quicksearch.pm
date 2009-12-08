@@ -33,65 +33,80 @@ use Bugzilla::Util;
 use base qw(Exporter);
 @Bugzilla::Search::Quicksearch::EXPORT = qw(quicksearch);
 
-# Word renamings
+# Custom mappings for some fields.
 use constant MAPPINGS => {
-                # Status, Resolution, Platform, OS, Priority, Severity
-                "status" => "bug_status",
-                "resolution" => "resolution",  # no change
-                "platform" => "rep_platform",
-                "os" => "op_sys",
-                "opsys" => "op_sys",
-                "priority" => "priority",    # no change
-                "pri" => "priority",
-                "severity" => "bug_severity",
-                "sev" => "bug_severity",
-                # People: AssignedTo, Reporter, QA Contact, CC, Added comment (?)
-                "owner" => "assigned_to",    # deprecated since bug 76507
-                "assignee" => "assigned_to",
-                "assignedto" => "assigned_to",
-                "reporter" => "reporter",    # no change
-                "rep" => "reporter",
-                "qa" => "qa_contact",
-                "qacontact" => "qa_contact",
-                "cc" => "cc",          # no change
-                # Product, Version, Component, Target Milestone
-                "product" => "product",     # no change
-                "prod" => "product",
-                "version" => "version",     # no change
-                "ver" => "version",
-                "component" => "component",   # no change
-                "comp" => "component",
-                "milestone" => "target_milestone",
-                "target" => "target_milestone",
-                "targetmilestone" => "target_milestone",
-                # Summary, Description, URL, Status whiteboard, Keywords
-                "summary" => "short_desc",
-                "shortdesc" => "short_desc",
-                "desc" => "longdesc",
-                "description" => "longdesc",
-                #"comment" => "longdesc",    # ???
-                          # reserve "comment" for "added comment" email search?
-                "longdesc" => "longdesc",
-                "url" => "bug_file_loc",
-                "whiteboard" => "status_whiteboard",
-                "statuswhiteboard" => "status_whiteboard",
-                "sw" => "status_whiteboard",
-                "keywords" => "keywords",    # no change
-                "kw" => "keywords",
-                "group" => "bug_group",
-                "flag" => "flagtypes.name",
-                "requestee" => "requestees.login_name",
-                "req" => "requestees.login_name",
-                "setter" => "setters.login_name",
-                "set" => "setters.login_name",
-                # Attachments
-                "attachment" => "attachments.description",
-                "attachmentdesc" => "attachments.description",
-                "attachdesc" => "attachments.description",
-                "attachmentdata" => "attach_data.thedata",
-                "attachdata" => "attach_data.thedata",
-                "attachmentmimetype" => "attachments.mimetype",
-                "attachmimetype" => "attachments.mimetype"
+    # Status, Resolution, Platform, OS, Priority, Severity
+    "status"   => "bug_status",
+    "platform" => "rep_platform",
+    "os"       => "op_sys",
+    "severity" => "bug_severity",
+
+    # People: AssignedTo, Reporter, QA Contact, CC, etc.
+    "assignee" => "assigned_to",
+
+    # Product, Version, Component, Target Milestone
+    "milestone" => "target_milestone",
+
+    # Summary, Description, URL, Status whiteboard, Keywords
+    "summary"     => "short_desc",
+    "description" => "longdesc",
+    "comment"     => "longdesc",
+    "url"         => "bug_file_loc",
+    "whiteboard"  => "status_whiteboard",
+    "sw"          => "status_whiteboard",
+    "kw"          => "keywords",
+    "group"       => "bug_group",
+
+    # Flags
+    "flag"        => "flagtypes.name",
+    "requestee"   => "requestees.login_name",
+    "setter"      => "setters.login_name",
+
+    # Attachments
+    "attachment"     => "attachments.description",
+    "attachmentdesc" => "attachments.description",
+    "attachdesc"     => "attachments.description",
+    "attachmentdata" => "attach_data.thedata",
+    "attachdata"     => "attach_data.thedata",
+    "attachmentmimetype" => "attachments.mimetype",
+    "attachmimetype" => "attachments.mimetype"
+};
+
+sub FIELD_MAP {
+    my $cache = Bugzilla->request_cache;
+    return $cache->{quicksearch_fields} if $cache->{quicksearch_fields};
+
+    # Get all the fields whose names don't contain periods. (Fields that
+    # contain periods are always handled in MAPPINGS.) 
+    my @db_fields = grep { $_->name !~ /\./ } 
+                         Bugzilla->get_fields({ obsolete => 0 });
+    my %full_map = (%{ MAPPINGS() }, map { $_->name => $_->name } @db_fields);
+
+    # Eliminate the fields that start with bug_ or rep_, because those are
+    # handled by the MAPPINGS instead, and we don't want too many names
+    # for them. (Also, otherwise "rep" doesn't match "reporter".)
+    #
+    # Remove "status_whiteboard" because we have "whiteboard" for it in
+    # the mappings, and otherwise "stat" can't match "status".
+    #
+    # Also, don't allow searching the _accessible stuff via quicksearch
+    # (both because it's unnecessary and because otherwise 
+    # "reporter_accessible" and "reporter" both match "rep".
+    delete @full_map{qw(rep_platform bug_status bug_file_loc bug_group
+                        bug_severity bug_status
+                        status_whiteboard
+                        cclist_accessible reporter_accessible)};
+
+    $cache->{quicksearch_fields} = \%full_map;
+
+    return $cache->{quicksearch_fields};
+}
+
+# Certain fields, when specified like "field:value" get an operator other
+# than "substring"
+use constant FIELD_OPERATOR => {
+    content         => 'matches',
+    owner_idle_time => 'greaterthan',
 };
 
 # We might want to put this into localconfig or somewhere
@@ -137,7 +152,7 @@ sub quicksearch {
         my @words = splitString($searchstring);
         _handle_status_and_resolution(\@words);
 
-        my @unknownFields;
+        my (@unknownFields, %ambiguous_fields);
 
         # Loop over all main-level QuickSearch words.
         foreach my $qsword (@words) {
@@ -151,7 +166,8 @@ sub quicksearch {
                 # Split by '|' to get all operands for a boolean OR.
                 foreach my $or_operand (split(/\|/, $qsword)) {
                     if (!_handle_field_names($or_operand, $negate,
-                                             \@unknownFields))
+                                             \@unknownFields, 
+                                             \%ambiguous_fields))
                     {
                         # Having ruled out the special cases, we may now split
                         # by comma, which is another legal boolean OR indicator.
@@ -170,9 +186,10 @@ sub quicksearch {
         } # foreach (@words)
 
         # Inform user about any unknown fields
-        if (scalar(@unknownFields)) {
+        if (scalar(@unknownFields) || scalar(keys %ambiguous_fields)) {
             ThrowUserError("quicksearch_unknown_field",
-                           { fields => \@unknownFields });
+                           { unknown   => \@unknownFields,
+                             ambiguous => \%ambiguous_fields });
         }
 
         # Make sure we have some query terms left
@@ -342,7 +359,7 @@ sub _handle_special_first_chars {
 }
 
 sub _handle_field_names {
-    my ($or_operand, $negate, $unknownFields) = @_;
+    my ($or_operand, $negate, $unknownFields, $ambiguous_fields) = @_;
     
     # votes:xx ("at least xx votes")
     if ($or_operand =~ /^votes:([0-9]+)$/) {
@@ -363,20 +380,80 @@ sub _handle_field_names {
         my @fields = split(/,/, $1);
         my @values = split(/,/, $2);
         foreach my $field (@fields) {
+            my $translated = _translate_field_name($field);
             # Skip and record any unknown fields
-            if (!defined(MAPPINGS->{$field})) {
+            if (!defined $translated) {
                 push(@$unknownFields, $field);
                 next;
             }
-            $field = MAPPINGS->{$field};
-            foreach (@values) {
-                addChart($field, 'substring', $_, $negate);
+            # If we got back an array, that means the substring is
+            # ambiguous and could match more than field name
+            elsif (ref $translated) {
+                $ambiguous_fields->{$field} = $translated;
+                next;
+            }
+            foreach my $value (@values) {
+                my $operator = FIELD_OPERATOR->{$translated} || 'substring';
+                addChart($translated, $operator, $value, $negate);
             }
         }
         return 1;
     }
     
     return 0;
+}
+
+sub _translate_field_name {
+    my $field = shift;
+    $field = lc($field);
+    my $field_map = FIELD_MAP;
+
+    # If the field exactly matches a mapping, just return right now.
+    return $field_map->{$field} if exists $field_map->{$field};
+
+    # Check if we match, as a starting substring, exactly one field.
+    my @field_names = keys %$field_map;
+    my @matches = grep { $_ =~ /^\Q$field\E/ } @field_names;
+    # Eliminate duplicates that are actually the same field
+    # (otherwise "assi" matches both "assignee" and "assigned_to", and
+    # the lines below fail when they shouldn't.)
+    my %match_unique = map { $field_map->{$_} => $_ } @matches;
+    @matches = values %match_unique;
+
+    if (scalar(@matches) == 1) {
+        return $field_map->{$matches[0]};
+    }
+    elsif (scalar(@matches) > 1) {
+        return \@matches;
+    }
+
+    # Check if we match exactly one custom field, ignoring the cf_ on the
+    # custom fields (to allow people to type things like "build" for 
+    # "cf_build").
+    my %cfless;
+    foreach my $name (@field_names) {
+        my $no_cf = $name;
+        if ($no_cf =~ s/^cf_//) {
+            if ($field eq $no_cf) {
+                return $field_map->{$name};
+            }
+            $cfless{$no_cf} = $name;
+        }
+    }
+
+    # See if we match exactly one substring of any of the cf_-less fields.
+    my @cfless_matches = grep { $_ =~ /^\Q$field\E/ } (keys %cfless);
+
+    if (scalar(@cfless_matches) == 1) {
+        my $match = $cfless_matches[0];
+        my $actual_field = $cfless{$match};
+        return $field_map->{$actual_field};
+    }
+    elsif (scalar(@matches) > 1) {
+        return \@matches;
+    }
+
+    return undef;
 }
 
 sub _special_field_syntax {

@@ -1400,18 +1400,20 @@
     characters long.
 
   [% ELSIF error == "quicksearch_unknown_field" %]
-    [% title = "Unknown QuickSearch Field" %]
-    [% IF fields.unique.size == 1 %]
-      Field <code>[% fields.first FILTER html %]</code> is not a known field.
-    [% ELSE %]
-      Fields
-      [% FOREACH field = fields.unique.sort %]
-         <code>[% field FILTER html %]</code>
-         [% ', ' UNLESS loop.last() %]
-      [% END %]
-      are not known fields.
+    [% title = "QuickSearch Error" %]
+    There is a problem with your search:
+    [% FOREACH field = unknown %]
+      <p><code>[% field FILTER html %]</code> is not a valid field name.</p>
     [% END %]
-    The legal field names are <a href="page.cgi?id=quicksearchhack.html">listed here</a>.
+    [% FOREACH field = ambiguous.keys %]
+      <p><code>[% field FILTER html %]</code> matches more than one field:
+        [%+ ambiguous.${field}.join(', ') FILTER html %]</p>
+    [% END %]
+
+    [% IF unknown.size %]
+      <p>The legal field names are
+        <a href="page.cgi?id=quicksearchhack.html">listed here</a>.</p>
+    [% END %]
 
   [% ELSIF error == "reassign_to_empty" %]
     [% title = "Illegal Reassignment" %]

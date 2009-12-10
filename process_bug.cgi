@@ -197,7 +197,7 @@ else {
 
 $vars->{'title_tag'} = "bug_processed";
 
-my ($action, $next_bug);
+my $action;
 if (defined $cgi->param('id')) {
     $action = Bugzilla->user->settings->{'post_bug_submit_action'}->{'value'};
 
@@ -208,16 +208,18 @@ if (defined $cgi->param('id')) {
         }
         my $cur = lsearch(\@bug_list, $cgi->param('id'));
         if ($cur >= 0 && $cur < $#bug_list) {
-            $next_bug = $bug_list[$cur + 1];
-            # No need to check whether the user can see the bug or not.
-            # All we want is its ID. An error will be thrown later
-            # if the user cannot see it.
-            $vars->{'bug'} = {bug_id => $next_bug};
+            my $next_bug_id = $bug_list[$cur + 1];
+            detaint_natural($next_bug_id);
+            if ($next_bug_id and $user->can_see_bug($next_bug_id)) {
+                # We create an object here so that send_results can use it
+                # when displaying the header.
+                $vars->{'bug'} = new Bugzilla::Bug($next_bug_id);
+            }
         }
     }
     # Include both action = 'same_bug' and 'nothing'.
     else {
-        $vars->{'bug'} = {bug_id => $cgi->param('id')};
+        $vars->{'bug'} = $first_bug;
     }
 }
 else {
@@ -535,7 +537,7 @@ foreach my $b (@bug_objects) {
 foreach my $bug (@bug_objects) {
     $dbh->bz_start_transaction();
 
-    my $timestamp = $dbh->selectrow_array(q{SELECT NOW()});
+    my $timestamp = $dbh->selectrow_array(q{SELECT LOCALTIMESTAMP(0)});
     my $changes = $bug->update($timestamp);
 
     my %notify_deps;
@@ -636,31 +638,23 @@ foreach my $bug (@bug_objects) {
 if (Bugzilla->usage_mode == USAGE_MODE_EMAIL) {
     # Do nothing.
 }
-elsif ($action eq 'next_bug') {
-    if ($next_bug) {
-        if (detaint_natural($next_bug) && Bugzilla->user->can_see_bug($next_bug)) {
-            my $bug = new Bugzilla::Bug($next_bug);
-            ThrowCodeError("bug_error", { bug => $bug }) if $bug->error;
-
-            $vars->{'bugs'} = [$bug];
-            $vars->{'nextbug'} = $bug->bug_id;
-
-            $template->process("bug/show.html.tmpl", $vars)
-              || ThrowTemplateError($template->error());
-
-            exit;
+elsif ($action eq 'next_bug' or $action eq 'same_bug') {
+    my $bug = $vars->{'bug'};
+    if ($bug and $user->can_see_bug($bug)) {
+        if ($action eq 'same_bug') {
+            # $bug->update() does not update the internal structure of
+            # the bug sufficiently to display the bug with the new values.
+            # (That is, if we just passed in the old Bug object, we'd get
+            # a lot of old values displayed.)
+            $bug = new Bugzilla::Bug($bug->id);
+            $vars->{'bug'} = $bug;
         }
-    }
-} elsif ($action eq 'same_bug') {
-    if (Bugzilla->user->can_see_bug($cgi->param('id'))) {
-        my $bug = new Bugzilla::Bug($cgi->param('id'));
-        ThrowCodeError("bug_error", { bug => $bug }) if $bug->error;
-
         $vars->{'bugs'} = [$bug];
-
+        if ($action eq 'next_bug') {
+            $vars->{'nextbug'} = $bug->id;
+        }
         $template->process("bug/show.html.tmpl", $vars)
           || ThrowTemplateError($template->error());
-
         exit;
     }
 } elsif ($action ne 'nothing') {

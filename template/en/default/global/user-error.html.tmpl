@@ -1741,6 +1741,8 @@
     flagtype
   [% ELSIF class == "Bugzilla::Field" %]
     field
+  [% ELSIF class == "Bugzilla::Product" %]
+    product
   [% ELSIF class == "Bugzilla::Search::Saved" %]
     saved search
   [% ELSIF ( matches = class.match('^Bugzilla::Field::Choice::(.+)') ) %]

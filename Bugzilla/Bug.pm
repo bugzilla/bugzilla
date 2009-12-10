@@ -236,6 +236,27 @@ use constant UPDATE_COMMENT_COLUMNS => qw(
 # activity table.
 use constant MAX_LINE_LENGTH => 254;
 
+# This maps the names of internal Bugzilla bug fields to things that would
+# make sense to somebody who's not intimately familiar with the inner workings
+# of Bugzilla. (These are the field names that the WebService and email_in.pl
+# use.)
+use constant FIELD_MAP => {
+    creation_time    => 'creation_ts',
+    description      => 'comment',
+    id               => 'bug_id',
+    last_change_time => 'delta_ts',
+    platform         => 'rep_platform',
+    severity         => 'bug_severity',
+    status           => 'bug_status',
+    summary          => 'short_desc',
+    url              => 'bug_file_loc',
+    whiteboard       => 'status_whiteboard',
+
+    # These are special values for the WebService Bug.search method.
+    limit            => 'LIMIT',
+    offset           => 'OFFSET',
+};
+
 #####################################################################
 
 sub new {
@@ -556,7 +577,6 @@ sub create {
 
     return $bug;
 }
-
 
 sub run_create_validators {
     my $class  = shift;
@@ -1168,6 +1188,9 @@ sub _check_cc {
     my ($invocant, $component, $ccs) = @_;
     return [map {$_->id} @{$component->initial_cc}] unless $ccs;
 
+    # Allow comma-separated input as well as arrayrefs.
+    $ccs = [split(/[\s,]+/, $ccs)] if !ref $ccs;
+
     my %cc_ids;
     foreach my $person (@$ccs) {
         next unless $person;
@@ -1732,6 +1755,17 @@ sub _check_freetext_field {
 
 sub _check_multi_select_field {
     my ($invocant, $values, $field) = @_;
+
+    # Allow users (mostly email_in.pl) to specify multi-selects as
+    # comma-separated values.
+    if (defined $values and !ref $values) {
+        # We don't split on spaces because multi-select values can and often
+        # do have spaces in them. (Theoretically they can have commas in them
+        # too, but that's much less common and people should be able to work
+        # around it pretty cleanly, if they want to use email_in.pl.)
+        $values = [split(',', $values)];
+    }
+
     return [] if !$values;
     my @checked_values;
     foreach my $value (@$values) {
@@ -1865,6 +1899,7 @@ sub set_component  {
 }
 sub set_custom_field {
     my ($self, $field, $value) = @_;
+
     if (ref $value eq 'ARRAY' && $field->type != FIELD_TYPE_MULTI_SELECT) {
         $value = $value->[0];
     }
@@ -3175,6 +3210,25 @@ sub LogActivityEntry {
                   VALUES (?, ?, ?, ?, ?, ?)",
                   undef, ($i, $whoid, $timestamp, $fieldid, $removestr, $addstr));
     }
+}
+
+# Convert WebService API and email_in.pl field names to internal DB field
+# names.
+sub map_fields {
+    my ($params) = @_; 
+
+    my %field_values;
+    foreach my $field (keys %$params) {
+        my $field_name = FIELD_MAP->{$field} || $field;
+        $field_values{$field_name} = $params->{$field};
+    }
+
+    # This protects the WebService Bug.search method.
+    unless (Bugzilla->user->is_timetracker) {
+        delete @field_values{qw(estimated_time remaining_time deadline)};
+    }
+    
+    return \%field_values;
 }
 
 # CountOpenDependencies counts the number of open dependent bugs for a

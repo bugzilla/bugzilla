@@ -37,24 +37,6 @@ use Bugzilla::Util qw(trim);
 # Constants #
 #############
 
-# This maps the names of internal Bugzilla bug fields to things that would
-# make sense to somebody who's not intimately familiar with the inner workings
-# of Bugzilla. (These are the field names that the WebService uses.)
-use constant FIELD_MAP => {
-    creation_time    => 'creation_ts',
-    description      => 'comment',
-    id               => 'bug_id',
-    last_change_time => 'delta_ts',
-    platform         => 'rep_platform',
-    severity         => 'bug_severity',
-    status           => 'bug_status',
-    summary          => 'short_desc',
-    url              => 'bug_file_loc',
-    whiteboard       => 'status_whiteboard',
-    limit            => 'LIMIT',
-    offset           => 'OFFSET',
-};
-
 use constant PRODUCT_SPECIFIC_FIELDS => qw(version target_milestone component);
 
 use constant DATE_FIELDS => {
@@ -251,7 +233,7 @@ sub search {
                        { param => 'limit', function => 'Bug.search()' });
     }
     
-    $params = _map_fields($params);
+    $params = Bugzilla::Bug::map_fields($params);
     delete $params->{WHERE};
     
     # Do special search types for certain fields.
@@ -286,7 +268,7 @@ sub search {
 sub create {
     my ($self, $params) = @_;
     Bugzilla->login(LOGIN_REQUIRED);
-    $params = _map_fields($params);
+    $params = Bugzilla::Bug::map_fields($params);
     my $bug = Bugzilla::Bug->create($params);
     Bugzilla::BugMail::Send($bug->bug_id, { changer => $bug->reporter->login });
     return { id => $self->type('int', $bug->bug_id) };
@@ -294,7 +276,8 @@ sub create {
 
 sub legal_values {
     my ($self, $params) = @_;
-    my $field = FIELD_MAP->{$params->{field}} || $params->{field};
+    my $field = Bugzilla::Bug::FIELD_MAP->{$params->{field}} 
+                || $params->{field};
 
     my @global_selects = Bugzilla->get_fields(
         {type => [FIELD_TYPE_SINGLE_SELECT, FIELD_TYPE_MULTI_SELECT]});
@@ -518,24 +501,6 @@ sub _attachment_to_hash {
         is_patch         => $self->type('int', $attach->ispatch),
         attacher         => $self->type('string', $attacher->login)
     };
-}
-
-# Convert WebService API field names to internal DB field names.
-# Used by create() and search().
-sub _map_fields {
-    my ($params) = @_;
-    
-    my %field_values;
-    foreach my $field (keys %$params) {
-        my $field_name = FIELD_MAP->{$field} || $field;
-        $field_values{$field_name} = $params->{$field};
-    }
-
-    unless (Bugzilla->user->is_timetracker) {
-        delete @field_values{qw(estimated_time remaining_time deadline)};
-    }
-    
-    return \%field_values;
 }
 
 1;

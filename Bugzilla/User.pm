@@ -716,7 +716,14 @@ sub can_enter_product {
     my $dbh = Bugzilla->dbh;
     $warn ||= 0;
 
-    if (!defined $input) {
+    $input = trim($input) if !ref $input;
+    if (!defined $input or $input eq '') {
+        return unless $warn == THROW_ERROR;
+        ThrowUserError('object_not_specified',
+                       { class => 'Bugzilla::Product' });
+    }
+
+    if (!scalar @{ $self->get_enterable_products }) {
         return unless $warn == THROW_ERROR;
         ThrowUserError('no_products');
     }

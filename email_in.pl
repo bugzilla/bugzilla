@@ -45,12 +45,13 @@ use Encode;
 
 use Bugzilla;
 use Bugzilla::Bug;
+use Bugzilla::BugMail;
 use Bugzilla::Constants qw(USAGE_MODE_EMAIL);
 use Bugzilla::Error;
 use Bugzilla::Mailer;
+use Bugzilla::Token;
 use Bugzilla::User;
 use Bugzilla::Util;
-use Bugzilla::Token;
 
 #############
 # Constants #
@@ -74,9 +75,6 @@ sub parse_mail {
     
     my %fields;
 
-    # Email::Address->parse returns an array
-    my ($reporter) = Email::Address->parse($input_email->header('From'));
-    $fields{'reporter'} = $reporter->address;
     my $summary = $input_email->header('Subject');
     if ($summary =~ /\[\S+ (\d+)\](.*)/i) {
         $fields{'bug_id'} = $1;
@@ -107,19 +105,8 @@ sub parse_mail {
             # Otherwise, we stop parsing fields on the first blank line.
             $line = trim($line);
             last if !$line;
-            
-            if ($line =~ /^@(\S+)\s*=\s*(.*)\s*/) {
+            if ($line =~ /^\@(\S+)\s*(?:=|\s)\s*(.*)\s*/) {
                 $current_field = lc($1);
-                # It's illegal to pass the reporter field as you could
-                # override the "From:" field of the message and bypass
-                # authentication checks, such as PGP.
-                if ($current_field eq 'reporter') {
-                    # We reset the $current_field variable to something
-                    # post_bug and process_bug will ignore, in case the
-                    # attacker splits the reporter field on several lines.
-                    $current_field = 'illegal_field';
-                    next;
-                }
                 $fields{$current_field} = $2;
             }
             else {
@@ -128,6 +115,10 @@ sub parse_mail {
         }
     }
 
+    %fields = %{ Bugzilla::Bug::map_fields(\%fields) };
+
+    my ($reporter) = Email::Address->parse($input_email->header('From'));
+    $fields{'reporter'} = $reporter->address;
 
     # The summary line only affects us if we're doing a post_bug.
     # We have to check it down here because there might have been
@@ -150,24 +141,24 @@ sub parse_mail {
 }
 
 sub post_bug {
-    my ($fields_in) = @_;
-    my %fields = %$fields_in;
-
+    my ($fields) = @_;
     debug_print('Posting a new bug...');
 
-    my $cgi = Bugzilla->cgi;
-    foreach my $field (keys %fields) {
-        $cgi->param(-name => $field, -value => $fields{$field});
+    # Bugzilla::Bug->create throws a confusing CodeError if
+    # the REQUIRED_CREATE_FIELDS are missing, but much more
+    # sensible errors if the fields exist but are just undef.
+    foreach my $field (Bugzilla::Bug::REQUIRED_CREATE_FIELDS) {
+        $fields->{$field} = undef if !exists $fields->{$field};
     }
 
-    $cgi->param(-name => 'inbound_email', -value => 1);
-
-    require 'post_bug.cgi';
+    my $bug = Bugzilla::Bug->create($fields);
+    debug_print("Created bug " . $bug->id);
+    Bugzilla::BugMail::Send($bug->id, { changer => $bug->reporter->login });
+    debug_print("Sent bugmail");
 }
 
 sub process_bug {
     my ($fields_in) = @_; 
-
     my %fields = %$fields_in;
 
     my $bug_id = $fields{'bug_id'};
@@ -340,7 +331,6 @@ pod2usage({-verbose => 0, -exitval => 1}) if $switch{'help'};
 
 Bugzilla->usage_mode(USAGE_MODE_EMAIL);
 
-
 my @mail_lines = <STDIN>;
 my $mail_text = join("", @mail_lines);
 my $mail_fields = parse_mail($mail_text);
@@ -351,9 +341,7 @@ if (my $suffix = Bugzilla->params->{'emailsuffix'}) {
     $username =~ s/\Q$suffix\E$//i;
 }
 
-my $user = Bugzilla::User->new({ name => $username })
-    || ThrowUserError('invalid_username', { name => $username });
-
+my $user = Bugzilla::User->check($username);
 Bugzilla->set_user($user);
 
 if ($mail_fields->{'bug_id'}) {
@@ -391,9 +379,9 @@ The script expects to read an email with the following format:
  From: account@domain.com
  Subject: Bug Summary
 
- @product = ProductName
- @component = ComponentName
- @version = 1.0
+ @product ProductName
+ @component ComponentName
+ @version 1.0
 
  This is a bug description. It will be entered into the bug exactly as
  written here.
@@ -404,39 +392,25 @@ The script expects to read an email with the following format:
  This is a signature line, and will be removed automatically, It will not
  be included in the bug description.
 
-The C<@> labels can be any valid field name in Bugzilla that can be
-set on C<enter_bug.cgi>. For the list of required field names, see 
-L<Bugzilla::WebService::Bug/Create>. Note, that there is some difference
-in the names of the required input fields between web and email interfaces, 
-as listed below:
-
-=over
-
-=item *
-
-C<platform> in web is C<@rep_platform> in email
-
-=item *
-
-C<severity> in web is C<@bug_severity> in email
-
-=back
-
-For the list of all field names, see the C<fielddefs> table in the database. 
+For the list of valid field names for the C<@> fields, including
+a list of which ones are required, see L<Bugzilla::WebService::Bug/create>.
+(Note, however, that you cannot specify C<@description> as a field--
+you just add a comment by adding text after the C<@> fields.)
 
 The values for the fields can be split across multiple lines, but
 note that a newline will be parsed as a single space, for the value.
 So, for example:
 
- @short_desc = This is a very long
+ @summary This is a very long
  description
 
 Will be parsed as "This is a very long description".
 
-If you specify C<@short_desc>, it will override the summary you specify
+If you specify C<@summary>, it will override the summary you specify
 in the Subject header.
 
-C<account@domain.com> must be a valid Bugzilla account.
+C<account@domain.com> (the value of the C<From> header) must be a valid
+Bugzilla account.
 
 Note that signatures must start with '-- ', the standard signature
 border.
@@ -453,11 +427,11 @@ Your subject starts with [Bug 123456] -- then it modifies bug 123456.
 
 =item *
 
-You include C<@bug_id = 123456> in the first lines of the email.
+You include C<@id 123456> in the first lines of the email.
 
 =back
 
-If you do both, C<@bug_id> takes precedence.
+If you do both, C<@id> takes precedence.
 
 You send your email in the same format as for creating a bug, except
 that you only specify the fields you want to change. If the very
@@ -466,7 +440,7 @@ will be assumed that you are only adding a comment to the bug.
 
 Note that when updating a bug, the C<Subject> header is ignored,
 except for getting the bug ID. If you want to change the bug's summary,
-you have to specify C<@short_desc> as one of the fields to change.
+you have to specify C<@summary> as one of the fields to change.
 
 Please remember not to include any extra text in your emails, as that
 text will also be added as a comment. This includes any text that your
@@ -476,8 +450,6 @@ another email.
 =head3 Adding/Removing CCs
 
 To add CCs, you can specify them in a comma-separated list in C<@cc>.
-For backward compatibility, C<@newcc> can also be used. If both are
-present, C<@cc> takes precedence.
 
 To remove CCs, specify them as a comma-separated list in C<@removecc>.
 

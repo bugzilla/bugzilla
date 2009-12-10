@@ -264,13 +264,8 @@ if ($token) {
              ("createbug:$id", $token));
 }
 
-if (Bugzilla->usage_mode == USAGE_MODE_EMAIL) {
-    Bugzilla::BugMail::Send($id, $vars->{'mailrecipients'});
-}
-else {
-    print $cgi->header();
-    $template->process("bug/create/created.html.tmpl", $vars)
-        || ThrowTemplateError($template->error());
-}
+print $cgi->header();
+$template->process("bug/create/created.html.tmpl", $vars)
+    || ThrowTemplateError($template->error());
 
 1;

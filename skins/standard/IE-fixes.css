@@ -18,6 +18,10 @@
      word-wrap: break-word;
 }
 
+.component_table {
+    margin-top: .5em;
+}
+
 #footer #useful-links li {
     padding-bottom: 0.8ex;
 }

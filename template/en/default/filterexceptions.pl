@@ -92,10 +92,6 @@
   'request.attach_id', 
 ],
 
-'reports/components.html.tmpl' => [
-  'numcols',
-],
-
 'reports/duplicates-table.html.tmpl' => [
   'column.name', 
   'column.description',

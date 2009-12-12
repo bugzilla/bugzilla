@@ -37,6 +37,7 @@ use Bugzilla::User;
 use Bugzilla::Group;
 use Bugzilla::Token;
 use Bugzilla::Whine::Schedule;
+use Bugzilla::Whine::Query;
 
 # require the user to have logged in
 my $user = Bugzilla->login(LOGIN_REQUIRED);
@@ -267,16 +268,9 @@ if ($cgi->param('update')) {
             }
 
             # Check queries for changes
-            $sth = $dbh->prepare("SELECT id " .
-                                 "FROM whine_queries " .
-                                 "WHERE eventid=?");
-            $sth->execute($eventid);
-            my @queries = ();
-            while (my ($qid) = $sth->fetchrow_array) {
-                push @queries, $qid;
-            }
-
-            for my $qid (@queries) {
+            my $queries = Bugzilla::Whine::Query->match({ eventid => $eventid });
+            for my $query (@$queries) {
+                my $qid = $query->id;
                 if ($cgi->param("remove_query_$qid")) {
 
                     $sth = $dbh->prepare("SELECT whine_queries.id " .
@@ -371,32 +365,27 @@ for my $event_id (keys %{$events}) {
             $mailto = $schedule->mailto->name;
         }
 
-        my $this_schedule = {
-            'day'         => $schedule->run_day,
-            'time'        => $schedule->run_time,
-            'mailto_type' => $mailto_type,
-            'mailto'      => $mailto,
-            'id'          => $schedule->id,
-        };
-        push @{$events->{$event_id}->{'schedule'}}, $this_schedule;
+        push @{$events->{$event_id}->{'schedule'}},
+             {
+                 'day'         => $schedule->run_day,
+                 'time'        => $schedule->run_time,
+                 'mailto_type' => $mailto_type,
+                 'mailto'      => $mailto,
+                 'id'          => $schedule->id,
+             };
     }
 
     # queries
-    $sth = $dbh->prepare("SELECT query_name, title, sortkey, id, " .
-                         "onemailperbug " .
-                         "FROM whine_queries " .
-                         "WHERE eventid=? " .
-                         "ORDER BY sortkey");
-    $sth->execute($event_id);
-    for my $row (@{$sth->fetchall_arrayref}) {
-        my $this_query = {
-            'name'          => $row->[0],
-            'title'         => $row->[1],
-            'sort'          => $row->[2],
-            'id'            => $row->[3],
-            'onemailperbug' => $row->[4],
-        };
-        push @{$events->{$event_id}->{'queries'}}, $this_query;
+    my $queries = Bugzilla::Whine::Query->match({ eventid => $event_id });
+    for my $query (@$queries) {
+        push @{$events->{$event_id}->{'queries'}}, 
+             {
+                 'name'          => $query->name,
+                 'title'         => $query->title,
+                 'sort'          => $query->sortkey,
+                 'id'            => $query->id,
+                 'onemailperbug' => $query->one_email_per_bug,
+             };
     }
 }
 

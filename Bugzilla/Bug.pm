@@ -1110,7 +1110,7 @@ sub _check_bug_status {
     my $old_status; # Note that this is undef for new bugs.
 
     if (ref $invocant) {
-        @valid_statuses = @{$invocant->status->can_change_to};
+        @valid_statuses = @{$invocant->statuses_available};
         $product = $invocant->product_obj;
         $old_status = $invocant->status;
         my $comments = $invocant->{added_comments} || [];
@@ -1118,12 +1118,11 @@ sub _check_bug_status {
     }
     else {
         @valid_statuses = @{Bugzilla::Status->can_change_to()};
-    }
-
-    if (!$product->votes_to_confirm) {
-        # UNCONFIRMED becomes an invalid status if votes_to_confirm is 0,
-        # even if you are in editbugs.
-        @valid_statuses = grep {$_->name ne 'UNCONFIRMED'} @valid_statuses;
+        if (!$product->votes_to_confirm) {
+            # UNCONFIRMED becomes an invalid status if votes_to_confirm is 0,
+            # even if you are in editbugs.
+            @valid_statuses = grep {$_->name ne 'UNCONFIRMED'} @valid_statuses;
+        }
     }
 
     # Check permissions for users filing new bugs.
@@ -2167,6 +2166,8 @@ sub set_status {
     my $old_status = $self->status;
     $self->set('bug_status', $status);
     delete $self->{'status'};
+    delete $self->{'statuses_available'};
+    delete $self->{'choices'};
     my $new_status = $self->status;
     
     if ($new_status->is_open) {
@@ -2680,11 +2681,6 @@ sub isopened {
     return is_open_state($self->{bug_status}) ? 1 : 0;
 }
 
-sub isunconfirmed {
-    my $self = shift;
-    return ($self->bug_status eq 'UNCONFIRMED') ? 1 : 0;
-}
-
 sub keywords {
     my ($self) = @_;
     return join(', ', (map { $_->name } @{$self->keyword_objects}));
@@ -2803,6 +2799,31 @@ sub status {
 
     $self->{'status'} ||= new Bugzilla::Status({name => $self->{'bug_status'}});
     return $self->{'status'};
+}
+
+sub statuses_available {
+    my $self = shift;
+    return [] if $self->{'error'};
+    return $self->{'statuses_available'}
+        if defined $self->{'statuses_available'};
+
+    my @statuses = @{ $self->status->can_change_to };
+
+    # UNCONFIRMED is only a valid status if it is enabled in this product.
+    if (!$self->product_obj->votes_to_confirm) {
+        @statuses = grep { $_->name ne 'UNCONFIRMED' } @statuses;
+    }
+
+    my @available;
+    foreach my $status (@statuses) {
+        # Make sure this is a legal status transition
+        next if !$self->check_can_change_field(
+                     'bug_status', $self->status->name, $status->name);
+        push(@available, $status);
+    }
+
+    $self->{'statuses_available'} = \@available;
+    return $self->{'statuses_available'};
 }
 
 sub show_attachment_flags {
@@ -2958,9 +2979,10 @@ sub choices {
     }
 
     my %choices = (
-        product   => \@products,
-        component => $self->product_obj->components,
-        version   => $self->product_obj->versions,
+        bug_status => $self->statuses_available,
+        product    => \@products,
+        component  => $self->product_obj->components,
+        version    => $self->product_obj->versions,
         target_milestone => $self->product_obj->milestones,
     );
 
@@ -3451,12 +3473,7 @@ sub check_can_change_field {
     }
 
     # *Only* users with (product-specific) "canconfirm" privs can confirm bugs.
-    if ($field eq 'canconfirm'
-        || ($field eq 'everconfirmed' && $newvalue)
-        || ($field eq 'bug_status'
-            && $oldvalue eq 'UNCONFIRMED'
-            && is_open_state($newvalue)))
-    {
+    if ($self->_changes_everconfirmed($field, $oldvalue, $newvalue)) {
         $$PrivilegesRequired = 3;
         return $user->in_group('canconfirm', $self->{'product_id'});
     }
@@ -3529,6 +3546,24 @@ sub check_can_change_field {
     # If we haven't returned by this point, then the user doesn't
     # have the necessary permissions to change this field.
     $$PrivilegesRequired = 1;
+    return 0;
+}
+
+# A helper for check_can_change_field
+sub _changes_everconfirmed {
+    my ($self, $field, $old, $new) = @_;
+    return 1 if $field eq 'everconfirmed';
+    if ($field eq 'bug_status') {
+        if ($self->everconfirmed) {
+            # Moving a confirmed bug to UNCONFIRMED will change everconfirmed.
+            return 1 if $new eq 'UNCONFIRMED';
+        }
+        else {
+            # Moving an unconfirmed bug to an open state that isn't 
+            # UNCONFIRMED will confirm the bug.
+            return 1 if (is_open_state($new) and $new ne 'UNCONFIRMED');
+        }
+    }
     return 0;
 }
 
@@ -3626,8 +3661,7 @@ sub _validate_attribute {
     my @valid_attributes = (
         # Miscellaneous properties and methods.
         qw(error groups product_id component_id
-           comments milestoneurl attachments
-           isopened isunconfirmed
+           comments milestoneurl attachments isopened
            flag_types num_attachment_flag_types
            show_attachment_flags any_flags_requesteeble),
 

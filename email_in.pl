@@ -44,9 +44,10 @@ use Pod::Usage;
 use Encode;
 
 use Bugzilla;
+use Bugzilla::Attachment;
 use Bugzilla::Bug;
 use Bugzilla::BugMail;
-use Bugzilla::Constants qw(USAGE_MODE_EMAIL);
+use Bugzilla::Constants qw(USAGE_MODE_EMAIL CMT_ATTACHMENT_CREATED);
 use Bugzilla::Error;
 use Bugzilla::Mailer;
 use Bugzilla::Token;
@@ -153,8 +154,7 @@ sub post_bug {
 
     my $bug = Bugzilla::Bug->create($fields);
     debug_print("Created bug " . $bug->id);
-    Bugzilla::BugMail::Send($bug->id, { changer => $bug->reporter->login });
-    debug_print("Sent bugmail");
+    return ($bug, $bug->comments->[0]);
 }
 
 sub process_bug {
@@ -199,6 +199,52 @@ sub process_bug {
     $cgi->param('token', issue_hash_token([$bug->id, $bug->delta_ts]));
 
     require 'process_bug.cgi';
+    debug_print("Bug processed.");
+
+    my $added_comment;
+    if (trim($fields{'comment'})) {
+        $added_comment = $bug->comments->[-1];
+    }
+    return ($bug, $added_comment);
+}
+
+sub handle_attachments {
+    my ($bug, $attachments, $comment) = @_;
+    return if !$attachments;
+    debug_print("Handling attachments...");
+    my $dbh = Bugzilla->dbh;
+    $dbh->bz_start_transaction();
+    my ($update_comment, $update_bug);
+    foreach my $attachment (@$attachments) {
+        my $data = delete $attachment->{payload};
+        debug_print("Inserting Attachment: " . Dumper($attachment), 2);
+        $attachment->{content_type} ||= 'application/octet-stream';
+        my $obj = Bugzilla::Attachment->create({
+            bug         => $bug,
+            description => $attachment->{filename},
+            filename    => $attachment->{filename},
+            mimetype    => $attachment->{content_type},
+            data        => $data,
+        });
+        # If we added a comment, and our comment does not already have a type,
+        # and this is our first attachment, then we make the comment an 
+        # "attachment created" comment.
+        if ($comment and !$comment->type and !$update_comment) {
+            $comment->set_type(CMT_ATTACHMENT_CREATED, $obj->id);
+            $update_comment = 1;
+        }
+        else {
+            $bug->add_comment('', { type => CMT_ATTACHMENT_CREATED,
+                                    extra_data => $obj->id });
+            $update_bug = 1;
+        }
+    }
+    # We only update the comments and bugs at the end of the transaction,
+    # because doing so modifies bugs_fulltext, which is a non-transactional
+    # table.
+    $bug->update() if $update_bug;
+    $comment->update() if $update_comment;
+    $dbh->bz_commit_transaction();
 }
 
 ######################
@@ -334,6 +380,7 @@ Bugzilla->usage_mode(USAGE_MODE_EMAIL);
 my @mail_lines = <STDIN>;
 my $mail_text = join("", @mail_lines);
 my $mail_fields = parse_mail($mail_text);
+my $attachments = delete $mail_fields->{'attachments'};
 
 my $username = $mail_fields->{'reporter'};
 # If emailsuffix is in use, we have to remove it from the email address.
@@ -344,12 +391,26 @@ if (my $suffix = Bugzilla->params->{'emailsuffix'}) {
 my $user = Bugzilla::User->check($username);
 Bugzilla->set_user($user);
 
+my ($bug, $comment);
 if ($mail_fields->{'bug_id'}) {
-    process_bug($mail_fields);
+    ($bug, $comment) = process_bug($mail_fields);
 }
 else {
-    post_bug($mail_fields);
+    ($bug, $comment) = post_bug($mail_fields);
 }
+
+handle_attachments($bug, $attachments, $comment);
+
+# This is here for post_bug and handle_attachments, so that when posting a bug
+# with an attachment, any comment goes out as an attachment comment.
+#
+# Eventually this should be sending the mail for process_bug, too, but we have
+# to wait for $bug->update() to be fully used in email_in.pl first. So
+# currently, process_bug.cgi does the mail sending for bugs, and this does
+# any mail sending for attachments after the first one.
+Bugzilla::BugMail::Send($bug->id, { changer => Bugzilla->user->login });
+debug_print("Sent bugmail");
+
 
 __END__
 

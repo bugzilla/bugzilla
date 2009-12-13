@@ -43,7 +43,8 @@ sub get_param_list {
   {
    name => 'maintainer',
    type => 't',
-   default => 'THE MAINTAINER HAS NOT YET BEEN SET'
+   default => 'please.set.the.maintainer.parameter@administration.parameters',
+   checker => \&check_email,
   },
 
   {

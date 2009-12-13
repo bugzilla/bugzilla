@@ -55,6 +55,7 @@ use File::Basename;
     AUTH_LOGINFAILED
     AUTH_DISABLED
     AUTH_NO_SUCH_USER
+    AUTH_LOCKOUT
 
     USER_PASSWORD_MIN_LENGTH
 
@@ -149,6 +150,8 @@ use File::Basename;
 
     MAX_TOKEN_AGE
     MAX_LOGINCOOKIE_AGE
+    MAX_LOGIN_ATTEMPTS
+    LOGIN_LOCKOUT_INTERVAL
 
     SAFE_PROTOCOLS
     LEGAL_CONTENT_TYPES
@@ -227,6 +230,7 @@ use constant AUTH_ERROR => 2;
 use constant AUTH_LOGINFAILED => 3;
 use constant AUTH_DISABLED => 4;
 use constant AUTH_NO_SUCH_USER  => 5;
+use constant AUTH_LOCKOUT => 6;
 
 # The minimum length a password must have.
 use constant USER_PASSWORD_MIN_LENGTH => 6;
@@ -372,6 +376,12 @@ use constant TIMETRACKING_FIELDS =>
 use constant MAX_TOKEN_AGE => 3;
 # How many days a logincookie will remain valid if not used.
 use constant MAX_LOGINCOOKIE_AGE => 30;
+
+# Maximum failed logins to lock account for this IP
+use constant MAX_LOGIN_ATTEMPTS => 5;
+# If the maximum login attempts occur during this many minutes, the
+# account is locked.
+use constant LOGIN_LOCKOUT_INTERVAL => 30;
 
 # Protocols which are considered as safe.
 use constant SAFE_PROTOCOLS => ('afs', 'cid', 'ftp', 'gopher', 'http', 'https',

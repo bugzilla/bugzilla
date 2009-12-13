@@ -65,6 +65,11 @@ use base qw(Bugzilla::Object Exporter);
 # Constants
 #####################################################################
 
+# Used as the IP for authentication failures for password-lockout purposes
+# when there is no IP (for example, if we're doing authentication from the
+# command line for some reason).
+use constant NO_IP => '255.255.255.255';
+
 use constant USER_MATCH_MULTIPLE => -1;
 use constant USER_MATCH_FAILED   => 0;
 use constant USER_MATCH_SUCCESS  => 1;
@@ -247,6 +252,15 @@ sub is_disabled { $_[0]->disabledtext ? 1 : 0; }
 sub showmybugslink { $_[0]->{showmybugslink}; }
 sub email_disabled { $_[0]->{disable_mail}; }
 sub email_enabled { !($_[0]->{disable_mail}); }
+sub cryptpassword {
+    my $self = shift;
+    # We don't store it because we never want it in the object (we
+    # don't want to accidentally dump even the hash somewhere).
+    my ($pw) = Bugzilla->dbh->selectrow_array(
+        'SELECT cryptpassword FROM profiles WHERE userid = ?',
+        undef, $self->id);
+    return $pw;
+}
 
 sub set_authorizer {
     my ($self, $authorizer) = @_;
@@ -1655,6 +1669,54 @@ sub create {
     return $user;
 }
 
+###########################
+# Account Lockout Methods #
+###########################
+
+sub account_is_locked_out {
+    my $self = shift;
+    my $login_failures = scalar @{ $self->account_ip_login_failures };
+    return $login_failures >= MAX_LOGIN_ATTEMPTS ? 1 : 0;
+}
+
+sub note_login_failure {
+    my $self = shift;
+    my $ip_addr = Bugzilla->cgi->remote_addr || NO_IP;
+    trick_taint($ip_addr);
+    Bugzilla->dbh->do("INSERT INTO login_failure (user_id, ip_addr, login_time)
+                       VALUES (?, ?, LOCALTIMESTAMP(0))",
+                      undef, $self->id, $ip_addr);
+    delete $self->{account_ip_login_failures};
+}
+
+sub clear_login_failures {
+    my $self = shift;
+    my $ip_addr = Bugzilla->cgi->remote_addr || NO_IP;
+    trick_taint($ip_addr);
+    Bugzilla->dbh->do(
+        'DELETE FROM login_failure WHERE user_id = ? AND ip_addr = ?',
+        undef, $self->id, $ip_addr);
+    delete $self->{account_ip_login_failures};
+}
+
+sub account_ip_login_failures {
+    my $self = shift;
+    my $dbh = Bugzilla->dbh;
+    my $time = $dbh->sql_interval(LOGIN_LOCKOUT_INTERVAL, 'MINUTE');
+    my $ip_addr = Bugzilla->cgi->remote_addr || NO_IP;
+    trick_taint($ip_addr);
+    $self->{account_ip_login_failures} ||= Bugzilla->dbh->selectall_arrayref(
+        "SELECT login_time, ip_addr, user_id FROM login_failure
+          WHERE user_id = ? AND login_time > LOCALTIMESTAMP(0) - $time
+                AND ip_addr = ?
+       ORDER BY login_time", {Slice => {}}, $self->id, $ip_addr);
+    return $self->{account_ip_login_failures};
+}
+
+###############
+# Subroutines #
+###############
+
 sub is_available_username {
     my ($username, $old_username) = @_;
 
@@ -1845,6 +1907,29 @@ internally, such code must call this method to flush the cached result.
 
 An arrayref of group ids. The user can share their own queries with these
 groups.
+
+=back
+
+=head2 Account Lockout
+
+=over
+
+=item C<account_is_locked_out>
+
+Returns C<1> if the account has failed to log in too many times recently,
+and thus is locked out for a period of time. Returns C<0> otherwise.
+
+=item C<account_ip_login_failures>
+
+Returns an arrayref of hashrefs, that contains information about the recent
+times that this account has failed to log in from the current remote IP.
+The hashes contain C<ip_addr>, C<login_time>, and C<user_id>.
+
+=item C<note_login_failure>
+
+This notes that this account has failed to log in, and stores the fact
+in the database. The storing happens immediately, it does not wait for
+you to call C<update>.
 
 =back
 

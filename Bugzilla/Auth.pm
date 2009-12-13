@@ -32,6 +32,9 @@ use fields qw(
 
 use Bugzilla::Constants;
 use Bugzilla::Error;
+use Bugzilla::Mailer;
+use Bugzilla::Util qw(datetime_from);
+use Bugzilla::User::Setting ();
 use Bugzilla::Auth::Login::Stack;
 use Bugzilla::Auth::Verify::Stack;
 use Bugzilla::Auth::Persist::Cookie;
@@ -162,7 +165,10 @@ sub _handle_login_result {
     # the password was just wrong. (This makes it harder for a cracker
     # to find account names by brute force)
     elsif ($fail_code == AUTH_LOGINFAILED or $fail_code == AUTH_NO_SUCH_USER) {
-        ThrowUserError("invalid_username_or_password");
+        my $remaining_attempts = MAX_LOGIN_ATTEMPTS 
+                                 - ($result->{failure_count} || 0);
+        ThrowUserError("invalid_username_or_password", 
+                       { remaining => $remaining_attempts });
     }
     # The account may be disabled
     elsif ($fail_code == AUTH_DISABLED) {
@@ -172,6 +178,40 @@ sub _handle_login_result {
         # and throw a user error
         ThrowUserError("account_disabled",
             {'disabled_reason' => $result->{user}->disabledtext});
+    }
+    elsif ($fail_code == AUTH_LOCKOUT) {
+        my $attempts = $user->account_ip_login_failures;
+
+        # We want to know when the account will be unlocked. This is 
+        # determined by the 5th-from-last login failure (or more/less than
+        # 5th, if MAX_LOGIN_ATTEMPTS is not 5).
+        my $determiner = $attempts->[scalar(@$attempts) - MAX_LOGIN_ATTEMPTS];
+        my $unlock_at = datetime_from($determiner->{login_time}, 
+                                      Bugzilla->local_timezone);
+        $unlock_at->add(minutes => LOGIN_LOCKOUT_INTERVAL);
+
+        # If we were *just* locked out, notify the maintainer about the
+        # lockout.
+        if ($result->{just_locked_out}) {
+            # We're sending to the maintainer, who may be not a Bugzilla 
+            # account, but just an email address. So we use the
+            # installation's default language for sending the email.
+            my $default_settings = Bugzilla::User::Setting::get_defaults();
+            my $template = Bugzilla->template_inner($default_settings->{lang});
+            my $vars = {
+                locked_user => $user,
+                attempts    => $attempts,
+                unlock_at   => $unlock_at,
+            };
+            my $message;
+            $template->process('email/lockout.txt.tmpl', $vars, \$message)
+                || ThrowTemplateError($template->error);
+            MessageToMTA($message);
+        }
+
+        $unlock_at->set_time_zone($user->timezone);
+        ThrowUserError('account_locked', 
+            { ip_addr => $determiner->{ip_addr}, unlock_at => $unlock_at });
     }
     # If we get here, then we've run out of options, which shouldn't happen.
     else {
@@ -234,6 +274,11 @@ various fields to be used in the error message.
 
 An incorrect username or password was given.
 
+The hashref may also contain a C<failure_count> element, which specifies
+how many times the account has failed to log in within the lockout
+period (see L</AUTH_LOCKOUT>). This is used to warn the user when
+he is getting close to being locked out.
+
 =head2 C<AUTH_NO_SUCH_USER>
 
 This is an optional more-specific version of C<AUTH_LOGINFAILED>.
@@ -250,6 +295,15 @@ should never be communicated to the user, for security reasons.
 
 The user successfully logged in, but their account has been disabled.
 Usually this is throw only by C<Bugzilla::Auth::login>.
+
+=head2 C<AUTH_LOCKOUT>
+
+The user's account is locked out after having failed to log in too many
+times within a certain period of time (as specified by
+L<Bugzilla::Constants/LOGIN_LOCKOUT_INTERVAL>).
+
+The hashref will also contain a C<user> element, representing the
+L<Bugzilla:User> whose account is locked out.
 
 =head1 LOGIN TYPES
 

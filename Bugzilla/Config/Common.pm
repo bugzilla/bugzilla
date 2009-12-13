@@ -34,6 +34,7 @@ package Bugzilla::Config::Common;
 
 use strict;
 
+use Email::Address;
 use Socket;
 
 use Bugzilla::Util;
@@ -50,7 +51,7 @@ use base qw(Exporter);
        check_user_verify_class
        check_mail_delivery_method check_notification check_utf8
        check_bug_status check_smtp_auth check_theschwartz_available
-       check_maxattachmentsize
+       check_maxattachmentsize check_email
 );
 
 # Checking functions for the various values
@@ -92,6 +93,14 @@ sub check_regexp {
     my ($value) = (@_);
     eval { qr/$value/ };
     return $@;
+}
+
+sub check_email {
+    my ($value) = @_;
+    if ($value !~ $Email::Address::mailbox) {
+        return "must be a valid email address.";
+    }
+    return "";
 }
 
 sub check_sslbase {

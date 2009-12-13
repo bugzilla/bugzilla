@@ -77,6 +77,12 @@
       that login name.
     [% END %]
 
+  [% ELSIF error == "account_locked" %]
+    [% title = "Account Locked" %]
+    Your IP ([% ip_addr FILTER html %]) has been locked out of this
+    account until [% unlock_at FILTER time %], as you have
+    exceeded the maximum number of login attempts.
+
   [% ELSIF error == "alias_has_comma_or_space" %]
     [% title = "Invalid Characters In Alias" %]
     The alias you entered, <em>[% alias FILTER html %]</em>,
@@ -962,6 +968,15 @@
   [% ELSIF error == "invalid_username_or_password" %]
     [% title = "Invalid Username Or Password" %]
     The username or password you entered is not valid.
+    [%# People get two login attempts before being warned about
+      # being locked out.
+      #%]
+    [% IF remaining <=  2 %]
+      If you do not enter the correct password after 
+      [%+ remaining FILTER html %] more attempt(s), you will be
+      locked out of this account for 
+      [%+ constants.LOGIN_LOCKOUT_INTERVAL FILTER html %] minutes.
+    [% END %]
 
   [% ELSIF error == "json_rpc_post_only" %]
     For security reasons, you may only use JSON-RPC with the POST

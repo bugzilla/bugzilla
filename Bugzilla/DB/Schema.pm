@@ -23,6 +23,7 @@
 #                 Lance Larsh <lance.larsh@oracle.com>
 #                 Dennis Melentyev <dennis.melentyev@infopulse.com.ua>
 #                 Akamai Technologies <bugzilla-dev@akamai.com>
+#                 Elliotte Martin <emartin@everythingsolved.com>
 
 package Bugzilla::DB::Schema;
 
@@ -981,6 +982,25 @@ use constant ABSTRACT_SCHEMA => {
             logincookies_lastused_idx => ['lastused'],
         ],
     },
+
+    login_failure => {
+        FIELDS => [
+            user_id    => {TYPE => 'INT3', NOTNULL => 1,
+                           REFERENCES => {TABLE  => 'profiles',
+                                          COLUMN => 'userid',
+                                          DELETE => 'CASCADE'}},
+            login_time => {TYPE => 'DATETIME', NOTNULL => 1},
+            ip_addr    => {TYPE => 'varchar(40)', NOTNULL => 1},
+        ],
+        INDEXES => [
+            # We do lookups by every item in the table simultaneously, but 
+            # having an index with all three items would be the same size as
+            # the table. So instead we have an index on just the smallest item, 
+            # to speed lookups.
+            login_failure_user_id_idx => ['user_id'],
+        ],
+    },
+
 
     # "tokens" stores the tokens users receive when a password or email
     #     change is requested.  Tokens provide an extra measure of security

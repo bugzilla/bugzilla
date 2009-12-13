@@ -36,7 +36,7 @@ use strict;
 use Bugzilla::Config::Common;
 use Email::Send;
 
-$Bugzilla::Config::MTA::sortkey = "10";
+our $sortkey = 1200;
 
 sub get_param_list {
   my $class = shift;

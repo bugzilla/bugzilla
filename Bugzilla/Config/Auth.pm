@@ -35,7 +35,7 @@ use strict;
 
 use Bugzilla::Config::Common;
 
-$Bugzilla::Config::Auth::sortkey = "02";
+our $sortkey = 300;
 
 sub get_param_list {
   my $class = shift;

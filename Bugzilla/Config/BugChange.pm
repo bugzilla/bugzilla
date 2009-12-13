@@ -36,7 +36,7 @@ use strict;
 use Bugzilla::Config::Common;
 use Bugzilla::Status;
 
-$Bugzilla::Config::BugChange::sortkey = "03";
+our $sortkey = 500;
 
 sub get_param_list {
   my $class = shift;

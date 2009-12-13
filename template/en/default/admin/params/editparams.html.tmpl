@@ -27,7 +27,7 @@
 [% PROCESS global/variables.none.tmpl %]
 
 [% curpanel = -1 %]
-[% panels = panels.sort('sortkey') %]
+[% panels = panels.nsort('sortkey') %]
 
 [% FOREACH panel = panels %]
   [% PROCESS "admin/params/${panel.name}.html.tmpl"

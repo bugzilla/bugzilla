@@ -347,6 +347,10 @@ sub adjust_statement {
         
         # Oracle need no 'AS'
         $nonstring =~ s/\bAS\b//ig;
+        
+        # Take the first 4000 chars for comparison  
+        $nonstring =~ s/\(\s*(longdescs_\d+\.thetext|attachdata_\d+\.thedata)/
+                      \(DBMS_LOB.SUBSTR\($1, 4000, 1\)/ig;
 
         # Look for a LIMIT clause
         ($limit) = ($nonstring =~ m(/\* LIMIT (\d*) \*/)o);

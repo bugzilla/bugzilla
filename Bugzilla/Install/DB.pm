@@ -459,7 +459,7 @@ sub update_table_definitions {
     _move_data_nomail_into_db();
 
     # The products table lacked sensible defaults.
-    if ($dbh->bz_column_info('products', 'milestoneurl') {
+    if ($dbh->bz_column_info('products', 'milestoneurl')) {
         $dbh->bz_alter_column('products', 'milestoneurl',
             {TYPE => 'TINYTEXT', NOTNULL => 1, DEFAULT => "''"});
     }

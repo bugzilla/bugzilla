@@ -120,11 +120,10 @@
     [% END %]
 [% END %]
 
-[% IF mode == "edit" %]
-  <a href="#" onclick="toggle_all_comments('collapse'); return false;">Collapse All Comments</a> -
-  <a href="#" onclick="toggle_all_comments('expand'); return false;">Expand All Comments</a>
-  <hr>
-[% END %]
+<!-- This auto-sizes the comments and positions the collapse/expand links 
+     to the right. -->
+<table class="bz_comment_table" cellpadding="0" cellspacing="0"><tr>
+<td>
 
 [% FOREACH comment = comments %]
   [% IF count >= start_at %]
@@ -138,6 +137,19 @@
   # make sure you are aware of this fact.
   #%]  
 [% Hook.process("aftercomments") %]
+
+</td>
+<td>
+  [% IF mode == "edit" %]
+    <ul class="bz_collapse_expand_comments">
+      <li><a href="#" onclick="toggle_all_comments('collapse'); 
+                               return false;">Collapse All Comments</a></li>
+      <li><a href="#" onclick="toggle_all_comments('expand');
+                               return false;">Expand All Comments</a></li>
+    </ul>
+  [% END %]
+</td>
+</tr></table>
 
 [%############################################################################%]
 [%# Block for individual comments                                            #%]

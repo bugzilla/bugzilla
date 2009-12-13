@@ -226,75 +226,19 @@
              bugid       = bug.bug_id
              num_attachment_flag_types = bug.num_attachment_flag_types
              show_attachment_flags = bug.show_attachment_flags
-   %]
+  %]
 
 
-[%# *** Comments Groups *** %]
+  [% PROCESS comment_box %]
 
-  <br>
-  <table cellpadding="1" cellspacing="1">
-    <tr>
-      <td id="comment_status_commit">
-        <!-- The table keeps the commit button aligned with the box. -->
-        <a name="add_comment"></a>
-        [% IF user.id %]
-          <label for="comment" accesskey="c"><b>Additional <u>C</u>omments</b></label>:
-          [% IF user.is_insider %]
-            <input type="checkbox" name="commentprivacy" value="1"
-                   id="newcommentprivacy"
-                   onClick="updateCommentTagControl(this, form)">
-            <label for="newcommentprivacy"> 
-              Make comment private (visible only to members of the
-              <strong>[% Param('insidergroup') FILTER html %]</strong>
-              group)
-            </label>
-          [% END %]
-          <table><tr><td>
-          [% INCLUDE global/textarea.html.tmpl
-                     name      = 'comment'
-                     id        = 'comment'
-                     minrows   = 10
-                     maxrows   = 25
-                     cols      = constants.COMMENT_COLS
-          %]
-          [% Hook.process("after_comment_textarea") %]
-          <br>
-          [% PROCESS commit_button id=""%]
-          <table class="status" cellspacing="0" cellpadding="0">
-            <tr>
-              <td class="field_label">
-                <b><a href="page.cgi?id=fields.html#status">Status</a></b>:
-              </td>
-              <td>
-                <a name="bug_status_bottom"></a>
-                [% PROCESS bug/knob.html.tmpl %]
-              </td>
-            </tr>
-          </table>
-          </td></tr></table>
-        [% ELSE %]
-          <fieldset>
-            <legend>Note</legend>
-            <p>
-              You need to
-              <a href="show_bug.cgi?id=
-                       [%- bug.bug_id %]&amp;GoAheadAndLogIn=1">log in</a>
-              before you can comment on or make changes to this [% terms.bug %].
-            </p>
-          </fieldset>
-        [% END %]
-        [%# *** Additional Comments *** %]
-        <hr>
-        <div id="comments">
-        [% PROCESS bug/comments.html.tmpl
-           comments = bug.comments
-           mode = user.id ? "edit" : "show"
-         %]
-        </div>
-        
-      </td>
-    </tr>
-  </table>
+  [%# *** Additional Comments *** %]
+  <div id="comments">
+    [% PROCESS bug/comments.html.tmpl
+      comments = bug.comments
+      mode = user.id ? "edit" : "show"
+    %]
+  </div>
+
 </form>
 
 [%############################################################################%]
@@ -1096,6 +1040,66 @@
       </td>
     </tr>
   </table> 
+[% END %]
+
+[%############################################################################%]
+[%# Block for the Additional Comments box                                    #%]
+[%############################################################################%]
+
+[% BLOCK comment_box %]
+  <div class="bz_section_additional_comments">
+    <a name="add_comment"></a>
+    [% IF user.id %]
+      <label for="comment" accesskey="c"><b>Additional 
+        <u>C</u>omments</b></label>:
+
+      [% IF user.is_insider %]
+        <input type="checkbox" name="commentprivacy" value="1"
+               id="newcommentprivacy"
+               onClick="updateCommentTagControl(this, form)">
+        <label for="newcommentprivacy">
+          Make comment private (visible only to members of the
+          <strong>[% Param('insidergroup') FILTER html %]</strong> group)
+        </label>
+      [% END %]
+
+      <!-- This table keeps the submit button aligned with the box. -->
+      <table><tr><td>
+        [% INCLUDE global/textarea.html.tmpl
+                   name      = 'comment'
+                   id        = 'comment'
+                   minrows   = 10
+                   maxrows   = 25
+                   cols      = constants.COMMENT_COLS
+        %]
+        [% Hook.process("after_comment_textarea", 'bug/edit.html.tmpl') %]
+        <br>
+        [% PROCESS commit_button id=""%]
+
+        <table class="status" cellspacing="0" cellpadding="0">
+          <tr>
+            <td class="field_label">
+              <b><a href="page.cgi?id=fields.html#status">Status</a></b>:
+            </td>
+            <td>
+              <a name="bug_status_bottom"></a>
+              [% PROCESS bug/knob.html.tmpl %]
+            </td>
+          </tr>
+        </table>
+      </td></tr></table>
+
+    [%# For logged-out users %]
+    [% ELSE %]
+      <table><tr><td><fieldset>
+        <legend>Note</legend>
+        You need to
+        <a href="show_bug.cgi?id=
+                 [%- bug.bug_id %]&amp;GoAheadAndLogIn=1">log in</a>
+         before you can comment on or make changes to this [% terms.bug %].
+      </fieldset></table><tr></td>
+    [% END %]
+  </div>
 [% END %]
 
 [%############################################################################%]

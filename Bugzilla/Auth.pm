@@ -303,7 +303,7 @@ times within a certain period of time (as specified by
 L<Bugzilla::Constants/LOGIN_LOCKOUT_INTERVAL>).
 
 The hashref will also contain a C<user> element, representing the
-L<Bugzilla:User> whose account is locked out.
+L<Bugzilla::User> whose account is locked out.
 
 =head1 LOGIN TYPES
 

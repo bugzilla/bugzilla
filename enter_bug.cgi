@@ -416,6 +416,7 @@ if ($cloned_bug_id) {
     $vars->{'dependson'}      = join (", ", $cloned_bug_id, @{$cloned_bug->dependson});
     $vars->{'blocked'}        = join (", ", @{$cloned_bug->blocked});
     $vars->{'deadline'}       = $cloned_bug->deadline;
+    $vars->{'estimated_time'} = $cloned_bug->estimated_time;
 
     if (defined $cloned_bug->cc) {
         $vars->{'cc'}         = join (", ", @{$cloned_bug->cc});
@@ -458,12 +459,14 @@ else {
     $default{'rep_platform'}  = pickplatform();
     $default{'op_sys'}        = pickos();
 
+    $vars->{'alias'}          = formvalue('alias');
     $vars->{'short_desc'}     = formvalue('short_desc');
     $vars->{'bug_file_loc'}   = formvalue('bug_file_loc', "http://");
     $vars->{'keywords'}       = formvalue('keywords');
     $vars->{'dependson'}      = formvalue('dependson');
     $vars->{'blocked'}        = formvalue('blocked');
     $vars->{'deadline'}       = formvalue('deadline');
+    $vars->{'estimated_time'} = formvalue('estimated_time');
 
     $vars->{'cc'}             = join(', ', $cgi->param('cc'));
 

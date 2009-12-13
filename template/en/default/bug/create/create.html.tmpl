@@ -436,7 +436,7 @@ TUI_hide_default('expert_fields');
   <tr>
     <th>Estimated Hours:</th>
     <td colspan="2">
-      <input name="estimated_time" size="6" maxlength="6" value="0.0">
+      <input name="estimated_time" size="6" maxlength="6" value="[% estimated_time FILTER html %]">
     </td>
   </tr>
   <tr>
@@ -456,7 +456,7 @@ TUI_hide_default('expert_fields');
   <tr>
     <th>Alias:</th>
     <td colspan="2">
-      <input name="alias" size="20">
+      <input name="alias" size="20" value="[% alias FILTER html %]">
     </td>
   </tr>
 [% END %]

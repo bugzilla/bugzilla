@@ -96,7 +96,8 @@ sub bug {
 
 sub is_about_attachment {
     my ($self) = @_;
-    return 1 if $self->type == CMT_ATTACHMENT_CREATED;
+    return 1 if ($self->type == CMT_ATTACHMENT_CREATED
+                 or $self->type == CMT_ATTACHMENT_UPDATED);
     return 0;
 }
 
@@ -160,7 +161,9 @@ sub _check_extra_data {
         if ($type == CMT_MOVED_TO) {
             $extra_data = Bugzilla::User->check($extra_data)->login;
         }
-        elsif ($type == CMT_ATTACHMENT_CREATED) {
+        elsif ($type == CMT_ATTACHMENT_CREATED 
+               or $type == CMT_ATTACHMENT_UPDATED) 
+        {
              my $attachment = Bugzilla::Attachment->check({ 
                  id => $extra_data });
              $extra_data = $attachment->id;

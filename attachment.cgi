@@ -616,13 +616,11 @@ sub update {
 
     # If the user submitted a comment while editing the attachment,
     # add the comment to the bug. Do this after having validated isprivate!
-    if ($cgi->param('comment')) {
-        # Prepend a string to the comment to let users know that the comment came
-        # from the "edit attachment" screen.
-        my $comment = "(From update of attachment " . $attachment->id . ")\n" .
-                      $cgi->param('comment');
-
-        $bug->add_comment($comment, { isprivate => $attachment->isprivate });
+    my $comment = $cgi->param('comment');
+    if (trim($comment)) {
+        $bug->add_comment($comment, { isprivate => $attachment->isprivate,
+                                      type => CMT_ATTACHMENT_UPDATED,
+                                      extra_data => $attachment->id });
     }
 
     if ($can_edit) {

@@ -93,6 +93,7 @@ use File::Basename;
     CMT_POPULAR_VOTES
     CMT_MOVED_TO
     CMT_ATTACHMENT_CREATED
+    CMT_ATTACHMENT_UPDATED
 
     THROW_ERROR
     
@@ -282,6 +283,7 @@ use constant CMT_HAS_DUPE => 2;
 use constant CMT_POPULAR_VOTES => 3;
 use constant CMT_MOVED_TO => 4;
 use constant CMT_ATTACHMENT_CREATED => 5;
+use constant CMT_ATTACHMENT_UPDATED => 6;
 
 # Determine whether a validation routine should return 0 or throw
 # an error when the validation fails.

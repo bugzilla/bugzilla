@@ -499,13 +499,10 @@
 
     [% IF Param("usetargetmilestone") && bug.target_milestone %]
       <tr>
-        <td class="field_label">
-          <label for="target_milestone"><b>
-            [% IF bug.milestoneurl %]
-              <a href="[% bug.milestoneurl FILTER html %]">
-            [% END %]
-            Target&nbsp;Milestone[% "</a>" IF bug.milestoneurl %]
-          [%%]</b></label>:
+        <th class="field_label">
+          <label for="target_milestone">
+              <a href="page.cgi?id=fields.html#target_milestone">
+            Target&nbsp;Milestone</a></label>:
         </td>
         [% PROCESS select selname = "target_milestone" %]
       </tr>

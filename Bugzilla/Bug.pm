@@ -1972,7 +1972,6 @@ sub set_product {
         $self->{_old_product_name} = $old_product->name;
         # Delete fields that depend upon the old Product value.
         delete $self->{choices};
-        delete $self->{milestoneurl};
         $product_changed = 1;
     }
 
@@ -2732,15 +2731,6 @@ sub comments {
         @comments = grep { datetime_from($_->creation_ts) <= $to } @comments;
     }
     return \@comments;
-}
-
-sub milestoneurl {
-    my ($self) = @_;
-    return $self->{'milestoneurl'} if exists $self->{'milestoneurl'};
-    return '' if $self->{'error'};
-
-    $self->{'milestoneurl'} = $self->product_obj->milestone_url;
-    return $self->{'milestoneurl'};
 }
 
 sub product {

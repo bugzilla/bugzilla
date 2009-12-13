@@ -67,23 +67,6 @@
   </p>
 [% END %]
 
-[% IF changes.milestoneurl.defined %]
-  <p>
-  Updated milestone URL 
-  [% IF changes.milestoneurl.0 != '' %]
-    from<br> <a href="[%- changes.milestoneurl.0 FILTER html %]">
-    [%- changes.milestoneurl.0 FILTER html %]</a>
-  [% END %]
-  to
-  [% IF product.milestone_url != '' %]
-     <br><a href="[%- product.milestone_url FILTER html %]">
-     [%- product.milestone_url FILTER html %]</a>.
-  [% ELSE %]
-    be empty.
-  [% END %]
-  </p>
-[% END %]
-
 [% IF changes.defaultmilestone.defined %]
   <p>
   Updated default milestone from '[% changes.defaultmilestone.0 FILTER html %]' to

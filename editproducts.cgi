@@ -182,7 +182,6 @@ if ($action eq 'new') {
                                  description      => scalar $cgi->param('description'),
                                  version          => scalar $cgi->param('version'),
                                  defaultmilestone => scalar $cgi->param('defaultmilestone'),
-                                 milestoneurl     => scalar $cgi->param('milestoneurl'),
                                  isactive         => scalar $cgi->param('is_active'),
                                  votesperuser     => scalar $cgi->param('votesperuser'),
                                  maxvotesperbug   => scalar $cgi->param('maxvotesperbug'),
@@ -294,7 +293,6 @@ if ($action eq 'update') {
     $product->set_name($product_name);
     $product->set_description(scalar $cgi->param('description'));
     $product->set_default_milestone(scalar $cgi->param('defaultmilestone'));
-    $product->set_milestone_url(scalar $cgi->param('milestoneurl'));
     $product->set_is_active(scalar $cgi->param('is_active'));
     $product->set_votes_per_user(scalar $cgi->param('votesperuser'));
     $product->set_votes_per_bug(scalar $cgi->param('maxvotesperbug'));

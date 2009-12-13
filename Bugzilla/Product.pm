@@ -53,7 +53,6 @@ use constant DB_COLUMNS => qw(
    name
    classification_id
    description
-   milestoneurl
    isactive
    votesperuser
    maxvotesperbug
@@ -71,7 +70,6 @@ use constant UPDATE_COLUMNS => qw(
     name
     description
     defaultmilestone
-    milestoneurl
     isactive
     votesperuser
     maxvotesperbug
@@ -84,7 +82,6 @@ use constant VALIDATORS => {
     description      => \&_check_description,
     version          => \&_check_version,
     defaultmilestone => \&_check_default_milestone,
-    milestoneurl     => \&_check_milestone_url,
     isactive         => \&Bugzilla::Object::check_boolean,
     votesperuser     => \&_check_votes_per_user,
     maxvotesperbug   => \&_check_votes_per_bug,
@@ -630,7 +627,6 @@ sub _create_series {
 sub set_name { $_[0]->set('name', $_[1]); }
 sub set_description { $_[0]->set('description', $_[1]); }
 sub set_default_milestone { $_[0]->set('defaultmilestone', $_[1]); }
-sub set_milestone_url { $_[0]->set('milestoneurl', $_[1]); }
 sub set_is_active { $_[0]->set('isactive', $_[1]); }
 sub set_votes_per_user { $_[0]->set('votesperuser', $_[1]); }
 sub set_votes_per_bug { $_[0]->set('maxvotesperbug', $_[1]); }
@@ -887,7 +883,6 @@ sub flag_types {
 ###############################
 
 sub description       { return $_[0]->{'description'};       }
-sub milestone_url     { return $_[0]->{'milestoneurl'};      }
 sub is_active         { return $_[0]->{'isactive'};       }
 sub votes_per_user    { return $_[0]->{'votesperuser'};      }
 sub max_votes_per_bug { return $_[0]->{'maxvotesperbug'};    }
@@ -940,7 +935,6 @@ Bugzilla::Product - Bugzilla product class.
     my $id               = $product->id;
     my $name             = $product->name;
     my $description      = $product->description;
-    my $milestoneurl     = $product->milestone_url;
     my isactive          = $product->is_active;
     my votesperuser      = $product->votes_per_user;
     my maxvotesperbug    = $product->max_votes_per_bug;

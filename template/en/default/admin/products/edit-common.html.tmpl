@@ -45,12 +45,6 @@
 
 [% IF Param('usetargetmilestone') -%]
   <tr>
-    <th align="right">URL describing milestones for this product:</th>
-    <td><input type="text" size="64" maxlength="255" name="milestoneurl"
-               value="[% product.milestoneurl FILTER html %]">
-    </td>
-  </tr>
-  <tr>
     <th align="right">Default milestone:</th>
     <td>
       [% IF product.milestones.size %]

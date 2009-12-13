@@ -1214,8 +1214,6 @@ use constant ABSTRACT_SCHEMA => {
                                                  COLUMN => 'id',
                                                  DELETE => 'CASCADE'}},
             description       => {TYPE => 'MEDIUMTEXT'},
-            milestoneurl      => {TYPE => 'TINYTEXT', NOTNULL => 1,
-                                  DEFAULT => "''"},
             isactive          => {TYPE => 'BOOLEAN', NOTNULL => 1,
                                   DEFAULT => 1},
             votesperuser      => {TYPE => 'INT2', NOTNULL => 1,

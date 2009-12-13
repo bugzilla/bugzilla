@@ -459,8 +459,10 @@ sub update_table_definitions {
     _move_data_nomail_into_db();
 
     # The products table lacked sensible defaults.
-    $dbh->bz_alter_column('products', 'milestoneurl',
-                          {TYPE => 'TINYTEXT', NOTNULL => 1, DEFAULT => "''"});
+    if ($dbh->bz_column_info('products', 'milestoneurl') {
+        $dbh->bz_alter_column('products', 'milestoneurl',
+            {TYPE => 'TINYTEXT', NOTNULL => 1, DEFAULT => "''"});
+    }
     if ($dbh->bz_column_info('products', 'disallownew')){
         $dbh->bz_alter_column('products', 'disallownew',
                               {TYPE => 'BOOLEAN', NOTNULL => 1,  DEFAULT => 0});
@@ -588,6 +590,8 @@ sub update_table_definitions {
 
     _set_attachment_comment_types();
 
+    $dbh->bz_drop_column('products', 'milestoneurl');
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################
@@ -623,8 +627,6 @@ sub _update_pre_checksetup_bugzillas {
                             {TYPE => 'BOOLEAN', NOTNULL => 1}, 0);
     }
 
-    $dbh->bz_add_column('products', 'milestoneurl',
-                        {TYPE => 'TINYTEXT', NOTNULL => 1}, '');
     $dbh->bz_add_column('components', 'initialqacontact',
                         {TYPE => 'TINYTEXT'});
     $dbh->bz_add_column('components', 'description',

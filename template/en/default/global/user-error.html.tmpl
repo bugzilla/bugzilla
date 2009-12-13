@@ -160,7 +160,11 @@
     [% IF object == "administrative_pages" %]
       administrative pages
     [% ELSIF object == "attachment" %]
-      this attachment
+      [% IF attach_id %]
+        attachment #[% attach_id FILTER html %]
+      [% ELSE %]
+        this attachment
+      [% END %]
     [% ELSIF object == "bugs" %]
       [%+ terms.bugs %]
     [% ELSIF object == "charts" %]

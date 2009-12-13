@@ -411,21 +411,47 @@ sub update_see_also {
 }
 
 sub attachments {
-    my ($self, $params) = validate(@_, 'ids');
+    my ($self, $params) = validate(@_, 'ids', 'attachment_ids');
 
     my $ids = $params->{ids};
     defined $ids || ThrowCodeError('param_required', { param => 'ids' });
 
-    my %attachments;
+    if (!(defined $params->{ids}
+          || defined $params->{attachment_ids}))
+    {
+        ThrowCodeError('param_required',
+                       { function => 'Bug.attachments', 
+                         params   => ['ids', 'attachment_ids'] });
+    }
+
+    my $ids = $params->{ids} || [];
+    my $attach_ids = $params->{attachment_ids} || [];
+
+    my %bugs;
     foreach my $bug_id (@$ids) {
         my $bug = Bugzilla::Bug->check($bug_id);
-        $attachments{$bug->id} = [];
+        $bugs{$bug->id} = [];
         foreach my $attach (@{$bug->attachments}) {
-            push @{$attachments{$bug->id}},
+            push @{$bugs{$bug->id}},
                 $self->_attachment_to_hash($attach, $params);
         }
     }
-    return { bugs => \%attachments };
+
+    my %attachments;
+    foreach my $attach (@{Bugzilla::Attachment->new_from_list($attach_ids)}) {
+        Bugzilla::Bug->check($attach->bug_id);
+        if ($attach->isprivate && !Bugzilla->user->is_insider) {
+            ThrowUserError('auth_failure', {action    => 'access',
+                                            object    => 'attachment',
+                                            attach_id => $attach->id});
+        }
+        $attachments{$attach->id} =
+            $self->_attachment_to_hash($attach, $params);
+    }
+
+    $bugs{attachments} = \%attachments;
+
+    return { bugs => \%bugs };
 }
 
 ##############################
@@ -586,12 +612,15 @@ B<EXPERIMENTAL>
 
 =item B<Description>
 
-Gets information about all attachments from a bug.
+It allows you to get data about attachments, given a list of bugs
+and/or attachment ids.
 
 B<Note>: Private attachments will only be returned if you are in the 
 insidergroup or if you are the submitter of the attachment.
 
 =item B<Params>
+
+B<Note>: At least one of C<ids> or C<attachment_ids> is required.
 
 =over
 
@@ -599,13 +628,52 @@ insidergroup or if you are the submitter of the attachment.
 
 See the description of the C<ids> parameter in the L</get> method.
 
+=item C<attachment_ids>
+
+C<array> An array of integer attachment ids.
+
 =back
 
 =item B<Returns>
 
-A hash containing a single element, C<bugs>. This is a hash of hashes. 
-Each hash has the numeric bug id as a key, and contains the following
-items:
+A hash containing two elements: C<bugs> and C<attachments>. The return
+value looks like this:
+
+ {
+     bugs => {
+         1345 => {
+             attachments => [
+                 { (attachment) },
+                 { (attachment) }
+             ]
+         },
+         9874 => {
+             attachments => [
+                 { (attachment) },
+                 { (attachment) }
+             ]
+
+         },
+     },
+
+     attachments => {
+         234 => { (attachment) },
+         123 => { (attachment) },
+     }
+ }
+
+The attachments of any bugs that you specified in the C<ids> argument in
+input are returned in C<bugs> on output. C<bugs> is a hash that has integer
+bug IDs for keys and contains a single key, C<attachments>. That key points
+to an arrayref that contains attachments as a hash. (Fields for attachments
+are described below.)
+
+For any attachments that you specified directly in C<attachment_ids>, they
+are returned in C<attachments> on output. This is a hash where the attachment
+ids point directly to hashes describing the individual attachment.
+
+The fields for each attachment (where it says C<(attachment)> in the
+diagram above) are:
 
 =over
 
@@ -665,7 +733,18 @@ C<string> The login name of the user that created the attachment.
 
 =item B<Errors>
 
-This method can throw all the same errors as L</get>.
+This method can throw all the same errors as L</get>. In addition,
+it can also throw the following error:
+
+=over
+
+=item 304 (Auth Failure, Attachment is Private)
+
+You specified the id of a private attachment in the C<attachment_ids>
+argument, and you are not in the "insider group" that can see
+private attachments.
+
+=back
 
 =item B<History>
 

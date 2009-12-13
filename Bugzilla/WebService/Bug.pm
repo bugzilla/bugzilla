@@ -413,11 +413,8 @@ sub update_see_also {
 sub attachments {
     my ($self, $params) = validate(@_, 'ids', 'attachment_ids');
 
-    my $ids = $params->{ids};
-    defined $ids || ThrowCodeError('param_required', { param => 'ids' });
-
     if (!(defined $params->{ids}
-          || defined $params->{attachment_ids}))
+          or defined $params->{attachment_ids}))
     {
         ThrowCodeError('param_required',
                        { function => 'Bug.attachments', 

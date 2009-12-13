@@ -211,25 +211,27 @@
     </tr>
   </table>
 
-  
-  [% PROCESS section_restrict_visibility %]
-  [% IF user.is_timetracker %]
-    <br>
-    [% PROCESS section_timetracking %]
-  [% END %]
-  
+  <table id="bz_big_form_parts" cellspacing="0" cellpadding="0"><tr>
+  <td>
+    [% IF user.is_timetracker %]
+      [% PROCESS section_timetracking %]
+    [% END %]
 
-[%# *** Attachments *** %]
+    [%# *** Attachments *** %]
 
-  [% PROCESS attachment/list.html.tmpl
-             attachments = bug.attachments
-             bugid       = bug.bug_id
-             num_attachment_flag_types = bug.num_attachment_flag_types
-             show_attachment_flags = bug.show_attachment_flags
-  %]
+    [% PROCESS attachment/list.html.tmpl
+               attachments = bug.attachments
+               bugid       = bug.bug_id
+               num_attachment_flag_types = bug.num_attachment_flag_types
+               show_attachment_flags = bug.show_attachment_flags
+    %]
 
-
-  [% PROCESS comment_box %]
+    [% PROCESS comment_box %]
+  </td>
+  <td>
+    [% PROCESS section_restrict_visibility %]
+  </td>
+  </tr></table>
 
   [%# *** Additional Comments *** %]
   <div id="comments">
@@ -647,103 +649,92 @@
 [% BLOCK section_restrict_visibility %]
   [% RETURN UNLESS bug.groups.size %]
 
-  [% inallgroups = 1 %]
-  [% inagroup = 0 %]
-  [% emitted_description = 0 %]
+  <div class="bz_group_visibility_section">
+    [% inallgroups = 1 %]
+    [% inagroup = 0 %]
+    [% emitted_description = 0 %]
 
-  [% FOREACH group = bug.groups %]
-    [% SET inallgroups = 0 IF NOT group.ingroup %]
-    [% SET inagroup = 1 IF group.ison %]
+    [% FOREACH group = bug.groups %]
+      [% SET inallgroups = 0 IF NOT group.ingroup %]
+      [% SET inagroup = 1 IF group.ison %]
 
-    [% NEXT IF group.mandatory %]
+      [% NEXT IF group.mandatory %]
 
-    [% IF NOT emitted_description %]
-      [% emitted_description = 1 %]
-      <table class="bz_group_visibility_section">
-        <tr>
-          <td class="field_label">
-            <label id="bz_restrict_group_visibility_label"><b>Restrict Group Visibility</b>:</label>
-          </td>
-          <td>
-            <div id="bz_restrict_group_visibility_help">
-              <b>Only users in all of the selected groups can view this [% terms.bug %]:</b>
-              <br>
-              <small>
-                (Unchecking all boxes makes this a more public [% terms.bug %].)
-              </small>
-            </div>
-    [% END %]
+      [% IF NOT emitted_description %]
+        [% emitted_description = 1 %]
+          <div id="bz_restrict_group_visibility_help">
+            <b>Only users in all of the selected groups can view this 
+              [%+ terms.bug %]:</b>
+             <p class="instructions">
+               Unchecking all boxes makes this a more public [% terms.bug %].
+             </p>
+          </div>
+      [% END %]
 
-    [% IF group.ingroup %]
-      <input type="hidden" name="defined_bit-[% group.bit %]" value="1">
-    [% END %]
-    <input type="checkbox" value="1" name="bit-[% group.bit %]" id="bit-[% group.bit %]"
-           [% ' checked="checked"' IF group.ison %]
-           [% ' disabled="disabled"' IF NOT group.ingroup %]>
-    <label for="bit-[% group.bit %]">[% group.description FILTER html_light %]</label>
-    <br>
-  [% END %]
+      [% IF group.ingroup %]
+        <input type="hidden" name="defined_bit-[% group.bit %]" value="1">
+      [% END %]
 
-  [% IF emitted_description %]
-    [% IF NOT inallgroups %]
-      <b>Only members of a group can change the visibility of [% terms.abug %] for that group.</b>
+      <input type="checkbox" value="1" name="bit-[% group.bit %]" 
+             id="bit-[% group.bit %]"
+             [% ' checked="checked"' IF group.ison %]
+             [% ' disabled="disabled"' IF NOT group.ingroup %]>
+      <label for="bit-[% group.bit %]">
+      [%- group.description FILTER html_light %]</label>
       <br>
     [% END %]
-      </td>
-    </tr>
-    [% "</table>" IF NOT inagroup %]
-  [% END %]
 
-  [% IF inagroup %]
-    [% IF NOT emitted_description %]
-      [% emitted_description = 1 %]
-      <table class="bz_group_visibility_section">
+    [% IF emitted_description %]
+      [% IF NOT inallgroups %]
+        <p class="instructions">Only members of a group can change the 
+          visibility of [% terms.abug %] for that group.</p>
+      [% END %]
     [% END %]
-    <tr>
-      <td class="field_label">
-        <label id="bz_enable_role_visibility_label"><b>Enable Role Visibility</b>:</label>
-      </td>
-      <td>
-        <div id="bz_enable_role_visibility_help">
-          <b>Users in the roles selected below can always view this [% terms.bug %]:</b>
-          <br>
-          <small>
-            (The assignee
-            [% IF (Param('useqacontact')) %]
-               and QA contact
-            [% END %]
-            can always see [% terms.abug %], and this section does not take effect unless
-            the [% terms.bug %] is restricted to at least one group.)
-          </small>
+
+    [% IF inagroup %]
+      <div id="bz_enable_role_visibility_help">
+        <b>Users in the roles selected below can always view 
+          this [% terms.bug %]:</b>
+      </div>
+      <div id="bz_enable_role_visibility">
+        <div>
+          [% user_can_edit_accessible = 
+            bug.check_can_change_field("reporter_accessible", 0, 1) 
+          %]
+          [% IF user_can_edit_accessible %]
+            <input type="hidden" name="defined_reporter_accessible" value="1">
+          [% END %]
+          <input type="checkbox" value="1"
+                 name="reporter_accessible" id="reporter_accessible"
+                 [% " checked" IF bug.reporter_accessible %]
+                 [% " disabled=\"disabled\"" UNLESS user_can_edit_accessible %]>
+          <label for="reporter_accessible">Reporter</label>
         </div>
         <div>
-          <div>
-            [% user_can_edit_accessible = bug.check_can_change_field("reporter_accessible", 0, 1) %]
-            [% IF user_can_edit_accessible %]
-              <input type="hidden" name="defined_reporter_accessible" value="1">
-            [% END %]
-            <input type="checkbox" value="1"
-                   name="reporter_accessible" id="reporter_accessible"
-                   [% " checked" IF bug.reporter_accessible %]
-                   [% " disabled=\"disabled\"" UNLESS user_can_edit_accessible %]>
-            <label for="reporter_accessible">Reporter</label>
-          </div>
-          <div>
-            [% user_can_edit_accessible = bug.check_can_change_field("cclist_accessible", 0, 1) %]
-            [% IF user_can_edit_accessible %]
-              <input type="hidden" name="defined_cclist_accessible" value="1">
-            [% END %]
-            <input type="checkbox" value="1"
-                   name="cclist_accessible" id="cclist_accessible"
-                   [% " checked" IF bug.cclist_accessible %]
-                   [% " disabled=\"disabled\"" UNLESS user_can_edit_accessible %]>
-            <label for="cclist_accessible">CC List</label>
-          </div>
+          [% user_can_edit_accessible = 
+            bug.check_can_change_field("cclist_accessible", 0, 1) 
+          %]
+          [% IF user_can_edit_accessible %]
+            <input type="hidden" name="defined_cclist_accessible" value="1">
+          [% END %]
+          <input type="checkbox" value="1"
+                 name="cclist_accessible" id="cclist_accessible"
+                 [% " checked" IF bug.cclist_accessible %]
+                 [% " disabled=\"disabled\"" UNLESS user_can_edit_accessible %]>
+          <label for="cclist_accessible">CC List</label>
         </div>
-      </td>
-    </tr>
-  </table>
-  [% END %]
+        <p class="instructions">
+          The assignee
+          [% IF (Param('useqacontact')) %]
+             and QA contact
+          [% END %]
+          can always see [% terms.abug %], and this section does not
+          take effect unless the [% terms.bug %] is restricted to at
+          least one group.
+        </p>
+      </div>
+    [% END %]
+  </div> [%# bz_group_visibility_section %]
 [% END %]
 
 [%############################################################################%]

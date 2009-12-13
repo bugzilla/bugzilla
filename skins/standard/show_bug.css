@@ -59,6 +59,26 @@ table#flags {
     
 }
 
+#bz_big_form_parts td {
+    vertical-align: top;
+}
+
+.bz_group_visibility_section {
+    margin-left: 1em;
+}
+
+.bz_group_visibility_section .instructions {
+    font-style: italic;
+}
+
+#bz_restrict_group_visibility_help .instructions {
+    margin-top: 0;
+}
+
+#bz_enable_role_visibility_help {
+    margin-top: 1em;
+}
+
 .bz_time_tracking_table {
     border-collapse: collapse;
 }

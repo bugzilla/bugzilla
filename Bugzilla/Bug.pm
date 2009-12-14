@@ -122,6 +122,9 @@ use constant REQUIRED_CREATE_FIELDS => qw(
 # There are also other, more complex validators that are called
 # from run_create_validators.
 sub VALIDATORS {
+    my $cache = Bugzilla->request_cache;
+    return $cache->{bug_validators} if defined $cache->{bug_validators};
+
     my $validators = {
         alias          => \&_check_alias,
         bug_file_loc   => \&_check_bug_file_loc,
@@ -163,7 +166,8 @@ sub VALIDATORS {
         $validators->{$field->name} = $validator;
     }
 
-    return $validators;
+    $cache->{bug_validators} = $validators;
+    return $cache->{bug_validators};
 };
 
 use constant UPDATE_VALIDATORS => {

@@ -36,6 +36,7 @@ use Bugzilla::Util;
 use File::Find;
 use File::Path;
 use File::Basename;
+use File::Copy qw(move);
 use IO::File;
 use POSIX ();
 
@@ -129,7 +130,6 @@ sub FILESYSTEM {
         'docs/*/README.docs'   => { perms => $owner_readable },
         "$datadir/bugzilla-update.xml" => { perms => $ws_writeable },
         "$datadir/params" => { perms => $ws_writeable },
-        "$datadir/mailer.testfile" => { perms => $ws_writeable },
         "$extensionsdir/create.pl" => { perms => $owner_executable },
     );
 
@@ -212,6 +212,12 @@ sub FILESYSTEM {
     my %create_files = (
         "$datadir/extensions/additional" => { perms    => $ws_readable, 
                                               contents => '' },
+        # We create this file so that it always has the right owner
+        # and permissions. Otherwise, the webserver creates it as
+        # owned by itself, which can cause problems if jobqueue.pl
+        # or something else is not running as the webserver or root.
+        "$datadir/mailer.testfile" => { perms    => $ws_writeable,
+                                        contents => '' },
     );
 
     # Each standard stylesheet has an associated custom stylesheet that
@@ -347,6 +353,13 @@ sub update_filesystem {
         }
     }
 
+    # Move the testfile if we can't write to it, so that we can re-create
+    # it with the correct permissions below.
+    if (!-w "$datadir/mailer.testfile") {
+        _rename_file("$datadir/mailer.testfile", 
+                     "$datadir/mailer.testfile.old");
+    }
+
     _create_files(%files);
     if ($params->{index_html}) {
         _create_files(%{$fs->{index_html}});
@@ -439,6 +452,17 @@ sub create_htaccess {
         $webdot = new IO::File("$webdot_dir/.htaccess", 'w') || die $!;
         print $webdot $webdot_data;
         $webdot->close;
+    }
+}
+
+sub _rename_file {
+    my ($from, $to) = @_;
+    print "Renaming $from to $to...\n";
+    if (-e $to) {
+        warn "$to already exists, not moving\n";
+    }
+    else {
+        move($from, $to) or warn $!;
     }
 }
 

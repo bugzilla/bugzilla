@@ -86,9 +86,15 @@ sub process {
     my $self = shift;
     my ($file, $vars) = @_;
 
-    #Bugzilla::Hook::process('template_before_process', 
-    #                        { vars => $vars, file => $file, 
-    #                          template => $self });
+    # This hook can't call itself recursively, because otherwise we
+    # end up with problems when we throw an error inside of extensions
+    # (they end up in infinite recursion, because throwing an error involves
+    # processing a template).
+    if (!Bugzilla::Hook::in('template_before_process')) {
+        Bugzilla::Hook::process('template_before_process', 
+                                { vars => $vars, file => $file, 
+                                  template => $self });
+    }
 
     return $self->SUPER::process(@_);
 }

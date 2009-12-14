@@ -25,11 +25,32 @@ use strict;
 
 sub process {
     my ($name, $args) = @_;
+
+    _entering($name);
+
     foreach my $extension (@{ Bugzilla->extensions }) {
         if ($extension->can($name)) {
             $extension->$name($args);
         }
     }
+
+    _leaving($name);
+}
+
+sub in {
+    my $hook_name = shift;
+    my $currently_in = Bugzilla->request_cache->{hook_stack}->[-1] || '';
+    return $hook_name eq $currently_in ? 1 : 0;
+}
+
+sub _entering {
+    my ($hook_name) = @_;
+    my $hook_stack = Bugzilla->request_cache->{hook_stack} ||= [];
+    push(@$hook_stack, $hook_name);
+}
+
+sub _leaving {
+    pop @{ Bugzilla->request_cache->{hook_stack} };
 }
 
 1;
@@ -395,6 +416,8 @@ L</config_add_panels> if you want to add new panels.
 
 =head2 enter_bug_entrydefaultvars
 
+B<DEPRECATED> - Use L</template_before_process> instead.
+
 This happens right before the template is loaded on enter_bug.cgi.
 
 Params:
@@ -635,6 +658,8 @@ your template.
 
 =head2 product_confirm_delete
 
+B<DEPRECATED> - Use L</template_before_process> instead.
+
 Called before displaying the confirmation message when deleting a product.
 
 Params:
@@ -715,6 +740,10 @@ to operating only if a certain file is being loaded (which is why you
 get a C<file> argument below). Otherwise, modifying the C<vars> argument
 will affect every single template in Bugzilla.
 
+Note that this is only called on the top-level C<< $template->process >>
+call. It is not called for C<[% PROCESS %]> or C<[% INCLUDE %]> statements 
+in templates.
+
 Params:
 
 =over
@@ -737,6 +766,11 @@ C<bug/show.html.tmpl>).
 The L<Bugzilla::Template> object that C<process> was called on.
 
 =back
+
+B<Note:> This hook is not called if you are already in this hook.
+(That is, it won't call itself recursively.) This prevents infinite
+recursion in situations where this hook needs to process a template
+(such as if this hook throws an error).
 
 =head2 webservice
 

@@ -355,9 +355,9 @@ sub update_filesystem {
 
     # Move the testfile if we can't write to it, so that we can re-create
     # it with the correct permissions below.
-    if (!-w "$datadir/mailer.testfile") {
-        _rename_file("$datadir/mailer.testfile", 
-                     "$datadir/mailer.testfile.old");
+    my $testfile = "$datadir/mailer.testfile";
+    if (-e $testfile and !-w $testfile) {
+        _rename_file($testfile, "$testfile.old");
     }
 
     _create_files(%files);

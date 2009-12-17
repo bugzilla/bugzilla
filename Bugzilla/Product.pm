@@ -58,6 +58,7 @@ use constant DB_COLUMNS => qw(
    maxvotesperbug
    votestoconfirm
    defaultmilestone
+   allows_unconfirmed
 );
 
 use constant REQUIRED_CREATE_FIELDS => qw(
@@ -74,9 +75,11 @@ use constant UPDATE_COLUMNS => qw(
     votesperuser
     maxvotesperbug
     votestoconfirm
+    allows_unconfirmed
 );
 
 use constant VALIDATORS => {
+    allows_unconfirmed => \&Bugzilla::Object::check_boolean,
     classification   => \&_check_classification,
     name             => \&_check_name,
     description      => \&_check_description,
@@ -631,6 +634,7 @@ sub set_is_active { $_[0]->set('isactive', $_[1]); }
 sub set_votes_per_user { $_[0]->set('votesperuser', $_[1]); }
 sub set_votes_per_bug { $_[0]->set('maxvotesperbug', $_[1]); }
 sub set_votes_to_confirm { $_[0]->set('votestoconfirm', $_[1]); }
+sub set_allows_unconfirmed { $_[0]->set('allows_unconfirmed', $_[1]); }
 
 sub set_group_controls {
     my ($self, $group, $settings) = @_;
@@ -882,6 +886,7 @@ sub flag_types {
 ####      Accessors      ######
 ###############################
 
+sub allows_unconfirmed { return $_[0]->{'allows_unconfirmed'}; }
 sub description       { return $_[0]->{'description'};       }
 sub is_active         { return $_[0]->{'isactive'};       }
 sub votes_per_user    { return $_[0]->{'votesperuser'};      }
@@ -941,6 +946,7 @@ Bugzilla::Product - Bugzilla product class.
     my votestoconfirm    = $product->votes_to_confirm;
     my $defaultmilestone = $product->default_milestone;
     my $classificationid = $product->classification_id;
+    my $allows_unconfirmed = $product->allows_unconfirmed;
 
 =head1 DESCRIPTION
 

@@ -176,17 +176,22 @@ if ($action eq 'new') {
 
     check_token_data($token, 'add_product');
 
-    my $product =
-      Bugzilla::Product->create({classification   => $classification_name,
-                                 name             => $product_name,
-                                 description      => scalar $cgi->param('description'),
-                                 version          => scalar $cgi->param('version'),
-                                 defaultmilestone => scalar $cgi->param('defaultmilestone'),
-                                 isactive         => scalar $cgi->param('is_active'),
-                                 votesperuser     => scalar $cgi->param('votesperuser'),
-                                 maxvotesperbug   => scalar $cgi->param('maxvotesperbug'),
-                                 votestoconfirm   => scalar $cgi->param('votestoconfirm'),
-                                 create_series    => scalar $cgi->param('createseries')});
+    my %create_params = (
+        classification   => $classification_name,
+        name             => $product_name,
+        description      => scalar $cgi->param('description'),
+        version          => scalar $cgi->param('version'),
+        defaultmilestone => scalar $cgi->param('defaultmilestone'),
+        isactive         => scalar $cgi->param('is_active'),
+        create_series    => scalar $cgi->param('createseries'),
+        allows_unconfirmed => scalar $cgi->param('allows_unconfirmed'),
+    );
+    if (Bugzilla->params->{'usevotes'}) {
+        $create_params{votesperuser}   = $cgi->param('votesperuser');
+        $create_params{maxvotesperbug} = $cgi->param('maxvotesperbug');
+        $create_params{votestoconfirm} = $cgi->param('votestoconfirm');
+    }
+    my $product = Bugzilla::Product->create(\%create_params);
 
     delete_token($token);
 
@@ -294,9 +299,12 @@ if ($action eq 'update') {
     $product->set_description(scalar $cgi->param('description'));
     $product->set_default_milestone(scalar $cgi->param('defaultmilestone'));
     $product->set_is_active(scalar $cgi->param('is_active'));
-    $product->set_votes_per_user(scalar $cgi->param('votesperuser'));
-    $product->set_votes_per_bug(scalar $cgi->param('maxvotesperbug'));
-    $product->set_votes_to_confirm(scalar $cgi->param('votestoconfirm'));
+    if (Bugzilla->params->{'usevotes'}) {
+        $product->set_votes_per_user(scalar $cgi->param('votesperuser'));
+        $product->set_votes_per_bug(scalar $cgi->param('maxvotesperbug'));
+        $product->set_votes_to_confirm(scalar $cgi->param('votestoconfirm'));
+    }
+    $product->set_allows_unconfirmed(scalar $cgi->param('allows_unconfirmed'));
 
     my $changes = $product->update();
 

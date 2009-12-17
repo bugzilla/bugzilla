@@ -77,7 +77,8 @@
           <label for="takebug">take [% terms.bug %]</label>
           [% bug_statuses = [] %]
           [% FOREACH bug_status = bug.status.can_change_to %]
-            [% NEXT IF bug_status.name == "UNCONFIRMED" && !bug.product_obj.votes_to_confirm %]
+            [% NEXT IF bug_status.name == "UNCONFIRMED" 
+                       && !bug.product_obj.allows_unconfirmed %]
             [% bug_statuses.push(bug_status) IF bug_status.is_open %]
           [% END %]
           [% IF bug_statuses.size %]

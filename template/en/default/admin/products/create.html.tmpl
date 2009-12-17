@@ -25,15 +25,17 @@
 [% PROCESS global/header.html.tmpl
   title = title
   style_urls = ['skins/standard/admin.css']
+  javascript_urls = ['js/util.js']
 %]
 
 [% DEFAULT
   product.votesperuser = "0",
   product.maxvotesperbug  = "10000",
-  product.votestoconfirm = "0",
+  product.votes_to_confirm = "0",
   product.is_active = 1,
   version = "unspecified",
   product.defaultmilestone = constants.DEFAULT_MILESTONE
+  product.allows_unconfirmed = 0
 %]
 
 <form method="post" action="editproducts.cgi">

@@ -592,6 +592,8 @@ sub update_table_definitions {
 
     $dbh->bz_drop_column('products', 'milestoneurl');
 
+    _add_allows_unconfirmed_to_product_table();
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################
@@ -3326,6 +3328,16 @@ sub _set_attachment_comment_types {
         'SELECT DISTINCT bug_id FROM longdescs WHERE '
         . $dbh->sql_in('comment_id', \@comment_ids));
     _populate_bugs_fulltext($bug_ids);
+}
+
+sub _add_allows_unconfirmed_to_product_table {
+    my $dbh = Bugzilla->dbh;
+    if (!$dbh->bz_column_info('products', 'allows_unconfirmed')) {
+        $dbh->bz_add_column('products', 'allows_unconfirmed',
+            { TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'FALSE' });
+        $dbh->do('UPDATE products SET allows_unconfirmed = 1 
+                   WHERE votestoconfirm > 0');
+    }
 }
 
 1;

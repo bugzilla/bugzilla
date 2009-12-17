@@ -69,39 +69,44 @@
        [% ' checked="checked"' IF product.is_active %]>
   </td>
 </tr>
+<tr>
+  <th align="right">
+    <label for="allows_unconfirmed">Enable the
+      [%+ display_value('bug_status', 'UNCONFIRMED') FILTER html %] status
+      in this product:</label>
+  </th>
+  <td><input type="checkbox" id="allows_unconfirmed" name="allows_unconfirmed"
+             [% ' checked="checked"' IF product.allows_unconfirmed %]
+             [% IF Param('usevotes') %]
+               onchange="bz_toggleClass('votes_to_confirm_container', 
+                                        'bz_default_hidden')"
+             [% END %]>
+    [% IF Param('usevotes') %]
+      <span id="votes_to_confirm_container"
+            [% ' class="bz_default_hidden"' IF !product.allows_unconfirmed %]>
+        ...and automatically confirm [% terms.bugs %] if they get
+        <input size="3" maxlength="5" name="votestoconfirm" id="votestoconfirm"
+               value="[% product.votes_to_confirm FILTER html %]">
+         votes. (Setting this to 0 disables auto-confirming [% terms.bugs %]
+         by vote.)
+      </span>
+    [% END %]
+  </td>
+</tr>
 
-[% IF !Param('usevotes') %]
-<tr class="param_disabled">
-  <td colspan="2"
-      style="font-family: arial; font-style: italic; font-size: 0.7em; text-align: center;">
-    The 'usevotes' parameter is currently 'off'. These voting
-    settings will take effect when the parameter is next enabled.</td>
-</tr>
+[% IF Param('usevotes') %]
+  <tr>
+    <th align="right">Maximum votes per person:</th>
+    <td><input size="5" maxlength="5" name="votesperuser" id="votesperuser"
+               value="[% product.votesperuser FILTER html %]">
+    </td>
+  </tr>
+  <tr>
+    <th align="right">
+      Maximum votes a person can put on a single [% terms.bug %]:
+    </th>
+    <td><input size="5" maxlength="5" name="maxvotesperbug" id="maxvotesperbug"
+               value="[% product.maxvotesperbug FILTER html %]">
+    </td>
+  </tr>
 [% END %]
-<tr [% IF !Param('usevotes') %]class="param_disabled" [% END %]>
-  <th align="right">Maximum votes per person:</th>
-  <td><input size="5" maxlength="5" name="votesperuser" 
-             value="[% product.votesperuser FILTER html %]">
-  </td>
-</tr>
-<tr [% IF !Param('usevotes') %]class="param_disabled" [% END %]>
-  <th align="right">
-    Maximum votes a person can put on a single [% terms.bug %]:
-  </th>
-  <td><input size="5" maxlength="5" name="maxvotesperbug" 
-             value="[% product.maxvotesperbug FILTER html %]">
-  </td>
-</tr>
-<tr [% IF !Param('usevotes') %]class="param_disabled" [% END %]>
-  <th align="right">
-    Confirmation threshold:
-  </th>
-  <td>
-    Enter the number of votes [% terms.abug %] in this product needs to
-    automatically get out of the
-    <a href="page.cgi?id=fields.html#status">[% display_value("bug_status", "UNCONFIRMED") FILTER html %]</a>
-    state.<br>
-    <input size="5" maxlength="5" name="votestoconfirm" 
-           value="[% product.votestoconfirm FILTER html %]">
-  </td>
-</tr>

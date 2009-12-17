@@ -976,7 +976,8 @@ BugCheck("bugs WHERE bug_status IN ($confirmed_open_states) AND everconfirmed = 
 Status('bug_check_votes_everconfirmed');
 
 BugCheck("bugs INNER JOIN products ON bugs.product_id = products.id " .
-         "WHERE everconfirmed = 0 AND votestoconfirm <= votes",
+         "WHERE everconfirmed = 0 AND votestoconfirm > 0
+                AND votestoconfirm <= votes",
          'bug_check_votes_everconfirmed_error_text');
 
 ###########################################################################

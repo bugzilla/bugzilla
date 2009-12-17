@@ -1122,9 +1122,7 @@ sub _check_bug_status {
     }
     else {
         @valid_statuses = @{Bugzilla::Status->can_change_to()};
-        if (!$product->votes_to_confirm) {
-            # UNCONFIRMED becomes an invalid status if votes_to_confirm is 0,
-            # even if you are in editbugs.
+        if (!$product->allows_unconfirmed) {
             @valid_statuses = grep {$_->name ne 'UNCONFIRMED'} @valid_statuses;
         }
     }
@@ -1157,9 +1155,13 @@ sub _check_bug_status {
             }
         }
     }
+
     # Time to validate the bug status.
     $new_status = Bugzilla::Status->check($new_status) unless ref($new_status);
-    if (!grep {$_->name eq $new_status->name} @valid_statuses) {
+    # We skip this check if we are changing from a status to itself.
+    if ( (!$old_status || $old_status->id != $new_status->id)
+          && !grep {$_->name eq $new_status->name} @valid_statuses) 
+    {
         ThrowUserError('illegal_bug_status_transition',
                        { old => $old_status, new => $new_status });
     }
@@ -2804,7 +2806,7 @@ sub statuses_available {
     my @statuses = @{ $self->status->can_change_to };
 
     # UNCONFIRMED is only a valid status if it is enabled in this product.
-    if (!$self->product_obj->votes_to_confirm) {
+    if (!$self->product_obj->allows_unconfirmed) {
         @statuses = grep { $_->name ne 'UNCONFIRMED' } @statuses;
     }
 
@@ -2814,6 +2816,11 @@ sub statuses_available {
         next if !$self->check_can_change_field(
                      'bug_status', $self->status->name, $status->name);
         push(@available, $status);
+    }
+
+    # If this bug has an inactive status set, it should still be in the list.
+    if (!grep($_->name eq $self->status->name, @available)) {
+        unshift(@available, $self->status);
     }
 
     $self->{'statuses_available'} = \@available;
@@ -3367,7 +3374,10 @@ sub CheckIfVotedConfirmed {
     my $bug = new Bugzilla::Bug($id);
 
     my $ret = 0;
-    if (!$bug->everconfirmed && $bug->votes >= $bug->product_obj->votes_to_confirm) {
+    if (!$bug->everconfirmed
+        and $bug->product_obj->votes_to_confirm
+        and $bug->votes >= $bug->product_obj->votes_to_confirm) 
+    {
         $bug->add_comment('', { type => CMT_POPULAR_VOTES });
 
         if ($bug->bug_status eq 'UNCONFIRMED') {

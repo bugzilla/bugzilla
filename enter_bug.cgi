@@ -520,8 +520,10 @@ my $initial_statuses = Bugzilla::Status->can_change_to();
 @$initial_statuses = grep { $_->is_open } @$initial_statuses;
 
 my @status = map { $_->name } @$initial_statuses;
-# UNCONFIRMED is illegal if votes_to_confirm = 0.
-@status = grep {$_ ne 'UNCONFIRMED'} @status unless $product->votes_to_confirm;
+# UNCONFIRMED is illegal if allows_unconfirmed is false.
+if (!$product->allows_unconfirmed) {
+    @status = grep {$_ ne 'UNCONFIRMED'} @status;
+}
 scalar(@status) || ThrowUserError('no_initial_bug_status');
 
 # If the user has no privs...

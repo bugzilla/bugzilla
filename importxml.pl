@@ -913,7 +913,7 @@ sub process_bug {
     
     # Check everconfirmed 
     my $everconfirmed;
-    if ($product->votes_to_confirm) {
+    if ($product->allows_unconfirmed) {
         $everconfirmed = $bug_fields{'everconfirmed'} || 0;
     }
     else {

@@ -39,6 +39,8 @@
   style_urls = ['skins/standard/admin.css']
 %]
 
+[% PROCESS "global/field-descs.none.tmpl" %]
+
 [% IF changes.name.defined %]
   <p>
   Updated product name from '[% changes.name.0 FILTER html %]' to
@@ -99,6 +101,24 @@
   [%+ product.votes_to_confirm FILTER html %].
   </p>
   [% checkvotes = 1 %]
+[% END %]
+
+[% IF changes.allows_unconfirmed.defined %]
+  <p>
+  [% IF product.allows_unconfirmed %]
+    The product now allows the 
+    [%+ display_value('bug_status', 'UNCONFIRMED') FILTER html %] status.
+  [% ELSE %]
+    The product no longer allows the 
+    [%+ display_value('bug_status', 'UNCONFIRMED') FILTER html %] status.
+    Note that any 
+    <a href="buglist.cgi?product=
+            [%- product.name FILTER url_quote %]&amp;bug_status=UNCONFIRMED"> 
+    [%- terms.bugs %] that currently have the 
+    [%+ display_value('bug_status', 'UNCONFIRMED') FILTER html %] status</a>
+    will remain in that status until they are edited.
+  [% END %]
+  </p>
 [% END %]
 
 [% IF !changes.keys.size %]

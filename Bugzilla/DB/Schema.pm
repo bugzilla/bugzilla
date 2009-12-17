@@ -1224,6 +1224,8 @@ use constant ABSTRACT_SCHEMA => {
                                   DEFAULT => 0},
             defaultmilestone  => {TYPE => 'varchar(20)',
                                   NOTNULL => 1, DEFAULT => "'---'"},
+            allows_unconfirmed => {TYPE => 'BOOLEAN', NOTNULL => 1,
+                                   DEFAULT => 'FALSE'},
         ],
         INDEXES => [
             products_name_idx   => {FIELDS => ['name'],

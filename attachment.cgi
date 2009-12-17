@@ -496,7 +496,8 @@ sub insert {
       ($bug_status) = grep {$_->name eq $bug_status} @{$bug->status->can_change_to};
 
       if ($bug_status && $bug_status->is_open
-          && ($bug_status->name ne 'UNCONFIRMED' || $bug->product_obj->votes_to_confirm))
+          && ($bug_status->name ne 'UNCONFIRMED' 
+              || $bug->product_obj->allows_unconfirmed))
       {
           $bug->set_status($bug_status->name);
           $bug->clear_resolution();

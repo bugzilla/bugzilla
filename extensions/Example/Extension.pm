@@ -448,12 +448,10 @@ sub template_before_create {
 sub template_before_process {
     my ($self, $args) = @_;
     
-    my ($vars, $file, $template) = @$args{qw(vars file template)};
-    
-    $vars->{'example'} = 1;
-    
-    if ($file =~ m{^bug/show}) {
-        $vars->{'showing_a_bug'} = 1;
+    my ($vars, $file, $context) = @$args{qw(vars file context)};
+
+    if ($file eq 'bug/edit.html.tmpl') {
+        $vars->{'viewing_the_bug_form'} = 1;
     }
 }
 

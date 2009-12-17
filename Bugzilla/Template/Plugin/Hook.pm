@@ -68,6 +68,7 @@ sub process {
 
     # process() accepts an arrayref of templates, so we just pass the whole
     # arrayref.
+    $context->{bz_in_hook} = 1; # See Bugzilla::Template::Context
     return $context->process($cache->{"${lang}__$extension_template"});
 }
 

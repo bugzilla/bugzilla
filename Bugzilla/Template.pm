@@ -80,25 +80,6 @@ sub _load_constants {
     return \%constants;
 }
 
-# Overload Template::Process in order to add a hook to allow additional
-# variables to be made available by an extension
-sub process {
-    my $self = shift;
-    my ($file, $vars) = @_;
-
-    # This hook can't call itself recursively, because otherwise we
-    # end up with problems when we throw an error inside of extensions
-    # (they end up in infinite recursion, because throwing an error involves
-    # processing a template).
-    if (!Bugzilla::Hook::in('template_before_process')) {
-        Bugzilla::Hook::process('template_before_process', 
-                                { vars => $vars, file => $file, 
-                                  template => $self });
-    }
-
-    return $self->SUPER::process(@_);
-}
-
 # Returns the path to the templates based on the Accept-Language
 # settings of the user and of the available languages
 # If no Accept-Language is present it uses the defined default
@@ -487,7 +468,7 @@ sub create {
         COMPILE_DIR => bz_locations()->{'datadir'} . "/template",
 
         # Initialize templates (f.e. by loading plugins like Hook).
-        PRE_PROCESS => "global/initialize.none.tmpl",
+        PRE_PROCESS => ["global/initialize.none.tmpl"],
 
         ENCODING => Bugzilla->params->{'utf8'} ? 'UTF-8' : undef,
 
@@ -801,6 +782,8 @@ sub create {
             },
         },
     };
+
+    local $Template::Config::CONTEXT = 'Bugzilla::Template::Context';
 
     Bugzilla::Hook::process('template_before_create', { config => $config });
     my $template = $class->new($config) 

@@ -110,8 +110,6 @@ use constant FIELD_OPERATOR => {
 };
 
 # We might want to put this into localconfig or somewhere
-use constant PLATFORMS => ('pc', 'sun', 'macintosh', 'mac');
-use constant OPSYSTEMS => ('windows', 'win', 'linux');
 use constant PRODUCT_EXCEPTIONS => (
     'row',   # [Browser]
              #   ^^^
@@ -273,22 +271,6 @@ sub _handle_status_and_resolution {
     elsif ($words->[0] eq 'OPEN') {
         shift @$words;
     }
-    elsif ($words->[0] =~ /^\+[A-Z]+(,[A-Z]+)*$/) {
-        # e.g. +DUP,FIX
-        if (matchPrefixes(\%states,
-                          \%resolutions,
-                          [split(/,/, substr($words->[0], 1))],
-                          \@closedStates,
-                          $legal_resolutions)) {
-            shift @$words;
-            # Allowing additional resolutions means we need to keep
-            # the "no resolution" resolution.
-            $resolutions{'---'} = 1;
-        }
-        else {
-            # Carry on if no match found.
-        }
-    }
     elsif ($words->[0] =~ /^[A-Z]+(,[A-Z]+)*$/) {
         # e.g. NEW,ASSI,REOP,FIX
         undef %states;
@@ -326,10 +308,6 @@ sub _handle_special_first_chars {
     my $baseWord = substr($qsword, 1);
     my @subWords = split(/[\|,]/, $baseWord);
 
-    if ($firstChar eq '+') {
-        addChart('short_desc', 'substring', $_, $negate) foreach (@subWords);
-        return 1;
-    }
     if ($firstChar eq '#') {
         addChart('short_desc', 'substring', $baseWord, $negate);
         addChart('content', 'matches', $baseWord, $negate);
@@ -458,27 +436,14 @@ sub _translate_field_name {
 
 sub _special_field_syntax {
     my ($word, $negate) = @_;
-    # Platform and operating system
-    if (grep { lc($word) eq $_ } PLATFORMS
-        or grep { lc($word) eq $_ } OPSYSTEMS)
-    {
-        addChart('rep_platform', 'substring', $word, $negate);
-        addChart('op_sys', 'substring', $word, $negate);
-        return 1;
-    }
     
-    # Priority
-    my $legal_priorities = get_legal_field_values('priority');
-    if (grep { lc($_) eq lc($word) } @$legal_priorities) {
-        addChart('priority', 'equals', $word, $negate);
-        return 1;
-    }
-
     # P1-5 Syntax
     if ($word =~ m/^P(\d+)(?:-(\d+))?$/i) {
         my $start = $1 - 1;
         $start = 0 if $start < 0;
         my $end = $2 - 1;
+
+        my $legal_priorities = get_legal_field_values('priority');
         $end = scalar(@$legal_priorities) - 1
             if $end > (scalar @$legal_priorities - 1);
         my $prios = $legal_priorities->[$start];
@@ -489,13 +454,6 @@ sub _special_field_syntax {
         return 1;
     }
 
-    # Severity
-    my $legal_severities = get_legal_field_values('bug_severity');
-    if (grep { lc($word) eq substr($_, 0, 3)} @$legal_severities) {
-        addChart('bug_severity', 'substring', $word, $negate);
-        return 1;
-    }
-    
     # Votes (votes>xx)
     if ($word =~ m/^votes>([0-9]+)$/) {
         addChart('votes', 'greaterthan', $1, $negate);

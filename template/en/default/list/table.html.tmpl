@@ -77,16 +77,6 @@
 
 [% tableheader = BLOCK %]
   <table class="bz_buglist" cellspacing="0" cellpadding="4" width="100%">
-    <colgroup>
-      [% IF dotweak %]
-        <col class="bz_checkbox_column">
-      [% END %]
-      <col class="bz_id_column">
-      [% FOREACH id = displaycolumns %]
-      <col class="bz_[% id FILTER css_class_quote %]_column">
-      [% END %]
-    </colgroup>
-
     <tr class="bz_buglist_header bz_first_buglist_header" align="left">
       [% IF dotweak %]
       <th>&nbsp;</th>
@@ -188,18 +178,19 @@
              ">
 
     [% IF dotweak %]
-    <td>
+    <td class="bz_checkbox_column">
       <input type="checkbox" name="id_[% bug.bug_id %]">
     </td>
     [% END %]
-    <td class="first-child">
+    <td class="first-child bz_id_column">
       <a name="b[% bug.bug_id %]"
          href="show_bug.cgi?id=[% bug.bug_id %]">[% bug.bug_id %]</a>
       <span style="display: none">[%+ '[SEC]' IF bug.secure_mode %]</span>
     </td>
 
     [% FOREACH column = displaycolumns %]
-    <td [% 'style="white-space: nowrap"' IF NOT abbrev.$column.wrap %]>
+    <td [% 'style="white-space: nowrap"' IF NOT abbrev.$column.wrap %]
+        class="bz_[% column FILTER css_class_quote %]_column">
       [% IF abbrev.$column.maxlength %]
         <span title="[%- display_value(column, bug.$column) FILTER html %]">
       [% END %]

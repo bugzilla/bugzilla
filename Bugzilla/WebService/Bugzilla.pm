@@ -21,7 +21,6 @@ package Bugzilla::WebService::Bugzilla;
 use strict;
 use base qw(Bugzilla::WebService);
 use Bugzilla::Constants;
-use Bugzilla::Hook;
 
 use DateTime;
 
@@ -38,15 +37,14 @@ sub version {
 
 sub extensions {
     my $self = shift;
-    my $extensions = Bugzilla::Hook::enabled_plugins();
-    foreach my $name (keys %$extensions) {
-        my $info = $extensions->{$name};
-        foreach my $data (keys %$info) {
-            $extensions->{$name}->{$data} = 
-                $self->type('string', $info->{$data});
-        }
+
+    my %retval;
+    foreach my $extension (@{ Bugzilla->extensions }) {
+        my $version = $extension->VERSION || 0;
+        my $name    = $extension->NAME;
+        $retval{$name}->{version} = $self->type('string', $version);
     }
-    return { extensions => $extensions };
+    return { extensions => \%retval };
 }
 
 sub timezone {
@@ -135,16 +133,31 @@ in this Bugzilla.
 
 =item B<Returns>
 
-A hash with a single item, C<extesions>. This points to a hash. I<That> hash
-contains the names of extensions as keys, and information about the extension
-as values. One of the values that must be returned is the 'version' of the
-extension
+A hash with a single item, C<extensions>. This points to a hash. I<That> hash
+contains the names of extensions as keys, and the values are a hash.
+That hash contains a single key C<version>, which is the version of the
+extension, or C<0> if the extension hasn't defined a version.
+
+The return value looks something like this:
+
+ extensions => {
+     Example => {
+         version => '3.6',
+     },
+     BmpConvert => {
+         version => '1.0',
+     },
+ }
 
 =item B<History>
 
 =over
 
 =item Added in Bugzilla B<3.2>.
+
+=item As of Bugzilla B<3.6>, the names of extensions are canonical names
+that the extensions define themselves. Before 3.6, the names of the
+extensions depended on the directory they were in on the Bugzilla server.
 
 =back
 

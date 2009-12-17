@@ -304,7 +304,8 @@ sub init {
     # into their equivalent lists of open and closed statuses.
     if ($params->param('bug_status')) {
         my @bug_statuses = $params->param('bug_status');
-        my @legal_statuses = @{get_legal_field_values('bug_status')};
+        # Also include inactive bug statuses, as you can query them.
+        my @legal_statuses = @{Bugzilla::Field->new({name => 'bug_status'})->legal_values};
         if (scalar(@bug_statuses) == scalar(@legal_statuses)
             || $bug_statuses[0] eq "__all__")
         {
@@ -322,7 +323,8 @@ sub init {
     
     if ($params->param('resolution')) {
         my @resolutions = $params->param('resolution');
-        my $legal_resolutions = get_legal_field_values('resolution');
+        # Also include inactive resolutions, as you can query them.
+        my $legal_resolutions = Bugzilla::Field->new({name => 'resolution'})->legal_values;
         if (scalar(@resolutions) == scalar(@$legal_resolutions)) {
             $params->delete('resolution');
         }

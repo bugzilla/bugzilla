@@ -31,7 +31,7 @@ You have one or more [% terms.bugs %] assigned to you in the [% terms.Bugzilla %
 attention.
 
 All of these [% terms.bugs %] are in the [% display_value("bug_status", "NEW") %] or
-[% display_value("bug_status", "REOPENED") %] state, and have not been
+[%= display_value("bug_status", "REOPENED") %] state, and have not been
 touched in [% Param("whinedays") %] days or more.
 You need to take a look at them, and decide on an initial action.
 
@@ -42,9 +42,9 @@ Generally, this means one of three things:
 (2) You decide the [% terms.bug %] doesn't belong to you, and you reassign it to
     someone else. (Hint: if you don't know who to reassign it to, make
     sure that the Component field seems reasonable, and then use the
-    "Reassign [% terms.bug %] to default assignee of selected component" option.)
+    "Reset Assignee to default" option.)
 (3) You decide the [% terms.bug %] belongs to you, but you can't solve it this moment.
-    Just use the "Accept [% terms.bug %]" command.
+    Accept the [% terms.bug %] by setting the status to [% display_value("bug_status", "ASSIGNED") %].
 
 To get a list of all [% display_value("bug_status", "NEW") %]/[% display_value("bug_status", "REOPENED") %] [%+ terms.bugs %], you can use this URL (bookmark
 it if you like!):

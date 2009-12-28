@@ -31,10 +31,6 @@
 [% PROCESS global/variables.none.tmpl %]
 [% PROCESS 'global/field-descs.none.tmpl' %]
 
-[%# assignee_login_string is a literal string used for getting the 
-  # assignee's name out of the bug data %]
-[% SET assignee_login_string="map_assigned_to.login_name" %]
-
 [% body %]
 
 [% IF author.login == recipient.login %]
@@ -56,7 +52,7 @@
   Priority: [%+ display_value("priority", bug.priority) -%]
   Severity: [%+ display_value("bug_severity", bug.bug_severity) -%]
   Platform: [%+ display_value("rep_platform", bug.rep_platform) %]
-  Assignee: [%+ bug.$assignee_login_string %]
+  Assignee: [%+ bug.assigned_to %]
     Status: [%+ display_value("bug_status", bug.bug_status) %]
             [%- IF bug.resolution -%] Resolution: [% display_value("resolution", bug.resolution) -%]
                                 [%- END %]

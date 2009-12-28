@@ -31,10 +31,6 @@
 [% PROCESS global/variables.none.tmpl %]
 [% PROCESS 'global/field-descs.none.tmpl' %]
 
-[%# assignee_login_string is a literal string used for getting the 
-  # assignee's name out of the bug data %]
-[% SET assignee_login_string="map_assigned_to.login_name" %]
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
   <head>
@@ -81,7 +77,7 @@
         <td align="left">[% bug.bug_severity FILTER html %]</td>
         <td align="left">[% bug.priority FILTER html %]</td>
         <td align="left">[% bug.rep_platform FILTER html %]</td>
-        <td align="left">[% bug.$assignee_login_string FILTER html %]</td>
+        <td align="left">[% bug.assigned_to FILTER html %]</td>
         <td align="left">[% get_status(bug.bug_status) FILTER html %]</td>
         <td align="left">[% get_resolution(bug.resolution) FILTER html %]</td>
         <td align="left">[% bug.short_desc FILTER html %]</td>

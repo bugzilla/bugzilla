@@ -434,7 +434,6 @@ sub run_queries {
             bug_status
             resolution
             short_desc
-            assigned_to
         );
         # A new Bugzilla::CGI object needs to be created to allow
         # Bugzilla::Search to execute a saved query.  It's exceedingly weird,

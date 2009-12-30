@@ -249,8 +249,34 @@ sub view {
 
         # Make sure the attachment is served from the correct server.
         my $bug_id = $attachment->bug_id;
-        if (!$cgi->url_is_attachment_base($bug_id)) {
-            # We couldn't call Bugzilla->login earlier as we first had to 
+        if ($cgi->url_is_attachment_base($bug_id)) {
+            # No need to validate the token for public attachments. We cannot request
+            # credentials as we are on the alternate host.
+            if (!attachmentIsPublic($attachment)) {
+                my $token = $cgi->param('t');
+                my ($userid, undef, $token_attach_id) = Bugzilla::Token::GetTokenData($token);
+                unless ($userid
+                        && detaint_natural($token_attach_id)
+                        && ($token_attach_id == $attachment->id))
+                {
+                    # Not a valid token.
+                    print $cgi->redirect('-location' => correct_urlbase() . $path);
+                    exit;
+                }
+                # Change current user without creating cookies.
+                Bugzilla->set_user(new Bugzilla::User($userid));
+                # Tokens are single use only, delete it.
+                delete_token($token);
+            }
+        }
+        elsif ($cgi->url_is_attachment_base) {
+            # If we come here, this means that each bug has its own host
+            # for attachments, and that we are trying to view one attachment
+            # using another bug's host. That's not desired.
+            $cgi->redirect_to_urlbase;
+        }
+        else {
+            # We couldn't call Bugzilla->login earlier as we first had to
             # make sure we were not going to request credentials on the
             # alternate host.
             Bugzilla->login();
@@ -269,25 +295,6 @@ sub view {
                 my $token = url_quote(issue_session_token($attachment->id));
                 print $cgi->redirect(-location => $attachbase . "$path&t=$token");
                 exit;
-            }
-        } else {
-            # No need to validate the token for public attachments. We cannot request
-            # credentials as we are on the alternate host.
-            if (!attachmentIsPublic($attachment)) {
-                my $token = $cgi->param('t');
-                my ($userid, undef, $token_attach_id) = Bugzilla::Token::GetTokenData($token);
-                unless ($userid
-                        && detaint_natural($token_attach_id)
-                        && ($token_attach_id == $attachment->id))
-                {
-                    # Not a valid token.
-                    print $cgi->redirect('-location' => correct_urlbase() . $path);
-                    exit;
-                }
-                # Change current user without creating cookies.
-                Bugzilla->set_user(new Bugzilla::User($userid));
-                # Tokens are single use only, delete it.
-                delete_token($token);
             }
         }
     } else {

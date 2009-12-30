@@ -203,9 +203,14 @@ if ($action eq 'search') {
 
     check_token_data($token, 'add_user');
 
+    # When e.g. the 'Env' auth method is used, the password field
+    # is not displayed. In that case, set the password to *.
+    my $password = $cgi->param('password');
+    $password = '*' if !defined $password;
+
     my $new_user = Bugzilla::User->create({
         login_name    => scalar $cgi->param('login'),
-        cryptpassword => scalar $cgi->param('password'),
+        cryptpassword => $password,
         realname      => scalar $cgi->param('name'),
         disabledtext  => scalar $cgi->param('disabledtext'),
         disable_mail  => scalar $cgi->param('disable_mail')});

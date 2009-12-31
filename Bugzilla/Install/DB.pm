@@ -594,6 +594,8 @@ sub update_table_definitions {
 
     _add_allows_unconfirmed_to_product_table();
 
+    _convert_flagtypes_fks_to_set_null();
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################
@@ -3337,6 +3339,18 @@ sub _add_allows_unconfirmed_to_product_table {
             { TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'FALSE' });
         $dbh->do('UPDATE products SET allows_unconfirmed = 1 
                    WHERE votestoconfirm > 0');
+    }
+}
+
+sub _convert_flagtypes_fks_to_set_null {
+    my $dbh = Bugzilla->dbh;
+    foreach my $column (qw(request_group_id grant_group_id)) {
+        my $fk = $dbh->bz_fk_info('flagtypes', $column);
+        if ($fk and !defined $fk->{DELETE}) {
+            # checksetup will re-create the FK with the appropriate definition
+            # at the end of its table upgrades, so we just drop it here.
+            $dbh->bz_drop_fk('flagtypes', $column);
+        }
     }
 }
 

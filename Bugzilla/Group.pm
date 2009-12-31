@@ -84,19 +84,47 @@ sub user_regexp  { return $_[0]->{'userregexp'};   }
 sub is_active    { return $_[0]->{'isactive'};     }
 sub icon_url     { return $_[0]->{'icon_url'};     }
 
+sub bugs {
+    my $self = shift;
+    return $self->{bugs} if exists $self->{bugs};
+    my $bug_ids = Bugzilla->dbh->selectcol_arrayref(
+        'SELECT bug_id FROM bug_group_map WHERE group_id = ?',
+        undef, $self->id);
+    require Bugzilla::Bug;
+    $self->{bugs} = Bugzilla::Bug->new_from_list($bug_ids);
+    return $self->{bugs};
+}
+
 sub members_direct {
     my ($self) = @_;
-    return $self->{members_direct} if defined $self->{members_direct};
-    my $dbh = Bugzilla->dbh;
-    my $user_ids = $dbh->selectcol_arrayref(
-        "SELECT user_group_map.user_id
-           FROM user_group_map
-          WHERE user_group_map.group_id = ?
-                AND grant_type = " . GRANT_DIRECT . "
-                AND isbless = 0", undef, $self->id);
-    require Bugzilla::User;
-    $self->{members_direct} = Bugzilla::User->new_from_list($user_ids);
+    $self->{members_direct} ||= $self->_get_members(GRANT_DIRECT);
     return $self->{members_direct};
+}
+
+sub members_non_inherited {
+    my ($self) = @_;
+    $self->{members_non_inherited} ||= $self->_get_members();
+    return $self->{members_non_inherited};
+}
+
+# A helper for members_direct and members_non_inherited
+sub _get_members {
+    my ($self, $grant_type) = @_;
+    my $dbh = Bugzilla->dbh;
+    my $grant_clause = $grant_type ? "AND grant_type = $grant_type" : "";
+    my $user_ids = $dbh->selectcol_arrayref(
+        "SELECT DISTINCT user_id
+           FROM user_group_map
+          WHERE isbless = 0 $grant_clause AND group_id = ?", undef, $self->id);
+    require Bugzilla::User;
+    return Bugzilla::User->new_from_list($user_ids);
+}
+
+sub flag_types {
+    my $self = shift;
+    require Bugzilla::FlagType;
+    $self->{flag_types} ||= Bugzilla::FlagType::match({ group => $self->id });
+    return $self->{flag_types};
 }
 
 sub grant_direct {
@@ -131,6 +159,30 @@ sub granted_by_direct {
     return $self->{granted_by_direct}->{$type};
 }
 
+sub products {
+    my $self = shift;
+    return $self->{products} if exists $self->{products};
+    my $product_data = Bugzilla->dbh->selectall_arrayref(
+        'SELECT product_id, entry, membercontrol, othercontrol,
+                canedit, editcomponents, editbugs, canconfirm
+          FROM  group_control_map WHERE group_id = ?', {Slice=>{}},
+        $self->id);
+    my @ids = map { $_->{product_id} } @$product_data;
+    require Bugzilla::Product;
+    my $products = Bugzilla::Product->new_from_list(\@ids); 
+    my %data_map = map { $_->{product_id} => $_ } @$product_data;
+    my @retval;
+    foreach my $product (@$products) {
+        # Data doesn't need to contain product_id--we already have
+        # the product object.
+        delete $data_map{$product->id}->{product_id};
+        push(@retval, { controls => $data_map{$product->id},
+                        product  => $product });
+    }
+    $self->{products} = \@retval;
+    return $self->{products};
+}
+
 ###############################
 ####        Methods        ####
 ###############################
@@ -163,6 +215,66 @@ sub update {
 
     $self->_rederive_regexp() if exists $changes->{userregexp};
     return $changes;
+}
+
+sub check_remove {
+    my ($self, $params) = @_;
+
+    # System groups cannot be deleted!
+    if (!$self->is_bug_group) {
+        ThrowUserError("system_group_not_deletable", { name => $self->name });
+    }
+
+    # Groups having a special role cannot be deleted.
+    my @special_groups;
+    foreach my $special_group (GROUP_PARAMS) {
+        if ($self->name eq Bugzilla->params->{$special_group}) {
+            push(@special_groups, $special_group);
+        }
+    }
+    if (scalar(@special_groups)) {
+        ThrowUserError('group_has_special_role',
+                       { name   => $self->name,
+                         groups => \@special_groups });
+    }
+
+    return if $params->{'test_only'};
+
+    my $cantdelete = 0;
+
+    my $users = $self->members_non_inherited;
+    if (scalar(@$users) && !$params->{'remove_from_users'}) {
+        $cantdelete = 1;
+    }
+
+    my $bugs = $self->bugs;
+    if (scalar(@$bugs) && !$params->{'remove_from_bugs'}) {
+        $cantdelete = 1;
+    }
+    
+    my $products = $self->products;
+    if (scalar(@$products) && !$params->{'remove_from_products'}) {
+        $cantdelete = 1;
+    }
+
+    my $flag_types = $self->flag_types;
+    if (scalar(@$flag_types) && !$params->{'remove_from_flags'}) {
+        $cantdelete = 1;
+    }
+
+    ThrowUserError('group_cannot_delete', { group => $self }) if $cantdelete;
+}
+
+sub remove_from_db {
+    my $self = shift;
+    my $dbh = Bugzilla->dbh;
+    $self->check_remove(@_);
+    $dbh->do('DELETE FROM whine_schedules
+               WHERE mailto_type = ? AND mailto = ?',
+              undef, MAILTO_GROUP, $self->id);
+    # All the other tables will be handled by foreign keys when we
+    # drop the main "groups" row.
+    $self->SUPER::remove_from_db(@_);
 }
 
 # Add missing entries in bug_group_map for bugs created while
@@ -222,20 +334,6 @@ sub _rederive_regexp {
             $sthdel->execute($uid, $self->id, GRANT_REGEXP) if $present;
         }
     }
-}
-
-sub members_non_inherited {
-    my ($self) = @_;
-    return $self->{members_non_inherited} 
-           if exists $self->{members_non_inherited};
-
-    my $member_ids = Bugzilla->dbh->selectcol_arrayref(
-        'SELECT DISTINCT user_id FROM user_group_map 
-          WHERE isbless = 0 AND group_id = ?',
-        undef, $self->id) || [];
-    require Bugzilla::User;
-    $self->{members_non_inherited} = Bugzilla::User->new_from_list($member_ids);
-    return $self->{members_non_inherited};
 }
 
 sub flatten_group_membership {
@@ -413,6 +511,53 @@ be a member of this group.
 =head1 METHODS
 
 =over
+
+=item C<check_remove>
+
+=over
+
+=item B<Description>
+
+Determines whether it's OK to remove this group from the database, and
+throws an error if it's not OK.
+
+=item B<Params>
+
+=over
+
+=item C<test_only>
+
+C<boolean> If you want to only check if the group can be deleted I<at all>,
+under any circumstances, specify C<test_only> to just do the most basic tests
+(the other parameters will be ignored in this situation, as those tests won't
+be run).
+
+=item C<remove_from_users>
+
+C<boolean> True if it would be OK to remove all users who are in this group
+from this group.
+
+=item C<remove_from_bugs>
+
+C<boolean> True if it would be OK to remove all bugs that are in this group
+from this group.
+
+=item C<remove_from_flags>
+
+C<boolean> True if it would be OK to stop all flagtypes that reference
+this group from referencing this group (e.g., as their grantgroup or
+requestgroup).
+
+=item C<remove_from_products>
+
+C<boolean> True if it would be OK to remove this group from all group controls
+on products.
+
+=back
+
+=item B<Returns> (nothing)
+
+=back
 
 =item C<members_non_inherited>
 

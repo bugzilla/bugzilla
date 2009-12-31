@@ -682,9 +682,10 @@
 
   [% ELSIF error == "group_cannot_delete" %]
     [% title = "Cannot Delete Group" %]
-    The <em>[% name FILTER html %]</em> group cannot be deleted because
+    The <em>[% group.name FILTER html %]</em> group cannot be deleted because
     there are
-    <a href="editgroups.cgi?action=del&amp;group=[% gid FILTER url_quote %]">records</a>
+    <a href="editgroups.cgi?action=del&amp;group=
+             [%- group.id FILTER url_quote %]">records</a>
     in the database which refer to it. All references to this group must
     be removed before you can remove it.
 
@@ -1760,6 +1761,8 @@
     flagtype
   [% ELSIF class == "Bugzilla::Field" %]
     field
+  [% ELSIF class == "Bugzilla::Group" %]
+    group
   [% ELSIF class == "Bugzilla::Product" %]
     product
   [% ELSIF class == "Bugzilla::Search::Saved" %]

@@ -837,6 +837,14 @@ sub bz_drop_table {
     }
 }
 
+sub bz_fk_info {
+    my ($self, $table, $column) = @_;
+    my $col_info = $self->bz_column_info($table, $column);
+    return undef if !$col_info;
+    my $fk = $col_info->{REFERENCES};
+    return $fk;
+}
+
 sub bz_rename_column {
     my ($self, $table, $old_name, $new_name) = @_;
 

@@ -29,6 +29,7 @@ use Bugzilla::Error;
 
 use constant can_logout => 0;
 use constant can_login  => 0;
+use constant requires_persistence  => 0;
 use constant requires_verification => 0;
 
 sub get_login_info {

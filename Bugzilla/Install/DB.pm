@@ -593,8 +593,8 @@ sub update_table_definitions {
     $dbh->bz_drop_column('products', 'milestoneurl');
 
     _add_allows_unconfirmed_to_product_table();
-
     _convert_flagtypes_fks_to_set_null();
+    _fix_decimal_types();
 
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
@@ -3352,6 +3352,14 @@ sub _convert_flagtypes_fks_to_set_null {
             $dbh->bz_drop_fk('flagtypes', $column);
         }
     }
+}
+
+sub _fix_decimal_types {
+    my $dbh = Bugzilla->dbh;
+    my $type = {TYPE => 'decimal(7,2)', NOTNULL => 1, DEFAULT => '0'};
+    $dbh->bz_alter_column('bugs', 'estimated_time', $type);
+    $dbh->bz_alter_column('bugs', 'remaining_time', $type);
+    $dbh->bz_alter_column('longdescs', 'work_time', $type);
 }
 
 1;

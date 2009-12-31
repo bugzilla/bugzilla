@@ -35,6 +35,7 @@ use strict;
 use base qw(Exporter);
 use Bugzilla::Constants;
 use Bugzilla::Hook;
+use Bugzilla::Install::Filesystem qw(fix_file_permissions);
 use Data::Dumper;
 use File::Temp;
 
@@ -297,27 +298,11 @@ sub write_params {
     rename $tmpname, $param_file
       or die "Can't rename $tmpname to $param_file: $!";
 
-    ChmodDataFile($param_file, 0666);
+    fix_file_permissions($param_file);
 
     # And now we have to reset the params cache so that Bugzilla will re-read
     # them.
     delete Bugzilla->request_cache->{params};
-}
-
-# Some files in the data directory must be world readable if and only if
-# we don't have a webserver group. Call this function to do this.
-# This will become a private function once all the datafile handling stuff
-# moves into this package
-
-# This sub is not perldoc'd for that reason - noone should know about it
-sub ChmodDataFile {
-    my ($file, $mask) = @_;
-    my $perm = 0770;
-    if ((stat(bz_locations()->{'datadir'}))[2] & 0002) {
-        $perm = 0777;
-    }
-    $perm = $perm & $mask;
-    chmod $perm,$file;
 }
 
 sub read_param_file {

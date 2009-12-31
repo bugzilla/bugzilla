@@ -27,6 +27,7 @@ package Bugzilla::Install;
 use strict;
 
 use Bugzilla::Component;
+use Bugzilla::Config qw(:admin);
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Group;
@@ -309,6 +310,12 @@ sub make_admin {
     eval { 
         $group_insert->execute($user->id, $editusers->id, 0, GRANT_DIRECT); 
     };
+
+    # If there is no maintainer set, make this user the maintainer.
+    if (!Bugzilla->params->{'maintainer'}) {
+        SetParam('maintainer', $user->email);
+        write_params();
+    }
 
     print "\n", get_text('install_admin_created', { user => $user }), "\n";
 }

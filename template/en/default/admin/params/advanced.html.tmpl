@@ -1,0 +1,42 @@
+[%# The contents of this file are subject to the Mozilla Public
+  # License Version 1.1 (the "License"); you may not use this file
+  # except in compliance with the License. You may obtain a copy of
+  # the License at http://www.mozilla.org/MPL/
+  #
+  # Software distributed under the License is distributed on an "AS
+  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+  # implied. See the License for the specific language governing
+  # rights and limitations under the License.
+  #
+  # The Original Code is the Bugzilla Bug Tracking System.
+  #
+  # The Initial Developer of the Original Code is Netscape Communications
+  # Corporation. Portions created by Netscape are
+  # Copyright (C) 1998 Netscape Communications Corporation. All
+  # Rights Reserved.
+  #
+  # Contributor(s): Dave Miller <justdave@bugzilla.org>
+  #                 Frédéric Buclin <LpSolit@gmail.com>
+  #%]
+
+[% 
+   title = "Advanced"
+   desc = "Settings for advanced configurations."
+%]
+
+[% param_descs = {
+  cookiedomain => 
+    "If your website is at 'www.foo.com', setting this to"
+    _ " '.foo.com' will also allow 'bar.foo.com' to access"
+    _ " $terms.Bugzilla cookies. This is useful if you have more than"
+    _ " one hostname pointing at the same web server, and you"
+    _ " want them to share the $terms.Bugzilla cookie.",
+
+  proxy_url => 
+    "$terms.Bugzilla may have to access the web to get notifications about"
+    _ " new releases (see the <tt>upgrade_notification</tt> parameter)."
+    _ " If your $terms.Bugzilla server is behind a proxy, it may be"
+    _ " necessary to enter its URL if the web server cannot access the"
+    _ " HTTP_PROXY environment variable. If you have to authenticate,"
+    _ " use the <code>http://user:pass@proxy_url/</code> syntax.",
+} %]

@@ -27,41 +27,55 @@
 #                 Joseph Heenan <joseph@heenan.me.uk>
 #                 Erik Stambaugh <erik@dasbistro.com>
 #                 Frédéric Buclin <LpSolit@gmail.com>
-#
+#                 Max Kanat-Alexander <mkanat@bugzilla.org>
 
-package Bugzilla::Config::Core;
-
+package Bugzilla::Config::General;
 use strict;
-
 use Bugzilla::Config::Common;
 
-our $sortkey = 100;
+our $sortkey = 150;
 
 use constant get_param_list => (
   {
-   name => 'urlbase',
+   name => 'maintainer',
    type => 't',
    default => '',
-   checker => \&check_urlbase
+   checker => \&check_email
   },
 
   {
-   name => 'ssl_redirect',
+   name => 'docs_urlbase',
+   type => 't',
+   default => 'docs/%lang%/html/',
+   checker => \&check_url
+  },
+
+  {
+   name => 'utf8',
    type => 'b',
-   default => 0
+   default => '0',
+   checker => \&check_utf8
   },
 
   {
-   name => 'sslbase',
-   type => 't',
-   default => '',
-   checker => \&check_sslbase
+   name => 'shutdownhtml',
+   type => 'l',
+   default => ''
   },
 
   {
-   name => 'cookiepath',
-   type => 't',
-   default => '/'
+   name => 'announcehtml',
+   type => 'l',
+   default => ''
+  },
+
+  {
+   name => 'upgrade_notification',
+   type => 's',
+   choices => ['development_snapshot', 'latest_stable_release',
+               'stable_branch_release', 'disabled'],
+   default => 'latest_stable_release',
+   checker => \&check_notification
   },
 );
 

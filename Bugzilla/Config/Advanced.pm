@@ -27,41 +27,24 @@
 #                 Joseph Heenan <joseph@heenan.me.uk>
 #                 Erik Stambaugh <erik@dasbistro.com>
 #                 Frédéric Buclin <LpSolit@gmail.com>
-#
+#                 Max Kanat-Alexander <mkanat@bugzilla.org>
 
-package Bugzilla::Config::Core;
-
+package Bugzilla::Config::Advanced;
 use strict;
 
-use Bugzilla::Config::Common;
-
-our $sortkey = 100;
+our $sortkey = 1700;
 
 use constant get_param_list => (
   {
-   name => 'urlbase',
+   name => 'cookiedomain',
    type => 't',
-   default => '',
-   checker => \&check_urlbase
+   default => ''
   },
 
   {
-   name => 'ssl_redirect',
-   type => 'b',
-   default => 0
-  },
-
-  {
-   name => 'sslbase',
+   name => 'proxy_url',
    type => 't',
-   default => '',
-   checker => \&check_sslbase
-  },
-
-  {
-   name => 'cookiepath',
-   type => 't',
-   default => '/'
+   default => ''
   },
 );
 

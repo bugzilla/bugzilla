@@ -96,7 +96,7 @@ YAHOO.util.Event.onDOMReady(onLoadActions);
 
       <p class="notice">This message is only shown to logged in users with admin privs.
       You can configure this notification from the
-      <a href="editparams.cgi?section=core#upgrade_notification">Parameters</a> page.</p>
+      <a href="editparams.cgi?section=general#upgrade_notification">Parameters</a> page.</p>
     [% ELSIF release.error == "cannot_download" %]
       <p>The local XML file '[% release.xml_file FILTER html %]' cannot be created.
       Please make sure the web server can write in this directory and that you can access

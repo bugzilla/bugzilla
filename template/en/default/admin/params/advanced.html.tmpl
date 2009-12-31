@@ -32,6 +32,14 @@
     _ " one hostname pointing at the same web server, and you"
     _ " want them to share the $terms.Bugzilla cookie.",
 
+  inbound_proxies =>
+    "When inbound traffic to $terms.Bugzilla goes through a proxy,"
+    _ " $terms.Bugzilla thinks that the IP address of every single"
+    _ " user is the IP address of the proxy. If you enter a comma-separated"
+    _ " list of IPs in this parameter, then $terms.Bugzilla will trust any"
+    _ " <code>X-Forwarded-For</code> header sent from those IPs,"
+    _ " and use the value of that header as the end user's IP address.",
+
   proxy_url => 
     "$terms.Bugzilla may have to access the web to get notifications about"
     _ " new releases (see the <tt>upgrade_notification</tt> parameter)."

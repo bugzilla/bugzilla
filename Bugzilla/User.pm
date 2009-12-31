@@ -65,11 +65,6 @@ use base qw(Bugzilla::Object Exporter);
 # Constants
 #####################################################################
 
-# Used as the IP for authentication failures for password-lockout purposes
-# when there is no IP (for example, if we're doing authentication from the
-# command line for some reason).
-use constant NO_IP => '255.255.255.255';
-
 use constant USER_MATCH_MULTIPLE => -1;
 use constant USER_MATCH_FAILED   => 0;
 use constant USER_MATCH_SUCCESS  => 1;
@@ -1681,7 +1676,7 @@ sub account_is_locked_out {
 
 sub note_login_failure {
     my $self = shift;
-    my $ip_addr = Bugzilla->cgi->remote_addr || NO_IP;
+    my $ip_addr = remote_ip();
     trick_taint($ip_addr);
     Bugzilla->dbh->do("INSERT INTO login_failure (user_id, ip_addr, login_time)
                        VALUES (?, ?, LOCALTIMESTAMP(0))",
@@ -1691,7 +1686,7 @@ sub note_login_failure {
 
 sub clear_login_failures {
     my $self = shift;
-    my $ip_addr = Bugzilla->cgi->remote_addr || NO_IP;
+    my $ip_addr = remote_ip();
     trick_taint($ip_addr);
     Bugzilla->dbh->do(
         'DELETE FROM login_failure WHERE user_id = ? AND ip_addr = ?',
@@ -1703,7 +1698,7 @@ sub account_ip_login_failures {
     my $self = shift;
     my $dbh = Bugzilla->dbh;
     my $time = $dbh->sql_interval(LOGIN_LOCKOUT_INTERVAL, 'MINUTE');
-    my $ip_addr = Bugzilla->cgi->remote_addr || NO_IP;
+    my $ip_addr = remote_ip();
     trick_taint($ip_addr);
     $self->{account_ip_login_failures} ||= Bugzilla->dbh->selectall_arrayref(
         "SELECT login_time, ip_addr, user_id FROM login_failure

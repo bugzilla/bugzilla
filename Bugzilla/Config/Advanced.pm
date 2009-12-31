@@ -42,6 +42,12 @@ use constant get_param_list => (
   },
 
   {
+   name => 'inbound_proxies',
+   type => 't',
+   default => ''
+  },
+
+  {
    name => 'proxy_url',
    type => 't',
    default => ''

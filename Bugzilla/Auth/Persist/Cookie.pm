@@ -52,7 +52,7 @@ sub persist_login {
 
     my $ip_addr;
     if ($input_params->{'Bugzilla_restrictlogin'}) {
-        $ip_addr = $cgi->remote_addr;
+        $ip_addr = remote_ip();
         # The IP address is valid, at least for comparing with itself in a
         # subsequent login
         trick_taint($ip_addr);

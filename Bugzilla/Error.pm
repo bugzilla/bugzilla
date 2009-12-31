@@ -64,7 +64,7 @@ sub _throw_error {
         for (1..75) { $mesg .= "-"; };
         $mesg .= "\n[$$] " . time2str("%D %H:%M:%S ", time());
         $mesg .= "$name $error ";
-        $mesg .= "$ENV{REMOTE_ADDR} " if $ENV{REMOTE_ADDR};
+        $mesg .= remote_ip();
         $mesg .= Bugzilla->user->login;
         $mesg .= (' actually ' . Bugzilla->sudoer->login) if Bugzilla->sudoer;
         $mesg .= "\n";

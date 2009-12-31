@@ -35,7 +35,7 @@ sub get_login_info {
     my $cgi = Bugzilla->cgi;
     my $dbh = Bugzilla->dbh;
 
-    my $ip_addr      = $cgi->remote_addr();
+    my $ip_addr      = remote_ip();
     my $login_cookie = $cgi->cookie("Bugzilla_logincookie");
     my $user_id      = $cgi->cookie("Bugzilla_login");
 

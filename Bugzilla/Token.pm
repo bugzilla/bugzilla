@@ -142,7 +142,7 @@ sub IssuePasswordToken {
 
     ThrowUserError('too_soon_for_new_token', {'type' => 'password'}) if $too_soon;
 
-    my ($token, $token_ts) = _create_token($user->id, 'password', $::ENV{'REMOTE_ADDR'});
+    my ($token, $token_ts) = _create_token($user->id, 'password', remote_ip());
 
     # Mail the user the token along with instructions for using it.
     my $template = Bugzilla->template_inner($user->settings->{'lang'}->{'value'});
@@ -283,7 +283,7 @@ sub Cancel {
     my $user = new Bugzilla::User($userid);
 
     $vars->{'emailaddress'} = $userid ? $user->email : $eventdata;
-    $vars->{'remoteaddress'} = $::ENV{'REMOTE_ADDR'};
+    $vars->{'remoteaddress'} = remote_ip();
     $vars->{'token'} = $token;
     $vars->{'tokentype'} = $tokentype;
     $vars->{'issuedate'} = $issuedate;

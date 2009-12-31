@@ -48,7 +48,7 @@
        */
       [% IF user.settings.quote_replies.value != 'off' %]
         document.write('[<a href="#add_comment" onclick="replyToComment(' + 
-                       id + ',' + real_id + ');">reply<' + '/a>]');
+                       id + ',' + real_id + '); return false;">reply<' + '/a>]');
       [% END %]
   }
 

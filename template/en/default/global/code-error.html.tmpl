@@ -344,7 +344,11 @@
   [% ELSIF error == "ldap_search_error" %]
     An error occurred while trying to search LDAP for 
     &quot;[% username FILTER html %]&quot;: 
-   <code>[% errstr FILTER html %]</code>
+    [% IF errstr %]
+      <code>[% errstr FILTER html %]</code>
+    [% ELSE %]
+      Unable to find user in LDAP
+    [% END %]
 
   [% ELSIF error == "ldap_server_not_defined" %]
     The LDAP server for authentication has not been defined.

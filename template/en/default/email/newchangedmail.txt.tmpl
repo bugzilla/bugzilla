@@ -20,7 +20,7 @@
 
 [% PROCESS "global/variables.none.tmpl" %]
 From: [% Param('mailfrom') %]
-To: [% to %]
+To: [% to_user.email %]
 Subject: [[% terms.Bug %] [%+ bugid %]] [% 'New: ' IF isnew %][%+ summary %]
 X-Bugzilla-Reason: [% reasonsheader %]
 X-Bugzilla-Type: [% isnew ? 'new' : 'changed' %]
@@ -48,7 +48,7 @@ X-Bugzilla-Changed-Fields: [% changedfields %]
 [% FOREACH comment = new_comments %]
 
 [%- IF comment.count %]
---- Comment #[% comment.count %] from [% comment.author.identity %] [%+ comment.time FILTER time %] ---
+--- Comment #[% comment.count %] from [% comment.author.identity %] [%+ comment.time FILTER time(undef, to_user.timezone) %] ---
 [% END %]
 [%+ comment.body_full({ is_bugmail => 1, wrap => 1 }) %]
 [% END %]

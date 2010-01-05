@@ -413,8 +413,8 @@ sub wrap_hard {
 sub format_time {
     my ($date, $format, $timezone) = @_;
 
-    # If $format is undefined, try to guess the correct date format.
-    if (!defined($format)) {
+    # If $format is not set, try to guess the correct date format.
+    if (!$format) {
         if (!ref $date
             && $date =~ /^(\d{4})[-\.](\d{2})[-\.](\d{2}) (\d{2}):(\d{2})(:(\d{2}))?$/) 
         {

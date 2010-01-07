@@ -136,7 +136,7 @@ sub get_format {
 # If you want to modify this routine, read the comments carefully
 
 sub quoteUrls {
-    my ($text, $curr_bugid, $already_wrapped) = (@_);
+    my ($text, $curr_bugid) = (@_);
     return $text unless $text;
 
     # We use /g for speed, but uris can have other things inside them
@@ -150,10 +150,6 @@ sub quoteUrls {
     # escape the 2nd escape char we're using
     my $chr1 = chr(1);
     $text =~ s/\0/$chr1\0/g;
-
-    # If the comment is already wrapped, we should ignore newlines when
-    # looking for matching regexps. Else we should take them into account.
-    my $s = $already_wrapped ? qr/\s/ : qr/[[:blank:]]/;
 
     # However, note that adding the title (for buglinks) can affect things
     # In particular, attachment matches go before bug titles, so that titles
@@ -209,7 +205,7 @@ sub quoteUrls {
                ("\0\0" . ($count-1) . "\0\0")
               ~egmx;
 
-    $text =~ s~\b(attachment$s*\#?$s*(\d+))
+    $text =~ s~\b(attachment\s*\#?\s*(\d+))
               ~($things[$count++] = get_attachment_link($2, $1)) &&
                ("\0\0" . ($count-1) . "\0\0")
               ~egmxi;
@@ -222,9 +218,9 @@ sub quoteUrls {
     # Also, we can't use $bug_re?$comment_re? because that will match the
     # empty string
     my $bug_word = get_text('term', { term => 'bug' });
-    my $bug_re = qr/\Q$bug_word\E$s*\#?$s*(\d+)/i;
-    my $comment_re = qr/comment$s*\#?$s*(\d+)/i;
-    $text =~ s~\b($bug_re(?:$s*,?$s*$comment_re)?|$comment_re)
+    my $bug_re = qr/\Q$bug_word\E\s*\#?\s*(\d+)/i;
+    my $comment_re = qr/comment\s*\#?\s*(\d+)/i;
+    $text =~ s~\b($bug_re(?:\s*,?\s*$comment_re)?|$comment_re)
               ~ # We have several choices. $1 here is the link, and $2-4 are set
                 # depending on which part matched
                (defined($2) ? get_bug_link($2, $1, { comment_num => $3 }) :
@@ -536,10 +532,10 @@ sub create {
             css_class_quote => \&Bugzilla::Util::css_class_quote ,
 
             quoteUrls => [ sub {
-                               my ($context, $bug, $already_wrapped) = @_;
+                               my ($context, $bug) = @_;
                                return sub {
                                    my $text = shift;
-                                   return quoteUrls($text, $bug, $already_wrapped);
+                                   return quoteUrls($text, $bug);
                                };
                            },
                            1

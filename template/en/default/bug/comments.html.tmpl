@@ -222,7 +222,7 @@
 [% END %]
 <pre class="bz_comment_text" 
      [% ' id="comment_text_' _ count _ '"' IF mode == "edit" %]>
-  [%- wrapped_comment FILTER quoteUrls(bug.bug_id, comment.already_wrapped) -%]
+  [%- wrapped_comment FILTER quoteUrls(bug.bug_id) -%]
 </pre>
     </div>
   [% END %]

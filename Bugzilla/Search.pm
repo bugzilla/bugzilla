@@ -305,7 +305,9 @@ sub init {
     if ($params->param('bug_status')) {
         my @bug_statuses = $params->param('bug_status');
         # Also include inactive bug statuses, as you can query them.
-        my @legal_statuses = @{Bugzilla::Field->new({name => 'bug_status'})->legal_values};
+        my @legal_statuses =
+          map {$_->name} @{Bugzilla::Field->new({name => 'bug_status'})->legal_values};
+
         if (scalar(@bug_statuses) == scalar(@legal_statuses)
             || $bug_statuses[0] eq "__all__")
         {

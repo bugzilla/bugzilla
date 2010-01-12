@@ -624,10 +624,11 @@ function doOnSelectProduct(selectmode) {
     <select name="[% sel.name %]" id="[% sel.name %]"
             multiple="multiple" size="[% sel.size %]">
       [% FOREACH value = ${sel.name} %]
-      [% IF value.id %]
-        [%# This only applies for Resolution really %]
-          <option value="[% value.name OR '---' FILTER html %]"
-            [% " selected" IF lsearch(default.${sel.name}, value.name) != -1 %]>
+        [% IF value.id %]
+          [%# This only applies for Resolution really %]
+          [% v = value.name OR '---' -%]
+          <option value="[% v FILTER html %]"
+            [% " selected" IF lsearch(default.${sel.name}, v) != -1 %]>
             [% display_value(sel.name, value.name) FILTER html %]
           </option>
         [% ELSE %]

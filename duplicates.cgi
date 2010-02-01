@@ -33,6 +33,24 @@ use Bugzilla::Search;
 use Bugzilla::Field;
 use Bugzilla::Product;
 
+use constant DEFAULTS => {
+    # We want to show bugs which:
+    # a) Aren't CLOSED; and
+    # b)  i) Aren't VERIFIED; OR
+    #    ii) Were resolved INVALID/WONTFIX
+    #
+    # The rationale behind this is that people will eventually stop
+    # reporting fixed bugs when they get newer versions of the software,
+    # but if the bug is determined to be erroneous, people will still
+    # keep reporting it, so we do need to show it here.
+    fully_exclude_status  => ['CLOSED'],
+    partly_exclude_status => ['VERIFIED'],
+    except_resolution => ['INVALID', 'WONTFIX'],
+    changedsince => 7,
+    maxrows      => 20,
+    sortby       => 'count',
+};
+
 ###############
 # Subroutines #
 ###############
@@ -55,13 +73,44 @@ sub add_indirect_dups {
 sub walk_dup_chain {
     my ($dups, $from_id) = @_;
     my $to_id = $dups->{$from_id};
+    my %seen;
     while (my $bug_id = $dups->{$to_id}) {
-        last if $bug_id == $from_id; # avoid duplicate loops
+        if ($seen{$bug_id}) {
+            warn "Duplicate loop: $to_id -> $bug_id\n";
+            last;
+        }
+        $seen{$bug_id} = 1;
         $to_id = $bug_id;
     }
     # Optimize for future calls to add_indirect_dups.
     $dups->{$from_id} = $to_id;
     return $to_id;
+}
+
+# Get params from URL
+sub formvalue {
+    my ($name) = (@_);
+    my $cgi = Bugzilla->cgi;
+    if (defined $cgi->param($name)) {
+        return $cgi->param($name);
+    }
+    elsif (exists DEFAULTS->{$name}) {
+        return ref DEFAULTS->{$name} ? @{ DEFAULTS->{$name} } 
+                                     : DEFAULTS->{$name};
+    }
+    return undef;
+}
+
+sub sort_duplicates {
+    my ($a, $b, $sort_by) = @_;
+    if ($sort_by eq 'count' or $sort_by eq 'delta') {
+        return $a->{$sort_by} <=> $b->{$sort_by};
+    }
+    if ($sort_by =~ /^(bug_)?id$/) {
+        return $a->{'bug'}->$sort_by <=> $b->{'bug'}->$sort_by;
+    }
+    return $a->{'bug'}->$sort_by cmp $b->{'bug'}->$sort_by;
+    
 }
 
 ###############
@@ -70,35 +119,38 @@ sub walk_dup_chain {
 
 my $cgi = Bugzilla->cgi;
 my $template = Bugzilla->template;
-my $vars = {};
-
-Bugzilla->login();
+my $user = Bugzilla->login();
 
 my $dbh = Bugzilla->switch_to_shadow_db();
 
-# Get params from URL
-sub formvalue {
-    my ($name, $default) = (@_);
-    return Bugzilla->cgi->param($name) || $default || "";
-}
-
-my $sortby = formvalue("sortby");
-my $changedsince = formvalue("changedsince", 7);
-my $maxrows = formvalue("maxrows", 100);
+my $changedsince = formvalue("changedsince");
+my $maxrows = formvalue("maxrows");
 my $openonly = formvalue("openonly");
-my $reverse = formvalue("reverse") ? 1 : 0;
+my $sortby = formvalue("sortby");
+if (!grep(lc($_) eq lc($sortby), qw(count delta id))) {
+    Bugzilla::Field->check($sortby);
+}
+my $reverse = formvalue("reverse");
+# Reverse count and delta by default.
+if (!defined $reverse) {
+    if ($sortby eq 'count' or $sortby eq 'delta') {
+        $reverse = 1;
+    }
+    else {
+        $reverse = 0;
+    }
+}
 my @query_products = $cgi->param('product');
 my $sortvisible = formvalue("sortvisible");
-my @buglist = (split(/[:,]/, formvalue("bug_id")));
-detaint_natural($_) foreach @buglist;
-# If we got any non-numeric items, they will now be undef. Remove them from
-# the list.
-@buglist = grep($_, @buglist);
+my @bugs;
+if ($sortvisible) {
+    my @limit_to_ids = (split(/[:,]/, formvalue("bug_id") || ''));
+    @bugs = @{ Bugzilla::Bug->new_from_list(\@limit_to_ids) };
+    @bugs = @{ $user->visible_bugs(\@bugs) };
+}
 
 # Make sure all products are valid.
-foreach my $p (@query_products) {
-    Bugzilla::Product::check_product($p);
-}
+@query_products = map { Bugzilla::Product->check($_) } @query_products;
 
 # Small backwards-compatibility hack, dated 2002-04-10.
 $sortby = "count" if $sortby eq "dup_count";
@@ -111,7 +163,6 @@ my $origchangedsince = $changedsince;
 detaint_natural($changedsince)
   || ThrowUserError("invalid_changedsince", 
                     { changedsince => $origchangedsince });
-
 
 my %total_dups = @{$dbh->selectcol_arrayref(
     "SELECT dupe_of, COUNT(dupe)
@@ -136,117 +187,76 @@ my %since_dups = @{$dbh->selectcol_arrayref(
     $reso_field_id, $changedsince)};
 add_indirect_dups(\%since_dups, \%dupe_relation);
 
-my (@bugs, @bug_ids);
-
+# Enforce the mostfreqthreshold parameter and the "bug_id" cgi param.
 foreach my $id (keys %total_dups) {
     if ($total_dups{$id} < Bugzilla->params->{'mostfreqthreshold'}) {
         delete $total_dups{$id};
         next;
     }
-    if ($sortvisible and @buglist and !grep($_ == $id, @buglist)) {
+    if ($sortvisible and !grep($_->id == $id, @bugs)) {
         delete $total_dups{$id};
     }
 }
 
-if (scalar %total_dups) {
-    # use Bugzilla::Search so that we get the security checking
-    my $params = new Bugzilla::CGI({ 'bug_id' => [keys %total_dups] });
-
-    if ($openonly) {
-        $params->param('resolution', '---');
-    } else {
-        # We want to show bugs which:
-        # a) Aren't CLOSED; and
-        # b)  i) Aren't VERIFIED; OR
-        #    ii) Were resolved INVALID/WONTFIX
-
-        # The rationale behind this is that people will eventually stop
-        # reporting fixed bugs when they get newer versions of the software,
-        # but if the bug is determined to be erroneous, people will still
-        # keep reporting it, so we do need to show it here.
-
-        # a)
-        $params->param('field0-0-0', 'bug_status');
-        $params->param('type0-0-0', 'notequals');
-        $params->param('value0-0-0', 'CLOSED');
-
-        # b) i)
-        $params->param('field0-1-0', 'bug_status');
-        $params->param('type0-1-0', 'notequals');
-        $params->param('value0-1-0', 'VERIFIED');
-
-        # b) ii)
-        $params->param('field0-1-1', 'resolution');
-        $params->param('type0-1-1', 'anyexact');
-        $params->param('value0-1-1', 'INVALID,WONTFIX');
-    }
-
-    # Restrict to product if requested
-    if ($cgi->param('product')) {
-        $params->param('product', join(',', @query_products));
-    }
-
-    my $query = new Bugzilla::Search('fields' => [qw(bug_id
-                                                     component
-                                                     bug_severity
-                                                     op_sys
-                                                     target_milestone
-                                                     short_desc
-                                                     bug_status
-                                                     resolution
-                                                    )
-                                                 ],
-                                     'params' => $params,
-                                    );
-
-    my $results = $dbh->selectall_arrayref($query->getSQL());
-
-    foreach my $result (@$results) {
-        # Note: maximum row count is dealt with in the template.
-
-        my ($id, $component, $bug_severity, $op_sys, $target_milestone, 
-            $short_desc, $bug_status, $resolution) = @$result;
-
-        push (@bugs, { id => $id,
-                       count => $total_dups{$id},
-                       delta => $since_dups{$id} || 0, 
-                       component => $component,
-                       bug_severity => $bug_severity,
-                       op_sys => $op_sys,
-                       target_milestone => $target_milestone,
-                       short_desc => $short_desc,
-                       bug_status => $bug_status, 
-                       resolution => $resolution });
-        push (@bug_ids, $id); 
-    }
+if (!@bugs) {
+    @bugs = @{ Bugzilla::Bug->new_from_list([keys %total_dups]) };
+    @bugs = @{ $user->visible_bugs(\@bugs) };
 }
 
-$vars->{'bugs'} = \@bugs;
-$vars->{'bug_ids'} = \@bug_ids;
+my @fully_exclude_status = formvalue('fully_exclude_status');
+my @partly_exclude_status = formvalue('partly_exclude_status');
+my @except_resolution = formvalue('except_resolution');
 
-$vars->{'sortby'} = $sortby;
-$vars->{'sortvisible'} = $sortvisible;
-$vars->{'changedsince'} = $changedsince;
-$vars->{'maxrows'} = $maxrows;
-$vars->{'openonly'} = $openonly;
-$vars->{'reverse'} = $reverse;
-$vars->{'format'} = $cgi->param('format');
-$vars->{'query_products'} = \@query_products;
-$vars->{'products'} = Bugzilla->user->get_selectable_products;
+# Filter bugs by criteria
+my @result_bugs;
+foreach my $bug (@bugs) {
+    # It's possible, if somebody specified a bug ID that wasn't a dup
+    # in the "buglist" parameter and specified $sortvisible that there
+    # would be bugs in the list with 0 dups, so we want to avoid that.
+    next if !$total_dups{$bug->id};
 
+    next if ($openonly and !$bug->isopened);
+    # If the bug has a status in @fully_exclude_status, we skip it,
+    # no question.
+    next if grep($_ eq $bug->bug_status, @fully_exclude_status);
+    # If the bug has a status in @partly_exclude_status, we skip it...
+    if (grep($_ eq $bug->bug_status, @partly_exclude_status)) {
+        # ...unless it has a resolution in @except_resolution.
+        next if !grep($_ eq $bug->resolution, @except_resolution);
+    }
 
-my $format = $template->get_format("reports/duplicates",
-                                   scalar($cgi->param('format')),
-                                   scalar($cgi->param('ctype')));
+    if (scalar @query_products) {
+        next if !grep($_->id == $bug->product_id, @query_products);
+    }
 
-# We set the charset in Bugzilla::CGI, but CGI.pm ignores it unless the
-# Content-Type is a text type. In some cases, such as when we are
-# generating RDF, it isn't, so we specify the charset again here.
-print $cgi->header(
-    -type => $format->{'ctype'},
-    (Bugzilla->params->{'utf8'} ? ('charset', 'utf8') : () )
+    # Note: maximum row count is dealt with later.
+    push (@result_bugs, { bug => $bug,
+                          count => $total_dups{$bug->id},
+                          delta => $since_dups{$bug->id} || 0 });
+}
+@bugs = @result_bugs;
+@bugs = sort { sort_duplicates($a, $b, $sortby) } @bugs;
+if ($reverse) {
+    @bugs = reverse @bugs;
+}
+@bugs = @bugs[0..$maxrows-1] if scalar(@bugs) > $maxrows;
+
+my %vars = (
+    bugs     => \@bugs,
+    bug_ids  => [map { $_->{'bug'}->id } @bugs],
+    sortby   => $sortby,
+    openonly => $openonly,
+    maxrows  => $maxrows,
+    reverse  => $reverse,
+    format   => scalar $cgi->param('format'),
+    product  => [map { $_->name } @query_products],
+    sortvisible  => $sortvisible,
+    changedsince => $changedsince,
 );
 
+my $format = $template->get_format("reports/duplicates", $vars{'format'});
+print $cgi->header;
+
 # Generate and return the UI (HTML page) from the appropriate template.
-$template->process($format->{'template'}, $vars)
+$template->process($format->{'template'}, \%vars)
   || ThrowTemplateError($template->error());

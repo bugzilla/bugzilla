@@ -810,8 +810,8 @@ sub get_enterable_products {
 }
 
 sub can_access_product {
-    my ($self, $product_name) = @_;
-
+    my ($self, $product) = @_;
+    my $product_name = blessed($product) ? $product->name : $product;
     return scalar(grep {$_->name eq $product_name} @{$self->get_accessible_products});
 }
 
@@ -2055,10 +2055,11 @@ the database again. Used mostly by L<Bugzilla::Product>.
 
  Returns:     an array of product objects.
 
-=item C<can_access_product(product_name)>
+=item C<can_access_product($product)>
 
-Returns 1 if the user can search or enter bugs into the specified product,
-and 0 if the user should not be aware of the existence of the product.
+Returns 1 if the user can search or enter bugs into the specified product
+(either a L<Bugzilla::Product> or a product name), and 0 if the user should
+not be aware of the existence of the product.
 
 =item C<get_accessible_products>
 

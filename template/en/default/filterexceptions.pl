@@ -92,20 +92,6 @@
   'request.attach_id', 
 ],
 
-'reports/duplicates-table.html.tmpl' => [
-  'column.name', 
-  'column.description',
-  'bug.count', 
-  'bug.delta', 
-],
-
-'reports/duplicates.html.tmpl' => [
-  'bug_ids_string', 
-  'maxrows',
-  'changedsince',
-  'reverse',
-],
-
 'reports/keywords.html.tmpl' => [
   'keyword.bug_count', 
 ],

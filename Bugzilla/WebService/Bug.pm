@@ -434,7 +434,7 @@ sub legal_values {
         defined $id || ThrowCodeError('param_required',
             { function => 'Bug.legal_values', param => 'product_id' });
         grep($_->id eq $id, @{Bugzilla->user->get_accessible_products})
-            || ThrowUserError('product_access_denied', { product => $id });
+            || ThrowUserError('product_access_denied', { id => $id });
 
         my $product = new Bugzilla::Product($id);
         my @objects;

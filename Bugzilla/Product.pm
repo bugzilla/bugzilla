@@ -913,6 +913,17 @@ sub check_product {
     return $product;
 }
 
+sub check {
+    my ($class, $params) = @_;
+    $params = { name => $params } if !ref $params;
+    $params->{_error} = 'product_access_denied';
+    my $product = $class->SUPER::check($params);
+    if (!Bugzilla->user->can_access_product($product)) {
+        ThrowUserError('product_access_denied', $params);
+    }
+    return $product;
+}
+
 1;
 
 __END__

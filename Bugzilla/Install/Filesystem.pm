@@ -48,6 +48,12 @@ our @EXPORT = qw(
     fix_file_permissions
 );
 
+use constant HT_DEFAULT_DENY => <<EOT;
+# nothing in this directory is retrievable unless overridden by an .htaccess
+# in a subdirectory
+deny from all
+EOT
+
 # This looks like a constant because it effectively is, but
 # it has to call other subroutines and read the current filesystem,
 # so it's defined as a sub. This is not exported, so it doesn't have
@@ -125,7 +131,9 @@ sub FILESYSTEM {
 
         "$localconfig.old" => { perms => $owner_readable },
 
-        'docs/makedocs.pl'   => { perms => $owner_executable },
+        'contrib/README'       => { perms => $owner_readable },
+        'contrib/*/README'     => { perms => $owner_readable },
+        'docs/makedocs.pl'     => { perms => $owner_executable },
         'docs/style.css'       => { perms => $ws_readable },
         'docs/*/rel_notes.txt' => { perms => $ws_readable },
         'docs/*/README.docs'   => { perms => $owner_readable },
@@ -190,6 +198,8 @@ sub FILESYSTEM {
                                      dirs => $owner_dir_readable },
          'docs/*/xml'          => { files => $owner_readable,
                                      dirs => $owner_dir_readable },
+         'contrib'             => { files => $owner_executable,
+                                     dirs => $owner_dir_readable, },
     );
 
     # --- FILES TO CREATE --- #
@@ -256,21 +266,19 @@ EOT
     # Because checksetup controls the .htaccess creation separately
     # by a localconfig variable, these go in a separate variable from
     # %create_files.
-    my $ht_default_deny = <<EOT;
-# nothing in this directory is retrievable unless overridden by an .htaccess
-# in a subdirectory
-deny from all
-EOT
-
     my %htaccess = (
         "$attachdir/.htaccess"       => { perms    => $ws_readable,
-                                          contents => $ht_default_deny },
+                                          contents => HT_DEFAULT_DENY },
         "$libdir/Bugzilla/.htaccess" => { perms    => $ws_readable,
-                                          contents => $ht_default_deny },
+                                          contents => HT_DEFAULT_DENY },
         "$extlib/.htaccess"          => { perms    => $ws_readable,
-                                          contents => $ht_default_deny },
+                                          contents => HT_DEFAULT_DENY },
         "$templatedir/.htaccess"     => { perms    => $ws_readable,
-                                          contents => $ht_default_deny },
+                                          contents => HT_DEFAULT_DENY },
+        'contrib/.htaccess'          => { perms    => $ws_readable,
+                                          contents => HT_DEFAULT_DENY },
+        't/.htaccess'                => { perms    => $ws_readable,
+                                          contents => HT_DEFAULT_DENY },
 
         '.htaccess' => { perms => $ws_readable, contents => <<EOT
 # Don't allow people to retrieve non-cgi executable files or our private data
@@ -592,22 +600,13 @@ sub fix_all_file_permissions {
         _fix_perms($dir, $owner_id, $group_id, $dirs{$dir});
     }
 
-    foreach my $dir (sort keys %recurse_dirs) {
-        next unless -d $dir;
-        # Set permissions on the directory itself.
-        my $perms = $recurse_dirs{$dir};
-        _fix_perms($dir, $owner_id, $group_id, $perms->{dirs});
-        # Now recurse through the directory and set the correct permissions
-        # on subdirectories and files.
-        find({ no_chdir => 1, wanted => sub {
-            my $name = $File::Find::name;
-            if (-d $name) {
-                _fix_perms($name, $owner_id, $group_id, $perms->{dirs});
-            }
-            else {
-                _fix_perms($name, $owner_id, $group_id, $perms->{files});
-            }
-        }}, $dir);
+    foreach my $pattern (sort keys %recurse_dirs) {
+        my $perms = $recurse_dirs{$pattern};
+        # %recurse_dirs supports globs
+        foreach my $dir (glob $pattern) {
+            next unless -d $dir;
+            _fix_perms_recursively($dir, $owner_id, $group_id, $perms);
+        }
     }
 
     foreach my $file (sort keys %files) {
@@ -640,8 +639,13 @@ sub _fix_cvs_dirs {
     find({ no_chdir => 1, wanted => sub {
         my $name = $File::Find::name;
         if ($File::Find::dir =~ /\/CVS/ || $_ eq '.cvsignore'
-            || (-d $name && $_ eq 'CVS')) {
-            _fix_perms($name, $owner_id, $owner_gid, 0700);
+            || (-d $name && $_ =~ /CVS$/)) 
+        {
+            my $perms = 0600;
+            if (-d $name) {
+                $perms = 0700;
+            }
+            _fix_perms($name, $owner_id, $owner_gid, $perms);
         }
     }}, $dir);
 }
@@ -659,6 +663,23 @@ sub _fix_perms {
     chmod $perms, $name
         or warn install_string('chmod_failed', { path => $name, 
                                                  error => $! }) . "\n";
+}
+
+sub _fix_perms_recursively {
+    my ($dir, $owner_id, $group_id, $perms) = @_;
+    # Set permissions on the directory itself.
+    _fix_perms($dir, $owner_id, $group_id, $perms->{dirs});
+    # Now recurse through the directory and set the correct permissions
+    # on subdirectories and files.
+    find({ no_chdir => 1, wanted => sub {
+        my $name = $File::Find::name;
+        if (-d $name) {
+            _fix_perms($name, $owner_id, $group_id, $perms->{dirs});
+        }
+        else {
+            _fix_perms($name, $owner_id, $group_id, $perms->{files});
+        }
+    }}, $dir);
 }
 
 sub _check_web_server_group {

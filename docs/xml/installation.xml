@@ -1,5 +1,5 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"> -->
-<!-- $Id: installation.xml,v 1.136.2.12 2008/02/24 19:31:07 lpsolit%gmail.com Exp $ -->
+<!-- $Id: installation.xml,v 1.136.2.18 2009/07/29 12:34:55 lpsolit%gmail.com Exp $ -->
 <chapter id="installing-bugzilla">
   <title>Installing Bugzilla</title>
 
@@ -19,14 +19,6 @@
     If you are installing on another OS, check <xref linkend="os-specific"/>
     before you start your installation to see if there are any special
     instructions.
-    </para>
-
-    <para>
-      As an alternative to following these instructions, you may wish to
-      try Arne Schirmacher's unofficial and unsupported 
-      <ulink url="http://www.softwaretesting.de/article/view/33/1/8/">Bugzilla
-      Installer</ulink>, which installs Bugzilla and all its prerequisites
-      on Linux or Solaris systems.
     </para>
 
     <para>This guide assumes that you have administrative access to the
@@ -287,7 +279,7 @@
 
         <listitem>
           <para>
-            CGI &min-cgi-ver; or CGI &min-mp-cgi-ver; if using mod_perl
+            CGI &min-cgi-ver;
           </para>
         </listitem>
 
@@ -464,7 +456,7 @@
         <listitem>
           <para>
             CGI
-            (&min-cgi-ver;) for mod_perl
+            (&min-mp-cgi-ver;) for mod_perl
           </para>
         </listitem>
 
@@ -1042,6 +1034,14 @@
                     when granting extra access.
                 </para>
                 </note>
+
+                <note>
+                <para>
+                    On Windows, you may have to also add the
+                    <computeroutput>ScriptInterpreterSource Registry-Strict</computeroutput>
+                    line, see <link linkend="win32-http">Windows specific notes</link>.
+                </para>
+                </note>
             </step>                    
     
             <step>
@@ -1344,19 +1344,6 @@ c:\perl\bin\perl.exe -xc:\bugzilla -wT "%s" %s
         the Reports page.
       </para>
 
-      <para>
-        When upgrading Bugzilla, this format may change.
-        To create new status data, (re)move old data and run the following 
-        commands:
-      </para>
-
-      <screen>
-        <prompt>bash$</prompt>
-        <command>cd &lt;your-bugzilla-directory&gt;</command>
-        <prompt>bash$</prompt>
-        <command>./collectstats.pl --regenerate</command>
-      </screen>
-
       <note>
         <para>
           Windows does not have 'cron', but it does have the Task
@@ -1569,7 +1556,7 @@ AddType application/rdf+xml .rdf</screen>
         based system such as GNU/Linux.  That said, if you do want to get
         Bugzilla running on Windows, you will need to make the following
         adjustments. A detailed step-by-step
-        <ulink url="http://www.bugzilla.org/docs/win32install.html">
+        <ulink url="https://wiki.mozilla.org/Bugzilla:Win32Install">
         installation guide for Windows</ulink> is also available
         if you need more help with your installation.
       </para>
@@ -1659,16 +1646,6 @@ C:\perl&gt; <command>ppm install &lt;module name&gt;</command>
         </tip>
       </section>
   
-      <section id="win32-code-changes">
-        <title>Code changes required to run on Win32</title>
-
-        <para>
-          Bugzilla on Win32 is supported out of the box from version 2.20; this
-          means that no code changes are required to get Bugzilla running.
-        </para>
-        
-      </section>
-
       <section id="win32-http">
         <title>Serving the web pages</title>
 
@@ -1684,14 +1661,16 @@ C:\perl&gt; <command>ppm install &lt;module name&gt;</command>
 
         <note>
           <para>
-            If using Apache on windows, you can set the <ulink
-            url="http://httpd.apache.org/docs-2.0/mod/core.html#scriptinterpretersource">ScriptInterpreterSource</ulink>
-            directive in your Apache config to avoid having to modify
-            the first line of every script to contain your path to Perl
-            instead of <filename>/usr/bin/perl</filename>. When setting
-            <filename>ScriptInterpreterSource</filename>, do not forget
-            to specify the <command>-T</command> flag to enable the taint
-            mode. For example: <command>C:\Perl\bin\perl.exe -T</command>.
+            The web server looks at <filename>/usr/bin/perl</filename> to
+            call Perl. If you are using Apache on windows, you can set the
+            <ulink url="http://httpd.apache.org/docs-2.0/mod/core.html#scriptinterpretersource">ScriptInterpreterSource</ulink>
+            directive in your Apache config file to make it look at the
+            right place: insert the line
+            <programlisting>ScriptInterpreterSource Registry-Strict</programlisting>
+            into your <filename>httpd.conf</filename> file, and create the key
+            <programlisting>HKEY_CLASSES_ROOT\.cgi\Shell\ExecCGI\Command</programlisting>
+            with <option>C:\Perl\bin\perl.exe -T</option> as value (adapt to your
+            path if needed) in the registry. When this is done, restart Apache.
           </para>
         </note>
 
@@ -2184,6 +2163,424 @@ pid-file=/home/foo/mymysql/the.pid
         They are all important.  A future version of Bugzilla will
         hopefully be able to do this for you out of the box.</para>
       </section>
+    </section>
+  </section>
+
+
+  <section id="upgrade">
+    <title>Upgrading to New Releases</title>
+    
+    <para>Upgrading to new Bugzilla releases is very simple. There is
+      a script included with Bugzilla that will automatically
+      do all of the database migration for you.</para>
+    
+    <para>The following sections explain how to upgrade from one
+      version of Bugzilla to another. Whether you are upgrading
+      from one bug-fix version to another (such as 3.0.1 to 3.0.2)
+      or from one major version to another (such as from 3.0 to 3.2),
+      the instructions are always the same.</para>
+
+    <note>
+      <para>
+        Any examples in the following sections are written as though the
+        user were updating to version 2.22.1, but the procedures are the
+        same no matter what version you're updating to. Also, in the
+        examples, the user's Bugzilla installation is found at
+        <filename>/var/www/html/bugzilla</filename>. If that is not the
+        same as the location of your Bugzilla installation, simply
+        substitute the proper paths where appropriate.
+      </para>
+    </note>
+
+    <section id="upgrade-before">
+      <title>Before You Upgrade</title>
+    
+      <para>Before you start your upgrade, there are a few important
+        steps to take:</para>
+
+      <orderedlist>
+        <listitem>
+          <para>
+            Read the <ulink url="http://www.bugzilla.org/releases/">Release
+            Notes</ulink> of the version you're upgrading to,
+            particularly the "Notes for Upgraders" section.
+          </para>
+        </listitem>
+        
+        <listitem>
+          <para>
+            View the Sanity Check (<xref linkend="sanitycheck"/>) page
+            on your installation before upgrading. Attempt to fix all warnings
+            that the page produces before you go any further, or you may
+            experience problems  during your upgrade.
+          </para>
+        </listitem>
+        
+        <listitem>
+          <para>
+            Shut down your Bugzilla installation by putting some HTML or
+            text in the shutdownhtml parameter
+            (see <xref linkend="parameters"/>).
+          </para>
+        </listitem>
+        
+        <listitem>
+          <para>
+            Make a backup of the Bugzilla database.
+            <emphasis>THIS IS VERY IMPORTANT</emphasis>. If
+            anything goes wrong during the upgrade, your installation
+            can be corrupted beyond recovery. Having a backup keeps you safe.
+          </para>
+
+          <warning>
+            <para>
+              Upgrading is a one-way process. You cannot "downgrade" an
+              upgraded Bugzilla. If you wish to revert to the old Bugzilla
+              version for any reason, you will have to restore your database
+              from this backup.
+            </para>
+          </warning>
+
+          <para>Here are some sample commands you could use to backup
+            your database, depending on what database system you're
+            using. You may have to modify these commands for your
+            particular setup.</para>
+          
+          <variablelist>
+            <varlistentry>
+              <term>MySQL:</term>
+              <listitem>
+                <para>
+                  <command>mysqldump --opt -u bugs -p bugs > bugs.sql</command>
+                </para>
+              </listitem>
+            </varlistentry>
+              
+            <varlistentry>
+              <term>PostgreSQL:</term>
+              <listitem>
+                <para>
+                  <command>pg_dump --no-privileges --no-owner -h localhost -U bugs
+                    > bugs.sql</command>
+                </para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+        </listitem>
+      </orderedlist>
+    </section>
+      
+    <section id="upgrade-files">
+      <title>Getting The New Bugzilla</title>
+      
+      <para>There are three ways to get the new version of Bugzilla.
+        We'll list them here briefly and then explain them
+        more later.</para>
+      
+      <variablelist>
+        <varlistentry>
+          <term>CVS (<xref linkend="upgrade-cvs"/>)</term>
+          <listitem>
+            <para>
+              If have <command>cvs</command> installed on your machine
+              and you have Internet access, this is the easiest way to
+              upgrade, particularly if you have made modifications
+              to the code or templates of Bugzilla.
+            </para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>Download the tarball (<xref linkend="upgrade-tarball"/>)</term>
+          <listitem>
+            <para>
+              This is a very simple way to upgrade, and good if you
+              haven't made many (or any) modifications to the code or
+              templates of your Bugzilla.
+            </para>
+          </listitem>
+        </varlistentry>
+        
+        <varlistentry>
+          <term>Patches (<xref linkend="upgrade-patches"/>)</term>
+          <listitem>
+            <para>
+              If you have made modifications to your Bugzilla, and
+              you don't have Internet access or you don't want to use
+              cvs, then this is the best way to upgrade.
+            </para>
+            
+            <para>
+              You can only do minor upgrades (such as 3.0 to 3.0.1 or
+              3.0.1 to 3.0.2) with patches.
+            </para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+        
+      <section id="upgrade-modified">
+        <title>If you have modified your Bugzilla</title>
+      
+        <para>
+          If you have modified the code or templates of your Bugzilla,
+          then upgrading requires a bit more thought and effort.
+          A discussion of the various methods of updating compared with
+          degree and methods of local customization can be found in
+          <xref linkend="template-method"/>.
+        </para>
+
+        <para>
+          The larger the jump you are trying to make, the more difficult it
+          is going to be to upgrade if you have made local customizations.
+          Upgrading from 3.0 to 3.0.1 should be fairly painless even if
+          you are heavily customized, but going from 2.18 to 3.0 is going
+          to mean a fair bit of work re-writing your local changes to use
+          the new files, logic, templates, etc. If you have done no local
+          changes at all, however, then upgrading should be approximately
+          the same amount of work regardless of how long it has been since
+          your version was released.
+        </para>
+      </section>
+
+      <section id="upgrade-cvs">
+        <title>Upgrading using CVS</title>
+
+        <para>
+          This requires that you have cvs installed (most Unix machines do),
+          and requires that you are able to access cvs-mirror.mozilla.org
+          on port 2401, which may not be an option if you are behind a
+          highly restrictive firewall or don't have Internet access.
+        </para>
+
+        <para>
+          The following shows the sequence of commands needed to update a
+          Bugzilla installation via CVS, and a typical series of results.
+        </para>
+
+        <programlisting>
+bash$ <command>cd /var/www/html/bugzilla</command>
+bash$ <command>cvs login</command>
+Logging in to :pserver:anonymous@cvs-mirror.mozilla.org:2401/cvsroot
+CVS password: <emphasis>('anonymous', or just leave it blank)</emphasis>
+bash$ <command>cvs -q update -r BUGZILLA-2_22_1 -dP</command>
+P checksetup.pl
+P collectstats.pl
+P docs/rel_notes.txt
+P template/en/default/list/quips.html.tmpl
+<emphasis>(etc.)</emphasis>
+        </programlisting>
+
+        <caution>
+          <para>
+            If a line in the output from <command>cvs update</command> begins
+            with a <computeroutput>C</computeroutput>, then that represents a
+            file with local changes that CVS was unable to properly merge. You
+            need to resolve these conflicts manually before Bugzilla (or at
+            least the portion using that file) will be usable.
+          </para>
+        </caution>
+      </section>
+
+      <section id="upgrade-tarball">
+        <title>Upgrading using the tarball</title>
+
+        <para>
+          If you are unable (or unwilling) to use CVS, another option that's
+          always available is to obtain the latest tarball from the <ulink
+          url="http://www.bugzilla.org/download/">Download Page</ulink> and 
+          create a new Bugzilla installation from that.
+        </para>
+
+        <para>
+          This sequence of commands shows how to get the tarball from the
+          command-line; it is also possible to download it from the site
+          directly in a web browser. If you go that route, save the file
+          to the <filename class="directory">/var/www/html</filename>
+          directory (or its equivalent, if you use something else) and 
+          omit the first three lines of the example.
+        </para>
+
+        <programlisting>
+bash$ <command>cd /var/www/html</command>
+bash$ <command>wget http://ftp.mozilla.org/pub/mozilla.org/webtools/bugzilla-2.22.1.tar.gz</command>
+<emphasis>(Output omitted)</emphasis>
+bash$ <command>tar xzvf bugzilla-2.22.1.tar.gz</command>
+bugzilla-2.22.1/
+bugzilla-2.22.1/.cvsignore
+<emphasis>(Output truncated)</emphasis>
+bash$ <command>cd bugzilla-2.22.1</command>
+bash$ <command>cp ../bugzilla/localconfig* .</command>
+bash$ <command>cp -r ../bugzilla/data .</command>
+bash$ <command>cd ..</command>
+bash$ <command>mv bugzilla bugzilla.old</command>
+bash$ <command>mv bugzilla-2.22.1 bugzilla</command>
+        </programlisting>
+
+        <warning>
+          <para>
+            The <command>cp</command> commands both end with periods which
+            is a very important detail--it means that the destination
+            directory is the current working directory.
+          </para>
+        </warning>
+
+        <para>
+          This upgrade method will give you a clean install of Bugzilla.
+          That's fine if you don't have any local customizations that you
+          want to maintain. If you do have customizations, then you will 
+          need to reapply them by hand to the appropriate files.
+        </para>
+      </section>
+
+      <section id="upgrade-patches">
+        <title>Upgrading using patches</title>
+
+        <para>
+          A patch is a collection of all the bug fixes that have been made
+          since the last bug-fix release.
+        </para>
+        
+        <para>
+          If you are doing a bug-fix upgrade&mdash;that is, one where only the 
+          last number of the revision changes, such as from 2.22 to
+          2.22.1&mdash;then you have the option of obtaining and applying a
+          patch file from the <ulink
+          url="http://www.bugzilla.org/download/">Download Page</ulink>.
+        </para>
+        
+        <para>
+          As above, this example starts with obtaining the file via the 
+          command line. If you have already downloaded it, you can omit the
+          first two commands.
+        </para>
+
+        <programlisting>
+bash$ <command>cd /var/www/html/bugzilla</command>
+bash$ <command>wget http://ftp.mozilla.org/pub/mozilla.org/webtools/bugzilla-2.22-to-2.22.1.diff.gz</command>
+<emphasis>(Output omitted)</emphasis>
+bash$ <command>gunzip bugzilla-2.22-to-2.22.1.diff.gz</command>
+bash$ <command>patch -p1 &lt; bugzilla-2.22-to-2.22.1.diff</command>
+patching file checksetup.pl
+patching file collectstats.pl
+<emphasis>(etc.)</emphasis>
+        </programlisting>
+
+        <warning>
+          <para>
+            Be aware that upgrading from a patch file does not change the
+            entries in your <filename class="directory">CVS</filename> directory.
+            This could make it more difficult to upgrade using CVS
+            (<xref linkend="upgrade-cvs"/>) in the future.
+          </para>
+        </warning>
+
+      </section>
+    </section>
+
+    <section id="upgrade-completion">
+      <title>Completing Your Upgrade</title>
+
+      <para>
+        Now that you have the new Bugzilla code, there are a few final
+        steps to complete your upgrade.
+      </para>
+      
+      <orderedlist>
+        <listitem>
+          <para>
+            If your new Bugzilla installation is in a different
+            directory or on a different machine than your old Bugzilla
+            installation, make sure that you have copied the
+            <filename>data</filename> directory and the
+            <filename>localconfig</filename> file from your old Bugzilla
+            installation. (If you followed the tarball instructions
+            above, this has already happened.)
+          </para>
+        </listitem>
+        
+        <listitem>
+          <para>
+            If this is a major update, check that the configuration
+            (<xref linkend="configuration"/>) for your new Bugzilla is
+            up-to-date. Sometimes the configuration requirements change
+            between major versions.
+          </para>
+        </listitem>
+        
+        <listitem>
+          <para>
+            If you didn't do it as part of the above configuration step,
+            now you need to run <command>checksetup.pl</command>, which
+            will do everything required to convert your existing database
+            and settings for the new version:
+          </para>
+
+          <programlisting>
+bash$ <command>cd /var/www/html/bugzilla</command>
+bash$ <command>./checksetup.pl</command>
+          </programlisting>
+
+          <warning>
+            <para>
+              The period at the beginning of the command
+              <command>./checksetup.pl</command> is important and can not
+              be omitted.
+            </para>
+          </warning>
+          
+          <caution>
+            <para>
+              If this is a major upgrade (say, 2.22 to 3.0 or similar),
+              running <command>checksetup.pl</command> on a large
+              installation (75,000 or more bugs) can take a long time,
+              possibly several hours.
+            </para>
+          </caution>
+        </listitem>
+
+        <listitem>
+          <para>
+            Clear any HTML or text that you put into the shutdownhtml
+            parameter, to re-activate Bugzilla.
+          </para> 
+        </listitem>
+
+        <listitem>
+          <para>
+            View the Sanity Check (<xref linkend="sanitycheck"/>) page in your
+            upgraded Bugzilla.
+          </para>
+          <para>
+            It is recommended that, if possible, you fix any problems
+            you see, immediately. Failure to do this may mean that Bugzilla
+            will not work correctly. Be aware that if the sanity check page
+            contains more errors after an upgrade, it doesn't necessarily
+            mean there are more errors in your database than there were
+            before, as additional tests are added to the sanity check over
+            time, and it is possible that those errors weren't being
+            checked for in the old version.
+          </para>
+        </listitem>
+      </orderedlist>
+
+    </section>
+    
+    <section id="upgrade-notifications">
+      <title>Automatic Notifications of New Releases</title>
+
+      <para>
+        Bugzilla 3.0 introduced the ability to automatically notify
+        administrators when new releases are available, based on the
+        <literal>upgrade_notification</literal> parameter, see
+        <xref linkend="parameters"/>. Administrators will see these
+        notifications when they access the <filename>index.cgi</filename>
+        page, i.e. generally when logging in. Bugzilla will check once per
+        day for new releases, unless the parameter is set to
+        <quote>disabled</quote>. If you are behind a proxy, you may have to set
+        the <literal>proxy_url</literal> parameter accordingly. If the proxy
+        requires authentication, use the
+        <literal>http://user:pass@proxy_url/</literal> syntax.
+      </para>
     </section>
   </section>
 

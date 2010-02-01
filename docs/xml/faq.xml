@@ -316,6 +316,23 @@ C:\mysql\bin\replace "#!/usr/bin/perl" "#!C:\perl\bin\perl" -- *.cgi *.pl
       <title>Managerial Questions</title>
 
       <qandaentry>
+        <question id="faq-phb-deletebugs">
+          <para>
+            Is it possible to delete bug reports?
+          </para>
+        </question>
+        <answer>
+          <para>
+            Yes. You have to turn on the 'allowbugdeletion' parameter, which is
+            off by default. Note that you cannot delete bug reports one by one.
+            You have to move them in a product or component, e.g. named "Trash",
+            and then delete this product or component. The reason we make it
+            hard is that you generally don't want to do that. 
+          </para>
+        </answer>
+      </qandaentry>
+
+      <qandaentry>
         <question id="faq-phb-client">
           <para>
             Is Bugzilla web-based, or do you have to have specific software or

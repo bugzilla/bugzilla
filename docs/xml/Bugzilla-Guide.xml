@@ -1,6 +1,5 @@
 <?xml version="1.0"?>
-<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
-                      "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" [
     <!ENTITY % myents SYSTEM "bugzilla.ent">
     %myents;
 
@@ -36,7 +35,7 @@
 
 <!ENTITY bz-ver "3.0.11">
 <!ENTITY bz-nextver "3.2">
-<!ENTITY bz-date "2010-01-31">
+<!ENTITY bz-date "2009-01-31">
 <!ENTITY current-year "2010">
 
 <!ENTITY landfillbase "http://landfill.bugzilla.org/bugzilla-3.0-branch/">

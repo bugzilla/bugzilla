@@ -135,6 +135,7 @@ sub FILESYSTEM {
         'docs/*/README.docs'   => { perms => $owner_readable },
         "$datadir/bugzilla-update.xml" => { perms => $ws_writeable },
         "$datadir/params" => { perms => $ws_writeable },
+        "$datadir/old-params.txt" => { perms => $owner_readable },
     );
 
     # Directories that we want to set the perms on, but not
@@ -362,6 +363,12 @@ sub update_filesystem {
     my $testfile = "$datadir/mailer.testfile";
     if (-e $testfile and !-w $testfile) {
         _rename_file($testfile, "$testfile.old");
+    }
+
+    # If old-params.txt exists in the root directory, move it to datadir.
+    my $oldparamsfile = "old_params.txt";
+    if (-e $oldparamsfile) {
+        _rename_file($oldparamsfile, "$datadir/$oldparamsfile");
     }
 
     _create_files(%files);

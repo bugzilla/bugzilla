@@ -790,9 +790,9 @@ sub extract_flags_from_cgi {
     my ($class, $bug, $attachment, $vars, $skip) = @_;
     my $cgi = Bugzilla->cgi;
 
-    my $match_status = Bugzilla::User::match_field($cgi, {
+    my $match_status = Bugzilla::User::match_field({
         '^requestee(_type)?-(\d+)$' => { 'type' => 'multi' },
-    }, $skip);
+    }, undef, $skip);
 
     $vars->{'match_field'} = 'requestee';
     if ($match_status == USER_MATCH_FAILED) {

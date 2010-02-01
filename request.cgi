@@ -63,7 +63,7 @@ unless (defined $cgi->param('requestee')
     $fields->{'requestee'}->{'type'} = 'single';
 }
 
-Bugzilla::User::match_field($cgi, $fields);
+Bugzilla::User::match_field($fields);
 
 if ($action eq 'queue') {
     queue();

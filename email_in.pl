@@ -152,6 +152,17 @@ sub post_bug {
         $fields->{$field} = undef if !exists $fields->{$field};
     }
 
+    my ($retval, $non_conclusive_fields) =
+      Bugzilla::User::match_field({
+        'assigned_to'   => { 'type' => 'single' },
+        'qa_contact'    => { 'type' => 'single' },
+        'cc'            => { 'type' => 'multi'  }
+      }, $fields, MATCH_SKIP_CONFIRM);
+
+    if ($retval != USER_MATCH_SUCCESS) {
+        ThrowUserError('user_match_too_many', {fields => $non_conclusive_fields});
+    }
+
     my $bug = Bugzilla::Bug->create($fields);
     debug_print("Created bug " . $bug->id);
     return ($bug, $bug->comments->[0]);

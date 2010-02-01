@@ -1628,6 +1628,12 @@
     <tt>[% name FILTER html %]</tt> does not exist or you are not allowed 
     to see that user.
 
+  [% ELSIF error == "user_match_too_many" %]
+    [% title = "No Conclusive Match" %]
+    [% terms.Bugzilla %] cannot make a conclusive match for one or more
+    of the names and/or email addresses you entered for
+    the [% fields.join(', ') FILTER html %] field(s).
+
   [% ELSIF error == "user_not_insider" %]
     [% title = "User Not In Insidergroup" %]
     Sorry, but you are not allowed to (un)mark comments or attachments

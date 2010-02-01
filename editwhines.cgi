@@ -193,7 +193,7 @@ if ($cgi->param('update')) {
                 }
             }
             if (scalar %{$arglist}) {
-                &Bugzilla::User::match_field($cgi, $arglist);
+                Bugzilla::User::match_field($arglist);
             }
 
             for my $sid (@scheduleids) {

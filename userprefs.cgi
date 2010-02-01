@@ -247,7 +247,7 @@ sub SaveEmail {
     my $cgi = Bugzilla->cgi;
     my $user = Bugzilla->user;
 
-    Bugzilla::User::match_field($cgi, { 'new_watchedusers' => {'type' => 'multi'} });
+    Bugzilla::User::match_field({ 'new_watchedusers' => {'type' => 'multi'} });
 
     ###########################################################################
     # Role-based preferences

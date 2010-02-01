@@ -85,7 +85,7 @@ if ($token) {
 }    
 
 # do a match on the fields if applicable
-Bugzilla::User::match_field ($cgi, {
+Bugzilla::User::match_field ({
     'cc'            => { 'type' => 'multi'  },
     'assigned_to'   => { 'type' => 'single' },
     'qa_contact'    => { 'type' => 'single' },

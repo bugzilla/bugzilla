@@ -118,7 +118,7 @@ if ($action eq 'add') {
 if ($action eq 'new') {
     check_token_data($token, 'add_component');
     # Do the user matching
-    Bugzilla::User::match_field ($cgi, {
+    Bugzilla::User::match_field ({
         'initialowner'     => { 'type' => 'single' },
         'initialqacontact' => { 'type' => 'single' },
         'initialcc'        => { 'type' => 'multi'  },
@@ -219,7 +219,7 @@ if ($action eq 'edit') {
 if ($action eq 'update') {
     check_token_data($token, 'edit_component');
     # Do the user matching
-    Bugzilla::User::match_field ($cgi, {
+    Bugzilla::User::match_field ({
         'initialowner'     => { 'type' => 'single' },
         'initialqacontact' => { 'type' => 'single' },
         'initialcc'        => { 'type' => 'multi'  },

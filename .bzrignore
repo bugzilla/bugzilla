@@ -1,0 +1,16 @@
+.htaccess
+/template/en/custom
+/docs/xml/bugzilla.ent
+/docs/txt
+/docs/html/*.html
+/docs/html/api/Bugzilla
+/docs/html/api/*.html
+/docs/html/api/contrib
+/docs/pdf
+/extensions
+/skins/custom
+/skins/contrib
+/graphs
+/data
+/localconfig
+/index.html

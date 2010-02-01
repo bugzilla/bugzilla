@@ -180,16 +180,17 @@ my %since_dups = @{$dbh->selectcol_arrayref(
     "SELECT dupe_of, COUNT(dupe)
        FROM duplicates INNER JOIN bugs_activity 
                        ON bugs_activity.bug_id = duplicates.dupe 
-      WHERE added = 'DUPLICATE' AND fieldid = ? AND " 
-            . $dbh->sql_to_days('bug_when') . " >= (" 
-            . $dbh->sql_to_days('NOW()') . " - ?)
-   GROUP BY dupe_of", {Columns=>[1,2]},
+      WHERE added = 'DUPLICATE' AND fieldid = ? 
+            AND bug_when >= LOCALTIMESTAMP(0) - "
+                . $dbh->sql_interval('?', 'DAY') .
+ " GROUP BY dupe_of", {Columns=>[1,2]},
     $reso_field_id, $changedsince)};
 add_indirect_dups(\%since_dups, \%dupe_relation);
 
 # Enforce the mostfreqthreshold parameter and the "bug_id" cgi param.
+my $mostfreq = Bugzilla->params->{'mostfreqthreshold'};
 foreach my $id (keys %total_dups) {
-    if ($total_dups{$id} < Bugzilla->params->{'mostfreqthreshold'}) {
+    if ($total_dups{$id} < $mostfreq) {
         delete $total_dups{$id};
         next;
     }

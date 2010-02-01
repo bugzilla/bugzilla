@@ -652,12 +652,13 @@ sub visible_bugs {
         }
 
         $sth->execute(@check_ids);
+        my $use_qa_contact = Bugzilla->params->{'useqacontact'};
         while (my $row = $sth->fetchrow_arrayref) {
             my ($bug_id, $reporter, $owner, $qacontact, $reporter_access, 
                 $cclist_access, $isoncclist, $missinggroup) = @$row;
             $visible_cache->{$bug_id} ||= 
                 ((($reporter == $user_id) && $reporter_access)
-                 || (Bugzilla->params->{'useqacontact'}
+                 || ($use_qa_contact
                      && $qacontact && ($qacontact == $user_id))
                  || ($owner == $user_id)
                  || ($isoncclist && $cclist_access)

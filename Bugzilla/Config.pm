@@ -221,7 +221,7 @@ sub update_params {
     # --- REMOVE OLD PARAMS ---
 
     my %oldparams;
-    # Remove any old params, put them in old-params.txt
+    # Remove any old params
     foreach my $item (keys %$param) {
         if (!grep($_ eq $item, map ($_->{'name'}, @param_list))) {
             $oldparams{$item} = $param->{$item};
@@ -229,13 +229,16 @@ sub update_params {
         }
     }
 
+    # Write any old parameters to old-params.txt
+    my $datadir = bz_locations()->{'datadir'};
+    my $old_param_file = "$datadir/old-params.txt";
     if (scalar(keys %oldparams)) {
-        my $op_file = new IO::File('old-params.txt', '>>', 0600)
-          || die "old-params.txt: $!";
+        my $op_file = new IO::File($old_param_file, '>>', 0600)
+          || die "Couldn't create $old_param_file: $!";
 
         print "The following parameters are no longer used in Bugzilla,",
               " and so have been\nmoved from your parameters file into",
-              " old-params.txt:\n";
+              " $old_param_file:\n";
 
         local $Data::Dumper::Terse  = 1;
         local $Data::Dumper::Indent = 0;

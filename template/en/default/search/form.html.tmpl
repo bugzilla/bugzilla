@@ -535,9 +535,9 @@ function doOnSelectProduct(selectmode) {
 <table>
   <tr>
     <td>
-      <select name="bugidtype">
-        <option value="include"[% " selected" IF default.bugidtype.0 == "include" %]>Only include</option>
-        <option value="exclude"[% " selected" IF default.bugidtype.0 == "exclude" %]>Exclude</option>
+      <select name="bug_id_type">
+        <option value="anyexact"[% " selected" IF default.bug_id_type.0 == "anyexact" %]>Only include</option>
+        <option value="nowords"[% " selected" IF default.bug_id_type.0 == "nowords" %]>Exclude</option>
       </select>
       <label for="bug_id">[% terms.bugs %] numbered</label>:
     </td>

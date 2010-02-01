@@ -194,6 +194,7 @@ sub init {
     my $self = shift;
     my @fields = @{ $self->{'fields'} || [] };
     my $params = $self->{'params'};
+    $params->convert_old_params();
     $self->{'user'} ||= Bugzilla->user;
     my $user = $self->{'user'};
 
@@ -288,14 +289,6 @@ sub init {
             }
             push(@specialchart, ["votes", "greaterthan", $c - 1]);
         }
-    }
-
-    if ($params->param('bug_id')) {
-        my $type = "anyexact";
-        if ($params->param('bugidtype') && $params->param('bugidtype') eq 'exclude') {
-            $type = "nowords";
-        }
-        push(@specialchart, ["bug_id", $type, join(',', $params->param('bug_id'))]);
     }
 
     # If the user has selected all of either status or resolution, change to

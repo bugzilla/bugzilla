@@ -131,7 +131,7 @@ sub PrefillForm {
                       "longdesc", "longdesc_type", "bug_file_loc",
                       "bug_file_loc_type", "status_whiteboard",
                       "status_whiteboard_type", "bug_id",
-                      "bugidtype", "keywords", "keywords_type",
+                      "bug_id_type", "keywords", "keywords_type",
                       "deadlinefrom", "deadlineto",
                       "x_axis_field", "y_axis_field", "z_axis_field",
                       "chart_format", "cumulate", "x_labels_vertical",

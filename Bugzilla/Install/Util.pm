@@ -43,6 +43,7 @@ our @EXPORT_OK = qw(
     template_include_path
     vers_cmp
     get_console_locale
+    prevent_windows_dialog_boxes
 );
 
 sub bin_loc {
@@ -332,6 +333,26 @@ sub get_console_locale {
     return $locale;
 }
 
+sub prevent_windows_dialog_boxes {
+    # This code comes from http://bugs.activestate.com/show_bug.cgi?id=82183
+    # and prevents Perl modules from popping up dialog boxes, particularly
+    # during checksetup (since loading DBD::Oracle during checksetup when
+    # Oracle isn't installed causes a scary popup and pauses checksetup).
+    #
+    # Win32::API ships with ActiveState by default, though there could 
+    # theoretically be a Windows installation without it, I suppose.
+    if (ON_WINDOWS and eval { require Win32::API }) {
+        # Call kernel32.SetErrorMode with arguments that mean:
+        # "The system does not display the critical-error-handler message box.
+        # Instead, the system sends the error to the calling process." and
+        # "A child process inherits the error mode of its parent process."
+        my $SetErrorMode = Win32::API->new('kernel32', 'SetErrorMode', 
+                                           'I', 'I');
+        my $SEM_FAILCRITICALERRORS = 0x0001;
+        my $SEM_NOGPFAULTERRORBOX  = 0x0002;
+        $SetErrorMode->Call($SEM_FAILCRITICALERRORS | $SEM_NOGPFAULTERRORBOX);
+    }
+}
 
 # This is like request_cache, but it's used only by installation code
 # for setup.cgi and things like that.

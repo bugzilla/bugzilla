@@ -53,12 +53,15 @@ BEGIN { chdir dirname($0); }
 use lib qw(. lib);
 use Bugzilla::Constants;
 use Bugzilla::Install::Requirements;
-use Bugzilla::Install::Util qw(install_string get_version_and_os get_console_locale);
+use Bugzilla::Install::Util qw(install_string get_version_and_os 
+                               get_console_locale
+                               prevent_windows_dialog_boxes);
 
 ######################################################################
 # Live Code
 ######################################################################
 
+prevent_windows_dialog_boxes();
 # When we're running at the command line, we need to pick the right
 # language before ever displaying any string.
 $ENV{'HTTP_ACCEPT_LANGUAGE'} ||= get_console_locale();

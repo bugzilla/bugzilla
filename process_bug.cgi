@@ -248,36 +248,39 @@ foreach my $bug (@bug_objects) {
     }
 }
 
-my $product_change;
-foreach my $bug (@bug_objects) {
-    my $args;
-    if (should_set('product')) {
-        $args->{product} = scalar $cgi->param('product');
-        $args->{component} = scalar $cgi->param('component');
-        $args->{version} = scalar $cgi->param('version');
-        $args->{target_milestone} = scalar $cgi->param('target_milestone');
-        $args->{confirm_product_change} =  scalar $cgi->param('confirm_product_change');
-        $args->{other_bugs} = \@bug_objects;
+# For security purposes, and because lots of other checks depend on it,
+# we set the product first before anything else.
+my $product_change; # Used only for strict_isolation checks, right now.
+if (should_set('product')) {
+    foreach my $b (@bug_objects) {
+        my $changed = $b->set_product(scalar $cgi->param('product'),
+            { component        => scalar $cgi->param('component'),
+              version          => scalar $cgi->param('version'),
+              target_milestone => scalar $cgi->param('target_milestone'),
+              change_confirmed => scalar $cgi->param('confirm_product_change'),
+              other_bugs => \@bug_objects,
+            });
+        $product_change ||= $changed;
     }
+}
 
-    foreach my $group (@{$bug->product_obj->groups_valid}) {
+# strict_isolation checks mean that we should set the groups
+# immediately after changing the product.
+foreach my $b (@bug_objects) {
+    foreach my $group (@{$b->product_obj->groups_valid}) {
         my $gid = $group->id;
         if (should_set("bit-$gid", 1)) {
             # Check ! first to avoid having to check defined below.
             if (!$cgi->param("bit-$gid")) {
-                push (@{$args->{remove_group}}, $gid);
+                $b->remove_group($gid);
             }
             # "== 1" is important because mass-change uses -1 to mean
             # "don't change this restriction"
             elsif ($cgi->param("bit-$gid") == 1) {
-               push (@{$args->{add_group}}, $gid);
+                $b->add_group($gid);
             }
         }
     }
-
-    # this will be deleted later when code moves to $bug->set_all
-    my $changed = $bug->set_all($args);
-    $product_change ||= $changed;
 }
 
 if ($cgi->param('id') && (defined $cgi->param('dependson')

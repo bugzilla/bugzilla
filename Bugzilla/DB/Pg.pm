@@ -94,13 +94,25 @@ sub bz_last_key {
     return $last_insert_id;
 }
 
+sub sql_istring {
+    my ($self, $string) = @_;
+
+    return "LOWER(${string}::text)";
+}
+
+sub sql_position {
+    my ($self, $fragment, $text) = @_;
+
+    return "POSITION($fragment IN ${text}::text)";
+}
+
 sub sql_regexp {
     my ($self, $expr, $pattern, $nocheck, $real_pattern) = @_;
     $real_pattern ||= $pattern;
 
     $self->bz_check_regexp($real_pattern) if !$nocheck;
 
-    return "$expr ~* $pattern";
+    return "${expr}::text ~* $pattern";
 }
 
 sub sql_not_regexp {
@@ -109,7 +121,7 @@ sub sql_not_regexp {
 
     $self->bz_check_regexp($real_pattern) if !$nocheck;
 
-    return "$expr !~* $pattern" 
+    return "${expr}::text !~* $pattern" 
 }
 
 sub sql_limit {

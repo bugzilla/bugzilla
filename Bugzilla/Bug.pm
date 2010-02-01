@@ -643,33 +643,6 @@ sub run_create_validators {
     return $params;
 }
 
-sub set_all {
-    my ($self, $args) = @_;
-
-    # For security purposes, and because lots of other checks depend on it,
-    # we set the product first before anything else.
-    my $product_change = 0;
-    if ($args->{product}) {
-        my $changed = $self->set_product($args->{product},
-                                        { component => $args->{component},
-                                          version   => $args->{version},
-                                          target_milestone => $args->{target_milestone},
-                                          change_confirmed => $args->{confirm_product_change},
-                                          other_bugs => $args->{other_bugs},
-                                        });
-        # that will be used later to check strict isolation
-        $product_change = $changed;
-    }
-
-    # add/remove groups
-    $self->remove_group($_) foreach @{$args->{remove_group}};
-    $self->add_group($_) foreach @{$args->{add_group}};
-
-    # this is temporary until all related code is moved from
-    # process_bug.cgi to set_all
-    return $product_change;
-}
-
 sub update {
     my $self = shift;
 

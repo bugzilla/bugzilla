@@ -59,6 +59,41 @@
 
 <h2><a name="v34_point"></a>Updates In This 3.4.x Release</h2>
 
+<h3>3.4.5</h3>
+
+<p>This release contains fixes for multiple security issues. See the
+  <a href="http://www.bugzilla.org/security/3.0.10/">Security Advisory</a>
+  for details.</p>
+
+<p>In addition, the following important fixes/changes have been made in
+  this release:</p>
+
+<ul>
+  <li>Whining was failing if jobqueue.pl was enabled.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=530270">[% terms.Bug %] 530270</a>)
+  </li>
+  <li>The Assignee field was empty in Whine mails.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=511216">[% terms.Bug %] 511216</a>)
+  </li>
+  <li>Administrators can now successfully create user accounts using 
+    editusers.cgi when using the "Env" authentication method.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=483987">[% terms.Bug %] 483987</a>)
+  </li>
+  <li>[% terms.Bug %]mail now uses the timezone of the recipient of the email,
+    when displaying the time a comment was made, instead of the timezone of the
+    person who made the change.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=534587">[% terms.Bug %] 534587</a>)
+  </li>
+  <li>"[% terms.bug %] 1234" in comments sometimes would not become a link if
+    word-wrapping happened between "[% terms.bug %]" and the number.
+   (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=514703">[% terms.Bug %] 514703</a>)
+  </li>
+  <li>Running checksetup.pl on Windows will no longer pop up an error box
+    about OCI.dll.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=480968">[% terms.Bug %] 480968</a>)
+  </li>
+</ul>
+
 <h3>3.4.4</h3>
 
 <p>This release contains a fix for a security issue. See the

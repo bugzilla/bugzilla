@@ -111,7 +111,6 @@ my @columns = qw(
     assigned_to
     reporter
     qa_contact
-    component
     classification
     version
     votes

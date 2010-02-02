@@ -17,11 +17,9 @@
 #                 Max Kanat-Alexander <mkanat@bugzilla.org>
 #                 Akamai Technologies <bugzilla-dev@akamai.com>
 
-use strict;
-
 package Bugzilla::Component;
-
-use base qw(Bugzilla::Object);
+use strict;
+use base qw(Bugzilla::Field::ChoiceInterface Bugzilla::Object);
 
 use Bugzilla::Constants;
 use Bugzilla::Util;
@@ -35,6 +33,8 @@ use Bugzilla::Series;
 ###############################
 
 use constant DB_TABLE => 'components';
+# This is mostly for the editfields.cgi case where ->get_all is called.
+use constant LIST_ORDER => 'product_id, name';
 
 use constant DB_COLUMNS => qw(
     id
@@ -80,7 +80,7 @@ sub new {
     my $dbh = Bugzilla->dbh;
 
     my $product;
-    if (ref $param) {
+    if (ref $param and !defined $param->{id}) {
         $product = $param->{product};
         my $name = $param->{name};
         if (!defined $product) {
@@ -155,6 +155,8 @@ sub update {
 sub remove_from_db {
     my $self = shift;
     my $dbh = Bugzilla->dbh;
+
+    $self->_check_if_controller(); # From ChoiceInterface
 
     $dbh->bz_start_transaction();
 
@@ -418,10 +420,24 @@ sub product {
 ####      Accessors        ####
 ###############################
 
-sub id          { return $_[0]->{'id'};          }
-sub name        { return $_[0]->{'name'};        }
 sub description { return $_[0]->{'description'}; }
 sub product_id  { return $_[0]->{'product_id'};  }
+
+##############################################
+# Implement Bugzilla::Field::ChoiceInterface #
+##############################################
+
+use constant FIELD_NAME => 'component';
+use constant is_default => 0;
+use constant is_active => 1;
+
+sub is_set_on_bug {
+    my ($self, $bug) = @_;
+    # We treat it like a hash always, so that we don't have to check if it's
+    # a hash or an object.
+    return 0 if !defined $bug->{component_id};
+    $bug->{component_id} == $self->id ? 1 : 0;
+}
 
 ###############################
 ####      Subroutines      ####

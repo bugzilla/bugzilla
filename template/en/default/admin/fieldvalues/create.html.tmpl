@@ -75,6 +75,9 @@
             [% FOREACH field_value = field.value_field.legal_values %]
               [% NEXT IF field_value.name == '' %]
               <option value="[% field_value.id FILTER none %]">
+                [% IF field.value_field.name == 'component' %]
+                  [% field_value.product.name FILTER html %]:
+                [% END %]
                 [%- field_value.name FILTER html -%]
               </option>
             [% END %]

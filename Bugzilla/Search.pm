@@ -219,8 +219,8 @@ sub init {
         type     => [FIELD_TYPE_MULTI_SELECT, FIELD_TYPE_BUG_URLS],
         obsolete => 0 });
     foreach my $field (@select_fields) {
+        next if $field->is_abnormal;
         my $name = $field->name;
-        next if $name eq 'product'; # products don't have sortkeys.
         $special_order{$name} = [ "$name.sortkey", "$name.value" ],
         $special_order_join{$name} =
            "LEFT JOIN $name ON $name.value = bugs.$name";

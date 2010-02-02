@@ -129,6 +129,8 @@ use File::Basename;
     FIELD_TYPE_BUG_ID
     FIELD_TYPE_BUG_URLS
 
+    ABNORMAL_SELECTS
+
     TIMETRACKING_FIELDS
 
     USAGE_MODE_BROWSER
@@ -367,6 +369,13 @@ use constant FIELD_TYPE_TEXTAREA  => 4;
 use constant FIELD_TYPE_DATETIME  => 5;
 use constant FIELD_TYPE_BUG_ID  => 6;
 use constant FIELD_TYPE_BUG_URLS => 7;
+
+# See the POD for Bugzilla::Field/is_abnormal to see why these are listed
+# here.
+use constant ABNORMAL_SELECTS => qw(
+    product
+    component
+);
 
 # The fields from fielddefs that are blocked from non-timetracking users.
 # work_time is sometimes called actual_time.

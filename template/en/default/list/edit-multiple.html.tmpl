@@ -276,6 +276,8 @@
   [% END %]
 
   [% USE Bugzilla %]
+  [%# Show all legal values and all fields, ignoring visibility controls. %]
+  [% bug = 0 %]
   [% FOREACH field = Bugzilla.active_custom_fields %]
     <tr>
       [% PROCESS bug/field.html.tmpl value = dontchange

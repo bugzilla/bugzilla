@@ -180,7 +180,7 @@ use constant DEFAULT_FIELDS => (
     {name => 'priority',     desc => 'Priority',   in_new_bugmail => 1,
      type => FIELD_TYPE_SINGLE_SELECT, buglist => 1},
     {name => 'component',    desc => 'Component',  in_new_bugmail => 1,
-     buglist => 1},
+     type => FIELD_TYPE_SINGLE_SELECT, buglist => 1},
     {name => 'assigned_to',  desc => 'AssignedTo', in_new_bugmail => 1,
      buglist => 1},
     {name => 'reporter',     desc => 'ReportedBy', in_new_bugmail => 1,
@@ -490,6 +490,28 @@ objects.
 sub is_select { 
     return ($_[0]->type == FIELD_TYPE_SINGLE_SELECT 
             || $_[0]->type == FIELD_TYPE_MULTI_SELECT) ? 1 : 0 
+}
+
+=over
+
+=item C<is_abnormal>
+
+Most fields that have a C<SELECT> L</type> have a certain schema for
+the table that stores their values, the table has the same name as the field,
+and the field's legal values can be edited via F<editvalues.cgi>.
+
+However, some fields do not follow that pattern. Those fields are
+considered "abnormal".
+
+This method returns C<1> if the field is "abnormal", C<0> otherwise.
+
+=back
+
+=cut
+
+sub is_abnormal {
+    my $self = shift;
+    return grep($_ eq $self->name, ABNORMAL_SELECTS) ? 1 : 0;
 }
 
 sub legal_values {

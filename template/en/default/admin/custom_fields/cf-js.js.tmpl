@@ -28,7 +28,14 @@ var select_values = new Array();
 [% FOREACH sel_field = Bugzilla.get_fields({ is_select => 1 }) %]
   select_values[[% sel_field.id FILTER js %]] = [
   [% FOREACH legal_value = sel_field.legal_values %]
-    [[% legal_value.id FILTER js %], '[% legal_value.name FILTER js %]'][% ',' UNLESS loop.last %]
+    [%# Prefix components with the name of their product so that admins
+        know which component we're talking about. #%]
+    [% IF sel_field.name == 'component' %]
+      [% SET value_name = legal_value.product.name _ ': ' _ legal_value.name %]
+    [% ELSE %]
+      [% SET value_name = legal_value.name %]
+    [% END %]
+    [[% legal_value.id FILTER js %], '[% value_name FILTER js %]'][% ',' UNLESS loop.last %]
   [% END %]
   ];
 [% END %]

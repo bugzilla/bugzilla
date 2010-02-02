@@ -30,14 +30,6 @@
 
 [% PROCESS bug/time.html.tmpl %]
 
-[% USE Bugzilla %]
-[% SET select_fields = {} %]
-[% FOREACH field = Bugzilla.get_fields(
-  { type => constants.FIELD_TYPE_SINGLE_SELECT, custom => 0 })
-%]
-  [% select_fields.${field.name} = field %]
-[% END %]
-
   <script type="text/javascript">
   <!--
   
@@ -323,7 +315,7 @@
     
     <tr>
        [% INCLUDE bug/field.html.tmpl
-            bug = bug, field = select_fields.product,
+            bug = bug, field = bug_fields.product,
             override_legal_values = bug.choices.product
             desc_url = 'describecomponents.cgi', value = bug.product
             editable = bug.check_can_change_field('product', 0, 1) %]
@@ -332,14 +324,12 @@
     [%#  Component  #%]
     [%###############%]
     <tr>
-      <td class="field_label">
-        <label for="component" accesskey="m">
-          <b><a href="describecomponents.cgi?product=[% bug.product FILTER url_quote %]">
-            Co<u>m</u>ponent</a>:
-          </b>
-        </label>
-      </td>
-      [% PROCESS select selname => "component" %]
+      [% INCLUDE bug/field.html.tmpl
+          bug = bug, field = bug_fields.component, value = bug.component
+          override_legal_values = bug.choices.component
+          desc_url = "describecomponents.cgi?product=$bug.product"
+          editable = bug.check_can_change_field('component', 0, 1)
+      %]
     </tr>
     <tr>
       <td class="field_label">
@@ -357,11 +347,11 @@
       </td>
       <td class="field_value">
        [% INCLUDE bug/field.html.tmpl
-            bug = bug, field = select_fields.rep_platform,
+            bug = bug, field = bug_fields.rep_platform,
             no_tds = 1, value = bug.rep_platform
             editable = bug.check_can_change_field('rep_platform', 0, 1) %]
        [%+ INCLUDE bug/field.html.tmpl 
-            bug = bug, field = select_fields.op_sys, 
+            bug = bug, field = bug_fields.op_sys, 
             no_tds = 1, value = bug.op_sys
             editable = bug.check_can_change_field('op_sys', 0, 1) %]
        <script type="text/javascript">
@@ -417,11 +407,11 @@
       </td>
       <td>
        [% INCLUDE bug/field.html.tmpl
-            bug = bug, field = select_fields.priority,
+            bug = bug, field = bug_fields.priority,
             no_tds = 1, value = bug.priority
             editable = bug.check_can_change_field('priority', 0, 1) %]
        [%+ INCLUDE bug/field.html.tmpl
-            bug = bug, field = select_fields.bug_severity,
+            bug = bug, field = bug_fields.bug_severity,
             no_tds = 1, value = bug.bug_severity
             editable = bug.check_can_change_field('bug_severity', 0, 1) %]
         [% IF bug.use_votes %]
@@ -895,7 +885,7 @@
 
 [% BLOCK section_customfields %]
 [%# *** Custom Fields *** %]
-
+  [% USE Bugzilla %]
   [% FOREACH field = Bugzilla.active_custom_fields %]
     <tr>
       [% PROCESS bug/field.html.tmpl value=bug.${field.name}

@@ -504,7 +504,7 @@
       it controls the visibility of the following fields:
       [%+ fields.join(', ') FILTER html %].
     [% END %]
-    [% ' and ' IF fields.size AND vals.size %]
+    [% ' Also, ' IF fields.size AND vals.size %]
     [% IF vals.size %]
       it controls the visibility of the following field values:
       <ul>

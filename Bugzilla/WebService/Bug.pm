@@ -422,8 +422,8 @@ sub legal_values {
     my $field = Bugzilla::Bug::FIELD_MAP->{$params->{field}} 
                 || $params->{field};
 
-    my @global_selects = Bugzilla->get_fields(
-        {type => [FIELD_TYPE_SINGLE_SELECT, FIELD_TYPE_MULTI_SELECT]});
+    my @global_selects = grep { !$_->is_abnormal }
+                         Bugzilla->get_fields({ is_select => 1 });
 
     my $values;
     if (grep($_->name eq $field, @global_selects)) {

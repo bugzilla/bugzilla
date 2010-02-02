@@ -40,12 +40,10 @@
   #%]
 
 [% SET hidden = 0 %]
-[% IF field.visibility_field.defined %]
-  [% IF !bug.${field.visibility_field.name}
-         .contains(field.visibility_value.name) 
-  %]
-    [% SET hidden = 1 %]
-  [% END %]
+[% IF field.visibility_field.defined AND bug
+      AND !field.visibility_value.is_set_on_bug(bug) 
+%]
+  [% SET hidden = 1 %]
 [% END %]
 
 [% IF NOT no_tds %]
@@ -138,8 +136,6 @@
             [% legal_values = field.legal_values %]
           [% END %]
           [% FOREACH legal_value = legal_values %]
-            [% SET control_value = legal_value.visibility_value %]
-            [% SET control_field = field.value_field %]
             <option value="[% legal_value.name FILTER html %]"
                     id="v[% legal_value.id FILTER html %]_
                         [%- field.name FILTER html %]"
@@ -147,10 +143,7 @@
                 # hidden %]
               [% IF value.contains(legal_value.name).size %]
                 selected="selected"
-              [% ELSIF (control_field && control_value
-                        && !bug.${control_field.name}.contains(control_value.name))
-                       || !legal_value.is_active
-              %]
+              [% ELSIF bug AND !legal_value.is_visible_on_bug(bug) %]
                 class="bz_hidden_option" disabled="disabled"
               [% END %]>
               [%- display_value(field.name, legal_value.name) FILTER html ~%]

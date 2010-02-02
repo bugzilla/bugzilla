@@ -32,9 +32,7 @@ use Bugzilla::Mailer;
 use Bugzilla::Series;
 use Bugzilla::Hook;
 
-# Currently, we only implement enough of the Bugzilla::Field::Choice
-# interface to control the visibility of other fields.
-use base qw(Bugzilla::Field::Choice);
+use base qw(Bugzilla::Field::ChoiceInterface Bugzilla::Object);
 
 use constant DEFAULT_CLASSIFICATION_ID => 1;
 
@@ -43,10 +41,6 @@ use constant DEFAULT_CLASSIFICATION_ID => 1;
 ###############################
 
 use constant DB_TABLE => 'products';
-# Reset these back to the Bugzilla::Object defaults, instead of the
-# Bugzilla::Field::Choice defaults.
-use constant NAME_FIELD => 'name';
-use constant LIST_ORDER => 'name';
 
 use constant DB_COLUMNS => qw(
    id
@@ -565,14 +559,7 @@ sub _check_votes {
 # Implement Bugzilla::Field::Choice #
 #####################################
 
-sub field {
-    my $invocant = shift;
-    my $class = ref $invocant || $invocant;
-    my $cache = Bugzilla->request_cache;
-    $cache->{"field_$class"} ||= new Bugzilla::Field({ name => 'product' });
-    return $cache->{"field_$class"};
-}
-
+use constant FIELD_NAME => 'product';
 use constant is_default => 0;
 
 ###############################

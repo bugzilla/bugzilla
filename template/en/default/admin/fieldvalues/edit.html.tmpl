@@ -73,7 +73,10 @@
               <option value="[% field_value.id FILTER none %]"
                [% ' selected="selected"' 
                   IF field_value.id == value.visibility_value.id %]>
-                [%- field_value.name FILTER html -%]
+                [% IF field.value_field.name == 'component' %]
+                  [% field_value.product.name FILTER html %]:
+                [% END %]
+                [% field_value.name FILTER html -%]
               </option>
             [% END %]
           </select>

@@ -32,6 +32,7 @@
     [% FOREACH val = legal_value.controlled_values.$controlled_field %]
       [% cont_ids.push(val.id) %]
     [% END %]
+    [% NEXT IF !cont_ids.size %]
     showValueWhen('[% controlled_field FILTER js %]',
                   [[% cont_ids.join(',') FILTER js %]],
                   '[% field.name FILTER js %]',

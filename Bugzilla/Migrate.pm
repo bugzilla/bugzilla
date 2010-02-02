@@ -323,7 +323,7 @@ sub reset_serial_values {
     );
     my @select_fields = grep { $_->is_select } (values %{ $self->bug_fields });
     foreach my $field (@select_fields) {
-        next if $field->name eq 'product';
+        next if $field->is_abnormal;
         $reset{$field->name} = 'id';
     }
     
@@ -709,8 +709,8 @@ sub insert_bugs {
         $self->debug($bug, 3);
 
         foreach my $field (@standard_drop_downs) {
+            next if $field->is_abnormal;
             my $field_name = $field->name;
-            next if $field_name eq 'product';
             if (!defined $bug->{$field_name}) {
                 # If there's a default value for this, then just let create()
                 # pick it.

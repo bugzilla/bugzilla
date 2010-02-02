@@ -1197,25 +1197,21 @@ sub match_field {
         }
         $raw_field = clean_text($raw_field || '');
 
-        # Tolerate fields that do not exist (in case you specify
-        # e.g. the QA contact, and it's currently not in use).
-        next unless ($raw_field && $raw_field ne '');
-
-        my @queries = ();
-
         # Now we either split $raw_field by spaces/commas and put the list
         # into @queries, or in the case of fields which only accept single
         # entries, we simply use the verbatim text.
-
-        # single field
+        my @queries;
         if ($fields->{$field}->{'type'} eq 'single') {
             @queries = ($raw_field);
-
-        # multi-field
+            # We will repopulate it later if a match is found, else it must
+            # be set to an empty string so that the field remains defined.
+            $data->{$field} = '';
         }
         elsif ($fields->{$field}->{'type'} eq 'multi') {
             @queries =  split(/[\s,;]+/, $raw_field);
-
+            # We will repopulate it later if a match is found, else it must
+            # be undefined.
+            delete $data->{$field};
         }
         else {
             # bad argument
@@ -1224,6 +1220,10 @@ sub match_field {
                              function =>  'Bugzilla::User::match_field',
                            });
         }
+
+        # Tolerate fields that do not exist (in case you specify
+        # e.g. the QA contact, and it's currently not in use).
+        next unless (defined $raw_field && $raw_field ne '');
 
         my $limit = 0;
         if ($params->{'maxusermatches'}) {
@@ -1284,7 +1284,7 @@ sub match_field {
         if ($fields->{$field}->{'type'} eq 'single') {
             $data->{$field} = $logins[0] || '';
         }
-        else {
+        elsif (scalar @logins) {
             $data->{$field} = \@logins;
         }
     }

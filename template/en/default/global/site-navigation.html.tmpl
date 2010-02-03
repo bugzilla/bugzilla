@@ -65,12 +65,6 @@
           href="[% Param('mybugstemplate').replace('%userid%', user_login) %]">
   [% END %]
 
-  [% FOREACH q = user.queries %]
-    <link rel="Saved&nbsp;Searches" 
-          title="[% q.name FILTER html %]"
-          href="buglist.cgi?cmdtype=runnamed&amp;namedcmd=[% q.name FILTER url_quote %]">
-  [% END %]
-
   [% FOREACH q = user.queries_subscribed %]
     <link rel="Saved&nbsp;Search"
           title="[% q.name FILTER html %] ([% q.user.login FILTER html %])"

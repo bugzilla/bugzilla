@@ -134,10 +134,9 @@
     [% IF (om = order.match("$id( DESC)?")) %]
       [% desc = ' DESC' IF NOT om.0 %]
     [% END %]
-    [% order = order.remove("\\b$id( DESC)?(,\\s*|\$)") %]
     <a href="buglist.cgi?[% urlquerypart FILTER html %]&amp;order=
       [% id FILTER url_quote %][% desc FILTER url_quote %]
-      [% ",$order" FILTER url_quote IF order %]
+      [% ',' _ order.remove("\\b$id( DESC)?(,\\s*|\$)") FILTER url_quote IF order %]
       [%-#%]&amp;query_based_on=
       [% defaultsavename OR searchname FILTER url_quote %]">
         [%- abbrev.$id.title || field_descs.$id || column.title -%]</a>

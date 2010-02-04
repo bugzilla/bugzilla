@@ -1,5 +1,5 @@
 .htaccess
-/lib
+/lib/*
 /template/en/custom
 /docs/bugzilla.ent
 /docs/en/xml/bugzilla.ent

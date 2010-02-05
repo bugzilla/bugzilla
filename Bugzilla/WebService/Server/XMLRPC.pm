@@ -78,7 +78,7 @@ sub deserialize {
         $som->{_bz_do_taint} = 1;
     }
     bless $som, 'Bugzilla::XMLRPC::SOM';
-    Bugzilla->input_params($som->paramsin); 
+    Bugzilla->input_params($som->paramsin || {}); 
     return $som;
 }
 

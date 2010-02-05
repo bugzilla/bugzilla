@@ -134,8 +134,12 @@ sub check {
         # We don't want to override the normal template "user" object if
         # "user" is one of the params.
         delete $param->{user};
-        my $error = delete $param->{_error} || 'object_does_not_exist';
-        ThrowUserError($error, { %$param, class => $class });
+        if (my $error = delete $param->{_error}) {
+            ThrowUserError($error, { %$param, class => $class });
+        }
+        else {
+            ThrowUserError('object_does_not_exist', { %$param, class => $class });
+        }
     }
     return $obj;
 }

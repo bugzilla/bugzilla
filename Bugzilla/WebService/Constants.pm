@@ -112,6 +112,8 @@ use constant WS_ERROR_CODE => {
     invalid_user_group    => 504,
     user_access_by_id_denied    => 505,
     user_access_by_match_denied => 505,
+    # Fatal errors (must be negative).
+    unknown_method              => -32601,
 };
 
 # These are the fallback defaults for errors not in ERROR_CODE.

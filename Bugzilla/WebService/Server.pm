@@ -18,10 +18,12 @@
 package Bugzilla::WebService::Server;
 use strict;
 use Bugzilla::Util qw(ssl_require_redirect);
+use Bugzilla::Error;
 
 sub handle_login {
     my ($self, $class, $method, $full_method) = @_;
     eval "require $class";
+    ThrowCodeError('unknown_method', {method => $full_method}) if $@;
     return if $class->login_exempt($method);
     Bugzilla->login();
 

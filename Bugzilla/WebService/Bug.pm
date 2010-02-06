@@ -32,7 +32,7 @@ use Bugzilla::WebService::Constants;
 use Bugzilla::WebService::Util qw(filter validate);
 use Bugzilla::Bug;
 use Bugzilla::BugMail;
-use Bugzilla::Util qw(trim);
+use Bugzilla::Util qw(trick_taint trim);
 use Bugzilla::Version;
 use Bugzilla::Milestone;
 use Bugzilla::Status;
@@ -427,6 +427,8 @@ sub legal_values {
 
     my $values;
     if (grep($_->name eq $field, @global_selects)) {
+        # The field is a valid one.
+        trick_taint($field);
         $values = get_legal_field_values($field);
     }
     elsif (grep($_ eq $field, PRODUCT_SPECIFIC_FIELDS)) {

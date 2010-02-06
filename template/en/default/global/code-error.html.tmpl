@@ -483,6 +483,9 @@
        I could not figure out what you wanted to do.
     [% END %]
 
+  [% ELSIF error == "unknown_method" %]
+    The requested method '[% method FILTER html %]' was not found.
+
   [% ELSIF error == "usage_mode_invalid" %]
     '[% invalid_usage_mode FILTER html %]' is not a valid usage mode.
 

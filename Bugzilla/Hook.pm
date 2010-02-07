@@ -454,6 +454,52 @@ changed flags, and search for a specific condition like C<added eq 'review-'>.
 
 =back
 
+=head2 group_before_delete
+
+This happens in L<Bugzilla::Group/remove_from_db>, after we've confirmed
+that the group can be deleted, but before any rows have actually
+been removed from the database. This occurs inside a database
+transaction.
+
+Params:
+
+=over
+
+=item C<group> - The L<Bugzilla::Group> being deleted.
+
+=back
+
+=head2 group_end_of_create
+
+This happens at the end of L<Bugzilla::Group/create>, after all other
+changes are made to the database. This occurs inside a database transaction.
+
+Params:
+
+=over
+
+=item C<group> - The changed L<Bugzilla::Group> object, with all fields set
+to their updated values.
+
+=back
+
+=head2 group_end_of_update
+
+This happens at the end of L<Bugzilla::Group/update>, after all other 
+changes are made to the database. This occurs inside a database transaction.
+
+Params:
+
+=over
+
+=item C<group> - The changed L<Bugzilla::Group> object, with all fields set 
+to their updated values.
+
+=item C<changes> - The hash of changed fields. 
+C<< $changes->{$field} = [$old, $new] >>
+
+=back
+
 =head2 install_before_final_checks
 
 Allows execution of custom code before the final checks are done in 

@@ -195,6 +195,8 @@ sub set_icon_url    { $_[0]->set('icon_url', $_[1]);    }
 
 sub update {
     my $self = shift;
+    my $dbh = Bugzilla->dbh;
+    $dbh->bz_start_transaction();
     my $changes = $self->SUPER::update(@_);
 
     if (exists $changes->{name}) {
@@ -214,6 +216,10 @@ sub update {
                                   && $changes->{isactive}->[1]);
 
     $self->_rederive_regexp() if exists $changes->{userregexp};
+
+    Bugzilla::Hook::process('group_end_of_update', 
+                            { group => $self, changes => $changes });
+    $dbh->bz_commit_transaction();
     return $changes;
 }
 
@@ -269,12 +275,15 @@ sub remove_from_db {
     my $self = shift;
     my $dbh = Bugzilla->dbh;
     $self->check_remove(@_);
+    $dbh->bz_start_transaction();
+    Bugzilla::Hook::process('group_before_delete', { group => $self });
     $dbh->do('DELETE FROM whine_schedules
                WHERE mailto_type = ? AND mailto = ?',
               undef, MAILTO_GROUP, $self->id);
     # All the other tables will be handled by foreign keys when we
     # drop the main "groups" row.
     $self->SUPER::remove_from_db(@_);
+    $dbh->bz_commit_transaction();
 }
 
 # Add missing entries in bug_group_map for bugs created while
@@ -375,6 +384,8 @@ sub create {
     print get_text('install_group_create', { name => $params->{name} }) . "\n" 
         if Bugzilla->usage_mode == USAGE_MODE_CMDLINE;
 
+    $dbh->bz_start_transaction();
+
     my $group = $class->SUPER::create(@_);
 
     # Since we created a new group, give the "admin" group all privileges
@@ -392,6 +403,9 @@ sub create {
     }
 
     $group->_rederive_regexp() if $group->user_regexp;
+
+    Bugzilla::Hook::process('group_end_of_create', { group => $group });
+    $dbh->bz_commit_transaction();
     return $group;
 }
 

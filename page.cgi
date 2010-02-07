@@ -35,6 +35,29 @@ use lib qw(. lib);
 use Bugzilla;
 use Bugzilla::Error;
 use Bugzilla::Hook;
+use Bugzilla::Search::Quicksearch;
+
+###############
+# Subroutines #
+###############
+
+# For quicksearch.html.
+sub quicksearch_field_names {
+    my $fields = Bugzilla::Search::Quicksearch::FIELD_MAP;
+    my %fields_reverse;
+    # Put longer names before shorter names.
+    my @nicknames = sort { length($b) <=> length($a) } (keys %$fields);
+    foreach my $nickname (@nicknames) {
+        my $db_field = $fields->{$nickname};
+        $fields_reverse{$db_field} ||= [];
+        push(@{ $fields_reverse{$db_field} }, $nickname);
+    }
+    return \%fields_reverse;
+}
+
+###############
+# Main Script #
+###############
 
 Bugzilla->login();
 
@@ -51,7 +74,9 @@ if ($id) {
         ThrowCodeError("bad_page_cgi_id", { "page_id" => $id });
     }
 
-    my %vars;
+    my %vars = ( 
+      quicksearch_field_names => \&quicksearch_field_names,
+    );
     Bugzilla::Hook::process('page_before_template', 
                             { page_id => $id, vars => \%vars });
 

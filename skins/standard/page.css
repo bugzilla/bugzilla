@@ -17,9 +17,21 @@
   * Contributor(s): Max Kanat-Alexander <mkanat@bugzilla.org>
   */
 
+/* This CSS is used by various informational pages in the
+   template/en/default/pages/ directory. */
+
 #bugzilla-body {
     padding: 0 1em;
 }
+
+#bugzilla-body > * {
+    /* People have an easier time reading narrower columns of text. */
+    max-width: 45em;
+}
+
+/*****************/
+/* Release Notes */
+/*****************/
 
 .req_new {
     color: red;
@@ -33,3 +45,26 @@
     border: 1px solid black;
     padding: .25em;
 }
+
+/********************/
+/* QuickSearch Help */
+/********************/
+
+.qs_help li {
+   margin-top: 1ex;
+}
+
+.qs_fields th {
+    padding: 0 .25em;
+}
+.qs_fields th.field_nickname {
+    text-align: left;
+}
+.qs_fields td {
+    padding: .25em;
+    border-top: 1px solid gray;
+}
+.qs_fields .field_name {
+    width: 10em;
+}
+

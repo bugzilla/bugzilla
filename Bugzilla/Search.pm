@@ -28,6 +28,7 @@
 #                 Joel Peshkin <bugreport@peshkin.net>
 #                 Lance Larsh <lance.larsh@oracle.com>
 #                 Jesse Clark <jjclark1982@gmail.com>
+#                 Rémi Zara <remi_zara@mac.com>
 
 use strict;
 
@@ -636,6 +637,7 @@ sub init {
         "^component,(?!changed)" => \&_component_nonchanged,
         "^product,(?!changed)" => \&_product_nonchanged,
         "^classification,(?!changed)" => \&_classification_nonchanged,
+        "^keywords,(?:equals|notequals|anyexact|anyword|allwords|nowords)" => \&_keywords_exact,
         "^keywords,(?!changed)" => \&_keywords_nonchanged,
         "^dependson,(?!changed)" => \&_dependson_nonchanged,
         "^blocked,(?!changed)" => \&_blocked_nonchanged,
@@ -1865,7 +1867,7 @@ sub _classification_nonchanged {
                               $$term);
 }
 
-sub _keywords_nonchanged {
+sub _keywords_exact {
     my $self = shift;
     my %func_args = @_;
     my ($chartid, $v, $ff, $f, $t, $term, $supptables) =
@@ -1902,6 +1904,23 @@ sub _keywords_nonchanged {
         push(@$supptables, "LEFT JOIN keywords AS $table " .
                            "ON $table.bug_id = bugs.bug_id");
     }
+}
+
+sub _keywords_nonchanged {
+    my $self = shift;
+    my %func_args = @_;
+    my ($chartid, $v, $ff, $f, $t, $term, $supptables) =
+        @func_args{qw(chartid v ff f t term supptables)};
+
+    my $k_table = "keywords_$$chartid";
+    my $kd_table = "keyworddefs_$$chartid";
+    
+    push(@$supptables, "LEFT JOIN keywords AS $k_table " .
+                       "ON $k_table.bug_id = bugs.bug_id");
+    push(@$supptables, "LEFT JOIN keyworddefs AS $kd_table " .
+                       "ON $kd_table.id = $k_table.keywordid");
+    
+    $$f = "$kd_table.name";
 }
 
 sub _dependson_nonchanged {

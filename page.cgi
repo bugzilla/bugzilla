@@ -66,9 +66,9 @@ my $template = Bugzilla->template;
 
 my $id = $cgi->param('id');
 if ($id) {
-    # Remove all dodgy chars, and split into name and ctype.
-    $id =~ s/[^\w\-\.]//g;
-    $id =~ /(.*)\.(.*)/;
+    # Split into name and ctype, but be careful not to allow directory
+    # traversal.
+    $id =~ /^([\w\-\/]+)\.(\w+)$/;
     if (!$2) {
         # if this regexp fails to match completely, something bad came in
         ThrowCodeError("bad_page_cgi_id", { "page_id" => $id });

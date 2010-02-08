@@ -301,7 +301,7 @@ function doOnSelectProduct(selectmode) {
       <td>
         [% INCLUDE "search/type-select.html.tmpl"
            name = "keywords_type",
-           types = ['allwords', 'anywords', 'nowords'], 
+           types = ['allwords', 'anywords', 'nowords', 'regexp', 'notregexp'],
            selected = default.keywords_type.0 %]
       </td>
       <td>

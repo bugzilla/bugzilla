@@ -99,8 +99,8 @@
                  value="[% value FILTER html %]" size="7">
         </span>
 
-        [% IF bug.${field.name} %]  
-          [% bug.${field.name} FILTER bug_link(bug.${field.name}) FILTER none %]
+        [% IF value %]  
+          [% value FILTER bug_link(value, use_alias => 1) FILTER none %]
         [% END %]
         <span id="[% field.name FILTER html %]_edit_container" class="edit_me bz_default_hidden">
           (<a href="#" id="[% field.name FILTER html %]_edit_action">edit</a>)
@@ -110,7 +110,7 @@
                           '[% field.name FILTER js %]_input_area',
                           '[% field.name FILTER js %]_edit_action',
                           '[% field.name FILTER js %]',
-                          "[% bug.${field.name} FILTER js %]");
+                          "[% value FILTER js %]");
         </script>
     [% CASE [ constants.FIELD_TYPE_SINGLE_SELECT 
               constants.FIELD_TYPE_MULTI_SELECT ] %]
@@ -198,11 +198,24 @@
   <div class="uneditable_textarea">[% value FILTER wrap_comment(60)
                                             FILTER html %]</div>
 [% ELSIF field.type == constants.FIELD_TYPE_BUG_ID %]
-    [% IF bug.${field.name} %]  
-        [% bug.${field.name} FILTER bug_link(bug.${field.name}) FILTER none %]
+    [% IF value %]  
+        [% value FILTER bug_link(value, use_alias => 1) FILTER none %]
     [% END %]
 [% ELSE %]
   [% value.join(', ') FILTER html %]
 [% END %]
 [% Hook.process('end_field_column') %]
 [% '</td>' IF NOT no_tds %]
+
+[%# for reverse relationships, we show this pseudo-field after the main field %]
+[% IF bug.id && field.is_relationship %]
+    [% extra_field_item = {} %]
+    [% extra_field_item.header = field.reverse_desc _ ":" FILTER html %]
+    [% extra_field_item.data = BLOCK %]
+        [% FOREACH depbug = bug.related_bugs(field) %]
+            [% depbug.id FILTER bug_link(depbug, use_alias => 1) FILTER none %][% " " %]
+        [% END %]
+    [% END %]
+[% ELSE %]
+    [% extra_field_item = '' %]
+[% END %]

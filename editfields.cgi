@@ -68,6 +68,7 @@ elsif ($action eq 'new') {
         visibility_field_id => scalar $cgi->param('visibility_field_id'),
         visibility_value_id => scalar $cgi->param('visibility_value_id'),
         value_field_id => scalar $cgi->param('value_field_id'),
+        reverse_desc => scalar $cgi->param('reverse_desc'),
     });
 
     delete_token($token);
@@ -113,6 +114,7 @@ elsif ($action eq 'update') {
     $field->set_visibility_field($cgi->param('visibility_field_id'));
     $field->set_visibility_value($cgi->param('visibility_value_id'));
     $field->set_value_field($cgi->param('value_field_id'));
+    $field->set_reverse_desc($cgi->param('reverse_desc'));
     $field->update();
 
     delete_token($token);

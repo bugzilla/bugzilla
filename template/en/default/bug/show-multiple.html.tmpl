@@ -186,6 +186,13 @@
         [% PROCESS bug/field.html.tmpl value=bug.${field.name} editable=0 %]
         [%# Even-numbered fields get a closing <tr> %]
         [% '</tr>' IF !(field_counter % 2) %]
+        [% IF extra_field_item %]
+          [% field_counter = field_counter + 1 %]
+          [% '<tr>' IF field_counter % 2 %]
+          <th>[% extra_field_item.header FILTER none %]</th>
+          <td>[% extra_field_item.data FILTER none %]</td>
+          [% '</tr>' IF !(field_counter % 2) %]
+        [% END %]
     [% END %]
     [%# And we have to finish the row if we ended on an odd number. %]
     [% '<th></th><td></td></tr>' IF field_counter % 2 %]

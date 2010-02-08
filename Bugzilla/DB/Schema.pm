@@ -693,6 +693,7 @@ use constant ABSTRACT_SCHEMA => {
             value_field_id => {TYPE => 'INT3',
                                REFERENCES => {TABLE  => 'fielddefs',
                                               COLUMN => 'id'}},
+            reverse_desc => {TYPE => 'TINYTEXT'},
         ],
         INDEXES => [
             fielddefs_name_idx    => {FIELDS => ['name'],

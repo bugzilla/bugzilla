@@ -101,6 +101,7 @@ use constant DB_COLUMNS => qw(
     visibility_field_id
     visibility_value_id
     value_field_id
+    reverse_desc
 );
 
 use constant REQUIRED_CREATE_FIELDS => qw(name description);
@@ -120,6 +121,7 @@ use constant VALIDATORS => {
 use constant UPDATE_VALIDATORS => {
     value_field_id      => \&_check_value_field_id,
     visibility_value_id => \&_check_control_value,
+    reverse_desc        => \&_check_reverse_desc,
 };
 
 use constant UPDATE_COLUMNS => qw(
@@ -132,6 +134,7 @@ use constant UPDATE_COLUMNS => qw(
     visibility_field_id
     visibility_value_id
     value_field_id
+    reverse_desc
 
     type
 );
@@ -356,6 +359,22 @@ sub _check_control_value {
                     ->check({ id => $value_id });
     return $value_obj->id;
 }
+
+sub _check_reverse_desc {
+    my ($invocant, $reverse_desc, $type) = @_;
+    
+    if (blessed $invocant) {
+        $type = $invocant->type;
+    }
+    
+    if ($type != FIELD_TYPE_BUG_ID) {
+        return undef; # store NULL for non-reversible field types
+    }
+    
+    $reverse_desc = clean_text($reverse_desc);
+    return $reverse_desc;
+}
+
 
 =pod
 
@@ -637,6 +656,44 @@ sub controls_values_of {
     return $self->{controls_values_of};
 }
 
+=over
+
+=item C<is_relationship>
+
+Applies only to fields of type FIELD_TYPE_BUG_ID.
+Checks to see if a reverse relationship description has been set.
+This is the canonical condition to enable reverse link display,
+dependency tree display, and similar functionality.
+
+=back
+
+=cut
+
+sub is_relationship  {     
+    my $self = shift;
+    my $desc = $self->reverse_desc;
+    if (defined $desc && $desc ne "") {
+        return 1;
+    }
+    return 0;
+}
+
+=over
+
+=item C<reverse_desc>
+
+Applies only to fields of type FIELD_TYPE_BUG_ID.
+Describes the reverse relationship of this field.
+For example, if a BUG_ID field is called "Is a duplicate of",
+the reverse description would be "Duplicates of this bug".
+
+=back
+
+=cut
+
+sub reverse_desc { return $_[0]->{reverse_desc} }
+
+
 =pod
 
 =head2 Instance Mutators
@@ -661,6 +718,8 @@ They will throw an error if you try to set the values to something invalid.
 
 =item C<set_buglist>
 
+=item C<set_reverse_desc>
+
 =item C<set_visibility_field>
 
 =item C<set_visibility_value>
@@ -677,6 +736,7 @@ sub set_obsolete       { $_[0]->set('obsolete',    $_[1]); }
 sub set_sortkey        { $_[0]->set('sortkey',     $_[1]); }
 sub set_in_new_bugmail { $_[0]->set('mailhead',    $_[1]); }
 sub set_buglist        { $_[0]->set('buglist',     $_[1]); }
+sub set_reverse_desc    { $_[0]->set('reverse_desc', $_[1]); }
 sub set_visibility_field {
     my ($self, $value) = @_;
     $self->set('visibility_field_id', $value);
@@ -868,6 +928,12 @@ sub run_create_validators {
         $class->_check_value_field_id($params->{value_field_id},
             ($type == FIELD_TYPE_SINGLE_SELECT 
              || $type == FIELD_TYPE_MULTI_SELECT) ? 1 : 0);
+
+    $params->{reverse_desc} = $class->_check_reverse_desc(
+        $params->{reverse_desc}, $type);
+
+
+
     return $params;
 }
 

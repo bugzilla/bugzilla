@@ -32,6 +32,7 @@
            onload = "toggleCheckbox(document.getElementById('enter_bug'), 'new_bugmail');"
            javascript_urls = [ 'js/util.js' ]
            doc_section = "custom-fields.html#edit-custom-fields"
+           style_urls = ['skins/standard/admin.css']
 %]
 
 <p>
@@ -40,12 +41,12 @@
 </p>
 
 <form id="edit_field" action="editfields.cgi" method="GET">
-  <table border="0" cellspacing="0" cellpadding="5">
+  <table border="0" cellspacing="0" cellpadding="5" id="edit_custom_field">
     <tr>
-      <th align="right">Name:</th>
+      <th class="narrow_label">Name:</th>
       <td>[% field.name FILTER html %]</td>
 
-      <th align="right">
+      <th>
         <label for="enter_bug">Can be set on [% terms.bug %] creation:</label>
       </th>
       <td><input type="checkbox" id="enter_bug" name="enter_bug" value="1"
@@ -53,31 +54,31 @@
                  onchange="toggleCheckbox(this, 'new_bugmail');"></td>
     </tr>
     <tr>
-      <th align="right"><label for="desc">Description:</label></th>
+      <th class="narrow_label"><label for="desc">Description:</label></th>
       <td><input type="text" id="desc" name="desc" size="40"
                  value="[% field.description FILTER html %]"></td>
 
-      <th align="right">
+      <th>
         <label for="new_bugmail">Displayed in [% terms.bug %]mail for new [% terms.bugs %]:</label>
       </th>
       <td><input type="checkbox" id="new_bugmail" name="new_bugmail" value="1"
                  [%- " checked" IF field.mailhead %]></td>
     </tr>
     <tr>
-      <th align="right">Type:</th>
+      <th class="narrow_label">Type:</th>
       <td>[% field_types.${field.type} FILTER html %]</td>
 
-      <th align="right"><label for="obsolete">Is obsolete:</label></th>
+      <th><label for="obsolete">Is obsolete:</label></th>
       <td><input type="checkbox" id="obsolete" name="obsolete" value="1"
                  [%- " checked" IF field.obsolete %]></td>
     </tr>
     <tr>
-      <th align="right"><label for="sortkey">Sortkey:</label></th>
+      <th class="narrow_label"><label for="sortkey">Sortkey:</label></th>
       <td>
         <input type="text" id="sortkey" name="sortkey" size="6" maxlength="6"
                value="[% field.sortkey FILTER html %]">
       </td>
-      <th align="right">
+      <th>
         <label for="visibility_field_id">Field only appears when:</label>
       </th>
       <td>
@@ -139,6 +140,23 @@
           </select>
         </td>
       </tr>
+    [% END %]
+    [% IF field.type == constants.FIELD_TYPE_BUG_ID %]
+       <tr>
+        <th class="narrow_label">
+          <label for="reverse_desc">Reverse Relationship Description:</label>
+        </th>
+        <td>
+          <input type="text" id="reverse_desc" name="reverse_desc" size="40"
+                 value="[% field.reverse_desc FILTER html %]">
+          <br/>
+          Use this label for the list of [% terms.bugs %] that link to a [% terms.bug %]
+          with this [% field_types.${constants.FIELD_TYPE_BUG_ID} %] field.
+          For example, if the description is "Is a duplicate of",
+          the reverse description would be "Duplicates of this [% terms.bug %]".
+          Leave blank to disable the list for this field.
+        </td>
+       </tr>
     [% END %]
   </table>
   <br>

@@ -888,10 +888,16 @@
   [% USE Bugzilla %]
   [% FOREACH field = Bugzilla.active_custom_fields %]
     <tr>
-      [% PROCESS bug/field.html.tmpl value=bug.${field.name}
+      [% PROCESS bug/field.html.tmpl value = bug.${field.name}
                                      editable = bug.check_can_change_field(field.name, 0, 1)
                                      value_span = 2 %]
     </tr>
+    [% IF extra_field_item %]
+      <tr>
+        <th class="field_label">[% extra_field_item.header FILTER none %]</th>
+        <td>[% extra_field_item.data FILTER none %]</td>
+      </tr>
+    [% END %]
   [% END %]
 [% END %]
 

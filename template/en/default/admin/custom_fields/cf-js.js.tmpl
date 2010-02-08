@@ -50,6 +50,16 @@ function onChangeType(type_field) {
     else {
         value_field.disabled = true;
     }
+
+   var reverse_desc = document.getElementById('reverse_desc');
+   if (type_field.value == [% constants.FIELD_TYPE_BUG_ID %])
+   {
+       reverse_desc.disabled = false;
+   }
+   else {
+       reverse_desc.disabled = true;
+       reverse_desc.value = '';
+   }
 }
 
 function onChangeVisibilityField() {

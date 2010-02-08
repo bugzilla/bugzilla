@@ -1450,6 +1450,12 @@
     To file this [% terms.bug %], you must first choose a component.
     If necessary, just guess.
 
+  [% ELSIF error == "relationship_loop_single" %]
+    [% title = "Relationship Loop Detected" %]
+    [% field_descs.$field_name FILTER html %]
+    for [% terms.bug %] [%+ bug_id FILTER html %]
+    has a circular dependency on [% terms.bug %] [%+ dep_id FILTER html %].
+
   [% ELSIF error == "require_new_password" %]
     [% title = "New Password Needed" %]
     You cannot change your password without choosing a new one.

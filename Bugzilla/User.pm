@@ -1186,7 +1186,9 @@ sub match_field {
     }
     $fields = $expanded_fields;
 
-    for my $field (keys %{$fields}) {
+    foreach my $field (keys %{$fields}) {
+        next unless defined $data->{$field};
+
         #Concatenate login names, so that we have a common way to handle them.
         my $raw_field;
         if (ref $data->{$field}) {

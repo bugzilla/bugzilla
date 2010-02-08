@@ -70,6 +70,9 @@
       plot any arbitrary search against time. Far more powerful.
     </li>
   [% END %]
+  [% Hook.process('current_state') %]
 </ul>
+
+[% Hook.process('end') %]
 
 [% PROCESS global/footer.html.tmpl %]

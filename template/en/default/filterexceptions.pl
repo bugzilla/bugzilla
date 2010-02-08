@@ -416,6 +416,7 @@
 'admin/custom_fields/cf-js.js.tmpl' => [
   'constants.FIELD_TYPE_SINGLE_SELECT',
   'constants.FIELD_TYPE_MULTI_SELECT',
+  'constants.FIELD_TYPE_BUG_ID',
 ],
 
 'admin/params/common.html.tmpl' => [

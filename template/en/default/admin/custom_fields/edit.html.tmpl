@@ -150,8 +150,9 @@
           <input type="text" id="reverse_desc" name="reverse_desc" size="40"
                  value="[% field.reverse_desc FILTER html %]">
           <br/>
-          Use this label for the list of [% terms.bugs %] that link to a [% terms.bug %]
-          with this [% field_types.${constants.FIELD_TYPE_BUG_ID} %] field.
+          Use this label for the list of [% terms.bugs %] that link to
+          [%+ terms.abug %] with this 
+          [%+ field_types.${constants.FIELD_TYPE_BUG_ID} FILTER html %] field.
           For example, if the description is "Is a duplicate of",
           the reverse description would be "Duplicates of this [% terms.bug %]".
           Leave blank to disable the list for this field.

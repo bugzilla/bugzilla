@@ -126,9 +126,10 @@ YAHOO.util.Event.onDOMReady(function() {onChangeType(document.getElementById('ty
       <td>
         <input type="text" id="reverse_desc" name="reverse_desc" value="" size="40" disabled="disabled">
         <br/>
-        Use this label for the list of [% terms.bugs %] that link to a [% terms.bug %]
-        with this [% field_types.${constants.FIELD_TYPE_BUG_ID} %] field.
-        For example, if the description is "Is a duplicate of",
+        Use this label for the list of [% terms.bugs %] that link to
+        [%+ terms.abug %] with this 
+        [%+ field_types.${constants.FIELD_TYPE_BUG_ID} FILTER html %]
+        field. For example, if the description is "Is a duplicate of",
         the reverse description would be "Duplicates of this [% terms.bug %]".
         Leave blank to disable the list for this field.
       </td>

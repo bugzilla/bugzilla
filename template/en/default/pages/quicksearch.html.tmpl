@@ -69,9 +69,9 @@
   <li>[% terms.Bugzilla %] does not just search for the exact word you put in,
     but also for any word that <strong>contains</strong> that word.
     So, for example, searching for "cat" would also find [% terms.bugs %]
-    that contain it&mdash;for example, a but mentioning 
-    "<strong>cat</strong>ch" or "certifi<strong>cat</strong>e". It will
-    not find partial words in the [% field_descs.longdesc FILTER html %]
+    that contain it as part of other words&mdash;for example, [% terms.abug %]
+    mentioning "<strong>cat</strong>ch" or "certifi<strong>cat</strong>e". It
+    will not find partial words in the [% field_descs.longdesc FILTER html %]
     or [% field_descs.keywords FILTER html %] fields,
     though&mdash;only full words are matched, there.</li>
 

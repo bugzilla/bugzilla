@@ -160,6 +160,7 @@
             [% PROCESS "flag/list.html.tmpl" bug_id = attachment.bug_id
                                              attach_id = attachment.id
                                              flag_types = attachment.flag_types
+                                             read_only_flags = !can_edit
             %]
           </div>
         [% END %]

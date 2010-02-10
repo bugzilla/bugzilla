@@ -272,6 +272,7 @@ function showHideStatusItems(e, dupArrayInfo) {
         // by "resolution" behave properly when resolution is hidden.
         var resolution = document.getElementById('resolution');
         if (resolution && resolution.options[0].value != '') {
+            resolution.bz_lastSelected = resolution.selectedIndex;
             var emptyOption = new Option('', '');
             resolution.insertBefore(emptyOption, resolution.options[0]);
             emptyOption.selected = true;
@@ -295,7 +296,7 @@ function showHideStatusItems(e, dupArrayInfo) {
             // Remove the blank option we inserted.
             if (resolution && resolution.options[0].value == '') {
                 resolution.removeChild(resolution.options[0]);
-                resolution.options[0].selected = true;
+                resolution.selectedIndex = resolution.bz_lastSelected;
             }
         }
 

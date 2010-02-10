@@ -27,8 +27,7 @@ use base qw(JSON::RPC::Server::CGI Bugzilla::WebService::Server);
 use Bugzilla::Error;
 use Bugzilla::WebService::Constants;
 use Bugzilla::WebService::Util qw(taint_data);
-use Date::Parse;
-use DateTime;
+use Bugzilla::Util qw(datetime_from);
 
 sub new {
     my $class = shift;
@@ -69,14 +68,21 @@ sub type {
         $retval = "$value";
     }
     elsif ($type eq 'dateTime') {
-        # str2time uses Time::Local internally, so I believe it should
-        # always return seconds based on the *Unix* epoch, even if the
-        # system doesn't use the Unix epoch.
-        $retval = str2time($value) * 1000;
+        # ISO-8601 "YYYYMMDDTHH:MM:SS" with a literal T
+        $retval = $self->datetime_format($value);
     }
     # XXX Will have to implement base64 if Bugzilla starts using it.
 
     return $retval;
+}
+
+sub datetime_format {
+    my ($self, $date_string) = @_;
+
+    # YUI expects ISO8601 in UTC time; uncluding TZ specifier
+    my $time = datetime_from($date_string, 'UTC');
+    my $iso_datetime = $time->iso8601() . 'Z';
+    return $iso_datetime;
 }
 
 ##################
@@ -162,9 +168,10 @@ sub _argument_type_check {
 
 sub _bz_convert_datetime {
     my ($self, $time) = @_;
-    my $dt = DateTime->from_epoch(epoch => ($time / 1000), 
-                                  time_zone => Bugzilla->local_timezone);
-    return $dt->strftime('%Y-%m-%d %T');
+    
+    my $converted = datetime_from($time, Bugzilla->local_timezone);
+    $time = $converted->ymd() . ' ' . $converted->hms();
+    return $time
 }
 
 sub handle_login {
@@ -232,9 +239,16 @@ your JSON-RPC call would look like:
 For JSON-RPC 1.1, you can pass parameters either in the above fashion
 or using the standard named-parameters mechanism of JSON-RPC 1.1.
 
-C<dateTime> fields are represented as an integer number of microseconds
-since the Unix epoch (January 1, 1970 UTC). They are always in the UTC
-timezone.
+C<dateTime> fields are strings in the standard ISO-8601 format:
+C<YYYY-MM-DDTHH:MM:SSZ>, where C<T> and C<Z> are a literal T and Z,
+respectively. The "Z" means that all times are in UTC timezone--times are
+always returned in UTC, and should be passed in as UTC. (Note: The JSON-RPC
+interface currently also accepts non-UTC times for any values passed in, if
+they include a time-zone specifier that follows the ISO-8601 standard, instead
+of "Z" at the end. This behavior is expected to continue into the future, but
+to be fully safe for forward-compatibility with all future versions of
+Bugzilla, it is safest to pass in all times as UTC with the "Z" timezone
+specifier.)
 
 All other types are standard JSON types.
 

@@ -798,11 +798,15 @@ sub update {
                 Bugzilla->user->id, $delta_ts);
         }
     }
-    
+   
+    # Comment Privacy 
     foreach my $comment_id (keys %{$self->{comment_isprivate} || {}}) {
         $dbh->do("UPDATE longdescs SET isprivate = ? WHERE comment_id = ?",
                  undef, $self->{comment_isprivate}->{$comment_id}, $comment_id);
-        # XXX It'd be nice to track this in the bug activity.
+        my ($from, $to) 
+            = $self->{comment_isprivate}->{$comment_id} ? (0, 1) : (1, 0);
+        LogActivityEntry($self->id, "longdescs.isprivate", $from, $to, 
+                         Bugzilla->user->id, $delta_ts, $comment_id);
     }
 
     # Insert the values into the multiselect value tables
@@ -3142,7 +3146,8 @@ sub GetBugActivity {
 
     my $query = "SELECT fielddefs.name, bugs_activity.attach_id, " .
         $dbh->sql_date_format('bugs_activity.bug_when', '%Y.%m.%d %H:%i:%s') .
-            ", bugs_activity.removed, bugs_activity.added, profiles.login_name
+            ", bugs_activity.removed, bugs_activity.added, profiles.login_name, 
+               bugs_activity.comment_id
           FROM bugs_activity
                $suppjoins
      LEFT JOIN fielddefs
@@ -3163,7 +3168,7 @@ sub GetBugActivity {
     my $incomplete_data = 0;
 
     foreach my $entry (@$list) {
-        my ($fieldname, $attachid, $when, $removed, $added, $who) = @$entry;
+        my ($fieldname, $attachid, $when, $removed, $added, $who, $comment_id) = @$entry;
         my %change;
         my $activity_visible = 1;
 
@@ -3174,7 +3179,14 @@ sub GetBugActivity {
             || $fieldname eq 'deadline')
         {
             $activity_visible = Bugzilla->user->is_timetracker;
-        } else {
+        }
+        elsif ($fieldname eq 'longdescs.isprivate'
+                && !Bugzilla->user->is_insider 
+                && $added) 
+        { 
+            $activity_visible = 0;
+        } 
+        else {
             $activity_visible = 1;
         }
 
@@ -3205,6 +3217,11 @@ sub GetBugActivity {
             $change{'attachid'} = $attachid;
             $change{'removed'} = $removed;
             $change{'added'} = $added;
+            
+            if ($comment_id) {
+                $change{'comment'} = Bugzilla::Comment->new($comment_id);
+            }
+
             push (@$changes, \%change);
         }
     }
@@ -3219,7 +3236,7 @@ sub GetBugActivity {
 
 # Update the bugs_activity table to reflect changes made in bugs.
 sub LogActivityEntry {
-    my ($i, $col, $removed, $added, $whoid, $timestamp) = @_;
+    my ($i, $col, $removed, $added, $whoid, $timestamp, $comment_id) = @_;
     my $dbh = Bugzilla->dbh;
     # in the case of CCs, deps, and keywords, there's a possibility that someone
     # might try to add or remove a lot of them at once, which might take more
@@ -3247,9 +3264,9 @@ sub LogActivityEntry {
         trick_taint($removestr);
         my $fieldid = get_field_id($col);
         $dbh->do("INSERT INTO bugs_activity
-                  (bug_id, who, bug_when, fieldid, removed, added)
-                  VALUES (?, ?, ?, ?, ?, ?)",
-                  undef, ($i, $whoid, $timestamp, $fieldid, $removestr, $addstr));
+                  (bug_id, who, bug_when, fieldid, removed, added, comment_id)
+                  VALUES (?, ?, ?, ?, ?, ?, ?)",
+                  undef, ($i, $whoid, $timestamp, $fieldid, $removestr, $addstr, $comment_id));
     }
 }
 

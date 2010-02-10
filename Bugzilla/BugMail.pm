@@ -238,7 +238,8 @@ sub Send {
     my $diffs = $dbh->selectall_arrayref(
            "SELECT profiles.login_name, profiles.realname, fielddefs.description,
                    bugs_activity.bug_when, bugs_activity.removed, 
-                   bugs_activity.added, bugs_activity.attach_id, fielddefs.name
+                   bugs_activity.added, bugs_activity.attach_id, fielddefs.name,
+                   bugs_activity.comment_id
               FROM bugs_activity
         INNER JOIN fielddefs
                 ON fielddefs.id = bugs_activity.fieldid
@@ -256,7 +257,7 @@ sub Send {
     my $fullwho;
     my @changedfields;
     foreach my $ref (@$diffs) {
-        my ($who, $whoname, $what, $when, $old, $new, $attachid, $fieldname) = (@$ref);
+        my ($who, $whoname, $what, $when, $old, $new, $attachid, $fieldname, $comment_id) = (@$ref);
         my $diffpart = {};
         if ($who ne $lastwho) {
             $lastwho = $who;
@@ -278,6 +279,12 @@ sub Send {
             ($diffpart->{'isprivate'}) = $dbh->selectrow_array(
                 'SELECT isprivate FROM attachments WHERE attach_id = ?',
                 undef, ($attachid));
+        }
+        if ($fieldname eq 'longdescs.isprivate') {
+            my $comment = Bugzilla::Comment->new($comment_id);
+            my $comment_num = $comment->count;
+            $what =~ s/^(Comment )?/Comment #$comment_num /;
+            $diffpart->{'isprivate'} = $new;
         }
         $difftext = three_columns($what, $old, $new);
         $diffpart->{'header'} = $diffheader;

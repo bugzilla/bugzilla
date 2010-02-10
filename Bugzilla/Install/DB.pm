@@ -599,6 +599,9 @@ sub update_table_definitions {
     _convert_flagtypes_fks_to_set_null();
     _fix_decimal_types();
 
+    # 2009-11-14 dkl@redhat.com - Bug 310450
+    $dbh->bz_add_column('bugs_activity', 'comment_id', {TYPE => 'INT3'});
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################

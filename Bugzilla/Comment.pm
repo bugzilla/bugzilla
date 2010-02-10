@@ -188,6 +188,22 @@ sub _check_type {
     return $type;
 }
 
+sub count {
+    my ($self) = @_;
+
+    return $self->{'count'} if defined $self->{'count'};
+
+    my $dbh = Bugzilla->dbh;
+    ($self->{'count'}) = $dbh->selectrow_array(
+        "SELECT COUNT(*)
+           FROM longdescs 
+          WHERE bug_id = ? 
+                AND bug_when <= ?",
+        undef, $self->bug_id, $self->creation_ts);
+
+    return --$self->{'count'};
+}   
+
 1;
 
 __END__
@@ -243,6 +259,10 @@ C<0> otherwise.
 
 L<Bugzilla::User> who created the comment.
 
+=item C<count>
+
+C<int> The position this comment is located in the full list of comments for a bug starting from 0.
+
 =item C<body_full>
 
 =over
@@ -272,8 +292,6 @@ C<boolean>. C<1> if the comment should be returned word-wrapped.
 A string, the full text of the comment as it would be displayed to an end-user.
 
 =back
-
-
 
 =back
 

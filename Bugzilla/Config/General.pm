@@ -39,6 +39,7 @@ use constant get_param_list => (
   {
    name => 'maintainer',
    type => 't',
+   no_reset => '1',
    default => '',
    checker => \&check_email
   },

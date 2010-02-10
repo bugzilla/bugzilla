@@ -87,7 +87,7 @@ if ($action eq 'save' && $current_module) {
         my $name = $i->{'name'};
         my $value = $cgi->param($name);
 
-        if (defined $cgi->param("reset-$name")) {
+        if (defined $cgi->param("reset-$name") && !$i->{'no_reset'}) {
             $value = $i->{'default'};
         } else {
             if ($i->{'type'} eq 'm') {

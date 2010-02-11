@@ -42,6 +42,7 @@ use Bugzilla::Product;
 use Bugzilla::Component;
 use Bugzilla::Status;
 use Bugzilla::Mailer;
+use Bugzilla::Hook;
 
 use Date::Parse;
 use Date::Format;
@@ -425,6 +426,9 @@ sub Send {
             }
         }
     }
+
+    Bugzilla::Hook::process('bugmail_recipients',
+                            { recipients => \%recipients });
     
     # Find all those user-watching anyone on the current list, who is not
     # on it already themselves.

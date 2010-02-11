@@ -189,6 +189,14 @@ sub buglist_columns {
     $columns->{'example'} = { 'name' => 'bugs.delta_ts' , 'title' => 'Example' };
 }
 
+sub bugmail_recipients {
+    my ($self, $args) = @_;
+    my $recipients = $args->{'recipients'};
+    # Uncomment the below line to add the first user in the Bugzilla database
+    # to every bugmail as though he/she were a CC.
+    #$recipients->{1}->{+REL_CC} = 1;
+}
+
 sub colchange_columns {
     my ($self, $args) = @_;
     

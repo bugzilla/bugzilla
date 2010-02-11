@@ -29,6 +29,7 @@
 #                 Lance Larsh <lance.larsh@oracle.com>
 #                 Jesse Clark <jjclark1982@gmail.com>
 #                 Rémi Zara <remi_zara@mac.com>
+#                 Reed Loden <reed@reedloden.com>
 
 use strict;
 
@@ -614,7 +615,7 @@ sub init {
         "^long_?desc,changedafter" => \&_long_desc_changedbefore_after,
         "^content,matches" => \&_content_matches,
         "^content," => sub { ThrowUserError("search_content_without_matches"); },
-        "^(?:deadline|creation_ts|delta_ts),(?:lessthan|greaterthan|equals|notequals),(?:-|\\+)?(?:\\d+)(?:[dDwWmMyY])\$" => \&_timestamp_compare,
+        "^(?:deadline|creation_ts|delta_ts),(?:lessthan|lessthaneq|greaterthan|greaterthaneq|equals|notequals),(?:-|\\+)?(?:\\d+)(?:[dDwWmMyY])\$" => \&_timestamp_compare,
         "^commenter,(?:equals|anyexact),(%\\w+%)" => \&_commenter_exact,
         "^commenter," => \&_commenter,
         # The _ is allowed for backwards-compatibility with 3.2 and lower.
@@ -642,7 +643,7 @@ sub init {
         "^dependson,(?!changed)" => \&_dependson_nonchanged,
         "^blocked,(?!changed)" => \&_blocked_nonchanged,
         "^alias,(?!changed)" => \&_alias_nonchanged,
-        "^owner_idle_time,(greaterthan|lessthan)" => \&_owner_idle_time_greater_less,
+        "^owner_idle_time,(greaterthan|greaterthaneq|lessthan|lessthaneq)" => \&_owner_idle_time_greater_less,
         "^($multi_fields),(?:notequals|notregexp|notsubstring|nowords|nowordssubstr)" => \&_multiselect_negative,
         "^($multi_fields),(?:allwords|allwordssubstr|anyexact)" => \&_multiselect_multiple,
         "^($multi_fields),(?!changed)" => \&_multiselect_nonchanged,
@@ -655,8 +656,10 @@ sub init {
         ",regexp" => \&_regexp,
         ",notregexp" => \&_notregexp,
         ",lessthan" => \&_lessthan,
+        ",lessthaneq" => \&_lessthaneq,
         ",matches" => sub { ThrowUserError("search_content_without_matches"); },
         ",greaterthan" => \&_greaterthan,
+        ",greaterthaneq" => \&_greaterthaneq,
         ",anyexact" => \&_anyexact,
         ",anywordssubstr" => \&_anywordsubstr,
         ",allwordssubstr" => \&_allwordssubstr,
@@ -1595,8 +1598,12 @@ sub _percentage_complete {
         $oper = "=";
     } elsif ($$t eq "greaterthan") {
         $oper = ">";
+    } elsif ($$t eq "greaterthaneq") {
+        $oper = ">=";
     } elsif ($$t eq "lessthan") {
         $oper = "<";
+    } elsif ($$t eq "lessthaneq") {
+        $oper = "<=";
     } elsif ($$t eq "notequal") {
         $oper = "<>";
     } elsif ($$t eq "regexp") {
@@ -2134,12 +2141,28 @@ sub _lessthan {
     $$term = "$$ff < $$q";
 }
 
+sub _lessthaneq {
+    my $self = shift;
+    my %func_args = @_;
+    my ($ff, $q, $term) = @func_args{qw(ff q term)};
+
+    $$term = "$$ff <= $$q";
+}
+
 sub _greaterthan {
     my $self = shift;
     my %func_args = @_;
     my ($ff, $q, $term) = @func_args{qw(ff q term)};
     
     $$term = "$$ff > $$q";
+}
+
+sub _greaterthaneq {
+    my $self = shift;
+    my %func_args = @_;
+    my ($ff, $q, $term) = @func_args{qw(ff q term)};
+    
+    $$term = "$$ff >= $$q";
 }
 
 sub _anyexact {

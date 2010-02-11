@@ -59,7 +59,7 @@ sub _init {
     my $class = shift;
     my ($param) = @_;
     my $dbh = Bugzilla->dbh;
-    my $columns = join(',', $class->DB_COLUMNS);
+    my $columns = join(',', $class->_get_db_columns);
     my $table   = $class->DB_TABLE;
     my $name_field = $class->NAME_FIELD;
     my $id_field   = $class->ID_FIELD;
@@ -241,7 +241,7 @@ sub match {
 sub _do_list_select {
     my ($class, $where, $values, $postamble) = @_;
     my $table = $class->DB_TABLE;
-    my $cols  = join(',', $class->DB_COLUMNS);
+    my $cols  = join(',', $class->_get_db_columns);
     my $order = $class->LIST_ORDER;
 
     my $sql = "SELECT $cols FROM $table";
@@ -487,12 +487,33 @@ sub get_all {
 
 sub check_boolean { return $_[1] ? 1 : 0 }
 
-# For some classes, VALIDATORS takes time to generate, so we cache it. Also,
-# this allows the object_validators hook to only run once per request, 
-# instead of every time we call set() on a class of objects.
-#
-# This method is intentionally private and should only be called by
-# Bugzilla::Object.
+####################
+# Constant Helpers #
+####################
+
+# For some classes, some constants take time to generate, so we cache them
+# and only access them through the below methods. This also allows certain
+# hooks to only run once per request instead of multiple times on each
+# page.
+
+sub _get_db_columns {
+    my $invocant = shift;
+    my $class = ref($invocant) || $invocant;
+    my $cache = Bugzilla->request_cache;
+    my $cache_key = "object_${class}_db_columns";
+    return @{ $cache->{$cache_key} } if $cache->{$cache_key};
+    # Currently you can only add new columns using object_columns, not
+    # remove or modify existing columns, because removing columns would
+    # almost certainly cause Bugzilla to function improperly.
+    my @add_columns;
+    Bugzilla::Hook::process('object_columns',
+                            { class => $class, columns => \@add_columns });
+    my @columns = ($invocant->DB_COLUMNS, @add_columns);
+    $cache->{$cache_key} = \@columns;
+    return @{ $cache->{$cache_key} };
+}
+
+# This method is private and should only be called by Bugzilla::Object.
 sub _get_validators {
     my $invocant = shift;
     my $class = ref($invocant) || $invocant;
@@ -553,6 +574,12 @@ for C<Bugzilla::Keyword> this would be C<keyworddefs>.
 
 The names of the columns that you want to read out of the database
 and into this object. This should be an array.
+
+I<Note>: Though normally you will never need to access this constant's data 
+directly in your subclass, if you do, you should access it by calling the
+C<_get_db_columns> method instead of accessing the constant directly. (The
+only exception to this rule is calling C<SUPER::DB_COLUMNS> from within
+your own C<DB_COLUMNS> subroutine in a subclass.)
 
 =item C<NAME_FIELD>
 

@@ -181,6 +181,8 @@ takes a C<modules> parameter, just like L</auth_login_methods>.
 
 =head2 bug_columns
 
+B<DEPRECATED> Use L</object_columns> instead.
+
 This allows you to add new fields that will show up in every L<Bugzilla::Bug>
 object. Note that you will also need to use the L</bug_fields> hook in
 conjunction with this hook to make this work.
@@ -602,6 +604,44 @@ The value being set on the object.
 
 =back
 
+=head2 object_columns
+
+This hook allows you to add new "fields" to existing Bugzilla objects,
+that correspond to columns in their tables.
+
+For example, if you added an C<example> column to the "bugs" table, you
+would have to also add an C<example> field to the C<Bugzilla::Bug> object
+in order to access that data via Bug objects.
+
+Don't do anything slow inside this hook--it's called several times on
+every page of Bugzilla.
+
+Params:
+
+=over
+
+=item C<class>
+
+The name of the class that this hook is being called on. You can check this 
+like C<< if ($class->isa('Some::Class')) >> in your code, to add new
+fields only for certain classes.
+
+=item C<columns>
+
+An arrayref. Add the string names of columns to this array to add new
+values to objects. 
+
+For example, if you add an C<example> column to a particular table
+(using L</install_update_db>), and then push the string C<example> into 
+this array for the object that uses that table, then you can access the
+information in that column via C<< $object->{example} >> on all objects
+of that type.
+
+This arrayref does not contain the standard column names--you cannot modify
+or remove standard object columns using this hook.
+
+=back
+
 =head2 object_end_of_create_validators
 
 Called at the end of L<Bugzilla::Object/run_create_validators>. You can
@@ -688,7 +728,7 @@ Params:
 
 The name of the class that C<VALIDATORS> was called on. You can check this 
 like C<< if ($class->isa('Some::Class')) >> in your code, to add
-validators only for certain classes
+validators only for certain classes.
 
 =item C<validators>
 

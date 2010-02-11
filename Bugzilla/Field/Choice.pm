@@ -142,7 +142,7 @@ sub create {
     my $class = shift;
     my ($params) = @_;
     foreach my $key (keys %$params) {
-        if (!grep {$_ eq $key} $class->DB_COLUMNS) {
+        if (!grep {$_ eq $key} $class->_get_db_columns) {
             delete $params->{$key};
         }
     }

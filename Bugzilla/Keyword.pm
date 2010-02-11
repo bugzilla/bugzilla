@@ -78,7 +78,8 @@ sub get_all_with_bug_count {
     my $class = shift;
     my $dbh = Bugzilla->dbh;
     my $keywords =
-      $dbh->selectall_arrayref('SELECT ' . join(', ', DB_COLUMNS) . ',
+      $dbh->selectall_arrayref('SELECT ' 
+                                      . join(', ', $class->_get_db_columns) . ',
                                        COUNT(keywords.bug_id) AS bug_count
                                   FROM keyworddefs
                              LEFT JOIN keywords

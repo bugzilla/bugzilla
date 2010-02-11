@@ -333,6 +333,15 @@ sub object_before_set {
     }
 }
 
+sub object_columns {
+    my ($self, $args) = @_;
+    my ($class, $columns) = @$args{qw(class columns)};
+
+    if ($class->isa('Bugzilla::ExampleObject')) {
+        push(@$columns, 'example');
+    }
+}
+
 sub object_end_of_create_validators {
     my ($self, $args) = @_;
     

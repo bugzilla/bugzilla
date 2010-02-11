@@ -444,7 +444,7 @@ sub create {
     $timestamp ||= Bugzilla->dbh->selectrow_array('SELECT NOW()');
 
     my $params = {};
-    my @columns = grep { $_ ne 'id' } $class->DB_COLUMNS;
+    my @columns = grep { $_ ne 'id' } $class->_get_db_columns;
     $params->{$_} = $flag->{$_} foreach @columns;
 
     $params->{creation_date} = $params->{modification_date} = $timestamp;

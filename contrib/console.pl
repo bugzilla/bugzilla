@@ -96,7 +96,7 @@ sub get_object {
     elsif (m/^\d+$/) {
         @results = ($class->new($_));
     }
-    elsif (m/\w/i && grep {$_ eq 'name'} ($class->DB_COLUMNS)) {
+    elsif (m/\w/i && grep {$_ eq 'name'} ($class->_get_db_columns)) {
         @results = @{$class->match({name => $_})};
     }
     else {

@@ -675,6 +675,32 @@ L<Bugzilla::Object/update> returns.
 
 =back
 
+=head2 object_validators
+
+Allows you to add new items to L<Bugzilla::Object/VALIDATORS> for
+particular classes.
+
+Params:
+
+=over
+
+=item C<class>
+
+The name of the class that C<VALIDATORS> was called on. You can check this 
+like C<< if ($class->isa('Some::Class')) >> in your code, to add
+validators only for certain classes
+
+=item C<validators>
+
+A hashref, where the keys are database columns and the values are subroutine
+references. You can add new validators or modify existing ones. If you modify
+an existing one, you should remember to call the original validator
+inside of your modified validator. (This way, several extensions can all
+modify the same validator.)
+
+=back
+
+
 =head2 page_before_template
 
 This is a simple way to add your own pages to Bugzilla. This hooks C<page.cgi>,

@@ -288,7 +288,7 @@ sub set {
                             { object => $self, field => $field,
                               value => $value });
 
-    my %validators = (%{$self->VALIDATORS}, %{$self->UPDATE_VALIDATORS});
+    my %validators = (%{$self->_get_validators}, %{$self->UPDATE_VALIDATORS});
     if (exists $validators{$field}) {
         my $validator = $validators{$field};
         $value = $self->$validator($value, $field);
@@ -430,7 +430,7 @@ sub check_required_create_fields {
 sub run_create_validators {
     my ($class, $params) = @_;
 
-    my $validators = $class->VALIDATORS;
+    my $validators = $class->_get_validators;
 
     my %field_values;
     # We do the sort just to make sure that validation always
@@ -486,6 +486,27 @@ sub get_all {
 ###############################
 
 sub check_boolean { return $_[1] ? 1 : 0 }
+
+# For some clases, VALIDATORS takes time to generate, so we cache it. Also,
+# this allows the object_validators hook to only run once per request, 
+# instead of every time we call set() on a class of objects.
+#
+# This method is intentionally private and should only be called by
+# Bugzilla::Object.
+sub _get_validators {
+    my $invocant = shift;
+    my $class = ref($invocant) || $invocant;
+    my $cache = Bugzilla->request_cache;
+    my $cache_key = "object_${class}_validators";
+    return $cache->{$cache_key} if $cache->{$cache_key};
+    # We copy this into a hash so that the hook doesn't modify the constant.
+    # (That could be bad in mod_perl.)
+    my %validators = %{ $invocant->VALIDATORS };
+    Bugzilla::Hook::process('object_validators', 
+                            { class => $class, validators => \%validators });
+    $cache->{$cache_key} = \%validators;
+    return $cache->{$cache_key};
+}
 
 1;
 

@@ -25,6 +25,7 @@ use strict;
 use base qw(Bugzilla::Extension);
 
 use Bugzilla::Constants;
+use Bugzilla::Error;
 use Bugzilla::Group;
 use Bugzilla::User;
 use Bugzilla::Util qw(diff_arrays html_quote);
@@ -374,6 +375,45 @@ sub object_end_of_update {
             print "The name field changed from $old to $new!";
         }
     }
+}
+
+sub object_validators {
+    my ($self, $args) = @_;
+    my ($class, $validators) = @$args{qw(class validators)};
+
+    if ($class->isa('Bugzilla::Bug')) {
+        # This is an example of adding a new validator.
+        # See the _check_example subroutine below.
+        $validators->{example} = \&_check_example;
+
+        # This is an example of overriding an existing validator.
+        # See the check_short_desc validator below.
+        my $original = $validators->{short_desc};
+        $validators->{short_desc} = sub { _check_short_desc($original, @_) };
+    }
+}
+
+sub _check_example {
+    my ($invocant, $value, $field) = @_;
+    warn "I was called to validate the value of $field.";
+    warn "The value of $field that I was passed in is: $value";
+
+    # Make the value always be 1.
+    my $fixed_value = 1;
+    return $fixed_value;
+}
+
+sub _check_short_desc {
+    my $original = shift;
+    my $invocant = shift;
+    my $value = $invocant->$original(@_);
+    if ($value !~ /example/i) {
+        # Uncomment this line to make Bugzilla throw an error every time
+        # you try to file a bug or update a bug without the word "example"
+        # in the summary.
+        #ThrowUserError('example_short_desc_invalid');
+    }
+    return $value;
 }
 
 sub page_before_template {

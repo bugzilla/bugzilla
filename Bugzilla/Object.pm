@@ -322,11 +322,17 @@ sub update {
     $dbh->bz_start_transaction();
 
     my $old_self = $self->new($self->id);
-    
+   
+    my @all_columns = $self->UPDATE_COLUMNS;
+    my @hook_columns;
+    Bugzilla::Hook::process('object_update_columns',
+                            { object => $self, columns => \@hook_columns });
+    push(@all_columns, @hook_columns);
+
     my %numeric = map { $_ => 1 } $self->NUMERIC_COLUMNS;
     my %date    = map { $_ => 1 } $self->DATE_COLUMNS;
     my (@update_columns, @values, %changes);
-    foreach my $column ($self->UPDATE_COLUMNS) {
+    foreach my $column (@all_columns) {
         my ($old, $new) = ($old_self->{$column}, $self->{$column});
         # This has to be written this way in order to allow us to set a field
         # from undef or to undef, and avoid warnings about comparing an undef

@@ -386,6 +386,15 @@ sub object_end_of_update {
     }
 }
 
+sub object_update_columns {
+    my ($self, $args) = @_;
+    my ($object, $columns) = @$args{qw(object columns)};
+
+    if ($object->isa('Bugzilla::ExampleObject')) {
+        push(@$columns, 'example');
+    }
+}
+
 sub object_validators {
     my ($self, $args) = @_;
     my ($class, $validators) = @$args{qw(class validators)};

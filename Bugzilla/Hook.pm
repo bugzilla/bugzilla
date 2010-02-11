@@ -715,6 +715,35 @@ L<Bugzilla::Object/update> returns.
 
 =back
 
+=head2 object_update_columns
+
+If you've added fields to bugs via L</object_columns>, then this
+hook allows you to say which of those columns should be updated in the
+database when L<Bugzilla::Object/update> is called on the object.
+
+If you don't use this hook, then your custom columns won't be modified in
+the database by Bugzilla.
+
+Params:
+
+=over
+
+=item C<object>
+
+The object that is about to be updated. You should check this
+like C<< if ($object->isa('Some::Class')) >> in your code, to modify
+the "update columns" only for certain classes.
+
+=item C<columns>
+
+An arrayref. Add the string names of columns to this array to allow
+that column to be updated when C<update()> is called on the object.
+
+This arrayref does not contain the standard column names--you cannot stop
+standard columns from being updated by using this hook.
+
+=back
+
 =head2 object_validators
 
 Allows you to add new items to L<Bugzilla::Object/VALIDATORS> for

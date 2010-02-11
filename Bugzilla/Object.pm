@@ -487,7 +487,7 @@ sub get_all {
 
 sub check_boolean { return $_[1] ? 1 : 0 }
 
-# For some clases, VALIDATORS takes time to generate, so we cache it. Also,
+# For some classes, VALIDATORS takes time to generate, so we cache it. Also,
 # this allows the object_validators hook to only run once per request, 
 # instead of every time we call set() on a class of objects.
 #

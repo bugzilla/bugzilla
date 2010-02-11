@@ -191,10 +191,14 @@ sub buglist_columns {
 
 sub bugmail_recipients {
     my ($self, $args) = @_;
-    my $recipients = $args->{'recipients'};
-    # Uncomment the below line to add the first user in the Bugzilla database
-    # to every bugmail as though he/she were a CC.
-    #$recipients->{1}->{+REL_CC} = 1;
+    my $recipients = $args->{recipients};
+    my $bug = $args->{bug};
+    if ($bug->id == 1) {
+        # Uncomment the line below to add the second user in the Bugzilla
+        # database to the recipients list of every bugmail sent out about
+        # bug 1 as though that user were on the CC list.
+        #$recipients->{2}->{+REL_CC} = 1;
+    }
 }
 
 sub colchange_columns {

@@ -374,6 +374,10 @@ Params:
 
 =over
 
+=item C<bug>
+
+The L<Bugzilla::Bug> that bugmail is being sent about.
+
 =item C<recipients>
 
 This is a hashref. The keys are numeric user ids from the C<profiles>

@@ -55,17 +55,6 @@ use constant FORMAT_2_SIZE => [19,55];
 use constant BIT_DIRECT    => 1;
 use constant BIT_WATCHING  => 2;
 
-# We need these strings for the X-Bugzilla-Reasons header
-# Note: this hash uses "," rather than "=>" to avoid auto-quoting of the LHS.
-use constant REL_NAMES => {
-    REL_ASSIGNEE      , "AssignedTo", 
-    REL_REPORTER      , "Reporter",
-    REL_QA            , "QAcontact",
-    REL_CC            , "CC",
-    REL_VOTER         , "Voter",
-    REL_GLOBAL_WATCHER, "GlobalWatcher"
-};
-
 # We use this instead of format because format doesn't deal well with
 # multi-byte languages.
 sub multiline_sprintf {
@@ -98,6 +87,15 @@ sub multiline_sprintf {
 
 sub three_columns {
     return multiline_sprintf(FORMAT_TRIPLE, \@_, FORMAT_3_SIZE);
+}
+
+sub relationships {
+    my $ref = RELATIONSHIPS;
+    # Clone it so that we don't modify the constant;
+    my %relationships = %$ref;
+    Bugzilla::Hook::process('bugmail_relationships', 
+                            { relationships => \%relationships });
+    return %relationships;
 }
 
 # This is a bit of a hack, basically keeping the old system()
@@ -615,8 +613,9 @@ sub sendMail {
         push(@reasons_watch, $relationship) if ($bits & BIT_WATCHING);
     }
 
-    my @headerrel   = map { REL_NAMES->{$_} } @reasons;
-    my @watchingrel = map { REL_NAMES->{$_} } @reasons_watch;
+    my %relationships = relationships();
+    my @headerrel   = map { $relationships{$_} } @reasons;
+    my @watchingrel = map { $relationships{$_} } @reasons_watch;
     push(@headerrel,   'None') unless @headerrel;
     push(@watchingrel, 'None') unless @watchingrel;
     push @watchingrel, map { user_id_to_login($_) } @$watchingRef;

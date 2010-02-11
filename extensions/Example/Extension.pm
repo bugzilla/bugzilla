@@ -36,6 +36,9 @@ use Bugzilla::Extension::Example::Util;
 
 use Data::Dumper;
 
+# See bugmail_relationships.
+use constant REL_EXAMPLE => -127;
+
 our $VERSION = '1.0';
 
 sub attachment_process_data {
@@ -193,12 +196,26 @@ sub bugmail_recipients {
     my ($self, $args) = @_;
     my $recipients = $args->{recipients};
     my $bug = $args->{bug};
+
+    my $user = 
+        new Bugzilla::User({ name => Bugzilla->params->{'maintainer'} });
+
     if ($bug->id == 1) {
-        # Uncomment the line below to add the second user in the Bugzilla
-        # database to the recipients list of every bugmail sent out about
-        # bug 1 as though that user were on the CC list.
-        #$recipients->{2}->{+REL_CC} = 1;
+        # Uncomment the line below to add the maintainer to the recipients
+        # list of every bugmail from bug 1 as though that the maintainer
+        # were on the CC list.
+        #$recipients->{$user->id}->{+REL_CC} = 1;
+
+        # And this line adds the maintainer as though he had the "REL_EXAMPLE"
+        # relationship from the bugmail_relationships hook below.
+        #$recipients->{$user->id}->{+REL_EXAMPLE} = 1;
     }
+}
+
+sub bugmail_relationships {
+    my ($self, $args) = @_;
+    my $relationships = $args->{relationships};
+    $relationships->{+REL_EXAMPLE} = 'Example';
 }
 
 sub colchange_columns {

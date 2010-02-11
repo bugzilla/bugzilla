@@ -298,8 +298,18 @@ use constant REL_CC                 => 3;
 use constant REL_VOTER              => 4;
 use constant REL_GLOBAL_WATCHER     => 5;
 
-use constant RELATIONSHIPS => REL_ASSIGNEE, REL_QA, REL_REPORTER, REL_CC, 
-                              REL_VOTER, REL_GLOBAL_WATCHER;
+# We need these strings for the X-Bugzilla-Reasons header
+# Note: this hash uses "," rather than "=>" to avoid auto-quoting of the LHS.
+# This should be accessed through Bugzilla::BugMail::relationships() instead
+# of being accessed directly.
+use constant RELATIONSHIPS => {
+    REL_ASSIGNEE      , "AssignedTo",
+    REL_REPORTER      , "Reporter",
+    REL_QA            , "QAcontact",
+    REL_CC            , "CC",
+    REL_VOTER         , "Voter",
+    REL_GLOBAL_WATCHER, "GlobalWatcher"
+};
                               
 # Used for global events like EVT_FLAG_REQUESTED
 use constant REL_ANY                => 100;

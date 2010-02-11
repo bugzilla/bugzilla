@@ -27,6 +27,7 @@ use strict;
 use lib qw(. lib);
 
 use Bugzilla;
+use Bugzilla::BugMail;
 use Bugzilla::Constants;
 use Bugzilla::Search;
 use Bugzilla::Util;
@@ -261,7 +262,8 @@ sub SaveEmail {
     # relationship/event matrix.
     # Note: the database holds only "off" email preferences, as can be implied 
     # from the name of the table - profiles_nomail.
-    foreach my $rel (RELATIONSHIPS) {
+    my %relationships = Bugzilla::BugMail::relationships();
+    foreach my $rel (keys %relationships) {
         # Positive events: a ticked box means "send me mail."
         foreach my $event (POS_EVENTS) {
             if (defined($cgi->param("email-$rel-$event"))

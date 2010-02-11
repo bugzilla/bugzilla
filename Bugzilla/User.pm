@@ -1568,7 +1568,9 @@ sub create {
     my $user = $class->SUPER::create(@_);
 
     # Turn on all email for the new user
-    foreach my $rel (RELATIONSHIPS) {
+    require Bugzilla::BugMail;
+    my %relationships = Bugzilla::BugMail::relationships();
+    foreach my $rel (keys %relationships) {
         foreach my $event (POS_EVENTS, NEG_EVENTS) {
             # These "exceptions" define the default email preferences.
             # 

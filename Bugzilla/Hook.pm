@@ -398,6 +398,33 @@ instead of as a string.)
 =back
 
 
+=head2 bugmail_relationships
+
+There are various sorts of "relationships" that a user can have to a bug,
+such as Assignee, CC, etc. If you want to add a new type of relationship,
+you should use this hook.
+
+Params:
+
+=over
+
+=item C<relationships>
+
+A hashref, where the keys are numbers and the values are strings.
+
+The keys represent a numeric identifier for the relationship. The
+numeric identifier should be a negative number between -1 and -127.
+The number must be unique across all extensions. (Negative numbers
+are used so as not to conflict with relationship identifiers in Bugzilla
+itself.)
+
+The value is the "name" of this relationship that will show up in email
+headers in bugmails. The "name" should be short and should contain no
+spaces.
+
+=back
+
+
 =head2 colchange_columns
 
 This happens in F<colchange.cgi> right after the list of possible display

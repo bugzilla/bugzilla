@@ -27,6 +27,7 @@
 use strict;
 use 5.008001;
 use lib qw(. lib t);
+use Config;
 use Support::Files;
 use Test::More tests => scalar(@Support::Files::testitems);
 
@@ -59,8 +60,12 @@ sub compile_file {
         $T = "T";
     }
 
+    my $libs = '';
+    if ($ENV{PERL5LIB}) {
+       $libs = join " ", map { "-I$_" } split /$Config{path_sep}/, $ENV{PERL5LIB};
+    }
     my $perl = qq{"$^X"};
-    my $output = `$perl -wc$T $file 2>&1`;
+    my $output = `$perl $libs -wc$T $file 2>&1`;
     chomp($output);
     my $return_val = $?;
     $output =~ s/^\Q$file\E syntax OK$//ms;

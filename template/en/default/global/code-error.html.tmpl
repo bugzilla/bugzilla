@@ -374,11 +374,6 @@
     You cannot set the resolution of [% terms.abug %] to [% display_value("resolution", "MOVED") FILTER html %] without
     moving the [% terms.bug %].
 
-  [% ELSIF error == "no_open_bug_status" %]
-    [% title = "$terms.Bug Cannot Be Confirmed" %]
-    There is no valid transition from
-    [%+ display_value("bug_status", "UNCONFIRMED") FILTER html %] to an open state.
-
   [% ELSIF error == "param_invalid" %]
     [% title = "Invalid Parameter" %]
     <code>[% param FILTER html %]</code> is not a valid parameter

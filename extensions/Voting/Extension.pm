@@ -836,7 +836,7 @@ sub _confirm_if_vote_confirmed {
                     last;
                 }
             }
-            ThrowCodeError('no_open_bug_status') unless $new_status;
+            ThrowCodeError('voting_no_open_bug_status') unless $new_status;
 
             # We cannot call $bug->set_status() here, because a user without
             # canconfirm privs should still be able to confirm a bug by

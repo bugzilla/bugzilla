@@ -424,9 +424,6 @@ if ($action eq 'search') {
     $vars->{'series'} = $dbh->selectrow_array(
         'SELECT COUNT(*) FROM series WHERE creator = ?',
         undef, $otherUserID);
-    $vars->{'votes'} = $dbh->selectrow_array(
-        'SELECT COUNT(*) FROM votes WHERE who = ?',
-        undef, $otherUserID);
     $vars->{'watch'}{'watched'} = $dbh->selectrow_array(
         'SELECT COUNT(*) FROM watch WHERE watched = ?',
         undef, $otherUserID);
@@ -537,7 +534,6 @@ if ($action eq 'search') {
     $dbh->do('DELETE FROM tokens WHERE userid = ?', undef, $otherUserID);
     $dbh->do('DELETE FROM user_group_map WHERE user_id = ?', undef,
              $otherUserID);
-    $dbh->do('DELETE FROM votes WHERE who = ?', undef, $otherUserID);
     $dbh->do('DELETE FROM watch WHERE watcher = ? OR watched = ?', undef,
              ($otherUserID, $otherUserID));
 

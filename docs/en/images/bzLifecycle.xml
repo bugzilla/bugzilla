@@ -968,8 +968,7 @@ UNCONFIRMED state#</dia:string>
       <dia:attribute name="text">
         <dia:composite type="text">
           <dia:attribute name="string">
-            <dia:string>#Bug confirmed or
-receives enough votes#</dia:string>
+            <dia:string>#Bug confirmed#</dia:string>
           </dia:attribute>
           <dia:attribute name="font">
             <dia:font family="sans" style="0" name="Helvetica"/>

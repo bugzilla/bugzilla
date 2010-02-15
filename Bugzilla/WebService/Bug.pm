@@ -386,9 +386,6 @@ sub search {
     if (my $when = delete $params->{creation_ts}) {
         $params->{WHERE}->{'creation_ts >= ?'} = $when;
     }
-    if (my $votes = delete $params->{votes}) { 
-        $params->{WHERE}->{'votes >= ?'} = $votes;
-    }
     if (my $summary = delete $params->{short_desc}) {
         my @strings = ref $summary ? @$summary : ($summary);
         my @likes = ("short_desc LIKE ?") x @strings;
@@ -1687,11 +1684,6 @@ C<string> The "URL" field of a bug.
 
 C<string> The Version field of a bug.
 
-=item C<votes>
-
-C<int> Searches for bugs with this many votes or greater. May not
-be an array.
-
 =item C<whiteboard>
 
 C<string> Search the "Status Whiteboard" field on bugs for a substring.
@@ -1721,6 +1713,8 @@ for that value.
 =over
 
 =item Added in Bugzilla B<3.4>.
+
+=item Searching by C<votes> was removed in Bugzilla B<3.8>.
 
 =back
 

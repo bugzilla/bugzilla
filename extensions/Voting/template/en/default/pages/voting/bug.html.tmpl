@@ -16,10 +16,11 @@
   # Rights Reserved.
   #
   # Contributor(s): Gervase Markham <gerv@gerv.net>
+  #                 Max Kanat-Alexander <mkanat@bugzilla.org>
   #%]
 
 [%# INTERFACE:
-  # bug_id: integer. ID of the bug we are listing the votes for.
+  # bug: Bugzilla::Bug that we are listing the votes for.
   # users: list of hashes. May be empty. Each hash has two members:
   #   login_name: string. The login name of the user whose vote is attached
   #   vote_count: integer. The number of times that user has votes for this bug.
@@ -29,7 +30,7 @@
 
 [% PROCESS global/header.html.tmpl
            title = "Show Votes"
-           subheader = "$terms.Bug <a href=\"show_bug.cgi?id=$bug_id\">$bug_id</a>"
+           subheader = "$terms.Bug $bug.id" FILTER bug_link(bug)
  %]
 
 [% total = 0 %]
@@ -43,18 +44,18 @@
     [% total = total + voter.vote_count %]
     <tr>
       <td>
-          <a href="votes.cgi?action=show_user&amp;user_id=
+          <a href="page.cgi?id=voting/user.html&amp;user_id=
                   [%- voter.id FILTER url_quote %]">
           [% voter.login_name FILTER email FILTER html %]
         </a>
       </td>
       <td align="right">
-        [% voter.vote_count %]
+        [% voter.vote_count FILTER html %]
       </td>
     </tr>
   [% END %]
 </table>
 
-<p>Total votes: [% total %]</p>
+<p>Total votes: [% total FILTER html %]</p>
 
 [% PROCESS global/footer.html.tmpl %]

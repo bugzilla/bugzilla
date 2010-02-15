@@ -127,7 +127,7 @@ sub PrefillForm {
                       "email", "emailtype", "emailreporter",
                       "emailassigned_to", "emailcc", "emailqa_contact",
                       "emaillongdesc", "content",
-                      "changedin", "votes", "short_desc", "short_desc_type",
+                      "changedin", "short_desc", "short_desc_type",
                       "longdesc", "longdesc_type", "bug_file_loc",
                       "bug_file_loc_type", "status_whiteboard",
                       "status_whiteboard_type", "bug_id",

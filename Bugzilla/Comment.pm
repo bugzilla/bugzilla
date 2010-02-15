@@ -148,7 +148,7 @@ sub set_type {
 sub _check_extra_data {
     my ($invocant, $extra_data, $type) = @_;
     $type = $invocant->type if ref $invocant;
-    if ($type == CMT_NORMAL or $type == CMT_POPULAR_VOTES) {
+    if ($type == CMT_NORMAL) {
         if (defined $extra_data) {
             ThrowCodeError('comment_extra_data_not_allowed',
                            { type => $type, extra_data => $extra_data });

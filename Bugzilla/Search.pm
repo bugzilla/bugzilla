@@ -86,10 +86,8 @@ use constant SPECIAL_ORDER_JOIN => {
 # 3. title: The title of the column as displayed to users.
 # 
 # Note: There are a few hacks in the code that deviate from these definitions.
-#       In particular, when the list is sorted by the "votes" field the word 
-#       "DESC" is added to the end of the field to sort in descending order, 
-#       and the redundant short_desc column is removed when the client
-#       requests "all" columns.
+#       In particular, the redundant short_desc column is removed when the
+#       client requests "all" columns.
 #
 # This is really a constant--that is, once it's been called once, the value
 # will always be the same unless somebody adds a new custom field. But
@@ -279,18 +277,6 @@ sub init {
     if (grep($_ eq 'flagtypes.name', @fields)) {
         push(@supptables, "LEFT JOIN flags ON flags.bug_id = bugs.bug_id AND attach_id IS NULL");
         push(@supptables, "LEFT JOIN flagtypes ON flagtypes.id = flags.type_id");
-    }
-
-    my $minvotes;
-    if (defined $params->param('votes')) {
-        my $c = trim($params->param('votes'));
-        if ($c ne "") {
-            if ($c !~ /^[0-9]*$/) {
-                ThrowUserError("illegal_at_least_x_votes",
-                                  { value => $c });
-            }
-            push(@specialchart, ["votes", "greaterthan", $c - 1]);
-        }
     }
 
     # If the user has selected all of either status or resolution, change to

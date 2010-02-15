@@ -377,12 +377,6 @@ sub Send {
     # the relationships in a hash. The keys are userids, the values are an
     # array of role constants.
     
-    # Voters
-    my $voters = $dbh->selectcol_arrayref(
-        "SELECT who FROM votes WHERE bug_id = ?", undef, ($id));
-        
-    $recipients{$_}->{+REL_VOTER} = BIT_DIRECT foreach (@$voters);
-
     # CCs
     $recipients{$_}->{+REL_CC} = BIT_DIRECT foreach (@ccs);
     
@@ -405,8 +399,8 @@ sub Send {
     foreach my $ref (@$diffs) {
         my ($who, $whoname, $what, $when, $old, $new) = (@$ref);
         if ($old) {
-            # You can't stop being the reporter, and mail isn't sent if you
-            # remove your vote.
+            # You can't stop being the reporter, so we don't check that
+            # relationship here.
             # Ignore people whose user account has been deleted or renamed.
             if ($what eq "CC") {
                 foreach my $cc_user (split(/[\s,]+/, $old)) {
@@ -462,7 +456,6 @@ sub Send {
     foreach my $user_id (keys %recipients) {
         my %rels_which_want;
         my $sent_mail = 0;
-
         my $user = new Bugzilla::User($user_id);
         # Deleted users must be excluded.
         next unless $user;

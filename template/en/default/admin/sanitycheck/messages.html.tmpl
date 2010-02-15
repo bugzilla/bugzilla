@@ -81,12 +81,6 @@
   [% ELSIF san_tag == "bug_check_status_everconfirmed_error_text2" %]
     [% terms.Bugs %] with confirmed status but don't have everconfirmed set
 
-  [% ELSIF san_tag == "bug_check_votes_everconfirmed" %]
-    Checking votes/everconfirmed
-
-  [% ELSIF san_tag == "bug_check_votes_everconfirmed_error_text" %]
-    [% terms.Bugs %] that have enough votes to be confirmed but haven't been
-
   [% ELSIF san_tag == "bug_check_control_values" %]
     Checking for bad values in group_control_map
 
@@ -274,25 +268,6 @@
 
   [% ELSIF san_tag == "unsent_bugmail_fix" %]
     <a href="sanitycheck.cgi?rescanallBugMail=1">Send these mails</a>.
-
-  [% ELSIF san_tag == "vote_cache_rebuild_start" %]
-    OK, now rebuilding vote cache.
-
-  [% ELSIF san_tag == "vote_cache_rebuild_end" %]
-    Vote cache has been rebuilt.
-
-  [% ELSIF san_tag == "vote_cache_rebuild_fix" %]
-    <a href="sanitycheck.cgi?rebuildvotecache=1">Click here to
-    rebuild the vote cache</a>
-
-  [% ELSIF san_tag == "vote_cache_alert" %]
-    Bad vote cache for [% PROCESS bug_link bug_id = id %]
-
-  [% ELSIF san_tag == "vote_count_start" %]
-    Checking cached vote counts.
-
-  [% ELSIF san_tag == "vote_count_alert" %]
-    Bad vote sum for [% terms.bug %] [%+ id FILTER html %].
 
   [% ELSIF san_tag == "whines_obsolete_target_deletion_start" %]
     OK, now removing non-existent users/groups from whines.

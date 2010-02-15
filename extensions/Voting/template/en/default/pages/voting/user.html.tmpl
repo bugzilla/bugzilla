@@ -31,7 +31,7 @@
   #            maxvotes: max votes allowed for a user in this product
   #            maxperbug: max votes per bug allowed for a user in this product
   #
-  # bug_id: number; if the user is voting for a bug, this is the bug id
+  # this_bug: Bugzilla::Bug; if the user is voting for a bug, this is the bug
   #
   # canedit: boolean; Should the votes be presented in a form, or readonly? 
   #
@@ -44,18 +44,18 @@
   [% subheader = voting_user.login FILTER html %]
   [% IF canedit %]
     [% title = "Change Votes" %]
-    [% IF bug_id %]
+    [% IF this_bug %]
       [%# We .select and .focus the input so it works for textbox and 
           checkbox %]
-      [% onload = "document.forms['voting_form'].bug_" _ bug_id _
-                  ".select();document.forms['voting_form'].bug_" _ bug_id _
+      [% onload = "document.forms['voting_form'].bug_" _ this_bug.id _
+                  ".select();document.forms['voting_form'].bug_" _ this_bug.id _
                   ".focus()" %]
     [% END %]
   [% ELSE %]
     [% title = "Show Votes" %]
   [% END %]
   [% PROCESS global/header.html.tmpl
-             style_urls = [ "skins/standard/voting.css" ] 
+             style_urls = [ "extensions/Voting/web/style.css" ] 
   %]
 [% ELSE %]
   <hr>
@@ -72,7 +72,7 @@
 [% END %]
 
 [% IF products.size %]
-  <form name="voting_form" method="post" action="votes.cgi">
+  <form name="voting_form" method="post" action="page.cgi?id=voting/user.html">
     <input type="hidden" name="action" value="vote">
     <table cellspacing="4">
       <tr>
@@ -108,9 +108,9 @@
         </tr>
 
         [% FOREACH bug = product.bugs %]
-          <tr [% IF bug.id == bug_id && canedit %] 
+          <tr [% IF bug.id == this_bug.id && canedit %] 
             class="bz_bug_being_voted_on" [% END %]>
-            <td>[% IF bug.id == bug_id && canedit %]Enter New Vote here &rarr;
+            <td>[% IF bug.id == this_bug.id && canedit %]Enter New Vote here &rarr;
               [%- END %]</td>
             <td align="right"><a name="vote_[% bug.id %]">
               [% IF canedit %]
@@ -130,7 +130,7 @@
             </td>
             <td>
               [% bug.summary FILTER html %]
-              (<a href="votes.cgi?action=show_bug&amp;bug_id=[% bug.id %]">Show Votes</a>)
+              (<a href="page.cgi?id=voting/bug.html&amp;bug_id=[% bug.id %]">Show Votes</a>)
             </td>
           </tr>
         [% END %]

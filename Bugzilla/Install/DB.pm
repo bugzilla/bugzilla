@@ -168,11 +168,6 @@ sub update_table_definitions {
     $dbh->bz_add_column('bugs', 'everconfirmed',
                         {TYPE => 'BOOLEAN', NOTNULL => 1}, 1);
 
-    $dbh->bz_add_column('products', 'maxvotesperbug',
-                        {TYPE => 'INT2', NOTNULL => 1, DEFAULT => '10000'});
-    $dbh->bz_add_column('products', 'votestoconfirm',
-                        {TYPE => 'INT2', NOTNULL => 1}, 0);
-
     _populate_milestones_table();
 
     # 2000-03-22 Changed the default value for target_milestone to be "---"
@@ -363,8 +358,10 @@ sub update_table_definitions {
         {TYPE => 'MEDIUMTEXT', NOTNULL => 1, DEFAULT => "''"});
     $dbh->bz_alter_column('bugs', 'keywords',
         {TYPE => 'MEDIUMTEXT', NOTNULL => 1, DEFAULT => "''"});
-    $dbh->bz_alter_column('bugs', 'votes',
-                          {TYPE => 'INT3', NOTNULL => 1, DEFAULT => '0'});
+    if ($dbh->bz_column_info('bugs', 'votes')) {
+        $dbh->bz_alter_column('bugs', 'votes',
+                              {TYPE => 'INT3', NOTNULL => 1, DEFAULT => '0'});
+    }
 
     $dbh->bz_alter_column('bugs', 'lastdiffed', {TYPE => 'DATETIME'});
 
@@ -469,11 +466,14 @@ sub update_table_definitions {
     if ($dbh->bz_column_info('products', 'disallownew')){
         $dbh->bz_alter_column('products', 'disallownew',
                               {TYPE => 'BOOLEAN', NOTNULL => 1,  DEFAULT => 0});
+    
+        if ($dbh->bz_column_info('products', 'votesperuser')) {
+            $dbh->bz_alter_column('products', 'votesperuser', 
+                {TYPE => 'INT2', NOTNULL => 1, DEFAULT => 0});
+            $dbh->bz_alter_column('products', 'votestoconfirm',
+                {TYPE => 'INT2', NOTNULL => 1, DEFAULT => 0});
+        }
     }
-    $dbh->bz_alter_column('products', 'votesperuser', 
-                          {TYPE => 'INT2', NOTNULL => 1, DEFAULT => 0});
-    $dbh->bz_alter_column('products', 'votestoconfirm',
-                          {TYPE => 'INT2', NOTNULL => 1, DEFAULT => 0});
 
     # 2006-08-04 LpSolit@gmail.com - Bug 305941
     $dbh->bz_drop_column('profiles', 'refreshed_when');
@@ -654,14 +654,14 @@ sub _add_bug_vote_cache {
     # (P.S. All is not lost; it appears that the latest betas of MySQL 
     # support a new table format which will allow 32 indices.)
 
-    $dbh->bz_drop_column('bugs', 'area');
-    if (!$dbh->bz_column_info('bugs', 'votes')) {
+    if ($dbh->bz_column_info('bugs', 'area')) {
+        $dbh->bz_drop_column('bugs', 'area');
         $dbh->bz_add_column('bugs', 'votes', {TYPE => 'INT3', NOTNULL => 1,
                                               DEFAULT => 0});
         $dbh->bz_add_index('bugs', 'bugs_votes_idx', [qw(votes)]);
+        $dbh->bz_add_column('products', 'votesperuser',
+                            {TYPE => 'INT2', NOTNULL => 1}, 0);
     }
-    $dbh->bz_add_column('products', 'votesperuser',
-                        {TYPE => 'INT2', NOTNULL => 1}, 0);
 }
 
 sub _update_product_name_definition {
@@ -896,9 +896,11 @@ sub _add_unique_login_name_index_to_profiles {
                            ["votes", "who"],
                            ["longdescs", "who"]) {
                 my ($table, $field) = (@$i);
-                print "   Updating $table.$field...\n";
-                $dbh->do("UPDATE $table SET $field = $u1 " .
-                          "WHERE $field = $u2");
+                if ($dbh->bz_table_info($table)) {
+                    print "   Updating $table.$field...\n";
+                    $dbh->do("UPDATE $table SET $field = $u1 " .
+                              "WHERE $field = $u2");
+                }
             }
             $dbh->do("DELETE FROM profiles WHERE userid = $u2");
         }
@@ -2206,9 +2208,9 @@ sub _rename_votes_count_and_force_group_refresh {
     #
     # Renaming the 'count' column in the votes table because Sybase doesn't
     # like it
-    if ($dbh->bz_column_info('votes', 'count')) {
-        $dbh->bz_rename_column('votes', 'count', 'vote_count');
-    }
+    return if !$dbh->bz_table_info('votes');
+    return if $dbh->bz_column_info('votes', 'count');
+    $dbh->bz_rename_column('votes', 'count', 'vote_count');
 }
 
 sub _fix_group_with_empty_name {
@@ -2266,7 +2268,9 @@ sub _migrate_email_prefs_to_new_table {
                              "Reporter"  => REL_REPORTER,
                              "QAcontact" => REL_QA,
                              "CClist"    => REL_CC,
-                             "Voter"     => REL_VOTER);
+                             # REL_VOTER was "4" before it was moved to an
+                             #  extension.
+                             "Voter"     => 4);
 
         my %events = ("Removeme"    => EVT_ADDED_REMOVED,
                       "Comments"    => EVT_COMMENT,
@@ -3343,8 +3347,10 @@ sub _add_allows_unconfirmed_to_product_table {
     if (!$dbh->bz_column_info('products', 'allows_unconfirmed')) {
         $dbh->bz_add_column('products', 'allows_unconfirmed',
             { TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'FALSE' });
-        $dbh->do('UPDATE products SET allows_unconfirmed = 1 
-                   WHERE votestoconfirm > 0');
+        if ($dbh->bz_column_info('products', 'votestoconfirm')) {
+            $dbh->do('UPDATE products SET allows_unconfirmed = 1 
+                       WHERE votestoconfirm > 0');
+        }
     }
 }
 

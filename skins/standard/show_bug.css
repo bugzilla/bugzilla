@@ -54,9 +54,8 @@ table#flags {
     height: 1em;
 }
 
-#duplicate_settings, #votes_container {
+#duplicate_settings {
     white-space: nowrap;
-    
 }
 
 #bz_big_form_parts td {

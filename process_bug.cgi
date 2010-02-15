@@ -573,26 +573,11 @@ foreach my $bug (@bug_objects) {
     # an error later.
     delete $changed_deps{''};
 
-    # @msgs will store emails which have to be sent to voters, if any.
-    my @msgs;
-    if ($changes->{'product'}) {
-        # If some votes have been removed, RemoveVotes() returns
-        # a list of messages to send to voters.
-        # We delay the sending of these messages till changes are committed.
-        @msgs = RemoveVotes($bug->id, 0, 'votes_bug_moved');
-        CheckIfVotedConfirmed($bug->id);
-    }
-
     $dbh->bz_commit_transaction();
 
     ###############
     # Send Emails #
     ###############
-
-    # Now is a good time to send email to voters.
-    foreach my $msg (@msgs) {
-        MessageToMTA($msg);
-    }
 
     my $old_qa  = $changes->{'qa_contact'}  ? $changes->{'qa_contact'}->[0] : '';
     my $old_own = $changes->{'assigned_to'} ? $changes->{'assigned_to'}->[0] : '';

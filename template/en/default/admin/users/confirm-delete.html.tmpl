@@ -33,7 +33,6 @@
   # namedquery_group_map:     number of named queries the user has shared
   # profiles_activity:        number of changes made to other users' profiles
   # series:                   number of series the viewed user has created
-  # votes:                    number of bugs the viewed user has voted on
   # watch.watched:            number of users the viewed user is being watched
   #                           by
   # watch.watcher:            number of users the viewed user is watching
@@ -226,8 +225,8 @@
   [% END %]
 
   [% IF assignee_or_qa || cc || component_cc || email_setting || flags.requestee ||
-        namedqueries || profile_setting || quips || series || votes || watch.watched ||
-        watch.watcher || whine_events || whine_schedules %]
+        namedqueries || profile_setting || quips || series || watch.watched ||
+        watch.watcher || whine_events || whine_schedules || other_safe %]
     <div class="warningmessages">
       <p>The following deletions are <b>safe</b> and will not generate
       referential integrity inconsistencies.</p>
@@ -372,23 +371,6 @@
             will have no author anymore, but will remain available.
           </li>
         [% END %]
-        [% IF votes %]
-          <li>
-            [% otheruser.login FILTER html %] has voted on
-            [% IF votes == 1 %]
-              [%+ terms.abug %]
-            [% ELSE %]
-              [%+ votes %] [%+ terms.bugs %]
-            [% END %].
-            If you delete the user account,
-            [% IF votes == 1 %]
-              this vote
-            [% ELSE %]
-              these votes
-            [% END %]
-            will be deleted along with the user account.
-          </li>
-        [% END %]
         [% IF watch.watched || watch.watcher %]
           <li>
             [% otheruser.login FILTER html %]
@@ -445,6 +427,7 @@
             but the whines themselves will be left unaltered.
           </li>
         [% END %]
+        [% Hook.process('warn_safe') %]
       </ul>
     </div>
 

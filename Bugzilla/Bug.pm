@@ -57,7 +57,6 @@ use URI::QueryParam;
 use base qw(Bugzilla::Object Exporter);
 @Bugzilla::Bug::EXPORT = qw(
     bug_alias_to_id
-    RemoveVotes CheckIfVotedConfirmed
     LogActivityEntry
     editable_bug_fields
 );
@@ -631,7 +630,6 @@ sub run_create_validators {
 
     # You can't set these fields on bug creation (or sometimes ever).
     delete $params->{resolution};
-    delete $params->{votes};
     delete $params->{lastdiffed};
     delete $params->{bug_id};
 
@@ -967,7 +965,6 @@ sub remove_from_db {
     # - flags
     # - keywords
     # - longdescs
-    # - votes
 
     # Also, the attach_data table uses attachments.attach_id as a foreign
     # key, and so indirectly depends on a bug deletion too.
@@ -983,7 +980,6 @@ sub remove_from_db {
              undef, ($bug_id, $bug_id));
     $dbh->do("DELETE FROM flags WHERE bug_id = ?", undef, $bug_id);
     $dbh->do("DELETE FROM keywords WHERE bug_id = ?", undef, $bug_id);
-    $dbh->do("DELETE FROM votes WHERE bug_id = ?", undef, $bug_id);
 
     # The attach_data table doesn't depend on bugs.bug_id directly.
     my $attach_ids =
@@ -1819,7 +1815,7 @@ sub fields {
            bug_status resolution dup_id see_also
            bug_file_loc status_whiteboard keywords
            priority bug_severity target_milestone
-           dependson blocked votes everconfirmed
+           dependson blocked everconfirmed
            reporter assigned_to cc estimated_time
            remaining_time actual_time deadline),
 
@@ -2870,14 +2866,6 @@ sub show_attachment_flags {
     return $self->{'show_attachment_flags'};
 }
 
-sub use_votes {
-    my ($self) = @_;
-    return 0 if $self->{'error'};
-
-    return Bugzilla->params->{'usevotes'} 
-           && $self->product_obj->votes_per_user > 0;
-}
-
 sub groups {
     my $self = shift;
     return $self->{'groups'} if exists $self->{'groups'};
@@ -3017,20 +3005,6 @@ sub choices {
 
     $self->{'choices'} = \%choices;
     return $self->{'choices'};
-}
-
-sub votes {
-    my ($self) = @_;
-    return 0 if $self->{error};
-    return $self->{votes} if defined $self->{votes};
-
-    my $dbh = Bugzilla->dbh;
-    $self->{votes} = $dbh->selectrow_array(
-        'SELECT SUM(vote_count) FROM votes
-          WHERE bug_id = ? ' . $dbh->sql_group_by('bug_id'),
-        undef, $self->bug_id);
-    $self->{votes} ||= 0;
-    return $self->{votes};
 }
 
 # Convenience Function. If you need speed, use this. If you need
@@ -3310,136 +3284,6 @@ sub CountOpenDependencies {
     }
 
     return @dependencies;
-}
-
-# If a bug is moved to a product which allows less votes per bug
-# compared to the previous product, extra votes need to be removed.
-sub RemoveVotes {
-    my ($id, $who, $reason) = (@_);
-    my $dbh = Bugzilla->dbh;
-
-    my $whopart = ($who) ? " AND votes.who = $who" : "";
-
-    my $sth = $dbh->prepare("SELECT profiles.login_name, " .
-                            "profiles.userid, votes.vote_count, " .
-                            "products.votesperuser, products.maxvotesperbug " .
-                            "FROM profiles " . 
-                            "LEFT JOIN votes ON profiles.userid = votes.who " .
-                            "LEFT JOIN bugs ON votes.bug_id = bugs.bug_id " .
-                            "LEFT JOIN products ON products.id = bugs.product_id " .
-                            "WHERE votes.bug_id = ? " . $whopart);
-    $sth->execute($id);
-    my @list;
-    while (my ($name, $userid, $oldvotes, $votesperuser, $maxvotesperbug) = $sth->fetchrow_array()) {
-        push(@list, [$name, $userid, $oldvotes, $votesperuser, $maxvotesperbug]);
-    }
-
-    # @messages stores all emails which have to be sent, if any.
-    # This array is passed to the caller which will send these emails itself.
-    my @messages = ();
-
-    if (scalar(@list)) {
-        foreach my $ref (@list) {
-            my ($name, $userid, $oldvotes, $votesperuser, $maxvotesperbug) = (@$ref);
-
-            $maxvotesperbug = min($votesperuser, $maxvotesperbug);
-
-            # If this product allows voting and the user's votes are in
-            # the acceptable range, then don't do anything.
-            next if $votesperuser && $oldvotes <= $maxvotesperbug;
-
-            # If the user has more votes on this bug than this product
-            # allows, then reduce the number of votes so it fits
-            my $newvotes = $maxvotesperbug;
-
-            my $removedvotes = $oldvotes - $newvotes;
-
-            if ($newvotes) {
-                $dbh->do("UPDATE votes SET vote_count = ? " .
-                         "WHERE bug_id = ? AND who = ?",
-                         undef, ($newvotes, $id, $userid));
-            } else {
-                $dbh->do("DELETE FROM votes WHERE bug_id = ? AND who = ?",
-                         undef, ($id, $userid));
-            }
-
-            # Notice that we did not make sure that the user fit within the $votesperuser
-            # range.  This is considered to be an acceptable alternative to losing votes
-            # during product moves.  Then next time the user attempts to change their votes,
-            # they will be forced to fit within the $votesperuser limit.
-
-            # Now lets send the e-mail to alert the user to the fact that their votes have
-            # been reduced or removed.
-            my $vars = {
-                'to' => $name . Bugzilla->params->{'emailsuffix'},
-                'bugid' => $id,
-                'reason' => $reason,
-
-                'votesremoved' => $removedvotes,
-                'votesold' => $oldvotes,
-                'votesnew' => $newvotes,
-            };
-
-            my $voter = new Bugzilla::User($userid);
-            my $template = Bugzilla->template_inner($voter->settings->{'lang'}->{'value'});
-
-            my $msg;
-            $template->process("email/votes-removed.txt.tmpl", $vars, \$msg);
-            push(@messages, $msg);
-        }
-        Bugzilla->template_inner("");
-
-        my $votes = $dbh->selectrow_array("SELECT SUM(vote_count) " .
-                                          "FROM votes WHERE bug_id = ?",
-                                          undef, $id) || 0;
-        $dbh->do("UPDATE bugs SET votes = ? WHERE bug_id = ?",
-                 undef, ($votes, $id));
-    }
-    # Now return the array containing emails to be sent.
-    return @messages;
-}
-
-# If a user votes for a bug, or the number of votes required to
-# confirm a bug has been reduced, check if the bug is now confirmed.
-sub CheckIfVotedConfirmed {
-    my $id = shift;
-    my $bug = new Bugzilla::Bug($id);
-
-    my $ret = 0;
-    if (!$bug->everconfirmed
-        and $bug->product_obj->votes_to_confirm
-        and $bug->votes >= $bug->product_obj->votes_to_confirm) 
-    {
-        $bug->add_comment('', { type => CMT_POPULAR_VOTES });
-
-        if ($bug->bug_status eq 'UNCONFIRMED') {
-            # Get a valid open state.
-            my $new_status;
-            foreach my $state (@{$bug->status->can_change_to}) {
-                if ($state->is_open && $state->name ne 'UNCONFIRMED') {
-                    $new_status = $state->name;
-                    last;
-                }
-            }
-            ThrowCodeError('no_open_bug_status') unless $new_status;
-
-            # We cannot call $bug->set_status() here, because a user without
-            # canconfirm privs should still be able to confirm a bug by
-            # popular vote. We already know the new status is valid, so it's safe.
-            $bug->{bug_status} = $new_status;
-            $bug->{everconfirmed} = 1;
-            delete $bug->{'status'}; # Contains the status object.
-        }
-        else {
-            # If the bug is in a closed state, only set everconfirmed to 1.
-            # Do not call $bug->_set_everconfirmed(), for the same reason as above.
-            $bug->{everconfirmed} = 1;
-        }
-        $bug->update();
-
-        $ret = 1;
-    }
-    return $ret;
 }
 
 ################################################################################

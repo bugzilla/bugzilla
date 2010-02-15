@@ -188,7 +188,6 @@ use constant DEFAULT_FIELDS => (
      buglist => 1},
     {name => 'reporter',     desc => 'ReportedBy', in_new_bugmail => 1,
      buglist => 1},
-    {name => 'votes',        desc => 'Votes',      buglist => 1},
     {name => 'qa_contact',   desc => 'QAContact',  in_new_bugmail => 1,
      buglist => 1},
     {name => 'cc',           desc => 'CC',         in_new_bugmail => 1},

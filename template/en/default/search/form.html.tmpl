@@ -422,20 +422,14 @@ function doOnSelectProduct(selectmode) {
   </tr>
 </table>
 
-[%# *** Email Numbering Votes *** %]
+[%# *** Email Numbering *** %]
 
 <table>
   <tr>
     <td>
       <fieldset>
         <legend>
-          <strong>
-            [% IF Param('usevotes') %]
-              Email Addresses, [% terms.Bug %] Numbers, and Votes
-            [% ELSE %]
-              Email Addresses and [% terms.Bug %] Numbers
-            [% END %]
-          </strong>
+          <strong>Email Addresses and [% terms.Bug %] Numbers</strong>
         </legend>
 
 
@@ -550,18 +544,7 @@ function doOnSelectProduct(selectmode) {
     <td></td>
     <td>(comma-separated list)</td>
   </tr>
-  [% IF Param('usevotes') %]
-    <tr>
-      <td align="right">
-        <label for="votes">Only [% terms.bugs %] with at least</label>:
-      </td>
-      <td>
-        <input name="votes" id="votes" size="3"
-               value="[% default.votes.0 FILTER html %]">
-        votes
-      </td>
-    </tr>
-  [% END %]
+  [% Hook.process('email_numbering_end') %]
 </table>
 
 

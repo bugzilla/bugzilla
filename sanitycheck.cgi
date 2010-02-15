@@ -102,33 +102,12 @@ unless (Bugzilla->usage_mode == USAGE_MODE_CMDLINE) {
 # Users with 'editkeywords' privs only can only check keywords.
 ###########################################################################
 unless ($user->in_group('editcomponents')) {
-    check_votes_or_keywords('keywords');
+    check_keywords();
     Status('checks_completed');
 
     $template->process('global/footer.html.tmpl', $vars)
         || ThrowTemplateError($template->error());
     exit;
-}
-
-###########################################################################
-# Fix vote cache
-###########################################################################
-
-if ($cgi->param('rebuildvotecache')) {
-    Status('vote_cache_rebuild_start');
-    $dbh->bz_start_transaction();
-    $dbh->do(q{UPDATE bugs SET votes = 0});
-    my $sth_update = $dbh->prepare(q{UPDATE bugs 
-                                        SET votes = ? 
-                                      WHERE bug_id = ?});
-    my $sth = $dbh->prepare(q{SELECT bug_id, SUM(vote_count)
-                                FROM votes }. $dbh->sql_group_by('bug_id'));
-    $sth->execute();
-    while (my ($id, $v) = $sth->fetchrow_array) {
-        $sth_update->execute($v, $id);
-    }
-    $dbh->bz_commit_transaction();
-    Status('vote_cache_rebuild_end');
 }
 
 ###########################################################################
@@ -310,7 +289,7 @@ if ($cgi->param('remove_invalid_bug_references')) {
                       'bugs_fulltext/', 'cc/',
                       'dependencies/blocked', 'dependencies/dependson',
                       'duplicates/dupe', 'duplicates/dupe_of',
-                      'flags/', 'keywords/', 'longdescs/', 'votes/') {
+                      'flags/', 'keywords/', 'longdescs/') {
 
         my ($table, $field) = split('/', $pair);
         $field ||= "bug_id";
@@ -489,7 +468,6 @@ CrossCheck("bugs", "bug_id",
            ["dependencies", "blocked"],
            ["dependencies", "dependson"],
            ['flags', 'bug_id'],
-           ["votes", "bug_id"],
            ["keywords", "bug_id"],
            ["duplicates", "dupe_of", "dupe"],
            ["duplicates", "dupe", "dupe_of"]);
@@ -524,7 +502,6 @@ CrossCheck("profiles", "userid",
            ["bugs_activity", "who", "bug_id"],
            ["cc", "who", "bug_id"],
            ['quips', 'userid'],
-           ["votes", "who", "bug_id"],
            ["longdescs", "who", "bug_id"],
            ["logincookies", "userid"],
            ["namedqueries", "userid"],
@@ -681,75 +658,19 @@ while (my ($id, $email) = $sth->fetchrow_array) {
 }
 
 ###########################################################################
-# Perform vote/keyword cache checks
+# Perform keyword cache checks
 ###########################################################################
 
-check_votes_or_keywords();
-
-sub check_votes_or_keywords {
-    my $check = shift || 'all';
-
-    my $dbh = Bugzilla->dbh;
-    my $sth = $dbh->prepare(q{SELECT bug_id, votes, keywords
-                                FROM bugs
-                               WHERE votes != 0 OR keywords != ''});
-    $sth->execute;
-
-    my %votes;
-    my %keyword;
-
-    while (my ($id, $v, $k) = $sth->fetchrow_array) {
-        if ($v != 0) {
-            $votes{$id} = $v;
-        }
-        if ($k) {
-            $keyword{$id} = $k;
-        }
-    }
-
-    # If we only want to check keywords, skip checks about votes.
-    _check_votes(\%votes) unless ($check eq 'keywords');
-    # If we only want to check votes, skip checks about keywords.
-    _check_keywords(\%keyword) unless ($check eq 'votes');
-}
-
-sub _check_votes {
-    my $votes = shift;
-
-    Status('vote_count_start');
-    my $dbh = Bugzilla->dbh;
-    my $sth = $dbh->prepare(q{SELECT bug_id, SUM(vote_count)
-                                FROM votes }.
-                                $dbh->sql_group_by('bug_id'));
-    $sth->execute;
-
-    my $offer_votecache_rebuild = 0;
-
-    while (my ($id, $v) = $sth->fetchrow_array) {
-        if ($v <= 0) {
-            Status('vote_count_alert', {id => $id}, 'alert');
-        } else {
-            if (!defined $votes->{$id} || $votes->{$id} != $v) {
-                Status('vote_cache_alert', {id => $id}, 'alert');
-                $offer_votecache_rebuild = 1;
-            }
-            delete $votes->{$id};
-        }
-    }
-    foreach my $id (keys %$votes) {
-        Status('vote_cache_alert', {id => $id}, 'alert');
-        $offer_votecache_rebuild = 1;
-    }
-
-    Status('vote_cache_rebuild_fix') if $offer_votecache_rebuild;
-}
-
-sub _check_keywords {
-    my $keyword = shift;
-
-    Status('keyword_check_start');
+sub check_keywords {
     my $dbh = Bugzilla->dbh;
     my $cgi = Bugzilla->cgi;
+
+    my %keyword = @{ $dbh->selectcol_arrayref(
+        q{SELECT bug_id, keywords FROM bugs WHERE keywords != ''},
+        {Columns=>[1,2]}) };
+
+
+    Status('keyword_check_start');
 
     my %keywordids;
     my $keywords = $dbh->selectall_arrayref(q{SELECT id, name
@@ -819,13 +740,13 @@ sub _check_keywords {
 
     my @badbugs = ();
 
-    foreach my $b (keys(%$keyword)) {
-        if (!exists $realk{$b} || $realk{$b} ne $keyword->{$b}) {
+    foreach my $b (keys(%keyword)) {
+        if (!exists $realk{$b} || $realk{$b} ne $keyword{$b}) {
             push(@badbugs, $b);
         }
     }
     foreach my $b (keys(%realk)) {
-        if (!exists $keyword->{$b}) {
+        if (!exists $keyword{$b}) {
             push(@badbugs, $b);
         }
     }
@@ -972,13 +893,6 @@ my $confirmed_open_states = join(', ', map {$dbh->quote($_)} @confirmed_open_sta
 
 BugCheck("bugs WHERE bug_status IN ($confirmed_open_states) AND everconfirmed = 0",
          'bug_check_status_everconfirmed_error_text2', 'repair_everconfirmed');
-
-Status('bug_check_votes_everconfirmed');
-
-BugCheck("bugs INNER JOIN products ON bugs.product_id = products.id " .
-         "WHERE everconfirmed = 0 AND votestoconfirm > 0
-                AND votestoconfirm <= votes",
-         'bug_check_votes_everconfirmed_error_text');
 
 ###########################################################################
 # Control Values

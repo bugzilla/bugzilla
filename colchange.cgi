@@ -55,9 +55,6 @@ if (Bugzilla->params->{"useclassification"}) {
 
 push(@masterlist, ("product", "component", "version", "op_sys"));
 
-if (Bugzilla->params->{"usevotes"}) {
-    push (@masterlist, "votes");
-}
 if (Bugzilla->params->{"usebugaliases"}) {
     unshift(@masterlist, "alias");
 }

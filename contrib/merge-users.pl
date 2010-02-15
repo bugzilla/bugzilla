@@ -129,7 +129,6 @@ my $changes = {
     flags           => ['setter_id', 'requestee_id'],
     cc              => ['who bug_id'],
     longdescs       => ['who'],
-    votes           => ['who'],
     # Tables affecting global behavior / other users.
     components      => ['initialowner', 'initialqacontact'],
     component_cc    => ['user_id component_id'],

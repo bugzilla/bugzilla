@@ -278,7 +278,8 @@ sub set {
     my ($self, $field, $value) = @_;
 
     # This method is protected. It's used to help implement set_ functions.
-    caller->isa('Bugzilla::Object')
+    my $caller = caller;
+    $caller->isa('Bugzilla::Object') || $caller->isa('Bugzilla::Extension')
         || ThrowCodeError('protection_violation', 
                           { caller     => caller,
                             superclass => __PACKAGE__,

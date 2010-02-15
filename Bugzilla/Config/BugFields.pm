@@ -72,12 +72,6 @@ sub get_param_list {
   },
 
   {
-   name => 'usevotes',
-   type => 'b',
-   default => 0
-  },
-
-  {
    name => 'usebugaliases',
    type => 'b',
    default => 0

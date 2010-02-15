@@ -339,12 +339,6 @@ sub _handle_special_first_chars {
 sub _handle_field_names {
     my ($or_operand, $negate, $unknownFields, $ambiguous_fields) = @_;
     
-    # votes:xx ("at least xx votes")
-    if ($or_operand =~ /^votes:([0-9]+)$/) {
-        addChart('votes', 'greaterthan', $1 - 1, $negate);
-        return 1;
-    }
-    
     # Flag and requestee shortcut
     if ($or_operand =~ /^(?:flag:)?([^\?]+\?)([^\?]*)$/) {
         addChart('flagtypes.name', 'substring', $1, $negate);
@@ -451,18 +445,6 @@ sub _special_field_syntax {
             $prios = join(',', @$legal_priorities[$start..$end])
         }
         addChart('priority', 'anyexact', $prios, $negate);
-        return 1;
-    }
-
-    # Votes (votes>xx)
-    if ($word =~ m/^votes>([0-9]+)$/) {
-        addChart('votes', 'greaterthan', $1, $negate);
-        return 1;
-    }
-    
-    # Votes (votes>=xx, votes=>xx)
-    if ($word =~ m/^votes(>=|=>)([0-9]+)$/) {
-        addChart('votes', 'greaterthan', $2-1, $negate);
         return 1;
     }
 

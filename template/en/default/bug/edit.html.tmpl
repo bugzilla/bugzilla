@@ -398,7 +398,7 @@
 [% BLOCK section_details2 %]
 
  [%###############################################################%]
- [%# Importance (priority, severity and votes) #%]
+ [%# Importance (priority and severity) #%]
  [%###############################################################%]
     <tr>
       <td class="field_label">
@@ -414,22 +414,7 @@
             bug = bug, field = bug_fields.bug_severity,
             no_tds = 1, value = bug.bug_severity
             editable = bug.check_can_change_field('bug_severity', 0, 1) %]
-        [% IF bug.use_votes %]
-          <span id="votes_container">
-          [% IF bug.votes %] 
-            with 
-            <a href="votes.cgi?action=show_bug&amp;bug_id=[% bug.bug_id %]">
-              [% bug.votes %] 
-              [% IF bug.votes == 1 %]
-                vote
-              [% ELSE %]
-                votes
-              [% END %]</a> 
-          [% END %]    
-          (<a href="votes.cgi?action=show_user&amp;bug_id=
-                  [% bug.bug_id %]#vote_[% bug.bug_id %]">vote</a>)
-          </span>  
-        [% END %]
+        [% Hook.process('after_importance', 'bug/edit.html.tmpl') %]
       </td>
     </tr>
 

@@ -76,37 +76,8 @@
       in this product:</label>
   </th>
   <td><input type="checkbox" id="allows_unconfirmed" name="allows_unconfirmed"
-             [% ' checked="checked"' IF product.allows_unconfirmed %]
-             [% IF Param('usevotes') %]
-               onchange="bz_toggleClass('votes_to_confirm_container', 
-                                        'bz_default_hidden')"
-             [% END %]>
-    [% IF Param('usevotes') %]
-      <span id="votes_to_confirm_container"
-            [% ' class="bz_default_hidden"' IF !product.allows_unconfirmed %]>
-        ...and automatically confirm [% terms.bugs %] if they get
-        <input size="3" maxlength="5" name="votestoconfirm" id="votestoconfirm"
-               value="[% product.votes_to_confirm FILTER html %]">
-         votes. (Setting this to 0 disables auto-confirming [% terms.bugs %]
-         by vote.)
-      </span>
-    [% END %]
+             [% ' checked="checked"' IF product.allows_unconfirmed %]>
   </td>
 </tr>
 
-[% IF Param('usevotes') %]
-  <tr>
-    <th align="right">Maximum votes per person:</th>
-    <td><input size="5" maxlength="5" name="votesperuser" id="votesperuser"
-               value="[% product.votesperuser FILTER html %]">
-    </td>
-  </tr>
-  <tr>
-    <th align="right">
-      Maximum votes a person can put on a single [% terms.bug %]:
-    </th>
-    <td><input size="5" maxlength="5" name="maxvotesperbug" id="maxvotesperbug"
-               value="[% product.maxvotesperbug FILTER html %]">
-    </td>
-  </tr>
-[% END %]
+[% Hook.process('rows') %]

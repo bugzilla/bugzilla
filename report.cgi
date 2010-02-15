@@ -113,7 +113,6 @@ my @columns = qw(
     qa_contact
     classification
     version
-    votes
     keywords
     target_milestone
 );

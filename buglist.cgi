@@ -653,18 +653,6 @@ else {
 # and are hard-coded into the display templates.
 @displaycolumns = grep($_ ne 'bug_id', @displaycolumns);
 
-# Add the votes column to the list of columns to be displayed
-# in the bug list if the user is searching for bugs with a certain
-# number of votes and the votes column is not already on the list.
-
-# Some versions of perl will taint 'votes' if this is done as a single
-# statement, because the votes param is tainted at this point
-my $votes = $params->param('votes');
-$votes ||= "";
-if (trim($votes) && !grep($_ eq 'votes', @displaycolumns)) {
-    push(@displaycolumns, 'votes');
-}
-
 # Remove the timetracking columns if they are not a part of the group
 # (happens if a user had access to time tracking and it was revoked/disabled)
 if (!Bugzilla->user->is_timetracker) {
@@ -806,12 +794,6 @@ if ($order) {
                 # Special handlings for certain columns
                 next if $column_name eq 'relevance' && !$fulltext;
                                 
-                # If we are sorting by votes, sort in descending order if
-                # no explicit sort order was given.
-                if ($column_name eq 'votes' && !$direction) {
-                    $direction = "DESC";
-                }
-
                 if (exists $columns->{$column_name}) {
                     $direction = " $direction" if $direction;
                     push(@order, "$column_name$direction");

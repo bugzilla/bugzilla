@@ -48,9 +48,6 @@ use constant DB_COLUMNS => qw(
    classification_id
    description
    isactive
-   votesperuser
-   maxvotesperbug
-   votestoconfirm
    defaultmilestone
    allows_unconfirmed
 );
@@ -66,9 +63,6 @@ use constant UPDATE_COLUMNS => qw(
     description
     defaultmilestone
     isactive
-    votesperuser
-    maxvotesperbug
-    votestoconfirm
     allows_unconfirmed
 );
 
@@ -80,9 +74,6 @@ use constant VALIDATORS => {
     version          => \&_check_version,
     defaultmilestone => \&_check_default_milestone,
     isactive         => \&Bugzilla::Object::check_boolean,
-    votesperuser     => \&_check_votes_per_user,
-    maxvotesperbug   => \&_check_votes_per_bug,
-    votestoconfirm   => \&_check_votes_to_confirm,
     create_series    => \&Bugzilla::Object::check_boolean
 };
 
@@ -154,99 +145,6 @@ sub update {
     # Don't update the DB if something goes wrong below -> transaction.
     $dbh->bz_start_transaction();
     my ($changes, $old_self) = $self->SUPER::update(@_);
-
-    # We also have to fix votes.
-    my @msgs; # Will store emails to send to voters.
-    if ($changes->{maxvotesperbug} || $changes->{votesperuser} || $changes->{votestoconfirm}) {
-        # We cannot |use| these modules, due to dependency loops.
-        require Bugzilla::Bug;
-        import Bugzilla::Bug qw(RemoveVotes CheckIfVotedConfirmed);
-        require Bugzilla::User;
-        import Bugzilla::User qw(user_id_to_login);
-
-        # 1. too many votes for a single user on a single bug.
-        my @toomanyvotes_list = ();
-        if ($self->max_votes_per_bug < $self->votes_per_user) {
-            my $votes = $dbh->selectall_arrayref(
-                        'SELECT votes.who, votes.bug_id
-                           FROM votes
-                                INNER JOIN bugs
-                                ON bugs.bug_id = votes.bug_id
-                          WHERE bugs.product_id = ?
-                                AND votes.vote_count > ?',
-                         undef, ($self->id, $self->max_votes_per_bug));
-
-            foreach my $vote (@$votes) {
-                my ($who, $id) = (@$vote);
-                # If some votes are removed, RemoveVotes() returns a list
-                # of messages to send to voters.
-                push(@msgs, RemoveVotes($id, $who, 'votes_too_many_per_bug'));
-                my $name = user_id_to_login($who);
-
-                push(@toomanyvotes_list, {id => $id, name => $name});
-            }
-        }
-        $changes->{'too_many_votes'} = \@toomanyvotes_list;
-
-        # 2. too many total votes for a single user.
-        # This part doesn't work in the general case because RemoveVotes
-        # doesn't enforce votesperuser (except per-bug when it's less
-        # than maxvotesperbug).  See Bugzilla::Bug::RemoveVotes().
-
-        my $votes = $dbh->selectall_arrayref(
-                    'SELECT votes.who, votes.vote_count
-                       FROM votes
-                            INNER JOIN bugs
-                            ON bugs.bug_id = votes.bug_id
-                      WHERE bugs.product_id = ?',
-                     undef, $self->id);
-
-        my %counts;
-        foreach my $vote (@$votes) {
-            my ($who, $count) = @$vote;
-            if (!defined $counts{$who}) {
-                $counts{$who} = $count;
-            } else {
-                $counts{$who} += $count;
-            }
-        }
-        my @toomanytotalvotes_list = ();
-        foreach my $who (keys(%counts)) {
-            if ($counts{$who} > $self->votes_per_user) {
-                my $bug_ids = $dbh->selectcol_arrayref(
-                              'SELECT votes.bug_id
-                                 FROM votes
-                                      INNER JOIN bugs
-                                      ON bugs.bug_id = votes.bug_id
-                                WHERE bugs.product_id = ?
-                                      AND votes.who = ?',
-                               undef, ($self->id, $who));
-
-                foreach my $bug_id (@$bug_ids) {
-                    # RemoveVotes() returns a list of messages to send
-                    # in case some voters had too many votes.
-                    push(@msgs, RemoveVotes($bug_id, $who, 'votes_too_many_per_user'));
-                    my $name = user_id_to_login($who);
-
-                    push(@toomanytotalvotes_list, {id => $bug_id, name => $name});
-                }
-            }
-        }
-        $changes->{'too_many_total_votes'} = \@toomanytotalvotes_list;
-
-        # 3. enough votes to confirm
-        my $bug_list =
-          $dbh->selectcol_arrayref('SELECT bug_id FROM bugs WHERE product_id = ?
-                                    AND bug_status = ? AND votes >= ?',
-                      undef, ($self->id, 'UNCONFIRMED', $self->votes_to_confirm));
-
-        my @updated_bugs = ();
-        foreach my $bug_id (@$bug_list) {
-            my $confirmed = CheckIfVotedConfirmed($bug_id);
-            push (@updated_bugs, $bug_id) if $confirmed;
-        }
-        $changes->{'confirmed_bugs'} = \@updated_bugs;
-    }
 
     # Also update group settings.
     if ($self->{check_group_controls}) {
@@ -363,11 +261,6 @@ sub update {
     # Changes have been committed.
     delete $self->{check_group_controls};
     Bugzilla->user->clear_product_cache();
-
-    # Now that changes have been committed, we can send emails to voters.
-    foreach my $msg (@msgs) {
-        MessageToMTA($msg);
-    }
 
     return $changes;
 }
@@ -524,37 +417,6 @@ sub _check_milestone_url {
     return $url;
 }
 
-sub _check_votes_per_user {
-    return _check_votes(@_, 0);
-}
-
-sub _check_votes_per_bug {
-    return _check_votes(@_, 10000);
-}
-
-sub _check_votes_to_confirm {
-    return _check_votes(@_, 0);
-}
-
-# This subroutine is only used internally by other _check_votes_* validators.
-sub _check_votes {
-    my ($invocant, $votes, $field, $default) = @_;
-
-    detaint_natural($votes);
-    # On product creation, if the number of votes is not a valid integer,
-    # we silently fall back to the given default value.
-    # If the product already exists and the change is illegal, we complain.
-    if (!defined $votes) {
-        if (ref $invocant) {
-            ThrowUserError('product_illegal_votes', {field => $field, votes => $_[1]});
-        }
-        else {
-            $votes = $default;
-        }
-    }
-    return $votes;
-}
-
 #####################################
 # Implement Bugzilla::Field::Choice #
 #####################################
@@ -618,9 +480,6 @@ sub set_name { $_[0]->set('name', $_[1]); }
 sub set_description { $_[0]->set('description', $_[1]); }
 sub set_default_milestone { $_[0]->set('defaultmilestone', $_[1]); }
 sub set_is_active { $_[0]->set('isactive', $_[1]); }
-sub set_votes_per_user { $_[0]->set('votesperuser', $_[1]); }
-sub set_votes_per_bug { $_[0]->set('maxvotesperbug', $_[1]); }
-sub set_votes_to_confirm { $_[0]->set('votestoconfirm', $_[1]); }
 sub set_allows_unconfirmed { $_[0]->set('allows_unconfirmed', $_[1]); }
 
 sub set_group_controls {
@@ -876,9 +735,6 @@ sub flag_types {
 sub allows_unconfirmed { return $_[0]->{'allows_unconfirmed'}; }
 sub description       { return $_[0]->{'description'};       }
 sub is_active         { return $_[0]->{'isactive'};       }
-sub votes_per_user    { return $_[0]->{'votesperuser'};      }
-sub max_votes_per_bug { return $_[0]->{'maxvotesperbug'};    }
-sub votes_to_confirm  { return $_[0]->{'votestoconfirm'};    }
 sub default_milestone { return $_[0]->{'defaultmilestone'};  }
 sub classification_id { return $_[0]->{'classification_id'}; }
 
@@ -939,9 +795,6 @@ Bugzilla::Product - Bugzilla product class.
     my $name             = $product->name;
     my $description      = $product->description;
     my isactive          = $product->is_active;
-    my votesperuser      = $product->votes_per_user;
-    my maxvotesperbug    = $product->max_votes_per_bug;
-    my votestoconfirm    = $product->votes_to_confirm;
     my $defaultmilestone = $product->default_milestone;
     my $classificationid = $product->classification_id;
     my $allows_unconfirmed = $product->allows_unconfirmed;

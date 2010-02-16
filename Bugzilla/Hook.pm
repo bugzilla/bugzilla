@@ -880,20 +880,6 @@ Params:
 
 =back
 
-=head2 sanitycheck_check
-
-This hook allows for extra sanity checks to be added, for use by
-F<sanitycheck.cgi>.
-
-Params:
-
-=over
-
-=item C<status> - a CODEREF that allows status messages to be displayed
-to the user. (F<sanitycheck.cgi>'s C<Status>)
-
-=back
-
 =head2 product_end_of_create
 
 Called right after a new product has been created, allowing additional
@@ -906,6 +892,20 @@ Params:
 =over
 
 =item C<product> - The new L<Bugzilla::Product> object that was just created.
+
+=back
+
+=head2 sanitycheck_check
+
+This hook allows for extra sanity checks to be added, for use by
+F<sanitycheck.cgi>.
+
+Params:
+
+=over
+
+=item C<status> - a CODEREF that allows status messages to be displayed
+to the user. (F<sanitycheck.cgi>'s C<Status>)
 
 =back
 

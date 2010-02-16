@@ -326,7 +326,7 @@ sub _check_votestoconfirm {
 sub _check_votes {
     my ($default, $invocant, $votes, $field) = @_;
 
-    detaint_natural($votes);
+    detaint_natural($votes) if defined $votes;
     # On product creation, if the number of votes is not a valid integer,
     # we silently fall back to the given default value.
     # If the product already exists and the change is illegal, we complain.

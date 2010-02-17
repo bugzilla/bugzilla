@@ -47,7 +47,7 @@ use Bugzilla;
 use Bugzilla::Attachment;
 use Bugzilla::Bug;
 use Bugzilla::BugMail;
-use Bugzilla::Constants qw(USAGE_MODE_EMAIL CMT_ATTACHMENT_CREATED);
+use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Mailer;
 use Bugzilla::Token;
@@ -145,11 +145,32 @@ sub post_bug {
     my ($fields) = @_;
     debug_print('Posting a new bug...');
 
+    my $user = Bugzilla->user;
+
     # Bugzilla::Bug->create throws a confusing CodeError if
     # the REQUIRED_CREATE_FIELDS are missing, but much more
     # sensible errors if the fields exist but are just undef.
     foreach my $field (Bugzilla::Bug::REQUIRED_CREATE_FIELDS) {
         $fields->{$field} = undef if !exists $fields->{$field};
+    }
+
+    # Restrict the bug to groups marked as Default.
+    # We let Bug->create throw an error if the product is
+    # not accessible, to throw the correct message.
+    my $product = new Bugzilla::Product({ name => $fields->{product} });
+    if ($product) {
+        my @gids;
+        my $controls = $product->group_controls;
+        foreach my $gid (keys %$controls) {
+            if (($controls->{$gid}->{membercontrol} == CONTROLMAPDEFAULT
+                 && $user->in_group_id($gid))
+                || ($controls->{$gid}->{othercontrol} == CONTROLMAPDEFAULT
+                    && !$user->in_group_id($gid)))
+            {
+                push(@gids, $gid);
+            }
+        }
+        $fields->{groups} = \@gids;
     }
 
     my ($retval, $non_conclusive_fields) =

@@ -167,7 +167,7 @@
 [% FOREACH bug = bugs %]
   [% count = loop.count() %]
 
-  <tr class="bz_bugitem
+  <tr id="b[% bug.bug_id %]" class="bz_bugitem
              bz_[% bug.bug_severity FILTER css_class_quote -%]
              bz_[% bug.priority FILTER css_class_quote -%]
              bz_[% bug.bug_status FILTER css_class_quote -%]
@@ -183,8 +183,7 @@
     </td>
     [% END %]
     <td class="first-child bz_id_column">
-      <a name="b[% bug.bug_id %]"
-         href="show_bug.cgi?id=[% bug.bug_id %]">[% bug.bug_id %]</a>
+      <a href="show_bug.cgi?id=[% bug.bug_id %]">[% bug.bug_id %]</a>
       <span style="display: none">[%+ '[SEC]' IF bug.secure_mode %]</span>
     </td>
 

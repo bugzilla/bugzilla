@@ -50,9 +50,9 @@ function toggle_display(link) {
 
 <br>
 <table id="attachment_table" cellspacing="0" cellpadding="4">
-  <tr>
+  <tr id="a0">
     <th colspan="[% show_attachment_flags ? 3 : 2 %]" align="left">
-      <a name="a0" id="a0">Attachments</a>
+      Attachments
     </th>
   </tr>
 
@@ -65,7 +65,7 @@ function toggle_display(link) {
       [% IF attachment.isobsolete %]
         [% obsolete_attachments = obsolete_attachments + 1 %]
       [% END %]
-      <tr class="[% "bz_contenttype_" _ attachment.contenttype
+      <tr id="a[% count %]" class="[% "bz_contenttype_" _ attachment.contenttype
                      FILTER css_class_quote UNLESS attachment.isurl %]
                  [% " bz_patch" IF attachment.ispatch %]
                  [% " bz_url" IF attachment.isurl %]
@@ -74,7 +74,7 @@ function toggle_display(link) {
                      IF attachment.isobsolete %]">
         <td valign="top">
           [% IF attachment.datasize %]
-            <a name="a[% count %]" href="attachment.cgi?id=[% attachment.id %]"
+            <a href="attachment.cgi?id=[% attachment.id %]"
                title="View the content of the attachment">
           [% END %]
           <b>[% attachment.description FILTER html FILTER obsolete(attachment.isobsolete) %]</b>

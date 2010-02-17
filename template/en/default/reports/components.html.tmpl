@@ -80,10 +80,9 @@
 [%############################################################################%]
 
 [% BLOCK describe_comp %]
-  <tr>
+  <tr id="[% comp.name FILTER html %]">
     <td rowspan="2" class="component_name">
-      <a name="[% comp.name FILTER html %]"
-         href="buglist.cgi?product=
+      <a href="buglist.cgi?product=
                [%- product.name FILTER url_quote %]&amp;component=
                [%- comp.name FILTER url_quote %]&amp;resolution=---">
       [% comp.name FILTER html %]</a>

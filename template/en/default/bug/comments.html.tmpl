@@ -158,7 +158,7 @@
 [% BLOCK a_comment %]
   [% RETURN IF comment.is_private AND ! user.is_insider %]
 
-    <div class="bz_comment[% " bz_private" IF comment.is_private %]
+    <div id="c[% count %]" class="bz_comment[% " bz_private" IF comment.is_private %]
                 [% " bz_comment_hilite" IF marks.$count %]
                 [% " bz_first_comment" IF count == description %]">
       [% IF count == description %]
@@ -194,7 +194,7 @@
         [% END %]
 
         <span class="bz_comment_number">
-          <a name="c[% count %]" 
+          <a 
              href="show_bug.cgi?id=[% bug.bug_id %]#c[% count %]">
             [%- comment_label FILTER html %]</a>
         </span>

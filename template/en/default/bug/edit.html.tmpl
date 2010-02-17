@@ -1019,8 +1019,7 @@
 [%############################################################################%]
 
 [% BLOCK comment_box %]
-  <div class="bz_section_additional_comments">
-    <a name="add_comment"></a>
+  <div id="add_comment" class="bz_section_additional_comments">
     [% IF user.id %]
       <label for="comment" accesskey="c"><b>Additional 
         <u>C</u>omments</b></label>:
@@ -1048,13 +1047,13 @@
         <br>
         [% PROCESS commit_button id=""%]
 
-        <table class="status" cellspacing="0" cellpadding="0">
+        <table id="bug_status_bottom"
+               class="status" cellspacing="0" cellpadding="0">
           <tr>
             <td class="field_label">
               <b><a href="page.cgi?id=fields.html#status">Status</a></b>:
             </td>
             <td>
-              <a name="bug_status_bottom"></a>
               [% PROCESS bug/knob.html.tmpl %]
             </td>
           </tr>

@@ -58,7 +58,7 @@
 
 [% bug_ids_string = bug_ids.join(',') %]
 
-<h3><a name="params">Change Parameters</a></h3>
+<h3 id="params">Change Parameters</h3>
 
 <form method="get" action="duplicates.cgi">
   <input type="hidden" name="sortby" value="[% sortby FILTER html %]">
@@ -136,9 +136,9 @@
 
 <hr>
 
-<b>
-  <a name="explanation">What are "Most Frequently Reported [% terms.Bugs %]"?</a>
-</b>
+<h3 id="explanation">
+  What are "Most Frequently Reported [% terms.Bugs %]"?
+</h3>
 
 <p>
   The Most Frequent [% terms.Bugs %] page lists the known open 

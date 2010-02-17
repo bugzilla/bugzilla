@@ -129,7 +129,7 @@
     [% extra_class = " b_open" %]
     [% extra_args = 'onclick="return doToggle(this, event)"' %] 
   [% END %]
-  <a name="b[% bugid %]" 
+  <a id="b[% bugid %]" 
      class="b [%+ extra_class FILTER none %]"
      title="Click to expand or contract this portion of the tree. Hold down the Ctrl key while clicking to expand or contract all subtrees."
      [% extra_args FILTER none %]>&nbsp;&nbsp;</a>

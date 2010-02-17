@@ -31,13 +31,11 @@
 <table class="field_value_explanation">
   <thead>
   <tr>
-    <td>
-      <a name="bug_status"></a>
+    <td id="bug_status">
       <h2>[% field_descs.bug_status FILTER upper FILTER html %]</h2>
     </td>
 
-    <td>
-      <a name="resolution"></a>
+    <td id="resolution">
       <h2>[% field_descs.resolution FILTER upper FILTER html %]</h2>
     </td>
   </tr>
@@ -266,7 +264,7 @@
 
   [% NEXT IF skip_fields.contains(field) %]
 
-  <dt><a name="[% field FILTER html %]"></a>[% field_desc FILTER html %]</dt>
+  <dt id="[% field FILTER html %]">[% field_desc FILTER html %]</dt>
     <dd>
       [% SET help_text = field_help_map.${field_desc}.help %]
       [% IF help_text %]

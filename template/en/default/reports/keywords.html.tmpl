@@ -49,10 +49,9 @@
       </tr>
   [% END %]
 
-  <tr>
+  <tr id="[% keyword.name FILTER html %]">
     <th>
-      <a name="[% keyword.name FILTER html %]">
-        [% keyword.name FILTER html %]</a>
+        [% keyword.name FILTER html %]
     </th>
     <td>[% keyword.description FILTER html_light %]</td>
     <td align="center">

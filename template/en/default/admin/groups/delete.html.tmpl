@@ -60,6 +60,15 @@
     all users from this group for me.</label></p>
   [% END %]
 
+  [% IF group.granted_by_direct(constants.GROUP_MEMBERSHIP).size %]
+    <p><b>Members of this group inherit membership in the following groups:</b></p>
+    <ul>
+      [% FOREACH grantor = group.granted_by_direct(constants.GROUP_MEMBERSHIP) %]
+        <li>[% grantor.name FILTER html %]</li>
+      [% END %]
+    </ul>
+  [% END %]
+
   [% IF group.bugs.size %]
     <p><b>[% group.bugs.size FILTER html %] [%+ terms.bug %] reports are
      visible only to this group. You cannot delete this group while any 

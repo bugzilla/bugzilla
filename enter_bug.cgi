@@ -397,7 +397,14 @@ $vars->{'token'}             = issue_session_token('createbug:');
 
 my @enter_bug_fields = grep { $_->enter_bug } Bugzilla->active_custom_fields;
 foreach my $field (@enter_bug_fields) {
-    $vars->{$field->name} = formvalue($field->name);
+    my $cf_name = $field->name;
+    my $cf_value = $cgi->param($cf_name);
+    if (defined $cf_value) {
+        if ($field->type == FIELD_TYPE_MULTI_SELECT) {
+            $cf_value = [$cgi->param($cf_name)];
+        }
+        $default{$cf_name} = $vars->{$cf_name} = $cf_value;
+    }
 }
 
 # This allows the Field visibility and value controls to work with the

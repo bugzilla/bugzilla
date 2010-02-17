@@ -66,7 +66,7 @@
                   onchange="toggleRequesteeField(this);"
                   class="flag_select">
             [%# Only display statuses the user is allowed to set. %]
-            [% IF user.can_request_flag(type) %]
+            [% IF user.can_request_flag(type) || flag.setter_id == user.id %]
               <option value="X"></option>
             [% END %]
             [% IF type.is_active %]

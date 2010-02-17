@@ -149,13 +149,9 @@
                value="[% dontchange FILTER html %]"
                size="6">
       </td>
-      <th><label for="deadline">Deadline (YYYY-MM-DD):</label></th>
-      <td>
-        <input id="deadline"
-               name="deadline"
-               value="[% dontchange FILTER html %]"
-               size="10">
-      </td>
+      [% PROCESS bug/field.html.tmpl 
+          field = bug_fields.deadline, value = dontchange
+          editable = 1, allow_dont_change = 1 %]
     </tr>
     <tr>
       <th><label for="remaining_time">Remaining Hours:</label></th>

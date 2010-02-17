@@ -218,8 +218,7 @@ use constant NUMERIC_COLUMNS => qw(
 );
 
 sub DATE_COLUMNS {
-    my @fields = Bugzilla->get_fields(
-        { custom => 1, type => FIELD_TYPE_DATETIME });
+    my @fields = Bugzilla->get_fields({ type => FIELD_TYPE_DATETIME });
     return map { $_->name } @fields;
 }
 

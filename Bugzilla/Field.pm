@@ -219,7 +219,7 @@ use constant DEFAULT_FIELDS => (
      in_new_bugmail => 1, buglist => 1},
     {name => 'remaining_time',        desc => 'Remaining Hours', buglist => 1},
     {name => 'deadline',              desc => 'Deadline',
-     in_new_bugmail => 1, buglist => 1},
+     type => FIELD_TYPE_DATETIME, in_new_bugmail => 1, buglist => 1},
     {name => 'commenter',             desc => 'Commenter'},
     {name => 'flagtypes.name',        desc => 'Flags', buglist => 1},
     {name => 'requestees.login_name', desc => 'Flag Requestee'},

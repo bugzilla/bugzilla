@@ -445,11 +445,9 @@ TUI_hide_default('expert_fields');
     </td>
   </tr>
   <tr>
-    <th>Deadline:</th>
-    <td colspan="2">
-      <input name="deadline" size="10" maxlength="10" value="[% deadline FILTER html %]">
-      <small>(YYYY-MM-DD)</small>
-    </td>
+    [% INCLUDE bug/field.html.tmpl
+      bug = default, field = bug_fields.deadline, value = deadline,
+      editable = 1, value_span = 2 %] 
   </tr>
 
   <tr>

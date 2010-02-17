@@ -999,9 +999,9 @@
         [% PROCESS formattimeunit time_unit=bug.estimated_time - (bug.actual_time + bug.remaining_time) %]
       </td>
        <td>
-         <input name="deadline" id="deadline" value="[% bug.deadline %]"
-                size="10" maxlength="10"><br />
-         <small>(YYYY-MM-DD)</small>
+         [% INCLUDE bug/field.html.tmpl
+           field = bug_fields.deadline, value = bug.deadline, no_tds = 1
+           editable = bug.check_can_change_field('deadline', 0, 1) %]
       </td>        
     </tr>
     <tr>

@@ -98,6 +98,9 @@ table#flags {
 .bz_time_tracking_table .bz_summarize_time {
     text-align: right;
 }
+.bz_time_tracking_table #deadline {
+    width: 7em;
+}
 
 #summary tr td { 
     vertical-align:top;

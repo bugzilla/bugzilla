@@ -731,10 +731,12 @@ sub _check_setter {
 
     # Make sure the user is authorized to modify flags, see bug 180879:
     # - The flag exists and is unchanged.
+    # - The flag setter can unset flag.
     # - Users in the request_group can clear pending requests and set flags
     #   and can rerequest set flags.
     # - Users in the grant_group can set/clear flags, including "+" and "-".
     unless (($status eq $self->{_old_status})
+            || ($status eq 'X' && $setter->id == Bugzilla->user->id)
             || (($status eq 'X' || $status eq '?')
                 && $setter->can_request_flag($self->type))
             || $setter->can_set_flag($self->type))

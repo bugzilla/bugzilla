@@ -43,7 +43,7 @@ use Bugzilla::Search::Quicksearch;
 
 # For quicksearch.html.
 sub quicksearch_field_names {
-    my $fields = Bugzilla::Search::Quicksearch::FIELD_MAP;
+    my $fields = Bugzilla::Search::Quicksearch->FIELD_MAP;
     my %fields_reverse;
     # Put longer names before shorter names.
     my @nicknames = sort { length($b) <=> length($a) } (keys %$fields);

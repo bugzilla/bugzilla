@@ -55,7 +55,7 @@ var queryform = "queryform"
 [% IF NOT cgi.param("help") %]
   document.write("<p><a href='query.cgi?help=1&amp;format=advanced'>Give me some help<\/a> (reloads page).<\/p>");
 [% ELSE %]
-  [% PROCESS "search/search-help.html.tmpl" %]
+  [% PROCESS "bug/field-help.none.tmpl" %]
   if (generateHelp())
     document.write("<p>For help, mouse over the page elements.<\/p>");
   else

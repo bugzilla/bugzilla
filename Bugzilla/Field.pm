@@ -547,6 +547,24 @@ sub legal_values {
 
 =over
 
+=item C<is_timetracking>
+
+True if this is a time-tracking field that should only be shown to users
+in the C<timetrackinggroup>.
+
+=back
+
+=cut
+
+sub is_timetracking {
+    my ($self) = @_;
+    return grep($_ eq $self->name, TIMETRACKING_FIELDS) ? 1 : 0;
+}
+
+=pod
+
+=over
+
 =item C<visibility_field>
 
 What field controls this field's visibility? Returns a C<Bugzilla::Field>

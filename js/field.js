@@ -316,8 +316,11 @@ function showDuplicateItem(e) {
             YAHOO.util.Dom.removeClass('duplicate_settings', 
                                        'bz_default_hidden');
             YAHOO.util.Dom.addClass('dup_id_discoverable', 'bz_default_hidden');
-            dup_id.focus();
-            dup_id.select();
+            // check to make sure the field is visible or IE throws errors
+            if( ! YAHOO.util.Dom.hasClass( dup_id, 'bz_default_hidden' ) ){
+                dup_id.focus();
+                dup_id.select();
+            }
         }
         else {
             YAHOO.util.Dom.addClass('duplicate_settings', 'bz_default_hidden');

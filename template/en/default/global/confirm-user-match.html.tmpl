@@ -41,7 +41,7 @@
 [% IF matchsuccess == 1 %]
   [% PROCESS global/header.html.tmpl title="Confirm Match" %]
 
-[% USE Bugzilla %]
+  [% USE Bugzilla %]
 
   <form method="post" 
   [% IF script -%]
@@ -70,9 +70,13 @@
   [% PROCESS global/header.html.tmpl title="Match Failed" %]
   <p>
     [% terms.Bugzilla %] was unable to make any match at all for one or more of
-    the names and/or email addresses you entered on the previous page.<br>
-    Please go back and try other names or email addresses.
+    the names and/or email addresses you entered on the previous page.
+    [% IF !user.id %]
+      <b>Note: You are currently logged out. Only exact matches against e-mail
+      addresses will be performed.</b>
+    [% END %]
   </p>
+  <p>Please go back and try other names or email addresses.</p>
 [% END %]
 
   <table border="0">

@@ -362,7 +362,6 @@ sub page_before_template {
 sub _page_bug {
     my ($vars) = @_;
     my $dbh = Bugzilla->dbh;
-    my $template = Bugzilla->template;
     my $input = Bugzilla->input_params;
 
     my $bug_id = $input->{bug_id};
@@ -384,7 +383,6 @@ sub _page_user {
     my ($vars) = @_;
     my $dbh = Bugzilla->dbh;
     my $user = Bugzilla->user;
-    my $template = Bugzilla->template;
     my $input = Bugzilla->input_params;
 
     my $action = $input->{action};

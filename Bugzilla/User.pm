@@ -1066,7 +1066,8 @@ sub match {
     # first try wildcards
     my $wildstr = $str;
 
-    if ($wildstr =~ s/\*/\%/g) { # don't do wildcards if no '*' in the string
+    # Do not do wildcards if there is no '*' in the string.
+    if ($wildstr =~ s/\*/\%/g && $user->id) {
         # Build the query.
         trick_taint($wildstr);
         my $query  = "SELECT DISTINCT userid FROM profiles ";
@@ -1101,7 +1102,7 @@ sub match {
     }
 
     # then try substring search
-    if (!scalar(@users) && length($str) >= 3) {
+    if (!scalar(@users) && length($str) >= 3 && $user->id) {
         trick_taint($str);
 
         my $query   = "SELECT DISTINCT userid FROM profiles ";

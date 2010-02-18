@@ -335,6 +335,7 @@ sub get_names {
     my @select_fields = Bugzilla->get_fields({ is_select => 1 });
     foreach my $field (@select_fields) {
         my @names =  map($_->name, @{$field->legal_values});
+        unshift @names, ' ' if $field->name eq 'resolution'; 
         $fields{$field->name} = \@names;
     } 
     my $field_list = $fields{$field};

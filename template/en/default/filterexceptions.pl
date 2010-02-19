@@ -259,7 +259,6 @@
 ],
 
 'bug/edit.html.tmpl' => [
-  'bug.deadline',
   'bug.remaining_time', 
   'bug.delta_ts', 
   'bug.bug_id', 

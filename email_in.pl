@@ -157,6 +157,7 @@ sub post_bug {
     # Restrict the bug to groups marked as Default.
     # We let Bug->create throw an error if the product is
     # not accessible, to throw the correct message.
+    $fields->{product} = '' if !defined $fields->{product};
     my $product = new Bugzilla::Product({ name => $fields->{product} });
     if ($product) {
         my @gids;

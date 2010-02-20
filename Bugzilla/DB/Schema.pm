@@ -1248,7 +1248,7 @@ use constant ABSTRACT_SCHEMA => {
             creator     => {TYPE => 'INT3',
                             REFERENCES => {TABLE  => 'profiles',
                                            COLUMN => 'userid',
-                                           DELETE => 'SET NULL'}},
+                                           DELETE => 'CASCADE'}},
             category    => {TYPE => 'INT2', NOTNULL => 1,
                             REFERENCES => {TABLE  => 'series_categories',
                                            COLUMN => 'id',

@@ -119,10 +119,15 @@ sub body_full {
     $params ||= {};
     my $template = Bugzilla->template_inner;
     my $body;
-    $template->process("bug/format_comment.txt.tmpl", 
-                       { comment => $self, %$params }, \$body)
-        || ThrowTemplateError($template->error());
-    $body =~ s/^X//;
+    if ($self->type) {
+        $template->process("bug/format_comment.txt.tmpl", 
+                           { comment => $self, %$params }, \$body)
+            || ThrowTemplateError($template->error());
+        $body =~ s/^X//;
+    }
+    else {
+        $body = $self->body;
+    }
     if ($params->{wrap} and !$self->already_wrapped) {
         $body = wrap_comment($body);
     }

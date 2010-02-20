@@ -411,7 +411,9 @@ sub remove_from_db {
                                      WHERE series_categories.name = ?',
                                     undef, $self->name);
 
-        $dbh->do('DELETE FROM series WHERE ' . $dbh->sql_in('series_id', $series_ids));
+        if (scalar @$series_ids) {
+            $dbh->do('DELETE FROM series WHERE ' . $dbh->sql_in('series_id', $series_ids));
+        }
 
         # If no subcategory uses this product name, completely purge it.
         my $in_use =

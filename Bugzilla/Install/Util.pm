@@ -196,6 +196,9 @@ sub extension_template_directory {
     my $extension = shift;
     my $class = ref($extension) || $extension;
     my $base_dir = extension_package_directory($class);
+    if ($base_dir eq bz_locations->{'extensionsdir'}) {
+        return bz_locations->{'templatedir'};
+    }
     return "$base_dir/template";
 }
 

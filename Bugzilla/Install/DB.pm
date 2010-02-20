@@ -595,6 +595,7 @@ sub update_table_definitions {
     _add_allows_unconfirmed_to_product_table();
     _convert_flagtypes_fks_to_set_null();
     _fix_decimal_types();
+    _fix_series_creator_fk();
 
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
@@ -3360,6 +3361,16 @@ sub _fix_decimal_types {
     $dbh->bz_alter_column('bugs', 'estimated_time', $type);
     $dbh->bz_alter_column('bugs', 'remaining_time', $type);
     $dbh->bz_alter_column('longdescs', 'work_time', $type);
+}
+
+sub _fix_series_creator_fk {
+    my $dbh = Bugzilla->dbh;
+    my $fk = $dbh->bz_fk_info('series', 'creator');
+    # Change the FK from SET NULL to CASCADE. (It will be re-created
+    # automatically at the end of all DB changes.)
+    if ($fk and $fk->{DELETE} eq 'SET NULL') {
+        $dbh->bz_drop_fk('series', 'creator');
+    }
 }
 
 1;

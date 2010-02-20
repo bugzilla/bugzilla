@@ -59,14 +59,14 @@ table.bz_buglist td, table.bz_buglist th {
 
 /* we use a first-child class and not the pseudo-class because IE
  * doesn't support it :-( */
-tr.bz_secure td.first-child { 
+tr.bz_secure td.first-child, a.bz_secure { 
   background-image: url("../../images/padlock.png");
   background-position: center left;
   background-repeat: no-repeat;
   background-color: inherit;
 }
 
-th.first-child, td.first-child {
+th.first-child, td.first-child, a.bz_secure {
   padding-left: 20px;
 }
 

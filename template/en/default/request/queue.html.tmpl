@@ -31,6 +31,7 @@
   "
   onload="var f = document.request_form; selectProduct(f.product, f.component, null, null, 'Any');"
   javascript_urls=["js/productform.js"]
+  style_urls = ['skins/standard/buglist.css']
 %]
 
 <script type="text/javascript">
@@ -214,7 +215,8 @@ to some group are shown by default.
 [% END %]
 
 [% BLOCK display_bug %]
-  <a href="show_bug.cgi?id=[% request.bug_id %]">
+  <a href="show_bug.cgi?id=[% request.bug_id %]"
+     [%- ' class="bz_secure"' IF request.restricted %]>
     [% request.bug_id %]: [%+ request.bug_summary FILTER html %]</a>
 [% END %]
 

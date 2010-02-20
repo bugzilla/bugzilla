@@ -36,7 +36,7 @@ sub get_notifications {
     if (!-e $local_file || (time() - (stat($local_file))[9] > TIME_INTERVAL)) {
         unlink $local_file; # Make sure the old copy is away.
         if (-e $local_file) {
-            return { error => 'no_update', xml_file => $local_file };
+            return { 'error' => 'no_update', xml_file => $local_file };
         }
         my $error = _synchronize_data();
         # If an error is returned, leave now.

@@ -137,7 +137,6 @@ sub FILESYSTEM {
         'docs/style.css'       => { perms => $ws_readable },
         'docs/*/rel_notes.txt' => { perms => $ws_readable },
         'docs/*/README.docs'   => { perms => $owner_readable },
-        "$datadir/bugzilla-update.xml" => { perms => $ws_writeable },
         "$datadir/params" => { perms => $ws_writeable },
         "$datadir/old-params.txt" => { perms => $owner_readable },
         "$extensionsdir/create.pl" => { perms => $owner_executable },

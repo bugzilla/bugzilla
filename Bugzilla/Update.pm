@@ -34,18 +34,13 @@ sub get_notifications {
     # Update the local XML file if this one doesn't exist or if
     # the last modification time (stat[9]) is older than TIME_INTERVAL.
     if (!-e $local_file || (time() - (stat($local_file))[9] > TIME_INTERVAL)) {
-        # Are we sure we didn't try to refresh this file already
-        # but we failed because we cannot modify its timestamp?
-        my $can_alter = (-e $local_file) ? utime(undef, undef, $local_file) : 1;
-        if ($can_alter) {
-            unlink $local_file; # Make sure the old copy is away.
-            my $error = _synchronize_data();
-            # If an error is returned, leave now.
-            return $error if $error;
+        unlink $local_file; # Make sure the old copy is away.
+        if (-e $local_file) {
+            return { error => 'no_update', xml_file => $local_file };
         }
-        else {
-            return {'error' => 'no_update', 'xml_file' => $local_file};
-        }
+        my $error = _synchronize_data();
+        # If an error is returned, leave now.
+        return $error if $error;
     }
 
     # If we cannot access the local XML file, ignore it.

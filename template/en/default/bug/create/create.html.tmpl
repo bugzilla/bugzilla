@@ -30,9 +30,11 @@
 
 [% PROCESS global/header.html.tmpl
   title = title
-  style_urls = [ 'skins/standard/create_attachment.css',
+  style_urls = [ 'skins/standard/yui/autocomplete.css',
+                 'skins/standard/create_attachment.css',
                  'skins/standard/yui/calendar.css' ]
-  javascript_urls = [ "js/attachment.js", "js/util.js", "js/yui/calendar.js",
+  javascript_urls = [ "js/yui/bz_autocomplete_bundle.js",
+                      "js/attachment.js", "js/util.js", "js/yui/calendar.js",
                       "js/field.js", "js/TUI.js" ]
   onload = 'set_assign_to();'
 %]
@@ -384,6 +386,7 @@ TUI_hide_default('expert_fields');
     <th><a href="page.cgi?id=fields.html#assigned_to">Assign To</a>:</th>
     <td colspan="2">
       [% INCLUDE global/userselect.html.tmpl
+         id => "assigned_to"
          name => "assigned_to"
          value => assigned_to
          disabled => assigned_to_disabled
@@ -400,6 +403,7 @@ TUI_hide_default('expert_fields');
       <th>QA Contact:</th>
       <td colspan="2">
       [% INCLUDE global/userselect.html.tmpl
+         id => "qa_contact"
          name => "qa_contact"
          value => qa_contact
          disabled => qa_contact_disabled
@@ -416,6 +420,7 @@ TUI_hide_default('expert_fields');
     <th>CC:</th>
     <td colspan="2">
       [% INCLUDE global/userselect.html.tmpl
+         id => "cc"
          name => "cc"
          value => cc
          disabled => cc_disabled

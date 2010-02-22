@@ -532,3 +532,8 @@ form#Create .comment {
 #down_button {
     background-image: url(global/down.png);
 }
+
+/* custom styles for inline instances of autocomplete input fields*/
+.yui-skin-sam .yui-ac-input { position:static !important; 
+                              vertical-align:middle !important;}
+.yui-skin-sam .yui-ac-container { left:0px !important;}

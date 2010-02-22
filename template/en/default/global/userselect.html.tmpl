@@ -12,6 +12,7 @@
   #
   # Contributor(s): Byron Jones <bugzilla@glob.com.au>
   #                 Frédéric Buclin <LpSolit@gmail.com>
+  #                 Guy Pyrzak <guy.pyrzak@gmail.com>
   #%]
 
 [%# INTERFACE:
@@ -69,15 +70,30 @@
   [% END %]
 </select>
 [% ELSE %]
-<input
-  name="[% name FILTER html %]"
-  value="[% value FILTER html %]"
-  [% IF onchange %] onchange="[% onchange FILTER html %]" [% END %]
-  [% IF disabled %] disabled="[% disabled FILTER html %]" [% END %]
-  [% IF accesskey %] accesskey="[% accesskey FILTER html %]" [% END %]
-  [% IF size %] size="[% size FILTER html %]" [% END %]
-  [% IF id %] id="[% id FILTER html %]" [% END %]
->
+  [% IF id && feature_enabled('jsonrpc') %]
+    <div id="[% id FILTER html %]_autocomplete">
+  [% END %]  
+  <input
+    name="[% name FILTER html %]"
+    value="[% value FILTER html %]"
+    [% IF onchange %] onchange="[% onchange FILTER html %]" [% END %]
+    [% IF disabled %] disabled="[% disabled FILTER html %]" [% END %]
+    [% IF accesskey %] accesskey="[% accesskey FILTER html %]" [% END %]
+    [% IF size %] size="[% size FILTER html %]" [% END %]
+    [% IF id %] id="[% id FILTER html %]" [% END %]
+  >
+  [% IF id && feature_enabled('jsonrpc') %]
+    <div id="[% id FILTER html %]_autocomplete_container"></div>
+    </div>  
+    <script type="text/javascript">
+      if( typeof(YAHOO.bugzilla.userAutocomplete) !== 'undefined' 
+          && YAHOO.bugzilla.userAutocomplete != null){
+        YAHOO.bugzilla.userAutocomplete.init( "[% id FILTER js %]", 
+                    "[% id FILTER js %]_autocomplete_container"
+                    [% IF multiple %], true[% END%]);        
+      }
+    </script>
+  [% END %]
 [% END %]
 
 

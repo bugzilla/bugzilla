@@ -33,6 +33,8 @@
 [% END %]
 [% PROCESS global/header.html.tmpl
   title = title
+  style_urls = [ 'skins/standard/yui/autocomplete.css']
+  javascript_urls = [ "js/yui/bz_autocomplete_bundle.js", "js/field.js"]
 %]
 
 <form method="post" action="editcomponents.cgi">

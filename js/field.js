@@ -559,3 +559,74 @@ function browserCanHideOptions(aSelect) {
 }
 
 /* (end) option hiding code */
+
+/**
+ * The Autoselect
+ */
+YAHOO.bugzilla.userAutocomplete = {
+    counter : 0,
+    dataSource : null,
+    generateRequest : function ( enteredText ){ 
+      YAHOO.bugzilla.userAutocomplete.counter = 
+                                   YAHOO.bugzilla.userAutocomplete.counter + 1;
+      YAHOO.util.Connect.setDefaultPostHeader('application/json', true);
+      var json_object = {
+          method : "User.get",
+          id : YAHOO.bugzilla.userAutocomplete.counter,
+          params : [ { 
+            match : [ unescape(enteredText) ],
+            include_fields : [ "email", "real_name" ]
+          } ]
+      };
+      var stringified =  YAHOO.lang.JSON.stringify(json_object);
+      var debug = { msg: "json-rpc obj debug info", "json obj": json_object, 
+                    "param" : stringified}
+      YAHOO.bugzilla.userAutocomplete.debug_helper( debug );
+      return stringified;
+    },
+    resultListFormat : function(oResultData, enteredText, sResultMatch) {
+        return ( unescape(oResultData.real_name) + " (" +  oResultData.email + ")");
+    },
+    debug_helper : function ( ){
+        /* used to help debug any errors that might happen */
+        if( typeof(console) !== 'undefined' && console != null && arguments.length > 0 ){
+            console.log("debug helper info:", arguments);
+        }
+        return true;
+    },    
+    init_ds : function(){
+        this.dataSource = new YAHOO.util.XHRDataSource("jsonrpc.cgi");
+        this.dataSource.connMethodPost = true;
+        this.dataSource.responseSchema = {
+            resultsList : "result.users",
+            metaFields : { error: "error", jsonRpcId: "id"},
+            fields : [
+                { key : "email" },
+                { key : "real_name"}
+            ]
+        };    
+    },
+    init : function( field, container, multiple ) {
+        if( this.dataSource == null ){
+            this.init_ds();  
+        }            
+        var userAutoComp = new YAHOO.widget.AutoComplete( field, container, 
+                                this.dataSource );
+        // other stuff we might want to do with the autocomplete goes here
+        userAutoComp.generateRequest = this.generateRequest;
+        userAutoComp.formatResult = this.resultListFormat;
+        userAutoComp.doBeforeLoadData = this.debug_helper;
+        userAutoComp.minQueryLength = 3;
+        userAutoComp.autoHighlight = false;
+        // this is a throttle to determine the delay of the query from typing
+        // set this higher to cause fewer calls to the server
+        userAutoComp.queryDelay = 0.05
+        userAutoComp.useIFrame = true
+        userAutoComp.resultTypeList = false;
+        if( multiple == true ){
+            userAutoComp.delimChar = [","," "];
+        }
+        
+    }
+};
+

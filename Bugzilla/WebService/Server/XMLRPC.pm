@@ -324,3 +324,7 @@ L<http://rt.cpan.org/Public/Bug/Display.html?id=20569> and in Fedora's
 perl-SOAP-Lite package in versions 0.68-1 and above.
 
 =end private
+
+=head1 SEE ALSO
+
+L<Bugzilla::WebService>

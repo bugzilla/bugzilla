@@ -301,3 +301,29 @@ would return something like:
   { users => [{ id => 1, real_name => 'John Smith' }] }
 
 =back
+
+=head1 SEE ALSO
+
+=head2 Server Types
+
+=over
+
+=item L<Bugzilla::WebService::Server::XMLRPC>
+
+=item L<Bugzilla::WebService::Server::JSONRPC>
+
+=back
+
+=head2 WebService Methods
+
+=over
+
+=item L<Bugzilla::WebService::Bug>
+
+=item L<Bugzilla::WebService::Bugzilla>
+
+=item L<Bugzilla::WebService::Product>
+
+=item L<Bugzilla::WebService::User>
+
+=back

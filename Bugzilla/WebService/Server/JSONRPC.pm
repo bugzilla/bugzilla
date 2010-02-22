@@ -205,8 +205,8 @@ are specific to JSON-RPC. For a general overview of the Bugzilla WebServices,
 see L<Bugzilla::WebService>.
 
 Please note that I<everything> about this JSON-RPC interface is
-B<UNSTABLE>. If you want a stable API, please use the
-C<XML-RPC|Bugzilla::WebService::Server::XMLRPC> interface.
+B<EXPERIMENTAL>. If you want a fully stable API, please use the
+C<Bugzilla::WebService::Server::XMLRPC|XML-RPC> interface.
 
 =head1 JSON-RPC
 

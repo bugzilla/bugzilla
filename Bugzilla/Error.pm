@@ -125,7 +125,9 @@ sub _throw_error {
                 # the internal JSON::RPC error codes.
                 $server->raise_error(code    => 100000 + $code,
                                      message => $message);
-                $server->response($server->error_response_header);
+                # We die with no message. JSON::RPC checks raise_error before
+                # it checks $@, so it returns the proper error.
+                die;
             }
         }
     }

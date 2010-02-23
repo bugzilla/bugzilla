@@ -47,9 +47,12 @@ GetOptions(\%switch, 'all|a', 'upgrade-all|u', 'show-config|s', 'global|g',
 
 pod2usage({ -verbose => 1 }) if $switch{'help'};
 
-if (ON_WINDOWS) {
-    print "\nYou cannot run this script on Windows. Please follow instructions\n";
-    print "given by checksetup.pl to install missing Perl modules.\n\n";
+if (ON_ACTIVESTATE) {
+    print <<END;
+You cannot run this script when using ActiveState Perl. Please follow
+the instructions given by checksetup.pl to install missing Perl modules.
+
+END
     exit;
 }
 

@@ -376,17 +376,6 @@ sub _check_missing {
     return \@missing;
 }
 
-# Returns the build ID of ActivePerl. If several versions of
-# ActivePerl are installed, it won't be able to know which one
-# you are currently running. But that's our best guess.
-sub _get_activestate_build_id {
-    eval 'use Win32::TieRegistry';
-    return 0 if $@;
-    my $key = Win32::TieRegistry->new('LMachine\Software\ActiveState\ActivePerl')
-      or return 0;
-    return $key->GetValue("CurrentVersion");
-}
-
 sub print_module_instructions {
     my ($check_results, $output) = @_;
 
@@ -427,7 +416,7 @@ sub print_module_instructions {
     if ((!$output && @{$check_results->{missing}})
         || ($output && $check_results->{any_missing}))
     {
-        if (ON_WINDOWS) {
+        if (ON_ACTIVESTATE) {
             my $perl_ver = sprintf('%vd', $^V);
             
             # URL when running Perl 5.8.x.
@@ -439,7 +428,7 @@ sub print_module_instructions {
             print colored(install_string('ppm_repo_add', 
                                  { theory_url => $url_to_theory58S }), 'red');
             # ActivePerls older than revision 819 require an additional command.
-            if (_get_activestate_build_id() < 819) {
+            if (ON_ACTIVESTATE < 819) {
                 print install_string('ppm_repo_up');
             }
         }
@@ -477,7 +466,7 @@ sub print_module_instructions {
         }
     }
 
-    if ($output && $check_results->{any_missing} && !ON_WINDOWS
+    if ($output && $check_results->{any_missing} && !ON_ACTIVESTATE
         && !$check_results->{hide_all}) 
     {
         print install_string('install_all', { perl => $^X });
@@ -586,7 +575,7 @@ sub install_command {
     my $module = shift;
     my ($command, $package);
 
-    if (ON_WINDOWS) {
+    if (ON_ACTIVESTATE) {
         $command = 'ppm install %s';
         $package = $module->{package};
     }

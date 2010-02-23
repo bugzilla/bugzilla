@@ -149,6 +149,7 @@ use File::Basename;
     DB_MODULE
     ROOT_USER
     ON_WINDOWS
+    ON_ACTIVESTATE
 
     MAX_TOKEN_AGE
     MAX_LOGINCOOKIE_AGE
@@ -471,6 +472,8 @@ use constant DB_MODULE => {
 
 # True if we're on Win32.
 use constant ON_WINDOWS => ($^O =~ /MSWin32/i);
+# True if we're using ActiveState Perl (as opposed to Strawberry) on Windows.
+use constant ON_ACTIVESTATE => eval { &Win32::BuildNumber };
 
 # The user who should be considered "root" when we're giving
 # instructions to Bugzilla administrators.

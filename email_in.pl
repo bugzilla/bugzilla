@@ -154,26 +154,6 @@ sub post_bug {
         $fields->{$field} = undef if !exists $fields->{$field};
     }
 
-    # Restrict the bug to groups marked as Default.
-    # We let Bug->create throw an error if the product is
-    # not accessible, to throw the correct message.
-    $fields->{product} = '' if !defined $fields->{product};
-    my $product = new Bugzilla::Product({ name => $fields->{product} });
-    if ($product) {
-        my @gids;
-        my $controls = $product->group_controls;
-        foreach my $gid (keys %$controls) {
-            if (($controls->{$gid}->{membercontrol} == CONTROLMAPDEFAULT
-                 && $user->in_group_id($gid))
-                || ($controls->{$gid}->{othercontrol} == CONTROLMAPDEFAULT
-                    && !$user->in_group_id($gid)))
-            {
-                push(@gids, $gid);
-            }
-        }
-        $fields->{groups} = \@gids;
-    }
-
     my ($retval, $non_conclusive_fields) =
       Bugzilla::User::match_field({
         'assigned_to'   => { 'type' => 'single' },

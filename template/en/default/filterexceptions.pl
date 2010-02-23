@@ -316,7 +316,6 @@
 ],
 
 'bug/create/create.html.tmpl' => [
-  'g.bit',
   'sel.name',
   'sel.description',
   'cloned_bug_id',

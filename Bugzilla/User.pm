@@ -334,7 +334,7 @@ sub queries_subscribed {
                 ON ngm.namedquery_id = lif.namedquery_id
           WHERE lif.user_id = ? 
                 AND lif.namedquery_id NOT IN ($query_id_string)
-                AND ngm.group_id IN (" . $self->groups_as_string . ")",
+                AND " . $self->groups_in_sql,
           undef, $self->id);
     require Bugzilla::Search::Saved;
     $self->{queries_subscribed} =
@@ -353,7 +353,7 @@ sub queries_available {
 
     my $avail_query_ids = Bugzilla->dbh->selectcol_arrayref(
         'SELECT namedquery_id FROM namedquery_group_map
-          WHERE group_id IN (' . $self->groups_as_string . ")
+          WHERE '  . $self->groups_in_sql . "
                 AND namedquery_id NOT IN ($query_id_string)");
     require Bugzilla::Search::Saved;
     $self->{queries_available} =
@@ -464,6 +464,14 @@ sub groups_as_string {
     return scalar(@ids) ? join(',', @ids) : '-1';
 }
 
+sub groups_in_sql {
+    my ($self, $field) = @_;
+    $field ||= 'group_id';
+    my @ids = map { $_->id } @{ $self->groups };
+    @ids = (-1) if !scalar @ids;
+    return Bugzilla->dbh->sql_in($field, \@ids);
+}
+
 sub bless_groups {
     my $self = shift;
 
@@ -524,7 +532,7 @@ sub in_group {
                               FROM group_control_map
                              WHERE product_id = ?
                                    AND $group != 0
-                                   AND group_id IN (" . $self->groups_as_string . ") " .
+                                   AND " . $self->groups_in_sql . ' ' .
                               $dbh->sql_limit(1),
                              undef, $product_id);
 
@@ -550,7 +558,7 @@ sub get_products_by_permission {
                           "SELECT DISTINCT product_id
                              FROM group_control_map
                             WHERE $group != 0
-                              AND group_id IN(" . $self->groups_as_string . ")");
+                              AND " . $self->groups_in_sql);
 
     # No need to go further if the user has no "special" privs.
     return [] unless scalar(@$product_ids);
@@ -898,10 +906,9 @@ sub visible_groups_direct {
     my $sth;
    
     if (Bugzilla->params->{'usevisibilitygroups'}) {
-        my $glist = $self->groups_as_string;
         $sth = $dbh->prepare("SELECT DISTINCT grantor_id
                                  FROM group_group_map
-                                WHERE member_id IN($glist)
+                                WHERE " . $self->groups_in_sql('member_id') . "
                                   AND grant_type=" . GROUP_VISIBLE);
     }
     else {
@@ -1956,6 +1963,13 @@ groups that this user is a member of.
 Returns a string containing a comma-separated list of numeric group ids.  If
 the user is not a member of any groups, returns "-1". This is most often used
 within an SQL IN() function.
+
+=item C<groups_in_sql>
+
+This returns an C<IN> clause for SQL, containing either all of the groups
+the user is in, or C<-1> if the user is in no groups. This takes one
+argument--the name of the SQL field that should be on the left-hand-side
+of the C<IN> statement, which defaults to C<group_id> if not specified.
 
 =item C<in_group($group_name, $product_id)>
 

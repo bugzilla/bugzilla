@@ -15,9 +15,9 @@
 # Contributor(s): Tiago R. Mello <timello@async.com.br>
 #                 Frédéric Buclin <LpSolit@gmail.com>
 
-use strict;
-
 package Bugzilla::Product;
+use strict;
+use base qw(Bugzilla::Field::ChoiceInterface Bugzilla::Object);
 
 use Bugzilla::Constants;
 use Bugzilla::Util;
@@ -32,7 +32,7 @@ use Bugzilla::Mailer;
 use Bugzilla::Series;
 use Bugzilla::Hook;
 
-use base qw(Bugzilla::Field::ChoiceInterface Bugzilla::Object);
+use Scalar::Util qw(blessed);
 
 use constant DEFAULT_CLASSIFICATION_ID => 1;
 
@@ -256,6 +256,9 @@ sub update {
                 }
             }
         }
+
+        delete $self->{groups_available};
+        delete $self->{groups_mandatory};
     }
     $dbh->bz_commit_transaction();
     # Changes have been committed.
@@ -611,9 +614,53 @@ sub group_controls {
     return $self->{group_controls};
 }
 
-sub groups_mandatory_for {
-    my ($self, $user) = @_;
-    my $groups = $user->groups_as_string;
+sub groups_available {
+    my ($self) = @_;
+    return $self->{groups_available} if defined $self->{groups_available};
+    my $dbh = Bugzilla->dbh;
+    my $shown = CONTROLMAPSHOWN;
+    my $default = CONTROLMAPDEFAULT;
+    my %member_groups = @{ $dbh->selectcol_arrayref(
+        "SELECT group_id, membercontrol
+           FROM group_control_map
+                INNER JOIN groups ON group_control_map.group_id = groups.id
+          WHERE isbuggroup = 1 AND isactive = 1 AND product_id = ?
+                AND (membercontrol = $shown OR membercontrol = $default)
+                AND " . Bugzilla->user->groups_in_sql(),
+        {Columns=>[1,2]}, $self->id) };
+    # We don't need to check the group membership here, because we only
+    # add these groups to the list below if the group isn't already listed
+    # for membercontrol.
+    my %other_groups = @{ $dbh->selectcol_arrayref(
+        "SELECT group_id, othercontrol
+           FROM group_control_map
+                INNER JOIN groups ON group_control_map.group_id = groups.id
+          WHERE isbuggroup = 1 AND isactive = 1 AND product_id = ?
+                AND (othercontrol = $shown OR othercontrol = $default)", 
+        {Columns=>[1,2]}, $self->id) };
+
+    # If the user is a member, then we use the membercontrol value.
+    # Otherwise, we use the othercontrol value.
+    my %all_groups = %member_groups;
+    foreach my $id (keys %other_groups) {
+        if (!defined $all_groups{$id}) {
+            $all_groups{$id} = $other_groups{$id};
+        }
+    }
+
+    my $available = Bugzilla::Group->new_from_list([keys %all_groups]);
+    foreach my $group (@$available) {
+        $group->{is_default} = 1 if $all_groups{$group->id} == $default;
+    }
+
+    $self->{groups_available} = $available;
+    return $self->{groups_available};
+}
+
+sub groups_mandatory {
+    my ($self) = @_;
+    return $self->{groups_mandatory} if $self->{groups_mandatory};
+    my $groups = Bugzilla->user->groups_as_string;
     my $mandatory = CONTROLMAPMANDATORY;
     # For membercontrol we don't check group_id IN, because if membercontrol
     # is Mandatory, the group is Mandatory for everybody, regardless of their
@@ -625,7 +672,20 @@ sub groups_mandatory_for {
                      OR (othercontrol = $mandatory
                          AND group_id NOT IN ($groups)))",
         undef, $self->id);
-    return Bugzilla::Group->new_from_list($ids);
+    $self->{groups_mandatory} = Bugzilla::Group->new_from_list($ids);
+    return $self->{groups_mandatory};
+}
+
+# We don't just check groups_valid, because we want to know specifically
+# if this group is valid for the currently-logged-in user.
+sub group_is_valid {
+    my ($self, $group) = @_;
+    my $group_id = blessed($group) ? $group->id : $group;
+    my $is_mandatory = grep { $group_id == $_->id } 
+                            @{ $self->groups_mandatory };
+    my $is_available = grep { $group_id == $_->id }
+                            @{ $self->groups_available };
+    return ($is_mandatory or $is_available) ? 1 : 0;
 }
 
 sub groups_valid {
@@ -837,21 +897,46 @@ below.
               a Bugzilla::Group object and the properties of group
               relative to the product.
 
-=item C<groups_mandatory_for>
+=item C<groups_available>
+
+Tells you what groups are set to Default or Shown for the 
+currently-logged-in user (taking into account both OtherControl and
+MemberControl). Returns an arrayref of L<Bugzilla::Group> objects with
+an extra hash keys set, C<is_default>, which is true if the group
+is set to Default for the currently-logged-in user.
+
+=item C<groups_mandatory>
+
+Tells you what groups are mandatory for bugs in this product, for the
+currently-logged-in user. Returns an arrayref of C<Bugzilla::Group> objects.
+
+=item C<group_is_valid>
 
 =over
 
 =item B<Description>
 
-Tells you what groups are mandatory for bugs in this product.
+Tells you whether or not the currently-logged-in user can set a group
+on a bug (whether or not they match the MemberControl/OtherControl
+settings for a group in this product). Groups that are C<Mandatory> for
+the currently-loggeed-in user are also acceptable since from Bugzilla's
+perspective, there's no problem with "setting" a Mandatory group on
+a bug. (In fact, the user I<must> set the Mandatory group on the bug.)
 
 =item B<Params>
 
-C<$user> - The user who you want to check.
+=over
 
-=item B<Returns> An arrayref of C<Bugzilla::Group> objects.
+=item C<$group> - Either a numeric group id or a L<Bugzilla::Group> object.
 
 =back
+
+=item B<Returns>
+
+C<1> if the group is valid in this product, C<0> otherwise.
+
+=back
+
 
 =item C<groups_valid>
 

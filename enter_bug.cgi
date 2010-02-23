@@ -555,66 +555,14 @@ else {
     $default{'bug_status'} = ($status[0] ne 'UNCONFIRMED') ? $status[0] : $status[1];
 }
 
-my $grouplist = $dbh->selectall_arrayref(
-                  q{SELECT DISTINCT groups.id, groups.name, groups.description,
-                                    membercontrol, othercontrol
-                      FROM groups
-                 LEFT JOIN group_control_map
-                        ON group_id = id AND product_id = ?
-                     WHERE isbuggroup != 0 AND isactive != 0
-                  ORDER BY description}, undef, $product->id);
-
-my @groups;
-
-foreach my $row (@$grouplist) {
-    my ($id, $groupname, $description, $membercontrol, $othercontrol) = @$row;
-    # Only include groups if the entering user will have an option.
-    next if ((!$membercontrol) 
-               || ($membercontrol == CONTROLMAPNA) 
-               || ($membercontrol == CONTROLMAPMANDATORY)
-               || (($othercontrol != CONTROLMAPSHOWN) 
-                    && ($othercontrol != CONTROLMAPDEFAULT)
-                    && (!Bugzilla->user->in_group($groupname)))
-             );
-    my $check;
-
-    # If this is a cloned bug, 
-    # AND the product for this bug is the same as for the original
-    #   THEN set a group's checkbox if the original also had it on
-    # ELSE IF this is a bookmarked template
-    #   THEN set a group's checkbox if was set in the bookmark
-    # ELSE
-    #   set a groups's checkbox based on the group control map
-    #
-    if ( ($cloned_bug_id) &&
-         ($product->name eq $cloned_bug->product ) ) {
-        foreach my $i (0..(@{$cloned_bug->groups} - 1) ) {
-            if ($cloned_bug->groups->[$i]->{'bit'} == $id) {
-                $check = $cloned_bug->groups->[$i]->{'ison'};
-            }
-        }
-    }
-    elsif(formvalue("maketemplate") ne "") {
-        $check = formvalue("bit-$id", 0);
-    }
-    else {
-        # Checkbox is checked by default if $control is a default state.
-        $check = (($membercontrol == CONTROLMAPDEFAULT)
-                 || (($othercontrol == CONTROLMAPDEFAULT)
-                      && (!Bugzilla->user->in_group($groupname))));
-    }
-
-    my $group = 
-    {
-        'bit' => $id , 
-        'checked' => $check , 
-        'description' => $description 
-    };
-
-    push @groups, $group;        
+my @groups = $cgi->param('groups');
+if ($cloned_bug) {
+    my @clone_groups = map { $_->name } @{ $cloned_bug->groups_in };
+    # It doesn't matter if there are duplicate names, since all we check
+    # for in the template is whether or not the group is set.
+    push(@groups, @clone_groups);
 }
-
-$vars->{'group'} = \@groups;
+$default{'groups'} = \@groups;
 
 Bugzilla::Hook::process('enter_bug_entrydefaultvars', { vars => $vars });
 

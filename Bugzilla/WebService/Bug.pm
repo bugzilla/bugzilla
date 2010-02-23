@@ -1802,6 +1802,15 @@ don't want it to be assigned to the component owner.
 
 =item C<cc> (array) - An array of usernames to CC on this bug.
 
+=item C<groups> (array) - An array of group names to put this
+bug into. You can see valid group names on the Permissions
+tab of the Preferences screen, or, if you are an administrator,
+in the Groups control panel. Note that invalid group names or
+groups that the bug can't be restricted to are silently ignored. If
+you don't specify this argument, then a bug will be added into
+all the groups that are set as being "Default" for this product. (If
+you want to avoid that, you should specify C<groups> as an empty array.)
+
 =item C<qa_contact> (username) - If this installation has QA Contacts
 enabled, you can set the QA Contact here if you don't want to use
 the component's default QA Contact.
@@ -1866,6 +1875,10 @@ in them. The error message will have more details.
 
 =item Before B<3.0.4>, parameters marked as B<Defaulted> were actually
 B<Required>, due to a bug in Bugzilla.
+
+=item The C<groups> argument was added in Bugzilla B<3.8>. Before
+Bugzilla 3.8, bugs were only added into Mandatory groups by this
+method.
 
 =back
 

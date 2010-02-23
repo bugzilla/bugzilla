@@ -497,8 +497,8 @@ sub create {
     # Add the group restrictions
     my $sth_group = $dbh->prepare(
         'INSERT INTO bug_group_map (bug_id, group_id) VALUES (?, ?)');
-    foreach my $group_id (@$groups) {
-        $sth_group->execute($bug->bug_id, $group_id);
+    foreach my $group (@$groups) {
+        $sth_group->execute($bug->bug_id, $group->id);
     }
 
     $dbh->do('UPDATE bugs SET creation_ts = ? WHERE bug_id = ?', undef,
@@ -597,8 +597,7 @@ sub run_create_validators {
 
     $params->{keywords} = $class->_check_keywords($params->{keywords}, $product);
 
-    $params->{groups} = $class->_check_groups($product,
-        $params->{groups});
+    $params->{groups} = $class->_check_groups($params->{groups}, $product);
 
     my $component = $class->_check_component($params->{component}, $product);
     $params->{component_id} = $component->id;
@@ -1388,48 +1387,38 @@ sub _check_estimated_time {
 }
 
 sub _check_groups {
-    my ($invocant, $product, $group_ids) = @_;
-
-    my $user = Bugzilla->user;
+    my ($invocant, $group_names, $product) = @_;
 
     my %add_groups;
-    my $controls = $product->group_controls;
 
-    foreach my $id (@$group_ids) {
-        my $group = new Bugzilla::Group($id)
-            || ThrowUserError("invalid_group_ID");
-
-        # This can only happen if somebody hacked the enter_bug form.
-        ThrowCodeError("inactive_group", { name => $group->name })
-            unless $group->is_active;
-
-        my $membercontrol = $controls->{$id}
-                            && $controls->{$id}->{membercontrol};
-        my $othercontrol  = $controls->{$id} 
-                            && $controls->{$id}->{othercontrol};
-        
-        my $permit = ($membercontrol && $user->in_group($group->name))
-                     || $othercontrol;
-
-        $add_groups{$id} = 1 if $permit;
+    # In email or WebServices, when the "groups" item actually 
+    # isn't specified, then just add the default groups.
+    if (!defined $group_names) {
+        my $available = $product->groups_available;
+        foreach my $group (@$available) {
+            $add_groups{$group->id} = $group if $group->{is_default};
+        }
     }
+    else {
+        # Allow a comma-separated list, for email_in.pl.
+        $group_names = [map { trim($_) } split(',', $group_names)]
+            if !ref $group_names;
 
-    foreach my $id (keys %$controls) {
-        next unless $controls->{$id}->{'group'}->is_active;
-        my $membercontrol = $controls->{$id}->{membercontrol} || 0;
-        my $othercontrol  = $controls->{$id}->{othercontrol}  || 0;
-
-        # Add groups required
-        if ($membercontrol == CONTROLMAPMANDATORY
-            || ($othercontrol == CONTROLMAPMANDATORY
-                && !$user->in_group_id($id))) 
-        {
-            # User had no option, bug needs to be in this group.
-            $add_groups{$id} = 1;
+        # First check all the groups they chose to set.
+        foreach my $name (@$group_names) {
+            # We don't want to expose the existence or non-existence of groups,
+            # so instead of doing check(), we just do "next" on an invalid
+            # group.
+            my $group = new Bugzilla::Group({ name => $name }) or next;
+            next if !$product->group_is_valid($group);
+            $add_groups{$group->id} = $group;
         }
     }
 
-    my @add_groups = keys %add_groups;
+    # Now enforce mandatory groups.
+    $add_groups{$_->id} = $_ foreach @{ $product->groups_mandatory };
+
+    my @add_groups = values %add_groups;
     return \@add_groups;
 }
 
@@ -2099,7 +2088,7 @@ sub set_product {
         }
     
         # Make sure the bug is in all the mandatory groups for the new product.
-        foreach my $group (@{$product->groups_mandatory_for(Bugzilla->user)}) {
+        foreach my $group (@{$product->groups_mandatory}) {
             $self->add_group($group);
         }
     }

@@ -37,7 +37,7 @@
   <li><a href="#v34_previous">Release Notes for Previous Versions</a></li>
 </ul>
 
-<h2><a name="v34_introduction"></a>Introduction</h2>
+<h2 id="v34_introduction">Introduction</h2>
 
 <p>This is [% terms.Bugzilla %] 3.4! [% terms.Bugzilla %] 3.4 brings a lot
   of great enhancements for [% terms.Bugzilla %] over previous versions,
@@ -57,7 +57,7 @@
   <a href="http://www.sjsufoundation.org/">San Jose State University
   Foundation</a>.</p>
 
-<h2><a name="v34_point"></a>Updates In This 3.4.x Release</h2>
+<h2 id="v34_point">Updates In This 3.4.x Release</h2>
 
 <h3>3.4.5</h3>
 
@@ -194,7 +194,7 @@
   <a href="http://www.bugzilla.org/security/3.4/">Security Advisory</a>
   for details.</p>
 
-<h2><a name="v34_req">Minimum Requirements</a></h2>
+<h2 id="v34_req">Minimum Requirements</h2>
 
 <p>Any requirements that are new since 3.2.3 will look like
   <span class="req_new">this</span>.</p>
@@ -208,7 +208,7 @@
   <li><a href="#v34_req_optional_mod">Optional Perl Modules</a></li>
 </ul>
 
-<h3><a name="v34_req_perl"></a>Perl</h3>
+<h3 id="v34_req_perl">Perl</h3>
 
 <p>Perl v5.8.1</p>
 
@@ -218,14 +218,14 @@
 
 [% INCLUDE db_req db='oracle' %]
 
-<h3><a name="v34_req_modules"></a>Required Perl Modules</h3>
+<h3 id="v34_req_modules">Required Perl Modules</h3>
 
 [% INCLUDE req_table reqs = REQUIRED_MODULES
                      new = ['URI', 'DateTime', 'DateTime-TimeZone', 
                             'Digest-SHA']
                      updated = ['Template-Toolkit'] %]
 
-<h3><a name="v34_req_optional_mod"></a>Optional Perl Modules</h3>
+<h3 id="v34_req_optional_mod">Optional Perl Modules</h3>
 
 <p>The following perl modules, if installed, enable various
   features of [% terms.Bugzilla %]:</p>
@@ -235,7 +235,7 @@
                      updated = []
                      include_feature = 1 %]
 
-<h2><a name="v34_feat"></a>New Features and Improvements</h2>
+<h2 id="v34_feat">New Features and Improvements</h2>
 
 <ul>
   <li><a href="#v34_feat_enter">Simple [% terms.Bug %] Filing</a></li>
@@ -258,7 +258,7 @@
   <li><a href="#v34_feat_other">Other Enhancements and Changes</a></li>
 </ul>
 
-<h3><a name="v34_feat_enter">Simple [% terms.Bug %] Filing</a></h3>
+<h3 id="v34_feat_enter">Simple [% terms.Bug %] Filing</h3>
 
 <p>When entering a new [% terms.bug %], the vast majority of fields are
   now hidden by default, which enormously simplifies the bug-filing form. 
@@ -267,15 +267,14 @@
   or "Simple" version of the [% terms.bug %]-entry form, and will display the
   same version to you again next time you file [% terms.abug %].</p>
 
-<h3><a name="v34_feat_index">New Home Page</a></h3>
+<h3 id="v34_feat_index">New Home Page</h3>
 
 <p>[% terms.Bugzilla %]'s front page has been redesigned to be better at
   guiding new users into the activities that they most commonly want to
   do. Further enhancements to the home page are coming in future versions
   of [% terms.Bugzilla %].</p>
 
-<h3><a name="v34_feat_spam"></a>Email Addresses Hidden From Logged-Out 
-    Users</h3>
+<h3 id="v34_feat_spam">Email Addresses Hidden From Logged-Out Users</h3>
 
 <p>To help prevent spam to [% terms.Bugzilla %] users, all email addresses
   stored in [% terms.Bugzilla %] are now displayed only if you are logged in.
@@ -288,12 +287,12 @@
   The WebService still returns full email addresses, even if you are logged
   out.</p>
 
-<h3><a name="v34_feat_urls"></a>Shorter Search URLs</h3>
+<h3 id="v34_feat_urls">Shorter Search URLs</h3>
 
 <p>When submitting a search, all the unused fields are now stripped from
   the URL, so search URLs are much more meaningful, and much shorter.</p>
 
-<h3><a name="v34_feat_async">Asynchronous Email Sending</a></h3>
+<h3 id="v34_feat_async">Asynchronous Email Sending</h3>
 
 <p>The largest performance problem in former versions of [% terms.Bugzilla %]
   was that when updating [% terms.bugs %], email would be sent immediately
@@ -312,16 +311,15 @@
   should result in a very large speed-up for updating [% terms.bugs %],
   particularly on larger installations.</p>
 
-<h3><a name="v34_feat_tz">Dates and Times Displayed In User's Time
-    Zone</a></h3>
+<h3 id="v34_feat_tz">Dates and Times Displayed In User's Time Zone</h3>
 
 <p>Users can now select what time zone they are in and [% terms.Bugzilla %]
   will adjust displayed times to be correct for their time zone. However,
   times the user inputs are unfortunately still in [% terms.Bugzilla %]'s
   time zone.</p>
 
-<h3><a name="v34_feat_vis">Custom Fields That Only Appear When
-    Another Field Has a Particular Value</a></h3>
+<h3 id="v34_feat_vis">Custom Fields That Only Appear When Another Field
+    Has a Particular Value</h3>
 
 <p>When creating a new custom field (or updating the definition of
   an existing custom field), you can now say that "this field only
@@ -335,8 +333,8 @@
 
 <p>This is a good way of making Product-specific fields.</p>
 
-<h3><a name="v34_feat_vals">Custom Fields Whose List of Values
-    Change Depending on the Value of Another Field</a></h3>
+<h3 id="v34_feat_vals">Custom Fields Whose List of Values Change
+    Depending on the Value of Another Field</h3>
 
 <p>When creating a drop-down or multiple-selection custom field, you can
   now specify that another field "controls the values" of this field.
@@ -355,14 +353,13 @@
   the <em>user interface</em>. [% terms.Bugzilla %] itself will still accept
   any combination of values as valid, in the backend.</p>
 
-<h3><a name="v34_feat_bugid">New Custom Field Type: [% terms.Bug %]
-  ID</a></h3>
+<h3 id="v34_feat_bugid">New Custom Field Type: [% terms.Bug %] ID</h3>
 
 <p>You can now create a custom field that holds a reference to a single
   valid [% terms.bug %] ID. In the future this will be enhanced to allow
   [%+ terms.bugs %] to refer to each other via this field.</p>
 
-<h3><a name="v34_feat_see">"See Also" Field</a></h3>
+<h3 id="v34_feat_see">"See Also" Field</h3>
 
 <p>We have added a new standard field called "See Also" to 
   [%+ terms.Bugzilla %]. In this field, you can put URLs to multiple 
@@ -380,19 +377,19 @@
   the <a href="editparams.cgi?section=bugfields#use_see_also">use_see_also
   parameter</a>.</p>
 
-<h3><a name="v34_feat_cols">Re-order Columns in Search Results</a></h3>
+<h3 id="v34_feat_cols">Re-order Columns in Search Results</h3>
 
 <p>There is a new interface for choosing what columns appear in search
   results, which allows you to change the order in which columns appear
   from left to right when viewing the [% terms.bug %] list.</p>
 
-<h3><a name="v34_feat_desc">Search Descriptions</a></h3>
+<h3 id="v34_feat_desc">Search Descriptions</h3>
 
 <p>When displaying search results, [% terms.Bugzilla %] will now show
   a brief description of what you searched for, at the top of the
   [%+ terms.bug %] list.</p>
 
-<h3><a name="v34_feat_other"></a>Other Enhancements and Changes</h3>
+<h3 id="v34_feat_other">Other Enhancements and Changes</h3>
 
 <h4>Enhancements for Users</h4>
 
@@ -515,7 +512,7 @@
     and dateTimes, and translates them to <kbd>undef</kbd>.</li>
 </ul>
 
-<h2><a name="v34_issues">Outstanding Issues</a></h2>
+<h2 id="v34_issues">Outstanding Issues</h2>
 
 <ul>
   <li><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=423439">
@@ -544,8 +541,7 @@
     working on Windows machines.</li>
 </ul>
 
-<h2><a name="v34_upgrading">Notes On Upgrading From a Previous 
-  Version</a></h2>
+<h2 id="v34_upgrading">Notes On Upgrading From a Previous Version</h2>
 
 <p>When upgrading to 3.4, <kbd>checksetup.pl</kbd> will create foreign keys
   for many columns in the database. Before doing this, it will check the
@@ -565,8 +561,7 @@
 <p>Remember that you should always back up your database before doing
   an upgrade.</p>
 
-<h2><a name="v34_code_changes"></a>Code Changes Which May Affect
-  Customizations</h2>
+<h2 id="v34_code_changes">Code Changes Which May Affect Customizations</h2>
 
 <ul>
   <li><kbd>checksetup.pl</kbd> now re-writes the <kbd>localconfig</kbd>
@@ -616,7 +611,7 @@
 
 
 
-<h1><a name="v34_previous"></a>[% terms.Bugzilla %] 3.2 Release Notes</h1>
+<h1 id="v34_previous">[% terms.Bugzilla %] 3.2 Release Notes</h1>
 
 <h2>Table of Contents</h2>
 
@@ -633,7 +628,7 @@
   <li><a href="#v32_previous">Release Notes for Previous Versions</a></li>
 </ul>
 
-<h2><a name="v32_introduction"></a>Introduction</h2>
+<h2 id="v32_introduction">Introduction</h2>
 
 <p>Welcome to [% terms.Bugzilla %] 3.2! This is our first major feature
   release since [% terms.Bugzilla %] 3.0, and it brings a lot of great
@@ -646,7 +641,7 @@
   and this one, <strong>particularly the "Notes For Upgraders" section of each
   version's release notes</strong>.</p>
 
-<h2><a name="v32_point">Updates in this 3.2.x Release</a></h2>
+<h2 id="v32_point">Updates in this 3.2.x Release</h2>
 
 <p>This section describes what's changed in the most recent b<!-- -->ug-fix
   releases of [% terms.Bugzilla %] after 3.2. We only list the
@@ -725,7 +720,7 @@
     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=469136">[% terms.Bug %] 469136</a>)</li>
 </ul>
 
-<h2><a name="v32_security">Security Fixes In This 3.2.x Release</a></h2>
+<h2 id="v32_security">Security Fixes In This 3.2.x Release</h2>
 
 <h3>3.2.3</h3>
 
@@ -748,7 +743,7 @@
   <a href="http://www.bugzilla.org/security/2.22.6/">Security Advisory</a>
   for this release.</p>
 
-<h2><a name="v32_req"></a>Minimum Requirements</h2>
+<h2 id="v32_req">Minimum Requirements</h2>
 
 <p>Any requirements that are new since 3.0.5 will look like
   <span class="req_new">this</span>.</p>
@@ -763,11 +758,11 @@
     Modules</a></li>
 </ul>
 
-<h3><a name="v32_req_perl"></a>Perl</h3>
+<h3 id="v32_req_perl">Perl</h3>
 
 <p>Perl <span class="req_new">v<strong>5.8.1</strong></span></p>
 
-<h3><a name="v32_req_mysql"></a>For MySQL Users</h3>
+<h3 id="v32_req_mysql">For MySQL Users</h3>
 
 <ul>
   <li>MySQL v4.1.2</li>
@@ -775,22 +770,22 @@
       DBD::mysql <span class="req_new">v4.00</span></li>
 </ul>
 
-<h3><a name="v32_req_pg"></a>For PostgreSQL Users</h3>
+<h3 id="v32_req_pg">For PostgreSQL Users</h3>
 
 <ul>
   <li>PostgreSQL v8.00.0000</li>
   <li><strong>perl module:</strong> DBD::Pg v1.45</li>
 </ul>
 
-<h3><a name="v32_req_oracle"></a>Email Addresses Hidden From Logged-Out 
-    UsersFor Oracle Users</h3>
+<h3 id="v32_req_oracle">Email Addresses Hidden From Logged-Out Users
+    For Oracle Users</h3>
 
 <ul>
   <li>Oracle v10.02.0</li>
   <li><strong>perl module:</strong> DBD::Oracle v1.19</li>
 </ul>
 
-<h3><a name="v32_req_modules"></a>Required Perl Modules</h3>
+<h3 id="v32_req_modules">Required Perl Modules</h3>
 
 <table class="req_table" border="0" cellpadding="0" cellspacing="0">
 <tr> <th>Module</th>       <th>Version</th> </tr>
@@ -812,7 +807,7 @@
 </tr>
 </table>
 
-<h3><a name="v32_req_optional_mod"></a>Optional Perl Modules</h3>
+<h3 id="v32_req_optional_mod">Optional Perl Modules</h3>
 
 <p>The following perl modules, if installed, enable various
   features of [% terms.Bugzilla %]:</p>
@@ -920,7 +915,7 @@
 </tr>
 </table>
 
-<h2><a name="v32_feat"></a>New Features and Improvements</h2>
+<h2 id="v32_feat">New Features and Improvements</h2>
 
 <ul>
   <li><a href="#v32_feat_ui">Major UI Improvements</a></li>
@@ -934,7 +929,7 @@
   <li><a href="#v32_feat_other">Other Enhancements and Changes</a></li>
 </ul>
 
-<h3><a name="v32_feat_ui"></a>Major UI Improvements</h3>
+<h3 id="v32_feat_ui">Major UI Improvements</h3>
 
 <p>[% terms.Bugzilla %] 3.2 has had some UI assistance from the NASA
   Human-Computer Interaction department and the new 
@@ -944,7 +939,7 @@
 <p>In particular, you will notice a massively redesigned [% terms.bug %]
   editing form, in addition to our <a href="#v32_feat_skin">new skin</a>.</p>
 
-<h3><a name="v32_feat_skin"></a>New Default Skin: Dusk</h3>
+<h3 id="v32_feat_skin">New Default Skin: Dusk</h3>
 
 <p>[% terms.Bugzilla %] 3.2 now ships with a skin called "Dusk" that is
   a bit more colorful than old default "Classic" skin.</p>
@@ -959,14 +954,14 @@
   <a href="http://wiki.mozilla.org/Bugzilla:Addons#Skins">Addons page</a>
   for additional skins, or try making your own!</p>
 
-<h3><a name="v32_feat_status"></a>Custom Status Workflow</h3>
+<h3 id="v32_feat_status">Custom Status Workflow</h3>
 
 <p>You can now customize the list of statuses in [% terms.Bugzilla %],
   and transitions between them.</p>
 
 <p>You can also specify that a comment must be made on certain transitions.</p>
 
-<h3><a name="v32_feat_fields"></a>New Custom Field Types</h3>
+<h3 id="v32_feat_fields">New Custom Field Types</h3>
 
 <p>[% terms.Bugzilla %] 3.2 has support for three new types of
   custom fields:</p>
@@ -979,7 +974,7 @@
     calendar popup to make picking a date easier.</li>
 </ul>
 
-<h3><a name="v32_feat_install"></a>Easier Installation</h3>
+<h3 id="v32_feat_install">Easier Installation</h3>
 
 <p>[% terms.Bugzilla %] now comes with a script called 
   <kbd>install-module.pl</kbd> that can automatically download
@@ -992,7 +987,7 @@
   <kbd>install-module.pl</kbd>, or you can read its
   <a href="[% docs_urlbase FILTER html %]api/install-module.html">documentation</a>.</p>
 
-<h3><a name="v32_feat_oracle"></a>Experimental Oracle Support</h3>
+<h3 id="v32_feat_oracle">Experimental Oracle Support</h3>
 
 <p>[% terms.Bugzilla %] 3.2 contains experimental support for using 
   Oracle as its database. Some features of [% terms.Bugzilla %] are known 
@@ -1008,7 +1003,7 @@
   development contributions to [% terms.Bugzilla %] which allowed this to 
   happen!</p>
 
-<h3><a name="v32_feat_utf8"></a>Improved UTF-8 Support</h3>
+<h3 id="v32_feat_utf8">Improved UTF-8 Support</h3>
 
 <p>[% terms.Bugzilla %] 3.2 now has advanced UTF-8 support in its code,
   including correct handling for truncating and wrapping multi-byte
@@ -1017,14 +1012,14 @@
   by users in every country with little (or at least much less)
   customization.</p>
 
-<h3><a name="v32_feat_grcons"></a>Group Icons</h3>
+<h3 id="v32_feat_grcons">Group Icons</h3>
 
 <p>Administrators can now specify that users who are in certain groups
   should have an icon appear next to their name whenever they comment.
   This is particularly useful for distinguishing developers from 
   [%+ terms.bug %] reporters.</p>
 
-<h3><a name="v32_feat_other"></a>Other Enhancements and Changes</h3>
+<h3 id="v32_feat_other">Other Enhancements and Changes</h3>
 
 <p>These are either minor enhancements, or enhancements that have
   very short descriptions. Some of these are very useful, though!</p>
@@ -1201,7 +1196,7 @@
     be localized. See <kbd>template/en/default/setup/strings.txt.pl</kbd>.
 </ul>
 
-<h2><a name="v32_issues"></a>Outstanding Issues</h2>
+<h2 id="v32_issues">Outstanding Issues</h2>
 
 <ul>
   <li><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=423439">
@@ -1230,9 +1225,9 @@
     working on Windows machines.</li>
 </ul>
 
-<h2><a name="v32_upgrading"></a>How to Upgrade From An Older Version</h2>
+<h2 id="v32_upgrading">How to Upgrade From An Older Version</h2>
 
-<h3><a name="v32_upgrading_notes"></a>Notes For Upgraders</h3>
+<h3 id="v32_upgrading_notes">Notes For Upgraders</h3>
 
 <ul>
   <li>If you upgrade by CVS, the <kbd>extensions</kbd> and 
@@ -1263,8 +1258,7 @@
   <a href="[% docs_urlbase FILTER html %]upgrade.html">Upgrading 
   documentation</a> for instructions on how to upgrade.</p>
 
-<h2><a name="v32_code_changes"></a>Code Changes Which May Affect 
-  Customizations</h2>
+<h2 id="v32_code_changes">Code Changes Which May Affect Customizations</h2>
 
 <ul>
   <li><a href="#v32_code_hooks">More Hooks!</a></li>
@@ -1273,19 +1267,19 @@
   <li><a href="#v32_code_other">Other Changes</a></li>
 </ul>
 
-<h3><a name="v32_code_hooks"></a>More Hooks!</h3>
+<h3 id="v32_code_hooks">More Hooks!</h3>
 
 <p>There are more code hooks in 3.2 than there were in 3.0. See the
   documentation of <a href="[% docs_urlbase FILTER html %]api/Bugzilla/Hook.html">Bugzilla::Hook</a>
   for more details.</p>
 
-<h3><a name="v32_code_search"></a>Search.pm Rearchitecture</h3>
+<h3 id="v32_code_search">Search.pm Rearchitecture</h3>
 
 <p><kbd>Bugzilla/Search.pm</kbd> has been heavily modified, to be much
   easier to read and use. It contains mostly the same code as it did in
   3.0, but it has been moved around and reorganized significantly.</p>
 
-<h3><a name="v32_code_lib"></a>lib Directory</h3>
+<h3 id="v32_code_lib">lib Directory</h3>
 
 <p>As part of implementing <a href="#v32_feat_install">install-module.pl</a>,
   [%+ terms.Bugzilla %] was given a local <kbd>lib</kbd> directory which
@@ -1294,7 +1288,7 @@
 <p>This means that all [% terms.Bugzilla %] scripts now start with
   <code>use lib qw(. lib);</code> as one of the first lines.</p>
 
-<h3><a name="v32_code_other"></a>Other Changes</h3>
+<h3 id="v32_code_other">Other Changes</h3>
 
 <ul>
   <li>You should now be using <code>get_status('NEW')</code> instead of
@@ -1303,7 +1297,7 @@
     template file has been removed.</li>
 </ul>
 
-<h1><a name="v32_previous"></a>[% terms.Bugzilla %] 3.0.x Release Notes</h1>
+<h1 id="v32_previous">[% terms.Bugzilla %] 3.0.x Release Notes</h1>
 
 <h2>Table of Contents</h2>
 
@@ -1320,7 +1314,7 @@
   <li><a href="#v30_previous">Release Notes for Previous Versions</a></li>
 </ul>
 
-<h2><a name="v30_introduction"></a>Introduction</h2>
+<h2 id="v30_introduction">Introduction</h2>
 
 <p>Welcome to [% terms.Bugzilla %] 3.0! It's been over eight years since
   we released [% terms.Bugzilla %] 2.0, and everything has changed since
@@ -1334,7 +1328,7 @@
   <a href="#v30_previous">previous versions</a> in between your version 
   and this one.</p>
 
-<h2><a name="v30_point"></a>Updates in this 3.0.x Release</h2>
+<h2 id="v30_point">Updates in this 3.0.x Release</h2>
 
 <p>This section describes what's changed in the most recent b<!-- -->ug-fix
   releases of [% terms.Bugzilla %] after 3.0. We only list the
@@ -1552,7 +1546,7 @@
     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=335354">[% terms.Bug %] 335354</a>)</li>
 </ul>
 
-<h2><a name="v30_req"></a>Minimum Requirements</h2>
+<h2 id="v30_req">Minimum Requirements</h2>
 
 <p>Any requirements that are new since 2.22 will look like
   <span class="req_new">this</span>.</p>
@@ -1567,7 +1561,7 @@
 </ul>
 
 
-<h3><a name="v30_req_perl"></a>Perl</h3>
+<h3 id="v30_req_perl">Perl</h3>
 
 <ul>
   <li>Perl <span class="req_new">v<strong>5.8.0</strong></span> (non-Windows 
@@ -1575,21 +1569,21 @@
   <li>Perl v<strong>5.8.1</strong> (Windows platforms)</li>
 </ul>
 
-<h3><a name="v30_req_mysql"></a>For MySQL Users</h3>
+<h3 id="v30_req_mysql">For MySQL Users</h3>
 
 <ul>
   <li>MySQL <span class="req_new">v4.1.2</span></li>
   <li><strong>perl module:</strong> DBD::mysql v2.9003</li>
 </ul>
 
-<h3><a name="v30_req_pg"></a>For PostgreSQL Users</h3>
+<h3 id="v30_req_pg">For PostgreSQL Users</h3>
 
 <ul>
   <li>PostgreSQL v8.00.0000</li>
   <li><strong>perl module:</strong> DBD::Pg v1.45</li>
 </ul>
 
-<h3><a name="v30_req_modules"></a>Required Perl Modules</h3>
+<h3 id="v30_req_modules">Required Perl Modules</h3>
 
 <table class="req_table" border="0" cellspacing="0" cellpadding="0">
   <tr>
@@ -1624,7 +1618,7 @@
   </tr>
 </table>
 
-<h3><a name="v30_req_optional_mod"></a>Optional Perl Modules</h3>
+<h3 id="v30_req_optional_mod">Optional Perl Modules</h3>
 
 <p>The following perl modules, if installed, enable various
   features of [% terms.Bugzilla %]:</p>
@@ -1726,7 +1720,7 @@
   </tr>
 </table>
 
-<h2><a name="v30_feat"></a>New Features and Improvements</h2>
+<h2 id="v30_feat">New Features and Improvements</h2>
 
 <ul>
   <li><a href="#v30_feat_cf">Custom Fields</a></li>
@@ -1754,7 +1748,7 @@
   <li><a href="#v30_feat_other">Other Enhancements and Changes</a></li>
 </ul>
 
-<h3><a name="v30_feat_cf"></a>Custom Fields</h3>
+<h3 id="v30_feat_cf">Custom Fields</h3>
 
 <p>[% terms.Bugzilla %] now includes very basic support for custom fields.</p>
 
@@ -1768,7 +1762,7 @@
   after a few weeks of using [% terms.Bugzilla %], only then should you
   start your custom fields.</p>
 
-<h3><a name="v30_feat_mp"></a>mod_perl Support</h3>
+<h3 id="v30_feat_mp">mod_perl Support</h3>
 
 <p>[% terms.Bugzilla %] 3.0 supports mod_perl, which allows for extremely
   enhanced page-load performance. mod_perl trades memory usage for performance,
@@ -1782,7 +1776,7 @@
   Apache, [% terms.Bugzilla %] still runs perfectly as a normal CGI
   application, as well.</p>
 
-<h3><a name="v30_feat_sq"></a>Shared Saved Searches</h3>
+<h3 id="v30_feat_sq">Shared Saved Searches</h3>
 
 <p>Users can now choose to &quot;share&quot; their saved searches
   with a certain group. That group will then be able to 
@@ -1802,8 +1796,7 @@
 <p>Users can control their shared and subscribed queries from
   the &quot;Preferences&quot; screen.</p>
 
-<h3><a name="v30_feat_afn"></a>Attachments and Flags on New 
-  [%+ terms.Bugs %]</h3>
+<h3 id="v30_feat_afn">Attachments and Flags on New [% terms.Bugs %]</h3>
 
 <p>You can now add an attachment while you are filing a new 
   [%+ terms.bug %].</p>
@@ -1811,7 +1804,7 @@
 <p>You can also set flags on the [% terms.bug %] and on attachments, while
   filing a new [% terms.bug %].</p>
 
-<h3><a name="v30_feat_cr"></a>Custom Resolutions</h3>
+<h3 id="v30_feat_cr">Custom Resolutions</h3>
 
 <p>You can now customize the list of resolutions available
   in [% terms.Bugzilla %], including renaming the default resolutions.</p>
@@ -1820,7 +1813,7 @@
   and <code>MOVED</code> have a special meaning to [% terms.Bugzilla %],
   though, and cannot be renamed or deleted.</p>
 
-<h3><a name="v30_feat_ppp"></a>Per-Product Permissions</h3>
+<h3 id="v30_feat_ppp">Per-Product Permissions</h3>
 
 <p>You can now grant users <kbd>editbugs</kbd> and <kbd>canconfirm</kbd>
   for only certain products. You can also grant users <kbd>editcomponents</kbd>
@@ -1828,7 +1821,7 @@
   including adding/removing components and other product-specific
   controls.</p>
 
-<h3><a name="v30_feat_ui"></a>User Interface Improvements</h3>
+<h3 id="v30_feat_ui">User Interface Improvements</h3>
 
 <p>There has been some work on the user interface for [% terms.Bugzilla %] 3.0,
   including:</p>
@@ -1842,7 +1835,7 @@
     page) has been changed, and the attachment table has been redesigned.</li>
 </ul>
 
-<h3><a name="v30_feat_xml"></a>XML-RPC Interface</h3>
+<h3 id="v30_feat_xml">XML-RPC Interface</h3>
 
 <p>[% terms.Bugzilla %] now has a Web Services interface using the XML-RPC
   protocol. It can be accessed by external applications by going
@@ -1852,7 +1845,7 @@
   <a href="[% docs_urlbase FILTER html %]api/">[% terms.Bugzilla %] 
   API Docs</a>, in the various <kbd>Bugzilla::WebService</kbd> modules.</p>
 
-<h3><a name="v30_feat_skin"></a>Skins</h3>
+<h3 id="v30_feat_skin">Skins</h3>
 
 <p>[% terms.Bugzilla %] can have multiple &quot;skins&quot; installed,
   and users can pick between them. To write a skin, you just have to
@@ -1863,14 +1856,13 @@
   [%+ terms.Bugzilla %]. If you write an alternate skin, please
   let us know!</p>
 
-<h3><a name="v30_feat_sbu"></a>Unchangeable Fields Appear
-  Unchangeable</h3>
+<h3 id="v30_feat_sbu">Unchangeable Fields Appear Unchangeable</h3>
 
 <p>As long as you are logged in, when viewing [% terms.abug %], if you 
   cannot change a field, it will not look like you can change it. That 
   is, the value will just appear as plain text.</p>
 
-<h3><a name="v30_feat_et"></a>All Emails in Templates</h3>
+<h3 id="v30_feat_et">All Emails in Templates</h3>
 
 <p>All outbound emails are now controlled by the templating system.
   What used to be the <code>passwordmail</code>, <code>whinemail</code>,
@@ -1885,7 +1877,7 @@
   who shows up in the <code>From</code> field on all emails that
   [%+ terms.Bugzilla %] sends.</p>
 
-<h3><a name="v30_feat_df"></a>No More Double-Filed [% terms.Bugs %]</h3>
+<h3 id="v30_feat_df">No More Double-Filed [% terms.Bugs %]</h3>
 
 <p>Users of [% terms.Bugzilla %] will sometimes accidentally submit 
   [%+ terms.abug %] twice, either by going back in their web browser, 
@@ -1898,12 +1890,12 @@
   you about what you're doing, before it actually submits the duplicate
   [%+ terms.bug %].</p>
 
-<h3><a name="v30_feat_cc"></a>Default CC List for Components</h3>
+<h3 id="v30_feat_cc">Default CC List for Components</h3>
 
 <p>You can specify a list of users who will <em>always</em> be added to
   the CC list of new [% terms.bugs %] in a component.</p>
 
-<h3><a name="v30_feat_emi"></a>File/Modify [% terms.Bugs %] By Email</h3>
+<h3 id="v30_feat_emi">File/Modify [% terms.Bugs %] By Email</h3>
 
 <p>You can now file or modify [% terms.bugs %] via email. Previous versions
   of [% terms.Bugzilla %] included this feature only as an
@@ -1913,8 +1905,7 @@
 <p>For more details see the <a href="[% docs_urlbase FILTER html %]api/email_in.html">documentation
   for email_in.pl</a>.</p>
 
-<h3><a name="v30_feat_gw"></a>Users Who Get All [% terms.Bug %] 
-  Notifications</h3>
+<h3 id="v30_feat_gw">Users Who Get All [% terms.Bug %] Notifications</h3>
 
 <p>There is now a parameter called <kbd>globalwatchers</kbd>. This
   is a comma-separated list of [% terms.Bugzilla %] users who will
@@ -1923,7 +1914,7 @@
 <p>Group controls still apply, though, so users who can't see [% terms.abug %]
   still won't get notifications about that [% terms.bug %].</p>
 
-<h3><a name="v30_feat_utf8"></a>Improved UTF-8 Support</h3>
+<h3 id="v30_feat_utf8">Improved UTF-8 Support</h3>
 
 <p>[% terms.Bugzilla %] users running MySQL should now have excellent
   UTF-8 support if they turn on the <kbd>utf8</kbd> parameter. (New
@@ -1931,7 +1922,7 @@
   now correctly supports searching and sorting in non-English languages,
   including multi-bytes languages such as Chinese.</p>
 
-<h3><a name="v30_feat_upda"></a>Automatic Update Notification</h3>
+<h3 id="v30_feat_upda">Automatic Update Notification</h3>
 
 <p>If you belong to the <kbd>admin</kbd> group, you will be notified
   when you log in if there is a new release of [% terms.Bugzilla %]
@@ -1944,20 +1935,20 @@
   through a proxy to access the web, you may also have to set the
   <kbd>proxy_url</kbd> parameter.</p>
 
-<h3><a name="v30_feat_welc"></a>Welcome Page for New Installs</h3>
+<h3 id="v30_feat_welc">Welcome Page for New Installs</h3>
 
 <p>When you log in for the first time on a brand-new [% terms.Bugzilla %]
   installation, you will be presented with a page that describes
   where you should go from here, and what parameters you should set.</p>
 
-<h3><a name="v30_feat_qs"></a>QuickSearch Plugin for IE7 and Firefox 2</h3>
+<h3 id="v30_feat_qs">QuickSearch Plugin for IE7 and Firefox 2</h3>
 
 <p>Firefox 2 users and Internet Explorer 7 users will be presented
   with the option to add [% terms.Bugzilla %] to their search bar.
   This uses the 
   <a href="page.cgi?id=quicksearch.html">QuickSearch syntax</a>.</p>
 
-<h3><a name="v30_feat_other"></a>Other Enhancements and Changes</h3>
+<h3 id="v30_feat_other">Other Enhancements and Changes</h3>
 
 <p>These are either minor enhancements, or enhancements that have
   very short descriptions. Some of these are very useful, though!</p>
@@ -2065,7 +2056,7 @@
     installation.</li>
 </ul>
 
-<h2><a name="v30_issues"></a>Outstanding Issues</h2>
+<h2 id="v30_issues">Outstanding Issues</h2>
 
 <ul>
   <li><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=69621">
@@ -2105,7 +2096,7 @@
     Search yourself.</li>
 </ul>
 
-<h2><a name="v30_security"></a>Security Updates in This Release</h2>
+<h2 id="v30_security">Security Updates in This Release</h2>
 
 <h3>3.0.6</h3>
 
@@ -2144,9 +2135,9 @@
   uncommonly-used template. For details, see the 
   <a href="http://www.bugzilla.org/security/2.20.4/">Security Advisory</a>.</p>
 
-<h2><a name="v30_upgrading"></a>How to Upgrade From An Older Version</h2>
+<h2 id="v30_upgrading">How to Upgrade From An Older Version</h2>
 
-<h3><a name="v30_upgrading_notes"></a>Notes For Upgraders</h3>
+<h3 id="v30_upgrading_notes">Notes For Upgraders</h3>
 
 <ul>
   <li>If you upgrade by CVS, there are several .cvsignore files
@@ -2179,8 +2170,7 @@
   <a href="[% docs_urlbase FILTER html %]upgrade.html">Upgrading 
   documentation</a> for instructions on how to upgrade.</p>
 
-<h2><a name="v30_code_changes"></a>Code Changes Which May Affect 
-  Customizations</h2>
+<h2 id="v30_code_changes">Code Changes Which May Affect Customizations</h2>
 
 <ul>
   <li><a href="#v30_code_loc"><strong>Packagers:</strong> Location
@@ -2196,8 +2186,8 @@
   <li><a href="#v30_code_other">Other Changes</a></li>
 </ul>
 
-<h3><a name="v30_code_loc"></a><strong>Packagers:</strong> Location
-    Variables Have Moved</h3>
+<h3 id="v30_code_loc"><strong>Packagers:</strong> Location Variables
+    Have Moved</h3>
 
 <p>In previous versions of [% terms.Bugzilla %], <kbd>Bugzilla::Config</kbd>
   held all the paths for different things, such as the path to localconfig
@@ -2210,7 +2200,7 @@
   <em>absolute</em> (not relative) paths. There is already code in that
   subroutine to help you with this.</p>
 
-<h3><a name="v30_code_hooks"></a>Hooks!</h3>
+<h3 id="v30_code_hooks">Hooks!</h3>
 
 <p>[% terms.Bugzilla %] now supports a code hook mechanism. See the 
   documentation for 
@@ -2226,7 +2216,7 @@
 <p>If you need more hooks, please 
   <a href="http://www.bugzilla.org/developers/reporting_bugs.html">File a b<!-- -->ug</a>!</p>
 
-<h3><a name="v30_code_api"></a>API Documentation</h3>
+<h3 id="v30_code_api">API Documentation</h3>
 
 <p>[% terms.Bugzilla %] now ships with all of its perldoc built
   as HTML. Go ahead and read the
@@ -2234,7 +2224,7 @@
   for all of the [% terms.Bugzilla %] modules now! Even scripts like
   <kbd>checksetup.pl</kbd> have HTML documentation.</p>
 
-<h3><a name="v30_code_globals"></a>Elimination of globals.pl</h3>
+<h3 id="v30_code_globals">Elimination of globals.pl</h3>
 
 <p>The old file <kbd>globals.pl</kbd> has been eliminated.
   Its code is now in various modules. Each function went to the module
@@ -2246,7 +2236,7 @@
   the function, and that should get you the information about what
   it's called now and where it lives.</p>
 
-<h3><a name="v30_code_scope"></a>Cleaned Up Variable Scoping Issues</h3>
+<h3 id="v30_code_scope">Cleaned Up Variable Scoping Issues</h3>
 
 <p>In normal perl, you can have code like this:</p>
 <pre>my $var = 0;
@@ -2256,7 +2246,7 @@ sub y { $var++ }</pre>
   longer &quot;shared&quot; with subroutines--instead all variables
   that a subroutine needs must be declared inside the subroutine itself.</p>
 
-<h3><a name="v30_code_sql"></a>No More SendSQL</h3>
+<h3 id="v30_code_sql">No More SendSQL</h3>
 
 <p>The old <kbd>SendSQL</kbd> function and all of its companions are
   <strong>gone</strong>. Instead, we now use DBI for all database
@@ -2268,7 +2258,7 @@ sub y { $var++ }</pre>
   <a href="http://www.bugzilla.org/docs/developer.html#sql-sendreceive">Developer's
   Guide Section About DBI</a></p>
 
-<h3><a name="v30_code_auth"></a>Auth Re-write</h3>
+<h3 id="v30_code_auth">Auth Re-write</h3>
 
 <p>The <kbd>Bugzilla::Auth</kbd> family of modules have been completely
   re-written. For details on how the new structure of authentication,
@@ -2278,14 +2268,14 @@ sub y { $var++ }</pre>
 
 <p>It should be very easy to write new authentication plugins, now.</p>
 
-<h3><a name="v30_code_obj"></a>Bugzilla::Object</h3>
+<h3 id="v30_code_obj">Bugzilla::Object</h3>
 
 <p>There is a new base class for most of our objects, 
   <a href="[% docs_urlbase FILTER html %]api/Bugzilla/Object.html">Bugzilla::Object</a>.
   It makes it really easy to create new objects based on things that are 
   in the database.</p>
 
-<h3><a name="v30_code_req"></a>Bugzilla-&gt;request-cache</h3>
+<h3 id="v30_code_req">Bugzilla-&gt;request-cache</h3>
 
 <p><kbd>Bugzilla.pm</kbd> used to cache things like the database
   connection in package-global variables (like <kbd>$_dbh</kbd>).
@@ -2300,7 +2290,7 @@ sub y { $var++ }</pre>
   that they cache, so to reset the template object, you'd do:
   <code>delete Bugzilla-&gt;request_cache-&gt;{template};</code>.</p>
 
-<h3><a name="v30_code_other"></a>Other Changes</h3>
+<h3 id="v30_code_other">Other Changes</h3>
 
 <ul>
   <li><code>checksetup.pl</code> has been completely re-written, and most
@@ -2336,7 +2326,7 @@ sub y { $var++ }</pre>
     still exists, but the file is empty.</li>
 </ul>
 
-<h2><a name="v30_previous"></a>Release Notes For Previous Versions</h2>
+<h2 id="v30_previous">Release Notes For Previous Versions</h2>
 
 <p>Release notes for versions of [% terms.Bugzilla %] for versions
   prior to 3.0 are only available in text format: 
@@ -2347,8 +2337,7 @@ sub y { $var++ }</pre>
 
 [% BLOCK db_req %]
   [% SET m = DB_MODULE.$db %]
-  <h3><a name="v34_req_[% db FILTER html %]"></a>For [% m.name FILTER html %] 
-    Users</h3>
+  <h3 id="v34_req_[% db FILTER html %]">For [% m.name FILTER html %] Users</h3>
 
   <ul>
     <li>[% m.name FILTER html %]

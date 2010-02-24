@@ -119,7 +119,7 @@
     can be used when updating [% terms.abug %]).
     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=476678">[% terms.Bug %] 476678</a>)</li>
   <li>For installations using the <code>shadowdb</code> parameter, 
-    [% terms.Bugzilla %] was accidentally writing to the "tokens" table
+    [%+ terms.Bugzilla %] was accidentally writing to the "tokens" table
     in the shadow database (instead of the master database) when using the
     "Change Several [% terms.Bugs %] at Once" page.
     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=476943">[% terms.Bug  %] 476943</a>)</li>
@@ -516,7 +516,7 @@
     prepare for the fact that it will be moved into an extension at
     some point in the future.</li>
   <li>The <code>shutdownhtml</code> parameter now works even when 
-    [% terms.Bugzilla %]'s database server is down.</li>
+    [%+ terms.Bugzilla %]'s database server is down.</li>
 </ul>
 
 <h3>Enhancements for Localizers (or Localized Installations)</h3>
@@ -873,7 +873,7 @@
     debugging issues with SMTP.
     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=384497">[% terms.Bug %] 384497</a>)</li>
   <li>If you are a "global watcher" (you get all mails from every 
-    [% terms.bug %]), you can now see that in your Email Preferences.
+    [%+ terms.bug %]), you can now see that in your Email Preferences.
     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=365302">[% terms.Bug %] 365302</a>)</li>
   <li>The Status and Resolution of [% terms.bugs %] are now correctly
     localized in CSV search results.
@@ -1137,10 +1137,10 @@
   the &quot;Preferences&quot; screen.</p>
 
 <h3><a name="v30_feat_afn"></a>Attachments and Flags on New 
-  [% terms.Bugs %]</h3>
+  [%+ terms.Bugs %]</h3>
 
 <p>You can now add an attachment while you are filing a new 
-  [% terms.bug %].</p>
+  [%+ terms.bug %].</p>
 
 <p>You can also set flags on the [% terms.bug %] and on attachments, while
   filing a new [% terms.bug %].</p>
@@ -1171,7 +1171,7 @@
   <li>There is now navigation and a search box a the <em>top</em> of
     each page, in addition to the bar at the bottom of the page.</li>
   <li>A re-designed &quot;Format for Printing&quot; page for 
-    [% terms.bugs %].</li>
+    [%+ terms.bugs %].</li>
   <li>The layout of <kbd>show_bug.cgi</kbd> (the [% terms.bug %] editing 
     page) has been changed, and the attachment table has been redesigned.</li>
 </ul>
@@ -1194,7 +1194,7 @@
   Skins Documentation</a> for more details.</p>
 
 <p>We currently don't have any alternate skins shipping with
-  [% terms.Bugzilla %]. If you write an alternate skin, please
+  [%+ terms.Bugzilla %]. If you write an alternate skin, please
   let us know!</p>
 
 <h3><a name="v30_feat_sbu"></a>Unchangeable Fields Appear
@@ -1222,9 +1222,9 @@
 <h3><a name="v30_feat_df"></a>No More Double-Filed [% terms.Bugs %]</h3>
 
 <p>Users of [% terms.Bugzilla %] will sometimes accidentally submit 
-  [% terms.abug %] twice, either by going back in their web browser, 
+  [%+ terms.abug %] twice, either by going back in their web browser, 
   or just by refreshing a page. In the past, this could file the same 
-  [% terms.bug %] twice (or even three times) in a row, irritating 
+  [%+ terms.bug %] twice (or even three times) in a row, irritating 
   developers and confusing users.</p>
 
 <p>Now, if you try to submit [% terms.abug %] twice from the same screen 
@@ -1600,7 +1600,7 @@ sub y { $var++ }</pre>
 
 <p>For more information about how to use 
   <a href="http://search.cpan.org/perldoc?DBI">DBI</a> with 
-  [% terms.Bugzilla %], see the 
+  [%+ terms.Bugzilla %], see the 
   <a href="http://www.bugzilla.org/docs/developer.html#sql-sendreceive">Developer's
   Guide Section About DBI</a></p>
 

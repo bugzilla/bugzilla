@@ -28,6 +28,7 @@
 [% PROCESS global/header.html.tmpl
   title = "Reporting and Charting Kitchen"
   doc_section = "reporting.html"
+  style_urls = ['skins/standard/reports.css']
 %]
 
 <p>
@@ -38,18 +39,18 @@
 <h2>Current State</h2>
 
 <ul>
-  <li>
+  <li id="report_search">
     <strong><a href="query.cgi">Search</a></strong> -
     list sets of [% terms.bugs %].
   </li>
-  <li>
+  <li id="report_tabular">
     <strong>
       <a href="query.cgi?format=report-table">Tabular reports</a>
     </strong> -
     tables of [% terms.bug %] counts in 1, 2 or 3 dimensions, as HTML or CSV.
   </li>
   [% IF feature_enabled('graphical_reports') %]
-    <li>
+    <li id="report_graphical">
       <strong>
         <a href="query.cgi?format=report-graph">Graphical reports</a>
       </strong> -
@@ -64,14 +65,14 @@
 
   <ul>
     [% IF feature_enabled('old_charts') %]
-      <li>
+      <li id="old_charts">
         <strong><a href="reports.cgi">Old Charts</a></strong> - 
         plot the status and/or resolution of [% terms.bugs %] against
         time, for each product in your database.
       </li>
     [% END %]
     [% IF feature_enabled('new_charts') AND user.in_group(Param("chartgroup")) %]
-      <li>
+      <li id="new_charts">
         <strong><a href="chart.cgi">New Charts</a></strong> - 
         plot any arbitrary search against time. Far more powerful.
       </li>

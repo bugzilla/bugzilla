@@ -35,11 +35,21 @@ sub new {
     Bugzilla->_json_server($self);
     $self->dispatch(WS_DISPATCH);
     $self->return_die_message(1);
-    $self->json->allow_blessed(1);
-    $self->json->convert_blessed(1);
     # Default to JSON-RPC 1.0
     $self->version(0);
     return $self;
+}
+
+sub create_json_coder {
+    my $self = shift;
+    my $json = $self->SUPER::create_json_coder(@_);
+    $json->allow_blessed(1);
+    $json->convert_blessed(1);
+    # This may seem a little backwards, but what this really means is
+    # "don't convert our utf8 into byte strings, just leave it as a
+    # utf8 string."
+    $json->utf8(0) if Bugzilla->params->{'utf8'};
+    return $json;
 }
 
 # Override the JSON::RPC method to return our CGI object instead of theirs.

@@ -35,8 +35,6 @@ sub new {
     Bugzilla->_json_server($self);
     $self->dispatch(WS_DISPATCH);
     $self->return_die_message(1);
-    # Default to JSON-RPC 1.0
-    $self->version(0);
     return $self;
 }
 
@@ -95,6 +93,15 @@ sub datetime_format {
     return $iso_datetime;
 }
 
+
+# Store the ID of the current call, because Bugzilla::Error will need it.
+sub _handle {
+    my $self = shift;
+    my ($obj) = @_;
+    $self->{_bz_request_id} = $obj->{id};
+    return $self->SUPER::_handle(@_);
+}
+
 # Make all error messages returned by JSON::RPC go into the 100000
 # range, and bring down all our errors into the normal range.
 sub _error {
@@ -116,7 +123,7 @@ sub _error {
 
     # We want to always send the JSON-RPC 1.1 error format, although
     # If we're not in JSON-RPC 1.1, we don't need the silly "name" parameter.
-    if (!$self->version) {
+    if (!$self->version or $self->version ne '1.1') {
         my $object = $self->json->decode($json);
         my $message = $object->{error};
         # Just assure that future versions of JSON::RPC don't change the

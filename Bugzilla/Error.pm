@@ -124,7 +124,9 @@ sub _throw_error {
                 # higher than 999, but we do this to avoid conflicts with
                 # the internal JSON::RPC error codes.
                 $server->raise_error(code    => 100000 + $code,
-                                     message => $message);
+                                     message => $message,
+                                     id      => $server->{_bz_request_id},
+                                     version => $server->version);
                 # We die with no message. JSON::RPC checks raise_error before
                 # it checks $@, so it returns the proper error.
                 die;

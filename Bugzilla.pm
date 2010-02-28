@@ -417,22 +417,7 @@ sub dbh_main {
 
 sub languages {
     my $class = shift;
-    return $class->request_cache->{languages}
-        if $class->request_cache->{languages};
-
-    my @files = glob(catdir(bz_locations->{'templatedir'}, '*'));
-    my @languages;
-    foreach my $dir_entry (@files) {
-        # It's a language directory only if it contains "default" or
-        # "custom". This auto-excludes CVS directories as well.
-        next unless (-d catdir($dir_entry, 'default')
-                  || -d catdir($dir_entry, 'custom'));
-        $dir_entry = basename($dir_entry);
-        # Check for language tag format conforming to RFC 1766.
-        next unless $dir_entry =~ /^[a-zA-Z]{1,8}(-[a-zA-Z]{1,8})?$/;
-        push(@languages, $dir_entry);
-    }
-    return $class->request_cache->{languages} = \@languages;
+    return Bugzilla::Install::Util::supported_languages();
 }
 
 sub error_mode {

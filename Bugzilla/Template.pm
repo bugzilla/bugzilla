@@ -87,9 +87,8 @@ sub _load_constants {
 sub getTemplateIncludePath {
     my $cache = Bugzilla->request_cache;
     my $lang  = $cache->{'language'} || '';
-    $cache->{"template_include_path_$lang"} ||= template_include_path({
-        use_languages => Bugzilla->languages,
-        only_language => $lang });
+    $cache->{"template_include_path_$lang"} ||= 
+        template_include_path({ language => $lang });
     return $cache->{"template_include_path_$lang"};
 }
 
@@ -815,7 +814,7 @@ sub precompile_templates {
 
     print install_string('template_precompile') if $output;
 
-    my $paths = template_include_path({ use_languages => Bugzilla->languages });
+    my $paths = template_include_path();
 
     foreach my $dir (@$paths) {
         my $template = Bugzilla::Template->create(include_path => [$dir]);

@@ -279,84 +279,85 @@ sub install_string {
     return $string_template;
 }
 
-sub include_languages {
-    # If we are in CGI mode (not in checksetup.pl) and if the function has
-    # been called without any parameter, then we cache the result of this
-    # function in Bugzilla->request_cache. This is done to improve the
-    # performance of the template processing.
-    my $to_be_cached = 0;
-    if (not @_) {
-        my $cache = _cache();
-        if (exists $cache->{include_languages}) {
-            return @{ $cache->{include_languages} };
-        }
-        $to_be_cached = 1;
-    }
-    my ($params) = @_;
-    $params ||= {};
+sub _wanted_languages {
+    my ($requested, @wanted);
 
-    # Basically, the way this works is that we have a list of languages
-    # that we *want*, and a list of languages that Bugzilla actually
-    # supports. The caller tells us what languages they want, by setting
-    # $ENV{HTTP_ACCEPT_LANGUAGE}, using the "LANG" cookie or  setting
-    # $params->{only_language}. The languages we support are those
-    # specified in $params->{use_languages}. Otherwise we support every
-    # language installed in the template/ directory.
-    
-    my @wanted;
-    if ($params->{only_language}) {
-        @wanted = ($params->{only_language});
+    # Checking SERVER_SOFTWARE is the same as i_am_cgi() in Bugzilla::Util.
+    if (exists $ENV{'SERVER_SOFTWARE'}) {
+        my $cgi = Bugzilla->cgi;
+        $requested = $cgi->http('Accept-Language') || '';
+        my $lang = $cgi->cookie('LANG');
+        push(@wanted, $lang) if $lang;
     }
     else {
-        @wanted = _sort_accept_language($ENV{'HTTP_ACCEPT_LANGUAGE'} || '');
-        # Don't use the cookie if we are in "checksetup.pl". The test
-        # with $ENV{'SERVER_SOFTWARE'} is the same as in
-        # Bugzilla:Util::i_am_cgi.
-        if (exists $ENV{'SERVER_SOFTWARE'}) {
-            my $cgi = Bugzilla->cgi;
-            if (defined (my $lang = $cgi->cookie('LANG'))) {
-                unshift @wanted, $lang;
-            }
-        }
+        $requested = get_console_locale();
     }
-    
-    my @supported;
-    if (defined $params->{use_languages}) {
-        @supported = @{$params->{use_languages}};
-    }
-    else {
-        my @dirs = glob(bz_locations()->{'templatedir'} . "/*");
-        @dirs = map(basename($_), @dirs);
-        @supported = grep($_ ne 'CVS', @dirs);
-    }
-    
-    my @usedlanguages;
-    foreach my $wanted (@wanted) {
+
+    push(@wanted, _sort_accept_language($requested));
+    return \@wanted;
+}
+
+sub _wanted_to_actual_languages {
+    my ($wanted, $supported) = @_;
+
+    my @actual;
+    foreach my $lang (@$wanted) {
         # If we support the language we want, or *any version* of
-        # the language we want, it gets pushed into @usedlanguages.
+        # the language we want, it gets pushed into @actual.
         #
         # Per RFC 1766 and RFC 2616, things like 'en' match 'en-us' and
         # 'en-uk', but not the other way around. (This is unfortunately
         # not very clearly stated in those RFC; see comment just over 14.5
         # in http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.4)
-        if(my @found = grep /^\Q$wanted\E(-.+)?$/i, @supported) {
-            push (@usedlanguages, @found);
-        }
+        my @found = grep(/^\Q$lang\E(-.+)?$/i, @$supported);
+        push(@actual, @found) if @found;
     }
 
     # We always include English at the bottom if it's not there, even if
-    # somebody removed it from use_languages.
-    if (!grep($_ eq 'en', @usedlanguages)) {
-        push(@usedlanguages, 'en');
+    # it wasn't selected by the user.
+    if (!grep($_ eq 'en', @actual)) {
+        push(@actual, 'en');
     }
 
-    # Cache the result if we are in CGI mode and called without parameter
-    # (see the comment at the top of this function).
-    if ($to_be_cached) {
-        _cache()->{include_languages} = \@usedlanguages;
+    return \@actual;
+}
+
+sub supported_languages {
+    my $cache = _cache();
+    return $cache->{supported_languages} if $cache->{supported_languages};
+
+    my @dirs = glob(bz_locations()->{'templatedir'} . "/*");
+    my @languages;
+    foreach my $dir (@dirs) {
+        # It's a language directory only if it contains "default" or
+        # "custom". This auto-excludes CVS directories as well.
+        next if (!-d "$dir/default" and !-d "$dir/custom");
+        my $lang = basename($dir);
+        # Check for language tag format conforming to RFC 1766.
+        next unless $lang =~ /^[a-zA-Z]{1,8}(-[a-zA-Z]{1,8})?$/;
+        push(@languages, $lang);
     }
 
-    return @usedlanguages;
+    $cache->{supported_languages} = \@languages;
+    return \@languages;
+}
+
+sub include_languages {
+    my ($params) = @_;
+
+    # Basically, the way this works is that we have a list of languages
+    # that we *want*, and a list of languages that Bugzilla actually
+    # supports.
+    my $wanted;
+    if ($params->{language}) {
+        $wanted = [$params->{language}];
+    }
+    else {
+        $wanted = _wanted_languages();
+    }
+    my $supported = supported_languages();
+    my $actual    = _wanted_to_actual_languages($wanted, $supported);
+    return @$actual;
 }
 
 # Used by template_include_path
@@ -550,7 +551,6 @@ sub get_console_locale {
 sub init_console {
     eval { ON_WINDOWS && require Win32::Console::ANSI; };
     $ENV{'ANSI_COLORS_DISABLED'} = 1 if ($@ || !-t *STDOUT);
-    $ENV{'HTTP_ACCEPT_LANGUAGE'} ||= get_console_locale();
     prevent_windows_dialog_boxes();
 }
 

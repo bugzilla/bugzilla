@@ -48,7 +48,7 @@
           [%- bug.bug_id FILTER xml %]"/>
     <id>[% urlbase FILTER xml %]show_bug.cgi?id=[% bug.bug_id FILTER xml %]</id>
     <author>
-      <name>[% bug.reporter_realname FILTER xml %]</name>
+      <name>[% bug.reporter_realname ? bug.reporter_realname : bug.reporter FILTER xml %]</name>
     </author>
     <updated>[% bug.changedtime FILTER time("%Y-%m-%dT%H:%M:%SZ", "UTC") FILTER xml %]</updated>
     <summary type="html">
@@ -65,10 +65,10 @@
         <td>[% bug.component FILTER html %]</td>
       </tr><tr class="bz_feed_assignee">
         <td>[% columns.assigned_to_realname.title FILTER html %]</td>
-        <td>[% bug.assigned_to_realname FILTER html %]</td>
+        <td>[% bug.assigned_to_realname ? bug.assigned_to_realname : bug.assigned_to FILTER html %]</td>
       </tr><tr class="bz_feed_reporter">
         <td>[% columns.reporter_realname.title FILTER html %]</td>
-        <td>[% bug.reporter_realname FILTER html %]</td>
+        <td>[% bug.reporter_realname ? bug.reporter_realname : bug.reporter FILTER html %]</td>
       </tr><tr class="bz_feed_bug_status">
         <td>[% columns.bug_status.title FILTER html %]</td>
         <td>[% bug.bug_status FILTER html %]</td>

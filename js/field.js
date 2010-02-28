@@ -337,8 +337,9 @@ function setResolutionToDuplicate(e, duplicate_or_move_bug_status) {
     var resolution = document.getElementById('resolution');
     YAHOO.util.Dom.addClass('dup_id_discoverable', 'bz_default_hidden');
     status.value = duplicate_or_move_bug_status;
+    bz_fireEvent(status, 'change');
     resolution.value = "DUPLICATE";
-    showHideStatusItems("", ["",""]);
+    bz_fireEvent(resolution, 'change');
     YAHOO.util.Event.preventDefault(e);
 }
 

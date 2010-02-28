@@ -80,9 +80,10 @@
 [% END %]
 
 [% SET shown_types = [
-  'notequal', 'regexp', 'notregexp', 'lessthan', 'lessthaneq', 
+  'notequals', 'regexp', 'notregexp', 'lessthan', 'lessthaneq', 
   'greaterthan', 'greaterthaneq', 'changedbefore', 'changedafter', 
-  'changedfrom', 'changedto', 'changedby',
+  'changedfrom', 'changedto', 'changedby', 'notsubstring', 'nowords',
+  'nowordssubstr',
 ] %]
 <ul class="search_description">
 [% FOREACH desc_item = search_description %]

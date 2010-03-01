@@ -770,8 +770,13 @@ sub create {
                 \&Bugzilla::Install::Requirements::REQUIRED_MODULES,
             OPTIONAL_MODULES => sub {
                 my @optional = @{OPTIONAL_MODULES()};
-                @optional    = sort {$a->{feature} cmp $b->{feature}} 
-                                    @optional;
+                foreach my $item (@optional) {
+                    my @features;
+                    foreach my $feat_id (@{ $item->{feature} }) {
+                        push(@features, install_string("feature_$feat_id"));
+                    }
+                    $item->{feature} = \@features;
+                }
                 return \@optional;
             },
         },

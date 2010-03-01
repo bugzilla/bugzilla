@@ -676,6 +676,14 @@ sub bz_setup_database {
      }
    }
 
+   # Drop the trigger which causes bug 541553
+   my $trigger_name = "PRODUCTS_MILESTONEURL";
+   my $exist_trigger = $self->selectcol_arrayref(
+       "SELECT OBJECT_NAME FROM USER_OBJECTS
+        WHERE OBJECT_NAME = ?", undef, $trigger_name);
+   if(@$exist_trigger) {
+       $self->do("DROP TRIGGER $trigger_name");
+   }
 }
 
 package Bugzilla::DB::Oracle::st;

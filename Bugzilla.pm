@@ -176,17 +176,17 @@ sub init_page {
 
 sub template {
     my $class = shift;
-    $class->request_cache->{language} = "";
     $class->request_cache->{template} ||= Bugzilla::Template->create();
     return $class->request_cache->{template};
 }
 
 sub template_inner {
     my ($class, $lang) = @_;
-    $lang = defined($lang) ? $lang : ($class->request_cache->{language} || "");
-    $class->request_cache->{language} = $lang;
+    my $cache = $class->request_cache;
+    my $current_lang = $cache->{template_current_lang}->[0];
+    $lang ||= $current_lang || '';
     $class->request_cache->{"template_inner_$lang"}
-        ||= Bugzilla::Template->create();
+        ||= Bugzilla::Template->create(language => $lang);
     return $class->request_cache->{"template_inner_$lang"};
 }
 

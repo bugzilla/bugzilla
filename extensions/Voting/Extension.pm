@@ -800,7 +800,6 @@ sub _remove_votes {
             $template->process("voting/votes-removed.txt.tmpl", $vars, \$msg);
             push(@messages, $msg);
         }
-        Bugzilla->template_inner("");
 
         my $votes = $dbh->selectrow_array("SELECT SUM(vote_count) " .
                                           "FROM votes WHERE bug_id = ?",

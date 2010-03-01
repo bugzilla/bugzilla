@@ -122,7 +122,6 @@ sub IssueEmailChangeToken {
     $template->process("account/email/change-new.txt.tmpl", $vars, \$message)
       || ThrowTemplateError($template->error());
 
-    Bugzilla->template_inner("");
     MessageToMTA($message);
 }
 
@@ -160,7 +159,6 @@ sub IssuePasswordToken {
                                                                $vars, \$message)
       || ThrowTemplateError($template->error());
 
-    Bugzilla->template_inner("");
     MessageToMTA($message);
 }
 
@@ -300,7 +298,6 @@ sub Cancel {
     $template->process("account/cancel-token.txt.tmpl", $vars, \$message)
       || ThrowTemplateError($template->error());
 
-    Bugzilla->template_inner("");
     MessageToMTA($message);
 
     # Delete the token from the database.

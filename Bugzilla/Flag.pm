@@ -1012,7 +1012,6 @@ sub notify {
         $template->process("request/email.txt.tmpl", $vars, \$message)
           || ThrowTemplateError($template->error());
 
-        Bugzilla->template_inner("");
         MessageToMTA($message);
     }
 }

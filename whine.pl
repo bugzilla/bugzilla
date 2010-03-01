@@ -395,7 +395,6 @@ sub mail {
     $template->process("whine/multipart-mime.txt.tmpl", $args, \$msg)
         or die($template->error());
 
-    Bugzilla->template_inner("");
     MessageToMTA($msg);
 
     delete $args->{'boundary'};

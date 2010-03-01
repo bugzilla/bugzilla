@@ -62,7 +62,7 @@ sub process {
     # Get the hooks out of the cache if they exist. Otherwise, read them
     # from the disk.
     my $cache = Bugzilla->request_cache->{template_plugin_hook_cache} ||= {};
-    my $lang = Bugzilla->request_cache->{language} || '';
+    my $lang = $context->{bz_language} || '';
     $cache->{"${lang}__$extension_template"} 
         ||= $self->_get_hooks($extension_template);
 
@@ -75,7 +75,7 @@ sub process {
 sub _get_hooks {
     my ($self, $extension_template) = @_;
 
-    my $template_sets = _template_hook_include_path();
+    my $template_sets = $self->_template_hook_include_path();
     my @hooks;
     foreach my $dir_set (@$template_sets) {
         foreach my $template_dir (@$dir_set) {
@@ -93,8 +93,9 @@ sub _get_hooks {
 }
 
 sub _template_hook_include_path {
+    my $self = shift;
     my $cache = Bugzilla->request_cache;
-    my $language = $cache->{language} || '';
+    my $language = $self->_context->{bz_language} || '';
     my $cache_key = "template_plugin_hook_include_path_$language";
     $cache->{$cache_key} ||= template_include_path({
         language => $language,

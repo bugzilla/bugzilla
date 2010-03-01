@@ -647,7 +647,6 @@ sub sendMail {
     my $template = Bugzilla->template_inner($user->settings->{'lang'}->{'value'});
     $template->process("email/newchangedmail.txt.tmpl", $vars, \$msg)
       || ThrowTemplateError($template->error());
-    Bugzilla->template_inner("");
 
     MessageToMTA($msg);
 

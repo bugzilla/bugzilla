@@ -243,35 +243,37 @@
         [% END %]
       </div>
       <div id="attachment_comments_and_flags">
-      [% IF user.id %]
-        <div id="smallCommentFrame" >
-          <label for="comment">Comment (on the [% terms.bug %]):</label>
-          [% classNames = 'block' %]
-          [% classNames = "$classes bz_private" IF attachment.isprivate %]
-          [% INCLUDE global/textarea.html.tmpl
-            id      = 'comment'
-            name    = 'comment'
-            minrows = 10
-            cols    = 80
-            wrap    = 'soft'
-            classes = classNames          
-          %]
-        </div>
-      [% END %]            
-      [% IF attachment.flag_types.size > 0 %]
+        [% IF user.id %]
+          <div id="smallCommentFrame" >
+            <label for="comment">Comment (on the [% terms.bug %]):</label>
+            [% classNames = 'block' %]
+            [% classNames = "$classes bz_private" IF attachment.isprivate %]
+            [% INCLUDE global/textarea.html.tmpl
+              id      = 'comment'
+              name    = 'comment'
+              minrows = 10
+              cols    = 80
+              wrap    = 'soft'
+              classes = classNames          
+            %]
+          </div>
+        [% END %]             
         <div id="attachment_flags">
-          [% PROCESS "flag/list.html.tmpl" bug_id = attachment.bug_id
-                                           attach_id = attachment.id
-                                           flag_types = attachment.flag_types
-                                           read_only_flags = !can_edit
-          %]
+          [% IF attachment.flag_types.size > 0 %]
+     
+              [% PROCESS "flag/list.html.tmpl" bug_id = attachment.bug_id
+                                               attach_id = attachment.id
+                                               flag_types = attachment.flag_types
+                                               read_only_flags = !can_edit
+              %]
+     
+          [% END %]
+          [% IF user.id %]       
+            <div id="update_container">
+              <input type="submit" value="Submit" id="update">
+            </div>
+          [% END %]
         </div>
-      [% END %]
-      [% IF user.id %]       
-        <div id="update_container">
-          <input type="submit" value="Submit" id="update">
-        </div>
-      [% END %]             
       </div>        
     </div>
   </div>

@@ -19,6 +19,7 @@
  *                 Joel Peshkin <bugreport@peshkin.net>
  *                 Erik Stambaugh <erik@dasbistro.com>
  *                 Marc Schumann <wurblzap@gmail.com>
+ *                 Guy Pyrzak <guy.pyrzak@gmail.com>
  */
 
 function validateAttachmentForm(theform) {
@@ -307,7 +308,7 @@ function hideElementById(id)
 {
   var elm = document.getElementById(id);
   if (elm) {
-    elm.style.display = 'none';
+    YAHOO.util.Dom.addClass(elm, 'bz_default_hidden');
   }
 }
 
@@ -315,8 +316,7 @@ function showElementById(id, val)
 {
   var elm = document.getElementById(id);
   if (elm) {
-    if (!val) val = 'inline';
-    elm.style.display = val;
+    YAHOO.util.Dom.removeClass(elm, 'bz_default_hidden');
   }
 }
 
@@ -327,12 +327,24 @@ function normalizeComments()
 
   var small = document.getElementById('smallCommentFrame');
   var big = document.getElementById('editFrame');
-  if ( (small) && (small.style.display == 'none') )
+  if ( (small) && YAHOO.util.Dom.hasClass(small, 'bz_default_hidden') )
   {
     small.parentNode.removeChild(small);
   }
-  if ( (big) && (big.style.display == 'none') )
+  if ( (big) && YAHOO.util.Dom.hasClass(big, 'bz_default_hidden') )
   {
     big.parentNode.removeChild(big);
   }
 }
+
+function toggle_attachment_details_visibility ( ) 
+{
+    // show hide classes
+    var container = document.getElementById('attachment_info');
+    if( YAHOO.util.Dom.hasClass(container, 'read') ){
+        YAHOO.util.Dom.replaceClass(container, 'read', 'edit');
+    }else{
+        YAHOO.util.Dom.replaceClass(container, 'edit', 'read');
+    }
+}
+

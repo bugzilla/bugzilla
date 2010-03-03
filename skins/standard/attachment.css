@@ -205,7 +205,6 @@ textarea.bz_private {
 
 #update {
     clear: both; 
-    padding: 1.5em 0; 
     display: block;  
 }
 
@@ -215,6 +214,7 @@ textarea {
 
 div#update_container {
     clear: both; 
+    padding: 1.5em 0; 
 }
 
 #attachment_flags {

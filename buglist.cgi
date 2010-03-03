@@ -85,9 +85,11 @@ if (grep { $_ =~ /^cmd\-/ } $cgi->param()) {
 #
 if ($cgi->request_method() eq 'POST') {
     $cgi->clean_search_url();
-
-    print $cgi->redirect(-url => $cgi->self_url());
-    exit;
+    my $uri_length = length($cgi->self_url());
+    if ($uri_length < CGI_URI_LIMIT) {
+        print $cgi->redirect(-url => $cgi->self_url());
+        exit;
+    }
 }
 
 # Determine whether this is a quicksearch query.

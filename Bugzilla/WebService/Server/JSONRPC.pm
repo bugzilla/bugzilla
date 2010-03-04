@@ -27,7 +27,6 @@ use base qw(JSON::RPC::Server::CGI Bugzilla::WebService::Server);
 use Bugzilla::Error;
 use Bugzilla::WebService::Constants;
 use Bugzilla::WebService::Util qw(taint_data);
-use Bugzilla::Util qw(datetime_from);
 
 sub new {
     my $class = shift;
@@ -77,20 +76,17 @@ sub type {
     }
     elsif ($type eq 'dateTime') {
         # ISO-8601 "YYYYMMDDTHH:MM:SS" with a literal T
-        $retval = $self->datetime_format($value);
+        $retval = $self->datetime_format_outbound($value);
     }
     # XXX Will have to implement base64 if Bugzilla starts using it.
 
     return $retval;
 }
 
-sub datetime_format {
-    my ($self, $date_string) = @_;
-
-    # YUI expects ISO8601 in UTC time; uncluding TZ specifier
-    my $time = datetime_from($date_string, 'UTC');
-    my $iso_datetime = $time->iso8601() . 'Z';
-    return $iso_datetime;
+sub datetime_format_outbound {
+    my $self = shift;
+    # YUI expects ISO8601 in UTC time; including TZ specifier
+    return $self->SUPER::datetime_format_outbound(@_) . 'Z';
 }
 
 
@@ -192,10 +188,10 @@ sub _argument_type_check {
             my $value = $params->{$field};
             if (ref $value eq 'ARRAY') {
                 $params->{$field} = 
-                    [ map { $self->_bz_convert_datetime($_) } @$value ];
+                    [ map { $self->datetime_format_inbound($_) } @$value ];
             }
             else {
-                $params->{$field} = $self->_bz_convert_datetime($value);
+                $params->{$field} = $self->datetime_format_inbound($value);
             }
         }
     }
@@ -218,14 +214,6 @@ sub _argument_type_check {
     }
 
     return $params;
-}
-
-sub _bz_convert_datetime {
-    my ($self, $time) = @_;
-    
-    my $converted = datetime_from($time, Bugzilla->local_timezone);
-    $time = $converted->ymd() . ' ' . $converted->hms();
-    return $time
 }
 
 sub handle_login {

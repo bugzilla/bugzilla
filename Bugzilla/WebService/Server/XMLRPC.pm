@@ -106,10 +106,12 @@ sub decode_value {
     
     # We convert dateTimes to a DB-friendly date format.
     if ($type eq 'dateTime.iso8601') {
-        # We leave off the $ from the end of this regex to allow for possible
-        # extensions to the XML-RPC date standard.
-        $value =~ /^(\d{4})(\d{2})(\d{2})T(\d{2}):(\d{2}):(\d{2})/;
-        $value = "$1-$2-$3 $4:$5:$6";
+        if ($value !~ /T.*[\-+Z]/i) {
+           # The caller did not specify a timezone, so we assume UTC.
+           # pass 'Z' specifier to datetime_from to force it
+           $value = $value . 'Z';
+        }
+        $value = $self->datetime_format_inbound($value);
     }
 
     return $value;
@@ -288,7 +290,9 @@ API via: C<http://bugzilla.yourdomain.com/xmlrpc.cgi>
 =head1 PARAMETERS
 
 C<dateTime> fields are the standard C<dateTime.iso8601> XML-RPC field. They
-should be in C<YYYY-MM-DDTHH:MM:SS> format (where C<T> is a literal T).
+should be in C<YYYY-MM-DDTHH:MM:SS> format (where C<T> is a literal T). As
+of Bugzilla B<3.6>, Bugzilla always expects C<dateTime> fields to be in the
+UTC timezone, and all returned C<dateTime> values are in the UTC timezone.
 
 All other fields are standard XML-RPC types.
 
@@ -305,6 +309,14 @@ C<< <name> >> element for the struct C<< <member> >>s.
 Normally, XML-RPC does not allow empty values for C<int>, C<double>, or
 C<dateTime.iso8601> fields. Bugzilla does--it treats empty values as
 C<undef> (called C<NULL> or C<None> in some programming languages).
+
+Bugzilla accepts a timezone specifier at the end of C<dateTime.iso8601>
+fields that are specified as method arguments. The format of the timezone
+specifier is specified in the ISO-8601 standard. If no timezone specifier
+is included, the passed-in time is assumed to be in the UTC timezone.
+Bugzilla will never output a timezone specifier on returned data, because
+doing so would violate the XML-RPC specification. All returned times are in
+the UTC timezone.
 
 Bugzilla also accepts an element called C<< <nil> >>, as specified by the
 XML-RPC extension here: L<http://ontosys.com/xml-rpc/extensions.php>, which

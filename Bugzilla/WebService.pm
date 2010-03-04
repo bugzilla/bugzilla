@@ -21,6 +21,8 @@ package Bugzilla::WebService;
 use strict;
 use Date::Parse;
 use XMLRPC::Lite;
+use Bugzilla::Util qw(datetime_from);
+use Scalar::Util qw(blessed)
 
 # Used by the JSON-RPC server to convert incoming date fields apprpriately.
 use constant DATE_FIELDS => {};
@@ -36,21 +38,24 @@ sub login_exempt {
 sub type {
     my ($self, $type, $value) = @_;
     if ($type eq 'dateTime') {
-        $value = datetime_format($value);
+        $value = $self->datetime_format_outbound($value);
     }
     return XMLRPC::Data->type($type)->value($value);
 }
 
-sub datetime_format {
-    my ($date_string) = @_;
+sub datetime_format_outbound {
+    my ($self, $date) = @_;
 
-    my $time = str2time($date_string);
-    my ($sec, $min, $hour, $mday, $mon, $year) = localtime $time;
-    # This format string was stolen from SOAP::Utils->format_datetime,
-    # which doesn't work but which has almost the right format string.
-    my $iso_datetime = sprintf('%d%02d%02dT%02d:%02d:%02d',
-        $year + 1900, $mon + 1, $mday, $hour, $min, $sec);
-    return $iso_datetime;
+    my $time = $date;
+    if (blessed($date)) {
+        # We expect this to mean we were sent a datetime object
+        $time->set_time_zone('UTC');
+    } else {
+        # We always send our time in UTC, for consistency.
+        # passed in value is likely a string, create a datetime object
+        $time = datetime_from($date, 'UTC');
+    }
+    return $iso_datetime = $time->iso8601();
 }
 
 

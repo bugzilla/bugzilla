@@ -106,10 +106,12 @@ sub decode_value {
     
     # We convert dateTimes to a DB-friendly date format.
     if ($type eq 'dateTime.iso8601') {
-        # We leave off the $ from the end of this regex to allow for possible
-        # extensions to the XML-RPC date standard.
-        $value =~ /^(\d{4})(\d{2})(\d{2})T(\d{2}):(\d{2}):(\d{2})/;
-        $value = "$1-$2-$3 $4:$5:$6";
+        if ($value !~ /T.*[\-+Z]/i) {
+           # The caller did not specify a timezone, so we assume UTC.
+           # pass 'Z' specifier to datetime_from to force it
+           $value = $value . 'Z';
+        }
+        $value = $self->datetime_format_inbound($value);
     }
 
     return $value;

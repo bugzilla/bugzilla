@@ -21,6 +21,7 @@ package Bugzilla::WebService::Bugzilla;
 use strict;
 use base qw(Bugzilla::WebService);
 use Bugzilla::Constants;
+use Bugzilla::Util qw(datetime_from);
 
 use DateTime;
 
@@ -49,32 +50,27 @@ sub extensions {
 
 sub timezone {
     my $self = shift;
-    my $offset = Bugzilla->local_timezone->offset_for_datetime(DateTime->now());
-    $offset = (($offset / 60) / 60) * 100;
-    $offset = sprintf('%+05d', $offset);
-    return { timezone => $self->type('string', $offset) };
+    # All Webservices return times in UTC; Use UTC here for backwards compat.
+    return { timezone => $self->type('string', "+0000") };
 }
 
 sub time {
     my ($self) = @_;
+    # All Webservices return times in UTC; Use UTC here for backwards compat.
+    # Hardcode values where appropriate
     my $dbh = Bugzilla->dbh;
 
     my $db_time = $dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
+    $db_time = datetime_from($db_time, 'UTC');
     my $now_utc = DateTime->now();
-
-    my $tz = Bugzilla->local_timezone;
-    my $now_local = $now_utc->clone->set_time_zone($tz);
-    my $tz_offset = $tz->offset_for_datetime($now_local);
 
     return {
         db_time       => $self->type('dateTime', $db_time),
-        web_time      => $self->type('dateTime', $now_local),
+        web_time      => $self->type('dateTime', $now_utc),
         web_time_utc  => $self->type('dateTime', $now_utc),
-        tz_name       => $self->type('string', $tz->name),
-        tz_offset     => $self->type('string', 
-                                     $tz->offset_as_string($tz_offset)),
-        tz_short_name => $self->type('string', 
-                                     $now_local->time_zone_short_name),
+        tz_name       => $self->type('string', 'UTC'),
+        tz_offset     => $self->type('string', '+0000'),
+        tz_short_name => $self->type('string', 'UTC'),
     };
 }
 

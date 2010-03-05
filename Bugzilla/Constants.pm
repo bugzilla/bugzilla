@@ -467,7 +467,7 @@ use constant PASSWORD_SALT_LENGTH => 8;
 # Certain scripts redirect to GET even if the form was submitted originally
 # via POST such as buglist.cgi. This value determines whether the redirect
 # can be safely done or not based on the web server's URI length setting.
-use constant CGI_URI_LIMIT => 10000;
+use constant CGI_URI_LIMIT => 8000;
 
 sub bz_locations {
     # We know that Bugzilla/Constants.pm must be in %INC at this point.

@@ -55,7 +55,7 @@ sub datetime_format_outbound {
         # passed in value is likely a string, create a datetime object
         $time = datetime_from($date, 'UTC');
     }
-    return $iso_datetime = $time->iso8601();
+    return $time->iso8601();
 }
 
 

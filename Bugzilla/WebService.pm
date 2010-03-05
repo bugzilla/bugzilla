@@ -22,7 +22,7 @@ use strict;
 use Date::Parse;
 use XMLRPC::Lite;
 use Bugzilla::Util qw(datetime_from);
-use Scalar::Util qw(blessed)
+use Scalar::Util qw(blessed);
 
 # Used by the JSON-RPC server to convert incoming date fields apprpriately.
 use constant DATE_FIELDS => {};

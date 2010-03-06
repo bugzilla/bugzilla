@@ -1090,7 +1090,7 @@ private attachments.
 
 =item C<comments>
 
-B<UNSTABLE>
+B<STABLE>
 
 =over
 
@@ -1228,7 +1228,7 @@ that id.
 
 =item C<get> 
 
-B<EXPERIMENTAL>
+B<STABLE>
 
 =over
 
@@ -1255,7 +1255,7 @@ Note that it's possible for aliases to be disabled in Bugzilla, in which
 case you will be told that you have specified an invalid bug_id if you
 try to specify an alias. (It will be error 100.)
 
-=item C<permissive> B<UNSTABLE>
+=item C<permissive> B<EXPERIMENTAL>
 
 C<boolean> Normally, if you request any inaccessible or invalid bug ids,
 Bug.get will throw an error. If this parameter is True, instead of throwing an
@@ -1304,11 +1304,13 @@ isn't a duplicate of any bug, this will be an empty int.
 
 C<int> The numeric bug_id of this bug.
 
-=item internals B<UNSTABLE>
+=item internals B<DEPRECATED>
 
 A hash. The internals of a L<Bugzilla::Bug> object. This is extremely
 unstable, and you should only rely on this if you absolutely have to. The
 structure of the hash may even change between point releases of Bugzilla.
+
+This will be disappearing in a future version of Bugzilla.
 
 =item is_open 
 
@@ -1344,7 +1346,7 @@ C<string> The summary of this bug.
 
 =back
 
-=item C<faults> B<UNSTABLE>
+=item C<faults> B<EXPERIMENTAL>
 
 An array of hashes that contains invalid bug ids with error messages
 returned for them. Each hash contains the following items:
@@ -1436,7 +1438,7 @@ in Bugzilla B<3.4>:
 
 =item C<history> 
 
-B<UNSTABLE>
+B<EXPERIMENTAL>
 
 =over
 
@@ -1736,7 +1738,7 @@ for that value.
 
 =item C<create> 
 
-B<EXPERIMENTAL>
+B<STABLE>
 
 =over
 
@@ -1879,7 +1881,7 @@ B<Required>, due to a bug in Bugzilla.
 
 =item C<add_comment> 
 
-B<EXPERIMENTAL>
+B<STABLE>
 
 =over
 
@@ -1957,7 +1959,7 @@ purposes if you wish.
 
 =item C<update_see_also>
 
-B<UNSTABLE>
+B<EXPERIMENTAL>
 
 =over
 

@@ -191,7 +191,7 @@ string in (+/-)XXXX (RFC 2822) format.
 
 =item C<time>
 
-B<EXPERIMENTAL>
+B<STABLE>
 
 =over
 

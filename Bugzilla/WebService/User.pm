@@ -370,7 +370,7 @@ An account with that email address already exists in Bugzilla.
 
 =item C<create> 
 
-B<EXPERIMENTAL>
+B<STABLE>
 
 =over
 
@@ -439,7 +439,7 @@ password is under three characters.)
 
 =item C<get> 
 
-B<UNSTABLE>
+B<STABLE>
 
 =over
 

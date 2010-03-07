@@ -285,7 +285,7 @@
 
         <listitem>
           <para>
-            CGI &min-cgi-ver;
+            CGI (&min-cgi-ver;)
           </para>
         </listitem>
 
@@ -341,6 +341,18 @@
 
         <listitem>
           <para>
+            Email::MIME (&min-email-mime-ver;)
+          </para>
+        </listitem>
+
+        <listitem>
+          <para>
+            Email::MIME::Encodings (&min-email-mime-encodings-ver;)
+          </para>
+        </listitem>
+
+        <listitem>
+          <para>
             Email::MIME::Modifier (&min-email-mime-modifier-ver;)
           </para>
         </listitem>
@@ -358,7 +370,7 @@
         <listitem>
           <para>
             Template::Plugin::GD::Image
-            (&min-gd-ver;) for Graphical Reports
+            (&min-template-plugin-gd-image-ver;) for Graphical Reports
           </para>
         </listitem>
 
@@ -420,6 +432,13 @@
           <para>
             Net::LDAP
             (&min-net-ldap-ver;) for LDAP Authentication
+          </para>
+        </listitem>
+
+        <listitem>
+          <para>
+            Authen::SASL
+            (&min-authen-sasl-ver;) for SASL Authentication
           </para>
         </listitem>
 

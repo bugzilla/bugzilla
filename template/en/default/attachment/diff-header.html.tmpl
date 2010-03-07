@@ -53,11 +53,11 @@ Interdiff of #[% oldid %] and #[% newid %] for [% terms.bug %] #[% bugid %]
   [% END %]
   [% PROCESS global/header.html.tmpl doc_section = "attachments.html#patchviewer"
                                      javascript_urls = "js/attachment.js"
-                                     style_urls = ['skins/standard/create_attachment.css'] %]
+                                     style_urls = ['skins/standard/attachment.css'] %]
 [% ELSE %]
   <html>
   <head>
-  <link href="skins/standard/create_attachment.css" rel="stylesheet" type="text/css">
+  <link href="skins/standard/attachment.css" rel="stylesheet" type="text/css">
   <script src="js/attachment.js" type="text/javascript"></script>
   </head>
   <body onload="[% onload FILTER html %]">

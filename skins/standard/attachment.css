@@ -14,6 +14,7 @@
   *                 Joel Peshkin <bugreport@peshkin.net>
   *                 Erik Stambaugh <erik@dasbistro.com>
   *                 Marc Schumann <wurblzap@gmail.com>
+  *                 Guy Pyrzak <guy.pyrzak@gmail.com>
   */
 
 table.attachment_entry th {
@@ -121,10 +122,6 @@ table.attachment_info td {
     vertical-align: middle;
 }
 
-#attachment_attributes {
-    width: 25%;
-}
-
 #attachment_attributes div {
     padding-bottom: 0.4em;
 }
@@ -140,6 +137,105 @@ table.attachment_info td {
     display: block;
 }
 
-#attachment_attributes table#flags {
-    padding-top: 1em;
+#smallCommentFrame, #attachment_flags {
+    float: left;
+}
+
+#smallCommentFrame {
+    margin-right: 1.5em;
+}
+
+#attachment_comments_and_flags, #attachment_actions {
+    clear: both;
+    margin-bottom: 1ex;
+}
+
+#attachment_information_read_only .title {
+    font-weight: bold;
+    font-size: 1.5em;
+    padding: 0;
+    margin: 0;
+}
+
+#attachment_information_read_only .title #bz_edit {
+    font-size: 0.7em;
+}
+
+#attachment_information_read_only .details {
+    font-family: monospace;
+}
+
+#attachment_info.read #attachment_information_edit {
+    display: none;
+}
+
+#attachment_info.edit #attachment_information_read_only {
+    display: none;  
+}
+
+#attachment_info.edit #attachment_view_window {
+    float: left;
+    width: 80%;
+}
+
+#attachment_info.edit #attachment_information_edit {
+    width: 20%;
+}
+
+#attachment_info.edit #attachment_information_edit input.text,
+#attachment_info.edit #attachment_information_edit textarea {
+    width: 90%; 
+}
+
+#attachment_isobsolete {
+    padding-right: 1em;
+}
+
+#attachment_information_edit { 
+    float: left;
+}
+
+#smallCommentFrame textarea {
+    display: block;
+}
+
+textarea.bz_private {
+    border: 1px solid #F8C8BA;
+}
+
+#update {
+    clear: both; 
+    display: block;  
+}
+
+textarea {
+    font-family: monospace;
+}
+
+div#update_container {
+    clear: both; 
+    padding: 1.5em 0; 
+}
+
+#attachment_flags {
+    margin-bottom: 1em;
+}
+
+#attachment_flags p {
+    padding-bottom: 0;
+    margin-bottom: 0;
+}
+
+#editFrame, #viewDiffFrame, #viewFrame {
+    height: 400px; 
+    width: 100%;
+}
+
+.details span.bz_private{
+  border-left: 1px solid darkred;
+  padding-left: 0.5em;
+}
+
+.no_javascript .bz_hide, .no_javascript .bz_edit {
+    display: none;
 }

@@ -285,7 +285,7 @@
 
         <listitem>
           <para>
-            CGI &min-cgi-ver;
+            CGI (&min-cgi-ver;)
           </para>
         </listitem>
 
@@ -295,6 +295,18 @@
           </para>
         </listitem>
     
+        <listitem>
+          <para>
+            DateTime (&min-datetime-ver;)
+          </para>
+        </listitem>
+
+        <listitem>
+          <para>
+            DateTime::TimeZone (&min-datetime-timezone-ver;)
+          </para>
+        </listitem>
+
         <listitem>
           <para>
             DBI (&min-dbi-ver;)
@@ -322,8 +334,7 @@
 
         <listitem>
           <para>
-            <link linkend="install-modules-template">Template</link>
-            (&min-template-ver;)
+            Digest::SHA (&min-digest-sha-ver;)
           </para>
         </listitem>
 
@@ -335,7 +346,32 @@
 
         <listitem>
           <para>
+            Email::MIME (&min-email-mime-ver;)
+          </para>
+        </listitem>
+
+        <listitem>
+          <para>
+            Email::MIME::Encodings (&min-email-mime-encodings-ver;)
+          </para>
+        </listitem>
+
+        <listitem>
+          <para>
             Email::MIME::Modifier (&min-email-mime-modifier-ver;)
+          </para>
+        </listitem>
+
+        <listitem>
+          <para>
+            <link linkend="install-modules-template">Template</link>
+            (&min-template-ver;)
+          </para>
+        </listitem>
+
+        <listitem>
+          <para>
+            URI (&min-uri-ver;)
           </para>
         </listitem>
       </orderedlist>
@@ -352,7 +388,7 @@
         <listitem>
           <para>
             Template::Plugin::GD::Image
-            (&min-gd-ver;) for Graphical Reports
+            (&min-template-plugin-gd-image-ver;) for Graphical Reports
           </para>
         </listitem>
 
@@ -413,6 +449,13 @@
 
         <listitem>
           <para>
+            Authen::SASL
+            (&min-authen-sasl-ver;) for SASL Authentication
+          </para>
+        </listitem>
+
+        <listitem>
+          <para>
             Authen::Radius
             (&min-authen-radius-ver;) for RADIUS Authentication
           </para>
@@ -422,6 +465,20 @@
           <para>
             <link linkend="install-modules-soap-lite">SOAP::Lite</link>
             (&min-soap-lite-ver;) for the web service interface
+          </para>
+        </listitem>
+
+        <listitem>
+          <para>
+            JSON::RPC
+            (&min-json-rpc-ver;) for the JSON-RPC interface
+          </para>
+        </listitem>
+
+        <listitem>
+          <para>
+            Test::Taint
+            (&min-test-taint-ver;) for the web service interface
           </para>
         </listitem>
 
@@ -450,6 +507,20 @@
           <para>
             Email::Reply
             (&min-email-reply-ver;) for Inbound Email
+          </para>
+        </listitem>
+
+        <listitem>
+          <para>
+            TheSchwartz
+            (&min-theschwartz-ver;) for Mail Queueing
+          </para>
+        </listitem>
+
+        <listitem>
+          <para>
+            Daemon::Generic
+            (&min-daemon-generic-ver;) for Mail Queueing
           </para>
         </listitem>
 

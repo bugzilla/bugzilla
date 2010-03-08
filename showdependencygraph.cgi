@@ -58,7 +58,7 @@ local our (%seen, %edgesdone, %bugtitles);
 sub CreateImagemap {
     my $mapfilename = shift;
     my $map = "<map name=\"imagemap\">\n";
-    my $default;
+    my $default = "";
 
     open MAP, "<$mapfilename";
     while(my $line = <MAP>) {
@@ -206,6 +206,10 @@ foreach my $k (keys(%seen)) {
     my @params;
 
     if ($summary ne "" && $cgi->param('showsummary')) {
+        # Wide characters cause GraphViz to die.
+        if (Bugzilla->params->{'utf8'}) {
+            utf8::encode($summary) if utf8::is_utf8($summary);
+        }
         $summary =~ s/([\\\"])/\\$1/g;
         push(@params, qq{label="$k\\n$summary"});
     }

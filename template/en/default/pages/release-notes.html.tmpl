@@ -59,6 +59,52 @@
 
 <h2><a name="v34_point"></a>Updates In This 3.4.x Release</h2>
 
+<h3>3.4.6</h3>
+
+<ul>
+  <li>When doing a search that involves "not equals" or "does not contain the
+    string" or similar "negative" search types, the search description that
+    appears at the top of the resulting [% terms.bug %] list will indicate
+    that the search was of that type.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=474738">[% terms.Bug %] 474738</a>)
+  </li>
+  <li>In Internet Explorer, users couldn't easily mark a RESOLVED DUPLICATE
+    [%+ terms.bug %] as REOPENED, due to a JavaScript error.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=546719">[% terms.Bug %] 546719</a>)
+  </li>
+  <li>If you use a "bookmarkable template" to pre-fill forms on
+    the [% terms.bug %]-filing page, and you have custom fields
+    that are only supposed to appear (or only supposed to have certain
+    values) based on the values of other fields, those custom fields will
+    now work properly.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=538211">[% terms.Bug %] 538211</a>)
+  </li>
+  <li>If you have a custom field that's only supposed to appear when
+    a [% terms.bug %]'s resolution is FIXED, it will now behave properly
+    on the [% terms.bug %]-editing form when a user sets the [% terms.bug %]'s
+    status to RESOLVED.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=520993">[% terms.Bug %] 520993</a>)
+  </li>
+  <li>If you are logged-out and using <kbd>request.cgi</kbd>, the Requester
+    and Requestee fields no longer respect the <kbd>usermatching</kbd>
+    parameter--they always require full usernames.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=533018">[% terms.Bug %] 533018</a>)
+  </li>
+  <li>If you tried to do a search with too many terms (resulting in a URL
+    that was longer than about 7000 characters), Apache would return a 
+    500 error instead of your search results.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=513989">[% terms.Bug %] 513989</a>)
+  </li>
+  <li>[% terms.Bugzilla %] would sometimes lose fields from your sort order
+    when you added new fields to your sort order.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=470214">[% terms.Bug %] 470214</a>)
+  </li>
+  <li>The Atom format of search results would sometimes be missing the
+    Reporter or Assignee field for some [% terms.bugs %].
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=537834">[% terms.Bug %] 537834</a>)
+  </li>
+</ul>
+
 <h3>3.4.5</h3>
 
 <p>This release contains fixes for multiple security issues. See the

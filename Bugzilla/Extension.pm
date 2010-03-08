@@ -381,7 +381,7 @@ described in the L</Where Extension Code Goes> section above.
 During your subroutine, you may want to know what values were passed
 as CGI arguments  to the current script, or what arguments were passed to
 the current WebService method. You can get that data via 
-<Bugzilla/input_params>.
+L<Bugzilla/input_params>.
 
 =head3 Adding New Hooks To Bugzilla
 
@@ -447,8 +447,8 @@ named C<Foo>:
 Note that it is I<not> a subclass of C<Bugzilla::Extension>, because
 at the time that module requirements are being checked in L<checksetup>,
 C<Bugzilla::Extension> cannot be loaded. Also, just like F<Extension.pm>,
-it ends with C<< __PACKAGE__->NAME; >>. Note also that it has the exact
-same C<package> name as F<Extension.pm>.
+it ends with C<< __PACKAGE__->NAME; >>. Note also that it has the 
+B<exact same> C<package> name as F<Extension.pm>.
 
 This file may not use any Perl modules other than L<Bugzilla::Constants>,
 L<Bugzilla::Install::Util>, L<Bugzilla::Install::Requirements>, and 
@@ -483,8 +483,8 @@ which should have C<package Bugzilla::Extension::Foo::Bar;> as its package
 name.
 
 This allows any place in Bugzilla to load your modules, which is important
-for some hooks. It even allows other extensions to load your modules. It
-even allows you to install your modules into the global Perl install
+for some hooks. It even allows other extensions to load your modules, and 
+allows you to install your modules into the global Perl install
 as F<Bugzilla/Extension/Foo/Bar.pm>, if you'd like, which helps allow CPAN
 distribution of Bugzilla extensions.
 
@@ -594,7 +594,7 @@ C<header>.
 
 This is the name of the hook--what you saw in C<Hook.process> inside
 of the template you want to hook. In our example, this is 
-C<additioanl_header>.
+C<additional_header>.
 
 =item <template type>
 

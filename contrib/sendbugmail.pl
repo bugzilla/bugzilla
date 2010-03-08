@@ -4,8 +4,6 @@
 #
 # Nick Barnes, Ravenbrook Limited, 2004-04-01.
 #
-# $Id: sendbugmail.pl,v 1.8 2007/10/19 06:46:17 mkanat%bugzilla.org Exp $
-# 
 # Bugzilla email script for Bugzilla 2.17.4 and later.  Invoke this to send
 # bugmail for a bug which has been changed directly in the database.
 # This uses Bugzilla's own BugMail facility, and will email the

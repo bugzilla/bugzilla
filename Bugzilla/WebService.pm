@@ -19,10 +19,9 @@
 # actual RPC server, see Bugzilla::WebService::Server and its subclasses.
 package Bugzilla::WebService;
 use strict;
-use Date::Parse;
+use Bugzilla::WebService::Server;
+
 use XMLRPC::Lite;
-use Bugzilla::Util qw(datetime_from);
-use Scalar::Util qw(blessed);
 
 # Used by the JSON-RPC server to convert incoming date fields apprpriately.
 use constant DATE_FIELDS => {};
@@ -43,21 +42,15 @@ sub type {
     return XMLRPC::Data->type($type)->value($value);
 }
 
+# This is the XML-RPC implementation, see the README in Bugzilla/WebService/.
+# Our "base" implementation is in Bugzilla::WebService::Server.
 sub datetime_format_outbound {
-    my ($self, $date) = @_;
-
-    my $time = $date;
-    if (blessed($date)) {
-        # We expect this to mean we were sent a datetime object
-        $time->set_time_zone('UTC');
-    } else {
-        # We always send our time in UTC, for consistency.
-        # passed in value is likely a string, create a datetime object
-        $time = datetime_from($date, 'UTC');
-    }
-    return $time->iso8601();
+    my $self = shift;
+    my $value = Bugzilla::WebService::Server->datetime_format_outbound(@_);
+    # XML-RPC uses an ISO-8601 format that doesn't have any hyphens.
+    $value =~ s/-//g;
+    return $value;
 }
-
 
 1;
 

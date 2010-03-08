@@ -49,44 +49,6 @@ my $buffer = $cgi->query_string();
 my $user = Bugzilla->login();
 my $userid = $user->id;
 
-# Backwards compatibility hack -- if there are any of the old QUERY_*
-# cookies around, and we are logged in, then move them into the database
-# and nuke the cookie. This is required for Bugzilla 2.8 and earlier.
-if ($userid) {
-    my @oldquerycookies;
-    foreach my $i ($cgi->cookie()) {
-        if ($i =~ /^QUERY_(.*)$/) {
-            push(@oldquerycookies, [$1, $i, $cgi->cookie($i)]);
-        }
-    }
-    if (defined $cgi->cookie('DEFAULTQUERY')) {
-        push(@oldquerycookies, [DEFAULT_QUERY_NAME, 'DEFAULTQUERY',
-                                $cgi->cookie('DEFAULTQUERY')]);
-    }
-    if (@oldquerycookies) {
-        foreach my $ref (@oldquerycookies) {
-            my ($name, $cookiename, $value) = (@$ref);
-            if ($value) {
-                # If the query name contains invalid characters, don't import.
-                $name =~ /[<>&]/ && next;
-                trick_taint($name);
-                $dbh->bz_start_transaction();
-                my $query = $dbh->selectrow_array(
-                    "SELECT query FROM namedqueries " .
-                     "WHERE userid = ? AND name = ?",
-                     undef, ($userid, $name));
-                if (!$query) {
-                    $dbh->do("INSERT INTO namedqueries " .
-                            "(userid, name, query) VALUES " .
-                            "(?, ?, ?)", undef, ($userid, $name, $value));
-                }
-                $dbh->bz_commit_transaction();
-            }
-            $cgi->remove_cookie($cookiename);
-        }
-    }
-}
-
 if ($cgi->param('nukedefaultquery')) {
     if ($userid) {
         $dbh->do("DELETE FROM namedqueries" .

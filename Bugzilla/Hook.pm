@@ -77,6 +77,9 @@ subroutine to invoke any extension code if installed.
 
 The implementation of extensions is described in L<Bugzilla::Extension>.
 
+There is sample code for every hook in the Example extension, located in
+F<extensions/Example/Extension.pm>.
+
 =head2 How Hooks Work
 
 When a hook named C<HOOK_NAME> is run, Bugzilla looks through all

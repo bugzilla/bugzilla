@@ -1,5 +1,4 @@
 <!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"> -->
-<!-- $Id: installation.xml,v 1.172 2009/10/24 05:53:12 mkanat%bugzilla.org Exp $ -->
 <chapter id="installing-bugzilla">
   <title>Installing Bugzilla</title>
 

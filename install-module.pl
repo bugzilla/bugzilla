@@ -35,6 +35,7 @@ use Bugzilla::Install::CPAN;
 
 use Bugzilla::Constants;
 use Bugzilla::Install::Requirements;
+use Bugzilla::Install::Util qw(bin_loc);
 
 use Data::Dumper;
 use Getopt::Long;
@@ -101,6 +102,7 @@ if ($switch{'all'} || $switch{'upgrade-all'}) {
         # configuration, and really should be installed on its own.
         next if $cpan_name eq 'mod_perl2';
         next if $cpan_name eq 'DBD::Oracle' and !$ENV{ORACLE_HOME};
+        next if $cpan_name eq 'DBD::Pg' and !bin_loc('pg_config');
         install_module($cpan_name, $can_notest);
     }
 }

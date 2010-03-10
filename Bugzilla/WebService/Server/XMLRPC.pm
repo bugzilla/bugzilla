@@ -111,7 +111,7 @@ sub decode_value {
            # pass 'Z' specifier to datetime_from to force it
            $value = $value . 'Z';
         }
-        $value = $self->datetime_format_inbound($value);
+        $value = Bugzilla::WebService::Server::XMLRPC->datetime_format_inbound($value);
     }
 
     return $value;

@@ -153,7 +153,13 @@ sub extension_requirement_packages {
     # Bugzilla::Extension->load_all (because stuff has already been loaded).
     # (This matters because almost every page calls Bugzilla->feature, which
     # calls OPTIONAL_MODULES, which calls this method.)
-    if (eval { Bugzilla->extensions }) {
+    #
+    # We check if Bugzilla.pm is already loaded, instead of doing a "require",
+    # because we *do* want the code lower down to run during the Requirements
+    # phase of checksetup.pl, instead of Bugzilla->extensions, and Bugzilla.pm
+    # actually *can* be loaded during the Requirements phase if all the
+    # requirements have already been installed.
+    if ($INC{'Bugzilla.pm'}) {
         return Bugzilla->extensions;
     }
     my $packages = _cache()->{extension_requirement_packages};

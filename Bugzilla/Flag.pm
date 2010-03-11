@@ -550,6 +550,8 @@ sub retarget {
     foreach my $flagtype (@flagtypes) {
         next if !$flagtype->is_active;
         next if (!$flagtype->is_multiplicable && scalar @{$flagtype->{flags}});
+        next unless (($self->status eq '?' && $self->setter->can_request_flag($flagtype))
+                     || $self->setter->can_set_flag($flagtype));
 
         $self->{type_id} = $flagtype->id;
         delete $self->{type};

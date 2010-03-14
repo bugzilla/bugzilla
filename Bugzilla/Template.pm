@@ -237,7 +237,7 @@ sub quoteUrls {
     # we have to do this in one pattern, and so this is semi-messy.
     # Also, we can't use $bug_re?$comment_re? because that will match the
     # empty string
-    my $bug_word = get_text('term', { term => 'bug' });
+    my $bug_word = template_var('terms')->{bug};
     my $bug_re = qr/\Q$bug_word\E\s*\#?\s*(\d+)/i;
     my $comment_re = qr/comment\s*\#?\s*(\d+)/i;
     $text =~ s~\b($bug_re(?:\s*,?\s*$comment_re)?|$comment_re)
@@ -762,6 +762,11 @@ sub create {
             },
 
             'feature_enabled' => sub { return Bugzilla->feature(@_); },
+
+            # field_descs can be somewhat slow to generate, so we generate
+            # it only once per-language no matter how many times
+            # $template->process() is called.
+            'field_descs' => sub { return template_var('field_descs') },
 
             'install_string' => \&Bugzilla::Install::Util::install_string,
 

@@ -44,7 +44,7 @@ use base qw(Exporter);
                              file_mod_time is_7bit_clean
                              bz_crypt generate_random_password
                              validate_email_syntax clean_text
-                             get_text disable_utf8);
+                             get_text template_var disable_utf8);
 
 use Bugzilla::Constants;
 
@@ -621,6 +621,26 @@ sub get_text {
     return $message;
 }
 
+sub template_var {
+    my $name = shift;
+    my $cache = Bugzilla->request_cache->{util_template_var} ||= {};
+    my $template = Bugzilla->template_inner;
+    my $lang = Bugzilla->request_cache->{language};
+    return $cache->{$lang}->{$name} if defined $cache->{$lang};
+    my %vars;
+    # Note: If we suddenly start needing a lot of template_var variables,
+    # they should move into their own template, not field-descs.
+    my $result = $template->process('global/field-descs.none.tmpl', 
+                                    { vars => \%vars, in_template_var => 1 });
+    # Bugzilla::Error can't be "use"d in Bugzilla::Util.
+    if (!$result) {
+        require Bugzilla::Error;
+        Bugzilla::Error::ThrowTemplateError($template->error);
+    }
+    $cache->{$lang} = \%vars;
+    return $vars{$name};
+}
+
 sub disable_utf8 {
     if (Bugzilla->params->{'utf8'}) {
         binmode STDOUT, ':bytes'; # Turn off UTF8 encoding.
@@ -901,6 +921,14 @@ It uses the F<global/message.txt.tmpl> template to return a string.
 A string.
 
 =back
+
+
+=item C<template_var>
+
+This is a method of getting the value of a variable from a template in
+Perl code. The available variables are in the C<global/field-descs.none.tmpl>
+template. Just pass in the name of the variable that you want the value of.
+
 
 =back
 

@@ -18,5 +18,6 @@
   #   Max Kanat-Alexander <mkanat@bugzilla.org>
   #%]
 
-[% field_descs.votes = "Votes" %]
-
+[% IF in_template_var %]
+  [% vars.field_descs.votes = "Votes" %]
+[% END %]

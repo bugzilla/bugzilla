@@ -23,80 +23,6 @@
 
 [% PROCESS global/variables.none.tmpl %]
 
-[% field_descs = { "[Bug creation]"          => "[$terms.Bug creation]",
-                   "actual_time"             => "Actual Hours",
-                   "alias"                   => "Alias",
-                   "assigned_to"             => "Assignee",
-                   "attach_data.thedata"     => "Attachment data",
-                   "attachments.description" => "Attachment description",
-                   "attachments.filename"    => "Attachment filename",
-                   "attachments.mimetype"    => "Attachment mime type",
-                   "attachments.ispatch"     => "Attachment is patch",
-                   "attachments.isobsolete"  => "Attachment is obsolete",
-                   "attachments.isprivate"   => "Attachment is private",
-                   "attachments.isurl"       => "Attachment is a URL",
-                   "attachments.submitter"   => "Attachment creator",
-                   "blocked"                 => "Blocks",
-                   "bug_file_loc"            => "URL",
-                   "bug_group"               => "Group",
-                   "bug_id"                  => "$terms.Bug ID",
-                   "bug_severity"            => "Severity",
-                   "bug_status"              => "Status",
-                   "changeddate"             => "Changed",
-                   "cc"                      => "CC",
-                   "classification"          => "Classification",
-                   "cclist_accessible"       => "CC list accessible",
-                   "commenter"               => "Commenter",
-                   "component_id"            => "Component ID",
-                   "component"               => "Component",
-                   "content"                 => "Content",
-                   "creation_ts"             => "Creation date",
-                   "deadline"                => "Deadline",
-                   "delta_ts"                => "Changed",
-                   "dependson"               => "Depends on",
-                   "dup_id"                  => "Duplicate",
-                   "estimated_time"          => "Orig. Est.",
-                   "everconfirmed"           => "Ever confirmed",
-                   "flagtypes.name"          => "Flags",
-                   "keywords"                => "Keywords",
-                   "longdesc"                => "Comment",
-                   "longdescs.isprivate"     => "Comment is private",
-                   "newcc"                   => "CC",
-                   "op_sys"                  => "OS",
-                   "opendate"                => "Opened",
-                   "owner_idle_time"         => "Time Since Assignee Touched",
-                   "percentage_complete"     => "%Complete",
-                   "priority"                => "Priority",
-                   "product_id"              => "Product ID",
-                   "product"                 => "Product",
-                   "qa_contact"              => "QA Contact",
-                   "remaining_time"          => "Hours Left",
-                   "rep_platform"            => "Hardware",
-                   "reporter"                => "Reporter",
-                   "reporter_accessible"     => "Reporter accessible",
-                   "requestees.login_name"   => "Flag Requestee",
-                   "resolution"              => "Resolution",
-                   "see_also"                => "See Also",
-                   "setters.login_name"      => "Flag Setter",
-                   "setting"                 => "Setting",
-                   "settings"                => "Settings",
-                   "short_desc"              => "Summary",
-                   "status_whiteboard"       => "Whiteboard",
-                   "target_milestone"        => "Target Milestone",
-                   "version"                 => "Version",
-                   "work_time"               => "Hours Worked"} %]
-
-[%# Also include any custom fields or fields which don't have a
-    Description here, by copying their Description from the
-    database. If you want to override this for your language
-    or your installation, just use a hook. %]
-[% UNLESS Param('shutdownhtml') %]
-  [% FOREACH bz_field = bug_fields.values %]
-    [% SET field_descs.${bz_field.name} = bz_field.description
-       IF !field_descs.${bz_field.name}.defined %]
-  [% END %]
-[% END %]
-
 [% SET search_descs = {
   "noop"           => "---",
   "equals"         => "is equal to",
@@ -161,5 +87,88 @@
     [% value_name FILTER none %]
   [% END %]
 [% END %][% END %]
+
+[% IF in_template_var %]
+  [% vars.terms = terms %]
+
+  [%# field_descs is loaded as a global template variable and cached
+    # across all templates--see VARIABLES in Bugzilla/Template.pm.
+    #%]
+  [% vars.field_descs = {
+    "[Bug creation]"          => "[$terms.Bug creation]",
+     "actual_time"             => "Actual Hours",
+     "alias"                   => "Alias",
+     "assigned_to"             => "Assignee",
+     "attach_data.thedata"     => "Attachment data",
+     "attachments.description" => "Attachment description",
+     "attachments.filename"    => "Attachment filename",
+     "attachments.mimetype"    => "Attachment mime type",
+     "attachments.ispatch"     => "Attachment is patch",
+     "attachments.isobsolete"  => "Attachment is obsolete",
+     "attachments.isprivate"   => "Attachment is private",
+     "attachments.isurl"       => "Attachment is a URL",
+     "attachments.submitter"   => "Attachment creator",
+     "blocked"                 => "Blocks",
+     "bug_file_loc"            => "URL",
+     "bug_group"               => "Group",
+     "bug_id"                  => "$terms.Bug ID",
+     "bug_severity"            => "Severity",
+     "bug_status"              => "Status",
+     "changeddate"             => "Changed",
+     "cc"                      => "CC",
+     "classification"          => "Classification",
+     "cclist_accessible"       => "CC list accessible",
+     "commenter"               => "Commenter",
+     "component_id"            => "Component ID",
+     "component"               => "Component",
+     "content"                 => "Content",
+     "creation_ts"             => "Creation date",
+     "deadline"                => "Deadline",
+     "delta_ts"                => "Changed",
+     "dependson"               => "Depends on",
+     "dup_id"                  => "Duplicate",
+     "estimated_time"          => "Orig. Est.",
+     "everconfirmed"           => "Ever confirmed",
+     "flagtypes.name"          => "Flags",
+     "keywords"                => "Keywords",
+     "longdesc"                => "Comment",
+     "longdescs.isprivate"     => "Comment is private",
+     "newcc"                   => "CC",
+     "op_sys"                  => "OS",
+     "opendate"                => "Opened",
+     "owner_idle_time"         => "Time Since Assignee Touched",
+     "percentage_complete"     => "%Complete",
+     "priority"                => "Priority",
+     "product_id"              => "Product ID",
+     "product"                 => "Product",
+     "qa_contact"              => "QA Contact",
+     "remaining_time"          => "Hours Left",
+     "rep_platform"            => "Hardware",
+     "reporter"                => "Reporter",
+     "reporter_accessible"     => "Reporter accessible",
+     "requestees.login_name"   => "Flag Requestee",
+     "resolution"              => "Resolution",
+     "see_also"                => "See Also",
+     "setters.login_name"      => "Flag Setter",
+     "setting"                 => "Setting",
+     "settings"                => "Settings",
+     "short_desc"              => "Summary",
+     "status_whiteboard"       => "Whiteboard",
+     "target_milestone"        => "Target Milestone",
+     "version"                 => "Version",
+     "work_time"               => "Hours Worked",
+  } %]
+
+  [%# Also include any custom fields or fields which don't have a
+      Description here, by copying their Description from the
+      database. If you want to override this for your language
+      or your installation, just use a hook. %]
+  [% UNLESS Param('shutdownhtml') %]
+    [% FOREACH bz_field = bug_fields.values %]
+      [% SET vars.field_descs.${bz_field.name} = bz_field.description
+         IF !vars.field_descs.${bz_field.name}.defined %]
+    [% END %]
+  [% END %]
+[% END %]
 
 [% Hook.process("end") %]

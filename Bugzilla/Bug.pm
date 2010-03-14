@@ -2719,6 +2719,7 @@ sub comments {
             $comment->{count} = $count++;
             $comment->{bug} = $self;
         }
+        Bugzilla::Comment->preload($self->{'comments'});
     }
     my @comments = @{ $self->{'comments'} };
 

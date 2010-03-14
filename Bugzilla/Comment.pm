@@ -27,6 +27,7 @@ use base qw(Bugzilla::Object);
 use Bugzilla::Attachment;
 use Bugzilla::Constants;
 use Bugzilla::Error;
+use Bugzilla::User;
 use Bugzilla::Util;
 
 ###############################
@@ -72,6 +73,18 @@ sub update {
     my $changes = $self->SUPER::update(@_);
     $self->bug->_sync_fulltext();
     return $changes;
+}
+
+# Speeds up displays of comment lists by loading all ->author objects
+# at once for a whole list.
+sub preload {
+    my ($class, $comments) = @_;
+    my %user_ids = map { $_->{who} => 1 } @$comments;
+    my $users = Bugzilla::User->new_from_list([keys %user_ids]);
+    my %user_map = map { $_->id => $_ } @$users;
+    foreach my $comment (@$comments) {
+        $comment->{author} = $user_map{$comment->{who}};
+    }
 }
 
 ###############################

@@ -36,7 +36,7 @@
   #              already_wrapped: Determines whether the comment is pre-wrapped
   #%]
 
-[% PROCESS 'global/field-descs.none.tmpl' %]
+[% PROCESS 'global/variables.none.tmpl' %]
 
 [%- IF comment.type == constants.CMT_DUPE_OF -%]
 X[% comment.body %]
@@ -52,8 +52,7 @@ X[% comment.body %]
 [%+ terms.Bug %] moved to [% Param("move-to-url") %].
 If the move succeeded, [% comment.extra_data %] will receive a mail containing
 the number of the new [% terms.bug %] in the other database.
-If all went well, please mark this [% terms.bug %]
-[%+ get_status('VERIFIED') %], and paste in a link to the new [% terms.bug %].
+If all went well, please paste in a link to the new [% terms.bug %].
 Otherwise, reopen this [% terms.bug %].
 [%- ELSE -%]
 X[%- comment.body %]

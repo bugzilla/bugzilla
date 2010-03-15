@@ -28,7 +28,7 @@
 #                 Joel Peshkin <bugreport@peshkin.net>
 #                 Lance Larsh <lance.larsh@oracle.com>
 #                 Jesse Clark <jjclark1982@gmail.com>
-#                 Rémi Zara <remi_zara@mac.com>
+#                 RÃ©mi Zara <remi_zara@mac.com>
 
 use strict;
 

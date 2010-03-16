@@ -666,8 +666,10 @@ sub groups_mandatory {
     # is Mandatory, the group is Mandatory for everybody, regardless of their
     # group membership.
     my $ids = Bugzilla->dbh->selectcol_arrayref(
-        "SELECT group_id FROM group_control_map
-          WHERE product_id = ?
+        "SELECT group_id 
+           FROM group_control_map
+                INNER JOIN groups ON group_control_map.group_id = groups.id
+          WHERE product_id = ? AND isactive = 1
                 AND (membercontrol = $mandatory
                      OR (othercontrol = $mandatory
                          AND group_id NOT IN ($groups)))",
@@ -677,8 +679,8 @@ sub groups_mandatory {
 }
 
 # We don't just check groups_valid, because we want to know specifically
-# if this group is valid for the currently-logged-in user.
-sub group_is_valid {
+# if this group can be validly set by the currently-logged-in user.
+sub group_is_settable {
     my ($self, $group) = @_;
     my $group_id = blessed($group) ? $group->id : $group;
     my $is_mandatory = grep { $group_id == $_->id } 
@@ -686,6 +688,11 @@ sub group_is_valid {
     my $is_available = grep { $group_id == $_->id }
                             @{ $self->groups_available };
     return ($is_mandatory or $is_available) ? 1 : 0;
+}
+
+sub group_is_valid {
+    my ($self, $group) = @_;
+    return grep($_->id == $group->id, @{ $self->groups_valid }) ? 1 : 0;
 }
 
 sub groups_valid {
@@ -910,7 +917,7 @@ is set to Default for the currently-logged-in user.
 Tells you what groups are mandatory for bugs in this product, for the
 currently-logged-in user. Returns an arrayref of C<Bugzilla::Group> objects.
 
-=item C<group_is_valid>
+=item C<group_is_settable>
 
 =over
 
@@ -946,7 +953,9 @@ C<1> if the group is valid in this product, C<0> otherwise.
 
 Returns an arrayref of L<Bugzilla::Group> objects, representing groups
 that bugs could validly be restricted to within this product. Used mostly
-by L<Bugzilla::Bug> to assure that you're adding valid groups to a bug.
+when you need the list of all possible groups that could be set in a product
+by anybody, disregarding whether or not the groups are active or who the
+currently logged-in user is.
 
 B<Note>: This doesn't check whether or not the current user can add/remove
 bugs to/from these groups. It just tells you that bugs I<could be in> these
@@ -957,6 +966,13 @@ groups, in this product.
 =item B<Returns> An arrayref of L<Bugzilla::Group> objects.
 
 =back
+
+=item C<group_is_valid>
+
+Returns C<1> if the passed-in L<Bugzilla::Group> or group id could be set
+on a bug by I<anybody>, in this product. Even inactive groups are considered
+valid. (This is a shortcut for searching L</groups_valid> to find out if
+a group is valid in a particular product.)
 
 =item C<versions>
 

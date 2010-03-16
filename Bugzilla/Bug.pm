@@ -1410,7 +1410,7 @@ sub _check_groups {
             # so instead of doing check(), we just do "next" on an invalid
             # group.
             my $group = new Bugzilla::Group({ name => $name }) or next;
-            next if !$product->group_is_valid($group);
+            next if !$product->group_is_settable($group);
             $add_groups{$group->id} = $group;
         }
     }
@@ -2074,15 +2074,14 @@ sub set_product {
     }
     
     if ($product_changed) {
-        # Remove groups that aren't valid in the new product. This will also
-        # have the side effect of removing the bug from groups that aren't
-        # active anymore.
+        # Remove groups that can't be set in the new product, or that aren't
+        # active.
         #
         # We copy this array because the original array is modified while we're
         # working, and that confuses "foreach".
         my @current_groups = @{$self->groups_in};
         foreach my $group (@current_groups) {
-            if (!grep($group->id == $_->id, @{$product->groups_valid})) {
+            if (!$group->is_active or !$product->group_is_valid($group)) {
                 $self->remove_group($group);
             }
         }
@@ -2326,8 +2325,8 @@ sub add_group {
     return if !$group->is_active or !$group->is_bug_group;
 
     # Make sure that bugs in this product can actually be restricted
-    # to this group.
-    grep($group->id == $_->id, @{$self->product_obj->groups_valid})
+    # to this group by the current user.
+    $self->product_obj->group_is_settable($group)
          || ThrowUserError('group_invalid_restriction',
                 { product => $self->product, group_id => $group->id });
 
@@ -2355,12 +2354,14 @@ sub remove_group {
     return unless $group;
     
     # First, check if this is a valid group for this product.
-    # You can *always* remove a group that is not valid for this product, so
-    # we don't do any other checks if that's the case. (set_product does this.)
+    # You can *always* remove a group that is not valid for this product
+    # or that is not active, so we don't do any other checks if either of
+    # those are the case. (Users might remove inactive groups, and set_product
+    # removes groups that aren't valid for this product.)
     #
     # This particularly happens when isbuggroup is no longer 1, and we're
     # moving a bug to a new product.
-    if (grep($_->id == $group->id, @{$self->product_obj->groups_valid})) {   
+    if ($group->is_active and $self->product_obj->group_is_valid($group)) {
         my $controls = $self->product_obj->group_controls->{$group->id};
 
         # Nobody can ever remove a Mandatory group.

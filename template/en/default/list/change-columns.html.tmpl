@@ -34,10 +34,22 @@
 
 [% PROCESS "global/field-descs.none.tmpl" %]
 [% field_descs.short_short_desc     = "Summary (first 60 characters)" %]
-[% field_descs.short_desc           = "Full Summary" %]
-[% field_descs.assigned_to_realname = "Assignee Realname" %]
-[% field_descs.reporter_realname    = "Reporter Realname" %]
-[% field_descs.qa_contact_realname  = "QA Contact Realname" %]
+[% field_descs.short_desc           = "Summary (Full)" %]
+[% field_descs.assigned_to_realname = "$field_descs.assigned_to Real Name" %]
+[% field_descs.reporter_realname    = "$field_descs.reporter Real Name" %]
+[% field_descs.qa_contact_realname  = "$field_descs.qa_contact Real Name" %]
+
+[%# Create a mapping of field descriptions to field names, so that
+  # the "Available Columns" list can be sorted alphabetically by
+  # field description.
+  #%]
+[% SET available_columns = {} %]
+[% FOREACH column = columns.keys %]
+  [% NEXT IF collist.contains(column) %]
+  [%# We lowecase the keys so that the sort happens case-insensitively. %]
+  [% SET column_desc = field_descs.$column || column FILTER lower %]
+  [% available_columns.$column_desc = column %]
+[% END %]
 
 <form name="changecolumns" action="colchange.cgi" onsubmit="change_submit();">
   <input type="hidden" name="rememberedquery" value="[% buffer FILTER html %]">
@@ -70,12 +82,13 @@
                 [% (field_descs.${column} || column) FILTER html %]
               </option>
             [% END %]
-            [% FOREACH column = masterlist %]
-              [% IF lsearch(collist, column) == -1 %]
-                <option value="[% column FILTER html %]">
-                  [% (field_descs.${column} || column) FILTER html %]
-                </option>
-              [% END %]
+            [% FOREACH key = available_columns.keys.sort %]
+              [% SET column = available_columns.$key %]
+              <option value="[% column FILTER html %]">
+                [%# Don't display the lower-cased column description,
+                  # display the correct-case one. %]
+                [% (field_descs.$column || column) FILTER html %]
+              </option>
             [% END %]
           </select>
         </td>

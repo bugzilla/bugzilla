@@ -24,7 +24,6 @@
 #                 Pascal Held <paheld@gmail.com>
 
 use strict;
-
 use lib qw(. lib);
 
 use Bugzilla;
@@ -34,7 +33,24 @@ use Bugzilla::CGI;
 use Bugzilla::Search::Saved;
 use Bugzilla::Error;
 use Bugzilla::User;
-use Bugzilla::Keyword;
+
+use Storable qw(dclone);
+
+# Maps parameters that control columns to the names of columns.
+use constant COLUMN_PARAMS => {
+    'useclassification'   => ['classification'],
+    'usebugaliases'       => ['alias'],
+    'usetargetmilestone'  => ['target_milestone'],
+    'useqacontact'        => ['qa_contact', 'qa_contact_realname'],
+    'usestatuswhiteboard' => ['status_whiteboard'],
+};
+
+# We only show these columns if an object of this type exists in the
+# database.
+use constant COLUMN_CLASSES => {
+    'Bugzilla::Flag'    => 'flagtypes.name',
+    'Bugzilla::Keyword' => 'keywords',
+};
 
 Bugzilla->login();
 
@@ -42,52 +58,31 @@ my $cgi = Bugzilla->cgi;
 my $template = Bugzilla->template;
 my $vars = {};
 
-# The master list not only says what fields are possible, but what order
-# they get displayed in.
-my @masterlist = ("opendate", "changeddate", "bug_severity", "priority",
-                  "rep_platform", "assigned_to", "assigned_to_realname",
-                  "reporter", "reporter_realname", "bug_status",
-                  "resolution");
+my $columns = dclone(Bugzilla::Search::COLUMNS);
 
-if (Bugzilla->params->{"useclassification"}) {
-    push(@masterlist, "classification");
-}
+# You can't manually select "relevance" as a column you want to see.
+delete $columns->{'relevance'};
 
-push(@masterlist, ("product", "component", "version", "op_sys"));
-
-if (Bugzilla->params->{"usebugaliases"}) {
-    unshift(@masterlist, "alias");
-}
-if (Bugzilla->params->{"usetargetmilestone"}) {
-    push(@masterlist, "target_milestone");
-}
-if (Bugzilla->params->{"useqacontact"}) {
-    push(@masterlist, "qa_contact");
-    push(@masterlist, "qa_contact_realname");
-}
-if (Bugzilla->params->{"usestatuswhiteboard"}) {
-    push(@masterlist, "status_whiteboard");
-}
-if (Bugzilla::Keyword->any_exist) {
-    push(@masterlist, "keywords");
-}
-if (Bugzilla->has_flags) {
-    push(@masterlist, "flagtypes.name");
-}
-if (Bugzilla->user->is_timetracker) {
-    push(@masterlist, ("estimated_time", "remaining_time", "actual_time",
-                       "percentage_complete", "deadline")); 
+foreach my $param (keys %{ COLUMN_PARAMS() }) {
+    next if Bugzilla->params->{$param};
+    foreach my $column (@{ COLUMN_PARAMS->{$param} }) {
+        delete $columns->{$column};
+    }
 }
 
-push(@masterlist, ("short_desc", "short_short_desc"));
+foreach my $class (keys %{ COLUMN_CLASSES() }) {
+    eval("use $class; 1;") || die $@;
+    my $column = COLUMN_CLASSES->{$class};
+    delete $columns->{$column} if !$class->any_exist;
+}
 
-my @custom_fields = grep { $_->type != FIELD_TYPE_MULTI_SELECT }
-                         Bugzilla->active_custom_fields;
-push(@masterlist, map { $_->name } @custom_fields);
+if (!Bugzilla->user->is_timetracker) {
+    foreach my $column (TIMETRACKING_FIELDS) {
+        delete $columns->{$column};
+    }
+}
 
-Bugzilla::Hook::process('colchange_columns', {'columns' => \@masterlist} );
-
-$vars->{'masterlist'} = \@masterlist;
+$vars->{'columns'} = $columns;
 
 my @collist;
 if (defined $cgi->param('rememberedquery')) {
@@ -96,8 +91,8 @@ if (defined $cgi->param('rememberedquery')) {
         @collist = DEFAULT_COLUMN_LIST;
     } else {
         if (defined $cgi->param("selected_columns")) {
-            my %legal_list = map { $_ => 1 } @masterlist;
-            @collist = grep { exists $legal_list{$_} } $cgi->param("selected_columns");
+            @collist = grep { exists $columns->{$_} } 
+                            $cgi->param("selected_columns");
         }
         if (defined $cgi->param('splitheader')) {
             $splitheader = $cgi->param('splitheader')? 1: 0;

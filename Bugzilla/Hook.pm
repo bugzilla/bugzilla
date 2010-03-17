@@ -428,21 +428,6 @@ spaces.
 =back
 
 
-=head2 colchange_columns
-
-This happens in F<colchange.cgi> right after the list of possible display
-columns have been defined and gives you the opportunity to add additional
-display columns to the list of selectable columns.
-
-Params:
-
-=over
-
-=item C<columns> - An arrayref containing an array of column IDs.  Any IDs
-added by this hook must have been defined in the the L</buglist_columns> hook.
-
-=back
-
 =head2 config_add_panels
 
 If you want to add new panels to the Parameters administrative interface,

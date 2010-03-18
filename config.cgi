@@ -83,6 +83,15 @@ if ($cgi->param('product')) {
 
 Bugzilla::Product::preload($vars->{'products'});
 
+# Allow consumers to specify whether or not they want flag data.
+if (defined $cgi->param('flags')) {
+    $vars->{'show_flags'} = $cgi->param('flags');
+}
+else {
+    # We default to sending flag data.
+    $vars->{'show_flags'} = 1;
+}
+
 # Create separate lists of open versus resolved statuses.  This should really
 # be made part of the configuration.
 my @open_status;

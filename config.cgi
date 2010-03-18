@@ -35,8 +35,10 @@ use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Keyword;
+use Bugzilla::Product;
 use Bugzilla::Status;
 use Bugzilla::Field;
+
 use Digest::MD5 qw(md5_base64);
 
 my $user = Bugzilla->login(LOGIN_OPTIONAL);
@@ -78,6 +80,8 @@ if ($cgi->param('product')) {
 } else {
     $vars->{'products'} = $user->get_selectable_products;
 }
+
+Bugzilla::Product::preload($vars->{'products'});
 
 # Create separate lists of open versus resolved statuses.  This should really
 # be made part of the configuration.

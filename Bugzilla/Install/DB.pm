@@ -105,6 +105,8 @@ sub update_fielddefs_definition {
     #2008-08-26 elliotte_martin@yahoo.com - Bug 251556
     $dbh->bz_add_column('fielddefs', 'reverse_desc', {TYPE => 'TINYTEXT'});
 
+    $dbh->do('UPDATE fielddefs SET buglist = 1
+               WHERE custom = 1 AND type = ' . FIELD_TYPE_MULTI_SELECT);
 
     # Remember, this is not the function for adding general table changes.
     # That is below. Add new changes to the fielddefs table above this

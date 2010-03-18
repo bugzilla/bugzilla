@@ -162,8 +162,18 @@ sub COLUMNS {
     foreach my $field (Bugzilla->get_fields({ obsolete => 0, buglist => 1 })) {
         my $id = $field->name;
         $id = $old_names{$id} if exists $old_names{$id};
-        my $sql = 'bugs.' . $field->name;
-        $sql = $special_sql{$id} if exists $special_sql{$id};
+        my $sql;
+        if (exists $special_sql{$id}) {
+            $sql = $special_sql{$id};
+        }
+        elsif ($field->type == FIELD_TYPE_MULTI_SELECT) {
+            $sql = $dbh->sql_group_concat(
+                'DISTINCT map_bug_' . $field->name . '.value',
+                $dbh->quote(', '));
+        }
+        else {
+            $sql = 'bugs.' . $field->name;
+        }
         $columns{$id} = { name => $sql, title => $field->description };
     }
 
@@ -272,6 +282,12 @@ sub init {
     if (grep($_ eq 'actual_time' || $_ eq 'percentage_complete', @fields)) {
         push(@supptables, "LEFT JOIN longdescs AS ldtime " .
                           "ON ldtime.bug_id = bugs.bug_id");
+    }
+    foreach my $field (@multi_select_fields) {
+        my $field_name = $field->name;
+        next if !grep($_ eq $field_name, @fields);
+        push(@supptables, "LEFT JOIN bug_$field_name AS map_bug_$field_name"
+                          . " ON map_bug_$field_name.bug_id = bugs.bug_id");
     }
 
     if (grep($_ eq 'flagtypes.name', @fields)) {

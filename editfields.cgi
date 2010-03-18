@@ -64,7 +64,7 @@ elsif ($action eq 'new') {
         enter_bug   => scalar $cgi->param('enter_bug'),
         obsolete    => scalar $cgi->param('obsolete'),
         custom      => 1,
-        buglist     => (scalar $cgi->param('type') == FIELD_TYPE_MULTI_SELECT ? 0 : 1),
+        buglist     => 1,
         visibility_field_id => scalar $cgi->param('visibility_field_id'),
         visibility_value_id => scalar $cgi->param('visibility_value_id'),
         value_field_id => scalar $cgi->param('value_field_id'),

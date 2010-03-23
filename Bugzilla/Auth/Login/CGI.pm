@@ -57,10 +57,8 @@ sub fail_nodata {
     my $cgi = Bugzilla->cgi;
     my $template = Bugzilla->template;
 
-    if (Bugzilla->error_mode == Bugzilla::Constants::ERROR_MODE_DIE_SOAP_FAULT) {
-        die SOAP::Fault
-            ->faultcode(ERROR_AUTH_NODATA)
-            ->faultstring('Login Required');
+    if (Bugzilla->usage_mode != USAGE_MODE_BROWSER) {
+        ThrowUserError('login_required');
     }
 
     print $cgi->header();

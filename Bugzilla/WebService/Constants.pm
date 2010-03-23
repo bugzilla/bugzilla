@@ -24,7 +24,6 @@ our @EXPORT = qw(
     WS_ERROR_CODE
     ERROR_UNKNOWN_FATAL
     ERROR_UNKNOWN_TRANSIENT
-    ERROR_AUTH_NODATA
 
     WS_DISPATCH
 );
@@ -99,6 +98,9 @@ use constant WS_ERROR_CODE => {
     extern_id_conflict           => -303,
     auth_failure                 => 304,
 
+    # Except, historically, AUTH_NODATA, which is 410.
+    login_required               => 410,
+
     # User errors are 500-600.
     account_exists        => 500,
     illegal_email_address => 501,
@@ -120,7 +122,6 @@ use constant WS_ERROR_CODE => {
 use constant ERROR_UNKNOWN_FATAL     => -32000;
 use constant ERROR_UNKNOWN_TRANSIENT => 32000;
 
-use constant ERROR_AUTH_NODATA   => 410;
 use constant ERROR_GENERAL       => 999;
 
 sub WS_DISPATCH {

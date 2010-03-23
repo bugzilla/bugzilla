@@ -1043,6 +1043,7 @@ sub GetByWordList {
     my ($field, $strs) = (@_);
     my @list;
     my $dbh = Bugzilla->dbh;
+    return [] unless defined $strs;
 
     foreach my $w (split(/[\s,]+/, $strs)) {
         my $word = $w;

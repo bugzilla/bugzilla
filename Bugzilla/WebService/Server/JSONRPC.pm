@@ -52,6 +52,25 @@ sub create_json_coder {
 # Override the JSON::RPC method to return our CGI object instead of theirs.
 sub cgi { return Bugzilla->cgi; }
 
+# Override the JSON::RPC method to use $cgi->header properly instead of
+# just printing text directly. This fixes various problems, including
+# sending Bugzilla's cookies properly.
+sub response {
+    my ($self, $response) = @_;
+    my $headers = $response->headers;
+    my @header_args;
+    foreach my $name ($headers->header_field_names) {
+        my @values = $headers->header($name);
+        $name =~ s/-/_/g;
+        foreach my $value (@values) {
+            push(@header_args, "-$name", $value);
+        }
+    }
+    my $cgi = $self->cgi;
+    print $cgi->header(-status => $response->code, @header_args);
+    print $response->content;
+}
+
 sub type {
     my ($self, $type, $value) = @_;
     

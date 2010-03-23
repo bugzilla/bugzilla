@@ -49,7 +49,7 @@ use Bugzilla::Group;
 use Bugzilla::Status;
 use Bugzilla::Comment;
 
-use List::Util qw(min);
+use List::Util qw(min first);
 use Storable qw(dclone);
 use URI;
 use URI::QueryParam;
@@ -3315,6 +3315,20 @@ sub check_can_change_field {
         return 1;
     }
 
+    my @priv_results;
+    Bugzilla::Hook::process('bug_check_can_change_field',
+        { bug => $self, field => $field, 
+          new_value => $newvalue, old_value => $oldvalue, 
+          priv_results => \@priv_results });
+    if (my $priv_required = first { $_ > 0 } @priv_results) {
+        $$PrivilegesRequired = $priv_required;
+        return 0;
+    }
+    my $allow_found = first { $_ == 0 } @priv_results;
+    if (defined $allow_found) {
+        return 1;
+    }
+
     # Allow anyone to change comments.
     if ($field =~ /^longdesc/) {
         return 1;
@@ -3324,15 +3338,15 @@ sub check_can_change_field {
     # We store the required permission set into the $PrivilegesRequired
     # variable which gets passed to the error template.
     #
-    # $PrivilegesRequired = 0 : no privileges required;
-    # $PrivilegesRequired = 1 : the reporter, assignee or an empowered user;
-    # $PrivilegesRequired = 2 : the assignee or an empowered user;
-    # $PrivilegesRequired = 3 : an empowered user.
+    # $PrivilegesRequired = PRIVILEGES_REQUIRED_NONE : no privileges required;
+    # $PrivilegesRequired = PRIVILEGES_REQUIRED_REPORTER : the reporter, assignee or an empowered user;
+    # $PrivilegesRequired = PRIVILEGES_REQUIRED_ASSIGNEE : the assignee or an empowered user;
+    # $PrivilegesRequired = PRIVILEGES_REQUIRED_EMPOWERED : an empowered user.
     
     # Only users in the time-tracking group can change time-tracking fields.
     if ( grep($_ eq $field, qw(deadline estimated_time remaining_time)) ) {
         if (!$user->is_timetracker) {
-            $$PrivilegesRequired = 3;
+            $$PrivilegesRequired = PRIVILEGES_REQUIRED_EMPOWERED;
             return 0;
         }
     }
@@ -3344,7 +3358,7 @@ sub check_can_change_field {
 
     # *Only* users with (product-specific) "canconfirm" privs can confirm bugs.
     if ($self->_changes_everconfirmed($field, $oldvalue, $newvalue)) {
-        $$PrivilegesRequired = 3;
+        $$PrivilegesRequired = PRIVILEGES_REQUIRED_EMPOWERED;
         return $user->in_group('canconfirm', $self->{'product_id'});
     }
 
@@ -3375,36 +3389,36 @@ sub check_can_change_field {
     #   in that case we will have already returned 1 above
     #   when checking for the assignee of the bug.
     if ($field eq 'assigned_to') {
-        $$PrivilegesRequired = 2;
+        $$PrivilegesRequired = PRIVILEGES_REQUIRED_ASSIGNEE;
         return 0;
     }
     # - change the QA contact
     if ($field eq 'qa_contact') {
-        $$PrivilegesRequired = 2;
+        $$PrivilegesRequired = PRIVILEGES_REQUIRED_ASSIGNEE;
         return 0;
     }
     # - change the target milestone
     if ($field eq 'target_milestone') {
-        $$PrivilegesRequired = 2;
+        $$PrivilegesRequired = PRIVILEGES_REQUIRED_ASSIGNEE;
         return 0;
     }
     # - change the priority (unless he could have set it originally)
     if ($field eq 'priority'
         && !Bugzilla->params->{'letsubmitterchoosepriority'})
     {
-        $$PrivilegesRequired = 2;
+        $$PrivilegesRequired = PRIVILEGES_REQUIRED_ASSIGNEE;
         return 0;
     }
     # - unconfirm bugs (confirming them is handled above)
     if ($field eq 'everconfirmed') {
-        $$PrivilegesRequired = 2;
+        $$PrivilegesRequired = PRIVILEGES_REQUIRED_ASSIGNEE;
         return 0;
     }
     # - change the status from one open state to another
     if ($field eq 'bug_status'
         && is_open_state($oldvalue) && is_open_state($newvalue)) 
     {
-       $$PrivilegesRequired = 2;
+       $$PrivilegesRequired = PRIVILEGES_REQUIRED_ASSIGNEE;
        return 0;
     }
 
@@ -3415,7 +3429,7 @@ sub check_can_change_field {
 
     # If we haven't returned by this point, then the user doesn't
     # have the necessary permissions to change this field.
-    $$PrivilegesRequired = 1;
+    $$PrivilegesRequired = PRIVILEGES_REQUIRED_REPORTER;
     return 0;
 }
 

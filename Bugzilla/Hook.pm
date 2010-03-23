@@ -249,6 +249,66 @@ C<$changes-E<gt>{field} = [old, new]>
 
 =back
 
+=head2 bug_check_can_change_field
+
+This hook controls what fields users are allowed to change. You can add code here for 
+site-specific policy changes and other customizations. This hook is only
+executed if the field's new and old values differ. Any denies take priority over any allows. 
+So, if another extension denies a change but yours allows the change, the other extension's 
+deny will override your extension's allow.
+
+Params:
+
+=over
+
+=item C<bug>
+
+L<Bugzilla::Bug> - The current bug object that this field is changing on.
+
+=item C<field>
+
+The name (from the C<fielddefs> table) of the field that we are checking.
+
+=item C<new_value>
+
+The new value that the field is being changed to.
+
+=item C<old_value>
+
+The old value that the field is being changed from.
+
+=item C<priv_results>
+
+C<array> - This is how you explicitly allow or deny a change. You should only
+push something into this array if you want to explicitly allow or explicitly
+deny the change, and thus skip all other permission checks that would otherwise
+happen after this hook is called. If you don't care about the field change,
+then don't push anything into the array.
+
+The pushed value should be a choice from the following constants:
+
+=over
+
+=item C<PRIVILEGES_REQUIRED_NONE>
+
+No privileges required. This explicitly B<allows> a change.
+
+=item C<PRIVILEGES_REQUIRED_REPORTER>
+
+User is not the reporter, assignee or an empowered user, so B<deny>.
+
+=item C<PRIVILEGES_REQUIRED_ASSIGNEE>
+
+User is not the assignee or an empowered user, so B<deny>.
+
+=item C<PRIVILEGES_REQUIRED_EMPOWERED>
+
+User is not a sufficiently empowered user, so B<deny>.
+
+=back
+
+=back
+
 =head2 bug_fields
 
 Allows the addition of database fields from the bugs table to the standard

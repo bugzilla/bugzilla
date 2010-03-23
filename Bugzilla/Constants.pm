@@ -175,6 +175,11 @@ use File::Basename;
     PASSWORD_SALT_LENGTH
     
     CGI_URI_LIMIT
+
+    PRIVILEGES_REQUIRED_NONE
+    PRIVILEGES_REQUIRED_REPORTER
+    PRIVILEGES_REQUIRED_ASSIGNEE
+    PRIVILEGES_REQUIRED_EMPOWERED
 );
 
 @Bugzilla::Constants::EXPORT_OK = qw(contenttypes);
@@ -521,6 +526,15 @@ use constant PASSWORD_SALT_LENGTH => 8;
 # via POST such as buglist.cgi. This value determines whether the redirect
 # can be safely done or not based on the web server's URI length setting.
 use constant CGI_URI_LIMIT => 8000;
+
+# If the user isn't allowed to change a field, we must tell him who can.
+# We store the required permission set into the $PrivilegesRequired
+# variable which gets passed to the error template.
+
+use constant PRIVILEGES_REQUIRED_NONE      => 0;
+use constant PRIVILEGES_REQUIRED_REPORTER  => 1;
+use constant PRIVILEGES_REQUIRED_ASSIGNEE  => 2;
+use constant PRIVILEGES_REQUIRED_EMPOWERED => 3;
 
 sub bz_locations {
     # We know that Bugzilla/Constants.pm must be in %INC at this point.

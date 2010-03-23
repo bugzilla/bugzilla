@@ -775,9 +775,9 @@
       to <em>[% newvalue.join(', ') FILTER html %]</em>
     [% END %]
     , but only
-    [% IF privs < 3 %]
+    [% IF privs < constants.PRIVILEGES_REQUIRED_EMPOWERED %]
       the assignee
-      [% IF privs < 2 %] or reporter [% END %]
+      [% IF privs < constants.PRIVILEGES_REQUIRED_ASSIGNEE %] or reporter [% END %]
       of the [% terms.bug %], or
     [% END %]
     a user with the required permissions may change that field.

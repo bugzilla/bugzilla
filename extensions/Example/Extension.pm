@@ -29,6 +29,7 @@ use Bugzilla::Error;
 use Bugzilla::Group;
 use Bugzilla::User;
 use Bugzilla::Util qw(diff_arrays html_quote);
+use Bugzilla::Status qw(is_open_state);
 
 # This is extensions/Example/lib/Util.pm. I can load this here in my
 # Extension.pm only because I have a Config.pm.
@@ -584,6 +585,44 @@ sub template_before_process {
 
     if ($file eq 'bug/edit.html.tmpl') {
         $vars->{'viewing_the_bug_form'} = 1;
+    }
+}
+
+sub bug_check_can_change_field {
+    my ($self, $args) = @_;
+
+    my ($bug, $field, $new_value, $old_value, $priv_results)
+        = @$args{qw(bug field new_value old_value priv_results)};
+
+    my $user = Bugzilla->user;
+
+    # Disallow a bug from being reopened if currently closed unless user 
+    # is in 'admin' group
+    if ($field eq 'bug_status' && $bug->product_obj->name eq 'Example') {
+        if (!is_open_state($old_value) && is_open_state($new_value) 
+            && !$user->in_group('admin')) 
+        {
+            push(@$priv_results, PRIVILEGES_REQUIRED_EMPOWERED);
+            return;
+        }
+    }
+
+    # Disallow a bug's keywords from being edited unless user is the
+    # reporter of the bug 
+    if ($field eq 'keywords' && $bug->product_obj->name eq 'Example' 
+        && $user->login ne $bug->reporter->login) 
+    {
+        push(@$priv_results, PRIVILEGES_REQUIRED_REPORTER);
+        return;
+    }
+
+    # Allow updating of priority even if user cannot normally edit the bug 
+    # and they are in group 'engineering'
+    if ($field eq 'priority' && $bug->product_obj->name eq 'Example'
+        && $user->in_group('engineering')) 
+    {
+        push(@$priv_results, PRIVILEGES_REQUIRED_NONE);
+        return;
     }
 }
 

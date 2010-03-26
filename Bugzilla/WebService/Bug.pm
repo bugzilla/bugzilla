@@ -588,9 +588,7 @@ sub attachments {
             $self->_attachment_to_hash($attach, $params);
     }
 
-    $bugs{attachments} = \%attachments;
-
-    return { bugs => \%bugs };
+    return { bugs => \%bugs, attachments => \%attachments };
 }
 
 ##############################

@@ -109,10 +109,22 @@ function toggle_display(link) {
               <i>no flags</i>
             [% ELSE %]
               [% FOREACH flag = attachment.flags %]
-                [% flag.setter.nick FILTER html %]:
+                [% IF user.id %]
+                  <span title="[% flag.setter.identity FILTER html %]">[% flag.setter.nick FILTER html %]</span>:
+                [% ELSIF flag.setter.name %]
+                  <span title="[% flag.setter.name FILTER html %]">[% flag.setter.nick FILTER html %]</span>:
+                [% ELSE %]
+                  [% flag.setter.nick FILTER html %]:
+                [% END %]
                 [%+ flag.type.name FILTER html FILTER no_break %][% flag.status %]
                 [%+ IF flag.status == "?" && flag.requestee %]
-                  ([% flag.requestee.nick FILTER html %])
+                  [% IF user.id %]
+                    (<span title="[% flag.requestee.identity FILTER html %]">[% flag.requestee.nick FILTER html %]</span>)
+                  [% ELSIF flag.requestee.name %]
+                    (<span title="[% flag.requestee.name FILTER html %]">[% flag.requestee.nick FILTER html %]</span>)
+                  [% ELSE %]
+                    ([% flag.requestee.nick FILTER html %])
+                  [% END %]
                 [% END %]<br>
               [% END %]
             [% END %]

@@ -53,7 +53,7 @@
     [% FOREACH flag = type.flags %]
       <tr>
         <td>
-          [% flag.setter.nick FILTER html %]:
+          <span title="[% flag.setter.identity FILTER html %]">[% flag.setter.nick FILTER html %]</span>:
         </td>
         <td>
           <label title="[% type.description FILTER html %]"
@@ -147,10 +147,18 @@
         <p><b>Flags:</b></p>
         [% header_displayed = 1 %]
       [% END %]
-      [% flag.setter.nick FILTER html %]:
+      [% IF flag.setter.name %]
+        <span title="[% flag.setter.name FILTER html %]">[% flag.setter.nick FILTER html %]</span>:
+      [% ELSE %]
+        [% flag.setter.nick FILTER html %]:
+      [% END %]
       [%+ type.name FILTER html FILTER no_break %][% flag.status %]
       [% IF flag.requestee %]
-        ([% flag.requestee.nick FILTER html %])
+        [% IF flag.requestee.name %]
+          (<span title="[% flag.requestee.name FILTER html %]">[% flag.requestee.nick FILTER html %]</span>)
+        [% ELSE %]
+          ([% flag.requestee.nick FILTER html %])
+        [% END %]
       [% END %]<br>
     [% END %]
   [% END %]

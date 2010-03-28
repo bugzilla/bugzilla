@@ -1923,6 +1923,11 @@ A hash with one element, C<id> whose value is the id of the newly-created commen
 
 =over
 
+=item 54 (Hours Worked Too Large)
+
+You specified a C<work_time> larger than the maximum allowed value of
+C<99999.99>.
+
 =item 100 (Invalid Bug Alias) 
 
 If you specified an alias and either: (a) the Bugzilla you're querying
@@ -1940,6 +1945,11 @@ You did not have the necessary rights to edit the bug.
 
 You tried to add a private comment, but don't have the necessary rights.
 
+=item 114 (Comment Too Long)
+
+You tried to add a comment longer than the maximum allowed length
+(65,535 characters).
+
 =back
 
 =item B<History>
@@ -1956,6 +1966,9 @@ but can't, in Bugzilla B<3.4>.
 =item Before Bugzilla B<3.6>, the C<is_private> argument was called
 C<private>, and you can still call it C<private> for backwards-compatibility
 purposes if you wish.
+
+=item Before Bugzilla B<3.6>, error 54 and error 114 had a generic error
+code of 32000.
 
 =back
 
@@ -2055,6 +2068,11 @@ You did not have the necessary rights to edit the bug.
 
 One of the URLs you provided did not look like a valid bug URL.
 
+=item 115 (See Also Edit Denied)
+
+You did not have the necessary rights to edit the See Also field for
+this bug.
+
 =back
 
 =item B<History>
@@ -2062,6 +2080,8 @@ One of the URLs you provided did not look like a valid bug URL.
 =over
 
 =item Added in Bugzilla B<3.4>.
+
+=item Before Bugzilla B<3.6>, error 115 had a generic error code of 32000.
 
 =back
 

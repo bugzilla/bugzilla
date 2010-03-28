@@ -297,7 +297,8 @@
 
   [% ELSIF error == "comment_too_long" %]
     [% title = "Comment Too Long" %]
-    Comments cannot be longer than 65,535 characters.
+    Comments cannot be longer than 
+    [%+ constants.MAX_COMMENT_LENGTH FILTER html %] characters.
 
   [% ELSIF error == "auth_classification_not_enabled" %]
     [% title = "Classification Not Enabled" %]

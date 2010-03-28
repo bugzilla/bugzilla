@@ -175,7 +175,7 @@ TUI_hide_default('expert_fields');
 <input type="hidden" name="product" value="[% product.name FILTER html %]">
 <input type="hidden" name="token" value="[% token FILTER html %]">
 
-<table cellspacing="4" cellpadding="2" border="0">
+<table>
 <tbody>
   <tr>
     <td colspan="4">
@@ -204,11 +204,12 @@ TUI_hide_default('expert_fields');
   </tr>
 
   <tr>
-    <th>Product:</th>
-    <td width="10%">[% product.name FILTER html %]</td>
-
-    <th>Reporter:</th>
-    <td width="100%">[% user.login FILTER html %]</td>
+    [% INCLUDE bug/field.html.tmpl
+      bug = default, field = bug_fields.product, editable = 0,
+      value = product.name %]
+    [% INCLUDE bug/field.html.tmpl
+      bug = default, field = bug_fields.reporter, editable = 0,
+      value = user.login %]
   </tr>
 
   [%# We can't use the select block in these two cases for various reasons. %]
@@ -217,7 +218,7 @@ TUI_hide_default('expert_fields');
       <a href="describecomponents.cgi?product=[% product.name FILTER url_quote %]">
       Component</a>:
     </th>
-    <td>
+    <td id="field_container_component">
       <select name="component" id="component" onchange="set_assign_to();"
               size="7" aria-required="true" class="required">
         [%# Build the lists of assignees and QA contacts if "usemenuforusers" is enabled. %]
@@ -254,7 +255,7 @@ TUI_hide_default('expert_fields');
        </script>
     </td>
 
-    <td colspan="2">
+    <td colspan="2" id="comp_desc_container">
       [%# Enclose the fieldset in a nested table so that its width changes based
         # on the length on the component description. %]
       <table>
@@ -271,7 +272,8 @@ TUI_hide_default('expert_fields');
   </tr>
 
   <tr>
-    <th rowspan="3">Version:</th>
+    <th rowspan="3"><a href="page.cgi?id=fields.html#version">
+      [%- field_descs.version FILTER html %]:</a></th>
     <td rowspan="3">
       <select name="version" size="5">
         [%- FOREACH v = version %]
@@ -298,6 +300,22 @@ TUI_hide_default('expert_fields');
        bug = default, field = bug_fields.op_sys, editable = 1, 
        value = default.op_sys %]
   </tr>
+  [% IF !Param('defaultplatform') || !Param('defaultopsys') %]
+    <tr>
+      <td colspan="3">&nbsp;</th>
+      <td id="os_guess_note" class="comment">
+        <div>We've made a guess at your
+        [% IF Param('defaultplatform') %]
+          operating system. Please check it
+        [% ELSIF Param('defaultopsys') %]
+          platform. Please check it
+        [% ELSE %]
+          operating system and platform. Please check them
+        [% END %]
+        and make any corrections if necessary.</div>
+      </td>
+    </tr>
+  [% END %]
 </tbody>
 
 <tbody class="expert_fields">
@@ -318,25 +336,6 @@ TUI_hide_default('expert_fields');
     [% END %]
   </tr>
 </tbody>
-
-[% IF !Param('defaultplatform') || !Param('defaultopsys') %]
-  <tbody>
-    <tr>
-      <th>&nbsp;</th>
-      <td colspan="3" class="comment">
-        We've made a guess at your
-        [% IF Param('defaultplatform') %]
-          operating system. Please check it
-        [% ELSIF Param('defaultopsys') %]
-          platform. Please check it
-        [% ELSE %]
-          operating system and platform. Please check them
-        [% END %]
-        and make any corrections if necessary.
-      </td>
-    </tr>
-  </tbody>
-[% END %]
 
 <tbody class="expert_fields">
   <tr>
@@ -400,7 +399,8 @@ TUI_hide_default('expert_fields');
   
 [% IF Param("useqacontact") %]
     <tr>
-      <th>QA Contact:</th>
+      <th><a href="page.cgi?id=fields.html#qa_contact">
+        [%- field_descs.qa_contact FILTER html %]:</a></th>
       <td colspan="2">
       [% INCLUDE global/userselect.html.tmpl
          id => "qa_contact"
@@ -417,7 +417,8 @@ TUI_hide_default('expert_fields');
 [% END %]
 
   <tr>
-    <th>CC:</th>
+    <th><a href="page.cgi?id=fields.html#cc">
+      [%- field_descs.cc FILTER html %]:</a></th>
     <td colspan="2">
       [% INCLUDE global/userselect.html.tmpl
          id => "cc"
@@ -431,7 +432,7 @@ TUI_hide_default('expert_fields');
   </tr>
 
   <tr>
-    <th>Default CC:</th>
+    <th>Default [% field_descs.cc FILTER html %]:</th>
     <td colspan="2">
       <div id="initial_cc">
       </div>
@@ -444,7 +445,8 @@ TUI_hide_default('expert_fields');
 
 [% IF user.is_timetracker %]
   <tr>
-    <th>Estimated Hours:</th>
+    <th><a href="page.cgi?id=fields.html#estimated_time">Estimated 
+      Hours:</a></th>
     <td colspan="2">
       <input name="estimated_time" size="6" maxlength="6" value="[% estimated_time FILTER html %]">
     </td>
@@ -462,7 +464,8 @@ TUI_hide_default('expert_fields');
 
 [% IF Param("usebugaliases") %]
   <tr>
-    <th>Alias:</th>
+    <th><a href="page.cgi?id=fields.html#alias">
+      [%- field_descs.alias FILTER html %]:</a></th>
     <td colspan="2">
       <input name="alias" size="20" value="[% alias FILTER html %]">
     </td>
@@ -470,7 +473,8 @@ TUI_hide_default('expert_fields');
 [% END %]
 
   <tr>
-    <th>URL:</th>
+    <th><a href="page.cgi?id=fields.html#bug_file_loc">
+      [%- field_descs.bug_file_loc FILTER html %]:</a></th>
     <td colspan="2">
       <input name="bug_file_loc" size="40"
              value="[% bug_file_loc FILTER html %]">
@@ -495,7 +499,8 @@ TUI_hide_default('expert_fields');
 <tbody>
 
   <tr>
-    <th class="required">Summary:</th>
+    <th class="required"><a href="page.cgi?id=fields.html#short_desc">
+      [%- field_descs.short_desc FILTER html %]:</a></th>
     <td colspan="3">
       <input name="short_desc" size="70" value="[% short_desc FILTER html %]"
              maxlength="255" spellcheck="true" aria-required="true"
@@ -592,13 +597,15 @@ TUI_hide_default('expert_fields');
     [% END %]
 
     <tr>
-      <th>Depends on:</th>
+      <th><a href="page.cgi?id=fields.html#dependson">
+        [%- field_descs.dependson FILTER html %]:</a></th>
       <td colspan="3">
         <input name="dependson" accesskey="d" value="[% dependson FILTER html %]">
       </td>
     </tr>
     <tr>
-      <th>Blocks:</th>
+      <th><a href="page.cgi?id=fields.html#blocked">
+        [%- field_descs.blocked FILTER html %]:</a></th>
       <td colspan="3">
         <input name="blocked" accesskey="b" value="[% blocked FILTER html %]">
       </td>

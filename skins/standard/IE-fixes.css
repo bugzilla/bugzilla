@@ -22,6 +22,10 @@
     margin-top: .5em;
 }
 
+form#Create #comp_desc {
+    margin: .5em 1em;
+}
+
 #footer #useful-links li {
     padding-bottom: 0.8ex;
 }

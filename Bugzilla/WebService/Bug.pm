@@ -79,14 +79,16 @@ sub fields {
         my $names = $params->{names};
         foreach my $field_name (@$names) {
             my $loop_field = Bugzilla::Field->check($field_name);
-            push(@fields, $loop_field); 
+            # Don't push in duplicate fields if we also asked for this field
+            # in "ids".
+            if (!grep($_->id == $loop_field->id, @fields)) {
+                push(@fields, $loop_field);
+            }
         }
     }
 
-    if (!defined $params->{ids}
-        and !defined $params->{names})
-    {
-        @fields = @{Bugzilla::Field->match({obsolete => 0})};
+    if (!defined $params->{ids} and !defined $params->{names}) {
+        @fields = Bugzilla->get_fields({ obsolete => 0 });
     }
 
     my @fields_out;

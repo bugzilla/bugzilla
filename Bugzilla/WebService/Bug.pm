@@ -93,8 +93,7 @@ sub fields {
     foreach my $field (@fields) {
         my $visibility_field = $field->visibility_field 
                                ? $field->visibility_field->name : undef;
-        my $visibility_value = $field->visibility_value 
-                               ? $field->visibility_value->name : undef;
+        my $vis_value = $field->visibility_value; 
         my $value_field = $field->value_field
                           ? $field->value_field->name : undef;
 
@@ -118,7 +117,10 @@ sub fields {
            display_name      => $self->type('string', $field->description),
            is_on_bug_entry   => $self->type('boolean', $field->enter_bug),
            visibility_field  => $self->type('string', $visibility_field),
-           visibility_values => [$self->type('string', $visibility_value)],
+           visibility_values => [
+               defined $vis_value ? $self->type('string', $vis_value->name)
+                                  : ()
+           ],
         );
         if ($has_values) {
            $field_data{value_field} = $self->type('string', $value_field);
@@ -185,6 +187,7 @@ sub _legal_field_values {
                is_open       => $self->type('boolean', $status->is_open),
                sortkey       => $self->type('int', $status->sortkey),
                can_change_to => \@can_change_to,
+               visibility_values => [],
             });
         }
     }
@@ -192,13 +195,14 @@ sub _legal_field_values {
     else {
         my @values = Bugzilla::Field::Choice->type($field)->get_all();
         foreach my $value (@values) {
-            my $visibility_value = $value->visibility_value;
-            my $vis_val_name = $visibility_value ? $visibility_value->name
-                                                 : undef;
+            my $vis_val = $value->visibility_value;
             push(@result, {
                 name              => $self->type('string', $value->name),
                 sortkey           => $self->type('int'   , $value->sortkey),
-                visibility_values => [$self->type('string', $vis_val_name)],
+                visibility_values => [
+                    defined $vis_val ? $self->type('string', $vis_val->name) 
+                                     : ()
+                ],
             });
         }
     }

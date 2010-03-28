@@ -232,7 +232,7 @@ sub _bug_numbers_only {
         # List of bug numbers.
         $cgi->param('bug_id', $searchstring);
         $cgi->param('order', 'bugs.bug_id');
-        $cgi->param('bug_id_type', 'include');
+        $cgi->param('bug_id_type', 'anyexact');
     }
 }
 

@@ -383,7 +383,7 @@ input.requestee {
 }
 
 dt {
-    font-weight: bolder;
+    font-weight: bold;
 }
 body > dl > dt {
     border-top: dotted gray thin;

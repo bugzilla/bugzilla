@@ -265,6 +265,8 @@ sub install_string {
     die "No language defines the string '$string_id'"
         if !defined $string_template;
 
+    utf8::decode($string_template) if !utf8::is_utf8($string_template);
+
     $vars ||= {};
     my @replace_keys = keys %$vars;
     foreach my $key (@replace_keys) {
@@ -281,7 +283,7 @@ sub install_string {
         }
         $string_template =~ s/\Q##$key##\E/$replacement/g;
     }
-    
+
     return $string_template;
 }
 

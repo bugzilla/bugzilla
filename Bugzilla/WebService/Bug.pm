@@ -98,10 +98,11 @@ sub fields {
         my $value_field = $field->value_field
                           ? $field->value_field->name : undef;
 
-        my @values;
+        my (@values, $has_values);
         if ( ($field->is_select and $field->name ne 'product')
              or grep($_ eq $field->name, PRODUCT_SPECIFIC_FIELDS))
         {
+             $has_values = 1;
              @values = @{ $self->_legal_field_values({ field => $field }) };
         }
 
@@ -109,7 +110,7 @@ sub fields {
              $value_field = 'product';
         }
 
-        push (@fields_out, filter $params, {
+        my %field_data = (
            id                => $self->type('int', $field->id),
            type              => $self->type('int', $field->type),
            is_custom         => $self->type('boolean', $field->custom),
@@ -118,9 +119,12 @@ sub fields {
            is_on_bug_entry   => $self->type('boolean', $field->enter_bug),
            visibility_field  => $self->type('string', $visibility_field),
            visibility_values => [$self->type('string', $visibility_value)],
-           value_field       => $self->type('string', $value_field),
-           values            => \@values,
-        });
+        );
+        if ($has_values) {
+           $field_data{value_field} = $self->type('string', $value_field);
+           $field_data{values}      = \@values;
+        };
+        push(@fields_out, filter $params, \%field_data);
     }
 
     return { fields => \@fields_out };

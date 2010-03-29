@@ -82,6 +82,8 @@
         and/or attachments. These states are: granted, denied, requested and undefined.
         You can set as many flags as desired per [% terms.bug %], and define which users
         are allowed to edit them.</dd>
+
+        [% Hook.process('end_links_left') %]
       </dl>
     </td>
 
@@ -123,6 +125,8 @@
         <dd class="[% class %]">Set queries which will be run at some specified date
         and time, and get the result of these queries directly per email. This is a
         good way to create reminders and to keep track of the activity in your installation.</dd>
+
+        [% Hook.process('end_links_right') %]
       </dl>
     </td>
   </tr>

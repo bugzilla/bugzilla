@@ -79,31 +79,28 @@ sub SaveAccount {
     my $dbh = Bugzilla->dbh;
     my $user = Bugzilla->user;
 
+    my $oldpassword = $cgi->param('old_password');
     my $pwd1 = $cgi->param('new_password1');
     my $pwd2 = $cgi->param('new_password2');
 
+    my $old_login_name = $cgi->param('old_login');
+    my $new_login_name = trim($cgi->param('new_login_name'));
+
     if ($user->authorizer->can_change_password
-        && ($cgi->param('Bugzilla_password') ne "" || $pwd1 ne "" || $pwd2 ne ""))
+        && ($oldpassword ne "" || $pwd1 ne "" || $pwd2 ne ""))
     {
-        my ($oldcryptedpwd) = $dbh->selectrow_array(
-                        q{SELECT cryptpassword FROM profiles WHERE userid = ?},
-                        undef, $user->id);
+        my $oldcryptedpwd = $user->cryptpassword;
         $oldcryptedpwd || ThrowCodeError("unable_to_retrieve_password");
 
-        my $oldpassword = $cgi->param('Bugzilla_password');
-
-        if (bz_crypt($oldpassword, $oldcryptedpwd) ne $oldcryptedpwd) 
-        {
+        if (bz_crypt($oldpassword, $oldcryptedpwd) ne $oldcryptedpwd) {
             ThrowUserError("old_password_incorrect");
         }
 
-        if ($pwd1 ne "" || $pwd2 ne "")
-        {
-            $cgi->param('new_password1')
-              || ThrowUserError("new_password_missing");
+        if ($pwd1 ne "" || $pwd2 ne "") {
+            $pwd1 || ThrowUserError("new_password_missing");
             validate_password($pwd1, $pwd2);
 
-            if ($cgi->param('Bugzilla_password') ne $pwd1) {
+            if ($oldpassword ne $pwd1) {
                 my $cryptedpassword = bz_crypt($pwd1);
                 $dbh->do(q{UPDATE profiles
                               SET cryptpassword = ?
@@ -118,14 +115,10 @@ sub SaveAccount {
 
     if ($user->authorizer->can_change_email
         && Bugzilla->params->{"allowemailchange"}
-        && $cgi->param('new_login_name'))
+        && $new_login_name)
     {
-        my $old_login_name = $cgi->param('Bugzilla_login');
-        my $new_login_name = trim($cgi->param('new_login_name'));
-
-        if($old_login_name ne $new_login_name) {
-            $cgi->param('Bugzilla_password') 
-              || ThrowUserError("old_password_required");
+        if ($old_login_name ne $new_login_name) {
+            $oldpassword || ThrowUserError("old_password_required");
 
             # Block multiple email changes for the same user.
             if (Bugzilla::Token::HasEmailChangeToken($user->id)) {
@@ -497,16 +490,19 @@ sub SaveSavedSearches {
 
 my $cgi = Bugzilla->cgi;
 
-# This script needs direct access to the username and password CGI variables,
-# so we save them before their removal in Bugzilla->login, and delete them 
-# before login in case we might be in a sudo session.
-my $bugzilla_login    = $cgi->param('Bugzilla_login');
-my $bugzilla_password = $cgi->param('Bugzilla_password');
+# Delete credentials before logging in in case we are in a sudo session.
 $cgi->delete('Bugzilla_login', 'Bugzilla_password') if ($cgi->cookie('sudo'));
+$cgi->delete('GoAheadAndLogIn');
 
+# First try to get credentials from cookies.
+Bugzilla->login(LOGIN_OPTIONAL);
+
+if (!Bugzilla->user->id) {
+    # Use credentials given in the form if login cookies are not available.
+    $cgi->param('Bugzilla_login', $cgi->param('old_login'));
+    $cgi->param('Bugzilla_password', $cgi->param('old_password'));
+}
 Bugzilla->login(LOGIN_REQUIRED);
-$cgi->param('Bugzilla_login', $bugzilla_login);
-$cgi->param('Bugzilla_password', $bugzilla_password);
 
 $vars->{'changes_saved'} = $cgi->param('dosave');
 

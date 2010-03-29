@@ -536,7 +536,7 @@ sub has_flags {
     my $class = shift;
 
     if (!defined $class->request_cache->{has_flags}) {
-        $class->request_cache->{has_flags} = Bugzilla::Flag::has_flags();
+        $class->request_cache->{has_flags} = Bugzilla::Flag->any_exist;
     }
     return $class->request_cache->{has_flags};
 }

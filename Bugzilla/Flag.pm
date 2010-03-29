@@ -228,26 +228,6 @@ sub bug {
 
 =over
 
-=item C<has_flags>
-
-Returns 1 if at least one flag exists in the DB, else 0. This subroutine
-is mainly used to decide to display the "(My )Requests" link in the footer.
-
-=back
-
-=cut
-
-sub has_flags {
-    my $dbh = Bugzilla->dbh;
-
-    my $has_flags = $dbh->selectrow_array('SELECT 1 FROM flags ' . $dbh->sql_limit(1));
-    return $has_flags || 0;
-}
-
-=pod
-
-=over
-
 =item C<match($criteria)>
 
 Queries the database for flags matching the given criteria

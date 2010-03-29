@@ -83,7 +83,7 @@
       
       <para>Any machine that doesn't have Perl on it is a sad machine indeed.
       If you don't have it and your OS doesn't provide official packages, 
-      visit <ulink url="http://www.perl.com"/>.
+      visit <ulink url="http://www.perl.org"/>.
       Although Bugzilla runs with Perl &min-perl-ver;,
       it's a good idea to be using the latest stable version.
       </para>
@@ -2012,7 +2012,7 @@ pid-file=/home/foo/mymysql/the.pid
 
       <screen>
         <prompt>bash$</prompt>
-        <command>wget http://perl.com/CPAN/src/stable.tar.gz</command>
+        <command>wget http://perl.org/CPAN/src/stable.tar.gz</command>
         <prompt>bash$</prompt>
         <command>tar zvxf stable.tar.gz</command>
         <prompt>bash$</prompt>

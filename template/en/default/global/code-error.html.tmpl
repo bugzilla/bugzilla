@@ -431,9 +431,6 @@
     An error occurred while preparing for a RADIUS authentication request:
     <code>[% errstr FILTER html %]</code>.
 
-  [% ELSIF error == "unknown_comparison_type" %]
-    Specified comparison type is not supported.
-
   [% ELSIF error == "request_queue_group_invalid" %]
     The group field <em>[% group FILTER html %]</em> is invalid.
 

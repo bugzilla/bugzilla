@@ -612,7 +612,7 @@ sub init {
         "^long_?desc,changedby" => \&_long_desc_changedby,
         "^long_?desc,changedbefore" => \&_long_desc_changedbefore_after,
         "^long_?desc,changedafter" => \&_long_desc_changedbefore_after,
-        "^content,matches" => \&_content_matches,
+        "^content,(?:not)?matches" => \&_content_matches,
         "^content," => sub { ThrowUserError("search_content_without_matches"); },
         "^(?:deadline|creation_ts|delta_ts),(?:lessthan|greaterthan|equals|notequals),(?:-|\\+)?(?:\\d+)(?:[dDwWmMyY])\$" => \&_timestamp_compare,
         "^commenter,(?:equals|anyexact),(%\\w+%)" => \&_commenter_exact,
@@ -656,6 +656,7 @@ sub init {
         ",notregexp" => \&_notregexp,
         ",lessthan" => \&_lessthan,
         ",matches" => sub { ThrowUserError("search_content_without_matches"); },
+        ",notmatches" => sub { ThrowUserError("search_content_without_matches"); },
         ",greaterthan" => \&_greaterthan,
         ",anyexact" => \&_anyexact,
         ",anywordssubstr" => \&_anywordsubstr,
@@ -1415,8 +1416,8 @@ sub _long_desc_changedbefore_after {
 sub _content_matches {
     my $self = shift;
     my %func_args = @_;
-    my ($chartid, $supptables, $term, $groupby, $fields, $v) =
-        @func_args{qw(chartid supptables term groupby fields v)};
+    my ($chartid, $supptables, $term, $groupby, $fields, $t, $v) =
+        @func_args{qw(chartid supptables term groupby fields t v)};
     my $dbh = Bugzilla->dbh;
     
     # "content" is an alias for columns containing text for which we
@@ -1443,19 +1444,21 @@ sub _content_matches {
 
     # The term to use in the WHERE clause.
     $$term = "$term1 > 0 OR $term2 > 0";
+    if ($$t =~ /not/i) {
+        $$term = "NOT($$term)";
+    }
     
     # In order to sort by relevance (in case the user requests it),
     # we SELECT the relevance value so we can add it to the ORDER BY
     # clause. Every time a new fulltext chart isadded, this adds more 
-    # terms to the relevance sql. (That doesn't make sense in
-    # "NOT" charts, but Bugzilla never uses those with fulltext
-    # by default.)
+    # terms to the relevance sql.
     #
     # We build the relevance SQL by modifying the COLUMNS list directly,
     # which is kind of a hack but works.
     my $current = COLUMNS->{'relevance'}->{name};
     $current = $current ? "$current + " : '';
-    my $select_term = "($current$rterm1 + $rterm2)";
+    # For NOT searches, we just add 0 to the relevance.
+    my $select_term = $$t =~ /not/ ? 0 : "($current$rterm1 + $rterm2)";
     COLUMNS->{'relevance'}->{name} = $select_term;
 }
 

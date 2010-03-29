@@ -569,19 +569,10 @@ sub matchPrefixes {
 sub negateComparisonType {
     my $comparisonType = shift;
 
-    if ($comparisonType eq 'substring') {
-        return 'notsubstring';
-    }
-    elsif ($comparisonType eq 'anywords') {
+    if ($comparisonType eq 'anywords') {
         return 'nowords';
     }
-    elsif ($comparisonType eq 'regexp') {
-        return 'notregexp';
-    }
-    else {
-        # Don't know how to negate that
-        ThrowCodeError('unknown_comparison_type');
-    }
+    return "not$comparisonType";
 }
 
 # Add a boolean chart

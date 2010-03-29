@@ -188,6 +188,7 @@
         [% IF changes.sortkey.defined %]
           <li>Sortkey updated to '[% classification.sortkey FILTER html %]'</li>
         [% END %]
+        [% Hook.process('classification_updated_fields') %]
       </ul>
     [% ELSE %]
       No changes made to <em>[% classification.name FILTER html %]</em>.
@@ -237,6 +238,8 @@
           <li>Default CC list deleted</li>
         [% END %]
       [% END %]
+      [% Hook.process('component_updated_fields') %]
+      </ul>
     [% ELSE %]
       No changes made to <em>[% comp.name FILTER html %]</em>.
     [% END %]

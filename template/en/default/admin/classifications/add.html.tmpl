@@ -24,26 +24,9 @@
 
 <form method=post action="editclassifications.cgi">
   <table border=0 cellpadding=4 cellspacing=0>
-    <tr>
-      <th align="right">Classification:</th>
-      <td><input size=64 maxlength=64 name="classification"></td>
-    </tr>
-    <tr>
-      <th align="right">Description:</th>
-      <td>
-        [% INCLUDE global/textarea.html.tmpl
-          name    = 'description'
-          minrows = 4
-          cols    = 64
-          wrap    = 'virtual'
-        %]
-      </td>
-    </tr>
-    <tr>
-      <th align="right"><label for="sortkey">Sortkey:</label></th>
-      <td><input id="sortkey" size="20" maxlength="20" name="sortkey" 
-                 value=""></td>
-    </tr>
+
+    [% PROCESS "admin/classifications/edit-common.html.tmpl" %]
+
   </table>
   <hr>
   <input type=submit value="Add">

@@ -64,7 +64,7 @@
           <select id="flag-[% flag.id %]" name="flag-[% flag.id %]" 
                   title="[% type.description FILTER html %]"
                   onchange="toggleRequesteeField(this);"
-                  class="flag_select">
+                  class="flag_select flag_type-[% type.id %]">
             [%# Only display statuses the user is allowed to set. %]
             [% IF user.can_request_flag(type) || flag.setter_id == user.id %]
               <option value="X"></option>
@@ -176,7 +176,7 @@
               title="[% type.description FILTER html %]"
               [% " disabled=\"disabled\"" UNLESS (type.is_requestable && user.can_request_flag(type)) || user.can_set_flag(type) %]
               onchange="toggleRequesteeField(this);"
-              class="flag_select">
+              class="flag_select flag_type-[% type.id %]">
         <option value="X"></option>
         [% IF type.is_requestable && user.can_request_flag(type) %]
           <option value="?">?</option>

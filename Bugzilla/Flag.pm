@@ -54,6 +54,7 @@ whose names start with _ or a re specifically noted as being private.
 =cut
 
 use Scalar::Util qw(blessed);
+use Storable qw(dclone);
 
 use Bugzilla::FlagType;
 use Bugzilla::Hook;
@@ -1044,7 +1045,9 @@ sub _flag_types {
     }
 
     # Get all available flag types for the given product and component.
-    my $flag_types = Bugzilla::FlagType::match($vars);
+    my $cache = Bugzilla->request_cache->{flag_types_per_component}->{$vars->{target_type}} ||= {};
+    my $flag_data = $cache->{$vars->{component_id}} ||= Bugzilla::FlagType::match($vars);
+    my $flag_types = dclone($flag_data);
 
     $_->{flags} = [] foreach @$flag_types;
     my %flagtypes = map { $_->id => $_ } @$flag_types;
@@ -1054,8 +1057,7 @@ sub _flag_types {
     # or component).
     @$flags = grep { exists $flagtypes{$_->type_id} } @$flags;
     push(@{$flagtypes{$_->type_id}->{flags}}, $_) foreach @$flags;
-
-    return [sort {$a->sortkey <=> $b->sortkey || $a->name cmp $b->name} values %flagtypes];
+    return $flag_types;
 }
 
 =head1 SEE ALSO

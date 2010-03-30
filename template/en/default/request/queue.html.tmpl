@@ -242,5 +242,7 @@ to some group are shown by default.
 [% BLOCK display_buglist %]
   </table>
   [% NEXT UNLESS buglist.keys.size %]
-  <a href="buglist.cgi?bug_id=[% buglist.keys.nsort.join(",") FILTER html %]">(view as buglist)</a>
+  <a href="buglist.cgi?bug_id=
+           [%- buglist.keys.nsort.join(",") FILTER html %]">(view as
+  [%+ terms.bug %] list)</a>
 [% END %]

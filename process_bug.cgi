@@ -153,30 +153,33 @@ print $cgi->header() unless Bugzilla->usage_mode == USAGE_MODE_EMAIL;
 
 # Check for a mid-air collision. Currently this only works when updating
 # an individual bug.
-if (defined $cgi->param('delta_ts')
-    && $cgi->param('delta_ts') ne $first_bug->delta_ts)
+if (defined $cgi->param('delta_ts'))
 {
-    ($vars->{'operations'}) =
-        Bugzilla::Bug::GetBugActivity($first_bug->id, undef,
-                                      scalar $cgi->param('delta_ts'));
+    my $delta_ts_z = datetime_from($cgi->param('delta_ts'));
+    my $first_delta_tz_z =  datetime_from($first_bug->delta_ts);
+    if ($first_delta_tz_z ne $delta_ts_z) {
+        ($vars->{'operations'}) =
+            Bugzilla::Bug::GetBugActivity($first_bug->id, undef,
+                                          scalar $cgi->param('delta_ts'));
 
-    $vars->{'title_tag'} = "mid_air";
+        $vars->{'title_tag'} = "mid_air";
     
-    ThrowCodeError('undefined_field', { field => 'longdesclength' })
-        if !defined $cgi->param('longdesclength');
+        ThrowCodeError('undefined_field', { field => 'longdesclength' })
+            if !defined $cgi->param('longdesclength');
 
-    $vars->{'start_at'} = $cgi->param('longdesclength');
-    # Always sort midair collision comments oldest to newest,
-    # regardless of the user's personal preference.
-    $vars->{'comments'} = $first_bug->comments({ order => "oldest_to_newest" });
-    $vars->{'bug'} = $first_bug;
-    # The token contains the old delta_ts. We need a new one.
-    $cgi->param('token', issue_hash_token([$first_bug->id, $first_bug->delta_ts]));
-    
-    # Warn the user about the mid-air collision and ask them what to do.
-    $template->process("bug/process/midair.html.tmpl", $vars)
-      || ThrowTemplateError($template->error());
-    exit;
+        $vars->{'start_at'} = $cgi->param('longdesclength');
+        # Always sort midair collision comments oldest to newest,
+        # regardless of the user's personal preference.
+        $vars->{'comments'} = $first_bug->comments({ order => "oldest_to_newest" });
+        $vars->{'bug'} = $first_bug;
+
+        # The token contains the old delta_ts. We need a new one.
+        $cgi->param('token', issue_hash_token([$first_bug->id, $first_bug->delta_ts]));
+        # Warn the user about the mid-air collision and ask them what to do.
+        $template->process("bug/process/midair.html.tmpl", $vars)
+          || ThrowTemplateError($template->error());
+        exit;
+    }
 }
 
 # We couldn't do this check earlier as we first had to validate bug IDs

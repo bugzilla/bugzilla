@@ -2422,6 +2422,28 @@ sub add_see_also {
                            { url => $input, reason => 'id' });
         }
     }
+    # Google Code URLs
+    elsif ($uri->authority =~ /^code.google.com$/) {
+        # Google Code URLs only have one form:
+        #   http(s)://code.google.com/p/PROJECT_NAME/issues/detail?id=1234
+        my $project_name;
+        if ($uri->path =~ m|^/p/([^/]+)/issues/detail$|) {
+            $project_name = $1;
+        } else {
+            ThrowUserError('bug_url_invalid', 
+                           { url => $input });
+        }
+        my $bug_id = $uri->query_param('id');
+        detaint_natural($bug_id);
+        if (!$bug_id) {
+            ThrowUserError('bug_url_invalid', 
+                           { url => $input, reason => 'id' });
+        }
+        # While Google Code URLs can be either HTTP or HTTPS,
+        # always go with the HTTP scheme, as that's the default.
+        $result = "http://code.google.com/p/" . $project_name .
+                  "/issues/detail?id=" . $bug_id;
+    }
     # Bugzilla URLs
     else {
         if ($uri->path !~ /show_bug\.cgi$/) {

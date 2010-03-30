@@ -2401,7 +2401,7 @@ sub add_see_also {
         }
     }
     # Google Code URLs
-    elsif ($uri->authority =~ /^code.google.com$/) {
+    elsif ($uri->authority =~ /^code.google.com$/i) {
         # Google Code URLs only have one form:
         #   http(s)://code.google.com/p/PROJECT_NAME/issues/detail?id=1234
         my $project_name;

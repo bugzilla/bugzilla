@@ -485,6 +485,7 @@ sub _default_quicksearch_word {
         addChart('keywords', 'substring', $word, $negate);
     }
     
+    addChart('alias', 'substring', $word, $negate);
     addChart('short_desc', 'substring', $word, $negate);
     addChart('status_whiteboard', 'substring', $word, $negate);
     addChart('content', 'matches', $word, $negate);

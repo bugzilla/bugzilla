@@ -438,6 +438,9 @@ sub format_time {
 sub datetime_from {
     my ($date, $timezone) = @_;
 
+    # In the database, this is the "0" date.
+    return undef if $date =~ /^0000/;
+
     # strptime($date) returns an empty array if $date has an invalid
     # date format.
     my @time = strptime($date);

@@ -306,6 +306,9 @@ sub set {
     }
 
     $self->{$field} = $value;
+
+    Bugzilla::Hook::process('object_end_of_set',
+                            { object => $self, field => $field });
 }
 
 sub set_all {

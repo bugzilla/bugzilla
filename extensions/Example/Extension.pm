@@ -386,6 +386,17 @@ sub object_end_of_create_validators {
     
 }
 
+sub object_end_of_set {
+    my ($self, $args) = @_;
+
+    my ($object, $field) = @$args{qw(object field)};
+
+    # Note that this is a made-up class, for this example.
+    if ($object->isa('Bugzilla::ExampleObject')) {
+        warn "The field $field has changed to " . $object->{$field};
+    }
+}
+
 sub object_end_of_set_all {
     my ($self, $args) = @_;
     

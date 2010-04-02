@@ -40,7 +40,7 @@ use base qw(Exporter);
                              diff_arrays
                              trim wrap_hard wrap_comment find_wrap_point
                              format_time format_time_decimal validate_date
-                             validate_time
+                             validate_time datetime_from
                              file_mod_time is_7bit_clean
                              bz_crypt generate_random_password
                              validate_email_syntax clean_text
@@ -461,6 +461,46 @@ sub format_time {
         $date = '';
     }
     return trim($date);
+}
+
+sub datetime_from {
+    my ($date, $timezone) = @_;
+
+    # strptime($date) returns an empty array if $date has an invalid
+    # date format.
+    my @time = strptime($date);
+
+    unless (scalar @time) {
+        # If an unknown timezone is passed (such as MSK, for Moskow),
+        # strptime() is unable to parse the date. We try again, but we first
+        # remove the timezone.
+        $date =~ s/\s+\S+$//;
+        @time = strptime($date);
+    }
+
+    return undef if !@time;
+
+    # strptime() counts years from 1900, and months from 0 (January).
+    # We have to fix both values.
+    my $dt = DateTime->new({
+        year   => $time[5] + 1900,
+        month  => $time[4] + 1,
+        day    => $time[3],
+        hour   => $time[2],
+        minute => $time[1],
+        # DateTime doesn't like fractional seconds.
+        # Also, sometimes seconds are undef.
+        second => int($time[0] || 0),
+        # If a timezone was specified, use it. Otherwise, use the
+        # local timezone.
+        time_zone => Bugzilla->local_timezone->offset_as_string($time[6]) 
+                     || Bugzilla->local_timezone,
+    });
+
+    # Now display the date using the given timezone,
+    # or the user's timezone if none is given.
+    $dt->set_time_zone($timezone || Bugzilla->user->timezone);
+    return $dt;
 }
 
 sub format_time_decimal {
@@ -938,6 +978,15 @@ This routine is mainly called from templates to filter dates, see
 
 Returns a number with 2 digit precision, unless the last digit is a 0. Then it 
 returns only 1 digit precision.
+
+=item C<datetime_from($time, $timezone)>
+
+Returns a DateTime object given a date string. If the string is not in some
+valid date format that C<strptime> understands, we return C<undef>.
+
+You can optionally specify a timezone for the returned date. If not
+specified, defaults to the currently-logged-in user's timezone, or
+the Bugzilla server's local timezone if there isn't a logged-in user.
 
 =back
 

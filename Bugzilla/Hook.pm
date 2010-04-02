@@ -672,6 +672,34 @@ validated by the C<VALIDATORS> specified for the object.
 
 =back
 
+
+=head2 object_end_of_set
+
+Called during L<Bugzilla::Object/set>, after all the code of the function
+has completed (so the value has been validated and the field has been set
+to the new value). You can use this to perform actions after a value is
+changed for specific fields on certain types of objects.
+
+The new value is not specifically passed to this hook because you can
+get it as C<< $object->{$field} >>.
+
+Params:
+
+=over
+
+=item C<object>
+
+The object that C<set> was called on. You will probably want to
+do something like C<< if ($object->isa('Some::Class')) >> in your code to
+limit your changes to only certain subclasses of Bugzilla::Object.
+
+=item C<field>
+
+The name of the field that was updated in the object.
+
+=back
+
+
 =head2 object_end_of_set_all
 
 This happens at the end of L<Bugzilla::Object/set_all>. This is a

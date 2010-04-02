@@ -354,6 +354,18 @@ sub object_before_create {
     }
 }
 
+sub object_before_delete {
+    my ($self, $args) = @_;
+
+    my $object = $args->{'object'};
+
+    # Note that this is a made-up class, for this example.
+    if ($object->isa('Bugzilla::ExampleObject')) {
+        my $id = $object->id;
+        warn "An object with id $id is about to be deleted!";
+    } 
+}
+
 sub object_before_set {
     my ($self, $args) = @_;
     

@@ -704,6 +704,25 @@ A hashref. The set of named parameters passed to C<create>.
 
 =back
 
+
+=head2 object_before_delete
+
+This happens in L<Bugzilla::Object/remove_from_db>, after we've confirmed
+that the object can be deleted, but before any rows have actually
+been removed from the database. This sometimes occurs inside a database
+transaction.
+
+Params:
+
+=over
+
+=item C<object> - The L<Bugzilla::Object> being deleted. You will probably
+want to check its type like C<< $object->isa('Some::Class') >> before doing
+anything with it.
+
+=back
+
+
 =head2 object_before_set
 
 Called during L<Bugzilla::Object/set>, before any actual work is done.

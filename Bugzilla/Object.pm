@@ -376,6 +376,7 @@ sub update {
 
 sub remove_from_db {
     my $self = shift;
+    Bugzilla::Hook::process('object_before_delete', { object => $self });
     my $table = $self->DB_TABLE;
     my $id_field = $self->ID_FIELD;
     Bugzilla->dbh->do("DELETE FROM $table WHERE $id_field = ?",

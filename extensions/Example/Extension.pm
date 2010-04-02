@@ -119,13 +119,16 @@ sub bug_end_of_update {
     
     # This code doesn't actually *do* anything, it's just here to show you
     # how to use this hook.
-    my ($bug, $timestamp, $changes) = @$args{qw(bug timestamp changes)};
+    my ($bug, $old_bug, $timestamp, $changes) = 
+        @$args{qw(bug old_bug timestamp changes)};
     
     foreach my $field (keys %$changes) {
         my $used_to_be = $changes->{$field}->[0];
         my $now_it_is  = $changes->{$field}->[1];
     }
-    
+
+    my $old_summary = $old_bug->short_desc;
+
     my $status_message;
     if (my $status_change = $changes->{'bug_status'}) {
         my $old_status = new Bugzilla::Status({ name => $status_change->[0] });

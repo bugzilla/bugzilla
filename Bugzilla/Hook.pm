@@ -239,13 +239,22 @@ Params:
 
 =over
 
-=item C<bug> - The changed bug object, with all fields set to their updated
-values.
+=item C<bug> 
 
-=item C<timestamp> - The timestamp used for all updates in this transaction.
+The changed bug object, with all fields set to their updated values.
 
-=item C<changes> - The hash of changed fields. 
-C<$changes-E<gt>{field} = [old, new]>
+=item C<old_bug>
+
+A bug object pulled from the database before the fields were set to
+their updated values (so it has the old values available for each field).
+
+=item C<timestamp> 
+
+The timestamp used for all updates in this transaction.
+
+=item C<changes> 
+
+The hash of changed fields. C<< $changes->{field} = [old, new] >>
 
 =back
 

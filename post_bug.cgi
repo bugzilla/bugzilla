@@ -231,9 +231,6 @@ my ($flags, $new_flags) = Bugzilla::Flag->extract_flags_from_cgi($bug, undef, $v
 $bug->set_flags($flags, $new_flags);
 $bug->update($timestamp);
 
-# Email everyone the details of the new bug 
-$vars->{'mailrecipients'} = {'changer' => $user->login};
-
 $vars->{'id'} = $id;
 $vars->{'bug'} = $bug;
 
@@ -241,21 +238,24 @@ Bugzilla::Hook::process('post_bug_after_creation', { vars => $vars });
 
 ThrowCodeError("bug_error", { bug => $bug }) if $bug->error;
 
-$vars->{'sentmail'} = [];
-
-push (@{$vars->{'sentmail'}}, { type => 'created',
-                                id => $id,
-                              });
-
-foreach my $i (@{$bug->dependson || []}, @{$bug->blocked || []}) {
-    push (@{$vars->{'sentmail'}}, { type => 'dep', id => $i, });
-}
-
 if ($token) {
     trick_taint($token);
     $dbh->do('UPDATE tokens SET eventdata = ? WHERE token = ?', undef, 
              ("createbug:$id", $token));
 }
+
+my $recipients = { changer => $user->login };
+my $bug_sent = Bugzilla::BugMail::Send($id, $recipients);
+$bug_sent->{type} = 'created';
+$bug_sent->{id}   = $id;
+my @all_mail_results = ($bug_sent);
+foreach my $dep (@{$bug->dependson || []}, @{$bug->blocked || []}) {
+    my $dep_sent = Bugzilla::BugMail::Send($dep, $recipients);
+    $dep_sent->{type} = 'dep';
+    $dep_sent->{id}   = $dep;
+    push(@all_mail_results, $dep_sent);
+}
+$vars->{sentmail} = \@all_mail_results;
 
 print $cgi->header();
 $template->process("bug/create/created.html.tmpl", $vars)

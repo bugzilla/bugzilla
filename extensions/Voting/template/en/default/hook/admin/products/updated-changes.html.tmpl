@@ -89,8 +89,8 @@
           overwritten, which happens otherwise %]
       [% INCLUDE bug/process/results.html.tmpl
         type = 'votes'
-        mailrecipients = { 'changer' => user.login }
         header_done = 1
+        sent_bugmail = changes.confirmed_bugs_sent_bugmail.$id
         id = id
       %]
     [% END %]

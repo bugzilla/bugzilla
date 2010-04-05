@@ -78,10 +78,9 @@ my $vars = {};
 sub send_results {
     my ($bug_id, $vars) = @_;
     my $template = Bugzilla->template;
-    if (Bugzilla->usage_mode == USAGE_MODE_EMAIL) {
-         Bugzilla::BugMail::Send($bug_id, $vars->{'mailrecipients'});
-    }
-    else {
+    $vars->{'sent_bugmail'} = 
+        Bugzilla::BugMail::Send($bug_id, $vars->{'mailrecipients'});
+    if (Bugzilla->usage_mode != USAGE_MODE_EMAIL) {
         $template->process("bug/process/results.html.tmpl", $vars)
             || ThrowTemplateError($template->error());
     }

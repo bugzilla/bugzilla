@@ -739,13 +739,6 @@ sub create {
             # started the session.
             'sudoer' => sub { return Bugzilla->sudoer; },
 
-            # SendBugMail - sends mail about a bug, using Bugzilla::BugMail.pm
-            'SendBugMail' => sub {
-                my ($id, $mailrecipients) = (@_);
-                require Bugzilla::BugMail;
-                Bugzilla::BugMail::Send($id, $mailrecipients);
-            },
-
             # Allow templates to access the "corect" URLBase value
             'urlbase' => sub { return Bugzilla::Util::correct_urlbase(); },
 

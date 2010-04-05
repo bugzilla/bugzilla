@@ -29,6 +29,7 @@ use strict;
 use base qw(Bugzilla::Extension);
 
 use Bugzilla::Bug;
+use Bugzilla::BugMail;
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Field;
@@ -614,10 +615,12 @@ sub _update_votes {
     $dbh->bz_commit_transaction();
 
     $vars->{'type'} = "votes";
-    $vars->{'mailrecipients'} = { 'changer' => $user->login };
     $vars->{'title_tag'} = 'change_votes';
     foreach my $bug_id (@updated_bugs) {
         $vars->{'id'} = $bug_id;
+        $vars->{'sent_bugmail'} = 
+            Bugzilla::BugMail::Send($bug_id, { 'changer' => $user->login });
+        
         $template->process("bug/process/results.html.tmpl", $vars)
           || ThrowTemplateError($template->error());
         # Set header_done to 1 only after the first bug.
@@ -722,6 +725,12 @@ sub _modify_bug_votes {
     # Now that changes are done, we can send emails to voters.
     foreach my $msg (@msgs) {
         MessageToMTA($msg);
+    }
+    # And send out emails about changed bugs
+    foreach my $bug_id (@updated_bugs) {
+        my $sent_bugmail = Bugzilla::BugMail::Send(
+            $bug_id, { changer => Bugzilla->user->login });
+        $changes->{'confirmed_bugs_sent_bugmail'}->{$bug_id} = $sent_bugmail;
     }
 }
 

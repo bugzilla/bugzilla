@@ -523,6 +523,9 @@
 <h2 id="v36_code_changes">Code Changes Which May Affect Customizations</h2>
 
 <ul>
+  <li>There is no longer a SendBugMail method in the templates, and bugmail
+    is no longer sent by processing a template. Instead, it is sent
+    by using <kbd>Bugzilla::BugMail::Send</kbd>.</li>
   <li>Comments are now represented as a
     <a href="[% docs_urlbase FILTER html %]api/Bugzilla/Comment.html">Bugzilla::Comment</a>
     object instead of just being hashes.</li>

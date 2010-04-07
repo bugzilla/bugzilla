@@ -33,6 +33,20 @@
   font-weight: bold;
 }
 
+.bz_buglist_header th {
+  text-align: left;
+}
+
+.bz_sort_order_primary,
+.bz_sort_order_secondary {
+    display: inline-block;
+    padding-left: .2em;
+    text-decoration: none;
+}
+.bz_sort_order_primary   { color: black; }
+.bz_sort_order_secondary { color: #777;  }
+
+
 .bz_id_column {
 }
 
@@ -100,8 +114,4 @@ td.bz_total {
 
 .bz_query_explain {
     text-align: left;
-}
-
-.bz_sort_order_secondary {
-    color: gray;
 }

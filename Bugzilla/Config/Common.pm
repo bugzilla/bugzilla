@@ -334,6 +334,10 @@ sub check_notification {
                "about the next stable release, you should select " .
                "'latest_stable_release' instead";
     }
+    if ($option ne 'disabled' && !Bugzilla->feature('updates')) {
+        return "Some Perl modules are missing to get notifications about " .
+               "new releases. See the output of checksetup.pl for more information";
+    }
     return "";
 }
 
@@ -347,7 +351,8 @@ sub check_smtp_auth {
 }
 
 sub check_theschwartz_available {
-    if (!eval { require TheSchwartz; require Daemon::Generic; }) {
+    my $use_queue = shift;
+    if ($use_queue && !Bugzilla->feature('jobqueue')) {
         return "Using the job queue requires that you have certain Perl"
                . " modules installed. See the output of checksetup.pl"
                . " for more information";

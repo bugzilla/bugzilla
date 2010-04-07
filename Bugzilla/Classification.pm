@@ -70,7 +70,7 @@ sub remove_from_db {
     $dbh->do("UPDATE products SET classification_id = 1
               WHERE classification_id = ?", undef, $self->id);
 
-    $dbh->do("DELETE FROM classifications WHERE id = ?", undef, $self->id);
+    $self->SUPER::remove_from_db();
 
     $dbh->bz_commit_transaction();
 

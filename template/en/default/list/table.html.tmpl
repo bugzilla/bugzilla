@@ -78,7 +78,7 @@
 
 [% tableheader = BLOCK %]
   <table class="bz_buglist" cellspacing="0" cellpadding="4" width="100%">
-    <tr class="bz_buglist_header bz_first_buglist_header" align="left">
+    <tr class="bz_buglist_header bz_first_buglist_header">
       [% IF dotweak %]
       <th>&nbsp;</th>
       [% END %]
@@ -100,7 +100,7 @@
           [% PROCESS columnheader %]
         [% END %]
 
-        </tr><tr class="bz_buglist_header" align="left">
+        </tr><tr class="bz_buglist_header">
         [% IF dotweak %]
           <th>&nbsp;</th>
         [% END %]

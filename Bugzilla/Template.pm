@@ -401,14 +401,6 @@ $Template::Stash::SCALAR_OPS->{ 0 } =
       return $_[0];
   };
 
-# Add a "substr" method to the Template Toolkit's "scalar" object
-# that returns a substring of a string.
-$Template::Stash::SCALAR_OPS->{ substr } = 
-  sub {
-      my ($scalar, $offset, $length) = @_;
-      return substr($scalar, $offset, $length);
-  };
-
 # Add a "truncate" method to the Template Toolkit's "scalar" object
 # that truncates a string to a certain length.
 $Template::Stash::SCALAR_OPS->{ truncate } = 

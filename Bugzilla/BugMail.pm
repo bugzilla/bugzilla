@@ -109,7 +109,6 @@ sub three_columns {
 # roles when the email is sent.
 # All the names are email addresses, not userids
 # values are scalars, except for cc, which is a list
-# This hash usually comes from the "mailrecipients" var in a template call.
 sub Send {
     my ($id, $forced) = (@_);
 

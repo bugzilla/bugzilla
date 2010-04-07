@@ -375,6 +375,14 @@ sub update {
         MessageToMTA($msg);
     }
 
+    # And send out emails about changed bugs
+    require Bugzilla::BugMail;
+    foreach my $bug_id (@{ $changes->{'confirmed_bugs'} || [] }) {
+        my $sent_bugmail = Bugzilla::BugMail::Send(
+            $bug_id, { changer => Bugzilla->user->login });
+        $changes->{'confirmed_bugs_sent_bugmail'}->{$bug_id} = $sent_bugmail;
+    }
+
     return $changes;
 }
 

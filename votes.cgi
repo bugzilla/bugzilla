@@ -32,6 +32,7 @@ use Bugzilla::Constants;
 use Bugzilla::Util;
 use Bugzilla::Error;
 use Bugzilla::Bug;
+use Bugzilla::BugMail;
 use Bugzilla::User;
 use Bugzilla::Product;
 
@@ -348,11 +349,13 @@ sub record_votes {
     $dbh->bz_commit_transaction();
 
     $vars->{'type'} = "votes";
-    $vars->{'mailrecipients'} = { 'changer' => Bugzilla->user->login };
     $vars->{'title_tag'} = 'change_votes';
 
     foreach my $bug_id (@updated_bugs) {
         $vars->{'id'} = $bug_id;
+        $vars->{'sent_bugmail'} = Bugzilla::BugMail::Send($bug_id,
+            { 'changer' => Bugzilla->user->login });
+
         $template->process("bug/process/results.html.tmpl", $vars)
           || ThrowTemplateError($template->error());
         # Set header_done to 1 only after the first bug.

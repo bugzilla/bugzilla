@@ -273,10 +273,6 @@ use constant ABSTRACT_SCHEMA => {
                                                   COLUMN => 'userid'}},
             status_whiteboard   => {TYPE => 'MEDIUMTEXT', NOTNULL => 1,
                                     DEFAULT => "''"},
-            # Note: keywords field is only a cache; the real data
-            # comes from the keywords table
-            keywords            => {TYPE => 'MEDIUMTEXT', NOTNULL => 1,
-                                    DEFAULT => "''"},
             lastdiffed          => {TYPE => 'DATETIME'},
             everconfirmed       => {TYPE => 'BOOLEAN', NOTNULL => 1},
             reporter_accessible => {TYPE => 'BOOLEAN',

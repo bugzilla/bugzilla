@@ -459,10 +459,6 @@
   [% ELSIF message_tag == "keyword_deleted" %]
     [% title = "Keyword Deleted" %]
     The <em>[% keyword.name FILTER html %]</em> keyword has been deleted.
-    <b>After you have finished editing keywords, you need to
-    <a href="sanitycheck.cgi?rebuildkeywordcache=1">rebuild the keyword
-    cache</a></b> (on a very large installation of [% terms.Bugzilla %],
-    this can take several minutes).
 
   [% ELSIF message_tag == "keyword_updated" %]
     [% title = "Keyword Updated" %]
@@ -471,13 +467,7 @@
       been saved:
       <ul>
         [% IF changes.name.defined %]
-          <li>
-            Keyword renamed to <em>[% keyword.name FILTER html %]</em>.
-            <b>After you have finished editing keywords, you need to
-            <a href="sanitycheck.cgi?rebuildkeywordcache=1">rebuild
-            the keyword cache</a></b> (on a very large installation
-            of [% terms.Bugzilla %], this can take several minutes).
-          </li>
+          <li>Keyword renamed to <em>[% keyword.name FILTER html %]</em>.</li>
         [% END %]
         [% IF changes.description.defined %]
           <li>Description updated to <em>[% keyword.description FILTER html %]</em></li>

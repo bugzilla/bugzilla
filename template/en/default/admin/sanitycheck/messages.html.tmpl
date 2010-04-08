@@ -222,23 +222,6 @@
   [% ELSIF san_tag == "keyword_check_duplicated_ids" %]
     Duplicate keyword IDs found in [% PROCESS bug_link bug_id = id %].
 
-  [% ELSIF san_tag == "keyword_cache_start" %]
-    Checking cached keywords.
-
-  [% ELSIF san_tag == "keyword_cache_alert" %]
-    [% badbugs.size FILTER none %] [%+ terms.bugs %] found with
-    incorrect keyword cache: [% INCLUDE bug_list badbugs = badbugs %]
-
-  [% ELSIF san_tag == "keyword_cache_fixing" %]
-    OK, now fixing keyword cache.
-
-  [% ELSIF san_tag == "keyword_cache_fixed" %]
-    Keyword cache fixed.
-
-  [% ELSIF san_tag == "keyword_cache_rebuild" %]
-    <a href="sanitycheck.cgi?rebuildkeywordcache=1">Click here to
-    rebuild the keyword cache</a>.
-
   [% ELSIF san_tag == "profile_login_start" %]
     Checking profile logins.
 

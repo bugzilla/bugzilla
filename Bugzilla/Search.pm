@@ -126,6 +126,8 @@ sub COLUMNS {
 
         'flagtypes.name' => $dbh->sql_group_concat('DISTINCT '
                             . $dbh->sql_string_concat('flagtypes.name', 'flags.status'), "', '"),
+
+        'keywords' => $dbh->sql_group_concat('DISTINCT keyworddefs.name', "', '"),
     );
 
     # Backward-compatibility for old field names. Goes new_name => old_name.
@@ -293,6 +295,11 @@ sub init {
     if (grep($_ eq 'flagtypes.name', @fields)) {
         push(@supptables, "LEFT JOIN flags ON flags.bug_id = bugs.bug_id AND attach_id IS NULL");
         push(@supptables, "LEFT JOIN flagtypes ON flagtypes.id = flags.type_id");
+    }
+
+    if (grep($_ eq 'keywords', @fields)) {
+        push(@supptables, "LEFT JOIN keywords ON keywords.bug_id = bugs.bug_id");
+        push(@supptables, "LEFT JOIN keyworddefs ON keyworddefs.id = keywords.keywordid");
     }
 
     # If the user has selected all of either status or resolution, change to
@@ -960,7 +967,7 @@ sub init {
         # These fields never go into the GROUP BY (bug_id goes in
         # explicitly, below).
         next if (grep($_ eq $field, EMPTY_COLUMN, 
-                      qw(bug_id actual_time percentage_complete flagtypes.name)));
+                      qw(bug_id actual_time percentage_complete flagtypes.name keywords)));
         my $col = COLUMNS->{$field}->{name};
         push(@groupby, $col) if !grep($_ eq $col, @groupby);
     }

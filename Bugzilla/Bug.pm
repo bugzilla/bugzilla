@@ -703,8 +703,6 @@ sub update {
         $dbh->do('INSERT INTO keywords (bug_id, keywordid) VALUES (?,?)',
                  undef, $self->id, $keyword_id);
     }
-    $dbh->do('UPDATE bugs SET keywords = ? WHERE bug_id = ?', undef,
-             $self->keywords, $self->id);
     # If any changes were found, record it in the activity log
     if (scalar @$removed_kw || scalar @$added_kw) {
         my $removed_keywords = Bugzilla::Keyword->new_from_list($removed_kw);

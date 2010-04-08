@@ -25,7 +25,7 @@
   <span id="votes_container">
     [% IF bug.votes %]
       with
-      <a href="page.cgi?id=voting/bug.html?bug_id=
+      <a href="page.cgi?id=voting/bug.html&amp;bug_id=
                [%- bug.id FILTER url_quote %]">
         [%- bug.votes %] 
         [% IF bug.votes == 1 %]

@@ -572,9 +572,6 @@ sub init {
         if (defined $params->param($f)) {
             my $s = trim($params->param($f));
             if ($s ne "") {
-                my $n = $f;
-                my $q = $dbh->quote($s);
-                trick_taint($q);
                 my $type = $params->param($f . "_type");
                 push(@specialchart, [$f, $type, $s]);
             }

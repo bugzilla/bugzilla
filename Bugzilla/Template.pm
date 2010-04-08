@@ -370,6 +370,9 @@ $Template::Directive::WHILE_MAX = 1000000;
 # to template variables.
 use Template::Stash;
 
+# Allow keys to start with an underscore or a dot.
+$Template::Stash::PRIVATE = undef;
+
 # Add "contains***" methods to list variables that search for one or more 
 # items in a list and return boolean values representing whether or not 
 # one/all/any item(s) were found.

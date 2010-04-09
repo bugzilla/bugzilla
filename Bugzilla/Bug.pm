@@ -478,14 +478,10 @@ sub create {
     my $groups     = delete $params->{groups};
     my $depends_on = delete $params->{dependson};
     my $blocked    = delete $params->{blocked};
+    my $keywords   = delete $params->{keywords};
     my ($comment, $privacy) = ($params->{comment}, $params->{commentprivacy});
     delete $params->{comment};
     delete $params->{commentprivacy};
-
-    # Set up the keyword cache for bug creation.
-    my $keywords = $params->{keywords};
-    $params->{keywords} = join(', ', sort {lc($a) cmp lc($b)} 
-                                          map($_->name, @$keywords));
 
     # We don't want the bug to appear in the system until it's correctly
     # protected by groups.

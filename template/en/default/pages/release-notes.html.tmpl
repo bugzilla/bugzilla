@@ -118,7 +118,7 @@
 <p>A <a href="https://wiki.mozilla.org/Bugzilla:CMU_HCI_Research_2008">scientific
   usability study</a> was done on [% terms.Bugzilla %] by researchers
   from Carnegie-Mellon University. As a result of this study,
-  <a href="https://bugzilla.mozilla.org/showdependencytree.cgi?id=490786&hide_resolved=0">several
+  <a href="https://bugzilla.mozilla.org/showdependencytree.cgi?id=490786&amp;hide_resolved=0">several
   usability issues</a> were prioritized to be fixed, based on specific data
   from the study.</p>
 
@@ -199,7 +199,7 @@
   on shared hosting). SUExec support shows up as an option
   in the <kbd>localconfig</kbd> file during installation.</p>
 
-<h3 id="36_feat_mpwindows">Experimental mod_perl Support on Windows</h3>
+<h3 id="v36_feat_mpwindows">Experimental mod_perl Support on Windows</h3>
 
 <p>There is now experimental support for running [% terms.Bugzilla %]
   under mod_perl on Windows, for a significant performance enhancement
@@ -276,6 +276,12 @@
   <li><b>[% terms.Bug %] Editing:</b> The "Collapse All Comments"
     and "Expand All Comments" links now appear to the right of the
     comment list instead of above it.</li>
+  <li><b>[% terms.Bug %] Editing:</b> The See Also field now supports
+    URLs for Google Code Issues and the Debian B[% %]ug-Tracking System.</li>
+  <li><b>[% terms.Bug %] Editing:</b> There have been significant performance
+    improvements in <kbd>show_bug.cgi</kbd> (the script that displays the
+    [% terms.bug %]-editing form), particularly for [% terms.bugs %] that
+    have lots of comments or attachments.</li>
 
   <li><b>Attachments:</b> The "Details" page of an attachment
     now displays itself as uneditable if you can't edit the fields
@@ -288,6 +294,9 @@
   <li><b>Attachments:</b> When you click on an "attachment 12345" link
     in a comment, if the attachment is a patch, you will now see the
     formatted "Diff" view instead of the raw patch.</li>
+  <li><b>Attachments</b>: For text attachments, we now let the browser 
+    auto-detect the character encoding, instead of forcing the browser to
+    always assume the attachment is in UTF-8.</li>
   
   <li><b>Search:</b> You can now display [% terms.bug %] flags as a column
     in search results.</li>
@@ -384,6 +393,11 @@
     faster at upgrading installations, particularly older installations.
     Also, it's been made faster to run for the case where it's not
     doing an upgrade.</li>
+  <li><b>Installation:</b> If you install [% terms.Bugzilla %] using the
+    tarball, the <kbd>CGI.pm</kbd> module from CPAN is now included in
+    the <kbd>lib/</kbd> dir. If you would rather use the CGI.pm from your
+    global Perl installation, you can delete <kbd>CGI.pm</kbd> and the
+    <kbd>CGI</kbd> directory from the <kbd>lib/</kbd> directory.</li>
   
   <li>When editing a group, you can now specify that members of a group
     are allowed to grant others membership in that group itself.</li>
@@ -472,6 +486,9 @@
     that parameter will be ignored. Mostly this just affects
     customizers--[% terms.Bugzilla %]'s WebService is not functionally
     affected by these changes.</li>
+  <li>In previous versions of [% terms.Bugzilla %], error messages were
+    sent word-wrapped to the client, from the WebService. Error messages
+    are now sent as one unbroken line.</li>
 </ul>
 
 <h2 id="v36_issues">Outstanding Issues</h2>

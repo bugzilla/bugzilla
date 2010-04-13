@@ -32,9 +32,9 @@
      For a devel release, simple bump bz-ver and bz-date
 -->
 
-<!ENTITY bz-ver "3.6rc1">
+<!ENTITY bz-ver "3.6">
 <!ENTITY bz-nextver "3.8">
-<!ENTITY bz-date "2010-03-07">
+<!ENTITY bz-date "2010-04-13">
 <!ENTITY current-year "2010">
 
 <!ENTITY landfillbase "http://landfill.bugzilla.org/bugzilla-3.6-branch/">

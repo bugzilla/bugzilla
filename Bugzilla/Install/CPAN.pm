@@ -152,6 +152,8 @@ sub set_cpan_config {
     
     # Unless specified, we install the modules into the Bugzilla directory.
     if (!$do_global) {
+        require Config;
+
         $CPAN::Config->{makepl_arg} .= " LIB=\"$bzlib\""
             . " INSTALLMAN1DIR=\"$bzlib/man/man1\""
             . " INSTALLMAN3DIR=\"$bzlib/man/man3\""
@@ -162,7 +164,10 @@ sub set_cpan_config {
             # INSTALLDIRS=perl is set because that makes sure that MakeMaker
             # always uses the directories we've specified here.
             . " INSTALLDIRS=perl";
-        $CPAN::Config->{mbuild_arg} = "--install_base \"$bzlib\"";
+        $CPAN::Config->{mbuild_arg} = " --install_base \"$bzlib\""
+            . " --install_path lib=\"$bzlib\""
+            . " --install_path arch=\"$bzlib/$Config::Config{archname}\"";
+        $CPAN::Config->{mbuild_install_arg} = $CPAN::Config->{mbuild_arg};
 
         # When we're not root, sometimes newer versions of CPAN will
         # try to read/modify things that belong to root, unless we set

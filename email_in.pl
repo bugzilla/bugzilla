@@ -556,8 +556,6 @@ not send you anything.
 If any part of your request fails, all of it will fail. No partial
 changes will happen.
 
-There is no attachment support yet.
-
 =head1 CAUTION
 
 The script does not do any validation that the user is who they say
@@ -567,10 +565,6 @@ the message is actually coming from who it says it's coming from,
 and only allow access to the inbound email system from people you trust.
 
 =head1 LIMITATIONS
-
-Note that the email interface has the same limitations as the
-normal Bugzilla interface. So, for example, you cannot reassign
-a bug and change its status at the same time.
 
 The email interface only accepts emails that are correctly formatted
 per RFC2822. If you send it an incorrectly formatted message, it

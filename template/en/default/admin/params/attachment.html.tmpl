@@ -66,9 +66,8 @@
 
   maxattachmentsize => "The maximum size (in kilobytes) of attachments. " _
                        "$terms.Bugzilla will not accept attachments greater than this number " _
-                       "of kilobytes in size. To accept attachments of any size " _
-                       "(subject to the limitations of your server software), set this " _
-                       "value to zero.",
+                       "of kilobytes in size. Setting this parameter to 0 will prevent " _
+                       "attaching files to ${terms.bugs}.",
 
   maxlocalattachment => "The maximum size (in megabytes) of attachments identified by " _
                         "the user as 'Big Files' to be stored locally on the webserver. " _

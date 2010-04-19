@@ -548,6 +548,7 @@ TUI_hide_default('expert_fields');
     </tr>
   [% END %]
 
+  [% IF Param("maxattachmentsize") %]
   <tr>
     <th>Attachment:</th>
     <td colspan="3">
@@ -582,6 +583,7 @@ TUI_hide_default('expert_fields');
       </script>
     </td>
   </tr>
+  [% END %]
 </tbody>
 
 <tbody class="expert_fields">

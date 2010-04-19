@@ -19,6 +19,8 @@
   #                 Frédéric Buclin <LpSolit@gmail.com>
   #%]
 
+[% RETURN UNLESS attachments.size || Param("maxattachmentsize") %]
+
 <script type="text/javascript">
 <!--
 function toggle_display(link) {
@@ -155,8 +157,10 @@ function toggle_display(link) {
           [% END %]
         </span>
       [% END %]
-      <a href="attachment.cgi?bugid=[% bugid %]&amp;action=enter">Add an attachment</a>
-      (proposed patch, testcase, etc.)
+      [% IF Param("maxattachmentsize") %]
+        <a href="attachment.cgi?bugid=[% bugid %]&amp;action=enter">Add an attachment</a>
+        (proposed patch, testcase, etc.)
+      [% END %]
     </td>
   </tr>
 </table>

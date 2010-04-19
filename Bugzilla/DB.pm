@@ -147,7 +147,7 @@ sub bz_check_requirements {
         my $dbd_mod = $dbd->{module};
         my $dbd_ver = $dbd->{version};
         my $version = $dbd_ver ? " $dbd_ver or higher" : '';
-        print <<EOT;
+        die <<EOT;
 
 For $sql_server, Bugzilla requires that perl's $dbd_mod $dbd_ver or later be
 installed. To install this module, run the following command (as $root):
@@ -155,7 +155,6 @@ installed. To install this module, run the following command (as $root):
     $command
 
 EOT
-        exit;
     }
 
     # We don't try to connect to the actual database if $db_check is
@@ -178,14 +177,13 @@ EOT
     if ( vers_cmp($sql_vers,$sql_want) > -1 ) {
         print "ok: found v$sql_vers\n" if $output;
     } else {
-        print <<EOT;
+        die <<EOT;
 
 Your $sql_server v$sql_vers is too old. Bugzilla requires version
 $sql_want or later of $sql_server. Please download and install a
 newer version.
 
 EOT
-        exit;
     }
 
     print "\n" if $output;
@@ -213,10 +211,9 @@ sub bz_create_database {
         if (!$success) {
             my $error = $dbh->errstr || $@;
             chomp($error);
-            print STDERR  "The '$db_name' database could not be created.",
-                          " The error returned was:\n\n    $error\n\n",
-                          _bz_connect_error_reasons();
-            exit;
+            die "The '$db_name' database could not be created.",
+                " The error returned was:\n\n    $error\n\n",
+                _bz_connect_error_reasons();
         }
     }
 
@@ -237,9 +234,8 @@ sub _get_no_db_connection {
         # Can't use $dbh->errstr because $dbh is undef.
         my $error = $DBI::errstr || $@;
         chomp($error);
-        print STDERR "There was an error connecting to $sql_server:\n\n",
-                     "    $error\n\n", _bz_connect_error_reasons();
-        exit;
+        die "There was an error connecting to $sql_server:\n\n",
+            "    $error\n\n", _bz_connect_error_reasons(), "\n";
     }
     return $dbh;    
 }
@@ -1309,13 +1305,11 @@ sub _check_references {
             }
         }
         else {
-            print "\n", get_text('install_fk_invalid',
+            die "\n", get_text('install_fk_invalid',
                 { table => $table, column => $column,
                   foreign_table => $foreign_table,
                   foreign_column => $foreign_column,
                  'values' => $bad_values }), "\n";
-            # I just picked a number above 2, to be considered "abnormal exit"
-            exit 3
         }
     }
 }

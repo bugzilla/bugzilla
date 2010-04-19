@@ -425,8 +425,11 @@ sub print_module_instructions {
             if (vers_cmp($perl_ver, '5.10') > -1) {
                 $url_to_theory58S = 'http://cpan.uwinnipeg.ca/PPMPackages/10xx/';
             }
-            print colored(install_string('ppm_repo_add', 
-                                 { theory_url => $url_to_theory58S }), 'red');
+            print colored(
+                install_string('ppm_repo_add', 
+                               { theory_url => $url_to_theory58S }),
+                COLOR_ERROR);
+
             # ActivePerls older than revision 819 require an additional command.
             if (ON_ACTIVESTATE < 819) {
                 print install_string('ppm_repo_up');
@@ -459,7 +462,7 @@ sub print_module_instructions {
     }
 
     if (my @missing = @{$check_results->{missing}}) {
-        print colored(install_string('commands_required'), 'red') . "\n";
+        print colored(install_string('commands_required'), COLOR_ERROR), "\n";
         foreach my $package (@missing) {
             my $command = install_command($package);
             print "    $command\n";
@@ -472,7 +475,8 @@ sub print_module_instructions {
         print install_string('install_all', { perl => $^X });
     }
     if (!$check_results->{pass}) {
-        print colored(install_string('installation_failed'), 'red') . "\n\n";
+        print colored(install_string('installation_failed'), COLOR_ERROR),
+              "\n\n";
     }
 }
 
@@ -565,7 +569,7 @@ sub have_vers {
         $ok = "$ok:" if $ok;
         my $str = sprintf "%s %19s %-9s $ok $vstr $black_string\n",
                     install_string('checking_for'), $package, "($want_string)";
-        print $vok ? $str : colored($str, 'red');
+        print $vok ? $str : colored($str, COLOR_ERROR);
     }
     
     return $vok ? 1 : 0;

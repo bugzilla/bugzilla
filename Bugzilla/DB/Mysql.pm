@@ -311,13 +311,12 @@ sub bz_setup_database {
     my ($innodb_on) = @{$self->selectcol_arrayref(
         q{SHOW VARIABLES LIKE '%have_innodb%'}, {Columns=>[2]})};
     if ($innodb_on ne 'YES') {
-        print <<EOT;
+        die <<EOT;
 InnoDB is disabled in your MySQL installation. 
 Bugzilla requires InnoDB to be enabled. 
 Please enable it and then re-run checksetup.pl.
 
 EOT
-        exit 3;
     }
 
 

@@ -3080,11 +3080,11 @@ sub _check_content_length {
           WHERE CHAR_LENGTH($field_name) > ?", {Columns=>[1,2]}, $max_length) };
 
     if (scalar keys %contents) {
-        print install_string('install_data_too_long',
-                             { column     => $field_name,
-                               id_column  => $id_field,
-                               table      => $table_name,
-                               max_length => $max_length });
+        my $error = install_string('install_data_too_long',
+                                   { column     => $field_name,
+                                     id_column  => $id_field,
+                                     table      => $table_name,
+                                     max_length => $max_length });
         foreach my $id (keys %contents) {
             my $string = $contents{$id};
             # Don't dump the whole string--it could be 16MB.
@@ -3092,9 +3092,9 @@ sub _check_content_length {
                 $string = substr($string, 0, 30) . "..." 
                          . substr($string, -30) . "\n";
             }
-            print "$id: $string\n";
+            $error .= "$id: $string\n";
         }
-        exit 3;
+        die $error;
     }
 }
 

@@ -32,6 +32,7 @@ use File::Basename;
 use POSIX qw(setlocale LC_CTYPE);
 use Safe;
 use Scalar::Util qw(tainted);
+use Term::ANSIColor qw(colored);
 
 use base qw(Exporter);
 our @EXPORT_OK = qw(
@@ -559,7 +560,23 @@ sub get_console_locale {
 sub init_console {
     eval { ON_WINDOWS && require Win32::Console::ANSI; };
     $ENV{'ANSI_COLORS_DISABLED'} = 1 if ($@ || !-t *STDOUT);
+    $SIG{__DIE__} = \&_console_die;
     prevent_windows_dialog_boxes();
+}
+
+sub _console_die {
+    my ($message) = @_;
+    # $^S means "we are in an eval"
+    if ($^S) {
+        die $message;
+    }
+    # Remove newlines from the message before we color it, and then
+    # add them back in on display. Otherwise the ANSI escape code
+    # for resetting the color comes after the newline, and Perl thinks
+    # that it should put "at Bugzilla/Install.pm line 1234" after the
+    # message.
+    $message =~ s/\n+$//;
+    die colored($message, COLOR_ERROR) . "\n";
 }
 
 sub prevent_windows_dialog_boxes {

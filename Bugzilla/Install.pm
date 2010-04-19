@@ -109,14 +109,25 @@ use constant SYSTEM_GROUPS => (
         description => 'Can confirm a bug or mark it a duplicate'
     },
     {
-        name        => 'bz_canusewhines',
-        description => 'User can configure whine reports for self'
+        name         => 'bz_canusewhineatothers',
+        description  => 'Can configure whine reports for other users',
+    },
+    {
+        name         => 'bz_canusewhines',
+        description  => 'User can configure whine reports for self',
+        # inherited_by means that users in the groups listed below are
+        # automatically members of bz_canusewhines.
+        inherited_by => ['editbugs', 'bz_canusewhineatothers'],
     },
     {
         name        => 'bz_sudoers',
-        description => 'Can perform actions as other users'
+        description => 'Can perform actions as other users',
     },
-    # There are also other groups created in update_system_groups.
+    {
+        name         => 'bz_sudo_protect',
+        description  => 'Can not be impersonated by other users',
+        inherited_by => ['bz_sudoers'],
+    },
 );
 
 use constant DEFAULT_CLASSIFICATION => {
@@ -154,38 +165,29 @@ sub update_settings {
 sub update_system_groups {
     my $dbh = Bugzilla->dbh;
 
+    $dbh->bz_start_transaction();
+
     # Create most of the system groups
     foreach my $definition (SYSTEM_GROUPS) {
         my $exists = new Bugzilla::Group({ name => $definition->{name} });
-        $definition->{isbuggroup} = 0;
-        Bugzilla::Group->create($definition) unless $exists;
+        if (!$exists) {
+            $definition->{isbuggroup} = 0;
+            my $inherited_by = delete $definition->{inherited_by};
+            my $created = Bugzilla::Group->create($definition);
+            # Each group in inherited_by is automatically a member of this
+            # group.
+            if ($inherited_by) {
+                foreach my $name (@$inherited_by) {
+                    my $member = Bugzilla::Group->check($name);
+                    $dbh->do('INSERT INTO group_group_map (grantor_id, 
+                                          member_id) VALUES (?,?)',
+                             undef, $created->id, $member->id);
+                }
+            }
+        }
     }
 
-    # Certain groups need something done after they are created. We do
-    # that here.
-
-    # Make sure people who can whine at others can also whine.
-    if (!new Bugzilla::Group({name => 'bz_canusewhineatothers'})) {
-        my $whineatothers = Bugzilla::Group->create({
-            name        => 'bz_canusewhineatothers',
-            description => 'Can configure whine reports for other users',
-            isbuggroup  => 0 });
-        my $whine = new Bugzilla::Group({ name => 'bz_canusewhines' });
-
-        $dbh->do('INSERT INTO group_group_map (grantor_id, member_id) 
-                       VALUES (?,?)', undef, $whine->id, $whineatothers->id);
-    }
-
-    # Make sure sudoers are automatically protected from being sudoed.
-    if (!new Bugzilla::Group({name => 'bz_sudo_protect'})) {
-        my $sudo_protect = Bugzilla::Group->create({
-            name        => 'bz_sudo_protect',
-            description => 'Can not be impersonated by other users',
-            isbuggroup  => 0 });
-        my $sudo = new Bugzilla::Group({ name => 'bz_sudoers' });
-        $dbh->do('INSERT INTO group_group_map (grantor_id, member_id) 
-                       VALUES (?,?)', undef, $sudo_protect->id, $sudo->id);
-    }
+    $dbh->bz_commit_transaction();
 }
 
 sub create_default_classification {

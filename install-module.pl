@@ -26,7 +26,7 @@ use warnings;
 # CPAN has chdir'ed around. We do all of this in this funny order to
 # make sure that we use the lib/ modules instead of the base Perl modules,
 # in case the lib/ modules are newer.
-use Cwd qw(abs_path);
+use Cwd qw(abs_path cwd);
 use lib abs_path('.');
 use Bugzilla::Constants;
 use lib abs_path(bz_locations()->{ext_libpath});
@@ -35,14 +35,17 @@ use Bugzilla::Install::CPAN;
 
 use Bugzilla::Constants;
 use Bugzilla::Install::Requirements;
-use Bugzilla::Install::Util qw(bin_loc);
+use Bugzilla::Install::Util qw(bin_loc init_console vers_cmp);
 
 use Data::Dumper;
 use Getopt::Long;
 use Pod::Usage;
 
-our %switch;
+init_console();
 
+my @original_args = @ARGV;
+my $original_dir = cwd();
+our %switch;
 GetOptions(\%switch, 'all|a', 'upgrade-all|u', 'show-config|s', 'global|g',
                      'shell', 'help|h');
 
@@ -63,12 +66,7 @@ if ($switch{'show-config'}) {
     exit;
 }
 
-my $can_notest = 1;
-if (substr(CPAN->VERSION, 0, 3) < 1.8) {
-    $can_notest = 0;
-    print "* Note: If you upgrade your CPAN module, installs will be faster.\n";
-    print "* You can upgrade CPAN by doing: $^X install-module.pl CPAN\n";
-}
+check_cpan_requirements($original_dir, \@original_args);
 
 if ($switch{'shell'}) {
     CPAN::shell();
@@ -100,12 +98,12 @@ if ($switch{'all'} || $switch{'upgrade-all'}) {
         next if $cpan_name eq 'mod_perl2';
         next if $cpan_name eq 'DBD::Oracle' and !$ENV{ORACLE_HOME};
         next if $cpan_name eq 'DBD::Pg' and !bin_loc('pg_config');
-        install_module($cpan_name, $can_notest);
+        install_module($cpan_name);
     }
 }
 
 foreach my $module (@ARGV) {
-    install_module($module, $can_notest);
+    install_module($module);
 }
 
 __END__

@@ -21,15 +21,40 @@
 package Bugzilla::Install::CPAN;
 use strict;
 use base qw(Exporter);
-our @EXPORT = qw(set_cpan_config install_module BZ_LIB);
+our @EXPORT = qw(
+    BZ_LIB
+
+    check_cpan_requirements 
+    set_cpan_config
+    install_module 
+);
 
 use Bugzilla::Constants;
+use Bugzilla::Install::Requirements qw(have_vers);
 use Bugzilla::Install::Util qw(bin_loc install_string);
 
 use CPAN;
 use Cwd qw(abs_path);
 use File::Path qw(rmtree);
 use List::Util qw(shuffle);
+
+# These are required for install-module.pl to be able to install
+# all modules properly.
+use constant REQUIREMENTS => (
+    {
+        module  => 'CPAN',
+        package => 'CPAN',
+        version => '1.81',
+    },
+    {
+        # When Module::Build isn't installed, the YAML module allows
+        # CPAN to read META.yml to determine that Module::Build first
+        # needs to be installed to compile a module.
+        module  => 'YAML',
+        package => 'YAML',
+        version => 0,
+    },
+);
 
 # We need the absolute path of ext_libpath, because CPAN chdirs around
 # and so we can't use a relative directory.
@@ -46,13 +71,17 @@ use constant CPAN_DEFAULTS => {
     auto_commit => 0,
     # We always force builds, so there's no reason to cache them.
     build_cache => 0,
+    build_requires_install_policy => 'yes',
     cache_metadata => 1,
+    colorize_output => 1,
+    colorize_print => 'bold',
     index_expire => 1,
     scan_cache => 'atstart',
 
     inhibit_startup_message => 1,
     mbuild_install_build_command => './Build',
 
+    bzip2 => bin_loc('bzip2'),
     curl => bin_loc('curl'),
     gzip => bin_loc('gzip'),
     links => bin_loc('links'),
@@ -66,13 +95,37 @@ use constant CPAN_DEFAULTS => {
     urllist => [shuffle qw(
         http://cpan.pair.com/
         http://mirror.hiwaay.net/CPAN/
+        http://ftp.heanet.ie/mirrors/ftp.perl.org/pub/CPAN/
         ftp://ftp.dc.aleron.net/pub/CPAN/
-        http://perl.secsup.org/
-        http://mirrors.kernel.org/cpan/)],
+        http://mirrors.kernel.org/cpan/
+        http://mirrors2.kernel.org/cpan/)],
 };
 
+sub check_cpan_requirements {
+    my ($original_dir, $original_args) = @_;
+
+    my @install;
+    foreach my $module (REQUIREMENTS) {
+        my $installed = have_vers($module, 1);
+        push(@install, $module) if !$installed;
+    }
+
+    return if !@install;
+
+    my $restart_required;
+    foreach my $module (@install) {
+        $restart_required = 1 if $module->{module} eq 'CPAN';
+        install_module($module->{module}, 1);
+    }
+
+    if ($restart_required) {
+        chdir $original_dir;
+        exec($^X, $0, @$original_args);
+    }
+}
+
 sub install_module {
-    my ($name, $notest) = @_;
+    my ($name, $test) = @_;
     my $bzlib = BZ_LIB;
 
     # Certain modules require special stuff in order to not prompt us.
@@ -95,11 +148,11 @@ sub install_module {
     my $module = CPAN::Shell->expand('Module', $name);
     print install_string('install_module', 
               { module => $name, version => $module->cpan_version }) . "\n";
-    if ($notest) {
-        CPAN::Shell->notest('install', $name);
+    if ($test) {
+        CPAN::Shell->force('install', $name);
     }
     else {
-        CPAN::Shell->force('install', $name);
+        CPAN::Shell->notest('install', $name);
     }
 
     # If it installed any binaries in the Bugzilla directory, delete them.
@@ -218,7 +271,7 @@ Bugzilla::Install::CPAN - Routines to install Perl modules from CPAN.
  use Bugzilla::Install::CPAN;
 
  set_cpan_config();
- install_module('Module::Name', 1);
+ install_module('Module::Name');
 
 =head1 DESCRIPTION
 
@@ -245,8 +298,9 @@ Installs a module from CPAN. Takes two arguments:
 =item C<$name> - The name of the module, just like you'd pass to the
 C<install> command in the CPAN shell.
 
-=item C<$notest> - If true, we skip running tests on this module. This
-can greatly speed up the installation time.
+=item C<$test> - If true, we run tests on this module before installing,
+but we still force the install if the tests fail. This is only used
+when we internally install a newer CPAN module.
 
 =back
 

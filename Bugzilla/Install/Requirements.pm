@@ -542,6 +542,10 @@ sub have_vers {
     if ($module eq 'CGI' && $vnum =~ /(2\.7\d)(\d+)/) {
         $vnum = $1 . "." . $2;
     }
+    # CPAN did a similar thing, where it has versions like 1.9304.
+    if ($module eq 'CPAN' and $vnum =~ /^(\d\.\d{2})\d{2}$/) {
+        $vnum = $1;
+    }
 
     my $vstr;
     if ($vnum eq "-1") { # string compare just in case it's non-numeric

@@ -93,7 +93,6 @@ use constant CPAN_DEFAULTS => {
     urllist => [shuffle qw(
         http://cpan.pair.com/
         http://mirror.hiwaay.net/CPAN/
-        http://ftp.heanet.ie/mirrors/ftp.perl.org/pub/CPAN/
         ftp://ftp.dc.aleron.net/pub/CPAN/
         http://mirrors.kernel.org/cpan/
         http://mirrors2.kernel.org/cpan/)],

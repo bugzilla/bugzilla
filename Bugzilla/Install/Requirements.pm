@@ -533,8 +533,9 @@ sub have_vers {
 
     eval "require $module;";
 
-    # VERSION is provided by UNIVERSAL::
-    my $vnum = eval { $module->VERSION } || -1;
+    # VERSION is provided by UNIVERSAL::, and can be called even if
+    # the module isn't loaded.
+    my $vnum = $module->VERSION || -1;
 
     # CGI's versioning scheme went 2.75, 2.751, 2.752, 2.753, 2.76
     # That breaks the standard version tests, so we need to manually correct

@@ -125,6 +125,12 @@ sub install_module {
     my ($name, $test) = @_;
     my $bzlib = BZ_LIB;
 
+    # Make Module::AutoInstall install all dependencies and never prompt.
+    local $ENV{PERL_AUTOINSTALL} = '--alldeps';
+    # This makes Net::SSLeay not prompt the user, if it gets installed.
+    # It also makes any other MakeMaker prompts accept their defaults.
+    local $ENV{PERL_MM_USE_DEFAULT} = 1;
+
     # Certain modules require special stuff in order to not prompt us.
     my $original_makepl = $CPAN::Config->{makepl_arg};
     # This one's a regex in case we're doing Template::Plugin::GD and it
@@ -135,11 +141,12 @@ sub install_module {
     elsif ($name eq 'XML::Twig') {
         $CPAN::Config->{makepl_arg} = "-n $original_makepl";
     }
-    elsif ($name eq 'Net::LDAP') {
-        $CPAN::Config->{makepl_arg} .= " --skipdeps";
-    }
     elsif ($name eq 'SOAP::Lite') {
         $CPAN::Config->{makepl_arg} .= " --noprompt";
+    }
+    # MIME-tools has a Module::Install that's too old to understand alldeps.
+    elsif ($name =~ /^MIME::/) {
+        $ENV{PERL_AUTOINSTALL} = '--defaultdeps';
     }
 
     my $module = CPAN::Shell->expand('Module', $name);

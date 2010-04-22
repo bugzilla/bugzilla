@@ -37,6 +37,7 @@ use constant LIST_ORDER => NAME_FIELD;
 use constant UPDATE_VALIDATORS => {};
 use constant NUMERIC_COLUMNS   => ();
 use constant DATE_COLUMNS      => ();
+use constant VALIDATOR_DEPENDENCIES => {};
 
 # This allows the JSON-RPC interface to return Bugzilla::Object instances
 # as though they were hashes. In the future, this may be modified to return
@@ -313,7 +314,10 @@ sub set {
 
 sub set_all {
     my ($self, $params) = @_;
-    foreach my $key (keys %$params) {
+
+    my @sorted_names = sort { $self->_cmp_dependency($a, $b) }
+                            (keys %$params);
+    foreach my $key (@sorted_names) {
         my $method = "set_$key";
         $self->$method($params->{$key});
     }
@@ -447,19 +451,21 @@ sub run_create_validators {
     my ($class, $params) = @_;
 
     my $validators = $class->_get_validators;
+    my %field_values = %$params;
 
-    my %field_values;
-    # We do the sort just to make sure that validation always
-    # happens in a consistent order.
-    foreach my $field (sort keys %$params) {
+    my @sorted_names = sort { $class->_cmp_dependency($a, $b) } 
+                            (keys %field_values);
+    foreach my $field (@sorted_names) {
         my $value;
         if (exists $validators->{$field}) {
             my $validator = $validators->{$field};
-            $value = $class->$validator($params->{$field}, $field);
+            $value = $class->$validator($field_values{$field}, $field,
+                                        \%field_values);
         }
         else {
-            $value = $params->{$field};
+            $value = $field_values{$field};
         }
+
         # We want people to be able to explicitly set fields to NULL,
         # and that means they can be set to undef.
         trick_taint($value) if defined $value && !ref($value);
@@ -502,6 +508,30 @@ sub get_all {
 ###############################
 
 sub check_boolean { return $_[1] ? 1 : 0 }
+
+###################
+# General Helpers #
+###################
+
+# Helps sort fields according to VALIDATOR_DEPENDENCIES.
+sub _cmp_dependency {
+    my ($invocant, $a, $b) = @_;
+    my $dependencies = $invocant->VALIDATOR_DEPENDENCIES;
+    # If $a is a key in the hash and $b is one of its dependencies, then
+    # $b should come first (meaning $a is "greater" than $b).
+    if (my $b_first = $dependencies->{$a}) {
+        return 1 if grep { $_ eq $b } @$b_first;
+    }
+    # If $b is a key in the hash and $a is one of its dependencies,
+    # then $a should come first (meaning $a is "less" than $b).
+    if (my $a_first = $dependencies->{$b}) {
+        return -1 if grep { $_ eq $a } @$a_first;
+    }
+
+    # Sort alphabetically so that we get a consistent order for fields
+    # that don't have dependencies.
+    return $a cmp $b;
+}
 
 ####################
 # Constant Helpers #
@@ -650,6 +680,20 @@ when updating an object, not when creating it. Any validator that appears
 here must not appear in L</VALIDATORS>.
 
 L<Bugzilla::Bug> has good examples in its code of when to use this.
+
+=item C<VALIDATOR_DEPENDENCIES>
+
+During L</create> and L</set_all>, validators are normally called in
+a somewhat-random order.  If you need one field to be validated and set
+before another field, this constant is how you do it, by saying that
+one field "depends" on the value of other fields.
+
+This is a hashref, where the keys are field names and the values are
+arrayrefs of field names. You specify what fields a field depends on using
+the arrayrefs. So, for example, to say that a C<component> field depends
+on the C<product> field being set, you would do:
+
+ component => ['product']
 
 =item C<UPDATE_COLUMNS>
 

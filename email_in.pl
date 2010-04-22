@@ -243,7 +243,8 @@ sub handle_attachments {
         # and this is our first attachment, then we make the comment an 
         # "attachment created" comment.
         if ($comment and !$comment->type and !$update_comment) {
-            $comment->set_type(CMT_ATTACHMENT_CREATED, $obj->id);
+            $comment->set_all({ type       => CMT_ATTACHMENT_CREATED, 
+                                extra_data => $obj->id });
             $update_comment = 1;
         }
         else {

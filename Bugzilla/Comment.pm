@@ -30,6 +30,8 @@ use Bugzilla::Error;
 use Bugzilla::User;
 use Bugzilla::Util;
 
+use Scalar::Util qw(blessed);
+
 ###############################
 ####    Initialization     ####
 ###############################
@@ -57,11 +59,12 @@ use constant ID_FIELD => 'comment_id';
 use constant LIST_ORDER => 'bug_when';
 
 use constant VALIDATORS => {
+    extra_data => \&_check_extra_data,
     type => \&_check_type,
 };
 
-use constant UPDATE_VALIDATORS => {
-    extra_data => \&_check_extra_data,
+use constant VALIDATOR_DEPENDENCIES => {
+    extra_data => ['type'],
 };
 
 #########################
@@ -154,9 +157,8 @@ sub body_full {
 sub set_extra_data { $_[0]->set('extra_data', $_[1]); }
 
 sub set_type {
-    my ($self, $type, $extra_data) = @_;
+    my ($self, $type) = @_;
     $self->set('type', $type);
-    $self->set_extra_data($extra_data);
 }
 
 ##############
@@ -164,8 +166,9 @@ sub set_type {
 ##############
 
 sub _check_extra_data {
-    my ($invocant, $extra_data, $type) = @_;
-    $type = $invocant->type if ref $invocant;
+    my ($invocant, $extra_data, undef, $params) = @_;
+    my $type = blessed($invocant) ? $invocant->type : $params->{type};
+
     if ($type == CMT_NORMAL) {
         if (defined $extra_data) {
             ThrowCodeError('comment_extra_data_not_allowed',

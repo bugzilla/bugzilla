@@ -217,7 +217,8 @@ if (defined($cgi->upload('data')) || $cgi->param('attachurl')) {
         $attachment->set_flags($flags, $new_flags);
         $attachment->update($timestamp);
         my $comment = $bug->comments->[0];
-        $comment->set_type(CMT_ATTACHMENT_CREATED, $attachment->id);
+        $comment->set_all({ type => CMT_ATTACHMENT_CREATED, 
+                            extra_data => $attachment->id });
         $comment->update();
     }
     else {

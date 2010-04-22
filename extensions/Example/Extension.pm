@@ -415,7 +415,7 @@ sub object_end_of_set {
 sub object_end_of_set_all {
     my ($self, $args) = @_;
     
-    my $object = $args->{'class'};
+    my $object = $args->{'object'};
     my $object_params = $args->{'params'};
     
     # Note that this is a made-up class, for this example.

@@ -52,6 +52,11 @@ sub get_login_info {
     my $self = shift;
     my $result;
     foreach my $object (@{$self->{_stack}}) {
+        # See Bugzilla::WebService::Server::JSONRPC for where and why
+        # auth_no_automatic_login is used.
+        if (Bugzilla->request_cache->{auth_no_automatic_login}) {
+            next if $object->is_automatic;
+        }
         $result = $object->get_login_info(@_);
         $self->{successful} = $object;
         last if !$result->{failure};

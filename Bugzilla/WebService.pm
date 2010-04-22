@@ -29,6 +29,10 @@ use constant DATE_FIELDS => {};
 # For some methods, we shouldn't call Bugzilla->login before we call them
 use constant LOGIN_EXEMPT => { };
 
+# Used to allow methods to be called in the JSON-RPC WebService via GET.
+# Methods that can modify data MUST not be listed here.
+use constant READ_ONLY => ();
+
 sub login_exempt {
     my ($class, $method) = @_;
     return $class->LOGIN_EXEMPT->{$method};

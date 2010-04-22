@@ -23,6 +23,13 @@ use Bugzilla::Product;
 use Bugzilla::User;
 use Bugzilla::WebService::Util qw(validate);
 
+use constant READ_ONLY => qw(
+    get
+    get_accessible_products
+    get_enterable_products
+    get_selectable_products
+);
+
 ##################################################
 # Add aliases here for method name compatibility #
 ##################################################

@@ -120,10 +120,11 @@ use constant WS_ERROR_CODE => {
     user_access_by_id_denied    => 505,
     user_access_by_match_denied => 505,
 
-    # RPC Server Errors. See the following URL:
-    # http://xmlrpc-epi.sourceforge.net/specs/rfc.fault_codes.php
-    xmlrpc_invalid_value        => -32600,
-    unknown_method              => -32601,
+    # Errors thrown by the WebService itself. The ones that are negative 
+    # conform to http://xmlrpc-epi.sourceforge.net/specs/rfc.fault_codes.php
+    xmlrpc_invalid_value => -32600,
+    unknown_method       => -32601,
+    json_rpc_post_only   => 32610,
 };
 
 # These are the fallback defaults for errors not in ERROR_CODE.

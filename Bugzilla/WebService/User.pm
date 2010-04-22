@@ -36,6 +36,10 @@ use constant LOGIN_EXEMPT => {
     offer_account_by_email => 1,
 };
 
+use constant READ_ONLY => qw(
+    get
+);
+
 ##############
 # User Login #
 ##############

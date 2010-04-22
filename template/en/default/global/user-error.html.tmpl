@@ -979,9 +979,19 @@
       [%+ constants.LOGIN_LOCKOUT_INTERVAL FILTER html %] minutes.
     [% END %]
 
+  [% ELSIF error == "json_rpc_get_method_required" %]
+    When using JSON-RPC over GET, you must specify a 'method'
+    parameter. See the documentation at
+    [%+ docs_urlbase FILTER html %]api/Bugzilla/WebService/Server/JSONRPC.html
+
+  [% ELSIF error == "json_rpc_invalid_params" %]
+    Could not parse the 'params' argument as valid JSON.
+    Error: [% err_msg FILTER html %]
+    Value: [% params FILTER html %]
+
   [% ELSIF error == "json_rpc_post_only" %]
-    For security reasons, you may only use JSON-RPC with the POST
-    HTTP method.
+    For security reasons, you may only call the '[% method FILTER html %]'
+    method via HTTP POST.
 
   [% ELSIF error == "keyword_already_exists" %]
     [% title = "Keyword Already Exists" %]

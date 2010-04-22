@@ -48,6 +48,16 @@ use constant DATE_FIELDS => {
     search   => ['last_change_time', 'creation_time'],
 };
 
+use constant READ_ONLY => qw(
+    attachments
+    comments
+    fields
+    get
+    history
+    legal_values
+    search
+);
+
 ######################################################
 # Add aliases here for old method name compatibility #
 ######################################################

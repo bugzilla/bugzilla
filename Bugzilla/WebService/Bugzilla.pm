@@ -31,6 +31,13 @@ use constant LOGIN_EXEMPT => {
     version => 1,
 };
 
+use constant READ_ONLY => qw(
+    extensions
+    timezone
+    time
+    version
+);
+
 sub version {
     my $self = shift;
     return { version => $self->type('string', BUGZILLA_VERSION) };

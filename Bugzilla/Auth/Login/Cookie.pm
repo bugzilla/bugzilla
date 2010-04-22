@@ -27,6 +27,7 @@ use List::Util qw(first);
 use constant requires_persistence  => 0;
 use constant requires_verification => 0;
 use constant can_login => 0;
+use constant is_automatic => 1;
 
 # Note that Cookie never consults the Verifier, it always assumes
 # it has a valid DB account or it fails.

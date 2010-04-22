@@ -146,10 +146,6 @@ sub install_module {
     elsif ($name eq 'SOAP::Lite') {
         $CPAN::Config->{makepl_arg} .= " --noprompt";
     }
-    # MIME-tools has a Module::Install that's too old to understand alldeps.
-    elsif ($name =~ /^MIME::/) {
-        $ENV{PERL_AUTOINSTALL} = '--defaultdeps';
-    }
 
     my $module = CPAN::Shell->expand('Module', $name);
     print install_string('install_module', 

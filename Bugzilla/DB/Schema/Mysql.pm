@@ -43,6 +43,9 @@ use base qw(Bugzilla::DB::Schema);
 # that should be interpreted as a BOOLEAN instead of as an INT1 when
 # reading in the Schema from the disk. The values are discarded; I just
 # used "1" for simplicity.
+# 
+# THIS CONSTANT IS ONLY USED FOR UPGRADES FROM 2.18 OR EARLIER. DON'T
+# UPDATE IT TO MODERN COLUMN NAMES OR DEFINITIONS.
 use constant BOOLEAN_MAP => {
     bugs           => {everconfirmed => 1, reporter_accessible => 1,
                        cclist_accessible => 1, qacontact_accessible => 1,

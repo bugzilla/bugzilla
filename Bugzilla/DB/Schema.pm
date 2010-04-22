@@ -44,6 +44,7 @@ use Bugzilla::Constants;
 use Carp qw(confess);
 use Digest::MD5 qw(md5_hex);
 use Hash::Util qw(lock_value unlock_hash lock_keys unlock_keys);
+use List::MoreUtils qw(firstidx);
 use Safe;
 # Historical, needed for SCHEMA_VERSION = '1.00'
 use Storable qw(dclone freeze thaw);
@@ -2451,7 +2452,7 @@ sub delete_column {
     my ($self, $table, $column) = @_;
 
     my $abstract_fields = $self->{abstract_schema}{$table}{FIELDS};
-    my $name_position = lsearch($abstract_fields, $column);
+    my $name_position = firstidx { $_ eq $column } @$abstract_fields;
     die "Attempted to delete nonexistent column ${table}.${column}" 
         if $name_position == -1;
     # Delete the key/value pair from the array.
@@ -2540,7 +2541,7 @@ sub set_index {
 sub _set_object {
     my ($self, $table, $name, $definition, $array_to_change) = @_;
 
-    my $obj_position = lsearch($array_to_change, $name) + 1;
+    my $obj_position = (firstidx { $_ eq $name } @$array_to_change) + 1;
     # If the object doesn't exist, then add it.
     if (!$obj_position) {
         push(@$array_to_change, $name);
@@ -2573,7 +2574,7 @@ sub delete_index {
     my ($self, $table, $name) = @_;
 
     my $indexes = $self->{abstract_schema}{$table}{INDEXES};
-    my $name_position = lsearch($indexes, $name);
+    my $name_position = firstidx { $_ eq $name } @$indexes;
     die "Attempted to delete nonexistent index $name on the $table table" 
         if $name_position == -1;
     # Delete the key/value pair from the array.

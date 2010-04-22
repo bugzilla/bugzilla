@@ -115,7 +115,7 @@ sub canonicalise_query {
     my @parameters;
     foreach my $key (sort($self->param())) {
         # Leave this key out if it's in the exclude list
-        next if lsearch(\@exclude, $key) != -1;
+        next if grep { $_ eq $key } @exclude;
 
         # Remove the Boolean Charts for standard query.cgi fields
         # They are listed in the query URL already

@@ -36,7 +36,7 @@ use base qw(Exporter);
                              html_quote url_quote xml_quote
                              css_class_quote html_light_quote url_decode
                              i_am_cgi correct_urlbase remote_ip
-                             lsearch do_ssl_redirect_if_required use_attachbase
+                             do_ssl_redirect_if_required use_attachbase
                              diff_arrays
                              trim wrap_hard wrap_comment find_wrap_point
                              format_time format_time_decimal validate_date
@@ -304,18 +304,6 @@ sub use_attachbase {
     return ($attachbase ne ''
             && $attachbase ne Bugzilla->params->{'urlbase'}
             && $attachbase ne Bugzilla->params->{'sslbase'}) ? 1 : 0;
-}
-
-sub lsearch {
-    my ($list,$item) = (@_);
-    my $count = 0;
-    foreach my $i (@$list) {
-        if ($i eq $item) {
-            return $count;
-        }
-        $count++;
-    }
-    return -1;
 }
 
 sub diff_arrays {
@@ -680,9 +668,6 @@ Bugzilla::Util - Generic utility functions for bugzilla
   my $is_cgi   = i_am_cgi();
   my $urlbase  = correct_urlbase();
 
-  # Functions for searching
-  $loc = lsearch(\@arr, $val);
-
   # Data manipulation
   ($removed, $added) = diff_arrays(\@old, \@new);
 
@@ -818,21 +803,6 @@ current setting for the C<ssl_redirect> parameter.
 
 Returns true if an alternate host is used to display attachments; false
 otherwise.
-
-=back
-
-=head2 Searching
-
-Functions for searching within a set of values.
-
-=over 4
-
-=item C<lsearch($list, $item)>
-
-Returns the position of C<$item> in C<$list>. C<$list> must be a list
-reference.
-
-If the item is not in the list, returns -1.
 
 =back
 

@@ -562,10 +562,11 @@ sub get_products_by_permission {
 
     # No need to go further if the user has no "special" privs.
     return [] unless scalar(@$product_ids);
+    my %product_map = map { $_ => 1 } @$product_ids;
 
     # We will restrict the list to products the user can see.
     my $selectable_products = $self->get_selectable_products;
-    my @products = grep {lsearch($product_ids, $_->id) > -1} @$selectable_products;
+    my @products = grep { $product_map{$_->id} } @$selectable_products;
     return \@products;
 }
 
@@ -1490,7 +1491,7 @@ sub is_mover {
     if (!defined $self->{'is_mover'}) {
         my @movers = map { trim($_) } split(',', Bugzilla->params->{'movers'});
         $self->{'is_mover'} = ($self->id
-                               && lsearch(\@movers, $self->login) != -1);
+                               && grep { $_ eq $self->login } @movers);
     }
     return $self->{'is_mover'};
 }

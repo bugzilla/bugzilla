@@ -26,7 +26,7 @@
 
 use lib 't';
 use Support::Files;
-use Test::More tests => 16;
+use Test::More tests => 13;
 
 BEGIN { 
     use_ok(Bugzilla);
@@ -49,12 +49,6 @@ is(html_quote("<lala&@>"),"&lt;lala&amp;&#64;&gt;",'html_quote');
 
 #url_quote():
 is(url_quote("<lala&>gaa\"'[]{\\"),"%3Clala%26%3Egaa%22%27%5B%5D%7B%5C",'url_quote');
-
-#lsearch():
-my @list = ('apple','pear','plum','<"\\%');
-is(lsearch(\@list,'pear'),1,'lsearch 1');
-is(lsearch(\@list,'<"\\%'),3,'lsearch 2');
-is(lsearch(\@list,'kiwi'),-1,'lsearch 3 (missing item)');
 
 #trim():
 is(trim(" fg<*\$%>+=~~ "),'fg<*$%>+=~~','trim()');

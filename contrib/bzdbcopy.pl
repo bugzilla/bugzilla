@@ -71,11 +71,9 @@ my $ident_char = $target_db->get_info( 29 ); # SQL_IDENTIFIER_QUOTE_CHAR
 # has customized their source DB, we still want the script to work,
 # and it may otherwise fail in that situation (that is, the tables
 # may not exist in the target DB).
-my @table_list = $target_db->bz_table_list_real();
-
-# We don't want to copy over the bz_schema table's contents.
-my $bz_schema_location = lsearch(\@table_list, 'bz_schema');
-splice(@table_list, $bz_schema_location, 1) if $bz_schema_location > 0;
+#
+# We don't want to copy over the bz_schema table's contents, though.
+my @table_list = grep { $_ ne 'bz_schema' } $target_db->bz_table_list_real();
 
 # Instead of figuring out some fancy algorithm to insert data in the right
 # order and not break FK integrity, we just drop them all.

@@ -55,6 +55,7 @@ use File::Find;
 use File::Path qw(rmtree mkpath);
 use File::Spec;
 use IO::Dir;
+use List::MoreUtils qw(firstidx);
 use Scalar::Util qw(blessed);
 
 use base qw(Template);
@@ -716,7 +717,10 @@ sub create {
             'time2str' => \&Date::Format::time2str,
 
             # Generic linear search function
-            'lsearch' => \&Bugzilla::Util::lsearch,
+            'lsearch' => sub {
+                my ($array, $item) = @_;
+                return firstidx { $_ eq $item } @$array;
+            },
 
             # Currently logged in user, if any
             # If an sudo session is in progress, this is the user we're faking

@@ -25,12 +25,13 @@ use base qw(Bugzilla::Migrate);
 
 use Bugzilla::Constants;
 use Bugzilla::Install::Util qw(indicate_progress);
-use Bugzilla::Util qw(format_time trim generate_random_password lsearch);
+use Bugzilla::Util qw(format_time trim generate_random_password);
 
 use Email::Address;
 use Email::MIME;
 use File::Basename;
 use IO::File;
+use List::MoreUtils qw(firstidx);
 use List::Util qw(first);
 
 use constant REQUIRED_MODULES => [
@@ -168,14 +169,14 @@ use constant NON_COMMENT_FIELDS => qw(
 # we list out here the exact order of fields at the end of a PR
 # and wait for the next field to consider that we actually have
 # a field to parse.
-use constant END_FIELD_ORDER => [qw(
+use constant END_FIELD_ORDER => qw(
     Description
     How-To-Repeat
     Fix
     Release-Note
     Audit-Trail
     Unformatted
-)];
+);
 
 use constant CUSTOM_FIELDS => {
     cf_type => {
@@ -374,10 +375,12 @@ sub _get_gnats_field_data {
             # If this is one of the last few PR fields, then make sure
             # that we're getting our fields in the right order.
             my $new_field_valid = 1;
-            my $current_field_pos =
-                lsearch(END_FIELD_ORDER, $current_field || '');
+            my $search_for = $current_field || '';
+            my $current_field_pos = firstidx { $_ eq $search_for }
+                                             END_FIELD_ORDER;
             if ($current_field_pos > -1) {
-                my $new_field_pos = lsearch(END_FIELD_ORDER, $new_field);
+                my $new_field_pos = firstidx { $_ eq $new_field } 
+                                             END_FIELD_ORDER;
                 # We accept any field, as long as it's later than this one.
                 $new_field_valid = $new_field_pos > $current_field_pos ? 1 : 0;
             }

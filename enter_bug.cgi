@@ -508,14 +508,17 @@ else {
 # parameter.
 $vars->{'version'} = [map($_->name, @{$product->versions})];
 
+my $version_cookie = $cgi->cookie("VERSION-" . $product->name);
+
 if ( ($cloned_bug_id) &&
      ($product->name eq $cloned_bug->product ) ) {
     $default{'version'} = $cloned_bug->version;
 } elsif (formvalue('version')) {
     $default{'version'} = formvalue('version');
-} elsif (defined $cgi->cookie("VERSION-" . $product->name) &&
-    lsearch($vars->{'version'}, $cgi->cookie("VERSION-" . $product->name)) != -1) {
-    $default{'version'} = $cgi->cookie("VERSION-" . $product->name);
+} elsif (defined $version_cookie
+         and grep { $_ eq $version_cookie } @{ $vars->{'version'} })
+{
+    $default{'version'} = $version_cookie;
 } else {
     $default{'version'} = $vars->{'version'}->[$#{$vars->{'version'}}];
 }
@@ -556,7 +559,7 @@ $vars->{'bug_status'} = \@status;
 # Otherwise, and only if the user has privs, set the default
 # to the first confirmed bug status on the list, if available.
 
-if (formvalue('bug_status') && (lsearch(\@status, formvalue('bug_status')) >= 0)) {
+if (formvalue('bug_status') && grep { $_ eq formvalue('bug_status') } @status) {
     $default{'bug_status'} = formvalue('bug_status');
 } elsif (scalar @status == 1) {
     $default{'bug_status'} = $status[0];

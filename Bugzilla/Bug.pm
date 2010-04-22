@@ -49,6 +49,7 @@ use Bugzilla::Group;
 use Bugzilla::Status;
 use Bugzilla::Comment;
 
+use List::MoreUtils qw(firstidx);
 use List::Util qw(min first);
 use Storable qw(dclone);
 use URI;
@@ -3057,8 +3058,10 @@ sub editable_bug_fields {
     # Obsolete custom fields are not editable.
     my @obsolete_fields = Bugzilla->get_fields({obsolete => 1, custom => 1});
     @obsolete_fields = map { $_->name } @obsolete_fields;
-    foreach my $remove ("bug_id", "reporter", "creation_ts", "delta_ts", "lastdiffed", @obsolete_fields) {
-        my $location = lsearch(\@fields, $remove);
+    foreach my $remove ("bug_id", "reporter", "creation_ts", "delta_ts", 
+                        "lastdiffed", @obsolete_fields) 
+    {
+        my $location = firstidx { $_ eq $remove } @fields;
         # Custom multi-select fields are not stored in the bugs table.
         splice(@fields, $location, 1) if ($location > -1);
     }

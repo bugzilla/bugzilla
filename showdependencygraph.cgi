@@ -101,7 +101,7 @@ my @valid_rankdirs = ('LR', 'RL', 'TB', 'BT');
 
 my $rankdir = $cgi->param('rankdir') || 'TB';
 # Make sure the submitted 'rankdir' value is valid.
-if (lsearch(\@valid_rankdirs, $rankdir) < 0) {
+if (!grep { $_ eq $rankdir } @valid_rankdirs) {
     $rankdir = 'TB';
 }
 

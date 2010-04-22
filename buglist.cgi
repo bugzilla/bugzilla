@@ -683,7 +683,7 @@ my @selectcolumns = ("bug_id", "bug_severity", "priority", "bug_status",
                      "resolution", "product");
 
 # remaining and actual_time are required for percentage_complete calculation:
-if (lsearch(\@displaycolumns, "percentage_complete") >= 0) {
+if (grep { $_ eq "percentage_complete" } @displaycolumns) {
     push (@selectcolumns, "remaining_time");
     push (@selectcolumns, "actual_time");
 }
@@ -906,12 +906,12 @@ $buglist_sth->execute();
 # of Perl records.
 
 # If we're doing time tracking, then keep totals for all bugs.
-my $percentage_complete = lsearch(\@displaycolumns, 'percentage_complete') >= 0;
-my $estimated_time      = lsearch(\@displaycolumns, 'estimated_time') >= 0;
-my $remaining_time    = ((lsearch(\@displaycolumns, 'remaining_time') >= 0)
-                         || $percentage_complete);
-my $actual_time       = ((lsearch(\@displaycolumns, 'actual_time') >= 0)
-                         || $percentage_complete);
+my $percentage_complete = grep($_ eq 'percentage_complete', @displaycolumns);
+my $estimated_time      = grep($_ eq 'estimated_time', @displaycolumns);
+my $remaining_time      = grep($_ eq 'remaining_time', @displaycolumns)
+                            || $percentage_complete;
+my $actual_time         = grep($_ eq 'actual_time', @displaycolumns)
+                            || $percentage_complete;
 
 my $time_info = { 'estimated_time' => 0,
                   'remaining_time' => 0,

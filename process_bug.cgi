@@ -61,6 +61,7 @@ use Bugzilla::Flag;
 use Bugzilla::Status;
 use Bugzilla::Token;
 
+use List::MoreUtils qw(firstidx);
 use Storable qw(dclone);
 
 my $user = Bugzilla->login(LOGIN_REQUIRED);
@@ -208,7 +209,7 @@ if (defined $cgi->param('id')) {
         if ($cgi->cookie("BUGLIST")) {
             @bug_list = split(/:/, $cgi->cookie("BUGLIST"));
         }
-        my $cur = lsearch(\@bug_list, $cgi->param('id'));
+        my $cur = firstidx { $_ eq $cgi->param('id') } @bug_list;
         if ($cur >= 0 && $cur < $#bug_list) {
             my $next_bug_id = $bug_list[$cur + 1];
             detaint_natural($next_bug_id);

@@ -398,8 +398,8 @@ sub init {
         }
     }
 
-    my $chfieldfrom = trim(lc($params->param('chfieldfrom'))) || '';
-    my $chfieldto = trim(lc($params->param('chfieldto'))) || '';
+    my $chfieldfrom = trim(lc($params->param('chfieldfrom') || ''));
+    my $chfieldto = trim(lc($params->param('chfieldto') || ''));
     $chfieldfrom = '' if ($chfieldfrom eq 'now');
     $chfieldto = '' if ($chfieldto eq 'now');
     my @chfield = $params->param('chfield');
@@ -1190,8 +1190,7 @@ sub BuildOrderBy {
 sub split_order_term {
     my $fragment = shift;
     $fragment =~ /^(.+?)(?:\s+(ASC|DESC))?$/i;
-    my ($column_name, $direction) = (lc($1), uc($2));
-    $direction ||= "";
+    my ($column_name, $direction) = (lc($1), uc($2 || ''));
     return wantarray ? ($column_name, $direction) : $column_name;
 }
 

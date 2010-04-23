@@ -145,8 +145,6 @@ sub MessageToMTA {
                 push(@args, "-f$from_email") if $from_email;
             }
         }
-        push(@args, "-ODeliveryMode=deferred")
-            if !Bugzilla->params->{"sendmailnow"};
     }
     else {
         # Sendmail will automatically append our hostname to the From

@@ -65,12 +65,6 @@ sub get_param_list {
   },
 
   {
-   name => 'sendmailnow',
-   type => 'b',
-   default => 1
-  },
-
-  {
    name => 'smtpserver',
    type => 't',
    default => 'localhost'

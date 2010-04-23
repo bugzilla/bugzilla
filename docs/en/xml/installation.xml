@@ -1786,13 +1786,8 @@ C:\perl&gt; <command>ppm install &lt;module name&gt;</command>
         <ulink url="http://www.postfix.org/">Postfix</ulink> 
         is used as the built-in email server.  Postfix provides an executable
         that mimics sendmail enough to fool Bugzilla, as long as Bugzilla can 
-        find it.</para>
-
-        <para>As of version 2.20, Bugzilla will be able to find the fake 
-        sendmail executable without any assistance.  However, you will have 
-        to turn on the sendmailnow parameter before you do anything that would 
-        result in email being sent.  For more information, see the description 
-        of the sendmailnow parameter in <xref linkend="parameters"/>.</para>
+        find it. Bugzilla is able to find the fake sendmail executable without
+        any assistance.</para>
 
       </section>
 

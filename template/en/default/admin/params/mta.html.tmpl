@@ -55,14 +55,6 @@
     _ " won't get sent). This affects all mail sent by $terms.Bugzilla,"
     _ " not just $terms.bug updates.",
 
-  sendmailnow => "Sites using anything older than version 8.12 of 'sendmail' " _
-                 "can achieve a significant performance increase in the " _
-                 "UI -- at the cost of delaying the sending of mail -- by " _
-                 "disabling this parameter. Sites using 'sendmail' 8.12 or " _
-                 "higher should leave this on, as they will see no benefit from " _
-                 "turning it off. Sites using an MTA other than 'sendmail' " _
-                 "<b>must</b> leave it on, or no $terms.bug mail will be sent.",
-
   smtpserver => "The SMTP server address (if using SMTP for mail delivery).",
 
   smtp_username => "The username to pass to the SMTP server for SMTP authentication. " _

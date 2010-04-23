@@ -271,8 +271,6 @@
         Perl module, which Bugzilla uses to send email, can be configured to
         use many different underlying implementations for actually sending the
         mail using the <option>mail_delivery_method</option> parameter.
-        Implementations other than <literal>sendmail</literal> require that the
-        <option>sendmailnow</option> param be set to <literal>on</literal>.
         </para>
       </glossdef>
     </glossentry>

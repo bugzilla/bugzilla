@@ -989,6 +989,11 @@
     Error: [% err_msg FILTER html %]
     Value: [% params FILTER html %]
 
+  [% ELSIF error == "json_rpc_invalid_callback" %]
+    You cannot use '[% callback FILTER html %]' as your 'callback' parameter.
+    For security reasons, only letters, numbers, and the following
+    characters are allowed in the 'callback' parameter: <code>[]._</code>
+
   [% ELSIF error == "json_rpc_post_only" %]
     For security reasons, you may only call the '[% method FILTER html %]'
     method via HTTP POST.

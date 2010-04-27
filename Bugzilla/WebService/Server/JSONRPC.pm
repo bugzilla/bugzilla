@@ -28,7 +28,7 @@ use Bugzilla::Error;
 use Bugzilla::WebService::Constants;
 use Bugzilla::WebService::Util qw(taint_data);
 
-use Bugzilla::Util qw(correct_urlbase);
+use Bugzilla::Util qw(correct_urlbase trim);
 
 #####################################
 # Public JSON::RPC Method Overrides #
@@ -58,11 +58,19 @@ sub create_json_coder {
 # Override the JSON::RPC method to return our CGI object instead of theirs.
 sub cgi { return Bugzilla->cgi; }
 
-# Override the JSON::RPC method to use $cgi->header properly instead of
-# just printing text directly. This fixes various problems, including
-# sending Bugzilla's cookies properly.
 sub response {
     my ($self, $response) = @_;
+
+    # Implement JSONP.
+    if (my $callback = $self->_bz_callback) {
+        my $content = $response->content;
+        $response->content("$callback($content)");
+
+    }
+
+    # Use $cgi->header properly instead of just printing text directly.
+    # This fixes various problems, including sending Bugzilla's cookies
+    # properly.
     my $headers = $response->headers;
     my @header_args;
     foreach my $name ($headers->header_field_names) {
@@ -117,6 +125,10 @@ sub retrieve_json_from_get {
     # Setting _bz_request_id here is required in case we throw errors early,
     # before _handle.
     $self->{_bz_request_id} = $input{id} = $id;
+
+    # _bz_callback can throw an error, so we have to set it here, after we're
+    # ready to throw errors.
+    $self->_bz_callback(scalar $cgi->param('callback'));
 
     if (!$cgi->param('method')) {
         ThrowUserError('json_rpc_get_method_required');
@@ -345,9 +357,28 @@ sub _argument_type_check {
     return $params;
 }
 
+##########################
+# Private Custom Methods #
+##########################
+
 # _bz_method_name is stored by _find_procedure for later use.
 sub _bz_method_name {
     return $_[0]->{_bz_method_name}; 
+}
+
+sub _bz_callback {
+    my ($self, $value) = @_;
+    if (defined $value) {
+        $value = trim($value);
+        # We don't use \w because we don't want to allow Unicode here.
+        if ($value !~ /^[A-Za-z0-1_\.\[\]]+$/) {
+            ThrowUserError('json_rpc_invalid_callback', { callback => $value });
+        }
+        $self->{_bz_callback} = $value;
+        # JSONP needs to be parsed by a JS parser, not by a JSON parser.
+        $self->content_type('text/javascript');
+    }
+    return $self->{_bz_callback};
 }
 
 1;
@@ -418,6 +449,36 @@ You can also specify C<version> as a URL parameter, if you want to specify
 what version of the JSON-RPC protocol you're using, and C<id> as a URL
 parameter if you want there to be a specific C<id> value in the returned
 JSON-RPC response.
+
+=head2 JSONP
+
+When calling the JSON-RPC WebService over GET, you can use the "JSONP"
+method of doing cross-domain requests, if you want to access the WebService
+directly on a web page from another site. JSONP is described at
+L<http://bob.pythonmac.org/archives/2005/12/05/remote-json-jsonp/>.
+
+To use JSONP with Bugzilla's JSON-RPC WebService, simply specify a
+C<callback> parameter to jsonrpc.cgi when using it via GET as described above.
+For example, here's some HTML you could use to get the data from 
+C<Bugzilla.time> on a remote website, using JSONP:
+
+ <script type="text/javascript" 
+         src="http://bugzilla.example.com/jsonrpc.cgi?method=Bugzilla.time&amp;callback=foo">
+
+That would call the C<Bugzilla.time> method and pass its value to a function
+called C<foo> as the only argument. All the other URL parameters (such as
+C<params>, for passing in arguments to methods) that can be passed to
+C<jsonrpc.cgi> during GET requests are also available, of course. The above
+is just the simplest possible example.
+
+The values returned when using JSONP are identical to the values returned
+when not using JSONP, so you will also get error messages if there is an
+error.
+
+The C<callback> URL parameter may only contain letters, numbers, periods, and
+the underscore (C<_>) character. Including any other characters will cause
+Bugzilla to throw an error. (This error will be a normal JSON-RPC response,
+not JSONP.)
 
 =head1 PARAMETERS
 

@@ -61,7 +61,9 @@ use constant MAX_COMMENTS => 50;
 use base qw(Bugzilla::DB);
 
 sub new {
-    my ($class, $user, $pass, $host, $dbname, $port, $sock) = @_;
+    my ($class, $params) = @_;
+    my ($user, $pass, $host, $dbname, $port, $sock) =
+        @$params{qw(db_user db_pass db_host db_name db_port db_sock)};
 
     # construct the DSN from the parameters we got
     my $dsn = "dbi:mysql:host=$host;database=$dbname";
@@ -74,7 +76,8 @@ sub new {
         mysql_auto_reconnect => 1,
     );
     
-    my $self = $class->db_new($dsn, $user, $pass, \%attrs);
+    my $self = $class->db_new({ dsn => $dsn, user => $user, 
+                                pass => $pass, attrs => \%attrs });
 
     # This makes sure that if the tables are encoded as UTF-8, we
     # return their data correctly.

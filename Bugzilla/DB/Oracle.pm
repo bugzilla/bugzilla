@@ -54,7 +54,9 @@ use constant ISOLATION_LEVEL => 'READ COMMITTED';
 use constant BLOB_TYPE => { ora_type => ORA_BLOB };
 
 sub new {
-    my ($class, $user, $pass, $host, $dbname, $port) = @_;
+    my ($class, $params) = @_;
+    my ($user, $pass, $host, $dbname, $port) = 
+        @$params{qw(db_user db_pass db_host db_name db_port)};
 
     # You can never connect to Oracle without a DB name,
     # and there is no default DB.
@@ -70,7 +72,8 @@ sub new {
                   LongReadLen => ( Bugzilla->params->{'maxattachmentsize'}
                                      || 1000 ) * 1024, 
                 };
-    my $self = $class->db_new($dsn, $user, $pass, $attrs);
+    my $self = $class->db_new({ dsn => $dsn, user => $user, 
+                                pass => $pass, attrs => $attrs });
     # Needed by TheSchwartz
     $self->{private_bz_dsn} = $dsn;
 

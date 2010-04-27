@@ -83,22 +83,27 @@ sub connect_shadow {
     die "Tried to connect to non-existent shadowdb" 
         unless $params->{'shadowdb'};
 
-    my $lc = Bugzilla->localconfig;
+    # Instead of just passing in a new hashref, we locally modify the
+    # values of "localconfig", because some drivers access it while
+    # connecting.
+    my %connect_params = %{ Bugzilla->localconfig };
+    $connect_params{db_host} = $params->{'shadowdbhost'};
+    $connect_params{db_name} = $params->{'shadowdb'};
+    $connect_params{db_port} = $params->{'shadowdbport'};
+    $connect_params{db_sock} = $params->{'shadowdbsock'};
 
-    return _connect($lc->{db_driver}, $params->{"shadowdbhost"},
-                    $params->{'shadowdb'}, $params->{"shadowdbport"},
-                    $params->{"shadowdbsock"}, $lc->{db_user}, $lc->{db_pass});
+    return _connect(\%connect_params);
 }
 
 sub connect_main {
     my $lc = Bugzilla->localconfig;
-    return _connect($lc->{db_driver}, $lc->{db_host}, $lc->{db_name}, $lc->{db_port},
-                    $lc->{db_sock}, $lc->{db_user}, $lc->{db_pass});
+    return _connect(Bugzilla->localconfig); 
 }
 
 sub _connect {
-    my ($driver, $host, $dbname, $port, $sock, $user, $pass) = @_;
+    my ($params) = @_;
 
+    my $driver = $params->{db_driver};
     my $pkg_module = DB_MODULE->{lc($driver)}->{db};
 
     # do the actual import
@@ -107,7 +112,7 @@ sub _connect {
                 . " localconfig: " . $@);
 
     # instantiate the correct DB specific module
-    my $dbh = $pkg_module->new($user, $pass, $host, $dbname, $port, $sock);
+    my $dbh = $pkg_module->new($params);
 
     return $dbh;
 }
@@ -224,13 +229,14 @@ sub bz_create_database {
 sub _get_no_db_connection {
     my ($sql_server) = @_;
     my $dbh;
-    my $lc = Bugzilla->localconfig;
+    my %connect_params = %{ Bugzilla->localconfig };
+    $connect_params{db_name} = '';
     my $conn_success = eval {
-        $dbh = _connect($lc->{db_driver}, $lc->{db_host}, '', $lc->{db_port},
-                        $lc->{db_sock}, $lc->{db_user}, $lc->{db_pass});
+        $dbh = _connect(\%connect_params);
     };
     if (!$conn_success) {
-        my $sql_server = DB_MODULE->{lc($lc->{db_driver})}->{name};
+        my $driver = $connect_params{db_driver};
+        my $sql_server = DB_MODULE->{lc($driver)}->{name};
         # Can't use $dbh->errstr because $dbh is undef.
         my $error = $DBI::errstr || $@;
         chomp($error);
@@ -1060,7 +1066,9 @@ sub bz_rollback_transaction {
 #####################################################################
 
 sub db_new {
-    my ($class, $dsn, $user, $pass, $override_attrs) = @_;
+    my ($class, $params) = @_;
+    my ($dsn, $user, $pass, $override_attrs) = 
+        @$params{qw(dsn user pass attrs)};
 
     # set up default attributes used to connect to the database
     # (may be overridden by DB driver implementations)

@@ -52,7 +52,9 @@ use base qw(Bugzilla::DB);
 use constant BLOB_TYPE => { pg_type => DBD::Pg::PG_BYTEA };
 
 sub new {
-    my ($class, $user, $pass, $host, $dbname, $port) = @_;
+    my ($class, $params) = @_;
+    my ($user, $pass, $host, $dbname, $port) = 
+        @$params{qw(db_user db_pass db_host db_name db_port)};
 
     # The default database name for PostgreSQL. We have
     # to connect to SOME database, even if we have
@@ -70,7 +72,8 @@ sub new {
 
     my $attrs = { pg_enable_utf8 => Bugzilla->params->{'utf8'} };
 
-    my $self = $class->db_new($dsn, $user, $pass, $attrs);
+    my $self = $class->db_new({ dsn => $dsn, user => $user, 
+                                pass => $pass, attrs => $attrs });
 
     # all class local variables stored in DBI derived class needs to have
     # a prefix 'private_'. See DBI documentation.

@@ -1693,9 +1693,9 @@ sub _attach_data_thedata {
     my $atable = "attachments_$$chartid";
     my $dtable = "attachdata_$$chartid";
     my $extra = $self->{'user'}->is_insider ? "" : "AND $atable.isprivate = 0";
-    push(@$supptables, "INNER JOIN attachments AS $atable " .
+    push(@$supptables, "LEFT JOIN attachments AS $atable " .
                        "ON bugs.bug_id = $atable.bug_id $extra");
-    push(@$supptables, "INNER JOIN attach_data AS $dtable " .
+    push(@$supptables, "LEFT JOIN attach_data AS $dtable " .
                        "ON $dtable.id = $atable.attach_id");
     $$f = "$dtable.thedata";
 }
@@ -1708,7 +1708,7 @@ sub _attachments_submitter {
     
     my $atable = "map_attachment_submitter_$$chartid";
     my $extra = $self->{'user'}->is_insider ? "" : "AND $atable.isprivate = 0";
-    push(@$supptables, "INNER JOIN attachments AS $atable " .
+    push(@$supptables, "LEFT JOIN attachments AS $atable " .
                        "ON bugs.bug_id = $atable.bug_id $extra");
     push(@$supptables, "LEFT JOIN profiles AS attachers_$$chartid " .
                        "ON $atable.submitter_id = attachers_$$chartid.userid");
@@ -1724,7 +1724,7 @@ sub _attachments {
     
     my $table = "attachments_$$chartid";
     my $extra = $self->{'user'}->is_insider ? "" : "AND $table.isprivate = 0";
-    push(@$supptables, "INNER JOIN attachments AS $table " .
+    push(@$supptables, "LEFT JOIN attachments AS $table " .
                        "ON bugs.bug_id = $table.bug_id $extra");
     $$f =~ m/^attachments\.(.*)$/;
     my $field = $1;
@@ -1772,12 +1772,19 @@ sub _flagtypes_name {
     # Add the flags and flagtypes tables to the query.  We do 
     # a left join here so bugs without any flags still match 
     # negative conditions (f.e. "flag isn't review+").
+    my $attachments = "attachments_$$chartid";
+    my $extra = $self->{'user'}->is_insider ? "" : "AND $attachments.isprivate = 0";
+    push(@$supptables, "LEFT JOIN attachments AS $attachments " .
+                       "ON bugs.bug_id = $attachments.bug_id $extra");
     my $flags = "flags_$$chartid";
     push(@$supptables, "LEFT JOIN flags AS $flags " . 
                        "ON bugs.bug_id = $flags.bug_id ");
     my $flagtypes = "flagtypes_$$chartid";
     push(@$supptables, "LEFT JOIN flagtypes AS $flagtypes " . 
                        "ON $flags.type_id = $flagtypes.id");
+    push(@$supptables, "LEFT JOIN flags AS $flags " .
+                       "ON $flags.attach_id = $attachments.attach_id " .
+                       "OR $flags.attach_id IS NULL");
     
     # Generate the condition by running the operator-specific
     # function. Afterwards the condition resides in the global $term
@@ -1807,11 +1814,19 @@ sub _requestees_login_name {
     my %func_args = @_;
     my ($f, $chartid, $supptables) = @func_args{qw(f chartid supptables)};
     
+    my $attachments = "attachments_$$chartid";
+    my $extra = $self->{'user'}->is_insider ? "" : "AND $attachments.isprivate = 0";
+    push(@$supptables, "LEFT JOIN attachments AS $attachments " .
+                       "ON bugs.bug_id = $attachments.bug_id $extra");
     my $flags = "flags_$$chartid";
     push(@$supptables, "LEFT JOIN flags AS $flags " .
                        "ON bugs.bug_id = $flags.bug_id ");
     push(@$supptables, "LEFT JOIN profiles AS requestees_$$chartid " .
                        "ON $flags.requestee_id = requestees_$$chartid.userid");
+    push(@$supptables, "LEFT JOIN flags AS $flags " .
+                       "ON $flags.attach_id = $attachments.attach_id " .
+                       "OR $flags.attach_id IS NULL");
+
     $$f = "requestees_$$chartid.login_name";
 }
 
@@ -1819,12 +1834,20 @@ sub _setters_login_name {
     my $self = shift;
     my %func_args = @_;
     my ($f, $chartid, $supptables) = @func_args{qw(f chartid supptables)};
-    
+
+    my $attachments = "attachments_$$chartid";
+    my $extra = $self->{'user'}->is_insider ? "" : "AND $attachments.isprivate = 0";
+    push(@$supptables, "LEFT JOIN attachments AS $attachments " .
+                       "ON bugs.bug_id = $attachments.bug_id $extra");
     my $flags = "flags_$$chartid";
     push(@$supptables, "LEFT JOIN flags AS $flags " .
                        "ON bugs.bug_id = $flags.bug_id ");
     push(@$supptables, "LEFT JOIN profiles AS setters_$$chartid " .
                        "ON $flags.setter_id = setters_$$chartid.userid");
+    push(@$supptables, "LEFT JOIN flags AS $flags " .
+                       "ON $flags.attach_id = $attachments.attach_id " .
+                       "OR $flags.attach_id IS NULL");
+
     $$f = "setters_$$chartid.login_name";
 }
 

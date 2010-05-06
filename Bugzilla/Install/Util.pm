@@ -416,6 +416,18 @@ sub _template_base_directories {
         }
     }
 
+    # Extensions may also contain *only* templates, in which case they
+    # won't show up in extension_requirement_packages.
+    foreach my $path (_extension_paths()) {
+        next if !-d $path;
+        if (!-e "$path/Extension.pm" and !-e "$path/Config.pm"
+            and -d "$path/template") 
+        {
+            push(@template_dirs, "$path/template");
+        }
+    }
+
+
     push(@template_dirs, bz_locations()->{'templatedir'});
     return \@template_dirs;
 }

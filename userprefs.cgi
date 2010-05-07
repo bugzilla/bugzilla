@@ -219,21 +219,6 @@ sub DoEmail {
 
     @watchers = sort { lc($a) cmp lc($b) } @watchers;
     $vars->{'watchers'} = \@watchers;
-
-    ###########################################################################
-    # Role-based preferences
-    ###########################################################################
-    my $sth = $dbh->prepare("SELECT relationship, event " . 
-                            "FROM email_setting " . 
-                            "WHERE user_id = ?");
-    $sth->execute($user->id);
-
-    my %mail;
-    while (my ($relationship, $event) = $sth->fetchrow_array()) {
-        $mail{$relationship}{$event} = 1;
-    }
-
-    $vars->{'mail'} = \%mail;      
 }
 
 sub SaveEmail {
@@ -248,53 +233,63 @@ sub SaveEmail {
     ###########################################################################
     $dbh->bz_start_transaction();
 
-    # Delete all the user's current preferences
-    $dbh->do("DELETE FROM email_setting WHERE user_id = ?", undef, $user->id);
+    my $sth_insert = $dbh->prepare('INSERT INTO email_setting
+                                    (user_id, relationship, event) VALUES (?, ?, ?)');
 
-    # Repopulate the table - first, with normal events in the 
+    my $sth_delete = $dbh->prepare('DELETE FROM email_setting
+                                    WHERE user_id = ? AND relationship = ? AND event = ?');
+    # Load current email preferences into memory before updating them.
+    my $settings = $user->mail_settings;
+
+    # Update the table - first, with normal events in the
     # relationship/event matrix.
-    # Note: the database holds only "off" email preferences, as can be implied 
-    # from the name of the table - profiles_nomail.
     my %relationships = Bugzilla::BugMail::relationships();
     foreach my $rel (keys %relationships) {
+        next if ($rel == REL_QA && !Bugzilla->params->{'useqacontact'});
         # Positive events: a ticked box means "send me mail."
         foreach my $event (POS_EVENTS) {
-            if (defined($cgi->param("email-$rel-$event"))
-                && $cgi->param("email-$rel-$event") == 1)
-            {
-                $dbh->do("INSERT INTO email_setting " . 
-                         "(user_id, relationship, event) " . 
-                         "VALUES (?, ?, ?)",
-                         undef, ($user->id, $rel, $event));
+            my $is_set = $cgi->param("email-$rel-$event");
+            if ($is_set xor $settings->{$rel}{$event}) {
+                if ($is_set) {
+                    $sth_insert->execute($user->id, $rel, $event);
+                }
+                else {
+                    $sth_delete->execute($user->id, $rel, $event);
+                }
             }
         }
         
         # Negative events: a ticked box means "don't send me mail."
         foreach my $event (NEG_EVENTS) {
-            if (!defined($cgi->param("neg-email-$rel-$event")) ||
-                $cgi->param("neg-email-$rel-$event") != 1) 
-            {
-                $dbh->do("INSERT INTO email_setting " . 
-                         "(user_id, relationship, event) " . 
-                         "VALUES (?, ?, ?)",
-                         undef, ($user->id, $rel, $event));
+            my $is_set = $cgi->param("neg-email-$rel-$event");
+            if (!$is_set xor $settings->{$rel}{$event}) {
+                if (!$is_set) {
+                    $sth_insert->execute($user->id, $rel, $event);
+                }
+                else {
+                    $sth_delete->execute($user->id, $rel, $event);
+                }
             }
         }
     }
 
     # Global positive events: a ticked box means "send me mail."
     foreach my $event (GLOBAL_EVENTS) {
-        if (defined($cgi->param("email-" . REL_ANY . "-$event"))
-            && $cgi->param("email-" . REL_ANY . "-$event") == 1)
-        {
-            $dbh->do("INSERT INTO email_setting " . 
-                     "(user_id, relationship, event) " . 
-                     "VALUES (?, ?, ?)",
-                     undef, ($user->id, REL_ANY, $event));
+        my $is_set = $cgi->param("email-" . REL_ANY . "-$event");
+        if ($is_set xor $settings->{+REL_ANY}{$event}) {
+            if ($is_set) {
+                $sth_insert->execute($user->id, REL_ANY, $event);
+            }
+            else {
+                $sth_delete->execute($user->id, REL_ANY, $event);
+            }
         }
     }
 
     $dbh->bz_commit_transaction();
+
+    # We have to clear the cache about email preferences.
+    delete $user->{'mail_settings'};
 
     ###########################################################################
     # User watching

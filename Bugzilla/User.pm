@@ -1471,18 +1471,25 @@ sub wants_mail {
     # Skip DB query if relationship is explicit
     return 1 if $relationship == REL_GLOBAL_WATCHER;
 
+    my $wants_mail = grep { $self->mail_settings->{$relationship}{$_} } @$events;
+    return $wants_mail ? 1 : 0;
+}
+
+sub mail_settings {
+    my $self = shift;
     my $dbh = Bugzilla->dbh;
 
-    my $wants_mail = 
-        $dbh->selectrow_array('SELECT 1
-                                 FROM email_setting
-                                WHERE user_id = ?
-                                  AND relationship = ?
-                                  AND event IN (' . join(',', @$events) . ') ' .
-                                      $dbh->sql_limit(1),
-                              undef, ($self->id, $relationship));
+    if (!defined $self->{'mail_settings'}) {
+        my $data =
+          $dbh->selectall_arrayref('SELECT relationship, event FROM email_setting
+                                    WHERE user_id = ?', undef, $self->id);
+        my %mail;
+        # The hash is of the form $mail{$relationship}{$event} = 1.
+        $mail{$_->[0]}{$_->[1]} = 1 foreach @$data;
 
-    return defined($wants_mail) ? 1 : 0;
+        $self->{'mail_settings'} = \%mail;
+    }
+    return $self->{'mail_settings'};
 }
 
 sub is_mover {

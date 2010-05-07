@@ -1427,7 +1427,7 @@ sub wants_bug_mail {
     # 
     # We do them separately because if _any_ of them are set, we don't want
     # the mail.
-    if ($wants_mail && $changer && ($self->login eq $changer)) {
+    if ($wants_mail && $changer && ($self->id == $changer->id)) {
         $wants_mail &= $self->wants_mail([EVT_CHANGED_BY_ME], $relationship);
     }    
     

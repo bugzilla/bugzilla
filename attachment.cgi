@@ -538,7 +538,7 @@ sub insert {
   $vars->{'header_done'} = 1;
   $vars->{'contenttypemethod'} = $cgi->param('contenttypemethod');
 
-  my $recipients =  { 'changer' => $user->login, 'owner' => $owner };
+  my $recipients =  { 'changer' => $user, 'owner' => $owner };
   $vars->{'sent_bugmail'} = Bugzilla::BugMail::Send($bugid, $recipients);
 
   print $cgi->header();
@@ -666,7 +666,7 @@ sub update {
     $vars->{'bugs'} = [$bug];
     $vars->{'header_done'} = 1;
     $vars->{'sent_bugmail'} = 
-        Bugzilla::BugMail::Send($bug->id, { 'changer' => $user->login });
+        Bugzilla::BugMail::Send($bug->id, { 'changer' => $user });
 
     print $cgi->header();
 
@@ -739,7 +739,7 @@ sub delete_attachment {
         $vars->{'header_done'} = 1;
 
         $vars->{'sent_bugmail'} =
-            Bugzilla::BugMail::Send($bug->id, { 'changer' => $user->login });
+            Bugzilla::BugMail::Send($bug->id, { 'changer' => $user });
 
         $template->process("attachment/updated.html.tmpl", $vars)
           || ThrowTemplateError($template->error());

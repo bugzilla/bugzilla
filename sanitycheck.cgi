@@ -248,7 +248,7 @@ if ($cgi->param('rescanallBugMail')) {
     # and so choosing this user as being the last one having done a change
     # for the bug may be problematic. So the best we can do at this point
     # is to choose the currently logged in user for email notification.
-    $vars->{'changer'} = Bugzilla->user->login;
+    $vars->{'changer'} = Bugzilla->user;
 
     foreach my $bugid (@$list) {
         Bugzilla::BugMail::Send($bugid, $vars);

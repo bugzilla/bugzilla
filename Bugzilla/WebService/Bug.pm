@@ -430,7 +430,7 @@ sub create {
     Bugzilla->login(LOGIN_REQUIRED);
     $params = Bugzilla::Bug::map_fields($params);
     my $bug = Bugzilla::Bug->create($params);
-    Bugzilla::BugMail::Send($bug->bug_id, { changer => $bug->reporter->login });
+    Bugzilla::BugMail::Send($bug->bug_id, { changer => $bug->reporter });
     return { id => $self->type('int', $bug->bug_id) };
 }
 
@@ -520,7 +520,7 @@ sub add_comment {
     $dbh->bz_commit_transaction();
     
     # Send mail.
-    Bugzilla::BugMail::Send($bug->bug_id, { changer => Bugzilla->user->login });
+    Bugzilla::BugMail::Send($bug->bug_id, { changer => Bugzilla->user });
     
     return { id => $self->type('int', $new_comment_id) };
 }
@@ -566,7 +566,7 @@ sub update_see_also {
             $changes{$bug->id}->{see_also} = { added => [], removed => [] };
         }
 
-        Bugzilla::BugMail::Send($bug->id, { changer => $user->login });
+        Bugzilla::BugMail::Send($bug->id, { changer => $user });
     }
 
     return { changes => \%changes };

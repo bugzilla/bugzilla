@@ -90,6 +90,7 @@ sub DB_COLUMNS {
         delta_ts
         estimated_time
         everconfirmed
+        lastdiffed
         op_sys
         priority
         product_id
@@ -2612,6 +2613,11 @@ sub blocked {
 # Even bugs in an error state always have a bug_id.
 sub bug_id { $_[0]->{'bug_id'}; }
 
+sub bug_group {
+    my ($self) = @_;
+    return join(', ', (map { $_->name } @{$self->groups_in}));
+}
+
 sub related_bugs {
     my ($self, $relationship) = @_;
     return [] if $self->{'error'};
@@ -3586,7 +3592,8 @@ sub _validate_attribute {
         qw(error groups product_id component_id
            comments milestoneurl attachments isopened
            flag_types num_attachment_flag_types
-           show_attachment_flags any_flags_requesteeble),
+           show_attachment_flags any_flags_requesteeble
+           lastdiffed),
 
         # Bug fields.
         Bugzilla::Bug->fields

@@ -469,7 +469,7 @@ if ($move_action eq Bugzilla->params->{'move-button-text'}) {
 
     # Now send emails.
     foreach my $bug (@bug_objects) {
-        $vars->{'mailrecipients'} = { 'changer' => $user->login };
+        $vars->{'mailrecipients'} = { 'changer' => $user };
         $vars->{'id'} = $bug->id;
         $vars->{'type'} = "move";
         send_results($bug->id, $vars);
@@ -589,7 +589,7 @@ foreach my $bug (@bug_objects) {
         cc        => [split(/[\s,]+/, $old_cc)],
         owner     => $old_own,
         qacontact => $old_qa,
-        changer   => Bugzilla->user->login };
+        changer   => Bugzilla->user };
 
     $vars->{'id'} = $bug->id;
     $vars->{'type'} = "bug";
@@ -602,7 +602,7 @@ foreach my $bug (@bug_objects) {
     # other bug of any changes to that bug.
     my $new_dup_id = $changes->{'dup_id'} ? $changes->{'dup_id'}->[1] : undef;
     if ($new_dup_id) {
-        $vars->{'mailrecipients'} = { 'changer' => Bugzilla->user->login }; 
+        $vars->{'mailrecipients'} = { 'changer' => Bugzilla->user }; 
 
         $vars->{'id'} = $new_dup_id;
         $vars->{'type'} = "dupe";
@@ -614,7 +614,7 @@ foreach my $bug (@bug_objects) {
 
     my %all_dep_changes = (%notify_deps, %changed_deps);
     foreach my $id (sort { $a <=> $b } (keys %all_dep_changes)) {
-        $vars->{'mailrecipients'} = { 'changer' => Bugzilla->user->login };
+        $vars->{'mailrecipients'} = { 'changer' => Bugzilla->user };
         $vars->{'id'} = $id;
         $vars->{'type'} = "dep";
 

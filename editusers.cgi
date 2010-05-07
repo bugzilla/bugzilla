@@ -647,7 +647,7 @@ if ($action eq 'search') {
     # Send mail about what we've done to bugs.
     # The deleted user is not notified of the changes.
     foreach (keys(%updatedbugs)) {
-        Bugzilla::BugMail::Send($_, {'changer' => $user->login} );
+        Bugzilla::BugMail::Send($_, {'changer' => $user} );
     }
 
 ###########################################################################

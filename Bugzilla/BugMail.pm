@@ -27,6 +27,7 @@
 #                 J. Paul Reed <preed@sigkill.com>
 #                 Gervase Markham <gerv@gerv.net>
 #                 Byron Jones <bugzilla@glob.com.au>
+#                 Reed Loden <reed@reedloden.com>
 
 use strict;
 
@@ -110,121 +111,42 @@ sub relationships {
 sub Send {
     my ($id, $forced) = (@_);
 
-    my @headerlist;
-    my %defmailhead;
-    my %fielddescription;
-
-    my $msg = "";
-
     my $dbh = Bugzilla->dbh;
     my $bug = new Bugzilla::Bug($id);
 
-    # XXX - These variables below are useless. We could use field object
-    # methods directly. But we first have to implement a cache in
-    # Bugzilla->get_fields to avoid querying the DB all the time.
-    foreach my $field (Bugzilla->get_fields({obsolete => 0})) {
-        push(@headerlist, $field->name);
-        $defmailhead{$field->name} = $field->in_new_bugmail;
-        $fielddescription{$field->name} = $field->description;
-    }
+    # Only used for headers in bugmail for new bugs
+    my @fields = Bugzilla->get_fields({obsolete => 0, in_new_bugmail => 1});
 
-    my %values = %{$dbh->selectrow_hashref(
-        'SELECT ' . join(',', editable_bug_fields()) . ', reporter,
-                lastdiffed AS start_time, LOCALTIMESTAMP(0) AS end_time
-           FROM bugs WHERE bug_id = ?',
-        undef, $id)};
+    my $start = $bug->lastdiffed;
+    my $end   = $dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
 
-    my $product = new Bugzilla::Product($values{product_id});
-    $values{product} = $product->name;
-    if (Bugzilla->params->{'useclassification'}) {
-        $values{classification} = Bugzilla::Classification->new($product->classification_id)->name;
-    }
-    my $component = new Bugzilla::Component($values{component_id});
-    $values{component} = $component->name;
+    # Bugzilla::User objects of people in various roles. More than one person
+    # can 'have' a role, if the person in that role has changed, or people are
+    # watching.
+    my @assignees = ($bug->assigned_to);
+    my @qa_contacts = ($bug->qa_contact);
 
-    my ($start, $end) = ($values{start_time}, $values{end_time});
-
-    # User IDs of people in various roles. More than one person can 'have' a 
-    # role, if the person in that role has changed, or people are watching.
-    my $reporter = $values{'reporter'};
-    my @assignees = ($values{'assigned_to'});
-    my @qa_contacts = ($values{'qa_contact'});
-
-    my $cc_users = $dbh->selectall_arrayref(
-           "SELECT cc.who, profiles.login_name
-              FROM cc
-        INNER JOIN profiles
-                ON cc.who = profiles.userid
-             WHERE bug_id = ?",
-           undef, $id);
-
-    my (@ccs, @cc_login_names);
-    foreach my $cc_user (@$cc_users) {
-        my ($user_id, $user_login) = @$cc_user;
-        push (@ccs, $user_id);
-        push (@cc_login_names, $user_login);
-    }
+    my @ccs = @{ $bug->cc_users };
 
     # Include the people passed in as being in particular roles.
     # This can include people who used to hold those roles.
     # At this point, we don't care if there are duplicates in these arrays.
     my $changer = $forced->{'changer'};
     if ($forced->{'owner'}) {
-        push (@assignees, login_to_id($forced->{'owner'}, THROW_ERROR));
+        push (@assignees, Bugzilla::User->check($forced->{'owner'}));
     }
     
     if ($forced->{'qacontact'}) {
-        push (@qa_contacts, login_to_id($forced->{'qacontact'}, THROW_ERROR));
+        push (@qa_contacts, Bugzilla::User->check($forced->{'qacontact'}));
     }
     
     if ($forced->{'cc'}) {
         foreach my $cc (@{$forced->{'cc'}}) {
-            push(@ccs, login_to_id($cc, THROW_ERROR));
+            push(@ccs, Bugzilla::User->check($cc));
         }
     }
     
-    # Convert to names, for later display
-    $values{'changer'} = $changer;
-    # If no changer is specified, then it has no name.
-    if ($changer) {
-        $values{'changername'} = Bugzilla::User->new({name => $changer})->name;
-    }
-    $values{'assigned_to'} = user_id_to_login($values{'assigned_to'});
-    $values{'reporter'} = user_id_to_login($values{'reporter'});
-    if ($values{'qa_contact'}) {
-        $values{'qa_contact'} = user_id_to_login($values{'qa_contact'});
-    }
-    $values{'cc'} = join(', ', @cc_login_names);
-    $values{'estimated_time'} = format_time_decimal($values{'estimated_time'});
-
-    if ($values{'deadline'}) {
-        $values{'deadline'} = time2str("%Y-%m-%d", str2time($values{'deadline'}));
-    }
-
-    my $dependslist = $dbh->selectcol_arrayref(
-        'SELECT dependson FROM dependencies
-         WHERE blocked = ? ORDER BY dependson',
-        undef, ($id));
-
-    $values{'dependson'} = join(",", @$dependslist);
-
-    my $blockedlist = $dbh->selectcol_arrayref(
-        'SELECT blocked FROM dependencies
-         WHERE dependson = ? ORDER BY blocked',
-        undef, ($id));
-
-    $values{'blocked'} = join(",", @$blockedlist);
-
-    my $grouplist = $dbh->selectcol_arrayref(
-        '    SELECT name FROM groups
-         INNER JOIN bug_group_map
-                 ON groups.id = bug_group_map.group_id
-                    AND bug_group_map.bug_id = ?',
-        undef, ($id));
-
-    $values{'bug_group'} = join(', ', @$grouplist);
- 
-    my @args = ($id);
+    my @args = ($bug->id);
 
     # If lastdiffed is NULL, then we don't limit the search on time.
     my $when_restriction = '';
@@ -291,7 +213,6 @@ sub Send {
         push(@diffparts, $diffpart);
         push(@changedfields, $what);
     }
-    $values{'changed_fields'} = join(' ', @changedfields);
 
     my @depbugs;
     my $deptext = "";
@@ -307,7 +228,8 @@ sub Send {
 
         my $dependency_diffs = $dbh->selectall_arrayref(
            "SELECT bugs_activity.bug_id, bugs.short_desc, fielddefs.name, 
-                   bugs_activity.removed, bugs_activity.added
+                   fielddefs.description, bugs_activity.removed,
+                   bugs_activity.added
               FROM bugs_activity
         INNER JOIN bugs
                 ON bugs.bug_id = bugs_activity.bug_id
@@ -326,7 +248,7 @@ sub Send {
         my $lastbug = "";
         my $interestingchange = 0;
         foreach my $dependency_diff (@$dependency_diffs) {
-            my ($depbug, $summary, $what, $old, $new) = @$dependency_diff;
+            my ($depbug, $summary, $fieldname, $what, $old, $new) = @$dependency_diff;
 
             if ($depbug ne $lastbug) {
                 if ($interestingchange) {
@@ -341,8 +263,8 @@ sub Send {
                 $thisdiff .= ('-' x 76) . "\n";
                 $interestingchange = 0;
             }
-            $thisdiff .= three_columns($fielddescription{$what}, $old, $new);
-            if ($what eq 'bug_status'
+            $thisdiff .= three_columns($what, $old, $new);
+            if ($fieldname eq 'bug_status'
                 && is_open_state($old) ne is_open_state($new))
             {
                 $interestingchange = 1;
@@ -377,21 +299,21 @@ sub Send {
     # array of role constants.
     
     # CCs
-    $recipients{$_}->{+REL_CC} = BIT_DIRECT foreach (@ccs);
+    $recipients{$_->id}->{+REL_CC} = BIT_DIRECT foreach (@ccs);
     
     # Reporter (there's only ever one)
-    $recipients{$reporter}->{+REL_REPORTER} = BIT_DIRECT;
+    $recipients{$bug->reporter->id}->{+REL_REPORTER} = BIT_DIRECT;
     
     # QA Contact
     if (Bugzilla->params->{'useqacontact'}) {
         foreach (@qa_contacts) {
             # QA Contact can be blank; ignore it if so.
-            $recipients{$_}->{+REL_QA} = BIT_DIRECT if $_;
+            $recipients{$_->id}->{+REL_QA} = BIT_DIRECT if $_;
         }
     }
 
     # Assignee
-    $recipients{$_}->{+REL_ASSIGNEE} = BIT_DIRECT foreach (@assignees);
+    $recipients{$_->id}->{+REL_ASSIGNEE} = BIT_DIRECT foreach (@assignees);
 
     # The last relevant set of people are those who are being removed from 
     # their roles in this change. We get their names out of the diffs.
@@ -420,7 +342,7 @@ sub Send {
 
     Bugzilla::Hook::process('bugmail_recipients',
                             { bug => $bug, recipients => \%recipients });
-    
+
     # Find all those user-watching anyone on the current list, who is not
     # on it already themselves.
     my $involved = join(",", keys %recipients);
@@ -497,18 +419,19 @@ sub Send {
             # dep checks passed.
             if ($user->email_enabled && $dep_ok) {
                 # OK, OK, if we must. Email the user.
-                $sent_mail = sendMail($user, 
-                                      \@headerlist,
-                                      \%rels_which_want, 
-                                      \%values,
-                                      \%defmailhead, 
-                                      \%fielddescription, 
-                                      \@diffparts,
-                                      $comments,
-                                      ! $start, 
-                                      $id,
-                                      exists $watching{$user_id} ?
-                                             $watching{$user_id} : undef);
+                $sent_mail = sendMail(
+                    { to       => $user, 
+                      fields   => \@fields,
+                      bug      => $bug,
+                      comments => $comments,
+                      is_new   => !$start,
+                      changer  => $changer,
+                      watchers => exists $watching{$user_id} ?
+                                  $watching{$user_id} : undef,
+                      diff_parts      => \@diffparts,
+                      rels_which_want => \%rels_which_want,
+                      changed_fields  => \@changedfields,
+                    });
             }
         }
        
@@ -522,21 +445,25 @@ sub Send {
     
     $dbh->do('UPDATE bugs SET lastdiffed = ? WHERE bug_id = ?',
              undef, ($end, $id));
+    $bug->{lastdiffed} = $end;
 
     return {'sent' => \@sent, 'excluded' => \@excluded};
 }
 
 sub sendMail {
-    my ($user, $hlRef, $relRef, $valueRef, $dmhRef, $fdRef,
-        $diffRef, $comments_in, $isnew, $id, $watchingRef) = @_;
-
-    my @send_comments = @$comments_in;
-    my %values = %$valueRef;
-    my @headerlist = @$hlRef;
-    my %mailhead = %$dmhRef;
-    my %fielddescription = %$fdRef;
-    my @diffparts = @$diffRef;    
+    my $params = shift;
     
+    my $user   = $params->{to};
+    my @fields = @{ $params->{fields} };
+    my $bug    = $params->{bug};
+    my @send_comments = @{ $params->{comments} };
+    my $isnew   = $params->{is_new};
+    my $changer = $params->{changer};
+    my $watchingRef = $params->{watchers};
+    my @diffparts   = @{ $params->{diff_parts} };
+    my $relRef      = $params->{rels_which_want};
+    my @changed_fields = @{ $params->{changed_fields} };
+
     # Build difftext (the actions) by verifying the user should see them
     my $difftext = "";
     my $diffheader = "";
@@ -584,14 +511,31 @@ sub sendMail {
     $diffs =~ s/^\n+//s; $diffs =~ s/\n+$//s;
     if ($isnew) {
         my $head = "";
-        foreach my $f (@headerlist) {
-            next unless $mailhead{$f};
-            my $value = $values{$f};
+        foreach my $field (@fields) {
+            my $name = $field->name;
+            my $value = $bug->$name;
+
+            if (ref $value eq 'ARRAY') {
+                $value = join(', ', @$value);
+            }
+            elsif (ref $value && $value->isa('Bugzilla::User')) {
+                $value = $value->login;
+            }
+            elsif (ref $value && $value->isa('Bugzilla::Object')) {
+                $value = $value->name;
+            }
+            elsif ($name eq 'estimated_time') {
+                $value = format_time_decimal($value);
+            }
+            elsif ($name eq 'deadline') {
+                $value = time2str("%Y-%m-%d", str2time($value));
+            }
+
             # If there isn't anything to show, don't include this header.
             next unless $value;
             # Only send estimated_time if it is enabled and the user is in the group.
-            if (($f ne 'estimated_time' && $f ne 'deadline') || $user->is_timetracker) {
-                my $desc = $fielddescription{$f};
+            if (($name ne 'estimated_time' && $name ne 'deadline') || $user->is_timetracker) {
+                my $desc = $field->description;
                 $head .= multiline_sprintf(FORMAT_DOUBLE, ["$desc:", $value],
                                            FORMAT_2_SIZE);
             }
@@ -615,31 +559,16 @@ sub sendMail {
     my $vars = {
         isnew => $isnew,
         to_user => $user,
-        bugid => $id,
-        alias => Bugzilla->params->{'usebugaliases'} ? $values{'alias'} : "",
-        classification => $values{'classification'},
-        product => $values{'product'},
-        comp => $values{'component'},
-        keywords => $values{'keywords'},
-        severity => $values{'bug_severity'},
-        status => $values{'bug_status'},
-        priority => $values{'priority'},
-        assignedto => $values{'assigned_to'},
-        assignedtoname => Bugzilla::User->new({name => $values{'assigned_to'}})->name,
-        targetmilestone => $values{'target_milestone'},
-        changedfields => $values{'changed_fields'},
-        summary => $values{'short_desc'},
+        bug => $bug,
+        changedfields => @changed_fields,
         reasons => \@reasons,
         reasons_watch => \@reasons_watch,
         reasonsheader => join(" ", @headerrel),
         reasonswatchheader => join(" ", @watchingrel),
-        changer => $values{'changer'},
-        changername => $values{'changername'},
-        reporter => $values{'reporter'},
-        reportername => Bugzilla::User->new({name => $values{'reporter'}})->name,
+        changer => $changer,
         diffs => $diffs,
         new_comments => \@send_comments,
-        threadingmarker => build_thread_marker($id, $user->id, $isnew),
+        threadingmarker => build_thread_marker($bug->id, $user->id, $isnew),
     };
 
     my $msg;

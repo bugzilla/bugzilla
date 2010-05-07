@@ -1285,7 +1285,7 @@ sub process_bug {
     }
     Debug( $log, OK_LEVEL );
     push(@logs, $log);
-    Bugzilla::BugMail::Send( $id, { 'changer' => $exporter_login } ) if ($mail);
+    Bugzilla::BugMail::Send( $id, { 'changer' => $exporter } ) if ($mail);
 
     # done with the xml data. Lets clear it from memory
     $twig->purge;

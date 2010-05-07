@@ -245,7 +245,7 @@ if ($token) {
              ("createbug:$id", $token));
 }
 
-my $recipients = { changer => $user->login };
+my $recipients = { changer => $user };
 my $bug_sent = Bugzilla::BugMail::Send($id, $recipients);
 $bug_sent->{type} = 'created';
 $bug_sent->{id}   = $id;

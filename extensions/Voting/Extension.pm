@@ -619,7 +619,7 @@ sub _update_votes {
     foreach my $bug_id (@updated_bugs) {
         $vars->{'id'} = $bug_id;
         $vars->{'sent_bugmail'} = 
-            Bugzilla::BugMail::Send($bug_id, { 'changer' => $user->login });
+            Bugzilla::BugMail::Send($bug_id, { 'changer' => $user });
         
         $template->process("bug/process/results.html.tmpl", $vars)
           || ThrowTemplateError($template->error());
@@ -729,7 +729,7 @@ sub _modify_bug_votes {
     # And send out emails about changed bugs
     foreach my $bug_id (@updated_bugs) {
         my $sent_bugmail = Bugzilla::BugMail::Send(
-            $bug_id, { changer => Bugzilla->user->login });
+            $bug_id, { changer => Bugzilla->user });
         $changes->{'confirmed_bugs_sent_bugmail'}->{$bug_id} = $sent_bugmail;
     }
 }

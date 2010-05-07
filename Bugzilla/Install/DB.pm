@@ -604,6 +604,12 @@ sub update_table_definitions {
 
     # 2010-04-07 LpSolit@gmail.com - Bug 69621
     $dbh->bz_drop_column('bugs', 'keywords');
+    
+    # 2010-05-07 ewong@pw-wspx.org - Bug 463945
+    $dbh->bz_alter_column('group_control_map', 'membercontrol',
+                          {TYPE => 'INT1', NOTNULL => 1, DEFAULT => CONTROLMAPNA});
+    $dbh->bz_alter_column('group_control_map', 'othercontrol',
+                          {TYPE => 'INT1', NOTNULL => 1, DEFAULT => CONTROLMAPNA});
 
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #

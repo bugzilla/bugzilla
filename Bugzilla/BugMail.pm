@@ -560,7 +560,7 @@ sub sendMail {
         isnew => $isnew,
         to_user => $user,
         bug => $bug,
-        changedfields => @changed_fields,
+        changedfields => \@changed_fields,
         reasons => \@reasons,
         reasons_watch => \@reasons_watch,
         reasonsheader => join(" ", @headerrel),

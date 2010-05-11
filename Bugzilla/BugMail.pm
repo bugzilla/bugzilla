@@ -115,7 +115,7 @@ sub Send {
     my $bug = new Bugzilla::Bug($id);
 
     # Only used for headers in bugmail for new bugs
-    my @fields = Bugzilla->get_fields({obsolete => 0, in_new_bugmail => 1});
+    my @fields = Bugzilla->get_fields({obsolete => 0, mailhead => 1});
 
     my $start = $bug->lastdiffed;
     my $end   = $dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');

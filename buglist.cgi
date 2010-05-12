@@ -1163,6 +1163,9 @@ if ($dotweak && scalar @bugs) {
 # the "Remember search as" field.
 $vars->{'defaultsavename'} = $cgi->param('query_based_on');
 
+# If we did a quick search then redisplay the previously entered search 
+# string in the text field.
+$vars->{'quicksearch'} = $searchstring;
 
 ################################################################################
 # HTTP Header Generation

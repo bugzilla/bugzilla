@@ -34,7 +34,8 @@
         onsubmit="if (this.quicksearch.value == '')
                   { alert('Please enter one or more search terms first.');
                     return false; } return true;">
-    <input class="txt" type="text" id="quicksearch[% qs_suffix FILTER html %]" name="quicksearch">
+    <input class="txt" type="text" id="quicksearch[% qs_suffix FILTER html %]" name="quicksearch" 
+           value="[% quicksearch FILTER html %]">
     <input class="btn" type="submit" value="Search" 
            id="find[% qs_suffix FILTER html %]">
     [%-# Work around FF bug: keep this on one line %]</form>

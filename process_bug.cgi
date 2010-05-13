@@ -325,14 +325,23 @@ my @set_fields = qw(op_sys rep_platform priority bug_severity
                     deadline remaining_time estimated_time);
 push(@set_fields, 'assigned_to') if !$cgi->param('set_default_assignee');
 push(@set_fields, 'qa_contact')  if !$cgi->param('set_default_qa_contact');
+my %field_translation = (
+    bug_severity => 'severity',
+    rep_platform => 'platform',
+    short_desc   => 'summary',
+    bug_file_loc => 'url',
+);
+
+my %set_all_fields;
+foreach my $field_name (@set_fields) {
+    if (should_set($field_name)) {
+        my $param_name = $field_translation{$field_name} || $field_name;
+        $set_all_fields{$param_name} = $cgi->param($field_name);
+    }
+}
+
 my @custom_fields = Bugzilla->active_custom_fields;
 
-my %methods = (
-    bug_severity => 'set_severity',
-    rep_platform => 'set_platform',
-    short_desc   => 'set_summary',
-    bug_file_loc => 'set_url',
-);
 foreach my $b (@bug_objects) {
     if (should_set('comment') || $cgi->param('work_time')) {
         # Add a comment as needed to each bug. This is done early because
@@ -341,13 +350,7 @@ foreach my $b (@bug_objects) {
             { isprivate => scalar $cgi->param('commentprivacy'),
               work_time => scalar $cgi->param('work_time') });
     }
-    foreach my $field_name (@set_fields) {
-        if (should_set($field_name)) {
-            my $method = $methods{$field_name};
-            $method ||= "set_" . $field_name;
-            $b->$method($cgi->param($field_name));
-        }
-    }
+    $b->set_all(\%set_all_fields);
     $b->reset_assigned_to if $cgi->param('set_default_assignee');
     $b->reset_qa_contact  if $cgi->param('set_default_qa_contact');
 

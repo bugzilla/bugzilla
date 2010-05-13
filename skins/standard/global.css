@@ -463,6 +463,9 @@ div.user_match {
     vertical-align: top;
     font-weight: bold;
 }
+.field_help_link {
+    cursor: help;
+}
 .field_value, form#Create th, form#Create td {
     vertical-align: top;
 }

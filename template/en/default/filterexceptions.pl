@@ -316,8 +316,6 @@
 ],
 
 'bug/create/create.html.tmpl' => [
-  'sel.name',
-  'sel.description',
   'cloned_bug_id',
 ],
 

@@ -149,8 +149,8 @@ status_whiteboard =>
   _ " adding tags and status information.",
 
 target_milestone =>
-   "The target_milestone field is used to define when the engineer"
-   _ " the $terms.bug is assigned to expects to fix it.",
+   "The $field_descs.target_milestone field is used to define when the"
+   _ " engineer the $terms.bug is assigned to expects to fix it.",
 
 version =>
   "The version field defines the version of the software the"
@@ -215,6 +215,19 @@ email1 =>
 [% END %]
 
 [% FOREACH help_field = bug_fields.keys %]
+
+  [%# Add help for custom fields. %]
+  [% IF !help_html.${help_field}.defined %]
+    [% SET field_type = bug_fields.${help_field}.type %]
+    [% field_type_desc = BLOCK -%]
+      [% field_types.$field_type FILTER html %]
+    [%- END %]
+    [% help_html.${help_field} = 
+      "A custom $field_type_desc field in this installation"
+      _ " of ${terms.Bugzilla}." %]
+  [% END %]
+
+  [%# Add help for the search types, for query.cgi. %]
   [% type_desc = BLOCK %]
     The type of [% field_descs.${help_field} FILTER html %] search you 
     would like.

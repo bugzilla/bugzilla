@@ -534,38 +534,40 @@ if ( Bugzilla->params->{'usetargetmilestone'} ) {
 }
 
 # Construct the list of allowable statuses.
-my $initial_statuses = Bugzilla::Status->can_change_to();
+my @statuses = @{ Bugzilla::Status->can_change_to() };
 # Exclude closed states from the UI, even if the workflow allows them.
 # The back-end code will still accept them, though.
-@$initial_statuses = grep { $_->is_open } @$initial_statuses;
+@statuses = grep { $_->is_open } @statuses;
 
-my @status = map { $_->name } @$initial_statuses;
 # UNCONFIRMED is illegal if allows_unconfirmed is false.
 if (!$product->allows_unconfirmed) {
-    @status = grep {$_ ne 'UNCONFIRMED'} @status;
+    @statuses = grep { $_->name ne 'UNCONFIRMED' } @statuses;
 }
-scalar(@status) || ThrowUserError('no_initial_bug_status');
+scalar(@statuses) || ThrowUserError('no_initial_bug_status');
 
 # If the user has no privs...
 unless ($has_editbugs || $has_canconfirm) {
     # ... use UNCONFIRMED if available, else use the first status of the list.
-    my $bug_status = (grep {$_ eq 'UNCONFIRMED'} @status) ? 'UNCONFIRMED' : $status[0];
-    @status = ($bug_status);
+    my $bug_status = (grep { $_->name eq 'UNCONFIRMED' } @statuses) 
+                     ? 'UNCONFIRMED' : $statuses[0]->name;
+    @statuses = ($bug_status);
 }
 
-$vars->{'bug_status'} = \@status;
+$vars->{'bug_status'} = \@statuses;
 
 # Get the default from a template value if it is legitimate.
 # Otherwise, and only if the user has privs, set the default
 # to the first confirmed bug status on the list, if available.
 
-if (formvalue('bug_status') && grep { $_ eq formvalue('bug_status') } @status) {
+my $picked_status = formvalue('bug_status');
+if ($picked_status and grep($_->name eq $picked_status, @statuses)) {
     $default{'bug_status'} = formvalue('bug_status');
-} elsif (scalar @status == 1) {
-    $default{'bug_status'} = $status[0];
+} elsif (scalar @statuses == 1) {
+    $default{'bug_status'} = $statuses[0]->name;
 }
 else {
-    $default{'bug_status'} = ($status[0] ne 'UNCONFIRMED') ? $status[0] : $status[1];
+    $default{'bug_status'} = ($statuses[0]->name ne 'UNCONFIRMED') 
+                             ? $statuses[0]->name : $statuses[1]->name;
 }
 
 my @groups = $cgi->param('groups');

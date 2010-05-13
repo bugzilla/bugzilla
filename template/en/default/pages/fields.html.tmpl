@@ -267,12 +267,7 @@
   <dt id="[% field FILTER html %]">[% field_desc FILTER html %]</dt>
     <dd>
       [% SET help_text = field_help_map.${field_desc}.help %]
-      [% IF help_text %]
-        [% help_text FILTER none %]
-      [% ELSE %]
-        A custom [% field_types.${field_object.type} FILTER html %] field in
-        this installation of [% terms.Bugzilla %].
-      [% END %]
+      [% help_text FILTER none %]
     </dd>
 [% END %]
 </dl>

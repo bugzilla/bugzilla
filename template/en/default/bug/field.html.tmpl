@@ -47,19 +47,7 @@
 [% END %]
 
 [% IF NOT no_tds %]
-  <th class="field_label [% ' bz_hidden_field' IF hidden %]"
-      id="field_label_[% field.name FILTER html %]">
-    [% IF editable %]
-      <label for="[% field.name FILTER html %]">
-    [% END %]
-      [% IF desc_url %]
-        <a href="[% desc_url FILTER html %]">
-      [% ELSE %]
-        <a href="page.cgi?id=fields.html#[% field.name FILTER url_quote %]">
-      [% END %]
-      [%- field_descs.${field.name} FILTER html %]:</a>
-    [% '</label>' IF editable %]
-  </th>
+  [% PROCESS "bug/field-label.html.tmpl" %]
 [% END %]
 
 [% IF NOT no_tds %]

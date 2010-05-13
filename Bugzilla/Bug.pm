@@ -1531,7 +1531,9 @@ sub _check_resolution {
     ThrowUserError('resolution_not_allowed') if $self->status->is_open;
     
     # Check noresolveonopenblockers.
-    if (Bugzilla->params->{"noresolveonopenblockers"} && $resolution eq 'FIXED')
+    if (Bugzilla->params->{"noresolveonopenblockers"}
+        && $resolution eq 'FIXED'
+        && (!$self->resolution || $resolution ne $self->resolution))
     {
         my @dependencies = CountOpenDependencies($self->id);
         if (@dependencies) {

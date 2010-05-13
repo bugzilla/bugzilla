@@ -161,6 +161,7 @@ if (defined $cgi->param('rememberedquery')) {
     }
     else {
       print $cgi->redirect($vars->{'redirect_url'});
+      exit;
     }
     
     $template->process("global/message.html.tmpl", $vars)

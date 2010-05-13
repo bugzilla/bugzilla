@@ -1848,6 +1848,27 @@ sub _set_global_validator {
 # "Set" Methods #
 #################
 
+sub set_all {
+    my $self = shift;
+    my ($params) = @_;
+
+    if (exists $params->{'comment'} or exists $params->{'work_time'}) {
+        # Add a comment as needed to each bug. This is done early because
+        # there are lots of things that want to check if we added a comment.
+        $self->add_comment($params->{'comment'}->{'body'},
+            { isprivate => $params->{'comment'}->{'is_private'},
+              work_time => $params->{'work_time'} });
+    }
+
+    my %normal_set_all;
+    foreach my $name (keys %$params) {
+        if ($self->can("set_$name")) {
+            $normal_set_all{$name} = $params->{$name};
+        }
+    }
+    $self->SUPER::set_all(\%normal_set_all);
+}
+
 sub set_alias { $_[0]->set('alias', $_[1]); }
 sub set_assigned_to {
     my ($self, $value) = @_;

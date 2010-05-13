@@ -322,7 +322,8 @@ if (defined $cgi->param('keywords')) {
 my @set_fields = qw(op_sys rep_platform priority bug_severity
                     component target_milestone version
                     bug_file_loc status_whiteboard short_desc
-                    deadline remaining_time estimated_time);
+                    deadline remaining_time estimated_time
+                    work_time);
 push(@set_fields, 'assigned_to') if !$cgi->param('set_default_assignee');
 push(@set_fields, 'qa_contact')  if !$cgi->param('set_default_qa_contact');
 my %field_translation = (
@@ -340,16 +341,16 @@ foreach my $field_name (@set_fields) {
     }
 }
 
+if (should_set('comment')) {
+    $set_all_fields{comment} = {
+        body       => scalar $cgi->param('comment'),
+        is_private => scalar $cgi->param('commentprivacy'),
+    };
+}
+
 my @custom_fields = Bugzilla->active_custom_fields;
 
 foreach my $b (@bug_objects) {
-    if (should_set('comment') || $cgi->param('work_time')) {
-        # Add a comment as needed to each bug. This is done early because
-        # there are lots of things that want to check if we added a comment.
-        $b->add_comment(scalar($cgi->param('comment')),
-            { isprivate => scalar $cgi->param('commentprivacy'),
-              work_time => scalar $cgi->param('work_time') });
-    }
     $b->set_all(\%set_all_fields);
     $b->reset_assigned_to if $cgi->param('set_default_assignee');
     $b->reset_qa_contact  if $cgi->param('set_default_qa_contact');

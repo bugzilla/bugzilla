@@ -158,7 +158,7 @@
 
 [% BLOCK a_comment %]
   [% RETURN IF comment.is_private AND ! user.is_insider %]
-  [% RETURN IF timetracking_only AND !user.in_group(Param('timetrackinggroup')) %]
+  [% RETURN IF timetracking_only AND !user.is_timetracker %]
 
     <div id="c[% count %]" class="bz_comment[% " bz_private" IF comment.is_private %]
                 [% " bz_comment_hilite" IF marks.$count %]

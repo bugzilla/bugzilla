@@ -94,6 +94,7 @@
 
 
 [% DEFAULT start_at = 0 mode = "show" %]
+[% timetracking_only = (comment_body == '' && comment.work_time != 0) %]
 [% sort_order = user.settings.comment_sort_order.value %]
 
 [%# NOTE: (start_at > 0) means we came here from a midair collision,
@@ -157,6 +158,7 @@
 
 [% BLOCK a_comment %]
   [% RETURN IF comment.is_private AND ! user.is_insider %]
+  [% RETURN IF timetracking_only AND !user.in_group(Param('timetrackinggroup')) %]
 
     <div id="c[% count %]" class="bz_comment[% " bz_private" IF comment.is_private %]
                 [% " bz_comment_hilite" IF marks.$count %]

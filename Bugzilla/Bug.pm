@@ -2243,11 +2243,7 @@ sub add_comment {
     $comment = $self->_check_comment($comment);
 
     $params ||= {};
-    if (exists $params->{work_time}) {
-        $params->{work_time} = $self->_check_work_time($params->{work_time});
-        ThrowUserError('comment_required')
-            if $comment eq '' && $params->{work_time} != 0;
-    }
+    $params->{work_time} = $self->_check_work_time($params->{work_time});
     if (exists $params->{type}) {
         $params->{type} = $self->_check_comment_type($params->{type});
     }
@@ -2257,7 +2253,7 @@ sub add_comment {
     }
     # XXX We really should check extra_data, too.
 
-    if ($comment eq '' && !($params->{type} || $params->{work_time})) {
+    if ($comment eq '' && !($params->{type} || abs($params->{work_time}))) {
         return;
     }
 

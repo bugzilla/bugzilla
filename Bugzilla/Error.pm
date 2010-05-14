@@ -31,6 +31,8 @@ use base qw(Exporter);
 use Bugzilla::Constants;
 use Bugzilla::WebService::Constants;
 use Bugzilla::Util;
+
+use Carp;
 use Date::Format;
 
 # We cannot use $^S to detect if we are in an eval(), because mod_perl
@@ -50,6 +52,12 @@ sub _throw_error {
     $vars ||= {};
 
     $vars->{error} = $error;
+    # Don't show function arguments, in case they contain confidential data.
+    local $Carp::MaxArgNums = -1;
+    # Don't show the error as coming from Bugzilla::Error, show it as coming
+    # from the caller.
+    local $Carp::CarpInternal{'Bugzilla::Error'} = 1; 
+    $vars->{traceback} = Carp::longmess();
 
     # Make sure any transaction is rolled back (if supported).
     # If we are within an eval(), do not roll back transactions as we are

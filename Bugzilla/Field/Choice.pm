@@ -61,7 +61,7 @@ use constant VALIDATORS => {
     value   => \&_check_value,
     sortkey => \&_check_sortkey,
     visibility_value_id => \&_check_visibility_value_id,
-    isactive => \&Bugzilla::Object::check_boolean,
+    isactive => \&_check_isactive,
 };
 
 use constant CLASS_MAP => {
@@ -215,6 +215,25 @@ sub set_visibility_value {
 ##############
 # Validators #
 ##############
+
+sub _check_isactive {
+    my ($invocant, $value) = @_;
+    $value = Bugzilla::Object::check_boolean($invocant, $value);
+    if (!$value and ref $invocant) {
+        if ($invocant->is_default) {
+            my $field = $invocant->field;
+            ThrowUserError('fieldvalue_is_default', 
+                           { value => $invocant, field => $field,
+                             param_name => $invocant->DEFAULT_MAP->{$field->name}
+                           });
+        }
+        if ($invocant->is_static) {
+            ThrowUserError('fieldvalue_not_deletable',
+                           { value => $invocant, field => $invocant->field });
+        }
+    }
+    return $value;
+}
 
 sub _check_value {
     my ($invocant, $value) = @_;

@@ -94,7 +94,11 @@
            [% ELSIF value.is_static %]
              This value is non-deletable and cannot be disabled.
            [% END %]
-           </td>
+           [% IF !(value.is_default OR value.is_static) %]
+             <input id="defined_is_active" name="defined_is_active"
+                    type="hidden" value="1">
+           [% END %]
+      </td>
     </tr>
   </table>
   <input type="hidden" name="value" value="[% value.name FILTER html %]">

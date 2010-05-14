@@ -329,6 +329,14 @@ sub _fix_utf8 {
     return $input;
 }
 
+sub should_set {
+    my ($self, $param) = @_;
+    my $set = (defined $self->param($param) 
+               or defined $self->param("defined_$param"))
+              ? 1 : 0;
+    return $set;
+}
+
 # The various parts of Bugzilla which create cookies don't want to have to
 # pass them around to all of the callers. Instead, store them locally here,
 # and then output as required from |header|.

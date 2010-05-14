@@ -521,7 +521,8 @@
   [% ELSIF error == "fieldvalue_is_default" %]
     [% title = "Specified Field Value Is Default" %]
     '[% value.name FILTER html %]' is the default value for
-    the '[% field.description FILTER html %]' field and cannot be deleted.
+    the '[% field.description FILTER html %]' field and cannot be deleted
+    or disabled.
     [% IF user.in_group('tweakparams') %]
       You have to <a href="editparams.cgi?section=bugfields#
       [%- param_name FILTER url_quote %]">change</a> the default value first.
@@ -541,9 +542,9 @@
 
   [% ELSIF error == "fieldvalue_not_deletable" %]
     [% title = "Field Value Not Deletable" %]
-    The value '[% value.name FILTER html %]' cannot be removed because
-    it plays some special role for the '[% field.description FILTER html %]' 
-    field.
+    The value '[% value.name FILTER html %]' cannot be removed or
+    disabled, because it plays some special role for the 
+    '[% field.description FILTER html %]' field.
 
   [% ELSIF error == "fieldvalue_reserved_word" %]
     [% title = "Reserved Word Not Allowed" %]

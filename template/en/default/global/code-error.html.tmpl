@@ -43,10 +43,6 @@
     I don't recognize the value (<em>[% action FILTER html %]</em>)
     of the <em>action</em> variable.
   
-  [% ELSIF error == "attachment_already_obsolete" %]
-    Attachment #[% attach_id FILTER html %] ([% description FILTER html %]) 
-    is already obsolete.
-
   [% ELSIF error == "attachment_local_storage_disabled" %]
     [% title = "Local Storage Disabled" %]
     You cannot store attachments locally. This feature is disabled.

@@ -734,7 +734,7 @@ sub validate_can_edit {
                  && $user->in_group('editbugs', $product_id))) ? 1 : 0;
 }
 
-=item C<validate_obsolete($bug)>
+=item C<validate_obsolete($bug, $attach_ids)>
 
 Description: validates if attachments the user wants to mark as obsolete
              really belong to the given bug and are not already obsolete.
@@ -742,8 +742,10 @@ Description: validates if attachments the user wants to mark as obsolete
              he cannot view it (due to restrictions on it).
 
 Params:      $bug - The bug object obsolete attachments should belong to.
+             $attach_ids - The list of attachments to mark as obsolete.
 
-Returns:     1 on success. Else an error is thrown.
+Returns:     The list of attachment objects to mark as obsolete.
+             Else an error is thrown.
 
 =cut
 
@@ -777,9 +779,7 @@ sub validate_obsolete {
             ThrowCodeError('mismatched_bug_ids_on_obsolete', $vars);
         }
 
-        if ($attachment->isobsolete) {
-          ThrowCodeError('attachment_already_obsolete', $vars);
-        }
+        next if $attachment->isobsolete;
 
         push(@obsolete_attachments, $attachment);
     }

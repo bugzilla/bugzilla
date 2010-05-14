@@ -101,8 +101,8 @@ sub create {
     Bugzilla->user->clear_product_cache();
 
     # Add the new version and milestone into the DB as valid values.
-    Bugzilla::Version->create({name => $version, product => $product});
-    Bugzilla::Milestone->create({ name => $product->default_milestone, 
+    Bugzilla::Version->create({ value => $version, product => $product });
+    Bugzilla::Milestone->create({ value => $product->default_milestone, 
                                   product => $product });
 
     # Create groups and series for the new product, if requested.

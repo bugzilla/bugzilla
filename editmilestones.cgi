@@ -115,7 +115,7 @@ if ($action eq 'add') {
 
 if ($action eq 'new') {
     check_token_data($token, 'add_milestone');
-    my $milestone = Bugzilla::Milestone->create({ name    => $milestone_name,
+    my $milestone = Bugzilla::Milestone->create({ value   => $milestone_name,
                                                   product => $product,
                                                   sortkey => $sortkey });
     delete_token($token);

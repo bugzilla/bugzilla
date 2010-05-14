@@ -654,7 +654,7 @@ sub create_legal_values {
             next if new Bugzilla::Version({ product => $prod_obj,
                                             name    => $version });
             my $created = Bugzilla::Version->create({ product => $prod_obj,
-                                                      name    => $version });
+                                                      value   => $version });
             my $field = $self->bug_fields->{version};
             print get_text('migrate_value_created', { product => $prod_obj,
                                                       field   => $field,
@@ -663,8 +663,8 @@ sub create_legal_values {
         foreach my $milestone (keys %{ $product_values{$product}->{target_milestone} }) {
             next if new Bugzilla::Milestone({ product => $prod_obj,
                                               name    => $milestone });
-            my $created = Bugzilla::Milestone->create({ product => $prod_obj,
-                                                        name => $milestone });
+            my $created = Bugzilla::Milestone->create(
+                { product => $prod_obj, value => $milestone });
             my $field = $self->bug_fields->{target_milestone};
             print get_text('migrate_value_created', { product => $prod_obj,
                                                       field   => $field,

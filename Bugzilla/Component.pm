@@ -28,6 +28,8 @@ use Bugzilla::User;
 use Bugzilla::FlagType;
 use Bugzilla::Series;
 
+use Scalar::Util qw(blessed);
+
 ###############################
 ####    Initialization     ####
 ###############################
@@ -66,10 +68,11 @@ use constant VALIDATORS => {
     initialqacontact => \&_check_initialqacontact,
     description      => \&_check_description,
     initial_cc       => \&_check_cc_list,
+    name             => \&_check_name,
 };
 
-use constant UPDATE_VALIDATORS => {
-    name => \&_check_name,
+use constant VALIDATOR_DEPENDENCIES => {
+    name => ['product'],
 };
 
 ###############################
@@ -116,8 +119,11 @@ sub create {
     my $params = $class->run_create_validators(@_);
     my $cc_list = delete $params->{initial_cc};
     my $create_series = delete $params->{create_series};
+    my $product = delete $params->{product};
+    $params->{product_id} = $product->id;
 
     my $component = $class->insert_create_data($params);
+    $component->{product} = $product;
 
     # We still have to fill the component_cc table.
     $component->_update_cc_list($cc_list) if $cc_list;
@@ -127,17 +133,6 @@ sub create {
 
     $dbh->bz_commit_transaction();
     return $component;
-}
-
-sub run_create_validators {
-    my $class  = shift;
-    my $params = $class->SUPER::run_create_validators(@_);
-
-    my $product = delete $params->{product};
-    $params->{product_id} = $product->id;
-    $params->{name} = $class->_check_name($params->{name}, $product);
-
-    return $params;
 }
 
 sub update {
@@ -190,7 +185,8 @@ sub remove_from_db {
 ################################
 
 sub _check_name {
-    my ($invocant, $name, $product) = @_;
+    my ($invocant, $name, undef, $params) = @_;
+    my $product = blessed($invocant) ? $invocant->product : $params->{product};
 
     $name = trim($name);
     $name || ThrowUserError('component_blank_name');
@@ -199,7 +195,6 @@ sub _check_name {
         ThrowUserError('component_name_too_long', {'name' => $name});
     }
 
-    $product = $invocant->product if (ref $invocant);
     my $component = new Bugzilla::Component({product => $product, name => $name});
     if ($component && (!ref $invocant || $component->id != $invocant->id)) {
         ThrowUserError('component_already_exists', { name    => $component->name,

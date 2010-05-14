@@ -332,8 +332,7 @@ sub validateStatus {
     return if !defined $status;
 
     grep($status eq $_, qw(? +- + - all))
-      || ThrowCodeError("flag_status_invalid",
-                        { status => $status });
+      || ThrowUserError("flag_status_invalid", { status => $status });
     trick_taint($status);
     return $status;
 }
@@ -343,8 +342,7 @@ sub validateGroup {
     return if !defined $group;
 
     grep($group eq $_, qw(requester requestee category type))
-      || ThrowCodeError("request_queue_group_invalid", 
-                        { group => $group });
+      || ThrowUserError("request_queue_group_invalid", { group => $group });
     trick_taint($group);
     return $group;
 }

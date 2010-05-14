@@ -625,6 +625,14 @@
     and the user you asked isn't in that group.  Please choose someone else
     to ask, or ask an administrator to add the user to the group.
 
+  [% ELSIF error == "flag_status_invalid" %]
+    [% title = "Flag Status Invalid" %]
+    The flag status <em>[% status FILTER html %]</em>
+    [% IF id %]
+      for flag ID #[% id FILTER html %]
+    [% END %]
+    is invalid.
+
   [% ELSIF error == "flag_type_cc_list_invalid" %]
     [% title = "Flag Type CC List Invalid" %]
     [% admindocslinks = {'flags-overview.html#flags-admin'  => 'Administering Flags'} %]
@@ -1456,6 +1464,9 @@
     [% field_descs.$field_name FILTER html %]
     for [% terms.bug %] [%+ bug_id FILTER html %]
     has a circular dependency on [% terms.bug %] [%+ dep_id FILTER html %].
+
+  [% ELSIF error == "request_queue_group_invalid" %]
+    The group field <em>[% group FILTER html %]</em> is invalid.
 
   [% ELSIF error == "require_new_password" %]
     [% title = "New Password Needed" %]

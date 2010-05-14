@@ -277,13 +277,6 @@
     You can't ask a specific person for
     <em>[% type.name FILTER html %]</em>.
   
-  [% ELSIF error == "flag_status_invalid" %]
-    The flag status <em>[% status FILTER html %]</em>
-    [% IF id %]
-      for flag ID #[% id FILTER html %]
-    [% END %]
-    is invalid.
-
   [% ELSIF error == "flag_type_inactive" %]
     [% title = "Inactive Flag Type" %]
     The flag type [% type FILTER html %] is inactive and cannot be used
@@ -421,9 +414,6 @@
   [% ELSIF error == "radius_preparation_error" %]
     An error occurred while preparing for a RADIUS authentication request:
     <code>[% errstr FILTER html %]</code>.
-
-  [% ELSIF error == "request_queue_group_invalid" %]
-    The group field <em>[% group FILTER html %]</em> is invalid.
 
   [% ELSIF error == "report_axis_invalid" %]
     <em>[% val FILTER html %]</em> is not a valid value for 

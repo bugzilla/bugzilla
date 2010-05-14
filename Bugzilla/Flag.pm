@@ -748,7 +748,7 @@ sub _check_status {
     if (!grep($status eq $_ , qw(X + - ?))
         || ($status eq '?' && $self->status ne '?' && !$self->type->is_requestable))
     {
-        ThrowCodeError('flag_status_invalid', { id     => $self->id,
+        ThrowUserError('flag_status_invalid', { id     => $self->id,
                                                 status => $status });
     }
     return $status;

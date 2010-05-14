@@ -3221,7 +3221,10 @@ sub GetBugActivity {
 
         if ($activity_visible) {
             # Check for the results of an old Bugzilla data corruption bug
-            $incomplete_data = 1 if ($added =~ /^\?/ || $removed =~ /^\?/);
+            if (($added eq '?' && $removed eq '?')
+                || ($added =~ /^\? / || $removed =~ /^\? /)) {
+                $incomplete_data = 1;
+            }
 
             # An operation, done by 'who' at time 'when', has a number of
             # 'changes' associated with it.

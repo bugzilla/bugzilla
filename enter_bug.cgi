@@ -548,9 +548,8 @@ scalar(@statuses) || ThrowUserError('no_initial_bug_status');
 # If the user has no privs...
 unless ($has_editbugs || $has_canconfirm) {
     # ... use UNCONFIRMED if available, else use the first status of the list.
-    my $bug_status = (grep { $_->name eq 'UNCONFIRMED' } @statuses) 
-                     ? 'UNCONFIRMED' : $statuses[0]->name;
-    @statuses = ($bug_status);
+    my ($unconfirmed) = grep { $_->name eq 'UNCONFIRMED' } @statuses;
+    @statuses = ($unconfirmed || $statuses[0]);
 }
 
 $vars->{'bug_status'} = \@statuses;

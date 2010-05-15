@@ -452,6 +452,10 @@ div.user_match {
         display: none;
     }
 
+    div.bz_query_buttons {
+        display: none;
+    }
+
     body {
         background-image: none;
         background-color: #fff;

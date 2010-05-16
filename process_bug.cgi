@@ -323,7 +323,7 @@ my @set_fields = qw(op_sys rep_platform priority bug_severity
                     component target_milestone version
                     bug_file_loc status_whiteboard short_desc
                     deadline remaining_time estimated_time
-                    work_time);
+                    work_time set_default_assignee set_default_qa_contact);
 push(@set_fields, 'assigned_to') if !$cgi->param('set_default_assignee');
 push(@set_fields, 'qa_contact')  if !$cgi->param('set_default_qa_contact');
 my %field_translation = (
@@ -331,6 +331,8 @@ my %field_translation = (
     rep_platform => 'platform',
     short_desc   => 'summary',
     bug_file_loc => 'url',
+    set_default_assignee   => 'reset_assigned_to',
+    set_default_qa_contact => 'reset_qa_contact',
 );
 
 my %set_all_fields;
@@ -347,29 +349,24 @@ if (should_set('comment')) {
         is_private => scalar $cgi->param('commentprivacy'),
     };
 }
+if (should_set('see_also')) {
+    $set_all_fields{'see_also'}->{add} = 
+        [split(/[\s,]+/, $cgi->param('see_also'))];
+}
+if (should_set('remove_see_also')) {
+    $set_all_fields{'see_also'}->{remove} = [$cgi->param('remove_see_also')];
+}
 
 my @custom_fields = Bugzilla->active_custom_fields;
+foreach my $field (@custom_fields) {
+    my $fname = $field->name;
+    if (should_set($fname, 1)) {
+        $set_all_fields{$fname} = [$cgi->param($fname)];
+    }
+}
 
 foreach my $b (@bug_objects) {
     $b->set_all(\%set_all_fields);
-    $b->reset_assigned_to if $cgi->param('set_default_assignee');
-    $b->reset_qa_contact  if $cgi->param('set_default_qa_contact');
-
-    if (should_set('see_also')) {
-        my @see_also = split(',', $cgi->param('see_also'));
-        $b->add_see_also($_) foreach @see_also;
-    }
-    if (should_set('remove_see_also')) {
-        $b->remove_see_also($_) foreach $cgi->param('remove_see_also')
-    }
-
-    # And set custom fields.
-    foreach my $field (@custom_fields) {
-        my $fname = $field->name;
-        if (should_set($fname, 1)) {
-            $b->set_custom_field($field, [$cgi->param($fname)]);
-        }
-    }
 }
 
 # Certain changes can only happen on individual bugs, never on mass-changes.

@@ -1869,6 +1869,26 @@ sub set_all {
         }
     }
     $self->SUPER::set_all(\%normal_set_all);
+
+    $self->reset_assigned_to if $params->{'reset_assigned_to'};
+    $self->reset_qa_contact  if $params->{'reset_qa_contact'};
+
+    foreach my $url (@{ $params->{see_also}->{add} || [] }) {
+        $self->add_see_also($url);
+    }
+    foreach my $url (@{ $params->{see_also}->{remove} || [] }) {
+        $self->remove_see_also($url);
+    }
+
+    # And set custom fields.
+    my @custom_fields = Bugzilla->active_custom_fields;
+    foreach my $field (@custom_fields) {
+        my $fname = $field->name;
+        if (exists $params->{$fname}) {
+            $self->set_custom_field($field, $params->{$fname});
+        }
+    }
+
 }
 
 sub set_alias { $_[0]->set('alias', $_[1]); }

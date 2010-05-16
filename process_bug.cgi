@@ -280,32 +280,6 @@ if ($cgi->param('id')) {
     $first_bug->set_flags($flags, $new_flags);
 }
 
-if ($cgi->param('id') && (defined $cgi->param('dependson')
-                          || defined $cgi->param('blocked')) )
-{
-    $first_bug->set_dependencies(scalar $cgi->param('dependson'),
-                                 scalar $cgi->param('blocked'));
-}
-elsif (should_set('dependson') || should_set('blocked')) {
-    foreach my $bug (@bug_objects) {
-        my %temp_deps;
-        foreach my $type (qw(dependson blocked)) {
-            $temp_deps{$type} = { map { $_ => 1 } @{$bug->$type} };
-            if (should_set($type) && $cgi->param($type . '_action') =~ /^(add|remove)$/) {
-                foreach my $id (split(/[,\s]+/, $cgi->param($type))) {
-                    if ($cgi->param($type . '_action') eq 'remove') {
-                        delete $temp_deps{$type}{$id};
-                    }
-                    else {
-                        $temp_deps{$type}{$id} = 1;
-                    }
-                }
-            }
-        }
-        $bug->set_dependencies([ keys %{$temp_deps{'dependson'}} ], [ keys %{$temp_deps{'blocked'}} ]);
-    }
-}
-
 # Component, target_milestone, and version are in here just in case
 # the 'product' field wasn't defined in the CGI. It doesn't hurt to set
 # them twice.
@@ -347,6 +321,17 @@ if (should_set('see_also')) {
 }
 if (should_set('remove_see_also')) {
     $set_all_fields{'see_also'}->{remove} = [$cgi->param('remove_see_also')];
+}
+foreach my $dep_field (qw(dependson blocked)) {
+    if (should_set($dep_field)) {
+        if (my $dep_action = $cgi->param("${dep_field}_action")) {
+            $set_all_fields{$dep_field}->{$dep_action} =
+                [split(/\s,/, $cgi->param($dep_field))];
+        }
+        else {
+            $set_all_fields{$dep_field}->{set} = $cgi->param($dep_field);
+        }
+    }
 }
 
 my @custom_fields = Bugzilla->active_custom_fields;

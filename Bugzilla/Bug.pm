@@ -1854,6 +1854,36 @@ sub set_all {
     my $self = shift;
     my ($params) = @_;
 
+    if (exists $params->{'dependson'} or exists $params->{'blocked'}) {
+        my %set_deps;
+        foreach my $name (qw(dependson blocked)) {
+            my @dep_ids = @{ $self->$name };
+            # If only one of the two fields was passed in, then we need to
+            # retain the current value for the other one.
+            if (!exists $params->{$name}) {
+                $set_deps{$name} = \@dep_ids;
+                next;
+            }
+
+            # Explicitly setting them to a particular value overrides
+            # add/remove.
+            if (exists $params->{$name}->{set}) {
+                $set_deps{$name} = $params->{$name}->{set};
+                next;
+            }
+
+            foreach my $add (@{ $params->{$name}->{add} || [] }) {
+                push(@dep_ids, $add) if !grep($_ == $add, @dep_ids);
+            }
+            foreach my $remove (@{ $params->{$name}->{remove} || [] }) {
+                @dep_ids = grep($_ != $remove, @dep_ids);
+            }
+            $set_deps{$name} = \@dep_ids;
+        }
+
+        $self->set_dependencies($set_deps{'dependson'}, $set_deps{'blocked'});
+    }
+
     if (exists $params->{'keywords'}) {
         $self->modify_keywords($params->{'keywords'},
                                $params->{'keywords_action'});

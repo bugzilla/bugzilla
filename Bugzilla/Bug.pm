@@ -1854,6 +1854,11 @@ sub set_all {
     my $self = shift;
     my ($params) = @_;
 
+    if (exists $params->{'keywords'}) {
+        $self->modify_keywords($params->{'keywords'},
+                               $params->{'keywords_action'});
+    }
+
     if (exists $params->{'comment'} or exists $params->{'work_time'}) {
         # Add a comment as needed to each bug. This is done early because
         # there are lots of things that want to check if we added a comment.
@@ -2350,7 +2355,6 @@ sub modify_keywords {
     }
 
     $self->{'keyword_objects'} = \@result;
-    return $any_changes;
 }
 
 sub add_group {

@@ -306,16 +306,6 @@ elsif (should_set('dependson') || should_set('blocked')) {
     }
 }
 
-my $any_keyword_changes;
-if (defined $cgi->param('keywords')) {
-    foreach my $b (@bug_objects) {
-        my $return =
-            $b->modify_keywords(scalar $cgi->param('keywords'),
-                                scalar $cgi->param('keywordaction'));
-        $any_keyword_changes ||= $return;
-    }
-}
-
 # Component, target_milestone, and version are in here just in case
 # the 'product' field wasn't defined in the CGI. It doesn't hurt to set
 # them twice.
@@ -323,7 +313,8 @@ my @set_fields = qw(op_sys rep_platform priority bug_severity
                     component target_milestone version
                     bug_file_loc status_whiteboard short_desc
                     deadline remaining_time estimated_time
-                    work_time set_default_assignee set_default_qa_contact);
+                    work_time set_default_assignee set_default_qa_contact
+                    keywords keywordaction);
 push(@set_fields, 'assigned_to') if !$cgi->param('set_default_assignee');
 push(@set_fields, 'qa_contact')  if !$cgi->param('set_default_qa_contact');
 my %field_translation = (
@@ -333,6 +324,7 @@ my %field_translation = (
     bug_file_loc => 'url',
     set_default_assignee   => 'reset_assigned_to',
     set_default_qa_contact => 'reset_qa_contact',
+    keywordaction => 'keywords_action',
 );
 
 my %set_all_fields;

@@ -1854,6 +1854,15 @@ sub set_all {
     my $self = shift;
     my ($params) = @_;
 
+    # strict_isolation checks mean that we should set the groups
+    # immediately after changing the product.
+    foreach my $group (@{ $params->{groups}->{add} || [] }) {
+        $self->add_group($group);
+    }
+    foreach my $group (@{ $params->{groups}->{remove} || [] }) {
+        $self->remove_group($group);
+    }
+
     if (exists $params->{'dependson'} or exists $params->{'blocked'}) {
         my %set_deps;
         foreach my $name (qw(dependson blocked)) {
@@ -2400,7 +2409,8 @@ sub add_group {
     # to this group by the current user.
     $self->product_obj->group_is_settable($group)
          || ThrowUserError('group_invalid_restriction',
-                { product => $self->product, group_id => $group->id });
+                { product => $self->product, group_id => $group->id,
+                  bug => $self });
 
     # OtherControl people can add groups only during a product change,
     # and only when the group is not NA for them.

@@ -255,31 +255,6 @@ if (should_set('product')) {
     }
 }
 
-# strict_isolation checks mean that we should set the groups
-# immediately after changing the product.
-foreach my $b (@bug_objects) {
-    foreach my $group (@{$b->product_obj->groups_valid}) {
-        my $gid = $group->id;
-        if (should_set("bit-$gid", 1)) {
-            # Check ! first to avoid having to check defined below.
-            if (!$cgi->param("bit-$gid")) {
-                $b->remove_group($gid);
-            }
-            # "== 1" is important because mass-change uses -1 to mean
-            # "don't change this restriction"
-            elsif ($cgi->param("bit-$gid") == 1) {
-                $b->add_group($gid);
-            }
-        }
-    }
-}
-
-# Flags should be set AFTER the bug has been moved into another product/component.
-if ($cgi->param('id')) {
-    my ($flags, $new_flags) = Bugzilla::Flag->extract_flags_from_cgi($first_bug, undef, $vars);
-    $first_bug->set_flags($flags, $new_flags);
-}
-
 # Component, target_milestone, and version are in here just in case
 # the 'product' field wasn't defined in the CGI. It doesn't hurt to set
 # them twice.
@@ -333,6 +308,27 @@ foreach my $dep_field (qw(dependson blocked)) {
         }
     }
 }
+my %groups = ( add => [], remove => [] );
+my %checked_bit; # Used to avoid adding groups twice (defined_ + actual bit-)
+foreach my $param_name (grep(/bit-\d+$/, $cgi->param())) {
+    $param_name =~ /bit-(\d+)$/;
+    my $gid = $1;
+    next if $checked_bit{$gid};
+    my $bit_param = "bit-$gid";
+    if (should_set($bit_param, 1)) {
+        # Check ! first to avoid having to check defined below.
+        if (!$cgi->param($bit_param)) {
+            push(@{ $groups{remove} }, $gid);
+        }
+        # "== 1" is important because mass-change uses -1 to mean
+        # "don't change this restriction"
+        elsif ($cgi->param($bit_param) == 1) {
+            push(@{ $groups{add} }, $gid);
+        }
+    }
+    $checked_bit{$gid} = 1;
+}
+$set_all_fields{groups} = \%groups;
 
 my @custom_fields = Bugzilla->active_custom_fields;
 foreach my $field (@custom_fields) {
@@ -348,6 +344,12 @@ foreach my $b (@bug_objects) {
 
 # Certain changes can only happen on individual bugs, never on mass-changes.
 if (defined $cgi->param('id')) {
+    # Flags should be set AFTER the bug has been moved into another
+    # product/component.
+    my ($flags, $new_flags) = Bugzilla::Flag->extract_flags_from_cgi(
+        $first_bug, undef, $vars);
+    $first_bug->set_flags($flags, $new_flags);
+
     # Since aliases are unique (like bug numbers), they can only be changed
     # for one bug at a time.
     if (Bugzilla->params->{"usebugaliases"} && defined $cgi->param('alias')) {

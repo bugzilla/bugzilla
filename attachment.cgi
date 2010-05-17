@@ -377,6 +377,8 @@ sub viewall {
     my $bugid = $bug->id;
 
     my $attachments = Bugzilla::Attachment->get_attachments_by_bug($bugid);
+    # Ignore deleted attachments.
+    @$attachments = grep { $_->datasize } @$attachments;
 
     # Define the variables and functions that will be passed to the UI template.
     $vars->{'bug'} = $bug;

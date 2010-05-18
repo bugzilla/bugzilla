@@ -351,7 +351,7 @@ sub get_bug_link {
     $title = html_quote(clean_text($title));
 
     my $linkval = "show_bug.cgi?id=" . $bug->id;
-    if ($options->{comment_num}) {
+    if (defined $options->{comment_num}) {
         $linkval .= "#c" . $options->{comment_num};
     }
     return qq{$pre<a href="$linkval" title="$title">$link_text</a>$post};

@@ -674,12 +674,15 @@ use constant ABSTRACT_SCHEMA => {
                                REFERENCES => {TABLE  => 'fielddefs',
                                               COLUMN => 'id'}},
             reverse_desc => {TYPE => 'TINYTEXT'},
+            is_mandatory => {TYPE => 'BOOLEAN', NOTNULL => 1,
+                             DEFAULT => 'FALSE'},
         ],
         INDEXES => [
             fielddefs_name_idx    => {FIELDS => ['name'],
                                       TYPE => 'UNIQUE'},
             fielddefs_sortkey_idx => ['sortkey'],
             fielddefs_value_field_id_idx => ['value_field_id'],
+            fielddefs_is_mandatory_idx => ['is_mandatory'],
         ],
     },
 

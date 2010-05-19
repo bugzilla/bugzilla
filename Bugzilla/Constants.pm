@@ -128,6 +128,8 @@ use File::Basename;
     FIELD_TYPE_BUG_ID
     FIELD_TYPE_BUG_URLS
 
+    EMPTY_DATETIME_REGEX
+
     ABNORMAL_SELECTS
 
     TIMETRACKING_FIELDS
@@ -387,6 +389,8 @@ use constant FIELD_TYPE_TEXTAREA  => 4;
 use constant FIELD_TYPE_DATETIME  => 5;
 use constant FIELD_TYPE_BUG_ID  => 6;
 use constant FIELD_TYPE_BUG_URLS => 7;
+
+use constant EMPTY_DATETIME_REGEX => qr/^[0\-:\sA-Za-z]+$/; 
 
 # See the POD for Bugzilla::Field/is_abnormal to see why these are listed
 # here.

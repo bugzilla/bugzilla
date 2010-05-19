@@ -22,14 +22,13 @@
   #   field: a Bugzilla::Field object
   #   desc_url: An alternate link to help for the field.
   #   hidden: True if the field label should start hidden.
-  #   required: True if this field must have a value.
   #   rowspan: a "rowspan" value for the label's <th>.
   #%]
 
 [% PROCESS "bug/field-help.none.tmpl" %]
 
 <th class="field_label [% ' bz_hidden_field' IF hidden %]
-           [%- ' required' IF required %]"
+           [%- ' required' IF field.is_mandatory %]"
     id="field_label_[% field.name FILTER html %]"
     [% IF rowspan %] rowspan="[% rowspan FILTER html %]"[% END %]>
 

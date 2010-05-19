@@ -218,7 +218,7 @@ TUI_hide_default('expert_fields');
       describecomponents.cgi?product=[% product.name FILTER url_quote %]
     [% END %]
     [% INCLUDE "bug/field-label.html.tmpl"
-      field = bug_fields.component editable = 1 required = 1
+      field = bug_fields.component editable = 1
       desc_url = component_desc_url
     %]      
     <td id="field_container_component">
@@ -487,13 +487,13 @@ TUI_hide_default('expert_fields');
   </tr>
 </tbody>
 
-<tbody class="expert_fields">
+<tbody>
   [% USE Bugzilla %]
 
   [% FOREACH field = Bugzilla.active_custom_fields %]
     [% NEXT UNLESS field.enter_bug %]
     [% SET value = ${field.name}.defined ? ${field.name} : "" %]
-    <tr>
+    <tr [% 'class="expert_fields"' IF !field.is_mandatory %]>
       [% INCLUDE bug/field.html.tmpl 
         bug = default, field = field, value = value, editable = 1, 
         value_span = 3 %]
@@ -505,7 +505,7 @@ TUI_hide_default('expert_fields');
 
   <tr>
     [% INCLUDE "bug/field-label.html.tmpl"
-      field = bug_fields.short_desc editable = 1 required = 1
+      field = bug_fields.short_desc editable = 1
     %]
     <td colspan="3">
       <input name="short_desc" size="70" value="[% short_desc FILTER html %]"

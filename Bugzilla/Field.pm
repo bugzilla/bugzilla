@@ -102,6 +102,7 @@ use constant DB_COLUMNS => qw(
     visibility_value_id
     value_field_id
     reverse_desc
+    is_mandatory
 );
 
 use constant REQUIRED_CREATE_FIELDS => qw(name description);
@@ -116,6 +117,7 @@ use constant VALIDATORS => {
     sortkey     => \&_check_sortkey,
     type        => \&_check_type,
     visibility_field_id => \&_check_visibility_field_id,
+    is_mandatory => \&Bugzilla::Object::check_boolean,
 };
 
 use constant UPDATE_VALIDATORS => {
@@ -135,7 +137,7 @@ use constant UPDATE_COLUMNS => qw(
     visibility_value_id
     value_field_id
     reverse_desc
-
+    is_mandatory
     type
 );
 
@@ -158,7 +160,7 @@ use constant DEFAULT_FIELDS => (
     {name => 'bug_id',       desc => 'Bug #',      in_new_bugmail => 1,
      buglist => 1},
     {name => 'short_desc',   desc => 'Summary',    in_new_bugmail => 1,
-     buglist => 1},
+     is_mandatory => 1, buglist => 1},
     {name => 'classification', desc => 'Classification', in_new_bugmail => 1,
      buglist => 1},
     {name => 'product',      desc => 'Product',    in_new_bugmail => 1,
@@ -184,6 +186,7 @@ use constant DEFAULT_FIELDS => (
     {name => 'priority',     desc => 'Priority',   in_new_bugmail => 1,
      type => FIELD_TYPE_SINGLE_SELECT, buglist => 1},
     {name => 'component',    desc => 'Component',  in_new_bugmail => 1,
+     is_mandatory => 1,
      type => FIELD_TYPE_SINGLE_SELECT, buglist => 1},
     {name => 'assigned_to',  desc => 'AssignedTo', in_new_bugmail => 1,
      buglist => 1},
@@ -375,6 +378,7 @@ sub _check_reverse_desc {
     return $reverse_desc;
 }
 
+sub _check_is_mandatory { return $_[1] ? 1 : 0; }
 
 =pod
 
@@ -676,6 +680,25 @@ sub controls_values_of {
 
 =over
 
+=item C<is_visible_on_bug>
+
+See L<Bugzilla::Field::ChoiceInterface>.
+
+=back
+
+=cut
+
+sub is_visible_on_bug {
+    my ($self, $bug) = @_;
+
+    my $visibility_value = $self->visibility_value;
+    return 1 if !$visibility_value;
+
+    return $visibility_value->is_set_on_bug($bug);
+}
+
+=over
+
 =item C<is_relationship>
 
 Applies only to fields of type FIELD_TYPE_BUG_ID.
@@ -711,6 +734,18 @@ the reverse description would be "Duplicates of this bug".
 
 sub reverse_desc { return $_[0]->{reverse_desc} }
 
+=over
+
+=item C<is_mandatory>
+
+a boolean specifying whether or not the field is mandatory;
+
+=back
+
+=cut
+
+sub is_mandatory { return $_[0]->{is_mandatory} }
+
 
 =pod
 
@@ -744,6 +779,9 @@ They will throw an error if you try to set the values to something invalid.
 
 =item C<set_value_field>
 
+=item C<set_is_mandatory>
+
+
 =back
 
 =cut
@@ -771,6 +809,7 @@ sub set_value_field {
     $self->set('value_field_id', $value);
     delete $self->{value_field};
 }
+sub set_is_mandatory { $_[0]->set('is_mandatory', $_[1]); }
 
 # This is only used internally by upgrade code in Bugzilla::Field.
 sub _set_type { $_[0]->set('type', $_[1]); }
@@ -885,6 +924,8 @@ editable on the bug creation form. Defaults to 0.
 selectable as a display or order column in bug lists. Defaults to 0.
 
 C<obsolete> - boolean - Whether this field is obsolete. Defaults to 0.
+
+C<is_mandatory> - boolean - Whether this field is mandatory. Defaults to 0.
 
 =back
 
@@ -1019,6 +1060,7 @@ sub populate_field_definitions {
             $field->set_in_new_bugmail($def->{in_new_bugmail});
             $field->set_buglist($def->{buglist});
             $field->_set_type($def->{type}) if $def->{type};
+            $field->set_is_mandatory($def->{is_mandatory});
             $field->update();
         }
         else {

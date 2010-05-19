@@ -108,6 +108,11 @@ sub update_fielddefs_definition {
     $dbh->do('UPDATE fielddefs SET buglist = 1
                WHERE custom = 1 AND type = ' . FIELD_TYPE_MULTI_SELECT);
 
+    $dbh->bz_add_column('fielddefs', 'is_mandatory',
+        {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'FALSE'});
+    $dbh->bz_add_index('fielddefs', 'fielddefs_is_mandatory_idx',
+                       ['is_mandatory']);
+
     # Remember, this is not the function for adding general table changes.
     # That is below. Add new changes to the fielddefs table above this
     # comment.

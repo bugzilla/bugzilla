@@ -1473,6 +1473,11 @@
     [% title = "New Password Needed" %]
     You cannot change your password without choosing a new one.
 
+  [% ELSIF error == "required_field" %]
+    [% title = "Field Must Be Set" %]
+    A value must be set for the '[% field_descs.${field.name} FILTER html %]'
+    field.
+
   [% ELSIF error == "require_summary" %]
     [% title = "Summary Needed" %]
     You must enter a summary for this [% terms.bug %].

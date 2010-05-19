@@ -54,6 +54,7 @@ use List::Util qw(min first);
 use Storable qw(dclone);
 use URI;
 use URI::QueryParam;
+use Scalar::Util qw(blessed);
 
 use base qw(Bugzilla::Object Exporter);
 @Bugzilla::Bug::EXPORT = qw(
@@ -631,6 +632,14 @@ sub run_create_validators {
 
     Bugzilla::Hook::process('bug_end_of_create_validators',
                             { params => $params });
+
+    my @mandatory_fields = Bugzilla->get_fields({ is_mandatory => 1,
+                                                  enter_bug    => 1,
+                                                  obsolete     => 0 });
+    foreach my $field (@mandatory_fields) {
+        $class->_check_field_is_mandatory($params->{$field->name}, $field,
+                                          $params);
+    }
 
     return $params;
 }
@@ -1680,6 +1689,32 @@ sub _check_work_time {
 
 # Custom Field Validators
 
+sub _check_field_is_mandatory {
+    my ($invocant, $value, $field, $params) = @_;
+
+    if (!blessed($field)) {
+        $field = Bugzilla::Field->check({ name => $field });
+    }
+
+    return if !$field->is_mandatory;
+
+    return if !$field->is_visible_on_bug($params || $invocant);
+
+    if (ref($value) eq 'ARRAY') {
+        $value = join('', @$value);
+    }
+
+    $value = trim($value);
+    if (!defined($value)
+        or $value eq ""
+        or ($value eq '---' and $field->type == FIELD_TYPE_SINGLE_SELECT)
+        or ($value =~ EMPTY_DATETIME_REGEX
+            and $field->type == FIELD_TYPE_DATETIME))
+    {
+        ThrowUserError('required_field', { field => $field });
+    }
+}
+
 sub _check_datetime_field {
     my ($invocant, $date_time) = @_;
 
@@ -1843,6 +1878,7 @@ sub _set_global_validator {
                                            newvalue => $value,
                                            privs    => $privs });
     }
+    $self->_check_field_is_mandatory($value, $field);
 }
 
 

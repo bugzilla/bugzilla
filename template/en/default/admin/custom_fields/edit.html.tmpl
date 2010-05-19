@@ -78,6 +78,29 @@
         <input type="text" id="sortkey" name="sortkey" size="6" maxlength="6"
                value="[% field.sortkey FILTER html %]">
       </td>
+      <th align="right"><label for="is_mandatory">Is mandatory:</label></th>
+      <td><input type="checkbox" id="is_mandatory" name="is_mandatory" value="1"
+                 [%- ' checked="checked"' IF field.is_mandatory %]></td>
+    </tr>
+    <tr>
+      [% IF field.type == constants.FIELD_TYPE_BUG_ID %]
+        <th class="narrow_label">
+          <label for="reverse_desc">Reverse Relationship Description:</label>
+        </th>
+        <td>
+          <input type="text" id="reverse_desc" name="reverse_desc" size="40"
+                 value="[% field.reverse_desc FILTER html %]">
+          <br/>
+          Use this label for the list of [% terms.bugs %] that link to
+          [%+ terms.abug %] with this 
+          [%+ field_types.${constants.FIELD_TYPE_BUG_ID} FILTER html %] field.
+          For example, if the description is "Is a duplicate of",
+          the reverse description would be "Duplicates of this [% terms.bug %]".
+          Leave blank to disable the list for this field.
+        </td>
+      [% ELSE %]
+        <td colspan="2">&nbsp;</td>
+      [% END %]
       <th>
         <label for="visibility_field_id">Field only appears when:</label>
       </th>
@@ -140,24 +163,6 @@
           </select>
         </td>
       </tr>
-    [% END %]
-    [% IF field.type == constants.FIELD_TYPE_BUG_ID %]
-       <tr>
-        <th class="narrow_label">
-          <label for="reverse_desc">Reverse Relationship Description:</label>
-        </th>
-        <td>
-          <input type="text" id="reverse_desc" name="reverse_desc" size="40"
-                 value="[% field.reverse_desc FILTER html %]">
-          <br/>
-          Use this label for the list of [% terms.bugs %] that link to
-          [%+ terms.abug %] with this 
-          [%+ field_types.${constants.FIELD_TYPE_BUG_ID} FILTER html %] field.
-          For example, if the description is "Is a duplicate of",
-          the reverse description would be "Duplicates of this [% terms.bug %]".
-          Leave blank to disable the list for this field.
-        </td>
-       </tr>
     [% END %]
   </table>
   <br>

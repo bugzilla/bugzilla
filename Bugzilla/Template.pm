@@ -532,6 +532,7 @@ sub create {
             # See bugs 4928, 22983 and 32000 for more details
             html_linebreak => sub {
                 my ($var) = @_;
+                $var = html_quote($var);
                 $var =~ s/\r\n/\&#013;/g;
                 $var =~ s/\n\r/\&#013;/g;
                 $var =~ s/\r/\&#013;/g;

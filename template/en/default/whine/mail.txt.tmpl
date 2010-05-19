@@ -40,13 +40,13 @@
   This search was scheduled by [% author.login %].
 [% END %]
 
-
-[% FOREACH query=queries %]
+[% IF queries.size %]
+  [% FOREACH query=queries %]
 
 [%+ query.title +%]
 [%+ "-" FILTER repeat(query.title.length) %]
 
- [% FOREACH bug=query.bugs %]
+  [% FOREACH bug=query.bugs %]
   [% terms.Bug +%] [%+ bug.bug_id %]:
   [%+ urlbase %]show_bug.cgi?id=[% bug.bug_id +%]
   Priority: [%+ display_value("priority", bug.priority) -%]
@@ -55,11 +55,14 @@
   Assignee: [%+ bug.assigned_to %]
     Status: [%+ display_value("bug_status", bug.bug_status) %]
             [%- IF bug.resolution -%] Resolution: [% display_value("resolution", bug.resolution) -%]
-                                [%- END %]
+            [%- END %]
    Summary: [% bug.short_desc %]
 
- [% END %]
+   [% END %]
 
+  [% END %]
+[% ELSE %]
+
+  No [% terms.bugs %] were found that matched the search criteria.
 [% END %]
-
 

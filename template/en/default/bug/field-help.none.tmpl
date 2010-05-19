@@ -235,3 +235,5 @@ email1 =>
   [% SET type_name = help_field _ '_type' %]
   [% help_html.$type_name = type_desc %]
 [% END %]
+
+[% Hook.process("end") %]

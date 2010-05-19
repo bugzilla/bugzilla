@@ -39,7 +39,7 @@ BEGIN { eval "use base qw(Daemon::Generic)"; }
 
 our $VERSION = BUGZILLA_VERSION;
 
-# Info we need to install/uninstall the daemon on RHEL/Fedora.
+# Info we need to install/uninstall the daemon.
 our $chkconfig = "/sbin/chkconfig";
 our $initd = "/etc/init.d";
 our $initscript = "bugzilla-queue";
@@ -102,7 +102,12 @@ sub gd_usage {
 sub gd_can_install {
     my $self = shift;
 
-    my $source_file = "contrib/$initscript";
+    my $source_file;
+    if ( -e "/etc/SuSE-release" ) {
+        $source_file = "contrib/$initscript.suse";
+    } else {
+        $source_file = "contrib/$initscript.rhel";
+    }
     my $dest_file = "$initd/$initscript";
     my $sysconfig = '/etc/sysconfig';
     my $config_file = "$sysconfig/$initscript";

@@ -137,6 +137,11 @@ sub REQUIRED_MODULES {
         module  => 'URI',
         version => 0
     },
+    {
+        package => 'List-MoreUtils',
+        module  => 'List::MoreUtils',
+        version => 0
+    },
     );
 
     my $extra_modules = _get_extension_requirements('REQUIRED_MODULES');

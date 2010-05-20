@@ -41,7 +41,7 @@ elsif ($action eq "show_user" or $action eq 'vote') {
     $cgi->param('id', 'voting/user.html');
 }
 else {
-    ThrowCodeError("unknown_action", {action => $action});
+    ThrowUserError('unknown_action', {action => $action});
 }
 
 print $cgi->redirect('page.cgi?' . $cgi->query_string);

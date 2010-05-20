@@ -127,7 +127,7 @@ elsif ($action eq "delete") {
 }
 else 
 { 
-  ThrowCodeError("unknown_action", { action => $action });
+  ThrowUserError('unknown_action', {action => $action});
 }
 
 exit;

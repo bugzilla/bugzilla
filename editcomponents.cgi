@@ -252,7 +252,5 @@ if ($action eq 'update') {
     exit;
 }
 
-#
 # No valid action found
-#
-ThrowUserError('no_valid_action', {'field' => "component"});
+ThrowUserError('unknown_action', {action => $action});

@@ -183,4 +183,4 @@ if ($action eq 'delete') {
     exit;
 }
 
-ThrowCodeError("action_unrecognized", $vars);
+ThrowUserError('unknown_action', {action => $action});

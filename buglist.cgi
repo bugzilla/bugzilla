@@ -511,7 +511,7 @@ elsif (($cmdtype eq "doit") && defined $cgi->param('remtype')) {
             # We add or remove bugs based on the action choosen.
             my $action = trim($cgi->param('action') || '');
             $action =~ /^(add|remove)$/
-              || ThrowCodeError('unknown_action', {'action' => $action});
+              || ThrowUserError('unknown_action', {action => $action});
 
             # If we are removing bugs, then we must have an existing
             # saved search selected.

@@ -171,5 +171,5 @@ elsif ($action eq 'delete') {
         || ThrowTemplateError($template->error());
 }
 else {
-    ThrowUserError('no_valid_action', {'field' => 'custom_field'});
+    ThrowUserError('unknown_action', {action => $action});
 }

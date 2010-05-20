@@ -37,13 +37,7 @@
 [% DEFAULT title = "Internal Error" %]
 
 [% error_message = BLOCK %]
-  [% IF    error == "action_unrecognized" %]
-    [% docslinks = {'query.html' => "Searching for $terms.bugs",
-                    'query.html#list' => "$terms.Bug lists"} %]
-    I don't recognize the value (<em>[% action FILTER html %]</em>)
-    of the <em>action</em> variable.
-  
-  [% ELSIF error == "attachment_local_storage_disabled" %]
+  [% IF error == "attachment_local_storage_disabled" %]
     [% title = "Local Storage Disabled" %]
     You cannot store attachments locally. This feature is disabled.
 
@@ -450,13 +444,6 @@
   [% ELSIF error == "undefined_field" %]
     Form field [% field FILTER html %] was not defined.
     
-  [% ELSIF error == "unknown_action" %]
-    [% IF action %]
-       Unknown action [% action FILTER html %]!
-    [% ELSE %]
-       I could not figure out what you wanted to do.
-    [% END %]
-
   [% ELSIF error == "unknown_method" %]
     The requested method '[% method FILTER html %]' was not found.
 

@@ -193,10 +193,5 @@ if ($action eq 'update') {
     display_field_values($vars);
 }
 
-
-#
 # No valid action found
-#
-# We can't get here without $field being defined --
-# See the unless($field) block at the top.
-ThrowUserError('no_valid_action', { field => $field } );
+ThrowUserError('unknown_action', {action => $action});

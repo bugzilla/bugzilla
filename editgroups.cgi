@@ -357,13 +357,8 @@ if ($action eq 'remove_regexp') {
     exit;
 }
 
-
-#
 # No valid action found
-#
-
-ThrowCodeError("action_unrecognized", $vars);
-
+ThrowUserError('unknown_action', {action => $action});
 
 # Helper sub to handle the making of changes to a group
 sub doGroupChanges {

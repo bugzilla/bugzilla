@@ -227,7 +227,7 @@ elsif ($action eq "convert_search") {
     print $cgi->redirect(-location => correct_urlbase() . "query.cgi?format=create-series$url");
 }
 else {
-    ThrowCodeError("unknown_action");
+    ThrowUserError('unknown_action', {action => $action});
 }
 
 exit;

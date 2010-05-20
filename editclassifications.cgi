@@ -233,4 +233,4 @@ if ($action eq 'reclassify') {
 # No valid action found
 #
 
-ThrowCodeError("action_unrecognized", {action => $action});
+ThrowUserError('unknown_action', {action => $action});

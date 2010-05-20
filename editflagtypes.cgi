@@ -86,7 +86,7 @@ elsif ($action eq 'confirmdelete')  { confirmDelete();  }
 elsif ($action eq 'delete')         { deleteType($token); }
 elsif ($action eq 'deactivate')     { deactivate($token); }
 else { 
-    ThrowCodeError("action_unrecognized", { action => $action });
+    ThrowUserError('unknown_action', {action => $action});
 }
 
 exit;

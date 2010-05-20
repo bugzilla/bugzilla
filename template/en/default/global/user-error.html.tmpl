@@ -1251,10 +1251,6 @@
     Either no products have been defined to enter [% terms.bugs %] against or you have not
     been given access to any.
 
-  [% ELSIF error == "no_valid_action" %]
-    [% title = "No valid action specified" %]
-    Cannot edit [% field_descs.$field FILTER html %]: no valid action was specified.
-
   [% ELSIF error == "number_not_numeric" %]
     [% title = "Numeric Value Required" %]
     The value '[% num FILTER html %]' in the 
@@ -1580,6 +1576,13 @@
       an account
     [% END %]
     token too recently to request another. Please wait a while and try again.
+
+  [% ELSIF error == "unknown_action" %]
+    [% IF action %]
+       Unknown action [% action FILTER html %]!
+    [% ELSE %]
+       I could not figure out what you wanted to do.
+    [% END %]
 
   [% ELSIF error == "unknown_keyword" %]
     [% title = "Unknown Keyword" %]

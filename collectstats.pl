@@ -201,6 +201,10 @@ sub collect_stats {
           || ThrowCodeError('chart_file_open_fail', {'filename' => $file});
     }
 
+    if (Bugzilla->params->{'utf8'}) {
+        binmode DATA, ':utf8';
+    }
+
     # Now collect current data.
     my @row = (today());
     my $status_sql = q{SELECT COUNT(*) FROM bugs WHERE bug_status = ?};
@@ -257,6 +261,10 @@ sub get_old_data {
 
     open(DATA, '<', $file)
       || ThrowCodeError('chart_file_open_fail', {'filename' => $file});
+
+    if (Bugzilla->params->{'utf8'}) {
+        binmode DATA, ':utf8';
+    }
 
     my @data;
     my @columns;

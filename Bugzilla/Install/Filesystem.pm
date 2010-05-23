@@ -279,14 +279,8 @@ EOT
                                           contents => HT_DEFAULT_DENY },
         't/.htaccess'                => { perms    => $ws_readable,
                                           contents => HT_DEFAULT_DENY },
-
-        '.htaccess' => { perms => $ws_readable, contents => <<EOT
-# Don't allow people to retrieve non-cgi executable files or our private data
-<FilesMatch ^(.*\\.pm|.*\\.pl|.*localconfig.*)\$>
-  deny from all
-</FilesMatch>
-EOT
-        },
+        "$datadir/.htaccess"         => { perms    => $ws_readable,
+                                          contents => HT_DEFAULT_DENY },
 
         "$webdotdir/.htaccess" => { perms => $ws_readable, contents => <<EOT
 # Restrict access to .dot files to the public webdot server at research.att.com
@@ -305,18 +299,6 @@ EOT
 # And no directory listings, either.
 Deny from all
 EOT
-        },
-
-        # Even though $datadir may not (and should not) be accessible from the 
-        # web server, we can't know for sure, so create the .htaccess anyway. 
-        # It's harmless if it isn't accessible...
-        "$datadir/.htaccess" => { perms    => $ws_readable, contents => <<EOT
-# Nothing in this directory is retrievable unless overridden by an .htaccess
-# in a subdirectory.
-deny from all
-EOT
-
-
         },
     );
 
@@ -433,26 +415,6 @@ sub create_htaccess {
     _create_files(%{FILESYSTEM()->{htaccess}});
 
     # Repair old .htaccess files
-    my $htaccess = new IO::File('.htaccess', 'r') || die ".htaccess: $!";
-    my $old_data;
-    { local $/; $old_data = <$htaccess>; }
-    $htaccess->close;
-
-    my $repaired = 0;
-    if ($old_data =~ s/\|localconfig\|/\|.*localconfig.*\|/) {
-        $repaired = 1;
-    }
-    if ($old_data !~ /\(\.\*\\\.pm\|/) {
-        $old_data =~ s/\(/(.*\\.pm\|/;
-        $repaired = 1;
-    }
-    if ($repaired) {
-        print "Repairing .htaccess...\n";
-        $htaccess = new IO::File('.htaccess', 'w') || die $!;
-        print $htaccess $old_data;
-        $htaccess->close;
-    }
-
 
     my $webdot_dir = bz_locations()->{'webdotdir'};
     # The public webdot IP address changed.

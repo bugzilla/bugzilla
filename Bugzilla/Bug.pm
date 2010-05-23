@@ -1892,12 +1892,7 @@ sub set_all {
 
     # strict_isolation checks mean that we should set the groups
     # immediately after changing the product.
-    foreach my $group (@{ $params->{groups}->{add} || [] }) {
-        $self->add_group($group);
-    }
-    foreach my $group (@{ $params->{groups}->{remove} || [] }) {
-        $self->remove_group($group);
-    }
+    $self->_add_remove($params, 'groups');
 
     if (exists $params->{'dependson'} or exists $params->{'blocked'}) {
         my %set_deps;
@@ -1953,12 +1948,7 @@ sub set_all {
     $self->reset_assigned_to if $params->{'reset_assigned_to'};
     $self->reset_qa_contact  if $params->{'reset_qa_contact'};
 
-    foreach my $url (@{ $params->{see_also}->{add} || [] }) {
-        $self->add_see_also($url);
-    }
-    foreach my $url (@{ $params->{see_also}->{remove} || [] }) {
-        $self->remove_see_also($url);
-    }
+    $self->_add_remove($params, 'see_also');
 
     # And set custom fields.
     my @custom_fields = Bugzilla->active_custom_fields;
@@ -1968,6 +1958,21 @@ sub set_all {
             $self->set_custom_field($field, $params->{$fname});
         }
     }
+
+    $self->_add_remove($params, 'cc');
+}
+
+# Helper for set_all that helps with fields that have an "add/remove"
+# pattern instead of a "set_" pattern.
+sub _add_remove {
+    my ($self, $params, $name) = @_;
+    my @add    = @{ $params->{$name}->{add}    || [] };
+    my @remove = @{ $params->{$name}->{remove} || [] };
+    $name =~ s/s$//;
+    my $add_method = "add_$name";
+    my $remove_method = "remove_$name";
+    $self->$add_method($_) foreach @add;
+    $self->$remove_method($_) foreach @remove;
 }
 
 sub set_alias { $_[0]->set('alias', $_[1]); }

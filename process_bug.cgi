@@ -309,6 +309,38 @@ foreach my $dep_field (qw(dependson blocked)) {
         }
     }
 }
+# Formulate the CC data into two arrays of users involved in this CC change.
+my (@cc_add, @cc_remove);
+if (defined $cgi->param('newcc')
+    or defined $cgi->param('addselfcc')
+    or defined $cgi->param('removecc')
+    or defined $cgi->param('masscc')) 
+{
+
+    # If masscc is defined, then we came from buglist and need to either add or
+    # remove cc's... otherwise, we came from show_bug and may need to do both.
+    my ($cc_add, $cc_remove) = "";
+    if (defined $cgi->param('masscc')) {
+        if ($cgi->param('ccaction') eq 'add') {
+            $cc_add = $cgi->param('masscc');
+        } elsif ($cgi->param('ccaction') eq 'remove') {
+            $cc_remove = $cgi->param('masscc');
+        }
+    } else {
+        $cc_add = $cgi->param('newcc');
+        # We came from bug_form which uses a select box to determine what cc's
+        # need to be removed...
+        if ($cgi->param('removecc') && $cgi->param('cc')) {
+            $cc_remove = join(",", $cgi->param('cc'));
+        }
+    }
+
+    push(@cc_add, split(/[\s,]+/, $cc_add)) if $cc_add;
+    push(@cc_add, Bugzilla->user) if $cgi->param('addselfcc');
+
+    push(@cc_remove, split(/[\s,]+/, $cc_remove)) if $cc_remove;
+}
+$set_all_fields{cc} = { add => \@cc_add, remove => \@cc_remove };
 
 # Fields that can only be set on one bug at a time.
 if (defined $cgi->param('id')) {
@@ -370,43 +402,7 @@ if (defined $cgi->param('id')) {
     $first_bug->set_flags($flags, $new_flags);
 }
 
-# We need to check the addresses involved in a CC change before we touch 
-# any bugs. What we'll do here is formulate the CC data into two arrays of
-# users involved in this CC change.  Then those arrays can be used later 
-# on for the actual change.
-my (@cc_add, @cc_remove);
-if (defined $cgi->param('newcc')
-    || defined $cgi->param('addselfcc')
-    || defined $cgi->param('removecc')
-    || defined $cgi->param('masscc')) {
-        
-    # If masscc is defined, then we came from buglist and need to either add or
-    # remove cc's... otherwise, we came from bugform and may need to do both.
-    my ($cc_add, $cc_remove) = "";
-    if (defined $cgi->param('masscc')) {
-        if ($cgi->param('ccaction') eq 'add') {
-            $cc_add = join(' ',$cgi->param('masscc'));
-        } elsif ($cgi->param('ccaction') eq 'remove') {
-            $cc_remove = join(' ',$cgi->param('masscc'));
-        }
-    } else {
-        $cc_add = join(' ',$cgi->param('newcc'));
-        # We came from bug_form which uses a select box to determine what cc's
-        # need to be removed...
-        if (defined $cgi->param('removecc') && $cgi->param('cc')) {
-            $cc_remove = join (",", $cgi->param('cc'));
-        }
-    }
-
-    push(@cc_add, split(/[\s,]+/, $cc_add)) if $cc_add;
-    push(@cc_add, Bugzilla->user) if $cgi->param('addselfcc');
-
-    push(@cc_remove, split(/[\s,]+/, $cc_remove)) if $cc_remove;
-}
-
 foreach my $b (@bug_objects) {
-    $b->remove_cc($_) foreach @cc_remove;
-    $b->add_cc($_) foreach @cc_add;
     # Theoretically you could move a product without ever specifying
     # a new assignee or qa_contact, or adding/removing any CCs. So,
     # we have to check that the current assignee, qa, and CCs are still

@@ -1968,7 +1968,6 @@ sub set_all {
             $self->set_custom_field($field, $params->{$fname});
         }
     }
-
 }
 
 sub set_alias { $_[0]->set('alias', $_[1]); }
@@ -1988,6 +1987,15 @@ sub set_cclist_accessible { $_[0]->set('cclist_accessible', $_[1]); }
 sub set_comment_is_private {
     my ($self, $comment_id, $isprivate) = @_;
     return unless Bugzilla->user->is_insider;
+
+    # We also allow people to pass in a hash of comment ids to update.
+    if (ref $comment_id) {
+        while (my ($id, $is) = each %$comment_id) {
+            $self->set_comment_is_private($id, $is);
+        }
+        return;
+    }
+
     my ($comment) = grep($comment_id == $_->id, @{ $self->comments });
     ThrowUserError('comment_invalid_isprivate', { id => $comment_id }) 
         if !$comment;

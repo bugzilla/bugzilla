@@ -263,7 +263,8 @@ my @set_fields = qw(op_sys rep_platform priority bug_severity
                     bug_file_loc status_whiteboard short_desc
                     deadline remaining_time estimated_time
                     work_time set_default_assignee set_default_qa_contact
-                    keywords keywordaction);
+                    keywords keywordaction 
+                    cclist_accessible reporter_accessible);
 push(@set_fields, 'assigned_to') if !$cgi->param('set_default_assignee');
 push(@set_fields, 'qa_contact')  if !$cgi->param('set_default_qa_contact');
 my %field_translation = (
@@ -278,7 +279,7 @@ my %field_translation = (
 
 my %set_all_fields;
 foreach my $field_name (@set_fields) {
-    if (should_set($field_name)) {
+    if (should_set($field_name, 1)) {
         my $param_name = $field_translation{$field_name} || $field_name;
         $set_all_fields{$param_name} = $cgi->param($field_name);
     }
@@ -308,6 +309,24 @@ foreach my $dep_field (qw(dependson blocked)) {
         }
     }
 }
+
+# Fields that can only be set on one bug at a time.
+if (defined $cgi->param('id')) {
+    # Since aliases are unique (like bug numbers), they can only be changed
+    # for one bug at a time.
+    if (Bugzilla->params->{"usebugaliases"} && defined $cgi->param('alias')) {
+        $set_all_fields{alias} = $cgi->param('alias');
+    }
+}
+
+my %is_private;
+foreach my $field (grep(/^defined_isprivate/, $cgi->param())) {
+    $field =~ /(\d+)$/;
+    my $comment_id = $1;
+    $is_private{$comment_id} = $cgi->param("isprivate_$comment_id");
+}
+$set_all_fields{comment_is_private} = \%is_private;
+
 my %groups = ( add => [], remove => [] );
 my %checked_bit; # Used to avoid adding groups twice (defined_ + actual bit-)
 foreach my $param_name (grep(/bit-\d+$/, $cgi->param())) {
@@ -342,37 +361,13 @@ foreach my $b (@bug_objects) {
     $b->set_all(\%set_all_fields);
 }
 
-# Certain changes can only happen on individual bugs, never on mass-changes.
 if (defined $cgi->param('id')) {
     # Flags should be set AFTER the bug has been moved into another
-    # product/component.
+    # product/component. The structure of flags code doesn't currently
+    # allow them to be set using set_all.
     my ($flags, $new_flags) = Bugzilla::Flag->extract_flags_from_cgi(
         $first_bug, undef, $vars);
     $first_bug->set_flags($flags, $new_flags);
-
-    # Since aliases are unique (like bug numbers), they can only be changed
-    # for one bug at a time.
-    if (Bugzilla->params->{"usebugaliases"} && defined $cgi->param('alias')) {
-        $first_bug->set_alias($cgi->param('alias'));
-    }
-
-    # reporter_accessible and cclist_accessible--these are only set if
-    # the user can change them and they appear on the page.
-    if (should_set('cclist_accessible', 1)) {
-        $first_bug->set_cclist_accessible($cgi->param('cclist_accessible'))
-    }
-    if (should_set('reporter_accessible', 1)) {
-        $first_bug->set_reporter_accessible($cgi->param('reporter_accessible'))
-    }
-    
-    # You can only mark/unmark comments as private on single bugs. If
-    # you're not in the insider group, this code won't do anything.
-    foreach my $field (grep(/^defined_isprivate/, $cgi->param())) {
-        $field =~ /(\d+)$/;
-        my $comment_id = $1;
-        $first_bug->set_comment_is_private($comment_id,
-                                           $cgi->param("isprivate_$comment_id"));
-    }
 }
 
 # We need to check the addresses involved in a CC change before we touch 

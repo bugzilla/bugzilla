@@ -1890,6 +1890,13 @@ sub set_all {
     my $self = shift;
     my ($params) = @_;
 
+    # For security purposes, and because lots of other checks depend on it,
+    # we set the product first before anything else.
+    my $product_changed; # Used only for strict_isolation checks.
+    if (exists $params->{'product'}) {
+        $product_changed = $self->_set_product($params->{'product'}, $params);
+    }
+
     # strict_isolation checks mean that we should set the groups
     # immediately after changing the product.
     $self->_add_remove($params, 'groups');
@@ -1960,6 +1967,14 @@ sub set_all {
     }
 
     $self->_add_remove($params, 'cc');
+
+    # Theoretically you could move a product without ever specifying
+    # a new assignee or qa_contact, or adding/removing any CCs. So,
+    # we have to check that the current assignee, qa, and CCs are still
+    # valid if we've switched products, under strict_isolation. We can only
+    # do that here, because if they *did* change the assignee, qa, or CC,
+    # then we don't want to check the original ones, only the new ones. 
+    $self->_check_strict_isolation() if $product_changed;
 }
 
 # Helper for set_all that helps with fields that have an "add/remove"
@@ -2089,7 +2104,9 @@ sub set_flags {
 sub set_op_sys         { $_[0]->set('op_sys',        $_[1]); }
 sub set_platform       { $_[0]->set('rep_platform',  $_[1]); }
 sub set_priority       { $_[0]->set('priority',      $_[1]); }
-sub set_product {
+# For security reasons, you have to use set_all to change the product.
+# See the strict_isolation check in set_all for an explanation.
+sub _set_product {
     my ($self, $name, $params) = @_;
     my $old_product = $self->product_obj;
     my $product = $self->_check_product($name);
@@ -2107,9 +2124,10 @@ sub set_product {
     }
 
     $params ||= {};
-    my $comp_name = $params->{component} || $self->component;
-    my $vers_name = $params->{version}   || $self->version;
-    my $tm_name   = $params->{target_milestone};
+    # We delete these so that they're not set again later in set_all.
+    my $comp_name = delete $params->{component} || $self->component;
+    my $vers_name = delete $params->{version}   || $self->version;
+    my $tm_name   = delete $params->{target_milestone};
     # This way, if usetargetmilestone is off and we've changed products,
     # set_target_milestone will reset our target_milestone to
     # $product->default_milestone. But if we haven't changed products,
@@ -2141,7 +2159,7 @@ sub set_product {
         undef $@;
         Bugzilla->error_mode($old_error_mode);
         
-        my $verified = $params->{change_confirmed};
+        my $verified = $params->{product_change_confirmed};
         my %vars;
         if (!$verified || !$component_ok || !$version_ok || !$milestone_ok) {
             $vars{defaults} = {
@@ -2195,7 +2213,9 @@ sub set_product {
         # just die if any of these are invalid.
         $self->set_component($comp_name);
         $self->set_version($vers_name);
-        if ($product_changed && !$self->check_can_change_field('target_milestone', 0, 1)) {
+        if ($product_changed 
+            and !$self->check_can_change_field('target_milestone', 0, 1)) 
+        {
             # Have to set this directly to bypass the validators.
             $self->{target_milestone} = $product->default_milestone;
         }
@@ -2223,7 +2243,6 @@ sub set_product {
         }
     }
     
-    # XXX This is temporary until all of process_bug uses update();
     return $product_changed;
 }
 

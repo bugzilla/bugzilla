@@ -239,22 +239,6 @@ foreach my $bug (@bug_objects) {
     }
 }
 
-# For security purposes, and because lots of other checks depend on it,
-# we set the product first before anything else.
-my $product_change; # Used only for strict_isolation checks, right now.
-if (should_set('product')) {
-    foreach my $b (@bug_objects) {
-        my $changed = $b->set_product(scalar $cgi->param('product'),
-            { component        => scalar $cgi->param('component'),
-              version          => scalar $cgi->param('version'),
-              target_milestone => scalar $cgi->param('target_milestone'),
-              change_confirmed => scalar $cgi->param('confirm_product_change'),
-              other_bugs => \@bug_objects,
-            });
-        $product_change ||= $changed;
-    }
-}
-
 # Component, target_milestone, and version are in here just in case
 # the 'product' field wasn't defined in the CGI. It doesn't hurt to set
 # them twice.
@@ -264,7 +248,8 @@ my @set_fields = qw(op_sys rep_platform priority bug_severity
                     deadline remaining_time estimated_time
                     work_time set_default_assignee set_default_qa_contact
                     keywords keywordaction 
-                    cclist_accessible reporter_accessible);
+                    cclist_accessible reporter_accessible 
+                    product confirm_product_change);
 push(@set_fields, 'assigned_to') if !$cgi->param('set_default_assignee');
 push(@set_fields, 'qa_contact')  if !$cgi->param('set_default_qa_contact');
 my %field_translation = (
@@ -275,9 +260,10 @@ my %field_translation = (
     set_default_assignee   => 'reset_assigned_to',
     set_default_qa_contact => 'reset_qa_contact',
     keywordaction => 'keywords_action',
+    confirm_product_change => 'product_change_confirmed',
 );
 
-my %set_all_fields;
+my %set_all_fields = ( other_bugs => \@bug_objects );
 foreach my $field_name (@set_fields) {
     if (should_set($field_name, 1)) {
         my $param_name = $field_translation{$field_name} || $field_name;
@@ -400,18 +386,6 @@ if (defined $cgi->param('id')) {
     my ($flags, $new_flags) = Bugzilla::Flag->extract_flags_from_cgi(
         $first_bug, undef, $vars);
     $first_bug->set_flags($flags, $new_flags);
-}
-
-foreach my $b (@bug_objects) {
-    # Theoretically you could move a product without ever specifying
-    # a new assignee or qa_contact, or adding/removing any CCs. So,
-    # we have to check that the current assignee, qa, and CCs are still
-    # valid if we've switched products, under strict_isolation. We can only
-    # do that here. There ought to be some better way to do this,
-    # architecturally, but I haven't come up with it.
-    if ($product_change) {
-        $b->_check_strict_isolation();
-    }
 }
 
 my $move_action = $cgi->param('action') || '';

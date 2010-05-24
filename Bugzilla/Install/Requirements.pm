@@ -140,7 +140,8 @@ sub REQUIRED_MODULES {
     {
         package => 'List-MoreUtils',
         module  => 'List::MoreUtils',
-        version => 0
+        # Fixes a memory leak in part()
+        version => 0.23,
     },
     );
 

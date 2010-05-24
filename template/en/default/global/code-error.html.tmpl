@@ -353,6 +353,11 @@
     You cannot set the resolution of [% terms.abug %] to [% display_value("resolution", "MOVED") FILTER html %] without
     moving the [% terms.bug %].
 
+  [% ELSIF error == "object_dep_sort_loop" %]
+    There is a loop in VALIDATOR_DEPENDENCIES involving
+    '[%+ field FILTER html %]'. Here are the fields we considered:
+    [%+ considered.join(', ') FILTER html %].
+
   [% ELSIF error == "param_invalid" %]
     [% title = "Invalid Parameter" %]
     <code>[% param FILTER html %]</code> is not a valid parameter

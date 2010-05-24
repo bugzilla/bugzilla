@@ -29,6 +29,7 @@ use Bugzilla::Util;
 use Bugzilla::Error;
 
 use Date::Parse;
+use List::MoreUtils qw(part);
 
 use constant NAME_FIELD => 'name';
 use constant ID_FIELD   => 'id';
@@ -315,8 +316,7 @@ sub set {
 sub set_all {
     my ($self, $params) = @_;
 
-    my @sorted_names = sort { $self->_cmp_dependency($a, $b) }
-                            (keys %$params);
+    my @sorted_names = $self->_sort_by_dep(keys %$params);
     foreach my $key (@sorted_names) {
         my $method = "set_$key";
         $self->$method($params->{$key});
@@ -453,8 +453,7 @@ sub run_create_validators {
     my $validators = $class->_get_validators;
     my %field_values = %$params;
 
-    my @sorted_names = sort { $class->_cmp_dependency($a, $b) } 
-                            (keys %field_values);
+    my @sorted_names = $class->_sort_by_dep(keys %field_values);
     foreach my $field (@sorted_names) {
         my $value;
         if (exists $validators->{$field}) {
@@ -513,24 +512,59 @@ sub check_boolean { return $_[1] ? 1 : 0 }
 # General Helpers #
 ###################
 
-# Helps sort fields according to VALIDATOR_DEPENDENCIES.
-sub _cmp_dependency {
-    my ($invocant, $a, $b) = @_;
-    my $dependencies = $invocant->VALIDATOR_DEPENDENCIES;
-    # If $a is a key in the hash and $b is one of its dependencies, then
-    # $b should come first (meaning $a is "greater" than $b).
-    if (my $b_first = $dependencies->{$a}) {
-        return 1 if grep { $_ eq $b } @$b_first;
-    }
-    # If $b is a key in the hash and $a is one of its dependencies,
-    # then $a should come first (meaning $a is "less" than $b).
-    if (my $a_first = $dependencies->{$b}) {
-        return -1 if grep { $_ eq $a } @$a_first;
-    }
+# Sorts fields according to VALIDATOR_DEPENDENCIES. This is not a
+# traditional topological sort, because a "dependency" does not
+# *have* to be in the list--it just has to be earlier than its dependent
+# if it *is* in the list.
+sub _sort_by_dep {
+    my ($invocant, @fields) = @_;
 
-    # Sort alphabetically so that we get a consistent order for fields
-    # that don't have dependencies.
-    return $a cmp $b;
+    my $dependencies = $invocant->VALIDATOR_DEPENDENCIES;
+    my ($has_deps, $no_deps) = part { $dependencies->{$_} ? 0 : 1 } @fields;
+
+    # For fields with no dependencies, we sort them alphabetically,
+    # so that validation always happens in a consistent order.
+    # Fields with no dependencies come at the start of the list.
+    my @result = sort @$no_deps;
+
+    # Fields with dependencies all go at the end of the list, and if
+    # they have dependencies on *each other*, then they have to be
+    # sorted properly. We go through $has_deps in sorted order to be
+    # sure that fields always validate in a consistent order.
+    foreach my $field (sort @$has_deps) {
+        if (!grep { $_ eq $field } @result) {
+            _insert_dep_field($field, $has_deps, $dependencies, \@result);
+        }
+    }
+    return @result;
+}
+
+sub _insert_dep_field {
+    my ($field, $insert_me, $dependencies, $result, $loop_tracking) = @_;
+
+    if ($loop_tracking->{$field}) {
+        ThrowCodeError('object_dep_sort_loop', 
+                       { field => $field, 
+                         considered => [keys %$loop_tracking] });
+    }
+    $loop_tracking->{$field} = 1;
+
+    my $required_fields = $dependencies->{$field};
+    # Imagine Field A requires field B...
+    foreach my $required_field (@$required_fields) {
+        # If our dependency is already satisfied, we're good.
+        next if grep { $_ eq $required_field } @$result;
+
+        # If our dependency is not in the remaining fields to insert,
+        # then we're also OK.
+        next if !grep { $_ eq $required_field } @$insert_me;
+
+        # So, at this point, we know that Field B is in $insert_me.
+        # So let's put the required field into the result.
+        _insert_dep_field($required_field, $insert_me, $dependencies,
+                          $result, $loop_tracking);
+    }
+    push(@$result, $field);
 }
 
 ####################

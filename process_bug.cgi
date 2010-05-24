@@ -249,7 +249,8 @@ my @set_fields = qw(op_sys rep_platform priority bug_severity
                     work_time set_default_assignee set_default_qa_contact
                     keywords keywordaction 
                     cclist_accessible reporter_accessible 
-                    product confirm_product_change);
+                    product confirm_product_change
+                    bug_status resolution dup_id);
 push(@set_fields, 'assigned_to') if !$cgi->param('set_default_assignee');
 push(@set_fields, 'qa_contact')  if !$cgi->param('set_default_qa_contact');
 my %field_translation = (
@@ -261,6 +262,7 @@ my %field_translation = (
     set_default_qa_contact => 'reset_qa_contact',
     keywordaction => 'keywords_action',
     confirm_product_change => 'product_change_confirmed',
+    bug_status => 'status',
 );
 
 my %set_all_fields = ( other_bugs => \@bug_objects );
@@ -452,34 +454,6 @@ if ($move_action eq Bugzilla->params->{'move-button-text'}) {
             || ThrowTemplateError($template->error());
     }
     exit;
-}
-
-
-# You cannot mark bugs as duplicates when changing several bugs at once
-# (because currently there is no way to check for duplicate loops in that
-# situation).
-if (!$cgi->param('id') && $cgi->param('dup_id')) {
-    ThrowUserError('dupe_not_allowed');
-}
-
-# Set the status, resolution, and dupe_of (if needed). This has to be done
-# down here, because the validity of status changes depends on other fields,
-# such as Target Milestone.
-foreach my $b (@bug_objects) {
-    if (should_set('bug_status')) {
-        $b->set_status(
-            scalar $cgi->param('bug_status'),
-            {resolution =>  scalar $cgi->param('resolution'),
-                dupe_of => scalar $cgi->param('dup_id')}
-            );
-    }
-    elsif (should_set('resolution')) {
-       $b->set_resolution(scalar $cgi->param('resolution'), 
-                          {dupe_of => scalar $cgi->param('dup_id')});
-    }
-    elsif (should_set('dup_id')) {
-        $b->set_dup_id(scalar $cgi->param('dup_id'));
-    }
 }
 
 ##############################

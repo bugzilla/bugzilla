@@ -1886,6 +1886,8 @@ sub _set_global_validator {
 # "Set" Methods #
 #################
 
+# Note that if you are changing multiple bugs at once, you must pass
+# other_bugs to set_all in order for it to behave properly.
 sub set_all {
     my $self = shift;
     my ($params) = @_;
@@ -1946,6 +1948,8 @@ sub set_all {
 
     my %normal_set_all;
     foreach my $name (keys %$params) {
+        # These are handled separately below.
+        next if grep($_ eq $name, qw(status resolution dup_id));
         if ($self->can("set_$name")) {
             $normal_set_all{$name} = $params->{$name};
         }
@@ -1975,6 +1979,31 @@ sub set_all {
     # do that here, because if they *did* change the assignee, qa, or CC,
     # then we don't want to check the original ones, only the new ones. 
     $self->_check_strict_isolation() if $product_changed;
+
+    # You cannot mark bugs as duplicates when changing several bugs at once
+    # (because currently there is no way to check for duplicate loops in that
+    # situation).
+    if (exists $params->{'dup_id'} and $params->{other_bugs} 
+        and scalar @{ $params->{other_bugs} } > 1) 
+    {
+        ThrowUserError('dupe_not_allowed');
+    }
+
+    # Seting the status, resolution, and dupe_of has to be done
+    # down here, because the validity of status changes depends on
+    # other fields, such as Target Milestone.
+    if (exists $params->{'status'}) {
+        $self->set_status($params->{'status'},
+            { resolution => $params->{'resolution'},
+              dupe_of    => $params->{'dup_id'} });
+    }
+    elsif (exists $params->{'resolution'}) {
+       $self->set_resolution($params->{'resolution'},
+           { dupe_of => $params->{'dup_id'} });
+    }
+    elsif (exists $params->{'dup_id'}) {
+        $self->set_dup_id($params->{'dup_id'});
+    }
 }
 
 # Helper for set_all that helps with fields that have an "add/remove"

@@ -525,13 +525,13 @@ sub _sort_by_dep {
     # For fields with no dependencies, we sort them alphabetically,
     # so that validation always happens in a consistent order.
     # Fields with no dependencies come at the start of the list.
-    my @result = sort @$no_deps;
+    my @result = sort @{ $no_deps || [] };
 
     # Fields with dependencies all go at the end of the list, and if
     # they have dependencies on *each other*, then they have to be
     # sorted properly. We go through $has_deps in sorted order to be
     # sure that fields always validate in a consistent order.
-    foreach my $field (sort @$has_deps) {
+    foreach my $field (sort @{ $has_deps || [] }) {
         if (!grep { $_ eq $field } @result) {
             _insert_dep_field($field, $has_deps, $dependencies, \@result);
         }

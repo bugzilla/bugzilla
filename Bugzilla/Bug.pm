@@ -1693,7 +1693,8 @@ sub _check_field_is_mandatory {
     my ($invocant, $value, $field, $params) = @_;
 
     if (!blessed($field)) {
-        $field = Bugzilla::Field->check({ name => $field });
+        $field = Bugzilla::Field->new({ name => $field });
+        return if !$field;
     }
 
     return if !$field->is_mandatory;

@@ -403,6 +403,7 @@ use constant contenttypes =>
    "atom"=> "application/atom+xml" ,
    "xml" => "application/xml" ,
    "js"  => "application/x-javascript" ,
+   "json"=> "application/json" ,
    "csv" => "text/csv" ,
    "png" => "image/png" ,
    "ics" => "text/calendar" ,

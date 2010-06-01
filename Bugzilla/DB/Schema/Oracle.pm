@@ -35,6 +35,7 @@ use Carp qw(confess);
 use Bugzilla::Util;
 
 use constant ADD_COLUMN => 'ADD';
+use constant MULTIPLE_FKS_IN_ALTER => 0;
 # Whether this is true or not, this is what it needs to be in order for
 # hash_identifier to maintain backwards compatibility with versions before
 # 3.2rc2.
@@ -136,40 +137,44 @@ sub get_drop_index_ddl {
 # - Delete CASCADE
 # - Delete SET NULL
 sub get_fk_ddl {
-    my ($self, $table, $column, $references) = @_;
-    return "" if !$references;
+    my $self = shift;
+    my $ddl = $self->SUPER::get_fk_ddl(@_);
 
-    my $update    = $references->{UPDATE} || 'CASCADE';
-    my $delete    = $references->{DELETE};
-    my $to_table  = $references->{TABLE}  || confess "No table in reference";
-    my $to_column = $references->{COLUMN} || confess "No column in reference";
-    my $fk_name   = $self->_get_fk_name($table, $column, $references);
+    # iThe Bugzilla Oracle driver implements UPDATE via a trigger.
+    $ddl =~ s/ON UPDATE \S+//i;
+    # RESTRICT is the default for DELETE on Oracle and may not be specified.
+    $ddl =~ s/ON DELETE RESTRICT//i;
 
-    # 'ON DELETE RESTRICT' is enabled by default   
-    $delete = "" if ( defined $delete && $delete =~ /RESTRICT/i);
+    return $ddl;
+}
 
-    my $fk_string = "\n     CONSTRAINT $fk_name FOREIGN KEY ($column)\n"
-                    . "     REFERENCES $to_table($to_column)\n";
-   
-    $fk_string    = $fk_string . "     ON DELETE $delete" if $delete; 
-    
-    if ( $update =~ /CASCADE/i ){
-        my $tr_str = "CREATE OR REPLACE TRIGGER ${fk_name}_UC"
-                     . " AFTER UPDATE OF $to_column ON $to_table "
-                     . " REFERENCING "
-                     . " NEW AS NEW "
-                     . " OLD AS OLD "
-                     . " FOR EACH ROW "
-                     . " BEGIN "
-                     . "     UPDATE $table"
-                     . "        SET $column = :NEW.$to_column"
-                     . "      WHERE $column = :OLD.$to_column;"
-                     . " END ${fk_name}_UC;";
-        my $dbh = Bugzilla->dbh; 
-        $dbh->do($tr_str);      
+sub get_add_fks_sql {
+    my $self = shift;
+    my ($table, $column_fks) = @_;
+    my @sql = $self->SUPER::get_add_fks_sql(@_);
+
+    foreach my $column (keys %$column_fks) {
+        my $fk = $column_fks->{$column};
+        next if $fk->{UPDATE} && uc($fk->{UPDATE}) ne 'CASCADE';
+        my $fk_name   = $self->_get_fk_name($table, $column, $fk);
+        my $to_column = $fk->{COLUMN};
+        my $to_table  = $fk->{TABLE};
+
+        my $trigger = <<END;
+CREATE OR REPLACE TRIGGER ${fk_name}_UC
+          AFTER UPDATE OF $to_column ON $to_table
+              REFERENCING NEW AS NEW OLD AS OLD
+             FOR EACH ROW
+                    BEGIN
+                   UPDATE $table
+                      SET $column = :NEW.$to_column
+                    WHERE $column = :OLD.$to_column;
+                      END ${fk_name}_UC;
+END
+        push(@sql, $trigger);
     }
 
-    return $fk_string;
+    return @sql;
 }
 
 sub get_drop_fk_sql {

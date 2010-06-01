@@ -447,12 +447,14 @@ sub bz_setup_foreign_keys {
     my @tables = $self->_bz_schema->get_table_list();
     foreach my $table (@tables) {
         my @columns = $self->_bz_schema->get_table_columns($table);
+        my %add_fks;
         foreach my $column (@columns) {
             my $def = $self->_bz_schema->get_column_abstract($table, $column);
             if ($def->{REFERENCES}) {
-                $self->bz_add_fk($table, $column, $def->{REFERENCES});
+                $add_fks{$column} = $def->{REFERENCES};
             }
         }
+        $self->bz_add_fks($table, \%add_fks);
     }
 }
 
@@ -506,19 +508,36 @@ sub bz_add_column {
 
 sub bz_add_fk {
     my ($self, $table, $column, $def) = @_;
+    $self->bz_add_fks($table, { $column => $def });
+}
 
-    my $col_def = $self->bz_column_info($table, $column);
-    if (!$col_def->{REFERENCES}) {
-        $self->_check_references($table, $column, $def);
+sub bz_add_fks {
+    my ($self, $table, $column_fks) = @_;
+
+    my %add_these;
+    foreach my $column (keys %$column_fks) {
+        my $col_def = $self->bz_column_info($table, $column);
+        next if $col_def->{REFERENCES};
+        my $fk = $column_fks->{$column};
+        $self->_check_references($table, $column, $fk);
+        $add_these{$column} = $fk;
         print get_text('install_fk_add',
-                       { table => $table, column => $column, fk => $def }) 
+                       { table => $table, column => $column, fk => $fk })
             . "\n" if Bugzilla->usage_mode == USAGE_MODE_CMDLINE;
-        my @sql = $self->_bz_real_schema->get_add_fk_sql($table, $column, $def);
-        $self->do($_) foreach @sql;
-        $col_def->{REFERENCES} = $def;
-        $self->_bz_real_schema->set_column($table, $column, $col_def);
-        $self->_bz_store_real_schema;
     }
+
+    return if !scalar(keys %add_these);
+
+    my @sql = $self->_bz_real_schema->get_add_fks_sql($table, \%add_these);
+    $self->do($_) foreach @sql;
+
+    foreach my $column (keys %add_these) {
+        my $col_def = $self->bz_column_info($table, $column);
+        $col_def->{REFERENCES} = $add_these{$column};
+        $self->_bz_real_schema->set_column($table, $column, $col_def);
+    }
+
+    $self->_bz_store_real_schema();
 }
 
 sub bz_alter_column {
@@ -700,11 +719,11 @@ sub bz_add_field_tables {
         $self->_bz_add_field_table($ms_table,
             $self->_bz_schema->MULTI_SELECT_VALUE_TABLE);
 
-        $self->bz_add_fk($ms_table, 'bug_id', {TABLE => 'bugs',
-                                               COLUMN => 'bug_id',
-                                               DELETE => 'CASCADE'});
-        $self->bz_add_fk($ms_table, 'value',  {TABLE  => $field->name,
-                                               COLUMN => 'value'});
+        $self->bz_add_fks($ms_table, 
+            { bug_id => {TABLE => 'bugs', COLUMN => 'bug_id',
+                         DELETE => 'CASCADE'},
+
+              value  => {TABLE  => $field->name, COLUMN => 'value'} });
     }
 }
 

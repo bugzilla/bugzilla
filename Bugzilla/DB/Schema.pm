@@ -210,6 +210,9 @@ update this column in this table."
 
 use constant SCHEMA_VERSION  => '2.00';
 use constant ADD_COLUMN      => 'ADD COLUMN';
+# Multiple FKs can be added using ALTER TABLE ADD CONSTRAINT in one
+# SQL statement. This isn't true for all databases.
+use constant MULTIPLE_FKS_IN_ALTER => 1;
 # This is a reasonable default that's true for both PostgreSQL and MySQL.
 use constant MAX_IDENTIFIER_LEN => 63;
 
@@ -1817,11 +1820,26 @@ sub _hash_identifier {
 }
 
 
-sub get_add_fk_sql {
-    my ($self, $table, $column, $def) = @_;
+sub get_add_fks_sql {
+    my ($self, $table, $column_fks) = @_;
 
-    my $fk_string = $self->get_fk_ddl($table, $column, $def);
-    return ("ALTER TABLE $table ADD $fk_string");
+    my @add;
+    foreach my $column (keys %$column_fks) {
+        my $def = $column_fks->{$column};
+        my $fk_string = $self->get_fk_ddl($table, $column, $def);
+        push(@add, $fk_string);
+    }
+    my @sql;
+    if ($self->MULTIPLE_FKS_IN_ALTER) {
+        my $alter = "ALTER TABLE $table ADD " . join(', ADD ', @add);
+        push(@sql, $alter);
+    }
+    else {
+        foreach my $fk_string (@add) {
+            push(@sql, "ALTER TABLE $table ADD $fk_string");
+        }
+    }
+    return @sql;
 }
 
 sub get_drop_fk_sql { 

@@ -1864,6 +1864,12 @@ sub _remove_spaces_and_commas_from_flagtypes {
 
 sub _setup_usebuggroups_backward_compatibility {
     my $dbh = Bugzilla->dbh;
+
+    # Don't run this on newer Bugzillas. This is a reliable test because
+    # the longdescs table existed in 2.16 (which had usebuggroups)
+    # but not in 2.18, and this code happens between 2.16 and 2.18.
+    return if $dbh->bz_column_info('longdescs', 'already_wrapped');
+
     # 2002-11-24 - bugreport@peshkin.net - bug 147275
     #
     # If group_control_map is empty, backward-compatibility
@@ -1871,6 +1877,7 @@ sub _setup_usebuggroups_backward_compatibility {
     my ($maps_exist) = $dbh->selectrow_array(
         "SELECT DISTINCT 1 FROM group_control_map");
     if (!$maps_exist) {
+        print "Converting old usebuggroups controls...\n";
         # Initially populate group_control_map.
         # First, get all the existing products and their groups.
         my $sth = $dbh->prepare("SELECT groups.id, products.id, groups.name,

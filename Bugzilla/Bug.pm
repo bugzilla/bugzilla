@@ -128,19 +128,34 @@ sub VALIDATORS {
 
     my $validators = {
         alias          => \&_check_alias,
+        assigned_to    => \&_check_assigned_to,
         bug_file_loc   => \&_check_bug_file_loc,
         bug_severity   => \&_check_select_field,
+        bug_status     => \&_check_bug_status,
+        cc             => \&_check_cc,
         comment        => \&_check_comment,
         commentprivacy => \&_check_commentprivacy,
+        component      => \&_check_component,
         deadline       => \&_check_deadline,
+        dup_id         => \&_check_dup_id,
         estimated_time => \&_check_estimated_time,
+        everconfirmed  => \&Bugzilla::Object::check_boolean,
+        groups         => \&_check_groups,
+        keywords       => \&_check_keywords,
         op_sys         => \&_check_select_field,
         priority       => \&_check_priority,
         product        => \&_check_product,
+        qa_contact     => \&_check_qa_contact,
         remaining_time => \&_check_remaining_time,
         rep_platform   => \&_check_select_field,
+        resolution     => \&_check_resolution,
         short_desc     => \&_check_short_desc,
         status_whiteboard => \&_check_status_whiteboard,
+        target_milestone  => \&_check_target_milestone,
+        version           => \&_check_version,
+
+        cclist_accessible   => \&Bugzilla::Object::check_boolean,
+        reporter_accessible => \&Bugzilla::Object::check_boolean,
     };
 
     # Set up validators for custom fields.    
@@ -170,17 +185,30 @@ sub VALIDATORS {
     return $validators;
 };
 
-use constant UPDATE_VALIDATORS => {
-    assigned_to         => \&_check_assigned_to,
-    bug_status          => \&_check_bug_status,
-    cclist_accessible   => \&Bugzilla::Object::check_boolean,
-    dup_id              => \&_check_dup_id,
-    everconfirmed       => \&Bugzilla::Object::check_boolean,
-    qa_contact          => \&_check_qa_contact,
-    reporter_accessible => \&Bugzilla::Object::check_boolean,
-    resolution          => \&_check_resolution,
-    target_milestone    => \&_check_target_milestone,
-    version             => \&_check_version,
+sub VALIDATOR_DEPENDENCIES {
+    my $cache = Bugzilla->request_cache;
+    return $cache->{bug_validator_dependencies} 
+        if $cache->{bug_validator_dependencies};
+
+    my %deps = (
+        assigned_to      => ['component'],
+        bug_status       => ['product', 'comment'],
+        cc               => ['component'],
+        component        => ['product'],
+        groups           => ['product'],
+        keywords         => ['product'],
+        qa_contact       => ['component'],
+        target_milestone => ['product'],
+        version          => ['product'],
+    );
+
+    my @custom_deps = Bugzilla->get_fields(
+        { visibility_field_id => NOT_NULL });
+    foreach my $field (@custom_deps) {
+        $deps{$field->name} = [$field->visibility_field->name];
+    }
+    $cache->{bug_validator_dependencies} = \%deps;
+    return \%deps;
 };
 
 sub UPDATE_COLUMNS {
@@ -581,32 +609,10 @@ sub run_create_validators {
     my $class  = shift;
     my $params = $class->SUPER::run_create_validators(@_);
 
-    my $product = $params->{product};
+    my $product = delete $params->{product};
     $params->{product_id} = $product->id;
-    delete $params->{product};
-
-    ($params->{bug_status}, $params->{everconfirmed})
-        = $class->_check_bug_status($params->{bug_status}, $product,
-                                    $params->{comment});
-
-    $params->{target_milestone} = $class->_check_target_milestone(
-        $params->{target_milestone}, $product);
-
-    $params->{version} = $class->_check_version($params->{version}, $product);
-
-    $params->{keywords} = $class->_check_keywords($params->{keywords}, $product);
-
-    $params->{groups} = $class->_check_groups($params->{groups}, $product);
-
-    my $component = $class->_check_component($params->{component}, $product);
+    my $component = delete $params->{component};
     $params->{component_id} = $component->id;
-    delete $params->{component};
-
-    $params->{assigned_to} = 
-        $class->_check_assigned_to($params->{assigned_to}, $component);
-    $params->{qa_contact} =
-        $class->_check_qa_contact($params->{qa_contact}, $component);
-    $params->{cc} = $class->_check_cc($component, $params->{cc});
 
     # Callers cannot set reporter, creation_ts, or delta_ts.
     $params->{reporter} = $class->_check_reporter();
@@ -1042,8 +1048,10 @@ sub _check_alias {
 }
 
 sub _check_assigned_to {
-    my ($invocant, $assignee, $component) = @_;
+    my ($invocant, $assignee, undef, $params) = @_;
     my $user = Bugzilla->user;
+    my $component = blessed($invocant) ? $invocant->component_obj
+                                       : $params->{component};
 
     # Default assignee is the component owner.
     my $id;
@@ -1081,11 +1089,12 @@ sub _check_bug_file_loc {
 }
 
 sub _check_bug_status {
-    my ($invocant, $new_status, $product, $comment) = @_;
+    my ($invocant, $new_status, undef, $params) = @_;
     my $user = Bugzilla->user;
     my @valid_statuses;
     my $old_status; # Note that this is undef for new bugs.
 
+    my ($product, $comment);
     if (ref $invocant) {
         @valid_statuses = @{$invocant->statuses_available};
         $product = $invocant->product_obj;
@@ -1094,6 +1103,8 @@ sub _check_bug_status {
         $comment = $comments->[-1];
     }
     else {
+        $product = $params->{product};
+        $comment = $params->{comment};
         @valid_statuses = @{Bugzilla::Status->can_change_to()};
         if (!$product->allows_unconfirmed) {
             @valid_statuses = grep {$_->name ne 'UNCONFIRMED'} @valid_statuses;
@@ -1158,12 +1169,17 @@ sub _check_bug_status {
         ThrowUserError("milestone_required", { bug => $invocant });
     }
 
-    return $new_status->name if ref $invocant;
-    return ($new_status->name, $new_status->name eq 'UNCONFIRMED' ? 0 : 1);
+    if (!blessed $invocant) {
+        $params->{everconfirmed} = $new_status->name eq 'UNCONFIRMED' ? 0 : 1;
+    }
+
+    return $new_status->name;
 }
 
 sub _check_cc {
-    my ($invocant, $component, $ccs) = @_;
+    my ($invocant, $ccs, undef, $params) = @_;
+    my $component = blessed($invocant) ? $invocant->component_obj
+                                       : $params->{component};
     return [map {$_->id} @{$component->initial_cc}] unless $ccs;
 
     # Allow comma-separated input as well as arrayrefs.
@@ -1213,10 +1229,11 @@ sub _check_comment_type {
 }
 
 sub _check_component {
-    my ($invocant, $name, $product) = @_;
+    my ($invocant, $name, undef, $params) = @_;
     $name = trim($name);
     $name || ThrowUserError("require_component");
-    ($product = $invocant->product_obj) if ref $invocant;
+    my $product = blessed($invocant) ? $invocant->product_obj 
+                                     : $params->{product};
     my $obj = Bugzilla::Component->check({ product => $product, name => $name });
     return $obj;
 }
@@ -1391,8 +1408,9 @@ sub _check_estimated_time {
 }
 
 sub _check_groups {
-    my ($invocant, $group_names, $product) = @_;
-
+    my ($invocant, $group_names, undef, $params) = @_;
+    my $product = blessed($invocant) ? $invocant->product_obj 
+                                     : $params->{product};
     my %add_groups;
 
     # In email or WebServices, when the "groups" item actually 
@@ -1427,12 +1445,13 @@ sub _check_groups {
 }
 
 sub _check_keywords {
-    my ($invocant, $keyword_string, $product) = @_;
+    my ($invocant, $keyword_string, undef, $params) = @_;
     $keyword_string = trim($keyword_string);
     return [] if !$keyword_string;
     
     # On creation, only editbugs users can set keywords.
     if (!ref $invocant) {
+        my $product = $params->{product};
         return [] if !Bugzilla->user->in_group('editbugs', $product->id);
     }
     
@@ -1471,9 +1490,10 @@ sub _check_priority {
 }
 
 sub _check_qa_contact {
-    my ($invocant, $qa_contact, $component) = @_;
+    my ($invocant, $qa_contact, undef, $params) = @_;
     $qa_contact = trim($qa_contact) if !ref $qa_contact;
-    
+    my $component = blessed($invocant) ? $invocant->component_obj
+                                       : $params->{component};
     my $id;
     if (!ref $invocant) {
         # Bugs get no QA Contact on creation if useqacontact is off.
@@ -1650,9 +1670,9 @@ sub _check_strict_isolation_for_user {
 }
 
 sub _check_target_milestone {
-    my ($invocant, $target, $product) = @_;
-    $product = $invocant->product_obj if ref $invocant;
-
+    my ($invocant, $target, undef, $params) = @_;
+    my $product = blessed($invocant) ? $invocant->product_obj 
+                                     : $params->{product};
     $target = trim($target);
     $target = $product->default_milestone if !defined $target;
     my $object = Bugzilla::Milestone->check(
@@ -1675,9 +1695,10 @@ sub _check_time {
 }
 
 sub _check_version {
-    my ($invocant, $version, $product) = @_;
+    my ($invocant, $version, undef, $params) = @_;
     $version = trim($version);
-    ($product = $invocant->product_obj) if ref $invocant;
+    my $product = blessed($invocant) ? $invocant->product_obj 
+                                     : $params->{product};
     my $object = 
         Bugzilla::Version->check({ product => $product, name => $version });
     return $object->name;

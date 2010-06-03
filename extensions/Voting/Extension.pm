@@ -844,7 +844,7 @@ sub _confirm_if_vote_confirmed {
             }
             ThrowCodeError('voting_no_open_bug_status') unless $new_status;
 
-            # We cannot call $bug->set_status() here, because a user without
+            # We cannot call $bug->set_bug_status() here, because a user without
             # canconfirm privs should still be able to confirm a bug by
             # popular vote. We already know the new status is valid, so it's safe.
             $bug->{bug_status} = $new_status;

@@ -262,7 +262,6 @@ my %field_translation = (
     set_default_qa_contact => 'reset_qa_contact',
     keywordaction => 'keywords_action',
     confirm_product_change => 'product_change_confirmed',
-    bug_status => 'status',
 );
 
 my %set_all_fields = ( other_bugs => \@bug_objects );
@@ -409,7 +408,7 @@ if ($move_action eq Bugzilla->params->{'move-button-text'}) {
 
     my $new_status = Bugzilla->params->{'duplicate_or_move_bug_status'};
     foreach my $bug (@bug_objects) {
-        $bug->set_status($new_status, {resolution => 'MOVED', moving => 1});
+        $bug->set_bug_status($new_status, {resolution => 'MOVED', moving => 1});
     }
     $_->update() foreach @bug_objects;
     $dbh->bz_commit_transaction();

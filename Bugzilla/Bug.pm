@@ -192,11 +192,13 @@ sub VALIDATOR_DEPENDENCIES {
 
     my %deps = (
         assigned_to      => ['component'],
-        bug_status       => ['product', 'comment'],
+        bug_status       => ['product', 'comment', 'target_milestone'],
         cc               => ['component'],
         component        => ['product'],
+        dup_id           => ['bug_status', 'resolution'],
         groups           => ['product'],
         keywords         => ['product'],
+        resolution       => ['bug_status'],
         qa_contact       => ['component'],
         target_milestone => ['product'],
         version          => ['product'],
@@ -1971,7 +1973,6 @@ sub set_all {
     my %normal_set_all;
     foreach my $name (keys %$params) {
         # These are handled separately below.
-        next if grep($_ eq $name, qw(status resolution dup_id));
         if ($self->can("set_$name")) {
             $normal_set_all{$name} = $params->{$name};
         }
@@ -2009,22 +2010,6 @@ sub set_all {
         and scalar @{ $params->{other_bugs} } > 1) 
     {
         ThrowUserError('dupe_not_allowed');
-    }
-
-    # Seting the status, resolution, and dupe_of has to be done
-    # down here, because the validity of status changes depends on
-    # other fields, such as Target Milestone.
-    if (exists $params->{'status'}) {
-        $self->set_status($params->{'status'},
-            { resolution => $params->{'resolution'},
-              dupe_of    => $params->{'dup_id'} });
-    }
-    elsif (exists $params->{'resolution'}) {
-       $self->set_resolution($params->{'resolution'},
-           { dupe_of => $params->{'dup_id'} });
-    }
-    elsif (exists $params->{'dup_id'}) {
-        $self->set_dup_id($params->{'dup_id'});
     }
 }
 
@@ -2120,6 +2105,21 @@ sub set_dup_id {
     $self->set('dup_id', $dup_id);
     my $new = $self->dup_id;
     return if $old == $new;
+
+    # Make sure that we have the DUPLICATE resolution. This is needed
+    # if somebody calls set_dup_id without calling set_bug_status or
+    # set_resolution.
+    if ($self->resolution ne 'DUPLICATE') {
+        # Even if the current status is VERIFIED, we change it back to
+        # RESOLVED (or whatever the duplicate_or_move_bug_status is) here,
+        # because that's the same thing the UI does when you click on the
+        # "Mark as Duplicate" link. If people really want to retain their
+        # current status, they can use set_bug_status and set the DUPLICATE
+        # resolution before getting here.
+        $self->set_bug_status(
+            Bugzilla->params->{'duplicate_or_move_bug_status'},
+            { resolution => 'DUPLICATE' });
+    }
     
     # Update the other bug.
     my $dupe_of = new Bugzilla::Bug($self->dup_id);
@@ -2343,13 +2343,17 @@ sub set_resolution {
     # of another, theoretically. Note that this code block will also run
     # when going between different closed states.
     if ($self->resolution eq 'DUPLICATE') {
-        if ($params->{dupe_of}) {
-            $self->set_dup_id($params->{dupe_of});
+        if (my $dup_id = $params->{dup_id}) {
+            $self->set_dup_id($dup_id);
         }
         elsif (!$self->dup_id) {
             ThrowUserError('dupe_id_required');
         }
     }
+
+    # This method has handled dup_id, so set_all doesn't have to worry
+    # about it now.
+    delete $params->{dup_id};
 }
 sub clear_resolution {
     my $self = shift;
@@ -2360,7 +2364,7 @@ sub clear_resolution {
     $self->_clear_dup_id; 
 }
 sub set_severity       { $_[0]->set('bug_severity',  $_[1]); }
-sub set_status {
+sub set_bug_status {
     my ($self, $status, $params) = @_;
     my $old_status = $self->status;
     $self->set('bug_status', $status);
@@ -2368,11 +2372,15 @@ sub set_status {
     delete $self->{'statuses_available'};
     delete $self->{'choices'};
     my $new_status = $self->status;
-    
+   
     if ($new_status->is_open) {
         # Check for the everconfirmed transition
         $self->_set_everconfirmed($new_status->name eq 'UNCONFIRMED' ? 0 : 1);
         $self->clear_resolution();
+        # Calling clear_resolution handled the "resolution" and "dup_id"
+        # setting, so set_all doesn't have to worry about them.
+        delete $params->{resolution};
+        delete $params->{dup_id};
     }
     else {
         # We do this here so that we can make sure closed statuses have

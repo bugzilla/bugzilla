@@ -515,7 +515,7 @@ sub insert {
           && ($bug_status->name ne 'UNCONFIRMED' 
               || $bug->product_obj->allows_unconfirmed))
       {
-          $bug->set_status($bug_status->name);
+          $bug->set_bug_status($bug_status->name);
           $bug->clear_resolution();
       }
       # Make sure the person we are taking the bug from gets mail.

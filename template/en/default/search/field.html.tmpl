@@ -51,8 +51,8 @@
       tag_name = "span"
       editable = 1
     %]
-    from <input name="[% field.name %]from" 
-                id="[% field.name %]" 
+    from <input name="[% field.name FILTER html %]from" 
+                id="[% field.name FILTER html %]" 
                 size="10" maxlength="10"
                 value="[% value.0 FILTER html %]" 
                 onchange="updateCalendarFromField(this);[% onchange FILTER html %]">
@@ -62,8 +62,8 @@
            <span>Calendar</span>
          </button>
          <div id="con_calendar_[% field.name FILTER html %]"></div>               
-    to <input name="[% field.name %]to" 
-              id="[% field.name %]to" size="10" maxlength="10"
+    to <input name="[% field.name FILTER html %]to" 
+              id="[% field.name FILTER html %]to" size="10" maxlength="10"
               value="[% value.1 FILTER html %]" 
               onchange="updateCalendarFromField(this);[% onchange FILTER html %]">
        <button type="button" class="calendar_button"

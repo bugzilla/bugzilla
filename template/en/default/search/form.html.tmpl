@@ -198,14 +198,14 @@ TUI_hide_default('information_query');
     Detailed [% terms.Bug %] Information
   </a>
   <span class="section_help">Narrow results by the following fields: 
-    [%+ field_descs.longdesc %]s, [%+ field_descs.bug_file_loc %], 
-    [% IF Param('usestatuswhiteboard') %] [%+ field_descs.status_whiteboard %], [%+ END %]
-    [% IF use_keywords %] [%+ field_descs.keywords %], [%+ END %]
-    [% IF user.is_timetracker %] [%+ field_descs.deadline %], [%+ END %]
-    [% terms.Bug %] Numbers, [%+ field_descs.version %], 
-    [% IF Param('usetargetmilestone') %] [%+ field_descs.target_milestone %], [%+ END %]
-    [% field_descs.bug_severity %], [%+ field_descs.priority%], [%+ field_descs.rep_platform %], 
-    [%+ field_descs.op_sys %]
+    [%+ field_descs.longdesc FILTER html %]s, [%+ field_descs.bug_file_loc FILTER html %], 
+    [% IF Param('usestatuswhiteboard') %] [%+ field_descs.status_whiteboard FILTER html %], [%+ END %]
+    [% IF use_keywords %] [%+ field_descs.keywords FILTER html %], [%+ END %]
+    [% IF user.is_timetracker %] [%+ field_descs.deadline FILTER html %], [%+ END %]
+    [% terms.Bug %] Numbers, [%+ field_descs.version FILTER html %], 
+    [% IF Param('usetargetmilestone') %] [%+ field_descs.target_milestone FILTER html %], [%+ END %]
+    [% field_descs.bug_severity FILTER html %], [%+ field_descs.priority FILTER html %], [%+ field_descs.rep_platform FILTER html %], 
+    [%+ field_descs.op_sys FILTER html %]
   </span>
 </div>
 [%# *** Comment URL Whiteboard Keywords *** %]
@@ -310,8 +310,9 @@ TUI_hide_default('information_query');
   <div class="bz_section_title" id="people_filter">
     <div id="people_query_controller" class="arrow">&#9660;</div>
     <a href="javascript:TUI_toggle_class('people_query')">Search By People</a>
-    <span>Narrow results to a role (ie. [% field_descs.assigned_to%], [% field_descs.reporter %], 
-      [% field_descs.commenter %], etc.) a person has on a [% terms.bug %]
+    <span>Narrow results to a role (ie. [% field_descs.assigned_to FILTER html %],
+      [% field_descs.reporter FILTER html  %], [% field_descs.commenter FILTER html %],
+      etc.) a person has on [% terms.abug %]
     </span>
   </div>
   <div id="people_filter_section" class="bz_search_section people_query">
@@ -369,7 +370,7 @@ TUI_hide_default('information_query');
     </select>
   </li>
   <li>
-    <label for="chfieldvalue">[% search_descs.changedto %]:</label>
+    <label for="chfieldvalue">[% search_descs.changedto FILTER html %]:</label>
     <input name="chfieldvalue" id="chfieldvalue"
            size="20" value="[% default.chfieldvalue.0 FILTER html %]">
   </li>

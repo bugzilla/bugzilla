@@ -372,7 +372,7 @@ sub init {
         }
     }
 
-    foreach my $id ("1", "2") {
+    foreach my $id (1, 2, 3) {
         if (!defined ($params->param("email$id"))) {
             next;
         }

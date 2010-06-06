@@ -68,6 +68,7 @@ function TUI_hide_default(className) {
 
 function _TUI_toggle_control_link(className) {
     var link = document.getElementById(className + "_controller");
+    if (!link) return;
     var original_text = link.innerHTML;
     link.innerHTML = TUI_alternates[className];
     TUI_alternates[className] = original_text;
@@ -93,14 +94,14 @@ function _TUI_store(aClass, state) {
 }
 
 function _TUI_restore() {
-    var classes = YAHOO.util.Cookie.getSubs(TUI_COOKIE_NAME);
-    for (item in classes) {
-        if (classes[item] == 0) {
-            var elements = YAHOO.util.Dom.getElementsByClassName(item);
+    var yui_classes = YAHOO.util.Cookie.getSubs(TUI_COOKIE_NAME);
+    for (yui_item in yui_classes) {
+        if (yui_classes[yui_item] == 0) {
+            var elements = YAHOO.util.Dom.getElementsByClassName(yui_item);
             for (var i = 0; i < elements.length; i++) {
                 YAHOO.util.Dom.addClass(elements[i], 'bz_tui_hidden');
             }
-            _TUI_toggle_control_link(item);
+            _TUI_toggle_control_link(yui_item);
         }
     }
 }

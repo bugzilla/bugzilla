@@ -64,7 +64,7 @@ sub get_param_list {
   {
    name => 'defaultquery',
    type => 't',
-   default => 'bug_status=NEW&bug_status=ASSIGNED&bug_status=REOPENED&emailassigned_to1=1&emailassigned_to2=1&emailreporter2=1&emailcc2=1&emailqa_contact2=1&order=Importance&long_desc_type=substring'
+   default => 'bug_status=NEW&bug_status=ASSIGNED&bug_status=REOPENED&emailassigned_to1=1&emailassigned_to2=1&emailreporter2=1&emailcc2=1&emailqa_contact2=1&emaillongdesc3=1&order=Importance&long_desc_type=substring'
   },
 
   {

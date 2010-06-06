@@ -44,3 +44,9 @@ form#Create #comp_desc {
 #footer .links {
     display: inline;
 }
+
+#bug_id_container, .search_field_grid, 
+.search_email_fields, ul.bug_changes li { 
+  zoom: 1;
+  display: inline;
+}

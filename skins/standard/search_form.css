@@ -1,0 +1,133 @@
+/* The contents of this file are subject to the Mozilla Public
+  * License Version 1.1 (the "License"); you may not use this file
+  * except in compliance with the License. You may obtain a copy of
+  * the License at http://www.mozilla.org/MPL/
+  *
+  * Software distributed under the License is distributed on an "AS
+  * IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+  * implied. See the License for the specific language governing
+  * rights and limitations under the License.
+  *
+  * The Original Code is the Bugzilla Bug Tracking System.
+  *
+  * The Initial Developer of the Original Code is Guy Pyrzak
+  * Portions created by the Initial Developer are Copyright (C) 2010 the
+  * Initial Developer. All Rights Reserved.
+  *
+  * Contributor(s): 
+  *           Guy Pyrzak <guy.pyrzak@gmail.com>
+  */
+
+#bug_id_container { 
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.search_field_grid {
+  margin-top: 1em;
+  display: inline-block;
+}
+
+.search_field_grid .field_help_link, 
+.history_query .field_help_link 
+{
+  display: block;
+  text-align: left;
+}
+
+#chart .section_help {
+  font-size: 0.8em; 
+  font-weight: normal
+}
+
+#bug_id_container .field_help {
+  font-size: 0.75em
+}
+
+.search_field_row {
+  display: block;
+  padding: 0.5ex 0;
+  vertical-align: top;
+}
+
+.search_field_grid label {
+  display: block;
+}
+
+.search_field_grid select {
+  width: 17em;
+  height: 15ex;
+}
+
+.search_field_grid, .search_field_row {
+  padding-left: 1.5em;
+}
+
+.search_email_fields {
+  display: inline-block;
+  width: 14.5em;
+  padding-left: 1.5em;
+}
+
+ul.bug_changes {
+  margin: 0;
+  padding: 0;
+}
+
+ul.bug_changes li {
+  display: inline-block;
+  width: 14.5em;
+  vertical-align: top;
+  padding-left: 1.5em;
+}
+
+ul.bug_changes select {
+  width: 15em;
+}
+
+ul.bug_changes li label {
+   display: block;
+}
+
+div.bz_section_title {
+  display: block;
+  margin-top: 2em;
+  font-size: 1.2em;
+}
+
+div.bz_section_title a {
+  font-weight: bold;    
+}
+
+div.bz_section_title span {
+  font-size: 0.75em;
+  margin-left: 1em;    
+}  
+
+#summary_field {
+  margin: 0;
+  padding: 0;
+}
+
+#summary_field label {
+  margin-right: 2em;
+  font-weight: bold;
+  display: inline;
+}
+
+.hide_people_filter #people_filter_section, 
+.hide_history_filter #history_filter_section, 
+.hide_detailed_information #detailed_information_section 
+{
+  display: none;
+}
+
+.arrow {
+  display: inline;
+  width: 16px;
+  height: 16px;
+}
+
+.bz_search_section, ul.bz_search_section {
+  margin-top: 1em;
+}

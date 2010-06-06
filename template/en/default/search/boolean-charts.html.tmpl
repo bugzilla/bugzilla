@@ -50,7 +50,9 @@
 ] %]
 
   <h3 id="chart">
-    Advanced Searching Using Boolean Charts
+    Custom Search <span class="section_help">Didn't find what 
+      you're looking for above? This area allows for ANDs, ORs 
+      and other more complex searches.</span>
   </h3>
 
 [%# Whoever wrote the original version of boolean charts had a seriously twisted mind %]
@@ -87,9 +89,8 @@
         [% INCLUDE "search/type-select.html.tmpl"
            name = "type${chartnum}-${rownum}-${colnum}",
            types = types, selected = col.type %]
-
         <input name="[% "value${chartnum}-${rownum}-${colnum}" %]" 
-               value="[% col.value FILTER html %]"> 
+               value="[% col.value FILTER html %]">
       </td>
       
       [% UNLESS loop.last %]

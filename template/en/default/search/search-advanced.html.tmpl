@@ -38,8 +38,10 @@ var queryform = "queryform"
   title = "Search for $terms.bugs"
   onload = "doOnSelectProduct(0); enableHelp();"
   javascript = js_data
-  javascript_urls = [ "js/productform.js" "js/util.js" "js/help.js" ]
-  style_urls = [ "skins/standard/help.css" ]
+  javascript_urls = [ "js/yui/calendar.js", "js/productform.js", "js/util.js",
+                      "js/help.js" , "js/TUI.js", "js/field.js"]
+  style_urls = [ "skins/standard/help.css" , "skins/standard/search_form.css", 
+                 "skins/standard/yui/calendar.css" ]
   doc_section = "query.html"
   style = "dl.bug_changes dt {
              margin-top: 15px;

@@ -44,6 +44,7 @@ package Bugzilla::User;
 use Bugzilla::Error;
 use Bugzilla::Util;
 use Bugzilla::Constants;
+use Bugzilla::Search::Recent;
 use Bugzilla::User::Setting;
 use Bugzilla::Product;
 use Bugzilla::Classification;
@@ -51,8 +52,11 @@ use Bugzilla::Field;
 use Bugzilla::Group;
 
 use DateTime::TimeZone;
+use List::Util qw(max);
 use Scalar::Util qw(blessed);
 use Storable qw(dclone);
+use URI;
+use URI::QueryParam;
 
 use base qw(Bugzilla::Object Exporter);
 @Bugzilla::User::EXPORT = qw(is_available_username
@@ -359,6 +363,149 @@ sub queries_available {
     $self->{queries_available} =
         Bugzilla::Search::Saved->new_from_list($avail_query_ids);
     return $self->{queries_available};
+}
+
+##########################
+# Saved Recent Bug Lists #
+##########################
+
+sub recent_searches {
+    my $self = shift;
+    $self->{recent_searches} ||= 
+        Bugzilla::Search::Recent->match({ user_id => $self->id });
+    return $self->{recent_searches};
+}
+
+sub recent_search_containing {
+    my ($self, $bug_id) = @_;
+    my $searches = $self->recent_searches;
+
+    foreach my $search (@$searches) {
+        return $search if grep($_ == $bug_id, @{ $search->bug_list });
+    }
+
+    return undef;
+}
+
+sub recent_search_for {
+    my ($self, $bug) = @_;
+    my $params = Bugzilla->input_params;
+    my $cgi = Bugzilla->cgi;
+
+    if ($self->id) {
+        # First see if there's a list_id parameter in the query string.
+        my $list_id = $params->{list_id};
+        if (!$list_id) {
+            # If not, check for "list_id" in the query string of the referer.
+            my $referer = $cgi->referer;
+            if ($referer) {
+                my $uri = URI->new($referer);
+                if ($uri->path =~ /buglist\.cgi$/) {
+                    $list_id = $uri->query_param('list_id')
+                               || $uri->query_param('regetlastlist');
+                }
+            }
+        }
+
+        if ($list_id) {
+            # If we got a bad list_id (either some other user's or an expired
+            # one) don't crash, just don't return that list.
+            my $search = 
+                eval { Bugzilla::Search::Recent->check({ id => $list_id }) };
+            return $search if $search;
+        }
+
+        # If there's no list_id, see if the current bug's id is contained
+        # in any of the user's saved lists.
+        my $search = $self->recent_search_containing($bug->id);
+        return $search if $search;
+    }
+
+    # Finally (or always, if we're logged out), if there's a BUGLIST cookie
+    # and the selected bug is in the list, then return the cookie as a fake
+    # Search::Recent object.
+    if (my $list = $cgi->cookie('BUGLIST')) {
+        my @bug_ids = split(':', $list);
+        if (grep { $_ == $bug->id } @bug_ids) {
+            return { id => 'cookie', bug_list => \@bug_ids };
+        }
+    }
+
+    return undef;
+}
+
+sub save_last_search {
+    my ($self, $params) = @_;
+    my ($bug_ids, $order, $vars, $list_id) = 
+        @$params{qw(bugs order vars list_id)};
+
+    my $cgi = Bugzilla->cgi;
+    if ($order) {
+        $cgi->send_cookie(-name => 'LASTORDER',
+                          -value => $order,
+                          -expires => 'Fri, 01-Jan-2038 00:00:00 GMT');
+    }
+
+    return if !@$bug_ids;
+
+    if ($self->id) {
+        on_main_db {
+            my $search;
+            if ($list_id) {
+                # Use eval so that people can still use old search links or
+                # links that don't belong to them.
+                $search = eval { Bugzilla::Search::Recent->check(
+                                    { id => $list_id }) };
+            }
+
+            if ($search) {
+                # We only update placeholders. (Placeholders are
+                # Saved::Search::Recent objects with empty bug lists.)
+                # Otherwise, we could just keep creating new searches
+                # for the same refreshed list over and over.
+                if (!@{ $search->bug_list }) {
+                    $search->set_list_order($order);
+                    $search->set_bug_list($bug_ids);
+                    $search->update();
+                }
+            }
+            else {
+                # If we already have an existing search with a totally
+                # identical bug list, then don't create a new one. This
+                # prevents people from writing over their whole 
+                # recent-search list by just refreshing a saved search
+                # (which doesn't have list_id in the header) over and over.
+                my $list_string = join(',', @$bug_ids);
+                my $existing_search = Bugzilla::Search::Recent->match({
+                    user_id => $self->id, bug_list => $list_string });
+           
+                if (!scalar(@$existing_search)) {
+                    Bugzilla::Search::Recent->create({
+                        user_id    => $self->id,
+                        bug_list   => $bug_ids,
+                        list_order => $order });
+                }
+            }
+        };
+        delete $self->{recent_searches};
+    }
+    # Logged-out users use a cookie to store a single last search. We don't
+    # override that cookie with the logged-in user's latest search, because
+    # if they did one search while logged out and another while logged in,
+    # they may still want to navigate through the search they made while
+    # logged out.
+    else {
+        my $bug_list = join(":", @$bug_ids);
+        if (length($bug_list) < 4000) {
+            $cgi->send_cookie(-name => 'BUGLIST',
+                              -value => $bug_list,
+                              -expires => 'Fri, 01-Jan-2038 00:00:00 GMT');
+        }
+        else {
+            $cgi->remove_cookie('BUGLIST');
+            $vars->{'toolong'} = 1;
+        }
+    }
 }
 
 sub settings {

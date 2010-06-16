@@ -764,15 +764,6 @@ sub create {
             # Whether or not keywords are enabled, in this Bugzilla.
             'use_keywords' => sub { return Bugzilla::Keyword->any_exist; },
 
-            'last_bug_list' => sub {
-                my @bug_list;
-                my $cgi = Bugzilla->cgi;
-                if ($cgi->cookie("BUGLIST")) {
-                    @bug_list = split(/:/, $cgi->cookie("BUGLIST"));
-                }
-                return \@bug_list;
-            },
-
             'feature_enabled' => sub { return Bugzilla->feature(@_); },
 
             # field_descs can be somewhat slow to generate, so we generate

@@ -84,6 +84,8 @@ use File::Basename;
     QUERY_LIST
     LIST_OF_BUGS
 
+    SAVE_NUM_SEARCHES
+
     COMMENT_COLS
     MAX_COMMENT_LENGTH
 
@@ -283,6 +285,9 @@ use constant DEFAULT_MILESTONE => '---';
 # The possible types for saved searches.
 use constant QUERY_LIST => 0;
 use constant LIST_OF_BUGS => 1;
+
+# How many of the user's most recent searches to save.
+use constant SAVE_NUM_SEARCHES => 10;
 
 # The column length for displayed (and wrapped) bug comments.
 use constant COMMENT_COLS => 80;

@@ -40,6 +40,7 @@ use Bugzilla::Error;
 use Bugzilla::Util;
 use Bugzilla::Search;
 use Bugzilla::Search::Quicksearch;
+use Bugzilla::Search::Recent;
 use Bugzilla::Search::Saved;
 use Bugzilla::User;
 use Bugzilla::Bug;
@@ -60,7 +61,7 @@ my $buffer = $cgi->query_string();
 # We have to check the login here to get the correct footer if an error is
 # thrown and to prevent a logged out user to use QuickSearch if 'requirelogin'
 # is turned 'on'.
-Bugzilla->login();
+my $user = Bugzilla->login();
 
 if (length($buffer) == 0) {
     print $cgi->header(-refresh=> '10; URL=query.cgi');
@@ -86,6 +87,18 @@ if (grep { $_ =~ /^cmd\-/ } $cgi->param()) {
 if ($cgi->request_method() eq 'POST') {
     $cgi->clean_search_url();
     my $uri_length = length($cgi->self_url());
+
+    if (!$cgi->param('regetlastlist') and !$cgi->param('list_id')
+        and $user->id) 
+    {
+        # Insert a placeholder Bugzilla::Search::Recent, so that we know what
+        # the id of the resulting search will be. This is then pulled out
+        # of the Referer header when viewing show_bug.cgi to know what
+        # bug list we came from.
+        my $recent_search = Bugzilla::Search::Recent->create_placeholder;
+        $cgi->param('list_id', $recent_search->id);
+    }
+
     if ($uri_length < CGI_URI_LIMIT) {
         print $cgi->redirect(-url => $cgi->self_url());
         exit;
@@ -185,17 +198,26 @@ my $params;
 
 # If the user is retrieving the last bug list they looked at, hack the buffer
 # storing the query string so that it looks like a query retrieving those bugs.
-if (defined $cgi->param('regetlastlist')) {
-    $cgi->cookie('BUGLIST') || ThrowUserError("missing_cookie");
+if (my $last_list = $cgi->param('regetlastlist')) {
+    my ($bug_ids, $order);
 
-    $order = "reuse last sort" unless $order;
-    my $bug_id = $cgi->cookie('BUGLIST');
-    $bug_id =~ s/:/,/g;
+    # Logged-out users use the old cookie method for storing the last search.
+    if (!$user->id or $last_list eq 'cookie') {
+        $cgi->cookie('BUGLIST') || ThrowUserError("missing_cookie");
+        $order = "reuse last sort" unless $order;
+        $bug_ids = $cgi->cookie('BUGLIST');
+        $bug_ids =~ s/:/,/g;
+    }
+    # But logged in users store the last X searches in the DB so they can
+    # have multiple bug lists available.
+    else {
+        my $last_search = Bugzilla::Search::Recent->check(
+            { id => $last_list });
+        $bug_ids = join(',', @{ $last_search->bug_list });
+        $order   = $last_search->list_order if !$order;
+    }
     # set up the params for this new query
-    $params = new Bugzilla::CGI({
-                                 bug_id => $bug_id,
-                                 order => $order,
-                                });
+    $params = new Bugzilla::CGI({ bug_id => $bug_ids, order => $order });
 }
 
 # Figure out whether or not the user is doing a fulltext search.  If not,
@@ -431,7 +453,7 @@ if ($cmdtype eq "dorem") {
         $order = $params->param('order') || $order;
     }
     elsif ($remaction eq "forget") {
-        my $user = Bugzilla->login(LOGIN_REQUIRED);
+        $user = Bugzilla->login(LOGIN_REQUIRED);
         # Copy the name into a variable, so that we can trick_taint it for
         # the DB. We know it's safe, because we're using placeholders in 
         # the SQL, and the SQL is only a DELETE.
@@ -495,12 +517,12 @@ if ($cmdtype eq "dorem") {
 }
 elsif (($cmdtype eq "doit") && defined $cgi->param('remtype')) {
     if ($cgi->param('remtype') eq "asdefault") {
-        my $user = Bugzilla->login(LOGIN_REQUIRED);
+        $user = Bugzilla->login(LOGIN_REQUIRED);
         InsertNamedQuery(DEFAULT_QUERY_NAME, $buffer);
         $vars->{'message'} = "buglist_new_default_query";
     }
     elsif ($cgi->param('remtype') eq "asnamed") {
-        my $user = Bugzilla->login(LOGIN_REQUIRED);
+        $user = Bugzilla->login(LOGIN_REQUIRED);
         my $query_name = $cgi->param('newqueryname');
         my $new_query = $cgi->param('newquery');
         my $query_type = QUERY_LIST;
@@ -1177,26 +1199,11 @@ my $contenttype;
 my $disposition = "inline";
 
 if ($format->{'extension'} eq "html" && !$agent) {
-    if ($order && !$cgi->param('sharer_id')) {
-        $cgi->send_cookie(-name => 'LASTORDER',
-                          -value => $order,
-                          -expires => 'Fri, 01-Jan-2038 00:00:00 GMT');
+    if (!$cgi->param('regetlastlist')) {
+        Bugzilla->user->save_last_search(
+            { bugs => \@bugidlist, order => $order, vars => $vars,
+              list_id => scalar $cgi->param('list_id') });
     }
-    my $bugids = join(":", @bugidlist);
-    # See also Bug 111999
-    if (length($bugids) == 0) {
-        $cgi->remove_cookie('BUGLIST');
-    }
-    elsif (length($bugids) < 4000) {
-        $cgi->send_cookie(-name => 'BUGLIST',
-                          -value => $bugids,
-                          -expires => 'Fri, 01-Jan-2038 00:00:00 GMT');
-    }
-    else {
-        $cgi->remove_cookie('BUGLIST');
-        $vars->{'toolong'} = 1;
-    }
-
     $contenttype = "text/html";
 }
 else {

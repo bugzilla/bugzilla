@@ -842,6 +842,18 @@ use constant ABSTRACT_SCHEMA => {
         ],
     },
 
+    profile_search => {
+        FIELDS => [
+            id         => {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
+            user_id    => {TYPE => 'INT3', NOTNULL => 1},
+            bug_list   => {TYPE => 'MEDIUMTEXT', NOTNULL => 1},
+            list_order => {TYPE => 'MEDIUMTEXT'},
+        ],
+        INDEXES => [
+            profile_search_user_id => [qw(user_id)],
+        ],
+    },
+
     profiles_activity => {
         FIELDS => [
             userid        => {TYPE => 'INT3', NOTNULL => 1,

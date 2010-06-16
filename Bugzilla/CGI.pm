@@ -204,6 +204,10 @@ sub clean_search_url {
         $self->delete('order');
     }
 
+    # list_id is added in buglist.cgi after calling clean_search_url,
+    # and doesn't need to be saved in saved searches.
+    $self->delete('list_id'); 
+
     # And now finally, if query_format is our only parameter, that
     # really means we have no parameters, so we should delete query_format.
     if ($self->param('query_format') && scalar($self->param()) == 1) {

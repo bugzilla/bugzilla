@@ -87,7 +87,7 @@ sub check {
     my $search = $class->SUPER::check(@_);
     my $user = Bugzilla->user;
     if ($search->user_id != $user->id) {
-        ThrowUserError('object_not_found', { id => $search->id });
+        ThrowUserError('object_does_not_exist', { id => $search->id });
     }
     return $search;
 }

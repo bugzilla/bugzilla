@@ -1023,4 +1023,4 @@ if Bugzilla is currently using the shadowdb or not. Used like:
      $dbh->do("INSERT ...");
  }
 
-back
+=back

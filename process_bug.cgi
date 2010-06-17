@@ -75,19 +75,6 @@ my $vars = {};
 # Subroutines
 ######################################################################
 
-# Used to send email when an update is done.
-sub send_results {
-    my ($bug_id, $vars) = @_;
-    my $template = Bugzilla->template;
-    $vars->{'sent_bugmail'} = 
-        Bugzilla::BugMail::Send($bug_id, $vars->{'mailrecipients'});
-    if (Bugzilla->usage_mode != USAGE_MODE_EMAIL) {
-        $template->process("bug/process/results.html.tmpl", $vars)
-            || ThrowTemplateError($template->error());
-    }
-    $vars->{'header_done'} = 1;
-}
-
 # Tells us whether or not a field should be changed by process_bug.
 sub should_set {
     # check_defined is used for fields where there's another field
@@ -214,7 +201,7 @@ if (defined $cgi->param('id')) {
             my $next_bug_id = $bug_list[$cur + 1];
             detaint_natural($next_bug_id);
             if ($next_bug_id and $user->can_see_bug($next_bug_id)) {
-                # We create an object here so that send_results can use it
+                # We create an object here so that $bug->send_changes can use it
                 # when displaying the header.
                 $vars->{'bug'} = new Bugzilla::Bug($next_bug_id);
             }
@@ -459,21 +446,10 @@ if ($move_action eq Bugzilla->params->{'move-button-text'}) {
 # Do Actual Database Updates #
 ##############################
 foreach my $bug (@bug_objects) {
-    $dbh->bz_start_transaction();
+    my $changes = $bug->update();
 
-    my $timestamp = $dbh->selectrow_array(q{SELECT LOCALTIMESTAMP(0)});
-    my $changes = $bug->update($timestamp);
-
-    my %notify_deps;
     if ($changes->{'bug_status'}) {
-        my ($old_status, $new_status) = @{ $changes->{'bug_status'} };
-        
-        # If this bug has changed from opened to closed or vice-versa,
-        # then all of the bugs we block need to be notified.
-        if (is_open_state($old_status) ne is_open_state($new_status)) {
-            $notify_deps{$_} = 1 foreach (@{$bug->blocked});
-        }
-        
+        my $new_status = $changes->{'bug_status'}->[1];
         # We may have zeroed the remaining time, if we moved into a closed
         # status, so we should inform the user about that.
         if (!is_open_state($new_status) && $changes->{'remaining_time'}) {
@@ -482,66 +458,7 @@ foreach my $bug (@bug_objects) {
         }
     }
 
-    # To get a list of all changed dependencies, convert the "changes" arrays
-    # into a long string, then collapse that string into unique numbers in
-    # a hash.
-    my $all_changed_deps = join(', ', @{ $changes->{'dependson'} || [] });
-    $all_changed_deps = join(', ', @{ $changes->{'blocked'} || [] },
-                                   $all_changed_deps);
-    my %changed_deps = map { $_ => 1 } split(', ', $all_changed_deps);
-    # When clearning one field (say, blocks) and filling in the other
-    # (say, dependson), an empty string can get into the hash and cause
-    # an error later.
-    delete $changed_deps{''};
-
-    $dbh->bz_commit_transaction();
-
-    ###############
-    # Send Emails #
-    ###############
-
-    my $old_qa  = $changes->{'qa_contact'}  ? $changes->{'qa_contact'}->[0] : '';
-    my $old_own = $changes->{'assigned_to'} ? $changes->{'assigned_to'}->[0] : '';
-    my $old_cc  = $changes->{cc}            ? $changes->{cc}->[0] : '';
-    $vars->{'mailrecipients'} = {
-        cc        => [split(/[\s,]+/, $old_cc)],
-        owner     => $old_own,
-        qacontact => $old_qa,
-        changer   => Bugzilla->user };
-
-    $vars->{'id'} = $bug->id;
-    $vars->{'type'} = "bug";
-    
-    # Let the user know the bug was changed and who did and didn't
-    # receive email about the change.
-    send_results($bug->id, $vars);
- 
-    # If the bug was marked as a duplicate, we need to notify users on the
-    # other bug of any changes to that bug.
-    my $new_dup_id = $changes->{'dup_id'} ? $changes->{'dup_id'}->[1] : undef;
-    if ($new_dup_id) {
-        $vars->{'mailrecipients'} = { 'changer' => Bugzilla->user }; 
-
-        $vars->{'id'} = $new_dup_id;
-        $vars->{'type'} = "dupe";
-        
-        # Let the user know a duplication notation was added to the 
-        # original bug.
-        send_results($new_dup_id, $vars);
-    }
-
-    my %all_dep_changes = (%notify_deps, %changed_deps);
-    foreach my $id (sort { $a <=> $b } (keys %all_dep_changes)) {
-        $vars->{'mailrecipients'} = { 'changer' => Bugzilla->user };
-        $vars->{'id'} = $id;
-        $vars->{'type'} = "dep";
-
-        # Let the user (if he is able to see the bug) know we checked to
-        # see if we should email notice of this change to users with a 
-        # relationship to the dependent bug and who did and didn't 
-        # receive email about it.
-        send_results($id, $vars);
-    }
+    $bug->send_changes($changes, $vars);
 }
 
 if (Bugzilla->usage_mode == USAGE_MODE_EMAIL) {

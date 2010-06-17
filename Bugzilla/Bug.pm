@@ -660,6 +660,8 @@ sub update {
     # inside this function.
     my $delta_ts = shift || $dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
 
+    $dbh->bz_start_transaction();
+
     my ($changes, $old_bug) = $self->SUPER::update(@_);
 
     # Certain items in $changes have to be fixed so that they hold
@@ -889,6 +891,8 @@ sub update {
         $self->{delta_ts} = $delta_ts;
     }
 
+    $dbh->bz_commit_transaction();
+
     # The only problem with this here is that update() is often called
     # in the middle of a transaction, and if that transaction is rolled
     # back, this change will *not* be rolled back. As we expect rollbacks
@@ -1014,6 +1018,88 @@ sub remove_from_db {
     # Now this bug no longer exists
     $self->DESTROY;
     return $self;
+}
+
+#####################################################################
+# Sending Email After Bug Update
+#####################################################################
+
+sub send_changes {
+    my ($self, $changes, $vars) = @_;
+
+    my $user = Bugzilla->user;
+
+    my $old_qa  = $changes->{'qa_contact'}  
+                  ? $changes->{'qa_contact'}->[0] : '';
+    my $old_own = $changes->{'assigned_to'} 
+                  ? $changes->{'assigned_to'}->[0] : '';
+    my $old_cc  = $changes->{cc}
+                  ? $changes->{cc}->[0] : '';
+
+    my %forced = (
+        cc        => [split(/[\s,]+/, $old_cc)],
+        owner     => $old_own,
+        qacontact => $old_qa,
+        changer   => $user,
+    );
+
+    _send_bugmail({ id => $self->id, type => 'bug', forced => \%forced }, 
+                  $vars);
+
+    # If the bug was marked as a duplicate, we need to notify users on the
+    # other bug of any changes to that bug.
+    my $new_dup_id = $changes->{'dup_id'} ? $changes->{'dup_id'}->[1] : undef;
+    if ($new_dup_id) {
+        _send_bugmail({ forced => { changer => $user }, type => "dupe",
+                        id => $new_dup_id }, $vars);
+    }
+
+    # If there were changes in dependencies, we need to notify those
+    # dependencies.
+    my %notify_deps;
+    if ($changes->{'bug_status'}) {
+        my ($old_status, $new_status) = @{ $changes->{'bug_status'} };
+
+        # If this bug has changed from opened to closed or vice-versa,
+        # then all of the bugs we block need to be notified.
+        if (is_open_state($old_status) ne is_open_state($new_status)) {
+            $notify_deps{$_} = 1 foreach (@{ $self->blocked });
+        }
+    }
+
+    # To get a list of all changed dependencies, convert the "changes" arrays
+    # into a long string, then collapse that string into unique numbers in
+    # a hash.
+    my $all_changed_deps = join(', ', @{ $changes->{'dependson'} || [] });
+    $all_changed_deps = join(', ', @{ $changes->{'blocked'} || [] },
+                                   $all_changed_deps);
+    my %changed_deps = map { $_ => 1 } split(', ', $all_changed_deps);
+    # When clearning one field (say, blocks) and filling in the other
+    # (say, dependson), an empty string can get into the hash and cause
+    # an error later.
+    delete $changed_deps{''};
+
+    my %all_dep_changes = (%notify_deps, %changed_deps);
+    foreach my $id (sort { $a <=> $b } (keys %all_dep_changes)) {
+        _send_bugmail({ forced => { changer => $user }, type => "dep",
+                         id => $id }, $vars);
+    }
+}
+
+sub _send_bugmail {
+    my ($params, $vars) = @_;
+
+    my $results = 
+        Bugzilla::BugMail::Send($params->{'id'}, $params->{'forced'});
+
+    if (Bugzilla->usage_mode == USAGE_MODE_BROWSER) {
+        my $template = Bugzilla->template;
+        $vars->{$_} = $params->{$_} foreach keys %$params;
+        $vars->{'sent_bugmail'} = $results;
+        $template->process("bug/process/results.html.tmpl", $vars)
+            || ThrowTemplateError($template->error());
+        $vars->{'header_done'} = 1;
+    }
 }
 
 #####################################################################

@@ -236,7 +236,6 @@ sub FILESYSTEM {
     # for contrib skins which don't provide them themselves.
     foreach my $skin_dir ("$skinsdir/custom", <$skinsdir/contrib/*>) {
         next if basename($skin_dir) =~ /^cvs$/i;
-        $create_dirs{"$skin_dir/yui"} = $ws_dir_readable;
         foreach my $base_css (<$skinsdir/standard/*.css>) {
             _add_custom_css($skin_dir, basename($base_css), \%create_files, $ws_readable);
         }

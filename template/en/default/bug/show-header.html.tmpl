@@ -34,11 +34,9 @@
 [% title = "$terms.Bug $bug.bug_id &ndash; $filtered_desc" %]
 [% header = "$terms.Bug&nbsp;$bug.bug_id" %]
 [% header_addl_info = "Last modified: $filtered_timestamp" %]
-[% javascript_urls = [ "js/yui/bz_autocomplete_bundle.js",
-                       "js/util.js", "js/field.js", "js/yui/calendar.js" ] %]
-[% style_urls = [ "skins/standard/yui/autocomplete.css",
-                  "skins/standard/yui/calendar.css",
-                  "skins/standard/show_bug.css" ] %]
+[% yui = ['autocomplete', 'calendar'] %]
+[% javascript_urls = [ "js/util.js", "js/field.js" ] %]
+[% style_urls = [ "skins/standard/show_bug.css" ] %]
 [% doc_section = "bug_page.html" %]
 [% bodyclasses = ['bz_bug',
                   "bz_status_$bug.bug_status",

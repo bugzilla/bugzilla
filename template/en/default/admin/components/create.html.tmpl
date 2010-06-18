@@ -26,8 +26,8 @@
   
 [% title = BLOCK %]Add component to the [% product.name FILTER html %] product[% END %]
 [% PROCESS global/header.html.tmpl
-  style_urls = [ 'skins/standard/yui/autocomplete.css']
-  javascript_urls = [ "js/yui/bz_autocomplete_bundle.js", "js/field.js"]
+  yui = [ 'autocomplete' ]
+  javascript_urls = [ "js/field.js" ]
   title = title
 %]
 

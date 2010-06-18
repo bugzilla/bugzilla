@@ -46,7 +46,22 @@
   header_addl_info = ""
   onload = ""
   style_urls = []
+  yui = []
 %]
+
+[% SET yui_css = {
+  autocomplete => 1,
+  calendar     => 1,
+} %]
+
+[%# Note: This is simple dependency resolution--you can't have dependencies
+  # that depend on each other. You have to specify all of a module's deps,
+  # if that module is going to be specified in "yui".
+  #%]
+[% SET yui_deps = {
+  autocomplete => ['json', 'connection', 'datasource'],
+} %]
+
 
 [%# We should be able to set the default value of the header variable
   # to the value of the title variable using the DEFAULT directive,
@@ -70,6 +85,7 @@
     [% PROCESS 'global/setting-descs.none.tmpl' %]
 
     [%# Set up the skin CSS cascade:
+      #  0. YUI CSS
       #  1. Standard Bugzilla stylesheet set (persistent)
       #  2. Standard Bugzilla stylesheet set (selectable)
       #  3. All third-party "skin" stylesheet sets (selectable)
@@ -82,6 +98,14 @@
       [% user_skin = user.settings.skin.value %]
     [% END %]
     [% style_urls.unshift('skins/standard/global.css') %]
+
+
+    [% FOREACH yui_name = yui %]
+      [% IF yui_css.$yui_name %]
+        <link rel="stylesheet" type="text/css"
+              href="js/yui/assets/skins/sam/[%- yui_name FILTER html %].css">
+      [% END %]
+    [% END %]
 
     [%# CSS cascade, part 1: Standard Bugzilla stylesheet set (persistent).
       # Always present.
@@ -190,9 +214,24 @@
             type="text/css">
     <![endif]-->
 
-    <script src="js/yui/yahoo-dom-event.js" type="text/javascript"></script>
-    <script src="js/yui/cookie.js" type="text/javascript"></script>
+    [%# YUI Scripts %]
+    <script src="js/yui/yahoo-dom-event/yahoo-dom-event.js"
+            type="text/javascript"></script>
+    <script src="js/yui/cookie/cookie-min.js" type="text/javascript"></script>
+    [%# Resolve YUI dependencies. Note that CSS was already done above. %]
+    [% FOREACH yui_name = yui %]
+      [% IF yui_deps.$yui_name %]
+         [% yui = yui_deps.${yui_name}.merge(yui) %]
+      [% END %]
+    [% END %]
+    [% FOREACH yui_name = yui %]
+      <script type="text/javascript" 
+              src="js/yui/[% yui_name FILTER html %]/
+                   [%- yui_name FILTER html %]-min.js"></script>
+    [% END %]
+
     <script src="js/global.js" type="text/javascript"></script>
+
     <script type="text/javascript">
     <!--
         YAHOO.namespace('bugzilla');

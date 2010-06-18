@@ -25,6 +25,7 @@ use base qw(Bugzilla::WebService);
 use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Error;
+use Bugzilla::Group;
 use Bugzilla::User;
 use Bugzilla::Util qw(trim);
 use Bugzilla::Token;
@@ -156,11 +157,13 @@ sub get {
         if ($params->{match}) {
             ThrowUserError('user_access_by_match_denied');
         }
+        my $in_group = $self->_filter_users_by_group(
+            \@user_objects, $params);
         @users = map {filter $params, {
                      id        => $self->type('int', $_->id),
                      real_name => $self->type('string', $_->name), 
                      name      => $self->type('string', $_->login),
-                 }} @user_objects;
+                 }} @$in_group;
 
         return { users => \@users };
     }
@@ -199,7 +202,9 @@ sub get {
             }
         }
     }
-    
+   
+    my $in_group = $self->_filter_users_by_group(
+        \@user_objects, $params); 
     if (Bugzilla->user->in_group('editusers')) {
         @users =
             map {filter $params, {
@@ -210,7 +215,7 @@ sub get {
                 can_login => $self->type('boolean', $_->is_disabled ? 0 : 1),
                 email_enabled     => $self->type('boolean', $_->email_enabled),
                 login_denied_text => $self->type('string', $_->disabledtext),
-            }} @user_objects;
+            }} @$in_group;
 
     }    
     else {
@@ -221,10 +226,37 @@ sub get {
                 name      => $self->type('string', $_->login),
                 email     => $self->type('string', $_->email),
                 can_login => $self->type('boolean', $_->is_disabled ? 0 : 1),
-            }} @user_objects;
+            }} @$in_group;
     }
 
     return { users => \@users };
+}
+
+sub _filter_users_by_group {
+    my ($self, $users, $params) = @_;
+    my ($group_ids, $group_names) = @$params{qw(group_ids groups)};
+
+    # If no groups are specified, we return all users.
+    return $users if (!$group_ids and !$group_names);
+
+    my @groups = map { Bugzilla::Group->check({ id => $_ }) } 
+                     @{ $group_ids || [] };
+    my @name_groups = map { Bugzilla::Group->check($_) } 
+                          @{ $group_names || [] };
+    push(@groups, @name_groups);
+    
+
+    my @in_group = grep { $self->_user_in_any_group($_, \@groups) }
+                        @$users;
+    return \@in_group;
+}
+
+sub _user_in_any_group {
+    my ($self, $user, $groups) = @_;
+    foreach my $group (@$groups) {
+        return 1 if $user->in_group($group);
+    }
+    return 0;
 }
 
 1;
@@ -472,7 +504,9 @@ Logged-out users cannot pass this parameter to this function. If they try,
 they will get an error. Logged-in users will get an error if they specify
 the id of a user they cannot see.
 
-=item C<names> (array) - An array of login names (strings).
+=item C<names> (array)
+
+An array of login names (strings).
 
 =item C<match> (array)
 
@@ -492,6 +526,15 @@ Logged-out users cannot use this argument, and an error will be thrown
 if they try. (This is to make it harder for spammers to harvest email
 addresses from Bugzilla, and also to enforce the user visibility
 restrictions that are implemented on some Bugzillas.)
+
+=item C<group_ids> (array)
+
+=item C<groups> (array)
+
+C<group_ids> is an array of numeric ids for groups that a user can be in.
+C<groups> is an array of names of groups that a user can be in.
+If these are specified, they limit the return value to users who are
+in I<any> of the groups specified.
 
 =back
 
@@ -546,9 +589,10 @@ C<real_name>, C<email>, and C<can_login> items.
 
 =over
 
-=item 51 (Bad Login Name)
+=item 51 (Bad Login Name or Group Name)
 
-You passed an invalid login name in the "names" array.
+You passed an invalid login name in the "names" array or a bad
+group name/id in the C<groups>/C<group_ids> arguments.
 
 =item 304 (Authorization Required)
 
@@ -567,6 +611,8 @@ function.
 =over
 
 =item Added in Bugzilla B<3.4>.
+
+=item C<group_ids> and C<groups> were added in Bugzilla B<3.8>.
 
 =back
 

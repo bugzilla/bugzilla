@@ -179,9 +179,6 @@ sub _check_extra_data {
         if (!defined $extra_data) {
             ThrowCodeError('comment_extra_data_required', { type => $type });
         }
-        if ($type == CMT_MOVED_TO) {
-            $extra_data = Bugzilla::User->check($extra_data)->login;
-        }
         elsif ($type == CMT_ATTACHMENT_CREATED 
                or $type == CMT_ATTACHMENT_UPDATED) 
         {

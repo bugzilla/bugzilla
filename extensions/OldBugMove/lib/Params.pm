@@ -29,7 +29,7 @@
 #                 Frédéric Buclin <LpSolit@gmail.com>
 #
 
-package Bugzilla::Config::BugMove;
+package Bugzilla::Extension::OldBugMove::Params;
 
 use strict;
 
@@ -37,21 +37,7 @@ use Bugzilla::Config::Common;
 
 our $sortkey = 700;
 
-sub get_param_list {
-  my $class = shift;
-  my @param_list = (
-  {
-   name => 'move-enabled',
-   type => 'b',
-   default => 0
-  },
-
-  {
-   name => 'move-button-text',
-   type => 't',
-   default => 'Move To Bugscape'
-  },
-
+use constant get_param_list => (
   {
    name => 'move-to-url',
    type => 't',
@@ -65,29 +51,10 @@ sub get_param_list {
   },
 
   {
-   name => 'moved-from-address',
-   type => 't',
-   default => 'bugzilla-admin'
-  },
-
-  {
    name => 'movers',
    type => 't',
    default => ''
   },
-
-  {
-   name => 'moved-default-product',
-   type => 't',
-   default => ''
-  },
-
-  {
-   name => 'moved-default-component',
-   type => 't',
-   default => ''
-  } );
-  return @param_list;
-}
+);
 
 1;

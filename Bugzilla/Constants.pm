@@ -92,7 +92,6 @@ use File::Basename;
     CMT_NORMAL
     CMT_DUPE_OF
     CMT_HAS_DUPE
-    CMT_MOVED_TO
     CMT_ATTACHMENT_CREATED
     CMT_ATTACHMENT_UPDATED
 
@@ -299,7 +298,7 @@ use constant CMT_NORMAL => 0;
 use constant CMT_DUPE_OF => 1;
 use constant CMT_HAS_DUPE => 2;
 # Type 3 was CMT_POPULAR_VOTES, which moved to the Voting extension.
-use constant CMT_MOVED_TO => 4;
+# Type 4 was CMT_MOVED_TO, which moved to the OldBugMove extension.
 use constant CMT_ATTACHMENT_CREATED => 5;
 use constant CMT_ATTACHMENT_UPDATED => 6;
 

@@ -353,10 +353,6 @@
 [% END %]
 <input type="submit" id="commit" value="Commit">
 
-[% IF Param('move-enabled') && user.is_mover %]
-  <input type="submit" name="action" id="action" value="[% Param('move-button-text') %]">
-[% END %]
-
 [%############################################################################%]
 [%# Select Menu Block                                                        #%]
 [%############################################################################%]

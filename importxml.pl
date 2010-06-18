@@ -95,12 +95,15 @@ my $debug = 0;
 my $mail  = '';
 my $attach_path = '';
 my $help  = 0;
+my ($default_product_name, $default_component_name);
 
 my $result = GetOptions(
     "verbose|debug+" => \$debug,
     "mail|sendmail!" => \$mail,
     "attach_path=s"  => \$attach_path,
-    "help|?"         => \$help
+    "help|?"         => \$help,
+    "product=s"      => \$default_product_name,
+    "component=s"    => \$default_component_name,
 );
 
 pod2usage(0) if $help;
@@ -117,6 +120,9 @@ my $dbh = Bugzilla->dbh;
 my $params = Bugzilla->params;
 my ($timestamp) = $dbh->selectrow_array("SELECT NOW()");
 
+$default_product_name = '' if !defined $default_product_name;
+$default_component_name = '' if !defined $default_component_name;
+
 ###############################################################################
 # Helper sub routines                                                         #
 ###############################################################################
@@ -126,7 +132,7 @@ sub MailMessage {
     my $subject    = shift;
     my $message    = shift;
     my @recipients = @_;
-    my $from   = $params->{"moved-from-address"};
+    my $from   = $params->{"mailfrom"};
     $from =~ s/@/\@/g;
 
     foreach my $to (@recipients){
@@ -316,22 +322,8 @@ sub init() {
     }
     Error( "no maintainer", "REOPEN", $exporter ) unless ($maintainer);
     Error( "no exporter",   "REOPEN", $exporter ) unless ($exporter);
-    Error( "bug importing is disabled here", undef, $exporter ) unless ( $params->{"move-enabled"} );
     Error( "invalid exporter: $exporter", "REOPEN", $exporter ) if ( !login_to_id($exporter) );
     Error( "no urlbase set", "REOPEN", $exporter ) unless ($urlbase);
-    my $def_product =
-        new Bugzilla::Product( { name => $params->{"moved-default-product"} } )
-        || Error("an invalid default product was defined for the target DB. " .
-                  $params->{"maintainer"} . " needs to fix the definitions of " .
-                 "moved-default-product. \n", "REOPEN", $exporter);
-    my $def_component = new Bugzilla::Component(
-        {
-            product => $def_product,
-            name    => $params->{"moved-default-component"}
-        })
-    || Error("an invalid default component was defined for the target DB. " .
-             $params->{"maintainer"} . " needs to fix the definitions of " .
-             "moved-default-component.\n", "REOPEN", $exporter);
 }
     
 
@@ -634,48 +626,33 @@ sub process_bug {
     push( @query,  "reporter_accessible" );
     push( @values, $bug_fields{'reporter_accessible'} ? 1 : 0 );
 
-    # Product and Component if there is no valid default product and
-    # component defined in the parameters, we wouldn't be here
-    my $def_product =
-      new Bugzilla::Product( { name => $params->{"moved-default-product"} } );
-    my $def_component = new Bugzilla::Component(
-        {
-            product => $def_product,
-            name    => $params->{"moved-default-component"}
-        }
-    );
-    my $product;
-    my $component;
+    my $product = new Bugzilla::Product(
+        { name => $bug_fields{'product'} || '' });
+    if (!$product) {
+        $err .= "Unknown Product " . $bug_fields{'product'} . "\n";
+        $err .= "   Using default product set at the command line.\n";
+        $product = new Bugzilla::Product({ name => $default_product_name })
+            or Error("an invalid default product was defined for the target"
+                     . " DB. " . $params->{"maintainer"} . " needs to specify "
+                     . "--product when calling importxml.pl", "REOPEN", 
+                     $exporter);
+    }
+    my $component = new Bugzilla::Component({
+        product => $product, name => $bug_fields{'component'} || '' });
+    if (!$component) {
+        $err .= "Unknown Component " . $bug_fields{'component'} . "\n";
+        $err .= "   Using default product and component set ";
+        $err .= "at the command line.\n";
 
-    if ( defined $bug_fields{'product'} ) {
-        $product = new Bugzilla::Product( { name => $bug_fields{'product'} } );
-        unless ($product) {
-            $product = $def_product;
-            $err .= "Unknown Product " . $bug_fields{'product'} . "\n";
-            $err .= "   Using default product set in Parameters \n";
+        $product = new Bugzilla::Product({ name => $default_product_name });
+        $component = new Bugzilla::Component({
+           name => $default_component_name, product => $product });
+        if (!$component) {
+            Error("an invalid default component was defined for the target" 
+                  . " DB. ".  $params->{"maintainer"} . " needs to specify " 
+                  . "--component when calling importxml.pl", "REOPEN", 
+                  $exporter);
         }
-    }
-    else {
-        $product = $def_product;
-    }
-    if ( defined $bug_fields{'component'} ) {
-        $component = new Bugzilla::Component(
-            {
-                product => $product,
-                name    => $bug_fields{'component'}
-            }
-        );
-        unless ($component) {
-            $component = $def_component;
-            $product   = $def_product;
-            $err .= "Unknown Component " . $bug_fields{'component'} . "\n";
-            $err .= "   Using default product and component set ";
-            $err .= "in Parameters \n";
-        }
-    }
-    else {
-        $component = $def_component;
-        $product   = $def_product;
     }
 
     my $prod_id = $product->id;
@@ -927,9 +904,9 @@ sub process_bug {
     # that might not yet be in the database we have no way of populating
     # this table. Change the resolution instead.
     if ( $valid_res  && ( $bug_fields{'resolution'} eq "DUPLICATE" ) ) {
-        $resolution = "MOVED";
+        $resolution = "INVALID";
         $err .= "This bug was marked DUPLICATE in the database ";
-        $err .= "it was moved from.\n    Changing resolution to \"MOVED\"\n";
+        $err .= "it was moved from.\n    Changing resolution to \"INVALID\"\n";
     } 
 
     # If there is at least 1 initial bug status different from UNCO, use it,
@@ -1005,8 +982,8 @@ sub process_bug {
                }
                if(!$valid_res){
                    $err .= "Unknown resolution \"$resolution\".\n";
-                   $err .= "   Setting resolution to MOVED\n";
-                   $resolution = "MOVED";
+                   $err .= "   Setting resolution to INVALID\n";
+                   $resolution = "INVALID";
                }
             }   
         }
@@ -1346,31 +1323,38 @@ importxml - Import bugzilla bug data from xml.
 
 =head1 SYNOPSIS
 
-    importxml.pl [options] [file ...]
-
- Options:
-       -? --help        brief help message
-       -v --verbose     print error and debug information. 
-                        Multiple -v increases verbosity
-       -m --sendmail    send mail to recipients with log of bugs imported
-       --attach_path    The path to the attachment files.
-                        (Required if encoding="filename" is used for attachments.)
+ importxml.pl [options] [file ...]
 
 =head1 OPTIONS
 
-=over 8
+=over
 
 =item B<-?>
 
-    Print a brief help message and exits.
+Print a brief help message and exit.
 
 =item B<-v>
 
-    Print error and debug information. Mulltiple -v increases verbosity
+Print error and debug information. Mulltiple -v increases verbosity
 
-=item B<-m>
+=item B<-m> B<--sendmail>
 
-    Send mail to exporter with a log of bugs imported and any errors.
+Send mail to exporter with a log of bugs imported and any errors.
+
+=item B<--attach_path>
+
+The path to the attachment files. (Required if encoding="filename"
+is used for attachments.)
+
+=item B<--product=name>
+
+The product to put the bug in if the product specified in the
+XML doesn't exist.
+
+=item B<--component=name>
+
+The component to put the bug in if the component specified in the
+XML doesn't exist.
 
 =back
 

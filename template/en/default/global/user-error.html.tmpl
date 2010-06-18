@@ -145,8 +145,6 @@
       delete
     [% ELSIF action == "edit" %]
       add, modify or delete
-    [% ELSIF action == "move" %]
-      move
     [% ELSIF action == "run" %]
       run
     [% ELSIF action == "schedule" %]
@@ -155,6 +153,8 @@
       use
     [% ELSIF action == "approve" %]
       approve
+    [% ELSE %]
+      [% Hook.process('auth_failure_action') %]
     [% END %]
 
     [% IF object == "administrative_pages" %]
@@ -1163,11 +1163,6 @@
     [% title = "Resolution Required" %]
     A valid resolution is required to mark [% terms.bugs %] as
     [%+ status FILTER upper FILTER html %].
-
-  [% ELSIF error == "move_bugs_disabled" %]
-    [% title = BLOCK %][% terms.Bug %] Moving Disabled[% END %]
-    Sorry, [% terms.bug %] moving has been disabled. If you need
-    to move [% terms.abug %], please contact [% Param("maintainer") %].
 
   [% ELSIF error == "missing_subcategory" %]
     [% title = "Missing Subcategory" %]

@@ -2410,10 +2410,6 @@ sub set_resolution {
     my $new_res = $self->resolution;
 
     if ($new_res ne $old_res) {
-        # MOVED has a special meaning and can only be used when
-        # really moving bugs to another installation.
-        ThrowCodeError('no_manual_moved') if ($new_res eq 'MOVED' && !$params->{moving});
-
         # Clear the dup_id if we're leaving the dup resolution.
         if ($old_res eq 'DUPLICATE') {
             $self->_clear_dup_id();
@@ -3278,7 +3274,6 @@ sub user {
     return {} if $self->{'error'};
 
     my $user = Bugzilla->user;
-    my $canmove = Bugzilla->params->{'move-enabled'} && $user->is_mover;
 
     my $prod_id = $self->{'product_id'};
 
@@ -3293,8 +3288,7 @@ sub user {
     my $isreporter = $user->id
                      && $user->id == $self->{reporter_id};
 
-    $self->{'user'} = {canmove    => $canmove,
-                       canconfirm => $canconfirm,
+    $self->{'user'} = {canconfirm => $canconfirm,
                        canedit    => $canedit,
                        isreporter => $isreporter};
     return $self->{'user'};
@@ -3326,10 +3320,6 @@ sub choices {
     my $resolution_field = new Bugzilla::Field({ name => 'resolution' });
     # Don't include the empty resolution in drop-downs.
     my @resolutions = grep($_->name, @{ $resolution_field->legal_values });
-    # And don't include MOVED in the list unless the bug is already MOVED.
-    if ($self->resolution ne 'MOVED') {
-        @resolutions= grep { $_->name ne 'MOVED' } @resolutions;
-    }
     $choices{'resolution'} = \@resolutions;
 
     $self->{'choices'} = \%choices;

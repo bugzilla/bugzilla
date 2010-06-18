@@ -1133,9 +1133,6 @@
     <div class="knob-buttons">
       <input type="submit" value="Save Changes" 
              id="commit[% id FILTER css_class_quote %]">
-      [% IF bug.user.canmove %]
-        <input type="submit" name="action" id="action[% id FILTER css_class_quote %]" value="[% Param("move-button-text") %]">
-      [% END %]
     </div>
   [% END %]
 [% END %]

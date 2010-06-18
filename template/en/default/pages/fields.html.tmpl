@@ -203,18 +203,6 @@
           behavior would occur. If more information appears later,
           the [% terms.bug %] can be reopened.
         </dd>
-
-        [% IF Param('move-enabled') %]
-          <dt>
-            [% display_value("resolution", "MOVED") FILTER html %]
-          </dt>
-          <dd>
-            The problem was specific to a related product 
-            whose [% terms.bugs %] are tracked in
-            another [% terms.bug %] database.
-            The [% terms.bug %] has been moved to that database.
-          </dd>
-        [% END %]
       </dl>
     </td>
   </tr>

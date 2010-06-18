@@ -1639,17 +1639,6 @@ sub mail_settings {
     return $self->{'mail_settings'};
 }
 
-sub is_mover {
-    my $self = shift;
-
-    if (!defined $self->{'is_mover'}) {
-        my @movers = map { trim($_) } split(',', Bugzilla->params->{'movers'});
-        $self->{'is_mover'} = ($self->id
-                               && grep { $_ eq $self->login } @movers);
-    }
-    return $self->{'is_mover'};
-}
-
 sub is_insider {
     my $self = shift;
 

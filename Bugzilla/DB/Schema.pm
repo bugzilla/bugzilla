@@ -1217,7 +1217,7 @@ use constant ABSTRACT_SCHEMA => {
                                   REFERENCES => {TABLE  => 'classifications',
                                                  COLUMN => 'id',
                                                  DELETE => 'CASCADE'}},
-            description       => {TYPE => 'MEDIUMTEXT'},
+            description       => {TYPE => 'MEDIUMTEXT', NOTNULL => 1},
             isactive          => {TYPE => 'BOOLEAN', NOTNULL => 1,
                                   DEFAULT => 1},
             defaultmilestone  => {TYPE => 'varchar(20)',

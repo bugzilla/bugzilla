@@ -616,9 +616,13 @@ sub update_table_definitions {
     $dbh->bz_alter_column('group_control_map', 'othercontrol',
                           {TYPE => 'INT1', NOTNULL => 1, DEFAULT => CONTROLMAPNA});
 
+    # Add NOT NULL to some columns that need it, and DEFAULT to
+    # attachments.ispatch.
     $dbh->bz_alter_column('attachments', 'ispatch', 
         { TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'FALSE'});
     $dbh->bz_alter_column('keyworddefs', 'description',
+                          { TYPE => 'MEDIUMTEXT', NOTNULL => 1 }, '');
+    $dbh->bz_alter_column('products', 'description',
                           { TYPE => 'MEDIUMTEXT', NOTNULL => 1 }, '');
 
     ################################################################

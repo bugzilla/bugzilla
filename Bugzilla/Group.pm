@@ -437,7 +437,7 @@ sub _check_name {
     $name = trim($name);
     $name || ThrowUserError("empty_group_name");
     # If we're creating a Group or changing the name...
-    if (!ref($invocant) || $invocant->name ne $name) {
+    if (!ref($invocant) || lc($invocant->name) ne lc($name)) {
         my $exists = new Bugzilla::Group({name => $name });
         ThrowUserError("group_exists", { name => $name }) if $exists;
     }

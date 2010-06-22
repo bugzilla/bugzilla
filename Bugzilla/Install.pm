@@ -65,6 +65,9 @@ sub SETTINGS {
     # 2007-07-02 altlist@gmail.com -- Bug 225731
     quote_replies      => { options => ['quoted_reply', 'simple_reply', 'off'],
                             default => "quoted_reply" },
+    # 2009-02-01 mozilla@matt.mchenryfamily.org -- Bug 398473
+    comment_box_position => { options => ['before_comments', 'after_comments'],
+                              default => 'before_comments' },
     # 2008-08-27 LpSolit@gmail.com -- Bug 182238
     timezone           => { subclass => 'Timezone', default => 'local' },
     }

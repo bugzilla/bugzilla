@@ -218,7 +218,9 @@
                show_attachment_flags = bug.show_attachment_flags
     %]
 
-    [% PROCESS comment_box %]
+    [% IF user.settings.comment_box_position.value == 'before_comments' %]
+      [% PROCESS comment_box %]
+    [% END %]
   </td>
   <td>
     [% PROCESS section_restrict_visibility %]
@@ -232,6 +234,11 @@
       mode = user.id ? "edit" : "show"
     %]
   </div>
+
+  [% IF user.settings.comment_box_position.value == 'after_comments' %]
+    <hr>
+    [% PROCESS comment_box %]
+  [% END %]        
 
 </form>
 

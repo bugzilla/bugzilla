@@ -105,25 +105,31 @@ use constant DB_COLUMNS => qw(
     is_mandatory
 );
 
-use constant REQUIRED_CREATE_FIELDS => qw(name description);
+use constant REQUIRED_CREATE_FIELDS => qw(name description sortkey);
 
 use constant VALIDATORS => {
-    custom      => \&_check_custom,
-    description => \&_check_description,
-    enter_bug   => \&_check_enter_bug,
-    buglist     => \&Bugzilla::Object::check_boolean,
-    mailhead    => \&_check_mailhead,
-    obsolete    => \&_check_obsolete,
-    sortkey     => \&_check_sortkey,
-    type        => \&_check_type,
+    custom       => \&_check_custom,
+    description  => \&_check_description,
+    enter_bug    => \&_check_enter_bug,
+    buglist      => \&Bugzilla::Object::check_boolean,
+    mailhead     => \&_check_mailhead,
+    name         => \&_check_name,
+    obsolete     => \&_check_obsolete,
+    reverse_desc => \&_check_reverse_desc,
+    sortkey      => \&_check_sortkey,
+    type         => \&_check_type,
+    value_field_id      => \&_check_value_field_id,
     visibility_field_id => \&_check_visibility_field_id,
+    visibility_value_id => \&_check_control_value,
     is_mandatory => \&Bugzilla::Object::check_boolean,
 };
 
-use constant UPDATE_VALIDATORS => {
-    value_field_id      => \&_check_value_field_id,
-    visibility_value_id => \&_check_control_value,
-    reverse_desc        => \&_check_reverse_desc,
+use constant VALIDATOR_DEPENDENCIES => {
+    name => ['custom'],
+    type => ['custom'],
+    reverse_desc => ['type'],
+    value_field_id => ['type'],
+    visibility_value_id => ['visibility_field_id'],
 };
 
 use constant UPDATE_COLUMNS => qw(
@@ -271,7 +277,7 @@ sub _check_enter_bug { return $_[1] ? 1 : 0; }
 sub _check_mailhead { return $_[1] ? 1 : 0; }
 
 sub _check_name {
-    my ($invocant, $name, $is_custom) = @_;
+    my ($class, $name, undef, $params) = @_;
     $name = lc(clean_text($name));
     $name || ThrowUserError('field_missing_name');
 
@@ -279,7 +285,7 @@ sub _check_name {
     my $name_regex = qr/^[\w\.]+$/;
     # Custom fields have more restrictive name requirements than
     # standard fields.
-    $name_regex = qr/^[a-zA-Z0-9_]+$/ if $is_custom;
+    $name_regex = qr/^[a-zA-Z0-9_]+$/ if $params->{custom};
     # Custom fields can't be named just "cf_", and there is no normal
     # field named just "cf_".
     ($name =~ $name_regex && $name ne "cf_")
@@ -287,7 +293,7 @@ sub _check_name {
 
     # If it's custom, prepend cf_ to the custom field name to distinguish 
     # it from standard fields.
-    if ($name !~ /^cf_/ && $is_custom) {
+    if ($name !~ /^cf_/ && $params->{custom}) {
         $name = 'cf_' . $name;
     }
 
@@ -314,18 +320,24 @@ sub _check_sortkey {
 }
 
 sub _check_type {
-    my ($invocant, $type) = @_;
+    my ($invocant, $type, undef, $params) = @_;
     my $saved_type = $type;
     # The constant here should be updated every time a new,
     # higher field type is added.
     (detaint_natural($type) && $type <= FIELD_TYPE_BUG_URLS)
       || ThrowCodeError('invalid_customfield_type', { type => $saved_type });
+
+    my $custom = blessed($invocant) ? $invocant->custom : $params->{custom};
+    if ($custom && !$type) {
+        ThrowCodeError('field_type_not_specified');
+    }
+
     return $type;
 }
 
 sub _check_value_field_id {
-    my ($invocant, $field_id, $is_select) = @_;
-    $is_select = $invocant->is_select if !defined $is_select;
+    my ($invocant, $field_id, undef, $params) = @_;
+    my $is_select = $invocant->is_select($params);
     if ($field_id && !$is_select) {
         ThrowUserError('field_value_control_select_only');
     }
@@ -348,13 +360,13 @@ sub _check_visibility_field_id {
 }
 
 sub _check_control_value {
-    my ($invocant, $value_id, $field_id) = @_;
+    my ($invocant, $value_id, undef, $params) = @_;
     my $field;
     if (blessed $invocant) {
         $field = $invocant->visibility_field;
     }
-    elsif ($field_id) {
-        $field = $invocant->new($field_id);
+    elsif ($params->{visibility_field_id}) {
+        $field = $invocant->new($params->{visibility_field_id});
     }
     # When no field is set, no value is set.
     return undef if !$field;
@@ -364,12 +376,8 @@ sub _check_control_value {
 }
 
 sub _check_reverse_desc {
-    my ($invocant, $reverse_desc, $type) = @_;
-    
-    if (blessed $invocant) {
-        $type = $invocant->type;
-    }
-    
+    my ($invocant, $reverse_desc, undef, $params) = @_;
+    my $type = blessed($invocant) ? $invocant->type : $params->{type};
     if ($type != FIELD_TYPE_BUG_ID) {
         return undef; # store NULL for non-reversible field types
     }
@@ -510,9 +518,12 @@ objects.
 
 =cut
 
-sub is_select { 
-    return ($_[0]->type == FIELD_TYPE_SINGLE_SELECT 
-            || $_[0]->type == FIELD_TYPE_MULTI_SELECT) ? 1 : 0 
+sub is_select {
+    my ($invocant, $params) = @_;
+    # This allows this method to be called by create() validators.
+    my $type = blessed($invocant) ? $invocant->type : $params->{type}; 
+    return ($type == FIELD_TYPE_SINGLE_SELECT 
+            || $type == FIELD_TYPE_MULTI_SELECT) ? 1 : 0 
 }
 
 =over
@@ -935,6 +946,11 @@ C<is_mandatory> - boolean - Whether this field is mandatory. Defaults to 0.
 
 sub create {
     my $class = shift;
+    my ($params) = @_;
+    # This makes sure the "sortkey" validator runs, even if
+    # the parameter isn't sent to create().
+    $params->{sortkey} = undef if !exists $params->{sortkey};
+    $params->{type} ||= 0;
     my $field = $class->SUPER::create(@_);
 
     my $dbh = Bugzilla->dbh;
@@ -958,40 +974,6 @@ sub create {
     }
 
     return $field;
-}
-
-sub run_create_validators {
-    my $class = shift;
-    my $dbh = Bugzilla->dbh;
-    my $params = $class->SUPER::run_create_validators(@_);
-
-    $params->{name} = $class->_check_name($params->{name}, $params->{custom});
-    if (!exists $params->{sortkey}) {
-        $params->{sortkey} = $dbh->selectrow_array(
-            "SELECT MAX(sortkey) + 100 FROM fielddefs") || 100;
-    }
-
-    $params->{visibility_value_id} = 
-        $class->_check_control_value($params->{visibility_value_id},
-                                     $params->{visibility_field_id});
-
-    my $type = $params->{type} || 0;
-    
-    if ($params->{custom} && !$type) {
-        ThrowCodeError('field_type_not_specified');
-    }
-    
-    $params->{value_field_id} = 
-        $class->_check_value_field_id($params->{value_field_id},
-            ($type == FIELD_TYPE_SINGLE_SELECT 
-             || $type == FIELD_TYPE_MULTI_SELECT) ? 1 : 0);
-
-    $params->{reverse_desc} = $class->_check_reverse_desc(
-        $params->{reverse_desc}, $type);
-
-
-
-    return $params;
 }
 
 sub update {

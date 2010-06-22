@@ -507,7 +507,7 @@ use constant ABSTRACT_SCHEMA => {
             id          => {TYPE => 'SMALLSERIAL', NOTNULL => 1,
                             PRIMARYKEY => 1},
             name        => {TYPE => 'varchar(64)', NOTNULL => 1},
-            description => {TYPE => 'MEDIUMTEXT'},
+            description => {TYPE => 'MEDIUMTEXT', NOTNULL => 1},
         ],
         INDEXES => [
             keyworddefs_name_idx   => {FIELDS => ['name'],

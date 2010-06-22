@@ -618,6 +618,8 @@ sub update_table_definitions {
 
     $dbh->bz_alter_column('attachments', 'ispatch', 
         { TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'FALSE'});
+    $dbh->bz_alter_column('keyworddefs', 'description',
+                          { TYPE => 'MEDIUMTEXT', NOTNULL => 1 }, '');
 
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #

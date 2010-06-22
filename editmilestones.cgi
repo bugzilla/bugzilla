@@ -206,6 +206,9 @@ if ($action eq 'update') {
     $milestone->set_name($milestone_name);
     $milestone->set_sortkey($sortkey);
     my $changes = $milestone->update();
+    # Reloading the product since the default milestone name
+    # could have been changed.
+    $product = new Bugzilla::Product({ name => $product_name });
 
     delete_token($token);
 

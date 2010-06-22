@@ -36,6 +36,7 @@ use Bugzilla::Util qw(trick_taint trim);
 use Bugzilla::Version;
 use Bugzilla::Milestone;
 use Bugzilla::Status;
+use Bugzilla::Token qw(issue_hash_token);
 
 #############
 # Constants #
@@ -322,7 +323,7 @@ sub get {
         else {
             $bug = Bugzilla::Bug->check($bug_id);
         }
-        push(@bugs, $self->_bug_to_hash($bug));
+        push(@bugs, $self->_bug_to_hash($bug, $params));
     }
 
     return { bugs => \@bugs, faults => \@faults };
@@ -421,7 +422,28 @@ sub search {
     
     my $bugs = Bugzilla::Bug->match($params);
     my $visible = Bugzilla->user->visible_bugs($bugs);
-    my @hashes = map { $self->_bug_to_hash($_) } @$visible;
+    my @hashes = map { $self->_bug_to_hash($_, $params) } @$visible;
+    return { bugs => \@hashes };
+}
+
+sub possible_duplicates {
+    my ($self, $params) = validate(@_, 'product');
+    my $user = Bugzilla->user;
+
+    # Undo the array-ification that validate() does, for "summary".
+    $params->{summary} || ThrowCodeError('param_required',
+        { function => 'Bug.possible_duplicates', param => 'summary' });
+
+    my @products;
+    foreach my $name (@{ $params->{'product'} || [] }) {
+        my $object = $user->can_enter_product($name, THROW_ERROR);
+        push(@products, $object);
+    }
+
+    my $possible_dupes = Bugzilla::Bug->possible_duplicates(
+        { summary => $params->{summary}, products => \@products,
+          limit   => $params->{limit} });
+    my @hashes = map { $self->_bug_to_hash($_, $params) } @$possible_dupes;
     return { bugs => \@hashes };
 }
 
@@ -617,7 +639,7 @@ sub attachments {
 
 # A helper for get() and search().
 sub _bug_to_hash {
-    my ($self, $bug) = @_;
+    my ($self, $bug, $filters) = @_;
 
     # Timetracking fields are deleted if the user doesn't belong to
     # the corresponding group.
@@ -646,6 +668,11 @@ sub _bug_to_hash {
     $item{'component'}        = $self->type('string', $bug->component);
     $item{'dupe_of'}          = $self->type('int', $bug->dup_id);
 
+    if (Bugzilla->user->id) {
+        my $token = issue_hash_token([$bug->id, $bug->delta_ts]);
+        $item{'update_token'} = $self->type('string', $token);
+    }
+
     # if we do not delete this key, additional user info, including their
     # real name, etc, will wind up in the 'internals' hashref
     delete $item{internals}->{assigned_to_obj};
@@ -659,7 +686,7 @@ sub _bug_to_hash {
         $item{'alias'} = undef;
     }
 
-    return \%item;
+    return filter $filters, \%item;
 }
 
 sub _attachment_to_hash {

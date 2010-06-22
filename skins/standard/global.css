@@ -504,45 +504,6 @@ input.required, select.required, span.required_explanation {
     list-style-type: none;
 }
 
-/*************/
-/* enter_bug */
-/*************/
-
-form#Create table {
-    border-spacing: 0;
-    border-width: 0;
-}
-form#Create td, form#Create th {
-    padding: .25em;
-}
-form#Create th {
-    text-align: right;
-}
-
-/* This makes the "component" column as small as possible (since it
- * contains only fixed-width content) and the Reporter column
- * as large as possible, which makes the form not jump around
- * when the Component Description changes size. This works
- * pretty well on all browsers except IE 8.
- */
-form#Create #field_container_component { width: 1px; }
-form#Create #field_container_reporter  { width: 100%; }
-
-form#Create .comment {
-    vertical-align: top;
-    overflow: auto;
-    color: green;
-}
-form#Create #comp_desc_container td { padding: 0; }
-form#Create #comp_desc { height: 11ex; }
-form#Create #os_guess_note {
-    padding-top: 0;
-}
-form#Create #os_guess_note div {
-    max-width: 35em;
-}
-
-
 .image_button {
     background-repeat: no-repeat;
     background-position: center center;

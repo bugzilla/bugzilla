@@ -40,8 +40,8 @@ For interface details see L<Bugzilla::DB> and L<DBI>.
 =cut
 
 package Bugzilla::DB::Mysql;
-
 use strict;
+use base qw(Bugzilla::DB);
 
 use Bugzilla::Constants;
 use Bugzilla::Install::Util qw(install_string);
@@ -57,8 +57,7 @@ use Text::ParseWords;
 # MAX_COMMENT_LENGTH is big.
 use constant MAX_COMMENTS => 50;
 
-# This module extends the DB interface via inheritance
-use base qw(Bugzilla::DB);
+use constant FULLTEXT_OR => '|';
 
 sub new {
     my ($class, $params) = @_;

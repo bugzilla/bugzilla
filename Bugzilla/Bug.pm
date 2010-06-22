@@ -49,7 +49,7 @@ use Bugzilla::Group;
 use Bugzilla::Status;
 use Bugzilla::Comment;
 
-use List::MoreUtils qw(firstidx);
+use List::MoreUtils qw(firstidx uniq);
 use List::Util qw(min first);
 use Storable qw(dclone);
 use URI;
@@ -444,6 +444,87 @@ sub match {
     }
 
     return $class->SUPER::match(@_);
+}
+
+sub possible_duplicates {
+    my ($class, $params) = @_;
+    my $short_desc = $params->{summary};
+    my $products = $params->{products} || [];
+    my $limit = $params->{limit} || MAX_POSSIBLE_DUPLICATES;
+    $limit = MAX_POSSIBLE_DUPLICATES if $limit > MAX_POSSIBLE_DUPLICATES;
+    $products = [$products] if !ref($products) eq 'ARRAY';
+
+    my $orig_limit = $limit;
+    detaint_natural($limit) 
+        || ThrowCodeError('param_must_be_numeric', 
+                          { function => 'possible_duplicates',
+                            param    => $orig_limit });
+
+    my $dbh = Bugzilla->dbh;
+    my $user = Bugzilla->user;
+    my @words = split(/[\b\s]+/, $short_desc || '');
+    # Exclude punctuation from the array.
+    @words = map { /(\w+)/; $1 } @words;
+    # And make sure that each word is longer than 2 characters.
+    @words = grep { defined $_ and length($_) > 2 } @words;
+
+    return [] if !@words;
+
+    my ($where_sql, $relevance_sql);
+    if ($dbh->FULLTEXT_OR) {
+        my $joined_terms = join($dbh->FULLTEXT_OR, @words);
+        ($where_sql, $relevance_sql) = 
+            $dbh->sql_fulltext_search('bugs_fulltext.short_desc', 
+                                      $joined_terms, 1);
+        $relevance_sql ||= $where_sql;
+    }
+    else {
+        my (@where, @relevance);
+        my $count = 0;
+        foreach my $word (@words) {
+            $count++;
+            my ($term, $rel_term) = $dbh->sql_fulltext_search(
+                'bugs_fulltext.short_desc', $word, $count);
+            push(@where, $term);
+            push(@relevance, $rel_term || $term);
+        }
+
+        $where_sql = join(' OR ', @where);
+        $relevance_sql = join(' + ', @relevance);
+    }
+
+    my $product_ids = join(',', map { $_->id } @$products);
+    my $product_sql = $product_ids ? "AND product_id IN ($product_ids)" : "";
+
+    # Because we collapse duplicates, we want to get slightly more bugs
+    # than were actually asked for.
+    my $sql_limit = $limit + 5;
+
+    my $possible_dupes = $dbh->selectall_arrayref(
+        "SELECT bugs.bug_id AS bug_id, bugs.resolution AS resolution,
+                ($relevance_sql) AS relevance
+           FROM bugs
+                INNER JOIN bugs_fulltext ON bugs.bug_id = bugs_fulltext.bug_id
+          WHERE ($where_sql) $product_sql
+       ORDER BY relevance DESC, bug_id DESC
+          LIMIT $sql_limit", {Slice=>{}});
+
+    my @actual_dupe_ids;
+    # Resolve duplicates into their ultimate target duplicates.
+    foreach my $bug (@$possible_dupes) {
+        my $push_id = $bug->{bug_id};
+        if ($bug->{resolution} && $bug->{resolution} eq 'DUPLICATE') {
+            $push_id = _resolve_ultimate_dup_id($bug->{bug_id});
+        }
+        push(@actual_dupe_ids, $push_id);
+    }
+    @actual_dupe_ids = uniq @actual_dupe_ids;
+    if (scalar @actual_dupe_ids > $limit) {
+        @actual_dupe_ids = @actual_dupe_ids[0..($limit-1)];
+    }
+
+    my $visible = $user->visible_bugs(\@actual_dupe_ids);
+    return $class->new_from_list($visible);
 }
 
 # Docs for create() (there's no POD in this file yet, but we very
@@ -1426,23 +1507,7 @@ sub _check_dup_id {
 
     # Make sure a loop isn't created when marking this bug
     # as duplicate.
-    my %dupes;
-    my $this_dup = $dupe_of;
-    my $sth = $dbh->prepare('SELECT dupe_of FROM duplicates WHERE dupe = ?');
-
-    while ($this_dup) {
-        if ($this_dup == $self->id) {
-            ThrowUserError('dupe_loop_detected', { bug_id  => $self->id,
-                                                   dupe_of => $dupe_of });
-        }
-        # If $dupes{$this_dup} is already set to 1, then a loop
-        # already exists which does not involve this bug.
-        # As the user is not responsible for this loop, do not
-        # prevent him from marking this bug as a duplicate.
-        last if exists $dupes{$this_dup};
-        $dupes{$this_dup} = 1;
-        $this_dup = $dbh->selectrow_array($sth, undef, $this_dup);
-    }
+   _resolve_ultimate_dup_id($self->id, $dupe_of, 1);
 
     my $cur_dup = $self->dup_id || 0;
     if ($cur_dup != $dupe_of && Bugzilla->params->{'commentonduplicate'}
@@ -2841,6 +2906,38 @@ sub dup_id {
                                 $self->{'bug_id'});
     }
     return $self->{'dup_id'};
+}
+
+sub _resolve_ultimate_dup_id {
+    my ($bug_id, $dupe_of, $loops_are_an_error) = @_;
+    my $dbh = Bugzilla->dbh;
+    my $sth = $dbh->prepare('SELECT dupe_of FROM duplicates WHERE dupe = ?');
+
+    my $this_dup = $dupe_of || $dbh->selectrow_array($sth, undef, $bug_id);
+    my $last_dup = $bug_id;
+
+    my %dupes;
+    while ($this_dup) {
+        if ($this_dup == $bug_id) {
+            if ($loops_are_an_error) {
+                ThrowUserError('dupe_loop_detected', { bug_id  => $bug_id,
+                                                       dupe_of => $dupe_of });
+            }
+            else {
+                return $last_dup;
+            }
+        }
+        # If $dupes{$this_dup} is already set to 1, then a loop
+        # already exists which does not involve this bug.
+        # As the user is not responsible for this loop, do not
+        # prevent him from marking this bug as a duplicate.
+        return $last_dup if exists $dupes{$this_dup};
+        $dupes{$this_dup} = 1;
+        $last_dup = $this_dup;
+        $this_dup = $dbh->selectrow_array($sth, undef, $this_dup);
+    }
+
+    return $last_dup;
 }
 
 sub actual_time {

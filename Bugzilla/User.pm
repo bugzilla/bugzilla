@@ -900,7 +900,7 @@ sub can_enter_product {
       $product && grep($_->name eq $product->name,
                        @{ $self->get_enterable_products });
 
-    return 1 if $can_enter;
+    return $product if $can_enter;
 
     return 0 unless $warn == THROW_ERROR;
 

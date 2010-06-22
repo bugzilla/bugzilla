@@ -73,6 +73,11 @@ use constant ENUM_DEFAULTS => {
     resolution   => ["","FIXED","INVALID","WONTFIX", "DUPLICATE","WORKSFORME"],
 };
 
+# The character that means "OR" in a boolean fulltext search. If empty,
+# the database doesn't support OR searches in fulltext searches.
+# Used by Bugzilla::Bug::possible_duplicates.
+use constant FULLTEXT_OR => '';
+
 #####################################################################
 # Connection Methods
 #####################################################################

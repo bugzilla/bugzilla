@@ -35,16 +35,14 @@ For interface details see L<Bugzilla::DB> and L<DBI>.
 =cut
 
 package Bugzilla::DB::Oracle;
-
 use strict;
+use base qw(Bugzilla::DB);
 
 use DBD::Oracle;
 use DBD::Oracle qw(:ora_types);
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Util;
-# This module extends the DB interface via inheritance
-use base qw(Bugzilla::DB);
 
 #####################################################################
 # Constants
@@ -52,6 +50,7 @@ use base qw(Bugzilla::DB);
 use constant EMPTY_STRING  => '__BZ_EMPTY_STR__';
 use constant ISOLATION_LEVEL => 'READ COMMITTED';
 use constant BLOB_TYPE => { ora_type => ORA_BLOB };
+use constant FULLTEXT_OR => ' OR ';
 
 sub new {
     my ($class, $params) = @_;

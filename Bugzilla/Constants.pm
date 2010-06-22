@@ -175,6 +175,7 @@ use File::Basename;
     MAX_FIELD_VALUE_SIZE
     MAX_FREETEXT_LENGTH
     MAX_BUG_URL_LENGTH
+    MAX_POSSIBLE_DUPLICATES
 
     PASSWORD_DIGEST_ALGORITHM
     PASSWORD_SALT_LENGTH
@@ -526,6 +527,10 @@ use constant MAX_FREETEXT_LENGTH => 255;
 
 # The longest a bug URL in a BUG_URLS field can be.
 use constant MAX_BUG_URL_LENGTH => 255;
+
+# The largest number of possible duplicates that Bug::possible_duplicates
+# will return.
+use constant MAX_POSSIBLE_DUPLICATES => 25;
 
 # This is the name of the algorithm used to hash passwords before storing
 # them in the database. This can be any string that is valid to pass to

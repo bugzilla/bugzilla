@@ -27,6 +27,7 @@
 
 <ul class="bz_toc">
   <li><a href="#v36_introduction">Introduction</a></li>
+  <li><a href="#v36_point">Updates in this 3.6.x Release</a></li>
   <li><a href="#v36_req">Minimum Requirements</a></li>
   <li><a href="#v36_feat">New Features and Improvements</a></li>
   <li><a href="#v36_issues">Outstanding Issues</a></li>
@@ -57,6 +58,54 @@
   <a href="http://www.novell.com/">Novell</a> for funding the development
   of various features and improvements in this release of
   [%+ terms.Bugzilla %].</p>
+
+<h2 id="v36_point">Updates in this 3.6.x Release</h2>
+
+<h3>3.6.1</h3>
+
+<p>This release fixes two security issues. See the
+  <a href="http://www.bugzilla.org/security/3.2.6/">Security Advisory</a>
+  for details.</p>
+
+<p>In addition, the following important fixes/changes have been made in
+  this release:</p>
+
+<ul>
+  <li>Using the "Change Columns" page would sometimes result in a
+    plain-text page instead of HTML.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=376044">[% terms.Bug %] 376044</a>)
+  </li>
+  <li>Extensions that have only templates and no code are now working.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=562551">[% terms.Bug %] 562551</a>)
+  </li>
+  <li><kbd>install-module.pl</kbd> has been fixed so that it installs
+    modules properly on both new and old versions of Perl.
+     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=560318">[% terms.Bug %] 560318</a>
+     and <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=560330">[% terms.Bug %] 560330</a>)
+  </li>
+  <li>It is now possible to upgrade from 3.4 to 3.6 when using Oracle.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=561379">[% terms.Bug %] 561379</a>)
+  </li>
+  <li>Editing a field value's name (using the Field Values admin control
+    panel) wasn't working if the value was set as the default for that
+    field.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=561296">[% terms.Bug %] 561296</a>)
+  </li>
+  <li>Now, if you set the <kbd>maxattachmentsize</kbd> parameter to 
+   <kbd>0</kbd>, the ability to add attachments to [% terms.bugs %] will
+   be disabled in the user interface.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=560215">[% terms.Bug %] 560215</a>)
+  </li>
+  <li>If you had the <kbd>noresolveonopenblockers</kbd> parameter set,
+    [%+ terms.bugs %] couldn't be edited at all if they were marked FIXED
+    and had any open blockers. (The parameter is only supposed to prevent
+    <em>changing</em> [% terms.bugs %] to FIXED, not modifying already-FIXED
+    [%+ terms.bugs %].)
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=565314">[% terms.Bug %] 565314</a>)
+  </li>
+  <li>Some minor issues with Perl 5.12 were fixed (mostly warnings that Perl
+    5.12 was throwing). [% terms.Bugzilla %] now supports Perl 5.12.</li>
+</ul>
 
 <h2 id="v36_req">Minimum Requirements</h2>
 

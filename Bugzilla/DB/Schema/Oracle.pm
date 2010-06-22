@@ -214,6 +214,10 @@ sub get_alter_column_ddl {
 
     my $default = $new_def->{DEFAULT};
     my $default_old = $old_def->{DEFAULT};
+
+    if (defined $default) {
+        $default = $specific->{$default} if exists $specific->{$default};
+    }
     # This first condition prevents "uninitialized value" errors.
     if (!defined $default && !defined $default_old) {
         # Do Nothing
@@ -227,7 +231,6 @@ sub get_alter_column_ddl {
     elsif ( (defined $default && !defined $default_old) || 
             ($default ne $default_old) ) 
     {
-        $default = $specific->{$default} if exists $specific->{$default};
         push(@statements, "ALTER TABLE $table MODIFY $column "
                          . " DEFAULT $default");
     }
@@ -236,7 +239,7 @@ sub get_alter_column_ddl {
     if (!$old_def->{NOTNULL} && $new_def->{NOTNULL}) {
         my $setdefault;
         # Handle any fields that were NULL before, if we have a default,
-        $setdefault = $new_def->{DEFAULT} if exists $new_def->{DEFAULT};
+        $setdefault = $default if defined $default;
         # But if we have a set_nulls_to, that overrides the DEFAULT 
         # (although nobody would usually specify both a default and 
         # a set_nulls_to.)

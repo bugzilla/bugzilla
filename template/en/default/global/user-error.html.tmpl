@@ -1182,6 +1182,10 @@
       to add a version to this product.
     [% END %]
 
+  [% ELSIF error == "multiple_alias_not_allowed" %]
+    You cannot set aliases when modifying multiple [% terms.bugs %]
+    at once.
+
   [% ELSIF error == "need_quip" %]
     [% title = "Quip Required" %]
     [% docslinks = {'quips.html' => 'About quips'} %]

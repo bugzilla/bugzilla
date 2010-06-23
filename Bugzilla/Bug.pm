@@ -2073,6 +2073,15 @@ sub set_all {
     my $self = shift;
     my ($params) = @_;
 
+    # You cannot mark bugs as duplicate when changing several bugs at once
+    # (because currently there is no way to check for duplicate loops in that
+    # situation). You also cannot set the alias of several bugs at once.
+    if ($params->{other_bugs} and scalar @{ $params->{other_bugs} } > 1) {
+        ThrowUserError('dupe_not_allowed') if exists $params->{dup_id};
+        ThrowUserError('multiple_alias_not_allowed') 
+            if defined $params->{alias};
+    }
+
     # For security purposes, and because lots of other checks depend on it,
     # we set the product first before anything else.
     my $product_changed; # Used only for strict_isolation checks.
@@ -2162,15 +2171,6 @@ sub set_all {
     # do that here, because if they *did* change the assignee, qa, or CC,
     # then we don't want to check the original ones, only the new ones. 
     $self->_check_strict_isolation() if $product_changed;
-
-    # You cannot mark bugs as duplicates when changing several bugs at once
-    # (because currently there is no way to check for duplicate loops in that
-    # situation).
-    if (exists $params->{'dup_id'} and $params->{other_bugs} 
-        and scalar @{ $params->{other_bugs} } > 1) 
-    {
-        ThrowUserError('dupe_not_allowed');
-    }
 }
 
 # Helper for set_all that helps with fields that have an "add/remove"
@@ -2604,6 +2604,13 @@ sub add_comment {
 
     if ($comment eq '' && !($params->{type} || abs($params->{work_time}))) {
         return;
+    }
+
+    # If the user has explicitly set remaining_time, this will be overridden
+    # later in set_all. But if they haven't, this keeps remaining_time
+    # up-to-date.
+    if ($params->{work_time}) {
+        $self->set_remaining_time($self->remaining_time - $params->{work_time});
     }
 
     # So we really want to comment. Make sure we are allowed to do so.

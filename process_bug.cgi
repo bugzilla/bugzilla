@@ -234,7 +234,6 @@ my @set_fields = qw(op_sys rep_platform priority bug_severity
                     bug_file_loc status_whiteboard short_desc
                     deadline remaining_time estimated_time
                     work_time set_default_assignee set_default_qa_contact
-                    keywords keywordaction 
                     cclist_accessible reporter_accessible 
                     product confirm_product_change
                     bug_status resolution dup_id);
@@ -247,7 +246,6 @@ my %field_translation = (
     bug_file_loc => 'url',
     set_default_assignee   => 'reset_assigned_to',
     set_default_qa_contact => 'reset_qa_contact',
-    keywordaction => 'keywords_action',
     confirm_product_change => 'product_change_confirmed',
 );
 
@@ -259,6 +257,12 @@ foreach my $field_name (@set_fields) {
     }
 }
 
+if (should_set('keywords')) {
+    my $action = $cgi->param('keywordaction');
+    $action = 'remove' if $action eq 'delete';
+    $action = 'set'    if $action eq 'makeexact';
+    $set_all_fields{keywords}->{$action} = $cgi->param('keywords');
+}
 if (should_set('comment')) {
     $set_all_fields{comment} = {
         body       => scalar $cgi->param('comment'),

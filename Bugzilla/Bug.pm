@@ -1598,9 +1598,15 @@ sub _check_groups {
 }
 
 sub _check_keywords {
-    my ($invocant, $keyword_string, undef, $params) = @_;
-    $keyword_string = trim($keyword_string);
-    return [] if !$keyword_string;
+    my ($invocant, $keywords_in, undef, $params) = @_;
+
+    return [] if !defined $keywords_in;
+
+    my $keyword_array = $keywords_in;
+    if (!ref $keyword_array) {
+        $keywords_in = trim($keywords_in);
+        $keyword_array = [split(/[\s,]+/, $keywords_in)];
+    }
     
     # On creation, only editbugs users can set keywords.
     if (!ref $invocant) {
@@ -1609,7 +1615,7 @@ sub _check_keywords {
     }
     
     my %keywords;
-    foreach my $keyword (split(/[\s,]+/, $keyword_string)) {
+    foreach my $keyword (@$keyword_array) {
         next unless $keyword;
         my $obj = new Bugzilla::Keyword({ name => $keyword });
         ThrowUserError("unknown_keyword", { keyword => $keyword }) if !$obj;
@@ -2109,8 +2115,11 @@ sub set_all {
     }
 
     if (exists $params->{'keywords'}) {
-        $self->modify_keywords($params->{'keywords'},
-                               $params->{'keywords_action'});
+        # Sorting makes the order "add, remove, set", just like for other
+        # fields.
+        foreach my $action (sort keys %{ $params->{'keywords'} }) {
+            $self->modify_keywords($params->{'keywords'}->{$action}, $action);
+        }
     }
 
     if (exists $params->{'comment'} or exists $params->{'work_time'}) {
@@ -2622,15 +2631,15 @@ sub add_comment {
 sub modify_keywords {
     my ($self, $keywords, $action) = @_;
     
-    $action ||= "makeexact";
-    if (!grep($action eq $_, qw(add delete makeexact))) {
-        $action = "makeexact";
+    $action ||= 'set';
+    if (!grep($action eq $_, qw(add remove set))) {
+        $action = 'set';
     }
     
     $keywords = $self->_check_keywords($keywords);
 
     my (@result, $any_changes);
-    if ($action eq 'makeexact') {
+    if ($action eq 'set') {
         @result = @$keywords;
         # Check if anything was added or removed.
         my @old_ids = map { $_->id } @{$self->keyword_objects};

@@ -29,7 +29,7 @@
 [% PROCESS "bug/field-help.none.tmpl" %]
 [% DEFAULT tag_name = "th" %]
 <[% tag_name FILTER html %] class="field_label [% ' bz_hidden_field' IF hidden %]
-           [%- ' required' IF field.is_mandatory %]"
+           [%- ' required' IF field.is_mandatory && NOT bug.id %]"
     id="field_label_[% field.name FILTER html %]"
     [% IF rowspan %] rowspan="[% rowspan FILTER html %]"[% END %]>
 

@@ -39,6 +39,8 @@ use constant UPDATE_VALIDATORS => {};
 use constant NUMERIC_COLUMNS   => ();
 use constant DATE_COLUMNS      => ();
 use constant VALIDATOR_DEPENDENCIES => {};
+# XXX At some point, this will be joined with FIELD_MAP.
+use constant REQUIRED_FIELD_MAP  => {};
 
 # This allows the JSON-RPC interface to return Bugzilla::Object instances
 # as though they were hashes. In the future, this may be modified to return
@@ -447,10 +449,9 @@ sub check_required_create_fields {
     Bugzilla::Hook::process('object_before_create', { class => $class,
                                                       params => $params });
 
-    foreach my $field ($class->REQUIRED_CREATE_FIELDS) {
-        ThrowCodeError('param_required',
-            { function => "${class}->create", param => $field })
-            if !exists $params->{$field};
+    my @check_fields = $class->_required_create_fields();
+    foreach my $field (@check_fields) {
+        $params->{$field} = undef if !exists $params->{$field};
     }
 }
 
@@ -616,6 +617,30 @@ sub _get_validators {
     return $cache->{$cache_key};
 }
 
+# These are all the fields that need to be checked, always, when
+# calling create(), because they have no DEFAULT and they are marked
+# NOT NULL.
+sub _required_create_fields {
+    my $class = shift;
+    my $dbh = Bugzilla->dbh;
+    my $table = $class->DB_TABLE;
+
+    my @columns = $dbh->bz_table_columns($table);
+    my @required;
+    foreach my $column (@columns) {
+        my $def = $dbh->bz_column_info($table, $column);
+        if ($def->{NOTNULL} and !defined $def->{DEFAULT}
+            # SERIAL fields effectively have a DEFAULT, but they're not
+            # listed as having a DEFAULT in DB::Schema.
+            and $def->{TYPE} !~ /serial/i) 
+        {
+            my $field = $class->REQUIRED_FIELD_MAP->{$column} || $column;
+            push(@required, $field);
+        }
+    }
+    return @required;
+}
+
 1;
 
 __END__
@@ -687,11 +712,6 @@ The order that C<new_from_list> and C<get_all> should return objects
 in. This should be the name of a database column. Defaults to
 L</NAME_FIELD>.
 
-=item C<REQUIRED_CREATE_FIELDS>
-
-The list of fields that B<must> be specified when the user calls
-C<create()>. This should be an array.
-
 =item C<VALIDATORS>
 
 A hashref that points to a function that will validate each param to
@@ -741,6 +761,15 @@ on the C<product> field being set, you would do:
 A list of columns to update when L</update> is called.
 If a field can't be changed, it shouldn't be listed here. (For example,
 the L</ID_FIELD> usually can't be updated.)
+
+=item C<REQUIRED_FIELD_MAP>
+
+This is a hashref that maps database column names to L</create> argument
+names. You only need to specify values for fields where the argument passed
+to L</create> has a different name in the database than it does in the
+L</create> arguments. (For example, L<Bugzilla::Bug/create> takes a
+C<product> argument, but the column name in the C<bugs> table is
+C<product_id>.)
 
 =item C<NUMERIC_COLUMNS>
 
@@ -915,17 +944,13 @@ Description: Creates a new item in the database.
              are invalid.
 
 Params:      C<$params> - hashref - A value to put in each database
-               field for this object. Certain values must be set (the 
-               ones specified in L</REQUIRED_CREATE_FIELDS>), and
-               the function will throw a Code Error if you don't set
-               them.
+             field for this object.
 
 Returns:     The Object just created in the database.
 
 Notes:       In order for this function to work in your subclass,
              your subclass's L</ID_FIELD> must be of C<SERIAL>
-             type in the database. Your subclass also must
-             define L</REQUIRED_CREATE_FIELDS> and L</VALIDATORS>.
+             type in the database.
 
              Subclass Implementors: This function basically just
              calls L</check_required_create_fields>, then
@@ -940,8 +965,10 @@ Notes:       In order for this function to work in your subclass,
 
 =item B<Description>
 
-Part of L</create>. Throws an error if any of the L</REQUIRED_CREATE_FIELDS>
-have not been specified in C<$params>
+Part of L</create>. Modifies the incoming C<$params> argument so that
+any field that does not have a database default will be checked
+later by L</run_create_validators>, even if that field wasn't specified
+as an argument to L</create>.
 
 =item B<Params>
 

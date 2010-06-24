@@ -42,8 +42,6 @@ use constant DB_COLUMNS => qw(
     mailto_type
 );
 
-use constant REQUIRED_CREATE_FIELDS => qw(eventid mailto mailto_type);
-
 use constant UPDATE_COLUMNS => qw(
     eventid 
     run_day 

@@ -152,13 +152,6 @@ sub post_bug {
 
     my $user = Bugzilla->user;
 
-    # Bugzilla::Bug->create throws a confusing CodeError if
-    # the REQUIRED_CREATE_FIELDS are missing, but much more
-    # sensible errors if the fields exist but are just undef.
-    foreach my $field (Bugzilla::Bug::REQUIRED_CREATE_FIELDS) {
-        $fields->{$field} = undef if !exists $fields->{$field};
-    }
-
     my ($retval, $non_conclusive_fields) =
       Bugzilla::User::match_field({
         'assigned_to'   => { 'type' => 'single' },

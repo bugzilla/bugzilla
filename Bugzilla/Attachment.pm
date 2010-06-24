@@ -87,13 +87,9 @@ sub DB_COLUMNS {
         $dbh->sql_date_format('attachments.creation_ts', '%Y.%m.%d %H:%i') . ' AS creation_ts';
 }
 
-use constant REQUIRED_CREATE_FIELDS => qw(
-    bug
-    data
-    description
-    filename
-    mimetype
-);
+use constant REQUIRED_FIELD_MAP => {
+    bug_id => 'bug',
+};
 
 use constant UPDATE_COLUMNS => qw(
     description
@@ -515,6 +511,10 @@ sub _check_bug {
     my $user = Bugzilla->user;
 
     $bug = ref $invocant ? $invocant->bug : $bug;
+
+    $bug || ThrowCodeError('param_required', 
+                           { function => "$invocant->create", param => 'bug' });
+
     ($user->can_see_bug($bug->id) && $user->can_edit_product($bug->product_id))
       || ThrowUserError("illegal_attachment_edit_bug", { bug_id => $bug->id });
 
@@ -526,7 +526,7 @@ sub _check_content_type {
 
     $content_type = 'text/plain' if (ref $invocant && ($invocant->isurl || $invocant->ispatch));
     my $legal_types = join('|', LEGAL_CONTENT_TYPES);
-    if ($content_type !~ /^($legal_types)\/.+$/) {
+    if (!$content_type or $content_type !~ /^($legal_types)\/.+$/) {
         ThrowUserError("invalid_content_type", { contenttype => $content_type });
     }
     trick_taint($content_type);

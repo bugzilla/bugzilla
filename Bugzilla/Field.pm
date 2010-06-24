@@ -105,8 +105,6 @@ use constant DB_COLUMNS => qw(
     is_mandatory
 );
 
-use constant REQUIRED_CREATE_FIELDS => qw(name description sortkey);
-
 use constant VALIDATORS => {
     custom       => \&_check_custom,
     description  => \&_check_description,

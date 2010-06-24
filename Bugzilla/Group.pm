@@ -60,8 +60,6 @@ use constant VALIDATORS => {
     icon_url    => \&_check_icon_url,
 };
 
-use constant REQUIRED_CREATE_FIELDS => qw(name description isbuggroup);
-
 use constant UPDATE_COLUMNS => qw(
     name
     description

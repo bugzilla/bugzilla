@@ -55,8 +55,6 @@ use constant UPDATE_COLUMNS => qw(
 use constant NAME_FIELD => 'value';
 use constant LIST_ORDER => 'sortkey, value';
 
-use constant REQUIRED_CREATE_FIELDS => qw(value);
-
 use constant VALIDATORS => {
     value   => \&_check_value,
     sortkey => \&_check_sortkey,

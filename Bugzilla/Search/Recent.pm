@@ -34,8 +34,6 @@ use Bugzilla::Util;
 use constant DB_TABLE => 'profile_search';
 use constant LIST_ORDER => 'id';
 
-use constant REQUIRED_CREATE_FIELDS => ();
-
 use constant DB_COLUMNS => qw(
     id
     user_id
@@ -120,7 +118,7 @@ sub _check_user_id {
 sub _check_bug_list {
     my ($invocant, $list) = @_;
 
-    my @bug_ids = ref($list) ? @$list : split(',', $list);
+    my @bug_ids = ref($list) ? @$list : split(',', $list || '');
     detaint_natural($_) foreach @bug_ids;
     return join(',', @bug_ids);
 }

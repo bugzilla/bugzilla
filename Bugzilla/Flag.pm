@@ -87,14 +87,6 @@ use constant DB_COLUMNS => qw(
     status
 );
 
-use constant REQUIRED_CREATE_FIELDS => qw(
-    attach_id
-    bug_id
-    setter_id
-    status
-    type_id
-);
-
 use constant UPDATE_COLUMNS => qw(
     requestee_id
     setter_id
@@ -429,6 +421,7 @@ sub create {
     $params->{$_} = $flag->{$_} foreach @columns;
 
     $params->{creation_date} = $params->{modification_date} = $timestamp;
+
     $flag = $class->SUPER::create($params);
     return $flag;
 }

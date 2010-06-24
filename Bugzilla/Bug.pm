@@ -115,15 +115,6 @@ sub DB_COLUMNS {
     return @columns;
 }
 
-use constant REQUIRED_CREATE_FIELDS => qw(
-    component
-    product
-    short_desc
-    version
-);
-
-# There are also other, more complex validators that are called
-# from run_create_validators.
 sub VALIDATORS {
 
     my $validators = {
@@ -288,6 +279,11 @@ use constant FIELD_MAP => {
     # These are special values for the WebService Bug.search method.
     limit            => 'LIMIT',
     offset           => 'OFFSET',
+};
+
+use constant REQUIRED_FIELD_MAP => {
+    product_id   => 'product',
+    component_id => 'component',
 };
 
 #####################################################################
@@ -1696,8 +1692,8 @@ sub _check_reporter {
     else {
         # On bug creation, the reporter is the logged in user
         # (meaning that he must be logged in first!).
+        Bugzilla->login(LOGIN_REQUIRED);
         $reporter = Bugzilla->user->id;
-        $reporter || ThrowCodeError('invalid_user');
     }
     return $reporter;
 }

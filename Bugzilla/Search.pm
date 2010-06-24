@@ -802,6 +802,12 @@ sub init {
     %chartfields = @{$dbh->selectcol_arrayref(
         q{SELECT name, id FROM fielddefs}, { Columns=>[1,2] })};
 
+    if (!$user->is_timetracker) {
+        foreach my $tt_field (TIMETRACKING_FIELDS) {
+            delete $chartfields{$tt_field};
+        }
+    }
+
     $row = 0;
     for ($chart=-1 ;
          $chart < 0 || $params->param("field$chart-0-0") ;

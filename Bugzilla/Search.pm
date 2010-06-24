@@ -638,6 +638,14 @@ sub init {
     %chartfields = @{$dbh->selectcol_arrayref(
         q{SELECT name, id FROM fielddefs}, { Columns=>[1,2] })};
 
+    if (!$user->in_group(Bugzilla->params->{'timetrackinggroup'})) {
+        foreach my $tt_field (qw(estimated_time remaining_time work_time
+                                 actual_time percentage_complete deadline)) 
+        {
+            delete $chartfields{$tt_field};
+        }
+    }
+
     $row = 0;
     for ($chart=-1 ;
          $chart < 0 || $params->param("field$chart-0-0") ;

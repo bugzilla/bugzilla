@@ -168,7 +168,7 @@ sub clean_search_url {
     # Delete leftovers from the login form
     $self->delete('Bugzilla_remember', 'GoAheadAndLogIn');
 
-    foreach my $num (1,2) {
+    foreach my $num (1,2,3) {
         # If there's no value in the email field, delete the related fields.
         if (!$self->param("email$num")) {
             foreach my $field qw(type assigned_to reporter qa_contact

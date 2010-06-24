@@ -57,6 +57,7 @@ END
     feature_inbound_email     => 'Inbound Email',
     feature_jobqueue          => 'Mail Queueing',
     feature_jsonrpc           => 'JSON-RPC Interface',
+    feature_jsonrpc_faster    => 'Make JSON-RPC Faster',
     feature_new_charts        => 'New Charts',
     feature_old_charts        => 'Old Charts',
     feature_mod_perl          => 'mod_perl',

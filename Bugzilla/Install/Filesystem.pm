@@ -75,6 +75,13 @@ sub FILESYSTEM {
     my $skinsdir      = bz_locations()->{'skinsdir'};
     my $localconfig   = bz_locations()->{'localconfig'};
 
+    # We want to set the permissions the same for all localconfig files
+    # across all PROJECTs, so we do something special with $localconfig,
+    # lower down in the permissions section.
+    if ($ENV{PROJECT}) {
+        $localconfig =~ s/\.\Q$ENV{PROJECT}\E$//;
+    }
+
     my $ws_group      = Bugzilla->localconfig->{'webservergroup'};
     my $use_suexec    = Bugzilla->localconfig->{'use_suexec'};
 
@@ -91,6 +98,9 @@ sub FILESYSTEM {
     my $owner_readable = 0600;
     # Writeable by the web server.
     my $ws_writeable = $ws_group ? 0660 : 0666;
+
+    # Script-readable files that should not be world-readable under suexec.
+    my $script_readable = $use_suexec ? 0640 : $ws_readable;
 
     # DIRECTORIES
     # Readable by the web server.
@@ -129,6 +139,10 @@ sub FILESYSTEM {
         'migrate.pl'      => { perms => $owner_executable },
         'install-module.pl' => { perms => $owner_executable },
 
+        # Set the permissions for localconfig the same across all
+        # PROJECTs.
+        $localconfig       => { perms => $script_readable },
+        "$localconfig.*"   => { perms => $script_readable },
         "$localconfig.old" => { perms => $owner_readable },
 
         'contrib/README'       => { perms => $owner_readable },

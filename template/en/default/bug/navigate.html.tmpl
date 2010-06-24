@@ -16,7 +16,10 @@
   # Rights Reserved.
   #
   # Contributor(s): Gervase Markham <gerv@gerv.net>
+  #                 Max Kanat-Alexander <mkanat@bugzilla.org>
   #%]
+
+[% RETURN IF !bug %]
 
 [% PROCESS global/variables.none.tmpl %]
 [% IF bottom_navigator == 1 %]

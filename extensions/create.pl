@@ -41,7 +41,7 @@ mkpath($extension_dir)
   || die "$extension_dir already exists or cannot be created.\n";
 
 my $lcname = lc($name);
-foreach my $path (qw(lib template/en/default/hook), 
+foreach my $path (qw(lib web template/en/default/hook), 
                   "template/en/default/$lcname")
 {
     mkpath("$extension_dir/$path") || die "$extension_dir/$path: $!";
@@ -55,6 +55,7 @@ my %create_files = (
     'config.pm.tmpl'       => 'Config.pm',
     'extension.pm.tmpl'    => 'Extension.pm',
     'util.pm.tmpl'         => 'lib/Util.pm',
+    'web-readme.txt.tmpl'  => 'web/README',
     'hook-readme.txt.tmpl' => 'template/en/default/hook/README',
     'name-readme.txt.tmpl' => "template/en/default/$lcname/README",
 );

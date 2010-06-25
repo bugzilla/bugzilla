@@ -649,6 +649,17 @@ case your templates should probably be in a directory like
 F<extensions/Foo/template/en/default/page/foo/> so as not to conflict with
 other pages that other extensions might add.
 
+=head2 CSS, JavaScript, and Images
+
+If you include CSS, JavaScript, and images in your extension that are
+served directly to the user (that is, they're not read by a script and
+then printed--they're just linked directly in your HTML), they should go
+into the F<web/> subdirectory of your extension. 
+
+So, for example, if you had a CSS file called F<style.css> and your
+extension was called F<Foo>, your file would go into 
+F<extensions/Foo/web/style.css>.
+
 =head2 Disabling Your Extension
 
 If you want your extension to be totally ignored by Bugzilla (it will

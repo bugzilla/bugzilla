@@ -101,6 +101,9 @@ use constant OPERATOR_FIELD_OVERRIDE => {
     commenter => {
         _default => \&_commenter,
     },
+    reporter => {
+        _non_changed => \&_assigned_to_reporter_nonchanged,
+    },
     'requestees.login_name' => {
         _default => \&_requestees_login_name,
     },

@@ -701,7 +701,7 @@
 
   [% ELSIF error == "group_change_denied" %]
     [% title = "Cannot Add/Remove That Group" %]
-    You tried to add or remove group id [% group_id FILTER html %]
+    You tried to add or remove the '[% group.name FILTER html %]' group
     from [% terms.bug %] [%+ bug.id FILTER html %], but you do not
     have permissions to do so.
 
@@ -726,13 +726,13 @@
 
   [% ELSIF error == "group_invalid_removal" %]
     You tried to remove [% terms.bug %] [%+ bug.id FILTER html %]
-    from group id [% group_id FILTER html %], but [% terms.bugs %] in the 
-    '[% product FILTER html %]' product can not be removed from that
+    from the '[% group.name FILTER html %]' group, but [% terms.bugs %]
+     in the '[% product FILTER html %]' product can not be removed from that
     group.
     
   [% ELSIF error == "group_invalid_restriction" %]
     You tried to restrict [% terms.bug %] [%+ bug.id FILTER html %] to
-    to group id [% group_id FILTER html %], but [% terms.bugs %] in the
+    to the '[% group.name FILTER html %]' group, but [% terms.bugs %] in the
     '[% product FILTER html %]' product can not be restricted to
     that group.
 

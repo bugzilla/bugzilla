@@ -654,14 +654,15 @@
       [% END %]
 
       [% IF group.ingroup %]
-        <input type="hidden" name="defined_bit-[% group.bit %]" value="1">
+        <input type="hidden" name="defined_groups" 
+               value="[% group.name FILTER html %]">
       [% END %]
 
-      <input type="checkbox" value="1" name="bit-[% group.bit %]" 
-             id="bit-[% group.bit %]"
+      <input type="checkbox" value="[% group.name FILTER html %]"
+             name="groups" id="group_[% group.bit %]"
              [% ' checked="checked"' IF group.ison %]
              [% ' disabled="disabled"' IF NOT group.ingroup %]>
-      <label for="bit-[% group.bit %]">
+      <label for="group_[% group.bit %]">
       [%- group.description FILTER html_light %]</label>
       <br>
     [% END %]

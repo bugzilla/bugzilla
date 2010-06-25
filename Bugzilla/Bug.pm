@@ -2682,8 +2682,7 @@ sub add_group {
     my ($self, $group) = @_;
     # Invalid ids are silently ignored. (We can't tell people whether
     # or not a group exists.)
-    $group = new Bugzilla::Group($group) unless ref $group;
-    return unless $group;
+    $group = Bugzilla::Group->check($group) if !blessed $group;
 
     return if !$group->is_active or !$group->is_bug_group;
 
@@ -2691,7 +2690,7 @@ sub add_group {
     # to this group by the current user.
     $self->product_obj->group_is_settable($group)
          || ThrowUserError('group_invalid_restriction',
-                { product => $self->product, group_id => $group->id,
+                { product => $self->product, group => $group,
                   bug => $self });
 
     # OtherControl people can add groups only during a product change,
@@ -2702,7 +2701,7 @@ sub add_group {
             || $controls->{othercontrol} == CONTROLMAPNA)
         {
             ThrowUserError('group_change_denied',
-                           { bug => $self, group_id => $group->id });
+                           { bug => $self, group => $group });
         }
     }
 
@@ -2714,8 +2713,7 @@ sub add_group {
 
 sub remove_group {
     my ($self, $group) = @_;
-    $group = new Bugzilla::Group($group) unless ref $group;
-    return unless $group;
+    $group = Bugzilla::Group->check($group) if !blessed $group;
     
     # First, check if this is a valid group for this product.
     # You can *always* remove a group that is not valid for this product
@@ -2731,7 +2729,7 @@ sub remove_group {
         # Nobody can ever remove a Mandatory group.
         if ($controls->{membercontrol} == CONTROLMAPMANDATORY) {
             ThrowUserError('group_invalid_removal',
-                { product => $self->product, group_id => $group->id,
+                { product => $self->product, group => $group,
                   bug => $self });
         }
 
@@ -2743,7 +2741,7 @@ sub remove_group {
                 || $controls->{othercontrol} == CONTROLMAPNA)
             {
                 ThrowUserError('group_change_denied',
-                               { bug => $self, group_id => $group->id });
+                               { bug => $self, group => $group });
             }
         }
     }

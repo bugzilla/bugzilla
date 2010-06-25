@@ -337,27 +337,10 @@ foreach my $field (grep(/^defined_isprivate/, $cgi->param())) {
 }
 $set_all_fields{comment_is_private} = \%is_private;
 
-my %groups = ( add => [], remove => [] );
-my %checked_bit; # Used to avoid adding groups twice (defined_ + actual bit-)
-foreach my $param_name (grep(/bit-\d+$/, $cgi->param())) {
-    $param_name =~ /bit-(\d+)$/;
-    my $gid = $1;
-    next if $checked_bit{$gid};
-    my $bit_param = "bit-$gid";
-    if (should_set($bit_param, 1)) {
-        # Check ! first to avoid having to check defined below.
-        if (!$cgi->param($bit_param)) {
-            push(@{ $groups{remove} }, $gid);
-        }
-        # "== 1" is important because mass-change uses -1 to mean
-        # "don't change this restriction"
-        elsif ($cgi->param($bit_param) == 1) {
-            push(@{ $groups{add} }, $gid);
-        }
-    }
-    $checked_bit{$gid} = 1;
-}
-$set_all_fields{groups} = \%groups;
+my @check_groups = $cgi->param('defined_groups');
+my @set_groups = $cgi->param('groups');
+my ($removed_groups) = diff_arrays(\@check_groups, \@set_groups);
+$set_all_fields{groups} = { add => \@set_groups, remove => $removed_groups };
 
 my @custom_fields = Bugzilla->active_custom_fields;
 foreach my $field (@custom_fields) {

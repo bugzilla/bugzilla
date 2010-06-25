@@ -309,10 +309,18 @@
 
 [% IF groups.size > 0 %]
 
+  <script type="text/javascript">
+    function turn_off(myself, id) {
+        var other_checkbox = document.getElementById(id);
+        if (myself.checked && other_checkbox) {
+            other_checkbox.checked = false;
+        }
+    }
+  </script>
+
   <b>Groups:</b><br>
   <table border="1">
     <tr>
-      <th>Don't<br>change<br>this group<br>restriction</th>
       <th>Remove<br>[% terms.bugs %]<br>from this<br>group</th>
       <th>Add<br>[% terms.bugs %]<br>to this<br>group</th>
       <th>Group Name:</th>
@@ -321,14 +329,17 @@
     [% FOREACH group = groups %]
     <tr>
       <td align="center">
-        <input type="radio" name="bit-[% group.id %]" value="-1" checked="checked">
-      </td>
-      <td align="center">
-        <input type="radio" name="bit-[% group.id %]" value="0">
+        <input type="checkbox" name="defined_groups" 
+               id="defined_group_[% group.id %]"
+               value="[% group.name FILTER html %]"
+               onchange="turn_off(this, 'group_[% group.id %]')">
       </td>
       [% IF group.is_active %]
         <td align="center">
-          <input type="radio" name="bit-[% group.id %]" value="1">
+          <input type="checkbox" name="groups" 
+                 id="group_[% group.id FILTER html %]"
+                 value="[% group.name FILTER html %]"
+                 onchange="turn_off(this, 'defined_group_[% group.id %]')">
         </td>
       [% ELSE %]
         <td>&nbsp;</td>

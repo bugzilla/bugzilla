@@ -285,6 +285,12 @@ sub header {
         unshift(@_, '-cookie' => $self->{Bugzilla_cookie_list});
     }
 
+    # Add Strict-Transport-Security (STS) header if this response
+    # is over SSL and ssl_redirect is enabled.
+    if ($self->https && Bugzilla->params->{'ssl_redirect'}) {
+        unshift(@_, '-strict-transport-security' => 'max-age=' . MAX_STS_AGE);
+    }
+
     return $self->SUPER::header(@_) || "";
 }
 

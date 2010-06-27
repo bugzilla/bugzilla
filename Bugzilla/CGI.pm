@@ -275,13 +275,14 @@ sub multipart_start {
 sub header {
     my $self = shift;
 
+    # If there's only one parameter, then it's a Content-Type.
+    if (scalar(@_) == 1) {
+        # Since we're adding parameters below, we have to name it.
+        unshift(@_, '-type' => shift(@_));
+    }
+
     # Add the cookies in if we have any
     if (scalar(@{$self->{Bugzilla_cookie_list}})) {
-        if (scalar(@_) == 1) {
-            # if there's only one parameter, then it's a Content-Type.
-            # Since we're adding parameters we have to name it.
-            unshift(@_, '-type' => shift(@_));
-        }
         unshift(@_, '-cookie' => $self->{Bugzilla_cookie_list});
     }
 

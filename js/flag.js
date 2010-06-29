@@ -24,7 +24,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Enables or disables a requestee field depending on whether or not
+// Shows or hides a requestee field depending on whether or not
 // the user is requesting the corresponding flag.
 function toggleRequesteeField(flagField, no_focus)
 {
@@ -34,18 +34,18 @@ function toggleRequesteeField(flagField, no_focus)
   var requesteeField = document.getElementById(id);
   if (!requesteeField) return;
 
-  // Enable or disable the requestee field based on the value
+  // Show or hide the requestee field based on the value
   // of the flag field.
   if (flagField.value == "?") {
-      requesteeField.disabled = false;
+      YAHOO.util.Dom.removeClass(requesteeField.parentNode, 'bz_default_hidden');
       if (!no_focus) requesteeField.focus();
   } else
-      requesteeField.disabled = true;
+      YAHOO.util.Dom.addClass(requesteeField.parentNode, 'bz_default_hidden');
 }
 
-// Disables requestee fields when the window is loaded since they shouldn't
+// Hides requestee fields when the window is loaded since they shouldn't
 // be enabled until the user requests that flag type.
-function disableRequesteeFields()
+function hideRequesteeFields()
 {
   var inputElements = document.getElementsByTagName("input");
   var selectElements = document.getElementsByTagName("select");
@@ -68,8 +68,8 @@ function disableRequesteeFields()
       id = inputElement.name.replace(/requestee(_type)?-(\d+)/, "flag$1-$2");
       flagField = document.getElementById(id);
       if (flagField && flagField.value != "?")
-          inputElement.disabled = true;
+          YAHOO.util.Dom.addClass(inputElement.parentNode, 'bz_default_hidden');
     }
   }
 }
-YAHOO.util.Event.addListener(window, "load", disableRequesteeFields);
+YAHOO.util.Event.onDOMReady(hideRequesteeFields);

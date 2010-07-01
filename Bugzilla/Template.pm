@@ -44,6 +44,7 @@ use Bugzilla::Keyword;
 use Bugzilla::Util;
 use Bugzilla::User;
 use Bugzilla::Error;
+use Bugzilla::Search;
 use Bugzilla::Status;
 use Bugzilla::Token;
 
@@ -772,6 +773,8 @@ sub create {
             'field_descs' => sub { return template_var('field_descs') },
 
             'install_string' => \&Bugzilla::Install::Util::install_string,
+
+            'report_columns' => \&Bugzilla::Search::REPORT_COLUMNS,
 
             # These don't work as normal constants.
             DB_MODULE        => \&Bugzilla::Constants::DB_MODULE,

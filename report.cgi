@@ -107,30 +107,17 @@ else {
 }
 
 # Valid bug fields that can be reported on.
-my @columns = qw(
-    assigned_to
-    reporter
-    qa_contact
-    classification
-    version
-    keywords
-    target_milestone
-);
-# Single-select fields (custom or not) are also accepted as valid.
-my @single_selects = Bugzilla->get_fields({ type => FIELD_TYPE_SINGLE_SELECT,
-                                            obsolete => 0 });
-push(@columns, map { $_->name } @single_selects);
-my %valid_columns = map { $_ => 1 } @columns;
+my $valid_columns = Bugzilla::Search::REPORT_COLUMNS;
 
 # Validate the values in the axis fields or throw an error.
 !$row_field 
-  || ($valid_columns{$row_field} && trick_taint($row_field))
+  || ($valid_columns->{$row_field} && trick_taint($row_field))
   || ThrowCodeError("report_axis_invalid", {fld => "x", val => $row_field});
 !$col_field 
-  || ($valid_columns{$col_field} && trick_taint($col_field))
+  || ($valid_columns->{$col_field} && trick_taint($col_field))
   || ThrowCodeError("report_axis_invalid", {fld => "y", val => $col_field});
 !$tbl_field 
-  || ($valid_columns{$tbl_field} && trick_taint($tbl_field))
+  || ($valid_columns->{$tbl_field} && trick_taint($tbl_field))
   || ThrowCodeError("report_axis_invalid", {fld => "z", val => $tbl_field});
 
 my @axis_fields = ($row_field || EMPTY_COLUMN, 

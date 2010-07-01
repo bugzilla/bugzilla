@@ -55,6 +55,8 @@ use Bugzilla::Keyword;
 use Date::Format;
 use Date::Parse;
 
+use Storable qw(dclone);
+
 # If you specify a search type in the boolean charts, this describes
 # which operator maps to which internal function here.
 use constant OPERATORS => {
@@ -363,6 +365,32 @@ sub COLUMNS {
 
     $cache->{search_columns} = \%columns;
     return $cache->{search_columns};
+}
+
+sub REPORT_COLUMNS {
+    my $columns = dclone(COLUMNS);
+    # There's no reason to support reporting on unique fields.
+    # Also, some other fields don't make very good reporting axises,
+    # or simply don't work with the current reporting system.
+    my @no_report_columns = 
+        qw(bug_id alias short_short_desc opendate changeddate
+           flagtypes.name keywords relevance);
+
+    # Multi-select fields are not currently supported.
+    my @multi_selects = Bugzilla->get_fields(
+        { obsolete => 0, type => FIELD_TYPE_MULTI_SELECT });
+    push(@no_report_columns, map { $_->name } @multi_selects);
+
+    # If you're not a time-tracker, you can't use time-tracking
+    # columns.
+    if (!Bugzilla->user->is_timetracker) {
+        push(@no_report_columns, TIMETRACKING_FIELDS);
+    }
+
+    foreach my $name (@no_report_columns) {
+        delete $columns->{$name};
+    }
+    return $columns;
 }
 
 # Create a new Search

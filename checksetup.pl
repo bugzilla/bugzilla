@@ -62,12 +62,6 @@ use Bugzilla::Install::Util qw(install_string get_version_and_os init_console);
 # When we're running at the command line, we need to pick the right
 # language before ever displaying any string.
 init_console();
-# Required for displaying strings from install_string, which are always
-# in UTF-8, in every language. For other scripts, Bugzilla::init_page
-# handles this, but here we just need to assume that checksetup.pl output
-# is always UTF-8 in order for install_string to work properly in other
-# languages.
-binmode STDOUT, ':utf8';
 
 my %switch;
 GetOptions(\%switch, 'help|h|?', 'check-modules', 'no-templates|t',

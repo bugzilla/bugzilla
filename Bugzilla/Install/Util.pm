@@ -28,11 +28,13 @@ use strict;
 
 use Bugzilla::Constants;
 
+use Encode;
 use File::Basename;
 use POSIX qw(setlocale LC_CTYPE);
 use Safe;
 use Scalar::Util qw(tainted);
 use Term::ANSIColor qw(colored);
+use PerlIO;
 
 use base qw(Exporter);
 our @EXPORT_OK = qw(
@@ -47,7 +49,6 @@ our @EXPORT_OK = qw(
     include_languages
     template_include_path
     vers_cmp
-    get_console_locale
     init_console
 );
 
@@ -569,11 +570,44 @@ sub get_console_locale {
     return $locale;
 }
 
+sub set_output_encoding {
+    # If we've already set an encoding layer on STDOUT, don't
+    # add another one.
+    my @stdout_layers = PerlIO::get_layers(STDOUT);
+    return if grep(/^encoding/, @stdout_layers);
+
+    my $encoding;
+    if (ON_WINDOWS and eval { require Win32::Console }) {
+        # Although setlocale() works on Windows, it doesn't always return
+        # the current *console's* encoding. So we use OutputCP here instead,
+        # when we can.
+        $encoding = Win32::Console::OutputCP();
+    }
+    else {
+        my $locale = setlocale(LC_CTYPE);
+        if ($locale =~ /\.([^\.]+)$/) {
+            $encoding = $1;
+        }
+    }
+    $encoding = "cp$encoding" if ON_WINDOWS;
+
+    $encoding = Encode::resolve_alias($encoding) if $encoding;
+    if ($encoding and $encoding !~ /utf-8/i) {
+        binmode STDOUT, ":encoding($encoding)";
+        binmode STDERR, ":encoding($encoding)";
+    }
+    else {
+        binmode STDOUT, ':utf8';
+        binmode STDERR, ':utf8';
+    }
+}
+
 sub init_console {
     eval { ON_WINDOWS && require Win32::Console::ANSI; };
     $ENV{'ANSI_COLORS_DISABLED'} = 1 if ($@ || !-t *STDOUT);
     $SIG{__DIE__} = \&_console_die;
     prevent_windows_dialog_boxes();
+    set_output_encoding();
 }
 
 sub _console_die {

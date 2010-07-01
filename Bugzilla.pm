@@ -44,7 +44,7 @@ use Bugzilla::Extension;
 use Bugzilla::DB;
 use Bugzilla::Install::Localconfig qw(read_localconfig);
 use Bugzilla::Install::Requirements qw(OPTIONAL_MODULES);
-use Bugzilla::Install::Util;
+use Bugzilla::Install::Util qw(init_console);
 use Bugzilla::Template;
 use Bugzilla::User;
 use Bugzilla::Error;
@@ -82,7 +82,12 @@ use constant SHUTDOWNHTML_EXIT_SILENTLY => qw(
 
 # Note that this is a raw subroutine, not a method, so $class isn't available.
 sub init_page {
-    (binmode STDOUT, ':utf8') if Bugzilla->params->{'utf8'};
+    if (Bugzilla->usage_mode == USAGE_MODE_CMDLINE) {
+        init_console();
+    }
+    elsif (Bugzilla->params->{'utf8'}) {
+        binmode STDOUT, ':utf8';
+    }
 
     if (${^TAINT}) {
         # Some environment variables are not taint safe

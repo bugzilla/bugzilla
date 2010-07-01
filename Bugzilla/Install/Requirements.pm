@@ -541,6 +541,10 @@ sub have_vers {
     my $wanted  = $params->{version};
 
     eval "require $module;";
+    # Don't let loading a module change the output-encoding of STDOUT
+    # or STDERR. (CGI.pm tries to set "binmode" on these file handles when
+    # it's loaded, and other modules may do the same in the future.)
+    Bugzilla::Install::Util::set_output_encoding();
 
     # VERSION is provided by UNIVERSAL::, and can be called even if
     # the module isn't loaded.

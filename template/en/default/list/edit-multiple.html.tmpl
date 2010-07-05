@@ -201,7 +201,13 @@
 
     <th><label for="masscc">CC List:</label></th>
     <td colspan="3">
-      <input id="masscc" name="masscc" size="40">
+      [% INCLUDE global/userselect.html.tmpl
+           id => "masscc"
+           name => "masscc"
+           value => ""
+           size => 40
+           multiple => 5
+      %]
       <select name="ccaction">
         <option value="add">Add these to the CC List</option>
         <option value="remove">Remove these from the CC List</option>

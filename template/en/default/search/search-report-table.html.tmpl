@@ -32,7 +32,7 @@ var queryform = "reportform"
 [% PROCESS global/header.html.tmpl
   title = "Generate Tabular Report"
   onload = "doOnSelectProduct(0)"
-  yui = [ 'calendar' ]
+  yui = [ 'autocomplete', 'calendar' ]
   javascript = js_data
   javascript_urls = [ "js/productform.js", "js/TUI.js", "js/field.js" ]
   style_urls = [ "skins/standard/search_form.css" ]

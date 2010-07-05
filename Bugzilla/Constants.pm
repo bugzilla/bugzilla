@@ -403,6 +403,7 @@ use constant EMPTY_DATETIME_REGEX => qr/^[0\-:\sA-Za-z]+$/;
 # See the POD for Bugzilla::Field/is_abnormal to see why these are listed
 # here.
 use constant ABNORMAL_SELECTS => qw(
+    classification
     product
     component
 );

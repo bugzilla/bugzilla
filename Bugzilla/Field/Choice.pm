@@ -64,6 +64,7 @@ use constant VALIDATORS => {
 
 use constant CLASS_MAP => {
     bug_status => 'Bugzilla::Status',
+    classification => 'Bugzilla::Classification',
     component  => 'Bugzilla::Component',
     product    => 'Bugzilla::Product',
 };

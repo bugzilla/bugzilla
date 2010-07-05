@@ -39,3 +39,6 @@
                   [% legal_value.id FILTER js %]);
   [% END %]
 [% END %]
+[% IF field.name == 'classification' %]
+  YAHOO.util.Event.on('product', 'change', setClassification);
+[% END %]

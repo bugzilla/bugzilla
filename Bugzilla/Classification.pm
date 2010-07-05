@@ -20,11 +20,12 @@ use strict;
 package Bugzilla::Classification;
 
 use Bugzilla::Constants;
+use Bugzilla::Field;
 use Bugzilla::Util;
 use Bugzilla::Error;
 use Bugzilla::Product;
 
-use base qw(Bugzilla::Object);
+use base qw(Bugzilla::Field::ChoiceInterface Bugzilla::Object);
 
 ###############################
 ####    Initialization     ####
@@ -110,6 +111,14 @@ sub _check_sortkey {
     }
     return $sortkey;
 }
+
+#####################################
+# Implement Bugzilla::Field::Choice #
+#####################################
+
+use constant FIELD_NAME => 'classification';
+use constant is_default => 0;
+use constant is_active => 1;
 
 ###############################
 ####       Methods         ####

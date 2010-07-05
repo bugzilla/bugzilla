@@ -3415,9 +3415,13 @@ sub choices {
     if (!grep($_->name eq $self->product_obj->name, @products)) {
         unshift(@products, $self->product_obj);
     }
+    my %class_ids = map { $_->classification_id => 1 } @products;
+    my $classifications = 
+        Bugzilla::Classification->new_from_list([keys %class_ids]);
 
     my %choices = (
         bug_status => $self->statuses_available,
+        classification => $classifications,
         product    => \@products,
         component  => $self->product_obj->components,
         version    => $self->product_obj->versions,

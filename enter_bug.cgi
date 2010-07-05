@@ -416,7 +416,8 @@ foreach my $field (@enter_bug_fields) {
 }
 
 # This allows the Field visibility and value controls to work with the
-# Product field as a parent.
+# Classification and Product fields as a parent.
+$default{'classification'} = $product->classification->name;
 $default{'product'} = $product->name;
 
 if ($cloned_bug_id) {

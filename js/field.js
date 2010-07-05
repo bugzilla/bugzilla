@@ -375,6 +375,20 @@ function updateCommentTagControl(checkbox, form) {
 }
 
 /**
+ * Reset the value of the classification field and fire an event change
+ * on it.  Called when the product changes, in case the classification
+ * field (which is hidden) controls the visibility of any other fields.
+ */
+function setClassification() {
+    var classification = document.getElementById('classification');
+    var product = document.getElementById('product');
+    var selected_product = product.value; 
+    var select_classification = all_classifications[selected_product];
+    classification.value = select_classification;
+    bz_fireEvent(classification, 'change');
+}
+
+/**
  * Says that a field should only be displayed when another field has
  * a certain value. May only be called after the controller has already
  * been added to the DOM.

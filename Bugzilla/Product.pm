@@ -791,6 +791,13 @@ sub flag_types {
     return $self->{'flag_types'};
 }
 
+sub classification {
+    my $self = shift;
+    $self->{'classification'} ||= 
+        new Bugzilla::Classification($self->classification_id);
+    return $self->{'classification'};
+}
+
 ###############################
 ####      Accessors      ######
 ###############################
@@ -853,6 +860,7 @@ Bugzilla::Product - Bugzilla product class.
     my $bug_ids         = $product->bug_ids();
     my $has_access      = $product->user_has_access($user);
     my $flag_types      = $product->flag_types();
+    my $classification  = $product->classification();
 
     my $id               = $product->id;
     my $name             = $product->name;
@@ -1020,6 +1028,14 @@ a group is valid in a particular product.)
  Params:      none.
 
  Returns:     Two references to an array of flagtype objects.
+
+=item C<classification()>
+
+ Description: Returns the classification the product belongs to.
+
+ Params:      none.
+
+ Returns:     A Bugzilla::Classification object.
 
 =back
 

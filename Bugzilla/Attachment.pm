@@ -989,6 +989,12 @@ sub get_content_type {
             $cgi->param('ispatch', 1);
             $content_type = 'text/plain';
         }
+
+        # Internet Explorer sends image/x-png for PNG images,
+        # so convert that to image/png to match other browsers.
+        if ($content_type eq 'image/x-png') {
+            $content_type = 'image/png';
+        }
     }
     elsif ($cgi->param('contenttypemethod') eq 'list') {
         # The user selected a content type from the list, so use their

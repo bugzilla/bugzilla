@@ -77,7 +77,6 @@ use constant CPAN_DEFAULTS => {
     scan_cache => 'atstart',
 
     inhibit_startup_message => 1,
-    mbuild_install_build_command => './Build',
 
     bzip2 => bin_loc('bzip2'),
     curl => bin_loc('curl'),

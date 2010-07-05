@@ -155,12 +155,17 @@ use constant OPERATOR_FIELD_OVERRIDE => {
     },
     keywords => {
         equals       => \&_keywords_exact,
-        notequals    => \&_keywords_exact,
         anyexact     => \&_keywords_exact,
-        anywords     => \&_keywords_exact,
+        anyword      => \&_keywords_exact,
         allwords     => \&_keywords_exact,
-        nowords      => \&_keywords_exact,
-        _non_changed => \&_keywords_nonchanged,
+
+        notequals     => \&_multiselect_negative,
+        notregexp     => \&_multiselect_negative,
+        notsubstring  => \&_multiselect_negative,
+        nowords       => \&_multiselect_negative,
+        nowordssubstr => \&_multiselect_negative,
+
+        _non_changed  => \&_keywords_nonchanged,
     },
     'flagtypes.name' => {
         _default => \&_flagtypes_name,
@@ -2052,7 +2057,7 @@ sub _keywords_exact {
     my %func_args = @_;
     my ($chartid, $v, $ff, $f, $t, $term, $supptables) =
         @func_args{qw(chartid v ff f t term supptables)};
-    
+
     my @list;
     my $table = "keywords_$$chartid";
     foreach my $value (split(/[\s,]+/, $$v)) {
@@ -2202,8 +2207,16 @@ sub _multiselect_negative {
         nowordssubstr => 'anywordssubstr',
     );
 
-    my $table = "bug_$$f";
-    $$ff = "$table.value";
+    my $table;
+    if ($$f eq 'keywords') {
+        $table = "keywords LEFT JOIN keyworddefs"
+                 . " ON keywords.keywordid = keyworddefs.id";
+        $$ff = "keyworddefs.name";
+    }
+    else {
+        $table = "bug_$$f";
+        $$ff = "$table.value";
+    }
     
     $$t = $map{$$t};
     $self->_do_operator_function(\%func_args);

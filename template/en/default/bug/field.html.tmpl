@@ -18,6 +18,8 @@
   # Contributor(s): Myk Melez <myk@mozilla.org>
   #                 Max Kanat-Alexander <mkanat@bugzilla.org>
   #                 Elliotte Martin <elliotte_martin@yahoo.com>
+  #                 Guy Pyrzak <guy.pyrzak@gmail.com>
+  #                 Reed Loden <reed@reedloden.com>
   #%]
 
 [%# INTERFACE:
@@ -165,22 +167,35 @@
        [% FOREACH url = value %]
          <li>
            <a href="[% url FILTER html %]">[% url FILTER html %]</a>
-           [% IF editable %]
-             <label><input type="checkbox" value="[% url FILTER html %]"
-                           name="remove_[% field.name FILTER html %]">
-               Remove</label>
-           [% END %]
+           <label><input type="checkbox" value="[% url FILTER html %]"
+                         name="remove_[% field.name FILTER html %]">
+             Remove</label>
          </li>
        [% END %]
        [% '</ul>' IF value.size %]
 
-       [% IF editable && Param('use_see_also') %]
+       [% IF Param('use_see_also') %]
          <label for="[% field.name FILTER html %]">
            <strong>Add [% terms.Bug %] URLs:</strong>
          </label><br>
          <input type="text" id="[% field.name FILTER html %]" size="40"
                 class="text_input" name="[% field.name FILTER html %]">
        [% END %]
+     [% CASE constants.FIELD_TYPE_KEYWORDS %]
+       <div id="keyword_container">
+         <input type="text" id="[% field.name FILTER html %]" size="40"
+                class="text_input" name="[% field.name FILTER html %]"
+                value="[% value FILTER html %]">
+         <div id="keyword_autocomplete"></div>
+       </div>
+       <script type="text/javascript" defer="defer">
+         YAHOO.bugzilla.keyword_array = [
+           [%- FOREACH keyword = all_keywords %]
+             [%-# %]"[% keyword.name FILTER js %]"
+             [%- "," IF NOT loop.last %][% END %]];
+         YAHOO.bugzilla.keywordAutocomplete.init('[% field.name FILTER js %]', 
+                                                 'keyword_autocomplete');
+       </script>
   [% END %]
 [% ELSIF field.type == constants.FIELD_TYPE_TEXTAREA %]
   <div class="uneditable_textarea">[% value FILTER wrap_comment(60)

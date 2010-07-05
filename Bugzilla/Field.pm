@@ -182,7 +182,7 @@ use constant DEFAULT_FIELDS => (
     {name => 'status_whiteboard', desc => 'Status Whiteboard',
      in_new_bugmail => 1, buglist => 1},
     {name => 'keywords',     desc => 'Keywords',   in_new_bugmail => 1,
-     buglist => 1},
+     type => FIELD_TYPE_KEYWORDS, buglist => 1},
     {name => 'resolution',   desc => 'Resolution',
      type => FIELD_TYPE_SINGLE_SELECT, buglist => 1},
     {name => 'bug_severity', desc => 'Severity',   in_new_bugmail => 1,
@@ -322,7 +322,7 @@ sub _check_type {
     my $saved_type = $type;
     # The constant here should be updated every time a new,
     # higher field type is added.
-    (detaint_natural($type) && $type <= FIELD_TYPE_BUG_URLS)
+    (detaint_natural($type) && $type <= FIELD_TYPE_KEYWORDS)
       || ThrowCodeError('invalid_customfield_type', { type => $saved_type });
 
     my $custom = blessed($invocant) ? $invocant->custom : $params->{custom};

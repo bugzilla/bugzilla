@@ -765,6 +765,9 @@ sub create {
             # Whether or not keywords are enabled, in this Bugzilla.
             'use_keywords' => sub { return Bugzilla::Keyword->any_exist; },
 
+            # All the keywords.
+            'all_keywords' => sub { return Bugzilla::Keyword->get_all(); },
+
             'feature_enabled' => sub { return Bugzilla->feature(@_); },
 
             # field_descs can be somewhat slow to generate, so we generate

@@ -591,8 +591,13 @@
         <label for="keywords" accesskey="k">
           <b><a href="describekeywords.cgi"><u>K</u>eywords</a></b></label>:
       </td>
-      [% PROCESS input inputname => "keywords" size => 40 colspan => 2
-                       value => bug.keywords.join(', ') %]
+      <td class="field_value" colspan="2">
+        [% INCLUDE bug/field.html.tmpl
+           bug = bug, field = bug_fields.keywords, value = bug.keywords
+           editable = bug.check_can_change_field("keywords", 0, 1),
+           no_tds = 1
+        %]
+      </td>
     </tr>
   [% END %]
 [% END %]

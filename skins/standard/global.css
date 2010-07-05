@@ -527,7 +527,21 @@ input.required, select.required, span.required_explanation {
     background-image: url(global/down.png);
 }
 
-/* custom styles for inline instances of autocomplete input fields*/
+/* custom styles for inline instances of autocomplete input fields */
 .yui-skin-sam .yui-ac-input { position:static !important; 
-                              vertical-align:middle !important;}
-.yui-skin-sam .yui-ac-container { left:0px !important;}
+                              vertical-align:middle !important;
+                              width:auto !important; }
+.yui-skin-sam .yui-ac-container { left:0px !important; }
+.yui-skin-sam .yui-ac { display: inline-block; }
+
+#keyword_container {
+    padding-bottom: 2em;
+    padding-top: .2em;
+}
+
+#keyword_container .yui-ac-content {
+    max-height: 19em;
+    overflow: auto;
+    overflow-x: hidden;
+    margin-left: -1px;
+}

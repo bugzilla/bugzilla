@@ -31,9 +31,10 @@ var select_values = new Array();
     [%# Prefix components with the name of their product so that admins
         know which component we're talking about. #%]
     [% IF sel_field.name == 'component' %]
-      [% SET value_name = legal_value.product.name _ ': ' _ legal_value.name %]
+      [% SET value_name = display_value('product', legal_value.product.name) _ ': '
+                          _ display_value(sel_field.name, legal_value.name) %]
     [% ELSE %]
-      [% SET value_name = legal_value.name %]
+      [% SET value_name = display_value(sel_field.name, legal_value.name) %]
     [% END %]
     [[% legal_value.id FILTER js %], '[% value_name FILTER js %]'][% ',' UNLESS loop.last %]
   [% END %]

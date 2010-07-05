@@ -125,9 +125,9 @@
              [% ' selected="selected"' 
                 IF field.visibility_value.id == value.id %]>
               [% IF field.visibility_field.name == 'component' %]
-                [% value.product.name FILTER html %]:
+                [% display_value('product', value.product.name) FILTER html %]:
               [% END %]
-              [%+ value.name FILTER html %]
+              [%+ display_value(field.visibility_field.name, value.name) FILTER html %]
             </option>
           [% END %]   
         </select>

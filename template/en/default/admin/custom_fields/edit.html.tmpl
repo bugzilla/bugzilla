@@ -100,7 +100,7 @@
             <option value="[% value.id FILTER html %]"
              [% ' selected="selected"' 
                 IF field.visibility_value.id == value.id %]>
-              [% value.name FILTER html %]
+              [% display_value(field.visibility_field.name, value.name) FILTER html %]
             </option>
           [% END %]   
         </select>

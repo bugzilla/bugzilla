@@ -176,6 +176,7 @@ if ($action eq 'delete') {
     print $cgi->header();
 
     $vars->{'message'} = 'keyword_deleted';
+    $vars->{'keyword'} = $keyword;
     $vars->{'keywords'} = Bugzilla::Keyword->get_all_with_bug_count();
 
     $template->process("admin/keywords/list.html.tmpl", $vars)

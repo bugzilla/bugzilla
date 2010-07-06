@@ -380,14 +380,22 @@ $Template::Stash::PRIVATE = undef;
 $Template::Stash::LIST_OPS->{ contains } =
   sub {
       my ($list, $item) = @_;
-      return grep($_ eq $item, @$list);
+      if (ref $item && $item->isa('Bugzilla::Object')) {
+          return grep($_->id == $item->id, @$list);
+      } else {
+          return grep($_ eq $item, @$list);
+      }
   };
 
 $Template::Stash::LIST_OPS->{ containsany } =
   sub {
       my ($list, $items) = @_;
       foreach my $item (@$items) { 
-          return 1 if grep($_ eq $item, @$list);
+          if (ref $item && $item->isa('Bugzilla::Object')) {
+              return 1 if grep($_->id == $item->id, @$list);
+          } else {
+              return 1 if grep($_ eq $item, @$list);
+          }
       }
       return 0;
   };

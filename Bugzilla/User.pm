@@ -1152,11 +1152,14 @@ sub product_responsibilities {
     return $self->{'product_resp'} if defined $self->{'product_resp'};
     return [] unless $self->id;
 
-    my $list = $dbh->selectall_arrayref('SELECT product_id, id
+    my $list = $dbh->selectall_arrayref('SELECT components.product_id, components.id
                                            FROM components
-                                          WHERE initialowner = ?
-                                             OR initialqacontact = ?',
-                                  {Slice => {}}, ($self->id, $self->id));
+                                           LEFT JOIN component_cc
+                                           ON components.id = component_cc.component_id
+                                          WHERE components.initialowner = ?
+                                             OR components.initialqacontact = ?
+                                             OR component_cc.user_id = ?',
+                                  {Slice => {}}, ($self->id, $self->id, $self->id));
 
     unless ($list) {
         $self->{'product_resp'} = [];

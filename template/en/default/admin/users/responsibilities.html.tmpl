@@ -29,6 +29,7 @@
       <th>Component</th>
       <th>Default Assignee</th>
       <th>Default QA Contact</th>
+      <th>Default CC</th>
     </tr>
     [% FOREACH component = item.components %]
       <tr>
@@ -48,6 +49,9 @@
             [% component.$responsibility.id == otheruser.id ? "X" : "&nbsp;" %]
           </td>
         [% END %]
+        <td class="center">
+          [% component.initial_cc.contains(otheruser) ? "X" : "&nbsp;" %]
+        </td>
       </tr>
     [% END %]
     </tbody>

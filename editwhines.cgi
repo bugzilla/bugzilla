@@ -38,6 +38,7 @@ use Bugzilla::Group;
 use Bugzilla::Token;
 use Bugzilla::Whine::Schedule;
 use Bugzilla::Whine::Query;
+use Bugzilla::Whine;
 
 # require the user to have logged in
 my $user = Bugzilla->login(LOGIN_REQUIRED);
@@ -55,10 +56,8 @@ my $userid   = $user->id;
 my $token    = $cgi->param('token');
 my $sth; # database statement handle
 
-# $events is a hash ref, keyed by event id, that stores the active user's
-# events.  It starts off with:
-#  'subject' - the subject line for the email message
-#  'body'    - the text to be sent at the top of the message
+# $events is a hash ref of Bugzilla::Whine objects keyed by event id,
+# that stores the active user's events.
 #
 # Eventually, it winds up with:
 #  'queries'  - array ref containing hashes of:
@@ -144,9 +143,9 @@ if ($cgi->param('update')) {
                 trick_taint($subject) if $subject;
                 trick_taint($body)    if $body;
 
-                if ( ($subject ne $events->{$eventid}->{'subject'})
-                  || ($mailifnobugs != $events->{$eventid}->{'mailifnobugs'})
-                  || ($body    ne $events->{$eventid}->{'body'}) ) {
+                if ( ($subject ne $events->{$eventid}->subject)
+                  || ($mailifnobugs != $events->{$eventid}->mail_if_no_bugs)
+                  || ($body    ne $events->{$eventid}->body) ) {
 
                     $sth = $dbh->prepare("UPDATE whine_events " .
                                          "SET subject=?, body=?, mailifnobugs=? " .
@@ -348,7 +347,6 @@ $events = get_events($userid);
 #
 # build the whine list by event id
 for my $event_id (keys %{$events}) {
-
     $events->{$event_id}->{'schedule'} = [];
     $events->{$event_id}->{'queries'} = [];
 
@@ -405,24 +403,13 @@ $vars->{'local_timezone'} = Bugzilla->local_timezone->short_name_for_datetime(Da
 $template->process("whine/schedule.html.tmpl", $vars)
   || ThrowTemplateError($template->error());
 
-# get_events takes a userid and returns a hash, keyed by event ID, containing
-# the subject and body of each event that user owns
+# get_events takes a userid and returns a hash of
+# Bugzilla::Whine objects keyed by event ID.
 sub get_events {
     my $userid = shift;
-    my $dbh = Bugzilla->dbh;
-    my $events = {};
+    my $event_rows = Bugzilla::Whine->match({ owner_userid => $userid });
+    my %events = map { $_->{id} => $_ } @$event_rows;
 
-    my $sth = $dbh->prepare("SELECT DISTINCT id, subject, body, mailifnobugs " .
-                            "FROM whine_events " .
-                            "WHERE owner_userid=?");
-    $sth->execute($userid);
-    while (my ($ev, $sub, $bod, $mno) = $sth->fetchrow_array) {
-        $events->{$ev} = {
-            'subject' => $sub || '',
-            'body' => $bod || '',
-            'mailifnobugs' => $mno || 0,
-        };
-    }
-    return $events;
+    return \%events;
 }
 

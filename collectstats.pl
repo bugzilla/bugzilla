@@ -123,7 +123,7 @@ if ($regenerate) {
     my $removed_sth = $dbh->prepare(
         q{SELECT bugs_activity.bug_id, bugs_activity.removed,}
         . $dbh->sql_to_days('bugs_activity.bug_when')
-        . q{FROM bugs_activity
+       . q{ FROM bugs_activity
            WHERE bugs_activity.fieldid = ?
         ORDER BY bugs_activity.bug_when});
 

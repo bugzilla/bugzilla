@@ -258,7 +258,8 @@ foreach my $field_name (@set_fields) {
 }
 
 if (should_set('keywords')) {
-    my $action = $cgi->param('keywordaction');
+    my $action = $cgi->param('keywordaction') || '';
+    # Backward-compatibility for Bugzilla 3.x and older.
     $action = 'remove' if $action eq 'delete';
     $action = 'set'    if $action eq 'makeexact';
     $set_all_fields{keywords}->{$action} = $cgi->param('keywords');

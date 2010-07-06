@@ -2928,8 +2928,6 @@ sub _initialize_workflow_for_upgrade {
     my $old_params = shift;
     my $dbh = Bugzilla->dbh;
 
-    my $had_is_open = $dbh->bz_column_info('bug_status', 'is_open');
-
     $dbh->bz_add_column('bug_status', 'is_open',
                         {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'TRUE'});
 
@@ -2963,8 +2961,10 @@ sub _initialize_workflow_for_upgrade {
     }
 
     # We only populate the workflow here if we're upgrading from a version
-    # before 3.2.
-    return if $had_is_open;
+    # before 4.0 (which is where init_workflow was added).
+    my $new_exists = $dbh->selectrow_array(
+         'SELECT 1 FROM bug_status WHERE value = ?', undef, 'NEW');
+    return if !$new_exists;
 
     # Populate the status_workflow table. We do nothing if the table already
     # has entries. If all bug status transitions have been deleted, the

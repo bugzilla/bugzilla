@@ -625,6 +625,11 @@ sub update_table_definitions {
     $dbh->bz_alter_column('products', 'description',
                           { TYPE => 'MEDIUMTEXT', NOTNULL => 1 }, '');
 
+    # Change the default of allows_unconfirmed to TRUE as part
+    # of the new workflow.
+    $dbh->bz_alter_column('products', 'allows_unconfirmed',
+        { TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'TRUE' });
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################

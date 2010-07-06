@@ -190,6 +190,7 @@ Bugzilla::Field::populate_field_definitions();
 ###########################################################################
 
 Bugzilla::Install::DB::update_table_definitions(\%old_params);
+Bugzilla::Install::init_workflow();
 
 ###########################################################################
 # Bugzilla uses --GROUPS-- to assign various rights to its users.

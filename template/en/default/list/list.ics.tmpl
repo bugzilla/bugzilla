@@ -82,7 +82,7 @@ END:VCALENDAR
     [% END %]
   [% END %]
   [% IF NOT status %]
-    [% IF bug_status == 'ASSIGNED' %]
+    [% IF bug_status == 'IN_PROGRESS' || bug_status == 'ASSIGNED' %]
       [% status = 'IN-PROGRESS' %]
     [% ELSE %]
       [% status = 'NEEDS-ACTION' %]

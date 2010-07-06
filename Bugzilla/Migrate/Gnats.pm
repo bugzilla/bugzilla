@@ -67,8 +67,8 @@ use constant VALUE_MAP => {
         'non-critical' => 'normal',
     },
     bug_status => {
-        'open'      => 'NEW',
-        'analyzed'  => 'ASSIGNED',
+        'open'      => 'CONFIRMED',
+        'analyzed'  => 'IN_PROGRESS',
         'suspended' => 'RESOLVED',
         'feedback'  => 'RESOLVED',
         'released'  => 'VERIFIED',

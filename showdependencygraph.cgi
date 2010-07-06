@@ -199,9 +199,6 @@ my $sth = $dbh->prepare(
 foreach my $k (keys(%seen)) {
     # Retrieve bug information from the database
     my ($stat, $resolution, $summary) = $dbh->selectrow_array($sth, undef, $k);
-    $stat ||= 'NEW';
-    $resolution ||= '';
-    $summary ||= '';
 
     # Resolution and summary are shown only if user can see the bug
     if (!Bugzilla->user->can_see_bug($k)) {

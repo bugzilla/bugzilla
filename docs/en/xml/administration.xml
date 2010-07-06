@@ -771,7 +771,7 @@
             <listitem>
               <para>
                 Set this to the number of days you want to let bugs go
-                in the NEW or REOPENED state before notifying people they have
+                in the CONFIRMED state before notifying people they have
                 untouched new bugs. If you do not plan to use this feature, simply 
                 do not set up the whining cron job described in the installation
                 instructions, or set this value to "0" (never whine).
@@ -1239,7 +1239,7 @@
     basis. The number of <quote>votes</quote> available to 
     users is set per-product, as is the number of votes
     required to move a bug automatically from the UNCONFIRMED 
-    status to the NEW status.
+    status to the CONFIRMED status.
     </para>
 
     <para>
@@ -2547,7 +2547,7 @@ ReadOnly: ENTRY, NA/NA, CANEDIT
     This allows developers to gauge
     user need for a particular enhancement or bugfix. By allowing bugs with
     a certain number of votes to automatically move from "UNCONFIRMED" to
-    "NEW", users of the bug system can help high-priority bugs garner
+    "CONFIRMED", users of the bug system can help high-priority bugs garner
     attention so they don't sit for a long time awaiting triage.</para>
 
     <para>To modify Voting settings:</para>
@@ -2576,7 +2576,7 @@ ReadOnly: ENTRY, NA/NA, CANEDIT
         <para><emphasis>Number of votes a bug in this product needs to
         automatically get out of the UNCONFIRMED state</emphasis>: 
         Setting this field to "0" disables the automatic move of
-        bugs from UNCONFIRMED to NEW. 
+        bugs from UNCONFIRMED to CONFIRMED. 
         </para>
       </listitem>
 

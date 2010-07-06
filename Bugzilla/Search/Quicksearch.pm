@@ -273,8 +273,8 @@ sub _handle_status_and_resolution {
     elsif ($words->[0] eq 'OPEN') {
         shift @$words;
     }
-    elsif ($words->[0] =~ /^[A-Z]+(,[A-Z]+)*$/) {
-        # e.g. NEW,ASSI,REOP,FIX
+    elsif ($words->[0] =~ /^[A-Z_]+(,[_A-Z]+)*$/) {
+        # e.g. CON,IN_PR,FIX
         undef %states;
         if (matchPrefixes(\%states,
                           \%resolutions,

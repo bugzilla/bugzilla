@@ -1494,7 +1494,7 @@ c:\perl\bin\perl.exe -xc:\bugzilla -wT "%s" %s
       <para>What good are
       bugs if they're not annoying? To help make them more so you
       can set up Bugzilla's automatic whining system to complain at engineers
-      which leave their bugs in the NEW or REOPENED state without triaging them.
+      which leave their bugs in the CONFIRMED state without triaging them.
       </para>
       <para>
         This can be done by adding the following command as a daily

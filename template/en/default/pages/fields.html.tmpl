@@ -65,49 +65,33 @@
           Nobody has confirmed that this [% terms.bug %] is valid. Users
           who have the "canconfirm" permission set may confirm
           this [% terms.bug %], changing its state to 
-          <b>[% display_value("bug_status", "NEW") FILTER html %]</b>. 
+          <b>[% display_value("bug_status", "CONFIRMED") FILTER html %]</b>. 
           Or, it may be directly resolved and marked
           <b>[% display_value("bug_status", "RESOLVED") FILTER html %]</b>.
         </dd>
 
         <dt>
-          [% display_value("bug_status", "NEW") FILTER html %]
+          [% display_value("bug_status", "CONFIRMED") FILTER html %]
         </dt>
         <dd>
           This [% terms.bug %] is valid and has recently been filed.
           [%+ terms.Bugs %] in this state become 
-          <b>[% display_value("bug_status", "ASSIGNED") FILTER html %]</b> when
-          somebody is working on them, or become resolved and marked
+          <b>[% display_value("bug_status", "IN_PROGRESS") FILTER html %]</b>
+          when somebody is working on them, or become resolved and marked
           <b>[% display_value("bug_status", "RESOLVED") FILTER html %]</b>.
         </dd>
 
         <dt>
-          [% display_value("bug_status", "ASSIGNED") FILTER html %]
+          [% display_value("bug_status", "IN_PROGRESS") FILTER html %]
         </dt>
         <dd>
           This [% terms.bug %] is not yet resolved, but is assigned to the
           proper person who is working on the [% terms.bug %]. From here,
           [%+ terms.bugs %] can be given to another person and become
-          <b>[% display_value("bug_status", "NEW") FILTER html %]</b>, or
+          <b>[% display_value("bug_status", "CONFIRMED") FILTER html %]</b>, or
           resolved and become 
           <b>[% display_value("bug_status", "RESOLVED") FILTER html %]</b>.
         </dd>
-
-        <dt>
-          [% display_value("bug_status", "REOPENED") FILTER html %]
-        </dt>
-        <dd>
-          This [% terms.bug %] was once resolved, but the resolution was
-          deemed incorrect. For example, a 
-          <b>[% display_value("resolution", "WORKSFORME") FILTER html %]</b>
-          [%+ terms.bug %] is marked 
-          <b>[% display_value("bug_status", "REOPENED") FILTER html %]</b> when
-          more information shows up and the [% terms.bug %] is now
-          reproducible. From here, [% terms.bugs %] are either marked 
-          <b>[% display_value("bug_status", "ASSIGNED") FILTER html %]</b> or
-          <b>[% display_value("bug_status", "RESOLVED") FILTER html %]</b>.
-        </dd>
-      </dl>
     </td>
 
     <td>
@@ -128,11 +112,9 @@
         </dt>
         <dd>
           A resolution has been performed, and it is awaiting verification by
-          QA. From here [% terms.bugs %] are either re-opened and become
-          <b>[% display_value("bug_status", "REOPENED") FILTER html %]</b>, are
-          marked <b>[% display_value("bug_status", "VERIFIED") FILTER html %]</b>,
-          or are closed for good and marked 
-          <b>[% display_value("bug_status", "CLOSED") FILTER html %]</b>.
+          QA. From here [% terms.bugs %] are either reopened and given some
+          open status, or are verified by QA and marked
+          <b>[% display_value("bug_status", "VERIFIED") FILTER html %]</b>.
         </dd>
 
         <dt>
@@ -140,20 +122,8 @@
         </dt>
         <dd>
           QA has looked at the [% terms.bug %] and the resolution and
-          agrees that the appropriate resolution has been taken. 
-          [%+ terms.Bugs %] remain in this state until the product they were
-          reported against actually ships, at which point they become
-          <b>[% display_value("bug_status", "CLOSED") FILTER html %]</b>.
-        </dd>
-
-        <dt>
-          [% display_value("bug_status", "CLOSED") FILTER html %]
-        </dt>
-        <dd>
-          The [% terms.bug %] is considered dead, the resolution is correct.
-          Any zombie [% terms.bugs %] who choose to walk the earth again must
-          do so by becoming 
-          <b>[% display_value("bug_status", "REOPENED") FILTER html %]</b>.
+          agrees that the appropriate resolution has been taken. This is
+          the final staus for bugs. 
         </dd>
       </dl>
     </td>

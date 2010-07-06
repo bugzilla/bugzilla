@@ -241,7 +241,7 @@ Bugzilla::Status - Bug status class.
 
     use Bugzilla::Status;
 
-    my $bug_status = new Bugzilla::Status({name => 'ASSIGNED'});
+    my $bug_status = new Bugzilla::Status({ name => 'IN_PROGRESS' });
     my $bug_status = new Bugzilla::Status(4);
 
     my @closed_bug_statuses = closed_bug_statuses();

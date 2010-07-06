@@ -719,6 +719,9 @@
     Verify that the file permissions in your [% terms.Bugzilla %] directory are
     suitable for your system. Avoid unnecessary write access.
 
+  [% ELSIF message_tag == "install_workflow_init" %]
+    Setting up the default status workflow...
+
   [% ELSIF message_tag == "product_created" %]
     [% title = "Product Created" %]
     The product <em>[% product.name FILTER html %]</em> has been created. You will need to

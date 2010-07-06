@@ -419,7 +419,7 @@
       <dia:attribute name="text">
         <dia:composite type="text">
           <dia:attribute name="string">
-            <dia:string>#NEW#</dia:string>
+            <dia:string>#CONFIRMED#</dia:string>
           </dia:attribute>
           <dia:attribute name="font">
             <dia:font family="sans" style="80" name="Helvetica"/>
@@ -467,7 +467,7 @@
       <dia:attribute name="text">
         <dia:composite type="text">
           <dia:attribute name="string">
-            <dia:string>#ASSIGNED#</dia:string>
+            <dia:string>#IN_PROGRESS#</dia:string>
           </dia:attribute>
           <dia:attribute name="font">
             <dia:font family="sans" style="80" name="Helvetica"/>

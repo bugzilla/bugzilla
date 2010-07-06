@@ -68,8 +68,8 @@ use constant ENUM_DEFAULTS => {
     priority     => ["Highest", "High", "Normal", "Low", "Lowest", "---"],
     op_sys       => ["All","Windows","Mac OS","Linux","Other"],
     rep_platform => ["All","PC","Macintosh","Other"],
-    bug_status   => ["UNCONFIRMED","NEW","ASSIGNED","REOPENED","RESOLVED",
-                     "VERIFIED","CLOSED"],
+    bug_status   => ["UNCONFIRMED","CONFIRMED","IN_PROGRESS","RESOLVED",
+                     "VERIFIED"],
     resolution   => ["","FIXED","INVALID","WONTFIX", "DUPLICATE","WORKSFORME"],
 };
 

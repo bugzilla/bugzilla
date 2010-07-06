@@ -90,7 +90,7 @@ END
 #     bug_status => {
 #         # Translate "Handled" into "RESOLVED".
 #         "Handled"     => "RESOLVED",
-#         "In Progress" => "ASSIGNED",
+#         "In Progress" => "IN_PROGRESS",
 #     },
 #
 #     priority => {

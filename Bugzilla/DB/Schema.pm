@@ -1223,7 +1223,7 @@ use constant ABSTRACT_SCHEMA => {
             defaultmilestone  => {TYPE => 'varchar(20)',
                                   NOTNULL => 1, DEFAULT => "'---'"},
             allows_unconfirmed => {TYPE => 'BOOLEAN', NOTNULL => 1,
-                                   DEFAULT => 'FALSE'},
+                                   DEFAULT => 'TRUE'},
         ],
         INDEXES => [
             products_name_idx   => {FIELDS => ['name'],

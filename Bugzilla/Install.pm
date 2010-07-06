@@ -37,6 +37,24 @@ use Bugzilla::User::Setting;
 use Bugzilla::Util qw(get_text);
 use Bugzilla::Version;
 
+use constant STATUS_WORKFLOW => (
+    [undef, 'UNCONFIRMED'],
+    [undef, 'CONFIRMED'],
+    [undef, 'IN_PROGRESS'],
+    ['UNCONFIRMED', 'CONFIRMED'],
+    ['UNCONFIRMED', 'IN_PROGRESS'],
+    ['UNCONFIRMED', 'RESOLVED'],
+    ['CONFIRMED',   'IN_PROGRESS'],
+    ['CONFIRMED',   'RESOLVED'],
+    ['IN_PROGRESS', 'CONFIRMED'],
+    ['IN_PROGRESS', 'RESOLVED'],
+    ['RESOLVED',    'CONFIRMED'],
+    ['RESOLVED',    'VERIFIED'],
+    ['VERIFIED',    'CONFIRMED'],
+    # The RESOLVED/VERIFIED to UNCONFIRMED transition is enabled specially
+    # in the code for bugs that haven't been confirmed.
+);
+
 sub SETTINGS {
     return {
     # 2005-03-03 travis@sedsystems.ca -- Bug 41972
@@ -230,6 +248,24 @@ sub create_default_product {
             initialowner => $admin->login });
     }
 
+}
+
+sub init_workflow {
+    my $dbh = Bugzilla->dbh;
+    my $has_workflow = $dbh->selectrow_array('SELECT 1 FROM status_workflow');
+    return if $has_workflow;
+
+    print get_text('install_workflow_init'), "\n";
+
+    my %status_ids = @{ $dbh->selectcol_arrayref(
+        'SELECT value, id FROM bug_status', {Columns=>[1,2]}) };
+
+    foreach my $pair (STATUS_WORKFLOW) {
+        my $old_id = $pair->[0] ? $status_ids{$pair->[0]} : undef;
+        my $new_id = $status_ids{$pair->[1]};
+        $dbh->do('INSERT INTO status_workflow (old_status, new_status)
+                       VALUES (?,?)', undef, $old_id, $new_id);
+    }
 }
 
 sub create_admin {

@@ -1323,7 +1323,10 @@ sub _check_bug_status {
         
     }
     
-    if (ref $invocant && $new_status->name eq 'ASSIGNED'
+    if (ref $invocant 
+        && ($new_status->name eq 'IN_PROGRESS'
+            # Backwards-compat for the old default workflow.
+            or $new_status->name eq 'ASSIGNED')
         && Bugzilla->params->{"usetargetmilestone"}
         && Bugzilla->params->{"musthavemilestoneonaccept"}
         # musthavemilestoneonaccept applies only if at least two

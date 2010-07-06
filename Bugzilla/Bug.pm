@@ -266,6 +266,7 @@ use constant MAX_LINE_LENGTH => 254;
 # use.)
 use constant FIELD_MAP => {
     creation_time    => 'creation_ts',
+    creator          => 'reporter',
     description      => 'comment',
     id               => 'bug_id',
     last_change_time => 'delta_ts',

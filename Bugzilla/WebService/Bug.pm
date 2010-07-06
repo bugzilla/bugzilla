@@ -290,6 +290,7 @@ sub _translate_comment {
     return filter $filters, {
         id         => $self->type('int', $comment->id),
         bug_id     => $self->type('int', $comment->bug_id),
+        creator    => $self->type('string', $comment->author->login),
         author     => $self->type('string', $comment->author->login),
         time       => $self->type('dateTime', $comment->creation_ts),
         is_private => $self->type('boolean', $comment->is_private),
@@ -695,8 +696,6 @@ sub _attachment_to_hash {
     # Skipping attachment flags for now.
     delete $attach->{flags};
 
-    my $attacher = new Bugzilla::User($attach->attacher->id);
-
     return filter $filters, {
         creation_time    => $self->type('dateTime', $attach->attached),
         last_change_time => $self->type('dateTime', $attach->modification_time),
@@ -709,7 +708,8 @@ sub _attachment_to_hash {
         is_obsolete      => $self->type('int', $attach->isobsolete),
         is_url           => $self->type('int', $attach->isurl),
         is_patch         => $self->type('int', $attach->ispatch),
-        attacher         => $self->type('string', $attacher->login)
+        creator          => $self->type('string', $attach->attacher->login),
+        attacher         => $self->type('string', $attach->attacher->login),
     };
 }
 
@@ -1098,9 +1098,13 @@ parameter enabled.
 
 C<boolean> True if the attachment is a patch, False otherwise.
 
-=item C<attacher>
+=item C<creator>
 
 C<string> The login name of the user that created the attachment.
+
+Also returned as C<attacher>, for backwards-compatibility with older
+Bugzillas. (However, this backwards-compatibility will go away in Bugzilla
+5.0.)
 
 =back
 
@@ -1124,6 +1128,9 @@ private attachments.
 =over
 
 =item Added in Bugzilla B<3.6>.
+
+=item In Bugzilla B<4.0>, the C<attacher> return value was renamed to
+C<creator>.
 
 =back
 
@@ -1219,9 +1226,13 @@ ID of that attachment. Otherwise it will be null.
 
 C<string> The actual text of the comment.
 
-=item author
+=item creator
 
 C<string> The login name of the comment's author.
+
+Also returned as C<author>, for backwards-compatibility with older
+Bugzillas. (However, this backwards-compatibility will go away in Bugzilla
+5.0.)
 
 =item time
 
@@ -1262,6 +1273,9 @@ that id.
 =item Added in Bugzilla B<3.4>.
 
 =item C<attachment_id> was added to the return value in Bugzilla B<3.6>.
+
+=item In Bugzilla B<4.0>, the C<author> return value was renamed to
+C<creator>.
 
 =back
 
@@ -1643,6 +1657,10 @@ don't want this, be sure to also specify the C<product> argument.
 C<dateTime> Searches for bugs that were created at this time or later.
 May not be an array.
 
+=item C<creator>
+
+C<string> The login name of the user who created the bug.
+
 =item C<id>
 
 C<int> The numeric id of the bug.
@@ -1679,9 +1697,12 @@ C<string> The Priority field on a bug.
 
 C<string> The name of the Product that the bug is in.
 
-=item C<reporter>
+=item C<creator>
 
 C<string> The login name of the user who reported the bug.
+
+You can also pass this argument with the name C<reporter>, for
+backwards compatibility with older Bugzillas.
 
 =item C<resolution>
 
@@ -1762,6 +1783,9 @@ for that value.
 =item Added in Bugzilla B<3.4>.
 
 =item Searching by C<votes> was removed in Bugzilla B<4.0>.
+
+=item The C<reporter> input parameter was renamed to C<creator>
+in Bugzilla B<4.0>.
 
 =back
 

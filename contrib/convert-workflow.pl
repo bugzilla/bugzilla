@@ -54,16 +54,21 @@ END
 getc;
 
 my $dbh = Bugzilla->dbh;
-my %translation = (
-    NEW      => 'CONFIRMED',
-    ASSIGNED => 'IN_PROGRESS',
-    REOPENED => 'CONFIRMED',
-    CLOSED   => 'VERIFIED',
+# This is an array instead of a hash so that we can be sure that
+# the translation happens in the right order. In particular, we
+# want NEW to be renamed to CONFIRMED, instead of having REOPENED
+# be the one that gets renamed.
+my @translation = (
+    [NEW      => 'CONFIRMED'],
+    [ASSIGNED => 'IN_PROGRESS'],
+    [REOPENED => 'CONFIRMED'],
+    [CLOSED   => 'VERIFIED'],
 );
 
 my $status_field = Bugzilla::Field->check('bug_status');
 $dbh->bz_start_transaction();
-while (my ($from, $to) = each %translation) {
+foreach my $pair (@translation) {
+    my ($from, $to) = @$pair;
     print "Converting $from to $to...\n";
     $dbh->do('UPDATE bugs SET bug_status = ? WHERE bug_status = ?',
              undef, $to, $from);

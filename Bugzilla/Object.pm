@@ -41,6 +41,7 @@ use constant DATE_COLUMNS      => ();
 use constant VALIDATOR_DEPENDENCIES => {};
 # XXX At some point, this will be joined with FIELD_MAP.
 use constant REQUIRED_FIELD_MAP  => {};
+use constant EXTRA_REQUIRED_FIELDS => ();
 
 # This allows the JSON-RPC interface to return Bugzilla::Object instances
 # as though they were hashes. In the future, this may be modified to return
@@ -638,6 +639,7 @@ sub _required_create_fields {
             push(@required, $field);
         }
     }
+    push(@required, $class->EXTRA_REQUIRED_FIELDS);
     return @required;
 }
 
@@ -770,6 +772,40 @@ to L</create> has a different name in the database than it does in the
 L</create> arguments. (For example, L<Bugzilla::Bug/create> takes a
 C<product> argument, but the column name in the C<bugs> table is
 C<product_id>.)
+
+=item C<EXTRA_REQUIRED_FIELDS>
+
+Normally, Bugzilla::Object automatically figures out which fields
+are required for L</create>. It then I<always> runs those fields' validators,
+even if those fields weren't passed as arguments to L</create>. That way,
+any default values or required checks can be done for those fields by
+the validators.
+
+L</create> figures out which fields are required by looking for database
+columns in the L</DB_TABLE> that are NOT NULL and have no DEFAULT set.
+However, there are some fields that this check doesn't work for:
+
+=over
+
+=item *
+
+Fields that have database defaults (or are marked NULL in the database)
+but actually have different defaults specified by validators. (For example,
+the qa_contact field in the C<bugs> table can be NULL, so it won't be
+caught as being required. However, in reality it defaults to the
+component's initial_qa_contact.)
+
+=item * 
+
+Fields that have defaults that should be set by validators, but are
+actually stored in a table different from L</DB_TABLE> (like the "cc"
+field for bugs, which defaults to the "initialcc" of the Component, but won't
+be caught as a normal required field because it's in a separate table.) 
+
+=back
+
+Any field matching the above criteria needs to have its name listed in
+this constant. For an example of use, see the code of L<Bugzilla::Bug>.
 
 =item C<NUMERIC_COLUMNS>
 

@@ -90,6 +90,7 @@ sub DB_COLUMNS {
 use constant REQUIRED_FIELD_MAP => {
     bug_id => 'bug',
 };
+use constant EXTRA_REQUIRED_FIELDS => qw(data);
 
 use constant UPDATE_COLUMNS => qw(
     description

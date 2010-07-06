@@ -286,6 +286,21 @@ use constant REQUIRED_FIELD_MAP => {
     component_id => 'component',
 };
 
+# Target Milestone is here because it has a default that the validator
+# creates (product.defaultmilestone) that is different from the database
+# default.
+#
+# CC is here because it is a separate table, and has a validator-created
+# default of the component initialcc.
+#
+# QA Contact is allowed to be NULL in the database, so it wouldn't normally
+# be caught by _required_create_fields. However, it always has to be validated,
+# because it has a default of the component.defaultqacontact.
+#
+# Groups are in a separate table, but must always be validated so that
+# mandatory groups get set on bugs.
+use constant EXTRA_REQUIRED_FIELDS => qw(target_milestone cc qa_contact groups);
+
 #####################################################################
 
 sub new {

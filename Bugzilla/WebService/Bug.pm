@@ -1761,7 +1761,7 @@ for that value.
 
 =item Added in Bugzilla B<3.4>.
 
-=item Searching by C<votes> was removed in Bugzilla B<3.8>.
+=item Searching by C<votes> was removed in Bugzilla B<4.0>.
 
 =back
 
@@ -1923,8 +1923,8 @@ in them. The error message will have more details.
 =item Before B<3.0.4>, parameters marked as B<Defaulted> were actually
 B<Required>, due to a bug in Bugzilla.
 
-=item The C<groups> argument was added in Bugzilla B<3.8>. Before
-Bugzilla 3.8, bugs were only added into Mandatory groups by this
+=item The C<groups> argument was added in Bugzilla B<4.0>. Before
+Bugzilla 4.0, bugs were only added into Mandatory groups by this
 method.
 
 =back

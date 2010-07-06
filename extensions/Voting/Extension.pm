@@ -75,7 +75,7 @@ sub db_schema_abstract_schema {
 
 sub install_update_db {
     my $dbh = Bugzilla->dbh;
-    # Note that before Bugzilla 3.8, voting was a built-in part of Bugzilla,
+    # Note that before Bugzilla 4.0, voting was a built-in part of Bugzilla,
     # so updates to the columns for old versions of Bugzilla happen in
     # Bugzilla::Install::DB, and can't safely be moved to this extension.
 

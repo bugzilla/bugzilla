@@ -612,7 +612,7 @@ function.
 
 =item Added in Bugzilla B<3.4>.
 
-=item C<group_ids> and C<groups> were added in Bugzilla B<3.8>.
+=item C<group_ids> and C<groups> were added in Bugzilla B<4.0>.
 
 =back
 

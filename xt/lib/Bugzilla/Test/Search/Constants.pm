@@ -579,7 +579,6 @@ use constant LESSTHAN_OVERRIDE => (
     qa_contact        => { contains => [1,5] },
     resolution        => { contains => [1,5] },
     status_whiteboard => { contains => [1,5] },
-    target_milestone  => { contains => [1,5] },
 );
 
 # The mandatorily-set fields have values higher than <1>,
@@ -599,6 +598,7 @@ use constant GREATERTHAN_OVERRIDE => (
     rep_platform => { contains => [2,3,4,5] },
     short_desc   => { contains => [2,3,4,5] },
     version      => { contains => [2,3,4,5] },
+    target_milestone => { contains => [2,3,4,5] },
     # Bug 2 is the only bug besides 1 that has a Requestee set.
     'requestees.login_name'  => { contains => [2] },
     FIELD_TYPE_SINGLE_SELECT, { contains => [2,3,4,5] },

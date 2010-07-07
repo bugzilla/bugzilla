@@ -126,12 +126,15 @@ sub bz_last_key {
 }
 
 sub sql_group_concat {
-    my ($self, $column, $separator) = @_;
-    my $sep_sql;
-    if ($separator) {
-        $sep_sql = " SEPARATOR $separator";
+    my ($self, $column, $separator, $sort) = @_;
+    $separator = $self->quote(', ') if !defined $separator;
+    $sort = 1 if !defined $sort;
+    if ($sort) {
+        my $sort_order = $column;
+        $sort_order =~ s/^DISTINCT\s+//i;
+        $column = "$column ORDER BY $sort_order";
     }
-    return "GROUP_CONCAT($column$sep_sql)";
+    return "GROUP_CONCAT($column SEPARATOR $separator)";
 }
 
 sub sql_regexp {

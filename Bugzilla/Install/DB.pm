@@ -3198,8 +3198,8 @@ sub _populate_bugs_fulltext {
             q{INSERT INTO bugs_fulltext (bug_id, short_desc, comments, 
                                          comments_noprivate)
                    SELECT bugs.bug_id, bugs.short_desc, }
-                 . $dbh->sql_group_concat('longdescs.thetext', $newline)
-          . ', ' . $dbh->sql_group_concat('nopriv.thetext',    $newline) .
+                 . $dbh->sql_group_concat('longdescs.thetext', $newline, 0)
+          . ', ' . $dbh->sql_group_concat('nopriv.thetext',    $newline, 0) .
                  qq{ FROM bugs 
                           LEFT JOIN longdescs
                                  ON bugs.bug_id = longdescs.bug_id

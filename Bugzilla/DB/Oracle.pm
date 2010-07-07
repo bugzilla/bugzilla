@@ -119,7 +119,7 @@ sub bz_explain {
 
 sub sql_group_concat {
     my ($self, $text, $separator) = @_;
-    $separator ||= "','";
+    $separator = $self->quote(', ') if !defined $separator;
     return "group_concat(T_CLOB_DELIM($text, $separator))";
 }
 

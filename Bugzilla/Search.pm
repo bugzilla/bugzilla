@@ -308,10 +308,10 @@ sub COLUMNS {
                    . " * ($actual_time / ($actual_time + bugs.remaining_time))"
               . " END)",
 
-        'flagtypes.name' => $dbh->sql_group_concat('DISTINCT '
-                            . $dbh->sql_string_concat('flagtypes.name', 'flags.status'), "', '"),
+        'flagtypes.name' => $dbh->sql_group_concat('DISTINCT ' 
+            . $dbh->sql_string_concat('flagtypes.name', 'flags.status')),
 
-        'keywords' => $dbh->sql_group_concat('DISTINCT keyworddefs.name', "', '"),
+        'keywords' => $dbh->sql_group_concat('DISTINCT keyworddefs.name'),
     );
 
     # Backward-compatibility for old field names. Goes new_name => old_name.
@@ -354,8 +354,7 @@ sub COLUMNS {
         }
         elsif ($field->type == FIELD_TYPE_MULTI_SELECT) {
             $sql = $dbh->sql_group_concat(
-                'DISTINCT map_bug_' . $field->name . '.value',
-                $dbh->quote(', '));
+                'DISTINCT map_bug_' . $field->name . '.value');
         }
         else {
             $sql = 'bugs.' . $field->name;

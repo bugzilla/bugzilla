@@ -98,9 +98,14 @@ sub bz_last_key {
 }
 
 sub sql_group_concat {
-    my ($self, $text, $separator) = @_;
-    $separator ||= "','";
-    return "array_to_string(array_accum($text), $separator)";
+    my ($self, $text, $separator, $sort) = @_;
+    $sort = 1 if !defined $sort;
+    $separator = $self->quote(', ') if !defined $separator;
+    my $sql = "array_accum($text)";
+    if ($sort) {
+        $sql = "array_sort($sql)";
+    }
+    return "array_to_string($sql, $separator)";
 }
 
 sub sql_istring {
@@ -223,6 +228,20 @@ sub bz_setup_database {
                        INITCOND = '{}' 
                    )");
     }
+
+   $self->do(<<'END');
+CREATE OR REPLACE FUNCTION array_sort(ANYARRAY)
+RETURNS ANYARRAY LANGUAGE SQL
+IMMUTABLE STRICT
+AS $$
+SELECT ARRAY(
+    SELECT $1[s.i] AS each_item
+    FROM
+        generate_series(array_lower($1,1), array_upper($1,1)) AS s(i)
+    ORDER BY each_item
+);
+$$;
+END
 
     # PostgreSQL doesn't like having *any* index on the thetext
     # field, because it can't have index data longer than 2770

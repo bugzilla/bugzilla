@@ -89,15 +89,16 @@
 [% overrides.initialowner = {} %]
 [% overrides.initialqacontact = {} %]
 
-[% FOREACH component = product.components %]
-  [% overrides.initialowner.name.${component.name} = {
+[%# "component" is a reserved word in Template Toolkit. %]
+[% FOREACH my_component = product.components %]
+  [% overrides.initialowner.name.${my_component.name} = {
        override_content => 1
-       content => component.default_assignee.login
+       content => my_component.default_assignee.login
      }
   %]
-  [% overrides.initialqacontact.name.${component.name} = {
+  [% overrides.initialqacontact.name.${my_component.name} = {
        override_content => 1
-       content => component.default_qa_contact.login
+       content => my_component.default_qa_contact.login
      }
   %]
 [% END %]

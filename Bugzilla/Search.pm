@@ -2159,7 +2159,7 @@ sub _owner_idle_time_greater_less {
     
     my $table = "idle_" . $$chartid;
     $$v =~ /^(\d+)\s*([hHdDwWmMyY])?$/;
-    my $quantity = $1;
+    my $quantity = $1 || 0;
     my $unit = lc $2;
     my $unitinterval = 'DAY';
     if ($unit eq 'h') {

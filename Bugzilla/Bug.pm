@@ -3203,6 +3203,17 @@ sub comments {
     return \@comments;
 }
 
+# This is needed by xt/search.t.
+sub percentage_complete {
+    my $self = shift;
+    return undef if $self->{'error'} || !Bugzilla->user->is_timetracker;
+    my $remaining = $self->remaining_time;
+    my $actual    = $self->actual_time;
+    my $total = $remaining + $actual;
+    return undef if $total == 0;
+    return 100 * ($actual / $total);
+}
+
 sub product {
     my ($self) = @_;
     return $self->{product} if exists $self->{product};

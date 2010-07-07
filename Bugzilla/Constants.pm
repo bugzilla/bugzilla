@@ -141,11 +141,13 @@ use File::Basename;
     USAGE_MODE_XMLRPC
     USAGE_MODE_EMAIL
     USAGE_MODE_JSON
+    USAGE_MODE_TEST
 
     ERROR_MODE_WEBPAGE
     ERROR_MODE_DIE
     ERROR_MODE_DIE_SOAP_FAULT
     ERROR_MODE_JSON_RPC
+    ERROR_MODE_TEST
 
     COLOR_ERROR
 
@@ -457,6 +459,7 @@ use constant USAGE_MODE_CMDLINE    => 1;
 use constant USAGE_MODE_XMLRPC     => 2;
 use constant USAGE_MODE_EMAIL      => 3;
 use constant USAGE_MODE_JSON       => 4;
+use constant USAGE_MODE_TEST       => 5;
 
 # Error modes. Default set by Bugzilla->usage_mode (so ERROR_MODE_WEBPAGE
 # usually). Use with Bugzilla->error_mode.
@@ -464,6 +467,7 @@ use constant ERROR_MODE_WEBPAGE        => 0;
 use constant ERROR_MODE_DIE            => 1;
 use constant ERROR_MODE_DIE_SOAP_FAULT => 2;
 use constant ERROR_MODE_JSON_RPC       => 3;
+use constant ERROR_MODE_TEST           => 4;
 
 # The ANSI colors of messages that command-line scripts use
 use constant COLOR_ERROR => 'red';

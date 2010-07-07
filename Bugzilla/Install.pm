@@ -358,7 +358,9 @@ sub make_admin {
         write_params();
     }
 
-    print "\n", get_text('install_admin_created', { user => $user }), "\n";
+    if (Bugzilla->usage_mode == USAGE_MODE_CMDLINE) {
+        print "\n", get_text('install_admin_created', { user => $user }), "\n";
+    }
 }
 
 sub _prompt_for_password {

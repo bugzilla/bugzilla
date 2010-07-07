@@ -33,6 +33,7 @@ use Bugzilla::WebService::Constants;
 use Bugzilla::Util;
 
 use Carp;
+use Data::Dumper;
 use Date::Format;
 
 # We cannot use $^S to detect if we are in an eval(), because mod_perl
@@ -101,6 +102,12 @@ sub _throw_error {
         print Bugzilla->cgi->header();
         $template->process($name, $vars)
           || ThrowTemplateError($template->error());
+    }
+    # There are some tests that throw and catch a lot of errors,
+    # and calling $template->process over and over for those errors
+    # is too slow. So instead, we just "die" with a dump of the arguments.
+    elsif (Bugzilla->error_mode == ERROR_MODE_TEST) {
+        die Dumper($vars);
     }
     else {
         my $message;

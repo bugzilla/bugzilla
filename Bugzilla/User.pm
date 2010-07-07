@@ -985,7 +985,7 @@ sub check_can_admin_product {
     my ($self, $product_name) = @_;
 
     # First make sure the product name is valid.
-    my $product = Bugzilla::Product::check_product($product_name);
+    my $product = Bugzilla::Product->check($product_name);
 
     ($self->in_group('editcomponents', $product->id)
        && $self->can_see_product($product->name))

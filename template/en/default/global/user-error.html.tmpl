@@ -1328,10 +1328,6 @@
     [% END %]
     does not exist or you don't have access to it.
 
-  [% ELSIF error == "product_doesnt_exist" %]
-    [% title = "Specified Product Does Not Exist" %]
-    The product '[% product FILTER html %]' does not exist.
-
   [% ELSIF error == "product_illegal_group" %]
     [% title = "Illegal Group" %]
     [% group.name FILTER html %] is not an active [% terms.bug %] group
@@ -1400,15 +1396,6 @@
     [% admindocslinks = {'products.html' => 'Administering products',
                          'versions.html' => 'Administering versions'} %]
     You must enter a valid version to create a new product.
-
-  [% ELSIF error == "product_not_specified" %]
-    [% title = "No Product Specified" %]
-    [% admindocslinks = {'products.html'   => 'Administering products',
-                         'components.html' => 'Administering components',
-                         'milestones.html' => 'Administering milestones',
-                         'versions.html'   => 'Administering versions'} %]
-    No product specified when trying to edit components, milestones, versions
-    or product.
 
   [% ELSIF error == "query_name_exists" %]
     [% title = "Search Name Already In Use" %]

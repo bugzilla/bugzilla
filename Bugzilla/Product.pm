@@ -812,26 +812,17 @@ sub classification_id { return $_[0]->{'classification_id'}; }
 ####      Subroutines    ######
 ###############################
 
-sub check_product {
-    my ($product_name) = @_;
-
-    unless ($product_name) {
-        ThrowUserError('product_not_specified');
-    }
-    my $product = new Bugzilla::Product({name => $product_name});
-    unless ($product) {
-        ThrowUserError('product_doesnt_exist',
-                       {'product' => $product_name});
-    }
-    return $product;
-}
-
 sub check {
     my ($class, $params) = @_;
     $params = { name => $params } if !ref $params;
-    $params->{_error} = 'product_access_denied';
+    if (!$params->{allow_inaccessible}) {
+        $params->{_error} = 'product_access_denied';
+    }
     my $product = $class->SUPER::check($params);
-    if (!Bugzilla->user->can_access_product($product)) {
+
+    if (!$params->{allow_inaccessible}
+        && !Bugzilla->user->can_access_product($product))
+    {
         ThrowUserError('product_access_denied', $params);
     }
     return $product;
@@ -1051,15 +1042,6 @@ than calling those accessors on every item in the array individually.
 
 This function is not exported, so must be called like 
 C<Bugzilla::Product::preload($products)>.
-
-=item C<check_product($product_name)>
-
- Description: Checks if the product name was passed in and if is a valid
-              product.
-
- Params:      $product_name - String with a product name.
-
- Returns:     Bugzilla::Product object.
 
 =back
 

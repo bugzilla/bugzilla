@@ -182,11 +182,14 @@ sub rename_field_value {
     my $old_sql = $old;
     $old_sql =~ s/([_\%])/\\$1/g;
 
+    my $table = $class->DB_TABLE;
+    my $id_field = $class->ID_FIELD;
+
     my $dbh = Bugzilla->dbh;
     $dbh->bz_start_transaction();
 
     my %queries = @{ $dbh->selectcol_arrayref(
-        "SELECT id, query FROM namedqueries WHERE query LIKE ?",
+        "SELECT $id_field, query FROM $table WHERE query LIKE ?",
         {Columns=>[1,2]}, "\%$old_sql\%") };
     foreach my $id (keys %queries) {
         my $query = $queries{$id};
@@ -198,7 +201,7 @@ sub rename_field_value {
             # boolean charts. Users will have to fix those themselves.
             $query =~ s/\bvalue\Q$chart_id\E=\Q$old\E\b/value$chart_id=$new/i;
         }
-        $dbh->do("UPDATE namedqueries SET query = ? WHERE id = ?",
+        $dbh->do("UPDATE $table SET query = ? WHERE $id_field = ?",
                  undef, $query, $id);
     }
 

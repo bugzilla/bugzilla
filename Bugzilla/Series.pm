@@ -34,6 +34,11 @@ package Bugzilla::Series;
 use Bugzilla::Error;
 use Bugzilla::Util;
 
+# This is a hack so that we can re-use the rename_field_value
+# code from Bugzilla::Search::Saved.
+use constant DB_TABLE => 'series';
+use constant ID_FIELD => 'series_id';
+
 sub new {
     my $invocant = shift;
     my $class = ref($invocant) || $invocant;

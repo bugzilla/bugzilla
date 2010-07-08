@@ -102,6 +102,8 @@ foreach my $pair (@translation) {
     }
 
     Bugzilla::Search::Saved->rename_field_value('bug_status', $from, $to);
+    Bugzilla::Series->Bugzilla::Search::Saved::rename_field_value('bug_status',
+        $from, $to);
 }
 
 $dbh->bz_commit_transaction();

@@ -174,6 +174,37 @@ sub create {
     return $obj;
 }
 
+sub rename_field_value {
+    my ($class, $field, $old_value, $new_value) = @_;
+
+    my $old = url_quote($old_value);
+    my $new = url_quote($new_value);
+    my $old_sql = $old;
+    $old_sql =~ s/([_\%])/\\$1/g;
+
+    my $dbh = Bugzilla->dbh;
+    $dbh->bz_start_transaction();
+
+    my %queries = @{ $dbh->selectcol_arrayref(
+        "SELECT id, query FROM namedqueries WHERE query LIKE ?",
+        {Columns=>[1,2]}, "\%$old_sql\%") };
+    foreach my $id (keys %queries) {
+        my $query = $queries{$id};
+        $query =~ s/\b$field=\Q$old\E\b/$field=$new/gi;
+        # Fix boolean charts.
+        while ($query =~ /\bfield(\d+-\d+-\d+)=\Q$field\E\b/gi) {
+            my $chart_id = $1;
+            # Note that this won't handle lists or substrings inside of
+            # boolean charts. Users will have to fix those themselves.
+            $query =~ s/\bvalue\Q$chart_id\E=\Q$old\E\b/value$chart_id=$new/i;
+        }
+        $dbh->do("UPDATE namedqueries SET query = ? WHERE id = ?",
+                 undef, $query, $id);
+    }
+
+    $dbh->bz_commit_transaction();
+}
+
 sub preload {
     my ($searches) = @_;
     my $dbh = Bugzilla->dbh;

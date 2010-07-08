@@ -25,6 +25,7 @@ use lib qw(. lib);
 
 use Bugzilla;
 use Bugzilla::Config qw(:admin);
+use Bugzilla::Search::Saved;
 use Bugzilla::Status;
 
 my $confirmed   = new Bugzilla::Status({ name => 'CONFIRMED' });
@@ -79,7 +80,7 @@ foreach my $pair (@translation) {
     }
 
     foreach my $what (qw(added removed)) {
-        $dbh->do("UPDATE bugs_activity SET $what = ? 
+        $dbh->do("UPDATE bugs_activity SET $what = ?
                    WHERE fieldid = ? AND $what = ?",
                  undef, $to, $status_field->id, $from);
     }
@@ -99,6 +100,8 @@ foreach my $pair (@translation) {
         $dbh->do('UPDATE bug_status SET value = ? WHERE value = ?',
                  undef, $to, $from);
     }
+
+    Bugzilla::Search::Saved->rename_field_value('bug_status', $from, $to);
 }
 
 $dbh->bz_commit_transaction();

@@ -496,6 +496,8 @@ normally does, this function also makes the new group be inherited
 by the C<admin> group. That is, the C<admin> group will automatically
 be a member of this group.
 
+=back
+
 =head1 METHODS
 
 =over

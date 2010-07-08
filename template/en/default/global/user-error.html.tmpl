@@ -1487,8 +1487,8 @@
   [% ELSIF error == "search_field_operator_invalid" %]
     [% terms.Bugzilla %] does not support using the 
     "[%+ field_descs.$field FILTER html %]" ([% field FILTER html %])
-    field with the "[% search_descs.$operator %]" ([% operator FILTER html %])
-    search type.
+    field with the "[% search_descs.$operator FILTER html %]" 
+    ([% operator FILTER html %]) search type.
 
   [% ELSIF error == "series_already_exists" %]
     [% title = "Series Already Exists" %]

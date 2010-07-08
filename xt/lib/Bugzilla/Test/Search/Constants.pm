@@ -761,7 +761,7 @@ use constant TESTS => {
         { contains => [2,3,4,5], value => '<1>' },
     ],
     anyexact => [
-        { contains => [1,2], value => '<1>,<2>', 
+        { contains => [1,2], value => '<1>, <2>', 
           override => { ANY_OVERRIDE } },
     ],
     anywordssubstr => [

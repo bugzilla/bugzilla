@@ -767,11 +767,6 @@
     You are not authorized to edit attachments on [% terms.bug %] 
     [%+ bug_id FILTER html %].
          
-  [% ELSIF error == "illegal_attachment_is_patch" %]
-    [% title = "Your Search Makes No Sense" %]
-    The only legal values for the <em>Attachment is patch</em> field are
-    0 and 1.
-
   [% ELSIF error == "illegal_bug_status_transition" %]
     [% title = "Illegal $terms.Bug Status Change" %]
     [% IF old.defined %]
@@ -842,11 +837,6 @@
     [% admindocslinks = {'groups.html' => 'Assigning Group Controls to Products'} %]
     Your group control combination for group &quot;
     [% groupname FILTER html %]&quot; is illegal.
-
-  [% ELSIF error == "illegal_is_obsolete" %]
-    [% title = "Your Search Makes No Sense" %]
-    The only legal values for the <em>Attachment is obsolete</em> field are
-    0 and 1.
 
   [% ELSIF error == "illegal_query_name" %]
     [% title = "Illegal Search Name" %]

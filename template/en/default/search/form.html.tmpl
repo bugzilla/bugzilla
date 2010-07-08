@@ -310,8 +310,8 @@ TUI_hide_default('information_query');
   <div class="bz_section_title" id="people_filter">
     <div id="people_query_controller" class="arrow">&#9660;</div>
     <a href="javascript:TUI_toggle_class('people_query')">Search By People</a>
-    <span>Narrow results to a role (ie. [% field_descs.assigned_to FILTER html %],
-      [% field_descs.reporter FILTER html  %], [% field_descs.commenter FILTER html %],
+    <span>Narrow results to a role (i.e. [% field_descs.assigned_to FILTER html %],
+      [%+ field_descs.reporter FILTER html %], [% field_descs.commenter FILTER html %],
       etc.) a person has on [% terms.abug %]
     </span>
   </div>
@@ -375,7 +375,7 @@ TUI_hide_default('information_query');
            size="20" value="[% default.chfieldvalue.0 FILTER html %]">
   </li>
   <li>
-    <label for="chfieldfrom">Between:</label>
+    <label for="chfieldfrom">between:</label>
     <input name="chfieldfrom" id="chfieldfrom" size="10" 
            value="[% default.chfieldfrom.0 FILTER html %]" onchange="updateCalendarFromField(this)"> 
            <button type="button" class="calendar_button"

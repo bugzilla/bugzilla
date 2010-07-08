@@ -211,9 +211,8 @@ use constant ATTACHMENT_BOOLEANS_CONTAINS_BROKEN => (
 # bug_file_loc can be NULL, so it gets missed by the normal
 # notequals search.
 #
-# keywords & longdescs "notequals" match if *any* of the values
-# are not equal to the string provided. Also, keywords fails to match
-# if there are no keywords on the bug.
+# longdescs "notequals" matches if *any* of the values
+# are not equal to the string provided.
 #
 # attachments.* notequals doesn't find bugs that lack attachments.
 #
@@ -236,7 +235,6 @@ use constant NEGATIVE_BROKEN => (
     cc           => { contains => [1,5] },
     deadline     => { contains => [5] },
     dependson    => { contains => [2,4,5] },
-    keywords     => { contains => [1,5] },
     longdesc     => { contains => [1] },
     'longdescs.isprivate'   => { contains => [1] },
     percentage_complete     => { contains => [1] },
@@ -288,7 +286,7 @@ use constant ALLWORDS_BROKEN => (
 # nowords and nowordssubstr have these broken tests in common.
 #
 # flagtypes.name doesn't match bugs without flags.
-# cc, keywords, longdescs.isprivate, and bug_group actually work properly in
+# cc, longdescs.isprivate, and bug_group actually work properly in
 # terms of excluding bug 1 (since we exclude all values in the search,
 # on our test), but still fail at including bug 5.
 # The longdesc* and work_time fields, coincidentally, work completely
@@ -298,7 +296,6 @@ use constant NOWORDS_BROKEN => (
     'flagtypes.name' => { contains => [5] },
     bug_group        => { contains => [5] },
     cc               => { contains => [5] },
-    keywords         => { contains => [5] },
     longdesc         => {},
     work_time        => {},
     'longdescs.isprivate' => {},
@@ -951,7 +948,8 @@ use constant INJECTION_BROKEN_FIELD => {
         operator_ok => [qw(allwordssubstr anywordssubstr casesubstring
                            changedfrom changedto greaterthan greaterthaneq
                            lessthan lessthaneq notregexp notsubstring
-                           nowordssubstr regexp substring)]
+                           nowordssubstr regexp substring anywords
+                           notequals nowords)]
     },
 };
 

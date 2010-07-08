@@ -157,7 +157,7 @@ sub MessageToMTA {
         
         # Sendmail adds a Date: header also, but others may not.
         if (!defined $email->header('Date')) {
-            $email->header_set('Date', time2str("%a, %e %b %Y %T %z", time()));
+            $email->header_set('Date', time2str("%a, %d %b %Y %T %z", time()));
         }
     }
 

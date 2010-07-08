@@ -24,6 +24,7 @@
 From: [% Param('mailfrom') %]
 To: [% to_user.email %]
 Subject: [[% terms.Bug %] [%+ bug.id %]] [% 'New: ' IF isnew %][%+ bug.short_desc %]
+Date: [% bug.delta_ts FILTER time("%a, %d %b %Y %T %z", to_user.timezone) %]
 X-Bugzilla-Reason: [% reasonsheader %]
 X-Bugzilla-Type: [% isnew ? 'new' : 'changed' %]
 X-Bugzilla-Watch-Reason: [% reasonswatchheader %]

@@ -964,18 +964,24 @@ sub notify {
     # If there are users in the CC list who don't have an account,
     # use the default language for email notifications.
     my $default_lang;
+    my $default_timezone;
     if (grep { !$_ } values %recipients) {
         $default_lang = Bugzilla::User->new()->settings->{'lang'}->{'value'};
+        $default_timezone = Bugzilla::User->new()->settings->{'timezone'}->{'value'};
     }
 
     foreach my $to (keys %recipients) {
         # Add threadingmarker to allow flag notification emails to be the
         # threaded similar to normal bug change emails.
         my $thread_user_id = $recipients{$to} ? $recipients{$to}->id : 0;
-    
+
+        my $timezone = $recipients{$to} ?
+          $recipients{$to}->settings->{'timezone'}->{'value'} : $default_timezone;
+
         my $vars = { 'flag'            => $flag,
                      'old_flag'        => $old_flag,
                      'to'              => $to,
+                     'timezone'        => $timezone,
                      'bug'             => $bug,
                      'attachment'      => $attachment,
                      'threadingmarker' => build_thread_marker($bug->id, $thread_user_id) };

@@ -40,7 +40,8 @@ sub _known_broken {
 
     return {} if grep { $_ eq $self->field } @field_ok;
 
-    my $field_broken = INJECTION_BROKEN_FIELD->{$self->field};
+    my $field_broken = INJECTION_BROKEN_FIELD->{$self->field}
+                       || INJECTION_BROKEN_FIELD->{$self->field_object->type};
     # We don't want to auto-vivify $field_broken and thus make it true.
     my @operator_ok = $field_broken ? @{ $field_broken->{operator_ok} || [] }
                                     : ();
@@ -51,8 +52,18 @@ sub _known_broken {
 
 sub sql_error_ok { return $_[0]->_known_broken->{sql_error} }
 
-# Injection tests don't have to skip any fields.
-sub field_not_yet_implemented { undef }
+# Injection tests only skip fields on certain dbs.
+sub field_not_yet_implemented {
+    my ($self) = @_;
+    my $skip_for_dbs = $self->_known_broken->{db_skip};
+    return undef if !$skip_for_dbs;
+    my $dbh = Bugzilla->dbh;
+    if (my ($skip) = grep { $dbh->isa("Bugzilla::DB::$_") } @$skip_for_dbs) {
+        my $field = $self->field;
+        return "$field injection testing is not supported with $skip";
+    }
+    return undef;
+}
 # Injection tests don't do translation.
 sub translated_value { $_[0]->test_value }
 

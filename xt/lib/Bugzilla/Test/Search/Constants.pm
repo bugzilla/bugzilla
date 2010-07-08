@@ -885,6 +885,28 @@ use constant TESTS => {
 # operator_ok overrides the "brokenness" of certain operators, so that they
 # are always OK for that field/operator combination.
 use constant INJECTION_BROKEN_FIELD => {
+    # Pg can't run injection tests against integer or date fields. See bug 577557.
+    'attachments.isobsolete' => { db_skip => ['Pg'] },
+    'attachments.ispatch'    => { db_skip => ['Pg'] },
+    'attachments.isprivate'  => { db_skip => ['Pg'] },
+    'attachments.isurl'      => { db_skip => ['Pg'] },
+    blocked                  => { db_skip => ['Pg'] },
+    bug_id                   => { db_skip => ['Pg'] },
+    cclist_accessible        => { db_skip => ['Pg'] },
+    creation_ts              => { db_skip => ['Pg'] },
+    days_elapsed             => { db_skip => ['Pg'] },
+    dependson                => { db_skip => ['Pg'] },
+    deadline                 => { db_skip => ['Pg'] },
+    delta_ts                 => { db_skip => ['Pg'] },
+    estimated_time           => { db_skip => ['Pg'] },
+    everconfirmed            => { db_skip => ['Pg'] },
+    'longdescs.isprivate'    => { db_skip => ['Pg'] },
+    percentage_complete      => { db_skip => ['Pg'] },
+    remaining_time           => { db_skip => ['Pg'] },
+    reporter_accessible      => { db_skip => ['Pg'] },
+    work_time                => { db_skip => ['Pg'] },
+    FIELD_TYPE_BUG_ID,          { db_skip => ['Pg'] },
+    FIELD_TYPE_DATETIME,        { db_skip => ['Pg'] },
     owner_idle_time => { search => 1 },
     keywords => {
         search => 1,

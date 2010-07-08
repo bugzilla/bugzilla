@@ -538,6 +538,15 @@ sub init {
         push(@supptables, "LEFT JOIN keywords ON keywords.bug_id = bugs.bug_id");
         push(@supptables, "LEFT JOIN keyworddefs ON keyworddefs.id = keywords.keywordid");
     }
+    
+    # Calculating percentage_complete requires remaining_time. Mostly,
+    # we just need remaining_time in the GROUP_BY, but it simplifies
+    # things to just add it in the SELECT.
+    if (grep($_ eq 'percentage_complete', @fields)
+        and !grep($_ eq 'remaining_time', @fields))
+    {
+        push(@fields, 'remaining_time');
+    }
 
     # If the user has selected all of either status or resolution, change to
     # selecting none. This is functionally equivalent, but quite a lot faster.

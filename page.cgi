@@ -66,9 +66,13 @@ my $template = Bugzilla->template;
 
 my $id = $cgi->param('id');
 if ($id) {
-    # Split into name and ctype, but be careful not to allow directory
-    # traversal.
-    $id =~ /^([\w\-\/]+)\.(\w+)$/;
+    # Be careful not to allow directory traversal.
+    if ($id =~ /\.\./) {
+        # two dots in a row is bad
+        ThrowCodeError("bad_page_cgi_id", { "page_id" => $id });
+    }
+    # Split into name and ctype.
+    $id =~ /^([\w\-\/\.]+)\.(\w+)$/;
     if (!$2) {
         # if this regexp fails to match completely, something bad came in
         ThrowCodeError("bad_page_cgi_id", { "page_id" => $id });

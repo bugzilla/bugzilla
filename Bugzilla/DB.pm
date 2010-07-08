@@ -771,8 +771,14 @@ sub bz_drop_fk {
         print get_text('install_fk_drop',
                        { table => $table, column => $column, fk => $def })
             . "\n" if Bugzilla->usage_mode == USAGE_MODE_CMDLINE;
-        my @sql = $self->_bz_real_schema->get_drop_fk_sql($table,$column,$def);
-        $self->do($_) foreach @sql;
+        my @statements = 
+            $self->_bz_real_schema->get_drop_fk_sql($table,$column,$def);
+        foreach my $sql (@statements) {
+            # Because this is a deletion, we don't want to die hard if
+            # we fail because of some local customization. If something
+            # is already gone, that's fine with us!
+            eval { $self->do($sql); } or warn "Failed SQL: [$sql] Error: $@";
+        }
         delete $col_def->{REFERENCES};
         $self->_bz_real_schema->set_column($table, $column, $col_def);
         $self->_bz_store_real_schema;

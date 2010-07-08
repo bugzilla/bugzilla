@@ -117,7 +117,7 @@ sub sql_istring {
 sub sql_position {
     my ($self, $fragment, $text) = @_;
 
-    return "POSITION($fragment IN ${text}::text)";
+    return "POSITION(${fragment}::text IN ${text}::text)";
 }
 
 sub sql_regexp {

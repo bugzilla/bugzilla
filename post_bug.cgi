@@ -205,7 +205,6 @@ if (defined($cgi->upload('data')) || $cgi->param('attachurl')) {
              isprivate     => scalar $cgi->param('isprivate'),
              isurl         => scalar $cgi->param('attachurl'),
              mimetype      => $content_type,
-             store_in_file => scalar $cgi->param('bigfile'),
             });
     };
     Bugzilla->error_mode($error_mode_cache);

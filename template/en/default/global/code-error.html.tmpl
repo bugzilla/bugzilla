@@ -37,11 +37,7 @@
 [% DEFAULT title = "Internal Error" %]
 
 [% error_message = BLOCK %]
-  [% IF error == "attachment_local_storage_disabled" %]
-    [% title = "Local Storage Disabled" %]
-    You cannot store attachments locally. This feature is disabled.
-
-  [% ELSIF error == "attachment_url_disabled" %]
+  [% IF error == "attachment_url_disabled" %]
     [% title = "Attachment URL Disabled" %]
     You cannot attach a URL. This feature is currently disabled.
 

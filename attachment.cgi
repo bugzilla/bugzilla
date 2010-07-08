@@ -485,7 +485,6 @@ sub insert {
          isprivate     => scalar $cgi->param('isprivate'),
          isurl         => scalar $cgi->param('attachurl'),
          mimetype      => $content_type,
-         store_in_file => scalar $cgi->param('bigfile'),
          });
 
     foreach my $obsolete_attachment (@obsolete_attachments) {

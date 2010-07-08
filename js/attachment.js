@@ -56,8 +56,7 @@ function setContentTypeDisabledState(form)
 function URLFieldHandler() {
     var field_attachurl = document.getElementById("attachurl");
     var greyfields = new Array("data", "ispatch", "autodetect",
-                               "list", "manual", "bigfile",
-                               "contenttypeselection",
+                               "list", "manual", "contenttypeselection",
                                "contenttypeentry");
     var i, thisfield;
     if (field_attachurl.value.match(/^\s*$/)) {
@@ -103,8 +102,6 @@ function clearAttachmentFields() {
 
     document.getElementById('data').value = '';
     DataFieldHandler();
-    if ((element = document.getElementById('bigfile')))
-        element.checked = '';
     if ((element = document.getElementById('attachurl'))) {
         element.value = '';
         URLFieldHandler();

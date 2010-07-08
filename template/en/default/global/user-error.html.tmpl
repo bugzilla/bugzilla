@@ -574,9 +574,13 @@
 
   [% ELSIF error == "file_too_large" %]
     [% title = "File Too Large" %]
+    [%# Convert maxlocalattachment from Mb to Kb %]
+    [% max_local = Param('maxlocalattachment') * 1024 %]
+    [% max_limit = [Param('maxattachmentsize'), max_local] %]
     The file you are trying to attach is [% filesize FILTER html %] 
-    kilobytes (KB) in size. Non-patch attachments cannot be more than
-    [%+ Param('maxattachmentsize') %] KB. <br>
+    kilobytes (KB) in size. Attachments cannot be more than
+    [%# Hack to get the max value between both limits %]
+    [%+ max_limit.nsort.last FILTER html %] KB. <br>
     We recommend that you store your attachment elsewhere
     [% IF Param("allow_attach_url") %]
       and then specify the URL to this file on the attachment
@@ -1023,11 +1027,6 @@
     [% title = "Invalid Keyword Name" %]
     You may not use commas or whitespace in a keyword name.
      
-  [% ELSIF error == "local_file_too_large" %]
-    [% title = "Local File Too Large" %]
-    Local file uploads must not exceed 
-    [% Param('maxlocalattachment') %] MB in size.
-
   [% ELSIF error == "login_needed_for_password_change" %]
     [% title = "Login Name Required" %]
     You must enter a login name when requesting to change your password.
@@ -1311,13 +1310,6 @@
     [% title = "Password Too Short" %]
     The password must be at least
     [%+ constants.USER_PASSWORD_MIN_LENGTH FILTER html %] characters long.
-
-  [% ELSIF error == "patch_too_large" %]
-    [% title = "File Too Large" %]
-    The file you are trying to attach is [% filesize FILTER html %] 
-    kilobytes (KB) in size.
-    Patches cannot be more than [% Param('maxattachmentsize') %] KB in size.
-    Try splitting your patch into several pieces.
 
   [% ELSIF error == "product_access_denied" %]
     Either the product 

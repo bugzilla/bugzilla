@@ -64,13 +64,16 @@
                       "specify a URL when creating an attachment and " _
                       "treat the URL itself as if it were an attachment.",
 
-  maxattachmentsize => "The maximum size (in kilobytes) of attachments. " _
-                       "$terms.Bugzilla will not accept attachments greater than this number " _
-                       "of kilobytes in size. Setting this parameter to 0 will prevent " _
-                       "attaching files to ${terms.bugs}.",
+  maxattachmentsize => "The maximum size (in kilobytes) of attachments to be stored " _
+                       "in the database. If a file larger than this size is attached " _
+                       "to ${terms.abug}, $terms.Bugzilla will look at the " _
+                       "<a href='#maxlocalattachment'><tt>maxlocalattachment</tt> parameter</a> " _
+                       "to determine if the file can be stored locally on the web server. " _
+                       "If the file size exceeds both limits, then the attachment is rejected. " _
+                       "Settings both parameters to 0 will prevent attaching files to ${terms.bugs}.",
 
-  maxlocalattachment => "The maximum size (in megabytes) of attachments identified by " _
-                        "the user as 'Big Files' to be stored locally on the webserver. " _
-                        "If set to zero, attachments will never be kept on the local " _
-                        "filesystem." }
+  maxlocalattachment => "The maximum size (in megabytes) of attachments to be stored " _
+                        "locally on the web server. If set to a value lower than the " _
+                        "<a href='#maxattachmentsize'><tt>maxattachmentsize</tt> parameter</a>, " _
+                        "attachments will never be kept on the local filesystem." }
 %]

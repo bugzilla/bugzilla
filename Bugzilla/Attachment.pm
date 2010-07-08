@@ -59,6 +59,9 @@ use Bugzilla::Util;
 use Bugzilla::Field;
 use Bugzilla::Hook;
 
+use File::Copy;
+use List::Util qw(max);
+
 use base qw(Bugzilla::Object);
 
 ###############################
@@ -108,7 +111,6 @@ use constant VALIDATORS => {
     isprivate     => \&_check_is_private,
     isurl         => \&_check_is_url,
     mimetype      => \&_check_content_type,
-    store_in_file => \&_check_store_in_file,
 };
 
 use constant UPDATE_VALIDATORS => {
@@ -538,52 +540,29 @@ sub _check_content_type {
 sub _check_data {
     my ($invocant, $params) = @_;
 
-    my $data;
+    my $data = $params->{data};
     if ($params->{isurl}) {
-        $data = $params->{data};
         ($data && $data =~ m#^(http|https|ftp)://\S+#)
           || ThrowUserError('attachment_illegal_url', { url => $data });
 
         $params->{mimetype} = 'text/plain';
         $params->{ispatch} = 0;
-        $params->{store_in_file} = 0;
+        $params->{filesize} = length($data);
     }
     else {
-        if ($params->{store_in_file} || !ref $params->{data}) {
-            # If it's a filehandle, just store it, not the content of the file
-            # itself as the file may be quite large. If it's not a filehandle,
-            # it already contains the content of the file.
-            $data = $params->{data};
-        }
-        else {
-            # The file will be stored in the DB. We need the content of the file.
-            local $/;
-            my $fh = $params->{data};
-            $data = <$fh>;
-        }
+        $params->{filesize} = ref $data ? -s $data : length($data);
     }
     Bugzilla::Hook::process('attachment_process_data', { data       => \$data,
                                                          attributes => $params });
 
-    # Do not validate the size if we have a filehandle. It will be checked later.
-    return $data if ref $data;
-
-    $data || ThrowUserError('zero_length_file');
+    $params->{filesize} || ThrowUserError('zero_length_file');
     # Make sure the attachment does not exceed the maximum permitted size.
-    my $len = length($data);
-    my $max_size = $params->{store_in_file} ? Bugzilla->params->{'maxlocalattachment'} * 1048576
-                                            : Bugzilla->params->{'maxattachmentsize'} * 1024;
-    if ($len > $max_size) {
-        my $vars = { filesize => sprintf("%.0f", $len/1024) };
-        if ($params->{ispatch}) {
-            ThrowUserError('patch_too_large', $vars);
-        }
-        elsif ($params->{store_in_file}) {
-            ThrowUserError('local_file_too_large');
-        }
-        else {
-            ThrowUserError('file_too_large', $vars);
-        }
+    my $max_size = max(Bugzilla->params->{'maxlocalattachment'} * 1048576,
+                       Bugzilla->params->{'maxattachmentsize'} * 1024);
+
+    if ($params->{filesize} > $max_size) {
+        my $vars = { filesize => sprintf("%.0f", $params->{filesize}/1024) };
+        ThrowUserError('file_too_large', $vars);
     }
     return $data;
 }
@@ -640,15 +619,6 @@ sub _check_is_url {
         ThrowCodeError('attachment_url_disabled');
     }
     return $is_url ? 1 : 0;
-}
-
-sub _check_store_in_file {
-    my ($invocant, $store_in_file) = @_;
-
-    if ($store_in_file && !Bugzilla->params->{'maxlocalattachment'}) {
-        ThrowCodeError('attachment_local_storage_disabled');
-    }
-    return $store_in_file ? 1 : 0;
 }
 
 =pod
@@ -815,9 +785,6 @@ Params:     takes a hashref with the following keys:
             the attachment is private.
             C<isurl> - boolean (optional, default false) - true if the
             attachment is a URL pointing to some external ressource.
-            C<store_in_file> - boolean (optional, default false) - true
-            if the attachment must be stored in data/attachments/ instead
-            of in the DB.
 
 Returns:    The new attachment object.
 
@@ -833,52 +800,43 @@ sub create {
     # Extract everything which is not a valid column name.
     my $bug = delete $params->{bug};
     $params->{bug_id} = $bug->id;
-    my $fh = delete $params->{data};
-    my $store_in_file = delete $params->{store_in_file};
+    my $data = delete $params->{data};
+    my $size = delete $params->{filesize};
 
     my $attachment = $class->insert_create_data($params);
     my $attachid = $attachment->id;
 
-    # We only use $data here in this INSERT with a placeholder,
-    # so it's safe.
-    my $sth = $dbh->prepare("INSERT INTO attach_data
-                             (id, thedata) VALUES ($attachid, ?)");
-
-    my $data = $store_in_file ? "" : $fh;
-    trick_taint($data);
-    $sth->bind_param(1, $data, $dbh->BLOB_TYPE);
-    $sth->execute();
-
-    # If the file is to be stored locally, stream the file from the web server
-    # to the local file without reading it into a local variable.
-    if ($store_in_file) {
+    # The file is too large to be stored in the DB, so we store it locally.
+    if ($size > Bugzilla->params->{'maxattachmentsize'} * 1024) {
         my $attachdir = bz_locations()->{'attachdir'};
         my $hash = ($attachid % 100) + 100;
         $hash =~ s/.*(\d\d)$/group.$1/;
         mkdir "$attachdir/$hash", 0770;
         chmod 0770, "$attachdir/$hash";
-        open(AH, '>', "$attachdir/$hash/attachment.$attachid");
-        binmode AH;
-        if (ref $fh) {
-            my $limit = Bugzilla->params->{"maxlocalattachment"} * 1048576;
-            my $sizecount = 0;
-            while (<$fh>) {
-                print AH $_;
-                $sizecount += length($_);
-                if ($sizecount > $limit) {
-                    close AH;
-                    close $fh;
-                    unlink "$attachdir/$hash/attachment.$attachid";
-                    ThrowUserError("local_file_too_large");
-                }
-            }
-            close $fh;
+        if (ref $data) {
+            copy($data, "$attachdir/$hash/attachment.$attachid");
+            close $data;
         }
         else {
-            print AH $fh;
+            open(AH, '>', "$attachdir/$hash/attachment.$attachid");
+            binmode AH;
+            print AH $data;
+            close AH;
         }
-        close AH;
+        $data = ''; # Will be stored in the DB.
     }
+    # If we have a filehandle, we need its content to store it in the DB.
+    elsif (ref $data) {
+        local $/;
+        $data = <$data>;
+    }
+
+    my $sth = $dbh->prepare("INSERT INTO attach_data
+                             (id, thedata) VALUES ($attachid, ?)");
+
+    trick_taint($data);
+    $sth->bind_param(1, $data, $dbh->BLOB_TYPE);
+    $sth->execute();
 
     # Return the new attachment object.
     return $attachment;

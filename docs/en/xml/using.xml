@@ -332,9 +332,7 @@
         <para>
         <emphasis>Attachments:</emphasis>
           You can attach files (e.g. testcases or patches) to bugs. If there
-          are any attachments, they are listed in this section.  Attachments are
-          normally stored in the Bugzilla database, unless they are marked as
-          Big Files, which are stored directly on disk.
+          are any attachments, they are listed in this section.
         </para>
       </listitem>
 
@@ -859,20 +857,6 @@
       Content-Type (e.g. application/xhtml+xml), you can override this
       using a 'content_type' parameter on the URL, e.g.
       <filename>&amp;content_type=text/plain</filename>.
-    </para>
-
-    <para>
-      If you have a really large attachment, something that does not need to
-      be recorded forever (as most attachments are), or something that is too
-      big for your database, you can mark your attachment as a
-      <quote>Big File</quote>, assuming the administrator of the installation
-      has enabled this feature.  Big Files are stored directly on disk instead
-      of in the database.  The maximum size of a <quote>Big File</quote> is
-      normally larger than the maximum size of a regular attachment. Independently
-      of the storage system used, an administrator can delete these attachments
-      at any time. Nevertheless, if these files are stored in the database, the
-      <quote>allow_attachment_deletion</quote> parameter (which is turned off
-      by default) must be enabled in order to delete them.
     </para>
 
     <para>

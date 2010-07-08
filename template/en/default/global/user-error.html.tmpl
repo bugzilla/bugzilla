@@ -744,11 +744,15 @@
     [% title = "Group not specified" %]
     No group was specified.
 
+  [% ELSIF error == "group_not_visible" %]
+    [% title = "Group Not Allowed" %]
+    You are not allowed to see members of the [% group.name FILTER html %]
+    group.
+
   [% ELSIF error == "system_group_not_deletable" %]
     [% title = "System Groups not deletable" %]
     <em>[% name FILTER html %]</em> is a system group.
     This group cannot be deleted.
-
   [% ELSIF error == "group_unknown" %]
     [% title = "Unknown Group" %]
     The group [% name FILTER html %] does not exist. Please specify
@@ -1288,6 +1292,9 @@
     [% IF class == "Bugzilla::User" %]
       Either you mis-typed the name or that user has not yet registered
       for a [% terms.Bugzilla %] account.
+    [% ELSIF class == "Bugzilla::Keyword" %]
+      The legal keyword names are <a href="describekeywords.cgi">listed
+      here</a>.
     [% END %]
 
   [% ELSIF error == "old_password_incorrect" %]
@@ -1477,6 +1484,12 @@
     and the "matches" search can only be used with the "content"
     field.
 
+  [% ELSIF error == "search_field_operator_invalid" %]
+    [% terms.Bugzilla %] does not support using the 
+    "[%+ field_descs.$field FILTER html %]" ([% field FILTER html %])
+    field with the "[% search_descs.$operator %]" ([% operator FILTER html %])
+    search type.
+
   [% ELSIF error == "series_already_exists" %]
     [% title = "Series Already Exists" %]
     [% docslinks = {'reporting.html' => 'Reporting'} %]
@@ -1561,11 +1574,6 @@
     [% ELSE %]
        I could not figure out what you wanted to do.
     [% END %]
-
-  [% ELSIF error == "unknown_keyword" %]
-    [% title = "Unknown Keyword" %]
-    <code>[% keyword FILTER html %]</code> is not a known keyword.
-    The legal keyword names are <a href="describekeywords.cgi">listed here</a>.
 
   [% ELSIF error == "unknown_tab" %]
     [% title = "Unknown Tab" %]
@@ -1759,6 +1767,8 @@
     field
   [% ELSIF class == "Bugzilla::Group" %]
     group
+  [% ELSIF class == "Bugzilla::Keyword" %]
+    keyword
   [% ELSIF class == "Bugzilla::Product" %]
     product
   [% ELSIF class == "Bugzilla::Search::Recent" %]

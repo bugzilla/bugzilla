@@ -184,10 +184,6 @@
     '[% field.description FILTER html %]' ([% field.name FILTER html %])
     is not a custom field.
 
-  [% ELSIF error == "field_type_mismatch" %]
-    Cannot seem to handle <code>[% field FILTER html %]</code>
-    and <code>[% type FILTER html %]</code> together.
-
   [% ELSIF error == "field_type_not_specified" %]
     [% title = "Field Type Not Specified" %]
     You must specify a type when creating a custom field.

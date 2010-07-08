@@ -179,22 +179,6 @@ use constant FIELD_SUBSTR_SIZE => {
 # See the KNOWN_BROKEN constant for a general description of these
 # "_BROKEN" constants.
 
-# Search.pm currently enforces "this must be a 0 or 1" in situations
-# where it should not, with two of the attachment booleans.
-use constant ATTACHMENT_BOOLEANS_SEARCH_BROKEN => (
-    'attachments.ispatch'    => { search => 1 },
-    'attachments.isobsolete' => { search => 1 },
-);
-
-# Sometimes the search for attachment booleans works, but then contains
-# the wrong results, because it does not contain bugs that fully lack
-# attachments.
-use constant ATTACHMENT_BOOLEANS_CONTAINS_BROKEN => (
-    'attachments.isobsolete'  => { contains => [5] },
-    'attachments.ispatch'     => { contains => [5] },
-    'attachments.isprivate'   => { contains => [5] },
-);
-
 # Certain fields fail all the "negative" search tests:
 #
 # Blocked and Dependson "notequals" only finds bugs that have
@@ -223,7 +207,9 @@ use constant ATTACHMENT_BOOLEANS_CONTAINS_BROKEN => (
 #
 # requestees.login_name doesn't find bugs that fully lack requestees.
 use constant NEGATIVE_BROKEN => (
-    ATTACHMENT_BOOLEANS_CONTAINS_BROKEN,
+    'attachments.isobsolete'  => { contains => [5] },
+    'attachments.ispatch'     => { contains => [5] },
+    'attachments.isprivate'   => { contains => [5] },
     'attach_data.thedata'     => { contains => [5] },
     'attachments.description' => { contains => [5] },
     'attachments.filename'    => { contains => [5] },
@@ -237,7 +223,6 @@ use constant NEGATIVE_BROKEN => (
     dependson    => { contains => [2,4,5] },
     longdesc     => { contains => [1] },
     'longdescs.isprivate'   => { contains => [1] },
-    percentage_complete     => { contains => [1] },
     'requestees.login_name' => { contains => [3,4,5] },
     'setters.login_name'    => { contains => [5] },
     work_time               => { contains => [1] },
@@ -271,16 +256,12 @@ use constant GREATERTHAN_BROKEN => (
 # allwordssubstr work_time only matches against a single comment,
 # instead of matching against all comments on a bug. Same is true
 # for the other longdesc fields, cc, keywords, and bug_group.
-#
-# percentage_complete just drops in 0=0 for the term.
 use constant ALLWORDS_BROKEN => (
-    ATTACHMENT_BOOLEANS_SEARCH_BROKEN,
     bug_group => { contains => [1] },
     cc        => { contains => [1] },
     keywords  => { contains => [1] },
     longdesc  => { contains => [1] },
     work_time => { contains => [1] },
-    percentage_complete => { contains => [2,3,4,5] },
 );
 
 # nowords and nowordssubstr have these broken tests in common.
@@ -306,7 +287,7 @@ use constant NOWORDS_BROKEN => (
 use constant CHANGED_BROKEN => (
     classification => { contains => [1] },
     commenter => { contains => [1] },
-    percentage_complete     => { contains => [2,3,4,5] },
+    percentage_complete     => { contains => [1] },
     'requestees.login_name' => { contains => [1] },
     'setters.login_name'    => { contains => [1] },
     delta_ts                => { contains => [1] },
@@ -346,28 +327,9 @@ use constant CHANGED_VALUE_BROKEN => (
 # while the other fails. In this case, we have a special override for
 # "operator-value", which uniquely identifies tests.
 use constant KNOWN_BROKEN => {
-    notequals => { NEGATIVE_BROKEN },
-    # percentage_complete substring matches every bug, regardless of
-    # its percentage_complete value.
-    substring => {
-        percentage_complete => { contains => [2,3,4,5] },
-    },
-    casesubstring => {
-        percentage_complete => { contains => [2,3,4,5] },
-    },
+    notequals    => { NEGATIVE_BROKEN },
     notsubstring => { NEGATIVE_BROKEN },
-
-    # Attachment noolean fields don't work with regexes, right now,
-    # because they throw an error that regexes are not valid booleans.
-    'regexp-^1-' => { ATTACHMENT_BOOLEANS_SEARCH_BROKEN },
- 
-    # percentage_complete notregexp fails to match bugs that
-    # fully lack hours worked.
-    notregexp => {
-        NEGATIVE_BROKEN,
-        percentage_complete => { contains => [5] },
-    },
-    'notregexp-^1-' => { ATTACHMENT_BOOLEANS_SEARCH_BROKEN },
+    notregexp    => { NEGATIVE_BROKEN },
 
     # percentage_complete doesn't match bugs with 0 hours worked or remaining.
     #
@@ -376,19 +338,13 @@ use constant KNOWN_BROKEN => {
     # also broken in this way, but all our comments come from the same user.) 
     # Also, the attachments ones don't find bugs that have no attachments 
     # at all (which might be OK?).
-    #
-    # attachments.isprivate lessthan doesn't find bugs without attachments.
     lessthan   => {
-        ATTACHMENT_BOOLEANS_SEARCH_BROKEN,
-        'attachments.isprivate' => { contains => [5] },
         'longdescs.isprivate'   => { contains => [1] },
-        percentage_complete => { contains => [5] }, 
         work_time => { contains => [1,2,3,4] },
     },
     # The lessthaneq tests are broken for the same reasons, but they work
     # slightly differently so they have a different set of broken tests.
     lessthaneq => {
-        ATTACHMENT_BOOLEANS_CONTAINS_BROKEN,
         'longdescs.isprivate' => { contains => [1] },
         work_time => { contains => [2,3,4] },
     },
@@ -401,24 +357,18 @@ use constant KNOWN_BROKEN => {
         percentage_complete => { contains => [2] },
     },
 
-    # percentage_complete just throws 0=0 into the search term, returning
-    # all bugs.
+    # percentage_complete doesn't do a numeric comparison, so
+    # it doesn't find decimal values.
     anyexact => {
-        ATTACHMENT_BOOLEANS_SEARCH_BROKEN,
-        percentage_complete => { contains => [3,4,5] },
+        percentage_complete => { contains => [2] },
     },
     # bug_group anywordssubstr returns all our bugs. Not sure why.
     anywordssubstr => {
-        ATTACHMENT_BOOLEANS_SEARCH_BROKEN,
-        percentage_complete => { contains => [3,4,5] },
+        percentage_complete => { contains => [2] },
         bug_group => { contains => [3,4,5] },
     },
 
     'allwordssubstr-<1>' => { ALLWORDS_BROKEN },
-    'allwordssubstr-<1>,<2>' => {
-        ATTACHMENT_BOOLEANS_SEARCH_BROKEN,
-        percentage_complete => { contains => [1,2,3,4,5] },
-    },
     # flagtypes.name does not work here, probably because they all try to
     # match against a single flag.
     # Same for attach_data.thedata.
@@ -426,10 +376,6 @@ use constant KNOWN_BROKEN => {
         ALLWORDS_BROKEN,
         'attach_data.thedata' => { contains => [1] },
         'flagtypes.name' => { contains => [1] },
-    },
-    'allwords-<1> <2>' => {
-        ATTACHMENT_BOOLEANS_SEARCH_BROKEN,
-        percentage_complete => { contains => [1,2,3,4,5] },
     },
 
     nowordssubstr => { NOWORDS_BROKEN },
@@ -446,15 +392,13 @@ use constant KNOWN_BROKEN => {
     # attach_data doesn't work (perhaps because it's the entire
     # data, or some problem with the regex?).
     anywords => {
-        ATTACHMENT_BOOLEANS_SEARCH_BROKEN,
         'attach_data.thedata' => { contains => [1] },
         bug_group => { contains => [2,3,4,5] },
-        percentage_complete => { contains => [2,3,4,5] },
         work_time => { contains => [1] },
     },
     'anywords-<1> <2>' => {
         bug_group => { contains => [3,4,5] },
-        percentage_complete => { contains => [3,4,5] },
+        percentage_complete => { contains => [2] },
         'attach_data.thedata' => { contains => [1,2] },
         work_time => { contains => [1,2] },
     },
@@ -496,7 +440,7 @@ use constant KNOWN_BROKEN => {
         commenter   => { contains => [2,3,4] },
         creation_ts => { contains => [2,3,4] },
         delta_ts    => { contains => [2,3,4] },
-        percentage_complete     => { contains => [1,5] },
+        percentage_complete => { contains => [2,3,4] },
         'requestees.login_name' => { contains => [2,3,4] },
         'setters.login_name'    => { contains => [2,3,4] },
     },
@@ -552,11 +496,13 @@ use constant REGEX_OVERRIDE => {
     blocked   => { value => '^<1>$' },
     dependson => { value => '^<1>$' },
     bug_id    => { value => '^<1>$' },
-    'attachments.isprivate' => { value => '^1' },
-    cclist_accessible       => { value => '^1' },
-    reporter_accessible     => { value => '^1' },
-    everconfirmed           => { value => '^1' },
-    'longdescs.isprivate'   => { value => '^1' },
+    'attachments.isobsolete' => { value => '^1'},
+    'attachments.ispatch'    => { value => '^1'},
+    'attachments.isprivate'  => { value => '^1' },
+    cclist_accessible        => { value => '^1' },
+    reporter_accessible      => { value => '^1' },
+    everconfirmed            => { value => '^1' },
+    'longdescs.isprivate'    => { value => '^1' },
     creation_ts => { value => '^2037-01-01' },
     delta_ts    => { value => '^2037-01-01' },
     deadline    => { value => '^2037-02-01' },
@@ -734,11 +680,13 @@ use constant TESTS => {
               blocked   => { value => '<4-id>', contains => [1,2] },
               dependson => { value => '<3-id>', contains => [1,3] },
               bug_id    => { value => '<2-id>' },
-              'attachments.isprivate' => { value => 1, contains => [2,3,4,5] },
-              cclist_accessible       => { value => 1, contains => [2,3,4,5] },
-              reporter_accessible     => { value => 1, contains => [2,3,4,5] },
-              'longdescs.isprivate'   => { value => 1, contains => [2,3,4,5] },
-              everconfirmed           => { value => 1, contains => [2,3,4,5] },
+              'attachments.isprivate'  => { value => 1, contains => [2,3,4] },
+              'attachments.isobsolete' => { value => 1, contains => [2,3,4] },
+              'attachments.ispatch'    => { value => 1, contains => [2,3,4] },
+              cclist_accessible        => { value => 1, contains => [2,3,4,5] },
+              reporter_accessible      => { value => 1, contains => [2,3,4,5] },
+              'longdescs.isprivate'    => { value => 1, contains => [2,3,4,5] },
+              everconfirmed            => { value => 1, contains => [2,3,4,5] },
               creation_ts => { value => '2037-01-02', contains => [1,5] },
               delta_ts    => { value => '2037-01-02', contains => [1,5] },
               deadline    => { value => '2037-02-02' },
@@ -755,9 +703,9 @@ use constant TESTS => {
     lessthaneq => [
         { contains => [1], value => '<1>',
           override => {
-              'attachments.ispatch'    => { value => 0, contains => [2,3,4,5] },
-              'attachments.isobsolete' => { value => 0, contains => [2,3,4,5] },
-              'attachments.isprivate'  => { value => 0, contains => [2,3,4,5] },
+              'attachments.isobsolete' => { value => 0, contains => [2,3,4] },
+              'attachments.ispatch'    => { value => 0, contains => [2,3,4] },
+              'attachments.isprivate'  => { value => 0, contains => [2,3,4] },
               cclist_accessible        => { value => 0, contains => [2,3,4,5] },
               reporter_accessible      => { value => 0, contains => [2,3,4,5] },
               'longdescs.isprivate'    => { value => 0, contains => [2,3,4,5] },
@@ -768,6 +716,7 @@ use constant TESTS => {
               delta_ts       => { contains => [1,5] },
               remaining_time => { contains => [1,5] },
               longdesc       => { contains => [1,5] },
+              percentage_complete => { contains => [1,5] },
               work_time => { value => 1, contains => [1,5] },
               LESSTHAN_OVERRIDE,
           },
@@ -936,13 +885,7 @@ use constant TESTS => {
 # operator_ok overrides the "brokenness" of certain operators, so that they
 # are always OK for that field/operator combination.
 use constant INJECTION_BROKEN_FIELD => {
-    'attachments.isobsolete' => { search => 1 },
-    'attachments.ispatch'    => { search => 1 },
-    owner_idle_time => {
-        sql_error => qr/bugs\.owner_idle_time.+where clause/,
-        operator_ok => [qw(changedfrom changedto greaterthan greaterthaneq
-                           lessthan lessthaneq)]
-    },
+    owner_idle_time => { search => 1 },
     keywords => {
         search => 1,
         operator_ok => [qw(allwordssubstr anywordssubstr casesubstring
@@ -957,9 +900,9 @@ use constant INJECTION_BROKEN_FIELD => {
 # search => 1 means the Bugzilla::Search creation fails, but
 # field_ok contains fields that it does actually succeed for.
 use constant INJECTION_BROKEN_OPERATOR => {
-    changedafter  => { search => 1, field_ok => ['percentage_complete'] },
-    changedbefore => { search => 1, field_ok => ['percentage_complete'] },
-    changedby     => { search => 1, field_ok => ['percentage_complete'] },
+    changedafter  => { search => 1 },
+    changedbefore => { search => 1 },
+    changedby     => { search => 1 },
 };
 
 # Tests run by Bugzilla::Test::Search::InjectionTest.

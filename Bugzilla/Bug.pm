@@ -1632,8 +1632,7 @@ sub _check_keywords {
     my %keywords;
     foreach my $keyword (@$keyword_array) {
         next unless $keyword;
-        my $obj = new Bugzilla::Keyword({ name => $keyword });
-        ThrowUserError("unknown_keyword", { keyword => $keyword }) if !$obj;
+        my $obj = Bugzilla::Keyword->check($keyword);
         $keywords{$obj->id} = $obj;
     }
     return [values %keywords];

@@ -688,7 +688,8 @@ sub bz_add_table {
 sub _bz_add_table_raw {
     my ($self, $name) = @_;
     my @statements = $self->_bz_schema->get_table_ddl($name);
-    print "Adding new table $name ...\n" unless i_am_cgi();
+    print "Adding new table $name ...\n"
+        if Bugzilla->usage_mode == USAGE_MODE_CMDLINE;
     $self->do($_) foreach (@statements);
 }
 

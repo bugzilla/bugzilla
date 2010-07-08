@@ -488,7 +488,7 @@ use constant DB_MODULE => {
                     version => '4.00',
                 },
                 name => 'MySQL'},
-    'pg'    => {db => 'Bugzilla::DB::Pg', db_version => '8.00.0000',
+    'pg'    => {db => 'Bugzilla::DB::Pg', db_version => '8.03.0000',
                 dbd => {
                     package => 'DBD-Pg',
                     module  => 'DBD::Pg',

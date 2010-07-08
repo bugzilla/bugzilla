@@ -28,7 +28,7 @@
 
 <dl>
   [% FOREACH param = panel.param_list %]
-    <dt id="[% param.name FILTER html %]">[% param.name FILTER html %]</dt>
+    <dt id="[% param.name FILTER html %]_desc">[% param.name FILTER html %]</dt>
     <dd>[% panel.param_descs.${param.name} FILTER none %]
       <p>
       [% IF param.type == "t" %]

@@ -96,12 +96,12 @@ YAHOO.util.Event.onDOMReady(onLoadActions);
 
       <p class="notice">This message is only shown to logged in users with admin privs.
       You can configure this notification from the
-      <a href="editparams.cgi?section=general#upgrade_notification">Parameters</a> page.</p>
+      <a href="editparams.cgi?section=general#upgrade_notification_desc">Parameters</a> page.</p>
     [% ELSIF release.error == "cannot_download" %]
       <p>The local XML file '[% release.xml_file FILTER html %]' cannot be created.
       Please make sure the web server can write in this directory and that you can access
       the web. If you are behind a proxy, set the
-      <a href="editparams.cgi?section=core#proxy_url">proxy_url</a> parameter correctly.</p>
+      <a href="editparams.cgi?section=advanced#proxy_url_desc">proxy_url</a> parameter correctly.</p>
     [% ELSIF release.error == "no_update" %]
       <p>The local XML file '[% release.xml_file FILTER html %]' cannot be updated.
       Please make sure the web server can edit this file.</p>
@@ -114,7 +114,7 @@ YAHOO.util.Event.onDOMReady(onLoadActions);
     [% ELSIF release.error == "unknown_parameter" %]
       <p>'[% Param("upgrade_notification") FILTER html %]' is not a valid notification
       parameter. Please check this parameter in the
-      <a href="editparams.cgi?section=core#upgrade_notification">Parameters</a> page.</p>
+      <a href="editparams.cgi?section=general#upgrade_notification_desc">Parameters</a> page.</p>
     [% END %]
   </div>
 [% END %]

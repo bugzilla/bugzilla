@@ -2284,6 +2284,7 @@ sub _anyexact {
     
     my @list;
     foreach my $word (split(/,/, $value)) {
+        $word = trim($word);
         if ($word eq "---" && $field eq 'resolution') {
             $word = "";
         }

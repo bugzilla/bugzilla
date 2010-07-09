@@ -523,6 +523,45 @@ sub switch_to_main_db {
     return $class->dbh_main;
 }
 
+sub fields {
+    my ($class, $criteria) = @_;
+    $criteria ||= {};
+    my $cache = $class->request_cache;
+
+    # We create an advanced cache for fields by type, so that we
+    # can avoid going back to the database for every fields() call.
+    # (And most of our fields() calls are for getting fields by type.)
+    #
+    # We also cache fields by name, because calling $field->name a few
+    # million times can be slow in calling code, but if we just do it
+    # once here, that makes things a lot faster for callers.
+    if (!defined $cache->{fields}) {
+        my @all_fields = Bugzilla::Field->get_all;
+        my (%by_name, %by_type);
+        foreach my $field (@all_fields) {
+            my $name = $field->name;
+            $by_type{$field->type}->{$name} = $field;
+            $by_name{$name} = $field;
+        }
+        $cache->{fields} = { by_type => \%by_type, by_name => \%by_name };
+    }
+
+    my $fields = $cache->{fields};
+    my %requested;
+    if (my $types = $criteria->{type}) {
+        $types = ref($types) ? $types : [$types];
+        %requested = map { %{ $fields->{by_type}->{$_} || {} } } @$types;
+    }
+    else {
+        %requested = %{ $fields->{by_name} };
+    }
+    
+    my $do_by_name = $criteria->{by_name};
+
+    return $do_by_name ? \%requested : [values %requested];
+}
+
+# DEPRECATED. Use fields() instead.
 sub get_fields {
     my $class = shift;
     my $criteria = shift;
@@ -767,6 +806,30 @@ Bugzilla::User instance.
 Essentially, causes calls to C<Bugzilla-E<gt>user> to return C<undef>. This has the
 effect of logging out a user for the current request only; cookies and
 database sessions are left intact.
+
+=item C<fields>
+
+This is the standard way to get arrays or hashes of L<Bugzilla::Field>
+objects when you need them. It takes the following named arguments
+in a hashref:
+
+=over
+
+=item C<by_name>
+
+If false (or not specified), this method will return an arrayref of
+the requested fields. The order of the returned fields is random.
+
+If true, this method will return a hashref of fields, where the keys
+are field names and the valules are L<Bugzilla::Field> objects.
+
+=item C<type>
+
+Either a single C<FIELD_TYPE_*> constant or an arrayref of them. If specified,
+the returned fields will be limited to the types in the list. If you don't
+specify this argument, all fields will be returned.
+
+=back
 
 =item C<error_mode>
 

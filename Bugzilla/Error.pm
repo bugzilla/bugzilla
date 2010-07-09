@@ -53,12 +53,6 @@ sub _throw_error {
     $vars ||= {};
 
     $vars->{error} = $error;
-    # Don't show function arguments, in case they contain confidential data.
-    local $Carp::MaxArgNums = -1;
-    # Don't show the error as coming from Bugzilla::Error, show it as coming
-    # from the caller.
-    local $Carp::CarpInternal{'Bugzilla::Error'} = 1; 
-    $vars->{traceback} = Carp::longmess();
 
     # Make sure any transaction is rolled back (if supported).
     # If we are within an eval(), do not roll back transactions as we are
@@ -159,6 +153,16 @@ sub ThrowUserError {
 }
 
 sub ThrowCodeError {
+    my (undef, $vars) = @_;
+
+    # Don't show function arguments, in case they contain
+    # confidential data.
+    local $Carp::MaxArgNums = -1;
+    # Don't show the error as coming from Bugzilla::Error, show it
+    # as coming from the caller.
+    local $Carp::CarpInternal{'Bugzilla::Error'} = 1;
+    $vars->{traceback} = Carp::longmess();
+
     _throw_error("global/code-error.html.tmpl", @_);
 }
 

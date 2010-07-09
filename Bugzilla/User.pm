@@ -603,18 +603,28 @@ sub groups {
     return $self->{groups};
 }
 
+# It turns out that calling ->id on objects a few hundred thousand
+# times is pretty slow. (It showed up as a significant time contributor
+# when profiling xt/search.t.) So we cache the group ids separately from
+# groups for functions that need the group ids.
+sub _group_ids {
+    my ($self) = @_;
+    $self->{group_ids} ||= [map { $_->id } @{ $self->groups }];
+    return $self->{group_ids};
+}
+
 sub groups_as_string {
     my $self = shift;
-    my @ids = map { $_->id } @{ $self->groups };
-    return scalar(@ids) ? join(',', @ids) : '-1';
+    my $ids = $self->_group_ids;
+    return scalar(@$ids) ? join(',', @$ids) : '-1';
 }
 
 sub groups_in_sql {
     my ($self, $field) = @_;
     $field ||= 'group_id';
-    my @ids = map { $_->id } @{ $self->groups };
-    @ids = (-1) if !scalar @ids;
-    return Bugzilla->dbh->sql_in($field, \@ids);
+    my $ids = $self->_group_ids;
+    $ids = [-1] if !scalar @$ids;
+    return Bugzilla->dbh->sql_in($field, $ids);
 }
 
 sub bless_groups {
@@ -1096,7 +1106,7 @@ sub queryshare_groups {
             }
         }
         else {
-            @queryshare_groups = map { $_->id } @{ $self->groups };
+            @queryshare_groups = @{ $self->_group_ids };
         }
     }
 
@@ -1848,15 +1858,31 @@ sub is_available_username {
     return 1;
 }
 
+# This is used in a few performance-critical areas where we don't want to
+# do check() and pull all the user data from the database.
 sub login_to_id {
     my ($login, $throw_error) = @_;
     my $dbh = Bugzilla->dbh;
-    # No need to validate $login -- it will be used by the following SELECT
-    # statement only, so it's safe to simply trick_taint.
-    trick_taint($login);
-    my $user_id = $dbh->selectrow_array("SELECT userid FROM profiles WHERE " .
-                                        $dbh->sql_istrcmp('login_name', '?'),
-                                        undef, $login);
+    my $cache = Bugzilla->request_cache->{user_login_to_id} ||= {};
+
+    # We cache lookups because this function showed up as taking up a 
+    # significant amount of time in profiles of xt/search.t. However,
+    # for users that don't exist, we re-do the check every time, because
+    # otherwise we break is_available_username.
+    my $user_id;
+    if (defined $cache->{$login}) {
+        $user_id = $cache->{$login};
+    }
+    else {
+        # No need to validate $login -- it will be used by the following SELECT
+        # statement only, so it's safe to simply trick_taint.
+        trick_taint($login);
+        $user_id = $dbh->selectrow_array(
+            "SELECT userid FROM profiles 
+              WHERE " . $dbh->sql_istrcmp('login_name', '?'), undef, $login);
+        $cache->{$login} = $user_id;
+    }
+
     if ($user_id) {
         return $user_id;
     } elsif ($throw_error) {

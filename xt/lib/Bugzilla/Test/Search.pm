@@ -147,7 +147,7 @@ sub all_fields {
     my $self = shift;
     if (not $self->{all_fields}) {
         $self->_create_custom_fields();
-        my @fields = Bugzilla->get_fields;
+        my @fields = @{ Bugzilla->fields };
         @fields = sort { $a->name cmp $b->name } @fields;
         $self->{all_fields} = \@fields;
     }

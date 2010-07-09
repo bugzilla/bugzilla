@@ -35,6 +35,7 @@ use base qw(Exporter);
 
 # For bz_locations
 use File::Basename;
+use Memoize;
 
 @Bugzilla::Constants::EXPORT = qw(
     BUGZILLA_VERSION
@@ -404,11 +405,11 @@ use constant EMPTY_DATETIME_REGEX => qr/^[0\-:\sA-Za-z]+$/;
 
 # See the POD for Bugzilla::Field/is_abnormal to see why these are listed
 # here.
-use constant ABNORMAL_SELECTS => qw(
-    classification
-    product
-    component
-);
+use constant ABNORMAL_SELECTS => {
+    classification => 1,
+    component      => 1,
+    product        => 1,
+};
 
 # The fields from fielddefs that are blocked from non-timetracking users.
 # work_time is sometimes called actual_time.
@@ -618,5 +619,9 @@ sub bz_locations {
         'extensionsdir' => "$libpath/extensions",
     };
 }
+
+# This makes us not re-compute all the bz_locations data every time it's
+# called.
+BEGIN { memoize('bz_locations') };
 
 1;

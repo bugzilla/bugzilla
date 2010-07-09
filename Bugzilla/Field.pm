@@ -544,7 +544,7 @@ This method returns C<1> if the field is "abnormal", C<0> otherwise.
 
 sub is_abnormal {
     my $self = shift;
-    return grep($_ eq $self->name, ABNORMAL_SELECTS) ? 1 : 0;
+    return ABNORMAL_SELECTS->{$self->name} ? 1 : 0;
 }
 
 sub legal_values {

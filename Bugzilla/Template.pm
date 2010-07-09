@@ -765,8 +765,8 @@ sub create {
             # A way for all templates to get at Field data, cached.
             'bug_fields' => sub {
                 my $cache = Bugzilla->request_cache;
-                $cache->{template_bug_fields} ||= 
-                    { map { $_->name => $_ } Bugzilla->get_fields() };
+                $cache->{template_bug_fields} ||=
+                    Bugzilla->fields({ by_name => 1 });
                 return $cache->{template_bug_fields};
             },
 

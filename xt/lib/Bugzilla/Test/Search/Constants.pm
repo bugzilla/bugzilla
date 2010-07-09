@@ -734,6 +734,7 @@ use constant TESTS => {
               reporter_accessible      => { value => 0, contains => [1] },
               'longdescs.isprivate'    => { value => 0, contains => [1] },
               everconfirmed            => { value => 0, contains => [1] },
+              'flagtypes.name'         => { value => 2, contains => [2,3,4] },
               GREATERTHAN_OVERRIDE,
           },
         },

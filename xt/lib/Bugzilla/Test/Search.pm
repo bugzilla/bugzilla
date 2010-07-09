@@ -604,12 +604,12 @@ sub _create_one_bug {
     # All the bugs are created with everconfirmed = 0.
     $params{bug_status} = 'UNCONFIRMED';
     my $bug = Bugzilla::Bug->create(\%params);
-
+    
     # These are necessary for the changedfrom tests.
     my $extra_values = $self->_extra_bug_create_values->{$number};
-    foreach my $field qw(comments remaining_time flags percentage_complete
+    foreach my $field qw(comments remaining_time percentage_complete
                          keyword_objects everconfirmed dependson blocked
-                         groups_in)
+                         groups_in classification)
     {
         $extra_values->{$field} = $bug->$field;
     }
@@ -705,6 +705,7 @@ sub _create_one_bug {
         $bug->set_flags([], $flags);
         $timestamp->set(second => $number);
         $bug->update($timestamp->ymd . ' ' . $timestamp->hms);
+        $extra_values->{flags} = $bug->flags;
         
         # It's not generally safe to do update() multiple times on
         # the same Bug object.

@@ -1758,7 +1758,6 @@ sub _longdescs_isprivate {
     my $extra = $self->{'user'}->is_insider ? "" : "AND $table.isprivate = 0";
     push(@$joins, "LEFT JOIN longdescs AS $table " .
                          "ON $table.bug_id = bugs.bug_id $extra");
-    $args->{quoted} = $args->{value} ? 1 : 0;
     $args->{full_field} = "$table.isprivate";
 }
 

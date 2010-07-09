@@ -184,8 +184,15 @@ sub _known_broken {
     my $type = $self->field_object->type;
     my $operator = $self->operator;
     my $value = $self->main_value;
-    
     my $value_name = "$operator-$value";
+    
+    if (Bugzilla->dbh->isa('Bugzilla::DB::Pg')) {
+        my $field_broken = PG_BROKEN->{$field}->{$operator};
+        return $field_broken if $field_broken;
+        my $pg_value_broken = PG_BROKEN->{$field}->{$value_name};
+        return $pg_value_broken if $pg_value_broken;
+    }
+    
     my $value_broken = KNOWN_BROKEN->{$value_name}->{$field};
     $value_broken ||= KNOWN_BROKEN->{$value_name}->{$type};
     return $value_broken if $value_broken;

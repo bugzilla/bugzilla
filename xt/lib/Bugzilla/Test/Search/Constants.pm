@@ -45,6 +45,7 @@ our @EXPORT = qw(
     NUM_SEARCH_TESTS
     OR_BROKEN
     OR_SKIP
+    PG_BROKEN
     SKIP_FIELDS
     SUBSTR_SIZE
     TESTS
@@ -479,6 +480,29 @@ use constant KNOWN_BROKEN => {
         'attach_data.thedata' => { contains => [1] },
         # This should probably search the reporter.
         creation_ts => { contains => [1] },
+    },
+};
+
+# This tracks things that are broken in different ways on Pg compared to
+# MySQL. Actually, in some of these cases, Pg is behaving correctly
+# where MySQL isn't, but the result is still a bit surprising to the user.
+use constant PG_BROKEN => {
+    'attach_data.thedata' => {
+        allwords       => { },
+        allwordssubstr => { },
+        anywords       => { },
+        notregexp      => { contains => [5] },
+        nowords        => { contains => [5] },
+    },
+    percentage_complete => {
+        'allwordssubstr-<1>' => { contains => [3] },
+        anywordssubstr  => { contains => [2,3] },
+        casesubstring   => { contains => [3] },
+        'notregexp-<1>' => { contains => [3] },
+        notsubstring    => { contains => [3] },
+        nowordssubstr   => { contains => [3] },
+        'regexp-<1>'    => { contains => [3] },
+        substring       => { contains => [3] },
     },
 };
 

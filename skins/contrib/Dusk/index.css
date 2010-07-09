@@ -7,19 +7,3 @@
     {
         clear:both;
     }
-
-    #enter_bug 
-    {
-        background: url(index/bug.gif) no-repeat;
-    }
-    
-    #query
-    {
-        background: url(index/search.gif) no-repeat;
-    }
-    
-    #account
-    {
-        background: url(index/account.gif) no-repeat;
-    }
-    

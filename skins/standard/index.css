@@ -19,13 +19,14 @@
     #page-index
     {
         padding: 0.2em 0.2em 0.15em 0.2em;
+        max-width: 1000px;
     }
 
     /* By default these contain nothing, but these CSS rules make things
        easier on customizers. */
     .intro, .outro {
         text-align: center;
-        width: 50em;
+        width: 20em;
     }
 
     /* Hide from NN4 */
@@ -51,10 +52,10 @@
     
     .bz_common_actions {
         display: block;
-        height: 190px;
-        width: 195px;
+        height: 170px;
+        width: 145px;
         float: left;
-        margin: 0 3ex 3em 0;
+        margin: 0 2ex 2em 0;
         text-align: center;
     }
     .bz_common_actions span {
@@ -62,17 +63,18 @@
         top: 95%;
         font-weight: bold;
     }
-    
     .bz_common_actions,
     .bz_common_actions:visited,
     .bz_common_actions:hover
     {
         text-decoration: none;
     }
-
-    #enter_bug { background: url(index/bug.gif)     no-repeat; }
-    #query     { background: url(index/search.gif)  no-repeat; }
-    #account   { background: url(index/account.gif) no-repeat; }
+    #enter_bug { background: url(index/file-a-bug.png)     no-repeat; }
+    #query     { background: url(index/search.png)  no-repeat; }
+    #account   { 
+      background: url(index/new-account.png) no-repeat; 
+      margin-right: 0;
+    }
     
     #quicksearchForm
     {
@@ -83,7 +85,7 @@
     
     #quicksearchForm #quicksearch_main
     {
-        width: 25em;
+        width: 27em;
     }
     
     #quicksearchForm
@@ -94,6 +96,7 @@
     
     #page-index table{
         border-collapse: collapse;
+        margin: auto;
     }
     
     #welcome

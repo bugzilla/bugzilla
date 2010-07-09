@@ -406,6 +406,10 @@ sub _translate_value {
     foreach my $number (1..NUM_BUGS) {
         $value = $self->_translate_value_for_bug($number, $value);
     }
+    # Sanity check to make sure that none of the <> stuff was left in.
+    if ($value =~ /<\d/) {
+        die $self->name . ": value untranslated: $value\n";
+    }
     return $value;
 }
 

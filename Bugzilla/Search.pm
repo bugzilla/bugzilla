@@ -57,6 +57,10 @@ use Date::Parse;
 
 use Storable qw(dclone);
 
+#############
+# Constants #
+#############
+
 # If you specify a search type in the boolean charts, this describes
 # which operator maps to which internal function here.
 use constant OPERATORS => {
@@ -426,6 +430,21 @@ sub REPORT_COLUMNS {
     return $columns;
 }
 
+######################
+# Internal Accessors #
+######################
+
+sub _multi_select_fields {
+    my ($self) = @_;
+    $self->{multi_select_fields} ||= Bugzilla->fields({
+        type => [FIELD_TYPE_MULTI_SELECT, FIELD_TYPE_BUG_URLS]});
+    return $self->{multi_select_fields};
+}
+
+###############
+# Constructor #
+###############
+
 # Create a new Search
 # Note that the param argument may be modified by Bugzilla::Search
 sub new {
@@ -462,9 +481,6 @@ sub init {
     my %special_order_join = %{SPECIAL_ORDER_JOIN()};
 
     my $select_fields = Bugzilla->fields({ type => FIELD_TYPE_SINGLE_SELECT });
-    
-    my $multi_select_fields = Bugzilla->fields({
-        type => [FIELD_TYPE_MULTI_SELECT, FIELD_TYPE_BUG_URLS]});
     foreach my $field (@$select_fields) {
         next if $field->is_abnormal;
         my $name = $field->name;
@@ -520,7 +536,7 @@ sub init {
         push(@supptables, "LEFT JOIN longdescs AS ldtime " .
                           "ON ldtime.bug_id = bugs.bug_id");
     }
-    foreach my $field (@$multi_select_fields) {
+    foreach my $field (@{ $self->_multi_select_fields }) {
         my $field_name = $field->name;
         next if !grep($_ eq $field_name, @fields);
         push(@supptables, "LEFT JOIN bug_$field_name AS map_bug_$field_name"
@@ -996,7 +1012,6 @@ sub init {
                     operator   => $operator,
                     value      => $value,
                     quoted     => $quoted,
-                    multi_fields => $multi_select_fields,
                     joins        => \@supptables,
                     where        => \@wherepart,
                     having       => \@having,
@@ -1122,7 +1137,7 @@ sub init {
         my @skip_group_by = (EMPTY_COLUMN, 
             qw(bug_id actual_time percentage_complete flagtypes.name
                keywords));
-        push(@skip_group_by, map { $_->name } @$multi_select_fields);
+        push(@skip_group_by, map { $_->name } @{ $self->_multi_select_fields });
 
         next if grep { $_ eq $field } @skip_group_by;
         my $col = COLUMNS->{$field}->{name};
@@ -1174,7 +1189,7 @@ sub do_search_function {
     my $override = OPERATOR_FIELD_OVERRIDE->{$actual_field};
     if (!$override) {
         # Multi-select fields get special handling.
-        if (grep { $_->name eq $actual_field } @{ $args->{multi_fields} }) {
+        if (grep { $_->name eq $actual_field } @{ $self->_multi_select_fields }) {
             $override = OPERATOR_FIELD_OVERRIDE->{_multi_select};
         }
         # And so do attachment fields, if they don't have a specific

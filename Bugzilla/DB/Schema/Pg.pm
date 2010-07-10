@@ -100,11 +100,9 @@ sub get_rename_column_ddl {
     my @sql = ("ALTER TABLE $table RENAME COLUMN $old_name TO $new_name");
     my $def = $self->get_column_abstract($table, $old_name);
     if ($def->{TYPE} =~ /SERIAL/i) {
-        # We have to rename the series also, and fix the default of the series.
-        push(@sql, "ALTER TABLE ${table}_${old_name}_seq 
-                      RENAME TO ${table}_${new_name}_seq");
-        push(@sql, "ALTER TABLE $table ALTER COLUMN $new_name 
-                    SET DEFAULT NEXTVAL('${table}_${new_name}_seq')");
+        # We have to rename the series also.
+        push(@sql, "ALTER SEQUENCE ${table}_${old_name}_seq 
+                         RENAME TO ${table}_${new_name}_seq");
     }
     return @sql;
 }
@@ -147,7 +145,8 @@ sub _get_alter_type_sql {
                               TYPE $type");
 
     if ($new_def->{TYPE} =~ /serial/i && $old_def->{TYPE} !~ /serial/i) {
-        push(@statements, "CREATE SEQUENCE ${table}_${column}_seq");
+        push(@statements, "CREATE SEQUENCE ${table}_${column}_seq
+                                  OWNED BY $table.$column");
         push(@statements, "SELECT setval('${table}_${column}_seq',
                                          MAX($table.$column))
                              FROM $table");
@@ -160,10 +159,9 @@ sub _get_alter_type_sql {
     if ($old_def->{TYPE} =~ /serial/i && $new_def->{TYPE} !~ /serial/i) {
         push(@statements, "ALTER TABLE $table ALTER COLUMN $column 
                            DROP DEFAULT");
-        # XXX Pg actually won't let us drop the sequence, even though it's
-        #     no longer in use. So we harmlessly leave behind a sequence
-        #     that does nothing.
-        #push(@statements, "DROP SEQUENCE ${table}_${column}_seq");
+        push(@statements, "ALTER SEQUENCE ${table}_${column}_seq 
+                           OWNED BY NONE");
+        push(@statements, "DROP SEQUENCE ${table}_${column}_seq");
     }
 
     return @statements;

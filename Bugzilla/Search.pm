@@ -1119,8 +1119,12 @@ sub init {
     foreach my $field (@fields) {
         # These fields never go into the GROUP BY (bug_id goes in
         # explicitly, below).
-        next if (grep($_ eq $field, EMPTY_COLUMN, 
-                      qw(bug_id actual_time percentage_complete flagtypes.name keywords)));
+        my @skip_group_by = (EMPTY_COLUMN, 
+            qw(bug_id actual_time percentage_complete flagtypes.name
+               keywords));
+        push(@skip_group_by, map { $_->name } @$multi_select_fields);
+
+        next if grep { $_ eq $field } @skip_group_by;
         my $col = COLUMNS->{$field}->{name};
         push(@groupby, $col) if !grep($_ eq $col, @groupby);
     }

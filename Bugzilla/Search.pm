@@ -54,7 +54,7 @@ use Bugzilla::Keyword;
 
 use Date::Format;
 use Date::Parse;
-
+use List::MoreUtils qw(uniq);
 use Storable qw(dclone);
 
 #############
@@ -291,6 +291,78 @@ use constant SPECIAL_ORDER_JOIN => {
     'target_milestone' => 'LEFT JOIN milestones AS ms_order ON ms_order.value = bugs.target_milestone AND ms_order.product_id = bugs.product_id',
 };
 
+# Certain columns require other columns to come before them
+# in _display_columns, and should be put there if they're not there.
+use constant COLUMN_DEPENDS => {
+    classification      => ['product'],
+    percentage_complete => ['actual_time', 'remaining_time'],
+};
+
+# This describes tables that must be joined when you want to display
+# certain columns in the buglist. For the most part, Search.pm uses
+# DB::Schema to figure out what needs to be joined, but for some
+# fields it needs a little help.
+use constant COLUMN_JOINS => {
+    assigned_to => {
+        from  => 'assigned_to',
+        to    => 'userid',
+        table => 'profiles',
+        join  => 'INNER',
+    },
+    reporter => {
+        from  => 'reporter',
+        to    => 'userid',
+        table => 'profiles',
+        join  => 'INNER',
+    },
+    qa_contact => {
+        from  => 'qa_contact',
+        to    => 'userid',
+        table => 'profiles',
+    },
+    component => {
+        from  => 'component_id',
+        to    => 'id',
+        table => 'components',
+        join  => 'INNER',
+    },
+    product => {
+        from  => 'product_id',
+        to    => 'id',
+        table => 'products',
+        join  => 'INNER',
+    },
+    classification => {
+        table => 'classifications',
+        from  => 'map_product.classification_id',
+        to    => 'id',
+        join  => 'INNER',
+    },
+    actual_time => {
+        table  => 'longdescs',
+    },
+    'flagtypes.name' => {
+        name  => 'map_flags',
+        table => 'flags',
+        extra => ' AND attach_id IS NULL',
+        then_to => {
+            name  => 'map_flagtypes',
+            table => 'flagtypes',
+            from  => 'map_flags.type_id',
+            to    => 'id',
+        },
+    },
+    keywords => {
+        table => 'keywords',
+        then_to => {
+            name  => 'map_keyworddefs',
+            table => 'keyworddefs',
+            from  => 'map_keywords.keywordid',
+            to    => 'id',
+        },
+    },
+};
+
 # This constant defines the columns that can be selected in a query 
 # and/or displayed in a bug list.  Column records include the following
 # fields:
@@ -328,8 +400,8 @@ sub COLUMNS {
 
     # Next we define columns that have special SQL instead of just something
     # like "bugs.bug_id".
-    my $actual_time = '(SUM(ldtime.work_time)'
-        . ' * COUNT(DISTINCT ldtime.bug_when)/COUNT(bugs.bug_id))';
+    my $actual_time = '(SUM(map_actual_time.work_time)'
+        . ' * COUNT(DISTINCT map_actual_time.bug_when)/COUNT(bugs.bug_id))';
     my %special_sql = (
         deadline    => $dbh->sql_date_format('bugs.deadline', '%Y-%m-%d'),
         actual_time => $actual_time,
@@ -342,9 +414,9 @@ sub COLUMNS {
               . " END)",
 
         'flagtypes.name' => $dbh->sql_group_concat('DISTINCT ' 
-            . $dbh->sql_string_concat('flagtypes.name', 'flags.status')),
+            . $dbh->sql_string_concat('map_flagtypes.name', 'map_flags.status')),
 
-        'keywords' => $dbh->sql_group_concat('DISTINCT keyworddefs.name'),
+        'keywords' => $dbh->sql_group_concat('DISTINCT map_keyworddefs.name'),
     );
 
     # Backward-compatibility for old field names. Goes new_name => old_name.
@@ -374,7 +446,7 @@ sub COLUMNS {
     }
 
     foreach my $col (@id_fields) {
-        $special_sql{$col} = "map_${col}s.name";
+        $special_sql{$col} = "map_${col}.name";
     }
 
     # Do the actual column-getting from fielddefs, now.
@@ -387,7 +459,7 @@ sub COLUMNS {
         }
         elsif ($field->type == FIELD_TYPE_MULTI_SELECT) {
             $sql = $dbh->sql_group_concat(
-                'DISTINCT map_bug_' . $field->name . '.value');
+                'DISTINCT map_' . $field->name . '.value');
         }
         else {
             $sql = 'bugs.' . $field->name;
@@ -434,6 +506,7 @@ sub REPORT_COLUMNS {
 # Internal Accessors #
 ######################
 
+# Fields that are legal for boolean charts of any kind.
 sub _chart_fields {
     my ($self) = @_;
 
@@ -453,8 +526,79 @@ sub _chart_fields {
 sub _multi_select_fields {
     my ($self) = @_;
     $self->{multi_select_fields} ||= Bugzilla->fields({
-        type => [FIELD_TYPE_MULTI_SELECT, FIELD_TYPE_BUG_URLS]});
+        by_name => 1,
+        type    => [FIELD_TYPE_MULTI_SELECT, FIELD_TYPE_BUG_URLS]});
     return $self->{multi_select_fields};
+}
+
+# These are the fields the user has chosen to display on the buglist.
+sub _display_columns {
+    my ($self, $columns) = @_;
+    if ($columns) {
+        my @actual_columns;
+        foreach my $column (@$columns) {
+            if (my $add_first = COLUMN_DEPENDS->{$column}) {
+                push(@actual_columns, @$add_first);
+            }
+            push(@actual_columns, $column);
+        }
+        $self->{display_columns} = [uniq @actual_columns];
+    }
+    return $self->{display_columns} || [];
+}
+
+# JOIN statements for the display columns. This should not be called
+# Until the moment it is needed, because _display_columns might be
+# modified by the charts.
+sub _display_column_joins {
+    my ($self) = @_;
+    $self->{display_column_joins} ||= $self->_build_display_column_joins();
+    return @{ $self->{display_column_joins} };
+}
+
+sub _build_display_column_joins {
+    my ($self) = @_;
+    my @joins;
+    foreach my $field (@{ $self->_display_columns }) {
+        my @column_join = $self->_column_join($field);
+        push(@joins, @column_join);
+    }
+    return \@joins;
+}
+
+sub _column_join {
+    my ($self, $field) = @_;
+    my $join_info = COLUMN_JOINS->{$field};
+    if (!$join_info) {
+        if ($self->_multi_select_fields->{$field}) {
+            return $self->_translate_join($field, { table => "bug_$field" });
+        }
+        return ();
+    }
+    return $self->_translate_join($field, $join_info);
+}
+
+sub _translate_join {
+    my ($self, $field, $join_info) = @_;
+    my $from_table = "bugs";
+    my $from  = $join_info->{from} || "bug_id";
+    if ($from =~ /^(\w+)\.(\w+)$/) {
+        ($from_table, $from) = ($1, $2);
+    }
+    my $to    = $join_info->{to}    || "bug_id";
+    my $join  = $join_info->{join}  || 'LEFT';
+    my $table = $join_info->{table};
+    die "$field requires a table in COLUMN_JOINS" if !$table;
+    my $extra = $join_info->{extra} || '';
+    my $name  = $join_info->{name}  || "map_$field";
+    $name =~ s/\./_/g;
+
+    my @join_sql = "$join JOIN $table AS $name"
+                        . " ON $from_table.$from = $name.$to$extra";
+    if (my $then_to = $join_info->{then_to}) {
+        push(@join_sql, $self->_translate_join($field, $then_to));
+    }
+    return @join_sql;
 }
 
 ###############
@@ -477,7 +621,7 @@ sub new {
 
 sub init {
     my $self = shift;
-    my @fields = @{ $self->{'fields'} || [] };
+    my $fields = $self->_display_columns($self->{'fields'});
     my $params = $self->{'params'};
     $params->convert_old_params();
     $self->{'user'} ||= Bugzilla->user;
@@ -510,74 +654,11 @@ sub init {
     # All items that are in the ORDER BY must be in the SELECT.
     foreach my $orderitem (@inputorder) {
         my $column_name = split_order_term($orderitem);
-        if (!grep($_ eq $column_name, @fields)) {
-            push(@fields, $column_name);
+        if (!grep($_ eq $column_name, @$fields)) {
+            push(@$fields, $column_name);
         }
     }
  
-    # First, deal with all the old hard-coded non-chart-based poop.
-    if (grep(/^assigned_to/, @fields)) {
-        push @supptables, "INNER JOIN profiles AS map_assigned_to " .
-                          "ON bugs.assigned_to = map_assigned_to.userid";
-    }
-
-    if (grep(/^reporter/, @fields)) {
-        push @supptables, "INNER JOIN profiles AS map_reporter " .
-                          "ON bugs.reporter = map_reporter.userid";
-    }
-
-    if (grep(/^qa_contact/, @fields)) {
-        push @supptables, "LEFT JOIN profiles AS map_qa_contact " .
-                          "ON bugs.qa_contact = map_qa_contact.userid";
-    }
-
-    if (grep($_ eq 'product' || $_ eq 'classification', @fields)) 
-    {
-        push @supptables, "INNER JOIN products AS map_products " .
-                          "ON bugs.product_id = map_products.id";
-    }
-
-    if (grep($_ eq 'classification', @fields)) {
-        push @supptables,
-                "INNER JOIN classifications AS map_classifications " .
-                "ON map_products.classification_id = map_classifications.id";
-    }
-
-    if (grep($_ eq 'component', @fields)) {
-        push @supptables, "INNER JOIN components AS map_components " .
-                          "ON bugs.component_id = map_components.id";
-    }
-    
-    if (grep($_ eq 'actual_time' || $_ eq 'percentage_complete', @fields)) {
-        push(@supptables, "LEFT JOIN longdescs AS ldtime " .
-                          "ON ldtime.bug_id = bugs.bug_id");
-    }
-    foreach my $field (@{ $self->_multi_select_fields }) {
-        my $field_name = $field->name;
-        next if !grep($_ eq $field_name, @fields);
-        push(@supptables, "LEFT JOIN bug_$field_name AS map_bug_$field_name"
-                          . " ON map_bug_$field_name.bug_id = bugs.bug_id");
-    }
-
-    if (grep($_ eq 'flagtypes.name', @fields)) {
-        push(@supptables, "LEFT JOIN flags ON flags.bug_id = bugs.bug_id AND attach_id IS NULL");
-        push(@supptables, "LEFT JOIN flagtypes ON flagtypes.id = flags.type_id");
-    }
-
-    if (grep($_ eq 'keywords', @fields)) {
-        push(@supptables, "LEFT JOIN keywords ON keywords.bug_id = bugs.bug_id");
-        push(@supptables, "LEFT JOIN keyworddefs ON keyworddefs.id = keywords.keywordid");
-    }
-    
-    # Calculating percentage_complete requires remaining_time. Mostly,
-    # we just need remaining_time in the GROUP_BY, but it simplifies
-    # things to just add it in the SELECT.
-    if (grep($_ eq 'percentage_complete', @fields)
-        and !grep($_ eq 'remaining_time', @fields))
-    {
-        push(@fields, 'remaining_time');
-    }
-
     # If the user has selected all of either status or resolution, change to
     # selecting none. This is functionally equivalent, but quite a lot faster.
     # Also, if the status is __open__ or __closed__, translate those
@@ -1023,7 +1104,7 @@ sub init {
                     where        => \@wherepart,
                     having       => \@having,
                     group_by     => \@groupby,
-                    fields       => \@fields,
+                    fields       => $fields,
                 );
                 # This should add a "term" selement to %search_args.
                 $self->do_search_function(\%search_args);
@@ -1078,7 +1159,7 @@ sub init {
     my %suppseen = ("bugs" => 1);
     my $suppstring = "bugs";
     my @supplist = (" ");
-    foreach my $str (@supptables) {
+    foreach my $str ($self->_display_column_joins, @supptables) {
 
         if ($str =~ /^(LEFT|INNER|RIGHT)\s+JOIN/i) {
             $str =~ /^(.*?)\s+ON\s+(.*)$/i;
@@ -1101,7 +1182,7 @@ sub init {
     @andlist = ("1 = 1") if !@andlist;
 
     my @sql_fields;
-    foreach my $field (@fields) {
+    foreach my $field (@$fields) {
         my $alias = $field;
         # Aliases cannot contain dots in them. We convert them to underscores.
         $alias =~ s/\./_/g;
@@ -1137,13 +1218,13 @@ sub init {
     }
 
     # For some DBs, every field in the SELECT must be in the GROUP BY.
-    foreach my $field (@fields) {
+    foreach my $field (@$fields) {
         # These fields never go into the GROUP BY (bug_id goes in
         # explicitly, below).
         my @skip_group_by = (EMPTY_COLUMN, 
             qw(bug_id actual_time percentage_complete flagtypes.name
                keywords));
-        push(@skip_group_by, map { $_->name } @{ $self->_multi_select_fields });
+        push(@skip_group_by, keys %{ $self->_multi_select_fields });
 
         next if grep { $_ eq $field } @skip_group_by;
         my $col = COLUMNS->{$field}->{name};
@@ -1195,7 +1276,7 @@ sub do_search_function {
     my $override = OPERATOR_FIELD_OVERRIDE->{$actual_field};
     if (!$override) {
         # Multi-select fields get special handling.
-        if (grep { $_->name eq $actual_field } @{ $self->_multi_select_fields }) {
+        if ($self->_multi_select_fields->{$actual_field}) {
             $override = OPERATOR_FIELD_OVERRIDE->{_multi_select};
         }
         # And so do attachment fields, if they don't have a specific
@@ -1843,7 +1924,7 @@ sub _percentage_complete {
     push(@$joins, "LEFT JOIN longdescs AS $table " .
                          "ON $table.bug_id = bugs.bug_id");
 
-    # We need remaining_time in @fields, otherwise we can't use
+    # We need remaining_time in _display_columns, otherwise we can't use
     # it in the expression for creating percentage_complete.
     if (!grep { $_ eq 'remaining_time' } @$fields) {
         push(@$fields, 'remaining_time');
@@ -2070,12 +2151,12 @@ sub _classification_nonchanged {
     my $joins = $args->{joins};
     
     # Generate the restriction condition
-    push(@$joins, "INNER JOIN products AS map_products " .
-                          "ON bugs.product_id = map_products.id");
+    push(@$joins, "INNER JOIN products AS map_product " .
+                          "ON bugs.product_id = map_product.id");
     $args->{full_field} = "classifications.name";
     $self->_do_operator_function($args);
     my $term = $args->{term};
-    $args->{term} = build_subselect("map_products.classification_id",
+    $args->{term} = build_subselect("map_product.classification_id",
         "classifications.id", "classifications", $term);
 }
 

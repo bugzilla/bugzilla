@@ -3168,12 +3168,21 @@ sub _populate_bugs_fulltext {
         # If there are no bugs in the bugs table, there's nothing to populate.
         return if !@$bug_ids;
 
+        my $command = "INSERT";
         my $where = "";
         if ($fulltext) {
             print "Updating bugs_fulltext...\n";
             $where = "WHERE " . $dbh->sql_in('bugs.bug_id', $bug_ids);
-            $dbh->do("DELETE FROM bugs_fulltext WHERE " 
-                     . $dbh->sql_in('bug_id', $bug_ids));
+            # It turns out that doing a REPLACE INTO is up to 10x faster
+            # than any other possible method of updating the table, in MySQL,
+            # which matters a LOT for large installations.
+            if ($dbh->isa('Bugzilla::DB::Mysql')) {
+                $command = "REPLACE";
+            }
+            else {
+                $dbh->do("DELETE FROM bugs_fulltext WHERE " 
+                         . $dbh->sql_in('bug_id', $bug_ids));
+            }
         }
         else {
             print "Populating bugs_fulltext...";
@@ -3181,7 +3190,7 @@ sub _populate_bugs_fulltext {
         }
         my $newline = $dbh->quote("\n");
         $dbh->do(
-            q{INSERT INTO bugs_fulltext (bug_id, short_desc, comments, 
+         qq{$command INTO bugs_fulltext (bug_id, short_desc, comments, 
                                          comments_noprivate)
                    SELECT bugs.bug_id, bugs.short_desc, }
                  . $dbh->sql_group_concat('longdescs.thetext', $newline)

@@ -136,8 +136,9 @@ sub _get_alter_type_sql {
     if ($type =~ /serial/i && $old_def->{TYPE} !~ /serial/i) {
         die("You cannot specify a DEFAULT on a SERIAL-type column.") 
             if $new_def->{DEFAULT};
-        $type =~ s/serial/integer/i;
     }
+
+    $type =~ s/\bserial\b/integer/i;
 
     # On Pg, you don't need UNIQUE if you're a PK--it creates
     # two identical indexes otherwise.

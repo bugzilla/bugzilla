@@ -1273,17 +1273,6 @@
 
       <varlistentry>
         <term>
-          URL describing milestones for this product
-        </term>
-        <listitem>
-          <para> 
-            If there is reference URL, provide it here
-          </para>
-        </listitem>
-      </varlistentry>
-
-      <varlistentry>
-        <term>
           Default milestone
         </term>
         <listitem>
@@ -1817,8 +1806,7 @@ ReadOnly: ENTRY, NA/NA, CANEDIT
       </para>
     </note>
 
-    <para>To create new Milestones, set Default Milestones, and set
-    Milestone URL:</para>
+    <para>To create new Milestones, and set Default Milestones:</para>
 
     <orderedlist>
       <listitem>
@@ -1837,12 +1825,6 @@ ReadOnly: ENTRY, NA/NA, CANEDIT
         milestone appears. This is because milestones often do not 
         occur in alphanumeric order For example, "Future" might be
         after "Release 1.2". Select "Add".</para>
-      </listitem>
-
-      <listitem>
-        <para>From the Edit product screen, you can enter the URL of a 
-        page which gives information about your milestones and what
-        they mean. </para>
       </listitem>
     </orderedlist>
   </section>

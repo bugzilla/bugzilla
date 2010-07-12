@@ -37,7 +37,7 @@
           [% IF id %] id="[% id FILTER html %]"[% END %]
           [% IF accesskey %] accesskey="[% accesskey FILTER html %]"[% END %]
           [% IF style %] style="[% style FILTER html %]"[% END %]
-          [% IF classes %]class="[% classes FILTER html %]"[% END %]
+          [% IF classes %] class="[% classes FILTER html %]"[% END %]
           [% IF wrap %] wrap="[% wrap FILTER html %]"[% END %]
           [% IF defaultrows && user.settings.zoom_textareas.value == 'off' %]
             rows="[% defaultrows FILTER html %]"

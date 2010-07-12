@@ -51,7 +51,7 @@ X-Bugzilla-Changed-Fields: [% changedfields %]
 [% FOREACH comment = new_comments %]
 
 [%- IF comment.count %]
---- Comment #[% comment.count %] from [% comment.author.identity %] [%+ comment.time FILTER time(undef, to_user.timezone) %] ---
+--- Comment #[% comment.count %] from [% comment.author.identity %] [%+ comment.creation_ts FILTER time(undef, to_user.timezone) %] ---
 [% END %]
 [%+ comment.body_full({ is_bugmail => 1, wrap => 1 }) %]
 [% END %]

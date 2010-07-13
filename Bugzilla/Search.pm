@@ -717,6 +717,69 @@ sub _skip_group_by {
     return $self->{skip_group_by};
 }
 
+##############################################
+# Internal Accessors: Special Params Parsing #
+##############################################
+
+sub _params { $_[0]->{params} }
+
+sub _parse_params {
+    my ($self) = @_;
+    $self->_special_parse_bug_status();
+    $self->_special_parse_resolution();
+}
+
+sub _special_parse_bug_status {
+    my ($self) = @_;
+    my $params = $self->_params;
+    return if !defined $params->param('bug_status');
+
+    my @bug_status = $params->param('bug_status');
+    # Also include inactive bug statuses, as you can query them.
+    my $legal_statuses = $self->_chart_fields->{'bug_status'}->legal_values;
+
+    # If the status contains __open__ or __closed__, translate those
+    # into their equivalent lists of open and closed statuses.
+    if (grep { $_ eq '__open__' } @bug_status) {
+        my @open = grep { $_->is_open } @$legal_statuses;
+        @open = map { $_->name } @open;
+        push(@bug_status, @open);
+    }
+    if (grep { $_ eq '__closed__' } @bug_status) {
+        my @closed = grep { not $_->is_open } @$legal_statuses;
+        @closed = map { $_->name } @closed;
+        push(@bug_status, @closed);
+    }
+
+    @bug_status = uniq @bug_status;
+    # This will also handle removing __open__ and __closed__ for us.
+    @bug_status = _valid_values(\@bug_status, $legal_statuses);
+
+    # If the user has selected every status, change to selecting none.
+    # This is functionally equivalent, but quite a lot faster.    
+    if (scalar(@bug_status) == scalar(@$legal_statuses)
+        or grep { $_ eq "__all__" } @bug_status)
+    {
+        $params->delete('bug_status');
+    }
+    else {
+        $params->param('bug_status', @bug_status);
+    }
+}
+
+sub _special_parse_resolution {
+    my ($self) = @_;
+    my $params = $self->_params;
+    return if !defined $params->param('resolution');
+
+    my @resolution = $params->param('resolution');
+    my $legal_resolutions = $self->_chart_fields->{resolution}->legal_values;
+    @resolution = _valid_values(\@resolution, $legal_resolutions, '---');
+    if (scalar(@resolution) == scalar(@$legal_resolutions)) {
+        $params->delete('resolution');
+    }
+}
+
 ##################################
 # Helpers for Internal Accessors #
 ##################################
@@ -731,6 +794,20 @@ sub _column_join {
         return ();
     }
     return $self->_translate_join($field, $join_info);
+}
+
+sub _valid_values {
+    my ($input, $valid, $extra_value) = @_;
+    my @result;
+    foreach my $item (@$input) {
+        if (defined $extra_value and $item eq $extra_value) {
+            push(@result, $item);
+        }
+        elsif (grep { $_->name eq $item } @$valid) {
+            push(@result, $item);
+        }
+    }
+    return @result;
 }
 
 sub _translate_join {
@@ -793,7 +870,7 @@ sub new {
 
 sub init {
     my $self = shift;
-    my $params = $self->{'params'};
+    my $params = $self->_params;
     $params->convert_old_params();
     $self->{'user'} ||= Bugzilla->user;
     my $user = $self->{'user'};
@@ -806,50 +883,7 @@ sub init {
 
     my $dbh = Bugzilla->dbh;
 
- 
-    # If the user has selected all of either status or resolution, change to
-    # selecting none. This is functionally equivalent, but quite a lot faster.
-    # Also, if the status is __open__ or __closed__, translate those
-    # into their equivalent lists of open and closed statuses.
-    if ($params->param('bug_status')) {
-        my @bug_statuses = $params->param('bug_status');
-        # Also include inactive bug statuses, as you can query them.
-        my @legal_statuses =
-          map {$_->name} @{Bugzilla::Field->new({name => 'bug_status'})->legal_values};
-
-        # Filter out any statuses that have been removed completely that are still 
-        # being used by the client
-        my @valid_statuses;
-        foreach my $status (@bug_statuses) {
-            push(@valid_statuses, $status) if grep($_ eq $status, @legal_statuses);
-        }
-        
-        if (scalar(@valid_statuses) == scalar(@legal_statuses)
-            || $bug_statuses[0] eq "__all__")
-        {
-            $params->delete('bug_status');
-        }
-        elsif ($bug_statuses[0] eq '__open__') {
-            $params->param('bug_status', grep(is_open_state($_), 
-                                              @legal_statuses));
-        }
-        elsif ($bug_statuses[0] eq "__closed__") {
-            $params->param('bug_status', grep(!is_open_state($_), 
-                                              @legal_statuses));
-        }
-        else {
-            $params->param('bug_status', @valid_statuses);
-        }
-    }
-    
-    if ($params->param('resolution')) {
-        my @resolutions = $params->param('resolution');
-        # Also include inactive resolutions, as you can query them.
-        my $legal_resolutions = Bugzilla::Field->new({name => 'resolution'})->legal_values;
-        if (scalar(@resolutions) == scalar(@$legal_resolutions)) {
-            $params->delete('resolution');
-        }
-    }
+    $self->_parse_params();
     
     # All fields that don't have a . in their name should be specifyable
     # in the URL directly.

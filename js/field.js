@@ -22,6 +22,72 @@
 /* This library assumes that the needed YUI libraries have been loaded 
    already. */
 
+function validateEnterBug(theform) {
+    var component = theform.component;
+    var short_desc = theform.short_desc;
+    var version = theform.version;
+    var bug_status = theform.bug_status;
+    var description = theform.comment;
+    var attach_data = theform.data;
+    var attach_desc = theform.description;
+
+    var current_errors = YAHOO.util.Dom.getElementsByClassName(
+        'validation_error_text', null, theform);
+    for (var i = 0; i < current_errors.length; i++) {
+        current_errors[i].parentNode.removeChild(current_errors[i]);
+    }
+    var current_error_fields = YAHOO.util.Dom.getElementsByClassName(
+        'validation_error_field', null, theform);
+    for (var i = 0; i < current_error_fields.length; i++) {
+        var field = current_error_fields[i];
+        YAHOO.util.Dom.removeClass(field, 'validation_error_field');
+    }
+
+    var focus_me;
+
+    // These are checked in the reverse order that they appear on the page,
+    // so that the one closest to the top of the form will be focused.
+    if (attach_data.value && YAHOO.lang.trim(attach_desc.value) == '') {
+        _errorFor(attach_desc, 'attach_desc');
+        focus_me = attach_desc;
+    }
+    var check_description = status_comment_required[bug_status.value];
+    if (check_description && YAHOO.lang.trim(description.value) == '') {
+        _errorFor(description, 'description');
+        focus_me = description;
+    }
+    if (YAHOO.lang.trim(short_desc.value) == '') {
+        _errorFor(short_desc);
+        focus_me = short_desc;
+    }
+    if (version.selectedIndex < 0) {
+        _errorFor(version);
+        focus_me = version;
+    }
+    if (component.selectedIndex < 0) {
+        _errorFor(component);
+        focus_me = component;
+    }
+
+    if (focus_me) {
+        focus_me.focus();
+        return false;
+    }
+
+    return true;
+}
+
+function _errorFor(field, name) {
+    if (!name) name = field.id;
+    var string_name = name + '_required';
+    var error_text = BUGZILLA.string[string_name];
+    var new_node = document.createElement('div');
+    YAHOO.util.Dom.addClass(new_node, 'validation_error_text');
+    new_node.innerHTML = error_text;
+    YAHOO.util.Dom.insertAfter(new_node, field);
+    YAHOO.util.Dom.addClass(field, 'validation_error_field');
+}
+
 function createCalendar(name) {
     var cal = new YAHOO.widget.Calendar('calendar_' + name, 
                                         'con_calendar_' + name);

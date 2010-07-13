@@ -265,7 +265,13 @@ You are currently not watching any users.
 </p>
 
 <p id="new_watched_by_you">Add users to my watch list (comma separated list):
-  <input size="60" name="new_watchedusers" value="">
+  [% INCLUDE global/userselect.html.tmpl
+     id => "new_watchedusers"
+     name => "new_watchedusers"
+     value => ""
+     size => 60
+     multiple => 5
+  %]
 </p>            
 
 <p id="watching_you">Users watching you:<br>

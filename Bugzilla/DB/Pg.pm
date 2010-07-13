@@ -296,6 +296,12 @@ END
                 print "Fixing $sequence to be associated"
                       . " with $table.$column...\n";
                 $self->do("ALTER SEQUENCE $sequence OWNED BY $table.$column");
+                # In order to produce an exactly identical schema to what
+                # a brand-new checksetup.pl run would produce, we also need
+                # to re-set the default on this column.
+                $self->do("ALTER TABLE $table
+                          ALTER COLUMN $column
+                           SET DEFAULT nextval('$sequence')");
             }
         }
     }

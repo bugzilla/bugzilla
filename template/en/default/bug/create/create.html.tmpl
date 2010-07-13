@@ -160,6 +160,11 @@ function handleWantsAttachment(wants_attachment) {
     }
 }
 
+var status_comment_required = new Array();
+[% FOREACH status = bug_status %]
+  status_comment_required['[% status.name FILTER js %]'] = 
+    [% status.comment_required_on_change_from() ? 'true' : 'false' %]
+[% END %]
 
 TUI_alternates['expert_fields'] = 'Show Advanced Fields';
 // Hide the Advanced Fields by default, unless the user has a cookie
@@ -170,7 +175,8 @@ TUI_hide_default('expert_fields');
 </script>
 
 <form name="Create" id="Create" method="post" action="post_bug.cgi"
-      class="enter_bug_form" enctype="multipart/form-data">
+      class="enter_bug_form" enctype="multipart/form-data"
+      onsubmit="return validateEnterBug(this)">
 <input type="hidden" name="product" value="[% product.name FILTER html %]">
 <input type="hidden" name="token" value="[% token FILTER html %]">
 
@@ -278,7 +284,7 @@ TUI_hide_default('expert_fields');
       field = bug_fields.version editable = 1 rowspan = 3 
     %]
     <td rowspan="3">
-      <select name="version" size="5">
+      <select name="version" id="version" size="5">
         [%- FOREACH v = version %]
           <option value="[% v FILTER html %]"
             [% ' selected="selected"' IF v == default.version %]>[% v FILTER html -%]
@@ -695,10 +701,7 @@ TUI_hide_default('expert_fields');
   <tr>
     <th>&nbsp;</th>
     <td colspan="3">
-      <input type="submit" id="commit" value="Submit [% terms.Bug %]"
-             onclick="if (this.form.short_desc.value == '')
-             { alert('Please enter a summary sentence for this [% terms.bug %].');
-               return false; } return true;">
+      <input type="submit" id="commit" value="Submit [% terms.Bug %]">
       &nbsp;&nbsp;&nbsp;&nbsp;
       <input type="submit" name="maketemplate" id="maketemplate"
              value="Remember values as bookmarkable template"

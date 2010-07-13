@@ -545,3 +545,17 @@ input.required, select.required, span.required_explanation {
     overflow-x: hidden;
     margin-left: -1px;
 }
+
+/*******************/
+/* Form Validation */
+/*******************/
+
+.validation_error_text {
+    font-size: 120%;
+    color: #152446;
+    font-weight: bold;
+}
+
+.validation_error_field {
+    border: 2px solid #152446;
+}

@@ -838,6 +838,8 @@ sub create {
     $sth->bind_param(1, $data, $dbh->BLOB_TYPE);
     $sth->execute();
 
+    $attachment->{bug} = $bug;
+
     # Return the new attachment object.
     return $attachment;
 }

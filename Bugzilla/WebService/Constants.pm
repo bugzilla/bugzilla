@@ -121,6 +121,16 @@ use constant WS_ERROR_CODE => {
     user_access_by_id_denied    => 505,
     user_access_by_match_denied => 505,
 
+    # Attachment errors are 600-700.
+    patch_too_large        => 600,
+    local_file_too_large   => 600,
+    file_too_large         => 600,
+    invalid_content_type   => 601,
+    attachment_illegal_url => 602,
+    file_not_specified     => 603,
+    missing_attachment_description => 604,
+    attachment_url_disabled => 605,
+
     # Errors thrown by the WebService itself. The ones that are negative 
     # conform to http://xmlrpc-epi.sourceforge.net/specs/rfc.fault_codes.php
     xmlrpc_invalid_value => -32600,

@@ -25,6 +25,8 @@ use XMLRPC::Lite;
 
 # Used by the JSON-RPC server to convert incoming date fields apprpriately.
 use constant DATE_FIELDS => {};
+# Used by the JSON-RPC server to convert incoming base64 fields appropriately.
+use constant BASE64_FIELDS => {};
 
 # For some methods, we shouldn't call Bugzilla->login before we call them
 use constant LOGIN_EXEMPT => { };
@@ -105,6 +107,11 @@ May be null.
 =item C<boolean>
 
 True or false.
+
+=item C<base64>
+
+A base64-encoded string. This is the only way to transfer
+binary data via the WebService.
 
 =item C<array>
 

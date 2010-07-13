@@ -34,7 +34,6 @@ use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Keyword;
-use Bugzilla::Product;
 use Bugzilla::Status;
 use Bugzilla::Field;
 
@@ -77,8 +76,6 @@ if ($cgi->param('product')) {
 } else {
     $vars->{'products'} = $user->get_selectable_products;
 }
-
-Bugzilla::Product::preload($vars->{'products'});
 
 # Allow consumers to specify whether or not they want flag data.
 if (defined $cgi->param('flags')) {

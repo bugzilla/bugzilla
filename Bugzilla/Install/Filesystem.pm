@@ -214,6 +214,8 @@ sub FILESYSTEM {
                                      dirs => $owner_dir_readable },
          'contrib'             => { files => $owner_executable,
                                      dirs => $owner_dir_readable, },
+         '.bzr'                => { files => $owner_readable,
+                                     dirs => $owner_dir_readable },
     );
 
     # --- FILES TO CREATE --- #

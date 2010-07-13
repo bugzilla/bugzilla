@@ -727,8 +727,9 @@ sub _parse_params {
     my ($self) = @_;
     $self->_special_parse_bug_status();
     $self->_special_parse_resolution();
-    my $basic_charts = $self->_parse_basic_fields();
-    return @$basic_charts;
+    my @charts = $self->_parse_basic_fields();
+    push(@charts, $self->_special_parse_email);
+    return @charts;
 }
 
 sub _parse_basic_fields {
@@ -749,7 +750,7 @@ sub _parse_basic_fields {
         my $string_value = join(',', $params->param($param_name));
         push(@charts, [$field_name, $operator, $string_value]);
     }
-    return \@charts;
+    return @charts;
 }
 
 sub _special_parse_bug_status {
@@ -788,6 +789,37 @@ sub _special_parse_bug_status {
     else {
         $params->param('bug_status', @bug_status);
     }
+}
+
+sub _special_parse_email {
+    my ($self) = @_;
+    my $params = $self->_params;
+    
+    my @email_params = grep { $_ =~ /^email\d+$/ } $params->param();
+    
+    my @charts;
+    foreach my $param (@email_params) {
+        $param =~ /(\d+)$/;
+        my $id = $1;
+        my $email = trim($params->param("email$id"));
+        next if $email eq "";
+        my $type = $params->param("emailtype$id");
+        $type = "anyexact" if $type eq "exact";
+
+        my @or_charts;
+        foreach my $field qw(assigned_to reporter cc qa_contact) {
+            if ($params->param("email$field$id")) {
+                push(@or_charts, $field, $type, $email);
+            }
+        }
+        if ($params->param("emaillongdesc$id")) {
+            push(@or_charts, "commenter", $type, $email);
+        }
+
+        push(@charts, \@or_charts);
+    }
+    
+    return @charts;
 }
 
 sub _special_parse_resolution {
@@ -907,42 +939,6 @@ sub init {
 
     my @specialchart = $self->_parse_params();
     
-    foreach my $id (1, 2, 3) {
-        if (!defined ($params->param("email$id"))) {
-            next;
-        }
-        my $email = trim($params->param("email$id"));
-        if ($email eq "") {
-            next;
-        }
-        my $type = $params->param("emailtype$id");
-        $type = "anyexact" if ($type eq "exact");
-
-        my @clist;
-        foreach my $field ("assigned_to", "reporter", "cc", "qa_contact") {
-            if ($params->param("email$field$id")) {
-                push(@clist, $field, $type, $email);
-            }
-        }
-        if ($params->param("emaillongdesc$id")) {
-                push(@clist, "commenter", $type, $email);
-        }
-        if (@clist) {
-            push(@specialchart, \@clist);
-        }
-        else {
-            # No field is selected. Nothing to see here.
-            next;
-        }
-
-        if ($type eq "anyexact") {
-            foreach my $name (split(',', $email)) {
-                $name = trim($name);
-                login_to_id($name, THROW_ERROR) if $name;
-            }
-        }
-    }
-
     my $chfieldfrom = trim(lc($params->param('chfieldfrom') || ''));
     my $chfieldto = trim(lc($params->param('chfieldto') || ''));
     $chfieldfrom = '' if ($chfieldfrom eq 'now');
@@ -1228,13 +1224,13 @@ sub init {
 #               chart to merge the ON sections of each.
 # $suppstring = String which is pasted into query containing all table names
 
-    my ($sequence, $chartid);
+    my $sequence = 0;
     $row = 0;
     for ($chart=-1 ;
          $chart < 0 || $params->param("field$chart-0-0") ;
          $chart++) 
     {
-        $chartid = $chart >= 0 ? $chart : "";
+        my $chartid = $chart >= 0 ? $chart : "";
         my @chartandlist;
         for ($row = 0 ;
              $params->param("field$chart-$row-0") ;
@@ -1765,7 +1761,7 @@ sub _cc_nonchanged {
 
     # This is for the email1, email2, email3 fields from query.cgi.
     if ($chart_id eq "") {
-        $chart_id = "CC$$sequence";
+        $chart_id = "CC$sequence";
         $args->{sequence}++;
     }
     

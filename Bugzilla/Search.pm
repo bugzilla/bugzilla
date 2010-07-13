@@ -165,9 +165,6 @@ use constant OPERATOR_FIELD_OVERRIDE => {
     bug_group => {
         _non_changed => \&_bug_group_nonchanged,
     },
-    changedin => {
-        _default => \&_changedin_days_elapsed,
-    },
     classification => {
         _non_changed => \&_classification_nonchanged,
     },
@@ -180,7 +177,7 @@ use constant OPERATOR_FIELD_OVERRIDE => {
         _default   => sub { ThrowUserError("search_content_without_matches"); },
     },
     days_elapsed => {
-        _default => \&_changedin_days_elapsed,
+        _default => \&_days_elapsed,
     },
     dependson => {
         _non_changed => \&_dependson_nonchanged,
@@ -269,6 +266,7 @@ use constant SPECIAL_PARSING => {
 
 # Backwards compatibility for times that we changed the names of fields.
 use constant FIELD_MAP => {
+    changedin => 'days_elapsed',
     long_desc => 'longdesc',
 };
 
@@ -737,6 +735,15 @@ sub _parse_basic_fields {
     my $params = $self->_params;
     my $chart_fields = $self->_chart_fields;
     
+    foreach my $old_name (keys %{ FIELD_MAP() }) {
+        if (defined $params->param($old_name)) {
+            my @value = $params->param($old_name);
+            $params->delete($old_name);
+            my $new_name = FIELD_MAP->{$old_name};
+            $params->param($new_name, @value);
+        }
+    }
+    
     my @charts;
     foreach my $field_name (keys %$chart_fields) {
         # CGI params shouldn't have periods in them, so we only accept
@@ -945,32 +952,6 @@ sub init {
     $chfieldto = '' if ($chfieldto eq 'now');
     my @chfield = $params->param('chfield');
     my $chvalue = trim($params->param('chfieldvalue')) || '';
-
-    # 2003-05-20: The 'changedin' field is no longer in the UI, but we continue
-    # to process it because it will appear in stored queries and bookmarks.
-    my $changedin = trim($params->param('changedin')) || '';
-    if ($changedin) {
-        if ($changedin !~ /^[0-9]*$/) {
-            ThrowUserError("illegal_changed_in_last_x_days",
-                              { value => $changedin });
-        }
-
-        if (!$chfieldfrom
-            && !$chfieldto
-            && scalar(@chfield) == 1
-            && $chfield[0] eq "[Bug creation]")
-        {
-            # Deal with the special case where the query is using changedin
-            # to get bugs created in the last n days by converting the value
-            # into its equivalent for the chfieldfrom parameter.
-            $chfieldfrom = "-" . ($changedin - 1) . "d";
-        }
-        else {
-            # Oh boy, the general case.  Who knows why the user included
-            # the changedin parameter, but do our best to comply.
-            push(@specialchart, ["changedin", "lessthan", $changedin + 1]);
-        }
-    }
 
     if ($chfieldfrom ne '' || $chfieldto ne '') {
         my $sql_chfrom = $chfieldfrom ? $dbh->quote(SqlifyDate($chfieldfrom)):'';
@@ -2183,7 +2164,7 @@ sub _setters_login_name {
     $args->{full_field} = "$map_table.login_name";
 }
 
-sub _changedin_days_elapsed {
+sub _days_elapsed {
     my ($self, $args) = @_;
     my $dbh = Bugzilla->dbh;
     

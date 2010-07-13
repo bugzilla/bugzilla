@@ -50,7 +50,7 @@ use Bugzilla::Status;
 use Bugzilla::Comment;
 
 use List::MoreUtils qw(firstidx uniq);
-use List::Util qw(min first);
+use List::Util qw(min max first);
 use Storable qw(dclone);
 use URI;
 use URI::QueryParam;
@@ -2627,7 +2627,7 @@ sub add_comment {
     # later in set_all. But if they haven't, this keeps remaining_time
     # up-to-date.
     if ($params->{work_time}) {
-        $self->set_remaining_time($self->remaining_time - $params->{work_time});
+        $self->set_remaining_time(max($self->remaining_time - $params->{work_time}, 0));
     }
 
     # So we really want to comment. Make sure we are allowed to do so.

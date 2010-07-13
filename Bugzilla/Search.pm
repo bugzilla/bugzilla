@@ -292,7 +292,7 @@ use constant SPECIAL_ORDER => {
 };
 
 # Certain columns require other columns to come before them
-# in _display_columns, and should be put there if they're not there.
+# in _select_columns, and should be put there if they're not there.
 use constant COLUMN_DEPENDS => {
     classification      => ['product'],
     percentage_complete => ['actual_time', 'remaining_time'],
@@ -531,31 +531,85 @@ sub _multi_select_fields {
     return $self->{multi_select_fields};
 }
 
-# These are the fields the user has chosen to display on the buglist.
-sub _display_columns {
-    my ($self, $columns) = @_;
-    if ($columns) {
-        my @actual_columns;
-        foreach my $column (@$columns) {
-            if (my $add_first = COLUMN_DEPENDS->{$column}) {
-                push(@actual_columns, @$add_first);
-            }
-            push(@actual_columns, $column);
+###############################
+# Internal Accessors: Columns #
+###############################
+
+# These are the fields the user has chosen to display on the buglist,
+# exactly as they were passed to new().
+sub _input_columns { @{ $_[0]->{'fields'} || [] } }
+
+# These are columns that are also going to be in the SELECT for one reason
+# or another, but weren't actually requested by the caller.
+sub _extra_columns {
+    my ($self) = @_;
+    # Everything that's going to be in the ORDER BY must also be
+    # in the SELECT. We make a copy of input_order here so that modifications
+    # to extra_columns don't modify input_order.
+    $self->{extra_columns} ||= [ $self->_input_order ];
+    return @{ $self->{extra_columns} };
+}
+
+# For search functions to modify extra_columns. It doesn't matter if
+# people push the same column onto this array multiple times, because
+# _select_columns will call "uniq" on its final result.
+sub _add_extra_column {
+    my ($self, $column) = @_;
+    push(@{ $self->{extra_columns} }, $column);
+}
+
+# These are the columns that we're going to be actually SELECTing.
+sub _select_columns {
+    my ($self) = @_;
+    return @{ $self->{select_columns} } if $self->{select_columns};
+
+    my @select_columns;
+    foreach my $column ($self->_input_columns, $self->_extra_columns) {
+        if (my $add_first = COLUMN_DEPENDS->{$column}) {
+            push(@select_columns, @$add_first);
         }
-        $self->{display_columns} = [uniq @actual_columns];
+        push(@select_columns, $column);
     }
-    return $self->{display_columns} || [];
+    
+    $self->{select_columns} = [uniq @select_columns];
+    return @{ $self->{select_columns} };
 }
 
 # JOIN statements for the display columns. This should not be called
-# Until the moment it is needed, because _display_columns might be
+# Until the moment it is needed, because _select_columns might be
 # modified by the charts.
-sub _display_column_joins {
+sub _select_column_joins {
     my ($self) = @_;
-    $self->{display_column_joins} ||= $self->_build_display_column_joins();
+    $self->{display_column_joins} ||= $self->_build_select_column_joins();
     return @{ $self->{display_column_joins} };
 }
 
+# This takes _select_columns and translates it into the actual SQL that
+# will go into the SELECT clause.
+sub _sql_select {
+    my ($self) = @_;
+    my @sql_fields;
+    foreach my $column ($self->_select_columns) {
+        my $alias = $column;
+        # Aliases cannot contain dots in them. We convert them to underscores.
+        $alias =~ s/\./_/g;
+        my $sql = ($column eq EMPTY_COLUMN)
+                  ? EMPTY_COLUMN : COLUMNS->{$column}->{name} . " AS $alias";
+        push(@sql_fields, $sql);
+    }
+    return @sql_fields;
+}
+
+#############################
+# Internal Accessors: Order #
+#############################
+
+# The "order" that was requested by the consumer, exactly as it was
+# requested.
+sub _input_order { @{ $_[0]->{'order'} || [] } }
+
+# A hashref that describes all the special stuff that has to be done
+# for various fields if they go into the ORDER BY clause.
 sub _special_order {
     my ($self) = @_;
     return $self->{special_order} if $self->{special_order};
@@ -583,10 +637,10 @@ sub _special_order {
 # Helpers for Internal Accessors #
 ##################################
 
-sub _build_display_column_joins {
+sub _build_select_column_joins {
     my ($self) = @_;
     my @joins;
-    foreach my $field (@{ $self->_display_columns }) {
+    foreach my $field ($self->_select_columns) {
         my @column_join = $self->_column_join($field);
         push(@joins, @column_join);
     }
@@ -648,12 +702,10 @@ sub new {
 
 sub init {
     my $self = shift;
-    my $fields = $self->_display_columns($self->{'fields'});
     my $params = $self->{'params'};
     $params->convert_old_params();
     $self->{'user'} ||= Bugzilla->user;
     my $user = $self->{'user'};
-
     my @inputorder = @{ $self->{'order'} || [] };
     my @orderby;
 
@@ -665,14 +717,7 @@ sub init {
     my @andlist;
 
     my $dbh = Bugzilla->dbh;
-   
-    # All items that are in the ORDER BY must be in the SELECT.
-    foreach my $orderitem (@inputorder) {
-        my $column_name = split_order_term($orderitem);
-        if (!grep($_ eq $column_name, @$fields)) {
-            push(@$fields, $column_name);
-        }
-    }
+
  
     # If the user has selected all of either status or resolution, change to
     # selecting none. This is functionally equivalent, but quite a lot faster.
@@ -1119,7 +1164,6 @@ sub init {
                     where        => \@wherepart,
                     having       => \@having,
                     group_by     => \@groupby,
-                    fields       => $fields,
                 );
                 # This should add a "term" selement to %search_args.
                 $self->do_search_function(\%search_args);
@@ -1175,7 +1219,7 @@ sub init {
     my %suppseen = ("bugs" => 1);
     my $suppstring = "bugs";
     my @supplist = (" ");
-    foreach my $str ($self->_display_column_joins, @supptables) {
+    foreach my $str ($self->_select_column_joins, @supptables) {
 
         if ($str =~ /^(LEFT|INNER|RIGHT)\s+JOIN/i) {
             $str =~ /^(.*?)\s+ON\s+(.*)$/i;
@@ -1197,16 +1241,8 @@ sub init {
     # Make sure we create a legal SQL query.
     @andlist = ("1 = 1") if !@andlist;
 
-    my @sql_fields;
-    foreach my $field (@$fields) {
-        my $alias = $field;
-        # Aliases cannot contain dots in them. We convert them to underscores.
-        $alias =~ s/\./_/g;
-        my $sql_field = ($field eq EMPTY_COLUMN) ? EMPTY_COLUMN
-                                                 : COLUMNS->{$field}->{name} . " AS $alias";
-        push(@sql_fields, $sql_field);
-    }
-    my $query = "SELECT " . join(', ', @sql_fields) .
+
+    my $query = "SELECT " . join(', ', $self->_sql_select) .
                 " FROM $suppstring" .
                 " LEFT JOIN bug_group_map " .
                 " ON bug_group_map.bug_id = bugs.bug_id ";
@@ -1234,7 +1270,7 @@ sub init {
     }
 
     # For some DBs, every field in the SELECT must be in the GROUP BY.
-    foreach my $field (@$fields) {
+    foreach my $field ($self->_select_columns) {
         # These fields never go into the GROUP BY (bug_id goes in
         # explicitly, below).
         my @skip_group_by = (EMPTY_COLUMN, 
@@ -1940,11 +1976,9 @@ sub _percentage_complete {
     push(@$joins, "LEFT JOIN longdescs AS $table " .
                          "ON $table.bug_id = bugs.bug_id");
 
-    # We need remaining_time in _display_columns, otherwise we can't use
+    # We need remaining_time in _select_columns, otherwise we can't use
     # it in the expression for creating percentage_complete.
-    if (!grep { $_ eq 'remaining_time' } @$fields) {
-        push(@$fields, 'remaining_time');
-    }
+    $self->_add_extra_column('remaining_time');
 
     $self->_do_operator_function($args);
     push(@$having, $args->{term});

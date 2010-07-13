@@ -302,8 +302,7 @@
 
         <listitem>
           <para>
-            <link linkend="install-modules-dbd-mysql">DBD::mysql</link>
-            (&min-dbd-mysql-ver;) if using MySQL
+            DBD::mysql (&min-dbd-mysql-ver;) if using MySQL
           </para>
         </listitem>
         
@@ -327,8 +326,7 @@
 
         <listitem>
           <para>
-            <link linkend="install-modules-template">Template</link>
-            (&min-template-ver;)
+            Template (&min-template-ver;)
           </para>
         </listitem>
 
@@ -361,8 +359,7 @@
       <orderedlist>
         <listitem>
           <para>
-            <link linkend="install-modules-gd">GD</link>
-            (&min-gd-ver;) for bug charting
+            GD (&min-gd-ver;) for bug charting
           </para>
         </listitem>
 
@@ -375,29 +372,25 @@
 
         <listitem>
           <para>
-            <link linkend="install-modules-chart-base">Chart::Base</link>
-            (&min-chart-base-ver;) for bug charting
+            Chart::Base (&min-chart-base-ver;) for bug charting
           </para>
         </listitem>
 
         <listitem>
           <para>
-            <link linkend="install-modules-gd-graph">GD::Graph</link>
-            (&min-gd-graph-ver;) for bug charting
+            GD::Graph (&min-gd-graph-ver;) for bug charting
           </para>
         </listitem>
 
         <listitem>
           <para>
-            <link linkend="install-modules-gd-text">GD::Text</link>
-            (&min-gd-text-ver;) for bug charting
+            GD::Text (&min-gd-text-ver;) for bug charting
           </para>
         </listitem>
 
         <listitem>
           <para>
-            <link linkend="install-modules-xml-twig">XML::Twig</link>
-            (&min-xml-twig-ver;) for bug import/export
+            XML::Twig (&min-xml-twig-ver;) for bug import/export
           </para>
         </listitem>
 
@@ -416,8 +409,7 @@
 
         <listitem>
           <para>
-            <link linkend="install-modules-patchreader">PatchReader</link>
-            (&min-patchreader-ver;) for pretty HTML view of patches
+            PatchReader (&min-patchreader-ver;) for pretty HTML view of patches
           </para>
         </listitem>
 
@@ -450,8 +442,7 @@
 
         <listitem>
           <para>
-            <link linkend="install-modules-soap-lite">SOAP::Lite</link>
-            (&min-soap-lite-ver;) for the web service interface
+            SOAP::Lite (&min-soap-lite-ver;) for the web service interface
           </para>
         </listitem>
 
@@ -491,113 +482,8 @@
         </listitem>
       </orderedlist>
       </para>
-
-      <section id="install-modules-dbd-mysql">
-        <title>DBD::mysql</title>
-
-        <para>The installation process will ask you a few questions about the
-        desired compilation target and your MySQL installation. For most of the
-        questions the provided default will be adequate, but when asked if your
-        desired target is the MySQL or mSQL packages, you should
-        select the MySQL-related ones. Later you will be asked if you wish to
-        provide backwards compatibility with the older MySQL packages; you
-        should answer YES to this question. The default is NO.</para>
-
-        <para>A host of 'localhost' should be fine. A testing user of 'test',
-        with a null password, should have sufficient access to run
-        tests on the 'test' database which MySQL creates upon installation.
-        </para>
-      </section>
-
-      <section id="install-modules-template">
-        <title>Template Toolkit (&min-template-ver;)</title>
-
-        <para>When you install Template Toolkit, you'll get asked various
-        questions about features to enable. The defaults are fine, except
-        that it is recommended you use the high speed XS Stash of the Template
-        Toolkit, in order to achieve best performance.
-        </para>
-      </section> 
-
-      <section id="install-modules-gd">
-        <title>GD (&min-gd-ver;)</title>
-
-        <para>The GD module is only required if you want graphical reports.
-        </para>
-
-        <note>
-          <para>The Perl GD module requires some other libraries that may or
-          may not be installed on your system, including 
-          <classname>libpng</classname>
-          and 
-          <classname>libgd</classname>. 
-          The full requirements are listed in the Perl GD module README.
-          If compiling GD fails, it's probably because you're
-          missing a required library.</para>
-        </note>
-
-        <tip>
-          <para>The version of the GD module you need is very closely tied
-          to the <classname>libgd</classname> version installed on your system.
-          If you have a version 1.x of <classname>libgd</classname> the 2.x
-          versions of the GD module won't work for you.
-         </para>
-       </tip>
-      </section>
-
-      <section id="install-modules-chart-base">
-        <title>Chart::Base (&min-chart-base-ver;)</title>
-
-        <para>The Chart::Base module is only required if you want graphical 
-        reports. 
-        Note that earlier versions that 0.99c used GIFs, which are no longer
-        supported by the latest versions of GD.</para>
-      </section>
-
-      <section id="install-modules-gd-graph">
-        <title>GD::Graph (&min-gd-graph-ver;)</title>
-
-        <para>The GD::Graph module is only required if you want graphical 
-        reports.
-        </para>
-      </section>
-
-      <section id="install-modules-gd-text">
-        <title>GD::Text (&min-gd-text-ver;)</title>
-
-        <para>The GD::Text module is only required if you want graphical 
-        reports.
-        </para>
-      </section>
-
-      <section id="install-modules-xml-twig">
-        <title>XML::Twig (&min-xml-twig-ver;)</title>
-
-        <para>The XML::Twig module is only required if you want to import
-        XML bugs using the <filename>importxml.pl</filename>
-        script. This is required to use Bugzilla's "move bugs" feature;
-        you may also want to use it for migrating from another bug database.
-        </para>
-      </section>
-
-      <section id="install-modules-soap-lite">
-        <title>SOAP::Lite (&min-soap-lite-ver;)</title>
-        <para>Installing SOAP::Lite enables your Bugzilla installation to be
-        accessible at a standardized Web Service interface (SOAP/XML-RPC)
-        by third-party applications via HTTP(S).
-        </para>
-      </section>
-
-      <section id="install-modules-patchreader">
-        <title>PatchReader (&min-patchreader-ver;)</title>
-
-        <para>The PatchReader module is only required if you want to use
-        Patch Viewer, a
-        Bugzilla feature to show code patches in your web browser in a more
-        readable form.
-        </para>
-      </section>
     </section>
+
     <section id="install-MTA">
       <title>Mail Transfer Agent (MTA)</title>
     

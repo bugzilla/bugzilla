@@ -340,6 +340,7 @@ use constant COLUMN_JOINS => {
     },
     actual_time => {
         table  => 'longdescs',
+        join   => 'INNER',
     },
     'flagtypes.name' => {
         name  => 'map_flags',
@@ -502,6 +503,17 @@ sub REPORT_COLUMNS {
     return $columns;
 }
 
+# These are fields that never go into the GROUP BY on any DB. bug_id
+# is here because it *always* goes into the GROUP BY as the first item,
+# so it should be skipped when determining extra GROUP BY columns.
+use constant GROUP_BY_SKIP => EMPTY_COLUMN, qw(
+    actual_time
+    bug_id
+    flagtypes.name
+    keywords
+    percentage_complete
+);
+
 ######################
 # Internal Accessors #
 ######################
@@ -531,9 +543,9 @@ sub _multi_select_fields {
     return $self->{multi_select_fields};
 }
 
-###############################
-# Internal Accessors: Columns #
-###############################
+##############################
+# Internal Accessors: SELECT #
+##############################
 
 # These are the fields the user has chosen to display on the buglist,
 # exactly as they were passed to new().
@@ -590,9 +602,9 @@ sub _sql_select {
     return @sql_fields;
 }
 
-#############################
-# Internal Accessors: Order #
-#############################
+################################
+# Internal Accessors: ORDER BY #
+################################
 
 # The "order" that was requested by the consumer, exactly as it was
 # requested.
@@ -638,9 +650,9 @@ sub _sql_order_by {
     return @{ $self->{sql_order_by} };
 }
 
-###################################
-# Internal Accessors: FROM clause #
-###################################
+############################
+# Internal Accessors: FROM #
+############################
 
 # JOIN statements for the SELECT and ORDER BY columns. This should not be called
 # Until the moment it is needed, because _select_columns might be
@@ -660,6 +672,49 @@ sub _select_order_joins {
         }
     }
     return @joins;
+}
+
+################################
+# Internal Accessors: GROUP BY #
+################################
+
+# And these are the fields that we have to do GROUP BY for in DBs
+# that are more strict about putting everything into GROUP BY.
+sub _sql_group_by {
+    my ($self) = @_;
+
+    # Strict DBs require every element from the SELECT to be in the GROUP BY,
+    # unless that element is being used in an aggregate function.
+    my @extra_group_by;
+    foreach my $column ($self->_select_columns) {
+        next if $self->_skip_group_by->{$column};
+        my $sql = COLUMNS->{$column}->{name};
+        push(@extra_group_by, $sql);
+    }
+
+    # And all items from ORDER BY must be in the GROUP BY. The above loop 
+    # doesn't catch items that were put into the ORDER BY from SPECIAL_ORDER.
+    foreach my $column ($self->_input_order_columns) {
+        my $special_order = $self->_special_order->{$column}->{order};
+        next if !$special_order;
+        push(@extra_group_by, @$special_order);
+    }
+    
+    @extra_group_by = uniq @extra_group_by;
+    
+    # bug_id is the only field we actually group by.
+    return ('bugs.bug_id', join(',', @extra_group_by));
+}
+
+# A helper for _sql_group_by.
+sub _skip_group_by {
+    my ($self) = @_;
+    return $self->{skip_group_by} if $self->{skip_group_by};
+    my @skip_list = GROUP_BY_SKIP;
+    push(@skip_list, keys %{ $self->_multi_select_fields });
+    my %skip_hash = map { $_ => 1 } @skip_list;
+    $self->{skip_group_by} = \%skip_hash;
+    return $self->{skip_group_by};
 }
 
 ##################################
@@ -746,7 +801,6 @@ sub init {
     my @supptables;
     my @wherepart;
     my @having;
-    my @groupby;
     my @specialchart;
     my @andlist;
 
@@ -1197,7 +1251,6 @@ sub init {
                     joins        => \@supptables,
                     where        => \@wherepart,
                     having       => \@having,
-                    group_by     => \@groupby,
                 );
                 # This should add a "term" selement to %search_args.
                 $self->do_search_function(\%search_args);
@@ -1285,28 +1338,7 @@ sub init {
         }
     }
 
-    # For some DBs, every field in the SELECT must be in the GROUP BY.
-    foreach my $field ($self->_select_columns) {
-        # These fields never go into the GROUP BY (bug_id goes in
-        # explicitly, below).
-        my @skip_group_by = (EMPTY_COLUMN, 
-            qw(bug_id actual_time percentage_complete flagtypes.name
-               keywords));
-        push(@skip_group_by, keys %{ $self->_multi_select_fields });
-
-        next if grep { $_ eq $field } @skip_group_by;
-        my $col = COLUMNS->{$field}->{name};
-        push(@groupby, $col) if !grep($_ eq $col, @groupby);
-    }
-    # And all items from ORDER BY must be in the GROUP BY. The above loop 
-    # doesn't catch items that were put into the ORDER BY from SPECIAL_ORDER.
-    foreach my $item ($self->_sql_order_by) {
-        my $column_name = split_order_term($item);
-        if (my $order = $self->_special_order->{$column_name}->{order}) {
-            push(@groupby, $order);
-        }
-    }
-    $query .= ") " . $dbh->sql_group_by("bugs.bug_id", join(', ', @groupby));
+    $query .= ") " . $dbh->sql_group_by($self->_sql_group_by);
 
 
     if (@having) {
@@ -1760,8 +1792,8 @@ sub _long_desc_changedbefore_after {
 
 sub _content_matches {
     my ($self, $args) = @_;
-    my ($chart_id, $joins, $group_by, $fields, $operator, $value) =
-        @$args{qw(chart_id joins group_by fields operator value)};
+    my ($chart_id, $joins, $fields, $operator, $value) =
+        @$args{qw(chart_id joins fields operator value)};
     my $dbh = Bugzilla->dbh;
     
     # "content" is an alias for columns containing text for which we

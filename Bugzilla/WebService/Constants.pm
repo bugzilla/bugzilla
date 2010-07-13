@@ -66,7 +66,7 @@ use constant WS_ERROR_CODE => {
     alias_in_use             => 103,
     alias_is_numeric         => 103,
     alias_has_comma_or_space => 103,
-    alias_not_allowed        => 103,
+    multiple_alias_not_allowed => 103,
     # Misc. bug field errors
     illegal_field => 104,
     freetext_too_long => 104,

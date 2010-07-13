@@ -278,17 +278,17 @@ use constant EMPTY_COLUMN => '-1';
 
 # Some fields are not sorted on themselves, but on other fields. 
 # We need to have a list of these fields and what they map to.
-# Each field points to an array that contains the fields mapped 
-# to, in order.
 use constant SPECIAL_ORDER => {
-    'target_milestone' => [ 'ms_order.sortkey','ms_order.value' ],
-};
-
-# When we add certain fields to the ORDER BY, we need to then add a
-# table join to the FROM statement. This hash maps input fields to 
-# the join statements that need to be added.
-use constant SPECIAL_ORDER_JOIN => {
-    'target_milestone' => 'LEFT JOIN milestones AS ms_order ON ms_order.value = bugs.target_milestone AND ms_order.product_id = bugs.product_id',
+    'target_milestone' => {
+        order => ['map_target_milestone.sortkey','map_target_milestone.value'],
+        join  => {
+            table => 'milestones',
+            from  => 'target_milestone',
+            to    => 'value',
+            extra => ' AND bugs.product_id = map_target_milestone.product_id',
+            join  => 'INNER',
+        }
+    },
 };
 
 # Certain columns require other columns to come before them
@@ -556,6 +556,33 @@ sub _display_column_joins {
     return @{ $self->{display_column_joins} };
 }
 
+sub _special_order {
+    my ($self) = @_;
+    return $self->{special_order} if $self->{special_order};
+    
+    my %special_order = %{ SPECIAL_ORDER() };
+    my $select_fields = Bugzilla->fields({ type => FIELD_TYPE_SINGLE_SELECT });
+    foreach my $field (@$select_fields) {
+        next if $field->is_abnormal;
+        my $name = $field->name;
+        $special_order{$name} = {
+            order => ["map_$name.sortkey", "map_$name.value"],
+            join  => {
+                table => $name,
+                from  => "bugs.$name",
+                to    => "value",
+                join  => 'INNER',
+            }
+        };
+    }
+    $self->{special_order} = \%special_order;
+    return $self->{special_order};
+}
+
+##################################
+# Helpers for Internal Accessors #
+##################################
+
 sub _build_display_column_joins {
     my ($self) = @_;
     my @joins;
@@ -636,18 +663,6 @@ sub init {
     my @groupby;
     my @specialchart;
     my @andlist;
-
-    my %special_order      = %{SPECIAL_ORDER()};
-    my %special_order_join = %{SPECIAL_ORDER_JOIN()};
-
-    my $select_fields = Bugzilla->fields({ type => FIELD_TYPE_SINGLE_SELECT });
-    foreach my $field (@$select_fields) {
-        next if $field->is_abnormal;
-        my $name = $field->name;
-        $special_order{$name} = [ "$name.sortkey", "$name.value" ],
-        $special_order_join{$name} =
-           "LEFT JOIN $name ON $name.value = bugs.$name";
-    }
 
     my $dbh = Bugzilla->dbh;
    
@@ -1143,7 +1158,7 @@ sub init {
     # to other parts of the query, so we want to create it before we
     # write the FROM clause.
     foreach my $orderitem (@inputorder) {
-        BuildOrderBy(\%special_order, $orderitem, \@orderby);
+        $self->BuildOrderBy($orderitem, \@orderby);
     }
     # Now JOIN the correct tables in the FROM clause.
     # This is done separately from the above because it's
@@ -1151,8 +1166,9 @@ sub init {
     foreach my $orderitem (@inputorder) {
         # Grab the part without ASC or DESC.
         my $column_name = split_order_term($orderitem);
-        if ($special_order_join{$column_name}) {
-            push(@supptables, $special_order_join{$column_name});
+        if (my $join_info = $self->_special_order->{$column_name}->{join}) {
+            my @join_sql = $self->_translate_join($column_name, $join_info);
+            push(@supptables, @join_sql);
         }
     }
 
@@ -1234,8 +1250,8 @@ sub init {
     # doesn't catch items that were put into the ORDER BY from SPECIAL_ORDER.
     foreach my $item (@inputorder) {
         my $column_name = split_order_term($item);
-        if ($special_order{$column_name}) {
-            push(@groupby, @{ $special_order{$column_name} });
+        if (my $order = $self->_special_order->{$column_name}->{order}) {
+            push(@groupby, $order);
         }
     }
     $query .= ") " . $dbh->sql_group_by("bugs.bug_id", join(', ', @groupby));
@@ -1502,7 +1518,7 @@ sub IsValidQueryType
 # BuildOrderBy recursively, to let it know that we're "reversing" the 
 # order. That is, that we wanted "A DESC", not "A".
 sub BuildOrderBy {
-    my ($special_order, $orderitem, $stringlist, $reverseorder) = (@_);
+    my ($self, $orderitem, $stringlist, $reverseorder) = (@_);
 
     my ($orderfield, $orderdirection) = split_order_term($orderitem);
 
@@ -1518,12 +1534,12 @@ sub BuildOrderBy {
     }
 
     # Handle fields that have non-standard sort orders, from $specialorder.
-    if ($special_order->{$orderfield}) {
-        foreach my $subitem (@{$special_order->{$orderfield}}) {
+    if ($self->_special_order->{$orderfield}) {
+        foreach my $subitem (@{$self->_special_order->{$orderfield}->{order}}) {
             # DESC on a field with non-standard sort order means
             # "reverse the normal order for each field that we map to."
-            BuildOrderBy($special_order, $subitem, $stringlist,
-                         $orderdirection =~ m/desc/i);
+            $self->BuildOrderBy($subitem, $stringlist,
+                                $orderdirection =~ m/desc/i);
         }
         return;
     }

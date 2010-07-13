@@ -50,6 +50,10 @@ use constant DATE_FIELDS => {
     update   => ['deadline'],
 };
 
+use constant BASE64_FIELDS => {
+    add_attachment => ['data'],
+};
+
 use constant READ_ONLY => qw(
     attachments
     comments
@@ -592,6 +596,53 @@ sub legal_values {
     return { values => \@result };
 }
 
+sub add_attachment {
+    my ($self, $params) = validate(@_, 'ids');
+    my $dbh = Bugzilla->dbh;
+
+    Bugzilla->login(LOGIN_REQUIRED);
+    defined $params->{ids}
+        || ThrowCodeError('param_required', { param => 'ids' });
+    defined $params->{data}
+        || ThrowCodeError('param_required', { param => 'data' });
+
+    my @bugs = map { Bugzilla::Bug->check($_) } @{ $params->{ids} };
+    foreach my $bug (@bugs) {
+        Bugzilla->user->can_edit_product($bug->product_id)
+          || ThrowUserError("product_edit_denied", {product => $bug->product});
+    }
+
+    my @created;
+    $dbh->bz_start_transaction();
+    foreach my $bug (@bugs) {
+        my $attachment = Bugzilla::Attachment->create({
+            bug         => $bug,
+            data        => $params->{data},
+            description => $params->{summary},
+            filename    => $params->{file_name},
+            mimetype    => $params->{content_type},
+            ispatch     => $params->{is_patch},
+            isprivate   => $params->{is_private},
+            isurl       => $params->{is_url},
+        });
+        my $comment = $params->{comment} || '';
+        $attachment->bug->add_comment($comment, 
+            { isprivate  => $attachment->isprivate,
+              type       => CMT_ATTACHMENT_CREATED,
+              extra_data => $attachment->id });
+        push(@created, $attachment);
+    }
+    $_->bug->update($_->attached) foreach @created;
+    $dbh->bz_commit_transaction();
+
+    $_->send_changes() foreach @bugs;
+
+    my %attachments = map { $_->id => $self->_attachment_to_hash($_, $params) }
+                          @created;
+
+    return { attachments => \%attachments };
+}
+
 sub add_comment {
     my ($self, $params) = @_;
     
@@ -790,6 +841,7 @@ sub _attachment_to_hash {
         id               => $self->type('int', $attach->id),
         bug_id           => $self->type('int', $attach->bug->id),
         file_name        => $self->type('string', $attach->filename),
+        summary          => $self->type('string', $attach->description),
         description      => $self->type('string', $attach->description),
         content_type     => $self->type('string', $attach->contenttype),
         is_private       => $self->type('int', $attach->isprivate),
@@ -1158,9 +1210,13 @@ C<int> The numeric id of the bug that the attachment is attached to.
 
 C<string> The file name of the attachment.
 
-=item C<description>
+=item C<summary>
 
-C<string> The description for the attachment.
+C<string> A short string describing the attachment.
+
+Also returned as C<description>, for backwards-compatibility with older
+Bugzillas. (However, this backwards-compatibility will go away in Bugzilla
+5.0.)
 
 =item C<content_type>
 
@@ -1219,6 +1275,9 @@ private attachments.
 
 =item In Bugzilla B<4.0>, the C<attacher> return value was renamed to
 C<creator>.
+
+=item In Bugzilla B<4.0>, the C<description> return value was renamed to
+C<summary>.
 
 =back
 
@@ -2042,6 +2101,120 @@ method.
 =back
 
 =back
+
+
+=item C<add_attachment>
+
+B<UNSTABLE>
+
+=over
+
+=item B<Description>
+
+This allows you to add an attachment to a bug in Bugzilla.
+
+=item B<Params>
+
+=over
+
+=item C<ids>
+
+B<Required> C<array> An array of ints and/or strings--the ids
+or aliases of bugs that you want to add this attachment to.
+The same attachment and comment will be added to all
+these bugs.
+
+=item C<data>
+
+B<Required> C<base64> The content of the attachment.
+
+=item C<file_name>
+
+B<Required> C<string> The "file name" that will be displayed
+in the UI for this attachment.
+
+=item C<summary>
+
+B<Required> C<string> A short string describing the
+attachment.
+
+=item C<content_type>
+
+B<Required> C<string> The MIME type of the attachment, like
+C<text/plain> or C<image/png>.
+
+=item C<comment>
+
+C<string> A comment to add along with this attachment.
+
+=item C<is_patch>
+
+C<boolean> True if Bugzilla should treat this attachment as a patch.
+If you specify this, the C<content_type> should be C<text/plain>.
+(Future versions of Bugzilla will force the C<content_type> setting
+to C<text/plain> for patches and you will not have to specify it manually.)
+
+Defaults to False if not specified.
+
+=item C<is_private>
+
+C<boolean> True if the attachment should be private (restricted
+to the "insidergroup"), False if the attachment should be public.
+
+Defaults to False if not specified.
+
+=item C<is_url>
+
+C<boolean> True if the attachment is just a URL, pointing to data elsewhere.
+If so, the C<data> item should just contain the URL.
+
+Defaults to False if not specified.
+
+=back
+
+=item B<Returns>
+
+A single item C<attachments>, which contains the created
+attachments in the same format as the C<attachments> return
+value from L</attachments>.
+
+=item B<Errors>
+
+This method can throw all the same errors as L</get>, plus:
+
+=over
+
+=item 600 (Attachment Too Large)
+
+You tried to attach a file that was larger than Bugzilla will accept.
+
+=item 601 (Invalid MIME Type)
+
+You specified a C<content_type> argument that was blank, not a valid
+MIME type, or not a MIME type that Bugzilla accepts for attachments.
+
+=item 602 (Illegal URL)
+
+You specified C<is_url> as True, but the data that you attempted
+to attach was not a valid URL.
+
+=item 603 (File Name Not Specified)
+
+You did not specify a valid for the C<file_name> argument.
+
+=item 604 (Summary Required)
+
+You did not specify a value for the C<summary> argument.
+
+=item 605 (URL Attaching Disabled)
+
+You attempted to attach a URL, setting C<is_url> to True,
+but this Bugzilla does not support attaching URLs.
+
+=back
+
+=back
+
 
 =item C<add_comment> 
 

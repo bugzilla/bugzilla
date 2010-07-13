@@ -880,6 +880,8 @@ sub create {
         close AH;
     }
 
+    $attachment->{bug} = $bug;
+
     # Return the new attachment object.
     return $attachment;
 }

@@ -544,9 +544,8 @@ sub _input_columns { @{ $_[0]->{'fields'} || [] } }
 sub _extra_columns {
     my ($self) = @_;
     # Everything that's going to be in the ORDER BY must also be
-    # in the SELECT. We make a copy of input_order here so that modifications
-    # to extra_columns don't modify input_order.
-    $self->{extra_columns} ||= [ $self->_input_order ];
+    # in the SELECT.
+    $self->{extra_columns} ||= [ $self->_input_order_columns ];
     return @{ $self->{extra_columns} };
 }
 
@@ -575,15 +574,6 @@ sub _select_columns {
     return @{ $self->{select_columns} };
 }
 
-# JOIN statements for the display columns. This should not be called
-# Until the moment it is needed, because _select_columns might be
-# modified by the charts.
-sub _select_column_joins {
-    my ($self) = @_;
-    $self->{display_column_joins} ||= $self->_build_select_column_joins();
-    return @{ $self->{display_column_joins} };
-}
-
 # This takes _select_columns and translates it into the actual SQL that
 # will go into the SELECT clause.
 sub _sql_select {
@@ -607,6 +597,11 @@ sub _sql_select {
 # The "order" that was requested by the consumer, exactly as it was
 # requested.
 sub _input_order { @{ $_[0]->{'order'} || [] } }
+# The input order with just the column names, and no ASC or DESC.
+sub _input_order_columns {
+    my ($self) = @_;
+    return map { (split_order_term($_))[0] } $self->_input_order;
+}
 
 # A hashref that describes all the special stuff that has to be done
 # for various fields if they go into the ORDER BY clause.
@@ -633,19 +628,43 @@ sub _special_order {
     return $self->{special_order};
 }
 
-##################################
-# Helpers for Internal Accessors #
-##################################
+sub _sql_order_by {
+    my ($self) = @_;
+    if (!$self->{sql_order_by}) {
+        my @order_by = map { $self->_translate_order_by_column($_) }
+                           $self->_input_order;
+        $self->{sql_order_by} = \@order_by;
+    }
+    return @{ $self->{sql_order_by} };
+}
 
-sub _build_select_column_joins {
+###################################
+# Internal Accessors: FROM clause #
+###################################
+
+# JOIN statements for the SELECT and ORDER BY columns. This should not be called
+# Until the moment it is needed, because _select_columns might be
+# modified by the charts.
+sub _select_order_joins {
     my ($self) = @_;
     my @joins;
     foreach my $field ($self->_select_columns) {
         my @column_join = $self->_column_join($field);
         push(@joins, @column_join);
     }
-    return \@joins;
+    foreach my $field ($self->_input_order_columns) {
+        my $join_info = $self->_special_order->{$field}->{join};
+        if ($join_info) {
+            my @join_sql = $self->_translate_join($field, $join_info);
+            push(@joins, @join_sql);
+        }
+    }
+    return @joins;
 }
+
+##################################
+# Helpers for Internal Accessors #
+##################################
 
 sub _column_join {
     my ($self, $field) = @_;
@@ -682,6 +701,23 @@ sub _translate_join {
     return @join_sql;
 }
 
+sub _translate_order_by_column {
+    my ($self, $order_by_item) = @_;
+
+    my ($field, $direction) = split_order_term($order_by_item);
+    
+    $direction = '' if lc($direction) eq 'asc';
+    my $special_order = $self->_special_order->{$field}->{order};
+    # Standard fields have underscores in their SELECT alias instead
+    # of a period (because aliases can't have periods).
+    $field =~ s/\./_/g;
+    my @items = $special_order ? @$special_order : $field;
+    if (lc($direction) eq 'desc') {
+        @items = map { "$_ DESC" } @items;
+    }
+    return @items;
+}
+
 ###############
 # Constructor #
 ###############
@@ -706,8 +742,6 @@ sub init {
     $params->convert_old_params();
     $self->{'user'} ||= Bugzilla->user;
     my $user = $self->{'user'};
-    my @inputorder = @{ $self->{'order'} || [] };
-    my @orderby;
 
     my @supptables;
     my @wherepart;
@@ -1198,28 +1232,10 @@ sub init {
         }
     }
 
-    # The ORDER BY clause goes last, but can require modifications
-    # to other parts of the query, so we want to create it before we
-    # write the FROM clause.
-    foreach my $orderitem (@inputorder) {
-        $self->BuildOrderBy($orderitem, \@orderby);
-    }
-    # Now JOIN the correct tables in the FROM clause.
-    # This is done separately from the above because it's
-    # cleaner to do it this way.
-    foreach my $orderitem (@inputorder) {
-        # Grab the part without ASC or DESC.
-        my $column_name = split_order_term($orderitem);
-        if (my $join_info = $self->_special_order->{$column_name}->{join}) {
-            my @join_sql = $self->_translate_join($column_name, $join_info);
-            push(@supptables, @join_sql);
-        }
-    }
-
     my %suppseen = ("bugs" => 1);
     my $suppstring = "bugs";
     my @supplist = (" ");
-    foreach my $str ($self->_select_column_joins, @supptables) {
+    foreach my $str ($self->_select_order_joins, @supptables) {
 
         if ($str =~ /^(LEFT|INNER|RIGHT)\s+JOIN/i) {
             $str =~ /^(.*?)\s+ON\s+(.*)$/i;
@@ -1284,7 +1300,7 @@ sub init {
     }
     # And all items from ORDER BY must be in the GROUP BY. The above loop 
     # doesn't catch items that were put into the ORDER BY from SPECIAL_ORDER.
-    foreach my $item (@inputorder) {
+    foreach my $item ($self->_sql_order_by) {
         my $column_name = split_order_term($item);
         if (my $order = $self->_special_order->{$column_name}->{order}) {
             push(@groupby, $order);
@@ -1297,8 +1313,8 @@ sub init {
         $query .= " HAVING " . join(" AND ", @having);
     }
 
-    if (@orderby) {
-        $query .= " ORDER BY " . join(',', @orderby);
+    if ($self->_sql_order_by) {
+        $query .= " ORDER BY " . join(',', $self->_sql_order_by);
     }
 
     $self->{'sql'} = $query;
@@ -1528,61 +1544,6 @@ sub IsValidQueryType
         return 1;
     }
     return 0;
-}
-
-# BuildOrderBy - Private Subroutine
-# This function converts the input order to an "output" order,
-# suitable for concatenation to form an ORDER BY clause. Basically,
-# it just handles fields that have non-standard sort orders from
-# %specialorder.
-# Arguments:
-#  $orderitem - A string. The next value to append to the ORDER BY clause,
-#      in the format of an item in the 'order' parameter to
-#      Bugzilla::Search.
-#  $stringlist - A reference to the list of strings that will be join()'ed
-#      to make ORDER BY. This is what the subroutine modifies.
-#  $reverseorder - (Optional) A boolean. TRUE if we should reverse the order
-#      of the field that we are given (from ASC to DESC or vice-versa).
-#
-# Explanation of $reverseorder
-# ----------------------------
-# The role of $reverseorder is to handle things like sorting by
-# "target_milestone DESC".
-# Let's say that we had a field "A" that normally translates to a sort 
-# order of "B ASC, C DESC". If we sort by "A DESC", what we really then
-# mean is "B DESC, C ASC". So $reverseorder is only used if we call 
-# BuildOrderBy recursively, to let it know that we're "reversing" the 
-# order. That is, that we wanted "A DESC", not "A".
-sub BuildOrderBy {
-    my ($self, $orderitem, $stringlist, $reverseorder) = (@_);
-
-    my ($orderfield, $orderdirection) = split_order_term($orderitem);
-
-    if ($reverseorder) {
-        # If orderdirection is empty or ASC...
-        if (!$orderdirection || $orderdirection =~ m/asc/i) {
-            $orderdirection = "DESC";
-        } else {
-            # This has the minor side-effect of making any reversed invalid
-            # direction into ASC.
-            $orderdirection = "ASC";
-        }
-    }
-
-    # Handle fields that have non-standard sort orders, from $specialorder.
-    if ($self->_special_order->{$orderfield}) {
-        foreach my $subitem (@{$self->_special_order->{$orderfield}->{order}}) {
-            # DESC on a field with non-standard sort order means
-            # "reverse the normal order for each field that we map to."
-            $self->BuildOrderBy($subitem, $stringlist,
-                                $orderdirection =~ m/desc/i);
-        }
-        return;
-    }
-    # Aliases cannot contain dots in them. We convert them to underscores.
-    $orderfield =~ s/\./_/g if exists COLUMNS->{$orderfield};
-
-    push(@$stringlist, trim($orderfield . ' ' . $orderdirection));
 }
 
 # Splits out "asc|desc" from a sort order item.

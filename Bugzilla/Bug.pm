@@ -265,9 +265,14 @@ use constant MAX_LINE_LENGTH => 254;
 # of Bugzilla. (These are the field names that the WebService and email_in.pl
 # use.)
 use constant FIELD_MAP => {
+    blocks           => 'blocked',
+    is_confirmed     => 'everconfirmed',
+    cc_accessible    => 'cclist_accessible',
     creation_time    => 'creation_ts',
     creator          => 'reporter',
     description      => 'comment',
+    depends_on       => 'dependson',
+    dupe_of          => 'dup_id',
     id               => 'bug_id',
     last_change_time => 'delta_ts',
     platform         => 'rep_platform',
@@ -3707,11 +3712,17 @@ sub LogActivityEntry {
 # Convert WebService API and email_in.pl field names to internal DB field
 # names.
 sub map_fields {
-    my ($params) = @_; 
+    my ($params, $except) = @_; 
 
     my %field_values;
     foreach my $field (keys %$params) {
-        my $field_name = FIELD_MAP->{$field} || $field;
+        my $field_name;
+        if ($except->{$field}) {
+           $field_name = $field;
+        }
+        else {
+            $field_name = FIELD_MAP->{$field} || $field;
+        }
         $field_values{$field_name} = $params->{$field};
     }
 

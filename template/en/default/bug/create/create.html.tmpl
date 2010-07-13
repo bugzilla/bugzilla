@@ -311,7 +311,7 @@ TUI_hide_default('expert_fields');
   </tr>
   [% IF !Param('defaultplatform') || !Param('defaultopsys') %]
     <tr>
-      <td colspan="3">&nbsp;</th>
+      <th colspan="3">&nbsp;</th>
       <td id="os_guess_note" class="comment">
         <div>We've made a guess at your
         [% IF Param('defaultplatform') %]
@@ -485,9 +485,9 @@ TUI_hide_default('expert_fields');
     [% INCLUDE "bug/field-label.html.tmpl"
       field = bug_fields.bug_file_loc editable = 1
     %]
-    <td colspan="2">
-      <input name="bug_file_loc" size="40"
-             value="[% bug_file_loc FILTER html %]">
+    <td colspan="2" class="field_value">
+      <input name="bug_file_loc" id="bug_file_loc" class="text_input"
+             size="40" value="[% bug_file_loc FILTER html %]">
     </td>
   </tr>
 </tbody>
@@ -512,10 +512,10 @@ TUI_hide_default('expert_fields');
     [% INCLUDE "bug/field-label.html.tmpl"
       field = bug_fields.short_desc editable = 1
     %]
-    <td colspan="3">
+    <td colspan="3" class="field_value">
       <input name="short_desc" size="70" value="[% short_desc FILTER html %]"
              maxlength="255" spellcheck="true" aria-required="true"
-             class="required" id="short_desc">
+             class="required text_input" id="short_desc">
     </td>
   </tr>
 

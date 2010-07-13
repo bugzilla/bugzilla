@@ -424,12 +424,6 @@ dl dl > dt {
     padding-left: 1em;
 }
 
-/* For bug fields */
-.uneditable_textarea {
-    width: 30em;
-    font-size: medium;
-}
-
 div.user_match {
     margin-bottom: 1em;
 }
@@ -462,6 +456,10 @@ div.user_match {
     }
 }
 
+/**************/
+/* Bug Fields */
+/**************/
+
 .field_label {
     text-align: right;
     vertical-align: top;
@@ -473,6 +471,16 @@ div.user_match {
 .field_value, form#Create th, form#Create td {
     vertical-align: top;
 }
+.field_value .text_input {
+  width: 100%;
+  min-width: 25em;
+}
+
+.uneditable_textarea {
+    width: 30em;
+    font-size: medium;
+}
+
 th.required:before {
     content: "* ";
 }
@@ -502,29 +510,6 @@ input.required, select.required, span.required_explanation {
     margin: 0 0 1em 0;
     padding: 0;
     list-style-type: none;
-}
-
-.image_button {
-    background-repeat: no-repeat;
-    background-position: center center;
-    width: 30px;
-    height: 20px;
-}
-
-#select_button {
-    background-image: url(global/right.png);
-}
-
-#deselect_button {
-    background-image: url(global/left.png);
-}
-
-#up_button {
-    background-image: url(global/up.png);
-}
-
-#down_button {
-    background-image: url(global/down.png);
 }
 
 /* custom styles for inline instances of autocomplete input fields */
@@ -558,4 +543,31 @@ input.required, select.required, span.required_explanation {
 
 .validation_error_field {
     border: 2px solid #152446;
+}
+
+/*****************/
+/* colchange.cgi */
+/*****************/
+
+.image_button {
+    background-repeat: no-repeat;
+    background-position: center center;
+    width: 30px;
+    height: 20px;
+}
+
+#select_button {
+    background-image: url(global/right.png);
+}
+
+#deselect_button {
+    background-image: url(global/left.png);
+}
+
+#up_button {
+    background-image: url(global/up.png);
+}
+
+#down_button {
+    background-image: url(global/down.png);
 }

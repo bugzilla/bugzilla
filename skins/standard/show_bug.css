@@ -13,10 +13,6 @@
 .bz_bug .edit_form table {
   width: 100%;
 }
-.bz_bug .edit_form .text_input {
-  width: 100%;
-  min-width: 25em;
-}
 .bz_bug #alias {
     min-width: 0;
     width: 10em;

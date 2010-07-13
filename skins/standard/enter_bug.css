@@ -55,6 +55,11 @@
     max-width: 35em;
 }
 
+/* Text inputs need to be a little shorter on enter_bug
+ * than the 100% that they are on show_bug.
+ */
+#Create .field_value .text_input { max-width: 50em; }
+
 /* The Possible Duplicates table on enter_bug. */
 #possible_duplicates th {
     text-align: center; 

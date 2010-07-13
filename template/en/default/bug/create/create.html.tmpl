@@ -676,11 +676,11 @@ TUI_hide_default('expert_fields');
 
       <!-- Checkboxes -->
       [% FOREACH group = product.groups_available %]
-        <input type="checkbox" id="groups_[% group.id FILTER html %]"
+        <input type="checkbox" id="group_[% group.id FILTER html %]"
                name="groups" value="[% group.name FILTER html %]"
                [% ' checked="checked"' IF default.groups.contains(group.name)
                                           OR group.is_default %]>
-        <label for="groups_[% group.id FILTER html %]">
+        <label for="group_[% group.id FILTER html %]">
           [%- group.description FILTER html_light %]</label><br>
       [% END %]
     </td>

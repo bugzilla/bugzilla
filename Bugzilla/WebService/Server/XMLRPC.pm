@@ -152,13 +152,15 @@ use Bugzilla::WebService::Util qw(taint_data);
 
 sub paramsin {
     my $self = shift;
-    return $self->{bz_params_in} if $self->{bz_params_in};
-    my $params = $self->SUPER::paramsin(@_);
-    if ($self->{_bz_do_taint}) {
-        taint_data($params);
+    if (!$self->{bz_params_in}) {
+        my @params = $self->SUPER::paramsin(@_); 
+        if ($self->{_bz_do_taint}) {
+            taint_data(@params);
+        }
+        $self->{bz_params_in} = \@params;
     }
-    $self->{bz_params_in} = $params;
-    return $self->{bz_params_in};
+    my $params = $self->{bz_params_in};
+    return wantarray ? @$params : $params->[0];
 }
 
 1;

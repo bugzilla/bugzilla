@@ -727,6 +727,29 @@ sub _parse_params {
     my ($self) = @_;
     $self->_special_parse_bug_status();
     $self->_special_parse_resolution();
+    my $basic_charts = $self->_parse_basic_fields();
+    return @$basic_charts;
+}
+
+sub _parse_basic_fields {
+    my ($self) = @_;
+    my $params = $self->_params;
+    my $chart_fields = $self->_chart_fields;
+    
+    my @charts;
+    foreach my $field_name (keys %$chart_fields) {
+        # CGI params shouldn't have periods in them, so we only accept
+        # period-separated fields with underscores where the periods go.
+        my $param_name = $field_name;
+        $param_name =~ s/\./_/g;
+        next if !defined $params->param($param_name);
+        my $operator = $params->param("${param_name}_type");
+        $operator = 'anyexact' if !$operator;
+        $operator = 'matches' if $operator eq 'content';
+        my $string_value = join(',', $params->param($param_name));
+        push(@charts, [$field_name, $operator, $string_value]);
+    }
+    return \@charts;
 }
 
 sub _special_parse_bug_status {
@@ -752,14 +775,14 @@ sub _special_parse_bug_status {
     }
 
     @bug_status = uniq @bug_status;
-    # This will also handle removing __open__ and __closed__ for us.
+    my $all = grep { $_ eq "__all__" } @bug_status;
+    # This will also handle removing __open__ and __closed__ for us
+    # (__all__ too, which is why we check for it above, first).
     @bug_status = _valid_values(\@bug_status, $legal_statuses);
 
     # If the user has selected every status, change to selecting none.
     # This is functionally equivalent, but quite a lot faster.    
-    if (scalar(@bug_status) == scalar(@$legal_statuses)
-        or grep { $_ eq "__all__" } @bug_status)
-    {
+    if ($all or scalar(@bug_status) == scalar(@$legal_statuses)) {
         $params->delete('bug_status');
     }
     else {
@@ -878,42 +901,12 @@ sub init {
     my @supptables;
     my @wherepart;
     my @having;
-    my @specialchart;
     my @andlist;
 
     my $dbh = Bugzilla->dbh;
 
-    $self->_parse_params();
+    my @specialchart = $self->_parse_params();
     
-    # All fields that don't have a . in their name should be specifyable
-    # in the URL directly.
-    my $legal_fields = Bugzilla->fields({ by_name => 1 });
-    if (!$user->is_timetracker) {
-        foreach my $name (TIMETRACKING_FIELDS) {
-            delete $legal_fields->{$name};
-        }
-    }
-    foreach my $name (keys %$legal_fields) {
-        delete $legal_fields->{$name} if $name =~ /\./;
-    }
-
-    foreach my $field ($params->param()) {
-        if ($legal_fields->{$field}) {
-            my $type = $params->param("${field}_type");
-            if (!$type) {
-                if ($field eq 'keywords') {
-                    $type = 'anywords';
-                }
-                else {
-                    $type = 'anyexact';
-                }
-            }
-            $type = 'matches' if $field eq 'content';
-            push(@specialchart, [$field, $type,
-                                 join(',', $params->param($field))]);
-        }
-    }
-
     foreach my $id (1, 2, 3) {
         if (!defined ($params->param("email$id"))) {
             next;

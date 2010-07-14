@@ -802,11 +802,6 @@
     but only a user allowed to edit 
     both related [% terms.bugs %] may change that field.
 
-  [% ELSIF error == "illegal_changed_in_last_x_days" %]
-    [% title = "Your Search Makes No Sense" %]
-    The <em>Changed in last ___ days</em> field must be a simple number. 
-    You entered <tt>[% value FILTER html %]</tt>, which isn't.
-    
   [% ELSIF error == "illegal_date" %]
     [% title = "Illegal Date" %]
     '<tt>[% date FILTER html %]</tt>' is not a legal date.

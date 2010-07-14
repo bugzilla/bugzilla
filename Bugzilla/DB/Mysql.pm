@@ -721,7 +721,6 @@ EOT
 
         print "Converting table storage format to UTF-8. This may take a",
               " while.\n";
-        my @dropped_fks;
         foreach my $table ($self->bz_table_list_real) {
             my $info_sth = $self->prepare("SHOW FULL COLUMNS FROM $table");
             $info_sth->execute();
@@ -740,8 +739,9 @@ EOT
 
                     print "$table.$name needs to be converted to UTF-8...\n";
 
-                    my $dropped = $self->bz_drop_related_fks($table, $name);
-                    push(@dropped_fks, @$dropped);
+                    # These will be automatically re-created at the end
+                    # of checksetup.
+                    $self->bz_drop_related_fks($table, $name);
 
                     my $col_info =
                         $self->bz_column_info_real($table, $name);
@@ -792,10 +792,6 @@ EOT
             }
 
         } # foreach my $table (@tables)
-
-        foreach my $fk_args (@dropped_fks) {
-            $self->bz_add_fk(@$fk_args);
-        }
     }
 
     # Sometimes you can have a situation where all the tables are utf8,

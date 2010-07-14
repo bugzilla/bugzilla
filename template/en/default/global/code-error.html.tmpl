@@ -95,7 +95,12 @@
   
   [% ELSIF error == "chart_file_open_fail" %]
     Unable to open the chart datafile <tt>[% filename FILTER html %]</tt>.
-  
+ 
+  [% ELSIF error == "column_alter_nonexistent_fk" %]
+    You attempted to modify the foreign key for 
+    [%+ table FILTER html %].[% column FILTER html %], but there is
+    no foreign key on that column.
+ 
   [% ELSIF error == "column_not_null_without_default" %]
     Failed adding the column [% name FILTER html %]:
     You cannot add a NOT NULL column with no default to an existing table

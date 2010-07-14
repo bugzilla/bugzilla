@@ -247,7 +247,7 @@ sub bz_drop_table {
 # Dropping all FKs for a specified table. 
 sub _bz_drop_fks {
     my ($self, $table) = @_;
-    my @columns = $self->_bz_real_schema->get_table_columns($table);
+    my @columns = $self->bz_table_columns($table);
     foreach my $column (@columns) {
         $self->bz_drop_fk($table, $column);
     }

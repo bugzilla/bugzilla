@@ -421,7 +421,10 @@ sub bz_setup_database {
     # If we haven't ever stored a serialized schema,
     # set up the bz_schema table and store it.
     $self->_bz_init_schema_storage();
-    
+   
+    # We don't use bz_table_list here, because that uses _bz_real_schema.
+    # We actually want the table list from the ABSTRACT_SCHEMA in
+    # Bugzilla::DB::Schema.
     my @desired_tables = $self->_bz_schema->get_table_list();
     my $bugs_exists = $self->bz_table_info('bugs');
     if (!$bugs_exists) {
@@ -460,23 +463,38 @@ sub bz_setup_foreign_keys {
     # so if it doesn't have them, then we're setting up FKs
     # for the first time, and should be quieter about it.
     my $activity_fk = $self->bz_fk_info('profiles_activity', 'userid');
-    if (!$activity_fk) {
+    my $any_fks = $activity_fk && $activity_fk->{created};
+    if (!$any_fks) {
         print get_text('install_fk_setup'), "\n";
     }
 
-    # We use _bz_schema because bz_add_table has removed all REFERENCES
-    # items from _bz_real_schema.
-    my @tables = $self->_bz_schema->get_table_list();
+    my @tables = $self->bz_table_list();
     foreach my $table (@tables) {
-        my @columns = $self->_bz_schema->get_table_columns($table);
+        my @columns = $self->bz_table_columns($table);
         my %add_fks;
         foreach my $column (@columns) {
-            my $def = $self->_bz_schema->get_column_abstract($table, $column);
-            if ($def->{REFERENCES}) {
-                $add_fks{$column} = $def->{REFERENCES};
+            # First we check for any FKs that have created => 0,
+            # in the _bz_real_schema. This also picks up FKs with
+            # created => 1, but bz_add_fks will ignore those.
+            my $fk = $self->bz_fk_info($table, $column);
+            # Then we check the abstract schema to see if there
+            # should be an FK on this column, but one wasn't set in the
+            # _bz_real_schema for some reason. We do this to handle
+            # various problems caused by upgrading from versions
+            # prior to 4.2, and also to handle problems caused
+            # by enabling an extension pre-4.2, disabling it for
+            # the 4.2 upgrade, and then re-enabling it later.
+            if (!$fk) {
+                my $standard_def = 
+                    $self->_bz_schema->get_column_abstract($table, $column);
+                if (exists $standard_def->{REFERENCES}) {
+                    $fk = dclone($standard_def->{REFERENCES});
+                }
             }
+
+            $add_fks{$column} = $fk if $fk;
         }
-        $self->bz_add_fks($table, \%add_fks, { silently => !$activity_fk });
+        $self->bz_add_fks($table, \%add_fks, { silently => !$any_fks });
     }
 }
 
@@ -484,9 +502,9 @@ sub bz_setup_foreign_keys {
 sub bz_drop_foreign_keys {
     my ($self) = @_;
 
-    my @tables = $self->_bz_real_schema->get_table_list();
+    my @tables = $self->bz_table_list();
     foreach my $table (@tables) {
-        my @columns = $self->_bz_real_schema->get_table_columns($table);
+        my @columns = $self->bz_table_columns($table);
         foreach my $column (@columns) {
             $self->bz_drop_fk($table, $column);
         }
@@ -523,6 +541,20 @@ sub bz_add_column {
         foreach my $sql (@statements) {
             $self->do($sql);
         }
+
+        # To make things easier for callers, if they don't specify
+        # a REFERENCES item, we pull it from the _bz_schema if the
+        # column exists there and has a REFERENCES item.
+        # bz_setup_foreign_keys will then add this FK at the end of
+        # Install::DB.
+        my $col_abstract = 
+            $self->_bz_schema->get_column_abstract($table, $name);
+        if (exists $col_abstract->{REFERENCES}) {
+            my $new_fk = dclone($col_abstract->{REFERENCES});
+            $new_fk->{created} = 0;
+            $new_def->{REFERENCES} = $new_fk;
+        }
+        
         $self->_bz_real_schema->set_column($table, $name, $new_def);
         $self->_bz_store_real_schema;
     }
@@ -538,17 +570,17 @@ sub bz_add_fks {
 
     my %add_these;
     foreach my $column (keys %$column_fks) {
-        my $col_def = $self->bz_column_info($table, $column);
-        next if $col_def->{REFERENCES};
-        my $fk = $column_fks->{$column};
-        $self->_check_references($table, $column, $fk);
-        $add_these{$column} = $fk;
+        my $current_fk = $self->bz_fk_info($table, $column);
+        next if ($current_fk and $current_fk->{created});
+        my $new_fk = $column_fks->{$column};
+        $self->_check_references($table, $column, $new_fk);
+        $add_these{$column} = $new_fk;
         if (Bugzilla->usage_mode == USAGE_MODE_CMDLINE 
             and !$options->{silently}) 
         {
             print get_text('install_fk_add',
-                           { table => $table, column => $column, fk => $fk }),
-                  "\n";
+                           { table => $table, column => $column, 
+                             fk    => $new_fk }), "\n";
         }
     }
 
@@ -558,9 +590,9 @@ sub bz_add_fks {
     $self->do($_) foreach @sql;
 
     foreach my $column (keys %add_these) {
-        my $col_def = $self->bz_column_info($table, $column);
-        $col_def->{REFERENCES} = $add_these{$column};
-        $self->_bz_real_schema->set_column($table, $column, $col_def);
+        my $fk_def = $add_these{$column};
+        $fk_def->{created} = 1;
+        $self->_bz_real_schema->set_fk($table, $column, $fk_def);
     }
 
     $self->_bz_store_real_schema();
@@ -586,10 +618,8 @@ sub bz_alter_column {
         }
         # Preserve foreign key definitions in the Schema object when altering
         # types.
-        if (defined $current_def->{REFERENCES}) {
-            # Make sure we don't modify the caller's $new_def.
-            $new_def = dclone($new_def);
-            $new_def->{REFERENCES} = $current_def->{REFERENCES};
+        if (my $fk = $self->bz_fk_info($table, $name)) {
+            $new_def->{REFERENCES} = $fk;
         }
         $self->bz_alter_column_raw($table, $name, $new_def, $current_def,
                                    $set_nulls_to);
@@ -633,6 +663,15 @@ sub bz_alter_column_raw {
     }
     print "New: $new_ddl\n";
     $self->do($_) foreach (@statements);
+}
+
+sub bz_alter_fk {
+    my ($self, $table, $column, $fk_def) = @_;
+    my $current_fk = $self->bz_fk_info($table, $column);
+    ThrowCodeError('column_alter_nonexistent_fk',
+                   { table => $table, column => $column }) if !$current_fk;
+    $self->bz_drop_fk($table, $column);
+    $self->bz_add_fk($table, $column, $fk_def);
 }
 
 sub bz_add_index {
@@ -686,7 +725,9 @@ sub bz_add_table {
             # initial table creation, because column names have changed
             # over history and it's impossible to keep track of that info
             # in ABSTRACT_SCHEMA.
-            delete $fields{$col}->{REFERENCES};
+            if (exists $fields{$col}->{REFERENCES}) {
+                $fields{$col}->{REFERENCES}->{created} = 0;
+            }
         }
         $self->_bz_real_schema->add_table($name, $table_def);
         $self->_bz_store_real_schema;
@@ -790,22 +831,25 @@ sub bz_drop_column {
 sub bz_drop_fk {
     my ($self, $table, $column) = @_;
 
-    my $col_def = $self->bz_column_info($table, $column);
-    if ($col_def && exists $col_def->{REFERENCES}) {
-        my $def = $col_def->{REFERENCES};
+    my $fk_def = $self->bz_fk_info($table, $column);
+    if ($fk_def and $fk_def->{created}) {
         print get_text('install_fk_drop',
-                       { table => $table, column => $column, fk => $def })
+                       { table => $table, column => $column, fk => $fk_def })
             . "\n" if Bugzilla->usage_mode == USAGE_MODE_CMDLINE;
         my @statements = 
-            $self->_bz_real_schema->get_drop_fk_sql($table,$column,$def);
+            $self->_bz_real_schema->get_drop_fk_sql($table, $column, $fk_def);
         foreach my $sql (@statements) {
             # Because this is a deletion, we don't want to die hard if
             # we fail because of some local customization. If something
             # is already gone, that's fine with us!
             eval { $self->do($sql); } or warn "Failed SQL: [$sql] Error: $@";
         }
-        delete $col_def->{REFERENCES};
-        $self->_bz_real_schema->set_column($table, $column, $col_def);
+        # Under normal circumstances, we don't permanently drop the fk--
+        # we want checksetup to re-create it again later. The only
+        # time that FKs get permanently dropped is if the column gets
+        # dropped.
+        $fk_def->{created} = 0;
+        $self->_bz_real_schema->set_fk($table, $column, $fk_def);
         $self->_bz_store_real_schema;
     }
 
@@ -818,8 +862,7 @@ sub bz_get_related_fks {
     foreach my $check_table (@tables) {
         my @columns = $self->bz_table_columns($check_table);
         foreach my $check_column (@columns) {
-            my $def = $self->bz_column_info($check_table, $check_column);
-            my $fk = $def->{REFERENCES};
+            my $fk = $self->bz_fk_info($check_table, $check_column);
             if ($fk 
                 and (($fk->{TABLE} eq $table and $fk->{COLUMN} eq $column)
                      or ($check_column eq $column and $check_table eq $table)))
@@ -1029,6 +1072,11 @@ sub bz_table_indexes {
         $return_indexes{$name} = $self->bz_index_info($table, $name);
     }
     return \%return_indexes;
+}
+
+sub bz_table_list {
+    my ($self) = @_;
+    return $self->_bz_real_schema->get_table_list();
 }
 
 #####################################################################

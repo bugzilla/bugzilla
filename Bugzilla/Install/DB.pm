@@ -3155,13 +3155,11 @@ sub _add_foreign_keys_to_multiselects {
           WHERE type = ' . FIELD_TYPE_MULTI_SELECT);
 
     foreach my $name (@$names) {
-        $dbh->bz_add_fk("bug_$name", "bug_id", {TABLE  => 'bugs',
-                                                COLUMN => 'bug_id',
-                                                DELETE => 'CASCADE',});
+        $dbh->bz_add_fk("bug_$name", "bug_id", 
+            {TABLE => 'bugs', COLUMN => 'bug_id', DELETE => 'CASCADE'});
                                                 
-        $dbh->bz_add_fk("bug_$name", "value", {TABLE  => $name,
-                                               COLUMN => 'value',
-                                               DELETE => 'RESTRICT',});
+        $dbh->bz_add_fk("bug_$name", "value",
+            {TABLE  => $name, COLUMN => 'value', DELETE => 'RESTRICT'});
     }
 }
 
@@ -3380,9 +3378,8 @@ sub _convert_flagtypes_fks_to_set_null {
     foreach my $column (qw(request_group_id grant_group_id)) {
         my $fk = $dbh->bz_fk_info('flagtypes', $column);
         if ($fk and !defined $fk->{DELETE}) {
-            # checksetup will re-create the FK with the appropriate definition
-            # at the end of its table upgrades, so we just drop it here.
-            $dbh->bz_drop_fk('flagtypes', $column);
+            $fk->{DELETE} = 'SET NULL';
+            $dbh->bz_alter_fk('flagtypes', $column, $fk);
         }
     }
 }
@@ -3398,10 +3395,9 @@ sub _fix_decimal_types {
 sub _fix_series_creator_fk {
     my $dbh = Bugzilla->dbh;
     my $fk = $dbh->bz_fk_info('series', 'creator');
-    # Change the FK from SET NULL to CASCADE. (It will be re-created
-    # automatically at the end of all DB changes.)
     if ($fk and $fk->{DELETE} eq 'SET NULL') {
-        $dbh->bz_drop_fk('series', 'creator');
+        $fk->{DELETE} = 'CASCADE';
+        $dbh->bz_alter_fk('series', 'creator', $fk);
     }
 }
 

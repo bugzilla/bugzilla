@@ -44,12 +44,12 @@ use Bugzilla::Constants;
 use Carp qw(confess);
 use Digest::MD5 qw(md5_hex);
 use Hash::Util qw(lock_value unlock_hash lock_keys unlock_keys);
-use List::MoreUtils qw(firstidx);
+use List::MoreUtils qw(firstidx natatime);
 use Safe;
 # Historical, needed for SCHEMA_VERSION = '1.00'
 use Storable qw(dclone freeze thaw);
 
-# New SCHEMA_VERSION (2.00) use this
+# New SCHEMA_VERSIONs (2+) use this
 use Data::Dumper;
 
 =head1 NAME
@@ -208,7 +208,7 @@ update this column in this table."
 
 =cut
 
-use constant SCHEMA_VERSION  => '2.00';
+use constant SCHEMA_VERSION  => 3;
 use constant ADD_COLUMN      => 'ADD COLUMN';
 # Multiple FKs can be added using ALTER TABLE ADD CONSTRAINT in one
 # SQL statement. This isn't true for all databases.
@@ -2545,6 +2545,28 @@ sub set_column {
     $self->_set_object($table, $column, $new_def, $fields);
 }
 
+=item C<set_fk($table, $column \%fk_def)>
+
+Sets the C<REFERENCES> item on the specified column.
+
+=cut
+
+sub set_fk {
+    my ($self, $table, $column, $fk_def) = @_;
+    # Don't want to modify the source def before we explicitly set it below.
+    # This is just us being extra-cautious.
+    my $column_def = dclone($self->get_column_abstract($table, $column));
+    die "Tried to set an fk on $table.$column, but that column doesn't exist"
+        if !$column_def;
+    if ($fk_def) {
+        $column_def->{REFERENCES} = $fk_def;
+    }
+    else {
+        delete $column_def->{REFERENCES};
+    }
+    $self->set_column($table, $column, $column_def);
+}
+
 sub set_index {
 
 =item C<set_index($table, $name, $definition)>
@@ -2697,7 +2719,7 @@ sub serialize_abstract {
  Description: Used for when you've read a serialized Schema off the disk,
               and you want a Schema object that represents that data.
  Params:      $serialized - scalar. The serialized data.
-              $version - A number in the format X.YZ. The "version"
+              $version - A number. The "version"
                   of the Schema that did the serialization.
                   See the docs for C<SCHEMA_VERSION> for more details.
  Returns:     A Schema object. It will have the methods of (and work 
@@ -2710,7 +2732,7 @@ sub deserialize_abstract {
     my ($class, $serialized, $version) = @_;
 
     my $thawed_hash;
-    if (int($version) < 2) {
+    if ($version < 2) {
         $thawed_hash = thaw($serialized);
     }
     else {
@@ -2718,6 +2740,22 @@ sub deserialize_abstract {
         $cpt->reval($serialized) ||
             die "Unable to restore cached schema: " . $@;
         $thawed_hash = ${$cpt->varglob('VAR1')};
+    }
+
+    # Version 2 didn't have the "created" key for REFERENCES items.
+    if ($version < 3) {
+        my $standard = $class->new()->{abstract_schema};
+        foreach my $table_name (keys %$thawed_hash) {
+            my %standard_fields = 
+                @{ $standard->{$table_name}->{FIELDS} || [] };
+            my $table = $thawed_hash->{$table_name};
+            my %fields = @{ $table->{FIELDS} || [] };
+            while (my ($field, $def) = each %fields) {
+                if (exists $def->{REFERENCES}) {
+                    $def->{REFERENCES}->{created} = 1;
+                }
+            }
+        }
     }
 
     return $class->new(undef, $thawed_hash);

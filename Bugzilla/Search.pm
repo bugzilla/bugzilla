@@ -728,6 +728,7 @@ sub _parse_params {
     my @charts = $self->_parse_basic_fields();
     push(@charts, $self->_special_parse_email());
     push(@charts, $self->_special_parse_chfield());
+    push(@charts, $self->_special_parse_deadline());
     return @charts;
 }
 
@@ -872,6 +873,22 @@ sub _special_parse_chfield {
     }
 
     return @charts;
+}
+
+sub _special_parse_deadline {
+    my ($self) = @_;
+    return if !Bugzilla->user->is_timetracker;
+    my $params = $self->_params;
+    
+    my @charts;
+    if (my $from = $params->param('deadlinefrom')) {
+        push(@charts, ['deadline', 'greaterthaneq', $from]);
+    }
+    if (my $to = $params->param('deadlineto')) {
+        push(@charts, ['deadline', 'lessthaneq', $to]);
+    }
+      
+    return @charts;    
 }
 
 sub _special_parse_email {
@@ -1022,39 +1039,6 @@ sub init {
 
     my @specialchart = $self->_parse_params();
     
-    my $sql_deadlinefrom;
-    my $sql_deadlineto;
-    if ($user->is_timetracker) {
-      my $deadlinefrom;
-      my $deadlineto;
-            
-      if ($params->param('deadlinefrom')){
-        $params->param('deadlinefrom', '') if lc($params->param('deadlinefrom')) eq 'now';
-        $deadlinefrom = SqlifyDate($params->param('deadlinefrom'));
-        $sql_deadlinefrom = $dbh->quote($deadlinefrom);
-        trick_taint($sql_deadlinefrom);
-        my $term = "bugs.deadline >= $sql_deadlinefrom";
-        push(@wherepart, $term);
-        $self->search_description({
-            field => 'deadline', type => 'greaterthaneq',
-            value => $deadlinefrom, term => $term,
-        });
-      }
-      
-      if ($params->param('deadlineto')){
-        $params->param('deadlineto', '') if lc($params->param('deadlineto')) eq 'now';
-        $deadlineto = SqlifyDate($params->param('deadlineto'));
-        $sql_deadlineto = $dbh->quote($deadlineto);
-        trick_taint($sql_deadlineto);
-        my $term = "bugs.deadline <= $sql_deadlineto";
-        push(@wherepart, $term);
-        $self->search_description({
-            field => 'deadline', type => 'lessthaneq',
-            value => $deadlineto, term => $term,
-        });
-      }
-    }  
-
     foreach my $f ("short_desc", "longdesc", "bug_file_loc",
                    "status_whiteboard") {
         if (defined $params->param($f)) {

@@ -79,6 +79,11 @@ sub _delete_bad_keys {
 
 sub validate  {
     my ($self, $params, @keys) = @_;
+
+    # If $params is defined but not a reference, then we weren't
+    # sent any parameters at all, and we're getting @keys where
+    # $params should be.
+    return ($self, undef) if (defined $params and !ref $params);
     
     # If @keys is not empty then we convert any named 
     # parameters that have scalar values to arrayrefs

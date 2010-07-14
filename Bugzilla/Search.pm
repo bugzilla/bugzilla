@@ -157,7 +157,7 @@ use constant OPERATOR_FIELD_OVERRIDE => {
     },
     # We check all attachment fields against this.
     'attachments' => {
-        _default => \&_attachments,
+        _non_changed => \&_attachments,
     },
     blocked => {
         _non_changed => \&_blocked_nonchanged,
@@ -726,7 +726,8 @@ sub _parse_params {
     $self->_special_parse_bug_status();
     $self->_special_parse_resolution();
     my @charts = $self->_parse_basic_fields();
-    push(@charts, $self->_special_parse_email);
+    push(@charts, $self->_special_parse_email());
+    push(@charts, $self->_special_parse_chfield());
     return @charts;
 }
 
@@ -796,6 +797,81 @@ sub _special_parse_bug_status {
     else {
         $params->param('bug_status', @bug_status);
     }
+}
+
+sub _special_parse_chfield {
+    my ($self) = @_;
+    my $params = $self->_params;
+    
+    my $date_from = trim(lc($params->param('chfieldfrom')));
+    $date_from = '' if !defined $date_from;
+    my $date_to = trim(lc($params->param('chfieldto')));
+    $date_to = '' if !defined $date_to;
+    $date_from = '' if $date_from eq 'now';
+    $date_to = '' if $date_to eq 'now';
+    my @fields = $params->param('chfield');
+    my $value_to = trim($params->param('chfieldvalue'));
+    $value_to = '' if !defined $value_to;
+
+    my @charts;
+    # It is always safe and useful to push delta_ts into the charts
+    # if there are any dates specified. It doesn't conflict with
+    # searching [Bug creation], because a bug's delta_ts is set to
+    # its creation_ts when it is created. So this just gives the
+    # database an additional index to possibly choose.
+    if ($date_from ne '') {
+        push(@charts, ['delta_ts', 'greaterthaneq', $date_from]);
+    }
+    if ($date_to ne '') {
+        push(@charts, ['delta_ts', 'lessthaneq', $date_to]);
+    }
+    
+    if (grep { $_ eq '[Bug creation]' } @fields) {
+        if ($date_from ne '') {
+            push(@charts, ['creation_ts', 'greaterthaneq', $date_from]);
+        }
+        if ($date_to ne '') {
+            push(@charts, ['creation_ts', 'lessthaneq', $date_to]);
+        }
+    }
+
+    # Basically, we construct the chart like:
+    #
+    # (added_for_field1 = value OR added_for_field2 = value)
+    # AND (date_field1_changed >= date_from OR date_field2_changed >= date_from)
+    # AND (date_field1_changed <= date_to OR date_field2_changed <= date_to)
+    #
+    # Theoretically, all we *really* would need to do is look for the field id
+    # in the bugs_activity table, because we've already limited the search
+    # by delta_ts above, but there's no chart to do that, so we check the
+    # change date of the fields.
+    
+    if ($value_to ne '') {
+        my @value_chart;
+        foreach my $field (@fields) {
+            next if $field eq '[Bug creation]';
+            push(@value_chart, $field, 'changedto', $value_to);
+        }
+        push(@charts, \@value_chart) if @value_chart;
+    }
+
+    if ($date_from ne '') {
+        my @date_from_chart;
+        foreach my $field (@fields) {
+            next if $field eq '[Bug creation]';
+            push(@date_from_chart, $field, 'changedafter', $date_from);
+        }
+        push(@charts, \@date_from_chart) if @date_from_chart;
+    }
+    if ($date_to ne '') {
+        my @date_to_chart;
+        foreach my $field (@fields) {
+            push(@date_to_chart, $field, 'changedbefore', $date_to);
+        }
+        push(@charts, \@date_to_chart) if @date_to_chart;
+    }
+
+    return @charts;
 }
 
 sub _special_parse_email {
@@ -946,116 +1022,6 @@ sub init {
 
     my @specialchart = $self->_parse_params();
     
-    my $chfieldfrom = trim(lc($params->param('chfieldfrom') || ''));
-    my $chfieldto = trim(lc($params->param('chfieldto') || ''));
-    $chfieldfrom = '' if ($chfieldfrom eq 'now');
-    $chfieldto = '' if ($chfieldto eq 'now');
-    my @chfield = $params->param('chfield');
-    my $chvalue = trim($params->param('chfieldvalue')) || '';
-
-    if ($chfieldfrom ne '' || $chfieldto ne '') {
-        my $sql_chfrom = $chfieldfrom ? $dbh->quote(SqlifyDate($chfieldfrom)):'';
-        my $sql_chto   = $chfieldto   ? $dbh->quote(SqlifyDate($chfieldto))  :'';
-        my $sql_chvalue = $chvalue ne '' ? $dbh->quote($chvalue) : '';
-        trick_taint($sql_chvalue);
-        if(!@chfield) {
-            if ($sql_chfrom) {
-                my $term = "bugs.delta_ts >= $sql_chfrom";
-                push(@wherepart, $term);
-                $self->search_description({
-                    field => 'delta_ts', type => 'greaterthaneq',
-                    value => $chfieldfrom, term => $term,
-                });
-            }
-            if ($sql_chto) {
-                my $term = "bugs.delta_ts <= $sql_chto";
-                push(@wherepart, $term);
-                $self->search_description({
-                    field => 'delta_ts', type => 'lessthaneq',
-                    value => $chfieldto, term => $term,
-                });
-            }
-        } else {
-            my $bug_creation_clause;
-            my @list;
-            my @actlist;
-            foreach my $f (@chfield) {
-                if ($f eq "[Bug creation]") {
-                    # Treat [Bug creation] differently because we need to look
-                    # at bugs.creation_ts rather than the bugs_activity table.
-                    my @l;
-                    if ($sql_chfrom) {
-                        my $term = "bugs.creation_ts >= $sql_chfrom";
-                        push(@l, $term);
-                        $self->search_description({
-                            field => 'creation_ts', type => 'greaterthaneq',
-                            value => $chfieldfrom, term => $term,
-                        });
-                    }
-                    if ($sql_chto) {
-                        my $term = "bugs.creation_ts <= $sql_chto";
-                        push(@l, $term);
-                        $self->search_description({
-                            field => 'creation_ts', type => 'lessthaneq',
-                            value => $chfieldto, term => $term,
-                        });
-                    }
-                    $bug_creation_clause = "(" . join(' AND ', @l) . ")";
-                } else {
-                    push(@actlist, $self->_chart_fields->{$f}->id);
-                }
-            }
-
-            # @actlist won't have any elements if the only field being searched
-            # is [Bug creation] (in which case we don't need bugs_activity).
-            if(@actlist) {
-                my $extra = " actcheck.bug_id = bugs.bug_id";
-                push(@list, "(actcheck.bug_when IS NOT NULL)");
-
-                my $from_term = " AND actcheck.bug_when >= $sql_chfrom";
-                $extra .= $from_term if $sql_chfrom;
-                my $to_term = " AND actcheck.bug_when <= $sql_chto";
-                $extra .= $to_term if $sql_chto;
-                my $value_term = " AND actcheck.added = $sql_chvalue";
-                $extra .= $value_term if $sql_chvalue;
-
-                push(@supptables, "LEFT JOIN bugs_activity AS actcheck " .
-                                  "ON $extra AND " 
-                                 . $dbh->sql_in('actcheck.fieldid', \@actlist));
-
-                foreach my $field (@chfield) {
-                    next if $field eq "[Bug creation]";
-                    if ($sql_chvalue) {
-                        $self->search_description({
-                            field => $field, type => 'changedto',
-                            value => $chvalue, term  => $value_term,
-                        });
-                    }
-                    if ($sql_chfrom) {
-                        $self->search_description({
-                            field => $field, type => 'changedafter',
-                            value => $chfieldfrom, term => $from_term,
-                        });
-                    }
-                    if ($sql_chvalue) {
-                        $self->search_description({
-                            field => $field, type => 'changedbefore',
-                            value => $chfieldto, term => $to_term,
-                        });
-                    }
-                }
-            }
-
-            # Now that we're done using @list to determine if there are any
-            # regular fields to search (and thus we need bugs_activity),
-            # add the [Bug creation] criterion to the list so we can OR it
-            # together with the others.
-            push(@list, $bug_creation_clause) if $bug_creation_clause;
-
-            push(@wherepart, "(" . join(" OR ", @list) . ")");
-        }
-    }
-
     my $sql_deadlinefrom;
     my $sql_deadlineto;
     if ($user->is_timetracker) {
@@ -1783,7 +1749,7 @@ sub _long_desc_changedbefore_after {
         @$args{qw(chart_id operator value joins)};
     my $dbh = Bugzilla->dbh;
     
-    my $sql_operator = ($operator =~ /before/) ? '<' : '>';
+    my $sql_operator = ($operator =~ /before/) ? '<=' : '>=';
     my $table = "longdescs_$chart_id";
     my $sql_date = $dbh->quote(SqlifyDate($value));
     my $join_sql =
@@ -1934,7 +1900,7 @@ sub _work_time_changedbefore_after {
     my $dbh = Bugzilla->dbh;
     
     my $table = "longdescs_$chart_id";
-    my $sql_operator = ($operator =~ /before/) ? '<' : '>';
+    my $sql_operator = ($operator =~ /before/) ? '<=' : '>=';
     my $sql_date = $dbh->quote(SqlifyDate($value));
     my $join_sql =
         "LEFT JOIN longdescs AS $table"
@@ -2049,22 +2015,6 @@ sub _attachments {
     
     $field =~ /^attachments\.(.+)$/;
     my $attach_field = $1;
-    # XXX This is not actually the correct method of searching for
-    # changes in attachment values--this just tells you who posted an
-    # attachment.
-    if ($operator eq "changedby") {
-        $args->{value} = login_to_id($value, THROW_ERROR);
-        $args->{quoted} = $args->{value};
-        $attach_field = "submitter_id";
-        $args->{operator} = "equals";
-    }
-    elsif ($operator eq 'changedbefore' or $operator eq 'changedafter') {
-        $args->{value} = SqlifyDate($value);
-        $args->{quoted} = $dbh->quote($args->{value});
-        $attach_field = "creation_ts";
-        $args->{operator} = $operator eq 'changedbefore' ? "lessthan"
-                                                         : "greaterthan";
-    }
     
     $args->{full_field} = "$table.$attach_field";
 }
@@ -2515,12 +2465,14 @@ sub _changedbefore_changedafter {
         @$args{qw(chart_id joins field operator value)};
     my $dbh = Bugzilla->dbh;
     
-    my $sql_operator = ($operator =~ /before/) ? '<' : '>';
-    my $table = "act_$chart_id";
+    my $sql_operator = ($operator =~ /before/) ? '<=' : '>=';
     my $field_object = $self->_chart_fields->{$field}
         || ThrowCodeError("invalid_field_name", { field => $field });
     my $field_id = $field_object->id;
-    
+    # Charts on changed* fields need to be field-specific. Otherwise,
+    # OR chart rows make no sense if they contain multiple fields.
+    my $table = "act_${field_id}_$chart_id";
+
     my $sql_date = $dbh->quote(SqlifyDate($value));
     push(@$joins,
         "LEFT JOIN bugs_activity AS $table"
@@ -2536,10 +2488,10 @@ sub _changedfrom_changedto {
         @$args{qw(chart_id joins field operator quoted)};
     
     my $column = ($operator =~ /from/) ? 'removed' : 'added';
-    my $table = "act_$chart_id";
     my $field_object = $self->_chart_fields->{$field}
         || ThrowCodeError("invalid_field_name", { field => $field });
     my $field_id = $field_object->id;
+    my $table = "act_${field_id}_$chart_id";
     push(@$joins,
         "LEFT JOIN bugs_activity AS $table"
         .     " ON $table.bug_id = bugs.bug_id"
@@ -2553,10 +2505,10 @@ sub _changedby {
     my ($chart_id, $joins, $field, $operator, $value) =
         @$args{qw(chart_id joins field operator value)};
     
-    my $table = "act_$chart_id";
     my $field_object = $self->_chart_fields->{$field}
         || ThrowCodeError("invalid_field_name", { field => $field });
     my $field_id = $field_object->id;
+    my $table = "act_${field_id}_$chart_id";
     my $user_id  = login_to_id($value, THROW_ERROR);
     push(@$joins,
         "LEFT JOIN bugs_activity AS $table"

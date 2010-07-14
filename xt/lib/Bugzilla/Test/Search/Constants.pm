@@ -426,14 +426,7 @@ use constant KNOWN_BROKEN => {
     'changedbefore' => {
         CHANGED_BROKEN,
         'attach_data.thedata' => { contains => [1] },
-        creation_ts => { contains => [1,5] },
-        # attachments.* finds values where the date matches exactly.
-        'attachments.description' => { contains => [2] },
-        'attachments.filename'    => { contains => [2] },
-        'attachments.isobsolete'  => { contains => [2] },
-        'attachments.ispatch'     => { contains => [2] },
-        'attachments.isprivate'   => { contains => [2] },
-        'attachments.mimetype'    => { contains => [2] },
+        creation_ts => { contains => [1,2,5] },
     },
     'changedafter' => {
         'attach_data.thedata' => { contains => [2,3,4] },
@@ -854,18 +847,18 @@ use constant TESTS => {
     ],
 
     changedbefore => [
-        { contains => [1], value => '<2-delta>',
+        { contains => [1], value => '<1-delta>',
           override => {
               CHANGED_OVERRIDE,
-              creation_ts => { contains => [1,5] },
+              creation_ts => { contains => [1,2,5] },
               blocked   => { contains => [1,2] },
               dependson => { contains => [1,3] },
-              longdesc => { contains => [1,2,5] },
+              longdesc => { contains => [1,5] },
           }
         },
     ],
     changedafter => [
-        { contains => [2,3,4], value => '<1-delta>',
+        { contains => [2,3,4], value => '<2-delta>',
           override => { 
               CHANGED_OVERRIDE,
               creation_ts => { contains => [2,3,4] },

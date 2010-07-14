@@ -1065,11 +1065,12 @@ this code does.
 sub _bz_build_schema_from_disk {
     my ($self) = @_;
 
-    print "Building Schema object from database...\n";
-
     my $schema = $self->_bz_schema->get_empty_schema();
 
     my @tables = $self->bz_table_list_real();
+    if (@tables) {
+        print "Building Schema object from database...\n"; 
+    }
     foreach my $table (@tables) {
         $schema->add_table($table);
         my @columns = $self->bz_table_columns_real($table);

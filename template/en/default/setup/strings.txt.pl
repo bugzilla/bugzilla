@@ -44,6 +44,10 @@ EOT
 COMMANDS TO INSTALL REQUIRED MODULES (You *must* run all these commands
 and then re-run this script):
 EOT
+    db_enum_setup  => "Setting up choices for standard drop-down fields:",
+    db_schema_init => "Initializing bz_schema...",
+    db_table_new   => "Adding new table ##table##...",
+    db_table_setup => "Creating tables...",
     done => 'done.',
     extension_must_return_name => <<END,
 ##file## returned ##returned##, which is not a valid name for an extension.

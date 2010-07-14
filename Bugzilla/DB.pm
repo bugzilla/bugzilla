@@ -37,7 +37,7 @@ use base qw(DBI::db);
 
 use Bugzilla::Constants;
 use Bugzilla::Install::Requirements;
-use Bugzilla::Install::Util qw(vers_cmp);
+use Bugzilla::Install::Util qw(vers_cmp install_string);
 use Bugzilla::Install::Localconfig;
 use Bugzilla::Util;
 use Bugzilla::Error;
@@ -423,9 +423,13 @@ sub bz_setup_database {
     $self->_bz_init_schema_storage();
     
     my @desired_tables = $self->_bz_schema->get_table_list();
+    my $bugs_exists = $self->bz_table_info('bugs');
+    if (!$bugs_exists) {
+        print install_string('db_table_setup'), "\n";
+    }
 
     foreach my $table_name (@desired_tables) {
-        $self->bz_add_table($table_name);
+        $self->bz_add_table($table_name, { silently => !$bugs_exists });
     }
 }
 
@@ -435,16 +439,30 @@ sub bz_enum_initial_values {
 }
 
 sub bz_populate_enum_tables {
-    my ($self) = @_;
+    my ($self) = @_; 
+
+    my $any_severities = $self->selectrow_array(
+        'SELECT 1 FROM bug_severity ' . $self->sql_limit(1));
+    print install_string('db_enum_setup'), "\n  " if !$any_severities;
 
     my $enum_values = $self->bz_enum_initial_values();
     while (my ($table, $values) = each %$enum_values) {
         $self->_bz_populate_enum_table($table, $values);
     }
+
+    print "\n" if !$any_severities;
 }
 
 sub bz_setup_foreign_keys {
     my ($self) = @_;
+
+    # profiles_activity was the first table to get foreign keys,
+    # so if it doesn't have them, then we're setting up FKs
+    # for the first time, and should be quieter about it.
+    my $activity_fk = $self->bz_fk_info('profiles_activity', 'userid');
+    if (!$activity_fk) {
+        print get_text('install_fk_setup'), "\n";
+    }
 
     # We use _bz_schema because bz_add_table has removed all REFERENCES
     # items from _bz_real_schema.
@@ -458,7 +476,7 @@ sub bz_setup_foreign_keys {
                 $add_fks{$column} = $def->{REFERENCES};
             }
         }
-        $self->bz_add_fks($table, \%add_fks);
+        $self->bz_add_fks($table, \%add_fks, { silently => !$activity_fk });
     }
 }
 
@@ -516,7 +534,7 @@ sub bz_add_fk {
 }
 
 sub bz_add_fks {
-    my ($self, $table, $column_fks) = @_;
+    my ($self, $table, $column_fks, $options) = @_;
 
     my %add_these;
     foreach my $column (keys %$column_fks) {
@@ -525,9 +543,13 @@ sub bz_add_fks {
         my $fk = $column_fks->{$column};
         $self->_check_references($table, $column, $fk);
         $add_these{$column} = $fk;
-        print get_text('install_fk_add',
-                       { table => $table, column => $column, fk => $fk })
-            . "\n" if Bugzilla->usage_mode == USAGE_MODE_CMDLINE;
+        if (Bugzilla->usage_mode == USAGE_MODE_CMDLINE 
+            and !$options->{silently}) 
+        {
+            print get_text('install_fk_add',
+                           { table => $table, column => $column, fk => $fk }),
+                  "\n";
+        }
     }
 
     return if !scalar(keys %add_these);
@@ -650,12 +672,12 @@ sub bz_add_index_raw {
 }
 
 sub bz_add_table {
-    my ($self, $name) = @_;
+    my ($self, $name, $options) = @_;
 
     my $table_exists = $self->bz_table_info($name);
 
     if (!$table_exists) {
-        $self->_bz_add_table_raw($name);
+        $self->_bz_add_table_raw($name, $options);
         my $table_def = dclone($self->_bz_schema->get_table_abstract($name));
 
         my %fields = @{$table_def->{FIELDS}};
@@ -686,10 +708,13 @@ sub bz_add_table {
 # Returns:     nothing
 #
 sub _bz_add_table_raw {
-    my ($self, $name) = @_;
+    my ($self, $name, $options) = @_;
     my @statements = $self->_bz_schema->get_table_ddl($name);
-    print "Adding new table $name ...\n"
-        if Bugzilla->usage_mode == USAGE_MODE_CMDLINE;
+    if (Bugzilla->usage_mode == USAGE_MODE_CMDLINE
+        and !$options->{silently})
+    {
+        print install_string('db_table_new', { table => $name }), "\n";
+    }
     $self->do($_) foreach (@statements);
 }
 
@@ -1181,7 +1206,7 @@ sub _bz_init_schema_storage {
             $self->_bz_add_table_raw('bz_schema');
         }
 
-        print "Initializing the new Schema storage...\n";
+        print install_string('db_schema_init'), "\n";
         my $sth = $self->prepare("INSERT INTO bz_schema "
                                  ." (schema_data, version) VALUES (?,?)");
         $sth->bind_param(1, $store_me, $self->BLOB_TYPE);
@@ -1284,14 +1309,13 @@ sub _bz_populate_enum_table {
 
     # If the table is empty...
     if (!$table_size) {
+        print " $table";
         my $insert = $self->prepare(
             "INSERT INTO $sql_table (value,sortkey) VALUES (?,?)");
-        print "Inserting values into the '$table' table:\n";
         my $sortorder = 0;
         my $maxlen    = max(map(length($_), @$valuelist)) + 2;
         foreach my $value (@$valuelist) {
             $sortorder += 100;
-            printf "%-${maxlen}s sortkey: $sortorder\n", "'$value'";
             $insert->execute($value, $sortorder);
         }
     }

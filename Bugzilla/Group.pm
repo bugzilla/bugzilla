@@ -389,8 +389,11 @@ sub create {
     my ($params) = @_;
     my $dbh = Bugzilla->dbh;
 
-    print get_text('install_group_create', { name => $params->{name} }) . "\n" 
-        if Bugzilla->usage_mode == USAGE_MODE_CMDLINE;
+    my $silently = delete $params->{silently};
+    if (Bugzilla->usage_mode == USAGE_MODE_CMDLINE and !$silently) {
+        print get_text('install_group_create', { name => $params->{name} }),
+              "\n";
+    }
 
     $dbh->bz_start_transaction();
 

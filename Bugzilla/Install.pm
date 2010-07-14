@@ -174,12 +174,21 @@ use constant DEFAULT_COMPONENT => {
 };
 
 sub update_settings {
+    my $dbh = Bugzilla->dbh;
+    # If we're setting up settings for the first time, we want to be quieter.
+    my $any_settings = $dbh->selectrow_array(
+        'SELECT 1 FROM setting ' . $dbh->sql_limit(1));
+    if (!$any_settings) {
+        print get_text('install_setting_setup'), "\n";
+    }
+
     my %settings = %{SETTINGS()};
     foreach my $setting (keys %settings) {
         add_setting($setting,
                     $settings{$setting}->{options}, 
                     $settings{$setting}->{default},
-                    $settings{$setting}->{subclass});
+                    $settings{$setting}->{subclass}, undef,
+                    !$any_settings);
     }
 }
 
@@ -188,11 +197,19 @@ sub update_system_groups {
 
     $dbh->bz_start_transaction();
 
+    # If there is no editbugs group, this is the first time we're
+    # adding groups.
+    my $editbugs_exists = new Bugzilla::Group({ name => 'editbugs' });
+    if (!$editbugs_exists) {
+        print get_text('install_groups_setup'), "\n";
+    }
+
     # Create most of the system groups
     foreach my $definition (SYSTEM_GROUPS) {
         my $exists = new Bugzilla::Group({ name => $definition->{name} });
         if (!$exists) {
             $definition->{isbuggroup} = 0;
+            $definition->{silently} = !$editbugs_exists;
             my $inherited_by = delete $definition->{inherited_by};
             my $created = Bugzilla::Group->create($definition);
             # Each group in inherited_by is automatically a member of this

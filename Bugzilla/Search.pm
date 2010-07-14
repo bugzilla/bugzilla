@@ -719,9 +719,39 @@ sub _skip_group_by {
 # Internal Accessors: Special Params Parsing #
 ##############################################
 
+sub _convert_special_params_to_charts {
+    my ($self) = @_;
+    my $params = $self->_params;
+    
+    my @special_charts = $self->_special_charts();
+    
+    # first we delete any sign of "Chart #-1" from the HTML form hash
+    # since we want to guarantee the user didn't hide something here
+    my @badcharts = grep { /^(field|type|value)-1-/ } $params->param();
+    foreach my $field (@badcharts) {
+        $params->delete($field);
+    }
+
+    # now we take our special chart and stuff it into the form hash
+    my $chart = -1;
+    my $and = 0;
+    foreach my $or_array (@special_charts) {
+        my $or = 0;
+        while (@$or_array) {
+            $params->param("field$chart-$and-$or", shift @$or_array);
+            $params->param("type$chart-$and-$or", shift @$or_array);
+            $params->param("value$chart-$and-$or", shift @$or_array);
+            $or++;
+        }
+        $and++;
+    }
+}
+
 sub _params { $_[0]->{params} }
 
-sub _parse_params {
+# This parses all the standard search parameters except for the boolean
+# charts.
+sub _special_charts {
     my ($self) = @_;
     $self->_special_parse_bug_status();
     $self->_special_parse_resolution();
@@ -1037,40 +1067,7 @@ sub init {
 
     my $dbh = Bugzilla->dbh;
 
-    my @specialchart = $self->_parse_params();
-    
-    foreach my $f ("short_desc", "longdesc", "bug_file_loc",
-                   "status_whiteboard") {
-        if (defined $params->param($f)) {
-            my $s = trim($params->param($f));
-            if ($s ne "") {
-                my $type = $params->param($f . "_type");
-                push(@specialchart, [$f, $type, $s]);
-            }
-        }
-    }
-
-    # first we delete any sign of "Chart #-1" from the HTML form hash
-    # since we want to guarantee the user didn't hide something here
-    my @badcharts = grep /^(field|type|value)-1-/, $params->param();
-    foreach my $field (@badcharts) {
-        $params->delete($field);
-    }
-
-    # now we take our special chart and stuff it into the form hash
-    my $chart = -1;
-    my $row = 0;
-    foreach my $ref (@specialchart) {
-        my $col = 0;
-        while (@$ref) {
-            $params->param("field$chart-$row-$col", shift(@$ref));
-            $params->param("type$chart-$row-$col", shift(@$ref));
-            $params->param("value$chart-$row-$col", shift(@$ref));
-            $col++;
-
-        }
-        $row++;
-    }
+    $self->_convert_special_params_to_charts();
 
 
 # A boolean chart is a way of representing the terms in a logical
@@ -1156,8 +1153,8 @@ sub init {
 # $suppstring = String which is pasted into query containing all table names
 
     my $sequence = 0;
-    $row = 0;
-    for ($chart=-1 ;
+    my $row = 0;
+    for (my $chart=-1 ;
          $chart < 0 || $params->param("field$chart-0-0") ;
          $chart++) 
     {

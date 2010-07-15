@@ -455,11 +455,6 @@
   [% ELSIF error == "not_in_transaction" %]
     Attempted to end transaction without starting one first.
 
-  [% ELSIF error == "comma_operator_deprecated" %]
-    [% title = "SQL query generator internal error" %]
-    There is an internal error in the SQL query generation code,
-    creating queries with implicit JOIN.
-
   [% ELSIF error == "invalid_post_bug_submit_action" %]
     Invalid setting for post_bug_submit_action
 

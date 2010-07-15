@@ -2439,10 +2439,13 @@ ReadOnly: ENTRY, NA/NA, CANEDIT
       <title>Deleting Custom Fields</title>
 
       <para>
-        It is only possible to delete obsolete Custom Fields 
-        if the field has never been used in the database.
-        To remove a field which already has content,
-        mark it as obsolete.
+        Only custom fields which are marked as obsolete, and which never
+        have been used, can be deleted completely (else the integrity
+        of the bug history would be compromised). For custom fields marked
+        as obsolete, a "Delete" link will appear in the <quote>Action</quote>
+        column. If the custom field has been used in the past, the deletion
+        will be rejected. But marking the field as obsolete is sufficient
+        to hide it from the user interface entirely.
       </para>
     </section>
   </section>

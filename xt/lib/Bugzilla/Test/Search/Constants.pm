@@ -363,10 +363,8 @@ use constant KNOWN_BROKEN => {
     anyexact => {
         percentage_complete => { contains => [2] },
     },
-    # bug_group anywordssubstr returns all our bugs. Not sure why.
     anywordssubstr => {
         percentage_complete => { contains => [2] },
-        bug_group => { contains => [3,4,5] },
     },
 
     'allwordssubstr-<1>' => { ALLWORDS_BROKEN },
@@ -389,16 +387,13 @@ use constant KNOWN_BROKEN => {
     },
 
     # anywords searches don't work on decimal values.
-    # bug_group anywords returns all bugs.
     # attach_data doesn't work (perhaps because it's the entire
     # data, or some problem with the regex?).
     anywords => {
         'attach_data.thedata' => { contains => [1] },
-        bug_group => { contains => [2,3,4,5] },
         work_time => { contains => [1] },
     },
     'anywords-<1> <2>' => {
-        bug_group => { contains => [3,4,5] },
         percentage_complete => { contains => [2] },
         'attach_data.thedata' => { contains => [1,2] },
         work_time => { contains => [1,2] },

@@ -52,6 +52,7 @@ use Bugzilla::Field;
 use Bugzilla::Status;
 use Bugzilla::Keyword;
 
+use Data::Dumper;
 use Date::Format;
 use Date::Parse;
 use List::MoreUtils qw(uniq);
@@ -287,7 +288,7 @@ use constant SPECIAL_ORDER => {
             table => 'milestones',
             from  => 'target_milestone',
             to    => 'value',
-            extra => ' AND bugs.product_id = map_target_milestone.product_id',
+            extra => ['bugs.product_id = map_target_milestone.product_id'],
             join  => 'INNER',
         }
     },
@@ -345,11 +346,11 @@ use constant COLUMN_JOINS => {
         join   => 'INNER',
     },
     'flagtypes.name' => {
-        name  => 'map_flags',
+        as    => 'map_flags',
         table => 'flags',
-        extra => ' AND attach_id IS NULL',
+        extra => ['attach_id IS NULL'],
         then_to => {
-            name  => 'map_flagtypes',
+            as    => 'map_flagtypes',
             table => 'flagtypes',
             from  => 'map_flags.type_id',
             to    => 'id',
@@ -358,7 +359,7 @@ use constant COLUMN_JOINS => {
     keywords => {
         table => 'keywords',
         then_to => {
-            name  => 'map_keyworddefs',
+            as    => 'map_keyworddefs',
             table => 'keyworddefs',
             from  => 'map_keywords.keywordid',
             to    => 'id',
@@ -669,7 +670,7 @@ sub _select_order_joins {
     foreach my $field ($self->_input_order_columns) {
         my $join_info = $self->_special_order->{$field}->{join};
         if ($join_info) {
-            my @join_sql = $self->_translate_join($field, $join_info);
+            my @join_sql = $self->_translate_join($join_info, $field);
             push(@joins, @join_sql);
         }
     }
@@ -995,17 +996,18 @@ sub _charts_to_conditions {
                 push(@joins, @{ $or_item->{joins} });
                 push(@having, @{ $or_item->{having} });
             }
-            my $or_sql = join(' OR ', map { "($_)" } @or_terms);
-            push(@and_terms, $or_sql) if $or_sql ne '';
-        }
-        @and_terms = map { "($_)" } @and_terms;
-        foreach my $and_term (@and_terms) {
-            # Clean up the SQL a bit by removing extra parens.
-            while ($and_term =~ /^\(\(/ and $and_term =~ /\)\)$/) {
-                $and_term =~ s/^\(//;
-                $and_term =~ s/\)$//;
+
+            if (@or_terms) {
+                # If a term contains ANDs, we need to put parens around the
+                # condition. This is a pretty weak test, but it's actually OK
+                # to put parens around too many things.
+                @or_terms = map { $_ =~ /\bAND\b/i ? "($_)" : $_ } @or_terms;
+                my $or_sql = join(' OR ', @or_terms);
+                push(@and_terms, $or_sql);
             }
         }
+        # And here we need to paren terms that contain ORs.
+        @and_terms = map { $_ =~ /\bOR\b/i ? "($_)" : $_ } @and_terms;
         my $and_sql = join(' AND ', @and_terms);
         if ($negate and $and_sql ne '') {
             $and_sql = "NOT ($and_sql)";
@@ -1120,11 +1122,11 @@ sub _column_join {
     my $join_info = COLUMN_JOINS->{$field};
     if (!$join_info) {
         if ($self->_multi_select_fields->{$field}) {
-            return $self->_translate_join($field, { table => "bug_$field" });
+            return $self->_translate_join({ table => "bug_$field" }, $field);
         }
         return ();
     }
-    return $self->_translate_join($field, $join_info);
+    return $self->_translate_join($join_info, $field);
 }
 
 sub _valid_values {
@@ -1142,7 +1144,13 @@ sub _valid_values {
 }
 
 sub _translate_join {
-    my ($self, $field, $join_info) = @_;
+    my ($self, $join_info, $field) = @_;
+    
+    die "join with no table: " . Dumper($join_info, $field)
+        if !$join_info->{table};
+    die "join with no name: " . Dumper($join_info, $field)
+        if (!$join_info->{as} and !$field);
+        
     my $from_table = "bugs";
     my $from  = $join_info->{from} || "bug_id";
     if ($from =~ /^(\w+)\.(\w+)$/) {
@@ -1151,15 +1159,23 @@ sub _translate_join {
     my $to    = $join_info->{to}    || "bug_id";
     my $join  = $join_info->{join}  || 'LEFT';
     my $table = $join_info->{table};
-    die "$field requires a table in COLUMN_JOINS" if !$table;
-    my $extra = $join_info->{extra} || '';
-    my $name  = $join_info->{name}  || "map_$field";
+    my @extra = @{ $join_info->{extra} || [] };
+    my $name  = $join_info->{as}    || "map_$field";
     $name =~ s/\./_/g;
+    
+    # If a term contains ORs, we need to put parens around the condition.
+    # This is a pretty weak test, but it's actually OK to put parens
+    # around too many things.
+    @extra = map { $_ =~ /\bOR\b/i ? "($_)" : $_ } @extra;
+    my $extra_condition = join(' AND ', uniq @extra);
+    if ($extra_condition) {
+        $extra_condition = " AND $extra_condition";
+    }
 
     my @join_sql = "$join JOIN $table AS $name"
-                        . " ON $from_table.$from = $name.$to$extra";
+                        . " ON $from_table.$from = $name.$to$extra_condition";
     if (my $then_to = $join_info->{then_to}) {
-        push(@join_sql, $self->_translate_join($field, $then_to));
+        push(@join_sql, $self->_translate_join($then_to));
     }
     return @join_sql;
 }
@@ -1298,7 +1314,8 @@ sub init {
     my %suppseen = ("bugs" => 1);
     my $suppstring = "bugs";
     my @supplist = (" ");
-    foreach my $str ($self->_select_order_joins, @$joins) {
+    my @join_sql = map { $self->_translate_join($_) } @$joins;
+    foreach my $str ($self->_select_order_joins, @join_sql) {
 
         if ($str =~ /^(LEFT|INNER|RIGHT)\s+JOIN/i) {
             $str =~ /^(.*?)\s+ON\s+(.*)$/i;
@@ -1668,12 +1685,15 @@ sub _contact_exact_group {
     $group->check_members_are_visible();
     my $group_ids = Bugzilla::Group->flatten_group_membership($group->id);
     my $table = "user_group_map_$chart_id";
-    my $join_sql =
-        "LEFT JOIN user_group_map AS $table"
-        .     " ON $table.user_id = bugs.$field"
-        .        " AND " . $dbh->sql_in("$table.group_id", $group_ids)
-        .        " AND $table.isbless = 0";
-    push(@$joins, $join_sql);
+    my $join = {
+        table => 'user_group_map',
+        as    => $table,
+        from  => $field,
+        to    => 'user_id',
+        extra => [$dbh->sql_in("$table.group_id", $group_ids),
+                  "$table.isbless = 0"],
+    };
+    push(@$joins, $join);
     if ($operator =~ /^not/) {
         $args->{term} = "$table.group_id IS NULL";
     }
@@ -1694,10 +1714,9 @@ sub _contact_nonchanged {
 
 sub _qa_contact_nonchanged {
     my ($self, $args) = @_;
-    my $joins = $args->{joins};
-    
-    push(@$joins, "LEFT JOIN profiles AS map_qa_contact " .
-                         "ON bugs.qa_contact = map_qa_contact.userid");
+
+    # This will join in map_qa_contact for us.    
+    $self->_add_extra_column('qa_contact');
     $args->{full_field} = "COALESCE(map_qa_contact.login_name,'')";
 }
 
@@ -1734,16 +1753,19 @@ sub _cc_exact_group {
         $args->{sequence}++;
     }
     
-    my $group_table = "user_group_map_$chart_id";
     my $cc_table = "cc_$chart_id";
-    push(@$joins, "LEFT JOIN cc AS $cc_table " .
-                         "ON bugs.bug_id = $cc_table.bug_id");
-    my $join_sql =
-        "LEFT JOIN user_group_map AS $group_table"
-        .     " ON $group_table.user_id = $cc_table.who"
-        .        " AND " . $dbh->sql_in("$group_table.group_id", $all_groups)
-        .        " AND $group_table.isbless = 0 ";
-    push(@$joins, $join_sql);
+    push(@$joins, { table => 'cc', as => $cc_table });
+    my $group_table = "user_group_map_$chart_id";
+    my $group_join = {
+        table => 'user_group_map',
+        as    => $group_table,
+        from  => "$cc_table.who",
+        to    => 'user_id',
+        extra => [$dbh->sql_in("$group_table.group_id", $all_groups),
+                  "$group_table.isbless = 0"],
+    };
+    push(@$joins, $group_join);
+
     if ($operator =~ /^not/) {
         $args->{term} = "$group_table.group_id IS NULL";
     }
@@ -1773,11 +1795,12 @@ sub _cc_nonchanged {
     
     my $term = $args->{term};
     my $table = "cc_$chart_id";
-    my $join_sql =
-        "LEFT JOIN cc AS $table"
-        .     " ON bugs.bug_id = $table.bug_id"
-         .       " AND $table.who IN (SELECT userid FROM profiles WHERE $term)";
-    push(@$joins, $join_sql);
+    my $join = {
+        table => 'cc',
+        as    => $table,
+        extra => ["$table.who IN (SELECT userid FROM profiles WHERE $term)"],
+    };
+    push(@$joins, $join);
     
     $args->{term} = "$table.who IS NOT NULL";
 }
@@ -1788,8 +1811,7 @@ sub _long_desc_changedby {
     my ($chart_id, $joins, $value) = @$args{qw(chart_id joins value)};
     
     my $table = "longdescs_$chart_id";
-    push(@$joins, "LEFT JOIN longdescs AS $table " .
-                         "ON $table.bug_id = bugs.bug_id");
+    push(@$joins, { table => 'longdescs', as => $table });
     my $user_id = login_to_id($value, THROW_ERROR);
     $args->{term} = "$table.who = $user_id";
 }
@@ -1803,11 +1825,12 @@ sub _long_desc_changedbefore_after {
     my $sql_operator = ($operator =~ /before/) ? '<=' : '>=';
     my $table = "longdescs_$chart_id";
     my $sql_date = $dbh->quote(SqlifyDate($value));
-    my $join_sql =
-        "LEFT JOIN longdescs AS $table "
-        .        " ON $table.bug_id = bugs.bug_id"
-        .           " AND $table.bug_when $sql_operator $sql_date";
-    push(@$joins, $join_sql);
+    my $join = {
+        table => 'longdescs',
+        as    => $table,
+        extra => ["$table.bug_when $sql_operator $sql_date"],
+    };
+    push(@$joins, $join);
     $args->{term} = "$table.bug_when IS NOT NULL";
 }
 
@@ -1828,8 +1851,7 @@ sub _content_matches {
     my $table = "bugs_fulltext_$chart_id";
     my $comments_col = "comments";
     $comments_col = "comments_noprivate" unless $self->{'user'}->is_insider;
-    push(@$joins, "LEFT JOIN bugs_fulltext AS $table " .
-                         "ON bugs.bug_id = $table.bug_id");
+    push(@$joins, { table => 'bugs_fulltext', as => $table });
     
     # Create search terms to add to the SELECT and WHERE clauses.
     my ($term1, $rterm1) =
@@ -1903,11 +1925,12 @@ sub _commenter {
     }
     $self->_do_operator_function($args);
     my $term = $args->{term};
-    my $join_sql =
-        "LEFT JOIN longdescs AS $table"
-        . " ON $table.bug_id = bugs.bug_id $extra"
-        .    " AND $table.who IN (SELECT userid FROM profiles WHERE $term)";
-    push(@$joins, $join_sql);
+    my $join = {
+        table => 'longdescs',
+        as    => $table,
+        extra => ["$table.who IN (SELECT userid FROM profiles WHERE $term)"],
+    };
+    push(@$joins, $join);
     $args->{term} = "$table.who IS NOT NULL";
 }
 
@@ -1916,9 +1939,13 @@ sub _long_desc {
     my ($chart_id, $joins) = @$args{qw(chart_id joins)};
     
     my $table = "longdescs_$chart_id";
-    my $extra = $self->{'user'}->is_insider ? "" : "AND $table.isprivate = 0";
-    push(@$joins, "LEFT JOIN longdescs AS $table " .
-                         "ON $table.bug_id = bugs.bug_id $extra");
+    my $extra = $self->{'user'}->is_insider ? [] : ["$table.isprivate = 0"];
+    my $join = {
+        table => 'longdescs',
+        as    => $table,
+        extra => $extra,
+    };
+    push(@$joins, $join);
     $args->{full_field} = "$table.thetext";
 }
 
@@ -1927,9 +1954,13 @@ sub _longdescs_isprivate {
     my ($chart_id, $joins) = @$args{qw(chart_id joins)};
     
     my $table = "longdescs_$chart_id";
-    my $extra = $self->{'user'}->is_insider ? "" : "AND $table.isprivate = 0";
-    push(@$joins, "LEFT JOIN longdescs AS $table " .
-                         "ON $table.bug_id = bugs.bug_id $extra");
+    my $extra = $self->{'user'}->is_insider ? [] : ["$table.isprivate = 0"];
+    my $join = {
+        table => 'longdescs',
+        as    => $table,
+        extra => $extra,
+    };
+    push(@$joins, $join);
     $args->{full_field} = "$table.isprivate";
 }
 
@@ -1938,8 +1969,7 @@ sub _work_time_changedby {
     my ($chart_id, $joins, $value) = @$args{qw(chart_id joins value)};
     
     my $table = "longdescs_$chart_id";
-    push(@$joins, "LEFT JOIN longdescs AS $table " .
-                         "ON $table.bug_id = bugs.bug_id");
+    push(@$joins, { table => 'longdescs', as => $table });
     my $user_id = login_to_id($value, THROW_ERROR);
     $args->{term} = "$table.who = $user_id AND $table.work_time != 0";
 }
@@ -1953,12 +1983,13 @@ sub _work_time_changedbefore_after {
     my $table = "longdescs_$chart_id";
     my $sql_operator = ($operator =~ /before/) ? '<=' : '>=';
     my $sql_date = $dbh->quote(SqlifyDate($value));
-    my $join_sql =
-        "LEFT JOIN longdescs AS $table"
-        .     " ON $table.bug_id = bugs.bug_id"
-        .        " AND $table.work_time != 0"
-        .        " AND $table.bug_when $sql_operator $sql_date";
-    push(@$joins, $join_sql);
+    my $join = {
+        table => 'longdescs',
+        as    => $table,
+        extra => ["$table.work_time != 0",
+                  "$table.bug_when $sql_operator $sql_date"],
+    };
+    push(@$joins, $join);
     
     $args->{term} = "$table.bug_when IS NOT NULL";
 }
@@ -1968,8 +1999,7 @@ sub _work_time {
     my ($chart_id, $joins) = @$args{qw(chart_id joins)};
     
     my $table = "longdescs_$chart_id";
-    push(@$joins, "LEFT JOIN longdescs AS $table " .
-                         "ON $table.bug_id = bugs.bug_id");
+    push(@$joins, { table => 'longdescs', as => $table });
     $args->{full_field} = "$table.work_time";
 }
 
@@ -1987,8 +2017,7 @@ sub _percentage_complete {
     my $expression = COLUMNS->{percentage_complete}->{name};
     $expression =~ s/\bldtime\b/$table/g;
     $args->{full_field} = "($expression)";
-    push(@$joins, "LEFT JOIN longdescs AS $table " .
-                         "ON $table.bug_id = bugs.bug_id");
+    push(@$joins, { table => 'longdescs', as => $table });
 
     # We need remaining_time in _select_columns, otherwise we can't use
     # it in the expression for creating percentage_complete.
@@ -2007,18 +2036,22 @@ sub _bug_group_nonchanged {
     my ($chart_id, $joins, $field) = @$args{qw(chart_id joins field)};
     
     my $map_table = "bug_group_map_$chart_id";
-    push(@$joins,
-        "LEFT JOIN bug_group_map AS $map_table " .
-               "ON bugs.bug_id = $map_table.bug_id");
+    
+    push(@$joins, { table => 'bug_group_map', as => $map_table });
     
     my $groups_table = "groups_$chart_id";
     my $full_field = "$groups_table.name";
     $args->{full_field} = $full_field;
     $self->_do_operator_function($args);
     my $term = $args->{term};
-    push(@$joins,
-        "LEFT JOIN groups AS $groups_table " .
-               "ON $groups_table.id = $map_table.group_id AND $term");
+    my $groups_join = {
+        table => 'groups',
+        as    => $groups_table,
+        from  => "$map_table.group_id",
+        to    => 'id',
+        extra => [$term],
+    };
+    push(@$joins, $groups_join);
     $args->{term} = "$full_field IS NOT NULL";
 }
 
@@ -2029,11 +2062,19 @@ sub _attach_data_thedata {
     my $attach_table = "attachments_$chart_id";
     my $data_table = "attachdata_$chart_id";
     my $extra = $self->{'user'}->is_insider
-                ? "" : "AND $attach_table.isprivate = 0";
-    push(@$joins, "LEFT JOIN attachments AS $attach_table " .
-                         "ON bugs.bug_id = $attach_table.bug_id $extra");
-    push(@$joins, "LEFT JOIN attach_data AS $data_table " .
-                       "ON $data_table.id = $attach_table.attach_id");
+                ? [] : ["$attach_table.isprivate = 0"];
+    my $attachments_join = {
+        table => 'attachments',
+        as    => $attach_table,
+        extra => $extra,
+    };
+    my $data_join = {
+        table => 'attach_data',
+        as    => $data_table,
+        from  => "$attach_table.attach_id",
+        to    => "id",
+    };
+    push(@$joins, $attachments_join, $data_join);
     $args->{full_field} = "$data_table.thedata";
 }
 
@@ -2041,16 +2082,24 @@ sub _attachments_submitter {
     my ($self, $args) = @_;
     my ($chart_id, $joins) = @$args{qw(chart_id joins)};
     
-    my $attach_table = "attachment_submitter_$chart_id";
+    my $attach_table = "attachments_$chart_id";
+    my $profiles_table = "map_attachment_submitter_$chart_id";    
     my $extra = $self->{'user'}->is_insider
-                ? "" : "AND $attach_table.isprivate = 0";
-    push(@$joins, "LEFT JOIN attachments AS $attach_table " .
-                         "ON bugs.bug_id = $attach_table.bug_id $extra");
+                ? [] : ["$attach_table.isprivate = 0"];
+    my $attachments_join = {
+        table => 'attachments',
+        as    => $attach_table,
+        extra => $extra,
+    };
+    my $profiles_join = {
+        table => 'profiles',
+        as    => $profiles_table,
+        from  => "$attach_table.submitter_id",
+        to    => 'userid',
+    };
+    push(@$joins, $attachments_join, $profiles_join);
     
-    my $map_table = "map_attachment_submitter_$chart_id";
-    push(@$joins, "LEFT JOIN profiles AS $map_table " .
-                         "ON $attach_table.submitter_id = $map_table.userid");
-    $args->{full_field} = "$map_table.login_name";
+    $args->{full_field} = "$profiles_table.login_name";
 }
 
 sub _attachments {
@@ -2060,10 +2109,13 @@ sub _attachments {
     my $dbh = Bugzilla->dbh;
     
     my $table = "attachments_$chart_id";
-    my $extra = $self->{'user'}->is_insider ? "" : "AND $table.isprivate = 0";
-    push(@$joins, "LEFT JOIN attachments AS $table " .
-                         "ON bugs.bug_id = $table.bug_id $extra");
-    
+    my $extra = $self->{'user'}->is_insider? [] : ["$table.isprivate = 0"];
+    my $join = {
+        table => 'attachments',
+        as    => $table,
+        extra => $extra,
+    };
+    push(@$joins, $join);
     $field =~ /^attachments\.(.+)$/;
     my $attach_field = $1;
     
@@ -2074,19 +2126,25 @@ sub _join_flag_tables {
     my ($self, $args) = @_;
     my ($joins, $chart_id) = @$args{qw(joins chart_id)};
     
-    my $attachments = "attachments_$chart_id";
+    my $attach_table = "attachments_$chart_id";
+    my $flags_table = "flags_$chart_id";
     my $extra = $self->{'user'}->is_insider
-                ? "" : "AND $attachments.isprivate = 0";
-    push(@$joins, "LEFT JOIN attachments AS $attachments " .
-                         "ON bugs.bug_id = $attachments.bug_id $extra");
-    my $flags = "flags_$chart_id";
+                ? [] : ["$attach_table.isprivate = 0"];
+    my $attachments_join = {
+        table => 'attachments',
+        as    => $attach_table,
+        extra => $extra,
+    };
     # We join both the bugs and the attachments table in separately,
     # and then the join code will later combine the terms.
-    push(@$joins, "LEFT JOIN flags AS $flags " . 
-                         "ON bugs.bug_id = $flags.bug_id ");
-    push(@$joins, "LEFT JOIN flags AS $flags " .
-                         "ON $flags.attach_id = $attachments.attach_id " .
-                             "OR $flags.attach_id IS NULL");
+    my $flags_join = {
+        table => 'flags',
+        as    => $flags_table,
+        extra => ["($flags_table.attach_id = $attach_table.attach_id "
+                  . " OR $flags_table.attach_id IS NULL)"],
+    };
+    
+    push(@$joins, $attachments_join, $flags_join);
 }
 
 sub _flagtypes_name {
@@ -2110,8 +2168,13 @@ sub _flagtypes_name {
     $self->_join_flag_tables($args);
     my $flags = "flags_$chart_id";
     my $flagtypes = "flagtypes_$chart_id";
-    push(@$joins, "LEFT JOIN flagtypes AS $flagtypes " . 
-                         "ON $flags.type_id = $flagtypes.id");
+    my $flagtypes_join = {
+        table => 'flagtypes',
+        as    => $flagtypes,
+        from  => "$flags.type_id",
+        to    => 'id',
+    };
+    push(@$joins, $flagtypes_join);
     
     # Generate the condition by running the operator-specific
     # function. Afterwards the condition resides in the $args->{term}
@@ -2146,8 +2209,13 @@ sub _requestees_login_name {
     $self->_join_flag_tables($args);
     my $flags = "flags_$chart_id";
     my $map_table = "map_flag_requestees_$chart_id";
-    push(@$joins, "LEFT JOIN profiles AS $map_table " .
-                         "ON $flags.requestee_id = $map_table.userid");
+    my $profiles_join = {
+        table => 'profiles',
+        as    => $map_table,
+        from  => "$flags.requestee_id",
+        to    => 'userid',
+    };
+    push(@$joins, $profiles_join);
 
     $args->{full_field} = "$map_table.login_name";
 }
@@ -2159,9 +2227,13 @@ sub _setters_login_name {
     $self->_join_flag_tables($args);
     my $flags = "flags_$chart_id";
     my $map_table = "map_flag_setters_$chart_id";
-    push(@$joins, "LEFT JOIN profiles AS $map_table " .
-                         "ON $flags.setter_id = $map_table.userid");
-
+    my $profiles_join = {
+        table => 'profiles',
+        as    => $map_table,
+        from  => "$flags.setter_id",
+        to    => 'userid',
+    };
+    push(@$joins, $profiles_join);
     $args->{full_field} = "$map_table.login_name";
 }
 
@@ -2198,9 +2270,10 @@ sub _classification_nonchanged {
     my ($self, $args) = @_;
     my $joins = $args->{joins};
     
-    # Generate the restriction condition
-    push(@$joins, "INNER JOIN products AS map_product " .
-                          "ON bugs.product_id = map_product.id");
+    # This joins the right tables for us.
+    $self->_add_extra_column('product');
+    
+    # Generate the restriction condition    
     $args->{full_field} = "classifications.name";
     $self->_do_operator_function($args);
     my $term = $args->{term};
@@ -2228,13 +2301,12 @@ sub _keywords_exact {
         return;
     }
     
-    # This is an optimization for anywords, since we already know
+    # This is an optimization for anywords and anyexact, since we already know
     # the keyword id from having checked it above.
-    if ($operator eq 'anywords') {
+    if ($operator eq 'anywords' or $operator eq 'anyexact') {
         my $table = "keywords_$chart_id";
         $args->{term} = $dbh->sql_in("$table.keywordid", \@keyword_ids);
-        push(@$joins, "LEFT JOIN keywords AS $table"
-                      .     " ON $table.bug_id = bugs.bug_id");
+        push(@$joins, { table => 'keywords', as => $table });
         return;
     }
     
@@ -2249,10 +2321,14 @@ sub _keywords_nonchanged {
     my $k_table = "keywords_$chart_id";
     my $kd_table = "keyworddefs_$chart_id";
     
-    push(@$joins, "LEFT JOIN keywords AS $k_table " .
-                         "ON $k_table.bug_id = bugs.bug_id");
-    push(@$joins, "LEFT JOIN keyworddefs AS $kd_table " .
-                         "ON $kd_table.id = $k_table.keywordid");
+    push(@$joins, { table => 'keywords', as => $k_table });
+    my $defs_join = {
+        table => 'keyworddefs',
+        as    => $kd_table,
+        from  => "$k_table.keywordid",
+        to    => 'id',
+    };
+    push(@$joins, $defs_join);
     
     $args->{full_field} = "$kd_table.name";
 }
@@ -2268,8 +2344,13 @@ sub _dependson_nonchanged {
     $args->{full_field} = $full_field;
     $self->_do_operator_function($args);
     my $term = $args->{term};
-    push(@$joins, "LEFT JOIN dependencies AS $table " .
-                         "ON $table.blocked = bugs.bug_id AND ($term)");
+    my $dep_join = {
+        table => 'dependencies',
+        as    => $table,
+        to    => 'blocked',
+        extra => [$term],
+    };
+    push(@$joins, $dep_join);
     $args->{term} = "$full_field IS NOT NULL";
 }
 
@@ -2283,8 +2364,13 @@ sub _blocked_nonchanged {
     $args->{full_field} = $full_field;
     $self->_do_operator_function($args);
     my $term = $args->{term};
-    push(@$joins, "LEFT JOIN dependencies AS $table " .
-                         "ON $table.dependson = bugs.bug_id AND ($term)");
+    my $dep_join = {
+        table => 'dependencies',
+        as    => $table,
+        to    => 'dependson',
+        extra => [$term],
+    };
+    push(@$joins, $dep_join);
     $args->{term} = "$full_field IS NOT NULL";
 }
 
@@ -2304,29 +2390,27 @@ sub _owner_idle_time_greater_less {
     my $quoted = $dbh->quote(SqlifyDate($value));
     
     my $ld_table = "comment_$table";
-    my $comments_join =
-        "LEFT JOIN longdescs AS $ld_table"
-        .     " ON $ld_table.who = bugs.assigned_to"
-        .        " AND $ld_table.bug_id = bugs.bug_id"
-        .        " AND $ld_table.bug_when > $quoted";
-    push(@$joins, $comments_join);
-
-    my $act_table = "activity_$table";
-    my $assigned_fieldid = $self->_chart_fields->{'assigned_to'}->id;
-
-    # XXX Why are we joining using $assignedto_fieldid here? It shouldn't
-    #     matter when or if the assignee changed.
-    my $activity_join =
-        "LEFT JOIN bugs_activity AS $act_table"
-        .     " ON ( $act_table.who = bugs.assigned_to"
-        .         "  OR $act_table.fieldid = $assigned_fieldid )"
-        .        " AND $act_table.bug_id = bugs.bug_id"
-        .        " AND $act_table.bug_when > $quoted";
-    push(@$joins, $activity_join);
+    my $act_table = "activity_$table";    
+    my $comments_join = {
+        table => 'longdescs',
+        as    => $ld_table,
+        from  => 'assigned_to',
+        to    => 'who',
+        extra => ["$ld_table.bug_when > $quoted"],
+    };
+    my $activity_join = {
+        table => 'bugs_activity',
+        as    => $act_table,
+        from  => 'assigned_to',
+        to    => 'who',
+        extra => ["$act_table.bug_when > $quoted"]
+    };
+    
+    push(@$joins, $comments_join, $activity_join);
     
     if ($operator =~ /greater/) {
         $args->{term} =
-            "$ld_table.who IS NULL AND $act_table.who IS NULL)";
+            "$ld_table.who IS NULL AND $act_table.who IS NULL";
     } else {
          $args->{term} =
             "$ld_table.who IS NOT NULL OR $act_table.who IS NOT NULL";
@@ -2356,8 +2440,8 @@ sub _multiselect_negative {
 
 sub _multiselect_multiple {
     my ($self, $args) = @_;
-    my ($chart_id, $joins, $field, $operator, $value)
-        = @$args{qw(chart_id joins field operator value)};
+    my ($chart_id, $field, $operator, $value)
+        = @$args{qw(chart_id field operator value)};
     my $dbh = Bugzilla->dbh;
     
     my $table = "bug_$field";
@@ -2387,8 +2471,7 @@ sub _multiselect_nonchanged {
 
     my $table = "${field}_$chart_id";
     $args->{full_field} = "$table.value";
-    push(@$joins, "LEFT JOIN bug_$field AS $table " .
-                         "ON $table.bug_id = bugs.bug_id ");
+    push(@$joins, { table => "bug_$field", as => $table });
 }
 
 sub _simple_operator {
@@ -2527,11 +2610,13 @@ sub _changedbefore_changedafter {
     my $table = "act_${field_id}_$chart_id";
 
     my $sql_date = $dbh->quote(SqlifyDate($value));
-    push(@$joins,
-        "LEFT JOIN bugs_activity AS $table"
-        .     " ON $table.bug_id = bugs.bug_id"
-        .         " AND $table.fieldid = $field_id"
-        .         " AND $table.bug_when $sql_operator $sql_date");
+    my $join = {
+        table => 'bugs_activity',
+        as    => $table,
+        extra => ["$table.fieldid = $field_id",
+                  "$table.bug_when $sql_operator $sql_date"],
+    };
+    push(@$joins, $join);
     $args->{term} = "$table.bug_when IS NOT NULL";
 }
 
@@ -2545,11 +2630,14 @@ sub _changedfrom_changedto {
         || ThrowCodeError("invalid_field_name", { field => $field });
     my $field_id = $field_object->id;
     my $table = "act_${field_id}_$chart_id";
-    push(@$joins,
-        "LEFT JOIN bugs_activity AS $table"
-        .     " ON $table.bug_id = bugs.bug_id"
-        .        " AND $table.fieldid = $field_id"
-        .        " AND $table.$column = $quoted");
+    my $join = {
+        table => 'bugs_activity',
+        as    => $table,
+        extra => ["$table.fieldid = $field_id",
+                  "$table.$column = $quoted"],
+    };
+    push(@$joins, $join);
+
     $args->{term} = "$table.bug_when IS NOT NULL";
 }
 
@@ -2563,11 +2651,13 @@ sub _changedby {
     my $field_id = $field_object->id;
     my $table = "act_${field_id}_$chart_id";
     my $user_id  = login_to_id($value, THROW_ERROR);
-    push(@$joins,
-        "LEFT JOIN bugs_activity AS $table"
-        .     " ON $table.bug_id = bugs.bug_id"
-        .        " AND $table.fieldid = $field_id"
-        .        " AND $table.who = $user_id");
+    my $join = {
+        table => 'bugs_activity',
+        as    => $table,
+        extra => ["$table.fieldid = $field_id",
+                  "$table.who = $user_id"],
+    };
+    push(@$joins, $join);
     $args->{term} = "$table.bug_when IS NOT NULL";
 }
 

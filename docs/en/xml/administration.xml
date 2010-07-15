@@ -1127,7 +1127,10 @@
             <emphasis>&lt;groupname&gt;</emphasis>: 
             If you have created some groups, e.g. "securitysensitive", then
             checkboxes will appear here to allow you to add users to, or
-            remove them from, these groups.
+            remove them from, these groups. The first checkbox gives the
+            user the ability to add and remove other users as members of
+            this group. The second checkbox adds the user himself as a member
+            of the group.
             </para>
           </listitem>
 

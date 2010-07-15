@@ -55,7 +55,7 @@ use Bugzilla::Keyword;
 use Data::Dumper;
 use Date::Format;
 use Date::Parse;
-use List::MoreUtils qw(uniq);
+use List::MoreUtils qw(all part uniq);
 use Storable qw(dclone);
 
 #############
@@ -657,8 +657,80 @@ sub _sql_order_by {
 # Internal Accessors: FROM #
 ############################
 
-# JOIN statements for the SELECT and ORDER BY columns. This should not be called
-# Until the moment it is needed, because _select_columns might be
+sub _column_join {
+    my ($self, $field) = @_;
+    my $join_info = COLUMN_JOINS->{$field};
+    if ($join_info) {
+        # Don't allow callers to modify the constant.
+        $join_info = dclone($join_info);
+    }
+    else {
+        if ($self->_multi_select_fields->{$field}) {
+            $join_info = { table => "bug_$field" };
+        }
+    }
+    if ($join_info and !$join_info->{as}) {
+        $join_info = dclone($join_info);
+        $join_info->{as} = "map_$field";
+    }
+    return $join_info ? $join_info : ();
+}
+
+# Sometimes we join the same table more than once. In this case, we
+# want to AND all the various critiera that were used in both joins.
+sub _combine_joins {
+    my ($self, $joins) = @_;
+    my @result;
+    while(my $join = shift @$joins) {
+        my $name = $join->{as};
+        my ($others_like_me, $the_rest) = part { $_->{as} eq $name ? 0 : 1 }
+                                               @$joins;
+        if ($others_like_me) {
+            my $from = $join->{from};
+            my $to   = $join->{to};
+            # Sanity check to make sure that we have the same from and to
+            # for all the same-named joins.
+            if ($from) {
+                all { $_->{from} eq $from } @$others_like_me
+                  or die "Not all same-named joins have identical 'from': "
+                         . Dumper($join, $others_like_me);
+            }
+            if ($to) {
+                all { $_->{to} eq $to } @$others_like_me
+                  or die "Not all same-named joins have identical 'to': "
+                         . Dumper($join, $others_like_me);
+            }
+            
+            # We don't need to call uniq here--translate_join will do that
+            # for us.
+            my @conditions = map { @{ $_->{extra} || [] } }
+                                 ($join, @$others_like_me);
+            $join->{extra} = \@conditions;
+            $joins = $the_rest;
+        }
+        push(@result, $join);
+    }
+    
+    return @result;
+}
+
+# Takes all the "then_to" items and just puts them as the next item in
+# the array. Right now this only does one level of "then_to", but we
+# could re-write this to handle then_to recursively if we need more levels.
+sub _extract_then_to {
+    my ($self, $joins) = @_;
+    my @result;
+    foreach my $join (@$joins) {
+        push(@result, $join);
+        if (my $then_to = $join->{then_to}) {
+            push(@result, $then_to);
+        }
+    }
+    return @result;
+}
+
+# JOIN statements for the SELECT and ORDER BY columns. This should not be
+# called until the moment it is needed, because _select_columns might be
 # modified by the charts.
 sub _select_order_joins {
     my ($self) = @_;
@@ -670,11 +742,84 @@ sub _select_order_joins {
     foreach my $field ($self->_input_order_columns) {
         my $join_info = $self->_special_order->{$field}->{join};
         if ($join_info) {
-            my @join_sql = $self->_translate_join($join_info, $field);
-            push(@joins, @join_sql);
+            # Don't let callers modify SPECIAL_ORDER.
+            $join_info = dclone($join_info);
+            if (!$join_info->{as}) {
+                $join_info->{as} = "map_$field";
+            }
+            push(@joins, $join_info);
         }
     }
     return @joins;
+}
+
+# These are the joins that are *always* in the FROM clause.
+sub _standard_joins {
+    my ($self) = @_;
+    my $user = $self->{'user'};
+    my @joins;
+
+    my $security_join = {
+        table => 'bug_group_map',
+        as    => 'security_map',
+    };
+    push(@joins, $security_join);
+
+    if ($user->id) {
+        $security_join->{extra} =
+            ["NOT (" . $user->groups_in_sql('security_map.group_id') . ")"];
+            
+        my $security_cc_join = {
+            table => 'cc',
+            as    => 'security_cc',
+            extra => ['security_cc.who = ' . $user->id],
+        };
+        push(@joins, $security_cc_join);
+    }
+    
+    return @joins;
+}
+
+sub _sql_from {
+    my ($self, $joins_input) = @_;
+    my @joins = ($self->_standard_joins, $self->_select_order_joins,
+                 @$joins_input);
+    @joins = $self->_extract_then_to(\@joins);
+    @joins = $self->_combine_joins(\@joins);
+    my @join_sql = map { $self->_translate_join($_) } @joins;
+    return "bugs\n" . join("\n", @join_sql);
+}
+
+sub _translate_join {
+    my ($self, $join_info) = @_;
+    
+    die "join with no table: " . Dumper($join_info) if !$join_info->{table};
+    die "join with no 'as': " . Dumper($join_info) if !$join_info->{as};
+        
+    my $from_table = "bugs";
+    my $from  = $join_info->{from} || "bug_id";
+    if ($from =~ /^(\w+)\.(\w+)$/) {
+        ($from_table, $from) = ($1, $2);
+    }
+    my $table = $join_info->{table};
+    my $name  = $join_info->{as};
+    my $to    = $join_info->{to}    || "bug_id";
+    my $join  = $join_info->{join}  || 'LEFT';
+    my @extra = @{ $join_info->{extra} || [] };
+    $name =~ s/\./_/g;
+    
+    # If a term contains ORs, we need to put parens around the condition.
+    # This is a pretty weak test, but it's actually OK to put parens
+    # around too many things.
+    @extra = map { $_ =~ /\bOR\b/i ? "($_)" : $_ } @extra;
+    my $extra_condition = join(' AND ', uniq @extra);
+    if ($extra_condition) {
+        $extra_condition = " AND $extra_condition";
+    }
+
+    my @join_sql = "$join JOIN $table AS $name"
+                        . " ON $from_table.$from = $name.$to$extra_condition";
+    return @join_sql;
 }
 
 ################################
@@ -1117,18 +1262,6 @@ sub _handle_chart {
 # Helpers for Internal Accessors #
 ##################################
 
-sub _column_join {
-    my ($self, $field) = @_;
-    my $join_info = COLUMN_JOINS->{$field};
-    if (!$join_info) {
-        if ($self->_multi_select_fields->{$field}) {
-            return $self->_translate_join({ table => "bug_$field" }, $field);
-        }
-        return ();
-    }
-    return $self->_translate_join($join_info, $field);
-}
-
 sub _valid_values {
     my ($input, $valid, $extra_value) = @_;
     my @result;
@@ -1141,43 +1274,6 @@ sub _valid_values {
         }
     }
     return @result;
-}
-
-sub _translate_join {
-    my ($self, $join_info, $field) = @_;
-    
-    die "join with no table: " . Dumper($join_info, $field)
-        if !$join_info->{table};
-    die "join with no name: " . Dumper($join_info, $field)
-        if (!$join_info->{as} and !$field);
-        
-    my $from_table = "bugs";
-    my $from  = $join_info->{from} || "bug_id";
-    if ($from =~ /^(\w+)\.(\w+)$/) {
-        ($from_table, $from) = ($1, $2);
-    }
-    my $to    = $join_info->{to}    || "bug_id";
-    my $join  = $join_info->{join}  || 'LEFT';
-    my $table = $join_info->{table};
-    my @extra = @{ $join_info->{extra} || [] };
-    my $name  = $join_info->{as}    || "map_$field";
-    $name =~ s/\./_/g;
-    
-    # If a term contains ORs, we need to put parens around the condition.
-    # This is a pretty weak test, but it's actually OK to put parens
-    # around too many things.
-    @extra = map { $_ =~ /\bOR\b/i ? "($_)" : $_ } @extra;
-    my $extra_condition = join(' AND ', uniq @extra);
-    if ($extra_condition) {
-        $extra_condition = " AND $extra_condition";
-    }
-
-    my @join_sql = "$join JOIN $table AS $name"
-                        . " ON $from_table.$from = $name.$to$extra_condition";
-    if (my $then_to = $join_info->{then_to}) {
-        push(@join_sql, $self->_translate_join($then_to));
-    }
-    return @join_sql;
 }
 
 sub _translate_order_by_column {
@@ -1311,52 +1407,18 @@ sub init {
 
     my ($joins, $having, $where_terms) = $self->_charts_to_conditions();
 
-    my %suppseen = ("bugs" => 1);
-    my $suppstring = "bugs";
-    my @supplist = (" ");
-    my @join_sql = map { $self->_translate_join($_) } @$joins;
-    foreach my $str ($self->_select_order_joins, @join_sql) {
-
-        if ($str =~ /^(LEFT|INNER|RIGHT)\s+JOIN/i) {
-            $str =~ /^(.*?)\s+ON\s+(.*)$/i;
-            my ($leftside, $rightside) = ($1, $2);
-            if (defined $suppseen{$leftside}) {
-                $supplist[$suppseen{$leftside}] .= " AND ($rightside)";
-            } else {
-                $suppseen{$leftside} = scalar @supplist;
-                push @supplist, " $leftside ON ($rightside)";
-            }
-        } else {
-            # Do not accept implicit joins using comma operator
-            # as they are not DB agnostic
-            ThrowCodeError("comma_operator_deprecated");
-        }
-    }
-    $suppstring .= join('', @supplist);
-    
     my $query = "SELECT " . join(', ', $self->_sql_select) .
-                " FROM $suppstring" .
-                " LEFT JOIN bug_group_map " .
-                " ON bug_group_map.bug_id = bugs.bug_id ";
+                "\n  FROM " . $self->_sql_from($joins);
 
-    if ($user->id) {
-        if (scalar @{ $user->groups }) {
-            $query .= " AND bug_group_map.group_id NOT IN (" 
-                   . $user->groups_as_string . ") ";
-        }
-
-        $query .= " LEFT JOIN cc ON cc.bug_id = bugs.bug_id AND cc.who = " . $user->id;
-    }
-    
     push(@$where_terms, 'bugs.creation_ts IS NOT NULL');
 
-    my $security_term = '(bug_group_map.group_id IS NULL';
+    my $security_term = '(security_map.group_id IS NULL';
 
     if ($user->id) {
         my $userid = $user->id;
         $security_term .= <<END;
  OR (bugs.reporter_accessible = 1 AND bugs.reporter = $userid)
- OR (bugs.cclist_accessible = 1 AND cc.who IS NOT NULL)
+ OR (bugs.cclist_accessible = 1 AND security_cc.who IS NOT NULL)
  OR bugs.assigned_to = $userid
 END
         if (Bugzilla->params->{'useqacontact'}) {
@@ -1367,7 +1429,7 @@ END
     $security_term .= ")";
     push(@$where_terms, $security_term);
     
-    $query .= ' WHERE ' . join(' AND ', @$where_terms) . ' '
+    $query .= "\n WHERE " . join(' AND ', @$where_terms) . ' '
               . $dbh->sql_group_by($self->_sql_group_by);
 
 

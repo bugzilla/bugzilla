@@ -308,6 +308,9 @@ sub param {
         if (!scalar(@result)
             && $self->request_method && $self->request_method eq 'POST')
         {
+            # Some servers fail to set the QUERY_STRING parameter, which
+            # causes undef issues
+            $ENV{'QUERY_STRING'} = '' unless exists $ENV{'QUERY_STRING'};
             @result = $self->SUPER::url_param(@_);
         }
 

@@ -274,6 +274,10 @@ use constant FIELD_MAP => {
 # <none> for the X, Y, or Z axis in report.cgi.
 use constant EMPTY_COLUMN => '-1';
 
+# A special value that is pushed into charts during _params_to_charts to
+# represent that the particular chart we're dealing with should be negated.
+use constant NEGATE => 'NOT';
+
 # Some fields are not sorted on themselves, but on other fields. 
 # We need to have a list of these fields and what they map to.
 use constant SPECIAL_ORDER => {
@@ -719,7 +723,9 @@ sub _skip_group_by {
 # Internal Accessors: Special Params Parsing #
 ##############################################
 
-sub _convert_special_params_to_charts {
+sub _params { $_[0]->{params} }
+
+sub _convert_special_params_to_chart_params {
     my ($self) = @_;
     my $params = $self->_params;
     
@@ -746,8 +752,6 @@ sub _convert_special_params_to_charts {
         $and++;
     }
 }
-
-sub _params { $_[0]->{params} }
 
 # This parses all the standard search parameters except for the boolean
 # charts.
@@ -965,6 +969,148 @@ sub _special_parse_resolution {
     }
 }
 
+######################################
+# Internal Accessors: Boolean Charts #
+######################################
+
+sub _charts_to_conditions {
+    my ($self) = @_;
+    my @charts = $self->_params_to_charts();
+    
+    my (@joins, @having, @where_terms);
+    
+    foreach my $chart (@charts) {
+        my @and_terms;
+        my $negate;
+        foreach my $and_item (@$chart) {
+            if (!ref $and_item and $and_item eq NEGATE) {
+                $negate = 1;
+                next;
+            }
+            my @or_terms;
+            foreach my $or_item (@$and_item) {
+                if ($or_item->{term} ne '') {
+                    push(@or_terms, $or_item->{term});
+                }
+                push(@joins, @{ $or_item->{joins} });
+                push(@having, @{ $or_item->{having} });
+            }
+            my $or_sql = join(' OR ', map { "($_)" } @or_terms);
+            push(@and_terms, $or_sql) if $or_sql ne '';
+        }
+        @and_terms = map { "($_)" } @and_terms;
+        foreach my $and_term (@and_terms) {
+            # Clean up the SQL a bit by removing extra parens.
+            while ($and_term =~ /^\(\(/ and $and_term =~ /\)\)$/) {
+                $and_term =~ s/^\(//;
+                $and_term =~ s/\)$//;
+            }
+        }
+        my $and_sql = join(' AND ', @and_terms);
+        if ($negate and $and_sql ne '') {
+            $and_sql = "NOT ($and_sql)";
+        }
+        push(@where_terms, $and_sql) if $and_sql ne '';
+    }
+
+    return (\@joins, \@having, \@where_terms);
+}
+
+sub _params_to_charts {
+    my ($self) = @_;
+    my $params = $self->_params;
+    $self->_convert_special_params_to_chart_params();
+    my @param_list = $params->param();
+    
+    my @all_field_params = grep { /^field-?\d+/ } @param_list;
+    my @chart_ids = map { /^field(-?\d+)/; $1 } @all_field_params;
+    @chart_ids = sort { $a <=> $b } uniq @chart_ids;
+    
+    my $sequence = 0;
+    my @charts;
+    foreach my $chart_id (@chart_ids) {
+        my @all_and = grep { /^field$chart_id-\d+/ } @param_list;
+        my @and_ids = map { /^field$chart_id-(\d+)/; $1 } @all_and;
+        @and_ids = sort { $a <=> $b } uniq @and_ids;
+        
+        my @and_charts;
+        foreach my $and_id (@and_ids) {
+            my @all_or = grep { /^field$chart_id-$and_id-\d+/ } @param_list;
+            my @or_ids = map { /^field$chart_id-$and_id-(\d+)/; $1 } @all_or;
+            @or_ids = sort { $a <=> $b } uniq @or_ids;
+            
+            my @or_charts;
+            foreach my $or_id (@or_ids) {
+                my $info = $self->_handle_chart($chart_id, $and_id, $or_id);
+                # $info will be undefined if _handle_chart returned early,
+                # meaning that the field, value, or operator were empty.
+                push(@or_charts, $info) if defined $info;
+            }
+            if ($params->param("negate$chart_id")) {
+                push(@and_charts, NEGATE);
+            }
+            push(@and_charts, \@or_charts);
+        }
+        push(@charts, \@and_charts);
+    }
+    
+    return @charts;
+}
+
+sub _handle_chart {
+    my ($self, $chart_id, $and_id, $or_id) = @_;
+    my $dbh = Bugzilla->dbh;
+    my $params = $self->_params;
+    
+    my $sql_chart_id = $chart_id;
+    if ($chart_id < 0) {
+        $sql_chart_id = "default_" . abs($chart_id);
+    }
+    
+    my $identifier = "$chart_id-$and_id-$or_id";
+    
+    my $field = $params->param("field$identifier");
+    my $operator = $params->param("type$identifier");
+    my $value = $params->param("value$identifier");
+
+    return if (!defined $field or !defined $operator or !defined $value);
+    $value = trim($value);
+    return if $value eq '';
+    $self->_chart_fields->{$field}
+        or ThrowCodeError("invalid_field_name", { field => $field });
+    trick_taint($field);
+        
+    # This is the field as you'd reference it in a SQL statement.
+    my $full_field = $field =~ /\./ ? $field : "bugs.$field";
+
+    my $quoted = $dbh->quote($value);
+    trick_taint($quoted);
+
+    my %search_args = (
+        chart_id   => $sql_chart_id,
+        sequence   => $or_id,
+        field      => $field,
+        full_field => $full_field,
+        operator   => $operator,
+        value      => $value,
+        quoted     => $quoted,
+        joins      => [],
+        having     => [],
+    );
+    # This should add a "term" selement to %search_args.
+    $self->do_search_function(\%search_args);
+    
+    # All the things here that don't get pulled out of
+    # %search_args are their original values before
+    # do_search_function modified them.   
+    $self->search_description({
+        field => $field, type => $operator,
+        value => $value, term => $search_args{term},
+    });
+    
+    return \%search_args;
+}
+    
 ##################################
 # Helpers for Internal Accessors #
 ##################################
@@ -1060,14 +1206,9 @@ sub init {
     $self->{'user'} ||= Bugzilla->user;
     my $user = $self->{'user'};
 
-    my @supptables;
-    my @wherepart;
-    my @having;
-    my @andlist;
-
     my $dbh = Bugzilla->dbh;
 
-    $self->_convert_special_params_to_charts();
+   
 
 
 # A boolean chart is a way of representing the terms in a logical
@@ -1152,94 +1293,12 @@ sub init {
 #               chart to merge the ON sections of each.
 # $suppstring = String which is pasted into query containing all table names
 
-    my $sequence = 0;
-    my $row = 0;
-    for (my $chart=-1 ;
-         $chart < 0 || $params->param("field$chart-0-0") ;
-         $chart++) 
-    {
-        my $chartid = $chart >= 0 ? $chart : "";
-        my @chartandlist;
-        for ($row = 0 ;
-             $params->param("field$chart-$row-0") ;
-             $row++) 
-        {
-            my @orlist;
-            for (my $col = 0 ;
-                 $params->param("field$chart-$row-$col") ;
-                 $col++) 
-            {
-                my $field = $params->param("field$chart-$row-$col") || "noop";
-                my $operator = $params->param("type$chart-$row-$col") || "noop";
-                my $value = $params->param("value$chart-$row-$col");
-                $value = "" if !defined $value;
-                $value = trim($value);
-                next if ($field eq "noop" || $operator eq "noop" 
-                         || $value eq "");
-
-                # chart -1 is generated by other code above, not from the user-
-                # submitted form, so we'll blindly accept any values in chart -1
-                if (!$self->_chart_fields->{$field} and $chart != -1) {
-                    ThrowCodeError("invalid_field_name", { field => $field });
-                }
-
-                # This is either from the internal chart (in which case we
-                # already know about it), or it was in _chart_fields, so it is
-                # a valid field name, which means that it's ok.
-                trick_taint($field);
-                my $quoted = $dbh->quote($value);
-                trick_taint($quoted);
-
-                my $full_field = $field =~ /\./ ? $field : "bugs.$field";
-                my %search_args = (
-                    chart_id   => $chartid,
-                    sequence   => $sequence,
-                    field      => $field,
-                    full_field => $full_field,
-                    operator   => $operator,
-                    value      => $value,
-                    quoted     => $quoted,
-                    joins        => \@supptables,
-                    where        => \@wherepart,
-                    having       => \@having,
-                );
-                # This should add a "term" selement to %search_args.
-                $self->do_search_function(\%search_args);
-                
-                if ($search_args{term}) {
-                    # All the things here that don't get pulled out of
-                    # %search_args are their original values before
-                    # do_search_function modified them.
-                    $self->search_description({
-                        field => $field, type => $operator,
-                        value => $value, term => $search_args{term},
-                    });
-                    push(@orlist, $search_args{term});
-                }
-                else {
-                    # This field and this type don't work together.
-                    ThrowUserrror("search_field_operator_invalid",
-                                   { field => $field, operator => $operator });
-                }
-            }
-            if (@orlist) {
-                @orlist = map("($_)", @orlist) if (scalar(@orlist) > 1);
-                push(@chartandlist, "(" . join(" OR ", @orlist) . ")");
-            }
-        }
-        if (@chartandlist) {
-            if ($params->param("negate$chart")) {
-                push(@andlist, "NOT(" . join(" AND ", @chartandlist) . ")");
-            } else {
-                push(@andlist, "(" . join(" AND ", @chartandlist) . ")");
-            }
-        }
-    }
+    my ($joins, $having, $where_terms) = $self->_charts_to_conditions();
 
     my %suppseen = ("bugs" => 1);
     my $suppstring = "bugs";
     my @supplist = (" ");
-    foreach my $str ($self->_select_order_joins, @supptables) {
+    foreach my $str ($self->_select_order_joins, @$joins) {
 
         if ($str =~ /^(LEFT|INNER|RIGHT)\s+JOIN/i) {
             $str =~ /^(.*?)\s+ON\s+(.*)$/i;
@@ -1258,10 +1317,6 @@ sub init {
     }
     $suppstring .= join('', @supplist);
     
-    # Make sure we create a legal SQL query.
-    @andlist = ("1 = 1") if !@andlist;
-
-
     my $query = "SELECT " . join(', ', $self->_sql_select) .
                 " FROM $suppstring" .
                 " LEFT JOIN bug_group_map " .
@@ -1275,25 +1330,32 @@ sub init {
 
         $query .= " LEFT JOIN cc ON cc.bug_id = bugs.bug_id AND cc.who = " . $user->id;
     }
+    
+    push(@$where_terms, 'bugs.creation_ts IS NOT NULL');
 
-    $query .= " WHERE " . join(' AND ', (@wherepart, @andlist)) .
-              " AND bugs.creation_ts IS NOT NULL AND ((bug_group_map.group_id IS NULL)";
+    my $security_term = '(bug_group_map.group_id IS NULL';
 
     if ($user->id) {
         my $userid = $user->id;
-        $query .= "    OR (bugs.reporter_accessible = 1 AND bugs.reporter = $userid) " .
-              "    OR (bugs.cclist_accessible = 1 AND cc.who IS NOT NULL) " .
-              "    OR (bugs.assigned_to = $userid) ";
+        $security_term .= <<END;
+ OR (bugs.reporter_accessible = 1 AND bugs.reporter = $userid)
+ OR (bugs.cclist_accessible = 1 AND cc.who IS NOT NULL)
+ OR bugs.assigned_to = $userid
+END
         if (Bugzilla->params->{'useqacontact'}) {
-            $query .= "OR (bugs.qa_contact = $userid) ";
+            $security_term.= " OR bugs.qa_contact = $userid";
         }
     }
 
-    $query .= ") " . $dbh->sql_group_by($self->_sql_group_by);
+    $security_term .= ")";
+    push(@$where_terms, $security_term);
+    
+    $query .= ' WHERE ' . join(' AND ', @$where_terms) . ' '
+              . $dbh->sql_group_by($self->_sql_group_by);
 
 
-    if (@having) {
-        $query .= " HAVING " . join(" AND ", @having);
+    if (@$having) {
+        $query .= " HAVING " . join(" AND ", @$having);
     }
 
     if ($self->_sql_order_by) {
@@ -1311,7 +1373,7 @@ sub init {
 # it into SQL, using the constants at the top of this file.
 sub do_search_function {
     my ($self, $args) = @_;
-    my ($field, $operator, $value) = @$args{qw(field operator value)};
+    my ($field, $operator) = @$args{qw(field operator)};
     
     my $actual_field = FIELD_MAP->{$field} || $field;
     $args->{field} = $actual_field;
@@ -1347,6 +1409,14 @@ sub do_search_function {
     # direct operator function from OPERATORS.
     if (!defined $args->{term}) {
         $self->_do_operator_function($args);
+    }
+    
+    if (!defined $args->{term}) {
+        # This field and this type don't work together. Generally,
+        # this should never be reached, because it should be handled
+        # explicitly by OPERATOR_FIELD_OVERRIDE.
+        ThrowUserError("search_field_operator_invalid",
+                       { field => $field, operator => $operator });
     }
 }
 
@@ -1684,8 +1754,8 @@ sub _cc_exact_group {
 
 sub _cc_nonchanged {
     my ($self, $args) = @_;
-    my ($chart_id, $sequence, $field, $full_field, $operator, $joins, $value) =
-        @$args{qw(chart_id sequence field full_field operator joins value)};
+    my ($chart_id, $sequence, $field, $full_field, $operator, $joins) =
+        @$args{qw(chart_id sequence field full_field operator joins)};
 
     # This is for the email1, email2, email3 fields from query.cgi.
     if ($chart_id eq "") {
@@ -1905,8 +1975,8 @@ sub _work_time {
 
 sub _percentage_complete {
     my ($self, $args) = @_;
-    my ($chart_id, $joins, $operator, $value, $having, $fields) =
-        @$args{qw(chart_id joins operator value having fields)};
+    my ($chart_id, $joins, $operator, $having, $fields) =
+        @$args{qw(chart_id joins operator having fields)};
 
     my $table = "longdescs_$chart_id";
 
@@ -1929,7 +1999,7 @@ sub _percentage_complete {
    
     # We put something into $args->{term} so that do_search_function
     # stops processing.
-    $args->{term} = "0=0";
+    $args->{term} = '';
 }
 
 sub _bug_group_nonchanged {
@@ -1985,8 +2055,8 @@ sub _attachments_submitter {
 
 sub _attachments {
     my ($self, $args) = @_;
-    my ($chart_id, $joins, $field, $operator, $value) =
-        @$args{qw(chart_id joins field operator value)};
+    my ($chart_id, $joins, $field) =
+        @$args{qw(chart_id joins field)};
     my $dbh = Bugzilla->dbh;
     
     my $table = "attachments_$chart_id";
@@ -2064,7 +2134,7 @@ sub _flagtypes_name {
        push(@$having,
             "SUM(CASE WHEN $full_field IS NOT NULL THEN 1 ELSE 0 END) = " .
             "SUM(CASE WHEN $term THEN 1 ELSE 0 END)");
-       $args->{term} = "0=0";
+       $args->{term} = '';
     }
 }
 
@@ -2145,16 +2215,16 @@ sub _keywords_exact {
     my $dbh = Bugzilla->dbh;
     
     my @keyword_ids;
-    foreach my $value (split(/[\s,]+/, $value)) {
-        next if $value eq '';
-        my $keyword = Bugzilla::Keyword->check($value);
+    foreach my $word (split(/[\s,]+/, $value)) {
+        next if $word eq '';
+        my $keyword = Bugzilla::Keyword->check($word);
         push(@keyword_ids, $keyword->id);
     }
     
     # XXX We probably should instead throw an error here if there were
     # just commas in the field.
     if (!@keyword_ids) {
-        $args->{term} = "0=0";
+        $args->{term} = '';
         return;
     }
     
@@ -2173,8 +2243,8 @@ sub _keywords_exact {
 
 sub _keywords_nonchanged {
     my ($self, $args) = @_;
-    my ($chart_id, $joins, $value, $operator) =
-        @$args{qw(chart_id joins value operator)};
+    my ($chart_id, $joins) =
+        @$args{qw(chart_id joins)};
 
     my $k_table = "keywords_$chart_id";
     my $kd_table = "keyworddefs_$chart_id";
@@ -2288,6 +2358,7 @@ sub _multiselect_multiple {
     my ($self, $args) = @_;
     my ($chart_id, $joins, $field, $operator, $value)
         = @$args{qw(chart_id joins field operator value)};
+    my $dbh = Bugzilla->dbh;
     
     my $table = "bug_$field";
     $args->{full_field} = "$table.value";
@@ -2295,6 +2366,7 @@ sub _multiselect_multiple {
     my @terms;
     foreach my $word (split(/[\s,]+/, $value)) {
         $args->{value} = $word;
+        $args->{quoted} = $dbh->quote($value);
         $self->_do_operator_function($args);
         my $term = $args->{term};
         push(@terms, "bugs.bug_id IN (SELECT bug_id FROM $table WHERE $term)");
@@ -2390,7 +2462,7 @@ sub _anyexact {
     }
     # XXX Perhaps if it's all commas, we should just throw an error.
     else {
-        $args->{term} = "0=0";
+        $args->{term} = '';
     }
 }
 

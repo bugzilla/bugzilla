@@ -449,7 +449,7 @@ sub run_queries {
             'params' => $searchparams,
             'user'   => $args->{'recipient'}, # the search runs as the recipient
         );
-        my $sqlquery = $search->getSQL();
+        my $sqlquery = $search->sql;
         $sth = $dbh->prepare($sqlquery);
         $sth->execute;
 

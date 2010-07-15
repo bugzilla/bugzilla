@@ -128,7 +128,7 @@ my @axis_fields = ($row_field || EMPTY_COLUMN,
 my $params = new Bugzilla::CGI($cgi);
 my $search = new Bugzilla::Search('fields' => \@axis_fields, 
                                   'params' => $params);
-my $query = $search->getSQL();
+my $query = $search->sql;
 
 $::SIG{TERM} = 'DEFAULT';
 $::SIG{PIPE} = 'DEFAULT';

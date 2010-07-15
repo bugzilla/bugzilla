@@ -497,20 +497,17 @@ sub do_tests {
 
     my $search_broken = $self->search_known_broken;
     
-    my $search;
+    my $search = $self->_test_search_object_creation();
+    
+    my $sql;
     TODO: {
         local $TODO = $search_broken if $search_broken;
-        $search = $self->_test_search_object_creation();
+        lives_ok { $sql = $search->sql } "$name: generate SQL";
     }
     
-    my ($results, $sql);
+    my $results;
     SKIP: {
-        skip "Can't run SQL without Search object", 2 if !$search;
-        lives_ok { $sql = $search->getSQL() } "$name: get SQL";
-    
-        # This prevents warnings from DBD::mysql if we pass undef $sql,
-        # which happens if "new Bugzilla::Search" fails.
-        $sql ||= '';
+        skip "Can't run SQL without any SQL", 1 if !defined $sql;
         $results = $self->_test_sql($sql);
     }
 

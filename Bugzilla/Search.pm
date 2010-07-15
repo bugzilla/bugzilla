@@ -58,6 +58,73 @@ use Date::Parse;
 use List::MoreUtils qw(all part uniq);
 use Storable qw(dclone);
 
+# Description Of Boolean Charts
+# -----------------------------
+#
+# A boolean chart is a way of representing the terms in a logical
+# expression.  Bugzilla builds SQL queries depending on how you enter
+# terms into the boolean chart. Boolean charts are represented in
+# urls as three-tuples of (chart id, row, column). The query form
+# (query.cgi) may contain an arbitrary number of boolean charts where
+# each chart represents a clause in a SQL query.
+#
+# The query form starts out with one boolean chart containing one
+# row and one column.  Extra rows can be created by pressing the
+# AND button at the bottom of the chart.  Extra columns are created
+# by pressing the OR button at the right end of the chart. Extra
+# charts are created by pressing "Add another boolean chart".
+#
+# Each chart consists of an arbitrary number of rows and columns.
+# The terms within a row are ORed together. The expressions represented
+# by each row are ANDed together. The expressions represented by each
+# chart are ANDed together.
+#
+#        ----------------------
+#        | col2 | col2 | col3 |
+# --------------|------|------|
+# | row1 |  a1  |  a2  |      |
+# |------|------|------|------|  => ((a1 OR a2) AND (b1 OR b2 OR b3) AND (c1))
+# | row2 |  b1  |  b2  |  b3  |
+# |------|------|------|------|
+# | row3 |  c1  |      |      |
+# -----------------------------
+#
+#        --------
+#        | col2 |
+# --------------|
+# | row1 |  d1  | => (d1)
+# ---------------
+#
+# Together, these two charts represent a SQL expression like this
+# SELECT blah FROM blah WHERE ( (a1 OR a2)AND(b1 OR b2 OR b3)AND(c1)) AND (d1)
+#
+# The terms within a single row of a boolean chart are all constraints
+# on a single piece of data.  If you're looking for a bug that has two
+# different people cc'd on it, then you need to use two boolean charts.
+# This will find bugs with one CC matching 'foo@blah.org' and and another
+# CC matching 'bar@blah.org'.
+#
+# --------------------------------------------------------------
+# CC    | equal to
+# foo@blah.org
+# --------------------------------------------------------------
+# CC    | equal to
+# bar@blah.org
+#
+# If you try to do this query by pressing the AND button in the
+# original boolean chart then what you'll get is an expression that
+# looks for a single CC where the login name is both "foo@blah.org",
+# and "bar@blah.org". This is impossible.
+#
+# --------------------------------------------------------------
+# CC    | equal to
+# foo@blah.org
+# AND
+# CC    | equal to
+# bar@blah.org
+# --------------------------------------------------------------
+
+
 #############
 # Constants #
 #############
@@ -442,6 +509,9 @@ sub COLUMNS {
 
     foreach my $col (@email_fields) {
         my $sql = "map_${col}.login_name";
+        # XXX This needs to be generated inside an accessor instead,
+        #     probably, because it should use $self->_user to determine
+        #     this, not Bugzilla->user.
         if (!Bugzilla->user->id) {
              $sql = $dbh->sql_string_until($sql, $dbh->quote('@'));
         }
@@ -517,6 +587,67 @@ use constant GROUP_BY_SKIP => EMPTY_COLUMN, qw(
     percentage_complete
 );
 
+###############
+# Constructor #
+###############
+
+# Note that the params argument may be modified by Bugzilla::Search
+sub new {
+    my $invocant = shift;
+    my $class = ref($invocant) || $invocant;
+  
+    my $self = { @_ };
+    bless($self, $class);
+    $self->{'user'} ||= Bugzilla->user;
+
+    return $self;
+}
+
+
+####################
+# Public Accessors #
+####################
+
+sub sql {
+    my ($self) = @_;
+    return $self->{sql} if $self->{sql};
+    my $dbh = Bugzilla->dbh;
+    
+    my ($joins, $having_terms, $where_terms) = $self->_charts_to_conditions();
+
+    my $select = join(', ', $self->_sql_select);
+    my $from = $self->_sql_from($joins);
+    my $where = $self->_sql_where($where_terms);
+    my $group_by = $dbh->sql_group_by($self->_sql_group_by);
+    my $having = @$having_terms
+                 ? "\nHAVING " . join(' AND ', @$having_terms) : '';
+    my $order_by = $self->_sql_order_by
+                   ? "\nORDER BY " . join(', ', $self->_sql_order_by) : '';
+    
+    my $query = <<END;
+SELECT $select
+  FROM $from
+ WHERE $where
+$group_by$having$order_by
+END
+    $self->{sql} = $query;
+    return $self->{sql};
+}
+
+sub search_description {
+    my ($self, $params) = @_;
+    my $desc = $self->{'search_description'} ||= [];
+    if ($params) {
+        push(@$desc, $params);
+    }
+    # Make sure that the description has actually been generated if
+    # people are asking for the whole thing.
+    else {
+        $self->sql;
+    }
+    return $self->{'search_description'};
+}
+
 ######################
 # Internal Accessors #
 ######################
@@ -528,7 +659,7 @@ sub _chart_fields {
     if (!$self->{chart_fields}) {
         my $chart_fields = Bugzilla->fields({ by_name => 1 });
 
-        if (!Bugzilla->user->is_timetracker) {
+        if (!$self->_user->is_timetracker) {
             foreach my $tt_field (TIMETRACKING_FIELDS) {
                 delete $chart_fields->{$tt_field};
             }
@@ -538,6 +669,9 @@ sub _chart_fields {
     return $self->{chart_fields};
 }
 
+# There are various places in Search.pm that we need to know the list of
+# valid multi-select fields--or really, fields that are stored like
+# multi-selects, which includes BUG_URLS fields.
 sub _multi_select_fields {
     my ($self) = @_;
     $self->{multi_select_fields} ||= Bugzilla->fields({
@@ -545,6 +679,8 @@ sub _multi_select_fields {
         type    => [FIELD_TYPE_MULTI_SELECT, FIELD_TYPE_BUG_URLS]});
     return $self->{multi_select_fields};
 }
+
+sub _user { return $_[0]->{user} }
 
 ##############################
 # Internal Accessors: SELECT #
@@ -653,6 +789,23 @@ sub _sql_order_by {
     return @{ $self->{sql_order_by} };
 }
 
+sub _translate_order_by_column {
+    my ($self, $order_by_item) = @_;
+
+    my ($field, $direction) = split_order_term($order_by_item);
+    
+    $direction = '' if lc($direction) eq 'asc';
+    my $special_order = $self->_special_order->{$field}->{order};
+    # Standard fields have underscores in their SELECT alias instead
+    # of a period (because aliases can't have periods).
+    $field =~ s/\./_/g;
+    my @items = $special_order ? @$special_order : $field;
+    if (lc($direction) eq 'desc') {
+        @items = map { "$_ DESC" } @items;
+    }
+    return @items;
+}
+
 ############################
 # Internal Accessors: FROM #
 ############################
@@ -756,7 +909,7 @@ sub _select_order_joins {
 # These are the joins that are *always* in the FROM clause.
 sub _standard_joins {
     my ($self) = @_;
-    my $user = $self->{'user'};
+    my $user = $self->_user;
     my @joins;
 
     my $security_join = {
@@ -790,6 +943,7 @@ sub _sql_from {
     return "bugs\n" . join("\n", @join_sql);
 }
 
+# This takes a join data structure and turns it into actual JOIN SQL.
 sub _translate_join {
     my ($self, $join_info) = @_;
     
@@ -820,6 +974,51 @@ sub _translate_join {
     my @join_sql = "$join JOIN $table AS $name"
                         . " ON $from_table.$from = $name.$to$extra_condition";
     return @join_sql;
+}
+
+#############################
+# Internal Accessors: WHERE #
+#############################
+
+# Note: There's also quite a bit of stuff that affects the WHERE clause
+# in the "Internal Accessors: Boolean Charts" section.
+
+# The terms that are always in the WHERE clause. These implement bug
+# group security.
+sub _standard_where {
+    my ($self) = @_;
+    # If replication lags badly between the shadow db and the main DB,
+    # it's possible for bugs to show up in searches before their group
+    # controls are properly set. To prevent this, when initially creating
+    # bugs we set their creation_ts to NULL, and don't give them a creation_ts
+    # until their group controls are set. So if a bug has a NULL creation_ts,
+    # it shouldn't show up in searches at all.
+    my @where = ('bugs.creation_ts IS NOT NULL');
+    
+    my $security_term = 'security_map.group_id IS NULL';
+
+    my $user = $self->_user;
+    if ($user->id) {
+        my $userid = $user->id;
+        $security_term .= <<END;
+ OR (bugs.reporter_accessible = 1 AND bugs.reporter = $userid)
+ OR (bugs.cclist_accessible = 1 AND security_cc.who IS NOT NULL)
+ OR bugs.assigned_to = $userid
+END
+        if (Bugzilla->params->{'useqacontact'}) {
+            $security_term.= " OR bugs.qa_contact = $userid";
+        }
+        $security_term = "($security_term)";
+    }
+
+    push(@where, $security_term);
+
+    return @where;
+}
+
+sub _sql_where {
+    my ($self, $where_terms) = @_;
+    return join(' AND ', $self->_standard_where, @$where_terms);
 }
 
 ################################
@@ -1057,7 +1256,7 @@ sub _special_parse_chfield {
 
 sub _special_parse_deadline {
     my ($self) = @_;
-    return if !Bugzilla->user->is_timetracker;
+    return if !$self->_user->is_timetracker;
     my $params = $self->_params;
     
     my @charts;
@@ -1115,6 +1314,21 @@ sub _special_parse_resolution {
     }
 }
 
+
+sub _valid_values {
+    my ($input, $valid, $extra_value) = @_;
+    my @result;
+    foreach my $item (@$input) {
+        if (defined $extra_value and $item eq $extra_value) {
+            push(@result, $item);
+        }
+        elsif (grep { $_->name eq $item } @$valid) {
+            push(@result, $item);
+        }
+    }
+    return @result;
+}
+
 ######################################
 # Internal Accessors: Boolean Charts #
 ######################################
@@ -1166,6 +1380,9 @@ sub _charts_to_conditions {
 sub _params_to_charts {
     my ($self) = @_;
     my $params = $self->_params;
+    # XXX This should probably just be moved into using FIELD_MAP here
+    #     in Search.pm.
+    $params->convert_old_params();
     $self->_convert_special_params_to_chart_params();
     my @param_list = $params->param();
     
@@ -1259,194 +1476,8 @@ sub _handle_chart {
 }
     
 ##################################
-# Helpers for Internal Accessors #
+# do_search_function And Helpers #
 ##################################
-
-sub _valid_values {
-    my ($input, $valid, $extra_value) = @_;
-    my @result;
-    foreach my $item (@$input) {
-        if (defined $extra_value and $item eq $extra_value) {
-            push(@result, $item);
-        }
-        elsif (grep { $_->name eq $item } @$valid) {
-            push(@result, $item);
-        }
-    }
-    return @result;
-}
-
-sub _translate_order_by_column {
-    my ($self, $order_by_item) = @_;
-
-    my ($field, $direction) = split_order_term($order_by_item);
-    
-    $direction = '' if lc($direction) eq 'asc';
-    my $special_order = $self->_special_order->{$field}->{order};
-    # Standard fields have underscores in their SELECT alias instead
-    # of a period (because aliases can't have periods).
-    $field =~ s/\./_/g;
-    my @items = $special_order ? @$special_order : $field;
-    if (lc($direction) eq 'desc') {
-        @items = map { "$_ DESC" } @items;
-    }
-    return @items;
-}
-
-###############
-# Constructor #
-###############
-
-# Create a new Search
-# Note that the param argument may be modified by Bugzilla::Search
-sub new {
-    my $invocant = shift;
-    my $class = ref($invocant) || $invocant;
-  
-    my $self = { @_ };
-    bless($self, $class);
-
-    $self->init();
- 
-    return $self;
-}
-
-sub init {
-    my $self = shift;
-    my $params = $self->_params;
-    $params->convert_old_params();
-    $self->{'user'} ||= Bugzilla->user;
-    my $user = $self->{'user'};
-
-    my $dbh = Bugzilla->dbh;
-
-   
-
-
-# A boolean chart is a way of representing the terms in a logical
-# expression.  Bugzilla builds SQL queries depending on how you enter
-# terms into the boolean chart. Boolean charts are represented in
-# urls as tree-tuples of (chart id, row, column). The query form
-# (query.cgi) may contain an arbitrary number of boolean charts where
-# each chart represents a clause in a SQL query.
-#
-# The query form starts out with one boolean chart containing one
-# row and one column.  Extra rows can be created by pressing the
-# AND button at the bottom of the chart.  Extra columns are created
-# by pressing the OR button at the right end of the chart. Extra
-# charts are created by pressing "Add another boolean chart".
-#
-# Each chart consists of an arbitrary number of rows and columns.
-# The terms within a row are ORed together. The expressions represented
-# by each row are ANDed together. The expressions represented by each
-# chart are ANDed together.
-#
-#        ----------------------
-#        | col2 | col2 | col3 |
-# --------------|------|------|
-# | row1 |  a1  |  a2  |      |
-# |------|------|------|------|  => ((a1 OR a2) AND (b1 OR b2 OR b3) AND (c1))
-# | row2 |  b1  |  b2  |  b3  |
-# |------|------|------|------|
-# | row3 |  c1  |      |      |
-# -----------------------------
-#
-#        --------
-#        | col2 |
-# --------------|
-# | row1 |  d1  | => (d1)
-# ---------------
-#
-# Together, these two charts represent a SQL expression like this
-# SELECT blah FROM blah WHERE ( (a1 OR a2)AND(b1 OR b2 OR b3)AND(c1)) AND (d1)
-#
-# The terms within a single row of a boolean chart are all constraints
-# on a single piece of data.  If you're looking for a bug that has two
-# different people cc'd on it, then you need to use two boolean charts.
-# This will find bugs with one CC matching 'foo@blah.org' and and another
-# CC matching 'bar@blah.org'.
-#
-# --------------------------------------------------------------
-# CC    | equal to
-# foo@blah.org
-# --------------------------------------------------------------
-# CC    | equal to
-# bar@blah.org
-#
-# If you try to do this query by pressing the AND button in the
-# original boolean chart then what you'll get is an expression that
-# looks for a single CC where the login name is both "foo@blah.org",
-# and "bar@blah.org". This is impossible.
-#
-# --------------------------------------------------------------
-# CC    | equal to
-# foo@blah.org
-# AND
-# CC    | equal to
-# bar@blah.org
-# --------------------------------------------------------------
-
-# $chartid is the number of the current chart whose SQL we're constructing
-# $row is the current row of the current chart
-
-# names for table aliases are constructed using $chartid and $row
-#   SELECT blah  FROM $table "$table_$chartid_$row" WHERE ....
-
-# $f  = field of table in bug db (e.g. bug_id, reporter, etc)
-# $ff = qualified field name (field name prefixed by table)
-#       e.g. bugs_activity.bug_id
-# $t  = type of query. e.g. "equal to", "changed after", case sensitive substr"
-# $v  = value - value the user typed in to the form
-# $q  = sanitized version of user input trick_taint(($dbh->quote($v)))
-# @supptables = Tables and/or table aliases used in query
-# %suppseen   = A hash used to store all the tables in supptables to weed
-#               out duplicates.
-# @supplist   = A list used to accumulate all the JOIN clauses for each
-#               chart to merge the ON sections of each.
-# $suppstring = String which is pasted into query containing all table names
-
-    my ($joins, $having, $where_terms) = $self->_charts_to_conditions();
-
-    my $query = "SELECT " . join(', ', $self->_sql_select) .
-                "\n  FROM " . $self->_sql_from($joins);
-
-    push(@$where_terms, 'bugs.creation_ts IS NOT NULL');
-
-    my $security_term = '(security_map.group_id IS NULL';
-
-    if ($user->id) {
-        my $userid = $user->id;
-        $security_term .= <<END;
- OR (bugs.reporter_accessible = 1 AND bugs.reporter = $userid)
- OR (bugs.cclist_accessible = 1 AND security_cc.who IS NOT NULL)
- OR bugs.assigned_to = $userid
-END
-        if (Bugzilla->params->{'useqacontact'}) {
-            $security_term.= " OR bugs.qa_contact = $userid";
-        }
-    }
-
-    $security_term .= ")";
-    push(@$where_terms, $security_term);
-    
-    $query .= "\n WHERE " . join(' AND ', @$where_terms) . ' '
-              . $dbh->sql_group_by($self->_sql_group_by);
-
-
-    if (@$having) {
-        $query .= " HAVING " . join(" AND ", @$having);
-    }
-
-    if ($self->_sql_order_by) {
-        $query .= " ORDER BY " . join(',', $self->_sql_order_by);
-    }
-
-    $self->{'sql'} = $query;
-}
-
-###############################################################################
-# Helper functions for the init() method.
-###############################################################################
 
 # This takes information about the current boolean chart and translates
 # it into SQL, using the constants at the top of this file.
@@ -1539,6 +1570,9 @@ sub _pick_override_function {
     return $search_func;
 }
 
+###########################
+# Search Function Helpers #
+###########################
 
 sub SqlifyDate {
     my ($str) = @_;
@@ -1633,20 +1667,6 @@ sub GetByWordListSubstr {
     return \@list;
 }
 
-sub getSQL {
-    my $self = shift;
-    return $self->{'sql'};
-}
-
-sub search_description {
-    my ($self, $params) = @_;
-    my $desc = $self->{'search_description'} ||= [];
-    if ($params) {
-        push(@$desc, $params);
-    }
-    return $self->{'search_description'};
-}
-
 sub pronoun {
     my ($noun, $user) = (@_);
     if ($noun eq "%user%") {
@@ -1667,6 +1687,10 @@ sub pronoun {
     }
     return 0;
 }
+
+######################
+# Public Subroutines #
+######################
 
 # Validate that the query type is one we can deal with
 sub IsValidQueryType
@@ -1725,7 +1749,7 @@ sub _invalid_combination {
 sub _contact_pronoun {
     my ($self, $args) = @_;
     my ($value, $quoted) = @$args{qw(value quoted)};
-    my $user = $self->{'user'};
+    my $user = $self->_user;
     
     if ($value =~ /^\%group/) {
         $self->_contact_exact_group($args);
@@ -1785,7 +1809,7 @@ sub _qa_contact_nonchanged {
 sub _cc_pronoun {
     my ($self, $args) = @_;
     my ($full_field, $value) = @$args{qw(full_field value)};
-    my $user = $self->{'user'};
+    my $user = $self->_user;
 
     if ($value =~ /\%group/) {
         return $self->_cc_exact_group($args);
@@ -1801,7 +1825,7 @@ sub _cc_exact_group {
     my ($self, $args) = @_;
     my ($chart_id, $sequence, $joins, $operator, $value) =
         @$args{qw(chart_id sequence joins operator value)};
-    my $user = $self->{'user'};
+    my $user = $self->_user;
     my $dbh = Bugzilla->dbh;
     
     $value =~ m/%group\.([^%]+)%/;
@@ -1912,7 +1936,7 @@ sub _content_matches {
     # Add the fulltext table to the query so we can search on it.
     my $table = "bugs_fulltext_$chart_id";
     my $comments_col = "comments";
-    $comments_col = "comments_noprivate" unless $self->{'user'}->is_insider;
+    $comments_col = "comments_noprivate" unless $self->_user->is_insider;
     push(@$joins, { table => 'bugs_fulltext', as => $table });
     
     # Create search terms to add to the SELECT and WHERE clauses.
@@ -1959,7 +1983,7 @@ sub _timestamp_translate {
 sub _commenter_pronoun {
     my ($self, $args) = @_;
     my $value = $args->{value};
-    my $user = $self->{'user'};
+    my $user = $self->_user;
 
     if ($value =~ /^(%\w+%)$/) {
         $args->{value} = pronoun($1, $user);
@@ -1979,7 +2003,7 @@ sub _commenter {
     }
     my $table = "longdescs_$chart_id";
     
-    my $extra = $self->{'user'}->is_insider ? "" : "AND $table.isprivate = 0";
+    my $extra = $self->_user->is_insider ? "" : "AND $table.isprivate = 0";
     # commenter_pronoun could have changed $full_field to something else,
     # so we only set this if commenter_pronoun hasn't set it.
     if ($full_field eq 'bugs.commenter') {
@@ -2001,7 +2025,7 @@ sub _long_desc {
     my ($chart_id, $joins) = @$args{qw(chart_id joins)};
     
     my $table = "longdescs_$chart_id";
-    my $extra = $self->{'user'}->is_insider ? [] : ["$table.isprivate = 0"];
+    my $extra = $self->_user->is_insider ? [] : ["$table.isprivate = 0"];
     my $join = {
         table => 'longdescs',
         as    => $table,
@@ -2016,7 +2040,7 @@ sub _longdescs_isprivate {
     my ($chart_id, $joins) = @$args{qw(chart_id joins)};
     
     my $table = "longdescs_$chart_id";
-    my $extra = $self->{'user'}->is_insider ? [] : ["$table.isprivate = 0"];
+    my $extra = $self->_user->is_insider ? [] : ["$table.isprivate = 0"];
     my $join = {
         table => 'longdescs',
         as    => $table,
@@ -2123,7 +2147,7 @@ sub _attach_data_thedata {
     
     my $attach_table = "attachments_$chart_id";
     my $data_table = "attachdata_$chart_id";
-    my $extra = $self->{'user'}->is_insider
+    my $extra = $self->_user->is_insider
                 ? [] : ["$attach_table.isprivate = 0"];
     my $attachments_join = {
         table => 'attachments',
@@ -2146,7 +2170,7 @@ sub _attachments_submitter {
     
     my $attach_table = "attachments_$chart_id";
     my $profiles_table = "map_attachment_submitter_$chart_id";    
-    my $extra = $self->{'user'}->is_insider
+    my $extra = $self->_user->is_insider
                 ? [] : ["$attach_table.isprivate = 0"];
     my $attachments_join = {
         table => 'attachments',
@@ -2171,7 +2195,7 @@ sub _attachments {
     my $dbh = Bugzilla->dbh;
     
     my $table = "attachments_$chart_id";
-    my $extra = $self->{'user'}->is_insider? [] : ["$table.isprivate = 0"];
+    my $extra = $self->_user->is_insider ? [] : ["$table.isprivate = 0"];
     my $join = {
         table => 'attachments',
         as    => $table,
@@ -2190,7 +2214,7 @@ sub _join_flag_tables {
     
     my $attach_table = "attachments_$chart_id";
     my $flags_table = "flags_$chart_id";
-    my $extra = $self->{'user'}->is_insider
+    my $extra = $self->_user->is_insider
                 ? [] : ["$attach_table.isprivate = 0"];
     my $attachments_join = {
         table => 'attachments',

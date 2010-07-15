@@ -851,7 +851,7 @@ my @orderstrings = split(/,\s*/, $order);
 my $search = new Bugzilla::Search('fields' => \@selectcolumns, 
                                   'params' => $params,
                                   'order' => \@orderstrings);
-my $query = $search->getSQL();
+my $query = $search->sql;
 $vars->{'search_description'} = $search->search_description;
 
 if (defined $cgi->param('limit')) {

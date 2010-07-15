@@ -242,11 +242,16 @@
       </para>
       
       <para>
-        The preferred way of installing Perl modules is to use the
-        <filename>install-module.pl</filename> script on Unix,
-        or PPM on Windows (see <xref linkend="win32-perl-modules"/>). If for
-        some reason you need to install the Perl modules manually, see
-        <xref linkend="install-perlmodules-manual"/>. For instance, on Unix:
+        The preferred way to install missing Perl modules is to use the package
+        manager provided by your operating system (e.g <quote>rpm</quote> or
+        <quote>yum</quote> on Linux distros, or <quote>ppm</quote> on Windows
+        if using ActivePerl, see <xref linkend="win32-perl-modules"/>).
+        If some Perl modules are still missing or are too old, then we recommend
+        using the <filename>install-module.pl</filename> script (doesn't work
+        with ActivePerl on Windows). If for some reason you really need to
+        install the Perl modules manually, see
+        <xref linkend="install-perlmodules-manual"/>. For instance, on Unix,
+        you invoke <filename>install-module.pl</filename> as follows:
       </para>  
         
       <screen><prompt>bash#</prompt> perl install-module.pl &lt;modulename&gt;</screen>

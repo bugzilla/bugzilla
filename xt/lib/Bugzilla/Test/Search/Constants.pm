@@ -31,6 +31,7 @@ use Bugzilla::Constants;
 
 our @EXPORT = qw(
     ATTACHMENT_FIELDS
+    BROKEN_NOT
     COLUMN_TRANSLATION
     COMMENT_FIELDS
     CUSTOM_FIELDS
@@ -491,6 +492,270 @@ use constant PG_BROKEN => {
         nowordssubstr   => { contains => [3] },
         'regexp-<1>'    => { contains => [3] },
         substring       => { contains => [3] },
+    },
+};
+
+###################
+# Broken NotTests #
+###################
+
+# These are fields that are broken in the same way for pretty much every
+# NOT test that is broken.
+use constant COMMON_BROKEN_NOT => (
+    "attach_data.thedata"     => { contains => [5] },
+    "attachments.description" => { contains => [5] },
+    "attachments.filename"    => { contains => [5] },
+    "attachments.isobsolete"  => { contains => [5] },
+    "attachments.ispatch"     => { contains => [5] },
+    "attachments.isprivate"   => { contains => [5] },
+    "attachments.mimetype"    => { contains => [5] },
+    "attachments.submitter"   => { contains => [5] },
+    "bug_file_loc"            => { contains => [5] },
+    "deadline"                => { contains => [5] },
+    "flagtypes.name"          => { contains => [5] },
+    "keywords"                => { contains => [5] },
+    "longdescs.isprivate"     => { contains => [1] },
+    "percentage_complete"     => { contains => [1 .. 5] },
+    "requestees.login_name"   => { contains => [3, 4, 5] },
+    "see_also"                => { contains => [5] },
+    "setters.login_name"      => { contains => [5] },
+    FIELD_TYPE_BUG_ID,           { contains => [5] },
+    FIELD_TYPE_DATETIME,         { contains => [5] },
+    FIELD_TYPE_FREETEXT,         { contains => [5] },
+    FIELD_TYPE_MULTI_SELECT,     { contains => [1, 5] },
+    FIELD_TYPE_TEXTAREA,         { contains => [5] },
+);
+
+# Common BROKEN_NOT values for the changed* fields.
+use constant CHANGED_BROKEN_NOT => (
+    "attach_data.thedata"   => { contains => [1] },
+    "classification"        => { contains => [1] },
+    "commenter"             => { contains => [1] },
+    "delta_ts"              => { contains => [1] },
+    "percentage_complete"   => { contains => [1] },
+    "requestees.login_name" => { contains => [1] },
+    "setters.login_name"    => { contains => [1] },
+    "work_time"             => { contains => [1] },    
+);
+
+# For changedfrom and changedto.
+use constant CHANGED_FROM_TO_BROKEN_NOT => (
+    "bug_group" => { contains => [1] },
+    "cc" => { contains => [1] },
+    "cf_multi_select" => { contains => [1] },
+    "estimated_time" => { contains => [1] },
+    "flagtypes.name" => { contains => [1] },
+    "keywords" => { contains => [1] },    
+);
+
+# Common broken tests for the "not" or "no" operators.
+use constant NEGATIVE_BROKEN_NOT => (
+    "blocked"             => { contains => [3, 4, 5] },
+    "bug_group"           => { contains => [5] },
+    "cc"                  => { contains => [1, 5] },
+    "dependson"           => { contains => [2, 4, 5] },
+    "flagtypes.name"      => { contains => [1 .. 5] },
+    "percentage_complete" => { contains => [1 .. 5] },    
+);
+
+# These are field/operator combinations that are broken when run under NOT().
+use constant BROKEN_NOT => {
+    allwords       => {
+        COMMON_BROKEN_NOT,
+        "attach_data.thedata" => { contains => [1,5] },
+        bug_group => { contains => [1] },
+        cc => { contains => [1] },
+        "flagtypes.name"      => { contains => [1,5] },
+        keywords => { contains => [1,5] },
+        longdesc => { contains => [1] },
+        'see_also' => { },
+        work_time => { contains => [1] },
+        FIELD_TYPE_MULTI_SELECT, { },
+    },
+    'allwords-<1> <2>' => {
+        'attach_data.thedata' => { contains => [5] },
+        bug_group => { },
+        cc => { },
+        'flagtypes.name'      => { contains => [5] },
+        'keywords'            => { contains => [5] },
+        'longdesc' => { },
+        'longdescs.isprivate' => { },
+        work_time => { },
+    },
+    allwordssubstr => {
+        COMMON_BROKEN_NOT,
+        bug_group => { contains => [1] },
+        cc => { contains => [1] },
+        keywords => { contains => [1,5] },
+        longdesc => { contains => [1] },
+        see_also => { },
+        work_time => { contains => [1] },
+        FIELD_TYPE_MULTI_SELECT, { },
+    },
+    'allwordssubstr-<1>,<2>' => {
+        bug_group => { },
+        "cc" => { },
+        FIELD_TYPE_MULTI_SELECT, { },
+        keywords => { contains => [5] },
+        "longdesc" => { },
+        "longdescs.isprivate" => { },
+        "see_also" => { },
+        "work_time" => { },
+    },
+    anyexact => {
+        COMMON_BROKEN_NOT,
+        "flagtypes.name" => { contains => [1, 2, 5] },
+        "longdesc"       => { contains => [1, 2] },
+        "work_time"      => { contains => [1, 2] }
+    },
+    'anyexact-<1>, <2>' => {
+        bug_group => { contains => [1] },
+        percentage_complete => { contains => [1,3,4,5] },
+        keywords => { contains => [1,5] },
+        see_also => { },
+        FIELD_TYPE_MULTI_SELECT, { },
+    },
+    anywords => {
+        COMMON_BROKEN_NOT,
+        "attach_data.thedata" => { contains => [1, 5] },
+        "work_time"           => { contains => [1, 2] },
+        "work_time"           => { contains => [1] },
+        FIELD_TYPE_MULTI_SELECT, { contains => [5] },
+    },
+    'anywords-<1> <2>' => {
+        'attach_data.thedata' => { contains => [1,2,5] },
+        "percentage_complete" => { contains => [1,3,4,5] },
+        work_time => { contains => [1,2] },
+    },
+    anywordssubstr => {
+        COMMON_BROKEN_NOT,
+        "work_time" => { contains => [1, 2] },
+    },
+    'anywordssubstr-<1> <2>' => {
+        percentage_complete => { contains => [1,3,4,5] },
+        FIELD_TYPE_MULTI_SELECT, { contains => [5] },
+    },
+    casesubstring => {
+        COMMON_BROKEN_NOT,
+        bug_group => { contains => [1] },
+        keywords  => { contains => [1,5] },
+        longdesc  => { contains => [1] },
+        work_time => { contains => [1] }   ,
+        FIELD_TYPE_MULTI_SELECT, { contains => [1,5] },
+    },
+    'casesubstring-<1>-lc' => {
+        bug_group => { },
+        keywords => { contains => [5] },
+        longdesc => { },
+        FIELD_TYPE_MULTI_SELECT, { contains => [5] },
+    },
+    changedafter => {
+        "attach_data.thedata"   => { contains => [2, 3, 4] },
+        "classification"        => { contains => [2, 3, 4] },
+        "commenter"             => { contains => [2, 3, 4] },
+        "creation_ts"           => { contains => [2, 3, 4] },
+        "delta_ts"              => { contains => [2, 3, 4] },
+        "percentage_complete"   => { contains => [2, 3, 4] },
+        "requestees.login_name" => { contains => [2, 3, 4] },
+        "setters.login_name"    => { contains => [2, 3, 4] },
+    },
+    changedbefore=> {
+        CHANGED_BROKEN_NOT,
+        creation_ts => { contains => [1, 2, 5] },
+        work_time   => { }
+    },
+    changedby => {
+        CHANGED_BROKEN_NOT,
+        creation_ts => { contains => [1] },
+    },
+    changedfrom => {
+        CHANGED_BROKEN_NOT,
+        CHANGED_FROM_TO_BROKEN_NOT,
+        'attach_data.thedata' => { },
+        blocked         => { contains => [1, 2] },
+        dependson       => { contains => [1, 3] },
+        longdesc        => { },
+        FIELD_TYPE_BUG_ID, { contains => [1 .. 4] },
+        
+    },
+    changedto => {
+        CHANGED_BROKEN_NOT,
+        CHANGED_FROM_TO_BROKEN_NOT,
+        longdesc => { contains => [1] },
+        "remaining_time" => { contains => [1] },
+    },
+    equals => {
+        COMMON_BROKEN_NOT,
+        bug_group => { contains => [1] },
+        "flagtypes.name" => { contains => [1, 5] },
+        keywords  => { contains => [1,5] },
+        longdesc  => { contains => [1] },
+        work_time => { contains => [1] }
+    },
+    greaterthan => {
+        COMMON_BROKEN_NOT,
+        cc        => { contains => [1] },
+        work_time => { contains => [2, 3, 4] },
+        FIELD_TYPE_MULTI_SELECT, { contains => [5] },
+    },
+    greaterthaneq => {
+        COMMON_BROKEN_NOT,
+        cc               => { contains => [1] },
+        "flagtypes.name" => { contains => [2, 5] },
+        "work_time"      => { contains => [2, 3, 4] },
+        percentage_complete => { contains => [1,3,4,5] },,
+        FIELD_TYPE_MULTI_SELECT, { contains => [5] },
+    },
+    lessthan => {
+        COMMON_BROKEN_NOT,
+        longdesc => { contains => [1] },
+        'longdescs.isprivate' => { },
+    },
+    'lessthan-2' => {
+        bug_group => { contains => [1] },
+        keywords  => { contains => [1,5] },
+    },
+    lessthaneq => {
+        COMMON_BROKEN_NOT,
+        bug_group => { contains => [1] },
+        keywords  => { contains => [1,5] },
+        longdesc  => { contains => [1] },
+        'longdescs.isprivate' => { },
+    },
+    notequals      => { NEGATIVE_BROKEN_NOT },
+    notregexp      => { NEGATIVE_BROKEN_NOT },
+    notsubstring   => { NEGATIVE_BROKEN_NOT },
+    nowords        => {
+        NEGATIVE_BROKEN_NOT,
+        "attach_data.thedata" => { contains => [1] },
+        "work_time"           => { contains => [2, 3, 4] },
+        "cc" => { contains => [5] },
+        "flagtypes.name" => { },
+    },
+    nowordssubstr  => {
+        NEGATIVE_BROKEN_NOT,
+        "attach_data.thedata" => { },
+        "cc" => { contains => [5] },
+        "flagtypes.name" => { },
+        "work_time"           => { contains => [2, 3, 4] },
+    },
+    regexp         => {
+        COMMON_BROKEN_NOT,
+        bug_group => { contains => [1] },
+        "flagtypes.name" => { contains => [1,5] },
+        keywords  => { contains => [1,5] },
+        longdesc  => { contains => [1] },
+        work_time => { contains => [1] },
+    },
+    'regexp-^1-' => {
+        "flagtypes.name" => { contains => [5] },
+    },
+    substring      => {
+        COMMON_BROKEN_NOT,
+        bug_group => { contains => [1] },
+        keywords  => { contains => [1,5] },
+        longdesc  => { contains => [1] },
+        work_time => { contains => [1] },
     },
 };
 

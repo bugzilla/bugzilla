@@ -178,25 +178,29 @@ sub bug_is_contained {
 
 # The tests we know are broken for this operator/field combination.
 sub _known_broken {
-    my $self = shift;
+    my ($self, $constant, $skip_pg_check) = @_;
+    $constant ||= KNOWN_BROKEN;
     my $field = $self->field;
     my $type = $self->field_object->type;
     my $operator = $self->operator;
     my $value = $self->main_value;
     my $value_name = "$operator-$value";
+    if (my $extra_name = $self->test->{extra_name}) {
+        $value_name .= "-$extra_name";
+    }    
     
-    if (Bugzilla->dbh->isa('Bugzilla::DB::Pg')) {
+    if (!$skip_pg_check and Bugzilla->dbh->isa('Bugzilla::DB::Pg')) {
         my $field_broken = PG_BROKEN->{$field}->{$operator};
         return $field_broken if $field_broken;
         my $pg_value_broken = PG_BROKEN->{$field}->{$value_name};
         return $pg_value_broken if $pg_value_broken;
     }
     
-    my $value_broken = KNOWN_BROKEN->{$value_name}->{$field};
-    $value_broken ||= KNOWN_BROKEN->{$value_name}->{$type};
+    my $value_broken = $constant->{$value_name}->{$field};
+    $value_broken ||= $constant->{$value_name}->{$type};
     return $value_broken if $value_broken;
-    my $operator_broken = KNOWN_BROKEN->{$operator}->{$field};
-    $operator_broken ||= KNOWN_BROKEN->{$operator}->{$type};
+    my $operator_broken = $constant->{$operator}->{$field};
+    $operator_broken ||= $constant->{$operator}->{$type};
     return $operator_broken if $operator_broken;
     return {};
 }

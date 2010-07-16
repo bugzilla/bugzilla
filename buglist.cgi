@@ -849,7 +849,7 @@ my @orderstrings = split(/,\s*/, $order);
 
 # Generate the basic SQL query that will be used to generate the bug list.
 my $search = new Bugzilla::Search('fields' => \@selectcolumns, 
-                                  'params' => $params,
+                                  'params' => scalar $params->Vars,
                                   'order' => \@orderstrings);
 my $query = $search->sql;
 $vars->{'search_description'} = $search->search_description;

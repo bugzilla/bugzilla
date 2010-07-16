@@ -332,8 +332,10 @@ use constant SPECIAL_PARSING => {
     delta_ts    => \&_timestamp_translate,
 };
 
-# Backwards compatibility for times that we changed the names of fields.
+# Backwards compatibility for times that we changed the names of fields
+# or URL parameters.
 use constant FIELD_MAP => {
+    bugidtype => 'bug_id_type',
     changedin => 'days_elapsed',
     long_desc => 'longdesc',
 };
@@ -679,6 +681,23 @@ sub _multi_select_fields {
         type    => [FIELD_TYPE_MULTI_SELECT, FIELD_TYPE_BUG_URLS]});
     return $self->{multi_select_fields};
 }
+
+# $self->{params} contains values that could be undef, could be a string,
+# or could be an arrayref. Sometimes we want that value as an array,
+# always.
+sub _param_array {
+    my ($self, $name) = @_;
+    my $value = $self->_params->{$name};
+    if (!defined $value) {
+        return ();
+    }
+    if (ref($value) eq 'ARRAY') {
+        return @$value;
+    }
+    return ($value);
+}
+
+sub _params { $_[0]->{params} }
 
 sub _user { return $_[0]->{user} }
 
@@ -1068,7 +1087,24 @@ sub _skip_group_by {
 # Internal Accessors: Special Params Parsing #
 ##############################################
 
-sub _params { $_[0]->{params} }
+# Backwards compatibility for old field names.
+sub _convert_old_params {
+    my ($self) = @_;
+    my $params = $self->_params;
+    
+    # bugidtype has different values in modern Search.pm.
+    if (defined $params->{'bugidtype'}) {
+        my $value = $params->{'bugidtype'};
+        $params->{'bugidtype'} = $value eq 'exclude' ? 'nowords' : 'anyexact';
+    }
+    
+    foreach my $old_name (keys %{ FIELD_MAP() }) {
+        if (defined $params->{$old_name}) {
+            my $new_name = FIELD_MAP->{$old_name};
+            $params->{$new_name} = delete $params->{$old_name};
+        }
+    }
+}
 
 sub _convert_special_params_to_chart_params {
     my ($self) = @_;
@@ -1078,9 +1114,9 @@ sub _convert_special_params_to_chart_params {
     
     # first we delete any sign of "Chart #-1" from the HTML form hash
     # since we want to guarantee the user didn't hide something here
-    my @badcharts = grep { /^(field|type|value)-1-/ } $params->param();
+    my @badcharts = grep { /^(field|type|value)-1-/ } keys %$params;
     foreach my $field (@badcharts) {
-        $params->delete($field);
+        delete $params->{$field};
     }
 
     # now we take our special chart and stuff it into the form hash
@@ -1088,10 +1124,11 @@ sub _convert_special_params_to_chart_params {
     my $and = 0;
     foreach my $or_array (@special_charts) {
         my $or = 0;
+        my $identifier = "$chart-$and-$or";
         while (@$or_array) {
-            $params->param("field$chart-$and-$or", shift @$or_array);
-            $params->param("type$chart-$and-$or", shift @$or_array);
-            $params->param("value$chart-$and-$or", shift @$or_array);
+            $params->{"field$identifier"} = shift @$or_array;
+            $params->{"type$identifier"}  = shift @$or_array;
+            $params->{"value$identifier"} = shift @$or_array;
             $or++;
         }
         $and++;
@@ -1102,6 +1139,7 @@ sub _convert_special_params_to_chart_params {
 # charts.
 sub _special_charts {
     my ($self) = @_;
+    $self->_convert_old_params();
     $self->_special_parse_bug_status();
     $self->_special_parse_resolution();
     my @charts = $self->_parse_basic_fields();
@@ -1116,27 +1154,17 @@ sub _parse_basic_fields {
     my $params = $self->_params;
     my $chart_fields = $self->_chart_fields;
     
-    foreach my $old_name (keys %{ FIELD_MAP() }) {
-        if (defined $params->param($old_name)) {
-            my @value = $params->param($old_name);
-            $params->delete($old_name);
-            my $new_name = FIELD_MAP->{$old_name};
-            $params->param($new_name, @value);
-        }
-    }
-    
     my @charts;
     foreach my $field_name (keys %$chart_fields) {
         # CGI params shouldn't have periods in them, so we only accept
         # period-separated fields with underscores where the periods go.
         my $param_name = $field_name;
         $param_name =~ s/\./_/g;
-        next if !defined $params->param($param_name);
-        my $operator = $params->param("${param_name}_type");
-        $operator = 'anyexact' if !$operator;
+        my @values = $self->_param_array($param_name);
+        next if !@values;
+        my $operator = $params->{"${param_name}_type"} || 'anyexact';
         $operator = 'matches' if $operator eq 'content';
-        my $string_value = join(',', $params->param($param_name));
-        push(@charts, [$field_name, $operator, $string_value]);
+        push(@charts, [$field_name, $operator, \@values]);
     }
     return @charts;
 }
@@ -1144,9 +1172,9 @@ sub _parse_basic_fields {
 sub _special_parse_bug_status {
     my ($self) = @_;
     my $params = $self->_params;
-    return if !defined $params->param('bug_status');
+    return if !defined $params->{'bug_status'};
 
-    my @bug_status = $params->param('bug_status');
+    my @bug_status = $self->_param_array('bug_status');
     # Also include inactive bug statuses, as you can query them.
     my $legal_statuses = $self->_chart_fields->{'bug_status'}->legal_values;
 
@@ -1172,10 +1200,10 @@ sub _special_parse_bug_status {
     # If the user has selected every status, change to selecting none.
     # This is functionally equivalent, but quite a lot faster.    
     if ($all or scalar(@bug_status) == scalar(@$legal_statuses)) {
-        $params->delete('bug_status');
+        delete $params->{'bug_status'};
     }
     else {
-        $params->param('bug_status', @bug_status);
+        $params->{'bug_status'} = \@bug_status;
     }
 }
 
@@ -1183,14 +1211,12 @@ sub _special_parse_chfield {
     my ($self) = @_;
     my $params = $self->_params;
     
-    my $date_from = trim(lc($params->param('chfieldfrom')));
-    $date_from = '' if !defined $date_from;
-    my $date_to = trim(lc($params->param('chfieldto')));
-    $date_to = '' if !defined $date_to;
+    my $date_from = trim(lc($params->{'chfieldfrom'} || ''));
+    my $date_to = trim(lc($params->{'chfieldto'} || ''));
     $date_from = '' if $date_from eq 'now';
     $date_to = '' if $date_to eq 'now';
-    my @fields = $params->param('chfield');
-    my $value_to = trim($params->param('chfieldvalue'));
+    my @fields = $self->_param_array('chfield');
+    my $value_to = $params->{'chfieldvalue'};
     $value_to = '' if !defined $value_to;
 
     my @charts;
@@ -1260,38 +1286,38 @@ sub _special_parse_deadline {
     my $params = $self->_params;
     
     my @charts;
-    if (my $from = $params->param('deadlinefrom')) {
+    if (my $from = $params->{'deadlinefrom'}) {
         push(@charts, ['deadline', 'greaterthaneq', $from]);
     }
-    if (my $to = $params->param('deadlineto')) {
+    if (my $to = $params->{'deadlineto'}) {
         push(@charts, ['deadline', 'lessthaneq', $to]);
     }
-      
-    return @charts;    
+    
+    return @charts;
 }
 
 sub _special_parse_email {
     my ($self) = @_;
     my $params = $self->_params;
     
-    my @email_params = grep { $_ =~ /^email\d+$/ } $params->param();
+    my @email_params = grep { $_ =~ /^email\d+$/ } keys %$params;
     
     my @charts;
     foreach my $param (@email_params) {
         $param =~ /(\d+)$/;
         my $id = $1;
-        my $email = trim($params->param("email$id"));
-        next if $email eq "";
-        my $type = $params->param("emailtype$id");
+        my $email = trim($params->{"email$id"});
+        next if !$email;
+        my $type = $params->{"emailtype$id"} || 'anyexact';
         $type = "anyexact" if $type eq "exact";
 
         my @or_charts;
         foreach my $field qw(assigned_to reporter cc qa_contact) {
-            if ($params->param("email$field$id")) {
+            if ($params->{"email$field$id"}) {
                 push(@or_charts, $field, $type, $email);
             }
         }
-        if ($params->param("emaillongdesc$id")) {
+        if ($params->{"emaillongdesc$id"}) {
             push(@or_charts, "commenter", $type, $email);
         }
 
@@ -1304,16 +1330,15 @@ sub _special_parse_email {
 sub _special_parse_resolution {
     my ($self) = @_;
     my $params = $self->_params;
-    return if !defined $params->param('resolution');
+    return if !defined $params->{'resolution'};
 
-    my @resolution = $params->param('resolution');
+    my @resolution = $self->_param_array('resolution');
     my $legal_resolutions = $self->_chart_fields->{resolution}->legal_values;
     @resolution = _valid_values(\@resolution, $legal_resolutions, '---');
     if (scalar(@resolution) == scalar(@$legal_resolutions)) {
-        $params->delete('resolution');
+        delete $params->{'resolution'};
     }
 }
-
 
 sub _valid_values {
     my ($input, $valid, $extra_value) = @_;
@@ -1380,11 +1405,8 @@ sub _charts_to_conditions {
 sub _params_to_charts {
     my ($self) = @_;
     my $params = $self->_params;
-    # XXX This should probably just be moved into using FIELD_MAP here
-    #     in Search.pm.
-    $params->convert_old_params();
     $self->_convert_special_params_to_chart_params();
-    my @param_list = $params->param();
+    my @param_list = keys %$params;
     
     my @all_field_params = grep { /^field-?\d+/ } @param_list;
     my @chart_ids = map { /^field(-?\d+)/; $1 } @all_field_params;
@@ -1410,7 +1432,7 @@ sub _params_to_charts {
                 # meaning that the field, value, or operator were empty.
                 push(@or_charts, $info) if defined $info;
             }
-            if ($params->param("negate$chart_id")) {
+            if ($params->{"negate$chart_id"}) {
                 push(@and_charts, NEGATE);
             }
             push(@and_charts, \@or_charts);
@@ -1433,12 +1455,12 @@ sub _handle_chart {
     
     my $identifier = "$chart_id-$and_id-$or_id";
     
-    my $field = $params->param("field$identifier");
-    my $operator = $params->param("type$identifier");
-    my $value = $params->param("value$identifier");
+    my $field = $params->{"field$identifier"};
+    my $operator = $params->{"type$identifier"};
+    my @values = $self->_param_array("value$identifier");
 
-    return if (!defined $field or !defined $operator or !defined $value);
-    $value = trim($value);
+    return if (!defined $field or !defined $operator or !@values);
+    my $value = trim(join(',', @values));
     return if $value eq '';
     $self->_chart_fields->{$field}
         or ThrowCodeError("invalid_field_name", { field => $field });
@@ -1474,7 +1496,7 @@ sub _handle_chart {
     
     return \%search_args;
 }
-    
+   
 ##################################
 # do_search_function And Helpers #
 ##################################

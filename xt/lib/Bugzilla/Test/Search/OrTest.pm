@@ -25,7 +25,6 @@ package Bugzilla::Test::Search::OrTest;
 use base qw(Bugzilla::Test::Search::FieldTest);
 
 use Bugzilla::Test::Search::Constants;
-use Bugzilla::Test::Search::FakeCGI;
 use List::MoreUtils qw(any uniq);
 
 use constant type => 'OR';
@@ -172,15 +171,15 @@ sub search_columns {
 sub search_params {
     my ($self) = @_;
     my @all_params = map { $_->search_params } $self->field_tests;
-    my $params = new Bugzilla::Test::Search::FakeCGI;
+    my %params;
     my $chart = 0;
     foreach my $item (@all_params) {
-        $params->param("field0-0-$chart", $item->param('field0-0-0'));
-        $params->param("type0-0-$chart", $item->param('type0-0-0'));
-        $params->param("value0-0-$chart", $item->param('value0-0-0'));
+        $params{"field0-0-$chart"} = $item->{'field0-0-0'};
+        $params{"type0-0-$chart"}  = $item->{'type0-0-0'};
+        $params{"value0-0-$chart"} = $item->{'value0-0-0'};
         $chart++;
     }
-    return $params;
+    return \%params;
 }
 
 1;

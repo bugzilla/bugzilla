@@ -26,7 +26,6 @@ package Bugzilla::Test::Search::FieldTest;
 
 use strict;
 use warnings;
-use Bugzilla::Test::Search::FakeCGI;
 use Bugzilla::Search;
 use Bugzilla::Test::Search::Constants;
 
@@ -278,19 +277,16 @@ sub join_broken {
 
 # The CGI object that will get passed to Bugzilla::Search as its arguments.
 sub search_params {
-    my $self = shift;
+    my ($self) = @_;
     return $self->{search_params} if $self->{search_params};
 
-    my $field = $self->field;
-    my $operator = $self->operator;
-    my $value = $self->translated_value;
+    my %params = (
+        "field0-0-0" => $self->field,
+        "type0-0-0"  => $self->operator,
+        "value0-0-0"  => $self->translated_value,
+    );
     
-    my $cgi = new Bugzilla::Test::Search::FakeCGI;
-    $cgi->param("field0-0-0", $field);
-    $cgi->param('type0-0-0', $operator);
-    $cgi->param('value0-0-0', $value);
-    
-    $self->{search_params} = $cgi;
+    $self->{search_params} = \%params;
     return $self->{search_params};
 }
 

@@ -147,6 +147,11 @@
       address.
     [% END %]
 
+  [% ELSIF error == "extension_disabled" %]
+    [% title = "Extension Disabled" %]
+    You cannot access this page because the extension '[% name FILTER html %]'
+    is disabled.
+
   [% ELSIF error == "extension_must_be_subclass" %]
     <code>[% package FILTER html %]</code> from 
     <code>[% filename FILTER html %]</code> is not a subclass of

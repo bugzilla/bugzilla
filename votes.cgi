@@ -28,10 +28,11 @@ use lib qw(. lib);
 use Bugzilla;
 use Bugzilla::Error;
 
-my $cgi = Bugzilla->cgi;
+my $is_enabled = grep { $_->NAME eq 'Voting' } @{ Bugzilla->extensions };
+$is_enabled || ThrowCodeError('extension_disabled', { name => 'Voting' });
 
-my $to_url;
-my $action = $cgi->param('action');
+my $cgi = Bugzilla->cgi;
+my $action = $cgi->param('action') || 'show_user';
 
 if ($action eq "show_bug") {
     $cgi->delete('action');

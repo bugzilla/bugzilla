@@ -32,7 +32,7 @@ use Bugzilla::Util;
 #############
 
 use constant DB_TABLE => 'profile_search';
-use constant LIST_ORDER => 'id';
+use constant LIST_ORDER => 'id DESC';
 
 use constant DB_COLUMNS => qw(
     id

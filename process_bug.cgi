@@ -189,13 +189,11 @@ $vars->{'title_tag'} = "bug_processed";
 
 my $action;
 if (defined $cgi->param('id')) {
-    $action = Bugzilla->user->settings->{'post_bug_submit_action'}->{'value'};
+    $action = $user->settings->{'post_bug_submit_action'}->{'value'};
 
     if ($action eq 'next_bug') {
-        my @bug_list;
-        if ($cgi->cookie("BUGLIST")) {
-            @bug_list = split(/:/, $cgi->cookie("BUGLIST"));
-        }
+        my $bug_list_obj = $user->recent_search_for($first_bug);
+        my @bug_list = $bug_list_obj ? @{$bug_list_obj->bug_list} : ();
         my $cur = firstidx { $_ eq $cgi->param('id') } @bug_list;
         if ($cur >= 0 && $cur < $#bug_list) {
             my $next_bug_id = $bug_list[$cur + 1];

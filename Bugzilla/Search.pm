@@ -601,6 +601,19 @@ sub new {
     my $self = { @_ };
     bless($self, $class);
     $self->{'user'} ||= Bugzilla->user;
+    
+    # There are certain behaviors of the CGI "Vars" hash that we don't want.
+    # In particular, if you put a single-value arrayref into it, later you
+    # get back out a string, which breaks anyexact charts (because they
+    # need arrays even for individual items, or we will re-trigger bug 67036).
+    #
+    # We can't just untie the hash--that would give us a hash with no values.
+    # We have to manually copy the hash into a new one, and we have to always
+    # do it, because there's no way to know if we were passed a tied hash
+    # or not.
+    my $params_in = $self->_params;
+    my %params = map { $_ => $params_in->{$_} } keys %$params_in;
+    $self->{params} = \%params;
 
     return $self;
 }
@@ -1112,8 +1125,8 @@ sub _convert_special_params_to_chart_params {
     
     my @special_charts = $self->_special_charts();
     
-    # first we delete any sign of "Chart #-1" from the HTML form hash
-    # since we want to guarantee the user didn't hide something here
+    # First we delete any sign of "Chart #-1" from the input parameters,
+    # because we want to guarantee the user didn't hide something there.
     my @badcharts = grep { /^(field|type|value)-1-/ } keys %$params;
     foreach my $field (@badcharts) {
         delete $params->{$field};
@@ -1457,20 +1470,37 @@ sub _handle_chart {
     
     my $field = $params->{"field$identifier"};
     my $operator = $params->{"type$identifier"};
-    my @values = $self->_param_array("value$identifier");
+    my $value = $params->{"value$identifier"};
 
-    return if (!defined $field or !defined $operator or !@values);
-    my $value = trim(join(',', @values));
-    return if $value eq '';
+    return if (!defined $field or !defined $operator or !defined $value);
+
+    my $string_value;
+    if (ref $value eq 'ARRAY') {
+        # Trim input and ignore blank values.
+        @$value = map { trim($_) } @$value;
+        @$value = grep { defined $_ and $_ ne '' } @$value;
+        return if !@$value;
+        $string_value = join(',', @$value);
+    }
+    else {
+        return if $value eq '';
+        $string_value = $value;
+    }
+    
     $self->_chart_fields->{$field}
         or ThrowCodeError("invalid_field_name", { field => $field });
     trick_taint($field);
-        
+    
     # This is the field as you'd reference it in a SQL statement.
     my $full_field = $field =~ /\./ ? $field : "bugs.$field";
 
-    my $quoted = $dbh->quote($value);
-    trick_taint($quoted);
+    # "value" and "quoted" are for search functions that always operate
+    # on a scalar string and never care if they were passed multiple
+    # parameters. If the user does pass multiple parameters, they will
+    # become a space-separated string for those search functions.
+    #
+    # all_values and all_quoted are for search functions that do operate
+    # on multiple values, like anyexact.
 
     my %search_args = (
         chart_id   => $sql_chart_id,
@@ -1478,8 +1508,9 @@ sub _handle_chart {
         field      => $field,
         full_field => $full_field,
         operator   => $operator,
-        value      => $value,
-        quoted     => $quoted,
+        value      => $string_value,
+        quoted     => $dbh->quote($string_value),
+        all_values => $value,
         joins      => [],
         having     => [],
     );
@@ -1491,7 +1522,7 @@ sub _handle_chart {
     # do_search_function modified them.   
     $self->search_description({
         field => $field, type => $operator,
-        value => $value, term => $search_args{term},
+        value => $string_value, term => $search_args{term},
     });
     
     return \%search_args;
@@ -1708,6 +1739,29 @@ sub pronoun {
         return "bugs.qa_contact";
     }
     return 0;
+}
+
+sub _all_values {
+    my ($self, $args, $split_on) = @_;
+    $split_on ||= qr/[\s,]+/;
+    my $dbh = Bugzilla->dbh;
+    my $all_values = $args->{all_values};
+    
+    my @array;
+    if (ref $all_values eq 'ARRAY') {
+        @array = @$all_values;
+    }
+    else {
+        @array = split($split_on, $all_values);
+        @array = map { trim($_) } @array;
+        @array = grep { defined $_ and $_ ne '' } @array;
+    }
+    
+    if ($args->{field} eq 'resolution') {
+        @array = map { $_ eq '---' ? '' : $_ } @array;
+    }
+    
+    return @array;
 }
 
 ######################
@@ -2582,6 +2636,10 @@ sub _multiselect_nonchanged {
     push(@$joins, { table => "bug_$field", as => $table });
 }
 
+###############################
+# Standard Operator Functions #
+###############################
+
 sub _simple_operator {
     my ($self, $args) = @_;
     my ($full_field, $quoted, $operator) =
@@ -2634,24 +2692,15 @@ sub _notregexp {
 
 sub _anyexact {
     my ($self, $args) = @_;
-    my ($field, $value, $full_field) = @$args{qw(field value full_field)};
+    my ($field, $full_field) = @$args{qw(field full_field)};
     my $dbh = Bugzilla->dbh;
     
-    my @list;
-    foreach my $word (split(/,/, $value)) {
-        $word = trim($word);
-        if ($word eq "---" && $field eq 'resolution') {
-            $word = "";
-        }
-        my $quoted_word = $dbh->quote($word);
-        trick_taint($quoted_word);
-        push(@list, $quoted_word);
-    }
+    my @list = $self->_all_values($args, ',');
+    @list = map { $dbh->quote($_) } @list;
     
     if (@list) {
         $args->{term} = $dbh->sql_in($full_field, \@list);
     }
-    # XXX Perhaps if it's all commas, we should just throw an error.
     else {
         $args->{term} = '';
     }

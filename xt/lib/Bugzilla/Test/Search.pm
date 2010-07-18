@@ -302,7 +302,7 @@ sub create_keyword {
 
 sub create_user {
     my ($prefix) = @_;
-    my $user_name = $prefix . '-' . random(10) . "@" . random(10)
+    my $user_name = $prefix . '-' . random(15) . "@" . random(12)
                     . "." . random(3);
     my $user_realname = $prefix . '-' . random();
     my $user = Bugzilla::User->create({
@@ -374,7 +374,7 @@ sub _create_field_values {
     $values{'keywords'} = create_keyword($number)->name;
 
     foreach my $field qw(assigned_to qa_contact reporter cc) {
-        $values{$field} = create_user("$number-$field-")->login;
+        $values{$field} = create_user("$number-$field")->login;
     }
 
     my $classification = Bugzilla::Classification->create(
@@ -415,7 +415,7 @@ sub _create_field_values {
         # "short_desc" as a word and matches it in every bug.
         my $value = "$number-$field" . random();
         if ($field eq 'bug_file_loc' or $field eq 'see_also') {
-            $value = "http://$value" . random(3)
+            $value = "http://$value-" . random(3)
                      . "/show_bug.cgi?id=$number";
         }
         $values{$field} = $value;
@@ -439,8 +439,8 @@ sub _create_field_values {
                                . ' ' . random();
 
     my @flags;
-    my $setter = create_user("$number-setter");
-    my $requestee = create_user("$number-requestee");
+    my $setter = create_user("$number-setters.login_name");
+    my $requestee = create_user("$number-requestees.login_name");
     $values{set_flags} = _create_flags($number, $setter, $requestee);
 
     my $month = $for_create ? "12" : "02";

@@ -46,6 +46,7 @@ our @EXPORT = qw(
     OR_BROKEN
     OR_SKIP
     SKIP_FIELDS
+    SUBSTR_NO_FIELD_ADD
     SUBSTR_SIZE
     TESTS
     TESTS_PER_RUN
@@ -156,21 +157,34 @@ use constant USER_FIELDS => qw(
 );
 
 # For the "substr"-type searches, how short of a substring should
-# we use?
+# we use? The goal is to be shorter than the full string, but
+# long enough to still be globally unique.
 use constant SUBSTR_SIZE => 20;
 # However, for some fields, we use a different size.
 use constant FIELD_SUBSTR_SIZE => {
-    alias => 12,
-    bug_file_loc => 30,
+    alias => 11,
     # Just the month and day.
     deadline => -5,
     creation_ts => -8,
     delta_ts => -8,
+    percentage_complete => 7,
     work_time => 3,
     remaining_time => 3,
-    see_also => 30,
-    target_milestone => 12,
+    target_milestone => 15,
+    longdesc => 25,
+    # Just the hour and minute.
+    FIELD_TYPE_DATETIME, -5,
 };
+
+# For most fields, we add the length of the name of the field plus
+# the SUBSTR_SIZE specified above to determine how large of a substring
+# we're going to use. However, for some fields, it doesn't make sense to
+# add in their field name this way.
+use constant SUBSTR_NO_FIELD_ADD => FIELD_TYPE_DATETIME, qw(
+    target_milestone remaining_time percentage_complete work_time
+    attachments.mimetype attachments.submitter attachments.filename
+    attachments.description flagtypes.name
+);
 
 ################
 # Known Broken #

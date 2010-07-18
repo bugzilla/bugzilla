@@ -454,13 +454,27 @@ sub _translate_value_for_bug {
 sub _substr_value {
     my ($self, $value) = @_;
     my $field = $self->field;
+    my $type  = $self->field_object->type;
     my $substr_size = SUBSTR_SIZE;
     if (exists FIELD_SUBSTR_SIZE->{$field}) {
         $substr_size = FIELD_SUBSTR_SIZE->{$field};
     }
-
+    elsif (exists FIELD_SUBSTR_SIZE->{$type}) {
+        $substr_size = FIELD_SUBSTR_SIZE->{$type};
+    }
     if ($substr_size > 0) {
-        return substr($value, 0, $substr_size);
+        # The field name is included in every field value, and if it's
+        # long, it might take up the whole substring, and we don't want that.
+        if (!grep { $_ eq $field or $_ eq $type } SUBSTR_NO_FIELD_ADD) {
+            $substr_size += length($field);
+        }
+        my $string = substr($value, 0, $substr_size);
+        # Make percentage_complete substrings strings match integers uniquely,
+        # by searching for the full decimal number.
+        if ($field eq 'percentage_complete' and length($string) < $substr_size) {
+            $string .= ".000";
+        }
+        return $string;
     }
     return substr($value, $substr_size);
 }

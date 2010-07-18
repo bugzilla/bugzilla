@@ -78,6 +78,21 @@ use constant ENUM_DEFAULTS => {
 # Used by Bugzilla::Bug::possible_duplicates.
 use constant FULLTEXT_OR => '';
 
+# These are used in regular expressions to mean "the start or end of a word".
+#
+# We don't use [[:<:]] and [[:>:]], even though they mean
+# "start and end of a word" and are supported by both MySQL and PostgreSQL,
+# because they don't work if your search starts or ends with a non-alphanumeric
+# character, and there's a fair chance somebody will want to use the "word"
+# search to search flags for something like "review+".
+#
+# We do use [:almum:] because it is supported by at least MySQL and
+# PostgreSQL, and hopefully will get us as much Unicode support as possible,
+# depending on how well the regexp engines of the various databases support
+# Unicode.
+use constant WORD_START => '(^|[^[:alnum:]])';
+use constant WORD_END   => '($|[^[:alnum:]])';
+
 #####################################################################
 # Connection Methods
 #####################################################################

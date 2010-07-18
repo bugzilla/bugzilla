@@ -1050,7 +1050,9 @@ END
 
 sub _sql_where {
     my ($self, $where_terms) = @_;
-    return join(' AND ', $self->_standard_where, @$where_terms);
+    # The newline and this particular spacing makes the resulting
+    # SQL a bit more readable for debugging.
+    return join("\n   AND ", $self->_standard_where, @$where_terms);
 }
 
 ################################
@@ -1676,48 +1678,7 @@ sub SqlifyDate {
 
 sub build_subselect {
     my ($outer, $inner, $table, $cond) = @_;
-    my $q = "SELECT $inner FROM $table WHERE $cond";
-    #return "$outer IN ($q)";
-    my $dbh = Bugzilla->dbh;
-    my $list = $dbh->selectcol_arrayref($q);
-    return "1=2" unless @$list; # Could use boolean type on dbs which support it
-    return $dbh->sql_in($outer, $list);}
-
-sub GetByWordList {
-    my ($field, $strs) = (@_);
-    my @list;
-    my $dbh = Bugzilla->dbh;
-    return [] unless defined $strs;
-
-    foreach my $w (split(/[\s,]+/, $strs)) {
-        my $word = $w;
-        if ($word ne "") {
-            $word =~ tr/A-Z/a-z/;
-            $word = $dbh->quote('(^|[^a-z0-9])' . quotemeta($word) . '($|[^a-z0-9])');
-            trick_taint($word);
-            push(@list, $dbh->sql_regexp($field, $word));
-        }
-    }
-
-    return \@list;
-}
-
-# Support for "any/all/nowordssubstr" comparison type ("words as substrings")
-sub GetByWordListSubstr {
-    my ($field, $strs) = (@_);
-    my @list;
-    my $dbh = Bugzilla->dbh;
-    my $sql_word;
-
-    foreach my $word (split(/[\s,]+/, $strs)) {
-        if ($word ne "") {
-            $sql_word = $dbh->quote($word);
-            trick_taint($sql_word);
-            push(@list, $dbh->sql_iposition($sql_word, $field) . " > 0");
-        }
-    }
-
-    return \@list;
+    return "$outer IN (SELECT $inner FROM $table WHERE $cond)";
 }
 
 sub pronoun {
@@ -1741,6 +1702,10 @@ sub pronoun {
     return 0;
 }
 
+# Used by anyexact to get the list of input values. This allows us to
+# support values with commas inside of them in the standard charts, and
+# still accept string values for the boolean charts (and split them on
+# commas).
 sub _all_values {
     my ($self, $args, $split_on) = @_;
     $split_on ||= qr/[\s,]+/;
@@ -1762,6 +1727,50 @@ sub _all_values {
     }
     
     return @array;
+}
+
+# Support for "any/all/nowordssubstr" comparison type ("words as substrings")
+sub _substring_terms {
+    my ($self, $args) = @_;
+    my $dbh = Bugzilla->dbh;
+
+    # We don't have to (or want to) use _all_values, because we'd just
+    # split each term on spaces and commas anyway.
+    my @words = split(/[\s,]+/, $args->{value});
+    @words = grep { defined $_ and $_ ne '' } @words;
+    @words = map { $dbh->quote($_) } @words;
+    my @terms = map { $dbh->sql_iposition($_, $args->{full_field}) . " > 0" }
+                    @words;
+    return @terms;
+}
+
+sub _word_terms {
+    my ($self, $args) = @_;
+    my $dbh = Bugzilla->dbh;
+    
+    my @values = split(/[\s,]+/, $args->{value});
+    @values = grep { defined $_ and $_ ne '' } @values;
+    my @substring_terms = $self->_substring_terms($args);
+    
+    my @terms;
+    my $start = $dbh->WORD_START;
+    my $end   = $dbh->WORD_END;
+    foreach my $word (@values) {
+        my $regex  = $start . quotemeta($word) . $end;
+        my $quoted = $dbh->quote($regex);
+        # We don't have to check the regexp, because we escaped it, so we're
+        # sure it's valid.
+        my $regex_term = $dbh->sql_regexp($args->{full_field}, $quoted,
+                                          'no check');
+        # Regular expressions are slow--substring searches are faster.
+        # If we're searching for a word, we're also certain that the
+        # substring will appear in the value. So we limit first by
+        # substring and then by a regex that will match just words.
+        my $substring_term = shift @substring_terms;
+        push(@terms, "$substring_term AND $regex_term");
+    }
+    
+    return @terms;
 }
 
 ######################
@@ -2338,9 +2347,6 @@ sub _flagtypes_name {
     };
     push(@$joins, $flagtypes_join);
     
-    # Generate the condition by running the operator-specific
-    # function. Afterwards the condition resides in the $args->{term}
-    # variable.
     my $full_field = $dbh->sql_string_concat("$flagtypes.name",
                                              "$flags.status");
     $args->{full_field} = $full_field;
@@ -2710,16 +2716,15 @@ sub _anywordsubstr {
     my ($self, $args) = @_;
     my ($full_field, $value) = @$args{qw(full_field value)};
     
-    my $list = GetByWordListSubstr($full_field, $value);
-    $args->{term} = join(" OR ", @$list);
+    my @terms = $self->_substring_terms($args);
+    $args->{term} = join("\n\tOR ", @terms);
 }
 
 sub _allwordssubstr {
     my ($self, $args) = @_;
-    my ($full_field, $value) = @$args{qw(full_field value)};
     
-    my $list = GetByWordListSubstr($full_field, $value);
-    $args->{term} = join(" AND ", @$list);
+    my @terms = $self->_substring_terms($args);
+    $args->{term} = join("\n\tAND ", @terms);
 }
 
 sub _nowordssubstr {
@@ -2731,18 +2736,19 @@ sub _nowordssubstr {
 
 sub _anywords {
     my ($self, $args) = @_;
-    my ($full_field, $value) = @$args{qw(full_field value)};
     
-    my $list = GetByWordList($full_field, $value);
-    $args->{term} = join(" OR ", @$list);
+    my @terms = $self->_word_terms($args);
+    # Because _word_terms uses AND, we need to parenthesize its terms
+    # if there are more than one.
+    @terms = map("($_)", @terms) if scalar(@terms) > 1;
+    $args->{term} = join("\n\tOR ", @terms);
 }
 
 sub _allwords {
     my ($self, $args) = @_;
-    my ($full_field, $value) = @$args{qw(full_field value)};
     
-    my $list = GetByWordList($full_field, $value);
-    $args->{term} = join(" AND ", @$list);
+    my @terms = $self->_word_terms($args);
+    $args->{term} = join("\n\tAND ", @terms);
 }
 
 sub _nowords {

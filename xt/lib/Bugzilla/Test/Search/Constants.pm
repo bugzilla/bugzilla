@@ -374,7 +374,6 @@ use constant KNOWN_BROKEN => {
     # Same for attach_data.thedata.
     'allwords-<1>' => {
         ALLWORDS_BROKEN,
-        'attach_data.thedata' => { contains => [1] },
         'flagtypes.name' => { contains => [1] },
     },
 
@@ -384,19 +383,16 @@ use constant KNOWN_BROKEN => {
     # attachments.
     nowords => {
         NOWORDS_BROKEN,
-        'attach_data.thedata' => { contains => [1,5] },
     },
 
     # anywords searches don't work on decimal values.
     # attach_data doesn't work (perhaps because it's the entire
     # data, or some problem with the regex?).
     anywords => {
-        'attach_data.thedata' => { contains => [1] },
         work_time => { contains => [1] },
     },
     'anywords-<1> <2>' => {
         percentage_complete => { contains => [2] },
-        'attach_data.thedata' => { contains => [1,2] },
         work_time => { contains => [1,2] },
     },
 
@@ -477,11 +473,8 @@ use constant KNOWN_BROKEN => {
 # where MySQL isn't, but the result is still a bit surprising to the user.
 use constant PG_BROKEN => {
     'attach_data.thedata' => {
-        allwords       => { },
-        allwordssubstr => { },
-        anywords       => { },
-        notregexp      => { contains => [5] },
-        nowords        => { contains => [5] },
+        notregexp => { contains => [5] },
+        nowords   => { contains => [5] },
     },
     percentage_complete => {
         'allwordssubstr-<1>' => { contains => [3] },
@@ -562,7 +555,6 @@ use constant NEGATIVE_BROKEN_NOT => (
 use constant BROKEN_NOT => {
     allwords       => {
         COMMON_BROKEN_NOT,
-        "attach_data.thedata" => { contains => [1,5] },
         bug_group => { contains => [1] },
         cc => { contains => [1] },
         "flagtypes.name"      => { contains => [1,5] },
@@ -617,13 +609,12 @@ use constant BROKEN_NOT => {
     },
     anywords => {
         COMMON_BROKEN_NOT,
-        "attach_data.thedata" => { contains => [1, 5] },
         "work_time"           => { contains => [1, 2] },
         "work_time"           => { contains => [1] },
         FIELD_TYPE_MULTI_SELECT, { contains => [5] },
     },
     'anywords-<1> <2>' => {
-        'attach_data.thedata' => { contains => [1,2,5] },
+        'attach_data.thedata' => { contains => [5] },
         "percentage_complete" => { contains => [1,3,4,5] },
         work_time => { contains => [1,2] },
     },
@@ -727,7 +718,6 @@ use constant BROKEN_NOT => {
     notsubstring   => { NEGATIVE_BROKEN_NOT },
     nowords        => {
         NEGATIVE_BROKEN_NOT,
-        "attach_data.thedata" => { contains => [1] },
         "work_time"           => { contains => [2, 3, 4] },
         "cc" => { contains => [5] },
         "flagtypes.name" => { },

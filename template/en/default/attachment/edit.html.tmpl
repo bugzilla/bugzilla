@@ -68,19 +68,17 @@
             <span class="bz_edit">(<a href="javascript:toggle_attachment_details_visibility()">edit</a>)</span>
           [% END %]
         </div>
-        [% IF NOT attachment.isurl %]
-          <div class="details">
-            [% attachment.filename FILTER html %] ([% attachment.contenttype FILTER html %]) 
-            [% IF attachment.datasize %]
-              [%+ attachment.datasize FILTER unitconvert %]
-            [% ELSE %]
-              <em>deleted</em>
-            [% END %], created by  [%+ INCLUDE global/user.html.tmpl who = attachment.attacher %]
-            [% IF attachment.isprivate %]
-              <span class="bz_private">Only visible to <strong>[% Param('insidergroup') FILTER html %]</strong></span>
-            [% END %]
-          </div>
-        [% END %]
+        <div class="details">
+          [% attachment.filename FILTER html %] ([% attachment.contenttype FILTER html %])
+          [% IF attachment.datasize %]
+            [%+ attachment.datasize FILTER unitconvert %]
+          [% ELSE %]
+            <em>deleted</em>
+          [% END %], created by [%+ INCLUDE global/user.html.tmpl who = attachment.attacher %]
+          [% IF attachment.isprivate %]
+            <span class="bz_private">Only visible to <strong>[% Param('insidergroup') FILTER html %]</strong></span>
+          [% END %]
+        </div>
       </div>
       <div id="attachment_information_edit">
         <span class="bz_hide">
@@ -99,12 +97,6 @@
           %]          
         </div>
 
-        [% IF attachment.isurl %]
-          <input type="hidden" name="filename"
-                 value="[% attachment.filename FILTER html %]">
-          <input type="hidden" name="contenttypeentry"
-                 value="[% attachment.contenttype FILTER html %]">
-        [% ELSE %]
           <div id="attachment_filename">
             <label for="filename">Filename:</label>
             <input type="text" size="20"  class="text block[% editable_or_hide %]"
@@ -138,7 +130,7 @@
                    [%+ 'checked="checked"' IF attachment.ispatch %]>
                    <label for="ispatch">patch</label>
           </div>
-        [% END %]
+
         <div class="readonly">
           <div class="checkboxes">
             <div id="attachment_isobsolete">
@@ -168,18 +160,6 @@
       <div id="attachment_view_window">
         [% IF !attachment.datasize %]
           <div><b>The content of this attachment has been deleted.</b></div>
-        [% ELSIF attachment.isurl %]
-          <div>
-            <a href="[% attachment.data FILTER html %]">
-              [% IF attachment.datasize < 120 %]
-                [% attachment.data FILTER html %]
-              [% ELSE %]
-                [% attachment.data FILTER truncate(80) FILTER html %]
-                &nbsp;...
-                [% attachment.data.match(".*(.{20})$").0 FILTER html %]
-              [% END %]
-            </a>
-          </div>
         [% ELSIF !Param("allow_attachment_display") %]
           <div id="view_disabled" >
             <p><b>

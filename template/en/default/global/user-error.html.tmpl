@@ -222,11 +222,6 @@
     [% title = "Attachment Deletion Disabled" %]
     Attachment deletion is disabled on this installation.
 
-  [% ELSIF error == "attachment_illegal_url" %]
-    [% title = "Illegal Attachment URL" %]
-    <em>[% url FILTER html %]</em> is not a legal URL for attachments.
-    It must start either with http://, https:// or ftp://.
-
   [% ELSIF error == "attachment_removed" %]
     [% title = "Attachment Removed" %]
     The attachment you are attempting to access has been removed.
@@ -582,13 +577,8 @@
     [%# Hack to get the max value between both limits %]
     [%+ max_limit.nsort.last FILTER html %] KB. <br>
     We recommend that you store your attachment elsewhere
-    [% IF Param("allow_attach_url") %]
-      and then specify the URL to this file on the attachment
-      creation page in the <b>AttachURL</b> field.
-    [% ELSE %]
-      and then insert the URL to it in a comment, or in the URL field
-      for this [% terms.bug %].
-    [% END %]
+    and then paste the URL to this file on the attachment
+    creation page in the appropriate text field.
     <br>Alternately, if your attachment is an image, you could convert
     it to a compressible format like JPG or PNG and try again.
 

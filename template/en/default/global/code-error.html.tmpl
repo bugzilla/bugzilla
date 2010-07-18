@@ -37,11 +37,7 @@
 [% DEFAULT title = "Internal Error" %]
 
 [% error_message = BLOCK %]
-  [% IF error == "attachment_url_disabled" %]
-    [% title = "Attachment URL Disabled" %]
-    You cannot attach a URL. This feature is currently disabled.
-
-  [% ELSIF error == "auth_invalid_email" %]
+  [% IF error == "auth_invalid_email" %]
     [% title = "Invalid Email Address" %]
     We received an email address (<b>[% addr FILTER html %]</b>)
     that didn't pass our syntax checking for a legal email address,

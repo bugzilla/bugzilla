@@ -64,7 +64,6 @@
           isobsolete (0|1) #IMPLIED
           ispatch (0|1) #IMPLIED
           isprivate (0|1) #IMPLIED
-          isurl (0|1) #IMPLIED
 >
 <!ELEMENT attachid (#PCDATA)>
 <!ELEMENT date (#PCDATA)>

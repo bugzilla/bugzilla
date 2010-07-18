@@ -124,10 +124,10 @@ use constant WS_ERROR_CODE => {
     # Attachment errors are 600-700.
     file_too_large         => 600,
     invalid_content_type   => 601,
-    attachment_illegal_url => 602,
+    # Error 602 attachment_illegal_url no longer exists.
     file_not_specified     => 603,
     missing_attachment_description => 604,
-    attachment_url_disabled => 605,
+    # Error 605 attachment_url_disabled no longer exists.
 
     # Errors thrown by the WebService itself. The ones that are negative 
     # conform to http://xmlrpc-epi.sourceforge.net/specs/rfc.fault_codes.php

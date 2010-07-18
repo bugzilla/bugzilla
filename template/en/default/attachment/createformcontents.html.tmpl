@@ -21,29 +21,27 @@
   #                 Marc Schumann <wurblzap@gmail.com>
   #%]
 
-<tr>
+<tr class="attachment_data">
   <th><label for="data">File</label>:</th>
   <td>
-    <em>Enter the path to the file on your computer.</em><br>
-    <input type="file" id="data" name="data" size="50"
-      [% IF Param("allow_attach_url") %]
-        onchange="DataFieldHandler()" 
-      [% END %]
-    >
+    <em>Enter the path to the file on your computer</em> (or
+    <a id="attachment_data_controller" href="javascript:TUI_toggle_class('attachment_text_field');
+                                             javascript:TUI_toggle_class('attachment_data')"
+    >paste text as attachment</a>).<br>
+    <input type="file" id="data" name="data" size="50" onchange="DataFieldHandler()">
   </td>
 </tr>
-[% IF Param("allow_attach_url") %]
-<tr class="expert_fields">
-  <th><label for="attachurl">AttachURL</label>:</th>
+<tr class="attachment_text_field">
+  <th><label for="attach_text">File</label>:</th>
   <td>
-    <em>URL to be attached instead.</em><br>
-    <input type="text" id="attachurl" name="attachurl" size="60" 
-           maxlength="2000"
-           onkeyup="URLFieldHandler()" onblur="URLFieldHandler()">
+    <em>Paste the text to be added as an attachment</em> (or
+    <a id="attachment_text_field_controller" href="javascript:TUI_toggle_class('attachment_text_field');
+                                                   javascript:TUI_toggle_class('attachment_data')"
+    >attach a file</a>).<br>
+    <textarea id="attach_text" name="attach_text" cols="80" rows="15"
+              onkeyup="TextFieldHandler()" onblur="TextFieldHandler()"></textarea>
   </td>
 </tr>
-</tbody>
-[% END %]
 <tr>
   <th><label for="description">Description</label>:</th>
   <td>

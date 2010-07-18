@@ -623,7 +623,6 @@ sub add_attachment {
             mimetype    => $params->{content_type},
             ispatch     => $params->{is_patch},
             isprivate   => $params->{is_private},
-            isurl       => $params->{is_url},
         });
         my $comment = $params->{comment} || '';
         $attachment->bug->add_comment($comment, 
@@ -846,7 +845,6 @@ sub _attachment_to_hash {
         content_type     => $self->type('string', $attach->contenttype),
         is_private       => $self->type('int', $attach->isprivate),
         is_obsolete      => $self->type('int', $attach->isobsolete),
-        is_url           => $self->type('int', $attach->isurl),
         is_patch         => $self->type('int', $attach->ispatch),
         creator          => $self->type('string', $attach->attacher->login),
         attacher         => $self->type('string', $attach->attacher->login),
@@ -1231,13 +1229,6 @@ group called the "insidergroup"), False otherwise.
 
 C<boolean> True if the attachment is obsolete, False otherwise.
 
-=item C<is_url>
-
-C<boolean> True if the attachment is a URL instead of actual data,
-False otherwise. Note that such attachments only happen when the 
-Bugzilla installation has at some point had the C<allow_attach_url>
-parameter enabled.
-
 =item C<is_patch>
 
 C<boolean> True if the attachment is a patch, False otherwise.
@@ -1278,6 +1269,9 @@ C<creator>.
 
 =item In Bugzilla B<4.0>, the C<description> return value was renamed to
 C<summary>.
+
+=item In Bugzilla B<4.2>, the C<is_url> return value was removed
+(this attribute no longer exists for attachments).
 
 =back
 
@@ -2163,13 +2157,6 @@ to the "insidergroup"), False if the attachment should be public.
 
 Defaults to False if not specified.
 
-=item C<is_url>
-
-C<boolean> True if the attachment is just a URL, pointing to data elsewhere.
-If so, the C<data> item should just contain the URL.
-
-Defaults to False if not specified.
-
 =back
 
 =item B<Returns>
@@ -2193,11 +2180,6 @@ You tried to attach a file that was larger than Bugzilla will accept.
 You specified a C<content_type> argument that was blank, not a valid
 MIME type, or not a MIME type that Bugzilla accepts for attachments.
 
-=item 602 (Illegal URL)
-
-You specified C<is_url> as True, but the data that you attempted
-to attach was not a valid URL.
-
 =item 603 (File Name Not Specified)
 
 You did not specify a valid for the C<file_name> argument.
@@ -2206,10 +2188,15 @@ You did not specify a valid for the C<file_name> argument.
 
 You did not specify a value for the C<summary> argument.
 
-=item 605 (URL Attaching Disabled)
+=back
 
-You attempted to attach a URL, setting C<is_url> to True,
-but this Bugzilla does not support attaching URLs.
+=item B<History>
+
+=over
+
+=item Added in Bugzilla B<4.0>.
+
+=item The C<is_url> parameter was removed in Bugzilla B<4.2>.
 
 =back
 

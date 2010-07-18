@@ -53,13 +53,13 @@ function setContentTypeDisabledState(form)
     form.contenttypeentry.disabled = isdisabled;
 }
 
-function URLFieldHandler() {
-    var field_attachurl = document.getElementById("attachurl");
+function TextFieldHandler() {
+    var field_text = document.getElementById("attach_text");
     var greyfields = new Array("data", "ispatch", "autodetect",
                                "list", "manual", "contenttypeselection",
                                "contenttypeentry");
     var i, thisfield;
-    if (field_attachurl.value.match(/^\s*$/)) {
+    if (field_text.value.match(/^\s*$/)) {
         for (i = 0; i < greyfields.length; i++) {
             thisfield = document.getElementById(greyfields[i]);
             if (thisfield) {
@@ -78,7 +78,7 @@ function URLFieldHandler() {
 
 function DataFieldHandler() {
     var field_data = document.getElementById("data");
-    var greyfields = new Array("attachurl");
+    var greyfields = new Array("attach_text");
     var i, thisfield;
     if (field_data.value.match(/^\s*$/)) {
         for (i = 0; i < greyfields.length; i++) {
@@ -102,9 +102,9 @@ function clearAttachmentFields() {
 
     document.getElementById('data').value = '';
     DataFieldHandler();
-    if ((element = document.getElementById('attachurl'))) {
+    if ((element = document.getElementById('attach_text'))) {
         element.value = '';
-        URLFieldHandler();
+        TextFieldHandler();
     }
     document.getElementById('description').value = '';
     /* Fire onchange so that the disabled state of the content-type

@@ -429,10 +429,6 @@ sub update_table_definitions {
     # PUBLIC is a reserved word in Oracle.
     $dbh->bz_rename_column('series', 'public', 'is_public');
 
-    # 2005-09-28 bugreport@peshkin.net Bug 149504
-    $dbh->bz_add_column('attachments', 'isurl',
-                        {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 0});
-
     # 2005-10-21 LpSolit@gmail.com - Bug 313020
     $dbh->bz_add_column('namedqueries', 'query_type',
                         {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 0});
@@ -629,6 +625,9 @@ sub update_table_definitions {
     # of the new workflow.
     $dbh->bz_alter_column('products', 'allows_unconfirmed',
         { TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'TRUE' });
+
+    # 2010-07-18 LpSolit@gmail.com - Bug 119703
+    _remove_attachment_isurl();
 
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
@@ -3398,6 +3397,18 @@ sub _fix_series_creator_fk {
     if ($fk and $fk->{DELETE} eq 'SET NULL') {
         $fk->{DELETE} = 'CASCADE';
         $dbh->bz_alter_fk('series', 'creator', $fk);
+    }
+}
+
+sub _remove_attachment_isurl {
+    my $dbh = Bugzilla->dbh;
+
+    if ($dbh->bz_column_info('attachments', 'isurl')) {
+        # Now all attachments must have a filename.
+        $dbh->do('UPDATE attachments SET filename = ? WHERE isurl = 1',
+                 undef, 'url.txt');
+        $dbh->bz_drop_column('attachments', 'isurl');
+        $dbh->do("DELETE FROM fielddefs WHERE name='attachments.isurl'");
     }
 }
 

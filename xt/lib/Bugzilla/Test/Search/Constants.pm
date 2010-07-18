@@ -128,13 +128,8 @@ use constant FLAG_FIELDS => {
 # These are fields that we don't test. Test::More will mark these
 # "TODO & SKIP", and not run tests for them at all.
 #
-# attachments.isurl can't easily be supported by us, but it's basically
-# identical to isprivate and isobsolete for searching, so that's not a big
-# loss.
-#
 # We don't support days_elapsed or owner_idle_time yet.
 use constant SKIP_FIELDS => qw(
-    attachments.isurl
     owner_idle_time
     days_elapsed
 );
@@ -1183,7 +1178,6 @@ use constant INJECTION_BROKEN_FIELD => {
     'attachments.isobsolete' => { db_skip => ['Pg'] },
     'attachments.ispatch'    => { db_skip => ['Pg'] },
     'attachments.isprivate'  => { db_skip => ['Pg'] },
-    'attachments.isurl'      => { db_skip => ['Pg'] },
     blocked                  => { db_skip => ['Pg'] },
     bug_id                   => { db_skip => ['Pg'] },
     cclist_accessible        => { db_skip => ['Pg'] },

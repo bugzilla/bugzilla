@@ -862,12 +862,18 @@
     </para>
 
     <para>
-      Also, if the administrator turned on the <quote>allow_attach_url</quote>
-      parameter, you can enter the URL pointing to the attachment instead of
+      Also, you can enter the URL pointing to the attachment instead of
       uploading the attachment itself. For example, this is useful if you want to
       point to an external application, a website or a very large file. Note that
       there is no guarantee that the source file will always be available, nor
       that its content will remain unchanged.
+    </para>
+
+    <para>
+      Another way to attach data is to paste text directly in the text field,
+      and Bugzilla will convert it into an attachment. This is pretty useful
+      when you do copy and paste, and you don't want to put the text in a temporary
+      file first.
     </para>
 
     <section id="patchviewer">

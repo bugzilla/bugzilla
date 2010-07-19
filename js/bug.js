@@ -54,6 +54,22 @@ YAHOO.bugzilla.dupTable = {
                                    'bz_default_hidden');
         dataTable.getDataSource().sendRequest(post_data, callback);
     },
+    // This is the keyup event handler. It calls updateTable with a relatively
+    // long delay, to allow additional input. However, the delay is short
+    // enough that nobody could get from the summary field to the Submit
+    // Bug button before the table is shown (which is important, because
+    // the showing of the table causes the Submit Bug button to move, and
+    // if the table shows at the exact same time as the button is clicked,
+    // the click on the button won't register.)
+    doUpdateTable: function(e, args) {
+        var dt = args[0];
+        var product_name = args[1];
+        var summary = YAHOO.util.Event.getTarget(e);
+        clearTimeout(YAHOO.bugzilla.dupTable.lastTimeout);
+        YAHOO.bugzilla.dupTable.lastTimeout = setTimeout(function() {
+            YAHOO.bugzilla.dupTable.updateTable(dt, product_name, summary) },
+            600);
+    },
     formatBugLink: function(el, oRecord, oColumn, oData) {
         el.innerHTML = '<a href="show_bug.cgi?id=' + oData + '">' 
                        + oData + '</a>';
@@ -107,11 +123,7 @@ YAHOO.bugzilla.dupTable = {
         data.options.initialLoad = false;
         var dt = new YAHOO.widget.DataTable(data.container, data.columns, 
             this.dataSource, data.options); 
-        YAHOO.util.Event.on(data.summary_field, 'blur',
-            function(e) {
-                YAHOO.bugzilla.dupTable.updateTable(dt, data.product_name, 
-                    YAHOO.util.Event.getTarget(e))
-            }
-        );
+        YAHOO.util.Event.on(data.summary_field, 'keyup', this.doUpdateTable,
+                            [dt, data.product_name]);
     },
 };

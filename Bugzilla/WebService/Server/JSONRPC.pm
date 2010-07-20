@@ -29,7 +29,7 @@ use Bugzilla::WebService::Constants;
 use Bugzilla::WebService::Util qw(taint_data);
 use Bugzilla::Util qw(correct_urlbase trim);
 
-use MIME::Base64 qw(decode_base64);
+use MIME::Base64 qw(decode_base64 encode_base64);
 
 #####################################
 # Public JSON::RPC Method Overrides #
@@ -191,7 +191,10 @@ sub type {
         # ISO-8601 "YYYYMMDDTHH:MM:SS" with a literal T
         $retval = $self->datetime_format_outbound($value);
     }
-    # XXX Will have to implement base64 if Bugzilla starts using it.
+    elsif ($type eq 'base64') {
+        utf8::encode($value) if utf8::is_utf8($value);
+        $retval = encode_base64($value, '');
+    }
 
     return $retval;
 }

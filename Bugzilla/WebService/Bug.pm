@@ -29,7 +29,7 @@ use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Field;
 use Bugzilla::WebService::Constants;
-use Bugzilla::WebService::Util qw(filter validate);
+use Bugzilla::WebService::Util qw(filter filter_wants validate);
 use Bugzilla::Bug;
 use Bugzilla::BugMail;
 use Bugzilla::Util qw(trick_taint trim);
@@ -834,11 +834,11 @@ sub _attachment_to_hash {
     # Skipping attachment flags for now.
     delete $attach->{flags};
 
-    return filter $filters, {
+    my $item = filter $filters, {
         creation_time    => $self->type('dateTime', $attach->attached),
         last_change_time => $self->type('dateTime', $attach->modification_time),
         id               => $self->type('int', $attach->id),
-        bug_id           => $self->type('int', $attach->bug->id),
+        bug_id           => $self->type('int', $attach->bug_id),
         file_name        => $self->type('string', $attach->filename),
         summary          => $self->type('string', $attach->description),
         description      => $self->type('string', $attach->description),
@@ -846,9 +846,21 @@ sub _attachment_to_hash {
         is_private       => $self->type('int', $attach->isprivate),
         is_obsolete      => $self->type('int', $attach->isobsolete),
         is_patch         => $self->type('int', $attach->ispatch),
-        creator          => $self->type('string', $attach->attacher->login),
-        attacher         => $self->type('string', $attach->attacher->login),
     };
+
+    # creator/attacher require an extra lookup, so we only send them if
+    # the filter wants them.
+    foreach my $field qw(creator attacher) {
+        if (filter_wants $filters, $field) {
+            $item->{$field} = $self->type('string', $attach->attacher->login);
+        }
+    }
+
+    if (filter_wants $filters, 'data') {
+        $item->{'data'} = $self->type('base64', $attach->data);
+    }
+
+    return $item;
 }
 
 1;
@@ -1145,6 +1157,9 @@ C<array> An array of integer attachment ids.
 
 =back
 
+Also accepts the L<include_fields|Bugzilla::WebService/include_fields>,
+and L<exclude_fields|Bugzilla::WebService/exclude_fields> arguments.
+
 =item B<Returns>
 
 A hash containing two elements: C<bugs> and C<attachments>. The return
@@ -1187,6 +1202,10 @@ The fields for each attachment (where it says C<(attachment)> in the
 diagram above) are:
 
 =over
+
+=item C<data>
+
+C<base64> The raw data of the attachment, encoded as Base64.
 
 =item C<creation_time>
 
@@ -1269,6 +1288,8 @@ C<creator>.
 
 =item In Bugzilla B<4.0>, the C<description> return value was renamed to
 C<summary>.
+
+=item The C<data> return value was added in Bugzilla B<4.0>.
 
 =item In Bugzilla B<4.2>, the C<is_url> return value was removed
 (this attribute no longer exists for attachments).

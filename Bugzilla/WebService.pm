@@ -269,11 +269,11 @@ the structs, to possibly improve performance or save some bandwidth.
 
 =over
 
-=item C<include_fields> (array)
+=item C<include_fields> 
 
-An array of strings, representing the (case-sensitive) names of fields.
-Only the fields specified in this hash will be returned, the rest will
-not be included.
+C<array> An array of strings, representing the (case-sensitive) names of
+fields in the return value. Only the fields specified in this hash will
+be returned, the rest will not be included.
 
 If you specify an empty array, then this function will return empty
 hashes.
@@ -288,10 +288,11 @@ would return something like:
 
   { users => [{ id => 1, name => 'user@domain.com' }] }
 
-=item C<exclude_fields> (array)
+=item C<exclude_fields>
 
-An array of strings, representing the (case-sensitive) names of fields.
-The fields specified will not be included in the returned hashes.
+C<array> An array of strings, representing the (case-sensitive) names of
+fields in the return value. The fields specified will not be included in
+the returned hashes.
 
 If you specify all the fields, then this function will return empty
 hashes.

@@ -175,11 +175,20 @@
        [% '</ul>' IF value.size %]
 
        [% IF Param('use_see_also') %]
-         <label for="[% field.name FILTER html %]">
-           <strong>Add [% terms.Bug %] URLs:</strong>
-         </label><br>
-         <input type="text" id="[% field.name FILTER html %]" size="40"
-                class="text_input" name="[% field.name FILTER html %]">
+         <span id="container_showhide_[% field.name FILTER html %]"
+               class="bz_default_hidden">
+           <a href="#" id="showhide_[% field.name FILTER html %]">(add)</a>
+         </span>
+         <div id="container_[% field.name FILTER html %]">
+           <label for="[% field.name FILTER html %]">
+             <strong>Add [% terms.Bug %] URLs:</strong>
+           </label><br>
+           <input type="text" id="[% field.name FILTER html %]" size="40"
+                  class="text_input" name="[% field.name FILTER html %]">
+         </div>
+         <script type="text/javascript">
+             setupEditLink('[% field.name FILTER js %]');
+         </script>
        [% END %]
      [% CASE constants.FIELD_TYPE_KEYWORDS %]
        <div id="keyword_container">

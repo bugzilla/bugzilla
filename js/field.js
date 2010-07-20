@@ -203,6 +203,12 @@ function updateCalendarFromField(date_field) {
     }
 }
 
+function setupEditLink(id) {
+    var link_container = 'container_showhide_' + id;
+    var input_container = 'container_' + id;
+    var link = 'showhide_' + id;
+    hideEditableField(link_container, input_container, link);
+}
 
 /* Hide input fields and show the text with (edit) next to it */  
 function hideEditableField( container, input, action, field_id, original_value ) {

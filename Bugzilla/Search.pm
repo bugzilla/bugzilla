@@ -1629,77 +1629,9 @@ sub _pick_override_function {
 # Search Function Helpers #
 ###########################
 
-sub SqlifyDate {
-    my ($str) = @_;
-    $str = "" if !defined $str;
-    if ($str eq "") {
-        my ($sec, $min, $hour, $mday, $month, $year, $wday) = localtime(time());
-        return sprintf("%4d-%02d-%02d 00:00:00", $year+1900, $month+1, $mday);
-    }
-
-
-    if ($str =~ /^(-|\+)?(\d+)([hHdDwWmMyY])$/) {   # relative date
-        my ($sign, $amount, $unit, $date) = ($1, $2, lc $3, time);
-        my ($sec, $min, $hour, $mday, $month, $year, $wday)  = localtime($date);
-        if ($sign && $sign eq '+') { $amount = -$amount; }
-        if ($unit eq 'w') {                  # convert weeks to days
-            $amount = 7*$amount + $wday;
-            $unit = 'd';
-        }
-        if ($unit eq 'd') {
-            $date -= $sec + 60*$min + 3600*$hour + 24*3600*$amount;
-            return time2str("%Y-%m-%d %H:%M:%S", $date);
-        }
-        elsif ($unit eq 'y') {
-            return sprintf("%4d-01-01 00:00:00", $year+1900-$amount);
-        }
-        elsif ($unit eq 'm') {
-            $month -= $amount;
-            while ($month<0) { $year--; $month += 12; }
-            return sprintf("%4d-%02d-01 00:00:00", $year+1900, $month+1);
-        }
-        elsif ($unit eq 'h') {
-            # Special case 0h for 'beginning of this hour'
-            if ($amount == 0) {
-                $date -= $sec + 60*$min;
-            } else {
-                $date -= 3600*$amount;
-            }
-            return time2str("%Y-%m-%d %H:%M:%S", $date);
-        }
-        return undef;                      # should not happen due to regexp at top
-    }
-    my $date = str2time($str);
-    if (!defined($date)) {
-        ThrowUserError("illegal_date", { date => $str });
-    }
-    return time2str("%Y-%m-%d %H:%M:%S", $date);
-}
-
 sub build_subselect {
     my ($outer, $inner, $table, $cond) = @_;
     return "$outer IN (SELECT $inner FROM $table WHERE $cond)";
-}
-
-sub pronoun {
-    my ($noun, $user) = (@_);
-    if ($noun eq "%user%") {
-        if ($user->id) {
-            return $user->id;
-        } else {
-            ThrowUserError('login_required_for_pronoun');
-        }
-    }
-    if ($noun eq "%reporter%") {
-        return "bugs.reporter";
-    }
-    if ($noun eq "%assignee%") {
-        return "bugs.assigned_to";
-    }
-    if ($noun eq "%qacontact%") {
-        return "bugs.qa_contact";
-    }
-    return 0;
 }
 
 # Used by anyexact to get the list of input values. This allows us to
@@ -1773,67 +1705,95 @@ sub _word_terms {
     return @terms;
 }
 
-######################
-# Public Subroutines #
-######################
+#####################################
+# "Special Parsing" Functions: Date #
+#####################################
 
-# Validate that the query type is one we can deal with
-sub IsValidQueryType
-{
-    my ($queryType) = @_;
-    if (grep { $_ eq $queryType } qw(specific advanced)) {
-        return 1;
+sub _timestamp_translate {
+    my ($self, $args) = @_;
+    my $value = $args->{value};
+    my $dbh = Bugzilla->dbh;
+
+    return if $value !~ /^[\+\-]?\d+[hdwmy]$/i;
+    
+    $args->{value}  = SqlifyDate($value);
+    $args->{quoted} = $dbh->quote($args->{value});
+}
+
+sub SqlifyDate {
+    my ($str) = @_;
+    $str = "" if !defined $str;
+    if ($str eq "") {
+        my ($sec, $min, $hour, $mday, $month, $year, $wday) = localtime(time());
+        return sprintf("%4d-%02d-%02d 00:00:00", $year+1900, $month+1, $mday);
+    }
+
+    if ($str =~ /^(-|\+)?(\d+)([hHdDwWmMyY])$/) {   # relative date
+        my ($sign, $amount, $unit, $date) = ($1, $2, lc $3, time);
+        my ($sec, $min, $hour, $mday, $month, $year, $wday)  = localtime($date);
+        if ($sign && $sign eq '+') { $amount = -$amount; }
+        if ($unit eq 'w') {                  # convert weeks to days
+            $amount = 7*$amount + $wday;
+            $unit = 'd';
+        }
+        if ($unit eq 'd') {
+            $date -= $sec + 60*$min + 3600*$hour + 24*3600*$amount;
+            return time2str("%Y-%m-%d %H:%M:%S", $date);
+        }
+        elsif ($unit eq 'y') {
+            return sprintf("%4d-01-01 00:00:00", $year+1900-$amount);
+        }
+        elsif ($unit eq 'm') {
+            $month -= $amount;
+            while ($month<0) { $year--; $month += 12; }
+            return sprintf("%4d-%02d-01 00:00:00", $year+1900, $month+1);
+        }
+        elsif ($unit eq 'h') {
+            # Special case 0h for 'beginning of this hour'
+            if ($amount == 0) {
+                $date -= $sec + 60*$min;
+            } else {
+                $date -= 3600*$amount;
+            }
+            return time2str("%Y-%m-%d %H:%M:%S", $date);
+        }
+        return undef;                      # should not happen due to regexp at top
+    }
+    my $date = str2time($str);
+    if (!defined($date)) {
+        ThrowUserError("illegal_date", { date => $str });
+    }
+    return time2str("%Y-%m-%d %H:%M:%S", $date);
+}
+
+######################################
+# "Special Parsing" Functions: Users #
+######################################
+
+sub pronoun {
+    my ($noun, $user) = (@_);
+    if ($noun eq "%user%") {
+        if ($user->id) {
+            return $user->id;
+        } else {
+            ThrowUserError('login_required_for_pronoun');
+        }
+    }
+    if ($noun eq "%reporter%") {
+        return "bugs.reporter";
+    }
+    if ($noun eq "%assignee%") {
+        return "bugs.assigned_to";
+    }
+    if ($noun eq "%qacontact%") {
+        return "bugs.qa_contact";
     }
     return 0;
 }
 
-# Splits out "asc|desc" from a sort order item.
-sub split_order_term {
-    my $fragment = shift;
-    $fragment =~ /^(.+?)(?:\s+(ASC|DESC))?$/i;
-    my ($column_name, $direction) = (lc($1), uc($2 || ''));
-    return wantarray ? ($column_name, $direction) : $column_name;
-}
-
-# Used to translate old SQL fragments from buglist.cgi's "order" argument
-# into our modern field IDs.
-sub translate_old_column {
-    my ($column) = @_;
-    # All old SQL fragments have a period in them somewhere.
-    return $column if $column !~ /\./;
-
-    if ($column =~ /\bAS\s+(\w+)$/i) {
-        return $1;
-    }
-    # product, component, classification, assigned_to, qa_contact, reporter
-    elsif ($column =~ /map_(\w+?)s?\.(login_)?name/i) {
-        return $1;
-    }
-    
-    # If it doesn't match the regexps above, check to see if the old 
-    # SQL fragment matches the SQL of an existing column
-    foreach my $key (%{ COLUMNS() }) {
-        next unless exists COLUMNS->{$key}->{name};
-        return $key if COLUMNS->{$key}->{name} eq $column;
-    }
-
-    return $column;
-}
-
-#####################################################################
-# Search Functions
-#####################################################################
-
-sub _invalid_combination {
-    my ($self, $args) = @_;
-    my ($field, $operator) = @$args{qw(field operator)};
-    ThrowUserError('search_field_operator_invalid',
-                   { field => $field, operator => $operator });
-}
-
 sub _contact_pronoun {
     my ($self, $args) = @_;
-    my ($value, $quoted) = @$args{qw(value quoted)};
+    my $value = $args->{value};
     my $user = $self->_user;
     
     if ($value =~ /^\%group/) {
@@ -1871,24 +1831,6 @@ sub _contact_exact_group {
     else {
         $args->{term} = "$table.group_id IS NOT NULL";
     }
-}
-
-sub _contact_nonchanged {
-    my ($self, $args) = @_;
-    my $field = $args->{field};
-    
-    $args->{full_field} = "profiles.login_name";
-    $self->_do_operator_function($args);
-    my $term = $args->{term};
-    $args->{term} = "bugs.$field IN (SELECT userid FROM profiles WHERE $term)";
-}
-
-sub _qa_contact_nonchanged {
-    my ($self, $args) = @_;
-
-    # This will join in map_qa_contact for us.    
-    $self->_add_extra_column('qa_contact');
-    $args->{full_field} = "COALESCE(map_qa_contact.login_name,'')";
 }
 
 sub _cc_pronoun {
@@ -1943,6 +1885,48 @@ sub _cc_exact_group {
     else {
         $args->{term} = "$group_table.group_id IS NOT NULL";
     }
+}
+
+# XXX This should probably be merged with cc_pronoun.
+sub _commenter_pronoun {
+    my ($self, $args) = @_;
+    my $value = $args->{value};
+    my $user = $self->_user;
+
+    if ($value =~ /^(%\w+%)$/) {
+        $args->{value} = pronoun($1, $user);
+        $args->{quoted} = $args->{value};
+        $args->{full_field} = "profiles.userid";
+    }
+}
+
+#####################################################################
+# Search Functions
+#####################################################################
+
+sub _invalid_combination {
+    my ($self, $args) = @_;
+    my ($field, $operator) = @$args{qw(field operator)};
+    ThrowUserError('search_field_operator_invalid',
+                   { field => $field, operator => $operator });
+}
+
+sub _contact_nonchanged {
+    my ($self, $args) = @_;
+    my $field = $args->{field};
+    
+    $args->{full_field} = "profiles.login_name";
+    $self->_do_operator_function($args);
+    my $term = $args->{term};
+    $args->{term} = "bugs.$field IN (SELECT userid FROM profiles WHERE $term)";
+}
+
+sub _qa_contact_nonchanged {
+    my ($self, $args) = @_;
+
+    # This will join in map_qa_contact for us.    
+    $self->_add_extra_column('qa_contact');
+    $args->{full_field} = "COALESCE(map_qa_contact.login_name,'')";
 }
 
 sub _cc_nonchanged {
@@ -2051,30 +2035,6 @@ sub _content_matches {
     # For NOT searches, we just add 0 to the relevance.
     my $select_term = $operator =~ /not/ ? 0 : "($current$rterm1 + $rterm2)";
     COLUMNS->{'relevance'}->{name} = $select_term;
-}
-
-sub _timestamp_translate {
-    my ($self, $args) = @_;
-    my $value = $args->{value};
-    my $dbh = Bugzilla->dbh;
-
-    return if $value !~ /^[\+\-]?\d+[hdwmy]$/i;
-    
-    $args->{value}  = SqlifyDate($value);
-    $args->{quoted} = $dbh->quote($args->{value});
-}
-
-# XXX This should probably be merged with cc_pronoun.
-sub _commenter_pronoun {
-    my ($self, $args) = @_;
-    my $value = $args->{value};
-    my $user = $self->_user;
-
-    if ($value =~ /^(%\w+%)$/) {
-        $args->{value} = pronoun($1, $user);
-        $args->{quoted} = $args->{value};
-        $args->{full_field} = "profiles.userid";
-    }
 }
 
 sub _commenter {
@@ -2822,6 +2782,53 @@ sub _changedby {
     };
     push(@$joins, $join);
     $args->{term} = "$table.bug_when IS NOT NULL";
+}
+
+######################
+# Public Subroutines #
+######################
+
+# Validate that the query type is one we can deal with
+sub IsValidQueryType
+{
+    my ($queryType) = @_;
+    if (grep { $_ eq $queryType } qw(specific advanced)) {
+        return 1;
+    }
+    return 0;
+}
+
+# Splits out "asc|desc" from a sort order item.
+sub split_order_term {
+    my $fragment = shift;
+    $fragment =~ /^(.+?)(?:\s+(ASC|DESC))?$/i;
+    my ($column_name, $direction) = (lc($1), uc($2 || ''));
+    return wantarray ? ($column_name, $direction) : $column_name;
+}
+
+# Used to translate old SQL fragments from buglist.cgi's "order" argument
+# into our modern field IDs.
+sub translate_old_column {
+    my ($column) = @_;
+    # All old SQL fragments have a period in them somewhere.
+    return $column if $column !~ /\./;
+
+    if ($column =~ /\bAS\s+(\w+)$/i) {
+        return $1;
+    }
+    # product, component, classification, assigned_to, qa_contact, reporter
+    elsif ($column =~ /map_(\w+?)s?\.(login_)?name/i) {
+        return $1;
+    }
+    
+    # If it doesn't match the regexps above, check to see if the old 
+    # SQL fragment matches the SQL of an existing column
+    foreach my $key (%{ COLUMNS() }) {
+        next unless exists COLUMNS->{$key}->{name};
+        return $key if COLUMNS->{$key}->{name} eq $column;
+    }
+
+    return $column;
 }
 
 1;

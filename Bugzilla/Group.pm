@@ -420,6 +420,25 @@ sub create {
     return $group;
 }
 
+sub ValidateGroupName {
+    my ($name, @users) = (@_);
+    my $dbh = Bugzilla->dbh;
+    my $query = "SELECT id FROM groups " .
+                "WHERE name = ?";
+    if (Bugzilla->params->{'usevisibilitygroups'}) {
+        my @visible = (-1);
+        foreach my $user (@users) {
+            $user && push @visible, @{$user->visible_groups_direct};
+        }
+        my $visible = join(', ', @visible);
+        $query .= " AND id IN($visible)";
+    }
+    my $sth = $dbh->prepare($query);
+    $sth->execute($name);
+    my ($ret) = $sth->fetchrow_array();
+    return $ret;
+}
+
 ###############################
 ###       Validators        ###
 ###############################
@@ -480,6 +499,7 @@ Bugzilla::Group - Bugzilla group class.
     my $icon_url     = $group->icon_url;
     my $is_active_bug_group = $group->is_active_bug_group;
 
+    my $group_id = Bugzilla::Group::ValidateGroupName('admin', @users);
     my @groups   = Bugzilla::Group->get_all;
 
 =head1 DESCRIPTION
@@ -499,7 +519,20 @@ normally does, this function also makes the new group be inherited
 by the C<admin> group. That is, the C<admin> group will automatically
 be a member of this group.
 
+=item C<ValidateGroupName($name, @users)>
+
+Description: ValidateGroupName checks to see if ANY of the users
+             in the provided list of user objects can see the
+             named group.
+
+Params:      $name - String with the group name.
+             @users - An array with Bugzilla::User objects.
+
+Returns:     It returns the group id if successful
+             and undef otherwise.
+
 =back
+
 
 =head1 METHODS
 

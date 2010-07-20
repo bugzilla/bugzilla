@@ -622,7 +622,9 @@ sub _console_die {
     # that it should put "at Bugzilla/Install.pm line 1234" after the
     # message.
     $message =~ s/\n+$//;
-    die colored($message, COLOR_ERROR) . "\n";
+    # We put quotes around the message to stringify any object exceptions,
+    # like Template::Exception.
+    die colored("$message", COLOR_ERROR) . "\n";
 }
 
 sub prevent_windows_dialog_boxes {

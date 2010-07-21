@@ -67,6 +67,8 @@ END
     feature_updates           => 'Automatic Update Notifications',
     feature_xmlrpc            => 'XML-RPC Interface',
 
+    file_remove => 'Removing ##name##...',
+    file_rename => 'Renaming ##from## to ##to##...',
     header => "* This is Bugzilla ##bz_ver## on perl ##perl_ver##\n"
             . "* Running on ##os_name## ##os_ver##",
     install_all => <<EOT,

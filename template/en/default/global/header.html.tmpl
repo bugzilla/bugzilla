@@ -64,6 +64,14 @@
   datatable    => ['json', 'connection', 'datasource', 'element'],
 } %]
 
+[%# These are JS URLs that are *always* on the page and come before
+  # every other JS URL.
+  #%]
+[% SET starting_js_urls = [
+    "js/yui/yahoo-dom-event/yahoo-dom-event.js",
+    "js/yui/cookie/cookie-min.js",
+] %]
+
 
 [%# We should be able to set the default value of the header variable
   # to the value of the title variable using the DEFAULT directive,
@@ -87,118 +95,33 @@
 
     [% PROCESS 'global/setting-descs.none.tmpl' %]
 
-    [%# Set up the skin CSS cascade:
-      #  0. YUI CSS
-      #  1. Standard Bugzilla stylesheet set (persistent)
-      #  2. Standard Bugzilla stylesheet set (selectable)
-      #  3. All third-party "skin" stylesheet sets (selectable)
-      #  4. Page-specific styles
-      #  5. Custom Bugzilla stylesheet set (persistent)
-      # "Selectable" skin file sets may be either preferred or alternate.
-      # Exactly one is preferred, determined by the "skin" user preference.
-      #%]
-    [% IF user.settings.skin.value != 'standard' %]
-      [% user_skin = user.settings.skin.value %]
-    [% END %]
-    [% style_urls.unshift('skins/standard/global.css') %]
-
-    [%# YUI dependency resolution %]
-    [%# We have to do this in a separate array, because modifying the
-      # existing array by unshift'ing dependencies confuses FOREACH.
-      #%]
-    [% SET yui_resolved = [] %]
-    [% FOREACH yui_name = yui %]
-      [% FOREACH yui_dep = yui_deps.${yui_name}.reverse %]
-        [% yui_resolved.push(yui_dep) IF NOT yui_resolved.contains(yui_dep) %]
-      [% END %]
-      [% yui_resolved.push(yui_name) IF NOT yui_resolved.contains(yui_name) %]
-    [% END %]
-    [% SET yui = yui_resolved %]
-
-    [%# YUI CSS %]
-    [% FOREACH yui_name = yui %]
-      [% IF yui_css.$yui_name %]
-        <link rel="stylesheet" type="text/css"
-              href="js/yui/assets/skins/sam/[%- yui_name FILTER html %].css">
-      [% END %]
-    [% END %]
+    [% SET yui = yui_resolve_deps(yui, yui_deps) %]
+    [% SET css_sets = css_files(style_urls, yui, yui_css) %]
 
     [%# CSS cascade, part 1: Standard Bugzilla stylesheet set (persistent).
       # Always present.
       #%]
-    [% FOREACH style_url = style_urls %]
-      <link href="[% style_url FILTER html %]"
-            rel="stylesheet"
-            type="text/css">
-    [% END %]
-    <!--[if lte IE 7]>
-      [%# Internet Explorer treats [if IE] HTML comments as uncommented.
-        # Use it to import CSS fixes so that Bugzilla looks decent on IE 7
-        # and below.
-        #%]
-      <link href="skins/standard/IE-fixes.css"
-            rel="stylesheet"
-            type="text/css">
-    <![endif]-->
-
-    [%# CSS cascade, part 2: Standard Bugzilla stylesheet set (selectable)
-      # Present if skin selection is enabled.
+    [%# This allows people to switch back to the "Classic" skin if they
+      # are in another skin. 
       #%]
-    [% IF user.settings.skin.is_enabled %]
-      [% FOREACH style_url = style_urls %]
-        <link href="[% style_url FILTER html %]"
-              rel="[% 'alternate ' IF user_skin %]stylesheet"
-              title="[% setting_descs.standard FILTER html %]"
-              type="text/css">
-      [% END %]
-      <!--[if lte IE 7]>
-      [%# Internet Explorer treats [if IE] HTML comments as uncommented.
-        # Use it to import CSS fixes so that Bugzilla looks decent on IE 7
-        # and below.
-        #%]
-        <link href="skins/standard/IE-fixes.css"
-              rel="[% 'alternate ' IF user_skin %]stylesheet"
-              title="[% setting_descs.standard FILTER html %]"
-              type="text/css">
-      <![endif]-->
+    <link href="[% 'skins/standard/global.css' FILTER mtime_url FILTER html %]"
+          rel="alternate stylesheet" 
+          title="[% setting_descs.standard FILTER html %]">
+    [% FOREACH style_url = css_sets.standard %]
+      [% PROCESS format_css_link css_set_name = 'standard' %]
     [% END %]
 
-    [%# CSS cascade, part 3: Third-party stylesheet set (selectable).
-      # All third-party skins are present if skin selection is enabled.
-      # The admin-selected skin is always present.
+    [%# CSS cascade, part 2 & 3: Third-party stylesheet set (selected and
+      # selectable). All third-party skins are present as alternate
+      # stylesheets, even if they are not currently in use.
       #%]
-    [% FOREACH contrib_skin = user.settings.skin.legal_values %]
-      [% NEXT IF contrib_skin == 'standard' %]
-      [% NEXT UNLESS contrib_skin == user_skin
-                  OR user.settings.skin.is_enabled %]
-      [% contrib_skin = contrib_skin FILTER url_quote %]
-      [% IF contrib_skin.match('\.css$') %]
-        [%# 1st skin variant: single-file stylesheet %]
-        <link href="[% "skins/contrib/$contrib_skin" %]"
-              rel="[% 'alternate ' UNLESS contrib_skin == user_skin %]stylesheet"
-              title="[% contrib_skin FILTER html %]"
-              type="text/css">
-      [% ELSE %]
-        [%# 2nd skin variant: stylesheet set %]
-        [% FOREACH style_url = style_urls %]
-          [% IF style_url.match('^skins/standard/') %]
-            <link href="[% style_url.replace('^skins/standard/',
-                                             "skins/contrib/$contrib_skin/") %]"
-                  rel="[% 'alternate ' UNLESS contrib_skin == user_skin %]stylesheet"
-                  title="[% contrib_skin FILTER html %]"
-                  type="text/css">
-          [% END %]
-        [% END %]
-        <!--[if lte IE 7]>
-          [%# Internet Explorer treats [if IE] HTML comments as uncommented.
-            # Use it to import CSS fixes so that Bugzilla looks decent on IE 7
-            # and below.
-            #%]
-          <link href="skins/contrib/[% contrib_skin FILTER html %]/IE-fixes.css"
-                rel="[% 'alternate ' UNLESS contrib_skin == user_skin %]stylesheet"
-                title="[% contrib_skin FILTER html %]"
-                type="text/css">
-        <![endif]-->
+    [% FOREACH style_url = css_sets.skin %]
+      [% PROCESS format_css_link css_set_name = user.settings.skin.value %]
+    [% END %]
+
+    [% FOREACH alternate_skin = css_sets.alternate.keys %]
+      [% FOREACH style_url = css_sets.alternate.$alternate_skin %]
+        [% PROCESS format_css_link css_set_name = alternate_skin %]
       [% END %]
     [% END %]
 
@@ -214,33 +137,19 @@
       # Always present. Site administrators may override all other style
       # definitions, including skins, using custom stylesheets.
       #%]
-    [% FOREACH style_url = style_urls %]
-      [% IF style_url.match('^skins/standard/') %]
-        <link href="[% style_url.replace('^skins/standard/', "skins/custom/")
-                       FILTER html %]" rel="stylesheet" type="text/css">
-      [% END %]
+    [% FOREACH style_url = css_sets.custom %]
+      [% PROCESS format_css_link css_set_name = 'standard' %]
     [% END %]
-    <!--[if lte IE 7]>
-      [%# Internet Explorer treats [if IE] HTML comments as uncommented.
-        # Use it to import CSS fixes so that Bugzilla looks decent on IE 7
-        # and below.
-        #%]
-      <link href="skins/custom/IE-fixes.css"
-            rel="stylesheet"
-            type="text/css">
-    <![endif]-->
 
     [%# YUI Scripts %]
-    <script src="js/yui/yahoo-dom-event/yahoo-dom-event.js"
-            type="text/javascript"></script>
-    <script src="js/yui/cookie/cookie-min.js" type="text/javascript"></script>
     [% FOREACH yui_name = yui %]
-      <script type="text/javascript" 
-              src="js/yui/[% yui_name FILTER html %]/
-                   [%- yui_name FILTER html %]-min.js"></script>
+      [% starting_js_urls.push("js/yui/$yui_name/${yui_name}.js") %]
     [% END %]
+    [% starting_js_urls.push('js/global.js') %]
 
-    <script src="js/global.js" type="text/javascript"></script>
+    [% FOREACH javascript_url = starting_js_urls %]
+      [% PROCESS format_js_link %]
+    [% END %]
 
     <script type="text/javascript">
     <!--
@@ -291,10 +200,8 @@
     // -->
     </script>
 
-    [% IF javascript_urls %]
-      [% FOREACH javascript_url = javascript_urls %]
-        <script src="[% javascript_url FILTER html %]" type="text/javascript"></script>
-      [% END %]
+    [% FOREACH javascript_url = javascript_urls %]
+      [% PROCESS format_js_link %]
     [% END %]
 
     [%# this puts the live bookmark up on firefox for the Atom feed %]
@@ -379,4 +286,42 @@
 
 [% IF message %]
 <div id="message">[% message %]</div>
+[% END %]
+
+[% BLOCK format_css_link %]
+  [% IF style_url.match('/IE-fixes\.css') %]
+    <!--[if lte IE 7]>
+      [%# Internet Explorer treats [if IE] HTML comments as uncommented.
+        # We use it to import CSS fixes so that Bugzilla looks decent on IE 7
+        # and below.
+        #%]
+  [% END %]
+
+  [% IF css_set_name == 'standard'
+       OR css_set_name == user.settings.skin.value
+  %]
+    [% SET css_rel = 'stylesheet' %]
+    [% SET css_set_display_name = setting_descs.${user.settings.skin.value}
+                                  || user.settings.skin.value %]
+  [% ELSE %]
+    [% SET css_rel = 'alternate stylesheet' %]
+    [% SET css_set_display_name = setting_descs.$css_set_name || css_set_name %]
+  [% END %]
+
+  [% IF css_set_name == 'standard' %]
+    [% SET css_title_link = '' %]
+  [% ELSE %]
+    [% css_title_link = BLOCK ~%]
+      title="[% css_set_display_name FILTER html %]"
+    [% END %]
+  [% END %]
+
+  <link href="[% style_url FILTER html %]" rel="[% css_rel FILTER none %]"
+        type="text/css" [% css_title_link FILTER none %]>
+
+  [% '<![endif]-->' IF style_url.match('/IE-fixes\.css') %]
+[% END %]
+
+[% BLOCK format_js_link %]
+  <script type="text/javascript" src="[% javascript_url FILTER mtime_url FILTER html %]"></script>
 [% END %]

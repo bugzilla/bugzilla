@@ -284,20 +284,6 @@ sub FILESYSTEM {
                                         contents => '' },
     );
 
-    # Each standard stylesheet has an associated custom stylesheet that
-    # we create. Also, we create placeholders for standard stylesheets
-    # for contrib skins which don't provide them themselves.
-    foreach my $skin_dir ("$skinsdir/custom", <$skinsdir/contrib/*>) {
-        next if basename($skin_dir) =~ /^cvs$/i;
-        foreach my $base_css (<$skinsdir/standard/*.css>) {
-            _add_custom_css($skin_dir, basename($base_css), \%create_files);
-        }
-        foreach my $dir_css (<$skinsdir/standard/*/*.css>) {
-            $dir_css =~ s{.+?([^/]+/[^/]+)$}{$1};
-            _add_custom_css($skin_dir, $dir_css, \%create_files);
-        }
-    }
-
     # Because checksetup controls the creation of index.html separately
     # from all other files, it gets its very own hash.
     my %index_html = (
@@ -455,18 +441,51 @@ EOT
         print "Removing duplicates directory...\n";
         rmtree("$datadir/duplicates");
     }
+
+    _remove_empty_css_files();
+    _convert_single_file_skins();
 }
 
-# A simple helper for creating "empty" CSS files.
-sub _add_custom_css {
-    my ($skin_dir, $path, $create_files) = @_;
-    $create_files->{"$skin_dir/$path"} = { perms => WS_SERVE, contents => <<EOT
+sub _remove_empty_css_files {
+    my $skinsdir = bz_locations()->{'skinsdir'};
+    foreach my $css_file (glob("$skinsdir/custom/*.css"),
+                          glob("$skinsdir/contrib/*/*.css"))
+    {
+        _remove_empty_css($css_file);
+    }
+}
+
+# A simple helper for the update code that removes "empty" CSS files.
+sub _remove_empty_css {
+    my ($file) = @_;
+    my $basename = basename($file);
+    my $empty_contents = <<EOT;
 /*
- * Custom rules for $path.
+ * Custom rules for $basename.
  * The rules you put here override rules in that stylesheet.
  */
 EOT
+    if (length($empty_contents) == -s $file) {
+        open(my $fh, '<', $file) or warn "$file: $!";
+        my $file_contents;
+        { local $/; $file_contents = <$fh>; }
+        if ($file_contents eq $empty_contents) {
+            print install_string('file_remove', { name => $file }), "\n";
+            unlink $file or warn "$file: $!";
+        }
     };
+}
+
+# We used to allow a single css file in the skins/contrib/ directory
+# to be a whole skin.
+sub _convert_single_file_skins {
+    my $skinsdir = bz_locations()->{'skinsdir'};
+    foreach my $skin_file (glob "$skinsdir/contrib/*.css") {
+        my $dir_name = $skin_file;
+        $dir_name =~ s/\.css$//;
+        mkdir $dir_name or warn "$dir_name: $!";
+        _rename_file($skin_file, "$dir_name/global.css");
+    }
 }
 
 sub create_htaccess {
@@ -492,7 +511,7 @@ sub create_htaccess {
 
 sub _rename_file {
     my ($from, $to) = @_;
-    print "Renaming $from to $to...\n";
+    print install_string('file_rename', { from => $from, to => $to }), "\n";
     if (-e $to) {
         warn "$to already exists, not moving\n";
     }

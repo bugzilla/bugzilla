@@ -358,6 +358,121 @@ sub get_bug_link {
     return qq{$pre<a href="$linkval" title="$title">$link_text</a>$post};
 }
 
+#####################
+# Header Generation #
+#####################
+
+# Returns the last modification time of a file, as an integer number of
+# seconds since the epoch.
+sub _mtime { return (stat($_[0]))[9] }
+
+sub mtime_filter {
+    my ($file_url) = @_;
+    my $cgi_path = bz_locations()->{'cgi_path'};
+    my $file_path = "$cgi_path/$file_url";
+    return "$file_url?" . _mtime($file_path);
+}
+
+# Set up the skin CSS cascade:
+#
+#  1. YUI CSS
+#  2. Standard Bugzilla stylesheet set (persistent)
+#  3. Standard Bugzilla stylesheet set (selectable)
+#  4. All third-party "skin" stylesheet sets (selectable)
+#  5. Page-specific styles
+#  6. Custom Bugzilla stylesheet set (persistent)
+#
+# "Selectable" skin file sets may be either preferred or alternate.
+# Exactly one is preferred, determined by the "skin" user preference.
+sub css_files {
+    my ($style_urls, $yui, $yui_css) = @_;
+    
+    # global.css goes on every page, and so does IE-fixes.css.
+    my @requested_css = ('skins/standard/global.css', @$style_urls,
+                         'skins/standard/IE-fixes.css');
+
+    my @yui_required_css;
+    foreach my $yui_name (@$yui) {
+        next if !$yui_css->{$yui_name};
+        push(@yui_required_css, "js/yui/assets/skins/sam/$yui_name.css");
+    }
+    unshift(@requested_css, @yui_required_css);
+    
+    my @css_sets = map { _css_link_set($_) } @requested_css;
+    
+    my %by_type = (standard => [], alternate => {}, skin => [], custom => []);
+    foreach my $set (@css_sets) {
+        foreach my $key (keys %$set) {
+            if ($key eq 'alternate') {
+                foreach my $alternate_skin (keys %{ $set->{alternate} }) {
+                    my $files = $by_type{alternate}->{$alternate_skin} ||= [];
+                    push(@$files, $set->{alternate}->{$alternate_skin});
+                }
+            }
+            else {
+                push(@{ $by_type{$key} }, $set->{$key});
+            }
+        }
+    }
+    
+    return \%by_type;
+}
+
+sub _css_link_set {
+    my ($file_name) = @_;
+
+    my $standard_mtime = _mtime($file_name);
+    my %set = (standard => $file_name . "?$standard_mtime");
+    
+    # We use (^|/) to allow Extensions to use the skins system if they
+    # want.
+    if ($file_name !~ m{(^|/)skins/standard/}) {
+        return \%set;
+    }
+    
+    my $user = Bugzilla->user;
+    my $cgi_path = bz_locations()->{'cgi_path'};
+    my $all_skins = $user->settings->{'skin'}->legal_values;    
+    my %skin_urls;
+    foreach my $option (@$all_skins) {
+        next if $option eq 'standard';
+        my $skin_file_name = $file_name;
+        $skin_file_name =~ s{(^|/)skins/standard/}{skins/contrib/$option/};
+        if (my $mtime = _mtime("$cgi_path/$skin_file_name")) {
+            $skin_urls{$option} = $skin_file_name . "?$mtime";
+        }
+    }
+    $set{alternate} = \%skin_urls;
+    
+    my $skin = $user->settings->{'skin'}->{'value'};
+    if ($skin ne 'standard' and defined $set{alternate}->{$skin}) {
+        $set{skin} = delete $set{alternate}->{$skin};
+    }
+    
+    my $custom_file_name = $file_name;
+    $custom_file_name =~ s{(^|/)skins/standard/}{skins/custom/};
+    if (my $custom_mtime = _mtime("$cgi_path/$custom_file_name")) {
+        $set{custom} = $custom_file_name . "?$custom_mtime";
+    }
+    
+    return \%set;
+}
+
+# YUI dependency resolution
+sub yui_resolve_deps {
+    my ($yui, $yui_deps) = @_;
+    
+    my @yui_resolved;
+    foreach my $yui_name (@$yui) {
+        my $deps = $yui_deps->{$yui_name} || [];
+        foreach my $dep (reverse @$deps) {
+            push(@yui_resolved, $dep) if !grep { $_ eq $dep } @yui_resolved;
+        }
+        push(@yui_resolved, $yui_name) if !grep { $_ eq $yui_name } @yui_resolved;
+    }
+    return \@yui_resolved;
+}
+
 ###############################################################################
 # Templatization Code
 
@@ -647,6 +762,8 @@ sub create {
             html_light => \&Bugzilla::Util::html_light_quote,
 
             email => \&Bugzilla::Util::email_filter,
+            
+            mtime_url => \&mtime_filter,
 
             # iCalendar contentline filter
             ics => [ sub {
@@ -769,6 +886,9 @@ sub create {
                     Bugzilla->fields({ by_name => 1 });
                 return $cache->{template_bug_fields};
             },
+            
+            'css_files' => \&css_files,
+            yui_resolve_deps => \&yui_resolve_deps,
 
             # Whether or not keywords are enabled, in this Bugzilla.
             'use_keywords' => sub { return Bugzilla::Keyword->any_exist; },

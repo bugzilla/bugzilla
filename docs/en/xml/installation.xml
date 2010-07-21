@@ -1044,7 +1044,7 @@ max_allowed_packet=4M
     AddHandler cgi-script .cgi
     Options +Indexes +ExecCGI
     DirectoryIndex index.cgi
-    AllowOverride Limit
+    AllowOverride Limit FileInfo Indexes
     &lt;/Directory&gt;
                 </programlisting>
     

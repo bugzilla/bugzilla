@@ -74,7 +74,7 @@ PerlChildInitHandler "sub { srand(); }"
     $sizelimit
     PerlOptions +ParseHeaders
     Options +ExecCGI
-    AllowOverride Limit
+    AllowOverride Limit FileInfo Indexes
     DirectoryIndex index.cgi index.html
 </Directory>
 EOT

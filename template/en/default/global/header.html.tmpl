@@ -143,7 +143,7 @@
 
     [%# YUI Scripts %]
     [% FOREACH yui_name = yui %]
-      [% starting_js_urls.push("js/yui/$yui_name/${yui_name}.js") %]
+      [% starting_js_urls.push("js/yui/$yui_name/${yui_name}-min.js") %]
     [% END %]
     [% starting_js_urls.push('js/global.js') %]
 

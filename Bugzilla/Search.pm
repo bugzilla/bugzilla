@@ -189,31 +189,30 @@ use constant OPERATOR_REVERSE => {
 };
 
 use constant OPERATOR_FIELD_OVERRIDE => {
-    
     # User fields
     'attachments.submitter' => {
-        _default => \&_attachments_submitter,
+        _non_changed => \&_user_nonchanged,
     },
     assigned_to => {
-        _non_changed => \&_contact_nonchanged,
+        _non_changed => \&_user_nonchanged,
     },
     cc => {
-        _non_changed => \&_cc_nonchanged,
+        _non_changed => \&_user_nonchanged,
     },
     commenter => {
-        _default => \&_commenter,
+        _non_changed => \&_user_nonchanged,
     },
     reporter => {
-        _non_changed => \&_contact_nonchanged,
+        _non_changed => \&_user_nonchanged,
     },
     'requestees.login_name' => {
-        _default => \&_requestees_login_name,
+        _non_changed => \&_user_nonchanged,
     },
     'setters.login_name' => {
-        _default => \&_setters_login_name,    
-    },    
+        _non_changed => \&_user_nonchanged,    
+    },
     qa_contact => {
-        _non_changed => \&_qa_contact_nonchanged,
+        _non_changed => \&_user_nonchanged,
     },
     
     # General Bug Fields
@@ -330,6 +329,38 @@ use constant SPECIAL_PARSING => {
     creation_ts => \&_timestamp_translate,
     deadline    => \&_timestamp_translate,
     delta_ts    => \&_timestamp_translate,
+};
+
+# Information about fields that represent "users", used by _user_nonchanged.
+# There are other user fields than the ones listed here, but those use
+# defaults in _user_nonchanged.
+use constant USER_FIELDS => {
+    'attachments.submitter' => {
+        field    => 'submitter_id',
+        join     => { table => 'attachments' },
+        isprivate => 1,
+    },
+    cc => {
+        field => 'who',
+        join  => { table => 'cc' },
+    },
+    commenter => {
+        field => 'who',
+        join  => { table => 'longdescs', join => 'INNER' },
+        isprivate => 1,
+    },
+    qa_contact => {
+        nullable => 1,
+    },
+    'requestees.login_name' => {
+        nullable => 1,
+        field    => 'requestee_id',
+        join     => { table => 'flags' },
+    },
+    'setters.login_name' => {
+        field    => 'setter_id',
+        join     => { table => 'flags' },
+    },
 };
 
 # Backwards compatibility for times that we changed the names of fields
@@ -1786,7 +1817,7 @@ sub pronoun {
         return "bugs.assigned_to";
     }
     if ($noun eq "%qacontact%") {
-        return "bugs.qa_contact";
+        return "COALESCE(bugs.qa_contact,0)";
     }
     return 0;
 }
@@ -1802,6 +1833,7 @@ sub _contact_pronoun {
     elsif ($value =~ /^(%\w+%)$/) {
         $args->{value} = pronoun($1, $user);
         $args->{quoted} = $args->{value};
+        $args->{value_is_id} = 1;
     }
 }
 
@@ -1844,7 +1876,7 @@ sub _cc_pronoun {
     elsif ($value =~ /^(%\w+%)$/) {
         $args->{value} = pronoun($1, $user);
         $args->{quoted} = $args->{value};
-        $args->{full_field} = "profiles.userid";
+        $args->{value_is_id} = 1;
     }
 }
 
@@ -1896,7 +1928,7 @@ sub _commenter_pronoun {
     if ($value =~ /^(%\w+%)$/) {
         $args->{value} = pronoun($1, $user);
         $args->{quoted} = $args->{value};
-        $args->{full_field} = "profiles.userid";
+        $args->{value_is_id} = 1;
     }
 }
 
@@ -1911,53 +1943,116 @@ sub _invalid_combination {
                    { field => $field, operator => $operator });
 }
 
-sub _contact_nonchanged {
+# For all the "user" fields--assigned_to, reporter, qa_contact,
+# cc, commenter, requestee, etc.
+sub _user_nonchanged {
     my ($self, $args) = @_;
-    my $field = $args->{field};
-    
-    $args->{full_field} = "profiles.login_name";
-    $self->_do_operator_function($args);
-    my $term = $args->{term};
-    $args->{term} = "bugs.$field IN (SELECT userid FROM profiles WHERE $term)";
-}
+    my ($field, $operator, $chart_id, $sequence, $joins) =
+        @$args{qw(field operator chart_id sequence joins)};
 
-sub _qa_contact_nonchanged {
-    my ($self, $args) = @_;
+    my $is_in_other_table;
+    if (my $join = USER_FIELDS->{$field}->{join}) {
+        $is_in_other_table = 1;
+        my $as = "${field}_$chart_id";
+        # Needed for setters.login_name and requestees.login_name.
+        # Otherwise when we try to join "profiles" below, we'd get
+        # something like "setters.login_name.login_name" in the "from".
+        $as =~ s/\./_/g;        
+        # This helps implement the email1, email2, etc. parameters.
+        if ($chart_id =~ /default/) {
+            $as .= "_$sequence";
+        }
+        my $isprivate = USER_FIELDS->{$field}->{isprivate};
+        my $extra = ($isprivate and !$self->_user->is_insider)
+                    ? ["$as.isprivate = 0"] : [];
+        # We want to copy $join so as not to modify USER_FIELDS.
+        push(@$joins, { %$join, as => $as, extra => $extra });
+        my $search_field = USER_FIELDS->{$field}->{field};
+        $args->{full_field} = "$as.$search_field";
+    }
 
-    # This will join in map_qa_contact for us.    
-    $self->_add_extra_column('qa_contact');
-    $args->{full_field} = "COALESCE(map_qa_contact.login_name,'')";
-}
-
-sub _cc_nonchanged {
-    my ($self, $args) = @_;
-    my ($chart_id, $sequence, $field, $full_field, $operator, $joins) =
-        @$args{qw(chart_id sequence field full_field operator joins)};
-
-    # This is for the email1, email2, email3 fields from query.cgi.
-    if ($chart_id eq "") {
-        $chart_id = "CC$sequence";
-        $args->{sequence}++;
+    my $is_nullable = USER_FIELDS->{$field}->{nullable};
+    my $null_alternate = "''";
+    # When using a pronoun, we use the userid, and we don't have to
+    # join the profiles table.
+    if ($args->{value_is_id}) {
+        $null_alternate = 0;
+    }
+    else {
+        my $as = "name_${field}_$chart_id";
+        # For fields with periods in their name.
+        $as =~ s/\./_/;
+        my $join = {
+            table => 'profiles',
+            as    => $as,
+            from  => $args->{full_field},
+            to    => 'userid',
+            join  => (!$is_in_other_table and !$is_nullable) ? 'INNER' : undef,
+        };
+        push(@$joins, $join);
+        $args->{full_field} = "$as.login_name";
     }
     
-    # $full_field might have been changed by one of the cc_pronoun
-    # functions, in which case we leave it alone.
-    if ($full_field eq 'bugs.cc') {
-        $args->{full_field} = "profiles.login_name";
+    # We COALESCE fields that can be NULL, to make "not"-style operators
+    # continue to work properly. For example, "qa_contact is not equal to bob"
+    # should also show bugs where the qa_contact is NULL. With COALESCE,
+    # it does.
+    if ($is_nullable) {
+        $args->{full_field} = "COALESCE($args->{full_field}, $null_alternate)";
     }
     
-    $self->_do_operator_function($args);
-    
-    my $term = $args->{term};
-    my $table = "cc_$chart_id";
-    my $join = {
-        table => 'cc',
-        as    => $table,
-        extra => ["$table.who IN (SELECT userid FROM profiles WHERE $term)"],
-    };
-    push(@$joins, $join);
-    
-    $args->{term} = "$table.who IS NOT NULL";
+    # For fields whose values are stored in other tables, negation (NOT)
+    # only works properly if we put the condition into the JOIN instead
+    # of the WHERE.
+    if ($is_in_other_table) {
+        # Using the last join works properly whether we're searching based
+        # on userid or login_name.
+        my $last_join = $joins->[-1];
+        
+        # For negative operators, the system we're using here
+        # only works properly if we reverse the operator and check IS NULL
+        # in the WHERE.
+        my $is_negative = $operator =~ /^no/ ? 1 : 0;
+        if ($is_negative) {
+            $args->{operator} = $self->_reverse_operator($operator);
+        }
+        $self->_do_operator_function($args);
+        push(@{ $last_join->{extra} }, $args->{term});
+        
+        # For login_name searches, we only want a single join.
+        # So we create a subselect table out of our two joins. This makes
+        # negation (NOT) work properly for values that are in other
+        # tables.
+        if ($last_join->{table} eq 'profiles') {
+            pop @$joins;
+            $last_join->{join} = 'INNER';
+            my ($join_sql) = $self->_translate_join($last_join);
+            my $first_join = $joins->[-1];
+            my $as = $first_join->{as};            
+            my $table = $first_join->{table};
+            my $columns = "bug_id";
+            $columns .= ",isprivate" if @{ $first_join->{extra} };
+            my $new_table = "SELECT $columns FROM $table AS $as $join_sql";
+            $first_join->{table} = "($new_table)";
+            # We always want to LEFT JOIN the generated table.
+            delete $first_join->{join};
+            # To support OR charts, we need multiple tables.
+            my $new_as = $first_join->{as} . "_$sequence";
+            $_ =~ s/\Q$as\E/$new_as/ foreach @{ $first_join->{extra} };
+            $first_join->{as} = $new_as;
+            $last_join = $first_join;
+        }
+        
+        # If we're joining the first table (we're using a pronoun and
+        # searching by user id) then we need to check $other_table->{field}.
+        my $check_field = $last_join->{as} . '.bug_id';
+        if ($is_negative) {
+            $args->{term} = "$check_field IS NULL";
+        }
+        else {
+            $args->{term} = "$check_field IS NOT NULL";
+        }
+    }
 }
 
 # XXX This duplicates having Commenter as a search field.
@@ -2035,34 +2130,6 @@ sub _content_matches {
     # For NOT searches, we just add 0 to the relevance.
     my $select_term = $operator =~ /not/ ? 0 : "($current$rterm1 + $rterm2)";
     COLUMNS->{'relevance'}->{name} = $select_term;
-}
-
-sub _commenter {
-    my ($self, $args) = @_;
-    my ($chart_id, $sequence, $joins, $field, $full_field, $operator) =
-        @$args{qw(chart_id sequence joins field full_field operator)};
-
-    if ($chart_id eq "") {
-        $chart_id = "LD$sequence";
-        $args->{sequence}++;
-    }
-    my $table = "longdescs_$chart_id";
-    
-    my $extra = $self->_user->is_insider ? "" : "AND $table.isprivate = 0";
-    # commenter_pronoun could have changed $full_field to something else,
-    # so we only set this if commenter_pronoun hasn't set it.
-    if ($full_field eq 'bugs.commenter') {
-        $args->{full_field} = "profiles.login_name";
-    }
-    $self->_do_operator_function($args);
-    my $term = $args->{term};
-    my $join = {
-        table => 'longdescs',
-        as    => $table,
-        extra => ["$table.who IN (SELECT userid FROM profiles WHERE $term)"],
-    };
-    push(@$joins, $join);
-    $args->{term} = "$table.who IS NOT NULL";
 }
 
 sub _long_desc {
@@ -2209,30 +2276,6 @@ sub _attach_data_thedata {
     $args->{full_field} = "$data_table.thedata";
 }
 
-sub _attachments_submitter {
-    my ($self, $args) = @_;
-    my ($chart_id, $joins) = @$args{qw(chart_id joins)};
-    
-    my $attach_table = "attachments_$chart_id";
-    my $profiles_table = "map_attachment_submitter_$chart_id";    
-    my $extra = $self->_user->is_insider
-                ? [] : ["$attach_table.isprivate = 0"];
-    my $attachments_join = {
-        table => 'attachments',
-        as    => $attach_table,
-        extra => $extra,
-    };
-    my $profiles_join = {
-        table => 'profiles',
-        as    => $profiles_table,
-        from  => "$attach_table.submitter_id",
-        to    => 'userid',
-    };
-    push(@$joins, $attachments_join, $profiles_join);
-    
-    $args->{full_field} = "$profiles_table.login_name";
-}
-
 sub _attachments {
     my ($self, $args) = @_;
     my ($chart_id, $joins, $field) =
@@ -2327,42 +2370,6 @@ sub _flagtypes_name {
             "SUM(CASE WHEN $term THEN 1 ELSE 0 END)");
        $args->{term} = '';
     }
-}
-
-# XXX These two functions can probably be joined (requestees and setters).
-sub _requestees_login_name {
-    my ($self, $args) = @_;
-    my ($chart_id, $joins) = @$args{qw(chart_id joins)};
-    
-    $self->_join_flag_tables($args);
-    my $flags = "flags_$chart_id";
-    my $map_table = "map_flag_requestees_$chart_id";
-    my $profiles_join = {
-        table => 'profiles',
-        as    => $map_table,
-        from  => "$flags.requestee_id",
-        to    => 'userid',
-    };
-    push(@$joins, $profiles_join);
-
-    $args->{full_field} = "$map_table.login_name";
-}
-
-sub _setters_login_name {
-    my ($self, $args) = @_;
-    my ($chart_id, $joins) = @$args{qw(chart_id joins)};
-    
-    $self->_join_flag_tables($args);
-    my $flags = "flags_$chart_id";
-    my $map_table = "map_flag_setters_$chart_id";
-    my $profiles_join = {
-        table => 'profiles',
-        as    => $map_table,
-        from  => "$flags.setter_id",
-        to    => 'userid',
-    };
-    push(@$joins, $profiles_join);
-    $args->{full_field} = "$map_table.login_name";
 }
 
 sub _days_elapsed {

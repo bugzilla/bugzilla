@@ -225,17 +225,13 @@ use constant NEGATIVE_BROKEN => (
     'attachments.description' => { contains => [5] },
     'attachments.filename'    => { contains => [5] },
     'attachments.mimetype'    => { contains => [5] },
-    'attachments.submitter'   => { contains => [5] },
     blocked      => { contains => [3,4,5] },
     bug_file_loc => { contains => [5] },
     bug_group    => { contains => [1,5] },
-    cc           => { contains => [1,5] },
     deadline     => { contains => [5] },
     dependson    => { contains => [2,4,5] },
     longdesc     => { contains => [1] },
     'longdescs.isprivate'   => { contains => [1] },
-    'requestees.login_name' => { contains => [3,4,5] },
-    'setters.login_name'    => { contains => [5] },
     work_time               => { contains => [1] },
     # Custom fields are busted because they can be NULL.
     FIELD_TYPE_FREETEXT, { contains => [5] },
@@ -278,7 +274,7 @@ use constant ALLWORDS_BROKEN => (
 # nowords and nowordssubstr have these broken tests in common.
 #
 # flagtypes.name doesn't match bugs without flags.
-# cc, longdescs.isprivate, and bug_group actually work properly in
+# longdescs.isprivate, and bug_group actually work properly in
 # terms of excluding bug 1 (since we exclude all values in the search,
 # on our test), but still fail at including bug 5.
 # The longdesc* and work_time fields, coincidentally, work completely
@@ -287,7 +283,6 @@ use constant NOWORDS_BROKEN => (
     NEGATIVE_BROKEN,
     'flagtypes.name' => { contains => [5] },
     bug_group        => { contains => [5] },
-    cc               => { contains => [5] },
     longdesc         => {},
     work_time        => {},
     'longdescs.isprivate' => {},
@@ -508,16 +503,13 @@ use constant COMMON_BROKEN_NOT => (
     "attachments.ispatch"     => { contains => [5] },
     "attachments.isprivate"   => { contains => [5] },
     "attachments.mimetype"    => { contains => [5] },
-    "attachments.submitter"   => { contains => [5] },
     "bug_file_loc"            => { contains => [5] },
     "deadline"                => { contains => [5] },
     "flagtypes.name"          => { contains => [5] },
     "keywords"                => { contains => [5] },
     "longdescs.isprivate"     => { contains => [1] },
     "percentage_complete"     => { contains => [1 .. 5] },
-    "requestees.login_name"   => { contains => [3, 4, 5] },
     "see_also"                => { contains => [5] },
-    "setters.login_name"      => { contains => [5] },
     FIELD_TYPE_BUG_ID,           { contains => [5] },
     FIELD_TYPE_DATETIME,         { contains => [5] },
     FIELD_TYPE_FREETEXT,         { contains => [5] },
@@ -551,7 +543,6 @@ use constant CHANGED_FROM_TO_BROKEN_NOT => (
 use constant NEGATIVE_BROKEN_NOT => (
     "blocked"             => { contains => [3, 4, 5] },
     "bug_group"           => { contains => [5] },
-    "cc"                  => { contains => [1, 5] },
     "dependson"           => { contains => [2, 4, 5] },
     "flagtypes.name"      => { contains => [1 .. 5] },
     "percentage_complete" => { contains => [1 .. 5] },    
@@ -561,8 +552,8 @@ use constant NEGATIVE_BROKEN_NOT => (
 use constant BROKEN_NOT => {
     allwords       => {
         COMMON_BROKEN_NOT,
-        bug_group => { contains => [1] },
         cc => { contains => [1] },
+        bug_group => { contains => [1] },
         "flagtypes.name"      => { contains => [1,5] },
         keywords => { contains => [1,5] },
         longdesc => { contains => [1] },
@@ -592,7 +583,7 @@ use constant BROKEN_NOT => {
     },
     'allwordssubstr-<1>,<2>' => {
         bug_group => { },
-        "cc" => { },
+        cc => { },
         FIELD_TYPE_MULTI_SELECT, { },
         keywords => { contains => [5] },
         "longdesc" => { },
@@ -725,13 +716,11 @@ use constant BROKEN_NOT => {
     nowords        => {
         NEGATIVE_BROKEN_NOT,
         "work_time"           => { contains => [2, 3, 4] },
-        "cc" => { contains => [5] },
         "flagtypes.name" => { },
     },
     nowordssubstr  => {
         NEGATIVE_BROKEN_NOT,
         "attach_data.thedata" => { },
-        "cc" => { contains => [5] },
         "flagtypes.name" => { },
         "work_time"           => { contains => [2, 3, 4] },
     },

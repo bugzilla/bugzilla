@@ -34,11 +34,11 @@
 %]
 
 [% edit_contentlink = BLOCK %]editcomponents.cgi?action=edit&amp;product=
-  [%- product.name FILTER url_quote %]&amp;component=%%name%%[% END %]
+  [%- product.name FILTER uri %]&amp;component=%%name%%[% END %]
 [% delete_contentlink = BLOCK %]editcomponents.cgi?action=del&amp;product=
-  [%- product.name FILTER url_quote %]&amp;component=%%name%%[% END %]
+  [%- product.name FILTER uri %]&amp;component=%%name%%[% END %]
 [% bug_count_contentlink = BLOCK %]buglist.cgi?component=%%name%%&amp;product=
-  [%- product.name FILTER url_quote %][% END %]
+  [%- product.name FILTER uri %][% END %]
 
 
 [% columns = [
@@ -111,12 +111,12 @@
      overrides = overrides
 %]
 
-<p><a href="editcomponents.cgi?action=add&amp;product=[% product.name FILTER url_quote %]">Add</a>
+<p><a href="editcomponents.cgi?action=add&amp;product=[% product.name FILTER uri %]">Add</a>
     a new component to product '[% product.name FILTER html %]'</p>
 
 [% IF ! showbugcounts %]
 
-  <p><a href="editcomponents.cgi?product=[% product.name FILTER url_quote %]&amp;showbugcounts=1">
+  <p><a href="editcomponents.cgi?product=[% product.name FILTER uri %]&amp;showbugcounts=1">
       Redisplay table with [% terms.bug %] counts (slower)</a></p>
 
 [% END %]

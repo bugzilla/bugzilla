@@ -112,7 +112,7 @@
           <li>
             [% otheruser.login FILTER html %]
             <a href="buglist.cgi?field0-0-0=attachments.submitter&type0-0-0=equals&value0-0-0=
-               [%- otheruser.login FILTER url_quote %]">has submitted
+               [%- otheruser.login FILTER uri %]">has submitted
             [% IF attachments == 1 %]
               one attachment
             [% ELSE %]
@@ -132,7 +132,7 @@
           <li>
             [% otheruser.login FILTER html %]
             <a href="buglist.cgi?emailreporter1=1&amp;emailtype1=exact&amp;email1=
-               [%- otheruser.login FILTER url_quote %]">has reported
+               [%- otheruser.login FILTER uri %]">has reported
             [% IF reporter == 1 %]
               one [% terms.bug %]
             [% ELSE %]
@@ -170,7 +170,7 @@
           <li>
             [% otheruser.login FILTER html %] has
             <a href="buglist.cgi?field0-0-0=setters.login_name&amp;type0-0-0=equals&amp;value0-0-0=
-               [%- otheruser.login FILTER url_quote %]">set
+               [%- otheruser.login FILTER uri %]">set
             or requested
             [% IF flags.setter == 1 %]
               a flag
@@ -191,7 +191,7 @@
           <li>
             [% otheruser.login FILTER html %] has
             <a href="buglist.cgi?emaillongdesc1=1&amp;emailtype1=exact&amp;email1=
-               [%- otheruser.login FILTER url_quote %]">commented
+               [%- otheruser.login FILTER uri %]">commented
             [% IF longdescs == 1 %]
               once on [% terms.abug %]
             [% ELSE %]
@@ -236,7 +236,7 @@
           <li>
             [% otheruser.login FILTER html %]
             <a href="buglist.cgi?emailassigned_to1=1&amp;emailqa_contact1=1&amp;emailtype1=exact&amp;email1=
-               [%- otheruser.login FILTER url_quote %]">is
+               [%- otheruser.login FILTER uri %]">is
             the assignee or the QA contact of
             [% IF assignee_or_qa == 1 %]
               one [% terms.bug %]
@@ -251,7 +251,7 @@
           <li>
             [% otheruser.login FILTER html %]
             <a href="buglist.cgi?emailcc1=1&amp;emailtype1=exact&amp;email1=
-               [%- otheruser.login FILTER url_quote %]">is
+               [%- otheruser.login FILTER uri %]">is
             on the CC list of
             [% IF cc == 1 %]
               [%+ terms.abug %]
@@ -282,7 +282,7 @@
           <li>
             [% otheruser.login FILTER html %] has been
             <a href="buglist.cgi?field0-0-0=requestees.login_name&amp;type0-0-0=equals&amp;value0-0-0=
-               [%- otheruser.login FILTER url_quote %]">asked
+               [%- otheruser.login FILTER uri %]">asked
             to set
             [% IF flags.requestee == 1 %]
               a flag

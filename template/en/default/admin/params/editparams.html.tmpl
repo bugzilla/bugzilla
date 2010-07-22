@@ -78,7 +78,7 @@
               </td>
             [% ELSE %]
               <td>
-                <a href="editparams.cgi?section=[% panel.name FILTER url_quote %]"
+                <a href="editparams.cgi?section=[% panel.name FILTER uri %]"
                    title="[% panel.desc FILTER html %]">[% panel.title FILTER html %]</a>
               </td>
             [% END %]

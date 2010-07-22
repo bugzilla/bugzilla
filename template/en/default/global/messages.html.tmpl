@@ -129,7 +129,7 @@
   [% ELSIF message_tag == "buglist_updated_named_query" %]
     [% title = "Search updated" %]
     Your search named <code><a 
-     href="buglist.cgi?cmdtype=runnamed&amp;namedcmd=[% queryname FILTER url_quote %]"
+     href="buglist.cgi?cmdtype=runnamed&amp;namedcmd=[% queryname FILTER uri %]"
     >[% queryname FILTER html %]</a></code> has been updated.
 
   [% ELSIF message_tag == "buglist_new_default_query" %]
@@ -139,7 +139,7 @@
   [% ELSIF message_tag == "buglist_new_named_query" %]
     [% title = "Search created" %]
     OK, you have a new search named <code><a
-     href="buglist.cgi?cmdtype=runnamed&amp;namedcmd=[% queryname FILTER url_quote %]"
+     href="buglist.cgi?cmdtype=runnamed&amp;namedcmd=[% queryname FILTER uri %]"
     >[% queryname FILTER html %]</a></code>.
 
   [% ELSIF message_tag == "buglist_query_gone" %]
@@ -734,7 +734,7 @@
   [% ELSIF message_tag == "product_created" %]
     [% title = "Product Created" %]
     The product <em>[% product.name FILTER html %]</em> has been created. You will need to
-    <a href="editcomponents.cgi?action=add&product=[% product.name FILTER url_quote %]">
+    <a href="editcomponents.cgi?action=add&product=[% product.name FILTER uri %]">
     add at least one component</a> before anyone can enter [% terms.bugs %] against this product.
 
   [% ELSIF message_tag == "product_deleted" %]

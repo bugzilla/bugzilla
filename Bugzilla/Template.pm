@@ -674,12 +674,6 @@ sub create {
 
             xml => \&Bugzilla::Util::xml_quote ,
 
-            # This filter escapes characters in a variable or value string for
-            # use in a query string.  It escapes all characters NOT in the
-            # regex set: [a-zA-Z0-9_\-.].  The 'uri' filter should be used for
-            # a full URL that may have characters that need encoding.
-            url_quote => \&Bugzilla::Util::url_quote ,
-
             # This filter is similar to url_quote but used a \ instead of a %
             # as prefix. In addition it replaces a ' ' by a '_'.
             css_class_quote => \&Bugzilla::Util::css_class_quote ,

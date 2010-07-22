@@ -55,7 +55,7 @@
       users in it.</b>
 
     <br><a href="editusers.cgi?action=list&amp;groupid=
-                 [%- group.id FILTER url_quote %]&amp;grouprestrict=1">Show
+                 [%- group.id FILTER uri %]&amp;grouprestrict=1">Show
     me which users</a> - <label><input type="checkbox" name="removeusers">Remove
     all users from this group for me.</label></p>
   [% END %]
@@ -75,7 +75,7 @@
      [%+ terms.bugs %] are using it.</b>
 
     <br><a href="buglist.cgi?field0-0-0=bug_group&amp;type0-0-0=equals&amp;value0-0-0=
-                 [%- group.name FILTER url_quote %]">Show me
+                 [%- group.name FILTER uri %]">Show me
     which [% terms.bugs %]</a> - 
     <label><input type="checkbox" name="removebugs">Remove
     all [% terms.bugs %] from this group restriction for me.</label></p>
@@ -119,7 +119,7 @@
         [% END %]
 
         <li><a href="editproducts.cgi?action=editgroupcontrols&amp;product=
-                    [%- data.product.name FILTER url_quote %]">
+                    [%- data.product.name FILTER uri %]">
           [%- data.product.name FILTER html %]</a>
           ([% active.join(', ') FILTER html %])
           [% IF hidden %]
@@ -139,7 +139,7 @@
     You cannot delete this group while there are flag types using it.</b>
 
     <br><a href="editflagtypes.cgi?action=list&amp;group=
-                 [%- group.id FILTER url_quote %]">Show
+                 [%- group.id FILTER uri %]">Show
     me which types</a> - 
     <label><input type="checkbox" name="removeflags">Remove all
     flag types from this group for me.</label></p>

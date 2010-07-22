@@ -26,7 +26,7 @@
 
 [% IF classification %]
   [% classification_url_part = BLOCK %]&amp;classification=
-    [%- classification.name FILTER url_quote %]
+    [%- classification.name FILTER uri %]
   [%- END %]
   [% classification_title = BLOCK %] 
     in classification '[% classification.name FILTER html %]'

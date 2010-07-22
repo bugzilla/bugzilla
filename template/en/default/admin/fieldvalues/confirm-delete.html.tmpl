@@ -49,8 +49,8 @@
   <a title="List of [% terms.bugs %] where '
             [%- field.description FILTER html %]' is '
             [%- value.name FILTER html %]'"
-     href="buglist.cgi?[% field.name FILTER url_quote %]=
-           [%- value.name FILTER url_quote %]">
+     href="buglist.cgi?[% field.name FILTER uri %]=
+           [%- value.name FILTER uri %]">
    [%- value.bug_count FILTER html %]</a>
 [% ELSE %]
   None
@@ -94,8 +94,8 @@
           <a title="List of [% terms.bugs %] where '
                     [%- field.description FILTER html %]' is '
                     [%- value.name FILTER html %]'"
-             href="buglist.cgi?[% field.name FILTER url_quote %]=
-                   [%- value.name FILTER url_quote %]">
+             href="buglist.cgi?[% field.name FILTER uri %]=
+                   [%- value.name FILTER uri %]">
             [% IF value.bug_count > 1 %]
               those [% terms.bugs %] 
             [% ELSE %]
@@ -116,7 +116,7 @@
       <li>This value controls the visibility of the following fields:<br>
         [% FOREACH field = value.controls_visibility_of_fields %]
           <a href="editfields.cgi?action=edit&name=
-                   [%- field.name FILTER url_quote %]">
+                   [%- field.name FILTER uri %]">
             [%- field.description FILTER html %] 
             ([% field.name FILTER html %])</a><br>
         [% END %]
@@ -129,8 +129,8 @@
        [% FOREACH field_name = value.controlled_values.keys %]
          [% FOREACH controlled = value.controlled_values.${field_name} %]
            <a href="editvalues.cgi?action=edit&field=
-                    [%- controlled.field.name FILTER url_quote %]&value=
-                    [%- controlled.name FILTER url_quote %]">
+                    [%- controlled.field.name FILTER uri %]&value=
+                    [%- controlled.name FILTER uri %]">
              [% controlled.field.description FILTER html %]
              ([% controlled.field.name FILTER html %]):
              [%+ controlled.name FILTER html %]</a><br>

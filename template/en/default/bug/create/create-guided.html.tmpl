@@ -82,7 +82,7 @@ function PutDescription() {
 [% ELSIF product.name == "Thunderbird" %]
   [% productstring = "product=Mozilla%20Application%20Suite&amp;product=Thunderbird" %]
 [% ELSE %]
-  [% productstring = BLOCK %]product=[% product.name FILTER url_quote %][% END %]
+  [% productstring = BLOCK %]product=[% product.name FILTER uri %][% END %]
 [% END %]
 
 <p>
@@ -205,7 +205,7 @@ function PutDescription() {
         To pick the right component, you could use the same one as
         similar [% terms.bugs %] you found in your search, or read the full list of
         <a target="_blank" href="describecomponents.cgi?product=
-            [% product.name FILTER url_quote %]">component
+            [% product.name FILTER uri %]">component
         descriptions</a> (opens in new window) if you need more help.
       </p>
     </td>

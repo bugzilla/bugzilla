@@ -36,8 +36,8 @@
         <td>
           [% IF user.in_group("editcomponents", component.product_id) %]
             <a href="editcomponents.cgi?action=edit&amp;product=
-                     [% item.product.name FILTER url_quote %]&amp;component=
-                     [% component.name FILTER url_quote %]">
+                     [% item.product.name FILTER uri %]&amp;component=
+                     [% component.name FILTER uri %]">
           [% END %]
           [% component.name FILTER html %]
           [% IF user.in_group("editcomponents", component.product_id) %]

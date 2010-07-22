@@ -221,7 +221,7 @@ TUI_hide_default('attachment_text_field');
   [%# We can't use the select block in these two cases for various reasons. %]
   <tr>
     [% component_desc_url = BLOCK -%]
-      describecomponents.cgi?product=[% product.name FILTER url_quote %]
+      describecomponents.cgi?product=[% product.name FILTER uri %]
     [% END %]
     [% INCLUDE "bug/field-label.html.tmpl"
       field = bug_fields.component editable = 1

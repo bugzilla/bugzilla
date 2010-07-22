@@ -71,7 +71,7 @@
     <tr>
       <td>My [% terms.Bugs %]</td>
       <td>
-        [% filtered_username = user.login FILTER url_quote %]
+        [% filtered_username = user.login FILTER uri %]
         <a href="[% Param('mybugstemplate').replace('%userid%', filtered_username) %]">Run</a>
       </td>
       <td>
@@ -96,20 +96,20 @@
       <tr>
         <td>[% q.name FILTER html %]</td>
         <td>
-          <a href="buglist.cgi?cmdtype=dorem&amp;remaction=run&amp;namedcmd=[% q.name FILTER url_quote %]
-                   [% IF q.shared_with_group.id %]&amp;sharer_id=[% user.id FILTER url_quote %][% END %]">Run</a>
+          <a href="buglist.cgi?cmdtype=dorem&amp;remaction=run&amp;namedcmd=[% q.name FILTER uri %]
+                   [% IF q.shared_with_group.id %]&amp;sharer_id=[% user.id FILTER uri %][% END %]">Run</a>
         </td>
         <td>
           <a href="query.cgi?[% q.edit_link FILTER html %]&amp;known_name=
-                   [% q.name FILTER url_quote %]">Edit</a>
+                   [% q.name FILTER uri %]">Edit</a>
         </td>
         <td>
           [% IF q.used_in_whine %]
             Remove from <a href="editwhines.cgi">whining</a> first
           [% ELSE %]
             <a href="buglist.cgi?cmdtype=dorem&amp;remaction=forget&amp;namedcmd=
-                     [% q.name FILTER url_quote %]&amp;token=
-                     [% issue_hash_token([q.id, q.name]) FILTER url_quote %]">Forget</a>
+                     [% q.name FILTER uri %]&amp;token=
+                     [% issue_hash_token([q.id, q.name]) FILTER uri %]">Forget</a>
           [% END %]
         </td>
         <td align="center">
@@ -187,12 +187,12 @@
         <td>[% q.shared_with_group.name FILTER html %]</td>
         <td>
           <a href="buglist.cgi?cmdtype=dorem&amp;remaction=run&amp;namedcmd=
-                   [% q.name FILTER url_quote %]&amp;sharer_id=
-                   [% q.user.id FILTER url_quote %]">Run</a>
+                   [% q.name FILTER uri %]&amp;sharer_id=
+                   [% q.user.id FILTER uri %]">Run</a>
         </td>
         <td>
           <a href="query.cgi?[% q.edit_link FILTER html %]&amp;known_name=
-                   [% q.name FILTER url_quote %]">Edit</a>
+                   [% q.name FILTER uri %]">Edit</a>
         </td>
         <td align="center">
           <input type="checkbox" 

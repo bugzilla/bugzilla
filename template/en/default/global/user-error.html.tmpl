@@ -237,7 +237,7 @@
     You are not authorized to access [% terms.bug %] #[% bug_id FILTER html %].
     To see this [% terms.bug %], you must
     first <a href="show_bug.cgi?id=
-                   [% bug_id FILTER url_quote %]&amp;GoAheadAndLogIn=1">log
+                   [% bug_id FILTER uri %]&amp;GoAheadAndLogIn=1">log
     in to an account</a> with the appropriate permissions.
 
   [% ELSIF error == "bug_url_invalid" %]
@@ -520,7 +520,7 @@
     or disabled.
     [% IF user.in_group('tweakparams') %]
       You have to <a href="editparams.cgi?section=bugfields#
-      [%- param_name FILTER url_quote %]">change</a> the default value first.
+      [%- param_name FILTER uri %]">change</a> the default value first.
     [% END %]
 
   [% ELSIF error == "fieldvalue_name_too_long" %]
@@ -689,7 +689,7 @@
     The <em>[% group.name FILTER html %]</em> group cannot be deleted because
     there are
     <a href="editgroups.cgi?action=del&amp;group=
-             [%- group.id FILTER url_quote %]">records</a>
+             [%- group.id FILTER uri %]">records</a>
     in the database which refer to it. All references to this group must
     be removed before you can remove it.
 
@@ -1086,7 +1086,7 @@
     has to have at least one component in order for you to
     enter [% terms.abug %] into it.<br>
     [% IF user.in_group("editcomponents", product.id) %]
-      <a href="editcomponents.cgi?action=add&amp;product=[% product.name FILTER url_quote %]">Create
+      <a href="editcomponents.cgi?action=add&amp;product=[% product.name FILTER uri %]">Create
       a new component</a>.
     [% ELSE %]
       Please contact [% Param("maintainer") %] and ask them
@@ -1153,7 +1153,7 @@
     has to have at least one version in order for you to
     enter [% terms.abug %] into it.<br>
     [% IF user.in_group("editcomponents", product.id) %]
-      <a href="editversions.cgi?action=add&amp;product=[% product.name FILTER url_quote %]">Create
+      <a href="editversions.cgi?action=add&amp;product=[% product.name FILTER uri %]">Create
       a new version</a>.
     [% ELSE %]
       Please contact [% Param("maintainer") %] and ask them
@@ -1198,8 +1198,8 @@
     This will remove all [% terms.bugs %] from the
     <em>[% name FILTER html %]</em> tag. This will delete the tag completely. Click
     <a href="buglist.cgi?cmdtype=dorem&amp;remaction=forget&amp;namedcmd=
-    [%- name FILTER url_quote %]&amp;token=
-    [%- issue_hash_token([query_id, name]) FILTER url_quote %]">here</a>
+    [%- name FILTER uri %]&amp;token=
+    [%- issue_hash_token([query_id, name]) FILTER uri %]">here</a>
     if you really want to delete it.
 
   [% ELSIF error == "no_bugs_to_remove" %]
@@ -1327,7 +1327,7 @@
     [% title = "Must define new default milestone" %]
     [% admindocslinks = {'products.html' => 'Administering products',
                          'milestones.html' => 'About Milestones'} %]
-    You must <a href="editmilestones.cgi?action=add&amp;product=[% product FILTER url_quote %]">
+    You must <a href="editmilestones.cgi?action=add&amp;product=[% product FILTER uri %]">
     create the milestone '[% milestone FILTER html %]'</a> before
     it can be made the default milestone for product '[% product FILTER html %]'.
 
@@ -1376,8 +1376,8 @@
     The name <em>[% name FILTER html %]</em> is already used by another
     saved search. You first have to
     <a href="buglist.cgi?cmdtype=dorem&amp;remaction=forget&amp;namedcmd=
-    [%- name FILTER url_quote %]&amp;token=
-    [% issue_hash_token([query_id, name]) FILTER url_quote %]">delete</a>
+    [%- name FILTER uri %]&amp;token=
+    [% issue_hash_token([query_id, name]) FILTER uri %]">delete</a>
     it if you really want to use this name.
 
   [% ELSIF error == "query_name_missing" %]
@@ -1707,7 +1707,7 @@
   <p>  
     Alternatively, you can    
     <a href="buglist.cgi?cmdtype=dorem&amp;remaction=forget&amp;namedcmd=
-                  [% namedcmd FILTER url_quote %]">forget</a>
+                  [% namedcmd FILTER uri %]">forget</a>
                   
     [% FOREACH q = Bugzilla.user.queries %]
       [% IF q.name == namedcmd %]

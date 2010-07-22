@@ -55,7 +55,7 @@
 
   [%# *** Saved Searches *** %]
   [% IF user.showmybugslink %]
-    [% user_login = user.login FILTER url_quote %]
+    [% user_login = user.login FILTER uri %]
     <link rel="Saved&nbsp;Searches" title="My [% terms.Bugs %]"
           href="[% Param('mybugstemplate').replace('%userid%', user_login) %]">
   [% END %]
@@ -64,8 +64,8 @@
     <link rel="Saved&nbsp;Search"
           title="[% q.name FILTER html %] ([% q.user.login FILTER html %])"
           href="buglist.cgi?cmdtype=dorem&amp;remaction=run&amp;namedcmd=
-                 [% q.name FILTER url_quote %]&amp;sharer_id=
-                 [% q.user.id FILTER url_quote %]">
+                 [% q.name FILTER uri %]&amp;sharer_id=
+                 [% q.user.id FILTER uri %]">
   [% END %]
 
   [%# *** Bugzilla Administration Tools *** %]

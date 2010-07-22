@@ -56,7 +56,7 @@
     <td>[% keyword.description FILTER html_light %]</td>
     <td align="center">
       [% IF keyword.bug_count > 0 %]
-        <a href="buglist.cgi?keywords=[% keyword.name FILTER url_quote %]&amp;resolution=---">
+        <a href="buglist.cgi?keywords=[% keyword.name FILTER uri %]&amp;resolution=---">
           Search</a>
       [% ELSE %]
         none
@@ -64,7 +64,7 @@
     </td>
     <td align="right">
       [% IF keyword.bug_count > 0 %]
-        <a href="buglist.cgi?keywords=[% keyword.name FILTER url_quote %]">
+        <a href="buglist.cgi?keywords=[% keyword.name FILTER uri %]">
           [% keyword.bug_count %]</a>
       [% ELSE %]
         none

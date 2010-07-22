@@ -35,9 +35,9 @@
 %]
 
 [% edit_contentlink = BLOCK %]editvalues.cgi?action=edit&amp;field=
-  [%- field.name FILTER url_quote %]&amp;value=%%name%%[% END %]
+  [%- field.name FILTER uri %]&amp;value=%%name%%[% END %]
 [% delete_contentlink = BLOCK %]editvalues.cgi?action=del&amp;field=
-  [%- field.name FILTER url_quote %]&amp;value=%%name%%[% END %]
+  [%- field.name FILTER uri %]&amp;value=%%name%%[% END %]
 
 
 [% columns = [

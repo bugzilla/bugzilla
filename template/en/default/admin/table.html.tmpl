@@ -144,7 +144,7 @@
           [% WHILE link_uri.search('%%(.+?)%%')%]
             [% FOREACH m = link_uri.match('%%(.+?)%%') %]
               [% IF row.$m %]
-                [% replacement_value = FILTER url_quote; row.$m; END %]
+                [% replacement_value = FILTER uri; row.$m; END %]
               [% ELSE %]
                 [% replacement_value = "" %]
               [% END %]

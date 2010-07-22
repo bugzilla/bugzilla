@@ -34,7 +34,7 @@
     [% errortext FILTER html %]: [% INCLUDE bug_list badbugs = badbugs %]
 
   [% ELSIF san_tag == "bug_check_repair" %]
-    <a href="sanitycheck.cgi?[% param FILTER url_quote %]=1">[% text FILTER html %]</a>.
+    <a href="sanitycheck.cgi?[% param FILTER uri %]=1">[% text FILTER html %]</a>.
 
   [% ELSIF san_tag == "bug_check_creation_date" %]
     Checking for [% terms.bugs %] with no creation date (which makes them invisible).
@@ -299,12 +299,12 @@
      # which itself calls this template again, generating a recursion error.
      # I doubt having a tooltip with the bug status and summary is so
      # important here anyway, as you can click the "(as buglist)" link. %]
-    <a href="show_bug.cgi?id=[% bug_id FILTER url_quote %]">[% bug_id FILTER html %]</a>
+    <a href="show_bug.cgi?id=[% bug_id FILTER uri %]">[% bug_id FILTER html %]</a>
     [% ", " IF !loop.last %]
   [% END %]
-  (<a href="buglist.cgi?bug_id=[% badbugs.join(",") FILTER url_quote %]">as [% terms.bug %] list</a>).
+  (<a href="buglist.cgi?bug_id=[% badbugs.join(",") FILTER uri %]">as [% terms.bug %] list</a>).
 [% END %]
 
 [% BLOCK bug_link %]
-  <a href="show_bug.cgi?id=[% bug_id FILTER url_quote %]">[% terms.bug %] [%+ bug_id FILTER html %]</a>
+  <a href="show_bug.cgi?id=[% bug_id FILTER uri %]">[% terms.bug %] [%+ bug_id FILTER html %]</a>
 [% END %]

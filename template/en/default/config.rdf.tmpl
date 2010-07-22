@@ -118,14 +118,14 @@
     <Seq>
       [% FOREACH product = products %]
         <li>
-          <bz:product rdf:about="[% urlbase FILTER xml %]product.cgi?name=[% product.name FILTER url_quote %]">
+          <bz:product rdf:about="[% urlbase FILTER xml %]product.cgi?name=[% product.name FILTER uri %]">
             <bz:name>[% product.name FILTER html %]</bz:name>
 
             <bz:components>
               <Seq>
                 [% FOREACH component = product.components %]
-                  <li resource="[% urlbase FILTER xml %]component.cgi?name=[% component.name FILTER url_quote 
-                      %]&amp;product=[% product.name FILTER url_quote %]"/>
+                  <li resource="[% urlbase FILTER xml %]component.cgi?name=[% component.name FILTER uri 
+                      %]&amp;product=[% product.name FILTER uri %]"/>
                 [% END %]
               </Seq>
             </bz:components>
@@ -133,7 +133,7 @@
             <bz:versions>
               <Seq>
                 [% FOREACH version = product.versions %]
-                  <li resource="[% urlbase FILTER xml %]version.cgi?name=[% version.name FILTER url_quote %]"/>
+                  <li resource="[% urlbase FILTER xml %]version.cgi?name=[% version.name FILTER uri %]"/>
                 [% END %]
               </Seq>
             </bz:versions>
@@ -142,7 +142,7 @@
               <bz:target_milestones>
                 <Seq>
                   [% FOREACH milestone = product.milestones %]
-                    <li resource="[% urlbase FILTER xml %]milestone.cgi?name=[% milestone.name FILTER url_quote %]"/>
+                    <li resource="[% urlbase FILTER xml %]milestone.cgi?name=[% milestone.name FILTER uri %]"/>
                   [% END %]
                 </Seq>
               </bz:target_milestones>
@@ -160,8 +160,8 @@
       [% FOREACH product = products %]
         [% FOREACH component = product.components %]
           <li>
-            <bz:component rdf:about="[% urlbase FILTER xml %]component.cgi?name=[% component.name FILTER url_quote 
-                          %]&amp;product=[% product.name FILTER url_quote %]">
+            <bz:component rdf:about="[% urlbase FILTER xml %]component.cgi?name=[% component.name FILTER uri 
+                          %]&amp;product=[% product.name FILTER uri %]">
               <bz:name>[% component.name FILTER html %]</bz:name>
               [% IF show_flags %]
                 <bz:flag_types>
@@ -170,8 +170,8 @@
                     [% FOREACH flag_type = flag_types %]
                       [% NEXT UNLESS flag_type.is_active %]
                       [% all_visible_flag_types.${flag_type.id} = flag_type %]
-                      <li resource="[% urlbase FILTER xml %]flag.cgi?id=[% flag_type.id FILTER url_quote
-                          %]&amp;name=[% flag_type.name FILTER url_quote %]" />
+                      <li resource="[% urlbase FILTER xml %]flag.cgi?id=[% flag_type.id FILTER uri
+                          %]&amp;name=[% flag_type.name FILTER uri %]" />
                     [% END %]
                   </Seq>
                 </bz:flag_types>
@@ -188,7 +188,7 @@
       [% FOREACH product = products %]
         [% FOREACH version = product.versions %]
           <li>
-            <bz:version rdf:about="[% urlbase FILTER xml %]version.cgi?name=[% version.name FILTER url_quote %]">
+            <bz:version rdf:about="[% urlbase FILTER xml %]version.cgi?name=[% version.name FILTER uri %]">
               <bz:name>[% version.name FILTER html %]</bz:name>
             </bz:version>
           </li>
@@ -203,7 +203,7 @@
         [% FOREACH product = products %]
           [% FOREACH milestone = product.milestones %]
             <li>
-              <bz:target_milestone rdf:about="[% urlbase FILTER xml %]milestone.cgi?name=[% milestone.name FILTER url_quote %]">
+              <bz:target_milestone rdf:about="[% urlbase FILTER xml %]milestone.cgi?name=[% milestone.name FILTER uri %]">
                 <bz:name>[% milestone.name FILTER html %]</bz:name>
               </bz:target_milestone>
             </li>
@@ -218,8 +218,8 @@
       <Seq>
         [% FOREACH flag_type = all_visible_flag_types.values.sort('name') %]
           <li>
-            <bz:flag_type rdf:about="[% urlbase FILTER xml %]flag.cgi?id=[% flag_type.id FILTER url_quote
-                          %]&amp;name=[% flag_type.name FILTER url_quote %]">
+            <bz:flag_type rdf:about="[% urlbase FILTER xml %]flag.cgi?id=[% flag_type.id FILTER uri
+                          %]&amp;name=[% flag_type.name FILTER uri %]">
               <bz:id>[% flag_type.id FILTER html %]</bz:id>
               <bz:name>[% flag_type.name FILTER html %]</bz:name>
               <bz:description>[% flag_type.description FILTER html %]</bz:description>
@@ -243,7 +243,7 @@
       [% PROCESS "global/field-descs.none.tmpl" %]
       [% FOREACH item = field %]
         <li>
-          <bz:field rdf:about="[% urlbase FILTER xml %]field.cgi?name=[% item.name FILTER url_quote %]">
+          <bz:field rdf:about="[% urlbase FILTER xml %]field.cgi?name=[% item.name FILTER uri %]">
             <bz:name>[% item.name FILTER html %]</bz:name>
             <bz:description>[% (field_descs.${item.name} OR item.description) FILTER html %]</bz:description>
             [%-# These values are meaningful for custom fields only. %]

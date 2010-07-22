@@ -34,14 +34,14 @@
     <td bgcolor="#ff0000">
       <font size="+2">
         You already used the form to file
-        <a href="[% urlbase FILTER html %]attachment.cgi?id=[% attachid FILTER url_quote %]&action=edit">attachment [% attachid FILTER url_quote %]</a>.
+        <a href="[% urlbase FILTER html %]attachment.cgi?id=[% attachid FILTER uri %]&action=edit">attachment [% attachid FILTER uri %]</a>.
       </font>
     </td>
   </tr>
 </table>
 
 <p>
-  You can either <a href="[% urlbase FILTER html %]attachment.cgi?bugid=[% bugid FILTER url_quote %]&action=enter">
+  You can either <a href="[% urlbase FILTER html %]attachment.cgi?bugid=[% bugid FILTER uri %]&action=enter">
   create a new attachment</a> or [% "go back to $terms.bug $bugid" FILTER bug_link(bugid) FILTER none %].
 <p>
 

@@ -119,7 +119,7 @@
               [% "Unknown" IF NOT users.$userid %]
             </td>
             <td>
-              <a href="quips.cgi?action=delete&amp;quipid=[% quipid FILTER url_quote %]">
+              <a href="quips.cgi?action=delete&amp;quipid=[% quipid FILTER uri %]">
                 Delete
               </a>
             </td>

@@ -45,7 +45,7 @@
     [% IF desc_url %]
       href="[% desc_url FILTER html %]"
     [% ELSE %]
-      href="page.cgi?id=fields.html#[% field.name FILTER url_quote %]"
+      href="page.cgi?id=fields.html#[% field.name FILTER uri %]"
     [% END %]
   >[%- field_descs.${field.name} FILTER html %]:</a>
 

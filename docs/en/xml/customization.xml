@@ -207,20 +207,11 @@
         This means that if the data can possibly contain special HTML characters
         such as &lt;, and the data was not intended to be HTML, they need to be
         converted to entity form, i.e. &amp;lt;.  You use the 'html' filter in the
-        Template Toolkit to do this.  If you forget, you may open up
-        your installation to cross-site scripting attacks.
+        Template Toolkit to do this (or the 'uri' filter to encode special
+        characters in URLs).  If you forget, you may open up your installation
+        to cross-site scripting attacks.
       </para>
 
-      <para>
-        Also note that Bugzilla adds a few filters of its own, that are not
-        in standard Template Toolkit.  In particular, the 'url_quote' filter
-        can convert characters that are illegal or have special meaning in URLs,
-        such as &amp;, to the encoded form, i.e. %26.  This actually encodes most
-        characters (but not the common ones such as letters and numbers and so
-        on), including the HTML-special characters, so there's never a need to
-        HTML filter afterwards.
-      </para>
- 
       <para>
         Editing templates is a good way of doing a <quote>poor man's custom
         fields</quote>.

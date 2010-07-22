@@ -66,7 +66,7 @@
     [% terms.Bug %] 
     <a href="show_bug.cgi?id=[% bug.bug_id FILTER html %]">[% bug.bug_id FILTER html %]</a>
     [% IF Param("usebugaliases") AND bug.alias AND NOT bug.error %]
-      (<a href="show_bug.cgi?id=[% bug.alias FILTER url_quote %]">
+      (<a href="show_bug.cgi?id=[% bug.alias FILTER uri %]">
         [% bug.alias FILTER html %]</a>)
     [% END %]
   </h1>

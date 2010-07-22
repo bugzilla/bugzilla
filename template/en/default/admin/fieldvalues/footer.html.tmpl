@@ -32,7 +32,7 @@
 [% UNLESS no_add_link %]
   <a title="Add a value for the '[% field.description FILTER html %]' field."
      href="editvalues.cgi?action=add&amp;field=
-          [%- field.name FILTER url_quote %]">Add</a> a value.
+          [%- field.name FILTER uri %]">Add</a> a value.
 [% END %]
 
 [% IF value.defined && !no_edit_link %]
@@ -40,15 +40,15 @@
   title="Edit value '[% value.name FILTER html %]' for the '
          [%- field.name FILTER html %]' field"
   href="editvalues.cgi?action=edit&amp;field=
-        [%- field.name FILTER url_quote %]&amp;value=
-        [%- value.name FILTER url_quote %]">
+        [%- field.name FILTER uri %]&amp;value=
+        [%- value.name FILTER uri %]">
         '[% value.name FILTER html %]'</a>.
 [% END %]
 
 [% UNLESS no_edit_other_link %]
   Edit other values for the <a 
   href="editvalues.cgi?field=
-        [%- field.name FILTER url_quote %]">'[% field.description FILTER html %]'</a> field.
+        [%- field.name FILTER uri %]">'[% field.description FILTER html %]'</a> field.
 
 [% END %]
 

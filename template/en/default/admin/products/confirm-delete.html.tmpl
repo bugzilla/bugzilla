@@ -58,7 +58,7 @@
   <tr>
     <td valign="top">Product:</td>
     <td valign="top">
-      <a href="editproducts.cgi?product=[% product.name FILTER url_quote %]">
+      <a href="editproducts.cgi?product=[% product.name FILTER uri %]">
         [% product.name FILTER html %]
       </a>
     </td>
@@ -104,7 +104,7 @@
   <tr>
     <td>
       [% IF product.components.size > 0 %]
-        <a href="editcomponents.cgi?product=[% product.name FILTER url_quote %]"
+        <a href="editcomponents.cgi?product=[% product.name FILTER uri %]"
            title="Edit components for product '[% product.name FILTER html %]'">
           Components:
         </a>
@@ -138,7 +138,7 @@
   <tr>
     <td>
       [% IF product.versions.size > 0 %]
-        <a href="editversions.cgi?product=[%- product.name FILTER url_quote %]">
+        <a href="editversions.cgi?product=[%- product.name FILTER uri %]">
           Versions:
         </a>
       [% ELSE %]
@@ -161,7 +161,7 @@
     <tr>
       <td valign="top">
         [% IF product.milestones.size > 0 %]
-          <a href="editmilestones.cgi?product=[%- product.name FILTER url_quote %]">
+          <a href="editmilestones.cgi?product=[%- product.name FILTER uri %]">
             Milestones:
           </a>
         [% ELSE %]
@@ -184,7 +184,7 @@
     <td>[% terms.Bugs %]:</td>
     <td>
       [% IF product.bug_count %]
-        <a href="buglist.cgi?product=[% product.name FILTER url_quote %]"
+        <a href="buglist.cgi?product=[% product.name FILTER uri %]"
            title="List of [% terms.bugs %] for product '[% product.name FILTER html %]'">
           [% product.bug_count FILTER html %]
         </a>

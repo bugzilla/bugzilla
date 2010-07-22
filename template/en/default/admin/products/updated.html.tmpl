@@ -45,7 +45,7 @@
   <p>
   Updated product name from '[% changes.name.0 FILTER html %]' to
   '<a href="editproducts.cgi?action=edit&amp;product=
-  [%- product.name FILTER url_quote %]">[% product.name FILTER html %]</a>'.
+  [%- product.name FILTER uri %]">[% product.name FILTER html %]</a>'.
   </p>
 [% END %]
 
@@ -86,7 +86,7 @@
     [%+ display_value('bug_status', 'UNCONFIRMED') FILTER html %] status.
     Note that any 
     <a href="buglist.cgi?product=
-            [%- product.name FILTER url_quote %]&amp;bug_status=UNCONFIRMED"> 
+            [%- product.name FILTER uri %]&amp;bug_status=UNCONFIRMED"> 
     [%- terms.bugs %] that currently have the 
     [%+ display_value('bug_status', 'UNCONFIRMED') FILTER html %] status</a>
     will remain in that status until they are edited.

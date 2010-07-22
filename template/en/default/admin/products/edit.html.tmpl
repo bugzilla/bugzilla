@@ -45,7 +45,7 @@
 
     <tr>
       <th align="right" valign="top">
-        <a href="editcomponents.cgi?product=[% product.name FILTER url_quote %]">
+        <a href="editcomponents.cgi?product=[% product.name FILTER uri %]">
         Edit components:
         </a>
       </th>
@@ -67,7 +67,7 @@
     </tr>
     <tr>
       <th align="right" valign="top">
-        <a href="editversions.cgi?product=[% product.name FILTER url_quote %]">Edit
+        <a href="editversions.cgi?product=[% product.name FILTER uri %]">Edit
 versions:</a>
       </th>
       <td>
@@ -84,7 +84,7 @@ versions:</a>
     [% IF Param('usetargetmilestone') %]
       <tr>
         <th align="right" valign="top">
-          <a href="editmilestones.cgi?product=[% product.name FILTER url_quote %]">
+          <a href="editmilestones.cgi?product=[% product.name FILTER uri %]">
           Edit milestones:</a>
         </th>
         <td>
@@ -102,7 +102,7 @@ versions:</a>
     <tr>
       <th align="right" valign="top">
         <a href="editproducts.cgi?action=editgroupcontrols&product=
-          [%- product.name FILTER url_quote %]">
+          [%- product.name FILTER uri %]">
           Edit Group Access Controls:
         </a>
       </th>
@@ -130,7 +130,7 @@ versions:</a>
     </tr>
     <tr>
       <th align="right">[% terms.Bugs %]:</th>
-      <td><a href="buglist.cgi?product=[% product.name FILTER url_quote %]">
+      <td><a href="buglist.cgi?product=[% product.name FILTER uri %]">
             [% product.bug_count FILTER html %]</a></td>
     </tr>
   </table>

@@ -30,12 +30,12 @@ for the account [% oldemailaddress %] to your address.
 
 To confirm the change, visit the following link:
 
-[%+ urlbase %]token.cgi?t=[% token FILTER url_quote %]&a=cfmem
+[%+ urlbase %]token.cgi?t=[% token FILTER uri %]&a=cfmem
 
 If you are not the person who made this request, or you wish to cancel
 this request, visit the following link:
 
-[%+ urlbase %]token.cgi?t=[% token FILTER url_quote %]&a=cxlem
+[%+ urlbase %]token.cgi?t=[% token FILTER uri %]&a=cxlem
 
 If you do nothing, the request will lapse after [% constants.MAX_TOKEN_AGE %] days
 (on [% expiration_ts FILTER time("%B %e, %Y at %H:%M %Z") %]).

@@ -42,7 +42,7 @@
   [% "&amp;$tbl_vals" IF tbl_vals %][% END %]
 [% ELSE %]
   [% urlbase = BLOCK %]buglist.cgi?[% buglistbase FILTER html %]&amp;
-  [% tbl_field FILTER url_quote %]=[% tbl FILTER url_quote %][% END %]
+  [% tbl_field FILTER uri %]=[% tbl FILTER uri %][% END %]
 [% END %]
 
 <script type="text/javascript">
@@ -193,8 +193,8 @@ YAHOO.util.Event.addListener(window, "load", function() {
         <td class="[% classes.$row_idx.$col_idx %]" align="center">
           [% IF data.$tbl.$col.$row AND data.$tbl.$col.$row > 0 %]
             <a href="[% urlbase %]&amp;
-              [% row_field FILTER url_quote %]=[% row FILTER url_quote %]&amp;
-              [% col_field FILTER url_quote %]=[% col FILTER url_quote %]">
+              [% row_field FILTER uri %]=[% row FILTER uri %]&amp;
+              [% col_field FILTER uri %]=[% col FILTER uri %]">
               [% data.$tbl.$col.$row %]</a>
           [% ELSE %]
             .
@@ -203,7 +203,7 @@ YAHOO.util.Event.addListener(window, "load", function() {
       [% END %] 
       <td class="ttotal" align="right">
         <a href="[% urlbase %]&amp;
-          [% row_field FILTER url_quote %]=[% row FILTER url_quote %]
+          [% row_field FILTER uri %]=[% row FILTER uri %]
           [% "&amp;$col_vals" IF col_vals %]">
         [% row_total %]</a>
         [% grand_total = grand_total + row_total %]
@@ -220,7 +220,7 @@ YAHOO.util.Event.addListener(window, "load", function() {
       
         <td class="ttotal" align="center">
           <a href="[% urlbase %]&amp;
-            [% col_field FILTER url_quote %]=[% col FILTER url_quote %]
+            [% col_field FILTER uri %]=[% col FILTER uri %]
             [% "&amp;$row_vals" IF row_vals %]">
           [% col_totals.$col %]</a>
         </td>

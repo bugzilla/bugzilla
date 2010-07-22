@@ -180,9 +180,9 @@ function subcatSelected() {
                        [%- series.series_id %]">Delete</a> |
               [% END %]
               <a href="buglist.cgi?cmdtype=dorem&amp;namedcmd=
-                [% series.category FILTER url_quote %]%20/%20
-                [% series.subcategory FILTER url_quote %]%20/%20
-                [% series.name FILTER url_quote -%]&amp;series_id=
+                [% series.category FILTER uri %]%20/%20
+                [% series.subcategory FILTER uri %]%20/%20
+                [% series.name FILTER uri -%]&amp;series_id=
                 [% series.series_id %]&amp;remaction=runseries">Run Search</a>
             </td>        
           </tr>

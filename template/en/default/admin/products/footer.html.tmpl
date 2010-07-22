@@ -30,10 +30,10 @@
 
 [% IF Param('useclassification') && classification %]
   [% classification_url_part = BLOCK %]&amp;classification=
-     [%- classification.name FILTER url_quote %]
+     [%- classification.name FILTER uri %]
   [% END %]
   [% classification_url_part_start = BLOCK %]classification=
-     [%- classification.name FILTER url_quote %]
+     [%- classification.name FILTER uri %]
   [% END %]
   [% classification_text = BLOCK %] 
     of classification '[% classification.name FILTER html %]'
@@ -61,7 +61,7 @@
   Edit product <a 
   title="Edit Product '[% product.name FILTER html %]' 
          [%- classification_text %]"
-  href="editproducts.cgi?action=edit&amp;product=[% product.name FILTER url_quote %]">
+  href="editproducts.cgi?action=edit&amp;product=[% product.name FILTER uri %]">
         '[% product.name FILTER html %]'</a>.
 [% END %]
 

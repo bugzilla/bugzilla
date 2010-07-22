@@ -69,7 +69,7 @@ Interdiff of #[% oldid %] and #[% newid %] for [% terms.bug %] #[% bugid %]
   [% IF headers %]
     <a href="[% PROCESS viewurl id=attachid %]">View</a>
     | <a href="[% PROCESS editurl id=attachid %]">Details</a>
-    | <a href="[% PROCESS diffurl id=attachid %]&amp;context=[% context FILTER url_quote %]&amp;collapsed=[% collapsed FILTER url_quote %]&amp;headers=[% headers FILTER url_quote %]&amp;format=raw">Raw&nbsp;Unified</a>
+    | <a href="[% PROCESS diffurl id=attachid %]&amp;context=[% context FILTER uri %]&amp;collapsed=[% collapsed FILTER uri %]&amp;headers=[% headers FILTER uri %]&amp;format=raw">Raw&nbsp;Unified</a>
     | Return to [% "$terms.bug $bugid" FILTER bug_link(bugid) FILTER none %]
   [% END %]
   [% IF other_patches.size > 0 %]
@@ -115,12 +115,12 @@ Interdiff of #[% oldid %] and #[% newid %] for [% terms.bug %] #[% bugid %]
   [% IF context == "patch" %]
     (<strong>Patch</strong> / 
   [% ELSE %]
-    (<a href="[% PROCESS diffurl id=attachid %]&amp;headers=[% headers FILTER url_quote %]">Patch</a> / 
+    (<a href="[% PROCESS diffurl id=attachid %]&amp;headers=[% headers FILTER uri %]">Patch</a> / 
   [% END %]
   [% IF context == "file" %]
     <strong>File</strong> /
   [% ELSE %]
-    <a href="[% PROCESS diffurl id=attachid %]&amp;headers=[% headers FILTER url_quote %]&amp;context=file">File</a> / 
+    <a href="[% PROCESS diffurl id=attachid %]&amp;headers=[% headers FILTER uri %]&amp;context=file">File</a> / 
   [% END %]
 
   [% IF context == "patch" || context == "file" %]

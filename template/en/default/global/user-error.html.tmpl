@@ -1004,8 +1004,8 @@
     characters are allowed in the 'callback' parameter: <code>[]._</code>
 
   [% ELSIF error == "json_rpc_post_only" %]
-    For security reasons, you may only call the '[% method FILTER html %]'
-    method via HTTP POST.
+    For security reasons, you must use HTTP POST to call the
+    '[% method FILTER html %]' method.
 
   [% ELSIF error == "keyword_already_exists" %]
     [% title = "Keyword Already Exists" %]

@@ -45,6 +45,7 @@ use Bugzilla::DB::Schema;
 
 use List::Util qw(max);
 use Storable qw(dclone);
+use Text::ParseWords qw(shellwords);
 
 #####################################################################
 # Constants
@@ -383,8 +384,9 @@ sub sql_fulltext_search {
     # make the string lowercase to do case insensitive search
     my $lower_text = lc($text);
 
-    # split the text we search for into separate words
-    my @words = split(/\s+/, $lower_text);
+    # split the text we're searching for into separate words, understanding
+    # quotes.
+    my @words = shellwords($lower_text);
 
     # surround the words with wildcards and SQL quotes so we can use them
     # in LIKE search clauses

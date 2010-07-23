@@ -310,7 +310,7 @@ sub _handle_special_first_chars {
 
     if ($firstChar eq '#') {
         addChart('short_desc', 'substring', $baseWord, $negate);
-        addChart('content', 'matches', $baseWord, $negate);
+        addChart('content', 'matches', _matches_phrase($baseWord), $negate);
         return 1;
     }
     if ($firstChar eq ':') {
@@ -470,7 +470,7 @@ sub _default_quicksearch_word {
     addChart('alias', 'substring', $word, $negate);
     addChart('short_desc', 'substring', $word, $negate);
     addChart('status_whiteboard', 'substring', $word, $negate);
-    addChart('content', 'matches', $word, $negate);
+    addChart('content', 'matches', _matches_phrase($word), $negate);
 }
 
 sub _handle_urls {
@@ -520,6 +520,13 @@ sub splitString {
         s/"//g;
     }
     return @parts;
+}
+
+# Quote and escape a phrase appropriately for a "content matches" search.
+sub _matches_phrase {
+    my ($phrase) = @_;
+    $phrase =~ s/"/\\"/g;
+    return "\"$phrase\"";
 }
 
 # Expand found prefixes to states or resolutions

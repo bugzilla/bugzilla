@@ -566,6 +566,7 @@ sub init {
     foreach my $field ($params->param()) {
         if (grep { $_->name eq $field } @legal_fields) {
             my $type = $params->param("${field}_type");
+            my @values = $params->param($field);
             if (!$type) {
                 if ($field eq 'keywords') {
                     $type = 'anywords';
@@ -575,8 +576,11 @@ sub init {
                 }
             }
             $type = 'matches' if $field eq 'content';
-            push(@specialchart, [$field, $type,
-                                 join(',', $params->param($field))]);
+            my $send_value = join(',', @values);
+            if ($type eq 'anyexact') {
+                $send_value = \@values;
+            }
+            push(@specialchart, [$field, $type, $send_value]);
         }
     }
 
@@ -932,6 +936,11 @@ sub init {
                 my $original_field = $field; # Saved for search_description
                 my $operator = $params->param("type$chart-$row-$col") || "noop";
                 my $value = $params->param("value$chart-$row-$col");
+                my @values;
+                if (ref $value) {
+                    @values = @$value;
+                    $value = join(',', @values);
+                }
                 $value = "" if !defined $value;
                 $value = trim($value);
                 next if ($field eq "noop" || $operator eq "noop" 
@@ -959,6 +968,7 @@ sub init {
                     ff       => \$full_field,
                     t        => \$operator,
                     v        => \$value,
+                    all_v    => \@values,
                     q        => \$quoted,
                     term     => \$term,
                     multi_fields => \@multi_select_fields,
@@ -2360,11 +2370,13 @@ sub _greaterthaneq {
 sub _anyexact {
     my $self = shift;
     my %func_args = @_;
-    my ($f, $ff, $v, $q, $term) = @func_args{qw(f ff v q term)};
+    my ($f, $ff, $all_v, $v, $q, $term) = @func_args{qw(f ff all_v v q term)};
     my $dbh = Bugzilla->dbh;
     
     my @list;
-    foreach my $w (split(/,/, $$v)) {
+    my @all_values = scalar(@$all_v) ? @$all_v : split(',', $$v);
+    foreach my $w (@all_values) {
+        $w = trim($w);
         if ($w eq "---" && $$f =~ /resolution/) {
             $w = "";
         }

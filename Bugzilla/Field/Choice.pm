@@ -202,14 +202,19 @@ sub remove_from_db {
 sub _check_if_controller {
     my $self = shift;
     my $vis_fields = $self->controls_visibility_of_fields;
-    my $values     = $self->controlled_values;
-    if (@$vis_fields || scalar(keys %$values)) {
+    my $values = $self->controlled_values_array;
+    if (@$vis_fields || @$values) {
         ThrowUserError('fieldvalue_is_controller',
             { value => $self, fields => [map($_->name, @$vis_fields)],
-              vals => $values });
+              vals => $self->controlled_values });
     }
 }
 
+sub controlled_values_array {
+    my ($self) = @_;
+    my $values = $self->controlled_values;
+    return [map { @{ $values->{$_} } } keys %$values];
+}
 
 #############
 # Accessors #

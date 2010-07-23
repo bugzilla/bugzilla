@@ -63,7 +63,7 @@
 
 [% IF value.is_default || value.bug_count || (value_count == 1)
       || value.controls_visibility_of_fields.size
-      || value.controlled_values.size 
+      || value.controlled_values_array.size 
 %]
 
   <p>Sorry, but the '[% value.name FILTER html %]' value cannot be deleted
@@ -123,7 +123,7 @@
       </li>
     [% END %]
 
-    [% IF value.controlled_values.size %]
+    [% IF value.controlled_values_array.size %]
       <li>This value controls the visibility of the following values in
         other fields:<br>
        [% FOREACH field_name = value.controlled_values.keys %]

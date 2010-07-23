@@ -84,7 +84,7 @@ F<extensions/Example/Extension.pm>.
 
 When a hook named C<HOOK_NAME> is run, Bugzilla looks through all
 enabled L<extensions|Bugzilla::Extension> for extensions that implement
-a subroutined named C<HOOK_NAME>.
+a subroutine named C<HOOK_NAME>.
 
 See L<Bugzilla::Extension> for more details about how an extension
 can run code during a hook.
@@ -101,8 +101,8 @@ can run code during a hook.
 
 Invoke any code hooks with a matching name from any installed extensions.
 
-See C<customization.xml> in the Bugzilla Guide for more information on
-Bugzilla's extension mechanism.
+See L<Bugzilla::Extension> for more information on Bugzilla's extension
+mechanism.
 
 =item B<Params>
 
@@ -111,7 +111,7 @@ Bugzilla's extension mechanism.
 =item C<$name> - The name of the hook to invoke.
 
 =item C<$args> - A hashref. The named args to pass to the hook. 
-They will be accessible to the hook via L<Bugzilla/hook_args>.
+They will be passed as arguments to the hook method in the extension.
 
 =back
 
@@ -140,8 +140,9 @@ Params:
 =item C<data> - A reference pointing either to the content of the file
 being uploaded or pointing to the filehandle associated with the file.
 
-=item C<attributes> - A hashref whose keys are the same as
-L<Bugzilla::Attachment/create>. The data it contains hasn't been checked yet.
+=item C<attributes> - A hashref whose keys are the same as the input to
+L<Bugzilla::Attachment/create>. The data in this hashref hasn't been validated
+yet.
 
 =back
 
@@ -163,7 +164,8 @@ actual path to the module on disk. (For example, if the key is C<DB>, the
 value is F<Bugzilla/Auth/Login/DB.pm>.)
 
 For your extension, the path will start with 
-F<extensions/yourextension/lib/>. (See the code in the example extension.)
+F<Bugzilla/Extension/Foo/>, where "Foo" is the name of your Extension. 
+(See the code in the example extension.)
 
 If your login type is in the hash as a key, you should set that key to the
 right path to your module. That module's C<new> method will be called,
@@ -211,7 +213,8 @@ Params:
 =item C<bug> - The changed bug object, with all fields set to their updated
 values.
 
-=item C<timestamp> - The timestamp used for all updates in this transaction.
+=item C<timestamp> - The timestamp used for all updates in this transaction,
+as a SQL date string.
 
 =back
 
@@ -250,7 +253,8 @@ their updated values (so it has the old values available for each field).
 
 =item C<timestamp> 
 
-The timestamp used for all updates in this transaction.
+The timestamp used for all updates in this transaction, as a SQL date
+string.
 
 =item C<changes> 
 
@@ -260,11 +264,14 @@ The hash of changed fields. C<< $changes->{field} = [old, new] >>
 
 =head2 bug_check_can_change_field
 
-This hook controls what fields users are allowed to change. You can add code here for 
-site-specific policy changes and other customizations. This hook is only
-executed if the field's new and old values differ. Any denies take priority over any allows. 
-So, if another extension denies a change but yours allows the change, the other extension's 
-deny will override your extension's allow.
+This hook controls what fields users are allowed to change. You can add code
+here for site-specific policy changes and other customizations. 
+
+This hook is only executed if the field's new and old values differ. 
+
+Any denies take priority over any allows. So, if another extension denies
+a change but yours allows the change, the other extension's deny will
+override your extension's allow.
 
 Params:
 
@@ -379,9 +386,8 @@ A B<reference> to the exact text that you are parsing.
 Generally you should not modify this yourself. Instead you should be 
 returning regular expressions using the C<regexes> array.
 
-The text has already been word-wrapped, but has not been parsed in any way
-otherwise. (So, for example, it is not HTML-escaped. You get "&", not 
-"&amp;".)
+The text has not been parsed in any way. (So, for example, it is not
+HTML-escaped. You get "&", not "&amp;".)
 
 =item C<bug>
 
@@ -390,9 +396,8 @@ C<undef>, meaning that we are parsing text that is not on a bug.
 
 =item C<comment>
 
-A hashref representing the comment you are about to parse, including
-all of the fields that comments contain when they are returned by
-by L<Bugzilla::Bug/longdescs>.
+A L<Bugzilla::Comment> object representing the comment you are about to
+parse.
 
 Sometimes this is C<undef>, meaning that we are parsing text that is
 not a bug comment (but could still be some other part of a bug, like
@@ -402,9 +407,9 @@ the summary line).
 
 =head2 buglist_columns
 
-This happens in buglist.cgi after the standard columns have been defined and
-right before the display column determination.  It gives you the opportunity
-to add additional display columns.
+This happens in L<Bugzilla::Search/COLUMNS>, which determines legal bug
+list columns for F<buglist.cgi> and F<colchange.cgi>. It gives you the
+opportunity to add additional display columns.
 
 Params:
 
@@ -508,13 +513,13 @@ Params:
 
 =item C<panel_modules>
 
-A hashref, where the keys are the "name" of the module and the value
-is the Perl module containing that config module. For example, if
+A hashref, where the keys are the "name" of the panel and the value
+is the Perl module representing that panel. For example, if
 the name is C<Auth>, the value would be C<Bugzilla::Config::Auth>.
 
-For your extension, the Perl module name must start with 
-C<extensions::yourextension::lib>. (See the code in the example
-extension.)
+For your extension, the Perl module would start with 
+C<Bugzilla::Extension::Foo>, where "Foo" is the name of your Extension.
+(See the code in the example extension.)
 
 =back
 
@@ -558,9 +563,9 @@ Params:
 
 =head2 flag_end_of_update
 
-This happens at the end of L<Bugzilla::Flag/update_flags>, after all other changes
-are made to the database and after emails are sent. It gives you a before/after
-snapshot of flags so you can react to specific flag changes.
+This happens at the end of L<Bugzilla::Flag/update_flags>, after all other
+changes are made to the database and after emails are sent. It gives you a
+before/after snapshot of flags so you can react to specific flag changes.
 This generally occurs inside a database transaction.
 
 Note that the interface to this hook is B<UNSTABLE> and it may change in the
@@ -572,7 +577,8 @@ Params:
 
 =item C<object> - The changed bug or attachment object.
 
-=item C<timestamp> - The timestamp used for all updates in this transaction.
+=item C<timestamp> - The timestamp used for all updates in this transaction,
+as a SQL date string.
 
 =item C<old_flags> - The snapshot of flag summaries from before the change.
 
@@ -606,8 +612,9 @@ Params:
 
 =over
 
-=item C<group> - The changed L<Bugzilla::Group> object, with all fields set
-to their updated values.
+=item C<group> 
+
+The new L<Bugzilla::Group> object that was just created.
 
 =back
 
@@ -640,6 +647,9 @@ Params:
 =item C<silent>
 
 A flag that indicates whether or not checksetup is running in silent mode.
+If this is true, messages that are I<always> printed by checksetup.pl should be
+suppressed, but messages about any changes that are just being done this one
+time should be printed.
 
 =back
 
@@ -647,13 +657,14 @@ A flag that indicates whether or not checksetup is running in silent mode.
 
 This happens at the very end of all the tables being updated
 during an installation or upgrade. If you need to modify your custom
-schema, do it here. No params are passed.
+schema or add new columns to existing tables, do it here. No params are
+passed.
 
 =head2 db_schema_abstract_schema
 
 This allows you to add tables to Bugzilla. Note that we recommend that you 
-prefix the names of your tables with some word, so that they don't conflict 
-with any future Bugzilla tables.
+prefix the names of your tables with some word (preferably the name of
+your Extension), so that they don't conflict with any future Bugzilla tables.
 
 If you wish to add new I<columns> to existing Bugzilla tables, do that
 in L</install_update_db>.
@@ -952,6 +963,10 @@ C<page.cgi?id=fields.html> loads F<template/en/default/pages/fields.html.tmpl>.
 This hook is called right before the template is loaded, so that you can
 pass your own variables to your own pages.
 
+You can also use this to implement complex custom pages, by doing your own
+output and then calling  C<exit> at the end of the hook, thus preventing
+the normal C<page.cgi> behavior from occurring.
+
 Params:
 
 =over
@@ -962,6 +977,9 @@ This is the name of the page being loaded, like C<fields.html>.
 
 Note that if two extensions use the same name, it is uncertain which will
 override the others, so you should be careful with how you name your pages.
+Usually extensions prefix their pages with a directory named after their
+extension, so for an extension named "Foo", page ids usually look like
+C<foo/mypage.html>.
 
 =item C<vars>
 
@@ -988,8 +1006,13 @@ Params:
 
 Called right after a new product has been created, allowing additional
 changes to be made to the new product's attributes. This occurs inside of
-a database transaction, so if the hook throws an error all previous
-changes will be rolled back including the creation of the new product.
+a database transaction, so if the hook throws an error, all previous
+changes will be rolled back, including the creation of the new product.
+(However, note that such rollbacks should not normally be used, as
+some databases that Bugzilla supports have very bad rollback performance.
+If you want to validate input and throw errors before the Product is created,
+use L</object_end_of_create_validators> instead, or add a validator 
+using L</object_validators>.)
 
 Params:
 
@@ -1104,20 +1127,20 @@ Params:
 
 =item C<dispatch>
 
-A hashref that you can specify the names of your modules and what Perl
+A hashref where you can specify the names of your modules and which Perl
 module handles the functions for that module. (This is actually sent to 
 L<SOAP::Lite/dispatch_with>. You can see how that's used in F<xmlrpc.cgi>.)
 
-The Perl module name must start with C<extensions::yourextension::lib::>
-(replace C<yourextension> with the name of your extension). The C<package>
-declaration inside that module must also start with 
-C<extensions::yourextension::lib::> in that module's code.
+The Perl module name will most likely start with C<Bugzilla::Extension::Foo::>
+(where "Foo" is the name of your extension).
 
 Example:
 
-  $dispatch->{Example} = "extensions::example::lib::Example";
+  $dispatch->{'Example.Blah'} = "Bugzilla::Extension::Example::Webservice::Blah";
 
-And then you'd have a module F<extensions/example/lib/Example.pm>
+And then you'd have a module F<extensions/Example/lib/Webservice/Blah.pm>,
+and could call methods from that module like C<Example.Blah.Foo()> using
+the WebServices interface.
 
 It's recommended that all the keys you put in C<dispatch> start with the
 name of your extension, so that you don't conflict with the standard Bugzilla

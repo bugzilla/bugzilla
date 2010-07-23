@@ -30,8 +30,6 @@ use Bugzilla::Status;
 use Bugzilla::Field;
 use Bugzilla::Util;
 
-use Text::ParseWords qw(quotewords);
-
 use base qw(Exporter);
 @Bugzilla::Search::Quicksearch::EXPORT = qw(quicksearch);
 
@@ -149,7 +147,7 @@ sub quicksearch {
         $searchstring =~ s/\s+OR\s+/|/g;
         $searchstring =~ s/\s+NOT\s+/ -/g;
 
-        my @words = quotewords('\s+', 0, $searchstring);
+        my @words = splitString($searchstring);
         _handle_status_and_resolution(\@words);
 
         my (@unknownFields, %ambiguous_fields);
@@ -494,6 +492,36 @@ sub _handle_urls {
 # Helpers
 ###########################################################################
 
+# Split string on whitespace, retaining quoted strings as one
+sub splitString {
+    my $string = shift;
+    my @quoteparts;
+    my @parts;
+    my $i = 0;
+
+    # Now split on quote sign; be tolerant about unclosed quotes
+    @quoteparts = split(/"/, $string);
+    foreach my $part (@quoteparts) {
+        # After every odd quote, quote special chars
+        $part = url_quote($part) if $i++ % 2;
+    }
+    # Join again
+    $string = join('"', @quoteparts);
+
+    # Now split on unescaped whitespace
+    @parts = split(/\s+/, $string);
+    foreach (@parts) {
+        # Protect plus signs from becoming a blank.
+        # If "+" appears as the first character, leave it alone
+        # as it has a special meaning. Strings which start with
+        # "+" must be quoted.
+        s/(?<!^)\+/%2B/g;
+        # Remove quotes
+        s/"//g;
+    }
+    return @parts;
+}
+
 # Expand found prefixes to states or resolutions
 sub matchPrefixes {
     my $hr_states = shift;
@@ -552,7 +580,7 @@ sub makeChart {
     my $cgi = Bugzilla->cgi;
     $cgi->param("field$expr", $field);
     $cgi->param("type$expr",  $type);
-    $cgi->param("value$expr", $value);
+    $cgi->param("value$expr", url_decode($value));
 }
 
 1;

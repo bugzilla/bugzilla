@@ -124,10 +124,9 @@
     [%+ terms.Bugs %] will no longer be restricted to these groups and may become
     public if no other group applies:<br>
     [% FOREACH group = old_groups %]
-      <input type="checkbox" id="group_[% group.group.id FILTER html %]"
-             name="groups" disabled="disabled"
-             value="[% group.group.name FILTER html %]">
-      <label for="group_[% group.group.id FILTER html %]">
+      <input type="checkbox" id="group_[% group.id FILTER html %]"
+             name="groups" disabled="disabled" value="[% group.name FILTER html %]">
+      <label for="group_[% group.id FILTER html %]">
         [% group.name FILTER html %]: [% group.description FILTER html %]
       </label>
       <br>

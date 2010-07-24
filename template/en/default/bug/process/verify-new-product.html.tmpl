@@ -162,7 +162,7 @@
              [% ' checked="checked"' IF ((group.membercontrol == constants.CONTROLMAPDEFAULT && user.in_group(group.group.name))
                  || (group.othercontrol == constants.CONTROLMAPDEFAULT && !user.in_group(group.group.name))
                  || cgi.param("groups").contains(group.group.name)) %]
-             %] value="[% group.group.name FILTER html %]">
+             value="[% group.group.name FILTER html %]">
       <label for="group_[% group.group.id FILTER html %]">
         [% group.group.name FILTER html %]: [% group.group.description FILTER html %]
       </label>

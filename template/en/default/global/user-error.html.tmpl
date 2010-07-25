@@ -154,7 +154,7 @@
     [% ELSIF action == "approve" %]
       approve
     [% ELSE %]
-      [% Hook.process('auth_failure_action') %]
+      [%+ Hook.process('auth_failure_action') %]
     [% END %]
 
     [% IF object == "administrative_pages" %]

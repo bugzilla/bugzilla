@@ -855,8 +855,7 @@ changes will be rolled back, including the creation of the new product.
 (However, note that such rollbacks should not normally be used, as
 some databases that Bugzilla supports have very bad rollback performance.
 If you want to validate input and throw errors before the Product is created,
-use L</object_end_of_create_validators> instead, or add a validator 
-using L</object_validators>.)
+use L</object_end_of_create_validators> instead.)
 
 Params:
 

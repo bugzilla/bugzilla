@@ -1513,7 +1513,7 @@ our %names_to_events = (
 # Note: the "+" signs before the constants suppress bareword quoting.
 sub wants_bug_mail {
     my $self = shift;
-    my ($bug_id, $relationship, $fieldDiffs, $comments, $dependencyText,
+    my ($bug_id, $relationship, $fieldDiffs, $comments, $dep_mail,
         $changer, $bug_is_new) = @_;
 
     # Make a list of the events which have happened during this bug change,
@@ -1572,7 +1572,7 @@ sub wants_bug_mail {
     
     # Dependent changed bugmails must have an event to ensure the bugmail is
     # emailed.
-    if ($dependencyText ne '') {
+    if ($dep_mail) {
         $events{+EVT_DEPEND_BLOCK} = 1;
     }
 

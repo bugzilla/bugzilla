@@ -109,13 +109,11 @@ sub relationships {
 # All the names are email addresses, not userids
 # values are scalars, except for cc, which is a list
 sub Send {
-    my ($id, $forced) = (@_);
+    my ($id, $forced, $params) = @_;
+    $params ||= {};
 
     my $dbh = Bugzilla->dbh;
     my $bug = new Bugzilla::Bug($id);
-
-    # Only used for headers in bugmail for new bugs
-    my @fields = Bugzilla->get_fields({obsolete => 0, mailhead => 1});
 
     my $start = $bug->lastdiffed;
     my $end   = $dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
@@ -146,142 +144,21 @@ sub Send {
         }
     }
     
-    my @args = ($bug->id);
+    my ($diffparts, $changedfields, $diffs) =
+      $params->{dep_only} ? ([], [], []) : _get_diffs($bug, $end);
 
-    # If lastdiffed is NULL, then we don't limit the search on time.
-    my $when_restriction = '';
-    if ($start) {
-        $when_restriction = ' AND bug_when > ? AND bug_when <= ?';
-        push @args, ($start, $end);
-    }
-    
-    my $diffs = $dbh->selectall_arrayref(
-           "SELECT profiles.login_name, profiles.realname, fielddefs.description,
-                   bugs_activity.bug_when, bugs_activity.removed, 
-                   bugs_activity.added, bugs_activity.attach_id, fielddefs.name,
-                   bugs_activity.comment_id
-              FROM bugs_activity
-        INNER JOIN fielddefs
-                ON fielddefs.id = bugs_activity.fieldid
-        INNER JOIN profiles
-                ON profiles.userid = bugs_activity.who
-             WHERE bugs_activity.bug_id = ?
-                   $when_restriction
-          ORDER BY bugs_activity.bug_when", undef, @args);
+    if ($params->{dep_only} && $start) {
+        my $blocker_id = $params->{blocker}->id;
+        my $deptext =
+          "\nBug " . $bug->id . " depends on bug $blocker_id, which changed state.\n\n" .
+          "Bug $blocker_id Summary: " . $params->{blocker}->short_desc . "\n" .
+          correct_urlbase() . "show_bug.cgi?id=$blocker_id\n\n";
+        $deptext .= three_columns("What    ", "Old Value", "New Value");
+        $deptext .= ('-' x 76) . "\n";
+        $deptext .= three_columns('Status', @{$params->{changes}->{bug_status}});
+        $deptext .= three_columns('Resolution', @{$params->{changes}->{resolution}});
 
-    my @new_depbugs;
-    my $difftext = "";
-    my $diffheader = "";
-    my @diffparts;
-    my $lastwho = "";
-    my $fullwho;
-    my @changedfields;
-    foreach my $ref (@$diffs) {
-        my ($who, $whoname, $what, $when, $old, $new, $attachid, $fieldname, $comment_id) = (@$ref);
-        my $diffpart = {};
-        if ($who ne $lastwho) {
-            $lastwho = $who;
-            $fullwho = $whoname ? "$whoname <$who>" : $who;
-            $diffheader = "\n$fullwho changed:\n\n";
-            $diffheader .= three_columns("What    ", "Removed", "Added");
-            $diffheader .= ('-' x 76) . "\n";
-        }
-        $what =~ s/^(Attachment )?/Attachment #$attachid / if $attachid;
-        if( $fieldname eq 'estimated_time' ||
-            $fieldname eq 'remaining_time' ) {
-            $old = format_time_decimal($old);
-            $new = format_time_decimal($new);
-        }
-        if ($fieldname eq 'dependson') {
-            push(@new_depbugs, grep {$_ =~ /^\d+$/} split(/[\s,]+/, $new));
-        }
-        if ($attachid) {
-            ($diffpart->{'isprivate'}) = $dbh->selectrow_array(
-                'SELECT isprivate FROM attachments WHERE attach_id = ?',
-                undef, ($attachid));
-        }
-        if ($fieldname eq 'longdescs.isprivate') {
-            my $comment = Bugzilla::Comment->new($comment_id);
-            my $comment_num = $comment->count;
-            $what =~ s/^(Comment )?/Comment #$comment_num /;
-            $diffpart->{'isprivate'} = $new;
-        }
-        $difftext = three_columns($what, $old, $new);
-        $diffpart->{'header'} = $diffheader;
-        $diffpart->{'fieldname'} = $fieldname;
-        $diffpart->{'text'} = $difftext;
-        push(@diffparts, $diffpart);
-        push(@changedfields, $what);
-    }
-
-    my @depbugs;
-    my $deptext = "";
-    # Do not include data about dependent bugs when they have just been added.
-    # Completely skip checking for dependent bugs on bug creation as all
-    # dependencies bugs will just have been added.
-    if ($start) {
-        my $dep_restriction = "";
-        if (scalar @new_depbugs) {
-            $dep_restriction = "AND bugs_activity.bug_id NOT IN (" .
-                               join(", ", @new_depbugs) . ")";
-        }
-
-        my $dependency_diffs = $dbh->selectall_arrayref(
-           "SELECT bugs_activity.bug_id, bugs.short_desc, fielddefs.name, 
-                   fielddefs.description, bugs_activity.removed,
-                   bugs_activity.added
-              FROM bugs_activity
-        INNER JOIN bugs
-                ON bugs.bug_id = bugs_activity.bug_id
-        INNER JOIN dependencies
-                ON bugs_activity.bug_id = dependencies.dependson
-        INNER JOIN fielddefs
-                ON fielddefs.id = bugs_activity.fieldid
-             WHERE dependencies.blocked = ?
-               AND (fielddefs.name = 'bug_status'
-                    OR fielddefs.name = 'resolution')
-                   $when_restriction
-                   $dep_restriction
-          ORDER BY bugs_activity.bug_when, bugs.bug_id", undef, @args);
-
-        my $thisdiff = "";
-        my $lastbug = "";
-        my $interestingchange = 0;
-        foreach my $dependency_diff (@$dependency_diffs) {
-            my ($depbug, $summary, $fieldname, $what, $old, $new) = @$dependency_diff;
-
-            if ($depbug ne $lastbug) {
-                if ($interestingchange) {
-                    $deptext .= $thisdiff;
-                }
-                $lastbug = $depbug;
-                $thisdiff =
-                  "\nBug $id depends on bug $depbug, which changed state.\n\n" .
-                  "Bug $depbug Summary: $summary\n" .
-                  correct_urlbase() . "show_bug.cgi?id=$depbug\n\n";
-                $thisdiff .= three_columns("What    ", "Old Value", "New Value");
-                $thisdiff .= ('-' x 76) . "\n";
-                $interestingchange = 0;
-            }
-            $thisdiff .= three_columns($what, $old, $new);
-            if ($fieldname eq 'bug_status'
-                && is_open_state($old) ne is_open_state($new))
-            {
-                $interestingchange = 1;
-            }
-            push(@depbugs, $depbug);
-        }
-
-        if ($interestingchange) {
-            $deptext .= $thisdiff;
-        }
-        $deptext = trim($deptext);
-
-        if ($deptext) {
-            my $diffpart = {};
-            $diffpart->{'text'} = "\n" . trim($deptext);
-            push(@diffparts, $diffpart);
-        }
+        push(@$diffparts, {text => $deptext});
     }
 
     my $comments = $bug->comments({ after => $start, to => $end });
@@ -374,6 +251,9 @@ sub Send {
     my @sent;
     my @excluded;
 
+    # Only used for headers in bugmail for new bugs
+    my @fields = $start ? () : Bugzilla->get_fields({obsolete => 0, mailhead => 1});
+
     foreach my $user_id (keys %recipients) {
         my %rels_which_want;
         my $sent_mail = 0;
@@ -389,7 +269,7 @@ sub Send {
                                           $relationship, 
                                           $diffs, 
                                           $comments,
-                                          $deptext,
+                                          $params->{dep_only},
                                           $changer,
                                           !$start))
                 {
@@ -403,16 +283,12 @@ sub Send {
             # So the user exists, can see the bug, and wants mail in at least
             # one role. But do we want to send it to them?
 
-            # We shouldn't send mail if this is a dependency mail (i.e. there 
-            # is something in @depbugs), and any of the depending bugs are not 
-            # visible to the user. This is to avoid leaking the summaries of 
-            # confidential bugs.
+            # We shouldn't send mail if this is a dependency mail and the
+            # depending bug is not visible to the user.
+            # This is to avoid leaking the summary of a confidential bug.
             my $dep_ok = 1;
-            foreach my $dep_id (@depbugs) {
-                if (!$user->can_see_bug($dep_id)) {
-                   $dep_ok = 0;
-                   last;
-                }
+            if ($params->{dep_only}) {
+                $dep_ok = $user->can_see_bug($params->{blocker}->id) ? 1 : 0;
             }
 
             # Make sure the user isn't in the nomail list, and the insider and 
@@ -425,12 +301,13 @@ sub Send {
                       bug      => $bug,
                       comments => $comments,
                       is_new   => !$start,
+                      delta_ts => $params->{dep_only} ? $end : undef,
                       changer  => $changer,
                       watchers => exists $watching{$user_id} ?
                                   $watching{$user_id} : undef,
-                      diff_parts      => \@diffparts,
+                      diff_parts      => $diffparts,
                       rels_which_want => \%rels_which_want,
-                      changed_fields  => \@changedfields,
+                      changed_fields  => $changedfields,
                     });
             }
         }
@@ -442,10 +319,15 @@ sub Send {
             push(@excluded, $user->login); 
         } 
     }
-    
-    $dbh->do('UPDATE bugs SET lastdiffed = ? WHERE bug_id = ?',
-             undef, ($end, $id));
-    $bug->{lastdiffed} = $end;
+
+    # When sending bugmail about a blocker being reopened or resolved,
+    # we say nothing about changes in the bug being blocked, so we must
+    # not update lastdiffed in this case.
+    if (!$params->{dep_only}) {
+        $dbh->do('UPDATE bugs SET lastdiffed = ? WHERE bug_id = ?',
+                 undef, ($end, $id));
+        $bug->{lastdiffed} = $end;
+    }
 
     return {'sent' => \@sent, 'excluded' => \@excluded};
 }
@@ -458,6 +340,7 @@ sub sendMail {
     my $bug    = $params->{bug};
     my @send_comments = @{ $params->{comments} };
     my $isnew   = $params->{is_new};
+    my $delta_ts = $params->{delta_ts};
     my $changer = $params->{changer};
     my $watchingRef = $params->{watchers};
     my @diffparts   = @{ $params->{diff_parts} };
@@ -558,6 +441,7 @@ sub sendMail {
 
     my $vars = {
         isnew => $isnew,
+        delta_ts => $delta_ts,
         to_user => $user,
         bug => $bug,
         changedfields => \@changed_fields,
@@ -579,6 +463,76 @@ sub sendMail {
     MessageToMTA($msg);
 
     return 1;
+}
+
+sub _get_diffs {
+    my ($bug, $end) = @_;
+    my $dbh = Bugzilla->dbh;
+
+    my @args = ($bug->id);
+    # If lastdiffed is NULL, then we don't limit the search on time.
+    my $when_restriction = '';
+    if ($bug->lastdiffed) {
+        $when_restriction = ' AND bug_when > ? AND bug_when <= ?';
+        push @args, ($bug->lastdiffed, $end);
+    }
+
+    my $diffs = $dbh->selectall_arrayref(
+           "SELECT profiles.login_name, profiles.realname, fielddefs.description,
+                   bugs_activity.bug_when, bugs_activity.removed,
+                   bugs_activity.added, bugs_activity.attach_id, fielddefs.name,
+                   bugs_activity.comment_id
+              FROM bugs_activity
+        INNER JOIN fielddefs
+                ON fielddefs.id = bugs_activity.fieldid
+        INNER JOIN profiles
+                ON profiles.userid = bugs_activity.who
+             WHERE bugs_activity.bug_id = ?
+                   $when_restriction
+          ORDER BY bugs_activity.bug_when", undef, @args);
+
+    my $difftext = "";
+    my $diffheader = "";
+    my @diffparts;
+    my $lastwho = "";
+    my $fullwho;
+    my @changedfields;
+    foreach my $ref (@$diffs) {
+        my ($who, $whoname, $what, $when, $old, $new, $attachid, $fieldname, $comment_id) = @$ref;
+        my $diffpart = {};
+        if ($who ne $lastwho) {
+            $lastwho = $who;
+            $fullwho = $whoname ? "$whoname <$who>" : $who;
+            $diffheader = "\n$fullwho changed:\n\n";
+            $diffheader .= three_columns("What    ", "Removed", "Added");
+            $diffheader .= ('-' x 76) . "\n";
+        }
+        $what =~ s/^(Attachment )?/Attachment #$attachid / if $attachid;
+        if( $fieldname eq 'estimated_time' ||
+            $fieldname eq 'remaining_time' ) {
+            $old = format_time_decimal($old);
+            $new = format_time_decimal($new);
+        }
+        if ($attachid) {
+            ($diffpart->{'isprivate'}) = $dbh->selectrow_array(
+                'SELECT isprivate FROM attachments WHERE attach_id = ?',
+                undef, ($attachid));
+        }
+        if ($fieldname eq 'longdescs.isprivate') {
+            my $comment = Bugzilla::Comment->new($comment_id);
+            my $comment_num = $comment->count;
+            $what =~ s/^(Comment )?/Comment #$comment_num /;
+            $diffpart->{'isprivate'} = $new;
+        }
+        $difftext = three_columns($what, $old, $new);
+        $diffpart->{'header'} = $diffheader;
+        $diffpart->{'fieldname'} = $fieldname;
+        $diffpart->{'text'} = $difftext;
+        push(@diffparts, $diffpart);
+        push(@changedfields, $what);
+    }
+
+    return (\@diffparts, \@changedfields, $diffs);
 }
 
 1;

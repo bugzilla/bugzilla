@@ -40,7 +40,7 @@ X-Bugzilla-Status: [% bug.bug_status %]
 X-Bugzilla-Priority: [% bug.priority %]
 X-Bugzilla-Assigned-To: [% bug.assigned_to.login %]
 X-Bugzilla-Target-Milestone: [% bug.target_milestone %]
-X-Bugzilla-Changed-Fields: [% changedfields %]
+X-Bugzilla-Changed-Fields: [% changedfields.join(" ") %]
 [%+ threadingmarker %]
 
 [%+ urlbase %]show_bug.cgi?id=[% bug.id %]

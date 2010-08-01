@@ -858,7 +858,6 @@ if (defined $cgi->param('limit')) {
     }
 }
 elsif ($fulltext) {
-    $query .= " " . $dbh->sql_limit(FULLTEXT_BUGLIST_LIMIT);
     if ($cgi->param('order') && $cgi->param('order') =~ /^relevance/) {
         $vars->{'message'} = 'buglist_sorted_by_relevance';
     }

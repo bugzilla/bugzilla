@@ -112,8 +112,6 @@ use File::Basename;
     GLOBAL_EVENTS
     EVT_FLAG_REQUESTED EVT_REQUESTED_FLAG
 
-    FULLTEXT_BUGLIST_LIMIT
-
     ADMIN_GROUP_NAME
     PER_PRODUCT_PRIVILEGES
 
@@ -367,10 +365,6 @@ use constant EVT_FLAG_REQUESTED     => 100; # Flag has been requested of me
 use constant EVT_REQUESTED_FLAG     => 101; # I have requested a flag
 
 use constant GLOBAL_EVENTS => EVT_FLAG_REQUESTED, EVT_REQUESTED_FLAG;
-
-#  Number of bugs to return in a buglist when performing
-#  a fulltext search.
-use constant FULLTEXT_BUGLIST_LIMIT => 200;
 
 # Default administration group name.
 use constant ADMIN_GROUP_NAME => 'admin';

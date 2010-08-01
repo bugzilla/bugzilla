@@ -260,7 +260,7 @@
   </tr>
 </table>
 
-[% IF one_product.defined %]
+[% IF one_product.defined && bugs.size %]
   <p class="bz_query_single_product">
     [% PROCESS enter_bug_link %]
   </p>

@@ -1210,7 +1210,21 @@ sub _parse_basic_fields {
         next if !@values;
         my $operator = $params->{"${param_name}_type"} || 'anyexact';
         $operator = 'matches' if $operator eq 'content';
-        push(@charts, [$field_name, $operator, \@values]);
+        # Fields that are displayed as multi-selects are passed as arrays,
+        # so that they can properly search values that contain commas.
+        # However, other fields are sent as strings, so that they are properly
+        # split on commas if required.
+        my $field = $chart_fields->{$field_name};
+        my $pass_value;
+        if ($field->is_select or $field->name eq 'version'
+            or $field->name eq 'target_milestone')
+        {
+            $pass_value = \@values;
+        }
+        else {
+            $pass_value = join(',', @values);
+        }
+        push(@charts, [$field_name, $operator, $pass_value]);
     }
     return @charts;
 }

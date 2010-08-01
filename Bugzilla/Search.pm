@@ -564,7 +564,8 @@ sub init {
     }
 
     foreach my $field ($params->param()) {
-        if (grep { $_->name eq $field } @legal_fields) {
+        my ($field_obj) = grep { $_->name eq $field } @legal_fields;
+        if ($field_obj) {
             my $type = $params->param("${field}_type");
             my @values = $params->param($field);
             if (!$type) {
@@ -577,7 +578,10 @@ sub init {
             }
             $type = 'matches' if $field eq 'content';
             my $send_value = join(',', @values);
-            if ($type eq 'anyexact') {
+            if ( $type eq 'anyexact'
+                 and ($field_obj->is_select or $field eq 'version'
+                      or $field eq 'target_milestone') )
+            {
                 $send_value = \@values;
             }
             push(@specialchart, [$field, $type, $send_value]);

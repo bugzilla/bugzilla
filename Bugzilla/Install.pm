@@ -48,11 +48,11 @@ use constant STATUS_WORKFLOW => (
     ['CONFIRMED',   'RESOLVED'],
     ['IN_PROGRESS', 'CONFIRMED'],
     ['IN_PROGRESS', 'RESOLVED'],
+    ['RESOLVED',    'UNCONFIRMED'],
     ['RESOLVED',    'CONFIRMED'],
     ['RESOLVED',    'VERIFIED'],
+    ['VERIFIED',    'UNCONFIRMED'],
     ['VERIFIED',    'CONFIRMED'],
-    # The RESOLVED/VERIFIED to UNCONFIRMED transition is enabled specially
-    # in the code for bugs that haven't been confirmed.
 );
 
 sub SETTINGS {

@@ -684,14 +684,13 @@ YAHOO.bugzilla.userAutocomplete = {
     },    
     init_ds : function(){
         this.dataSource = new YAHOO.util.XHRDataSource("jsonrpc.cgi");
+        this.dataSource.connTimeout = 30000;
         this.dataSource.connMethodPost = true;
+        this.dataSource.connXhrMode = "cancelStaleRequests";
+        this.dataSource.maxCacheEntries = 5;
         this.dataSource.responseSchema = {
             resultsList : "result.users",
             metaFields : { error: "error", jsonRpcId: "id"},
-            fields : [
-                { key : "email" },
-                { key : "real_name"}
-            ]
         };    
     },
     init : function( field, container, multiple ) {
@@ -701,6 +700,7 @@ YAHOO.bugzilla.userAutocomplete = {
         var userAutoComp = new YAHOO.widget.AutoComplete( field, container, 
                                 this.dataSource );
         // other stuff we might want to do with the autocomplete goes here
+        userAutoComp.maxResultsDisplayed = BUGZILLA.param.maxusermatches;
         userAutoComp.generateRequest = this.generateRequest;
         userAutoComp.formatResult = this.resultListFormat;
         userAutoComp.doBeforeLoadData = this.debug_helper;

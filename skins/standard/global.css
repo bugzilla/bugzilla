@@ -518,16 +518,19 @@ input.required, select.required, span.required_explanation {
                               width:auto !important; }
 .yui-skin-sam .yui-ac-container { left:0px !important; }
 .yui-skin-sam .yui-ac { display: inline-block; }
+#bugzilla-body .yui-ac-content {
+    max-height: 19em;
+    overflow: auto;
+    overflow-x: hidden;
+}
 
 #keyword_container {
     padding-bottom: 2em;
     padding-top: .2em;
 }
 
+
 #keyword_container .yui-ac-content {
-    max-height: 19em;
-    overflow: auto;
-    overflow-x: hidden;
     margin-left: -1px;
 }
 

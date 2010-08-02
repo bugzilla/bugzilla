@@ -3731,12 +3731,6 @@ sub map_fields {
         }
         $field_values{$field_name} = $params->{$field};
     }
-
-    # This protects the WebService Bug.search method.
-    unless (Bugzilla->user->is_timetracker) {
-        delete @field_values{qw(estimated_time remaining_time deadline)};
-    }
-    
     return \%field_values;
 }
 

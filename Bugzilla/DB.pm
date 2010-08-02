@@ -45,7 +45,6 @@ use Bugzilla::DB::Schema;
 
 use List::Util qw(max);
 use Storable qw(dclone);
-use Text::ParseWords qw(shellwords);
 
 #####################################################################
 # Constants
@@ -369,16 +368,28 @@ sub sql_fulltext_search {
     # make the string lowercase to do case insensitive search
     my $lower_text = lc($text);
 
-    # split the text we're searching for into separate words, understanding
-    # quotes.
-    my @words = shellwords($lower_text);
+    # split the text we're searching for into separate words. As a hack
+    # to allow quicksearch to work, if the field starts and ends with
+    # a double-quote, then we don't split it into words. We can't use
+    # Text::ParseWords here because it gets very confused by unbalanced
+    # quotes, which breaks searches like "don't try this" (because of the
+    # unbalanced single-quote in "don't").
+    my @words;
+    if ($lower_text =~ /^"/ and $lower_text =~ /"$/) {
+        $lower_text =~ s/^"//;
+        $lower_text =~ s/"$//;
+        @words = ($lower_text);
+    }
+    else {
+        @words = split(/\s+/, $lower_text);
+    }
 
     # surround the words with wildcards and SQL quotes so we can use them
     # in LIKE search clauses
-    @words = map($self->quote("%$_%"), @words);
+    @words = map($self->quote("\%$_\%"), @words);
 
     # untaint words, since they are safe to use now that we've quoted them
-    map(trick_taint($_), @words);
+    trick_taint($_) foreach @words;
 
     # turn the words into a set of LIKE search clauses
     @words = map("LOWER($column) LIKE $_", @words);

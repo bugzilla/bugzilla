@@ -408,10 +408,10 @@ sub sendMail {
                 $value = $value->name;
             }
             elsif ($name eq 'estimated_time') {
-                $value = format_time_decimal($value);
+                $value = ($value == 0) ? 0 : format_time_decimal($value);
             }
             elsif ($name eq 'deadline') {
-                $value = time2str("%Y-%m-%d", str2time($value));
+                $value = time2str("%Y-%m-%d", str2time($value)) if $value;
             }
 
             # If there isn't anything to show, don't include this header.

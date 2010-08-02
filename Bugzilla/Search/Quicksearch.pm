@@ -535,6 +535,9 @@ sub splitString {
         # as it has a special meaning. Strings which start with
         # "+" must be quoted.
         s/(?<!^)\+/%2B/g;
+        # Also protect the minus sign from being considered
+        # as negation, in quotes.
+        s/(?<!^)\-/%2D/g;
         # Remove quotes
         s/"//g;
     }

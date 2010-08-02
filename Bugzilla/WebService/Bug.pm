@@ -388,7 +388,11 @@ sub search {
     
     $params = Bugzilla::Bug::map_fields($params);
     delete $params->{WHERE};
-    
+
+    unless (Bugzilla->user->is_timetracker) {
+        delete $params->{$_} foreach qw(estimated_time remaining_time deadline);
+    }
+
     # Do special search types for certain fields.
     if ( my $bug_when = delete $params->{delta_ts} ) {
         $params->{WHERE}->{'delta_ts >= ?'} = $bug_when;

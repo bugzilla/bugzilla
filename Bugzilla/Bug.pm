@@ -983,7 +983,9 @@ sub update {
           old_bug => $old_bug });
 
     # If any change occurred, refresh the timestamp of the bug.
-    if (scalar(keys %$changes) || $self->{added_comments}) {
+    if (scalar(keys %$changes) || $self->{added_comments}
+        || $self->{comment_isprivate})
+    {
         $dbh->do('UPDATE bugs SET delta_ts = ? WHERE bug_id = ?',
                  undef, ($delta_ts, $self->id));
         $self->{delta_ts} = $delta_ts;

@@ -95,6 +95,17 @@ use constant WORD_START => '(^|[^[:alnum:]])';
 use constant WORD_END   => '($|[^[:alnum:]])';
 
 #####################################################################
+# Overridden Superclass Methods 
+#####################################################################
+
+sub quote {
+    my $self = shift;
+    my $retval = $self->SUPER::quote(@_);
+    trick_taint($retval) if defined $retval;
+    return $retval;
+}
+
+#####################################################################
 # Connection Methods
 #####################################################################
 

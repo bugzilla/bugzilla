@@ -690,7 +690,7 @@ YAHOO.bugzilla.userAutocomplete = {
         this.dataSource.maxCacheEntries = 5;
         this.dataSource.responseSchema = {
             resultsList : "result.users",
-            metaFields : { error: "error", jsonRpcId: "id"},
+            metaFields : { error: "error", jsonRpcId: "id"}
         };    
     },
     init : function( field, container, multiple ) {

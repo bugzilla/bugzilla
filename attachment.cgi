@@ -481,7 +481,7 @@ sub insert {
          creation_ts   => $timestamp,
          data          => scalar $cgi->param('attach_text') || $cgi->upload('data'),
          description   => scalar $cgi->param('description'),
-         filename      => $cgi->param('attach_text') ? 'attachment.txt' : scalar $cgi->upload('data'),
+         filename      => $cgi->param('attach_text') ? "file_$bugid.txt" : scalar $cgi->upload('data'),
          ispatch       => scalar $cgi->param('ispatch'),
          isprivate     => scalar $cgi->param('isprivate'),
          mimetype      => $content_type,

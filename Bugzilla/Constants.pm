@@ -147,6 +147,7 @@ use File::Basename;
 
     MIN_SMALLINT
     MAX_SMALLINT
+    MAX_INT_32
 
     MAX_LEN_QUERY_NAME
     MAX_MILESTONE_SIZE
@@ -418,6 +419,7 @@ use constant ON_WINDOWS => ($^O =~ /MSWin32/i);
 
 use constant MIN_SMALLINT => -32768;
 use constant MAX_SMALLINT => 32767;
+use constant MAX_INT_32 => 2147483647;
 
 # The longest that a saved search name can be.
 use constant MAX_LEN_QUERY_NAME => 64;

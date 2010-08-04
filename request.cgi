@@ -207,7 +207,9 @@ sub queue {
     
     # Filter results by exact product or component.
     if (defined $cgi->param('product') && $cgi->param('product') ne "") {
-        my $product = Bugzilla::Product::check_product(scalar $cgi->param('product'));
+        # The second argument is set to true so that an error is thrown
+        # if the product is not accessible by the user.
+        my $product = Bugzilla::Product::check_product(scalar $cgi->param('product'), 1);
         push(@criteria, "bugs.product_id = " . $product->id);
         push(@excluded_columns, 'product') unless $cgi->param('do_union');
         if (defined $cgi->param('component') && $cgi->param('component') ne "") {

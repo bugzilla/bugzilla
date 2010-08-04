@@ -147,12 +147,13 @@ elsif ($action eq 'begin-sudo') {
     $reason = substr($reason, $[, 200);
     
     # Calculate the session expiry time (T + 6 hours)
-    my $time_string = time2str('%a, %d-%b-%Y %T %Z', time+(6*60*60), 'GMT');
+    my $time_string = time2str('%a, %d-%b-%Y %T %Z', time + MAX_SUDO_TOKEN_AGE, 'GMT');
 
     # For future sessions, store the unique ID of the target user
+    my $token = Bugzilla::Token::_create_token($user->id, 'sudo', $target_user->id);
     $cgi->send_cookie('-name'    => 'sudo',
                       '-expires' => $time_string,
-                      '-value'   => $target_user->id
+                      '-value'   => $token
     );
     
     # For the present, change the values of Bugzilla::user & Bugzilla::sudoer
@@ -174,6 +175,7 @@ elsif ($action eq 'begin-sudo') {
 # end-sudo: End the current sudo session (if one is in progress)
 elsif ($action eq 'end-sudo') {
     # Regardless of our state, delete the sudo cookie if it exists
+    my $token = $cgi->cookie('sudo');
     $cgi->remove_cookie('sudo');
 
     # Are we in an sudo session?
@@ -182,6 +184,8 @@ elsif ($action eq 'end-sudo') {
     if (defined($sudoer)) {
         Bugzilla->sudo_request($sudoer, undef);
     }
+    # Now that the session is over, remove the token from the DB.
+    delete_token($token);
 
     # NOTE: If you want to log the end of an sudo session, so it here.
     

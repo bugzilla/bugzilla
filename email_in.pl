@@ -106,7 +106,7 @@ sub parse_mail {
             # Otherwise, we stop parsing fields on the first blank line.
             $line = trim($line);
             last if !$line;
-            if ($line =~ /^\@(\S+)\s*(?:=|\s|$)\s*(.*)\s*/) {
+            if ($line =~ /^\@(\w+)\s*(?:=|\s|$)\s*(.*)\s*/) {
                 $current_field = lc($1);
                 $fields{$current_field} = $2;
             }

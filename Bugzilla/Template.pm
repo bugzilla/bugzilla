@@ -809,6 +809,8 @@ sub create {
                 {
                     $var = wrap_comment($var, 72);
                 }
+                $var =~ s/\&nbsp;/ /g;
+
                 return $var;
             },
 

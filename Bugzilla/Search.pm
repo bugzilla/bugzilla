@@ -1209,7 +1209,7 @@ sub _parse_basic_fields {
         my @values = $self->_param_array($param_name);
         next if !@values;
         my $operator = $params->{"${param_name}_type"} || 'anyexact';
-        $operator = 'matches' if $operator eq 'content';
+        $operator = 'matches' if $param_name eq 'content';
         # Fields that are displayed as multi-selects are passed as arrays,
         # so that they can properly search values that contain commas.
         # However, other fields are sent as strings, so that they are properly

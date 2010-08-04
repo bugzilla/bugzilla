@@ -51,10 +51,12 @@ use Bugzilla::Error;
 use Bugzilla::Util;
 use Bugzilla::Field;
 use Bugzilla::Flag;
+use Bugzilla::Token;
 
 use File::Basename;
 use File::Spec::Functions;
 use DateTime::TimeZone;
+use Date::Parse;
 use Safe;
 
 #####################################################################
@@ -334,24 +336,37 @@ sub login {
     # 3: There must be a valid value in the 'sudo' cookie
     # 4: A Bugzilla::User object must exist for the given cookie value
     # 5: That user must NOT be in the 'bz_sudo_protect' group
-    my $sudo_cookie = $class->cgi->cookie('sudo');
-    detaint_natural($sudo_cookie) if defined($sudo_cookie);
-    my $sudo_target;
-    $sudo_target = new Bugzilla::User($sudo_cookie) if defined($sudo_cookie);
-    if (defined($authenticated_user)                 &&
-        $authenticated_user->in_group('bz_sudoers')  &&
-        defined($sudo_cookie)                        &&
-        defined($sudo_target)                        &&
-        !($sudo_target->in_group('bz_sudo_protect'))
-       )
-    {
-        $class->set_user($sudo_target);
-        $class->request_cache->{sudoer} = $authenticated_user;
-        # And make sure that both users have the same Auth object,
-        # since we never call Auth::login for the sudo target.
-        $sudo_target->set_authorizer($authenticated_user->authorizer);
+    my $token = $class->cgi->cookie('sudo');
+    if (defined $authenticated_user && $token) {
+        my ($user_id, $date, $sudo_target_id) = Bugzilla::Token::GetTokenData($token);
+        if (!$user_id
+            || $user_id != $authenticated_user->id
+            || !detaint_natural($sudo_target_id)
+            || (time() - str2time($date) > MAX_SUDO_TOKEN_AGE))
+        {
+            $class->cgi->remove_cookie('sudo');
+            ThrowUserError('sudo_invalid_cookie');
+        }
 
-        # NOTE: If you want to do any special logging, do it here.
+        my $sudo_target = new Bugzilla::User($sudo_target_id);
+        if ($authenticated_user->in_group('bz_sudoers')
+            && defined $sudo_target
+            && !$sudo_target->in_group('bz_sudo_protect'))
+        {
+            $class->set_user($sudo_target);
+            $class->request_cache->{sudoer} = $authenticated_user;
+            # And make sure that both users have the same Auth object,
+            # since we never call Auth::login for the sudo target.
+            $sudo_target->set_authorizer($authenticated_user->authorizer);
+
+            # NOTE: If you want to do any special logging, do it here.
+        }
+        else {
+            delete_token($token);
+            $class->cgi->remove_cookie('sudo');
+            ThrowUserError('sudo_illegal_action', { sudoer => $authenticated_user,
+                                                    target_user => $sudo_target });
+        }
     }
     else {
         $class->set_user($authenticated_user);

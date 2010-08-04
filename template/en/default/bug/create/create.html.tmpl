@@ -129,9 +129,10 @@ function set_assign_to() {
             if (inputElement.name.search(/^flag_type-(\d+)$/) != -1) {
                 var id = inputElement.name.replace(/^flag_type-(\d+)$/, "$1");
                 inputElement.disabled = true;
-                // Also disable the requestee field, if it exists.
+                // Also hide the requestee field, if it exists.
                 inputElement = document.getElementById("requestee_type-" + id);
-                if (inputElement) inputElement.disabled = true;
+                if (inputElement)
+                  YAHOO.util.Dom.addClass(inputElement.parentNode, 'bz_default_hidden');
             }
         }
         // Now enable flags available for the selected component.

@@ -87,6 +87,9 @@ sub _init {
           || ThrowCodeError('param_must_be_numeric',
                             {function => $class . '::_init'});
 
+        # Too large integers make PostgreSQL crash.
+        return if $id > MAX_INT_32;
+
         $object = $dbh->selectrow_hashref(qq{
             SELECT $columns FROM $table
              WHERE $id_field = ?}, undef, $id);
@@ -165,6 +168,8 @@ sub new_from_list {
         detaint_natural($id) ||
             ThrowCodeError('param_must_be_numeric',
                           {function => $class . '::new_from_list'});
+        # Too large integers make PostgreSQL crash.
+        next if $id > MAX_INT_32;
         push(@detainted_ids, $id);
     }
     # We don't do $invocant->match because some classes have

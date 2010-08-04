@@ -160,6 +160,7 @@ use Memoize;
 
     MAX_TOKEN_AGE
     MAX_LOGINCOOKIE_AGE
+    MAX_SUDO_TOKEN_AGE
     MAX_LOGIN_ATTEMPTS
     LOGIN_LOCKOUT_INTERVAL
     MAX_STS_AGE
@@ -415,6 +416,8 @@ use constant TIMETRACKING_FIELDS =>
 use constant MAX_TOKEN_AGE => 3;
 # How many days a logincookie will remain valid if not used.
 use constant MAX_LOGINCOOKIE_AGE => 30;
+# How many seconds (default is 6 hours) a sudo cookie remains valid.
+use constant MAX_SUDO_TOKEN_AGE => 21600;
 
 # Maximum failed logins to lock account for this IP
 use constant MAX_LOGIN_ATTEMPTS => 5;

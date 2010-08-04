@@ -141,6 +141,7 @@ use File::Basename;
 
     MAX_TOKEN_AGE
     MAX_LOGINCOOKIE_AGE
+    MAX_SUDO_TOKEN_AGE
 
     SAFE_PROTOCOLS
 
@@ -356,6 +357,8 @@ use constant FIELD_TYPE_DATETIME  => 5;
 use constant MAX_TOKEN_AGE => 3;
 # How many days a logincookie will remain valid if not used.
 use constant MAX_LOGINCOOKIE_AGE => 30;
+# How many seconds (default is 6 hours) a sudo cookie remains valid.
+use constant MAX_SUDO_TOKEN_AGE => 21600;
 
 # Protocols which are considered as safe.
 use constant SAFE_PROTOCOLS => ('afs', 'cid', 'ftp', 'gopher', 'http', 'https',

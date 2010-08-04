@@ -1457,6 +1457,22 @@
       [% END %]
     [% END %]
 
+  [% ELSIF error == "sudo_invalid_cookie" %]
+    [% title = "Invalid Sudo Cookie" %]
+    Your sudo cookie is invalid. Either it expired or you didn't start
+    a sudo session correctly. Refresh the page or load another page
+    to continue what you are doing as yourself.
+
+  [% ELSIF error == "sudo_illegal_action" %]
+    [% title = "Impersonation Not Authorized" %]
+    [% IF NOT sudoer.in_group("bz_sudoers") %]
+      You are not allowed to impersonate users.
+    [% ELSIF target_user AND target_user.in_group("bz_sudo_protect") %]
+      You are not allowed to impersonate [% target_user.identity FILTER html %].
+    [% ELSE %]
+      The user you tried to impersonate doesn't exist.
+    [% END %]
+
   [% ELSIF error == "sudo_in_progress" %]
     [% title = "Session In Progress" %]
     A sudo session (impersonating [% target FILTER html %]) is in progress.  

@@ -266,16 +266,23 @@ sub classification_id { return $_[0]->{'classification_id'}; }
 ###############################
 
 sub check_product {
-    my ($product_name) = @_;
+    my ($product_name, $check_can_access) = @_;
 
-    unless ($product_name) {
-        ThrowUserError('product_not_specified');
-    }
+    $product_name || ThrowUserError('product_not_specified');
     my $product = new Bugzilla::Product({name => $product_name});
-    unless ($product) {
-        ThrowUserError('product_doesnt_exist',
-                       {'product' => $product_name});
+    if (!$product) {
+        if ($check_can_access) {
+            ThrowUserError('product_access_denied', { product => $product_name });
+        }
+        else {
+            ThrowUserError('product_doesnt_exist', { product => $product_name });
+        }
     }
+
+    if ($check_can_access && !Bugzilla->user->can_access_product($product->name)) {
+        ThrowUserError('product_access_denied', { product => $product_name });
+    }
+
     return $product;
 }
 
@@ -451,12 +458,14 @@ than calling those accessors on every item in the array individually.
 This function is not exported, so must be called like 
 C<Bugzilla::Product::preload($products)>.
 
-=item C<check_product($product_name)>
+=item C<check_product($product_name, $check_can_access)>
 
  Description: Checks if the product name was passed in and if is a valid
               product.
 
  Params:      $product_name - String with a product name.
+              $check_can_access - (optional) If set to true, the function
+              will also make sure that the user can access the product.
 
  Returns:     Bugzilla::Product object.
 

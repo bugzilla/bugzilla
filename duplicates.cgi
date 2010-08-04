@@ -86,7 +86,9 @@ my @buglist = (split(/[:,]/, formvalue("bug_id")));
 
 # Make sure all products are valid.
 foreach my $p (@query_products) {
-    Bugzilla::Product::check_product($p);
+    # The second argument is set to true so that an error
+    # is thrown if the product is not accessible by the user.
+    Bugzilla::Product::check_product($p, 1);
 }
 
 # Small backwards-compatibility hack, dated 2002-04-10.

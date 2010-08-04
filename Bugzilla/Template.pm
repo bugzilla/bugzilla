@@ -267,21 +267,15 @@ sub get_attachment_link {
     my ($attachid, $link_text) = @_;
     my $dbh = Bugzilla->dbh;
 
-    detaint_natural($attachid)
-      || die "get_attachment_link() called with non-integer attachment number";
+    my $attachment = new Bugzilla::Attachment($attachid);
 
-    my ($bugid, $isobsolete, $desc, $is_patch) =
-        $dbh->selectrow_array('SELECT bug_id, isobsolete, description, ispatch
-                               FROM attachments WHERE attach_id = ?',
-                               undef, $attachid);
-
-    if ($bugid) {
+    if ($attachment) {
         my $title = "";
         my $className = "";
-        if (Bugzilla->user->can_see_bug($bugid)) {
-            $title = $desc;
+        if (Bugzilla->user->can_see_bug($attachment->bug_id)) {
+            $title = $attachment->description;
         }
-        if ($isobsolete) {
+        if ($attachment->isobsolete) {
             $className = "bz_obsolete";
         }
         # Prevent code injection in the title.
@@ -293,7 +287,7 @@ sub get_attachment_link {
         # If the attachment is a patch, try to link to the diff rather
         # than the text, by default.
         my $patchlink = "";
-        if ($is_patch and Bugzilla->feature('patch_viewer')) {
+        if ($attachment->ispatch and Bugzilla->feature('patch_viewer')) {
             $patchlink = '&amp;action=diff';
         }
 

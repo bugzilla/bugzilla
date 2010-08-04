@@ -255,8 +255,8 @@ sub get_attachment_link {
     my ($attachid, $link_text) = @_;
     my $dbh = Bugzilla->dbh;
 
-    detaint_natural($attachid)
-      || die "get_attachment_link() called with non-integer attachment number";
+    (detaint_natural($attachid) && $attachid <= MAX_INT_32)
+      || return $link_text;
 
     my ($bugid, $isobsolete, $desc) =
         $dbh->selectrow_array('SELECT bug_id, isobsolete, description
@@ -304,6 +304,7 @@ sub get_bug_link {
     }
     my $quote_bug_num = html_quote($bug_num);
     detaint_natural($bug_num) || return "&lt;invalid bug number: $quote_bug_num&gt;";
+    ($bug_num <= MAX_INT_32) || return $link_text;
 
     my ($bug_alias, $bug_state, $bug_res, $bug_desc) =
         $dbh->selectrow_array('SELECT bugs.alias, bugs.bug_status, bugs.resolution, bugs.short_desc

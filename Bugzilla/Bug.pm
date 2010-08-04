@@ -883,7 +883,8 @@ sub update {
     # back, this change will *not* be rolled back. As we expect rollbacks
     # to be extremely rare, that is OK for us.
     $self->_sync_fulltext()
-        if $self->{added_comments} || $changes->{short_desc};
+        if $self->{added_comments} || $changes->{short_desc}
+           || $self->{comment_isprivate};
 
     # Remove obsolete internal variables.
     delete $self->{'_old_assigned_to'};

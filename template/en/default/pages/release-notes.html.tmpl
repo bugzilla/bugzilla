@@ -61,6 +61,64 @@
 
 <h2 id="v36_point">Updates in this 3.6.x Release</h2>
 
+<h3>3.6.2</h3>
+
+<p>This release fixes various security issues. See the
+  <a href="http://www.bugzilla.org/security/3.2.7/">Security Advisory</a>
+  for details.</p>
+
+<p>In addition, the following important fixes/changes have been made in
+  this release:</p>
+
+<ul>
+  <li>[% terms.Bugzilla %] installations running on older versions of IIS
+    will no longer experience the "Undef to trick_taint" errors that would
+    sometimes occur.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=521416">[% terms.Bug %] 521416</a>)
+  </li>
+  <li>Email notifications where missing the dates that comments were made.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=578003">[% terms.Bug %] 578003</a>)
+  </li>
+  <li>Putting a phrase in quotes in the Quicksearch box now works properly,
+    again.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=578494">[% terms.Bug %] 578494</a>
+    and <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=553884">[% terms.Bug %] 553884</a>)
+  </li>
+  <li>Quicksearch was usually (incorrectly) being limited to 200 results.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=581622">[% terms.Bug %] 581622</a>)
+  </li>
+  <li>On Windows, <kbd>install-module.pl</kbd> can now properly install
+    DateTime and certain other Perl modules that didn't install properly
+    before.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=576105">[% terms.Bug %] 576105</a>)
+  </li>
+  <li>Searching "keywords" for "contains none of the words" or "does not
+    match regular expression" now works properly.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=562014">[% terms.Bug %] 562014</a>)
+  </li>
+  <li>Doing <kbd>collectstats.pl --regenerate</kbd> now works on installations
+    using PostgreSQL.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=577058">[% terms.Bug %] 577058</a>)
+  </li>
+  <li>The "Field Values" administrative control panel was sometimes denying
+    admins the ability to delete field values when there was no reason
+    to deny the deletion.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=577054">[% terms.Bug %] 577054</a>)
+  </li>
+  <li>Eliminate the "uninitialized value" warnings that would happen when
+    editing a product's components.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=576911">[% terms.Bug %] 576911</a>)
+  </li>
+  <li>The updating of bugs_fulltext that happens during 
+    <kbd>checksetup.pl</kbd> for upgrades to 3.6 should now be MUCH faster.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=577754">[% terms.Bug %] 577754</a>)
+  </li>
+  <li><kbd>email_in.pl</kbd> was not allowing the setting of time-tracking
+    fields via inbound emails.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=583622">[% terms.Bug %] 583622</a>)
+  </li>
+</ul>
+
 <h3>3.6.1</h3>
 
 <p>This release fixes two security issues. See the

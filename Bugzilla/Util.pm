@@ -39,8 +39,7 @@ use base qw(Exporter);
                              do_ssl_redirect_if_required use_attachbase
                              diff_arrays on_main_db
                              trim wrap_hard wrap_comment find_wrap_point
-                             format_time format_time_decimal validate_date
-                             validate_time datetime_from
+                             format_time validate_date validate_time datetime_from
                              file_mod_time is_7bit_clean
                              bz_crypt generate_random_password
                              validate_email_syntax clean_text
@@ -464,18 +463,6 @@ sub datetime_from {
     # or the user's timezone if none is given.
     $dt->set_time_zone($timezone || Bugzilla->user->timezone);
     return $dt;
-}
-
-sub format_time_decimal {
-    my ($time) = (@_);
-
-    my $newtime = sprintf("%.2f", $time);
-
-    if ($newtime =~ /0\Z/) {
-        $newtime = sprintf("%.1f", $time);
-    }
-
-    return $newtime;
 }
 
 sub file_mod_time {
@@ -934,11 +921,6 @@ is used, as defined in his preferences.
 
 This routine is mainly called from templates to filter dates, see
 "FILTER time" in L<Bugzilla::Template>.
-
-=item C<format_time_decimal($time)>
-
-Returns a number with 2 digit precision, unless the last digit is a 0. Then it 
-returns only 1 digit precision.
 
 =item C<datetime_from($time, $timezone)>
 

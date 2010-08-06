@@ -28,6 +28,7 @@
 #                 Gervase Markham <gerv@gerv.net>
 #                 Byron Jones <bugzilla@glob.com.au>
 #                 Reed Loden <reed@reedloden.com>
+#                 Frédéric Buclin <LpSolit@gmail.com>
 
 use strict;
 
@@ -38,57 +39,17 @@ use Bugzilla::User;
 use Bugzilla::Constants;
 use Bugzilla::Util;
 use Bugzilla::Bug;
-use Bugzilla::Classification;
-use Bugzilla::Product;
-use Bugzilla::Component;
-use Bugzilla::Status;
+use Bugzilla::Comment;
 use Bugzilla::Mailer;
 use Bugzilla::Hook;
 
 use Date::Parse;
 use Date::Format;
-
-use constant FORMAT_TRIPLE => "%19s|%-28s|%-28s";
-use constant FORMAT_3_SIZE => [19,28,28];
-use constant FORMAT_DOUBLE => "%19s %-55s";
-use constant FORMAT_2_SIZE => [19,55];
+use Scalar::Util qw(blessed);
+use List::MoreUtils qw(uniq);
 
 use constant BIT_DIRECT    => 1;
 use constant BIT_WATCHING  => 2;
-
-# We use this instead of format because format doesn't deal well with
-# multi-byte languages.
-sub multiline_sprintf {
-    my ($format, $args, $sizes) = @_;
-    my @parts;
-    my @my_sizes = @$sizes; # Copy this so we don't modify the input array.
-    foreach my $string (@$args) {
-        my $size = shift @my_sizes;
-        my @pieces = split("\n", wrap_hard($string, $size));
-        push(@parts, \@pieces);
-    }
-
-    my $formatted;
-    while (1) {
-        # Get the first item of each part.
-        my @line = map { shift @$_ } @parts;
-        # If they're all undef, we're done.
-        last if !grep { defined $_ } @line;
-        # Make any single undef item into ''
-        @line = map { defined $_ ? $_ : '' } @line;
-        # And append a formatted line
-        $formatted .= sprintf($format, @line);
-        # Remove trailing spaces, or they become lots of =20's in 
-        # quoted-printable emails.
-        $formatted =~ s/\s+$//;
-        $formatted .= "\n";
-    }
-    return $formatted;
-}
-
-sub three_columns {
-    return multiline_sprintf(FORMAT_TRIPLE, \@_, FORMAT_3_SIZE);
-}
 
 sub relationships {
     my $ref = RELATIONSHIPS;
@@ -143,22 +104,26 @@ sub Send {
             push(@ccs, Bugzilla::User->check($cc));
         }
     }
-    
-    my ($diffparts, $changedfields, $diffs) =
-      $params->{dep_only} ? ([], [], []) : _get_diffs($bug, $end);
 
-    if ($params->{dep_only} && $start) {
-        my $blocker_id = $params->{blocker}->id;
-        my $deptext =
-          "\nBug " . $bug->id . " depends on bug $blocker_id, which changed state.\n\n" .
-          "Bug $blocker_id Summary: " . $params->{blocker}->short_desc . "\n" .
-          correct_urlbase() . "show_bug.cgi?id=$blocker_id\n\n";
-        $deptext .= three_columns("What    ", "Old Value", "New Value");
-        $deptext .= ('-' x 76) . "\n";
-        $deptext .= three_columns('Status', @{$params->{changes}->{bug_status}});
-        $deptext .= three_columns('Resolution', @{$params->{changes}->{resolution}});
+    my @diffs;
+    if (!$start) {
+        @diffs = _get_new_bugmail_fields($bug);
+    }
 
-        push(@$diffparts, {text => $deptext});
+    if ($params->{dep_only}) {
+        push(@diffs, { field_name => 'bug_status',
+                       old => $params->{changes}->{bug_status}->[0],
+                       new => $params->{changes}->{bug_status}->[1],
+                       login_name => $changer->login,
+                       blocker => $params->{blocker} },
+                     { field_name => 'resolution',
+                       old => $params->{changes}->{resolution}->[0],
+                       new => $params->{changes}->{resolution}->[1],
+                       login_name => $changer->login,
+                       blocker => $params->{blocker} });
+    }
+    else {
+        push(@diffs, _get_diffs($bug, $end));
     }
 
     my $comments = $bug->comments({ after => $start, to => $end });
@@ -194,24 +159,23 @@ sub Send {
 
     # The last relevant set of people are those who are being removed from 
     # their roles in this change. We get their names out of the diffs.
-    foreach my $ref (@$diffs) {
-        my ($who, $whoname, $what, $when, $old, $new) = (@$ref);
-        if ($old) {
+    foreach my $change (@diffs) {
+        if ($change->{old}) {
             # You can't stop being the reporter, so we don't check that
             # relationship here.
             # Ignore people whose user account has been deleted or renamed.
-            if ($what eq "CC") {
-                foreach my $cc_user (split(/[\s,]+/, $old)) {
+            if ($change->{field_name} eq 'cc') {
+                foreach my $cc_user (split(/[\s,]+/, $change->{old})) {
                     my $uid = login_to_id($cc_user);
                     $recipients{$uid}->{+REL_CC} = BIT_DIRECT if $uid;
                 }
             }
-            elsif ($what eq "QAContact") {
-                my $uid = login_to_id($old);
+            elsif ($change->{field_name} eq 'qa_contact') {
+                my $uid = login_to_id($change->{old});
                 $recipients{$uid}->{+REL_QA} = BIT_DIRECT if $uid;
             }
-            elsif ($what eq "AssignedTo") {
-                my $uid = login_to_id($old);
+            elsif ($change->{field_name} eq 'assigned_to') {
+                my $uid = login_to_id($change->{old});
                 $recipients{$uid}->{+REL_ASSIGNEE} = BIT_DIRECT if $uid;
             }
         }
@@ -251,9 +215,6 @@ sub Send {
     my @sent;
     my @excluded;
 
-    # Only used for headers in bugmail for new bugs
-    my @fields = $start ? () : Bugzilla->get_fields({obsolete => 0, mailhead => 1});
-
     foreach my $user_id (keys %recipients) {
         my %rels_which_want;
         my $sent_mail = 0;
@@ -265,13 +226,12 @@ sub Send {
             # Go through each role the user has and see if they want mail in
             # that role.
             foreach my $relationship (keys %{$recipients{$user_id}}) {
-                if ($user->wants_bug_mail($id,
+                if ($user->wants_bug_mail($bug,
                                           $relationship, 
-                                          $diffs, 
+                                          $start ? \@diffs : [],
                                           $comments,
                                           $params->{dep_only},
-                                          $changer,
-                                          !$start))
+                                          $changer))
                 {
                     $rels_which_want{$relationship} = 
                         $recipients{$user_id}->{$relationship};
@@ -291,27 +251,23 @@ sub Send {
                 $dep_ok = $user->can_see_bug($params->{blocker}->id) ? 1 : 0;
             }
 
-            # Make sure the user isn't in the nomail list, and the insider and 
-            # dep checks passed.
+            # Make sure the user isn't in the nomail list, and the dep check passed.
             if ($user->email_enabled && $dep_ok) {
                 # OK, OK, if we must. Email the user.
                 $sent_mail = sendMail(
                     { to       => $user, 
-                      fields   => \@fields,
                       bug      => $bug,
                       comments => $comments,
-                      is_new   => !$start,
                       delta_ts => $params->{dep_only} ? $end : undef,
                       changer  => $changer,
                       watchers => exists $watching{$user_id} ?
                                   $watching{$user_id} : undef,
-                      diff_parts      => $diffparts,
+                      diffs    => \@diffs,
                       rels_which_want => \%rels_which_want,
-                      changed_fields  => $changedfields,
                     });
             }
         }
-       
+
         if ($sent_mail) {
             push(@sent, $user->login); 
         } 
@@ -336,94 +292,36 @@ sub sendMail {
     my $params = shift;
     
     my $user   = $params->{to};
-    my @fields = @{ $params->{fields} };
     my $bug    = $params->{bug};
     my @send_comments = @{ $params->{comments} };
-    my $isnew   = $params->{is_new};
     my $delta_ts = $params->{delta_ts};
     my $changer = $params->{changer};
     my $watchingRef = $params->{watchers};
-    my @diffparts   = @{ $params->{diff_parts} };
+    my @diffs = @{ $params->{diffs} };
     my $relRef      = $params->{rels_which_want};
-    my @changed_fields = @{ $params->{changed_fields} };
 
-    # Build difftext (the actions) by verifying the user should see them
-    my $difftext = "";
-    my $diffheader = "";
-    my $add_diff;
+    # Only display changes the user is allowed see.
+    my @display_diffs;
 
-    foreach my $diff (@diffparts) {
-        $add_diff = 0;
+    foreach my $diff (@diffs) {
+        my $add_diff = 0;
         
-        if (exists($diff->{'fieldname'}) && 
-            ($diff->{'fieldname'} eq 'estimated_time' ||
-             $diff->{'fieldname'} eq 'remaining_time' ||
-             $diff->{'fieldname'} eq 'work_time' ||
-             $diff->{'fieldname'} eq 'deadline'))
-        {
+        if (grep { $_ eq $diff->{field_name} } TIMETRACKING_FIELDS) {
             $add_diff = 1 if $user->is_timetracker;
-        } elsif ($diff->{'isprivate'} 
-                 && !$user->is_insider)
-        {
-            $add_diff = 0;
-        } else {
+        }
+        elsif (!$diff->{isprivate} || $user->is_insider) {
             $add_diff = 1;
         }
-
-        if ($add_diff) {
-            if (exists($diff->{'header'}) && 
-             ($diffheader ne $diff->{'header'})) {
-                $diffheader = $diff->{'header'};
-                $difftext .= $diffheader;
-            }
-            $difftext .= $diff->{'text'};
-        }
+        push(@display_diffs, $diff) if $add_diff;
     }
 
     if (!$user->is_insider) {
         @send_comments = grep { !$_->is_private } @send_comments;
     }
 
-    if ($difftext eq "" && !scalar(@send_comments) && !$isnew) {
+    if (!scalar(@display_diffs) && !scalar(@send_comments)) {
       # Whoops, no differences!
       return 0;
-    }
-
-    my $diffs = $difftext;
-    # Remove extra newlines.
-    $diffs =~ s/^\n+//s; $diffs =~ s/\n+$//s;
-    if ($isnew) {
-        my $head = "";
-        foreach my $field (@fields) {
-            my $name = $field->name;
-            my $value = $bug->$name;
-
-            if (ref $value eq 'ARRAY') {
-                $value = join(', ', @$value);
-            }
-            elsif (ref $value && $value->isa('Bugzilla::User')) {
-                $value = $value->login;
-            }
-            elsif (ref $value && $value->isa('Bugzilla::Object')) {
-                $value = $value->name;
-            }
-            elsif ($name eq 'estimated_time') {
-                $value = ($value == 0) ? 0 : format_time_decimal($value);
-            }
-            elsif ($name eq 'deadline') {
-                $value = time2str("%Y-%m-%d", str2time($value)) if $value;
-            }
-
-            # If there isn't anything to show, don't include this header.
-            next unless $value;
-            # Only send estimated_time if it is enabled and the user is in the group.
-            if (($name ne 'estimated_time' && $name ne 'deadline') || $user->is_timetracker) {
-                my $desc = $field->description;
-                $head .= multiline_sprintf(FORMAT_DOUBLE, ["$desc:", $value],
-                                           FORMAT_2_SIZE);
-            }
-        }
-        $diffs = $head . ($difftext ? "\n\n" : "") . $diffs;
     }
 
     my (@reasons, @reasons_watch);
@@ -440,19 +338,18 @@ sub sendMail {
     push @watchingrel, map { user_id_to_login($_) } @$watchingRef;
 
     my $vars = {
-        isnew => $isnew,
         delta_ts => $delta_ts,
         to_user => $user,
         bug => $bug,
-        changedfields => \@changed_fields,
         reasons => \@reasons,
         reasons_watch => \@reasons_watch,
         reasonsheader => join(" ", @headerrel),
         reasonswatchheader => join(" ", @watchingrel),
         changer => $changer,
-        diffs => $diffs,
+        diffs => \@display_diffs,
+        changedfields => [uniq map { $_->{field_name} } @display_diffs],
         new_comments => \@send_comments,
-        threadingmarker => build_thread_marker($bug->id, $user->id, $isnew),
+        threadingmarker => build_thread_marker($bug->id, $user->id, !$bug->lastdiffed),
     };
 
     my $msg;
@@ -478,9 +375,9 @@ sub _get_diffs {
     }
 
     my $diffs = $dbh->selectall_arrayref(
-           "SELECT profiles.login_name, profiles.realname, fielddefs.description,
-                   bugs_activity.bug_when, bugs_activity.removed,
-                   bugs_activity.added, bugs_activity.attach_id, fielddefs.name,
+           "SELECT profiles.login_name, profiles.realname, fielddefs.name AS field_name,
+                   bugs_activity.bug_when, bugs_activity.removed AS old,
+                   bugs_activity.added AS new, bugs_activity.attach_id,
                    bugs_activity.comment_id
               FROM bugs_activity
         INNER JOIN fielddefs
@@ -489,50 +386,58 @@ sub _get_diffs {
                 ON profiles.userid = bugs_activity.who
              WHERE bugs_activity.bug_id = ?
                    $when_restriction
-          ORDER BY bugs_activity.bug_when", undef, @args);
+          ORDER BY bugs_activity.bug_when", {Slice=>{}}, @args);
 
-    my $difftext = "";
-    my $diffheader = "";
-    my @diffparts;
-    my $lastwho = "";
-    my $fullwho;
-    my @changedfields;
-    foreach my $ref (@$diffs) {
-        my ($who, $whoname, $what, $when, $old, $new, $attachid, $fieldname, $comment_id) = @$ref;
-        my $diffpart = {};
-        if ($who ne $lastwho) {
-            $lastwho = $who;
-            $fullwho = $whoname ? "$whoname <$who>" : $who;
-            $diffheader = "\n$fullwho changed:\n\n";
-            $diffheader .= three_columns("What    ", "Removed", "Added");
-            $diffheader .= ('-' x 76) . "\n";
-        }
-        $what =~ s/^(Attachment )?/Attachment #$attachid / if $attachid;
-        if( $fieldname eq 'estimated_time' ||
-            $fieldname eq 'remaining_time' ) {
-            $old = format_time_decimal($old);
-            $new = format_time_decimal($new);
-        }
-        if ($attachid) {
-            ($diffpart->{'isprivate'}) = $dbh->selectrow_array(
+    foreach my $diff (@$diffs) {
+        if ($diff->{attach_id}) {
+            $diff->{isprivate} = $dbh->selectrow_array(
                 'SELECT isprivate FROM attachments WHERE attach_id = ?',
-                undef, ($attachid));
-        }
-        if ($fieldname eq 'longdescs.isprivate') {
-            my $comment = Bugzilla::Comment->new($comment_id);
-            my $comment_num = $comment->count;
-            $what =~ s/^(Comment )?/Comment #$comment_num /;
-            $diffpart->{'isprivate'} = $new;
-        }
-        $difftext = three_columns($what, $old, $new);
-        $diffpart->{'header'} = $diffheader;
-        $diffpart->{'fieldname'} = $fieldname;
-        $diffpart->{'text'} = $difftext;
-        push(@diffparts, $diffpart);
-        push(@changedfields, $what);
+                undef, $diff->{attach_id});
+         }
+         if ($diff->{field_name} eq 'longdescs.isprivate') {
+             my $comment = Bugzilla::Comment->new($diff->{comment_id});
+             $diff->{num} = $comment->count;
+             $diff->{isprivate} = $diff->{new};
+         }
     }
 
-    return (\@diffparts, \@changedfields, $diffs);
+    return @$diffs;
+}
+
+sub _get_new_bugmail_fields {
+    my $bug = shift;
+    my @fields = Bugzilla->get_fields({obsolete => 0, mailhead => 1});
+    my @diffs;
+
+    foreach my $field (@fields) {
+        my $name = $field->name;
+        my $value = $bug->$name;
+
+        if (ref $value eq 'ARRAY') {
+            $value = join(', ', @$value);
+        }
+        elsif (blessed($value) && $value->isa('Bugzilla::User')) {
+            $value = $value->login;
+        }
+        elsif (blessed($value) && $value->isa('Bugzilla::Object')) {
+            $value = $value->name;
+        }
+        elsif ($name eq 'estimated_time') {
+            # "0.00" (which is what we get from the DB) is true,
+            # so we explicitly do a numerical comparison with 0.
+            $value = 0 if $value == 0;
+        }
+        elsif ($name eq 'deadline') {
+            $value = time2str("%Y-%m-%d", str2time($value)) if $value;
+        }
+
+        # If there isn't anything to show, don't include this header.
+        next unless $value;
+
+        push(@diffs, {field_name => $name, new => $value});
+    }
+
+    return @diffs;
 }
 
 1;

@@ -61,6 +61,11 @@ use Scalar::Util qw(blessed);
 
 use base qw(Template);
 
+use constant FORMAT_TRIPLE => '%19s|%-28s|%-28s';
+use constant FORMAT_3_SIZE => [19,28,28];
+use constant FORMAT_DOUBLE => '%19s %-55s';
+use constant FORMAT_2_SIZE => [19,55];
+
 # Convert the constants in the Bugzilla::Constants module into a hash we can
 # pass to the template object for reflection into its "constants" namespace
 # (which is like its "variables" namespace, but for constants).  To do so, we
@@ -350,6 +355,36 @@ sub get_bug_link {
         $linkval .= "#c" . $options->{comment_num};
     }
     return qq{$pre<a href="$linkval" title="$title">$link_text</a>$post};
+}
+
+# We use this instead of format because format doesn't deal well with
+# multi-byte languages.
+sub multiline_sprintf {
+    my ($format, $args, $sizes) = @_;
+    my @parts;
+    my @my_sizes = @$sizes; # Copy this so we don't modify the input array.
+    foreach my $string (@$args) {
+        my $size = shift @my_sizes;
+        my @pieces = split("\n", wrap_hard($string, $size));
+        push(@parts, \@pieces);
+    }
+
+    my $formatted;
+    while (1) {
+        # Get the first item of each part.
+        my @line = map { shift @$_ } @parts;
+        # If they're all undef, we're done.
+        last if !grep { defined $_ } @line;
+        # Make any single undef item into ''
+        @line = map { defined $_ ? $_ : '' } @line;
+        # And append a formatted line
+        $formatted .= sprintf($format, @line);
+        # Remove trailing spaces, or they become lots of =20's in
+        # quoted-printable emails.
+        $formatted =~ s/\s+$//;
+        $formatted .= "\n";
+    }
+    return $formatted;
 }
 
 #####################
@@ -832,6 +867,14 @@ sub create {
 
             # Function to create date strings
             'time2str' => \&Date::Format::time2str,
+
+            # Fixed size column formatting for bugmail.
+            'format_columns' => sub {
+                my $cols = shift;
+                my $format = ($cols == 3) ? FORMAT_TRIPLE : FORMAT_DOUBLE;
+                my $col_size = ($cols == 3) ? FORMAT_3_SIZE : FORMAT_2_SIZE;
+                return multiline_sprintf($format, \@_, $col_size);
+            },
 
             # Generic linear search function
             'lsearch' => sub {

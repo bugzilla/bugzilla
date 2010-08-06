@@ -1492,35 +1492,33 @@ sub match_field {
 
 }
 
-# Changes in some fields automatically trigger events. The 'field names' are
-# from the fielddefs table. We really should be using proper field names 
-# throughout.
+# Changes in some fields automatically trigger events. The field names are
+# from the fielddefs table.
 our %names_to_events = (
-    'Resolution'             => EVT_OPENED_CLOSED,
-    'Keywords'               => EVT_KEYWORD,
-    'CC'                     => EVT_CC,
-    'Severity'               => EVT_PROJ_MANAGEMENT,
-    'Priority'               => EVT_PROJ_MANAGEMENT,
-    'Status'                 => EVT_PROJ_MANAGEMENT,
-    'Target Milestone'       => EVT_PROJ_MANAGEMENT,
-    'Attachment description' => EVT_ATTACHMENT_DATA,
-    'Attachment mime type'   => EVT_ATTACHMENT_DATA,
-    'Attachment is patch'    => EVT_ATTACHMENT_DATA,
-    'Depends on'             => EVT_DEPEND_BLOCK,
-    'Blocks'                 => EVT_DEPEND_BLOCK);
+    'resolution'              => EVT_OPENED_CLOSED,
+    'keywords'                => EVT_KEYWORD,
+    'cc'                      => EVT_CC,
+    'bug_severity'            => EVT_PROJ_MANAGEMENT,
+    'priority'                => EVT_PROJ_MANAGEMENT,
+    'bug_status'              => EVT_PROJ_MANAGEMENT,
+    'target_milestone'        => EVT_PROJ_MANAGEMENT,
+    'attachments.description' => EVT_ATTACHMENT_DATA,
+    'attachments.mimetype'    => EVT_ATTACHMENT_DATA,
+    'attachments.ispatch'     => EVT_ATTACHMENT_DATA,
+    'dependson'               => EVT_DEPEND_BLOCK,
+    'blocked'                 => EVT_DEPEND_BLOCK);
 
 # Returns true if the user wants mail for a given bug change.
 # Note: the "+" signs before the constants suppress bareword quoting.
 sub wants_bug_mail {
     my $self = shift;
-    my ($bug_id, $relationship, $fieldDiffs, $comments, $dep_mail,
-        $changer, $bug_is_new) = @_;
+    my ($bug, $relationship, $fieldDiffs, $comments, $dep_mail, $changer) = @_;
 
     # Make a list of the events which have happened during this bug change,
     # from the point of view of this user.    
     my %events;    
-    foreach my $ref (@$fieldDiffs) {
-        my ($who, $whoname, $fieldName, $when, $old, $new) = @$ref;
+    foreach my $change (@$fieldDiffs) {
+        my $fieldName = $change->{field_name};
         # A change to any of the above fields sets the corresponding event
         if (defined($names_to_events{$fieldName})) {
             $events{$names_to_events{$fieldName}} = 1;
@@ -1532,16 +1530,16 @@ sub wants_bug_mail {
 
         # If the user is in a particular role and the value of that role
         # changed, we need the ADDED_REMOVED event.
-        if (($fieldName eq "AssignedTo" && $relationship == REL_ASSIGNEE) ||
-            ($fieldName eq "QAContact" && $relationship == REL_QA)) 
+        if (($fieldName eq "assigned_to" && $relationship == REL_ASSIGNEE) ||
+            ($fieldName eq "qa_contact" && $relationship == REL_QA))
         {
             $events{+EVT_ADDED_REMOVED} = 1;
         }
         
-        if ($fieldName eq "CC") {
+        if ($fieldName eq "cc") {
             my $login = $self->login;
-            my $inold = ($old =~ /^(.*,\s*)?\Q$login\E(,.*)?$/);
-            my $innew = ($new =~ /^(.*,\s*)?\Q$login\E(,.*)?$/);
+            my $inold = ($change->{old} =~ /^(.*,\s*)?\Q$login\E(,.*)?$/);
+            my $innew = ($change->{new} =~ /^(.*,\s*)?\Q$login\E(,.*)?$/);
             if ($inold != $innew)
             {
                 $events{+EVT_ADDED_REMOVED} = 1;
@@ -1549,7 +1547,7 @@ sub wants_bug_mail {
         }
     }
 
-    if ($bug_is_new) {
+    if (!$bug->lastdiffed) {
         # Notify about new bugs.
         $events{+EVT_BUG_CREATED} = 1;
 
@@ -1589,19 +1587,8 @@ sub wants_bug_mail {
         $wants_mail &= $self->wants_mail([EVT_CHANGED_BY_ME], $relationship);
     }    
     
-    if ($wants_mail) {
-        my $dbh = Bugzilla->dbh;
-        # We don't create a Bug object from the bug_id here because we only
-        # need one piece of information, and doing so (as of 2004-11-23) slows
-        # down bugmail sending by a factor of 2. If Bug creation was more
-        # lazy, this might not be so bad.
-        my $bug_status = $dbh->selectrow_array('SELECT bug_status
-                                                FROM bugs WHERE bug_id = ?',
-                                                undef, $bug_id);
-
-        if ($bug_status eq "UNCONFIRMED") {
-            $wants_mail &= $self->wants_mail([EVT_UNCONFIRMED], $relationship);
-        }
+    if ($wants_mail && $bug->bug_status eq 'UNCONFIRMED') {
+        $wants_mail &= $self->wants_mail([EVT_UNCONFIRMED], $relationship);
     }
     
     return $wants_mail;

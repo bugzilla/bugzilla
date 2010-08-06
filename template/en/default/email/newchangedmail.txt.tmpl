@@ -16,10 +16,13 @@
   # Rights Reserved.
   #
   # Contributor(s): André Batosti <batosti@async.com.br>
+  #                 Frédéric Buclin <LpSolit@gmail.com>
   #%]
 
-[% PROCESS "global/variables.none.tmpl" %]
+[% PROCESS "global/field-descs.none.tmpl" %]
 [% PROCESS "global/reason-descs.none.tmpl" %]
+
+[% isnew = bug.lastdiffed ? 0 : 1 %]
 
 From: [% Param('mailfrom') %]
 To: [% to_user.email %]
@@ -43,11 +46,8 @@ X-Bugzilla-Target-Milestone: [% bug.target_milestone %]
 X-Bugzilla-Changed-Fields: [% changedfields.join(" ") %]
 [%+ threadingmarker %]
 
-[%+ urlbase %]show_bug.cgi?id=[% bug.id %]
-[%- IF diffs %]
+[%+ PROCESS generate_diffs -%]
 
-[%+ diffs %]
-[% END -%]
 [% FOREACH comment = new_comments %]
 
 [%- IF comment.count %]
@@ -68,3 +68,52 @@ Configure [% terms.bug %]mail: [% urlbase %]userprefs.cgi?tab=email
        IF watch_reason_descs.$reason %]
 [% END %]
 [%+ reason_lines.join("\n") %]
+
+[% BLOCK generate_diffs %]
+  [% urlbase %]show_bug.cgi?id=[% bug.id %]
+
+[%+ last_changer = "" %]
+  [% FOREACH change = diffs %]
+    [% IF !isnew && change.login_name != last_changer %]
+      [% last_changer = change.login_name %]
+      [% IF change.blocker %]
+        [% terms.Bug %] [%+ bug.id %] depends on [% terms.bug %] [%+ change.blocker.id %], which changed state.
+
+[%+ terms.Bug %] [%+ change.blocker.id %] Summary: [% change.blocker.short_desc %]
+[%+ urlbase %]show_bug.cgi?id=[% change.blocker.id %]
+      [% ELSE %]
+        [%~ IF change.realname %]
+          [% change.realname _ " <" _ change.login_name _ ">" %]
+        [% ELSE %]
+          [% change.login_name %]
+        [% END %] changed:
+      [% END %]
+
+           What    |Removed                     |Added
+----------------------------------------------------------------------------
+[%+ END %][%# End of IF. This indentation is intentional! ~%]
+
+    [% field_label = field_descs.${change.field_name} %]
+    [% old_value = display_value(change.field_name, change.old) %]
+    [% new_value = display_value(change.field_name, change.new) %]
+
+    [%~ IF change.field_name == "estimated_time" || change.field_name == "remaining_time" %]
+      [% old_value = old_value FILTER format('%.2f') %]
+      [% new_value = new_value FILTER format('%.2f') %]
+    [% END %]
+
+    [%~ IF change.attach_id %]
+      [% field_label = field_label.replace('^(Attachment )?', "Attachment #${change.attach_id} ") %]
+    [% END %]
+
+    [%~ IF change.field_name == 'longdescs.isprivate' %]
+      [% field_label = field_label.replace('^(Comment )?', "Comment #${change.num} ") %]
+    [% END %]
+
+    [%~ IF isnew %]
+      [% format_columns(2, field_label _ ":", new_value) -%]
+    [% ELSE %]
+      [% format_columns(3, field_label, old_value, new_value) -%]
+    [% END %]
+  [% END -%]
+[% END %]

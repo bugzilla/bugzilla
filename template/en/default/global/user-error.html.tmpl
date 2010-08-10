@@ -574,7 +574,7 @@
   [% ELSIF error == "file_too_large" %]
     [% title = "File Too Large" %]
     The file you are trying to attach is [% filesize FILTER html %] 
-    kilobytes (KB) in size. Non-patch attachments cannot be more than
+    kilobytes (KB) in size. Attachments cannot be more than
     [%+ Param('maxattachmentsize') %] KB. <br>
     We recommend that you store your attachment elsewhere
     [% IF Param("allow_attach_url") %]

@@ -329,17 +329,16 @@ sub get_bug_link {
     # Initialize these variables to be "" so that we don't get warnings
     # if we don't change them below (which is highly likely).
     my ($pre, $title, $post) = ("", "", "");
+    my @css_classes = ("bz_bug_link");
 
     $title = get_text('get_status', { status => $bug->bug_status });
-    if ($bug->bug_status eq 'UNCONFIRMED') {
-        $pre = "<i>";
-        $post = "</i>";
-    }
+
+    push @css_classes, "bz_status_" . css_class_quote($bug->bug_status);
+
     if ($bug->resolution) {
-        $pre .= '<span class="bz_closed">';
+        push @css_classes, "bz_closed";
         $title .= ' ' . get_text('get_resolution',
                                  { resolution => $bug->resolution });
-        $post .= '</span>';
     }
     if (Bugzilla->user->can_see_bug($bug)) {
         $title .= " - " . $bug->short_desc;
@@ -354,6 +353,10 @@ sub get_bug_link {
     if (defined $options->{comment_num}) {
         $linkval .= "#c" . $options->{comment_num};
     }
+
+    $pre  = '<span class="' . join(" ", @css_classes) . '">';
+    $post = '</span>';
+
     return qq{$pre<a href="$linkval" title="$title">$link_text</a>$post};
 }
 

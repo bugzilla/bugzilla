@@ -251,6 +251,18 @@ div#docslinks {
     margin: 0;
 }
 
+/**************************/
+/* Bug links and statuses */
+/**************************/
+
+.bz_bug_link {
+    /* Catch-all if you want common styles for all bug links */
+}
+
+.bz_bug_link .bz_status_UNCONFIRMED {
+    font-style: italic;
+}
+
 .bz_obsolete {
     text-decoration: line-through;
 }

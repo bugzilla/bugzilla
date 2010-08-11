@@ -367,7 +367,7 @@ END
         "The original value of the Summary field was longer than 255"
         . " characters, and so it was truncated during an upgrade."
         . " The original summary was:\n\n##summary##",
-    update_summary_truncating => <<'END',
+    update_summary_truncated => <<'END',
 WARNING: Some of your bugs had summaries longer than 255 characters.
 They have had their original summary copied into a comment, and then
 the summary was truncated to 255 characters. The affected bug numbers were:

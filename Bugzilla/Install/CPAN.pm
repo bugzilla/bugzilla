@@ -191,7 +191,7 @@ sub set_cpan_config {
 
         # If we can't make one, we finally try to use the Bugzilla directory.
         if (!-w $dir) {
-            print "WARNING: Using the Bugzilla directory as the CPAN home.\n";
+            print STDERR install_string('cpan_bugzilla_home'), "\n";
             $dir = "$bzlib/.cpan";
         }
     }

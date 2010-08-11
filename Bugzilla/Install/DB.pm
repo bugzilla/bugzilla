@@ -1279,15 +1279,7 @@ sub _move_quips_into_db {
             $dbh->do("INSERT INTO quips (quip) VALUES (?)", undef, $_);
         }
 
-        print <<EOT;
-
-Quips are now stored in the database, rather than in an external file.
-The quips previously stored in $datadir/comments have been copied into
-the database, and that file has been renamed to $datadir/comments.bak
-You may delete the renamed file once you have confirmed that all your
-quips were moved successfully.
-
-EOT
+        print "\n", install_string('update_quips', { data => $datadir }), "\n";
         $comments->close;
         rename("$datadir/comments", "$datadir/comments.bak")
             || warn "Failed to rename: $!";
@@ -1861,9 +1853,9 @@ sub _remove_spaces_and_commas_from_flagtypes {
                 if (length($tryflagname) > 50) {
                     my $lastchanceflagname = (substr $tryflagname, 0, 47) . '...';
                     if (defined($flagtypes{$lastchanceflagname})) {
-                        print "  ... last attempt as \"$lastchanceflagname\" still failed.'\n",
-                              "Rename the flag by hand and run checksetup.pl again.\n";
-                        die("Bad flag type name $flagname");
+                        print "  ... last attempt as \"$lastchanceflagname\" still failed.'\n";
+                        die install_string('update_flags_bad_name',
+                                           { flag => $flagname }), "\n";
                     }
                     $tryflagname = $lastchanceflagname;
                 }
@@ -2747,12 +2739,7 @@ sub _change_short_desc_from_mediumtext_to_varchar {
                FROM bugs WHERE CHAR_LENGTH(short_desc) > 255');
 
         if (@$long_summary_bugs) {
-            print <<EOT;
-
-WARNING: Some of your bugs had summaries longer than 255 characters.
-They have had their original summary copied into a comment, and then
-the summary was truncated to 255 characters. The affected bug numbers were:
-EOT
+            print "\n", install_string('update_summary_truncated');
             my $comment_sth = $dbh->prepare(
                 'INSERT INTO longdescs (bug_id, who, thetext, bug_when)
                       VALUES (?, ?, ?, NOW())');
@@ -2761,10 +2748,9 @@ EOT
             my @affected_bugs;
             foreach my $bug (@$long_summary_bugs) {
                 my ($bug_id, $summary, $reporter_id) = @$bug;
-                my $summary_comment = "The original summary for this bug"
-                   . " was longer than 255 characters, and so it was truncated"
-                   . " when Bugzilla was upgraded. The original summary was:"
-                   . "\n\n$summary";
+                my $summary_comment =
+                    install_string('update_summary_truncate_comment',
+                                   { summary => $summary });
                 $comment_sth->execute($bug_id, $reporter_id, $summary_comment);
                 my $short_summary = substr($summary, 0, 252) . "...";
                 $desc_sth->execute($short_summary, $bug_id);
@@ -2849,12 +2835,8 @@ sub _move_data_nomail_into_db {
         # If there are any nomail entries remaining, move them to nomail.bad
         # and say something to the user.
         if (scalar(keys %nomail)) {
-            print <<EOT;
-
-WARNING: The following users were listed in data/nomail, but do not
-have an account here. The unmatched entries have been moved
-to $datadir/nomail.bad:
-EOT
+            print "\n", install_string('update_nomail_bad',
+                                       { data => $datadir }), "\n";
             my $nomail_bad = new IO::File("$datadir/nomail.bad", '>>');
             foreach my $unknown_user (keys %nomail) {
                 print "\t$unknown_user\n";
@@ -3281,9 +3263,10 @@ sub _fix_invalid_custom_field_names {
         next if $field->name =~ /^[a-zA-Z0-9_]+$/;
         # The field name is illegal and can break the DB. Kill the field!
         $field->set_obsolete(1);
-        print "Removing custom field '" . $field->name . "' (illegal name)... ";
+        print install_string('update_cf_invalid_name',
+                             { field => $field->name }), "\n";
         eval { $field->remove_from_db(); };
-        print $@ ? "failed:\n$@\n" : "succeeded\n";
+        warn $@ if $@;
     }
 }
 

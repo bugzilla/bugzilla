@@ -316,12 +316,7 @@ sub bz_setup_database {
     my ($innodb_on) = @{$self->selectcol_arrayref(
         q{SHOW VARIABLES LIKE '%have_innodb%'}, {Columns=>[2]})};
     if ($innodb_on ne 'YES') {
-        die <<EOT;
-InnoDB is disabled in your MySQL installation. 
-Bugzilla requires InnoDB to be enabled. 
-Please enable it and then re-run checksetup.pl.
-
-EOT
+        die install_string('mysql_innodb_disabled');
     }
 
 
@@ -423,17 +418,7 @@ EOT
         # We just do the check here since this check is a reliable way
         # of telling that we are upgrading from a version pre-2.20.
         if (grep($_ eq 'bz_schema', $self->bz_table_list_real())) {
-            die("\nYou are upgrading from a version before 2.20, but the"
-              . " bz_schema\ntable already exists. This means that you"
-              . " restored a mysqldump into\nthe Bugzilla database without"
-              . " first dropping the already-existing\nBugzilla database,"
-              . " at some point. Whenever you restore a Bugzilla\ndatabase"
-              . " backup, you must always drop the entire database first.\n\n"
-              . "Please drop your Bugzilla database and restore it from a"
-              . " backup that\ndoes not contain the bz_schema table. If for"
-              . " some reason you cannot\ndo this, you can connect to your"
-              . " MySQL database and drop the bz_schema\ntable, as a last"
-              . " resort.\n");
+            die install_string('bz_schema_exists_before_220');
         }
 
         my $bug_count = $self->selectrow_array("SELECT COUNT(*) FROM bugs");
@@ -447,12 +432,8 @@ EOT
         # If we're going to take longer than 5 minutes, we let the user know
         # and allow them to abort.
         if ($rename_time > 5) {
-            print "\nWe are about to rename old indexes.\n"
-                  . "The estimated time to complete renaming is "
-                  . "$rename_time minutes.\n"
-                  . "You cannot interrupt this action once it has begun.\n"
-                  . "If you would like to cancel, press Ctrl-C now..."
-                  . " (Waiting 45 seconds...)\n\n";
+            print "\n", install_string('mysql_index_renaming',
+                                       { minutes => $rename_time });
             # Wait 45 seconds for them to respond.
             sleep(45) unless Bugzilla->installation_answers->{NO_PAUSE};
         }
@@ -685,36 +666,16 @@ EOT
     my @non_utf8_tables = grep(defined($_->{Collation}) && $_->{Collation} !~ /^utf8/, @$utf_table_status);
     
     if (Bugzilla->params->{'utf8'} && scalar @non_utf8_tables) {
-        print <<EOT;
-
-WARNING: We are about to convert your table storage format to UTF8. This
-         allows Bugzilla to correctly store and sort international characters.
-         However, if you have any non-UTF-8 data in your database,
-         it ***WILL BE DELETED*** by this process. So, before
-         you continue with checksetup.pl, if you have any non-UTF-8
-         data (or even if you're not sure) you should press Ctrl-C now
-         to interrupt checksetup.pl, and run contrib/recode.pl to make all 
-         the data in your database into UTF-8. You should also back up your
-         database before continuing. This will affect every single table
-         in the database, even non-Bugzilla tables.
-
-         If you ever used a version of Bugzilla before 2.22, we STRONGLY
-         recommend that you stop checksetup.pl NOW and run contrib/recode.pl.
-
-EOT
+        print "\n", install_string('mysql_utf8_conversion');
 
         if (!Bugzilla->installation_answers->{NO_PAUSE}) {
             if (Bugzilla->installation_mode == 
                 INSTALLATION_MODE_NON_INTERACTIVE) 
             {
-                print <<EOT;
-         Re-run checksetup.pl in interactive mode (without an 'answers' file)
-         to continue.
-EOT
-                exit;
+                die install_string('continue_without_answers'), "\n";
             }
             else {
-                print "         Press Enter to continue or Ctrl-C to exit...";
+                print "\n         " . install_string('enter_or_ctrl_c');
                 getc;
             }
         }
@@ -1088,4 +1049,5 @@ sub _bz_build_schema_from_disk {
 
     return $schema;
 }
+
 1;

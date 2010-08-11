@@ -31,7 +31,7 @@ package Bugzilla::Install::Localconfig;
 use strict;
 
 use Bugzilla::Constants;
-use Bugzilla::Install::Util qw(bin_loc);
+use Bugzilla::Install::Util qw(bin_loc install_string);
 use Bugzilla::Util qw(generate_random_password);
 
 use Data::Dumper;
@@ -50,169 +50,66 @@ use constant LOCALCONFIG_VARS => (
     {
         name    => 'create_htaccess',
         default => 1,
-        desc    => <<EOT
-# If you are using Apache as your web server, Bugzilla can create .htaccess
-# files for you that will instruct Apache not to serve files that shouldn't
-# be accessed from the web browser (like your local configuration data and non-cgi
-# executable files).  For this to work, the directory your Bugzilla
-# installation is in must be within the jurisdiction of a <Directory> block
-# in the httpd.conf file that has 'AllowOverride Limit' in it.  If it has
-# 'AllowOverride All' or other options with Limit, that's fine.
-# (Older Apache installations may use an access.conf file to store these
-# <Directory> blocks.)
-# If this is set to 1, Bugzilla will create these files if they don't exist.
-# If this is set to 0, Bugzilla will not create these files.
-EOT
     },
     {
         name    => 'webservergroup',
         default => ON_WINDOWS ? '' : 'apache',
-        desc    => q{# Usually, this is the group your web server runs as.
-# If you have a Windows box, ignore this setting.
-# If you have use_suexec switched on below, this is the group Apache switches
-# to in order to run Bugzilla scripts.
-# If you do not have access to the group your scripts will run under,
-# set this to "". If you do set this to "", then your Bugzilla installation
-# will be _VERY_ insecure, because some files will be world readable/writable,
-# and so anyone who can get local access to your machine can do whatever they
-# want. You should only have this set to "" if this is a testing installation
-# and you cannot set this up any other way. YOU HAVE BEEN WARNED!
-# If you set this to anything other than "", you will need to run checksetup.pl
-# as} . ROOT_USER . qq{, or as a user who is a member of the specified group.\n}
     },
     {
         name    => 'use_suexec',
         default => 0,
-        desc    => <<EOT
-# Set this if Bugzilla runs in an Apache SuexecUserGroup environment.
-# (If your web server runs control panel software (cPanel, Plesk or similar),
-# or if your Bugzilla is to run in a shared hosting environment, then you are
-# almost certainly in an Apache SuexecUserGroup environment.)
-# If you have a Windows box, ignore this setting.
-# If set to 0, Bugzilla will set file permissions as tightly as possible.
-# If set to 1, Bugzilla will set file permissions so that it may work in an
-# SuexecUserGroup environment. The difference is that static files (CSS,
-# JavaScript and so on) will receive world read permissions.
-EOT
     },
     {
         name    => 'db_driver',
         default => 'mysql',
-        desc    => <<EOT
-# What SQL database to use. Default is mysql. List of supported databases
-# can be obtained by listing Bugzilla/DB directory - every module corresponds
-# to one supported database and the name corresponds to a driver name.
-EOT
     },
     {
         name    => 'db_host',
-        default => 'localhost',
-        desc    => 
-            "# The DNS name of the host that the database server runs on.\n"
+        default => 'localhost',           
     },
     {
         name    => 'db_name',
         default => 'bugs',
-        desc    => "# The name of the database\n"
     },
     {
         name    => 'db_user',
         default => 'bugs',
-        desc    => "# Who we connect to the database as.\n"
     },
     {
         name    => 'db_pass',
         default => '',
-        desc    => <<EOT
-# Enter your database password here. It's normally advisable to specify
-# a password for your bugzilla database user.
-# If you use apostrophe (') or a backslash (\\) in your password, you'll
-# need to escape it by preceding it with a '\\' character. (\\') or (\\)
-# (Far simpler just not to use those characters.)
-EOT
     },
     {
         name    => 'db_port',
         default => 0,
-        desc    => <<EOT
-# Sometimes the database server is running on a non-standard port. If that's
-# the case for your database server, set this to the port number that your
-# database server is running on. Setting this to 0 means "use the default
-# port for my database server."
-EOT
     },
     {
         name    => 'db_sock',
         default => '',
-        desc    => <<EOT
-# MySQL Only: Enter a path to the unix socket for MySQL. If this is
-# blank, then MySQL's compiled-in default will be used. You probably
-# want that.
-EOT
     },
     {
         name    => 'db_check',
         default => 1,
-        desc    => <<EOT
-# Should checksetup.pl try to verify that your database setup is correct?
-# (with some combinations of database servers/Perl modules/moonphase this
-# doesn't work)
-EOT
     },
     {
         name    => 'index_html',
         default => 0,
-        desc    => <<EOT
-# With the introduction of a configurable index page using the
-# template toolkit, Bugzilla's main index page is now index.cgi.
-# Most web servers will allow you to use index.cgi as a directory
-# index, and many come preconfigured that way, but if yours doesn't
-# then you'll need an index.html file that provides redirection
-# to index.cgi. Setting \$index_html to 1 below will allow
-# checksetup.pl to create one for you if it doesn't exist.
-# NOTE: checksetup.pl will not replace an existing file, so if you
-#       wish to have checksetup.pl create one for you, you must
-#       make sure that index.html doesn't already exist
-EOT
     },
     {
         name    => 'cvsbin',
-        default => \&_get_default_cvsbin,
-        desc    => <<EOT
-# For some optional functions of Bugzilla (such as the pretty-print patch
-# viewer), we need the cvs binary to access files and revisions.
-# Because it's possible that this program is not in your path, you can specify
-# its location here.  Please specify the full path to the executable.
-EOT
+        default => sub { bin_loc('cvs') },
     },
     {
         name    => 'interdiffbin',
-        default => \&_get_default_interdiffbin,
-        desc    => <<EOT
-# For some optional functions of Bugzilla (such as the pretty-print patch
-# viewer), we need the interdiff binary to make diffs between two patches.
-# Because it's possible that this program is not in your path, you can specify
-# its location here.  Please specify the full path to the executable.
-EOT
+        default => sub { bin_loc('interdiff') },
     },
     {
         name    => 'diffpath',
-        default => \&_get_default_diffpath,
-        desc    => <<EOT
-# The interdiff feature needs diff, so we have to have that path.
-# Please specify the directory name only; do not use trailing slash.
-EOT
+        default => sub { dirname(bin_loc('diff')) },
     },
     {
         name    => 'site_wide_secret',
         default => sub { generate_random_password(256) },
-        desc    => <<EOT
-# This secret key is used by your installation for the creation and
-# validation of encrypted tokens to prevent unsolicited changes,
-# such as bug changes. A random string is generated by default.
-# It's very important that this key is kept secret. It also must be
-# very long.
-EOT
     },
 );
 
@@ -229,18 +126,8 @@ sub read_localconfig {
         $s->rdo($filename);
         if ($@ || $!) {
             my $err_msg = $@ ? $@ : $!;
-            die <<EOT;
-An error has occurred while reading your 'localconfig' file.  The text of 
-the error message is:
-
-$err_msg
-
-Please fix the error in your 'localconfig' file. Alternately, rename your
-'localconfig' file, rerun checksetup.pl, and re-enter your answers.
-
-  \$ mv -f localconfig localconfig.old
-  \$ ./checksetup.pl
-EOT
+            die install_string('error_localconfig_read',
+                    { error => $err_msg, localconfig => $filename }), "\n";
         }
 
         my @read_symbols;
@@ -336,15 +223,7 @@ sub update_localconfig {
     }
 
     if (!$localconfig->{'interdiffbin'} && $output) {
-        print <<EOT
-
-OPTIONAL NOTE: If you want to be able to use the 'difference between two
-patches' feature of Bugzilla (which requires the PatchReader Perl module
-as well), you should install patchutils from:
-
-    http://cyberelk.net/tim/patchutils/
-
-EOT
+        print "\n", install_string('patchutils_missing'), "\n";
     }
 
     my @old_vars;
@@ -365,34 +244,28 @@ EOT
         }
         close $old_file;
         my $oldstuff = join(', ', @old_vars);
-        print <<EOT
-
-The following variables are no longer used in $filename, and
-have been moved to $filename_old: $oldstuff
-
-EOT
+        print install_string('lc_old_vars',
+            { localconfig => $filename, old_file => $filename_old,
+              vars => $oldstuff }), "\n";
     }
 
     # Re-write localconfig
     open(my $fh, ">$filename") || die "$filename: $!";
     foreach my $var (LOCALCONFIG_VARS) {
-        print $fh "\n", $var->{desc},
-                  Data::Dumper->Dump([$localconfig->{$var->{name}}],
-                                     ["*$var->{name}"]);
+        my $name = $var->{name};
+        my $desc = install_string("localconfig_$name", { root => ROOT_USER });
+        chomp($desc);
+        # Make the description into a comment.
+        $desc =~ s/^/# /mg;
+        print $fh $desc, "\n",
+                  Data::Dumper->Dump([$localconfig->{$name}],
+                                     ["*$name"]), "\n";
    }
 
     if (@new_vars) {
         my $newstuff = join(', ', @new_vars);
-        print <<EOT;
-
-This version of Bugzilla contains some variables that you may want to 
-change and adapt to your local settings. Please edit the file 
-$filename and rerun checksetup.pl.
-
-The following variables are new to $filename since you last ran
-checksetup.pl:  $newstuff
-
-EOT
+        print "\n", install_string('lc_new_vars',
+            { localconfig => $filename, new_vars => $newstuff }), "\n";
         exit;
     }
 
@@ -400,13 +273,6 @@ EOT
     delete Bugzilla->request_cache->{localconfig};
 
     return { old_vars => \@old_vars, new_vars => \@new_vars };
-}
-
-sub _get_default_cvsbin       { return bin_loc('cvs') }
-sub _get_default_interdiffbin { return bin_loc('interdiff') }
-sub _get_default_diffpath {
-    my $diff_bin = bin_loc('diff');
-    return dirname($diff_bin);
 }
 
 1;

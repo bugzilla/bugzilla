@@ -501,16 +501,19 @@ sub _translate_feature {
 sub check_graphviz {
     my ($output) = @_;
 
-    return 1 if (Bugzilla->params->{'webdotbase'} =~ /^https?:/);
+    my $webdotbase = Bugzilla->params->{'webdotbase'};
+    return 1 if $webdotbase =~ /^https?:/;
 
-    printf("Checking for %15s %-9s ", "GraphViz", "(any)") if $output;
+    my $checking_for = install_string('checking_for');
+    my $any = install_string('any');
+    printf("%s %15s %-9s ", $checking_for, "GraphViz", "($any)") if $output;
 
     my $return = 0;
-    if(-x Bugzilla->params->{'webdotbase'}) {
-        print "ok: found\n" if $output;
+    if(-x $webdotbase) {
+        print install_string('module_ok'), "\n" if $output;
         $return = 1;
     } else {
-        print "not a valid executable: " . Bugzilla->params->{'webdotbase'} . "\n";
+        print install_string('bad_executable', { bin => $webdotbase }), "\n";
     }
 
     my $webdotdir = bz_locations()->{'webdotdir'};
@@ -519,8 +522,8 @@ sub check_graphviz {
         my $htaccess = new IO::File("$webdotdir/.htaccess", 'r') 
             || die "$webdotdir/.htaccess: " . $!;
         if (!grep(/png/, $htaccess->getlines)) {
-            print "Dependency graph images are not accessible.\n";
-            print "delete $webdotdir/.htaccess and re-run checksetup.pl to fix.\n";
+            print STDERR install_string('webdot_bad_htaccess',
+                                        { dir => $webdotdir }), "\n";
         }
         $htaccess->close;
     }

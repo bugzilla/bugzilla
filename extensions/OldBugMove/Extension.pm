@@ -107,7 +107,7 @@ sub object_end_of_set_all {
     my ($self, $args) = @_;
     my $object = $args->{'object'};
 
-    if ($object->isa('Bugzilla::Bug') and _bug_is_moving($object)) {
+    if ($object->isa('Bugzilla::Bug') and Bugzilla->input_params->{'oldbugmove'}) {
         my $new_status = Bugzilla->params->{'duplicate_or_move_bug_status'};
         $object->set_bug_status($new_status, { resolution => 'MOVED' });
     }
@@ -132,7 +132,7 @@ sub _check_bug_resolution {
     my $original_validator = shift;
     my ($invocant, $resolution) = @_;
 
-    if ($resolution eq 'MOVED' and !_bug_is_moving($invocant)) {
+    if ($resolution eq 'MOVED' and !Bugzilla->input_params->{'oldbugmove'}) {
         # MOVED has a special meaning and can only be used when
         # really moving bugs to another installation.
         ThrowUserError('oldbugmove_no_manual_move');
@@ -196,12 +196,6 @@ sub _move_bug {
       || ThrowTemplateError($template->error());
     $msg .= "\n";
     MessageToMTA($msg);
-}
-
-sub _bug_is_moving {
-    my $bug = shift;
-    my $oldbugmove = Bugzilla->input_params->{"oldbugmove_" . $bug->id};
-    return $oldbugmove ? 1 : 0;
 }
 
 sub _user_is_mover {

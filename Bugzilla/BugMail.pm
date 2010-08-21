@@ -127,6 +127,8 @@ sub Send {
     }
 
     my $comments = $bug->comments({ after => $start, to => $end });
+    # Skip empty comments.
+    @$comments = grep { $_->type || $_->body =~ /\S/ } @$comments;
 
     ###########################################################################
     # Start of email filtering code

@@ -89,7 +89,8 @@
 
 [% BLOCK a_comment %]
   [% RETURN IF comment.is_private AND ! user.is_insider %]
-  [% RETURN IF comment.body == '' AND comment.work_time != 0 AND !user.is_timetracker %]
+  [% comment_text = comment.body_full({ wrap => 1 }) %]
+  [% RETURN IF comment_text == '' AND (comment.work_time - 0) != 0 AND !user.is_timetracker %]
 
     <div id="c[% count %]" class="bz_comment[% " bz_private" IF comment.is_private %]
                 [% " bz_comment_hilite" IF marks.$count %]
@@ -162,7 +163,7 @@
   #%]
 <pre class="bz_comment_text" 
      [% ' id="comment_text_' _ count _ '"' IF mode == "edit" %]>
-  [%- comment.body_full({ wrap => 1 }) FILTER quoteUrls(bug, comment) -%]
+  [%- comment_text FILTER quoteUrls(bug, comment) -%]
 </pre>
     </div>
 [% END %]

@@ -1473,10 +1473,6 @@
       [%+ series.name FILTER html %]</em>
       already exists.
     
-  [% ELSIF error == "sidebar_supports_mozilla_only" %]
-    Sorry - sidebar.cgi currently only supports Mozilla based web browsers.
-    <a href="http://www.mozilla.org">Upgrade today</a>. :-)
-
   [% ELSIF error == "still_unresolved_bugs" %]
     [% IF dependency_count == 1 %]
       [% terms.Bug %]# <a href="show_bug.cgi?id=[% dependencies.0.bug_id FILTER none %]">[% dependencies.0.bug_id FILTER none %]</a>

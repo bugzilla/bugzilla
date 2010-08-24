@@ -1597,16 +1597,17 @@ sub do_search_function {
         return if $args->{term};
     }
     
-    my $override = OPERATOR_FIELD_OVERRIDE->{$actual_field};
+    my $operator_field_override = $self->_get_operator_field_override();
+    my $override = $operator_field_override->{$actual_field};
     if (!$override) {
         # Multi-select fields get special handling.
         if ($self->_multi_select_fields->{$actual_field}) {
-            $override = OPERATOR_FIELD_OVERRIDE->{_multi_select};
+            $override = $operator_field_override->{_multi_select};
         }
         # And so do attachment fields, if they don't have a specific
         # individual override.
         elsif ($actual_field =~ /^attachments\./) {
-            $override = OPERATOR_FIELD_OVERRIDE->{attachments};
+            $override = $operator_field_override->{attachments};
         }
     }
     
@@ -1669,6 +1670,22 @@ sub _pick_override_function {
     }
 
     return $search_func;
+}
+
+sub _get_operator_field_override {
+    my $self = shift;
+    my $cache = Bugzilla->request_cache;
+
+    return $cache->{operator_field_override} 
+        if defined $cache->{operator_field_override};
+
+    my %operator_field_override = %{ OPERATOR_FIELD_OVERRIDE() };
+    Bugzilla::Hook::process('search_operator_field_override',
+                            { search => $self, 
+                              operators => \%operator_field_override });
+
+    $cache->{operator_field_override} = \%operator_field_override;
+    return $cache->{operator_field_override};
 }
 
 ###########################

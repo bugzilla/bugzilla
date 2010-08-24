@@ -433,6 +433,29 @@ The definition is structured as:
 
 =back
 
+=head2 search_operator_field_override
+
+This allows you to modify L<Bugzilla::Search/OPERATOR_FIELD_OVERRIDE>,
+which determines the search functions for fields. It allows you to specify
+custom search functionality for certain fields. 
+
+See L<Bugzilla::Search/OPERATOR_FIELD_OVERRIDE> for reference and see
+the code in the example extension.
+
+Note that the interface to this hook is B<UNSTABLE> and it may change in the
+future.
+
+Params:
+
+=over
+
+=item C<operators> - See L<Bugzilla::Search/OPERATOR_FIELD_OVERRIDE> to get
+an idea of the structure.
+
+=item C<search> - The L<Bugzilla::Search> object.
+
+=back
+
 =head2 bugmail_recipients
 
 This allows you to modify the list of users who are going to be receiving

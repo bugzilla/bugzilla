@@ -28,7 +28,7 @@ Bugzilla::Field - a particular piece of information about bugs
   use Data::Dumper;
 
   # Display information about all fields.
-  print Dumper(Bugzilla->get_fields());
+  print Dumper(Bugzilla->fields());
 
   # Display information about non-obsolete custom fields.
   print Dumper(Bugzilla->active_custom_fields);
@@ -36,9 +36,9 @@ Bugzilla::Field - a particular piece of information about bugs
   use Bugzilla::Field;
 
   # Display information about non-obsolete custom fields.
-  # Bugzilla->get_fields() is a wrapper around Bugzilla::Field->match(),
-  # so both methods take the same arguments.
-  print Dumper(Bugzilla::Field->match({ obsolete => 0, custom => 1 }));
+  # Bugzilla->fields() is a wrapper around Bugzilla::Field->get_all(),
+  # with arguments which filter the fields before returning them.
+  print Dumper(Bugzilla->fields({ obsolete => 0, custom => 1 }));
 
   # Create or update a custom field or field definition.
   my $field = Bugzilla::Field->create(

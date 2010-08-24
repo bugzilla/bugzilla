@@ -563,28 +563,27 @@ sub fields {
 
     my $fields = $cache->{fields};
     my %requested;
-    if (my $types = $criteria->{type}) {
+    if (my $types = delete $criteria->{type}) {
         $types = ref($types) ? $types : [$types];
         %requested = map { %{ $fields->{by_type}->{$_} || {} } } @$types;
     }
     else {
         %requested = %{ $fields->{by_name} };
     }
-    
-    my $do_by_name = $criteria->{by_name};
+
+    my $do_by_name = delete $criteria->{by_name};
+
+    # Filtering before returning the fields based on
+    # the criterias.
+    foreach my $filter (keys %$criteria) {
+        foreach my $field (keys %requested) {
+            if ($requested{$field}->$filter != $criteria->{$filter}) {
+                delete $requested{$field};
+            }
+        }
+    }
 
     return $do_by_name ? \%requested : [values %requested];
-}
-
-# DEPRECATED. Use fields() instead.
-sub get_fields {
-    my $class = shift;
-    my $criteria = shift;
-    # This function may be called during installation, and Field::match
-    # may fail at that time. so we want to return an empty list in that
-    # case.
-    my $fields = eval { Bugzilla::Field->match($criteria) } || [];
-    return @$fields;
 }
 
 sub active_custom_fields {

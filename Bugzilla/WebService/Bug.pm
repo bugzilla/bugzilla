@@ -104,7 +104,7 @@ sub fields {
     }
 
     if (!defined $params->{ids} and !defined $params->{names}) {
-        @fields = Bugzilla->get_fields({ obsolete => 0 });
+        @fields = @{ Bugzilla->fields({ obsolete => 0 }) };
     }
 
     my @fields_out;
@@ -558,8 +558,8 @@ sub legal_values {
     my $field = Bugzilla::Bug::FIELD_MAP->{$params->{field}} 
                 || $params->{field};
 
-    my @global_selects = grep { !$_->is_abnormal }
-                         Bugzilla->get_fields({ is_select => 1 });
+    my @global_selects =
+        @{ Bugzilla->fields({ is_select => 1, is_abnormal => 0 }) };
 
     my $values;
     if (grep($_->name eq $field, @global_selects)) {

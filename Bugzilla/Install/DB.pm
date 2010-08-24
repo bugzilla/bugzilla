@@ -3257,9 +3257,9 @@ sub _fix_logincookies_ipaddr {
 }
 
 sub _fix_invalid_custom_field_names {
-    my @fields = Bugzilla->get_fields({ custom => 1 });
+    my $fields = Bugzilla->fields({ custom => 1 });
 
-    foreach my $field (@fields) {
+    foreach my $field (@$fields) {
         next if $field->name =~ /^[a-zA-Z0-9_]+$/;
         # The field name is illegal and can break the DB. Kill the field!
         $field->set_obsolete(1);

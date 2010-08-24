@@ -75,8 +75,8 @@ my $token  = $cgi->param('token');
 # field = '' -> Show nice list of fields
 #
 if (!$cgi->param('field')) {
-    my @field_list = grep { !$_->is_abnormal }
-                          Bugzilla->get_fields({ is_select => 1 });
+    my @field_list =
+        @{ Bugzilla->fields({ is_select => 1, is_abnormal => 0 }) };
 
     $vars->{'fields'} = \@field_list;
     $template->process("admin/fieldvalues/select-field.html.tmpl", $vars)

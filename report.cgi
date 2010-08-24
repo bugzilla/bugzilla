@@ -319,7 +319,7 @@ sub get_names {
     
     # These are all the fields we want to preserve the order of in reports.
     my %fields;
-    my @select_fields = Bugzilla->get_fields({ is_select => 1 });
+    my @select_fields = @{ Bugzilla->fields({ is_select => 1 }) };
     foreach my $field (@select_fields) {
         my @names =  map($_->name, @{$field->legal_values});
         unshift @names, ' ' if $field->name eq 'resolution'; 

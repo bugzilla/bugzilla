@@ -108,7 +108,7 @@
         <select name="visibility_field_id" id="visibility_field_id"
                 onchange="onChangeVisibilityField()">
           <option></option>
-          [% FOREACH sel_field = Bugzilla.get_fields({ is_select => 1 }) %]
+          [% FOREACH sel_field = Bugzilla.fields({ is_select => 1 }) %]
             [% NEXT IF sel_field.id == field.id %]
             <option value="[% sel_field.id FILTER html %]"
              [% ' selected="selected"' 
@@ -151,7 +151,7 @@
         <td>
           <select name="value_field_id" id="value_field_id">
             <option></option>
-            [% FOREACH sel_field = Bugzilla.get_fields({ is_select => 1 }) %]
+            [% FOREACH sel_field = Bugzilla.fields({ is_select => 1 }) %]
               [% NEXT IF sel_field.id == field.id %]
               <option value="[% sel_field.id FILTER html %]"
                [% ' selected="selected"' 

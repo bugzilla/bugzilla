@@ -123,7 +123,7 @@ YAHOO.util.Event.onDOMReady(function() {onChangeType(document.getElementById('ty
         <select name="visibility_field_id" id="visibility_field_id"
                 onchange="onChangeVisibilityField()">
           <option></option>
-          [% FOREACH sel_field = Bugzilla.get_fields({ is_select => 1 }) %]
+          [% FOREACH sel_field = Bugzilla.fields({ is_select => 1 }) %]
             <option value="[% sel_field.id FILTER html %]">
               [% sel_field.description FILTER html %]
               ([% sel_field.name FILTER html %])
@@ -149,7 +149,7 @@ YAHOO.util.Event.onDOMReady(function() {onChangeType(document.getElementById('ty
       <td>
         <select disabled="disabled" name="value_field_id" id="value_field_id">
           <option></option>
-          [% FOREACH sel_field = Bugzilla.get_fields({ is_select => 1 }) %]
+          [% FOREACH sel_field = Bugzilla.fields({ is_select => 1 }) %]
             <option value="[% sel_field.id FILTER html %]">
               [% sel_field.description FILTER html %]
               ([% sel_field.name FILTER html %])

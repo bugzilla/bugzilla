@@ -225,7 +225,7 @@ $vars->{'bug_severity'} = Bugzilla::Field->new({name => 'bug_severity'})->legal_
 $vars->{'resolution'} = Bugzilla::Field->new({name => 'resolution'})->legal_values;
 
 # Boolean charts
-my @fields = Bugzilla->get_fields({ obsolete => 0 });
+my @fields = @{ Bugzilla->fields({ obsolete => 0 }) };
 
 # If we're not in the time-tracking group, exclude time-tracking fields.
 if (!Bugzilla->user->is_timetracker) {

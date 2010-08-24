@@ -69,7 +69,7 @@
 %]
 
 [% USE Bugzilla %]
-[% custom_fields = Bugzilla.get_fields({ custom => 1 }) %]
+[% custom_fields = Bugzilla.fields({ custom => 1 }) %]
 
 [%# We want to display the type name of fields, not their type ID. %]
 [% overrides.type = {} %]

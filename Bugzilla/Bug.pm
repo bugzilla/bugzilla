@@ -195,11 +195,11 @@ sub VALIDATOR_DEPENDENCIES {
         version          => ['product'],
     );
 
-    my @custom_deps = Bugzilla->get_fields(
-        { visibility_field_id => NOT_NULL });
-    foreach my $field (@custom_deps) {
-        $deps{$field->name} = [$field->visibility_field->name];
+    foreach my $field (@{ Bugzilla->fields }) {
+        $deps{$field->name} = [ $field->visibility_field->name ]
+            if $field->{visibility_field_id};
     }
+
     $cache->{bug_validator_dependencies} = \%deps;
     return \%deps;
 };
@@ -242,7 +242,7 @@ use constant NUMERIC_COLUMNS => qw(
 );
 
 sub DATE_COLUMNS {
-    my @fields = Bugzilla->get_fields({ type => FIELD_TYPE_DATETIME });
+    my @fields = @{ Bugzilla->fields({ type => FIELD_TYPE_DATETIME }) };
     return map { $_->name } @fields;
 }
 
@@ -739,9 +739,9 @@ sub run_create_validators {
     Bugzilla::Hook::process('bug_end_of_create_validators',
                             { params => $params });
 
-    my @mandatory_fields = Bugzilla->get_fields({ is_mandatory => 1,
-                                                  enter_bug    => 1,
-                                                  obsolete     => 0 });
+    my @mandatory_fields = @{ Bugzilla->fields({ is_mandatory => 1,
+                                                 enter_bug    => 1,
+                                                 obsolete     => 0 }) };
     foreach my $field (@mandatory_fields) {
         $class->_check_field_is_mandatory($params->{$field->name}, $field,
                                           $params);
@@ -3501,7 +3501,7 @@ sub bug_alias_to_id {
 sub editable_bug_fields {
     my @fields = Bugzilla->dbh->bz_table_columns('bugs');
     # Obsolete custom fields are not editable.
-    my @obsolete_fields = Bugzilla->get_fields({obsolete => 1, custom => 1});
+    my @obsolete_fields = @{ Bugzilla->fields({obsolete => 1, custom => 1}) };
     @obsolete_fields = map { $_->name } @obsolete_fields;
     foreach my $remove ("bug_id", "reporter", "creation_ts", "delta_ts", 
                         "lastdiffed", @obsolete_fields) 
@@ -4061,8 +4061,9 @@ sub AUTOLOAD {
 
       return $self->{$attr} if defined $self->{$attr};
 
-      $self->{_multi_selects} ||= [Bugzilla->get_fields(
-          {custom => 1, type => FIELD_TYPE_MULTI_SELECT })];
+      $self->{_multi_selects} ||= Bugzilla->fields(
+          { custom => 1, type => FIELD_TYPE_MULTI_SELECT });
+
       if ( grep($_->name eq $attr, @{$self->{_multi_selects}}) ) {
           # There is a bug in Perl 5.10.0, which is fixed in 5.10.1,
           # which taints $attr at this point. trick_taint() can go

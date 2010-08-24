@@ -254,7 +254,7 @@ sub debug {
 
 sub bug_fields {
     my $self = shift;
-    $self->{bug_fields} ||= { map { $_->{name} => $_ } Bugzilla->get_fields };
+    $self->{bug_fields} ||= Bugzilla->fields({ by_name => 1 });
     return $self->{bug_fields};
 }
 

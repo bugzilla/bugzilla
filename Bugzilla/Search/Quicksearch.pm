@@ -80,7 +80,7 @@ sub FIELD_MAP {
     # Get all the fields whose names don't contain periods. (Fields that
     # contain periods are always handled in MAPPINGS.) 
     my @db_fields = grep { $_->name !~ /\./ } 
-                         Bugzilla->get_fields({ obsolete => 0 });
+                         @{ Bugzilla->fields({ obsolete => 0 }) };
     my %full_map = (%{ MAPPINGS() }, map { $_->name => $_->name } @db_fields);
 
     # Eliminate the fields that start with bug_ or rep_, because those are

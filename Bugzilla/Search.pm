@@ -557,7 +557,8 @@ sub COLUMNS {
     }
 
     # Do the actual column-getting from fielddefs, now.
-    foreach my $field (Bugzilla->get_fields({ obsolete => 0, buglist => 1 })) {
+    my @fields = @{ Bugzilla->fields({ obsolete => 0, buglist => 1 }) };
+    foreach my $field (@fields) {
         my $id = $field->name;
         $id = $old_names{$id} if exists $old_names{$id};
         my $sql;
@@ -593,8 +594,8 @@ sub REPORT_COLUMNS {
            flagtypes.name keywords relevance);
 
     # Multi-select fields are not currently supported.
-    my @multi_selects = Bugzilla->get_fields(
-        { obsolete => 0, type => FIELD_TYPE_MULTI_SELECT });
+    my @multi_selects = @{Bugzilla->fields(
+        { obsolete => 0, type => FIELD_TYPE_MULTI_SELECT })};
     push(@no_report_columns, map { $_->name } @multi_selects);
 
     # If you're not a time-tracker, you can't use time-tracking

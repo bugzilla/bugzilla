@@ -408,7 +408,7 @@ sub _get_diffs {
 
 sub _get_new_bugmail_fields {
     my $bug = shift;
-    my @fields = Bugzilla->get_fields({obsolete => 0, mailhead => 1});
+    my @fields = @{ Bugzilla->fields({obsolete => 0, in_new_bugmail => 1}) };
     my @diffs;
 
     foreach my $field (@fields) {

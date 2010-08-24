@@ -25,7 +25,7 @@ function toggleCheckbox(this_checkbox, other_checkbox_id) {
 
 var select_values = new Array();
 [% USE Bugzilla %]
-[% FOREACH sel_field = Bugzilla.get_fields({ is_select => 1 }) %]
+[% FOREACH sel_field = Bugzilla.fields({ is_select => 1 }) %]
   select_values[[% sel_field.id FILTER js %]] = [
   [% FOREACH legal_value = sel_field.legal_values %]
     [%# Prefix components with the name of their product so that admins

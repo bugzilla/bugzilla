@@ -42,9 +42,7 @@
   #%]
 
 [% SET hidden = 0 %]
-[% IF field.visibility_field.defined AND bug
-      AND !field.visibility_value.is_set_on_bug(bug) 
-%]
+[% IF bug AND !field.is_visible_on_bug(bug) %]
   [% SET hidden = 1 %]
 [% END %]
 

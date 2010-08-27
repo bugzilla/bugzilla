@@ -118,12 +118,14 @@
             </option>
           [% END %]
         </select>
-        <label for="visibility_value_id"><strong>is set to:</strong></label>
-        <select name="visibility_value_id" id="visibility_value_id">
+        <label for="visibility_values">
+          <strong>is set to any of:</strong>
+        </label>
+        <select multiple="multiple" size="5" name="visibility_values" 
+                id="visibility_values" class="field_value">
           [% FOREACH value = field.visibility_field.legal_values %]
             <option value="[% value.id FILTER html %]"
-             [% ' selected="selected"' 
-                IF field.visibility_value.id == value.id %]>
+              [% " selected" IF field.visibility_values.contains(value) %]>
               [% IF field.visibility_field.name == 'component' %]
                 [% display_value('product', value.product.name) FILTER html %]:
               [% END %]

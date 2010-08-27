@@ -465,12 +465,12 @@ function setClassification() {
  * a certain value. May only be called after the controller has already
  * been added to the DOM.
  */
-function showFieldWhen(controlled_id, controller_id, value) {
+function showFieldWhen(controlled_id, controller_id, values) {
     var controller = document.getElementById(controller_id);
     // Note that we don't get an object for "controlled" here, because it
     // might not yet exist in the DOM. We just pass along its id.
-    YAHOO.util.Event.addListener(controller, 'change', 
-        handleVisControllerValueChange, [controlled_id, controller, value]);
+    YAHOO.util.Event.addListener(controller, 'change',
+        handleVisControllerValueChange, [controlled_id, controller, values]);
 }
 
 /**
@@ -480,13 +480,21 @@ function showFieldWhen(controlled_id, controller_id, value) {
 function handleVisControllerValueChange(e, args) {
     var controlled_id = args[0];
     var controller = args[1];
-    var value = args[2];
+    var values = args[2];
 
     var label_container = 
         document.getElementById('field_label_' + controlled_id);
     var field_container =
         document.getElementById('field_container_' + controlled_id);
-    if (bz_valueSelected(controller, value)) {
+    var selected = false;
+    for (var i = 0; i < values.length; i++) {
+        if (bz_valueSelected(controller, values[i])) {
+            selected = true;
+            break;
+        }
+    }
+
+    if (selected) {
         YAHOO.util.Dom.removeClass(label_container, 'bz_hidden_field');
         YAHOO.util.Dom.removeClass(field_container, 'bz_hidden_field');
     }

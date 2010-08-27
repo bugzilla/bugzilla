@@ -77,6 +77,7 @@ use base qw(Exporter Bugzilla::Object);
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Util;
+use List::MoreUtils qw(any);
 
 use Scalar::Util qw(blessed);
 
@@ -99,7 +100,6 @@ use constant DB_COLUMNS => qw(
     enter_bug
     buglist
     visibility_field_id
-    visibility_value_id
     value_field_id
     reverse_desc
     is_mandatory
@@ -118,7 +118,7 @@ use constant VALIDATORS => {
     type         => \&_check_type,
     value_field_id      => \&_check_value_field_id,
     visibility_field_id => \&_check_visibility_field_id,
-    visibility_value_id => \&_check_control_value,
+    visibility_values => \&_check_visibility_values,
     is_mandatory => \&Bugzilla::Object::check_boolean,
 };
 
@@ -127,7 +127,7 @@ use constant VALIDATOR_DEPENDENCIES => {
     type => ['custom'],
     reverse_desc => ['type'],
     value_field_id => ['type'],
-    visibility_value_id => ['visibility_field_id'],
+    visibility_values => ['visibility_field_id'],
 };
 
 use constant UPDATE_COLUMNS => qw(
@@ -138,7 +138,6 @@ use constant UPDATE_COLUMNS => qw(
     enter_bug
     buglist
     visibility_field_id
-    visibility_value_id
     value_field_id
     reverse_desc
     is_mandatory
@@ -357,8 +356,8 @@ sub _check_visibility_field_id {
     return $field->id;
 }
 
-sub _check_control_value {
-    my ($invocant, $value_id, undef, $params) = @_;
+sub _check_visibility_values {
+    my ($invocant, $values, undef, $params) = @_;
     my $field;
     if (blessed $invocant) {
         $field = $invocant->visibility_field;
@@ -366,11 +365,24 @@ sub _check_control_value {
     elsif ($params->{visibility_field_id}) {
         $field = $invocant->new($params->{visibility_field_id});
     }
-    # When no field is set, no value is set.
-    return undef if !$field;
-    my $value_obj = Bugzilla::Field::Choice->type($field)
-                    ->check({ id => $value_id });
-    return $value_obj->id;
+    # When no field is set, no values are set.
+    return [] if !$field;
+
+    if (!scalar @$values) {
+        ThrowUserError('field_visibility_values_must_be_selected',
+                       { field => $field });
+    }
+
+    my @visibility_values;
+    my $choice = Bugzilla::Field::Choice->type($field);
+    foreach my $value (@$values) {
+        if (!blessed $value) {
+            $value = $choice->check({ id => $value });
+        }
+        push(@visibility_values, $value);
+    }
+
+    return \@visibility_values;
 }
 
 sub _check_reverse_desc {
@@ -603,9 +615,9 @@ sub visibility_field {
 
 =over
 
-=item C<visibility_value>
+=item C<visibility_values>
 
-If we have a L</visibility_field>, then what value does that field have to
+If we have a L</visibility_field>, then what values does that field have to
 be set to in order to show this field? Returns a L<Bugzilla::Field::Choice>
 or undef if there is no C<visibility_field> set.
 
@@ -613,16 +625,23 @@ or undef if there is no C<visibility_field> set.
 
 =cut
 
-
-sub visibility_value {
+sub visibility_values {
     my $self = shift;
-    if ($self->{visibility_field_id}) {
-        require Bugzilla::Field::Choice;
-        $self->{visibility_value} ||=
-            Bugzilla::Field::Choice->type($self->visibility_field)->new(
-                $self->{visibility_value_id});
+    my $dbh = Bugzilla->dbh;
+    
+    return [] if !$self->{visibility_field_id};
+
+    if (!defined $self->{visibility_values}) {
+        my $visibility_value_ids =
+            $dbh->selectcol_arrayref("SELECT value_id FROM field_visibility
+                                      WHERE field_id = ?", undef, $self->id);
+
+        $self->{visibility_values} =
+            Bugzilla::Field::Choice->type($self->visibility_field)
+            ->new_from_list($visibility_value_ids);
     }
-    return $self->{visibility_value};
+
+    return $self->{visibility_values};
 }
 
 =pod
@@ -700,10 +719,13 @@ See L<Bugzilla::Field::ChoiceInterface>.
 sub is_visible_on_bug {
     my ($self, $bug) = @_;
 
-    my $visibility_value = $self->visibility_value;
-    return 1 if !$visibility_value;
+    # Always return visible, if this field is not
+    # visibility controlled.
+    return 1 if !$self->{visibility_field_id};
 
-    return $visibility_value->is_set_on_bug($bug);
+    my $visibility_values = $self->visibility_values;
+
+    return (any { $_->is_set_on_bug($bug) } @$visibility_values) ? 1 : 0;
 }
 
 =over
@@ -784,7 +806,7 @@ They will throw an error if you try to set the values to something invalid.
 
 =item C<set_visibility_field>
 
-=item C<set_visibility_value>
+=item C<set_visibility_values>
 
 =item C<set_value_field>
 
@@ -806,12 +828,11 @@ sub set_visibility_field {
     my ($self, $value) = @_;
     $self->set('visibility_field_id', $value);
     delete $self->{visibility_field};
-    delete $self->{visibility_value};
+    delete $self->{visibility_values};
 }
-sub set_visibility_value {
-    my ($self, $value) = @_;
-    $self->set('visibility_value_id', $value);
-    delete $self->{visibility_value};
+sub set_visibility_values {
+    my ($self, $value_ids) = @_;
+    $self->set('visibility_values', $value_ids);
 }
 sub set_value_field {
     my ($self, $value) = @_;
@@ -945,13 +966,24 @@ C<is_mandatory> - boolean - Whether this field is mandatory. Defaults to 0.
 sub create {
     my $class = shift;
     my ($params) = @_;
+    my $dbh = Bugzilla->dbh;
+
     # This makes sure the "sortkey" validator runs, even if
     # the parameter isn't sent to create().
     $params->{sortkey} = undef if !exists $params->{sortkey};
     $params->{type} ||= 0;
-    my $field = $class->SUPER::create(@_);
+    
+    $dbh->bz_start_transaction();
+    $class->check_required_create_fields(@_);
+    my $field_values      = $class->run_create_validators($params);
+    my $visibility_values = delete $field_values->{visibility_values};
+    my $field             = $class->insert_create_data($field_values);
+    
+    $field->set_visibility_values($visibility_values);
+    $field->_update_visibility_values();
 
-    my $dbh = Bugzilla->dbh;
+    $dbh->bz_commit_transaction();
+
     if ($field->custom) {
         my $name = $field->name;
         my $type = $field->type;
@@ -981,9 +1013,29 @@ sub update {
     if ($changes->{value_field_id} && $self->is_select) {
         $dbh->do("UPDATE " . $self->name . " SET visibility_value_id = NULL");
     }
+    $self->_update_visibility_values();
     return $changes;
 }
 
+sub _update_visibility_values {
+    my $self = shift;
+    my $dbh = Bugzilla->dbh;
+
+    my @visibility_value_ids = map($_->id, @{$self->visibility_values});
+    $self->_delete_visibility_values();
+    for my $value_id (@visibility_value_ids) {
+        $dbh->do("INSERT INTO field_visibility (field_id, value_id)
+                  VALUES (?, ?)", undef, $self->id, $value_id);
+    }
+}
+
+sub _delete_visibility_values {
+    my ($self) = @_;
+    my $dbh = Bugzilla->dbh;
+    $dbh->do("DELETE FROM field_visibility WHERE field_id = ?",
+        undef, $self->id);
+    delete $self->{visibility_values};
+}
 
 =pod
 

@@ -88,7 +88,6 @@ sub update_fielddefs_definition {
     }
 
     $dbh->bz_add_column('fielddefs', 'visibility_field_id', {TYPE => 'INT3'});
-    $dbh->bz_add_column('fielddefs', 'visibility_value_id', {TYPE => 'INT2'});
     $dbh->bz_add_column('fielddefs', 'value_field_id', {TYPE => 'INT3'});
     $dbh->bz_add_index('fielddefs', 'fielddefs_value_field_id_idx',
                        ['value_field_id']);
@@ -112,6 +111,9 @@ sub update_fielddefs_definition {
         {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'FALSE'});
     $dbh->bz_add_index('fielddefs', 'fielddefs_is_mandatory_idx',
                        ['is_mandatory']);
+
+    # 2010-04-05 dkl@redhat.com - Bug 479400
+    _migrate_field_visibility_value();
 
     # Remember, this is not the function for adding general table changes.
     # That is below. Add new changes to the fielddefs table above this
@@ -560,8 +562,6 @@ sub update_table_definitions {
 
     # 2008-09-07 LpSolit@gmail.com - Bug 452893
     _fix_illegal_flag_modification_dates();
-
-    _add_visiblity_value_to_value_tables();
 
     # 2009-03-02 arbingersys@gmail.com - Bug 423613
     _add_extern_id_index();
@@ -3208,20 +3208,6 @@ sub _fix_illegal_flag_modification_dates {
     print "$rows flags had an illegal modification date. Fixed!\n" if ($rows =~ /^\d+$/);
 }
 
-sub _add_visiblity_value_to_value_tables {
-    my $dbh = Bugzilla->dbh;
-    my @standard_fields = 
-        qw(bug_status resolution priority bug_severity op_sys rep_platform);
-    my $custom_fields = $dbh->selectcol_arrayref(
-        'SELECT name FROM fielddefs WHERE custom = 1 AND type IN(?,?)',
-        undef, FIELD_TYPE_SINGLE_SELECT, FIELD_TYPE_MULTI_SELECT);
-    foreach my $field (@standard_fields, @$custom_fields) {
-        $dbh->bz_add_column($field, 'visibility_value_id', {TYPE => 'INT2'});
-        $dbh->bz_add_index($field, "${field}_visibility_value_id_idx", 
-                           ['visibility_value_id']);
-    }
-}
-
 sub _add_extern_id_index {
     my $dbh = Bugzilla->dbh;
     if (!$dbh->bz_index_info('profiles', 'profiles_extern_id_idx')) {
@@ -3392,6 +3378,33 @@ sub _remove_attachment_isurl {
                  undef, 'url.txt');
         $dbh->bz_drop_column('attachments', 'isurl');
         $dbh->do("DELETE FROM fielddefs WHERE name='attachments.isurl'");
+    }
+}
+
+sub _migrate_field_visibility_value {
+    my $dbh = Bugzilla->dbh;
+
+    if ($dbh->bz_column_info('fielddefs', 'visibility_value_id')) {
+        print "Populating new field_visibility table...\n";
+
+        $dbh->bz_start_transaction();
+
+        my %results =
+            @{ $dbh->selectcol_arrayref(
+                "SELECT id, visibility_value_id FROM fielddefs
+                 WHERE visibility_value_id IS NOT NULL",
+               { Columns => [1,2] }) };
+
+        my $insert_sth =
+            $dbh->prepare("INSERT INTO field_visibility (field_id, value_id)
+                           VALUES (?, ?)");
+
+        foreach my $id (keys %results) {
+            $insert_sth->execute($id, $results{$id});
+        }
+
+        $dbh->bz_commit_transaction();
+        $dbh->bz_drop_column('fielddefs', 'visibility_value_id');
     }
 }
 

@@ -482,6 +482,11 @@
     Only Drop-Down or Multi-Select fields can have a field that
     controls their values.
 
+  [% ELSIF error == "field_visibility_values_must_be_selected" %]
+    [% title = "Missing visibility field values" %]
+    At least one value must be selected for the visibility field
+    '[% field.name FILTER html %]'.
+
   [% ELSIF error == "fieldname_invalid" %]
     [% title = "Specified Field Does Not Exist" %]
     The field '[% field.name FILTER html %]' does not exist or 

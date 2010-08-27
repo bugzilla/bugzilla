@@ -130,8 +130,11 @@ YAHOO.util.Event.onDOMReady(function() {onChangeType(document.getElementById('ty
             </option>
           [% END %]
         </select>
-        <label for="visibility_value_id"><strong>is set to:</strong></label>
-        <select name="visibility_value_id" id="visibility_value_id">
+        <label for="visibility_values">
+          <strong>is set to any of:</strong>
+        </label>
+        <select multiple="multiple" size="5" name="visibility_values"
+                id="visibility_values" class="field_value">
           <option value=""></option>
         </select>
       </td>

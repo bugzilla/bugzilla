@@ -671,7 +671,6 @@ use constant ABSTRACT_SCHEMA => {
             visibility_field_id => {TYPE => 'INT3', 
                                     REFERENCES => {TABLE  => 'fielddefs',
                                                    COLUMN => 'id'}},
-            visibility_value_id => {TYPE => 'INT2'},
             value_field_id => {TYPE => 'INT3',
                                REFERENCES => {TABLE  => 'fielddefs',
                                               COLUMN => 'id'}},
@@ -685,6 +684,25 @@ use constant ABSTRACT_SCHEMA => {
             fielddefs_sortkey_idx => ['sortkey'],
             fielddefs_value_field_id_idx => ['value_field_id'],
             fielddefs_is_mandatory_idx => ['is_mandatory'],
+        ],
+    },
+
+    # Field Visibility Information
+    # -------------------------
+
+    field_visibility => {
+        FIELDS => [
+            field_id => {TYPE => 'INT3', 
+                         REFERENCES => {TABLE  => 'fielddefs',
+                                        COLUMN => 'id',
+                                        DELETE => 'CASCADE'}},
+            value_id => {TYPE => 'INT2', NOTNULL => 1}
+        ],
+        INDEXES => [
+            field_visibility_field_id_idx => {
+                FIELDS => [qw(field_id value_id)],
+                TYPE   => 'UNIQUE'
+            },
         ],
     },
 

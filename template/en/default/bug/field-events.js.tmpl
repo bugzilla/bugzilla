@@ -23,8 +23,11 @@
 
 [% FOREACH controlled_field = field.controls_visibility_of %]
   showFieldWhen('[% controlled_field.name FILTER js %]',
-                '[% field.name FILTER js %]',
-                '[% controlled_field.visibility_value.name FILTER js %]');
+                '[% field.name FILTER js %]', [
+  [%- FOREACH visibility_value = controlled_field.visibility_values -%]
+    '[%- visibility_value.name FILTER js -%]'[% "," UNLESS loop.last %]
+  [%- END %]
+  ]);
 [% END %]
 [% FOREACH legal_value = field.legal_values %]
   [% FOREACH controlled_field = legal_value.controlled_values.keys %]

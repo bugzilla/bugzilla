@@ -563,6 +563,8 @@ sub update_table_definitions {
     # 2008-09-07 LpSolit@gmail.com - Bug 452893
     _fix_illegal_flag_modification_dates();
 
+    _add_visiblity_value_to_value_tables();
+
     # 2009-03-02 arbingersys@gmail.com - Bug 423613
     _add_extern_id_index();
 
@@ -3206,6 +3208,20 @@ sub _fix_illegal_flag_modification_dates {
                          WHERE modification_date < creation_date');
     # If no rows are affected, $dbh->do returns 0E0 instead of 0.
     print "$rows flags had an illegal modification date. Fixed!\n" if ($rows =~ /^\d+$/);
+}
+
+sub _add_visiblity_value_to_value_tables {
+    my $dbh = Bugzilla->dbh;
+    my @standard_fields = 
+        qw(bug_status resolution priority bug_severity op_sys rep_platform);
+    my $custom_fields = $dbh->selectcol_arrayref(
+        'SELECT name FROM fielddefs WHERE custom = 1 AND type IN(?,?)',
+        undef, FIELD_TYPE_SINGLE_SELECT, FIELD_TYPE_MULTI_SELECT);
+    foreach my $field (@standard_fields, @$custom_fields) {
+        $dbh->bz_add_column($field, 'visibility_value_id', {TYPE => 'INT2'});
+        $dbh->bz_add_index($field, "${field}_visibility_value_id_idx",
+                           ['visibility_value_id']);
+    }
 }
 
 sub _add_extern_id_index {

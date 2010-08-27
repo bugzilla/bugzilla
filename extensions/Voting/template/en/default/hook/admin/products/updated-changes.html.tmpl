@@ -59,7 +59,7 @@
   [% IF changes.too_many_votes.size %]
     [% FOREACH detail = changes.too_many_votes %]
       &rarr;removed votes for [% terms.bug %] <a href="show_bug.cgi?id=
-     [%- detail.id FILTER url_quote %]">
+     [%- detail.id FILTER uri %]">
      [%- detail.id FILTER html %]</a> from [% detail.name FILTER html %]<br>
     [% END %]
   [% ELSE %]
@@ -72,7 +72,7 @@
   [% IF changes.too_many_total_votes.size %]
     [% FOREACH detail = changes.too_many_total_votes %]
       &rarr;removed votes for [% terms.bug %] <a href="show_bug.cgi?id=
-     [%- detail.id FILTER url_quote %]">
+     [%- detail.id FILTER uri %]">
      [%- detail.id FILTER html %]</a> from [% detail.name FILTER html %]<br>
     [% END %]
   [% ELSE %]

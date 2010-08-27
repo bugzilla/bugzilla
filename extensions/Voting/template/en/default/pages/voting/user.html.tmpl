@@ -93,7 +93,7 @@
         <tr>
           <th>[% product.name FILTER html %]</th>
           <td colspan="2" ><a href="buglist.cgi?bug_id=
-              [%- product.bug_ids.join(",") FILTER url_quote %]">([% terms.bug %] list)</a>
+              [%- product.bug_ids.join(",") FILTER uri %]">([% terms.bug %] list)</a>
           </td>
           <td>
             [% IF product.maxperbug < product.maxvotes AND
@@ -149,7 +149,7 @@
 
     [% IF canedit %]
       <input type="submit" value="Change My Votes" id="change"> or 
-      <a href="buglist.cgi?bug_id=[% all_bug_ids.join(",") FILTER url_quote %]">view all
+      <a href="buglist.cgi?bug_id=[% all_bug_ids.join(",") FILTER uri %]">view all
         as [% terms.bug %] list</a>
       <br>
       <br>
@@ -163,7 +163,7 @@
       [% END %]
       and then click <b>Change My Votes</b>.
     [% ELSE %]
-       <a href="buglist.cgi?bug_id=[% all_bug_ids.join(",") FILTER url_quote %]">View all
+       <a href="buglist.cgi?bug_id=[% all_bug_ids.join(",") FILTER uri %]">View all
          as [% terms.bug %] list</a>
     [% END %]
   </form>

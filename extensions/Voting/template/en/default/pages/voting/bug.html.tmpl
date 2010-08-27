@@ -45,7 +45,7 @@
     <tr>
       <td>
           <a href="page.cgi?id=voting/user.html&amp;user_id=
-                  [%- voter.id FILTER url_quote %]">
+                  [%- voter.id FILTER uri %]">
           [% voter.login_name FILTER email FILTER html %]
         </a>
       </td>

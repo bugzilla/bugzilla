@@ -26,7 +26,7 @@
     [% IF bug.votes %]
       with
       <a href="page.cgi?id=voting/bug.html&amp;bug_id=
-               [%- bug.id FILTER url_quote %]">
+               [%- bug.id FILTER uri %]">
         [%- bug.votes %] 
         [% IF bug.votes == 1 %]
             vote
@@ -35,7 +35,7 @@
         [% END %]</a>
     [% END %]
     (<a href="page.cgi?id=voting/user.html&amp;bug_id=
-              [%- bug.id FILTER url_quote %]#vote_
-              [%- bug.id FILTER url_quote %]">vote</a>)
+              [%- bug.id FILTER uri %]#vote_
+              [%- bug.id FILTER uri %]">vote</a>)
   </span>
 [% END %]

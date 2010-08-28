@@ -95,6 +95,7 @@ You have the following choices:
         <input type="hidden" name="delta_ts" value="[% bug.delta_ts FILTER html %]">
         <input type="hidden" name="comment" value="[% cgi.param("comment") FILTER html %]">
         <input type="hidden" name="commentprivacy" value="[% cgi.param("commentprivacy") FILTER html %]">
+        <input type="hidden" name="longdesclength" value="[% bug.comments.size %]">
         <input type="hidden" name="token" value="[% cgi.param("token") FILTER html %]">
         <input type="submit" id="process_comment" value="Submit only my new comment">
       </form>

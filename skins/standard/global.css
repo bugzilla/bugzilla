@@ -362,7 +362,7 @@ div#docslinks {
     display: none !important;
 }
 
-span.quote {
+.bz_comment_text span.quote {
     color: #65379c;
     /* Make quoted text not wrap. */
     white-space: pre;

@@ -154,8 +154,11 @@
     <script type="text/javascript">
     <!--
         YAHOO.namespace('bugzilla');
-        if (YAHOO.env.ua.gecko) {
+        
+        if ( "onpagehide" in window || YAHOO.env.ua.gecko) {
             YAHOO.util.Event._simpleRemove(window, "unload", 
+                                           YAHOO.util.Event._unload);
+            YAHOO.util.Event._simpleAdd(window, "pagehide", 
                                            YAHOO.util.Event._unload);
         }
         [%# The language selector needs javascript to set its cookie,

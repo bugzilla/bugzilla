@@ -66,15 +66,13 @@ var queryform = "queryform"
 // -->
 </script>
 
-<form method="post" action="buglist.cgi" name="queryform">
+<form method="post" action="buglist.cgi" name="queryform" id="queryform">
 
 [% PROCESS search/form.html.tmpl %]
 
-[% PROCESS search/knob.html.tmpl %]
-
-<hr>
-
 [% PROCESS "search/boolean-charts.html.tmpl" %]
+
+[% PROCESS search/knob.html.tmpl %]
 
 </form>
 

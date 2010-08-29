@@ -251,14 +251,14 @@ TUI_hide_default('information_query');
   [% END %]
 
   <div class="search_field_row">
-    <label for="bug_id">[% terms.Bugs %] numbered</label>
+    <span class="field_label"><label for="bug_id">[% terms.Bugs %] numbered</label></span>
     <div id="bug_id_container" >
       <input type="text" name="bug_id" id="bug_id"
            value="[% default.bug_id.0 FILTER html %]" size="20">
            <div class="field_help">(comma-separated list)</div>
     </div>
     should be 
-    <select name="bug_id_type">
+    <select name="bug_id_type" id="bug_id_type">
       <option value="anyexact"[% " selected" IF default.bug_id_type.0 == "anyexact" %]>only included in</option>
       <option value="nowords"[% " selected" IF default.bug_id_type.0 == "nowords" %]>excluded from</option>
     </select> the results

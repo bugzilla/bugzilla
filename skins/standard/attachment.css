@@ -228,7 +228,8 @@ div#update_container {
 
 #editFrame, #viewDiffFrame, #viewFrame {
     height: 400px; 
-    width: 100%;
+    width: 95%;
+    margin-left: 2%;
 }
 
 .details span.bz_private{

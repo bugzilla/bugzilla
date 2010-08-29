@@ -176,6 +176,14 @@ div.bz_section_title span {
   font-weight: bold;
 }
 
+#queryform, #reportform {
+  margin-bottom: 2em;
+}
+
+#knob {
+  margin-top: 2em;
+}
+
 .hide_people_filter #people_filter_section, 
 .hide_history_filter #history_filter_section, 
 .hide_detailed_information #detailed_information_section 

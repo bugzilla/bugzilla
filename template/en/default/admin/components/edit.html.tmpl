@@ -43,6 +43,11 @@
     [% PROCESS "admin/components/edit-common.html.tmpl" %]
 
     <tr>
+      <td><label for="isactive">Enabled For [% terms.Bugs %]:</label></td>
+      <td><input id="isactive" name="isactive" type="checkbox" value="1" 
+                 [% 'checked="checked"' IF comp.isactive %]></td>
+    </tr>
+    <tr>
       <td>[% terms.Bugs %]:</td>
       <td>
 [% IF comp.bug_count > 0 %]

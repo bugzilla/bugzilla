@@ -1171,11 +1171,11 @@ if ($dotweak && scalar @bugs) {
     # versions for the product (if there is only one product on the list of
     # products), and a list of components for the product.
     if ($one_product) {
-        $vars->{'versions'} = [map($_->name ,@{ $one_product->versions })];
-        $vars->{'components'} = [map($_->name, @{ $one_product->components })];
+        $vars->{'versions'} = [map($_->name, grep($_->is_active, @{ $one_product->versions }))];
+        $vars->{'components'} = [map($_->name, grep($_->is_active, @{ $one_product->components }))];
         if (Bugzilla->params->{'usetargetmilestone'}) {
-            $vars->{'targetmilestones'} = [map($_->name, 
-                                               @{ $one_product->milestones })];
+            $vars->{'targetmilestones'} = [map($_->name, grep($_->is_active,  
+                                               @{ $one_product->milestones }))];
         }
     }
 }

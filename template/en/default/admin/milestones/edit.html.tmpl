@@ -47,7 +47,11 @@
       <td><input id="sortkey" size="20" maxlength="20" name="sortkey" value="
       [%- milestone.sortkey FILTER html %]"></td>
     </tr>
-
+    <tr>
+      <th><label for="isactive">Enabled For [% terms.Bugs %]:</label></th>
+      <td><input id="isactive" name="isactive" type="checkbox" value="1"
+                 [% 'checked="checked"' IF milestone.isactive %]></td>
+    </tr>
   </table>
 
   <input type="hidden" name="milestoneold" value="[% milestone.name FILTER html %]">

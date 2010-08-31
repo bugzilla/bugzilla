@@ -238,6 +238,7 @@ TUI_hide_default('attachment_text_field');
         [% END %]
 
         [%- FOREACH c = product.components %]
+          [% NEXT IF NOT c.is_active %]
           <option value="[% c.name FILTER html %]"
                   id="v[% c.id FILTER html %]_component"
             [% IF c.name == default.component_ %]
@@ -288,8 +289,9 @@ TUI_hide_default('attachment_text_field');
     <td rowspan="3">
       <select name="version" id="version" size="5">
         [%- FOREACH v = version %]
-          <option value="[% v FILTER html %]"
-            [% ' selected="selected"' IF v == default.version %]>[% v FILTER html -%]
+          [% NEXT IF NOT v.is_active %]
+          <option value="[% v.name FILTER html %]"
+            [% ' selected="selected"' IF v.name == default.version %]>[% v.name FILTER html -%]
           </option>
         [%- END %]
       </select>
@@ -733,9 +735,10 @@ TUI_hide_default('attachment_text_field');
     <select name="[% field.name FILTER html %]" 
             id="[% field.name FILTER html %]">
     [%- FOREACH x = ${field.name} %]
-      <option value="[% x FILTER html %]"
-        [% " selected=\"selected\"" IF x == default.${field.name} %]>
-        [% display_value(field.name, x) FILTER html %]
+      [% NEXT IF NOT x.is_active %]
+      <option value="[% x.name FILTER html %]"
+        [% " selected=\"selected\"" IF x.name == default.${field.name} %]>
+        [% display_value(field.name, x.name) FILTER html %]
       </option>
     [% END %]
     </select>

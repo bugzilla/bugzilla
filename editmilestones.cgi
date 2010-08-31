@@ -60,6 +60,7 @@ my $sortkey        = trim($cgi->param('sortkey')     || 0);
 my $action         = trim($cgi->param('action')      || '');
 my $showbugcounts = (defined $cgi->param('showbugcounts'));
 my $token          = $cgi->param('token');
+my $isactive       = $cgi->param('isactive');
 
 #
 # product = '' -> Show nice list of products
@@ -115,9 +116,11 @@ if ($action eq 'add') {
 
 if ($action eq 'new') {
     check_token_data($token, 'add_milestone');
-    my $milestone = Bugzilla::Milestone->create({ value   => $milestone_name,
-                                                  product => $product,
-                                                  sortkey => $sortkey });
+
+    my $milestone = Bugzilla::Milestone->create({ value    => $milestone_name,
+                                                  product  => $product,
+                                                  sortkey  => $sortkey });
+
     delete_token($token);
 
     $vars->{'message'} = 'milestone_created';
@@ -205,6 +208,7 @@ if ($action eq 'update') {
 
     $milestone->set_name($milestone_name);
     $milestone->set_sortkey($sortkey);
+    $milestone->set_is_active($isactive);
     my $changes = $milestone->update();
     # Reloading the product since the default milestone name
     # could have been changed.

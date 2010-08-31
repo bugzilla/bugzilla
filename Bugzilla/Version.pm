@@ -44,6 +44,7 @@ use constant DB_COLUMNS => qw(
     id
     value
     product_id
+    isactive
 );
 
 use constant REQUIRED_FIELD_MAP => {
@@ -52,11 +53,13 @@ use constant REQUIRED_FIELD_MAP => {
 
 use constant UPDATE_COLUMNS => qw(
     value
+    isactive
 );
 
 use constant VALIDATORS => {
-    product => \&_check_product,
-    value   => \&_check_value,
+    product  => \&_check_product,
+    value    => \&_check_value,
+    isactive => \&Bugzilla::Object::check_boolean,
 };
 
 use constant VALIDATOR_DEPENDENCIES => {
@@ -153,6 +156,7 @@ sub remove_from_db {
 ###############################
 
 sub product_id { return $_[0]->{'product_id'}; }
+sub is_active  { return $_[0]->{'isactive'};   }
 
 sub product {
     my $self = shift;
@@ -166,7 +170,8 @@ sub product {
 # Validators
 ################################
 
-sub set_name { $_[0]->set('value', $_[1]); }
+sub set_name      { $_[0]->set('value', $_[1]);    }
+sub set_is_active { $_[0]->set('isactive', $_[1]); }
 
 sub _check_value {
     my ($invocant, $name, undef, $params) = @_;

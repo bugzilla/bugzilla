@@ -234,6 +234,9 @@
           <li>Default CC list deleted</li>
         [% END %]
       [% END %]
+      [% IF changes.isactive.defined %]
+        <li>[% comp.is_active ? "Enabled" : "Disabled" %] for [% terms.bugs %]</li>
+      [% END %]
       [% Hook.process('component_updated_fields') %]
       </ul>
     [% ELSE %]
@@ -547,6 +550,9 @@
         [% IF changes.sortkey.defined %]
           <li>Sortkey updated to <em>[% milestone.sortkey FILTER html %]</em>
         [% END %]
+        [% IF changes.isactive.defined %]
+          <li>[% milestone.is_active ? "Enabled" : "Disabled" %] for [% terms.bugs %]</li>
+        [% END %]
       </ul>
     [% ELSE %]
       No changes made to milestone <em>[% milestone.name FILTER html %]</em>.
@@ -831,9 +837,16 @@
   [% ELSIF message_tag == "version_updated" %]
     [% title = "Version Updated" %]
     [% IF changes.size %]
-      [% IF changes.value.defined %]
-        Version renamed to <em>[% version.name FILTER html %]</em>.
-      [% END %]
+      Changes to the version <em>[% version.name FILTER html %]</em>
+      have been saved:
+      <ul>
+        [% IF changes.value.defined %]
+          <li>Version renamed to <em>[% version.name FILTER html %]</em></li>
+        [% END %]
+        [% IF changes.isactive.defined %]
+          <li>[% version.is_active ? "Enabled" : "Disabled" %] for [% terms.bugs %]</li>
+        [% END %]
+      </ul>
     [% ELSE %]
       No changes made to version <em>[% version.name FILTER html %]</em>.
     [% END %]

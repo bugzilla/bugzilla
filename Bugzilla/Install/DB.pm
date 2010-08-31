@@ -631,6 +631,9 @@ sub update_table_definitions {
     # 2010-07-18 LpSolit@gmail.com - Bug 119703
     _remove_attachment_isurl();
 
+    # 2009-05-07 ghendricks@novell.com - Bug 77193
+    _add_isactive_to_product_fields();
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################
@@ -3394,6 +3397,26 @@ sub _remove_attachment_isurl {
                  undef, 'url.txt');
         $dbh->bz_drop_column('attachments', 'isurl');
         $dbh->do("DELETE FROM fielddefs WHERE name='attachments.isurl'");
+    }
+}
+
+sub _add_isactive_to_product_fields {
+    my $dbh = Bugzilla->dbh;
+
+    # If we add the isactive column all values should start off as active
+    if (!$dbh->bz_column_info('components', 'isactive')) {
+        $dbh->bz_add_column('components', 'isactive', 
+            {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'TRUE'});
+    }
+    
+    if (!$dbh->bz_column_info('versions', 'isactive')) {
+        $dbh->bz_add_column('versions', 'isactive', 
+            {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'TRUE'});
+    }
+
+    if (!$dbh->bz_column_info('milestones', 'isactive')) {
+        $dbh->bz_add_column('milestones', 'isactive', 
+            {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'TRUE'});
     }
 }
 

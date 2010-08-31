@@ -128,6 +128,7 @@ if ($action eq 'new') {
     my $default_qa_contact = trim($cgi->param('initialqacontact') || '');
     my $description        = trim($cgi->param('description')      || '');
     my @initial_cc         = $cgi->param('initialcc');
+    my $isactive           = $cgi->param('isactive');
 
     my $component = Bugzilla::Component->create({
         name             => $comp_name,
@@ -230,7 +231,8 @@ if ($action eq 'update') {
     my $default_qa_contact    = trim($cgi->param('initialqacontact') || '');
     my $description           = trim($cgi->param('description')      || '');
     my @initial_cc            = $cgi->param('initialcc');
-
+    my $isactive              = $cgi->param('isactive');
+  
     my $component =
         Bugzilla::Component->check({ product => $product, name => $comp_old_name });
 
@@ -239,6 +241,7 @@ if ($action eq 'update') {
     $component->set_default_assignee($default_assignee);
     $component->set_default_qa_contact($default_qa_contact);
     $component->set_cc_list(\@initial_cc);
+    $component->set_is_active($isactive);
     my $changes = $component->update();
 
     $vars->{'message'} = 'component_updated';

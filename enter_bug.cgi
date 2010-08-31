@@ -502,7 +502,7 @@ else {
 #
 # Eventually maybe each product should have a "current version"
 # parameter.
-$vars->{'version'} = [map($_->name, @{$product->versions})];
+$vars->{'version'} = $product->versions;
 
 my $version_cookie = $cgi->cookie("VERSION-" . $product->name);
 
@@ -521,7 +521,7 @@ if ( ($cloned_bug_id) &&
 
 # Get list of milestones.
 if ( Bugzilla->params->{'usetargetmilestone'} ) {
-    $vars->{'target_milestone'} = [map($_->name, @{$product->milestones})];
+    $vars->{'target_milestone'} = $product->milestones;
     if (formvalue('target_milestone')) {
        $default{'target_milestone'} = formvalue('target_milestone');
     } else {

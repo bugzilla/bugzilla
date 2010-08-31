@@ -124,6 +124,7 @@
             [% legal_values = field.legal_values %]
           [% END %]
           [% FOREACH legal_value = legal_values %]
+            [% NEXT IF NOT legal_value.is_active AND NOT value.contains(legal_value.name).size %]
             <option value="[% legal_value.name FILTER html %]"
                     id="v[% legal_value.id FILTER html %]_
                         [%- field.name FILTER html %]"

@@ -287,37 +287,33 @@ foreach my $dep_field (qw(dependson blocked)) {
     }
 }
 # Formulate the CC data into two arrays of users involved in this CC change.
-my (@cc_add, @cc_remove);
 if (defined $cgi->param('newcc')
     or defined $cgi->param('addselfcc')
     or defined $cgi->param('removecc')
     or defined $cgi->param('masscc')) 
 {
-
+    my (@cc_add, @cc_remove);
     # If masscc is defined, then we came from buglist and need to either add or
     # remove cc's... otherwise, we came from show_bug and may need to do both.
-    my ($cc_add, $cc_remove) = "";
     if (defined $cgi->param('masscc')) {
         if ($cgi->param('ccaction') eq 'add') {
-            $cc_add = $cgi->param('masscc');
+            @cc_add = $cgi->param('masscc');
         } elsif ($cgi->param('ccaction') eq 'remove') {
-            $cc_remove = $cgi->param('masscc');
+            @cc_remove = $cgi->param('masscc');
         }
     } else {
-        $cc_add = $cgi->param('newcc');
-        # We came from bug_form which uses a select box to determine what cc's
+        @cc_add = $cgi->param('newcc');
+        push(@cc_add, Bugzilla->user) if $cgi->param('addselfcc');
+
+        # We came from show_bug which uses a select box to determine what cc's
         # need to be removed...
         if ($cgi->param('removecc') && $cgi->param('cc')) {
-            $cc_remove = join(",", $cgi->param('cc'));
+            @cc_remove = $cgi->param('cc');
         }
     }
 
-    push(@cc_add, split(/[\s,]+/, $cc_add)) if $cc_add;
-    push(@cc_add, Bugzilla->user) if $cgi->param('addselfcc');
-
-    push(@cc_remove, split(/[\s,]+/, $cc_remove)) if $cc_remove;
+    $set_all_fields{cc} = { add => \@cc_add, remove => \@cc_remove };
 }
-$set_all_fields{cc} = { add => \@cc_add, remove => \@cc_remove };
 
 # Fields that can only be set on one bug at a time.
 if (defined $cgi->param('id')) {

@@ -508,7 +508,12 @@ sub insert_create_data {
     $dbh->do("INSERT INTO $table (" . join(', ', @field_names)
              . ") VALUES ($qmarks)", undef, @values);
     my $id = $dbh->bz_last_key($table, $class->ID_FIELD);
-    return $class->new($id);
+
+    my $object = $class->new($id);
+
+    Bugzilla::Hook::process('object_end_of_create', { class => $class,
+                                                      object => $object });
+    return $object;
 }
 
 sub get_all {

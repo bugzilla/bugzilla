@@ -1470,6 +1470,10 @@
     field with the "[% search_descs.$operator FILTER html %]" 
     ([% operator FILTER html %]) search type.
 
+  [% ELSIF error == 'see_also_self_reference' %]
+    You cannot put this [% terms.bug %] into its own
+    [%+ field_descs.see_also %] field.
+
   [% ELSIF error == "series_already_exists" %]
     [% title = "Series Already Exists" %]
     [% docslinks = {'reporting.html' => 'Reporting'} %]

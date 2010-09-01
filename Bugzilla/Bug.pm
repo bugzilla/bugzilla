@@ -952,6 +952,9 @@ sub update {
                                 join(', ', @$added_see)];
     }
 
+    # Call update for the referenced bugs.
+    $_->update() foreach @{ $self->{see_also_update} || [] };
+
     # Log bugs_activity items
     # XXX Eventually, when bugs_activity is able to track the dupe_id,
     # this code should go below the duplicates-table-updating code below.
@@ -1191,6 +1194,12 @@ sub send_changes {
     foreach my $id (sort { $a <=> $b } (keys %changed_deps)) {
         _send_bugmail({ forced => { changer => $user }, type => "dep",
                          id => $id }, $vars);
+    }
+
+    # Sending emails for the referenced bugs.
+    foreach my $ref_bug (@{ $self->{see_also_update} || [] }) {
+        _send_bugmail({ forced => { changer => $user },
+                        id => $ref_bug->id }, $vars);
     }
 }
 
@@ -2785,6 +2794,13 @@ sub add_see_also {
     my ($self, $input) = @_;
     $input = trim($input);
 
+    # If a bug id/alias has been taken, then treat it
+    # as a link to the local Bugzilla.
+    my $local_bug_uri = correct_urlbase() . "show_bug.cgi?id=";
+    if (my ($id) = $input =~ m/^(\w+)$/) {
+        $input = $local_bug_uri . $id;
+    }
+
     # We assume that the URL is an HTTP URL if there is no (something):// 
     # in front.
     my $uri = new URI($input);
@@ -2881,6 +2897,30 @@ sub add_see_also {
         # And remove any # part if there is one.
         $uri->fragment(undef);
         $result = $uri->canonical->as_string;
+
+        # See Also field of the referenced bug is updated
+        # to point to the current bug.
+        if ($result =~ m/\Q$local_bug_uri\E/) {
+            my $ref_bug = Bugzilla::Bug->check($bug_id);
+            if ($ref_bug->id == $self->id) {
+                ThrowUserError('see_also_self_reference');
+            }
+        
+            my $product = $ref_bug->product_obj;
+            if (!Bugzilla->user->can_edit_product($product->id)) {
+                ThrowUserError("product_edit_denied",
+                               { product => $product->name });
+            }
+
+            # We add it directly instead of calling $ref_bug->add_see_also
+            # to avoid recursion.
+            my $ref_input = $local_bug_uri . $self->id;
+            if (!grep($ref_input, @{ $ref_bug->see_also })) {
+                push @{ $ref_bug->see_also }, $ref_input;
+                push @{ $self->{see_also_update} }, $ref_bug;
+            }
+        }
+
     }
 
     if (length($result) > MAX_BUG_URL_LENGTH) {

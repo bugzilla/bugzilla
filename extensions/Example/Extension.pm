@@ -408,6 +408,15 @@ sub object_columns {
     }
 }
 
+sub object_end_of_create {
+    my ($self, $args) = @_;
+    
+    my $class  = $args->{'class'};
+    my $object = $args->{'object'};
+
+    warn "Created a new $class object!";
+}
+
 sub object_end_of_create_validators {
     my ($self, $args) = @_;
     

@@ -210,8 +210,7 @@ Params:
 
 =over
 
-=item C<bug> - The changed bug object, with all fields set to their updated
-values.
+=item C<bug> - The created bug object.
 
 =item C<timestamp> - The timestamp used for all updates in this transaction,
 as a SQL date string.
@@ -818,6 +817,27 @@ of that type.
 
 This arrayref does not contain the standard column names--you cannot modify
 or remove standard object columns using this hook.
+
+=back
+
+=head2 object_end_of_create
+
+Called at the end of L<Bugzilla::Object/create>, after all other changes are
+made to the database. This occurs inside a database transaction.
+
+Params:
+
+=over
+
+=item C<class>
+
+The name of the class that C<create> was called on. You can check this 
+like C<< if ($class->isa('Some::Class')) >> in your code, to perform specific
+tasks for only certain classes.
+
+=item C<object>
+
+The created object.
 
 =back
 

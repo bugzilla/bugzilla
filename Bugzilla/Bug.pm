@@ -2791,14 +2791,14 @@ sub remove_group {
 }
 
 sub add_see_also {
-    my ($self, $input) = @_;
+    my ($self, $input, $skip_recursion) = @_;
     $input = trim($input);
 
     # If a bug id/alias has been taken, then treat it
     # as a link to the local Bugzilla.
     my $local_bug_uri = correct_urlbase() . "show_bug.cgi?id=";
-    if (my ($id) = $input =~ m/^(\w+)$/) {
-        $input = $local_bug_uri . $id;
+    if ($input =~ m/^\w+$/) {
+        $input = $local_bug_uri . $input;
     }
 
     # We assume that the URL is an HTTP URL if there is no (something):// 
@@ -2900,7 +2900,7 @@ sub add_see_also {
 
         # See Also field of the referenced bug is updated
         # to point to the current bug.
-        if ($result =~ m/\Q$local_bug_uri\E/) {
+        if ($result =~ m/^\Q$local_bug_uri\E/ and !$skip_recursion) {
             my $ref_bug = Bugzilla::Bug->check($bug_id);
             if ($ref_bug->id == $self->id) {
                 ThrowUserError('see_also_self_reference');
@@ -2912,11 +2912,9 @@ sub add_see_also {
                                { product => $product->name });
             }
 
-            # We add it directly instead of calling $ref_bug->add_see_also
-            # to avoid recursion.
             my $ref_input = $local_bug_uri . $self->id;
             if (!grep($ref_input, @{ $ref_bug->see_also })) {
-                push @{ $ref_bug->see_also }, $ref_input;
+                $ref_bug->add_see_also($ref_input, 'skip recursion');
                 push @{ $self->{see_also_update} }, $ref_bug;
             }
         }

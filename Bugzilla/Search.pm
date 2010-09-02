@@ -537,13 +537,9 @@ sub init {
     my $sql_deadlinefrom;
     my $sql_deadlineto;
     if ($user->is_timetracker) {
-      my $deadlinefrom;
-      my $deadlineto;
-            
-      if ($params->param('deadlinefrom')){
-        $params->param('deadlinefrom', '') if lc($params->param('deadlinefrom')) eq 'now';
-        $deadlinefrom = SqlifyDate($params->param('deadlinefrom'));
-        $sql_deadlinefrom = $dbh->quote($deadlinefrom);
+      if ($params->param('deadlinefrom')) {
+        my $deadlinefrom = $params->param('deadlinefrom');
+        $sql_deadlinefrom = $dbh->quote(SqlifyDate($deadlinefrom));
         trick_taint($sql_deadlinefrom);
         my $term = "bugs.deadline >= $sql_deadlinefrom";
         push(@wherepart, $term);
@@ -553,10 +549,9 @@ sub init {
         });
       }
       
-      if ($params->param('deadlineto')){
-        $params->param('deadlineto', '') if lc($params->param('deadlineto')) eq 'now';
-        $deadlineto = SqlifyDate($params->param('deadlineto'));
-        $sql_deadlineto = $dbh->quote($deadlineto);
+      if ($params->param('deadlineto')) {
+        my $deadlineto = $params->param('deadlineto');
+        $sql_deadlineto = $dbh->quote(SqlifyDate($deadlineto));
         trick_taint($sql_deadlineto);
         my $term = "bugs.deadline <= $sql_deadlineto";
         push(@wherepart, $term);
@@ -1003,7 +998,7 @@ sub init {
 ###############################################################################
 sub SqlifyDate {
     my ($str) = @_;
-    $str = "" if !defined $str;
+    $str = "" if (!defined $str || lc($str) eq 'now');
     if ($str eq "") {
         my ($sec, $min, $hour, $mday, $month, $year, $wday) = localtime(time());
         return sprintf("%4d-%02d-%02d 00:00:00", $year+1900, $month+1, $mday);

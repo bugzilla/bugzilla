@@ -149,6 +149,7 @@ use Memoize;
     ERROR_MODE_TEST
 
     COLOR_ERROR
+    COLOR_SUCCESS
 
     INSTALLATION_MODE_INTERACTIVE
     INSTALLATION_MODE_NON_INTERACTIVE
@@ -470,6 +471,7 @@ use constant ERROR_MODE_TEST           => 4;
 
 # The ANSI colors of messages that command-line scripts use
 use constant COLOR_ERROR => 'red';
+use constant COLOR_SUCCESS => 'green';
 
 # The various modes that checksetup.pl can run in.
 use constant INSTALLATION_MODE_INTERACTIVE => 0;

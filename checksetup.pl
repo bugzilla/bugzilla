@@ -53,7 +53,8 @@ BEGIN { chdir dirname($0); }
 use lib qw(. lib);
 use Bugzilla::Constants;
 use Bugzilla::Install::Requirements;
-use Bugzilla::Install::Util qw(install_string get_version_and_os init_console);
+use Bugzilla::Install::Util qw(install_string get_version_and_os 
+                               init_console success);
 
 ######################################################################
 # Live Code
@@ -97,6 +98,9 @@ exit if $switch{'check-modules'};
 
 require Bugzilla;
 require Bugzilla::User;
+
+require Bugzilla::Util;
+import Bugzilla::Util qw(get_text);
 
 require Bugzilla::Config;
 import Bugzilla::Config qw(:admin);
@@ -232,8 +236,11 @@ Bugzilla::Hook::process('install_before_final_checks', { silent => $silent });
 # Check if the default parameter for urlbase is still set, and if so, give
 # notification that they should go and visit editparams.cgi 
 if (Bugzilla->params->{'urlbase'} eq '') {
-    print "\n" . Bugzilla::Install::get_text('install_urlbase_default') . "\n"
+    print "\n" . get_text('install_urlbase_default') . "\n"
         unless $silent;
+}
+if (!$silent) {
+    success(get_text('install_success'));
 }
 
 __END__

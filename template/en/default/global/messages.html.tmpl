@@ -683,6 +683,9 @@
   [% ELSIF message_tag == "install_setting_setup" %]
     Setting up user preferences...
 
+  [% ELSIF message_tag == "install_success" %]
+    checksetup.pl complete.
+
   [% ELSIF message_tag == "install_table_drop" %]
     Dropping the '[% name FILTER html %]' table...
 

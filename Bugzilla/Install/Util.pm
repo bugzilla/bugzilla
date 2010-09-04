@@ -47,6 +47,7 @@ our @EXPORT_OK = qw(
     indicate_progress
     install_string
     include_languages
+    success
     template_include_path
     vers_cmp
     init_console
@@ -625,6 +626,11 @@ sub _console_die {
     # We put quotes around the message to stringify any object exceptions,
     # like Template::Exception.
     die colored("$message", COLOR_ERROR) . "\n";
+}
+
+sub success {
+    my ($message) = @_;
+    print colored($message, COLOR_SUCCESS), "\n";
 }
 
 sub prevent_windows_dialog_boxes {

@@ -144,7 +144,7 @@ elsif ($action eq 'begin-sudo') {
 
     # If we have a reason passed in, keep it under 200 characters
     my $reason = $cgi->param('reason') || '';
-    $reason = substr($reason, $[, 200);
+    $reason = substr($reason, 0, 200);
     
     # Calculate the session expiry time (T + 6 hours)
     my $time_string = time2str('%a, %d-%b-%Y %T %Z', time + MAX_SUDO_TOKEN_AGE, 'GMT');

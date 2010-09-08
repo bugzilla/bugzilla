@@ -346,6 +346,8 @@ sub init {
     }
 
     foreach my $field ($params->param()) {
+        # "votes" got special treatment, above.
+        next if $field eq 'votes';
         if (grep { $_->name eq $field } @legal_fields) {
             my $type = $params->param("${field}_type");
             if (!$type) {

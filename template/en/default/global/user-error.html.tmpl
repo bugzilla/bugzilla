@@ -1498,32 +1498,17 @@
     <a href="http://www.mozilla.org">Upgrade today</a>. :-)
 
   [% ELSIF error == "still_unresolved_bugs" %]
-    [% IF dependency_count == 1 %]
-      [% terms.Bug %]# <a href="show_bug.cgi?id=[% dependencies.0.bug_id FILTER none %]">[% dependencies.0.bug_id FILTER none %]</a>
-      still has [% dependencies.0.dependencies FILTER html %] unresolved
-      [% IF dependencies.0.dependencies == 1 %]
-        dependency
-      [% ELSE %]
-        dependencies
-      [% END %]. Show
-      <a href="showdependencytree.cgi?id=[% dependencies.0.bug_id FILTER none %]&amp;hide_resolved=1">Dependency
-      Tree</a>.
+    [% title = "Unresolved Dependencies" %]
+    [% terms.Bug %] [%+ bug_id FILTER bug_link(bug_id) FILTER none %]
+    has [% dep_count FILTER none %] unresolved
+    [% IF dep_count == 1 %]
+      dependency
     [% ELSE %]
-      There are [% dependency_count FILTER none %] open [% terms.bugs %] which
-      have unresolved dependencies.
-      <br>
-      [% FOREACH bug = dependencies %]
-        [% terms.Bug %]# <a href="show_bug.cgi?id=[% bug.bug_id FILTER none %]">[% bug.bug_id FILTER none %]</a>
-        has [% bug.dependencies FILTER html %] open
-        [% IF bug.dependencies == 1 %]
-          dependency.
-        [% ELSE %]
-          dependencies.
-        [% END %]
-        (<a href="showdependencytree.cgi?id=[% bug.bug_id FILTER none %]&amp;hide_resolved=1">Dependency
-        Tree</a>)<br>
-      [% END %]
-    [% END %]
+      dependencies
+    [% END %].
+    They must either be resolved or removed from the
+    "[% field_descs.dependson FILTER html %]" field before you can resolve
+    this [% terms.bug %] as [% display_value("resolution", "FIXED") FILTER html %].
 
   [% ELSIF error == "sudo_invalid_cookie" %]
     [% title = "Invalid Sudo Cookie" %]

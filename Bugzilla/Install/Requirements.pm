@@ -116,18 +116,8 @@ sub REQUIRED_MODULES {
     {
         package => 'Email-MIME',
         module  => 'Email::MIME',
-        version => '1.861'
-    },
-    {
-        package => 'Email-MIME-Encodings',
-        module  => 'Email::MIME::Encodings',
-        # Fixes bug 486206
-        version => '1.313',
-    },
-    {
-        package => 'Email-MIME-Modifier',
-        module  => 'Email::MIME::Modifier',
-        version => '1.442'
+        # This fixes a memory leak in walk_parts that affected jobqueue.pl.
+        version => '1.904'
     },
     {
         package => 'URI',

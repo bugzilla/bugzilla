@@ -355,18 +355,6 @@
 
         <listitem>
           <para>
-            Email::MIME::Encodings (&min-email-mime-encodings-ver;)
-          </para>
-        </listitem>
-
-        <listitem>
-          <para>
-            Email::MIME::Modifier (&min-email-mime-modifier-ver;)
-          </para>
-        </listitem>
-
-        <listitem>
-          <para>
             Template (&min-template-ver;)
           </para>
         </listitem>

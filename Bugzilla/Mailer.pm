@@ -48,8 +48,6 @@ use Encode qw(encode);
 use Encode::MIME::Header;
 use Email::Address;
 use Email::MIME;
-# Loading this gives us encoding_set.
-use Email::MIME::Modifier;
 use Email::Send;
 
 sub MessageToMTA {

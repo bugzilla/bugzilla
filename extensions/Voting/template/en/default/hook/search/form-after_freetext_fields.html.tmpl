@@ -18,14 +18,11 @@
   #   Max Kanat-Alexander <mkanat@bugzilla.org>
   #%]
 
-<tr>
-  <td align="right">
+<div class="search_field_row">
+  <span class="field_label ">
     <label for="votes">Only [% terms.bugs %] with at least</label>:
-  </td>
-  <td>
-    <input name="votes" id="votes" size="3"
-           value="[% default.votes.0 FILTER html %]"> votes
-    <input type="hidden" name="votes_type" value="greaterthaneq">
-  </td>
-</tr>
-
+  </span>
+  <input name="votes" id="votes" size="3"
+         value="[% default.votes.0 FILTER html %]"> votes
+  <input type="hidden" name="votes_type" value="greaterthaneq">
+</div>

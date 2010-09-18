@@ -253,7 +253,7 @@
     [% ELSIF reason == 'path_only' %]
       You must specify a full URL.
     [% ELSIF reason == 'show_bug' %]
-      [%+ field_descs.see_also %] URLs should point to one of:
+      [%+ field_descs.see_also FILTER html %] URLs should point to one of:
       <ul>
         <li><code>show_bug.cgi</code> in a [% terms.Bugzilla %]
           installation.</li>

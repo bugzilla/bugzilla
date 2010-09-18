@@ -2906,11 +2906,17 @@ sub add_see_also {
         $uri->query("id=$bug_id");
         # And remove any # part if there is one.
         $uri->fragment(undef);
-        $result = $uri->canonical->as_string;
+        my $uri_canonical = $uri->canonical;
+        $result = $uri_canonical->as_string;
 
-        # See Also field of the referenced bug is updated
-        # to point to the current bug.
-        if ($result =~ m/^\Q$local_bug_uri\E/ and !$skip_recursion) {
+        # If this is a link to a local bug (treating the domain
+        # case-insensitively and ignoring http(s)://), then also update
+        # the other bug to point at this one.
+        my $canonical_local = URI->new($local_bug_uri)->canonical;
+        if (!$skip_recursion 
+            and $canonical_local->authority eq $uri_canonical->authority
+            and $canonical_local->path eq $uri_canonical->path) 
+        {
             my $ref_bug = Bugzilla::Bug->check($bug_id);
             if ($ref_bug->id == $self->id) {
                 ThrowUserError('see_also_self_reference');

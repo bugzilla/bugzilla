@@ -20,6 +20,7 @@
   # name: mandatory; field name
   # id: optional; field id
   # value: optional; default field value/selection
+  # classes: optional; an array of classes to be added
   # onchange: optional; onchange attribute value
   # disabled: optional; if true, the field is disabled
   # accesskey: optional, input only; accesskey attribute value
@@ -34,6 +35,7 @@
 [% IF Param("usemenuforusers") %]
 <select name="[% name FILTER html %]"
   [% IF id %] id="[% id FILTER html %]" [% END %]
+  [% IF classes %] class="[% classes.join(' ') FILTER html %]" [% END %]
   [% IF onchange %] onchange="[% onchange FILTER html %]" [% END %]
   [% IF disabled %] disabled="[% disabled FILTER html %]" [% END %]
   [% IF accesskey %] accesskey="[% accesskey FILTER html %]" [% END %]
@@ -78,11 +80,13 @@
 </select>
 [% ELSE %]
   [% IF id && feature_enabled('jsonrpc') %]
-    <div id="[% id FILTER html %]_autocomplete">
+    <div id="[% id FILTER html %]_autocomplete" 
+         [% IF classes %] class="[% classes.join(' ') FILTER html %]" [% END %]>
   [% END %]  
   <input
     name="[% name FILTER html %]"
     value="[% value FILTER html %]"
+    [% IF classes %] class="[% classes.join(' ') FILTER html %]" [% END %]
     [% IF onchange %] onchange="[% onchange FILTER html %]" [% END %]
     [% IF disabled %] disabled="[% disabled FILTER html %]" [% END %]
     [% IF accesskey %] accesskey="[% accesskey FILTER html %]" [% END %]

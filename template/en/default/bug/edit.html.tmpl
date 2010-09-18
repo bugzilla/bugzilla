@@ -482,6 +482,7 @@
                  id => "assigned_to"
                  name => "assigned_to"
                  value => bug.assigned_to.login
+                 classes => ["bz_userfield"]
                  size => 30
             %]
             <br>
@@ -524,6 +525,7 @@
                 name => "qa_contact"
                 value => bug.qa_contact.login
                 size => 30
+                classes => ["bz_userfield"]
                 emptyok => 1
             %]
             <br>
@@ -821,6 +823,7 @@
                   name => "newcc"
                   value => ""
                   size => 30
+                  classes => ["bz_userfield"]
                   multiple => 5
                 %]
             </div>

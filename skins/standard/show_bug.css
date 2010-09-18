@@ -109,3 +109,7 @@ table#flags {
 .knob-buttons {
     float: right;
 }
+
+.text_input, .bz_userfield, #keyword_container {
+    width: 100%;
+}

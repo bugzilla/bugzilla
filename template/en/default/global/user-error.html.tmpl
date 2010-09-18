@@ -251,8 +251,14 @@
     [% IF reason == 'http' %]
       URLs must start with "http" or "https".
     [% ELSIF reason == 'show_bug' %]
-      [%+ terms.Bug %] URLs should point to <code>show_bug.cgi</code>
-      in a [% terms.Bugzilla %] installation.
+      [%+ field_descs.see_also %] URLs should point to one of:
+      <ul>
+        <li><code>show_bug.cgi</code> in a [% terms.Bugzilla %]
+          installation.</li>
+        <li>A b[% %]ug on launchpad.net</li>
+        <li>An issue on code.google.com.</li>
+        <li>A b[% %]ug on b[% %]ugs.debian.org.</li>
+      </ul>
     [% ELSIF reason == 'id' %]
       There is no valid [% terms.bug %] id in that URL.
     [% END %]

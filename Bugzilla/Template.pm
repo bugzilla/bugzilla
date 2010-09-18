@@ -399,10 +399,17 @@ sub multiline_sprintf {
 sub _mtime { return (stat($_[0]))[9] }
 
 sub mtime_filter {
-    my ($file_url) = @_;
-    my $cgi_path = bz_locations()->{'cgi_path'};
-    my $file_path = "$cgi_path/$file_url";
-    return "$file_url?" . _mtime($file_path);
+    my ($file_url, $mtime) = @_;
+    # This environment var is set in the .htaccess if we have mod_headers
+    # and mod_expires installed, to make sure that JS and CSS with "?"
+    # after them will still be cached by clients.
+    return $file_url if !$ENV{BZ_CACHE_CONTROL};
+    if (!$mtime) {
+        my $cgi_path = bz_locations()->{'cgi_path'};
+        my $file_path = "$cgi_path/$file_url";
+        $mtime = _mtime($file_path);
+    }
+    return "$file_url?$mtime";
 }
 
 # Set up the skin CSS cascade:
@@ -453,8 +460,7 @@ sub css_files {
 sub _css_link_set {
     my ($file_name) = @_;
 
-    my $standard_mtime = _mtime($file_name);
-    my %set = (standard => $file_name . "?$standard_mtime");
+    my %set = (standard => mtime_filter($file_name));
     
     # We use (^|/) to allow Extensions to use the skins system if they
     # want.
@@ -471,7 +477,7 @@ sub _css_link_set {
         my $skin_file_name = $file_name;
         $skin_file_name =~ s{(^|/)skins/standard/}{skins/contrib/$option/};
         if (my $mtime = _mtime("$cgi_path/$skin_file_name")) {
-            $skin_urls{$option} = $skin_file_name . "?$mtime";
+            $skin_urls{$option} = mtime_filter($skin_file_name, $mtime);
         }
     }
     $set{alternate} = \%skin_urls;
@@ -484,7 +490,7 @@ sub _css_link_set {
     my $custom_file_name = $file_name;
     $custom_file_name =~ s{(^|/)skins/standard/}{skins/custom/};
     if (my $custom_mtime = _mtime("$cgi_path/$custom_file_name")) {
-        $set{custom} = $custom_file_name . "?$custom_mtime";
+        $set{custom} = mtime_filter($custom_file_name, $custom_mtime);
     }
     
     return \%set;

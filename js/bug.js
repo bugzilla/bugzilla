@@ -100,7 +100,7 @@ YAHOO.bugzilla.dupTable = {
         new_ds.maxCacheEntries = 3;
         new_ds.responseSchema = {
             resultsList : "result.bugs",
-            metaFields : { error: "error", jsonRpcId: "id" },
+            metaFields : { error: "error", jsonRpcId: "id" }
         };
         // DataSource can't understand a JSON-RPC error response, so
         // we have to modify the result data if we get one.
@@ -125,5 +125,5 @@ YAHOO.bugzilla.dupTable = {
             this.dataSource, data.options); 
         YAHOO.util.Event.on(data.summary_field, 'keyup', this.doUpdateTable,
                             [dt, data.product_name]);
-    },
+    }
 };

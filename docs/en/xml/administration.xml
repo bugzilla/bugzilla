@@ -2641,7 +2641,7 @@ ReadOnly: ENTRY, NA/NA, CANEDIT
 
     <para>
     Groups allow for separating bugs into logical divisions.
-    Groups are typically used to
+    Groups are typically used
     to isolate bugs that should only be seen by certain people. For
     example, a company might create a different group for each one of its customers
     or partners. Group permissions could be set so that each partner or customer would

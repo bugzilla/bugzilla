@@ -342,7 +342,19 @@ TUI_hide_default('information_query');
           [% " selected" IF default.emailtype.$n == qv.name %]>[% qv.description %]</option>
       [% END %]
       </select>
-      <input name="email[% n %]" class="email" id="email[% n %]" value="[% default.email.$n FILTER html %]">
+      [% IF feature_enabled('jsonrpc') %]
+        <div id="email[% n %]_autocomplete">
+      [% END %]
+      <input name="email[% n %]" class="email" id="email[% n %]" 
+             value="[% default.email.$n FILTER html %]">
+      [% IF feature_enabled('jsonrpc') %]
+        <div id="email[% n %]_autocomplete_container"></div>
+        </div>
+        <script type="text/javascript">
+          YAHOO.bugzilla.userAutocomplete.init( "email[% n %]", 
+                    "email[% n %]_autocomplete_container");
+        </script>
+      [% END %]
     </div>
   [% END %]
    [% Hook.process('email_numbering_end') %]

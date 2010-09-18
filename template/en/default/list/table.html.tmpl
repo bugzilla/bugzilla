@@ -207,7 +207,10 @@
         [% SET login_column = column.remove('_realname$') %]
         [% bug.${login_column}.truncate(abbrev.$column.maxlength, 
                                         abbrev.$column.ellipsis) FILTER html %]
-
+      [% ELSIF column == 'short_desc' || column == "short_short_desc" %]
+        <a href="show_bug.cgi?id=[% bug.id FILTER html %]">
+          [%- bug.$column.truncate(abbrev.$column.maxlength, abbrev.$column.ellipsis) FILTER html -%]
+        </a>
       [% ELSE %]
         [%- display_value(column, bug.$column).truncate(abbrev.$column.maxlength, abbrev.$column.ellipsis) FILTER html -%]
       [% END %]

@@ -176,16 +176,19 @@ EOT
     # And now check the version of the database server itself.
     my $dbh = _get_no_db_connection();
 
-    printf("Checking for %15s %-9s ", $sql_server, "(v$sql_want)")
-        if $output;
     my $sql_vers = $dbh->bz_server_version;
     $dbh->disconnect;
 
+    my $version_ok = vers_cmp($sql_vers, $sql_want) > -1 ? 1 : 0;
+    if ($output) {
+        Bugzilla::Install::Requirements::_checking_for({
+            package => $sql_server, wanted => $sql_want,
+            found   => $sql_vers, ok => $version_ok });
+    }
+
     # Check what version of the database server is installed and let
     # the user know if the version is too old to be used with Bugzilla.
-    if ( vers_cmp($sql_vers,$sql_want) > -1 ) {
-        print "ok: found v$sql_vers\n" if $output;
-    } else {
+    if (!$version_ok) {
         die <<EOT;
 
 Your $sql_server v$sql_vers is too old. Bugzilla requires version

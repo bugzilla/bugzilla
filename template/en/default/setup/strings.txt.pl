@@ -28,6 +28,11 @@
 
 %strings = (
     any  => 'any',
+    apachectl_failed => <<END,
+WARNING: We could not check the configuration of Apache. This sometimes
+happens when you are not running checksetup.pl as ##root##. To see the
+problem we ran into, run: ##command##
+END
     blacklisted => '(blacklisted)',
     checking_for => 'Checking for',
     checking_dbd      => 'Checking available perl DBD modules...',
@@ -99,6 +104,18 @@ EOT
 # Note: When translating these "modules" messages, don't change the formatting
 # if possible, because there is hardcoded formatting in 
 # Bugzilla::Install::Requirements to match the box formatting.
+    modules_message_apache => <<END,
+***********************************************************************
+* APACHE MODULES                                                      *
+***********************************************************************
+* Normally, when Bugzilla is upgraded, all Bugzilla users have to     *
+* clear their browser cache or Bugzilla will break. If you enable     *
+* certain modules in your Apache configuration (usually called        *
+* httpd.conf or apache2.conf) then your users will not have to clear  *
+* their caches when you upgrade Bugzilla. The modules you need to     *
+* enable are:                                                         *
+*                                                                     *
+END
     modules_message_db => <<EOT,
 ***********************************************************************
 * DATABASE ACCESS                                                     *

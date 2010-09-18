@@ -65,6 +65,14 @@
   [% count = count + increment %]
 [% END %]
 
+[% IF user.settings.comment_box_position.value == "before_comments" && user.id %]
+  <div class="bz_add_comment">
+    <a href="#" 
+       onclick="return goto_add_comments();">
+       Add Comment</a>
+  </div>
+[% END %]
+
 [%# Note: this template is used in multiple places; if you use this hook,
   # make sure you are aware of this fact.
   #%]  
@@ -78,6 +86,11 @@
                                return false;">Collapse All Comments</a></li>
       <li><a href="#" onclick="toggle_all_comments('expand', [% comments.size %]);
                                return false;">Expand All Comments</a></li>
+      [% IF user.settings.comment_box_position.value == "after_comments" && user.id %]
+        <li class="bz_add_comment"><a href="#" 
+            onclick="return goto_add_comments('bug_status_bottom');">
+            Add Comment</a></li>
+      [% END %]                               
     </ul>
   [% END %]
 </td>

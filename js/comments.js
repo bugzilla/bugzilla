@@ -86,3 +86,14 @@ function addCollapseLink(count) {
                    '); return false;" title="Collapse the comment.">[-]<\/a> ');
 }
 
+function goto_add_comments( anchor ){
+    anchor =  (anchor || "add_comment");
+    // we need this line to expand the comment box
+    document.getElementById('comment').focus();
+    setTimeout(function(){ 
+        document.location.hash = anchor;
+        // firefox doesn't seem to keep focus through the anchor change
+        document.getElementById('comment').focus();
+    },10);
+    return false;
+}

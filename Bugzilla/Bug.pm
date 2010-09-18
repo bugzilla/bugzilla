@@ -2793,6 +2793,15 @@ sub add_see_also {
         ThrowUserError('bug_url_invalid', { url => $input, reason => 'http' });
     }
 
+    # This stops the following edge cases from being accepted:
+    # * show_bug.cgi?id=1
+    # * /show_bug.cgi?id=1
+    # * http:///show_bug.cgi?id=1
+    if (!$uri->authority or $uri->path !~ m{/}) {
+        ThrowUserError('bug_url_invalid',
+                       { url => $input, reason => 'path_only' });
+    }
+
     my $result;
     # Launchpad URLs
     if ($uri->authority =~ /launchpad.net$/) {

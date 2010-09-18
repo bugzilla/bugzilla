@@ -514,8 +514,7 @@ input.required, select.required, span.required_explanation {
 
 /* custom styles for inline instances of autocomplete input fields */
 .yui-skin-sam .yui-ac-input { position:static !important; 
-                              vertical-align:middle !important;
-                              width:auto !important; }
+                              vertical-align:middle !important; }
 .yui-skin-sam .yui-ac-container { left:0px !important; }
 .yui-skin-sam .yui-ac { display: inline-block; }
 #bugzilla-body .yui-ac-content {

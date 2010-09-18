@@ -250,6 +250,8 @@
     <code>[% url FILTER html %]</code> is not a valid URL to [% terms.abug %].
     [% IF reason == 'http' %]
       URLs must start with "http" or "https".
+    [% ELSIF reason == 'path_only' %]
+      You must specify a full URL.
     [% ELSIF reason == 'show_bug' %]
       [%+ field_descs.see_also %] URLs should point to one of:
       <ul>

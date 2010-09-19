@@ -208,7 +208,7 @@
         [% bug.${login_column}.truncate(abbrev.$column.maxlength, 
                                         abbrev.$column.ellipsis) FILTER html %]
       [% ELSIF column == 'short_desc' || column == "short_short_desc" %]
-        <a href="show_bug.cgi?id=[% bug.id FILTER html %]">
+        <a href="show_bug.cgi?id=[% bug.bug_id FILTER html %]">
           [%- bug.$column.truncate(abbrev.$column.maxlength, abbrev.$column.ellipsis) FILTER html -%]
         </a>
       [% ELSE %]

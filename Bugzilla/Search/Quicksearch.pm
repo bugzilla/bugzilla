@@ -30,6 +30,9 @@ use Bugzilla::Status;
 use Bugzilla::Field;
 use Bugzilla::Util;
 
+use List::Util qw(min max);
+use List::MoreUtils qw(firstidx);
+
 use base qw(Exporter);
 @Bugzilla::Search::Quicksearch::EXPORT = qw(quicksearch);
 
@@ -434,21 +437,33 @@ sub _special_field_syntax {
     
     # P1-5 Syntax
     if ($word =~ m/^P(\d+)(?:-(\d+))?$/i) {
-        my $start = $1 - 1;
-        $start = 0 if $start < 0;
-        my $end = $2 - 1;
-
+        my ($p_start, $p_end) = ($1, $2);
         my $legal_priorities = get_legal_field_values('priority');
-        $end = scalar(@$legal_priorities) - 1
-            if $end > (scalar @$legal_priorities - 1);
+
+        # If Pn exists explicitly, use it.
+        my $start = firstidx { $_ eq "P$p_start" } @$legal_priorities;
+        my $end;
+        $end = firstidx { $_ eq "P$p_end" } @$legal_priorities if defined $p_end;
+
+        # If Pn doesn't exist explicitly, then we mean the nth priority.
+        if ($start == -1) {
+            $start = max(0, $p_start - 1);
+        }
         my $prios = $legal_priorities->[$start];
-        if ($end) {
+
+        if (defined $end) {
+            # If Pn doesn't exist explicitly, then we mean the nth priority.
+            if ($end == -1) {
+                $end = min(scalar(@$legal_priorities), $p_end) - 1;
+                $end = max(0, $end); # Just in case the user typed P0.
+            }
+            ($start, $end) = ($end, $start) if $end < $start;
             $prios = join(',', @$legal_priorities[$start..$end])
         }
+
         addChart('priority', 'anyexact', $prios, $negate);
         return 1;
     }
-
     return 0;    
 }
 
@@ -504,7 +519,12 @@ sub splitString {
     @quoteparts = split(/"/, $string);
     foreach my $part (@quoteparts) {
         # After every odd quote, quote special chars
-        $part = url_quote($part) if $i++ % 2;
+        if ($i++ %2) {
+            $part = url_quote($part);
+            # Protect the minus sign from being considered
+            # as negation, in quotes.
+            $part =~ s/(?<=^)\-/%2D/;
+        }
     }
     # Join again
     $string = join('"', @quoteparts);
@@ -517,9 +537,6 @@ sub splitString {
         # as it has a special meaning. Strings which start with
         # "+" must be quoted.
         s/(?<!^)\+/%2B/g;
-        # Also protect the minus sign from being considered
-        # as negation, in quotes.
-        s/(?<!^)\-/%2D/g;
         # Remove quotes
         s/"//g;
     }

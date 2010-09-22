@@ -42,6 +42,7 @@ use Email::MIME::Attachment::Stripper;
 use Getopt::Long qw(:config bundling);
 use Pod::Usage;
 use Encode;
+use Scalar::Util qw(blessed);
 
 use Bugzilla;
 use Bugzilla::Attachment;
@@ -373,7 +374,8 @@ sub die_handler {
     # In Template-Toolkit, [% RETURN %] is implemented as a call to "die".
     # But of course, we really don't want to actually *die* just because
     # the user-error or code-error template ended. So we don't really die.
-    return if $msg->isa('Template::Exception') && $msg->type eq 'return';
+    return if blessed($msg) && $msg->isa('Template::Exception')
+              && $msg->type eq 'return';
 
     # If this is inside an eval, then we should just act like...we're
     # in an eval (instead of printing the error and exiting).

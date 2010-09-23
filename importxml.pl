@@ -942,7 +942,7 @@ sub process_bug {
         $initial_status = $bug_statuses[0]->name;
     }
     else {
-        @bug_statuses = @{Bugzilla::Status->get_all()};
+        @bug_statuses = Bugzilla::Status->get_all();
         # Exclude UNCO and inactive bug statuses.
         @bug_statuses = grep { $_->is_active && $_->name ne 'UNCONFIRMED'} @bug_statuses;
         my @open_statuses = grep { $_->is_open } @bug_statuses;

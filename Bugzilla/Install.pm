@@ -345,14 +345,12 @@ sub make_admin {
     $user = ref($user) ? $user 
             : new Bugzilla::User(login_to_id($user, THROW_ERROR));
 
-    my $admin_group = new Bugzilla::Group({ name => 'admin' });
-
-    # Admins get explicit membership and bless capability for the admin group
-    $dbh->selectrow_array("SELECT id FROM groups WHERE name = 'admin'");
-
     my $group_insert = $dbh->prepare(
         'INSERT INTO user_group_map (user_id, group_id, isbless, grant_type)
               VALUES (?, ?, ?, ?)');
+
+    # Admins get explicit membership and bless capability for the admin group
+    my $admin_group = new Bugzilla::Group({ name => 'admin' });
     # These are run in an eval so that we can ignore the error of somebody
     # already being granted these things.
     eval { 

@@ -53,9 +53,9 @@
     }
 
     #header .links {
-        border-left: 1px solid silver;
-        border-right: 1px solid silver;
-        border-bottom: 1px solid silver;
+        border-left: 1px solid #747E93;
+        border-right: 1px solid #747E93;
+        border-bottom: 1px solid #747E93;
         -moz-border-radius-bottomleft: 5px;
         -moz-border-radius-bottomright: 5px;
         padding: 0.5em;

@@ -52,6 +52,12 @@ use constant get_param_list => (
    type => 't',
    default => ''
   },
+
+  {
+   name => 'strict_transport_security',
+   type => 'b',
+   default => 0,
+  },
 );
 
 1;

@@ -275,8 +275,8 @@ sub header {
     }
 
     # Add Strict-Transport-Security (STS) header if this response
-    # is over SSL and ssl_redirect is enabled.
-    if ($self->https && Bugzilla->params->{'ssl_redirect'}) {
+    # is over SSL and the strict_transport_security param is turned on.
+    if ($self->https && Bugzilla->params->{'strict_transport_security'}) {
         unshift(@_, '-strict-transport-security' => 'max-age=' . MAX_STS_AGE);
     }
 

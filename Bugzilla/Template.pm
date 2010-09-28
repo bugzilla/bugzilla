@@ -795,7 +795,7 @@ sub create {
 
             email => \&Bugzilla::Util::email_filter,
             
-            mtime_url => \&mtime_filter,
+            mtime => \&mtime_filter,
 
             # iCalendar contentline filter
             ics => [ sub {

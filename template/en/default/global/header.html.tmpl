@@ -104,7 +104,7 @@
     [%# This allows people to switch back to the "Classic" skin if they
       # are in another skin. 
       #%]
-    <link href="[% 'skins/standard/global.css' FILTER mtime_url FILTER html %]"
+    <link href="[% 'skins/standard/global.css' FILTER mtime FILTER html %]"
           rel="alternate stylesheet" 
           title="[% setting_descs.standard FILTER html %]">
     [% FOREACH style_url = css_sets.standard %]
@@ -327,5 +327,5 @@
 [% END %]
 
 [% BLOCK format_js_link %]
-  <script type="text/javascript" src="[% javascript_url FILTER mtime_url FILTER html %]"></script>
+  <script type="text/javascript" src="[% javascript_url FILTER mtime FILTER html %]"></script>
 [% END %]

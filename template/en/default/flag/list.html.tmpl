@@ -30,7 +30,7 @@
 
 [% DEFAULT flag_table_id = "flags" %]
 
-<script type="text/javascript" src="js/flag.js"></script>
+<script src="[% 'js/flag.js' FILTER mtime %]" type="text/javascript"></script>
 
 <table id="[% flag_table_id FILTER html %]">
   [% UNLESS flag_no_header %]

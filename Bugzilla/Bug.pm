@@ -2780,6 +2780,11 @@ sub add_see_also {
     my ($self, $input) = @_;
     $input = trim($input);
 
+    if (!$input) {
+        ThrowCodeError('param_required',
+                       { function => 'add_see_also', param => '$input' });
+    }
+
     # We assume that the URL is an HTTP URL if there is no (something):// 
     # in front.
     my $uri = new URI($input);

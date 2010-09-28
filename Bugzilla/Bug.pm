@@ -2795,6 +2795,11 @@ sub add_see_also {
     my ($self, $input, $skip_recursion) = @_;
     $input = trim($input);
 
+    if (!$input) {
+        ThrowCodeError('param_required', 
+                       { function => 'add_see_also', param => '$input' });
+    }
+
     # If a bug id/alias has been taken, then treat it
     # as a link to the local Bugzilla.
     my $local_bug_uri = correct_urlbase() . "show_bug.cgi?id=";

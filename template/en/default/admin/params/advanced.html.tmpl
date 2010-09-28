@@ -24,6 +24,19 @@
    desc = "Settings for advanced configurations."
 %]
 
+[% sts_desc = BLOCK %]
+  Enables the sending of the 
+  <a href="http://en.wikipedia.org/wiki/Strict_Transport_Security">Strict-Transport-Security</a>
+  header along with HTTP responses on SSL connections. This adds greater
+  security to your SSL connections by forcing the browser to always
+  access your domain over SSL and never accept an invalid certificate. 
+  However, it should only be used if you have the <code>ssl_redirect</code>
+  parameter turned on, Bugzilla is the only thing running
+  on its domain (i.e., your <code>urlbase</code> is something like
+  <code>http://bugzilla.example.com/</code>), and you never plan to disable
+  the <code>ssl_redirect</code> parameter.
+[% END %]
+
 [% param_descs = {
   cookiedomain => 
     "If your website is at 'www.foo.com', setting this to"
@@ -47,4 +60,6 @@
     _ " necessary to enter its URL if the web server cannot access the"
     _ " HTTP_PROXY environment variable. If you have to authenticate,"
     _ " use the <code>http://user:pass@proxy_url/</code> syntax.",
+
+  strict_transport_security => sts_desc,
 } %]

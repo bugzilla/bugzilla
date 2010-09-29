@@ -276,8 +276,12 @@ sub header {
 
     # Add Strict-Transport-Security (STS) header if this response
     # is over SSL and the strict_transport_security param is turned on.
-    if ($self->https && Bugzilla->params->{'strict_transport_security'}) {
-        unshift(@_, '-strict-transport-security' => 'max-age=' . MAX_STS_AGE);
+    if ($self->https && Bugzilla->params->{'strict_transport_security'} ne 'off') {
+        my $sts_opts = 'max-age=' . MAX_STS_AGE;
+        if (Bugzilla->params->{'strict_transport_security'} eq 'include_subdomains') {
+            $sts_opts .= '; includeSubDomains';
+        }
+        unshift(@_, '-strict_transport_security' => $sts_opts);
     }
 
     return $self->SUPER::header(@_) || "";

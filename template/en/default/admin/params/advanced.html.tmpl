@@ -35,6 +35,22 @@
   on its domain (i.e., your <code>urlbase</code> is something like
   <code>http://bugzilla.example.com/</code>), and you never plan to disable
   the <code>ssl_redirect</code> parameter.
+  <ul>
+    <li>
+      off - Don't send the Strict-Transport-Security header with requests.
+    </li>
+    <li>
+      this_domain_only - Send the Strict-Transport-Security header with all
+      requests, but only support it for the current domain.
+    </li>
+    <li>
+      include_subdomains - Send the Strict-Transport-Security header along
+      with the <code>includeSubDomains</code> flag, which will apply the
+      security change to all subdomains. This is especially useful when
+      combined with an <code>attachment_base</code> that exists as (a)
+      subdomain(s) under the main [% terms.Bugzilla %] domain.
+    </li>
+  </ul>
 [% END %]
 
 [% param_descs = {

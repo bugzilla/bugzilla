@@ -444,7 +444,7 @@ sub datetime_from {
 
     # strptime() counts years from 1900, and months from 0 (January).
     # We have to fix both values.
-    my $dt = DateTime->new({
+    my %args = (
         year   => $time[5] + 1900,
         month  => $time[4] + 1,
         day    => $time[3],
@@ -452,12 +452,21 @@ sub datetime_from {
         minute => $time[1],
         # DateTime doesn't like fractional seconds.
         # Also, sometimes seconds are undef.
-        second => int($time[0] || 0),
+        second => defined($time[0]) ? int($time[0]) : undef,
         # If a timezone was specified, use it. Otherwise, use the
         # local timezone.
         time_zone => Bugzilla->local_timezone->offset_as_string($time[6]) 
                      || Bugzilla->local_timezone,
-    });
+    );
+
+    # If something wasn't specified in the date, it's best to just not
+    # pass it to DateTime at all. (This is important for doing datetime_from
+    # on the deadline field, which is usually just a date with no time.)
+    foreach my $arg (keys %args) {
+        delete $args{$arg} if !defined $args{$arg};
+    }
+
+    my $dt = new DateTime(\%args);
 
     # Now display the date using the given timezone,
     # or the user's timezone if none is given.

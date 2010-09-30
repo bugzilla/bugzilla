@@ -43,6 +43,8 @@ sub datetime_format_inbound {
 sub datetime_format_outbound {
     my ($self, $date) = @_;
 
+    return undef if (!defined $date or $date eq '');
+
     my $time = $date;
     if (blessed($date)) {
         # We expect this to mean we were sent a datetime object

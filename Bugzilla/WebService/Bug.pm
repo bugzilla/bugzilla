@@ -781,56 +781,126 @@ sub attachments {
 # Private Helper Subroutines #
 ##############################
 
-# A helper for get() and search().
-sub _bug_to_hash {
-    my ($self, $bug, $filters) = @_;
+# A helper for get() and search(). This is done in this fashion in order
+# to produce a stable API and to explicitly type return values.
+# The internals of Bugzilla::Bug are not stable enough to just
+# return them directly.
 
-    # Timetracking fields are deleted if the user doesn't belong to
-    # the corresponding group.
-    unless (Bugzilla->user->is_timetracker) {
-        delete $bug->{'estimated_time'};
-        delete $bug->{'remaining_time'};
-        delete $bug->{'deadline'};
+sub _bug_to_hash {
+    my ($self, $bug, $params) = @_;
+
+    # All the basic bug attributes are here, in alphabetical order.
+    # A bug attribute is "basic" if it doesn't require an additional
+    # database call to get the info.
+    my %item = (
+        alias            => $self->type('string', $bug->alias),
+        classification   => $self->type('string', $bug->classification),
+        component        => $self->type('string', $bug->component),
+        creation_time    => $self->type('dateTime', $bug->creation_ts),
+        id               => $self->type('int', $bug->bug_id),
+        is_confirmed     => $self->type('boolean', $bug->everconfirmed),
+        last_change_time => $self->type('dateTime', $bug->delta_ts),
+        op_sys           => $self->type('string', $bug->op_sys),
+        platform         => $self->type('string', $bug->rep_platform),
+        priority         => $self->type('string', $bug->priority),
+        product          => $self->type('string', $bug->product),
+        resolution       => $self->type('string', $bug->resolution),
+        severity         => $self->type('string', $bug->bug_severity),
+        status           => $self->type('string', $bug->bug_status),
+        summary          => $self->type('string', $bug->short_desc),
+        target_milestone => $self->type('string', $bug->target_milestone),
+        url              => $self->type('string', $bug->bug_file_loc),
+        version          => $self->type('string', $bug->version),
+        whiteboard       => $self->type('string', $bug->status_whiteboard),
+    );
+
+
+    # First we handle any fields that require extra SQL calls.
+    # We don't do the SQL calls at all if the filter would just
+    # eliminate them anyway.
+    if (filter_wants $params, 'assigned_to') {
+        $item{'assigned_to'} = $self->type('string', $bug->assigned_to->login);
+    }
+    if (filter_wants $params, 'blocks') {
+        my @blocks = map { $self->type('int', $_) } @{ $bug->blocked };
+        $item{'blocks'} = \@blocks;
+    }
+    if (filter_wants $params, 'cc') {
+        my @cc = map { $self->type('string', $_) } @{ $bug->cc || [] };
+        $item{'cc'} = \@cc;
+    }
+    if (filter_wants $params, 'creator') {
+        $item{'creator'} = $self->type('string', $bug->reporter->login);
+    }
+    if (filter_wants $params, 'depends_on') {
+        my @depends_on = map { $self->type('int', $_) } @{ $bug->dependson };
+        $item{'depends_on'} = \@depends_on;
+    }
+    if (filter_wants $params, 'dupe_of') {
+        $item{'dupe_of'} = $self->type('int', $bug->dup_id);
+    }
+    if (filter_wants $params, 'groups') {
+        my @groups = map { $self->type('string', $_->name) }
+                     @{ $bug->groups_in };
+        $item{'groups'} = \@groups;
+    }
+    if (filter_wants $params, 'is_open') {
+        $item{'is_open'} = $self->type('boolean', $bug->status->is_open);
+    }
+    if (filter_wants $params, 'keywords') {
+        my @keywords = map { $self->type('string', $_->name) }
+                       @{ $bug->keyword_objects };
+        $item{'keywords'} = \@keywords;
+    }
+    if (filter_wants $params, 'qa_contact') {
+        my $qa_login = $bug->qa_contact ? $bug->qa_contact->login : '';
+        $item{'qa_contact'} = $self->type('string', $qa_login);
+    }
+    if (filter_wants $params, 'see_also') {
+        my @see_also = map { $self->type('string', $_) } @{ $bug->see_also };
+        $item{'see_also'} = \@see_also;
     }
 
-    # This is done in this fashion in order to produce a stable API.
-    # The internals of Bugzilla::Bug are not stable enough to just
-    # return them directly.
-    my %item;
-    $item{'internals'}        = $bug;
-    $item{'creation_time'}    = $self->type('dateTime', $bug->creation_ts);
-    $item{'last_change_time'} = $self->type('dateTime', $bug->delta_ts);
-    $item{'id'}               = $self->type('int', $bug->bug_id);
-    $item{'summary'}          = $self->type('string', $bug->short_desc);
-    $item{'assigned_to'}      = $self->type('string', $bug->assigned_to->login);
-    $item{'resolution'}       = $self->type('string', $bug->resolution);
-    $item{'status'}           = $self->type('string', $bug->bug_status);
-    $item{'is_open'}          = $self->type('boolean', $bug->status->is_open);
-    $item{'severity'}         = $self->type('string', $bug->bug_severity);
-    $item{'priority'}         = $self->type('string', $bug->priority);
-    $item{'product'}          = $self->type('string', $bug->product);
-    $item{'component'}        = $self->type('string', $bug->component);
-    $item{'dupe_of'}          = $self->type('int', $bug->dup_id);
+    # And now custom fields
+    my @custom_fields = Bugzilla->active_custom_fields;
+    foreach my $field (@custom_fields) {
+        my $name = $field->name;
+        next if !filter_wants $params, $name;
+        if ($field->type == FIELD_TYPE_BUG_ID) {
+            $item{$name} = $self->type('int', $bug->$name);
+        }
+        elsif ($field->type == FIELD_TYPE_DATETIME) {
+            $item{$name} = $self->type('dateTime', $bug->$name);
+        }
+        elsif ($field->type == FIELD_TYPE_MULTI_SELECT) {
+            my @values = map { $self->type('string', $_) } @{ $bug->$name };
+            $item{$name} = \@values;
+        }
+        else {
+            $item{$name} = $self->type('string', $bug->$name);
+        }
+    }
+
+    # Timetracking fields are only sent if the user can see them.
+    if (Bugzilla->user->is_timetracker) {
+        $item{'estimated_time'} = $self->type('double', $bug->estimated_time);
+        $item{'remaining_time'} = $self->type('double', $bug->remaining_time);
+        $item{'deadline'}       = $self->type('dateTime', $bug->deadline);
+    }
 
     if (Bugzilla->user->id) {
         my $token = issue_hash_token([$bug->id, $bug->delta_ts]);
         $item{'update_token'} = $self->type('string', $token);
     }
 
-    # if we do not delete this key, additional user info, including their
-    # real name, etc, will wind up in the 'internals' hashref
-    delete $item{internals}->{assigned_to_obj};
+    # The "accessible" bits go here because they have long names and it
+    # makes the code look nicer to separate them out.
+    $item{'is_cc_accessible'} = $self->type('boolean', 
+                                            $bug->cclist_accessible);
+    $item{'is_creator_accessible'} = $self->type('boolean',
+                                                 $bug->reporter_accessible);
 
-    if (Bugzilla->params->{'usebugaliases'}) {
-        $item{'alias'} = $self->type('string', $bug->alias);
-    }
-    else {
-        # For API reasons, we always want the value to appear, we just
-        # don't want it to have a value if aliases are turned off.
-        $item{'alias'} = undef;
-    }
-
-    return filter $filters, \%item;
+    return filter $params, \%item;
 }
 
 sub _attachment_to_hash {
@@ -1468,6 +1538,10 @@ Note: Can also be called as "get_bugs" for compatibilty with Bugzilla 3.0 API.
 
 =item B<Params>
 
+In addition to the parameters below, this method also accepts the
+standard L<include_fields|Bugzilla::WebService/include_fields> and
+L<exclude_fields|Bugzilla::WebService/exclude_fields> arguments.
+
 =over
 
 =item C<ids>
@@ -1506,71 +1580,194 @@ the valid ids. Each hash contains the following items:
 
 =over
 
-=item alias
+=item C<alias>
 
-C<string> The alias of this bug. If there is no alias or aliases are 
-disabled in this Bugzilla, this will be an empty string.
+C<string> The unique alias of this bug.
 
-=item assigned_to 
+=item C<assigned_to>
 
 C<string> The login name of the user to whom the bug is assigned.
 
-=item component
+=item C<blocks>
+
+C<array> of C<int>s. The ids of bugs that are "blocked" by this bug.
+
+=item C<cc>
+
+C<array> of C<string>s. The login names of users on the CC list of this
+bug.
+
+=item C<classification>
+
+C<string> The name of the current classification the bug is in.
+
+=item C<component>
 
 C<string> The name of the current component of this bug.
 
-=item creation_time
+=item C<creation_time>
 
 C<dateTime> When the bug was created.
 
-=item dupe_of
+=item C<creator>
+
+C<string> The login name of the person who filed this bug (the reporter).
+
+=item C<deadline>
+
+C<dateTime> The day that this bug is due to be completed.
+
+If you are not in the time-tracking group, this field will not be included
+in the return value.
+
+=item C<depends_on>
+
+C<array> of C<int>s. The ids of bugs that this bug "depends on".
+
+=item C<dupe_of>
 
 C<int> The bug ID of the bug that this bug is a duplicate of. If this bug 
-isn't a duplicate of any bug, this will be an empty int.
+isn't a duplicate of any bug, this will be null.
 
-=item id
+=item C<estimated_time>
 
-C<int> The numeric bug_id of this bug.
+C<double> The number of hours that it was estimated that this bug would
+take.
 
-=item internals B<DEPRECATED>
+If you are not in the time-tracking group, this field will not be included
+in the return value.
 
-A hash. The internals of a L<Bugzilla::Bug> object. This is extremely
-unstable, and you should only rely on this if you absolutely have to. The
-structure of the hash may even change between point releases of Bugzilla.
+=item C<groups>
 
-This will be disappearing in a future version of Bugzilla.
+C<array> of C<string>s. The names of all the groups that this bug is in.
 
-=item is_open 
+=item C<id>
 
-C<boolean> Returns true (1) if this bug is open, false (0) if it is closed.
+C<int> The unique numeric id of this bug.
 
-=item last_change_time
+=item C<is_cc_accessible>
+
+C<boolean> If true, this bug can be accessed by members of the CC list,
+even if they are not in the groups the bug is restricted to.
+
+=item C<is_confirmed>
+
+C<boolean> True if the bug has been confirmed. Usually this means that
+the bug has at some point been moved out of the C<UNCONFIRMED> status
+and into another open status.
+
+=item C<is_open>
+
+C<boolean> True if this bug is open, false if it is closed.
+
+=item C<is_creator_accessible>
+
+C<boolean> If true, this bug can be accessed by the creator (reporter)
+of the bug, even if he or she is not a member of the groups the bug
+is restricted to.
+
+=item C<keywords>
+
+C<array> of C<string>s. Each keyword that is on this bug.
+
+=item C<last_change_time>
 
 C<dateTime> When the bug was last changed.
 
-=item priority
+=item C<op_sys>
+
+C<string> The name of the operating system that the bug was filed against.
+
+=item C<platform>
+
+C<string> The name of the platform (hardware) that the bug was filed against.
+
+=item C<priority>
 
 C<string> The priority of the bug.
 
-=item product
+=item C<product>
 
 C<string> The name of the product this bug is in.
 
-=item resolution
+=item C<qa_contact>
 
-C<string> The current resolution of the bug, or an empty string if the bug is open. 
+C<string> The login name of the current QA Contact on the bug.
 
-=item severity
+=item C<remaining_time>
+
+C<double> The number of hours of work remaining until work on this bug
+is complete.
+
+If you are not in the time-tracking group, this field will not be included
+in the return value.
+
+=item C<resolution>
+
+C<string> The current resolution of the bug, or an empty string if the bug
+is open.
+
+=item C<see_also>
+
+B<UNSTABLE>
+
+C<array> of C<string>s. The URLs in the See Also field on the bug.
+
+=item C<severity>
 
 C<string> The current severity of the bug.
 
-=item status 
+=item C<status>
 
 C<string> The current status of the bug.
 
-=item summary
+=item C<summary>
 
 C<string> The summary of this bug.
+
+=item C<target_milestone>
+
+C<string> The milestone that this bug is supposed to be fixed by, or for
+closed bugs, the milestone that it was fixed for.
+
+=item C<update_token>
+
+C<string> The token that you would have to pass to the F<process_bug.cgi>
+page in order to update this bug. This changes every time the bug is
+updated.
+
+This field is not returned to logged-out users.
+
+=item C<url>
+
+B<UNSTABLE>
+
+C<string> A URL that demonstrates the problem described in
+the bug, or is somehow related to the bug report.
+
+=item C<version>
+
+C<string> The version the bug was reported against.
+
+=item C<whiteboard>
+
+C<string> The value of the "status whiteboard" field on the bug.
+
+=item I<custom fields>
+
+Every custom field in this installation will also be included in the
+return value. Most fields are returned as C<string>s. However, some
+field types have different return values:
+
+=over
+
+=item Bug ID Fields - C<int>
+
+=item Multiple-Selection Fields - C<array> of C<string>s.
+
+=item Date/Time Fields - C<dateTime>
+
+=back 
 
 =back
 
@@ -1658,6 +1855,14 @@ in Bugzilla B<3.4>:
 =item C<faults>
 
 =back 
+
+=item In Bugzilla B<4.0>, the following items were added to the C<bugs>
+return value: C<blocks>, C<cc>, C<classification>, C<creator>,
+C<deadline>, C<depends_on>, C<estimated_time>, C<is_cc_accessible>, 
+C<is_confirmed>, C<is_creator_accessible>, C<groups>, C<keywords>,
+C<op_sys>, C<platform>, C<qa_contact>, C<remaining_time>, C<see_also>,
+C<target_milestone>, C<update_token>, C<url>, C<version>, C<whiteboard>,
+and all custom fields.
 
 =back
 

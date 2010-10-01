@@ -309,10 +309,20 @@ use constant EXTRA_REQUIRED_FIELDS => qw(target_milestone cc qa_contact groups);
 
 #####################################################################
 
+# This and "new" catch every single way of creating a bug, so that we
+# can call _create_cf_accessors.
+sub _do_list_select {
+    my $invocant = shift;
+    $invocant->_create_cf_accessors();
+    return $invocant->SUPER::_do_list_select(@_);
+}
+
 sub new {
     my $invocant = shift;
     my $class = ref($invocant) || $invocant;
     my $param = shift;
+
+    $class->_create_cf_accessors();
 
     # Remove leading "#" mark if we've just been passed an id.
     if (!ref $param && $param =~ /^#(\d+)$/) {
@@ -2977,8 +2987,44 @@ sub remove_see_also {
 }
 
 #####################################################################
-# Instance Accessors
+# Simple Accessors
 #####################################################################
+
+# These are accessors that don't need to access the database.
+# Keep them in alphabetical order.
+
+sub alias               { return $_[0]->{alias}               }
+sub bug_file_loc        { return $_[0]->{bug_file_loc}        }
+sub bug_id              { return $_[0]->{bug_id}              }
+sub bug_severity        { return $_[0]->{bug_severity}        }
+sub bug_status          { return $_[0]->{bug_status}          }
+sub cclist_accessible   { return $_[0]->{cclist_accessible}   }
+sub component_id        { return $_[0]->{component_id}        }
+sub creation_ts         { return $_[0]->{creation_ts}         }
+sub estimated_time      { return $_[0]->{estimated_time}      }
+sub deadline            { return $_[0]->{deadline}            }
+sub delta_ts            { return $_[0]->{delta_ts}            }
+sub error               { return $_[0]->{error}               }
+sub everconfirmed       { return $_[0]->{everconfirmed}       }
+sub lastdiffed          { return $_[0]->{lastdiffed}          }
+sub op_sys              { return $_[0]->{op_sys}              }
+sub priority            { return $_[0]->{priority}            }
+sub product_id          { return $_[0]->{product_id}          }
+sub remaining_time      { return $_[0]->{remaining_time}      }
+sub reporter_accessible { return $_[0]->{reporter_accessible} }
+sub rep_platform        { return $_[0]->{rep_platform}        }
+sub resolution          { return $_[0]->{resolution}          }
+sub short_desc          { return $_[0]->{short_desc}          }
+sub status_whiteboard   { return $_[0]->{status_whiteboard}   }
+sub target_milestone    { return $_[0]->{target_milestone}    }
+sub version             { return $_[0]->{version}             }
+
+#####################################################################
+# Complex Accessors
+#####################################################################
+
+# These are accessors that have to access the database for additional
+# information about a bug.
 
 # These subs are in alphabetical order, as much as possible.
 # If you add a new sub, please try to keep it in alphabetical order
@@ -3098,9 +3144,6 @@ sub blocked {
     $self->{'blocked'} = EmitDependList("dependson", "blocked", $self->bug_id);
     return $self->{'blocked'};
 }
-
-# Even bugs in an error state always have a bug_id.
-sub bug_id { $_[0]->{'bug_id'}; }
 
 sub bug_group {
     my ($self) = @_;
@@ -4046,73 +4089,55 @@ sub ValidateDependencies {
 
 
 #####################################################################
-# Autoloaded Accessors
+# Custom Field Accessors
 #####################################################################
 
-# Determines whether an attribute access trapped by the AUTOLOAD function
-# is for a valid bug attribute.  Bug attributes are properties and methods
-# predefined by this module as well as bug fields for which an accessor
-# can be defined by AUTOLOAD at runtime when the accessor is first accessed.
-#
-# XXX Strangely, some predefined attributes are on the list, but others aren't,
-# and the original code didn't specify why that is.  Presumably the only
-# attributes that need to be on this list are those that aren't predefined;
-# we should verify that and update the list accordingly.
-#
-sub _validate_attribute {
-    my ($attribute) = @_;
+sub _create_cf_accessors {
+    my ($invocant) = @_;
+    my $class = ref($invocant) || $invocant;
+    return if Bugzilla->request_cache->{"${class}_cf_accessors_created"};
 
-    my @valid_attributes = (
-        # Miscellaneous properties and methods.
-        qw(error groups product_id component_id
-           comments milestoneurl attachments isopened
-           flag_types num_attachment_flag_types
-           show_attachment_flags any_flags_requesteeble
-           lastdiffed),
+    my $fields = Bugzilla->fields({ custom => 1 });
+    foreach my $field (@$fields) {
+        my $accessor = $class->_accessor_for($field);
+        my $name = "${class}::" . $field->name;
+        {
+            no strict 'refs';
+            next if defined *{$name};
+            *{$name} = $accessor;
+        }
+    }
 
-        # Bug fields.
-        Bugzilla::Bug->fields
-    );
-
-    return grep($attribute eq $_, @valid_attributes) ? 1 : 0;
+    Bugzilla->request_cache->{"${class}_cf_accessors_created"} = 1;
 }
 
-sub AUTOLOAD {
-  use vars qw($AUTOLOAD);
-  my $attr = $AUTOLOAD;
+sub _accessor_for {
+    my ($class, $field) = @_;
+    if ($field->type == FIELD_TYPE_MULTI_SELECT) {
+        return $class->_multi_select_accessor($field->name);
+    }
+    return $class->_cf_accessor($field->name);
+}
 
-  $attr =~ s/.*:://;
-  return unless $attr=~ /[^A-Z]/;
-  if (!_validate_attribute($attr)) {
-      require Carp;
-      Carp::confess("invalid bug attribute $attr");
-  }
+sub _cf_accessor {
+    my ($class, $field) = @_;
+    my $accessor = sub {
+        my ($self) = @_;
+        return $self->{$field};
+    };
+    return $accessor;
+}
 
-  no strict 'refs';
-  *$AUTOLOAD = sub {
-      my $self = shift;
-
-      return $self->{$attr} if defined $self->{$attr};
-
-      $self->{_multi_selects} ||= Bugzilla->fields(
-          { custom => 1, type => FIELD_TYPE_MULTI_SELECT });
-
-      if ( grep($_->name eq $attr, @{$self->{_multi_selects}}) ) {
-          # There is a bug in Perl 5.10.0, which is fixed in 5.10.1,
-          # which taints $attr at this point. trick_taint() can go
-          # away once we require 5.10.1 or newer.
-          trick_taint($attr);
-
-          $self->{$attr} ||= Bugzilla->dbh->selectcol_arrayref(
-              "SELECT value FROM bug_$attr WHERE bug_id = ? ORDER BY value",
-              undef, $self->id);
-          return $self->{$attr};
-      }
-
-      return '';
-  };
-
-  goto &$AUTOLOAD;
+sub _multi_select_accessor {
+    my ($class, $field) = @_;
+    my $accessor = sub {
+        my ($self) = @_;
+        $self->{$field} ||= Bugzilla->dbh->selectcol_arrayref(
+            "SELECT value FROM bug_$field WHERE bug_id = ? ORDER BY value",
+            undef, $self->id);
+        return $self->{$field};
+    };
+    return $accessor;
 }
 
 1;

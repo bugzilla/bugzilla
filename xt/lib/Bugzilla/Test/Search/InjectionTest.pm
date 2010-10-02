@@ -37,15 +37,14 @@ sub _known_broken {
     # We don't want to auto-vivify $operator_broken and thus make it true.
     my @field_ok = $operator_broken ? @{ $operator_broken->{field_ok} || [] }
                                     : ();
-
-    return {} if grep { $_ eq $self->field } @field_ok;
+    $operator_broken = undef if grep { $_ eq $self->field } @field_ok;
 
     my $field_broken = INJECTION_BROKEN_FIELD->{$self->field}
                        || INJECTION_BROKEN_FIELD->{$self->field_object->type};
     # We don't want to auto-vivify $field_broken and thus make it true.
     my @operator_ok = $field_broken ? @{ $field_broken->{operator_ok} || [] }
                                     : ();
-    return {} if grep { $_ eq $self->operator } @operator_ok;
+    $field_broken = undef if grep { $_ eq $self->operator } @operator_ok;
 
     return $operator_broken || $field_broken || {};
 }

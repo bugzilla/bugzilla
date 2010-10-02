@@ -381,6 +381,11 @@ sub viewall {
     # Ignore deleted attachments.
     @$attachments = grep { $_->datasize } @$attachments;
 
+    if ($cgi->param('hide_obsolete')) {
+        @$attachments = grep { !$_->isobsolete } @$attachments;
+        $vars->{'hide_obsolete'} = 1;
+    }
+
     # Define the variables and functions that will be passed to the UI template.
     $vars->{'bug'} = $bug;
     $vars->{'attachments'} = $attachments;

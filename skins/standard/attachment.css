@@ -240,3 +240,10 @@ div#update_container {
 .no_javascript .bz_hide, .no_javascript .bz_edit {
     display: none;
 }
+
+#hidden_obsolete_message {
+   text-align: left; 
+   width: 75%; 
+   margin: 0  auto; 
+   font-weight: bold
+}

@@ -551,12 +551,13 @@ input.required, select.required, span.required_explanation {
 
 .validation_error_text {
     font-size: 120%;
-    color: #152446;
+    color: #B70000;
     font-weight: bold;
 }
 
-.validation_error_field {
-    border: 2px solid #152446;
+.validation_error_field, input.validation_error_field {
+    border: 2px solid #B70000;
+    background-color: #FFEBEB;
 }
 
 /*****************/

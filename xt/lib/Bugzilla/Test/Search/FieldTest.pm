@@ -279,7 +279,7 @@ sub join_broken {
 # Accessors: Bugzilla::Search Arguments #
 #########################################
 
-# The CGI object that will get passed to Bugzilla::Search as its arguments.
+# The data that will get passed to Bugzilla::Search as its arguments.
 sub search_params {
     my ($self) = @_;
     return $self->{search_params} if $self->{search_params};

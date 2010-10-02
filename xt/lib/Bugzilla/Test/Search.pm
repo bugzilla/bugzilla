@@ -99,8 +99,8 @@ sub num_tests {
                      ? ($top_combinations * $all_combinations) : 0;
     # And AND tests, which means we run 2x $join_tests;
     $join_tests = $join_tests * 2;
-    # Also, because of NOT tests, we run 2x $top_combinations.
-    my $basic_tests = $top_combinations * 2;
+    # Also, because of NOT tests and Normal tests, we run 3x $top_combinations.
+    my $basic_tests = $top_combinations * 3;
     my $operator_field_tests = ($basic_tests + $join_tests) * TESTS_PER_RUN;
 
     # Then we test each field/operator combination for SQL injection.

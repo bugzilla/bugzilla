@@ -810,9 +810,11 @@
             including you
           [% END %]
         [% END %]
-        <span id="cc_edit_area_showhide_container" class="bz_default_hidden">
-          (<a href="#" id="cc_edit_area_showhide">[% IF user.id %]edit[% ELSE %]show[% END %]</a>)
-        </span>
+        [% IF user.id || bug.cc.size %]
+          <span id="cc_edit_area_showhide_container" class="bz_default_hidden">
+            (<a href="#" id="cc_edit_area_showhide">[% IF user.id %]edit[% ELSE %]show[% END %]</a>)
+          </span>
+        [% END %]
         <div id="cc_edit_area">
           <br>
           [% IF user.id %]
@@ -843,13 +845,15 @@
             [% END %]
           [% END %]
         </div>
-        <script type="text/javascript">
-          hideEditableField( 'cc_edit_area_showhide_container', 
-                             'cc_edit_area', 
-                             'cc_edit_area_showhide', 
-                             '', 
-                             '');  
-        </script>
+        [% IF user.id || bug.cc.size %]
+          <script type="text/javascript">
+            hideEditableField( 'cc_edit_area_showhide_container', 
+                               'cc_edit_area', 
+                               'cc_edit_area_showhide', 
+                               '', 
+                               '');  
+          </script>
+        [% END %]
       </td>
     </tr>
 [% END %]

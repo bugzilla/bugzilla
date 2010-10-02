@@ -536,7 +536,6 @@ input.required, select.required, span.required_explanation {
 }
 
 #keyword_container {
-    padding-bottom: 2em;
     padding-top: .2em;
 }
 

@@ -1289,15 +1289,16 @@ sub _special_parse_chfield {
 
     my @charts;
     # It is always safe and useful to push delta_ts into the charts
-    # if there are any dates specified. It doesn't conflict with
+    # if there is a "from" date specified. It doesn't conflict with
     # searching [Bug creation], because a bug's delta_ts is set to
     # its creation_ts when it is created. So this just gives the
     # database an additional index to possibly choose.
+    #
+    # It's not safe to do it for "to" dates, though--"chfieldto" means
+    # "a field that changed before this date", and delta_ts could be either
+    # later or earlier than that.
     if ($date_from ne '') {
         push(@charts, ['delta_ts', 'greaterthaneq', $date_from]);
-    }
-    if ($date_to ne '') {
-        push(@charts, ['delta_ts', 'lessthaneq', $date_to]);
     }
 
     # Basically, we construct the chart like:

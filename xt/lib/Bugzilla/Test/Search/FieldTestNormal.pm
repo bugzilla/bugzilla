@@ -28,6 +28,12 @@ use base qw(Bugzilla::Test::Search::FieldTest);
 
 use Scalar::Util qw(blessed);
 
+use constant CH_OPERATOR => {
+    changedafter  => 'chfieldfrom',
+    changedbefore => 'chfieldto',
+    changedto     => 'chfieldvalue',
+};
+
 # Normally, we just clone a FieldTest because that's the best for performance,
 # overall--that way we don't have to translate the value again. However,
 # sometimes (like in Bugzilla::Test::Search's direct code) we just want
@@ -54,11 +60,19 @@ sub search_params {
     my ($self) = @_;
     my $field = $self->field;
     my $operator = $self->operator;
-    $field =~ s/\./_/g;
     my $value = $self->translated_value;
     if ($operator eq 'anyexact') {
         $value = [split(',', $value)];
     }
+    
+    if (my $ch_param = CH_OPERATOR->{$operator}) {
+        if ($field eq 'creation_ts') {
+            $field = '[Bug creation]';
+        }
+        return { chfield => $field, $ch_param => $value };
+    }
+
+    $field =~ s/\./_/g;
     return { $field => $value, "${field}_type" => $self->operator };
 }
 

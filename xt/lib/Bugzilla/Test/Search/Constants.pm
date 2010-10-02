@@ -48,6 +48,7 @@ our @EXPORT = qw(
     OR_SKIP
     PG_BROKEN
     SKIP_FIELDS
+    SPECIAL_PARAM_TESTS
     SUBSTR_NO_FIELD_ADD
     SUBSTR_SIZE
     TESTS
@@ -1247,5 +1248,18 @@ use constant OR_BROKEN => {
         'work_time-equals' => { contains => [1] },
     },
 };
+
+#################
+# Special Tests #
+#################
+
+use constant SPECIAL_PARAM_TESTS => (
+    { field => 'bug_status', operator => 'anyexact', value => '__open__',
+      contains => [5] },
+    { field => 'bug_status', operator => 'anyexact', value => '__closed__',
+      contains => [1,2,3,4] },
+    { field => 'bug_status', operator => 'anyexact', value => '__all__',
+      contains => [1,2,3,4,5] },
+);
 
 1;

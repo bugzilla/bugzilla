@@ -59,7 +59,7 @@ sub field_object { return $_[0]->{field_object} }
 # than we need the object.
 sub field {
     my ($self) = @_;
-    return $self->{field_name} ||= $self->field_object->name;
+    $self->{field_name} ||= $self->field_object->name;
     return $self->{field_name};
 }
 # The Bugzilla::Test::Search object that this is a child of.

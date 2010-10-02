@@ -58,6 +58,7 @@ use Bugzilla::FlagType;
 use Bugzilla::Group;
 use Bugzilla::Install ();
 use Bugzilla::Test::Search::Constants;
+use Bugzilla::Test::Search::FieldTestNormal;
 use Bugzilla::Test::Search::OperatorTest;
 use Bugzilla::User ();
 use Bugzilla::Util qw(generate_random_password);
@@ -108,7 +109,11 @@ sub num_tests {
     my $sql_injection_tests = scalar(@fields) * scalar(@top_operators)
                               * scalar(@injection_values) * NUM_SEARCH_TESTS;
 
-    return $operator_field_tests + $sql_injection_tests;
+    # This @{ [] } thing is the only reasonable way to get a count out of a
+    # constant array.
+    my $special_tests = scalar(@{ [SPECIAL_PARAM_TESTS] }) * TESTS_PER_RUN;
+    
+    return $operator_field_tests + $sql_injection_tests + $special_tests;
 }
 
 sub _total_operator_tests {
@@ -852,6 +857,14 @@ sub run {
     # Even though _setup_bugs set us as an admin, we want to be sure at
     # this point that we have an admin with refreshed group memberships.
     Bugzilla->set_user($self->admin);
+    foreach my $test (SPECIAL_PARAM_TESTS) {
+        my $operator_test =
+            new Bugzilla::Test::Search::OperatorTest($test->{operator}, $self);
+        my $field = Bugzilla::Field->check($test->{field});
+        my $special_test = new Bugzilla::Test::Search::FieldTestNormal(
+            $operator_test, $field, $test);
+        $special_test->run();
+    }
     foreach my $operator ($self->top_level_operators) {
         my $operator_test =
             new Bugzilla::Test::Search::OperatorTest($operator, $self);

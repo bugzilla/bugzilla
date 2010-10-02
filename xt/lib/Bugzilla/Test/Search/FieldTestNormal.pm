@@ -26,12 +26,22 @@ use strict;
 use warnings;
 use base qw(Bugzilla::Test::Search::FieldTest);
 
-# We just clone a FieldTest because that's the best for performance,
-# overall--that way we don't have to translate the value again.
+use Scalar::Util qw(blessed);
+
+# Normally, we just clone a FieldTest because that's the best for performance,
+# overall--that way we don't have to translate the value again. However,
+# sometimes (like in Bugzilla::Test::Search's direct code) we just want
+# to create a FieldTestNormal.
 sub new {
-    my ($class, $field_test) = @_;
-    my $self = { %$field_test };
-    return bless $self, $class;
+    my $class = shift;
+    my ($first_arg) = @_;
+    if (blessed $first_arg
+        and $first_arg->isa('Bugzilla::Test::Search::FieldTest'))
+    {
+        my $self = { %$first_arg };
+        return bless $self, $class;
+    }
+    return $class->SUPER::new(@_);
 }
 
 sub name {

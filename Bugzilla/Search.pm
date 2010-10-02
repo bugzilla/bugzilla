@@ -1234,6 +1234,11 @@ sub _special_parse_bug_status {
     my ($self) = @_;
     my $params = $self->_params;
     return if !defined $params->{'bug_status'};
+    # We want to allow the bug_status_type parameter to work normally,
+    # meaning that this special code should only be activated if we are
+    # doing the normal "anyexact" search on bug_status.
+    return if (defined $params->{'bug_status_type'}
+               and $params->{'bug_status_type'} ne 'anyexact');
 
     my @bug_status = $self->_param_array('bug_status');
     # Also include inactive bug statuses, as you can query them.
@@ -1405,6 +1410,7 @@ sub _valid_values {
     my ($input, $valid, $extra_value) = @_;
     my @result;
     foreach my $item (@$input) {
+        $item = trim($item);
         if (defined $extra_value and $item eq $extra_value) {
             push(@result, $item);
         }

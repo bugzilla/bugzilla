@@ -1264,7 +1264,7 @@ sub _special_parse_bug_status {
     @bug_status = _valid_values(\@bug_status, $legal_statuses);
 
     # If the user has selected every status, change to selecting none.
-    # This is functionally equivalent, but quite a lot faster.    
+    # This is functionally equivalent, but quite a lot faster.
     if ($all or scalar(@bug_status) == scalar(@$legal_statuses)) {
         delete $params->{'bug_status'};
     }
@@ -1285,6 +1285,8 @@ sub _special_parse_chfield {
     my $value_to = $params->{'chfieldvalue'};
     $value_to = '' if !defined $value_to;
 
+    @fields = map { $_ eq '[Bug creation]' ? 'creation_ts' : $_ } @fields;
+
     my @charts;
     # It is always safe and useful to push delta_ts into the charts
     # if there are any dates specified. It doesn't conflict with
@@ -1296,15 +1298,6 @@ sub _special_parse_chfield {
     }
     if ($date_to ne '') {
         push(@charts, ['delta_ts', 'lessthaneq', $date_to]);
-    }
-    
-    if (grep { $_ eq '[Bug creation]' } @fields) {
-        if ($date_from ne '') {
-            push(@charts, ['creation_ts', 'greaterthaneq', $date_from]);
-        }
-        if ($date_to ne '') {
-            push(@charts, ['creation_ts', 'lessthaneq', $date_to]);
-        }
     }
 
     # Basically, we construct the chart like:
@@ -1321,7 +1314,6 @@ sub _special_parse_chfield {
     if ($value_to ne '') {
         my @value_chart;
         foreach my $field (@fields) {
-            next if $field eq '[Bug creation]';
             push(@value_chart, $field, 'changedto', $value_to);
         }
         push(@charts, \@value_chart) if @value_chart;
@@ -1330,7 +1322,6 @@ sub _special_parse_chfield {
     if ($date_from ne '') {
         my @date_from_chart;
         foreach my $field (@fields) {
-            next if $field eq '[Bug creation]';
             push(@date_from_chart, $field, 'changedafter', $date_from);
         }
         push(@charts, \@date_from_chart) if @date_from_chart;
@@ -2775,10 +2766,18 @@ sub _changedbefore_changedafter {
     my ($chart_id, $joins, $field, $operator, $value) =
         @$args{qw(chart_id joins field operator value)};
     my $dbh = Bugzilla->dbh;
-    
-    my $sql_operator = ($operator =~ /before/) ? '<=' : '>=';
+
     my $field_object = $self->_chart_fields->{$field}
         || ThrowCodeError("invalid_field_name", { field => $field });
+    
+    # Asking when creation_ts changed is just asking when the bug was created.
+    if ($field_object->name eq 'creation_ts') {
+        $args->{operator} =
+            $operator eq 'changedbefore' ? 'lessthaneq' : 'greaterthaneq';
+        return $self->_do_operator_function($args);
+    }
+    
+    my $sql_operator = ($operator =~ /before/) ? '<=' : '>=';
     my $field_id = $field_object->id;
     # Charts on changed* fields need to be field-specific. Otherwise,
     # OR chart rows make no sense if they contain multiple fields.

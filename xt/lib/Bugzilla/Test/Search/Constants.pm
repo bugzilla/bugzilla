@@ -420,13 +420,11 @@ use constant KNOWN_BROKEN => {
     'changedbefore' => {
         CHANGED_BROKEN,
         'attach_data.thedata' => { contains => [1] },
-        creation_ts => { contains => [1,2,5] },
     },
     'changedafter' => {
         'attach_data.thedata' => { contains => [2,3,4] },
         classification => { contains => [2,3,4] },
         commenter   => { contains => [2,3,4] },
-        creation_ts => { contains => [2,3,4] },
         delta_ts    => { contains => [2,3,4] },
         percentage_complete => { contains => [2,3,4] },
         'requestees.login_name' => { contains => [2,3,4] },
@@ -642,7 +640,6 @@ use constant BROKEN_NOT => {
         "attach_data.thedata"   => { contains => [2, 3, 4] },
         "classification"        => { contains => [2, 3, 4] },
         "commenter"             => { contains => [2, 3, 4] },
-        "creation_ts"           => { contains => [2, 3, 4] },
         "delta_ts"              => { contains => [2, 3, 4] },
         "percentage_complete"   => { contains => [2, 3, 4] },
         "requestees.login_name" => { contains => [2, 3, 4] },
@@ -650,7 +647,6 @@ use constant BROKEN_NOT => {
     },
     changedbefore=> {
         CHANGED_BROKEN_NOT,
-        creation_ts => { contains => [1, 2, 5] },
         work_time   => { }
     },
     changedby => {
@@ -1096,7 +1092,7 @@ use constant TESTS => {
         { contains => [1], value => '<1-delta>',
           override => {
               CHANGED_OVERRIDE,
-              creation_ts => { contains => [1,2,5] },
+              creation_ts => { contains => [1,5] },
               blocked   => { contains => [1,2] },
               dependson => { contains => [1,3] },
               longdesc => { contains => [1,5] },
@@ -1107,7 +1103,7 @@ use constant TESTS => {
         { contains => [2,3,4], value => '<2-delta>',
           override => { 
               CHANGED_OVERRIDE,
-              creation_ts => { contains => [2,3,4] },
+              creation_ts => { contains => [3,4] },
               # We only change this for one bug, and it doesn't match.
               'longdescs.isprivate' => { contains => [] },
               # Same for everconfirmed.
@@ -1200,8 +1196,8 @@ use constant INJECTION_BROKEN_FIELD => {
 # search => 1 means the Bugzilla::Search creation fails, but
 # field_ok contains fields that it does actually succeed for.
 use constant INJECTION_BROKEN_OPERATOR => {
-    changedafter  => { search => 1 },
-    changedbefore => { search => 1 },
+    changedafter  => { search => 1, field_ok => ['creation_ts'] },
+    changedbefore => { search => 1, field_ok => ['creation_ts'] },
     changedby     => { search => 1 },
 };
 

@@ -71,9 +71,16 @@ sub search_params {
         }
         return { chfield => $field, $ch_param => $value };
     }
+    
+    if ($field eq 'deadline' and $operator eq 'greaterthaneq') {
+        return { deadlinefrom => $value };
+    }
+    if ($field eq 'deadline' and $operator eq 'lessthaneq') {
+        return { deadlineto => $value };
+    }
 
     $field =~ s/\./_/g;
-    return { $field => $value, "${field}_type" => $self->operator };
+    return { $field => $value, "${field}_type" => $operator };
 }
 
 1;

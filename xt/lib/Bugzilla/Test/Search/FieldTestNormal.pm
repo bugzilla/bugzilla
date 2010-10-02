@@ -42,17 +42,14 @@ sub name {
 
 sub search_params {
     my ($self) = @_;
-    return $self->{search_params} if $self->{search_params};
-
     my $field = $self->field;
+    my $operator = $self->operator;
+    $field =~ s/\./_/g;
     my $value = $self->translated_value;
-    my %params = (
-        $field => $value,
-        "${field}_type" => $self->operator,
-    );
-    
-    $self->{search_params} = \%params;
-    return $self->{search_params};
+    if ($operator eq 'anyexact') {
+        $value = [split(',', $value)];
+    }
+    return { $field => $value, "${field}_type" => $self->operator };
 }
 
 1;

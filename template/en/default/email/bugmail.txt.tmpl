@@ -17,34 +17,13 @@
   #
   # Contributor(s): André Batosti <batosti@async.com.br>
   #                 Frédéric Buclin <LpSolit@gmail.com>
+  #                 Guy Pyrzak <guy.pyrzak@gmail.com>
   #%]
 
 [% PROCESS "global/field-descs.none.tmpl" %]
 [% PROCESS "global/reason-descs.none.tmpl" %]
 
 [% isnew = bug.lastdiffed ? 0 : 1 %]
-
-From: [% Param('mailfrom') %]
-To: [% to_user.email %]
-Subject: [[% terms.Bug %] [%+ bug.id %]] [% 'New: ' IF isnew %][%+ bug.short_desc %]
-Date: [% delta_ts || bug.delta_ts FILTER time("%a, %d %b %Y %T %z", to_user.timezone) %]
-X-Bugzilla-Reason: [% reasonsheader %]
-X-Bugzilla-Type: [% isnew ? 'new' : 'changed' %]
-X-Bugzilla-Watch-Reason: [% reasonswatchheader %]
-[% IF Param('useclassification') %]
-X-Bugzilla-Classification: [% bug.classification %]
-[% END %]
-X-Bugzilla-Product: [% bug.product %]
-X-Bugzilla-Component: [% bug.component %]
-X-Bugzilla-Keywords: [% bug.keywords %]
-X-Bugzilla-Severity: [% bug.bug_severity %]
-X-Bugzilla-Who: [% changer.login %]
-X-Bugzilla-Status: [% bug.bug_status %]
-X-Bugzilla-Priority: [% bug.priority %]
-X-Bugzilla-Assigned-To: [% bug.assigned_to.login %]
-X-Bugzilla-Target-Milestone: [% bug.target_milestone %]
-X-Bugzilla-Changed-Fields: [% changedfields.join(" ") %]
-[%+ threadingmarker %]
 
 [%+ PROCESS generate_diffs -%]
 
@@ -74,42 +53,25 @@ Configure [% terms.bug %]mail: [% urlbase %]userprefs.cgi?tab=email
 
 [%+ last_changer = "" %]
   [% FOREACH change = diffs %]
-    [% IF !isnew && change.login_name != last_changer %]
-      [% last_changer = change.login_name %]
+    [% IF !isnew && change.who.login != last_changer %]
+      [% last_changer = change.who.login %]
       [% IF change.blocker %]
         [% terms.Bug %] [%+ bug.id %] depends on [% terms.bug %] [%+ change.blocker.id %], which changed state.
 
 [%+ terms.Bug %] [%+ change.blocker.id %] Summary: [% change.blocker.short_desc %]
 [%+ urlbase %]show_bug.cgi?id=[% change.blocker.id %]
       [% ELSE %]
-        [%~ IF change.realname %]
-          [% change.realname _ " <" _ change.login_name _ ">" %]
+        [%~ IF change.who.name %]
+          [% change.who.name _ " <" _ change.who.login _ ">" %]
         [% ELSE %]
-          [% change.login_name %]
+          [% change.who.login %]
         [% END %] changed:
       [% END %]
 
            What    |Removed                     |Added
 ----------------------------------------------------------------------------
 [%+ END %][%# End of IF. This indentation is intentional! ~%]
-
-    [% field_label = field_descs.${change.field_name} %]
-    [% old_value = display_value(change.field_name, change.old) %]
-    [% new_value = display_value(change.field_name, change.new) %]
-
-    [%~ IF change.field_name == "estimated_time" || change.field_name == "remaining_time" %]
-      [% old_value = old_value FILTER format('%.2f') %]
-      [% new_value = new_value FILTER format('%.2f') %]
-    [% END %]
-
-    [%~ IF change.attach_id %]
-      [% field_label = field_label.replace('^(Attachment )?', "Attachment #${change.attach_id} ") %]
-    [% END %]
-
-    [%~ IF change.field_name == 'longdescs.isprivate' %]
-      [% field_label = field_label.replace('^(Comment )?', "Comment #${change.num} ") %]
-    [% END %]
-
+    [% PROCESS "email/bugmail-common.txt.html"%]
     [%~ IF isnew %]
       [% format_columns(2, field_label _ ":", new_value) -%]
     [% ELSE %]

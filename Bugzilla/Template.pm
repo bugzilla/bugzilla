@@ -348,8 +348,12 @@ sub get_bug_link {
     }
     # Prevent code injection in the title.
     $title = html_quote(clean_text($title));
-
     my $linkval = "show_bug.cgi?id=" . $bug->id;
+    
+    if ($options->{full_url}) {
+        $linkval = correct_urlbase() . $linkval;
+    }
+    
     if (defined $options->{comment_num}) {
         $linkval .= "#c" . $options->{comment_num};
     }

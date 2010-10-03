@@ -1171,8 +1171,8 @@ sub _convert_special_params_to_chart_params {
     my $and = 0;
     foreach my $or_array (@special_charts) {
         my $or = 0;
-        my $identifier = "$chart-$and-$or";
         while (@$or_array) {
+            my $identifier = "$chart-$and-$or";
             $params->{"field$identifier"} = shift @$or_array;
             $params->{"type$identifier"}  = shift @$or_array;
             $params->{"value$identifier"} = shift @$or_array;

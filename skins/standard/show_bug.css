@@ -113,3 +113,6 @@ table#flags {
 .text_input, .bz_userfield, #keyword_container {
     width: 100%;
 }
+.bz_bug .bz_alias_short_desc_container {
+    width: inherit;
+}

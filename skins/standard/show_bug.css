@@ -111,3 +111,6 @@ table#flags {
 .knob-buttons {
     float: right;
 }
+.bz_bug .bz_alias_short_desc_container {
+    width: inherit;
+}

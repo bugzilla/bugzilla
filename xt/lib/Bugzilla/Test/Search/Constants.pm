@@ -1259,6 +1259,9 @@ use constant SPECIAL_PARAM_TESTS => (
     { field => 'bug_status', operator => 'anyexact', value => '__all__',
       contains => [1,2,3,4,5] },
     
+    { field => 'resolution', operator => 'anyexact', value => '---',
+      contains => [5] },
+    
     { field => 'assigned_to', operator => 'anyexact',
       value => '<1>, <2-reporter>', contains => [1,2],
       extra_params => { emailreporter1 => 1 } },

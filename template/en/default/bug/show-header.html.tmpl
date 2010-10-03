@@ -32,10 +32,22 @@
 [% subheader = filtered_desc %]
 [% filtered_timestamp = bug.delta_ts FILTER time %]
 [% title = "$terms.Bug $bug.bug_id &ndash; $filtered_desc" %]
+[% unfiltered_title = "$terms.Bug $bug.bug_id – $bug.short_desc" %]
 [% header = "$terms.Bug&nbsp;$bug.bug_id" %]
 [% header_addl_info = "Last modified: $filtered_timestamp" %]
 [% yui = ['autocomplete', 'calendar'] %]
 [% javascript_urls = [ "js/util.js", "js/field.js" ] %]
+[% IF ! Bugzilla.cgi.url.match("show_bug.cgi") && bug.defined %]
+  [% javascript =  BLOCK %]
+    if( history && history.replaceState ) {
+      history.replaceState( null, 
+                         "[% unfiltered_title FILTER js %]",  
+                         "show_bug.cgi?id=[% bug.bug_id FILTER js %]" );
+      document.title = "[% unfiltered_title FILTER js %]";
+    }
+    [% javascript FILTER none %]
+  [% END %]
+[% END %]
 [% style_urls = [ "skins/standard/show_bug.css" ] %]
 [% doc_section = "bug_page.html" %]
 [% bodyclasses = ['bz_bug',

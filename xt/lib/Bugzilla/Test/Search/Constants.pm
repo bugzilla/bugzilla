@@ -28,6 +28,7 @@
 package Bugzilla::Test::Search::Constants;
 use base qw(Exporter);
 use Bugzilla::Constants;
+use Bugzilla::Util qw(generate_random_password);
 
 our @EXPORT = qw(
     ATTACHMENT_FIELDS
@@ -146,12 +147,13 @@ use constant OR_SKIP => qw(
 # All the fields that represent users.
 use constant USER_FIELDS => qw(
     assigned_to
+    cc
     reporter
     qa_contact
     commenter
     attachments.submitter
     setters.login_name
-    requestees.login_name cc
+    requestees.login_name
 );
 
 # For the "substr"-type searches, how short of a substring should
@@ -1256,6 +1258,16 @@ use constant SPECIAL_PARAM_TESTS => (
       contains => [1,2,3,4] },
     { field => 'bug_status', operator => 'anyexact', value => '__all__',
       contains => [1,2,3,4,5] },
+    
+    { field => 'assigned_to', operator => 'anyexact',
+      value => '<1>, <2-reporter>', contains => [1,2],
+      extra_params => { emailreporter1 => 1 } },
+    { field => 'assigned_to', operator => 'equals',
+      value => '<1>', extra_name => 'email2', contains => [],
+      extra_params => {
+          email2 => generate_random_password(100), emaillongdesc2 => 1,
+      },
+    }
 );
 
 1;

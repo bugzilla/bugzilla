@@ -34,6 +34,8 @@ use constant CH_OPERATOR => {
     changedto     => 'chfieldvalue',
 };
 
+use constant EMAIL_FIELDS => qw(assigned_to qa_contact cc reporter commenter);
+
 # Normally, we just clone a FieldTest because that's the best for performance,
 # overall--that way we don't have to translate the value again. However,
 # sometimes (like in Bugzilla::Test::Search's direct code) we just want
@@ -77,6 +79,17 @@ sub search_params {
     }
     if ($field eq 'deadline' and $operator eq 'lessthaneq') {
         return { deadlineto => $value };
+    }
+    
+    if (grep { $_ eq $field } EMAIL_FIELDS) {
+        $field = 'longdesc' if $field eq 'commenter';
+        return {
+            email1           => $value,
+            "email${field}1" => 1,
+            emailtype1       => $operator,
+            # Used to do extra tests on special sorts of email* combinations.
+            %{ $self->test->{extra_params} || {} },
+        };
     }
 
     $field =~ s/\./_/g;

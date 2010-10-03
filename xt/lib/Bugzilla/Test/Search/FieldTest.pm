@@ -431,7 +431,13 @@ sub _translate_value_for_bug {
     $value =~ s/<$number-delta>/$bug_delta/g;
     my $reporter = $bug->reporter->login;
     $value =~ s/<$number-reporter>/$reporter/g;
-
+    if ($value =~ /<$number-bug_group>/) {
+        my @bug_groups = map { $_->name } @{ $bug->groups_in };
+        @bug_groups = grep { $_ =~ /^\d+-group-/ } @bug_groups;
+        my $group = $bug_groups[0];
+        $value =~ s/<$number-bug_group>/$group/g;
+    }
+    
     my @bug_values = $self->bug_values($number);    
     return $value if !@bug_values;
     

@@ -336,6 +336,9 @@ use constant CHANGED_VALUE_BROKEN => (
 # while the other fails. In this case, we have a special override for
 # "operator-value", which uniquely identifies tests.
 use constant KNOWN_BROKEN => {
+    "equals-%group.<1-bug_group>%" => {
+        commenter => { contains => [1,2,3,4,5] },
+    },
     notequals    => { NEGATIVE_BROKEN },
     notsubstring => { NEGATIVE_BROKEN },
     notregexp    => { NEGATIVE_BROKEN },
@@ -1262,6 +1265,7 @@ use constant SPECIAL_PARAM_TESTS => (
     { field => 'resolution', operator => 'anyexact', value => '---',
       contains => [5] },
     
+    # email* query parameters.
     { field => 'assigned_to', operator => 'anyexact',
       value => '<1>, <2-reporter>', contains => [1,2],
       extra_params => { emailreporter1 => 1 } },
@@ -1270,7 +1274,28 @@ use constant SPECIAL_PARAM_TESTS => (
       extra_params => {
           email2 => generate_random_password(100), emaillongdesc2 => 1,
       },
-    }
+    },
+    
+    # standard pronouns
+    { field => 'assigned_to', operator => 'equals', value => '%assignee%',
+      contains => [1,2,3,4,5] },
+    { field => 'reporter', operator => 'equals', value => '%reporter%',
+      contains => [1,2,3,4,5] },
+    { field => 'qa_contact', operator => 'equals', value => '%qacontact%',
+      contains => [1,2,3,4,5] },
+    { field => 'cc', operator => 'equals', value => '%user%',
+      contains => [1] },
+    # group pronouns
+    { field => 'reporter', operator => 'equals',
+      value => '%group.<1-bug_group>%', contains => [1,2,3,4,5] },
+    { field => 'assigned_to', operator => 'equals',
+      value => '%group.<1-bug_group>%', contains => [1,2,3,4,5] },
+    { field => 'qa_contact', operator => 'equals',
+      value => '%group.<1-bug_group>%', contains => [1,2,3,4] },
+    { field => 'cc', operator => 'equals',
+      value => '%group.<1-bug_group>%', contains => [1,2,3,4] },
+    { field => 'commenter', operator => 'equals',
+      value => '%group.<1-bug_group>%', contains => [1,2,3,4,5] },
 );
 
 1;

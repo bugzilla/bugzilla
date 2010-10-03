@@ -592,6 +592,7 @@ sub _create_one_bug {
     my $update_alias = $self->bug_update_value($number, 'alias');
     
     # Otherwise, make bug 6 a clone of bug 1.
+    my $real_number = $number;
     $number = 1 if $number == 6;
     
     my $reporter = $self->bug_create_value($number, 'reporter');
@@ -689,9 +690,14 @@ sub _create_one_bug {
         $update_params{groups} = { add => $update_params{groups},
                                    remove => $bug->groups_in };
         my @cc_remove = map { $_->login } @{ $bug->cc_users };
-        my $cc_add = $update_params{cc};
-        $cc_add = [$cc_add] if !ref $cc_add;
-        $update_params{cc} = { add => $cc_add, remove => \@cc_remove };
+        my $cc_new = $update_params{cc};
+        my @cc_add = ref($cc_new) ? @$cc_new : ($cc_new);
+        # We make the admin an explicit CC on bug 1 (but not on bug 6), so
+        # that we can test the %user% pronoun properly.
+        if ($real_number == 1) {
+            push(@cc_add, $self->admin->login);
+        }
+        $update_params{cc} = { add => \@cc_add, remove => \@cc_remove };
         my $see_also_remove = $bug->see_also;
         my $see_also_add = [$update_params{see_also}];
         $update_params{see_also} = { add => $see_also_add, 

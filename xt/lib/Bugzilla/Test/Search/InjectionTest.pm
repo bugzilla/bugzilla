@@ -54,7 +54,11 @@ sub sql_error_ok { return $_[0]->_known_broken->{sql_error} }
 # Injection tests only skip fields on certain dbs.
 sub field_not_yet_implemented {
     my ($self) = @_;
-    my $skip_for_dbs = $self->_known_broken->{db_skip};
+    # We use the constant directly because we don't want operator_ok
+    # or field_ok to stop us.
+    my $broken = INJECTION_BROKEN_FIELD->{$self->field}
+                 || INJECTION_BROKEN_FIELD->{$self->field_object->type};
+    my $skip_for_dbs = $broken->{db_skip};
     return undef if !$skip_for_dbs;
     my $dbh = Bugzilla->dbh;
     if (my ($skip) = grep { $dbh->isa("Bugzilla::DB::$_") } @$skip_for_dbs) {

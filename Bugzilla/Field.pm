@@ -218,6 +218,8 @@ use constant DEFAULT_FIELDS => (
      buglist => 1},
     {name => 'longdesc',              desc => 'Comment'},
     {name => 'longdescs.isprivate',   desc => 'Comment is private'},
+    {name => 'longdescs.count',       desc => 'Number of Comments',
+     buglist => 1},
     {name => 'alias',                 desc => 'Alias', buglist => 1},
     {name => 'everconfirmed',         desc => 'Ever Confirmed'},
     {name => 'reporter_accessible',   desc => 'Reporter Accessible'},

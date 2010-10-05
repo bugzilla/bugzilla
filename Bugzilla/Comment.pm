@@ -56,7 +56,10 @@ use constant UPDATE_COLUMNS => qw(
 
 use constant DB_TABLE => 'longdescs';
 use constant ID_FIELD => 'comment_id';
-use constant LIST_ORDER => 'bug_when';
+# In some rare cases, two comments can have identical timestamps. If
+# this happens, we want to be sure that the comment added later shows up
+# later in the sequence.
+use constant LIST_ORDER => 'bug_when, comment_id';
 
 use constant VALIDATORS => {
     extra_data => \&_check_extra_data,

@@ -272,6 +272,14 @@ use constant OPERATOR_FIELD_OVERRIDE => {
         changedafter  => \&_long_desc_changedbefore_after,
         _default      => \&_long_desc,
     },
+    'longdescs.count' => {
+        changedby     => \&_long_desc_changedby,
+        changedbefore => \&_long_desc_changedbefore_after,
+        changedafter  => \&_long_desc_changedbefore_after,
+        changedfrom   => \&_invalid_combination,
+        changedto     => \&_invalid_combination,
+        _default      => \&_long_descs_count,
+    },
     'longdescs.isprivate' => {
         _default => \&_longdescs_isprivate,
     },
@@ -466,6 +474,10 @@ use constant COLUMN_JOINS => {
             to    => 'id',
         },
     },
+    'longdescs.count' => {
+        table => 'longdescs',
+        join  => 'INNER',
+    },
 };
 
 # This constant defines the columns that can be selected in a query 
@@ -524,6 +536,8 @@ sub COLUMNS {
             . $dbh->sql_string_concat('map_flagtypes.name', 'map_flags.status')),
 
         'keywords' => $dbh->sql_group_concat('DISTINCT map_keyworddefs.name'),
+        
+        'longdescs.count' => 'COUNT(DISTINCT map_longdescs_count.comment_id)',
     );
 
     # Backward-compatibility for old field names. Goes new_name => old_name.
@@ -620,6 +634,7 @@ use constant GROUP_BY_SKIP => EMPTY_COLUMN, qw(
     bug_id
     flagtypes.name
     keywords
+    longdescs.count
     percentage_complete
 );
 
@@ -2171,7 +2186,7 @@ sub _content_matches {
     COLUMNS->{'relevance'}->{name} = $select_term;
 }
 
-sub _long_desc {
+sub _join_longdescs {
     my ($self, $args) = @_;
     my ($chart_id, $joins) = @$args{qw(chart_id joins)};
     
@@ -2182,22 +2197,37 @@ sub _long_desc {
         as    => $table,
         extra => $extra,
     };
+    # We only want to do an INNER JOIN if we're not checking isprivate.
+    # Otherwise we'd exclude all bugs with only private comments from
+    # the search entirely.
+    $join->{join} = 'INNER' if $self->_user->is_insider;
     push(@$joins, $join);
+    return $table;
+}
+
+sub _long_desc {
+    my ($self, $args) = @_;
+    my $table = $self->_join_longdescs($args);
     $args->{full_field} = "$table.thetext";
+}
+
+sub _long_descs_count {
+    my ($self, $args) = @_;
+    my ($chart_id, $joins) = @$args{qw(chart_id joins)};
+    my $table = "longdescs_count_$chart_id";
+    my $extra =  $self->_user->is_insider ? "" : "WHERE isprivate = 0";
+    my $join = {
+        table => "(SELECT bug_id, COUNT(*) AS num"
+                 . " FROM longdescs $extra GROUP BY bug_id)",
+        as    => $table,
+    };
+    push(@$joins, $join);
+    $args->{full_field} = "${table}.num";
 }
 
 sub _longdescs_isprivate {
     my ($self, $args) = @_;
-    my ($chart_id, $joins) = @$args{qw(chart_id joins)};
-    
-    my $table = "longdescs_$chart_id";
-    my $extra = $self->_user->is_insider ? [] : ["$table.isprivate = 0"];
-    my $join = {
-        table => 'longdescs',
-        as    => $table,
-        extra => $extra,
-    };
-    push(@$joins, $join);
+    my $table = $self->_join_longdescs($args);
     $args->{full_field} = "$table.isprivate";
 }
 

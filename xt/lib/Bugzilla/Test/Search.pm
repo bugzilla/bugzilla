@@ -667,6 +667,13 @@ sub _create_one_bug {
                       undef, $bug->id);
         }
         
+        # Bug 1 gets three comments, so that longdescs.count matches it
+        # uniquely. The third comment is added in the middle, so that the
+        # last comment contains all of the important data, like work_time.
+        if ($number == 1) {
+            $bug->add_comment("1-comment-" . random(100));
+        }
+        
         my %update_params = %{ $self->_bug_update_values->{$number} };
         my %reverse_map = reverse %{ Bugzilla::Bug->FIELD_MAP };
         foreach my $db_name (keys %reverse_map) {
@@ -712,7 +719,7 @@ sub _create_one_bug {
         $update_params{reporter_accessible} = $number == 1 ? 1 : 0;
         $update_params{cclist_accessible} = $number == 1 ? 1 : 0;
         $update_params{alias} = $update_alias;
-        
+
         $bug->set_all(\%update_params);
         my $flags = $self->bug_create_value($number, 'set_flags')->{b};
         $bug->set_flags([], $flags);

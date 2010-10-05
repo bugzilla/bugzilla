@@ -332,6 +332,9 @@ sub _field_values_for_bug {
         # searches use the last comment.
         @values = reverse @values;
     }
+    elsif ($field eq 'longdescs.count') {
+        @values = scalar(@{ $self->bug($number)->comments });
+    }
     elsif ($field eq 'bug_group') {
         @values = $self->_values_for($number, 'groups_in', 'name');
     }
@@ -515,7 +518,7 @@ sub do_tests {
     my $search_broken = $self->search_known_broken;
     
     my $search = $self->_test_search_object_creation();
-    
+
     my $sql;
     TODO: {
         local $TODO = $search_broken if $search_broken;

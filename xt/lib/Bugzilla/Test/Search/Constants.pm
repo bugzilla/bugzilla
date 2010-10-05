@@ -309,6 +309,7 @@ use constant CHANGED_VALUE_BROKEN => (
     estimated_time   => { contains => [1] },
     'flagtypes.name' => { contains => [1] },
     keywords  => { contains => [1] },
+    'longdescs.count' => { search => 1 },
     work_time => { contains => [1] },
     FIELD_TYPE_MULTI_SELECT, { contains => [1] },
 );
@@ -511,6 +512,7 @@ use constant CHANGED_BROKEN_NOT => (
 
 # For changedfrom and changedto.
 use constant CHANGED_FROM_TO_BROKEN_NOT => (
+    'longdescs.count' => { search => 1 },
     "bug_group" => { contains => [1] },
     "cc" => { contains => [1] },
     "cf_multi_select" => { contains => [1] },
@@ -737,6 +739,7 @@ use constant REGEX_OVERRIDE => {
     cclist_accessible        => { value => '^1' },
     reporter_accessible      => { value => '^1' },
     everconfirmed            => { value => '^1' },
+    'longdescs.count'        => { value => '^3' },
     'longdescs.isprivate'    => { value => '^1' },
     creation_ts => { value => '^2037-01-01' },
     delta_ts    => { value => '^2037-01-01' },
@@ -808,6 +811,7 @@ use constant NEGATIVE_MULTI_BOOLEAN_OVERRIDE => (
 
 # For anyexact and anywordssubstr
 use constant ANY_OVERRIDE => (
+    'longdescs.count' => { contains => [1,2,3,4] },
     'work_time' => { value => '1.0,2.0' },
     dependson => { value => '<1>,<3>', contains => [1,3] },
     MULTI_BOOLEAN_OVERRIDE,
@@ -944,6 +948,7 @@ use constant TESTS => {
               'attachments.ispatch'    => { value => 1, contains => [2,3,4] },
               cclist_accessible        => { value => 1, contains => [2,3,4,5] },
               reporter_accessible      => { value => 1, contains => [2,3,4,5] },
+              'longdescs.count'        => { value => 3, contains => [2,3,4,5] },
               'longdescs.isprivate'    => { value => 1, contains => [2,3,4,5] },
               everconfirmed            => { value => 1, contains => [2,3,4,5] },
               creation_ts => { value => '2037-01-02', contains => [1,5] },
@@ -967,6 +972,7 @@ use constant TESTS => {
               'attachments.isprivate'  => { value => 0, contains => [2,3,4] },
               cclist_accessible        => { value => 0, contains => [2,3,4,5] },
               reporter_accessible      => { value => 0, contains => [2,3,4,5] },
+              'longdescs.count'        => { value => 2, contains => [2,3,4,5] },
               'longdescs.isprivate'    => { value => 0, contains => [2,3,4,5] },
               everconfirmed            => { value => 0, contains => [2,3,4,5] },
               blocked   => { contains => [1,2] },
@@ -991,6 +997,7 @@ use constant TESTS => {
               'attachments.isprivate'  => { value => 0, contains => [1] },
               cclist_accessible        => { value => 0, contains => [1] },
               reporter_accessible      => { value => 0, contains => [1] },
+              'longdescs.count'        => { value => 2, contains => [1] },
               'longdescs.isprivate'    => { value => 0, contains => [1] },
               everconfirmed            => { value => 0, contains => [1] },
               'flagtypes.name'         => { value => 2, contains => [2,3,4] },
@@ -1006,6 +1013,7 @@ use constant TESTS => {
               'attachments.isprivate'  => { value => 1, contains => [1] },
               cclist_accessible        => { value => 1, contains => [1] },
               reporter_accessible      => { value => 1, contains => [1] },
+              'longdescs.count'        => { value => 3, contains => [1] },
               'longdescs.isprivate'    => { value => 1, contains => [1] },
               everconfirmed            => { value => 1, contains => [1] },
               dependson => { value => '<3>', contains => [1,3] },
@@ -1074,6 +1082,7 @@ use constant TESTS => {
           override => {
               MULTI_BOOLEAN_OVERRIDE,
               dependson => { value => '<1> <3>', contains => [1,3] },
+              'longdescs.count' => { contains => [1,2,3,4] },              
               work_time => { value => '1.0 2.0' },
           },
         },
@@ -1109,6 +1118,7 @@ use constant TESTS => {
               blocked   => { contains => [1,2] },
               dependson => { contains => [1,3] },
               longdesc => { contains => [1,5] },
+              'longdescs.count' => { contains => [1,5] },
           }
         },
     ],
@@ -1195,6 +1205,15 @@ use constant INJECTION_BROKEN_FIELD => {
     FIELD_TYPE_BUG_ID,          { db_skip => ['Pg'] },
     FIELD_TYPE_DATETIME,        { db_skip => ['Pg'] },
     owner_idle_time => { search => 1 },
+    'longdescs.count' => {
+        search => 1,
+        db_skip => ['Pg'],
+        operator_ok => [qw(allwordssubstr anywordssubstr casesubstring
+                           changedbefore changedafter greaterthan greaterthaneq
+                           lessthan lessthaneq notregexp notsubstring
+                           nowordssubstr regexp substring anywords
+                           notequals nowords)],
+    },
     keywords => {
         search => 1,
         operator_ok => [qw(allwordssubstr anywordssubstr casesubstring

@@ -166,7 +166,9 @@ sub transformed_value_was_equal {
 sub bug_is_contained {
     my ($self, $number) = @_;
     my $contains = $self->test->{contains};
-    if ($self->transformed_value_was_equal($number)) {
+    if ($self->transformed_value_was_equal($number)
+        and !$self->test->{override}->{$self->field}->{contains})
+    {
         $contains = $self->test->{if_equal}->{contains};
     }
     return grep($_ == $number, @$contains) ? 1 : 0;
@@ -482,11 +484,6 @@ sub _substr_value {
             $substr_size += length($field);
         }
         my $string = substr($value, 0, $substr_size);
-        # Make percentage_complete substrings strings match integers uniquely,
-        # by searching for the full decimal number.
-        if ($field eq 'percentage_complete' and length($string) < $substr_size) {
-            $string .= ".000";
-        }
         return $string;
     }
     return substr($value, $substr_size);

@@ -406,6 +406,11 @@ use constant COLUMN_DEPENDS => {
 # DB::Schema to figure out what needs to be joined, but for some
 # fields it needs a little help.
 use constant COLUMN_JOINS => {
+    actual_time => {
+        table => '(SELECT bug_id, SUM(work_time) AS total'
+                 . ' FROM longdescs GROUP BY bug_id)',
+        join  => 'INNER',
+    },
     assigned_to => {
         from  => 'assigned_to',
         to    => 'userid',
@@ -440,10 +445,6 @@ use constant COLUMN_JOINS => {
         from  => 'map_product.classification_id',
         to    => 'id',
         join  => 'INNER',
-    },
-    actual_time => {
-        table  => 'longdescs',
-        join   => 'INNER',
     },
     'flagtypes.name' => {
         as    => 'map_flags',
@@ -504,18 +505,20 @@ sub COLUMNS {
 
     # Next we define columns that have special SQL instead of just something
     # like "bugs.bug_id".
-    my $actual_time = '(SUM(map_actual_time.work_time)'
-        . ' * COUNT(DISTINCT map_actual_time.bug_when)/COUNT(bugs.bug_id))';
+    my $total_time = "(map_actual_time.total + bugs.remaining_time)";
     my %special_sql = (
         deadline    => $dbh->sql_date_format('bugs.deadline', '%Y-%m-%d'),
-        actual_time => $actual_time,
+        actual_time => 'map_actual_time.total',
 
+        # "FLOOR" is in there to turn this into an integer, making searches
+        # totally predictable. Otherwise you get floating-point numbers that
+        # are rather hard to search reliably if you're asking for exact
+        # numbers.
         percentage_complete =>
-            "(CASE WHEN $actual_time + bugs.remaining_time = 0.0"
-              . " THEN 0.0"
-              . " ELSE 100"
-                   . " * ($actual_time / ($actual_time + bugs.remaining_time))"
-              . " END)",
+            "(CASE WHEN $total_time = 0"
+               . " THEN 0"
+               . " ELSE FLOOR(100 * (map_actual_time.total / $total_time))"
+                . " END)",
 
         'flagtypes.name' => $dbh->sql_group_concat('DISTINCT ' 
             . $dbh->sql_string_concat('map_flagtypes.name', 'map_flags.status')),
@@ -614,7 +617,6 @@ sub REPORT_COLUMNS {
 # is here because it *always* goes into the GROUP BY as the first item,
 # so it should be skipped when determining extra GROUP BY columns.
 use constant GROUP_BY_SKIP => EMPTY_COLUMN, qw(
-    actual_time
     bug_id
     flagtypes.name
     keywords
@@ -2240,30 +2242,12 @@ sub _work_time {
 
 sub _percentage_complete {
     my ($self, $args) = @_;
-    my ($chart_id, $joins, $operator, $having, $fields) =
-        @$args{qw(chart_id joins operator having fields)};
+    
+    $args->{full_field} = COLUMNS->{percentage_complete}->{name};
 
-    my $table = "longdescs_$chart_id";
-
-    # We can't just use "percentage_complete" as the field, because
-    # (a) PostgreSQL doesn't accept it in the HAVING clause
-    # and (b) it wouldn't work in multiple chart rows, because it uses
-    # a fixed name for the table, "ldtime".
-    my $expression = COLUMNS->{percentage_complete}->{name};
-    $expression =~ s/\bldtime\b/$table/g;
-    $args->{full_field} = "($expression)";
-    push(@$joins, { table => 'longdescs', as => $table });
-
-    # We need remaining_time in _select_columns, otherwise we can't use
-    # it in the expression for creating percentage_complete.
-    $self->_add_extra_column('remaining_time');
-
-    $self->_do_operator_function($args);
-    push(@$having, $args->{term});
-   
-    # We put something into $args->{term} so that do_search_function
-    # stops processing.
-    $args->{term} = '';
+    # We need actual_time in _select_columns, otherwise we can't use
+    # it in the expression for searching percentage_complete.
+    $self->_add_extra_column('actual_time');
 }
 
 sub _bug_group_nonchanged {

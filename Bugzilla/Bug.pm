@@ -3327,7 +3327,10 @@ sub percentage_complete {
     my $actual    = $self->actual_time;
     my $total = $remaining + $actual;
     return undef if $total == 0;
-    return 100 * ($actual / $total);
+    # Search.pm truncates this value to an integer, so we want to as well,
+    # since this is mostly used in a test where its value needs to be
+    # identical to what the database will return.
+    return int(100 * ($actual / $total));
 }
 
 sub product {

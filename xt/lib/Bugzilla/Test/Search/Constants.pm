@@ -140,7 +140,6 @@ use constant SKIP_FIELDS => qw(
 # right in OR tests, and it's too much work to document the exact tests
 # that they cause to fail.
 use constant OR_SKIP => qw(
-    percentage_complete
     flagtypes.name
 );
 
@@ -167,7 +166,7 @@ use constant FIELD_SUBSTR_SIZE => {
     deadline => -5,
     creation_ts => -8,
     delta_ts => -8,
-    percentage_complete => 7,
+    percentage_complete => 1,
     work_time => 3,
     remaining_time => 3,
     target_milestone => 15,
@@ -361,19 +360,8 @@ use constant KNOWN_BROKEN => {
         work_time => { contains => [2,3,4] },
     },
 
-    greaterthan => { GREATERTHAN_BROKEN },
-
-    # percentage_complete is broken -- it won't match equal values.
-    greaterthaneq => {
-        GREATERTHAN_BROKEN,
-        percentage_complete => { contains => [2] },
-    },
-
-    # percentage_complete doesn't do a numeric comparison, so
-    # it doesn't find decimal values.
-    anyexact => {
-        percentage_complete => { contains => [2] },
-    },
+    greaterthan   => { GREATERTHAN_BROKEN },
+    greaterthaneq => { GREATERTHAN_BROKEN },
 
     'allwordssubstr-<1>' => { ALLWORDS_BROKEN },
     # flagtypes.name does not work here, probably because they all try to
@@ -399,7 +387,6 @@ use constant KNOWN_BROKEN => {
         work_time => { contains => [1] },
     },
     'anywords-<1> <2>' => {
-        percentage_complete => { contains => [2] },
         work_time => { contains => [1,2] },
     },
 
@@ -481,16 +468,6 @@ use constant PG_BROKEN => {
         notregexp => { contains => [5] },
         nowords   => { contains => [5] },
     },
-    percentage_complete => {
-        'allwordssubstr-<1>' => { contains => [3] },
-        anywordssubstr  => { contains => [2,3] },
-        casesubstring   => { contains => [3] },
-        'notregexp-<1>' => { contains => [3] },
-        notsubstring    => { contains => [3] },
-        nowordssubstr   => { contains => [3] },
-        'regexp-<1>'    => { contains => [3] },
-        substring       => { contains => [3] },
-    },
 };
 
 ###################
@@ -512,7 +489,6 @@ use constant COMMON_BROKEN_NOT => (
     "flagtypes.name"          => { contains => [5] },
     "keywords"                => { contains => [5] },
     "longdescs.isprivate"     => { contains => [1] },
-    "percentage_complete"     => { contains => [1 .. 5] },
     "see_also"                => { contains => [5] },
     FIELD_TYPE_BUG_ID,           { contains => [5] },
     FIELD_TYPE_DATETIME,         { contains => [5] },
@@ -527,7 +503,7 @@ use constant CHANGED_BROKEN_NOT => (
     "classification"        => { contains => [1] },
     "commenter"             => { contains => [1] },
     "delta_ts"              => { contains => [1] },
-    "percentage_complete"   => { contains => [1] },
+    percentage_complete     => { contains => [1] },
     "requestees.login_name" => { contains => [1] },
     "setters.login_name"    => { contains => [1] },
     "work_time"             => { contains => [1] },    
@@ -549,7 +525,6 @@ use constant NEGATIVE_BROKEN_NOT => (
     "bug_group"           => { contains => [5] },
     "dependson"           => { contains => [2, 4, 5] },
     "flagtypes.name"      => { contains => [1 .. 5] },
-    "percentage_complete" => { contains => [1 .. 5] },    
 );
 
 # These are field/operator combinations that are broken when run under NOT().
@@ -603,7 +578,6 @@ use constant BROKEN_NOT => {
     },
     'anyexact-<1>, <2>' => {
         bug_group => { contains => [1] },
-        percentage_complete => { contains => [1,3,4,5] },
         keywords => { contains => [1,5] },
         see_also => { },
         FIELD_TYPE_MULTI_SELECT, { },
@@ -616,7 +590,6 @@ use constant BROKEN_NOT => {
     },
     'anywords-<1> <2>' => {
         'attach_data.thedata' => { contains => [5] },
-        "percentage_complete" => { contains => [1,3,4,5] },
         work_time => { contains => [1,2] },
     },
     anywordssubstr => {
@@ -624,7 +597,6 @@ use constant BROKEN_NOT => {
         "work_time" => { contains => [1, 2] },
     },
     'anywordssubstr-<1> <2>' => {
-        percentage_complete => { contains => [1,2,3,4,5] },
         FIELD_TYPE_MULTI_SELECT, { contains => [5] },
     },
     casesubstring => {
@@ -645,8 +617,8 @@ use constant BROKEN_NOT => {
         "attach_data.thedata"   => { contains => [2, 3, 4] },
         "classification"        => { contains => [2, 3, 4] },
         "commenter"             => { contains => [2, 3, 4] },
+        percentage_complete     => { contains => [2, 3, 4] },
         "delta_ts"              => { contains => [2, 3, 4] },
-        "percentage_complete"   => { contains => [2, 3, 4] },
         "requestees.login_name" => { contains => [2, 3, 4] },
         "setters.login_name"    => { contains => [2, 3, 4] },
     },
@@ -693,7 +665,6 @@ use constant BROKEN_NOT => {
         cc               => { contains => [1] },
         "flagtypes.name" => { contains => [2, 5] },
         "work_time"      => { contains => [2, 3, 4] },
-        percentage_complete => { contains => [1,3,4,5] },,
         FIELD_TYPE_MULTI_SELECT, { contains => [5] },
     },
     lessthan => {
@@ -717,14 +688,14 @@ use constant BROKEN_NOT => {
     notsubstring   => { NEGATIVE_BROKEN_NOT },
     nowords        => {
         NEGATIVE_BROKEN_NOT,
-        "work_time"           => { contains => [2, 3, 4] },
+        "work_time" => { contains => [2, 3, 4] },
         "flagtypes.name" => { },
     },
     nowordssubstr  => {
         NEGATIVE_BROKEN_NOT,
         "attach_data.thedata" => { },
         "flagtypes.name" => { },
-        "work_time"           => { contains => [2, 3, 4] },
+        "work_time" => { contains => [2, 3, 4] },
     },
     regexp         => {
         COMMON_BROKEN_NOT,
@@ -774,7 +745,7 @@ use constant REGEX_OVERRIDE => {
     remaining_time => { value => '^9.0' },
     work_time      => { value => '^1.0' },
     longdesc       => { value => '^1-' },
-    percentage_complete => { value => '^10.0' },
+    percentage_complete => { value => '^10' },
     FIELD_TYPE_BUG_ID, { value => '^<1>$' },
     FIELD_TYPE_DATETIME, { value => '^2037-03-01' }
 };
@@ -915,22 +886,46 @@ use constant TESTS => {
         { contains => [2,3,4,5], value => '<1>' },
     ],
     substring => [
-        { contains => [1], value => '<1>' },
+        { contains => [1], value => '<1>',
+          override => {
+              percentage_complete => { contains => [1,2,3] },
+          }
+        },
     ],
     casesubstring => [
-        { contains => [1], value => '<1>' },
+        { contains => [1], value => '<1>',
+          override => {
+              percentage_complete => { contains => [1,2,3] },
+          }
+        },
         { contains => [], value => '<1>', transform => sub { lc($_[0]) },
-          extra_name => 'lc', if_equal => { contains => [1] } },
+          extra_name => 'lc', if_equal => { contains => [1] },
+          override => {
+              percentage_complete => { contains => [1,2,3] },
+          }
+        },
     ],
     notsubstring => [
-        { contains => [2,3,4,5], value => '<1>' },
+        { contains => [2,3,4,5], value => '<1>',
+          override => {
+              percentage_complete => { contains => [4,5] },
+          },
+        }
     ],
     regexp => [
-        { contains => [1], value => '<1>', escape => 1 },
+        { contains => [1], value => '<1>', escape => 1,
+          override => {
+              percentage_complete => { value => '^10' },
+          }
+        },
         { contains => [1], value => '^1-', override => REGEX_OVERRIDE },
     ],
     notregexp => [
-        { contains => [2,3,4,5], value => '<1>', escape => 1 },
+        { contains => [2,3,4,5], value => '<1>', escape => 1,
+          override => {
+              percentage_complete => { value => '^10' },
+          }
+        },
         { contains => [2,3,4,5], value => '^1-', override => REGEX_OVERRIDE },
     ],
     lessthan => [
@@ -1031,14 +1026,26 @@ use constant TESTS => {
     ],
     anywordssubstr => [
         { contains => [1,2], value => '<1> <2>', 
-          override => { ANY_OVERRIDE } },
+          override => {
+              ANY_OVERRIDE,
+              percentage_complete => { contains => [1,2,3] },
+          }
+        },
     ],
     allwordssubstr => [
         { contains => [1], value => '<1>',
-          override => { MULTI_BOOLEAN_OVERRIDE } },
+          override => {
+              MULTI_BOOLEAN_OVERRIDE,
+              # We search just the number "1" for percentage_complete,
+              # which matches a lot of bugs.
+              percentage_complete => { contains => [1,2,3] },
+          },
+        },
         { contains => [], value => '<1>,<2>',
           override => {
               dependson => { value => '<1-id> <3-id>', contains => [] },
+              # bug 3 has the value "21" here, so matches "2,1"
+              percentage_complete => { value => '<2>,<3>', contains => [3] }
           }
         },
     ],
@@ -1048,6 +1055,7 @@ use constant TESTS => {
               # longdescs.isprivate translates to "1 0", so no bugs should
               # show up.
               'longdescs.isprivate' => { contains => [] },
+              percentage_complete => { contains => [4,5] },
               # 1.0 0.0 exludes bug 5.
               # XXX However, it also shouldn't match 2, 3, or 4, because
               # they contain at least one comment with 0.0 work_time.

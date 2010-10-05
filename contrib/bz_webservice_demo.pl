@@ -210,7 +210,7 @@ if ($fetch_extension_info) {
     _die_on_fault($soapresult);
     my $extensions = $soapresult->result()->{extensions};
     foreach my $extensionname (keys(%$extensions)) {
-        print "Extensionn '$extensionname' information\n";
+        print "Extension '$extensionname' information\n";
         my $extension = $extensions->{$extensionname};
         foreach my $data (keys(%$extension)) {
             print '  ' . $data . ' => ' . $extension->{$data} . "\n";

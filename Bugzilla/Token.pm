@@ -63,13 +63,14 @@ sub issue_new_user_account_token {
     # But to prevent using this way to mailbomb an email address, make sure
     # the last request is at least 10 minutes old before sending a new email.
 
-    my $pending_requests =
-        $dbh->selectrow_array('SELECT COUNT(*)
-                                 FROM tokens
-                                WHERE tokentype = ?
-                                  AND ' . $dbh->sql_istrcmp('eventdata', '?') . '
-                                  AND issuedate > NOW() - ' . $dbh->sql_interval(10, 'MINUTE'),
-                               undef, ('account', $login_name));
+    my $pending_requests = $dbh->selectrow_array(
+        'SELECT COUNT(*)
+           FROM tokens
+          WHERE tokentype = ?
+                AND ' . $dbh->sql_istrcmp('eventdata', '?') . '
+                AND issuedate > '
+                    . $dbh->sql_date_math('NOW()', '-', 10, 'MINUTE'),
+        undef, ('account', $login_name));
 
     ThrowUserError('too_soon_for_new_token', {'type' => 'account'}) if $pending_requests;
 
@@ -131,13 +132,12 @@ sub IssuePasswordToken {
     my $user = shift;
     my $dbh = Bugzilla->dbh;
 
-    my $too_soon =
-        $dbh->selectrow_array('SELECT 1 FROM tokens
-                                WHERE userid = ?
-                                  AND tokentype = ?
-                                  AND issuedate > NOW() - ' .
-                                      $dbh->sql_interval(10, 'MINUTE'),
-                                undef, ($user->id, 'password'));
+    my $too_soon = $dbh->selectrow_array(
+        'SELECT 1 FROM tokens
+          WHERE userid = ? AND tokentype = ?
+                AND issuedate > ' 
+                    . $dbh->sql_date_math('NOW()', '-', 10, 'MINUTE'),
+        undef, ($user->id, 'password'));
 
     ThrowUserError('too_soon_for_new_token', {'type' => 'password'}) if $too_soon;
 

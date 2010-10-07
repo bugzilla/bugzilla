@@ -226,10 +226,10 @@ sub sql_date_format {
     return "DATE_FORMAT($date, " . $self->quote($format) . ")";
 }
 
-sub sql_interval {
-    my ($self, $interval, $units) = @_;
+sub sql_date_math {
+    my ($self, $date, $operator, $interval, $units) = @_;
     
-    return "INTERVAL $interval $units";
+    return "$date $operator INTERVAL $interval $units";
 }
 
 sub sql_iposition {

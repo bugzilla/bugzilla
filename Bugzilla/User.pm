@@ -1791,12 +1791,13 @@ sub clear_login_failures {
 sub account_ip_login_failures {
     my $self = shift;
     my $dbh = Bugzilla->dbh;
-    my $time = $dbh->sql_interval(LOGIN_LOCKOUT_INTERVAL, 'MINUTE');
+    my $time = $dbh->sql_date_math('LOCALTIMESTAMP(0)', '-', 
+                                   LOGIN_LOCKOUT_INTERVAL, 'MINUTE');
     my $ip_addr = remote_ip();
     trick_taint($ip_addr);
     $self->{account_ip_login_failures} ||= Bugzilla->dbh->selectall_arrayref(
         "SELECT login_time, ip_addr, user_id FROM login_failure
-          WHERE user_id = ? AND login_time > LOCALTIMESTAMP(0) - $time
+          WHERE user_id = ? AND login_time > $time
                 AND ip_addr = ?
        ORDER BY login_time", {Slice => {}}, $self->id, $ip_addr);
     return $self->{account_ip_login_failures};

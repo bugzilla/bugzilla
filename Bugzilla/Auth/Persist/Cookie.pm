@@ -69,8 +69,9 @@ sub persist_login {
 
     # Issuing a new cookie is a good time to clean up the old
     # cookies.
-    $dbh->do("DELETE FROM logincookies WHERE lastused < LOCALTIMESTAMP(0) - "
-             . $dbh->sql_interval(MAX_LOGINCOOKIE_AGE, 'DAY'));
+    $dbh->do("DELETE FROM logincookies WHERE lastused < "
+             . $dbh->sql_date_math('LOCALTIMESTAMP(0)', '-',
+                                   MAX_LOGINCOOKIE_AGE, 'DAY'));
 
     $dbh->bz_commit_transaction();
 

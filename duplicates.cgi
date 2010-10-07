@@ -181,8 +181,8 @@ my %since_dups = @{$dbh->selectcol_arrayref(
        FROM duplicates INNER JOIN bugs_activity 
                        ON bugs_activity.bug_id = duplicates.dupe 
       WHERE added = 'DUPLICATE' AND fieldid = ? 
-            AND bug_when >= LOCALTIMESTAMP(0) - "
-                . $dbh->sql_interval('?', 'DAY') .
+            AND bug_when >= "
+                . $dbh->sql_date_math('LOCALTIMESTAMP(0)', '-', '?', 'DAY') .
  " GROUP BY dupe_of", {Columns=>[1,2]},
     $reso_field_id, $changedsince)};
 add_indirect_dups(\%since_dups, \%dupe_relation);

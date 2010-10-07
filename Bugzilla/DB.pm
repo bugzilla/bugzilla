@@ -307,7 +307,7 @@ EOT
 
 # List of abstract methods we are checking the derived class implements
 our @_abstract_methods = qw(new sql_regexp sql_not_regexp sql_limit sql_to_days
-                            sql_date_format sql_interval bz_explain
+                            sql_date_format sql_date_math bz_explain
                             sql_group_concat);
 
 # This overridden import method will check implementation of inherited classes
@@ -1904,13 +1904,13 @@ Formatted SQL for date formatting (scalar)
 
 =back
 
-=item C<sql_interval>
+=item C<sql_date_math>
 
 =over
 
 =item B<Description>
 
-Outputs proper SQL syntax for a time interval function.
+Outputs proper SQL syntax for adding some amount of time to a date.
 
 Abstract method, should be overridden by database specific code.
 
@@ -1918,15 +1918,28 @@ Abstract method, should be overridden by database specific code.
 
 =over
 
-=item C<$interval> - the time interval requested (e.g. '30') (integer)
+=item C<$date>
 
-=item C<$units> - the units the interval is in (e.g. 'MINUTE') (string)
+C<string> The date being added to or subtracted from.
+
+=item C<$operator>
+
+C<string> Either C<-> or C<+>, depending on whether you're subtracting
+or adding.
+
+=item C<$interval>
+
+C<integer> The time interval you're adding or subtracting (e.g. C<30>)
+
+=item C<$units> 
+
+C<string> the units the interval is in (e.g. 'MINUTE')
 
 =back
 
 =item B<Returns>
 
-Formatted SQL for interval function (scalar)
+Formatted SQL for adding or subtracting a date and some amount of time (scalar)
 
 =back
 

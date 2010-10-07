@@ -197,13 +197,15 @@ sub sql_date_format {
     return "TO_CHAR($date, " . $self->quote($format) . ")";
 }
 
-sub sql_interval {
-    my ($self, $interval, $units) = @_;
+sub sql_date_math {
+    my ($self, $date, $operator, $interval, $units) = @_;
+    my $time_sql;
     if ($units =~ /YEAR|MONTH/i) {
-        return "NUMTOYMINTERVAL($interval,'$units')";
+        $time_sql = "NUMTOYMINTERVAL($interval,'$units')";
     } else{
-        return "NUMTODSINTERVAL($interval,'$units')";
+        $time_sql = "NUMTODSINTERVAL($interval,'$units')";
     }
+   return "$date $operator $time_sql";
 }
 
 sub sql_position {

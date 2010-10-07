@@ -74,6 +74,13 @@ sub search_params {
         return { chfield => $field, $ch_param => $value };
     }
     
+    if ($field eq 'delta_ts' and $operator eq 'greaterthaneq') {
+        return { chfieldfrom => $value };
+    }
+    if ($field eq 'delta_ts' and $operator eq 'lessthaneq') {
+        return { chfieldto => $value };
+    }
+    
     if ($field eq 'deadline' and $operator eq 'greaterthaneq') {
         return { deadlinefrom => $value };
     }

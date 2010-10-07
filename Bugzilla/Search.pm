@@ -1309,13 +1309,19 @@ sub _special_parse_chfield {
     # if there is a "from" date specified. It doesn't conflict with
     # searching [Bug creation], because a bug's delta_ts is set to
     # its creation_ts when it is created. So this just gives the
-    # database an additional index to possibly choose.
-    #
-    # It's not safe to do it for "to" dates, though--"chfieldto" means
-    # "a field that changed before this date", and delta_ts could be either
-    # later or earlier than that.
+    # database an additional index to possibly choose, on a table that
+    # is smaller than bugs_activity.
     if ($date_from ne '') {
         push(@charts, ['delta_ts', 'greaterthaneq', $date_from]);
+    }
+    # It's not normally safe to do it for "to" dates, though--"chfieldto" means
+    # "a field that changed before this date", and delta_ts could be either
+    # later or earlier than that, if we're searching for the time that a field
+    # changed. However, chfieldto all by itself, without any chfieldvalue or
+    # chfield, means "just search delta_ts", and so we still want that to
+    # work.
+    if ($date_to ne '' and !@fields and $value_to eq '') {
+        push(@charts, ['delta_ts', 'lessthaneq', $date_to]);
     }
 
     # Basically, we construct the chart like:

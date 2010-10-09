@@ -110,7 +110,7 @@ foreach my $path (@Support::Templates::include_paths) {
 
         # /g means we execute this loop for every match
         # /s means we ignore linefeeds in the regexp matches
-        while ($slurp =~ /\[%(.*?)%\]/gs) {
+        while ($slurp =~ /\[%(?:-|\+|~)?(.*?)(?:-|\+|~)?%\]/gs) {
             my $directive = $1;
 
             my @lineno = ($` =~ m/\n/gs);
@@ -155,11 +155,11 @@ sub directive_ok {
     my ($file, $directive) = @_;
 
     # Comments
-    return 1 if $directive =~ /^[+-]?#/;        
+    return 1 if $directive =~ /^#/;        
 
-    # Remove any leading/trailing + or - and whitespace.
-    $directive =~ s/^[+-]?\s*//;
-    $directive =~ s/\s*[+-]?$//;
+    # Remove any leading/trailing whitespace.
+    $directive =~ s/^\s*//;
+    $directive =~ s/\s*$//;
 
     # Empty directives are ok; they are usually line break helpers
     return 1 if $directive eq '';

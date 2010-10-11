@@ -337,6 +337,31 @@ WARNING: We are about to convert your table storage format to UTF-8. This
          If you ever used a version of Bugzilla before 2.22, we STRONGLY
          recommend that you stop checksetup.pl NOW and run contrib/recode.pl.
 END
+    no_checksetup_from_cgi => <<END,
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+          "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <title>checksetup.pl cannot run from a web browser</title>
+  </head>
+
+  <body>
+    <h1>checksetup.pl cannot run from a web browser</h1>
+    <p>
+      You <b>must not</b> execute this script from your web browser.
+      To install or upgrade Bugzilla, run this script from
+      the command-line (e.g. <tt>bash</tt> or <tt>ssh</tt> on Linux
+      or <tt>cmd.exe</tt> on Windows), and follow instructions given there.
+    </p>
+
+    <p>
+      For more information on how to install Bugzilla, please
+      <a href="http://www.bugzilla.org/docs/">read the documentation</a>
+      available on the official Bugzilla website.
+    </p>
+  </body>
+</html>
+END
     patchutils_missing => <<'END',
 OPTIONAL NOTE: If you want to be able to use the 'difference between two
 patches' feature of Bugzilla (which requires the PatchReader Perl module

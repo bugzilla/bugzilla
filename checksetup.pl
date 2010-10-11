@@ -60,6 +60,9 @@ use Bugzilla::Install::Util qw(install_string get_version_and_os
 # Live Code
 ######################################################################
 
+# Do not run checksetup.pl from the web browser.
+Bugzilla::Install::Util::no_checksetup_from_cgi() if $ENV{'SERVER_SOFTWARE'};
+
 # When we're running at the command line, we need to pick the right
 # language before ever displaying any string.
 init_console();

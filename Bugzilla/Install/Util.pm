@@ -298,7 +298,7 @@ sub _wanted_languages {
 
     # Checking SERVER_SOFTWARE is the same as i_am_cgi() in Bugzilla::Util.
     if (exists $ENV{'SERVER_SOFTWARE'}) {
-        my $cgi = Bugzilla->cgi;
+        my $cgi = eval { Bugzilla->cgi } || eval { require CGI; return CGI->new() };
         $requested = $cgi->http('Accept-Language') || '';
         my $lang = $cgi->cookie('LANG');
         push(@wanted, $lang) if $lang;
@@ -502,6 +502,12 @@ sub vers_cmp {
         }
     }
     @A <=> @B;
+}
+
+sub no_checksetup_from_cgi {
+    print "Content-Type: text/html; charset=UTF-8\r\n\r\n";
+    print install_string('no_checksetup_from_cgi');
+    exit;
 }
 
 ######################

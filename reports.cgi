@@ -18,22 +18,15 @@
 # Copyright (C) 1998 Netscape Communications Corporation. All
 # Rights Reserved.
 #
-# Contributor(s): Harrison Page <harrison@netscape.com>,
-# Terry Weissman <terry@mozilla.org>,
-# Dawn Endico <endico@mozilla.org>
-# Bryce Nesbitt <bryce@nextbus.COM>,
-# Joe Robins <jmrobins@tgix.com>,
-# Gervase Markham <gerv@gerv.net> and Adam Spiers <adam@spiers.net>
-#    Added ability to chart any combination of resolutions/statuses.
-#    Derive the choice of resolutions/statuses from the -All- data file
-#    Removed hardcoded order of resolutions/statuses when reading from
-#    daily stats file, so now works independently of collectstats.pl
-#    version
-#    Added image caching by date and datasets
-# Myk Melez <myk@mozilla.org>:
-#    Implemented form field validation and reorganized code.
-# Frédéric Buclin <LpSolit@gmail.com>:
-#    Templatization.
+# Contributor(s): Harrison Page <harrison@netscape.com>
+#                 Terry Weissman <terry@mozilla.org>
+#                 Dawn Endico <endico@mozilla.org>
+#                 Bryce Nesbitt <bryce@nextbus.com>
+#                 Joe Robins <jmrobins@tgix.com>
+#                 Gervase Markham <gerv@gerv.net>
+#                 Adam Spiers <adam@spiers.net>
+#                 Myk Melez <myk@mozilla.org>
+#                 Frédéric Buclin <LpSolit@gmail.com>
 
 use strict;
 
@@ -113,14 +106,12 @@ else {
 
     my $datasets = join('', $cgi->param('datasets'));
 
-    my $type = chart_image_type();
     my $data_file = daily_stats_filename($product);
-    my $image_file = chart_image_name($data_file, $type, $datasets);
+    my $image_file = chart_image_name($data_file, $datasets);
     my $url_image = correct_urlbase() . "$graph_url/$image_file";
 
     if (! -e "$graph_dir/$image_file") {
-        generate_chart("$dir/$data_file", "$graph_dir/$image_file", $type,
-                       $product, $datasets);
+        generate_chart("$dir/$data_file", "$graph_dir/$image_file", $product, $datasets);
     }
 
     $vars->{'url_image'} = $url_image;
@@ -160,17 +151,8 @@ sub daily_stats_filename {
     return $prodname;
 }
 
-sub chart_image_type {
-    # what chart type should we be generating?
-    my $testimg = Chart::Lines->new(2,2);
-    my $type = $testimg->can('gif') ? "gif" : "png";
-
-    undef $testimg;
-    return $type;
-}
-
 sub chart_image_name {
-    my ($data_file, $type, $datasets) = @_;
+    my ($data_file, $datasets) = @_;
 
     # This routine generates a filename from the requested fields. The problem
     # is that we have to check the safety of doing this. We can't just require
@@ -190,11 +172,11 @@ sub chart_image_name {
     # show. Charts should be deleted by collectstats.pl nightly.
     my $id = join ("_", split (":", $datasets));
 
-    return "${data_file}_${id}.$type";
+    return "${data_file}_${id}.png";
 }
 
 sub generate_chart {
-    my ($data_file, $image_file, $type, $product, $datasets) = @_;
+    my ($data_file, $image_file, $product, $datasets) = @_;
 
     if (! open FILE, $data_file) {
         if ($product eq '-All-') {
@@ -279,5 +261,5 @@ sub generate_chart {
         );
     
     $img->set (%settings);
-    $img->$type($image_file, [ @data{('DATE', @labels)} ]);
+    $img->png($image_file, [ @data{('DATE', @labels)} ]);
 }

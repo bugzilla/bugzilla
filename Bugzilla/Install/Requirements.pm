@@ -126,7 +126,7 @@ sub REQUIRED_MODULES {
     {
         package => 'DBI',
         module  => 'DBI',
-        version => '1.41'
+        version => (vers_cmp($perl_ver, '5.13.3') > -1) ? '1.614' : '1.41'
     },
     # 2.22 fixes various problems related to UTF8 strings in hash keys,
     # as well as line endings on Windows.
@@ -165,6 +165,7 @@ sub REQUIRED_MODULES {
 };
 
 sub OPTIONAL_MODULES {
+    my $perl_ver = sprintf('%vd', $^V);
     my @modules = (
     {
         package => 'GD',
@@ -273,7 +274,7 @@ sub OPTIONAL_MODULES {
         # We need the 'utf8_mode' method of HTML::Parser, for HTML::Scrubber.
         package => 'HTML-Parser',
         module  => 'HTML::Parser',
-        version => '3.40',
+        version => (vers_cmp($perl_ver, '5.13.3') > -1) ? '3.67' : '3.40',
         feature => ['html_desc'],
     },
     {

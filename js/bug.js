@@ -76,11 +76,13 @@ YAHOO.bugzilla.dupTable = {
     },
     formatStatus: function(el, oRecord, oColumn, oData) {
         var resolution = oRecord.getData('resolution');
+        var bug_status = display_value('bug_status', oData);
         if (resolution) {
-            el.innerHTML = oData + ' ' + resolution;
+            el.innerHTML = bug_status + ' ' 
+                           + display_value('resolution', resolution);
         }
         else {
-            el.innerHTML = oData;
+            el.innerHTML = bug_status;
         }
     },
     formatCcButton: function(el, oRecord, oColumn, oData) {

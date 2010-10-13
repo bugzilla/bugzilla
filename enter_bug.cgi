@@ -545,6 +545,9 @@ scalar(@statuses) || ThrowUserError('no_initial_bug_status');
 unless ($has_editbugs || $has_canconfirm) {
     # ... use UNCONFIRMED if available, else use the first status of the list.
     my ($unconfirmed) = grep { $_->name eq 'UNCONFIRMED' } @statuses;
+
+    # Because of an apparent Perl bug, "$unconfirmed || $statuses[0]" doesn't
+    # work, so we're using an "?:" operator. See bug 603314 for details.
     @statuses = ($unconfirmed ? $unconfirmed : $statuses[0]);
 }
 

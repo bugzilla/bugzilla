@@ -1304,9 +1304,9 @@ use constant ABSTRACT_SCHEMA => {
                             DEFAULT => 'FALSE'},
         ],
         INDEXES => [
-            series_creator_idx  =>
-                {FIELDS => [qw(creator category subcategory name)],
-                 TYPE => 'UNIQUE'},
+            series_creator_idx  => ['creator'],
+            series_category_idx => {FIELDS => [qw(category subcategory name)],
+                                    TYPE => 'UNIQUE'},
         ],
     },
 

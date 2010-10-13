@@ -1456,6 +1456,7 @@ sub _contact_pronoun {
     elsif ($$value =~ /^(%\w+%)$/) {
         $$value = pronoun($1, $user);
         $$quoted = $$value;
+        $self->_do_operator_function(\%func_args);
     }
     
 }

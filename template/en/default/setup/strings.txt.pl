@@ -389,8 +389,8 @@ EOT
 EOT
     template_precompile   => "Precompiling templates...",
     template_removal_failed => <<END,
-WARNING: The directory '##datadir##/template' could not be removed.
-         It has been moved into '##datadir##/deleteme', which should be
+WARNING: The directory '##template_cache##' could not be removed.
+         It has been moved into '##deleteme##', which should be
          deleted manually to conserve disk space.
 END
     template_removing_dir => "Removing existing compiled templates...",

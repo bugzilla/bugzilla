@@ -596,6 +596,7 @@ sub bz_locations {
         $datadir = "data";
     }
 
+    $datadir = "$libpath/$datadir";
     # We have to return absolute paths for mod_perl. 
     # That means that if you modify these paths, they must be absolute paths.
     return {
@@ -605,10 +606,11 @@ sub bz_locations {
         # make sure this still points to the CGIs.
         'cgi_path'    => $libpath,
         'templatedir' => "$libpath/template",
+        'template_cache' => "$datadir/template",
         'project'     => $project,
         'localconfig' => "$libpath/$localconfig",
-        'datadir'     => "$libpath/$datadir",
-        'attachdir'   => "$libpath/$datadir/attachments",
+        'datadir'     => $datadir,
+        'attachdir'   => "$datadir/attachments",
         'skinsdir'    => "$libpath/skins",
         # $webdotdir must be in the web server's tree somewhere. Even if you use a 
         # local dot, we output images to there. Also, if $webdotdir is 
@@ -616,7 +618,7 @@ sub bz_locations {
         # change showdependencygraph.cgi to set image_url to the correct 
         # location.
         # The script should really generate these graphs directly...
-        'webdotdir'   => "$libpath/$datadir/webdot",
+        'webdotdir'   => "$datadir/webdot",
         'extensionsdir' => "$libpath/extensions",
     };
 }

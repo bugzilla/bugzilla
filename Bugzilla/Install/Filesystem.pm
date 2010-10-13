@@ -121,6 +121,7 @@ sub FILESYSTEM {
     my $extlib        = bz_locations()->{'ext_libpath'};
     my $skinsdir      = bz_locations()->{'skinsdir'};
     my $localconfig   = bz_locations()->{'localconfig'};
+    my $template_cache = bz_locations()->{'template_cache'};
 
     # We want to set the permissions the same for all localconfig files
     # across all PROJECTs, so we do something special with $localconfig,
@@ -189,7 +190,7 @@ sub FILESYSTEM {
     # the webserver.
     my %recurse_dirs = (
         # Writeable directories
-        "$datadir/template" => { files => CGI_READ,
+         $template_cache    => { files => CGI_READ,
                                   dirs => DIR_CGI_OVERWRITE },
          $attachdir         => { files => CGI_WRITE,
                                   dirs => DIR_CGI_WRITE },

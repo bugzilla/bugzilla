@@ -30,6 +30,7 @@ use Bugzilla::Error;
 
 use Date::Parse;
 use List::MoreUtils qw(part);
+use Scalar::Util qw(blessed);
 
 use constant NAME_FIELD => 'name';
 use constant ID_FIELD   => 'id';
@@ -462,13 +463,21 @@ sub check_required_create_fields {
 }
 
 sub run_create_validators {
-    my ($class, $params) = @_;
+    my ($class, $params, $options) = @_;
 
     my $validators = $class->_get_validators;
     my %field_values = %$params;
 
+    # Make a hash skiplist for easier searching later
+    my %skip_list = map { $_ => 1 } @{ $options->{skip} || [] };
+
+    # Get the sorted field names
     my @sorted_names = $class->_sort_by_dep(keys %field_values);
-    foreach my $field (@sorted_names) {
+
+    # Remove the skipped names
+    my @unskipped = grep { !$skip_list{$_} } @sorted_names;
+
+    foreach my $field (@unskipped) {
         my $value;
         if (exists $validators->{$field}) {
             my $validator = $validators->{$field};
@@ -527,9 +536,53 @@ sub get_all {
 
 sub check_boolean { return $_[1] ? 1 : 0 }
 
+sub check_time {
+    my ($invocant, $value, $field, $params, $allow_negative) = @_;
+
+    # If we don't have a current value default to zero
+    my $current = blessed($invocant) ? $invocant->{$field}
+                                     : 0;
+    $current ||= 0;
+
+    # Don't let the user set the value if they aren't a timetracker
+    return $current unless Bugzilla->user->is_timetracker;
+
+    # Get the new value or zero if it isn't defined
+    $value = trim($value) || 0;
+
+    # Make sure the new value is well formed
+    _validate_time($value, $field, $allow_negative);
+
+    return $value;
+}
+
+
 ###################
 # General Helpers #
 ###################
+
+sub _validate_time {
+    my ($time, $field, $allow_negative) = @_;
+
+    # regexp verifies one or more digits, optionally followed by a period and
+    # zero or more digits, OR we have a period followed by one or more digits
+    # (allow negatives, though, so people can back out errors in time reporting)
+    if ($time !~ /^-?(?:\d+(?:\.\d*)?|\.\d+)$/) {
+        ThrowUserError("number_not_numeric",
+                       {field => $field, num => "$time"});
+    }
+
+    # Callers can optionally allow negative times
+    if ( ($time < 0) && !$allow_negative ) {
+        ThrowUserError("number_too_small",
+                       {field => $field, num => "$time", min_num => "0"});
+    }
+
+    if ($time > 99999.99) {
+        ThrowUserError("number_too_large",
+                       {field => $field, num => "$time", max_num => "99999.99"});
+    }
+}
 
 # Sorts fields according to VALIDATOR_DEPENDENCIES. This is not a
 # traditional topological sort, because a "dependency" does not
@@ -1036,7 +1089,11 @@ Description: Runs the validation of input parameters for L</create>.
              of their input parameters. This method is B<only> called
              by L</create>.
 
-Params:      The same as L</create>.
+Params:      C<$params> - hashref - A value to put in each database
+             field for this object.
+             C<$options> - hashref - Processing options. Currently
+             the only option supported is B<skip>, which can be
+             used to specify a list of fields to not validate.
 
 Returns:     A hash, in a similar format as C<$params>, except that
              these are the values to be inserted into the database,

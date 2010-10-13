@@ -70,6 +70,7 @@ use lib qw(. lib);
 
 
 use Bugzilla;
+use Bugzilla::Object;
 use Bugzilla::Bug;
 use Bugzilla::Product;
 use Bugzilla::Version;
@@ -763,7 +764,7 @@ sub process_bug {
         push( @query,  "deadline" );
         if ( defined $bug_fields{'estimated_time'} ) {
             eval {
-                Bugzilla::Bug::ValidateTime($bug_fields{'estimated_time'}, "e");
+                Bugzilla::Object::_validate_time($bug_fields{'estimated_time'}, "e");
             };
             if (!$@){
                 push( @values, $bug_fields{'estimated_time'} );
@@ -772,7 +773,7 @@ sub process_bug {
         }
         if ( defined $bug_fields{'remaining_time'} ) {
             eval {
-                Bugzilla::Bug::ValidateTime($bug_fields{'remaining_time'}, "r");
+                Bugzilla::Object::_validate_time($bug_fields{'remaining_time'}, "r");
             };
             if (!$@){
                 push( @values, $bug_fields{'remaining_time'} );
@@ -781,7 +782,7 @@ sub process_bug {
         }
         if ( defined $bug_fields{'actual_time'} ) {
             eval {
-                Bugzilla::Bug::ValidateTime($bug_fields{'actual_time'}, "a");
+                Bugzilla::Object::_validate_time($bug_fields{'actual_time'}, "a");
             };
             if ($@){
                 $bug_fields{'actual_time'} = 0.0;

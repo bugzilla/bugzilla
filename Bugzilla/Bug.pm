@@ -26,6 +26,7 @@
 #                 Frédéric Buclin <LpSolit@gmail.com>
 #                 Lance Larsh <lance.larsh@oracle.com>
 #                 Elliotte Martin <elliotte_martin@yahoo.com>
+#                 Christian Legnitto <clegnitto@mozilla.com>
 
 package Bugzilla::Bug;
 
@@ -125,11 +126,11 @@ sub VALIDATORS {
         bug_status     => \&_check_bug_status,
         cc             => \&_check_cc,
         comment        => \&_check_comment,
-        commentprivacy => \&_check_commentprivacy,
         component      => \&_check_component,
+        creation_ts    => \&_check_creation_ts,
         deadline       => \&_check_deadline,
         dup_id         => \&_check_dup_id,
-        estimated_time => \&_check_estimated_time,
+        estimated_time => \&Bugzilla::Object::check_time,
         everconfirmed  => \&Bugzilla::Object::check_boolean,
         groups         => \&_check_groups,
         keywords       => \&_check_keywords,
@@ -137,7 +138,7 @@ sub VALIDATORS {
         priority       => \&_check_priority,
         product        => \&_check_product,
         qa_contact     => \&_check_qa_contact,
-        remaining_time => \&_check_remaining_time,
+        remaining_time => \&Bugzilla::Object::check_time,
         rep_platform   => \&_check_select_field,
         resolution     => \&_check_resolution,
         short_desc     => \&_check_short_desc,
@@ -185,6 +186,7 @@ sub VALIDATOR_DEPENDENCIES {
         assigned_to      => ['component'],
         bug_status       => ['product', 'comment', 'target_milestone'],
         cc               => ['component'],
+        comment          => ['creation_ts'],
         component        => ['product'],
         dup_id           => ['bug_status', 'resolution'],
         groups           => ['product'],
@@ -246,16 +248,6 @@ sub DATE_COLUMNS {
     return map { $_->name } @fields;
 }
 
-# This is used by add_comment to know what we validate before putting in
-# the DB.
-use constant UPDATE_COMMENT_COLUMNS => qw(
-    thetext
-    work_time
-    type
-    extra_data
-    isprivate
-);
-
 # Used in LogActivityEntry(). Gives the max length of lines in the
 # activity table.
 use constant MAX_LINE_LENGTH => 254;
@@ -292,6 +284,9 @@ use constant REQUIRED_FIELD_MAP => {
     component_id => 'component',
 };
 
+# Creation timestamp is here because it needs to be validated
+# but it can be NULL in the database (see comments in create above)
+#
 # Target Milestone is here because it has a default that the validator
 # creates (product.defaultmilestone) that is different from the database
 # default.
@@ -305,7 +300,7 @@ use constant REQUIRED_FIELD_MAP => {
 #
 # Groups are in a separate table, but must always be validated so that
 # mandatory groups get set on bugs.
-use constant EXTRA_REQUIRED_FIELDS => qw(target_milestone cc qa_contact groups);
+use constant EXTRA_REQUIRED_FIELDS => qw(creation_ts target_milestone cc qa_contact groups);
 
 #####################################################################
 
@@ -615,14 +610,12 @@ sub create {
 
     # These are not a fields in the bugs table, so we don't pass them to
     # insert_create_data.
-    my $cc_ids     = delete $params->{cc};
-    my $groups     = delete $params->{groups};
-    my $depends_on = delete $params->{dependson};
-    my $blocked    = delete $params->{blocked};
-    my $keywords   = delete $params->{keywords};
-    my ($comment, $privacy) = ($params->{comment}, $params->{commentprivacy});
-    delete $params->{comment};
-    delete $params->{commentprivacy};
+    my $cc_ids           = delete $params->{cc};
+    my $groups           = delete $params->{groups};
+    my $depends_on       = delete $params->{dependson};
+    my $blocked          = delete $params->{blocked};
+    my $keywords         = delete $params->{keywords};
+    my $creation_comment = delete $params->{comment};
 
     # We don't want the bug to appear in the system until it's correctly
     # protected by groups.
@@ -686,20 +679,14 @@ sub create {
         }
     }
 
-    # And insert the comment. We always insert a comment on bug creation,
+    # Comment #0 handling...
+
+    # We now have a bug id so we can fill this out
+    $creation_comment->{'bug_id'} = $bug->id;
+
+    # Insert the comment. We always insert a comment on bug creation,
     # but sometimes it's blank.
-    my @columns = qw(bug_id who bug_when thetext);
-    my @values  = ($bug->bug_id, $bug->{reporter_id}, $timestamp, $comment);
-    # We don't include the "isprivate" column unless it was specified. 
-    # This allows it to fall back to its database default.
-    if (defined $privacy) {
-        push(@columns, 'isprivate');
-        push(@values, $privacy);
-    }
-    my $qmarks = "?," x @columns;
-    chop($qmarks);
-    $dbh->do('INSERT INTO longdescs (' . join(',', @columns)  . ")
-                   VALUES ($qmarks)", undef, @values);
+    Bugzilla::Comment->insert_create_data($creation_comment);
 
     Bugzilla::Hook::process('bug_end_of_create', { bug => $bug,
                                                    timestamp => $timestamp,
@@ -726,8 +713,6 @@ sub run_create_validators {
 
     # Callers cannot set reporter, creation_ts, or delta_ts.
     $params->{reporter} = $class->_check_reporter();
-    $params->{creation_ts} = 
-        Bugzilla->dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
     $params->{delta_ts} = $params->{creation_ts};
 
     if ($params->{estimated_time}) {
@@ -903,26 +888,21 @@ sub update {
 
     # Comments
     foreach my $comment (@{$self->{added_comments} || []}) {
-        my $columns = join(',', keys %$comment);
-        my @values  = values %$comment;
-        my $qmarks  = join(',', ('?') x @values);
-        $dbh->do("INSERT INTO longdescs (bug_id, who, bug_when, $columns)
-                       VALUES (?,?,?,$qmarks)", undef,
-                 $self->bug_id, Bugzilla->user->id, $delta_ts, @values);
+        $comment = Bugzilla::Comment->insert_create_data($comment);
         if ($comment->{work_time}) {
             LogActivityEntry($self->id, "work_time", "", $comment->{work_time},
                 Bugzilla->user->id, $delta_ts);
         }
     }
-   
+
     # Comment Privacy 
-    foreach my $comment_id (keys %{$self->{comment_isprivate} || {}}) {
-        $dbh->do("UPDATE longdescs SET isprivate = ? WHERE comment_id = ?",
-                 undef, $self->{comment_isprivate}->{$comment_id}, $comment_id);
+    foreach my $comment (@{$self->{comment_isprivate} || []}) {
+        $comment->update();
+        
         my ($from, $to) 
-            = $self->{comment_isprivate}->{$comment_id} ? (0, 1) : (1, 0);
+            = $comment->is_private ? (0, 1) : (1, 0);
         LogActivityEntry($self->id, "longdescs.isprivate", $from, $to, 
-                         Bugzilla->user->id, $delta_ts, $comment_id);
+                         Bugzilla->user->id, $delta_ts, $comment->id);
     }
 
     # Insert the values into the multiselect value tables
@@ -1417,33 +1397,43 @@ sub _check_cc {
 }
 
 sub _check_comment {
-    my ($invocant, $comment) = @_;
+    my ($invocant, $comment_txt, undef, $params) = @_;
 
-    $comment = '' unless defined $comment;
-
-    # Remove any trailing whitespace. Leading whitespace could be
-    # a valid part of the comment.
-    $comment =~ s/\s*$//s;
-    $comment =~ s/\r\n?/\n/g; # Get rid of \r.
-
-    ThrowUserError('comment_too_long') if length($comment) > MAX_COMMENT_LENGTH;
-    return $comment;
-}
-
-sub _check_commentprivacy {
-    my ($invocant, $comment_privacy) = @_;
-    if ($comment_privacy && !Bugzilla->user->is_insider) {
-        ThrowUserError('user_not_insider');
+    # Comment can be empty. We should force it to be empty if the text is undef
+    if (!defined $comment_txt) {
+        $comment_txt = '';
     }
-    return $comment_privacy ? 1 : 0;
-}
 
-sub _check_comment_type {
-    my ($invocant, $type) = @_;
-    detaint_natural($type)
-      || ThrowCodeError('bad_arg', { argument => 'type', 
-                                     function => caller });
-    return $type;
+    # Load up some data
+    my $isprivate = $params->{commentprivacy};
+    my $timestamp = $params->{creation_ts};
+
+    # Create the new comment so we can check it
+    my $comment = {
+        thetext  => $comment_txt,
+        bug_when => $timestamp,
+    };
+
+    # We don't include the "isprivate" column unless it was specified. 
+    # This allows it to fall back to its database default.
+    if (defined $isprivate) {
+        $comment->{isprivate} = $isprivate;
+    }
+
+    # Don't need this anymore as it is now in the comment hash
+    delete $params->{commentprivacy};
+
+    # Validate comment. We have to do this special as a comment normally
+    # requires a bug to be already created. For a new bug, the first comment
+    # obviously can't get the bug if the bug is created after this
+    # (see bug 590334)
+    Bugzilla::Comment->check_required_create_fields($comment);
+    $comment = Bugzilla::Comment->run_create_validators($comment,
+                                                        { skip => ['bug_id'] }
+    );
+
+    return $comment; 
+
 }
 
 sub _check_component {
@@ -1454,6 +1444,10 @@ sub _check_component {
                                      : $params->{product};
     my $obj = Bugzilla::Component->check({ product => $product, name => $name });
     return $obj;
+}
+
+sub _check_creation_ts {
+    return Bugzilla->dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
 }
 
 sub _check_deadline {
@@ -1605,10 +1599,6 @@ sub _check_dup_id {
     return $dupe_of;
 }
 
-sub _check_estimated_time {
-    return $_[0]->_check_time($_[1], 'estimated_time');
-}
-
 sub _check_groups {
     my ($invocant, $group_names, undef, $params) = @_;
     my $product = blessed($invocant) ? $invocant->product_obj 
@@ -1726,10 +1716,6 @@ sub _check_qa_contact {
 
     # "0" always means "undef", for QA Contact.
     return $id || undef;
-}
-
-sub _check_remaining_time {
-    return $_[0]->_check_time($_[1], 'remaining_time');
 }
 
 sub _check_reporter {
@@ -1886,20 +1872,6 @@ sub _check_target_milestone {
     return $object->name;
 }
 
-sub _check_time {
-    my ($invocant, $time, $field) = @_;
-
-    my $current = 0;
-    if (ref $invocant && $field ne 'work_time') {
-        $current = $invocant->$field;
-    }
-    return $current unless Bugzilla->user->is_timetracker;
-    
-    $time = trim($time) || 0;
-    ValidateTime($time, $field);
-    return $time;
-}
-
 sub _check_version {
     my ($invocant, $version, undef, $params) = @_;
     $version = trim($version);
@@ -1908,10 +1880,6 @@ sub _check_version {
     my $object = 
         Bugzilla::Version->check({ product => $product, name => $version });
     return $object->name;
-}
-
-sub _check_work_time {
-    return $_[0]->_check_time($_[1], 'work_time');
 }
 
 # Custom Field Validators
@@ -2265,8 +2233,9 @@ sub set_comment_is_private {
 
     $isprivate = $isprivate ? 1 : 0;
     if ($isprivate != $comment->is_private) {
-        $self->{comment_isprivate} ||= {};
-        $self->{comment_isprivate}->{$comment_id} = $isprivate;
+        $self->{comment_isprivate} ||= [];
+        $comment->set_is_private($isprivate);
+        push @{$self->{comment_isprivate}}, $comment;
     }
 }
 sub set_component  {
@@ -2636,22 +2605,21 @@ sub remove_cc {
 sub add_comment {
     my ($self, $comment, $params) = @_;
 
-    $comment = $self->_check_comment($comment);
-
     $params ||= {};
-    $params->{work_time} = $self->_check_work_time($params->{work_time});
-    if (exists $params->{type}) {
-        $params->{type} = $self->_check_comment_type($params->{type});
-    }
-    if (exists $params->{isprivate}) {
-        $params->{isprivate} = 
-            $self->_check_commentprivacy($params->{isprivate});
-    }
-    # XXX We really should check extra_data, too.
 
+    # This makes it so we won't create new comments when there is nothing
+    # to add 
     if ($comment eq '' && !($params->{type} || abs($params->{work_time}))) {
         return;
     }
+
+    # Fill out info that doesn't change and callers may not pass in
+    $params->{'bug_id'}  = $self;
+    $params->{'thetext'} = $comment;
+
+    # Validate all the entered data
+    Bugzilla::Comment->check_required_create_fields($params);
+    $params = Bugzilla::Comment->run_create_validators($params);
 
     # If the user has explicitly set remaining_time, this will be overridden
     # later in set_all. But if they haven't, this keeps remaining_time
@@ -2660,23 +2628,9 @@ sub add_comment {
         $self->set_remaining_time(max($self->remaining_time - $params->{work_time}, 0));
     }
 
-    # So we really want to comment. Make sure we are allowed to do so.
-    my $privs;
-    $self->check_can_change_field('longdesc', 0, 1, \$privs)
-        || ThrowUserError('illegal_change', { field => 'longdesc', privs => $privs });
-
     $self->{added_comments} ||= [];
-    my $add_comment = dclone($params);
-    $add_comment->{thetext} = $comment;
 
-    # We only want to trick_taint fields that we know about--we don't
-    # want to accidentally let somebody set some field that's not OK
-    # to set!
-    foreach my $field (UPDATE_COMMENT_COLUMNS) {
-        trick_taint($add_comment->{$field}) if defined $add_comment->{$field};
-    }
-
-    push(@{$self->{added_comments}}, $add_comment);
+    push(@{$self->{added_comments}}, $params);
 }
 
 # There was a lot of duplicate code when I wrote this as three separate
@@ -3636,29 +3590,6 @@ sub EmitDependList {
             ORDER BY is_open DESC, $targetfield",
             undef, $bug_id);
     return $list_ref;
-}
-
-sub ValidateTime {
-    my ($time, $field) = @_;
-
-    # regexp verifies one or more digits, optionally followed by a period and
-    # zero or more digits, OR we have a period followed by one or more digits
-    # (allow negatives, though, so people can back out errors in time reporting)
-    if ($time !~ /^-?(?:\d+(?:\.\d*)?|\.\d+)$/) {
-        ThrowUserError("number_not_numeric",
-                       {field => "$field", num => "$time"});
-    }
-
-    # Only the "work_time" field is allowed to contain a negative value.
-    if ( ($time < 0) && ($field ne "work_time") ) {
-        ThrowUserError("number_too_small",
-                       {field => "$field", num => "$time", min_num => "0"});
-    }
-
-    if ($time > 99999.99) {
-        ThrowUserError("number_too_large",
-                       {field => "$field", num => "$time", max_num => "99999.99"});
-    }
 }
 
 # Get the activity of a bug, starting from $starttime (if given).

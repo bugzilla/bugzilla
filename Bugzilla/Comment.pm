@@ -17,6 +17,7 @@
 # All rights reserved.
 #
 # Contributor(s): James Robson <arbingersys@gmail.com> 
+#                 Christian Legnitto <clegnitto@mozilla.com> 
 
 use strict;
 
@@ -50,6 +51,7 @@ use constant DB_COLUMNS => qw(
 );
 
 use constant UPDATE_COLUMNS => qw(
+    isprivate
     type
     extra_data
 );
@@ -62,12 +64,21 @@ use constant ID_FIELD => 'comment_id';
 use constant LIST_ORDER => 'bug_when, comment_id';
 
 use constant VALIDATORS => {
-    extra_data => \&_check_extra_data,
-    type => \&_check_type,
+    bug_id      => \&_check_bug_id,
+    who         => \&_check_who,
+    bug_when    => \&_check_bug_when,
+    work_time   => \&_check_work_time,
+    thetext     => \&_check_thetext,
+    isprivate   => \&_check_isprivate,
+    extra_data  => \&_check_extra_data,
+    type        => \&_check_type,
 };
 
 use constant VALIDATOR_DEPENDENCIES => {
     extra_data => ['type'],
+    bug_id     => ['who'],
+    work_time  => ['who'],
+    isprivate  => ['who'],
 };
 
 #########################
@@ -157,12 +168,9 @@ sub body_full {
 # Mutators #
 ############
 
-sub set_extra_data { $_[0]->set('extra_data', $_[1]); }
-
-sub set_type {
-    my ($self, $type) = @_;
-    $self->set('type', $type);
-}
+sub set_is_private  { $_[0]->set('isprivate',  $_[1]); }
+sub set_type        { $_[0]->set('type',       $_[1]); }
+sub set_extra_data  { $_[0]->set('extra_data', $_[1]); }
 
 ##############
 # Validators #
@@ -207,6 +215,87 @@ sub _check_type {
     detaint_natural($type)
         or ThrowCodeError('comment_type_invalid', { type => $original });
     return $type;
+}
+
+sub _check_bug_id {
+    my ($invocant, $bug_id) = @_;
+
+    ThrowCodeError('param_required', {function => 'Bugzilla::Comment->create',
+                                      param => 'bug_id'}) unless $bug_id;
+
+    my $bug;
+    if (blessed $bug_id) {
+        # We got a bug object passed in, use it
+        $bug = $bug_id;
+        $bug->check_is_visible;
+    }
+    else {
+        # We got a bug id passed in, check it and get the bug object
+        $bug = Bugzilla::Bug->check({ id => $bug_id });
+    }
+
+    # Make sure the user can edit the product
+    Bugzilla->user->can_edit_product($bug->{product_id});
+
+    # Make sure the user can comment
+    my $privs;
+    $bug->check_can_change_field('longdesc', 0, 1, \$privs)
+        || ThrowUserError('illegal_change', 
+                          { field => 'longdesc', privs => $privs });
+    return $bug->id;
+}
+
+sub _check_who {
+    my ($invocant, $who) = @_;
+    Bugzilla->login(LOGIN_REQUIRED);
+    return Bugzilla->user->id;
+}
+
+sub _check_bug_when {
+    my ($invocant, $when) = @_;
+
+    # Make sure the timestamp is defined, default to a timestamp from the db
+    if (!defined $when) {
+        $when = Bugzilla->dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
+    }
+
+    # Make sure the timestamp parses
+    if (!datetime_from($when)) {
+        ThrowCodeError('invalid_timestamp', { timestamp => $when });
+    }
+
+    return $when;
+}
+
+sub _check_work_time {
+    my ($invocant, $value_in, $field, $params) = @_;
+
+    # Call down to Bugzilla::Object, letting it know negative
+    # values are ok
+    return $invocant->check_time( $value_in, $field, $params, 1);
+}
+
+sub _check_thetext {
+    my ($invocant, $thetext) = @_;
+
+    ThrowCodeError('param_required',{function => 'Bugzilla::Comment->create',
+                                     param => 'thetext'}) unless defined $thetext;
+
+    # Remove any trailing whitespace. Leading whitespace could be
+    # a valid part of the comment.
+    $thetext =~ s/\s*$//s;
+    $thetext =~ s/\r\n?/\n/g; # Get rid of \r.
+
+    ThrowUserError('comment_too_long') if length($thetext) > MAX_COMMENT_LENGTH;
+    return $thetext;
+}
+
+sub _check_isprivate {
+    my ($invocant, $isprivate) = @_;
+    if ($isprivate && !Bugzilla->user->is_insider) {
+        ThrowUserError('user_not_insider');
+    }
+    return $isprivate ? 1 : 0;
 }
 
 sub count {

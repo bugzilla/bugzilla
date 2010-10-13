@@ -236,6 +236,10 @@
     The series_id [% series_id FILTER html %] is not valid. It may be that
     this series has been deleted.
 
+  [% ELSIF error == "invalid_timestamp" %]
+    The entered timestamp <code>[% timestamp FILTER html %]</code> could not
+    be parsed into a valid date and time.
+
   [% ELSIF error == "invalid_webservergroup" %]
     There is no such group: [% group FILTER html %]. Check your $webservergroup
     setting in [% constants.bz_locations.localconfig FILTER html %].

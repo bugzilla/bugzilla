@@ -137,10 +137,12 @@ sub PrefillForm {
                       "chart_format", "cumulate", "x_labels_vertical",
                       "category", "subcategory", "name", "newcategory",
                       "newsubcategory", "public", "frequency");
-    # These fields can also have default values (when used in reports).
-    my @custom_select_fields =
-      grep { $_->type == FIELD_TYPE_SINGLE_SELECT } Bugzilla->active_custom_fields;
-    push(@list, map { $_->name } @custom_select_fields);
+    # These fields can also have default values. And because there are
+    # hooks in the advanced search page which let you add fields as
+    # discrete forms, we also need to retain the operators.
+    my @custom_fields = Bugzilla->active_custom_fields;
+    push(@list, map { $_->name } @custom_fields);
+    push(@list, map { $_->name . '_type'} @custom_fields);
 
     foreach my $name (@list) {
         $default{$name} = [];

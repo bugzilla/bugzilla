@@ -630,6 +630,9 @@ sub update_table_definitions {
     $dbh->bz_alter_column('products', 'allows_unconfirmed',
         { TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'TRUE' });
 
+    # 2010-10-09 LpSolit@gmail.com - Bug 505165
+    $dbh->bz_alter_column('flags', 'setter_id', {TYPE => 'INT3', NOTNULL => 1});
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################

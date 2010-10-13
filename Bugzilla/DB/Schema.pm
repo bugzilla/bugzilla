@@ -557,7 +557,7 @@ use constant ABSTRACT_SCHEMA => {
                                                  DELETE => 'CASCADE'}},
             creation_date     => {TYPE => 'DATETIME', NOTNULL => 1},
             modification_date => {TYPE => 'DATETIME'},
-            setter_id         => {TYPE => 'INT3',
+            setter_id         => {TYPE => 'INT3', NOTNULL => 1,
                                   REFERENCES => {TABLE  => 'profiles',
                                                  COLUMN => 'userid'}},
             requestee_id      => {TYPE => 'INT3',

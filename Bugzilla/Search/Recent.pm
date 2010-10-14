@@ -90,6 +90,18 @@ sub check {
     return $search;
 }
 
+sub new_from_cookie {
+    my ($invocant, $bug_ids) = @_;
+    my $class = ref($invocant) || $invocant;
+
+    my $search = { id       => 'cookie',
+                   user_id  => Bugzilla->user->id,
+                   bug_list => join(',', @$bug_ids) };
+
+    bless $search, $class;
+    return $search;
+}
+
 ####################
 # Simple Accessors #
 ####################

@@ -425,7 +425,8 @@ sub recent_search_for {
     if (my $list = $cgi->cookie('BUGLIST')) {
         my @bug_ids = split(':', $list);
         if (grep { $_ == $bug->id } @bug_ids) {
-            return { id => 'cookie', bug_list => \@bug_ids };
+            my $search = Bugzilla::Search::Recent->new_from_cookie(\@bug_ids);
+            return $search;
         }
     }
 

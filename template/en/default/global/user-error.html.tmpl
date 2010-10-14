@@ -1301,6 +1301,14 @@
     [% title = "Passwords Don't Match" %]
     The two passwords you entered did not match.
 
+  [% ELSIF error == "password_current_too_short" %]
+    [% title = "New Password Required" %]
+    Your password is currently less than
+    [%+ constants.USER_PASSWORD_MIN_LENGTH FILTER html %] characters long,
+    which is the new minimum length required for passwords.
+    You must <a href="token.cgi?a=reqpw&loginname=[% locked_user.email FILTER html %]">
+    request a new password</a> in order to log in again.
+
   [% ELSIF error == "password_too_short" %]
     [% title = "Password Too Short" %]
     The password must be at least

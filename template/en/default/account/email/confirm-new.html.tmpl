@@ -24,11 +24,11 @@
            title = title
            onload = "document.forms['confirm_account_form'].realname.focus();" %]
 
-<div>
+<p>
   To create your account, you must enter a password in the form below.
   Your email address and Real Name (if provided) will be shown with
   changes you make.
-</div>
+</p>
 
 <form id="confirm_account_form" method="post" action="token.cgi">
   <input type="hidden" name="t" value="[% token FILTER html %]">
@@ -44,7 +44,10 @@
     </tr>
     <tr>
       <th align="right"><label for="passwd1">Type your password</label>:</th>
-      <td><input type="password" id="passwd1" name="passwd1" value=""></td>
+      <td>
+        <input type="password" id="passwd1" name="passwd1" value="">
+        (minimum [% constants.USER_PASSWORD_MIN_LENGTH FILTER none %] characters)
+      </td>
     </tr>
     <tr>
       <th align="right"><label for="passwd2">Confirm your password</label>:</th>

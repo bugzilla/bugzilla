@@ -151,7 +151,12 @@ sub _handle_login_result {
         }
     }
     elsif ($fail_code == AUTH_ERROR) {
-        ThrowCodeError($result->{error}, $result->{details});
+        if ($result->{user_error}) {
+            ThrowUserError($result->{error}, $result->{details});
+        }
+        else {
+            ThrowCodeError($result->{error}, $result->{details});
+        }
     }
     elsif ($fail_code == AUTH_NODATA) {
         $self->{_info_getter}->fail_nodata($self) 

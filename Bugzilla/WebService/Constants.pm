@@ -102,6 +102,7 @@ use constant WS_ERROR_CODE => {
     auth_invalid_email           => 302,
     extern_id_conflict           => -303,
     auth_failure                 => 304,
+    password_current_too_short   => 305,
 
     # Except, historically, AUTH_NODATA, which is 410.
     login_required               => 410,

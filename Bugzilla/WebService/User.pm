@@ -331,6 +331,11 @@ The username does not exist, or the password is wrong.
 The account has been disabled.  A reason may be specified with the
 error.
 
+=item 305 (New Password Required)
+
+The current password is correct, but the user is asked to change
+his password.
+
 =item 50 (Param Required)
 
 A login or password parameter was not provided.

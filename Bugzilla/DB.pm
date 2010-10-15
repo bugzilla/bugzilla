@@ -933,10 +933,16 @@ sub bz_drop_index {
     my $index_exists = $self->bz_index_info($table, $name);
 
     if ($index_exists) {
+        # We cannot delete an index used by a FK.
+        foreach my $column (@{$index_exists->{FIELDS}}) {
+            $self->bz_drop_related_fks($table, $column);
+        }
         $self->bz_drop_index_raw($table, $name);
         $self->_bz_real_schema->delete_index($table, $name);
         $self->_bz_store_real_schema;        
     }
+
+    return $index_exists ? 1 : 0;
 }
 
 # bz_drop_index_raw($table, $name, $silent)

@@ -765,6 +765,22 @@ sub bz_setup_database {
     }
 
      $self->_fix_defaults();
+
+    # Bug 451735 highlighted a bug in bz_drop_index() which didn't
+    # check for FKs before trying to delete an index. Consequently,
+    # the series_creator_idx index was considered to be deleted
+    # despite it was still present in the DB. That's why we have to
+    # force the deletion, bypassing the DB schema.
+    if (!$self->bz_index_info('series', 'series_category_idx')) {
+        if (!$self->bz_drop_index('series', 'series_creator_idx')
+            && $self->bz_index_info_real('series', 'series_creator_idx'))
+        {
+            foreach my $column (qw(creator category subcategory name)) {
+                $self->bz_drop_related_fks('series', $column);
+            }
+            $self->bz_drop_index_raw('series', 'series_creator_idx');
+        }
+    }
 }
 
 # When you import a MySQL 3/4 mysqldump into MySQL 5, columns that

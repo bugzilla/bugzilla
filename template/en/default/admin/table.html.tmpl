@@ -143,7 +143,7 @@
           [% link_uri = contentlink %]
           [% WHILE link_uri.search('%%(.+?)%%')%]
             [% FOREACH m = link_uri.match('%%(.+?)%%') %]
-              [% IF row.$m %]
+              [% IF row.$m.defined %]
                 [% replacement_value = FILTER url_quote; row.$m; END %]
               [% ELSE %]
                 [% replacement_value = "" %]

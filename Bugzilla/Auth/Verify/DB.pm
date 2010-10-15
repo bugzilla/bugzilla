@@ -76,8 +76,8 @@ sub check_credentials {
 
     # Force the user to type a longer password if it's too short.
     if (length($password) < USER_PASSWORD_MIN_LENGTH) {
-        return { failure => AUTH_ERROR, error => 'password_current_too_short',
-                 user_error => 1, details => { locked_user => $user } };
+        return { failure => AUTH_ERROR, user_error => 'password_current_too_short',
+                 details => { locked_user => $user } };
     }
 
     # The user's credentials are okay, so delete any outstanding

@@ -152,7 +152,7 @@ sub _handle_login_result {
     }
     elsif ($fail_code == AUTH_ERROR) {
         if ($result->{user_error}) {
-            ThrowUserError($result->{error}, $result->{details});
+            ThrowUserError($result->{user_error}, $result->{details});
         }
         else {
             ThrowCodeError($result->{error}, $result->{details});

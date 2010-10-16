@@ -174,6 +174,7 @@ sub FILESYSTEM {
         "$datadir/params"      => { perms => CGI_WRITE },
         "$datadir/old-params.txt"  => { perms => OWNER_WRITE },
         "$extensionsdir/create.pl" => { perms => OWNER_EXECUTE },
+        "$extensionsdir/*/*.pl"    => { perms => WS_EXECUTE },
     );
 
     # Directories that we want to set the perms on, but not

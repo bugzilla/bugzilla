@@ -941,8 +941,6 @@ sub bz_drop_index {
         $self->_bz_real_schema->delete_index($table, $name);
         $self->_bz_store_real_schema;        
     }
-
-    return $index_exists ? 1 : 0;
 }
 
 # bz_drop_index_raw($table, $name, $silent)

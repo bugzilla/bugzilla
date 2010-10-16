@@ -772,7 +772,7 @@ sub bz_setup_database {
     # despite it was still present in the DB. That's why we have to
     # force the deletion, bypassing the DB schema.
     if (!$self->bz_index_info('series', 'series_category_idx')) {
-        if (!$self->bz_drop_index('series', 'series_creator_idx')
+        if (!$self->bz_index_info('series', 'series_creator_idx')
             && $self->bz_index_info_real('series', 'series_creator_idx'))
         {
             foreach my $column (qw(creator category subcategory name)) {

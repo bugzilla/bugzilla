@@ -847,6 +847,15 @@ if (!$order) {
 
 my @orderstrings = split(/,\s*/, $order);
 
+# The bug status defined by a specific search is of type __foo__, but
+# Search.pm converts it into a list of real bug statuses, which cannot
+# be used when editing the specific search again. So we restore this
+# parameter manually.
+my $input_bug_status;
+if ($params->param('query_format') eq 'specific') {
+    $input_bug_status = $params->param('bug_status');
+}
+
 # Generate the basic SQL query that will be used to generate the bug list.
 my $search = new Bugzilla::Search('fields' => \@selectcolumns, 
                                   'params' => $params,
@@ -1056,6 +1065,9 @@ if ($format->{'extension'} eq 'ics') {
         $vars->{'ics_priorities'}->{$p} = ($n > 9) ? 9 : $n++;
     }
 }
+
+# Restore the bug status used by the specific search.
+$params->param('bug_status', $input_bug_status) if $input_bug_status;
 
 # The list of query fields in URL query string format, used when creating
 # URLs to the same query results page with different parameters (such as

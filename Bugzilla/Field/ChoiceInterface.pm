@@ -110,10 +110,21 @@ sub is_static {
 
 sub controls_visibility_of_fields {
     my $self = shift;
-    $self->{controls_visibility_of_fields} ||= Bugzilla::Field->match(
-        { visibility_field_id => $self->field->id, 
-          visibility_value_id => $self->id });
-    return $self->{controls_visibility_of_fields};
+    my $dbh = Bugzilla->dbh;
+
+    if (!$self->{controls_visibility_of_fields}) {
+        my $ids = $dbh->selectcol_arrayref(
+            "SELECT id FROM fielddefs
+               INNER JOIN field_visibility
+                 ON fielddefs.id = field_visibility.field_id
+             WHERE value_id = ? AND visibility_field_id = ?", undef,
+            $self->id, $self->field->id);
+
+        $self->{controls_visibility_of_fields} =
+            Bugzilla::Field->new_from_list($ids);
+   }
+
+   return $self->{controls_visibility_of_fields};
 }
 
 sub visibility_value {

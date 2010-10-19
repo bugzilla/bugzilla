@@ -320,27 +320,6 @@ sub bz_setup_database {
     }
 
 
-    my %table_status = @{ $self->selectcol_arrayref("SHOW TABLE STATUS", 
-                                                    {Columns=>[1,2]}) };
-    my @isam_tables;
-    foreach my $name (keys %table_status) {
-        push(@isam_tables, $name) if (defined($table_status{$name}) && $table_status{$name} eq "ISAM");
-    }
-
-    if(scalar(@isam_tables)) {
-        print "One or more of the tables in your existing MySQL database are\n"
-              . "of type ISAM. ISAM tables are deprecated in MySQL 3.23 and\n"
-              . "don't support more than 16 indexes per table, which \n"
-              . "Bugzilla needs.\n  Converting your ISAM tables to type"
-              . " MyISAM:\n\n";
-        foreach my $table (@isam_tables) {
-            print "Converting table $table... ";
-            $self->do("ALTER TABLE $table TYPE = MYISAM");
-            print "done.\n";
-        }
-        print "\nISAM->MyISAM table conversion done.\n\n";
-    }
-
     my ($sd_index_deleted, $longdescs_index_deleted);
     my @tables = $self->bz_table_list_real();
     # We want to convert tables to InnoDB, but it's possible that they have 
@@ -370,26 +349,24 @@ sub bz_setup_database {
     }
 
     # Upgrade tables from MyISAM to InnoDB
-    my @myisam_tables;
-    foreach my $name (keys %table_status) {
-        if (defined($table_status{$name})
-            && $table_status{$name} =~ /^MYISAM$/i 
-            && !grep($_ eq $name, Bugzilla::DB::Schema::Mysql::MYISAM_TABLES))
-        {
-            push(@myisam_tables, $name) ;
-        }
+    my $db_name = Bugzilla->localconfig->{db_name};
+    my $myisam_tables = $self->selectcol_arrayref(
+        'SELECT TABLE_NAME FROM information_schema.TABLES 
+          WHERE TABLE_SCHEMA = ? AND ENGINE = ?',
+        undef, $db_name, 'MyISAM');
+    foreach my $should_be_myisam (Bugzilla::DB::Schema::Mysql::MYISAM_TABLES) {
+        @$myisam_tables = grep { $_ ne $should_be_myisam } @$myisam_tables;
     }
-    if (scalar @myisam_tables) {
+
+    if (scalar @$myisam_tables) {
         print "Bugzilla now uses the InnoDB storage engine in MySQL for",
               " most tables.\nConverting tables to InnoDB:\n";
-        foreach my $table (@myisam_tables) {
+        foreach my $table (@$myisam_tables) {
             print "Converting table $table... ";
             $self->do("ALTER TABLE $table ENGINE = InnoDB");
             print "done.\n";
         }
     }
-    
-    $self->_after_table_status(\@tables);
     
     # Versions of Bugzilla before the existence of Bugzilla::DB::Schema did 
     # not provide explicit names for the table indexes. This means
@@ -647,8 +624,11 @@ sub bz_setup_database {
 
     # 2005-09-24 - bugreport@peshkin.net, bug 307602
     # Make sure that default 4G table limit is overridden
-    my $row = $self->selectrow_hashref("SHOW TABLE STATUS LIKE 'attach_data'");
-    if ($$row{'Create_options'} !~ /MAX_ROWS/i) {
+    my $attach_data_create = $self->selectrow_array(
+        'SELECT CREATE_OPTIONS FROM information_schema.TABLES 
+          WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?',
+        undef, $db_name, 'attach_data');
+    if ($attach_data_create !~ /MAX_ROWS/i) {
         print "Converting attach_data maximum size to 100G...\n";
         $self->do("ALTER TABLE attach_data
                    AVG_ROW_LENGTH=1000000,
@@ -660,12 +640,15 @@ sub bz_setup_database {
     # partial-conversion situations can happen, and this handles anything
     # that could come up (including having the DB charset be utf8 but not
     # the table charsets.
-    my $utf_table_status =
-        $self->selectall_arrayref("SHOW TABLE STATUS", {Slice=>{}});
-    $self->_after_table_status([map($_->{Name}, @$utf_table_status)]);
-    my @non_utf8_tables = grep(defined($_->{Collation}) && $_->{Collation} !~ /^utf8/, @$utf_table_status);
+    #
+    # TABLE_COLLATION IS NOT NULL prevents us from trying to convert views.
+    my $non_utf8_tables = $self->selectrow_array(
+        "SELECT 1 FROM information_schema.TABLES 
+          WHERE TABLE_SCHEMA = ? AND TABLE_COLLATION IS NOT NULL 
+                AND TABLE_COLLATION NOT LIKE 'utf8%' 
+          LIMIT 1", undef, $db_name);
     
-    if (Bugzilla->params->{'utf8'} && scalar @non_utf8_tables) {
+    if (Bugzilla->params->{'utf8'} && $non_utf8_tables) {
         print "\n", install_string('mysql_utf8_conversion');
 
         if (!Bugzilla->installation_answers->{NO_PAUSE}) {
@@ -836,19 +819,6 @@ sub _fix_defaults {
                          @{ $fix_columns{$table} });
         my $sql = "ALTER TABLE $table " . join(',', @alters);
         $self->do($sql);
-    }
-}
-
-# There is a bug in MySQL 4.1.0 - 4.1.15 that makes certain SELECT
-# statements fail after a SHOW TABLE STATUS: 
-# http://bugs.mysql.com/bug.php?id=13535
-# This is a workaround, a dummy SELECT to reset the LAST_INSERT_ID.
-sub _after_table_status {
-    my ($self, $tables) = @_;
-    if (grep($_ eq 'bugs', @$tables)
-        && $self->bz_column_info_real("bugs", "bug_id"))
-    {
-        $self->do('SELECT 1 FROM bugs WHERE bug_id IS NULL');
     }
 }
 

@@ -479,14 +479,16 @@ use constant INSTALLATION_MODE_NON_INTERACTIVE => 1;
 
 # Data about what we require for different databases.
 use constant DB_MODULE => {
-    'mysql' => {db => 'Bugzilla::DB::Mysql', db_version => '4.1.2',
+    # MySQL 5.0.15 was the first production 5.0.x release.
+    'mysql' => {db => 'Bugzilla::DB::Mysql', db_version => '5.0.15',
                 dbd => { 
                     package => 'DBD-mysql',
                     module  => 'DBD::mysql',
                     # Disallow development versions
                     blacklist => ['_'],
-                    # For UTF-8 support
-                    version => '4.00',
+                    # For UTF-8 support. 4.001 makes sure that blobs aren't
+                    # marked as UTF-8.
+                    version => '4.001',
                 },
                 name => 'MySQL'},
     'pg'    => {db => 'Bugzilla::DB::Pg', db_version => '8.03.0000',

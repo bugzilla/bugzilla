@@ -260,6 +260,7 @@ use constant FIELD_MAP => {
     blocks           => 'blocked',
     is_confirmed     => 'everconfirmed',
     cc_accessible    => 'cclist_accessible',
+    commentprivacy   => 'comment_is_private',
     creation_time    => 'creation_ts',
     creator          => 'reporter',
     description      => 'comment',
@@ -1405,7 +1406,7 @@ sub _check_comment {
     }
 
     # Load up some data
-    my $isprivate = $params->{commentprivacy};
+    my $isprivate = delete $params->{comment_is_private};
     my $timestamp = $params->{creation_ts};
 
     # Create the new comment so we can check it
@@ -1419,9 +1420,6 @@ sub _check_comment {
     if (defined $isprivate) {
         $comment->{isprivate} = $isprivate;
     }
-
-    # Don't need this anymore as it is now in the comment hash
-    delete $params->{commentprivacy};
 
     # Validate comment. We have to do this special as a comment normally
     # requires a bug to be already created. For a new bug, the first comment

@@ -81,7 +81,8 @@ if ($cgi->param('product')) {
     $vars->{'products'} = $user->get_selectable_products;
 }
 
-Bugzilla::Product::preload($vars->{'products'});
+# We set the 2nd argument to 1 to also preload flag types.
+Bugzilla::Product::preload($vars->{'products'}, 1);
 
 # Allow consumers to specify whether or not they want flag data.
 if (defined $cgi->param('flags')) {

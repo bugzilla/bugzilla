@@ -48,7 +48,6 @@ whose names start with _ or are specifically noted as being private.
 
 =cut
 
-use Bugzilla::User;
 use Bugzilla::Error;
 use Bugzilla::Util;
 use Bugzilla::Group;
@@ -223,6 +222,7 @@ explicitly excluded from the flagtype.
 
 sub grant_list {
     my $self = shift;
+    require Bugzilla::User;
     my @custusers;
     my @allusers = @{Bugzilla->user->get_userlist};
     foreach my $user (@allusers) {
@@ -264,15 +264,33 @@ sub flag_count {
 sub inclusions {
     my $self = shift;
 
-    $self->{'inclusions'} ||= get_clusions($self->id, 'in');
-    return $self->{'inclusions'};
+    if (!defined $self->{inclusions}) {
+        ($self->{inclusions}, $self->{inclusions_as_hash}) = get_clusions($self->id, 'in');
+    }
+    return $self->{inclusions};
+}
+
+sub inclusions_as_hash {
+    my $self = shift;
+
+    $self->inclusions unless defined $self->{inclusions_as_hash};
+    return $self->{inclusions_as_hash};
 }
 
 sub exclusions {
     my $self = shift;
 
-    $self->{'exclusions'} ||= get_clusions($self->id, 'ex');
-    return $self->{'exclusions'};
+    if (!defined $self->{exclusions}) {
+        ($self->{exclusions}, $self->{exclusions_as_hash}) = get_clusions($self->id, 'ex');
+    }
+    return $self->{exclusions};
+}
+
+sub exclusions_as_hash {
+    my $self = shift;
+
+    $self->exclusions unless defined $self->{exclusions_as_hash};
+    return $self->{exclusions_as_hash};
 }
 
 ######################################################################
@@ -310,7 +328,7 @@ sub get_clusions {
                                  "WHERE flagtypes.id = ? " .
                                  " AND flag${type}clusions.type_id = flagtypes.id",
                                  undef, $id);
-    my %clusions;
+    my (%clusions, %clusions_as_hash);
     foreach my $data (@$list) {
         my ($product_id, $product_name, $component_id, $component_name) = @$data;
         $product_id ||= 0;
@@ -318,8 +336,9 @@ sub get_clusions {
         $component_id ||= 0;
         $component_name ||= "__Any__";
         $clusions{"$product_name:$component_name"} = "$product_id:$component_id";
+        $clusions_as_hash{$product_id}->{$component_id} = 1;
     }
-    return \%clusions;
+    return (\%clusions, \%clusions_as_hash);
 }
 
 =pod
@@ -423,15 +442,13 @@ sub sqlify_criteria {
         my $is_active = $criteria->{is_active} ? "1" : "0";
         push(@criteria, "flagtypes.is_active = $is_active");
     }
-    if ($criteria->{product_id} && $criteria->{'component_id'}) {
+    if ($criteria->{product_id}) {
         my $product_id = $criteria->{product_id};
-        my $component_id = $criteria->{component_id};
         
         # Add inclusions to the query, which simply involves joining the table
         # by flag type ID and target product/component.
         push(@$tables, "INNER JOIN flaginclusions AS i ON flagtypes.id = i.type_id");
         push(@criteria, "(i.product_id = $product_id OR i.product_id IS NULL)");
-        push(@criteria, "(i.component_id = $component_id OR i.component_id IS NULL)");
         
         # Add exclusions to the query, which is more complicated.  First of all,
         # we do a LEFT JOIN so we don't miss flag types with no exclusions.
@@ -439,9 +456,19 @@ sub sqlify_criteria {
         # component.  However, since we want flag types that *aren't* on the
         # exclusions list, we add a WHERE criteria to use only records with
         # NULL exclusion type, i.e. without any exclusions.
-        my $join_clause = "flagtypes.id = e.type_id " .
-                          "AND (e.product_id = $product_id OR e.product_id IS NULL) " .
-                          "AND (e.component_id = $component_id OR e.component_id IS NULL)";
+        my $join_clause = "flagtypes.id = e.type_id ";
+
+        my $addl_join_clause = "";
+        if ($criteria->{component_id}) {
+            my $component_id = $criteria->{component_id};
+            push(@criteria, "(i.component_id = $component_id OR i.component_id IS NULL)");
+            $join_clause .= "AND (e.component_id = $component_id OR e.component_id IS NULL) ";
+        }
+        else {
+            $addl_join_clause = "AND e.component_id IS NULL OR (i.component_id != e.component_id) ";
+        }
+        $join_clause .= "AND ((e.product_id = $product_id $addl_join_clause) OR e.product_id IS NULL)";
+
         push(@$tables, "LEFT JOIN flagexclusions AS e ON ($join_clause)");
         push(@criteria, "e.type_id IS NULL");
     }

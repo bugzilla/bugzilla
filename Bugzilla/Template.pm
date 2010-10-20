@@ -823,7 +823,8 @@ sub precompile_templates {
 
     print install_string('template_precompile') if $output;
 
-    my $paths = template_include_path({ use_languages => Bugzilla->languages });
+    my $paths = template_include_path({ use_languages => Bugzilla->languages,
+                                        only_language => Bugzilla->languages });
 
     foreach my $dir (@$paths) {
         my $template = Bugzilla::Template->create(include_path => [$dir]);

@@ -313,7 +313,14 @@ sub include_languages {
     
     my @wanted;
     if ($params->{only_language}) {
-        @wanted = ($params->{only_language});
+        # We can pass several languages at once as an arrayref
+        # or a single language.
+        if (ref $params->{only_language}) {
+            @wanted = @{ $params->{only_language} };
+        }
+        else {
+            @wanted = ($params->{only_language});
+        }
     }
     else {
         @wanted = _sort_accept_language($ENV{'HTTP_ACCEPT_LANGUAGE'} || '');
@@ -434,7 +441,7 @@ sub _template_base_directories {
 
 sub template_include_path {
     my ($params) = @_;
-    my @used_languages = include_languages(@_);
+    my @used_languages = include_languages($params);
     # Now, we add template directories in the order they will be searched:
     my $template_dirs = _template_base_directories(); 
 

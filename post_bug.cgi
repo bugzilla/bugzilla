@@ -129,7 +129,7 @@ push(@bug_fields, qw(
 
     alias
     blocked
-    commentprivacy
+    comment_is_private
     bug_file_loc
     bug_severity
     bug_status
@@ -184,7 +184,7 @@ if (defined $cgi->param('version')) {
 
 # Add an attachment if requested.
 if (defined($cgi->upload('data')) || $cgi->param('attachurl')) {
-    $cgi->param('isprivate', $cgi->param('commentprivacy'));
+    $cgi->param('isprivate', $cgi->param('comment_is_private'));
 
     # Must be called before create() as it may alter $cgi->param('ispatch').
     my $content_type = Bugzilla::Attachment::get_content_type();

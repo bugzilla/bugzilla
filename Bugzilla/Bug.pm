@@ -125,7 +125,7 @@ sub VALIDATORS {
         bug_status     => \&_check_bug_status,
         cc             => \&_check_cc,
         comment        => \&_check_comment,
-        commentprivacy => \&_check_commentprivacy,
+        comment_is_private => \&_check_comment_is_private,
         component      => \&_check_component,
         deadline       => \&_check_deadline,
         dup_id         => \&_check_dup_id,
@@ -268,6 +268,7 @@ use constant FIELD_MAP => {
     blocks           => 'blocked',
     is_confirmed     => 'everconfirmed',
     cc_accessible    => 'cclist_accessible',
+    commentprivacy   => 'comment_is_private',
     creation_time    => 'creation_ts',
     creator          => 'reporter',
     description      => 'comment',
@@ -610,9 +611,9 @@ sub create {
     my $depends_on = delete $params->{dependson};
     my $blocked    = delete $params->{blocked};
     my $keywords   = delete $params->{keywords};
-    my ($comment, $privacy) = ($params->{comment}, $params->{commentprivacy});
+    my ($comment, $privacy) = ($params->{comment}, $params->{comment_is_private});
     delete $params->{comment};
-    delete $params->{commentprivacy};
+    delete $params->{comment_is_private};
 
     # We don't want the bug to appear in the system until it's correctly
     # protected by groups.
@@ -1404,7 +1405,7 @@ sub _check_comment {
     return $comment;
 }
 
-sub _check_commentprivacy {
+sub _check_comment_is_private {
     my ($invocant, $comment_privacy) = @_;
     if ($comment_privacy && !Bugzilla->user->is_insider) {
         ThrowUserError('user_not_insider');
@@ -2620,7 +2621,7 @@ sub add_comment {
     }
     if (exists $params->{isprivate}) {
         $params->{isprivate} = 
-            $self->_check_commentprivacy($params->{isprivate});
+            $self->_check_comment_is_private($params->{isprivate});
     }
     # XXX We really should check extra_data, too.
 

@@ -452,14 +452,14 @@ if ($cloned_bug_id) {
     my $bug_desc = $cloned_bug->comments({ order => 'oldest_to_newest' })->[0];
     my $isprivate = $bug_desc->is_private;
 
-    $vars->{'comment'}        = "";
-    $vars->{'commentprivacy'} = 0;
+    $vars->{'comment'} = "";
+    $vars->{'comment_is_private'} = 0;
 
     if (!$isprivate || Bugzilla->user->is_insider) {
         # We use "body" to avoid any format_comment text, which would be
         # pointless to clone.
-        $vars->{'comment'}        = $bug_desc->body;
-        $vars->{'commentprivacy'} = $isprivate;
+        $vars->{'comment'} = $bug_desc->body;
+        $vars->{'comment_is_private'} = $isprivate;
     }
 
 } # end of cloned bug entry form
@@ -484,7 +484,7 @@ else {
     $vars->{'cc'}             = join(', ', $cgi->param('cc'));
 
     $vars->{'comment'}        = formvalue('comment');
-    $vars->{'commentprivacy'} = formvalue('commentprivacy');
+    $vars->{'comment_is_private'} = formvalue('comment_is_private');
 
 } # end of normal/bookmarked entry form
 

@@ -585,9 +585,9 @@ TUI_hide_default('expert_fields');
       <th>&nbsp;</th>
       <td colspan="3">
         &nbsp;&nbsp;
-        <input type="checkbox" id="commentprivacy" name="commentprivacy"
-          [% " checked=\"checked\"" IF commentprivacy %]>
-        <label for="commentprivacy">
+        <input type="checkbox" id="comment_is_private" name="comment_is_private"
+          [% ' checked="checked"' IF comment_is_private %]>
+        <label for="comment_is_private">
           Make description private (visible only to members of the 
           <strong>[% Param('insidergroup') FILTER html %]</strong> group)
         </label>

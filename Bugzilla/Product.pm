@@ -31,6 +31,7 @@ use Bugzilla::Install::Requirements;
 use Bugzilla::Mailer;
 use Bugzilla::Series;
 use Bugzilla::Hook;
+use Bugzilla::FlagType;
 
 use Scalar::Util qw(blessed);
 
@@ -113,7 +114,7 @@ sub create {
 # for each product in the list, particularly with hundreds or thousands
 # of products.
 sub preload {
-    my ($products) = @_;
+    my ($products, $preload_flagtypes) = @_;
     my %prods = map { $_->id => $_ } @$products;
     my @prod_ids = keys %prods;
     return unless @prod_ids;
@@ -129,6 +130,9 @@ sub preload {
             $prods{$product_id}->{"${field}s"} ||= [];
             push(@{$prods{$product_id}->{"${field}s"}}, $obj);
         }
+    }
+    if ($preload_flagtypes) {
+        $_->flag_types foreach @$products;
     }
 }
 
@@ -775,17 +779,34 @@ sub user_has_access {
 sub flag_types {
     my $self = shift;
 
-    if (!defined $self->{'flag_types'}) {
-        $self->{'flag_types'} = {};
-        foreach my $type ('bug', 'attachment') {
-            my %flagtypes;
-            foreach my $component (@{$self->components}) {
-                foreach my $flagtype (@{$component->flag_types->{$type}}) {
-                    $flagtypes{$flagtype->{'id'}} ||= $flagtype;
-                }
+    return $self->{'flag_types'} if defined $self->{'flag_types'};
+
+    # We cache flag types to avoid useless calls to get_clusions().
+    my $cache = Bugzilla->request_cache->{flag_types_per_product} ||= {};
+    $self->{flag_types} = {};
+    my $prod_id = $self->id;
+    my $flagtypes = Bugzilla::FlagType::match({ product_id => $prod_id });
+
+    foreach my $type ('bug', 'attachment') {
+        my @flags = grep { $_->target_type eq $type } @$flagtypes;
+        $self->{flag_types}->{$type} = \@flags;
+
+        # Also populate component flag types, while we are here.
+        foreach my $comp (@{$self->components}) {
+            $comp->{flag_types} ||= {};
+            my $comp_id = $comp->id;
+
+            foreach my $flag (@flags) {
+                my $flag_id = $flag->id;
+                $cache->{$flag_id} ||= $flag;
+                my $i = $cache->{$flag_id}->inclusions_as_hash;
+                my $e = $cache->{$flag_id}->exclusions_as_hash;
+                my $included = $i->{0}->{0} || $i->{0}->{$comp_id}
+                               || $i->{$prod_id}->{0} || $i->{$prod_id}->{$comp_id};
+                my $excluded = $e->{0}->{0} || $e->{0}->{$comp_id}
+                               || $e->{$prod_id}->{0} || $e->{$prod_id}->{$comp_id};
+                push(@{$comp->{flag_types}->{$type}}, $flag) if ($included && !$excluded);
             }
-            $self->{'flag_types'}->{$type} = [sort { $a->{'sortkey'} <=> $b->{'sortkey'}
-                                                    || $a->{'name'} cmp $b->{'name'} } values %flagtypes];
         }
     }
     return $self->{'flag_types'};
@@ -1039,6 +1060,9 @@ a group is valid in a particular product.)
 When passed an arrayref of C<Bugzilla::Product> objects, preloads their
 L</milestones>, L</components>, and L</versions>, which is much faster
 than calling those accessors on every item in the array individually.
+
+If the 2nd argument passed to C<preload> is true, flag types for these
+products and their components are also preloaded.
 
 This function is not exported, so must be called like 
 C<Bugzilla::Product::preload($products)>.

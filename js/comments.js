@@ -44,18 +44,18 @@ function toggle_comment_display(link, comment_id) {
         collapse_comment(link, comment);
 }
 
-function toggle_all_comments(action, comments_size) {
-    var num_comments = comments_size;
-
+function toggle_all_comments(action) {
     // If for some given ID the comment doesn't exist, this doesn't mean
     // there are no more comments, but that the comment is private and
     // the user is not allowed to view it.
 
-    for (var id = 0; id < num_comments; id++) {
-        var comment = document.getElementById('comment_text_' + id);
+    var comments = YAHOO.util.Dom.getElementsByClassName('bz_comment_text');
+    for (var i = 0; i < comments.length; i++) {
+        var comment = comments[i];
         if (!comment)
             continue;
 
+        var id = comments[i].id.match(/\d*$/);
         var link = document.getElementById('comment_link_' + id);
         if (action == 'collapse')
             collapse_comment(link, comment);

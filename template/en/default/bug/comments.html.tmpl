@@ -82,9 +82,9 @@
 <td>
   [% IF mode == "edit" %]
     <ul class="bz_collapse_expand_comments">
-      <li><a href="#" onclick="toggle_all_comments('collapse', [% comments.size %]); 
+      <li><a href="#" onclick="toggle_all_comments('collapse'); 
                                return false;">Collapse All Comments</a></li>
-      <li><a href="#" onclick="toggle_all_comments('expand', [% comments.size %]);
+      <li><a href="#" onclick="toggle_all_comments('expand');
                                return false;">Expand All Comments</a></li>
       [% IF user.settings.comment_box_position.value == "after_comments" && user.id %]
         <li class="bz_add_comment"><a href="#" 

@@ -274,9 +274,6 @@
     The flag type [% type FILTER html %] is inactive and cannot be used
     to create new flags.
 
-  [% ELSIF error == "flag_type_nonexistent" %]
-    There is no flag type with the ID <em>[% id FILTER html %]</em>.
-
   [% ELSIF error == "flag_type_target_type_invalid" %]
     The target type was neither <em>[% terms.bug %]</em> nor <em>attachment</em>
     but rather <em>[% target_type FILTER html %]</em>.

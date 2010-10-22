@@ -23,20 +23,15 @@
 
 [% PROCESS "global/js-products.html.tmpl" %]
 
-[% IF type.target_type == "bug" %]
-  [% title = BLOCK %]Create Flag Type for [% terms.Bugs %][% END %]
-  [% typeLabelLowerPlural = BLOCK %][% terms.bugs %][% END %]
-  [% typeLabelLowerSingular = BLOCK %][% terms.bug %][% END %]
+[% IF action == "insert" %]
+  [% title = BLOCK %]
+    Create Flag Type for [% type.target_type == "bug" ? terms.Bugs : "Attachments" %]
+    [% IF type.id %]
+      Based on [% type.name FILTER html %]
+    [% END %]
+  [% END %]
+  [% doc_section = "flags-overview.html#flags-create" %]
 [% ELSE %]
-  [% title = "Create Flag Type for Attachments" %]
-  [% typeLabelLowerPlural = BLOCK %]attachments[% END %]
-  [% typeLabelLowerSingular = BLOCK %]attachment[% END %]
-[% END %]
-
-[% doc_section = "flags-overview.html#flags-create" %]
-[% IF last_action == "copy" %]
-  [% title = BLOCK %]Create Flag Type Based on [% type.name FILTER html %][% END %]
-[% ELSIF last_action == "edit" %]
   [% title = BLOCK %]Edit Flag Type [% type.name FILTER html %][% END %]
   [% doc_section = "flags-overview.html#flags-edit" %]
 [% END %]
@@ -53,10 +48,10 @@
 %]
 
 <form method="post" action="editflagtypes.cgi">
-  <input type="hidden" name="action" value="[% action %]">
+  <input type="hidden" name="action" value="[% action FILTER html %]">
   <input type="hidden" name="id" value="[% type.id %]">
   <input type="hidden" name="token" value="[% token FILTER html %]">
-  <input type="hidden" name="target_type" value="[% type.target_type %]">
+  <input type="hidden" name="target_type" value="[% type.target_type FILTER html %]">
   [% FOREACH category = type.inclusions %]
     <input type="hidden" name="inclusions" value="[% category.value FILTER html %]">
   [% END %]
@@ -72,7 +67,7 @@
     <tr>
       <th>Name:</th>
       <td>
-        a short name identifying this type<br>
+        a short name identifying this type.<br>
         <input type="text" name="name" value="[% type.name FILTER html %]"
                size="50" maxlength="50">
       </td>
@@ -81,7 +76,7 @@
     <tr>
       <th>Description:</th>
       <td>
-        a comprehensive description of this type<br>
+        a comprehensive description of this type.<br>
         [% INCLUDE global/textarea.html.tmpl
           name           = 'description'
           minrows        = 4
@@ -95,9 +90,9 @@
       <th>Category:</th>
 
       <td>
-        the products/components to which [% typeLabelLowerPlural %] must
-        (inclusions) or must not (exclusions) belong in order for users
-        to be able to set flags of this type for them
+        the products/components to which [% type.target_type == "bug" ? terms.bugs : "attachments" %]
+        must (inclusions) or must not (exclusions) belong in order for users
+        to be able to set flags of this type for them.
         <table>
           <tr>
             <td style="vertical-align: top;">
@@ -139,10 +134,10 @@
     <tr>
       <th>Sort Key:</th>
       <td>
-        a number between 1 and 32767 by which this type will be sorted
-        when displayed to users in a list; ignore if you don't care
-        what order the types appear in or if you want them to appear
-        in alphabetical order<br>
+        a number between 1 and [% constants.MAX_SMALLINT FILTER none %] by which
+        this type will be sorted when displayed to users in a list; ignore if you
+        don't care what order the types appear in or if you want them to appear
+        in alphabetical order.<br>
         <input type="text" name="sortkey" value="[% type.sortkey || 1 %]" size="5" maxlength="5">
       </td>
     </tr>
@@ -196,7 +191,7 @@
         <input type="checkbox" id="is_multiplicable" name="is_multiplicable"
                [% " checked" IF type.is_multiplicable || !type.is_multiplicable.defined %]>
         <label for="is_multiplicable">multiplicable (multiple flags of this type can be set on
-          the same [% typeLabelLowerSingular %])</label>
+          the same [% type.target_type == "bug" ? terms.bug : "attachment" %])</label>
       </td>
     </tr>
 
@@ -204,7 +199,7 @@
       <th>Grant Group:</th>
       <td>
         the group allowed to grant/deny flags of this type
-        (to allow all users to grant/deny these flags, select no group)<br>
+        (to allow all users to grant/deny these flags, select no group).<br>
         [% PROCESS select selname = "grant_group" %]
       </td>
     </tr>
@@ -213,19 +208,16 @@
       <th>Request Group:</th>
       <td>
         if flags of this type are requestable, the group allowed to request them
-        (to allow all users to request these flags, select no group)<br>
+        (to allow all users to request these flags, select no group).<br>
         Note that the request group alone has no effect if the grant group is not defined!<br>
         [% PROCESS select selname = "request_group" %]
       </td>
     </tr>
 
     <tr>
-      <th></th>
+      <th>&nbsp;</th>
       <td>
-        <input type="submit" id="save" value="
-          [%- IF (last_action == "enter" || last_action == "copy") %]Create
-          [%- ELSE %]Save Changes
-          [%- END %]">
+        <input type="submit" id="save" value="[% action == "insert" ? "Create" : "Save Changes" %]">
       </td>
     </tr>
 

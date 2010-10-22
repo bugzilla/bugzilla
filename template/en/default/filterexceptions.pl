@@ -426,12 +426,8 @@
 ],
 
 'admin/flag-type/edit.html.tmpl' => [
-  'action', 
   'type.id', 
-  'type.target_type', 
   'type.sortkey || 1',
-  'typeLabelLowerPlural',
-  'typeLabelLowerSingular',
   'selname',
 ],
 

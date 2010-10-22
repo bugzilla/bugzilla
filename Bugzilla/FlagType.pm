@@ -48,6 +48,7 @@ whose names start with _ or are specifically noted as being private.
 
 =cut
 
+use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Util;
 use Bugzilla::Group;
@@ -58,57 +59,124 @@ use base qw(Bugzilla::Object);
 ####    Initialization     ####
 ###############################
 
-=begin private
-
-=head1 PRIVATE VARIABLES/CONSTANTS
-
-=over
-
-=item C<DB_COLUMNS>
-
-basic sets of columns and tables for getting flag types from the
-database.
-
-=back
-
-=cut
+use constant DB_TABLE => 'flagtypes';
+use constant LIST_ORDER => 'sortkey, name';
 
 use constant DB_COLUMNS => qw(
-    flagtypes.id
-    flagtypes.name
-    flagtypes.description
-    flagtypes.cc_list
-    flagtypes.target_type
-    flagtypes.sortkey
-    flagtypes.is_active
-    flagtypes.is_requestable
-    flagtypes.is_requesteeble
-    flagtypes.is_multiplicable
-    flagtypes.grant_group_id
-    flagtypes.request_group_id
+    id
+    name
+    description
+    cc_list
+    target_type
+    sortkey
+    is_active
+    is_requestable
+    is_requesteeble
+    is_multiplicable
+    grant_group_id
+    request_group_id
 );
 
-=pod
+use constant UPDATE_COLUMNS => qw(
+    name
+    description
+    cc_list
+    sortkey
+    is_active
+    is_requestable
+    is_requesteeble
+    is_multiplicable
+    grant_group_id
+    request_group_id
+);
 
-=over
+use constant VALIDATORS => {
+    name             => \&_check_name,
+    description      => \&_check_description,
+    cc_list          => \&_check_cc_list,
+    target_type      => \&_check_target_type,
+    sortkey          => \&_check_sortey,
+    is_active        => \&Bugzilla::Object::check_boolean,
+    is_requestable   => \&Bugzilla::Object::check_boolean,
+    is_requesteeble  => \&Bugzilla::Object::check_boolean,
+    is_multiplicable => \&Bugzilla::Object::check_boolean,
+    grant_group      => \&_check_group,
+    request_group    => \&_check_group,
+};
 
-=item C<DB_TABLE>
+use constant UPDATE_VALIDATORS => {
+    grant_group_id   => \&_check_group,
+    request_group_id => \&_check_group,
+};
+###############################
 
-Which database(s) is the data coming from?
+sub create {
+    my $class = shift;
 
-Note: when adding tables to DB_TABLE, make sure to include the separator
-(i.e. words like "LEFT OUTER JOIN") before the table name, since tables take
-multiple separators based on the join type, and therefore it is not possible
-to join them later using a single known separator.
+    $class->check_required_create_fields(@_);
+    my $params = $class->run_create_validators(@_);
 
-=back
+    # Extract everything which is not a valid column name.
+    $params->{grant_group_id} = delete $params->{grant_group};
+    $params->{request_group_id} = delete $params->{request_group};
+    my $inclusions = delete $params->{inclusions};
+    my $exclusions = delete $params->{exclusions};
 
-=end private
+    my $flagtype = $class->insert_create_data($params);
 
-=cut
+    $flagtype->set_clusions({ inclusions => $inclusions,
+                              exclusions => $exclusions });
+    return $flagtype;
+}
 
-use constant DB_TABLE => 'flagtypes';
-use constant LIST_ORDER => 'flagtypes.sortkey, flagtypes.name';
+sub update {
+    my $self = shift;
+    my $dbh = Bugzilla->dbh;
+
+    $dbh->bz_start_transaction();
+    my $changes = $self->SUPER::update(@_);
+
+    # Clear existing flags for bugs/attachments in categories no longer on
+    # the list of inclusions or that have been added to the list of exclusions.
+    my $flag_ids = $dbh->selectcol_arrayref('SELECT DISTINCT flags.id
+                                               FROM flags
+                                         INNER JOIN bugs
+                                                 ON flags.bug_id = bugs.bug_id
+                                    LEFT OUTER JOIN flaginclusions AS i
+                                                 ON (flags.type_id = i.type_id
+                                                     AND (bugs.product_id = i.product_id
+                                                          OR i.product_id IS NULL)
+                                                     AND (bugs.component_id = i.component_id
+                                                          OR i.component_id IS NULL))
+                                              WHERE flags.type_id = ?
+                                                AND i.type_id IS NULL',
+                                             undef, $self->id);
+    Bugzilla::Flag->force_retarget($flag_ids);
+
+    $flag_ids = $dbh->selectcol_arrayref('SELECT DISTINCT flags.id
+                                            FROM flags
+                                      INNER JOIN bugs
+                                              ON flags.bug_id = bugs.bug_id
+                                      INNER JOIN flagexclusions AS e
+                                              ON flags.type_id = e.type_id
+                                           WHERE flags.type_id = ?
+                                             AND (bugs.product_id = e.product_id
+                                                  OR e.product_id IS NULL)
+                                             AND (bugs.component_id = e.component_id
+                                                  OR e.component_id IS NULL)',
+                                          undef, $self->id);
+    Bugzilla::Flag->force_retarget($flag_ids);
+
+    # Silently remove requestees from flags which are no longer
+    # specifically requestable.
+    if (!$self->is_requesteeble) {
+        $dbh->do('UPDATE flags SET requestee_id = NULL WHERE type_id = ?',
+                  undef, $self->id);
+    }
+
+    $dbh->bz_commit_transaction();
+    return $changes;
+}
 
 ###############################
 ####      Accessors      ######
@@ -179,9 +247,120 @@ sub sortkey          { return $_[0]->{'sortkey'};          }
 sub request_group_id { return $_[0]->{'request_group_id'}; }
 sub grant_group_id   { return $_[0]->{'grant_group_id'};   }
 
+################################
+# Validators
+################################
+
+sub _check_name {
+    my ($invocant, $name) = @_;
+
+    $name = trim($name);
+    ($name && $name !~ /[\s,]/ && length($name) <= 50)
+      || ThrowUserError('flag_type_name_invalid', { name => $name });
+    return $name;
+}
+
+sub _check_description {
+    my ($invocant, $desc) = @_;
+
+    $desc = trim($desc);
+    $desc || ThrowUserError('flag_type_description_invalid');
+    return $desc;
+}
+
+sub _check_cc_list {
+    my ($invocant, $cc_list) = @_;
+
+    length($cc_list) <= 200
+      || ThrowUserError('flag_type_cc_list_invalid', { cc_list => $cc_list });
+
+    my @addresses = split(/[,\s]+/, $cc_list);
+    # We do not call Util::validate_email_syntax because these
+    # addresses do not require to match 'emailregexp' and do not
+    # depend on 'emailsuffix'. So we limit ourselves to a simple
+    # sanity check:
+    # - match the syntax of a fully qualified email address;
+    # - do not contain any illegal character.
+    foreach my $address (@addresses) {
+        ($address =~ /^[\w\.\+\-=]+@[\w\.\-]+\.[\w\-]+$/
+           && $address !~ /[\\\(\)<>&,;:"\[\] \t\r\n]/)
+          || ThrowUserError('illegal_email_address',
+                            {addr => $address, default => 1});
+    }
+    return $cc_list;
+}
+
+sub _check_target_type {
+    my ($invocant, $target_type) = @_;
+
+    ($target_type eq 'bug' || $target_type eq 'attachment')
+      || ThrowCodeError('flag_type_target_type_invalid', { target_type => $target_type });
+    return $target_type;
+}
+
+sub _check_sortey {
+    my ($invocant, $sortkey) = @_;
+
+    (detaint_natural($sortkey) && $sortkey <= MAX_SMALLINT)
+      || ThrowUserError('flag_type_sortkey_invalid', { sortkey => $sortkey });
+    return $sortkey;
+}
+
+sub _check_group {
+    my ($invocant, $group) = @_;
+    return unless $group;
+
+    trick_taint($group);
+    $group = Bugzilla::Group->check($group);
+    return $group->id;
+}
+
 ###############################
 ####       Methods         ####
 ###############################
+
+sub set_name             { $_[0]->set('name', $_[1]); }
+sub set_description      { $_[0]->set('description', $_[1]); }
+sub set_cc_list          { $_[0]->set('cc_list', $_[1]); }
+sub set_sortkey          { $_[0]->set('sortkey', $_[1]); }
+sub set_is_active        { $_[0]->set('is_active', $_[1]); }
+sub set_is_requestable   { $_[0]->set('is_requestable', $_[1]); }
+sub set_is_specifically_requestable { $_[0]->set('is_requesteeble', $_[1]); }
+sub set_is_multiplicable { $_[0]->set('is_multiplicable', $_[1]); }
+sub set_grant_group      { $_[0]->set('grant_group_id', $_[1]); }
+sub set_request_group    { $_[0]->set('request_group_id', $_[1]); }
+
+sub set_clusions {
+    my ($self, $list) = @_;
+    my $dbh = Bugzilla->dbh;
+    my $flag_id = $self->id;
+    my %products;
+
+    foreach my $category (keys %$list) {
+        my $sth = $dbh->prepare("INSERT INTO flag$category 
+                                (type_id, product_id, component_id) VALUES (?, ?, ?)");
+
+        $dbh->do("DELETE FROM flag$category WHERE type_id = ?", undef, $flag_id);
+
+        foreach my $prod_comp (@{$list->{$category} || []}) {
+            my ($prod_id, $comp_id) = split(':', $prod_comp);
+            # Does the product exist?
+            if ($prod_id && detaint_natural($prod_id)) {
+                $products{$prod_id} ||= new Bugzilla::Product($prod_id);
+                next unless defined $products{$prod_id};
+
+                # Does the component belong to this product?
+                if ($comp_id && detaint_natural($comp_id)) {
+                    my $found = grep { $_->id == $comp_id } @{$products{$prod_id}->components};
+                    next unless $found;
+                }
+            }
+            $prod_id ||= undef;
+            $comp_id ||= undef;
+            $sth->execute($flag_id, $prod_id, $comp_id);
+        }
+    }
+}
 
 =pod
 

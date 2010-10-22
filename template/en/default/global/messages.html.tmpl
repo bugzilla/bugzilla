@@ -645,6 +645,9 @@
             <li>Request group deleted</li>
           [% END %]
         [% END %]
+        [% IF changes.inclusions.defined || changes.exclusions.defined %]
+          <li>The inclusions and exclusions lists have been updated</li>
+        [% END %]
      </ul>
     [% ELSE %]
       No changes made to file type <em>[% flagtype.name FILTER html %]</em>.

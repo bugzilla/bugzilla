@@ -52,6 +52,7 @@
   <input type="hidden" name="id" value="[% type.id %]">
   <input type="hidden" name="token" value="[% token FILTER html %]">
   <input type="hidden" name="target_type" value="[% type.target_type FILTER html %]">
+  <input type="hidden" name="check_clusions" value="[% check_clusions FILTER none %]">
   [% FOREACH category = type.inclusions %]
     <input type="hidden" name="inclusions" value="[% category.value FILTER html %]">
   [% END %]

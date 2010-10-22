@@ -132,9 +132,28 @@ sub create {
 sub update {
     my $self = shift;
     my $dbh = Bugzilla->dbh;
+    my $flag_id = $self->id;
 
     $dbh->bz_start_transaction();
     my $changes = $self->SUPER::update(@_);
+
+    # Update the flaginclusions and flagexclusions tables.
+    foreach my $category ('inclusions', 'exclusions') {
+        next unless delete $self->{"_update_$category"};
+
+        $dbh->do("DELETE FROM flag$category WHERE type_id = ?", undef, $flag_id);
+
+        my $sth = $dbh->prepare("INSERT INTO flag$category
+                                (type_id, product_id, component_id) VALUES (?, ?, ?)");
+
+        foreach my $prod_comp (values %{$self->{$category}}) {
+            my ($prod_id, $comp_id) = split(':', $prod_comp);
+            $prod_id ||= undef;
+            $comp_id ||= undef;
+            $sth->execute($flag_id, $prod_id, $comp_id);
+        }
+        $changes->{$category} = [0, 1];
+    }
 
     # Clear existing flags for bugs/attachments in categories no longer on
     # the list of inclusions or that have been added to the list of exclusions.
@@ -333,17 +352,15 @@ sub set_request_group    { $_[0]->set('request_group_id', $_[1]); }
 sub set_clusions {
     my ($self, $list) = @_;
     my $dbh = Bugzilla->dbh;
-    my $flag_id = $self->id;
     my %products;
 
     foreach my $category (keys %$list) {
-        my $sth = $dbh->prepare("INSERT INTO flag$category 
-                                (type_id, product_id, component_id) VALUES (?, ?, ?)");
-
-        $dbh->do("DELETE FROM flag$category WHERE type_id = ?", undef, $flag_id);
+        my %clusions;
+        my %clusions_as_hash;
 
         foreach my $prod_comp (@{$list->{$category} || []}) {
             my ($prod_id, $comp_id) = split(':', $prod_comp);
+            my $component;
             # Does the product exist?
             if ($prod_id && detaint_natural($prod_id)) {
                 $products{$prod_id} ||= new Bugzilla::Product($prod_id);
@@ -351,14 +368,20 @@ sub set_clusions {
 
                 # Does the component belong to this product?
                 if ($comp_id && detaint_natural($comp_id)) {
-                    my $found = grep { $_->id == $comp_id } @{$products{$prod_id}->components};
-                    next unless $found;
+                    ($component) = grep { $_->id == $comp_id } @{$products{$prod_id}->components};
+                    next unless $component;
                 }
             }
-            $prod_id ||= undef;
-            $comp_id ||= undef;
-            $sth->execute($flag_id, $prod_id, $comp_id);
+            $prod_id ||= 0;
+            $comp_id ||= 0;
+            my $prod_name = $prod_id ? $products{$prod_id}->name : '__Any__';
+            my $comp_name = $comp_id ? $component->name : '__Any__';
+            $clusions{"$prod_name:$comp_name"} = "$prod_id:$comp_id";
+            $clusions_as_hash{$prod_id}->{$comp_id} = 1;
         }
+        $self->{$category} = \%clusions;
+        $self->{"${category}_as_hash"} = \%clusions_as_hash;
+        $self->{"_update_$category"} = 1;
     }
 }
 

@@ -126,6 +126,7 @@ if (my ($category_action) = grep { $_ =~ /^categoryAction-(?:\w+)$/ } $cgi->para
     $type->{'exclusions'} = \%exclusions;
     $vars->{'type'} = $type;
     $vars->{'token'} = $token;
+    $vars->{'check_clusions'} = 1;
 
     $template->process("admin/flag-type/edit.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
@@ -305,7 +306,8 @@ if ($action eq 'update') {
     $flagtype->set_is_multiplicable($is_multiplicable);
     $flagtype->set_grant_group($grant_group);
     $flagtype->set_request_group($request_group);
-    $flagtype->set_clusions({ inclusions => \@inclusions, exclusions => \@exclusions});
+    $flagtype->set_clusions({ inclusions => \@inclusions, exclusions => \@exclusions})
+      if $cgi->param('check_clusions');
     my $changes = $flagtype->update();
 
     delete_token($token);

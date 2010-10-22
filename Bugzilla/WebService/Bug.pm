@@ -2619,7 +2619,7 @@ pass in an invalid user name.
 
 =back
 
-=item C<cc_accessible>
+=item C<is_cc_accessible>
 
 C<boolean> Whether or not users in the CC list are allowed to access
 the bug, even if they aren't in a group that can normally access the bug.
@@ -2749,7 +2749,7 @@ normally have permission to file new bugs in that product.
 
 C<string> The full login name of the bug's QA Contact.
 
-=item C<reporter_accessible>
+=item C<is_creator_accessible>
 
 C<boolean> Whether or not the bug's reporter is allowed to access
 the bug, even if he or she isn't in a group that can normally access

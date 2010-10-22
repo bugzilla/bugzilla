@@ -258,7 +258,6 @@ use constant MAX_LINE_LENGTH => 254;
 # use.)
 use constant FIELD_MAP => {
     blocks           => 'blocked',
-    is_confirmed     => 'everconfirmed',
     cc_accessible    => 'cclist_accessible',
     commentprivacy   => 'comment_is_private',
     creation_time    => 'creation_ts',
@@ -267,6 +266,9 @@ use constant FIELD_MAP => {
     depends_on       => 'dependson',
     dupe_of          => 'dup_id',
     id               => 'bug_id',
+    is_confirmed     => 'everconfirmed',
+    is_cc_accessible => 'cclist_accessible',
+    is_creator_accessible => 'reporter_accessible',
     last_change_time => 'delta_ts',
     platform         => 'rep_platform',
     severity         => 'bug_severity',

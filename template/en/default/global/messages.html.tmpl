@@ -594,10 +594,61 @@
     [% title = BLOCK %]Flag Type '[% name FILTER html %]' Created[% END %]
     The flag type <em>[% name FILTER html %]</em> has been created.
 
-  [% ELSIF message_tag == "flag_type_changes_saved" %]
-    [% title = BLOCK %]Flag Type '[% name FILTER html %]' Changes Saved[% END %]
-    Your changes to the flag type <em>[% name FILTER html %]</em>
-    have been saved.
+  [% ELSIF message_tag == "flag_type_updated" %]
+    [% title = BLOCK %]Flag Type '[% flagtype.name FILTER html %]' Updated[% END %]
+    [% IF changes.size %]
+      Changes to the flag type <em>[% flagtype.name FILTER html %]</em>
+      have been saved:
+      <ul>
+        [% IF changes.is_active.defined %]
+          <li>Flag type is now [% flagtype.is_active ? "active" : "inactive" %]</li>
+        [% END %]
+        [% IF changes.name.defined %]
+          <li>Flag type renamed to <em>[% flagtype.name FILTER html %]</em></li>
+        [% END %]
+        [% IF changes.description.defined %]
+          <li>Description updated to <em>[% flagtype.description FILTER html %]</em></li>
+        [% END %]
+        [% IF changes.cc_list.defined %]
+          [% IF flagtype.cc_list %]
+            <li>CC list updated to <em>[% flagtype.cc_list FILTER html %]</em></li>
+          [% ELSE %]
+            <li>CC list is now empty</li>
+          [% END %]
+        [% END %]
+        [% IF changes.sortkey.defined %]
+          <li>Sortkey updated to <em>[% flagtype.sortkey FILTER html %]</em></li>
+        [% END %]
+        [% IF changes.is_requestable.defined %]
+          <li>Flag type is [% "no longer" UNLESS flagtype.is_requestable %] requestable</li>
+        [% END %]
+        [% IF changes.is_requesteeble.defined AND flagtype.is_requestable %]
+          <li>
+            Flag type is [% "no longer" UNLESS flagtype.is_requesteeble %]
+            specifically requestable
+          </li>
+        [% END %]
+        [% IF changes.is_multiplicable.defined %]
+          <li>Flag type is [% "no longer" UNLESS flagtype.is_multiplicable %] multiplicable</li>
+        [% END %]
+        [% IF changes.grant_group_id.defined %]
+          [% IF flagtype.grant_group_id %]
+            <li>Grant group updated to <em>[% flagtype.grant_group.name FILTER html %]</em></li>
+          [% ELSE %]
+            <li>Grant group deleted</li>
+          [% END %]
+        [% END %]
+        [% IF changes.request_group_id.defined %]
+          [% IF flagtype.request_group_id %]
+            <li>Request group updated to <em>[% flagtype.request_group.name FILTER html %]</em></li>
+          [% ELSE %]
+            <li>Request group deleted</li>
+          [% END %]
+        [% END %]
+     </ul>
+    [% ELSE %]
+      No changes made to file type <em>[% flagtype.name FILTER html %]</em>.
+    [% END %]
 
   [% ELSIF message_tag == "flag_type_deleted" %]
     [% title = BLOCK %]Flag Type '[% name FILTER html %]' Deleted[% END %]

@@ -306,12 +306,13 @@ if ($action eq 'update') {
     $flagtype->set_grant_group($grant_group);
     $flagtype->set_request_group($request_group);
     $flagtype->set_clusions({ inclusions => \@inclusions, exclusions => \@exclusions});
-    $flagtype->update();
+    my $changes = $flagtype->update();
 
     delete_token($token);
 
-    $vars->{'name'} = $flagtype->name;
-    $vars->{'message'} = "flag_type_changes_saved";
+    $vars->{'flagtype'} = $flagtype;
+    $vars->{'changes'} = $changes;
+    $vars->{'message'} = 'flag_type_updated';
 
     my @flagtypes = Bugzilla::FlagType->get_all;
     $vars->{'bug_types'} = [grep { $_->target_type eq 'bug' } @flagtypes];

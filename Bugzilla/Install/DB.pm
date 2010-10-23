@@ -2964,10 +2964,9 @@ sub _initialize_workflow_for_upgrade {
     }
 
     # We only populate the workflow here if we're upgrading from a version
-    # before 4.0 (which is where init_workflow was added).
-    my $new_exists = $dbh->selectrow_array(
-         'SELECT 1 FROM bug_status WHERE value = ?', undef, 'NEW');
-    return if !$new_exists;
+    # before 4.0 (which is where init_workflow was added). This was the
+    # first schema change done for 4.0, so we check this.
+    return if $dbh->bz_column_info('bugs_activity', 'comment_id');
 
     # Populate the status_workflow table. We do nothing if the table already
     # has entries. If all bug status transitions have been deleted, the

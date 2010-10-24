@@ -109,9 +109,9 @@ sub fields {
 
     my @fields_out;
     foreach my $field (@fields) {
-        my $visibility_field = $field->visibility_field 
+        my $visibility_field = $field->visibility_field
                                ? $field->visibility_field->name : undef;
-        my $vis_value = $field->visibility_value; 
+        my $vis_values = $field->visibility_values;
         my $value_field = $field->value_field
                           ? $field->value_field->name : undef;
 
@@ -135,10 +135,8 @@ sub fields {
            display_name      => $self->type('string', $field->description),
            is_on_bug_entry   => $self->type('boolean', $field->enter_bug),
            visibility_field  => $self->type('string', $visibility_field),
-           visibility_values => [
-               defined $vis_value ? $self->type('string', $vis_value->name)
-                                  : ()
-           ],
+           visibility_values =>
+              [ map { $self->type('string', $_->name) } @$vis_values ],
         );
         if ($has_values) {
            $field_data{value_field} = $self->type('string', $value_field);

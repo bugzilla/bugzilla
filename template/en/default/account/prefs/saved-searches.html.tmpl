@@ -31,9 +31,9 @@
       var checkbox = document.getElementById(group.name.replace(/share_(\d+)/, "force_$1"));
 
       if (bz_isValueInArray(bless_groups, group.value)) {
-        checkbox.disabled = false;
+        YAHOO.util.Dom.removeClass(checkbox.parentNode, "bz_default_hidden");
       } else {
-        checkbox.disabled = true;
+        YAHOO.util.Dom.addClass(checkbox.parentNode, "bz_default_hidden");
         checkbox.checked = false;
       }
     } //-->
@@ -132,12 +132,12 @@
               [% END %]
             </select>
             [% IF user.can_bless %]
-              <input type="checkbox" id="force_[% q.id FILTER html %]"
-                     name="force_[% q.id FILTER html %]" value="1"
-                     [% " disabled"
-                        IF !bless_group_ids.grep("^$q.shared_with_group.id\$").0
-                     %]>
-              <label for="force_[% q.id FILTER html %]">Add to footer</label>
+              <span [% IF !bless_group_ids.grep("^$q.shared_with_group.id\$").0
+                     %]class="bz_default_hidden"[% END %]>
+                <input type="checkbox" id="force_[% q.id FILTER html %]"
+                       name="force_[% q.id FILTER html %]" value="1">
+                <label for="force_[% q.id FILTER html %]">Add to footer</label>
+              </span>
             [% END %]
             [% IF q.shared_with_users %]
               (shared with [% q.shared_with_users FILTER html %]

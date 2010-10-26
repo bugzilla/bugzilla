@@ -208,7 +208,9 @@ sub build_thread_marker {
         $threadingmarker = "Message-ID: <bug-$bug_id-$user_id$sitespec>";
     }
     else {
-        $threadingmarker = "In-Reply-To: <bug-$bug_id-$user_id$sitespec>" .
+        my $rand_bits = generate_random_password(10);
+        $threadingmarker = "Message-ID: <bug-$bug_id-$user_id-$rand_bits$sitespec>" .
+                           "\nIn-Reply-To: <bug-$bug_id-$user_id$sitespec>" .
                            "\nReferences: <bug-$bug_id-$user_id$sitespec>";
     }
 

@@ -147,6 +147,9 @@ sub install_module {
     }
 
     my $module = CPAN::Shell->expand('Module', $name);
+    if (!$module) {
+        die install_string('no_such_module', { module => $name }) . "\n";
+    }
     print install_string('install_module', 
               { module => $name, version => $module->cpan_version }) . "\n";
     if ($test) {

@@ -311,6 +311,7 @@ EOT
     module_not_found => "not found",
     module_ok => 'ok',
     module_unknown_version => "found unknown version",
+    no_such_module => "There is no Perl module on CPAN named ##module##.",
     mysql_innodb_disabled => <<'END',
 InnoDB is disabled in your MySQL installation.
 Bugzilla requires InnoDB to be enabled.

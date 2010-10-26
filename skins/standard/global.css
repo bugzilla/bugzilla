@@ -293,9 +293,8 @@ div#docslinks {
     margin-bottom: 2em;
 }
 
-/* The rules for these classes make international text wrap correctly,
-   even for languages like Japanese that have no spaces. */
-.bz_comment_text, .uneditable_textarea {
+/* tbody.file pre is for the Diff view of attachments. */
+.bz_comment_text, .uneditable_textarea, tbody.file pre {
      font-family: monospace;
     /* Note that these must all be on separate lines or they stop
        working in Konqueror. */

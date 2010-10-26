@@ -189,7 +189,9 @@
                 cookiepath: '[% Param('cookiepath') FILTER js %]',
                 maxusermatches: [% Param('maxusermatches') FILTER js %]
             },
-
+            constant: {
+                COMMENT_COLS: [% constants.COMMENT_COLS FILTER js %]
+            },
             string: {
                 [%# Please keep these in alphabetical order. %]
 

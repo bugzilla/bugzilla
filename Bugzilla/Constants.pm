@@ -295,7 +295,7 @@ use constant LIST_OF_BUGS => 1;
 # How many of the user's most recent searches to save.
 use constant SAVE_NUM_SEARCHES => 10;
 
-# The column length for displayed (and wrapped) bug comments.
+# The column width for comment textareas and comments in bugmails.
 use constant COMMENT_COLS => 80;
 # Used in _check_comment(). Gives the max length allowed for a comment.
 use constant MAX_COMMENT_LENGTH => 65535;

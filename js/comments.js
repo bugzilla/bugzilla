@@ -18,6 +18,7 @@
  * Contributor(s): Frédéric Buclin <LpSolit@gmail.com>
  *                 Max Kanat-Alexander <mkanat@bugzilla.org>
  *                 Edmund Wong <ewong@pw-wspx.org>
+ *                 Anthony Pipkin <a.pipkin@yahoo.com>
  */
 
 function updateCommentPrivacy(checkbox, id) {
@@ -74,6 +75,53 @@ function expand_comment(link, comment) {
     link.innerHTML = "[-]";
     link.title = "Collapse the comment";
     YAHOO.util.Dom.removeClass(comment, 'collapsed');
+}
+
+function wrapReplyText(text) {
+    // This is -3 to account for "\n> "
+    var maxCol = BUGZILLA.constant.COMMENT_COLS - 3;
+    var text_lines = text.split("\n");
+    var wrapped_lines = new Array();
+
+    for (var i = 0; i < text_lines.length; i++) {
+        var paragraph = text_lines[i];
+        // Don't wrap already-quoted text.
+        if (paragraph.indexOf('>') == 0) {
+            wrapped_lines.push('> ' + paragraph);
+            continue;
+        }
+
+        var replace_lines = new Array();
+        while (paragraph.length > maxCol) {
+            var testLine = paragraph.substring(0, maxCol);
+            var pos = testLine.search(/\s\S*$/);
+
+            if (pos < 1) {
+                // Try to find some ASCII punctuation that's reasonable
+                // to break on.
+                var punct = '\\-\\./,!;:';
+                var punctRe = new RegExp('[' + punct + '][^' + punct + ']+$');
+                pos = testLine.search(punctRe) + 1;
+                // Try to find some CJK Punctuation that's reasonable
+                // to break on.
+                if (pos == 0)
+                    pos = testLine.search(/[\u3000\u3001\u3002\u303E\u303F]/) + 1;
+                // If we can't find any break point, we simply break long
+                // words. This makes long, punctuation-less CJK text wrap,
+                // even if it wraps incorrectly.
+                if (pos == 0) pos = maxCol;
+            }
+
+            var wrapped_line = paragraph.substring(0, pos);
+            replace_lines.push(wrapped_line);
+            paragraph = paragraph.substring(pos);
+            // Strip whitespace from the start of the line
+            paragraph = paragraph.replace(/^\s+/, '');
+        }
+        replace_lines.push(paragraph);
+        wrapped_lines.push("> " + replace_lines.join("\n> "));
+    }
+    return wrapped_lines.join("\n");
 }
 
 /* This way, we are sure that browsers which do not support JS

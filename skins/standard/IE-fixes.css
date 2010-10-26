@@ -13,7 +13,7 @@
   * Contributor(s): Marc Schumann <wurblzap@gmail.com>
   */
 
-.bz_comment_text, .uneditable_textarea {
+.bz_comment_text, .uneditable_textarea, tbody.file pre {
      white-space: pre;
      word-wrap: break-word;
 }

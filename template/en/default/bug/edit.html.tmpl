@@ -52,17 +52,7 @@
         /* pre id="comment_name_N" */
         var text_elem = document.getElementById('comment_text_'+id);
         var text = getText(text_elem);
-
-        /* make sure we split on all newlines -- IE or Moz use \r and \n
-         * respectively.
-         */
-        text = text.split(/\r|\n/);
-
-        for (var i=0; i < text.length; i++) {
-            replytext += "> " + text[i] + "\n"; 
-        }
-
-        replytext = prefix + replytext + "\n";
+        replytext = prefix + wrapReplyText(text);
       [% ELSIF user.settings.quote_replies.value == 'simple_reply' %]
         replytext = prefix;
       [% END %]

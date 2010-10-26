@@ -130,6 +130,7 @@ EOT
     module_not_found => "not found",
     module_ok => 'ok',
     module_unknown_version => "found unknown version",
+    no_such_module => "There is no Perl module on CPAN named ##module##.",
     ppm_repo_add => <<EOT,
 ***********************************************************************
 * Note For Windows Users                                              *

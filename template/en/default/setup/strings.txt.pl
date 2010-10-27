@@ -171,8 +171,10 @@ END
     localconfig_db_host => <<'END',
 The DNS name or IP address of the host that the database server runs on.
 END
-    localconfig_db_name => 
-"The name of the database. For Oracle, this is the database's SID.",
+    localconfig_db_name => <<'END',
+The name of the database. For Oracle, this is the database's SID. For
+SQLite, this is a name (or path) for the DB file.
+END
     localconfig_db_pass => <<'END',
 Enter your database password here. It's normally advisable to specify
 a password for your bugzilla database user.

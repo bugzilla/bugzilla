@@ -232,7 +232,7 @@ EOT
 sub bz_create_database {
     my $dbh;
     # See if we can connect to the actual Bugzilla database.
-    my $conn_success = eval { $dbh = connect_main(); };
+    my $conn_success = $dbh = connect_main();
     my $db_name = Bugzilla->localconfig->{db_name};
 
     if (!$conn_success) {
@@ -767,10 +767,11 @@ sub bz_add_table {
             # initial table creation, because column names have changed
             # over history and it's impossible to keep track of that info
             # in ABSTRACT_SCHEMA.
-            if (exists $fields{$col}->{REFERENCES}) {
-                $fields{$col}->{REFERENCES}->{created} = 0;
-            }
+            next unless exists $fields{$col}->{REFERENCES};
+            $fields{$col}->{REFERENCES}->{created} =
+                $self->_bz_real_schema->FK_ON_CREATE;
         }
+        
         $self->_bz_real_schema->add_table($name, $table_def);
         $self->_bz_store_real_schema;
     }
@@ -1179,7 +1180,10 @@ sub bz_start_transaction {
         # what we need in Bugzilla to be safe, for what we do.
         # Different DBs have different defaults for their isolation
         # level, so we just set it here manually.
-        $self->do('SET TRANSACTION ISOLATION LEVEL ' . $self->ISOLATION_LEVEL);
+        if ($self->ISOLATION_LEVEL) {
+            $self->do('SET TRANSACTION ISOLATION LEVEL ' 
+                      . $self->ISOLATION_LEVEL);
+        }
         $self->{private_bz_transaction_count} = 1;
     }
 }

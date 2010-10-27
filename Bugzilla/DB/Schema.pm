@@ -52,6 +52,12 @@ use Storable qw(dclone freeze thaw);
 # New SCHEMA_VERSIONs (2+) use this
 use Data::Dumper;
 
+# Whether or not this database can safely create FKs when doing a
+# CREATE TABLE statement. This is false for most DBs, because they
+# prevent you from creating FKs on tables and columns that don't
+# yet exist. (However, in SQLite it's 1 because SQLite allows that.)
+use constant FK_ON_CREATE => 0;
+
 =head1 NAME
 
 Bugzilla::DB::Schema - Abstract database schema for Bugzilla
@@ -1781,8 +1787,9 @@ C<ALTER TABLE> SQL statement
     # DEFAULT attribute must appear before any column constraints
     # (e.g., NOT NULL), for Oracle
     $type_ddl .= " DEFAULT $default" if (defined($default));
-    $type_ddl .= " NOT NULL" if ($finfo->{NOTNULL});
+    # PRIMARY KEY must appear before NOT NULL for SQLite.
     $type_ddl .= " PRIMARY KEY" if ($finfo->{PRIMARYKEY});
+    $type_ddl .= " NOT NULL" if ($finfo->{NOTNULL});
 
     return($type_ddl);
 
@@ -2016,7 +2023,7 @@ sub get_table_ddl {
     return @ddl;
 
 } #eosub--get_table_ddl
-#--------------------------------------------------------------------------
+
 sub _get_create_table_ddl {
 
 =item C<_get_create_table_ddl>
@@ -2032,25 +2039,27 @@ sub _get_create_table_ddl {
 
     my $thash = $self->{schema}{$table};
     die "Table $table does not exist in the database schema."
-        unless (ref($thash));
+        unless ref $thash;
 
-    my $create_table = "CREATE TABLE $table \(\n";
-
+    my (@col_lines, @fk_lines);
     my @fields = @{ $thash->{FIELDS} };
     while (@fields) {
         my $field = shift(@fields);
         my $finfo = shift(@fields);
-        $create_table .= "\t$field\t" . $self->get_type_ddl($finfo);
-        $create_table .= "," if (@fields);
-        $create_table .= "\n";
+        push(@col_lines, "\t$field\t" . $self->get_type_ddl($finfo));
+        if ($self->FK_ON_CREATE and $finfo->{REFERENCES}) {
+            my $fk = $finfo->{REFERENCES};
+            my $fk_ddl = "\t" . $self->get_fk_ddl($table, $field, $fk);
+            push(@fk_lines, $fk_ddl);
+        }
     }
+    
+    my $sql = "CREATE TABLE $table (\n" . join(",\n", @col_lines, @fk_lines)
+              . "\n)";
+    return $sql
 
-    $create_table .= "\)";
+} 
 
-    return($create_table)
-
-} #eosub--_get_create_table_ddl
-#--------------------------------------------------------------------------
 sub _get_create_index_ddl {
 
 =item C<_get_create_index_ddl>

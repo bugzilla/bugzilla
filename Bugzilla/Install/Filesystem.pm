@@ -199,6 +199,8 @@ sub FILESYSTEM {
                                   dirs => DIR_CGI_WRITE | DIR_ALSO_WS_SERVE },
          graphs             => { files => WS_SERVE,
                                   dirs => DIR_CGI_WRITE | DIR_ALSO_WS_SERVE },
+         "$datadir/db"      => { files => CGI_WRITE,
+                                  dirs => DIR_CGI_WRITE },
 
          # Readable directories
          "$datadir/mining"     => { files => CGI_READ,
@@ -265,6 +267,7 @@ sub FILESYSTEM {
         "$datadir/extensions"   => DIR_CGI_READ,
         $extensionsdir          => DIR_CGI_READ,
         # Directories that cgi scripts can write to.
+        "$datadir/db"           => DIR_CGI_WRITE,
         $attachdir              => DIR_CGI_WRITE,
         graphs                  => DIR_CGI_WRITE | DIR_ALSO_WS_SERVE,
         $webdotdir              => DIR_CGI_WRITE | DIR_ALSO_WS_SERVE,

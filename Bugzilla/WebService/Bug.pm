@@ -133,6 +133,7 @@ sub fields {
            is_custom         => $self->type('boolean', $field->custom),
            name              => $self->type('string', $field->name),
            display_name      => $self->type('string', $field->description),
+           is_mandatory      => $self->type('boolean', $field->is_mandatory),
            is_on_bug_entry   => $self->type('boolean', $field->enter_bug),
            visibility_field  => $self->type('string', $visibility_field),
            visibility_values => [
@@ -1041,6 +1042,12 @@ across all Bugzilla installations.
 
 C<string> The name of the field, as it is shown in the user interface.
 
+=item C<is_mandatory>
+
+C<boolean> True if the field must have a value when filing new bugs.
+Also, mandatory fields cannot have their value cleared when updating
+bugs.
+
 =item C<is_on_bug_entry>
 
 C<boolean> For custom fields, this is true if the field is shown when you
@@ -1145,6 +1152,8 @@ You specified an invalid field name or id.
 =over
 
 =item Added in Bugzilla B<3.6>.
+
+=item The C<is_mandatory> return value was added in Bugzilla B<4.0>.
 
 =back
 

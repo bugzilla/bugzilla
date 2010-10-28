@@ -373,7 +373,7 @@ sub _create_field_values {
 
     $values{'keywords'} = create_keyword($number)->name;
 
-    foreach my $field qw(assigned_to qa_contact reporter cc) {
+    foreach my $field (qw(assigned_to qa_contact reporter cc)) {
         $values{$field} = create_user("$number-$field")->login;
     }
 
@@ -497,7 +497,7 @@ sub _create_flags {
     my $flagtypes = _create_flagtypes($number);
 
     my %flags;
-    foreach my $type qw(a b) {
+    foreach my $type (qw(a b)) {
         $flags{$type} = _get_flag_values(@_, $flagtypes->{$type});
     }
     return \%flags;
@@ -607,9 +607,9 @@ sub _create_one_bug {
     
     # These are necessary for the changedfrom tests.
     my $extra_values = $self->_extra_bug_create_values->{$number};
-    foreach my $field qw(comments remaining_time percentage_complete
+    foreach my $field (qw(comments remaining_time percentage_complete
                          keyword_objects everconfirmed dependson blocked
-                         groups_in classification)
+                         groups_in classification))
     {
         $extra_values->{$field} = $bug->$field;
     }

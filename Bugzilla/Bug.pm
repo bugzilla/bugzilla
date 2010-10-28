@@ -1464,7 +1464,7 @@ sub _check_dependencies {
 
     my %deps_in = (dependson => $depends_on || '', blocked => $blocks || '');
 
-    foreach my $type qw(dependson blocked) {
+    foreach my $type (qw(dependson blocked)) {
         my @bug_ids = ref($deps_in{$type}) 
             ? @{$deps_in{$type}} 
             : split(/[\s,]+/, $deps_in{$type});

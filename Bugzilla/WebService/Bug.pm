@@ -927,7 +927,7 @@ sub _attachment_to_hash {
 
     # creator/attacher require an extra lookup, so we only send them if
     # the filter wants them.
-    foreach my $field qw(creator attacher) {
+    foreach my $field (qw(creator attacher)) {
         if (filter_wants $filters, $field) {
             $item->{$field} = $self->type('string', $attach->attacher->login);
         }

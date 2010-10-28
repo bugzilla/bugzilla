@@ -129,6 +129,26 @@ use Storable qw(dclone);
 # Constants #
 #############
 
+# This is the regex for real numbers from Regexp::Common, modified to be
+# more readable.
+use constant NUMBER_REGEX => qr/
+    ^[+-]?      # A sign, optionally.
+
+    (?=\d|\.)   # Then either a digit or "."
+    \d*         # Followed by many other digits
+    (?:
+        \.      # Followed possibly by some decimal places
+        (?:\d*)
+    )?
+ 
+    (?:         # Followed possibly by an exponent.
+        [Ee]
+        [+-]?
+        \d+
+    )?
+    $
+/x;
+
 # If you specify a search type in the boolean charts, this describes
 # which operator maps to which internal function here.
 use constant OPERATORS => {
@@ -187,6 +207,17 @@ use constant OPERATOR_REVERSE => {
     # The following don't currently have reversals:
     # casesubstring, anyexact, allwords, allwordssubstr
 };
+
+# For these operators, even if a field is numeric (is_numeric returns true),
+# we won't treat the input like a number.
+use constant NON_NUMERIC_OPERATORS => qw(
+    changedafter
+    changedbefore
+    changedfrom
+    changedto
+    regexp
+    notregexp
+);
 
 use constant OPERATOR_FIELD_OVERRIDE => {
     # User fields
@@ -1568,9 +1599,9 @@ sub _handle_chart {
     # parameters. If the user does pass multiple parameters, they will
     # become a space-separated string for those search functions.
     #
-    # all_values and all_quoted are for search functions that do operate
+    # all_values is for search functions that do operate
     # on multiple values, like anyexact.
-
+    
     my %search_args = (
         chart_id   => $sql_chart_id,
         sequence   => $or_id,
@@ -1578,11 +1609,11 @@ sub _handle_chart {
         full_field => $full_field,
         operator   => $operator,
         value      => $string_value,
-        quoted     => $dbh->quote($string_value),
         all_values => $value,
         joins      => [],
         having     => [],
     );
+    $search_args{quoted} = $self->_quote_unless_numeric(\%search_args);
     # This should add a "term" selement to %search_args.
     $self->do_search_function(\%search_args);
     
@@ -1596,7 +1627,7 @@ sub _handle_chart {
     
     return \%search_args;
 }
-   
+
 ##################################
 # do_search_function And Helpers #
 ##################################
@@ -1712,6 +1743,29 @@ sub _get_operator_field_override {
 ###########################
 # Search Function Helpers #
 ###########################
+
+# When we're doing a numeric search against a numeric column, we want to
+# just put a number into the SQL instead of a string. On most DBs, this
+# is just a performance optimization, but on SQLite it actually changes
+# the behavior of some searches.
+sub _quote_unless_numeric {
+    my ($self, $args, $value) = @_;
+    if (!defined $value) {
+        $value = $args->{value};
+    }
+    my ($field, $operator) = @$args{qw(field operator)};
+    
+    my $numeric_operator = !grep { $_ eq $operator } NON_NUMERIC_OPERATORS;
+    my $numeric_field = $self->_chart_fields->{$field}->is_numeric;
+    my $numeric_value = ($value =~ NUMBER_REGEX) ? 1 : 0;
+    my $is_numeric = $numeric_operator && $numeric_field && $numeric_value;
+    if ($is_numeric) {
+        my $quoted = $value;
+        trick_taint($quoted);
+        return $quoted;
+    }
+    return Bugzilla->dbh->quote($value);
+}
 
 sub build_subselect {
     my ($outer, $inner, $table, $cond) = @_;
@@ -2726,7 +2780,7 @@ sub _anyexact {
     my $dbh = Bugzilla->dbh;
     
     my @list = $self->_all_values($args, ',');
-    @list = map { $dbh->quote($_) } @list;
+    @list = map { $self->_quote_unless_numeric($args, $_) } @list;
     
     if (@list) {
         $args->{term} = $dbh->sql_in($full_field, \@list);

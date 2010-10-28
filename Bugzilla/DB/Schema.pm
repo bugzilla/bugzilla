@@ -683,6 +683,8 @@ use constant ABSTRACT_SCHEMA => {
             reverse_desc => {TYPE => 'TINYTEXT'},
             is_mandatory => {TYPE => 'BOOLEAN', NOTNULL => 1,
                              DEFAULT => 'FALSE'},
+            is_numeric    => {TYPE => 'BOOLEAN', NOTNULL => 1,
+                             DEFAULT => 'FALSE'},
         ],
         INDEXES => [
             fielddefs_name_idx    => {FIELDS => ['name'],

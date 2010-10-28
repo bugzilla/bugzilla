@@ -103,6 +103,7 @@ use constant DB_COLUMNS => qw(
     value_field_id
     reverse_desc
     is_mandatory
+    is_numeric
 );
 
 use constant VALIDATORS => {
@@ -120,9 +121,11 @@ use constant VALIDATORS => {
     visibility_field_id => \&_check_visibility_field_id,
     visibility_values => \&_check_visibility_values,
     is_mandatory => \&Bugzilla::Object::check_boolean,
+    is_numeric   => \&_check_is_numeric,
 };
 
 use constant VALIDATOR_DEPENDENCIES => {
+    is_numeric => ['type'],
     name => ['custom'],
     type => ['custom'],
     reverse_desc => ['type'],
@@ -141,6 +144,7 @@ use constant UPDATE_COLUMNS => qw(
     value_field_id
     reverse_desc
     is_mandatory
+    is_numeric
     type
 );
 
@@ -161,7 +165,7 @@ use constant SQL_DEFINITIONS => {
 # the fielddefs table.
 use constant DEFAULT_FIELDS => (
     {name => 'bug_id',       desc => 'Bug #',      in_new_bugmail => 1,
-     buglist => 1},
+     buglist => 1, is_numeric => 1},
     {name => 'short_desc',   desc => 'Summary',    in_new_bugmail => 1,
      is_mandatory => 1, buglist => 1},
     {name => 'classification', desc => 'Classification', in_new_bugmail => 1,
@@ -199,15 +203,20 @@ use constant DEFAULT_FIELDS => (
     {name => 'qa_contact',   desc => 'QAContact',  in_new_bugmail => 1,
      buglist => 1},
     {name => 'cc',           desc => 'CC',         in_new_bugmail => 1},
-    {name => 'dependson',    desc => 'Depends on', in_new_bugmail => 1},
-    {name => 'blocked',      desc => 'Blocks',     in_new_bugmail => 1},
+    {name => 'dependson',    desc => 'Depends on', in_new_bugmail => 1,
+     is_numeric => 1},
+    {name => 'blocked',      desc => 'Blocks',     in_new_bugmail => 1,
+     is_numeric => 1},
 
     {name => 'attachments.description', desc => 'Attachment description'},
     {name => 'attachments.filename',    desc => 'Attachment filename'},
     {name => 'attachments.mimetype',    desc => 'Attachment mime type'},
-    {name => 'attachments.ispatch',     desc => 'Attachment is patch'},
-    {name => 'attachments.isobsolete',  desc => 'Attachment is obsolete'},
-    {name => 'attachments.isprivate',   desc => 'Attachment is private'},
+    {name => 'attachments.ispatch',     desc => 'Attachment is patch',
+     is_numeric => 1},
+    {name => 'attachments.isobsolete',  desc => 'Attachment is obsolete',
+     is_numeric => 1},
+    {name => 'attachments.isprivate',   desc => 'Attachment is private',
+     is_numeric => 1},
     {name => 'attachments.submitter',   desc => 'Attachment creator'},
 
     {name => 'target_milestone',      desc => 'Target Milestone',
@@ -217,26 +226,32 @@ use constant DEFAULT_FIELDS => (
     {name => 'delta_ts',              desc => 'Last changed date',
      buglist => 1},
     {name => 'longdesc',              desc => 'Comment'},
-    {name => 'longdescs.isprivate',   desc => 'Comment is private'},
+    {name => 'longdescs.isprivate',   desc => 'Comment is private',
+     is_numeric => 1},
     {name => 'longdescs.count',       desc => 'Number of Comments',
-     buglist => 1},
+     buglist => 1, is_numeric => 1},
     {name => 'alias',                 desc => 'Alias', buglist => 1},
-    {name => 'everconfirmed',         desc => 'Ever Confirmed'},
-    {name => 'reporter_accessible',   desc => 'Reporter Accessible'},
-    {name => 'cclist_accessible',     desc => 'CC Accessible'},
+    {name => 'everconfirmed',         desc => 'Ever Confirmed',
+     is_numeric => 1},
+    {name => 'reporter_accessible',   desc => 'Reporter Accessible',
+     is_numeric => 1},
+    {name => 'cclist_accessible',     desc => 'CC Accessible',
+     is_numeric => 1},
     {name => 'bug_group',             desc => 'Group', in_new_bugmail => 1},
     {name => 'estimated_time',        desc => 'Estimated Hours',
-     in_new_bugmail => 1, buglist => 1},
-    {name => 'remaining_time',        desc => 'Remaining Hours', buglist => 1},
+     in_new_bugmail => 1, buglist => 1, is_numeric => 1},
+    {name => 'remaining_time',        desc => 'Remaining Hours', buglist => 1,
+     is_numeric => 1},
     {name => 'deadline',              desc => 'Deadline',
      type => FIELD_TYPE_DATETIME, in_new_bugmail => 1, buglist => 1},
     {name => 'commenter',             desc => 'Commenter'},
     {name => 'flagtypes.name',        desc => 'Flags', buglist => 1},
     {name => 'requestees.login_name', desc => 'Flag Requestee'},
     {name => 'setters.login_name',    desc => 'Flag Setter'},
-    {name => 'work_time',             desc => 'Hours Worked', buglist => 1},
+    {name => 'work_time',             desc => 'Hours Worked', buglist => 1,
+     is_numeric => 1},
     {name => 'percentage_complete',   desc => 'Percentage Complete',
-     buglist => 1},
+     buglist => 1, is_numeric => 1},
     {name => 'content',               desc => 'Content'},
     {name => 'attach_data.thedata',   desc => 'Attachment data'},
     {name => "owner_idle_time",       desc => "Time Since Assignee Touched"},
@@ -272,6 +287,13 @@ sub _check_description {
 }
 
 sub _check_enter_bug { return $_[1] ? 1 : 0; }
+
+sub _check_is_numeric {
+    my ($invocant, $value, undef, $params) = @_;
+    my $type = blessed($invocant) ? $invocant->type : $params->{type};
+    return 1 if $type == FIELD_TYPE_BUG_ID;
+    return $value ? 1 : 0;
+}
 
 sub _check_mailhead { return $_[1] ? 1 : 0; }
 
@@ -779,6 +801,21 @@ a boolean specifying whether or not the field is mandatory;
 
 sub is_mandatory { return $_[0]->{is_mandatory} }
 
+=over
+
+=item C<is_numeric>
+
+A boolean specifying whether or not this field logically contains
+numeric (integer, decimal, or boolean) values. By "logically contains" we
+mean that the user inputs numbers into the value of the field in the UI.
+This is mostly used by L<Bugzilla::Search>.
+
+=back
+
+=cut
+
+sub is_numeric { return $_[0]->{is_numeric} }
+
 
 =pod
 
@@ -821,6 +858,7 @@ They will throw an error if you try to set the values to something invalid.
 
 sub set_description    { $_[0]->set('description', $_[1]); }
 sub set_enter_bug      { $_[0]->set('enter_bug',   $_[1]); }
+sub set_is_numeric     { $_[0]->set('is_numeric',  $_[1]); }
 sub set_obsolete       { $_[0]->set('obsolete',    $_[1]); }
 sub set_sortkey        { $_[0]->set('sortkey',     $_[1]); }
 sub set_in_new_bugmail { $_[0]->set('mailhead',    $_[1]); }
@@ -1095,6 +1133,7 @@ sub populate_field_definitions {
             $field->set_buglist($def->{buglist});
             $field->_set_type($def->{type}) if $def->{type};
             $field->set_is_mandatory($def->{is_mandatory});
+            $field->set_is_numeric($def->{is_numeric});
             $field->update();
         }
         else {

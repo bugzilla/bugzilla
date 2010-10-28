@@ -115,6 +115,11 @@ sub update_fielddefs_definition {
     # 2010-04-05 dkl@redhat.com - Bug 479400
     _migrate_field_visibility_value();
 
+    $dbh->bz_add_column('fielddefs', 'is_numeric',
+        {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'FALSE'});
+    $dbh->do('UPDATE fielddefs SET is_numeric = 1 WHERE type = '
+             . FIELD_TYPE_BUG_ID);
+
     # Remember, this is not the function for adding general table changes.
     # That is below. Add new changes to the fielddefs table above this
     # comment.

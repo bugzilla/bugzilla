@@ -112,7 +112,7 @@ if (my ($category_action) = grep { $_ =~ /^categoryAction-(?:\w+)$/ } $cgi->para
     my $type = {};
     $type->{$_} = $cgi->param($_) foreach $cgi->param();
     # Make sure boolean fields are defined, else they fall back to 1.
-    foreach my $boolean qw(is_active is_requestable is_requesteeble is_multiplicable) {
+    foreach my $boolean (qw(is_active is_requestable is_requesteeble is_multiplicable)) {
         $type->{$boolean} ||= 0;
     }
 

@@ -1393,7 +1393,7 @@ sub _special_parse_email {
         $type = "anyexact" if $type eq "exact";
 
         my @or_charts;
-        foreach my $field qw(assigned_to reporter cc qa_contact) {
+        foreach my $field (qw(assigned_to reporter cc qa_contact)) {
             if ($params->{"email$field$id"}) {
                 push(@or_charts, $field, $type, $email);
             }

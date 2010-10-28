@@ -41,6 +41,7 @@
           [% IF style %] style="[% style FILTER html %]"[% END %]
           [% IF classes %] class="[% classes FILTER html %]"[% END %]
           [% IF wrap %] wrap="[% wrap FILTER html %]"[% END %]
+          [% IF disabled %] disabled="disabled"[% END %]
           [% IF defaultrows && user.settings.zoom_textareas.value == 'off' %]
             rows="[% defaultrows FILTER html %]"
           [% ELSE %]

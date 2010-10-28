@@ -1134,7 +1134,7 @@ sub send_changes {
                   ? $changes->{cc}->[0] : '';
 
     my %forced = (
-        cc        => [split(/[\s,]+/, $old_cc)],
+        cc        => [split(/[,;]+/, $old_cc)],
         owner     => $old_own,
         qacontact => $old_qa,
         changer   => $user,
@@ -1384,10 +1384,11 @@ sub _check_cc {
     return [map {$_->id} @{$component->initial_cc}] unless $ccs;
 
     # Allow comma-separated input as well as arrayrefs.
-    $ccs = [split(/[\s,]+/, $ccs)] if !ref $ccs;
+    $ccs = [split(/[,;]+/, $ccs)] if !ref $ccs;
 
     my %cc_ids;
     foreach my $person (@$ccs) {
+        $person = trim($person);
         next unless $person;
         my $id = login_to_id($person, THROW_ERROR);
         $cc_ids{$id} = 1;

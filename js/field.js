@@ -724,7 +724,7 @@ YAHOO.bugzilla.userAutocomplete = {
         userAutoComp.useIFrame = true;
         userAutoComp.resultTypeList = false;
         if( multiple == true ){
-            userAutoComp.delimChar = [","," "];
+            userAutoComp.delimChar = [","];
         }
         
     }

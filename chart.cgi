@@ -200,7 +200,7 @@ elsif ($action eq "delete") {
 
     $series->remove_from_db();
     # Remove (sub)categories which no longer have any series.
-    foreach my $cat qw(category subcategory) {
+    foreach my $cat (qw(category subcategory)) {
         my $is_used = $dbh->selectrow_array("SELECT COUNT(*) FROM series WHERE $cat = ?",
                                              undef, $series->{"${cat}_id"});
         if (!$is_used) {

@@ -262,10 +262,7 @@
         [% END %]             
         <div id="attachment_flags">
           [% IF attachment.flag_types.size > 0 %]
-     
-              [% PROCESS "flag/list.html.tmpl" bug_id = attachment.bug_id
-                                               attach_id = attachment.id
-                                               flag_types = attachment.flag_types
+              [% PROCESS "flag/list.html.tmpl" flag_types = attachment.flag_types
                                                read_only_flags = !can_edit
               %]
      

@@ -325,14 +325,11 @@
 
 <h3 id="v40_feat_apache_config">New Apache Configuration</h3>
 
-<p>(Note: If your [% terms.Bugzilla %] runs under mod_perl or runs on some
-  other webserver than Apache, this section does not apply to you.)</p>
-
-<p>The Apache configuration used for [% terms.Bugzilla %] has changed.
-  In particular, a different AllowOverride statement is required.
-  See the
-  <a href="[% docs_urlbase FILTER html %]configuration.html#http-apache">Configuration</a>
-  section of the [% terms.Bugzilla %] Guide for details.</p>
+<p>If you run [% terms.Bugzilla %] under Apache (as most people do),
+  you most likely require a <strong>new Apache configuration</strong> 
+  for this version of [% terms.Bugzilla %]. See the 
+  <a href="#v40_upgrading">Notes On Upgrading From a Previous Version</a>
+  section for details.</p>
 
 <h3 id="v40_feat_other">Other Enhancements and Changes</h3>
 
@@ -576,6 +573,26 @@
 </ul>
 
 <h2 id="v40_upgrading">Notes On Upgrading From a Previous Version</h2>
+
+<h3>IMPORTANT: Apache Configuration Change</h3>
+
+<p>(Note: If your [% terms.Bugzilla %] runs under mod_perl or runs on some
+  other webserver than Apache, this section does not apply to you.)</p>
+
+<p>You will need to update the configuration of Apache for 
+  [%+ terms.Bugzilla %]. In particular, this line in the [% terms.Bugzilla %]
+  <kbd>&lt;Directory&gt;</kbd> block:</p>
+
+<blockquote><code>AllowOverride Limit</code></blockquote>
+
+<p>needs to become:</p>
+
+<blockquote><code>AllowOverride Limit FileInfo Indexes</code></blockquote>
+ 
+<p>For full details on how to configure Apache for [% terms.Bugzilla %],
+  see the
+  <a href="[% docs_urlbase FILTER html %]configuration.html#http-apache">Configuration</a>
+  section of the [% terms.Bugzilla %] Guide.</p>
 
 <h3>New .htaccess file</h3>
 

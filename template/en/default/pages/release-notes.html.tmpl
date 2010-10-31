@@ -61,6 +61,50 @@
 
 <h2 id="v36_point">Updates in this 3.6.x Release</h2>
 
+<h3>3.6.3</h3>
+
+<p>This release fixes various important security issues. See the
+  <a href="http://www.bugzilla.org/security/3.2.8/">Security Advisory</a>
+  for details.</p>
+
+<p>In addition, the following important fixes/changes have been made in
+  this release:</p>
+
+<ul>
+  <li>It is no longer possible to get a mid-air collision <em>again</em> after
+    selecting "Submit only my comment" on the mid-air collision page.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=591218">[% terms.Bug %] 591218</a>)
+  </li>
+  <li>Saving a search with either of the deadline fields set to "Now" would
+    cause that deadline field to be removed from the saved search.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=590144">[% terms.Bug %] 590144</a>)
+  </li>
+  <li>Searching for [% terms.bugs %] "with at least X votes" was instead
+    returning [% terms.bugs %] with <em>exactly</em> that many votes.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=584414">[% terms.Bug %] 584414</a>)
+  </li>
+  <li>Typing something like "P1-5" in the quicksearch box should have
+    been searching the [% field_descs.priority FILTER html %] field,
+    but it was not.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=585028">[% terms.Bug %] 585028</a>)
+  </li>
+  <li>Users who had passwords less than 6 characters long couldn't log in.
+    Such users could only exist before 3.6, so it looked like after upgrading
+    to 3.6, certain users couldn't log in.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=575947">[% terms.Bug %] 575947</a>)
+  </li>
+  <li>Loading <a href="config.cgi?ctype=rdf">config.cgi?ctype=rdf</a> should
+    now be faster, particularly on installations that have many flags.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=553266">[% terms.Bug %] 553266</a>
+    and <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=605693">[% terms.Bug %] 605693</a>)
+  </li>
+  <li>Non-english templates were not being precompiled by checksetup.pl,
+    leading to reduced performance for localized [% terms.Bugzilla %]
+    installations.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=605425">[% terms.Bug %] 605425</a>)
+  </li>
+</ul>
+
 <h3>3.6.2</h3>
 
 <p>This release fixes various security issues. See the

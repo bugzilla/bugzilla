@@ -14,3 +14,4 @@ find -name '*-skin.css' -exec rm -f {} \;
 find -depth -path '*/assets' -not -path './assets' -exec rm -rf {} \;
 rm assets/skins/sam/sprite.psd
 rm assets/skins/sam/skin.css
+rmdir utilities

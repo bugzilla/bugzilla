@@ -72,6 +72,7 @@ sub FILESYSTEM {
     my $extlib        = bz_locations()->{'ext_libpath'};
     my $skinsdir      = bz_locations()->{'skinsdir'};
     my $localconfig   = bz_locations()->{'localconfig'};
+    my $graphsdir     = bz_locations()->{'graphsdir'};
 
     my $ws_group      = Bugzilla->localconfig->{'webservergroup'};
 
@@ -158,7 +159,7 @@ sub FILESYSTEM {
                                   dirs => $ws_dir_writeable },
          $webdotdir         => { files => $ws_writeable,
                                   dirs => $ws_dir_writeable },
-         graphs             => { files => $ws_writeable,
+         $graphsdir         => { files => $ws_writeable,
                                   dirs => $ws_dir_writeable },
 
          # Readable directories
@@ -210,7 +211,7 @@ sub FILESYSTEM {
         "$datadir/duplicates"   => $ws_dir_readable,
         $attachdir              => $ws_dir_writeable,
         $extensionsdir          => $ws_dir_readable,
-        graphs                  => $ws_dir_writeable,
+        $graphsdir              => $ws_dir_writeable,
         $webdotdir              => $ws_dir_writeable,
         "$skinsdir/custom"      => $ws_dir_readable,
         "$skinsdir/contrib"     => $ws_dir_readable,
@@ -311,8 +312,17 @@ EOT
 # in a subdirectory.
 deny from all
 EOT
+        },
 
+        "$graphsdir/.htaccess" => { perms => $ws_readable, contents => <<EOT
+# Allow access to .png and .gif files.
+<FilesMatch (\\.gif|\\.png)\$>
+  Allow from all
+</FilesMatch>
 
+# And no directory listings, either.
+Deny from all
+EOT
         },
     );
 
@@ -338,10 +348,11 @@ sub update_filesystem {
     my %files = %{$fs->{create_files}};
 
     my $datadir = bz_locations->{'datadir'};
+    my $graphsdir = bz_locations->{'graphsdir'};
     # If the graphs/ directory doesn't exist, we're upgrading from
     # a version old enough that we need to update the $datadir/mining 
     # format.
-    if (-d "$datadir/mining" && !-d 'graphs') {
+    if (-d "$datadir/mining" && !-d $graphsdir) {
         _update_old_charts($datadir);
     }
 

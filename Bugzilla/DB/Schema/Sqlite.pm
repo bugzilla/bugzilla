@@ -64,6 +64,15 @@ sub _initialize {
 
 }
 
+sub get_create_database_sql {
+    # If we get here, it means there was some error creating the
+    # database file during bz_create_database in Bugzilla::DB,
+    # and we just want to display that error instead of doing
+    # anything else.
+    Bugzilla->dbh;
+    die "Reached an unreachable point";
+}
+
 sub get_type_ddl {
     my $self = shift;
     my $def = dclone($_[0]);

@@ -211,6 +211,12 @@
     [% IF value %]  
         [% value FILTER bug_link(value, use_alias => 1) FILTER none %]
     [% END %]
+[% ELSIF field.type == constants.FIELD_TYPE_BUG_URLS %]
+  [% '<ul class="bug_urls">' IF value.size %]
+    [% FOREACH url = value %]
+      <li><a href="[% url FILTER html %]">[% url FILTER html %]</a></li>
+    [% END %]
+  [% '</ul>' IF value.size %]
 [% ELSE %]
   [% value.join(', ') FILTER html %]
 [% END %]

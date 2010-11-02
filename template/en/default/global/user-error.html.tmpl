@@ -923,7 +923,7 @@
 
   [% ELSIF error == "invalid_datasets" %]
     [% title = "Invalid Datasets" %]
-    Invalid datasets <em>[% datasets FILTER html %]</em>. Only digits,
+    Invalid datasets <em>[% datasets.join(":") FILTER html %]</em>. Only digits,
     letters and colons are allowed.
 
   [% ELSIF error == "invalid_format" %]

@@ -49,9 +49,12 @@ use Bugzilla::Field;
 # in the regenerate mode).
 $| = 1;
 
+my $datadir = bz_locations()->{'datadir'};
+my $graphsdir = bz_locations()->{'graphsdir'};
+
 # Tidy up after graphing module
 my $cwd = Cwd::getcwd();
-if (chdir("graphs")) {
+if (chdir($graphsdir)) {
     unlink <./*.gif>;
     unlink <./*.png>;
     # chdir("..") doesn't work if graphs is a symlink, see bug 429378
@@ -67,8 +70,6 @@ if ($#ARGV >= 0 && $ARGV[0] eq "--regenerate") {
     shift(@ARGV);
     $regenerate = 1;
 }
-
-my $datadir = bz_locations()->{'datadir'};
 
 # As we can now customize statuses and resolutions, looking at the current list
 # of legal values only is not enough as some now removed statuses and resolutions

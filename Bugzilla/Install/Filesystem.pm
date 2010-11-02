@@ -122,6 +122,7 @@ sub FILESYSTEM {
     my $skinsdir      = bz_locations()->{'skinsdir'};
     my $localconfig   = bz_locations()->{'localconfig'};
     my $template_cache = bz_locations()->{'template_cache'};
+    my $graphsdir     = bz_locations()->{'graphsdir'};
 
     # We want to set the permissions the same for all localconfig files
     # across all PROJECTs, so we do something special with $localconfig,
@@ -197,7 +198,7 @@ sub FILESYSTEM {
                                   dirs => DIR_CGI_WRITE },
          $webdotdir         => { files => WS_SERVE,
                                   dirs => DIR_CGI_WRITE | DIR_ALSO_WS_SERVE },
-         graphs             => { files => WS_SERVE,
+         $graphsdir         => { files => WS_SERVE,
                                   dirs => DIR_CGI_WRITE | DIR_ALSO_WS_SERVE },
          "$datadir/db"      => { files => CGI_WRITE,
                                   dirs => DIR_CGI_WRITE },
@@ -269,7 +270,7 @@ sub FILESYSTEM {
         # Directories that cgi scripts can write to.
         "$datadir/db"           => DIR_CGI_WRITE,
         $attachdir              => DIR_CGI_WRITE,
-        graphs                  => DIR_CGI_WRITE | DIR_ALSO_WS_SERVE,
+        $graphsdir              => DIR_CGI_WRITE | DIR_ALSO_WS_SERVE,
         $webdotdir              => DIR_CGI_WRITE | DIR_ALSO_WS_SERVE,
         # Directories that contain content served directly by the web server.
         "$skinsdir/custom"      => DIR_WS_SERVE,
@@ -331,6 +332,17 @@ EOT
         "$datadir/.htaccess"         => { perms    => WS_SERVE,
                                           contents => HT_DEFAULT_DENY },
 
+        "$graphsdir/.htaccess" => { perms => WS_SERVE, contents => <<EOT
+# Allow access to .png and .gif files.
+<FilesMatch (\\.gif|\\.png)\$>
+  Allow from all
+</FilesMatch>
+
+# And no directory listings, either.
+Deny from all
+EOT
+        },
+
         "$webdotdir/.htaccess" => { perms => WS_SERVE, contents => <<EOT
 # Restrict access to .dot files to the public webdot server at research.att.com
 # if research.att.com ever changes their IP, or if you use a different
@@ -373,10 +385,11 @@ sub update_filesystem {
     my %files = %{$fs->{create_files}};
 
     my $datadir = bz_locations->{'datadir'};
+    my $graphsdir = bz_locations->{'graphsdir'};
     # If the graphs/ directory doesn't exist, we're upgrading from
     # a version old enough that we need to update the $datadir/mining 
     # format.
-    if (-d "$datadir/mining" && !-d 'graphs') {
+    if (-d "$datadir/mining" && !-d $graphsdir) {
         _update_old_charts($datadir);
     }
 

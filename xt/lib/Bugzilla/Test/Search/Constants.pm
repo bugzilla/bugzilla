@@ -310,7 +310,6 @@ use constant CHANGED_VALUE_BROKEN => (
     'flagtypes.name' => { contains => [1] },
     keywords  => { contains => [1] },
     'longdescs.count' => { search => 1 },
-    work_time => { contains => [1] },
     FIELD_TYPE_MULTI_SELECT, { contains => [1] },
 );
 
@@ -430,6 +429,7 @@ use constant KNOWN_BROKEN => {
         # from a blank value" probably.
         blocked   => { contains => [3,4,5] },
         dependson => { contains => [2,4,5] },
+        work_time => { contains => [1] },
         FIELD_TYPE_BUG_ID, { contains => [5] },
     },
     # changeto doesn't find work_time changes (probably due to decimal/string
@@ -645,6 +645,7 @@ use constant BROKEN_NOT => {
     changedto => {
         CHANGED_BROKEN_NOT,
         CHANGED_FROM_TO_BROKEN_NOT,
+        work_time => { },
         longdesc => { contains => [1] },
         "remaining_time" => { contains => [1] },
     },

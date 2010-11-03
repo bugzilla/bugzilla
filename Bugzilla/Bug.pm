@@ -891,6 +891,9 @@ sub update {
 
     # Comments
     foreach my $comment (@{$self->{added_comments} || []}) {
+        # Override the Comment's timestamp to be identical to the update
+        # timestamp.
+        $comment->{bug_when} = $delta_ts;
         $comment = Bugzilla::Comment->insert_create_data($comment);
         if ($comment->{work_time}) {
             LogActivityEntry($self->id, "work_time", "", $comment->{work_time},

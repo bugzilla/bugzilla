@@ -895,8 +895,8 @@ sub update {
         # timestamp.
         $comment->{bug_when} = $delta_ts;
         $comment = Bugzilla::Comment->insert_create_data($comment);
-        if ($comment->{work_time}) {
-            LogActivityEntry($self->id, "work_time", "", $comment->{work_time},
+        if ($comment->work_time) {
+            LogActivityEntry($self->id, "work_time", "", $comment->work_time,
                 Bugzilla->user->id, $delta_ts);
         }
     }

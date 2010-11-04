@@ -54,6 +54,7 @@ use Bugzilla::Mailer;
 use Bugzilla::Token;
 use Bugzilla::User;
 use Bugzilla::Util;
+use Bugzilla::Hook;
 
 #############
 # Constants #
@@ -76,6 +77,8 @@ sub parse_mail {
     $input_email = Email::MIME->new($mail_text);
     
     my %fields = %{ $switch{'default'} || {} };
+    Bugzilla::Hook::process('email_in_before_parse', { mail => $input_email,
+                                                       fields => \%fields });
 
     my $summary = $input_email->header('Subject');
     if ($summary =~ /\[\S+ (\d+)\](.*)/i) {
@@ -394,6 +397,9 @@ Bugzilla->usage_mode(USAGE_MODE_EMAIL);
 my @mail_lines = <STDIN>;
 my $mail_text = join("", @mail_lines);
 my $mail_fields = parse_mail($mail_text);
+
+Bugzilla::Hook::process('email_in_after_parse', { fields => $mail_fields });
+
 my $attachments = delete $mail_fields->{'attachments'};
 
 my $username = $mail_fields->{'reporter'};

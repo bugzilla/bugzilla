@@ -959,11 +959,9 @@ or get information about bugs that have already been filed.
 See L<Bugzilla::WebService> for a description of how parameters are passed,
 and what B<STABLE>, B<UNSTABLE>, and B<EXPERIMENTAL> mean.
 
-=head2 Utility Functions
+=head1 Utility Functions
 
-=over
-
-=item C<fields>
+=head2 fields
 
 B<UNSTABLE>
 
@@ -1160,7 +1158,7 @@ You specified an invalid field name or id.
 =back
 
 
-=item C<legal_values> 
+=head2 legal_values
 
 B<DEPRECATED> - Use L</fields> instead.
 
@@ -1204,15 +1202,9 @@ You specified a field that doesn't exist or isn't a drop-down field.
 
 =back
 
+=head1 Bug Information
 
-=back
-
-=head2 Bug Information
-
-=over
-
-
-=item C<attachments>
+=head2 attachments
 
 B<EXPERIMENTAL>
 
@@ -1388,7 +1380,7 @@ C<summary>.
 =back
 
 
-=item C<comments>
+=head2 comments
 
 B<STABLE>
 
@@ -1533,7 +1525,7 @@ C<creator>.
 =back
 
 
-=item C<get> 
+=head2 get
 
 B<STABLE>
 
@@ -1878,7 +1870,7 @@ and all custom fields.
 
 =back
 
-=item C<history> 
+=head2 history
 
 B<EXPERIMENTAL>
 
@@ -1985,7 +1977,7 @@ The same as L</get>.
 =back
 
 
-=item C<search>
+=head2 search
 
 B<UNSTABLE>
 
@@ -2178,14 +2170,9 @@ in Bugzilla B<4.0>.
 =back
 
 
-=back
+=head1 Bug Creation and Modification
 
-=head2 Bug Creation and Modification
-
-=over
-
-
-=item C<create> 
+=head2 create
 
 B<STABLE>
 
@@ -2349,7 +2336,7 @@ argument.
 =back
 
 
-=item C<add_attachment>
+=head2 add_attachment
 
 B<UNSTABLE>
 
@@ -2462,7 +2449,7 @@ but this Bugzilla does not support attaching URLs.
 =back
 
 
-=item C<add_comment> 
+=head2 add_comment
 
 B<STABLE>
 
@@ -2553,7 +2540,7 @@ code of 32000.
 =back
 
 
-=item C<update>
+=head2 update
 
 B<UNSTABLE>
 
@@ -2945,7 +2932,7 @@ which we won't even know about until after we do QA for 4.0.
 =back
 
 
-=item C<update_see_also>
+=head2 update_see_also
 
 B<EXPERIMENTAL>
 
@@ -3054,8 +3041,5 @@ this bug.
 =item Before Bugzilla B<3.6>, error 115 had a generic error code of 32000.
 
 =back
-
-=back
-
 
 =back

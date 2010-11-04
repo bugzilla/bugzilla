@@ -129,25 +129,21 @@ internally in the WebService code.
 
 =head1 METHODS
 
-=over
-
-=item C<filter>
+=head2 filter
 
 This helps implement the C<include_fields> and C<exclude_fields> arguments
 of WebService methods. Given a hash (the second argument to this subroutine),
 this will remove any keys that are I<not> in C<include_fields> and then remove
 any keys that I<are> in C<exclude_fields>.
 
-=item C<filter_wants>
+=head2 filter_wants
 
 Returns C<1> if a filter would preserve the specified field when passing
 a hash to L</filter>, C<0> otherwise.
 
-=item C<validate>
+=head2 validate
 
 This helps in the validation of parameters passed into the WebSerice
 methods. Currently it converts listed parameters into an array reference
 if the client only passed a single scalar value. It modifies the parameters
 hash in place so other parameters should be unaltered.
-
-=back

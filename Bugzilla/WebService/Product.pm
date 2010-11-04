@@ -97,11 +97,9 @@ get information about them.
 See L<Bugzilla::WebService> for a description of how parameters are passed,
 and what B<STABLE>, B<UNSTABLE>, and B<EXPERIMENTAL> mean.
 
-=head2 List Products
+=head1 List Products
 
-=over
-
-=item C<get_selectable_products> 
+=head2 get_selectable_products
 
 B<EXPERIMENTAL>
 
@@ -122,7 +120,7 @@ ids.
 
 =back
 
-=item C<get_enterable_products> 
+=head2 get_enterable_products
 
 B<EXPERIMENTAL>
 
@@ -144,7 +142,7 @@ ids.
 
 =back
 
-=item C<get_accessible_products> 
+=head2 get_accessible_products
 
 B<UNSTABLE>
 
@@ -166,7 +164,7 @@ ids.
 
 =back
 
-=item C<get> 
+=head2 get
 
 B<EXPERIMENTAL>
 
@@ -200,6 +198,3 @@ is returned.
 =item B<Errors> (none)
 
 =back
-
-=back
-

@@ -226,7 +226,7 @@ sub quoteUrls {
               ~<a href=\"mailto:$2\">$1$2</a>~igx;
 
     # attachment links
-    $text =~ s~\b(attachment\s*\#?\s*(\d+))
+    $text =~ s~\b(attachment\s*\#?\s*(\d+)(?:\s+\[details\])?)
               ~($things[$count++] = get_attachment_link($2, $1)) &&
                ("\0\0" . ($count-1) . "\0\0")
               ~egmxi;

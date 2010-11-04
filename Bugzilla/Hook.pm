@@ -1159,6 +1159,49 @@ name), you can get it from here.
 
 =back
 
+=head2 user_preferences
+
+This hook allows you to add additional panels to the User Preferences page,
+and validate data displayed and returned from these panels. It works in
+combination with the C<tabs> hook available in the
+F<template/en/default/account/prefs/prefs.html.tmpl> template. To make it
+work, you must define two templates in your extension:
+F<extensions/Foo/template/en/default/hook/account/prefs/prefs-tabs.html.tmpl>
+contains a list of additional panels to include.
+F<extensions/Foo/template/en/default/account/prefs/bar.html.tmpl> contains
+the content of the panel itself. See the C<Example> extension to see how
+things work.
+
+Params:
+
+=over
+
+=item C<current_tab>
+
+The name of the current panel being viewed by the user. You should always
+make sure that the name of the panel matches what you expect it to be.
+Else you could be interacting with the panel of another extension.
+
+=item C<save_changes>
+
+A boolean which is true when data should be validated and the DB updated
+accordingly. This means the user clicked the "Submit Changes" button.
+
+=item C<handled>
+
+This is a B<reference> to a scalar, not a scalar. (So you would set it like
+C<$$handled = 1>, not like C<$handled = 1>.) Set this to a true value to let
+Bugzilla know that the passed-in panel is valid and that you have handled it.
+(Otherwise, Bugzilla will throw an error that the panel is invalid.) Don't set
+this to true if you didn't handle the panel listed in C<current_tab>.
+
+=item C<vars>
+
+You can add as many new key/value pairs as you want to this hashref.
+It will be passed to the template.
+
+=back
+
 =head2 webservice
 
 This hook allows you to add your own modules to the WebService. (See

@@ -569,6 +569,34 @@ L</config_add_panels> if you want to add new panels.
 
 =back
 
+=head2 email_in_before_parse
+
+This happens right after an inbound email is converted into an Email::MIME
+object, but before we start parsing the email to extract field data. This
+means the email has already been decoded for you. It gives you a chance
+to interact with the email itself before L<email_in> starts parsing its content.
+
+=over
+
+=item C<mail> - An Email::MIME object. The decoded incoming email.
+
+=item C<fields> - A hashref. The hash which will contain extracted data.
+
+=back
+
+=head2 email_in_after_parse
+
+This happens after all the data has been extracted from the email, but before
+the reporter is validated, during L<email_in>. This lets you do things after
+the normal parsing of the email, such as sanitizing field data, changing the
+user account being used to file a bug, etc.
+
+=over
+
+=item C<fields> - A hashref. The hash containing the extracted field data.
+
+=back
+
 =head2 enter_bug_entrydefaultvars
 
 B<DEPRECATED> - Use L</template_before_process> instead.

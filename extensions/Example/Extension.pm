@@ -281,6 +281,48 @@ sub config_modify_panels {
     push(@{ $verify_class->{choices} }, 'Example');
 }
 
+sub email_in_before_parse {
+    my ($self, $args) = @_;
+
+    my $subject = $args->{mail}->header('Subject');
+    # Correctly extract the bug ID from email subjects of the form [Bug comp/NNN].
+    if ($subject =~ /\[.*(\d+)\].*/) {
+        $args->{fields}->{bug_id} = $1;
+    }
+}
+
+sub email_in_after_parse {
+    my ($self, $args) = @_;
+    my $reporter = $args->{fields}->{reporter};
+    my $dbh = Bugzilla->dbh;
+
+    # No other check needed if this is a valid regular user.
+    return if login_to_id($reporter);
+
+    # The reporter is not a regular user. We create an account for him,
+    # but he can only comment on existing bugs.
+    # This is useful for people who reply by email to bugmails received
+    # in mailing-lists.
+    if ($args->{fields}->{bug_id}) {
+        # WARNING: we return now to skip the remaining code below.
+        # You must understand that removing this line would make the code
+        # below effective! Do it only if you are OK with the behavior
+        # described here.
+        return;
+
+        Bugzilla::User->create({ login_name => $reporter, cryptpassword => '*' });
+
+        # For security reasons, delete all fields unrelated to comments.
+        foreach my $field (keys %{$args->{fields}}) {
+            next if $field =~ /^(?:bug_id|comment|reporter)$/;
+            delete $args->{fields}->{$field};
+        }
+    }
+    else {
+        ThrowUserError('invalid_username', { name => $reporter });
+    }
+}
+
 sub flag_end_of_update {
     my ($self, $args) = @_;
     

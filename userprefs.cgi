@@ -502,7 +502,8 @@ if (!Bugzilla->user->id) {
 }
 Bugzilla->login(LOGIN_REQUIRED);
 
-$vars->{'changes_saved'} = $cgi->param('dosave');
+my $save_changes = $cgi->param('dosave');
+$vars->{'changes_saved'} = $save_changes;
 
 my $current_tab_name = $cgi->param('tab') || "settings";
 
@@ -512,22 +513,22 @@ trick_taint($current_tab_name);
 $vars->{'current_tab_name'} = $current_tab_name;
 
 my $token = $cgi->param('token');
-check_token_data($token, 'edit_user_prefs') if $cgi->param('dosave');
+check_token_data($token, 'edit_user_prefs') if $save_changes;
 
 # Do any saving, and then display the current tab.
 SWITCH: for ($current_tab_name) {
     /^account$/ && do {
-        SaveAccount() if $cgi->param('dosave');
+        SaveAccount() if $save_changes;
         DoAccount();
         last SWITCH;
     };
     /^settings$/ && do {
-        SaveSettings() if $cgi->param('dosave');
+        SaveSettings() if $save_changes;
         DoSettings();
         last SWITCH;
     };
     /^email$/ && do {
-        SaveEmail() if $cgi->param('dosave');
+        SaveEmail() if $save_changes;
         DoEmail();
         last SWITCH;
     };
@@ -536,15 +537,24 @@ SWITCH: for ($current_tab_name) {
         last SWITCH;
     };
     /^saved-searches$/ && do {
-        SaveSavedSearches() if $cgi->param('dosave');
+        SaveSavedSearches() if $save_changes;
         DoSavedSearches();
         last SWITCH;
     };
+    # Extensions must set it to 1 to confirm the tab is valid.
+    my $handled = 0;
+    Bugzilla::Hook::process('user_preferences',
+                            { 'vars'       => $vars,
+                              save_changes => $save_changes,
+                              current_tab  => $current_tab_name,
+                              handled      => \$handled });
+    last SWITCH if $handled;
+
     ThrowUserError("unknown_tab",
                    { current_tab_name => $current_tab_name });
 }
 
-delete_token($token) if $cgi->param('dosave');
+delete_token($token) if $save_changes;
 if ($current_tab_name ne 'permissions') {
     $vars->{'token'} = issue_session_token('edit_user_prefs');
 }

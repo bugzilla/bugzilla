@@ -55,6 +55,8 @@
             { name => "permissions", label => "Permissions", 
               link => "userprefs.cgi?tab=permissions", saveable => "0" } ] %]
 
+[% Hook.process('tabs') %]
+
 [% FOREACH tab IN tabs %]
   [% IF tab.name == current_tab_name %]
     [% current_tab = tab %]

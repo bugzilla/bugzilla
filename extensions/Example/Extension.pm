@@ -682,6 +682,26 @@ sub bug_check_can_change_field {
     }
 }
 
+sub user_preferences {
+    my ($self, $args) = @_;
+    my $tab = $args->{current_tab};
+    my $save = $args->{save_changes};
+    my $handled = $args->{handled};
+
+    return unless $tab eq 'my_tab';
+
+    my $value = Bugzilla->input_params->{'example_pref'};
+    if ($save) {
+        # Validate your data and update the DB accordingly.
+        $value =~ s/\s+/:/g;
+    }
+    $args->{'vars'}->{example_pref} = $value;
+
+    # Set the 'handled' scalar reference to true so that the caller
+    # knows the panel name is valid and that an extension took care of it.
+    $$handled = 1;
+}
+
 sub webservice {
     my ($self, $args) = @_;
 

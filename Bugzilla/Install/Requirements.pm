@@ -280,6 +280,15 @@ sub OPTIONAL_MODULES {
         version => '1.999022',
         feature => 'mod_perl'
     },
+
+    {
+        package => 'CGI.pm',
+        module  => 'CGI',
+        # 3.50 fixes a security problem that affects Bugzilla.
+        # (bug 591165)
+        version => '3.50',
+        feature => 'Recommended important security fix'
+    },
     );
 
     my $all_modules = _get_extension_requirements(

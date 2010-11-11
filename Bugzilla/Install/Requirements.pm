@@ -94,9 +94,9 @@ sub REQUIRED_MODULES {
     {
         package => 'CGI.pm',
         module  => 'CGI',
-        # 3.49 fixes a problem with operating Bugzilla behind a proxy.
-        # (bug 509303)
-        version => '3.49',
+        # 3.50 fixes a security problem that affects Bugzilla.
+        # (bug 591165)
+        version => '3.50',
     },
     {
         package => 'Digest-SHA',

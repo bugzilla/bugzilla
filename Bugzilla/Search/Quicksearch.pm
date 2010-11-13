@@ -248,6 +248,7 @@ sub _handle_alias {
         my $is_alias = Bugzilla->dbh->selectrow_array(
             q{SELECT 1 FROM bugs WHERE alias = ?}, undef, $alias);
         if ($is_alias) {
+            $alias = url_quote($alias);
             print Bugzilla->cgi->redirect(
                 -uri => correct_urlbase() . "show_bug.cgi?id=$alias");
             exit;

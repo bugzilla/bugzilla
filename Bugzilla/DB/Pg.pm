@@ -143,7 +143,7 @@ sub sql_limit {
 sub sql_from_days {
     my ($self, $days) = @_;
 
-    return "TO_TIMESTAMP(${days}::int, 'J')::date";
+    return "TO_TIMESTAMP('$days', 'J')::date";
 }
 
 sub sql_to_days {

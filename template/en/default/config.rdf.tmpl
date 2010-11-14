@@ -124,6 +124,7 @@
         <li>
           <bz:product rdf:about="[% escaped_urlbase %]product.cgi?name=[% product.name FILTER url_quote %]">
             <bz:name>[% product.name FILTER html %]</bz:name>
+            <bz:allows_unconfirmed>[% product.allows_unconfirmed FILTER html %]</bz:allows_unconfirmed>
 
             <bz:components>
               <Seq>

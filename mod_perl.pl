@@ -16,7 +16,6 @@
 # Contributor(s): Max Kanat-Alexander <mkanat@bugzilla.org>
 
 package Bugzilla::ModPerl;
-
 use strict;
 
 # If you have an Apache2::Status handler in your Apache configuration,
@@ -30,21 +29,20 @@ use strict;
 
 use Apache2::ServerUtil;
 use ModPerl::RegistryLoader ();
-use CGI ();
-CGI->compile(qw(:cgi -no_xhtml -oldstyle_urls :private_tempfiles
-                :unique_headers SERVER_PUSH :push));
 use File::Basename ();
-use Template::Config ();
-Template::Config->preload();
 
+# This loads most of our modules.
 use Bugzilla ();
-use Bugzilla::Constants ();
+# Loading Bugzilla.pm doesn't load this, though, and we want it preloaded.
+use Bugzilla::BugMail ();
 use Bugzilla::CGI ();
+use Bugzilla::Constants ();
 use Bugzilla::Extension ();
 use Bugzilla::Install::Requirements ();
-use Bugzilla::Mailer ();
-use Bugzilla::Template ();
 use Bugzilla::Util ();
+
+# Pre-compile the CGI.pm methods that we're going to use.
+Bugzilla::CGI->compile(qw(:cgi :push));
 
 my ($sizelimit, $maxrequests) = ('', '');
 if (Bugzilla::Constants::ON_WINDOWS) {

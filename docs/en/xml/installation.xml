@@ -843,12 +843,12 @@ max_allowed_packet=4M
 
           <para>As the postgres user, you then need to create a new user: </para>
             
-          <screen> <prompt>bash$</prompt> createuser -U postgres -dAP bugs</screen>
+          <screen> <prompt>bash$</prompt> createuser -U postgres -dRSP bugs</screen>
  
           <para>When asked for a password, provide the password which will be set as
           <replaceable>$db_pass</replaceable> in <filename>localconfig</filename>.
-          The created user will have the ability to create databases and will not be
-          able to create new users.</para>
+          The created user will not be a superuser (-S) and will not be able to create
+          new users (-R). He will only have the ability to create databases (-d).</para>
         </section>
         
         <section>

@@ -161,11 +161,13 @@
     <script type="text/javascript">
     <!--
         YAHOO.namespace('bugzilla');
-        
+        YAHOO.util.Event.addListener = function (el, sType, fn, obj, overrideContext) {
+               if ( ("onpagehide" in window || YAHOO.env.ua.gecko) && sType === "unload") { sType = "pagehide"; };
+               var capture = ((sType == "focusin" || sType == "focusout") && !YAHOO.env.ua.ie) ? true : false;
+               return this._addListener(el, this._getType(sType), fn, obj, overrideContext, capture);
+         };
         if ( "onpagehide" in window || YAHOO.env.ua.gecko) {
             YAHOO.util.Event._simpleRemove(window, "unload", 
-                                           YAHOO.util.Event._unload);
-            YAHOO.util.Event._simpleAdd(window, "pagehide", 
                                            YAHOO.util.Event._unload);
         }
         [%# The language selector needs javascript to set its cookie,

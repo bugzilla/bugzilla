@@ -641,6 +641,16 @@
     [% END %]
     is invalid.
 
+  [% ELSIF error == "flag_type_cannot_deactivate" %]
+    [% title = "Cannot Deactivate Flag Type" %]
+    Sorry, but the flag type '[% flagtype.name FILTER html %]' also applies to some
+    products you cannot see, and so you are not allowed to deactivate it.
+
+  [% ELSIF error == "flag_type_cannot_delete" %]
+    [% title = "Flag Type Deletion Not Allowed" %]
+    Sorry, but the flag type '[% flagtype.name FILTER html %]' also applies to some
+    products you cannot see, and so you are not allowed to delete it.
+
   [% ELSIF error == "flag_type_cc_list_invalid" %]
     [% title = "Flag Type CC List Invalid" %]
     [% admindocslinks = {'flags-overview.html#flags-admin'  => 'Administering Flags'} %]
@@ -660,6 +670,11 @@
     [% admindocslinks = {'flags-overview.html#flags-admin'  => 'Administering Flags'} %]
     The name <em>[% name FILTER html %]</em> must be 1-50 characters long
     and must not contain any spaces or commas.
+
+  [% ELSIF error == "flag_type_not_editable" %]
+    [% title = "Flag Type Not Editable" %]
+    You are not allowed to edit properties of the '[% flagtype.name FILTER html %]'
+    flag type, because this flag type is not available for the products you can administer.
 
   [% ELSIF error == "flag_type_not_multiplicable" %]
     [% docslinks = {'flags-overview.html' => 'An overview on Flags',
@@ -1311,6 +1326,7 @@
     [%+ constants.USER_PASSWORD_MIN_LENGTH FILTER html %] characters long.
 
   [% ELSIF error == "product_access_denied" %]
+    [% title = "Product Access Denied" %]
     Either the product 
     [%+ IF id.defined %]
       with the id [% id FILTER html %]
@@ -1387,6 +1403,15 @@
     [% admindocslinks = {'products.html' => 'Administering products',
                          'versions.html' => 'Administering versions'} %]
     You must enter a valid version to create a new product.
+
+  [% ELSIF error == "product_unknown_component" %]
+    [% title = "Unknown Component" %]
+    Product '[% product FILTER html %]' has no component
+    [% IF comp_id %]
+      with ID [% comp_id FILTER html %].
+    [% ELSE %]
+      named '[% comp FILTER html %]'.
+    [% END %]
 
   [% ELSIF error == "query_name_exists" %]
     [% title = "Search Name Already In Use" %]

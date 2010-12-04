@@ -112,6 +112,9 @@ use constant UPDATE_VALIDATORS => {
 
 sub create {
     my $class = shift;
+    my $dbh = Bugzilla->dbh;
+
+    $dbh->bz_start_transaction();
 
     $class->check_required_create_fields(@_);
     my $params = $class->run_create_validators(@_);
@@ -126,6 +129,9 @@ sub create {
 
     $flagtype->set_clusions({ inclusions => $inclusions,
                               exclusions => $exclusions });
+    $flagtype->update();
+
+    $dbh->bz_commit_transaction();
     return $flagtype;
 }
 
@@ -161,7 +167,7 @@ sub update {
                                                FROM flags
                                          INNER JOIN bugs
                                                  ON flags.bug_id = bugs.bug_id
-                                    LEFT OUTER JOIN flaginclusions AS i
+                                          LEFT JOIN flaginclusions AS i
                                                  ON (flags.type_id = i.type_id
                                                      AND (bugs.product_id = i.product_id
                                                           OR i.product_id IS NULL)
@@ -351,7 +357,6 @@ sub set_request_group    { $_[0]->set('request_group_id', $_[1]); }
 
 sub set_clusions {
     my ($self, $list) = @_;
-    my $dbh = Bugzilla->dbh;
     my %products;
 
     foreach my $category (keys %$list) {
@@ -360,22 +365,33 @@ sub set_clusions {
 
         foreach my $prod_comp (@{$list->{$category} || []}) {
             my ($prod_id, $comp_id) = split(':', $prod_comp);
-            my $component;
+            my $prod_name = '__Any__';
+            my $comp_name = '__Any__';
             # Does the product exist?
-            if ($prod_id && detaint_natural($prod_id)) {
-                $products{$prod_id} ||= new Bugzilla::Product($prod_id);
-                next unless defined $products{$prod_id};
+            if ($prod_id) {
+                $products{$prod_id} ||= Bugzilla::Product->check({ id => $prod_id });
+                detaint_natural($prod_id);
+                $prod_name = $products{$prod_id}->name;
 
                 # Does the component belong to this product?
-                if ($comp_id && detaint_natural($comp_id)) {
-                    ($component) = grep { $_->id == $comp_id } @{$products{$prod_id}->components};
-                    next unless $component;
+                if ($comp_id) {
+                    detaint_natural($comp_id)
+                      || ThrowCodeError('param_must_be_numeric',
+                                        { function => 'Bugzilla::FlagType::set_clusions' });
+
+                    my ($component) = grep { $_->id == $comp_id } @{$products{$prod_id}->components}
+                                        or ThrowUserError('product_unknown_component',
+                                                          { product => $prod_name, comp_id => $comp_id });
+                    $comp_name = $component->name;
+                }
+                else {
+                    $comp_id = 0;
                 }
             }
-            $prod_id ||= 0;
-            $comp_id ||= 0;
-            my $prod_name = $prod_id ? $products{$prod_id}->name : '__Any__';
-            my $comp_name = $comp_id ? $component->name : '__Any__';
+            else {
+                $prod_id = 0;
+                $comp_id = 0;
+            }
             $clusions{"$prod_name:$comp_name"} = "$prod_id:$comp_id";
             $clusions_as_hash{$prod_id}->{$comp_id} = 1;
         }
@@ -520,15 +536,16 @@ sub get_clusions {
     my $dbh = Bugzilla->dbh;
 
     my $list =
-        $dbh->selectall_arrayref("SELECT products.id, products.name, " .
-                                 "       components.id, components.name " . 
-                                 "FROM flagtypes, flag${type}clusions " . 
-                                 "LEFT OUTER JOIN products " .
-                                 "  ON flag${type}clusions.product_id = products.id " . 
-                                 "LEFT OUTER JOIN components " .
-                                 "  ON flag${type}clusions.component_id = components.id " . 
-                                 "WHERE flagtypes.id = ? " .
-                                 " AND flag${type}clusions.type_id = flagtypes.id",
+        $dbh->selectall_arrayref("SELECT products.id, products.name,
+                                         components.id, components.name
+                                    FROM flagtypes
+                              INNER JOIN flag${type}clusions
+                                      ON flag${type}clusions.type_id = flagtypes.id
+                               LEFT JOIN products
+                                      ON flag${type}clusions.product_id = products.id
+                               LEFT JOIN components
+                                      ON flag${type}clusions.component_id = components.id
+                                   WHERE flagtypes.id = ?",
                                  undef, $id);
     my (%clusions, %clusions_as_hash);
     foreach my $data (@$list) {
@@ -667,7 +684,7 @@ sub sqlify_criteria {
             $join_clause .= "AND (e.component_id = $component_id OR e.component_id IS NULL) ";
         }
         else {
-            $addl_join_clause = "AND e.component_id IS NULL OR (i.component_id != e.component_id) ";
+            $addl_join_clause = "AND e.component_id IS NULL OR (i.component_id = e.component_id) ";
         }
         $join_clause .= "AND ((e.product_id = $product_id $addl_join_clause) OR e.product_id IS NULL)";
 

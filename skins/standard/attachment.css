@@ -99,10 +99,6 @@ tbody.file pre:empty {
   width: 3em;
 }
 
-.warning {
-  color: red
-}
-
 table.attachment_info th {
     text-align: right;
     vertical-align: top;

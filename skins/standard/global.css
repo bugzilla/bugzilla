@@ -385,6 +385,10 @@ input.requestee {
     font-size: x-large;
 }
 
+.warning {
+  color: red;
+}
+
 .throw_error {
     background-color: #ff0000;
     color: black;

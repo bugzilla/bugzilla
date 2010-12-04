@@ -76,7 +76,8 @@
         <a href="editcomponents.cgi">components</a>, <a href="editversions.cgi">versions</a>
         and <a href="editmilestones.cgi">milestones</a> directly.</dd>
 
-        [% class = user.in_group('editcomponents') ? "" : "forbidden" %]
+        [% class = (user.in_group('editcomponents')
+                   || user.get_products_by_permission('editcomponents').size) ? "" : "forbidden" %]
         <dt id="flags" class="[% class %]"><a href="editflagtypes.cgi">Flags</a></dt>
         <dd class="[% class %]">A flag is a custom 4-states attribute of [% terms.bugs %]
         and/or attachments. These states are: granted, denied, requested and undefined.

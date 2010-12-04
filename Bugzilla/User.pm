@@ -1006,6 +1006,49 @@ sub check_can_admin_product {
     return $product;
 }
 
+sub check_can_admin_flagtype {
+    my ($self, $flagtype_id) = @_;
+
+    my $flagtype = Bugzilla::FlagType->check({ id => $flagtype_id });
+    my $can_fully_edit = 1;
+
+    if (!$self->in_group('editcomponents')) {
+        my $products = $self->get_products_by_permission('editcomponents');
+        # You need editcomponents privs for at least one product to have
+        # a chance to edit the flagtype.
+        scalar(@$products)
+          || ThrowUserError('auth_failure', {group  => 'editcomponents',
+                                             action => 'edit',
+                                             object => 'flagtypes'});
+        my $can_admin = 0;
+        my $i = $flagtype->inclusions_as_hash;
+        my $e = $flagtype->exclusions_as_hash;
+
+        # If there is at least one product for which the user doesn't have
+        # editcomponents privs, then don't allow him to do everything with
+        # this flagtype, independently of whether this product is in the
+        # exclusion list or not.
+        my %product_ids;
+        map { $product_ids{$_->id} = 1 } @$products;
+        $can_fully_edit = 0 if grep { !$product_ids{$_} } keys %$i;
+
+        unless ($e->{0}->{0}) {
+            foreach my $product (@$products) {
+                my $id = $product->id;
+                next if $e->{$id}->{0};
+                # If we are here, the product has not been explicitly excluded.
+                # Check whether it's explicitly included, or at least one of
+                # its components.
+                $can_admin = ($i->{0}->{0} || $i->{$id}->{0}
+                              || scalar(grep { !$e->{$id}->{$_} } keys %{$i->{$id}}));
+                last if $can_admin;
+            }
+        }
+        $can_admin || ThrowUserError('flag_type_not_editable', { flagtype => $flagtype });
+    }
+    return wantarray ? ($flagtype, $can_fully_edit) : $flagtype;
+}
+
 sub can_request_flag {
     my ($self, $flag_type) = @_;
 
@@ -2260,6 +2303,21 @@ not be aware of the existence of the product.
  Params:      $product_name - a product name.
 
  Returns:     On success, a product object. On failure, an error is thrown.
+
+=item C<check_can_admin_flagtype($flagtype_id)>
+
+ Description: Checks whether the user is allowed to edit properties of the flag type.
+              If the flag type is also used by some products for which the user
+              hasn't editcomponents privs, then the user is only allowed to edit
+              the inclusion and exclusion lists for products he can administrate.
+
+ Params:      $flagtype_id - a flag type ID.
+
+ Returns:     On success, a flag type object. On failure, an error is thrown.
+              In list context, a boolean indicating whether the user can edit
+              all properties of the flag type is also returned. The boolean
+              is false if the user can only edit the inclusion and exclusions
+              lists.
 
 =item C<can_request_flag($flag_type)>
 

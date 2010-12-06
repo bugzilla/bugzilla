@@ -246,9 +246,9 @@ sub OPTIONAL_MODULES {
     {
         package => 'SOAP-Lite',
         module  => 'SOAP::Lite',
-        # 0.710.04 is required for correct UTF-8 handling, but .04 and .05 are
-        # affected by bug 468009.
-        version => '0.710.06',
+        # Fixes various bugs, including 542931 and 552353 + stops
+        # throwing warnings with Perl 5.12.
+        version => '0.712',
         feature => ['xmlrpc'],
     },
     {

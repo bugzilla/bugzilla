@@ -381,7 +381,7 @@ sub _bz_callback {
     if (defined $value) {
         $value = trim($value);
         # We don't use \w because we don't want to allow Unicode here.
-        if ($value !~ /^[A-Za-z0-1_\.\[\]]+$/) {
+        if ($value !~ /^[A-Za-z0-9_\.\[\]]+$/) {
             ThrowUserError('json_rpc_invalid_callback', { callback => $value });
         }
         $self->{_bz_callback} = $value;

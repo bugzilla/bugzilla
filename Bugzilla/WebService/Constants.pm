@@ -137,6 +137,7 @@ use constant WS_ERROR_CODE => {
     xmlrpc_invalid_value => -32600,
     unknown_method       => -32601,
     json_rpc_post_only   => 32610,
+    json_rpc_invalid_callback => 32611,
 };
 
 # These are the fallback defaults for errors not in ERROR_CODE.

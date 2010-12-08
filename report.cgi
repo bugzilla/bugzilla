@@ -29,6 +29,8 @@ use Bugzilla::Constants;
 use Bugzilla::Util;
 use Bugzilla::Error;
 use Bugzilla::Field;
+use Bugzilla::Search;
+
 use List::MoreUtils qw(uniq);
 
 my $cgi = Bugzilla->cgi;
@@ -45,8 +47,6 @@ if (grep(/^cmd-/, $cgi->param())) {
     print $cgi->redirect($location);
     exit;
 }
-
-use Bugzilla::Search;
 
 Bugzilla->login();
 
@@ -178,9 +178,9 @@ foreach my $result (@$results) {
     $tbl_isnumeric &&= ($tbl =~ /^-?\d+(\.\d+)?$/o);
 }
 
-my @col_names = @{get_names($names{"col"}, $col_isnumeric, $col_field)};
-my @row_names = @{get_names($names{"row"}, $row_isnumeric, $row_field)};
-my @tbl_names = @{get_names($names{"tbl"}, $tbl_isnumeric, $tbl_field)};
+my @col_names = get_names($names{"col"}, $col_isnumeric, $col_field);
+my @row_names = get_names($names{"row"}, $row_isnumeric, $row_field);
+my @tbl_names = get_names($names{"tbl"}, $tbl_isnumeric, $tbl_field);
 
 # The GD::Graph package requires a particular format of data, so once we've
 # gathered everything into the hashes and made sure we know the size of the
@@ -312,44 +312,29 @@ disable_utf8() if ($format->{'ctype'} =~ /^image\//);
 $template->process("$format->{'template'}", $vars)
   || ThrowTemplateError($template->error());
 
-exit;
-
 
 sub get_names {
-    my ($names, $isnumeric, $field) = @_;
+    my ($names, $isnumeric, $field_name) = @_;
     
-    # These are all the fields we want to preserve the order of in reports.
-    my %fields;
-    my @select_fields = @{ Bugzilla->fields({ is_select => 1 }) };
-    foreach my $field (@select_fields) {
-        my @names =  map($_->name, @{$field->legal_values});
-        unshift @names, ' ' if $field->name eq 'resolution'; 
-        $fields{$field->name} = [ uniq @names ];
-    } 
-    my $field_list = $fields{$field};
-    my @sorted;
+    my ($field, @sorted);
+    $field = Bugzilla::Field->check($field_name) if $field_name;
     
-    if ($field_list) {
-        my @unsorted = keys %{$names};
-        
-        # Extract the used fields from the field_list, in the order they 
-        # appear in the field_list. This lets us keep e.g. severities in
-        # the normal order.
-        #
-        # This is O(n^2) but it shouldn't matter for short lists.
-        foreach my $item (@$field_list) {
-            push(@sorted, $item) if grep { $_ eq $item } @unsorted;
+    if ($field && $field->is_select) {
+        foreach my $value (@{$field->legal_values}) {
+            push(@sorted, $value->name) if $names->{$value->name};
         }
+        unshift(@sorted, ' ') if $field_name eq 'resolution';
+        @sorted = uniq @sorted;
     }  
     elsif ($isnumeric) {
         # It's not a field we are preserving the order of, so sort it 
         # numerically...
-        sub numerically { $a <=> $b }
-        @sorted = sort numerically keys(%{$names});
-    } else {
+        @sorted = sort { $a <=> $b } keys %$names;
+    }
+    else {
         # ...or alphabetically, as appropriate.
-        @sorted = sort(keys(%{$names}));
+        @sorted = sort keys %$names;
     }
     
-    return \@sorted;
+    return @sorted;
 }

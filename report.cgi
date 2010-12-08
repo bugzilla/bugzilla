@@ -29,6 +29,7 @@ use Bugzilla::Constants;
 use Bugzilla::Util;
 use Bugzilla::Error;
 use Bugzilla::Field;
+use List::MoreUtils qw(uniq);
 
 my $cgi = Bugzilla->cgi;
 my $template = Bugzilla->template;
@@ -323,7 +324,7 @@ sub get_names {
     foreach my $field (@select_fields) {
         my @names =  map($_->name, @{$field->legal_values});
         unshift @names, ' ' if $field->name eq 'resolution'; 
-        $fields{$field->name} = \@names;
+        $fields{$field->name} = [ uniq @names ];
     } 
     my $field_list = $fields{$field};
     my @sorted;

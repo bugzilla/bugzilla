@@ -27,6 +27,7 @@ use Bugzilla;
 use Bugzilla::Config qw(:admin);
 use Bugzilla::Search::Saved;
 use Bugzilla::Status;
+use Getopt::Long;
 
 my $confirmed   = new Bugzilla::Status({ name => 'CONFIRMED' });
 my $in_progress = new Bugzilla::Status({ name => 'IN_PROGRESS' });
@@ -35,6 +36,8 @@ if ($confirmed and $in_progress) {
     print "You are already using the new workflow.\n";
     exit 1;
 }
+my $enable_unconfirmed  = 0;
+my $result = GetOptions("enable-unconfirmed" => \$enable_unconfirmed);
 
 print <<END;
 WARNING: This will convert the status of all bugs using the following
@@ -50,8 +53,16 @@ so that it appears that these statuses were always in existence.
 
 Emails will not be sent for the change.
 
-To continue, press any key, or press Ctrl-C to stop this program...
 END
+if ($enable_unconfirmed) {
+    print "UNCONFIRMED will be enabled in all products.\n";
+} else {
+    print <<END;
+If you also want to enable the UNCONFIRMED status in every product,
+restart this script with the --enable-unconfirmed option.
+END
+}
+print "\nTo continue, press any key, or press Ctrl-C to stop this program...";
 getc;
 
 my $dbh = Bugzilla->dbh;
@@ -105,7 +116,10 @@ foreach my $pair (@translation) {
     Bugzilla::Series->Bugzilla::Search::Saved::rename_field_value('bug_status',
         $from, $to);
 }
-
+if ($enable_unconfirmed) {
+    print "Enabling UNCONFIRMED in all products...\n";
+    $dbh->do('UPDATE products SET allows_unconfirmed = 1');
+}
 $dbh->bz_commit_transaction();
 
 print <<END;

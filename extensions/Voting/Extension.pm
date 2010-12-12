@@ -40,6 +40,7 @@ use Bugzilla::Util qw(detaint_natural);
 use List::Util qw(min);
 
 use constant NAME => 'Voting';
+use constant VERSION => BUGZILLA_VERSION;
 use constant DEFAULT_VOTES_PER_BUG => 1;
 # These came from Bugzilla itself, so they maintain the old numbers
 # they had before.
@@ -49,8 +50,6 @@ use constant REL_VOTER => 4;
 ################
 # Installation #
 ################
-
-our $VERSION = BUGZILLA_VERSION;
 
 sub db_schema_abstract_schema {
     my ($self, $args) = @_;

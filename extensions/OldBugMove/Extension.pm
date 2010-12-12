@@ -32,11 +32,11 @@ use Bugzilla::Util qw(trim);
 use Scalar::Util qw(blessed);
 use Storable qw(dclone);
 
+use constant VERSION => BUGZILLA_VERSION;
+
 # This is 4 because that's what it originally was when this code was
 # a part of Bugzilla.
 use constant CMT_MOVED_TO => 4;
-
-our $VERSION = BUGZILLA_VERSION;
 
 sub install_update_db {
     my $reso_type = Bugzilla::Field::Choice->type('resolution');

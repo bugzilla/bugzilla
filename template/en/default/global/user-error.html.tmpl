@@ -707,10 +707,10 @@
 
   [% ELSIF error == "freetext_too_long" %]
     [% title = "Text Too Long" %]
-    The text you entered is too long ([% text.length FILTER html %] characters,
-    above the maximum length allowed of [% constants.MAX_FREETEXT_LENGTH FILTER none %]
-    characters):
-    <p><em>[% text FILTER html %]</em></p>
+    The text you entered in the [% field_descs.$field FILTER html %]
+    field is too long ([% text.length FILTER html %] characters,
+    above the maximum length allowed of
+    [%+ constants.MAX_FREETEXT_LENGTH FILTER none %] characters).
 
   [% ELSIF error == "group_cannot_delete" %]
     [% title = "Cannot Delete Group" %]

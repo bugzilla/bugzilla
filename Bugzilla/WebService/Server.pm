@@ -36,6 +36,9 @@ sub datetime_format_inbound {
     my ($self, $time) = @_;
     
     my $converted = datetime_from($time, Bugzilla->local_timezone);
+    if (!defined $converted) {
+        ThrowUserError('illegal_date', { date => $time });
+    }
     $time = $converted->ymd() . ' ' . $converted->hms();
     return $time
 }

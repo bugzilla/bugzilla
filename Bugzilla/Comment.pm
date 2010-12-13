@@ -77,7 +77,7 @@ use constant VALIDATORS => {
 use constant VALIDATOR_DEPENDENCIES => {
     extra_data => ['type'],
     bug_id     => ['who'],
-    work_time  => ['who'],
+    work_time  => ['who', 'bug_id'],
     isprivate  => ['who'],
 };
 
@@ -180,6 +180,17 @@ sub set_extra_data  { $_[0]->set('extra_data', $_[1]); }
 # Validators #
 ##############
 
+sub run_create_validators {
+    my $self = shift;
+    my $params = $self->SUPER::run_create_validators(@_);
+    # Sometimes this run_create_validators is called with parameters that
+    # skip bug_id validation, so it might not exist in the resulting hash.
+    if (defined $params->{bug_id}) {
+        $params->{bug_id} = $params->{bug_id}->id;
+    }
+    return $params;
+}
+
 sub _check_extra_data {
     my ($invocant, $extra_data, undef, $params) = @_;
     my $type = blessed($invocant) ? $invocant->type : $params->{type};
@@ -246,7 +257,7 @@ sub _check_bug_id {
     $bug->check_can_change_field('longdesc', 0, 1, \$privs)
         || ThrowUserError('illegal_change', 
                           { field => 'longdesc', privs => $privs });
-    return $bug->id;
+    return $bug;
 }
 
 sub _check_who {
@@ -276,7 +287,12 @@ sub _check_work_time {
 
     # Call down to Bugzilla::Object, letting it know negative
     # values are ok
-    return $invocant->check_time( $value_in, $field, $params, 1);
+    my $time = $invocant->check_time($value_in, $field, $params, 1);
+    my $privs;
+    $params->{bug_id}->check_can_change_field('work_time', 0, $time, \$privs)
+        || ThrowUserError('illegal_change',
+                          { field => 'work_time', privs => $privs });
+    return $time;
 }
 
 sub _check_thetext {

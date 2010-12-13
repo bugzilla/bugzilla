@@ -48,7 +48,6 @@ use constant PRODUCT_SPECIFIC_FIELDS => qw(version target_milestone component);
 use constant DATE_FIELDS => {
     comments => ['new_since'],
     search   => ['last_change_time', 'creation_time'],
-    update   => ['deadline'],
 };
 
 use constant BASE64_FIELDS => {
@@ -470,7 +469,10 @@ sub update {
     my $user = Bugzilla->login(LOGIN_REQUIRED);
     my $dbh = Bugzilla->dbh;
 
-    $params = Bugzilla::Bug::map_fields($params, { summary => 1 });
+    # We skip certain fields because their set_ methods actually use
+    # the external names instead of the internal names.
+    $params = Bugzilla::Bug::map_fields($params, 
+        { summary => 1, platform => 1, severity => 1, url => 1 });
 
     my $ids = delete $params->{ids};
     defined $ids || ThrowCodeError('param_required', { param => 'ids' });
@@ -539,6 +541,11 @@ sub update {
         foreach my $field (keys %changes) {
             my $change = $changes{$field};
             my $api_field = $api_name{$field} || $field;
+            # We normalize undef to an empty string, so that the API
+            # stays consistent for things like Deadline that can become
+            # empty.
+            $change->[0] = '' if !defined $change->[0];
+            $change->[1] = '' if !defined $change->[1];
             $hash{changes}->{$api_field} = {
                 removed => $self->type('string', $change->[0]),
                 added   => $self->type('string', $change->[1]) 
@@ -891,7 +898,9 @@ sub _bug_to_hash {
     if (Bugzilla->user->is_timetracker) {
         $item{'estimated_time'} = $self->type('double', $bug->estimated_time);
         $item{'remaining_time'} = $self->type('double', $bug->remaining_time);
-        $item{'deadline'}       = $self->type('dateTime', $bug->deadline);
+        # No need to format $bug->deadline specially, because Bugzilla::Bug
+        # already does it for us.
+        $item{'deadline'} = $self->type('string', $bug->deadline);
     }
 
     if (Bugzilla->user->id) {
@@ -1616,7 +1625,8 @@ C<string> The login name of the person who filed this bug (the reporter).
 
 =item C<deadline>
 
-C<dateTime> The day that this bug is due to be completed.
+C<string> The day that this bug is due to be completed, in the format
+C<YYYY-MM-DD>.
 
 If you are not in the time-tracking group, this field will not be included
 in the return value.
@@ -2284,7 +2294,8 @@ A hash with one element, C<id>. This is the id of the newly-filed bug.
 
 =item 51 (Invalid Object)
 
-The component you specified is not valid for this Product.
+You specified a field value that is invalid. The error message will have
+more details.
 
 =item 103 (Invalid Alias)
 
@@ -2309,6 +2320,11 @@ you don't have permission to enter bugs in this product.
 
 You didn't specify a summary for the bug.
 
+=item 116 (Dependency Loop)
+
+You specified values in the C<blocks> or C<depends_on> fields
+that would cause a circular dependency between bugs.
+
 =item 504 (Invalid User)
 
 Either the QA Contact, Assignee, or CC lists have some invalid user
@@ -2330,6 +2346,9 @@ method.
 =item The C<comment_is_private> argument was added in Bugzilla B<4.0>.
 Before Bugzilla 4.0, you had to use the undocumented C<commentprivacy>
 argument.
+
+=item Error 116 was added in Bugzilla B<4.0>. Before that, dependency
+loop errors had a generic code of C<32000>.
 
 =back
 
@@ -2495,7 +2514,7 @@ doesn't support aliases or (b) there is no bug with that alias.
 
 The id you specified doesn't exist in the database.
 
-=item 108 (Bug Edit Denied)
+=item 109 (Bug Edit Denied)
 
 You did not have the necessary rights to edit the bug.
 
@@ -2647,9 +2666,8 @@ C<string> The Component the bug is in.
 
 =item C<deadline>
 
-C<dateTime> The Deadline field--a date specifying when the bug must
-be completed by. The time specified is ignored--only the date is
-significant.
+C<string> The Deadline field--a date specifying when the bug must
+be completed by, in the format C<YYYY-MM-DD>.
 
 =item C<dupe_of>
 
@@ -2898,21 +2916,91 @@ Here's an example of what a return value might look like:
    ]
  }
 
+Currently, some fields are not tracked in changes: C<comment>,
+C<comment_is_private>, and C<work_time>. This means that they will not
+show up in the return value even if they were successfully updated.
+This may change in a future version of Bugzilla.
+
 =item B<Errors>
 
-This function can throw all of the errors that L</get> can throw, plus:
+This function can throw all of the errors that L</get>, L</create>,
+and L</add_comment> can throw, plus:
 
 =over
 
-=item 103 (Invalid Alias)
+=item 50 (Empty Field)
 
-Either you tried to set an alias when changing multiple bugs at once,
-or the alias you specified is invalid for some reason.
+You tried to set some field to be empty, but that field cannot be empty.
+The error message will have more details.
+
+=item 52 (Input Not A Number)
+
+You tried to set a numeric field to a value that wasn't numeric.
+
+=item 54 (Number Too Large)
+
+You tried to set a numeric field to a value larger than that field can
+accept.
+
+=item 55 (Number Too Small)
+
+You tried to set a negative value in a numeric field that does not accept
+negative values.
+
+=item 56 (Bad Date/Time)
+
+You specified an invalid date or time in a date/time field (such as
+the C<deadline> field or a custom date/time field).
+
+=item 112 (See Also Invalid)
+
+You attempted to add an invalid value to the C<see_also> field.
+
+=item 115 (Permission Denied)
+
+You don't have permission to change a particular field to a particular value.
+The error message will have more detail.
+
+=item 116 (Dependency Loop)
+
+You specified a value in the C<blocks> or C<depends_on> fields that causes
+a dependency loop.
+
+=item 117 (Invalid Comment ID)
+
+You specified a comment id in C<comment_is_private> that isn't on this bug.
+
+=item 118 (Duplicate Loop)
+
+You specified a value for C<dupe_of> that causes an infinite loop of
+duplicates.
+
+=item 119 (dupe_of Required)
+
+You changed the resolution to C<DUPLICATE> but did not specify a value
+for the C<dupe_of> field.
+
+=item 120 (Group Add/Remove Denied)
+
+You tried to add or remove a group that you don't have permission to modify
+for this bug, or you tried to add a group that isn't valid in this product.
+
+=item 121 (Resolution Required)
+
+You tried to set the C<status> field to a closed status, but you didn't
+specify a resolution.
+
+=item 122 (Resolution On Open Status)
+
+This bug has an open status, but you specified a value for the C<resolution>
+field.
+
+=item 123 (Invalid Status Transition)
+
+You tried to change from one status to another, but the status workflow
+rules don't allow that change.
 
 =back
-
-FIXME: Plus a whole load of other errors that we haven't documented yet,
-which we won't even know about until after we do QA for 4.0.
 
 =item B<History>
 
@@ -3010,7 +3098,7 @@ This method can throw all of the errors that L</get> throws, plus:
 
 =over
 
-=item 108 (Bug Edit Denied)
+=item 109 (Bug Edit Denied)
 
 You did not have the necessary rights to edit the bug.
 

@@ -544,9 +544,6 @@ sub check_time {
                                      : 0;
     $current ||= 0;
 
-    # Don't let the user set the value if they aren't a timetracker
-    return $current unless Bugzilla->user->is_timetracker;
-
     # Get the new value or zero if it isn't defined
     $value = trim($value) || 0;
 

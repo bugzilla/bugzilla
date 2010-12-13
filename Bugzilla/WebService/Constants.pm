@@ -49,13 +49,17 @@ our @EXPORT = qw(
 use constant WS_ERROR_CODE => {
     # Generic errors (Bugzilla::Object and others) are 50-99.    
     object_not_specified        => 50,
+    reassign_to_empty           => 50,
     param_required              => 50,
     params_required             => 50,
+    undefined_field             => 50,
     object_does_not_exist       => 51,
     param_must_be_numeric       => 52,
     number_not_numeric          => 52,
     param_invalid               => 53,
     number_too_large            => 54,
+    number_too_small            => 55,
+    illegal_date                => 56,
     # Bug errors usually occupy the 100-200 range.
     improper_bug_id_field_value => 100,
     bug_id_does_not_exist       => 101,
@@ -88,6 +92,7 @@ use constant WS_ERROR_CODE => {
     comment_is_private => 110,
     comment_id_invalid => 111,
     comment_too_long => 114,
+    comment_invalid_isprivate => 117, 
     # See Also errors
     bug_url_invalid => 112,
     bug_url_too_long => 112,
@@ -96,6 +101,20 @@ use constant WS_ERROR_CODE => {
     # Note: 114 is above in the Comment-related section.
     # Bug update errors
     illegal_change => 115,
+    # Dependency errors
+    dependency_loop_single => 116,
+    dependency_loop_multi  => 116,
+    # Note: 117 is above in the Comment-related section.
+    # Dup errors
+    dupe_loop_detected => 118,
+    dupe_id_required => 119,
+    # Group errors
+    group_change_denied => 120,
+    group_invalid_restriction => 120,
+    # Status/Resolution errors
+    missing_resolution => 121,
+    resolution_not_allowed => 122,
+    illegal_bug_status_transition => 123,
 
     # Authentication errors are usually 300-400.
     invalid_username_or_password => 300,

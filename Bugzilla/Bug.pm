@@ -1436,12 +1436,14 @@ sub _check_component {
 
 sub _check_deadline {
     my ($invocant, $date) = @_;
-    
-    # Check time-tracking permissions.
-    # deadline() returns '' instead of undef if no deadline is set.
-    my $current = ref $invocant ? ($invocant->deadline || undef) : undef;
-    return $current unless Bugzilla->user->is_timetracker;
-    
+
+    # When filing bugs, we're forgiving and just return undef if
+    # the user isn't a timetracker. When updating bugs, check_can_change_field
+    # controls permissions, so we don't want to check them here.
+    if (!ref $invocant and !Bugzilla->user->is_timetracker) {
+        return undef;
+    }
+
     # Validate entered deadline
     $date = trim($date);
     return undef if !$date;
@@ -1644,8 +1646,7 @@ sub _check_keywords {
     my %keywords;
     foreach my $keyword (@$keyword_array) {
         next unless $keyword;
-        my $obj = new Bugzilla::Keyword({ name => $keyword });
-        ThrowUserError("unknown_keyword", { keyword => $keyword }) if !$obj;
+        my $obj = Bugzilla::Keyword->check($keyword);
         $keywords{$obj->id} = $obj;
     }
     return [values %keywords];
@@ -1776,6 +1777,10 @@ sub _check_short_desc {
     if (!defined $short_desc || $short_desc eq '') {
         ThrowUserError("require_summary");
     }
+    if (length($short_desc) > MAX_FREETEXT_LENGTH) {
+        ThrowUserError('freetext_too_long', 
+                       { field => 'short_desc', text => $short_desc });
+    }
     return $short_desc;
 }
 
@@ -1868,11 +1873,12 @@ sub _check_target_milestone {
 sub _check_time {
     my ($invocant, $time, $field) = @_;
 
-    my $current = 0;
-    if (ref $invocant && $field ne 'work_time') {
-        $current = $invocant->$field;
+    # When filing bugs, we're forgiving and just return 0 if
+    # the user isn't a timetracker. When updating bugs, check_can_change_field
+    # controls permissions, so we don't want to check them here.
+    if (!ref $invocant and !Bugzilla->user->is_timetracker) {
+        return 0;
     }
-    return $current unless Bugzilla->user->is_timetracker;
     
     $time = trim($time) || 0;
     ValidateTime($time, $field);
@@ -1890,7 +1896,15 @@ sub _check_version {
 }
 
 sub _check_work_time {
-    return $_[0]->_check_time($_[1], 'work_time');
+    my ($self, $input) = @_;
+    my $time = $self->_check_time($input, 'work_time');
+    # Because work_time isn't set by a set_ function, we need to
+    # do check_can_change_field here manually.
+    my $privs;
+    $self->check_can_change_field('work_time', 0, $time, \$privs)
+        || ThrowUserError('illegal_change', 
+                          { field => 'work_time', privs => $privs });
+    return $time;
 }
 
 # Custom Field Validators
@@ -1947,11 +1961,12 @@ sub _check_datetime_field {
 sub _check_default_field { return defined $_[1] ? trim($_[1]) : ''; }
 
 sub _check_freetext_field {
-    my ($invocant, $text) = @_;
+    my ($invocant, $text, $field) = @_;
 
     $text = (defined $text) ? trim($text) : '';
     if (length($text) > MAX_FREETEXT_LENGTH) {
-        ThrowUserError('freetext_too_long', { text => $text });
+        ThrowUserError('freetext_too_long', 
+                       { field => $field, text => $text });
     }
     return $text;
 }
@@ -2228,7 +2243,6 @@ sub reset_assigned_to {
 sub set_cclist_accessible { $_[0]->set('cclist_accessible', $_[1]); }
 sub set_comment_is_private {
     my ($self, $comment_id, $isprivate) = @_;
-    return unless Bugzilla->user->is_insider;
 
     # We also allow people to pass in a hash of comment ids to update.
     if (ref $comment_id) {
@@ -2244,6 +2258,7 @@ sub set_comment_is_private {
 
     $isprivate = $isprivate ? 1 : 0;
     if ($isprivate != $comment->is_private) {
+        ThrowUserError('user_not_insider') if !Bugzilla->user->is_insider;
         $self->{comment_isprivate} ||= {};
         $self->{comment_isprivate}->{$comment_id} = $isprivate;
     }
@@ -2567,7 +2582,13 @@ sub set_bug_status {
     else {
         # We do this here so that we can make sure closed statuses have
         # resolutions.
-        my $resolution = delete $params->{resolution} || $self->resolution;
+        my $resolution = $self->resolution;
+        # We need to check "defined" to prevent people from passing
+        # a blank resolution in the WebService, which would otherwise fail
+        # silently.
+        if (defined $params->{resolution}) {
+            $resolution = delete $params->{resolution};
+        }
         $self->set_resolution($resolution, $params);
 
         # Changing between closed statuses zeros the remaining time.
@@ -3783,7 +3804,8 @@ sub check_can_change_field {
     } elsif (trim($oldvalue) eq trim($newvalue)) {
         return 1;
     # numeric fields need to be compared using ==
-    } elsif (($field eq 'estimated_time' || $field eq 'remaining_time')
+    } elsif (($field eq 'estimated_time' || $field eq 'remaining_time' 
+              || $field eq 'work_time')
              && $oldvalue == $newvalue)
     {
         return 1;
@@ -3818,7 +3840,7 @@ sub check_can_change_field {
     # $PrivilegesRequired = PRIVILEGES_REQUIRED_EMPOWERED : an empowered user.
     
     # Only users in the time-tracking group can change time-tracking fields.
-    if ( grep($_ eq $field, qw(deadline estimated_time remaining_time)) ) {
+    if ( grep($_ eq $field, TIMETRACKING_FIELDS) ) {
         if (!$user->is_timetracker) {
             $$PrivilegesRequired = PRIVILEGES_REQUIRED_EMPOWERED;
             return 0;

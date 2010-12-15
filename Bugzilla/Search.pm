@@ -2323,11 +2323,8 @@ sub _work_time_changedbefore_after {
 
 sub _work_time {
     my ($self, $args) = @_;
-    my ($chart_id, $joins) = @$args{qw(chart_id joins)};
-    
-    my $table = "longdescs_$chart_id";
-    push(@$joins, { table => 'longdescs', as => $table });
-    $args->{full_field} = "$table.work_time";
+    $self->_add_extra_column('actual_time');
+    $args->{full_field} = COLUMNS->{actual_time}->{name};
 }
 
 sub _percentage_complete {

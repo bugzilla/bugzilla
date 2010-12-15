@@ -335,6 +335,9 @@ sub _field_values_for_bug {
     elsif ($field eq 'longdescs.count') {
         @values = scalar(@{ $self->bug($number)->comments });
     }
+    elsif ($field eq 'work_time') {
+        @values = $self->_values_for($number, 'actual_time');
+    }
     elsif ($field eq 'bug_group') {
         @values = $self->_values_for($number, 'groups_in', 'name');
     }

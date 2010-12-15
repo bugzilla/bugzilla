@@ -617,7 +617,7 @@ sub _create_one_bug {
     my $extra_values = $self->_extra_bug_create_values->{$number};
     foreach my $field (qw(comments remaining_time percentage_complete
                          keyword_objects everconfirmed dependson blocked
-                         groups_in classification))
+                         groups_in classification actual_time))
     {
         $extra_values->{$field} = $bug->$field;
     }

@@ -108,7 +108,6 @@ use constant COLUMN_TRANSLATION => {
 # Make comment field names to their Bugzilla::Comment accessor.
 use constant COMMENT_FIELDS => {
     longdesc  => 'body',
-    work_time => 'work_time',
     commenter => 'author',
     'longdescs.isprivate' => 'is_private',
 };
@@ -234,7 +233,6 @@ use constant NEGATIVE_BROKEN => (
     dependson    => { contains => [2,4,5] },
     longdesc     => { contains => [1] },
     'longdescs.isprivate'   => { contains => [1] },
-    work_time               => { contains => [1] },
     # Custom fields are busted because they can be NULL.
     FIELD_TYPE_FREETEXT, { contains => [5] },
     FIELD_TYPE_BUG_ID,   { contains => [5] },
@@ -262,15 +260,14 @@ use constant GREATERTHAN_BROKEN => (
 
 # allwords and allwordssubstr have these broken tests in common.
 #
-# allwordssubstr work_time only matches against a single comment,
+# allwordssubstr on longdescs fields matches against a single comment,
 # instead of matching against all comments on a bug. Same is true
-# for the other longdesc fields, cc, keywords, and bug_group.
+# for cc, keywords, and bug_group.
 use constant ALLWORDS_BROKEN => (
     bug_group => { contains => [1] },
     cc        => { contains => [1] },
     keywords  => { contains => [1] },
     longdesc  => { contains => [1] },
-    work_time => { contains => [1] },
 );
 
 # nowords and nowordssubstr have these broken tests in common.
@@ -279,14 +276,13 @@ use constant ALLWORDS_BROKEN => (
 # longdescs.isprivate, and bug_group actually work properly in
 # terms of excluding bug 1 (since we exclude all values in the search,
 # on our test), but still fail at including bug 5.
-# The longdesc* and work_time fields, coincidentally, work completely
+# The longdesc* fields, coincidentally, work completely
 # correctly, possibly because there's only one comment on bug 5.
 use constant NOWORDS_BROKEN => (
     NEGATIVE_BROKEN,
     'flagtypes.name' => { contains => [5] },
     bug_group        => { contains => [5] },
     longdesc         => {},
-    work_time        => {},
     'longdescs.isprivate' => {},
 );
 
@@ -342,22 +338,16 @@ use constant KNOWN_BROKEN => {
     notsubstring => { NEGATIVE_BROKEN },
     notregexp    => { NEGATIVE_BROKEN },
 
-    # percentage_complete doesn't match bugs with 0 hours worked or remaining.
-    #
     # longdescs.isprivate matches if any comment matches, instead of if all
-    # comments match. Same for longdescs and work_time. (Commenter is probably
+    # comments match. (Commenter is probably
     # also broken in this way, but all our comments come from the same user.) 
-    # Also, the attachments ones don't find bugs that have no attachments 
-    # at all (which might be OK?).
     lessthan   => {
         'longdescs.isprivate'   => { contains => [1] },
-        work_time => { contains => [1,2,3,4] },
     },
     # The lessthaneq tests are broken for the same reasons, but they work
     # slightly differently so they have a different set of broken tests.
     lessthaneq => {
         'longdescs.isprivate' => { contains => [1] },
-        work_time => { contains => [2,3,4] },
     },
 
     greaterthan   => { GREATERTHAN_BROKEN },
@@ -378,16 +368,6 @@ use constant KNOWN_BROKEN => {
     # attachments.
     nowords => {
         NOWORDS_BROKEN,
-    },
-
-    # anywords searches don't work on decimal values.
-    # attach_data doesn't work (perhaps because it's the entire
-    # data, or some problem with the regex?).
-    anywords => {
-        work_time => { contains => [1] },
-    },
-    'anywords-<1> <2>' => {
-        work_time => { contains => [1,2] },
     },
 
     # setters.login_name and requestees.login name aren't tracked individually
@@ -432,8 +412,8 @@ use constant KNOWN_BROKEN => {
         work_time => { contains => [1] },
         FIELD_TYPE_BUG_ID, { contains => [5] },
     },
-    # changeto doesn't find work_time changes (probably due to decimal/string
-    # stuff). Same for remaining_time and estimated_time.
+    # changeto doesn't find remaining_time changes (possibly due to us not
+    # tracking that data properly).
     #
     # multi-valued fields are stored as comma-separated strings, so you
     # can't do changedfrom/to on them.
@@ -507,7 +487,6 @@ use constant CHANGED_BROKEN_NOT => (
     percentage_complete     => { contains => [1] },
     "requestees.login_name" => { contains => [1] },
     "setters.login_name"    => { contains => [1] },
-    "work_time"             => { contains => [1] },    
 );
 
 # For changedfrom and changedto.
@@ -539,7 +518,6 @@ use constant BROKEN_NOT => {
         keywords => { contains => [1,5] },
         longdesc => { contains => [1] },
         'see_also' => { },
-        work_time => { contains => [1] },
         FIELD_TYPE_MULTI_SELECT, { },
     },
     'allwords-<1> <2>' => {
@@ -550,7 +528,6 @@ use constant BROKEN_NOT => {
         'keywords'            => { contains => [5] },
         'longdesc' => { },
         'longdescs.isprivate' => { },
-        work_time => { },
     },
     allwordssubstr => {
         COMMON_BROKEN_NOT,
@@ -559,7 +536,6 @@ use constant BROKEN_NOT => {
         keywords => { contains => [1,5] },
         longdesc => { contains => [1] },
         see_also => { },
-        work_time => { contains => [1] },
         FIELD_TYPE_MULTI_SELECT, { },
     },
     'allwordssubstr-<1>,<2>' => {
@@ -570,13 +546,11 @@ use constant BROKEN_NOT => {
         "longdesc" => { },
         "longdescs.isprivate" => { },
         "see_also" => { },
-        "work_time" => { },
     },
     anyexact => {
         COMMON_BROKEN_NOT,
         "flagtypes.name" => { contains => [1, 2, 5] },
         "longdesc"       => { contains => [1, 2] },
-        "work_time"      => { contains => [1, 2] }
     },
     'anyexact-<1>, <2>' => {
         bug_group => { contains => [1] },
@@ -586,17 +560,13 @@ use constant BROKEN_NOT => {
     },
     anywords => {
         COMMON_BROKEN_NOT,
-        "work_time"           => { contains => [1, 2] },
-        "work_time"           => { contains => [1] },
         FIELD_TYPE_MULTI_SELECT, { contains => [5] },
     },
     'anywords-<1> <2>' => {
         'attach_data.thedata' => { contains => [5] },
-        work_time => { contains => [1,2] },
     },
     anywordssubstr => {
         COMMON_BROKEN_NOT,
-        "work_time" => { contains => [1, 2] },
     },
     'anywordssubstr-<1> <2>' => {
         FIELD_TYPE_MULTI_SELECT, { contains => [5] },
@@ -606,7 +576,6 @@ use constant BROKEN_NOT => {
         bug_group => { contains => [1] },
         keywords  => { contains => [1,5] },
         longdesc  => { contains => [1] },
-        work_time => { contains => [1] }   ,
         FIELD_TYPE_MULTI_SELECT, { contains => [1,5] },
     },
     'casesubstring-<1>-lc' => {
@@ -626,11 +595,11 @@ use constant BROKEN_NOT => {
     },
     changedbefore=> {
         CHANGED_BROKEN_NOT,
-        work_time   => { }
     },
     changedby => {
         CHANGED_BROKEN_NOT,
         creation_ts => { contains => [1] },
+        work_time   => { contains => [1] },
     },
     changedfrom => {
         CHANGED_BROKEN_NOT,
@@ -639,13 +608,13 @@ use constant BROKEN_NOT => {
         blocked         => { contains => [1, 2] },
         dependson       => { contains => [1, 3] },
         longdesc        => { },
+        work_time       => { contains => [1] },
         FIELD_TYPE_BUG_ID, { contains => [1 .. 4] },
         
     },
     changedto => {
         CHANGED_BROKEN_NOT,
         CHANGED_FROM_TO_BROKEN_NOT,
-        work_time => { },
         longdesc => { contains => [1] },
         "remaining_time" => { contains => [1] },
     },
@@ -655,19 +624,16 @@ use constant BROKEN_NOT => {
         "flagtypes.name" => { contains => [1, 5] },
         keywords  => { contains => [1,5] },
         longdesc  => { contains => [1] },
-        work_time => { contains => [1] }
     },
     greaterthan => {
         COMMON_BROKEN_NOT,
         cc        => { contains => [1] },
-        work_time => { contains => [2, 3, 4] },
         FIELD_TYPE_MULTI_SELECT, { contains => [5] },
     },
     greaterthaneq => {
         COMMON_BROKEN_NOT,
         cc               => { contains => [1] },
         "flagtypes.name" => { contains => [2, 5] },
-        "work_time"      => { contains => [2, 3, 4] },
         FIELD_TYPE_MULTI_SELECT, { contains => [5] },
     },
     lessthan => {
@@ -691,14 +657,12 @@ use constant BROKEN_NOT => {
     notsubstring   => { NEGATIVE_BROKEN_NOT },
     nowords        => {
         NEGATIVE_BROKEN_NOT,
-        "work_time" => { contains => [2, 3, 4] },
         "flagtypes.name" => { },
     },
     nowordssubstr  => {
         NEGATIVE_BROKEN_NOT,
         "attach_data.thedata" => { },
         "flagtypes.name" => { },
-        "work_time" => { contains => [2, 3, 4] },
     },
     regexp         => {
         COMMON_BROKEN_NOT,
@@ -706,7 +670,6 @@ use constant BROKEN_NOT => {
         "flagtypes.name" => { contains => [1,5] },
         keywords  => { contains => [1,5] },
         longdesc  => { contains => [1] },
-        work_time => { contains => [1] },
     },
     'regexp-^1-' => {
         "flagtypes.name" => { contains => [5] },
@@ -716,7 +679,6 @@ use constant BROKEN_NOT => {
         bug_group => { contains => [1] },
         keywords  => { contains => [1,5] },
         longdesc  => { contains => [1] },
-        work_time => { contains => [1] },
     },
 };
 
@@ -1065,10 +1027,7 @@ use constant TESTS => {
               # show up.
               'longdescs.isprivate' => { contains => [] },
               percentage_complete => { contains => [4,5] },
-              # 1.0 0.0 exludes bug 5.
-              # XXX However, it also shouldn't match 2, 3, or 4, because
-              # they contain at least one comment with 0.0 work_time.
-              work_time => { contains => [2,3,4] },
+              work_time => { contains => [2,3,4,5] },
           }
         },
     ],
@@ -1076,7 +1035,6 @@ use constant TESTS => {
         { contains => [1], value => '<1>',
           override => {
               MULTI_BOOLEAN_OVERRIDE,
-              work_time => { value => '1.0', contains => [1] },
           }
         },
         { contains => [1,2], value => '<1> <2>',
@@ -1084,7 +1042,6 @@ use constant TESTS => {
               MULTI_BOOLEAN_OVERRIDE,
               dependson => { value => '<1> <3>', contains => [1,3] },
               'longdescs.count' => { contains => [1,2,3,4] },              
-              work_time => { value => '1.0 2.0' },
           },
         },
     ],
@@ -1103,10 +1060,7 @@ use constant TESTS => {
               # longdescs.isprivate translates to "1 0", so no bugs should
               # show up.
               'longdescs.isprivate' => { contains => [] },
-              # 1.0 0.0 exludes bug 5.
-              # XXX However, it also shouldn't match 2, 3, or 4, because
-              # they contain at least one comment with 0.0 work_time.
-              work_time => { contains => [2,3,4] },
+              work_time => { contains => [2,3,4,5] },
           }
         },
     ],

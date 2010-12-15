@@ -76,9 +76,24 @@ sub _sqlite_create_table {
         undef, $table);
 }
 
+sub _sqlite_table_lines {
+    my $self = shift;
+    my $table_sql = $self->_sqlite_create_table(@_);
+    $table_sql =~ s/\n*\)$//s;
+    # The $ makes this work even if people some day add crazy stuff to their
+    # schema like multi-column foreign keys.
+    return split(/,\s*$/m, $table_sql);
+}
+
 # This does most of the "heavy lifting" of the schema-altering functions.
 sub _sqlite_alter_schema {
     my ($self, $table, $create_table, $options) = @_;
+    
+    # $create_table is sometimes an array in the form that _sqlite_table_lines
+    # returns.
+    if (ref $create_table) {
+        $create_table = join(',', @$create_table) . "\n)";
+    }
     
     my $dbh = Bugzilla->dbh;
     
@@ -257,21 +272,23 @@ sub get_rename_column_ddl {
 
 sub get_add_fks_sql {
     my ($self, $table, $column_fks) = @_;
+    my @clauses = $self->_sqlite_table_lines($table);
     my @add = $self->_column_fks_to_ddl($table, $column_fks);
-    my $table_sql = $self->_sqlite_create_table($table);
-    my $add_lines = join("\n,", @add) . "\n";
-    $table_sql =~ s/\)$/$add_lines)/s
-        || die "Can't find end of CREATE TABLE: $table_sql";
-    return $self->_sqlite_alter_schema($table, $table_sql);
+    push(@clauses, @add);
+    return $self->_sqlite_alter_schema($table, \@clauses);
 }
 
 sub get_drop_fk_sql {
     my ($self, $table, $column, $references) = @_;
-    my $table_sql = $self->_sqlite_create_table($table);
+    my @clauses = $self->_sqlite_table_lines($table);
     my $fk_name = $self->_get_fk_name($table, $column, $references);
-    $table_sql =~ s/^\s+CONSTRAINT $fk_name.*?ON DELETE \S+,?$//ms
-        || die "Can't find $fk_name: $table_sql";
-    return $self->_sqlite_alter_schema($table, $table_sql);
+    
+    my $line_re = qr/^\s+CONSTRAINT $fk_name /s;
+    grep { $line_re } @clauses
+        or die "Can't find $fk_name: " . join(',', @clauses);
+    @clauses = grep { $_ !~ $line_re } @clauses;
+    
+    return $self->_sqlite_alter_schema($table, \@clauses);
 }
 
 

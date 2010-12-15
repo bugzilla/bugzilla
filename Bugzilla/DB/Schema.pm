@@ -1867,12 +1867,8 @@ sub _hash_identifier {
 sub get_add_fks_sql {
     my ($self, $table, $column_fks) = @_;
 
-    my @add;
-    foreach my $column (keys %$column_fks) {
-        my $def = $column_fks->{$column};
-        my $fk_string = $self->get_fk_ddl($table, $column, $def);
-        push(@add, $fk_string);
-    }
+    my @add = $self->_column_fks_to_ddl($table, $column_fks);
+
     my @sql;
     if ($self->MULTIPLE_FKS_IN_ALTER) {
         my $alter = "ALTER TABLE $table ADD " . join(', ADD ', @add);
@@ -1884,6 +1880,17 @@ sub get_add_fks_sql {
         }
     }
     return @sql;
+}
+
+sub _column_fks_to_ddl {
+    my ($self, $table, $column_fks) = @_;
+    my @ddl;
+    foreach my $column (keys %$column_fks) {
+        my $def = $column_fks->{$column};
+        my $fk_string = $self->get_fk_ddl($table, $column, $def);
+        push(@ddl, $fk_string);
+    }
+    return @ddl;
 }
 
 sub get_drop_fk_sql { 
@@ -2051,7 +2058,7 @@ sub _get_create_table_ddl {
         push(@col_lines, "\t$field\t" . $self->get_type_ddl($finfo));
         if ($self->FK_ON_CREATE and $finfo->{REFERENCES}) {
             my $fk = $finfo->{REFERENCES};
-            my $fk_ddl = "\t" . $self->get_fk_ddl($table, $field, $fk);
+            my $fk_ddl = $self->get_fk_ddl($table, $field, $fk);
             push(@fk_lines, $fk_ddl);
         }
     }
@@ -2176,7 +2183,8 @@ sub get_alter_column_ddl {
 
 =cut
 
-    my ($self, $table, $column, $new_def, $set_nulls_to) = @_;
+    my $self = shift;
+    my ($table, $column, $new_def, $set_nulls_to) = @_;
 
     my @statements;
     my $old_def = $self->get_column_abstract($table, $column);
@@ -2213,17 +2221,7 @@ sub get_alter_column_ddl {
 
     # If we went from NULL to NOT NULL.
     if (!$old_def->{NOTNULL} && $new_def->{NOTNULL}) {
-        my $setdefault;
-        # Handle any fields that were NULL before, if we have a default,
-        $setdefault = $default if defined $default;
-        # But if we have a set_nulls_to, that overrides the DEFAULT 
-        # (although nobody would usually specify both a default and 
-        # a set_nulls_to.)
-        $setdefault = $set_nulls_to if defined $set_nulls_to;
-        if (defined $setdefault) {
-            push(@statements, "UPDATE $table SET $column = $setdefault"
-                            . "  WHERE $column IS NULL");
-        }
+        push(@statements, $self->_set_nulls_sql(@_));
         push(@statements, "ALTER TABLE $table ALTER COLUMN $column"
                         . " SET NOT NULL");
     }
@@ -2243,6 +2241,23 @@ sub get_alter_column_ddl {
     }
 
     return @statements;
+}
+
+sub _set_nulls_sql {
+    my ($self, $table, $column, $new_def, $set_nulls_to) = @_;
+    my $setdefault;
+    # Handle any fields that were NULL before, if we have a default,
+    $setdefault = $new_def->{DEFAULT} if defined $new_def->{DEFAULT};
+    # But if we have a set_nulls_to, that overrides the DEFAULT 
+    # (although nobody would usually specify both a default and 
+    # a set_nulls_to.)
+    $setdefault = $set_nulls_to if defined $set_nulls_to;
+    my @sql;
+    if (defined $setdefault) {
+        push(@sql, "UPDATE $table SET $column = $setdefault"
+                . "  WHERE $column IS NULL");
+    }
+    return @sql;
 }
 
 sub get_drop_index_ddl {

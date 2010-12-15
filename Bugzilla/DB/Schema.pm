@@ -2243,18 +2243,22 @@ sub get_alter_column_ddl {
     return @statements;
 }
 
+# Helps handle any fields that were NULL before, if we have a default,
+# when doing an ALTER COLUMN.
 sub _set_nulls_sql {
     my ($self, $table, $column, $new_def, $set_nulls_to) = @_;
-    my $setdefault;
-    # Handle any fields that were NULL before, if we have a default,
-    $setdefault = $new_def->{DEFAULT} if defined $new_def->{DEFAULT};
-    # But if we have a set_nulls_to, that overrides the DEFAULT 
+    my $default = $new_def->{DEFAULT};
+    # If we have a set_nulls_to, that overrides the DEFAULT 
     # (although nobody would usually specify both a default and 
     # a set_nulls_to.)
-    $setdefault = $set_nulls_to if defined $set_nulls_to;
+    $default = $set_nulls_to if defined $set_nulls_to;
+    if (defined $default) {
+         my $specific = $self->{db_specific};
+         $default = $specific->{$default} if exists $specific->{$default};
+    }
     my @sql;
-    if (defined $setdefault) {
-        push(@sql, "UPDATE $table SET $column = $setdefault"
+    if (defined $default) {
+        push(@sql, "UPDATE $table SET $column = $default"
                 . "  WHERE $column IS NULL");
     }
     return @sql;

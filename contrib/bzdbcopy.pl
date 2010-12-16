@@ -32,14 +32,14 @@ use Bugzilla::Util;
 
 # Settings for the 'Source' DB that you are copying from.
 use constant SOURCE_DB_TYPE => 'Mysql';
-use constant SOURCE_DB_NAME => 'bugs_tip';
+use constant SOURCE_DB_NAME => 'bugs';
 use constant SOURCE_DB_USER => 'bugs';
-use constant SOURCE_DB_PASSWORD => 'buGmElateR';
+use constant SOURCE_DB_PASSWORD => '';
 use constant SOURCE_DB_HOST => 'localhost';
 
 # Settings for the 'Target' DB that you are copying to.
-use constant TARGET_DB_TYPE => 'Sqlite';
-use constant TARGET_DB_NAME => 'bugs_tip';
+use constant TARGET_DB_TYPE => 'Pg';
+use constant TARGET_DB_NAME => 'bugs';
 use constant TARGET_DB_USER => 'bugs';
 use constant TARGET_DB_PASSWORD => '';
 use constant TARGET_DB_HOST => 'localhost';

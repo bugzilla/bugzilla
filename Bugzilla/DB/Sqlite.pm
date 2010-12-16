@@ -235,8 +235,22 @@ sub sql_string_until {
     return "SUBSTR($string, 1, $position - 1)"
 }
 
+###############
+# bz_ methods #
+###############
+
 # XXX This needs to be implemented.
 sub bz_explain { }
+
+sub bz_table_list_real {
+    my $self = shift;
+    my @tables = $self->SUPER::bz_table_list_real(@_);
+    # SQLite includes a sqlite_sequence table in every database that isn't
+    # one of our real tables. We exclude any table that starts with sqlite_,
+    # just to be safe.
+    @tables = grep { $_ !~ /^sqlite_/ } @tables;
+    return @tables;
+}
 
 1;
 

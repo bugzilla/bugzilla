@@ -32,14 +32,14 @@ use Bugzilla::Util;
 
 # Settings for the 'Source' DB that you are copying from.
 use constant SOURCE_DB_TYPE => 'Mysql';
-use constant SOURCE_DB_NAME => 'bugs';
+use constant SOURCE_DB_NAME => 'bugs_tip';
 use constant SOURCE_DB_USER => 'bugs';
-use constant SOURCE_DB_PASSWORD => '';
+use constant SOURCE_DB_PASSWORD => 'buGmElateR';
 use constant SOURCE_DB_HOST => 'localhost';
 
 # Settings for the 'Target' DB that you are copying to.
-use constant TARGET_DB_TYPE => 'Pg';
-use constant TARGET_DB_NAME => 'bugs';
+use constant TARGET_DB_TYPE => 'Sqlite';
+use constant TARGET_DB_NAME => 'bugs_tip';
 use constant TARGET_DB_USER => 'bugs';
 use constant TARGET_DB_PASSWORD => '';
 use constant TARGET_DB_HOST => 'localhost';
@@ -50,11 +50,16 @@ use constant TARGET_DB_HOST => 'localhost';
 
 print "Connecting to the '" . SOURCE_DB_NAME . "' source database on " 
       . SOURCE_DB_TYPE . "...\n";
-my $source_db = Bugzilla::DB::_connect(SOURCE_DB_TYPE, SOURCE_DB_HOST, 
-    SOURCE_DB_NAME, undef, undef, SOURCE_DB_USER, SOURCE_DB_PASSWORD);
+my $source_db = Bugzilla::DB::_connect({
+    db_driver => SOURCE_DB_TYPE, 
+    db_host   => SOURCE_DB_HOST, 
+    db_name   => SOURCE_DB_NAME, 
+    db_user   => SOURCE_DB_USER, 
+    db_pass   => SOURCE_DB_PASSWORD,
+});
 # Don't read entire tables into memory.
 if (SOURCE_DB_TYPE eq 'Mysql') {
-    $source_db->{'mysql_use_result'}=1;
+    $source_db->{'mysql_use_result'} = 1;
 
     # MySQL cannot have two queries running at the same time. Ensure the schema
     # is loaded from the database so bz_column_info will not execute a query
@@ -63,8 +68,13 @@ if (SOURCE_DB_TYPE eq 'Mysql') {
 
 print "Connecting to the '" . TARGET_DB_NAME . "' target database on "
       . TARGET_DB_TYPE . "...\n";
-my $target_db = Bugzilla::DB::_connect(TARGET_DB_TYPE, TARGET_DB_HOST, 
-    TARGET_DB_NAME, undef, undef, TARGET_DB_USER, TARGET_DB_PASSWORD);
+my $target_db = Bugzilla::DB::_connect({
+    db_driver => TARGET_DB_TYPE,
+    db_host   => TARGET_DB_HOST, 
+    db_name   => TARGET_DB_NAME, 
+    db_user   => TARGET_DB_USER,
+    db_pass   => TARGET_DB_PASSWORD,
+});
 my $ident_char = $target_db->get_info( 29 ); # SQL_IDENTIFIER_QUOTE_CHAR
 
 # We use the table list from the target DB, because if somebody

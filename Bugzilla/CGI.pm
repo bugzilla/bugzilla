@@ -299,6 +299,12 @@ sub header {
         unshift(@_, '-strict_transport_security' => $sts_opts);
     }
 
+    # Add X-Frame-Options header to prevent framing and subsequent
+    # possible clickjacking problems.
+    unless ($self->url_is_attachment_base) {
+        unshift(@_, '-x_frame_options' => 'SAMEORIGIN');
+    }
+
     return $self->SUPER::header(@_) || "";
 }
 

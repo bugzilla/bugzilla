@@ -645,6 +645,9 @@ sub update_table_definitions {
     # 2010-10-09 LpSolit@gmail.com - Bug 451735
     _fix_series_indexes();
 
+    $dbh->bz_add_column('bug_see_also', 'id',
+        {TYPE => 'MEDIUMSERIAL', NOTNULL => 1, PRIMARYKEY => 1});
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################

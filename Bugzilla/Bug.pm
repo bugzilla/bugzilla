@@ -931,6 +931,7 @@ sub update {
     }
 
     # See Also
+    my @old_see_also = @{ $old_bug->see_also };
     foreach my $field_values (@{ $self->{added_see_also} || [] }) {
         my $class = delete $field_values->{class};
         $class->insert_create_data($field_values);
@@ -940,7 +941,7 @@ sub update {
     delete $self->{added_see_also};
 
     my ($removed_see, $added_see) = 
-        diff_arrays($old_bug->see_also, $self->see_also);
+        diff_arrays(\@old_see_also, $self->see_also);
 
     if (scalar @$removed_see) {
         $dbh->do('DELETE FROM bug_see_also WHERE bug_id = ? AND '

@@ -573,6 +573,7 @@ sub insert_users {
     }
 }
 
+# XXX This should also insert Classifications.
 sub insert_products {
     my ($self, $products) = @_;
     foreach my $product (@$products) {
@@ -639,6 +640,7 @@ sub create_legal_values {
     }
     
     foreach my $field (@select_fields) {
+        next if $field->is_abnormal;
         my $name = $field->name;
         foreach my $value (keys %{ $values{$name} }) {
             next if Bugzilla::Field::Choice->type($field)->new({ name => $value });

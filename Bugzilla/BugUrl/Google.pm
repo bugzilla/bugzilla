@@ -12,11 +12,12 @@
 #
 # The Original Code is the Bugzilla Bug Tracking System.
 #
-# The Initial Developer of the Original Code is Tiago Mello
+# The Initial Developer of the Original Code is Tiago Mello.
 # Portions created by Tiago Mello are Copyright (C) 2010
 # Tiago Mello. All Rights Reserved.
 #
 # Contributor(s): Tiago Mello <timello@linux.vnet.ibm.com>
+#                 Reed Loden <reed@reedloden.com>
 
 package Bugzilla::BugUrl::Google;
 use strict;

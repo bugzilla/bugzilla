@@ -1604,7 +1604,7 @@ C<string> The login name of a user that a bug is assigned to.
 =item C<component>
 
 C<string> The name of the Component that the bug is in. Note that
-if there are multiple Compoonents with the same name, and you search
+if there are multiple Components with the same name, and you search
 for that name, bugs in I<all> those Components will be returned. If you
 don't want this, be sure to also specify the C<product> argument.
 

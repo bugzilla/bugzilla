@@ -319,7 +319,25 @@ sub OPTIONAL_MODULES {
         version => '1.999022',
         feature => ['mod_perl'],
     },
+    {
+        package => 'Apache-SizeLimit',
+        module  => 'Apache2::SizeLimit',
+        # 0.93 fixes problems on Linux and Windows, and changes the
+        # syntax used by SizeLimit.
+        version => '0.93',
+        feature => ['mod_perl'],
+    },
     );
+
+    if (ON_WINDOWS) {
+        # SizeLimit needs Win32::API to work on Windows.
+        push(@modules, {
+            package => 'Win32-API',
+            module  => 'Win32::API',
+            version => 0,
+            feature => ['mod_perl'],
+        });
+    }
 
     my $extra_modules = _get_extension_requirements('OPTIONAL_MODULES');
     push(@modules, @$extra_modules);

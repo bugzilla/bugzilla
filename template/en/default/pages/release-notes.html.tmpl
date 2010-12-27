@@ -291,7 +291,7 @@
 <p>All of the code for voting in [% terms.Bugzilla %] has been moved
   into an extension, called "Voting", in the <kbd>extensions/Voting/</kbd>
   directory. To enable it, you must remove the <kbd>disabled</kbd> file
-  from that directory, and run checksetup.pl.</p>
+  from that directory, and run <kbd>checksetup.pl</kbd>.</p>
 
 <p>In a future version of [% terms.Bugzilla %], the Voting extension will
   be moved outside of the [% terms.Bugzilla %] core code, so we are looking
@@ -419,7 +419,7 @@
     by very few [% terms.Bugzilla %] installations--if you aren't certain
     whether or not you are using it, you're not using it. To enable the system,
     you have to remove the file <kbd>extensions/OldBugMove/disabled</kbd>
-    and then run checksetup.pl. In a future version of [% terms.Bugzilla %],
+    and then run <kbd>checksetup.pl</kbd>. In a future version of [% terms.Bugzilla %],
     this extension may be moved outside of the core [% terms.Bugzilla %] code,
     so if you are interested in maintaining it, please let us know.</li>
   <li><strong>Custom Fields: </strong> "[% terms.Bug %] ID" custom fields can
@@ -453,8 +453,8 @@
   <li><strong>Installation:</strong> Now, whenever <kbd>checksetup.pl</kbd>
     throws an error, it will be printed in the color red, to make it
     obvious that something is wrong.</li>
-  <li><strong>Installation:</strong> Some actions of checksetup.pl were
-    silent, in the past. Now, checksetup.pl will print a message for
+  <li><strong>Installation:</strong> Some actions of <kbd>checksetup.pl</kbd> were
+    silent, in the past. Now, <kbd>checksetup.pl</kbd> will print a message for
     almost anything it does.</li>
   <li><strong>Installation:</strong> The process of adding foreign keys
     to a table is now much faster. This will particularly improve the speed
@@ -1395,7 +1395,7 @@
     are allowed to grant others membership in that group itself.</li>
   <li>The ability to compress BMP attachments to PNGs is now an Extension.
     To enable the feature, remove the file
-    <kbd>extensions/BmpConvert/disabled</kbd> and then run checksetup.pl.</li>
+    <kbd>extensions/BmpConvert/disabled</kbd> and then run <kbd>checksetup.pl</kbd>.</li>
   <li>The default list of values for the Priority field are now clear English
     words instead of P1, P2, etc.</li>
   <li>There is now a system in place so that all field values can be
@@ -1665,7 +1665,7 @@
     word-wrapping happened between "[% terms.bug %]" and the number.
    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=514703">[% terms.Bug %] 514703</a>)
   </li>
-  <li>Running checksetup.pl on Windows will no longer pop up an error box
+  <li>Running <kbd>checksetup.pl</kbd> on Windows will no longer pop up an error box
     about OCI.dll.
     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=480968">[% terms.Bug %] 480968</a>)
   </li>
@@ -2460,7 +2460,7 @@
 
   <li>Some versions of the SOAP::Lite Perl module had a b[% %]ug that caused
     [%+ terms.Bugzilla %]'s XML-RPC service to break. 
-    <code>checksetup.pl</code> now checks for these bad versions and 
+    <kbd>checksetup.pl</kbd> now checks for these bad versions and 
     will reject them.
     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=468009">[% terms.Bug %] 468009</a>)</li>
 
@@ -3148,7 +3148,7 @@
      <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=413672">[% terms.Bug %] 413672</a>, and
      <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=431721">[% terms.Bug %] 431721</a>)</li>
 
-  <li>checksetup.pl now handles UTF-8 conversion more reliably during upgrades.
+  <li><kbd>checksetup.pl</kbd> now handles UTF-8 conversion more reliably during upgrades.
     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=374951">[% terms.Bug %] 374951</a>)</li>
 
   <li>Comments written in CJK languages are now correctly word-wrapped.
@@ -3903,7 +3903,7 @@
     will tell you when this is, and it will give you certain instructions
     at that time, that you have to follow before you can complete
     the upgrade. Don't do the conversion yourself manually--follow
-    the instructions of checksetup.pl.</li>
+    the instructions of <kbd>checksetup.pl</kbd>.</li>
   <li>If you ever ran 2.23.3, 2.23.4, or 3.0rc1, you will have to run
     <kbd>./collectstats.pl --regenerate</kbd> at the command line, because
     the data for your Old Charts is corrupted. This can take several days,
@@ -4042,7 +4042,7 @@ sub y { $var++ }</pre>
 <h3 id="v30_code_other">Other Changes</h3>
 
 <ul>
-  <li><code>checksetup.pl</code> has been completely re-written, and most
+  <li><kbd>checksetup.pl</kbd> has been completely re-written, and most
     of its code moved into modules in the <kbd>Bugzilla::Install</kbd>
     namespace. See the
     <a href="[% docs_urlbase FILTER html %]api/checksetup.html">checksetup

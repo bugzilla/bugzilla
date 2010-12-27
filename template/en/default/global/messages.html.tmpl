@@ -558,7 +558,7 @@
       [% FOREACH param = param_changed %]
         Changed <em>[% param FILTER html %]</em><br>
         [% IF param == 'utf8' && Param('utf8') %]
-          <strong>You must now re-run checksetup.pl.</strong><br>
+          <strong>You must now re-run <kbd>checksetup.pl</kbd>.</strong><br>
         [% END %]
       [% END %]
     [% ELSE %]

@@ -81,29 +81,7 @@ if (grep { $_ =~ /^cmd\-/ } $cgi->param()) {
     exit;
 }
 
-# If query was POSTed, clean the URL from empty parameters and redirect back to
-# itself. This will make advanced search URLs more tolerable.
-#
-if ($cgi->request_method() eq 'POST') {
-    $cgi->clean_search_url();
-    my $uri_length = length($cgi->self_url());
-
-    if (!$cgi->param('regetlastlist') and !$cgi->param('list_id')
-        and $user->id) 
-    {
-        # Insert a placeholder Bugzilla::Search::Recent, so that we know what
-        # the id of the resulting search will be. This is then pulled out
-        # of the Referer header when viewing show_bug.cgi to know what
-        # bug list we came from.
-        my $recent_search = Bugzilla::Search::Recent->create_placeholder;
-        $cgi->param('list_id', $recent_search->id);
-    }
-
-    if ($uri_length < CGI_URI_LIMIT) {
-        print $cgi->redirect(-url => $cgi->self_url());
-        exit;
-    }
-}
+$cgi->redirect_search_url();
 
 # Determine whether this is a quicksearch query.
 my $searchstring = $cgi->param('quicksearch');

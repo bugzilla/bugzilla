@@ -408,8 +408,8 @@ sub recent_search_for {
         if ($list_id && $list_id ne 'cookie') {
             # If we got a bad list_id (either some other user's or an expired
             # one) don't crash, just don't return that list.
-            my $search = 
-                eval { Bugzilla::Search::Recent->check({ id => $list_id }) };
+            my $search = Bugzilla::Search::Recent->check_quietly(
+                { id => $list_id });
             return $search if $search;
         }
 

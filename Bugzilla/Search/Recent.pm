@@ -90,6 +90,15 @@ sub check {
     return $search;
 }
 
+sub check_quietly {
+    my $class = shift;
+    my $error_mode = Bugzilla->error_mode;
+    Bugzilla->error_mode(ERROR_MODE_DIE);
+    my $search = eval { $class->check(@_) };
+    Bugzilla->error_mode($error_mode);
+    return $search;
+}
+
 sub new_from_cookie {
     my ($invocant, $bug_ids) = @_;
     my $class = ref($invocant) || $invocant;

@@ -42,7 +42,6 @@
 /* header (begin) */
     #header {
         margin-bottom: 1em;
-        padding-bottom: 2px;
     }
 
     #header form, #header form input,
@@ -149,7 +148,7 @@
  */
     #footer {
         clear: both;
-        margin-top: 5px;
+        margin-top: 1em;
         width: 100%;
         background: #edf2f2;
         border-top: 1px solid #ddd;

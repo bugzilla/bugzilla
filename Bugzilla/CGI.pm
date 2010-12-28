@@ -413,7 +413,6 @@ sub redirect_search_url {
         # with no list id, and we could get a URL with a list_id that isn't
         # ours.
         my $list_id = $self->param('list_id');
-        my $last_search;
         if ($list_id) {
             # If we have a valid list_id, no need to redirect or clean.
             return if Bugzilla::Search::Recent->check_quietly(

@@ -1132,7 +1132,7 @@ max_allowed_packet=4M
                 </warning> 
                 
                 <programlisting>
-    PerlSwitches -I/var/www/html/bugzilla -I/var/www/html/bugzilla/lib -w -T
+    PerlSwitches -w -T
     PerlConfigRequire /var/www/html/bugzilla/mod_perl.pl
                 </programlisting>
             </step>

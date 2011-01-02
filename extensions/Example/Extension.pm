@@ -246,13 +246,6 @@ sub bugmail_relationships {
     $relationships->{+REL_EXAMPLE} = 'Example';
 }
 
-sub colchange_columns {
-    my ($self, $args) = @_;
-    
-    my $columns = $args->{'columns'};
-    push (@$columns, "example")
-}
-
 sub config {
     my ($self, $args) = @_;
 

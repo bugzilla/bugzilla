@@ -620,13 +620,13 @@
 [%############################################################################%]
 [% BLOCK section_dependson_blocks %]
   <tr>
-    [% PROCESS dependencies
-               dep = { title => "Depends&nbsp;on", fieldname => "dependson" } %]
+    [% INCLUDE dependencies 
+         field = bug_fields.dependson deps = bug.depends_on_obj %]
   </tr>
   
   <tr>
-    [% PROCESS dependencies accesskey = "b"
-               dep = { title => "<u>B</u>locks", fieldname => "blocked" } %]
+    [% INCLUDE dependencies 
+         field = bug_fields.blocked deps = bug.blocks_obj %]
   
   <tr>
     <th>&nbsp;</th>
@@ -936,37 +936,35 @@
 
 [% BLOCK dependencies %]
 
-  <th class="field_label">
-    <label for="[% dep.fieldname %]"[% " accesskey=\"$accesskey\"" IF accesskey %]>
-    [% dep.title %]</label>:
-  </th>
-  <td>    
-    <span id="[% dep.fieldname %]_input_area">
-      [% IF bug.check_can_change_field(dep.fieldname, 0, 1) %]
-        <input name="[% dep.fieldname %]" id="[% dep.fieldname %]"
-               class="text_input"
-               value="[% bug.${dep.fieldname}.join(', ') %]">
+  [% INCLUDE "bug/field-label.html.tmpl" %]
+
+  <td>
+    <span id="[% field.name FILTER html %]_input_area">
+      [% IF bug.check_can_change_field(field.name, 0, 1) %]
+        <input name="[% field.name FILTER html %]" 
+               id="[% field.name FILTER html %]" class="text_input"
+               value="[% bug.${field.name}.join(', ') FILTER html %]">
       [% END %]
     </span>
     
-    [% FOREACH depbug = bug.${dep.fieldname} %]
-      [% depbug FILTER bug_link(depbug, use_alias => 1) FILTER none %][% " " %]
+    [% FOREACH dep_bug = deps %]
+      [% dep_bug.id FILTER bug_link(dep_bug, use_alias => 1)
+                    FILTER none %][% " " %]
     [% END %]
-    [% IF bug.check_can_change_field(dep.fieldname, 0, 1) %]
-      <span id="[% dep.fieldname %]_edit_container" class="edit_me bz_default_hidden" >
-        (<a href="#" id="[% dep.fieldname %]_edit_action">edit</a>)
+    [% IF bug.check_can_change_field(field.name, 0, 1) %]
+      <span id="[% field.name FILTER html %]_edit_container" 
+            class="edit_me bz_default_hidden">
+        (<a href="#" id="[% field.name FILTER html %]_edit_action">edit</a>)
       </span>
       <script type="text/javascript">
-        hideEditableField('[% dep.fieldname %]_edit_container', 
-                          '[% dep.fieldname %]_input_area', 
-                          '[% dep.fieldname %]_edit_action', 
-                          '[% dep.fieldname %]', 
-                          "[% bug.${dep.fieldname}.join(', ') %]");
+        hideEditableField('[% field.name FILTER js %]_edit_container', 
+                          '[% field.name FILTER js %]_input_area', 
+                          '[% field.name FILTER js %]_edit_action', 
+                          '[% field.name FILTER js %]', 
+                          '[% bug.${field.name}.join(', ') FILTER js %]');
       </script>
     [% END %]
   </td>
-  
-  [% accesskey = undef %]
   
 [% END %]
 

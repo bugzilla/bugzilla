@@ -52,7 +52,7 @@ if (!$cgi->param('id') && $single) {
 my $format = $template->get_format("bug/show", scalar $cgi->param('format'), 
                                    scalar $cgi->param('ctype'));
 
-my @bugs = ();
+my @bugs;
 my %marks;
 
 # If the user isn't logged in, we use data from the shadow DB. If he plans
@@ -90,6 +90,8 @@ if ($single) {
         }
     }
 }
+
+Bugzilla::Bug->preload(\@bugs);
 
 $vars->{'bugs'} = \@bugs;
 $vars->{'marks'} = \%marks;

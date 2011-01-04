@@ -639,6 +639,15 @@ sub template_var {
     return $vars{$name};
 }
 
+sub display_value {
+    my ($field, $value) = @_;
+    my $value_descs = template_var('value_descs');
+    if (defined $value_descs->{$field}->{$value}) {
+        return $value_descs->{$field}->{$value};
+    }
+    return $value;
+}
+
 sub disable_utf8 {
     if (Bugzilla->params->{'utf8'}) {
         binmode STDOUT, ':bytes'; # Turn off UTF8 encoding.

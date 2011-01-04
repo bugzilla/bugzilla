@@ -317,51 +317,19 @@ sub get_attachment_link {
 
 sub get_bug_link {
     my ($bug, $link_text, $options) = @_;
+    $options ||= {};
     my $dbh = Bugzilla->dbh;
 
-    if (!$bug) {
-        return html_quote('<missing bug number>');
+    if (defined $bug) {
+        $bug = blessed($bug) ? $bug : new Bugzilla::Bug($bug);
+        return $link_text if $bug->{error};
     }
 
-    $bug = blessed($bug) ? $bug : new Bugzilla::Bug($bug);
-    return $link_text if $bug->{error};
-    
-    # Initialize these variables to be "" so that we don't get warnings
-    # if we don't change them below (which is highly likely).
-    my ($pre, $title, $post) = ("", "", "");
-    my @css_classes = ("bz_bug_link");
-
-    $title = get_text('get_status', { status => $bug->bug_status });
-
-    push @css_classes, "bz_status_" . css_class_quote($bug->bug_status);
-
-    if ($bug->resolution) {
-        push @css_classes, "bz_closed";
-        $title .= ' ' . get_text('get_resolution',
-                                 { resolution => $bug->resolution });
-    }
-    if (Bugzilla->user->can_see_bug($bug)) {
-        $title .= " - " . $bug->short_desc;
-        if ($options->{use_alias} && $link_text =~ /^\d+$/ && $bug->alias) {
-            $link_text = $bug->alias;
-        }
-    }
-    # Prevent code injection in the title.
-    $title = html_quote(clean_text($title));
-    my $linkval = "show_bug.cgi?id=" . $bug->id;
-    
-    if ($options->{full_url}) {
-        $linkval = correct_urlbase() . $linkval;
-    }
-    
-    if (defined $options->{comment_num}) {
-        $linkval .= "#c" . $options->{comment_num};
-    }
-
-    $pre  = '<span class="' . join(" ", @css_classes) . '">';
-    $post = '</span>';
-
-    return qq{$pre<a href="$linkval" title="$title">$link_text</a>$post};
+    my $template = Bugzilla->template_inner;
+    my $linkified;
+    $template->process('bug/link.html.tmpl', 
+        { bug => $bug, link_text => $link_text, %$options }, \$linkified);
+    return $linkified;
 }
 
 # We use this instead of format because format doesn't deal well with
@@ -948,6 +916,9 @@ sub create {
             # it only once per-language no matter how many times
             # $template->process() is called.
             'field_descs' => sub { return template_var('field_descs') },
+            # This way we don't have to load field-descs.none.tmpl in
+            # many templates.
+            'display_value' => \&Bugzilla::Util::display_value,
 
             'install_string' => \&Bugzilla::Install::Util::install_string,
 

@@ -472,6 +472,26 @@ sub match {
     return $class->SUPER::match(@_);
 }
 
+# Helps load up information for bugs for show_bug.cgi and other situations
+# that will need to access info on lots of bugs.
+sub preload {
+    my ($class, $bugs) = @_;
+    my $user = Bugzilla->user;
+
+    # It would be faster but MUCH more complicated to select all the
+    # deps for the entire list in one SQL statement. If we ever have
+    # a profile that proves that that's necessary, we can switch over
+    # to the more complex method.
+    my @all_dep_ids;
+    foreach my $bug (@$bugs) {
+        push(@all_dep_ids, @{ $bug->blocked }, @{ $bug->dependson });
+    }
+    @all_dep_ids = uniq @all_dep_ids;
+    # If we don't do this, can_see_bug will do one call per bug in
+    # the dependency lists, during get_bug_link in Bugzilla::Template.
+    $user->visible_bugs(\@all_dep_ids);
+}
+
 sub possible_duplicates {
     my ($class, $params) = @_;
     my $short_desc = $params->{summary};
@@ -2302,6 +2322,8 @@ sub set_dependencies {
     detaint_natural($_) foreach (@$dependson, @$blocked);
     $self->{'dependson'} = $dependson;
     $self->{'blocked'}   = $blocked;
+    delete $self->{depends_on_obj};
+    delete $self->{blocks_obj};
 }
 sub _clear_dup_id { $_[0]->{dup_id} = undef; }
 sub set_dup_id {
@@ -3003,6 +3025,12 @@ sub blocked {
     return $self->{'blocked'};
 }
 
+sub blocks_obj {
+    my ($self) = @_;
+    $self->{blocks_obj} ||= $self->_bugs_in_order($self->blocked);
+    return $self->{blocks_obj};
+}
+
 sub bug_group {
     my ($self) = @_;
     return join(', ', (map { $_->name } @{$self->groups_in}));
@@ -3094,6 +3122,12 @@ sub dependson {
     $self->{'dependson'} = 
         EmitDependList("blocked", "dependson", $self->bug_id);
     return $self->{'dependson'};
+}
+
+sub depends_on_obj {
+    my ($self) = @_;
+    $self->{depends_on_obj} ||= $self->_bugs_in_order($self->dependson);
+    return $self->{depends_on_obj};
 }
 
 sub flag_types {
@@ -3494,6 +3528,15 @@ sub EmitDependList {
             ORDER BY is_open DESC, $targetfield",
             undef, $bug_id);
     return $list_ref;
+}
+
+# Creates a lot of bug objects in the same order as the input array.
+sub _bugs_in_order {
+    my ($self, $bug_ids) = @_;
+    my $bugs = $self->new_from_list($bug_ids);
+    my %bug_map = map { $_->id => $_ } @$bugs;
+    my @result = map { $bug_map{$_} } @$bug_ids;
+    return \@result;
 }
 
 # Get the activity of a bug, starting from $starttime (if given).

@@ -61,35 +61,25 @@
                    ${constants.FIELD_TYPE_BUG_ID}        => "$terms.Bug ID",
                 } %]
 
-[%# You can use this hash to localize (translate) the values displayed
-  # for drop-down and multiple-select fields. Lines starting with "#"
-  # are comments.
-  #%]
-[% value_descs = {
-  "bug_status" => {
-    # "UNCONFIRMED" => "UNCO",
-    # "CONFIRMED"   => "ITSABUG",
-  },
-
-  "resolution" => {
-    ""        => "---",
-    # "FIXED"      => "NO LONGER AN ISSUE",
-    # "WORKSFORME" => "NOTMYPROBLEM!",
-  },
-} %]
-
-[%# We use "FILTER none" here because only the caller can know how to
-  # filter the result appropriately. 
-  #%]
-[% MACRO display_value(field_name, value_name) BLOCK %][% FILTER trim %]
-  [% IF value_descs.${field_name}.${value_name}.defined %]
-    [% value_descs.${field_name}.${value_name} FILTER none %]
-  [% ELSE %]
-    [% value_name FILTER none %]
-  [% END %]
-[% END %][% END %]
-
 [% IF in_template_var %]
+
+  [%# You can use this hash to localize (translate) the values displayed
+    # for drop-down and multiple-select fields. Lines starting with "#"
+    # are comments.
+    #%]
+  [% value_descs = {
+    "bug_status" => {
+      # "UNCONFIRMED" => "UNCO",
+      # "CONFIRMED"   => "ITSABUG",
+    },
+
+    "resolution" => {
+      ""        => "---",
+      # "FIXED"      => "NO LONGER AN ISSUE",
+      # "WORKSFORME" => "NOTMYPROBLEM!",
+    },
+  } %]
+
   [% vars.terms = terms %]
 
   [%# field_descs is loaded as a global template variable and cached

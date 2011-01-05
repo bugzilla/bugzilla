@@ -28,6 +28,7 @@ use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Group;
 use Bugzilla::User;
+use Bugzilla::User::Setting;
 use Bugzilla::Util qw(diff_arrays html_quote);
 use Bugzilla::Status qw(is_open_state);
 
@@ -384,6 +385,16 @@ sub group_end_of_update {
 sub install_before_final_checks {
     my ($self, $args) = @_;
     print "Install-before_final_checks hook\n" unless $args->{silent};
+    
+    # Add a new user setting like this:
+    #
+    # add_setting('product_chooser',           # setting name
+    #             ['pretty', 'full', 'small'], # options
+    #             'pretty');                   # default
+    #
+    # To add descriptions for the setting and choices, add extra values to 
+    # the hash defined in global/setting-descs.none.tmpl. Do this in a hook: 
+    # hook/global/setting-descs-settings.none.tmpl .
 }
 
 sub job_map {

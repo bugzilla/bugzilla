@@ -386,6 +386,20 @@ sub install_before_final_checks {
     print "Install-before_final_checks hook\n" unless $args->{silent};
 }
 
+sub job_map {
+    my ($self, $args) = @_;
+    
+    my $job_map = $args->{job_map};
+    
+    # This adds the named class (an instance of TheSchwartz::Worker) as a
+    # handler for when a job is added with the name "some_task".
+    $job_map->{'some_task'} = 'Bugzilla::Extension::Example::Job::SomeClass';
+    
+    # Schedule a job like this:
+    # my $queue = Bugzilla->job_queue();
+    # $queue->insert('some_task', { some_parameter => $some_variable });
+}
+
 sub mailer_before_send {
     my ($self, $args) = @_;
     

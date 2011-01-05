@@ -35,6 +35,16 @@ use constant JOB_MAP => {
     send_mail => 'Bugzilla::Job::Mailer',
 };
 
+sub job_map {
+    if (!defined(Bugzilla->request_cache->{job_map})) {
+        my $job_map = JOB_MAP;
+        Bugzilla::Hook::process('job_map', { job_map => $job_map });
+        Bugzilla->request_cache->{job_map} = $job_map;
+    }
+    
+    return Bugzilla->request_cache->{job_map};
+}
+
 sub new {
     my $class = shift;
 
@@ -69,7 +79,7 @@ sub insert {
     my $self = shift;
     my $job = shift;
 
-    my $mapped_job = JOB_MAP->{$job};
+    my $mapped_job = Bugzilla::JobQueue->job_map()->{$job};
     ThrowCodeError('jobqueue_no_job_mapping', { job => $job })
         if !$mapped_job;
     unshift(@_, $mapped_job);

@@ -730,6 +730,23 @@ database when run.
 
 =back
 
+=head2 job_map
+
+Bugzilla has a system - L<Bugzilla::JobQueue> - for running jobs 
+asynchronously, if the administrator has set it up. This hook allows the 
+addition of mappings from job names to handler classes, so an extension can 
+fire off jobs.
+
+Params:
+
+=over
+
+=item C<job_map> - The job map hash. Key: the name of the job, as should be 
+passed to Bugzilla->job_queue->insert(). Value: the name of the Perl module 
+which implements the task (an instance of L<TheSchwartz::Worker>). 
+
+=back
+
 =head2 mailer_before_send
 
 Called right before L<Bugzilla::Mailer> sends a message to the MTA.

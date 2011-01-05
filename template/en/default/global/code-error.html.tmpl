@@ -304,7 +304,8 @@
   [% ELSIF error == "jobqueue_no_job_mapping" %]
     <code>Bugzilla::JobQueue</code> has not been configured to handle
     the job "[% job FILTER html %]".  You need to add this job type
-    to the <code>JOB_MAP</code> constant in <code>Bugzilla::JobQueue</code>.
+    to the <code>JOB_MAP</code> constant in <code>Bugzilla::JobQueue</code>,
+    perhaps by using the 'job_map' hook.
 
   [% ELSIF error == "ldap_bind_failed" %]
     Failed to bind to the LDAP server. The error message was: 

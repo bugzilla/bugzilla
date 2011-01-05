@@ -201,7 +201,7 @@ sub gd_run {
 
     my $jq = Bugzilla->job_queue();
     $jq->set_verbose($self->{debug});
-    foreach my $module (values %{ Bugzilla::JobQueue::JOB_MAP() }) {
+    foreach my $module (values %{ Bugzilla::JobQueue->job_map() }) {
         eval "use $module";
         $jq->can_do($module);
     }

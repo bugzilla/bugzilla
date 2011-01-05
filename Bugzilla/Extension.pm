@@ -272,7 +272,8 @@ This is the base class for all Bugzilla extensions.
 
 The L</SYNOPSIS> above gives a pretty good overview of what's basically
 required to write an extension. This section gives more information
-on exactly how extensions work and how you write them.
+on exactly how extensions work and how you write them. There is also a 
+L<wiki page|https://wiki.mozilla.org/Bugzilla:Extension_Notes> with additional HOWTOs, tips and tricks.
 
 =head2 Using F<extensions/create.pl>
 

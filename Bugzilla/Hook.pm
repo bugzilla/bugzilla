@@ -494,6 +494,14 @@ as though he were on the CC list:
 (We use C<+> in front of C<REL_CC> so that Perl interprets it as a constant
 instead of as a string.)
 
+=item C<users>
+
+This is a hash of L<Bugzilla::User> objects, keyed by id. This is so you can
+find out more information about any of the user ids in the C<recipients> hash.
+Every id in the incoming C<recipients> hash will have an object in here. 
+(But if you add additional recipients to the C<recipients> hash, you are 
+B<not> required to add them to this hash.)
+
 =back
 
 

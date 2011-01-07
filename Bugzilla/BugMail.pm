@@ -184,8 +184,14 @@ sub Send {
         }
     }
 
+    # Make sure %user_cache has every user in it so far referenced
+    foreach my $user_id (keys %recipients) {
+        $user_cache{$user_id} ||= new Bugzilla::User($user_id);
+    }
+    
     Bugzilla::Hook::process('bugmail_recipients',
-                            { bug => $bug, recipients => \%recipients });
+                            { bug => $bug, recipients => \%recipients,
+                              users => \%user_cache });
 
     # Find all those user-watching anyone on the current list, who is not
     # on it already themselves.

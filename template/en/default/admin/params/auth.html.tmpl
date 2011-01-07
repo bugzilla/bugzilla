@@ -125,5 +125,17 @@
                        "default (.*) permits any account matching the emailregexp " _
                        "to be created. If this parameter is left blank, no users " _
                        "will be permitted to create their own accounts and all accounts " _
-                       "will have to be created by an administrator." }
+                       "will have to be created by an administrator.",
+
+  password_complexity =>
+    "Set the complexity required for passwords. In all cases must the passwords " _
+    "be at least ${constants.USER_PASSWORD_MIN_LENGTH} characters long." _
+    "<ul><li>no_constraints - No complexity required.</li>" _
+    "<li>mixed_letters - Passwords must contain at least one UPPER and one lower " _
+    "case letter.</li>" _
+    "<li>letters_numbers - Passwords must contain at least one UPPER and one " _
+    "lower case letter and a number.</li>" _
+    "<li>letters_numbers_specialchars - Passwords must contain at least one " _
+    "UPPER or one lower case letter, a number and a special character.</li></ul>"
+  }
 %]

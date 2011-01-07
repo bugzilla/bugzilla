@@ -1946,6 +1946,19 @@ sub validate_password {
     } elsif ((defined $matchpassword) && ($password ne $matchpassword)) {
         ThrowUserError('passwords_dont_match');
     }
+    
+    my $complexity_level = Bugzilla->params->{password_complexity};
+    if ($complexity_level eq 'letters_numbers_specialchars') {
+        ThrowUserError('password_not_complex')
+          if ($password !~ /\w/ || $password !~ /\d/ || $password !~ /[[:punct:]]/);
+    } elsif ($complexity_level eq 'letters_numbers') {
+        ThrowUserError('password_not_complex')
+          if ($password !~ /[[:lower:]]/ || $password !~ /[[:upper:]]/ || $password !~ /\d/);
+    } elsif ($complexity_level eq 'mixed_letters') {
+        ThrowUserError('password_not_complex')
+          if ($password !~ /[[:lower:]]/ || $password !~ /[[:upper:]]/);
+    }
+
     # Having done these checks makes us consider the password untainted.
     trick_taint($_[0]);
     return 1;

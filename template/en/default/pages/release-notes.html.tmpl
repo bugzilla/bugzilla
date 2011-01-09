@@ -251,8 +251,8 @@
   if you did two separate searches in separate windows, these links would
   only work for the <em>last</em> search you did. Now, [% terms.Bugzilla %]
   will "remember" which search result you came from and give you the right
-  "last search results" or "next bug" from <em>that</em> list, instead of
-  always using your most recent search.</p>
+  "last search results" or "next [% terms.bug %]" from <em>that</em> list,
+  instead of always using your most recent search.</p>
 
 <p>There are still some situations where [% terms.Bugzilla %] will have to
   "guess" which search you are trying to navigate through, but it does its
@@ -487,7 +487,7 @@
     bugmail_relationships, object_columns, object_update_columns,
     and object_validators. The colchange_columns hook has been removed,
     as it is no longer necessary (buglist_columns will be used for data
-    about which columns can be on the buglist).</li>
+    about which columns can be on the [% terms.bug %] list).</li>
   <li>When [% terms.Bugzilla %] throws certain types of errors, it will
     now include a "traceback" of where exactly the error occurred in the
     code, to help administrators and developers debug problems.</li>

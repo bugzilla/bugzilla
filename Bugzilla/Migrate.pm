@@ -742,7 +742,7 @@ sub insert_bugs {
         my ($set_status, $set_resolution);
         if (defined $bug->{resolution}) {
             $set_resolution = Bugzilla::Field::Choice->type('resolution')
-                              ->new({ name => $bug->{resolution} });
+                              ->new({ name => delete $bug->{resolution} });
         }
         if (!$allowed_statuses{lc($bug->{bug_status})}) {
             $set_status = new Bugzilla::Status({ name => $bug->{bug_status} });

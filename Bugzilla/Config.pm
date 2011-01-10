@@ -48,8 +48,6 @@ use File::Temp;
   );
 Exporter::export_ok_tags('admin');
 
-use vars qw(@param_list);
-
 # INITIALISATION CODE
 # Perl throws a warning if we use bz_locations() directly after do.
 our %params;
@@ -62,15 +60,17 @@ sub _load_params {
         eval("require $module") || die $@;
         my @new_param_list = $module->get_param_list();
         $hook_panels{lc($panel)} = { params => \@new_param_list };
-        foreach my $item (@new_param_list) {
-            $params{$item->{'name'}} = $item;
-        }
-        push(@param_list, @new_param_list);
     }
     # This hook is also called in editparams.cgi. This call here is required
     # to make SetParam work.
     Bugzilla::Hook::process('config_modify_panels', 
                             { panels => \%hook_panels });
+
+    foreach my $panel (keys %hook_panels) {
+        foreach my $item (@{$hook_panels{$panel}->{params}}) {
+            $params{$item->{'name'}} = $item;
+        }
+    }
 }
 # END INIT CODE
 
@@ -203,8 +203,8 @@ sub update_params {
     # --- DEFAULTS FOR NEW PARAMS ---
 
     _load_params unless %params;
-    foreach my $item (@param_list) {
-        my $name = $item->{'name'};
+    foreach my $name (keys %params) {
+        my $item = $params{$name};
         unless (exists $param->{$name}) {
             print "New parameter: $name\n" unless $new_install;
             if (exists $answer->{$name}) {
@@ -223,9 +223,8 @@ sub update_params {
     my %oldparams;
     # Remove any old params
     foreach my $item (keys %$param) {
-        if (!grep($_ eq $item, map ($_->{'name'}, @param_list))) {
-            $oldparams{$item} = $param->{$item};
-            delete $param->{$item};
+        if (!exists $params{$item}) {
+            $oldparams{$item} = delete $param->{$item};
         }
     }
 

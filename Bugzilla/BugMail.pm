@@ -393,8 +393,9 @@ sub _generate_bugmail {
             body => $msg_html,
         ),
     );
-  
-    my $email = new Email::MIME($msg_header);
+
+    # TT trims the trailing newline, and threadingmarker may be ignored.
+    my $email = new Email::MIME("$msg_header\n");
     $email->parts_set(\@parts);
     $email->content_type_set('multipart/alternative');
     return $email;

@@ -273,8 +273,8 @@ use constant ABSTRACT_SCHEMA => {
             target_milestone    => {TYPE => 'varchar(20)',
                                     NOTNULL => 1, DEFAULT => "'---'"},
             qa_contact          => {TYPE => 'INT3',
-                                    REERENCES => {TABLE  => 'profiles',
-                                                  COLUMN => 'userid'}},
+                                    REFERENCES => {TABLE  => 'profiles',
+                                                   COLUMN => 'userid'}},
             status_whiteboard   => {TYPE => 'MEDIUMTEXT', NOTNULL => 1,
                                     DEFAULT => "''"},
             lastdiffed          => {TYPE => 'DATETIME'},
@@ -490,7 +490,10 @@ use constant ABSTRACT_SCHEMA => {
 
     bug_see_also => {
         FIELDS => [
-            bug_id => {TYPE => 'INT3', NOTNULL => 1},
+            bug_id => {TYPE => 'INT3', NOTNULL => 1,
+                       REFERENCES => {TABLE  => 'bugs',
+                                      COLUMN => 'bug_id',
+                                      DELETE => 'CASCADE'}},
             value  => {TYPE => 'varchar(255)', NOTNULL => 1},
         ],
         INDEXES => [

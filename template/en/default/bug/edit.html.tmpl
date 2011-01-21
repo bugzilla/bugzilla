@@ -60,6 +60,7 @@
     [% IF user.is_insider %]
       if (document.getElementById('isprivate_' + real_id).checked) {
           document.getElementById('newcommentprivacy').checked = 'checked';
+          updateCommentTagControl(document.getElementById('newcommentprivacy'), 'comment'); 
       }
     [% END %]
 
@@ -130,7 +131,7 @@
   //-->
   </script>
 
-<form name="changeform" method="post" action="process_bug.cgi">
+<form name="changeform" id="changeform" method="post" action="process_bug.cgi">
 
   <input type="hidden" name="delta_ts" value="[% bug.delta_ts %]">
   <input type="hidden" name="longdesclength" value="[% bug.comments.size %]">
@@ -1066,7 +1067,7 @@
       [% IF user.is_insider %]
         <input type="checkbox" name="comment_is_private" value="1"
                id="newcommentprivacy"
-               onClick="updateCommentTagControl(this, form)">
+               onClick="updateCommentTagControl(this, 'comment')">
         <label for="newcommentprivacy">
           Make comment private (visible only to members of the
           <strong>[% Param('insidergroup') FILTER html %]</strong> group)

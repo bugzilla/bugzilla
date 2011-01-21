@@ -443,11 +443,11 @@ function boldOnChange(e, field_id){
     }
 }
 
-function updateCommentTagControl(checkbox, form) {
+function updateCommentTagControl(checkbox, field) {
     if (checkbox.checked) {
-        form.comment.className='bz_private';
+        YAHOO.util.Dom.addClass(field, 'bz_private');
     } else {
-        form.comment.className='';
+        YAHOO.util.Dom.removeClass(field, 'bz_private');
     }
 }
 

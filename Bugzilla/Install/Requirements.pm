@@ -247,9 +247,9 @@ sub OPTIONAL_MODULES {
     {
         package => 'CGI.pm',
         module  => 'CGI',
-        # 3.50 fixes a security problem that affects Bugzilla.
+        # 3.51 fixes a security problem that affects Bugzilla.
         # (bug 591165)
-        version => '3.50',
+        version => '3.51',
         feature => 'Recommended important security fix'
     },
     );

@@ -465,6 +465,10 @@
             <span>
               [% INCLUDE global/user.html.tmpl who = bug.assigned_to %]
               (<a href="#" id="bz_assignee_edit_action">edit</a>)
+              [% IF bug.assigned_to.id != user.id %]
+                (<a title="Reassign to yourself" 
+                    href="#" id="bz_assignee_take_action">take</a>)
+              [% END %]
             </span>
           </div>
           <div id="bz_assignee_input">
@@ -485,6 +489,12 @@
                              'bz_assignee_edit_action', 
                              'assigned_to', 
                              '[% bug.assigned_to.login FILTER js %]' );
+           hideEditableField('bz_assignee_edit_container',
+                             'bz_assignee_input',
+                             'bz_assignee_take_action',
+                             'assigned_to',
+                             '[% bug.assigned_to.login FILTER js %]',
+                             '[% user.login FILTER js %]' );
            initDefaultCheckbox('assignee');                  
           </script>
         [% ELSE %]

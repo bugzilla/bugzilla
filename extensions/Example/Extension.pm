@@ -267,9 +267,14 @@ sub config_modify_panels {
     my $auth_params = $panels->{'auth'}->{params};
     my ($info_class)   = grep($_->{name} eq 'user_info_class', @$auth_params);
     my ($verify_class) = grep($_->{name} eq 'user_verify_class', @$auth_params);
-    
+
     push(@{ $info_class->{choices} },   'CGI,Example');
     push(@{ $verify_class->{choices} }, 'Example');
+
+    push(@$auth_params, { name => 'param_example',
+                          type => 't',
+                          default => 0,
+                          checker => \&check_numeric });    
 }
 
 sub email_in_before_parse {

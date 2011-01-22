@@ -73,6 +73,7 @@
         [% FOREACH panel = panels %]
           <tr>
             [% IF panel.current %]
+              [% Hook.process("current_panel") %]
               <td class="selected_section">
                 <span title="[% panel.desc FILTER html %]">[% panel.title FILTER html %]</span>
               </td>

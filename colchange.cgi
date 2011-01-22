@@ -33,6 +33,7 @@ use Bugzilla::CGI;
 use Bugzilla::Search::Saved;
 use Bugzilla::Error;
 use Bugzilla::User;
+use Bugzilla::Token;
 
 use Storable qw(dclone);
 
@@ -86,6 +87,19 @@ $vars->{'columns'} = $columns;
 
 my @collist;
 if (defined $cgi->param('rememberedquery')) {
+    my $search;
+    if (defined $cgi->param('saved_search')) {
+        $search = new Bugzilla::Search::Saved($cgi->param('saved_search'));
+    }
+
+    my $token = $cgi->param('token');
+    if ($search) {
+        check_hash_token($token, [$search->id, $search->name]);
+    }
+    else {
+        check_hash_token($token, ['default-list']);
+    }
+
     my $splitheader = 0;
     if (defined $cgi->param('resetit')) {
         @collist = DEFAULT_COLUMN_LIST;
@@ -122,11 +136,6 @@ if (defined $cgi->param('rememberedquery')) {
     }
 
     $vars->{'message'} = "change_columns";
-
-    my $search;
-    if (defined $cgi->param('saved_search')) {
-        $search = new Bugzilla::Search::Saved($cgi->param('saved_search'));
-    }
 
     if ($cgi->param('save_columns_for_search')
         && defined $search && $search->user->id == Bugzilla->user->id) 

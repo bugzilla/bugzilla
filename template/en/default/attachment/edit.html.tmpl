@@ -162,7 +162,7 @@
         [% IF !attachment.datasize %]
           <div><b>The content of this attachment has been deleted.</b></div>
         [% ELSIF !Param("allow_attachment_display") %]
-          <div id="view_disabled" >
+          <div id="view_disabled">
             <p><b>
               The attachment is not viewable in your browser due to security
               restrictions enabled by your [% terms.Bugzilla %] administrator.

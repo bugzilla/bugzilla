@@ -119,6 +119,8 @@ sub update_fielddefs_definition {
         {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'FALSE'});
     $dbh->do('UPDATE fielddefs SET is_numeric = 1 WHERE type = '
              . FIELD_TYPE_BUG_ID);
+             
+    Bugzilla::Hook::process('install_update_db_fielddefs');
 
     # Remember, this is not the function for adding general table changes.
     # That is below. Add new changes to the fielddefs table above this

@@ -718,6 +718,15 @@ during an installation or upgrade. If you need to modify your custom
 schema or add new columns to existing tables, do it here. No params are
 passed.
 
+=head2 install_update_db_fielddefs
+
+This is used to update the schema of the fielddefs table before
+any other schema changes take place. No params are passed.
+
+This hook should only be used for updating the schema of the C<fielddefs>
+table. Do not modify any other table in this hook. To modify other tables, use
+the L</install_update_db> hook.
+
 =head2 db_schema_abstract_schema
 
 This allows you to add tables to Bugzilla. Note that we recommend that you 

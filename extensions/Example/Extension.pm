@@ -402,6 +402,12 @@ sub install_before_final_checks {
     # hook/global/setting-descs-settings.none.tmpl .
 }
 
+#sub install_update_db_fielddefs {
+#    my $dbh = Bugzilla->dbh;
+#    $dbh->bz_add_column('fielddefs', 'example_column', 
+#                        {TYPE => 'MEDIUMTEXT', NOTNULL => 1, DEFAULT => ''});
+#}
+
 sub job_map {
     my ($self, $args) = @_;
     

@@ -553,8 +553,7 @@
   <tr>
     <td class="field_label">
       <label for="bug_file_loc" accesskey="u"><b>
-        [% IF bug.bug_file_loc 
-           AND NOT bug.bug_file_loc.match("^(javascript|data)") %]
+        [% IF is_safe_url(bug.bug_file_loc) %]
           <a href="[% bug.bug_file_loc FILTER html %]"><u>U</u>RL</a>
         [% ELSE %]
           <u>U</u>RL
@@ -564,8 +563,7 @@
     <td>
       [% IF bug.check_can_change_field("bug_file_loc", 0, 1) %]
         <span id="bz_url_edit_container" class="bz_default_hidden"> 
-        [% IF bug.bug_file_loc 
-           AND NOT bug.bug_file_loc.match("^(javascript|data)") %]
+        [% IF is_safe_url(bug.bug_file_loc) %]
            <a href="[% bug.bug_file_loc FILTER html %]" target="_blank"
               title="[% bug.bug_file_loc FILTER html %]">
              [% bug.bug_file_loc FILTER truncate(40) FILTER html %]</a>
@@ -576,7 +574,8 @@
       [% END %]
       <span id="bz_url_input_area">
         [% url_output =  PROCESS input no_td=1 inputname => "bug_file_loc" size => "40" colspan => 2 %]
-        [% IF NOT bug.check_can_change_field("bug_file_loc", 0, 1)  %]
+        [% IF NOT bug.check_can_change_field("bug_file_loc", 0, 1)
+              AND is_safe_url(bug.bug_file_loc)  %]
           <a href="[% bug.bug_file_loc FILTER html %]">[% url_output FILTER none %]</a>
         [% ELSE %]
           [% url_output FILTER none %]

@@ -66,6 +66,12 @@ use constant FORMAT_3_SIZE => [19,28,28];
 use constant FORMAT_DOUBLE => '%19s %-55s';
 use constant FORMAT_2_SIZE => [19,55];
 
+# Pseudo-constant.
+sub SAFE_URL_REGEXP {
+    my $safe_protocols = join('|', SAFE_PROTOCOLS);
+    return qr/($safe_protocols):[^\s<>\"]+[\w\/]/i;
+}
+
 # Convert the constants in the Bugzilla::Constants module into a hash we can
 # pass to the template object for reflection into its "constants" namespace
 # (which is like its "variables" namespace, but for constants).  To do so, we
@@ -205,12 +211,8 @@ sub quoteUrls {
               ~egox;
 
     # non-mailto protocols
-    my $safe_protocols = join('|', SAFE_PROTOCOLS);
-    my $protocol_re = qr/($safe_protocols)/i;
-
-    $text =~ s~\b(${protocol_re}:  # The protocol:
-                  [^\s<>\"]+       # Any non-whitespace
-                  [\w\/])          # so that we end in \w or /
+    my $safe_protocols = SAFE_URL_REGEXP();
+    $text =~ s~\b($safe_protocols)
               ~($tmp = html_quote($1)) &&
                ($things[$count++] = "<a href=\"$tmp\">$tmp</a>") &&
                ("\0\0" . ($count-1) . "\0\0")
@@ -888,6 +890,19 @@ sub create {
                 my $docs_urlbase = Bugzilla->params->{'docs_urlbase'};
                 $docs_urlbase =~ s/\%lang\%/$language/;
                 return $docs_urlbase;
+            },
+
+            # Check whether the URL is safe.
+            'is_safe_url' => sub {
+                my $url = shift;
+                return 0 unless $url;
+
+                my $safe_url_regexp = SAFE_URL_REGEXP();
+                return 1 if $url =~ /^$safe_url_regexp$/;
+                # Pointing to a local file with no colon in its name is fine.
+                return 1 if $url =~ /^[^\s<>\":]+[\w\/]$/i;
+                # If we come here, then we cannot guarantee it's safe.
+                return 0;
             },
 
             # Allow templates to generate a token themselves.

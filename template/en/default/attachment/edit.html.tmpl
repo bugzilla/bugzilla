@@ -185,10 +185,7 @@
               defaultcontent = (attachment.contenttype.match('^text\/')) ?
                                  attachment.data.replace('(.*\n|.+)', '>$1') : undef
             %]
-            [%# The regexp is stolen from quoteUrls(), see Template.pm %]
-            [% safe_protocols = constants.SAFE_PROTOCOLS.join('|') %]
-            [% IF attachment.contenttype == 'text/plain'
-                  && attachment.data.match("^($safe_protocols):" _ '[^\s<>\"]+[\w\/]$') %]
+            [% IF attachment.contenttype == 'text/plain' AND is_safe_url(attachment.data) %]
               <p>
                 <a href="[% attachment.data FILTER html %]">
                   [% IF attachment.datasize < 120 %]

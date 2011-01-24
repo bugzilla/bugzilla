@@ -98,7 +98,7 @@
 <h3 id="v40_req_modules">Required Perl Modules</h3>
 
 [% INCLUDE req_table reqs = REQUIRED_MODULES
-                     new = ['List-MoreUtils', 'Win32-API']
+                     new = ['List-MoreUtils', 'Math-Random-Secure']
                      updated = ['Email-MIME', 'CGI.pm', 'Apache-SizeLimit'] %]
 
 <h3 id="v40_req_optional_mod">Optional Perl Modules</h3>
@@ -107,8 +107,8 @@
   features of [% terms.Bugzilla %]:</p>
 
 [% INCLUDE req_table reqs = OPTIONAL_MODULES
-                     new  = ['JSON-XS']
-                     updated = []
+                     new  = ['JSON-XS', 'Win32-API']
+                     updated = ['Apache-SizeLimit', 'SOAP-Lite']
                      include_feature = 1 %]
 
 <h3 id="v40_req_apache">Optional Apache Modules</h3>
@@ -497,6 +497,11 @@
     you may wish to run this test to assure that your changes are correct.
     You can see more information about running this test by doing
     <kbd>perldoc xt/search.t</kbd> at the command line.</li>
+  <li>[% terms.Bugzilla %] now sends the
+    <a href="https://developer.mozilla.org/en/the_x-frame-options_response_header"><code>X-Frame-Options: SAMEORIGIN</code></a> header
+    with every page request in order to prevent "clickjacking" attacks. Note
+    that this prevents other domains from displaying [% terms.Bugzilla %]
+    in an HTML frame.</li> 
 </ul>
 
 <h4 id="v40_feat_ws_changes">WebService Changes</h4>
@@ -576,10 +581,11 @@
 
 <h3>IMPORTANT: Apache Configuration Change</h3>
 
-<p>(Note: If your [% terms.Bugzilla %] runs under mod_perl or runs on some
-  other webserver than Apache, this section does not apply to you.)</p>
+<h4>mod_cgi</h4>
 
-<p>You will need to update the configuration of Apache for 
+<p>If you run [% terms.Bugzilla %] under mod_cgi (this is the most common
+  configuration, involving a &lt;Directory&gt; block in your Apache config
+  file), you will need to update the configuration of Apache for 
   [%+ terms.Bugzilla %]. In particular, this line in the [% terms.Bugzilla %]
   <kbd>&lt;Directory&gt;</kbd> block:</p>
 
@@ -593,6 +599,20 @@
   see the
   <a href="[% docs_urlbase FILTER html %]configuration.html#http-apache">Configuration</a>
   section of the [% terms.Bugzilla %] Guide.</p>
+
+<h4>mod_perl</h4>
+
+<p>If your [% terms.Bugzilla %] runs under mod_perl, the required Apache
+  configuration is now simpler. The line that used to look like:</p>
+
+<blockquote><code>PerlSwitches -w -T -I/var/www/html/bugzilla 
+    -I/var/www/html/bugzilla/lib</code></blockquote>
+
+<p>Now should be only:</p>
+
+<blockquote><code>PerlSwitches -w -T</code></blockquote>
+
+<p>The <code>PerlConfigRequire</code> line should stay the same, however.</p>
 
 <h3>New .htaccess file</h3>
 

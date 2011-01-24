@@ -251,7 +251,7 @@ EOT
             elsif (defined @$glob) {
                 $localconfig{$var} = \@$glob;
             }
-            elsif (%$glob) {
+            elsif (defined %$glob) {
                 $localconfig{$var} = \%$glob;
             }
         }

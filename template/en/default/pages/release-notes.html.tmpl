@@ -281,7 +281,8 @@
   features of [% terms.Bugzilla %]:</p>
 
 [% INCLUDE req_table reqs = OPTIONAL_MODULES
-                     new  = ['Authen-SASL', 'RadiusPerl']
+                     new  = ['Authen-SASL', 'RadiusPerl', 'CGI.pm',
+                             'Math-Random-Secure']
                      updated = []
                      include_feature = 1 %]
 

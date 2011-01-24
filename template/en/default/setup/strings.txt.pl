@@ -62,6 +62,7 @@ END
     feature_mod_perl          => 'mod_perl',
     feature_moving            => 'Move Bugs Between Installations',
     feature_patch_viewer      => 'Patch Viewer',
+    feature_rand_security     => 'Improve cookie and token security',
     feature_smtp_auth         => 'SMTP Authentication',
     feature_updates           => 'Automatic Update Notifications',
     feature_xmlrpc            => 'XML-RPC Interface',

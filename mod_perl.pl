@@ -46,6 +46,9 @@ use Bugzilla::Mailer ();
 use Bugzilla::Template ();
 use Bugzilla::Util ();
 
+# For PerlChildInitHandler
+eval { require Math::Random::Secure };
+
 my ($sizelimit, $maxrequests) = ('', '');
 if (Bugzilla::Constants::ON_WINDOWS) {
     $maxrequests = "MaxRequestsPerChild 25";
@@ -64,8 +67,14 @@ my $cgi_path = Bugzilla::Constants::bz_locations()->{'cgi_path'};
 my $server = Apache2::ServerUtil->server;
 my $conf = <<EOT;
 $maxrequests
-# Make sure each httpd child receives a different random seed (bug 476622)
-PerlChildInitHandler "sub { srand(); }"
+# Make sure each httpd child receives a different random seed (bug 476622).
+# Math::Random::Secure has one srand that needs to be called for
+# every process, and Perl has another. (Various Perl modules still use
+# the built-in rand(), even though we only use Math::Random::Secure in
+# Bugzilla itself, so we need to srand() both of them.) However, 
+# Math::Random::Secure may not be installed, so we call its srand in an
+# eval.
+PerlChildInitHandler "sub { eval { Math::Random::Secure::srand() }; srand(); }"
 <Directory "$cgi_path">
     AddHandler perl-script .cgi
     # No need to PerlModule these because they're already defined in mod_perl.pl

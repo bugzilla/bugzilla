@@ -288,6 +288,12 @@ sub OPTIONAL_MODULES {
         version => '1.999022',
         feature => ['mod_perl'],
     },
+    {
+        package => 'Math-Random-Secure',
+        module  => 'Math::Random::Secure',
+        version => '0.05',
+        feature => ['rand_security'],
+    },
     );
 
     my $extra_modules = _get_extension_requirements('OPTIONAL_MODULES');

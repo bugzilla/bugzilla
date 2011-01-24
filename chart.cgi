@@ -74,8 +74,8 @@ if (!Bugzilla->feature('new_charts')) {
 # Go back to query.cgi if we are adding a boolean chart parameter.
 if (grep(/^cmd-/, $cgi->param())) {
     my $params = $cgi->canonicalise_query("format", "ctype", "action");
-    print "Location: query.cgi?format=" . $cgi->param('query_format') .
-                                          ($params ? "&$params" : "") . "\n\n";
+    print $cgi->redirect("query.cgi?format=" . $cgi->param('query_format') .
+                                               ($params ? "&$params" : ""));
     exit;
 }
 
@@ -98,7 +98,7 @@ $action ||= "assemble";
 # Go to buglist.cgi if we are doing a search.
 if ($action eq "search") {
     my $params = $cgi->canonicalise_query("format", "ctype", "action");
-    print "Location: buglist.cgi" . ($params ? "?$params" : "") . "\n\n";
+    print $cgi->redirect("buglist.cgi" . ($params ? "?$params" : ""));
     exit;
 }
 

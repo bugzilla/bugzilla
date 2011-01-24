@@ -61,6 +61,41 @@
 
 <h2 id="v36_point">Updates in this 3.6.x Release</h2>
 
+<h3>3.6.4</h3>
+
+<p>This release fixes several security issues, some of which are
+  <strong>highly critical</strong>. See the
+  <a href="http://www.bugzilla.org/security/3.2.9/">Security Advisory</a>
+  for details.</p>
+
+<p>In addition, the following important fixes/changes have been made in
+  this release:</p>
+
+<ul>
+  <li>Due to one of the security fixes, [% terms.Bugzilla %] 3.6.4 now
+    requires a newer version of the CGI.pm Perl module than previous
+    releases of [% terms.Bugzilla %] did. When you run 
+    <kbd>checksetup.pl</kbd>, it will inform you how to upgrade your CGI.pm
+    module.
+  </li>
+  <li>When replying to a comment with a link like "attachment 1234 [details]",
+    the "[details]" link will no longer be duplicated in your reply.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=474766">[% terms.Bug %] 474766</a>)
+  </li>
+  <li>Using Quicksearch no longer requires that the <kbd>List::MoreUtils</kbd>
+    module be installed.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=611129">[% terms.Bug %] 611129</a>)
+  </li>
+  <li>When using <a href="config.cgi?ctype=rdf">config.cgi?ctype=rdf</a>,
+    information about products now includes <kbd>allows_unconfirmed</kbd>.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=610217">[% terms.Bug %] 610217</a>)
+  </li>
+  <li>When using tabular reports, any value whose name started with a period
+    or an underscore wasn't being displayed.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=617684">[% terms.Bug %] 617684</a>)
+  </li>
+</ul>
+
 <h3>3.6.3</h3>
 
 <p>This release fixes various important security issues. See the
@@ -233,7 +268,7 @@
 <h3 id="v36_req_modules">Required Perl Modules</h3>
 
 [% INCLUDE req_table reqs = REQUIRED_MODULES
-                     new = [] updated = [] %]
+                     new = [] updated = ['CGI.pm'] %]
 
 <h3 id="v36_req_optional_mod">Optional Perl Modules</h3>
 
@@ -241,7 +276,7 @@
   features of [% terms.Bugzilla %]:</p>
 
 [% INCLUDE req_table reqs = OPTIONAL_MODULES
-                     new  = ['JSON-RPC', 'Test-Taint']
+                     new  = ['JSON-RPC', 'Test-Taint', 'Math-Random-Secure']
                      updated = ['Chart']
                      include_feature = 1 %]
 

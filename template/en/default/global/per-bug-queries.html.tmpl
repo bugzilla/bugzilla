@@ -63,6 +63,7 @@
         <input type="hidden" name="cmdtype" value="doit">
         <input type="hidden" name="remtype" value="asnamed">
         <input type="hidden" name="list_of_bugs" value="1">
+        <input type="hidden" name="token" value="[% issue_hash_token(['savedsearch']) FILTER html %]">
         <select id="lob_action" name="action" onchange="update_text();">
           <option value="add">Add</option>
           [% IF lists_of_bugs.size %]

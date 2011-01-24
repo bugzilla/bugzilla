@@ -504,6 +504,8 @@ elsif (($cmdtype eq "doit") && defined $cgi->param('remtype')) {
         my $query_name = $cgi->param('newqueryname');
         my $new_query = $cgi->param('newquery');
         my $query_type = QUERY_LIST;
+        my $token = $cgi->param('token');
+        check_hash_token($token, ['savedsearch']);
         # If list_of_bugs is true, we are adding/removing individual bugs
         # to a saved search. We get the existing list of bug IDs (if any)
         # and add/remove the passed ones.

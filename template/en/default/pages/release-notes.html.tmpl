@@ -98,7 +98,7 @@
 <h3 id="v40_req_modules">Required Perl Modules</h3>
 
 [% INCLUDE req_table reqs = REQUIRED_MODULES
-                     new = ['List-MoreUtils', 'Math-Random-Secure']
+                     new = ['List-MoreUtils']
                      updated = ['Email-MIME', 'CGI.pm', 'Apache-SizeLimit'] %]
 
 <h3 id="v40_req_optional_mod">Optional Perl Modules</h3>
@@ -107,7 +107,7 @@
   features of [% terms.Bugzilla %]:</p>
 
 [% INCLUDE req_table reqs = OPTIONAL_MODULES
-                     new  = ['JSON-XS', 'Win32-API']
+                     new  = ['JSON-XS', 'Win32-API', 'Math-Random-Secure']
                      updated = ['Apache-SizeLimit', 'SOAP-Lite']
                      include_feature = 1 %]
 

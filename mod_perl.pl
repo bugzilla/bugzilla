@@ -37,6 +37,7 @@ use lib Bugzilla::Constants::bz_locations()->{'ext_libpath'};
 use Apache2::ServerUtil;
 use ModPerl::RegistryLoader ();
 use File::Basename ();
+use Math::Random::Secure;
 
 # This loads most of our modules.
 use Bugzilla ();
@@ -60,8 +61,12 @@ my $cgi_path = Bugzilla::Constants::bz_locations()->{'cgi_path'};
 # Set up the configuration for the web server
 my $server = Apache2::ServerUtil->server;
 my $conf = <<EOT;
-# Make sure each httpd child receives a different random seed (bug 476622)
-PerlChildInitHandler "sub { srand(); }"
+# Make sure each httpd child receives a different random seed (bug 476622).
+# Math::Random::Secure has one srand that needs to be called for
+# every process, and Perl has another. (Various Perl modules still use
+# the built-in rand(), even though we only use Math::Random::Secure in
+# Bugzilla itself, so we need to srand() both of them.)
+PerlChildInitHandler "sub { Math::Random::Secure::srand(); srand(); }"
 <Directory "$cgi_path">
     AddHandler perl-script .cgi
     # No need to PerlModule these because they're already defined in mod_perl.pl

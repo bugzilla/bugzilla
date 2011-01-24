@@ -157,6 +157,12 @@ sub REQUIRED_MODULES {
         module  => 'List::MoreUtils',
         version => 0.22,
     },
+    {
+        package => 'Math-Random-Secure',
+        module  => 'Math::Random::Secure',
+        # This is the first version that installs properly on Windows.
+        version => '0.05',
+    },
     );
 
     my $extra_modules = _get_extension_requirements('REQUIRED_MODULES');

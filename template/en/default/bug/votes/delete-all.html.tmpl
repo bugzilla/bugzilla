@@ -35,6 +35,7 @@
 
 <form action="votes.cgi" method="post">
     <input type="hidden" name="action" value="vote">
+  <input type="hidden" name="token" value="[% issue_hash_token(['vote']) FILTER html %]"> 
   <p>
     <input type="radio" name="delete_all_votes" value="1">
     Yes, delete all my votes

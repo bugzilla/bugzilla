@@ -35,6 +35,7 @@ use Bugzilla::Bug;
 use Bugzilla::BugMail;
 use Bugzilla::User;
 use Bugzilla::Product;
+use Bugzilla::Token;
 
 use List::Util qw(min);
 
@@ -263,6 +264,9 @@ sub record_votes {
       detaint_natural($votes{$id}) 
         || ThrowUserError("votes_must_be_nonnegative");
     }
+
+    my $token = $cgi->param('token');
+    check_hash_token($token, ['vote']);
 
     ############################################################################
     # End Data/Security Validation

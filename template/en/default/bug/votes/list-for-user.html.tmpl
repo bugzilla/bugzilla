@@ -74,6 +74,7 @@
 [% IF products.size %]
   <form name="voting_form" method="post" action="votes.cgi">
     <input type="hidden" name="action" value="vote">
+    <input type="hidden" name="token" value="[% issue_hash_token(['vote']) FILTER html %]">
     <table cellspacing="4">
       <tr>
         <td></td>

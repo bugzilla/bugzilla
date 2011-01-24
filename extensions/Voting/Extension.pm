@@ -36,6 +36,7 @@ use Bugzilla::Field;
 use Bugzilla::Mailer;
 use Bugzilla::User;
 use Bugzilla::Util qw(detaint_natural);
+use Bugzilla::Token;
 
 use List::Util qw(min);
 
@@ -528,6 +529,9 @@ sub _update_votes {
       detaint_natural($votes{$id})
         || ThrowUserError("voting_must_be_nonnegative");
     }
+
+    my $token = $cgi->param('token');
+    check_hash_token($token, ['vote']);
 
     ############################################################################
     # End Data/Security Validation

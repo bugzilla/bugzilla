@@ -52,6 +52,7 @@ use Bugzilla::Util;
 use Bugzilla::Chart;
 use Bugzilla::Series;
 use Bugzilla::User;
+use Bugzilla::Token;
 
 # For most scripts we don't make $cgi and $template global variables. But
 # when preparing Bugzilla for mod_perl, this script used these
@@ -138,7 +139,9 @@ elsif ($action eq "wrap") {
 }
 elsif ($action eq "create") {
     assertCanCreate($cgi);
-    
+    my $token = $cgi->param('token');
+    check_hash_token($token, ['create-series']);
+
     my $series = new Bugzilla::Series($cgi);
 
     if (!$series->existsInDatabase()) {
@@ -168,7 +171,11 @@ elsif ($action eq "alter") {
     detaint_natural($series_id) || ThrowCodeError("invalid_series_id");
     assertCanEdit($series_id);
 
-    my $series = new Bugzilla::Series($cgi);
+    # We cannot use the $series object below, as its name may have changed.
+    my $series = new Bugzilla::Series($series_id);
+    my $token = $cgi->param('token');
+    check_hash_token($token, [$series->{series_id}, $series->{name}]);
+    $series = new Bugzilla::Series($cgi);
 
     # We need to check if there is _another_ series in the database with
     # our (potentially new) name. So we call existsInDatabase() to see if

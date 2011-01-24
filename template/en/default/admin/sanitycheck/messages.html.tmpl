@@ -34,7 +34,8 @@
     [% errortext FILTER html %]: [% INCLUDE bug_list badbugs = badbugs %]
 
   [% ELSIF san_tag == "bug_check_repair" %]
-    <a href="sanitycheck.cgi?[% param FILTER uri %]=1">[% text FILTER html %]</a>.
+    <a href="sanitycheck.cgi?[% param FILTER uri %]=1&amp;token=
+       [%- issue_hash_token(['sanitycheck']) FILTER uri %]">[% text FILTER html %]</a>.
 
   [% ELSIF san_tag == "bug_check_creation_date" %]
     Checking for [% terms.bugs %] with no creation date (which makes them invisible).
@@ -136,11 +137,13 @@
     [% END %]
 
   [% ELSIF san_tag == "cross_check_attachment_has_references" %]
-    <a href="sanitycheck.cgi?remove_invalid_attach_references=1">Remove
+    <a href="sanitycheck.cgi?remove_invalid_attach_references=1&amp;token=
+       [%- issue_hash_token(['sanitycheck']) FILTER uri %]">Remove
     invalid references to non existent attachments.</a>
 
   [% ELSIF san_tag == "cross_check_bug_has_references" %]
-    <a href="sanitycheck.cgi?remove_invalid_bug_references=1">Remove
+    <a href="sanitycheck.cgi?remove_invalid_bug_references=1&amp;token=
+       [%- issue_hash_token(['sanitycheck']) FILTER uri %]">Remove
     invalid references to non existent [% terms.bugs %].</a>
 
   [% ELSIF san_tag == "double_cross_check_to" %]
@@ -186,7 +189,8 @@
     [%+ PROCESS bug_link bug_id = bug_id %].
 
   [% ELSIF san_tag == "flag_fix" %]
-    <a href="sanitycheck.cgi?remove_invalid_flags=1">Click
+    <a href="sanitycheck.cgi?remove_invalid_flags=1&amp;token=
+       [%- issue_hash_token(['sanitycheck']) FILTER uri %]">Click
     here to delete invalid flags</a>
 
   [% ELSIF san_tag == "group_control_map_entries_creation" %]
@@ -250,7 +254,8 @@
     half an hour: [% INCLUDE bug_list badbugs = badbugs %]
 
   [% ELSIF san_tag == "unsent_bugmail_fix" %]
-    <a href="sanitycheck.cgi?rescanallBugMail=1">Send these mails</a>.
+    <a href="sanitycheck.cgi?rescanallBugMail=1&amp;token=
+       [%- issue_hash_token(['sanitycheck']) FILTER uri %]">Send these mails</a>.
 
   [% ELSIF san_tag == "whines_obsolete_target_deletion_start" %]
     OK, now removing non-existent users/groups from whines.
@@ -268,7 +273,8 @@
     [% END %]
 
   [% ELSIF san_tag == "whines_obsolete_target_fix" %]
-    <a href="sanitycheck.cgi?remove_old_whine_targets=1">Click here to
+    <a href="sanitycheck.cgi?remove_old_whine_targets=1&amp;token=
+       [%- issue_hash_token(['sanitycheck']) FILTER uri %]">Click here to
     remove old users/groups</a>
 
   [% ELSE %]

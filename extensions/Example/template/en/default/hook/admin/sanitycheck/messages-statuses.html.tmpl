@@ -27,7 +27,8 @@
     <a href="editusers.cgi?id=[% userid FILTER none %]">Edit this user</a>.
   [% END %]
 [% ELSIF san_tag == "example_check_au_user_prompt" %]
-  <a href="sanitycheck.cgi?example_repair_au_user=1">Fix these users</a>.
+  <a href="sanitycheck.cgi?example_repair_au_user=1&amp;token=
+     [%- issue_hash_token(['sanitycheck']) FILTER uri %]">Fix these users</a>.
 [% ELSIF san_tag == "example_repair_au_user_start" %]
   <em>EXAMPLE PLUGIN</em> - OK, would now make users Australian.
 [% ELSIF san_tag == "example_repair_au_user_end" %]

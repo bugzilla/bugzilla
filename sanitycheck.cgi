@@ -35,6 +35,7 @@ use Bugzilla::Error;
 use Bugzilla::Hook;
 use Bugzilla::Util;
 use Bugzilla::Status;
+use Bugzilla::Token;
 
 ###########################################################################
 # General subs
@@ -79,6 +80,15 @@ if (Bugzilla->usage_mode == USAGE_MODE_CMDLINE) {
 }
 else {
     $template = Bugzilla->template;
+
+    # Only check the token if we are running this script from the
+    # web browser and a parameter is passed to the script.
+    # XXX - Maybe these two parameters should be deleted once logged in?
+    $cgi->delete('GoAheadAndLogIn', 'Bugzilla_restrictlogin');
+    if (scalar($cgi->param())) {
+        my $token = $cgi->param('token');
+        check_hash_token($token, ['sanitycheck']);
+    }
 }
 my $vars = {};
 

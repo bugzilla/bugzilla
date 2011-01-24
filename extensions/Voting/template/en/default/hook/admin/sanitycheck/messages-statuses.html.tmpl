@@ -19,7 +19,8 @@
   #%]
 
 [% IF san_tag == "voting_cache_rebuild_fix" %]
-    <a href="sanitycheck.cgi?rebuild_vote_cache=1">Click here to
+    <a href="sanitycheck.cgi?rebuild_vote_cache=1&amp;token=
+       [%- issue_hash_token(['sanitycheck']) FILTER uri %]">Click here to
     rebuild the vote cache</a>
 
 [% ELSIF san_tag == "voting_cache_alert" %]

@@ -878,6 +878,19 @@ sub create {
                 return $docs_urlbase;
             },
 
+            # Check whether the URL is safe.
+            'is_safe_url' => sub {
+                my $url = shift;
+                return 0 unless $url;
+
+                my $safe_protocols = join('|', SAFE_PROTOCOLS);
+                return 1 if $url =~ /^($safe_protocols):[^\s<>\"]+[\w\/]$/i;
+                # Pointing to a local file with no colon in its name is fine.
+                return 1 if $url =~ /^[^\s<>\":]+[\w\/]$/i;
+                # If we come here, then we cannot guarantee it's safe.
+                return 0;
+            },
+
             # Allow templates to generate a token themselves.
             'issue_hash_token' => \&Bugzilla::Token::issue_hash_token,
 

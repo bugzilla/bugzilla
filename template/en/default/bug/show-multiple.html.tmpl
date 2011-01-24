@@ -163,11 +163,11 @@
       <tr>
         <th>[% field_descs.bug_file_loc FILTER html %]:</th>
         <td colspan="3">
-          [% IF bug.bug_file_loc.match("^(javascript|data)") %]
-            [% bug.bug_file_loc FILTER html %]
-          [% ELSE %]
+          [% IF is_safe_url(bug.bug_file_loc) %]
             <a href="[% bug.bug_file_loc FILTER html %]">
                      [% bug.bug_file_loc FILTER html %]</a>
+          [% ELSE %]
+            [% bug.bug_file_loc FILTER html %]
           [% END %]
         </td>
       </tr>

@@ -327,6 +327,13 @@ sub OPTIONAL_MODULES {
         version => '0.93',
         feature => ['mod_perl'],
     },
+    {
+        package => 'Math-Random-Secure',
+        module  => 'Math::Random::Secure',
+        # This is the first version that installs properly on Windows.
+        version => '0.05',
+        feature => ['rand_security'],
+    },
     );
 
     if (ON_WINDOWS) {

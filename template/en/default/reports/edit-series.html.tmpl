@@ -40,6 +40,8 @@
   [% PROCESS reports/series.html.tmpl 
      button_name = "Change Data Set" %]
   <input type="hidden" name="action" value="alter">
+  <input type="hidden" name="token"
+         value="[% issue_hash_token([default.id, default.name]) FILTER html %]">
   
   [% IF default.series_id %]
     <input type="hidden" name="series_id" value="[% default.series_id %]">

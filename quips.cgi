@@ -32,6 +32,7 @@ use Bugzilla::Constants;
 use Bugzilla::Util;
 use Bugzilla::Error;
 use Bugzilla::User;
+use Bugzilla::Token;
 
 my $user = Bugzilla->login(LOGIN_REQUIRED);
 
@@ -41,6 +42,7 @@ my $template = Bugzilla->template;
 my $vars = {};
 
 my $action = $cgi->param('action') || "";
+my $token = $cgi->param('token');
 
 if ($action eq "show") {
     # Read in the entire quip list
@@ -74,6 +76,7 @@ if ($action eq "add") {
     (Bugzilla->params->{'quip_list_entry_control'} eq "closed") &&
       ThrowUserError("no_new_quips");
 
+    check_hash_token($token, ['create-quips']);
     # Add the quip 
     my $approved = (Bugzilla->params->{'quip_list_entry_control'} eq "open")
                    || Bugzilla->user->in_group('admin') || 0;
@@ -92,7 +95,8 @@ if ($action eq 'approve') {
       || ThrowUserError("auth_failure", {group  => "admin",
                                          action => "approve",
                                          object => "quips"});
- 
+
+    check_hash_token($token, ['approve-quips']);
     # Read in the entire quip list
     my $quipsref = $dbh->selectall_arrayref("SELECT quipid, approved FROM quips");
     
@@ -134,6 +138,7 @@ if ($action eq "delete") {
     my $quipid = $cgi->param("quipid");
     ThrowCodeError("need_quipid") unless $quipid =~ /(\d+)/; 
     $quipid = $1;
+    check_hash_token($token, ['quips', $quipid]);
 
     ($vars->{'deleted_quip'}) = $dbh->selectrow_array(
                                     "SELECT quip FROM quips WHERE quipid = ?",

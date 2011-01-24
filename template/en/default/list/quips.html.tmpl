@@ -73,6 +73,8 @@
 
   <form method="post" action="quips.cgi">
     <input type="hidden" name="action" value="add">
+    <input type="hidden" name="token"
+           value="[% issue_hash_token(['create-quips']) FILTER html %]">
     <input size="80" name="quip">
     <p>
       <input type="submit" id="add" value="Add This Quip">
@@ -103,6 +105,8 @@
     </p>
     <form name="editform" method="post" action="quips.cgi">
       <input type="hidden" name="action" value="approve">
+      <input type="hidden" name="token"
+             value="[% issue_hash_token(['approve-quips']) FILTER html %]">
       <table border="1">
         <thead><tr>
           <th>Quip</th>
@@ -119,7 +123,8 @@
               [% "Unknown" IF NOT users.$userid %]
             </td>
             <td>
-              <a href="quips.cgi?action=delete&amp;quipid=[% quipid FILTER uri %]">
+              <a href="quips.cgi?action=delete&amp;quipid=[% quipid FILTER uri %]&amp;token=
+                 [%- issue_hash_token(['quips', quipid]) FILTER uri %]">
                 Delete
               </a>
             </td>

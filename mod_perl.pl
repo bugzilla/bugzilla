@@ -19,6 +19,13 @@ package Bugzilla::ModPerl;
 
 use strict;
 
+# This sets up our libpath without having to specify it in the mod_perl
+# configuration.
+use File::Basename;
+use lib dirname(__FILE__);
+use Bugzilla::Constants ();
+use lib Bugzilla::Constants::bz_locations()->{'ext_libpath'};
+
 # If you have an Apache2::Status handler in your Apache configuration,
 # you need to load Apache2::Status *here*, so that any later-loaded modules
 # can report information to Apache2::Status.
@@ -38,7 +45,6 @@ use Template::Config ();
 Template::Config->preload();
 
 use Bugzilla ();
-use Bugzilla::Constants ();
 use Bugzilla::CGI ();
 use Bugzilla::Extension ();
 use Bugzilla::Install::Requirements ();

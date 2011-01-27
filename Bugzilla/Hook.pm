@@ -1136,6 +1136,21 @@ Params:
 
 =back
 
+=head2 quicksearch_map
+
+This hook allows you to alter the Quicksearch syntax to include e.g. special 
+searches for custom fields you have.
+
+Params:
+
+=over
+
+=item C<map> - a hash where the key is the name you want to use in 
+Quicksearch, and the value is the name from the C<fielddefs> table that you 
+want it to map to. You can modify existing mappings or add new ones.
+
+=back
+
 =head2 sanitycheck_check
 
 This hook allows for extra sanity checks to be added, for use by

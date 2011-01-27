@@ -627,6 +627,14 @@ sub product_end_of_create {
     }
 }
 
+sub quicksearch_map {
+    my ($self, $args) = @_;
+    my $map = $args->{'map'};
+
+    # This demonstrates adding a shorter alias for a long custom field name.
+    $map->{'impact'} = $map->{'cf_long_field_name_for_impact_field'};
+}
+
 sub sanitycheck_check {
     my ($self, $args) = @_;
     

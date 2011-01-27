@@ -277,8 +277,8 @@ use constant MAILTO_GROUP => 1;
 
 # The default list of columns for buglist.cgi
 use constant DEFAULT_COLUMN_LIST => (
-    "bug_severity", "priority", "op_sys","assigned_to",
-    "bug_status", "resolution", "short_desc"
+    "product", "component", "assigned_to",
+    "bug_status", "resolution", "short_desc", "changeddate"
 );
 
 # Used by query.cgi and buglist.cgi as the named-query name

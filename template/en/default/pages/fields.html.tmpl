@@ -57,10 +57,10 @@
   <tr>
     <td>
       <dl>
-        <dt>
+        <dt class="unconfirmed">
           [% display_value("bug_status", "UNCONFIRMED") FILTER html %]
         </dt>
-        <dd>
+        <dd class="unconfirmed">
           This [% terms.bug %] has recently been added to the database. 
           Nobody has confirmed that this [% terms.bug %] is valid. Users
           who have the "canconfirm" permission set may confirm
@@ -70,10 +70,10 @@
           <b>[% display_value("bug_status", "RESOLVED") FILTER html %]</b>.
         </dd>
 
-        <dt>
+        <dt class="confirmed">
           [% display_value("bug_status", "CONFIRMED") FILTER html %]
         </dt>
-        <dd>
+        <dd class="confirmed">
           This [% terms.bug %] is valid and has recently been filed.
           [%+ terms.Bugs %] in this state become 
           <b>[% display_value("bug_status", "IN_PROGRESS") FILTER html %]</b>
@@ -81,10 +81,10 @@
           <b>[% display_value("bug_status", "RESOLVED") FILTER html %]</b>.
         </dd>
 
-        <dt>
+        <dt class="in_progress">
           [% display_value("bug_status", "IN_PROGRESS") FILTER html %]
         </dt>
-        <dd>
+        <dd class="in_progress">
           This [% terms.bug %] is not yet resolved, but is assigned to the
           proper person who is working on the [% terms.bug %]. From here,
           [%+ terms.bugs %] can be given to another person and become
@@ -92,6 +92,8 @@
           resolved and become 
           <b>[% display_value("bug_status", "RESOLVED") FILTER html %]</b>.
         </dd>
+        
+        [% Hook.process('open-status') %]
       </dl>
     </td>
 
@@ -108,56 +110,58 @@
   <tr>
     <td>
       <dl>
-        <dt>
+        <dt class="resolved">
           [% display_value("bug_status", "RESOLVED") FILTER html %]
         </dt>
-        <dd>
+        <dd class="resolved">
           A resolution has been performed, and it is awaiting verification by
           QA. From here [% terms.bugs %] are either reopened and given some
           open status, or are verified by QA and marked
           <b>[% display_value("bug_status", "VERIFIED") FILTER html %]</b>.
         </dd>
 
-        <dt>
+        <dt class="verified">
           [% display_value("bug_status", "VERIFIED") FILTER html %]
         </dt>
-        <dd>
+        <dd class="verified">
           QA has looked at the [% terms.bug %] and the resolution and
           agrees that the appropriate resolution has been taken. This is
           the final status for [% terms.bugs %].
         </dd>
+        
+        [% Hook.process('closed-status') %]
       </dl>
     </td>
 
     <td>
       <dl>
-        <dt>
+        <dt class="fixed">
           [% display_value("resolution", "FIXED") FILTER html %]
         </dt>
-        <dd>
+        <dd class="fixed">
           A fix for this [% terms.bug %] is checked into the tree and 
           tested.
         </dd>
 
-        <dt>
+        <dt class="invalid">
           [% display_value("resolution", "INVALID") FILTER html %]
         </dt>
-        <dd>
+        <dd class="invalid">
           The problem described is not [% terms.abug %].
         </dd>
 
-        <dt>
+        <dt class="wontfix">
           [% display_value("resolution", "WONTFIX") FILTER html %]
         </dt>
-        <dd>
+        <dd class="wontfix">
           The problem described is [% terms.abug %] which will never be 
           fixed.
         </dd>
 
-        <dt>
+        <dt class="duplicate">
          [% display_value("resolution", "DUPLICATE") FILTER html %]
         </dt>
-        <dd>
+        <dd class="duplicate">
           The problem is a duplicate of an existing [% terms.bug %].
           When [% terms.abug %] is marked as a
           <b>[% display_value("resolution", "DUPLICATE") FILTER html %]</b>,
@@ -165,15 +169,17 @@
           next to the resolution.
         </dd>
 
-        <dt>
+        <dt class="worksforme">
           [% display_value("resolution", "WORKSFORME") FILTER html %]
         </dt>
-        <dd>
+        <dd class="worksforme">
           All attempts at reproducing this [% terms.bug %] were futile, 
           and reading the code produces no clues as to why the described
           behavior would occur. If more information appears later,
           the [% terms.bug %] can be reopened.
         </dd>
+        
+        [% Hook.process('resolution') %]
       </dl>
     </td>
   </tr>

@@ -52,6 +52,8 @@ jobqueue.pl - Runs jobs in the background for Bugzilla.
    stop      Stops a running jobqueue daemon
    restart   Stops a running jobqueue if one is running, and then
              starts a new one.
+   once      Checks the job queue once, executes the first item found (if
+             any) and then exits
    check     Report the current status of the daemon.
    install   On some *nix systems, this automatically installs and
              configures jobqueue.pl as a system service so that it will

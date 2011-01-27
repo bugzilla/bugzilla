@@ -196,8 +196,25 @@ sub gd_setup_signals {
     $SIG{TERM} = sub { $self->gd_quit_event(); }
 }
 
+sub gd_other_cmd {
+    my ($self) = shift;
+    if ($ARGV[0] eq "once") {
+        $self->_do_work("work_once");
+
+        exit(0);
+    }
+    
+    $self->SUPER::gd_other_cmd();
+}
+
 sub gd_run {
     my $self = shift;
+
+    $self->_do_work("work");
+}
+
+sub _do_work {
+    my ($self, $fn) = @_;
 
     my $jq = Bugzilla->job_queue();
     $jq->set_verbose($self->{debug});
@@ -205,7 +222,8 @@ sub gd_run {
         eval "use $module";
         $jq->can_do($module);
     }
-    $jq->work;
+
+    $jq->$fn;
 }
 
 1;

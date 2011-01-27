@@ -437,7 +437,9 @@ Bugzilla::Config::Common - Parameter checking functions
 
 =head1 DESCRIPTION
 
-All parameter checking functions are called with two parameters:
+All parameter checking functions are called with two parameters: the value to 
+check, and a hash with the details of the param (type, default etc.) as defined
+in the relevant F<Bugzilla::Config::*> package.
 
 =head2 Functions
 

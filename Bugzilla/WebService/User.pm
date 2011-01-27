@@ -193,8 +193,9 @@ sub get {
     if ($params->{'maxusermatches'}) {
         $limit = $params->{'maxusermatches'} + 1;
     }
+    my $exclude_disabled = $params->{'include_disabled'} ? 0 : 1;
     foreach my $match_string (@{ $params->{'match'} || [] }) {
-        my $matched = Bugzilla::User::match($match_string, $limit);
+        my $matched = Bugzilla::User::match($match_string, $limit, $exclude_disabled);
         foreach my $user (@$matched) {
             if (!$unique_users{$user->id}) {
                 push(@user_objects, $user);
@@ -531,6 +532,12 @@ C<groups> is an array of names of groups that a user can be in.
 If these are specified, they limit the return value to users who are
 in I<any> of the groups specified.
 
+=item C<include_disabled> (boolean)
+
+By default, when using the C<match> parameter, disabled users are excluded
+from the returned results. Setting C<include_disabled> to C<true> will include 
+any users that are set to disabled in the returned results.
+
 =back
 
 =item B<Returns> 
@@ -608,6 +615,9 @@ function.
 =item Added in Bugzilla B<3.4>.
 
 =item C<group_ids> and C<groups> were added in Bugzilla B<4.0>.
+
+=item C<include_disabled> added in Bugzilla B<4.0>. Default behavior 
+for C<match> has changed to only returning enabled accounts.
 
 =back
 

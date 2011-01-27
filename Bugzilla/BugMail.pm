@@ -343,7 +343,8 @@ sub Send {
     }
 
     Bugzilla::Hook::process('bugmail_recipients',
-                            { bug => $bug, recipients => \%recipients });
+                            { bug => $bug, recipients => \%recipients,
+                              diffs => $diffs });
 
     # Find all those user-watching anyone on the current list, who is not
     # on it already themselves.

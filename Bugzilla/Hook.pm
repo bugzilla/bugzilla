@@ -502,8 +502,17 @@ Every id in the incoming C<recipients> hash will have an object in here.
 (But if you add additional recipients to the C<recipients> hash, you are 
 B<not> required to add them to this hash.)
 
-=back
+=item C<diffs>
 
+This is a list of hashes, each hash representing a change to the bug. Each 
+hash has the following members: C<field_name>, C<bug_when>, C<old>, C<new> 
+and C<who> (a L<Bugzilla::User>). If appropriate, there will also be 
+C<attach_id> or C<comment_id>; if either is present, there will be 
+C<isprivate>. See C<_get_diffs> in F<Bugzilla/BugMail.pm> to see exactly how 
+it is populated. Warning: the format and existence of the "diffs" parameter 
+is subject to change in future releases of Bugzilla.
+
+=back
 
 =head2 bugmail_relationships
 

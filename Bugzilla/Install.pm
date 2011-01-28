@@ -149,6 +149,10 @@ use constant SYSTEM_GROUPS => (
         description  => 'Can not be impersonated by other users',
         inherited_by => ['bz_sudoers'],
     },
+    {
+        name         => 'bz_quip_moderators',
+        description  => 'Can moderate quips',
+    },
 );
 
 use constant DEFAULT_CLASSIFICATION => {

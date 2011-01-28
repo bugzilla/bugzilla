@@ -37,7 +37,7 @@
   <p>
     <font color="red">
       Your quip '<tt>[% added_quip FILTER html %]</tt>' has been added.
-      [% IF Param("quip_list_entry_control") == "moderated" AND !user.in_group('admin') %]
+      [% IF Param("quip_list_entry_control") == "moderated" AND !user.in_group('bz_quip_moderators') %]
         It will be used as soon as it gets approved.
       [% END %]
     </font>
@@ -66,7 +66,7 @@
   <p>
     You can extend the quip list. Type in something clever or funny or boring
     (but not obscene or offensive, please) and bonk on the button.
-    [% IF Param("quip_list_entry_control") == "moderated" AND !user.in_group('admin') %]
+    [% IF Param("quip_list_entry_control") == "moderated" AND !user.in_group('bz_quip_moderators') %]
       Note that your quip has to be approved before it is used.
     [% END %]
   </p>
@@ -86,7 +86,7 @@
 [% END %]
 
 [% IF show_quips %]
-  [% IF !user.in_group('admin') %]
+  [% IF !user.in_group('bz_quip_moderators') %]
     <h2>
       Existing quips:
     </h2>
@@ -163,7 +163,7 @@
   <p>
     Those who like their wisdom in large doses can
     <a href="quips.cgi?action=show">view
-    [% IF user.in_group('admin') %]
+    [% IF user.in_group('bz_quip_moderators') %]
       and edit
     [% END %]
     the whole quip list</a>.

@@ -1375,7 +1375,18 @@
              Indicates user can configure whine reports for self.
             </para>
           </listitem>
-        </varlistentry>	 	
+        </varlistentry>
+
+        <varlistentry>
+          <term>
+             bz_quip_moderators
+          </term>
+          <listitem>
+            <para>
+             Indicates user can moderate quips.
+            </para>
+          </listitem>
+        </varlistentry>
  
         <varlistentry>
           <term>

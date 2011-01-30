@@ -3486,21 +3486,33 @@ sub _migrate_user_tags {
         # Tags are all lowercase.
         my $tag_name = lc($name);
 
-        $sth_tags->execute($user_id, $tag_name);
+        # Some queries were incorrectly parsed when _migrate_user_tags()
+        # was first implemented, and so some tags may have already been
+        # added to the DB. We don't want to crash in that case.
+        eval { $sth_tags->execute($user_id, $tag_name); };
         my $tag_id = $dbh->selectrow_array(
           'SELECT id FROM tags WHERE user_id = ? AND name = ?',
            undef, ($user_id, $tag_name));
 
-        $query =~ s/^bug_id=//;
-        # Commas in Bugzilla 3.x are encoded as %2C, but not in 2.22.
-        $query =~ s/%2C/,/g;
-        my @bug_ids = split(/[\s,]+/, $query);
-        $sth_bug_tag->execute($_, $tag_id) foreach @bug_ids;
-
+        my $columnlist = "";
+        if ($query =~ /^bug_id=([^&;]+)(.*)$/) {
+            my $buglist = $1;
+            $columnlist = $2 if $2;
+            # Commas in Bugzilla 3.x are encoded as %2C, but not in 2.22.
+            $buglist =~ s/%2C/,/g;
+            my @bug_ids = split(/[\s,]+/, $buglist);
+            foreach my $bug_id (@bug_ids) {
+                # Some sanity check. We never know.
+                next unless detaint_natural($bug_id);
+                # For the same reason as above, let's do it in an eval.
+                eval { $sth_bug_tag->execute($bug_id, $tag_id); };
+            }
+        }
+        
         # Existing tags may be used in whines, or shared with
         # other users. So we convert them rather than delete them.
         my $encoded_name = url_quote($tag_name);
-        $sth_nq->execute("tag=$encoded_name", $user_id, $name);
+        $sth_nq->execute("tag=$encoded_name$columnlist", $user_id, $name);
     }
 
     $dbh->bz_drop_column('namedqueries', 'query_type');

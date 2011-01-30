@@ -3493,7 +3493,7 @@ sub _migrate_user_tags {
 
         $query =~ s/^bug_id=//;
         # Commas in Bugzilla 3.x are encoded as %2C, but not in 2.22.
-        $query =~ s/%2C/,/g
+        $query =~ s/%2C/,/g;
         my @bug_ids = split(/[\s,]+/, $query);
         $sth_bug_tag->execute($_, $tag_id) foreach @bug_ids;
 

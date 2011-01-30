@@ -438,10 +438,6 @@ sub update_table_definitions {
     # PUBLIC is a reserved word in Oracle.
     $dbh->bz_rename_column('series', 'public', 'is_public');
 
-    # 2005-10-21 LpSolit@gmail.com - Bug 313020
-    $dbh->bz_add_column('namedqueries', 'query_type',
-                        {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 0});
-
     # 2005-11-04 LpSolit@gmail.com - Bug 305927
     $dbh->bz_alter_column('groups', 'userregexp',
                           {TYPE => 'TINYTEXT', NOTNULL => 1, DEFAULT => "''"});
@@ -549,10 +545,6 @@ sub update_table_definitions {
     # 2007-09-09 LpSolit@gmail.com - Bug 99215
     _fix_attachment_modification_date();
 
-    # This had the wrong definition in DB::Schema.
-    $dbh->bz_alter_column('namedqueries', 'query_type',
-                          {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 0});
-
     $dbh->bz_drop_index('longdescs', 'longdescs_thetext_idx');
     _populate_bugs_fulltext();
 
@@ -649,6 +641,9 @@ sub update_table_definitions {
 
     $dbh->bz_add_column('bug_see_also', 'id',
         {TYPE => 'MEDIUMSERIAL', NOTNULL => 1, PRIMARYKEY => 1});
+
+    # 2011-01-29 LpSolit@gmail.com - Bug 616185
+    _migrate_user_tags();
 
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
@@ -3470,6 +3465,43 @@ sub _fix_series_indexes {
     $dbh->bz_add_index('series', 'series_creator_idx', ['creator']);
     $dbh->bz_add_index('series', 'series_category_idx',
         {FIELDS => [qw(category subcategory name)], TYPE => 'UNIQUE'});
+}
+
+sub _migrate_user_tags {
+    my $dbh = Bugzilla->dbh;
+    return unless $dbh->bz_column_info('namedqueries', 'query_type');
+
+    my $tags = $dbh->selectall_arrayref('SELECT userid, name, query
+                                           FROM namedqueries
+                                          WHERE query_type != 0');
+
+    my $sth_tags = $dbh->prepare('INSERT INTO tags (user_id, name) VALUES (?, ?)');
+    my $sth_bug_tag = $dbh->prepare('INSERT INTO bug_tag (bug_id, tag_id)
+                                     VALUES (?, ?)');
+    my $sth_nq = $dbh->prepare('UPDATE namedqueries SET query = ?
+                                WHERE userid = ? AND name = ?');
+
+    foreach my $tag (@$tags) {
+        my ($user_id, $name, $query) = @$tag;
+        # Tags are all lowercase.
+        my $tag_name = lc($name);
+
+        $sth_tags->execute($user_id, $tag_name);
+        my $tag_id = $dbh->selectrow_array(
+          'SELECT id FROM tags WHERE user_id = ? AND name = ?',
+           undef, ($user_id, $tag_name));
+
+        $query =~ s/^bug_id=//;
+        my @bug_ids = split(/[\s,]+/, $query);
+        $sth_bug_tag->execute($_, $tag_id) foreach @bug_ids;
+
+        # Existing tags may be used in whines, or shared with
+        # other users. So we convert them rather than delete them.
+        my $encoded_name = url_quote($tag_name);
+        $sth_nq->execute("tag=$encoded_name", $user_id, $name);
+    }
+
+    $dbh->bz_drop_column('namedqueries', 'query_type');
 }
 
 1;

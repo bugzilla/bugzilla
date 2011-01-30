@@ -953,7 +953,6 @@ use constant ABSTRACT_SCHEMA => {
                                             DELETE => 'CASCADE'}},
             name         => {TYPE => 'varchar(64)', NOTNULL => 1},
             query        => {TYPE => 'LONGTEXT', NOTNULL => 1},
-            query_type   => {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 0},
         ],
         INDEXES => [
             namedqueries_userid_idx => {FIELDS => [qw(userid name)],
@@ -976,6 +975,36 @@ use constant ABSTRACT_SCHEMA => {
             namedqueries_link_in_footer_id_idx => {FIELDS => [qw(namedquery_id user_id)],
                                                    TYPE => 'UNIQUE'},
             namedqueries_link_in_footer_userid_idx => ['user_id'],
+        ],
+    },
+
+    tags => {
+        FIELDS => [
+            id   => {TYPE => 'MEDIUMSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
+            name => {TYPE => 'varchar(64)', NOTNULL => 1},
+            user_id  => {TYPE => 'INT3', NOTNULL => 1,
+                         REFERENCES => {TABLE  => 'profiles',
+                                        COLUMN => 'userid',
+                                        DELETE => 'CASCADE'}},
+        ],
+        INDEXES => [
+            tags_user_id_idx => {FIELDS => [qw(user_id name)], TYPE => 'UNIQUE'},
+        ],
+    },
+
+    bug_tag => {
+        FIELDS => [
+            bug_id => {TYPE => 'INT3', NOTNULL => 1,
+                       REFERENCES => {TABLE  => 'bugs',
+                                      COLUMN => 'bug_id',
+                                      DELETE => 'CASCADE'}},
+            tag_id => {TYPE => 'INT3', NOTNULL => 1,
+                       REFERENCES => {TABLE  => 'tags',
+                                      COLUMN => 'id',
+                                      DELETE => 'CASCADE'}},
+        ],
+        INDEXES => [
+            bug_tag_bug_id_idx => {FIELDS => [qw(bug_id tag_id)], TYPE => 'UNIQUE'},
         ],
     },
 

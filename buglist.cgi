@@ -231,24 +231,15 @@ sub DiffDate {
 }
 
 sub LookupNamedQuery {
-    my ($name, $sharer_id, $query_type, $throw_error) = @_;
-    $throw_error = 1 unless defined $throw_error;
+    my ($name, $sharer_id) = @_;
 
     Bugzilla->login(LOGIN_REQUIRED);
 
-    my $constructor = $throw_error ? 'check' : 'new';
-    my $query = Bugzilla::Search::Saved->$constructor(
+    my $query = Bugzilla::Search::Saved->check(
         { user => $sharer_id, name => $name });
 
-    return $query if (!$query and !$throw_error);
-
-    if (defined $query_type and $query->type != $query_type) {
-        ThrowUserError("missing_query", { queryname => $name,
-                                          sharer_id => $sharer_id });
-    }
-
     $query->url
-       || ThrowUserError("buglist_parameters_required", { queryname  => $name });
+       || ThrowUserError("buglist_parameters_required");
 
     return wantarray ? ($query->url, $query->id) : $query->url;
 }
@@ -266,15 +257,13 @@ sub LookupNamedQuery {
 #         empty, or we will throw a UserError.
 # link_in_footer (optional) - 1 if the Named Query should be 
 # displayed in the user's footer, 0 otherwise.
-# query_type (optional) - 1 if the Named Query contains a list of
-# bug IDs only, 0 otherwise (default).
 #
 # All parameters are validated before passing them into the database.
 #
 # Returns: A boolean true value if the query existed in the database 
 # before, and we updated it. A boolean false value otherwise.
 sub InsertNamedQuery {
-    my ($query_name, $query, $link_in_footer, $query_type) = @_;
+    my ($query_name, $query, $link_in_footer) = @_;
     my $dbh = Bugzilla->dbh;
 
     $query_name = trim($query_name);
@@ -283,13 +272,11 @@ sub InsertNamedQuery {
     if ($query_obj) {
         $query_obj->set_name($query_name);
         $query_obj->set_url($query);
-        $query_obj->set_query_type($query_type);
         $query_obj->update();
     } else {
         Bugzilla::Search::Saved->create({
             name           => $query_name,
             query          => $query,
-            query_type     => $query_type,
             link_in_footer => $link_in_footer
         });
     }
@@ -461,10 +448,7 @@ if ($cmdtype eq "dorem") {
         my $query_id;
         ($buffer, $query_id) = LookupNamedQuery(scalar $cgi->param("namedcmd"),
                                                 $user->id);
-        if (!$query_id) {
-            # The user has no query of this name. Play along.
-        }
-        else {
+        if ($query_id) {
             # Make sure the user really wants to delete his saved search.
             my $token = $cgi->param('token');
             check_hash_token($token, [$query_id, $qname]);
@@ -503,93 +487,54 @@ elsif (($cmdtype eq "doit") && defined $cgi->param('remtype')) {
         $user = Bugzilla->login(LOGIN_REQUIRED);
         my $query_name = $cgi->param('newqueryname');
         my $new_query = $cgi->param('newquery');
-        my $query_type = QUERY_LIST;
         my $token = $cgi->param('token');
         check_hash_token($token, ['savedsearch']);
-        # If list_of_bugs is true, we are adding/removing individual bugs
-        # to a saved search. We get the existing list of bug IDs (if any)
-        # and add/remove the passed ones.
+        # If list_of_bugs is true, we are adding/removing tags to/from
+        # individual bugs.
         if ($cgi->param('list_of_bugs')) {
-            # We add or remove bugs based on the action choosen.
+            # We add/remove tags based on the action choosen.
             my $action = trim($cgi->param('action') || '');
             $action =~ /^(add|remove)$/
               || ThrowUserError('unknown_action', {action => $action});
 
-            # If we are removing bugs, then we must have an existing
-            # saved search selected.
-            if ($action eq 'remove') {
-                $query_name && ThrowUserError('no_bugs_to_remove');
-            }
+            my $method = "${action}_tag";
 
-            my %bug_ids;
-            my $is_new_name = 0;
-            if ($query_name) {
-                my ($query, $query_id) =
-                  LookupNamedQuery($query_name, undef, QUERY_LIST, !THROW_ERROR);
-                # Make sure this name is not already in use by a normal saved search.
-                if ($query) {
-                    ThrowUserError('query_name_exists', {name     => $query_name,
-                                                         query_id => $query_id});
-                }
-                $is_new_name = 1;
-            }
             # If no new tag name has been given, use the selected one.
-            $query_name ||= $cgi->param('oldqueryname');
+            $query_name ||= $cgi->param('oldqueryname')
+              or ThrowUserError('no_tag_to_edit', {action => $action});
 
-            # Don't throw an error if it's a new tag name: if the tag already
-            # exists, add/remove bugs to it, else create it. But if we are
-            # considering an existing tag, then it has to exist and we throw
-            # an error if it doesn't (hence the usage of !$is_new_name).
-            my ($old_query, $query_id) =
-              LookupNamedQuery($query_name, undef, LIST_OF_BUGS, !$is_new_name);
-
-            if ($old_query) {
-                # We get the encoded query. We need to decode it.
-                my $old_cgi = new Bugzilla::CGI($old_query);
-                foreach my $bug_id (split /[\s,]+/, scalar $old_cgi->param('bug_id')) {
-                    $bug_ids{$bug_id} = 1 if detaint_natural($bug_id);
-                }
-            }
-
-            my $keep_bug = ($action eq 'add') ? 1 : 0;
-            my $changes = 0;
+            my @buglist;
+            # Validate all bug IDs before editing tags in any of them.
             foreach my $bug_id (split(/[\s,]+/, $cgi->param('bug_ids'))) {
                 next unless $bug_id;
-                my $bug = Bugzilla::Bug->check($bug_id);
-                $bug_ids{$bug->id} = $keep_bug;
-                $changes = 1;
+                push(@buglist, Bugzilla::Bug->check($bug_id));
             }
-            ThrowUserError('no_bug_ids',
-                           {'action' => $action,
-                            'tag' => $query_name})
-              unless $changes;
 
-            # Only keep bug IDs we want to add/keep. Disregard deleted ones.
-            my @bug_ids = grep { $bug_ids{$_} == 1 } keys %bug_ids;
-            # If the list is now empty, we could as well delete it completely.
-            if (!scalar @bug_ids) {
-                ThrowUserError('no_bugs_in_list', {name     => $query_name,
-                                                   query_id => $query_id});
+            foreach my $bug (@buglist) {
+                $bug->$method($query_name);
             }
-            $new_query = "bug_id=" . join(',', sort {$a <=> $b} @bug_ids);
-            $query_type = LIST_OF_BUGS;
-        }
-        my $tofooter = 1;
-        my $existed_before = InsertNamedQuery($query_name, $new_query,
-                                              $tofooter, $query_type);
-        if ($existed_before) {
-            $vars->{'message'} = "buglist_updated_named_query";
+
+            $vars->{'message'} = 'tag_updated';
+            $vars->{'action'} = $action;
+            $vars->{'tag'} = $query_name;
+            $vars->{'buglist'} = [map { $_->id } @buglist];
         }
         else {
-            $vars->{'message'} = "buglist_new_named_query";
+            my $existed_before = InsertNamedQuery($query_name, $new_query, 1);
+            if ($existed_before) {
+                $vars->{'message'} = "buglist_updated_named_query";
+            }
+            else {
+                $vars->{'message'} = "buglist_new_named_query";
+            }
+
+            # Make sure to invalidate any cached query data, so that the footer is
+            # correctly displayed
+            $user->flush_queries_cache();
+
+            $vars->{'queryname'} = $query_name;
         }
 
-        # Make sure to invalidate any cached query data, so that the footer is
-        # correctly displayed
-        $user->flush_queries_cache();
-
-        $vars->{'queryname'} = $query_name;
-        
         print $cgi->header();
         $template->process("global/message.html.tmpl", $vars)
           || ThrowTemplateError($template->error());

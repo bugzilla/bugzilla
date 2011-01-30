@@ -45,17 +45,15 @@ use constant DB_COLUMNS => qw(
     userid
     name
     query
-    query_type
 );
 
 use constant VALIDATORS => {
     name       => \&_check_name,
     query      => \&_check_query,
-    query_type => \&_check_query_type,
     link_in_footer => \&_check_link_in_footer,
 };
 
-use constant UPDATE_COLUMNS => qw(name query query_type);
+use constant UPDATE_COLUMNS => qw(name query);
 
 ###############
 # Constructor #
@@ -139,12 +137,6 @@ sub _check_query {
     # Don't store the query name as a parameter.
     $cgi->delete('known_name');
     return $cgi->query_string;
-}
-
-sub _check_query_type {
-    my ($invocant, $type) = @_;
-    # Right now the only query type is LIST_OF_BUGS.
-    return $type ? LIST_OF_BUGS : QUERY_LIST;
 }
 
 #########################
@@ -301,7 +293,6 @@ sub shared_with_users {
 # Simple Accessors #
 ####################
 
-sub type { return $_[0]->{'query_type'}; }
 sub url  { return $_[0]->{'query'}; }
 
 sub user {
@@ -317,7 +308,6 @@ sub user {
 
 sub set_name       { $_[0]->set('name',       $_[1]); }
 sub set_url        { $_[0]->set('query',      $_[1]); }
-sub set_query_type { $_[0]->set('query_type', $_[1]); }
 
 1;
 

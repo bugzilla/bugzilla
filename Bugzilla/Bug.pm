@@ -1895,6 +1895,17 @@ sub _check_strict_isolation_for_user {
     }
 }
 
+sub _check_tag_name {
+    my ($invocant, $tag) = @_;
+
+    $tag = clean_text($tag);
+    $tag || ThrowUserError('no_tag_to_edit');
+    ThrowUserError('tag_name_too_long') if length($tag) > MAX_LEN_QUERY_NAME;
+    trick_taint($tag);
+    # Tags are all lowercase.
+    return lc($tag);
+}
+
 sub _check_target_milestone {
     my ($invocant, $target, undef, $params) = @_;
     my $product = blessed($invocant) ? $invocant->product_obj 
@@ -2864,6 +2875,78 @@ sub remove_see_also {
                                            privs    => $privs });
         }
     $self->{see_also} = \@new_see_also;
+}
+
+sub add_tag {
+    my ($self, $tag) = @_;
+    my $dbh = Bugzilla->dbh;
+    my $user = Bugzilla->user;
+    $tag = $self->_check_tag_name($tag);
+
+    my $tag_id = $user->tags->{$tag}->{id};
+    # If this tag doesn't exist for this user yet, create it.
+    if (!$tag_id) {
+        $dbh->do('INSERT INTO tags (user_id, name) VALUES (?, ?)',
+                  undef, ($user->id, $tag));
+
+        $tag_id = $dbh->selectrow_array('SELECT id FROM tags
+                                         WHERE name = ? AND user_id = ?',
+                                         undef, ($tag, $user->id));
+        # The list has changed.
+        delete $user->{tags};
+    }
+    # Do nothing if this tag is already set for this bug.
+    return if grep { $_ eq $tag } @{$self->tags};
+
+    # Increment the counter. Do it before the SQL call below,
+    # to not count the tag twice.
+    $user->tags->{$tag}->{bug_count}++;
+
+    $dbh->do('INSERT INTO bug_tag (bug_id, tag_id) VALUES (?, ?)',
+              undef, ($self->id, $tag_id));
+
+    push(@{$self->{tags}}, $tag);
+}
+
+sub remove_tag {
+    my ($self, $tag) = @_;
+    my $dbh = Bugzilla->dbh;
+    my $user = Bugzilla->user;
+    $tag = $self->_check_tag_name($tag);
+
+    my $tag_id = exists $user->tags->{$tag} ? $user->tags->{$tag}->{id} : undef;
+    # Do nothing if the user doesn't use this tag, or didn't set it for this bug.
+    return unless ($tag_id && grep { $_ eq $tag } @{$self->tags});
+
+    $dbh->do('DELETE FROM bug_tag WHERE bug_id = ? AND tag_id = ?',
+              undef, ($self->id, $tag_id));
+
+    $self->{tags} = [grep { $_ ne $tag } @{$self->tags}];
+
+    # Decrement the counter, and delete the tag if no bugs are using it anymore.
+    if (!--$user->tags->{$tag}->{bug_count}) {
+        $dbh->do('DELETE FROM tags WHERE name = ? AND user_id = ?',
+                  undef, ($tag, $user->id));
+
+        # The list has changed.
+        delete $user->{tags};
+    }
+}
+
+sub tags {
+    my $self = shift;
+    my $dbh = Bugzilla->dbh;
+    my $user = Bugzilla->user;
+
+    # This method doesn't support several users using the same bug object.
+    if (!exists $self->{tags}) {
+        $self->{tags} = $dbh->selectcol_arrayref(
+            'SELECT name FROM bug_tag
+             INNER JOIN tags ON tags.id = bug_tag.tag_id
+             WHERE bug_id = ? AND user_id = ?',
+             undef, ($self->id, $user->id));
+    }
+    return $self->{tags};
 }
 
 #####################################################################

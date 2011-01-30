@@ -865,6 +865,17 @@
       The cookie that was remembering your login is now gone.
     [% END %]
 
+  [% ELSIF message_tag == "tag_updated" %]
+    [% title = "Tag Updated" %]
+    The '[% tag FILTER html %]' tag has been
+    [% IF action == "add" %]
+      added to
+    [% ELSE %]
+      removed from
+    [% END %]
+    [%+ buglist.size > 1 ? terms.bugs : terms.bug %]
+    [%+ buglist.join(", ") FILTER html %].
+
   [% ELSIF message_tag == "term" %]
     [% terms.$term FILTER html %]
 

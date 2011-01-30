@@ -363,6 +363,24 @@ sub queries_available {
     return $self->{queries_available};
 }
 
+sub tags {
+    my $self = shift;
+    my $dbh = Bugzilla->dbh;
+
+    if (!defined $self->{tags}) {
+        # We must use LEFT JOIN instead of INNER JOIN as we may be
+        # in the process of inserting a new tag to some bugs,
+        # in which case there are no bugs with this tag yet.
+        $self->{tags} = $dbh->selectall_hashref(
+            'SELECT name, id, COUNT(bug_id) AS bug_count
+               FROM tags
+          LEFT JOIN bug_tag ON bug_tag.tag_id = tags.id
+              WHERE user_id = ? ' . $dbh->sql_group_by('id', 'name'),
+            'name', undef, $self->id);
+    }
+    return $self->{tags};
+}
+
 ##########################
 # Saved Recent Bug Lists #
 ##########################
@@ -2073,6 +2091,11 @@ internally, such code must call this method to flush the cached result.
 
 An arrayref of group ids. The user can share their own queries with these
 groups.
+
+=item C<tags>
+
+Returns a hashref with tag IDs as key, and a hashref with tag 'id',
+'name' and 'bug_count' as value.
 
 =back
 

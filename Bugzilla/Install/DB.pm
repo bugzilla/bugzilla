@@ -32,6 +32,9 @@ use Bugzilla::Series;
 use Date::Parse;
 use Date::Format;
 use IO::File;
+use List::MoreUtils qw(uniq);
+use URI;
+use URI::QueryParam;
 
 # NOTE: This is NOT the function for general table updates. See
 # update_table_definitions for that. This is only for the fielddefs table.
@@ -3471,49 +3474,70 @@ sub _migrate_user_tags {
     my $dbh = Bugzilla->dbh;
     return unless $dbh->bz_column_info('namedqueries', 'query_type');
 
-    my $tags = $dbh->selectall_arrayref('SELECT userid, name, query
+    my $tags = $dbh->selectall_arrayref('SELECT id, userid, name, query
                                            FROM namedqueries
                                           WHERE query_type != 0');
 
-    my $sth_tags = $dbh->prepare('INSERT INTO tags (user_id, name) VALUES (?, ?)');
+    my $sth_tags = $dbh->prepare(
+        'INSERT INTO tags (user_id, name) VALUES (?, ?)');
+    my $sth_tag_id = $dbh->prepare(
+        'SELECT id FROM tags WHERE user_id = ? AND name = ?');
     my $sth_bug_tag = $dbh->prepare('INSERT INTO bug_tag (bug_id, tag_id)
                                      VALUES (?, ?)');
     my $sth_nq = $dbh->prepare('UPDATE namedqueries SET query = ?
-                                WHERE userid = ? AND name = ?');
+                                WHERE id = ?');
+    my $sth_nq_footer = $dbh->prepare(
+        'DELETE FROM namedqueries_link_in_footer 
+               WHERE user_id = ? AND namedquery_id = ?');
 
+    if (scalar @$tags) {
+        print install_string('update_queries_to_tags'), "\n";
+    }
+
+    my $total = scalar(@$tags);
+    my $current = 0;
+
+    $dbh->bz_start_transaction();
     foreach my $tag (@$tags) {
-        my ($user_id, $name, $query) = @$tag;
+        my ($query_id, $user_id, $name, $query) = @$tag;
         # Tags are all lowercase.
         my $tag_name = lc($name);
 
-        # Some queries were incorrectly parsed when _migrate_user_tags()
-        # was first implemented, and so some tags may have already been
-        # added to the DB. We don't want to crash in that case.
-        eval { $sth_tags->execute($user_id, $tag_name); };
-        my $tag_id = $dbh->selectrow_array(
-          'SELECT id FROM tags WHERE user_id = ? AND name = ?',
-           undef, ($user_id, $tag_name));
+        $sth_tags->execute($user_id, $tag_name);
 
-        my $columnlist = "";
-        if ($query =~ /^bug_id=([^&;]+)(.*)$/) {
-            my $buglist = $1;
-            $columnlist = $2 if $2;
-            # Commas in Bugzilla 3.x are encoded as %2C, but not in 2.22.
-            $buglist =~ s/%2C/,/g;
-            my @bug_ids = split(/[\s,]+/, $buglist);
-            foreach my $bug_id (@bug_ids) {
-                # Some sanity check. We never know.
-                next unless detaint_natural($bug_id);
-                # For the same reason as above, let's do it in an eval.
-                eval { $sth_bug_tag->execute($bug_id, $tag_id); };
-            }
+        my $tag_id = $dbh->selectrow_array($sth_tag_id,
+            undef, $user_id, $tag_name);
+
+        indicate_progress({ current => ++$current, total => $total,
+                            every => 25 });
+
+        my $uri = URI->new("buglist.cgi?$query", 'http');
+        my $bug_id_list = $uri->query_param_delete('bug_id');
+        if (!$bug_id_list) {
+            warn "No bug_id param for tag $name from user $user_id: $query";
+            next;
+        }
+        my @bug_ids = split(/[\s,]+/, $bug_id_list);
+        # Make sure that things like "001" get converted to "1"
+        @bug_ids = map { int($_) } @bug_ids;
+        # And remove duplicates
+        @bug_ids = uniq @bug_ids;
+        foreach my $bug_id (@bug_ids) {
+            # If "int" above failed this might be undef. We also
+            # don't want to accept bug 0.
+            next if !$bug_id;
+            $sth_bug_tag->execute($bug_id, $tag_id);
         }
         
         # Existing tags may be used in whines, or shared with
         # other users. So we convert them rather than delete them.
-        my $encoded_name = url_quote($tag_name);
-        $sth_nq->execute("tag=$encoded_name$columnlist", $user_id, $name);
+        $uri->query_param('tag', $tag_name);
+        $sth_nq->execute($uri->query, $query_id);
+        # But we don't keep showing them in the footer.
+        $sth_nq_footer->execute($user_id, $query_id);
     }
+
+    $dbh->bz_commit_transaction();
 
     $dbh->bz_drop_column('namedqueries', 'query_type');
 }

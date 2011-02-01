@@ -593,8 +593,8 @@ TUI_hide_default('attachment_text_field');
           [% ' checked="checked"' IF comment_is_private %]
                onClick="updateCommentTagControl(this, 'comment')">
         <label for="comment_is_private">
-          Make description private (visible only to members of the 
-          <strong>[% Param('insidergroup') FILTER html %]</strong> group)
+          Make description and any new attachment private (visible only to members 
+          of the <strong>[% Param('insidergroup') FILTER html %]</strong> group)
         </label>
       </td>
     </tr>

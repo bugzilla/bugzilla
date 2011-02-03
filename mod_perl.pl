@@ -17,6 +17,7 @@
 
 package Bugzilla::ModPerl;
 use strict;
+use warnings;
 
 # This sets up our libpath without having to specify it in the mod_perl
 # configuration.
@@ -90,6 +91,14 @@ my $rl = new ModPerl::RegistryLoader();
 # Bugzilla/ModPerl/ResponseHandler.pm
 $rl->{package} = 'Bugzilla::ModPerl::ResponseHandler';
 my $feature_files = Bugzilla::Install::Requirements::map_files_to_features();
+
+# Prevent "use lib" from doing anything when the .cgi files are compiled.
+# This is important to prevent the current directory from getting into
+# @INC and messing things up. (See bug 630750.)
+no warnings 'redefine';
+local *lib::import = sub {};
+use warnings;
+
 foreach my $file (glob "$cgi_path/*.cgi") {
     my $base_filename = File::Basename::basename($file);
     if (my $feature = $feature_files->{$base_filename}) {
@@ -110,6 +119,14 @@ sub handler : method {
     # $0 is broken under mod_perl before 2.0.2, so we have to set it
     # here explicitly or init_page's shutdownhtml code won't work right.
     $0 = $ENV{'SCRIPT_FILENAME'};
+
+    # Prevent "use lib" from modifying @INC in the case where a .cgi file
+    # is being automatically recompiled by mod_perl when Apache is
+    # running. (This happens if a file changes while Apache is already
+    # running.)
+    no warnings 'redefine';
+    local *lib::import = sub {};
+    use warnings;
 
     Bugzilla::init_page();
     return $class->SUPER::handler(@_);

@@ -266,6 +266,9 @@
      
           [% END %]
         </div>
+
+        [% Hook.process('form_before_submit') %]
+
         [% IF user.id %]       
           <div id="update_container">
             <input type="submit" value="Submit" id="update">

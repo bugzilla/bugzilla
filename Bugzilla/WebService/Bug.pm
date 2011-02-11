@@ -2403,7 +2403,7 @@ C<string> A comment to add along with this attachment.
 
 C<boolean> True if Bugzilla should treat this attachment as a patch.
 If you specify this, you do not need to specify a C<content_type>.
-The C<content_type of the attachment will be forced to C<text/plain>.
+The C<content_type> of the attachment will be forced to C<text/plain>.
 
 Defaults to False if not specified.
 

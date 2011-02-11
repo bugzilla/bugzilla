@@ -163,10 +163,11 @@
            cols = 60 defaultcontent = value mandatory = field.is_mandatory %]
      [% CASE constants.FIELD_TYPE_BUG_URLS %]
        [% '<ul class="bug_urls">' IF value.size %]
-       [% FOREACH url = value %]
+       [% FOREACH bug_url = value %]
          <li>
-           <a href="[% url FILTER html %]">[% url FILTER html %]</a>
-           <label><input type="checkbox" value="[% url FILTER html %]"
+           <a href="[% bug_url.name FILTER html %]">
+             [% bug_url.name FILTER html %]</a>
+           <label><input type="checkbox" value="[% bug_url.name FILTER html %]"
                          name="remove_[% field.name FILTER html %]">
              Remove</label>
          </li>
@@ -213,8 +214,9 @@
     [% END %]
 [% ELSIF field.type == constants.FIELD_TYPE_BUG_URLS %]
   [% '<ul class="bug_urls">' IF value.size %]
-    [% FOREACH url = value %]
-      <li><a href="[% url FILTER html %]">[% url FILTER html %]</a></li>
+    [% FOREACH bug_url = value %]
+      <li><a href="[% bug_url.name FILTER html %]">
+            [% bug_url.name FILTER html %]</a></li>
     [% END %]
   [% '</ul>' IF value.size %]
 [% ELSE %]

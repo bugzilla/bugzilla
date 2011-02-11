@@ -655,8 +655,8 @@ sub _create_one_bug {
         $dbh->do('UPDATE bugs SET creation_ts = ?, bug_status = ?,
                   resolution = ? WHERE bug_id = ?',
                  undef, $creation_ts, $status, $resolution, $bug->id);
-        $dbh->do('INSERT INTO bug_see_also (bug_id, value) VALUES (?,?)',
-                 undef, $bug->id, $see_also);
+        $dbh->do('INSERT INTO bug_see_also (bug_id, value, class) VALUES (?,?,?)',
+                 undef, $bug->id, $see_also, 'Bugzilla::BugUrl::Bugzilla');
 
         if ($number == 1) {
             # Bug 1 needs to start off with reporter_accessible and

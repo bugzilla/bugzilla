@@ -347,6 +347,9 @@ sub _field_values_for_bug {
     elsif ($field eq 'content') {
         @values = $self->_values_for($number, 'short_desc');
     }
+    elsif ($field eq 'see_also') {
+        @values = $self->_values_for($number, 'see_also', 'name');
+    }
     # Bugzilla::Bug truncates creation_ts, but we need the full value
     # from the database. This has no special value for changedfrom,
     # because it never changes.
@@ -385,7 +388,7 @@ sub _values_for {
         my $bug = $self->bug($number);
         $item = $bug->$bug_field;
     }
-    
+
     if ($item_field) {
         if ($bug_field eq 'flags' and $item_field eq 'name') {
             return (map { $_->name . $_->status } @$item);

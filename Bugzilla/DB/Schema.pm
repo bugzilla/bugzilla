@@ -499,6 +499,7 @@ use constant ABSTRACT_SCHEMA => {
                                       COLUMN => 'bug_id',
                                       DELETE => 'CASCADE'}},
             value  => {TYPE => 'varchar(255)', NOTNULL => 1},
+            class  => {TYPE => 'varchar(255)', NOTNULL => 1},
         ],
         INDEXES => [
             bug_see_also_bug_id_idx => {FIELDS => [qw(bug_id value)], 

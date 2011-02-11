@@ -40,6 +40,7 @@ use constant DB_COLUMNS => qw(
     id
     bug_id
     value
+    class
 );
 
 # This must be strings with the names of the validations,
@@ -48,6 +49,7 @@ use constant DB_COLUMNS => qw(
 use constant VALIDATORS => {
     value  => '_check_value',
     bug_id => '_check_bug_id',
+    class  => \&_check_class,
 };
 
 # This is the order we go through all of subclasses and
@@ -60,6 +62,13 @@ use constant SUB_CLASSES => qw(
     Bugzilla::BugUrl::Google
     Bugzilla::BugUrl::Debian
 );
+
+###############################
+####      Accessors      ######
+###############################
+
+sub class  { return $_[0]->{class}  }
+sub bug_id { return $_[0]->{bug_id} }
 
 ###############################
 ####        Methods        ####
@@ -92,6 +101,18 @@ sub new {
     return $class->SUPER::new(@_);
 }
 
+sub _do_list_select {
+    my $class = shift;
+    my $objects = $class->SUPER::_do_list_select(@_);
+
+    foreach my $object (@$objects) {
+        eval "use " . $object->class; die $@ if $@;
+        bless $object, $object->class;
+    }
+
+    return $objects
+}
+
 # This is an abstract method. It must be overridden
 # in every subclass.
 sub should_handle {
@@ -113,6 +134,12 @@ sub class_for {
 
     ThrowUserError('bug_url_invalid', { url    => $value,
                                         reason => 'show_bug' });
+}
+
+sub _check_class {
+    my ($class, $subclass) = @_;
+    eval "use $subclass"; die $@ if $@;
+    return $subclass;
 }
 
 sub _check_bug_id {

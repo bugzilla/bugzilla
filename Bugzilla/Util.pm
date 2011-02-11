@@ -55,7 +55,7 @@ use Digest;
 use Email::Address;
 use List::Util qw(first);
 use Math::Random::Secure qw(irand);
-use Scalar::Util qw(tainted);
+use Scalar::Util qw(tainted blessed);
 use Template::Filters;
 use Text::Wrap;
 
@@ -307,25 +307,37 @@ sub use_attachbase {
 }
 
 sub diff_arrays {
-    my ($old_ref, $new_ref) = @_;
+    my ($old_ref, $new_ref, $attrib) = @_;
 
     my @old = @$old_ref;
     my @new = @$new_ref;
+    $attrib ||= 'name';
 
     # For each pair of (old, new) entries:
+    # If object arrays were passed then an attribute should be defined;
     # If they're equal, set them to empty. When done, @old contains entries
     # that were removed; @new contains ones that got added.
     foreach my $oldv (@old) {
         foreach my $newv (@new) {
-            next if ($newv eq '');
-            if ($oldv eq $newv) {
-                $newv = $oldv = '';
+            next if ($newv eq '' or $oldv eq '');
+            if (blessed($oldv) and blessed($newv)) {
+                if ($oldv->$attrib eq $newv->$attrib) {
+                    $newv = $oldv = '';
+                }
+            }
+            else {
+                if ($oldv eq $newv) {
+                    $newv = $oldv = ''
+                }
             }
         }
     }
 
-    my @removed = grep { $_ ne '' } @old;
-    my @added = grep { $_ ne '' } @new;
+    my @removed;
+    my @added;
+    @removed = grep { $_ ne '' } @old;
+    @added   = grep { $_ ne '' } @new;
+
     return (\@removed, \@added);
 }
 

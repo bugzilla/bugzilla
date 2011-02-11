@@ -37,21 +37,59 @@ use constant VALIDATOR_DEPENDENCIES => {
 ####        Methods        ####
 ###############################
 
+sub ref_bug_url {
+    my $self = shift;
+
+    if (!exists $self->{ref_bug_url}) {
+        my $ref_bug_id = new URI($self->name)->query_param('id');
+        my $ref_value = $self->local_uri($self->bug_id);
+        $self->{ref_bug_url} =
+            new Bugzilla::BugUrl::Bugzilla::Local({ bug_id => $ref_bug_id,
+                                                    value => $ref_value });
+    }
+    return $self->{ref_bug_url};
+}
+
 sub insert_create_data {
     my ($class, $field_values) = @_;
 
     my $ref_bug = delete $field_values->{ref_bug};
-    my $url = $class->local_uri . $field_values->{bug_id};
     my $bug_url = $class->SUPER::insert_create_data($field_values);
+    my $url = $class->local_uri($bug_url->bug_id);
 
     # Check if the ref bug has already the url and then,
     # update the ref bug to point to the current bug.
-    if (!grep { $_ eq $url } @{ $ref_bug->see_also }) {
-        $class->SUPER::insert_create_data(
-            { value => $url, bug_id => $ref_bug->id } );
+    if (!grep { $_->name eq $url } @{ $ref_bug->see_also }) {
+        $class->SUPER::insert_create_data({ value  => $url,
+                                            bug_id => $ref_bug->id,
+                                            class  => ref($class) || $class });
     }
 
     return $bug_url;
+}
+
+sub remove_from_db {
+    my $self = shift;
+
+    my $dbh = Bugzilla->dbh;
+    my $ref_bug_url = $self->ref_bug_url;
+
+    $dbh->bz_start_transaction();
+
+    # We remove the current see also first so then we
+    # avoid infinite loop later.
+    $self->SUPER::remove_from_db();
+
+    # We also remove the referenced bug url.
+    if (defined $ref_bug_url) {
+        my $ref_bug = Bugzilla::Bug->check($ref_bug_url->bug_id);
+        my $product = $ref_bug->product_obj;
+        if (Bugzilla->user->can_edit_product($product->id)) {
+            $ref_bug_url->remove_from_db();
+        }
+    }
+
+    $dbh->bz_commit_transaction();
 }
 
 sub should_handle {
@@ -59,7 +97,7 @@ sub should_handle {
 
     return $uri->as_string =~ m/^\w+$/ ? 1 : 0;
 
-    my $canonical_local = URI->new($class->_local_uri)->canonical;
+    my $canonical_local = URI->new($class->local_uri)->canonical;
 
     # Treating the domain case-insensitively and ignoring http(s)://
     return ($canonical_local->authority eq $uri->canonical->authority
@@ -73,7 +111,7 @@ sub _check_value {
     # bug id/alias to the local Bugzilla.
     my $value = $uri->as_string;
     if ($value =~ m/^\w+$/) {
-        $uri = new URI($class->local_uri . $value);
+        $uri = new URI($class->local_uri($value));
     } else {
         # It's not a word, then we have to check
         # if it's a valid Bugzilla url.
@@ -99,7 +137,9 @@ sub _check_value {
 }
 
 sub local_uri {
-    return correct_urlbase() . "show_bug.cgi?id=";
+    my ($self, $bug_id) = @_;
+    $bug_id ||= '';
+    return correct_urlbase() . "show_bug.cgi?id=$bug_id";
 }
 
 1;

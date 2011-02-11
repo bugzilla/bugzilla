@@ -28,6 +28,7 @@ use Bugzilla::Install ();
 use Bugzilla::Install::Util qw(indicate_progress install_string);
 use Bugzilla::Util;
 use Bugzilla::Series;
+use Bugzilla::BugUrl;
 
 use Date::Parse;
 use Date::Format;
@@ -647,6 +648,8 @@ sub update_table_definitions {
 
     # 2011-01-29 LpSolit@gmail.com - Bug 616185
     _migrate_user_tags();
+
+    _populate_bug_see_also_class();
 
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
@@ -3540,6 +3543,29 @@ sub _migrate_user_tags {
     $dbh->bz_commit_transaction();
 
     $dbh->bz_drop_column('namedqueries', 'query_type');
+}
+
+sub _populate_bug_see_also_class {
+    my $dbh = Bugzilla->dbh;
+
+    return if $dbh->bz_column_info('bug_see_also', 'class');
+
+    $dbh->bz_add_column('bug_see_also', 'class',
+        {TYPE => 'varchar(64)', NOTNULL => 1}, '');
+
+    my $result = $dbh->selectall_arrayref(
+        "SELECT id, value FROM bug_see_also");
+
+    my $update_sth =
+        $dbh->prepare("UPDATE bug_see_also SET class = ? WHERE id = ?");
+    
+    $dbh->bz_start_transaction();
+    foreach my $see_also (@$result) {
+        my ($id, $value) = @$see_also;
+        my $class = Bugzilla::BugUrl->class_for($value);
+        $update_sth->execute($class, $id);
+    }
+    $dbh->bz_commit_transaction();
 }
 
 1;

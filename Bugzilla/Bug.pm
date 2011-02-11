@@ -51,7 +51,7 @@ use Bugzilla::Status;
 use Bugzilla::Comment;
 use Bugzilla::BugUrl;
 
-use List::MoreUtils qw(firstidx uniq);
+use List::MoreUtils qw(firstidx uniq part);
 use List::Util qw(min max first);
 use Storable qw(dclone);
 use URI;
@@ -951,28 +951,17 @@ sub update {
     }
 
     # See Also
-    my @old_see_also = @{ $old_bug->see_also };
-    foreach my $field_values (@{ $self->{added_see_also} || [] }) {
-        my $class = delete $field_values->{class};
-        $class->insert_create_data($field_values);
-        push @{ $self->see_also }, $field_values->{value};
-    }
 
-    delete $self->{added_see_also};
+    my ($removed_see, $added_see) =
+        diff_arrays($old_bug->see_also, $self->see_also, 'name');
 
-    my ($removed_see, $added_see) = 
-        diff_arrays(\@old_see_also, $self->see_also);
-
-    if (scalar @$removed_see) {
-        $dbh->do('DELETE FROM bug_see_also WHERE bug_id = ? AND '
-                 . $dbh->sql_in('value', [('?') x @$removed_see]),
-                  undef, $self->id, @$removed_see);
-    }
+    $_->remove_from_db foreach @$removed_see;
+    $_->insert_create_data($_) foreach @$added_see;
 
     # If any changes were found, record it in the activity log
-    if (scalar @$removed_see || scalar @$added_see) {
-        $changes->{see_also} = [join(', ', @$removed_see),
-                                join(', ', @$added_see)];
+    if (scalar $removed_see || scalar $added_see) {
+        $changes->{see_also} = [join(', ', map { $_->name } @$removed_see),
+                                join(', ', map { $_->name } @$added_see)];
     }
 
     # Log bugs_activity items
@@ -2825,32 +2814,36 @@ sub remove_group {
 
 sub add_see_also {
     my ($self, $input) = @_;
+
+    # This is needed by xt/search.t.
+    $input = $input->name if blessed($input);
+
     $input = trim($input);
 
     my ($class, $uri) = Bugzilla::BugUrl->class_for($input);
 
-    my $params = { value => $uri, bug_id => $self };
+    my $params = { value => $uri, bug_id => $self, class => $class };
     $class->check_required_create_fields($params);
 
     my $field_values = $class->run_create_validators($params);
     $uri = $field_values->{value};
     $field_values->{value} = $uri->as_string;
-    $field_values->{class} = $class;
 
     # If this is a link to a local bug then save the
     # ref bug id for sending changes email.
     if ($class->isa('Bugzilla::BugUrl::Bugzilla::Local')) {
         my $ref_bug = $field_values->{ref_bug};
-        my $self_url = $class->local_uri . $self->id;
+        my $self_url = $class->local_uri($self->id);
         push @{ $self->{see_also_changes} }, $ref_bug->id
-            if !grep { $_ eq $self_url } @{ $ref_bug->see_also };
+            if !grep { $_->name eq $self_url } @{ $ref_bug->see_also };
     }
 
     # We only add the new URI if it hasn't been added yet. URIs are
     # case-sensitive, but most of our DBs are case-insensitive, so we do
     # this check case-insensitively.
     my $value = $uri->as_string;
-    if (!grep { lc($_) eq lc($value) } @{ $self->see_also }) {
+
+    if (!grep { lc($_->name) eq lc($value) } @{ $self->see_also }) {
         my $privs;
         my $can = $self->check_can_change_field('see_also', '', $value, \$privs);
         if (!$can) {
@@ -2859,22 +2852,39 @@ sub add_see_also {
                                                privs    => $privs });
         }
 
-        push @{ $self->{added_see_also} }, $field_values;
+        push @{ $self->{see_also} }, bless ($field_values, $class);
     }
 }
 
 sub remove_see_also {
     my ($self, $url) = @_;
     my $see_also = $self->see_also;
-    my @new_see_also = grep { lc($_) ne lc($url) } @$see_also;
+
+    # This is needed by xt/search.t.
+    $url = $url->name if blessed($url);
+
+    my ($removed_bug_url, $new_see_also) =
+        part { lc($_->name) ne lc($url) } @$see_also;
+ 
+    # Since we remove also the url from the referenced bug,
+    # we need to notify changes for that bug too.
+    $removed_bug_url = $removed_bug_url->[0];
+    if ($removed_bug_url->isa('Bugzilla::BugUrl::Bugzilla::Local')
+        and defined $removed_bug_url->ref_bug_url)
+    {
+        push @{ $self->{see_also_changes} },
+             $removed_bug_url->ref_bug_url->bug_id;
+    }
+
     my $privs;
-    my $can = $self->check_can_change_field('see_also', $see_also, \@new_see_also, \$privs);
+    my $can = $self->check_can_change_field('see_also', $see_also, $new_see_also, \$privs);
     if (!$can) {
         ThrowUserError('illegal_change', { field    => 'see_also',
                                            oldvalue => $url,
                                            privs    => $privs });
-        }
-    $self->{see_also} = \@new_see_also;
+    }
+
+    $self->{see_also} = $new_see_also || [];
 }
 
 sub add_tag {
@@ -3353,9 +3363,16 @@ sub reporter {
 sub see_also {
     my ($self) = @_;
     return [] if $self->{'error'};
-    $self->{'see_also'} ||= Bugzilla->dbh->selectcol_arrayref(
-        'SELECT value FROM bug_see_also WHERE bug_id = ?', undef, $self->id);
-    return $self->{'see_also'};
+    if (!defined $self->{see_also}) {
+        my $ids = Bugzilla->dbh->selectcol_arrayref(
+            'SELECT id FROM bug_see_also WHERE bug_id = ?',
+            undef, $self->id);
+
+        my $bug_urls = Bugzilla::BugUrl->new_from_list($ids);
+
+        $self->{see_also} = $bug_urls;
+    }
+    return $self->{see_also};
 }
 
 sub status {

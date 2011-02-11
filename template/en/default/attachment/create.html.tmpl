@@ -123,6 +123,9 @@
         </td>
       </tr>
     [% END %]
+
+    [% Hook.process('form_before_submit') %]
+
     <tr>
       <th>&nbsp;</th>
       <td><input type="submit" id="create" value="Submit"></td>

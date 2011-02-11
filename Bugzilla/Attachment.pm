@@ -111,6 +111,10 @@ use constant VALIDATORS => {
     store_in_file => \&_check_store_in_file,
 };
 
+use constant VALIDATOR_DEPENDENCIES => {
+    mimetype => ['ispatch', 'isurl'],
+};
+
 use constant UPDATE_VALIDATORS => {
     filename   => \&_check_filename,
     isobsolete => \&Bugzilla::Object::check_boolean,
@@ -523,9 +527,15 @@ sub _check_bug {
 }
 
 sub _check_content_type {
-    my ($invocant, $content_type) = @_;
+    my ($invocant, $content_type, undef, $params) = @_;
 
-    $content_type = 'text/plain' if (ref $invocant && ($invocant->isurl || $invocant->ispatch));
+    my ($is_url, $is_patch) = @$params{qw(isurl ispatch)};
+    if (ref $invocant) {
+        $is_url = $invocant->isurl;
+        $is_patch = $invocant->ispatch;
+    }
+
+    $content_type = 'text/plain' if ($is_url || $is_patch);
     $content_type = trim($content_type);
     my $legal_types = join('|', LEGAL_CONTENT_TYPES);
     if (!$content_type or $content_type !~ /^($legal_types)\/.+$/) {

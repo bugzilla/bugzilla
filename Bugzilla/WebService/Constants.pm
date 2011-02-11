@@ -150,6 +150,7 @@ use constant WS_ERROR_CODE => {
     file_not_specified     => 603,
     missing_attachment_description => 604,
     attachment_url_disabled => 605,
+    zero_length_file       => 606,
 
     # Errors thrown by the WebService itself. The ones that are negative 
     # conform to http://xmlrpc-epi.sourceforge.net/specs/rfc.fault_codes.php

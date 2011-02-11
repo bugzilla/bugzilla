@@ -2463,6 +2463,10 @@ You did not specify a value for the C<summary> argument.
 You attempted to attach a URL, setting C<is_url> to True,
 but this Bugzilla does not support attaching URLs.
 
+=item 606 (Empty Data)
+
+You set the "data" field to an empty string.
+
 =back
 
 =back

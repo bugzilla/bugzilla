@@ -2446,6 +2446,10 @@ You did not specify a valid for the C<file_name> argument.
 
 You did not specify a value for the C<summary> argument.
 
+=item 606 (Empty Data)
+
+You set the "data" field to an empty string.
+
 =back
 
 =item B<History>

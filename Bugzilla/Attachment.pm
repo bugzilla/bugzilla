@@ -112,6 +112,10 @@ use constant VALIDATORS => {
     mimetype      => \&_check_content_type,
 };
 
+use constant VALIDATOR_DEPENDENCIES => {
+    mimetype => ['ispatch'],
+};
+
 use constant UPDATE_VALIDATORS => {
     isobsolete => \&Bugzilla::Object::check_boolean,
 };
@@ -508,9 +512,10 @@ sub _check_bug {
 }
 
 sub _check_content_type {
-    my ($invocant, $content_type) = @_;
-
-    $content_type = 'text/plain' if (ref $invocant && $invocant->ispatch);
+    my ($invocant, $content_type, undef, $params) = @_;
+ 
+    my $is_patch = ref($invocant) ? $invocant->ispatch : $params->{ispatch};
+    $content_type = 'text/plain' if $is_patch;
     $content_type = trim($content_type);
     my $legal_types = join('|', LEGAL_CONTENT_TYPES);
     if (!$content_type or $content_type !~ /^($legal_types)\/.+$/) {

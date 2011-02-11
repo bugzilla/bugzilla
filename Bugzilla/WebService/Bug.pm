@@ -18,6 +18,7 @@
 #                 Tsahi Asher <tsahi_75@yahoo.com>
 #                 Noura Elhawary <nelhawar@redhat.com>
 #                 Frank Becker <Frank@Frank-Becker.de>
+#                 Dave Lawrence <dkl@redhat.com>
 
 package Bugzilla::WebService::Bug;
 
@@ -429,9 +430,17 @@ sub search {
         my $clause = join(' OR ', @likes);
         $params->{WHERE}->{"($clause)"} = [map { "\%$_\%" } @strings];
     }
-    
-    my $bugs = Bugzilla::Bug->match($params);
+   
+    # We want include_fields and exclude_fields to be passed to
+    # _bug_to_hash but not to Bugzilla::Bug->match so we copy the 
+    # params and delete those before passing to Bugzilla::Bug->match.
+    my %match_params = %{ $params };
+    delete $match_params{'include_fields'};
+    delete $match_params{'exclude_fields'};
+
+    my $bugs = Bugzilla::Bug->match(\%match_params);
     my $visible = Bugzilla->user->visible_bugs($bugs);
+
     my @hashes = map { $self->_bug_to_hash($_, $params) } @$visible;
     return { bugs => \@hashes };
 }

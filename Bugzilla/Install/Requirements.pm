@@ -150,7 +150,9 @@ sub REQUIRED_MODULES {
     {
         package => 'URI',
         module  => 'URI',
-        version => 0
+        # This version properly handles a semicolon as the delimiter
+        # in a URL query string.
+        version => '1.37',
     },
     {
         package => 'List-MoreUtils',

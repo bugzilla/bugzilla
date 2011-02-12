@@ -228,9 +228,11 @@ sub bug_create_value {
     if ($number == 6 and $field ne 'alias') {
         $number = 1;
     }
-    my $value = $self->_bug_create_values->{$number}->{$field};
-    return $value if defined $value;
-    return $self->_extra_bug_create_values->{$number}->{$field};
+    my $extra_values = $self->_extra_bug_create_values->{$number};
+    if (exists $extra_values->{$field}) {
+        return $extra_values->{$field};
+    }
+    return $self->_bug_create_values->{$number}->{$field};
 }
 sub bug_update_value {
     my ($self, $number, $field) = @_;
@@ -637,6 +639,7 @@ sub _create_one_bug {
         $dbh->do('UPDATE longdescs SET bug_when = ? WHERE bug_id = ?',
                  undef, $ts, $bug->id);
         $bug->{creation_ts} = $ts;
+        $extra_values->{see_also} = [];
     }
     else {
         # Manually set the creation_ts so that each bug has a different one.
@@ -657,6 +660,7 @@ sub _create_one_bug {
                  undef, $creation_ts, $status, $resolution, $bug->id);
         $dbh->do('INSERT INTO bug_see_also (bug_id, value, class) VALUES (?,?,?)',
                  undef, $bug->id, $see_also, 'Bugzilla::BugUrl::Bugzilla');
+        $extra_values->{see_also} = $bug->see_also;
 
         if ($number == 1) {
             # Bug 1 needs to start off with reporter_accessible and

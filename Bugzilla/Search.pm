@@ -56,6 +56,7 @@ use Data::Dumper;
 use Date::Format;
 use Date::Parse;
 use List::MoreUtils qw(all part uniq);
+use POSIX qw(INT_MAX);
 use Storable qw(dclone);
 
 # Description Of Boolean Charts
@@ -718,12 +719,14 @@ sub sql {
                  ? "\nHAVING " . join(' AND ', @$having_terms) : '';
     my $order_by = $self->_sql_order_by
                    ? "\nORDER BY " . join(', ', $self->_sql_order_by) : '';
+    my $limit = $self->_sql_limit;
+    $limit = "\n$limit" if $limit;
     
     my $query = <<END;
 SELECT $select
   FROM $from
  WHERE $where
-$group_by$having$order_by
+$group_by$having$order_by$limit
 END
     $self->{sql} = $query;
     return $self->{sql};
@@ -916,6 +919,33 @@ sub _translate_order_by_column {
         @items = map { "$_ DESC" } @items;
     }
     return @items;
+}
+
+#############################
+# Internal Accessors: LIMIT #
+#############################
+
+sub _sql_limit {
+    my ($self) = @_;
+    my $limit = $self->_params->{limit};
+    my $offset = $self->_params->{offset};
+    if (defined $offset and not defined $limit) {
+        $limit = INT_MAX;
+    }
+    if (defined $limit) {
+        detaint_natural($limit) 
+            || ThrowCodeError('param_must_be_numeric', 
+                              { function => 'Bugzilla::Search::new',
+                                param    => 'limit' });
+        if (defined $offset) {
+            detaint_natural($offset)
+                || ThrowCodeError('param_must_be_numeric',
+                                  { function => 'Bugzilla::Search::new',
+                                    param    => 'offset' });
+        }
+        return Bugzilla->dbh->sql_limit($limit, $offset);
+    }
+    return '';
 }
 
 ############################

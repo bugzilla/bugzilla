@@ -772,24 +772,16 @@ if (!$order) {
 
 my @orderstrings = split(/,\s*/, $order);
 
+if ($fulltext and grep { /^relevance/ } @orderstrings) {
+    $vars->{'message'} = 'buglist_sorted_by_relevance'
+}
+
 # Generate the basic SQL query that will be used to generate the bug list.
 my $search = new Bugzilla::Search('fields' => \@selectcolumns, 
                                   'params' => scalar $params->Vars,
                                   'order' => \@orderstrings);
 my $query = $search->sql;
 $vars->{'search_description'} = $search->search_description;
-
-if (defined $cgi->param('limit')) {
-    my $limit = $cgi->param('limit');
-    if (detaint_natural($limit)) {
-        $query .= " " . $dbh->sql_limit($limit);
-    }
-}
-elsif ($fulltext) {
-    if ($cgi->param('order') && $cgi->param('order') =~ /^relevance/) {
-        $vars->{'message'} = 'buglist_sorted_by_relevance';
-    }
-}
 
 
 ################################################################################

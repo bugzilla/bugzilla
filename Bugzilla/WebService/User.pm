@@ -138,6 +138,11 @@ sub create {
 sub get {
     my ($self, $params) = validate(@_, 'names', 'ids');
 
+    defined($params->{names}) || defined($params->{ids})
+        || defined($params->{match})
+        || ThrowCodeError('params_required', 
+               { function => 'User.get', params => ['ids', 'names', 'match'] });
+
     my @user_objects;
     @user_objects = map { Bugzilla::User->check($_) } @{ $params->{names} }
                     if $params->{names};
@@ -535,8 +540,10 @@ in I<any> of the groups specified.
 =item C<include_disabled> (boolean)
 
 By default, when using the C<match> parameter, disabled users are excluded
-from the returned results. Setting C<include_disabled> to C<true> will include 
-any users that are set to disabled in the returned results.
+from the returned results unless their full username is identical to the
+match string. Setting C<include_disabled> to C<true> will include disabled
+users in the returned results even if their username doesn't fully match
+the input string.
 
 =back
 

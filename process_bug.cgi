@@ -206,7 +206,8 @@ if (defined $cgi->param('id')) {
     if ($action eq 'next_bug') {
         my @bug_list;
         if ($cgi->cookie("BUGLIST")) {
-            @bug_list = split(/:/, $cgi->cookie("BUGLIST"));
+            # Also split on colons, which was used as a separator in old cookies.
+            @bug_list = split(/[:-]/, $cgi->cookie("BUGLIST"));
         }
         my $cur = lsearch(\@bug_list, $cgi->param('id'));
         if ($cur >= 0 && $cur < $#bug_list) {

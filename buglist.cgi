@@ -190,7 +190,7 @@ if (defined $cgi->param('regetlastlist')) {
 
     $order = "reuse last sort" unless $order;
     my $bug_id = $cgi->cookie('BUGLIST');
-    $bug_id =~ s/:/,/g;
+    $bug_id =~ s/[:-]/,/g;
     # set up the params for this new query
     $params = new Bugzilla::CGI({
                                  bug_id => $bug_id,
@@ -1209,7 +1209,7 @@ if ($format->{'extension'} eq "html" && !$agent) {
                           -value => $order,
                           -expires => 'Fri, 01-Jan-2038 00:00:00 GMT');
     }
-    my $bugids = join(":", @bugidlist);
+    my $bugids = join('-', @bugidlist);
     # See also Bug 111999
     if (length($bugids) == 0) {
         $cgi->remove_cookie('BUGLIST');

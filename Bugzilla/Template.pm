@@ -767,7 +767,9 @@ sub create {
                 my @bug_list;
                 my $cgi = Bugzilla->cgi;
                 if ($cgi->cookie("BUGLIST")) {
-                    @bug_list = split(/:/, $cgi->cookie("BUGLIST"));
+                    # Also split on colons, which was used as a separator
+                    # in old cookies.
+                    @bug_list = split(/[:-]/, $cgi->cookie("BUGLIST"));
                 }
                 return \@bug_list;
             },

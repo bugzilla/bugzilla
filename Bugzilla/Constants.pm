@@ -484,6 +484,8 @@ use constant DB_MODULE => {
                     version => '4.001',
                 },
                 name => 'MySQL'},
+    # Also see Bugzilla::DB::Pg::bz_check_server_version, which has special
+    # code to require DBD::Pg 2.17.2 for PostgreSQL 9 and above.
     'pg'    => {db => 'Bugzilla::DB::Pg', db_version => '8.03.0000',
                 dbd => {
                     package => 'DBD-Pg',

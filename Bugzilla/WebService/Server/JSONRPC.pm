@@ -27,8 +27,9 @@ use base qw(JSON::RPC::Server::CGI Bugzilla::WebService::Server);
 use Bugzilla::Error;
 use Bugzilla::WebService::Constants;
 use Bugzilla::WebService::Util qw(taint_data);
-use Bugzilla::Util qw(correct_urlbase trim);
+use Bugzilla::Util qw(correct_urlbase trim disable_utf8);
 
+use HTTP::Message;
 use MIME::Base64 qw(decode_base64 encode_base64);
 
 #####################################
@@ -58,6 +59,20 @@ sub create_json_coder {
 
 # Override the JSON::RPC method to return our CGI object instead of theirs.
 sub cgi { return Bugzilla->cgi; }
+
+sub response_header {
+    my $self = shift;
+    # The HTTP body needs to be bytes (not a utf8 string) for recent
+    # versions of HTTP::Message, but JSON::RPC::Server doesn't handle this
+    # properly. $_[1] is the HTTP body content we're going to be sending.
+    if (utf8::is_utf8($_[1])) {
+        utf8::encode($_[1]);
+        # Since we're going to just be sending raw bytes, we need to
+        # set STDOUT to not expect utf8.
+        disable_utf8();
+    }
+    return $self->SUPER::response_header(@_);
+}
 
 sub response {
     my ($self, $response) = @_;

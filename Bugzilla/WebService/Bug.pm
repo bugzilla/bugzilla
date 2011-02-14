@@ -569,6 +569,10 @@ sub create {
 
 sub legal_values {
     my ($self, $params) = @_;
+
+    defined $params->{field} 
+        or ThrowCodeError('param_required', { param => 'field' });
+
     my $field = Bugzilla::Bug::FIELD_MAP->{$params->{field}} 
                 || $params->{field};
 

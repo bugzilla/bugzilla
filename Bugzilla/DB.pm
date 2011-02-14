@@ -136,35 +136,16 @@ sub bz_check_requirements {
 
     my $lc = Bugzilla->localconfig;
     my $db = DB_MODULE->{lc($lc->{db_driver})};
+
     # Only certain values are allowed for $db_driver.
     if (!defined $db) {
         die "$lc->{db_driver} is not a valid choice for \$db_driver in"
             . bz_locations()->{'localconfig'};
     }
 
-    die("It is not safe to run Bugzilla inside the 'mysql' database.\n"
-        . "Please pick a different value for \$db_name in localconfig.")
-        if $lc->{db_name} eq 'mysql';
-
     # Check the existence and version of the DBD that we need.
-    my $dbd        = $db->{dbd};
-    my $sql_server = $db->{name};
-    my $sql_want   = $db->{db_version};
-    unless (have_vers($dbd, $output)) {
-        my $command = install_command($dbd);
-        my $root    = ROOT_USER;
-        my $dbd_mod = $dbd->{module};
-        my $dbd_ver = $dbd->{version};
-        my $version = $dbd_ver ? " $dbd_ver or higher" : '';
-        die <<EOT;
-
-For $sql_server, Bugzilla requires that perl's $dbd_mod $dbd_ver or later be
-installed. To install this module, run the following command (as $root):
-
-    $command
-
-EOT
-    }
+    my $dbd = $db->{dbd};
+    _bz_check_dbd($db, $output);
 
     # We don't try to connect to the actual database if $db_check is
     # disabled.
@@ -175,11 +156,42 @@ EOT
 
     # And now check the version of the database server itself.
     my $dbh = _get_no_db_connection();
+    $dbh->bz_check_server_version($db, $output);
 
-    my $sql_vers = $dbh->bz_server_version;
-    $dbh->disconnect;
+    print "\n" if $output;
+}
 
+sub _bz_check_dbd {
+    my ($db, $output) = @_;
+
+    my $dbd = $db->{dbd};
+    unless (have_vers($dbd, $output)) {
+        my $sql_server = $db->{name};
+        my $command = install_command($dbd);
+        my $root    = ROOT_USER;
+        my $dbd_mod = $dbd->{module};
+        my $dbd_ver = $dbd->{version};
+        die <<EOT;
+
+For $sql_server, Bugzilla requires that perl's $dbd_mod $dbd_ver or later be
+installed. To install this module, run the following command (as $root):
+
+    $command
+
+EOT
+    }
+}
+
+sub bz_check_server_version {
+    my ($self, $db, $output) = @_;
+
+    my $sql_vers = $self->bz_server_version;
+    $self->disconnect;
+
+    my $sql_want = $db->{db_version};
     my $version_ok = vers_cmp($sql_vers, $sql_want) > -1 ? 1 : 0;
+
+    my $sql_server = $db->{name};
     if ($output) {
         Bugzilla::Install::Requirements::_checking_for({
             package => $sql_server, wanted => $sql_want,
@@ -198,7 +210,8 @@ newer version.
 EOT
     }
 
-    print "\n" if $output;
+    # This is used by subclasses.
+    return $sql_vers;
 }
 
 # Note that this function requires that localconfig exist and

@@ -211,6 +211,19 @@ sub bz_explain {
 # Custom Database Setup
 #####################################################################
 
+sub bz_check_server_version {
+    my $self = shift;
+    my ($db) = @_;
+    my $server_version = $self->SUPER::bz_check_server_version(@_);
+    my ($major_version) = $server_version =~ /^(\d+)/;
+    # Pg 9 requires DBD::Pg 2.17.2 in order to properly read bytea values.
+    if ($major_version >= 9) {
+        local $db->{dbd}->{version} = '2.17.2';
+        local $db->{name} = $db->{name} . ' 9+';
+        Bugzilla::DB::_bz_check_dbd(@_);
+    }
+}
+
 sub bz_setup_database {
     my $self = shift;
     $self->SUPER::bz_setup_database(@_);

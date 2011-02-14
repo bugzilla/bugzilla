@@ -133,6 +133,11 @@ sub create {
 sub get {
     my ($self, $params) = validate(@_, 'names', 'ids');
 
+    defined($params->{names}) || defined($params->{ids})
+        || defined($params->{match})
+        || ThrowCodeError('params_required', 
+               { function => 'User.get', params => ['ids', 'names', 'match'] });
+
     my @user_objects;
     @user_objects = map { Bugzilla::User->check($_) } @{ $params->{names} }
                     if $params->{names};

@@ -70,14 +70,14 @@
           [% END %]
         </div>
         <div class="details">
-          [% attachment.filename FILTER html %] ([% attachment.contenttype FILTER html %])
+          [% attachment.filename FILTER html %] ([% attachment.contenttype FILTER html %]),
           [% IF attachment.datasize %]
             [%+ attachment.datasize FILTER unitconvert %]
           [% ELSE %]
             <em>deleted</em>
           [% END %], created by [%+ INCLUDE global/user.html.tmpl who = attachment.attacher %]
-          [% IF attachment.isprivate %]
-            <span class="bz_private">Only visible to <strong>[% Param('insidergroup') FILTER html %]</strong></span>
+          [% IF attachment.isprivate %];
+            <span class="bz_private">only visible to <strong>[% Param('insidergroup') FILTER html %]</strong> members</span>
           [% END %]
         </div>
       </div>

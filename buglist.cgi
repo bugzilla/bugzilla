@@ -184,7 +184,7 @@ if (my $last_list = $cgi->param('regetlastlist')) {
         $cgi->cookie('BUGLIST') || ThrowUserError("missing_cookie");
         $order = "reuse last sort" unless $order;
         $bug_ids = $cgi->cookie('BUGLIST');
-        $bug_ids =~ s/:/,/g;
+        $bug_ids =~ s/[:-]/,/g;
     }
     # But logged in users store the last X searches in the DB so they can
     # have multiple bug lists available.

@@ -423,7 +423,8 @@ sub recent_search_for {
     # and the selected bug is in the list, then return the cookie as a fake
     # Search::Recent object.
     if (my $list = $cgi->cookie('BUGLIST')) {
-        my @bug_ids = split(':', $list);
+        # Also split on colons, which was used as a separator in old cookies.
+        my @bug_ids = split(/[:-]/, $list);
         if (grep { $_ == $bug->id } @bug_ids) {
             my $search = Bugzilla::Search::Recent->new_from_cookie(\@bug_ids);
             return $search;
@@ -494,7 +495,7 @@ sub save_last_search {
     # they may still want to navigate through the search they made while
     # logged out.
     else {
-        my $bug_list = join(":", @$bug_ids);
+        my $bug_list = join('-', @$bug_ids);
         if (length($bug_list) < 4000) {
             $cgi->send_cookie(-name => 'BUGLIST',
                               -value => $bug_list,

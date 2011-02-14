@@ -63,6 +63,7 @@ use constant SUB_CLASSES => qw(
     Bugzilla::BugUrl::Debian
     Bugzilla::BugUrl::JIRA
     Bugzilla::BugUrl::Trac
+    Bugzilla::BugUrl::MantisBT
 );
 
 ###############################

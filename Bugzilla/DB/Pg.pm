@@ -190,10 +190,10 @@ sub sql_string_until {
     # PostgreSQL does not permit a negative substring length; therefore we
     # use CASE to only perform the SUBSTRING operation when $substring can
     # be found withing $string.
-    return "CASE WHEN " . $self->sql_position($substring, $string)
-                        . " != 0 THEN SUBSTRING($string FROM 1 FOR "
-                        . $self->sql_position($substring, $string) . " - 1)"
-		        . " ELSE $string END";
+    my $position = $self->sql_position($substring, $string);
+    return "CASE WHEN $position != 0"
+             . " THEN SUBSTRING($string FROM 1 FOR $position - 1)"
+             . " ELSE $string END";
 }
 
 # Tell us whether or not a particular sequence exists in the DB.

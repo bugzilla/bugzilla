@@ -1130,6 +1130,10 @@ if ($format->{'extension'} eq "csv") {
     # We set CSV files to be downloaded, as they are designed for importing
     # into other programs.
     $disposition = "attachment";
+
+    # If the user clicked the CSV link in the search results,
+    # They should get the Field Description, not the column name in the db
+    $vars->{'human'} = $cgi->param('human');
 }
 
 # Suggest a name for the bug list if the user wants to save it as a file.

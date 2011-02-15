@@ -291,7 +291,6 @@ use constant ALLWORDS_BROKEN => (
     ATTACHMENT_BOOLEANS_SEARCH_BROKEN,
     bug_group => { contains => [1] },
     cc        => { contains => [1] },
-    keywords  => { contains => [1] },
     longdesc  => { contains => [1] },
     work_time => { contains => [1] },
     percentage_complete => { contains => [2,3,4,5] },
@@ -428,7 +427,10 @@ use constant KNOWN_BROKEN => {
         bug_group => { contains => [3,4,5] },
     },
 
-    'allwordssubstr-<1>' => { ALLWORDS_BROKEN },
+    'allwordssubstr-<1>' => { 
+        ALLWORDS_BROKEN, 
+        keywords => { contains => [1] } 
+    },
     'allwordssubstr-<1>,<2>' => {
         ATTACHMENT_BOOLEANS_SEARCH_BROKEN,
         percentage_complete => { contains => [1,2,3,4,5] },

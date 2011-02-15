@@ -2089,33 +2089,26 @@ sub _keywords_exact {
     my ($chartid, $v, $ff, $f, $t, $term, $supptables) =
         @func_args{qw(chartid v ff f t term supptables)};
 
-    my @list;
+    my @keyword_ids;
+    foreach my $word (split(/[\s,]+/, $$v)) {
+        next if $word eq '';
+        my $keyword = Bugzilla::Keyword->check($word);
+        push(@keyword_ids, $keyword->id);
+    }
+
     my $table = "keywords_$$chartid";
-    foreach my $value (split(/[\s,]+/, $$v)) {
-        if ($value eq '') {
-            next;
-        }
-        my $keyword = new Bugzilla::Keyword({name => $value});
-        if ($keyword) {
-            push(@list, "$table.keywordid = " . $keyword->id);
-        }
-        else {
-            ThrowUserError("unknown_keyword",
-                           { keyword => $$v });
-        }
+    my $id_field = "$table.keywordid";
+    if ($$t eq 'anywords' or $$t eq 'anyexact') {
+        my $dbh = Bugzilla->dbh;
+        $$term = $dbh->sql_in($id_field, \@keyword_ids);
     }
-    my $haveawordterm;
-    if (@list) {
-        $haveawordterm = "(" . join(' OR ', @list) . ")";
-        if ($$t eq "anywords") {
-            $$term = $haveawordterm;
-        } elsif ($$t eq "allwords") {
-            $self->_allwords;
-            if ($$term && $haveawordterm) {
-                $$term = "(($$term) AND $haveawordterm)";
-            }
-        }
+    if ($$t eq 'allwords') {
+       my @terms = 
+         map { "bugs.bug_id IN (SELECT bug_id FROM keywords WHERE keywordid = $_)" } @keyword_ids;
+       $$term = join(' AND ', @terms);
+       return;
     }
+
     if ($$term) {
         push(@$supptables, "LEFT JOIN keywords AS $table " .
                            "ON $table.bug_id = bugs.bug_id");

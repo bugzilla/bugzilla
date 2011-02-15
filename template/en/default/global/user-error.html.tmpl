@@ -1284,6 +1284,10 @@
       Either you mis-typed the name or that user has not yet registered
       for a [% terms.Bugzilla %] account.
     [% END %]
+    [% IF class == "Bugzilla::Keyword" %]
+      The legal keyword names are <a href="describekeywords.cgi">listed
+      here</a>.
+    [% END %]
 
   [% ELSIF error == "old_password_incorrect" %]
     [% title = "Incorrect Old Password" %]

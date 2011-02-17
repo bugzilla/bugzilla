@@ -164,6 +164,7 @@ sub FILESYSTEM {
         'bugzilla.dtd'  => { perms => WS_SERVE },
         'mod_perl.pl'   => { perms => WS_SERVE },
         'robots.txt'    => { perms => WS_SERVE },
+        '.htaccess'     => { perms => WS_SERVE },
 
         'contrib/README'       => { perms => OWNER_WRITE },
         'contrib/*/README'     => { perms => OWNER_WRITE },

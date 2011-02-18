@@ -512,11 +512,11 @@ if ( ($cloned_bug_id) &&
 } elsif (formvalue('version')) {
     $default{'version'} = formvalue('version');
 } elsif (defined $version_cookie
-         and grep { $_ eq $version_cookie } @{ $vars->{'version'} })
+         and grep { $_->name eq $version_cookie } @{ $vars->{'version'} })
 {
     $default{'version'} = $version_cookie;
 } else {
-    $default{'version'} = $vars->{'version'}->[$#{$vars->{'version'}}];
+    $default{'version'} = $vars->{'version'}->[$#{$vars->{'version'}}]->name;
 }
 
 # Get list of milestones.

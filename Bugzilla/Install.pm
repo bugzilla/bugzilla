@@ -88,6 +88,8 @@ sub SETTINGS {
                               default => 'before_comments' },
     # 2008-08-27 LpSolit@gmail.com -- Bug 182238
     timezone           => { subclass => 'Timezone', default => 'local' },
+    # 2011-02-07 dkl@mozilla.com -- Bug 580490
+    quicksearch_fulltext => { options => ['on', 'off'], default => 'on' },
     }
 };
 

@@ -128,7 +128,7 @@ use constant COMPONENT_EXCEPTIONS => (
 );
 
 # Quicksearch-wide globals for boolean charts.
-our ($chart, $and, $or);
+our ($chart, $and, $or, $fulltext);
 
 sub quicksearch {
     my ($searchstring) = (@_);
@@ -141,6 +141,8 @@ sub quicksearch {
     # Remove leading and trailing commas and whitespace.
     $searchstring =~ s/(^[\s,]+|[\s,]+$)//g;
     ThrowUserError('buglist_parameters_required') unless ($searchstring);
+
+    $fulltext = Bugzilla->user->settings->{'quicksearch_fulltext'}->{'value'} eq 'on' ? 1 : 0;
 
     if ($searchstring =~ m/^[0-9,\s]*$/) {
         _bug_numbers_only($searchstring);
@@ -317,7 +319,7 @@ sub _handle_special_first_chars {
 
     if ($firstChar eq '#') {
         addChart('short_desc', 'substring', $baseWord, $negate);
-        addChart('content', 'matches', _matches_phrase($baseWord), $negate);
+        addChart('content', 'matches', _matches_phrase($baseWord), $negate) if $fulltext;
         return 1;
     }
     if ($firstChar eq ':') {
@@ -489,7 +491,7 @@ sub _default_quicksearch_word {
     addChart('alias', 'substring', $word, $negate);
     addChart('short_desc', 'substring', $word, $negate);
     addChart('status_whiteboard', 'substring', $word, $negate);
-    addChart('content', 'matches', _matches_phrase($word), $negate);
+    addChart('content', 'matches', _matches_phrase($word), $negate) if $fulltext;
 }
 
 sub _handle_urls {

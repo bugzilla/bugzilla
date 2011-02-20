@@ -929,6 +929,12 @@ sub _sql_limit {
     my ($self) = @_;
     my $limit = $self->_params->{limit};
     my $offset = $self->_params->{offset};
+    
+    my $max_results = Bugzilla->params->{'max_search_results'};
+    if (!$self->{allow_unlimited} && (!$limit || $limit > $max_results)) {
+        $limit = $max_results;
+    }
+    
     if (defined $offset and not defined $limit) {
         $limit = INT_MAX;
     }

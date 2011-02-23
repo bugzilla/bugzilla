@@ -165,8 +165,7 @@
        [% '<ul class="bug_urls">' IF value.size %]
        [% FOREACH bug_url = value %]
          <li>
-           <a href="[% bug_url.name FILTER html %]">
-             [% bug_url.name FILTER html %]</a>
+           [% PROCESS bug_url_link bug_url = bug_url %]
            <label><input type="checkbox" value="[% bug_url.name FILTER html %]"
                          name="remove_[% field.name FILTER html %]">
              Remove</label>
@@ -215,8 +214,9 @@
 [% ELSIF field.type == constants.FIELD_TYPE_BUG_URLS %]
   [% '<ul class="bug_urls">' IF value.size %]
     [% FOREACH bug_url = value %]
-      <li><a href="[% bug_url.name FILTER html %]">
-            [% bug_url.name FILTER html %]</a></li>
+      <li>
+        [% PROCESS bug_url_link bug_url = bug_url %]
+      </li>
     [% END %]
   [% '</ul>' IF value.size %]
 [% ELSE %]
@@ -236,4 +236,13 @@
     [% END %]
 [% ELSE %]
     [% extra_field_item = '' %]
+[% END %]
+
+[% BLOCK bug_url_link %]
+  [% IF bug_url.isa('Bugzilla::BugUrl::Bugzilla::Local') %]
+    [% bug_url.target_bug_id FILTER bug_link(bug_url.target_bug_id, use_alias => 1) FILTER none %]
+  [% ELSE %]
+    <a href="[% bug_url.name FILTER html %]">
+      [% bug_url.name FILTER html %]</a>
+  [% END %]
 [% END %]

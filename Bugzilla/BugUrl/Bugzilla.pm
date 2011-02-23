@@ -59,4 +59,9 @@ sub _check_value {
     return $uri;
 }
 
+sub target_bug_id {
+    my ($self) = @_;
+    return new URI($self->name)->query_param('id');
+}
+
 1;

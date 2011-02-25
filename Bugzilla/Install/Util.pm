@@ -221,8 +221,14 @@ sub extension_package_directory {
     my ($invocant, $file) = @_;
     my $class = ref($invocant) || $invocant;
 
+    # $file is set on the first invocation, store the value in the extension's
+    # package for retrieval on subsequent calls
     my $var;
-    { no strict 'refs'; $var = \${"${class}::EXTENSION_PACKAGE_DIR"}; }
+    {
+        no warnings 'once';
+        no strict 'refs';
+        $var = \${"${class}::EXTENSION_PACKAGE_DIR"};
+    }
     if ($file) {
         $$var = dirname($file);
     }

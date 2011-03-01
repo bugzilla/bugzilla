@@ -411,7 +411,7 @@ sub sql_fulltext_search {
     @words = map("LOWER($column) LIKE $_", @words);
 
     # search for occurrences of all specified words in the column
-    return "CASE WHEN (" . join(" AND ", @words) . ") THEN 1 ELSE 0 END";
+    return join (" AND ", @words), "CASE WHEN (" . join(" AND ", @words) . ") THEN 1 ELSE 0 END";
 }
 
 #####################################################################
@@ -1958,8 +1958,17 @@ Note that both parameters need to be sql-quoted.
 
 =item B<Description>
 
-Returns SQL syntax for performing a full text search for specified text 
-on a given column.
+Returns one or two SQL expressions for performing a full text search for
+specified text on a given column.
+
+If one value is returned, it is a numeric expression that indicates
+a match with a positive value and a non-match with zero. In this case,
+the DB must support casting numeric expresions to booleans.
+
+If the DB does not support casting numeric expresions to booleans, then
+the first value is a boolean expression that indicates the presence of
+a match, and the second value is a numeric expression that can be
+used for ranking.
 
 There is a ANSI SQL version of this method implemented using LIKE operator,
 but it's not a real full text search. DB specific modules should override 

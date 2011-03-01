@@ -1646,7 +1646,7 @@ sub _content_matches {
     $rterm2 = $term2 if !$rterm2;
 
     # The term to use in the WHERE clause.
-    $$term = "$term1 > 0 OR $term2 > 0";
+    $$term = "$term1 OR $term2";
     if ($$t =~ /not/i) {
         $$term = "NOT($$term)";
     }

@@ -64,7 +64,7 @@ sub search_params {
     my $operator = $self->operator;
     my $value = $self->translated_value;
     if ($operator eq 'anyexact') {
-        $value = [split(',', $value)];
+        $value = [split ',', $value];
     }
     
     if (my $ch_param = CH_OPERATOR->{$operator}) {

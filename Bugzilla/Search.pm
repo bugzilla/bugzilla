@@ -282,18 +282,19 @@ use constant OPERATOR_FIELD_OVERRIDE => {
         _non_changed => \&_dependson_nonchanged,
     },
     keywords => {
-        equals       => \&_keywords_exact,
-        anyexact     => \&_keywords_exact,
-        anyword      => \&_keywords_exact,
-        allwords     => \&_keywords_exact,
-
-        notequals     => \&_multiselect_negative,
-        notregexp     => \&_multiselect_negative,
-        notsubstring  => \&_multiselect_negative,
-        nowords       => \&_multiselect_negative,
-        nowordssubstr => \&_multiselect_negative,
-
-        _non_changed  => \&_keywords_nonchanged,
+        notequals      => \&_multiselect_negative,
+        notregexp      => \&_multiselect_negative,
+        notsubstring   => \&_multiselect_negative,
+        nowords        => \&_multiselect_negative,
+        nowordssubstr  => \&_multiselect_negative,
+        
+        allwords       => \&_multiselect_multiple,
+        allwordssubstr => \&_multiselect_multiple,
+        anyexact       => \&_multiselect_multiple,
+        anywords       => \&_multiselect_multiple,
+        anywordssubstr => \&_multiselect_multiple,
+        
+        _non_changed    => \&_multiselect_nonchanged,
     },
     'flagtypes.name' => {
         _default => \&_flagtypes_name,
@@ -2560,58 +2561,6 @@ sub _classification_nonchanged {
         "classifications.id", "classifications", $term);
 }
 
-sub _keywords_exact {
-    my ($self, $args) = @_;
-    my ($chart_id, $joins, $value, $operator) =
-        @$args{qw(chart_id joins value operator)};
-    my $dbh = Bugzilla->dbh;
-    
-    my @keyword_ids;
-    foreach my $word (split(/[\s,]+/, $value)) {
-        next if $word eq '';
-        my $keyword = Bugzilla::Keyword->check($word);
-        push(@keyword_ids, $keyword->id);
-    }
-    
-    # XXX We probably should instead throw an error here if there were
-    # just commas in the field.
-    if (!@keyword_ids) {
-        $args->{term} = '';
-        return;
-    }
-    
-    # This is an optimization for anywords and anyexact, since we already know
-    # the keyword id from having checked it above.
-    if ($operator eq 'anywords' or $operator eq 'anyexact') {
-        my $table = "keywords_$chart_id";
-        $args->{term} = $dbh->sql_in("$table.keywordid", \@keyword_ids);
-        push(@$joins, { table => 'keywords', as => $table });
-        return;
-    }
-    
-    $self->_keywords_nonchanged($args);
-}
-
-sub _keywords_nonchanged {
-    my ($self, $args) = @_;
-    my ($chart_id, $joins) =
-        @$args{qw(chart_id joins)};
-
-    my $k_table = "keywords_$chart_id";
-    my $kd_table = "keyworddefs_$chart_id";
-    
-    push(@$joins, { table => 'keywords', as => $k_table });
-    my $defs_join = {
-        table => 'keyworddefs',
-        as    => $kd_table,
-        from  => "$k_table.keywordid",
-        to    => 'id',
-    };
-    push(@$joins, $defs_join);
-    
-    $args->{full_field} = "$kd_table.name";
-}
-
 # XXX This should be combined with blocked_nonchanged.
 sub _dependson_nonchanged {
     my ($self, $args) = @_;
@@ -2700,16 +2649,7 @@ sub _multiselect_negative {
     my ($self, $args) = @_;
     my ($field, $operator) = @$args{qw(field operator)};
 
-    my $table;
-    if ($field eq 'keywords') {
-        $table = "keywords LEFT JOIN keyworddefs"
-                 . " ON keywords.keywordid = keyworddefs.id";
-        $args->{full_field} = "keyworddefs.name";
-    }
-    else { 
-        $table = "bug_$field";
-        $args->{full_field} = "$table.value";
-    }
+    my $table = $self->_multiselect_table($args);
     $args->{operator} = $self->_reverse_operator($operator);
     $self->_do_operator_function($args);
     my $term = $args->{term};
@@ -2723,19 +2663,21 @@ sub _multiselect_multiple {
         = @$args{qw(chart_id field operator value)};
     my $dbh = Bugzilla->dbh;
     
-    my $table = "bug_$field";
-    $args->{full_field} = "$table.value";
+    # We want things like "cf_multi_select=two+words" to still be
+    # considered a search for two separate words, unless we're using
+    # anyexact. (_all_values would consider that to be one "word" with a
+    # space in it, because it's not in the Boolean Charts).
+    my @words = $operator eq 'anyexact' ? $self->_all_values($args)
+                                        : split(/[\s,]+/, $value);
     
     my @terms;
-    foreach my $word (split(/[\s,]+/, $value)) {
+    foreach my $word (@words) {
         $args->{value} = $word;
-        $args->{quoted} = $dbh->quote($value);
-        $self->_do_operator_function($args);
-        my $term = $args->{term};
-        push(@terms, "bugs.bug_id IN (SELECT bug_id FROM $table WHERE $term)");
+        $args->{quoted} = $dbh->quote($word);
+        push(@terms, $self->_multiselect_term($args));
     }
     
-    if ($operator eq 'anyexact') {
+    if ($operator =~ /^any/) {
         $args->{term} = join(" OR ", @terms);
     }
     else {
@@ -2743,14 +2685,32 @@ sub _multiselect_multiple {
     }
 }
 
+sub _multiselect_table {
+    my ($self, $args) = @_;
+    my ($field, $chart_id) = @$args{qw(field chart_id)};
+    if ($field eq 'keywords') {
+        $args->{full_field} = 'keyworddefs.name';
+        return "keywords INNER JOIN keyworddefs".
+                               " ON keywords.keywordid = keyworddefs.id";
+    }
+    my $table = "bug_$field";
+    $args->{full_field} = "bug_$field.value";
+    return $table;
+}
+
+sub _multiselect_term {
+    my ($self, $args) = @_;
+    my $table = $self->_multiselect_table($args);
+    $self->_do_operator_function($args);
+    my $term = $args->{term};
+    return "bugs.bug_id IN (SELECT bug_id FROM $table WHERE $term)";
+}
+
 sub _multiselect_nonchanged {
     my ($self, $args) = @_;
     my ($chart_id, $joins, $field, $operator) =
         @$args{qw(chart_id joins field operator)};
-
-    my $table = "${field}_$chart_id";
-    $args->{full_field} = "$table.value";
-    push(@$joins, { table => "bug_$field", as => $table });
+    $args->{term} = $self->_multiselect_term($args);
 }
 
 ###############################

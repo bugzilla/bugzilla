@@ -253,9 +253,7 @@ use constant NEGATIVE_BROKEN => (
 use constant GREATERTHAN_BROKEN => (
     bug_group => { contains => [1] },
     cc        => { contains => [1] },
-    keywords  => { contains => [1] },
     longdesc  => { contains => [1] },
-    FIELD_TYPE_MULTI_SELECT, { contains => [1] },
 );
 
 # allwords and allwordssubstr have these broken tests in common.
@@ -266,7 +264,6 @@ use constant GREATERTHAN_BROKEN => (
 use constant ALLWORDS_BROKEN => (
     bug_group => { contains => [1] },
     cc        => { contains => [1] },
-    keywords  => { contains => [1] },
     longdesc  => { contains => [1] },
 );
 
@@ -468,13 +465,10 @@ use constant COMMON_BROKEN_NOT => (
     "bug_file_loc"            => { contains => [5] },
     "deadline"                => { contains => [5] },
     "flagtypes.name"          => { contains => [5] },
-    "keywords"                => { contains => [5] },
     "longdescs.isprivate"     => { contains => [1] },
-    "see_also"                => { contains => [5] },
     FIELD_TYPE_BUG_ID,           { contains => [5] },
     FIELD_TYPE_DATETIME,         { contains => [5] },
     FIELD_TYPE_FREETEXT,         { contains => [5] },
-    FIELD_TYPE_MULTI_SELECT,     { contains => [1, 5] },
     FIELD_TYPE_TEXTAREA,         { contains => [5] },
 );
 
@@ -494,10 +488,10 @@ use constant CHANGED_FROM_TO_BROKEN_NOT => (
     'longdescs.count' => { search => 1 },
     "bug_group" => { contains => [1] },
     "cc" => { contains => [1] },
-    "cf_multi_select" => { contains => [1] },
     "estimated_time" => { contains => [1] },
     "flagtypes.name" => { contains => [1] },
     "keywords" => { contains => [1] },    
+    FIELD_TYPE_MULTI_SELECT, { contains => [1] },
 );
 
 # Common broken tests for the "not" or "no" operators.
@@ -515,17 +509,13 @@ use constant BROKEN_NOT => {
         cc => { contains => [1] },
         bug_group => { contains => [1] },
         "flagtypes.name"      => { contains => [1,5] },
-        keywords => { contains => [1,5] },
         longdesc => { contains => [1] },
-        'see_also' => { },
-        FIELD_TYPE_MULTI_SELECT, { },
     },
     'allwords-<1> <2>' => {
         'attach_data.thedata' => { contains => [5] },
         bug_group => { },
         cc => { },
         'flagtypes.name'      => { contains => [5] },
-        'keywords'            => { contains => [5] },
         'longdesc' => { },
         'longdescs.isprivate' => { },
     },
@@ -533,19 +523,13 @@ use constant BROKEN_NOT => {
         COMMON_BROKEN_NOT,
         bug_group => { contains => [1] },
         cc => { contains => [1] },
-        keywords => { contains => [1,5] },
         longdesc => { contains => [1] },
-        see_also => { },
-        FIELD_TYPE_MULTI_SELECT, { },
     },
     'allwordssubstr-<1>,<2>' => {
         bug_group => { },
         cc => { },
-        FIELD_TYPE_MULTI_SELECT, { },
-        keywords => { contains => [5] },
         "longdesc" => { },
         "longdescs.isprivate" => { },
-        "see_also" => { },
     },
     anyexact => {
         COMMON_BROKEN_NOT,
@@ -554,13 +538,9 @@ use constant BROKEN_NOT => {
     },
     'anyexact-<1>, <2>' => {
         bug_group => { contains => [1] },
-        keywords => { contains => [1,5] },
-        see_also => { },
-        FIELD_TYPE_MULTI_SELECT, { },
     },
     anywords => {
         COMMON_BROKEN_NOT,
-        FIELD_TYPE_MULTI_SELECT, { contains => [5] },
     },
     'anywords-<1> <2>' => {
         'attach_data.thedata' => { contains => [5] },
@@ -568,21 +548,14 @@ use constant BROKEN_NOT => {
     anywordssubstr => {
         COMMON_BROKEN_NOT,
     },
-    'anywordssubstr-<1> <2>' => {
-        FIELD_TYPE_MULTI_SELECT, { contains => [5] },
-    },
     casesubstring => {
         COMMON_BROKEN_NOT,
         bug_group => { contains => [1] },
-        keywords  => { contains => [1,5] },
         longdesc  => { contains => [1] },
-        FIELD_TYPE_MULTI_SELECT, { contains => [1,5] },
     },
     'casesubstring-<1>-lc' => {
         bug_group => { },
-        keywords => { contains => [5] },
         longdesc => { },
-        FIELD_TYPE_MULTI_SELECT, { contains => [5] },
     },
     changedafter => {
         "attach_data.thedata"   => { contains => [2, 3, 4] },
@@ -593,7 +566,7 @@ use constant BROKEN_NOT => {
         "requestees.login_name" => { contains => [2, 3, 4] },
         "setters.login_name"    => { contains => [2, 3, 4] },
     },
-    changedbefore=> {
+    changedbefore => {
         CHANGED_BROKEN_NOT,
     },
     changedby => {
@@ -622,19 +595,16 @@ use constant BROKEN_NOT => {
         COMMON_BROKEN_NOT,
         bug_group => { contains => [1] },
         "flagtypes.name" => { contains => [1, 5] },
-        keywords  => { contains => [1,5] },
         longdesc  => { contains => [1] },
     },
     greaterthan => {
         COMMON_BROKEN_NOT,
         cc        => { contains => [1] },
-        FIELD_TYPE_MULTI_SELECT, { contains => [5] },
     },
     greaterthaneq => {
         COMMON_BROKEN_NOT,
         cc               => { contains => [1] },
         "flagtypes.name" => { contains => [2, 5] },
-        FIELD_TYPE_MULTI_SELECT, { contains => [5] },
     },
     lessthan => {
         COMMON_BROKEN_NOT,
@@ -643,12 +613,10 @@ use constant BROKEN_NOT => {
     },
     'lessthan-2' => {
         bug_group => { contains => [1] },
-        keywords  => { contains => [1,5] },
     },
     lessthaneq => {
         COMMON_BROKEN_NOT,
         bug_group => { contains => [1] },
-        keywords  => { contains => [1,5] },
         longdesc  => { contains => [1] },
         'longdescs.isprivate' => { },
     },
@@ -668,7 +636,6 @@ use constant BROKEN_NOT => {
         COMMON_BROKEN_NOT,
         bug_group => { contains => [1] },
         "flagtypes.name" => { contains => [1,5] },
-        keywords  => { contains => [1,5] },
         longdesc  => { contains => [1] },
     },
     'regexp-^1-' => {
@@ -677,7 +644,6 @@ use constant BROKEN_NOT => {
     substring      => {
         COMMON_BROKEN_NOT,
         bug_group => { contains => [1] },
-        keywords  => { contains => [1,5] },
         longdesc  => { contains => [1] },
     },
 };
@@ -735,6 +701,8 @@ use constant GREATERTHAN_OVERRIDE => (
     bug_status   => { contains => [2,3,4,5] },
     component    => { contains => [2,3,4,5] },
     commenter    => { contains => [2,3,4,5] },
+    # keywords matches if *any* keyword matches
+    keywords     => { contains => [1,2,3,4] },
     op_sys       => { contains => [2,3,4,5] },
     priority     => { contains => [2,3,4,5] },
     product      => { contains => [2,3,4,5] },
@@ -748,6 +716,8 @@ use constant GREATERTHAN_OVERRIDE => (
     FIELD_TYPE_SINGLE_SELECT, { contains => [2,3,4,5] },
     # Override SINGLE_SELECT for resolution.
     resolution => { contains => [2,3,4] },
+    # MULTI_SELECTs match if *any* value matches
+    FIELD_TYPE_MULTI_SELECT, { contains => [1,2,3,4] },
 );
 
 # For all positive multi-value types.
@@ -1168,14 +1138,6 @@ use constant INJECTION_BROKEN_FIELD => {
                            lessthan lessthaneq notregexp notsubstring
                            nowordssubstr regexp substring anywords
                            notequals nowords equals anyexact)],
-    },
-    keywords => {
-        search => 1,
-        operator_ok => [qw(allwordssubstr anywordssubstr casesubstring
-                           changedfrom changedto greaterthan greaterthaneq
-                           lessthan lessthaneq notregexp notsubstring
-                           nowordssubstr regexp substring anywords
-                           notequals nowords)]
     },
 };
 

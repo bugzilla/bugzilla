@@ -274,9 +274,7 @@ use constant OPERATOR_FIELD_OVERRIDE => {
     'attachments' => {
         _non_changed => \&_attachments,
     },
-    blocked => {
-        _non_changed => \&_blocked_nonchanged,
-    },
+    blocked   => MULTI_SELECT_OVERRIDE,
     bug_group => MULTI_SELECT_OVERRIDE,
     classification => {
         _non_changed => \&_classification_nonchanged,
@@ -292,10 +290,8 @@ use constant OPERATOR_FIELD_OVERRIDE => {
     days_elapsed => {
         _default => \&_days_elapsed,
     },
-    dependson => {
-        _non_changed => \&_dependson_nonchanged,
-    },
-    keywords => MULTI_SELECT_OVERRIDE,
+    dependson => MULTI_SELECT_OVERRIDE,
+    keywords  => MULTI_SELECT_OVERRIDE,
     'flagtypes.name' => {
         _default => \&_flagtypes_name,
     },    
@@ -2525,47 +2521,6 @@ sub _classification_nonchanged {
         "classifications.id", "classifications", $term);
 }
 
-# XXX This should be combined with blocked_nonchanged.
-sub _dependson_nonchanged {
-    my ($self, $args) = @_;
-    my ($chart_id, $joins, $field, $operator) =
-        @$args{qw(chart_id joins field operator)};
-    
-    my $table = "dependson_$chart_id";
-    my $full_field = "$table.$field";
-    $args->{full_field} = $full_field;
-    $self->_do_operator_function($args);
-    my $term = $args->{term};
-    my $dep_join = {
-        table => 'dependencies',
-        as    => $table,
-        to    => 'blocked',
-        extra => [$term],
-    };
-    push(@$joins, $dep_join);
-    $args->{term} = "$full_field IS NOT NULL";
-}
-
-sub _blocked_nonchanged {
-    my ($self, $args) = @_;
-    my ($chart_id, $joins, $field, $operator) =
-        @$args{qw(chart_id joins field operator)};
-
-    my $table = "blocked_$chart_id";
-    my $full_field = "$table.$field";
-    $args->{full_field} = $full_field;
-    $self->_do_operator_function($args);
-    my $term = $args->{term};
-    my $dep_join = {
-        table => 'dependencies',
-        as    => $table,
-        to    => 'dependson',
-        extra => [$term],
-    };
-    push(@$joins, $dep_join);
-    $args->{term} = "$full_field IS NOT NULL";
-}
-
 sub _alias_nonchanged {
     my ($self, $args) = @_;
     $args->{full_field} = "COALESCE(bugs.alias, '')";
@@ -2617,8 +2572,9 @@ sub _multiselect_negative {
     $args->{operator} = $self->_reverse_operator($operator);
     $self->_do_operator_function($args);
     my $term = $args->{term};
+    my $select = $args->{_select_field} || 'bug_id';
     $args->{term} =
-        "bugs.bug_id NOT IN (SELECT bug_id FROM $table WHERE $term)";
+        "bugs.bug_id NOT IN (SELECT $select FROM $table WHERE $term)";
 }
 
 sub _multiselect_multiple {
@@ -2667,6 +2623,12 @@ sub _multiselect_table {
         return "bug_group_map INNER JOIN groups
                                       ON bug_group_map.group_id = groups.id";
     }
+    elsif ($field eq 'blocked' or $field eq 'dependson') {
+        my $select = $field eq 'blocked' ? 'dependson' : 'blocked';
+        $args->{_select_field} = $select;
+        $args->{full_field} = "dependencies.$field";
+        return "dependencies";
+    }
     my $table = "bug_$field";
     $args->{full_field} = "bug_$field.value";
     return $table;
@@ -2677,7 +2639,8 @@ sub _multiselect_term {
     my $table = $self->_multiselect_table($args);
     $self->_do_operator_function($args);
     my $term = $args->{term};
-    return "bugs.bug_id IN (SELECT bug_id FROM $table WHERE $term)";
+    my $select = $args->{_select_field} || 'bug_id';
+    return "bugs.bug_id IN (SELECT $select FROM $table WHERE $term)";
 }
 
 sub _multiselect_nonchanged {

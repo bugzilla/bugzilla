@@ -193,11 +193,6 @@ use constant SUBSTR_NO_FIELD_ADD => FIELD_TYPE_DATETIME, qw(
 
 # Certain fields fail all the "negative" search tests:
 #
-# Blocked and Dependson "notequals" only finds bugs that have
-# values for the field, but where the dependency list doesn't contain
-# the bug you listed. It doesn't find bugs that fully lack values for
-# the fields, as it should.
-#
 # bug_file_loc can be NULL, so it gets missed by the normal
 # notequals search.
 #
@@ -220,10 +215,8 @@ use constant NEGATIVE_BROKEN => (
     'attachments.description' => { contains => [5] },
     'attachments.filename'    => { contains => [5] },
     'attachments.mimetype'    => { contains => [5] },
-    blocked      => { contains => [3,4,5] },
     bug_file_loc => { contains => [5] },
     deadline     => { contains => [5] },
-    dependson    => { contains => [2,4,5] },
     longdesc     => { contains => [1] },
     'longdescs.isprivate'   => { contains => [1] },
     # Custom fields are busted because they can be NULL.
@@ -486,8 +479,6 @@ use constant CHANGED_FROM_TO_BROKEN_NOT => (
 
 # Common broken tests for the "not" or "no" operators.
 use constant NEGATIVE_BROKEN_NOT => (
-    "blocked"        => { contains => [3, 4, 5] },
-    "dependson"      => { contains => [2, 4, 5] },
     "flagtypes.name" => { contains => [1 .. 5] },
 );
 

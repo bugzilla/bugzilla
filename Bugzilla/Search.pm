@@ -277,9 +277,7 @@ use constant OPERATOR_FIELD_OVERRIDE => {
     blocked => {
         _non_changed => \&_blocked_nonchanged,
     },
-    bug_group => {
-        _non_changed => \&_bug_group_nonchanged,
-    },
+    bug_group => MULTI_SELECT_OVERRIDE,
     classification => {
         _non_changed => \&_classification_nonchanged,
     },
@@ -2364,30 +2362,6 @@ sub _percentage_complete {
     $self->_add_extra_column('actual_time');
 }
 
-sub _bug_group_nonchanged {
-    my ($self, $args) = @_;
-    my ($chart_id, $joins, $field) = @$args{qw(chart_id joins field)};
-    
-    my $map_table = "bug_group_map_$chart_id";
-    
-    push(@$joins, { table => 'bug_group_map', as => $map_table });
-    
-    my $groups_table = "groups_$chart_id";
-    my $full_field = "$groups_table.name";
-    $args->{full_field} = $full_field;
-    $self->_do_operator_function($args);
-    my $term = $args->{term};
-    my $groups_join = {
-        table => 'groups',
-        as    => $groups_table,
-        from  => "$map_table.group_id",
-        to    => 'id',
-        extra => [$term],
-    };
-    push(@$joins, $groups_join);
-    $args->{term} = "$full_field IS NOT NULL";
-}
-
 sub _attach_data_thedata {
     my ($self, $args) = @_;
     my ($chart_id, $joins) = @$args{qw(chart_id joins)};
@@ -2687,6 +2661,11 @@ sub _multiselect_table {
         $args->{full_field} = 'tags.name';
         return "bug_tag INNER JOIN tags ON bug_tag.tag_id = tags.id"
                                        . " AND user_id = " . $self->_user->id;
+    }
+    elsif ($field eq 'bug_group') {
+        $args->{full_field} = 'groups.name';
+        return "bug_group_map INNER JOIN groups
+                                      ON bug_group_map.group_id = groups.id";
     }
     my $table = "bug_$field";
     $args->{full_field} = "bug_$field.value";

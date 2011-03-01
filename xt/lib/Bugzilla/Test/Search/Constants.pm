@@ -198,12 +198,6 @@ use constant SUBSTR_NO_FIELD_ADD => FIELD_TYPE_DATETIME, qw(
 # the bug you listed. It doesn't find bugs that fully lack values for
 # the fields, as it should.
 #
-# cc "not" matches if any CC'ed user matches, and it fails to match
-# if there are no CCs on the bug.
-#
-# bug_group notequals doesn't find bugs that fully lack groups,
-# and matches if there is one group that isn't equal.
-#
 # bug_file_loc can be NULL, so it gets missed by the normal
 # notequals search.
 #
@@ -228,7 +222,6 @@ use constant NEGATIVE_BROKEN => (
     'attachments.mimetype'    => { contains => [5] },
     blocked      => { contains => [3,4,5] },
     bug_file_loc => { contains => [5] },
-    bug_group    => { contains => [1,5] },
     deadline     => { contains => [5] },
     dependson    => { contains => [2,4,5] },
     longdesc     => { contains => [1] },
@@ -245,13 +238,12 @@ use constant NEGATIVE_BROKEN => (
 # As with other fields, longdescs greaterthan matches if any comment
 # matches (which might be OK).
 #
-# Same for keywords, bug_group, and cc. Logically, all of these might
+# Same for keywords, and cc. Logically, all of these might
 # be OK, but it makes the operation not the logical reverse of
 # lessthaneq. What we're really saying here by marking these broken
 # is that there ought to be some way of searching "all ccs" vs "any cc"
 # (and same for the other fields).
 use constant GREATERTHAN_BROKEN => (
-    bug_group => { contains => [1] },
     cc        => { contains => [1] },
     longdesc  => { contains => [1] },
 );
@@ -260,9 +252,8 @@ use constant GREATERTHAN_BROKEN => (
 #
 # allwordssubstr on longdescs fields matches against a single comment,
 # instead of matching against all comments on a bug. Same is true
-# for cc and bug_group.
+# for cc.
 use constant ALLWORDS_BROKEN => (
-    bug_group => { contains => [1] },
     cc        => { contains => [1] },
     longdesc  => { contains => [1] },
 );
@@ -270,15 +261,14 @@ use constant ALLWORDS_BROKEN => (
 # nowords and nowordssubstr have these broken tests in common.
 #
 # flagtypes.name doesn't match bugs without flags.
-# longdescs.isprivate, and bug_group actually work properly in
+# longdescs.isprivate actually works properly in
 # terms of excluding bug 1 (since we exclude all values in the search,
-# on our test), but still fail at including bug 5.
+# on our test), but still fails at including bug 5.
 # The longdesc* fields, coincidentally, work completely
 # correctly, possibly because there's only one comment on bug 5.
 use constant NOWORDS_BROKEN => (
     NEGATIVE_BROKEN,
     'flagtypes.name' => { contains => [5] },
-    bug_group        => { contains => [5] },
     longdesc         => {},
     'longdescs.isprivate' => {},
 );
@@ -496,10 +486,9 @@ use constant CHANGED_FROM_TO_BROKEN_NOT => (
 
 # Common broken tests for the "not" or "no" operators.
 use constant NEGATIVE_BROKEN_NOT => (
-    "blocked"             => { contains => [3, 4, 5] },
-    "bug_group"           => { contains => [5] },
-    "dependson"           => { contains => [2, 4, 5] },
-    "flagtypes.name"      => { contains => [1 .. 5] },
+    "blocked"        => { contains => [3, 4, 5] },
+    "dependson"      => { contains => [2, 4, 5] },
+    "flagtypes.name" => { contains => [1 .. 5] },
 );
 
 # These are field/operator combinations that are broken when run under NOT().
@@ -507,13 +496,11 @@ use constant BROKEN_NOT => {
     allwords       => {
         COMMON_BROKEN_NOT,
         cc => { contains => [1] },
-        bug_group => { contains => [1] },
         "flagtypes.name"      => { contains => [1,5] },
         longdesc => { contains => [1] },
     },
     'allwords-<1> <2>' => {
         'attach_data.thedata' => { contains => [5] },
-        bug_group => { },
         cc => { },
         'flagtypes.name'      => { contains => [5] },
         'longdesc' => { },
@@ -521,12 +508,10 @@ use constant BROKEN_NOT => {
     },
     allwordssubstr => {
         COMMON_BROKEN_NOT,
-        bug_group => { contains => [1] },
         cc => { contains => [1] },
         longdesc => { contains => [1] },
     },
     'allwordssubstr-<1>,<2>' => {
-        bug_group => { },
         cc => { },
         "longdesc" => { },
         "longdescs.isprivate" => { },
@@ -535,9 +520,6 @@ use constant BROKEN_NOT => {
         COMMON_BROKEN_NOT,
         "flagtypes.name" => { contains => [1, 2, 5] },
         "longdesc"       => { contains => [1, 2] },
-    },
-    'anyexact-<1>, <2>' => {
-        bug_group => { contains => [1] },
     },
     anywords => {
         COMMON_BROKEN_NOT,
@@ -550,11 +532,9 @@ use constant BROKEN_NOT => {
     },
     casesubstring => {
         COMMON_BROKEN_NOT,
-        bug_group => { contains => [1] },
         longdesc  => { contains => [1] },
     },
     'casesubstring-<1>-lc' => {
-        bug_group => { },
         longdesc => { },
     },
     changedafter => {
@@ -593,7 +573,6 @@ use constant BROKEN_NOT => {
     },
     equals => {
         COMMON_BROKEN_NOT,
-        bug_group => { contains => [1] },
         "flagtypes.name" => { contains => [1, 5] },
         longdesc  => { contains => [1] },
     },
@@ -611,12 +590,8 @@ use constant BROKEN_NOT => {
         longdesc => { contains => [1] },
         'longdescs.isprivate' => { },
     },
-    'lessthan-2' => {
-        bug_group => { contains => [1] },
-    },
     lessthaneq => {
         COMMON_BROKEN_NOT,
-        bug_group => { contains => [1] },
         longdesc  => { contains => [1] },
         'longdescs.isprivate' => { },
     },
@@ -634,7 +609,6 @@ use constant BROKEN_NOT => {
     },
     regexp         => {
         COMMON_BROKEN_NOT,
-        bug_group => { contains => [1] },
         "flagtypes.name" => { contains => [1,5] },
         longdesc  => { contains => [1] },
     },
@@ -643,7 +617,6 @@ use constant BROKEN_NOT => {
     },
     substring      => {
         COMMON_BROKEN_NOT,
-        bug_group => { contains => [1] },
         longdesc  => { contains => [1] },
     },
 };
@@ -697,6 +670,7 @@ use constant GREATERTHAN_OVERRIDE => (
     classification => { contains => [2,3,4,5] },
     assigned_to  => { contains => [2,3,4,5] },
     bug_id       => { contains => [2,3,4,5] },
+    bug_group    => { contains => [1,2,3,4] },
     bug_severity => { contains => [2,3,4,5] },
     bug_status   => { contains => [2,3,4,5] },
     component    => { contains => [2,3,4,5] },

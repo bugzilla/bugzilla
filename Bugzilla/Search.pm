@@ -296,10 +296,10 @@ use constant OPERATOR_FIELD_OVERRIDE => {
         _default => \&_flagtypes_name,
     },    
     longdesc => {
+        %{ MULTI_SELECT_OVERRIDE() },
         changedby     => \&_long_desc_changedby,
         changedbefore => \&_long_desc_changedbefore_after,
         changedafter  => \&_long_desc_changedbefore_after,
-        _default      => \&_long_desc,
     },
     'longdescs.count' => {
         changedby     => \&_long_desc_changedby,
@@ -2286,12 +2286,6 @@ sub _join_longdescs {
     return $table;
 }
 
-sub _long_desc {
-    my ($self, $args) = @_;
-    my $table = $self->_join_longdescs($args);
-    $args->{full_field} = "$table.thetext";
-}
-
 sub _long_descs_count {
     my ($self, $args) = @_;
     my ($chart_id, $joins) = @$args{qw(chart_id joins)};
@@ -2568,13 +2562,8 @@ sub _multiselect_negative {
     my ($self, $args) = @_;
     my ($field, $operator) = @$args{qw(field operator)};
 
-    my $table = $self->_multiselect_table($args);
     $args->{operator} = $self->_reverse_operator($operator);
-    $self->_do_operator_function($args);
-    my $term = $args->{term};
-    my $select = $args->{_select_field} || 'bug_id';
-    $args->{term} =
-        "bugs.bug_id NOT IN (SELECT $select FROM $table WHERE $term)";
+    $args->{term} = $self->_multiselect_term($args, 1);
 }
 
 sub _multiselect_multiple {
@@ -2605,6 +2594,13 @@ sub _multiselect_multiple {
     }
 }
 
+sub _multiselect_nonchanged {
+    my ($self, $args) = @_;
+    my ($chart_id, $joins, $field, $operator) =
+        @$args{qw(chart_id joins field operator)};
+    $args->{term} = $self->_multiselect_term($args)
+}
+
 sub _multiselect_table {
     my ($self, $args) = @_;
     my ($field, $chart_id) = @$args{qw(field chart_id)};
@@ -2626,8 +2622,14 @@ sub _multiselect_table {
     elsif ($field eq 'blocked' or $field eq 'dependson') {
         my $select = $field eq 'blocked' ? 'dependson' : 'blocked';
         $args->{_select_field} = $select;
-        $args->{full_field} = "dependencies.$field";
+        $args->{full_field} = $field;
         return "dependencies";
+    }
+    elsif ($field eq 'longdesc') {
+        $args->{_extra_where} = " AND isprivate = 0"
+            if !$self->_user->is_insider;
+        $args->{full_field} = 'thetext';
+        return "longdescs";
     }
     my $table = "bug_$field";
     $args->{full_field} = "bug_$field.value";
@@ -2635,19 +2637,14 @@ sub _multiselect_table {
 }
 
 sub _multiselect_term {
-    my ($self, $args) = @_;
+    my ($self, $args, $not) = @_;
     my $table = $self->_multiselect_table($args);
     $self->_do_operator_function($args);
     my $term = $args->{term};
+    $term .= $args->{_extra_where} || '';
     my $select = $args->{_select_field} || 'bug_id';
-    return "bugs.bug_id IN (SELECT $select FROM $table WHERE $term)";
-}
-
-sub _multiselect_nonchanged {
-    my ($self, $args) = @_;
-    my ($chart_id, $joins, $field, $operator) =
-        @$args{qw(chart_id joins field operator)};
-    $args->{term} = $self->_multiselect_term($args);
+    my $not_sql = $not ? "NOT " : '';
+    return "bugs.bug_id ${not_sql}IN (SELECT $select FROM $table WHERE $term)";
 }
 
 ###############################

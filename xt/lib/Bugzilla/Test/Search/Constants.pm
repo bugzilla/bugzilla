@@ -196,9 +196,6 @@ use constant SUBSTR_NO_FIELD_ADD => FIELD_TYPE_DATETIME, qw(
 # bug_file_loc can be NULL, so it gets missed by the normal
 # notequals search.
 #
-# longdescs "notequals" matches if *any* of the values
-# are not equal to the string provided.
-#
 # attachments.* notequals doesn't find bugs that lack attachments.
 #
 # deadline notequals does not find bugs that lack deadlines
@@ -217,7 +214,6 @@ use constant NEGATIVE_BROKEN => (
     'attachments.mimetype'    => { contains => [5] },
     bug_file_loc => { contains => [5] },
     deadline     => { contains => [5] },
-    longdesc     => { contains => [1] },
     'longdescs.isprivate'   => { contains => [1] },
     # Custom fields are busted because they can be NULL.
     FIELD_TYPE_FREETEXT, { contains => [5] },
@@ -238,7 +234,6 @@ use constant NEGATIVE_BROKEN => (
 # (and same for the other fields).
 use constant GREATERTHAN_BROKEN => (
     cc        => { contains => [1] },
-    longdesc  => { contains => [1] },
 );
 
 # allwords and allwordssubstr have these broken tests in common.
@@ -248,7 +243,6 @@ use constant GREATERTHAN_BROKEN => (
 # for cc.
 use constant ALLWORDS_BROKEN => (
     cc        => { contains => [1] },
-    longdesc  => { contains => [1] },
 );
 
 # nowords and nowordssubstr have these broken tests in common.
@@ -262,7 +256,6 @@ use constant ALLWORDS_BROKEN => (
 use constant NOWORDS_BROKEN => (
     NEGATIVE_BROKEN,
     'flagtypes.name' => { contains => [5] },
-    longdesc         => {},
     'longdescs.isprivate' => {},
 );
 
@@ -488,29 +481,24 @@ use constant BROKEN_NOT => {
         COMMON_BROKEN_NOT,
         cc => { contains => [1] },
         "flagtypes.name"      => { contains => [1,5] },
-        longdesc => { contains => [1] },
     },
     'allwords-<1> <2>' => {
         'attach_data.thedata' => { contains => [5] },
         cc => { },
         'flagtypes.name'      => { contains => [5] },
-        'longdesc' => { },
         'longdescs.isprivate' => { },
     },
     allwordssubstr => {
         COMMON_BROKEN_NOT,
         cc => { contains => [1] },
-        longdesc => { contains => [1] },
     },
     'allwordssubstr-<1>,<2>' => {
         cc => { },
-        "longdesc" => { },
         "longdescs.isprivate" => { },
     },
     anyexact => {
         COMMON_BROKEN_NOT,
         "flagtypes.name" => { contains => [1, 2, 5] },
-        "longdesc"       => { contains => [1, 2] },
     },
     anywords => {
         COMMON_BROKEN_NOT,
@@ -523,10 +511,6 @@ use constant BROKEN_NOT => {
     },
     casesubstring => {
         COMMON_BROKEN_NOT,
-        longdesc  => { contains => [1] },
-    },
-    'casesubstring-<1>-lc' => {
-        longdesc => { },
     },
     changedafter => {
         "attach_data.thedata"   => { contains => [2, 3, 4] },
@@ -551,7 +535,6 @@ use constant BROKEN_NOT => {
         'attach_data.thedata' => { },
         blocked         => { contains => [1, 2] },
         dependson       => { contains => [1, 3] },
-        longdesc        => { },
         work_time       => { contains => [1] },
         FIELD_TYPE_BUG_ID, { contains => [1 .. 4] },
         
@@ -565,7 +548,6 @@ use constant BROKEN_NOT => {
     equals => {
         COMMON_BROKEN_NOT,
         "flagtypes.name" => { contains => [1, 5] },
-        longdesc  => { contains => [1] },
     },
     greaterthan => {
         COMMON_BROKEN_NOT,
@@ -578,12 +560,10 @@ use constant BROKEN_NOT => {
     },
     lessthan => {
         COMMON_BROKEN_NOT,
-        longdesc => { contains => [1] },
         'longdescs.isprivate' => { },
     },
     lessthaneq => {
         COMMON_BROKEN_NOT,
-        longdesc  => { contains => [1] },
         'longdescs.isprivate' => { },
     },
     notequals      => { NEGATIVE_BROKEN_NOT },
@@ -601,14 +581,12 @@ use constant BROKEN_NOT => {
     regexp         => {
         COMMON_BROKEN_NOT,
         "flagtypes.name" => { contains => [1,5] },
-        longdesc  => { contains => [1] },
     },
     'regexp-^1-' => {
         "flagtypes.name" => { contains => [5] },
     },
     substring      => {
         COMMON_BROKEN_NOT,
-        longdesc  => { contains => [1] },
     },
 };
 
@@ -668,6 +646,7 @@ use constant GREATERTHAN_OVERRIDE => (
     commenter    => { contains => [2,3,4,5] },
     # keywords matches if *any* keyword matches
     keywords     => { contains => [1,2,3,4] },
+    longdesc     => { contains => [1,2,3,4] },
     op_sys       => { contains => [2,3,4,5] },
     priority     => { contains => [2,3,4,5] },
     product      => { contains => [2,3,4,5] },

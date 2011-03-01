@@ -350,6 +350,9 @@ sub _field_values_for_bug {
     elsif ($field eq 'see_also') {
         @values = $self->_values_for($number, 'see_also', 'name');
     }
+    elsif ($field eq 'tag') {
+        @values = $self->_values_for($number, 'tags');
+    }
     # Bugzilla::Bug truncates creation_ts, but we need the full value
     # from the database. This has no special value for changedfrom,
     # because it never changes.

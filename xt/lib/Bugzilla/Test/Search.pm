@@ -429,6 +429,7 @@ sub _create_field_values {
         }
         $values{$field} = $value;
     }
+    $values{'tag'} = ["$number-tag-" . random()];
     
     my @date_fields = grep { $_->type == FIELD_TYPE_DATETIME } $self->all_fields;
     foreach my $field (@date_fields) {
@@ -481,6 +482,7 @@ sub _create_field_values {
             my $name = $field->name;
             $values{$name} = [$values{$name}, $new_value->name];
         }
+        push(@{ $values{'tag'} }, "6-tag-" . random());
     }
 
     # On bug 5, any field that *can* be left empty, *is* left empty.
@@ -607,7 +609,7 @@ sub _create_one_bug {
     
     # There are some things in bug_create_values that shouldn't go into
     # create().
-    delete @params{qw(attachment set_flags)};
+    delete @params{qw(attachment set_flags tag)};
     
     my ($status, $resolution, $see_also) = 
         delete @params{qw(bug_status resolution see_also)};
@@ -662,6 +664,15 @@ sub _create_one_bug {
                  undef, $bug->id, $see_also, 'Bugzilla::BugUrl::Bugzilla');
         $extra_values->{see_also} = $bug->see_also;
 
+        # All the tags must be created as the admin user, so that the
+        # admin user can find them, later.
+        my $original_user = Bugzilla->user;
+        Bugzilla->set_user($self->admin);
+        my $tags = $self->bug_create_value($number, 'tag');
+        $bug->add_tag($_) foreach @$tags;
+        $extra_values->{tags} = $tags;
+        Bugzilla->set_user($original_user);
+
         if ($number == 1) {
             # Bug 1 needs to start off with reporter_accessible and
             # cclist_accessible being 0, so that when we change them to 1,
@@ -669,12 +680,9 @@ sub _create_one_bug {
             $dbh->do('UPDATE bugs SET reporter_accessible = 0,
                       cclist_accessible = 0 WHERE bug_id = ?',
                       undef, $bug->id);
-        }
-        
-        # Bug 1 gets three comments, so that longdescs.count matches it
-        # uniquely. The third comment is added in the middle, so that the
-        # last comment contains all of the important data, like work_time.
-        if ($number == 1) {
+            # Bug 1 gets three comments, so that longdescs.count matches it
+            # uniquely. The third comment is added in the middle, so that the
+            # last comment contains all of the important data, like work_time.
             $bug->add_comment("1-comment-" . random(100));
         }
         

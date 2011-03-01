@@ -220,6 +220,22 @@ use constant NON_NUMERIC_OPERATORS => qw(
     notregexp
 );
 
+use constant MULTI_SELECT_OVERRIDE => {
+    notequals      => \&_multiselect_negative,
+    notregexp      => \&_multiselect_negative,
+    notsubstring   => \&_multiselect_negative,
+    nowords        => \&_multiselect_negative,
+    nowordssubstr  => \&_multiselect_negative,
+    
+    allwords       => \&_multiselect_multiple,
+    allwordssubstr => \&_multiselect_multiple,
+    anyexact       => \&_multiselect_multiple,
+    anywords       => \&_multiselect_multiple,
+    anywordssubstr => \&_multiselect_multiple,
+    
+    _non_changed    => \&_multiselect_nonchanged,
+};
+
 use constant OPERATOR_FIELD_OVERRIDE => {
     # User fields
     'attachments.submitter' => {
@@ -281,21 +297,7 @@ use constant OPERATOR_FIELD_OVERRIDE => {
     dependson => {
         _non_changed => \&_dependson_nonchanged,
     },
-    keywords => {
-        notequals      => \&_multiselect_negative,
-        notregexp      => \&_multiselect_negative,
-        notsubstring   => \&_multiselect_negative,
-        nowords        => \&_multiselect_negative,
-        nowordssubstr  => \&_multiselect_negative,
-        
-        allwords       => \&_multiselect_multiple,
-        allwordssubstr => \&_multiselect_multiple,
-        anyexact       => \&_multiselect_multiple,
-        anywords       => \&_multiselect_multiple,
-        anywordssubstr => \&_multiselect_multiple,
-        
-        _non_changed    => \&_multiselect_nonchanged,
-    },
+    keywords => MULTI_SELECT_OVERRIDE,
     'flagtypes.name' => {
         _default => \&_flagtypes_name,
     },    
@@ -323,25 +325,13 @@ use constant OPERATOR_FIELD_OVERRIDE => {
         lessthaneq    => \&_owner_idle_time_greater_less,
         _default      => \&_invalid_combination,
     },
-    
     product => {
         _non_changed => \&_product_nonchanged,
     },
+    tag => MULTI_SELECT_OVERRIDE,
     
     # Custom multi-select fields
-    _multi_select => {
-        notequals      => \&_multiselect_negative,
-        notregexp      => \&_multiselect_negative,
-        notsubstring   => \&_multiselect_negative,
-        nowords        => \&_multiselect_negative,
-        nowordssubstr  => \&_multiselect_negative,
-        
-        allwords       => \&_multiselect_multiple,
-        allwordssubstr => \&_multiselect_multiple,
-        anyexact       => \&_multiselect_multiple,
-        
-        _non_changed    => \&_multiselect_nonchanged,
-    },
+    _multi_select => MULTI_SELECT_OVERRIDE,
     
     # Timetracking Fields
     percentage_complete => {
@@ -2692,6 +2682,11 @@ sub _multiselect_table {
         $args->{full_field} = 'keyworddefs.name';
         return "keywords INNER JOIN keyworddefs".
                                " ON keywords.keywordid = keyworddefs.id";
+    }
+    elsif ($field eq 'tag') {
+        $args->{full_field} = 'tags.name';
+        return "bug_tag INNER JOIN tags ON bug_tag.tag_id = tags.id"
+                                       . " AND user_id = " . $self->_user->id;
     }
     my $table = "bug_$field";
     $args->{full_field} = "bug_$field.value";

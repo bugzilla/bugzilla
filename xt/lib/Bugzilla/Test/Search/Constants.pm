@@ -260,7 +260,7 @@ use constant GREATERTHAN_BROKEN => (
 #
 # allwordssubstr on longdescs fields matches against a single comment,
 # instead of matching against all comments on a bug. Same is true
-# for cc, keywords, and bug_group.
+# for cc and bug_group.
 use constant ALLWORDS_BROKEN => (
     bug_group => { contains => [1] },
     cc        => { contains => [1] },
@@ -710,6 +710,7 @@ use constant GREATERTHAN_OVERRIDE => (
     rep_platform => { contains => [2,3,4,5] },
     short_desc   => { contains => [2,3,4,5] },
     version      => { contains => [2,3,4,5] },
+    tag          => { contains => [1,2,3,4] },
     target_milestone => { contains => [2,3,4,5] },
     # Bug 2 is the only bug besides 1 that has a Requestee set.
     'requestees.login_name'  => { contains => [2] },
@@ -757,6 +758,7 @@ use constant CHANGED_OVERRIDE => (
     'attachments.submitter' => { contains => [] },
     bug_id    => { contains => [] },
     reporter  => { contains => [] },
+    tag       => { contains => [] },
 );
 
 #########

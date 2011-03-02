@@ -74,6 +74,13 @@ sub get_param_list {
   },
 
   {
+    name => 'default_search_limit',
+    type => 't',
+    default => '500',
+    checker => \&check_numeric
+  },
+
+  {
     name => 'max_search_results',
     type => 't',
     default => '10000',

@@ -920,7 +920,7 @@ sub _sql_limit {
         $limit = $max_results;
     }
     
-    if (defined $offset and not defined $limit) {
+    if (defined($offset) && !$limit) {
         $limit = INT_MAX;
     }
     if (defined $limit) {

@@ -776,6 +776,14 @@ if ($fulltext and grep { /^relevance/ } @orderstrings) {
     $vars->{'message'} = 'buglist_sorted_by_relevance'
 }
 
+# In the HTML interface, by default, we limit the returned results,
+# which speeds up quite a few searches where people are really only looking
+# for the top results.
+if ($format->{'extension'} eq 'html' && !defined $cgi->param('limit')) {
+    $params->param('limit', Bugzilla->params->{'default_search_limit'});
+    $vars->{'default_limited'} = 1;
+}
+
 # Generate the basic SQL query that will be used to generate the bug list.
 my $search = new Bugzilla::Search('fields' => \@selectcolumns, 
                                   'params' => scalar $params->Vars,
@@ -783,6 +791,9 @@ my $search = new Bugzilla::Search('fields' => \@selectcolumns,
 my $query = $search->sql;
 $vars->{'search_description'} = $search->search_description;
 
+# We don't want saved searches and other buglist things to save
+# our default limit.
+$params->delete('limit') if $vars->{'default_limited'};
 
 ################################################################################
 # Query Execution

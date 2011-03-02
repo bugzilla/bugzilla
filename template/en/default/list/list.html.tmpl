@@ -110,9 +110,7 @@
 [%############################################################################%]
 
 [% IF bugs.size > 9 %]
-  <span class="bz_result_count">
-    [% bugs.size %] [%+ terms.bugs %] found.
-  </span>
+  [% PROCESS num_results %]
 [% END %]
 
 [%############################################################################%]
@@ -134,15 +132,7 @@
 [%# Succeeding Status Line                                                   #%]
 [%############################################################################%]
 
-<span class="bz_result_count">
-  [% IF bugs.size == 0 %]
-    <span class="zero_results">[% terms.zeroSearchResults %].</span>
-  [% ELSIF bugs.size == 1 %]
-    One [% terms.bug %] found.
-  [% ELSE %]
-    [% bugs.size %] [%+ terms.bugs %] found.
-  [% END %]
-</span>
+[% PROCESS num_results %]
 
 [% IF bugs.size == 0 %]
   <ul class="zero_result_links">
@@ -274,6 +264,10 @@
 
 [% PROCESS global/footer.html.tmpl %]
 
+[%##########%]
+[%# Blocks #%]
+[%##########%]
+
 [% BLOCK edit_search_url %]
   [% editqueryname = searchname OR defaultsavename OR '' %]
   query.cgi?[% urlquerypart FILTER html %]
@@ -290,4 +284,22 @@
    [% IF one_product.defined %]
      in the "[% one_product.name FILTER html %]" product
    [% END %]</a>
+[% END %]
+
+[% BLOCK num_results %]
+  <span class="bz_result_count">
+    [% IF bugs.size == 0 %]
+      <span class="zero_results">[% terms.zeroSearchResults %].</span>
+    [% ELSIF default_limited AND bugs.size >= Param('default_search_limit') %]
+      This result was limited to [% Param('default_search_limit') FILTER html %]
+      [%+ terms.bugs %].
+      <a href="buglist.cgi?[% urlquerypart FILTER html %]
+              [%- "&order=$qorder" FILTER html IF order %]&limit=0">See
+        all search results for this query</a>.
+    [% ELSIF bugs.size == 1 %]
+      One [% terms.bug %] found.
+    [% ELSE %]
+      [% bugs.size %] [%+ terms.bugs %] found.
+    [% END %]
+  </span>
 [% END %]

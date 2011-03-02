@@ -58,6 +58,18 @@ sub name {
     return "$name (Normal Params)";
 }
 
+sub search_columns {
+    my $self = shift;
+    my $field = $self->field;
+    # For the assigned_to, qa_contact, and reporter fields, have the
+    # "Normal Params" test check that the _realname columns work
+    # all by themselves.
+    if (grep($_ eq $field, EMAIL_FIELDS) && $self->field_object->buglist) {
+        return ['bug_id', "${field}_realname"]
+    }
+    return $self->SUPER::search_columns(@_);
+}
+
 sub search_params {
     my ($self) = @_;
     my $field = $self->field;

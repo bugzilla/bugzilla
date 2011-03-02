@@ -945,6 +945,8 @@ sub _sql_limit {
 
 sub _column_join {
     my ($self, $field) = @_;
+    # The _realname fields require the same join as the username fields.
+    $field =~ s/_realname$//;
     my $join_info = COLUMN_JOINS->{$field};
     if ($join_info) {
         # Don't allow callers to modify the constant.

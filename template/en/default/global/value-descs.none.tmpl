@@ -10,24 +10,27 @@
   #
   # The Original Code is the Bugzilla Bug Tracking System.
   #
-  # The Initial Developer of the Original Code is Everything Solved, Inc.
-  # Portions created by the Initial Developer are Copyright (C) 2010
+  # The Initial Developer of the Original Code is BugzillaSource, Inc.
+  # Portions created by the Initial Developer are Copyright (C) 2011 
   # the Initial Developer. All Rights Reserved.
   #
-  # Contributor(s): 
+  # Contributor(s):
   #   Max Kanat-Alexander <mkanat@bugzilla.org>
   #%]
 
-[% PROCESS "global/value-descs.none.tmpl" %]
+[%# You can use this hash to localize (translate) the values displayed
+  # for drop-down and multiple-select fields. Lines starting with "#"
+  # are comments.
+  #%]
+[% value_descs = {
+  "bug_status" => {
+    # "UNCONFIRMED" => "UNCO",
+    # "CONFIRMED"   => "ITSABUG",
+  },
 
-BUGZILLA.value_descs = {
-  [% FOREACH vd_field = value_descs.keys %]
-    [% vd_field FILTER js %]: {
-      [% FOREACH vd_value = value_descs.${vd_field}.keys %]
-        '[% vd_value FILTER js %]':
-        '[% value_descs.${vd_field}.${vd_value} FILTER js %]'
-        [%~ ',' UNLESS loop.last %]
-      [% END %]
-    }[% ',' UNLESS loop.last %]
-  [% END %]
-};
+  "resolution" => {
+    ""        => "---",
+    # "FIXED"      => "NO LONGER AN ISSUE",
+    # "WORKSFORME" => "NOTMYPROBLEM!",
+  },
+} %]

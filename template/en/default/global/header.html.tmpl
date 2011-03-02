@@ -212,7 +212,7 @@
 
         [% FOREACH yui_name = yui %]
           [% FOREACH yui_template = yui_templates.$yui_name %]
-            [% PROCESS $yui_template %]
+            [% INCLUDE $yui_template %]
           [% END %]
         [% END %]
         [% IF javascript %]

@@ -389,6 +389,7 @@ use constant USER_FIELDS => {
 # Backwards compatibility for times that we changed the names of fields
 # or URL parameters.
 use constant FIELD_MAP => {
+    'attachments.thedata' => 'attach_data.thedata',
     bugidtype => 'bug_id_type',
     changedin => 'days_elapsed',
     long_desc => 'longdesc',

@@ -288,11 +288,9 @@ use constant OPERATOR_FIELD_OVERRIDE => {
     days_elapsed => {
         _default => \&_days_elapsed,
     },
-    dependson => MULTI_SELECT_OVERRIDE,
-    keywords  => MULTI_SELECT_OVERRIDE,
-    'flagtypes.name' => {
-        _default => \&_flagtypes_name,
-    },    
+    dependson        => MULTI_SELECT_OVERRIDE,
+    keywords         => MULTI_SELECT_OVERRIDE,
+    'flagtypes.name' => MULTI_SELECT_OVERRIDE,
     longdesc => {
         %{ MULTI_SELECT_OVERRIDE() },
         changedby     => \&_long_desc_changedby,
@@ -2355,57 +2353,6 @@ sub _join_flag_tables {
     push(@$joins, $attachments_join, $flags_join);
 }
 
-sub _flagtypes_name {
-    my ($self, $args) = @_;
-    my ($chart_id, $operator, $joins, $field, $having) = 
-        @$args{qw(chart_id operator joins field having)};
-    my $dbh = Bugzilla->dbh;
-    
-    # Matches bugs by flag name/status.
-    # Note that--for the purposes of querying--a flag comprises
-    # its name plus its status (i.e. a flag named "review" 
-    # with a status of "+" can be found by searching for "review+").
-    
-    # Don't do anything if this condition is about changes to flags,
-    # as the generic change condition processors can handle those.
-    return if $operator =~ /^changed/;
-    
-    # Add the flags and flagtypes tables to the query.  We do 
-    # a left join here so bugs without any flags still match 
-    # negative conditions (f.e. "flag isn't review+").
-    $self->_join_flag_tables($args);
-    my $flags = "flags_$chart_id";
-    my $flagtypes = "flagtypes_$chart_id";
-    my $flagtypes_join = {
-        table => 'flagtypes',
-        as    => $flagtypes,
-        from  => "$flags.type_id",
-        to    => 'id',
-    };
-    push(@$joins, $flagtypes_join);
-    
-    my $full_field = $dbh->sql_string_concat("$flagtypes.name",
-                                             "$flags.status");
-    $args->{full_field} = $full_field;
-    $self->_do_operator_function($args);
-    my $term = $args->{term};
-    
-    # If this is a negative condition (f.e. flag isn't "review+"),
-    # we only want bugs where all flags match the condition, not 
-    # those where any flag matches, which needs special magic.
-    # Instead of adding the condition to the WHERE clause, we select
-    # the number of flags matching the condition and the total number
-    # of flags on each bug, then compare them in a HAVING clause.
-    # If the numbers are the same, all flags match the condition,
-    # so this bug should be included.
-    if ($operator =~ /^not/) {
-       push(@$having,
-            "SUM(CASE WHEN $full_field IS NOT NULL THEN 1 ELSE 0 END) = " .
-            "SUM(CASE WHEN $term THEN 1 ELSE 0 END)");
-       $args->{term} = '';
-    }
-}
-
 sub _days_elapsed {
     my ($self, $args) = @_;
     my $dbh = Bugzilla->dbh;
@@ -2562,6 +2509,8 @@ sub _multiselect_nonchanged {
 sub _multiselect_table {
     my ($self, $args) = @_;
     my ($field, $chart_id) = @$args{qw(field chart_id)};
+    my $dbh = Bugzilla->dbh;
+    
     if ($field eq 'keywords') {
         $args->{full_field} = 'keyworddefs.name';
         return "keywords INNER JOIN keyworddefs".
@@ -2609,6 +2558,11 @@ sub _multiselect_table {
             if !$self->_user->is_insider;
         return "attachments INNER JOIN attach_data "
                . " ON attachments.attach_id = attach_data.id"
+    }
+    elsif ($field eq 'flagtypes.name') {
+        $args->{full_field} = $dbh->sql_string_concat("flagtypes.name",
+                                                      "flags.status");
+        return "flags INNER JOIN flagtypes ON flags.type_id = flagtypes.id";
     }
     my $table = "bug_$field";
     $args->{full_field} = "bug_$field.value";

@@ -46,7 +46,6 @@ our @EXPORT = qw(
     NUM_BUGS
     NUM_SEARCH_TESTS
     OR_BROKEN
-    OR_SKIP
     SKIP_FIELDS
     SPECIAL_PARAM_TESTS
     SUBSTR_NO_FIELD_ADD
@@ -134,13 +133,6 @@ use constant SKIP_FIELDS => qw(
     days_elapsed
 );
 
-# During OR tests, we skip these fields. They basically just don't work
-# right in OR tests, and it's too much work to document the exact tests
-# that they cause to fail.
-use constant OR_SKIP => qw(
-    flagtypes.name
-);
-
 # All the fields that represent users.
 use constant USER_FIELDS => qw(
     assigned_to
@@ -212,13 +204,6 @@ use constant ALLWORDS_BROKEN => (
     cc        => { contains => [1] },
 );
 
-# nowords and nowordssubstr have these broken tests in common.
-#
-# flagtypes.name doesn't match bugs without flags.
-use constant NOWORDS_BROKEN => (
-    'flagtypes.name' => { contains => [5] },
-);
-
 # Fields that don't generally work at all with changed* searches, but
 # probably should.
 use constant CHANGED_BROKEN => (
@@ -272,15 +257,9 @@ use constant KNOWN_BROKEN => {
     greaterthaneq => { GREATERTHAN_BROKEN },
 
     'allwordssubstr-<1>' => { ALLWORDS_BROKEN },
-    # flagtypes.name does not work here, probably because they all try to
-    # match against a single flag.
     'allwords-<1>' => {
         ALLWORDS_BROKEN,
-        'flagtypes.name' => { contains => [1] },
     },
-
-    nowordssubstr => { NOWORDS_BROKEN },
-    nowords => { NOWORDS_BROKEN },
 
     # setters.login_name and requestees.login name aren't tracked individually
     # in bugs_activity, so can't be searched using this method.
@@ -357,12 +336,6 @@ use constant KNOWN_BROKEN => {
 # Broken NotTests #
 ###################
 
-# These are fields that are broken in the same way for pretty much every
-# NOT test that is broken.
-use constant COMMON_BROKEN_NOT => (
-    "flagtypes.name"          => { contains => [5] },
-);
-
 # Common BROKEN_NOT values for the changed* fields.
 use constant CHANGED_BROKEN_NOT => (
     "attach_data.thedata"   => { contains => [1] },
@@ -385,41 +358,19 @@ use constant CHANGED_FROM_TO_BROKEN_NOT => (
     FIELD_TYPE_MULTI_SELECT, { contains => [1] },
 );
 
-# Common broken tests for the "not" or "no" operators.
-use constant NEGATIVE_BROKEN_NOT => (
-    "flagtypes.name" => { contains => [1 .. 5] },
-);
-
 # These are field/operator combinations that are broken when run under NOT().
 use constant BROKEN_NOT => {
     allwords       => {
-        COMMON_BROKEN_NOT,
         cc => { contains => [1] },
-        "flagtypes.name"      => { contains => [1,5] },
     },
     'allwords-<1> <2>' => {
         cc => { },
-        'flagtypes.name'      => { contains => [5] },
     },
     allwordssubstr => {
-        COMMON_BROKEN_NOT,
         cc => { contains => [1] },
     },
     'allwordssubstr-<1>,<2>' => {
         cc => { },
-    },
-    anyexact => {
-        COMMON_BROKEN_NOT,
-        "flagtypes.name" => { contains => [1, 2, 5] },
-    },
-    anywords => {
-        COMMON_BROKEN_NOT,
-    },
-    anywordssubstr => {
-        COMMON_BROKEN_NOT,
-    },
-    casesubstring => {
-        COMMON_BROKEN_NOT,
     },
     changedafter => {
         "attach_data.thedata"   => { contains => [2, 3, 4] },
@@ -454,45 +405,11 @@ use constant BROKEN_NOT => {
         longdesc => { contains => [1] },
         "remaining_time" => { contains => [1] },
     },
-    equals => {
-        COMMON_BROKEN_NOT,
-        "flagtypes.name" => { contains => [1, 5] },
-    },
     greaterthan => {
-        COMMON_BROKEN_NOT,
         cc        => { contains => [1] },
     },
     greaterthaneq => {
-        COMMON_BROKEN_NOT,
         cc               => { contains => [1] },
-        "flagtypes.name" => { contains => [2, 5] },
-    },
-    lessthan => {
-        COMMON_BROKEN_NOT,
-    },
-    lessthaneq => {
-        COMMON_BROKEN_NOT,
-    },
-    notequals      => { NEGATIVE_BROKEN_NOT },
-    notregexp      => { NEGATIVE_BROKEN_NOT },
-    notsubstring   => { NEGATIVE_BROKEN_NOT },
-    nowords        => {
-        NEGATIVE_BROKEN_NOT,
-        "flagtypes.name" => { },
-    },
-    nowordssubstr  => {
-        NEGATIVE_BROKEN_NOT,
-        "flagtypes.name" => { },
-    },
-    regexp         => {
-        COMMON_BROKEN_NOT,
-        "flagtypes.name" => { contains => [1,5] },
-    },
-    'regexp-^1-' => {
-        "flagtypes.name" => { contains => [5] },
-    },
-    substring      => {
-        COMMON_BROKEN_NOT,
     },
 };
 

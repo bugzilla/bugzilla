@@ -70,7 +70,7 @@ sub debug_value {
 # SKIP & TODO Messages #
 ########################
 
-sub _join_skip { OR_SKIP }
+sub _join_skip { () }
 sub _join_broken_constant { OR_BROKEN }
 
 sub field_not_yet_implemented {

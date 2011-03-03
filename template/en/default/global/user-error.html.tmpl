@@ -149,6 +149,8 @@
       run
     [% ELSIF action == "schedule" %]
       schedule
+    [% ELSIF action == "search" %]
+      search
     [% ELSIF action == "use" %]
       use
     [% ELSIF action == "approve" %]
@@ -167,6 +169,8 @@
       [% END %]
     [% ELSIF object == "bugs" %]
       [%+ terms.bugs %]
+    [% ELSIF object == "bug_fields" %]
+      the [% field_descs.$field FILTER html %] field
     [% ELSIF object == "charts" %]
       the "New Charts" feature
     [% ELSIF object == "classifications" %]

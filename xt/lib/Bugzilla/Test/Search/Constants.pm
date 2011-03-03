@@ -214,7 +214,6 @@ use constant NEGATIVE_BROKEN => (
     'attachments.mimetype'    => { contains => [5] },
     bug_file_loc => { contains => [5] },
     deadline     => { contains => [5] },
-    'longdescs.isprivate'   => { contains => [1] },
     # Custom fields are busted because they can be NULL.
     FIELD_TYPE_FREETEXT, { contains => [5] },
     FIELD_TYPE_BUG_ID,   { contains => [5] },
@@ -248,15 +247,9 @@ use constant ALLWORDS_BROKEN => (
 # nowords and nowordssubstr have these broken tests in common.
 #
 # flagtypes.name doesn't match bugs without flags.
-# longdescs.isprivate actually works properly in
-# terms of excluding bug 1 (since we exclude all values in the search,
-# on our test), but still fails at including bug 5.
-# The longdesc* fields, coincidentally, work completely
-# correctly, possibly because there's only one comment on bug 5.
 use constant NOWORDS_BROKEN => (
     NEGATIVE_BROKEN,
     'flagtypes.name' => { contains => [5] },
-    'longdescs.isprivate' => {},
 );
 
 # Fields that don't generally work at all with changed* searches, but
@@ -310,18 +303,6 @@ use constant KNOWN_BROKEN => {
     notequals    => { NEGATIVE_BROKEN },
     notsubstring => { NEGATIVE_BROKEN },
     notregexp    => { NEGATIVE_BROKEN },
-
-    # longdescs.isprivate matches if any comment matches, instead of if all
-    # comments match. (Commenter is probably
-    # also broken in this way, but all our comments come from the same user.) 
-    lessthan   => {
-        'longdescs.isprivate'   => { contains => [1] },
-    },
-    # The lessthaneq tests are broken for the same reasons, but they work
-    # slightly differently so they have a different set of broken tests.
-    lessthaneq => {
-        'longdescs.isprivate' => { contains => [1] },
-    },
 
     greaterthan   => { GREATERTHAN_BROKEN },
     greaterthaneq => { GREATERTHAN_BROKEN },
@@ -441,7 +422,6 @@ use constant COMMON_BROKEN_NOT => (
     "bug_file_loc"            => { contains => [5] },
     "deadline"                => { contains => [5] },
     "flagtypes.name"          => { contains => [5] },
-    "longdescs.isprivate"     => { contains => [1] },
     FIELD_TYPE_BUG_ID,           { contains => [5] },
     FIELD_TYPE_DATETIME,         { contains => [5] },
     FIELD_TYPE_FREETEXT,         { contains => [5] },
@@ -486,7 +466,6 @@ use constant BROKEN_NOT => {
         'attach_data.thedata' => { contains => [5] },
         cc => { },
         'flagtypes.name'      => { contains => [5] },
-        'longdescs.isprivate' => { },
     },
     allwordssubstr => {
         COMMON_BROKEN_NOT,
@@ -494,7 +473,6 @@ use constant BROKEN_NOT => {
     },
     'allwordssubstr-<1>,<2>' => {
         cc => { },
-        "longdescs.isprivate" => { },
     },
     anyexact => {
         COMMON_BROKEN_NOT,
@@ -560,11 +538,9 @@ use constant BROKEN_NOT => {
     },
     lessthan => {
         COMMON_BROKEN_NOT,
-        'longdescs.isprivate' => { },
     },
     lessthaneq => {
         COMMON_BROKEN_NOT,
-        'longdescs.isprivate' => { },
     },
     notequals      => { NEGATIVE_BROKEN_NOT },
     notregexp      => { NEGATIVE_BROKEN_NOT },
@@ -828,7 +804,7 @@ use constant TESTS => {
               cclist_accessible        => { value => 1, contains => [2,3,4,5] },
               reporter_accessible      => { value => 1, contains => [2,3,4,5] },
               'longdescs.count'        => { value => 3, contains => [2,3,4,5] },
-              'longdescs.isprivate'    => { value => 1, contains => [2,3,4,5] },
+              'longdescs.isprivate'    => { value => 1, contains => [1,2,3,4,5] },
               everconfirmed            => { value => 1, contains => [2,3,4,5] },
               creation_ts => { value => '2037-01-02', contains => [1,5] },
               delta_ts    => { value => '2037-01-02', contains => [1,5] },
@@ -852,7 +828,7 @@ use constant TESTS => {
               cclist_accessible        => { value => 0, contains => [2,3,4,5] },
               reporter_accessible      => { value => 0, contains => [2,3,4,5] },
               'longdescs.count'        => { value => 2, contains => [2,3,4,5] },
-              'longdescs.isprivate'    => { value => 0, contains => [2,3,4,5] },
+              'longdescs.isprivate'    => { value => -1, contains => [] },
               everconfirmed            => { value => 0, contains => [2,3,4,5] },
               blocked   => { contains => [1,2] },
               dependson => { contains => [1,3] },
@@ -932,7 +908,9 @@ use constant TESTS => {
           override => {
               dependson => { value => '<1-id> <3-id>', contains => [] },
               # bug 3 has the value "21" here, so matches "2,1"
-              percentage_complete => { value => '<2>,<3>', contains => [3] }
+              percentage_complete => { value => '<2>,<3>', contains => [3] },
+              # 1 0 matches bug 1, which has both public and private comments.
+             'longdescs.isprivate' => { contains => [1] },              
           }
         },
     ],
@@ -966,7 +944,9 @@ use constant TESTS => {
           override => { MULTI_BOOLEAN_OVERRIDE } },
         { contains => [], value => '<1> <2>',
           override => {
-            dependson => { contains => [], value => '<2-id> <3-id>' }
+            dependson => { contains => [], value => '<2-id> <3-id>' },
+            # 1 0 matches bug 1, which has both public and private comments.
+            'longdescs.isprivate' => { contains => [1] },
           }
         },
     ],

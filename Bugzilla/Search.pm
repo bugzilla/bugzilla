@@ -309,9 +309,7 @@ use constant OPERATOR_FIELD_OVERRIDE => {
         changedto     => \&_invalid_combination,
         _default      => \&_long_descs_count,
     },
-    'longdescs.isprivate' => {
-        _default => \&_longdescs_isprivate,
-    },
+    'longdescs.isprivate' => MULTI_SELECT_OVERRIDE,
     owner_idle_time => {
         greaterthan   => \&_owner_idle_time_greater_less,
         greaterthaneq => \&_owner_idle_time_greater_less,
@@ -2269,25 +2267,6 @@ sub _content_matches {
     COLUMNS->{'relevance'}->{name} = $select_term;
 }
 
-sub _join_longdescs {
-    my ($self, $args) = @_;
-    my ($chart_id, $joins) = @$args{qw(chart_id joins)};
-    
-    my $table = "longdescs_$chart_id";
-    my $extra = $self->_user->is_insider ? [] : ["$table.isprivate = 0"];
-    my $join = {
-        table => 'longdescs',
-        as    => $table,
-        extra => $extra,
-    };
-    # We only want to do an INNER JOIN if we're not checking isprivate.
-    # Otherwise we'd exclude all bugs with only private comments from
-    # the search entirely.
-    $join->{join} = 'INNER' if $self->_user->is_insider;
-    push(@$joins, $join);
-    return $table;
-}
-
 sub _long_descs_count {
     my ($self, $args) = @_;
     my ($chart_id, $joins) = @$args{qw(chart_id joins)};
@@ -2300,12 +2279,6 @@ sub _long_descs_count {
     };
     push(@$joins, $join);
     $args->{full_field} = "${table}.num";
-}
-
-sub _longdescs_isprivate {
-    my ($self, $args) = @_;
-    my $table = $self->_join_longdescs($args);
-    $args->{full_field} = "$table.isprivate";
 }
 
 sub _work_time_changedby {
@@ -2588,11 +2561,12 @@ sub _multiselect_multiple {
         push(@terms, $self->_multiselect_term($args));
     }
     
+    # The spacing in the joins helps make the resulting SQL more readable.
     if ($operator =~ /^any/) {
-        $args->{term} = join(" OR ", @terms);
+        $args->{term} = join("\n        OR ", @terms);
     }
     else {
-        $args->{term} = join(" AND ", @terms);
+        $args->{term} = join("\n        AND ", @terms);
     }
 }
 
@@ -2631,6 +2605,14 @@ sub _multiselect_table {
         $args->{_extra_where} = " AND isprivate = 0"
             if !$self->_user->is_insider;
         $args->{full_field} = 'thetext';
+        return "longdescs";
+    }
+    elsif ($field eq 'longdescs.isprivate') {
+        ThrowUserError('auth_failure', { action => 'search',
+                                         object => 'bug_fields',
+                                         field => 'longdescs.isprivate' })
+            if !$self->_user->is_insider;
+        $args->{full_field} = 'isprivate';
         return "longdescs";
     }
     my $table = "bug_$field";

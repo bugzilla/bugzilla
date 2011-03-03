@@ -267,11 +267,9 @@ use constant OPERATOR_FIELD_OVERRIDE => {
     alias => {
         _non_changed => \&_alias_nonchanged,
     },
-    'attach_data.thedata' => {
-        _non_changed => \&_attach_data_thedata,
-    },
     # We check all attachment fields against this.
     attachments => MULTI_SELECT_OVERRIDE,
+    'attach_data.thedata' => MULTI_SELECT_OVERRIDE,
     blocked     => MULTI_SELECT_OVERRIDE,
     bug_group   => MULTI_SELECT_OVERRIDE,
     classification => {
@@ -2326,29 +2324,6 @@ sub _percentage_complete {
     $self->_add_extra_column('actual_time');
 }
 
-sub _attach_data_thedata {
-    my ($self, $args) = @_;
-    my ($chart_id, $joins) = @$args{qw(chart_id joins)};
-    
-    my $attach_table = "attachments_$chart_id";
-    my $data_table = "attachdata_$chart_id";
-    my $extra = $self->_user->is_insider
-                ? [] : ["$attach_table.isprivate = 0"];
-    my $attachments_join = {
-        table => 'attachments',
-        as    => $attach_table,
-        extra => $extra,
-    };
-    my $data_join = {
-        table => 'attach_data',
-        as    => $data_table,
-        from  => "$attach_table.attach_id",
-        to    => "id",
-    };
-    push(@$joins, $attachments_join, $data_join);
-    $args->{full_field} = "$data_table.thedata";
-}
-
 sub _join_flag_tables {
     my ($self, $args) = @_;
     my ($joins, $chart_id) = @$args{qw(joins chart_id)};
@@ -2600,6 +2575,12 @@ sub _multiselect_table {
         $field =~ /^attachments\.(.+)$/;
         $args->{full_field} = $1;
         return "attachments";
+    }
+    elsif ($field eq 'attach_data.thedata') {
+        $args->{_extra_where} = " AND attachments.isprivate = 0"
+            if !$self->_user->is_insider;
+        return "attachments INNER JOIN attach_data "
+               . " ON attachments.attach_id = attach_data.id"
     }
     my $table = "bug_$field";
     $args->{full_field} = "bug_$field.value";

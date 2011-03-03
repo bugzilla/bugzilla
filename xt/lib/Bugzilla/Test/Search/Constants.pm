@@ -47,7 +47,6 @@ our @EXPORT = qw(
     NUM_SEARCH_TESTS
     OR_BROKEN
     OR_SKIP
-    PG_BROKEN
     SKIP_FIELDS
     SPECIAL_PARAM_TESTS
     SUBSTR_NO_FIELD_ADD
@@ -203,7 +202,6 @@ use constant SUBSTR_NO_FIELD_ADD => FIELD_TYPE_DATETIME, qw(
 #
 # requestees.login_name doesn't find bugs that fully lack requestees.
 use constant NEGATIVE_BROKEN => (
-    'attach_data.thedata'     => { contains => [5] },
     bug_file_loc => { contains => [5] },
     deadline     => { contains => [5] },
     # Custom fields are busted because they can be NULL.
@@ -302,19 +300,13 @@ use constant KNOWN_BROKEN => {
     'allwordssubstr-<1>' => { ALLWORDS_BROKEN },
     # flagtypes.name does not work here, probably because they all try to
     # match against a single flag.
-    # Same for attach_data.thedata.
     'allwords-<1>' => {
         ALLWORDS_BROKEN,
         'flagtypes.name' => { contains => [1] },
     },
 
     nowordssubstr => { NOWORDS_BROKEN },
-    # attach_data.thedata doesn't match properly with any of the plain
-    # "words" searches. Also, bug 5 doesn't match because it lacks
-    # attachments.
-    nowords => {
-        NOWORDS_BROKEN,
-    },
+    nowords => { NOWORDS_BROKEN },
 
     # setters.login_name and requestees.login name aren't tracked individually
     # in bugs_activity, so can't be searched using this method.
@@ -387,16 +379,6 @@ use constant KNOWN_BROKEN => {
     },
 };
 
-# This tracks things that are broken in different ways on Pg compared to
-# MySQL. Actually, in some of these cases, Pg is behaving correctly
-# where MySQL isn't, but the result is still a bit surprising to the user.
-use constant PG_BROKEN => {
-    'attach_data.thedata' => {
-        notregexp => { contains => [5] },
-        nowords   => { contains => [5] },
-    },
-};
-
 ###################
 # Broken NotTests #
 ###################
@@ -404,7 +386,6 @@ use constant PG_BROKEN => {
 # These are fields that are broken in the same way for pretty much every
 # NOT test that is broken.
 use constant COMMON_BROKEN_NOT => (
-    "attach_data.thedata"     => { contains => [5] },
     "bug_file_loc"            => { contains => [5] },
     "deadline"                => { contains => [5] },
     "flagtypes.name"          => { contains => [5] },
@@ -449,7 +430,6 @@ use constant BROKEN_NOT => {
         "flagtypes.name"      => { contains => [1,5] },
     },
     'allwords-<1> <2>' => {
-        'attach_data.thedata' => { contains => [5] },
         cc => { },
         'flagtypes.name'      => { contains => [5] },
     },
@@ -466,9 +446,6 @@ use constant BROKEN_NOT => {
     },
     anywords => {
         COMMON_BROKEN_NOT,
-    },
-    'anywords-<1> <2>' => {
-        'attach_data.thedata' => { contains => [5] },
     },
     anywordssubstr => {
         COMMON_BROKEN_NOT,
@@ -537,7 +514,6 @@ use constant BROKEN_NOT => {
     },
     nowordssubstr  => {
         NEGATIVE_BROKEN_NOT,
-        "attach_data.thedata" => { },
         "flagtypes.name" => { },
     },
     regexp         => {

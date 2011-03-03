@@ -191,13 +191,6 @@ sub _known_broken {
         $value_name .= "-$extra_name";
     }    
     
-    if (!$skip_pg_check and Bugzilla->dbh->isa('Bugzilla::DB::Pg')) {
-        my $field_broken = PG_BROKEN->{$field}->{$operator};
-        return $field_broken if $field_broken;
-        my $pg_value_broken = PG_BROKEN->{$field}->{$value_name};
-        return $pg_value_broken if $pg_value_broken;
-    }
-    
     my $value_broken = $constant->{$value_name}->{$field};
     $value_broken ||= $constant->{$value_name}->{$type};
     return $value_broken if $value_broken;

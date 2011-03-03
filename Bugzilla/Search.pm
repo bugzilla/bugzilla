@@ -271,11 +271,9 @@ use constant OPERATOR_FIELD_OVERRIDE => {
         _non_changed => \&_attach_data_thedata,
     },
     # We check all attachment fields against this.
-    'attachments' => {
-        _non_changed => \&_attachments,
-    },
-    blocked   => MULTI_SELECT_OVERRIDE,
-    bug_group => MULTI_SELECT_OVERRIDE,
+    attachments => MULTI_SELECT_OVERRIDE,
+    blocked     => MULTI_SELECT_OVERRIDE,
+    bug_group   => MULTI_SELECT_OVERRIDE,
     classification => {
         _non_changed => \&_classification_nonchanged,
     },
@@ -2351,26 +2349,6 @@ sub _attach_data_thedata {
     $args->{full_field} = "$data_table.thedata";
 }
 
-sub _attachments {
-    my ($self, $args) = @_;
-    my ($chart_id, $joins, $field) =
-        @$args{qw(chart_id joins field)};
-    my $dbh = Bugzilla->dbh;
-    
-    my $table = "attachments_$chart_id";
-    my $extra = $self->_user->is_insider ? [] : ["$table.isprivate = 0"];
-    my $join = {
-        table => 'attachments',
-        as    => $table,
-        extra => $extra,
-    };
-    push(@$joins, $join);
-    $field =~ /^attachments\.(.+)$/;
-    my $attach_field = $1;
-    
-    $args->{full_field} = "$table.$attach_field";
-}
-
 sub _join_flag_tables {
     my ($self, $args) = @_;
     my ($joins, $chart_id) = @$args{qw(joins chart_id)};
@@ -2615,6 +2593,13 @@ sub _multiselect_table {
             if !$self->_user->is_insider;
         $args->{full_field} = 'isprivate';
         return "longdescs";
+    }
+    elsif ($field =~ /^attachments/) {
+        $args->{_extra_where} = " AND isprivate = 0"
+            if !$self->_user->is_insider;
+        $field =~ /^attachments\.(.+)$/;
+        $args->{full_field} = $1;
+        return "attachments";
     }
     my $table = "bug_$field";
     $args->{full_field} = "bug_$field.value";

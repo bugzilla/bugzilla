@@ -196,8 +196,6 @@ use constant SUBSTR_NO_FIELD_ADD => FIELD_TYPE_DATETIME, qw(
 # bug_file_loc can be NULL, so it gets missed by the normal
 # notequals search.
 #
-# attachments.* notequals doesn't find bugs that lack attachments.
-#
 # deadline notequals does not find bugs that lack deadlines
 #
 # setters notequal doesn't find bugs that fully lack flags.
@@ -205,13 +203,7 @@ use constant SUBSTR_NO_FIELD_ADD => FIELD_TYPE_DATETIME, qw(
 #
 # requestees.login_name doesn't find bugs that fully lack requestees.
 use constant NEGATIVE_BROKEN => (
-    'attachments.isobsolete'  => { contains => [5] },
-    'attachments.ispatch'     => { contains => [5] },
-    'attachments.isprivate'   => { contains => [5] },
     'attach_data.thedata'     => { contains => [5] },
-    'attachments.description' => { contains => [5] },
-    'attachments.filename'    => { contains => [5] },
-    'attachments.mimetype'    => { contains => [5] },
     bug_file_loc => { contains => [5] },
     deadline     => { contains => [5] },
     # Custom fields are busted because they can be NULL.
@@ -413,12 +405,6 @@ use constant PG_BROKEN => {
 # NOT test that is broken.
 use constant COMMON_BROKEN_NOT => (
     "attach_data.thedata"     => { contains => [5] },
-    "attachments.description" => { contains => [5] },
-    "attachments.filename"    => { contains => [5] },
-    "attachments.isobsolete"  => { contains => [5] },
-    "attachments.ispatch"     => { contains => [5] },
-    "attachments.isprivate"   => { contains => [5] },
-    "attachments.mimetype"    => { contains => [5] },
     "bug_file_loc"            => { contains => [5] },
     "deadline"                => { contains => [5] },
     "flagtypes.name"          => { contains => [5] },

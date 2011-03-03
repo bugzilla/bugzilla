@@ -190,27 +190,6 @@ use constant SUBSTR_NO_FIELD_ADD => FIELD_TYPE_DATETIME, qw(
 # See the KNOWN_BROKEN constant for a general description of these
 # "_BROKEN" constants.
 
-# Certain fields fail all the "negative" search tests:
-#
-# bug_file_loc can be NULL, so it gets missed by the normal
-# notequals search.
-#
-# deadline notequals does not find bugs that lack deadlines
-#
-# setters notequal doesn't find bugs that fully lack flags.
-# (maybe this is OK?)
-#
-# requestees.login_name doesn't find bugs that fully lack requestees.
-use constant NEGATIVE_BROKEN => (
-    bug_file_loc => { contains => [5] },
-    deadline     => { contains => [5] },
-    # Custom fields are busted because they can be NULL.
-    FIELD_TYPE_FREETEXT, { contains => [5] },
-    FIELD_TYPE_BUG_ID,   { contains => [5] },
-    FIELD_TYPE_DATETIME, { contains => [5] },
-    FIELD_TYPE_TEXTAREA, { contains => [5] },
-);
-
 # Shared between greaterthan and greaterthaneq.
 #
 # As with other fields, longdescs greaterthan matches if any comment
@@ -227,9 +206,8 @@ use constant GREATERTHAN_BROKEN => (
 
 # allwords and allwordssubstr have these broken tests in common.
 #
-# allwordssubstr on longdescs fields matches against a single comment,
-# instead of matching against all comments on a bug. Same is true
-# for cc.
+# allwordssubstr on cc fields matches against a single cc,
+# instead of matching against all ccs on a bug.
 use constant ALLWORDS_BROKEN => (
     cc        => { contains => [1] },
 );
@@ -238,7 +216,6 @@ use constant ALLWORDS_BROKEN => (
 #
 # flagtypes.name doesn't match bugs without flags.
 use constant NOWORDS_BROKEN => (
-    NEGATIVE_BROKEN,
     'flagtypes.name' => { contains => [5] },
 );
 
@@ -290,9 +267,6 @@ use constant KNOWN_BROKEN => {
     "equals-%group.<1-bug_group>%" => {
         commenter => { contains => [1,2,3,4,5] },
     },
-    notequals    => { NEGATIVE_BROKEN },
-    notsubstring => { NEGATIVE_BROKEN },
-    notregexp    => { NEGATIVE_BROKEN },
 
     greaterthan   => { GREATERTHAN_BROKEN },
     greaterthaneq => { GREATERTHAN_BROKEN },
@@ -386,13 +360,7 @@ use constant KNOWN_BROKEN => {
 # These are fields that are broken in the same way for pretty much every
 # NOT test that is broken.
 use constant COMMON_BROKEN_NOT => (
-    "bug_file_loc"            => { contains => [5] },
-    "deadline"                => { contains => [5] },
     "flagtypes.name"          => { contains => [5] },
-    FIELD_TYPE_BUG_ID,           { contains => [5] },
-    FIELD_TYPE_DATETIME,         { contains => [5] },
-    FIELD_TYPE_FREETEXT,         { contains => [5] },
-    FIELD_TYPE_TEXTAREA,         { contains => [5] },
 );
 
 # Common BROKEN_NOT values for the changed* fields.
@@ -569,6 +537,8 @@ use constant LESSTHAN_OVERRIDE => (
     qa_contact        => { contains => [1,5] },
     resolution        => { contains => [1,5] },
     status_whiteboard => { contains => [1,5] },
+    FIELD_TYPE_TEXTAREA, { contains => [1,5] },
+    FIELD_TYPE_FREETEXT, { contains => [1,5] },
 );
 
 # The mandatorily-set fields have values higher than <1>,
@@ -754,7 +724,7 @@ use constant TESTS => {
           override => {
               # A lot of these contain bug 5 because an empty value is validly
               # less than the specified value.
-              bug_file_loc => { value => 'http://2-' },
+              bug_file_loc => { value => 'http://2-', contains => [1,5] },
               see_also     => { value => 'http://2-' },
               'attachments.mimetype' => { value => 'text/x-2-' },
               blocked   => { value => '<4-id>', contains => [1,2] },
@@ -770,13 +740,13 @@ use constant TESTS => {
               everconfirmed            => { value => 1, contains => [2,3,4,5] },
               creation_ts => { value => '2037-01-02', contains => [1,5] },
               delta_ts    => { value => '2037-01-02', contains => [1,5] },
-              deadline    => { value => '2037-02-02' },
+              deadline    => { value => '2037-02-02', contains => [1,5] },
               remaining_time => { value => 10, contains => [1,5] },
               percentage_complete => { value => 11, contains => [1,5] },
               longdesc => { value => '2-', contains => [1,5] },
               work_time => { value => 1, contains => [5] },
-              FIELD_TYPE_BUG_ID, { value => '<2>' },
-              FIELD_TYPE_DATETIME, { value => '2037-03-02' },
+              FIELD_TYPE_BUG_ID, { value => '<2>', contains => [1,5] },
+              FIELD_TYPE_DATETIME, { value => '2037-03-02', contains => [1,5] },
               LESSTHAN_OVERRIDE,
           }
         },
@@ -792,14 +762,18 @@ use constant TESTS => {
               'longdescs.count'        => { value => 2, contains => [2,3,4,5] },
               'longdescs.isprivate'    => { value => -1, contains => [] },
               everconfirmed            => { value => 0, contains => [2,3,4,5] },
-              blocked   => { contains => [1,2] },
-              dependson => { contains => [1,3] },
+              bug_file_loc   => { contains => [1,5] },
+              blocked        => { contains => [1,2] },
+              deadline       => { contains => [1,5] },
+              dependson      => { contains => [1,3] },
               creation_ts    => { contains => [1,5] },
               delta_ts       => { contains => [1,5] },
               remaining_time => { contains => [1,5] },
               longdesc       => { contains => [1,5] },
               percentage_complete => { contains => [1,5] },
               work_time => { value => 1, contains => [1,5] },
+              FIELD_TYPE_BUG_ID, { contains => [1,5] },
+              FIELD_TYPE_DATETIME, { contains => [1,5] },
               LESSTHAN_OVERRIDE,
           },
         },

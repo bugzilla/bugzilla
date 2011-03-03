@@ -130,6 +130,9 @@ use Storable qw(dclone);
 # Constants #
 #############
 
+# When doing searches, NULL datetimes are treated as this date.
+use constant EMPTY_DATETIME => '1970-01-01 00:00:00';
+
 # This is the regex for real numbers from Regexp::Common, modified to be
 # more readable.
 use constant NUMBER_REGEX => qr/
@@ -264,14 +267,13 @@ use constant OPERATOR_FIELD_OVERRIDE => {
     },
     
     # General Bug Fields
-    alias => {
-        _non_changed => \&_alias_nonchanged,
-    },
-    # We check all attachment fields against this.
-    attachments => MULTI_SELECT_OVERRIDE,
+    alias        => { _non_changed => \&_nullable },
     'attach_data.thedata' => MULTI_SELECT_OVERRIDE,
-    blocked     => MULTI_SELECT_OVERRIDE,
-    bug_group   => MULTI_SELECT_OVERRIDE,
+    # We check all attachment fields against this.
+    attachments  => MULTI_SELECT_OVERRIDE,
+    blocked      => MULTI_SELECT_OVERRIDE,
+    bug_file_loc => { _non_changed => \&_nullable },
+    bug_group    => MULTI_SELECT_OVERRIDE,
     classification => {
         _non_changed => \&_classification_nonchanged,
     },
@@ -318,10 +320,8 @@ use constant OPERATOR_FIELD_OVERRIDE => {
     },
     tag => MULTI_SELECT_OVERRIDE,
     
-    # Custom multi-select fields
-    _multi_select => MULTI_SELECT_OVERRIDE,
-    
     # Timetracking Fields
+    deadline => { _non_changed => \&_deadline },
     percentage_complete => {
         _non_changed => \&_percentage_complete,
     },
@@ -332,6 +332,13 @@ use constant OPERATOR_FIELD_OVERRIDE => {
         _default      => \&_work_time,
     },
     
+    # Custom Fields
+    FIELD_TYPE_FREETEXT, { _non_changed => \&_nullable },
+    FIELD_TYPE_BUG_ID,   { _non_changed => \&_nullable_int },
+    FIELD_TYPE_DATETIME, { _non_changed => \&_nullable_datetime },
+    FIELD_TYPE_TEXTAREA, { _non_changed => \&_nullable },
+    FIELD_TYPE_MULTI_SELECT, MULTI_SELECT_OVERRIDE,
+    FIELD_TYPE_BUG_URLS,     MULTI_SELECT_OVERRIDE,    
 };
 
 # These are fields where special action is taken depending on the
@@ -1669,16 +1676,15 @@ sub do_search_function {
     
     my $operator_field_override = $self->_get_operator_field_override();
     my $override = $operator_field_override->{$actual_field};
+    # Attachment fields get special handling, if they don't have a specific
+    # individual override.
+    if (!$override and $actual_field =~ /^attachments\./) {
+        $override = $operator_field_override->{attachments};
+    }
+    # If there's still no override, check for an override on the field's type.
     if (!$override) {
-        # Multi-select fields get special handling.
-        if ($self->_multi_select_fields->{$actual_field}) {
-            $override = $operator_field_override->{_multi_select};
-        }
-        # And so do attachment fields, if they don't have a specific
-        # individual override.
-        elsif ($actual_field =~ /^attachments\./) {
-            $override = $operator_field_override->{attachments};
-        }
+        my $field_obj = $self->_chart_fields->{$actual_field};
+        $override = $operator_field_override->{$field_obj->type};
     }
     
     if ($override) {
@@ -2444,10 +2450,32 @@ sub _classification_nonchanged {
         "classifications.id", "classifications", $term);
 }
 
-sub _alias_nonchanged {
+sub _nullable {
     my ($self, $args) = @_;
-    $args->{full_field} = "COALESCE(bugs.alias, '')";
-    $self->_do_operator_function($args);
+    my $field = $args->{full_field};
+    $args->{full_field} = "COALESCE($field, '')";
+}
+
+sub _nullable_int {
+    my ($self, $args) = @_;
+    my $field = $args->{full_field};
+    $args->{full_field} = "COALESCE($field, 0)";
+}
+
+sub _nullable_datetime {
+    my ($self, $args) = @_;
+    my $field = $args->{full_field};
+    my $empty = Bugzilla->dbh->quote(EMPTY_DATETIME);
+    $args->{full_field} = "COALESCE($field, $empty)";
+}
+
+sub _deadline {
+    my ($self, $args) = @_;
+    my $field = $args->{full_field};
+    # This makes "equals" searches work on all DBs (even on MySQL, which
+    # has a bug: http://bugs.mysql.com/bug.php?id=60324).
+    $args->{full_field} = Bugzilla->dbh->sql_date_format($field, '%Y-%m-%d');
+    $self->_nullable_datetime($args);
 }
 
 sub _owner_idle_time_greater_less {

@@ -2328,31 +2328,6 @@ sub _percentage_complete {
     $self->_add_extra_column('actual_time');
 }
 
-sub _join_flag_tables {
-    my ($self, $args) = @_;
-    my ($joins, $chart_id) = @$args{qw(joins chart_id)};
-    
-    my $attach_table = "attachments_$chart_id";
-    my $flags_table = "flags_$chart_id";
-    my $extra = $self->_user->is_insider
-                ? [] : ["$attach_table.isprivate = 0"];
-    my $attachments_join = {
-        table => 'attachments',
-        as    => $attach_table,
-        extra => $extra,
-    };
-    # We join both the bugs and the attachments table in separately,
-    # and then the join code will later combine the terms.
-    my $flags_join = {
-        table => 'flags',
-        as    => $flags_table,
-        extra => ["($flags_table.attach_id = $attach_table.attach_id "
-                  . " OR $flags_table.attach_id IS NULL)"],
-    };
-    
-    push(@$joins, $attachments_join, $flags_join);
-}
-
 sub _days_elapsed {
     my ($self, $args) = @_;
     my $dbh = Bugzilla->dbh;

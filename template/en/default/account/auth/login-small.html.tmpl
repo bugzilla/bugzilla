@@ -47,15 +47,18 @@
     <input id="Bugzilla_login[% qs_suffix FILTER html %]" 
            class="bz_login"
            name="Bugzilla_login"
+           title="Login"
            onfocus="mini_login_on_focus('[% qs_suffix FILTER js %]')"
     >
     <input class="bz_password" 
            id="Bugzilla_password[% qs_suffix FILTER html %]" 
            name="Bugzilla_password"
            type="password"
+           title="Password"
     >
     <input class="bz_password bz_default_hidden bz_mini_login_help" type="text" 
            id="Bugzilla_password_dummy[% qs_suffix %]" value="password"
+           title="Password"
            onfocus="mini_login_on_focus('[% qs_suffix FILTER js %]')"
     >
     [% IF Param('rememberlogin') == 'defaulton' ||
@@ -112,7 +115,8 @@
      onclick="return show_forgot_form('[% qs_suffix %]')">Forgot Password</a>
   <form action="token.cgi" method="post" id="forgot_form[% qs_suffix %]"
         class="mini_forgot bz_default_hidden">
-    <label>Login: <input type="text" name="loginname" size="20"></label>
+    <label for="login[% qs_suffix FILTER html %]">Login:</label>
+    <input type="text" name="loginname" size="20" id="login[% qs_suffix FILTER html %]">
     <input id="forgot_button[% qs_suffix %]" value="Reset Password" 
            type="submit">
     <input type="hidden" name="a" value="reqpw">

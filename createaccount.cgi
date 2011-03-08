@@ -65,7 +65,7 @@ if (defined($login)) {
     $login = Bugzilla::User->check_login_name_for_creation($login);
     $vars->{'login'} = $login;
 
-    if ($login !~ /$createexp/) {
+    if ($login !~ /$createexp/i) {
         ThrowUserError("account_creation_restricted");
     }
 

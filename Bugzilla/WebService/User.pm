@@ -95,7 +95,7 @@ sub offer_account_by_email {
     if (!$createexp) {
         ThrowUserError("account_creation_disabled");
     }
-    elsif ($email !~ /$createexp/) {
+    elsif ($email !~ /$createexp/i) {
         ThrowUserError("account_creation_restricted");
     }
 

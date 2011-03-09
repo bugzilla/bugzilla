@@ -170,6 +170,8 @@ sub init_page {
         else {
             $extension = 'txt';
         }
+        # Set the HTTP status to 503 when Bugzilla is down to avoid pages
+        # from being indexed.
         print Bugzilla->cgi->header(-status=>503) if i_am_cgi();
         my $t_output;
         $template->process("global/message.$extension.tmpl", $vars, \$t_output)

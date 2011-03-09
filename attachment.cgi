@@ -53,7 +53,7 @@ use Bugzilla::Attachment::PatchReader;
 use Bugzilla::Token;
 use Bugzilla::Keyword;
 
-use Encode qw(encode);
+use Encode qw(encode find_encoding);
 
 # For most scripts we don't make $cgi and $template global variables. But
 # when preparing Bugzilla for mod_perl, this script used these
@@ -335,6 +335,12 @@ sub view {
         # In order to prevent Apache from adding a charset, we have to send a
         # charset that's a single space.
         $cgi->charset(' ');
+        if (Bugzilla->feature('detect_charset') && $contenttype =~ /^text\//) {
+            my $encoding = detect_encoding($attachment->data);
+            if ($encoding) {
+                $cgi->charset(find_encoding($encoding)->mime_name);
+            }
+        }
     }
     print $cgi->header(-type=>"$contenttype; name=\"$filename\"",
                        -content_disposition=> "$disposition; filename=\"$filename\"",

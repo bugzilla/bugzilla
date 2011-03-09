@@ -43,7 +43,8 @@ use base qw(Exporter);
                              file_mod_time is_7bit_clean
                              bz_crypt generate_random_password
                              validate_email_syntax clean_text
-                             get_text template_var disable_utf8);
+                             get_text template_var disable_utf8
+                             detect_encoding);
 
 use Bugzilla::Constants;
 
@@ -58,6 +59,8 @@ use Math::Random::Secure qw(irand);
 use Scalar::Util qw(tainted blessed);
 use Template::Filters;
 use Text::Wrap;
+use Encode qw(encode decode resolve_alias);
+use Encode::Guess;
 
 sub trick_taint {
     require Carp;
@@ -673,6 +676,63 @@ sub disable_utf8 {
     }
 }
 
+use constant UTF8_ACCIDENTAL => qw(shiftjis big5-eten euc-kr euc-jp);
+
+sub detect_encoding {
+    my $data = shift;
+
+    if (!Bugzilla->feature('detect_charset')) {
+        require Bugzilla::Error;
+        Bugzilla::Error::ThrowCodeError('feature_disabled',
+            { feature => 'detect_charset' });
+    }
+
+    require Encode::Detect::Detector;
+    import Encode::Detect::Detector 'detect';
+
+    my $encoding = detect($data);
+    $encoding = resolve_alias($encoding) if $encoding;
+
+    # Encode::Detect is bad at detecting certain charsets, but Encode::Guess
+    # is better at them. Here's the details:
+
+    # shiftjis, big5-eten, euc-kr, and euc-jp: (Encode::Detect
+    # tends to accidentally mis-detect UTF-8 strings as being
+    # these encodings.)
+    if ($encoding && grep($_ eq $encoding, UTF8_ACCIDENTAL)) {
+        $encoding = undef;
+        my $decoder = guess_encoding($data, UTF8_ACCIDENTAL);
+        $encoding = $decoder->name if ref $decoder;
+    }
+
+    # Encode::Detect sometimes mis-detects various ISO encodings as iso-8859-8,
+    # but Encode::Guess can usually tell which one it is.
+    if ($encoding && $encoding eq 'iso-8859-8') {
+        my $decoded_as = _guess_iso($data, 'iso-8859-8', 
+            # These are ordered this way because it gives the most 
+            # accurate results.
+            qw(iso-8859-7 iso-8859-2));
+        $encoding = $decoded_as if $decoded_as;
+    }
+
+    return $encoding;
+}
+
+# A helper for detect_encoding.
+sub _guess_iso {
+    my ($data, $versus, @isos) = (shift, shift, shift);
+
+    my $encoding;
+    foreach my $iso (@isos) {
+        my $decoder = guess_encoding($data, ($iso, $versus));
+        if (ref $decoder) {
+            $encoding = $decoder->name if ref $decoder;
+            last;
+        }
+    }
+    return $encoding;
+}
+
 1;
 
 __END__
@@ -902,6 +962,12 @@ ASCII 10 (LineFeed) and ASCII 13 (Carrage Return).
 =item C<disable_utf8()>
 
 Disable utf8 on STDOUT (and display raw data instead).
+
+=item C<detect_encoding($str)>
+
+Guesses what encoding a given data is encoded in, returning the canonical name
+of the detected encoding (which may be different from the MIME charset 
+specification).
 
 =item C<clean_text($str)>
 Returns the parameter "cleaned" by exchanging non-printable characters with spaces.

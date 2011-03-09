@@ -291,6 +291,19 @@ sub OPTIONAL_MODULES {
         version => 0,
         feature => ['html_desc'],
     },
+    {
+        # we need version 2.21 of Encode for mime_name
+        package => 'Encode',
+        module  => 'Encode',
+        version => 2.21,
+        feature => ['detect_charset'],
+    },
+    {
+        package => 'Encode-Detect',
+        module  => 'Encode::Detect',
+        version => 0,
+        feature => ['detect_charset'],
+    },
 
     # Inbound Email
     {

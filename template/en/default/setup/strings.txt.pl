@@ -108,6 +108,7 @@ END
     feature_smtp_auth         => 'SMTP Authentication',
     feature_updates           => 'Automatic Update Notifications',
     feature_xmlrpc            => 'XML-RPC Interface',
+    feature_detect_charset    => 'Automatic charset detection for text attachments',
 
     file_remove => 'Removing ##name##...',
     file_rename => 'Renaming ##from## to ##to##...',

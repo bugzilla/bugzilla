@@ -170,7 +170,7 @@ sub init_page {
         else {
             $extension = 'txt';
         }
-        print Bugzilla->cgi->header() if i_am_cgi();
+        print Bugzilla->cgi->header(-status=>503) if i_am_cgi();
         my $t_output;
         $template->process("global/message.$extension.tmpl", $vars, \$t_output)
             || ThrowTemplateError($template->error);

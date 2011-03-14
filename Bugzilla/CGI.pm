@@ -23,6 +23,7 @@
 
 package Bugzilla::CGI;
 use strict;
+use base qw(CGI);
 
 use Bugzilla::Constants;
 use Bugzilla::Error;
@@ -39,19 +40,6 @@ BEGIN {
     }
 }
 
-use CGI qw(-no_xhtml -oldstyle_urls :private_tempfiles
-           :unique_headers SERVER_PUSH);
-use base qw(CGI);
-
-# We need to disable output buffering - see bug 179174
-$| = 1;
-
-# Ignore SIGTERM and SIGPIPE - this prevents DB corruption. If the user closes
-# their browser window while a script is running, the web server sends these
-# signals, and we don't want to die half way through a write.
-$::SIG{TERM} = 'IGNORE';
-$::SIG{PIPE} = 'IGNORE';
-
 # CGI.pm uses AUTOLOAD, but explicitly defines a DESTROY sub.
 # We need to do so, too, otherwise perl dies when the object is destroyed
 # and we don't have a DESTROY method (because CGI.pm's AUTOLOAD will |die|
@@ -61,9 +49,32 @@ sub DESTROY {
     $self->SUPER::DESTROY(@_);
 };
 
+sub _init_bz_cgi_globals {
+    my $invocant = shift;
+    # We need to disable output buffering - see bug 179174
+    $| = 1;
+
+    # Ignore SIGTERM and SIGPIPE - this prevents DB corruption. If the user closes
+    # their browser window while a script is running, the web server sends these
+    # signals, and we don't want to die half way through a write.
+    $SIG{TERM} = 'IGNORE';
+    $SIG{PIPE} = 'IGNORE';
+
+    # We don't precompile any functions here, that's done specially in
+    # mod_perl code.
+    $invocant->_setup_symbols(qw(:no_xhtml :oldstyle_urls :private_tempfiles
+                                 :unique_headers));
+}
+
+BEGIN { __PACKAGE__->_init_bz_cgi_globals() if i_am_cgi(); }
+
 sub new {
     my ($invocant, @args) = @_;
     my $class = ref($invocant) || $invocant;
+
+    # Under mod_perl, CGI's global variables get reset on each request,
+    # so we need to set them up again every time.
+    $class->_init_bz_cgi_globals() if $ENV{MOD_PERL};
 
     my $self = $class->SUPER::new(@args);
 

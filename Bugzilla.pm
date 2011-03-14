@@ -647,6 +647,11 @@ sub _cleanup {
         $dbh->disconnect;
     }
     undef $_request_cache;
+
+    # These are both set by CGI.pm but need to be undone so that
+    # Apache can actually shut down its children if it needs to.
+    $SIG{TERM} = 'DEFAULT' if $SIG{TERM} eq 'IGNORE';
+    $SIG{PIPE} = 'DEFAULT' if $SIG{PIPE} eq 'IGNORE';
 }
 
 sub END {

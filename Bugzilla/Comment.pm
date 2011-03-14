@@ -37,6 +37,9 @@ use Scalar::Util qw(blessed);
 ####    Initialization     ####
 ###############################
 
+# Updates of comments are audited in bugs_activity instead of audit_log.
+use constant AUDIT_UPDATES => 0;
+
 use constant DB_COLUMNS => qw(
     comment_id
     bug_id

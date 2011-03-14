@@ -507,6 +507,23 @@ use constant ABSTRACT_SCHEMA => {
         ],
     },
 
+    # Auditing
+    # --------
+
+    audit_log => {
+        FIELDS => [
+            user_id   => {TYPE => 'INT3',
+                          REFERENCES => {TABLE  => 'profiles',
+                                         COLUMN => 'userid'}},
+            class     => {TYPE => 'varchar(255)', NOTNULL => 1},
+            object_id => {TYPE => 'INT4', NOTNULL => 1},
+            field     => {TYPE => 'varchar(64)', NOTNULL => 1},
+            removed   => {TYPE => 'MEDIUMTEXT'},
+            added     => {TYPE => 'MEDIUMTEXT'},
+            at_time   => {TYPE => 'DATETIME', NOTNULL => 1},
+        ],
+    },
+
     # Keywords
     # --------
 

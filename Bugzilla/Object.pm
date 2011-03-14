@@ -43,6 +43,7 @@ use constant VALIDATOR_DEPENDENCIES => {};
 # XXX At some point, this will be joined with FIELD_MAP.
 use constant REQUIRED_FIELD_MAP  => {};
 use constant EXTRA_REQUIRED_FIELDS => ();
+use constant AUDIT_UPDATES => 1;
 
 # This allows the JSON-RPC interface to return Bugzilla::Object instances
 # as though they were hashes. In the future, this may be modified to return
@@ -392,6 +393,8 @@ sub update {
                             { object => $self, old_object => $old_self,
                               changes => \%changes });
 
+    $self->audit_log(\%changes) if $self->AUDIT_UPDATES;
+
     $dbh->bz_commit_transaction();
 
     if (wantarray) {
@@ -406,9 +409,41 @@ sub remove_from_db {
     Bugzilla::Hook::process('object_before_delete', { object => $self });
     my $table = $self->DB_TABLE;
     my $id_field = $self->ID_FIELD;
-    Bugzilla->dbh->do("DELETE FROM $table WHERE $id_field = ?",
-                      undef, $self->id);
+    my $dbh = Bugzilla->dbh;
+    $dbh->bz_start_transaction();
+    $self->audit_log(AUDIT_REMOVE);
+    $dbh->do("DELETE FROM $table WHERE $id_field = ?", undef, $self->id);
+    $dbh->bz_commit_transaction();
     undef $self;
+}
+
+sub audit_log {
+    my ($self, $changes) = @_;
+    my $class = ref $self;
+    my $dbh = Bugzilla->dbh;
+    my $user_id = Bugzilla->user->id || undef;
+    my $sth = $dbh->prepare(
+        'INSERT INTO audit_log (user_id, class, object_id, field,
+                                removed, added, at_time) 
+              VALUES (?,?,?,?,?,?,LOCALTIMESTAMP(0))');
+    # During creation or removal, $changes is actually just a string
+    # indicating whether we're creating or removing the object.
+    if ($changes eq AUDIT_CREATE or $changes eq AUDIT_REMOVE) {
+        # We put the object's name in the "added" or "removed" field.
+        # We do this thing with NAME_FIELD because $self->name returns
+        # the wrong thing for Bugzilla::User.
+        my $name = $self->{$self->NAME_FIELD};
+        my @added_removed = $changes eq AUDIT_CREATE ? (undef, $name) 
+                                                     : ($name, undef);
+        $sth->execute($user_id, $class, $self->id, $changes, @added_removed);
+        return;
+    }
+
+    # During update, it's the actual %changes hash produced by update().
+    foreach my $field (keys %$changes) {
+        my ($from, $to) = @{ $changes->{$field} };
+        $sth->execute($user_id, $class, $self->id, $field, $from, $to);
+    }
 }
 
 ###############################
@@ -522,6 +557,8 @@ sub insert_create_data {
 
     Bugzilla::Hook::process('object_end_of_create', { class => $class,
                                                       object => $object });
+    $object->audit_log(AUDIT_CREATE);
+
     return $object;
 }
 

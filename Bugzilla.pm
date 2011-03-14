@@ -650,8 +650,9 @@ sub _cleanup {
 
     # These are both set by CGI.pm but need to be undone so that
     # Apache can actually shut down its children if it needs to.
-    $SIG{TERM} = 'DEFAULT' if $SIG{TERM} eq 'IGNORE';
-    $SIG{PIPE} = 'DEFAULT' if $SIG{PIPE} eq 'IGNORE';
+    foreach my $signal (qw(TERM PIPE)) {
+        $SIG{$signal} = 'DEFAULT' if $SIG{$signal} && $SIG{$signal} eq 'IGNORE';
+    }
 }
 
 sub END {

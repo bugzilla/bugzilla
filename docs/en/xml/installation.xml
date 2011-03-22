@@ -118,8 +118,8 @@
           </note> 
            
           <para>If you install from something other than a packaging/installation
-          system, such as .rpm (Redhat Package), .deb (Debian Package), .exe
-          (Windows Executable), or .msi (Microsoft Installer), make sure the MySQL
+          system, such as .rpm (RPM Package Manager), .deb (Debian Package), .exe
+          (Windows Executable), or .msi (Windows Installer), make sure the MySQL
           server is started when the machine boots.
           </para>
       </section>
@@ -135,8 +135,8 @@
           </para>
            
           <para>If you install from something other than a packaging/installation
-          system, such as .rpm (Redhat Package), .deb (Debian Package), .exe
-          (Windows Executable), or .msi (Microsoft Installer), make sure the
+          system, such as .rpm (RPM Package Manager), .deb (Debian Package), .exe
+          (Windows Executable), or .msi (Windows Installer), make sure the
           PostgreSQL server is started when the machine boots.
           </para>
       </section>
@@ -156,8 +156,8 @@
 
         <para>
           If you install from something other than a packaging/installation
-          system, such as .rpm (Redhat Package), .deb (Debian Package), .exe
-          (Windows Executable), or .msi (Microsoft Installer), make sure the
+          system, such as .rpm (RPM Package Manager), .deb (Debian Package), .exe
+          (Windows Executable), or .msi (Windows Installer), make sure the
           Oracle server is started when the machine boots.
         </para>
       </section>

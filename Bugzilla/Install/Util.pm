@@ -46,6 +46,7 @@ our @EXPORT_OK = qw(
     extension_package_directory
     extension_requirement_packages
     extension_template_directory
+    extension_web_directory
     indicate_progress
     install_string
     include_languages
@@ -212,6 +213,14 @@ sub extension_template_directory {
         return bz_locations->{'templatedir'};
     }
     return "$base_dir/template";
+}
+
+# Used in this file and in Bugzilla::Extension.
+sub extension_web_directory {
+    my $extension = shift;
+    my $class = ref($extension) || $extension;
+    my $base_dir = extension_package_directory($class);
+    return "$base_dir/web";
 }
 
 # For extensions that are in the extensions/ dir, this both sets and fetches

@@ -26,7 +26,7 @@ use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Install::Util qw(
     extension_code_files extension_template_directory 
-    extension_package_directory);
+    extension_package_directory extension_web_directory);
 
 use File::Basename;
 use File::Spec;
@@ -214,6 +214,7 @@ sub lib_dir {
 
 sub template_dir { return extension_template_directory(@_); }
 sub package_dir  { return extension_package_directory(@_);  }
+sub web_dir      { return extension_web_directory(@_);      }
 
 ######################
 # Helper Subroutines #
@@ -782,6 +783,15 @@ override this method in F<Config.pm>.
 The directory that your package's templates are in.
 
 This defaults to the C<template> subdirectory of the L</package_dir>.
+
+If you want to override this method, and you have a F<Config.pm>, you must
+override this method in F<Config.pm>.
+
+=head3 C<web_dir>
+
+The directory that your package's web related files are in, such as css and javascript.
+
+This defaults to the C<web> subdirectory of the L</package_dir>.
 
 If you want to override this method, and you have a F<Config.pm>, you must
 override this method in F<Config.pm>.

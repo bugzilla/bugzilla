@@ -70,7 +70,7 @@ You are receiving this mail because:
            What    |Removed                     |Added
 ----------------------------------------------------------------------------
 [%+ END %][%# End of IF. This indentation is intentional! ~%]
-    [% PROCESS "email/bugmail-common.txt.html"%]
+    [% PROCESS "email/bugmail-common.txt.tmpl"%]
     [%~ IF isnew %]
       [% format_columns(2, field_label _ ":", new_value) -%]
     [% ELSE %]

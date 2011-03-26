@@ -120,18 +120,22 @@
                   <option value="[% comp FILTER html %]">[% comp FILTER html %]</option>
                 [% END %]
               </select><br>
-              <input type="submit" name="categoryAction-include" value="Include">
-              <input type="submit" name="categoryAction-exclude" value="Exclude">
+              <input type="submit" id="categoryAction-include" 
+                                   name="categoryAction-include" value="Include">
+              <input type="submit" id="categoryAction-exclude"
+                                   name="categoryAction-exclude" value="Exclude">
             </td>
             <td style="vertical-align: top;">
               <b>Inclusions:</b><br>
               [% PROCESS category_select name="inclusion_to_remove" categories = inclusions %]<br>
-              <input type="submit" name="categoryAction-removeInclusion" value="Remove Inclusion">
+              <input type="submit" id="categoryAction-removeInclusion" 
+                     name="categoryAction-removeInclusion" value="Remove Inclusion">
             </td>
             <td style="vertical-align: top;">
               <b>Exclusions:</b><br>
               [% PROCESS category_select name="exclusion_to_remove" categories = exclusions %]<br>
-              <input type="submit" name="categoryAction-removeExclusion" value="Remove Exclusion">
+              <input type="submit" id="categoryAction-removeExclusion" 
+                     name="categoryAction-removeExclusion" value="Remove Exclusion">
             </td>
           </tr>
         </table>

@@ -184,7 +184,7 @@
     </table>
   [% END %]
 
-  <input type="submit" value="Update Group">
+  <input type="submit" id="update-group" value="Update Group">
   <input type="hidden" name="token" value="[% token FILTER html %]">
 </form>
   
@@ -200,7 +200,7 @@
     <legend>Remove all explicit memberships from users whose login names
       match the following regular expression:</legend>
     <input type="text" size="20" name="regexp">
-    <input type="submit" value="Remove Memberships">
+    <input type="submit" id="remove-membership" value="Remove Memberships">
 
     <p>If you leave the field blank, all explicit memberships in 
       this group will be removed.</p>

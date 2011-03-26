@@ -139,7 +139,7 @@ versions:</a>
         value="[% product.name FILTER html %]">
   <input type="hidden" name="action" value="update">
   <input type="hidden" name="token" value="[% token FILTER html %]">
-  <input type="submit" name="submit" value="Save Changes">
+  <input type="submit" id="update-product" value="Save Changes">
 </form>
   
 [% PROCESS "admin/products/footer.html.tmpl"

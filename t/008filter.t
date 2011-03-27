@@ -110,7 +110,7 @@ foreach my $path (@Support::Templates::include_paths) {
 
         # /g means we execute this loop for every match
         # /s means we ignore linefeeds in the regexp matches
-        while ($slurp =~ /\[%(?:-|\+|~)?(.*?)(?:-|\+|~)?%\]/gs) {
+        while ($slurp =~ /\[%(?:-|\+|~|=)?(.*?)(?:-|\+|~|=)?%\]/gs) {
             my $directive = $1;
 
             my @lineno = ($` =~ m/\n/gs);

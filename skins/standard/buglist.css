@@ -17,6 +17,13 @@
   *
   * Contributor(s): Myk Melez <myk@mozilla.org>
   */
+.bz_query_head {
+  text-align: center;
+}
+
+.bz_query_timestamp {
+  font-weight: bold;
+}
 
 .search_description {
   margin: .5em 0;

@@ -31,6 +31,7 @@ use Bugzilla::User;
 use Bugzilla::User::Setting;
 use Bugzilla::Util qw(diff_arrays html_quote);
 use Bugzilla::Status qw(is_open_state);
+use Bugzilla::Install::Filesystem;
 
 # This is extensions/Example/lib/Util.pm. I can load this here in my
 # Extension.pm only because I have a Config.pm.
@@ -400,6 +401,33 @@ sub install_before_final_checks {
     # To add descriptions for the setting and choices, add extra values to 
     # the hash defined in global/setting-descs.none.tmpl. Do this in a hook: 
     # hook/global/setting-descs-settings.none.tmpl .
+}
+
+sub install_filesystem {
+    my ($self, $args) = @_;
+    my $create_dirs  = $args->{'create_dirs'};
+    my $recurse_dirs = $args->{'recurse_dirs'};
+    my $htaccess     = $args->{'htaccess'};
+
+    # Create a new directory in datadir specifically for this extension.
+    # The directory will need to allow files to be created by the extension
+    # code as well as allow the webserver to server content from it.
+    # my $data_path = bz_locations->{'datadir'} . "/" . __PACKAGE__->NAME;
+    # $create_dirs->{$data_path} = Bugzilla::Install::Filesystem::DIR_CGI_WRITE;
+   
+    # Update the permissions of any files and directories that currently reside
+    # in the extension's directory. 
+    # $recurse_dirs->{$data_path} = {
+    #     files => Bugzilla::Install::Filesystem::CGI_READ,
+    #     dirs  => Bugzilla::Install::Filesystem::DIR_CGI_WRITE
+    # };
+    
+    # Create a htaccess file that allows specific content to be served from the 
+    # extension's directory.
+    # $htaccess->{"$data_path/.htaccess"} = {
+    #     perms    => Bugzilla::Install::Filesystem::WS_SERVE,
+    #     contents => Bugzilla::Install::Filesystem::HT_DEFAULT_DENY
+    # };
 }
 
 #sub install_update_db_fielddefs {

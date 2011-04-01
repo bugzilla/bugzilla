@@ -720,6 +720,97 @@ time should be printed.
 
 =back
 
+=head2 install_filesystem
+
+Allows for additional files and directories to be added to the
+list of files and directories already managed by checksetup.pl.
+You will be able to also set permissions for the files and
+directories using this hook. You can also use this hook to create 
+appropriate .htaccess files for any directory to secure its contents.
+For examples see  L<FILESYSTEM> in L<Bugzilla::Install::Filesystem>.
+
+Params:
+
+=over
+
+=item C<files>
+
+Hash reference of files that are already present when your extension was
+installed but need to have specific permissions set. Each file key
+points to another hash reference containing the following settings.
+
+Params:
+
+=over
+
+=item C<perms> - Permissions to be set on the file.
+
+=back
+
+=item C<create_dirs>
+
+Hash reference containing the name of each directory that will be created,
+pointing at its default permissions.
+
+=item C<non_recurse_dirs>
+
+Hash reference containing directories that we want to set the perms on, but not
+recurse through. These are directories not created in checksetup.pl. Each directory
+key's value is the permissions to be set on the directory.
+
+=item C<recurse_dirs>
+
+Hash reference of directories that will have permissions set for each item inside 
+each of the directories, including the directory itself. Each directory key
+points to another hash reference containing the following settings.
+
+Params:
+
+=over
+
+=item C<files> - Permissions to be set on any files beneath the directory.
+
+=item C<dirs> - Permissions to be set on the directory itself and any directories
+beneath it.
+
+=back
+
+=item C<create_files>
+
+Hash reference of additional files to be created. Each file key points to another
+hash reference containing the following settings.
+
+Params:
+
+=over
+
+=item C<perms> - The permissions to be set on the file itself.
+
+=item C<contents> - The contents to be added to the file or leave blank for an
+empty file.
+
+=back
+
+=item C<htaccess>
+
+Hash reference containing htaccess files to be created. You can set the permissions
+for the htaccess as well as the contents of the file. Each file key points to another 
+hash reference containing the following settings.
+
+Params:
+
+=over
+
+=item C<perms> - Permissions to be set on the htaccess file.
+
+=item C<contents> - Contents of the htaccess file. It can be set manually or
+use L<HT_DEFAULT_DENY> defined in L<Bugzilla::Install::Filesystem> to deny all
+by default.
+
+=back
+
+=back
+
 =head2 install_update_db
 
 This happens at the very end of all the tables being updated

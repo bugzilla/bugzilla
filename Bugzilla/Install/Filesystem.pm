@@ -32,6 +32,7 @@ use Bugzilla::Error;
 use Bugzilla::Install::Localconfig;
 use Bugzilla::Install::Util qw(install_string);
 use Bugzilla::Util;
+use Bugzilla::Hook;
 
 use File::Find;
 use File::Path;
@@ -359,6 +360,15 @@ Deny from all
 EOT
         },
     );
+
+    Bugzilla::Hook::process('install_filesystem', {
+        files            => \%files,
+        create_dirs      => \%create_dirs,
+        non_recurse_dirs => \%non_recurse_dirs,
+        recurse_dirs     => \%recurse_dirs,
+        create_files     => \%create_files,
+        htaccess         => \%htaccess,
+    });
 
     my %all_files = (%create_files, %htaccess, %index_html, %files);
     my %all_dirs  = (%create_dirs, %non_recurse_dirs);

@@ -49,6 +49,7 @@ use Bugzilla::Constants;
 use Bugzilla::Group;
 use Bugzilla::User;
 use Bugzilla::Field;
+use Bugzilla::Search::Clause;
 use Bugzilla::Status;
 use Bugzilla::Keyword;
 
@@ -124,7 +125,6 @@ use Storable qw(dclone);
 # CC    | equal to
 # bar@blah.org
 # --------------------------------------------------------------
-
 
 #############
 # Constants #
@@ -399,10 +399,6 @@ use constant FIELD_MAP => {
 # A SELECTed expression that we use as a placeholder if somebody selects
 # <none> for the X, Y, or Z axis in report.cgi.
 use constant EMPTY_COLUMN => '-1';
-
-# A special value that is pushed into charts during _params_to_charts to
-# represent that the particular chart we're dealing with should be negated.
-use constant NEGATE => 'NOT';
 
 # Some fields are not sorted on themselves, but on other fields. 
 # We need to have a list of these fields and what they map to.
@@ -694,14 +690,12 @@ sub sql {
     return $self->{sql} if $self->{sql};
     my $dbh = Bugzilla->dbh;
     
-    my ($joins, $having_terms, $where_terms) = $self->_charts_to_conditions();
+    my ($joins, $clause) = $self->_charts_to_conditions();
 
     my $select = join(', ', $self->_sql_select);
     my $from = $self->_sql_from($joins);
-    my $where = $self->_sql_where($where_terms);
+    my $where = $self->_sql_where($clause);
     my $group_by = $dbh->sql_group_by($self->_sql_group_by);
-    my $having = @$having_terms
-                 ? "\nHAVING " . join(' AND ', @$having_terms) : '';
     my $order_by = $self->_sql_order_by
                    ? "\nORDER BY " . join(', ', $self->_sql_order_by) : '';
     my $limit = $self->_sql_limit;
@@ -711,7 +705,7 @@ sub sql {
 SELECT $select
   FROM $from
  WHERE $where
-$group_by$having$order_by$limit
+$group_by$order_by$limit
 END
     $self->{sql} = $query;
     return $self->{sql};
@@ -1135,13 +1129,15 @@ sub _standard_where {
     my $user = $self->_user;
     if ($user->id) {
         my $userid = $user->id;
+        # This indentation makes the resulting SQL more readable.
         $security_term .= <<END;
- OR (bugs.reporter_accessible = 1 AND bugs.reporter = $userid)
- OR (bugs.cclist_accessible = 1 AND security_cc.who IS NOT NULL)
- OR bugs.assigned_to = $userid
+
+        OR (bugs.reporter_accessible = 1 AND bugs.reporter = $userid)
+        OR (bugs.cclist_accessible = 1 AND security_cc.who IS NOT NULL)
+        OR bugs.assigned_to = $userid
 END
         if (Bugzilla->params->{'useqacontact'}) {
-            $security_term.= " OR bugs.qa_contact = $userid";
+            $security_term.= "        OR bugs.qa_contact = $userid";
         }
         $security_term = "($security_term)";
     }
@@ -1152,10 +1148,15 @@ END
 }
 
 sub _sql_where {
-    my ($self, $where_terms) = @_;
+    my ($self, $main_clause) = @_;
     # The newline and this particular spacing makes the resulting
     # SQL a bit more readable for debugging.
-    return join("\n   AND ", $self->_standard_where, @$where_terms);
+    my $where = join("\n   AND ", $self->_standard_where);
+    my $clause_sql = $main_clause->as_string;
+    if ($clause_sql) {
+        $where .= "\n   AND " . $clause_sql;
+    }
+    return $where;
 }
 
 ################################
@@ -1224,35 +1225,6 @@ sub _convert_old_params {
     }
 }
 
-sub _convert_special_params_to_chart_params {
-    my ($self) = @_;
-    my $params = $self->_params;
-    
-    my @special_charts = $self->_special_charts();
-    
-    # First we delete any sign of "Chart #-1" from the input parameters,
-    # because we want to guarantee the user didn't hide something there.
-    my @badcharts = grep { /^(field|type|value)-1-/ } keys %$params;
-    foreach my $field (@badcharts) {
-        delete $params->{$field};
-    }
-
-    # now we take our special chart and stuff it into the form hash
-    my $chart = -1;
-    my $and = 0;
-    foreach my $or_array (@special_charts) {
-        my $or = 0;
-        while (@$or_array) {
-            my $identifier = "$chart-$and-$or";
-            $params->{"field$identifier"} = shift @$or_array;
-            $params->{"type$identifier"}  = shift @$or_array;
-            $params->{"value$identifier"} = shift @$or_array;
-            $or++;
-        }
-        $and++;
-    }
-}
-
 # This parses all the standard search parameters except for the boolean
 # charts.
 sub _special_charts {
@@ -1260,11 +1232,12 @@ sub _special_charts {
     $self->_convert_old_params();
     $self->_special_parse_bug_status();
     $self->_special_parse_resolution();
-    my @charts = $self->_parse_basic_fields();
-    push(@charts, $self->_special_parse_email());
-    push(@charts, $self->_special_parse_chfield());
-    push(@charts, $self->_special_parse_deadline());
-    return @charts;
+    my $clause = new Bugzilla::Search::Clause();
+    $clause->add( $self->_parse_basic_fields()     );
+    $clause->add( $self->_special_parse_email()    );
+    $clause->add( $self->_special_parse_chfield()  );
+    $clause->add( $self->_special_parse_deadline() );
+    return $clause;
 }
 
 sub _parse_basic_fields {
@@ -1272,7 +1245,7 @@ sub _parse_basic_fields {
     my $params = $self->_params;
     my $chart_fields = $self->_chart_fields;
     
-    my @charts;
+    my $clause = new Bugzilla::Search::Clause();
     foreach my $field_name (keys %$chart_fields) {
         # CGI params shouldn't have periods in them, so we only accept
         # period-separated fields with underscores where the periods go.
@@ -1296,9 +1269,9 @@ sub _parse_basic_fields {
         else {
             $pass_value = join(',', @values);
         }
-        push(@charts, [$field_name, $operator, $pass_value]);
+        $clause->add($field_name, $operator, $pass_value);
     }
-    return @charts;
+    return $clause;
 }
 
 sub _special_parse_bug_status {
@@ -1358,7 +1331,8 @@ sub _special_parse_chfield {
 
     @fields = map { $_ eq '[Bug creation]' ? 'creation_ts' : $_ } @fields;
 
-    my @charts;
+    my $clause = new Bugzilla::Search::Clause();
+
     # It is always safe and useful to push delta_ts into the charts
     # if there is a "from" date specified. It doesn't conflict with
     # searching [Bug creation], because a bug's delta_ts is set to
@@ -1366,7 +1340,7 @@ sub _special_parse_chfield {
     # database an additional index to possibly choose, on a table that
     # is smaller than bugs_activity.
     if ($date_from ne '') {
-        push(@charts, ['delta_ts', 'greaterthaneq', $date_from]);
+        $clause->add('delta_ts', 'greaterthaneq', $date_from);
     }
     # It's not normally safe to do it for "to" dates, though--"chfieldto" means
     # "a field that changed before this date", and delta_ts could be either
@@ -1375,7 +1349,7 @@ sub _special_parse_chfield {
     # chfield, means "just search delta_ts", and so we still want that to
     # work.
     if ($date_to ne '' and !@fields and $value_to eq '') {
-        push(@charts, ['delta_ts', 'lessthaneq', $date_to]);
+        $clause->add('delta_ts', 'lessthaneq', $date_to);
     }
 
     # Basically, we construct the chart like:
@@ -1390,29 +1364,29 @@ sub _special_parse_chfield {
     # change date of the fields.
     
     if ($value_to ne '') {
-        my @value_chart;
+        my $value_clause = new Bugzilla::Search::Clause('OR');
         foreach my $field (@fields) {
-            push(@value_chart, $field, 'changedto', $value_to);
+            $value_clause->add($field, 'changedto', $value_to);
         }
-        push(@charts, \@value_chart) if @value_chart;
+        $clause->add($value_clause);
     }
 
     if ($date_from ne '') {
-        my @date_from_chart;
+        my $from_clause = new Bugzilla::Search::Clause('OR');
         foreach my $field (@fields) {
-            push(@date_from_chart, $field, 'changedafter', $date_from);
+            $from_clause->add($field, 'changedafter', $date_from);
         }
-        push(@charts, \@date_from_chart) if @date_from_chart;
+        $clause->add($from_clause);
     }
     if ($date_to ne '') {
-        my @date_to_chart;
+        my $to_clause = new Bugzilla::Search::Clause('OR');
         foreach my $field (@fields) {
-            push(@date_to_chart, $field, 'changedbefore', $date_to);
+            $to_clause->add($field, 'changedbefore', $date_to);
         }
-        push(@charts, \@date_to_chart) if @date_to_chart;
+        $clause->add($to_clause);
     }
 
-    return @charts;
+    return $clause;
 }
 
 sub _special_parse_deadline {
@@ -1420,15 +1394,15 @@ sub _special_parse_deadline {
     return if !$self->_user->is_timetracker;
     my $params = $self->_params;
     
-    my @charts;
+    my $clause = new Bugzilla::Search::Clause();
     if (my $from = $params->{'deadlinefrom'}) {
-        push(@charts, ['deadline', 'greaterthaneq', $from]);
+        $clause->add('deadline', 'greaterthaneq', $from);
     }
     if (my $to = $params->{'deadlineto'}) {
-        push(@charts, ['deadline', 'lessthaneq', $to]);
+        $clause->add('deadline', 'lessthaneq', $to);
     }
     
-    return @charts;
+    return $clause;
 }
 
 sub _special_parse_email {
@@ -1437,7 +1411,7 @@ sub _special_parse_email {
     
     my @email_params = grep { $_ =~ /^email\d+$/ } keys %$params;
     
-    my @charts;
+    my $clause = new Bugzilla::Search::Clause();
     foreach my $param (@email_params) {
         $param =~ /(\d+)$/;
         my $id = $1;
@@ -1446,20 +1420,20 @@ sub _special_parse_email {
         my $type = $params->{"emailtype$id"} || 'anyexact';
         $type = "anyexact" if $type eq "exact";
 
-        my @or_charts;
+        my $or_clause = new Bugzilla::Search::Clause('OR');
         foreach my $field (qw(assigned_to reporter cc qa_contact)) {
             if ($params->{"email$field$id"}) {
-                push(@or_charts, $field, $type, $email);
+                $or_clause->add($field, $type, $email);
             }
         }
         if ($params->{"emaillongdesc$id"}) {
-            push(@or_charts, "commenter", $type, $email);
+            $or_clause->add("commenter", $type, $email);
         }
-
-        push(@charts, \@or_charts);
+        
+        $clause->add($or_clause);
     }
     
-    return @charts;
+    return $clause;
 }
 
 sub _special_parse_resolution {
@@ -1496,52 +1470,36 @@ sub _valid_values {
 
 sub _charts_to_conditions {
     my ($self) = @_;
-    my @charts = $self->_params_to_charts();
     
-    my (@joins, @having, @where_terms);
-    
-    foreach my $chart (@charts) {
-        my @and_terms;
-        my $negate;
-        foreach my $and_item (@$chart) {
-            if (!ref $and_item and $and_item eq NEGATE) {
-                $negate = 1;
-                next;
-            }
-            my @or_terms;
-            foreach my $or_item (@$and_item) {
-                if ($or_item->{term} ne '') {
-                    push(@or_terms, $or_item->{term});
-                }
-                push(@joins, @{ $or_item->{joins} });
-                push(@having, @{ $or_item->{having} });
-            }
-
-            if (@or_terms) {
-                # If a term contains ANDs, we need to put parens around the
-                # condition. This is a pretty weak test, but it's actually OK
-                # to put parens around too many things.
-                @or_terms = map { $_ =~ /\bAND\b/i ? "($_)" : $_ } @or_terms;
-                my $or_sql = join(' OR ', @or_terms);
-                push(@and_terms, $or_sql);
-            }
-        }
-        # And here we need to paren terms that contain ORs.
-        @and_terms = map { $_ =~ /\bOR\b/i ? "($_)" : $_ } @and_terms;
-        my $and_sql = join(' AND ', @and_terms);
-        if ($negate and $and_sql ne '') {
-            $and_sql = "NOT ($and_sql)";
-        }
-        push(@where_terms, $and_sql) if $and_sql ne '';
-    }
-
-    return (\@joins, \@having, \@where_terms);
+    my $clause = $self->_charts;
+    my @joins;
+    $clause->walk_conditions(sub {
+        my ($condition) = @_;
+        return if !$condition->translated;
+        push(@joins, @{ $condition->translated->{joins} });
+    });
+    return (\@joins, $clause);
 }
 
-sub _params_to_charts {
+sub _charts {
     my ($self) = @_;
+    
+    my $clause = $self->_params_to_data_structure();
+    my $chart_id = 0;
+    $clause->walk_conditions(sub { $self->_handle_chart($chart_id++, @_) });
+    return $clause;
+}
+
+sub _params_to_data_structure {
+    my ($self) = @_;
+    
+    # First we get the "special" charts, representing all the normal
+    # field son the search page. This may modify _params, so it needs to
+    # happen first.
+    my $clause = $self->_special_charts;
+
+    # Then we process the old Boolean Charts input format.    
     my $params = $self->_params;
-    $self->_convert_special_params_to_chart_params();
     my @param_list = keys %$params;
     
     my @all_field_params = grep { /^field-?\d+/ } @param_list;
@@ -1549,54 +1507,43 @@ sub _params_to_charts {
     @chart_ids = sort { $a <=> $b } uniq @chart_ids;
     
     my $sequence = 0;
-    my @charts;
     foreach my $chart_id (@chart_ids) {
         my @all_and = grep { /^field$chart_id-\d+/ } @param_list;
         my @and_ids = map { /^field$chart_id-(\d+)/; $1 } @all_and;
         @and_ids = sort { $a <=> $b } uniq @and_ids;
         
-        my @and_charts;
+        my $and_clause = new Bugzilla::Search::Clause();
         foreach my $and_id (@and_ids) {
             my @all_or = grep { /^field$chart_id-$and_id-\d+/ } @param_list;
             my @or_ids = map { /^field$chart_id-$and_id-(\d+)/; $1 } @all_or;
             @or_ids = sort { $a <=> $b } uniq @or_ids;
             
-            my @or_charts;
+            my $or_clause = new Bugzilla::Search::Clause('OR');
             foreach my $or_id (@or_ids) {
-                my $info = $self->_handle_chart($chart_id, $and_id, $or_id);
-                # $info will be undefined if _handle_chart returned early,
-                # meaning that the field, value, or operator were empty.
-                push(@or_charts, $info) if defined $info;
+                my $identifier = "$chart_id-$and_id-$or_id";
+                my $field = $params->{"field$identifier"};
+                my $operator = $params->{"type$identifier"};
+                my $value = $params->{"value$identifier"};                
+                $or_clause->add($field, $operator, $value);
             }
-            if ($params->{"negate$chart_id"}) {
-                push(@and_charts, NEGATE);
-            }
-            push(@and_charts, \@or_charts);
+            $and_clause->add($or_clause);
+
+            $and_clause->negate(1) if $params->{"negate$chart_id"};
         }
-        push(@charts, \@and_charts);
+        $clause->add($and_clause);
     }
     
-    return @charts;
+    return $clause;
 }
 
 sub _handle_chart {
-    my ($self, $chart_id, $and_id, $or_id) = @_;
+    my ($self, $chart_id, $condition) = @_;
     my $dbh = Bugzilla->dbh;
     my $params = $self->_params;
-    
-    my $sql_chart_id = $chart_id;
-    if ($chart_id < 0) {
-        $sql_chart_id = "default_" . abs($chart_id);
-    }
-    
-    my $identifier = "$chart_id-$and_id-$or_id";
-    
-    my $field = $params->{"field$identifier"};
-    my $operator = $params->{"type$identifier"};
-    my $value = $params->{"value$identifier"};
+    my ($field, $operator, $value) = $condition->fov;
 
     return if (!defined $field or !defined $operator or !defined $value);
-
+    
     my $string_value;
     if (ref $value eq 'ARRAY') {
         # Trim input and ignore blank values.
@@ -1626,15 +1573,14 @@ sub _handle_chart {
     # on multiple values, like anyexact.
     
     my %search_args = (
-        chart_id   => $sql_chart_id,
-        sequence   => $or_id,
+        chart_id   => $chart_id,
+        sequence   => $chart_id,
         field      => $field,
         full_field => $full_field,
         operator   => $operator,
         value      => $string_value,
         all_values => $value,
         joins      => [],
-        having     => [],
     );
     $search_args{quoted} = $self->_quote_unless_numeric(\%search_args);
     # This should add a "term" selement to %search_args.
@@ -1648,7 +1594,7 @@ sub _handle_chart {
         value => $string_value, term => $search_args{term},
     });
     
-    return \%search_args;
+    $condition->translated(\%search_args);
 }
 
 ##################################

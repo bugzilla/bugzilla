@@ -413,6 +413,13 @@
     [%+ ELSIF fld == "z" %]the multiple tables/images
     [%+ ELSE %]a report axis[% END %] field.
 
+  [% ELSIF error == "search_cp_without_op" %]
+    Search argument f[% id FILTER html %] is "CP" but there is no
+    matching "OP" before it.
+
+  [% ELSIF error == "search_invalid_joiner" %]
+    '[% joiner FILTER html %]' is not a valid joiner for a search.
+
   [% ELSIF error == "setting_info_invalid" %]
     To create a new setting, you must supply a setting name, a list of 
     value/sortindex pairs, and the default value.

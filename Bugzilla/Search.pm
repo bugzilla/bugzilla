@@ -50,6 +50,7 @@ use Bugzilla::Group;
 use Bugzilla::User;
 use Bugzilla::Field;
 use Bugzilla::Search::Clause;
+use Bugzilla::Search::Condition qw(condition);
 use Bugzilla::Status;
 use Bugzilla::Keyword;
 
@@ -691,7 +692,6 @@ sub sql {
     my $dbh = Bugzilla->dbh;
     
     my ($joins, $clause) = $self->_charts_to_conditions();
-
     my $select = join(', ', $self->_sql_select);
     my $from = $self->_sql_from($joins);
     my $where = $self->_sql_where($clause);
@@ -1498,7 +1498,18 @@ sub _params_to_data_structure {
     # happen first.
     my $clause = $self->_special_charts;
 
-    # Then we process the old Boolean Charts input format.    
+    # Then we process the old Boolean Charts input format.
+    $clause->add( $self->_boolean_charts );
+    
+    # And then process the modern "custom search" format.
+    $clause->add( $self->_custom_search );
+   
+    return $clause;
+}
+
+sub _boolean_charts {
+    my ($self) = @_;
+    
     my $params = $self->_params;
     my @param_list = keys %$params;
     
@@ -1506,7 +1517,7 @@ sub _params_to_data_structure {
     my @chart_ids = map { /^field(-?\d+)/; $1 } @all_field_params;
     @chart_ids = sort { $a <=> $b } uniq @chart_ids;
     
-    my $sequence = 0;
+    my $clause = new Bugzilla::Search::Clause();
     foreach my $chart_id (@chart_ids) {
         my @all_and = grep { /^field$chart_id-\d+/ } @param_list;
         my @and_ids = map { /^field$chart_id-(\d+)/; $1 } @all_and;
@@ -1527,13 +1538,54 @@ sub _params_to_data_structure {
                 $or_clause->add($field, $operator, $value);
             }
             $and_clause->add($or_clause);
-
             $and_clause->negate(1) if $params->{"negate$chart_id"};
         }
         $clause->add($and_clause);
     }
     
     return $clause;
+}
+
+sub _custom_search {
+    my ($self) = @_;
+    my $params = $self->_params;
+    my @param_list = keys %$params;
+    
+    my @field_params = grep { /^f\d+$/ } @param_list;
+    my @field_ids = map { /(\d+)/; $1 } @field_params;
+    @field_ids = sort { $a <=> $b } @field_ids;
+    
+    my $current_clause = new Bugzilla::Search::Clause();
+    my @clause_stack;
+    foreach my $id (@field_ids) {
+        my $field = $params->{"f$id"};
+        if ($field eq 'OP') {
+            my $joiner = $params->{"j$id"};
+            my $new_clause = new Bugzilla::Search::Clause($joiner);
+            $new_clause->negate($params->{"n$id"});
+            $current_clause->add($new_clause);
+            push(@clause_stack, $current_clause);
+            $current_clause = $new_clause;
+            next;
+        }
+        if ($field eq 'CP') {
+            $current_clause = pop @clause_stack;
+            ThrowCodeError('search_cp_without_op', { id => $id })
+                if !$current_clause;
+            next;
+        }
+        
+        my $operator = $params->{"o$id"};
+        my $value = $params->{"v$id"};
+        my $condition = condition($field, $operator, $value);
+        $condition->negate($params->{"n$id"});
+        $current_clause->add($condition);
+    }
+    
+    # We allow people to specify more OPs than CPs, so at the end of the
+    # loop our top clause may be still in the stack instead of being
+    # $current_clause.
+    return $clause_stack[0] || $current_clause;
 }
 
 sub _handle_chart {

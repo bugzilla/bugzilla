@@ -50,7 +50,17 @@ sub translated {
 
 sub as_string {
     my ($self) = @_;
-    return $self->translated->{term};
+    my $term = $self->translated->{term};
+    $term = "NOT( $term )" if $term && $self->negate;
+    return $term;
+}
+
+sub negate {
+    my ($self, $value) = @_;
+    if (@_ == 2) {
+        $self->{negate} = $value ? 1 : 0;
+    }
+    return $self->{negate};
 }
 
 ###########################

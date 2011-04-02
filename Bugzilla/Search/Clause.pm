@@ -21,10 +21,18 @@
 
 package Bugzilla::Search::Clause;
 use strict;
+
+use Bugzilla::Error;
 use Bugzilla::Search::Condition qw(condition);
+use Bugzilla::Util qw(trick_taint);
 
 sub new {
     my ($class, $joiner) = @_;
+    if ($joiner and $joiner ne 'OR' and $joiner ne 'AND') {
+        ThrowCodeError('search_invalid_joiner', { joiner => $joiner });
+    }
+    # This will go into SQL directly so needs to be untainted.
+    trick_taint($joiner) if $joiner;
     bless { joiner => $joiner || 'AND' }, $class;
 }
 
@@ -41,12 +49,14 @@ sub has_children {
     return scalar(@{ $self->children }) > 0 ? 1 : 0;
 }
 
-sub has_conditions {
+sub has_valid_conditions {
     my ($self) = @_;
     my $children = $self->children;
-    return 1 if grep { $_->isa('Bugzilla::Search::Condition') } @$children;
+    return 1 if grep { $_->isa('Bugzilla::Search::Condition')
+                       && $_->translated } @$children;
     foreach my $child (@$children) {
-        return 1 if $child->has_conditions;
+        next if $child->isa('Bugzilla::Search::Condition');
+        return 1 if $child->has_valid_conditions;
     }
     return 0;
 }
@@ -69,7 +79,7 @@ sub add {
 sub negate {
     my ($self, $value) = @_;
     if (@_ == 2) {
-        $self->{negate} = $value;
+        $self->{negate} = $value ? 1 : 0;
     }
     return $self->{negate};
 }
@@ -90,7 +100,7 @@ sub as_string {
     my ($self) = @_;
     my @strings;
     foreach my $child (@{ $self->children }) {
-        next if $child->isa(__PACKAGE__) && !$child->has_conditions;
+        next if $child->isa(__PACKAGE__) && !$child->has_valid_conditions;
         next if $child->isa('Bugzilla::Search::Condition')
                 && !$child->translated;
 

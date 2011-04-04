@@ -1193,6 +1193,24 @@ your template.
 
 =back
 
+
+=head2 post_bug_after_creation
+
+B<DEPRECATED> (Use L</bug_end_of_create> instead.)
+
+This happens after a bug is created and before bug mail is sent
+during C<post_bug.cgi>. Note that this only happens during C<post_bug.cgi>,
+it doesn't happen during any of the other methods of creating a bug.
+
+Params:
+
+=over
+
+=item C<vars> - The template vars hashref.
+
+=back
+
+
 =head2 product_confirm_delete
 
 B<DEPRECATED> - Use L</template_before_process> instead.

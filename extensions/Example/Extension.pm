@@ -276,6 +276,25 @@ sub config_modify_panels {
     push(@{ $verify_class->{choices} }, 'Example');
 }
 
+sub db_schema_abstract_schema {
+    my ($self, $args) = @_;
+#    $args->{'schema'}->{'example_table'} = {
+#        FIELDS => [
+#            id       => {TYPE => 'SMALLSERIAL', NOTNULL => 1,
+#                     PRIMARYKEY => 1},
+#            for_key  => {TYPE => 'INT3', NOTNULL => 1,
+#                           REFERENCES  => {TABLE  =>  'example_table2',
+#                                           COLUMN =>  'id',
+#                                           DELETE => 'CASCADE'}},
+#            col_3    => {TYPE => 'varchar(64)', NOTNULL => 1},
+#        ],
+#        INDEXES => [
+#            id_index_idx   => {FIELDS => ['col_3'], TYPE => 'UNIQUE'},
+#            for_id_idx => ['for_key'],
+#        ],
+#    };
+}
+
 sub email_in_before_parse {
     my ($self, $args) = @_;
 
@@ -316,6 +335,13 @@ sub email_in_after_parse {
     else {
         ThrowUserError('invalid_username', { name => $reporter });
     }
+}
+
+sub enter_bug_entrydefaultvars {
+    my ($self, $args) = @_;
+    
+    my $vars = $args->{vars};
+    $vars->{'example'} = 1;
 }
 
 sub flag_end_of_update {
@@ -426,6 +452,13 @@ sub install_filesystem {
     #     perms    => Bugzilla::Install::Filesystem::WS_SERVE,
     #     contents => Bugzilla::Install::Filesystem::HT_DEFAULT_DENY
     # };
+}
+
+sub install_update_db {
+    my $dbh = Bugzilla->dbh;
+#    $dbh->bz_add_column('example', 'new_column',
+#                        {TYPE => 'INT2', NOTNULL => 1, DEFAULT => 0});
+#    $dbh->bz_add_index('example', 'example_new_column_idx', [qw(value)]);
 }
 
 sub mailer_before_send {
@@ -606,6 +639,13 @@ sub page_before_template {
     if ($page eq 'example.html') {
         $vars->{cgi_variables} = { Bugzilla->cgi->Vars };
     }
+}
+
+sub post_bug_after_creation {
+    my ($self, $args) = @_;
+    
+    my $vars = $args->{vars};
+    $vars->{'example'} = 1;
 }
 
 sub product_confirm_delete {

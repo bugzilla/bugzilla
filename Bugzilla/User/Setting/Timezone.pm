@@ -39,6 +39,7 @@ sub legal_values {
     # Append 'local' to the list, which will use the timezone
     # given by the server.
     push(@timezones, 'local');
+    push(@timezones, 'UTC');
 
     return $self->{'legal_values'} = \@timezones;
 }

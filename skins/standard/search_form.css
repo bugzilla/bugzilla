@@ -200,3 +200,7 @@ div.bz_section_title span {
 .bz_search_section, ul.bz_search_section {
   margin-top: 1em;
 }
+
+.bz_simple_search_form th {
+  text-align: right;
+}

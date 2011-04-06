@@ -1880,40 +1880,58 @@ sub _timestamp_translate {
 
 sub SqlifyDate {
     my ($str) = @_;
+    my $fmt = "%Y-%m-%d %H:%M:%S";
     $str = "" if !defined $str;
     if ($str eq "") {
         my ($sec, $min, $hour, $mday, $month, $year, $wday) = localtime(time());
         return sprintf("%4d-%02d-%02d 00:00:00", $year+1900, $month+1, $mday);
     }
 
-    if ($str =~ /^(-|\+)?(\d+)([hHdDwWmMyY])$/) {   # relative date
-        my ($sign, $amount, $unit, $date) = ($1, $2, lc $3, time);
+    if ($str =~ /^(-|\+)?(\d+)([hdwmy])(s?)$/i) {   # relative date
+        my ($sign, $amount, $unit, $startof, $date) = ($1, $2, lc $3, lc $4, time);
         my ($sec, $min, $hour, $mday, $month, $year, $wday)  = localtime($date);
         if ($sign && $sign eq '+') { $amount = -$amount; }
+        $startof = 1 if $amount == 0;
         if ($unit eq 'w') {                  # convert weeks to days
-            $amount = 7*$amount + $wday;
+            $amount = 7*$amount;
+            $amount += $wday if $startof;
             $unit = 'd';
         }
         if ($unit eq 'd') {
-            $date -= $sec + 60*$min + 3600*$hour + 24*3600*$amount;
-            return time2str("%Y-%m-%d %H:%M:%S", $date);
+            if ($startof) {
+              $fmt = "%Y-%m-%d 00:00:00";
+              $date -= $sec + 60*$min + 3600*$hour;
+            }
+            $date -= 24*3600*$amount;
+            return time2str($fmt, $date);
         }
         elsif ($unit eq 'y') {
-            return sprintf("%4d-01-01 00:00:00", $year+1900-$amount);
+            if ($startof) {
+                return sprintf("%4d-01-01 00:00:00", $year+1900-$amount);
+            } 
+            else {
+                return sprintf("%4d-%02d-%02d %02d:%02d:%02d", 
+                               $year+1900-$amount, $month+1, $mday, $hour, $min, $sec);
+            }
         }
         elsif ($unit eq 'm') {
             $month -= $amount;
             while ($month<0) { $year--; $month += 12; }
-            return sprintf("%4d-%02d-01 00:00:00", $year+1900, $month+1);
+            if ($startof) {
+                return sprintf("%4d-%02d-01 00:00:00", $year+1900, $month+1);
+            }
+            else {
+                return sprintf("%4d-%02d-%02d %02d:%02d:%02d", 
+                               $year+1900, $month+1, $mday, $hour, $min, $sec);
+            }
         }
         elsif ($unit eq 'h') {
-            # Special case 0h for 'beginning of this hour'
-            if ($amount == 0) {
-                $date -= $sec + 60*$min;
-            } else {
-                $date -= 3600*$amount;
-            }
-            return time2str("%Y-%m-%d %H:%M:%S", $date);
+            # Special case for 'beginning of an hour'
+            if ($startof) {
+                $fmt = "%Y-%m-%d %H:00:00";
+            } 
+            $date -= 3600*$amount;
+            return time2str($fmt, $date);
         }
         return undef;                      # should not happen due to regexp at top
     }
@@ -1921,7 +1939,7 @@ sub SqlifyDate {
     if (!defined($date)) {
         ThrowUserError("illegal_date", { date => $str });
     }
-    return time2str("%Y-%m-%d %H:%M:%S", $date);
+    return time2str($fmt, $date);
 }
 
 ######################################

@@ -150,6 +150,15 @@ use constant WS_ERROR_CODE => {
     # Error 605 attachment_url_disabled no longer exists.
     zero_length_file       => 606,
 
+    # Product erros are 700-800
+    product_blank_name => 700,
+    product_name_too_long => 701,
+    product_name_already_in_use => 702,
+    product_name_diff_in_case => 702,
+    product_must_have_description => 703,
+    product_must_have_version => 704,
+    product_must_define_defaultmilestone => 705,
+
     # Errors thrown by the WebService itself. The ones that are negative 
     # conform to http://xmlrpc-epi.sourceforge.net/specs/rfc.fault_codes.php
     xmlrpc_invalid_value => -32600,

@@ -238,13 +238,15 @@ This allows you to create a new product in Bugzilla.
 
 =item B<Params> 
 
-Some params must be set, or an error will be thrown. These params are marked Required.
+Some params must be set, or an error will be thrown. These params are 
+marked B<Required>.
 
 =over
 
 =item C<name>
 
-B<Required> C<string> The name of this product. Must be unique.
+B<Required> C<string> The name of this product. Must be globally unique
+within Bugzilla.
 
 =item C<description>
 
@@ -256,23 +258,25 @@ B<Required> C<string> The default version for this product.
 
 =item C<has_unconfirmed> 
 
-C<boolean> Allows unconfirmed bugs in the product.
+C<boolean> Allow the UNCONFIRMED status to be set on bugs in this product.
 
 =item C<classification>
 
-C<boolean> Classification wich contains the product.
+C<boolean> The name of the Classification wich contains this product.
 
 =item C<default_milestone> 
 
-C<boolean> The default milestone of this product.
+C<boolean> The default milestone for this product.
 
 =item C<is_open> 
 
-C<boolean> True if the product is currently allowing bugs to be entered into it.
+C<boolean> True if the product is currently allowing bugs to be entered
+into it.
 
-=item C<create_series> 
+=item C<create_series>
 
-C<boolean> Set if series are creating for the new product. 
+C<boolean> True if you want series for New Charts to be created for this
+new product.
 
 =back
 
@@ -286,15 +290,17 @@ A hash with one element, id. This is the id of the newly-filed product.
 
 =item 700 (Product blank name)
 
-You must specify a non blank name for this product.
+You must specify a non-blank name for this product.
 
 =item 701 (Product name too long)
 
-The name specified for this product was longer than the maximum allowed length.
+The name specified for this product was longer than the maximum
+allowed length.
 
 =item 702 (Product name already exists)
 
-You specified the name of a product that already exists. (Product names must be globally unique in Bugzilla.)
+You specified the name of a product that already exists.
+(Product names must be globally unique in Bugzilla.)
 
 =item 703 (Product must have description)
 

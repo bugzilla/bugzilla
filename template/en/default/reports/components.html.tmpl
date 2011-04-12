@@ -45,7 +45,7 @@
       Select a component to see open [% terms.bugs %] in that component:
     </td>
     <td class="product_container">
-      <h2 class="product_name">[% product.name FILTER html %]</h2>
+      <span class="product_name">[% product.name FILTER html %]</span>
       <div class="product_desc">
         [% product.description FILTER html_light %]
       </div>
@@ -53,9 +53,10 @@
   </tr>
 </table>
 
-<h3 class="components_header">Components</h3>
+<span class="components_header">Components</span>
 
-<table class="component_table" cellspacing="0" cellpadding="0">
+<table summary="Components table"
+       class="component_table" cellspacing="0" cellpadding="0">
   <thead>
   <tr>
     <th>&nbsp;</th>

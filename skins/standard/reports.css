@@ -29,6 +29,8 @@
 }
 
 .product_name {
+  font-weight: bold;
+  font-size: 150%;
   margin: 0;
 }
 
@@ -50,6 +52,7 @@
 .components_header {
   margin: 0;
   font-size: 140%;
+  font-weight: bold;
 }
 
 .component_table {

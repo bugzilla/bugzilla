@@ -108,7 +108,7 @@ use constant WS_ERROR_CODE => {
     # Dup errors
     dupe_loop_detected => 118,
     dupe_id_required => 119,
-    # Group errors
+    # Bug-related group errors
     group_change_denied => 120,
     group_invalid_restriction => 120,
     # Status/Resolution errors
@@ -159,6 +159,12 @@ use constant WS_ERROR_CODE => {
     product_must_have_version => 704,
     product_must_define_defaultmilestone => 705,
 
+    # Group errors are 800-900
+    empty_group_name => 800,
+    group_exists => 801,
+    empty_group_description => 802,
+    invalid_regexp => 803,
+
     # Errors thrown by the WebService itself. The ones that are negative 
     # conform to http://xmlrpc-epi.sourceforge.net/specs/rfc.fault_codes.php
     xmlrpc_invalid_value => -32600,
@@ -184,6 +190,7 @@ sub WS_DISPATCH {
         'Bug'      => 'Bugzilla::WebService::Bug',
         'User'     => 'Bugzilla::WebService::User',
         'Product'  => 'Bugzilla::WebService::Product',
+        'Group'    => 'Bugzilla::WebService::Group',
         %hook_dispatch
     };
     return $dispatch;

@@ -332,6 +332,8 @@ would return something like:
 
 =item L<Bugzilla::WebService::Bugzilla>
 
+=item L<Bugzilla::WebService::Group>
+
 =item L<Bugzilla::WebService::Product>
 
 =item L<Bugzilla::WebService::User>

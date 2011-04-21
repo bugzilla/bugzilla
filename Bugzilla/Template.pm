@@ -442,9 +442,10 @@ sub _css_link_set {
         return \%set;
     }
     
-    my $user = Bugzilla->user;
+    my $skin_user_prefs = Bugzilla->user->settings->{skin};
     my $cgi_path = bz_locations()->{'cgi_path'};
-    my $all_skins = $user->settings->{'skin'}->legal_values;    
+    # If the DB is not accessible, user settings are not available.
+    my $all_skins = $skin_user_prefs ? $skin_user_prefs->legal_values : [];
     my %skin_urls;
     foreach my $option (@$all_skins) {
         next if $option eq 'standard';
@@ -456,7 +457,7 @@ sub _css_link_set {
     }
     $set{alternate} = \%skin_urls;
     
-    my $skin = $user->settings->{'skin'}->{'value'};
+    my $skin = $skin_user_prefs->{'value'};
     if ($skin ne 'standard' and defined $set{alternate}->{$skin}) {
         $set{skin} = delete $set{alternate}->{$skin};
     }

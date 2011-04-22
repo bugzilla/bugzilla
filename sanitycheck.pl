@@ -111,4 +111,4 @@ user will receive an email with the results of the script run.
 
 This script provides a way of running a 'Sanity Check' on the database
 via either a CLI or cron. It is equivalent to calling sanitycheck.cgi
-via a web broswer.
+via a web browser.

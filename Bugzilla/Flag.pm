@@ -478,19 +478,19 @@ sub update_flags {
             # This is a new flag.
             my $flag = $class->create($new_flag, $timestamp);
             $new_flag->{id} = $flag->id;
-            $class->notify($new_flag, undef, $self);
+            $class->notify($new_flag, undef, $self, $timestamp);
         }
         else {
             my $changes = $new_flag->update($timestamp);
             if (scalar(keys %$changes)) {
-                $class->notify($new_flag, $old_flags{$new_flag->id}, $self);
+                $class->notify($new_flag, $old_flags{$new_flag->id}, $self, $timestamp);
             }
             delete $old_flags{$new_flag->id};
         }
     }
     # These flags have been deleted.
     foreach my $old_flag (values %old_flags) {
-        $class->notify(undef, $old_flag, $self);
+        $class->notify(undef, $old_flag, $self, $timestamp);
         $old_flag->remove_from_db();
     }
 
@@ -893,7 +893,7 @@ sub extract_flags_from_cgi {
 
 =over
 
-=item C<notify($flag, $bug, $attachment)>
+=item C<notify($flag, $old_flag, $object, $timestamp)>
 
 Sends an email notification about a flag being created, fulfilled
 or deleted.
@@ -903,7 +903,7 @@ or deleted.
 =cut
 
 sub notify {
-    my ($class, $flag, $old_flag, $obj) = @_;
+    my ($class, $flag, $old_flag, $obj, $timestamp) = @_;
 
     my ($bug, $attachment);
     if (blessed($obj) && $obj->isa('Bugzilla::Attachment')) {
@@ -939,6 +939,11 @@ sub notify {
     # Is there someone to notify?
     return unless ($addressee || $cc_list);
 
+    # The email client will display the Date: header in the desired timezone,
+    # so we can always use UTC here.
+    $timestamp ||= Bugzilla->dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
+    $timestamp = format_time($timestamp, '%a, %d %b %Y %T %z', 'UTC');
+
     # If the target bug is restricted to one or more groups, then we need
     # to make sure we don't send email about it to unauthorized users
     # on the request type's CC: list, so we have to trawl the list for users
@@ -964,10 +969,8 @@ sub notify {
     # If there are users in the CC list who don't have an account,
     # use the default language for email notifications.
     my $default_lang;
-    my $default_timezone;
     if (grep { !$_ } values %recipients) {
         $default_lang = Bugzilla::User->new()->settings->{'lang'}->{'value'};
-        $default_timezone = Bugzilla::User->new()->settings->{'timezone'}->{'value'};
     }
 
     foreach my $to (keys %recipients) {
@@ -975,13 +978,10 @@ sub notify {
         # threaded similar to normal bug change emails.
         my $thread_user_id = $recipients{$to} ? $recipients{$to}->id : 0;
 
-        my $timezone = $recipients{$to} ?
-          $recipients{$to}->settings->{'timezone'}->{'value'} : $default_timezone;
-
         my $vars = { 'flag'            => $flag,
                      'old_flag'        => $old_flag,
                      'to'              => $to,
-                     'timezone'        => $timezone,
+                     'date'            => $timestamp,
                      'bug'             => $bug,
                      'attachment'      => $attachment,
                      'threadingmarker' => build_thread_marker($bug->id, $thread_user_id) };

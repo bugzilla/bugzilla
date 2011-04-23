@@ -602,8 +602,6 @@ sub force_retarget {
 sub _set_requestee {
     my ($self, $requestee, $attachment, $skip_requestee_on_error) = @_;
 
-    # Used internally to check if the requestee is retargetting the request.
-    $self->{_old_requestee_id} = $self->requestee ? $self->requestee->id : 0;
     $self->{requestee} =
       $self->_check_requestee($requestee, $attachment, $skip_requestee_on_error);
 
@@ -725,9 +723,9 @@ sub _check_setter {
                           old_status => $self->{_old_status} });
     }
 
-    # If the requester is retargetting the request, we don't
-    # update the setter, so that the setter gets the notification.
-    if ($status eq '?' && $self->{_old_requestee_id} == $setter->id) {
+    # If the request is being retargetted, we don't update
+    # the setter, so that the setter gets the notification.
+    if ($status eq '?' && $self->{_old_status} eq '?') {
         return $self->setter;
     }
     return $setter;

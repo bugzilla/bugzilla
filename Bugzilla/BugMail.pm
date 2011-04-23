@@ -224,6 +224,11 @@ sub Send {
     my @sent;
     my @excluded;
 
+    # The email client will display the Date: header in the desired timezone,
+    # so we can always use UTC here.
+    my $date = $params->{dep_only} ? $end : $bug->delta_ts;
+    $date = format_time($date, '%a, %d %b %Y %T %z', 'UTC');
+
     foreach my $user_id (keys %recipients) {
         my %rels_which_want;
         my $sent_mail = 0;
@@ -268,7 +273,7 @@ sub Send {
                     { to       => $user, 
                       bug      => $bug,
                       comments => $comments,
-                      delta_ts => $params->{dep_only} ? $end : undef,
+                      date     => $date,
                       changer  => $changer,
                       watchers => exists $watching{$user_id} ?
                                   $watching{$user_id} : undef,
@@ -304,7 +309,7 @@ sub sendMail {
     my $user   = $params->{to};
     my $bug    = $params->{bug};
     my @send_comments = @{ $params->{comments} };
-    my $delta_ts = $params->{delta_ts};
+    my $date = $params->{date};
     my $changer = $params->{changer};
     my $watchingRef = $params->{watchers};
     my @diffs = @{ $params->{diffs} };
@@ -348,7 +353,7 @@ sub sendMail {
     push @watchingrel, map { user_id_to_login($_) } @$watchingRef;
 
     my $vars = {
-        delta_ts => $delta_ts,
+        date => $date,
         to_user => $user,
         bug => $bug,
         reasons => \@reasons,

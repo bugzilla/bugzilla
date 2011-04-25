@@ -53,6 +53,7 @@ var flags = new Array([% product.components.size %]);
 [% END %]
 [% count = 0 %]
 [%- FOREACH c = product.components %]
+    [% NEXT IF NOT c.is_active %]
     components[[% count %]] = "[% c.name FILTER js %]";
     comp_desc[[% count %]] = "[% c.description FILTER html_light FILTER js %]";
     initialowners[[% count %]] = "[% c.default_assignee.login FILTER js %]";

@@ -29,7 +29,7 @@
   # hyphenok: optional, select only; if true, prepend menu option for "-" to start of select
   # multiple: optional, do multiselect box, value is size (height) of box
   # custom_userlist: optional, specify a limited list of users to use
-  # title: optional, extra information to display as a tooltip
+  # field_title: optional, extra information to display as a tooltip
   #%]
 
 [% IF Param("usemenuforusers") %]
@@ -40,7 +40,7 @@
   [% IF disabled %] disabled="[% disabled FILTER html %]" [% END %]
   [% IF accesskey %] accesskey="[% accesskey FILTER html %]" [% END %]
   [% IF multiple %] multiple="multiple" size="[% multiple FILTER html %]" [% END %]
-  [% IF title %] title="[% title FILTER html %]" [% END %]
+  [% IF field_title %] title="[% field_title FILTER html %]" [% END %]
 >
   [% IF emptyok %]
     <option value=""></option>
@@ -90,7 +90,7 @@
     [% IF onchange %] onchange="[% onchange FILTER html %]" [% END %]
     [% IF disabled %] disabled="[% disabled FILTER html %]" [% END %]
     [% IF accesskey %] accesskey="[% accesskey FILTER html %]" [% END %]
-    [% IF title %] title="[% title FILTER html %]" [% END %]
+    [% IF field_title %] title="[% field_title FILTER html %]" [% END %]
     [% IF size %] size="[% size FILTER html %]" [% END %]
     [% IF id %] id="[% id FILTER html %]" [% END %]
   >

@@ -58,8 +58,14 @@ our @EXPORT_OK = qw(
 
 sub bin_loc {
     my ($bin, $path) = @_;
+
+    # If the binary is a full path...
+    if ($bin =~ m{[/\\]}) {
+        return MM->maybe_command($bin) || '';
+    }
+
+    # Otherwise we look for it in the path in a cross-platform way.
     my @path = $path ? @$path : File::Spec->path;
-    
     foreach my $dir (@path) {
         next if !-d $dir;
         my $full_path = File::Spec->catfile($dir, $bin);

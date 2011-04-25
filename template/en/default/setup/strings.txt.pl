@@ -131,6 +131,13 @@ then the value of the ##column## column that needs to be fixed:
 EOT
     install_module => 'Installing ##module## version ##version##...',
     installation_failed => '*** Installation aborted. Read the messages above. ***',
+    install_no_compiler => <<END,
+ERROR: Using install-module.pl requires that you install a compiler, such as
+gcc.
+END
+    install_no_make => <<END,
+ERROR: Using install-module.pl requires that you install "make".
+END
     lc_new_vars => <<'END',
 This version of Bugzilla contains some variables that you may want to 
 change and adapt to your local settings. Please edit the file 

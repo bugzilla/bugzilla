@@ -958,7 +958,7 @@ sub process_bug {
                        $err .= "UNCONFIRMED\n";
                    }
                }
-               if(!$valid_res){
+               elsif (!$valid_res) {
                    $err .= "Unknown resolution \"$resolution\".\n";
                    $err .= "   Setting resolution to INVALID\n";
                    $resolution = "INVALID";

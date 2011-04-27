@@ -97,6 +97,7 @@ use constant DB_COLUMNS => (
     'profiles.mybugslink AS showmybugslink',
     'profiles.disabledtext',
     'profiles.disable_mail',
+    'profiles.extern_id',
 );
 use constant NAME_FIELD => 'login_name';
 use constant ID_FIELD   => 'userid';
@@ -108,6 +109,7 @@ use constant VALIDATORS => {
     disabledtext  => \&_check_disabledtext,
     login_name    => \&check_login_name_for_creation,
     realname      => \&_check_realname,
+    extern_id     => \&_check_extern_id,
 };
 
 sub UPDATE_COLUMNS {
@@ -117,6 +119,7 @@ sub UPDATE_COLUMNS {
         disabledtext
         login_name
         realname
+        extern_id
     );
     push(@cols, 'cryptpassword') if exists $self->{cryptpassword};
     return @cols;
@@ -135,6 +138,12 @@ sub new {
     bless ($user, $class);
     return $user unless $param;
 
+    if (ref($param) eq 'HASH') {
+        if (defined $param->{extern_id}) {
+            $param = { condition => 'extern_id = ?' , values => [$param->{extern_id}] };
+            $_[0] = $param;
+        }
+    }
     return $class->SUPER::new(@_);
 }
 
@@ -180,6 +189,22 @@ sub update {
 sub _check_disable_mail { return $_[1] ? 1 : 0; }
 sub _check_disabledtext { return trim($_[1]) || ''; }
 
+# Check whether the extern_id is unique.
+sub _check_extern_id {
+    my ($invocant, $extern_id) = @_;
+    $extern_id = trim($extern_id);
+    return undef unless defined($extern_id) && $extern_id ne "";
+    if (!ref($invocant) || $invocant->extern_id ne $extern_id) {
+        my $existing_login = $invocant->new({ extern_id => $extern_id });
+        if ($existing_login) {
+            ThrowUserError( 'extern_id_exists',
+                            { extern_id => $extern_id,
+                              existing_login_name => $existing_login->login });
+        }
+    }
+    return $extern_id;
+}
+
 # This is public since createaccount.cgi needs to use it before issuing
 # a token for account creation.
 sub check_login_name_for_creation {
@@ -219,6 +244,7 @@ sub _check_realname { return trim($_[1]) || ''; }
 
 sub set_disabledtext { $_[0]->set('disabledtext', $_[1]); }
 sub set_disable_mail { $_[0]->set('disable_mail', $_[1]); }
+sub set_extern_id    { $_[0]->set('extern_id', $_[1]); }
 
 sub set_login {
     my ($self, $login) = @_;
@@ -243,6 +269,7 @@ sub set_password { $_[0]->set('cryptpassword', $_[1]); }
 # Accessors for user attributes
 sub name  { $_[0]->{realname};   }
 sub login { $_[0]->{login_name}; }
+sub extern_id { $_[0]->{extern_id}; }
 sub email { $_[0]->login . Bugzilla->params->{'emailsuffix'}; }
 sub disabledtext { $_[0]->{'disabledtext'}; }
 sub is_disabled { $_[0]->disabledtext ? 1 : 0; }

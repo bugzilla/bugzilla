@@ -28,6 +28,7 @@ use constant requires_persistence  => 1;
 use constant requires_verification => 1;
 use constant user_can_create_account => 0;
 use constant is_automatic => 0;
+use constant extern_id_used => 0; 
 
 sub new {
     my ($class) = @_;
@@ -130,5 +131,13 @@ Bugzilla. (For example, C<Env> auth is "automatic" because the webserver
 just passes us an environment variable on most page requests, and does not
 ask the user for authentication information directly in Bugzilla.) Defaults
 to C<false>.
+
+=item C<extern_id_used>
+
+Whether or not this login method uses the extern_id field. If
+used, users with editusers permission will be be allowed to
+edit the extern_id for all users.
+
+The default value is C<0>.
 
 =back

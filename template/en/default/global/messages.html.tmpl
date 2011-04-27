@@ -60,6 +60,8 @@
               A new password has been set.
             [% ELSIF field == 'disabledtext' %]
               The disable text has been modified.
+            [% ELSIF field == 'extern_id' %]
+              The user's External Login ID has been modified.
             [% ELSIF field == 'disable_mail' %]
               [% IF otheruser.email_disabled %]
                 [% terms.Bug %]mail has been disabled.

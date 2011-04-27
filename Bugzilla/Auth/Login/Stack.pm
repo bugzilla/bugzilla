@@ -28,6 +28,7 @@ use fields qw(
 );
 use Hash::Util qw(lock_keys);
 use Bugzilla::Hook;
+use List::MoreUtils qw(any);
 
 sub new {
     my $class = shift;
@@ -95,6 +96,11 @@ sub user_can_create_account {
         return 1 if $object->user_can_create_account;
     }
     return 0;
+}
+
+sub extern_id_used {
+    my ($self) = @_;
+    return any { $_->extern_id_used } @{ $self->{_stack} };
 }
 
 1;

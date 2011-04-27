@@ -86,4 +86,9 @@ sub user_can_create_account {
     return 0;
 }
 
+sub extern_id_used {
+    my ($self) = @_;
+    return any { $_->extern_id_used } @{ $self->{_stack} };
+}
+
 1;

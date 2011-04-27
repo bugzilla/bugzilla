@@ -1696,6 +1696,14 @@
     [% title = "Illegal User ID" %]
     User ID '[% userid FILTER html %]' is not valid integer.
 
+  [% ELSIF error == "extern_id_exists" %]
+    [% title = "Account Already Exists" %]
+    There is already an account
+    [% IF existing_login_name %]
+      ([% existing_login_name FILTER html %])
+    [% END %]
+    with the External Login ID "[% extern_id FILTER html %]".
+
   [% ELSE %]
 
     [%# Try to find hooked error messages %]

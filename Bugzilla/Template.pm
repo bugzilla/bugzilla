@@ -955,6 +955,7 @@ sub create {
                 }
                 return \@optional;
             },
+            'default_authorizer' => new Bugzilla::Auth(),
         },
     };
 

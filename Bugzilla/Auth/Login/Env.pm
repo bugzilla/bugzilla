@@ -32,6 +32,7 @@ use constant can_login  => 0;
 use constant requires_persistence  => 0;
 use constant requires_verification => 0;
 use constant is_automatic => 1;
+use constant extern_id_used => 1;
 
 sub get_login_info {
     my ($self) = @_;

@@ -1160,14 +1160,20 @@ sub send_changes {
 
     # If there were changes in dependencies, we need to notify those
     # dependencies.
-    my %notify_deps;
     if ($changes->{'bug_status'}) {
         my ($old_status, $new_status) = @{ $changes->{'bug_status'} };
 
         # If this bug has changed from opened to closed or vice-versa,
         # then all of the bugs we block need to be notified.
         if (is_open_state($old_status) ne is_open_state($new_status)) {
-            $notify_deps{$_} = 1 foreach (@{ $self->blocked });
+            my $params = { forced   => { changer => $user },
+                           type     => 'dep',
+                           dep_only => 1 };
+
+            foreach my $id (@{ $self->blocked }) {
+                $params->{id} = $id;
+                _send_bugmail($params, $vars);
+            }
         }
     }
 
@@ -1183,8 +1189,7 @@ sub send_changes {
     # an error later.
     delete $changed_deps{''};
 
-    my %all_dep_changes = (%notify_deps, %changed_deps);
-    foreach my $id (sort { $a <=> $b } (keys %all_dep_changes)) {
+    foreach my $id (sort { $a <=> $b } (keys %changed_deps)) {
         _send_bugmail({ forced => { changer => $user }, type => "dep",
                          id => $id }, $vars);
     }
@@ -1194,7 +1199,7 @@ sub _send_bugmail {
     my ($params, $vars) = @_;
 
     my $results = 
-        Bugzilla::BugMail::Send($params->{'id'}, $params->{'forced'});
+        Bugzilla::BugMail::Send($params->{'id'}, $params->{'forced'}, $params);
 
     if (Bugzilla->usage_mode == USAGE_MODE_BROWSER) {
         my $template = Bugzilla->template;

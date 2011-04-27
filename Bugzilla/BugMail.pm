@@ -109,7 +109,8 @@ sub relationships {
 # All the names are email addresses, not userids
 # values are scalars, except for cc, which is a list
 sub Send {
-    my ($id, $forced) = (@_);
+    my ($id, $forced, $params) = (@_);
+    $params ||= {};
 
     my $dbh = Bugzilla->dbh;
     my $bug = new Bugzilla::Bug($id);
@@ -379,7 +380,8 @@ sub Send {
 
     # The email client will display the Date: header in the desired timezone,
     # so we can always use UTC here.
-    my $date = format_time($bug->delta_ts, '%a, %d %b %Y %T %z', 'UTC');
+    my $date = $params->{dep_only} ? $end : $bug->delta_ts;
+    $date = format_time($date, '%a, %d %b %Y %T %z', 'UTC');
 
     foreach my $user_id (keys %recipients) {
         my %rels_which_want;

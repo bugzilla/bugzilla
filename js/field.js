@@ -22,7 +22,15 @@
 /* This library assumes that the needed YUI libraries have been loaded 
    already. */
 
+var bz_no_validate_enter_bug = false;
 function validateEnterBug(theform) {
+    // This is for the "bookmarkable templates" button.
+    if (bz_no_validate_enter_bug) {
+        // Set it back to false for people who hit the "back" button
+        bz_no_validate_enter_bug = false;
+        return true;
+    }
+
     var component = theform.component;
     var short_desc = theform.short_desc;
     var version = theform.version;

@@ -133,6 +133,8 @@
         [% val = val FILTER email %]
     [% ELSIF field == 'creation_ts' OR field == 'delta_ts' %]
       [% val = val FILTER time("%Y-%m-%d %T %z") %]
+    [% ELSIF field == "see_also" %]
+      [% val = val.name %]
     [% END %]
     <[% field %][% IF name != '' %] name="[% name FILTER xml %]"[% END -%]>
       [%- val FILTER xml %]</[% field %]>

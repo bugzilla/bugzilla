@@ -121,7 +121,13 @@
 </bugzilla>
 
 [% BLOCK bug_field %]
-  [% FOREACH val = bug.$field %]
+  [% field_values = bug.$field %]
+  [%# Work around TT bug https://rt.cpan.org/Public/Bug/Display.html?id=9802 %]
+  [% IF bug.$field.size == 1 %]
+    [% field_values = [bug.$field.first] %]
+  [% END %]
+
+  [% FOREACH val = field_values %]
     [%# We need to handle some fields differently. This should become
       # nicer once we have custfields, and a type attribute for the fields
       #%]

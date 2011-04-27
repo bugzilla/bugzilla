@@ -584,24 +584,16 @@ sub bz_crypt {
 # strength of the string in bits.
 sub generate_random_password {
     my $size = shift || 10; # default to 10 chars if nothing specified
-    my $rand;
-    if (eval { require Math::Random::Secure; 1; }) {
-        $rand = \&Math::Random::Secure::irand;
-    }
-    else {
-        # For details on why this block works the way it does, see bug 619594.
-        # (Note that we don't do this if Math::Random::Secure is installed,
-        # because we don't need to.)
-        my $counter = 0;
-        $rand = sub {
-            # If we regenerate the seed every 5 characters, our seed is roughly
-            # as strong (in terms of bit size) as our randomly-generated
-            # string itself.
-            _do_srand() if ($counter % 5) == 0;
-            $counter++;
-            return int(rand $_[0]);
-        };
-    }
+    my $counter = 0;
+    # For details on why this block works the way it does, see bug 619594.
+    my $rand = sub {
+        # If we regenerate the seed every 5 characters, our seed is roughly
+        # as strong (in terms of bit size) as our randomly-generated
+        # string itself.
+        _do_srand() if ($counter % 5) == 0;
+        $counter++;
+        return int(rand $_[0]);
+    };
     return join("", map{ ('0'..'9','a'..'z','A'..'Z')[$rand->(62)] } 
                        (1..$size));
 }

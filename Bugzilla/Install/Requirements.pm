@@ -289,12 +289,6 @@ sub OPTIONAL_MODULES {
         version => '3.51',
         feature => 'Recommended important security fix'
     },
-    {
-        package => 'Math-Random-Secure',
-        module  => 'Math::Random::Secure',
-        version => '0.05',
-        feature => 'Improve cookie and token security',
-    },
     );
 
     my $all_modules = _get_extension_requirements(

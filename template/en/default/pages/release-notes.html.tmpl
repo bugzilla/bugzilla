@@ -28,6 +28,7 @@
 
 <ul class="bz_toc">
   <li><a href="#v40_introduction">Introduction</a></li>
+  <li><a href="#v40_point">Updates in this 4.0.x Release</a></li>
   <li><a href="#v40_req">Minimum Requirements</a></li>
   <li><a href="#v40_feat">New Features and Improvements</a></li>
   <li><a href="#v40_issues">Outstanding Issues</a></li>
@@ -68,6 +69,44 @@
   and <a href="http://www.redhat.com/">Red Hat</a> for funding the development
   of certain features and improvements in this release of
   [%+ terms.Bugzilla %].</p>
+
+<h2 id="v40_point">Updates in this 4.0.x Release</h2>
+
+<h3>4.0.1</h3>
+
+<ul>
+  <li>During installation, the CPAN module Math::Random::Secure would
+    sometimes fail to install properly and give an error about
+    <kbd>Math::Random::Secure::irand</kbd>. Now, when using
+    <kbd>install-module.pl</kbd> to install Math::Random::Secure, this
+    will no longer happen. If you are currently experiencing this b[% %]ug
+    and it prevented you from installing 4.0, remove Math::Random::Secure
+    from your <kbd>lib/</kbd> directory, like:
+    <p><kbd>rm -rf lib/Math/Random/Secure*</kbd></p>
+    <p>(<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=646578">[% terms.Bug %] 646578</a>)</p></li>
+  <li>The "Remember values as bookmarkable template" button on the
+    [%+ terms.bug %] entry page will now work even when some required fields
+    are empty. 
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=640719">[% terms.Bug %] 640719</a>)</li>
+  <li>Email notifications about dependencies and flags had the wrong
+    timestamp.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=643910">[% terms.Bug %] 643910</a>
+    and  (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=652165">[% terms.Bug %] 652165</a>)</li>
+  <li>You can now select "UTC" as a valid timezone in General Preferences.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=646209">[% terms.Bug %] 646209</a>)</li>
+  <li>Automatic duplicate detection now works on PostgreSQL (although
+    it is not as high-quality as on other DB platforms). 
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=634144">[% terms.Bug %] 634144</a>)</li>
+   <li>Autcomplete for users now works even if you are using the
+     "emailsuffix" option.
+     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=641519">[% terms.Bug %] 641519</a>)</li>
+   <li>Javascript errors during series creation in New Charts have been
+     fixed.
+     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=644285">[% terms.Bug %] 644285</a>)</li>
+    <li>The "Show Votes" page now works, for installations using the Voting
+      extension.
+      (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=652381">[% terms.Bug %] 652381</a>)</li> 
+</ul>
 
 <h2 id="v40_req">Minimum Requirements</h2>
 

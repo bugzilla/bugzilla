@@ -54,3 +54,10 @@ form#Create #comp_desc {
 #keyword_container .yui-ac-content {
     _height: 30em; /* ie6 */
 }
+
+.bz_short_desc_column a, .bz_short_short_desc_column a {
+    /* color:inherit */
+    color: expression(this.parentNode.currentStyle['color']);
+}
+
+

@@ -115,3 +115,8 @@ td.bz_total {
 .bz_query_explain {
     text-align: left;
 }
+
+.bz_short_desc_column a, .bz_short_short_desc_column a {
+    color: inherit;
+}
+

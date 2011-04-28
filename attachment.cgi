@@ -476,10 +476,13 @@ sub insert {
     # Must be called before create() as it may alter $cgi->param('ispatch').
     my $content_type = Bugzilla::Attachment::get_content_type();
 
+    # Get the filehandle of the attachment.
+    my $data_fh = $cgi->upload('data');
+
     my $attachment = Bugzilla::Attachment->create(
         {bug           => $bug,
          creation_ts   => $timestamp,
-         data          => scalar $cgi->param('attachurl') || $cgi->upload('data'),
+         data          => scalar $cgi->param('attachurl') || $data_fh,
          description   => scalar $cgi->param('description'),
          filename      => $cgi->param('attachurl') ? '' : scalar $cgi->upload('data'),
          ispatch       => scalar $cgi->param('ispatch'),

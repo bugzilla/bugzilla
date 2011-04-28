@@ -61,6 +61,41 @@
 
 <h2 id="v36_point">Updates in this 3.6.x Release</h2>
 
+<h3>3.6.5</h3>
+
+<p>Although the 3.6.x branch will only receive security-related fixes 
+  from here on out, there were a few b[% %]ug fixes that made it into the
+  branch before it was locked to security fixes only. Those b[% %]ug fixes
+  are now being released as 3.6.5.</p>
+
+<ul>
+  <li>During installation, the CPAN module Math::Random::Secure would
+    sometimes fail to install properly and give an error about
+    <kbd>Math::Random::Secure::irand</kbd>. Now, when using
+    <kbd>install-module.pl</kbd> to install Math::Random::Secure, this
+    will no longer happen. If you are currently experiencing this b[% %]ug
+    and it prevented you from installing 3.6.4, remove Math::Random::Secure
+    from your <kbd>lib/</kbd> directory, like:
+    <p><kbd>rm -rf lib/Math/Random/Secure*</kbd></p>
+    <p>(<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=646578">[% terms.Bug %] 646578</a>)</p>
+  </li>
+  <li>Doing "contains all of the words" searches on the Keywords field now
+    works properly again.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=490322">[% terms.Bug %] 490322</a>)
+  </li>
+  <li>It was possible to create a BUGLIST cookie that was longer than
+    4KB, making the web server refuse all of your requests from then on.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=480044">[% terms.Bug %] 480044</a>)
+  <li><kbd>whine.pl</kbd> will now work on PostgreSQL 8.4 and later.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=616981">[% terms.Bug %] 616981</a>)
+  </li>
+  <li>If you installed Math::Random::Secure in [% terms.Bugzilla %]'s
+    <kbd>lib/</kbd> directory, mod_perl installations sometimes wouldn't
+    be able to use it.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=621597">[% terms.Bug %] 621597</a>)
+  </li>
+</ul>
+
 <h3>3.6.4</h3>
 
 <p>This release fixes several security issues, some of which are

@@ -1310,7 +1310,7 @@
     Your password is currently less than
     [%+ constants.USER_PASSWORD_MIN_LENGTH FILTER html %] characters long,
     which is the new minimum length required for passwords.
-    You must <a href="token.cgi?a=reqpw&loginname=[% locked_user.email FILTER html %]">
+    You must <a href="token.cgi?a=reqpw&amp;loginname=[% locked_user.email FILTER url_quote %]">
     request a new password</a> in order to log in again.
 
   [% ELSIF error == "password_too_short" %]
@@ -1568,16 +1568,16 @@
   [% ELSIF error == "sudo_password_required" %]
     [% title = "Password Required" %]
     Your [% terms.Bugzilla %] password is required to begin a sudo 
-    session. Please <a href="relogin.cgi?action=prepare-sudo&target_login=
-    [%- target_login FILTER html %]&reason=
-    [%- reason FILTER html %]">go back</a> and enter your password.
+    session. Please <a href="relogin.cgi?action=prepare-sudo&amp;target_login=
+    [%- target_login FILTER url_quote %]&amp;reason=
+    [%- reason FILTER url_quote %]">go back</a> and enter your password.
     
   [% ELSIF error == "sudo_preparation_required" %]
     [% title = "Preparation Required" %]
     You may not start a sudo session directly.  Please
-    <a href="relogin.cgi?action=prepare-sudo&target_login=
-    [%- target_login FILTER html %]&reason=
-    [%- reason FILTER html %]">start your session normally</a>.
+    <a href="relogin.cgi?action=prepare-sudo&amp;target_login=
+    [%- target_login FILTER url_quote %]&amp;reason=
+    [%- reason FILTER url_quote %]">start your session normally</a>.
 
   [% ELSIF error == "sudo_protected" %]
     [% title = "User Protected" %]
@@ -1784,7 +1784,7 @@
                   
     [% FOREACH q = Bugzilla.user.queries %]
       [% IF q.name == namedcmd %]
-        or <a href="query.cgi?[% q.url FILTER html %]">edit</a>
+        or <a href="query.cgi?[% q.url FILTER url_quote %]">edit</a>
       [% END %]
     [% END %]
     

@@ -21,8 +21,11 @@ use fields qw(
     _stack
     successful
 );
-use Hash::Util qw(lock_keys);
+
 use Bugzilla::Hook;
+
+use Hash::Util qw(lock_keys);
+use List::MoreUtils qw(any);
 
 sub new {
     my $class = shift;

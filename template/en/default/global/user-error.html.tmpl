@@ -744,6 +744,13 @@
     '[% product FILTER html %]' product can not be restricted to
     that group.
 
+  [% ELSIF error == "group_restriction_not_allowed" %]
+    [% title = "Group Restriction Not Allowed" %]
+    You tried to restrict [% terms.abug %] to the "[% name FILTER html %]"
+    group, but either this group does not exist, or you are not allowed
+    to restrict [% terms.bugs %] to this group in the "[% product.name FILTER html %]"
+    product.
+
   [% ELSIF error == "group_not_specified" %]
     [% title = "Group not specified" %]
     No group was specified.

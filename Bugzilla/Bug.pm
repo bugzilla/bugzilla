@@ -1615,11 +1615,14 @@ sub _check_groups {
 
         # First check all the groups they chose to set.
         foreach my $name (@$group_names) {
-            # We don't want to expose the existence or non-existence of groups,
-            # so instead of doing check(), we just do "next" on an invalid
-            # group.
-            my $group = new Bugzilla::Group({ name => $name }) or next;
-            next if !$product->group_is_settable($group);
+            my $group = Bugzilla::Group->check(
+                { name => $name, product => $product,
+                  _error => 'group_restriction_not_allowed' });
+
+            if (!$product->group_is_settable($group)) {
+                ThrowUserError('group_restriction_not_allowed',
+                               { name => $name, product => $product });
+            }
             $add_groups{$group->id} = $group;
         }
     }

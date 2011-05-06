@@ -2267,9 +2267,8 @@ is private, otherwise it is assumed to be public.
 =item C<groups> (array) - An array of group names to put this
 bug into. You can see valid group names on the Permissions
 tab of the Preferences screen, or, if you are an administrator,
-in the Groups control panel. Note that invalid group names or
-groups that the bug can't be restricted to are silently ignored. If
-you don't specify this argument, then a bug will be added into
+in the Groups control panel.
+If you don't specify this argument, then the bug will be added into
 all the groups that are set as being "Default" for this product. (If
 you want to avoid that, you should specify C<groups> as an empty array.)
 
@@ -2330,6 +2329,11 @@ You didn't specify a summary for the bug.
 You specified values in the C<blocks> or C<depends_on> fields
 that would cause a circular dependency between bugs.
 
+=item 120 (Group Restriction Denied)
+
+You tried to restrict the bug to a group which does not exist, or which
+you cannot use with this product.
+
 =item 504 (Invalid User)
 
 Either the QA Contact, Assignee, or CC lists have some invalid user
@@ -2346,7 +2350,9 @@ B<Required>, due to a bug in Bugzilla.
 
 =item The C<groups> argument was added in Bugzilla B<4.0>. Before
 Bugzilla 4.0, bugs were only added into Mandatory groups by this
-method.
+method. Since Bugzilla B<4.0.2>, passing an illegal group name will
+throw an error. In Bugzilla 4.0 and 4.0.1, illegal group names were
+silently ignored.
 
 =item The C<comment_is_private> argument was added in Bugzilla B<4.0>.
 Before Bugzilla 4.0, you had to use the undocumented C<commentprivacy>

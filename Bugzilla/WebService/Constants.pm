@@ -111,6 +111,7 @@ use constant WS_ERROR_CODE => {
     # Bug-related group errors
     group_change_denied => 120,
     group_invalid_restriction => 120,
+    group_restriction_not_allowed => 120,
     # Status/Resolution errors
     missing_resolution => 121,
     resolution_not_allowed => 122,

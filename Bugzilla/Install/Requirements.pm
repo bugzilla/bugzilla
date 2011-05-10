@@ -230,7 +230,8 @@ sub OPTIONAL_MODULES {
     {
         package => 'PatchReader',
         module  => 'PatchReader',
-        version => '0.9.4',
+        # 0.9.6 fixes two notable bugs and significantly improves the UX.
+        version => '0.9.6',
         feature => ['patch_viewer'],
     },
     {

@@ -830,16 +830,26 @@
             </div>
           [% END %]
           [% IF bug.cc %]
-            <select id="cc" name="cc" multiple="multiple" size="5">
+            <select id="cc" multiple="multiple" size="5"
+              [% IF bug.user.canedit %]name="cc"[% END %]>
               [% FOREACH c = bug.cc %]
                 <option value="[% c FILTER email FILTER html %]">
                   [% c FILTER email FILTER html %]</option>
               [% END %]
             </select>
-            [% IF user.id %]
+            [% IF user.id && !bug.user.canedit %]
+              <input type="hidden" name="cc" value="[% user.login FILTER email FILTER html %]">
+            [% END %]
+            [% IF user.id AND (bug.user.canedit OR bug.cc.contains(user.login)) %]
               <br>
               <input type="checkbox" id="removecc" name="removecc">
-              [%%]<label for="removecc">Remove selected CCs</label>
+              <label for="removecc">
+                [% IF bug.user.canedit %]
+                  Remove selected CCs
+                [% ELSE %]
+                  Remove me from the CC list
+                [% END %]
+              </label>
               <br>
             [% END %]
           [% END %]

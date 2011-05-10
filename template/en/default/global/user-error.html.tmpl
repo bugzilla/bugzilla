@@ -280,6 +280,10 @@
                     'query.html#list' => "$terms.Bug lists"} %]
     You may not search, or create saved searches, without any search terms.
 
+  [% ELSIF error == "cc_remove_denied" %]
+    [% title = "Change Denied" %]
+    You do not have permission to remove other people from the CC list.
+
   [% ELSIF error == "chart_too_large" %]
     [% title = "Chart Too Large" %]
     Sorry, but 2000 x 2000 is the maximum size for a chart.

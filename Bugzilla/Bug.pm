@@ -2658,6 +2658,10 @@ sub remove_cc {
     my ($self, $user_or_name) = @_;
     my $user = ref $user_or_name ? $user_or_name
                                  : Bugzilla::User->check($user_or_name);
+    my $currentUser = Bugzilla->user;
+    if (!$self->user->{'canedit'} && $user->id != $currentUser->id) {
+        ThrowUserError('cc_remove_denied');
+    }
     my $cc_users = $self->cc_users;
     @$cc_users = grep { $_->id != $user->id } @$cc_users;
 }

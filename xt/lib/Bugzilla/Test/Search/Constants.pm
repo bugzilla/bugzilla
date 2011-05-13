@@ -36,6 +36,7 @@ our @EXPORT = qw(
     COLUMN_TRANSLATION
     COMMENT_FIELDS
     CUSTOM_FIELDS
+    CUSTOM_SEARCH_TESTS
     FIELD_SIZE
     FIELD_SUBSTR_SIZE
     FLAG_FIELDS
@@ -1019,6 +1020,16 @@ use constant SPECIAL_PARAM_TESTS => (
       value => '%group.<1-bug_group>%', contains => [1,2,3,4] },
     { field => 'commenter', operator => 'equals',
       value => '%group.<1-bug_group>%', contains => [1,2,3,4,5] },
+);
+
+use constant CUSTOM_SEARCH_TESTS => (
+    { name  => 'bug_id AND assigned_to', contains => [1],
+      columns => ['assigned_to'],
+      params => [
+        { f => 'bug_id',      o => 'equals', v => '<1>' },
+        { f => 'assigned_to', o => 'equals', v => '<1>' },
+      ]
+    },
 );
 
 1;

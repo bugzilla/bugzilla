@@ -80,10 +80,10 @@ sub invalid_field_operator_combination { return undef }
 sub search_params {
     my ($self) = @_;
 
-    my %params;
+    my %params = %{ $self->test->{top_params} || {} };
     my $counter = 0;
     foreach my $row (@{ $self->test->{params} }) {
-        $row->{v} = $self->translate_value($row);
+        $row->{v} = $self->translate_value($row) if exists $row->{v};
         foreach my $key (keys %$row) {
             $params{"${key}$counter"} = $row->{$key};
         }
@@ -107,7 +107,7 @@ sub translate_value {
 
 sub search_columns {
     my ($self) = @_;
-    return ['bug_id', @{ $self->test->{columns} }];
+    return ['bug_id', @{ $self->test->{columns} || [] }];
 }
 
 1;

@@ -1023,13 +1023,142 @@ use constant SPECIAL_PARAM_TESTS => (
 );
 
 use constant CUSTOM_SEARCH_TESTS => (
-    { name  => 'bug_id AND assigned_to', contains => [1],
-      columns => ['assigned_to'],
+    { name => 'OP without CP', contains => [1],
       params => [
-        { f => 'bug_id',      o => 'equals', v => '<1>' },
-        { f => 'assigned_to', o => 'equals', v => '<1>' },
+          { f => 'OP' },
+          { f => 'bug_id', o => 'equals', v => '<1>' },
       ]
     },
+
+    { name => 'Empty OP/CP pair before criteria', contains => [1],
+      params => [
+          { f => 'OP' }, { f => 'CP' },
+          { f => 'bug_id', o => 'equals', v => '<1>' },
+      ]
+    },
+
+    { name => 'Empty OP/CP pair after criteria', contains => [1],
+      params => [
+          { f => 'bug_id', o => 'equals', v => '<1>' },
+          { f => 'OP' }, { f => 'CP' },
+      ]
+    },
+
+    { name  => 'empty OP/CP mid criteria', contains => [1],
+      columns => ['assigned_to'],
+      params => [
+          { f => 'bug_id', o => 'equals', v => '<1>' },
+          { f => 'OP' }, { f => 'CP' },
+          { f => 'assigned_to', o => 'substr', v => '@' },
+      ]
+    },
+
+    { name  => 'bug_id = 1 AND assigned_to contains @', contains => [1],
+      columns => ['assigned_to'],
+      params => [
+          { f => 'bug_id',      o => 'equals', v => '<1>' },
+          { f => 'assigned_to', o => 'substr', v => '@' },
+      ]
+    },
+
+    { name  => 'NOT(bug_id = 1) AND NOT(assigned_to = 2)',
+      contains => [3,4,5],
+      columns => ['assigned_to'],
+      params => [
+          { n => 1, f => 'bug_id',      o => 'equals', v => '<1>' },
+          { n => 1, f => 'assigned_to', o => 'equals', v => '<2>' },
+      ]
+    },
+
+    { name  => 'bug_id = 1 OR assigned_to = 2', contains => [1,2],
+      columns => ['assigned_to'], top_params => { j_top => 'OR' },
+      params => [
+          { f => 'bug_id',      o => 'equals', v => '<1>' },
+          { f => 'assigned_to', o => 'equals', v => '<2>' },
+      ]
+    },
+
+    { name => 'NOT(bug_id = 1 AND assigned_to = 1)', contains => [2,3,4,5],
+      columns => ['assigned_to'],
+      params => [
+          { f => 'OP', n => 1 },
+            { f => 'bug_id',      o => 'equals', v => '<1>' },
+            { f => 'assigned_to', o => 'equals', v => '<1>' },
+          { f => 'CP' },
+      ]
+    },
+
+
+    { name  => '(bug_id = 1 AND assigned_to contains @) '
+               . ' OR (bug_id = 2 AND assigned_to contains @)',
+      contains => [1,2], columns => ['assigned_to'],
+      top_params => { j_top => 'OR' },
+      params => [
+          { f => 'OP' },
+            { f => 'bug_id',      o => 'equals', v => '<1>' },
+            { f => 'assigned_to', o => 'substr', v => '@' },
+          { f => 'CP' },
+          { f => 'OP' },
+            { f => 'bug_id',      o => 'equals', v => '<2>' },
+            { f => 'assigned_to', o => 'substr', v => '@' },
+          { f => 'CP' },
+      ]
+    },
+
+    { name  => '(bug_id = 1 OR assigned_to = 2) '
+               . ' AND (bug_id = 2 OR assigned_to = 1)',
+      contains => [1,2], columns => ['assigned_to'],
+      params => [
+          { f => 'OP', j => 'OR' },
+            { f => 'bug_id',      o => 'equals', v => '<1>' },
+            { f => 'assigned_to', o => 'equals', v => '<2>' },
+          { f => 'CP' },
+          { f => 'OP', j => 'OR' },
+            { f => 'bug_id',      o => 'equals', v => '<2>' },
+            { f => 'assigned_to', o => 'equals', v => '<1>' },
+          { f => 'CP' },
+      ]
+    },
+
+    { name  => 'bug_id = 3 OR ( (bug_id = 1 OR assigned_to = 2) '
+               . ' AND (bug_id = 2 OR assigned_to = 1) )',
+      contains => [1,2,3], columns => ['assigned_to'],
+      top_params => { j_top => 'OR' },
+      params => [
+          { f => 'bug_id', o => 'equals', v => '<3>' },
+          { f => 'OP' },
+            { f => 'OP', j => 'OR' },
+              { f => 'bug_id',      o => 'equals', v => '<1>' },
+              { f => 'assigned_to', o => 'equals', v => '<2>' },
+            { f => 'CP' },
+            { f => 'OP', j => 'OR' },
+              { f => 'bug_id',      o => 'equals', v => '<2>' },
+              { f => 'assigned_to', o => 'equals', v => '<1>' },
+            { f => 'CP' },
+          { f => 'CP' },
+      ]
+    },
+
+    { name  => 'bug_id = 3 OR ( (bug_id = 1 OR assigned_to = 2) '
+               . ' AND (bug_id = 2 OR assigned_to = 1) ) OR bug_id = 4',
+      contains => [1,2,3,4], columns => ['assigned_to'],
+      top_params => { j_top => 'OR' },
+      params => [
+          { f => 'bug_id', o => 'equals', v => '<3>' },
+          { f => 'OP' },
+            { f => 'OP', j => 'OR' },
+              { f => 'bug_id',      o => 'equals', v => '<1>' },
+              { f => 'assigned_to', o => 'equals', v => '<2>' },
+            { f => 'CP' },
+            { f => 'OP', j => 'OR' },
+              { f => 'bug_id',      o => 'equals', v => '<2>' },
+              { f => 'assigned_to', o => 'equals', v => '<1>' },
+            { f => 'CP' },
+          { f => 'CP' },
+          { f => 'bug_id', o => 'equals', v => '<4>' },
+      ]
+    },
+
 );
 
 1;

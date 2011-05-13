@@ -1555,7 +1555,7 @@ sub _custom_search {
     my @field_ids = map { /(\d+)/; $1 } @field_params;
     @field_ids = sort { $a <=> $b } @field_ids;
     
-    my $current_clause = new Bugzilla::Search::Clause();
+    my $current_clause = new Bugzilla::Search::Clause($params->{j_top});
     my @clause_stack;
     foreach my $id (@field_ids) {
         my $field = $params->{"f$id"};

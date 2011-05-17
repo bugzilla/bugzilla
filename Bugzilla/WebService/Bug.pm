@@ -175,8 +175,9 @@ sub _legal_field_values {
             my $product_name = $value->product->name;
             if ($user->can_see_product($product_name)) {
                 push(@result, {
-                    name    => $self->type('string', $value->name),
-                    sortkey => $self->type('int', $sortkey),
+                    name     => $self->type('string', $value->name),
+                    sort_key => $self->type('int', $sortkey),
+                    sortkey  => $self->type('int', $sortkey), # deprecated
                     visibility_values => [$self->type('string', $product_name)],
                 });
             }
@@ -200,9 +201,10 @@ sub _legal_field_values {
             }
 
             push (@result, {
-               name          => $self->type('string', $status->name),
-               is_open       => $self->type('boolean', $status->is_open),
-               sortkey       => $self->type('int', $status->sortkey),
+               name     => $self->type('string', $status->name),
+               is_open  => $self->type('boolean', $status->is_open),
+               sort_key => $self->type('int', $status->sortkey),
+               sortkey  => $self->type('int', $status->sortkey), # depricated
                can_change_to => \@can_change_to,
                visibility_values => [],
             });
@@ -214,8 +216,9 @@ sub _legal_field_values {
         foreach my $value (@values) {
             my $vis_val = $value->visibility_value;
             push(@result, {
-                name              => $self->type('string', $value->name),
-                sortkey           => $self->type('int'   , $value->sortkey),
+                name     => $self->type('string', $value->name),
+                sort_key => $self->type('int'   , $value->sortkey),
+                sortkey  => $self->type('int'   , $value->sortkey), # depricated
                 visibility_values => [
                     defined $vis_val ? $self->type('string', $vis_val->name) 
                                      : ()
@@ -1110,10 +1113,14 @@ Each hash has the following keys:
 C<string> The actual value--this is what you would specify for this
 field in L</create>, etc.
 
-=item C<sortkey>
+=item C<sort_key>
 
 C<int> Values, when displayed in a list, are sorted first by this integer
 and then secondly by their name.
+
+=item C<sortkey>
+
+B<DEPRECATED> - Use C<sort_key> instead.
 
 =item C<visibility_values>
 
@@ -1170,6 +1177,8 @@ You specified an invalid field name or id.
 =item Added in Bugzilla B<3.6>.
 
 =item The C<is_mandatory> return value was added in Bugzilla B<4.0>.
+
+=item C<sortkey> was renamed to C<sort_key> in Bugzilla B<4.2>.
 
 =back
 

@@ -156,9 +156,12 @@ sub debug_value {
 # result was equal to its first value.
 sub transformed_value_was_equal {
     my ($self, $number, $value) = @_;
-    if (defined $value) {
+    if (@_ > 2) {
         $self->{transformed_value_was_equal}->{$number} = $value;
+        $self->search_test->was_equal_cache($self, $number, $value);
     }
+    my $cached = $self->search_test->was_equal_cache($self, $number);
+    return $cached if defined $cached;
     return $self->{transformed_value_was_equal}->{$number};
 }
 
@@ -213,6 +216,23 @@ sub contains_known_broken {
         return "$field $operator contains $number is known to be broken";
     }
     return undef;
+}
+
+# Used by subclasses. Checks both bug_is_contained and contains_known_broken
+# to tell you whether or not the bug will *actually* be found by the test.
+sub will_actually_contain_bug {
+    my ($self, $number) = @_;
+    my $is_contained = $self->bug_is_contained($number) ? 1 : 0;
+    my $is_broken = $self->contains_known_broken($number) ? 1 : 0;
+
+    # If the test is supposed to contain the bug and *isn't* broken,
+    # then the test will contain the bug.
+    return 1 if ($is_contained and !$is_broken);
+    # If this test is *not* supposed to contain the bug, but that test is
+    # broken, then this test *will* contain the bug.
+    return 1 if (!$is_contained and $is_broken);
+
+    return 0;
 }
 
 # Returns a string if creating a Bugzilla::Search object throws an error,

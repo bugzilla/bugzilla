@@ -851,6 +851,20 @@ sub value_translation_cache {
     return $self->{value_translation_cache}->{$test_name};
 }
 
+# When doing AND/OR tests, the value for transformed_value_was_equal
+# (see Bugzilla::Test::Search::FieldTest) won't be recalculated
+# if we pull our values from the value_translation_cache. So we need
+# to also cache the values for transformed_value_was_equal.
+sub was_equal_cache {
+    my ($self, $field_test, $number, $value) = @_;
+    return if !$self->option('long');
+    my $test_name = $field_test->name;
+    if (@_ == 4) {
+        $self->{tvwe_cache}->{$test_name}->{$number} = $value;
+    }
+    return $self->{tvwe_cache}->{$test_name}->{$number};
+}
+
 #############
 # Main Test #
 #############

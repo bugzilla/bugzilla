@@ -53,6 +53,8 @@ sub operator_test { die "unimplemented" }
 sub field_object { die "unimplemented" }
 sub main_value { die "unimplenmented" }
 sub test_value { die "unimplemented" }
+# Custom tests don't use transforms.
+sub transformed_value_was_equal { 0 }
 sub debug_value {
     my ($self) = @_;
     my $string = '';

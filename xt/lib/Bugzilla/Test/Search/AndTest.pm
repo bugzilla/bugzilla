@@ -40,12 +40,10 @@ sub bug_is_contained {
     return all { $_->bug_is_contained($number) } $self->field_tests;
 }
 
-########################
-# SKIP & TODO Messages #
-########################
-
-sub _join_skip { () }
-sub _join_broken_constant { {} }
+sub _bug_will_actually_be_contained {
+    my ($self, $number) = @_;
+    return all { $_->will_actually_contain_bug($number) } $self->field_tests;
+}
 
 ##############################
 # Bugzilla::Search arguments #

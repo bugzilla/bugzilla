@@ -1103,13 +1103,19 @@
 
     [%# For logged-out users %]
     [% ELSE %]
-      <table><tr><td><fieldset>
-        <legend>Note</legend>
-        You need to
-        <a href="show_bug.cgi?id=
-                 [%- bug.bug_id %]&amp;GoAheadAndLogIn=1">log in</a>
-         before you can comment on or make changes to this [% terms.bug %].
-      </fieldset></table><tr></td>
+      <table>
+        <tr>
+          <td>
+            <fieldset>
+              <legend>Note</legend>
+              You need to
+              <a href="show_bug.cgi?id=
+                      [%- bug.bug_id %]&amp;GoAheadAndLogIn=1">log in</a>
+              before you can comment on or make changes to this [% terms.bug %].
+            </fieldset>
+          </td>
+        </tr> 
+      </table>
     [% END %]
   </div>
 [% END %]

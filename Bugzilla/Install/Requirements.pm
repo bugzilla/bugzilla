@@ -530,9 +530,8 @@ sub print_module_instructions {
           or ($output and $check_results->{any_missing}) ) ? 1 : 0;
 
     # We only print the PPM repository note if we have to.
-    if ($need_module_instructions and ON_ACTIVESTATE) {
-        my $perl_ver = sprintf('%vd', $^V);
-            
+    my $perl_ver = sprintf('%vd', $^V);
+    if ($need_module_instructions && ON_ACTIVESTATE && vers_cmp($perl_ver, '5.12') < 0) {
         # URL when running Perl 5.8.x.
         my $url_to_theory58S = 'http://theoryx5.uwinnipeg.ca/ppms';
         # Packages for Perl 5.10 are not compatible with Perl 5.8.

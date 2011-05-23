@@ -59,3 +59,5 @@
 [% FOREACH group = bug.groups_in %]
   [% bodyclasses.push("bz_group_$group.name") %]
 [% END %]
+
+[% Hook.process('end') %]

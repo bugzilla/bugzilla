@@ -172,7 +172,7 @@ sub flag_handler {
     my (
         $name,            $status,      $setter_login,
         $requestee_login, $exporterid,  $bugid,
-        $productid,       $componentid, $attachid
+        $componentid,     $productid,   $attachid
       )
       = @_;
 

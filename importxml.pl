@@ -1115,15 +1115,6 @@ sub process_bug {
                 $keywordseen{$keyword_obj->id} = 1;
             }
         }
-        my ($keywordarray) = $dbh->selectcol_arrayref(
-            "SELECT d.name FROM keyworddefs d
-                    INNER JOIN keywords k 
-                    ON d.id = k.keywordid 
-                    WHERE k.bug_id = ? 
-                    ORDER BY d.name", undef, $id);
-        my $keywordstring = join( ", ", @{$keywordarray} );
-        $dbh->do( "UPDATE bugs SET keywords = ? WHERE bug_id = ?",
-            undef, $keywordstring, $id )
     }
 
     # Insert values of custom multi-select fields. They have already

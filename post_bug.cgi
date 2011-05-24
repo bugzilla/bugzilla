@@ -256,8 +256,11 @@ foreach my $dep (@{$bug->dependson || []}, @{$bug->blocked || []}) {
 }
 $vars->{sentmail} = \@all_mail_results;
 
+$format = $template->get_format("bug/create/created",
+                                 scalar($cgi->param('created-format')),
+                                 "html");
 print $cgi->header();
-$template->process("bug/create/created.html.tmpl", $vars)
+$template->process($format->{'template'}, $vars)
     || ThrowTemplateError($template->error());
 
 1;

@@ -229,7 +229,8 @@ sub quoteUrls {
 
     # mailto:
     # Use |<nothing> so that $1 is defined regardless
-    $text =~ s~\b(mailto:|)?([\w\.\-\+\=]+\@[\w\-]+(?:\.[\w\-]+)+)\b
+    # &#64; is the encoded '@' character.
+    $text =~ s~\b(mailto:|)?([\w\.\-\+\=]+&\#64;[\w\-]+(?:\.[\w\-]+)+)\b
               ~<a href=\"mailto:$2\">$1$2</a>~igx;
 
     # attachment links

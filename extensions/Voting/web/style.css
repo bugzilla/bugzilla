@@ -22,3 +22,7 @@ tr.bz_bug_being_voted_on td {
     border-style: solid none solid none;
     border-width: thin;
 }
+
+#votes_container { 
+    white-space: nowrap; 
+}

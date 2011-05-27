@@ -18,10 +18,6 @@
   #   Max Kanat-Alexander <mkanat@bugzilla.org>
   #%]
 [% IF bug.product_obj.votesperuser %]
-  <style type="text/css">
-    #votes_container { white-space: nowrap; }
-  </style>
-
   <span id="votes_container">
     [% IF bug.votes %]
       with

@@ -38,16 +38,8 @@ BEGIN {
         # isn't Windows friendly (Bug 248988)
         $ENV{'TMPDIR'} = $ENV{'TEMP'} || $ENV{'TMP'} || "$ENV{'WINDIR'}\\TEMP";
     }
+    *AUTOLOAD = \&CGI::AUTOLOAD;
 }
-
-# CGI.pm uses AUTOLOAD, but explicitly defines a DESTROY sub.
-# We need to do so, too, otherwise perl dies when the object is destroyed
-# and we don't have a DESTROY method (because CGI.pm's AUTOLOAD will |die|
-# on getting an unknown sub to try to call)
-sub DESTROY {
-    my $self = shift;
-    $self->SUPER::DESTROY(@_);
-};
 
 sub _init_bz_cgi_globals {
     my $invocant = shift;

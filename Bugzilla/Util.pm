@@ -240,14 +240,11 @@ sub xml_quote {
     return $var;
 }
 
-# This function must not be relied upon to return a valid string to pass to
-# the DB or the user in UTF-8 situations. The only thing you  can rely upon
-# it for is that if you url_decode a string, it will url_encode back to the 
-# exact same thing.
 sub url_decode {
     my ($todecode) = (@_);
     $todecode =~ tr/+/ /;       # pluses become spaces
     $todecode =~ s/%([0-9a-fA-F]{2})/pack("c",hex($1))/ge;
+    utf8::decode($todecode) if Bugzilla->params->{'utf8'};
     return $todecode;
 }
 

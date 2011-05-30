@@ -869,7 +869,8 @@
 
   [% ELSIF message_tag == "tag_updated" %]
     [% title = "Tag Updated" %]
-    The '[% tag FILTER html %]' tag has been
+    The '<a href="buglist.cgi?tag=[% tag FILTER uri %]">[% tag FILTER html %]</a>'
+    tag has been
     [% IF action == "add" %]
       added to
     [% ELSE %]

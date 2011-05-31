@@ -68,19 +68,6 @@ if (length($buffer) == 0) {
     ThrowUserError("buglist_parameters_required");
 }
 
-# If a parameter starts with cmd-, this means the And or Or button has been
-# pressed in the advanced search page with JS turned off.
-if (grep { $_ =~ /^cmd\-/ } $cgi->param()) {
-    my $url = "query.cgi?$buffer#chart";
-    print $cgi->redirect(-location => $url);
-    # Generate and return the UI (HTML page) from the appropriate template.
-    $vars->{'message'} = "buglist_adding_field";
-    $vars->{'url'} = $url;
-    $template->process("global/message.html.tmpl", $vars)
-      || ThrowTemplateError($template->error());
-    exit;
-}
-
 $cgi->redirect_search_url();
 
 # Determine whether this is a quicksearch query.

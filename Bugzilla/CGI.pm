@@ -149,9 +149,18 @@ sub clean_search_url {
             $self->delete("${param}_type");
         }
 
-        # Boolean Chart stuff is empty if it's "noop"
-        if ($param =~ /\d-\d-\d/ && defined $self->param($param)
-            && $self->param($param) eq 'noop')
+        # Custom Search stuff is empty if it's "noop". We also keep around
+        # the old Boolean Chart syntax for backwards-compatibility.
+        if (($param =~ /\d-\d-\d/ || $param =~ /^[[:alpha:]]\d+$/)
+            && defined $self->param($param) && $self->param($param) eq 'noop')
+        {
+            $self->delete($param);
+        }
+        
+        # Any "join" for custom search that's an AND can be removed, because
+        # that's the default.
+        if (($param =~ /^j\d+$/ || $param eq 'j_top')
+            && $self->param($param) eq 'AND')
         {
             $self->delete($param);
         }

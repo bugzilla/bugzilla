@@ -75,71 +75,36 @@ local our %default;
 # Items which are single-valued, the template should only reference [0]
 # and ignore any multiple values.
 sub PrefillForm {
-    my ($buf) = (@_);
+    my ($buf) = @_;
     my $cgi = Bugzilla->cgi;
     $buf = new Bugzilla::CGI($buf);
     my $foundone = 0;
 
-    # Nothing must be undef, otherwise the template complains.
-    my @list = ("bug_status", "resolution", "assigned_to",
-                      "rep_platform", "priority", "bug_severity",
-                      "classification", "product", "reporter", "op_sys",
-                      "component", "version", "chfield", "chfieldfrom",
-                      "chfieldto", "chfieldvalue", "target_milestone",
-                      "email", "emailtype", "emailreporter",
-                      "emailassigned_to", "emailcc", "emailqa_contact",
-                      "emaillongdesc", "content",
-                      "changedin", "short_desc", "short_desc_type",
-                      "longdesc", "longdesc_type", "bug_file_loc",
-                      "bug_file_loc_type", "status_whiteboard",
-                      "status_whiteboard_type", "bug_id",
-                      "bug_id_type", "keywords", "keywords_type",
-                      "deadlinefrom", "deadlineto",
-                      "x_axis_field", "y_axis_field", "z_axis_field",
-                      "chart_format", "cumulate", "x_labels_vertical",
-                      "category", "subcategory", "name", "newcategory",
-                      "newsubcategory", "public", "frequency");
-    # These fields can also have default values. And because there are
-    # hooks in the advanced search page which let you add fields as
-    # discrete forms, we also need to retain the operators.
-    my @custom_fields = Bugzilla->active_custom_fields;
-    push(@list, map { $_->name } @custom_fields);
-    push(@list, map { $_->name . '_type'} @custom_fields);
+    # Query parameters that don't represent form fields on this page.
+    my @skip = qw(format query_format list_id columnlist);
 
-    foreach my $name (@list) {
-        $default{$name} = [];
-    }
- 
-    # we won't prefill the boolean chart data from this query if
-    # there are any being submitted via params
-    my $prefillcharts = (grep(/^field-/, $cgi->param)) ? 0 : 1;
- 
     # Iterate over the URL parameters
     foreach my $name ($buf->param()) {
+        next if grep { $_ eq $name } @skip;
+        $foundone = 1;
         my @values = $buf->param($name);
-
-        # If the name begins with the string 'field', 'type', 'value', or
-        # 'negate', then it is part of the boolean charts. Because
-        # these are built different than the rest of the form, we need
-        # to store these as parameters. We also need to indicate that
-        # we found something so the default query isn't added in if
-        # all we have are boolean chart items.
-        if ($name =~ m/^(?:field|type|value|negate)/) {
-            $cgi->param(-name => $name, -value => $values[0]) if ($prefillcharts);
-            $foundone = 1;
+        
+        # If the name is a single letter followed by numbers, it's part
+        # of Custom Search. We store these as an array of hashes.
+        if ($name =~ /^([[:lower:]])(\d+)$/) {
+            $default{'custom_search'}->[$2]->{$1} = $values[0];
         }
         # If the name ends in a number (which it does for the fields which
         # are part of the email searching), we use the array
         # positions to show the defaults for that number field.
-        elsif ($name =~ m/^(.+)(\d)$/ && defined($default{$1})) {
-            $foundone = 1;
+        elsif ($name =~ /^(\w)(\d)$/) {
             $default{$1}->[$2] = $values[0];
         }
-        elsif (exists $default{$name}) {
-            $foundone = 1;
-            push (@{$default{$name}}, @values);
+        else {
+            push (@{ $default{$name} }, @values);
         }
     }
+
     return $foundone;
 }
 
@@ -151,10 +116,6 @@ if (!PrefillForm($buffer)) {
     } else {
         PrefillForm(Bugzilla->params->{"defaultquery"});
     }
-}
-
-if (!scalar(@{$default{'chfieldto'}}) || $default{'chfieldto'}->[0] eq "") {
-    $default{'chfieldto'} = ["Now"];
 }
 
 # if using groups for entry, then we don't want people to see products they 
@@ -239,43 +200,6 @@ if (!Bugzilla->user->is_timetracker) {
 @fields = sort {lc($a->description) cmp lc($b->description)} @fields;
 unshift(@fields, { name => "noop", description => "---" });
 $vars->{'fields'} = \@fields;
-
-# Creating new charts - if the cmd-add value is there, we define the field
-# value so the code sees it and creates the chart. It will attempt to select
-# "xyzzy" as the default, and fail. This is the correct behaviour.
-foreach my $cmd (grep(/^cmd-/, $cgi->param)) {
-    if ($cmd =~ /^cmd-add(\d+)-(\d+)-(\d+)$/) {
-        $cgi->param(-name => "field$1-$2-$3", -value => "xyzzy");
-    }
-}
-
-if (!$cgi->param('field0-0-0')) {
-    $cgi->param(-name => 'field0-0-0', -value => "xyzzy");
-}
-
-# Create data structure of boolean chart info. It's an array of arrays of
-# arrays - with the inner arrays having three members - field, type and
-# value.
-my @charts;
-for (my $chart = 0; $cgi->param("field$chart-0-0"); $chart++) {
-    my @rows;
-    for (my $row = 0; $cgi->param("field$chart-$row-0"); $row++) {
-        my @cols;
-        for (my $col = 0; $cgi->param("field$chart-$row-$col"); $col++) {
-            my $value = $cgi->param("value$chart-$row-$col");
-            if (!defined($value)) {
-                $value = '';
-            }
-            push(@cols, { field => $cgi->param("field$chart-$row-$col"),
-                          type => $cgi->param("type$chart-$row-$col") || 'noop',
-                          value => $value });
-        }
-        push(@rows, \@cols);
-    }
-    push(@charts, {'rows' => \@rows, 'negate' => scalar($cgi->param("negate$chart")) });
-}
-
-$default{'charts'} = \@charts;
 
 # Named queries
 if ($userid) {

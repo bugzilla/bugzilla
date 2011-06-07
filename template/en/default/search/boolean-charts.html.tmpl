@@ -59,6 +59,7 @@
 <div id="custom_search_filter_section" 
      class="bz_search_section custom_search_query">
   [% SET indent_level = 0 %]
+  [% SET cond_num = 0 %]
   [% FOREACH condition = default.custom_search %]
     [% SET cond_num = loop.count - 1 %]
     [% PROCESS one_condition with_buttons = 0 %]

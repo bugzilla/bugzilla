@@ -669,13 +669,6 @@ function browserCanHideOptions(aSelect) {
 
 /* (end) option hiding code */
 
-// A convenience function to sanitize raw text for harmful HTML before outputting
-function _escapeHTML(text) {
-    return text.replace(/&/g, '&amp;').
-                replace(/</g, '&lt;').
-                replace(/>/g, '&gt;');
-}
-
 /**
  * The Autoselect
  */
@@ -701,7 +694,8 @@ YAHOO.bugzilla.userAutocomplete = {
       return stringified;
     },
     resultListFormat : function(oResultData, enteredText, sResultMatch) {
-        return ( _escapeHTML(oResultData.real_name) + " (" +  _escapeHTML(oResultData.name) + ")");
+        return ( YAHOO.lang.escapeHTML(oResultData.real_name) + " ("
+                 + YAHOO.lang.escapeHTML(oResultData.name) + ")");
     },
     debug_helper : function ( ){
         /* used to help debug any errors that might happen */

@@ -36,8 +36,6 @@ use strict;
 package Bugzilla::Search;
 use base qw(Exporter);
 @Bugzilla::Search::EXPORT = qw(
-    EMPTY_COLUMN
-
     IsValidQueryType
     split_order_term
     translate_old_column
@@ -397,11 +395,7 @@ use constant FIELD_MAP => {
     long_desc => 'longdesc',
 };
 
-# A SELECTed expression that we use as a placeholder if somebody selects
-# <none> for the X, Y, or Z axis in report.cgi.
-use constant EMPTY_COLUMN => '-1';
-
-# Some fields are not sorted on themselves, but on other fields. 
+# Some fields are not sorted on themselves, but on other fields.
 # We need to have a list of these fields and what they map to.
 use constant SPECIAL_ORDER => {
     'target_milestone' => {
@@ -644,7 +638,7 @@ sub REPORT_COLUMNS {
 # These are fields that never go into the GROUP BY on any DB. bug_id
 # is here because it *always* goes into the GROUP BY as the first item,
 # so it should be skipped when determining extra GROUP BY columns.
-use constant GROUP_BY_SKIP => EMPTY_COLUMN, qw(
+use constant GROUP_BY_SKIP => qw(
     bug_id
     flagtypes.name
     keywords
@@ -828,8 +822,7 @@ sub _sql_select {
         my $alias = $column;
         # Aliases cannot contain dots in them. We convert them to underscores.
         $alias =~ s/\./_/g;
-        my $sql = ($column eq EMPTY_COLUMN)
-                  ? EMPTY_COLUMN : COLUMNS->{$column}->{name} . " AS $alias";
+        my $sql = COLUMNS->{$column}->{name} . " AS $alias";
         push(@sql_fields, $sql);
     }
     return @sql_fields;

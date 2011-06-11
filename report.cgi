@@ -121,9 +121,7 @@ my $valid_columns = Bugzilla::Search::REPORT_COLUMNS;
   || ($valid_columns->{$tbl_field} && trick_taint($tbl_field))
   || ThrowCodeError("report_axis_invalid", {fld => "z", val => $tbl_field});
 
-my @axis_fields = ($row_field || EMPTY_COLUMN, 
-                   $col_field || EMPTY_COLUMN,
-                   $tbl_field || EMPTY_COLUMN);
+my @axis_fields = grep { $_ } ($row_field, $col_field, $tbl_field);
 
 # Clone the params, so that Bugzilla::Search can modify them
 my $params = new Bugzilla::CGI($cgi);
@@ -154,16 +152,10 @@ my $row_isnumeric = 1;
 my $tbl_isnumeric = 1;
 
 foreach my $result (@$results) {
-    my ($row, $col, $tbl) = @$result;
-
     # handle empty dimension member names
-    $row = ' ' if ($row eq '');
-    $col = ' ' if ($col eq '');
-    $tbl = ' ' if ($tbl eq '');
-
-    $row = "" if ($row eq EMPTY_COLUMN);
-    $col = "" if ($col eq EMPTY_COLUMN);
-    $tbl = "" if ($tbl eq EMPTY_COLUMN);
+    my $row = check_value($row_field, $result);
+    my $col = check_value($col_field, $result);
+    my $tbl = check_value($tbl_field, $result);
 
     $data{$tbl}{$col}{$row}++;
     $names{"col"}{$col}++;
@@ -336,4 +328,21 @@ sub get_names {
     }
     
     return @sorted;
+}
+
+sub check_value {
+    my ($field, $result) = @_;
+
+    my $value;
+    if (!defined $field) {
+        $value = '';
+    }
+    elsif ($field eq '') {
+        $value = ' ';
+    }
+    else {
+        $value = shift @$result;
+        $value = ' ' if (!defined $value || $value eq '');
+    }
+    return $value;
 }

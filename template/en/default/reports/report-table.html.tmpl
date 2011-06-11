@@ -187,7 +187,7 @@ YAHOO.util.Event.addListener(window, "load", function() {
       [% FOREACH col = col_names %]
         [% row_total = row_total + data.$tbl.$col.$row %]
         [% NEXT IF col == "" %]
-        [% col_totals.$col = col_totals.$col + data.$tbl.$col.$row %]
+        [% col_totals.$col = (col_totals.$col || 0) + data.$tbl.$col.$row %]
         
         [% col_idx = 1 - col_idx %]
         <td class="[% classes.$row_idx.$col_idx %]" align="center">

@@ -245,13 +245,6 @@ sub bugmail_relationships {
     $relationships->{+REL_EXAMPLE} = 'Example';
 }
 
-sub config {
-    my ($self, $args) = @_;
-
-    my $config = $args->{config};
-    $config->{Example} = "Bugzilla::Extension::Example::Config";
-}
-
 sub config_add_panels {
     my ($self, $args) = @_;
     

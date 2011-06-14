@@ -55,6 +55,12 @@ sub as_string {
     return $term;
 }
 
+sub as_params {
+    my ($self) = @_;
+    return { f => $self->field, o => $self->operator, v => $self->value,
+             n => scalar $self->negate };
+}
+
 sub negate {
     my ($self, $value) = @_;
     if (@_ == 2) {

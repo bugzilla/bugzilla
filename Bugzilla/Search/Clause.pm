@@ -44,19 +44,14 @@ sub children {
 
 sub joiner { return $_[0]->{joiner} }
 
-sub has_children {
-    my ($self) = @_;
-    return scalar(@{ $self->children }) > 0 ? 1 : 0;
-}
-
-sub has_valid_conditions {
+sub has_translated_conditions {
     my ($self) = @_;
     my $children = $self->children;
     return 1 if grep { $_->isa('Bugzilla::Search::Condition')
                        && $_->translated } @$children;
     foreach my $child (@$children) {
         next if $child->isa('Bugzilla::Search::Condition');
-        return 1 if $child->has_valid_conditions;
+        return 1 if $child->has_translated_conditions;
     }
     return 0;
 }
@@ -100,7 +95,7 @@ sub as_string {
     my ($self) = @_;
     my @strings;
     foreach my $child (@{ $self->children }) {
-        next if $child->isa(__PACKAGE__) && !$child->has_valid_conditions;
+        next if $child->isa(__PACKAGE__) && !$child->has_translated_conditions;
         next if $child->isa('Bugzilla::Search::Condition')
                 && !$child->translated;
 
@@ -119,5 +114,25 @@ sub as_string {
     return $sql;
 }
 
+# Search.pm converts URL parameters to Clause objects. This helps do the
+# reverse.
+sub as_params {
+    my ($self) = @_;
+    my @params;
+    foreach my $child (@{ $self->children }) {
+        if ($child->isa(__PACKAGE__)) {
+            my %open_paren = (f => 'OP', n => scalar $child->negate,
+                              j => $child->joiner);
+            push(@params, \%open_paren);
+            push(@params, $child->as_params);
+            my %close_paren =  (f => 'CP');
+            push(@params, \%close_paren);
+        }
+        else {
+            push(@params, $child->as_params);
+        }
+    }
+    return @params;
+}
 
 1;

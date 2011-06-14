@@ -719,6 +719,25 @@ sub search_description {
     return $self->{'search_description'};
 }
 
+sub boolean_charts_to_custom_search {
+    my ($self, $cgi_buffer) = @_;
+    my @as_params = $self->_boolean_charts->as_params;
+
+    # We need to start our new ids after the last custom search "f" id.
+    # We can just pick the last id in the array because they are sorted
+    # numerically.
+    my $last_id = ($self->_field_ids)[-1];
+    my $count = defined($last_id) ? $last_id + 1 : 0;
+    foreach my $param_set (@as_params) {
+        foreach my $name (keys %$param_set) {
+            my $value = $param_set->{$name};
+            next if !defined $value;
+            $cgi_buffer->param($name . $count, $value);
+        }
+        $count++;
+    }
+}
+
 ######################
 # Internal Accessors #
 ######################
@@ -1542,15 +1561,10 @@ sub _boolean_charts {
 sub _custom_search {
     my ($self) = @_;
     my $params = $self->_params;
-    my @param_list = keys %$params;
-    
-    my @field_params = grep { /^f\d+$/ } @param_list;
-    my @field_ids = map { /(\d+)/; $1 } @field_params;
-    @field_ids = sort { $a <=> $b } @field_ids;
-    
+
     my $current_clause = new Bugzilla::Search::Clause($params->{j_top});
     my @clause_stack;
-    foreach my $id (@field_ids) {
+    foreach my $id ($self->_field_ids) {
         my $field = $params->{"f$id"};
         if ($field eq 'OP') {
             my $joiner = $params->{"j$id"};
@@ -1579,6 +1593,17 @@ sub _custom_search {
     # loop our top clause may be still in the stack instead of being
     # $current_clause.
     return $clause_stack[0] || $current_clause;
+}
+
+sub _field_ids {
+    my ($self) = @_;
+    my $params = $self->_params;
+    my @param_list = keys %$params;
+    
+    my @field_params = grep { /^f\d+$/ } @param_list;
+    my @field_ids = map { /(\d+)/; $1 } @field_params;
+    @field_ids = sort { $a <=> $b } @field_ids;
+    return @field_ids;
 }
 
 sub _handle_chart {

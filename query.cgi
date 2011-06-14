@@ -80,6 +80,16 @@ sub PrefillForm {
     $buf = new Bugzilla::CGI($buf);
     my $foundone = 0;
 
+    # If there are old-style boolean charts in the URL (from an old saved
+    # search or from an old link on the web somewhere) then convert them
+    # to the new "custom search" format so that the form is populated
+    # properly.
+    my $any_boolean_charts = grep { /^field-?\d+/ } $buf->param();
+    if ($any_boolean_charts) {
+        my $search = new Bugzilla::Search(params => scalar $buf->Vars);
+        $search->boolean_charts_to_custom_search($buf);
+    }
+
     # Query parameters that don't represent form fields on this page.
     my @skip = qw(format query_format list_id columnlist);
 

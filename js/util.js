@@ -243,15 +243,16 @@ function bz_optionIndex(aSelect, aValue) {
  *                       without the word "on" in front of it.
  */
 function bz_fireEvent(anElement, anEvent) {
-    // IE
-    if (document.createEventObject) {
+    if (document.createEvent) {
+        // DOM-compliant browser
+        var evt = document.createEvent("HTMLEvents");
+        evt.initEvent(anEvent, true, true);
+        return !anElement.dispatchEvent(evt);
+    } else {
+        // IE
         var evt = document.createEventObject();
         return anElement.fireEvent('on' + anEvent, evt);
     }
-    // Firefox, etc.
-    var evt = document.createEvent("HTMLEvents");
-    evt.initEvent(anEvent, true, true); // event type, bubbling, cancelable
-    return !anElement.dispatchEvent(evt);
 }
 
 /**

@@ -66,16 +66,13 @@ sub existOnce {
 # Check to make sure all templates that are referenced in
 # Bugzilla exist in the proper place.
 
-foreach my $lang (@languages) {
-    foreach my $file (@referenced_files) {
-        my @path = map(File::Spec->catfile($_, $file),
-                       split(':', $include_path{$lang} . ":" . $include_path{"en"}));
-        if (my $path = existOnce(@path)) {
-            ok(1, "$path exists");
-        } else {
-            ok(0, "$file cannot be located --ERROR");
-            print $fh "Looked in:\n  " . join("\n  ", @path) . "\n";
-        }
+foreach my $file (@referenced_files) {
+    my @path = map(File::Spec->catfile($_, $file), @include_paths);
+    if (my $path = existOnce(@path)) {
+        ok(1, "$path exists");
+    } else {
+        ok(0, "$file cannot be located --ERROR");
+        print $fh "Looked in:\n  " . join("\n  ", @path) . "\n";
     }
 }
 

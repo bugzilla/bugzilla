@@ -61,11 +61,7 @@ foreach my $path (@Support::Templates::include_paths) {
     chdir $path; # relative path
     
     # We load a %safe list of acceptable exceptions.
-    if (!-r "filterexceptions.pl") {
-        ok(0, "$path has templates but no filterexceptions.pl file. --ERROR");
-        next;
-    }
-    else {
+    if (-r "filterexceptions.pl") {
         do "filterexceptions.pl";
         if (ON_WINDOWS) {
           # filterexceptions.pl uses / separated paths, while 
@@ -86,10 +82,12 @@ foreach my $path (@Support::Templates::include_paths) {
     # us to flag which members were not found, and report that as a warning, 
     # thereby keeping the lists clean.
     foreach my $file (keys %safe) {
-        my $list = $safe{$file};
-        $safe{$file} = {};
-        foreach my $directive (@$list) {
-            $safe{$file}{$directive} = 0;    
+        if (ref $safe{$file} eq 'ARRAY') {
+            my $list = $safe{$file};
+            $safe{$file} = {};
+            foreach my $directive (@$list) {
+                $safe{$file}{$directive} = 0;    
+            }
         }
     }
 

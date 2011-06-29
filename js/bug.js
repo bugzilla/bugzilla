@@ -88,11 +88,11 @@ YAHOO.bugzilla.dupTable = {
     formatCcButton: function(el, oRecord, oColumn, oData) {
         var url = 'process_bug.cgi?id=' + oRecord.getData('id') 
                   + '&addselfcc=1&token=' + escape(oData);
-        var button = document.createElement('button');
-        button.setAttribute('type', 'button');
+        var button = document.createElement('a');
+        button.setAttribute('href',  url);
         button.innerHTML = YAHOO.bugzilla.dupTable.addCcMessage;
-        button.onclick = function() { window.location = url; return false; };
         el.appendChild(button);
+        new YAHOO.widget.Button(button);
     },
     init_ds: function() {
         var new_ds = new YAHOO.util.XHRDataSource("jsonrpc.cgi");

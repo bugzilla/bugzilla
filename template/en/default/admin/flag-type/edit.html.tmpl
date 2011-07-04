@@ -252,10 +252,19 @@
 [% BLOCK group_select %]
   <select name="[% selname %]" id="[% selname %]" [%- ' disabled="disabled"' UNLESS can_fully_edit %]>
     <option value="">(no group)</option>
+    [% group_found = 0 %]
     [% FOREACH group = groups %]
       <option value="[% group.name FILTER html %]"
-        [% " selected" IF (type.${selname} && type.${selname}.name == group.name) %]>
-      [%- group.name FILTER html %]
+        [% IF type.${selname} && type.${selname}.name == group.name %]
+          [% ' selected="selected"' %]
+          [% group_found = 1 %]
+        [% END %]>
+        [%- group.name FILTER html ~%]
+      </option>
+    [% END %]
+    [% IF !group_found && type.${selname} %]
+      <option value="[% type.${selname}.name FILTER html %]" selected="selected">
+        [%- type.${selname}.name FILTER html ~%]
       </option>
     [% END %]
   </select>

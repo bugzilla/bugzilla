@@ -100,7 +100,7 @@
             [% IF product.maxperbug < product.maxvotes AND
                   product.maxperbug > 1 %]
               <font size="-1">
-                (Note: only [% product.maxperbug %] vote
+                (Note: only [% product.maxperbug FILTER html %] vote
                 [% "s" IF product.maxperbug != 1 %] allowed per [% terms.bug %] in
                 this product.)
               </font>
@@ -120,17 +120,17 @@
                 [% END %]
               [%- END %]
             </td>
-            <td align="right"><a name="vote_[% bug.id %]">
+            <td align="right"><a name="vote_[% bug.id FILTER html %]">
               [% IF canedit %]
                 [% IF product.onevoteonly %]
-                  <input type="checkbox" name="[% bug.id %]" value="1"
-                    [% " checked" IF bug.count %] id="bug_[% bug.id %]">
+                  <input type="checkbox" name="[% bug.id FILTER html %]" value="1"
+                    [% " checked" IF bug.count %] id="bug_[% bug.id FILTER html %]">
                 [% ELSE %]
-                  <input name="[% bug.id %]" value="[% bug.count %]"
-                         size="2" id="bug_[% bug.id %]">
+                  <input name="[% bug.id FILTER html %]" value="[% bug.count FILTER html %]"
+                         size="2" id="bug_[% bug.id FILTER html %]">
                 [% END %]
               [% ELSE %]
-                [% bug.count %]
+                [% bug.count FILTER html %]
               [% END %]
             </a></td>
             <td align="center">
@@ -138,15 +138,15 @@
             </td>
             <td>
               [% bug.summary FILTER html %]
-              (<a href="page.cgi?id=voting/bug.html&amp;bug_id=[% bug.id %]">Show Votes</a>)
+              (<a href="page.cgi?id=voting/bug.html&amp;bug_id=[% bug.id FILTER uri %]">Show Votes</a>)
             </td>
           </tr>
         [% END %]
 
         <tr>
           <td></td>
-          <td colspan="3">[% product.total %] vote
-            [% "s" IF product.total != 1 %] used out of [% product.maxvotes %]
+          <td colspan="3">[% product.total FILTER html %] vote
+            [% "s" IF product.total != 1 %] used out of [% product.maxvotes FILTER html %]
             allowed.
             <br>
             <br>

@@ -24,7 +24,7 @@
     [% IF votes == 1 %]
       [%+ terms.abug %]
     [% ELSE %]
-      [%+ votes %] [%+ terms.bugs %]
+      [%+ votes FILTER html %] [%+ terms.bugs %]
     [% END %].
 
     If you delete the user account,

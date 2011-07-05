@@ -27,7 +27,7 @@
       with
       <a href="page.cgi?id=voting/bug.html&amp;bug_id=
                [%- bug.id FILTER url_quote %]">
-        [%- bug.votes %] 
+        [%- bug.votes FILTER html %] 
         [% IF bug.votes == 1 %]
             vote
         [% ELSE %]

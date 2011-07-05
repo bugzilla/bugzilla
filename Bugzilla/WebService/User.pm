@@ -218,7 +218,7 @@ sub get {
                 real_name => $self->type('string', $_->name),
                 name      => $self->type('string', $_->login),
                 email     => $self->type('string', $_->email),
-                can_login => $self->type('boolean', $_->is_disabled ? 0 : 1),
+                can_login => $self->type('boolean', $_->is_enabled ? 1 : 0),
                 email_enabled     => $self->type('boolean', $_->email_enabled),
                 login_denied_text => $self->type('string', $_->disabledtext),
             }} @$in_group;
@@ -231,7 +231,7 @@ sub get {
                 real_name => $self->type('string', $_->name),
                 name      => $self->type('string', $_->login),
                 email     => $self->type('string', $_->email),
-                can_login => $self->type('boolean', $_->is_disabled ? 0 : 1),
+                can_login => $self->type('boolean', $_->is_enabled ? 1 : 0),
             }} @$in_group;
     }
 

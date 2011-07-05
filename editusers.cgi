@@ -77,7 +77,7 @@ if ($action eq 'search') {
     my $matchstr      = $cgi->param('matchstr');
     my $matchtype     = $cgi->param('matchtype');
     my $grouprestrict = $cgi->param('grouprestrict') || '0';
-    my $query = 'SELECT DISTINCT userid, login_name, realname, disabledtext ' .
+    my $query = 'SELECT DISTINCT userid, login_name, realname, is_enabled ' .
                 'FROM profiles';
     my @bindValues;
     my $nextCondition;

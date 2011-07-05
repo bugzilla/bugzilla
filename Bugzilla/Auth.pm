@@ -86,7 +86,7 @@ sub login {
 
     # Make sure the user isn't disabled.
     my $user = $login_info->{user};
-    if ($user->disabledtext) {
+    if (!$user->is_enabled) {
         return $self->_handle_login_result({ failure => AUTH_DISABLED,
                                               user    => $user }, $type);
     }

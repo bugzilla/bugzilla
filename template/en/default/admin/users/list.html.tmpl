@@ -69,7 +69,7 @@
 [% FOREACH thisuser = users %]
   [% IF !thisuser.realname %]
     [%# We cannot pass one class now and one class later. %]
-    [% SET classes = (thisuser.disabledtext ? "bz_inactive missing" : "missing") %]
+    [% SET classes = (thisuser.is_enabled ? "missing" : "bz_inactive missing") %]
     [% overrides.realname.login_name.${thisuser.login_name} = {
            content          => "missing"
            override_content => 1
@@ -77,7 +77,7 @@
            override_class   => 1
        }
     %]
-  [% ELSIF thisuser.disabledtext %]
+  [% ELSIF !thisuser.is_enabled %]
     [% overrides.realname.login_name.${thisuser.login_name} = {
            class          => "bz_inactive"
            override_class => 1
@@ -85,7 +85,7 @@
     %]
   [% END %]
 
-  [% IF thisuser.disabledtext %]
+  [% IF !thisuser.is_enabled %]
     [% overrides.login_name.login_name.${thisuser.login_name} = {
            class          => "bz_inactive"
            override_class => 1

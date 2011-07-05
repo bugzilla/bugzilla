@@ -114,7 +114,7 @@ if ( $action eq 'reqpw' ) {
     $user_account = Bugzilla::User->check($login_name);
 
     # Make sure the user account is active.
-    if ($user_account->is_disabled) {
+    if (!$user_account->is_enabled) {
         ThrowUserError('account_disabled',
                        {disabled_reason => get_text('account_disabled', {account => $login_name})});
     }

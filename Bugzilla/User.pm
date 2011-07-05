@@ -1243,7 +1243,7 @@ sub match {
                       "AND group_id IN(" .
                       join(', ', (-1, @{$user->visible_groups_inherited})) . ") ";
         }
-        $query    .= " AND LENGTH(disabledtext) = 0 " if $exclude_disabled;
+        $query    .= " AND disabledtext = '' " if $exclude_disabled;
         $query    .= $dbh->sql_limit($limit) if $limit;
 
         # Execute the query, retrieve the results, and make them into
@@ -1278,7 +1278,7 @@ sub match {
                       " AND group_id IN(" .
                 join(', ', (-1, @{$user->visible_groups_inherited})) . ") ";
         }
-        $query     .= " AND LENGTH(disabledtext) = 0 " if $exclude_disabled;
+        $query     .= " AND disabledtext = '' " if $exclude_disabled;
         $query     .= $dbh->sql_limit($limit) if $limit;
         my $user_ids = $dbh->selectcol_arrayref($query, undef, ($str, $str));
         @users = @{Bugzilla::User->new_from_list($user_ids)};
@@ -1696,7 +1696,7 @@ sub get_userlist {
                   "AND group_id IN(" .
                   join(', ', (-1, @{$self->visible_groups_inherited})) . ")";
     }
-    $query    .= " WHERE LENGTH(disabledtext) = 0 ";
+    $query    .= " WHERE disabledtext = '' ";
     $query    .= $dbh->sql_group_by('userid', 'login_name, realname');
 
     my $sth = $dbh->prepare($query);

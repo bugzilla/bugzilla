@@ -4082,7 +4082,7 @@ sub AUTOLOAD {
   *$AUTOLOAD = sub {
       my $self = shift;
 
-      return $self->{$attr} if defined $self->{$attr};
+      return $self->{$attr} if exists $self->{$attr};
 
       $self->{_multi_selects} ||= [Bugzilla->get_fields(
           {custom => 1, type => FIELD_TYPE_MULTI_SELECT })];

@@ -47,9 +47,9 @@
   [% END %]
 
   [%# Step 1: Display every flag type (except inactive types with no flags). %]
-  [% FOREACH type = flag_types %]
-    
-    [%# Step 1a: Display existing flag(s). %]
+  [% FOREACH type = flag_types -%]
+
+    [%-# Step 1a: Display existing flag(s). %]
     [% FOREACH flag = type.flags %]
       <tr>
         <td>
@@ -112,9 +112,9 @@
           </td>
         [% END %]
       </tr>
-    [% END %]
-    
-    [%# Step 1b: Display UI for setting flag. %]
+    [% END -%]
+
+    [%-# Step 1b: Display UI for setting flag. %]
     [% IF (!type.flags || type.flags.size == 0) && type.is_active %]
 
       [% PROCESS flag_row first_cell_empty = 1 addl_text = "" %]

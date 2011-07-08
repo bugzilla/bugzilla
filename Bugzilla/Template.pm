@@ -655,6 +655,7 @@ sub create {
                 $var =~ s/\r/\\r/g;
                 $var =~ s/\@/\\x40/g; # anti-spam for email addresses
                 $var =~ s/</\\x3c/g;
+                $var =~ s/>/\\x3e/g;
                 return $var;
             },
             

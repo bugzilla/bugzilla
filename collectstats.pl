@@ -476,7 +476,7 @@ sub CollectSeriesData {
     # (days_since_epoch + series_id) % frequency = 0. So they'll run every
     # <frequency> days, but the start date depends on the series_id.
     my $days_since_epoch = int(time() / (60 * 60 * 24));
-    my $today = $ARGV[0] || today_dash();
+    my $today = today_dash();
 
     # We save a copy of the main $dbh and then switch to the shadow and get
     # that one too. Remember, these may be the same.

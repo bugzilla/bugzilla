@@ -961,7 +961,7 @@ sub update {
     $_->insert_create_data($_) foreach @$added_see;
 
     # If any changes were found, record it in the activity log
-    if (scalar $removed_see || scalar $added_see) {
+    if (scalar @$removed_see || scalar @$added_see) {
         $changes->{see_also} = [join(', ', map { $_->name } @$removed_see),
                                 join(', ', map { $_->name } @$added_see)];
     }

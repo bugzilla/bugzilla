@@ -86,6 +86,14 @@ sub parse_mail {
         $summary = trim($2);
     }
 
+    # Ignore automatic replies.
+    # XXX - Improve the way to detect such subjects in different languages.
+    my $auto_submitted = $input_email->header('Auto-Submitted') || '';
+    if ($summary =~ /out of( the)? office/i || $auto_submitted eq 'auto-replied') {
+        debug_print("Automatic reply detected: $summary");
+        exit;
+    }
+
     my ($body, $attachments) = get_body_and_attachments($input_email);
     if (@$attachments) {
         $fields{'attachments'} = $attachments;

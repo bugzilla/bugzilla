@@ -28,7 +28,7 @@ use Bugzilla;
 my $cgi = Bugzilla->cgi;
 
 # Convert comma/space separated elements into separate params
-my $buglist = $cgi->param('buglist') || $cgi->param('bug_id') || $cgi->param('id');
+my $buglist = $cgi->param('buglist') || $cgi->param('bug_id') || $cgi->param('id') || '';
 my @ids = split (/[\s,]+/, $buglist);
 
 my $ids = join('', map { $_ = "&id=" . $_ } @ids);

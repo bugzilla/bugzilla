@@ -1612,6 +1612,8 @@ sub _handle_chart {
     my $params = $self->_params;
     my ($field, $operator, $value) = $condition->fov;
 
+    $field = FIELD_MAP->{$field} || $field;
+
     return if (!defined $field or !defined $operator or !defined $value);
     
     my $string_value;
@@ -1677,10 +1679,7 @@ sub do_search_function {
     my ($self, $args) = @_;
     my ($field, $operator) = @$args{qw(field operator)};
     
-    my $actual_field = FIELD_MAP->{$field} || $field;
-    $args->{field} = $actual_field;
-    
-    if (my $parse_func = SPECIAL_PARSING->{$actual_field}) {
+    if (my $parse_func = SPECIAL_PARSING->{$field}) {
         $self->$parse_func($args);
         # Some parsing functions set $term, though most do not.
         # For the ones that set $term, we don't need to do any further
@@ -1689,15 +1688,15 @@ sub do_search_function {
     }
     
     my $operator_field_override = $self->_get_operator_field_override();
-    my $override = $operator_field_override->{$actual_field};
+    my $override = $operator_field_override->{$field};
     # Attachment fields get special handling, if they don't have a specific
     # individual override.
-    if (!$override and $actual_field =~ /^attachments\./) {
+    if (!$override and $field =~ /^attachments\./) {
         $override = $operator_field_override->{attachments};
     }
     # If there's still no override, check for an override on the field's type.
     if (!$override) {
-        my $field_obj = $self->_chart_fields->{$actual_field};
+        my $field_obj = $self->_chart_fields->{$field};
         $override = $operator_field_override->{$field_obj->type};
     }
     

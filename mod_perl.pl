@@ -35,6 +35,7 @@ use lib Bugzilla::Constants::bz_locations()->{'ext_libpath'};
 # startup, so we always specify () after using any module in this
 # file.
 
+use Apache2::Log ();
 use Apache2::ServerUtil;
 use ModPerl::RegistryLoader ();
 use File::Basename ();
@@ -48,6 +49,10 @@ use Bugzilla::CGI ();
 use Bugzilla::Extension ();
 use Bugzilla::Install::Requirements ();
 use Bugzilla::Util ();
+
+# Make warnings go to the virtual host's log and not the main
+# server log.
+BEGIN { *CORE::GLOBAL::warn = \&Apache2::ServerRec::warn; }
 
 # Pre-compile the CGI.pm methods that we're going to use.
 Bugzilla::CGI->compile(qw(:cgi :push));

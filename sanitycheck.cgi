@@ -76,7 +76,7 @@ my $dbh = Bugzilla->dbh;
 # take the user prefs into account rather than querying the web browser.
 my $template;
 if (Bugzilla->usage_mode == USAGE_MODE_CMDLINE) {
-    $template = Bugzilla->template_inner($user->settings->{'lang'}->{'value'});
+    $template = Bugzilla->template_inner($user->setting('lang'));
 }
 else {
     $template = Bugzilla->template;

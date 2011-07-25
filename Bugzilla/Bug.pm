@@ -3300,7 +3300,7 @@ sub comments {
     my @comments = @{ $self->{'comments'} };
 
     my $order = $params->{order} 
-        || Bugzilla->user->settings->{'comment_sort_order'}->{'value'};
+        || Bugzilla->user->setting('comment_sort_order');
     if ($order ne 'oldest_to_newest') {
         @comments = reverse @comments;
         if ($order eq 'newest_to_oldest_desc_first') {

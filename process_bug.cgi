@@ -189,7 +189,7 @@ $vars->{'title_tag'} = "bug_processed";
 
 my $action;
 if (defined $cgi->param('id')) {
-    $action = $user->settings->{'post_bug_submit_action'}->{'value'};
+    $action = $user->setting('post_bug_submit_action');
 
     if ($action eq 'next_bug') {
         my $bug_list_obj = $user->recent_search_for($first_bug);

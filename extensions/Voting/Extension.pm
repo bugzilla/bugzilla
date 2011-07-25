@@ -806,7 +806,7 @@ sub _remove_votes {
             };
 
             my $voter = new Bugzilla::User($userid);
-            my $template = Bugzilla->template_inner($voter->settings->{'lang'}->{'value'});
+            my $template = Bugzilla->template_inner($voter->setting('lang'));
 
             my $msg;
             $template->process("voting/votes-removed.txt.tmpl", $vars, \$msg);

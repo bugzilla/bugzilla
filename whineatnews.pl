@@ -88,7 +88,7 @@ foreach my $email (sort (keys %bugs)) {
     $vars->{'bugs'} = \@bugs;
 
     my $msg;
-    my $template = Bugzilla->template_inner($user->settings->{'lang'}->{'value'});
+    my $template = Bugzilla->template_inner($user->setting('lang'));
     $template->process("email/whine.txt.tmpl", $vars, \$msg)
       or die($template->error());
 

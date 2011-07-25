@@ -164,7 +164,7 @@ elsif ($action eq 'begin-sudo') {
 
     # Go ahead and send out the message now
     my $message;
-    my $mail_template = Bugzilla->template_inner($target_user->settings->{'lang'}->{'value'});
+    my $mail_template = Bugzilla->template_inner($target_user->setting('lang'));
     $mail_template->process('email/sudo.txt.tmpl', { reason => $reason }, \$message);
     MessageToMTA($message);
 

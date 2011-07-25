@@ -593,11 +593,16 @@ sub settings {
     return $self->{'settings'};
 }
 
+sub setting {
+    my ($self, $name) = @_;
+    return $self->settings->{$name}->{'value'};
+}
+
 sub timezone {
     my $self = shift;
 
     if (!defined $self->{timezone}) {
-        my $tz = $self->settings->{timezone}->{value};
+        my $tz = $self->setting('timezone');
         if ($tz eq 'local') {
             # The user wants the local timezone of the server.
             $self->{timezone} = Bugzilla->local_timezone;
@@ -2240,6 +2245,10 @@ value          - the value of this setting for this user. Will be the same
                  is_default is true.
 is_default     - a boolean to indicate whether the user has chosen to make
                  a preference for themself or use the site default.
+
+=item C<setting(name)>
+
+Returns the value for the specified setting.
 
 =item C<timezone>
 

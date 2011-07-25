@@ -101,7 +101,7 @@ sub IssueEmailChangeToken {
 
     # Mail the user the token along with instructions for using it.
 
-    my $template = Bugzilla->template_inner($user->settings->{'lang'}->{'value'});
+    my $template = Bugzilla->template_inner($user->setting('lang'));
     my $vars = {};
 
     $vars->{'oldemailaddress'} = $old_email . $email_suffix;
@@ -144,7 +144,7 @@ sub IssuePasswordToken {
     my ($token, $token_ts) = _create_token($user->id, 'password', remote_ip());
 
     # Mail the user the token along with instructions for using it.
-    my $template = Bugzilla->template_inner($user->settings->{'lang'}->{'value'});
+    my $template = Bugzilla->template_inner($user->setting('lang'));
     my $vars = {};
 
     $vars->{'token'} = $token;
@@ -292,7 +292,7 @@ sub Cancel {
     $vars->{'cancelaction'} = $cancelaction;
 
     # Notify the user via email about the cancellation.
-    my $template = Bugzilla->template_inner($user->settings->{'lang'}->{'value'});
+    my $template = Bugzilla->template_inner($user->setting('lang'));
 
     my $message;
     $template->process("account/cancel-token.txt.tmpl", $vars, \$message)

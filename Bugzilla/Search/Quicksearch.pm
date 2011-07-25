@@ -142,7 +142,7 @@ sub quicksearch {
     $searchstring =~ s/(^[\s,]+|[\s,]+$)//g;
     ThrowUserError('buglist_parameters_required') unless ($searchstring);
 
-    $fulltext = Bugzilla->user->settings->{'quicksearch_fulltext'}->{'value'} eq 'on' ? 1 : 0;
+    $fulltext = Bugzilla->user->setting('quicksearch_fulltext') eq 'on' ? 1 : 0;
 
     if ($searchstring =~ m/^[0-9,\s]*$/) {
         _bug_numbers_only($searchstring);

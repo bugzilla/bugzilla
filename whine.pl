@@ -367,7 +367,7 @@ sub mail {
     # Don't send mail to someone whose bugmail notification is disabled.
     return if $addressee->email_disabled;
 
-    my $template = Bugzilla->template_inner($addressee->settings->{'lang'}->{'value'});
+    my $template = Bugzilla->template_inner($addressee->setting('lang'));
     my $msg = ''; # it's a temporary variable to hold the template output
     $args->{'alternatives'} ||= [];
 

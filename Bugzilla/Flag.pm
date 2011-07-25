@@ -970,7 +970,7 @@ sub notify {
     # use the default language for email notifications.
     my $default_lang;
     if (grep { !$_ } values %recipients) {
-        $default_lang = Bugzilla::User->new()->settings->{'lang'}->{'value'};
+        $default_lang = Bugzilla::User->new()->setting('lang');
     }
 
     foreach my $to (keys %recipients) {
@@ -987,7 +987,7 @@ sub notify {
                      'threadingmarker' => build_thread_marker($bug->id, $thread_user_id) };
 
         my $lang = $recipients{$to} ?
-          $recipients{$to}->settings->{'lang'}->{'value'} : $default_lang;
+          $recipients{$to}->setting('lang') : $default_lang;
 
         my $template = Bugzilla->template_inner($lang);
         my $message;

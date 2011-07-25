@@ -163,6 +163,7 @@ use constant SQL_DEFINITIONS => {
 # Field definitions for the fields that ship with Bugzilla.
 # These are used by populate_field_definitions to populate
 # the fielddefs table.
+# 'days_elapsed' is set in populate_field_definitions() itself.
 use constant DEFAULT_FIELDS => (
     {name => 'bug_id',       desc => 'Bug #',      in_new_bugmail => 1,
      buglist => 1, is_numeric => 1},

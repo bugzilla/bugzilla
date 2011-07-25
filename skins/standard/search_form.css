@@ -89,7 +89,7 @@
 }
 
 #summary_field.search_field_row input, 
-#summary_field.search_field_row select,
+#summary_field.search_field_row select
 {
   display: inline;
   padding-bottom: 0;

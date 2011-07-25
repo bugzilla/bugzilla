@@ -214,6 +214,8 @@
       versions
     [% ELSIF object == "workflow" %]
       the workflow
+    [% ELSE %]
+      [%+ Hook.process('auth_failure_object') %]
     [% END %].
 
     [% Hook.process("auth_failure") %]

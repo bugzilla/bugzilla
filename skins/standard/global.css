@@ -295,12 +295,7 @@ div#docslinks {
 /* tbody.file pre is for the Diff view of attachments. */
 .bz_comment_text, .uneditable_textarea, tbody.file pre {
      font-family: monospace;
-    /* Note that these must all be on separate lines or they stop
-       working in Konqueror. */
-     white-space: pre-wrap;      /* CSS 3 & 2.1 */
-     white-space: -moz-pre-wrap; /* Gecko */
-     white-space: -pre-wrap;     /* Opera 4-6 */
-     white-space: -o-pre-wrap;   /* Opera 7 */
+     white-space: pre-wrap;
 }
 
 .bz_comment_text {

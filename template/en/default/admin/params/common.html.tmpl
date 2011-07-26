@@ -62,55 +62,48 @@
           [% END %]
         </select>
       [% ELSIF param.type == "o" %]
-        <script type="text/javascript"><!--
-          document.write("<span style=\"display: none\">");
-        // -->
-        </script>
         <input id="input_[% param.name FILTER html %]" size="80"
                name="[% param.name FILTER html %]"
                value="[% Param(param.name) FILTER html %]"><br>
-        <script type="text/javascript"><!--
-          document.write("<\/span>");
-        // -->
-        </script>
         [% boxSize = 7 %]
         [% boxSize = 3 + param.choices.size IF param.choices.size < 7 %]
         [% plist = Param(param.name).split(',') %]
 
-        <script type="text/javascript"><!--
-          document.write(
-            '<table>' +
-            '  <tr>' +
-            '    <td rowspan="2">' +
-            '      <select id="select_[% param.name FILTER html %]"' +
-            '              size="[% boxSize FILTER html %]"' +
-            '              name="select_[% param.name FILTER html %]">' +
-                     [% FOREACH item = plist %]
-            '          <option value="[% item FILTER html %]">[% item FILTER html %]<\/option>' +
-                     [% END %]
-            '        <option class="sortlist_separator"' +
-            '                disabled="disabled"' +
-            '                value="[% sortlist_separator %]">active&uarr;&nbsp;&darr;inactive<\/option>' +
-                     [% FOREACH item = param.choices %]
-                       [% IF lsearch(plist, item) == -1 %]
-            '            <option value="[% item FILTER html %]">[% item FILTER html %]<\/option>' +
-                       [% END %]
-                     [% END %]
-            '      <\/select>' +
-            '    <\/td>' +
-            '    <td style="vertical-align: bottom">' +
-            '      <button type="button"' +
-            '              onClick="sortedList_moveItem(\'[% param.name FILTER html %]\', -1, \'[% sortlist_separator %]\');">&uarr;<\/button>' +
-            '    <\/td>' +
-            '  <\/tr>' +
-            '  <tr>' +
-            '    <td style="vertical-align: top">' +
-            '      <button type="button"' +
-            '              onClick="sortedList_moveItem(\'[% param.name FILTER html %]\', +1, \'[% sortlist_separator %]\');">&darr;<\/button>' +
-            '    <\/td>' +
-            '  <\/tr>' +
-            '<\/table>');
-        // -->
+        <table id="table_[% param.name FILTER html %]" class="bz_default_hidden">
+          <tr>
+            <td rowspan="2">
+              <select id="select_[% param.name FILTER html %]"
+                      name="select_[% param.name FILTER html %]"
+                      size="[% boxSize FILTER html %]">
+                [% FOREACH item = plist %]
+                  <option value="[% item FILTER html %]">[% item FILTER html %]</option>
+                [% END %]
+                <option class="sortlist_separator" disabled="disabled"
+                        value="[% sortlist_separator %]">active&uarr;&nbsp;&darr;inactive</option>
+                [% FOREACH item = param.choices %]
+                  [% IF lsearch(plist, item) == -1 %]
+                    <option value="[% item FILTER html %]">[% item FILTER html %]</option>
+                  [% END %]
+                [% END %]
+              </select>
+            </td>
+            <td style="vertical-align: bottom">
+              <button type="button"
+                      onClick="sortedList_moveItem('[% param.name FILTER html %]', -1, '[% sortlist_separator %]');">&uarr;</button>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="vertical-align: top">
+              <button type="button"
+                      onClick="sortedList_moveItem('[% param.name FILTER html %]', +1, '[% sortlist_separator %]');">&darr;</button>
+            </td>
+          </tr>
+        </table>
+
+        <script type="text/javascript">
+            bz_toggleClass("input_[% param.name FILTER html %]", "bz_default_hidden");
+            bz_toggleClass("table_[% param.name FILTER html %]", "bz_default_hidden");
         </script>
       [% ELSIF param.type == "s" %]
         <select name="[% param.name FILTER html %]" id="[% param.name FILTER html %]">

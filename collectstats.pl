@@ -25,14 +25,11 @@
 #                 Jean-Sebastien Guay <jean_seb@hybride.com>
 #                 Frédéric Buclin <LpSolit@gmail.com>
 
-# Run me out of cron at midnight to collect Bugzilla statistics.
-#
-# To run new charts for a specific date, pass it in on the command line in
-# ISO (2004-08-14) format.
-
 use strict;
 use lib qw(. lib);
 
+use Getopt::Long qw(:config bundling);
+use Pod::Usage;
 use List::Util qw(first);
 use Cwd;
 
@@ -44,6 +41,12 @@ use Bugzilla::Search;
 use Bugzilla::User;
 use Bugzilla::Product;
 use Bugzilla::Field;
+
+my %switch;
+GetOptions(\%switch, 'help|h', 'regenerate');
+
+# Print the help message if that switch was selected.
+pod2usage({-verbose => 1, -exitval => 1}) if $switch{'help'};
 
 # Turn off output buffering (probably needed when displaying output feedback
 # in the regenerate mode).
@@ -62,14 +65,6 @@ if (chdir($graphsdir)) {
 }
 
 my $dbh = Bugzilla->switch_to_shadow_db();
-
-
-# To recreate the daily statistics,  run "collectstats.pl --regenerate" .
-my $regenerate = 0;
-if ($#ARGV >= 0 && $ARGV[0] eq "--regenerate") {
-    shift(@ARGV);
-    $regenerate = 1;
-}
 
 # As we can now customize statuses and resolutions, looking at the current list
 # of legal values only is not enough as some now removed statuses and resolutions
@@ -112,7 +107,7 @@ my @resolutions = @{$fields->{'resolution'}};
 # per bug, per day. Instead, we now just get all the data out of the DB
 # at once and stuff it into some data structures.
 my (%bug_status, %bug_resolution, %removed);
-if ($regenerate) {
+if ($switch{'regenerate'}) {
     %bug_resolution = @{ $dbh->selectcol_arrayref(
         'SELECT bug_id, resolution FROM bugs', {Columns=>[1,2]}) };
     %bug_status = @{ $dbh->selectcol_arrayref(
@@ -149,7 +144,7 @@ foreach (@myproducts) {
 
     &check_data_dir ($dir);
 
-    if ($regenerate) {
+    if ($switch{'regenerate'}) {
         regenerate_stats($dir, $_, \%bug_resolution, \%bug_status, \%removed);
     } else {
         &collect_stats($dir, $_);
@@ -528,3 +523,39 @@ sub CollectSeriesData {
     }
 }
 
+__END__
+
+=head1 NAME
+
+collectstats.pl - Collect data about Bugzilla bugs.
+
+=head1 SYNOPSIS
+
+ ./collectstats.pl [--regenerate] [--help]
+
+Collects data about bugs to be used in Old and New Charts.
+
+=head1 OPTIONS
+
+=over
+
+=item B<--help>
+
+Print this help page.
+
+=item B<--regenerate>
+
+Recreate all the data about bugs, from day 1. This option is only relevant
+for Old Charts, and has no effect for New Charts.
+This option will overwrite all existing collected data and can take a huge
+amount of time. You normally don't need to use this option (do not use it
+in a cron job).
+
+=back
+
+=head1 DESCRIPTION
+
+This script collects data about all bugs for Old Charts, triaged by product
+and by bug status and resolution. It also collects data for New Charts, based
+on existing series. For New Charts, data is only collected once a series is
+defined; this script cannot recreate data prior to this date.

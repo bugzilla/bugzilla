@@ -35,7 +35,8 @@
                  'skins/standard/enter_bug.css' ]
   javascript_urls = [ "js/attachment.js", "js/util.js",
                       "js/field.js", "js/TUI.js", "js/bug.js" ]
-  onload = 'set_assign_to();'
+  onload = "set_assign_to(); hideElementById('attachment_true');
+            showElementById('attachment_false'); showElementById('btn_no_attachment');"
 %]
 
 <script type="text/javascript">
@@ -147,18 +148,6 @@ function set_assign_to() {
                 toggleRequesteeField(flagField, 1);
             }
         }
-    }
-}
-
-function handleWantsAttachment(wants_attachment) {
-    if (wants_attachment) {
-        document.getElementById('attachment_false').style.display = 'none';
-        document.getElementById('attachment_true').style.display = 'block';
-    }
-    else {
-        document.getElementById('attachment_false').style.display = 'block';
-        document.getElementById('attachment_true').style.display = 'none';
-        clearAttachmentFields();
     }
 }
 
@@ -605,21 +594,13 @@ TUI_hide_default('attachment_text_field');
   <tr>
     <th>Attachment:</th>
     <td colspan="3">
-      <script type="text/javascript">
-        <!--
-        document.write( '<div id="attachment_false">'
-                      +   '<input type="button" value="Add an attachment" '
-                      +          'onClick="handleWantsAttachment(true)"> '
-                      +   '<em style="display: none">This button has no '
-                      +   'functionality for you because your browser does '
-                      +   'not support CSS or does not use it.<\/em>'
-                      + '<\/div>'
-                      + '<div id="attachment_true" style="display: none">'
-                      +   '<input type="button" '
-                      +          'value="Don\'t add an attachment " '
-                      +          'onClick="handleWantsAttachment(false)">');
-        //-->
-      </script>
+      <div id="attachment_false" class="bz_default_hidden">
+        <input type="button" value="Add an attachment" onClick="handleWantsAttachment(true)">
+      </div>
+
+      <div id="attachment_true">
+        <input type="button" id="btn_no_attachment" value="Don't add an attachment"
+               class="bz_default_hidden"  onClick="handleWantsAttachment(false)">
         <fieldset>
           <legend>Add an attachment</legend>
           <table class="attachment_entry">
@@ -629,11 +610,7 @@ TUI_hide_default('attachment_text_field');
                        flag_table_id ="attachment_flags" %]
           </table>
         </fieldset>
-      <script type="text/javascript">
-        <!--
-        document.write('<\/div>');
-        //-->
-      </script>
+      </div>
     </td>
   </tr>
   [% END %]

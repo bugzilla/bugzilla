@@ -1804,4 +1804,5 @@
     [% SET field_name = matches.0 %]
     [% field_descs.$field_name FILTER html %]
   [% END %]
+  [% Hook.process('end_object_name', 'global/user-error.html.tmpl') %]
 [% END %]

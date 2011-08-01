@@ -1004,11 +1004,15 @@ sub can_enter_product {
         ThrowUserError('product_disabled', { product => $product });
     }
     # It could have no components...
-    elsif (!@{$product->components}) {
+    elsif (!@{$product->components}
+           || !grep { $_->is_active } @{$product->components})
+    {
         ThrowUserError('missing_component', { product => $product });
     }
     # It could have no versions...
-    elsif (!@{$product->versions}) {
+    elsif (!@{$product->versions}
+           || !grep { $_->is_active } @{$product->versions})
+    {
         ThrowUserError ('missing_version', { product => $product });
     }
 
@@ -1024,28 +1028,29 @@ sub get_enterable_products {
     }
 
      # All products which the user has "Entry" access to.
-     my @enterable_ids =@{$dbh->selectcol_arrayref(
+     my $enterable_ids = $dbh->selectcol_arrayref(
            'SELECT products.id FROM products
          LEFT JOIN group_control_map
                    ON group_control_map.product_id = products.id
                       AND group_control_map.entry != 0
                       AND group_id NOT IN (' . $self->groups_as_string . ')
             WHERE group_id IS NULL
-                  AND products.isactive = 1') || []};
+                  AND products.isactive = 1');
 
-    if (@enterable_ids) {
+    if (scalar @$enterable_ids) {
         # And all of these products must have at least one component
         # and one version.
-        @enterable_ids = @{$dbh->selectcol_arrayref(
+        $enterable_ids = $dbh->selectcol_arrayref(
                'SELECT DISTINCT products.id FROM products
             INNER JOIN components ON components.product_id = products.id
             INNER JOIN versions ON versions.product_id = products.id
-                 WHERE products.id IN (' . (join(',', @enterable_ids)) .
-            ')') || []};
+                 WHERE products.id IN (' . join(',', @$enterable_ids) . ')
+                   AND components.isactive = 1
+                   AND versions.isactive = 1');
     }
 
     $self->{enterable_products} =
-         Bugzilla::Product->new_from_list(\@enterable_ids);
+         Bugzilla::Product->new_from_list($enterable_ids);
     return $self->{enterable_products};
 }
 

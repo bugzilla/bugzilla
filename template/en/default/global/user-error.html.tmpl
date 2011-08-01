@@ -1128,7 +1128,7 @@
     [% admindocslinks = {'products.html'   => 'Administering products',
                          'components.html' => 'Creating a component'} %]
     Sorry, the product <em>[% product.name FILTER html %]</em>
-    has to have at least one component in order for you to
+    has to have at least one active component in order for you to
     enter [% terms.abug %] into it.<br>
     [% IF user.in_group("editcomponents", product.id) %]
       <a href="editcomponents.cgi?action=add&amp;product=[% product.name FILTER uri %]">Create
@@ -1195,7 +1195,7 @@
     [% title = "Missing Version" %]
     [% admindocslinks = {'versions.html' => 'Defining versions'} %]
     Sorry, the product <em>[% product.name FILTER html %]</em>
-    has to have at least one version in order for you to
+    has to have at least one active version in order for you to
     enter [% terms.abug %] into it.<br>
     [% IF user.in_group("editcomponents", product.id) %]
       <a href="editversions.cgi?action=add&amp;product=[% product.name FILTER uri %]">Create

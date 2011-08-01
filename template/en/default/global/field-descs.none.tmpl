@@ -125,7 +125,7 @@
      "component"               => "Component",
      "content"                 => "Content",
      "creation_ts"             => "Creation date",
-     "days_elapsed"            => "Days since bug changed",
+     "days_elapsed"            => "Days since $terms.bug changed",
      "deadline"                => "Deadline",
      "delta_ts"                => "Changed",
      "dependson"               => "Depends on",
@@ -174,6 +174,8 @@
          IF !vars.field_descs.${bz_field.name}.defined %]
     [% END %]
   [% END %]
+
+  [% PROCESS "bug/field-help.none.tmpl" %]
 [% END %]
 
 [% Hook.process("end") %]

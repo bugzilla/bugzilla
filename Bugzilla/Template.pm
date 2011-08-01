@@ -922,6 +922,10 @@ sub create {
             # $template->process() is called.
             'field_descs' => sub { return template_var('field_descs') },
 
+            # Calling bug/field-help.none.tmpl once per label is very
+            # expensive, so we generate it once per-language.
+            'help_html' => sub { return template_var('help_html') },
+
             'install_string' => \&Bugzilla::Install::Util::install_string,
 
             'report_columns' => \&Bugzilla::Search::REPORT_COLUMNS,

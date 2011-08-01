@@ -19,11 +19,13 @@
   #                 Max Kanat-Alexander <mkanat@bugzilla.org>
   #%]
 
-[%# This file describes both bug fields and search fields. %]
+[%# This file describes both bug fields and search fields.
+  # As calling this template once per label is very expensive,
+  # it is called only by Template.pm. %]
 
-[% PROCESS "global/field-descs.none.tmpl" %]
+[% RETURN UNLESS in_template_var %]
 
-[% help_html = {
+[% vars.help_html = {
 
 # Note that all these keys here are in alphabetical order, though
 # search-specific fields are at the bottom.
@@ -100,7 +102,7 @@ op_sys =>
 
 percentage_complete =>
   "How close to 100% done this $terms.bug is, by comparing its
-   $field_descs.work_time to its ${field_descs.estimated_time}.",
+   $vars.field_descs.work_time to its ${vars.field_descs.estimated_time}.",
 
 priority =>
   "Engineers prioritize their $terms.bugs using this field.",
@@ -116,8 +118,8 @@ qa_contact =>
 
 remaining_time =>
   "The number of hours of work left on this $terms.bug, calculated by
-   subtracting the $field_descs.work_time from the 
-   ${field_descs.estimated_time}.",
+   subtracting the $vars.field_descs.work_time from the 
+   ${vars.field_descs.estimated_time}.",
 
 rep_platform => 
   "The hardware platform the $terms.bug was observed on.",
@@ -137,8 +139,8 @@ see_also =>
 
    <p>You should normally use this field to refer to $terms.bugs in
      <em>other</em> installations. For $terms.bugs in this
-     installation, it is better to use the $field_descs.dependson and 
-     $field_descs.blocked fields.</p>",
+     installation, it is better to use the $vars.field_descs.dependson and 
+     $vars.field_descs.blocked fields.</p>",
 
 short_desc =>
   "The $terms.bug summary is a short sentence which succinctly"
@@ -149,7 +151,7 @@ status_whiteboard =>
   _ " adding tags and status information.",
 
 target_milestone =>
-   "The $field_descs.target_milestone field is used to define when the"
+   "The $vars.field_descs.target_milestone field is used to define when the"
    _ " engineer the $terms.bug is assigned to expects to fix it.",
 
 version =>
@@ -185,8 +187,8 @@ chfieldvalue =>
 
 content =>
   "This is a field available in searches that does a Google-like
-   'full-text' search on the $field_descs.short_desc and
-   $field_descs.longdesc fields.",
+   'full-text' search on the $vars.field_descs.short_desc and
+   $vars.field_descs.longdesc fields.",
 
 # Duplicated to email2 below, also.
 email1 =>
@@ -195,10 +197,10 @@ email1 =>
 
 } %]
 
-[% help_html.email2 = help_html.email1 %]
-[% help_html.chfieldto = help_html.chfieldfrom %]
-[% help_html.deadlinefrom = help_html.deadline %]
-[% help_html.deadlineto = help_html.deadline %]
+[% vars.help_html.email2 = vars.help_html.email1 %]
+[% vars.help_html.chfieldto = vars.help_html.chfieldfrom %]
+[% vars.help_html.deadlinefrom = vars.help_html.deadline %]
+[% vars.help_html.deadlineto = vars.help_html.deadline %]
 
 [% help_all_note = BLOCK %]
   <strong>Note:</strong> When searching, selecting the option "All"
@@ -206,34 +208,34 @@ email1 =>
   the word "All".
 [% END %]
 [% FOREACH all_field = ['op_sys', 'rep_platform'] %]
-  [% help_html.$all_field = help_html.$all_field _ ' ' _ help_all_note %]
+  [% vars.help_html.$all_field = vars.help_html.$all_field _ ' ' _ help_all_note %]
 [% END %]
 
 [% IF Param('useclassification') %]
-  [% help_html.product = help_html.product 
+  [% vars.help_html.product = vars.help_html.product 
       _ " Select a Classification to narrow down this list." %]
 [% END %]
 
 [% FOREACH help_field = bug_fields.keys %]
 
   [%# Add help for custom fields. %]
-  [% IF !help_html.${help_field}.defined %]
+  [% IF !vars.help_html.${help_field}.defined %]
     [% SET field_type = bug_fields.${help_field}.type %]
     [% field_type_desc = BLOCK -%]
       [% field_types.$field_type FILTER html %]
     [%- END %]
-    [% help_html.${help_field} = 
+    [% vars.help_html.${help_field} = 
       "A custom $field_type_desc field in this installation"
       _ " of ${terms.Bugzilla}." %]
   [% END %]
 
   [%# Add help for the search types, for query.cgi. %]
   [% type_desc = BLOCK %]
-    The type of [% field_descs.${help_field} FILTER html %] search you 
+    The type of [% vars.field_descs.${help_field} FILTER html %] search you 
     would like.
   [% END %]
   [% SET type_name = help_field _ '_type' %]
-  [% help_html.$type_name = type_desc %]
+  [% vars.help_html.$type_name = type_desc %]
 [% END %]
 
 [% Hook.process("end") %]

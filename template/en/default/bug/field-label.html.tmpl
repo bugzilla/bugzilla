@@ -26,7 +26,6 @@
   #   tag_name: the tag to use to surround the label
   #%]
 
-[% PROCESS "bug/field-help.none.tmpl" %]
 [% DEFAULT tag_name = "th" %]
 <[% tag_name FILTER html %] class="field_label [% ' bz_hidden_field' IF hidden %]
            [%- ' required' IF field.is_mandatory && NOT bug.id %]"

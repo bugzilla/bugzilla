@@ -72,6 +72,48 @@
 
 <h2 id="v40_point">Updates in this 4.0.x Release</h2>
 
+<h3>4.0.2</h3>
+
+<p>This release fixes several security issues. See the
+  <a href="http://www.bugzilla.org/security/3.4.11/">Security Advisory</a>
+  for details.</p>
+
+<p>In addition, the following important fixes/changes have been made in this
+  release:</p>
+
+<ul>
+  <li>The <kdb>B[% %]ug.create</kdb> WebService method now throws an error if you
+    pass a group name which doesn't exist. In [% terms.Bugzilla %] 4.0 and 4.0.1,
+    this group name was silently ignored, leaving your [% terms.bug %] unsecure
+    if no other group applied.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=653341">[% terms.Bug %] 653341</a>)</li>
+  <li>Moving several [% terms.bugs %] at once into another product displayed the
+    same confirmation page again and again, and changes were never committed
+    (regressed in 4.0).
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=663208">[% terms.Bug %] 663208</a>)</li>
+  <li>Marking [% terms.abug %] as a duplicate now works in Internet Explorer 9.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=656769">[% terms.Bug %] 656769</a>)</li>
+  <li><kdb>importxml.pl</kdb> no longer crashes when importing keywords (regressed
+    in 4.0).
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=657707">[% terms.Bug %] 657707</a>)</li>
+  <li>Data entered while reporting a new [% terms.bug %] could be lost if you had
+    to click the "Back" button of your web browser.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=652427">[% terms.Bug %] 652427</a>)</li>
+  <li>WebServices methods will return undefined [% terms.bug %] fields as undefined
+    instead of as an empty string. This change is consistent with how
+    [%+ terms.Bugzilla %] 4.2 behaves.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=657561">[% terms.Bug %] 657561</a>)</li>
+  <li>The XML-RPC interface now works with SOAP::Lite 0.711 and 0.712 under mod_perl.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=600810">[% terms.Bug %] 600810</a>)</li>
+  <li>LWP 6.00 and newer require Perl 5.8.8 and above. When installing this module
+    using <kdb>install-module.pl</kdb> on a Perl installation older than 5.8.8,
+    LWP 5.837 will be installed instead.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=655912">[% terms.Bug %] 655912</a>)</li>
+  <li>Viewing [% terms.abug %] report should be significantly faster when your
+    installation has many custom fields.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=634812">[% terms.Bug %] 634812</a>)</li>
+</ul>
+
 <h3>4.0.1</h3>
 
 <ul>

@@ -404,7 +404,7 @@ Returns:     C<true> if users are allowed to create new Bugzilla accounts,
              C<false> otherwise.
 
 =item C<extern_id_used>
-  
+
 Description: Whether or not current login system uses extern_id.
 
 =item C<can_change_email>

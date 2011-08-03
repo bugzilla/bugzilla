@@ -209,12 +209,6 @@ sub OPTIONAL_MODULES {
         feature => ['graphical_reports'],
     },
     {
-        package => 'XML-Twig',
-        module  => 'XML::Twig',
-        version => 0,
-        feature => ['moving', 'updates'],
-    },
-    {
         package => 'MIME-tools',
         # MIME::Parser is packaged as MIME::Tools on ActiveState Perl
         module  => ON_WINDOWS ? 'MIME::Tools' : 'MIME::Parser',
@@ -226,6 +220,12 @@ sub OPTIONAL_MODULES {
         module  => 'LWP::UserAgent',
         version => 0,
         feature => ['updates'],
+    },
+    {
+        package => 'XML-Twig',
+        module  => 'XML::Twig',
+        version => 0,
+        feature => ['moving', 'updates'],
     },
     {
         package => 'PatchReader',

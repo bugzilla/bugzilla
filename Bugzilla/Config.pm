@@ -116,33 +116,28 @@ sub update_params {
     my $answer = Bugzilla->installation_answers;
 
     my $param = read_param_file();
+    my %new_params;
 
     # If we didn't return any param values, then this is a new installation.
     my $new_install = !(keys %$param);
 
     # --- UPDATE OLD PARAMS ---
 
-    # Old Bugzilla versions stored the version number in the params file
-    # We don't want it, so get rid of it
-    delete $param->{'version'};
-
     # Change from usebrowserinfo to defaultplatform/defaultopsys combo
     if (exists $param->{'usebrowserinfo'}) {
         if (!$param->{'usebrowserinfo'}) {
             if (!exists $param->{'defaultplatform'}) {
-                $param->{'defaultplatform'} = 'Other';
+                $new_params{'defaultplatform'} = 'Other';
             }
             if (!exists $param->{'defaultopsys'}) {
-                $param->{'defaultopsys'} = 'Other';
+                $new_params{'defaultopsys'} = 'Other';
             }
         }
-        delete $param->{'usebrowserinfo'};
     }
 
     # Change from a boolean for quips to multi-state
     if (exists $param->{'usequip'} && !exists $param->{'enablequips'}) {
-        $param->{'enablequips'} = $param->{'usequip'} ? 'on' : 'off';
-        delete $param->{'usequip'};
+        $new_params{'enablequips'} = $param->{'usequip'} ? 'on' : 'off';
     }
 
     # Change from old product groups to controls for group_control_map
@@ -150,20 +145,19 @@ sub update_params {
     if (exists $param->{'usebuggroups'} && 
         !exists $param->{'makeproductgroups'}) 
     {
-        $param->{'makeproductgroups'} = $param->{'usebuggroups'};
+        $new_params{'makeproductgroups'} = $param->{'usebuggroups'};
     }
 
     # Modularise auth code
     if (exists $param->{'useLDAP'} && !exists $param->{'loginmethod'}) {
-        $param->{'loginmethod'} = $param->{'useLDAP'} ? "LDAP" : "DB";
+        $new_params{'loginmethod'} = $param->{'useLDAP'} ? "LDAP" : "DB";
     }
 
     # set verify method to whatever loginmethod was
     if (exists $param->{'loginmethod'} 
         && !exists $param->{'user_verify_class'}) 
     {
-        $param->{'user_verify_class'} = $param->{'loginmethod'};
-        delete $param->{'loginmethod'};
+        $new_params{'user_verify_class'} = $param->{'loginmethod'};
     }
 
     # Remove quip-display control from parameters
@@ -176,8 +170,7 @@ sub update_params {
         ($param->{'enablequips'} eq 'approved') && do {$new_value = 'moderated';};
         ($param->{'enablequips'} eq 'frozen')   && do {$new_value = 'closed';};
         ($param->{'enablequips'} eq 'off')      && do {$new_value = 'closed';};
-        $param->{'quip_list_entry_control'} = $new_value;
-        delete $param->{'enablequips'};
+        $new_params{'quip_list_entry_control'} = $new_value;
     }
 
     # Old mail_delivery_method choices contained no uppercase characters
@@ -197,7 +190,7 @@ sub update_params {
     # Both "authenticated sessions" and "always" turn on "ssl_redirect"
     # when upgrading.
     if (exists $param->{'ssl'} and $param->{'ssl'} ne 'never') {
-        $param->{'ssl_redirect'} = 1;
+        $new_params{'ssl_redirect'} = 1;
     }
 
     # --- DEFAULTS FOR NEW PARAMS ---
@@ -207,7 +200,10 @@ sub update_params {
         my $item = $params{$name};
         unless (exists $param->{$name}) {
             print "New parameter: $name\n" unless $new_install;
-            if (exists $answer->{$name}) {
+            if (exists $new_params{$name}) {
+                $param->{$name} = $new_params{$name};
+            }
+            elsif (exists $answer->{$name}) {
                 $param->{$name} = $answer->{$name};
             }
             else {

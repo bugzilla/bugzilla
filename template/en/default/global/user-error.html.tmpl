@@ -709,12 +709,6 @@
     in the database which refer to it. All references to this group must
     be removed before you can remove it.
 
-  [% ELSIF error == "group_change_denied" %]
-    [% title = "Cannot Add/Remove That Group" %]
-    You tried to add or remove the '[% group.name FILTER html %]' group
-    from [% terms.bug %] [%+ bug.id FILTER html %], but you do not
-    have permissions to do so.
-
   [% ELSIF error == "group_exists" %]
     [% title = "The group already exists" %]
     The group [% name FILTER html %] already exists.
@@ -735,23 +729,17 @@
 
 
   [% ELSIF error == "group_invalid_removal" %]
-    You tried to remove [% terms.bug %] [%+ bug.id FILTER html %]
-    from the '[% group.name FILTER html %]' group, but [% terms.bugs %]
-     in the '[% product FILTER html %]' product can not be removed from that
-    group.
-    
-  [% ELSIF error == "group_invalid_restriction" %]
-    You tried to restrict [% terms.bug %] [%+ bug.id FILTER html %] to
-    to the '[% group.name FILTER html %]' group, but [% terms.bugs %] in the
-    '[% product FILTER html %]' product can not be restricted to
-    that group.
+    You tried to remove [% terms.bug %] [%+ bug_id FILTER html %]
+    from the '[% name FILTER html %]' group, but either this group does not exist,
+    or you are not allowed to remove [% terms.bugs %] from this group in the
+    '[% product FILTER html %]' product.
 
   [% ELSIF error == "group_restriction_not_allowed" %]
     [% title = "Group Restriction Not Allowed" %]
-    You tried to restrict [% terms.abug %] to the "[% name FILTER html %]"
-    group, but either this group does not exist, or you are not allowed
-    to restrict [% terms.bugs %] to this group in the "[% product.name FILTER html %]"
-    product.
+    You tried to restrict [% bug_id ? "$terms.bug $bug_id" : terms.abug FILTER html %]
+    to the '[% name FILTER html %]' group, but either this group does not exist,
+    or you are not allowed to restrict [% terms.bugs %] to this group in the
+    '[% product FILTER html %]' product.
 
   [% ELSIF error == "group_not_specified" %]
     [% title = "Group not specified" %]

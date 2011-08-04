@@ -345,7 +345,17 @@ foreach my $field (@custom_fields) {
     }
 }
 
+# We are going to alter the list of removed groups, so we keep a copy here.
+my @unchecked_groups = @$removed_groups;
 foreach my $b (@bug_objects) {
+    # Don't blindly ask to remove unchecked groups available in the UI.
+    # A group can be already unchecked, and the user didn't try to remove it.
+    # In this case, we don't want remove_group() to complain.
+    my @remove_groups;
+    foreach my $g (@{$b->groups_in}) {
+        push(@remove_groups, $g->name) if grep { $_ eq $g->name } @unchecked_groups;
+    }
+    local $set_all_fields{groups}->{remove} = \@remove_groups;
     $b->set_all(\%set_all_fields);
 }
 

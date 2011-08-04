@@ -109,8 +109,7 @@ use constant WS_ERROR_CODE => {
     dupe_loop_detected => 118,
     dupe_id_required => 119,
     # Group errors
-    group_change_denied => 120,
-    group_invalid_restriction => 120,
+    group_invalid_removal => 120,
     group_restriction_not_allowed => 120,
     # Status/Resolution errors
     missing_resolution => 121,

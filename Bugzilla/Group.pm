@@ -426,6 +426,21 @@ sub ValidateGroupName {
     return $ret;
 }
 
+sub check_no_disclose {
+    my ($class, $params) = @_;
+    my $action = delete $params->{action};
+
+    $action =~ /^(?:add|remove)$/
+      or ThrowCodeError('bad_arg', { argument => $action,
+                                     function => "${class}::check_no_disclose" });
+
+    $params->{_error} = ($action eq 'add') ? 'group_restriction_not_allowed'
+                                           : 'group_invalid_removal';
+
+    my $group = $class->check($params);
+    return $group;
+}
+
 ###############################
 ###       Validators        ###
 ###############################
@@ -523,6 +538,47 @@ be a member of this group.
 =head1 METHODS
 
 =over
+
+=item C<check_no_disclose>
+
+=over
+
+=item B<Description>
+
+Throws an error if the user cannot add or remove this group to/from a given
+bug, but doesn't specify if this is because the group doesn't exist, or the
+user is not allowed to edit this group restriction.
+
+=item B<Params>
+
+This method takes a single hashref as argument, with the following keys:
+
+=over
+
+=item C<name>
+
+C<string> The name of the group to add or remove.
+
+=item C<bug_id>
+
+C<integer> The ID of the bug to which the group change applies.
+
+=item C<product>
+
+C<string> The name of the product the bug belongs to.
+
+=item C<action>
+
+C<string> Must be either C<add> or C<remove>, depending on whether the group
+must be added or removed from the bug. Any other value will generate an error.
+
+=back
+
+=item C<Returns>
+
+A C<Bugzilla::Group> object on success, else an error is thrown.
+
+=back
 
 =item C<check_remove>
 

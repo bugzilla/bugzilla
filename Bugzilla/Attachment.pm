@@ -560,6 +560,7 @@ sub _check_data {
             local $/;
             my $fh = $params->{data};
             $data = <$fh>;
+            close $fh;
         }
     }
     Bugzilla::Hook::process('attachment_process_data', { data       => \$data,

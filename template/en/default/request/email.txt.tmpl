@@ -75,6 +75,9 @@ Attachment [% attidsummary %]
 [%- END %]
 [%+ urlbase %]attachment.cgi?id=[% attachment.id %]&action=edit
 [%- END %]
+
+[%- Hook.process('after_summary') -%]
+
 [%- FILTER bullet = wrap(80) %]
 
 [% USE Bugzilla %]

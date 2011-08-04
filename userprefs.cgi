@@ -120,7 +120,7 @@ sub SaveAccount {
         && Bugzilla->params->{"allowemailchange"}
         && $cgi->param('new_login_name'))
     {
-        my $old_login_name = $cgi->param('Bugzilla_login');
+        my $old_login_name = $user->login;
         my $new_login_name = trim($cgi->param('new_login_name'));
 
         if($old_login_name ne $new_login_name) {

@@ -1371,7 +1371,7 @@ sub _check_groups {
             || ThrowUserError("invalid_group_ID");
 
         # This can only happen if somebody hacked the enter_bug form.
-        ThrowCodeError("inactive_group", { name => $group->name })
+        ThrowCodeError("inactive_group", { group_id => $id })
             unless $group->is_active;
 
         my $membercontrol = $controls->{$id}

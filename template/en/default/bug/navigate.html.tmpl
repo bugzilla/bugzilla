@@ -44,22 +44,24 @@
   [% END %]
 
 [% IF this_bug_idx != -1 %]
-  <a href="show_bug.cgi?id=[% bug_list.first %]">First</a>
-  <a href="show_bug.cgi?id=[% bug_list.last %]">Last</a>
+  <a href="show_bug.cgi?id=[% bug_list.first FILTER url_quote %]">First</a>
+  <a href="show_bug.cgi?id=[% bug_list.last FILTER url_quote %]">Last</a>
 [% END %]
 
   [% IF bug.bug_id %]
     [% IF this_bug_idx != -1 %]
       [% IF this_bug_idx > 0 %]
         [% prev_bug = this_bug_idx - 1 %]
-        <a href="show_bug.cgi?id=[% bug_list.$prev_bug %]">Prev</a>
+        <a href="show_bug.cgi?id=
+                 [%- bug_list.$prev_bug FILTER url_quote %]">Prev</a>
       [% ELSE %]
         <i><font color="#777777">Prev</font></i>
       [% END %]
 
       [% IF this_bug_idx + 1 < bug_list.size %]
         [% next_bug = this_bug_idx + 1 %]
-        <a href="show_bug.cgi?id=[% bug_list.$next_bug %]">Next</a>
+        <a href="show_bug.cgi?id=
+                 [%- bug_list.$next_bug FILTER url_quote %]">Next</a>
       [% ELSE %]
         <i><font color="#777777">Next</font></i>
       [% END %]

@@ -549,6 +549,9 @@ sub create {
             # as prefix. In addition it replaces a ' ' by a '_'.
             css_class_quote => \&Bugzilla::Util::css_class_quote ,
 
+            # Removes control characters and trims extra whitespace.
+            clean_text => \&Bugzilla::Util::clean_text ,
+
             quoteUrls => [ sub {
                                my ($context, $bug, $comment) = @_;
                                return sub {

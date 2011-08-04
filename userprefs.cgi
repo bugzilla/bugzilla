@@ -83,7 +83,7 @@ sub SaveAccount {
     my $pwd1 = $cgi->param('new_password1');
     my $pwd2 = $cgi->param('new_password2');
 
-    my $old_login_name = $cgi->param('old_login');
+    my $old_login_name = $user->login;
     my $new_login_name = trim($cgi->param('new_login_name'));
 
     if ($user->authorizer->can_change_password

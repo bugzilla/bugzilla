@@ -71,13 +71,6 @@ use constant REQUIREMENTS => (
 # we make it a constant.
 use constant BZ_LIB => abs_path(bz_locations()->{ext_libpath});
 
-# These modules are problematic to install with "notest" (sometimes they
-# get installed when they shouldn't). So we always test their installation
-# and never ignore test failures.
-use constant ALWAYS_TEST => qw(
-    Math::Random::Secure
-);
-
 # CPAN requires nearly all of its parameters to be set, or it will start
 # asking questions to the user. We want to avoid that, so we have
 # defaults here for most of the required parameters we know about, in case
@@ -202,10 +195,7 @@ sub install_module {
     print install_string('install_module', 
               { module => $module_name, version => $version }) . "\n";
 
-    if (_always_test($name)) {
-        CPAN::Shell->install($name);
-    }
-    elsif ($test) {
+    if ($test) {
         CPAN::Shell->force('install', $name);
     }
     else {
@@ -218,11 +208,6 @@ sub install_module {
     }
 
     $CPAN::Config->{makepl_arg} = $original_makepl;
-}
-
-sub _always_test {
-    my ($name) = @_;
-    return grep(lc($_) eq lc($name), ALWAYS_TEST) ? 1 : 0;
 }
 
 sub set_cpan_config {

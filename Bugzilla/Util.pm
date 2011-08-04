@@ -47,6 +47,7 @@ use base qw(Exporter);
                              detect_encoding);
 
 use Bugzilla::Constants;
+use Bugzilla::RNG qw(irand);
 
 use Date::Parse;
 use Date::Format;
@@ -55,7 +56,6 @@ use DateTime::TimeZone;
 use Digest;
 use Email::Address;
 use List::Util qw(first);
-use Math::Random::Secure qw(irand);
 use Scalar::Util qw(tainted blessed);
 use Template::Filters;
 use Text::Wrap;

@@ -39,7 +39,6 @@ use Apache2::Log ();
 use Apache2::ServerUtil;
 use ModPerl::RegistryLoader ();
 use File::Basename ();
-use Math::Random::Secure;
 
 # This loads most of our modules.
 use Bugzilla ();
@@ -49,6 +48,7 @@ use Bugzilla::CGI ();
 use Bugzilla::Extension ();
 use Bugzilla::Install::Requirements ();
 use Bugzilla::Util ();
+use Bugzilla::RNG ();
 
 # Make warnings go to the virtual host's log and not the main
 # server log.
@@ -68,11 +68,11 @@ my $cgi_path = Bugzilla::Constants::bz_locations()->{'cgi_path'};
 my $server = Apache2::ServerUtil->server;
 my $conf = <<EOT;
 # Make sure each httpd child receives a different random seed (bug 476622).
-# Math::Random::Secure has one srand that needs to be called for
+# Bugzilla::RNG has one srand that needs to be called for
 # every process, and Perl has another. (Various Perl modules still use
-# the built-in rand(), even though we only use Math::Random::Secure in
-# Bugzilla itself, so we need to srand() both of them.)
-PerlChildInitHandler "sub { Math::Random::Secure::srand(); srand(); }"
+# the built-in rand(), even though we never use it in Bugzilla itself,
+# so we need to srand() both of them.)
+PerlChildInitHandler "sub { Bugzilla::RNG::srand(); srand(); }"
 <Directory "$cgi_path">
     AddHandler perl-script .cgi
     # No need to PerlModule these because they're already defined in mod_perl.pl

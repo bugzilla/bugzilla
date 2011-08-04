@@ -515,7 +515,7 @@ use constant DB_MODULE => {
 };
 
 # True if we're on Win32.
-use constant ON_WINDOWS => ($^O =~ /MSWin32/i);
+use constant ON_WINDOWS => ($^O =~ /MSWin32/i) ? 1 : 0;
 # True if we're using ActiveState Perl (as opposed to Strawberry) on Windows.
 use constant ON_ACTIVESTATE => eval { &Win32::BuildNumber };
 

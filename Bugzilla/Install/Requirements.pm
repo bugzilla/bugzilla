@@ -160,12 +160,26 @@ sub REQUIRED_MODULES {
         version => 0.22,
     },
     {
-        package => 'Math-Random-Secure',
-        module  => 'Math::Random::Secure',
-        # This is the first version that installs properly on Windows.
-        version => '0.05',
+        package => 'Math-Random-ISAAC',
+        module  => 'Math::Random::ISAAC',
+        version => '1.0.1',
     },
     );
+
+    if (ON_WINDOWS) {
+        push(@modules, {
+            package => 'Win32',
+            module  => 'Win32',
+            # 0.35 fixes a memory leak in GetOSVersion, which we use.
+            version => 0.35,
+        }, 
+        {
+            package => 'Win32-API',
+            module  => 'Win32::API',
+            # 0.55 fixes a bug with char* that might affect Bugzilla::RNG.
+            version => '0.55',
+        });
+    }
 
     my $extra_modules = _get_extension_requirements('REQUIRED_MODULES');
     push(@modules, @$extra_modules);
@@ -350,16 +364,6 @@ sub OPTIONAL_MODULES {
         feature => ['mod_perl'],
     },
     );
-
-    if (ON_WINDOWS) {
-        # SizeLimit needs Win32::API to work on Windows.
-        push(@modules, {
-            package => 'Win32-API',
-            module  => 'Win32::API',
-            version => 0,
-            feature => ['mod_perl'],
-        });
-    }
 
     my $extra_modules = _get_extension_requirements('OPTIONAL_MODULES');
     push(@modules, @$extra_modules);

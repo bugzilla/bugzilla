@@ -109,6 +109,11 @@
     [% terms.Bug %] aliases cannot be longer than 20 characters.
     Please choose a shorter alias.
 
+  [% ELSIF error == "attachment_bug_id_mismatch" %]
+    [% title = "Invalid Attachments" %]
+    You tried to perform an action on attachments from different [% terms.bugs %].
+    This operation requires all attachments to be from the same [% terms.bug %].
+
   [% ELSIF error == "auth_cant_create_account" %]
     [% title = "Can't create accounts" %]
     This site is using an authentication scheme which does not permit

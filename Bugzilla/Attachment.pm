@@ -795,7 +795,10 @@ sub create {
     # If we have a filehandle, we need its content to store it in the DB.
     elsif (ref $data) {
         local $/;
-        $data = <$data>;
+        # Store the content in a temp variable while we close the FH.
+        my $tmp = <$data>;
+        close $data;
+        $data = $tmp;
     }
 
     my $sth = $dbh->prepare("INSERT INTO attach_data

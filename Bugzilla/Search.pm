@@ -2007,7 +2007,7 @@ sub _contact_exact_group {
     my $user = $self->_user;
     
     $value =~ /\%group\.([^%]+)%/;
-    my $group = Bugzilla::Group->check($1);
+    my $group = Bugzilla::Group->check({ name => $1, _error => 'invalid_group_name' });
     $group->check_members_are_visible();
     $user->in_group($group)
       || ThrowUserError('invalid_group_name', {name => $group->name});
@@ -2054,7 +2054,7 @@ sub _cc_exact_group {
     my $dbh = Bugzilla->dbh;
     
     $value =~ m/%group\.([^%]+)%/;
-    my $group = Bugzilla::Group->check($1);
+    my $group = Bugzilla::Group->check({ name => $1, _error => 'invalid_group_name' });
     $group->check_members_are_visible();
     $user->in_group($group)
       || ThrowUserError('invalid_group_name', {name => $group->name});

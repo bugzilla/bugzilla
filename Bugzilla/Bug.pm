@@ -2679,7 +2679,7 @@ sub add_comment {
 
     # This makes it so we won't create new comments when there is nothing
     # to add 
-    if ($comment eq '' && !($params->{type} || abs($params->{work_time}))) {
+    if ($comment eq '' && !($params->{type} || abs($params->{work_time} || 0))) {
         return;
     }
 

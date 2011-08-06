@@ -32,8 +32,8 @@
      For a devel release, simple bump bz-ver and bz-date
 -->
 
-<!ENTITY bz-ver "4.1.3">
-<!ENTITY bz-nextver "4.2">
+<!ENTITY bz-ver "4.3">
+<!ENTITY bz-nextver "5.0">
 <!ENTITY bz-date "2011-08-04">
 <!ENTITY current-year "2011">
 

@@ -164,8 +164,10 @@
           [% PROCESS section_url_keyword_whiteboard %]
           
           [% PROCESS section_spacer %]
-          
-          [%# *** Dependencies *** %]
+
+          [%# *** Dependencies and duplicates *** %]
+          [% PROCESS section_duplicates %]
+
           [% PROCESS section_dependson_blocks %]
           
         </table>
@@ -625,8 +627,31 @@
 [% END %]
 
 [%############################################################################%]
-[%# Block for Depends On / Blocks                                              #%]
+[%# Block for Duplicates                                                     #%]
 [%############################################################################%]
+
+[% BLOCK section_duplicates %]
+  [% RETURN UNLESS bug.duplicates.size %]
+  <tr>
+    <td class="field_label">
+      <label for="duplicates">Duplicates</label>:
+    </td>
+    <td class="field_value" colspan="2">
+      <span id="duplicates">
+        [% FOREACH dupe = bug.duplicates %]
+          [% dupe.id FILTER bug_link(dupe, use_alias => 1) FILTER none %][% " " %]
+        [% END %]
+      </span>
+      (<a href="buglist.cgi?bug_id=[% bug.duplicate_ids.join(",") FILTER html %]">
+       [%-%]view as [% terms.bug %] list</a>)
+    </td>
+  </tr>
+[% END %]
+
+[%############################################################################%]
+[%# Block for Depends On / Blocks                                            #%]
+[%############################################################################%]
+
 [% BLOCK section_dependson_blocks %]
   <tr>
     [% INCLUDE dependencies 

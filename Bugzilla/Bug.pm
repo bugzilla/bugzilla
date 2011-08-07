@@ -487,10 +487,11 @@ sub preload {
     my @all_dep_ids;
     foreach my $bug (@$bugs) {
         push(@all_dep_ids, @{ $bug->blocked }, @{ $bug->dependson });
+        push(@all_dep_ids, @{ $bug->duplicate_ids });
     }
     @all_dep_ids = uniq @all_dep_ids;
     # If we don't do this, can_see_bug will do one call per bug in
-    # the dependency lists, during get_bug_link in Bugzilla::Template.
+    # the dependency and duplicate lists, in Bugzilla::Template::get_bug_link.
     $user->visible_bugs(\@all_dep_ids);
 }
 
@@ -3241,6 +3242,26 @@ sub depends_on_obj {
     my ($self) = @_;
     $self->{depends_on_obj} ||= $self->_bugs_in_order($self->dependson);
     return $self->{depends_on_obj};
+}
+
+sub duplicates {
+    my $self = shift;
+    return $self->{duplicates} if exists $self->{duplicates};
+    return [] if $self->{error};
+    $self->{duplicates} = Bugzilla::Bug->new_from_list($self->duplicate_ids);
+    return $self->{duplicates};
+}
+
+sub duplicate_ids {
+    my $self = shift;
+    return $self->{duplicate_ids} if exists $self->{duplicate_ids};
+    return [] if $self->{error};
+
+    my $dbh = Bugzilla->dbh;
+    $self->{duplicate_ids} =
+      $dbh->selectcol_arrayref('SELECT dupe FROM duplicates WHERE dupe_of = ?',
+                               undef, $self->id);
+    return $self->{duplicate_ids};
 }
 
 sub flag_types {

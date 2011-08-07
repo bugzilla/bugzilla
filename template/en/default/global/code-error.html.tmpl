@@ -504,12 +504,14 @@
    admindocslinks = admindocslinks
 %]
 
+<p>
+  An unexpected error occurred. This could be a temporary problem, or some code
+  is behaving incorrectly. If this problem persists, please email this page
+  to <a href="mailto:[% Param("maintainer") %]">[% Param("maintainer") %]</a>
+  with details of what you were doing at the time this message appeared.
+</p>
+
 <tt>
-  <p>
-    [% terms.Bugzilla %] has suffered an internal error. Please save this page and send
-    it to [% Param("maintainer") %] with details of what you were doing at
-    the time this message appeared.
-  </p>
   <script type="text/javascript"> <!--
     document.write("<p>URL: " + 
                     document.location.href.replace(/&/g,"&amp;")

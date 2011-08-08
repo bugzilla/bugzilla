@@ -438,15 +438,16 @@ use constant LEGAL_CONTENT_TYPES => ('application', 'audio', 'image', 'message',
 
 use constant contenttypes =>
   {
-   "html"=> "text/html" ,
-   "rdf" => "application/rdf+xml" ,
-   "atom"=> "application/atom+xml" ,
-   "xml" => "application/xml" ,
-   "js"  => "application/x-javascript" ,
-   "json"=> "application/json" ,
-   "csv" => "text/csv" ,
-   "png" => "image/png" ,
-   "ics" => "text/calendar" ,
+   "html" => "text/html" ,
+   "rdf"  => "application/rdf+xml" ,
+   "atom" => "application/atom+xml" ,
+   "xml"  => "application/xml" ,
+   "dtd"  => "application/xml-dtd" , 
+   "js"   => "application/x-javascript" ,
+   "json" => "application/json" ,
+   "csv"  => "text/csv" ,
+   "png"  => "image/png" ,
+   "ics"  => "text/calendar" ,
   };
 
 # Usage modes. Default USAGE_MODE_BROWSER. Use with Bugzilla->usage_mode.

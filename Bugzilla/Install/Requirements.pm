@@ -322,12 +322,6 @@ sub OPTIONAL_MODULES {
 
     # Inbound Email
     {
-        package => 'Email-MIME-Attachment-Stripper',
-        module  => 'Email::MIME::Attachment::Stripper',
-        version => 0,
-        feature => ['inbound_email'],
-    },
-    {
         package => 'Email-Reply',
         module  => 'Email::Reply',
         version => 0,

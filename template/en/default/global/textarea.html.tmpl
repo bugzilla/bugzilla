@@ -53,4 +53,7 @@
           [% END %]
           [% IF mandatory %]
             aria-required="true"
+          [% END %]
+          [% IF onchange %]
+            onchange="[% onchange FILTER html %]"
           [% END %]>[% defaultcontent FILTER html %]</textarea>

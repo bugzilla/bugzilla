@@ -897,3 +897,16 @@ YAHOO.bugzilla.keywordAutocomplete = {
         });
     }
 };
+
+/**
+ * Set the disable email checkbox to true if the user has disabled text
+ */
+function userDisabledTextOnChange(disabledtext) {
+    var disable_mail = document.getElementById('disable_mail');
+    if (disabledtext.value === "" && !disable_mail_manually_set) {
+        disable_mail.checked = false;
+    }
+    if (disabledtext.value !== "" && !disable_mail_manually_set) {
+        disable_mail.checked = true;
+    }
+}

@@ -23,7 +23,7 @@
   # This template has the same interface as create.html.tmpl
   #%]
 
-[% PROCESS global/variables.none.tmpl %]
+[% PROCESS global/field-descs.none.tmpl %]
 
 [% USE Bugzilla %]
 [% cgi = Bugzilla.cgi %]
@@ -440,7 +440,7 @@ function PutDescription() {
 
   <tr>
     <td valign="top" align="right">
-      <b>Severity</b>
+      <b>[% field_descs.bug_severity FILTER html %]</b>
     </td>
     <td valign="top">
       <select name="bug_severity">

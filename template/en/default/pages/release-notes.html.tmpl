@@ -1263,9 +1263,12 @@
   <li><b>+</b> as a prefix to mean "search additional resolutions", and
     <b>+</b> as a prefix to mean "search just the summary". You can
     instead use <kbd>summary:</kbd> to explicitly search summaries.</li>
-  <li>Searching the Severity field if you type something that matches
-    the first few characters of a severity. You can explicitly search
-    the Severity field if you want to find [% terms.bugs %] by severity.</li>
+  <li>Searching the [% field_descs.bug_severity FILTER html %] field if you
+    type something that matches the first few characters of a [% 
+    field_descs.bug_severity FILTER html %]. You can explicitly
+    search the [% field_descs.bug_severity FILTER html %] field if you want to
+    find [% terms.bugs %] by [% field_descs.bug_severity FILTER
+    html %].</li>
   <li>Searching the Priority field if you typed something that exactly
     matched the name of a priority. You can explicitly search the
     Priority field if you want to find [% terms.bugs %] by priority.</li>

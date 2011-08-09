@@ -32,6 +32,8 @@ our @EXPORT_OK = qw(
     filter_wants
     taint_data
     validate
+    translate
+    params_to_objects
 );
 
 sub filter ($$) {
@@ -108,6 +110,31 @@ sub validate  {
     return ($self, $params);
 }
 
+sub translate {
+    my ($params, $mapped) = @_;
+    my %changes;
+    while (my ($key,$value) = each (%$params)) {
+        my $new_field = $mapped->{$key} || $key;
+        $changes{$new_field} = $value;
+    }
+    return \%changes;
+}
+
+sub params_to_objects {
+    my ($params, $class) = @_;
+
+    my @objects = map { $class->check($_) } 
+        @{ $params->{names} } if $params->{names};
+
+    my @objects_by_ids = map { $class->check({ id => $_ }) } 
+        @{ $params->{ids} } if $params->{ids};
+
+    push(@objects, @objects_by_ids);
+    my %seen;
+    @objects = grep { !$seen{$_->id}++ } @objects;
+    return \@objects;
+}
+
 __END__
 
 =head1 NAME
@@ -147,3 +174,19 @@ This helps in the validation of parameters passed into the WebSerice
 methods. Currently it converts listed parameters into an array reference
 if the client only passed a single scalar value. It modifies the parameters
 hash in place so other parameters should be unaltered.
+
+=head2 translate
+
+WebService methods frequently take parameters with different names than
+the ones that we use internally in Bugzilla. This function takes a hashref
+that has field names for keys and returns a hashref with those keys renamed
+according to the mapping passed in with the second parameter (which is also
+a hashref).
+
+=head2 params_to_objects
+
+Creates objects of the type passed in as the second parameter, using the
+parameters passed to a WebService method (the first parameter to this function).
+Helps make life simpler for WebService methods that internally create objects
+via both "ids" and "names" fields. Also de-duplicates objects that were loaded
+by both "ids" and "names". Returns an arrayref of objects.

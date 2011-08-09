@@ -22,8 +22,6 @@
   #                 Reed Loden <reed@reedloden.com>
   #%]
 
-[% PROCESS global/field-descs.none.tmpl %]
-
 [% dontchange = "--do_not_change--" %]
 <input type="hidden" name="dontchange" value="[% dontchange FILTER html %]">
 <input type="hidden" name="token" value="[% token FILTER html %]">
@@ -107,8 +105,8 @@
 
     <th>
       <label for="bug_severity">
-        <a href="page.cgi?id=fields.html#bug_severity">[% field_descs.bug_severity
-          FILTER html %]</a>:
+        <a href="page.cgi?id=fields.html#bug_severity">
+          [% field_descs.bug_severity FILTER html %]</a>:
       </label>
     </th>
     <td>

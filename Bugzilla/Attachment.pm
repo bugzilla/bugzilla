@@ -518,9 +518,13 @@ sub _check_content_type {
  
     my $is_patch = ref($invocant) ? $invocant->ispatch : $params->{ispatch};
     $content_type = 'text/plain' if $is_patch;
-    $content_type = trim($content_type);
+    $content_type = clean_text($content_type);
+    # The subsets below cover all existing MIME types and charsets registered by IANA.
+    # (MIME type: RFC 2045 section 5.1; charset: RFC 2278 section 3.3)
     my $legal_types = join('|', LEGAL_CONTENT_TYPES);
-    if (!$content_type or $content_type !~ /^($legal_types)\/.+$/) {
+    if (!$content_type
+        || $content_type !~ /^($legal_types)\/[a-z0-9_\-\+\.]+(;\s*charset=[a-z0-9_\-\+]+)?$/i)
+    {
         ThrowUserError("invalid_content_type", { contenttype => $content_type });
     }
     trick_taint($content_type);
@@ -560,7 +564,7 @@ sub _check_description {
 sub _check_filename {
     my ($invocant, $filename) = @_;
 
-    $filename = trim($filename);
+    $filename = clean_text($filename);
     $filename || ThrowUserError('file_not_specified');
 
     # Remove path info (if any) from the file name.  The browser should do this

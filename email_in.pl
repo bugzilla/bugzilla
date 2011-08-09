@@ -39,6 +39,7 @@ use Email::Address;
 use Email::Reply qw(reply);
 use Email::MIME;
 use Getopt::Long qw(:config bundling);
+use HTML::FormatText::WithLinks;
 use Pod::Usage;
 use Encode;
 use Scalar::Util qw(blessed);
@@ -68,6 +69,7 @@ use constant SIGNATURE_DELIMITER => '-- ';
 use constant BODY_TYPES => qw(
     text/plain
     text/html
+    application/xhtml+xml
     multipart/alternative
 );
 
@@ -321,7 +323,7 @@ sub get_body_and_attachments {
         # Note that this only happens if the email does not contain any
         # text/plain parts. If the email has an empty text/plain part,
         # you're fine, and this message does NOT get thrown.
-        ThrowUserError('email_no_text_plain');
+        ThrowUserError('email_no_body');
     }
 
     debug_print("Picked Body:\n$body", 2);
@@ -343,15 +345,40 @@ sub get_text_alternative {
         }
         debug_print("Alternative Part Content-Type: $ct", 2);
         debug_print("Alternative Part Character Encoding: $charset", 2);
-        if (!$ct || $ct =~ /^text\/plain/i) {
-            $body = $part->body;
-            if (Bugzilla->params->{'utf8'} && !utf8::is_utf8($body)) {
-                $body = Encode::decode($charset, $body);
-            }
-            last;
+        # If we find a text/plain body here, return it immediately.
+        if (!$ct || $ct =~ m{^text/plain}i) {
+            return _decode_body($charset, $part->body);
+        }
+        # If we find a text/html body, decode it, but don't return
+        # it immediately, because there might be a text/plain alternative
+        # later. This could be any HTML type.
+        if ($ct =~ m{^application/xhtml\+xml}i or $ct =~ m{text/html}i) {
+            my $parser = HTML::FormatText::WithLinks->new(
+                # Put footnnote indicators after the text, not before it.
+                before_link => '',
+                after_link  => '[%n]',
+                # Convert bold and italics, use "*" for bold instead of "_".
+                with_emphasis => 1,
+                bold_marker => '*',
+                # If the same link appears multiple times, only create
+                # one footnote.
+                unique_links => 1,
+                # If the link text is the URL, don't create a footnote.
+                skip_linked_urls => 1,
+            );
+            $body = _decode_body($charset, $part->body);
+            $body = $parser->parse($body);
         }
     }
 
+    return $body;
+}
+
+sub _decode_body {
+    my ($charset, $body) = @_;
+    if (Bugzilla->params->{'utf8'} && !utf8::is_utf8($body)) {
+        return Encode::decode($charset, $body);
+    }
     return $body;
 }
 

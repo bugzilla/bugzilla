@@ -327,6 +327,13 @@ sub OPTIONAL_MODULES {
         version => 0,
         feature => ['inbound_email'],
     },
+    {
+        package => 'HTML-FormatText-WithLinks',
+        module  => 'HTML::FormatText::WithLinks',
+        # We need 0.13 to set the "bold" marker to "*".
+        version => '0.13',
+        feature => ['inbound_email'],
+    },
 
     # Mail Queueing
     {

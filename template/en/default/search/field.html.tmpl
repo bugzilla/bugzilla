@@ -154,7 +154,7 @@
           };
           bz_option_duplicate_count['[% field.name FILTER js %]'] = {
             [% FOREACH dup_target = dup_counts.keys %]
-              [% dup_target FILTER js %]:[% dup_counts.$dup_target %]
+              [% dup_target FILTER js %]:[% dup_counts.$dup_target FILTER js %]
               [%~ ',' UNLESS loop.last %]
             [% END %]
           };

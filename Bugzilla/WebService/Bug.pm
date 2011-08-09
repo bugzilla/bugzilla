@@ -303,6 +303,7 @@ sub _translate_comment {
         is_private => $self->type('boolean', $comment->is_private),
         text       => $self->type('string', $comment->body_full),
         attachment_id => $self->type('int', $attach_id),
+        count      => $self->type('int', $comment->count),
     };
 }
 
@@ -1488,6 +1489,11 @@ C<int> The ID of the bug that this comment is on.
 C<int> If the comment was made on an attachment, this will be the
 ID of that attachment. Otherwise it will be null.
 
+=item count
+
+C<int> The number of the comment local to the bug. The Description is 0,
+comments start with 1.
+
 =item text
 
 C<string> The actual text of the comment.
@@ -1542,6 +1548,8 @@ that id.
 
 =item In Bugzilla B<4.0>, the C<author> return value was renamed to
 C<creator>.
+
+=item C<count> was added to the return value in Bugzilla B<5.0>.
 
 =back
 

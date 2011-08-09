@@ -916,8 +916,9 @@
     [% title = "Invalid Content-Type" %]
     The content type <em>[% contenttype FILTER html %]</em> is invalid.
     Valid types must be of the form <em>foo/bar</em> where <em>foo</em>
-    is one of <em>[% constants.LEGAL_CONTENT_TYPES.join(', ') FILTER html %]</em>.
-    
+    is one of <em>[% constants.LEGAL_CONTENT_TYPES.join(', ') FILTER html %]</em>
+    and <em>bar</em> must not contain any special characters (such as "=", "?", ...).
+
   [% ELSIF error == "invalid_context" %]
     [% title = "Invalid Context" %]
     The context [% context FILTER html %] is invalid (must be a number,

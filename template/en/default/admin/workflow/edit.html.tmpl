@@ -68,7 +68,7 @@
       </th>
 
       [% FOREACH new_status = statuses %]
-        [% IF status.id != new_status.id && (status.id || new_status.is_open) %]
+        [% IF status.id != new_status.id %]
           [% checked = workflow.${status.id}.${new_status.id}.defined ? 1 : 0 %]
           [% mandatory = (status.id && new_status.name == Param("duplicate_or_move_bug_status")) ? 1 : 0 %]
           <td align="center" class="checkbox-cell[% " checked" IF checked || mandatory %]"

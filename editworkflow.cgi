@@ -87,7 +87,7 @@ elsif ($action eq 'update') {
 
     # Part 1: Initial bug statuses.
     foreach my $new (@$statuses) {
-        if ($new->is_open && $cgi->param('w_0_' . $new->id)) {
+        if ($cgi->param('w_0_' . $new->id)) {
             $sth_insert->execute(undef, $new->id)
               unless defined $workflow->{0}->{$new->id};
         }

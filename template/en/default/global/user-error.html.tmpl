@@ -308,9 +308,10 @@
   [% ELSIF error == "comment_required" %]
     [% title = "Comment Required" %]
     You have to specify a
-    [% IF old && new %]
-      <b>comment</b> when changing the status of [% terms.abug %] from
-      [%+ old.name FILTER html %] to [% new.name FILTER html %].
+    [% IF old.defined && new.defined %]
+      <b>comment</b> when changing the [% field_descs.$field FILTER html %]
+      of [% terms.abug %] from [% (old || "(empty)") FILTER html %]
+      to [% (new || "(empty)") FILTER html %].
     [% ELSIF new %]
       description for this [% terms.bug %].
     [% ELSE %]
@@ -1527,7 +1528,11 @@
     
   [% ELSIF error == "still_unresolved_bugs" %]
     [% title = "Unresolved Dependencies" %]
-    [% terms.Bug %] [%+ bug_id FILTER bug_link(bug_id) FILTER none %]
+    [% IF bug_id %]
+      [% terms.Bug %] [%+ bug_id FILTER bug_link(bug_id) FILTER none %]
+    [% ELSE %]
+       This [% terms.bug %]
+    [% END %]
     has [% dep_count FILTER none %] unresolved
     [% IF dep_count == 1 %]
       dependency

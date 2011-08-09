@@ -2288,6 +2288,11 @@ the component's default QA Contact.
 =item C<status> (string) - The status that this bug should start out as.
 Note that only certain statuses can be set on bug creation.
 
+=item C<resolution> (string) - If you are filing a closed bug, then
+you will have to specify a resolution. You cannot currently specify
+a resolution of C<DUPLICATE> for new bugs, though. That must be done
+with L</update>.
+
 =item C<target_milestone> (string) - A valid target milestone for this
 product.
 
@@ -2369,6 +2374,9 @@ argument.
 
 =item Error 116 was added in Bugzilla B<4.0>. Before that, dependency
 loop errors had a generic code of C<32000>.
+
+=item The ability to file new bugs with a C<resolution> was added in
+Bugzilla B<4.2>.
 
 =back
 

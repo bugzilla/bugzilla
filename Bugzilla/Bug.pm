@@ -124,6 +124,7 @@ sub VALIDATORS {
     my $validators = {
         alias          => \&_check_alias,
         assigned_to    => \&_check_assigned_to,
+        blocked        => \&_check_dependencies,
         bug_file_loc   => \&_check_bug_file_loc,
         bug_severity   => \&_check_select_field,
         bug_status     => \&_check_bug_status,
@@ -132,6 +133,7 @@ sub VALIDATORS {
         component      => \&_check_component,
         creation_ts    => \&_check_creation_ts,
         deadline       => \&_check_deadline,
+        dependson      => \&_check_dependencies,
         dup_id         => \&_check_dup_id,
         estimated_time => \&_check_time_field,
         everconfirmed  => \&Bugzilla::Object::check_boolean,
@@ -187,14 +189,16 @@ sub VALIDATOR_DEPENDENCIES {
 
     my %deps = (
         assigned_to      => ['component'],
+        blocked          => ['product'],
         bug_status       => ['product', 'comment', 'target_milestone'],
         cc               => ['component'],
         comment          => ['creation_ts'],
         component        => ['product'],
+        dependson        => ['product'],
         dup_id           => ['bug_status', 'resolution'],
         groups           => ['product'],
         keywords         => ['product'],
-        resolution       => ['bug_status'],
+        resolution       => ['bug_status', 'dependson'],
         qa_contact       => ['component'],
         target_milestone => ['product'],
         version          => ['product'],
@@ -749,12 +753,7 @@ sub run_create_validators {
     $class->_check_strict_isolation($params->{cc}, $params->{assigned_to},
                                     $params->{qa_contact}, $product);
 
-    ($params->{dependson}, $params->{blocked}) = 
-        $class->_check_dependencies($params->{dependson}, $params->{blocked},
-                                    $product);
-
-    # You can't set these fields on bug creation (or sometimes ever).
-    delete $params->{resolution};
+    # You can't set these fields.
     delete $params->{lastdiffed};
     delete $params->{bug_id};
 
@@ -768,6 +767,11 @@ sub run_create_validators {
         $class->_check_field_is_mandatory($params->{$field->name}, $field,
                                           $params);
     }
+
+    # And this is not a valid DB field, it's just used as part of 
+    # _check_dependencies to avoid running it twice for both blocked 
+    # and dependson.
+    delete $params->{_dependencies_validated};
 
     return $params;
 }
@@ -1370,9 +1374,9 @@ sub _check_bug_status {
     # Check if a comment is required for this change.
     if ($new_status->comment_required_on_change_from($old_status) && !$comment)
     {
-        ThrowUserError('comment_required', { old => $old_status,
-                                             new => $new_status });
-        
+        ThrowUserError('comment_required',
+          { old => $old_status->name, new => $new_status->name,
+            field => 'bug_status' });
     }
     
     if (ref $invocant 
@@ -1453,7 +1457,24 @@ sub _check_comment {
     );
 
     return $comment; 
+}
 
+sub _check_commenton {
+    my ($invocant, $new_value, $field, $params) = @_;
+
+    my $has_comment =
+        ref($invocant) ? $invocant->{added_comments}
+                       : (defined $params->{comment}
+                          and $params->{comment}->{thetext} ne '');
+
+    my $is_changing = ref($invocant) ? $invocant->$field ne $new_value
+                                     : $new_value ne '';
+
+    if ($is_changing && !$has_comment) {
+        my $old_value = ref($invocant) ? $invocant->$field : undef;
+        ThrowUserError('comment_required',
+            { field => $field, old => $old_value, new => $new_value });
+    }
 }
 
 sub _check_component {
@@ -1492,15 +1513,23 @@ sub _check_deadline {
 # Takes two comma/space-separated strings and returns arrayrefs
 # of valid bug IDs.
 sub _check_dependencies {
-    my ($invocant, $depends_on, $blocks, $product) = @_;
+    my ($invocant, $value, $field, $params) = @_;
+
+    return $value if $params->{_dependencies_validated};
 
     if (!ref $invocant) {
         # Only editbugs users can set dependencies on bug entry.
-        return ([], []) unless Bugzilla->user->in_group('editbugs',
-                                                        $product->id);
+        return ([], []) unless Bugzilla->user->in_group(
+            'editbugs', $params->{product}->id);
     }
 
-    my %deps_in = (dependson => $depends_on || '', blocked => $blocks || '');
+    # This is done this way so that dependson and blocked can be in
+    # VALIDATORS, meaning that they can be in VALIDATOR_DEPENDENCIES,
+    # which means that they can be checked in the right order during
+    # bug creation.
+    my $opposite = $field eq 'dependson' ? 'blocked' : 'dependson';
+    my %deps_in = ($field => $value || '',
+                   $opposite => $params->{$opposite} || '');
 
     foreach my $type (qw(dependson blocked)) {
         my @bug_ids = ref($deps_in{$type}) 
@@ -1546,9 +1575,12 @@ sub _check_dependencies {
 
     # And finally, check for dependency loops.
     my $bug_id = ref($invocant) ? $invocant->id : 0;
-    my %deps = ValidateDependencies($deps_in{dependson}, $deps_in{blocked}, $bug_id);
+    my %deps = ValidateDependencies($deps_in{dependson}, $deps_in{blocked},
+                                    $bug_id);
 
-    return ($deps{'dependson'}, $deps{'blocked'});
+    $params->{$opposite} = $deps{$opposite};
+    $params->{_dependencies_validated} = 1;
+    return $deps{$field};
 }
 
 sub _check_dup_id {
@@ -1760,41 +1792,46 @@ sub _check_reporter {
 }
 
 sub _check_resolution {
-    my ($self, $resolution) = @_;
+    my ($invocant, $resolution, undef, $params) = @_;
     $resolution = trim($resolution);
+    my $status = ref($invocant) ? $invocant->status->name 
+                                : $params->{bug_status};
+    my $is_open = ref($invocant) ? $invocant->status->is_open 
+                                 : is_open_state($status);
     
     # Throw a special error for resolving bugs without a resolution
     # (or trying to change the resolution to '' on a closed bug without
     # using clear_resolution).
-    ThrowUserError('missing_resolution', { status => $self->status->name })
-        if !$resolution && !$self->status->is_open;
+    ThrowUserError('missing_resolution', { status => $status })
+        if !$resolution && !$is_open;
     
     # Make sure this is a valid resolution.
-    $resolution = $self->_check_select_field($resolution, 'resolution');
+    $resolution = $invocant->_check_select_field($resolution, 'resolution');
 
     # Don't allow open bugs to have resolutions.
-    ThrowUserError('resolution_not_allowed') if $self->status->is_open;
+    ThrowUserError('resolution_not_allowed') if $is_open;
     
     # Check noresolveonopenblockers.
+    my $dependson = ref($invocant) ? $invocant->dependson
+                                   : ($params->{dependson} || []);
     if (Bugzilla->params->{"noresolveonopenblockers"}
         && $resolution eq 'FIXED'
-        && (!$self->resolution || $resolution ne $self->resolution)
-        && scalar @{$self->dependson})
+        && (!ref $invocant or !$invocant->resolution 
+            or $resolution ne $invocant->resolution)
+        && scalar @$dependson)
     {
-        my $dep_bugs = Bugzilla::Bug->new_from_list($self->dependson);
+        my $dep_bugs = Bugzilla::Bug->new_from_list($dependson);
         my $count_open = grep { $_->isopened } @$dep_bugs;
         if ($count_open) {
+            my $bug_id = ref($invocant) ? $invocant->id : undef;
             ThrowUserError("still_unresolved_bugs",
-                           { bug_id => $self->id, dep_count => $count_open });
+                           { bug_id => $bug_id, dep_count => $count_open });
         }
     }
 
     # Check if they're changing the resolution and need to comment.
-    if (Bugzilla->params->{'commentonchange_resolution'} 
-        && $self->resolution && $resolution ne $self->resolution 
-        && !$self->{added_comments})
-    {
-        ThrowUserError('comment_required');
+    if (Bugzilla->params->{'commentonchange_resolution'}) {
+        $invocant->_check_commenton($resolution, 'resolution', $params);
     }
     
     return $resolution;
@@ -2327,7 +2364,9 @@ sub set_custom_field {
 sub set_deadline { $_[0]->set('deadline', $_[1]); }
 sub set_dependencies {
     my ($self, $dependson, $blocked) = @_;
-    ($dependson, $blocked) = $self->_check_dependencies($dependson, $blocked);
+    my %extra = ( blocked => $blocked );
+    $dependson = $self->_check_dependencies($dependson, 'dependson', \%extra);
+    $blocked = $extra{blocked};
     # These may already be detainted, but all setters are supposed to
     # detaint their input if they've run a validator (just as though
     # we had used Bugzilla::Object::set), so we do that here.
@@ -3854,6 +3893,8 @@ sub map_fields {
 
     my %field_values;
     foreach my $field (keys %$params) {
+        # Don't allow setting private fields via email_in or the WebService.
+        next if $field =~ /^_/;
         my $field_name;
         if ($except->{$field}) {
            $field_name = $field;

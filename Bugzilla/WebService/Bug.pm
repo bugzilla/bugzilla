@@ -2376,7 +2376,7 @@ argument.
 loop errors had a generic code of C<32000>.
 
 =item The ability to file new bugs with a C<resolution> was added in
-Bugzilla B<4.2>.
+Bugzilla B<5.0>.
 
 =back
 

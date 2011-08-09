@@ -481,13 +481,6 @@
 
         <listitem>
           <para>
-            Email::MIME::Attachment::Stripper
-            (&min-email-mime-attachment-stripper-ver;) for Inbound Email
-          </para>
-        </listitem>
-
-        <listitem>
-          <para>
             Email::Reply
             (&min-email-reply-ver;) for Inbound Email
           </para>

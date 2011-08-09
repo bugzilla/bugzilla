@@ -25,85 +25,6 @@
 
 <script type="text/javascript">
 
-var first_load = true;         [%# is this the first time we load the page? %]
-var last_sel = new Array();    [%# caches last selection %]
-
-[% IF Param('useclassification') %]
-var useclassification = true;
-var prods = new Array();
-[% ELSE %]
-var useclassification = false;
-[% END %]
-var cpts = new Array();
-var vers = new Array();
-[% IF Param('usetargetmilestone') %]
-var tms = new Array();
-[% END %]
-
-[%# Create an array of products, indexed by the classification #%]
-
-[% nclass = 0 %]
-[% FOREACH c = classification %]
-  prods[[% nclass FILTER js %]] = [
-    [% sep = '' %]
-    [%- FOREACH item = user.get_selectable_products(c.id) -%]
-      [%- IF item.components.size -%]
-        [%- sep FILTER js %]'[% item.name FILTER js %]'
-        [%- sep = ',' -%] 
-      [%- END -%]
-    [%- END -%] ];
-  [% nclass = nclass+1 %]
-[% END %]
-
-[%# Create three arrays of components, versions and target milestones, indexed
-  # numerically according to the product they refer to. #%]
-
-[% n = 0 %]
-[% FOREACH p = product %]
-  [% NEXT IF NOT p.components.size %]
-  [% IF Param('useclassification') %]
-  prods['[% p.name FILTER js %]'] = [% n %]
-  [% END %]
-  cpts[[% n %]] = [
-    [%- FOREACH item = p.components %]'[% item.name FILTER js %]'[% ", " UNLESS loop.last %] [%- END -%] ];
-  vers[[% n %]] = [
-    [%- FOREACH item = p.versions -%]'[%  item.name FILTER js %]'[% ", " UNLESS loop.last %] [%- END -%] ];
-  [% IF Param('usetargetmilestone') %]
-  tms[[% n %]]  = [
-     [%- FOREACH item = p.milestones %]'[% item.name FILTER js %]'[% ", " UNLESS loop.last %] [%- END -%] ];
-  [% END %]
-  [% n = n+1 %]
-[% END %]
-
-/*
- * doOnSelectProduct determines which selection should get updated 
- *
- * - selectmode = 0  - init
- *   selectmode = 1  - classification selected
- *   selectmode = 2  - product selected
- *
- * globals:
- *   queryform - string holding the name of the selection form
- */
-function doOnSelectProduct(selectmode) {
-    var f = document.forms[queryform];
-    var milestone = (typeof(f.target_milestone) == "undefined" ? 
-                                               null : f.target_milestone);
-    if (selectmode == 0) {
-        // If there is no classification selected, give us a chance to fill
-        // the select fields with values from the possibly selected product.
-        if (useclassification && f.classification.selectedIndex > -1) {
-            selectClassification(f.classification, f.product, f.component, f.version, milestone);
-        } else {
-            selectProduct(f.product, f.component, f.version, milestone, null);
-        }
-    } else if (selectmode == 1) {
-        selectClassification(f.classification, f.product, f.component, f.version, milestone);
-    } else {
-        selectProduct(f.product, f.component, f.version, milestone, null);
-    }
-}
-
 // Hide the Advanced Fields by default, unless the user has a cookie
 // that specifies otherwise.
 // &#9656; and &#9662; are both utf8 escaped characters for right 
@@ -143,7 +64,7 @@ TUI_hide_default('information_query');
          accesskey = "s"
          %]
       <script type="text/javascript"> <!--
-          document.forms[queryform].short_desc.focus(); 
+          document.getElementById('short_desc').focus();
       // -->
       </script>
 
@@ -154,23 +75,26 @@ TUI_hide_default('information_query');
   </div>
 
 [%# *** Classification Product Component *** %]
-  
+
+[% value_controllers = {
+    'classification' => { 'products' => bug_fields.product },
+    'product' => { 'components' => bug_fields.component,
+                   'versions'   => bug_fields.version,
+                   'milestones' => bug_fields.target_milestone },
+} %]
+
 [% Hook.process('before_selects_top') %]
 [% IF Param('useclassification') %]
-      [% fake_classfication = { name => bug_fields.classification.name,
-                                type => constants.FIELD_TYPE_SINGLE_SELECT } %]
-      [% INCLUDE "search/field.html.tmpl" 
-            field => fake_classfication
-            accesskey => "c"
-            onchange => "doOnSelectProduct(1);" 
-            value => default.classification
-      %]          
+  [% INCLUDE "search/field.html.tmpl"
+        field => bug_fields.classification
+        accesskey => "c"
+        value => default.classification
+  %]
 [% END %]
 
 [% INCLUDE "search/field.html.tmpl" 
       field => bug_fields.product
       accesskey => "p"
-      onchange => "doOnSelectProduct(2);" 
       value => default.product
 %]
 [% INCLUDE "search/field.html.tmpl" 

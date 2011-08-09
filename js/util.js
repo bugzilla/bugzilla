@@ -220,6 +220,34 @@ function bz_valueSelected(aSelect, aValue) {
 }
 
 /**
+ * Returns all Option elements that are selected in a <select>,
+ * as an array. Returns an empty array if nothing is selected.
+ *
+ * @param aSelect The select you want the selected values of.
+ */
+function bz_selectedOptions(aSelect) {
+    // HTML 5
+    if (aSelect.selectedOptions) {
+        return aSelect.selectedOptions;
+    }
+
+    var start_at = aSelect.selectedIndex;
+    if (start_at == -1) return [];
+    var first_selected =  aSelect.options[start_at];
+    if (!aSelect.multiple) return first_selected;
+    // selectedIndex is specified as being the "first selected item",
+    // so we can start from there.
+    var selected = [first_selected];
+    var options_length = aSelect.options.length;
+    // We start after first_selected
+    for (var i = start_at + 1; i < options_length; i++) {
+        var this_option = aSelect.options[i];
+        if (this_option.selected) selected.push(this_option);
+    }
+    return selected;
+}
+
+/**
  * Tells you where (what index) in a <select> a particular option is.
  * Returns -1 if the value is not in the <select>
  *

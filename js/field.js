@@ -517,44 +517,143 @@ function handleVisControllerValueChange(e, args) {
     }
 }
 
-function showValueWhen(controlled_field_id, controlled_value_ids, 
-                       controller_field_id, controller_value_id)
+/**
+ * This is a data structure representing the tree of controlled values.
+ * Let's call the "controller value" the "source" and the "controlled
+ * value" the "target". A target can have only one source, but a source
+ * can have an infinite number of targets.
+ *
+ * The data structure is a series of hash tables that go something
+ * like this:
+ *
+ * source_field -> target_field -> source_value_id -> target_value_ids
+ *
+ * We always know source_field when our event handler is called, since
+ * that's the field the event is being triggered on. We can then enumerate
+ * through every target field, check the status of each source field value,
+ * and act appropriately on each target value.
+ */
+var bz_value_controllers = {};
+// This keeps track of whether or not we've added an onchange handler
+// for the source field yet.
+var bz_value_controller_has_handler = {};
+function showValueWhen(target_field_id, target_value_ids,
+                       source_field_id, source_value_id, empty_shows_all)
 {
-    var controller_field = document.getElementById(controller_field_id);
-    // Note that we don't get an object for the controlled field here, 
-    // because it might not yet exist in the DOM. We just pass along its id.
-    YAHOO.util.Event.addListener(controller_field, 'change',
-        handleValControllerChange, [controlled_field_id, controlled_value_ids,
-                                    controller_field, controller_value_id]);
+    if (!bz_value_controllers[source_field_id]) {
+        bz_value_controllers[source_field_id] = {};
+    }
+    if (!bz_value_controllers[source_field_id][target_field_id]) {
+        bz_value_controllers[source_field_id][target_field_id] = {};
+    }
+    var source_values = bz_value_controllers[source_field_id][target_field_id];
+    source_values[source_value_id] = target_value_ids;
+
+    if (!bz_value_controller_has_handler[source_field_id]) {
+        var source_field = document.getElementById(source_field_id);
+        YAHOO.util.Event.addListener(source_field, 'change',
+            handleValControllerChange, [source_field, empty_shows_all]);
+        bz_value_controller_has_handler[source_field_id] = true;
+    }
 }
 
 function handleValControllerChange(e, args) {
-    var controlled_field = document.getElementById(args[0]);
-    var controlled_value_ids = args[1];
-    var controller_field = args[2];
-    var controller_value_id = args[3];
+    var source = args[0];
+    var empty_shows_all = args[1];
 
-    var controller_item = document.getElementById(
-        _value_id(controller_field.id, controller_value_id));
+    for (var target_field_id in bz_value_controllers[source.id]) {
+        var target = document.getElementById(target_field_id);
+        if (!target) continue;
+        _update_displayed_values(source, target, empty_shows_all);
+    }
+}
 
-    for (var i = 0; i < controlled_value_ids.length; i++) {
-        var item = getPossiblyHiddenOption(controlled_field,
-                                           controlled_value_ids[i]);
-        if (item.disabled && controller_item && controller_item.selected) {
-            item = showOptionInIE(item, controlled_field);
-            YAHOO.util.Dom.removeClass(item, 'bz_hidden_option');
-            item.disabled = false;
-        }
-        else if (!item.disabled) {
-            YAHOO.util.Dom.addClass(item, 'bz_hidden_option');
-            if (item.selected) {
-                item.selected = false;
-                bz_fireEvent(controlled_field, 'change');
-            }
-            item.disabled = true;
-            hideOptionInIE(item, controlled_field);
+/* See the docs for bz_option_duplicate count lower down for an explanation
+ * of this data structure.
+ */
+var bz_option_hide_count = {};
+
+function _update_displayed_values(source, target, empty_shows_all) {
+    var show_all = (empty_shows_all && source.selectedIndex == -1);
+
+    bz_option_hide_count[target.id] = {};
+
+    var source_values = bz_value_controllers[source.id][target.id];
+    for (source_value_id in source_values) {
+        var source_option = getPossiblyHiddenOption(source, source_value_id);
+        var target_values = source_values[source_value_id];
+        for (var i = 0; i < target_values.length; i++) {
+            var target_value_id = target_values[i];
+            _handle_source_target(source_option, target, target_value_id,
+                                  show_all);
         }
     }
+
+    // We may have updated which elements are selected or not selected
+    // in the target field, and it may have handlers associated with
+    // that, so we need to fire the change event on the target.
+    bz_fireEvent(target, 'change');
+}
+
+function _handle_source_target(source_option, target, target_value_id,
+                               show_all)
+{
+    var target_option = getPossiblyHiddenOption(target, target_value_id);
+
+    // We always call either _show_option or _hide_option on every single
+    // target value. Although this is not theoretically the most efficient
+    // thing we can do, it handles all possible edge cases, and there are
+    // a lot of those, particularly when this code is being used on the
+    // search form.
+    if (source_option.selected || (show_all && !source_option.disabled)) {
+        _show_option(target_option, target);
+    }
+    else {
+        _hide_option(target_option, target);
+    }
+}
+
+/* When an option has duplicates (see the docs for bz_option_duplicates
+ * lower down in this file), we only want to hide it if *all* the duplicates
+ * would be hidden. So we keep a counter of how many duplicates each option
+ * has. Then, when we run through a "change" call for a source field,
+ * we count how many times each value gets hidden, and only actually
+ * hide it if the counter hits a number higher than the duplicate count.
+ */
+var bz_option_duplicate_count = {};
+
+function _show_option(option, field) {
+    if (!option.disabled) return;
+    option = showOptionInIE(option, field);
+    YAHOO.util.Dom.removeClass(option, 'bz_hidden_option');
+    option.disabled = false;
+}
+
+function _hide_option(option, field) {
+    if (option.disabled) return;
+
+    var value_id = option.bz_value_id;
+
+    if (field.id in bz_option_duplicate_count
+        && value_id in bz_option_duplicate_count[field.id])
+    {
+        if (!bz_option_hide_count[field.id][value_id]) {
+            bz_option_hide_count[field.id][value_id] = 0;
+        }
+        bz_option_hide_count[field.id][value_id]++;
+        var current = bz_option_hide_count[field.id][value_id];
+        var dups    = bz_option_duplicate_count[field.id][value_id];
+        // We check <= because the value in bz_option_duplicate_count is
+        // 1 less than the total number of duplicates (since the shown
+        // option is also a "duplicate" but not counted in
+        // bz_option_duplicate_count).
+        if (current <= dups) return;
+    }
+
+    YAHOO.util.Dom.addClass(option, 'bz_hidden_option');
+    option.selected = false;
+    option.disabled = true;
+    hideOptionInIE(option, field);
 }
 
 // A convenience function to generate the "id" tag of an <option>
@@ -571,7 +670,7 @@ function _value_id(field_name, id) {
  * on <option> tags. However, you *can* insert a Comment Node as a
  * child of a <select> tag. So we just insert a Comment where the <option>
  * used to be. */
-var ie_hidden_options = new Array();
+var ie_hidden_options = {};
 function hideOptionInIE(anOption, aSelect) {
     if (browserCanHideOptions(aSelect)) return;
 
@@ -591,7 +690,7 @@ function hideOptionInIE(anOption, aSelect) {
 
     // Store the comment node for quick access for getPossiblyHiddenOption
     if (!ie_hidden_options[aSelect.id]) {
-        ie_hidden_options[aSelect.id] = new Array();
+        ie_hidden_options[aSelect.id] = {};
     }
     ie_hidden_options[aSelect.id][anOption.id] = commentNode;
 }
@@ -620,6 +719,7 @@ function showOptionInIE(aNode, aSelect) {
 function initHidingOptionsForIE(select_name) {
     var aSelect = document.getElementById(select_name);
     if (browserCanHideOptions(aSelect)) return;
+    if (!aSelect) return;
 
     for (var i = 0; ;i++) {
         var item = aSelect.options[i];
@@ -631,7 +731,27 @@ function initHidingOptionsForIE(select_name) {
     }
 }
 
+/* Certain fields, like the Component field, have duplicate values in
+ * them (the same name, but different ids). We don't display these
+ * duplicate values in the UI, but the option hiding/showing code still
+ * uses the ids of these unshown duplicates. So, whenever we get the
+ * id of an unshown duplicate in getPossiblyHiddenOption, we have to
+ * return the actually-used <option> instead.
+ *
+ * The structure of the data looks like:
+ *
+ *  field_name -> unshown_value_id -> shown_value_id_it_is_a_duplicate_of
+ */
+var bz_option_duplicates = {};
+
 function getPossiblyHiddenOption(aSelect, optionId) {
+
+    if (bz_option_duplicates[aSelect.id]
+        && bz_option_duplicates[aSelect.id][optionId])
+    {
+        optionId = bz_option_duplicates[aSelect.id][optionId];
+    }
+
     // Works always for <option> tags, and works for commentNodes
     // in IE (but not in Webkit).
     var id = _value_id(aSelect.id, optionId);
@@ -642,6 +762,10 @@ function getPossiblyHiddenOption(aSelect, optionId) {
     if (!val && ie_hidden_options[aSelect.id]) {
         val = ie_hidden_options[aSelect.id][id];
     }
+
+    // We add this property for our own convenience, it's used in
+    // other places.
+    val.bz_value_id = optionId;
 
     return val;
 }

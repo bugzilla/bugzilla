@@ -40,6 +40,46 @@ use Bugzilla::Keyword;
 use Bugzilla::Field;
 use Bugzilla::Install::Util qw(vers_cmp);
 
+###############
+# Subroutines #
+###############
+
+sub get_product_values {
+    my ($products, $field, $vars) = @_;
+    my @all_values = map { @{ $_->$field } } @$products;
+
+    my (@unique, %duplicates, %duplicate_count, %seen);
+    foreach my $value (@all_values) {
+        my $lc_name = lc($value->name);
+        if ($seen{$lc_name}) {
+            $duplicate_count{$seen{$lc_name}->id}++;
+            $duplicates{$value->id} = $seen{$lc_name};
+            next;
+        }
+        push(@unique, $value);
+        $seen{$lc_name} = $value;
+    }
+
+    if ($field eq 'version') {
+        @unique = sort { vers_cmp(lc($a->name), lc($b->name)) } @unique;
+    }
+    else {
+        @unique = sort { lc($a->name) cmp lc($b->name) } @unique;
+    }
+
+    $field =~ s/s$//;
+    $field = 'target_milestone' if $field eq 'milestone';
+    $vars->{duplicates}->{$field} = \%duplicates;
+    $vars->{duplicate_count}->{$field} = \%duplicate_count;
+    # "component" is a reserved word in Template Toolkit.
+    $field = 'component_' if $field eq 'component';
+    $vars->{$field} = \@unique;
+}
+
+###############
+# Main Script #
+###############
+
 my $cgi = Bugzilla->cgi;
 my $dbh = Bugzilla->dbh;
 my $template = Bugzilla->template;
@@ -133,36 +173,16 @@ if (!PrefillForm($buffer)) {
 my @selectable_products = sort {lc($a->name) cmp lc($b->name)} 
                                @{$user->get_selectable_products};
 Bugzilla::Product::preload(\@selectable_products);
+$vars->{'product'} = \@selectable_products;
 
 # Create the component, version and milestone lists.
-my %components;
-my %versions;
-my %milestones;
-
-foreach my $product (@selectable_products) {
-    $components{$_->name} = 1 foreach (@{$product->components});
-    $versions{$_->name}   = 1 foreach (@{$product->versions});
-    $milestones{$_->name} = 1 foreach (@{$product->milestones});
+foreach my $field (qw(components versions milestones)) {
+    get_product_values(\@selectable_products, $field, $vars);
 }
-
-my @components = sort(keys %components);
-my @versions = sort { vers_cmp (lc($a), lc($b)) } keys %versions;
-my @milestones = sort(keys %milestones);
-
-$vars->{'product'} = \@selectable_products;
 
 # Create data structures representing each classification
 if (Bugzilla->params->{'useclassification'}) {
     $vars->{'classification'} = $user->get_selectable_classifications;
-}
-
-# We use 'component_' because 'component' is a Template Toolkit reserved word.
-$vars->{'component_'} = \@components;
-
-$vars->{'version'} = \@versions;
-
-if (Bugzilla->params->{'usetargetmilestone'}) {
-    $vars->{'target_milestone'} = \@milestones;
 }
 
 my @chfields;

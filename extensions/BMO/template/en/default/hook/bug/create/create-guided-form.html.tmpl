@@ -1,0 +1,22 @@
+  <tr bgcolor="[% tablecolour  FILTER html %]">
+    <td valign="middle" align="right">
+      <b>Security</b>
+    </td>
+    <td valign="top">
+      <p>
+        [% sec_group = sec_groups.${product.name} || sec_groups._default %]
+
+        <input type="checkbox" name="groups" 
+               id="groups" value="[% sec_group FILTER none %]"
+          [% FOREACH g = group %]
+            [% IF g.name == sec_group %]
+              [% " checked=\"checked\"" IF g.checked %]
+            [% END %]
+          [% END %]
+        >
+        <label for="groups">
+        Many users could be harmed by this security problem: it should be kept
+        hidden from the public until it is resolved.</label>
+      </p>
+    </td>
+  </tr>

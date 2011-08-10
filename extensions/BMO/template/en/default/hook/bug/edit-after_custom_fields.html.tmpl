@@ -1,0 +1,82 @@
+[%# ***** BEGIN LICENSE BLOCK *****
+  # Version: MPL 1.1
+  # 
+  # The contents of this file are subject to the Mozilla Public License Version
+  # 1.1 (the "License"); you may not use this file except in compliance with
+  # the License. You may obtain a copy of the License at
+  # http://www.mozilla.org/MPL/
+  # 
+  # Software distributed under the License is distributed on an "AS IS" basis,
+  # WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+  # for the specific language governing rights and limitations under the
+  # License.
+  # 
+  # The Original Code is the BMO Bugzilla Extension;
+  # 
+  # The Initial Developer of the Original Code is the Mozilla Foundation.
+  # Portions created by the Initial Developer are Copyright (C) 2011 the
+  # Initial Developer. All Rights Reserved.
+  # 
+  # Contributor(s):
+  #   Byron Jones <glob@mozilla.com>
+  #
+  # ***** END LICENSE BLOCK *****
+  #%]
+
+[% show_custom_flags = 0 %]
+[% FOREACH field = Bugzilla.active_custom_fields %]
+  [% NEXT IF NOT user.id AND bug.${field.name} == "---" %]
+  [% NEXT IF cf_hidden_in_product(field.name, bug.product, bug.component, 2) %]
+  [% show_custom_flags = 1 %]
+  [% LAST %]
+[% END %]
+
+[% IF show_custom_flags %]
+  [% custom_flags = [] %]
+  <tr>
+    <td class="" colspan="2">
+      <label><b>Tracking Flags:</b></label>
+      [% IF user.id %]
+      <span id="edit_tracking_fields_action">
+      (<a onclick="bmo_show_tracking_flags()" href="javascript:void(0)">edit</a>)
+      </span>
+      [% END %]
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2">
+      <table id="custom-flags">
+      [% FOREACH field = Bugzilla.active_custom_fields %]
+        [% NEXT IF NOT user.id AND field.value == "---" %]
+        [% NEXT IF cf_hidden_in_product(field.name, bug.product, bug.component, 2) %]
+        [% custom_flags.push(field.name) %]
+        <tr id="row_[% field.name FILTER js %]">
+          <td>&nbsp;</td>
+          <td>
+            <label for="[% field.name FILTER html %]">
+              [% field_descs.${field.name} FILTER html %]:
+            </label>
+          </td>
+          <td>
+            [% PROCESS bug/field.html.tmpl value = bug.${field.name}
+                                           editable = user.id
+                                           no_tds = 1 %]
+            [% IF user.id %]
+              <span id="ro_[% field.name FILTER html %]" class="bz_hidden">
+                [% bug.${field.name} FILTER html %]
+              </span>
+            [% END %]
+          </td>
+        </tr>
+      [% END %]
+      </table>
+    </td>
+  </tr>
+  <script type="text/javascript">
+    var bmo_custom_flags = new Array([% custom_flags.size FILTER none %]);
+    [% FOREACH field_name = custom_flags %]
+      bmo_custom_flags['[% field_name FILTER js %]'] = '[% bug.${field_name} FILTER js %]';
+    [% END %]
+    bmo_hide_tracking_flags();
+  </script>
+[% END %]

@@ -1,0 +1,31 @@
+[%#
+  # The contents of this file are subject to the Mozilla Public
+  # License Version 1.1 (the "License"); you may not use this file
+  # except in compliance with the License. You may obtain a copy of
+  # the License at http://www.mozilla.org/MPL/
+  #
+  # Software distributed under the License is distributed on an "AS
+  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+  # implied. See the License for the specific language governing
+  # rights and limitations under the License.
+  #
+  # The Original Code is the Splinter Bugzilla Extension.
+  #
+  # The Initial Developer of the Original Code is Red Hat, Inc.
+  # Portions created by Red Hat, Inc. are Copyright (C) 2008
+  # Red Hat, Inc. All Rights Reserved.
+  #
+  # Contributor(s): Owen Taylor <otaylor@redhat.com>
+  #                 David Lawrence <dkl@mozilla.com>
+  #%]
+
+[% IF attachment.ispatch %]
+&#x0020; |
+  [% IF Param("splinter_base").search('\?') %]
+    <a href="[% urlbase FILTER none %][% Param("splinter_base") FILTER html %]&amp;bug=[% attachment.bug_id FILTER uri %]&amp;attachment=[% attachment.id FILTER uri%]">
+      Splinter Review</a>
+  [% ELSE %]
+    <a href="[% urlbase FILTER none %][% Param("splinter_base") FILTER html %]?bug=[% attachment.bug_id FILTER uri %]&amp;attachment=[% attachment.id FILTER uri %]">
+      Splinter Review</a>
+  [% END %]
+[% END %]

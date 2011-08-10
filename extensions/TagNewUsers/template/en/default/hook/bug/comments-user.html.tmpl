@@ -1,0 +1,37 @@
+[%#
+  # The contents of this file are subject to the Mozilla Public
+  # License Version 1.1 (the "License"); you may not use this file
+  # except in compliance with the License. You may obtain a copy of
+  # the License at http://www.mozilla.org/MPL/
+  #
+  # Software distributed under the License is distributed on an "AS
+  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+  # implied. See the License for the specific language governing
+  # rights and limitations under the License.
+  #
+  # The Original Code is the TagNewUsers Extension
+  #
+  # The Initial Developer of the Original Code is the Mozilla Foundation
+  # Portions created by the Initial Developers are Copyright (C) 2011 the
+  # Initial Developer. All Rights Reserved.
+  #
+  # Contributor(s):
+  #   Byron Jones <bjones@mozilla.com>
+  #%]
+
+[% IF comment.author.is_new %]
+<span
+  class="new_user" 
+  title="
+[%- comment.author.comment_count FILTER html %] comment[% "s" IF comment.author.comment_count != 1 -%]
+, created [%
+IF comment.author.creation_age == 0 %]today[%
+ELSIF comment.author.creation_age > 365 %]more than a year ago[%
+ELSE %][% comment.author.creation_age FILTER html %] day[% "s" IF comment.author.creation_age != 1 %] ago[% END %]."
+  >
+(New to [% terms.Bugzilla %])
+</span>
+[% END %]
+[% IF comment.is_about_attachment && comment.author.first_patch_bug_id == bug.id %]
+<span class="new_user">(First Patch)</span>
+[% END %]

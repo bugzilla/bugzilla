@@ -1,0 +1,217 @@
+[%# 1.0@bugzilla.org %]
+[%# The contents of this file are subject to the Mozilla Public
+  # License Version 1.1 (the "License"); you may not use this file
+  # except in compliance with the License. You may obtain a copy of
+  # the License at http://www.mozilla.org/MPL/
+  #
+  # Software distributed under the License is distributed on an "AS
+  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+  # implied. See the License for the specific language governing
+  # rights and limitations under the License.
+  #
+  # The Original Code is the Bugzilla Bug Tracking System.
+  #
+  # The Initial Developer of the Original Code is Mozilla Corporation.
+  # Portions created by Mozilla are Copyright (C) 2008 Mozilla
+  # Corporation. All Rights Reserved.
+  #
+  # Contributor(s): Reed Loden <reed@mozilla.com>
+  #                 David Tran <dtran@mozilla.com>
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% PROCESS global/header.html.tmpl
+   title = "Mozilla Corporation Mountain View Presentation Request"
+   javascript_urls = [ 'js/field.js', 'js/util.js' ]
+   style = ".yui-skin-sam .yui-calcontainer { z-index: 1; }"
+   yui = [ 'autocomplete', 'calendar' ]
+%]
+
+<div style='text-align: center; width: 98%; font-size: 2em; font-weight: bold; margin: 10px;'>Mountain View Presentation Request</div>
+
+<p><strong>Mountain View Presentation Request:</strong>  Please use this form if you plan on hosting a presentation so that IT will be able to properly provide support. </p>
+
+<p>Process:</p>
+
+<ol><li>Complete and submit request below.</li>
+    <li>Your request will be reviewed and assigned to the appropriate person in IT.</li>
+</ol>
+ 
+<p>These requests will only be visible internally in all cases and only to the
+person who submitted the request and any persons designated in the CC line.</p>
+
+<script type="text/javascript">
+function trySubmit() {
+  var out = 'Topic: the_topic\r\nPresenter: the_presenter\r\nDate: the_date\r\nTime: the_time\r\nAudience: the_audience\r\nAir Mozilla: air_mozilla\r\nDial-in: dial_in\r\nArchive: to_archive\r\nMember of IT to help with A/V: it_help\r\nDescription: the_description';
+
+  var topic = document.getElementById('topic').value;
+  var presenter = document.getElementById('presenter').value;
+  var date = document.getElementById('date').value;
+  var time = document.getElementById('time_hour').value + ':' + document.getElementById('time_minute').value + document.getElementById('ampm').value;
+  var shortdesc = 'Mountain View Presentation Request - ' + topic + ' (' + date + ' ' + time + ')';
+  var airmozilla = document.getElementById('airmozilla').checked? 'yes' : 'no';
+  var dialin = document.getElementById('dialin').checked? 'yes' : 'no';
+  var archive = document.getElementById('archive').checked? 'yes' : 'no';
+  var ithelp = document.getElementById('ithelp').checked? 'yes' : 'no';
+  
+  out = out.replace( /the_topic/, topic );
+  out = out.replace( /the_presenter/, presenter );
+  out = out.replace( /the_date/, date);
+  out = out.replace( /the_time/, time);
+  out = out.replace( /the_audience/, document.getElementById('audience').value );
+  out = out.replace( /air_mozilla/, airmozilla);
+  out = out.replace( /dial_in/, dialin);
+  out = out.replace( /the_description/, document.getElementById('description').value );
+  out = out.replace( /to_archive/, archive);
+  out = out.replace( /it_help/, ithelp);
+  
+  document.getElementById('comment').value = out;
+  document.getElementById('short_desc').value = shortdesc;
+  
+  return true;
+}
+
+</script>
+
+<form method="post" action="post_bug.cgi" id="presentationRequestForm" enctype="multipart/form-data"
+      onSubmit="return trySubmit();">
+
+        <input type="hidden" name="product" value="mozilla.org">
+        <input type="hidden" name="component" value="Server Operations: Desktop Issues">
+        <input type="hidden" name="rep_platform" value="All">
+        <input type="hidden" name="op_sys" value="Other">
+        <input type="hidden" name="priority" value="--">
+        <input type="hidden" name="version" value="other">
+        <input type="hidden" name="bug_severity" id="bug_severity" value="normal">
+        <input type="hidden" name="comment" id="comment" value="">
+        <input type="hidden" name="short_desc" id="short_desc" value="">
+  <input type="hidden" name="groups" value="mozilla-corporation-confidential">
+<table>
+
+<tr>
+  <td align="right"><strong>Presenter:</strong></td>
+  <td>
+    <input type="text" name="presenter" id="presenter" value="" size="60" />
+  </td>
+
+</tr>
+
+<tr>
+  <td align="right"><strong>Topic:</strong></td>
+  <td>
+    <input type="text" name="topic" id="topic" value="" size="60" />
+  </td>
+</tr>
+
+<tr>
+  <td align="right"><strong>Date:</strong></td>
+  <td>
+    <input type="text" id="date" name="date" size="10"
+           onchange="updateCalendarFromField(this)">
+    <button type="button" class="calendar_button" id="button_calendar_date"
+            onclick="showCalendar('date')"><span>Calendar</span>
+    </button>
+    <div id="con_calendar_date"></div>
+  </td>
+</tr>
+
+<tr>
+  <td align="right"><strong>Start Time:</strong></td>
+  <td>
+    <select name="time_hour" id="time_hour">
+      <option value="12" selected>12</option>
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5</option>
+      <option value="6">6</option>
+      <option value="7">7</option>
+      <option value="8">8</option>
+      <option value="9">9</option>
+      <option value="10">10</option>
+      <option value="11">11</option>
+    </select>:<select name="time_minute" id="time_minute">
+      <option value="00" selected>00</option>
+      <option value="15">15</option>
+      <option value="30">30</option>
+      <option value="45">45</option>
+    </select>
+    <select name="ampm" id="ampm">
+      <option value="AM" selected>AM</option>
+      <option value="PM">PM</option>
+    </select>
+  </td> 
+</tr>
+
+<tr>
+  <td align="right"><strong>Intended Audience:</strong></td>
+  <td>
+    <select name="audience" id="audience">
+      <option value="Public" selected>Open to Public</option>
+      <option value="Employees Only">Employees Only</option>
+      <option value="Interns">Interns</option>
+    </select>
+  </td>
+</tr>
+
+<tr>
+  <td align="right"><strong>Air Mozilla Broadcasting?</strong></td>
+  <td align="left"><input type="checkbox" name="airmozilla" id="airmozilla"></td>
+</tr>
+
+<tr>
+  <td align="right"><strong>Dial In?</strong></td>
+  <td align="left"><input type="checkbox" name="dialin" id="dialin"></td>
+</tr>
+
+<tr>
+<td align="right"><strong>Archive this?</strong></td>
+<td align="left"><input type="checkbox" name="archive" id="archive" value="yes"></td>
+</tr>
+
+
+<tr>
+<td align="right"><strong>Need IT to help run A/V?</strong></td>
+<td align="left"><input type="checkbox" name="ithelp" id="ithelp" value="yes" checked></td>
+</tr>
+
+<tr>
+  <td align="right"><strong>CC&nbsp;(optional):</strong></td>
+  <td colspan="3">
+    [% INCLUDE global/userselect.html.tmpl
+       id => "cc"
+       name => "cc"
+       value => cc
+       size => 60
+       multiple => 5
+    %]
+  </td>
+</tr>
+
+<tr>
+  <th><label for="description">Description</label>:</th>
+  <td>
+    <em>Please briefly describe the presentation and any specific needs you might have.</em><br>
+
+    <textarea id="description" name="description" rows="10" cols="80"></textarea>
+  </td>
+</tr>
+
+  </table>
+
+  <br>
+  <input type="submit" id="commit" value="Submit Request">
+</form>
+
+<p>Thanks for contacting us.
+   You will be notified by email of any progress made in resolving your request.
+
+</p>
+
+<script type="text/javascript">
+  createCalendar('date');
+</script>
+
+[% PROCESS global/footer.html.tmpl %]

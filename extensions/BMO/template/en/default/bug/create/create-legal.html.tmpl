@@ -1,0 +1,216 @@
+[%# 1.0@bugzilla.org %]
+[%# The contents of this file are subject to the Mozilla Public
+  # License Version 1.1 (the "License"); you may not use this file
+  # except in compliance with the License. You may obtain a copy of
+  # the License at http://www.mozilla.org/MPL/
+  #
+  # Software distributed under the License is distributed on an "AS
+  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+  # implied. See the License for the specific language governing
+  # rights and limitations under the License.
+  #
+  # The Original Code is the Bugzilla Bug Tracking System.
+  #
+  # The Initial Developer of the Original Code is Mozilla Corporation.
+  # Portions created by Mozilla are Copyright (C) 2008 Mozilla
+  # Corporation. All Rights Reserved.
+  #
+  # Contributor(s): Mark Smith <mark@mozilla.com>
+  #                 Reed Loden <reed@mozilla.com>
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% PROCESS global/header.html.tmpl
+   title = "Mozilla Corporation Legal Requests"
+   style_urls = [ 'skins/standard/attachment.css' ]
+   javascript_urls = [ 'js/attachment.js', 'js/field.js' ]
+   yui = [ 'autocomplete' ]
+%]
+
+[% IF user.in_group("mozilla-corporation-confidential")
+   OR user.in_group("mozilla-messaging-confidential") %]
+
+<div style='text-align: center; width: 98%; font-size: 2em; font-weight: bold; margin: 10px;'>MoLegal</div>
+
+<p><strong>Welcome to MoLegal.</strong>  If you need legal assistance please complete the form below.  To best service
+your request, it is essential that you give us complete information so we can respond
+properly and in a timely fashion.  Please use this form only for requests for legal
+assistance related to the Mozilla Corporation.  If you’ve been arrested, do not use
+this form or contact us.</p>
+
+<p>Process:</p>
+
+<ol><li>Complete and submit request below.</li>
+    <li>Your request will be reviewed and assigned to the appropriate legal service provider as necessary.</li>
+    <li>We will contact you to confirm receipt, gather any additional information, and agree on a completion timeline.</li>
+</ol>
+ 
+<p>These requests will only be visible internally and in all cases and only to the
+person who submitted the request and any persons designated in the CC line.</p>
+
+<p><strong>All Submissions, And Information Provided In Response To This Request,
+Are Confidential And Subject To The Attorney-Client Privilege And Work Product Doctrine.</strong></p>
+
+<script type="text/javascript">
+function trySubmit() {
+  var out = 'description\r\n\r\n--- First Response:\r\nfirst_response\r\n\r\n--- First Response Timeframe:\r\nfirst_resp_time\r\n\r\n' +
+            '--- Business Objective:\r\nbusiness_objective\r\n\r\n--- Other Party:\r\nother_party';
+
+  out = out.replace( /description/, document.getElementById('ncomment').value );
+  out = out.replace( /first_response/, document.getElementById('firstresp').value );
+  out = out.replace( /first_resp_time/, document.getElementById('firstrespwhen').value );
+  out = out.replace( /business_objective/, document.getElementById('busobj').value );
+  out = out.replace( /other_party/, document.getElementById('otherparty').value );
+
+  document.getElementById('comment').value = out;
+
+  return true;
+}
+</script>
+
+<form method="post" action="post_bug.cgi" id="legalRequestForm" enctype="multipart/form-data"
+      onSubmit="return trySubmit();">
+
+        <input type="hidden" name="product" value="Legal">
+        <input type="hidden" name="rep_platform" value="All">
+        <input type="hidden" name="op_sys" value="Other">
+        <input type="hidden" name="priority" value="--">
+        <input type="hidden" name="version" value="unspecified">
+<input type="hidden" name="comment" id="comment" value="">
+
+<table>
+
+<tr>
+  <td align="right"><strong>Request Type:</strong></td>
+  <td>
+    <select name="component">
+      [%- FOREACH c = product.components %]
+        [% NEXT IF NOT c.is_active %]
+        <option value="[% c.name FILTER html %]"
+          [% " selected=\"selected\"" IF c.name == "General" %]>
+          [% c.name FILTER html -%]
+        </option>
+      [%- END %]
+    </select>
+  </td>
+</tr>
+
+<tr>
+  <td align="right">
+    <strong>Urgency: </strong>
+  </td>
+  <td>
+    <select id="bug_severity" name="bug_severity">
+      <option value="blocker">Immediately - Don't leave the office, don't sleep until this is done (use with caution!)</option>
+      <option value="critical">A few days timeframe - critical priority</option>
+      <option value="major">One week timeframe - high priority</option>
+      <option value="normal">Two weeks timeframe - medium priority</option>
+      <option value="minor" selected="selected">One month timeframe - low priority</option>
+    </select>
+  </td>
+</tr>
+
+<tr>
+  <td align="right"><strong>First Response:</strong></td>
+  <td>
+<em>If your request is a project with numerous milestones or stages, please describe the first task you would like to see completed.</em><br>
+    <textarea id="firstresp" name="firstresp" cols="80" rows="3"></textarea><br />
+    <select id="firstrespwhen" name="firstrespwhen">
+      <option value="24 hours">Urgent!  Please do this within 24 hours!</option>
+      <option value="Few days">Important, but I can wait a few days for this.</option>
+      <option value="One week">Sometime within the next week is fine.</option>
+      <option value="Few weeks" selected="selected">Anytime in the next few weeks would be acceptable.</option>
+    </select>
+  </td>
+</tr>
+
+    <tr>
+      <td align="right"><strong>Summary:</strong></td>
+      <td colspan="3">
+        <input name="short_desc" size="60" value="[% short_desc FILTER html %]">
+      </td>
+    </tr>
+
+    <tr>
+      <td align="right"><strong>CC&nbsp;(optional):</strong></td>
+      <td colspan="3">
+        [% INCLUDE global/userselect.html.tmpl
+           id => "cc"
+           name => "cc"
+           value => cc
+           size => 60
+           multiple => 5
+        %]
+      </td>
+    </tr>
+
+<tr>
+  <td align="right"><strong>Name of Other Party:</strong></td>
+  <td>
+<em>If applicable, include full legal entity name, address, and any other relevant contact information.</em><br>
+    <textarea id="otherparty" name="otherparty" rows="3" cols="80"></textarea>
+  </td>
+</tr>
+
+<tr>
+  <td align="right"><strong>Business Objective:</strong></td>
+  <td>
+    <input type="text" name="busobj" id="busobj" value="" size="60" />
+  </td>
+</tr>
+
+    <tr><td align="right" valign="top"><strong>Description:</strong></td>
+      <td colspan="3">
+<em>Describe your question, what you want and/or provide any relevant deal terms, restrictions, or provisions that are applicable.</em>
+        <textarea id="ncomment" name="ncomment" rows="10" cols="80">
+          [% comment FILTER html %]</textarea>
+        <br>
+      </td>
+    </tr>
+
+    <tr>
+      <td align="right"><strong>URL&nbsp;(optional):</strong></td>
+      <td colspan="3">
+        <input name="bug_file_loc" size="60"
+               value="[% bug_file_loc FILTER html %]">
+      </td>
+    </tr>
+
+<tr><td colspan=3><br><br></td></tr>
+<tr><td></td><td colspan=2 style='background-color: #ddd;'><strong>Attachment (this is optional)</strong></td></tr>
+
+<tr>
+  <th><label for="data">File</label>:</th>
+  <td>
+    <em>Enter the path to the file on your computer.</em><br>
+    <input type="file" id="data" name="data" size="50">
+    <input type="hidden" name="contenttypemethod" value="autodetect" />
+  </td>
+</tr>
+<tr>
+  <th><label for="description">Description</label>:</th>
+  <td>
+    <em>Describe the attachment briefly.</em><br>
+    <input type="text" id="description" name="description" size="60" maxlength="200">
+  </td>
+</tr>
+
+  </table>
+
+  <br>
+
+  <input type="submit" id="commit" value="Submit Request">
+</form>
+
+<p>Thanks for contacting us.
+   You will be notified by email of any progress made in resolving your request.
+</p>
+
+[% ELSE %]
+
+<p>Sorry, you do not have access to this page.</p>
+
+[% END %]
+
+[% PROCESS global/footer.html.tmpl %]

@@ -1,0 +1,18 @@
+  <tr>
+    <th>Security:</th>
+    <td colspan="3">
+      [% sec_group = sec_groups.${product.name} || sec_groups._default %]
+
+      <input type="checkbox" name="groups" 
+             value="[% sec_group FILTER none %]" id="groups"
+        [% FOREACH g = group %]
+          [% IF g.name == sec_group %]
+            [% " checked=\"checked\"" IF g.checked %]
+          [% END %]
+        [% END %]
+      >
+      <label for="groups">Many users could be harmed by this security problem: 
+      it should be kept hidden from the public until it is resolved.</label>
+      <br><br>
+    </td>
+  </tr>

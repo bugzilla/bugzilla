@@ -1,0 +1,248 @@
+[%# 1.0@bugzilla.org %]
+[%# The contents of this file are subject to the Mozilla Public
+  # License Version 1.1 (the "License"); you may not use this file
+  # except in compliance with the License. You may obtain a copy of
+  # the License at http://www.mozilla.org/MPL/
+  #
+  # Software distributed under the License is distributed on an "AS
+  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+  # implied. See the License for the specific language governing
+  # rights and limitations under the License.
+  #
+  # The Original Code is the Bugzilla Bug Tracking System.
+  #
+  # The Initial Developer of the Original Code is Mozilla Corporation.
+  # Portions created by Mozilla are Copyright (C) 2008 Mozilla
+  # Corporation. All Rights Reserved.
+  #
+  # Contributor(s): Reed Loden <reed@mozilla.com>
+  #                 David Tran <dtran@mozilla.com>
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% PROCESS global/header.html.tmpl
+   title = "Mozilla Reps Budget Request Form"
+   style_urls = [ 'extensions/BMO/web/styles/moz_reps.css' ]
+   javascript_urls = [ 'extensions/BMO/web/js/form_validate.js',
+                       'js/util.js',
+                       'js/field.js' ]
+%]
+
+<p>These requests will only be visible to the person who submitted the request,
+any persons designated in the CC line, and authorized members of the Mozilla
+Rep team.</p>
+
+<script language="javascript" type="text/javascript">
+function trySubmit() {
+  var firstname = document.getElementById('firstname').value;
+  var lastname = document.getElementById('lastname').value;
+  var wikipage = document.getElementById('wikipage').value;
+  var shortdesc = 'Budget Request - ' + firstname + ' ' + lastname + ' - ' + wikipage; 
+  document.getElementById('short_desc').value = shortdesc;
+  return true;
+}
+
+function validateAndSubmit() {
+  var alert_text = '';
+  if(!isFilledOut('firstname')) alert_text += "Please enter your first name\n";
+  if(!isFilledOut('lastname')) alert_text += "Please enter your last name\n";
+  if(!isFilledOut('wikiprofile')) alert_text += "Please enter a wiki user profile.\n";
+  if(!isFilledOut('wikipage')) alert_text += "Please enter a wiki page address.\n";
+  if(!isFilledOut('successmeasure')) alert_text += "Please enter how you will measure the success of the event.\n";
+  if(!isFilledOut('budgettotal')) alert_text += "Please enter the total budget for the event.\n";
+  if(!isFilledOut('service1') || !isFilledOut('cost1')) alert_text += "Please enter at least one service and cost value.\n";
+  if(!isFilledOut('metric1') || !isFilledOut('success1')) alert_text += "Please enter at least one metric and success scenario.\n";
+
+  //Everything required is filled out..try to submit the form!
+  if(alert_text == '') {
+    return trySubmit();
+  }
+
+  //alert text, stay here on the pagee
+  alert(alert_text);
+  return false;
+}
+
+function togglePaymentInfo (e) {
+  var div = document.getElementById('paymentinfo');
+  if (e.checked == true) {
+    div.style.display = 'block';
+  }
+  else {
+    div.style.display = 'none';
+  }
+}
+
+</script>
+
+<h1>Mozilla Reps - Budget Request Form</h1>
+
+<form method="post" action="post_bug.cgi" id="swagRequestForm" enctype="multipart/form-data"
+      onSubmit="return validateAndSubmit();">
+
+  <input type="hidden" name="format" value="remo-budget">
+  <input type="hidden" name="product" value="Mozilla Reps">
+  <input type="hidden" name="component" value="Budget Requests">
+  <input type="hidden" name="rep_platform" value="All">
+  <input type="hidden" name="op_sys" value="Other">
+  <input type="hidden" name="priority" value="--">
+  <input type="hidden" name="version" value="unspecified">
+  <input type="hidden" name="bug_severity" id="bug_severity" value="normal">
+  <input type="hidden" name="short_desc" id="short_desc" value="">
+  <input type="hidden" name="groups" value="mozilla-reps">
+
+<table id="reps-form">
+
+<tr class="odd">
+  <td><strong>First Name: <span style="color: red;">*</span></strong></td>
+  <td>
+    <input type="text" name="firstname" id="firstname" value="" size="40" placeholder="John">
+  </td>
+</tr>
+
+<tr class="even">
+  <td><strong>Last Name: <span style="color: red;">*</span></strong></td>
+  <td>
+    <input type="text" name="lastname" id="lastname" value="" size="40" placeholder="Doe">
+  </td>
+</tr>
+
+<tr class="odd">
+  <td><strong>Wiki user profile:<span style="color: red;">*</span></strong></td>
+  <td>
+    <input type="text" name="wikiprofile" id="wikiprofile" value="" size="40" placeholder="JohnDoe">
+  </td>
+</tr>
+
+<tr class="even">
+  <td><strong>Event wiki page: <span style="color: red;">*</span></strong></td>
+  <td>
+    <input type="text" name="wikipage" id="wikipage" value="" size="40" placeholder="http://wiki.mozilla.org/JohnDoe">
+  </td>
+</tr>
+
+<tr class="odd">
+  <td><!--spacer-->&nbsp;</td>
+  <td><!--spacer-->&nbsp;</td>
+</tr>
+
+<tr class="even">
+  <td colspan="2">
+    <strong>Is advance payment needed?</strong>
+    <input type="checkbox" name="advancepayment" id="advancepayment" value="1"
+           onchange="togglePaymentInfo(this);">
+    <div id="paymentinfo" style="display:none;">
+      Please send an email to William at mozilla.com with all the information below:<br>
+      <br>
+      Payment information:<br>
+      Bank name:<br>
+      Bank address: <br> 
+      IBAN:<br>
+      Swift code/BIC:<br>
+      Additional bank details (if necessary):
+    </div>
+  </td>
+</tr>
+
+<tr class="odd">
+  <td><!--spacer-->&nbsp;</td>
+  <td><!--spacer-->&nbsp;</td>
+</tr>
+
+<tr class="even">
+  <td colspan="2">
+    <strong>Budget breakdown:</strong><br>
+    Total amount requested in $USD:  <span style="color: red;">*</span>
+    <input type="text" name="budgettotal" id="budgettotal" value="" size="40"><br>
+    Costs per service:
+    <table>
+    <tr>
+      <td>Service 1:  <span style="color: red;">*</span></td>
+      <td><input type="text" id="service1" name="service1" size="30"></td>
+      <td>Cost 1: <span style="color: red;">*</span></td>
+      <td><input type="text" id="cost1" name="cost1" size="30"></td>
+    </tr>
+    <tr>
+      <td>Service 2:</td>                        
+      <td><input type="text" id="service2" name="service2" size="30"></td>                        
+      <td>Cost 2:</td>                  
+      <td><input type="text" id="cost2" name="cost2" size="30"></td>
+    </tr>
+    <tr>
+      <td>Service 3:</td>                        
+      <td><input type="text" id="service3" name="service3" size="30"></td>                        
+      <td>Cost 3:</td>                  
+      <td><input type="text" id="cost3" name="cost3" size="30"></td>
+    </tr>
+    <tr>
+      <td>Service 4:</td>                        
+      <td><input type="text" id="service4" name="service4" size="30"></td>                        
+      <td>Cost 4:</td>                  
+      <td><input type="text" id="cost4" name="cost4" size="30"></td>
+    </tr>
+    <tr>
+      <td>Service 5:</td>                        
+      <td><input type="text" id="service5" name="service5" size="30"></td>                        
+      <td>Cost 5:</td>                  
+      <td><input type="text" id="cost5" name="cost5" size="30"></td>
+    </tr>
+    </table>
+    Additional costs:<br>
+    <textarea id="costadditional" name="costadditional" rows="5" cols="50"></textarea>
+  </td>
+</tr>
+
+<tr class="odd">
+  <td><!--spacer-->&nbsp;</td>
+  <td><!--spacer-->&nbsp;</td>
+</tr>
+
+<tr class="even">
+  <td colspan="2">
+    <strong>Success measurement:</strong><br>
+    How will the event help push the Mozilla project forward? 
+    <span style="color: red;">*</span><br>
+    <textarea id="successmeasure" name="successmeasure" rows="5" cols="50"></textarea>
+    <table>
+    </tr>
+      <td>Metric 1: <span style="color: red;">*</span></td>
+      <td><input type="text" id="metric1" name="metric1" size="30">
+      <td>Success scenario: <span style="color: red;">*</span></td>
+      <td><input type="text" id="success1" name="success1" size="30">
+    </tr>
+    <tr>
+      <td>Metric 2:</td>                         
+      <td><input type="text" id="metric2" name="metric2" size="30">
+      <td>Success scenario:</td> 
+      <td><input type="text" id="success2" name="success2" size="30">
+    </tr>
+    <tr>
+      <td>Metric 3:</td>                         
+      <td><input type="text" id="metric3" name="metric3" size="30">
+      <td>Success scenario:</td> 
+      <td><input type="text" id="success3" name="success3" size="30">
+    </tr>
+    </table>
+    Additional information:<br>
+    <textarea id="successadditional" name="successadditional" rows="5" cols="50"></textarea>
+  </td>
+</tr>
+
+<tr class="odd">
+  <td>&nbsp;</td>
+  <td align="right">
+    <input type="submit" id="commit" value="Submit Request">
+  </td>
+</tr>
+
+</table>
+
+</form>
+
+<p>
+  <strong><span style="color: red;">*</span></strong> - Required field<br />
+  Thanks for contacting us.
+</p>
+
+[% PROCESS global/footer.html.tmpl %]

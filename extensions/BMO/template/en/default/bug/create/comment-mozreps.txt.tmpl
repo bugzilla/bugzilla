@@ -1,0 +1,81 @@
+[%# The contents of this file are subject to the Mozilla Public
+  # License Version 1.1 (the "License"); you may not use this file
+  # except in compliance with the License. You may obtain a copy of
+  # the License at http://www.mozilla.org/MPL/
+  #
+  # Software distributed under the License is distributed on an "AS
+  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+  # implied. See the License for the specific language governing
+  # rights and limitations under the License.
+  #
+  # The Original Code is the BMO Bugzilla Extension.
+  #
+  # The Initial Developer of the Original Code is the Mozilla Foundation
+  # Portions created by the Initial Developers are Copyright (C) 2011 the
+  # Initial Developer. All Rights Reserved.
+  #
+  # Contributor(s): Byron Jones <glob@mozilla.com>
+  #%]
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+First Name:
+[%+ cgi.param('first_name') %]
+
+Last Name:
+[%+ cgi.param('last_name') %]
+
+Under 18 years old:
+[%+ IF cgi.param('underage') %]Yes[% ELSE %]No[% END %]
+
+Sex:
+[%+ cgi.param('sex') %]
+
+City:
+[%+ cgi.param('city') %]
+
+Country:
+[%+ cgi.param('country') %]
+
+Local Community:
+[% IF cgi.param('community') %]
+[%+ cgi.param('community') %]
+[% ELSE %]
+-
+[% END %]
+
+IM:
+[% IF cgi.param('im') %]
+[%+ cgi.param('im') %]
+[% ELSE %]
+-
+[% END %]
+
+References:
+[% IF cgi.param('references') %]
+[%+ cgi.param('references') %]
+[% ELSE %]
+-
+[% END %]
+
+Currently Involved with Mozilla:
+[% IF cgi.param('involved') %]
+[%+ cgi.param('involved') %]
+[% ELSE %]
+-
+[% END %]
+
+Languages Spoken:
+[%+ cgi.param('languages') %]
+
+How did you lean about Mozilla Reps:
+[%+ cgi.param('learn') %]
+
+What motivates you most about joining Mozilla Reps:
+[%+ cgi.param('motivation') %]
+
+Comments:
+[% IF cgi.param('comments') %]
+[%+ cgi.param('comments') %]
+[% ELSE %]
+-
+[% END %]

@@ -45,6 +45,11 @@ sub compile_file {
     # Bugzilla::Install::CPAN.)
     local @INC = @INC;
 
+    if ($file =~ /extensions/) {
+        skip "$file: extensions not tested",  1;
+        return;
+    }
+
     if ($file =~ s/\.pm$//) {
         $file =~ s{/}{::}g;
         use_ok($file);

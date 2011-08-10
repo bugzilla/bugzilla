@@ -1,0 +1,183 @@
+[%# The contents of this file are subject to the Mozilla Public
+  # License Version 1.1 (the "License"); you may not use this file
+  # except in compliance with the License. You may obtain a copy of
+  # the License at http://www.mozilla.org/MPL/
+  #
+  # Software distributed under the License is distributed on an "AS
+  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+  # implied. See the License for the specific language governing
+  # rights and limitations under the License.
+  #
+  # The Original Code is the Bugzilla Bug Tracking System.
+  #
+  # The Initial Developer of the Original Code is Netscape Communications
+  # Corporation. Portions created by Netscape are
+  # Copyright (C) 1998 Netscape Communications Corporation. All
+  # Rights Reserved.
+  #
+  # Contributor(s): Gervase Markham <gerv@gerv.net>
+  #%]
+
+[%# INTERFACE:
+  # classifications: array of hashes, with an 'object' key representing a
+  #                  classification object and 'products' the list of
+  #                  product objects the user can enter bugs into.
+  # target:   the script that displays this template.
+  # cloned_bug_id: ID of the bug being cloned.
+  # format:   the desired format to display the target.
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% IF target == "enter_bug.cgi" %]
+  [% title = "Enter $terms.Bug" %]
+  [% h2 = BLOCK %]First, you must pick a product on which to enter [% terms.abug %]. [% END %]
+[% ELSIF target == "describecomponents.cgi" %]
+  [% title = "Browse" %]
+  [% h2 = "Please specify the product whose components you want described." %]
+[% END %]
+
+[% DEFAULT title = "Choose a Product" %]
+[% PROCESS global/header.html.tmpl %]
+
+<center>
+<hr>
+<p><span style="font-family: verdana,helvetica;">Looking for technical support or help getting your site to work with Mozilla? <a href="http://www.mozilla.org/support/">Visit the
+mozilla.org support page</a> before filing [% terms.bugs %].</span></p>
+<hr>
+</center>
+
+<br>
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+[% SET classification = cgi.param('classification') %]
+[% IF NOT ((cgi.param("full")) OR (user.settings.product_chooser.value == 'full_product_chooser')) %]
+[% IF target == "enter_bug.cgi" %]
+<h2 align="center">Which product is affected by the problem you would like to report?</h2>
+[% END %]
+<table align="center" border="0" width="600" cellpadding="5" cellspacing="0">
+[% INCLUDE easyproduct
+   name="Core"
+   icon="dino.png"
+%]
+[% INCLUDE easyproduct
+   name="Firefox"
+   icon="firefox.png"
+%]
+[% INCLUDE easyproduct
+   name="Thunderbird"
+   icon="thunderbird.png"
+%]
+[% INCLUDE easyproduct
+   name="Calendar"
+   icon="sunbird.png"
+%]
+[% INCLUDE easyproduct
+   name="Camino"
+   icon="camino.png"
+%]
+[% INCLUDE easyproduct
+   name="SeaMonkey"
+   icon="seamonkey.png"
+%]
+[% INCLUDE easyproduct
+   name="Fennec"
+   icon="fennec.png"
+%]
+[% INCLUDE easyproduct
+   name="Mozilla Localizations"
+   icon="dino.png"
+%]
+[% INCLUDE easyproduct
+   name="Mozilla Labs"
+   icon="labs.png"
+%]
+[% INCLUDE easyproduct
+   name="Mozilla Services"
+   icon="dino.png"
+%]
+<tr>
+   <td><a href="[% target FILTER uri i%]?full=1
+             [%- IF cloned_bug_id %]&amp;cloned_bug_id=[% cloned_bug_id FILTER uri %][% END -%]
+             [%- IF classification %]&amp;classification=[% classification FILTER uri %][% END -%]
+             [%- IF format %]&amp;format=[% format FILTER uri %][% END %]">
+             <img src="extensions/BMO/web/producticons/other.png" height="64" width="64" border="0"></a></td>
+   <td><h2 align="left" style="margin-bottom: 0px;"><a href="[% target FILTER uri i%]?full=1
+             [%- IF cloned_bug_id %]&amp;cloned_bug_id=[% cloned_bug_id FILTER uri %][% END -%]
+             [%- IF classification %]&amp;classification=[% classification FILTER uri %][% END -%]
+             [%- IF format %]&amp;format=[% format FILTER uri %][% END %]">
+             Other Products</a></h2>
+       <p style="margin-top: 0px;">Other Mozilla products which aren't listed here</p>
+   </td>
+</tr>
+</table>
+[% ELSE %]
+<h2>[% h2 FILTER html %]</h2>
+
+<table>
+
+[% FOREACH c = classifications %]
+  [% IF c.object %]
+    <tr>
+      <td align="right"><h2>[% c.object.name FILTER html %]</h2></td>
+      <td><strong>[%+ c.object.description FILTER html_light %]</strong></td>
+    </tr>
+  [% END %]
+
+  [% FOREACH p = c.products %]
+    <tr>
+      <th align="right" valign="top">
+      [% IF p.name == "Mozilla PR" AND target == "enter_bug.cgi" AND NOT format AND NOT cgi.param("debug") %]
+        <a href="[% target FILTER uri %]?product=[% p.name FILTER uri -%]
+              [%- IF cloned_bug_id %]&amp;cloned_bug_id=[% cloned_bug_id FILTER uri %][% END %]&amp;format=mozpr">
+        [% p.name FILTER html FILTER no_break %]</a>:&nbsp;
+      [% ELSE %]
+        <a href="[% target FILTER uri %]?product=[% p.name FILTER uri -%]
+              [%- IF cloned_bug_id %]&amp;cloned_bug_id=[% cloned_bug_id FILTER uri %][% END -%]
+              [%- IF format %]&amp;format=[% format FILTER uri %][% END %]">
+        [% p.name FILTER html FILTER no_break %]</a>:&nbsp;
+      [% END %]
+      </th>
+      <td valign="top">[% p.description FILTER html_light %]</td>
+    </tr>
+  [% END %]
+[% END %]
+
+</table>
+
+<br>
+[% IF target == "enter_bug.cgi" AND user.settings.product_chooser.value != 'full_product_chooser' %]
+<p align="center">You can choose to get this screen by default when you click "New [% terms.Bug %]" by changing your <a href="userprefs.cgi?tab=settings">preferences</a>.</p>
+[% END %]
+[% END %]
+<br>
+
+[% PROCESS global/footer.html.tmpl %]
+
+[%###########################################################################%]
+[%# Block for "easy" product sections                                       #%]
+[%###########################################################################%]
+
+[% BLOCK easyproduct %]
+  [% FOREACH c = classifications %]
+    [% FOREACH p = c.products %]
+      [% IF p.name == name %]
+        <tr>
+          <td><a href="[% target FILTER uri %]?product=[% p.name FILTER uri %]
+                  [%- IF cloned_bug_id %]&amp;cloned_bug_id=[% cloned_bug_id FILTER uri %][% END -%]
+                  [%- IF format %]&amp;format=[% format FILTER uri %][% END %]">
+              <img src="extensions/BMO/web/producticons/[% icon FILTER uri %]" height="64" width="64" border="0"></a></td>
+          <td><h2 align="left" style="margin-bottom: 0px"><a href="[% target FILTER uri %]?product=[% p.name FILTER uri %]
+                  [%- IF cloned_bug_id %]&amp;cloned_bug_id=[% cloned_bug_id FILTER uri %][% END -%]
+                  [%- IF format %]&amp;format=[% format FILTER uri %][% END %]">
+              [% p.name FILTER html FILTER no_break %]</a>:</h2>
+              [% IF p.description %]
+                <p style="margin-top: 0px;">[% p.description FILTER html_light %]</p>
+              [% END %]
+          </td>
+        </tr>
+      [% LAST %]
+      [% END %]
+    [% END %]
+  [% END %]
+[% END %]

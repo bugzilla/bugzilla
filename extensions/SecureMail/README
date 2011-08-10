@@ -1,0 +1,8 @@
+This extension should be placed in a directory called "SecureMail" in the
+Bugzilla extensions/ directory. After installing it, remove the file
+"disabled" (if present) and then run checksetup.pl.
+
+Instructions for user key formats:
+
+S/MIME Keys must be in PEM format - i.e. Base64-encoded text, with BEGIN CERTIFICATE
+PGP keys must be ASCII-armoured - i.e. text, with BEGIN PGP PUBLIC KEY.

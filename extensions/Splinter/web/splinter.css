@@ -1,0 +1,402 @@
+textarea:focus {
+    background: #f7f2d0;
+}
+
+#note {
+    background: #ffee88;
+    padding: 0.5em;
+}
+
+#error {
+    border: 1px solid black;
+    padding: 0.5em;
+    color: #bb0000;
+}
+
+#chooseReview {
+    margin-top: 1em;
+}
+
+.review-draft .review-desc, .review-draft .review-attachment {
+    font-weight: bold;
+}
+
+#bugInfo, #attachInfo {
+    margin-top: 0.5em;
+    margin-bottom: 1em;
+}
+
+#helpful-links {
+    float:right;
+}
+
+#chooseAttachment table {
+    margin-bottom: 1em;
+}
+
+.attachment-draft .attachment-id, .attachment-draft .attachment-desc {
+    font-weight: bold;
+}
+
+.attachment-obsolete .attachment-desc {
+    text-decoration: line-through ;
+}
+
+#navigation {
+    color: #888888;
+}
+
+.navigation-link {
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.navigation-link-selected {
+    color: black;
+}
+
+#haveDraftNotice {
+    float: right;
+    color: #bb0000;
+    font-weight: bold;
+}
+
+#overview {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+#patchIntro {
+    border: 1px solid #888888;
+    font-size: 90%;
+    margin-bottom: 1em;
+    padding: 0.5em;
+}
+
+.reviewer-box {
+    padding: 0.5em;
+}
+
+.reviewer-0 .reviewer-box {
+    border-left: 10px solid green;
+}
+
+.reviewer-1 .reviewer-box {
+    border-left: 10px solid blue;
+}
+
+.reviewer-2 .reviewer-box {
+    border-left: 10px solid red;
+}
+
+.reviewer-3 .reviewer-box {
+    border-left: 10px solid yellow;
+}
+
+.reviewer-4 .reviewer-box {
+    border-left: 10px solid purple;
+}
+
+.reviewer-5 .reviewer-box {
+    border-left: 10px solid orange;
+}
+
+.reviewer {
+    float: left;
+}
+
+.review-date {
+    float: right;
+}
+
+.review-info-bottom {
+    clear: both;
+}
+
+.review {
+    border: 1px solid black;
+    font-size: 90%;
+    margin-top: 0.25em;
+    margin-bottom: 1em;
+}
+
+.review-intro {
+    margin-top: 0.5em;
+}
+
+.review-patch-file {
+    margin-top: 0.5em;
+    font-weight: bold;
+}
+
+.review-patch-comment {
+    border: 1px solid white;
+    padding: 1px;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+    cursor: pointer;
+}
+
+.review-patch-comment:hover {
+    border: 1px solid #8888ff;
+}
+
+.review-patch-comment .file-table {
+    width: 50%;
+}
+
+.review-patch-comment .file-table-changed {
+    width: 100%;
+}
+
+.review-patch-comment-separator {
+    margin: 0.5em;
+    border-bottom: 1px solid #888888;
+}
+
+div.review-patch-comment-text {
+    margin-left: 2em;
+}
+
+.review-patch-comment .reviewer-box {
+    border-left-width: 4px;
+}
+
+#restored {
+    color: #bb0000;
+    margin-bottom: 0.5em;
+}
+
+#myCommentFrame {
+    margin-top: 0.25em;
+    position: relative;
+    border: 1px solid black;
+    padding-right: 8px; /* compensate for child's padding */
+}
+
+#myComment {
+    border: 0px solid black;
+    padding: 4px;
+    margin: 0px;
+    width: 100%;
+    height: 10em;
+}
+
+#emptyCommentNotice {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    color: #888888;
+}
+
+#myPatchComments {
+    border: 1px solid black;
+    border-top-width: 0px;
+    padding: 0.5em;
+    font-size: 90%;
+}
+
+#buttonBox {
+    margin-top: 0.5em;
+    float: right;
+}
+
+.clear {
+    clear: both;
+}
+
+/* Used for IE <= 7, overridden for modern browsers */
+.pre-wrap {
+    white-space: pre;
+    word-wrap: break-word;
+}
+
+.pre-wrap {
+    white-space: pre-wrap;
+}
+
+#files {
+   position: relative;
+   margin-top: 0.5em;
+   margin-bottom: 0.5em;
+}
+
+.file-label {
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+}
+
+.file-label-name {
+    font-weight: bold;
+}
+
+.hunk-header td {
+    background: #ddccbb;
+    font-family: "DejaVu Sans Mono", monospace;
+    font-size: 80%;
+}
+
+.hunk-cell {
+    padding: 2px;
+}
+
+.old-line, .new-line {
+    font-family: "DejaVu Sans Mono", monospace;
+    font-size: 80%;
+    white-space: pre-wrap;      /* CSS 3 & 2.1 */
+    white-space: -moz-pre-wrap; /* Gecko */
+    white-space: -pre-wrap;     /* Opera 4-6 */
+    white-space: -o-pre-wrap;   /* Opera 7 */
+}
+
+.removed-line {
+    background: #ffccaa;;
+}
+
+.added-line {
+    background: #bbffbb;
+}
+
+.changed-line {
+    background: #aaccff;
+}
+
+.file-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.line-number {
+    font-size: 80%;
+    text-align: right;
+    padding-right: 0.25em;
+    color: #888888;
+    -moz-user-select: none;
+}
+
+.line-number-column {
+    width: 2em;
+}
+
+.file-table-wide-numbers .line-number-column {
+    width: 3em;
+}
+
+.middle-column {
+    width: 3px;
+}
+
+.file-table-changed .comment-removed {
+    width: 50%;
+    float: left;
+}
+
+.file-table-changed .comment-changed {
+    margin-left: 25%;
+    margin-right: 25%;
+    clear: both;
+}
+
+.file-table-changed .comment-added {
+    width: 50%;
+    float: right;
+}
+
+.comment-frame {
+    border: 1px solid black;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    margin-left: 2em;
+}
+
+.file-table-wide-numbers .comment-frame {
+    margin-left: 3em;
+}
+
+.comment .review-info {
+    margin-top: 0.5em;
+    font-size: 80%;
+}
+
+#commentTextFrame {
+    border: 1px solid #ffeeaa;
+    margin-bottom: 5px;
+}
+
+#commentEditor.focused #commentTextFrame {
+    border: 1px solid #8888bb;
+}
+
+#commentEditorInner {
+    background: #ffeeaa;
+    padding: 0.5em;
+    margin-left: 2em;
+}
+
+.file-table-wide-numbers #commentEditorInner {
+    margin-left: 3em;
+}
+
+#commentEditor textarea {
+    width: 100%;
+    height: 10em;
+    border: 0px;
+}
+
+#commentEditor textarea:focus {
+    background: white;
+}
+
+#commentEditorLeftButtons {
+    float: left;
+}
+
+#commentEditorLeftButtons input {
+    margin-right: 0.5em;
+}
+
+#commentEditorRightButtons {
+    float: right;
+}
+
+.comment-separator-removed {
+    clear: left;
+}
+
+.comment-separator-added {
+    clear: right;
+}
+
+#saveDraftNotice {
+    border: 1px solid black;
+    padding: 0.5em;
+    background: #ffccaa;
+    position: fixed;
+    bottom: 0px;
+    right: 0px;
+}
+
+#credits {
+    font-size: 80%;
+    color: #888888;
+    padding: 10px;
+    text-align: center;
+}
+
+#quickHelpShow a, #quickHelpContent a {
+    text-decoration: none;
+}
+
+#quickHelpContent {
+    border: 1px solid #000;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    padding-left: 0.5em;
+    margin-bottom: 10px;
+}
+
+.file-label-collapse {
+    padding-right: 5px;
+    font-family: monospace;
+}

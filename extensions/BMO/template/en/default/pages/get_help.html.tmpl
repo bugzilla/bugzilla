@@ -1,0 +1,42 @@
+[%# The contents of this file are subject to the Mozilla Public
+  # License Version 1.1 (the "License"); you may not use this file
+  # except in compliance with the License. You may obtain a copy of
+  # the License at http://www.mozilla.org/MPL/
+  #
+  # Software distributed under the License is distributed on an "AS
+  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+  # implied. See the License for the specific language governing
+  # rights and limitations under the License.
+  #
+  # The Original Code is the Bugzilla Bug Tracking System.
+  #
+  # The Initial Developer of the Original Code is Netscape Communications
+  # Corporation. Portions created by Netscape are
+  # Copyright (C) 1998 Netscape Communications Corporation. All
+  # Rights Reserved.
+  #
+  # Contributor(s): David Miller <justdave@bugzilla.org>
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+[% INCLUDE global/header.html.tmpl title = "Get Help with Mozilla Products" %]
+
+<div id="steps">     
+<h2>Got a problem?</h2> 
+ 
+<ul> 
+<li><a href="http://www.mozilla.org/support/">Get help with your mozilla.org product</a></li> 
+<li><a href="http://hendrix.mozilla.org/">Leave quick feedback</a></li> 
+<li><a href="http://input.mozilla.com/feedback">Report a broken website</a></li> 
+<li><a href="enter_bug.cgi">Report a [% terms.bug %]</a> - latest release only 
+    [% IF NOT user.id %] 
+      (you'll need an  
+      <a href="createaccount.cgi">account</a>) 
+    [% END %] 
+</li> 
+</ul>     
+</div>
+
+<br>
+
+[% INCLUDE global/footer.html.tmpl %]

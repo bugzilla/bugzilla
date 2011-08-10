@@ -1,0 +1,64 @@
+[%# The contents of this file are subject to the Mozilla Public
+  # License Version 1.1 (the "License"); you may not use this file
+  # except in compliance with the License. You may obtain a copy of
+  # the License at http://www.mozilla.org/MPL/
+  #
+  # Software distributed under the License is distributed on an "AS
+  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+  # implied. See the License for the specific language governing
+  # rights and limitations under the License.
+  #
+  # The Original Code is the Bugzilla Bug Tracking System.
+  #
+  # The Initial Developer of the Original Code is Netscape Communications
+  # Corporation. Portions created by Netscape are
+  # Copyright (C) 1998 Netscape Communications Corporation. All
+  # Rights Reserved.
+  #
+  # Contributor(s): Gervase Markham <gerv@gerv.net>
+  #%]
+[%# INTERFACE:
+  # This template has no interface.
+  #
+  # Form variables from a bug submission (i.e. the fields on a template from
+  # enter_bug.cgi) can be access via Bugzilla.cgi.param. It can be used to
+  # pull out various custom fields and format an initial Description entry
+  # from them.
+  #%]  
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+
+Requester info:
+
+Requester: [% cgi.param('firstname') %] [%+ cgi.param('lastname') %] 
+Wiki user profile: [% cgi.param('wikiprofile') %]
+Event wiki page: [% cgi.param('wikipage') %]
+Advance payment needed: [% IF cgi.param('advancepayment') %]Yes[% ELSE %]No[% END %]
+
+Budget breakdown: 
+
+Total amount requested in $USD: [% cgi.param('budgettotal') %]
+Costs per service:
+Service 1: [% cgi.param('service1') %]  Cost: [% cgi.param('cost1') %]
+Service 2: [% cgi.param('service2') %]  Cost: [% cgi.param('cost2') %]
+Service 3: [% cgi.param('service3') %]  Cost: [% cgi.param('cost3') %]
+Service 4: [% cgi.param('service4') %]  Cost: [% cgi.param('cost4') %]
+Service 5: [% cgi.param('service5') %]  Cost: [% cgi.param('cost5') %]
+
+Additional costs: (add comment box)
+[% cgi.param('costadditional') %]
+
+Success measurement: 
+
+How will the event help push the Mozilla project forward?
+[%+ cgi.param('successmeasure') %]
+
+Metric 1: [% cgi.param('metric1') %]  Success scenario: [% cgi.param('success1') %]
+Metric 2: [% cgi.param('metric2') %]  Success scenario: [% cgi.param('success2') %]
+Metric 3: [% cgi.param('metric3') %]  Success scenario: [% cgi.param('success3') %]
+
+Additional information:
+[%+ cgi.param('successadditional') %]
+
+[%+ cgi.param("comment") IF cgi.param("comment") %]
+

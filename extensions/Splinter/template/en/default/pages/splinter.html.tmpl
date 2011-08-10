@@ -1,0 +1,264 @@
+[%#
+  # The contents of this file are subject to the Mozilla Public
+  # License Version 1.1 (the "License"); you may not use this file
+  # except in compliance with the License. You may obtain a copy of
+  # the License at http://www.mozilla.org/MPL/
+  #
+  # Software distributed under the License is distributed on an "AS
+  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+  # implied. See the License for the specific language governing
+  # rights and limitations under the License.
+  #
+  # The Original Code is the Splinter Bugzilla Extension.
+  #
+  # The Initial Developer of the Original Code is Red Hat, Inc.
+  # Portions created by Red Hat, Inc. are Copyright (C) 2008
+  # Red Hat, Inc. All Rights Reserved.
+  #
+  # Contributor(s): Owen Taylor <otaylor@redhat.com>
+  #                 David Lawrence <dkl@mozilla.com>
+  #%]
+
+[% PROCESS global/header.html.tmpl
+  title = "Patch Review"
+  header = "Patch Review"
+  style_urls = [ "js/yui/assets/skins/sam/container.css",
+                 "js/yui/assets/skins/sam/button.css",
+                 "js/yui/assets/skins/sam/datatable.css",
+                 "extensions/Splinter/web/splinter.css" ]
+  javascript_urls = [ "js/yui/element/element-min.js",
+                      "js/yui/connection/connection-min.js",
+                      "js/yui/container/container-min.js",
+                      "js/yui/button/button-min.js", 
+                      "js/yui/json/json-min.js",
+                      "js/yui/datasource/datasource-min.js",
+                      "js/yui/datatable/datatable-min.js",
+                      "extensions/Splinter/web/splinter.js" ]
+%]
+
+[% can_edit = 0 %]
+
+<script type="text/javascript">
+  Splinter.configBase = '[% urlbase FILTER none %][% Param('splinter_base') FILTER js %]';
+  Splinter.configBugzillaUrl = '[% urlbase FILTER none %]';
+  Splinter.configHaveExtension = true;
+  Splinter.configHelp = '[% urlbase FILTER none %]page.cgi?id=splinter/help.html';
+  Splinter.configNote = '';
+
+  Splinter.configAttachmentStatuses = [
+  [% FOREACH status = attachment_statuses %]
+    '[% status FILTER js %]',
+  [% END %]
+  ];
+
+  Splinter.bugId = Splinter.Utils.isDigits('[% bug_id FILTER js %]') ? parseInt('[% bug_id FILTER js %]') : NaN;
+  Splinter.attachmentId = Splinter.Utils.isDigits('[% attach_id FILTER html %]') ? parseInt('[% attach_id FILTER js %]') : NaN;
+
+  if (!isNaN(Splinter.bugId)) {
+      var theBug = new Splinter.Bug.Bug();
+      theBug.id = parseInt('[% bug.id FILTER js %]');
+      theBug.token = '[% update_token FILTER js %]';
+      theBug.shortDesc = Splinter.Utils.strip('[% bug.short_desc FILTER js %]');
+      theBug.creationDate = Splinter.Bug.parseDate('[% bug.creation_ts FILTER time("%Y-%m-%d %T %z") FILTER js %]');
+      theBug.reporterEmail = Splinter.Utils.strip('[% bug.reporter.email FILTER js %]');
+      theBug.reporterName = Splinter.Utils.strip('[% bug.reporter.name FILTER js %]');
+  
+      [% FOREACH comment = bug.comments %]
+         var comment = new Splinter.Bug.Comment();
+         comment.whoName = Splinter.Utils.strip('[% comment.author.name FILTER js %]');
+         comment.whoEmail = Splinter.Utils.strip('[% comment.author.email FILTER js %]');
+         comment.date = Splinter.Bug.parseDate('[% comment.creation_ts FILTER time("%Y-%m-%d %T %z") FILTER js %]');
+         comment.text = '[% comment.thetext FILTER js %]';
+         theBug.comments.push(comment);
+      [% END %]
+
+      [% FOREACH attachment = bug.attachments %]
+         [% NEXT IF attachment.isprivate && !user.is_insider && attachment.attacher.id != user.id %]        
+         var attachid = parseInt('[% attachment.id FILTER js %]');
+         var attachment = new Splinter.Bug.Attachment('', attachid);
+         [% IF attachment.id == attach_id && attachment.ispatch %]
+           [% flag_types = attachment.flag_types %]
+           [% can_edit = attachment.validate_can_edit %]
+           attachment.data = '[% attach_data FILTER js %]';
+           attachment.token = '[% issue_hash_token([attachment.id, attachment.modification_time]) FILTER js %]';
+         [% END %]
+         attachment.description = Splinter.Utils.strip('[% attachment.description FILTER js %]');
+         attachment.filename = Splinter.Utils.strip('[% attachment.filename FILTER js %]');
+         attachment.contenttypeentry = Splinter.Utils.strip('[% attachment.contenttypeentry FILTER js %]');
+         attachment.date = Splinter.Bug.parseDate('[% attachment.attached FILTER time("%Y-%m-%d %T %z") FILTER js %]');
+         attachment.whoName = Splinter.Utils.strip('[% attachment.attacher.name FILTER js %]');
+         attachment.whoEmail = Splinter.Utils.strip('[% attachment.attacher.email FILTER js %]');
+         // attachment.status = Splinter.Utils.strip($(this).children('status').text());
+         // if (attachment.status == "")
+         //     attachment.status = null;
+         attachment.isPatch = [% attachment.ispatch ? 1 : 0 %];
+         attachment.isObsolete = [% attachment.isobsolete ? 1 : 0 %];
+         attachment.isPrivate = [% attachment.isprivate ? 1 : 0 %];
+         theBug.attachments.push(attachment);
+      [% END %]
+     
+      Splinter.theBug = theBug;
+  }
+</script>
+
+<!--[if lt IE 7]>
+<p style="border: 1px solid #880000; padding: 1em; background: #ffee88; font-size: 120%;">
+   Splinter Patch Review requires a modern browser, such as
+   <a href="http://www.firefox.com">Firefox</a>, for correct operation.
+</p>
+<![endif]-->
+
+<div id="helpful-links">
+  <a id="allReviewsLink" href="[% urlbase FILTER none %][% Param('splinter_base') FILTER js %]">
+    [reviews]</a>
+  <a id='helpLink' target='splinterHelp' 
+     href="[% urlbase FILTER none %]page.cgi?id=splinter/help.html">
+    [help]</a>
+</div>
+
+<div id="bugInfo" style="display: none;">
+  <b>[% terms.Bug %] <a id="bugLink"><span id="bugId"></span></a>:</b>
+  <span id="bugShortDesc"></span> -
+  <span id="bugReporter"></span> -
+  <span id="bugCreationDate"></span>
+</div>
+
+<div id="attachInfo" style="display:none;">
+  <b>Attachment <a id="attachLink"><span id="attachId"></span></a>:</b>
+  <span id="attachDesc"></span> -
+  <span id="attachCreator"></span> -
+  <span id="attachDate"></span>
+  [% IF feature_enabled('patch_viewer') %]
+    <a href="[% urlbase FILTER none %]attachment.cgi?id=[% attach_id FILTER uri %]&amp;action=diff"
+       target="_blank">[diff]</a>
+  [% END %]
+  <a href="[% urlbase FILTER none %]attachment.cgi?id=[% attach_id FILTER uri %]&amp;action=edit"
+     target="_blank">[details]</a>
+</div>
+
+<div id="error" style="display: none;"> </div>
+
+<div id="enterBug" style="display: none;">
+  [% terms.Bug %] to review:
+  <input id="enterBugInput" />
+  <input id="enterBugGo" type="button" value="Go" />
+  <div id="chooseReview" style="display: none;">
+    Drafts and published reviews:
+    <div id="chooseReviewTable"></div>
+  </div>
+</div>
+
+<div id="chooseAttachment" style="display: none;">
+  <div id="chooseAttachmentTable"></div>
+</div>
+
+<div id="quickHelpShow" style="display:none;">
+  <p>
+    <a href="javascript:Splinter.quickHelpToggle();" title="Show the quick help section" id="quickHelpToggle">
+    Show Quick Help</a>
+  </p>
+</div>
+
+<div id="quickHelpContent" style="display:none;">
+  <p>
+    <a href="javascript:Splinter.quickHelpToggle();" title="Hide the quick help section" id="quickHelpToggle">Close Quick Help</a>
+  </p>
+  <ul id="quickHelpList">
+    <li>From the Overview page, you can add a more generic overview comment that will appear at the beginning of your review.</li>
+    <li>To comment on a specific lines in the patch, first select the filename from the file navigation links.</li>
+    <li>Then double click the line you want to review and a comment box will appear below the line.</li>
+    <li>When the review is complete and you publish it, the overview comment and all line specific comments with their context, 
+        will be combined together into a single review comment on the [% terms.bug %] report.</li>
+    <li>For more detailed instructions, read the Splinter 
+        <a id='helpLink' target='splinterHelp' href="[% urlbase FILTER none %]page.cgi?id=splinter/help.html">help page</a>.
+    </li>
+  </ul>
+</div>
+
+<div id="navigationContainer" style="display: none;">
+  <b>Navigation:</b> <span id="navigation"></span>
+</div>
+
+<div id="overview" style="display: none;">
+  <div id="patchIntro"></div>
+  <div>
+    <span id="restored" style="display: none;">
+      (Restored from draft; last edited <span id="restoredLastModified"></span>)
+    </span>
+  </div>
+  <div>
+    <div id="myCommentFrame">
+      <textarea id="myComment"></textarea>
+      <div id="emptyCommentNotice">&lt;Overall Comment&gt;</div>
+    </div>
+    <div id="myPatchComments"></div>
+    <form id="publish" method="post" action="attachment.cgi" onsubmit="normalizeComments();">
+      <input type="hidden" id="publish_token" name="token" value="">
+      <input type="hidden" id="publish_action" name="action" value="update">
+      <input type="hidden" id="publish_review" name="comment" value="">
+      <input type="hidden" id="publish_attach_id" name="id" value="">
+      <input type="hidden" id="publish_attach_desc" name="description" value="">
+      <input type="hidden" id="publish_attach_filename" name="filename" value="">
+      <input type="hidden" id="publish_attach_contenttype" name="contenttypeentry" value="">
+      <input type="hidden" id="publish_attach_ispatch" name="ispatch" value="">
+      <input type="hidden" id="publish_attach_isobsolete" name="isobsolete" value="">
+      <input type="hidden" id="publish_attach_isprivate" name="isprivate" value="">
+      <div id="attachment_flags">
+        [% any_flags_requesteeble = 0 %]
+        [% FOREACH flag_type = flag_types %]
+          [% NEXT UNLESS flag_type.is_active %]
+          [% SET any_flags_requesteeble = 1 IF flag_type.is_requestable && flag_type.is_requesteeble %]
+        [% END %]
+        [% IF flag_types.size > 0 %]
+          [% PROCESS "flag/list.html.tmpl" bug_id = bug_id
+                                           attach_id = attach_d
+                                           flag_types = flag_types
+                                           read_only_flags = !can_edit
+                                           any_flags_requesteeble = any_flags_requesteeble
+           %]
+        [% END %]
+        <script>
+          [% FOREACH flag_type = flag_types %]
+            [% NEXT UNLESS flag_type.is_active %]
+            Event.addListener('flag_type-[% flag_type.id FILTER js %]', 'change', 
+                              function() { Splinter.flagChanged = 1;        
+                                           Splinter.queueUpdateHaveDraft(); });
+            [% FOREACH flag = flag_type.flags %]
+              Event.addListener('flag-[% flag.id FILTER js %]', 'change', 
+                                function() { Splinter.flagChanged = 1;
+                                             Splinter.queueUpdateHaveDraft(); });
+            [% END %]
+          [% END %]
+        </script>
+      </div>
+    </form>
+    <div id="buttonBox">
+      <span id="attachmentStatusSpan">Patch Status:
+        <select id="attachmentStatus"> </select>
+      </span>
+      <input id="publishButton" type="button" value="Publish" />
+      <input id="cancelButton" type="button" value="Cancel" />
+    </div>
+    <div class="clear"></div>
+  </div>
+  <div id="oldReviews" style="display: none;">
+    <div class="review-title">
+      Previous Reviews
+    </div>
+  </div>
+</div>
+
+<div id="files" style="display: none;">
+  <div id="file-collapse-all" style="display:none;">
+    <a href="javascript:void(0);" onclick="Splinter.toggleCollapsed('', 'none')">Collapse All</a> |
+    <a href="javascript:void(0);" onclick="Splinter.toggleCollapsed('', 'block')">Expand All</a> 
+  </div>
+</div>
+
+<div id="credits">
+  Powered by <a href="http://fishsoup.net/software/splinter">Splinter</a> 
+</div>
+
+<div id="saveDraftNotice" style="display: none;"></div>
+
+[% PROCESS global/footer.html.tmpl %]

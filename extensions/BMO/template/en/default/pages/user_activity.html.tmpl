@@ -1,0 +1,180 @@
+[%# The contents of this file are subject to the Mozilla Public
+  # License Version 1.1 (the "License"); you may not use this file
+  # except in compliance with the License. You may obtain a copy of
+  # the License at http://www.mozilla.org/MPL/
+  #
+  # Software distributed under the License is distributed on an "AS
+  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+  # implied. See the License for the specific language governing
+  # rights and limitations under the License.
+  #
+  # The Original Code is the BMO Extension
+  #
+  # The Initial Developer of the Original Code is the Mozilla Foundation
+  # Portions created by the Initial Developers are Copyright (C) 2011 the
+  # Initial Developer. All Rights Reserved.
+  #
+  # Contributor(s):
+  #   Byron Jones <bjones@mozilla.com>
+  #%]
+
+[% INCLUDE global/header.html.tmpl
+  title = "User Activity Report"
+  yui = [ 'autocomplete', 'calendar' ]
+  javascript_urls = [ "js/util.js", "js/field.js" ]
+%]
+
+<style>
+#report tr:hover {
+  background: #dddddd;
+}
+
+#report-header {
+  background: #dddddd;
+}
+</style>
+
+[% PROCESS "global/field-descs.none.tmpl" %]
+[% PROCESS bug/time.html.tmpl %]
+
+<form id="activity_form" name="activity_form" action="page.cgi" method="get">
+<input type="hidden" name="id" value="user_activity.html">
+<input type="hidden" name="action" value="run">
+<table>
+<tr>
+  <td>
+    <b>Who</b>:
+  </td>
+  <td>
+    [% INCLUDE global/userselect.html.tmpl
+       id => "who"
+       name => "who"
+       value => who
+       size => 40
+       emptyok => 0
+       title => "One or more email address (comma delimited)"
+    %]
+    &nbsp;
+  </td>
+  <td>
+    <b>Period</b>:
+  </td>
+  <td>
+    <input type="text" id="from" name="from" size="11"
+      align="right" value="[% from FILTER html %]" maxlength="10"
+      onchange="updateCalendarFromField(this)">
+    <button type="button" class="calendar_button" id="button_calendar_from"
+      onclick="showCalendar('from')"><span>Calendar</span>
+    </button>
+    <div id="con_calendar_from"></div>
+  </td>
+  <td>
+    -
+  </td>
+  <td>
+    <input type="text" name="to" size="11" id="to"
+      align="right" value ="[% to FILTER html %]" maxlength="10"
+      onchange="updateCalendarFromField(this)">
+    <button type="button" class="calendar_button" id="button_calendar_to"
+      onclick="showCalendar('to')"><span>Calendar</span>
+    </button>
+    <div id="con_calendar_to"></div>
+  </td>
+  <td>
+    <input type="submit" id="run" value="Generate Report">
+  </td>
+</tr>
+</table>
+</form>
+
+<script type="text/javascript">
+  createCalendar('from');
+  createCalendar('to');
+</script>
+
+[% IF action == 'run' %]
+
+[% IF incomplete_data %]
+  <p>
+    There used to be an issue in <a href="http://www.bugzilla.org/">[% terms.Bugzilla %]</a>
+    which caused activity data to be lost if there were a large number of cc's
+    or dependencies.  That has been fixed, but some data was already lost in
+    your activity table that could not be regenerated.  The changes that 
+    could not reliably determine are prefixed by '?'.
+  </p>
+[% END %]
+
+[% IF operations.size > 0 %]
+  <br>
+  <table border="1" cellpadding="4" cellspacing="0" id="report">
+    <tr id="report-header">
+      <th>Who</th>
+      <th>When</th>
+      <th>[% terms.Bug %]</th>
+      <th>What</th>
+      <th>Removed</th>
+      <th>Added</th>
+    </tr>
+
+    [% FOREACH operation = operations %]
+      <tr>
+        <td rowspan="[% operation.changes.size %]" valign="top">
+          [% operation.who FILTER email FILTER html %]
+        </td>
+        <td rowspan="[% operation.changes.size %]" valign="top">
+          [% operation.when FILTER time %]
+        </td>
+        <td rowspan="[% operation.changes.size %]" valign="top">
+          [% operation.bug FILTER bug_link(operation.bug) FILTER none %]
+        </td>
+        [% FOREACH change = operation.changes %]
+          [% "</tr><tr>" IF loop.index > 0 %]
+            <td>
+              [% IF change.attachid %]
+                <a href="attachment.cgi?id=[% change.attachid FILTER uri %]">Attachment #[% change.attachid FILTER html %]</a>
+              [% ELSIF change.comment.defined && change.fieldname == 'longdesc' %]
+                [% "Comment $change.comment.count" FILTER bug_link(operation.bug, comment_num => change.comment.count) FILTER none %]
+              [% ELSE %]
+                [%+ field_descs.${change.fieldname} FILTER html %]
+              [% END %]
+            </td>
+            [% PROCESS change_column change_type = change.removed %]
+            [% PROCESS change_column change_type = change.added %]
+        [% END %]
+      </tr>
+    [% END %]
+  </table>
+[% ELSE %]
+  <p>
+    No changes.
+  </p>
+[% END %]
+
+[% BLOCK change_column %]
+  <td>
+    [% IF change_type.defined %]
+      [% IF change.fieldname == 'estimated_time' ||
+            change.fieldname == 'remaining_time' ||
+            change.fieldname == 'work_time' %]
+        [% PROCESS formattimeunit time_unit=change_type %]
+      [% ELSIF change.fieldname == 'blocked' ||
+               change.fieldname == 'dependson' %]
+        [% change_type FILTER bug_list_link FILTER none %]
+      [% ELSIF change.fieldname == 'assigned_to' ||
+               change.fieldname == 'reporter' ||
+               change.fieldname == 'qa_contact' ||
+               change.fieldname == 'cc' ||
+               change.fieldname == 'flagtypes.name' %]
+        [% display_value(change.fieldname, change_type) FILTER email FILTER html %]
+      [% ELSE %]
+        [% display_value(change.fieldname, change_type) FILTER html %]
+      [% END %]
+    [% ELSE %]
+      &nbsp;
+    [% END %]
+  </td>
+[% END %]
+[% END %]
+
+
+[% INCLUDE global/footer.html.tmpl %]

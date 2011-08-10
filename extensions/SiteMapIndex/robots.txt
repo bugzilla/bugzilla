@@ -1,0 +1,9 @@
+User-agent: *
+Disallow: /*.cgi
+Disallow: /*show_bug.cgi*ctype=*
+Allow: /
+Allow: /*index.cgi
+Allow: /*page.cgi
+Allow: /*show_bug.cgi
+Allow: /*describecomponents.cgi
+Sitemap: SITEMAP_URL

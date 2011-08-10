@@ -1,0 +1,25 @@
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+User Agent: [% cgi.param('user_agent') %]
+[% IF cgi.param('build_id') %]
+Build ID: [% cgi.param('build_id') %][% END %]
+
+[% IF cgi.param('bug_steps') %]
+Steps to reproduce:
+
+[%+ cgi.param('bug_steps') %]
+[% END %]
+
+[% IF cgi.param('actual') %]
+
+Actual results:
+
+[%+ cgi.param('actual') %]
+[% END %]
+
+[% IF cgi.param('expected') %]
+
+Expected results:
+
+[%+ cgi.param('expected') %]
+[% END %]

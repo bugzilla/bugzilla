@@ -1,0 +1,38 @@
+[%#
+  # The contents of this file are subject to the Mozilla Public
+  # License Version 1.1 (the "License"); you may not use this file
+  # except in compliance with the License. You may obtain a copy of
+  # the License at http://www.mozilla.org/MPL/
+  #
+  # Software distributed under the License is distributed on an "AS
+  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+  # implied. See the License for the specific language governing
+  # rights and limitations under the License.
+  #
+  # The Original Code is the Bugzilla Example Plugin.
+  #
+  # The Initial Developer of the Original Code is Canonical Ltd.
+  # Portions created by Canonical Ltd. are Copyright (C) 2008
+  # Canonical Ltd. All Rights Reserved.
+  #
+  # Contributor(s): Bradley Baetz <bbaetz@acm.org>
+  #                 Owen Taylor <otaylor@redhat.com>
+  #%]
+[%
+    title = "Splinter Patch Review"
+    desc = "Configure Splinter"
+%]
+
+[% param_descs = {
+  splinter_base => "This is the base URL for the Splinter patch review page; " _
+                   "the default value '/page.cgi?id=splinter.html' works without " _
+                   "further configuration, however you may want to internally forward " _
+                   "/review to that URL in your web server's configuration and then change " _
+                   "this parameter. For example, withr the Apache HTTP server you can add " _
+                   "the following lines to the .htaccess for Bugzilla: " _
+                   "<pre>" _
+                   "RewriteEngine On\n" _
+                   "RewriteRule ^review(\?(.*))? page.cgi?id=splinter.html&amp;&#x0024;2 [L]" _
+                   "</pre>"
+ }
+%]

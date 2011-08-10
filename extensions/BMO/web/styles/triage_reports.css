@@ -1,0 +1,23 @@
+.hidden {
+  display: none;
+}
+
+#triage_form th {
+    text-align: left;
+}
+
+#product, #component {
+    width: 20em;
+}
+
+#report tr.bugitem:hover {
+  background: #ccccff;
+}
+
+#report td {
+  padding: 1px 10px 1px 10px;
+}
+
+#report-header {
+  background: #dddddd;
+}

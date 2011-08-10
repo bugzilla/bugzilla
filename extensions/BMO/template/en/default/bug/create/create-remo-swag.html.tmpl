@@ -1,0 +1,292 @@
+[%# 1.0@bugzilla.org %]
+[%# The contents of this file are subject to the Mozilla Public
+  # License Version 1.1 (the "License"); you may not use this file
+  # except in compliance with the License. You may obtain a copy of
+  # the License at http://www.mozilla.org/MPL/
+  #
+  # Software distributed under the License is distributed on an "AS
+  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+  # implied. See the License for the specific language governing
+  # rights and limitations under the License.
+  #
+  # The Original Code is the Bugzilla Bug Tracking System.
+  #
+  # The Initial Developer of the Original Code is Mozilla Corporation.
+  # Portions created by Mozilla are Copyright (C) 2008 Mozilla
+  # Corporation. All Rights Reserved.
+  #
+  # Contributor(s): Reed Loden <reed@mozilla.com>
+  #                 David Tran <dtran@mozilla.com>
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% PROCESS global/header.html.tmpl
+   title = "Mozilla Reps Swag Request Form"
+   javascript_urls = [ 'extensions/BMO/web/js/swag.js',
+                       'extensions/BMO/web/js/form_validate.js',
+                       'js/field.js', 
+                       'js/util.js' ]
+   style_urls = [ "extensions/BMO/web/styles/moz_reps.css",  
+                  "skins/custom/calendar.css" ]
+   yui = [ 'calendar' ]
+%]
+
+<p>These requests will only be visible to the person who submitted the request,
+any persons designated in the CC line, and authorized members of the Mozilla Rep team.</p>
+
+<script language="javascript" type="text/javascript">
+function trySubmit() {
+  var firstname = document.getElementById('firstname').value;
+  var lastname = document.getElementById('lastname').value;
+  var requester = firstname + ' ' + lastname;
+  var shortdesc = 'Swag Request - ' + requester;
+  document.getElementById('short_desc').value = shortdesc;
+  return true;
+}
+
+function validateAndSubmit() {
+  var alert_text = '';
+  if(!isFilledOut('firstname')) alert_text += "Please enter your first name\n";
+  if(!isFilledOut('lastname')) alert_text += "Please enter your last name\n";
+  if(!isFilledOut('wikiprofile')) alert_text += "Please enter your wiki user profile\n";
+  if(!isFilledOut('wikipage')) alert_text += "Please enter the event wiki page.\n";
+  if(!isFilledOut('attendance')) alert_text += "Please enter the estimated attendance.\n";
+  if(!isFilledOut('shiptofirstname')) alert_text += "Please enter the shipping first name\n";
+  if(!isFilledOut('shiptolastname')) alert_text += "Please enter the shipping last name\n";
+  if(!isFilledOut('shiptoaddress')) alert_text += "Please enter the ship to address\n";
+  if(!isFilledOut('shiptocity')) alert_text += "Please enter the ship to city\n";
+  if(!isFilledOut('shiptocountry')) alert_text += "Please enter the ship to country\n";
+  if(!isFilledOut('shiptopcode')) alert_text += "Please enter the ship to postal code\n";
+  if(!isFilledOut('shiptophone')) alert_text += "Please enter the ship to contact number\n";
+ 
+  //Everything required is filled out..try to submit the form!
+  if(alert_text == '') {
+    return trySubmit();
+  }
+
+  //alert text, stay here on the pagee
+  alert(alert_text);
+  return false;
+}
+
+</script>
+
+<h1>Mozilla Reps - Swag Request Form</h1>
+
+<form method="post" action="post_bug.cgi" id="swagRequestForm" enctype="multipart/form-data"
+      onSubmit="return validateAndSubmit();">
+
+  <input type="hidden" name="format" value="remo-swag">
+  <input type="hidden" name="product" value="Mozilla Reps">
+  <input type="hidden" name="component" value="Swag Requests">
+  <input type="hidden" name="rep_platform" value="All">
+  <input type="hidden" name="op_sys" value="Other">
+  <input type="hidden" name="priority" value="--">
+  <input type="hidden" name="version" value="unspecified">
+  <input type="hidden" name="bug_severity" id="bug_severity" value="normal">
+  <input type="hidden" name="short_desc" id="short_desc" value="">
+  <input type="hidden" name="groups" value="mozilla-reps">
+
+<table id="reps-form">
+
+<tr class="odd">
+  <td><strong>First Name: <span style="color: red;" title="Required">*</span></strong></td>
+  <td>
+    <input type="text" name="firstname" id="firstname" placeholder="John" size="40">
+  </td>
+</tr>
+
+<tr class="even">
+  <td><strong>Last Name: <span style="color: red;" title="Required">*</span></strong></td>
+  <td>
+    <input type="text" name="lastname" id="lastname" placeholder="Doe" size="40">
+  </td>
+</tr>
+
+<tr class="odd">
+  <td><strong>Wiki User Profile: <span style="color: red;" title="Required">*</span></strong></td>
+  <td>
+    <input type="text" name="wikiprofile" id="wikiprofile" size="40">
+  </td>
+</tr>
+
+<tr class="even">
+  <td><strong>Event Wiki Page: <span style="color: red;" title="Required">*</span></strong></td>
+  <td>
+    <input type="text" name="wikipage" id="wikipage" size="40">
+  </td>
+</tr>
+
+<tr class="even">
+  <td><strong>Estimated Attendance: <span style="color: red;" title="Required">*</span></strong></td>
+  <td>
+    <input type="text" name="attendance" id="attendance" size="40">
+  </td>
+</tr
+
+<tr class="odd">
+  <td><!--spacer-->&nbsp;</td>
+  <td><!--spacer-->&nbsp;</td>
+</tr>
+
+<tr class="even">
+  <td colspan="2"><strong>Shipping Details:</strong></td>
+</tr>
+
+<tr class="odd">
+  <td><strong>Ship Before:</strong>
+  <td>
+    <input type="text" id="shipdate" name="shipdate" size="10"
+           onchange="updateCalendarFromField(this)">
+    <button type="button" class="calendar_button" id="button_calendar_date"
+            onclick="showCalendar('shipdate')"><span>Calendar</span>
+    </button>
+    <div id="con_calendar_shipdate"></div>
+  </td>
+</tr>
+
+<tr class="even">
+  <td><strong>First Name: <span style="color: red;" title="Required">*</span></strong></td>
+  <td><input name="shiptofirstname" id="shiptofirstname" placeholder="John" size="40"></td>
+</tr>
+
+<tr class="odd">
+  <td><strong>Last Name: <span style="color: red;" title="Required">*</span></strong></td>
+  <td><input name="shiptolastname" id="shiptolastname" placeholder="Doe" size="40"></td>
+</tr>
+
+<tr class="even">
+  <td><strong>Address: <span style="color: red;" title="Required">*</span></strong></td>
+  <td><input name="shiptoaddress" id="shiptoaddress" placeholder="123 Main St." size="40"></td>
+</tr>
+
+<tr class="odd">
+  <td><strong>Address 2:</strong></td>
+  <td><input name="shiptoaddress2" id="shiptoaddress2" size="40"></td>
+</tr>
+
+<tr class="even">
+  <td><strong>City: <span style="color: red;" title="Required">*</span></strong></td>
+  <td><input name="shiptocity" id="shiptocity" size="40" placeholder="Anytown"></td>
+</tr>
+
+<tr class="odd">
+  <td><strong>State:</strong></td>
+  <td><input name="shiptostate" id="shiptostate" placeholder="CA" size="40"></td>
+</tr>
+
+<tr class="even">
+  <td><strong>Country: <span style="color: red;" title="Required">*</span></strong></td>
+  <td><input name="shiptocountry" id="shiptocountry" placeholder="USA" size="40"></td>
+</tr>
+
+<tr class="odd">
+  <td><strong>Postal Code: <span style="color: red;" title="Required">*</span></strong></td>
+  <td><input name="shiptopcode" id="shiptopcode" placeholder="90210" size="40"></td>
+</tr>
+
+<tr class="even">
+  <td><strong>Contact Number: <span style="color: red;" title="Required">*</span></strong></td>
+  <td><input name="shiptophone" id="shiptophone" placeholder="919-555-1212" size="40"></td>
+</tr>
+
+<tr class="odd">
+  <td><strong>Personal ID/RUT:</strong><br><small>(if your country requires this)</small></td>
+  <td><input name="shiptoidrut" id="shiptoidrut" size="40"></td>
+</tr>
+
+<tr class="even">
+  <td colspan="2">
+    <strong>Addition information for delivery person:</strong><br>
+    <textarea id="shipadditional" name="shipadditional" rows="4"></textarea>
+  </td>
+</tr>
+
+<tr class="odd">
+  <td><!--spacer-->&nbsp;</td>
+  <td><!--spacer-->&nbsp;</td>
+</tr>
+
+<tr class="even">
+  <td colspan="2"><strong>Swag Requested:</strong></td>
+</tr>
+
+<tr class="odd">
+  <td><strong>Stickers:</strong></td>
+  <td><input type="checkbox" id="stickers" name="stickers" value="1"></td>
+</tr>
+
+<tr class="odd">
+  <td><strong>Buttons:</strong></td>
+  <td><input type="checkbox" id="buttons" name="buttons" value="1"></td>
+</tr>
+
+<tr class="even">
+  <td><strong>Posters:</strong></td>
+  <td><input type="checkbox" id="posters" name="posters" value="1"></td>
+</tr>
+
+<tr class="odd">
+  <td><strong>Lanyards:</strong></td>
+  <td><input type="checkbox" id="lanyards" name="lanyards" value="1"></td>
+</tr>
+
+<tr class="even">
+  <td><strong>T-Shirts:</strong></td>
+  <td><input type="checkbox" id="tshirts" name="tshirts" value="1"></td>
+</tr>
+
+<tr class="odd">
+  <td><strong>Roll-Up Banners:</strong></td>
+  <td><input type="checkbox" id="rollupbanners" name="rollupbanners" value="1"></td>
+</tr>
+
+<tr class="even">
+  <td><strong>Horizontal Banner:</strong></td>
+  <td><input type="checkbox" id="horizontalbanner" name="horizontalbanner" value="1"></td>
+</tr>
+
+<tr class="odd">
+  <td><strong>Booth Cloth:</strong></td>
+  <td><input type="checkbox" id="boothcloth" name="boothcloth" value="1"></td>
+</tr>
+
+<tr class="even">
+  <td><strong>Pens:</strong></td>
+  <td><input type="checkbox" id="pens" name="pens" value="1"></td>
+</tr>
+
+<tr class="odd">
+  <td><strong>Other:</strong> (please specify)</td>
+  <td><input type="text" id="otherswag" name="otherswag" size="40"></td>
+</tr>
+
+<tr class="even">
+  <td>&nbsp;</td>
+  <td align="right">
+    <input type="submit" id="commit" value="Submit Request">
+  </td>
+</tr>
+
+</table>
+
+<p>
+  Quantities of different swag items requested that will actually be shipped 
+  depend on stock availability and number of attendees. Mozilla cannot guarantee 
+  that all items requested will be in stock at the time of shipment and you will 
+  be notified in case an item cannot be shipped. Please request swag at least 1 
+  month before desired delivery date.
+</p>
+
+<p>
+  <strong><span style="color: red;">*</span></strong> - Required field<br />
+  Thanks for contacting us.
+   You will be notified by email of any progress made in resolving your request.
+</p>
+
+<script type="text/javascript">
+  createCalendar('shipdate');
+</script>
+
+[% PROCESS global/footer.html.tmpl %]

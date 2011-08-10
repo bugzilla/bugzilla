@@ -1,0 +1,243 @@
+[%# The contents of this file are subject to the Mozilla Public
+  # License Version 1.1 (the "License"); you may not use this file
+  # except in compliance with the License. You may obtain a copy of
+  # the License at http://www.mozilla.org/MPL/
+  #
+  # Software distributed under the License is distributed on an "AS
+  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+  # implied. See the License for the specific language governing
+  # rights and limitations under the License.
+  #
+  # The Original Code is the BMO Extension
+  #
+  # The Initial Developer of the Original Code is the Mozilla Foundation
+  # Portions created by the Initial Developers are Copyright (C) 2011 the
+  # Initial Developer. All Rights Reserved.
+  #
+  # Contributor(s):
+  #   Dave Lawrence <dkl@mozilla.com>
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% PROCESS global/header.html.tmpl
+   title = "Mozilla Reps Payment Form"
+   style_urls = [ 'extensions/BMO/web/styles/moz_reps.css' ]
+   javascript_urls = [ 'extensions/BMO/web/js/form_validate.js',
+                       'js/util.js',
+                       'js/field.js' ]
+   yui = ['connection', 'json'] 
+%]
+
+<script language="javascript" type="text/javascript">
+
+var bug_cache = {};
+
+function validateAndSubmit() {
+  var alert_text = '';
+  if(!isFilledOut('firstname')) alert_text += "Please enter your first name\n";
+  if(!isFilledOut('lastname')) alert_text += "Please enter your last name\n";
+  if(!isFilledOut('wikiprofile')) alert_text += "Please enter a wiki user profile.\n";
+  if(!isFilledOut('wikipage')) alert_text += "Please enter a wiki page address.\n";
+  if(!isFilledOut('bug_id')) alert_text += "Please enter a valid [%terms.bug %] id to attach this additional information to.\n";
+  if(!isFilledOut('expenseform')) alert_text += "Please enter an expense form to upload.\n";
+  if(!isFilledOut('receipts')) alert_text += "Please enter a receipts file to upload.\n";
+
+  if (alert_text) {
+    alert(alert_text);
+    return false;
+  }
+
+  return true;
+}
+
+function togglePaymentInfo (e) {
+  var div = document.getElementById('paymentinfo');
+  if (e.checked == false) {
+    div.style.display = 'block';
+  }
+  else {
+    div.style.display = 'none';
+  }
+}
+
+function getBugInfo (e, div) {
+  var bug_id = e.value;
+  div = document.getElementById(div);
+
+  if (!bug_id) {
+    div.innerHTML = "";
+    return true;
+  }
+
+  div.style.display = 'block';
+
+  if (bug_cache[bug_id]) {
+    div.innerHTML = bug_cache[bug_id];
+    e.disabled = false;
+    return true;    
+  }
+
+  e.disabled = true;
+  div.innerHTML = 'Getting [% terms.bug %] info...';
+
+  YAHOO.util.Connect.setDefaultPostHeader('application/json', true); 
+  YAHOO.util.Connect.asyncRequest(
+    'POST',
+    'jsonrpc.cgi',
+    {
+      success: function(res) {
+        var bug_message = "";
+        data = YAHOO.lang.JSON.parse(res.responseText);
+        if (data.error) {
+          bug_message = "Get [% terms.bug %] failed: " + data.error.message;
+        }
+        else if (data.result) {
+          if (data.result.bugs[0].product !== 'Mozilla Reps'
+              || data.result.bugs[0].component !== 'Budget Requests') 
+          {
+            bug_message = "You can only attach budget payment " +
+                          "information to [% terms.bugs %] under the product " + 
+                          "'Mozilla Reps' and component 'Budget Requests'.";
+          }
+          else {
+            bug_message = "Bug " + bug_id + " - " + data.result.bugs[0].status +
+                          " - " + data.result.bugs[0].summary;
+          }
+        }
+        else {
+          bug_message = "Get [% terms.bug %] failed: " + res.responseText; 
+        }
+        div.innerHTML = bug_message;
+        bug_cache[bug_id] = bug_message;
+        e.disabled = false;
+      },
+      failure: function(res) {
+        if (res.responseText) {
+          div.innerHTML = "Get [% terms.bug %] failed: " + res.responseText;
+        }
+      }
+    },
+    YAHOO.lang.JSON.stringify({
+      version: "1.1",
+      method: "Bug.get",
+      id: bug_id,
+      params: {
+        ids: [ bug_id ], 
+        include_fields: [ 'product', 'component', 'status',  'summary' ]
+      }
+    })
+  );    
+}
+
+</script>
+
+<h1>Mozilla Reps - Payment Form</h1>
+
+<form method="post" action="page.cgi" id="paymentForm" enctype="multipart/form-data"
+      onSubmit="return validateAndSubmit();">
+<input type="hidden" id="id" name="id" value="remo-form-payment.html">
+<input type="hidden" id="token" name="token" value="[% token FILTER html %]">
+<input type="hidden" id="action" name="action" value="commit">
+
+<table id="reps-form">
+
+<tr class="odd">
+  <td width="25%"><strong>First Name: <span style="color: red;">*</span></strong></td>
+  <td>
+    <input type="text" name="firstname" id="firstname" value="" size="40" placeholder="John">
+  </td>
+</tr>
+
+<tr class="even">
+  <td><strong>Last Name: <span style="color: red;">*</span></strong></td>
+  <td>
+    <input type="text" name="lastname" id="lastname" value="" size="40" placeholder="Doe">
+  </td>
+</tr>
+
+<tr class="odd">
+  <td><strong>Wiki user profile:<span style="color: red;">*</span></strong></td>
+  <td>
+    <input type="text" name="wikiprofile" id="wikiprofile" value="" size="40" placeholder="JohnDoe">
+  </td>
+</tr>
+
+<tr class="even">
+  <td><strong>Event wiki page: <span style="color: red;">*</span></strong></td>
+  <td>
+    <input type="text" name="wikipage" id="wikipage" value="" size="40">
+  </td>
+</tr>
+
+<tr class="odd">
+  <td><strong>Budget request [% terms.bug %]: <span style="color: red;">*</span></strong></td>
+  <td>
+    <input type="text" name="bug_id" id="bug_id" value="" size="40"
+           onblur="getBugInfo(this,'bug_info');")>
+  </td>
+</tr>
+
+<tr class="odd">
+  <td colspan="2">
+    <div id="bug_info" style="display:none;"></div>
+  </td>
+</tr>
+
+<tr class="even">
+  <td colspan="2">
+    <strong>Have you already received payment for this event?</strong>
+    <input type="checkbox" name="receivedpayment" id="receivedpayment" value="1"
+           onchange="togglePaymentInfo(this);" checked="true">
+    <div id="paymentinfo" style="display:none;">
+      Please send an email to William at mozilla.com with all the information below:<br>
+      <br>
+      Payment information:<br>
+      Bank name:<br>
+      Bank address: <br> 
+      IBAN:<br>
+      Swift code/BIC:<br>
+      Additional bank details (if necessary):
+    </div>
+  </td>
+</tr>
+
+<tr class="odd">
+  <td colspan="2">
+    <strong>Expense form and scanned receipts/invoices:</strong>
+  </td>
+</tr>
+
+<tr class="odd">
+  <td>Expense Form: <span style="color: red;">*</span></td>
+  <td><input type="file" id="expenseform" name="expenseform" size="40"></td>
+</tr>
+
+<tr class="odd">
+  <td valign="top">Receipts File: <span style="color: red;">*</span></td>
+  <td>
+    <input type="file" id="receipts" name="receipts" size="40"><br>
+    <font style="color:red;">
+      Please black out any bank account information included<br>
+      on receipts before attaching them.
+    </font>
+  </td>
+</tr>
+
+<tr class="even">
+  <td>&nbsp;</td>
+  <td align="right">
+    <input type="submit" id="commit" value="Submit Request">
+  </td>
+</tr>
+
+</table>
+
+</form>
+
+<p>
+  <strong><span style="color: red;">*</span></strong> - Required field<br>
+  Thanks for contacting us.
+</p>
+
+[% PROCESS global/footer.html.tmpl %]

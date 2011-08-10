@@ -1,0 +1,304 @@
+[%# The contents of this file are subject to the Mozilla Public
+  # License Version 1.1 (the "License"); you may not use this file
+  # except in compliance with the License. You may obtain a copy of
+  # the License at http://www.mozilla.org/MPL/
+  #
+  # Software distributed under the License is distributed on an "AS
+  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+  # implied. See the License for the specific language governing
+  # rights and limitations under the License.
+  #
+  # The Original Code is the Bugzilla Bug Tracking System.
+  #
+  # The Initial Developer of the Original Code is Netscape Communications
+  # Corporation. Portions created by Netscape are
+  # Copyright (C) 1998 Netscape Communications Corporation. All
+  # Rights Reserved.
+  #
+  # Contributor(s): David Miller <justdave@bugzilla.org>
+  #                 Reed Loden <reed@reedloden.com>
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+[% INCLUDE global/header.html.tmpl
+   title = "Bugzilla 3.6 Upgrade"
+%]
+[% USE date %]
+
+<p><b>Last Updated:</b> [% date.format(template.modtime, "%d-%b-%Y %H:%M %Z") %]</p>
+
+<p>On Friday, July 9, 2010, at 11:40pm PDT (0640 UTC), bugzilla.mozilla.org was
+  <a href="show_bug.cgi?id=558044">upgraded</a> to Bugzilla 3.6.1+.  Please
+  <a href="enter_bug.cgi?product=mozilla.org&amp;component=Bugzilla:+Other+b.m.o+Issues&amp;blocked=bmo-regressions">file
+  any regressions</a> for tracking purposes.</p>
+
+<h3>Known Issues</h3>
+
+<p>The following is a list of issues which are known to be broken or incomplete with this upgrade so far.</p>
+
+<ul>
+
+<li>The <a href="https://bugzilla.mozilla.org/showdependencytree.cgi?id=577801&hide_resolved=1">stuff filed in Bugzilla</a>.</li>
+
+</ul>
+
+<h3>What's New</h3>
+
+<h4>Custom bugzilla.mozilla.org Changes</h4>
+
+<ul>
+  <li>Addition of autocomplete support for all user-related fields (assignee,
+    QA contact, and CC list) and the keywords field.</li>
+  <li>New attachment details UI.</li>
+  <li>New icons for the front page.</li>
+  <li>Removal of unused "Patches" column from buglist.</li>
+  <li>Initial support for <a href="http://en.wikipedia.org/wiki/Strict_Transport_Security">Strict-Transport-Security</a> (STS) header.</li>
+</ul>
+
+<h4>General Usability Improvements</h4>
+
+<p>A <a href="https://wiki.mozilla.org/Bugzilla:CMU_HCI_Research_2008">scientific
+  usability study</a> was done on [% terms.Bugzilla %] by researchers
+  from Carnegie-Mellon University. As a result of this study,
+  <a href="https://bugzilla.mozilla.org/showdependencytree.cgi?id=490786&amp;hide_resolved=0">several
+  usability issues</a> were prioritized to be fixed, based on specific data
+  from the study.</p>
+
+<p>As a result, you will see many small improvements in [% terms.Bugzilla %]'s
+  usability, such as using Javascript to validate certain forms before
+  they are submitted, standardizing the words that we use in the user interface,
+  being clearer about what [% terms.Bugzilla %] needs from the user,
+  and other changes, all of which are also listed individually in this New
+  Features section.</p>
+
+<p>Work continues on improving usability for the next release of
+  [%+ terms.Bugzilla %], but the results of the research have already
+  had an impact on this 3.6 release.</p>
+  
+<h4>Improved Quicksearch</h4>
+
+<p>The "quicksearch" box that appears on the front page of
+  [%+ terms.Bugzilla %] and in the header/footer of every page
+  is now simplified and made more powerful. There is a
+  <kbd>[?]</kbd> link next to the box that will take you to
+  the simplified <a href="page.cgi?id=quicksearch.html">Quicksearch Help</a>,
+  which describes every single feature of the system in a simple layout,
+  including new features such as the ability to use partial field names
+  when searching.</p>
+
+<p>Quicksearch should also be much faster than it was before, particularly
+  on large installations.</p>
+
+<p>Note that in order to implement the new quicksearch, certain old
+  and rarely-used features had to be removed:
+
+<ul>
+  <li><b>+</b> as a prefix to mean "search additional resolutions", and
+    <b>+</b> as a prefix to mean "search just the summary". You can
+    instead use <kbd>summary:</kbd> to explicitly search summaries.</li>
+  <li>Searching the Severity field if you type something that matches
+    the first few characters of a severity. You can explicitly search
+    the Severity field if you want to find [% terms.bugs %] by severity.</li>
+  <li>Searching the Priority field if you typed something that exactly
+    matched the name of a priority. You can explicitly search the
+    Priority field if you want to find [% terms.bugs %] by priority.</li>
+  <li>Searching the Platform and OS fields if you typed in one of a
+    certain hard-coded list of strings (like "pc", "windows", etc.).
+    You can explicitly search these fields, instead, if you want to
+    find [% terms.bugs %] with a specific Platform or OS set.</li>
+</ul>
+
+<h4>Simple "Browse" Interface</h4>
+
+<p>There is now a "Browse" link in the header of each [% terms.Bugzilla %]
+  page that presents a very basic interface that allows users to simply
+  browse through all open [% terms.bugs %] in particular components.</p>
+  
+<h4>JSON-RPC Interface</h4>
+
+<p>[% terms.Bugzilla %] now has support for the
+  <a href="http://json-rpc.org/">JSON-RPC</a> WebServices protocol via
+  <a href="[% docs_urlbase FILTER html %]api/Bugzilla/WebService/Server/JSONRPC.html">jsonrpc.cgi</a>.
+  The JSON-RPC interface is experimental in this release--if you want any
+  fundamental changes in how it works,
+  <a href="http://www.bugzilla.org/developers/reporting_bugs.html">let us
+  know</a>, for the next release of [% terms.Bugzilla %].</p>
+
+<h3>New Features</h3>
+
+<h4>Enhancements for Users</h4>
+
+<ul>
+  <li><b>[% terms.Bug %] Filing:</b> When filing [% terms.abug %],
+    [%+ terms.Bugzilla %] now visually indicates which fields are
+    mandatory.</li>
+  <li><b>[% terms.Bug %] Filing:</b> "Bookmarkable templates" now
+    support the "alias" and "estimated hours" fields.</li>
+    
+  <li><b>[% terms.Bug %] Editing:</b> In previous versions of
+    [%+ terms.Bugzilla %], if you added a private comment to [% terms.abug %],
+    then <em>none</em> of the changes that you made at that time were
+    sent to users who couldn't see the private comment. Now, for users
+    who can't see private comments, public changes are sent, but the private
+    comment is excluded from their email notification.</li>
+  <li><b>[% terms.Bug %] Editing:</b> The controls for groups now
+    appear to the right of the attachment and time-tracking tables,
+    when editing [% terms.abug %].</li>
+  <li><b>[% terms.Bug %] Editing:</b> The "Collapse All Comments"
+    and "Expand All Comments" links now appear to the right of the
+    comment list instead of above it.</li>
+  <li><b>[% terms.Bug %] Editing:</b> The See Also field now supports
+    URLs for Google Code Issues and the Debian B[% %]ug-Tracking System.</li>
+  <li><b>[% terms.Bug %] Editing:</b> There have been significant performance
+    improvements in <kbd>show_bug.cgi</kbd> (the script that displays the
+    [% terms.bug %]-editing form), particularly for [% terms.bugs %] that
+    have lots of comments or attachments.</li>
+
+  <li><b>Attachments:</b> The "Details" page of an attachment
+    now displays itself as uneditable if you can't edit the fields
+    there.</li>
+  <li><b>Attachments:</b> We now make sure that there is
+    a Description specified for an attachment, using JavaScript, before
+    the form is submitted.</li>
+  <li><b>Attachments:</b> There is now a link back to the [% terms.bug %]
+    at the bottom of the "Details" page for an attachment.</li>
+  <li><b>Attachments:</b> When you click on an "attachment 12345" link
+    in a comment, if the attachment is a patch, you will now see the
+    formatted "Diff" view instead of the raw patch.</li>
+  <li><b>Attachments</b>: For text attachments, we now let the browser 
+    auto-detect the character encoding, instead of forcing the browser to
+    always assume the attachment is in UTF-8.</li>
+  
+  <li><b>Search:</b> You can now display [% terms.bug %] flags as a column
+    in search results.</li>
+  <li><b>Search:</b> When viewing search results, you can see which columns are
+    being sorted on, and which direction the sort is on, as indicated
+    by arrows next to the column headers.</li>
+  <li><b>Search:</b> You can now search the Deadline field using relative
+    dates (like "1d", "2w", etc.).</li>
+  <li><b>Search:</b> The iCalendar format of search results now includes
+    a PRIORITY field.</li>
+  <li><b>Search:</b> It is no longer an error to enter an invalid search
+    order in a search URL--[% terms.Bugzilla %] will simply warn you that
+    some of your order options are invalid.</li>
+  <li><b>Search:</b> When there are no search results, some helpful
+    links are displayed, offering actions you might want to take.</li>
+  <li><b>Search:</b> For those who like to make their own
+    <kbd>buglist.cgi</kbd> URLs (and for people working on customizations),
+    <kbd>buglist.cgi</kbd> now accepts nearly every valid field in
+    [%+ terms.Bugzilla %] as a direct URL parameter, like
+    <kbd>&amp;field=value</kbd>.</li>
+  
+  <li><b>Requests:</b> When viewing the "My Requests" page, you can now
+    see the lists as a normal search result by clicking a link at the
+    bottom of each table.</li>
+  <li><b>Requests:</b> When viewing the "My Requests" page, if you are
+    using Classifications, the Product drop-down will be grouped by
+    Classification.</li>
+
+  <li>If there are multiple languages available for your
+    [%+ terms.Bugzilla %], you can now select what language you want
+    [%+ terms.Bugzilla %] displayed in using links at the top of every
+    page.</li>
+  <li>When creating a new account, you will be automatically logged in
+    after setting your password.</li>
+  <li>There is no longer a maximum password length for accounts.</li>
+  <li>In the Dusk skin, it's now easier to see links.</li>
+  <li>In the Whining system, you can now choose to receive emails even
+    if there are no [% terms.bugs %] that match your searches.</li>
+  <li>The arrows in dependency graphs now point the other way, so that
+    [%+ terms.bugs %] point at their dependencies.</li>
+  
+  <li><b>New Charts:</b> You can now convert an existing Saved Search
+    into a data series for New Charts.</li>
+  <li><b>New Charts:</b> There is now an interface that allows you to
+    delete data series.</li>
+  <li><b>New Charts:</b> When deleting a product, you now have the option
+    to delete the data series that are associated with that product.</li>
+</ul>
+
+<h4>Enhancements for Administrators and Developers</h4>
+
+<ul>
+  <li>Depending on how your workflow is set up, it is now possible to
+    have both UNCONFIRMED and REOPENED show up as status choices for
+    a closed [% terms.bug %]. If you only want one or the other to
+    show up, you should edit your status workflow appropriately
+    (possibly by removing or disabling the REOPENED status).</li>
+  <li>You can now "disable" field values so that they don't show
+    up as choices on [% terms.abug %] unless they are already set as
+    the value for that [% terms.bug %]. This doesn't work for the
+    per-product field values (component, target_milestone, and version)
+    yet, though.</li>
+  <li>Users are now locked out of their accounts for 30 minutes after
+    trying five bad passwords in a row during login. Every time a
+    user is locked out like this, the user in the "maintainer" parameter
+    will get an email.</li>
+  <li>The minimum length allowed for a password is now 6 characters.</li>
+  <li>The <kbd>UNCONFIRMED</kbd> status being enabled in a product
+    is now unrelated to the voting parameters. Instead, there is a checkbox
+    to enable the <kbd>UNCONFIRMED</kbd> status in a product.</li>
+  <li>Information about duplicates is now stored in the database instead
+    of being stored in the <kbd>data/</kbd> directory. On large installations
+    this could save several hundred megabytes of disk space.</li>
+  
+  <li>When editing a group, you can now specify that members of a group
+    are allowed to grant others membership in that group itself.</li>
+  <li>The ability to compress BMP attachments to PNGs is now an Extension.
+    To enable the feature, remove the file
+    <kbd>extensions/BmpConvert/disabled</kbd> and then run checksetup.pl.</li>
+  <li>The default list of values for the Priority field are now clear English
+    words instead of P1, P2, etc.</li>
+  <li><kbd>config.cgi</kbd> now returns an ETag header and understands
+    the If-None-Match header in HTTP requests.</li>
+  <li>The XML format of <kbd>show_bug.cgi</kbd> now returns more information:
+    the numeric id of each comment, whether an attachment is a URL,
+    the modification time of an attachment, the numeric id of a flag,
+    and the numeric id of a flag's type.</li>
+</ul>
+
+<h4>WebService Changes</h4>
+
+<ul>
+  <li>The WebService now returns all dates and times in the UTC timezone.
+    <kbd>B[% %]ugzilla.time</kbd> now acts as though the [% terms.Bugzilla %]
+    server were in the UTC timezone, always. If you want to write clients
+    that are compatible across all [% terms.Bugzilla %] versions,
+    check the timezone from <kbd>B[% %]ugzilla.timezone</kbd> or
+    <kbd>B[% %]ugzilla.time</kbd>, and always input times in that timezone
+    and expect times to be returned in that format.</li>
+  <li>You can now log in by passing <kbd>Bugzilla_login</kbd> and
+    <kbd>Bugzilla_password</kbd> as arguments to any WebService function.
+    See the
+    <a href="[% docs_urlbase FILTER html %]api/Bugzilla/WebService.html#LOGGING_IN">Bugzilla::WebService</a>
+    documentation for details.</li>
+  <li>New Method:
+    <a href="[% docs_urlbase FILTER html %]api/Bugzilla/WebService/Bug.html#attachments">B[% %]ug.attachments</a>
+    which allows getting information about attachments.</li>
+  <li>New Method:
+    <a href="[% docs_urlbase FILTER html %]api/Bugzilla/WebService/Bug.html#fields">B[% %]ug.fields</a>,
+    which gets information about all the fields that [% terms.abug %] can have
+    in [% terms.Bugzilla %], include custom fields and legal values for
+    all fields. The <kbd>B[% %]ug.legal_values</kbd> method is now deprecated.</li>
+  <li>In the <kbd>B[% %]ug.add_comment</kbd> method, the "private" parameter
+    has been renamed to "is_private" (for consistency with other methods).
+    You can still use "private", though, for backwards-compatibility.</li>
+  <li>The WebService now has Perl's "taint mode" turned on. This means that
+    it validates all data passed in before sending it to the database.
+    Also, all parameter names are validated, and if you pass in a parameter
+    whose name contains anything other than letters, numbers, or underscores,
+    that parameter will be ignored. Mostly this just affects
+    customizers--[% terms.Bugzilla %]'s WebService is not functionally
+    affected by these changes.</li>
+  <li>In previous versions of [% terms.Bugzilla %], error messages were
+    sent word-wrapped to the client, from the WebService. Error messages
+    are now sent as one unbroken line.</li>
+</ul>
+
+<h3>Last Ten Commits</h3>
+
+<pre>[% bzr_history.join('') FILTER html %]</pre>
+
+<br>
+
+[% INCLUDE global/footer.html.tmpl %]

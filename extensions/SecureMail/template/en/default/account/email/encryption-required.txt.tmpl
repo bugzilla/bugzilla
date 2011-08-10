@@ -1,0 +1,15 @@
+This email would have contained sensitive information, and you have not set 
+a PGP/GPG key or SMIME certificate in the "Secure Mail" section of your user 
+preferences.
+
+[% IF bug_id %]
+In order to receive the full text of similar mails in the future, please 
+go to: 
+[%+ urlbase %]userprefs.cgi?tab=securemail 
+and provide a key or certificate.
+
+You can see this bug's current state at: 
+[%+ urlbase %]show_bug.cgi?id=[% bug_id %]
+[% ELSE %]
+You will have to contact [% maintainer %] to reset your password.
+[% END %]

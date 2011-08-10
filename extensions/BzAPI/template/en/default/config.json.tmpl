@@ -1,0 +1,317 @@
+[%# The contents of this file are subject to the Mozilla Public
+  # License Version 1.1 (the "License"); you may not use this file
+  # except in compliance with the License. You may obtain a copy of
+  # the License at http://www.mozilla.org/MPL/
+  #
+  # Software distributed under the License is distributed on an "AS
+  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+  # implied. See the License for the specific language governing
+  # rights and limitations under the License.
+  #
+  # The Original Code is the Bugzilla Bug Tracking System.
+  #
+  # The Initial Developer of the Original Code is Netscape Communications
+  # Corporation. Portions created by Netscape are
+  # Copyright (C) 1998 Netscape Communications Corporation. All
+  # Rights Reserved.
+  #
+  # Contributor(s): Gervase Markham <gerv@gerv.net>
+  #%]
+
+[%
+  # Pinched from Bugzilla/API/Model/Utils.pm in BzAPI - need to keep in sync
+OLD2NEW = {
+  'opendate'            => 'creation_time', # query
+  'creation_ts'         => 'creation_time',
+  'changeddate'         => 'last_change_time', # query
+  'delta_ts'            => 'last_change_time',
+  'bug_id'              => 'id',
+  'rep_platform'        => 'platform',
+  'bug_severity'        => 'severity',
+  'bug_status'          => 'status',     
+  'short_desc'          => 'summary',
+  'short_short_desc'    => 'summary',
+  'bug_file_loc'        => 'url',
+  'status_whiteboard'   => 'whiteboard',
+  'reporter'            => 'creator',
+  'reporter_realname'   => 'creator_realname',
+  'cclist_accessible'   => 'is_cc_accessible',
+  'reporter_accessible' => 'is_creator_accessible',
+  'everconfirmed'       => 'is_confirmed',
+  'dependson'           => 'depends_on',
+  'blocked'             => 'blocks',
+  'attachment'          => 'attachments',
+  'flag'                => 'flags',
+  'flagtypes.name'      => 'flag',
+  'bug_group'           => 'group',
+  'group'               => 'groups',
+  'longdesc'            => 'comment',
+  'bug_file_loc_type'   => 'url_type',
+  'bugidtype'           => 'id_mode',
+  'longdesc_type'       => 'comment_type',
+  'short_desc_type'     => 'summary_type',
+  'status_whiteboard_type' => 'whiteboard_type',
+  'emailassigned_to1'   => 'email1_assigned_to',
+  'emailassigned_to2'   => 'email2_assigned_to',
+  'emailcc1'            => 'email1_cc',
+  'emailcc2'            => 'email2_cc',
+  'emailqa_contact1'    => 'email1_qa_contact',
+  'emailqa_contact2'    => 'email2_qa_contact',
+  'emailreporter1'      => 'email1_creator',
+  'emailreporter2'      => 'email2_creator',
+  'emaillongdesc1'      => 'email1_comment_creator',
+  'emaillongdesc2'      => 'email2_comment_creator',
+  'emailtype1'          => 'email1_type',
+  'emailtype2'          => 'email2_type',
+  'chfieldfrom'         => 'changed_after',
+  'chfieldto'           => 'changed_before',
+  'chfield'             => 'changed_field',
+  'chfieldvalue'        => 'changed_field_to',
+  'deadlinefrom'        => 'deadline_after',
+  'deadlineto'          => 'deadline_before',
+  'attach_data.thedata' => 'attachment.data',
+  'longdescs.isprivate' => 'comment.is_private',
+  'commenter'           => 'comment.creator',
+  'flagtypes.name'      => 'flag',
+  'requestees.login_name' => 'flag.requestee',
+  'setters.login_name'  => 'flag.setter',
+  'days_elapsed'        => 'idle',
+  'owner_idle_time'     => 'assignee_idle',
+  'dup_id'              => 'dupe_of',
+  'isopened'            => 'is_open',
+  'flag_type'           => 'flag_types',
+  'token'               => 'update_token'
+};
+
+OLDATTACH2NEW = {
+  'submitter'   => 'attacher',
+  'description' => 'description',
+  'filename'    => 'file_name',
+  'delta_ts'    => 'last_change_time',
+  'isobsolete'  => 'is_obsolete',
+  'ispatch'     => 'is_patch',
+  'isprivate'   => 'is_private',
+  'mimetype'    => 'content_type',
+  'contenttypeentry' => 'content_type',
+  'date'        => 'creation_time',
+  'attachid'    => 'id',
+  'desc'        => 'description',
+  'flag'        => 'flags',
+  'type'        => 'content_type',
+  'token'       => 'update_token'
+};
+
+%]
+
+[%# Add attachment stuff to the main hash - but with right prefix. (This is  
+  # the way the code is structured in BzAPI, and changing it makes it harder 
+  # to keep the two in sync.)
+  #%]
+[% FOREACH entry IN OLDATTACH2NEW %]
+  [% newkey = 'attachments.' _ entry.key %]
+  [% OLD2NEW.${newkey} = 'attachment.' _ OLDATTACH2NEW.${entry.key} %]
+[% END %]
+
+[% all_visible_flag_types = {} %]
+
+{
+  "version": "[% constants.BUGZILLA_VERSION FILTER json %]",
+  "maintainer": "[% Param('maintainer') FILTER json %]",
+  "announcement": "[% Param('announcehtml') FILTER json %]",
+  "max_attachment_size": [% (Param('maxattachmentsize') * 1000) FILTER json %],
+  
+[% IF Param('useclassification') %]
+  [% classifications = user.get_selectable_classifications() %]
+  [% cl_name_for = {} %]
+  "classification": { 
+  [% FOREACH cl IN classifications %]
+    [% cl_name_for.${cl.id} = cl.name %]
+    "[% cl.name FILTER json %]": {
+      "id": [% cl.id FILTER json %],
+      "description": "[% cl.description FILTER json %]",
+      "products": [
+      [% FOREACH product IN cl.products %]
+        "[% product.name FILTER json %]"[% ',' UNLESS loop.last() %]
+      [% END %]
+      ]
+    }[% ',' UNLESS loop.last() %]
+  [% END %]
+  },
+[% END %]
+
+  "product": {
+  [% FOREACH product = products %]
+    "[% product.name FILTER json %]": {
+      "id": [% product.id FILTER json %],
+      "description": "[% product.description FILTER json %]",
+      "is_active": [% product.isactive ? "true" : "false" %],
+      "is_permitting_unconfirmed": [% product.allows_unconfirmed ? "true" : "false" %],
+[% IF Param('useclassification') %]
+      "classification": "[% cl_name_for.${product.classification_id} FILTER json %]",
+[% END %]
+      "component": {
+      [% FOREACH component = product.components %]
+        "[% component.name FILTER json %]": {
+          "id": [% component.id FILTER json %],
+[% IF show_flags %]
+          "flag_type": [
+          [% flag_types = 
+              component.flag_types.bug.merge(component.flag_types.attachment) %]
+          [%-# "first" flag used to get commas right; can't use loop.last() in case
+             # last flag is inactive %]
+          [% first = 1 %]
+          [% FOREACH flag_type = flag_types %]
+            [% NEXT UNLESS flag_type.is_active %]
+            [% all_visible_flag_types.${flag_type.id} = flag_type %]
+            [% ',' UNLESS first %][% flag_type.id FILTER json %][% first = 0 %]
+          [% END %]],
+[% END %]
+          "description": "[% component.description FILTER json %]"
+        } [% ',' UNLESS loop.last() %]
+      [% END %]
+      },
+      "version": [
+      [% FOREACH version = product.versions %]
+        "[% version.name FILTER json %]"[% ',' UNLESS loop.last() %]
+      [% END %]
+      ],
+      
+[% IF Param('usetargetmilestone') %]
+      "default_target_milestone": "[% product.defaultmilestone FILTER json %]",
+      "target_milestone": [
+      [% FOREACH milestone = product.milestones %]
+        "[% milestone.name FILTER json %]"[% ',' UNLESS loop.last() %]
+      [% END %]
+      ],
+[% END %]
+
+      "group": [
+      [% FOREACH group = product.groups_valid %]
+        [% group.id FILTER json %][% ',' UNLESS loop.last() %]
+      [% END %]
+      ]
+    }[% ',' UNLESS loop.last() %]
+  [% END %]
+  },
+  
+  "group": {
+  [% FOREACH group = product.groups_valid %]
+    "[% group.id FILTER json %]": {
+      "name": "[% group.name FILTER json %]",
+      "description": "[% group.description FILTER json %]",
+      "is_accepting_bugs": [% group.is_bug_group ? 'true' : 'false' %],
+      "is_active": [% group.is_active ? 'true' : 'false' %]
+    }[% ',' UNLESS loop.last() %]
+  [% END %]
+  },
+
+[% IF show_flags %]
+  "flag_type": {
+  [% FOREACH flag_type = all_visible_flag_types.values.sort('name') %]
+    "[%+ flag_type.id FILTER json %]": {
+      "name": "[% flag_type.name FILTER json %]",
+      "description": "[% flag_type.description FILTER json %]",
+      [% IF user.in_group("editcomponents") %]
+        [% IF flag_type.request_group_id %]
+          "request_group": [% flag_type.request_group_id FILTER json %],
+        [% END %]
+        [% IF flag_type.grant_group_id %]
+          "grant_group": [% flag_type.grant_group_id FILTER json %],
+        [% END %]
+      [% END %]
+      "is_for_bugs": [% flag_type.target_type == "bug" ? 'true' : 'false'  %],
+      "is_requestable": [% flag_type.is_requestable ? 'true' : 'false' %],
+      "is_specifically_requestable": [% flag_type.is_requesteeble ? 'true' : 'false' %],
+      "is_multiplicable": [% flag_type.is_multiplicable ? 'true' : 'false' %]
+    }[% ',' UNLESS loop.last() %]
+  [% END %]
+  },
+[% END %]
+
+  [% PROCESS "global/field-descs.none.tmpl" %]
+  
+  [%# Put custom field value data where below loop expects to find it %]
+  [% FOREACH cf = custom_fields %]
+    [% ${cf.name} = [] %]
+    [% FOREACH value = cf.legal_values %]
+      [% ${cf.name}.push(value.name) %]
+    [% END %]
+  [% END %]
+  
+  [%# Built-in fields do not have type IDs. There aren't ID values for all  
+    # the types of the built-in fields, but we do what we can, and leave the
+    # rest as "0" (unknown).
+    #%]
+  [% type_id_for = {
+       "id" => 6,
+       "summary" => 1,
+       "classification" => 2,
+       "version" => 2,
+       "url" => 1,
+       "whiteboard" => 1,
+       "keywords" => 3,
+       "component" => 2,
+       "attachment.description" => 1,
+       "attachment.file_name" => 1,
+       "attachment.content_type" => 1,
+       "target_milestone" => 2,
+       "comment" => 4,
+       "alias" => 1,
+       "deadline" => 5,
+     } %]
+  
+  "field": {
+  [% FOREACH item = field %]
+    [% newname = OLD2NEW.${item.name} || item.name %]
+    "[% newname FILTER json %]": {
+      "description": "[% (field_descs.${item.name} OR 
+                          item.description) FILTER json %]",
+      "is_active": [% field.obsolete ? "false" : "true" %],
+      [% blacklist = ["version", "group", "product", "component"] %]
+      [% IF ${newname} AND NOT blacklist.contains(newname) %]
+        "values": [
+        [% FOREACH value = ${newname} %]
+          "[% value FILTER json %]"[% ',' UNLESS loop.last() %]
+        [% END %]
+        ],
+      [% END %]
+      [% paramname = newname.replace("_", "") %] [%# For op_sys... %]
+      [% IF paramname != "query" AND Param('default' _ paramname) %]
+        "default": "[% Param('default' _ paramname) %]",
+      [% END %]
+      [%-# The 'status' hash has a lot of extra stuff %]
+      [% IF newname == "status" %]
+        "open": [
+        [% FOREACH value = open_status %]
+          "[% value FILTER json %]"[% ',' UNLESS loop.last() %]
+        [% END %]
+        ],
+        "closed": [
+        [% FOREACH value = closed_status %]
+          "[% value FILTER json %]"[% ',' UNLESS loop.last() %]
+        [% END %]
+        ],
+        "transitions": {
+          "{Start}": [
+          [% FOREACH target = initial_status %]
+            "[% target.name FILTER json %]"[% ',' UNLESS loop.last() %]
+          [% END %]
+          ],
+        [% FOREACH status = status_objects %]
+          [% targets = status.can_change_to() %]
+          "[% status.name FILTER json %]": [
+          [% FOREACH target = targets %]
+            "[% target.name FILTER json %]"[% ',' UNLESS loop.last() %]
+          [% END %]
+          ][% ',' UNLESS loop.last() %]
+        [% END %]
+        },
+      [% END %]
+      [% IF newname.match("^cf_") %]
+        "is_on_bug_entry": [% item.enter_bug ? 'true' : 'false' %],
+      [% END %]
+      "type": [% item.type || type_id_for.$newname || 0 FILTER json %]
+    }[% ',' UNLESS loop.last() %]
+  [% END %]
+  }
+}

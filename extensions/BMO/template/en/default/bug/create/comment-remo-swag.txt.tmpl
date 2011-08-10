@@ -1,0 +1,68 @@
+[%# The contents of this file are subject to the Mozilla Public
+  # License Version 1.1 (the "License"); you may not use this file
+  # except in compliance with the License. You may obtain a copy of
+  # the License at http://www.mozilla.org/MPL/
+  #
+  # Software distributed under the License is distributed on an "AS
+  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+  # implied. See the License for the specific language governing
+  # rights and limitations under the License.
+  #
+  # The Original Code is the Bugzilla Bug Tracking System.
+  #
+  # The Initial Developer of the Original Code is Netscape Communications
+  # Corporation. Portions created by Netscape are
+  # Copyright (C) 1998 Netscape Communications Corporation. All
+  # Rights Reserved.
+  #
+  # Contributor(s): Gervase Markham <gerv@gerv.net>
+  #%]
+[%# INTERFACE:
+  # This template has no interface.
+  #
+  # Form variables from a bug submission (i.e. the fields on a template from
+  # enter_bug.cgi) can be access via Bugzilla.cgi.param. It can be used to
+  # pull out various custom fields and format an initial Description entry
+  # from them.
+  #%]  
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+
+Requester info: 
+
+Requester name: [% cgi.param('firstname') %][% " " %][% cgi.param('lastname') %]
+Wiki user profile: [% cgi.param('wikiprofile') %]
+Event wiki page: [% cgi.param('wikipage') %]
+Estimated Attendance: [% cgi.param('attendance') %]
+
+Shipping details:
+
+Ship swag before: [% cgi.param('shipdate') %]
+
+[%+ cgi.param("shiptofirstname") +%] [%+ cgi.param("shiptolastname") +%]
+[%+ cgi.param("shiptoaddress") +%]
+[%+ cgi.param("shiptoaddress2") +%]
+[%+ cgi.param("shiptocity") +%] [%+ cgi.param("shiptostate") +%] [%+ cgi.param("shiptopcode") +%]
+[%+ cgi.param("shiptocountry") %]
+
+Phone:  [% cgi.param("shiptophone") %]
+[%+ IF cgi.param("shiptoidrut") %]Personal ID/RUT: [% cgi.param("shiptoidrut") %][% END %]
+
+Addition information for delivery person:
+[%+ cgi.param('shipadditional') %] 
+
+Swag requested: 
+
+Stickers: [% IF cgi.param('stickers') %]Yes[% ELSE %]No[% END %]
+Buttons: [% IF cgi.param('buttons') %]Yes[% ELSE %]No[% END %]
+Posters: [% IF cgi.param('posters') %]Yes[% ELSE %]No[% END %]
+Lanyards: [% IF cgi.param('lanyards') %]Yes[% ELSE %]No[% END %]
+T-shirts: [% IF cgi.param('tshirts') %]Yes[% ELSE %]No[% END %]
+Roll-up banners: [% IF cgi.param('rollupbanners') %]Yes[% ELSE %]No[% END %]
+Horizontal banners: [% IF cgi.param('horizontalbanners') %]Yes[% ELSE %]No[% END %]
+Booth cloth: [% IF cgi.param('boothcloth') %]Yes[% ELSE %]No[% END %]
+Pens: [% IF cgi.param('pens') %]Yes[% ELSE %]No[% END %]
+Other: [% IF cgi.param('otherswag') %][% cgi.param('otherswag') %][% ELSE %]No[% END %]
+
+[%+ cgi.param("comment") IF cgi.param("comment") %]
+

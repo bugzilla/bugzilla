@@ -1,0 +1,55 @@
+[%# The contents of this file are subject to the Mozilla Public
+  # License Version 1.1 (the "License"); you may not use this file
+  # except in compliance with the License. You may obtain a copy of
+  # the License at http://www.mozilla.org/MPL/
+  #
+  # Software distributed under the License is distributed on an "AS
+  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+  # implied. See the License for the specific language governing
+  # rights and limitations under the License.
+  #
+  # The Original Code is the BMO Extension
+  #
+  # The Initial Developer of the Original Code is the Mozilla Foundation
+  # Portions created by the Initial Developers are Copyright (C) 2011 the
+  # Initial Developer. All Rights Reserved.
+  #
+  # Contributor(s):
+  #   Byron Jones <bjones@mozilla.com>
+  #%]
+
+[% IF error == "user_activity_missing_username" %]
+    [% title = "Missing Username" %]
+    You must provide at least one email address to report on.
+
+[% ELSIF error == "user_activity_missing_from_date" %]
+    [% title = "Missing Date" %]
+    You must provided the period start date.
+
+[% ELSIF error == "user_activity_missing_to_date" %]
+    [% title = "Missing Date" %]
+    You must provided the period end date.
+
+[% ELSIF error == "user_activity_invalid_date" %]
+    [% title = "Invalid Date" %]
+    The date '[% date FILTER html %]' is invalid.
+
+[% ELSIF error == "remo_payment_invalid_product" %]
+   [% title = "Mozilla Reps Payment Invalid $terms.Bug" %]
+   You can only attach budget payment information to [% terms.bugs %] under
+   the product 'Mozilla Reps' and component 'Budget Requests'.
+
+[% ELSIF error == "remo_payment_bug_edit_denied" %] 
+   [% title = "Mozilla Reps Payment $terms.Bug Edit Denied" %]
+   You do not have permission to edit [% terms.bug %] '[% bug_id FILTER html %]'.
+
+[% ELSIF error == "remo_payment_cancel_dupe" %]
+   [% title = "Already filed payment request" %]
+   You already used the form to file
+   <a href="[% urlbase FILTER html %]attachment.cgi?id=[% attachid FILTER uri %]&action=edit">
+   attachment [% attachid FILTER uri %]</a>.<br>
+   <br>
+   You can either <a href="[% urlbase FILTER html %]page.cgi?id=remo-form-payment.html">
+   create a new payment request</a> or [% "go back to $terms.bug $bugid" FILTER bug_link(bugid) FILTER none %].
+
+[% END %]

@@ -1,0 +1,8 @@
+[% IF column == 'attachment' && request.ispatch %]
+  &nbsp; 
+  [% IF Param("splinter_base").search('\?') %]
+    <a href="[% urlbase FILTER none %][% Param("splinter_base") FILTER html %]&amp;bug=[% request.bug_id FILTER uri %]&amp;attachment=[% request.attach_id FILTER uri %]">[review]</a>
+  [% ELSE %]
+    <a href="[% urlbase FILTER none %][% Param("splinter_base") FILTER html %]?bug=[% request.bug_id FILTER uri %]&amp;attachment=[% request.attach_id FILTER uri %]">[review]</a>
+  [% END %]
+[% END %]

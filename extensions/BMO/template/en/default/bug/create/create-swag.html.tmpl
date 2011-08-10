@@ -1,0 +1,221 @@
+[%# 1.0@bugzilla.org %]
+[%# The contents of this file are subject to the Mozilla Public
+  # License Version 1.1 (the "License"); you may not use this file
+  # except in compliance with the License. You may obtain a copy of
+  # the License at http://www.mozilla.org/MPL/
+  #
+  # Software distributed under the License is distributed on an "AS
+  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+  # implied. See the License for the specific language governing
+  # rights and limitations under the License.
+  #
+  # The Original Code is the Bugzilla Bug Tracking System.
+  #
+  # The Initial Developer of the Original Code is Mozilla Corporation.
+  # Portions created by Mozilla are Copyright (C) 2008 Mozilla
+  # Corporation. All Rights Reserved.
+  #
+  # Contributor(s): Reed Loden <reed@mozilla.com>
+  #                 David Tran <dtran@mozilla.com>
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% PROCESS global/header.html.tmpl
+   title = "Swag Request Form"
+   javascript_urls = [ 'extensions/BMO/web/js/swag.js', 
+                       'extensions/BMO/web/js/form_validate.js',
+                       'js/field.js' ]
+   yui = [ 'autocomplete' ]
+%]
+
+<div style='text-align: center; width: 98%; font-size: 2em; font-weight: bold; margin: 10px;'>Swag Request Form</div>
+
+<p><strong>Swag Request:</strong> Please use this form to file a request for swag. </p>
+
+<ol>
+  <li>You first need submit a <a href="/enter_bug.cgi?product=Marketing&amp;format=mktgevent">Event Request Form</a>. You'll be asked for the [% terms.bug %] number below.</li>
+  <li>Complete and submit request below.</li>
+  <li>Your request will be reviewed by the appropriate person in the Engagement team.</li>
+  <li>Your swag request will be reviewed and if approved shipped to you from
+      one of our two fulfillment houses. <i>Please note that swag is expensive and
+      products change over time - we are happy to send you a small quantity of swag
+      to use at your event!</i></li>
+</ol>
+ 
+<p>These requests will only be visible to the person who submitted the request,
+any persons designated in the CC line, and authorized members of the Mozilla
+Engagement team.</p>
+
+<script language="javascript" type="text/javascript">
+function trySubmit() {
+
+  var firstname = document.getElementById('firstname').value;
+  var lastname = document.getElementById('lastname').value;
+  var requester = firstname + ' ' + lastname;
+  var shortdesc = 'Swag Request - ' + requester;
+  document.getElementById('short_desc').value = shortdesc;
+
+  // the following fields we don't let the user mess with because they're
+  // calculated, but they need to be submitted, and disabled fields don't submit
+  document.getElementById('Totalswag').disabled = false;
+  document.getElementById('mens_total').disabled = false;
+  document.getElementById('womens_total').disabled = false;
+  
+  return true;
+}
+
+function validateAndSubmit() {
+
+  var alert_text = '';
+  if(!isFilledOut('firstname')) alert_text += "Please enter your first name\n";
+  if(!isFilledOut('lastname')) alert_text += "Please enter your last name\n";
+  if(!isFilledOut('dependson')) alert_text += "Please enter the [% terms.bug %] number for your Event Request Form\n";
+  if(!isValidEmail(document.getElementById('email').value)) alert_text += "Please enter a valid email address\n";
+  
+  //Everything required is filled out..try to submit the form!
+  if(alert_text == '') {
+    return trySubmit();
+  }
+
+  //alert text, stay here on the pagee
+  alert(alert_text);
+  return false;
+}
+
+</script>
+
+<form method="post" action="post_bug.cgi" id="swagRequestForm" enctype="multipart/form-data"
+      onSubmit="return validateAndSubmit();">
+
+  <input type="hidden" name="format" value="swag">
+  <input type="hidden" name="product" value="Marketing">
+  <input type="hidden" name="component" value="Swag Requests">
+  <input type="hidden" name="rep_platform" value="All">
+  <input type="hidden" name="op_sys" value="Other">
+  <input type="hidden" name="priority" value="--">
+  <input type="hidden" name="version" value="unspecified">
+  <input type="hidden" name="bug_severity" id="bug_severity" value="normal">
+  <input type="hidden" name="short_desc" id="short_desc" value="">
+  <input type="hidden" name="groups" value="mozilla-corporation-confidential">
+
+<table>
+<tr>
+  <td align="right"><strong>First Name: <span style="color: red;">*</span></strong></td>
+  <td align="left">
+    <input type="text" name="firstname" id="firstname" value="" size="20" maxlength="20" />
+  </td>
+</tr>
+
+<tr>
+  <td align="right"><strong>Last Name: <span style="color: red;">*</span></strong></td>
+  <td align="left">
+    <input type="text" name="lastname" id="lastname" value="" size="20" maxlength="20"/>
+  </td>
+</tr>
+
+<tr>
+  <td align="right"><strong>Email Address: <span style="color: red;">*</span></strong></td>
+  <td>
+    <input type="text" name="email" id="email" value="" size="50" maxlength="50"/>
+  </td>
+</tr>
+
+<tr>
+  <td align="right"><strong>CC:</strong></td>
+  <td colspan="3">
+    [% INCLUDE global/userselect.html.tmpl
+       id => "cc"
+       name => "cc"
+       value => cc
+       size => 50
+       multiple => 5
+    %]
+  </td>
+</tr>
+
+<tr>
+  <td><!-- spacer -->&nbsp;</td>
+</tr>
+
+<tr>
+  <td><!-- spacer -->&nbsp;</td>
+</tr>
+
+<tr>
+  <td align="right"><strong>[% terms.Bug %] number assigned to previously- &nbsp;&nbsp;<br>submitted <a href="/enter_bug.cgi?product=Marketing&amp;format=mktgevent">Event Request Form</a>: <span style="color: red;">*</span></strong></td>
+  <td colspan="3"><input name="dependson" id="dependson"></td>
+</tr>
+
+<tr>
+  <td align="right"><strong>Specific swag needed?</strong></td>
+  <td>
+    <textarea id="additional" name="additional" rows="5" cols="50"></textarea>
+  </td>
+</tr>
+
+<tr>
+  <td align="right"><br><br><strong>Ship to:</strong></td>
+  <td colspan="3"></td>
+</tr>
+<tr>
+  <td align="right"><strong>First name:</strong></td>
+  <td colspan="3"><input name="shiptofirstname" id="shiptofirstname"></td>
+</tr>
+<tr>
+  <td align="right"><strong>Last name:</strong></td>
+  <td colspan="3"><input name="shiptolastname" id="shiptolastname"></td>
+</tr>
+<tr>
+  <td align="right"><strong>Address</strong></td>
+  <td colspan="3"><input name="shiptoaddress" id="shiptoaddress" size="60"></td>
+</tr>
+<tr>
+  <td align="right"><strong>Address 2</strong></td>
+  <td colspan="3"><input name="shiptoaddress2" id="shiptoaddress2" size="60"></td>
+</tr>
+<tr>
+  <td align="right"><strong>City</strong></td>
+  <td colspan="3"><input name="shiptocity" id="shiptocity"></td>
+</tr>
+<tr>
+  <td align="right"><strong>State</strong></td>
+  <td colspan="3"><input name="shiptostate" id="shiptostate"></td>
+</tr>
+<tr>
+  <td align="right"><strong>Country</strong></td>
+  <td colspan="3"><input name="shiptocountry" id="shiptocountry"></td>
+</tr>
+<tr>
+  <td align="right"><strong>Postal Code</strong></td>
+  <td colspan="3"><input name="shiptopcode" id="shiptopcode"></td>
+</tr>
+<tr>
+  <td align="right"><strong>Telephone</strong></td>
+  <td colspan="3"><input name="shiptophone" id="shiptophone"></td>
+</tr>
+<tr>
+  <td align="right"><strong>Personal ID/RUT</strong><br><small>(if your country requires this)</small></td>
+  <td colspan="3"><input name="shiptoidrut" id="shiptoidrut"></td>
+</tr>
+
+<tr><td colspan="4"><br><br></td></tr>
+
+<tr>
+  <td align="right"><label for="comment"><strong>Any additional comments?</strong></label></td>
+  <td>
+    <textarea id="comment" name="comment" rows="5" cols="50"></textarea>
+  </td>
+</tr>
+
+  </table>
+  <br>
+  <input type="submit" id="commit" value="Submit Request">
+
+<p>
+  <strong><span style="color: red;">*</span></strong> - Required field<br />
+  Thanks for contacting us.
+   You will be notified by email of any progress made in resolving your request.
+</p>
+
+[% PROCESS global/footer.html.tmpl %]

@@ -1,0 +1,99 @@
+[%#
+  # The contents of this file are subject to the Mozilla Public
+  # License Version 1.1 (the "License"); you may not use this file
+  # except in compliance with the License. You may obtain a copy of
+  # the License at http://www.mozilla.org/MPL/
+  #
+  # Software distributed under the License is distributed on an "AS
+  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+  # implied. See the License for the specific language governing
+  # rights and limitations under the License.
+  #
+  # The Original Code is the Bugzilla SecureMail Extension.
+  #
+  # The Initial Developer of the Original Code is the Mozilla Foundation.
+  # Portions created by Mozilla are Copyright (C) 2008 Mozilla Foundation.
+  # All Rights Reserved.
+  #
+  # Contributor(s): Max Kanat-Alexander <mkanat@bugzilla.org>
+  #                 Gervase Markham <gerv@gerv.net>
+  # Dave Lawrence <dkl@mozilla.com>
+  #%]
+
+[% PROCESS global/header.html.tmpl
+  title = "SecureMail Help"
+%]
+
+[% terms.Bugzilla %] considers certain groups as "secure". If a [% terms.bug %] is in one of those groups, [% terms.Bugzilla %] 
+will not send unencrypted email about it. To receive encrypted email rather than just a "something changed" placeholder, you must provide either 
+a S/MIME or a GPG/PGP key on the <a href="[% urlbase FILTER none %]userprefs.cgi?tab=securemail">SecureMail preferences tab</a>.<br>
+<br>
+In addition, if you have uploaded a S/MIME or GPG/PGP key using the <a href="[% urlbase FILTER none %]userprefs.cgi?tab=securemail">
+SecureMail preferences tab</a>, if you request your password to be reset, [% terms.Bugzilla %] will send the reset email encrypted and you will
+be required to decrypt it to view the reset instructions.
+
+<h2>S/MIME</h2>
+
+<b>S/MIME Keys must be in PEM format - i.e. Base64-encoded text, with the first line containing BEGIN CERTIFICATE.</b></p>
+
+<p>
+S/MIME certificates can be obtained from a number of providers. You can get a free one from <a href="https://www.startssl.com/?app=12">StartCom</a>. 
+Once you have it, <a href="https://www.startssl.com/?app=25#52">export it from your browser as a .p12 file and import it into your mail client</a>. 
+You'll need to provide a password when you export - pick a strong one, and then back up the .p12 file somewhere safe.</p>
+
+<p>
+Then, you need to convert it to a .pem file. If you have OpenSSL installed, one way is as follows:</p>
+
+<p>
+<code>openssl pkcs12 -in certificate.p12 -out certificate.pem -nodes</code></p>
+
+<p>
+Open the .pem file in a text editor. You can recognise the public key because it starts "BEGIN CERTIFICATE" and ends "END CERTIFICATE" and 
+has an appropriate friendly name (e.g. "StartCom Free Certificate Member's StartCom Ltd. ID"). It is <b>not</b> the section beginning 
+"BEGIN RSA PRIVATE KEY", and it is not any of the intermediate certificates or root certificates.</p>
+
+<p>
+<b>Note: the .pem file has your private key in plaintext. Delete it once you have copied the public key out of it!</b></p>
+
+<h2>PGP</h2>
+
+<b>PGP keys must be ASCII-armoured - i.e. text, with the first line containing BEGIN PGP PUBLIC KEY.</b></p>
+
+<p>
+If you already have your own PGP key in a keyring, skip straight to step 3. Otherwise:</p>
+
+<ol>
+
+<li>Install the GPG suite of utilities for your operating system, either using your package manager or downloaded from <a href="http://www.gnupg.org/download/index.en.html">gnupg.org</a>.</p>
+
+<li><p>Generate a private key.</p>
+
+<p><code>gpg --gen-key</code></p>
+
+<p>
+You’ll have to answer several questions:</p>
+
+<p>
+<ul>
+  <li>What kind and size of key you want; the defaults are probably good enough.</li>
+  <li>How long the key should be valid; you can safely choose a non-expiring key.</li>
+  <li>Your real name and e-mail address; these are necessary for identifying your key in a larger set of keys.</li>
+  <li>A comment for your key; the comment can be empty.</li>
+  <li>A passphrase. Whatever you do, don’t forget it! Your key, and all your encrypted files, will be useless if you do.</li>
+</ul>
+
+<li><p>Generate an ASCII version of your public key.</p>
+
+<p><code>gpg --armor --output pubkey.txt --export 'Your Name'</code></p>
+
+<p>Paste the contents of pubkey.txt into the SecureMail text field in [% terms.Bugzilla %]. 
+
+<li>Configure your email client to use your associated private key to decrypt the encrypted emails. For Thunderbird, you need the <a href="https://addons.mozilla.org/en-us/thunderbird/addon/enigmail/">Enigmail</a> extension.</p>
+</ol>
+
+<p>
+Further reading: <a href="http://www.madboa.com/geek/gpg-quickstart">GPG Quickstart</a>.
+
+[% PROCESS global/footer.html.tmpl %]
+
+

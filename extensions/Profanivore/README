@@ -1,0 +1,14 @@
+Profanivore 'eats' English profanities in comments, leaving behind instead a 
+trail of droppings ('****'). It finds its food using a standard library Perl 
+regexp. The profanity is only eaten where the comment was written by a user 
+who does not have the global 'editbugs' privilege. The digestion happens at 
+display time, so the comment in the database is unaltered.
+
+However, it does not eat profanities when showing people their own comments; 
+the aim here is to prevent people immediately noticing they are being 
+censored, and getting 'creative'.
+
+The purpose of Profanivore is to make it a little harder for trolls to 
+vandalise public Bugzilla installations.
+
+It does not currently affect fields other than comments.

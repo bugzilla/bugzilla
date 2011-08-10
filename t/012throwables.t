@@ -62,7 +62,7 @@ foreach my $include_path (@include_paths) {
         $file =~ s/\s.*$//; # nuke everything after the first space
         $file =~ s|\\|/|g if ON_WINDOWS;  # convert \ to / in path if on windows
         $test_templates{$file} = () 
-            if $file =~ m#global/(code|user)-error\.html\.tmpl#;
+            if $file =~ m#global/(code|user)-error(?:-errors)?\.html\.tmpl#;
     }
 }
 
@@ -75,7 +75,7 @@ plan tests => $tests;
 
 # Collect all errors defined in templates
 foreach my $file (keys %test_templates) {
-    $file =~ m|template/([^/]+).*/global/([^/]+)-error\.html\.tmpl|;
+    $file =~ m|template/([^/]+).*/global/([^/]+)-error(?:-errors)?\.html\.tmpl|;
     my $lang = $1;
     my $errtype = $2;
 

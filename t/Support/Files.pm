@@ -23,12 +23,15 @@
 
 package Support::Files;
 
+use Bugzilla;
+
 use File::Find;
 
 @additional_files = ();
 
 @files = glob('*');
-find(sub { push(@files, $File::Find::name) if $_ =~ /\.pm$/;}, 'Bugzilla');
+my @extension_paths = map { $_->package_dir } @{ Bugzilla->extensions };
+find(sub { push(@files, $File::Find::name) if $_ =~ /\.pm$/;}, 'Bugzilla', @extension_paths);
 push(@files, 'extensions/create.pl');
 
 sub isTestingFile {

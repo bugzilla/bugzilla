@@ -1,0 +1,181 @@
+[%# The contents of this file are subject to the Mozilla Public
+  # License Version 1.1 (the "License"); you may not use this file
+  # except in compliance with the License. You may obtain a copy of
+  # the License at http://www.mozilla.org/MPL/
+  #
+  # Software distributed under the License is distributed on an "AS
+  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+  # implied. See the License for the specific language governing
+  # rights and limitations under the License.
+  #
+  # The Original Code is the Bugzilla Bug Tracking System.
+  #
+  # The Initial Developer of the Original Code is Netscape Communications
+  # Corporation. Portions created by Netscape are
+  # Copyright (C) 1998 Netscape Communications Corporation. All
+  # Rights Reserved.
+  #
+  # Contributor(s): Gervase Markham <gerv@gerv.net>
+  #                 Byron Jones <glob@mozilla.com>
+  #%]
+
+[%# INTERFACE
+  # none
+  # 
+  # Param("maintainer") is used to display the maintainer's email.
+  # Param("emailsuffix") is used to pre-fill the email field.
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% title = BLOCK %]
+  Create a new [% terms.Bugzilla %] account
+[% END %]
+
+[% PROCESS global/header.html.tmpl
+   title = title
+   style_urls = [ 'extensions/BMO/web/styles/create_account.css' ]
+%]
+
+<script type="text/javascript">
+function onSubmit() {
+  var email = document.getElementById('login').value;
+  if (email == '') {
+    alert('You must enter your email address.');
+    return false;
+  }
+  var isValid = 
+    email.match(/@/)
+    && email.match(/@.+\./)
+    && !email.match(/\.$/)
+    && !email.match(/[\\()&<>,'"\[\]]/)
+  ;
+  if (!isValid) {
+    alert(
+      "The e-mail address doesn't pass our syntax checking for a legal " +
+      "email address.\n\nA legal address must contain exactly one '@', and " +
+      "at least one '.' after the @.\n\nIt must also not contain any of " +
+      "these special characters: \ ( ) & < > , ; : \" [ ], or any whitespace."
+    );
+    return false;
+  }
+  return true;
+}
+</script>
+
+<table border="0" id="create-account">
+<tr>
+
+<td width="50%" id="create-account-left" valign="top">
+
+  <h2 class="column-header">I need help using a Mozilla Product</h2>
+
+  <table border="0" id="product-list">
+  [% INCLUDE product
+      icon = "firefox"
+      name = "Firefox Support"
+      url = "http://support.mozilla.com/"
+      desc = "Support for the Firefox web browser."
+  %]
+  [% INCLUDE product
+      icon = "firefox"
+      name = "Firefox for Mobile Support"
+      url = "http://support.mozilla.com/mobile"
+      desc = "Support for the Firefox Mobile web browser."
+  %]
+  [% INCLUDE product
+      icon = "thunderbird"
+      name = "Thunderbird Support"
+      url = "http://www.mozillamessaging.com/support/"
+      desc = "Support for Thunderbird email client."
+  %]
+  [% INCLUDE product
+      icon = "other"
+      name = "Support for other products"
+      url = "http://www.mozilla.org/support/"
+      desc = "Support for products not listed here."
+  %]
+  [% INCLUDE product
+      icon = "input"
+      name = "Feedback"
+      url = "http://input.mozilla.com/feedback"
+      desc = "Report issues with web site you use, or provide quick feedback for Firefox."
+  %]
+  [% INCLUDE product
+      icon = "idea"
+      name = "Ideas"
+      url = "http://input.mozilla.com/idea"
+      desc = "Offer us ideas on how to enhance Firefox."
+  %]
+  </table>
+
+</td>
+
+<td width="50%" id="create-account-right" valign="top">
+
+  <h2 class="column-header">I want to help</h2>
+
+  <div id="right-blurb">
+  <p>
+  Great!  There are three things to know and do:
+  </p>
+  <ol>
+  <li>
+    Please consider reading our
+    <a href="https://developer.mozilla.org/en/Bug_writing_guidelines" target="_blank">[% terms.bug %] writing guidelines</a>.
+  </li>
+  <li>
+    [% terms.Bugzilla %] is a public place, so what you type and your email address will be visible
+    to all logged-in users.  Some people use an
+    <a href="http://email.about.com/od/freeemailreviews/tp/free_email.htm" target="_blank">alternative email address</a>
+    for this reason.
+  </li>
+  <li>
+    Please give us an email address you want to use.  Once we confirm that it works,
+    you'll be asked to set a password and then you can start filing [% terms.bugs %] and helping fix them.
+  </li>
+  </ol>
+  </div>
+
+  <h2 class="column-header">Create an account</h2>
+
+  <form method="post" action="createaccount.cgi" onsubmit="return onSubmit()">
+  <table id="create-account-form">
+  <tr>
+    <td class="label">Email Address:</td>
+    <td>
+      <input size="35" id="login" name="login" placeholder="you@example.com">[% Param('emailsuffix') FILTER html %]</td>
+    <td>
+      <input type="submit" value="Create Account">
+     </td>
+    </tr>
+  </table>
+  </form>
+
+</td>
+
+</tr>
+</table>
+
+<p id="bmo-admin">
+  If you think there's something wrong with [% terms.Bugzilla %], you can
+  <a href="mailto:bugzilla-admin@mozilla.org">send an email to the admins</a>, but
+  remember, they can't file [% terms.bugs %] for you, or solve tech support problems.
+</p>
+
+[% PROCESS global/footer.html.tmpl %]
+
+[% BLOCK product %]
+  <tr>
+  <td valign="top">
+    <a href="[% url FILTER none %]"><img
+    src="extensions/BMO/web/producticons/[% icon FILTER uri %].png"
+    border="0" width="64" height="64"></a>
+  </td>
+  <td valign="top">
+    <h2><a href="[% url FILTER none %]">[% name FILTER html %]</a></h2>
+    <div>[% desc FILTER html %]</div>
+  </td>
+  </tr>
+[% END %]
+

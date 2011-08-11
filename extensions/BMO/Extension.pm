@@ -148,7 +148,12 @@ sub page_before_template {
         };
     }
     elsif ($page eq 'fields.html') {
-        $vars->{'fields_page'} = 1;
+        # Recently global/field-descs.none.tmpl and bug/field-help.none.tmpl 
+        # were changed for better performance and are now only loaded once.
+        # I have not found an easy way to allow our hook template to check if
+        # it is called from pages/fields.html.tmpl. So we set a value in request_cache
+        # that our hook template can see. 
+        Bugzilla->request_cache->{'bmo_fields_page'} = 1;
     }
     elsif ($page eq 'remo-form-payment.html') {
         _remo_form_payment($vars);

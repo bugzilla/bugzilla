@@ -245,7 +245,7 @@ sub GenerateUniqueToken {
     $column ||= "token";
 
     my $dbh = Bugzilla->dbh;
-    my $sth = $dbh->prepare("SELECT userid FROM $table WHERE $column = ?");
+    my $sth = $dbh->prepare("SELECT 1 FROM $table WHERE $column = ?");
 
     while ($duplicate) {
         ++$tries;

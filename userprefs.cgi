@@ -51,7 +51,9 @@ sub DoAccount {
     ($vars->{'realname'}) = $dbh->selectrow_array(
         "SELECT realname FROM profiles WHERE userid = ?", undef, $user->id);
 
-    if (Bugzilla->params->{'allowemailchange'} && $user->authorizer->can_change_email) {
+    if (Bugzilla->params->{'allowemailchange'}
+        && $user->authorizer->can_change_email)
+    {
        # First delete old tokens.
        Bugzilla::Token::CleanTokenTable();
 

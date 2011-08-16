@@ -341,7 +341,7 @@ sub GetTokenData {
     trick_taint($token);
 
     return $dbh->selectrow_array(
-        "SELECT userid, " . $dbh->sql_date_format('issuedate') . ", eventdata 
+        "SELECT userid, " . $dbh->sql_date_format('issuedate') . ", eventdata, tokentype
          FROM   tokens 
          WHERE  token = ?", undef, $token);
 }
@@ -359,8 +359,6 @@ sub delete_token {
 
 # Given a token, makes sure it comes from the currently logged in user
 # and match the expected event. Returns 1 on success, else displays a warning.
-# Note: this routine must not be called while tables are locked as it will try
-# to lock some tables itself, see CleanTokenTable().
 sub check_token_data {
     my ($token, $expected_action, $alternate_script) = @_;
     my $user = Bugzilla->user;
@@ -460,7 +458,7 @@ Bugzilla::Token - Provides different routines to manage tokens.
 
     my $token = Bugzilla::Token::GenerateUniqueToken($table, $column);
     my $token = Bugzilla::Token::HasEmailChangeToken($user_id);
-    my ($token, $date, $data) = Bugzilla::Token::GetTokenData($token);
+    my ($token, $date, $data, $type) = Bugzilla::Token::GetTokenData($token);
 
 =head1 SUBROUTINES
 
@@ -561,8 +559,8 @@ Bugzilla::Token - Provides different routines to manage tokens.
 
  Params:      $token - A valid token.
 
- Returns:     The user ID, the date and time when the token was created and
-              the (event)data stored with that token.
+ Returns:     The user ID, the date and time when the token was created,
+              the (event)data stored with that token, and its type.
 
 =back
 

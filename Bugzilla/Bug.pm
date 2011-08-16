@@ -1222,6 +1222,8 @@ sub send_changes {
 sub _send_bugmail {
     my ($params, $vars) = @_;
 
+    require Bugzilla::BugMail;
+
     my $results = 
         Bugzilla::BugMail::Send($params->{'id'}, $params->{'forced'}, $params);
 

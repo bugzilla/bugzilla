@@ -1770,6 +1770,10 @@
     attachment
   [% ELSIF class == "Bugzilla::User" %]
     user
+  [% ELSIF class == "Bugzilla::Classification" %]
+    classification
+  [% ELSIF class == "Bugzilla::Product" %]
+    product
   [% ELSIF class == "Bugzilla::Component" %]
     component
   [% ELSIF class == "Bugzilla::Version" %]
@@ -1788,8 +1792,6 @@
     group
   [% ELSIF class == "Bugzilla::Keyword" %]
     keyword
-  [% ELSIF class == "Bugzilla::Product" %]
-    product
   [% ELSIF class == "Bugzilla::Search::Recent" %]
     recent search
   [% ELSIF class == "Bugzilla::Search::Saved" %]

@@ -698,8 +698,9 @@ sub _checking_for {
     # show "ok" or "not found".
     if (exists $params->{found}) {
         my $found_string;
-        # We do a string compare in case it's non-numeric.
-        if ($found and $found eq "-1") {
+        # We do a string compare in case it's non-numeric. We make sure
+        # it's not a version object as negative versions are forbidden.
+        if ($found && !ref($found) && $found eq '-1') {
             $found_string = install_string('module_not_found');
         }
         elsif ($found) {

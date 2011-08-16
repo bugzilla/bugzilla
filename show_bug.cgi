@@ -43,7 +43,7 @@ my $single = !$cgi->param('format')
 
 # If we don't have an ID, _AND_ we're only doing a single bug, then prompt
 if (!$cgi->param('id') && $single) {
-    print Bugzilla->cgi->header();
+    print $cgi->header();
     $template->process("bug/choose.html.tmpl", $vars) ||
       ThrowTemplateError($template->error());
     exit;
@@ -111,7 +111,7 @@ if ($cgi->param("field")) {
     @fieldlist = $cgi->param("field");
 }
 
-unless (Bugzilla->user->is_timetracker) {
+unless ($user->is_timetracker) {
     @fieldlist = grep($_ !~ /(^deadline|_time)$/, @fieldlist);
 }
 

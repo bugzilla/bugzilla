@@ -389,7 +389,7 @@ if ($cmdtype eq "dorem") {
         # so that it can be modified easily.
         $vars->{'searchname'} = $cgi->param('namedcmd');
         if (!$cgi->param('sharer_id') ||
-            $cgi->param('sharer_id') == Bugzilla->user->id) {
+            $cgi->param('sharer_id') == $user->id) {
             $vars->{'searchtype'} = "saved";
             $vars->{'search_id'} = $query_id;
         }
@@ -590,7 +590,7 @@ else {
 
 # Remove the timetracking columns if they are not a part of the group
 # (happens if a user had access to time tracking and it was revoked/disabled)
-if (!Bugzilla->user->is_timetracker) {
+if (!$user->is_timetracker) {
    @displaycolumns = grep($_ ne 'estimated_time', @displaycolumns);
    @displaycolumns = grep($_ ne 'remaining_time', @displaycolumns);
    @displaycolumns = grep($_ ne 'actual_time', @displaycolumns);
@@ -793,7 +793,7 @@ if ($cgi->param('debug')) {
     # out how many hidden bugs are in a particular product (by doing
     # searches and looking at the number of rows the explain says it's
     # examining).
-    if (Bugzilla->user->in_group('admin')) {
+    if ($user->in_group('admin')) {
         $vars->{'query_explain'} = $dbh->bz_explain($query);
     }
 }
@@ -984,10 +984,10 @@ $vars->{'order'} = $order;
 $vars->{'caneditbugs'} = 1;
 $vars->{'time_info'} = $time_info;
 
-if (!Bugzilla->user->in_group('editbugs')) {
+if (!$user->in_group('editbugs')) {
     foreach my $product (keys %$bugproducts) {
         my $prod = new Bugzilla::Product({name => $product});
-        if (!Bugzilla->user->in_group('editbugs', $prod->id)) {
+        if (!$user->in_group('editbugs', $prod->id)) {
             $vars->{'caneditbugs'} = 0;
             last;
         }
@@ -995,7 +995,7 @@ if (!Bugzilla->user->in_group('editbugs')) {
 }
 
 my @bugowners = keys %$bugowners;
-if (scalar(@bugowners) > 1 && Bugzilla->user->in_group('editbugs')) {
+if (scalar(@bugowners) > 1 && $user->in_group('editbugs')) {
     my $suffix = Bugzilla->params->{'emailsuffix'};
     map(s/$/$suffix/, @bugowners) if $suffix;
     my $bugowners = join(",", @bugowners);
@@ -1024,7 +1024,7 @@ elsif (my @product_input = $cgi->param('product')) {
 }
 # We only want the template to use it if the user can actually 
 # enter bugs against it.
-if ($one_product && Bugzilla->user->can_enter_product($one_product)) {
+if ($one_product && $user->can_enter_product($one_product)) {
     $vars->{'one_product'} = $one_product;
 }
 
@@ -1043,7 +1043,7 @@ if ($dotweak && scalar @bugs) {
     $vars->{'token'} = issue_session_token('buglist_mass_change');
     Bugzilla->switch_to_shadow_db();
 
-    $vars->{'products'} = Bugzilla->user->get_enterable_products;
+    $vars->{'products'} = $user->get_enterable_products;
     $vars->{'platforms'} = get_legal_field_values('rep_platform');
     $vars->{'op_sys'} = get_legal_field_values('op_sys');
     $vars->{'priorities'} = get_legal_field_values('priority');

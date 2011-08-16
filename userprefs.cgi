@@ -51,8 +51,7 @@ sub DoAccount {
     ($vars->{'realname'}) = $dbh->selectrow_array(
         "SELECT realname FROM profiles WHERE userid = ?", undef, $user->id);
 
-    if(Bugzilla->params->{'allowemailchange'} 
-       && Bugzilla->user->authorizer->can_change_email) {
+    if (Bugzilla->params->{'allowemailchange'} && $user->authorizer->can_change_email) {
        # First delete old tokens.
        Bugzilla::Token::CleanTokenTable();
 
@@ -493,9 +492,9 @@ $cgi->delete('Bugzilla_login', 'Bugzilla_password') if ($cgi->cookie('sudo'));
 $cgi->delete('GoAheadAndLogIn');
 
 # First try to get credentials from cookies.
-Bugzilla->login(LOGIN_OPTIONAL);
+my $user = Bugzilla->login(LOGIN_OPTIONAL);
 
-if (!Bugzilla->user->id) {
+if (!$user->id) {
     # Use credentials given in the form if login cookies are not available.
     $cgi->param('Bugzilla_login', $cgi->param('old_login'));
     $cgi->param('Bugzilla_password', $cgi->param('old_password'));

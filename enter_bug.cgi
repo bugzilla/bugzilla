@@ -267,7 +267,7 @@ if ($cloned_bug_id) {
     $vars->{'comment'} = "";
     $vars->{'comment_is_private'} = 0;
 
-    if (!$isprivate || Bugzilla->user->is_insider) {
+    if (!$isprivate || $user->is_insider) {
         # We use "body" to avoid any format_comment text, which would be
         # pointless to clone.
         $vars->{'comment'} = $bug_desc->body;

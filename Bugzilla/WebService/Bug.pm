@@ -670,10 +670,10 @@ sub add_attachment {
 
 sub add_comment {
     my ($self, $params) = @_;
-    
-    #The user must login in order add a comment
-    Bugzilla->login(LOGIN_REQUIRED);
-    
+
+    # The user must login in order add a comment
+    my $user = Bugzilla->login(LOGIN_REQUIRED);
+
     # Check parameters
     defined $params->{id} 
         || ThrowCodeError('param_required', { param => 'id' }); 
@@ -682,8 +682,8 @@ sub add_comment {
         || ThrowCodeError('param_required', { param => 'comment' });
     
     my $bug = Bugzilla::Bug->check($params->{id});
-    
-    Bugzilla->user->can_edit_product($bug->product_id)
+
+    $user->can_edit_product($bug->product_id)
         || ThrowUserError("product_edit_denied", {product => $bug->product});
     
     # Backwards-compatibility for versions before 3.6    
@@ -707,8 +707,8 @@ sub add_comment {
     $dbh->bz_commit_transaction();
     
     # Send mail.
-    Bugzilla::BugMail::Send($bug->bug_id, { changer => Bugzilla->user });
-    
+    Bugzilla::BugMail::Send($bug->bug_id, { changer => $user });
+
     return { id => $self->type('int', $new_comment_id) };
 }
 

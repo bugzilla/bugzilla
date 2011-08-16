@@ -29,7 +29,7 @@ use Bugzilla::Error;
 use Bugzilla::User;
 use Bugzilla::Keyword;
 
-Bugzilla->login();
+my $user = Bugzilla->login();
 
 my $cgi = Bugzilla->cgi;
 my $template = Bugzilla->template;
@@ -39,8 +39,8 @@ my $vars = {};
 Bugzilla->switch_to_shadow_db;
 
 $vars->{'keywords'} = Bugzilla::Keyword->get_all_with_bug_count();
-$vars->{'caneditkeywords'} = Bugzilla->user->in_group("editkeywords");
+$vars->{'caneditkeywords'} = $user->in_group("editkeywords");
 
-print Bugzilla->cgi->header();
+print $cgi->header();
 $template->process("reports/keywords.html.tmpl", $vars)
   || ThrowTemplateError($template->error());

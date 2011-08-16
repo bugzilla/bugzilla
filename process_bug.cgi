@@ -216,7 +216,7 @@ else {
 # For each bug, we have to check if the user can edit the bug the product
 # is currently in, before we allow them to change anything.
 foreach my $bug (@bug_objects) {
-    if (!Bugzilla->user->can_edit_product($bug->product_obj->id) ) {
+    if (!$user->can_edit_product($bug->product_obj->id)) {
         ThrowUserError("product_edit_denied",
                       { product => $bug->product });
     }
@@ -301,7 +301,7 @@ if (defined $cgi->param('newcc')
         }
     } else {
         @cc_add = $cgi->param('newcc');
-        push(@cc_add, Bugzilla->user) if $cgi->param('addselfcc');
+        push(@cc_add, $user) if $cgi->param('addselfcc');
 
         # We came from show_bug which uses a select box to determine what cc's
         # need to be removed...
@@ -378,7 +378,7 @@ foreach my $bug (@bug_objects) {
         # status, so we should inform the user about that.
         if (!is_open_state($new_status) && $changes->{'remaining_time'}) {
             $vars->{'message'} = "remaining_time_zeroed"
-              if Bugzilla->user->is_timetracker;
+              if $user->is_timetracker;
         }
     }
 

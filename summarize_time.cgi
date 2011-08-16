@@ -250,10 +250,9 @@ sub get_earliest_activity_date {
 # Template code starts here
 #
 
-Bugzilla->login(LOGIN_REQUIRED);
+my $user = Bugzilla->login(LOGIN_REQUIRED);
 
 my $cgi = Bugzilla->cgi;
-my $user = Bugzilla->user;
 my $template = Bugzilla->template;
 my $vars = {};
 

@@ -202,7 +202,7 @@ foreach my $val (editable_bug_fields()) {
     push @chfields, $val;
 }
 
-if (Bugzilla->user->is_timetracker) {
+if ($user->is_timetracker) {
     push @chfields, "work_time";
 } else {
     @chfields = grep($_ ne "estimated_time", @chfields);
@@ -221,7 +221,7 @@ $vars->{'resolution'} = Bugzilla::Field->new({name => 'resolution'})->legal_valu
 my @fields = @{ Bugzilla->fields({ obsolete => 0 }) };
 
 # If we're not in the time-tracking group, exclude time-tracking fields.
-if (!Bugzilla->user->is_timetracker) {
+if (!$user->is_timetracker) {
     foreach my $tt_field (TIMETRACKING_FIELDS) {
         @fields = grep($_->name ne $tt_field, @fields);
     }

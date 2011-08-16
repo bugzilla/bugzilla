@@ -38,7 +38,7 @@ use Bugzilla::Util;
 # Just in case someone already has an account, let them get the correct footer
 # on an error message. The user is logged out just after the account is
 # actually created.
-Bugzilla->login(LOGIN_OPTIONAL);
+my $user = Bugzilla->login(LOGIN_OPTIONAL);
 
 my $dbh = Bugzilla->dbh;
 my $cgi = Bugzilla->cgi;
@@ -50,7 +50,7 @@ $vars->{'doc_section'} = 'myaccount.html';
 print $cgi->header();
 
 # If we're using LDAP for login, then we can't create a new account here.
-unless (Bugzilla->user->authorizer->user_can_create_account) {
+unless ($user->authorizer->user_can_create_account) {
     ThrowUserError("auth_cant_create_account");
 }
 

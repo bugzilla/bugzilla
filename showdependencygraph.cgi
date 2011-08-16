@@ -35,7 +35,7 @@ use Bugzilla::Error;
 use Bugzilla::Bug;
 use Bugzilla::Status;
 
-Bugzilla->login();
+my $user = Bugzilla->login();
 
 my $cgi = Bugzilla->cgi;
 my $template = Bugzilla->template;
@@ -189,7 +189,7 @@ foreach my $k (keys(%seen)) {
     my ($stat, $resolution, $summary) = $dbh->selectrow_array($sth, undef, $k);
 
     # Resolution and summary are shown only if user can see the bug
-    if (!Bugzilla->user->can_see_bug($k)) {
+    if (!$user->can_see_bug($k)) {
         $resolution = $summary = '';
     }
 

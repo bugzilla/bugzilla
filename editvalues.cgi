@@ -47,7 +47,7 @@ sub display_field_values {
 ######################################################################
 
 # require the user to have logged in
-Bugzilla->login(LOGIN_REQUIRED);
+my $user = Bugzilla->login(LOGIN_REQUIRED);
 
 my $dbh      = Bugzilla->dbh;
 my $cgi      = Bugzilla->cgi;
@@ -60,10 +60,10 @@ $vars->{'doc_section'} = 'edit-values.html';
 
 print $cgi->header();
 
-Bugzilla->user->in_group('admin') ||
-    ThrowUserError('auth_failure', {group  => "admin",
-                                    action => "edit",
-                                    object => "field_values"});
+$user->in_group('admin')
+  || ThrowUserError('auth_failure', {group  => "admin",
+                                     action => "edit",
+                                     object => "field_values"});
 
 #
 # often-used variables

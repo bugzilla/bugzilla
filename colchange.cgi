@@ -53,7 +53,7 @@ use constant COLUMN_CLASSES => {
     'Bugzilla::Keyword' => 'keywords',
 };
 
-Bugzilla->login();
+my $user = Bugzilla->login();
 
 my $cgi = Bugzilla->cgi;
 my $template = Bugzilla->template;
@@ -77,7 +77,7 @@ foreach my $class (keys %{ COLUMN_CLASSES() }) {
     delete $columns->{$column} if !$class->any_exist;
 }
 
-if (!Bugzilla->user->is_timetracker) {
+if (!$user->is_timetracker) {
     foreach my $column (TIMETRACKING_FIELDS) {
         delete $columns->{$column};
     }
@@ -138,7 +138,7 @@ if (defined $cgi->param('rememberedquery')) {
     $vars->{'message'} = "change_columns";
 
     if ($cgi->param('save_columns_for_search')
-        && defined $search && $search->user->id == Bugzilla->user->id) 
+        && defined $search && $search->user->id == $user->id)
     {
         my $params = new Bugzilla::CGI($search->url);
         $params->param('columnlist', join(",", @collist));
@@ -188,7 +188,7 @@ $vars->{'buffer'} = $cgi->query_string();
 
 my $search;
 if (defined $cgi->param('query_based_on')) {
-    my $searches = Bugzilla->user->queries;
+    my $searches = $user->queries;
     my ($search) = grep($_->name eq $cgi->param('query_based_on'), @$searches);
 
     if ($search) {

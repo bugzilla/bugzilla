@@ -56,27 +56,28 @@ unless ($action eq 'reqpw') {
     $tokentype || ThrowUserError("token_does_not_exist");
 
     # Make sure the token is the correct type for the action being taken.
-    my $error;
+    # The { user_error => 'wrong_token_for_*' } trick is to make 012throwables.t happy.
+    my $error = {};
     if (grep($action eq $_ , qw(cfmpw cxlpw chgpw)) && $tokentype ne 'password') {
-        $error = 'wrong_token_for_changing_passwd';
+        $error = { user_error => 'wrong_token_for_changing_passwd' };
     }
     elsif ($action eq 'cxlem'
            && ($tokentype ne 'emailold' && $tokentype ne 'emailnew'))
     {
-        $error = 'wrong_token_for_cancelling_email_change';
+        $error = { user_error => 'wrong_token_for_cancelling_email_change' };
     }
     elsif (grep($action eq $_ , qw(cfmem chgem)) && $tokentype ne 'emailnew') {
-        $error = 'wrong_token_for_confirming_email_change';
+        $error = { user_error => 'wrong_token_for_confirming_email_change' };
     }
     elsif ($action =~ /^(request|confirm|cancel)_new_account$/
            && $tokentype ne 'account')
     {
-        $error = 'wrong_token_for_creating_account';
+        $error = { user_error => 'wrong_token_for_creating_account' };
     }
 
-    if ($error) {
-        Bugzilla::Token::Cancel($token, $error);
-        ThrowUserError($error);
+    if (my $user_error = $error->{user_error}) {
+        Bugzilla::Token::Cancel($token, $user_error);
+        ThrowUserError($user_error);
     }
 }
 

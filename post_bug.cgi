@@ -153,14 +153,17 @@ my %bug_params;
 foreach my $field (@bug_fields) {
     $bug_params{$field} = $cgi->param($field);
 }
-$bug_params{'cc'}          = [$cgi->param('cc')];
-$bug_params{'groups'}      = [$cgi->param('groups')];
-$bug_params{'comment'}     = $comment;
+foreach my $field (qw(cc groups)) {
+    next if !$cgi->should_set($field);
+    $bug_params{$field} = [$cgi->param($field)];
+}
+$bug_params{'comment'} = $comment;
 
 my @multi_selects = grep {$_->type == FIELD_TYPE_MULTI_SELECT && $_->enter_bug}
                          Bugzilla->active_custom_fields;
 
 foreach my $field (@multi_selects) {
+    next if !$cgi->should_set($field->name);
     $bug_params{$field->name} = [$cgi->param($field->name)];
 }
 

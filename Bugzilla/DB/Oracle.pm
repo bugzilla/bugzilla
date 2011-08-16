@@ -312,9 +312,6 @@ sub adjust_statement {
     my $is_select = ($part =~ m/^\s*SELECT\b/io);
     my $has_from =  ($part =~ m/\bFROM\b/io) if $is_select;
 
-    # Oracle recognizes CURRENT_DATE, but not CURRENT_DATE()
-    $part =~ s/\bCURRENT_DATE\b\(\)/CURRENT_DATE/io;
-    
     # Oracle use SUBSTR instead of SUBSTRING
     $part =~ s/\bSUBSTRING\b/SUBSTR/io;
    
@@ -343,18 +340,11 @@ sub adjust_statement {
         $has_from = ($nonstring =~ m/\bFROM\b/io) 
                     if ($is_select and !$has_from);
 
-        # Oracle recognizes CURRENT_DATE, but not CURRENT_DATE()
-        $nonstring =~ s/\bCURRENT_DATE\b\(\)/CURRENT_DATE/io;
-
         # Oracle use SUBSTR instead of SUBSTRING
         $nonstring =~ s/\bSUBSTRING\b/SUBSTR/io;
-        
+
         # Oracle need no 'AS'
         $nonstring =~ s/\bAS\b//ig;
-        
-        # Take the first 4000 chars for comparison  
-        $nonstring =~ s/\(\s*(longdescs_\d+\.thetext|attachdata_\d+\.thedata)/
-                      \(DBMS_LOB.SUBSTR\($1, 4000, 1\)/ig;
 
         # Look for a LIMIT clause
         ($limit) = ($nonstring =~ m(/\* LIMIT (\d*) \*/)o);

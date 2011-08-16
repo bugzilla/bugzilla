@@ -559,8 +559,8 @@ sub possible_duplicates {
            FROM bugs
                 INNER JOIN bugs_fulltext ON bugs.bug_id = bugs_fulltext.bug_id
           WHERE ($where_sql) $product_sql
-       ORDER BY relevance DESC, bug_id DESC
-          LIMIT $sql_limit", {Slice=>{}});
+       ORDER BY relevance DESC, bug_id DESC " .
+          $dbh->sql_limit($sql_limit), {Slice=>{}});
 
     my @actual_dupe_ids;
     # Resolve duplicates into their ultimate target duplicates.

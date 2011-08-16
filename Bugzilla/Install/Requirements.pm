@@ -261,6 +261,12 @@ sub OPTIONAL_MODULES {
         feature => ['smtp_auth'],
     },
     {
+        package => 'Net-SMTP-SSL',
+        module  => 'Net::SMTP::SSL',
+        version => 1.01,
+        feature => ['smtp_ssl'],
+    },
+    {
         package => 'RadiusPerl',
         module  => 'Authen::Radius',
         version => 0,

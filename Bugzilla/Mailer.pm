@@ -164,6 +164,7 @@ sub MessageToMTA {
                     username => Bugzilla->params->{"smtp_username"},
                     password => Bugzilla->params->{"smtp_password"},
                     Hello => $hostname, 
+                    ssl => Bugzilla->params->{'smtp_ssl'},
                     Debug => Bugzilla->params->{'smtp_debug'};
     }
 

@@ -81,6 +81,12 @@ sub get_param_list {
    default => ''
   },
   {
+   name => 'smtp_ssl',
+   type => 'b',
+   default => 0,
+   checker => \&check_smtp_ssl
+  },
+  {
    name => 'smtp_debug',
    type => 'b',
    default => 0

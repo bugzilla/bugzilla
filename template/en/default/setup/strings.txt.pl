@@ -106,6 +106,7 @@ END
     feature_moving            => 'Move Bugs Between Installations',
     feature_patch_viewer      => 'Patch Viewer',
     feature_smtp_auth         => 'SMTP Authentication',
+    feature_smtp_ssl          => 'SSL Support for SMTP',
     feature_updates           => 'Automatic Update Notifications',
     feature_xmlrpc            => 'XML-RPC Interface',
     feature_detect_charset    => 'Automatic charset detection for text attachments',

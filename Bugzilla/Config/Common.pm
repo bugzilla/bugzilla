@@ -51,7 +51,7 @@ use base qw(Exporter);
        check_user_verify_class
        check_mail_delivery_method check_notification check_utf8
        check_bug_status check_smtp_auth check_theschwartz_available
-       check_maxattachmentsize check_email
+       check_maxattachmentsize check_email check_smtp_ssl
 );
 
 # Checking functions for the various values
@@ -346,6 +346,14 @@ sub check_smtp_auth {
     if ($username and !Bugzilla->feature('smtp_auth')) {
         return "SMTP Authentication is not available. Run checksetup.pl for"
                . " more details";
+    }
+    return "";
+}
+
+sub check_smtp_ssl {
+    my $use_ssl = shift;
+    if ($use_ssl && !Bugzilla->feature('smtp_ssl')) {
+        return "SSL support is not available. Run checksetup.pl for more details";
     }
     return "";
 }

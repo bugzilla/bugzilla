@@ -177,7 +177,7 @@ sub sql_fulltext_search {
     my ($self, $column, $text, $label) = @_;
     $text = $self->quote($text);
     trick_taint($text);
-    return "CONTAINS($column,$text,$label)", "SCORE($label)";
+    return "CONTAINS($column,$text,$label) > 0", "SCORE($label)";
 }
 
 sub sql_date_format {

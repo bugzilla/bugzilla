@@ -168,14 +168,7 @@ sub remove_from_db {
             ThrowUserError('component_has_bugs', {nb => $self->bug_count});
         }
     }
-
-    $dbh->do('DELETE FROM flaginclusions WHERE component_id = ?',
-             undef, $self->id);
-    $dbh->do('DELETE FROM flagexclusions WHERE component_id = ?',
-             undef, $self->id);
-    $dbh->do('DELETE FROM component_cc WHERE component_id = ?',
-             undef, $self->id);
-    $dbh->do('DELETE FROM components WHERE id = ?', undef, $self->id);
+    $self->SUPER::remove_from_db();
 
     $dbh->bz_commit_transaction();
 }

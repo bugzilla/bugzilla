@@ -766,7 +766,7 @@ if ($fulltext and grep { /^relevance/ } @orderstrings) {
 # In the HTML interface, by default, we limit the returned results,
 # which speeds up quite a few searches where people are really only looking
 # for the top results.
-if ($format->{'extension'} eq 'html' && !defined $cgi->param('limit')) {
+if ($format->{'extension'} eq 'html' && !defined $params->param('limit')) {
     $params->param('limit', Bugzilla->params->{'default_search_limit'});
     $vars->{'default_limited'} = 1;
 }

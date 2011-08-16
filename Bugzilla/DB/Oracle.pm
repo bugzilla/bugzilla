@@ -379,20 +379,17 @@ sub adjust_statement {
         if ($new_sql !~ /\bWHERE\b/) {
             $new_sql = $new_sql." WHERE 1=1";
         }
-         my ($before_where, $after_where) = split /\bWHERE\b/i,$new_sql;
-         if (defined($offset)) {
-             if ($new_sql =~ /(.*\s+)FROM(\s+.*)/i) { 
-                 my ($before_from,$after_from) = ($1,$2);
-                 $before_where = "$before_from FROM ($before_from,"
-                             . " ROW_NUMBER() OVER (ORDER BY 1) R "
-                             . " FROM $after_from ) "; 
-                 $after_where = " R BETWEEN $offset+1 AND $limit+$offset";
-             }
-         } else {
-                 $after_where = " rownum <=$limit AND ".$after_where;
-         }
-
-         $new_sql = $before_where." WHERE ".$after_where;
+        my ($before_where, $after_where) = split(/\bWHERE\b/i, $new_sql, 2);
+        if (defined($offset)) {
+            my ($before_from, $after_from) = split(/\bFROM\b/i, $new_sql, 2);
+            $before_where = "$before_from FROM ($before_from,"
+                          . " ROW_NUMBER() OVER (ORDER BY 1) R "
+                          . " FROM $after_from ) "; 
+            $after_where = " R BETWEEN $offset+1 AND $limit+$offset";
+        } else {
+            $after_where = " rownum <=$limit AND ".$after_where;
+        }
+        $new_sql = $before_where." WHERE ".$after_where;
     }
     return $new_sql;
 }

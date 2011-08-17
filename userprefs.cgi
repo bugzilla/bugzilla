@@ -84,8 +84,6 @@ sub SaveAccount {
     my $oldpassword = $cgi->param('old_password');
     my $pwd1 = $cgi->param('new_password1');
     my $pwd2 = $cgi->param('new_password2');
-
-    my $old_login_name = $user->login;
     my $new_login_name = trim($cgi->param('new_login_name'));
 
     if ($user->authorizer->can_change_password
@@ -119,7 +117,7 @@ sub SaveAccount {
         && Bugzilla->params->{"allowemailchange"}
         && $new_login_name)
     {
-        if ($old_login_name ne $new_login_name) {
+        if ($user->login ne $new_login_name) {
             $oldpassword || ThrowUserError("old_password_required");
 
             # Block multiple email changes for the same user.
@@ -133,8 +131,7 @@ sub SaveAccount {
             is_available_username($new_login_name)
               || ThrowUserError("account_exists", {email => $new_login_name});
 
-            Bugzilla::Token::IssueEmailChangeToken($user, $old_login_name,
-                                                   $new_login_name);
+            Bugzilla::Token::IssueEmailChangeToken($user, $new_login_name);
 
             $vars->{'email_changes_saved'} = 1;
         }

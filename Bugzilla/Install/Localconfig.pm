@@ -245,7 +245,8 @@ sub update_localconfig {
     # Move any custom or old variables into a separate file.
     if (scalar @old_vars) {
         my $filename_old = "$filename.old";
-        open(my $old_file, ">>$filename_old") || die "$filename_old: $!";
+        open(my $old_file, ">>:utf8", $filename_old) 
+            or die "$filename_old: $!";
         local $Data::Dumper::Purity = 1;
         foreach my $var (@old_vars) {
             print $old_file Data::Dumper->Dump([$localconfig->{$var}], 
@@ -259,7 +260,7 @@ sub update_localconfig {
     }
 
     # Re-write localconfig
-    open(my $fh, ">$filename") || die "$filename: $!";
+    open(my $fh, ">:utf8", $filename) or die "$filename: $!";
     foreach my $var (LOCALCONFIG_VARS) {
         my $name = $var->{name};
         my $desc = install_string("localconfig_$name", { root => ROOT_USER });

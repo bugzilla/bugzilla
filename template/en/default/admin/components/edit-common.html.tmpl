@@ -22,16 +22,20 @@
   # comp: object; Bugzilla::Component object.
   #%]
 
+[%# When called from the "New Product" page, the component description field
+  # must have a name different from the product description field. %]
+[% DEFAULT desc_name = "description" %]
+
 <tr>
-  <td valign="top">Component:</td>
+  <th align="right">Component:</th>
   <td><input size="64" maxlength="64" name="component"
              value="[%- comp.name FILTER html %]"></td>
 </tr>
 <tr>
-  <td valign="top">Component Description:</td>
+  <th align="right">Component Description:</th>
   <td>
     [% INCLUDE global/textarea.html.tmpl
-      name           = 'description'
+      name           = desc_name
       minrows        = 4
       cols           = 64
       wrap           = 'virtual'
@@ -40,7 +44,7 @@
   </td>
 </tr>
 <tr>
-  <td valign="top"><label for="initialowner">Default Assignee:</label></td>
+  <th align="right"><label for="initialowner">Default Assignee:</label></th>
   <td>
     [% INCLUDE global/userselect.html.tmpl
        name => "initialowner"
@@ -52,7 +56,7 @@
 </tr>
 [% IF Param('useqacontact') %]
   <tr>
-    <td valign="top"><label for="initialqacontact">Default QA contact:</label></td>
+    <th align="right"><label for="initialqacontact">Default QA contact:</label></th>
     <td>
       [% INCLUDE global/userselect.html.tmpl
          name => "initialqacontact"
@@ -65,9 +69,7 @@
   </tr>
 [% END %]
 <tr>
-  <td valign="top">
-    <label for="initialcc">Default CC List:</label>
-  </td>
+  <th align="right"><label for="initialcc">Default CC List:</label></th>
   <td>
     [% INCLUDE global/userselect.html.tmpl
        name     => "initialcc"

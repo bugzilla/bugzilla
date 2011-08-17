@@ -796,9 +796,7 @@
 
   [% ELSIF message_tag == "product_created" %]
     [% title = "Product Created" %]
-    The product <em>[% product.name FILTER html %]</em> has been created. You will need to
-    <a href="editcomponents.cgi?action=add&product=[% product.name FILTER uri %]">
-    add at least one component</a> before anyone can enter [% terms.bugs %] against this product.
+    The product <em>[% product.name FILTER html %]</em> has been created.
 
   [% ELSIF message_tag == "product_deleted" %]
     [% title = "Product Deleted" %]

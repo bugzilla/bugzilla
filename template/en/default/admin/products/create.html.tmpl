@@ -25,7 +25,8 @@
 [% PROCESS global/header.html.tmpl
   title = title
   style_urls = ['skins/standard/admin.css']
-  javascript_urls = ['js/util.js']
+  javascript_urls = ['js/util.js', 'js/field.js']
+  yui = [ 'autocomplete' ]
 %]
 
 [% DEFAULT
@@ -42,7 +43,7 @@
 
     <tr>
       <th align="right">Version:</th>
-      <td><input size="64" maxlength="255" name="version" 
+      <td><input size="20" maxlength="64" name="version" 
                 value="[% version FILTER html %]">
       </td>
     </tr>
@@ -52,6 +53,18 @@
         <input type="checkbox" name="createseries" value="1" checked="checked">
       </td>
     </tr>
+
+    <tr>
+      <td colspan="2">&nbsp;</td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        This product must have at least one component.
+        You will be able to create additional components later:
+      </td>
+    </tr>
+
+    [% PROCESS "admin/components/edit-common.html.tmpl" desc_name = "comp_desc" %]
   </table>
 
   <input type="submit" id="add-product" value="Add">

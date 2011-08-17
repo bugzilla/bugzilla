@@ -373,6 +373,11 @@
     You must reassign those [% terms.bugs %] to another component before you
     can delete this one.
 
+  [% ELSIF error == "component_is_last" %]
+    [% title = BLOCK %]Last Component in this Product[% END %]
+    '[% comp.name FILTER html %]' is the last component of the
+    '[% comp.product.name FILTER html %]' product. You cannot delete it.
+
   [% ELSIF error == "component_name_too_long" %]
     [% title = "Component Name Is Too Long" %]
     The name of a component is limited to [% constants.MAX_COMPONENT_SIZE FILTER html %]
@@ -1629,6 +1634,11 @@
     There are [% nb FILTER html %] [%+ terms.bugs %] associated with this
     version! You must reassign those [% terms.bugs %] to another version
     before you can delete this one.
+
+  [% ELSIF error == "version_is_last" %]
+    [% title = BLOCK %]Last Version in this Product[% END %]
+    '[% version.name FILTER html %]' is the last version of the
+    '[% version.product.name FILTER html %]' product. You cannot delete it.
 
   [% ELSIF error == "users_deletion_disabled" %]
     [% title = "Deletion not activated" %]

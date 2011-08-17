@@ -25,7 +25,7 @@
 
 [% IF Param('useclassification') %]
   <tr>
-    <th align="right"><b>Classification:</b></th>
+    <th align="right">Classification:</th>
     <td><b>[% classification.name FILTER html %]</b></td>
   </tr>
 [% END %]
@@ -40,6 +40,23 @@
   <th align="right">Description:</th>
   <td><textarea rows="4" cols="64" wrap="virtual" name="description">
         [% product.description FILTER html %]</textarea>
+  </td>
+</tr>
+
+<tr>
+  <th align="right">Open for [% terms.bug %] entry:</th>
+  <td><input type="checkbox" name="is_active" value="1"
+       [% ' checked="checked"' IF product.is_active %]>
+  </td>
+</tr>
+<tr>
+  <th align="right">
+    <label for="allows_unconfirmed">Enable the
+      [%+ display_value('bug_status', 'UNCONFIRMED') FILTER html %] status
+      in this product:</label>
+  </th>
+  <td><input type="checkbox" id="allows_unconfirmed" name="allows_unconfirmed"
+             [% ' checked="checked"' IF product.allows_unconfirmed %]>
   </td>
 </tr>
 
@@ -63,21 +80,4 @@
   </tr>
 [% END %]
     
-<tr>
-  <th align="right">Open for [% terms.bug %] entry:</th>
-  <td><input type="checkbox" name="is_active" value="1"
-       [% ' checked="checked"' IF product.is_active %]>
-  </td>
-</tr>
-<tr>
-  <th align="right">
-    <label for="allows_unconfirmed">Enable the
-      [%+ display_value('bug_status', 'UNCONFIRMED') FILTER html %] status
-      in this product:</label>
-  </th>
-  <td><input type="checkbox" id="allows_unconfirmed" name="allows_unconfirmed"
-             [% ' checked="checked"' IF product.allows_unconfirmed %]>
-  </td>
-</tr>
-
 [% Hook.process('rows') %]

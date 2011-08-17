@@ -37,6 +37,7 @@ use Bugzilla::Util;
 use Bugzilla::Error;
 use Bugzilla::Group;
 use Bugzilla::Product;
+use Bugzilla::Component;
 use Bugzilla::Classification;
 use Bugzilla::Token;
 
@@ -176,7 +177,13 @@ if ($action eq 'new') {
 
     check_token_data($token, 'add_product');
 
-    my %create_params = (
+    Bugzilla::User::match_field ({
+        'initialowner'     => { 'type' => 'single' },
+        'initialqacontact' => { 'type' => 'single' },
+        'initialcc'        => { 'type' => 'multi'  },
+    });
+
+    my %product_create_params = (
         classification   => $classification_name,
         name             => $product_name,
         description      => scalar $cgi->param('description'),
@@ -186,7 +193,23 @@ if ($action eq 'new') {
         create_series    => scalar $cgi->param('createseries'),
         allows_unconfirmed => scalar $cgi->param('allows_unconfirmed'),
     );
-    my $product = Bugzilla::Product->create(\%create_params);
+
+    $dbh->bz_start_transaction();
+    my $product = Bugzilla::Product->create(\%product_create_params);
+
+    my @initial_cc = $cgi->param('initialcc');
+    my %component_create_params = (
+        product          => $product,
+        name             => trim($cgi->param('component') || ''),
+        description      => scalar $cgi->param('comp_desc'),
+        initialowner     => scalar $cgi->param('initialowner'),
+        initialqacontact => scalar $cgi->param('initialqacontact'),
+        initial_cc       => \@initial_cc,
+        create_series    => scalar $cgi->param('createseries'),
+   );
+
+    Bugzilla::Component->create(\%component_create_params);
+    $dbh->bz_commit_transaction();
 
     delete_token($token);
 

@@ -229,6 +229,13 @@
   [% ELSIF san_tag == "profile_login_start" %]
     Checking profile logins.
 
+  [% ELSIF san_tag == "product_alert" %]
+    Product <a href="editproducts.cgi?product=[% name FILTER html%]">
+    [%- name FILTER html %]</a> has no components or no versions.
+
+  [% ELSIF san_tag == "product_check_start" %]
+    Checking products with no components or versions.
+
   [% ELSIF san_tag == "profile_login_alert" %]
     Bad profile email address, id=[% id FILTER html %],
     &lt;[% email FILTER html %]&gt;.

@@ -748,6 +748,26 @@ if (scalar(@invalid_flags)) {
 }
 
 ###########################################################################
+# Check for products with no component
+###########################################################################
+
+Status('product_check_start');
+
+my $products_missing_data = $dbh->selectcol_arrayref(
+      'SELECT DISTINCT products.name
+         FROM products
+    LEFT JOIN components
+           ON components.product_id = products.id
+    LEFT JOIN versions
+           ON versions.product_id = products.id
+        WHERE components.id IS NULL
+           OR versions.id IS NULL');
+
+if (scalar(@$products_missing_data)) {
+    Status('product_alert', { name => $_ }, 'alert') foreach @$products_missing_data;
+}
+
+###########################################################################
 # General bug checks
 ###########################################################################
 

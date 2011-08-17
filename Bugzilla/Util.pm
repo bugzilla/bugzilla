@@ -31,13 +31,12 @@ package Bugzilla::Util;
 use strict;
 
 use base qw(Exporter);
-@Bugzilla::Util::EXPORT = qw(trick_taint detaint_natural
-                             detaint_signed
+@Bugzilla::Util::EXPORT = qw(trick_taint detaint_natural detaint_signed
                              html_quote url_quote xml_quote
                              css_class_quote html_light_quote url_decode
                              i_am_cgi correct_urlbase remote_ip
                              do_ssl_redirect_if_required use_attachbase
-                             diff_arrays on_main_db
+                             diff_arrays on_main_db say
                              trim wrap_hard wrap_comment find_wrap_point
                              format_time validate_date validate_time datetime_from
                              file_mod_time is_7bit_clean
@@ -339,6 +338,13 @@ sub diff_arrays {
     @added   = grep { $_ ne '' } @new;
 
     return (\@removed, \@added);
+}
+
+# XXX - This is a temporary subroutine till we require Perl 5.10.1.
+# This will happen before Bugzilla 5.0rc1.
+sub say (@) {
+    print @_;
+    print "\n";
 }
 
 sub trim {

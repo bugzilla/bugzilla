@@ -437,7 +437,7 @@ sub dump {
     my $data = $self->data;
     
     require Data::Dumper;
-    print "<pre>Bugzilla::Chart object:\n";
+    say "<pre>Bugzilla::Chart object:";
     print Data::Dumper::Dumper($self);
     print "</pre>";
 }

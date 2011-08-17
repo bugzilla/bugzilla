@@ -287,10 +287,10 @@ print $cgi->header(-type => $format->{'ctype'},
 # prints out both data structures.
 if ($cgi->param('debug')) {
     require Data::Dumper;
-    print "<pre>data hash:\n";
-    print Data::Dumper::Dumper(%data) . "\n\n";
-    print "data array:\n";
-    print Data::Dumper::Dumper(@image_data) . "\n\n</pre>";
+    say "<pre>data hash:";
+    say Data::Dumper::Dumper(%data);
+    say "\ndata array:";
+    say Data::Dumper::Dumper(@image_data) . "\n\n</pre>";
 }
 
 # All formats point to the same section of the documentation.

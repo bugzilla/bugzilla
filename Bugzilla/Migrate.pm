@@ -30,7 +30,7 @@ use Bugzilla::Error;
 use Bugzilla::Install::Requirements ();
 use Bugzilla::Install::Util qw(indicate_progress);
 use Bugzilla::Product;
-use Bugzilla::Util qw(get_text trim generate_random_password);
+use Bugzilla::Util qw(get_text trim generate_random_password say);
 use Bugzilla::User ();
 use Bugzilla::Status ();
 use Bugzilla::Version;
@@ -261,7 +261,7 @@ sub bug_fields {
 sub users {
     my $self = shift;
     if (!exists $self->{users}) {
-        print get_text('migrate_reading_users'), "\n";
+        say get_text('migrate_reading_users');
         $self->{users} = $self->_read_users();
     }
     return $self->{users};
@@ -270,7 +270,7 @@ sub users {
 sub products {
     my $self = shift;
     if (!exists $self->{products}) {
-        print get_text('migrate_reading_products'), "\n";
+        say get_text('migrate_reading_products');
         $self->{products} = $self->_read_products();
     }
     return $self->{products};
@@ -279,7 +279,7 @@ sub products {
 sub bugs {
     my $self = shift;
     if (!exists $self->{bugs}) {
-        print get_text('migrate_reading_bugs'), "\n";
+        say get_text('migrate_reading_bugs');
         $self->{bugs} = $self->_read_bugs();
     }
     return $self->{bugs};
@@ -340,7 +340,7 @@ sub reset_serial_values {
 
 sub translate_all_bugs {
     my ($self, $bugs) = @_;
-    print get_text('migrate_translating_bugs'), "\n";
+    say get_text('migrate_translating_bugs');
     # We modify the array in place so that $self->bugs will return the
     # modified bugs, in case $self->before_insert wants them.
     my $num_bugs = scalar(@$bugs);
@@ -608,7 +608,7 @@ sub create_custom_fields {
         if (!$self->dry_run) {
             $created = Bugzilla::Field->create($created);
         }
-        print get_text('migrate_field_created', { field => $created }), "\n";
+        say get_text('migrate_field_created', { field => $created });
     }
     delete $self->{bug_fields};
 }
@@ -680,7 +680,7 @@ sub create_legal_values {
 sub insert_bugs {
     my ($self, $bugs) = @_;
     my $dbh = Bugzilla->dbh;
-    print get_text('migrate_creating_bugs'), "\n";
+    say get_text('migrate_creating_bugs');
 
     my $init_statuses = Bugzilla::Status->can_change_to();
     my %allowed_statuses = map { lc($_->name) => 1 } @$init_statuses;

@@ -158,7 +158,7 @@ sub remove_from_db {
         }
     }
 
-    $dbh->do('DELETE FROM milestones WHERE id = ?', undef, $self->id);
+    $self->SUPER::remove_from_db();
 }
 
 ################################

@@ -76,14 +76,7 @@ sub create {
 
 sub remove_from_db {
     my $self = shift;
-    my $dbh = Bugzilla->dbh;
-    my $id = $self->id;
-    $dbh->bz_start_transaction();
     $self->SUPER::remove_from_db();
-    $dbh->do('DELETE FROM status_workflow
-               WHERE old_status = ? OR new_status = ?',
-              undef, $id, $id);
-    $dbh->bz_commit_transaction();
     delete Bugzilla->request_cache->{status_bug_state_open};
 }
 

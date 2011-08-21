@@ -317,7 +317,7 @@ sub remove_from_db {
         }
     }
 
-    $dbh->do("DELETE FROM products WHERE id = ?", undef, $self->id);
+    $self->SUPER::remove_from_db();
 
     $dbh->bz_commit_transaction();
 

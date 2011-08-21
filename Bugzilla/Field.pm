@@ -948,7 +948,7 @@ sub remove_from_db {
     }
 
     # Once we reach here, we should be OK to delete.
-    $dbh->do('DELETE FROM fielddefs WHERE id = ?', undef, $self->id);
+    $self->SUPER::remove_from_db();
 
     my $type = $self->type;
 

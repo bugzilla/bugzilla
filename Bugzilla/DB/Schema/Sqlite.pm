@@ -162,6 +162,23 @@ sub get_create_database_sql {
     die "Reached an unreachable point";
 }
 
+sub _get_create_table_ddl {
+    my $self = shift;
+    my ($table) = @_;
+    my $ddl = $self->SUPER::_get_create_table_ddl(@_);
+
+    # TheSchwartz uses its own driver to access its tables, meaning
+    # that it doesn't understand "COLLATE bugzilla" and in fact
+    # SQLite throws an error when TheSchwartz tries to access its
+    # own tables, if COLLATE bugzilla is on them. We don't have
+    # to fix this elsewhere currently, because we only create
+    # TheSchwartz's tables, we never modify them.
+    if ($table =~ /^ts_/) {
+        $ddl =~ s/ COLLATE bugzilla//g;
+    }
+    return $ddl;
+}
+
 sub get_type_ddl {
     my $self = shift;
     my $def = dclone($_[0]);

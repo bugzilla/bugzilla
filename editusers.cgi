@@ -137,7 +137,7 @@ if ($action eq 'search') {
                 $expr = "profiles.login_name";
             }
 
-            if ($matchstr =~ /^(regexp|notregexp|exact)$/) {
+            if ($matchtype =~ /^(regexp|notregexp|exact)$/) {
                 $matchstr ||= '.';
             }
             else {

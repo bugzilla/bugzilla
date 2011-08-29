@@ -74,7 +74,7 @@ if ($action eq 'search') {
 ###########################################################################
 } elsif ($action eq 'list') {
     my $matchvalue    = $cgi->param('matchvalue') || '';
-    my $matchstr      = $cgi->param('matchstr');
+    my $matchstr      = trim($cgi->param('matchstr'));
     my $matchtype     = $cgi->param('matchtype');
     my $grouprestrict = $cgi->param('grouprestrict') || '0';
     my $query = 'SELECT DISTINCT userid, login_name, realname, is_enabled ' .

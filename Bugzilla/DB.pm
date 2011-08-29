@@ -93,6 +93,12 @@ use constant FULLTEXT_OR => '';
 use constant WORD_START => '(^|[^[:alnum:]])';
 use constant WORD_END   => '($|[^[:alnum:]])';
 
+# On most databases, in order to drop an index, you have to first drop
+# the foreign keys that use that index. However, on some databases,
+# dropping the FK immediately before dropping the index causes problems
+# and doesn't need to be done anyway, so those DBs set this to 0.
+use constant INDEX_DROPS_REQUIRE_FK_DROPS => 1;
+
 #####################################################################
 # Overridden Superclass Methods 
 #####################################################################
@@ -947,9 +953,11 @@ sub bz_drop_index {
     my $index_exists = $self->bz_index_info($table, $name);
 
     if ($index_exists) {
-        # We cannot delete an index used by a FK.
-        foreach my $column (@{$index_exists->{FIELDS}}) {
-            $self->bz_drop_related_fks($table, $column);
+        if ($self->INDEX_DROPS_REQUIRE_FK_DROPS) {
+            # We cannot delete an index used by a FK.
+            foreach my $column (@{$index_exists->{FIELDS}}) {
+                $self->bz_drop_related_fks($table, $column);
+            }
         }
         $self->bz_drop_index_raw($table, $name);
         $self->_bz_real_schema->delete_index($table, $name);

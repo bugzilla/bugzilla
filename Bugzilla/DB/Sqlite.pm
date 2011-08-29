@@ -39,6 +39,10 @@ use constant ISOLATION_LEVEL => undef;
 use constant WORD_START => '(?:^|\W)';
 use constant WORD_END   => '(?:$|\W)';
 
+# For some reason, dropping the related FKs causes the index to
+# disappear early, which causes all sorts of problems.
+use constant INDEX_DROPS_REQUIRE_FK_DROPS => 0;
+
 ####################################
 # Functions Added To SQLite Itself #
 ####################################

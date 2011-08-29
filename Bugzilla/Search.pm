@@ -2525,8 +2525,8 @@ sub _multiselect_table {
                                " ON keywords.keywordid = keyworddefs.id";
     }
     elsif ($field eq 'tag') {
-        $args->{full_field} = 'tags.name';
-        return "bug_tag INNER JOIN tags ON bug_tag.tag_id = tags.id"
+        $args->{full_field} = 'tag.name';
+        return "bug_tag INNER JOIN tag ON bug_tag.tag_id = tag.id"
                                        . " AND user_id = " . $self->_user->id;
     }
     elsif ($field eq 'bug_group') {

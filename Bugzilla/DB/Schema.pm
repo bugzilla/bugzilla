@@ -1000,7 +1000,7 @@ use constant ABSTRACT_SCHEMA => {
         ],
     },
 
-    tags => {
+    tag => {
         FIELDS => [
             id   => {TYPE => 'MEDIUMSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
             name => {TYPE => 'varchar(64)', NOTNULL => 1},
@@ -1010,7 +1010,7 @@ use constant ABSTRACT_SCHEMA => {
                                         DELETE => 'CASCADE'}},
         ],
         INDEXES => [
-            tags_user_id_idx => {FIELDS => [qw(user_id name)], TYPE => 'UNIQUE'},
+            tag_user_id_idx => {FIELDS => [qw(user_id name)], TYPE => 'UNIQUE'},
         ],
     },
 
@@ -1021,7 +1021,7 @@ use constant ABSTRACT_SCHEMA => {
                                       COLUMN => 'bug_id',
                                       DELETE => 'CASCADE'}},
             tag_id => {TYPE => 'INT3', NOTNULL => 1,
-                       REFERENCES => {TABLE  => 'tags',
+                       REFERENCES => {TABLE  => 'tag',
                                       COLUMN => 'id',
                                       DELETE => 'CASCADE'}},
         ],

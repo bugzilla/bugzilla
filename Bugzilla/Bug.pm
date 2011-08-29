@@ -2958,10 +2958,10 @@ sub add_tag {
     my $tag_id = $user->tags->{$tag}->{id};
     # If this tag doesn't exist for this user yet, create it.
     if (!$tag_id) {
-        $dbh->do('INSERT INTO tags (user_id, name) VALUES (?, ?)',
+        $dbh->do('INSERT INTO tag (user_id, name) VALUES (?, ?)',
                   undef, ($user->id, $tag));
 
-        $tag_id = $dbh->selectrow_array('SELECT id FROM tags
+        $tag_id = $dbh->selectrow_array('SELECT id FROM tag
                                          WHERE name = ? AND user_id = ?',
                                          undef, ($tag, $user->id));
         # The list has changed.
@@ -2997,7 +2997,7 @@ sub remove_tag {
 
     # Decrement the counter, and delete the tag if no bugs are using it anymore.
     if (!--$user->tags->{$tag}->{bug_count}) {
-        $dbh->do('DELETE FROM tags WHERE name = ? AND user_id = ?',
+        $dbh->do('DELETE FROM tag WHERE name = ? AND user_id = ?',
                   undef, ($tag, $user->id));
 
         # The list has changed.
@@ -3014,7 +3014,7 @@ sub tags {
     if (!exists $self->{tags}) {
         $self->{tags} = $dbh->selectcol_arrayref(
             'SELECT name FROM bug_tag
-             INNER JOIN tags ON tags.id = bug_tag.tag_id
+             INNER JOIN tag ON tag.id = bug_tag.tag_id
              WHERE bug_id = ? AND user_id = ?',
              undef, ($self->id, $user->id));
     }

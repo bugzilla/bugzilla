@@ -29,12 +29,13 @@ use strict;
 use lib 't';
 use base qw(Exporter);
 @Support::Templates::EXPORT = 
-         qw(@languages @include_paths %include_path @referenced_files 
-            %actual_files $num_actual_files);
-use vars qw(@languages @include_paths %include_path @referenced_files 
-            %actual_files $num_actual_files);
+         qw(@languages @include_paths $english_default_include_path
+         %include_path @referenced_files %actual_files $num_actual_files);
+use vars qw(@languages @include_paths $english_default_include_path
+            %include_path @referenced_files %actual_files $num_actual_files);
 
 use Bugzilla;
+use Bugzilla::Constants;
 use Bugzilla::Install::Util qw(template_include_path);
 use Support::Files;
 
@@ -49,6 +50,10 @@ use File::Spec;
 
 # All include paths
 @include_paths = ();
+
+# English default include path
+$english_default_include_path =
+    File::Spec->catdir(bz_locations()->{'templatedir'}, 'en', 'default');
 
 # Files which are referenced in the cgi files
 @referenced_files = ();

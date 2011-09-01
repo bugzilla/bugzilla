@@ -25,6 +25,37 @@
 <script src="[% 'js/comments.js' FILTER mtime %]" type="text/javascript">
 </script>
 
+<script type="text/javascript">
+<!--
+  /* Adds the reply text to the `comment' textarea */
+  function replyToComment(id, real_id, name) {
+      var prefix = "(In reply to " + name + " from comment #" + id + ")\n";
+      var replytext = "";
+      [% IF user.settings.quote_replies.value == 'quoted_reply' %]
+        /* pre id="comment_name_N" */
+        var text_elem = document.getElementById('comment_text_'+id);
+        var text = getText(text_elem);
+        replytext = prefix + wrapReplyText(text);
+      [% ELSIF user.settings.quote_replies.value == 'simple_reply' %]
+        replytext = prefix;
+      [% END %]
+
+      [% IF user.is_insider %]
+        if (document.getElementById('isprivate_' + real_id).checked) {
+            document.getElementById('newcommentprivacy').checked = 'checked';
+            updateCommentTagControl(document.getElementById('newcommentprivacy'), 'comment'); 
+        }
+      [% END %]
+
+      /* <textarea id="comment"> */
+      var textarea = document.getElementById('comment');
+      textarea.value += replytext;
+
+      textarea.focus();
+  } 
+//-->
+</script>
+
 [% DEFAULT start_at = 0 mode = "show" %]
 [% sort_order = user.settings.comment_sort_order.value %]
 
@@ -120,8 +151,12 @@
 
         [% IF mode == "edit" %]
           <span class="bz_comment_actions">
+            [<a class="bz_reply_link" href="#add_comment"
+              [% IF user.settings.quote_replies.value != 'off' %]
+                onclick="replyToComment('[% count %]', '[% comment.id %]', '[% comment.author.name || comment.author.nick FILTER js %]'); return false;"
+              [% END %]
+            >reply</a>]
             <script type="text/javascript"><!--
-              addReplyLink([% count %], [% comment.id %]);
               addCollapseLink([% count %]); // -->
             </script>
           </span>

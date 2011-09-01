@@ -32,72 +32,6 @@
 
   <script type="text/javascript">
   <!--
-  
-  /* Outputs a link to call replyToComment(); used to reduce HTML output */
-  function addReplyLink(id, real_id) {
-      /* XXX this should really be updated to use the DOM Core's
-       * createElement, but finding a container isn't trivial.
-       */
-      [% IF user.settings.quote_replies.value != 'off' %]
-        document.write('[<a href="#add_comment" onclick="replyToComment(' + 
-                       id + ',' + real_id + '); return false;">reply<' + '/a>]');
-      [% END %]
-  }
-
-  /* Adds the reply text to the `comment' textarea */
-  function replyToComment(id, real_id) {
-      var prefix = "(In reply to comment #" + id + ")\n";
-      var replytext = "";
-      [% IF user.settings.quote_replies.value == 'quoted_reply' %]
-        /* pre id="comment_name_N" */
-        var text_elem = document.getElementById('comment_text_'+id);
-        var text = getText(text_elem);
-        replytext = prefix + wrapReplyText(text);
-      [% ELSIF user.settings.quote_replies.value == 'simple_reply' %]
-        replytext = prefix;
-      [% END %]
-
-    [% IF user.is_insider %]
-      if (document.getElementById('isprivate_' + real_id).checked) {
-          document.getElementById('newcommentprivacy').checked = 'checked';
-          updateCommentTagControl(document.getElementById('newcommentprivacy'), 'comment'); 
-      }
-    [% END %]
-
-      /* <textarea id="comment"> */
-      var textarea = document.getElementById('comment');
-      textarea.value += replytext;
-
-      textarea.focus();
-  }
-
-  if (typeof Node == 'undefined') {
-      /* MSIE doesn't define Node, so provide a compatibility object */
-      window.Node = {
-          TEXT_NODE: 3,
-          ENTITY_REFERENCE_NODE: 5
-      };
-  }
-
-  /* Concatenates all text from element's childNodes. This is used
-   * instead of innerHTML because we want the actual text (and
-   * innerText is non-standard).
-   */
-  function getText(element) {
-      var child, text = "";
-      for (var i=0; i < element.childNodes.length; i++) {
-          child = element.childNodes[i];
-          var type = child.nodeType;
-          if (type == Node.TEXT_NODE || type == Node.ENTITY_REFERENCE_NODE) {
-              text += child.nodeValue;
-          } else {
-              /* recurse into nodes of other types */
-              text += getText(child);
-          }
-      }
-      return text;
-  }
-
 [% IF user.is_timetracker %]
   var fRemainingTime = [% bug.remaining_time %]; // holds the original value
   function adjustRemainingTime() {
@@ -116,7 +50,6 @@
       // if the remaining time is changed manually, update fRemainingTime
       fRemainingTime = document.changeform.remaining_time.value;
   }
-
 [% END %]
 
   /* Index all classifications so we can keep track of the classification

@@ -119,7 +119,7 @@ sub _check_value {
     }
 
     my $ref_bug_id  = $uri->query_param('id');
-    my $ref_bug     = Bugzilla::Bug->check($ref_bug_id);
+    my $ref_bug     = Bugzilla::Bug->check_for_edit($ref_bug_id);
     my $self_bug_id = $params->{bug_id};
     $params->{ref_bug} = $ref_bug;
 
@@ -127,12 +127,6 @@ sub _check_value {
         ThrowUserError('see_also_self_reference');
     }
  
-    my $product = $ref_bug->product_obj;
-    if (!Bugzilla->user->can_edit_product($product->id)) {
-        ThrowUserError("product_edit_denied",
-                       { product => $product->name });
-    }
-
     return $uri;
 }
 

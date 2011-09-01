@@ -481,7 +481,7 @@ sub update {
     my $ids = delete $params->{ids};
     defined $ids || ThrowCodeError('param_required', { param => 'ids' });
 
-    my @bugs = map { Bugzilla::Bug->check($_) } @$ids;
+    my @bugs = map { Bugzilla::Bug->check_for_edit($_) } @$ids;
 
     my %values = %$params;
     $values{other_bugs} = \@bugs;
@@ -497,11 +497,6 @@ sub update {
     delete $values{flags};
 
     foreach my $bug (@bugs) {
-        if (!$user->can_edit_product($bug->product_obj->id) ) {
-            ThrowUserError("product_edit_denied",
-                          { product => $bug->product });
-        }
-
         $bug->set_all(\%values);
     }
 
@@ -632,11 +627,7 @@ sub add_attachment {
     defined $params->{data}
         || ThrowCodeError('param_required', { param => 'data' });
 
-    my @bugs = map { Bugzilla::Bug->check($_) } @{ $params->{ids} };
-    foreach my $bug (@bugs) {
-        Bugzilla->user->can_edit_product($bug->product_id)
-          || ThrowUserError("product_edit_denied", {product => $bug->product});
-    }
+    my @bugs = map { Bugzilla::Bug->check_for_edit($_) } @{ $params->{ids} };
 
     my @created;
     $dbh->bz_start_transaction();
@@ -681,11 +672,8 @@ sub add_comment {
     (defined $comment && trim($comment) ne '')
         || ThrowCodeError('param_required', { param => 'comment' });
     
-    my $bug = Bugzilla::Bug->check($params->{id});
+    my $bug = Bugzilla::Bug->check_for_edit($params->{id});
 
-    $user->can_edit_product($bug->product_id)
-        || ThrowUserError("product_edit_denied", {product => $bug->product});
-    
     # Backwards-compatibility for versions before 3.6    
     if (defined $params->{private}) {
         $params->{is_private} = delete $params->{private};
@@ -726,10 +714,7 @@ sub update_see_also {
 
     my @bugs;
     foreach my $id (@{ $params->{ids} }) {
-        my $bug = Bugzilla::Bug->check($id);
-        $user->can_edit_product($bug->product_id)
-            || ThrowUserError("product_edit_denied", 
-                              { product => $bug->product });
+        my $bug = Bugzilla::Bug->check_for_edit($id);
         push(@bugs, $bug);
         if ($remove) {
             $bug->remove_see_also($_) foreach @$remove;

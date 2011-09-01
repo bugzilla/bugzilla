@@ -96,14 +96,14 @@ sub should_set {
 # Create a list of objects for all bugs being modified in this request.
 my @bug_objects;
 if (defined $cgi->param('id')) {
-  my $bug = Bugzilla::Bug->check(scalar $cgi->param('id'));
+  my $bug = Bugzilla::Bug->check_for_edit(scalar $cgi->param('id'));
   $cgi->param('id', $bug->id);
   push(@bug_objects, $bug);
 } else {
     foreach my $i ($cgi->param()) {
         if ($i =~ /^id_([1-9][0-9]*)/) {
             my $id = $1;
-            push(@bug_objects, Bugzilla::Bug->check($id));
+            push(@bug_objects, Bugzilla::Bug->check_for_edit($id));
         }
     }
 }
@@ -211,15 +211,6 @@ if (defined $cgi->param('id')) {
 else {
     # param('id') is not defined when changing multiple bugs at once.
     $action = 'nothing';
-}
-
-# For each bug, we have to check if the user can edit the bug the product
-# is currently in, before we allow them to change anything.
-foreach my $bug (@bug_objects) {
-    if (!$user->can_edit_product($bug->product_obj->id)) {
-        ThrowUserError("product_edit_denied",
-                      { product => $bug->product });
-    }
 }
 
 # Component, target_milestone, and version are in here just in case

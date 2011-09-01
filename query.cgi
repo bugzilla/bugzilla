@@ -60,6 +60,7 @@ sub get_product_values {
         $seen{$lc_name} = $value;
     }
 
+    $field =~ s/s$//;
     if ($field eq 'version') {
         @unique = sort { vers_cmp(lc($a->name), lc($b->name)) } @unique;
     }
@@ -67,7 +68,6 @@ sub get_product_values {
         @unique = sort { lc($a->name) cmp lc($b->name) } @unique;
     }
 
-    $field =~ s/s$//;
     $field = 'target_milestone' if $field eq 'milestone';
     $vars->{duplicates}->{$field} = \%duplicates;
     $vars->{duplicate_count}->{$field} = \%duplicate_count;

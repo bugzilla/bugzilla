@@ -474,40 +474,51 @@ sub viewall {
 
 # Display a form for entering a new attachment.
 sub enter {
-  # Retrieve and validate parameters
-  my $bug = Bugzilla::Bug->check(scalar $cgi->param('bugid'));
-  my $bugid = $bug->id;
-  Bugzilla::Attachment->_check_bug($bug);
-  my $dbh = Bugzilla->dbh;
-  my $user = Bugzilla->user;
+    # Retrieve and validate parameters
+    my $bug = Bugzilla::Bug->check(scalar $cgi->param('bugid'));
+    my $bugid = $bug->id;
+    Bugzilla::Attachment->_check_bug($bug);
+    my $dbh = Bugzilla->dbh;
+    my $user = Bugzilla->user;
 
-  # Retrieve the attachments the user can edit from the database and write
-  # them into an array of hashes where each hash represents one attachment.
-  my $canEdit = "";
-  if (!$user->in_group('editbugs', $bug->product_id)) {
-      $canEdit = "AND submitter_id = " . $user->id;
-  }
-  my $attach_ids = $dbh->selectcol_arrayref("SELECT attach_id FROM attachments
-                                             WHERE bug_id = ? AND isobsolete = 0 $canEdit
-                                             ORDER BY attach_id", undef, $bugid);
+    # Retrieve the attachments the user can edit from the database and write
+    # them into an array of hashes where each hash represents one attachment.
+  
+    my ($can_edit, $not_private) = ('', '');
+    if (!$user->in_group('editbugs', $bug->product_id)) {
+        $can_edit = "AND submitter_id = " . $user->id;
+    }
+    if (!$user->is_insider) {
+        $not_private = "AND isprivate = 0";
+    }
+    my $attach_ids = $dbh->selectcol_arrayref(
+        "SELECT attach_id
+           FROM attachments
+          WHERE bug_id = ?
+                AND isobsolete = 0
+                $can_edit $not_private
+       ORDER BY attach_id",
+         undef, $bugid);
 
-  # Define the variables and functions that will be passed to the UI template.
-  $vars->{'bug'} = $bug;
-  $vars->{'attachments'} = Bugzilla::Attachment->new_from_list($attach_ids);
+    # Define the variables and functions that will be passed to the UI template.
+    $vars->{'bug'} = $bug;
+    $vars->{'attachments'} = Bugzilla::Attachment->new_from_list($attach_ids);
 
-  my $flag_types = Bugzilla::FlagType::match({'target_type'  => 'attachment',
-                                              'product_id'   => $bug->product_id,
-                                              'component_id' => $bug->component_id});
-  $vars->{'flag_types'} = $flag_types;
-  $vars->{'any_flags_requesteeble'} =
-    grep { $_->is_requestable && $_->is_requesteeble } @$flag_types;
-  $vars->{'token'} = issue_session_token('create_attachment:');
+    my $flag_types = Bugzilla::FlagType::match({
+        'target_type'  => 'attachment',
+        'product_id'   => $bug->product_id,
+        'component_id' => $bug->component_id
+    });
+    $vars->{'flag_types'} = $flag_types;
+    $vars->{'any_flags_requesteeble'} =
+        grep { $_->is_requestable && $_->is_requesteeble } @$flag_types;
+    $vars->{'token'} = issue_session_token('create_attachment:');
 
-  print $cgi->header();
+    print $cgi->header();
 
-  # Generate and return the UI (HTML page) from the appropriate template.
-  $template->process("attachment/create.html.tmpl", $vars)
-    || ThrowTemplateError($template->error());
+    # Generate and return the UI (HTML page) from the appropriate template.
+    $template->process("attachment/create.html.tmpl", $vars)
+      || ThrowTemplateError($template->error());
 }
 
 # Insert a new attachment into the database.

@@ -56,23 +56,19 @@ TUI_hide_default('attachment_text_field');
     [% PROCESS attachment/createformcontents.html.tmpl %]
 
     [%# Additional fields for attachments on existing bugs: %]
-    <tr>
-      <th>Obsoletes:</th>
-      <td>
-        <em>(optional) Check each existing attachment made obsolete by your new attachment.</em><br>
-        [% IF attachments.size %]
+    [% IF attachments.size %]
+      <tr>
+        <th>Obsoletes:</th>
+        <td>
+          <em>(optional) Check each existing attachment made obsolete by your new attachment.</em><br>
           [% FOREACH attachment = attachments %]
-            [% IF ((attachment.isprivate == 0) || user.is_insider) %]
-              <input type="checkbox" id="[% attachment.id %]"
-                   name="obsolete" value="[% attachment.id %]">
-              <a href="attachment.cgi?id=[% attachment.id %]&amp;action=edit">[% attachment.id %]: [% attachment.description FILTER html %]</a><br>
-            [% END %]
+            <input type="checkbox" id="[% attachment.id %]"
+                 name="obsolete" value="[% attachment.id %]">
+            <a href="attachment.cgi?id=[% attachment.id %]&amp;action=edit">[% attachment.id %]: [% attachment.description FILTER html %]</a><br>
           [% END %]
-        [% ELSE %]
-            [no attachments can be made obsolete]
-        [% END %]
-      </td>
-    </tr>
+        </td>
+      </tr>
+    [% END %]
 
     [% IF (user.id != bug.assigned_to.id) AND user.in_group("editbugs", bug.product_id) %]
       <tr>

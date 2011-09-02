@@ -294,6 +294,7 @@ sub check_requirements {
     my $missing = Bugzilla::Install::Requirements::_check_missing(
         $self->REQUIRED_MODULES, 1);
     my %results = (
+        apache      => [],
         pass        => @$missing ? 0 : 1,
         missing     => $missing,
         any_missing => @$missing ? 1 : 0,

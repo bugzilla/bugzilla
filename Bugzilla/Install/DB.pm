@@ -646,6 +646,8 @@ sub update_table_definitions {
     $dbh->bz_add_column('bug_see_also', 'id',
         {TYPE => 'MEDIUMSERIAL', NOTNULL => 1, PRIMARYKEY => 1});
 
+    _rename_tags_to_tag();
+
     # 2011-01-29 LpSolit@gmail.com - Bug 616185
     _migrate_user_tags();
 
@@ -3485,9 +3487,9 @@ sub _migrate_user_tags {
                                           WHERE query_type != 0');
 
     my $sth_tags = $dbh->prepare(
-        'INSERT INTO tags (user_id, name) VALUES (?, ?)');
+        'INSERT INTO tag (user_id, name) VALUES (?, ?)');
     my $sth_tag_id = $dbh->prepare(
-        'SELECT id FROM tags WHERE user_id = ? AND name = ?');
+        'SELECT id FROM tag WHERE user_id = ? AND name = ?');
     my $sth_bug_tag = $dbh->prepare('INSERT INTO bug_tag (bug_id, tag_id)
                                      VALUES (?, ?)');
     my $sth_nq = $dbh->prepare('UPDATE namedqueries SET query = ?
@@ -3583,6 +3585,20 @@ sub _migrate_disabledtext_boolean {
                             {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'TRUE'});
         $dbh->do("UPDATE profiles SET is_enabled = 0 
                   WHERE disabledtext != ''");
+    }
+}
+
+sub _rename_tags_to_tag {
+    my $dbh = Bugzilla->dbh;
+    if ($dbh->bz_table_info('tags')) {
+        # If we get here, it's because the schema created "tag" as an empty
+        # table while "tags" still exists. We get rid of the empty
+        # tag table so we can do the rename over the top of it.
+        $dbh->bz_drop_table('tag');
+        $dbh->bz_drop_index('tags', 'tags_user_id_idx');
+        $dbh->bz_rename_table('tags','tag');
+        $dbh->bz_add_index('tag', 'tag_user_id_idx',
+                           {FIELDS => [qw(user_id name)], TYPE => 'UNIQUE'});
     }
 }
 

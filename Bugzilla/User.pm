@@ -423,8 +423,8 @@ sub tags {
         # in which case there are no bugs with this tag yet.
         $self->{tags} = $dbh->selectall_hashref(
             'SELECT name, id, COUNT(bug_id) AS bug_count
-               FROM tags
-          LEFT JOIN bug_tag ON bug_tag.tag_id = tags.id
+               FROM tag
+          LEFT JOIN bug_tag ON bug_tag.tag_id = tag.id
               WHERE user_id = ? ' . $dbh->sql_group_by('id', 'name'),
             'name', undef, $self->id);
     }

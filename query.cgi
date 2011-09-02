@@ -139,6 +139,9 @@ my %components;
 my %versions;
 my %milestones;
 
+# Exclude products with no components.
+@selectable_products = grep { scalar @{$_->components} } @selectable_products;
+
 foreach my $product (@selectable_products) {
     $components{$_->name} = 1 foreach (@{$product->components});
     $versions{$_->name}   = 1 foreach (@{$product->versions});

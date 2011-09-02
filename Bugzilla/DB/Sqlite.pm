@@ -25,6 +25,7 @@ use base qw(Bugzilla::DB);
 
 use Bugzilla::Constants;
 use Bugzilla::Error;
+use Bugzilla::Install::Util qw(install_string);
 
 use DateTime;
 use POSIX ();
@@ -38,6 +39,10 @@ use constant ISOLATION_LEVEL => undef;
 # simpler and more efficient than what Bugzilla::DB uses.
 use constant WORD_START => '(?:^|\W)';
 use constant WORD_END   => '(?:$|\W)';
+
+# For some reason, dropping the related FKs causes the index to
+# disappear early, which causes all sorts of problems.
+use constant INDEX_DROPS_REQUIRE_FK_DROPS => 0;
 
 ####################################
 # Functions Added To SQLite Itself #
@@ -241,6 +246,46 @@ sub sql_string_until {
 ###############
 # bz_ methods #
 ###############
+
+sub bz_setup_database {
+    my $self = shift;
+    $self->SUPER::bz_setup_database(@_);
+
+    # If we created TheSchwartz tables with COLLATE bugzilla (during the
+    # 4.1.x development series) re-create them without it.
+    my @tables = $self->bz_table_list();
+    my @ts_tables = grep { /^ts_/ } @tables;
+    my $drop_ok;
+    foreach my $table (@ts_tables) {
+        my $create_table =
+            $self->_bz_real_schema->_sqlite_create_table($table);
+        if ($create_table =~ /COLLATE bugzilla/) {
+            if (!$drop_ok) {
+                _sqlite_jobqueue_drop_message();
+                $drop_ok = 1;
+            }
+            $self->bz_drop_table($table);
+            $self->bz_add_table($table);
+        }
+    }
+}
+
+sub _sqlite_jobqueue_drop_message {
+    # This is not translated because this situation will only happen if
+    # you are updating from a 4.1.x development version of Bugzilla using
+    # SQLite, and we don't want to maintain this string in strings.txt.pl
+    # forever for just this one uncommon circumstance.
+    print <<END;
+WARNING: We have to re-create all the database tables used by jobqueue.pl.
+If there are any pending jobs in the database (that is, emails that
+haven't been sent), they will be deleted.
+
+END
+    unless (Bugzilla->installation_answers->{NO_PAUSE}) {
+        print install_string('enter_or_ctrl_c');
+        getc;
+    }
+}
 
 # XXX This needs to be implemented.
 sub bz_explain { }

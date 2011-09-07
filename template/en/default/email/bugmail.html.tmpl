@@ -64,7 +64,7 @@
       [% IF !isnew && change.who.login != last_changer %]
         [% last_changer = change.who.login %]
         [% IF in_table == 1 %]
-          [% in_table %]</table>
+          </table>
           [% SET in_table = 0 %]
         [% END %]
         [% IF change.blocker %]
@@ -90,7 +90,7 @@
 
       [% PROCESS "email/bugmail-common.txt.tmpl" %]
       [% IF in_table == 0 %]
-         <table border="1" cellspacing="0" cellpadding="8">[% in_table%]
+         <table border="1" cellspacing="0" cellpadding="8">
          [% SET in_table = 1 %]
       [% END %]
       [% IF isnew %]

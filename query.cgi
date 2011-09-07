@@ -147,7 +147,7 @@ sub PrefillForm {
         # If the name ends in a number (which it does for the fields which
         # are part of the email searching), we use the array
         # positions to show the defaults for that number field.
-        elsif ($name =~ /^(\w)(\d)$/) {
+        elsif ($name =~ /^(\w+)(\d)$/) {
             $default{$1}->[$2] = $values[0];
         }
         else {

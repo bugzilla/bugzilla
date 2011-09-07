@@ -153,7 +153,7 @@
           <span class="bz_comment_actions">
             [<a class="bz_reply_link" href="#add_comment"
               [% IF user.settings.quote_replies.value != 'off' %]
-                onclick="replyToComment('[% count %]', '[% comment.id %]', '[% comment.author.name || comment.author.nick FILTER js %]'); return false;"
+                onclick="replyToComment('[% count %]', '[% comment.id %]', '[% comment.author.name || comment.author.nick FILTER html FILTER js %]'); return false;"
               [% END %]
             >reply</a>]
             <script type="text/javascript"><!--

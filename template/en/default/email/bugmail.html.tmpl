@@ -39,7 +39,7 @@
         </div>
       [% END %]
       </p>
-      
+      <hr>
       <span>You are receiving this mail because:</span>
       
       <ul>
@@ -58,40 +58,41 @@
 </html>
 
 [% BLOCK generate_diffs %]
-  
-  [% "${terms.Bug} ${bug.id}" FILTER bug_link(bug, full_url => 1) FILTER none %]
-
+  [% SET in_table = 0 %]
   [% last_changer = "" %]
-  <table border="1" cellspacing="0" cellpadding="2">
     [% FOREACH change = diffs %]
       [% IF !isnew && change.who.login != last_changer %]
         [% last_changer = change.who.login %]
+        [% IF in_table == 1 %]
+          </table>
+          [% SET in_table = 0 %]
+        [% END %]
         [% IF change.blocker %]
-          <tr>
-            <td colspan="3">
               [% "${terms.Bug} ${bug.id}" FILTER bug_link(bug, full_url => 1) FILTER none  %] depends 
               on [% "${terms.bug} ${change.blocker.id}" 
                   FILTER bug_link(change.blocker, full_url => 1) FILTER none %],
               which changed state.
-          </td>
-          </tr>
         [% ELSE %]
-          <tr>
-            <td colspan="3">
               [% INCLUDE global/user.html.tmpl who = change.who %]
-              changed:
-            </td>
-          </tr>
+              changed [% "${terms.Bug} ${bug.id}" FILTER bug_link(bug, full_url => 1) FILTER none %]
         [% END %]
-        <tr>
-          <th>What</th>
-          <th>Removed</th>
-          <th>Added</th>
-        </tr>
+        <br>
+          [% IF in_table == 0 %]
+             <table border="1" cellspacing="0" cellpadding="8">
+             [% SET in_table = 1 %]
+          [% END %]
+          <tr>
+            <th>What</th>
+            <th>Removed</th>
+            <th>Added</th>
+          </tr>
       [% END %]
 
       [% PROCESS "email/bugmail-common.txt.tmpl" %]
-
+      [% IF in_table == 0 %]
+         <table border="1" cellspacing="0" cellpadding="8">
+         [% SET in_table = 1 %]
+      [% END %]
       [% IF isnew %]
         <tr>
           <th>[% field_label FILTER html %]</th>

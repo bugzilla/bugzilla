@@ -1083,71 +1083,16 @@ sub _sync_fulltext {
                WHERE bug_id = ?', undef, $all, $nopriv_string, $self->id);
 }
 
-
-# This is the correct way to delete bugs from the DB.
-# No bug should be deleted from anywhere else except from here.
-#
 sub remove_from_db {
     my ($self) = @_;
     my $dbh = Bugzilla->dbh;
 
-    if ($self->{'error'}) {
-        ThrowCodeError("bug_error", { bug => $self });
-    }
+    ThrowCodeError("bug_error", { bug => $self }) if $self->{'error'};
 
     my $bug_id = $self->{'bug_id'};
-
-    # tables having 'bugs.bug_id' as a foreign key:
-    # - attachments
-    # - bug_group_map
-    # - bugs
-    # - bugs_activity
-    # - bugs_fulltext
-    # - cc
-    # - dependencies
-    # - duplicates
-    # - flags
-    # - keywords
-    # - longdescs
-
-    # Also, the attach_data table uses attachments.attach_id as a foreign
-    # key, and so indirectly depends on a bug deletion too.
-
-    $dbh->bz_start_transaction();
-
-    $dbh->do("DELETE FROM bug_group_map WHERE bug_id = ?", undef, $bug_id);
-    $dbh->do("DELETE FROM bugs_activity WHERE bug_id = ?", undef, $bug_id);
-    $dbh->do("DELETE FROM cc WHERE bug_id = ?", undef, $bug_id);
-    $dbh->do("DELETE FROM dependencies WHERE blocked = ? OR dependson = ?",
-             undef, ($bug_id, $bug_id));
-    $dbh->do("DELETE FROM duplicates WHERE dupe = ? OR dupe_of = ?",
-             undef, ($bug_id, $bug_id));
-    $dbh->do("DELETE FROM flags WHERE bug_id = ?", undef, $bug_id);
-    $dbh->do("DELETE FROM keywords WHERE bug_id = ?", undef, $bug_id);
-
-    # The attach_data table doesn't depend on bugs.bug_id directly.
-    my $attach_ids =
-        $dbh->selectcol_arrayref("SELECT attach_id FROM attachments
-                                  WHERE bug_id = ?", undef, $bug_id);
-
-    if (scalar(@$attach_ids)) {
-        $dbh->do("DELETE FROM attach_data WHERE " 
-                 . $dbh->sql_in('id', $attach_ids));
-    }
-
-    # Several of the previous tables also depend on attach_id.
-    $dbh->do("DELETE FROM attachments WHERE bug_id = ?", undef, $bug_id);
-    $dbh->do("DELETE FROM bugs WHERE bug_id = ?", undef, $bug_id);
-    $dbh->do("DELETE FROM longdescs WHERE bug_id = ?", undef, $bug_id);
-
-    $dbh->bz_commit_transaction();
-
-    # The bugs_fulltext table doesn't support transactions.
+    $self->SUPER::remove_from_db();
+    # The bugs_fulltext table doesn't support foreign keys.
     $dbh->do("DELETE FROM bugs_fulltext WHERE bug_id = ?", undef, $bug_id);
-
-    # Now this bug no longer exists
-    $self->DESTROY;
-    return $self;
 }
 
 #####################################################################

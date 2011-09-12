@@ -96,6 +96,7 @@ sub DB_COLUMNS {
         estimated_time
         everconfirmed
         lastdiffed
+        master_bug_id
         op_sys
         priority
         product_id
@@ -139,6 +140,7 @@ sub VALIDATORS {
         everconfirmed  => \&Bugzilla::Object::check_boolean,
         groups         => \&_check_groups,
         keywords       => \&_check_keywords,
+        master_bug_id  => \&_check_master_bug_id,
         op_sys         => \&_check_select_field,
         priority       => \&_check_priority,
         product        => \&_check_product,
@@ -228,6 +230,7 @@ sub UPDATE_COLUMNS {
         deadline
         estimated_time
         everconfirmed
+        master_bug_id
         op_sys
         priority
         product_id
@@ -1676,6 +1679,18 @@ sub _check_keywords {
     return [values %keywords];
 }
 
+sub _check_master_bug_id {
+    my ($invocant, $bug_id) = @_;
+    my $bug = Bugzilla::Bug->check_for_edit({ id => $bug_id });
+
+    # Make sure the master bug isn't already a sighting.
+    if (defined $bug->master_bug_id) {
+        ThrowUserError("sighting_of_sighting_not_allowed");
+    }
+
+    return $bug->id;
+}
+
 sub _check_product {
     my ($invocant, $name) = @_;
     $name = trim($name);
@@ -2997,6 +3012,7 @@ sub delta_ts            { return $_[0]->{delta_ts}            }
 sub error               { return $_[0]->{error}               }
 sub everconfirmed       { return $_[0]->{everconfirmed}       }
 sub lastdiffed          { return $_[0]->{lastdiffed}          }
+sub master_bug_id       { return $_[0]->{master_bug_id}       }
 sub op_sys              { return $_[0]->{op_sys}              }
 sub priority            { return $_[0]->{priority}            }
 sub product_id          { return $_[0]->{product_id}          }
@@ -3410,6 +3426,13 @@ sub see_also {
         $self->{see_also} = $bug_urls;
     }
     return $self->{see_also};
+}
+
+sub sightings {
+    my $self = shift;
+    return [] if $self->{'error'};
+    $self->{'sightings'} ||= Bugzilla::Bug->match({master_bug_id => $self->id});
+    return $self->{'sightings'};
 }
 
 sub status {

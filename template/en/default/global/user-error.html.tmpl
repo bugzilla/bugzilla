@@ -1532,6 +1532,11 @@
       [%+ series.name FILTER html %]</em>
       already exists.
     
+  [% ELSIF error == "sighting_of_sighting_not_allowed" %]
+    [% title = "Sightings of Sightings are Not Allowed" %]
+    You may not create a sighting of a sighting or make a master 
+    [% terms.bug %] a sighting of another [% terms.bug %].
+
   [% ELSIF error == "still_unresolved_bugs" %]
     [% title = "Unresolved Dependencies" %]
     [% IF bug_id %]

@@ -295,6 +295,9 @@ use constant ABSTRACT_SCHEMA => {
                                     NOTNULL => 1, DEFAULT => '0'},
             deadline            => {TYPE => 'DATETIME'},
             alias               => {TYPE => 'varchar(20)'},
+            master_bug_id       => {TYPE => 'INT3',
+                                    REFERENCES => {TABLE  => 'bugs',
+                                                   COLUMN => 'bug_id'}},
         ],
         INDEXES => [
             bugs_alias_idx            => {FIELDS => ['alias'],

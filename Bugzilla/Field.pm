@@ -259,6 +259,8 @@ use constant DEFAULT_FIELDS => (
     {name => 'see_also',              desc => "See Also",
      type => FIELD_TYPE_BUG_URLS},
     {name => 'tag',                   desc => 'Tags'},
+    {name => 'master_bug_id',         desc => 'Master Bug ID',
+     in_new_bugmail => 1, is_numeric => 1},
 );
 
 ################

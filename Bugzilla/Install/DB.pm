@@ -656,6 +656,9 @@ sub update_table_definitions {
     # 2011-06-15 dkl@mozilla.com - Bug 658929
     _migrate_disabledtext_boolean();
 
+    # 2011-08-29 rowebb@gmail.com - Bug 679547
+    $dbh->bz_add_column('bugs', 'master_bug_id', {TYPE => 'INT3'});
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################

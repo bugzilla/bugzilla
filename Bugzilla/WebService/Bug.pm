@@ -806,6 +806,7 @@ sub _bug_to_hash {
         id               => $self->type('int', $bug->bug_id),
         is_confirmed     => $self->type('boolean', $bug->everconfirmed),
         last_change_time => $self->type('dateTime', $bug->delta_ts),
+        master_bug_id    => $self->type('int', $bug->master_bug_id),
         op_sys           => $self->type('string', $bug->op_sys),
         platform         => $self->type('string', $bug->rep_platform),
         priority         => $self->type('string', $bug->priority),
@@ -866,6 +867,10 @@ sub _bug_to_hash {
         my @see_also = map { $self->type('string', $_->name) }
                        @{ $bug->see_also };
         $item{'see_also'} = \@see_also;
+    }
+    if (filter_wants $params, 'sightings') {
+        my @sightings = map { $self->type('int', $_->id) } @{ $bug->sightings };
+        $item{'sightings'} = \@sightings;
     }
 
     # And now custom fields
@@ -1692,6 +1697,11 @@ C<array> of C<string>s. Each keyword that is on this bug.
 
 C<dateTime> When the bug was last changed.
 
+=item C<master_bug_id>
+
+C<int> The unique numeric id of the master bug that this bug is a sighting of. 
+C<undef> if this bug is not a sighting.
+
 =item C<op_sys>
 
 C<string> The name of the operating system that the bug was filed against.
@@ -1734,6 +1744,10 @@ C<array> of C<string>s. The URLs in the See Also field on the bug.
 =item C<severity>
 
 C<string> The current severity of the bug.
+
+=item C<sightings>
+
+C<array> of C<int>s The numeric ids of all this bug's sightings.
 
 =item C<status>
 
@@ -1881,6 +1895,9 @@ C<is_confirmed>, C<is_creator_accessible>, C<groups>, C<keywords>,
 C<op_sys>, C<platform>, C<qa_contact>, C<remaining_time>, C<see_also>,
 C<target_milestone>, C<update_token>, C<url>, C<version>, C<whiteboard>,
 and all custom fields.
+
+=item In Bugzilla B<5.0> C<sightings> and C<master_bug_id> were added to
+the C<bugs> return value.
 
 =back
 

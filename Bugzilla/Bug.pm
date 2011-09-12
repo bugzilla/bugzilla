@@ -1130,9 +1130,7 @@ sub remove_from_db {
     # The bugs_fulltext table doesn't support transactions.
     $dbh->do("DELETE FROM bugs_fulltext WHERE bug_id = ?", undef, $bug_id);
 
-    # Now this bug no longer exists
-    $self->DESTROY;
-    return $self;
+    undef $self;
 }
 
 #####################################################################

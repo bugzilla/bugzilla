@@ -46,7 +46,7 @@ for "crash secure SSL flash".
 <table summary="Search fields" class="bz_simple_search_form">
   <tr>
     <th>
-      <label for="bug_status">Status:</label>
+      <label for="bug_status">[% field_descs.bug_status FILTER html %]:</label>
     </th>
     <td>
       <select name="bug_status" id="bug_status">
@@ -64,7 +64,7 @@ for "crash secure SSL flash".
   </tr>
   <tr>
     <th>
-      <label for="product">Product:</label>
+      <label for="product">[% field_descs.product FILTER html %]:</label>
     </th>
     <td>
       <select name="product" id="product">

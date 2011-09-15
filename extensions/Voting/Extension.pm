@@ -52,6 +52,21 @@ use constant REL_VOTER => 4;
 # Installation #
 ################
 
+BEGIN {
+    *Bugzilla::Bug::votes = \&votes;
+}
+
+sub votes {
+    my $self = shift;
+    my $dbh = Bugzilla->dbh;
+
+    return $self->{votes} if exists $self->{votes};
+
+    $self->{votes} = $dbh->selectrow_array('SELECT votes FROM bugs WHERE bug_id = ?',
+                                           undef, $self->id);
+    return $self->{votes};
+}
+
 sub db_schema_abstract_schema {
     my ($self, $args) = @_;
     $args->{'schema'}->{'votes'} = {

@@ -318,7 +318,7 @@ hashes. Each hash describes a product, and has the following items:
 
 =item C<id>
 
-C<int> An integer id uniquely idenfifying the product in this installation only.
+C<int> An integer id uniquely identifying the product in this installation only.
 
 =item C<name>
 
@@ -342,7 +342,7 @@ following items:
 
 =item C<id>
 
-C<int> An integer id uniquely idenfifying the component in this installation
+C<int> An integer id uniquely identifying the component in this installation
 only.
 
 =item C<name>

@@ -655,8 +655,8 @@
       <para>
         This section deals with configuring your database server for use
         with Bugzilla. Currently, MySQL (<xref linkend="mysql"/>),
-        PostgreSQL (<xref linkend="postgresql"/>) and Oracle (<xref linkend="oracle"/>)
-        are available.
+        PostgreSQL (<xref linkend="postgresql"/>), Oracle (<xref linkend="oracle"/>)
+        and SQLite (<xref linkend="sqlite"/>) are available.
       </para>
 
       <section id="database-schema">
@@ -939,7 +939,26 @@ max_allowed_packet=4M
           </para>
         </section>
       </section>
-    </section>  
+
+      <section id="sqlite">
+        <title>SQLite</title>
+
+        <caution>
+          <para>
+            Due to SQLite's <ulink url="http://sqlite.org/faq.html#q5">concurrency
+            limitations</ulink> we recommend SQLite only for small and development
+            Bugzilla installations.
+          </para>
+        </caution>
+
+        <para>
+          No special configuration is required to run Bugzilla on SQLite.
+          The database will be stored in <filename>data/db/$db_name</filename>,
+          where <literal>$db_name</literal> is the database name defined
+          in <filename>localconfig</filename>.
+        </para>
+      </section>
+    </section>
 
     <section>
       <title>checksetup.pl</title>

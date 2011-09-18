@@ -118,6 +118,8 @@ sub create {
 
     $class->check_required_create_fields(@_);
     my $params = $class->run_create_validators(@_);
+    # In the DB, only the first character of the target type is stored.
+    $params->{target_type} = substr($params->{target_type}, 0, 1);
 
     # Extract everything which is not a valid column name.
     $params->{grant_group_id} = delete $params->{grant_group};

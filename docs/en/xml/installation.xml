@@ -611,7 +611,7 @@
         the user you will create for your database. Pick a strong
         password (for simplicity, it should not contain single quote
         characters) and put it here. $db_driver can be either 'mysql',
-        'Pg' or 'oracle'.
+        'Pg', 'Oracle' or 'Sqlite'.
       </para>
 
       <note>

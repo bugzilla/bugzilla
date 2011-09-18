@@ -204,7 +204,7 @@ sub _legal_field_values {
                name     => $self->type('string', $status->name),
                is_open  => $self->type('boolean', $status->is_open),
                sort_key => $self->type('int', $status->sortkey),
-               sortkey  => $self->type('int', $status->sortkey), # depricated
+               sortkey  => $self->type('int', $status->sortkey), # deprecated
                can_change_to => \@can_change_to,
                visibility_values => [],
             });
@@ -218,7 +218,7 @@ sub _legal_field_values {
             push(@result, {
                 name     => $self->type('string', $value->name),
                 sort_key => $self->type('int'   , $value->sortkey),
-                sortkey  => $self->type('int'   , $value->sortkey), # depricated
+                sortkey  => $self->type('int'   , $value->sortkey), # deprecated
                 visibility_values => [
                     defined $vis_val ? $self->type('string', $vis_val->name) 
                                      : ()

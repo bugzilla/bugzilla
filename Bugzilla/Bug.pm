@@ -2889,7 +2889,8 @@ sub remove_see_also {
     # Since we remove also the url from the referenced bug,
     # we need to notify changes for that bug too.
     $removed_bug_url = $removed_bug_url->[0];
-    if ($removed_bug_url->isa('Bugzilla::BugUrl::Bugzilla::Local')
+    if ($removed_bug_url
+        and $removed_bug_url->isa('Bugzilla::BugUrl::Bugzilla::Local')
         and defined $removed_bug_url->ref_bug_url)
     {
         push @{ $self->{see_also_changes} },
@@ -3383,7 +3384,7 @@ sub reporter {
 sub see_also {
     my ($self) = @_;
     return [] if $self->{'error'};
-    if (!defined $self->{see_also}) {
+    if (!exists $self->{see_also}) {
         my $ids = Bugzilla->dbh->selectcol_arrayref(
             'SELECT id FROM bug_see_also WHERE bug_id = ?',
             undef, $self->id);

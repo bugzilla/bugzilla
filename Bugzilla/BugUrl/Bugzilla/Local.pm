@@ -95,13 +95,20 @@ sub remove_from_db {
 sub should_handle {
     my ($class, $uri) = @_;
 
-    return $uri->as_string =~ m/^\w+$/ ? 1 : 0;
+    # Check if it is either a bug id number or an alias.
+    return 1 if $uri->as_string =~ m/^\w+$/;
 
+    # Check if it is a local Bugzilla uri and call
+    # Bugzilla::BugUrl::Bugzilla to check if it's a valid Bugzilla
+    # see also url.
     my $canonical_local = URI->new($class->local_uri)->canonical;
+    if ($canonical_local->authority eq $uri->canonical->authority
+        and $canonical_local->path eq $uri->canonical->path)
+    {
+        return $class->SUPER::should_handle($uri);
+    }
 
-    # Treating the domain case-insensitively and ignoring http(s)://
-    return ($canonical_local->authority eq $uri->canonical->authority
-            and $canonical_local->path eq $uri->canonical->path) ? 1 : 0;
+    return 0;
 }
 
 sub _check_value {

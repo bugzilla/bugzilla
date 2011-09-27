@@ -122,11 +122,13 @@ sub _product_to_hash {
     my ($self, $params, $product) = @_;
 
     my $field_data = {
-        internals   => $product,
         id          => $self->type('int', $product->id),
         name        => $self->type('string', $product->name),
         description => $self->type('string', $product->description),
         is_active   => $self->type('boolean', $product->is_active),
+        default_milestone => $self->type('string', $product->default_milestone),
+        has_unconfirmed   => $self->type('boolean', $product->allows_unconfirmed),
+        classification => $self->_classification_to_hash($product->classification),
     };
     if (filter_wants($params, 'components')) {
         $field_data->{components} = [map {
@@ -144,6 +146,20 @@ sub _product_to_hash {
         } @{$product->milestones}];
     }
     return filter($params, $field_data);
+}
+
+sub _classification_to_hash {
+    my ($self, $classification) = @_;
+    return {
+        id =>
+            $self->type('int', $classification->id),
+        name =>
+            $self->type('string', $classification->name),
+        description =>
+            $self->type('string' , $classification->description),
+        sort_key =>
+            $self->type('int', $classification->sortkey),
+    };
 }
 
 sub _component_to_hash {
@@ -333,6 +349,20 @@ C<string> A description of the product, which may contain HTML.
 
 C<boolean> A boolean indicating if the product is active.
 
+=item C<default_milestone>
+
+C<string> The name of the default milestone for the product.
+
+=item C<has_unconfirmed>
+
+C<boolean> Indicates whether the UNCONFIRMED bug status is available
+for this product.
+
+=item C<classification>
+
+C<hash> Contains the classification C<id>, C<name>, C<description>
+and C<sort_key> as keys.
+
 =item C<components>
 
 C<array> An array of hashes, where each hash describes a component, and has the
@@ -386,12 +416,6 @@ following items: C<name>, C<sort_key> and C<is_active>.
 C<array> An array of hashes, where each hash describes a milestone, and has the
 following items: C<name>, C<sort_key> and C<is_active>.
 
-=item C<internals>
-
-B<UNSTABLE>
-
-An internal representation of the product.
-
 =back
 
 Note, that if the user tries to access a product that is not in the
@@ -407,8 +431,10 @@ is returned.
 
 =item In Bugzilla B<4.2>, C<names> was added as an input parameter.
 
-=item In Bugzilla B<4.2> C<components>, C<versions>, and C<milestones>
-were added to the fields returned by C<get>.
+=item In Bugzilla B<4.2>, C<classification>, C<components>, C<versions>,
+C<milestones>, C<default_milestone> and C<has_unconfirmed> were added to
+the fields returned by C<get> as a replacement for C<internals>, which has
+been removed.
 
 =back
 

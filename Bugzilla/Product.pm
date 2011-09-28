@@ -223,7 +223,7 @@ sub update {
                                          $new_setting->{group}->name,
                                          Bugzilla->user->id, $timestamp);
                     }
-                    push(@{$changes->{'group_controls'}->{'now_mandatory'}},
+                    push(@{$changes->{'_group_controls'}->{'now_mandatory'}},
                          {name      => $new_setting->{group}->name,
                           bug_count => scalar @$bug_ids});
                 }
@@ -248,7 +248,7 @@ sub update {
                                          $old_setting->{group}->name, '',
                                          Bugzilla->user->id, $timestamp);
                     }
-                    push(@{$changes->{'group_controls'}->{'now_na'}},
+                    push(@{$changes->{'_group_controls'}->{'now_na'}},
                          {name => $old_setting->{group}->name,
                           bug_count => scalar @$bug_ids});
                 }

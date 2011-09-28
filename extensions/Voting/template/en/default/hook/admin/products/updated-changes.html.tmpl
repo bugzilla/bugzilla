@@ -56,8 +56,8 @@
 
   <p>Checking existing votes in this product for anybody who now
   has too many votes for [% terms.abug %]...<br>
-  [% IF changes.too_many_votes.size %]
-    [% FOREACH detail = changes.too_many_votes %]
+  [% IF changes._too_many_votes.size %]
+    [% FOREACH detail = changes._too_many_votes %]
       &rarr;removed votes for [% terms.bug %] <a href="show_bug.cgi?id=
      [%- detail.id FILTER uri %]">
      [%- detail.id FILTER html %]</a> from [% detail.name FILTER html %]<br>
@@ -69,8 +69,8 @@
 
   <p>Checking existing votes in this product for anybody
   who now has too many total votes...<br>
-  [% IF changes.too_many_total_votes.size %]
-    [% FOREACH detail = changes.too_many_total_votes %]
+  [% IF changes._too_many_total_votes.size %]
+    [% FOREACH detail = changes._too_many_total_votes %]
       &rarr;removed votes for [% terms.bug %] <a href="show_bug.cgi?id=
      [%- detail.id FILTER uri %]">
      [%- detail.id FILTER html %]</a> from [% detail.name FILTER html %]<br>
@@ -82,15 +82,15 @@
 
   <p>Checking unconfirmed [% terms.bugs %] in this product for any which now have
   sufficient votes...<br>
-  [% IF changes.confirmed_bugs.size %]
-    [% FOREACH id = changes.confirmed_bugs %]
+  [% IF changes._confirmed_bugs.size %]
+    [% FOREACH id = changes._confirmed_bugs %]
 
       [%# This is INCLUDED instead of PROCESSED to avoid variables getting
           overwritten, which happens otherwise %]
       [% INCLUDE bug/process/results.html.tmpl
         type = 'votes'
         header_done = 1
-        sent_bugmail = changes.confirmed_bugs_sent_bugmail.$id
+        sent_bugmail = changes._confirmed_bugs_sent_bugmail.$id
         id = id
       %]
     [% END %]

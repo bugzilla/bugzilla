@@ -1283,10 +1283,7 @@ sub _check_bug_status {
     else {
         $product = $params->{product};
         $comment = $params->{comment};
-        @valid_statuses = @{Bugzilla::Status->can_change_to()};
-        if (!$product->allows_unconfirmed) {
-            @valid_statuses = grep {$_->name ne 'UNCONFIRMED'} @valid_statuses;
-        }
+        @valid_statuses = @{ Bugzilla::Bug->statuses_available($product) };
     }
 
     # Check permissions for users filing new bugs.
@@ -3226,6 +3223,24 @@ sub classification {
     return $self->{classification};
 }
 
+sub default_bug_status {
+    my $class = shift;
+    # XXX This should just call new_bug_statuses when the UI accepts closed
+    # bug statuses instead of accepting them as a parameter.
+    my @statuses = @_;
+
+    my $status;
+    if (scalar(@statuses) == 1) {
+        $status = $statuses[0]->name;
+    }
+    else {
+        $status = ($statuses[0]->name ne 'UNCONFIRMED')
+                  ? $statuses[0]->name : $statuses[1]->name;
+    }
+
+    return $status;
+}
+
 sub dependson {
     my ($self) = @_;
     return $self->{'dependson'} if exists $self->{'dependson'};
@@ -3342,6 +3357,28 @@ sub comments {
     return \@comments;
 }
 
+sub new_bug_statuses {
+    my ($class, $product) = @_;
+    my $user = Bugzilla->user;
+
+    # Construct the list of allowable statuses.
+    my @statuses = @{ Bugzilla::Bug->statuses_available($product) };
+
+    # If the user has no privs...
+    unless ($user->in_group('editbugs', $product->id)
+            || $user->in_group('canconfirm', $product->id))
+    {
+        # ... use UNCONFIRMED if available, else use the first status of the list.
+        my ($unconfirmed) = grep { $_->name eq 'UNCONFIRMED' } @statuses;
+    
+        # Because of an apparent Perl bug, "$unconfirmed || $statuses[0]" doesn't
+        # work, so we're using an "?:" operator. See bug 603314 for details.
+        @statuses = ($unconfirmed ? $unconfirmed : $statuses[0]);
+    }
+
+    return \@statuses;
+}
+
 # This is needed by xt/search.t.
 sub percentage_complete {
     my $self = shift;
@@ -3422,17 +3459,39 @@ sub status {
 }
 
 sub statuses_available {
-    my $self = shift;
-    return [] if $self->{'error'};
-    return $self->{'statuses_available'}
-        if defined $self->{'statuses_available'};
+    my ($invocant, $product) = @_;
 
-    my @statuses = @{ $self->status->can_change_to };
+    my @statuses;
+
+    if (ref $invocant) {
+      return [] if $invocant->{'error'};
+
+      return $invocant->{'statuses_available'}
+          if defined $invocant->{'statuses_available'};
+
+        @statuses = @{ $invocant->status->can_change_to };
+        $product = $invocant->product_obj;
+    } else {
+        @statuses = @{ Bugzilla::Status->can_change_to };
+    }
 
     # UNCONFIRMED is only a valid status if it is enabled in this product.
-    if (!$self->product_obj->allows_unconfirmed) {
+    if (!$product->allows_unconfirmed) {
         @statuses = grep { $_->name ne 'UNCONFIRMED' } @statuses;
     }
+
+    if (ref $invocant) {
+        my $available = $invocant->_refine_available_statuses(@statuses);
+        $invocant->{'statuses_available'} = $available;
+        return $available;
+    }
+
+    return \@statuses;
+}
+
+sub _refine_available_statuses {
+    my $self = shift;
+    my @statuses = @_;
 
     my @available;
     foreach my $status (@statuses) {
@@ -3446,9 +3505,8 @@ sub statuses_available {
     if (!grep($_->name eq $self->status->name, @available)) {
         unshift(@available, $self->status);
     }
-
-    $self->{'statuses_available'} = \@available;
-    return $self->{'statuses_available'};
+    
+    return \@available;
 }
 
 sub show_attachment_flags {

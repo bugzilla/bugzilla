@@ -52,6 +52,21 @@ use constant REL_VOTER => 4;
 # Installation #
 ################
 
+BEGIN {
+    *Bugzilla::Bug::votes = \&votes;
+}
+
+sub votes {
+    my $self = shift;
+    my $dbh = Bugzilla->dbh;
+
+    return $self->{votes} if exists $self->{votes};
+
+    $self->{votes} = $dbh->selectrow_array('SELECT votes FROM bugs WHERE bug_id = ?',
+                                           undef, $self->id);
+    return $self->{votes};
+}
+
 sub db_schema_abstract_schema {
     my ($self, $args) = @_;
     $args->{'schema'}->{'votes'} = {
@@ -663,7 +678,7 @@ sub _modify_bug_votes {
         }
     }
 
-    $changes->{'too_many_votes'} = \@toomanyvotes_list;
+    $changes->{'_too_many_votes'} = \@toomanyvotes_list;
 
     # 2. too many total votes for a single user.
     # This part doesn't work in the general case because _remove_votes
@@ -710,7 +725,7 @@ sub _modify_bug_votes {
         }
     }
 
-    $changes->{'too_many_total_votes'} = \@toomanytotalvotes_list;
+    $changes->{'_too_many_total_votes'} = \@toomanytotalvotes_list;
 
     # 3. enough votes to confirm
     my $bug_list = $dbh->selectcol_arrayref(
@@ -723,7 +738,7 @@ sub _modify_bug_votes {
         my $confirmed = _confirm_if_vote_confirmed($bug_id);
         push (@updated_bugs, $bug_id) if $confirmed;
     }
-    $changes->{'confirmed_bugs'} = \@updated_bugs;
+    $changes->{'_confirmed_bugs'} = \@updated_bugs;
 
     # Now that changes are done, we can send emails to voters.
     foreach my $msg (@msgs) {
@@ -733,7 +748,7 @@ sub _modify_bug_votes {
     foreach my $bug_id (@updated_bugs) {
         my $sent_bugmail = Bugzilla::BugMail::Send(
             $bug_id, { changer => Bugzilla->user });
-        $changes->{'confirmed_bugs_sent_bugmail'}->{$bug_id} = $sent_bugmail;
+        $changes->{'_confirmed_bugs_sent_bugmail'}->{$bug_id} = $sent_bugmail;
     }
 }
 

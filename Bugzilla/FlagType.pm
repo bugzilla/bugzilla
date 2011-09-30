@@ -118,6 +118,8 @@ sub create {
 
     $class->check_required_create_fields(@_);
     my $params = $class->run_create_validators(@_);
+    # In the DB, only the first character of the target type is stored.
+    $params->{target_type} = substr($params->{target_type}, 0, 1);
 
     # Extract everything which is not a valid column name.
     $params->{grant_group_id} = delete $params->{grant_group};
@@ -357,7 +359,15 @@ sub set_request_group    { $_[0]->set('request_group_id', $_[1]); }
 
 sub set_clusions {
     my ($self, $list) = @_;
+    my $user = Bugzilla->user;
     my %products;
+    my $params = {};
+
+    # If the user has editcomponents privs, then we only need to make sure
+    # that the product exists.
+    if ($user->in_group('editcomponents')) {
+        $params->{allow_inaccessible} = 1;
+    }
 
     foreach my $category (keys %$list) {
         my %clusions;
@@ -369,8 +379,16 @@ sub set_clusions {
             my $comp_name = '__Any__';
             # Does the product exist?
             if ($prod_id) {
-                $products{$prod_id} ||= Bugzilla::Product->check({ id => $prod_id });
-                detaint_natural($prod_id);
+                detaint_natural($prod_id)
+                  || ThrowCodeError('param_must_be_numeric',
+                                    { function => 'Bugzilla::FlagType::set_clusions' });
+
+                if (!$products{$prod_id}) {
+                    $params->{id} = $prod_id;
+                    $products{$prod_id} = Bugzilla::Product->check($params);
+                    $user->in_group('editcomponents', $prod_id)
+                      || ThrowUserError('product_access_denied', $params);
+                }
                 $prod_name = $products{$prod_id}->name;
 
                 # Does the component belong to this product?

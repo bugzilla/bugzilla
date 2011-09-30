@@ -262,7 +262,7 @@
         [%- group.name FILTER html ~%]
       </option>
     [% END %]
-    [% IF !group_found && type.${selname} %]
+    [% IF !group_found && type.${selname}.name %]
       <option value="[% type.${selname}.name FILTER html %]" selected="selected">
         [%- type.${selname}.name FILTER html ~%]
       </option>

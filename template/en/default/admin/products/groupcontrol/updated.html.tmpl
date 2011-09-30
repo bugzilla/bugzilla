@@ -27,16 +27,16 @@
   title = title
 %]
 <p>
-[% IF changes.group_controls.now_na.size %]
-  [% FOREACH g = changes.group_controls.now_na %]
+[% IF changes._group_controls.now_na.size %]
+  [% FOREACH g = changes._group_controls.now_na %]
     Removing [% terms.bugs %] from group '[% g.name FILTER html %]' which
     no longer applies to this product<p>
     [% g.bug_count FILTER html %] [%+ terms.bugs %] removed<p>
   [% END %]
 [% END %]
 
-[% IF changes.group_controls.now_mandatory.size %]
-  [% FOREACH g = changes.group_controls.now_mandatory %]
+[% IF changes._group_controls.now_mandatory.size %]
+  [% FOREACH g = changes._group_controls.now_mandatory %]
     Adding [% terms.bugs %] to group '[% g.name FILTER html %]' which is 
     mandatory for this product<p>
     [% g.bug_count FILTER html %] [%+ terms.bugs %] added<p>

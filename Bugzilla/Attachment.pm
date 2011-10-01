@@ -565,7 +565,14 @@ sub _check_filename {
     my ($invocant, $filename) = @_;
 
     $filename = clean_text($filename);
-    $filename || ThrowUserError('file_not_specified');
+    if (!$filename) {
+        if (ref $invocant) {
+            ThrowUserError('filename_not_specified');
+        }
+        else {
+            ThrowUserError('file_not_specified');
+        }
+    }
 
     # Remove path info (if any) from the file name.  The browser should do this
     # for us, but some are buggy.  This may not work on Mac file names and could

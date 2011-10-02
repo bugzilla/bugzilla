@@ -27,15 +27,16 @@
 [% DEFAULT desc_name = "description" %]
 
 <tr>
-  <th align="right">Component:</th>
-  <td><input size="64" maxlength="64" name="component"
+  <th class="field_label"><label for="component">Component:</label></th>
+  <td><input size="64" maxlength="64" name="component" id="component"
              value="[%- comp.name FILTER html %]"></td>
 </tr>
 <tr>
-  <th align="right">Component Description:</th>
+  <th class="field_label"><label for="[% desc_name FILTER html %]">Component Description:</label></th>
   <td>
     [% INCLUDE global/textarea.html.tmpl
       name           = desc_name
+      id             = desc_name
       minrows        = 4
       cols           = 64
       wrap           = 'virtual'
@@ -44,7 +45,7 @@
   </td>
 </tr>
 <tr>
-  <th align="right"><label for="initialowner">Default Assignee:</label></th>
+  <th class="field_label"><label for="initialowner">Default Assignee:</label></th>
   <td>
     [% INCLUDE global/userselect.html.tmpl
        name => "initialowner"
@@ -56,7 +57,7 @@
 </tr>
 [% IF Param('useqacontact') %]
   <tr>
-    <th align="right"><label for="initialqacontact">Default QA contact:</label></th>
+    <th class="field_label"><label for="initialqacontact">Default QA contact:</label></th>
     <td>
       [% INCLUDE global/userselect.html.tmpl
          name => "initialqacontact"
@@ -69,7 +70,7 @@
   </tr>
 [% END %]
 <tr>
-  <th align="right"><label for="initialcc">Default CC List:</label></th>
+  <th class="field_label"><label for="initialcc">Default CC List:</label></th>
   <td>
     [% INCLUDE global/userselect.html.tmpl
        name     => "initialcc"

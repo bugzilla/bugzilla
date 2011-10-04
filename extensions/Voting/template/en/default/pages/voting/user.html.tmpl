@@ -111,15 +111,8 @@
         [% FOREACH bug = product.bugs %]
           <tr [% IF bug.id == this_bug.id && canedit %] 
             class="bz_bug_being_voted_on" [% END %]>
-            <td>
-              [% IF bug.id == this_bug.id && canedit %]
-                [% IF product.onevoteonly %]
-                  Vote For This [% terms.Bug %] &rarr;
-                [% ELSE %]
-                  Enter Votes Here &rarr;
-                [% END %]
-              [%- END %]
-            </td>
+            <td>[% IF bug.id == this_bug.id && canedit %]Enter New Vote here &rarr;
+              [%- END %]</td>
             <td align="right"><a name="vote_[% bug.id FILTER html %]">
               [% IF canedit %]
                 [% IF product.onevoteonly %]

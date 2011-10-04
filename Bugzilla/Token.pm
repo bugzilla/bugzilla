@@ -109,6 +109,8 @@ sub IssueEmailChangeToken {
     $vars->{'newemailaddress'} = $new_email . $email_suffix;
     $vars->{'expiration_ts'} = ctime($token_ts + MAX_TOKEN_AGE * 86400);
     $vars->{'token'} = $token;
+    # For SecureMail extension
+    $vars->{'to_user'} = $user;
     $vars->{'emailaddress'} = $old_email . $email_suffix;
 
     my $message;

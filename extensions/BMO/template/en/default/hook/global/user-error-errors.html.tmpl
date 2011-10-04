@@ -34,22 +34,7 @@
     [% title = "Invalid Date" %]
     The date '[% date FILTER html %]' is invalid.
 
-[% ELSIF error == "remo_payment_invalid_product" %]
-   [% title = "Mozilla Reps Payment Invalid $terms.Bug" %]
-   You can only attach budget payment information to [% terms.bugs %] under
-   the product 'Mozilla Reps' and component 'Budget Requests'.
-
-[% ELSIF error == "remo_payment_bug_edit_denied" %] 
-   [% title = "Mozilla Reps Payment $terms.Bug Edit Denied" %]
-   You do not have permission to edit [% terms.bug %] '[% bug_id FILTER html %]'.
-
-[% ELSIF error == "remo_payment_cancel_dupe" %]
-   [% title = "Already filed payment request" %]
-   You already used the form to file
-   <a href="[% urlbase FILTER html %]attachment.cgi?id=[% attachid FILTER uri %]&action=edit">
-   attachment [% attachid FILTER uri %]</a>.<br>
-   <br>
-   You can either <a href="[% urlbase FILTER html %]page.cgi?id=remo-form-payment.html">
-   create a new payment request</a> or [% "go back to $terms.bug $bugid" FILTER bug_link(bugid) FILTER none %].
+[% ELSIF error == "invalid_object" %]
+   Invalid [% object FILTER html %]: "[% value FILTER html %]"
 
 [% END %]

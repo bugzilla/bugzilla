@@ -54,3 +54,18 @@ function bmo_show_tracking_flags() {
     }
   }
 }
+
+// -- make attachment table, comments, new comment textarea equal widths
+
+YAHOO.util.Event.onDOMReady(function() {
+  var comment_tables = Dom.getElementsByClassName('bz_comment_table', 'table', 'comments');
+  if (comment_tables.length) {
+    var comment_width = comment_tables[0].getElementsByTagName('td')[0].clientWidth + 'px';
+    var attachment_table = Dom.get('attachment_table');
+    if (attachment_table)
+      attachment_table.style.width = comment_width;
+    var new_comment = Dom.get('comment');
+    if (new_comment)
+      new_comment.style.width = comment_width;
+  }
+});

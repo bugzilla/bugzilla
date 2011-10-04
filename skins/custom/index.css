@@ -1,0 +1,11 @@
+/*
+ * Custom rules for index.css.
+ * The rules you put here override rules in that stylesheet.
+ */
+
+/* index.html.tmpl puts intro hook contents inside a div which causes 
+ *  * the icons to display over two rows when adding the Help icon. 
+ *   * So we change to inline to make it display a single row. */
+#page-index .intro { display: inline; }
+
+#get_help { background: url(../standard/index/help.png) no-repeat; }

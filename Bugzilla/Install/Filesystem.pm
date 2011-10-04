@@ -169,6 +169,7 @@ sub FILESYSTEM {
 
         'contrib/README'       => { perms => OWNER_WRITE },
         'contrib/*/README'     => { perms => OWNER_WRITE },
+        'contrib/sendunsentbugmail.pl' => { perms => WS_EXECUTE },
         'docs/bugzilla.ent'    => { perms => OWNER_WRITE },
         'docs/makedocs.pl'     => { perms => OWNER_EXECUTE },
         'docs/style.css'       => { perms => WS_SERVE },
@@ -183,8 +184,10 @@ sub FILESYSTEM {
     # Directories that we want to set the perms on, but not
     # recurse through. These are directories we didn't create
     # in checkesetup.pl.
+    #
+    # Purpose of BMO change: unknown.
     my %non_recurse_dirs = (
-        '.'  => DIR_WS_SERVE,
+        '.'  => 0755,
         docs => DIR_WS_SERVE,
     );
 
@@ -242,10 +245,13 @@ sub FILESYSTEM {
                                      dirs => DIR_WS_SERVE },
          "$extensionsdir/*/web" => { files => WS_SERVE,
                                      dirs => DIR_WS_SERVE },
-
+                                     
+         # Purpose: allow webserver to read .bzr so we execute bzr commands
+         # in backticks and look at the result over the web. Used to show
+         # bzr history.
+         '.bzr'                => { files => WS_SERVE,
+                                    dirs  => DIR_WS_SERVE },
          # Directories only for the owner, not for the webserver.
-         '.bzr'                => { files => OWNER_WRITE,
-                                    dirs  => DIR_OWNER_WRITE },
          t                     => { files => OWNER_WRITE,
                                      dirs => DIR_OWNER_WRITE },
          xt                    => { files => OWNER_WRITE,

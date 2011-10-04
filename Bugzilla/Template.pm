@@ -234,7 +234,8 @@ sub quoteUrls {
               ~<a href=\"mailto:$2\">$1$2</a>~igx;
 
     # attachment links
-    $text =~ s~\b(attachment\s*\#?\s*(\d+)(?:\s+\[details\])?)
+    # BMO: Bug 652332 dkl@mozilla.com 2011-07-20
+    $text =~ s~\b(attachment\s*\#?\s*(\d+)(?:\s+\[diff\])?(?:\s+\[details\])?)
               ~($things[$count++] = get_attachment_link($2, $1)) &&
                ("\0\0" . ($count-1) . "\0\0")
               ~egmxi;
@@ -293,18 +294,20 @@ sub get_attachment_link {
         $title = html_quote(clean_text($title));
 
         $link_text =~ s/ \[details\]$//;
+        $link_text =~ s/ \[diff\]$//;
         my $linkval = "attachment.cgi?id=$attachid";
 
-        # If the attachment is a patch, try to link to the diff rather
-        # than the text, by default.
+        # If the attachment is a patch and patch_viewer feature is
+        # enabled, add link to the diff.
         my $patchlink = "";
         if ($attachment->ispatch and Bugzilla->feature('patch_viewer')) {
-            $patchlink = '&amp;action=diff';
+            $patchlink = qq| <a href="${linkval}&amp;action=diff" title="$title">[diff]</a>|;
         }
 
         # Whitespace matters here because these links are in <pre> tags.
         return qq|<span class="$className">|
-               . qq|<a href="${linkval}${patchlink}" name="attach_${attachid}" title="$title">$link_text</a>|
+               . qq|<a href="${linkval}" name="attach_${attachid}" title="$title">$link_text</a>|
+               . qq|${patchlink}|
                . qq| <a href="${linkval}&amp;action=edit" title="$title">[details]</a>|
                . qq|</span>|;
     }

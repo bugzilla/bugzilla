@@ -23,11 +23,11 @@
 <span
   class="new_user" 
   title="
-[%- comment.author.comment_count FILTER html %] comment[% "s" IF comment.author.comment_count != 1 -%]
+[%- comment.author.comment_count %] comment[% "s" IF comment.author.comment_count != 1 -%]
 , created [%
 IF comment.author.creation_age == 0 %]today[%
 ELSIF comment.author.creation_age > 365 %]more than a year ago[%
-ELSE %][% comment.author.creation_age FILTER html %] day[% "s" IF comment.author.creation_age != 1 %] ago[% END %]."
+ELSE %][% comment.author.creation_age %] day[% "s" IF comment.author.creation_age != 1 %] ago[% END %]."
   >
 (New to [% terms.Bugzilla %])
 </span>

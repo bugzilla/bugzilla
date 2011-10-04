@@ -31,22 +31,12 @@
 [% PROCESS global/header.html.tmpl
    title = "Enter $terms.ABug"
    onload = "PutDescription()"
-   style = "#somebugs { width: 100%; height: 500px }"
+   style_urls = [ "skins/standard/guided.css" ]
  %]
 
 [% style = "" %]
 
-<p>
-  <font color="red">
-    This is a template used on mozilla.org.  This template, and the
-    comment-guided.txt.tmpl template that formats the data submitted via 
-    the form in this template, are included as a demo of what it's
-    possible to do with custom templates in general, and custom [% terms.bug %]
-    entry templates in particular. As much of the text will not apply, 
-    you should alter it 
-    if you want to use this form on your [% terms.Bugzilla %] installation.
-  </font>
-</p>
+[% INCLUDE 'bug/create/user-message.html.tmpl' %]
 
 [% tablecolour = "#FFFFCC" %]
 
@@ -80,15 +70,15 @@ function PutDescription() {
 
 [%# Include other products if sensible %]
 [% IF product.name == "Firefox" %]
-  [% productstring = "product=Mozilla%20Application%20Suite&amp;product=Firefox" %]
+  [% productstring = "product=Toolkit&amp;product=Core&amp;product=Firefox" %]
 [% ELSIF product.name == "Thunderbird" %]
-  [% productstring = "product=Mozilla%20Application%20Suite&amp;product=Thunderbird" %]
+  [% productstring = "product=MailNews%20Core&amp;product=Thunderbird" %]
 [% ELSE %]
   [% productstring = BLOCK %]product=[% product.name FILTER uri %][% END %]
 [% END %]
 
 <p>
-    <a href="duplicates.cgi?[% productstring %]&amp;format=simple" target="somebugs">All-time Top 100</a> (loaded initially) |
+    <a href="duplicates.cgi?[% productstring %]&amp;format=simple" target="somebugs">All-time Top 20</a> (loaded initially) |
     <a href="duplicates.cgi?[% productstring %]&amp;format=simple&amp;sortby=delta&amp;reverse=1&amp;maxrows=100&amp;changedsince=14" target="somebugs">Hot in the last two weeks</a>  
 </p>
 
@@ -112,14 +102,14 @@ function PutDescription() {
     <input type="hidden" name="product" value="[% product.name FILTER html %]">
     [% IF product.name == "Firefox" OR 
           product.name == "Thunderbird" OR 
-          product.name == "Mozilla Application Suite" OR
+          product.name == "SeaMonkey" OR
           product.name == "Camino" %]
       <input type="hidden" name="product" value="Core">
       <input type="hidden" name="product" value="Toolkit">
-      <input type="hidden" name="product" value="PSM">
       <input type="hidden" name="product" value="NSPR">
       <input type="hidden" name="product" value="NSS">
-    [% END %]      
+      <input type="hidden" name="product" value="MailNews Core">
+    [% END %]
     <input type="hidden" name="chfieldfrom" value="-6m">
     <input type="hidden" name="chfieldto" value="Now">
     <input type="hidden" name="chfield" value="[Bug creation]">
@@ -215,7 +205,7 @@ function PutDescription() {
 
   [%# We override rep_platform and op_sys for simplicity. The values chosen
       are based on which are most common in the b.m.o database %]
-  [% rep_platform = [ "PC", "Macintosh", "All", "Other" ] %]
+  [% rep_platform = [ "x86", "x86_64", "PowerPC", "All", "Other" ] %]
 
   <tr bgcolor="[% tablecolour %]">
     <td align="right" valign="top">
@@ -238,7 +228,7 @@ function PutDescription() {
     </td>
   </tr>
 
-  [% IF product.name.match("Firefox|Camino|Mozilla Application Suite") %]
+  [% IF product.name.match("Firefox|Camino|SeaMonkey") %]
     [% matches = cgi.user_agent('Gecko/(\d+)') %]
     [% buildid = cgi.user_agent() IF matches %]
   [% END %]
@@ -257,8 +247,8 @@ function PutDescription() {
       <p>
         This should identify the exact version of the product you were using.  
         If the above field is blank or you know it is incorrect, copy the 
-        version text from the product's Help | 
-        About menu (for browsers this will begin with "Mozilla/5.0...").  
+        user agent text from the product's Help | Troubleshooting Information menu 
+        (for browsers this will begin with "Mozilla/5.0..."). 
         If the product won't start, instead paste the complete URL you downloaded 
         it from.
       </p>
@@ -275,7 +265,7 @@ function PutDescription() {
         URL that demonstrates the problem you are seeing (optional).<br>
         <b>IMPORTANT</b>: if the problem is with a broken web page, you need
         to report it
-        <a href="https://bugzilla.mozilla.org/page.cgi?id=broken-website.html">a different way</a>.
+        <a href="http://input.mozilla.com/feedback">a different way</a>.
       </p>
    </td>
   </tr>
@@ -418,10 +408,7 @@ function PutDescription() {
       %]
       <p>
         Add any additional information you feel may be
-        relevant to this [% terms.bug %], such as the <b>theme</b> you were
-        using (does the [% terms.bug %] still occur
-        with the default theme?), a 
-        <b><a href="http://kb.mozillazine.org/Quality_Feedback_Agent">Talkback crash ID</a></b>, or special
+        relevant to this [% terms.bug %], such as special
         information about <b>your computer's configuration</b>. Any information
         longer than a few lines, such as a <b>stack trace</b> or <b>HTML
         testcase</b>, should be added
@@ -431,13 +418,12 @@ function PutDescription() {
         into your URL bar.
         <br>
         <br>
-        If you are reporting a crash, note the module in
-        which the software crashed (e.g., <tt>Application Violation in
-        gkhtml.dll</tt>).
+        If you are reporting a crash, please <a href="https://developer.mozilla.org/En/How_to_get_a_stacktrace_for_a_bug_report
+">try and get a stack trace</a>, which tells us exactly where things went wrong.
       </p>
     </td>
   </tr>
-
+  
   <tr>
     <td valign="top" align="right">
       <b>Severity</b>

@@ -26,7 +26,7 @@ package Bugzilla::Error;
 use strict;
 use base qw(Exporter);
 
-@Bugzilla::Error::EXPORT = qw(ThrowCodeError ThrowTemplateError ThrowUserError);
+@Bugzilla::Error::EXPORT = qw(ThrowCodeError ThrowTemplateError ThrowUserError ThrowErrorPage);
 
 use Bugzilla::Constants;
 use Bugzilla::WebService::Constants;
@@ -210,6 +210,44 @@ sub ThrowTemplateError {
 END
     }
     exit;
+}
+
+sub ThrowErrorPage {
+    # BMO customisation for bug 659231
+    my ($template_name, $message) = @_;
+
+    my $dbh = Bugzilla->dbh;
+    $dbh->bz_rollback_transaction() if $dbh->bz_in_transaction();
+
+    if (Bugzilla->error_mode == ERROR_MODE_DIE) {
+        die("error: $message");
+    }
+
+    if (Bugzilla->error_mode == ERROR_MODE_DIE_SOAP_FAULT
+           || Bugzilla->error_mode == ERROR_MODE_JSON_RPC)
+    {
+        my $code = ERROR_UNKNOWN_TRANSIENT;
+        if (Bugzilla->error_mode == ERROR_MODE_DIE_SOAP_FAULT) {
+            die SOAP::Fault->faultcode($code)->faultstring($message);
+        } else {
+            my $server = Bugzilla->_json_server;
+            $server->raise_error(code    => 100000 + $code,
+                                 message => $message,
+                                 id      => $server->{_bz_request_id},
+                                 version => $server->version);
+            die if _in_eval();
+            $server->response($server->error_response_header);
+        }
+    } else {
+        my $cgi = Bugzilla->cgi;
+        my $template = Bugzilla->template;
+        my $vars = {};
+        $vars->{message} = $message;
+        print $cgi->header();
+        $template->process($template_name, $vars)
+          || ThrowTemplateError($template->error());
+        exit;
+    }
 }
 
 1;

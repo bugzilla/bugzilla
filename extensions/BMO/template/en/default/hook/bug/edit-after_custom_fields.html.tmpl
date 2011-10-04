@@ -49,6 +49,7 @@
       [% FOREACH field = Bugzilla.active_custom_fields %]
         [% NEXT IF NOT user.id AND field.value == "---" %]
         [% NEXT IF cf_hidden_in_product(field.name, bug.product, bug.component, 2) %]
+        [% NEXT IF cf_flag_disabled(field.name, bug) %]
         [% custom_flags.push(field.name) %]
         <tr id="row_[% field.name FILTER js %]">
           <td>&nbsp;</td>

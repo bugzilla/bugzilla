@@ -779,7 +779,8 @@ sub user_has_access {
 }
 
 sub flag_types {
-    my $self = shift;
+    my ($self, $params) = @_;
+    $params ||= {};
 
     return $self->{'flag_types'} if defined $self->{'flag_types'};
 
@@ -787,7 +788,7 @@ sub flag_types {
     my $cache = Bugzilla->request_cache->{flag_types_per_product} ||= {};
     $self->{flag_types} = {};
     my $prod_id = $self->id;
-    my $flagtypes = Bugzilla::FlagType::match({ product_id => $prod_id });
+    my $flagtypes = Bugzilla::FlagType::match({ product_id => $prod_id, %$params });
 
     foreach my $type ('bug', 'attachment') {
         my @flags = grep { $_->target_type eq $type } @$flagtypes;

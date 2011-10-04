@@ -30,23 +30,27 @@
 
 Requester info: 
 
-Requester name: [% cgi.param('firstname') %][% " " %][% cgi.param('lastname') %]
+First name: [% cgi.param('firstname') %]
+Last name: [% cgi.param('lastname') %]
 Wiki user profile: [% cgi.param('wikiprofile') %]
+Event name: [% cgi.param('eventname') %]
 Event wiki page: [% cgi.param('wikipage') %]
-Estimated Attendance: [% cgi.param('attendance') %]
+Estimated attendance: [% cgi.param('attendance') %]
 
 Shipping details:
 
-Ship swag before: [% cgi.param('shipdate') %]
+Ship swag before: [% cgi.param('cf_due_date') %]
 
-[%+ cgi.param("shiptofirstname") +%] [%+ cgi.param("shiptolastname") +%]
-[%+ cgi.param("shiptoaddress") +%]
-[%+ cgi.param("shiptoaddress2") +%]
-[%+ cgi.param("shiptocity") +%] [%+ cgi.param("shiptostate") +%] [%+ cgi.param("shiptopcode") +%]
-[%+ cgi.param("shiptocountry") %]
-
+First name: [% cgi.param("shiptofirstname") %]
+Last name: [% cgi.param("shiptolastname") %]
+Address line 1: [% cgi.param("shiptoaddress1") %]
+Address line 2: [% cgi.param("shiptoaddress2") %]
+City: [% cgi.param("shiptocity") %]
+State/Region: [% cgi.param("shiptostate") %]
+Postal code: [% cgi.param("shiptopcode") %]
+Country: [% cgi.param("shiptocountry") %]
 Phone:  [% cgi.param("shiptophone") %]
-[%+ IF cgi.param("shiptoidrut") %]Personal ID/RUT: [% cgi.param("shiptoidrut") %][% END %]
+[%+ IF cgi.param("shiptoidrut") %]Custom reference: [% cgi.param("shiptoidrut") %][% END %]
 
 Addition information for delivery person:
 [%+ cgi.param('shipadditional') %] 

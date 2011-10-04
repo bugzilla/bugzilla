@@ -32,21 +32,13 @@
 
   <script type="text/javascript">
   <!--
-  
-  /* Outputs a link to call replyToComment(); used to reduce HTML output */
-  function addReplyLink(id, real_id) {
-      /* XXX this should really be updated to use the DOM Core's
-       * createElement, but finding a container isn't trivial.
-       */
-      [% IF user.settings.quote_replies.value != 'off' %]
-        document.write('[<a href="#add_comment" onclick="replyToComment(' + 
-                       id + ',' + real_id + '); return false;">reply<' + '/a>]');
-      [% END %]
-  }
-
   /* Adds the reply text to the `comment' textarea */
-  function replyToComment(id, real_id) {
-      var prefix = "(In reply to comment #" + id + ")\n";
+  function replyToComment(id, real_id, name) {
+      var prefix = "(In reply to ";
+      if (name) {
+          prefix = prefix + name + " from";
+      }
+      prefix = prefix + " comment #" + id + ")\n";
       var replytext = "";
       [% IF user.settings.quote_replies.value == 'quoted_reply' %]
         /* pre id="comment_name_N" */
@@ -57,45 +49,21 @@
         replytext = prefix;
       [% END %]
 
-    [% IF user.is_insider %]
-      if (document.getElementById('isprivate_' + real_id).checked) {
-          document.getElementById('newcommentprivacy').checked = 'checked';
-          updateCommentTagControl(document.getElementById('newcommentprivacy'), 'comment'); 
-      }
-    [% END %]
+      [% IF user.is_insider %]
+        if (document.getElementById('isprivate_' + real_id).checked) {
+            document.getElementById('newcommentprivacy').checked = 'checked';
+            updateCommentTagControl(document.getElementById('newcommentprivacy'), 'comment'); 
+        }
+      [% END %]
+    
+      /* Remove embedded links to attachment details */
+      replytext = replytext.replace(/(attachment\s+\d+)(\s+\[[^\[]+\])+/gi, '$1');
 
       /* <textarea id="comment"> */
       var textarea = document.getElementById('comment');
       textarea.value += replytext;
 
       textarea.focus();
-  }
-
-  if (typeof Node == 'undefined') {
-      /* MSIE doesn't define Node, so provide a compatibility object */
-      window.Node = {
-          TEXT_NODE: 3,
-          ENTITY_REFERENCE_NODE: 5
-      };
-  }
-
-  /* Concatenates all text from element's childNodes. This is used
-   * instead of innerHTML because we want the actual text (and
-   * innerText is non-standard).
-   */
-  function getText(element) {
-      var child, text = "";
-      for (var i=0; i < element.childNodes.length; i++) {
-          child = element.childNodes[i];
-          var type = child.nodeType;
-          if (type == Node.TEXT_NODE || type == Node.ENTITY_REFERENCE_NODE) {
-              text += child.nodeValue;
-          } else {
-              /* recurse into nodes of other types */
-              text += getText(child);
-          }
-      }
-      return text;
   }
 
 [% IF user.is_timetracker %]
@@ -116,7 +84,6 @@
       // if the remaining time is changed manually, update fRemainingTime
       fRemainingTime = document.changeform.remaining_time.value;
   }
-
 [% END %]
 
   /* Index all classifications so we can keep track of the classification
@@ -164,17 +131,26 @@
           [% PROCESS section_url_keyword_whiteboard %]
           
           [% PROCESS section_spacer %]
-          
-          [%# *** Dependencies *** %]
+
+          [%# *** Dependencies and duplicates *** %]
+          [% PROCESS section_duplicates %]
+
           [% PROCESS section_dependson_blocks %]
-          
+
+          [% IF user.id %]          
+            <tr>
+              <td colspan="2">
+                [% PROCESS commit_button id="_top"%]
+              </td>
+            </tr>
+          [% END %]
         </table>
       </td>
       <td>
         <div class="bz_column_spacer">&nbsp;</div>
       </td>
       [%# 2nd Column %]
-      <td id="bz_show_bug_column_2" class="bz_show_bug_column">
+      <td id="bz_show_bug_column_2" class="bz_show_bug_column_table" valign="top">
         <table cellpadding="3" cellspacing="1">
         [%# *** Reported and modified dates *** %]
          [% PROCESS section_dates %]
@@ -182,16 +158,16 @@
          [% PROCESS section_cclist %]
          
          [% PROCESS section_spacer %]
-
-         [% PROCESS section_see_also %] 
+                
+         [% PROCESS section_flags %]
          
-         [% PROCESS section_customfields %]
+         [% PROCESS section_see_also %] 
          
          [% PROCESS section_spacer %]
          
+         [% PROCESS section_customfields %]
+         
          [% Hook.process("after_custom_fields") %]
-                
-         [% PROCESS section_flags %]
 
         </table>
       </td>
@@ -220,6 +196,8 @@
 
     [% IF user.settings.comment_box_position.value == 'before_comments' %]
       [% PROCESS comment_box %]
+    [% ELSE %]
+      [% PROCESS summon_comment_box %]
     [% END %]
   </td>
   <td>
@@ -238,7 +216,10 @@
   [% IF user.settings.comment_box_position.value == 'after_comments' %]
     <hr>
     [% PROCESS comment_box %]
-  [% END %]        
+  [% ELSE %]
+    [% PROCESS summon_comment_box %]
+  [% END %]
+  
 
 </form>
 
@@ -249,7 +230,10 @@
 [% BLOCK section_title %]
   [%# That's the main table, which contains all editable fields. %]
   <div class="bz_alias_short_desc_container edit_form">
-      [% PROCESS commit_button id="_top"%]
+     <span class="last_comment_link">
+       <a href="#c[% bug.comments.size - 1 %]" 
+          accesskey="l"><b>L</b>ast Comment</a>
+     </span>      
      <a href="show_bug.cgi?id=[% bug.bug_id %]">
         [%-# %]<b>[% terms.Bug %]&nbsp;[% bug.bug_id FILTER html %]</b>
      [%-# %]</a> -<span id="summary_alias_container" class="bz_default_hidden"> 
@@ -408,6 +392,30 @@
       </span>
     </td>
   </tr>
+  [% IF Param('usestatuswhiteboard') %]
+    <tr>
+      <td class="field_label">
+        <label for="status_whiteboard" accesskey="w"><b><u>W</u>hiteboard</b></label>:
+      </td>
+      [% PROCESS input inputname => "status_whiteboard" size => "40" colspan => 2 %]
+    </tr>
+  [% END %]
+  
+  [% IF use_keywords %]
+    <tr>
+      <td class="field_label">
+        <label for="keywords" accesskey="k">
+          <b><a href="describekeywords.cgi"><u>K</u>eywords</a></b></label>:
+      </td>
+      <td class="field_value" colspan="2">
+        [% INCLUDE bug/field.html.tmpl
+           bug = bug, field = bug_fields.keywords, value = bug.keywords
+           editable = bug.check_can_change_field("keywords", 0, 1),
+           no_tds = 1
+        %]
+      </td>
+    </tr>
+  [% END %]
 [% END %]
 
 [%############################################################################%]
@@ -568,14 +576,17 @@
     <td>
       [% IF bug.check_can_change_field("bug_file_loc", 0, 1) %]
         <span id="bz_url_edit_container" class="bz_default_hidden"> 
-        [% IF is_safe_url(bug.bug_file_loc) %]
-           <a href="[% bug.bug_file_loc FILTER html %]" target="_blank"
-              title="[% bug.bug_file_loc FILTER html %]">
-             [% bug.bug_file_loc FILTER truncate(40) FILTER html %]</a>
-        [% ELSE %]
-          [% bug.bug_file_loc FILTER html %]
-        [% END %]
-        (<a href="#" id="bz_url_edit_action">edit</a>)</span>
+          <a href="[% bug.bug_file_loc FILTER html %]" target="_blank"
+             title="[% bug.bug_file_loc FILTER html %]"
+             [% IF NOT is_safe_url(bug.bug_file_loc) %]
+               onclick="return confirm(
+                 'This is considered an unsafe URL and could possibly be harmful. '
+                  + 'The full URL is:\n\n[% bug.bug_file_loc FILTER js FILTER html %]\n\n'
+                  + 'Continue?')"
+             [% END %]>
+          [% bug.bug_file_loc FILTER truncate(40) FILTER html %]</a>
+          (<a href="#" id="bz_url_edit_action">edit</a>)
+        </span>
       [% END %]
       <span id="bz_url_input_area">
         [% url_output =  PROCESS input no_td=1 inputname => "bug_file_loc" size => "40" colspan => 2 %]
@@ -597,36 +608,34 @@
       [% END %]
     </td>
   </tr>
-  
-  [% IF Param('usestatuswhiteboard') %]
-    <tr>
-      <td class="field_label">
-        <label for="status_whiteboard" accesskey="w"><b><u>W</u>hiteboard</b></label>:
-      </td>
-      [% PROCESS input inputname => "status_whiteboard" size => "40" colspan => 2 %]
-    </tr>
-  [% END %]
-  
-  [% IF use_keywords %]
-    <tr>
-      <td class="field_label">
-        <label for="keywords" accesskey="k">
-          <b><a href="describekeywords.cgi"><u>K</u>eywords</a></b></label>:
-      </td>
-      <td class="field_value" colspan="2">
-        [% INCLUDE bug/field.html.tmpl
-           bug = bug, field = bug_fields.keywords, value = bug.keywords
-           editable = bug.check_can_change_field("keywords", 0, 1),
-           no_tds = 1
-        %]
-      </td>
-    </tr>
-  [% END %]
 [% END %]
 
 [%############################################################################%]
-[%# Block for Depends On / Blocks                                              #%]
+[%# Block for Duplicates                                                     #%]
 [%############################################################################%]
+
+[% BLOCK section_duplicates %]
+  [% RETURN UNLESS bug.duplicates.size %]
+  <tr>
+    <td class="field_label">
+      <label for="duplicates">Duplicates</label>:
+    </td>
+    <td class="field_value" colspan="2">
+      <span id="duplicates">
+        [% FOREACH dupe = bug.duplicates %]
+          [% dupe.id FILTER bug_link(dupe, use_alias => 1) FILTER none %][% " " %]
+        [% END %]
+      </span>
+      (<a href="buglist.cgi?bug_id=[% bug.duplicate_ids.join(",") FILTER html %]">
+       [%-%]view as [% terms.bug %] list</a>)
+    </td>
+  </tr>
+[% END %]
+
+[%############################################################################%]
+[%# Block for Depends On / Blocks                                            #%]
+[%############################################################################%]
+
 [% BLOCK section_dependson_blocks %]
   <tr>
     [% INCLUDE dependencies 
@@ -812,10 +821,18 @@
         [% IF user.id || bug.cc.size %]
           <span id="cc_edit_area_showhide_container" class="bz_default_hidden">
             (<a href="#" id="cc_edit_area_showhide">[% IF user.id %]edit[% ELSE %]show[% END %]</a>)
-          </span>
+          [% IF user.id %]
+            <div id="cc_list_num_users">
+              <ul class="cc_list_display"> 
+                [% FOREACH c = bug.cc %]
+                  <li>[% c FILTER email FILTER html %]</li>
+                [% END %]
+              </ul>
+            </div>
+          [% END %]
+        </span>
         [% END %]
         <div id="cc_edit_area">
-          <br>
           [% IF user.id %]
             <div>
               <div><label for="cc"><b>Add</b></label></div>
@@ -922,6 +939,8 @@
 [%# *** Custom Fields *** %]
   [% USE Bugzilla %]
   [% FOREACH field = Bugzilla.active_custom_fields %]
+    [% NEXT IF NOT user.id AND field.value == "---" %]
+    [% NEXT IF cf_hidden_in_product(field.name, bug.product, bug.component, 1) %]
     <tr>
       [% PROCESS bug/field.html.tmpl value = bug.${field.name}
                                      editable = bug.check_can_change_field(field.name, 0, 1)
@@ -1125,6 +1144,21 @@
       </table>
     [% END %]
   </div>
+[% END %]
+
+[% BLOCK summon_comment_box %]
+<div id="comment_top_hat">
+  <script type="text/javascript">
+    function summonCommentBox() {
+        var commentbox = document.getElementById('add_comment');
+        document.getElementById('comment_top_hat').appendChild(commentbox);
+        document.getElementById('wave_wand').style.display = 'none';
+    }
+  </script>
+  <p id="wave_wand">
+    <a href="javascript:summonCommentBox()"><i>Summon comment box</i></a>
+  </p>
+</div>
 [% END %]
 
 [%############################################################################%]

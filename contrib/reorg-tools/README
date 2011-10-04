@@ -1,0 +1,9 @@
+Upstreaming attempt: https://bugzilla.mozilla.org/show_bug.cgi?id=616499
+
+Included in this directory is a group of tools we've used for moving components
+around in a Bugzilla 3.2 install on bugzilla.mozilla.org.
+
+They may require tweaking if you use them on your own install.  Putting them
+here to make it easier to collaborate on them and keep them up-to-date.
+Hopefully Bugzilla upstream will be able to just do this from the web UI
+eventually.

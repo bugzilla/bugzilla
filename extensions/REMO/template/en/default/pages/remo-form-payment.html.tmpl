@@ -8,7 +8,7 @@
   # implied. See the License for the specific language governing
   # rights and limitations under the License.
   #
-  # The Original Code is the BMO Extension
+  # The Original Code is the REMO Extension
   #
   # The Initial Developer of the Original Code is the Mozilla Foundation
   # Portions created by the Initial Developers are Copyright (C) 2011 the
@@ -22,8 +22,8 @@
 
 [% PROCESS global/header.html.tmpl
    title = "Mozilla Reps Payment Form"
-   style_urls = [ 'extensions/BMO/web/styles/moz_reps.css' ]
-   javascript_urls = [ 'extensions/BMO/web/js/form_validate.js',
+   style_urls = [ 'extensions/REMO/web/styles/moz_reps.css' ]
+   javascript_urls = [ 'extensions/REMO/web/js/form_validate.js',
                        'js/util.js',
                        'js/field.js' ]
    yui = ['connection', 'json'] 
@@ -39,7 +39,7 @@ function validateAndSubmit() {
   if(!isFilledOut('lastname')) alert_text += "Please enter your last name\n";
   if(!isFilledOut('wikiprofile')) alert_text += "Please enter a wiki user profile.\n";
   if(!isFilledOut('wikipage')) alert_text += "Please enter a wiki page address.\n";
-  if(!isFilledOut('bug_id')) alert_text += "Please enter a valid [%terms.bug %] id to attach this additional information to.\n";
+  if(!isFilledOut('bug_id')) alert_text += "Please enter a valid [% terms.bug %] id to attach this additional information to.\n";
   if(!isFilledOut('expenseform')) alert_text += "Please enter an expense form to upload.\n";
   if(!isFilledOut('receipts')) alert_text += "Please enter a receipts file to upload.\n";
 
@@ -101,7 +101,7 @@ function getBugInfo (e, div) {
                           "'Mozilla Reps' and component 'Budget Requests'.";
           }
           else {
-            bug_message = "Bug " + bug_id + " - " + data.result.bugs[0].status +
+            bug_message = "[% terms.Bug %] " + bug_id + " - " + data.result.bugs[0].status +
                           " - " + data.result.bugs[0].summary;
           }
         }

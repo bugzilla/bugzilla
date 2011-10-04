@@ -80,17 +80,16 @@ function trySubmit() {
 <form method="post" action="post_bug.cgi" id="brownbagRequestForm" enctype="multipart/form-data"
       onSubmit="return trySubmit();">
 
-  <input type="hidden" name="product" value="mozilla.org">
-  <input type="hidden" name="component" value="Server Operations: Desktop Issues">
-  <input type="hidden" name="rep_platform" value="All">
-  <input type="hidden" name="op_sys" value="Other">
-  <input type="hidden" name="priority" value="--">
-  <input type="hidden" name="version" value="other">
-  <input type="hidden" name="bug_severity" id="bug_severity" value="normal">
-  <input type="hidden" name="comment" id="comment" value="">
-  <input type="hidden" name="short_desc" id="short_desc" value="">
-  <input type="hidden" name="groups" value="mozilla-corporation-confidential">
-
+        <input type="hidden" name="product" value="mozilla.org">
+        <input type="hidden" name="component" value="Server Operations: Desktop Issues">
+        <input type="hidden" name="rep_platform" value="All">
+        <input type="hidden" name="op_sys" value="Other">
+        <input type="hidden" name="priority" value="--">
+        <input type="hidden" name="version" value="other">
+        <input type="hidden" name="bug_severity" id="bug_severity" value="normal">
+        <input type="hidden" name="comment" id="comment" value="">
+        <input type="hidden" name="short_desc" id="short_desc" value="">
+	<input type="hidden" name="groups" value="mozilla-corporation-confidential">
 <table>
 
 <tr>
@@ -98,6 +97,7 @@ function trySubmit() {
   <td>
     <input type="text" name="presenter" id="presenter" value="" size="60" />
   </td>
+
 </tr>
 
 <tr>
@@ -146,7 +146,7 @@ function trySubmit() {
       <option value="AM" selected>AM</option>
       <option value="PM">PM</option>
     </select>
-  </td>            
+  </td>					  
 </tr>
 
 <tr>
@@ -171,14 +171,14 @@ function trySubmit() {
 </tr>
 
 <tr>
-  <td align="right"><strong>Archive this?</strong></td>
-  <td align="left"><input type="checkbox" name="archive" id="archive" value="yes"></td>
+<td align="right"><strong>Archive this?</strong></td>
+<td align="left"><input type="checkbox" name="archive" id="archive" value="yes"></td>
 </tr>
 
 
 <tr>
-  <td align="right"><strong>Need IT to help run A/V?</strong></td>
-  <td align="left"><input type="checkbox" name="ithelp" id="ithelp" value="yes" checked></td>
+<td align="right"><strong>Need IT to help run A/V?</strong></td>
+<td align="left"><input type="checkbox" name="ithelp" id="ithelp" value="yes" checked></td>
 </tr>
 
 <tr>
@@ -198,11 +198,12 @@ function trySubmit() {
   <th><label for="description">Description</label>:</th>
   <td>
     <em>Please briefly describe the brownbag and any specific needs you might have.</em><br>
+
     <textarea id="description" name="description" rows="10" cols="80"></textarea>
   </td>
 </tr>
 
-</table>
+  </table>
 
   <br>
   <input type="submit" id="commit" value="Submit Request">

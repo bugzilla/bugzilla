@@ -23,11 +23,13 @@
 
 [% PROCESS global/header.html.tmpl
    title = "Mozilla Reps Budget Request Form"
-   style_urls = [ 'extensions/BMO/web/styles/moz_reps.css' ]
-   javascript_urls = [ 'extensions/BMO/web/js/form_validate.js',
+   style_urls = [ 'extensions/REMO/web/styles/moz_reps.css' ]
+   javascript_urls = [ 'extensions/REMO/web/js/form_validate.js',
                        'js/util.js',
                        'js/field.js' ]
 %]
+
+[% IF user.in_group("mozilla-reps") %]
 
 <p>These requests will only be visible to the person who submitted the request,
 any persons designated in the CC line, and authorized members of the Mozilla
@@ -244,5 +246,9 @@ function togglePaymentInfo (e) {
   <strong><span style="color: red;">*</span></strong> - Required field<br />
   Thanks for contacting us.
 </p>
+
+[% ELSE %]
+  <p>Sorry, you do not have access to this page.</p>
+[% END %]
 
 [% PROCESS global/footer.html.tmpl %]

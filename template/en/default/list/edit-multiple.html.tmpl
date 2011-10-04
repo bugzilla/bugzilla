@@ -282,8 +282,9 @@
 
   [% USE Bugzilla %]
   [%# Show all legal values and all fields, ignoring visibility controls. %]
-  [% bug = 0 %]
+  [% bug = default.defined ? default : 0 %]
   [% FOREACH field = Bugzilla.active_custom_fields %]
+    [% NEXT IF cf_hidden_in_product(field.name, one_product, components) %]
     <tr>
       [% PROCESS bug/field.html.tmpl value = dontchange
                                      editable = 1
@@ -427,6 +428,7 @@
     [% FOREACH r = resolutions %]
       [% NEXT IF !r %]
       [% NEXT IF r == "DUPLICATE" || r == "MOVED" %]
+      [% NEXT IF r == "EXPIRED" AND user.login != "gerv@mozilla.org" %]
       <option value="[% r FILTER html %]">[% display_value("resolution", r) FILTER html %]</option>
     [% END %]
   </select>

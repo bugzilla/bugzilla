@@ -16,7 +16,6 @@
   # Red Hat, Inc. All Rights Reserved.
   #
   # Contributor(s): Owen Taylor <otaylor@redhat.com>
-  #                 David Lawrence <dkl@mozilla.com>
   #%]
 
 [% PROCESS global/header.html.tmpl
@@ -27,7 +26,6 @@
                  "js/yui/assets/skins/sam/datatable.css",
                  "extensions/Splinter/web/splinter.css" ]
   javascript_urls = [ "js/yui/element/element-min.js",
-                      "js/yui/connection/connection-min.js",
                       "js/yui/container/container-min.js",
                       "js/yui/button/button-min.js", 
                       "js/yui/json/json-min.js",
@@ -40,7 +38,7 @@
 
 <script type="text/javascript">
   Splinter.configBase = '[% urlbase FILTER none %][% Param('splinter_base') FILTER js %]';
-  Splinter.configBugUrl = '[% urlbase FILTER none %]';
+  Splinter.configBugzillaUrl = '[% urlbase FILTER none %]';
   Splinter.configHaveExtension = true;
   Splinter.configHelp = '[% urlbase FILTER none %]page.cgi?id=splinter/help.html';
   Splinter.configNote = '';
@@ -117,13 +115,14 @@
 </div>
 
 <div id="bugInfo" style="display: none;">
-  <b>[% terms.Bug %] <a id="bugLink"><span id="bugId"></span></a>:</b>
+  <b>Bug <a id="bugLink"><span id="bugId"></span></a>:</b>
   <span id="bugShortDesc"></span> -
   <span id="bugReporter"></span> -
   <span id="bugCreationDate"></span>
 </div>
 
 <div id="attachInfo" style="display:none;">
+  <span id="attachObsolete"></span>
   <b>Attachment <a id="attachLink"><span id="attachId"></span></a>:</b>
   <span id="attachDesc"></span> -
   <span id="attachCreator"></span> -
@@ -139,7 +138,7 @@
 <div id="error" style="display: none;"> </div>
 
 <div id="enterBug" style="display: none;">
-  [% terms.Bug %] to review:
+  Bug to review:
   <input id="enterBugInput" />
   <input id="enterBugGo" type="button" value="Go" />
   <div id="chooseReview" style="display: none;">
@@ -168,7 +167,7 @@
     <li>To comment on a specific lines in the patch, first select the filename from the file navigation links.</li>
     <li>Then double click the line you want to review and a comment box will appear below the line.</li>
     <li>When the review is complete and you publish it, the overview comment and all line specific comments with their context, 
-        will be combined together into a single review comment on the [% terms.bug %] report.</li>
+        will be combined together into a single review comment on the bug report.</li>
     <li>For more detailed instructions, read the Splinter 
         <a id='helpLink' target='splinterHelp' href="[% urlbase FILTER none %]page.cgi?id=splinter/help.html">help page</a>.
     </li>
@@ -234,7 +233,7 @@
     </form>
     <div id="buttonBox">
       <span id="attachmentStatusSpan">Patch Status:
-        <select id="attachmentStatus"> </select>
+	<select id="attachmentStatus"> </select>
       </span>
       <input id="publishButton" type="button" value="Publish" />
       <input id="cancelButton" type="button" value="Cancel" />

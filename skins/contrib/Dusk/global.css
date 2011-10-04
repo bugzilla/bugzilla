@@ -22,9 +22,13 @@
 
 body {
     background: #c8c8c8;
-    font-family: Helvetica, Arial, Geneva;
+    font-family: Verdana, sans-serif;
     padding-left: 1em;
     padding-right: 1em;
+}
+
+body, td, th, input {
+    font-family: Verdana, sans-serif;
 }
 
 /* page title */

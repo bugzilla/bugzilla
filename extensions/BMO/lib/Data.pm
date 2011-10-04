@@ -27,7 +27,7 @@ use base qw(Exporter);
 use Tie::IxHash;
 
 our @EXPORT_OK = qw($cf_visible_in_products
-                    $cf_flags
+                    $cf_flags $cf_disabled_flags
                     %group_to_cc_map
                     $blocking_trusted_setters
                     $blocking_trusted_requesters
@@ -78,7 +78,6 @@ tie(%$cf_visible_in_products, "Tie::IxHash",
         "Add-on SDK"            => [],
         "addons.mozilla.org"    => [],
         "AUS"                   => [],
-        "Camino"                => [],
         "Core Graveyard"        => [],
         "Core"                  => [],
         "Directory"             => [],
@@ -108,6 +107,9 @@ tie(%$cf_visible_in_products, "Tie::IxHash",
             "Server Operations: Security",
         ],
     },
+    qw/^cf_office$/ => {
+        "mozilla.org"           => ["Server Operations: Desktop Issues"],
+    },
     qr/^cf_crash_signature$/ => {
         "addons.mozilla.org"    => [], 
         "Add-on SDK"            => [], 
@@ -136,12 +138,37 @@ tie(%$cf_visible_in_products, "Tie::IxHash",
         "Mozilla Labs"          => [],
         "mozilla.org"           => [], 
         "Tech Evangelism"       => [],  
+    },
+    qw/^cf_due_date$/ => {
+        "Mozilla Reps" => [],
     }, 
 );
 
 # Which custom fields are acting as flags (ie. custom flags)
 our $cf_flags = [
     qr/^cf_(?:blocking|tracking|status)_/,
+];
+
+# List of disabled fields.
+# Temp kludge until custom fields can be disabled correctly upstream.
+# Disabled fields are hidden unless they have a value set
+our $cf_disabled_flags = [
+    'cf_blocking_20',
+    'cf_status_20',
+    'cf_tracking_firefox5',
+    'cf_status_firefox5',
+    'cf_blocking_thunderbird32',
+    'cf_status_thunderbird32',
+    'cf_blocking_thunderbird30',
+    'cf_status_thunderbird30',
+    'cf_blocking_seamonkey21',
+    'cf_status_seamonkey21',
+    'cf_tracking_seamonkey22',
+    'cf_status_seamonkey22',
+    'cf_tracking_firefox6',
+    'cf_status_firefox6',
+    'cf_tracking_thunderbird6',
+    'cf_status_thunderbird6',
 ];
 
 # Who to CC on particular bugmails when certain groups are added or removed.

@@ -1,0 +1,73 @@
+[%# The contents of this file are subject to the Mozilla Public License Version
+  # 1.1 (the "License"); you may not use this file except in compliance with
+  # the License. You may obtain a copy of the License at
+  # http://www.mozilla.org/MPL/
+  #
+  # Software distributed under the License is distributed on an "AS IS" basis,
+  # WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+  # for the specific language governing rights and limitations under the
+  # License.
+  #
+  # The Original Code is the Bugzilla Bug Tracking System.
+  #
+  # The Initial Developer of the Original Code is
+  # the Mozilla Foundation.
+  # Portions created by the Initial Developer are Copyright (C) 2011
+  # the Initial Developer. All Rights Reserved.
+  #
+  # Contributor(s): Byron Jones <glob@mozilla.com>
+  #
+  #%]
+[% PROCESS global/variables.none.tmpl %]
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<title>[% terms.Bugzilla %] - [% terms.Bug %] Updates Temporarily Suspended</title>
+<style type="text/css">
+body {
+  margin: 2em;
+  background-color: #455372;
+  color: #fff;
+  font-family: verdana, sans-serif;
+  font-size: small;
+}
+a {
+  color: #fff;
+  text-decoration: underline;
+}
+#buggie {
+  float: left;
+}
+#content {
+  margin-left: 100px;
+  max-width: 600px;
+}
+</style>
+</head>
+<body>
+<img src="images/buggie.png" id="buggie" alt="buggie">
+<div id="content">
+<h1>[% terms.Bug %] Updates Temporarily Suspended</h1>
+
+<p>
+We are currently adding a field to [% terms.Bugzilla %].  This requires us to
+prevent updates to [% terms.bugs %] for the duration of the database schema
+change to add the field (usually 3 to 5 minutes).
+</p>
+
+<p>
+<b>You should be able to leave this page open, wait a minute or two, then hit
+reload or refresh in your browser</b> (and OK any request to re-send the form
+data) to complete your [% terms.bug %] change.  Once this maintenance is
+complete, your change will succeed and you won't get this page any more.
+</p>
+
+<p>
+Only updates to [% terms.bugs %] are being blocked by this page, any other
+activities in [% terms.Bugzilla %] are still fair game. <a href="index.cgi"
+target="_blank">Open [% terms.Bugzilla %] in a new tab/window</a> if you'd
+like, to continue working on other things while waiting.
+</p>
+</div>
+</body>
+</html>

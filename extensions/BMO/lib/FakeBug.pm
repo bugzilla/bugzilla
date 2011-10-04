@@ -1,7 +1,5 @@
 package Bugzilla::Extension::BMO::FakeBug;
 
-use strict;
-
 # hack to allow the bug entry templates to use check_can_change_field to see if
 # various field values should be available to the current user
 

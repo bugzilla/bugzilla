@@ -439,10 +439,17 @@ sub search {
     delete $match_params{'include_fields'};
     delete $match_params{'exclude_fields'};
 
+    my $count_only = delete $match_params{count_only};
+
     my $bugs = Bugzilla::Bug->match(\%match_params);
     my $visible = Bugzilla->user->visible_bugs($bugs);
-    my @hashes = map { $self->_bug_to_hash($_, $params) } @$visible;
-    return { bugs => \@hashes };
+    if ($count_only) {
+        return { bug_count => scalar @$visible };
+    }
+    else {
+        my @hashes = map { $self->_bug_to_hash($_, $params) } @$visible;
+        return { bugs => \@hashes };
+    }
 }
 
 sub possible_duplicates {
@@ -468,6 +475,12 @@ sub possible_duplicates {
 
 sub update {
     my ($self, $params) = validate(@_, 'ids');
+
+    # BMO: Don't allow updating of bugs if disabled
+    if (Bugzilla->params->{disable_bug_updates}) {
+        ThrowErrorPage('bug/process/updates-disabled.html.tmpl',
+            'Bug updates are currently disabled.');
+    }
 
     my $user = Bugzilla->login(LOGIN_REQUIRED);
     my $dbh = Bugzilla->dbh;
@@ -563,6 +576,13 @@ sub update {
 
 sub create {
     my ($self, $params) = @_;
+
+    # BMO: Don't allow updating of bugs if disabled
+    if (Bugzilla->params->{disable_bug_updates}) {
+        ThrowErrorPage('bug/process/updates-disabled.html.tmpl',
+            'Bug updates are currently disabled.');
+    }
+
     Bugzilla->login(LOGIN_REQUIRED);
     $params = Bugzilla::Bug::map_fields($params);
     my $bug = Bugzilla::Bug->create($params);
@@ -625,6 +645,12 @@ sub add_attachment {
     my ($self, $params) = validate(@_, 'ids');
     my $dbh = Bugzilla->dbh;
 
+    # BMO: Don't allow updating of bugs if disabled
+    if (Bugzilla->params->{disable_bug_updates}) {
+        ThrowErrorPage('bug/process/updates-disabled.html.tmpl',
+            'Bug updates are currently disabled.');
+    }
+
     Bugzilla->login(LOGIN_REQUIRED);
     defined $params->{ids}
         || ThrowCodeError('param_required', { param => 'ids' });
@@ -670,6 +696,12 @@ sub add_attachment {
 sub add_comment {
     my ($self, $params) = @_;
     
+    # BMO: Don't allow updating of bugs if disabled
+    if (Bugzilla->params->{disable_bug_updates}) {
+        ThrowErrorPage('bug/process/updates-disabled.html.tmpl',
+            'Bug updates are currently disabled.');
+    }
+
     #The user must login in order add a comment
     Bugzilla->login(LOGIN_REQUIRED);
     
@@ -713,6 +745,12 @@ sub add_comment {
 
 sub update_see_also {
     my ($self, $params) = @_;
+
+    # BMO: Don't allow updating of bugs if disabled
+    if (Bugzilla->params->{disable_bug_updates}) {
+        ThrowErrorPage('bug/process/updates-disabled.html.tmpl',
+            'Bug updates are currently disabled.');
+    }
 
     my $user = Bugzilla->login(LOGIN_REQUIRED);
 
@@ -2159,6 +2197,11 @@ C<string> The Version field of a bug.
 C<string> Search the "Status Whiteboard" field on bugs for a substring.
 Works the same as the C<summary> field described above, but searches the
 Status Whiteboard field.
+
+=item C<count_only>
+
+C<boolean> If count_only set to true, only a single hash key called C<bug_count> 
+will be returned which is the number of bugs that matched the search.
 
 =back
 

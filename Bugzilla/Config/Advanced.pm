@@ -62,6 +62,12 @@ use constant get_param_list => (
    default => 'off',
    checker => \&check_multi
   },
+
+  {
+   name => 'disable_bug_updates',
+   type => 'b',
+   default => 0
+  },
 );
 
 1;

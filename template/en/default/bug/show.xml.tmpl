@@ -20,8 +20,10 @@
   #
   #%]
 [% PROCESS bug/time.html.tmpl %]
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
 <?xml version="1.0" [% IF Param('utf8') %]encoding="UTF-8" [% END %]standalone="yes" ?>
-<!DOCTYPE bugzilla SYSTEM "[% urlbase FILTER html %]bugzilla.dtd">
+<!DOCTYPE bugzilla [% IF cgi.param('dtd') %][[% PROCESS pages/bugzilla.dtd.tmpl %]][% ELSE %]SYSTEM "[% urlbase FILTER xml %]page.cgi?id=bugzilla.dtd"[% END %]>
 
 <bugzilla version="[% constants.BUGZILLA_VERSION %]"
           urlbase="[% urlbase FILTER xml %]"
@@ -142,6 +144,7 @@
     [% ELSIF field == "see_also" %]
       [% val = val.name %]
     [% END %]
+    [% NEXT IF cf_hidden_in_product(field.name, bug.product, bug.component) %]
     <[% field %][% IF name != '' %] name="[% name FILTER xml %]"[% END -%]>
       [%- val FILTER xml %]</[% field %]>
   [% END %]

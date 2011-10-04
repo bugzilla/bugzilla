@@ -23,24 +23,23 @@
 
 [% PROCESS global/header.html.tmpl
    title = "Mozilla Reps Swag Request Form"
-   javascript_urls = [ 'extensions/BMO/web/js/swag.js',
-                       'extensions/BMO/web/js/form_validate.js',
+   javascript_urls = [ 'extensions/REMO/web/js/swag.js',
+                       'extensions/REMO/web/js/form_validate.js',
                        'js/field.js', 
                        'js/util.js' ]
-   style_urls = [ "extensions/BMO/web/styles/moz_reps.css",  
-                  "skins/custom/calendar.css" ]
+   style_urls = [ "extensions/REMO/web/styles/moz_reps.css" ] 
    yui = [ 'calendar' ]
 %]
+
+[% IF user.in_group("mozilla-reps") %]
 
 <p>These requests will only be visible to the person who submitted the request,
 any persons designated in the CC line, and authorized members of the Mozilla Rep team.</p>
 
 <script language="javascript" type="text/javascript">
 function trySubmit() {
-  var firstname = document.getElementById('firstname').value;
-  var lastname = document.getElementById('lastname').value;
-  var requester = firstname + ' ' + lastname;
-  var shortdesc = 'Swag Request - ' + requester;
+  var eventname = document.getElementById('eventname').value;
+  var shortdesc = 'Swag Request - ' + eventname;
   document.getElementById('short_desc').value = shortdesc;
   return true;
 }
@@ -50,11 +49,12 @@ function validateAndSubmit() {
   if(!isFilledOut('firstname')) alert_text += "Please enter your first name\n";
   if(!isFilledOut('lastname')) alert_text += "Please enter your last name\n";
   if(!isFilledOut('wikiprofile')) alert_text += "Please enter your wiki user profile\n";
+  if(!isFilledOut('eventname')) alert_text += "Please enter your event name\n";
   if(!isFilledOut('wikipage')) alert_text += "Please enter the event wiki page.\n";
   if(!isFilledOut('attendance')) alert_text += "Please enter the estimated attendance.\n";
   if(!isFilledOut('shiptofirstname')) alert_text += "Please enter the shipping first name\n";
   if(!isFilledOut('shiptolastname')) alert_text += "Please enter the shipping last name\n";
-  if(!isFilledOut('shiptoaddress')) alert_text += "Please enter the ship to address\n";
+  if(!isFilledOut('shiptoaddress1')) alert_text += "Please enter the ship to address\n";
   if(!isFilledOut('shiptocity')) alert_text += "Please enter the ship to city\n";
   if(!isFilledOut('shiptocountry')) alert_text += "Please enter the ship to country\n";
   if(!isFilledOut('shiptopcode')) alert_text += "Please enter the ship to postal code\n";
@@ -112,6 +112,13 @@ function validateAndSubmit() {
 </tr>
 
 <tr class="even">
+  <td><strong>Event Name: <span style="color: red;" title="Required">*</span></strong></td>
+  <td>
+    <input type="text" name="eventname" id="eventname" size="40">
+  </td>
+</tr>
+
+<tr class="odd">
   <td><strong>Event Wiki Page: <span style="color: red;" title="Required">*</span></strong></td>
   <td>
     <input type="text" name="wikipage" id="wikipage" size="40">
@@ -121,7 +128,12 @@ function validateAndSubmit() {
 <tr class="even">
   <td><strong>Estimated Attendance: <span style="color: red;" title="Required">*</span></strong></td>
   <td>
-    <input type="text" name="attendance" id="attendance" size="40">
+    <select id="attendance" name="attendance">
+      <option value="1-50">1-50</option>
+      <option value="51-200">51-200</option>
+      <option value="201-500">201-500</option>
+      <option value="501-1000+">501-1000+</option>
+    </select>
   </td>
 </tr
 
@@ -137,12 +149,13 @@ function validateAndSubmit() {
 <tr class="odd">
   <td><strong>Ship Before:</strong>
   <td>
-    <input type="text" id="shipdate" name="shipdate" size="10"
-           onchange="updateCalendarFromField(this)">
-    <button type="button" class="calendar_button" id="button_calendar_date"
-            onclick="showCalendar('shipdate')"><span>Calendar</span>
-    </button>
-    <div id="con_calendar_shipdate"></div>
+    [% INCLUDE bug/field.html.tmpl 
+       bug      = default,
+       field    = bug_fields.cf_due_date 
+       value    = default.cf_due_date, 
+       editable = 1, 
+       no_tds   = 1
+    %]
   </td>
 </tr>
 
@@ -157,12 +170,12 @@ function validateAndSubmit() {
 </tr>
 
 <tr class="even">
-  <td><strong>Address: <span style="color: red;" title="Required">*</span></strong></td>
-  <td><input name="shiptoaddress" id="shiptoaddress" placeholder="123 Main St." size="40"></td>
+  <td><strong>Address Line 1: <span style="color: red;" title="Required">*</span></strong></td>
+  <td><input name="shiptoaddress1" id="shiptoaddress1" placeholder="123 Main St." size="40"></td>
 </tr>
 
 <tr class="odd">
-  <td><strong>Address 2:</strong></td>
+  <td><strong>Address Line 2:</strong></td>
   <td><input name="shiptoaddress2" id="shiptoaddress2" size="40"></td>
 </tr>
 
@@ -172,7 +185,7 @@ function validateAndSubmit() {
 </tr>
 
 <tr class="odd">
-  <td><strong>State:</strong></td>
+  <td><strong>State/Region (if applicable):</strong></td>
   <td><input name="shiptostate" id="shiptostate" placeholder="CA" size="40"></td>
 </tr>
 
@@ -187,12 +200,12 @@ function validateAndSubmit() {
 </tr>
 
 <tr class="even">
-  <td><strong>Contact Number: <span style="color: red;" title="Required">*</span></strong></td>
+  <td><strong>Phone (including country code): <span style="color: red;" title="Required">*</span></strong></td>
   <td><input name="shiptophone" id="shiptophone" placeholder="919-555-1212" size="40"></td>
 </tr>
 
 <tr class="odd">
-  <td><strong>Personal ID/RUT:</strong><br><small>(if your country requires this)</small></td>
+  <td><strong>Custom Reference (Fiscal or VAT-number, if known):</strong><br><small>(if your country requires this)</small></td>
   <td><input name="shiptoidrut" id="shiptoidrut" size="40"></td>
 </tr>
 
@@ -203,16 +216,16 @@ function validateAndSubmit() {
   </td>
 </tr>
 
-<tr class="odd">
+<tr class="even">
   <td><!--spacer-->&nbsp;</td>
   <td><!--spacer-->&nbsp;</td>
 </tr>
 
-<tr class="even">
+<tr class="odd">
   <td colspan="2"><strong>Swag Requested:</strong></td>
 </tr>
 
-<tr class="odd">
+<tr class="even">
   <td><strong>Stickers:</strong></td>
   <td><input type="checkbox" id="stickers" name="stickers" value="1"></td>
 </tr>
@@ -285,8 +298,8 @@ function validateAndSubmit() {
    You will be notified by email of any progress made in resolving your request.
 </p>
 
-<script type="text/javascript">
-  createCalendar('shipdate');
-</script>
+[% ELSE %]
+  <p>Sorry, you do not have access to this page.</p>
+[% END %]
 
 [% PROCESS global/footer.html.tmpl %]

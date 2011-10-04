@@ -32,7 +32,7 @@
 [% USE Bugzilla %]                                                            
 
 <p><strong>Please use this form for IT requests only!</strong></p>
-<p>If you have a [% terms.bug %] to file, go <a href="enter_bug.cgi">here</a>.</p>
+<p>If you have a bug to file, go <a href="enter_bug.cgi">here</a>.</p>
 
 <form method="post" action="post_bug.cgi" id="itRequestForm" enctype="multipart/form-data">
   <input type="hidden" name="product" value="mozilla.org">
@@ -75,12 +75,12 @@
 
   <td>
     <select id="bug_severity" name="bug_severity" onchange="setsevdesc(this)">
-      <option value="blocker">All work stops until this is done</option>
-      <option value="critical">As soon as possible (urgent)</option>
-      <option value="major">Within 24 hours</option>
-      <option value="normal">Within the next week</option>
-      <option value="minor" selected="selected">No rush</option>
-      <option value="trivial">Whenever you get around to it</option>
+      <option value="blocker">All work for IT stops until this is done</option>
+      <option value="critical">IT should work on it soon as possible (urgent)</option>
+      <option value="major">IT should get to it within 24 hours</option>
+      <option value="normal">IT should get to it within the next week</option>
+      <option value="minor" selected="selected">No rush, but hopefully IT can get to it soon</option>
+      <option value="trivial">Whenever IT can get around to it</option>
       <option value="enhancement">This is just an idea, filing it so we don't forget</option>
     </select>
   </td>
@@ -96,13 +96,16 @@
         <input type="radio" name="component" id="componentac" onclick="setcompdesc(this)" value="Server Operations: Account Requests">
         <label for="componentac">Request an LDAP/E-mail/etc. account</label><br>
         <input type="radio" name="component" id="componentmvd" onclick="setcompdesc(this)" value="Server Operations: Desktop Issues">
-        <label for="componentmvd">Desktop/Laptop/Printer/Phone problem/order/request</label><br>
-        <input type="radio" name="component" id="componenttbm" onclick="setcompdesc(this)" value="Server Operations: Tinderbox Maintenance">
+        <label for="componentmvd">Desktop/Laptop/Printer/Phone/Tablet/License problem/order/request</label><br>
+        <input type="radio" name="component" id="componenttbm" onclick="setcompdesc(this)" value="Server Operations: RelEng">
         <label for="componenttbm">Report a problem with a tinderbox machine</label><br>
-        <input type="radio" name="component" id="componentwcp" onclick="setcompdesc(this)" value="Server Operations: Web Content Push">
-        <label for="componentwcp">Deploy a change to a production website</label><br>
+        <input type="radio" name="component" id="componentwcp" onclick="setcompdesc(this)" value="Server Operations: Web Operations">
+        <label for="componentwcp">Report a problem with a Mozilla website, or to request a change or push</label><br>
+        <input type="radio" name="component" id="componentacl" onclick="setcompdesc(this)" value="Server Operations: ACL Request">
+        <label for="componentacl">Request a firewall change</label><br>
         <input type="radio" name="component" id="componentso" onclick="setcompdesc(this)" value="Server Operations">
         <label for="componentso">Any other issue</label><br>
+        Mailing list requests should be filed <a href="[% ulrbase FILTER none %]enter_bug.cgi?product=mozilla.org&format=mozlist">here</a> instead.
       </td>
       <td id="compdescription" align="left" style="color: green; padding-left: 1em">
       </td>
@@ -169,7 +172,7 @@
   </table>
 
   <br>
-  <!-- infra [% terms.bugs %] -->
+  <!-- infra bugs -->
   <input type="checkbox" name="groups" id="groups" value="infra" checked="checked"><label for="groups"><strong>This is an internal issue which should not be publicly visible.</strong></label><br>(please uncheck this box if it isn't)
   <br><br>
 

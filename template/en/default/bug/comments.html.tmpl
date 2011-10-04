@@ -25,6 +25,37 @@
 <script src="[% 'js/comments.js' FILTER mtime %]" type="text/javascript">
 </script>
 
+<script type="text/javascript">
+<!--
+  /* Adds the reply text to the `comment' textarea */
+  function replyToComment(id, real_id, name) {
+      var prefix = "(In reply to " + name + " from comment #" + id + ")\n";
+      var replytext = "";
+      [% IF user.settings.quote_replies.value == 'quoted_reply' %]
+        /* pre id="comment_name_N" */
+        var text_elem = document.getElementById('comment_text_'+id);
+        var text = getText(text_elem);
+        replytext = prefix + wrapReplyText(text);
+      [% ELSIF user.settings.quote_replies.value == 'simple_reply' %]
+        replytext = prefix;
+      [% END %]
+
+      [% IF user.is_insider %]
+        if (document.getElementById('isprivate_' + real_id).checked) {
+            document.getElementById('newcommentprivacy').checked = 'checked';
+            updateCommentTagControl(document.getElementById('newcommentprivacy'), 'comment'); 
+        }
+      [% END %]
+
+      /* <textarea id="comment"> */
+      var textarea = document.getElementById('comment');
+      textarea.value += replytext;
+
+      textarea.focus();
+  } 
+//-->
+</script>
+
 [% DEFAULT start_at = 0 mode = "show" %]
 [% sort_order = user.settings.comment_sort_order.value %]
 
@@ -52,6 +83,8 @@
     [% END %]
 [% END %]
 
+[% Hook.process("comment_banner") %]
+
 <!-- This auto-sizes the comments and positions the collapse/expand links 
      to the right. -->
 <table class="bz_comment_table" cellpadding="0" cellspacing="0"><tr>
@@ -63,14 +96,6 @@
   [% END %]
   
   [% count = count + increment %]
-[% END %]
-
-[% IF user.settings.comment_box_position.value == "before_comments" && user.id %]
-  <div class="bz_add_comment">
-    <a href="#" 
-       onclick="return goto_add_comments();">
-       Add Comment</a>
-  </div>
 [% END %]
 
 [%# Note: this template is used in multiple places; if you use this hook,
@@ -86,11 +111,6 @@
                                return false;">Collapse All Comments</a></li>
       <li><a href="#" onclick="toggle_all_comments('expand');
                                return false;">Expand All Comments</a></li>
-      [% IF user.settings.comment_box_position.value == "after_comments" && user.id %]
-        <li class="bz_add_comment"><a href="#" 
-            onclick="return goto_add_comments('bug_status_bottom');">
-            Add Comment</a></li>
-      [% END %]                               
     </ul>
   [% END %]
 </td>
@@ -120,8 +140,12 @@
 
         [% IF mode == "edit" %]
           <span class="bz_comment_actions">
+            [<a class="bz_reply_link" href="#add_comment"
+              [% IF user.settings.quote_replies.value != 'off' %]
+                onclick="replyToComment('[% count %]', '[% comment.id %]', '[% comment.author.name || comment.author.nick FILTER html FILTER js %]'); return false;"
+              [% END %]
+            >reply</a>]
             <script type="text/javascript"><!--
-              addReplyLink([% count %], [% comment.id %]);
               addCollapseLink([% count %]); // -->
             </script>
           </span>
@@ -148,6 +172,7 @@
 
         <span class="bz_comment_user">
           [% INCLUDE global/user.html.tmpl who = comment.author %]
+          [% Hook.process('user', 'bug/comments.html.tmpl') %]
         </span>
 
         <span class="bz_comment_user_images">

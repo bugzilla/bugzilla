@@ -42,6 +42,7 @@ use DateTime;
 use Bugzilla::Extension::BMO::FakeBug;
 use Bugzilla::Extension::BMO::Data qw($cf_visible_in_products
                                       $cf_flags
+                                      $cf_disabled_flags
                                       %group_to_cc_map
                                       $blocking_trusted_setters
                                       $blocking_trusted_requesters
@@ -51,7 +52,8 @@ use Bugzilla::Extension::BMO::Data qw($cf_visible_in_products
                                       %always_fileable_group
                                       %product_sec_groups);
 use Bugzilla::Extension::BMO::Reports qw(user_activity_report
-                                         triage_reports);
+                                         triage_reports
+                                         group_admins);
 
 our $VERSION = '0.1';
 
@@ -69,6 +71,7 @@ sub template_before_process {
     my $vars = $args->{'vars'};
     
     $vars->{'cf_hidden_in_product'} = \&cf_hidden_in_product;
+    $vars->{'cf_flag_disabled'} = \&cf_flag_disabled;
     
     if ($file =~ /^list\/list/) {
         # Purpose: enable correct sorting of list table
@@ -155,8 +158,8 @@ sub page_before_template {
         # that our hook template can see. 
         Bugzilla->request_cache->{'bmo_fields_page'} = 1;
     }
-    elsif ($page eq 'remo-form-payment.html') {
-        _remo_form_payment($vars);
+    elsif ($page eq 'group_admins.html') {
+        group_admins($vars);
     }
 }
 
@@ -240,6 +243,13 @@ sub cf_hidden_in_product {
     }
     
     return 0;
+}
+
+sub cf_flag_disabled {
+    my ($field_name, $bug) = @_;
+    return 0 unless grep { $field_name eq $_ } @$cf_disabled_flags;
+    my $value = $bug->{$field_name};
+    return $value eq '---' || $value eq '';
 }
 
 # Purpose: CC certain email addresses on bugmail when a bug is added or 
@@ -440,6 +450,19 @@ sub _link_hg {
     return qq{<a href="https://hg.mozilla.org/$repo/rev/$id">$text</a>};
 }
 
+sub _link_bzr {
+    my $args = shift;
+    my $preamble = html_quote($args->{matches}->[0]);
+    my $url = html_quote($args->{matches}->[1]);
+    my $text = html_quote($args->{matches}->[2]);
+    my $id = html_quote($args->{matches}->[3]);
+
+    $url =~ s/\s+$//;
+    $url =~ s/\/$//;
+
+    return qq{$preamble<a href="http://$url/revision/$id">$text</a>};
+}
+
 sub bug_format_comment {
     my ($self, $args) = @_;
     my $regexes = $args->{'regexes'};
@@ -464,6 +487,13 @@ sub bug_format_comment {
     push (@$regexes, {
         match => qr/\br(\d{4,})\b/,
         replace => \&_link_svn
+    });
+
+    push (@$regexes, {
+        match => qr/\b(Committing\sto:\sbzr\+ssh:\/\/
+                    (?:[^\@]+\@)?(bzr\.mozilla\.org[^\n]+)\n.*?\nCommitted\s)
+                    (revision\s(\d+))\./sx,
+        replace => \&_link_bzr
     });
 
     # Note: for grouping in this regexp, always use non-capturing parentheses.
@@ -597,146 +627,6 @@ sub install_update_db {
     }
 }
 
-sub _remo_form_payment {
-    my ($vars) = @_;
-    my $input = Bugzilla->input_params;
-
-    my $user = Bugzilla->login(LOGIN_REQUIRED);
-
-    if ($input->{'action'} eq 'commit') {
-        my $template = Bugzilla->template;
-        my $cgi      = Bugzilla->cgi;
-        my $dbh      = Bugzilla->dbh;
-
-        my $bug_id = $input->{'bug_id'};
-        detaint_natural($bug_id);
-        my $bug = Bugzilla::Bug->check($bug_id);
-
-        # Detect if the user already used the same form to submit again
-        my $token = trim($input->{'token'});
-        if ($token) {
-            my ($creator_id, $date, $old_attach_id) = Bugzilla::Token::GetTokenData($token);
-            if (!$creator_id 
-                || $creator_id != $user->id 
-                || $old_attach_id !~ "^remo_form_payment:")
-            {
-                # The token is invalid.
-                ThrowUserError('token_does_not_exist');
-            }
-
-            $old_attach_id =~ s/^remo_form_payment://;
-            if ($old_attach_id) {
-                ThrowUserError('remo_payment_cancel_dupe', 
-                               { bugid => $bug_id, attachid => $old_attach_id });
-            }
-        }
-
-        # Make sure the user can attach to this bug
-        if (!$bug->user->{'canedit'}) {
-            ThrowUserError("remo_payment_bug_edit_denied", 
-                           { bug_id => $bug->id });
-        }
-
-        # Make sure the bug is under the correct product/component
-        if ($bug->product ne 'Mozilla Reps' 
-            || $bug->component ne 'Budget Requests') 
-        {
-            ThrowUserError('remo_payment_invalid_product');    
-        }
-
-        my ($timestamp) = $dbh->selectrow_array("SELECT NOW()");
-
-        $dbh->bz_start_transaction;
-    
-        # Create the comment to be added based on the form fields from rep-payment-form
-        my $comment;
-        $template->process("pages/comment-remo-form-payment.txt.tmpl", $vars, \$comment)
-            || ThrowTemplateError($template->error());
-        $bug->add_comment($comment, { isprivate => 0 });
-
-        # Attach expense report
-        # FIXME: Would be nice to be able to have the above prefilled comment and
-        # the following attachments all show up under a single comment. But the longdescs
-        # table can only handle one attach_id per comment currently. At least only one
-        # email is sent the way it is done below.
-        my $attachment;
-        if (defined $cgi->upload('expenseform')) {
-            # Determine content-type
-            my $content_type = $cgi->uploadInfo($cgi->param('expenseform'))->{'Content-Type'};
- 
-            $attachment = Bugzilla::Attachment->create(
-                { bug           => $bug, 
-                  creation_ts   => $timestamp, 
-                  data          => $cgi->upload('expenseform'), 
-                  description   => 'Expense Form', 
-                  filename      => scalar $cgi->upload('expenseform'), 
-                  ispatch       => 0, 
-                  isprivate     => 0, 
-                  isurl         => 0, 
-                  mimetype      => $content_type, 
-                  store_in_file => 0, 
-            });
-
-            # Insert comment for attachment
-            $bug->add_comment('', { isprivate  => 0, 
-                                    type       => CMT_ATTACHMENT_CREATED, 
-                                    extra_data => $attachment->id });
-        }
-
-        # Attach receipts file
-        if (defined $cgi->upload("receipts")) {
-            # Determine content-type
-            my $content_type = $cgi->uploadInfo($cgi->param("receipts"))->{'Content-Type'};
-
-            $attachment = Bugzilla::Attachment->create(
-                { bug           => $bug, 
-                  creation_ts   => $timestamp, 
-                  data          => $cgi->upload('receipts'), 
-                  description   => "Receipts", 
-                  filename      => scalar $cgi->upload("receipts"), 
-                  ispatch       => 0, 
-                  isprivate     => 0, 
-                  isurl         => 0, 
-                  mimetype      => $content_type, 
-                  store_in_file => 0, 
-            });
-
-            # Insert comment for attachment
-            $bug->add_comment('', { isprivate  => 0, 
-                                    type       => CMT_ATTACHMENT_CREATED, 
-                                    extra_data => $attachment->id });
-        }
-
-        $bug->update($timestamp);
-
-        if ($token) {
-            trick_taint($token);
-            $dbh->do('UPDATE tokens SET eventdata = ? WHERE token = ?', undef,
-                     ("remo_form_payment:" . $attachment->id, $token));
-        }
-
-        $dbh->bz_commit_transaction;
-    
-        # Define the variables and functions that will be passed to the UI template.
-        $vars->{'attachment'} = $attachment;
-        $vars->{'bugs'} = [ new Bugzilla::Bug($bug_id) ];
-        $vars->{'header_done'} = 1;
-        $vars->{'contenttypemethod'} = 'autodetect';
- 
-        my $recipients = { 'changer' => $user };
-        $vars->{'sent_bugmail'} = Bugzilla::BugMail::Send($bug_id, $recipients);
-        
-        print $cgi->header();
-        # Generate and return the UI (HTML page) from the appropriate template.
-        $template->process("attachment/created.html.tmpl", $vars)
-            || ThrowTemplateError($template->error()); 
-        exit;
-    }
-    else {
-        $vars->{'token'} = issue_session_token('remo_form_payment:');
-    }
-}
-
 sub _last_closed_date {
     my ($self) = @_;
     my $dbh = Bugzilla->dbh;
@@ -794,6 +684,63 @@ sub webservice {
 
     my $dispatch = $args->{dispatch};
     $dispatch->{BMO} = "Bugzilla::Extension::BMO::WebService";
+}
+
+our $search_content_matches;
+BEGIN {
+    $search_content_matches = \&Bugzilla::Search::_content_matches;
+}
+
+sub search_operator_field_override {
+    my ($self, $args) = @_;
+    my $search = $args->{'search'};
+    my $operators = $args->{'operators'};
+
+    my $cgi = Bugzilla->cgi;
+    my @comments = $cgi->param('comments');
+    my $exclude_comments = scalar(@comments) && !grep { $_ eq '1' } @comments;
+
+    if ($cgi->param('query_format') eq 'specific' && $exclude_comments) {
+        # use the non-comment operator
+        $operators->{'content'}->{matches} = \&_short_desc_matches;
+        $operators->{'content'}->{notmatches} = \&_short_desc_matches;
+
+    } else {
+        # restore default content operator
+        $operators->{'content'}->{matches} = $search_content_matches;
+        $operators->{'content'}->{notmatches} = $search_content_matches;
+    }
+}
+
+sub _short_desc_matches {
+    # copy of Bugzilla::Search::_content_matches
+
+    my $self = shift;
+    my %func_args = @_;
+    my ($chartid, $supptables, $term, $groupby, $fields, $t, $v) =
+        @func_args{qw(chartid supptables term groupby fields t v)};
+    my $dbh = Bugzilla->dbh;
+
+    # Add the fulltext table to the query so we can search on it.
+    my $table = "bugs_fulltext_$$chartid";
+    push(@$supptables, "LEFT JOIN bugs_fulltext AS $table " .
+                       "ON bugs.bug_id = $table.bug_id");
+
+    # Create search terms to add to the SELECT and WHERE clauses.
+    my ($term1, $rterm1) = $dbh->sql_fulltext_search("$table.short_desc", $$v, 1);
+    $rterm1 = $term1 if !$rterm1;
+
+    # The term to use in the WHERE clause.
+    $$term = $term1;
+    if ($$t =~ /not/i) {
+        $$term = "NOT($$term)";
+    }
+
+    my $current = Bugzilla::Search::COLUMNS->{'relevance'}->{name};
+    $current = $current ? "$current + " : '';
+    # For NOT searches, we just add 0 to the relevance.
+    my $select_term = $$t =~ /not/ ? 0 : "($current$rterm1)";
+    Bugzilla::Search::COLUMNS->{'relevance'}->{name} = $select_term;
 }
 
 __PACKAGE__->NAME;

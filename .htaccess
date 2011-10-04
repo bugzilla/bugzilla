@@ -23,3 +23,18 @@
 </IfModule>
 </IfModule>
 </IfModule>
+
+Redirect permanent /queryhelp.cgi https://bugzilla.mozilla.org/query.cgi?format=advanced&help=1
+Redirect permanent /bug_status.html https://bugzilla.mozilla.org/page.cgi?id=fields.html
+Redirect permanent /bugwritinghelp.html https://bugzilla.mozilla.org/page.cgi?id=bug-writing.html
+Redirect permanent /etiquette.html https://bugzilla.mozilla.org/page.cgi?id=etiquette.html
+Redirect permanent /duplicates.html https://bugzilla.mozilla.org/duplicates.cgi
+
+RewriteEngine On
+RewriteRule ^form[\.:](itrequest|brownbag|mozlist|mktgevent|poweredby|presentation|swag|trademark)$ enter_bug.cgi?product=mozilla.org&format=$1
+RewriteRule ^form[\.:]legal$ enter_bug.cgi?product=Legal&format=legal
+RewriteRule ^form[\.:]mozpr$ enter_bug.cgi?product=Mozilla+PR&format=mozpr
+RewriteRule ^form[\.:]reps[\.:]mentorship$ enter_bug.cgi?product=Mozilla+Reps&format=mozreps
+RewriteRule ^form[\.:]reps[\.:]budget$ enter_bug.cgi?product=Mozilla+Reps&format=remo-budget
+RewriteRule ^form[\.:]reps[\.:]swag$ enter_bug.cgi?product=Mozilla+Reps&format=remo-swag
+RewriteRule ^form[\.:]reps[\.:]payment$ page.cgi?id=remo-form-payment.html

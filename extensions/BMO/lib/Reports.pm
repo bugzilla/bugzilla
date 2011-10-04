@@ -31,7 +31,8 @@ use DateTime;
 use base qw(Exporter);
 
 our @EXPORT_OK = qw(user_activity_report
-                    triage_reports);
+                    triage_reports
+                    group_admins);
 
 sub user_activity_report {
     my ($vars) = @_;
@@ -303,14 +304,16 @@ sub triage_reports {
 
         # load product and components from input
 
-        my $product = Bugzilla::Product->new({ name => $input->{'product'} });
+        my $product = Bugzilla::Product->new({ name => $input->{'product'} })
+            || ThrowUserError('invalid_object', { object => 'Product', value => $input->{'product'} });
 
         my @component_ids;
         if ($input->{'component'} ne '') {
             my $ra_components = ref($input->{'component'})
                 ? $input->{'component'} : [ $input->{'component'} ];
             foreach my $component_name (@$ra_components) {
-                my $component = Bugzilla::Component->new({ name => $component_name, product => $product });
+                my $component = Bugzilla::Component->new({ name => $component_name, product => $product })
+                    || ThrowUserError('invalid_object', { object => 'Component', value => $component_name });
                 push @component_ids, $component->id;
             }
         }
@@ -319,15 +322,22 @@ sub triage_reports {
 
         my $filter_commenter = $input->{'filter_commenter'};
         my $filter_commenter_on = $input->{'commenter'};
+        my $filter_last = $input->{'filter_last'};
+        my $filter_last_period = $input->{'last'};
+
+        if (!$filter_commenter || $filter_last) {
+            $filter_commenter = '1';
+            $filter_commenter_on = 'reporter';
+        }
+
         my $filter_commenter_id;
         if ($filter_commenter && $filter_commenter_on eq 'is') {
             Bugzilla::User::match_field({ 'commenter_is' => {'type' => 'single'} });
-            my $user = Bugzilla::User->new({ name => $input->{'commenter_is'} });
+            my $user = Bugzilla::User->new({ name => $input->{'commenter_is'} })
+                || ThrowUserError('invalid_object', { object => 'User', value => $input->{'commenter_is'} });
             $filter_commenter_id = $user ? $user->id : 0;
         }
 
-        my $filter_last = $input->{'filter_last'};
-        my $filter_last_period = $input->{'last'};
         my $filter_last_time;
         if ($filter_last) {
             if ($filter_last_period eq 'is') {
@@ -338,11 +348,10 @@ sub triage_reports {
                     $filter_last_period = 14 if $filter_last_period < 14;
             }
         }
-        my $now = (time);
-        $filter_commenter = 1 unless $filter_commenter || $filter_last;
 
         # form sql queries
 
+        my $now = (time);
         my $bugs_sql = "
               SELECT bug_id, short_desc, reporter, creation_ts
                 FROM bugs
@@ -471,6 +480,43 @@ sub triage_reports {
     }
     
     $vars->{'input'} = $input;
+}
+
+sub group_admins {
+    my ($vars, $filter) = @_;
+    my $dbh = Bugzilla->dbh;
+    my $user = Bugzilla->user;
+
+    $user->in_group('editusers')
+        || ThrowUserError('auth_failure', { group  => 'editusers', 
+                                            action => 'run', 
+                                            object => 'group_admins' });
+
+    my $query = "
+        SELECT groups.name, " .
+               $dbh->sql_group_concat('profiles.login_name', "','", 1) . "
+          FROM groups
+               LEFT JOIN user_group_map
+                    ON user_group_map.group_id = groups.id
+                    AND user_group_map.isbless = 1
+                    AND user_group_map.grant_type = 0
+               LEFT JOIN profiles
+                    ON user_group_map.user_id = profiles.userid
+         WHERE groups.isbuggroup = 1
+      GROUP BY groups.name";
+    
+    my @groups;
+    foreach my $group (@{ $dbh->selectall_arrayref($query) }) {
+        my @admins;
+        if ($group->[1]) {
+            foreach my $admin (split(/,/, $group->[1])) {
+                push(@admins, Bugzilla::User->new({ name => $admin }));
+            }
+        }
+        push(@groups, { name => $group->[0], admins => \@admins });
+    }
+
+    $vars->{'groups'} = \@groups;
 }
 
 1;

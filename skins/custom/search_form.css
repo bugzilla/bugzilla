@@ -1,0 +1,6 @@
+
+/* let the browser choose the select height from the "size" param */
+.search_field_grid select {
+    height: auto;
+}
+

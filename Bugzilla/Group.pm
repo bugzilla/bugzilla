@@ -119,9 +119,10 @@ sub _get_members {
 }
 
 sub flag_types {
-    my $self = shift;
+    my ($self, $params) = @_;
+    $params ||= {};
     require Bugzilla::FlagType;
-    $self->{flag_types} ||= Bugzilla::FlagType::match({ group => $self->id });
+    $self->{flag_types} ||= Bugzilla::FlagType::match({ group => $self->id, %$params });
     return $self->{flag_types};
 }
 

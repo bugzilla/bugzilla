@@ -98,12 +98,21 @@ for "crash secure SSL flash".
       <label for="content">Words:</label>
     </th>
     <td>
-      <input name="content" size="40" id="content"
+      <input name="content" size="60" id="content"
              value="[% default.content.0 FILTER html %]">
       <script type="text/javascript"> <!--
           document.forms['queryform'].content.focus(); 
       // -->
       </script>
+    </td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td>
+      <input type="hidden" name="comments" value="0">
+      <input type="checkbox" id="comments" name="comments"
+             value="1" [% 'checked' IF cgi.param("comments") %]>
+      <label for="comments">Search comments</label>
     </td>
   </tr>
   <tr>

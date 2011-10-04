@@ -2786,7 +2786,8 @@ sub _changedby {
 sub IsValidQueryType
 {
     my ($queryType) = @_;
-    if (grep { $_ eq $queryType } qw(specific advanced)) {
+    # BMO: Added google query type
+    if (grep { $_ eq $queryType } qw(specific advanced google)) {
         return 1;
     }
     return 0;

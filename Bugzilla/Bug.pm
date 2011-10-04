@@ -1628,6 +1628,14 @@ sub _check_groups {
                                      : $params->{product};
     my %add_groups;
 
+    # BMO: Allow extension to add groups before the
+    # real checks are done.
+    Bugzilla::Hook::process('bug_check_groups', {
+        product     => $product,
+        group_names => $group_names, 
+        add_groups  => \%add_groups 
+    });
+
     # In email or WebServices, when the "groups" item actually 
     # isn't specified, then just add the default groups.
     if (!defined $group_names) {
@@ -1646,7 +1654,12 @@ sub _check_groups {
         foreach my $name (@$group_names) {
             my $group = Bugzilla::Group->check_no_disclose({ %args, name => $name });
 
-            if (!$product->group_is_settable($group)) {
+            # BMO: Do not check group_is_settable if the group is 
+            # already added, such as from the extension hook. group_is_settable
+            # will reject any group the user is not currently in.
+            if (!$add_groups{$group->id} 
+                && !$product->group_is_settable($group)) 
+            {
                 ThrowUserError('group_restriction_not_allowed', { %args, name => $name });
             }
             $add_groups{$group->id} = $group;
@@ -1655,7 +1668,7 @@ sub _check_groups {
 
     # Now enforce mandatory groups.
     $add_groups{$_->id} = $_ foreach @{ $product->groups_mandatory };
-
+   
     my @add_groups = values %add_groups;
     return \@add_groups;
 }
@@ -3244,15 +3257,37 @@ sub depends_on_obj {
     return $self->{depends_on_obj};
 }
 
+sub duplicates {
+    my $self = shift;
+    return $self->{duplicates} if exists $self->{duplicates};
+    return [] if $self->{error};
+    $self->{duplicates} = Bugzilla::Bug->new_from_list($self->duplicate_ids);
+    return $self->{duplicates};
+}
+
+sub duplicate_ids {
+    my $self = shift;
+    return $self->{duplicate_ids} if exists $self->{duplicate_ids};
+    return [] if $self->{error};
+
+    my $dbh = Bugzilla->dbh;
+    $self->{duplicate_ids} =
+      $dbh->selectcol_arrayref('SELECT dupe FROM duplicates WHERE dupe_of = ?',
+                               undef, $self->id);
+    return $self->{duplicate_ids};
+}
+
 sub flag_types {
-    my ($self) = @_;
+    my ($self, $params) = @_;
+    $params ||= {};
     return $self->{'flag_types'} if exists $self->{'flag_types'};
     return [] if $self->{'error'};
 
     my $vars = { target_type  => 'bug',
                  product_id   => $self->{product_id},
                  component_id => $self->{component_id},
-                 bug_id       => $self->bug_id };
+                 bug_id       => $self->bug_id, 
+                 %$params };
 
     $self->{'flag_types'} = Bugzilla::Flag->_flag_types($vars);
     return $self->{'flag_types'};

@@ -78,6 +78,8 @@ use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Util;
 use List::MoreUtils qw(any);
+use Bugzilla::Config qw(SetParam write_params);
+use Bugzilla::Hook;
 
 use Scalar::Util qw(blessed);
 
@@ -916,53 +918,64 @@ sub remove_from_db {
         ThrowUserError('customfield_not_obsolete', {'name' => $self->name });
     }
 
-    $dbh->bz_start_transaction();
+    # BMO: disable bug updates during field creation
+    # using an eval as try/finally
+    eval {
+        SetParam('disable_bug_updates', 1);
+        write_params();
 
-    # Check to see if bug activity table has records (should be fast with index)
-    my $has_activity = $dbh->selectrow_array("SELECT COUNT(*) FROM bugs_activity
-                                      WHERE fieldid = ?", undef, $self->id);
-    if ($has_activity) {
-        ThrowUserError('customfield_has_activity', {'name' => $name });
-    }
+        $dbh->bz_start_transaction();
 
-    # Check to see if bugs table has records (slow)
-    my $bugs_query = "";
-
-    if ($self->type == FIELD_TYPE_MULTI_SELECT) {
-        $bugs_query = "SELECT COUNT(*) FROM bug_$name";
-    }
-    else {
-        $bugs_query = "SELECT COUNT(*) FROM bugs WHERE $name IS NOT NULL";
-        if ($self->type != FIELD_TYPE_BUG_ID && $self->type != FIELD_TYPE_DATETIME) {
-            $bugs_query .= " AND $name != ''";
+        # Check to see if bug activity table has records (should be fast with index)
+        my $has_activity = $dbh->selectrow_array("SELECT COUNT(*) FROM bugs_activity
+                                          WHERE fieldid = ?", undef, $self->id);
+        if ($has_activity) {
+            ThrowUserError('customfield_has_activity', {'name' => $name });
         }
-        # Ignore the default single select value
-        if ($self->type == FIELD_TYPE_SINGLE_SELECT) {
-            $bugs_query .= " AND $name != '---'";
+
+        # Check to see if bugs table has records (slow)
+        my $bugs_query = "";
+
+        if ($self->type == FIELD_TYPE_MULTI_SELECT) {
+            $bugs_query = "SELECT COUNT(*) FROM bug_$name";
         }
-    }
+        else {
+            $bugs_query = "SELECT COUNT(*) FROM bugs WHERE $name IS NOT NULL";
+            if ($self->type != FIELD_TYPE_BUG_ID && $self->type != FIELD_TYPE_DATETIME) {
+                $bugs_query .= " AND $name != ''";
+            }
+            # Ignore the default single select value
+            if ($self->type == FIELD_TYPE_SINGLE_SELECT) {
+                $bugs_query .= " AND $name != '---'";
+            }
+        }
 
-    my $has_bugs = $dbh->selectrow_array($bugs_query);
-    if ($has_bugs) {
-        ThrowUserError('customfield_has_contents', {'name' => $name });
-    }
+        my $has_bugs = $dbh->selectrow_array($bugs_query);
+        if ($has_bugs) {
+            ThrowUserError('customfield_has_contents', {'name' => $name });
+        }
 
-    # Once we reach here, we should be OK to delete.
-    $dbh->do('DELETE FROM fielddefs WHERE id = ?', undef, $self->id);
+        # Once we reach here, we should be OK to delete.
+        $dbh->do('DELETE FROM fielddefs WHERE id = ?', undef, $self->id);
 
-    my $type = $self->type;
+        my $type = $self->type;
 
-    # the values for multi-select are stored in a seperate table
-    if ($type != FIELD_TYPE_MULTI_SELECT) {
-        $dbh->bz_drop_column('bugs', $name);
-    }
+        # the values for multi-select are stored in a seperate table
+        if ($type != FIELD_TYPE_MULTI_SELECT) {
+            $dbh->bz_drop_column('bugs', $name);
+        }
 
-    if ($self->is_select) {
-        # Delete the table that holds the legal values for this field.
-        $dbh->bz_drop_field_tables($self);
-    }
+        if ($self->is_select) {
+            # Delete the table that holds the legal values for this field.
+            $dbh->bz_drop_field_tables($self);
+        }
 
-    $dbh->bz_commit_transaction()
+        $dbh->bz_commit_transaction();
+    };
+    my $error = "$@";
+    SetParam('disable_bug_updates', 0);
+    write_params();
+    die $error if $error;
 }
 
 =pod
@@ -1014,36 +1027,72 @@ sub create {
     # the parameter isn't sent to create().
     $params->{sortkey} = undef if !exists $params->{sortkey};
     $params->{type} ||= 0;
+
+    # BMO: disable bug updates during field creation
+    # using an eval as try/finally
+    my $field;
+    eval {
+        if ($params->{'custom'}) {
+            SetParam('disable_bug_updates', 1);
+            write_params();
+        }
+
+        # Purpose: if the field is active in the fields list before all of the 
+        # data structures are created, anything accessing Bug.pm will crash. So
+        # stash a copy of the intended obsolete value for later and force it
+        # to be obsolete on initial creation.
+        # Upstreaming: https://bugzilla.mozilla.org/show_bug.cgi?id=531243
+        my $original_obsolete;
+        if ($params->{'custom'}) {
+            $original_obsolete = $params->{'obsolete'};
+            $params->{'obsolete'} = 1;
+        }
+
+        $dbh->bz_start_transaction();
+        $class->check_required_create_fields(@_);
+        my $field_values      = $class->run_create_validators($params);
+        my $visibility_values = delete $field_values->{visibility_values};
+        my $field             = $class->insert_create_data($field_values);
     
-    $dbh->bz_start_transaction();
-    $class->check_required_create_fields(@_);
-    my $field_values      = $class->run_create_validators($params);
-    my $visibility_values = delete $field_values->{visibility_values};
-    my $field             = $class->insert_create_data($field_values);
-    
-    $field->set_visibility_values($visibility_values);
-    $field->_update_visibility_values();
+        $field->set_visibility_values($visibility_values);
+        $field->_update_visibility_values();
 
-    $dbh->bz_commit_transaction();
+        $dbh->bz_commit_transaction();
 
-    if ($field->custom) {
-        my $name = $field->name;
-        my $type = $field->type;
-        if (SQL_DEFINITIONS->{$type}) {
-            # Create the database column that stores the data for this field.
-            $dbh->bz_add_column('bugs', $name, SQL_DEFINITIONS->{$type});
+        if ($field->custom) {
+            # Restore the obsolete value that got stashed earlier (in memory)
+            $field->set_obsolete($original_obsolete);
+
+            my $name = $field->name;
+            my $type = $field->type;
+            if (SQL_DEFINITIONS->{$type}) {
+                # Create the database column that stores the data for this field.
+                $dbh->bz_add_column('bugs', $name, SQL_DEFINITIONS->{$type});
+            }
+
+            if ($field->is_select) {
+                # Create the table that holds the legal values for this field.
+                $dbh->bz_add_field_tables($field);
+            }
+
+            if ($type == FIELD_TYPE_SINGLE_SELECT) {
+                # Insert a default value of "---" into the legal values table.
+                $dbh->do("INSERT INTO $name (value) VALUES ('---')");
+            }
+
+            # Safe to write the original 'obsolete' value to the database now
+            $field->update;
         }
+    };
 
-        if ($field->is_select) {
-            # Create the table that holds the legal values for this field.
-            $dbh->bz_add_field_tables($field);
-        }
-
-        if ($type == FIELD_TYPE_SINGLE_SELECT) {
-            # Insert a default value of "---" into the legal values table.
-            $dbh->do("INSERT INTO $name (value) VALUES ('---')");
-        }
+    my $error = "$@";
+    if ($params->{'custom'}) {
+        SetParam('disable_bug_updates', 0);
+        write_params();
     }
+    die $error if $error;
+
+    Bugzilla::Hook::process("field_end_of_create", { field => $field });
 
     return $field;
 }

@@ -54,6 +54,7 @@
   <th>Content Type:</th>
   <td>
     <em>If the attachment is a patch, check the box below.</em><br>
+    [% Hook.process("patch_notes") %]
     <input type="checkbox" id="ispatch" name="ispatch" value="1"
            onchange="setContentTypeDisabledState(this.form);">
     <label for="ispatch">patch</label><br><br>

@@ -1,0 +1,54 @@
+/* ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1
+ * 
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at http://www.mozilla.org/MPL/
+ * 
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
+ * the specific language governing rights and limitations under the License.
+ * 
+ * The Original Code is the InlineHistory Bugzilla Extension;
+ * Derived from the Bugzilla Tweaks Addon.
+ * 
+ * The Initial Developer of the Original Code is the Mozilla Foundation.
+ * Portions created by the Initial Developer are Copyright (C) 2011 the Initial
+ * Developer. All Rights Reserved.
+ * 
+ * Contributor(s):
+ *   Johnathan Nightingale <johnath@mozilla.com>
+ *   Ehsan Akhgari <ehsan@mozilla.com>
+ *   Byron Jones <glob@mozilla.com>
+ *
+ * ***** END LICENSE BLOCK *****
+ */
+
+.ih_history {
+    background: none !important;
+    color: #444;
+}
+
+.ih_inlinehistory {
+    font-weight: normal;
+    font-size: small;
+    color: #444;
+    border-top: 1px dotted #C8C8BA;
+    padding-top: 5px;
+}
+
+.bz_comment.ih_history {
+    padding: 5px 5px 0px 5px
+}
+
+.ih_history_item {
+    margin-bottom: 5px;
+}
+
+.ih_hidden {
+    display: none;
+}
+
+.ih_deleted {
+    text-decoration: line-through;
+}

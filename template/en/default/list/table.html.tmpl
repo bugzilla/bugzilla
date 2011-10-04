@@ -80,12 +80,15 @@
 [%############################################################################%]
 
 [% tableheader = BLOCK %]
-  <table class="bz_buglist" cellspacing="0" cellpadding="4" width="100%">
+  <table class="bz_buglist sortable" cellspacing="0" cellpadding="4" width="100%">
+    <thead> 
     <tr class="bz_buglist_header bz_first_buglist_header">
       [% IF dotweak %]
       <th>&nbsp;</th>
       [% END %]
-      <th colspan="[% splitheader ? 2 : 1 %]" class="first-child">
+      <th colspan="[% splitheader ? 2 : 1 %]" class="first-child
+                   sortable_column_0
+                   sorted_[% lsearch(order_columns, 'bug_id') FILTER html %]">
         <a href="buglist.cgi?
                   [% urlquerypart FILTER html %]&amp;order=
                   [% PROCESS new_order id='bug_id' %]
@@ -100,7 +103,7 @@
         [% FOREACH id = displaycolumns %]
           [% NEXT UNLESS loop.count() % 2 == 0 %]
           [% column = columns.$id %]
-          [% PROCESS columnheader %]
+          [% PROCESS columnheader key=loop.count() %]
         [% END %]
 
         </tr><tr class="bz_buglist_header">
@@ -112,7 +115,7 @@
         [% FOREACH id = displaycolumns %]
           [% NEXT IF loop.count() % 2 == 0 %]
           [% column = columns.$id %]
-          [% PROCESS columnheader %]
+          [% PROCESS columnheader key=loop.count() %]
         [% END %]
 
       [% ELSE %]
@@ -125,10 +128,13 @@
       [% END %]
 
     </tr>
+    </thead>
 [% END %]
 
 [% BLOCK columnheader %]
-  <th colspan="[% splitheader ? 2 : 1 %]">
+  <th colspan="[% splitheader ? 2 : 1 %]"
+      class="sortable_column_[% key FILTER html %]
+             sorted_[% lsearch(order_columns, id) FILTER html %]">
     <a href="buglist.cgi?[% urlquerypart FILTER html %]&amp;order=
       [% PROCESS new_order %]
       [%-#%]&amp;query_based_on=
@@ -168,6 +174,7 @@
 
 [% tableheader %]
 
+<tbody class="sorttable_body">
 [% FOREACH bug = bugs %]
   [% count = loop.count() %]
 
@@ -193,7 +200,17 @@
 
     [% FOREACH column = displaycolumns %]
     <td [% 'style="white-space: nowrap"' IF NOT abbrev.$column.wrap %]
-        class="bz_[% column FILTER css_class_quote %]_column">
+        class="bz_[% column FILTER css_class_quote %]_column"
+        [% SWITCH column %]
+          [% CASE 'opendate' %]
+            sorttable_customkey="[% bug.opentime FILTER html %]"
+          [% CASE 'changeddate' %]
+            sorttable_customkey="[% bug.changedtime FILTER html %]"
+          [% CASE columns_sortkey.keys %]
+            [% SET sortkey = columns_sortkey.$column.${bug.$column} %]
+            sorttable_customkey="[% sortkey FILTER html %]"
+        [% END %]
+    >
       [% IF abbrev.$column.maxlength %]
         <span title="[%- display_value(column, bug.$column) FILTER html %]">
       [% END %]
@@ -228,6 +245,7 @@
   [% END %]
 
 [% END %]
+</tbody>
 
 </table>
 

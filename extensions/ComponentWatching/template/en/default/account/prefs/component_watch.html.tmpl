@@ -113,19 +113,19 @@ You are currently watching:
 [% FOREACH watch IN watches %]
   <tr>
   [% IF (watch.component) %]
-    <td><input type="checkbox" name="del_[% watch.product.id FILTER uri %]_[% watch.component.id FILTER uri %]" value="1"></td>
+    <td><input type="checkbox" name="del_[% watch.product.id %]_[% watch.component.id %]" value="1"></td>
     <td>[% watch.component.product.name FILTER html %]</td>
     <td>
-      <a href="buglist.cgi?product=[% watch.product.name FILTER uri -%]
-               &component=[% watch.component.name FILTER uri %]&resolution=---">
+      <a href="buglist.cgi?product=[% watch.product.name FILTER url ~%]
+               &component=[% watch.component.name FILTER url %]&resolution=---">
       [% watch.component.name FILTER html %]
       </a>
     </td>
   [% ELSE %]
-    <td><input type="checkbox" name="del_[% watch.product.id FILTER uri %]" value="1"></td>
+    <td><input type="checkbox" name="del_[% watch.product.id %]" value="1"></td>
     <td>[% watch.product.name FILTER html %]</td>
     <td>
-      <a href="describecomponents.cgi?product=[% watch.product.name FILTER uri %]">
+      <a href="describecomponents.cgi?product=[% watch.product.name FILTER url %]">
       __Any__
       </a>
     </td>

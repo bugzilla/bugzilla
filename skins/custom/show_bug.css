@@ -1,0 +1,85 @@
+/*
+ * Custom rules for show_bug.css.
+ * The rules you put here override rules in that stylesheet.
+ */
+
+.last_comment_link {
+    float: right;
+    font-size: 80%;
+    font-weight: normal;
+    margin-left: 1em;
+}
+
+/* colorize bugs in various groups */
+body[class*=bz_group_] {
+    background-color: #e0e0ff;
+    border-left: solid red 2px;
+    padding-left: 13px;
+}
+
+body[class*=bz_group_] #bugzilla-body {
+    background-color: inherit;
+}
+
+body.bz_group_webtools-security,
+body.bz_group_websites-security,
+body.bz_group_bugzilla-security {
+    background-color: #ffeeee;
+}
+
+body.bz_group_client-services-security {
+    background-color: #ffff80;
+}
+
+body.bz_group_core-security {
+    background-color: #ffe0b0;
+}
+
+#legal_disclaimer {
+    width: 40em;
+    padding: 1em;
+    margin: 0 1em 1em 1em;
+    font-weight: bold;
+    border: 1px red solid;
+    background-color: lightyellow;
+}
+
+.bz_patch {
+    background: #ffffcc;
+}
+
+.cc_list_display {
+    list-style: none;
+    margin:0px;
+    padding:5px;
+    padding-right:20px;
+    height:100px;
+    overflow:auto;
+    float:left;
+    max-width:465px;
+    border:1px solid #CCC;
+}
+
+.cc_list_display li {
+    margin:0px;
+    padding:0px;
+    white-space:nowrap;
+}
+
+#wave_wand {
+    margin-top: 0px;
+}
+
+/* put the width on the TD rather than the PRE to stop the col resizing
+   when comments are hidden */
+.bz_comment {
+    width: 55em;
+}
+.bz_comment_text {
+    width: auto;
+}
+
+.bz_comment_number {
+	float: right;
+}
+

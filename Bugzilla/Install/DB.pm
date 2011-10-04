@@ -637,6 +637,9 @@ sub update_table_definitions {
     # 2009-05-07 ghendricks@novell.com - Bug 77193
     _add_isactive_to_product_fields();
 
+    # 2009-05-07 ghendricks@novell.com - Bug 77193
+    _add_isactive_to_product_fields();
+
     # 2010-10-09 LpSolit@gmail.com - Bug 505165
     $dbh->bz_alter_column('flags', 'setter_id', {TYPE => 'INT3', NOTNULL => 1});
 
@@ -3207,6 +3210,11 @@ sub _populate_bugs_fulltext {
             print "Populating bugs_fulltext with $num_bugs entries...";
             print " (this can take a long time.)\n";
         }
+
+        # As recommended by Monty Widenius for GNOME's upgrade.
+        # mkanat and justdave concur it'll be helpful for bmo, too.
+        $dbh->do('SET SESSION myisam_sort_buffer_size = 3221225472');
+        
         my $newline = $dbh->quote("\n");
         $dbh->do(
          qq{$command INTO bugs_fulltext (bug_id, short_desc, comments, 
@@ -3599,6 +3607,26 @@ sub _rename_tags_to_tag {
         $dbh->bz_rename_table('tags','tag');
         $dbh->bz_add_index('tag', 'tag_user_id_idx',
                            {FIELDS => [qw(user_id name)], TYPE => 'UNIQUE'});
+    }
+}
+
+sub _add_isactive_to_product_fields {
+    my $dbh = Bugzilla->dbh;
+
+    # If we add the isactive column all values should start off as active
+    if (!$dbh->bz_column_info('components', 'isactive')) {
+        $dbh->bz_add_column('components', 'isactive', 
+            {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'TRUE'});
+    }
+    
+    if (!$dbh->bz_column_info('versions', 'isactive')) {
+        $dbh->bz_add_column('versions', 'isactive', 
+            {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'TRUE'});
+    }
+
+    if (!$dbh->bz_column_info('milestones', 'isactive')) {
+        $dbh->bz_add_column('milestones', 'isactive', 
+            {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'TRUE'});
     }
 }
 

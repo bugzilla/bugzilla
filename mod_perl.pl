@@ -79,7 +79,7 @@ PerlChildInitHandler "sub { Bugzilla::RNG::srand(); srand(); }"
     PerlResponseHandler Bugzilla::ModPerl::ResponseHandler
     PerlCleanupHandler  Apache2::SizeLimit Bugzilla::ModPerl::CleanupHandler
     PerlOptions +ParseHeaders
-    Options +ExecCGI
+    Options +ExecCGI +FollowSymLinks
     AllowOverride Limit FileInfo Indexes
     DirectoryIndex index.cgi index.html
 </Directory>

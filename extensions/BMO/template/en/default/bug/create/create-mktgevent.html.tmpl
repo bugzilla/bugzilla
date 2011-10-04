@@ -91,18 +91,19 @@ function validateAndSubmit() {
 <form method="post" action="post_bug.cgi" id="swagRequestForm" enctype="multipart/form-data"
       onSubmit="return validateAndSubmit();">
 
-  <input type="hidden" name="format" value="mktgevent">
-  <input type="hidden" name="product" value="Marketing">
-  <input type="hidden" name="component" value="Event Requests">
-  <input type="hidden" name="rep_platform" value="All">
-  <input type="hidden" name="op_sys" value="Other">
-  <input type="hidden" name="priority" value="--">
-  <input type="hidden" name="version" value="unspecified">
-  <input type="hidden" name="bug_severity" id="bug_severity" value="normal">
-  <input type="hidden" name="short_desc" id="short_desc" value="">
-  <input type="hidden" name="groups" value="mozilla-corporation-confidential">
+        <input type="hidden" name="format" value="mktgevent">
+        <input type="hidden" name="product" value="Marketing">
+        <input type="hidden" name="component" value="Event Requests">
+        <input type="hidden" name="rep_platform" value="All">
+        <input type="hidden" name="op_sys" value="Other">
+        <input type="hidden" name="priority" value="--">
+        <input type="hidden" name="version" value="unspecified">
+        <input type="hidden" name="bug_severity" id="bug_severity" value="normal">
 
+        <input type="hidden" name="short_desc" id="short_desc" value="">
+	<input type="hidden" name="groups" value="mozilla-corporation-confidential">
 <table>
+
 <tr>
   <td align="right"><strong>First Name: <span style="color: red;">*</span></strong></td>
   <td align="left">

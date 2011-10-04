@@ -180,6 +180,7 @@
     [% USE Bugzilla %]
     [% field_counter = 0 %]
     [% FOREACH field = Bugzilla.active_custom_fields %]
+        [% NEXT IF cf_hidden_in_product(field.name, bug.product, bug.component) %]
         [% field_counter = field_counter + 1 %]
         [%# Odd-numbered fields get an opening <tr> %]
         [% '<tr>' IF field_counter % 2 %]

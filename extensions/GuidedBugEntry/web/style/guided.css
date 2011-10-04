@@ -81,6 +81,8 @@
 .exits {
     width: 600px;
     margin-bottom: 10px;
+    border: 1px solid #aaa;
+    border-radius: 5px;
 }
 
 .exits td {

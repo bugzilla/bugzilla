@@ -267,7 +267,12 @@ sub Send {
             }
 
             # Make sure the user isn't in the nomail list, and the dep check passed.
-            if ($user->email_enabled && $dep_ok) {
+            # Upstreaming: when we port to 4.2, check the login names of the
+            # user objects in the bugmail_recipients hook instead.
+            if ($user->email_enabled && $dep_ok &&
+                ($user->login !~ /bugs$/) &&
+                ($user->login !~ /\.tld$/))
+            {
                 # OK, OK, if we must. Email the user.
                 $sent_mail = sendMail(
                     { to       => $user, 

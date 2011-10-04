@@ -255,7 +255,8 @@ use constant AUTH_NO_SUCH_USER  => 5;
 use constant AUTH_LOCKOUT => 6;
 
 # The minimum length a password must have.
-use constant USER_PASSWORD_MIN_LENGTH => 6;
+# BMO uses 8 characters.
+use constant USER_PASSWORD_MIN_LENGTH => 8;
 
 use constant LOGIN_OPTIONAL => 0;
 use constant LOGIN_NORMAL => 1;
@@ -424,8 +425,8 @@ use constant MAX_LOGIN_ATTEMPTS => 5;
 use constant LOGIN_LOCKOUT_INTERVAL => 30;
 
 # The maximum number of seconds the Strict-Transport-Security header
-# will remain valid. Default is one week.
-use constant MAX_STS_AGE => 604800;
+# will remain valid. BMO uses one month.
+use constant MAX_STS_AGE => 2629744;
 
 # Protocols which are considered as safe.
 use constant SAFE_PROTOCOLS => ('afs', 'cid', 'ftp', 'gopher', 'http', 'https',
@@ -438,15 +439,16 @@ use constant LEGAL_CONTENT_TYPES => ('application', 'audio', 'image', 'message',
 
 use constant contenttypes =>
   {
-   "html"=> "text/html" ,
-   "rdf" => "application/rdf+xml" ,
-   "atom"=> "application/atom+xml" ,
-   "xml" => "application/xml" ,
-   "js"  => "application/x-javascript" ,
-   "json"=> "application/json" ,
-   "csv" => "text/csv" ,
-   "png" => "image/png" ,
-   "ics" => "text/calendar" ,
+   "html" => "text/html" ,
+   "rdf"  => "application/rdf+xml" ,
+   "atom" => "application/atom+xml" ,
+   "xml"  => "application/xml" ,
+   "dtd"  => "application/xml-dtd" , 
+   "js"   => "application/x-javascript" ,
+   "json" => "application/json" ,
+   "csv"  => "text/csv" ,
+   "png"  => "image/png" ,
+   "ics"  => "text/calendar" ,
   };
 
 # Usage modes. Default USAGE_MODE_BROWSER. Use with Bugzilla->usage_mode.

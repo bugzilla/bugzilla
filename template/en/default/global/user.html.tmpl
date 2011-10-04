@@ -27,6 +27,9 @@
   [% FILTER collapse %]
     [% IF user.id %]
       <a class="email" href="mailto:[% who.email FILTER html %]"
+      [% IF user.in_group('editusers') || user.bless_groups.size > 0 %]
+         onclick="show_admin_username(event, [% who.id FILTER none %], '[% who.email FILTER js %]'); return false"
+      [% END %]
          title="[% who.identity FILTER html %]">
     [%- END -%]
     [% IF who.name %]

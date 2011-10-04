@@ -31,5 +31,11 @@
     %]page.cgi?id=triage_reports.html">Triage Report</a></strong> - Report
     on UNCONFIRMED [% terms.bugs %] to assist triage.
   </li>
+  [% IF user.in_group('editusers') %]
+    <li>
+      <strong><a href="[% urlbase FILTER none
+      %]page.cgi?id=group_admins.html">Group Admins</a></strong> - Group Admins Report
+    </li>
+  [% END %]
 </ul>
 

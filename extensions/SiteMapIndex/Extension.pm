@@ -101,7 +101,8 @@ sub install_filesystem {
                                     | Bugzilla::Install::Filesystem::DIR_ALSO_WS_SERVE;
 
     $recurse_dirs->{$sitemap_path} = { 
-        files => Bugzilla::Install::Filesystem::WS_SERVE,
+        files => Bugzilla::Install::Filesystem::CGI_WRITE
+                 | Bugzilla::Install::Filesystem::DIR_ALSO_WS_SERVE,
         dirs  => Bugzilla::Install::Filesystem::DIR_CGI_WRITE 
                  | Bugzilla::Install::Filesystem::DIR_ALSO_WS_SERVE 
     };

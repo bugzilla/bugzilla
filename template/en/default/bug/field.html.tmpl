@@ -125,6 +125,30 @@
           [% END %]
           [% FOREACH legal_value = legal_values %]
             [% NEXT IF NOT legal_value.is_active AND NOT value.contains(legal_value.name).size %]
+          
+            [%# Purpose: hide field values from those who can't change them %]
+            [% IF field.name.match("^cf_blocking_") OR
+                  field.name.match("^cf_status_") OR
+                  field.name.match("^cf_tracking_") OR
+                  field.name == "resolution" %]
+              [% NEXT UNLESS bug.check_can_change_field(field.name, '---', legal_value.name) OR
+                             value.contains(legal_value.name).size %]
+            [% END %]
+            
+            [% IF field.name == "resolution" &&
+               legal_value.name != bug.resolution %]
+              [% r = legal_value.name %]
+              [% IF bug.user.canconfirm &&
+                    !(bug.user.canedit || bug.user.isreporter) %]
+                [% NEXT IF r != "WORKSFORME" && r != "INCOMPLETE" %]
+              [% END %]
+              [% IF bug.user.isreporter &&
+                    !(bug.user.canconfirm || bug.user.canedit) %]
+                [% NEXT IF r == "INCOMPLETE" %]
+              [% END %]
+              [% NEXT IF r == "EXPIRED" %]
+            [% END %]
+          
             <option value="[% legal_value.name FILTER html %]"
                     id="v[% legal_value.id FILTER html %]_
                         [%- field.name FILTER html %]"

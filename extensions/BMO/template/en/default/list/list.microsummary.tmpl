@@ -21,8 +21,9 @@
 
 [% PROCESS global/variables.none.tmpl %]
 
+
 [% IF searchname %]
-    [% searchname FILTER html %] ([% bugs.size %])
+    [% searchname %] ([% bugs.size %])
 [% ELSE %]
     [% terms.Bug %] List ([% bugs.size %])
 [% END %]

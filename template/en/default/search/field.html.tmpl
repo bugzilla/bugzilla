@@ -115,7 +115,7 @@
       <select name="[% field.name FILTER html%]" 
               id="[% field.name FILTER html %]" 
         [% IF onchange %] onchange="[% onchange FILTER html %]"[% END %]
-        multiple="multiple" size="7">
+        multiple="multiple" size="9">
         [% legal_values = ${field.name} %]
         [% IF field.name == "component" %]
           [% legal_values = ${"component_"} %]

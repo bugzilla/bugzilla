@@ -25,7 +25,8 @@
 [% bugidsummary = bug.bug_id _ ': ' _ bug.short_desc %]
 [% attidsummary = attachment.id _ ': ' _ attachment.description %]
 [% flagtype_name = flag ? flag.type.name : old_flag.type.name %]
-[% statuses = { '+' => "granted" , '-' => 'denied' , 'X' => "canceled" ,
+[%# Upstreaming: denied (bug 621883) %]
+[% statuses = { '+' => "granted" , '-' => 'not granted' , 'X' => "canceled" ,
                 '?' => "asked" } %]
 
 [% to_identity = "" %]

@@ -34,6 +34,11 @@ textarea:focus {
     margin-bottom: 1em;
 }
 
+#attachObsolete {
+    font-weight: bold;
+    color: #c00000;
+}
+
 .attachment-draft .attachment-id, .attachment-draft .attachment-desc {
     font-weight: bold;
 }
@@ -399,4 +404,12 @@ div.review-patch-comment-text {
 .file-label-collapse {
     padding-right: 5px;
     font-family: monospace;
+}
+
+.file-review-label {
+    font-size: 80%;
+}
+
+.file-reviewed-nav {
+    text-decoration: line-through;
 }

@@ -29,6 +29,9 @@
         [% ELSE %]
             votes
         [% END %]</a>
+        [% IF bug.user_votes %]
+          including you
+        [% END %]
     [% END %]
     (<a href="page.cgi?id=voting/user.html&amp;bug_id=
               [%- bug.id FILTER uri %]#vote_

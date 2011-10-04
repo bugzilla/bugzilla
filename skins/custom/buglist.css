@@ -1,0 +1,36 @@
+/* For the JS-sorting buglist. */
+
+th.sorttable_sorted,
+th.sorttable_sorted_reverse,
+th.sorted_0 {
+    background-color: #aaa;
+}
+
+th.sorted_1 {
+    background-color: #bbb;
+}
+
+th.sorted_2 {
+    background-color: #ccc;
+}
+
+th.sorted_3 {
+    background-color: #ddd;
+}
+
+th.sorted_4 {
+    background-color: #eee;
+}
+
+th.sorted_5 {
+    background-color: #fff;
+}
+
+.bz_short_desc_column a, .bz_short_short_desc_column a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.bz_short_desc_column a:hover, .bz_short_short_desc_column a:hover {
+    text-decoration: underline;
+}

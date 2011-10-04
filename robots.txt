@@ -1,3 +1,12 @@
+User-agent: Browsershots
+Disallow:
+
 User-agent: *
-Allow: /index.cgi
-Disallow: /
+Disallow: /*.cgi
+Disallow: /*show_bug.cgi*ctype=*
+Allow: /
+Allow: /*index.cgi
+Allow: /*page.cgi
+Allow: /*show_bug.cgi
+Allow: /*describecomponents.cgi
+Sitemap: http://bugzilla.mozilla.org/page.cgi?id=sitemap/sitemap.xml

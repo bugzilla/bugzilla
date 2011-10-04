@@ -1,0 +1,135 @@
+[%# ***** BEGIN LICENSE BLOCK *****
+  # Version: MPL 1.1
+  # 
+  # The contents of this file are subject to the Mozilla Public License Version
+  # 1.1 (the "License"); you may not use this file except in compliance with
+  # the License. You may obtain a copy of the License at
+  # http://www.mozilla.org/MPL/
+  # 
+  # Software distributed under the License is distributed on an "AS IS" basis,
+  # WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+  # for the specific language governing rights and limitations under the
+  # License.
+  # 
+  # The Original Code is the InlineHistory Bugzilla Extension;
+  # Derived from the Bugzilla Tweaks Addon.
+  # 
+  # The Initial Developer of the Original Code is the Mozilla Foundation.
+  # Portions created by the Initial Developer are Copyright (C) 2011 the
+  # Initial Developer. All Rights Reserved.
+  # 
+  # Contributor(s):
+  #   Johnathan Nightingale <johnath@mozilla.com>
+  #   Ehsan Akhgari <ehsan@mozilla.com>
+  #   Byron Jones <glob@mozilla.com>
+  #
+  # ***** END LICENSE BLOCK *****
+  #%]
+
+[% IF ih_activity %]
+[%# this div exists to allow bugzilla-tweaks to detect when we're active %]
+<div id="inline-history-ext"></div>
+
+<script>
+  var ih_activity = new Array();
+  var ih_activity_flags = new Array();
+  var ih_activity_sort_order = '[% user.settings.comment_sort_order.value FILTER js %]';
+  [% FOREACH operation = ih_activity %]
+    var html = '';
+    [% has_cc = 0 %]
+    [% has_flag = 0 %]
+    [% FOREACH change = operation.changes %]
+      [%# track flag changes %]
+      [% IF change.fieldname == 'flagtypes.name' && change.added != '' %]
+        var item = new Array(5);
+        item[0] = '[% operation.who.login FILTER js %]';
+        item[1] = '[% operation.when FILTER time FILTER js %]';
+        item[2] = '[% change.attachid FILTER js %]';
+        item[3] = '[% change.added FILTER js %]';
+        item[4] = '[% operation.who.identity FILTER js %]';
+        ih_activity_flags.push(item);
+        [% has_flag = 1 %]
+      [% END %]
+
+      [%# wrap CC changes in a span for toggling visibility %]
+      [% IF change.fieldname == 'cc' %]
+        html += '<span class="ih_cc">';
+        [% has_cc = 1 %]
+      [% END %]
+
+      [%# make attachment changes better %]
+      [% IF change.attachid %]
+        html += '<a '
+                + 'href="attachment.cgi?action=edit&amp;id=[% change.attachid FILTER none %]" '
+                + 'title="[% change.attach.description FILTER js %]" '
+                + 'class="[% "bz_obsolete" IF change.attach.isobsolete %]"'
+                + '>Attachment #[% change.attachid FILTER none %]</a> - ';
+      [% END %]
+
+      [%# display duplicates as history rather than comments %]
+      [% IF change.dupe %]
+        html += 'Duplicate of this [% terms.bug %]: ';
+      [% ELSE %]
+        html += '[% field_descs.${change.fieldname} FILTER js %]: ';
+      [% END %]
+
+      [% IF change.removed != '' %]
+        [% IF change.added == '' %]
+          html += '<span class="ih_deleted">';
+        [% END %]
+        [% PROCESS add_change value = change.removed, is_old = 1 %]
+        [% IF change.added == '' %]
+          html += '</span>';
+        [% ELSE %]
+          html += ' &#x2794; ';
+        [% END %]
+      [% END %]
+      [% PROCESS add_change value = change.added, is_old = 0 %]
+      [% "html += '<br>';" UNLESS loop.last %]
+
+      [% IF change.fieldname == 'cc' %]
+        html += '</span>';
+      [% END %]
+    [% END %]
+    var item = new Array(7);
+    item[0] = '[% operation.who.login FILTER js %]';
+    item[1] = '[% operation.when FILTER time FILTER js %]';
+    item[2] = html;
+    item[3] = '<div class="bz_comment_head">'
+              + '<span class="bz_comment_user">'
+              + '[% INCLUDE global/user.html.tmpl who = operation.who FILTER js %]'
+              + '</span>'
+              + '<span class="bz_comment_time"> ' + item[1] + ' </span>'
+              + '</div>';
+    item[4] = [% IF has_cc && (operation.changes.size == 1) %]true[% ELSE %]false[% END %];
+    item[5] = [% IF change.dupe %][% change.added FILTER js %][% ELSE %]0[% END %];
+    item[6] = [% IF has_flag %]true[% ELSE %]false[% END %];
+    ih_activity[[% loop.index %]] = item;
+  [% END %]
+  inline_history.init();
+</script>
+[% END %]
+
+[% BLOCK add_change %]
+  html += '[%~%]
+  [% '<span class="old">' IF is_old %]
+  [% IF change.fieldname == 'estimated_time' ||
+        change.fieldname == 'remaining_time' ||
+        change.fieldname == 'work_time' %]
+    [% PROCESS formattimeunit time_unit = value FILTER html FILTER js %]
+  [% ELSIF change.fieldname == 'blocked' ||
+           change.fieldname == 'dependson' ||
+           change.fieldname == 'dupe' %]
+    [% value FILTER bug_list_link FILTER js %]
+  [% ELSIF change.fieldname == 'assigned_to' ||
+           change.fieldname == 'reporter' ||
+           change.fieldname == 'qa_contact' ||
+           change.fieldname == 'cc' ||
+           change.fieldname == 'flagtypes.name' %]
+    [% display_value(change.fieldname, value) FILTER email FILTER js %]
+  [% ELSE %]
+    [% display_value(change.fieldname, value) FILTER html FILTER js %]
+  [% END %]
+  [% '</span>' IF is_old %]
+  [%~ %]';
+[% END %]

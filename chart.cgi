@@ -274,7 +274,8 @@ sub assertCanCreate {
 
     # Check permission for frequency
     my $min_freq = 7;
-    if ($cgi->param('frequency') < $min_freq && !$user->in_group("admin")) {
+    # Upstreaming: denied, as this min_freq feature is going away.
+    if ($cgi->param('frequency') < $min_freq && !$user->in_group("bz_canusewhines")) {
         ThrowUserError("illegal_frequency", { 'minimum' => $min_freq });
     }
 }

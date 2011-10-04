@@ -26,6 +26,7 @@ use Bugzilla::Field;
 use Bugzilla::User;
 use Bugzilla::Install::Util qw(indicate_progress);
 use Date::Parse;
+use Scalar::Util qw(blessed);
 
 # users younger than PROFILE_AGE days will be tagged as new
 use constant PROFILE_AGE => 60;
@@ -221,6 +222,21 @@ sub _user_is_new {
     return 
         ($user->{comment_count} <= COMMENT_COUNT)
         || ($user->{creation_age} <= PROFILE_AGE);
+}
+
+sub webservice_user_get {
+    my ($self, $args) = @_;
+    my ($webservice, $params, $users) = @$args{qw(webservice params users)};
+
+    foreach my $user (@$users) { 
+        # Most of the time the hash values are XMLRPC::Data objects
+        my $email = blessed $user->{'email'} ? $user->{'email'}->value : $user->{'email'};
+        if ($email) {
+            my $user_obj = Bugzilla::User->new({ name => $email });
+            $user->{'is_new'} 
+                = $webservice->type('boolean', $self->_user_is_new($user_obj) ? 1 : 0);
+        } 
+    }
 }
 
 __PACKAGE__->NAME;

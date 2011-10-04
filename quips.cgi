@@ -78,6 +78,7 @@ if ($action eq "add") {
 
     check_hash_token($token, ['create-quips']);
     # Add the quip 
+    # Upstreaming: https://bugzilla.mozilla.org/show_bug.cgi?id=621879
     my $approved = (Bugzilla->params->{'quip_list_entry_control'} eq "open")
                    || $user->in_group('bz_quip_moderators') || 0;
     my $comment = $cgi->param("quip");

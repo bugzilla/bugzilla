@@ -114,7 +114,8 @@ sub queue {
                 flags.attach_id, attachments.description,
                 requesters.realname, requesters.login_name,
                 requestees.realname, requestees.login_name, COUNT(privs.group_id),
-    " . $dbh->sql_date_format('flags.modification_date', '%Y.%m.%d %H:%i') .
+    " . $dbh->sql_date_format('flags.modification_date', '%Y.%m.%d %H:%i') . ",
+                attachments.ispatch " .
     # Use the flags and flagtypes tables for information about the flags,
     # the bugs and attachments tables for target info, the profiles tables
     # for setter and requestee info, the products/components tables
@@ -250,9 +251,9 @@ sub queue {
                 products.name, components.name, flags.attach_id,
                 attachments.description, requesters.realname,
                 requesters.login_name, requestees.realname,
-                requestees.login_name, flags.modification_date,
+                requestees.login_name, flags.modification_date, attachments.ispatch
                 cclist_accessible, bugs.reporter, bugs.reporter_accessible,
-                bugs.assigned_to');
+                bugs.assigned_to, attachments.ispatch');
 
     # Group the records, in other words order them by the group column
     # so the loop in the display template can break them up into separate
@@ -295,7 +296,8 @@ sub queue {
           'requester'       => ($data[9] ? "$data[9] <$data[10]>" : $data[10]) , 
           'requestee'       => ($data[11] ? "$data[11] <$data[12]>" : $data[12]) , 
           'restricted'      => $data[13] ? 1 : 0,
-          'created'         => $data[14]
+          'created'         => $data[14], 
+          'ispatch'         => $data[15], 
         };
         push(@requests, $request);
     }

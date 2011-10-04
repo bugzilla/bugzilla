@@ -371,11 +371,13 @@ sub default_qa_contact {
 }
 
 sub flag_types {
-    my $self = shift;
+    my ($self, $params) = @_;
+    $params ||= {};
 
     if (!defined $self->{'flag_types'}) {
         my $flagtypes = Bugzilla::FlagType::match({ product_id   => $self->product_id,
-                                                    component_id => $self->id });
+                                                    component_id => $self->id, 
+                                                    %$params });
 
         $self->{'flag_types'} = {};
         $self->{'flag_types'}->{'bug'} =

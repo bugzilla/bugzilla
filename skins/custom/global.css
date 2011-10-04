@@ -1,0 +1,73 @@
+/* 
+ * Custom rules for skins/standard/global.css.
+ * The rules you put here override rules in that stylesheet.
+ */
+
+body {
+	margin: 0;
+	padding: 15px 15px 2px 15px;
+	background: none;
+}
+
+#header {
+	margin-bottom: 0.5em;
+}
+
+#header .links {
+	font-size: 90%;
+}
+
+#header .btn, #header .txt {
+	font-size: 100%;
+}
+
+#header #information {
+	color: #dddddd;
+	font-size: small;
+}
+
+pre {
+    font-size: medium;
+}
+
+.field_label {
+    text-align: left;
+}
+
+#attachment_table {
+    width: 50em;
+}
+
+#page-index #quicksearchForm {
+    padding-top: 20px;
+}
+
+/* createaccount styling */
+.support_div {
+    width: 40%;
+    font-size: 80%;
+}
+
+.support_div > img {
+  padding: 5px 20px;
+}
+
+a {
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+a.controller {
+    font-size: 100%;
+    border: 1px solid #c0c0c0;
+    padding: 3px;
+}
+
+#footer .outro {
+    text-align:left;
+    padding-left:1ex;
+    padding-bottom:1ex;
+}

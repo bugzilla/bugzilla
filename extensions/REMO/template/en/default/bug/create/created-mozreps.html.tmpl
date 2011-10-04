@@ -8,30 +8,31 @@
   # implied. See the License for the specific language governing
   # rights and limitations under the License.
   #
-  # The Original Code is the BMO Extension
+  # The Original Code is the REMO Bugzilla Extension.
   #
   # The Initial Developer of the Original Code is the Mozilla Foundation
   # Portions created by the Initial Developers are Copyright (C) 2011 the
   # Initial Developer. All Rights Reserved.
   #
-  # Contributor(s):
-  #   Dave Lawrence <dkl@mozilla.com>
+  # Contributor(s): Byron Jones <glob@mozilla.com>
   #%]
 
-[% USE Bugzilla %]
-[% cgi = Bugzilla.cgi %]
+[% PROCESS global/variables.none.tmpl %]
 
-Mozilla Reps Payment Request
-----------------------------
+[% PROCESS global/header.html.tmpl
+   title = "Mozilla Reps - Application Form"
 
-Requester info:
+%]
 
-First name: [% cgi.param('firstname') %]  
-Last name: [% cgi.param('lastname') %]  
-Wiki user profile: [% cgi.param('wikiprofile') %]    
-Event wiki page: [% cgi.param('wikipage') %]
-Budget request [% terms.bug %]: [% cgi.param('bug_id') %]
-Have you already received payment for this event? [% IF cgi.param('receivedpayment') %]Yes[% ELSE %]No[% END %]
+<h1>Thank you!</h1>
 
-[%+ cgi.param("comment") IF cgi.param("comment") %]
+<p>
+Thank you for submitting your Mozilla Reps Application Form. A Mozilla Rep
+mentor will contact you shortly at your bugzilla email address.
+</p>
 
+<p style="font-size: x-small">
+Reference: <a href="show_bug.cgi?id=[% id %]">#[% id %]</a>
+</p>
+
+[% PROCESS global/footer.html.tmpl %]

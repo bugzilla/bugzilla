@@ -30,6 +30,7 @@ use Bugzilla::User;
 use Bugzilla::Util qw(trim);
 use Bugzilla::Token;
 use Bugzilla::WebService::Util qw(filter validate);
+use Bugzilla::Hook;
 
 # Don't need auth to login
 use constant LOGIN_EXEMPT => {
@@ -234,6 +235,9 @@ sub get {
                 can_login => $self->type('boolean', $_->is_enabled ? 1 : 0),
             }} @$in_group;
     }
+
+    Bugzilla::Hook::process('webservice_user_get', 
+        { webservice => $self, params => $params, users => \@users });
 
     return { users => \@users };
 }

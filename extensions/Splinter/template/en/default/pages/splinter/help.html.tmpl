@@ -25,15 +25,15 @@
 
 <h2>Splinter Patch Review</h2>
 <p>
-  Splinter is an add-on for [% terms.Bugzilla %] to allow conveniently
+  Splinter is an add-on for Bugzilla to allow conveniently
   reviewing patches that people have attached to
-  [% terms.Bugzilla %]. <a href="http://fishsoup.net/software/splinter">More
+  Bugzilla. <a href="http://fishsoup.net/software/splinter">More
   information about Splinter</a>.
 </p>
 <h3>The patch review view</h3>
 <p>
   If you get to Splinter by clicking on a link next to an
-  attachment in [% terms.Bugzilla %], you are presented with the patch
+  attachment in Bugzilla, you are presented with the patch
   review view. This view has a number of different pages that can
   be switched between with the links at the top of the screen.
   The first page is the Overview page, the other pages correspond to
@@ -69,31 +69,31 @@
 </p>
 <ul>
   <li>
-  An overall comment. The text area on the first page allows
-  you to enter your overall thoughts on the [% terms.bug %].
+	An overall comment. The text area on the first page allows
+	you to enter your overall thoughts on the bug.
   </li>
   <li>
-  Detailed comments on changes within the files. To comment on a
-  line in a patch, double click on it, and a text area will open
-  beneath that comment. When you are done, click the Save button
-  to save your comment or the Cancel button to throw your
-  comment away. You can double-click on a saved comment to start
-  editing it again and make further changes.
+	Detailed comments on changes within the files. To comment on a
+	line in a patch, double click on it, and a text area will open
+	beneath that comment. When you are done, click the Save button
+	to save your comment or the Cancel button to throw your
+	comment away. You can double-click on a saved comment to start
+	editing it again and make further changes.
   </li>
   <li>
-  A change to the attachment status. (This is specific to
-  [% terms.Bugzilla %] instances that have attachment status, which is a
-  non-upstream patch. It's somewhat similar to attachment flags,
-  which splinter doesn't currently support displaying or
-  changing.) This allows you to mark a patch as read to commit
-  or needing additional work. This is done by changing the
-  drop-down next to the Publish button.
+	A change to the attachment status. (This is specific to
+	Bugzilla instances that have attachment status, which is a
+	non-upstream patch. It's somewhat similar to attachment flags,
+	which splinter doesn't currently support displaying or
+	changing.) This allows you to mark a patch as read to commit
+	or needing additional work. This is done by changing the
+	drop-down next to the Publish button.
   </li>
 </ul>
 <p>
   Once you are done writing your review, go back to Overview page
   and click the "Publish" button to submit it as a comment on the
-  [% terms.bug %]. The comment will have a link back to the review page so
+  bug. The comment will have a link back to the review page so
   that people can see your comments with the full context.
 </p>
 <h3>Saved drafts</h3>
@@ -122,31 +122,31 @@
 <h3>Uploading patches for review</h3>
 <p>
   Splinter doesn't really care how patches are provided to
-  [% terms.Bugzilla %], as long as they are well-formatted patches. If you are
+  Bugzilla, as long as they are well-formatted patches. If you are
   using Git for version control, you can either format changes as
   patches
   using <a href="http://www.kernel.org/pub/software/scm/git/docs/git-format-patch.html">'git
-  format-patch</a> and attach them manually to the [% terms.bug %], or you
+  format-patch</a> and attach them manually to the bug, or you
   can
   use <a href="http://fishsoup.net/software/git-bz">git-bz</a>.
   git-bz is highly recommended; it automates most of the steps
-  that Splinter can't handle: it files new [% terms.bugs %], attaches updated
-  attachments to existing [% terms.bugs %], and closes [% terms.bugs %] when you push the
+  that Splinter can't handle: it files new bugs, attaches updated
+  attachments to existing bugs, and closes bugs when you push the
   corresponding git commits to your central repository.
 </p>
-<h3>The [% terms.bug %] review view</h3>
+<h3>The bug review view</h3>
 <p>
   Splinter also has a view where it shows all patches attached to
-  the [% terms.bug %] with their status and links to review them. You are
+  the bug with their status and links to review them. You are
   taken to this page after publishing a review. You can also get
-  to this page with the [% terms.bug %] link in the upper-right corner of the
+  to this page with the bug link in the upper-right corner of the
   patch review view.
 </p>
 <h3>Your reviews</h3>
 <p>
   Splinter can also show you a list of all your draft and
   published reviews. Access this page with the "Your reviews"
-  link at the bottom of the [% terms.bug %] review view. In-progress drafts
+  link at the bottom of the bug review view. In-progress drafts
   are shown in bold.
 </p>
 

@@ -76,6 +76,12 @@ local our $vars = {};
 my $action = $cgi->param('action') || 'view';
 my $format = $cgi->param('format') || '';
 
+# BMO: Don't allow updating of bugs if disabled
+if (Bugzilla->params->{disable_bug_updates} && $cgi->request_method eq 'POST') {
+    ThrowErrorPage('bug/process/updates-disabled.html.tmpl',
+        'Bug updates are currently disabled.');
+}
+
 # You must use the appropriate urlbase/sslbase param when doing anything
 # but viewing an attachment, or a raw diff.
 if ($action ne 'view'
@@ -497,7 +503,8 @@ sub enter {
 
   my $flag_types = Bugzilla::FlagType::match({'target_type'  => 'attachment',
                                               'product_id'   => $bug->product_id,
-                                              'component_id' => $bug->component_id});
+                                              'component_id' => $bug->component_id, 
+                                              'is_active'    => 1});
   $vars->{'flag_types'} = $flag_types;
   $vars->{'any_flags_requesteeble'} =
     grep { $_->is_requestable && $_->is_requesteeble } @$flag_types;

@@ -273,7 +273,7 @@ function showEditableField (e, ContainerInputArray) {
  *
  * var e: the event
  * var ContainerInputArray: An array containing the (edit) and text area and the input being displayed
- * var ContainerInputArray[0]: the conainer that will be hidden usually shows the (edit) text
+ * var ContainerInputArray[0]: the container that will be hidden usually shows the (edit) text
  * var ContainerInputArray[1]: the input area and label that will be displayed
  * var ContainerInputArray[2]: the field that is on the page, might get changed by browser autocomplete 
  * var ContainerInputArray[3]: the original value from the page loading.
@@ -684,7 +684,8 @@ YAHOO.bugzilla.userAutocomplete = {
           id : YAHOO.bugzilla.userAutocomplete.counter,
           params : [ { 
             match : [ decodeURIComponent(enteredText) ],
-            include_fields : [ "name", "real_name" ]
+            include_fields : [ "name", "real_name" ], 
+            include_disabled : 1
           } ]
       };
       var stringified =  YAHOO.lang.JSON.stringify(json_object);

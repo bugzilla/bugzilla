@@ -145,3 +145,30 @@ function goto_add_comments( anchor ){
     },10);
     return false;
 }
+
+if (typeof Node == 'undefined') {
+    /* MSIE doesn't define Node, so provide a compatibility object */
+    window.Node = {
+        TEXT_NODE: 3,
+        ENTITY_REFERENCE_NODE: 5
+    };
+}
+
+/* Concatenates all text from element's childNodes. This is used
+ * instead of innerHTML because we want the actual text (and
+ * innerText is non-standard).
+ */
+function getText(element) {
+    var child, text = "";
+    for (var i=0; i < element.childNodes.length; i++) {
+        child = element.childNodes[i];
+        var type = child.nodeType;
+        if (type == Node.TEXT_NODE || type == Node.ENTITY_REFERENCE_NODE) {
+            text += child.nodeValue;
+        } else {
+            /* recurse into nodes of other types */
+            text += getText(child);
+        }
+    }
+    return text;
+}

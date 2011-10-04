@@ -22,8 +22,14 @@
 
 [% PROCESS "global/field-descs.none.tmpl" %]
 [% PROCESS "global/reason-descs.none.tmpl" %]
+[% show_new = isnew
+              && (to_user.settings.bugmail_new_prefix.value == 'on') %]
 
 [% isnew = bug.lastdiffed ? 0 : 1 %]
+
+[% UNLESS to_user.settings.product_chooser.value == 'full_product_chooser' %]
+Do not reply to this email.  You can add comments to this [% terms.bug %] at
+[% END %]
 
 [%+ PROCESS generate_diffs -%]
 

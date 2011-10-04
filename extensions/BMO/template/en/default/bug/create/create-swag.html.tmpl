@@ -34,7 +34,7 @@
 <p><strong>Swag Request:</strong> Please use this form to file a request for swag. </p>
 
 <ol>
-  <li>You first need submit a <a href="/enter_bug.cgi?product=Marketing&amp;format=mktgevent">Event Request Form</a>. You'll be asked for the [% terms.bug %] number below.</li>
+  <li>You first need submit a <a href="/enter_bug.cgi?product=Marketing&amp;format=mktgevent">Event Request Form</a>. You'll be asked for the bug number below.</li>
   <li>Complete and submit request below.</li>
   <li>Your request will be reviewed by the appropriate person in the Engagement team.</li>
   <li>Your swag request will be reviewed and if approved shipped to you from
@@ -70,7 +70,7 @@ function validateAndSubmit() {
   var alert_text = '';
   if(!isFilledOut('firstname')) alert_text += "Please enter your first name\n";
   if(!isFilledOut('lastname')) alert_text += "Please enter your last name\n";
-  if(!isFilledOut('dependson')) alert_text += "Please enter the [% terms.bug %] number for your Event Request Form\n";
+  if(!isFilledOut('dependson')) alert_text += "Please enter the bug number for your Event Request Form\n";
   if(!isValidEmail(document.getElementById('email').value)) alert_text += "Please enter a valid email address\n";
   
   //Everything required is filled out..try to submit the form!
@@ -88,25 +88,25 @@ function validateAndSubmit() {
 <form method="post" action="post_bug.cgi" id="swagRequestForm" enctype="multipart/form-data"
       onSubmit="return validateAndSubmit();">
 
-  <input type="hidden" name="format" value="swag">
-  <input type="hidden" name="product" value="Marketing">
-  <input type="hidden" name="component" value="Swag Requests">
-  <input type="hidden" name="rep_platform" value="All">
-  <input type="hidden" name="op_sys" value="Other">
-  <input type="hidden" name="priority" value="--">
-  <input type="hidden" name="version" value="unspecified">
-  <input type="hidden" name="bug_severity" id="bug_severity" value="normal">
-  <input type="hidden" name="short_desc" id="short_desc" value="">
-  <input type="hidden" name="groups" value="mozilla-corporation-confidential">
+        <input type="hidden" name="format" value="swag">
+        <input type="hidden" name="product" value="Marketing">
+        <input type="hidden" name="component" value="Swag Requests">
+        <input type="hidden" name="rep_platform" value="All">
+        <input type="hidden" name="op_sys" value="Other">
+        <input type="hidden" name="priority" value="--">
+        <input type="hidden" name="version" value="unspecified">
+        <input type="hidden" name="bug_severity" id="bug_severity" value="normal">
 
+        <input type="hidden" name="short_desc" id="short_desc" value="">
+	<input type="hidden" name="groups" value="mozilla-corporation-confidential">
 <table>
+
 <tr>
   <td align="right"><strong>First Name: <span style="color: red;">*</span></strong></td>
   <td align="left">
     <input type="text" name="firstname" id="firstname" value="" size="20" maxlength="20" />
   </td>
 </tr>
-
 <tr>
   <td align="right"><strong>Last Name: <span style="color: red;">*</span></strong></td>
   <td align="left">
@@ -143,7 +143,7 @@ function validateAndSubmit() {
 </tr>
 
 <tr>
-  <td align="right"><strong>[% terms.Bug %] number assigned to previously- &nbsp;&nbsp;<br>submitted <a href="/enter_bug.cgi?product=Marketing&amp;format=mktgevent">Event Request Form</a>: <span style="color: red;">*</span></strong></td>
+  <td align="right"><strong>Bug number assigned to previously- &nbsp;&nbsp;<br>submitted <a href="/enter_bug.cgi?product=Marketing&amp;format=mktgevent">Event Request Form</a>: <span style="color: red;">*</span></strong></td>
   <td colspan="3"><input name="dependson" id="dependson"></td>
 </tr>
 

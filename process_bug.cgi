@@ -93,6 +93,12 @@ sub should_set {
 # Begin Data/Security Validation
 ######################################################################
 
+# BMO: Don't allow updating of bugs if disabled
+if (Bugzilla->params->{disable_bug_updates}) {
+    ThrowErrorPage('bug/process/updates-disabled.html.tmpl',
+        'Bug updates are currently disabled.');
+}
+
 # Create a list of objects for all bugs being modified in this request.
 my @bug_objects;
 if (defined $cgi->param('id')) {

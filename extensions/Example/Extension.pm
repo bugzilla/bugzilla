@@ -211,15 +211,12 @@ sub search_operator_field_override {
 
 sub _component_nonchanged {
     my $original = shift;
-    my $invocant = shift;
+    my ($invocant, $args) = @_;
 
-    my %func_args = @_;
-    $invocant->$original(%func_args);
-
+    $invocant->$original($args);
     # Actually, it does not change anything in the result,
     # just an example.
-    my ($term) = @func_args{qw(term)};
-    $$term = $$term . " OR 1=2";
+    $args->{term} = $args->{term} . " OR 1=2";
 }
 
 sub bugmail_recipients {
@@ -264,9 +261,14 @@ sub config_modify_panels {
     my $auth_params = $panels->{'auth'}->{params};
     my ($info_class)   = grep($_->{name} eq 'user_info_class', @$auth_params);
     my ($verify_class) = grep($_->{name} eq 'user_verify_class', @$auth_params);
-    
+
     push(@{ $info_class->{choices} },   'CGI,Example');
     push(@{ $verify_class->{choices} }, 'Example');
+
+    push(@$auth_params, { name => 'param_example',
+                          type => 't',
+                          default => 0,
+                          checker => \&check_numeric });    
 }
 
 sub db_schema_abstract_schema {
@@ -452,6 +454,26 @@ sub install_update_db {
 #    $dbh->bz_add_column('example', 'new_column',
 #                        {TYPE => 'INT2', NOTNULL => 1, DEFAULT => 0});
 #    $dbh->bz_add_index('example', 'example_new_column_idx', [qw(value)]);
+}
+
+sub install_update_db_fielddefs {
+    my $dbh = Bugzilla->dbh;
+#    $dbh->bz_add_column('fielddefs', 'example_column', 
+#                        {TYPE => 'MEDIUMTEXT', NOTNULL => 1, DEFAULT => ''});
+}
+
+sub job_map {
+    my ($self, $args) = @_;
+    
+    my $job_map = $args->{job_map};
+    
+    # This adds the named class (an instance of TheSchwartz::Worker) as a
+    # handler for when a job is added with the name "some_task".
+    $job_map->{'some_task'} = 'Bugzilla::Extension::Example::Job::SomeClass';
+    
+    # Schedule a job like this:
+    # my $queue = Bugzilla->job_queue();
+    # $queue->insert('some_task', { some_parameter => $some_variable });
 }
 
 sub mailer_before_send {

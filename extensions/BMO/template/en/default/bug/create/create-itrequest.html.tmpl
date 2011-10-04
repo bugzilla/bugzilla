@@ -32,7 +32,7 @@
 [% USE Bugzilla %]                                                            
 
 <p><strong>Please use this form for IT requests only!</strong></p>
-<p>If you have a bug to file, go <a href="enter_bug.cgi">here</a>.</p>
+<p>If you have a [% terms.bug %] to file, go <a href="enter_bug.cgi">here</a>.</p>
 
 <form method="post" action="post_bug.cgi" id="itRequestForm" enctype="multipart/form-data">
   <input type="hidden" name="product" value="mozilla.org">
@@ -172,7 +172,7 @@
   </table>
 
   <br>
-  <!-- infra bugs -->
+  <!-- infra [% terms.bugs %] -->
   <input type="checkbox" name="groups" id="groups" value="infra" checked="checked"><label for="groups"><strong>This is an internal issue which should not be publicly visible.</strong></label><br>(please uncheck this box if it isn't)
   <br><br>
 

@@ -1,3 +1,13 @@
+[% IF !javascript_urls %]
+  [% javascript_urls = [] %]
+[% END %]
+
 [% IF template.name == 'list/list.html.tmpl' %]
   [% javascript_urls.push('extensions/BMO/web/js/sorttable.js') %]
+[% END %]
+
+[% IF user.in_group('editusers') || user.bless_groups.size > 0 %]
+  [% yui.push('container', 'menu') %]
+  [% style_urls.push('js/yui/assets/skins/sam/menu.css') %]
+  [% javascript_urls.push('extensions/BMO/web/js/edituser_menu.js') %]
 [% END %]

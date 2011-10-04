@@ -92,12 +92,12 @@ function submitForm() {
 <table id="reps-form">
 
 <tr class="odd">
-  <th>First Name:[% mandatory %]</th>
+  <th>First Name:[% mandatory FILTER none %]</th>
   <td><input id="first_name" name="first_name" size="40" placeholder="John"></td>
 </tr>
 
 <tr class="even">
-  <th>Last Name:[% mandatory %]</th>
+  <th>Last Name:[% mandatory FILTER none %]</th>
   <td><input id="last_name" name="last_name" size="40" placeholder="Doe"></td>
 </tr>
 
@@ -107,7 +107,7 @@ function submitForm() {
 </tr>
 
 <tr class="even">
-  <th>Sex:[% mandatory %]</th>
+  <th>Sex:[% mandatory FILTER none %]</th>
   <td>
     <select id="sex" name="sex">
       <option value="Male">Male</option>
@@ -118,12 +118,12 @@ function submitForm() {
 </tr>
 
 <tr class="odd">
-  <th>City:[% mandatory %]</th>
+  <th>City:[% mandatory FILTER none %]</th>
   <td><input id="city" name="city" size="40" placeholder="Your city"></td>
 </tr>
 
 <tr class="even">
-  <th>Country:[% mandatory %]</th>
+  <th>Country:[% mandatory FILTER none %]</th>
   <td><input id="country" name="country" size="40" placeholder="Your country"></td>
 </tr>
 
@@ -161,17 +161,17 @@ function submitForm() {
 </tr>
 
 <tr class="odd">
-  <th>Languages Spoken:[% mandatory %]</th>
+  <th>Languages Spoken:[% mandatory FILTER none %]</th>
   <td><input id="languages" name="languages" size="40"></td>
 </tr>
 
 <tr class="even">
-  <th>How did you learn about Mozilla Reps?[% mandatory %]</th>
+  <th>How did you learn about Mozilla Reps?[% mandatory FILTER none %]</th>
   <td><input id="learn" name="learn" size="40"></td>
 </tr>
 
 <tr class="odd">
-  <th colspan="2">What motivates you most about joining Mozilla Reps?[% mandatory %]</th>
+  <th colspan="2">What motivates you most about joining Mozilla Reps?[% mandatory FILTER none %]</th>
 </tr>
 <tr class="odd">
   <td colspan="2"><textarea id="motivation" name="motivation" rows="4"></textarea></td>
@@ -187,7 +187,7 @@ function submitForm() {
 <tr class="odd">
   <th>
     I have read the
-    <a href="http://www.mozilla.com/en-US/privacy-policy" target="_blank">Mozilla Privacy Policy</a>:[% mandatory %]
+    <a href="http://www.mozilla.com/en-US/privacy-policy" target="_blank">Mozilla Privacy Policy</a>:[% mandatory FILTER none %]
   </th>
   <td><input id="privacy" type="checkbox"></td>
 </tr>

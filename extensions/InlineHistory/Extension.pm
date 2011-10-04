@@ -91,6 +91,12 @@ sub template_before_process {
                 $change->{added} = $change->{added} ? 'true' : 'false';
             }
 
+            # identify buglist changes
+            $change->{buglist} = 
+                $change->{fieldname} eq 'blocked' ||
+                $change->{fieldname} eq 'dependson' ||
+                $change->{fieldname} eq 'dupe';
+
             # split multiple flag changes (must be processed last)
             if ($change->{fieldname} eq 'flagtypes.name') {
                 my @added = split(/, /, $change->{added});

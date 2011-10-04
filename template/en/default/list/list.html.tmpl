@@ -42,7 +42,7 @@
 [%# Page Header                                                              #%]
 [%############################################################################%]
 
-[% url_filtered_title = title FILTER url_quote %]
+[% url_filtered_title = title FILTER uri %]
 [% PROCESS global/header.html.tmpl
   title = title
   style = style
@@ -198,7 +198,7 @@
         [% urlquerypart FILTER html %]&amp;ctype=csv&human=1">CSV</a> |
         <a href="buglist.cgi?
         [% urlquerypart FILTER html %]&amp;title=
-        [%- title FILTER url_quote %]&amp;ctype=atom">Feed</a> |
+        [%- title FILTER uri %]&amp;ctype=atom">Feed</a> |
         <a href="buglist.cgi?
         [% urlquerypart FILTER html %]&amp;ctype=ics">iCalendar</a> |
         <a href="colchange.cgi?

@@ -27,7 +27,7 @@
 [% PROCESS global/variables.none.tmpl %]
 
 [% PROCESS global/header.html.tmpl
-   title = "Enter A Bug"
+   title = "Enter A $terms.Bug"
    javascript_urls = [
                        'extensions/GuidedBugEntry/web/js/products.js',
                        'extensions/GuidedBugEntry/web/js/guided.js',
@@ -41,8 +41,8 @@
 <input id="yui-history-field" type="hidden">
 
 <noscript>
-You require JavaScript to use this bug entry form.<br><br>
-Please use the <a href="enter_bug.cgi?format=__default__">advanced bug entry form</a>.
+You require JavaScript to use this [% terms.bug %] entry form.<br><br>
+Please use the <a href="enter_bug.cgi?format=__default__">advanced [% terms.bug %] entry form</a>.
 </noscript>
 
 <div id="loading" class="hidden">
@@ -62,7 +62,7 @@ YAHOO.util.Dom.removeClass('loading', 'hidden');
 <div id="advanced">
   <a id="advanced_img" href="enter_bug.cgi?format=__default__"><img
   src="extensions/GuidedBugEntry/web/images/advanced.png" width="16" height="16" border="0"></a>
-  <a id="advanced_link" href="enter_bug.cgi?format=__default__">Switch to the advanced bug entry form</a>
+  <a id="advanced_link" href="enter_bug.cgi?format=__default__">Switch to the advanced [% terms.bug %] entry form</a>
 </div>
 
 <script type="text/javascript">
@@ -94,7 +94,7 @@ dupes.setLabels(
 
 [% BLOCK page_title %]
   <div id="page_title">
-    <h2>Enter A Bug</h2>
+    <h2>Enter A [% terms.Bug %]</h2>
     <h3>Step [% step_number FILTER html %] of 3</h3>
   </div>
 [% END %]
@@ -145,7 +145,7 @@ dupes.setLabels(
     <td class="product_img">
       <a href="javascript:void(0)"
       [% IF onclick %]
-      onclick="[% onclick %]"
+      onclick="[% onclick FILTER none %]"
       [% ELSE %]
       onclick="product.select('[% name FILTER js %]')"
       [% END %]
@@ -156,7 +156,7 @@ dupes.setLabels(
       <h2>
         <a href="javascript:void(0)"
         [% IF onclick %]
-        onclick="[% onclick %]"
+        onclick="[% onclick FILTER none %]"
         [% ELSE %]
         onclick="product.select('[% name FILTER js %]')"
         [% END %]
@@ -267,7 +267,7 @@ dupes.setLabels(
   </tr>
 </table>
 <h3>
-  None of the above; my bug is in:
+  None of the above; my [% terms.bug %] is in:
 </h3>
 [% END %]
 
@@ -275,14 +275,14 @@ dupes.setLabels(
   <tr>
     <td>
       <div class="exit_img">
-        <a href="[% href %]"
+        <a href="[% href FILTER none %]"
         ><img src="extensions/GuidedBugEntry/web/images/[% icon FILTER uri %]" width="32" height="32"
         ></a>
       </div>
     </td>
     <td width="100%">
       <h2>
-        <a href="[% href %]">[% name FILTER html %]</a>
+        <a href="[% href FILTER none %]">[% name FILTER html %]</a>
       </h2>
       [% desc FILTER html %]
     </td>
@@ -359,7 +359,7 @@ Product: <b><span id="dupes_product_name">?</span></b>:
 <li>Please fill out this form clearly, precisely and in as much detail as you can manage.</li>
 <li>Please report only a single problem at a time.</li>
 <li><a href="https://developer.mozilla.org/en/Bug_writing_guidelines" target="_blank">These guidelines</a>
-explain how to write effective bug reports.</li>
+explain how to write effective [% terms.bug %] reports.</li>
 </ul>
 
 <table id="bugForm" cellspacing="0">
@@ -512,7 +512,7 @@ explain how to write effective bug reports.</li>
 <tr class="odd">
   <td>&nbsp;</td>
   <td colspan="2" id="submitTD">
-    <input type="submit" id="submit" value="Submit Bug">
+    <input type="submit" id="submit" value="Submit [% terms.Bug %]">
   </td>
 </tr>
 

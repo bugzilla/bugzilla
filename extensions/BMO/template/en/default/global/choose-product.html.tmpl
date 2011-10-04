@@ -42,7 +42,8 @@
 
 <center>
 <hr>
-<p><span style="font-family: verdana,helvetica;">Looking for technical support or help getting your site to work with Mozilla? <a href="http://www.mozilla.org/support/">Visit the mozilla.org support page</a> before filing bugs.</span></p>
+<p><span style="font-family: verdana,helvetica;">Looking for technical support or help getting your site to work with Mozilla? <a
+href="http://www.mozilla.org/support/">Visit the mozilla.org support page</a> before filing [% terms.bugs %].</span></p>
 <hr>
 </center>
 
@@ -96,12 +97,12 @@
    icon="dino.png"
 %]
 <tr>
-   <td><a href="[% target FILTER uri i%]?full=1
+   <td><a href="[% target FILTER uri %]?full=1
              [%- IF cloned_bug_id %]&amp;cloned_bug_id=[% cloned_bug_id FILTER uri %][% END -%]
              [%- IF classification %]&amp;classification=[% classification FILTER uri %][% END -%]
              [%- IF format %]&amp;format=[% format FILTER uri %][% END %]">
              <img src="extensions/BMO/web/producticons/other.png" height="64" width="64" border="0"></a></td>
-   <td><h2 align="left" style="margin-bottom: 0px;"><a href="[% target FILTER uri i%]?full=1
+   <td><h2 align="left" style="margin-bottom: 0px;"><a href="[% target FILTER uri %]?full=1
              [%- IF cloned_bug_id %]&amp;cloned_bug_id=[% cloned_bug_id FILTER uri %][% END -%]
              [%- IF classification %]&amp;classification=[% classification FILTER uri %][% END -%]
              [%- IF format %]&amp;format=[% format FILTER uri %][% END %]">
@@ -146,7 +147,7 @@
 
 <br>
 [% IF target == "enter_bug.cgi" AND user.settings.product_chooser.value != 'full_product_chooser' %]
-<p align="center">You can choose to get this screen by default when you click "New Bug" by changing your <a href="userprefs.cgi?tab=settings">preferences</a>.</p>
+<p align="center">You can choose to get this screen by default when you click "New [% terms.Bug %]" by changing your <a href="userprefs.cgi?tab=settings">preferences</a>.</p>
 [% END %]
 [% END %]
 <br>

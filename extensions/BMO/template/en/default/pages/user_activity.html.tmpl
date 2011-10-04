@@ -110,7 +110,7 @@
     <tr id="report-header">
       <th>Who</th>
       <th>When</th>
-      <th>Bug</th>
+      <th>[% terms.Bug %]</th>
       <th>What</th>
       <th>Removed</th>
       <th>Added</th>
@@ -131,9 +131,9 @@
           [% "</tr><tr>" IF loop.index > 0 %]
             <td>
               [% IF change.attachid %]
-                <a href="attachment.cgi?id=[% change.attachid %]">Attachment #[% change.attachid %]</a>
+                <a href="attachment.cgi?id=[% change.attachid FILTER uri %]">Attachment #[% change.attachid FILTER html %]</a>
               [% ELSIF change.comment.defined && change.fieldname == 'longdesc' %]
-                 [% "Comment $change.comment.count" FILTER bug_link(operation.bug, comment_num => change.comment.count) %]
+                 [% "Comment $change.comment.count" FILTER bug_link(operation.bug, comment_num => change.comment.count) FILTER none %]
               [% ELSE %]
                 [%+ field_descs.${change.fieldname} FILTER html %]
               [% END %]

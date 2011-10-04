@@ -23,7 +23,7 @@
 
 
 [% IF searchname %]
-    [% searchname %] ([% bugs.size %])
+    [% searchname FILTER html %] ([% bugs.size %])
 [% ELSE %]
     [% terms.Bug %] List ([% bugs.size %])
 [% END %]

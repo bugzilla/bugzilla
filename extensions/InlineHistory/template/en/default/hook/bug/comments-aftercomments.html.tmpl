@@ -66,25 +66,36 @@
                 + '>Attachment #[% change.attachid FILTER none %]</a> - ';
       [% END %]
 
-      [%# display duplicates as history rather than comments %]
-      [% IF change.dupe %]
-        html += 'Duplicate of this [% terms.bug %]: ';
+      [%# buglists need to be displayed differently, as we shouldn't use strike-out %]
+      [% IF change.buglist %]
+        [% IF change.dupe %]
+          [% label = 'Duplicate of this ' _ terms.bug %]
+        [% ELSE %]
+          [% label = field_descs.${change.fieldname} %]
+        [% END %]
+        [% IF change.added != '' %]
+          html += '[% label FILTER js %]: ';
+          [% PROCESS add_change value = change.added %]
+        [% END %]
+        [% IF change.removed != '' %]
+          html += 'No longer [% label FILTER lcfirst FILTER js %]: ';
+          [% PROCESS add_change value = change.removed %]
+        [% END %]
       [% ELSE %]
         html += '[% field_descs.${change.fieldname} FILTER js %]: ';
-      [% END %]
-
-      [% IF change.removed != '' %]
-        [% IF change.added == '' %]
-          html += '<span class="ih_deleted">';
+        [% IF change.removed != '' %]
+          [% IF change.added == '' %]
+            html += '<span class="ih_deleted">';
+          [% END %]
+          [% PROCESS add_change value = change.removed %]
+          [% IF change.added == '' %]
+            html += '</span>';
+          [% ELSE %]
+            html += ' &#x2794; ';
+          [% END %]
         [% END %]
-        [% PROCESS add_change value = change.removed, is_old = 1 %]
-        [% IF change.added == '' %]
-          html += '</span>';
-        [% ELSE %]
-          html += ' &#x2794; ';
-        [% END %]
+        [% PROCESS add_change value = change.added %]
       [% END %]
-      [% PROCESS add_change value = change.added, is_old = 0 %]
       [% "html += '<br>';" UNLESS loop.last %]
 
       [% IF change.fieldname == 'cc' %]
@@ -112,14 +123,11 @@
 
 [% BLOCK add_change %]
   html += '[%~%]
-  [% '<span class="old">' IF is_old %]
   [% IF change.fieldname == 'estimated_time' ||
         change.fieldname == 'remaining_time' ||
         change.fieldname == 'work_time' %]
     [% PROCESS formattimeunit time_unit = value FILTER html FILTER js %]
-  [% ELSIF change.fieldname == 'blocked' ||
-           change.fieldname == 'dependson' ||
-           change.fieldname == 'dupe' %]
+  [% ELSIF change.buglist %]
     [% value FILTER bug_list_link FILTER js %]
   [% ELSIF change.fieldname == 'assigned_to' ||
            change.fieldname == 'reporter' ||
@@ -130,6 +138,5 @@
   [% ELSE %]
     [% display_value(change.fieldname, value) FILTER html FILTER js %]
   [% END %]
-  [% '</span>' IF is_old %]
   [%~ %]';
 [% END %]

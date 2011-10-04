@@ -112,8 +112,8 @@ sub generate_sitemap {
 
         last if !@$bugs;
 
-	    # We only need the product links in the first sitemap file
-	    $products = [] if $filecount > 1;
+        # We only need the product links in the first sitemap file
+        $products = [] if $filecount > 1;
 
         push(@$filelist, _generate_sitemap_file($extension_name, $filecount, $products, $bugs));
 

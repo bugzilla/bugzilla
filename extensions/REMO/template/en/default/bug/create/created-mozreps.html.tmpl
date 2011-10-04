@@ -32,7 +32,7 @@ mentor will contact you shortly at your bugzilla email address.
 </p>
 
 <p style="font-size: x-small">
-Reference: <a href="show_bug.cgi?id=[% id %]">#[% id %]</a>
+Reference: <a href="show_bug.cgi?id=[% id FILTER uri %]">#[% id FILTER html %]</a>
 </p>
 
 [% PROCESS global/footer.html.tmpl %]

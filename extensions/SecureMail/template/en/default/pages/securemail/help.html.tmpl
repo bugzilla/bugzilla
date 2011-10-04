@@ -24,12 +24,12 @@
   title = "SecureMail Help"
 %]
 
-Bugzilla considers certain groups as "secure". If a bug is in one of those groups, Bugzilla will not send unencrypted 
+[% terms.Bugzilla %] considers certain groups as "secure". If a [% terms.bug %] is in one of those groups, [% terms.Bugzilla %] will not send unencrypted 
 email about it. To receive encrypted email rather than just a "something changed" placeholder, you must provide either 
 a S/MIME or a GPG/PGP key on the <a href="[% urlbase FILTER none %]userprefs.cgi?tab=securemail">SecureMail preferences tab</a>.<br>
 <br>
 In addition, if you have uploaded a S/MIME or GPG/PGP key using the <a href="[% urlbase FILTER none %]userprefs.cgi?tab=securemail">
-SecureMail preferences tab</a>, if you request your password to be reset, Bugzilla will send the reset email encrypted and you will
+SecureMail preferences tab</a>, if you request your password to be reset, [% terms.Bugzilla %] will send the reset email encrypted and you will
 be required to decrypt it to view the reset instructions.
 
 <h2>S/MIME</h2>
@@ -86,7 +86,7 @@ You’ll have to answer several questions:</p>
 
 <p><code>gpg --armor --output pubkey.txt --export 'Your Name'</code></p>
 
-<p>Paste the contents of pubkey.txt into the SecureMail text field in Bugzilla. 
+<p>Paste the contents of pubkey.txt into the SecureMail text field in [% terms.Bugzilla %]. 
 
 <li>Configure your email client to use your associated private key to decrypt the encrypted emails. For Thunderbird, you need the <a href="https://addons.mozilla.org/en-us/thunderbird/addon/enigmail/">Enigmail</a> extension.</p>
 </ol>

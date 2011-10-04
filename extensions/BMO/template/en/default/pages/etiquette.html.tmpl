@@ -21,15 +21,15 @@
   #%]
 
 [% INCLUDE global/header.html.tmpl 
-   title = "Bugzilla Etiquette" 
+   title = "$terms.Bugzilla Etiquette" 
    style = "li { margin: 5px } .heading { font-weight: bold }" %]
 
 <p>
   There's a number of <i lang="fr">faux pas</i> you can commit when using 
-  Bugzilla. At the very   
+  [% terms.Bugzilla %]. At the very   
   least, these will make Mozilla contributors upset at you; if committed enough    
   times they will cause those contributors to demand the disabling of your
-  Bugzilla account. So, ignore this advice at your peril. 
+  [% terms.Bugzilla %] account. So, ignore this advice at your peril. 
 </p>
 
 <p>
@@ -47,14 +47,14 @@
   <li>
   <span class="heading">No pointless comments</span>.
   Unless you have something constructive and helpful to say, do not add a 
-  comment to a bug. In bugs where there is a heated debate going on, you 
+  comment to a [% terms.bug %]. In [% terms.bugs %] where there is a heated debate going on, you 
   should be even more
   inclined not to add a comment. Unless you have something new to contribute,
-  then the bug owner is aware of all the issues, and will make a judgement
-  as to what to do. If you agree the bug should be fixed, vote for it.
+  then the [% terms.bug %] owner is aware of all the issues, and will make a judgement
+  as to what to do. If you agree the [% terms.bug %] should be fixed, vote for it.
   Additional "I see this too" or "It works for me" comments are unnecessary
   unless they are on a different platform or a significantly different build.
-  Constructive and helpful thoughts unrelated to the topic of the bug
+  Constructive and helpful thoughts unrelated to the topic of the [% terms.bug %]
   should go in the appropriate
   <a href="http://www.mozilla.org/about/forums/">newsgroup</a>.
   </li>
@@ -63,8 +63,8 @@
   <span class="heading">No obligation</span>.
   "Open Source" is not the same as "the developers must do my bidding." 
   Everyone here wants to help, but the only person who has any
-  <i>obligation</i> to fix the bugs you want fixed is you. Therefore, you 
-  should not act as if you expect someone to fix a bug by a particular date 
+  <i>obligation</i> to fix the [% terms.bugs %] you want fixed is you. Therefore, you 
+  should not act as if you expect someone to fix a [% terms.bug %] by a particular date 
   or release. Aggressive or repeated demands will not be received
   well and will almost certainly diminish the impact and interest in your 
   suggestions.
@@ -80,17 +80,17 @@
   <i>things</i>, not <i>people</i>. Examples of things include: interfaces,
   algorithms, and schedules. Examples of people include: developers,
   designers and users. <b>Attacking a person may result in you being banned 
-  from Bugzilla.</b>  
+  from [% terms.Bugzilla %].</b>  
   </li>
   
   <li>
   <span class="heading">No private email</span>.
-  Unless the bug owner or another respected project contributor has asked you
+  Unless the [% terms.bug %] owner or another respected project contributor has asked you
   to email them with specific information, please place all information
-  relating to bugs
-  in the bug itself. Do not send them by private email; no-one else can read
+  relating to [% terms.bugs %]
+  in the [% terms.bug %] itself. Do not send them by private email; no-one else can read
   them if you do that, and they'll probably just get ignored. If a file
-  is too big for Bugzilla, add a comment giving the file size and contents
+  is too big for [% terms.Bugzilla %], add a comment giving the file size and contents
   and ask what to do.
   </li>
 </ol>
@@ -99,19 +99,19 @@
 
 <ol>
   <li>
-  <span class="heading">No messing with other people's bugs</span>.
-  Unless you are the bug assignee, or have some say over the use of their
+  <span class="heading">No messing with other people's [% terms.bugs %]</span>.
+  Unless you are the [% terms.bug %] assignee, or have some say over the use of their
   time, never change the Priority or Target Milestone fields. If in doubt, 
-  do not change the fields of bugs you do not own - add a comment
+  do not change the fields of [% terms.bugs %] you do not own - add a comment
   instead, suggesting the change.
   </li>
 
   <li>
   <span class="heading">No whining about decisions</span>.
-  If a respected project contributor has marked a bug as INVALID, then it is
+  If a respected project contributor has marked a [% terms.bug %] as INVALID, then it is
   invalid. Someone filing another duplicate of it does not change this. Unless
   you have further important evidence, do not post a comment arguing that an
-  INVALID or WONTFIX bug should be reopened. 
+  INVALID or WONTFIX [% terms.bug %] should be reopened. 
   </li>  
 
 </ol>
@@ -129,7 +129,7 @@
 <p>
   If you see someone not following these rules, the first step is, as an exception
   to guideline 1.4, to make them aware of this document by <em>private</em> mail. 
-  Flaming people publically in bugs violates guidelines 1.1 and 1.3. In the case of
+  Flaming people publically in [% terms.bugs %] violates guidelines 1.1 and 1.3. In the case of
   persistent offending you should report the matter to 
   <a href="mailto:gerv@mozilla.org">Gerv</a>. 
 </p>
@@ -141,7 +141,7 @@
 
 <p>
   Other useful documents:
-  <a href="page.cgi?id=bug-writing.html">The Bug Writing Guidelines</a>.
+  <a href="page.cgi?id=bug-writing.html">The [% terms.Bug %] Writing Guidelines</a>.
 </p>
 
 [% INCLUDE global/footer.html.tmpl %]

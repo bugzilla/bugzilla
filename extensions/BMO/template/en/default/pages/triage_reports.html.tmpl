@@ -59,7 +59,7 @@ var selected_components = [
 <input type="hidden" name="id" value="triage_reports.html">
 <input type="hidden" name="action" value="run">
 
-Show UNCONFIRMED bugs with:
+Show UNCONFIRMED [% terms.bugs %] with:
 <table id="triage_form">
 
 <tr>
@@ -149,7 +149,7 @@ Show UNCONFIRMED bugs with:
   </p>
   <table border="0" cellspacing="0" id="report" width="100%">
     <tr id="report-header">
-      <th>Bug / Date</th>
+      <th>[% terms.Bug %] / Date</th>
       <th>Summary</th>
       <th>Reporter / Commenter</th>
       <th>Comment Date</th>
@@ -190,7 +190,7 @@ Show UNCONFIRMED bugs with:
 
 [% ELSE %]
   <p>
-    No bugs found.
+    No [% terms.bugs %] found.
   </p>
 [% END %]
 

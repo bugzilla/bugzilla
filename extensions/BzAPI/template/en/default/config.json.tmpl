@@ -127,7 +127,7 @@ OLDATTACH2NEW = {
   [% FOREACH cl IN classifications %]
     [% cl_name_for.${cl.id} = cl.name %]
     "[% cl.name FILTER json %]": {
-      "id": [% cl.id %],
+      "id": [% cl.id FILTER json %],
       "description": "[% cl.description FILTER json %]",
       "products": [
       [% FOREACH product IN cl.products %]
@@ -142,7 +142,7 @@ OLDATTACH2NEW = {
   "product": {
   [% FOREACH product = products %]
     "[% product.name FILTER json %]": {
-      "id": [% product.id %],
+      "id": [% product.id FILTER json %],
       "description": "[% product.description FILTER json %]",
       "is_active": [% product.isactive ? "true" : "false" %],
       "is_permitting_unconfirmed": [% product.allows_unconfirmed ? "true" : "false" %],
@@ -152,7 +152,7 @@ OLDATTACH2NEW = {
       "component": {
       [% FOREACH component = product.components %]
         "[% component.name FILTER json %]": {
-          "id": [% component.id %],
+          "id": [% component.id FILTER json %],
 [% IF show_flags %]
           "flag_type": [
           [% flag_types = 
@@ -186,7 +186,7 @@ OLDATTACH2NEW = {
 
       "group": [
       [% FOREACH group = product.groups_valid %]
-        [% group.id %][% ',' UNLESS loop.last() %]
+        [% group.id FILTER json %][% ',' UNLESS loop.last() %]
       [% END %]
       ]
     }[% ',' UNLESS loop.last() %]
@@ -195,7 +195,7 @@ OLDATTACH2NEW = {
   
   "group": {
   [% FOREACH group = product.groups_valid %]
-    "[% group.id %]": {
+    "[% group.id FILTER json %]": {
       "name": "[% group.name FILTER json %]",
       "description": "[% group.description FILTER json %]",
       "is_accepting_bugs": [% group.is_bug_group ? 'true' : 'false' %],
@@ -207,15 +207,15 @@ OLDATTACH2NEW = {
 [% IF show_flags %]
   "flag_type": {
   [% FOREACH flag_type = all_visible_flag_types.values.sort('name') %]
-    "[%+ flag_type.id %]": {
+    "[%+ flag_type.id FILTER json %]": {
       "name": "[% flag_type.name FILTER json %]",
       "description": "[% flag_type.description FILTER json %]",
       [% IF user.in_group("editcomponents") %]
         [% IF flag_type.request_group_id %]
-          "request_group": [% flag_type.request_group_id %],
+          "request_group": [% flag_type.request_group_id FILTER json %],
         [% END %]
         [% IF flag_type.grant_group_id %]
-          "grant_group": [% flag_type.grant_group_id %],
+          "grant_group": [% flag_type.grant_group_id FILTER json %],
         [% END %]
       [% END %]
       "is_for_bugs": [% flag_type.target_type == "bug" ? 'true' : 'false'  %],
@@ -309,7 +309,7 @@ OLDATTACH2NEW = {
       [% IF newname.match("^cf_") %]
         "is_on_bug_entry": [% item.enter_bug ? 'true' : 'false' %],
       [% END %]
-      "type": [% item.type || type_id_for.$newname || 0 %]
+      "type": [% item.type || type_id_for.$newname || 0 FILTER json %]
     }[% ',' UNLESS loop.last() %]
   [% END %]
   }

@@ -599,6 +599,10 @@
     [% title = "No File Specified" %]
     You did not specify a file to attach.
 
+  [% ELSIF error == "filename_not_specified" %]
+    [% title = "No Filename Specified" %]
+    You must specify a filename for this attachment.
+
   [% ELSIF error == "file_too_large" %]
     [% title = "File Too Large" %]
     [%# Convert maxlocalattachment from Mb to Kb %]

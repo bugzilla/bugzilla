@@ -165,9 +165,10 @@ sub bugmail_recipients {
         # we need the product to process the component, so scan for that first
         my $product;
         foreach my $ra (@$diffs) {
-            my (undef, undef, undef, undef, $old, $new, undef, $field) = @$ra;
-            if ($field eq 'product') {
-                $product = Bugzilla::Product->new({ name => $old });
+            next if !(exists $ra->{'old'}
+                      && exists $ra->{'field_name'});
+            if ($ra->{'field_name'} eq 'product') {
+                $product = Bugzilla::Product->new({ name => $ra->{'old'} });
                 $oldProductId = $product->id;
             }
         }
@@ -175,9 +176,10 @@ sub bugmail_recipients {
             $product = Bugzilla::Product->new($oldProductId);
         }
         foreach my $ra (@$diffs) {
-            my (undef, undef, undef, undef, $old, $new, undef, $field) = @$ra;
-            if ($field eq 'component') {
-                my $component = Bugzilla::Component->new({ name => $old, product => $product });
+            next if !(exists $ra->{'old'}
+                      && exists $ra->{'field_name'});
+            if ($ra->{'field_name'} eq 'component') {
+                my $component = Bugzilla::Component->new({ name => $ra->{'old'}, product => $product });
                 $oldComponentId = $component->id;
             }
         }

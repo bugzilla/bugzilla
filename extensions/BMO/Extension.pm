@@ -263,12 +263,12 @@ sub bugmail_recipients {
     if (@$diffs) {
         # Changed bug
         foreach my $ref (@$diffs) {
-            my ($who, $whoname, $what, $when, 
-                $old, $new, $attachid, $fieldname) = (@$ref);
-            
-            if ($fieldname eq "bug_group") {
-                _cc_if_special_group($old, $recipients);
-                _cc_if_special_group($new, $recipients);
+            next if !(exists $ref->{'new'} 
+                      && exists $ref->{'old'} 
+                      && exists $ref->{'field_name'});
+            if ($ref->{'field_name'} eq "bug_group") {
+                _cc_if_special_group($ref->{'old'}, $recipients);
+                _cc_if_special_group($ref->{'new'}, $recipients);
             }
         }
     } else {

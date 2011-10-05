@@ -267,8 +267,12 @@ sub Send {
             }
 
             # Make sure the user isn't in the nomail list, and the dep check passed.
-            # Upstreaming: when we port to 4.2, check the login names of the
-            # user objects in the bugmail_recipients hook instead.
+            # BMO: normally we would check the login names of the
+            # user objects in the bugmail_recipients hook instead. There we could
+            # remove the (bugs|tld)$ addresses from the recipients. But the hook comes
+            # to early before watchers are decided and these addresses need to be 
+            # there for this to work. This may change with recent enhancements to 
+            # component watching. need to investigate further.
             if ($user->email_enabled && $dep_ok &&
                 ($user->login !~ /bugs$/) &&
                 ($user->login !~ /\.tld$/))

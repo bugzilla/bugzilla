@@ -3426,6 +3426,26 @@ sub _remove_attachment_isurl {
     }
 }
 
+sub _add_isactive_to_product_fields {
+    my $dbh = Bugzilla->dbh;
+
+    # If we add the isactive column all values should start off as active
+    if (!$dbh->bz_column_info('components', 'isactive')) {
+        $dbh->bz_add_column('components', 'isactive', 
+            {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'TRUE'});
+    }
+    
+    if (!$dbh->bz_column_info('versions', 'isactive')) {
+        $dbh->bz_add_column('versions', 'isactive', 
+            {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'TRUE'});
+    }
+
+    if (!$dbh->bz_column_info('milestones', 'isactive')) {
+        $dbh->bz_add_column('milestones', 'isactive', 
+            {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'TRUE'});
+    }
+}
+
 sub _migrate_field_visibility_value {
     my $dbh = Bugzilla->dbh;
 
@@ -3584,26 +3604,6 @@ sub _rename_tags_to_tag {
         $dbh->bz_rename_table('tags','tag');
         $dbh->bz_add_index('tag', 'tag_user_id_idx',
                            {FIELDS => [qw(user_id name)], TYPE => 'UNIQUE'});
-    }
-}
-
-sub _add_isactive_to_product_fields {
-    my $dbh = Bugzilla->dbh;
-
-    # If we add the isactive column all values should start off as active
-    if (!$dbh->bz_column_info('components', 'isactive')) {
-        $dbh->bz_add_column('components', 'isactive', 
-            {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'TRUE'});
-    }
-    
-    if (!$dbh->bz_column_info('versions', 'isactive')) {
-        $dbh->bz_add_column('versions', 'isactive', 
-            {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'TRUE'});
-    }
-
-    if (!$dbh->bz_column_info('milestones', 'isactive')) {
-        $dbh->bz_add_column('milestones', 'isactive', 
-            {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'TRUE'});
     }
 }
 

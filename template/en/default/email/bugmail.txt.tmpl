@@ -22,8 +22,6 @@
 
 [% PROCESS "global/field-descs.none.tmpl" %]
 [% PROCESS "global/reason-descs.none.tmpl" %]
-[% show_new = isnew
-              && (to_user.settings.bugmail_new_prefix.value == 'on') %]
 
 [% isnew = bug.lastdiffed ? 0 : 1 %]
 

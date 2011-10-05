@@ -663,6 +663,18 @@ sub create {
                 $var =~ s/>/\\x3e/g;
                 return $var;
             },
+
+            # Sadly, different to the above. See http://www.json.org/ 
+            # for details.
+            json => sub {
+                my ($var) = @_;
+                $var =~ s/([\\\"\/])/\\$1/g;
+                $var =~ s/\n/\\n/g;
+                $var =~ s/\r/\\r/g;
+                $var =~ s/\f/\\f/g;
+                $var =~ s/\t/\\t/g;
+                return $var;
+            },
             
             # Converts data to base64
             base64 => sub {

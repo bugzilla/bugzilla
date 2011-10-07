@@ -876,8 +876,6 @@ sub process_bug {
     }
 
     # Status & Resolution
-    my $has_res = defined($bug_fields{'resolution'});
-    my $has_status = defined($bug_fields{'bug_status'});
     my $valid_res = check_field('resolution',  
                                   scalar $bug_fields{'resolution'}, 
                                   undef, ERR_LEVEL );
@@ -932,10 +930,10 @@ sub process_bug {
         }
     }
 
-    if($has_status){
+    if ($status) {
         if($valid_status){
             if($is_open){
-                if($has_res){
+                if ($resolution) {
                     $err .= "Resolution set on an open status.\n";
                     $err .= "   Dropping resolution $resolution\n";
                     $resolution = undef;
@@ -969,7 +967,7 @@ sub process_bug {
                 }
             }
             else{ # $is_open is false
-               if(!$has_res){
+               if (!$resolution) {
                    $err .= "Missing Resolution. Setting status to ";
                    if($everconfirmed){
                        $status = $initial_status;
@@ -999,9 +997,8 @@ sub process_bug {
             $err .=  $bug_fields{'bug_status'} . "\".\n";
             $resolution = undef;
         }
-                
     }
-    else{ #has_status is false
+    else {
         if($everconfirmed){  
             $status = $initial_status;
         }
@@ -1012,8 +1009,8 @@ sub process_bug {
         $err .= "   Previous status was unknown\n";
         $resolution = undef;
     }
-                                 
-    if (defined $resolution){
+
+    if ($resolution) {
         push( @query,  "resolution" );
         push( @values, $resolution );
     }

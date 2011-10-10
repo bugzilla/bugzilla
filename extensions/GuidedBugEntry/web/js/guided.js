@@ -82,8 +82,8 @@ var guided = {
 
   setAdvancedLink: function() {
     href = 'enter_bug.cgi?format=__default__' +
-      '&product=' + escape(product.getName()) +
-      '&short_desc=' + escape(dupes.getSummary());
+      '&product=' + encodeURIComponent(product.getName()) +
+      '&short_desc=' + encodeURIComponent(dupes.getSummary());
     Dom.get('advanced_img').href = href;
     Dom.get('advanced_link').href = href;
   }
@@ -136,7 +136,7 @@ var product = {
     Dom.get('product').value = productName;
     Dom.get('product_label').innerHTML = YAHOO.lang.escapeHTML(productName);
     Dom.get('dupes_product_name').innerHTML = YAHOO.lang.escapeHTML(productName);
-    Dom.get('list_comp').href = 'describecomponents.cgi?product=' + escape(productName);
+    Dom.get('list_comp').href = 'describecomponents.cgi?product=' + encodeURIComponent(productName);
     guided.setAdvancedLink();
 
     if (productName == '') {

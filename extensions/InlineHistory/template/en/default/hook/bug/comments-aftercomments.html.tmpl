@@ -82,7 +82,12 @@
           [% PROCESS add_change value = change.removed %]
         [% END %]
       [% ELSE %]
-        html += '[% field_descs.${change.fieldname} FILTER js %]: ';
+        [% IF change.fieldname == 'longdescs.isprivate' %]
+          html += '<a href="#c[% change.comment.count FILTER js %]">'
+                  + 'Comment [% change.comment.count FILTER js %]</a> is private: ';
+        [% ELSE %]
+          html += '[% field_descs.${change.fieldname} FILTER js %]: ';
+        [% END %]
         [% IF change.removed != '' %]
           [% IF change.added == '' %]
             html += '<span class="ih_deleted">';

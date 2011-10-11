@@ -302,7 +302,9 @@ var inline_history = {
   },
 
   linkBugFlags: function() {
-    var rows = Dom.get('flags').getElementsByTagName('tr');
+    var flags = Dom.get('flags');
+    if (!flags) return;
+    var rows = flags.getElementsByTagName('tr');
     for (var i = 0, il = rows.length; i < il; i++) {
       var cells = rows[i].getElementsByTagName('td');
       if (!cells[1]) continue;

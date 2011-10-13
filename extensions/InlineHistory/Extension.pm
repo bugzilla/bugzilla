@@ -33,6 +33,9 @@ use Bugzilla::Attachment;
 
 our $VERSION = '1.4';
 
+# don't show inline history for bugs with lots of changes
+use constant MAXIMUM_ACTIVITY_COUNT => 500;
+
 sub template_before_process {
     my ($self, $args) = @_;
     my $file = $args->{'file'};
@@ -60,6 +63,13 @@ sub template_before_process {
     # build bug activity
     my ($activity) = Bugzilla::Bug::GetBugActivity($bug_id);
     $activity = _add_duplicates($bug_id, $activity);
+
+    if (scalar @$activity > MAXIMUM_ACTIVITY_COUNT) {
+        $activity = [];
+        $vars->{'ih_activity'} = 0;
+        $vars->{'ih_activity_max'} = 1;
+        return;
+    }
 
     # augment and tweak
     foreach my $operation (@$activity) {

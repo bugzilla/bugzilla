@@ -181,12 +181,15 @@ if ($action eq 'edit') {
 if ($action eq 'update') {
     check_token_data($token, 'edit_field_value');
     $vars->{'value_old'} = $value->name;
+    my %params = (
+        name    => scalar $cgi->param('value_new'),
+        sortkey => scalar $cgi->param('sortkey'),
+        visibility_value => scalar $cgi->param('visibility_value_id'),
+    );
     if ($cgi->should_set('is_active')) {
-        $value->set_is_active($cgi->param('is_active'));
+        params{is_active} = $cgi->param('is_active');
     }
-    $value->set_name($cgi->param('value_new'));
-    $value->set_sortkey($cgi->param('sortkey'));
-    $value->set_visibility_value($cgi->param('visibility_value_id'));
+    $value->set_all(\%params);
     $vars->{'changes'} = $value->update();
     delete_token($token);
     $vars->{'message'} = 'field_value_updated';

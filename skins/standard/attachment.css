@@ -201,10 +201,6 @@ textarea.bz_private {
     display: block;  
 }
 
-textarea {
-    font-family: monospace;
-}
-
 div#update_container {
     clear: both; 
     padding: 1.5em 0; 

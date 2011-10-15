@@ -1354,7 +1354,7 @@ c:\perl\bin\perl.exe -xc:\bugzilla -wT "%s" %s
         daily at 5 after midnight:
       </para>
       
-      <programlisting>5 0 * * * cd &lt;your-bugzilla-directory&gt; ; ./collectstats.pl</programlisting>
+      <programlisting>5 0 * * * cd &lt;your-bugzilla-directory&gt; &amp;&amp; ./collectstats.pl</programlisting>
 
       <para>
         After two days have passed you'll be able to view bug graphs from
@@ -1385,7 +1385,7 @@ c:\perl\bin\perl.exe -xc:\bugzilla -wT "%s" %s
         graphs. This example runs it at 12.55am. 
       </para>
 
-      <programlisting>55 0 * * * cd &lt;your-bugzilla-directory&gt; ; ./whineatnews.pl</programlisting>
+      <programlisting>55 0 * * * cd &lt;your-bugzilla-directory&gt; &amp;&amp; ./whineatnews.pl</programlisting>
 
       <note>
         <para>
@@ -1415,7 +1415,7 @@ c:\perl\bin\perl.exe -xc:\bugzilla -wT "%s" %s
         graphs. This example runs it every 15 minutes. 
       </para>
 
-      <programlisting>*/15 * * * * cd &lt;your-bugzilla-directory&gt; ; ./whine.pl</programlisting>
+      <programlisting>*/15 * * * * cd &lt;your-bugzilla-directory&gt; &amp;&amp; ./whine.pl</programlisting>
 
       <note>
         <para>

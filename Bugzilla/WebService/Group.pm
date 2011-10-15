@@ -21,6 +21,12 @@ use strict;
 use base qw(Bugzilla::WebService);
 use Bugzilla::Constants;
 use Bugzilla::Error;
+use Bugzilla::WebService::Util qw(validate translate params_to_objects);
+
+use constant MAPPED_RETURNS => {
+    userregexp => 'user_regexp',
+    isactive => 'is_active'
+};
 
 sub create {
     my ($self, $params) = @_;
@@ -42,6 +48,60 @@ sub create {
     return { id => $self->type('int', $group->id) };
 }
 
+sub update {
+    my ($self, $params) = @_;
+
+    my $dbh = Bugzilla->dbh;
+
+    Bugzilla->login(LOGIN_REQUIRED);
+    Bugzilla->user->in_group('creategroups')
+        || ThrowUserError("auth_failure", { group  => "creategroups",
+                                            action => "edit",
+                                            object => "group" });
+
+    defined($params->{names}) || defined($params->{ids})
+        || ThrowCodeError('params_required',
+               { function => 'Group.update', params => ['ids', 'names'] });
+
+    my $group_objects = params_to_objects($params, 'Bugzilla::Group');
+
+    my %values = %$params;
+    
+    # We delete names and ids to keep only new values to set.
+    delete $values{names};
+    delete $values{ids};
+
+    $dbh->bz_start_transaction();
+    foreach my $group (@$group_objects) {
+        $group->set_all(\%values);
+    }
+
+    my %changes;
+    foreach my $group (@$group_objects) {
+        my $returned_changes = $group->update();
+        $changes{$group->id} = translate($returned_changes, MAPPED_RETURNS);
+    }
+    $dbh->bz_commit_transaction();
+
+    my @result;
+    foreach my $group (@$group_objects) {
+        my %hash = (
+            id      => $group->id,
+            changes => {},
+        );
+        foreach my $field (keys %{ $changes{$group->id} }) {
+            my $change = $changes{$group->id}->{$field};
+            $hash{changes}{$field} = {
+                removed => $self->type('string', $change->[0]),
+                added   => $self->type('string', $change->[1]) 
+            };
+        }
+       push(@result, \%hash);
+    }
+
+    return { groups => \@result };
+}
+
 1;
 
 __END__
@@ -61,7 +121,7 @@ get information about them.
 See L<Bugzilla::WebService> for a description of how parameters are passed,
 and what B<STABLE>, B<UNSTABLE>, and B<EXPERIMENTAL> mean.
 
-=head1 Group Creation
+=head1 Group Creation and Modification
 
 =head2 create
 
@@ -137,5 +197,95 @@ You specified an invalid regular expression in the C<user_regexp> field.
 =back
 
 =back 
+
+=head2 update
+
+B<UNSTABLE>
+
+=over
+
+=item B<Description>
+
+This allows you to update a group in Bugzilla.
+
+=item B<Params>
+
+At least C<ids> or C<names> must be set, or an error will be thrown.
+
+=over
+
+=item C<ids>
+
+B<Required> C<array> Contain ids of groups to update.
+
+=item C<names>
+
+B<Required> C<array> Contain names of groups to update.
+
+=item C<name>
+
+C<string> A new name for group.
+
+=item C<description>
+
+C<string> A new description for groups. This is what will appear in the UI
+as the name of the groups.
+
+=item C<user_regexp>
+
+C<string> A new regular expression for email. Will automatically grant
+membership to these groups to anyone with an email address that matches
+this perl regular expression.
+
+=item C<is_active>
+
+C<boolean> Set if groups are active and eligible to be used for bugs.
+True if bugs can be restricted to this group, false otherwise.
+
+=item C<icon_url>
+
+C<string> A URL pointing to an icon that will appear next to the name of
+users who are in this group.
+
+=back
+
+=item B<Returns>
+
+A C<hash> with a single field "groups". This points to an array of hashes
+with the following fields:
+
+=over
+
+=item C<id>
+
+C<int> The id of the group that was updated.
+
+=item C<changes>
+
+C<hash> The changes that were actually done on this group. The keys are
+the names of the fields that were changed, and the values are a hash
+with two keys:
+
+=over
+
+=item C<added>
+
+C<string> The values that were added to this field,
+possibly a comma-and-space-separated list if multiple values were added.
+
+=item C<removed>
+
+C<string> The values that were removed from this field, possibly a
+comma-and-space-separated list if multiple values were removed.
+
+=back
+
+=back
+
+=item B<Errors>
+
+The same as L</create>.
+
+=back
 
 =cut

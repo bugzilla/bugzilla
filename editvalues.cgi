@@ -187,7 +187,7 @@ if ($action eq 'update') {
         visibility_value => scalar $cgi->param('visibility_value_id'),
     );
     if ($cgi->should_set('is_active')) {
-        params{is_active} = $cgi->param('is_active');
+        $params{is_active} = $cgi->param('is_active');
     }
     $value->set_all(\%params);
     $vars->{'changes'} = $value->update();

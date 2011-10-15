@@ -279,7 +279,7 @@
       <glossterm>MySQL</glossterm>
 
       <glossdef>
-        <para>MySQL is currently the required
+        <para>MySQL is one of the supported
         <glossterm linkend="gloss-rdbms">RDBMS</glossterm> for Bugzilla. MySQL
         can be downloaded from <ulink url="http://www.mysql.com"/>. While you
         should familiarize yourself with all of the documentation, some high

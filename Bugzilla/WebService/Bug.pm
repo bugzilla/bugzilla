@@ -1021,7 +1021,7 @@ containing the following keys:
 
 =item C<id>
 
-C<int> An integer id uniquely idenfifying this field in this installation only.
+C<int> An integer id uniquely identifying this field in this installation only.
 
 =item C<type>
 

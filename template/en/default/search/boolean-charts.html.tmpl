@@ -135,6 +135,7 @@
     [% ELSE %]
       <select name="f[% cond_num FILTER html %]" title="Field"
               id="f[% cond_num FILTER html %]"
+              onchange="fix_query_string(this)"
               class="custom_search_form_field">
         [% FOREACH field = fields %]
           <option value="[% field.name FILTER html %]"
@@ -150,6 +151,7 @@
     
       <input name="v[% cond_num FILTER html %]" title="Value"
              class="custom_search_form_field"
+             onchange="fix_query_string(this)"
              value="[% condition.v FILTER html %]">
     [% END %]
     
@@ -170,7 +172,8 @@
 
 [% BLOCK any_all_select %]
   <div class="any_all_select">
-    <select name="[% name FILTER html %]" id="[% name FILTER html %]">
+    <select name="[% name FILTER html %]" id="[% name FILTER html %]"
+            onchange="fix_query_string(this)">
       <option value="AND">Match ALL of the following:</option>
       <option value="OR" [% ' selected="selected"' IF selected == "OR" %]>
         Match ANY of the following:</option>

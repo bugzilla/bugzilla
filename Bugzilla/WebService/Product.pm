@@ -195,7 +195,7 @@ sub _product_to_hash {
         is_active   => $self->type('boolean', $product->is_active),
         default_milestone => $self->type('string', $product->default_milestone),
         has_unconfirmed   => $self->type('boolean', $product->allows_unconfirmed),
-        classification => $self->_classification_to_hash($product->classification),
+        classification => $self->type('string', $product->classification->name),
     };
     if (filter_wants($params, 'components')) {
         $field_data->{components} = [map {
@@ -213,20 +213,6 @@ sub _product_to_hash {
         } @{$product->milestones}];
     }
     return filter($params, $field_data);
-}
-
-sub _classification_to_hash {
-    my ($self, $classification) = @_;
-    return {
-        id =>
-            $self->type('int', $classification->id),
-        name =>
-            $self->type('string', $classification->name),
-        description =>
-            $self->type('string' , $classification->description),
-        sort_key =>
-            $self->type('int', $classification->sortkey),
-    };
 }
 
 sub _component_to_hash {
@@ -427,8 +413,7 @@ for this product.
 
 =item C<classification>
 
-C<hash> Contains the classification C<id>, C<name>, C<description>
-and C<sort_key> as keys.
+C<string> The classification name for the product.
 
 =item C<components>
 

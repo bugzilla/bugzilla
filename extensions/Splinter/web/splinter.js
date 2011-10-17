@@ -1661,6 +1661,11 @@ Splinter.insertCommentEditor = function (commentArea, file, location, type) {
     Event.addListener('commentTextArea', 'keydown', function (e) { 
         if (e.which == 13 && e.ctrlKey) {
             Splinter.saveComment();
+        } else if (e.which == 27) {
+            var comment = Dom.get('commentTextArea').value;
+            if (previousText == comment || comment == '') {
+                Splinter.cancelComment(previousText);
+            }
         } else {
             Splinter.queueSaveDraft();
         }

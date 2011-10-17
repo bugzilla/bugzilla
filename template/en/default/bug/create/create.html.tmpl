@@ -356,7 +356,7 @@ TUI_hide_default('attachment_text_field');
     %]
 
     <td rowspan="[% num_rows FILTER html %]">
-      [% IF product.flag_types(isactive=>1).bug.size > 0 %]
+      [% IF product.flag_types(is_active=>1).bug.size > 0 %]
         [% display_flag_headers = 0 %]
         [% any_flags_requesteeble = 0 %]
 

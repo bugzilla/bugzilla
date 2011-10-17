@@ -71,10 +71,18 @@ sub template_before_process {
         return;
     }
 
+    Bugzilla->request_cache->{ih_user_cache} ||= {};
+    my $user_cache = Bugzilla->request_cache->{ih_user_cache};
+
     # augment and tweak
     foreach my $operation (@$activity) {
         # make operation.who an object
-        $operation->{who} = Bugzilla::User->new({ name => $operation->{who} });
+        if (!$user_cache->{$operation->{who}}) {
+            $user_cache->{$operation->{who}} 
+                = Bugzilla::User->new({ name => $operation->{who} });
+        }
+        $operation->{who} = $user_cache->{$operation->{who}};
+
         for (my $i = 0; $i < scalar(@{$operation->{changes}}); $i++) {
             my $change = $operation->{changes}->[$i];
 

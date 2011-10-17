@@ -54,6 +54,7 @@ Subject: [% flagtype_name %] [%+ subject_status %]: [[% terms.Bug %] [%+ bug.bug
   [Attachment [% attachment.id %]] [% attachment.description FILTER clean_text %][% END %]
 Date: [% date %]
 X-Bugzilla-Type: request
+[%+ IF flag.requestee %]X-Bugzilla-Flag-Requestee: [% flag.requestee.email %][% END %]
 [%+ threadingmarker %]
 
 [%+ USE wrap -%]

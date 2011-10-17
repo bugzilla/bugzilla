@@ -414,6 +414,53 @@ sub datasize {
     return $self->{datasize};
 }
 
+=over
+
+=item C<linecount>
+
+the number of lines of the attachment content
+
+=back
+
+=cut
+
+# linecount allows for getting the number of lines of an attachment
+# from the database directly if the data has not yet been loaded for
+# performance reasons.
+
+sub linecount {
+    my ($self) = @_;
+
+    return $self->{linecount} if exists $self->{linecount};
+
+    # Limit this to just text/* attachments as this could
+    # cause strange results for binary attachments.
+    return if $self->contenttype !~ /^text\//;
+
+    # If the data has already been loaded, we can just determine
+    # line count from the data directly. 
+    if ($self->{data}) {
+        $self->{linecount} = $self->{data} =~ tr/\n/\n/;
+    }
+    else {
+        $self->{linecount} = 
+            int(Bugzilla->dbh->selectrow_array("
+                SELECT LENGTH(attach_data.thedata)-LENGTH(REPLACE(attach_data.thedata,'\n',''))/LENGTH('\n') 
+                FROM attach_data WHERE id = ?", undef, $self->id));
+    
+    }
+
+    # If we still do not have a linecount either the attachment
+    # is stored in a local file or has been deleted. If the former,
+    # we call self->data to force a load from the filesystem and
+    # then do a split on newlines and count again.
+    unless ($self->{linecount}) {
+        $self->{linecount} = $self->data =~ tr/\n/\n/;
+    }
+
+    return $self->{linecount};
+}
+
 sub _get_local_filename {
     my $self = shift;
     my $hash = ($self->id % 100) + 100;

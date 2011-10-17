@@ -34,11 +34,14 @@ use Bugzilla::Util qw(html_quote trick_taint trim datetime_from detaint_natural)
 use Bugzilla::Token;
 use Bugzilla::Error;
 use Bugzilla::Mailer;
+use Bugzilla::Util;
 
 use Scalar::Util qw(blessed);
 use Date::Parse;
 use DateTime;
+use Encode qw(find_encoding);
 
+use Bugzilla::Extension::BMO::Constants;
 use Bugzilla::Extension::BMO::FakeBug;
 use Bugzilla::Extension::BMO::Data qw($cf_visible_in_products
                                       $cf_flags
@@ -741,6 +744,55 @@ sub _short_desc_matches {
     # For NOT searches, we just add 0 to the relevance.
     my $select_term = $$t =~ /not/ ? 0 : "($current$rterm1)";
     Bugzilla::Search::COLUMNS->{'relevance'}->{name} = $select_term;
+}
+
+sub mailer_before_send {
+    my ($self, $args) = @_;
+    my $email = $args->{email};
+ 
+    # If email is a request for a review, add the attachment itself
+    # to the email as an attachment. Attachment must be content type
+    # text/plain and below a certain size. Otherwise the email already 
+    # contain a link to the attachment. 
+    if ($email 
+        && $email->header('X-Bugzilla-Type') eq 'request'
+        && ($email->header('X-Bugzilla-Flag-Requestee') 
+            && $email->header('X-Bugzilla-Flag-Requestee') eq $email->header('to'))) 
+    {
+        my $body = $email->body;
+
+        if (my ($attach_id) = $body =~ /Attachment\s+(\d+)\s*:/) {
+            my $attachment = Bugzilla::Attachment->new($attach_id);
+            if ($attachment 
+                && $attachment->ispatch 
+                && $attachment->contenttype eq 'text/plain'
+                && $attachment->linecount 
+                && $attachment->linecount < REQUEST_MAX_ATTACH_LINES) 
+            {
+                # Don't send a charset header with attachments, as they might 
+                # not be UTF-8, unless we can properly detect it.
+                my $charset;
+                if (Bugzilla->feature('detect_charset')) {
+                    my $encoding = detect_encoding($attachment->data);
+                    if ($encoding) {
+                        $charset = find_encoding($encoding)->mime_name;
+                    }
+                }
+
+                my $attachment_part = Email::MIME->create(
+                    attributes => {
+                        content_type => $attachment->contenttype,
+                        filename     => $attachment->filename,
+                        disposition  => "attachment",
+                    },
+                    body => $attachment->data,
+                );
+                $attachment_part->charset_set($charset) if $charset;
+
+                $email->parts_add([ $attachment_part ]);
+            }
+        }       
+    }
 }
 
 __PACKAGE__->NAME;

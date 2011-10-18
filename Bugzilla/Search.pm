@@ -296,7 +296,7 @@ sub COLUMNS {
     # Next we define columns that have special SQL instead of just something
     # like "bugs.bug_id".
     my $actual_time = '(SUM(ldtime.work_time)'
-        . ' * COUNT(DISTINCT ldtime.bug_when)/COUNT(bugs.bug_id))';
+        . ' * COUNT(DISTINCT ldtime.comment_id)/COUNT(bugs.bug_id))';
     my %special_sql = (
         deadline    => $dbh->sql_date_format('bugs.deadline', '%Y-%m-%d'),
         actual_time => $actual_time,

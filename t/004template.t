@@ -60,11 +60,16 @@ my $fh;
 # fall back to English if necessary.
 
 foreach my $file (@referenced_files) {
-    my $path = File::Spec->catfile($english_default_include_path, $file);
-    if (-e $path) {
-        ok(1, "$path exists");
+    my @path = map(File::Spec->catfile($_, $file), @include_paths);
+    push(@path, File::Spec->catfile($english_default_include_path, $file));
+    my $found;
+    foreach my $path (@path) {
+        $found = $path if -e $path;
+    }
+    if ($found) {
+        ok(1, "$file exists");
     } else {
-        ok(0, "$path cannot be located --ERROR");
+        ok(0, "$file cannot be located --ERROR");
     }
 }
 

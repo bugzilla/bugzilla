@@ -232,6 +232,10 @@
     .clickable_area {
         cursor: pointer;
     }
+
+    textarea {
+        font-family: monospace;
+    }
 /* generic (end) */
 
 /* Links that control whether or not something is visible. */

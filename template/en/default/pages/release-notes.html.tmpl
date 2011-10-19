@@ -1271,10 +1271,11 @@
   <li>Searching the Priority field if you typed something that exactly
     matched the name of a priority. You can explicitly search the
     Priority field if you want to find [% terms.bugs %] by priority.</li>
-  <li>Searching the Platform and OS fields if you typed in one of a
-    certain hard-coded list of strings (like "pc", "windows", etc.).
-    You can explicitly search these fields, instead, if you want to
-    find [% terms.bugs %] with a specific Platform or OS set.</li>
+  <li>Searching the [% field_descs.rep_platform FILTER html %] and OS fields
+    if you typed in one of a certain hard-coded list of strings (like "pc",
+    "windows", etc.). You can explicitly search these fields, instead, if you want
+    to find [% terms.bugs %] with a specific [% field_descs.rep_platform
+    FILTER html %] or OS set.</li>
 </ul>
 
 <h3 id="v36_feat_browse">Simple "Browse" Interface</h3>

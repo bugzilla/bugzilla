@@ -297,7 +297,8 @@
     [%############%]    
     <tr>
       <td class="field_label">
-        <label for="rep_platform" accesskey="h"><b>Platform</b></label>:
+        <label for="rep_platform" accesskey="h">
+          <b>[% field_descs.rep_platform FILTER html %]</b></label>:
       </td>
       <td class="field_value">
        [% INCLUDE bug/field.html.tmpl

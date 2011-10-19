@@ -217,7 +217,7 @@ function PutDescription() {
 
   <tr bgcolor="[% tablecolour %]">
     <td align="right" valign="top">
-      <b>Hardware Platform</b>
+      <b>[% field_descs.rep_platform FILTER html %]</b>
     </td>
     <td valign="top">
       [% PROCESS select sel = 'rep_platform' %]

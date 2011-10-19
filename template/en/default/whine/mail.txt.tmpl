@@ -48,7 +48,7 @@
   [%+ urlbase %]show_bug.cgi?id=[% bug.bug_id +%]
   Priority: [%+ display_value("priority", bug.priority) -%]
   [% field_descs.bug_severity %]: [%+ display_value("bug_severity", bug.bug_severity) -%]
-  Platform: [%+ display_value("rep_platform", bug.rep_platform) %]
+  [%+ field.descs.rep_platform %]: [%+ display_value("rep_platform", bug.rep_platform) %]
   Assignee: [%+ bug.assigned_to %]
     Status: [%+ display_value("bug_status", bug.bug_status) %]
             [%- IF bug.resolution -%] Resolution: [% display_value("resolution", bug.resolution) -%]

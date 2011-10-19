@@ -991,7 +991,7 @@ sub notify {
 
         my $template = Bugzilla->template_inner($lang);
         my $message;
-        $template->process("request/email.txt.tmpl", $vars, \$message)
+        $template->process("email/flagmail.txt.tmpl", $vars, \$message)
           || ThrowTemplateError($template->error());
 
         MessageToMTA($message);

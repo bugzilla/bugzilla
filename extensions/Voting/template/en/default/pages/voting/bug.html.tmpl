@@ -26,8 +26,6 @@
   #   vote_count: integer. The number of times that user has votes for this bug.
   #%]
 
-[% PROCESS global/variables.none.tmpl %]
-
 [% subheader = BLOCK %]
   [% "$terms.Bug $bug.id" FILTER bug_link(bug) FILTER none %] - [% bug.short_desc FILTER html %]
 [% END %]

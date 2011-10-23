@@ -27,7 +27,6 @@
   #   of the original bug can access that bug.
   #%]
 
-[% PROCESS global/variables.none.tmpl %]
 [% PROCESS global/header.html.tmpl title="Duplicate Warning" %]
 [% orig_bug = "$terms.bug $original_bug_id"
      FILTER bug_link(original_bug_id) %]

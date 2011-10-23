@@ -18,8 +18,6 @@
   # token: string; The token used to identify the session.
   #%]
 
-[% PROCESS global/variables.none.tmpl %]
-
 [% title = BLOCK %]
   Delete Attachment [% a.id FILTER html %] of [% terms.Bug %] [%+ a.bug_id FILTER html %]
 [% END %]

@@ -38,8 +38,6 @@
   # all_bug_ids: List of all bug ids the user has voted for, across all products
   #%]
 
-[% PROCESS global/variables.none.tmpl %]
-
 [% IF !header_done %]
   [% subheader = voting_user.login FILTER html %]
   [% IF canedit %]

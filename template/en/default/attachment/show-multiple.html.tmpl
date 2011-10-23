@@ -18,7 +18,6 @@
   # Contributor(s): Myk Melez <myk@mozilla.org>
   #%]
 
-[% PROCESS global/variables.none.tmpl %]
 [% filtered_summary = bugsummary FILTER html %]
 [% header = BLOCK %]View All Attachments for
   [%+ "$terms.Bug $bug.id" FILTER bug_link(bug) FILTER none %][% END %]

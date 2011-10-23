@@ -28,8 +28,6 @@
 [% USE Bugzilla %]
 [% cgi = Bugzilla.cgi %]
 
-[% PROCESS global/variables.none.tmpl %]
-
 [% title = BLOCK %]Select milestone of product
                    '[% product.name FILTER html %]'[% END %]
 [% PROCESS global/header.html.tmpl

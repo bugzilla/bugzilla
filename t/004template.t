@@ -78,7 +78,7 @@ foreach my $include_path (@include_paths) {
         # See Template.pm for the actual codebase definitions.
 
         # Initialize templates (f.e. by loading plugins like Hook).
-        PRE_PROCESS => "global/initialize.none.tmpl",
+        PRE_PROCESS => "global/variables.none.tmpl",
 
         FILTERS =>
         {

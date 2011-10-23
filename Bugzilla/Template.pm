@@ -610,7 +610,7 @@ sub create {
         COMPILE_DIR => bz_locations()->{'template_cache'},
 
         # Initialize templates (f.e. by loading plugins like Hook).
-        PRE_PROCESS => ["global/initialize.none.tmpl"],
+        PRE_PROCESS => ["global/variables.none.tmpl"],
 
         ENCODING => Bugzilla->params->{'utf8'} ? 'UTF-8' : undef,
 

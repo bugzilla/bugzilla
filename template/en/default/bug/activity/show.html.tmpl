@@ -26,8 +26,6 @@
   # activity/table.html.tmpl template fulfilled.
   #%]
 
-[% PROCESS global/variables.none.tmpl %]
-
 [% filtered_desc = bug.short_desc FILTER html %]
 [% PROCESS global/header.html.tmpl
   title = "Changes made to $terms.bug $bug.bug_id"

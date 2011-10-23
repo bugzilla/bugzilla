@@ -20,8 +20,6 @@
   #                     Frédéric Buclin <LpSolit@gmail.com>
   #%]
 
-[% PROCESS global/variables.none.tmpl %]
-
 [% bugidsummary = bug.bug_id _ ': ' _ bug.short_desc %]
 [% attidsummary = attachment.id _ ': ' _ attachment.description %]
 [% flagtype_name = flag ? flag.type.name : old_flag.type.name %]

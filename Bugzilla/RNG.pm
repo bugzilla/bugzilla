@@ -24,7 +24,6 @@ use strict;
 use base qw(Exporter);
 use Bugzilla::Constants qw(ON_WINDOWS);
 
-use IO::File;
 use Math::Random::ISAAC;
 use if ON_WINDOWS, 'Win32::API';
 
@@ -156,14 +155,14 @@ sub _get_seed {
 sub _read_seed_from {
     my ($from) = @_;
 
-    my $fh = IO::File->new($from, "r") or die "$from: $!";
+    open(my $fh, '<', $from) or die "$from: $!";
     my $buffer;
-    $fh->read($buffer, SEED_SIZE);
+    read($fh, $buffer, SEED_SIZE);
     if (length($buffer) < SEED_SIZE) {
         die "Could not read enough seed bytes from $from, got only " 
             . length($buffer);
     }
-    $fh->close;
+    close $fh;
     return $buffer;
 }
 

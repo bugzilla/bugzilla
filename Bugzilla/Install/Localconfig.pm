@@ -36,7 +36,6 @@ use Bugzilla::Util qw(generate_random_password);
 
 use Data::Dumper;
 use File::Basename qw(dirname);
-use IO::File;
 use Safe;
 
 use base qw(Exporter);

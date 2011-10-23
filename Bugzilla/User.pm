@@ -1763,6 +1763,18 @@ sub mail_settings {
     return $self->{'mail_settings'};
 }
 
+sub has_audit_entries {
+    my $self = shift;
+    my $dbh = Bugzilla->dbh;
+
+    if (!exists $self->{'has_audit_entries'}) {
+        $self->{'has_audit_entries'} =
+            $dbh->selectrow_array('SELECT 1 FROM audit_log WHERE user_id = ? ' .
+                                   $dbh->sql_limit(1), undef, $self->id);
+    }
+    return $self->{'has_audit_entries'};
+}
+
 sub is_insider {
     my $self = shift;
 

@@ -35,6 +35,7 @@ Do not reply to this email.  You can add comments to this [% terms.bug %] at
 
 [%- IF comment.count %]
 --- Comment #[% comment.count %] from [% comment.author.identity %] ---
+[%+ urlbase %]show_bug.cgi?id=[% bug.id %]#c[% comment.count %]
 [% END %]
 [%+ comment.body_full({ is_bugmail => 1, wrap => 1 }) %]
 [% END %]

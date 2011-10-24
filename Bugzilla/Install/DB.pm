@@ -656,6 +656,9 @@ sub update_table_definitions {
     # 2011-06-15 dkl@mozilla.com - Bug 658929
     _migrate_disabledtext_boolean();
 
+    # 2011-10-11 miketosh - Bug 690173
+    _on_delete_set_null_for_audit_log_userid();
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################
@@ -3604,6 +3607,15 @@ sub _rename_tags_to_tag {
         $dbh->bz_rename_table('tags','tag');
         $dbh->bz_add_index('tag', 'tag_user_id_idx',
                            {FIELDS => [qw(user_id name)], TYPE => 'UNIQUE'});
+    }
+}
+
+sub _on_delete_set_null_for_audit_log_userid {
+    my $dbh = Bugzilla->dbh;
+    my $fk = $dbh->bz_fk_info('audit_log', 'user_id');
+    if ($fk and !defined $fk->{DELETE}) {
+        $fk->{DELETE} = 'SET NULL';
+        $dbh->bz_alter_fk('audit_log', 'user_id', $fk);
     }
 }
 

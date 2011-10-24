@@ -226,7 +226,8 @@
 
   [% IF assignee_or_qa || cc || component_cc || email_setting || flags.requestee ||
         namedqueries || profile_setting || quips || series || watch.watched ||
-        watch.watcher || whine_events || whine_schedules || other_safe %]
+        watch.watcher || whine_events || whine_schedules || otheruser.has_audit_entries ||
+        other_safe %]
     <div class="warningmessages">
       <p>The following deletions are <b>safe</b> and will not generate
       referential integrity inconsistencies.</p>
@@ -425,6 +426,14 @@
             [% END %].
             The corresponding schedules will be deleted along with the user account,
             but the whines themselves will be left unaltered.
+          </li>
+        [% END %]
+        [% IF otheruser.has_audit_entries %]
+          <li>
+            The user has performed audited administrative tasks
+            that are logged in the database.
+            If you delete this user account, the audit log entries
+            will no longer be indentifiable.
           </li>
         [% END %]
         [% Hook.process('warn_safe') %]

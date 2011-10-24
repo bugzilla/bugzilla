@@ -2690,19 +2690,21 @@ sub add_comment {
 
     $params ||= {};
 
-    # This makes it so we won't create new comments when there is nothing
-    # to add 
-    if ($comment eq '' && !($params->{type} || abs($params->{work_time} || 0))) {
-        return;
-    }
-
     # Fill out info that doesn't change and callers may not pass in
     $params->{'bug_id'}  = $self;
-    $params->{'thetext'} = $comment;
+    $params->{'thetext'} = defined($comment) ? $comment : '';
 
     # Validate all the entered data
     Bugzilla::Comment->check_required_create_fields($params);
     $params = Bugzilla::Comment->run_create_validators($params);
+
+    # This makes it so we won't create new comments when there is nothing
+    # to add 
+    if ($params->{'thetext'} eq ''
+        && !($params->{type} || abs($params->{work_time} || 0)))
+    {
+        return;
+    }
 
     # If the user has explicitly set remaining_time, this will be overridden
     # later in set_all. But if they haven't, this keeps remaining_time

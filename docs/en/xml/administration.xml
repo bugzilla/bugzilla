@@ -862,7 +862,12 @@
             contains parameters for how user names can be queried and matched
             when entered.
           </para>
-
+          <para>
+            Another setting called 'ajax_user_autocompletion' enables certain
+            user fields to display a list of matched user names as a drop down after typing 
+            a few characters. Note that it is recommended to use mod_perl when
+            enabling 'ajax_user_autocompletion'.
+          </para>
         </section>
 
   </section>

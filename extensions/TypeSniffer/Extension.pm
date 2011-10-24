@@ -39,7 +39,8 @@ sub attachment_process_data {
     
     # If we have autodetected application/octet-stream from the Content-Type
     # header, let's have a better go using a sniffer.
-    if ($params->{'contenttypemethod'} eq 'autodetect' &&
+    if ($params->{'contenttypemethod'} &&
+        $params->{'contenttypemethod'} eq 'autodetect' &&
         $attributes->{'mimetype'} eq 'application/octet-stream') 
     {
         # data is either a filehandle, or the data itself

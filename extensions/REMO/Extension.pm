@@ -181,4 +181,51 @@ sub _remo_form_payment {
     }
 }
 
+sub post_bug_after_creation {
+    my ($self, $args) = @_;
+    my $vars = $args->{vars};
+    my $bug = $vars->{bug};
+    my $template = Bugzilla->template;
+
+    if (Bugzilla->input_params->{format} eq 'remo-swag') {
+        # If the attachment cannot be successfully added to the bug,
+        # we notify the user, but we don't interrupt the bug creation process.
+        my $error_mode_cache = Bugzilla->error_mode;
+        Bugzilla->error_mode(ERROR_MODE_DIE);
+        
+        my $attachment;
+        eval {
+            my $xml;
+            $template->process("bug/create/create-remo-swag.xml.tmpl", {}, \$xml)
+                || ThrowTemplateError($template->error());
+
+            $attachment = Bugzilla::Attachment->create(
+                { bug           => $bug, 
+                  creation_ts   => $bug->creation_ts, 
+                  data          => $xml,
+                  description   => 'Remo Swag Request (XML)', 
+                  filename      => 'remo-swag.xml',
+                  ispatch       => 0, 
+                  isprivate     => 0, 
+                  isurl         => 0, 
+                  mimetype      => 'text/xml',
+                  store_in_file => 0, 
+            });
+        };
+
+        if ($attachment) {
+            # Insert comment for attachment
+            $bug->add_comment('', { isprivate  => 0, 
+                                    type       => CMT_ATTACHMENT_CREATED, 
+                                    extra_data => $attachment->id });
+            $bug->update($bug->creation_ts);
+        }
+        else {
+            $vars->{'message'} = 'attachment_creation_failed';
+        }
+       
+        Bugzilla->error_mode($error_mode_cache);
+    }
+}
+
 __PACKAGE__->NAME;

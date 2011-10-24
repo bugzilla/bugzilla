@@ -1,4 +1,9 @@
-<!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"> -->
+<?xml version="1.0"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+                      "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
+    <!ENTITY % myents SYSTEM "bugzilla.ent">
+    %myents;
+]>
 
 <appendix id="troubleshooting">
 <title>Troubleshooting</title>
@@ -173,17 +178,17 @@ TEST-OK Webserver is preventing fetch of http://landfill.bugzilla.org/bugzilla-t
 
     <blockquote>
       <literallayout>
-        urlbase is <ulink url="http://bugzilla.mozilla.org/"/>
-        cookiepath is /
+urlbase is http://bugzilla.mozilla.org/
+cookiepath is /
 
-        urlbase is <ulink url="http://tools.mysite.tld/bugzilla/"/>
-                but you have http://tools.mysite.tld/someotherapp/ which shares
-                authentication with your Bugzilla
-        cookiepath is /
+urlbase is http://tools.mysite.tld/bugzilla/
+        but you have http://tools.mysite.tld/someotherapp/ which shares
+        authentication with your Bugzilla
+cookiepath is /
       </literallayout>
     </blockquote>
   </example>
-          
+
    <para>On the other hand, if you have more than one Bugzilla running on the
    server (some people do - we do on landfill) then you need to have the
    cookiepath restricted enough so that the different Bugzillas don't
@@ -195,11 +200,11 @@ TEST-OK Webserver is preventing fetch of http://landfill.bugzilla.org/bugzilla-t
    <title>Examples of urlbase/cookiepath pairs to restrict the login cookie</title>
       <blockquote>
         <literallayout>
-        urlbase is <ulink url="http://landfill.bugzilla.org/bugzilla-tip/"/>
-        cookiepath is /bugzilla-tip/
+urlbase is http://landfill.bugzilla.org/bugzilla-tip/
+cookiepath is /bugzilla-tip/
 
-        urlbase is <ulink url="http://landfill.bugzilla.org/bugzilla-2.16-branch/"/>
-        cookiepath is /bugzilla-2.16-branch/
+urlbase is http://landfill.bugzilla.org/bugzilla-4.0-branch/
+cookiepath is /bugzilla-4.0-branch/
         </literallayout>
       </blockquote>
     </example>

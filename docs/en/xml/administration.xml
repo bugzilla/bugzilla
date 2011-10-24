@@ -1,4 +1,10 @@
-<!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook V4.1//EN"> -->
+<?xml version="1.0"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+                      "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
+    <!ENTITY % myents SYSTEM "bugzilla.ent">
+    %myents;
+]>
+
 <chapter id="administration">
   <title>Administering Bugzilla</title>
 
@@ -23,10 +29,6 @@
           can be used. Administrators should review this list before 
           deploying a new Bugzilla installation.
         </para>
-
-        <indexterm>
-          <primary>checklist</primary>
-        </indexterm>
 
         <variablelist>
 

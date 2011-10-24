@@ -1,4 +1,9 @@
-<!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook V4.1//EN"> -->
+<?xml version="1.0"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+                      "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
+    <!ENTITY % myents SYSTEM "bugzilla.ent">
+    %myents;
+]>
 
 <chapter id="using">
   <title>Using Bugzilla</title>
@@ -377,7 +382,7 @@
       <title>Lifecycle of a Bugzilla Bug</title>
       <mediaobject>
         <imageobject>
-          <imagedata fileref="../images/bzLifecycle.png" scale="66" />
+          <imagedata fileref="../images/bzLifecycle.png"/>
         </imageobject>
       </mediaobject>
     </figure>

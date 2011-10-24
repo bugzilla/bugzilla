@@ -1,4 +1,10 @@
-<!-- <!DOCTYPE appendix PUBLIC "-//OASIS//DTD DocBook V4.1//EN"> -->
+<?xml version="1.0"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+                      "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
+    <!ENTITY % myents SYSTEM "bugzilla.ent">
+    %myents;
+]>
+
 <chapter id="customization">
   <title>Customizing Bugzilla</title>
 
@@ -14,7 +20,7 @@
     </para>
 
     <para>
-      See the <ulink url="api/Bugzilla/Extension.html">Bugzilla Extension
+	  See the <ulink url="../html/api/Bugzilla/Extension.html">Bugzilla Extension
       documentation</ulink> for information on how to write an Extension.
     </para>
   </section>
@@ -391,7 +397,7 @@
 
       <para>  
         An example of this is the mozilla.org 
-        <ulink url="http://landfill.bugzilla.org/bugzilla-tip/enter_bug.cgi?product=WorldControl&amp;format=guided">guided 
+        <ulink url="http://landfill.bugzilla.org/bugzilla-tip/enter_bug.cgi?product=WorldControl;format=guided">guided
         bug submission form</ulink>. The code for this comes with the Bugzilla
         distribution as an example for you to copy. It can be found in the
         files 

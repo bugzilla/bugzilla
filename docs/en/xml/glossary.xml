@@ -1,4 +1,10 @@
-<!-- <!DOCTYPE glossary PUBLIC "-//OASIS//DTD DocBook V4.1//EN" > -->
+<?xml version="1.0"?>
+<!DOCTYPE glossary PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+                      "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
+    <!ENTITY % myents SYSTEM "bugzilla.ent">
+    %myents;
+]>
+
 <glossary id="glossary">
   <glossdiv>
     <title>0-9, high ascii</title>
@@ -42,7 +48,7 @@
           <title>Useful Directives when configuring Bugzilla</title>
 
           <varlistentry>
-            <term><computeroutput><ulink url="http://httpd.apache.org/docs-2.0/mod/core.html#addhandler">AddHandler</ulink></computeroutput></term>
+            <term><computeroutput><ulink url="http://httpd.apache.org/docs/2.0/mod/mod_mime.html#addhandler">AddHandler</ulink></computeroutput></term>
             <listitem>
               <para>Tell Apache that it's OK to run CGI scripts.</para>
             </listitem>

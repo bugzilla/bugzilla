@@ -1734,25 +1734,23 @@ C:\perl&gt; <command>ppm install &lt;module name&gt;</command>
         </para>
 
         <screen>
-# perl -MCPAN -e'look XML::Parser'        <co id="macosx-look"/>
+# perl -MCPAN -e'look XML::Parser'
 # perl Makefile.PL EXPATLIBPATH=/sw/lib EXPATINCPATH=/sw/include
-# make; make test; make install           <co id="macosx-make"/>
-# exit                                    <co id="macosx-exit"/>
+# make; make test; make install
+# exit
         </screen>
-        <calloutlist>
-          <callout arearefs="macosx-look macosx-exit">
-            <para>The look command will download the module and spawn a
-            new shell with the extracted files as the current working directory.
-            The exit command will return you to your original shell.
-            </para>
-          </callout>
-          <callout arearefs="macosx-make">
-            <para>You should watch the output from these make commands,
-            especially <quote>make test</quote> as errors may prevent 
-            XML::Parser from functioning correctly with Bugzilla.
-            </para>
-          </callout>
-        </calloutlist>
+        <para>
+          The <command>look</command> command will download the module and spawn
+          a new shell with the extracted files as the current working directory.
+        </para>
+        <para>
+          You should watch the output from these <command>make</command> commands,
+          especially <quote>make test</quote> as errors may prevent
+          XML::Parser from functioning correctly with Bugzilla.
+        </para>
+        <para>
+          The <command>exit</command> command will return you to your original shell.
+        </para>
       </section>
     </section>
 

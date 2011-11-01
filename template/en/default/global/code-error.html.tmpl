@@ -129,7 +129,7 @@
 
   [% ELSIF error == "db_rename_conflict" %]
     Name conflict: Cannot rename [% old FILTER html %] to
-    [% new FILTER html %] because [% new FILTER html %] already exists.
+    [%+ new FILTER html %] because [% new FILTER html %] already exists.
 
   [% ELSIF error == "cookies_need_value" %]
     Every cookie must have a value.
@@ -213,7 +213,7 @@
 
   [% ELSIF error == "invalid_attach_id_to_obsolete" %]
      The attachment number of one of the attachments you wanted to obsolete,
-     [% attach_id FILTER html %], is invalid.
+     [%+ attach_id FILTER html %], is invalid.
           
   [% ELSIF error == "invalid_customfield_type" %]
     [% title = "Invalid Field Type" %]
@@ -251,7 +251,7 @@
     Attachment [% attach_id FILTER html %] ([% description FILTER html %]) 
     is attached to [% terms.bug %] [%+ attach_bug_id FILTER html %], 
     but you tried to flag it as obsolete while creating a new attachment to 
-    [% terms.bug %] [%+ my_bug_id FILTER html %].
+    [%+ terms.bug %] [%+ my_bug_id FILTER html %].
 
   [% ELSIF error == "feature_disabled" %]
     The [% install_string("feature_$feature") FILTER html %] feature is not
@@ -340,7 +340,7 @@
   [% ELSIF error == "mail_send_error" %]
     There was an error sending mail from '[% mail.header('From') FILTER html %]'
     to '[% mail.header('To') FILTER html %]':
-    [% msg FILTER html %]
+    [%+ msg FILTER html %]
 
   [% ELSIF error == "missing_bug_id" %]
     No [% terms.bug %] ID was given.

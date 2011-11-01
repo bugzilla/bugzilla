@@ -712,7 +712,7 @@
   [% ELSIF message_tag == "install_fk_invalid" %]
     ERROR: There are invalid values for the [% column FILTER html %] column in the [% table FILTER html %]
     table. (These values do not exist in the [% foreign_table FILTER html %] table, in the 
-    [% foreign_column FILTER html %] column.)
+    [%+ foreign_column FILTER html %] column.)
 
     Before continuing with checksetup, you will need to fix these values,
     either by deleting these rows from the database, or changing the values

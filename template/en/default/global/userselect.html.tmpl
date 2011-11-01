@@ -79,7 +79,7 @@
   [% END %]
 </select>
 [% ELSE %]
-  [% IF id && feature_enabled('jsonrpc') %]
+  [% IF feature_enabled('jsonrpc') && Param('ajax_user_autocompletion') && id %]
     <div id="[% id FILTER html %]_autocomplete" 
          [% IF classes %] class="[% classes.join(' ') FILTER html %]" [% END %]>
   [% END %]  
@@ -94,7 +94,7 @@
     [% IF size %] size="[% size FILTER html %]" [% END %]
     [% IF id %] id="[% id FILTER html %]" [% END %]
   >
-  [% IF id && feature_enabled('jsonrpc') %]
+  [% IF feature_enabled('jsonrpc') && Param('ajax_user_autocompletion') && id %]
     <div id="[% id FILTER html %]_autocomplete_container"></div>
     </div>  
     <script type="text/javascript">

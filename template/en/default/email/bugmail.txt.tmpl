@@ -25,8 +25,8 @@
 
 [% isnew = bug.lastdiffed ? 0 : 1 %]
 
-[% UNLESS to_user.settings.product_chooser.value == 'full_product_chooser' %]
-Do not reply to this email.  You can add comments to this [% terms.bug %] at
+[% IF !user.in_group('editbugs') %]
+Do not reply to this email. You can add comments to this [% terms.bug %] at
 [% END %]
 
 [%+ PROCESS generate_diffs -%]
@@ -35,7 +35,6 @@ Do not reply to this email.  You can add comments to this [% terms.bug %] at
 
 [%- IF comment.count %]
 --- Comment #[% comment.count %] from [% comment.author.identity %] ---
-[%+ urlbase %]show_bug.cgi?id=[% bug.id %]#c[% comment.count %]
 [% END %]
 [%+ comment.body_full({ is_bugmail => 1, wrap => 1 }) %]
 [% END %]
@@ -53,7 +52,7 @@ You are receiving this mail because:
 [%+ reason_lines.join("\n") %]
 
 [% BLOCK generate_diffs %]
-  [% urlbase %]show_bug.cgi?id=[% bug.id %]
+  [% urlbase %]show_bug.cgi?id=[% bug.id %][% "#c" _ new_comments.first.count IF new_comments.size > 0 %]
 
 [%+ last_changer = "" %]
   [% FOREACH change = diffs %]

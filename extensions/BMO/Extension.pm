@@ -500,7 +500,7 @@ sub bug_format_comment {
     push (@$regexes, {
         match => qr/\b(Committing\sto:\sbzr\+ssh:\/\/
                     (?:[^\@]+\@)?(bzr\.mozilla\.org[^\n]+)\n.*?\nCommitted\s)
-                    (revision\s(\d+))\./sx,
+                    (revision\s(\d+))/sx,
         replace => \&_link_bzr
     });
 

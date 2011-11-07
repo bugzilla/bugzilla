@@ -252,6 +252,7 @@ function showEditableField (e, ContainerInputArray) {
         inputs.push(inputArea);
     } else {
         inputs = inputArea.getElementsByTagName('input');
+        inputs = inputArea.getElementsByTagName('textarea');
     }
     if ( inputs.length > 0 ) {
         // Change the first field's value to ContainerInputArray[2]

@@ -18,13 +18,19 @@
   # Contributor(s): Owen Taylor <otaylor@redhat.com>
   #%]
 
+[% bodyclasses = [] %]
+[% FOREACH group = bug.groups_in %]
+  [% bodyclasses.push("bz_group_$group.name") %]
+[% END %]
+
 [% PROCESS global/header.html.tmpl
   title = "Patch Review"
   header = "Patch Review"
   style_urls = [ "js/yui/assets/skins/sam/container.css",
                  "js/yui/assets/skins/sam/button.css",
                  "js/yui/assets/skins/sam/datatable.css",
-                 "extensions/Splinter/web/splinter.css" ]
+                 "extensions/Splinter/web/splinter.css",
+                 "skins/standard/bug_groups.css" ]
   javascript_urls = [ "js/yui/element/element-min.js",
                       "js/yui/container/container-min.js",
                       "js/yui/button/button-min.js", 
@@ -32,6 +38,7 @@
                       "js/yui/datasource/datasource-min.js",
                       "js/yui/datatable/datatable-min.js",
                       "extensions/Splinter/web/splinter.js" ]
+  bodyclasses = bodyclasses
 %]
 
 [% can_edit = 0 %]

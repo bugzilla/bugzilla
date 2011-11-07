@@ -135,6 +135,11 @@ sub template_before_process {
         # to see if various field values should be available to the current user.
         $vars->{'default'} = Bugzilla::Extension::BMO::FakeBug->new($vars->{'default'} || {});
     }
+
+    if ($file =~ /^attachment\/diff-header\./) {
+        my $attachid = $vars->{attachid} ? $vars->{attachid} : $vars->{newid};
+        $vars->{attachment} = Bugzilla::Attachment->new($attachid) if $attachid;
+    }
 }
 
 sub page_before_template {

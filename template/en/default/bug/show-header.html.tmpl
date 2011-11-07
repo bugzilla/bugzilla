@@ -48,7 +48,8 @@
     [% javascript FILTER none %]
   [% END %]
 [% END %]
-[% style_urls = [ "skins/standard/show_bug.css" ] %]
+[% style_urls = [ "skins/standard/show_bug.css", 
+                  "skins/standard/bug_groups.css" ] %]
 [% doc_section = "bug_page.html" %]
 [% bodyclasses = ['bz_bug',
                   "bz_status_$bug.bug_status",

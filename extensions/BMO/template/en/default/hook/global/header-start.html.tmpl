@@ -6,6 +6,37 @@
   [% javascript_urls.push('extensions/BMO/web/js/sorttable.js') %]
 [% END %]
 
+[% IF !bodyclasses %]
+  [% bodyclasses = [] %]
+[% END %]
+
+[%# Change the background/border for bugs/attachments in certain bug groups %]
+[% IF template.name == 'attachment/edit.html.tmpl' 
+      || template.name == 'attachment/create.html.tmpl'
+      || template.name == 'attachment/diff-header.html.tmpl' %]
+  [% style_urls.push("skins/standard/bug_groups.css") %]
+
+  [% IF template.name == 'attachment/edit.html.tmpl'
+        || template.name == 'attachment/diff-header.html.tmpl' %]
+    [% IF bodyclasses == 'no_javascript' %]
+      [% bodyclasses = ['no_javascript'] %] 
+    [% END %]
+    [% FOREACH group = attachment.bug.groups_in %]
+      [% bodyclasses.push("bz_group_$group.name") %]
+    [% END %]
+  [% END %]
+
+  [% IF template.name == 'attachment/create.html.tmpl' %]
+    [% FOREACH group = bug.groups_in %]
+      [% bodyclasses.push("bz_group_$group.name") %]
+    [% END %]
+  [% END %]
+[% END %]
+
+[% IF template.name == 'bug/show-header.html.tmpl' %]
+[% style_urls.push("skins/standard/bug_groups.css") %]
+[% END %]
+
 [% IF user.in_group('editusers') || user.bless_groups.size > 0 %]
   [% yui.push('container', 'menu') %]
   [% style_urls.push('js/yui/assets/skins/sam/menu.css') %]

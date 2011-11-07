@@ -136,7 +136,8 @@
     [% PROCESS formattimeunit time_unit = value FILTER html FILTER js %]
   [% ELSIF change.buglist %]
     [% value FILTER bug_list_link FILTER js %]
-  [% ELSIF change.fieldname == 'bug_file_loc' %]
+  [% ELSIF change.fieldname == 'bug_file_loc' ||
+           change.fieldname == 'see_also' %]
     [%~%]<a href="[% value FILTER html FILTER js %]" target="_blank">
     [%~%][% value FILTER html FILTER js %]</a>
   [% ELSIF change.fieldname == 'assigned_to' ||

@@ -48,15 +48,19 @@ function init() {
   hideElementById('attachment_true');
   showElementById('attachment_false');
   showElementById('btn_no_attachment');
-  hideCrashSignatureField();
+  initCrashSignatureField();
   init_take_handler('[% user.login FILTER js %]');
 }
 
-function hideCrashSignatureField() {
+function initCrashSignatureField() {
   var el = document.getElementById('cf_crash_signature');
   if (!el) return;
-  hideEditableField('cf_crash_signature_container','cf_crash_signature_input',
-                    'cf_crash_signature_action', 'cf_crash_signature', '');
+  [% IF cf_crash_signature.length %]
+    YAHOO.util.Dom.addClass('cf_crash_signature_container', 'bz_default_hidden');
+  [% ELSE %]
+    hideEditableField('cf_crash_signature_container','cf_crash_signature_input',
+                      'cf_crash_signature_action', 'cf_crash_signature');
+  [% END %]
 }
 
 var initialowners = new Array([% product.components.size %]);
@@ -658,7 +662,8 @@ TUI_hide_default('attachment_text_field');
         (<a id="cf_crash_signature_action" href="#">edit</a>)
       </span>
       <span id="cf_crash_signature_input">
-        <textarea id="cf_crash_signature" name="cf_crash_signature" rows="4" cols="60"></textarea>
+        <textarea id="cf_crash_signature" name="cf_crash_signature" rows="4" cols="60"
+        >[% cf_crash_signature FILTER html %]</textarea>
       </span>
     </td>
   </tr>

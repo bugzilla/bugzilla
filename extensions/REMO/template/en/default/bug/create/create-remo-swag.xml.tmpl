@@ -1,0 +1,116 @@
+[%# The contents of this file are subject to the Mozilla Public
+  # License Version 1.1 (the "License"); you may not use this file
+  # except in compliance with the License. You may obtain a copy of
+  # the License at http://www.mozilla.org/MPL/
+  #
+  # Software distributed under the License is distributed on an "AS
+  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+  # implied. See the License for the specific language governing
+  # rights and limitations under the License.
+  #
+  # The Original Code is the REMO Bugzilla Extension.
+  #
+  # The Initial Developer of the Original Code is the Mozilla Foundation.
+  # Portions created by the Initial Developer are Copyright (C) 2011
+  # the Initial Developer. All Rights Reserved.
+  #
+  # Contributor(s):
+  #   David Lawrence <dkl@mozilla.com>
+  #%]
+
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+<?xml version="1.0" [% IF Param('utf8') %]encoding="UTF-8" [% END %]standalone="yes" ?>
+<!DOCTYPE remoswag [
+<!ELEMENT remoswag (firstname, 
+                    lastname, 
+                    wikiprofile, 
+                    eventname, 
+                    wikipage, 
+                    attendance,
+                    shipping,
+                    swagrequested)>
+<!ELEMENT firstname (#PCDATA)>
+<!ELEMENT lastname (#PCDATA)>
+<!ELEMENT wikiprofile (#PCDATA)>
+<!ELEMENT eventname (#PCDATA)>
+<!ELEMENT wikipage (#PCDATA)>
+<!ELEMENT attendance (#PCDATA)>
+<!ELEMENT shipping (shipbeforedate,
+                    shiptofirstname,
+                    shiptolastname,
+                    shiptoaddress1,
+                    shiptoaddress2,
+                    shiptocity,
+                    shiptostate,
+                    shiptopcode,
+                    shiptocountry,
+                    shiptophone,
+                    shiptoidrut,
+                    shipadditional)>
+<!ELEMENT shipbeforedate (#PCDATA)>
+<!ELEMENT shiptofirstname (#PCDATA)>
+<!ELEMENT shiptolastname (#PCDATA)>
+<!ELEMENT shiptoaddress1 (#PCDATA)>
+<!ELEMENT shiptoaddress2 (#PCDATA)>
+<!ELEMENT shiptocity (#PCDATA)>
+<!ELEMENT shiptostate (#PCDATA)>
+<!ELEMENT shiptopcode (#PCDATA)>
+<!ELEMENT shiptocountry (#PCDATA)>
+<!ELEMENT shiptophone (#PCDATA)>
+<!ELEMENT shiptoidrut (#PCDATA)>
+<!ELEMENT shipadditional (#PCDATA)>
+<!ELEMENT swagrequested (stickers,
+                         buttons,
+                         posters,
+                         lanyards,
+                         tshirts,
+                         rollupbanners,
+                         horizontalbanners,
+                         boothcloth,
+                         pens,
+                         otherswag)>
+<!ELEMENT stickers (#PCDATA)>
+<!ELEMENT buttons (#PCDATA)>
+<!ELEMENT posters (#PCDATA)>
+<!ELEMENT lanyards (#PCDATA)>
+<!ELEMENT tshirts (#PCDATA)>
+<!ELEMENT rollupbanners (#PCDATA)>
+<!ELEMENT horizontalbanners (#PCDATA)>
+<!ELEMENT boothcloth (#PCDATA)>
+<!ELEMENT pens (#PCDATA)>
+<!ELEMENT otherswag (#PCDATA)>]>
+<remoswag>
+  <firstname>[% cgi.param('firstname') FILTER xml %]</firstname>
+  <lastname>[% cgi.param('lastname') FILTER xml %]</lastname>
+  <wikiprofile>[% cgi.param('wikiprofile') FILTER xml %]</wikiprofile>
+  <eventname>[% cgi.param('eventname') FILTER xml %]</eventname>
+  <wikipage>[% cgi.param('wikipage') FILTER xml %]</wikipage>
+  <attendance> [% cgi.param('attendance') FILTER xml %]</attendance>
+  <shipping>
+    <shipbeforedate>[% cgi.param('cf_due_date') FILTER xml %]</shipbeforedate>
+    <shiptofirstname>[% cgi.param("shiptofirstname") FILTER xml %]</shiptofirstname>
+    <shiptolastname>[% cgi.param("shiptolastname") FILTER xml %]</shiptolastname>
+    <shiptoaddress1>[% cgi.param("shiptoaddress1") FILTER xml %]</shiptoaddress1>
+    <shiptoaddress2>[% cgi.param("shiptoaddress2") FILTER xml %]</shiptoaddress2>
+    <shiptocity>[% cgi.param("shiptocity") FILTER xml %]</shiptocity>
+    <shiptostate>[% cgi.param("shiptostate") FILTER xml %]</shiptostate>
+    <shiptopcode>[% cgi.param("shiptopcode") FILTER xml %]</shiptopcode>
+    <shiptocountry>[% cgi.param("shiptocountry") FILTER xml %]</shiptocountry>
+    <shiptophone>[% cgi.param("shiptophone") FILTER xml %]</shiptophone>
+    <shiptoidrut>[% cgi.param("shiptoidrut") FILTER xml %]</shiptoidrut>
+    <shipadditional>[% cgi.param('shipadditional') || '' FILTER xml %]</shipadditional>
+  </shipping>
+  <swagrequested>
+    <stickers>[% (cgi.param('stickers') ? 1 : 0) FILTER xml %]</stickers>
+    <buttons>[% (cgi.param('buttons') ? 1 : 0) FILTER xml %]</buttons>
+    <posters>[% (cgi.param('posters') ? 1 : 0) FILTER xml %]</posters>
+    <lanyards>[% (cgi.param('lanyards') ? 1 : 0) FILTER xml %]</lanyards>
+    <tshirts>[% (cgi.param('tshirts') ? 1 : 0) FILTER xml %]</tshirts>
+    <rollupbanners>[% (cgi.param('rollupbanners') ? 1 : 0) FILTER xml %]</rollupbanners>
+    <horizontalbanners>[% (cgi.param('horizontalbanners') ? 1 : 0) FILTER xml %]</horizontalbanners>
+    <boothcloth>[% (cgi.param('boothcloth') ? 1 : 0) FILTER xml %]</boothcloth>
+    <pens>[% (cgi.param('pens') ? 1 : 0) FILTER xml %]</pens>
+    <otherswag>[% cgi.param('otherswag') || '' FILTER xml %]</otherswag>
+  </swagrequested>
+</remoswag>

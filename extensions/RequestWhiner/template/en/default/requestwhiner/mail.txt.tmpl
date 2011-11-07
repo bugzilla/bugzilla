@@ -1,0 +1,38 @@
+[%# The contents of this file are subject to the Mozilla Public
+  # License Version 1.1 (the "License"); you may not use this file
+  # except in compliance with the License. You may obtain a copy of
+  # the License at http://www.mozilla.org/MPL/
+  #
+  # Software distributed under the License is distributed on an "AS
+  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+  # implied. See the License for the specific language governing
+  # rights and limitations under the License.
+  #
+  # The Original Code is the RequestWhiner Bugzilla Extension.
+  #
+  # The Initial Developer of the Original Code is Gervase Markham
+  # Portions created by the Initial Developer are Copyright (C) 2011 the
+  # Initial Developer. All Rights Reserved.
+  #
+  # Contributor(s): Gervase Markham <written.to.the.glory.of.god@gerv.net>
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+[% PROCESS 'global/field-descs.none.tmpl' %]
+
+Here are your outstanding requests older than [% threshold %] days:
+
+[% FOREACH request = requests.keys %]
+[%+ request +%]
+[%+ "-" FILTER repeat(request.length) +%]
+
+  [% FOREACH bug = requests.$request %]
+  [%+ terms.Bug +%] [%+ bug.id %]: [% bug.summary +%] ([% bug.age %] days old)
+    [%+ urlbase %]show_bug.cgi?id=[% bug.id +%]
+  [%+ END +%]
+[% END %]
+To see all your outstanding requests, visit:
+[%+ urlbase %]request.cgi?action=queue&requestee=[% recipient.email FILTER uri %]&group=type
+
+For guidance on handling requests, see:
+https://wiki.mozilla.org/BMO/Handling_Requests

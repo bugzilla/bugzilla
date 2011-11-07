@@ -32,15 +32,32 @@
   title = title
   yui = [ 'autocomplete', 'calendar', 'datatable', 'button' ]
   style_urls = [ 'skins/standard/attachment.css',
-                 'skins/standard/enter_bug.css' ]
+                 'skins/standard/enter_bug.css',
+                 'skins/custom/create_bug.css' ]
   javascript_urls = [ "js/attachment.js", "js/util.js",
-                      "js/field.js", "js/TUI.js", "js/bug.js" ]
-  onload = "set_assign_to(); hideElementById('attachment_true');
-            showElementById('attachment_false'); showElementById('btn_no_attachment');"
+                      "js/field.js", "js/TUI.js", "js/bug.js",
+                      "js/create_bug.js" ]
+  onload = "init();"
 %]
 
 <script type="text/javascript">
 <!--
+
+function init() {
+  set_assign_to();
+  hideElementById('attachment_true');
+  showElementById('attachment_false');
+  showElementById('btn_no_attachment');
+  hideCrashSignatureField();
+  init_take_handler('[% user.login FILTER js %]');
+}
+
+function hideCrashSignatureField() {
+  var el = document.getElementById('cf_crash_signature');
+  if (!el) return;
+  hideEditableField('cf_crash_signature_container','cf_crash_signature_input',
+                    'cf_crash_signature_action', 'cf_crash_signature', '');
+}
 
 var initialowners = new Array([% product.components.size %]);
 var last_initialowner;
@@ -109,6 +126,14 @@ function set_assign_to() {
 
         document.getElementById('initial_cc').innerHTML = initialccs[index];
         document.getElementById('comp_desc').innerHTML = comp_desc[index];
+
+        if (initialccs[index]) {
+          showElementById('initial_cc_label');
+          showElementById('initial_cc');
+        } else {
+          hideElementById('initial_cc_label');
+          hideElementById('initial_cc');
+        }
 
         [% IF Param("useqacontact") %]
             var contact = initialqacontacts[index];
@@ -183,9 +208,8 @@ TUI_hide_default('attachment_text_field');
 
   <tr>
     <td colspan="2">
-      <a id="expert_fields_controller" class="controller bz_default_hidden"
-         href="javascript:TUI_toggle_class('expert_fields')">Hide
-        Advanced Fields</a>
+      <input type="button" id="expert_fields_controller"
+             value="Hide Advanced Fields" onClick="toggleAdvancedFields()">
       [%# Show the link if the browser supports JS %]
       <script type="text/javascript">
         YAHOO.util.Dom.removeClass('expert_fields_controller', 
@@ -347,119 +371,77 @@ TUI_hide_default('attachment_text_field');
       bug = default, field = bug_fields.bug_status,
       editable = (bug_status.size > 1), value = default.bug_status
       override_legal_values = bug_status %]
-
-    <td>&nbsp;</td>
-    [%# Calculate the number of rows we can use for flags %]
-    [% num_rows = 6 + (Param("useqacontact") ? 1 : 0) +
-                      (user.is_timetracker ? 3 : 0) +
-                      (Param("usebugaliases") ? 1 : 0)
-    %]
-
-    <td rowspan="[% num_rows FILTER html %]">
-      [% IF product.flag_types(is_active=>1).bug.size > 0 %]
-        [% display_flag_headers = 0 %]
-        [% any_flags_requesteeble = 0 %]
-
-        [% FOREACH flag_type = product.flag_types(is_active=>1).bug %]
-          [% display_flag_headers = 1 %]
-          [% SET any_flags_requesteeble = 1 IF flag_type.is_requestable && flag_type.is_requesteeble %]
-        [% END %]
-
-        [% IF display_flag_headers %]
-          [% PROCESS "flag/list.html.tmpl" flag_types = product.flag_types(is_active=>1).bug
-                                           any_flags_requesteeble = any_flags_requesteeble
-                                           flag_table_id = "bug_flags"
-          %]
-        [% END %]
-      [% END %]
-    </td>
   </tr>
 
   <tr>
     [% INCLUDE "bug/field-label.html.tmpl"
       field = bug_fields.assigned_to editable = 1
     %]
-    <td colspan="2">
+    <td>
       [% INCLUDE global/userselect.html.tmpl
-         id => "assigned_to"
-         name => "assigned_to"
-         value => assigned_to
+         id       => "assigned_to"
+         name     => "assigned_to"
+         value    => assigned_to
          disabled => assigned_to_disabled
-         size => 30
-         emptyok => 1
+         size     => 30
+         emptyok  => 1
          custom_userlist => assignees_list
-       %]
+      %]
+      [% UNLESS assigned_to_disabled %]
+        <span id="take_bug">
+        &nbsp;(<a title="Assign to yourself" href="#"
+                  onclick="return take_bug('[% user.login FILTER js %]')">take</a>)
+        </span>
+      [% END %]
       <noscript>(Leave blank to assign to component's default assignee)</noscript>
     </td>
-  </tr>
   
 [% IF Param("useqacontact") %]
-    <tr>
-      [% INCLUDE "bug/field-label.html.tmpl"
-        field = bug_fields.qa_contact editable = 1
-      %]
-      <td colspan="2">
-      [% INCLUDE global/userselect.html.tmpl
-         id => "qa_contact"
-         name => "qa_contact"
-         value => qa_contact
-         disabled => qa_contact_disabled
-         size => 30
-         emptyok => 1
-         custom_userlist => qa_contacts_list
-       %]
-        <noscript>(Leave blank to assign to default qa contact)</noscript>
-      </td>
-    </tr>
+    [% INCLUDE "bug/field-label.html.tmpl"
+      field = bug_fields.qa_contact editable = 1
+    %]
+    <td>
+    [% INCLUDE global/userselect.html.tmpl
+       id       => "qa_contact"
+       name     => "qa_contact"
+       value    => qa_contact
+       disabled => qa_contact_disabled
+       size     => 30
+       emptyok  => 1
+       custom_userlist => qa_contacts_list
+     %]
+      <noscript>(Leave blank to assign to default qa contact)</noscript>
+    </td>
+  </tr>
 [% END %]
 
   <tr>
     [% INCLUDE "bug/field-label.html.tmpl"
       field = bug_fields.cc editable = 1 
     %]
-    <td colspan="2">
+    <td>
       [% INCLUDE global/userselect.html.tmpl
-         id => "cc"
-         name => "cc"
-         value => cc
+         id       => "cc"
+         name     => "cc"
+         value    => cc
          disabled => cc_disabled
-         size => 30
+         size     => 30
          multiple => 5
        %]
+     </td>
+     <th>
+      <span id="initial_cc_label" class="bz_default_hidden">
+        Default [% field_descs.cc FILTER html %]:
+      </span>
+    </th>
+    <td>
+      <span id="initial_cc"></span>
     </td>
-  </tr>
-
-  <tr>
-    <th>Default [% field_descs.cc FILTER html %]:</th>
-    <td colspan="2">
-      <div id="initial_cc">
-      </div>
-   </td>
-  </tr>
-  
-  <tr>
-    <td colspan="3">&nbsp;</td>
-  </tr>
-
-[% IF user.is_timetracker %]
-  <tr>
-    [% INCLUDE "bug/field-label.html.tmpl"
-      field = bug_fields.estimated_time editable = 1
-    %]
-    <td colspan="2">
-      <input name="estimated_time" size="6" maxlength="6" value="[% estimated_time FILTER html %]">
-    </td>
-  </tr>
-  <tr>
-    [% INCLUDE bug/field.html.tmpl
-      bug = default, field = bug_fields.deadline, value = deadline,
-      editable = 1, value_span = 2 %] 
   </tr>
 
   <tr>
     <td colspan="3">&nbsp;</td>
   </tr>
-[% END %]
 
 [% IF Param("usebugaliases") %]
   <tr>
@@ -471,36 +453,9 @@ TUI_hide_default('attachment_text_field');
     </td>
   </tr>
 [% END %]
-
-  <tr>
-    [% INCLUDE "bug/field-label.html.tmpl"
-      field = bug_fields.bug_file_loc editable = 1
-    %]
-    <td colspan="2" class="field_value">
-      <input name="bug_file_loc" id="bug_file_loc" class="text_input"
-             size="40" value="[% bug_file_loc FILTER html %]">
-    </td>
-  </tr>
 </tbody>
 
 <tbody>
-  [% USE Bugzilla %]
-  
-  [% FOREACH field = Bugzilla.active_custom_fields %]
-    [% NEXT UNLESS field.enter_bug %]
-    [% NEXT IF cf_hidden_in_product(field.name, product.name, component.name) %]
-    
-    [% SET value = ${field.name}.defined ? ${field.name} : "" %]
-    <tr [% 'class="expert_fields"' IF !field.is_mandatory %]>
-      [% INCLUDE bug/field.html.tmpl 
-        bug = default, field = field, value = value, editable = 1, 
-        value_span = 3 %]
-    </tr>
-  [% END %]
-</tbody>
-
-<tbody>
-
   <tr>
     [% INCLUDE "bug/field-label.html.tmpl"
       field = bug_fields.short_desc editable = 1
@@ -573,6 +528,19 @@ TUI_hide_default('attachment_text_field');
     </td>
   </tr>
 
+<tbody class="expert_fields">
+  <tr>
+    [% INCLUDE "bug/field-label.html.tmpl"
+      field = bug_fields.bug_file_loc editable = 1
+    %]
+    <td colspan="3" class="field_value">
+      <input name="bug_file_loc" id="bug_file_loc" class="text_input"
+             size="40" value="[% bug_file_loc FILTER html %]">
+    </td>
+  </tr>
+</tbody>
+
+<tbody>
   [% IF Param("maxattachmentsize") %]
   <tr>
     <th>Attachment:</th>
@@ -611,48 +579,170 @@ TUI_hide_default('attachment_text_field');
 
 <tbody class="expert_fields">
   [% IF user.in_group('editbugs', product.id) %]
+    <tr>
+      [% INCLUDE "bug/field-label.html.tmpl"
+        field = bug_fields.dependson editable = 1
+      %]
+      <td>
+        <input name="dependson" accesskey="d" value="[% dependson FILTER html %]" size="30">
+      </td>
+      [% INCLUDE "bug/field-label.html.tmpl"
+        field = bug_fields.blocked editable = 1
+      %]
+      <td>
+        <input name="blocked" accesskey="b" value="[% blocked FILTER html %]" size="30">
+      </td>
+    </tr>
+
     [% IF use_keywords %]
       <tr>
         [% INCLUDE bug/field.html.tmpl
            bug = default, field = bug_fields.keywords, editable = 1,
            value = keywords, desc_url = "describekeywords.cgi",
-           value_span = 2
+           value_span = 3
         %]
       </tr>
     [% END %]
 
     <tr>
       <th>Status Whiteboard:</th>
-      <td colspan="3">
+      <td colspan="3" class="field_value">
         <input id="status_whiteboard" name="status_whiteboard" size="70"
-               value="[% status_whiteboard FILTER html %]">
-      </td>
-    </tr>
-    <tr>
-      [% INCLUDE "bug/field-label.html.tmpl"
-        field = bug_fields.dependson editable = 1
-      %]
-      <td colspan="3">
-        <input name="dependson" accesskey="d" value="[% dependson FILTER html %]">
-      </td>
-    </tr>
-    <tr>
-      [% INCLUDE "bug/field-label.html.tmpl"
-        field = bug_fields.blocked editable = 1
-      %]
-      <td colspan="3">
-        <input name="blocked" accesskey="b" value="[% blocked FILTER html %]">
+               value="[% status_whiteboard FILTER html %]" class="text_input">
       </td>
     </tr>
   [% END %]
+
+  [% IF user.is_timetracker %]
+    <tr>
+      [% INCLUDE "bug/field-label.html.tmpl"
+        field = bug_fields.estimated_time editable = 1
+      %]
+      <td>
+        <input name="estimated_time" size="6" maxlength="6" value="[% estimated_time FILTER html %]">
+      </td>
+      [% INCLUDE bug/field.html.tmpl
+        bug = default, field = bug_fields.deadline, value = deadline, editable = 1
+      %]
+    </tr>
+  [% END %]
 </tbody>
+
+<tbody>
+[%# non-tracking flags custom fields %]
+[% FOREACH field = Bugzilla.active_custom_fields %]
+  [% NEXT UNLESS field.enter_bug %]
+  [% NEXT IF cf_hidden_in_product(field.name, product.name, component.name, 1) %]
+  [%# crash-signature gets custom handling %]
+  [% NEXT IF field.name == 'cf_crash_signature' %]
+  
+  [% SET value = ${field.name}.defined ? ${field.name} : "" %]
+  <tr [% 'class="expert_fields"' IF !field.is_mandatory %]>
+    [% INCLUDE bug/field.html.tmpl 
+      bug = default, field = field, value = value, editable = 1, 
+      value_span = 3 %]
+  </tr>
+[% END %]
+</tbody>
+
+[%# crash-signature handling %]
+[% UNLESS cf_hidden_in_product('cf_crash_signature', product.name, component.name, 1) %]
+<tbody class="expert_fields">
+  <tr>
+    <th id="field_label_cf_crash_signature" class="field_label">
+      <label for="cf_crash_signature"> Crash Signature: </label>
+    </th>
+    <td colspan="3">
+      <span id="cf_crash_signature_container">
+        <span id="cf_crash_signature_nonedit_display"><i>None</i></span>
+        (<a id="cf_crash_signature_action" href="#">edit</a>)
+      </span>
+      <span id="cf_crash_signature_input">
+        <textarea id="cf_crash_signature" name="cf_crash_signature" rows="4" cols="60"></textarea>
+      </span>
+    </td>
+  </tr>
+</tbody>
+[% END %]
+
+[% display_bug_flags = 0 %]
+[% FOREACH field = Bugzilla.active_custom_fields %]
+  [% NEXT UNLESS field.enter_bug %]
+  [% NEXT IF cf_hidden_in_product(field.name, product.name, component.name, 2) %]
+  [% display_bug_flags = 1 %]
+  [% LAST %]
+[% END %]
+
+[% display_flags = 0 %]
+[% any_flags_requesteeble = 0 %]
+[% FOREACH flag_type = product.flag_types(is_active=>1).bug %]
+  [% display_flags = 1 %]
+  [% SET any_flags_requesteeble = 1 IF flag_type.is_requestable && flag_type.is_requesteeble %]
+  [% LAST IF display_flags && any_flags_requesteeable %]
+[% END %]
+
+[% IF display_bug_flags || display_flags %]
+  <tbody class="expert_fields">
+    <tr>
+      <th>Flags:</th>
+      <td colspan="3">
+        <div id="bug_flags_false" class="bz_default_hidden">
+          <input type="button" value="Set [% terms.bug FILTER html %] flags" onClick="handleWantsBugFlags(true)">
+        </div>
+
+        <div id="bug_flags_true">
+          <input type="button" id="btn_no_bug_flags" value="Don't set [% terms.bug %] flags"
+                 class="bz_default_hidden"  onClick="handleWantsBugFlags(false)">
+
+          <fieldset>
+            <legend>Set [% terms.bug %] flags</legend>
+
+            <table cellpadding="0" cellspacing="0">
+            <tr>
+              [% IF display_bug_flags %]
+                <td>
+                  <table id="bug_tracking_flags">
+                    <tr>
+                      <th colspan="2" style="text-align:left">Tracking Flags:</th>
+                    </tr>
+                    <tr>
+                      [% FOREACH field = Bugzilla.active_custom_fields %]
+                        [% NEXT UNLESS field.enter_bug %]
+                        [% NEXT IF cf_hidden_in_product(field.name, product.name, component.name, 2) %]
+                        
+                        [% SET value = ${field.name}.defined ? ${field.name} : "" %]
+                        <tr>
+                          [% INCLUDE bug/field.html.tmpl 
+                            bug = default, field = field, value = value, editable = 1, 
+                            value_span = 3 %]
+                        </tr>
+                      [% END %]
+                    </tr>
+                  </table>
+                </td>
+              [% END %]
+              [% IF display_flags %]
+                <td>
+                  [% PROCESS "flag/list.html.tmpl" flag_types = product.flag_types(is_active=>1).bug
+                                                   any_flags_requesteeble = any_flags_requesteeble
+                                                   flag_table_id = "bug_flags"
+                  %]
+                </td>
+              [% END %]
+            </tr>
+            </table>
+          </fieldset>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+[% END %]
 
 <tbody class="expert_fields">
   [% IF product.groups_available.size %]
   <tr>
     <th>&nbsp;</th>
     <td colspan="3">
-      <br>
         <strong>
           Only users in all of the selected groups can view this 
           [%+ terms.bug %]:
@@ -661,7 +751,6 @@ TUI_hide_default('attachment_text_field');
       <font size="-1">
         (Leave all boxes unchecked to make this a public [% terms.bug %].)
       </font>
-      <br>
       <br>
 
       <!-- Checkboxes -->
@@ -694,12 +783,26 @@ TUI_hide_default('attachment_text_field');
     </td>
   </tr>
 </tbody>
+  [%# "status whiteboard" and "qa contact" are the longest labels
+    # add them here to avoid shifting the page when toggling advanced fields %]
+  <tr>
+    <th class="hidden_text">Status Whiteboard:</th>
+    <td>&nbsp;</td>
+    <th class="hidden_text">QA Contact:</th>
+  </tr>
   </table>
   <input type="hidden" name="form_name" value="enter_bug">
 </form>
 
 [%# Links or content with more information about the bug being created. %]
 [% Hook.process("end") %]
+
+<div id="guided">
+  <a id="guided_img" href="enter_bug.cgi?format=guided&amp;product=[% product.name FILTER url_quote %]"><img
+   src="extensions/BMO/web/images/guided.png" width="16" height="16" border="0" align="absmiddle"></a>
+  <a id="guided_link" href="enter_bug.cgi?format=guided&amp;product=[% product.name FILTER url_quote %]"
+   >Switch to the [% terms.Bugzilla %] Helper</a>
+</div>
 
 [% PROCESS global/footer.html.tmpl %]
 

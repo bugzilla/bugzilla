@@ -69,8 +69,14 @@ function TUI_hide_default(className) {
 function _TUI_toggle_control_link(className) {
     var link = document.getElementById(className + "_controller");
     if (!link) return;
-    var original_text = link.innerHTML;
-    link.innerHTML = TUI_alternates[className];
+    var original_text;
+    if (link.nodeName == 'INPUT') {
+      original_text = link.value;
+      link.value = TUI_alternates[className];
+    } else {
+      original_text = link.innerHTML;
+      link.innerHTML = TUI_alternates[className];
+    }
     TUI_alternates[className] = original_text;
 }
 

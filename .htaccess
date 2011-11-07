@@ -24,6 +24,8 @@
 </IfModule>
 </IfModule>
 
+AddType image/x-icon .ico
+
 Redirect permanent /queryhelp.cgi https://bugzilla.mozilla.org/query.cgi?format=advanced&help=1
 Redirect permanent /bug_status.html https://bugzilla.mozilla.org/page.cgi?id=fields.html
 Redirect permanent /bugwritinghelp.html https://bugzilla.mozilla.org/page.cgi?id=bug-writing.html

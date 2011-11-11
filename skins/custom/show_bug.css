@@ -28,10 +28,10 @@
     margin:0px;
     padding:5px;
     padding-right:20px;
-    height:100px;
     overflow:auto;
     float:left;
     max-width:465px;
+    max-height:100px;
     border:1px solid #CCC;
 }
 

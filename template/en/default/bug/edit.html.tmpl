@@ -821,14 +821,13 @@
         [% IF user.id || bug.cc.size %]
           <span id="cc_edit_area_showhide_container" class="bz_default_hidden">
             (<a href="#" id="cc_edit_area_showhide">[% IF user.id %]edit[% ELSE %]show[% END %]</a>)
-          [% IF user.id %]
-            <div id="cc_list_num_users">
-              <ul class="cc_list_display"> 
-                [% FOREACH c = bug.cc %]
-                  <li>[% c FILTER email FILTER html %]</li>
-                [% END %]
-              </ul>
-            </div>
+          [% IF user.id && bug.cc.size %]
+            <br>
+            <ul class="cc_list_display"> 
+              [% FOREACH c = bug.cc %]
+                <li>[% c FILTER email FILTER html %]</li>
+              [% END %]
+            </ul>
           [% END %]
         </span>
         [% END %]

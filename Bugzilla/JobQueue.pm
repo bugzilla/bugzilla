@@ -62,6 +62,7 @@ sub new {
             pass   => $lc->{db_pass},
             prefix => 'ts_',
         }],
+        driver_cache_expiration => 300, # 5 minutes
     );
 
     return $self;

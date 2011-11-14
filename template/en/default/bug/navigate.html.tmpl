@@ -29,12 +29,22 @@
     <li>&nbsp;-&nbsp;<a href="show_bug.cgi?ctype=xml&amp;id=
                         [% bug.bug_id  FILTER uri %]">XML</a></li>
     <li>&nbsp;-&nbsp;<a href="enter_bug.cgi?cloned_bug_id=
-                        [% bug.bug_id  FILTER uri %]">Clone This 
+                        [% bug.bug_id  FILTER uri %]"
+                        id="clone_bug">Clone This 
                         [% terms.Bug %]</a></li>
     [%# Links to more things users can do with this bug. %]
     [% Hook.process("links") %]
     <li>&nbsp;-&nbsp;<a href="#">Top of page </a></li>
-    </ul>
+  </ul>
+  <script type="text/javascript">
+  YAHOO.util.Event.onDOMReady(function() {
+    init_clone_bug_menu(
+      YAHOO.util.Dom.get('clone_bug'),
+      '[% bug.bug_id FILTER js %]',
+      '[% bug.product FILTER js %]',
+      '[% bug.component FILTER js %]');
+  });
+  </script>
 [% END %]        
 
 

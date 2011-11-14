@@ -55,6 +55,26 @@ function bmo_show_tracking_flags() {
   }
 }
 
+function init_clone_bug_menu(el, bug_id, product, component) {
+  var diff_url = 'enter_bug.cgi?cloned_bug_id=' + bug_id;
+  var cur_url = diff_url +
+    '&product=' + encodeURIComponent(product) +
+    '&component=' + encodeURIComponent(component);
+  var menu = new YAHOO.widget.Menu('clone_bug_menu', { position : 'dynamic' });
+  menu.addItems([
+    { text: 'Clone to the current product', url: cur_url },
+    { text: 'Clone to a different product', url: diff_url }
+  ]);
+  menu.render(document.body);
+  YAHOO.util.Event.addListener(el, 'click', show_clone_bug_menu, menu);
+}
+
+function show_clone_bug_menu(event, menu) {
+  menu.cfg.setProperty('xy', YAHOO.util.Event.getXY(event));
+  menu.show();
+  event.preventDefault();
+}
+
 // -- make attachment table, comments, new comment textarea equal widths
 
 YAHOO.util.Event.onDOMReady(function() {

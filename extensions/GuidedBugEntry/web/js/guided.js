@@ -548,7 +548,7 @@ var dupes = {
 
 var bugForm = {
   _visibleHelpPanel: null,
-  _mandatoryFields: [ 'short_desc', 'version_select' ],
+  _mandatoryFields: [ 'short_desc', 'component_select', 'version_select' ],
 
   onInit: function() {
     Dom.get('user_agent').value = navigator.userAgent;
@@ -601,16 +601,30 @@ var bugForm = {
     Dom.get('submit').disabled = false;
 
     // build components
-    // if there's a general component in it, make it selected by default
+
+    // check for a general component
     var defaultComponent = false;
+    for (var i = 0, n = product.details.components.length; i < n; i++) {
+      var component = product.details.components[i];
+      if (component.is_active == '1') {
+        if (component.name.match(/general/i)) {
+          defaultComponent = component.name;
+          break;
+        }
+      }
+    }
+
+    // if there isn't a default component, default to blank
+    if (!defaultComponent) {
+      elComponents.options[elComponents.options.length] = new Option('', '');
+    }
+
+    // build component select
     for (var i = 0, n = product.details.components.length; i < n; i++) {
       var component = product.details.components[i];
       if (component.is_active == '1') {
         elComponents.options[elComponents.options.length] =
           new Option(component.name, component.name);
-        if (!defaultComponent && component.name.match(/general/i)) {
-          defaultComponent = component.name;
-        }
       }
     }
 
@@ -735,8 +749,8 @@ var bugForm = {
     return filename;
   },
 
-  _mandatoryCheck: function() {
-    result = true;
+  _mandatoryMissing: function() {
+    var result = new Array();
     for (var i = 0, n = this._mandatoryFields.length; i < n; i++ ) {
       id = this._mandatoryFields[i];
       el = Dom.get(id);
@@ -750,7 +764,7 @@ var bugForm = {
 
       if (value == '') {
         Dom.addClass(id, 'missing');
-        result = false;
+        result.push(id);
       } else {
         Dom.removeClass(id, 'missing');
       }
@@ -762,17 +776,17 @@ var bugForm = {
     
     // check mandatory fields
 
-    if (!bugForm._mandatoryCheck()) {
-      if (Dom.hasClass('short_desc', 'missing')
-        && Dom.hasClass('version_select', 'missing')) {
-        alert('Please enter the summary, and select the relevant version.');
-      } else if (Dom.hasClass('short_desc', 'missing')) {
-        alert('Please enter the summary.');
-      } else {
-        alert('Please select the relevant version.\n\n' +
-          'If you are unsure select "unspecified".');
+    var missing = bugForm._mandatoryMissing();
+    if (missing.length) {
+      var message = 'The following field' + 
+        (missing.length == 1 ? ' is' : 's are') + ' required:\n\n';
+      for (var i = 0, n = missing.length; i < n; i++ ) {
+        var id = missing[i];
+        if (id == 'short_desc')       message += '  Summary\n';
+        if (id == 'component_select') message += '  Component\n';
+        if (id == 'version_select')   message += '  Version\n';
       }
-
+      alert(message);
       return false;
     }
 

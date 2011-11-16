@@ -98,7 +98,7 @@
           [% IF change.added == '' %]
             html += '</span>';
           [% ELSE %]
-            html += ' &#x2794; ';
+            html += ' &rarr; ';
           [% END %]
         [% END %]
         [% PROCESS add_change value = change.added %]

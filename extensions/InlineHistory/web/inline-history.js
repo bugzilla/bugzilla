@@ -368,6 +368,12 @@ var inline_history = {
     ul.appendChild(li);
   },
 
+  confirmUnsafeUrl: function(url) {
+    return confirm(
+      'This is considered an unsafe URL and could possibly be harmful.\n'
+      + 'The full URL is:\n\n' + url + '\n\nContinue?');
+  },
+
   previousElementSibling: function(el) {
     if (el.previousElementSibling)
       return el.previousElementSibling;

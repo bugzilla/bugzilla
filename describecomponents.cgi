@@ -46,7 +46,7 @@ my $product = new Bugzilla::Product({'name' => $product_name});
 
 unless ($product && $user->can_access_product($product->name)) {
     # Products which the user is allowed to see.
-    my @products = @{$user->get_enterable_products};
+    my @products = @{$user->get_accessible_products};
 
     if (scalar(@products) == 0) {
         ThrowUserError("no_products");

@@ -26,7 +26,15 @@
 
 [% PROCESS global/variables.none.tmpl %]
 
-<dl>
+[%# hide the recipient list by default from new users %]
+[% show_recipients =
+     user.settings.post_bug_submit_action.value == 'nothing'
+     || user.in_group('canconfirm')
+     || !user.can_see_bug(mailing_bugid)
+%]
+
+<dl id="bugmail_summary_[% mailing_bugid FILTER none %]"
+    [%~ ' class="bz_default_hidden"' UNLESS show_recipients %]>
 [% PROCESS emails
    description = "Email sent to"
    names = sent_bugmail.sent
@@ -37,6 +45,27 @@
    names = sent_bugmail.excluded
 %]
 </dl>
+
+[% IF !show_recipients %]
+  [% recipient_count = sent_bugmail.sent.size %]
+  <div id="bugmail_summary_placeholder_[% mailing_bugid FILTER none %]"
+       [%~ ' class="bz_default_hidden"' IF show_recipients %]>
+    [% IF recipient_count > 0 %]
+      Email sent to [% recipient_count FILTER html %]
+      recipient[% 's' UNLESS recipient_count == 1 %].
+    [% ELSE %]
+      No emails were sent.
+    [% END %]
+    (<a href="#" onclick="
+        YAHOO.util.Dom.removeClass(
+          'bugmail_summary_[% mailing_bugid FILTER none %]',
+          'bz_default_hidden');
+        YAHOO.util.Dom.addClass(
+          'bugmail_summary_placeholder_[% mailing_bugid FILTER none %]',
+          'bz_default_hidden');
+        return false;">show</a>)
+  </div>
+[% END %]
 
 [%############################################################################%]
 [%# Block for a set of email addresses                                       #%]

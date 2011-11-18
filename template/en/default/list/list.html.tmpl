@@ -189,8 +189,8 @@
           </form>
           [% IF time_summary_limited %]
             <small>
-              Time Summary will only include the bugs shown above. In order to
-              to see a time summary for all bugs found by the search, you can 
+              Time Summary will only include the [% terms.bugs %] shown above. In order to
+              to see a time summary for all [% terms.bugs %] found by the search, you can
               <a href="buglist.cgi?[% urlquerypart FILTER html %]
                        [%- "&order=$qorder" FILTER html IF order %]&limit=0">
                 Show all search results</a>.</small>

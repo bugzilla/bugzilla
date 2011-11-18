@@ -28,6 +28,7 @@ use fields qw(
 );
 use Hash::Util qw(lock_keys);
 use Bugzilla::Hook;
+use Bugzilla::Constants;
 use List::MoreUtils qw(any);
 
 sub new {
@@ -60,8 +61,13 @@ sub get_login_info {
         }
         $result = $object->get_login_info(@_);
         $self->{successful} = $object;
-        last if !$result->{failure};
-        # So that if none of them succeed, it's undef.
+        
+        # We only carry on down the stack if this method denied all knowledge.
+        last unless ($result->{failure}
+                    && ($result->{failure} eq AUTH_NODATA 
+                       || $result->{failure} eq AUTH_NO_SUCH_USER));
+        
+        # If none of the methods succeed, it's undef.
         $self->{successful} = undef;
     }
     return $result;

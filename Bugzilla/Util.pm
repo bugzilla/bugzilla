@@ -50,8 +50,6 @@ use Bugzilla::RNG qw(irand);
 
 use Date::Parse;
 use Date::Format;
-use DateTime;
-use DateTime::TimeZone;
 use Digest;
 use Email::Address;
 use List::Util qw(first);
@@ -485,6 +483,9 @@ sub datetime_from {
         delete $args{$arg} if !defined $args{$arg};
     }
 
+    # This module takes time to load and is only used here, so we
+    # |require| it here rather than |use| it.
+    require DateTime;
     my $dt = new DateTime(\%args);
 
     # Now display the date using the given timezone,

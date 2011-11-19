@@ -336,7 +336,7 @@ sub diff_arrays {
             $old[$old_pos] = undef;
         }
     }
-    # Ignore cancelled items as well as empty strings.
+    # Ignore canceled items as well as empty strings.
     my @removed = grep { defined $_ && $_ ne '' } @old;
     return (\@removed, \@added);
 }

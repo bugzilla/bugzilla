@@ -18,7 +18,7 @@
 # 
 # Contributor(s): Zach Lipton <zach@zachlipton.com>
 #                 Max Kanat-Alexander <mkanat@bugzilla.org>
-
+#                 Frédéric Buclin <LpSolit@gmail.com>
 
 #################
 #Bugzilla Test 7#
@@ -26,7 +26,7 @@
 
 use lib 't';
 use Support::Files;
-use Test::More tests => 13;
+use Test::More tests => 15;
 
 BEGIN { 
     use_ok(Bugzilla);
@@ -72,3 +72,16 @@ foreach my $input (keys %email_strings) {
     is(Bugzilla::Util::email_filter($input), $email_strings{$input}, 
        "email_filter('$input')");
 }
+
+# diff_arrays():
+my @old_array = qw(alpha beta alpha gamma gamma beta alpha delta epsilon gamma);
+my @new_array = qw(alpha alpha beta gamma epsilon delta beta delta);
+# The order is not relevant when comparing both arrays for matching items,
+# i.e. (foo bar) and (bar foo) are the same arrays (same items).
+# But when returning data, we try to respect the initial order.
+# We remove the leftmost items first, and return what's left. This means:
+# Removed (in this order): gamma alpha gamma.
+# Added (in this order): delta
+my ($removed, $added) = diff_arrays(\@old_array, \@new_array);
+is_deeply($removed, [qw(gamma alpha gamma)], 'diff_array(\@old, \@new) (check removal)');
+is_deeply($added, [qw(delta)], 'diff_array(\@old, \@new) (check addition)');

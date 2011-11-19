@@ -3375,6 +3375,13 @@ sub comments {
     return \@comments;
 }
 
+sub master_bug {
+    my $self = shift;
+    return undef if $self->{'error'};
+    $self->{'master_bug_obj'} ||= new Bugzilla::Bug($self->master_bug_id);
+    return $self->{'master_bug_obj'};
+}
+
 sub new_bug_statuses {
     my ($class, $product) = @_;
     my $user = Bugzilla->user;

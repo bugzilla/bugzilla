@@ -138,6 +138,12 @@
 
   <table id="bz_big_form_parts" cellspacing="0" cellpadding="0"><tr>
   <td>
+    [%# *** Sightings *** %]
+
+    [% PROCESS sighting/list.html.tmpl
+               bug = bug
+    %]
+
     [% IF user.is_timetracker %]
       [% PROCESS section_timetracking %]
     [% END %]
@@ -328,13 +334,7 @@
     </td>
     <td id="bz_field_status">
       <span id="static_bug_status">
-        [% display_value("bug_status", bug.bug_status) FILTER html %]
-        [% IF bug.resolution %]
-          [%+ display_value("resolution", bug.resolution) FILTER html %]
-          [% IF bug.dup_id %]
-            of [% "${terms.bug} ${bug.dup_id}" FILTER bug_link(bug.dup_id) FILTER none %]
-          [% END %]
-        [% END %]
+        [% PROCESS bug/status.html.tmpl target = bug %]
         [% IF bug.user.canedit || bug.user.isreporter %]
           (<a href="#add_comment" 
               onclick="window.setTimeout(function() { document.getElementById('bug_status').focus(); }, 10)">edit</a>)

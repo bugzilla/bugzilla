@@ -1,0 +1,59 @@
+[%# The contents of this file are subject to the Mozilla Public
+  # License Version 1.1 (the "License"); you may not use this file
+  # except in compliance with the License. You may obtain a copy of
+  # the License at http://www.mozilla.org/MPL/
+  #
+  # Software distributed under the License is distributed on an "AS
+  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+  # implied. See the License for the specific language governing
+  # rights and limitations under the License.
+  #
+  # The Original Code is the Bugzilla Bug Tracking System.
+  # 
+  # The Initial Developer of the Original Code is Riverbed Technology
+  # Portions created by the Initial Developer are Copyright (C) 2011 the
+  # Initial Developer. All Rights Reserved.
+  #
+  # Contributor(s): Robert Webb <rowebb@gmail.com>
+  #%]
+
+[%# INTERFACE:
+  # bug: Bugzila::Bug; the master bug of the sightings to list.
+  #%]
+
+[% master_bug = bug %]
+[% IF bug.master_bug_id %]
+  [% master_bug = bug.master_bug %]
+[% END %]
+
+[% sightings = master_bug.sightings %]
+[% IF sightings.size == 0 %]
+  [% RETURN %]
+[% END %]
+<table id="sighting_table" class="bz_sighting_table">
+  <tr>
+    <th>
+      [% field_descs.sighting FILTER html %]
+    </th>
+    <th>
+      [% field_descs.bug_status FILTER html %]
+    </th>
+  </tr>
+
+  [% PROCESS render_sighting_row target = master_bug tag = "th" %]
+
+  [% FOREACH sighting = sightings %]
+    [% PROCESS render_sighting_row target = sighting tag = "td" %]
+  [% END %]
+</table>
+
+[% BLOCK render_sighting_row %]
+    <tr id="s[% target.id FILTER html %]">
+      <[% tag %]>
+        [% target.bug_id FILTER bug_link(target) FILTER none %]
+      </[% tag %]>
+      <[% tag %]>
+        [% PROCESS bug/status.html.tmpl %]
+      </[% tag %]>
+    </tr>
+[% END %]

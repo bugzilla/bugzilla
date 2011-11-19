@@ -409,19 +409,28 @@ dl dl > dt {
     white-space: normal !important;
 }
 
-/* Style of the attachment table and time tracking table */
-#attachment_table {
+/* Style of the attachment table, sightings table and time tracking table */
+#attachment_table, #sighting_table {
     border-collapse: collapse;
     border: 1px solid #333333;
+    margin: 2ex 0;
 }
 
-#attachment_table th, .bz_attach_footer, .bz_time_tracking_table th {
+#attachment_table th, .bz_attach_footer, .bz_sighting_table th, 
+.bz_sighting_footer, .bz_time_tracking_table th {
     background-color: #E0E0E0;
     color: black;
+    padding: 0.5em;
 }
 
-#attachment_table td, .bz_time_tracking_table th, .bz_time_tracking_table td {
+#attachment_table td, .bz_sighting_table th, .bz_sighting_table td,
+.bz_time_tracking_table th, .bz_time_tracking_table td {
     border: 1px solid #333333;
+    padding: 0.5em;
+}
+
+#sighting_table td {
+    text-align: center;
 }
 
 .bz_attach_extra_info {

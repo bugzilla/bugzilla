@@ -29,11 +29,9 @@ use strict;
 use Bugzilla::Constants;
 
 use Encode;
-use ExtUtils::MM ();
 use File::Basename;
 use File::Spec;
 use POSIX qw(setlocale LC_CTYPE);
-use Safe;
 use Scalar::Util qw(tainted);
 use Term::ANSIColor qw(colored);
 use PerlIO;
@@ -58,6 +56,9 @@ our @EXPORT_OK = qw(
 
 sub bin_loc {
     my ($bin, $path) = @_;
+    # This module is not needed most of the time and is a bit slow,
+    # so we only load it when calling bin_loc().
+    require ExtUtils::MM;
 
     # If the binary is a full path...
     if ($bin =~ m{[/\\]}) {
@@ -541,7 +542,10 @@ sub no_checksetup_from_cgi {
 # Used by install_string
 sub _get_string_from_file {
     my ($string_id, $file) = @_;
-    
+    # This module is only needed by checksetup.pl,
+    # so only load it when needed.
+    require Safe;
+
     return undef if !-e $file;
     my $safe = new Safe;
     $safe->rdo($file);

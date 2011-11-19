@@ -77,6 +77,7 @@ if ($action eq 'search') {
     my $matchstr      = trim($cgi->param('matchstr'));
     my $matchtype     = $cgi->param('matchtype');
     my $grouprestrict = $cgi->param('grouprestrict') || '0';
+    my $enabled_only  = $cgi->param('enabled_only') || '0';
     my $query = 'SELECT DISTINCT userid, login_name, realname, is_enabled ' .
                 'FROM profiles';
     my @bindValues;
@@ -167,6 +168,12 @@ if ($action eq 'search') {
                 @{Bugzilla::Group->flatten_group_membership($group->id)});
             $query .= " $nextCondition ugm.group_id IN($grouplist) ";
         }
+
+        if ($enabled_only eq '1') {
+            $query .= " $nextCondition profiles.is_enabled = 1 ";
+            $nextCondition = 'AND';
+        }
+
         $query .= ' ORDER BY profiles.login_name';
 
         $vars->{'users'} = $dbh->selectall_arrayref($query,

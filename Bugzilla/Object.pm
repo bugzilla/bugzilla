@@ -441,6 +441,8 @@ sub audit_log {
 
     # During update, it's the actual %changes hash produced by update().
     foreach my $field (keys %$changes) {
+        # Skip private changes.
+        next if $field =~ /^_/;
         my ($from, $to) = @{ $changes->{$field} };
         $sth->execute($user_id, $class, $self->id, $field, $from, $to);
     }

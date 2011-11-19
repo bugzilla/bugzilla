@@ -26,8 +26,6 @@
 [% USE Bugzilla %]
 [% cgi = Bugzilla.cgi %]
 
-[% PROCESS global/variables.none.tmpl %]
-
 [% title = BLOCK %]Select value for the '[% field.description FILTER html %]'
                    ([% field.name FILTER html %]) field[% END %]
 [% PROCESS global/header.html.tmpl

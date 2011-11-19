@@ -26,8 +26,6 @@
   #               which the component belongs.
   #%]
 
-[% PROCESS global/variables.none.tmpl %]
-
 [% title = BLOCK %]
   Edit component '[% comp.name FILTER html %]' of product '[% product.name FILTER html %]'
 [% END %]
@@ -43,12 +41,12 @@
     [% PROCESS "admin/components/edit-common.html.tmpl" %]
 
     <tr>
-      <td><label for="isactive">Enabled For [% terms.Bugs %]:</label></td>
+      <th class="field_label"><label for="isactive">Enabled For [% terms.Bugs %]:</label></th>
       <td><input id="isactive" name="isactive" type="checkbox" value="1" 
                  [% 'checked="checked"' IF comp.isactive %]></td>
     </tr>
     <tr>
-      <td>[% terms.Bugs %]:</td>
+      <th class="field_label">[% terms.Bugs %]:</th>
       <td>
 [% IF comp.bug_count > 0 %]
         <a title="[% terms.Bugs %] in component '[% comp.name FILTER html %]'"

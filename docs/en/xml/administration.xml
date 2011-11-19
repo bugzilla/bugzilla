@@ -1,4 +1,10 @@
-<!-- <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook V4.1//EN"> -->
+<?xml version="1.0"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+                      "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
+    <!ENTITY % myents SYSTEM "bugzilla.ent">
+    %myents;
+]>
+
 <chapter id="administration">
   <title>Administering Bugzilla</title>
 
@@ -23,10 +29,6 @@
           can be used. Administrators should review this list before 
           deploying a new Bugzilla installation.
         </para>
-
-        <indexterm>
-          <primary>checklist</primary>
-        </indexterm>
 
         <variablelist>
 
@@ -862,7 +864,12 @@
             contains parameters for how user names can be queried and matched
             when entered.
           </para>
-
+          <para>
+            Another setting called 'ajax_user_autocompletion' enables certain
+            user fields to display a list of matched user names as a drop down after typing 
+            a few characters. Note that it is recommended to use mod_perl when
+            enabling 'ajax_user_autocompletion'.
+          </para>
         </section>
 
   </section>

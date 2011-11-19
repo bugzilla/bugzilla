@@ -22,8 +22,6 @@
   # showbugcounts: boolean; true if bug counts should be included in the table
   #%]
 
-[% PROCESS global/variables.none.tmpl %]
-
 [% IF classification %]
   [% classification_url_part = BLOCK %]&amp;classification=
     [%- classification.name FILTER uri %]

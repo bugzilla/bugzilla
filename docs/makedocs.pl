@@ -59,8 +59,16 @@ use Bugzilla::Constants qw(DB_MODULE BUGZILLA_VERSION);
 my $modules = REQUIRED_MODULES;
 my $opt_modules = OPTIONAL_MODULES;
 
+my $template;
+{
+    open(TEMPLATE, '<', 'bugzilla.ent.tmpl')
+      or die('Could not open bugzilla.ent.tmpl: ' . $!);
+    local $/;
+    $template = <TEMPLATE>;
+    close TEMPLATE;
+}
 open(ENTITIES, '>', 'bugzilla.ent') or die('Could not open bugzilla.ent: ' . $!);
-print ENTITIES '<?xml version="1.0"?>' ."\n\n";
+print ENTITIES "$template\n";
 print ENTITIES '<!-- Module Versions -->' . "\n";
 foreach my $module (@$modules, @$opt_modules)
 {
@@ -87,30 +95,6 @@ foreach my $db (keys %$db_modules) {
     print ENTITIES '<!ENTITY min-' . lc($db) . '-ver "'.$db_version.'">' . "\n";
 }
 close(ENTITIES);
-
-###############################################################################
-# Environment Variable Checking
-###############################################################################
-
-my ($JADE_PUB, $LDP_HOME, $build_docs);
-$build_docs = 1;
-if (defined $ENV{JADE_PUB} && $ENV{JADE_PUB} ne '') {
-    $JADE_PUB = $ENV{JADE_PUB};
-}
-else {
-    print "To build 'The Bugzilla Guide', you need to set the ";
-    print "JADE_PUB environment variable first.\n";
-    $build_docs = 0;
-}
-
-if (defined $ENV{LDP_HOME} && $ENV{LDP_HOME} ne '') {
-    $LDP_HOME = $ENV{LDP_HOME};
-}
-else {
-    print "To build 'The Bugzilla Guide', you need to set the ";
-    print "LDP_HOME environment variable first.\n";
-    $build_docs = 0;
-}
 
 ###############################################################################
 # Subs
@@ -199,30 +183,15 @@ foreach my $lang (@langs) {
     }
 
     make_pod() if $pod_simple;
-    next unless $build_docs;
 
-    chdir 'html';
-
-    MakeDocs('separate HTML', "jade -t sgml -i html -d $LDP_HOME/ldp.dsl\#html " .
-	 "$JADE_PUB/xml.dcl ../xml/Bugzilla-Guide.xml");
-    MakeDocs('big HTML', "jade -V nochunks -t sgml -i html -d " .
-         "$LDP_HOME/ldp.dsl\#html $JADE_PUB/xml.dcl " .
-	 "../xml/Bugzilla-Guide.xml > Bugzilla-Guide.html");
-    MakeDocs('big text', "lynx -dump -justify=off -nolist Bugzilla-Guide.html " .
-	 "> ../txt/Bugzilla-Guide.txt");
+    MakeDocs('separate HTML', 'xmlto -m ../xsl/chunks.xsl -o html html xml/Bugzilla-Guide.xml');
+    MakeDocs('big HTML', 'xmlto -m ../xsl/nochunks.xsl -o html html-nochunks xml/Bugzilla-Guide.xml');
+    MakeDocs('big text', 'lynx -dump -justify=off -nolist html/Bugzilla-Guide.html > txt/Bugzilla-Guide.txt');
 
     if (! grep($_ eq "--with-pdf", @ARGV)) {
         next;
     }
 
-    MakeDocs('PDF', "jade -t tex -d $LDP_HOME/ldp.dsl\#print $JADE_PUB/xml.dcl " .
-         '../xml/Bugzilla-Guide.xml');
-    chdir '../pdf';
-    MakeDocs(undef, 'mv ../xml/Bugzilla-Guide.tex .');
-    MakeDocs(undef, 'pdfjadetex Bugzilla-Guide.tex');
-    MakeDocs(undef, 'pdfjadetex Bugzilla-Guide.tex');
-    MakeDocs(undef, 'pdfjadetex Bugzilla-Guide.tex');
-    MakeDocs(undef, 'rm Bugzilla-Guide.tex Bugzilla-Guide.log Bugzilla-Guide.aux Bugzilla-Guide.out');
-
+    MakeDocs('PDF', 'dblatex -p ../xsl/pdf.xsl -o pdf/Bugzilla-Guide.pdf xml/Bugzilla-Guide.xml');
 }
 

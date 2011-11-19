@@ -96,7 +96,13 @@
       [% IF isnew %]
         <tr>
           <th>[% field_label FILTER html %]</th>
-          <td>[% new_value FILTER html %]</td>
+          <td>
+            [% IF change.field_name == "bug_id" %]
+              [% new_value FILTER bug_link(bug, full_url => 1) FILTER none %]
+            [% ELSE %]
+              [% new_value FILTER html %]
+            [% END %]
+          </td>
         </tr>
       [% ELSE %]
          <tr>

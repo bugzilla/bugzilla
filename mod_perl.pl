@@ -39,6 +39,7 @@ use Apache2::Log ();
 use Apache2::ServerUtil;
 use ModPerl::RegistryLoader ();
 use File::Basename ();
+use DateTime ();
 
 # This loads most of our modules.
 use Bugzilla ();

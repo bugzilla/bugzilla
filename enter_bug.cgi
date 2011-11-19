@@ -342,26 +342,14 @@ if ( Bugzilla->params->{'usetargetmilestone'} ) {
 }
 
 # Construct the list of allowable statuses.
-my @statuses = @{ Bugzilla::Status->can_change_to() };
+my @statuses = @{ Bugzilla::Bug->new_bug_statuses($product) };
 # Exclude closed states from the UI, even if the workflow allows them.
 # The back-end code will still accept them, though.
+# XXX We should remove this when the UI accepts closed statuses and update
+# Bugzilla::Bug->default_bug_status.
 @statuses = grep { $_->is_open } @statuses;
 
-# UNCONFIRMED is illegal if allows_unconfirmed is false.
-if (!$product->allows_unconfirmed) {
-    @statuses = grep { $_->name ne 'UNCONFIRMED' } @statuses;
-}
 scalar(@statuses) || ThrowUserError('no_initial_bug_status');
-
-# If the user has no privs...
-unless ($has_editbugs || $has_canconfirm) {
-    # ... use UNCONFIRMED if available, else use the first status of the list.
-    my ($unconfirmed) = grep { $_->name eq 'UNCONFIRMED' } @statuses;
-
-    # Because of an apparent Perl bug, "$unconfirmed || $statuses[0]" doesn't
-    # work, so we're using an "?:" operator. See bug 603314 for details.
-    @statuses = ($unconfirmed ? $unconfirmed : $statuses[0]);
-}
 
 $vars->{'bug_status'} = \@statuses;
 
@@ -372,12 +360,8 @@ $vars->{'bug_status'} = \@statuses;
 my $picked_status = formvalue('bug_status');
 if ($picked_status and grep($_->name eq $picked_status, @statuses)) {
     $default{'bug_status'} = formvalue('bug_status');
-} elsif (scalar @statuses == 1) {
-    $default{'bug_status'} = $statuses[0]->name;
-}
-else {
-    $default{'bug_status'} = ($statuses[0]->name ne 'UNCONFIRMED') 
-                             ? $statuses[0]->name : $statuses[1]->name;
+} else {
+    $default{'bug_status'} = Bugzilla::Bug->default_bug_status(@statuses);
 }
 
 my @groups = $cgi->param('groups');

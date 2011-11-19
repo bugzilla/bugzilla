@@ -21,9 +21,7 @@ body {
   background: white;
   color: #111;
   padding: 0 1em;
-  margin: 0;
   font-family: Verdana, Arial, sans-serif;
-  font-size: small;
 }
 
 a:link, a:active { color: #36415c; }
@@ -72,10 +70,11 @@ pre, code, tt, kbd, samp {
   border: 1px solid #ccc;
 }
 
-pre.code {
+pre.code, pre.programlisting, pre.screen {
   margin-left: 10px;
-  width: 90%;
-  padding: 10px;
+  padding: 0.5em;
+  background: #eed;
+  border: 1px solid #ccc;
 }
 
 /* Special styles for the Contents page */

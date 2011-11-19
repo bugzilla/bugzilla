@@ -39,8 +39,6 @@
   # nobody can guarantee the hook files processing order in the future.
   #%]
 
-[% PROCESS global/variables.none.tmpl %]
-
 [% PROCESS "global/field-descs.none.tmpl" %]
 
 [% DEFAULT title = "Error" %]
@@ -593,7 +591,7 @@
   [% ELSIF error == "fieldvalue_still_has_bugs" %]
     [% title = "You Cannot Delete This Field Value" %]
     You cannot delete the value '[% value.name FILTER html %]' from the 
-    [% field.description FILTER html %] field, because there are still
+    [%+ field.description FILTER html %] field, because there are still
     [%+ value.bug_count FILTER html %] [%+ terms.bugs %] using it.
 
   [% ELSIF error == "fieldvalue_undefined" %]
@@ -603,6 +601,10 @@
   [% ELSIF error == "file_not_specified" %]
     [% title = "No File Specified" %]
     You did not specify a file to attach.
+
+  [% ELSIF error == "filename_not_specified" %]
+    [% title = "No Filename Specified" %]
+    You must specify a filename for this attachment.
 
   [% ELSIF error == "file_too_large" %]
     [% title = "File Too Large" %]

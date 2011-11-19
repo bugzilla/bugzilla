@@ -18,8 +18,6 @@
   #   Max Kanat-Alexander <mkanat@bugzilla.org>
   #%]
 
-[% PROCESS global/variables.none.tmpl %]
-
 From: [% Param('mailfrom') %]
 To: [% Param('maintainer') %]
 Subject: [[% terms.Bugzilla %]] Account Lock-Out: [% locked_user.login %] ([% attempts.0.ip_addr %])

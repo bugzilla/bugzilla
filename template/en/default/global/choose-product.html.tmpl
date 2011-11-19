@@ -27,8 +27,6 @@
   # format:   the desired format to display the target.
   #%]
 
-[% PROCESS global/variables.none.tmpl %]
-
 [% IF target == "enter_bug.cgi" %]
   [% title = "Enter $terms.Bug" %]
   [% h2 = BLOCK %]First, you must pick a product on which to enter [% terms.abug %]: [% END %]

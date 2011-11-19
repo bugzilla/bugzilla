@@ -18,8 +18,6 @@
   # field: Bugzilla::Field; The field this value belongs to.
   #%]
 
-[% PROCESS global/variables.none.tmpl %]
-
 [% title = BLOCK %]
   Edit Value '[% value.name FILTER html %]' for the 
   '[% field.description FILTER html %]' ([% field.name FILTER html %]) field

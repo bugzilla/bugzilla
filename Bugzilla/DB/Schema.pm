@@ -519,7 +519,8 @@ use constant ABSTRACT_SCHEMA => {
         FIELDS => [
             user_id   => {TYPE => 'INT3',
                           REFERENCES => {TABLE  => 'profiles',
-                                         COLUMN => 'userid'}},
+                                         COLUMN => 'userid',
+                                         DELETE => 'SET NULL'}},
             class     => {TYPE => 'varchar(255)', NOTNULL => 1},
             object_id => {TYPE => 'INT4', NOTNULL => 1},
             field     => {TYPE => 'varchar(64)', NOTNULL => 1},

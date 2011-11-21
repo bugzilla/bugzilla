@@ -508,7 +508,7 @@ sub enter {
   $vars->{'flag_types'} = $flag_types;
   $vars->{'any_flags_requesteeble'} =
     grep { $_->is_requestable && $_->is_requesteeble } @$flag_types;
-  $vars->{'token'} = issue_session_token('create_attachment:');
+  $vars->{'token'} = issue_session_token('create_attachment');
 
   print $cgi->header();
 
@@ -531,27 +531,7 @@ sub insert {
 
     # Detect if the user already used the same form to submit an attachment
     my $token = trim($cgi->param('token'));
-    if ($token) {
-        my ($creator_id, $date, $old_attach_id) = Bugzilla::Token::GetTokenData($token);
-        unless ($creator_id 
-            && ($creator_id == $user->id) 
-                && ($old_attach_id =~ "^create_attachment:")) 
-        {
-            # The token is invalid.
-            ThrowUserError('token_does_not_exist');
-        }
-    
-        $old_attach_id =~ s/^create_attachment://;
-   
-        if ($old_attach_id) {
-            $vars->{'bugid'} = $bugid;
-            $vars->{'attachid'} = $old_attach_id;
-            print $cgi->header();
-            $template->process("attachment/cancel-create-dupe.html.tmpl",  $vars)
-                || ThrowTemplateError($template->error());
-            exit;
-        }
-    }
+    check_token_data($token, 'create_attachment', 'index.cgi');
 
     # Check attachments the user tries to mark as obsolete.
     my @obsolete_attachments;
@@ -576,6 +556,9 @@ sub insert {
          isprivate     => scalar $cgi->param('isprivate'),
          mimetype      => $content_type,
          });
+
+    # Delete the token used to create this attachment.
+    delete_token($token);
 
     foreach my $obsolete_attachment (@obsolete_attachments) {
         $obsolete_attachment->set_is_obsolete(1);
@@ -613,12 +596,6 @@ sub insert {
       $bug->set_assigned_to($user);
   }
   $bug->update($timestamp);
-
-  if ($token) {
-      trick_taint($token);
-      $dbh->do('UPDATE tokens SET eventdata = ? WHERE token = ?', undef,
-               ("create_attachment:" . $attachment->id, $token));
-  }
 
   $dbh->bz_commit_transaction;
 

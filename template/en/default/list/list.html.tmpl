@@ -188,6 +188,14 @@
             <input type="hidden" name="id" value="[% buglist_joined FILTER html %]">
             <input type="submit" id="timesummary" value="Time Summary">
           </form>
+          [% IF time_summary_limited %]
+            <small>
+              Time Summary will only include the [% terms.bugs %] shown above. In order to
+              to see a time summary for all [% terms.bugs %] found by the search, you can
+              <a href="buglist.cgi?[% urlquerypart FILTER html %]
+                       [%- "&order=$qorder" FILTER html IF order %]&limit=0">
+                Show all search results</a>.</small>
+          [% END %]
         [% END %]
       </td>
       
@@ -297,6 +305,7 @@
       <a href="buglist.cgi?[% urlquerypart FILTER html %]
               [%- "&order=$qorder" FILTER html IF order %]&limit=0">See
         all search results for this query</a>.
+      [% time_summary_limited = 1 %]
     [% ELSIF bugs.size == 1 %]
       One [% terms.bug %] found.
     [% ELSE %]

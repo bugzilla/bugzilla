@@ -1,0 +1,39 @@
+[%# The contents of this file are subject to the Mozilla Public
+  # License Version 1.1 (the "License"); you may not use this file
+  # except in compliance with the License. You may obtain a copy of
+  # the License at http://www.mozilla.org/MPL/
+  #
+  # Software distributed under the License is distributed on an "AS
+  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+  # implied. See the License for the specific language governing
+  # rights and limitations under the License.
+  #
+  # The Original Code is the BMO Bugzilla Extension.
+  #
+  # The Initial Developer of the Original Code is the Mozilla Foundation
+  # Portions created by the Initial Developers are Copyright (C) 2011 the
+  # Initial Developer. All Rights Reserved.
+  #
+  # Contributor(s):
+  #   David Lawrence <dkl@mozilla.com>
+  #%]
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+
+[% IF cgi.param('incident_type') == 'stolen' %]
+Was the device encrypted?: [% cgi.param('encrypted') %]
+Any user data on the device?: [% cgi.param('userdata') %]
+  [% IF cgi.param('userdata') == 'Yes' %]
+Sensitive data on the device:
+[%+ cgi.param('sensitivedata') %]
+  [% END %]
+Browser configured to remember passwords?: [% cgi.param('rememberpasswords') %]
+  [% IF cgi.param('rememberpasswords') == 'Yes' %]
+Critical sites:
+[%+ cgi.param('criticalsites') %]
+  [% END %]
+[% END %]
+[% IF cgi.param('comment') %]
+Extra Notes:
+[%+ cgi.param('comment') %]
+[% END %]

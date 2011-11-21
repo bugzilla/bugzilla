@@ -1,0 +1,246 @@
+[%# The contents of this file are subject to the Mozilla Public
+  # License Version 1.1 (the "License"); you may not use this file
+  # except in compliance with the License. You may obtain a copy of
+  # the License at http://www.mozilla.org/MPL/
+  #
+  # Software distributed under the License is distributed on an "AS
+  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+  # implied. See the License for the specific language governing
+  # rights and limitations under the License.
+  #
+  # The Original Code is the BMO Bugzilla Extension.
+  #
+  # The Initial Developer of the Original Code is the Mozilla Foundation
+  # Portions created by the Initial Developers are Copyright (C) 2011 the
+  # Initial Developer. All Rights Reserved.
+  #
+  # Contributor(s):
+  #   David Lawrence <dkl@mozilla.com>
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]                                      
+                                                                              
+[% PROCESS global/header.html.tmpl                                            
+   title = "Mozilla Corporation/Foundation Employee Incident" 
+%]
+                                                                            
+[% USE Bugzilla %]                                                            
+
+<script type="text/javascript">
+<!--
+    var type_desc = new Array();
+    type_desc['safety'] = "If this is an emergency please immediately call your local police or emergency number.";
+    type_desc['stolen'] = "Please report a lost Mozilla laptop or any mobile device that was used to access<br> " + 
+                          "Mozilla email or contained passwords for Mozilla servers, devices, applications, etc.";
+
+    function validateAndSubmit() {
+        var alert_text = '';
+        if (!isFilledOut('short_desc')) alert_text += "Please enter a summary.\n";
+
+        var select = YAHOO.util.Dom.get('incident_type');
+        var selectValue = select.options[select.selectedIndex].value;
+        if (selectValue == 'stolen') {
+            if (!isFilledOut('encrypted')) {
+                alert_text += "Please answer whether the device was encrypted.\n";
+            }
+            if (!isFilledOut('userdata')) {
+                alert_text += "Please answer whether the device had user data.\n";
+            }
+            if (!isFilledOut('rememberpasswords')) {
+                alert_text += "Please answer whether the browser was configured to remember passwords.\n";
+            }
+        }
+
+        if (alert_text) {
+            alert(alert_text);
+            return false;
+        }
+
+        return true;
+    }
+
+    function setType (select) {
+        var selectValue = select.options[select.selectedIndex].value;
+
+        // Set the current description displayed.
+        document.getElementById('type_desc').innerHTML = type_desc[selectValue];
+
+        // Display/hide some additional fields based on type selected
+        if (selectValue == 'stolen') {
+            YAHOO.util.Dom.removeClass('stolen', 'bz_default_hidden');
+        }
+        else {
+            YAHOO.util.Dom.addClass('stolen', 'bz_default_hidden');
+        }
+
+        // Alter the product/component/group based on type selected
+        if (selectValue == 'stolen') {
+            document.getElementById('product').value   = 'mozilla.org';
+            document.getElementById('component').value = 'Server Operations: Desktop Issues';
+            document.getElementById('groups').value    = 'infrasec';
+            document.getElementById('cc').value        = '';
+        }
+        else {
+            document.getElementById('product').value   = 'Mozilla Corporation';
+            document.getElementById('component').value = 'Facilities Management';
+            document.getElementById('groups').value    = 'mozilla-corporation-confidential';
+            document.getElementById('cc').value        = 'dcohen@mozilla.com, mcoates@mozilla.com, jvandeven@mozilla.com';
+        }
+    }
+
+    function toggleEnabled (source, value, target) {
+        var sourceElement = YAHOO.util.Dom.get(source);
+        var targetElement = YAHOO.util.Dom.get(target);
+        if (sourceElement[sourceElement.selectedIndex].value == value) {
+            targetElement.disabled = false;
+            targetElement.focus();
+        }
+        else {
+            targetElement.disabled = true;
+        }
+    }
+
+    function isFilledOut(elem_id)  {
+        var str = document.getElementById(elem_id).value; 
+        return str.length > 0 && str != "noneselected"; 
+    } 
+
+    YAHOO.util.Event.onDOMReady(function () {
+        setType(document.getElementById('incident_type'));
+        toggleEnabled('userdata', 'Yes', 'sensitivedata');
+        toggleEnabled('rememberpasswords', 'Yes', 'criticalsites');
+    });
+// -->
+</script>
+
+<p><strong>Please use this form for employee incidents only!</strong></p>
+<p>If you have a [% terms.bug %] to file, go <a href="enter_bug.cgi">here</a>.</p>
+<p><span style="color: red;">*</span></strong> Required Fields</p>
+<form method="post" action="post_bug.cgi" id="incidentForm" enctype="multipart/form-data"
+      onSubmit="return validateAndSubmit();">
+  <input type="hidden" id="product" name="product" value="">
+  <input type="hidden" id="component" name="component" value="">
+  <input type="hidden" id="rep_platform" name="rep_platform" value="All">
+  <input type="hidden" id="op_sys" name="op_sys" value="Other">
+  <input type="hidden" id="priority" name="priority" value="--">
+  <input type="hidden" id="version" name="version" value="other">
+  <input type="hidden" id="cc" name="cc" value="">
+  <input type="hidden" id="groups" name="groups" value="">
+  <input type="hidden" id="format" name="format" value="employee-incident">
+
+  <table>
+    <tr>
+      <td align="right" valign="top"><strong>Incident Type:</strong></td>
+      <td>
+        <select id="incident_type" name="incident_type" onchange="setType(this);">
+          <option value="safety" selected>Report a Safety Concern</option>
+          <option value="stolen">My laptop or phone was lost/stolen</option>
+        </select>
+        <div id="type_desc" style="color:red;"></div>
+      </td>
+    </tr>
+      <tr>
+      <td align="right">
+        <strong><span style="color: red;">*</span> Summary:</strong>
+      </td>
+      <td>
+        <input name="short_desc" id="short_desc" size="60" 
+               value="[% short_desc FILTER html %]">
+      </td>
+    </tr>
+    <tbody id="stolen" class="bz_default_hidden">
+      <tr class="stolen_row">
+        <td align="right"><strong>Stolen Details:</strong></td>
+        <td>
+          <table>
+          <tr>
+            <td>
+              <label for="encrypted">
+                <strong><span style="color: red;">*</span></strong>
+                To your knowledge,  was your device encrypted?
+              </label>
+            </td>
+            <td>
+              <select name="encrypted" id="encrypted">
+                <option value="">---</option>
+                <option value="No">No</option> 
+                <option value="Yes">Yes</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <label for="userdata">
+                <strong><span style="color: red;">*</span></strong>
+                Did you have any user data on your device?
+              </label>
+            </td>
+            <td>
+              <select name="userdata" id="userdata"
+                      onchange="toggleEnabled('userdata', 'Yes', 'sensitivedata');">
+                <option value="">---</option>
+                <option value="No">No</option>  
+                <option value="Yes">Yes</option>
+              </select>
+            </td> 
+           </tr>
+           </table>
+        </td>
+      </tr>
+      <tr class="stolen_row">
+        <td>&nbsp;</td>
+        <td>If yes, what sensitive data was stored on your device?</td>
+      </tr>
+      <tr class="stolen_row">
+        <td>&nbsp;</td>
+        <td>
+          <textarea name="sensitivedata" id="sensitivedata" rows="10" cols="80"></textarea>
+        </td>
+      </tr>
+      <tr class="stolen_row">
+        <td>&nbsp;</td>
+        <td>
+          <label for="rememberpasswords">
+            <strong><span style="color: red;">*</span></strong>
+            Was your browser configured to remember passwords?
+          </label>
+          <select name="rememberpasswords" id="rememberpasswords" 
+                  onchange="toggleEnabled('rememberpasswords', 'Yes', 'criticalsites');">
+            <option value="">---</option>
+            <option value="No">No</option>  
+            <option value="Yes">Yes</option>
+          </select>
+        </td>
+      </tr>
+      <tr class="stolen_row">
+        <td>&nbsp;</td>
+        <td>If yes, which critical sites were included?</td>
+      </tr>
+      <tr class="stolen_row">
+        <td>&nbsp;</td>
+        <td>
+          <textarea name="criticalsites" id="criticalsites" rows="10" cols="80"></textarea>
+        </td>
+      </tr>
+    </tbody>
+    <tr>
+      <td align="right" valign="top"><strong>Extra Notes:</strong></td>
+      <td>
+        <textarea name="comment" rows="10" cols="80">
+          [% comment FILTER html %]</textarea>
+      </td>
+    </tr>
+    <tr> 
+      <td>&nbsp;</td>
+      <td>
+        <input type="submit" id="commit" value="Submit Request">
+      </td>
+    </tr>
+  </table>
+</form>
+
+<p>
+  Thanks for contacting us. You will be notified by email of any progress made in resolving your request.
+</p>
+
+[% PROCESS global/footer.html.tmpl %]                   

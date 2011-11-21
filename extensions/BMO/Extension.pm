@@ -800,4 +800,62 @@ sub mailer_before_send {
     }
 }
 
+sub post_bug_after_creation {
+    my ($self, $args) = @_;
+    my $vars = $args->{vars};
+    my $bug = $vars->{bug};
+    my $template = Bugzilla->template;
+
+    if (Bugzilla->input_params->{format}
+        && Bugzilla->input_params->{format} eq 'employee-incident'
+        && $bug->component eq 'Server Operations: Desktop Issues')
+    {
+        my $error_mode_cache = Bugzilla->error_mode;
+        Bugzilla->error_mode(ERROR_MODE_DIE);
+
+        my $new_bug;
+        eval {
+            my $old_user = Bugzilla->user;
+            Bugzilla->set_user(Bugzilla::User->new({ name => 'nobody@mozilla.org' }));
+            my $new_user = Bugzilla->user;
+
+            # HACK: User needs to be in the editbugs and primary bug's group to allow
+            # setting of dependencies.
+            $new_user->{'groups'} = [ Bugzilla::Group->new({ name => 'editbugs' }), 
+                                      Bugzilla::Group->new({ name => 'infrasec' }) ];
+
+            my $comment;
+            $template->process('bug/create/comment-employee-incident.txt.tmpl', $vars, \$comment)
+                || ThrowTemplateError($template->error());
+
+            $new_bug = Bugzilla::Bug->create({ 
+                short_desc        => 'Investigate Lost Device',
+                product           => 'mozilla.org',
+                component         => 'Infrastructure Security',
+                status_whiteboard => '[infrasec:incident]',
+                bug_severity      => 'critical',
+                cc                => [ 'mcoates@mozilla.com' ],
+                groups            => [ 'infrasec' ], 
+                comment           => $comment,
+                op_sys            => 'All', 
+                rep_platform      => 'All',
+                version           => 'other',
+                dependson         => $bug->bug_id, 
+            });
+
+            my $recipients = { changer => $new_user };
+            Bugzilla::BugMail::Send($new_bug->id, $recipients);
+
+            Bugzilla->set_user($old_user);
+        };
+
+        Bugzilla->error_mode($error_mode_cache);
+
+        if ($@ || !$new_bug) {
+            warn "Failed to create secondary employee-incident bug: $@" if $@;
+            $vars->{'message'} = 'employee_incident_creation_failed';
+        }
+    }
+}
+
 __PACKAGE__->NAME;

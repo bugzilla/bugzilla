@@ -237,6 +237,7 @@ our %always_fileable_group = (
     'consulting'                        => 1,
     'core-security'                     => 1,
     'infra'                             => 1,
+    'infrasec'                          => 1, 
     'marketing-private'                 => 1,
     'mozilla-confidential'              => 1,
     'mozilla-corporation-confidential'  => 1,

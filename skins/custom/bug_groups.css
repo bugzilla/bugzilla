@@ -1,0 +1,24 @@
+/* colorize bugs in various groups */
+body[class*=bz_group_] {
+    background-color: #e0e0ff;
+    border-left: solid red 2px;
+    padding-left: 13px;
+}
+
+body[class*=bz_group_] #bugzilla-body {
+    background-color: inherit;
+}
+
+body.bz_group_webtools-security, 
+body.bz_group_websites-security, 
+body.bz_group_bugzilla-security {
+    background-color: #ffeeee;
+}
+
+body.bz_group_client-services-security {
+    background-color: #ffff80;
+}
+
+body.bz_group_core-security {
+    background-color: #ffe0b0;
+}

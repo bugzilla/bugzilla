@@ -1,0 +1,18 @@
+
+#bug_tracking_flags .field_label {
+    font-weight: normal !important;
+}
+
+#guided {
+    margin-top: 30px;
+}
+
+#component {
+    width: 25em;
+}
+
+.hidden_text {
+    opacity: 0;      
+    filter: alpha(opacity=0);
+}
+

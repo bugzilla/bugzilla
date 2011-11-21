@@ -30,7 +30,7 @@ use base qw(Exporter);
 
 use Bugzilla::Constants;
 use Bugzilla::WebService::Constants;
-use Bugzilla::Util;
+use Bugzilla::Hook;
 
 use Carp;
 use Data::Dumper;
@@ -62,12 +62,13 @@ sub _throw_error {
     my $datadir = bz_locations()->{'datadir'};
     # If a writable $datadir/errorlog exists, log error details there.
     if (-w "$datadir/errorlog") {
+        require Bugzilla::Util;
         require Data::Dumper;
         my $mesg = "";
         for (1..75) { $mesg .= "-"; };
         $mesg .= "\n[$$] " . time2str("%D %H:%M:%S ", time());
         $mesg .= "$name $error ";
-        $mesg .= remote_ip();
+        $mesg .= Bugzilla::Util::remote_ip();
         $mesg .= Bugzilla->user->login;
         $mesg .= (' actually ' . Bugzilla->sudoer->login) if Bugzilla->sudoer;
         $mesg .= "\n";
@@ -115,7 +116,6 @@ sub _throw_error {
         {
             # Clone the hash so we aren't modifying the constant.
             my %error_map = %{ WS_ERROR_CODE() };
-            require Bugzilla::Hook;
             Bugzilla::Hook::process('webservice_error_codes', 
                                     { error_map => \%error_map });
             my $code = $error_map{$error};
@@ -186,6 +186,8 @@ sub ThrowTemplateError {
     # Try a template first; but if this one fails too, fall back
     # on plain old print statements.
     if (!$template->process("global/code-error.html.tmpl", $vars)) {
+        require Bugzilla::Util;
+        import Bugzilla::Util qw(html_quote);
         my $maintainer = Bugzilla->params->{'maintainer'};
         my $error = html_quote($vars->{'template_error_msg'});
         my $error2 = html_quote($template->error());

@@ -47,6 +47,7 @@ use base qw(Exporter);
 
 use Bugzilla::Constants;
 use Bugzilla::RNG qw(irand);
+use Bugzilla::Error;
 
 use Date::Parse;
 use Date::Format;
@@ -639,10 +640,9 @@ sub get_text {
     $vars ||= {};
     $vars->{'message'} = $name;
     my $message;
-    if (!$template->process('global/message.txt.tmpl', $vars, \$message)) {
-        require Bugzilla::Error;
-        Bugzilla::Error::ThrowTemplateError($template->error());
-    }
+    $template->process('global/message.txt.tmpl', $vars, \$message)
+      || ThrowTemplateError($template->error());
+
     # Remove the indenting that exists in messages.html.tmpl.
     $message =~ s/^    //gm;
     return $message;
@@ -657,13 +657,10 @@ sub template_var {
     my %vars;
     # Note: If we suddenly start needing a lot of template_var variables,
     # they should move into their own template, not field-descs.
-    my $result = $template->process('global/field-descs.none.tmpl', 
-                                    { vars => \%vars, in_template_var => 1 });
-    # Bugzilla::Error can't be "use"d in Bugzilla::Util.
-    if (!$result) {
-        require Bugzilla::Error;
-        Bugzilla::Error::ThrowTemplateError($template->error);
-    }
+    $template->process('global/field-descs.none.tmpl',
+                       { vars => \%vars, in_template_var => 1 })
+      || ThrowTemplateError($template->error());
+
     $cache->{$lang} = \%vars;
     return $vars{$name};
 }
@@ -688,11 +685,8 @@ use constant UTF8_ACCIDENTAL => qw(shiftjis big5-eten euc-kr euc-jp);
 sub detect_encoding {
     my $data = shift;
 
-    if (!Bugzilla->feature('detect_charset')) {
-        require Bugzilla::Error;
-        Bugzilla::Error::ThrowCodeError('feature_disabled',
-            { feature => 'detect_charset' });
-    }
+    Bugzilla->feature('detect_charset')
+      || ThrowCodeError('feature_disabled', { feature => 'detect_charset' });
 
     require Encode::Detect::Detector;
     import Encode::Detect::Detector 'detect';

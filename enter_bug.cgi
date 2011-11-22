@@ -395,7 +395,7 @@ $vars->{'qa_contact_disabled'}  = !$has_editbugs;
 
 $vars->{'cloned_bug_id'}         = $cloned_bug_id;
 
-$vars->{'token'}             = issue_session_token('createbug:');
+$vars->{'token'} = issue_session_token('create_bug');
 
 
 my @enter_bug_fields = grep { $_->enter_bug } Bugzilla->active_custom_fields;

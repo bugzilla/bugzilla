@@ -920,6 +920,10 @@
       No changes made to version <em>[% version.name FILTER html %]</em>.
     [% END %]
 
+  [% ELSIF message_tag == "whine_query_failed" %]
+    The query '[% query_name FILTER html %]' from [% author.login FILTER html %]
+    failed: [% reason FILTER html %]
+
   [% ELSIF message_tag == "workflow_updated" %]
     The workflow has been updated.
   [% END %]

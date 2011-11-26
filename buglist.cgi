@@ -82,7 +82,7 @@ if (defined($searchstring)) {
 # If configured to not allow empty words, reject empty searches from the
 # Find a Specific Bug search form, including words being a single or 
 # several consecutive whitespaces only.
-if (!Bugzilla->params->{'specific_search_allow_empty_words'}
+if (!Bugzilla->params->{'search_allow_no_criteria'}
     && defined($cgi->param('content')) && $cgi->param('content') =~ /^\s*$/)
 {
     ThrowUserError("buglist_parameters_required");

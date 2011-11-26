@@ -452,7 +452,15 @@ sub run_queries {
             'params' => scalar $searchparams->Vars,
             'user'   => $args->{'recipient'}, # the search runs as the recipient
         );
-        my $sqlquery = $search->sql;
+        # If a query fails for whatever reason, it shouldn't kill the script.
+        my $sqlquery = eval { $search->sql };
+        if ($@) {
+            say get_text('whine_query_failed', { query_name => $thisquery->{'name'},
+                                                 author => $args->{'author'},
+                                                 reason => $@ });
+            next;
+        }
+
         $sth = $dbh->prepare($sqlquery);
         $sth->execute;
 

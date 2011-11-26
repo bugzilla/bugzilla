@@ -1168,6 +1168,11 @@ sub _sql_where {
     if ($clause_sql) {
         $where .= "\n   AND " . $clause_sql;
     }
+    elsif (!Bugzilla->params->{'search_allow_no_criteria'}
+           && !$self->{allow_unlimited})
+    {
+        ThrowUserError('buglist_parameters_required');
+    }
     return $where;
 }
 

@@ -51,9 +51,14 @@
                   "access the advanced query page. It's in URL parameter " _
                   "format, which makes it hard to read. Sorry!",
 
-  specific_search_allow_empty_words => 
-    "Whether to allow a search on the 'Simple Search' page with an empty"
-    _ " 'Words' field.",
+  search_allow_no_criteria =>
+    "Unless the code explicitly allows all $terms.bugs to be returned, this " _
+    "parameter permits to block the execution of queries with no criteria. " _
+    "When turned off, a query must have some criteria specified to limit " _
+    "the number of $terms.bugs returned to the user. When turned on, a user " _
+    "is allowed to run a query with no criteria and get all $terms.bugs he can " _
+    "see in his list. Turning this parameter on is not recommended on large " _
+    "installations.",
 
   default_search_limit =>
     "By default, $terms.Bugzilla limits searches done in the web"

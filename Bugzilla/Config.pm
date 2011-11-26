@@ -193,6 +193,11 @@ sub update_params {
         $new_params{'ssl_redirect'} = 1;
     }
 
+    # "specific_search_allow_empty_words" has been renamed to "search_allow_no_criteria".
+    if (exists $param->{'specific_search_allow_empty_words'}) {
+        $new_params{'search_allow_no_criteria'} = $param->{'specific_search_allow_empty_words'};
+    }
+
     # --- DEFAULTS FOR NEW PARAMS ---
 
     _load_params unless %params;

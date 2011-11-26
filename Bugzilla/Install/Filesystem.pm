@@ -46,6 +46,7 @@ our @EXPORT = qw(
     update_filesystem
     create_htaccess
     fix_all_file_permissions
+    fix_dir_permissions
     fix_file_permissions
 );
 
@@ -645,6 +646,26 @@ sub _update_old_charts {
     } 
 }
 
+sub fix_dir_permissions {
+    my ($dir) = @_;
+    return if ON_WINDOWS;
+    # Note that _get_owner_and_group is always silent here.
+    my ($owner_id, $group_id) = _get_owner_and_group();
+
+    my $perms;
+    my $fs = FILESYSTEM();
+    if ($perms = $fs->{recurse_dirs}->{$dir}) {
+        _fix_perms_recursively($dir, $owner_id, $group_id, $perms);
+    }
+    elsif ($perms = $fs->{all_dirs}->{$dir}) {
+        _fix_perms($dir, $owner_id, $group_id, $perms);
+    }
+    else {
+        # Do nothing. We know nothing about this directory.
+        warn "Unknown directory $dir";
+    }
+}
+
 sub fix_file_permissions {
     my ($file) = @_;
     return if ON_WINDOWS;
@@ -842,6 +863,12 @@ Params:      C<$output> - C<true> if you want this function to print
                  out information about what it's doing.
 
 Returns:     nothing
+
+=item C<fix_dir_permissions>
+
+Given the name of a directory, its permissions will be fixed according to
+how they are supposed to be set in Bugzilla's current configuration.
+If it fails to set the permissions, a warning will be printed to STDERR.
 
 =item C<fix_file_permissions>
 

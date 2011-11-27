@@ -444,11 +444,17 @@ sub run_queries {
         # Bugzilla::Search to execute a saved query.  It's exceedingly weird,
         # but that's how it works.
         my $searchparams = new Bugzilla::CGI($savedquery);
-        my $search = new Bugzilla::Search(
+        my $search = eval { new Bugzilla::Search(
             'fields' => \@searchfields,
             'params' => $searchparams,
             'user'   => $args->{'recipient'}, # the search runs as the recipient
-        );
+        ) };
+        if ($@) {
+            print STDERR get_text('whine_query_failed', { query_name => $thisquery->{'name'},
+                                                          author => $args->{'author'},
+                                                          reason => $@ }) . "\n";
+            next;
+        }
         my $sqlquery = $search->getSQL();
         $sth = $dbh->prepare($sqlquery);
         $sth->execute;

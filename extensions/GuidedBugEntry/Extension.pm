@@ -98,7 +98,7 @@ sub _init_vars {
     my @open_states = BUG_STATE_OPEN();
     $vars->{'open_states'} = \@open_states;
 
-    $vars->{'token'} = issue_session_token('createbug:');
+    $vars->{'token'} = issue_session_token('create_bug');
 
     $vars->{'platform'} = detect_platform();
     $vars->{'op_sys'} = detect_op_sys();

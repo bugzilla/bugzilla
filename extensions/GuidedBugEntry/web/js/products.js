@@ -61,7 +61,17 @@ var products = {
   },
 
   "Fennec": {
-    related: [ "Core", "Toolkit" ],
+    related: [ "Fennec Native", "Core", "Toolkit" ],
+    detectPlatform: true,
+    support:
+      'If you are new to Firefox or Bugzilla, please consider checking ' +
+      '<a href="http://support.mozilla.com/">' +
+      '<img src="extensions/GuidedBugEntry/web/images/sumo.png" width="16" height="16" align="absmiddle">' +
+      ' <b>Firefox Help</b></a> instead of creating a bug.'
+  },
+
+  "Fennec Native": {
+    related: [ "Fennec", "Core", "Toolkit" ],
     detectPlatform: true,
     support:
       'If you are new to Firefox or Bugzilla, please consider checking ' +

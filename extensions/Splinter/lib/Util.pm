@@ -36,6 +36,29 @@ use base qw(Exporter);
     add_review_links_to_email
 );
 
+# Validates an attachment ID.
+# Takes a parameter containing the ID to be validated.
+# If the second parameter is true, the attachment ID will be validated,
+# however the current user's access to the attachment will not be checked.
+# Will return false if 1) attachment ID is not a valid number,
+# 2) attachment does not exist, or 3) user isn't allowed to access the
+# attachment.
+#
+# Returns an attachment object.
+# Based on code from attachment.cgi
+sub attachment_id_is_valid {
+    my ($attach_id, $dont_validate_access) = @_;
+
+    # Validate the specified attachment id. 
+    detaint_natural($attach_id) || return 0;
+
+    # Make sure the attachment exists in the database.
+    my $attachment = new Bugzilla::Attachment($attach_id) || return 0;
+
+    return $attachment 
+        if ($dont_validate_access || attachment_is_visible($attachment));
+}
+
 # Checks if the current user can see an attachment
 # Based on code from attachment.cgi
 sub attachment_is_visible {
@@ -51,15 +74,9 @@ sub attachment_is_visible {
 
 sub attachment_id_is_patch {
     my $attach_id = shift;
-    my $attachment = new Bugzilla::Attachment($attach_id);
+    my $attachment = attachment_id_is_valid($attach_id);
 
-    # The check on attachment_is_visible here is to prevent a tiny
-    # information leak where someone could check if a private
-    # attachment was a patch by creating text that would get linkified
-    # differently. Likely excess paranoia
-    return (defined $attachment
-            && attachment_is_visible($attachment) 
-            && $attachment->ispatch);
+    return ($attachment && $attachment->ispatch);
 }
 
 sub get_review_url {
@@ -84,17 +101,18 @@ sub get_review_url {
 sub get_review_link {
     my ($attach_id, $link_text) = @_;
 
-    my $attachment = Bugzilla::Attachment->new($attach_id);
+    my $attachment = attachment_id_is_valid($attach_id);
 
     if ($attachment && $attachment->ispatch) {
-        return "<a href='" . html_quote(get_review_url($attachment->bug, $attach_id)) . "'>$link_text</a>";
+        return "<a href='" . html_quote(get_review_url($attachment->bug, $attach_id)) . 
+               "'>$link_text</a>";
     }
 }
 
 sub munge_create_attachment {
     my ($bug, $intro_text, $attach_id, $view_link) = @_;
 
-    if (attachment_id_is_patch ($attach_id)) {
+    if (attachment_id_is_patch($attach_id)) {
         return ("$intro_text" .
                 " View: $view_link\015\012" .
                 " Review: " . get_review_url($bug, $attach_id, 1) . "\015\012");

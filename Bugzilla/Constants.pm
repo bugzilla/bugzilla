@@ -40,6 +40,9 @@ use Memoize;
 @Bugzilla::Constants::EXPORT = qw(
     BUGZILLA_VERSION
 
+    REMOTE_FILE
+    LOCAL_FILE
+
     bz_locations
 
     IS_NULL
@@ -200,6 +203,10 @@ use Memoize;
 #
 # Bugzilla version
 use constant BUGZILLA_VERSION => "4.1.3+";
+
+# Location of the remote and local XML files to track new releases.
+use constant REMOTE_FILE => 'http://updates.bugzilla.org/bugzilla-update.xml';
+use constant LOCAL_FILE  => 'bugzilla-update.xml'; # Relative to datadir.
 
 # These are unique values that are unlikely to match a string or a number,
 # to be used in criteria for match() functions and other things. They start

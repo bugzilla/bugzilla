@@ -138,7 +138,6 @@
       enctype="multipart/form-data" onSubmit="return trySubmit();">
   <input type="hidden" id="format" name="format" value="mozlist">
   <input type="hidden" id="product" name="product" value="mozilla.org">
-  <input type="hidden" name="token" value="[% token FILTER html %]">
   <input type="hidden" id="rep_platform" name="rep_platform" value="All">
   <input type="hidden" id="op_sys" name="op_sys" value="Other">
   <input type="hidden" id="priority" name="priority" value="--">
@@ -146,6 +145,7 @@
   <input type="hidden" id="short_desc" name="short_desc" value="">
   <input type="hidden" id="component" name="component" value="">
   <input type="hidden" id="bug_severity" name="bug_severity" value="normal">
+  <input type="hidden" id="token" name="token" value="[% token FILTER html %]">
 
   <table>
   <tr id="listTypeTR" style="display: table-row;">

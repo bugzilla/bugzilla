@@ -186,7 +186,7 @@
         </span>
 
         <span class="bz_comment_user_images">
-          [% FOREACH group = comment.author.direct_group_membership %]
+          [% FOREACH group = comment.author.groups %]
             [% NEXT UNLESS group.icon_url %]
             <img src="[% group.icon_url FILTER html %]"
                  alt="[% group.name FILTER html %]"

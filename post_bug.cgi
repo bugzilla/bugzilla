@@ -68,30 +68,7 @@ if (Bugzilla->params->{disable_bug_updates}) {
 
 # Detect if the user already used the same form to submit a bug
 my $token = trim($cgi->param('token'));
-if ($token) {
-    my ($creator_id, $date, $old_bug_id) = Bugzilla::Token::GetTokenData($token);
-    unless ($creator_id
-              && ($creator_id == $user->id)
-              && ($old_bug_id =~ "^createbug:"))
-    {
-        # The token is invalid.
-        ThrowUserError('token_does_not_exist');
-    }
-
-    $old_bug_id =~ s/^createbug://;
-
-    if ($old_bug_id && (!$cgi->param('ignore_token')
-                        || ($cgi->param('ignore_token') != $old_bug_id)))
-    {
-        $vars->{'bugid'} = $old_bug_id;
-        $vars->{'allow_override'} = defined $cgi->param('ignore_token') ? 0 : 1;
-
-        print $cgi->header();
-        $template->process("bug/create/confirm-create-dupe.html.tmpl", $vars)
-           || ThrowTemplateError($template->error());
-        exit;
-    }
-}    
+check_token_data($token, 'create_bug', 'index.cgi');
 
 # do a match on the fields if applicable
 Bugzilla::User::match_field ({
@@ -175,8 +152,10 @@ foreach my $field (@multi_selects) {
 
 my $bug = Bugzilla::Bug->create(\%bug_params);
 
-# Get the bug ID back.
+# Get the bug ID back and delete the token used to create this bug.
 my $id = $bug->bug_id;
+delete_token($token);
+
 # We do this directly from the DB because $bug->creation_ts has the seconds
 # formatted out of it (which should be fixed some day).
 my $timestamp = $dbh->selectrow_array(
@@ -248,12 +227,6 @@ $vars->{'bug'} = $bug;
 Bugzilla::Hook::process('post_bug_after_creation', { vars => $vars });
 
 ThrowCodeError("bug_error", { bug => $bug }) if $bug->error;
-
-if ($token) {
-    trick_taint($token);
-    $dbh->do('UPDATE tokens SET eventdata = ? WHERE token = ?', undef, 
-             ("createbug:$id", $token));
-}
 
 my $recipients = { changer => $user };
 my $bug_sent = Bugzilla::BugMail::Send($id, $recipients);

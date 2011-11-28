@@ -92,18 +92,24 @@ YAHOO.util.Event.onDOMReady(onLoadActions);
       You can configure this notification from the
       <a href="editparams.cgi?section=general#upgrade_notification_desc">Parameters</a> page.</p>
     [% ELSIF release.error == "cannot_download" %]
-      <p>The local XML file '[% release.xml_file FILTER html %]' cannot be created.
-      Please make sure the web server can write in this directory and that you can access
+      <p>The remote file <a href="[% constants.REMOTE_FILE FILTER html %]">
+      [%~ constants.REMOTE_FILE FILTER html %]</a> cannot be downloaded
+      (reason: [% release.reason FILTER html %]).<br>
+      Either the remote server is temporarily unavailable, or your web server cannot access
       the web. If you are behind a proxy, set the
       <a href="editparams.cgi?section=advanced#proxy_url_desc">proxy_url</a> parameter correctly.</p>
+    [% ELSIF release.error == "no_write" %]
+      <p>The local XML file '[% constants.LOCAL_FILE FILTER html %]' cannot be created
+      (reason: [% release.reason FILTER html %]).<br>
+      Please make sure the web server can write into this directory.
     [% ELSIF release.error == "no_update" %]
-      <p>The local XML file '[% release.xml_file FILTER html %]' cannot be updated.
+      <p>The local XML file '[% constants.LOCAL_FILE FILTER html %]' cannot be updated.
       Please make sure the web server can edit this file.</p>
     [% ELSIF release.error == "no_access" %]
-      <p>The local XML file '[% release.xml_file FILTER html %]' cannot be read.
+      <p>The local XML file '[% constants.LOCAL_FILE FILTER html %]' cannot be read.
       Please make sure this file has the correct rights set on it.</p>
     [% ELSIF release.error == "corrupted" %]
-      <p>The local XML file '[% release.xml_file FILTER html %]' has an invalid XML format.
+      <p>The local XML file '[% constants.LOCAL_FILE FILTER html %]' has an invalid XML format.
       Please delete it and try accessing this page again.</p>
     [% ELSIF release.error == "unknown_parameter" %]
       <p>'[% Param("upgrade_notification") FILTER html %]' is not a valid notification

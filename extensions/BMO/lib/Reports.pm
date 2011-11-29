@@ -43,6 +43,15 @@ sub user_activity_report {
     my $from = trim($input->{'from'});
     my $to = trim($input->{'to'});
 
+    if ($from eq '') {
+        my $dt = DateTime->now()->subtract('weeks' => 8);
+        $from = $dt->ymd('-');
+    }
+    if ($to eq '') {
+        my $dt = DateTime->now();
+        $to = $dt->ymd('-');
+    }
+
     if ($input->{'action'} eq 'run') {
         if ($input->{'who'} eq '') {
             ThrowUserError('user_activity_missing_username');
@@ -50,7 +59,7 @@ sub user_activity_report {
         Bugzilla::User::match_field({ 'who' => {'type' => 'multi'} });
 
         ThrowUserError('user_activity_missing_from_date') unless $from;
-        my $from_time = str2time($from)
+        my $from_time = _parse_date($from)
             or ThrowUserError('user_activity_invalid_date', { date => $from });
         my $from_dt = DateTime->from_epoch(epoch => $from_time)
                               ->set_time_zone('local')
@@ -58,7 +67,7 @@ sub user_activity_report {
         $from = $from_dt->ymd();
 
         ThrowUserError('user_activity_missing_to_date') unless $to;
-        my $to_time = str2time($to)
+        my $to_time = _parse_date($to)
             or ThrowUserError('user_activity_invalid_date', { date => $to });
         my $to_dt = DateTime->from_epoch(epoch => $to_time)
                             ->set_time_zone('local')
@@ -178,11 +187,11 @@ sub user_activity_report {
         UNION ALL
 
         SELECT 
-                   'attachments.filename' AS name,
+                   'attachments.description' AS name,
                    attachments.bug_id,
                    attachments.attach_id,
                    ".$dbh->sql_date_format('attachments.creation_ts', '%Y.%m.%d %H:%i:%s')." AS ts,
-                   '' AS removed,
+                   '(new attachment)' AS removed,
                    attachments.description AS added,
                    profiles.login_name,
                    NULL AS comment_id,
@@ -264,6 +273,10 @@ sub user_activity_report {
                     next if $change{'comment'}->count == 0;
                 }
 
+                if ($attachid) {
+                    $change{'attach'} = Bugzilla::Attachment->new($attachid);
+                }
+
                 push (@$changes, \%change);
             }
         }
@@ -275,23 +288,51 @@ sub user_activity_report {
 
         $vars->{'incomplete_data'} = $incomplete_data;
         $vars->{'operations'} = \@operations;
-
-    } else {
-
-        if ($from eq '') {
-            my ($yy, $mm) = (localtime)[5, 4];
-            $from = sprintf("%4d-%02d-01", $yy + 1900, $mm + 1);
-        }
-        if ($to eq '') {
-            my ($yy, $mm, $dd) = (localtime)[5, 4, 3];
-            $to = sprintf("%4d-%02d-%02d", $yy + 1900, $mm + 1, $dd);
-        }
     }
 
     $vars->{'action'} = $input->{'action'};
     $vars->{'who'} = join(',', @who);
+    $vars->{'who_count'} = scalar @who;
     $vars->{'from'} = $from;
     $vars->{'to'} = $to;
+}
+
+sub _parse_date {
+    my ($str) = @_;
+    if ($str =~ /^(-|\+)?(\d+)([hHdDwWmMyY])$/) {
+        # relative date
+        my ($sign, $amount, $unit, $date) = ($1, $2, lc $3, time);
+        my ($sec, $min, $hour, $mday, $month, $year, $wday)  = localtime($date);
+        $amount = -$amount if $sign && $sign eq '+';
+        if ($unit eq 'w') {
+            # convert weeks to days
+            $amount = 7*$amount + $wday;
+            $unit = 'd';
+        }
+        if ($unit eq 'd') {
+            $date -= $sec + 60*$min + 3600*$hour + 24*3600*$amount;
+            return $date;
+        }
+        elsif ($unit eq 'y') {
+            return str2time(sprintf("%4d-01-01 00:00:00", $year+1900-$amount));
+        }
+        elsif ($unit eq 'm') {
+            $month -= $amount;
+            while ($month<0) { $year--; $month += 12; }
+            return str2time(sprintf("%4d-%02d-01 00:00:00", $year+1900, $month+1));
+        }
+        elsif ($unit eq 'h') {
+            # Special case 0h for 'beginning of this hour'
+            if ($amount == 0) {
+                $date -= $sec + 60*$min;
+            } else {
+                $date -= 3600*$amount;
+            }
+            return $date;
+        }
+        return undef;
+    }
+    return str2time($str);
 }
 
 sub triage_reports {

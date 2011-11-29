@@ -18,8 +18,14 @@
   #   Byron Jones <bjones@mozilla.com>
   #%]
 
+[% IF who %]
+[%   who_title = ' (' _ who _ ')' %]
+[% ELSE %]
+[%   who_title = '' %]
+[% END %]
+
 [% INCLUDE global/header.html.tmpl
-  title = "User Activity Report"
+  title = "User Activity Report" _ who_title
   yui = [ 'autocomplete', 'calendar' ]
   javascript_urls = [ "js/util.js", "js/field.js" ]
 %]
@@ -108,7 +114,9 @@
   <br>
   <table border="1" cellpadding="4" cellspacing="0" id="report">
     <tr id="report-header">
-      <th>Who</th>
+      [% IF who_count > 1 %]
+        <th>Who</th>
+      [% END %]
       <th>When</th>
       <th>[% terms.Bug %]</th>
       <th>What</th>
@@ -118,11 +126,13 @@
 
     [% FOREACH operation = operations %]
       <tr>
+        [% IF who_count > 1 %]
+          <td rowspan="[% operation.changes.size %]" valign="top">
+            [% operation.who FILTER email FILTER html %]
+          </td>
+        [% END %]
         <td rowspan="[% operation.changes.size %]" valign="top">
-          [% operation.who FILTER email FILTER html %]
-        </td>
-        <td rowspan="[% operation.changes.size %]" valign="top">
-          [% operation.when FILTER time %]
+          [% operation.when FILTER time FILTER no_break %]
         </td>
         <td rowspan="[% operation.changes.size %]" valign="top">
           [% operation.bug FILTER bug_link(operation.bug) FILTER none %]
@@ -131,8 +141,12 @@
           [% "</tr><tr>" IF loop.index > 0 %]
             <td>
               [% IF change.attachid %]
-                <a href="attachment.cgi?id=[% change.attachid FILTER uri %]">Attachment #[% change.attachid FILTER html %]</a>
-              [% ELSIF change.comment.defined && change.fieldname == 'longdesc' %]
+                <a href="attachment.cgi?id=[% change.attachid FILTER uri %]"
+                   title="[% change.attach.description FILTER html %]
+                          [%- %] - [% change.attach.filename FILTER html %]"
+                >Attachment #[% change.attachid FILTER html %]</a>
+              [% END %]
+              [%IF change.comment.defined && change.fieldname == 'longdesc' %]
                  [% "Comment $change.comment.count" FILTER bug_link(operation.bug, comment_num => change.comment.count) FILTER none %]
               [% ELSE %]
                 [%+ field_descs.${change.fieldname} FILTER html %]

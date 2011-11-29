@@ -26,7 +26,6 @@
        easier on customizers. */
     .intro, .outro {
         text-align: center;
-        width: 20em;
     }
 
     /* Hide from NN4 */
@@ -49,24 +48,32 @@
     {
         font-weight: bold;
     }
-    
+
     .bz_common_actions {
-        display: block;
-        height: 170px;
-        width: 145px;
-        float: left;
-        margin: 0 2ex 2em 0;
         text-align: center;
     }
-    .bz_common_actions span {
+    .bz_common_actions ul {
+        list-style-type: none;
+        padding: 0;
+    }
+    .bz_common_actions ul li {
+        display: inline;
+        vertical-align: top;
+    }
+    .bz_common_actions ul li a {
+        display: inline-block;
+        height: 170px;
+        width: 145px;
+        margin: 0 2ex 2em 0;
+    }
+    .bz_common_actions ul li a span {
         position: relative;
-        top: 95%;
+        top: 90%;
         font-weight: bold;
     }
-    .bz_common_actions,
-    .bz_common_actions:visited,
-    .bz_common_actions:hover
-    {
+    .bz_common_actions a,
+    .bz_common_actions a:visited,
+    .bz_common_actions a:hover {
         text-decoration: none;
     }
     #enter_bug { background: url(index/file-a-bug.png)     no-repeat; }

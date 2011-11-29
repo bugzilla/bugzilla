@@ -2838,6 +2838,7 @@ sub add_see_also {
     $input = $input->name if blessed($input);
 
     $input = trim($input);
+    return if !$input;
 
     my ($class, $uri) = Bugzilla::BugUrl->class_for($input);
 

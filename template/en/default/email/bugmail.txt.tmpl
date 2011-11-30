@@ -52,7 +52,7 @@ You are receiving this mail because:
 [%+ reason_lines.join("\n") %]
 
 [% BLOCK generate_diffs %]
-  [% urlbase %]show_bug.cgi?id=[% bug.id %][% "#c" _ new_comments.first.count IF new_comments.size > 0 %]
+  [% urlbase %]show_bug.cgi?id=[% bug.id %]
 
 [%+ last_changer = "" %]
   [% FOREACH change = diffs %]

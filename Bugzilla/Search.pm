@@ -738,6 +738,21 @@ sub boolean_charts_to_custom_search {
     }
 }
 
+sub invalid_order_columns {
+   my ($self) = @_;
+   my @invalid_columns;
+   foreach my $order ($self->_input_order) {
+       next if defined $self->_validate_order_column($order);
+       push(@invalid_columns, $order);
+   }
+   return \@invalid_columns;
+}
+
+sub order {
+   my ($self) = @_;
+   return $self->_valid_order;
+}
+
 ######################
 # Internal Accessors #
 ######################
@@ -803,7 +818,7 @@ sub _extra_columns {
     my ($self) = @_;
     # Everything that's going to be in the ORDER BY must also be
     # in the SELECT.
-    $self->{extra_columns} ||= [ $self->_input_order_columns ];
+    $self->{extra_columns} ||= [ $self->_valid_order_columns ];
     return @{ $self->{extra_columns} };
 }
 
@@ -854,10 +869,32 @@ sub _sql_select {
 # The "order" that was requested by the consumer, exactly as it was
 # requested.
 sub _input_order { @{ $_[0]->{'order'} || [] } }
-# The input order with just the column names, and no ASC or DESC.
-sub _input_order_columns {
+# Requested order with invalid values removed and old names translated
+sub _valid_order {
     my ($self) = @_;
-    return map { (split_order_term($_))[0] } $self->_input_order;
+    return map { ($self->_validate_order_column($_)) } $self->_input_order;
+}
+# The valid order with just the column names, and no ASC or DESC.
+sub _valid_order_columns {
+    my ($self) = @_;
+    return map { (split_order_term($_))[0] } $self->_valid_order;
+}
+
+sub _validate_order_column {
+    my ($self, $order_item) = @_;
+
+    # Translate old column names
+    my ($field, $direction) = split_order_term($order_item);
+    $field = translate_old_column($field);
+
+    # Only accept valid columns
+    return if (!exists COLUMNS->{$field});
+
+    # Relevance column can be used only with one or more fulltext searches
+    return if ($field eq 'relevance' && !COLUMNS->{$field}->{name});
+
+    $direction = " $direction" if $direction;
+    return "$field$direction";
 }
 
 # A hashref that describes all the special stuff that has to be done
@@ -889,7 +926,7 @@ sub _sql_order_by {
     my ($self) = @_;
     if (!$self->{sql_order_by}) {
         my @order_by = map { $self->_translate_order_by_column($_) }
-                           $self->_input_order;
+                           $self->_valid_order;
         $self->{sql_order_by} = \@order_by;
     }
     return @{ $self->{sql_order_by} };
@@ -1033,7 +1070,7 @@ sub _select_order_joins {
         my @column_join = $self->_column_join($field);
         push(@joins, @column_join);
     }
-    foreach my $field ($self->_input_order_columns) {
+    foreach my $field ($self->_valid_order_columns) {
         my $join_info = $self->_special_order->{$field}->{join};
         if ($join_info) {
             # Don't let callers modify SPECIAL_ORDER.
@@ -1196,7 +1233,7 @@ sub _sql_group_by {
 
     # And all items from ORDER BY must be in the GROUP BY. The above loop 
     # doesn't catch items that were put into the ORDER BY from SPECIAL_ORDER.
-    foreach my $column ($self->_input_order_columns) {
+    foreach my $column ($self->_valid_order_columns) {
         my $special_order = $self->_special_order->{$column}->{order};
         next if !$special_order;
         push(@extra_group_by, @$special_order);

@@ -698,69 +698,39 @@ if (!$order || $order =~ /^reuse/i) {
     }
 }
 
+my @order_columns;
 if ($order) {
     # Convert the value of the "order" form field into a list of columns
     # by which to sort the results.
     ORDER: for ($order) {
         /^Bug Number$/ && do {
-            $order = "bug_id";
+            @order_columns = ("bug_id");
             last ORDER;
         };
         /^Importance$/ && do {
-            $order = "priority,bug_severity";
+            @order_columns = ("priority", "bug_severity");
             last ORDER;
         };
         /^Assignee$/ && do {
-            $order = "assigned_to,bug_status,priority,bug_id";
+            @order_columns = ("assigned_to", "bug_status", "priority",
+                              "bug_id");
             last ORDER;
         };
         /^Last Changed$/ && do {
-            $order = "changeddate,bug_status,priority,assigned_to,bug_id";
+            @order_columns = ("changeddate", "bug_status", "priority",
+                              "assigned_to", "bug_id");
             last ORDER;
         };
         do {
-            my (@order, @invalid_fragments);
-
-            # A custom list of columns.  Make sure each column is valid.
-            foreach my $fragment (split(/,/, $order)) {
-                $fragment = trim($fragment);
-                next unless $fragment;
-                my ($column_name, $direction) = split_order_term($fragment);
-                $column_name = translate_old_column($column_name);
-
-                # Special handlings for certain columns
-                next if $column_name eq 'relevance' && !$fulltext;
-                                
-                if (exists $columns->{$column_name}) {
-                    $direction = " $direction" if $direction;
-                    push(@order, "$column_name$direction");
-                }
-                else {
-                    push(@invalid_fragments, $fragment);
-                }
-            }
-            if (scalar @invalid_fragments) {
-                $vars->{'message'} = 'invalid_column_name';
-                $vars->{'invalid_fragments'} = \@invalid_fragments;
-            }
-
-            $order = join(",", @order);
-            # Now that we have checked that all columns in the order are valid,
-            # detaint the order string.
-            trick_taint($order) if $order;
+            # A custom list of columns. Bugzilla::Search will validate items.
+            @order_columns = split(/\s*,\s*/, $order);
         };
     }
 }
 
-if (!$order) {
+if (!scalar @order_columns) {
     # DEFAULT
-    $order = "bug_status,priority,assigned_to,bug_id";
-}
-
-my @orderstrings = split(/,\s*/, $order);
-
-if ($fulltext and grep { /^relevance/ } @orderstrings) {
-    $vars->{'message'} = 'buglist_sorted_by_relevance'
+    @order_columns = ("bug_status", "priority", "assigned_to", "bug_id");
 }
 
 # In the HTML interface, by default, we limit the returned results,
@@ -774,9 +744,19 @@ if ($format->{'extension'} eq 'html' && !defined $params->param('limit')) {
 # Generate the basic SQL query that will be used to generate the bug list.
 my $search = new Bugzilla::Search('fields' => \@selectcolumns, 
                                   'params' => scalar $params->Vars,
-                                  'order' => \@orderstrings);
+                                  'order' => \@order_columns);
 my $query = $search->sql;
 $vars->{'search_description'} = $search->search_description;
+$order = join(',', $search->order);
+
+if (scalar @{$search->invalid_order_columns}) {
+    $vars->{'message'} = 'invalid_column_name';
+    $vars->{'invalid_fragments'} = $search->invalid_order_columns;
+}
+
+if ($fulltext and grep { /^relevance/ } $search->order) {
+    $vars->{'message'} = 'buglist_sorted_by_relevance'
+}
 
 # We don't want saved searches and other buglist things to save
 # our default limit.

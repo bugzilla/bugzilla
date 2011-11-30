@@ -966,6 +966,9 @@ sub update {
                                 join(', ', map { $_->name } @$added_see)];
     }
 
+    $_->update foreach @{ $self->{_update_ref_bugs} || [] };
+    delete $self->{_update_ref_bugs};
+
     # Log bugs_activity items
     # XXX Eventually, when bugs_activity is able to track the dupe_id,
     # this code should go below the duplicates-table-updating code below.
@@ -2848,12 +2851,13 @@ sub remove_group {
 }
 
 sub add_see_also {
-    my ($self, $input) = @_;
+    my ($self, $input, $skip_recursion) = @_;
 
     # This is needed by xt/search.t.
     $input = $input->name if blessed($input);
 
     $input = trim($input);
+    return if !$input;
 
     my ($class, $uri) = Bugzilla::BugUrl->class_for($input);
 
@@ -2863,15 +2867,6 @@ sub add_see_also {
     my $field_values = $class->run_create_validators($params);
     $uri = $field_values->{value};
     $field_values->{value} = $uri->as_string;
-
-    # If this is a link to a local bug then save the
-    # ref bug id for sending changes email.
-    if ($class->isa('Bugzilla::BugUrl::Bugzilla::Local')) {
-        my $ref_bug = $field_values->{ref_bug};
-        my $self_url = $class->local_uri($self->id);
-        push @{ $self->{see_also_changes} }, $ref_bug->id
-            if !grep { $_->name eq $self_url } @{ $ref_bug->see_also };
-    }
 
     # We only add the new URI if it hasn't been added yet. URIs are
     # case-sensitive, but most of our DBs are case-insensitive, so we do
@@ -2886,13 +2881,22 @@ sub add_see_also {
                                                newvalue => $value,
                                                privs    => $privs });
         }
-
+        # If this is a link to a local bug then save the
+        # ref bug id for sending changes email.
+        my $ref_bug = delete $field_values->{ref_bug};
+        if ($class->isa('Bugzilla::BugUrl::Bugzilla::Local')
+            and !$skip_recursion)
+        {
+            $ref_bug->add_see_also($self->id, 'skip_recursion');
+            push @{ $self->{_update_ref_bugs} }, $ref_bug;
+            push @{ $self->{see_also_changes} }, $ref_bug->id;
+        }
         push @{ $self->{see_also} }, bless ($field_values, $class);
     }
 }
 
 sub remove_see_also {
-    my ($self, $url) = @_;
+    my ($self, $url, $skip_recursion) = @_;
     my $see_also = $self->see_also;
 
     # This is needed by xt/search.t.
@@ -2900,17 +2904,6 @@ sub remove_see_also {
 
     my ($removed_bug_url, $new_see_also) =
         part { lc($_->name) ne lc($url) } @$see_also;
- 
-    # Since we remove also the url from the referenced bug,
-    # we need to notify changes for that bug too.
-    $removed_bug_url = $removed_bug_url->[0];
-    if ($removed_bug_url
-        and $removed_bug_url->isa('Bugzilla::BugUrl::Bugzilla::Local')
-        and defined $removed_bug_url->ref_bug_url)
-    {
-        push @{ $self->{see_also_changes} },
-             $removed_bug_url->ref_bug_url->bug_id;
-    }
 
     my $privs;
     my $can = $self->check_can_change_field('see_also', $see_also, $new_see_also, \$privs);
@@ -2918,6 +2911,23 @@ sub remove_see_also {
         ThrowUserError('illegal_change', { field    => 'see_also',
                                            oldvalue => $url,
                                            privs    => $privs });
+    }
+
+    # Since we remove also the url from the referenced bug,
+    # we need to notify changes for that bug too.
+    $removed_bug_url = $removed_bug_url->[0];
+    if (!$skip_recursion and $removed_bug_url
+        and $removed_bug_url->isa('Bugzilla::BugUrl::Bugzilla::Local'))
+    {
+        my $ref_bug
+            = Bugzilla::Bug->check($removed_bug_url->ref_bug_url->bug_id);
+
+        if (Bugzilla->user->can_edit_product($ref_bug->product_id)) {
+            my $self_url = $removed_bug_url->local_uri($self->id);
+            $ref_bug->remove_see_also($self_url, 'skip_recursion');
+            push @{ $self->{_update_ref_bugs} }, $ref_bug;
+            push @{ $self->{see_also_changes} }, $ref_bug->id;
+        }
     }
 
     $self->{see_also} = $new_see_also || [];

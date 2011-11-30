@@ -140,14 +140,29 @@ function custom_search_close_paren() {
 // using the query string, which query.cgi can read to re-create the page
 // exactly as the user had it before.
 function fix_query_string(form_member) {
-    if (!(window.history && window.history.replaceState))
+    // window.History comes from history.js.
+    // It falls back to the normal window.history object for HTML5 browsers.
+    if (!(window.History && window.History.replaceState))
         return;
 
     var form = YAHOO.util.Dom.getAncestorByTagName(form_member, 'form');
     var query = YAHOO.util.Connect.setForm(form);
-    window.history.replaceState(null, document.title, '?' + query);
+    window.History.replaceState(null, document.title, '?' + query);
 }
 
+// Browsers that do not support HTML5's history.replaceState gain an emulated
+// version via history.js, with the full query_string in the location's hash.
+// We rewrite the URL to include the hash and redirect to the new location,
+// which causes custom search fields to work.
+function redirect_html4_browsers() {
+    var hash = document.location.hash;
+    if (hash == '') return;
+    hash = hash.substring(1);
+    if (hash.substring(0, 10) != 'query.cgi?') return;
+    var url = document.location + "";
+    url = url.substring(0, url.indexOf('query.cgi#')) + hash;
+    document.location = url;
+}
 
 function _cs_fix_ids(parent, preserve_values) {
     // Update the label of the checkbox.

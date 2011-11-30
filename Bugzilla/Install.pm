@@ -93,6 +93,8 @@ sub SETTINGS {
     # 2011-06-21 glob@mozilla.com -- Bug 589128
     email_format       => { options => ['html', 'text_only'],
                             default => 'html' },
+    # 2011-10-11 glob@mozilla.com -- Bug 301656
+    requestee_cc       => { options => ['on', 'off'], default => 'on' },
     }
 };
 

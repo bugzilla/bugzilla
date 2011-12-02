@@ -2413,6 +2413,11 @@ ReadOnly: ENTRY, NA/NA, CANEDIT
               several types available:
                <simplelist>
                  <member>
+                   Bug ID: A field where you can enter the ID of another bug from
+                   the same Bugzilla installation. To point to a bug in a remote
+                   installation, use the See Also field instead.
+                 </member>
+                 <member>
                    Large Text Box: A multiple line box for entering free text.
                  </member>
                  <member>

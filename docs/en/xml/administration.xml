@@ -2427,6 +2427,16 @@ ReadOnly: ENTRY, NA/NA, CANEDIT
               be displayed at all. Obsolete Custom Fields are hidden.
             </para>
           </listitem>
+
+          <listitem>
+            <para>
+              <emphasis>Is mandatory:</emphasis>
+              Boolean that determines whether this field must be set.
+              For single and multi-select fields, this means that a (non-default)
+              value must be selected, and for text and date fields, some text
+              must be entered.
+            </para>
+          </listitem>
         </itemizedlist>
       </para>
     </section>

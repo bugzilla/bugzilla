@@ -55,6 +55,7 @@ use Bugzilla::Keyword;
 use Data::Dumper;
 use Date::Format;
 use Date::Parse;
+use Scalar::Util qw(blessed);
 use List::MoreUtils qw(all part uniq);
 use POSIX qw(INT_MAX);
 use Storable qw(dclone);
@@ -509,9 +510,14 @@ use constant COLUMN_JOINS => {
 # and we don't want it to happen at compile time, so we have it as a
 # subroutine.
 sub COLUMNS {
+    my $invocant = shift;
+    my $user = blessed($invocant) ? $invocant->_user : Bugzilla->user;
     my $dbh = Bugzilla->dbh;
     my $cache = Bugzilla->request_cache;
-    return $cache->{search_columns} if defined $cache->{search_columns};
+
+    if (defined $cache->{search_columns}->{$user->id}) {
+        return $cache->{search_columns}->{$user->id};
+    }
 
     # These are columns that don't exist in fielddefs, but are valid buglist
     # columns. (Also see near the bottom of this function for the definition
@@ -567,10 +573,7 @@ sub COLUMNS {
 
     foreach my $col (@email_fields) {
         my $sql = "map_${col}.login_name";
-        # XXX This needs to be generated inside an accessor instead,
-        #     probably, because it should use $self->_user to determine
-        #     this, not Bugzilla->user.
-        if (!Bugzilla->user->id) {
+        if (!$user->id) {
              $sql = $dbh->sql_string_until($sql, $dbh->quote('@'));
         }
         $special_sql{$col} = $sql;
@@ -610,7 +613,10 @@ sub COLUMNS {
 }
 
 sub REPORT_COLUMNS {
-    my $columns = dclone(COLUMNS);
+    my $invocant = shift;
+    my $user = blessed($invocant) ? $invocant->_user : Bugzilla->user;
+
+    my $columns = dclone(blessed($invocant) ? $invocant->COLUMNS : COLUMNS);
     # There's no reason to support reporting on unique fields.
     # Also, some other fields don't make very good reporting axises,
     # or simply don't work with the current reporting system.
@@ -625,7 +631,7 @@ sub REPORT_COLUMNS {
 
     # If you're not a time-tracker, you can't use time-tracking
     # columns.
-    if (!Bugzilla->user->is_timetracker) {
+    if (!$user->is_timetracker) {
         push(@no_report_columns, TIMETRACKING_FIELDS);
     }
 
@@ -841,7 +847,7 @@ sub _sql_select {
         my $alias = $column;
         # Aliases cannot contain dots in them. We convert them to underscores.
         $alias =~ s/\./_/g;
-        my $sql = COLUMNS->{$column}->{name} . " AS $alias";
+        my $sql = $self->COLUMNS->{$column}->{name} . " AS $alias";
         push(@sql_fields, $sql);
     }
     return @sql_fields;
@@ -1190,7 +1196,7 @@ sub _sql_group_by {
     my @extra_group_by;
     foreach my $column ($self->_select_columns) {
         next if $self->_skip_group_by->{$column};
-        my $sql = COLUMNS->{$column}->{name};
+        my $sql = $self->COLUMNS->{$column}->{name};
         push(@extra_group_by, $sql);
     }
 
@@ -2299,11 +2305,11 @@ sub _content_matches {
     #
     # We build the relevance SQL by modifying the COLUMNS list directly,
     # which is kind of a hack but works.
-    my $current = COLUMNS->{'relevance'}->{name};
+    my $current = $self->COLUMNS->{'relevance'}->{name};
     $current = $current ? "$current + " : '';
     # For NOT searches, we just add 0 to the relevance.
     my $select_term = $operator =~ /not/ ? 0 : "($current$rterm1 + $rterm2)";
-    COLUMNS->{'relevance'}->{name} = $select_term;
+    $self->COLUMNS->{'relevance'}->{name} = $select_term;
 }
 
 sub _long_descs_count {
@@ -2353,13 +2359,13 @@ sub _work_time_changedbefore_after {
 sub _work_time {
     my ($self, $args) = @_;
     $self->_add_extra_column('actual_time');
-    $args->{full_field} = COLUMNS->{actual_time}->{name};
+    $args->{full_field} = $self->COLUMNS->{actual_time}->{name};
 }
 
 sub _percentage_complete {
     my ($self, $args) = @_;
     
-    $args->{full_field} = COLUMNS->{percentage_complete}->{name};
+    $args->{full_field} = $self->COLUMNS->{percentage_complete}->{name};
 
     # We need actual_time in _select_columns, otherwise we can't use
     # it in the expression for searching percentage_complete.

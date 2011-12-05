@@ -192,18 +192,6 @@ sub sql_string_concat {
     return '(CAST(' . join(' AS text) || CAST(', @params) . ' AS text))';
 }
 
-sub sql_string_until {
-    my ($self, $string, $substring) = @_;
-
-    # PostgreSQL does not permit a negative substring length; therefore we
-    # use CASE to only perform the SUBSTRING operation when $substring can
-    # be found withing $string.
-    my $position = $self->sql_position($substring, $string);
-    return "CASE WHEN $position != 0"
-             . " THEN SUBSTRING($string FROM 1 FOR $position - 1)"
-             . " ELSE $string END";
-}
-
 # Tell us whether or not a particular sequence exists in the DB.
 sub bz_sequence_exists {
     my ($self, $seq_name) = @_;

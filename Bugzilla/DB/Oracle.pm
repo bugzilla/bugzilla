@@ -40,6 +40,8 @@ use base qw(Bugzilla::DB);
 
 use DBD::Oracle;
 use DBD::Oracle qw(:ora_types);
+use List::Util qw(max);
+
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Util;
@@ -50,6 +52,8 @@ use Bugzilla::Util;
 use constant EMPTY_STRING  => '__BZ_EMPTY_STR__';
 use constant ISOLATION_LEVEL => 'READ COMMITTED';
 use constant BLOB_TYPE => { ora_type => ORA_BLOB };
+# The max size allowed for LOB fields, in kilobytes.
+use constant MIN_LONG_READ_LEN => 32 * 1024;
 use constant FULLTEXT_OR => ' OR ';
 
 sub new {
@@ -68,8 +72,8 @@ sub new {
     my $dsn = "dbi:Oracle:host=$host;sid=$dbname";
     $dsn .= ";port=$port" if $port;
     my $attrs = { FetchHashKeyName => 'NAME_lc',  
-                  LongReadLen => ( Bugzilla->params->{'maxattachmentsize'}
-                                     || 1000 ) * 1024, 
+                  LongReadLen => max(Bugzilla->params->{'maxattachmentsize'},
+                                     MIN_LONG_READ_LEN) * 1024,
                 };
     my $self = $class->db_new({ dsn => $dsn, user => $user, 
                                 pass => $pass, attrs => $attrs });

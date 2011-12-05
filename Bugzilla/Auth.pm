@@ -202,7 +202,8 @@ sub _handle_login_result {
             # account, but just an email address. So we use the
             # installation's default language for sending the email.
             my $default_settings = Bugzilla::User::Setting::get_defaults();
-            my $template = Bugzilla->template_inner($default_settings->{lang});
+            my $template = Bugzilla->template_inner(
+                               $default_settings->{lang}->{default_value});
             my $vars = {
                 locked_user => $user,
                 attempts    => $attempts,

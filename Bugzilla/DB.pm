@@ -397,8 +397,11 @@ sub sql_string_concat {
 
 sub sql_string_until {
     my ($self, $string, $substring) = @_;
-    return "SUBSTRING($string FROM 1 FOR " .
-                      $self->sql_position($substring, $string) . " - 1)";
+
+    my $position = $self->sql_position($substring, $string);
+    return "CASE WHEN $position != 0"
+             . " THEN SUBSTR($string, 1, $position - 1)"
+             . " ELSE $string END";
 }
 
 sub sql_in {

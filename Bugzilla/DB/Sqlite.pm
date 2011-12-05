@@ -237,12 +237,6 @@ sub sql_date_math {
     return "DATETIME($date, '$operator' || $interval || ' $units')";
 }
 
-sub sql_string_until {
-    my ($self, $string, $substring) = @_;
-    my $position = $self->sql_position($substring, $string);
-    return "SUBSTR($string, 1, $position - 1)"
-}
-
 ###############
 # bz_ methods #
 ###############

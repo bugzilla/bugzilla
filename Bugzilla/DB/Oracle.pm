@@ -160,13 +160,6 @@ sub sql_string_concat {
     return 'CONCAT(' . join(', ', @params) . ')';
 }
 
-sub sql_string_until {
-    my ($self, $string, $substring) = @_;
-    return "SUBSTR($string, 1, " 
-           . $self->sql_position($substring, $string)
-           . " - 1)";
-}
-
 sub sql_to_days {
     my ($self, $date) = @_;
 

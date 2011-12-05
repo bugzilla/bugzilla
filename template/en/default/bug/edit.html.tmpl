@@ -490,15 +490,11 @@
 [%############################################################################%]
 [% BLOCK section_url_keyword_whiteboard %]
   <tr>
-    <td class="field_label">
-      <label for="bug_file_loc" accesskey="u"><b>
-        [% IF is_safe_url(bug.bug_file_loc) %]
-          <a href="[% bug.bug_file_loc FILTER html %]"><u>U</u>RL</a>
-        [% ELSE %]
-          <u>U</u>RL
-        [% END %]
-      [%%]</b></label>:
-    </td>
+    [% INCLUDE "bug/field-label.html.tmpl"
+      field = bug_fields.bug_file_loc
+      editable = 1
+      accesskey = "u"
+    %]
     <td>
       [% IF bug.check_can_change_field("bug_file_loc", 0, 1) %]
         <span id="bz_url_edit_container" class="bz_default_hidden"> 

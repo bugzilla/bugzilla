@@ -608,8 +608,8 @@ sub COLUMNS {
 
     Bugzilla::Hook::process('buglist_columns', { columns => \%columns });
 
-    $cache->{search_columns} = \%columns;
-    return $cache->{search_columns};
+    $cache->{search_columns}->{$user->id} = \%columns;
+    return $cache->{search_columns}->{$user->id};
 }
 
 sub REPORT_COLUMNS {

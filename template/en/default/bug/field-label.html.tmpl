@@ -24,6 +24,7 @@
   #   hidden: True if the field label should start hidden.
   #   rowspan: a "rowspan" value for the label's <th>.
   #   tag_name: the tag to use to surround the label
+  #   accesskey: access key for the label
   #%]
 
 [% DEFAULT tag_name = "th" %]
@@ -33,7 +34,7 @@
     [% IF rowspan %] rowspan="[% rowspan FILTER html %]"[% END %]>
 
   [% IF editable %]
-    <label for="[% field.name FILTER html %]">
+    <label for="[% field.name FILTER html %]"[% IF accesskey %] accesskey="[% accesskey FILTER html %]"[% END %]>
   [% END %]
 
   <a 

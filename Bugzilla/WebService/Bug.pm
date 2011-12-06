@@ -631,9 +631,12 @@ sub add_attachment {
 
     my @created;
     $dbh->bz_start_transaction();
+    my $timestamp = $dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
+
     foreach my $bug (@bugs) {
         my $attachment = Bugzilla::Attachment->create({
             bug         => $bug,
+            creation_ts => $timestamp,
             data        => $params->{data},
             description => $params->{summary},
             filename    => $params->{file_name},
@@ -648,7 +651,7 @@ sub add_attachment {
               extra_data => $attachment->id });
         push(@created, $attachment);
     }
-    $_->bug->update($_->attached) foreach @created;
+    $_->bug->update($timestamp) foreach @created;
     $dbh->bz_commit_transaction();
 
     $_->send_changes() foreach @bugs;

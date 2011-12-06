@@ -54,7 +54,7 @@ use Bugzilla::Keyword;
 
 use Date::Format;
 use Date::Parse;
-
+use Scalar::Util qw(blessed);
 use Storable qw(dclone);
 
 # If you specify a search type in the boolean charts, this describes
@@ -279,9 +279,14 @@ use constant SPECIAL_ORDER_JOIN => {
 # and we don't want it to happen at compile time, so we have it as a
 # subroutine.
 sub COLUMNS {
+    my $invocant = shift;
+    my $user = blessed($invocant) ? $invocant->{user} : Bugzilla->user;
     my $dbh = Bugzilla->dbh;
     my $cache = Bugzilla->request_cache;
-    return $cache->{search_columns} if defined $cache->{search_columns};
+
+    if (defined $cache->{search_columns}->{$user->id}) {
+        return $cache->{search_columns}->{$user->id};
+    }
 
     # These are columns that don't exist in fielddefs, but are valid buglist
     # columns. (Also see near the bottom of this function for the definition
@@ -333,7 +338,7 @@ sub COLUMNS {
 
     foreach my $col (@email_fields) {
         my $sql = "map_${col}.login_name";
-        if (!Bugzilla->user->id) {
+        if (!$user->id) {
              $sql = $dbh->sql_string_until($sql, $dbh->quote('@'));
         }
         $special_sql{$col} = $sql;
@@ -367,8 +372,8 @@ sub COLUMNS {
 
     Bugzilla::Hook::process('buglist_columns', { columns => \%columns });
 
-    $cache->{search_columns} = \%columns;
-    return $cache->{search_columns};
+    $cache->{search_columns}->{$user->id} = \%columns;
+    return $cache->{search_columns}->{$user->id};
 }
 
 sub REPORT_COLUMNS {
@@ -1012,7 +1017,7 @@ sub init {
     # to other parts of the query, so we want to create it before we
     # write the FROM clause.
     foreach my $orderitem (@inputorder) {
-        BuildOrderBy(\%special_order, $orderitem, \@orderby);
+        $self->_build_order_by(\%special_order, $orderitem, \@orderby);
     }
     # Now JOIN the correct tables in the FROM clause.
     # This is done separately from the above because it's
@@ -1056,7 +1061,7 @@ sub init {
         # Aliases cannot contain dots in them. We convert them to underscores.
         $alias =~ s/\./_/g;
         my $sql_field = ($field eq EMPTY_COLUMN) ? EMPTY_COLUMN
-                                                 : COLUMNS->{$field}->{name} . " AS $alias";
+                                                 : $self->COLUMNS->{$field}->{name} . " AS $alias";
         push(@sql_fields, $sql_field);
     }
     my $query = "SELECT " . join(', ', @sql_fields) .
@@ -1096,7 +1101,7 @@ sub init {
         push(@skip_group_by, map { $_->name } @multi_select_fields);
 
         next if grep { $_ eq $field } @skip_group_by;
-        my $col = COLUMNS->{$field}->{name};
+        my $col = $self->COLUMNS->{$field}->{name};
         push(@groupby, $col) if !grep($_ eq $col, @groupby);
     }
     # And all items from ORDER BY must be in the GROUP BY. The above loop 
@@ -1352,7 +1357,7 @@ sub IsValidQueryType
     return 0;
 }
 
-# BuildOrderBy - Private Subroutine
+# _build_order_by - Private Subroutine
 # This function converts the input order to an "output" order,
 # suitable for concatenation to form an ORDER BY clause. Basically,
 # it just handles fields that have non-standard sort orders from
@@ -1373,10 +1378,10 @@ sub IsValidQueryType
 # Let's say that we had a field "A" that normally translates to a sort 
 # order of "B ASC, C DESC". If we sort by "A DESC", what we really then
 # mean is "B DESC, C ASC". So $reverseorder is only used if we call 
-# BuildOrderBy recursively, to let it know that we're "reversing" the 
+# _build_order_by recursively, to let it know that we're "reversing" the
 # order. That is, that we wanted "A DESC", not "A".
-sub BuildOrderBy {
-    my ($special_order, $orderitem, $stringlist, $reverseorder) = (@_);
+sub _build_order_by {
+    my ($self, $special_order, $orderitem, $stringlist, $reverseorder) = @_;
 
     my ($orderfield, $orderdirection) = split_order_term($orderitem);
 
@@ -1396,13 +1401,13 @@ sub BuildOrderBy {
         foreach my $subitem (@{$special_order->{$orderfield}}) {
             # DESC on a field with non-standard sort order means
             # "reverse the normal order for each field that we map to."
-            BuildOrderBy($special_order, $subitem, $stringlist,
-                         $orderdirection =~ m/desc/i);
+            $self->_build_order_by($special_order, $subitem, $stringlist,
+                                   $orderdirection =~ m/desc/i);
         }
         return;
     }
     # Aliases cannot contain dots in them. We convert them to underscores.
-    $orderfield =~ s/\./_/g if exists COLUMNS->{$orderfield};
+    $orderfield =~ s/\./_/g if exists $self->COLUMNS->{$orderfield};
 
     push(@$stringlist, trim($orderfield . ' ' . $orderdirection));
 }
@@ -1658,11 +1663,11 @@ sub _content_matches {
     #
     # We build the relevance SQL by modifying the COLUMNS list directly,
     # which is kind of a hack but works.
-    my $current = COLUMNS->{'relevance'}->{name};
+    my $current = $self->COLUMNS->{'relevance'}->{name};
     $current = $current ? "$current + " : '';
     # For NOT searches, we just add 0 to the relevance.
     my $select_term = $$t =~ /not/ ? 0 : "($current$rterm1 + $rterm2)";
-    COLUMNS->{'relevance'}->{name} = $select_term;
+    $self->COLUMNS->{'relevance'}->{name} = $select_term;
 }
 
 sub _timestamp_translate {

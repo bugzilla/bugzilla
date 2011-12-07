@@ -795,10 +795,6 @@ sub delete_attachment {
         # Paste the reason provided by the admin into a comment.
         $bug->add_comment($msg);
 
-        # If the attachment is stored locally, remove it.
-        if (-e $attachment->_get_local_filename) {
-            unlink $attachment->_get_local_filename;
-        }
         $attachment->remove_from_db();
 
         # Now delete the token.

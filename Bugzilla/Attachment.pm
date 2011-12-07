@@ -900,6 +900,11 @@ sub remove_from_db {
     $dbh->do('UPDATE attachments SET mimetype = ?, ispatch = ?, isobsolete = ?
               WHERE attach_id = ?', undef, ('text/plain', 0, 1, $self->id));
     $dbh->bz_commit_transaction();
+
+    my $filename = $self->_get_local_filename;
+    if (-e $filename) {
+        unlink $filename or warn "Couldn't unlink $filename: $!";
+    }
 }
 
 ###############################

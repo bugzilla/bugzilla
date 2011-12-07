@@ -447,10 +447,12 @@ sub run_queries {
         # Bugzilla::Search to execute a saved query.  It's exceedingly weird,
         # but that's how it works.
         my $searchparams = new Bugzilla::CGI($savedquery);
+        my @orderstrings = split(/,\s*/, $searchparams->param('order'));
         my $search = new Bugzilla::Search(
             'fields' => \@searchfields,
             'params' => scalar $searchparams->Vars,
             'user'   => $args->{'recipient'}, # the search runs as the recipient
+            'order'  => \@orderstrings
         );
         # If a query fails for whatever reason, it shouldn't kill the script.
         my $sqlquery = eval { $search->sql };

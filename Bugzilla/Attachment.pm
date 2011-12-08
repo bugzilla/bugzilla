@@ -581,9 +581,11 @@ sub _check_filename {
     # a big deal if it munges incorrectly occasionally.
     $filename =~ s/^.*[\/\\]//;
 
-    # Truncate the filename to 100 characters, counting from the end of the
-    # string to make sure we keep the filename extension.
-    $filename = substr($filename, -100, 100);
+    # Truncate the filename to MAX_ATTACH_FILENAME_LENGTH characters, counting 
+    # from the end of the string to make sure we keep the filename extension.
+    $filename = substr($filename, 
+                       -MAX_ATTACH_FILENAME_LENGTH, 
+                       MAX_ATTACH_FILENAME_LENGTH);
     trick_taint($filename);
 
     return $filename;

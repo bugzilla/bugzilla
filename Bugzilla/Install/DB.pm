@@ -658,6 +658,10 @@ sub update_table_definitions {
 
     # 2011-10-11 miketosh - Bug 690173
     _on_delete_set_null_for_audit_log_userid();
+    
+    # 2011-11-23 gerv@gerv.net - Bug 705058 - make filenames longer
+    $dbh->bz_alter_column('attachments', 'filename', 
+                                    { TYPE => 'varchar(255)', NOTNULL => 1 });
 
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
@@ -2204,7 +2208,7 @@ sub _convert_attachments_filename_from_mediumtext {
     # shouldn't be there for security.  Buggy browsers include them,
     # and attachment.cgi now takes them out, but old ones need converting.
     my $ref = $dbh->bz_column_info("attachments", "filename");
-    if ($ref->{TYPE} ne 'varchar(100)') {
+    if ($ref->{TYPE} ne 'varchar(100)' && $ref->{TYPE} ne 'varchar(255)') {
         print "Removing paths from filenames in attachments table...";
 
         my $sth = $dbh->prepare("SELECT attach_id, filename FROM attachments " .

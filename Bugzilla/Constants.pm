@@ -182,6 +182,7 @@ use Memoize;
     MAX_FREETEXT_LENGTH
     MAX_BUG_URL_LENGTH
     MAX_POSSIBLE_DUPLICATES
+    MAX_ATTACH_FILENAME_LENGTH
 
     PASSWORD_DIGEST_ALGORITHM
     PASSWORD_SALT_LENGTH
@@ -562,6 +563,11 @@ use constant MAX_BUG_URL_LENGTH => 255;
 # The largest number of possible duplicates that Bug::possible_duplicates
 # will return.
 use constant MAX_POSSIBLE_DUPLICATES => 25;
+
+# Maximum length of filename stored in attachments table (longer ones will
+# be truncated to this value). Do not increase above 255 without making the
+# necessary schema changes to store longer names.
+use constant MAX_ATTACH_FILENAME_LENGTH => 255;
 
 # This is the name of the algorithm used to hash passwords before storing
 # them in the database. This can be any string that is valid to pass to

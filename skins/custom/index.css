@@ -4,8 +4,28 @@
  */
 
 /* index.html.tmpl puts intro hook contents inside a div which causes 
- *  * the icons to display over two rows when adding the Help icon. 
- *   * So we change to inline to make it display a single row. */
+ * the icons to display over two rows when adding the Help icon. 
+ * So we change to inline to make it display a single row. */
 #page-index .intro { display: inline; }
 
 #get_help { background: url(../standard/index/help.png) no-repeat; }
+
+.bz_common_actions {
+    display: block;
+    height: 170px;
+    width: 145px;
+    float: left;
+    margin: 0 2ex 2em 0;
+    text-align: center;
+}
+.bz_common_actions span {
+    position: relative;
+    top: 95%;
+    font-weight: bold;
+}
+.bz_common_actions, 
+.bz_common_actions:visited, 
+.bz_common_actions:hover
+{
+    text-decoration: none;
+}

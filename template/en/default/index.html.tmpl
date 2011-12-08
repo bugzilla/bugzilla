@@ -125,30 +125,20 @@ YAHOO.util.Event.onDOMReady(onLoadActions);
       <td>
         <h1 id="welcome"> Welcome to [% terms.Bugzilla %]</h1>
         <div class="intro">[% Hook.process('intro') %]</div>
-
-        <div class="bz_common_actions">
-          <ul>
-            <li>
-              <a id="enter_bug" href="enter_bug.cgi"><span>File
-              [%= terms.aBug %]</span></a>
-            </li>
-            <li>
-              <a id="query" href="query.cgi"><span>Search</span></a>
-            </li>
-            <li>
-              <a id="account"
-                 [% IF user.id %]
-                   href="userprefs.cgi"><span>User Preferences</span></a>
-                 [% ELSIF Param('createemailregexp')
-                          && user.authorizer.user_can_create_account 
-                 %]
-                   href="createaccount.cgi"><span>Open a New Account</span></a>
-                 [% ELSE %]
-                   href="?GoAheadAndLogIn=1"><span>Log In</span></a>
-                 [% END %]
-            </li>
-          </ul>
-        </div>
+        <a id="enter_bug" class="bz_common_actions"
+           href="enter_bug.cgi"><span>File [% terms.aBug %]</span></a>
+        <a id="query" class="bz_common_actions" 
+           href="query.cgi"><span>Search</span></a>
+        <a id="account" class="bz_common_actions"
+           [% IF user.id %]
+             href="userprefs.cgi"><span>User Preferences</span></a>
+           [% ELSIF Param('createemailregexp')
+                    && user.authorizer.user_can_create_account
+            %]
+             href="createaccount.cgi"><span>Open a New Account</span></a>
+           [% ELSE %]
+             href="?GoAheadAndLogIn=1"><span>Log In</span></a>
+           [% END %]
 
         <form id="quicksearchForm" name="quicksearchForm" action="buglist.cgi"
               onsubmit="return checkQuicksearch(this);">

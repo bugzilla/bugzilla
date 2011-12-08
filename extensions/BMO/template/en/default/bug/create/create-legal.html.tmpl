@@ -33,56 +33,32 @@
 
 <div style='text-align: center; width: 98%; font-size: 2em; font-weight: bold; margin: 10px;'>MoLegal</div>
 
-<p><strong>Welcome to MoLegal.</strong>  If you need legal assistance please complete the form below.  To best service
-your request, it is essential that you give us complete information so we can respond
-properly and in a timely fashion.  Please use this form only for requests for legal
-assistance related to the Mozilla Corporation.  If you’ve been arrested, do not use
-this form or contact us.</p>
+<p><strong>Welcome to MoLegal.</strong> For legal help please fill in the form below completely.</p>
 
-<p>Process:</p>
-
-<ol><li>Complete and submit request below.</li>
-    <li>Your request will be reviewed and assigned to the appropriate legal service provider as necessary.</li>
-    <li>We will contact you to confirm receipt, gather any additional information, and agree on a completion timeline.</li>
-</ol>
- 
-<p>These requests will only be visible internally and in all cases and only to the
-person who submitted the request and any persons designated in the CC line.</p>
+<p>Legal bugs are only visible to the reporter,  members of the legal team,  and those on the
+CC list. This is necessary to maintain attorney-client privilege. Please do not add non-
+employees to the cc list.</p>
 
 <p><strong>All Submissions, And Information Provided In Response To This Request,
 Are Confidential And Subject To The Attorney-Client Privilege And Work Product Doctrine.</strong></p>
 
-<script type="text/javascript">
-function trySubmit() {
-  var out = 'description\r\n\r\n--- First Response:\r\nfirst_response\r\n\r\n--- First Response Timeframe:\r\nfirst_resp_time\r\n\r\n' +
-            '--- Business Objective:\r\nbusiness_objective\r\n\r\n--- Other Party:\r\nother_party';
-
-  out = out.replace( /description/, document.getElementById('ncomment').value );
-  out = out.replace( /first_response/, document.getElementById('firstresp').value );
-  out = out.replace( /first_resp_time/, document.getElementById('firstrespwhen').value );
-  out = out.replace( /business_objective/, document.getElementById('busobj').value );
-  out = out.replace( /other_party/, document.getElementById('otherparty').value );
-
-  document.getElementById('comment').value = out;
-
-  return true;
-}
-</script>
-
-<form method="post" action="post_bug.cgi" id="legalRequestForm" enctype="multipart/form-data"
-      onSubmit="return trySubmit();">
-
-        <input type="hidden" name="product" value="Legal">
-        <input type="hidden" name="rep_platform" value="All">
-        <input type="hidden" name="op_sys" value="Other">
-        <input type="hidden" name="priority" value="--">
-        <input type="hidden" name="version" value="unspecified">
-<input type="hidden" name="comment" id="comment" value="">
+<form method="post" action="post_bug.cgi" id="legalRequestForm" enctype="multipart/form-data">
+  <input type="hidden" name="product" value="Legal">
+  <input type="hidden" name="rep_platform" value="All">
+  <input type="hidden" name="op_sys" value="Other">
+  <input type="hidden" name="version" value="unspecified">
+  <input type="hidden" name="priority" value="--">
+  <input type="hidden" name="bug_severity" value="normal">
+  <input type="hidden" name="format" value="legal">
+  <input type="hidden" name="token" value="[% token FILTER html %]">
+  [% IF user.in_group('canconfirm') %]
+    <input type="hidden" name="bug_status" value="NEW">
+  [% END %]
 
 <table>
 
 <tr>
-  <td align="right"><strong>Request Type:</strong></td>
+  <td align="right" width="170px"><strong>Request Type:</strong></td>
   <td>
     <select name="component">
       [%- FOREACH c = product.components %]
@@ -97,115 +73,142 @@ function trySubmit() {
 </tr>
 
 <tr>
+  <td align="right" valign="top">
+    <strong>Goal:</strong>
+  </td>
+  <td colspan="3">
+    <em>Identify the company goal this request maps to.</em><br>
+    <input name="goal" id="goal" size="60" value="[% goal FILTER html %]">
+  </td>
+</tr>
+
+<tr>
   <td align="right">
-    <strong>Urgency: </strong>
+    <strong>Priority to your Team:</strong>
   </td>
   <td>
-    <select id="bug_severity" name="bug_severity">
-      <option value="blocker">Immediately - Don't leave the office, don't sleep until this is done (use with caution!)</option>
-      <option value="critical">A few days timeframe - critical priority</option>
-      <option value="major">One week timeframe - high priority</option>
-      <option value="normal">Two weeks timeframe - medium priority</option>
-      <option value="minor" selected="selected">One month timeframe - low priority</option>
+    <select id="teampriority" name="teampriority">
+      <option value="High">High</option>
+      <option value="Medium">Medium</option>
+      <option value="Low" selected="selected">Low</option>
     </select>
   </td>
 </tr>
 
 <tr>
-  <td align="right"><strong>First Response:</strong></td>
+  <td align="right">
+    <strong>Timeframe for Completion:</strong>
+  </td>
   <td>
-<em>If your request is a project with numerous milestones or stages, please describe the first task you would like to see completed.</em><br>
-    <textarea id="firstresp" name="firstresp" cols="80" rows="3"></textarea><br />
-    <select id="firstrespwhen" name="firstrespwhen">
-      <option value="24 hours">Urgent!  Please do this within 24 hours!</option>
-      <option value="Few days">Important, but I can wait a few days for this.</option>
-      <option value="One week">Sometime within the next week is fine.</option>
-      <option value="Few weeks" selected="selected">Anytime in the next few weeks would be acceptable.</option>
+    <select id="timeframe" name="timeframe">
+      <option value="2 days">2 days</option>
+      <option value="a week">a week</option>
+      <option value="2-4 weeks">2-4 weeks</option>
+      <option value="this will take a while, but please get started soon">
+        this will take a while, but please get started soon</option>
+      <option value="no rush" selected="selected">no rush</option>
     </select>
   </td>
 </tr>
 
-    <tr>
-      <td align="right"><strong>Summary:</strong></td>
-      <td colspan="3">
-        <input name="short_desc" size="60" value="[% short_desc FILTER html %]">
-      </td>
-    </tr>
-
-    <tr>
-      <td align="right"><strong>CC&nbsp;(optional):</strong></td>
-      <td colspan="3">
-        [% INCLUDE global/userselect.html.tmpl
-           id => "cc"
-           name => "cc"
-           value => cc
-           size => 60
-           multiple => 5
-        %]
-      </td>
-    </tr>
+<tr>
+  <td align="right" valign="top">
+    <strong>Summary:</strong>
+  </td>
+  <td colspan="3">
+    <em>Include the name of the vendor, partner, product, or other identifier.</em><br>
+    <input name="short_desc" size="60" value="[% short_desc FILTER html %]">
+  </td>
+</tr>
 
 <tr>
-  <td align="right"><strong>Name of Other Party:</strong></td>
+  <td align="right">
+    <strong>CC&nbsp;(optional):</strong>
+  </td>
+  <td colspan="3">
+    [% INCLUDE global/userselect.html.tmpl
+       id       => "cc"
+       name     => "cc"
+       value    => cc
+       size     => 60
+       multiple => 5
+    %]
+  </td>
+</tr>
+
+<tr>
+  <td align="right" valign="top">
+    <strong>Name of Other Party:</strong>
+  </td>
   <td>
-<em>If applicable, include full legal entity name, address, and any other relevant contact information.</em><br>
+    <em>If applicable, include full legal entity name, address, and any other relevant contact information.</em><br>
     <textarea id="otherparty" name="otherparty" rows="3" cols="80"></textarea>
   </td>
 </tr>
 
 <tr>
-  <td align="right"><strong>Business Objective:</strong></td>
+  <td align="right">
+    <strong>Business Objective:</strong>
+  </td>
   <td>
     <input type="text" name="busobj" id="busobj" value="" size="60" />
   </td>
 </tr>
 
-    <tr><td align="right" valign="top"><strong>Description:</strong></td>
-      <td colspan="3">
-<em>Describe your question, what you want and/or provide any relevant deal terms, restrictions, or provisions that are applicable.</em>
-        <textarea id="ncomment" name="ncomment" rows="10" cols="80">
-          [% comment FILTER html %]</textarea>
-        <br>
-      </td>
-    </tr>
-
-    <tr>
-      <td align="right"><strong>URL&nbsp;(optional):</strong></td>
-      <td colspan="3">
-        <input name="bug_file_loc" size="60"
-               value="[% bug_file_loc FILTER html %]">
-      </td>
-    </tr>
-
-<tr><td colspan=3><br><br></td></tr>
-<tr><td></td><td colspan=2 style='background-color: #ddd;'><strong>Attachment (this is optional)</strong></td></tr>
+<tr>
+  <td align="right" valign="top">
+    <strong>Description:</strong>
+  </td>
+  <td colspan="3">
+    <em>Describe your question, what you want and/or provide any relevant deal terms, restrictions,<br> 
+    or provisions that are applicable. Also provide context and background.</em><br>
+    <textarea id="comment" name="comment" rows="10" cols="80">
+      [% comment FILTER html %]</textarea>
+  </td>
+</tr>
 
 <tr>
-  <th><label for="data">File</label>:</th>
+  <td align="right"><strong>URL&nbsp;(optional):</strong></td>
+  <td colspan="3">
+    <input name="bug_file_loc" size="60"
+           value="[% bug_file_loc FILTER html %]">
+  </td>
+</tr>
+
+<tr>
+  <td></td>
+  <td colspan=2><strong>Attachment (this is optional)</strong></td>
+</tr>
+
+<tr>
+  <td align="right" valign="top">
+    <strong><label for="data">File:</label></strong>
+  </td>
   <td>
     <em>Enter the path to the file on your computer.</em><br>
     <input type="file" id="data" name="data" size="50">
     <input type="hidden" name="contenttypemethod" value="autodetect" />
   </td>
 </tr>
+
 <tr>
-  <th><label for="description">Description</label>:</th>
+  <td align="right" valign="top">
+    <strong><label for="description">Description:</label></strong>
+  </td>
   <td>
     <em>Describe the attachment briefly.</em><br>
     <input type="text" id="description" name="description" size="60" maxlength="200">
   </td>
 </tr>
 
-  </table>
+</table>
 
-  <br>
+<br>
 
   <input type="submit" id="commit" value="Submit Request">
 </form>
 
-<p>Thanks for contacting us.
-   You will be notified by email of any progress made in resolving your request.
-</p>
+<p>Thanks for contacting us. You will be notified by email of any progress made in resolving your request.</p>
 
 [% ELSE %]
 

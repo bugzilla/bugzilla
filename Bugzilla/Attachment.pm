@@ -584,7 +584,7 @@ sub _check_filename {
     # Truncate the filename to MAX_ATTACH_FILENAME_LENGTH characters, counting 
     # from the end of the string to make sure we keep the filename extension.
     $filename = substr($filename, 
-                       -MAX_ATTACH_FILENAME_LENGTH, 
+                       -&MAX_ATTACH_FILENAME_LENGTH, 
                        MAX_ATTACH_FILENAME_LENGTH);
     trick_taint($filename);
 

@@ -35,7 +35,12 @@
 
     function validateAndSubmit() {
         var alert_text = '';
-        if (!isFilledOut('short_desc')) alert_text += "Please enter a summary.\n";
+        var typeSelect = YAHOO.util.Dom.get('incident_type');
+        var typeValue  = typeSelect.options[typeSelect.selectedIndex].value;
+
+        if (typeValue != 'stolen' && !isFilledOut('short_desc')) {
+            alert_text += "Please enter a summary.\n";
+        }
 
         var select = YAHOO.util.Dom.get('incident_type');
         var selectValue = select.options[select.selectedIndex].value;
@@ -56,6 +61,11 @@
             return false;
         }
 
+        // Hard code summary if stolen type was chosen
+        if (typeValue == 'stolen') {
+             document.getElementById('short_desc').value = '[Lost Device] Change LDAP Password for [% user.name FILTER js %]';
+        }
+
         return true;
     }
 
@@ -68,23 +78,27 @@
         // Display/hide some additional fields based on type selected
         if (selectValue == 'stolen') {
             YAHOO.util.Dom.removeClass('stolen', 'bz_default_hidden');
+            YAHOO.util.Dom.addClass('safety', 'bz_default_hidden');
         }
         else {
+            YAHOO.util.Dom.removeClass('safety', 'bz_default_hidden');
             YAHOO.util.Dom.addClass('stolen', 'bz_default_hidden');
         }
 
         // Alter the product/component/group based on type selected
         if (selectValue == 'stolen') {
-            document.getElementById('product').value   = 'mozilla.org';
-            document.getElementById('component').value = 'Server Operations: Desktop Issues';
-            document.getElementById('groups').value    = 'infrasec';
-            document.getElementById('cc').value        = '';
+            document.getElementById('product').value      = 'mozilla.org';
+            document.getElementById('component').value    = 'Server Operations: Desktop Issues';
+            document.getElementById('groups').value       = 'infra';
+            document.getElementById('cc').value           = 'mcoates@mozilla.com, jstevensen@mozilla.com, afowler@mozilla.com';
+            document.getElementById('bug_severity').value = 'critical';
         }
         else {
-            document.getElementById('product').value   = 'Mozilla Corporation';
-            document.getElementById('component').value = 'Facilities Management';
-            document.getElementById('groups').value    = 'mozilla-corporation-confidential';
-            document.getElementById('cc').value        = 'dcohen@mozilla.com, mcoates@mozilla.com, jvandeven@mozilla.com';
+            document.getElementById('product').value      = 'Mozilla Corporation';
+            document.getElementById('component').value    = 'Facilities Management';
+            document.getElementById('groups').value       = 'hr';
+            document.getElementById('cc').value           = 'dcohen@mozilla.com, mcoates@mozilla.com, jill@mozilla.com';
+            document.getElementById('bug_severity').value = 'normal';
         }
     }
 
@@ -121,12 +135,13 @@
   <input type="hidden" id="product" name="product" value="">
   <input type="hidden" id="component" name="component" value="">
   <input type="hidden" id="rep_platform" name="rep_platform" value="All">
-  <input type="hidden" id="op_sys" name="op_sys" value="Other">
+  <input type="hidden" id="op_sys" name="op_sys" value="All">
   <input type="hidden" id="priority" name="priority" value="--">
   <input type="hidden" id="version" name="version" value="other">
   <input type="hidden" id="cc" name="cc" value="">
   <input type="hidden" id="groups" name="groups" value="">
   <input type="hidden" id="format" name="format" value="employee-incident">
+  <input type="hidden" id="bug_severity" name="bug_severity" value="">
   <input type="hidden" id="token" name="token" value="[% token FILTER html %]">
 
   <table>
@@ -140,18 +155,20 @@
         <div id="type_desc" style="color:red;"></div>
       </td>
     </tr>
-      <tr>
-      <td align="right">
-        <strong><span style="color: red;">*</span> Summary:</strong>
-      </td>
-      <td>
-        <input name="short_desc" id="short_desc" size="60" 
-               value="[% short_desc FILTER html %]">
-      </td>
-    </tr>
+    <tbody id="safety" class="bz_default_hidden">
+      <tr class="safety">
+        <td align="right">
+          <strong><span style="color: red;">*</span> Summary:</strong>
+        </td>
+        <td>
+          <input name="short_desc" id="short_desc" size="60" 
+                 value="[% short_desc FILTER html %]">
+        </td>
+      </tr>
+    </tbody>
     <tbody id="stolen" class="bz_default_hidden">
-      <tr class="stolen_row">
-        <td align="right"><strong>Stolen Details:</strong></td>
+      <tr>
+        <td align="right" valign="top"><strong>Stolen Details:</strong></td>
         <td>
           <table>
           <tr>
@@ -188,22 +205,23 @@
            </table>
         </td>
       </tr>
-      <tr class="stolen_row">
+      <tr>
         <td>&nbsp;</td>
         <td>If yes, what sensitive data was stored on your device?</td>
       </tr>
-      <tr class="stolen_row">
+      <tr>
         <td>&nbsp;</td>
         <td>
           <textarea name="sensitivedata" id="sensitivedata" rows="10" cols="80"></textarea>
         </td>
       </tr>
-      <tr class="stolen_row">
+      <tr>
         <td>&nbsp;</td>
         <td>
           <label for="rememberpasswords">
             <strong><span style="color: red;">*</span></strong>
-            Was your browser configured to remember passwords?
+            Was your browser configured to remember passwords 
+            (<a href="http://support.mozilla.com/en-US/kb/make-firefox-remember-usernames-and-passwords">more info</a>)?
           </label>
           <select name="rememberpasswords" id="rememberpasswords" 
                   onchange="toggleEnabled('rememberpasswords', 'Yes', 'criticalsites');">
@@ -213,11 +231,11 @@
           </select>
         </td>
       </tr>
-      <tr class="stolen_row">
+      <tr>
         <td>&nbsp;</td>
         <td>If yes, which critical sites were included?</td>
       </tr>
-      <tr class="stolen_row">
+      <tr>
         <td>&nbsp;</td>
         <td>
           <textarea name="criticalsites" id="criticalsites" rows="10" cols="80"></textarea>

@@ -14,7 +14,7 @@
 [% IF template.name == 'attachment/edit.html.tmpl' 
       || template.name == 'attachment/create.html.tmpl'
       || template.name == 'attachment/diff-header.html.tmpl' %]
-  [% style_urls.push("skins/standard/bug_groups.css") %]
+  [% style_urls.push("skins/custom/bug_groups.css") %]
 
   [% IF template.name == 'attachment/edit.html.tmpl'
         || template.name == 'attachment/diff-header.html.tmpl' %]
@@ -31,10 +31,6 @@
       [% bodyclasses.push("bz_group_$group.name") %]
     [% END %]
   [% END %]
-[% END %]
-
-[% IF template.name == 'bug/show-header.html.tmpl' %]
-[% style_urls.push("skins/standard/bug_groups.css") %]
 [% END %]
 
 [% IF user.in_group('editusers') || user.bless_groups.size > 0 %]

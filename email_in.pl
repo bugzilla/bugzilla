@@ -158,22 +158,29 @@ sub parse_mail {
     return \%fields;
 }
 
+sub check_email_fields {
+    my ($fields) = @_;
+
+    my ($retval, $non_conclusive_fields) =
+      Bugzilla::User::match_field({
+        'assigned_to'   => { 'type' => 'single' },
+        'qa_contact'    => { 'type' => 'single' },
+        'cc'            => { 'type' => 'multi'  },
+        'newcc'         => { 'type' => 'multi'  }
+      }, $fields, MATCH_SKIP_CONFIRM);
+
+    if ($retval != USER_MATCH_SUCCESS) {
+        ThrowUserError('user_match_too_many', {fields => $non_conclusive_fields});
+    }
+}
+
 sub post_bug {
     my ($fields) = @_;
     debug_print('Posting a new bug...');
 
     my $user = Bugzilla->user;
 
-    my ($retval, $non_conclusive_fields) =
-      Bugzilla::User::match_field({
-        'assigned_to'   => { 'type' => 'single' },
-        'qa_contact'    => { 'type' => 'single' },
-        'cc'            => { 'type' => 'multi'  }
-      }, $fields, MATCH_SKIP_CONFIRM);
-
-    if ($retval != USER_MATCH_SUCCESS) {
-        ThrowUserError('user_match_too_many', {fields => $non_conclusive_fields});
-    }
+    check_email_fields($fields);
 
     my $bug = Bugzilla::Bug->create($fields);
     debug_print("Created bug " . $bug->id);
@@ -213,6 +220,8 @@ sub process_bug {
         $fields{'cc'} = [split(',', $fields{'removecc'})];
         $fields{'removecc'} = 1;
     }
+
+    check_email_fields(\%fields);
 
     my $cgi = Bugzilla->cgi;
     foreach my $field (keys %fields) {

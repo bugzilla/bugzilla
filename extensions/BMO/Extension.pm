@@ -271,12 +271,12 @@ sub bugmail_recipients {
     if (@$diffs) {
         # Changed bug
         foreach my $ref (@$diffs) {
-            next if !(exists $ref->{'new'} 
-                      && exists $ref->{'old'} 
-                      && exists $ref->{'field_name'});
-            if ($ref->{'field_name'} eq "bug_group") {
-                _cc_if_special_group($ref->{'old'}, $recipients);
-                _cc_if_special_group($ref->{'new'}, $recipients);
+            my ($who, $whoname, $what, $when, 
+                $old, $new, $attachid, $fieldname) = (@$ref);
+            
+            if ($fieldname eq "bug_group") {
+                _cc_if_special_group($old, $recipients);
+                _cc_if_special_group($new, $recipients);
             }
         }
     } else {
@@ -391,6 +391,16 @@ sub bug_check_can_change_field {
     } elsif ($field eq 'resolution' && $new_value eq 'FIXED') {
         # You need at least canconfirm to mark a bug as FIXED
         if (!$user->in_group('canconfirm', $bug->{'product_id'})) {
+            push (@$priv_results, PRIVILEGES_REQUIRED_EMPOWERED);
+        }
+
+    } elsif (
+        ($field eq 'bug_status' && $old_value eq 'VERIFIED')
+        || ($field eq 'dup_id' && $bug->status->name eq 'VERIFIED')
+        || ($field eq 'resolution' && $bug->status->name eq 'VERIFIED')
+    ) {
+        # You need at least editbugs to reopen a resolved/verified bug
+        if (!$user->in_group('editbugs', $bug->{'product_id'})) {
             push (@$priv_results, PRIVILEGES_REQUIRED_EMPOWERED);
         }
 
@@ -708,7 +718,10 @@ sub search_operator_field_override {
     my @comments = $cgi->param('comments');
     my $exclude_comments = scalar(@comments) && !grep { $_ eq '1' } @comments;
 
-    if ($cgi->param('query_format') eq 'specific' && $exclude_comments) {
+    if ($cgi->param('query_format')
+        && $cgi->param('query_format') eq 'specific'
+        && $exclude_comments
+    ) {
         # use the non-comment operator
         $operators->{'content'}->{matches} = \&_short_desc_matches;
         $operators->{'content'}->{notmatches} = \&_short_desc_matches;
@@ -759,7 +772,7 @@ sub mailer_before_send {
     # to the email as an attachment. Attachment must be content type
     # text/plain and below a certain size. Otherwise the email already 
     # contain a link to the attachment. 
-    if ($email 
+    if ($email
         && $email->header('X-Bugzilla-Type') eq 'request'
         && ($email->header('X-Bugzilla-Flag-Requestee') 
             && $email->header('X-Bugzilla-Flag-Requestee') eq $email->header('to'))) 
@@ -822,9 +835,12 @@ sub post_bug_after_creation {
             # HACK: User needs to be in the editbugs and primary bug's group to allow
             # setting of dependencies.
             $new_user->{'groups'} = [ Bugzilla::Group->new({ name => 'editbugs' }), 
+                                      Bugzilla::Group->new({ name => 'infra' }), 
                                       Bugzilla::Group->new({ name => 'infrasec' }) ];
 
             my $comment;
+            $vars->{no_display_action_needed} = 1;
+            $vars->{original_reporter} = $old_user;
             $template->process('bug/create/comment-employee-incident.txt.tmpl', $vars, \$comment)
                 || ThrowTemplateError($template->error());
 
@@ -834,7 +850,7 @@ sub post_bug_after_creation {
                 component         => 'Infrastructure Security',
                 status_whiteboard => '[infrasec:incident]',
                 bug_severity      => 'critical',
-                cc                => [ 'mcoates@mozilla.com' ],
+                cc                => [ 'mcoates@mozilla.com', 'jstevensen@mozilla.com' ],
                 groups            => [ 'infrasec' ], 
                 comment           => $comment,
                 op_sys            => 'All', 

@@ -3,9 +3,9 @@ var admin_usermenu;
 YAHOO.util.Event.onDOMReady(function() {
   admin_usermenu = new YAHOO.widget.Menu('admin_usermenu', { position : 'dynamic' });
   admin_usermenu.addItems([
-    { text: 'Edit',     url: '#', target: '_new' },
-    { text: 'Activity', url: '#', target: '_new' },
-    { text: 'Mail',     url: '#', target: '_new' }
+    { text: 'Edit',     url: '#', target: '_blank' },
+    { text: 'Activity', url: '#', target: '_blank' },
+    { text: 'Mail',     url: '#', target: '_blank' }
   ]);
   admin_usermenu.render(document.body);
 });

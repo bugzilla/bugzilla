@@ -803,9 +803,9 @@ TUI_hide_default('attachment_text_field');
 [% Hook.process("end") %]
 
 <div id="guided">
-  <a id="guided_img" href="enter_bug.cgi?format=guided&amp;product=[% product.name FILTER url_quote %]"><img
+  <a id="guided_img" href="enter_bug.cgi?format=guided&amp;product=[% product.name FILTER uri %]"><img
    src="extensions/BMO/web/images/guided.png" width="16" height="16" border="0" align="absmiddle"></a>
-  <a id="guided_link" href="enter_bug.cgi?format=guided&amp;product=[% product.name FILTER url_quote %]"
+  <a id="guided_link" href="enter_bug.cgi?format=guided&amp;product=[% product.name FILTER uri %]"
    >Switch to the [% terms.Bugzilla %] Helper</a>
 </div>
 

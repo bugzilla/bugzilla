@@ -1,0 +1,54 @@
+[%# The contents of this file are subject to the Mozilla Public License Version
+  # 1.1 (the "License"); you may not use this file except in compliance with
+  # the License. You may obtain a copy of the License at
+  # http://www.mozilla.org/MPL/
+  #
+  # Software distributed under the License is distributed on an "AS IS" basis,
+  # WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+  # for the specific language governing rights and limitations under the
+  # License.
+  #
+  # The Original Code is FlagTypeComment Bugzilla Extension.
+  #
+  # The Initial Developer of the Original Code is
+  # the Mozilla Foundation.
+  # Portions created by the Initial Developer are Copyright (C) 2011
+  # the Initial Developer. All Rights Reserved.
+  #
+  # Contributor(s):
+  #   Alex Keybl <akeybl@mozilla.com>
+  #   byron jones <glob@mozilla.com>
+  #%]
+
+[% IF ftc_states.size %]
+  <script type="text/javascript">
+  YAHOO.util.Event.onDOMReady(function() {
+    var selects = YAHOO.util.Dom.getElementsByClassName('flag_select');
+    for (var i = 0; i < selects.length; i++) {
+      YAHOO.util.Event.on(selects[i], 'change', ftc_on_change);
+    }
+  });
+
+  function ftc_on_change(ev) {
+    var id = ev.target.id.split('-')[1];
+    var state = ev.target.value;
+    var commentEl = document.getElementById('comment');
+    if (!commentEl) return;
+    [% FOREACH state = ftc_states %]
+      [% IF state.flagtype %]
+        if ([% state.flagtype FILTER none %] == id && '[% state.state FILTER js %]' == state) {
+          var text = '[% state.text FILTER js %]';
+          var value = commentEl.value;
+          if (value == text) {
+            return;
+          } else if (value == '') {
+            commentEl.value = text;
+          } else {
+            commentEl.value = text + "\n\n" + value;
+          }
+        }
+      [% END %]
+    [% END %]
+  }
+  </script>
+[% END %]

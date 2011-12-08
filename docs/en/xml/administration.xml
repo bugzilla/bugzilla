@@ -2480,6 +2480,35 @@ ReadOnly: ENTRY, NA/NA, CANEDIT
               be displayed at all. Obsolete Custom Fields are hidden.
             </para>
           </listitem>
+
+          <listitem>
+            <para>
+              <emphasis>Field only appears when:</emphasis>
+              A custom field can be made visible when some criteria is met.
+              For instance, when the bug belongs to a given product,
+              or when the bug is of some given severity. If left empty, then
+              the custom field will always be visible, in all bugs.
+            </para>
+          </listitem>
+
+          <listitem>
+            <para>
+              <emphasis>Field that controls the values that appear in this field:</emphasis>
+              When the custom field is of type <quote>Drop Down</quote> or
+              <quote>Multiple-Selection Box</quote>, you can restrict the
+              availability of the values of the custom field based on the
+              value of another field. This criteria is independent of the
+              criteria used in the <quote>Field only appears when</quote>
+              setting. For instance, you may decide that some given value
+              <quote>valueY</quote> is only available when the bug status
+              is RESOLVED while the value <quote>valueX</quote> should
+              always be listed.
+              Once you have selected the field which should control the
+              availability of the values of this custom field, you can
+              edit values of this custom field to set the criteria, see
+              <xref linkend="edit-values-list" />.
+            </para>
+          </listitem>
         </itemizedlist>
       </para>
     </section>
@@ -2514,13 +2543,12 @@ ReadOnly: ENTRY, NA/NA, CANEDIT
     <title>Legal Values</title>
 
     <para>
-      Since Bugzilla 2.20 RC1, legal values for Operating Systems, platforms,
-      bug priorities and severities can be edited from the User Interface
-      directly. This means that it is no longer required to manually edit
-      <filename>localconfig</filename>. Starting with Bugzilla 2.23.3, 
-      the list of valid resolutions can be customized from the same interface.
-      Since Bugzilla 3.1.1 the list of valid bug statuses can be customized
-      as well.
+      Legal values for the operating system, platform, bug priority and
+      severity, custom fields of type <quote>Drop Down</quote> and
+      <quote>Multiple-Selection Box</quote> (see <xref linkend="custom-fields" />),
+      as well as the list of valid bug statuses and resolutions can be
+      customized from the same interface. You can add, edit, disable and
+      remove values which can be used with these fields.
     </para>
 
     <section id="edit-values-list">
@@ -2535,6 +2563,11 @@ ReadOnly: ENTRY, NA/NA, CANEDIT
         There is no limit to how many values a field can have, but each value 
         must be unique to that field. The sortkey is important to display these
         values in the desired order.
+      </para>
+      <para>
+        When the availability of the values of a custom field is controlled
+        by another field, you can select from here which value of the other field
+        must be set for the value of the custom field to appear.
       </para>
     </section>
 

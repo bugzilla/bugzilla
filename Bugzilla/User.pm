@@ -448,26 +448,21 @@ sub save_last_search {
 
     return if !@$bug_ids;
 
+    my $search;
     if ($self->id) {
         on_main_db {
-            my $search;
             if ($list_id) {
-                # Use eval so that people can still use old search links or
-                # links that don't belong to them.
-                $search = eval { Bugzilla::Search::Recent->check(
-                                    { id => $list_id }) };
+                $search = Bugzilla::Search::Recent->check_quietly({ id => $list_id });
             }
 
             if ($search) {
-                # We only update placeholders. (Placeholders are
-                # Saved::Search::Recent objects with empty bug lists.)
-                # Otherwise, we could just keep creating new searches
-                # for the same refreshed list over and over.
-                if (!@{ $search->bug_list }) {
-                    $search->set_list_order($order);
+                if (join(',', @{$search->bug_list}) ne join(',', @$bug_ids)) {
                     $search->set_bug_list($bug_ids);
-                    $search->update();
                 }
+                if (!$search->list_order || $order ne $search->list_order) {
+                    $search->set_list_order($order);
+                }
+                $search->update();
             }
             else {
                 # If we already have an existing search with a totally
@@ -480,10 +475,13 @@ sub save_last_search {
                     user_id => $self->id, bug_list => $list_string });
            
                 if (!scalar(@$existing_search)) {
-                    Bugzilla::Search::Recent->create({
+                    $search = Bugzilla::Search::Recent->create({
                         user_id    => $self->id,
                         bug_list   => $bug_ids,
                         list_order => $order });
+                }
+                else {
+                    $search = $existing_search->[0];
                 }
             }
         };
@@ -506,6 +504,7 @@ sub save_last_search {
             $vars->{'toolong'} = 1;
         }
     }
+    return $search;
 }
 
 sub settings {

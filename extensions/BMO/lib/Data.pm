@@ -182,6 +182,7 @@ our $cf_disabled_flags = [
 
 # Who to CC on particular bugmails when certain groups are added or removed.
 our %group_to_cc_map = (
+  'addons-security'          => 'amo-editors@mozilla.org', 
   'bugzilla-security'        => 'security@bugzilla.org',
   'client-services-security' => 'amo-admins@mozilla.org',
   'core-security'            => 'security@mozilla.org',
@@ -232,6 +233,7 @@ our $other_setters = {
 
 # Groups in which you can always file a bug, whoever you are.
 our %always_fileable_group = (
+    'addons-security'                   => 1, 
     'bugzilla-security'                 => 1,
     'client-services-security'          => 1,
     'consulting'                        => 1,

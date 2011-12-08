@@ -32,39 +32,6 @@
 
   <script type="text/javascript">
   <!--
-  /* Adds the reply text to the `comment' textarea */
-  function replyToComment(id, real_id, name) {
-      var prefix = "(In reply to ";
-      if (name) {
-          prefix = prefix + name + " from";
-      }
-      prefix = prefix + " comment #" + id + ")\n";
-      var replytext = "";
-      [% IF user.settings.quote_replies.value == 'quoted_reply' %]
-        /* pre id="comment_name_N" */
-        var text_elem = document.getElementById('comment_text_'+id);
-        var text = getText(text_elem);
-        replytext = prefix + wrapReplyText(text);
-      [% ELSIF user.settings.quote_replies.value == 'simple_reply' %]
-        replytext = prefix;
-      [% END %]
-
-      [% IF user.is_insider %]
-        if (document.getElementById('isprivate_' + real_id).checked) {
-            document.getElementById('newcommentprivacy').checked = 'checked';
-            updateCommentTagControl(document.getElementById('newcommentprivacy'), 'comment'); 
-        }
-      [% END %]
-    
-      /* Remove embedded links to attachment details */
-      replytext = replytext.replace(/(attachment\s+\d+)(\s+\[[^\[]+\])+/gi, '$1');
-
-      /* <textarea id="comment"> */
-      var textarea = document.getElementById('comment');
-      textarea.value += replytext;
-
-      textarea.focus();
-  }
 
 [% IF user.is_timetracker %]
   var fRemainingTime = [% bug.remaining_time %]; // holds the original value

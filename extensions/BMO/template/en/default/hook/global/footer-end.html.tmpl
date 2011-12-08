@@ -1,0 +1,17 @@
+[% IF urlbase == 'https://bugzilla.mozilla.org/' %]
+<script type="text/javascript" src="[% 'extensions/BMO/web/js/webtrends.js' FILTER mtime %]"></script>
+<script type="text/javascript">
+//<![CDATA[
+var _tag=new WebTrends({"dcsid":"dcsqjgr30wz5bd6zokoukhwj3_7z7z","rate":100,"fpcdom":"mozilla.org"});
+_tag.dcsGetId();
+//]]>
+</script>
+<script>
+//<![CDATA[
+_tag.dcsCollect();
+//]]>
+</script>
+<noscript>
+<div><img alt="DCSIMG" id="DCSIMG" width="1" height="1" src="//statse.webtrendslive.com/dcsqjgr30wz5bd6zokoukhwj3_7z7z/njs.gif?dcsuri=/nojavascript&amp;WT.js=No&amp;WT.tv=8.6.2"/></div>
+</noscript>
+[% END %]

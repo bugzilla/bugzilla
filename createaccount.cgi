@@ -62,6 +62,11 @@ unless ($createexp) {
 my $login = $cgi->param('login');
 
 if (defined($login)) {
+    # Check the hash token to make sure this user actually submitted
+    # the create account form.
+    my $token = $cgi->param('token');
+    check_hash_token($token, ['create_account']);
+
     $login = Bugzilla::User->check_login_name_for_creation($login);
     $vars->{'login'} = $login;
 

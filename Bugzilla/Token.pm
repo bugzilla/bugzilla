@@ -176,9 +176,14 @@ sub issue_hash_token {
     $data ||= [];
     $time ||= time();
 
+    # For the user ID, use the actual ID if the user is logged in.
+    # Otherwise, use the remote IP, in case this is for something
+    # such as creating an account or logging in.
+    my $user_id = Bugzilla->user->id || remote_ip();
+
     # The concatenated string is of the form
-    # token creation time + site-wide secret + user ID + data
-    my @args = ($time, Bugzilla->localconfig->{'site_wide_secret'}, Bugzilla->user->id, @$data);
+    # token creation time + site-wide secret + user ID (either ID or remote IP) + data
+    my @args = ($time, Bugzilla->localconfig->{'site_wide_secret'}, $user_id, @$data);
 
     my $token = join('*', @args);
     # Wide characters cause md5_hex() to die.

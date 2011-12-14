@@ -355,7 +355,7 @@ sub history {
         $bug_id = $bug->id;
         $item{id} = $self->type('int', $bug_id);
 
-        my ($activity) = Bugzilla::Bug::GetBugActivity($bug_id);
+        my ($activity) = $bug->get_activity;
 
         my @history;
         foreach my $changeset (@$activity) {

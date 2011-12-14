@@ -676,8 +676,7 @@ sub update {
         if (defined $cgi->param('delta_ts')
             && $cgi->param('delta_ts') ne $attachment->modification_time)
         {
-            ($vars->{'operations'}) =
-                Bugzilla::Bug::GetBugActivity($bug->id, $attachment->id, $cgi->param('delta_ts'));
+            ($vars->{'operations'}) = $bug->get_activity($attachment->id, $cgi->param('delta_ts'));
 
             # The token contains the old modification_time. We need a new one.
             $cgi->param('token', issue_hash_token([$attachment->id, $attachment->modification_time]));

@@ -143,9 +143,7 @@ if (defined $cgi->param('delta_ts'))
     my $delta_ts_z = datetime_from($cgi->param('delta_ts'));
     my $first_delta_tz_z =  datetime_from($first_bug->delta_ts);
     if ($first_delta_tz_z ne $delta_ts_z) {
-        ($vars->{'operations'}) =
-            Bugzilla::Bug::GetBugActivity($first_bug->id, undef,
-                                          scalar $cgi->param('delta_ts'));
+        ($vars->{'operations'}) = $first_bug->get_activity(undef, $cgi->param('delta_ts'));
 
         $vars->{'title_tag'} = "mid_air";
     

@@ -3754,12 +3754,13 @@ sub _bugs_in_order {
 
 # Get the activity of a bug, starting from $starttime (if given).
 # This routine assumes Bugzilla::Bug->check has been previously called.
-sub GetBugActivity {
-    my ($bug_id, $attach_id, $starttime) = @_;
+sub get_activity {
+    my ($self, $attach_id, $starttime) = @_;
     my $dbh = Bugzilla->dbh;
+    my $user = Bugzilla->user;
 
     # Arguments passed to the SQL query.
-    my @args = ($bug_id);
+    my @args = ($self->id);
 
     # Only consider changes since $starttime, if given.
     my $datepart = "";
@@ -3778,8 +3779,7 @@ sub GetBugActivity {
     # Only includes attachments the user is allowed to see.
     my $suppjoins = "";
     my $suppwhere = "";
-    if (!Bugzilla->user->is_insider) 
-    {
+    if (!$user->is_insider) {
         $suppjoins = "LEFT JOIN attachments 
                    ON attachments.attach_id = bugs_activity.attach_id";
         $suppwhere = "AND COALESCE(attachments.isprivate, 0) = 0";
@@ -3814,16 +3814,11 @@ sub GetBugActivity {
         my $activity_visible = 1;
 
         # check if the user should see this field's activity
-        if ($fieldname eq 'remaining_time'
-            || $fieldname eq 'estimated_time'
-            || $fieldname eq 'work_time'
-            || $fieldname eq 'deadline')
-        {
-            $activity_visible = Bugzilla->user->is_timetracker;
+        if (grep { $fieldname eq $_ } TIMETRACKING_FIELDS) {
+            $activity_visible = $user->is_timetracker;
         }
         elsif ($fieldname eq 'longdescs.isprivate'
-                && !Bugzilla->user->is_insider 
-                && $added) 
+               && !$user->is_insider && $added)
         { 
             $activity_visible = 0;
         } 
@@ -3854,14 +3849,24 @@ sub GetBugActivity {
                 $changes = [];
             }
 
+            # If this is the same field as the previous item, then concatenate
+            # the data into the same change.
+            if ($operation->{'who'} && $who eq $operation->{'who'}
+                && $when eq $operation->{'when'}
+                && $fieldname eq $operation->{'fieldname'}
+                && ($attachid || 0) == ($operation->{'attachid'} || 0))
+            {
+                my $old_change = pop @$changes;
+                $removed = $old_change->{'removed'} . $removed;
+                $added = $old_change->{'added'} . $added;
+            }
             $operation->{'who'} = $who;
             $operation->{'when'} = $when;
-
-            $change{'fieldname'} = $fieldname;
-            $change{'attachid'} = $attachid;
+            $operation->{'fieldname'} = $change{'fieldname'} = $fieldname;
+            $operation->{'attachid'} = $change{'attachid'} = $attachid;
             $change{'removed'} = $removed;
             $change{'added'} = $added;
-            
+
             if ($comment_id) {
                 $change{'comment'} = Bugzilla::Comment->new($comment_id);
             }

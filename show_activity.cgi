@@ -54,8 +54,7 @@ my $bug = Bugzilla::Bug->check($id);
 # visible immediately due to replication lag.
 Bugzilla->switch_to_shadow_db;
 
-($vars->{'operations'}, $vars->{'incomplete_data'}) = 
-    Bugzilla::Bug::GetBugActivity($bug->id);
+($vars->{'operations'}, $vars->{'incomplete_data'}) = $bug->get_activity;
 
 $vars->{'bug'} = $bug;
 

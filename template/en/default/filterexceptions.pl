@@ -52,7 +52,6 @@
 ],
 
 'flag/list.html.tmpl' => [
-  'flag.id', 
   'flag.status', 
   'type.id', 
 ],

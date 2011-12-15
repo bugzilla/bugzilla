@@ -526,7 +526,7 @@ function handleValControllerChange(e, args) {
             YAHOO.util.Dom.removeClass(item, 'bz_hidden_option');
             item.disabled = false;
         }
-        else if (!item.disabled) {
+        else if (!item.disabled && controller_item && !controller_item.selected) {
             YAHOO.util.Dom.addClass(item, 'bz_hidden_option');
             if (item.selected) {
                 item.selected = false;

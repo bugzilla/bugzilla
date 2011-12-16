@@ -152,10 +152,12 @@ use constant UPDATE_COLUMNS => qw(
 use constant SQL_DEFINITIONS => {
     # Using commas because these are constants and they shouldn't
     # be auto-quoted by the "=>" operator.
-    FIELD_TYPE_FREETEXT,      { TYPE => 'varchar(255)' },
+    FIELD_TYPE_FREETEXT,      { TYPE => 'varchar(255)', 
+                                NOTNULL => 1, DEFAULT => "''"},
     FIELD_TYPE_SINGLE_SELECT, { TYPE => 'varchar(64)', NOTNULL => 1,
                                 DEFAULT => "'---'" },
-    FIELD_TYPE_TEXTAREA,      { TYPE => 'MEDIUMTEXT' },
+    FIELD_TYPE_TEXTAREA,      { TYPE => 'MEDIUMTEXT', 
+                                NOTNULL => 1, DEFAULT => "''"},
     FIELD_TYPE_DATETIME,      { TYPE => 'DATETIME'   },
     FIELD_TYPE_BUG_ID,        { TYPE => 'INT3'       },
 };

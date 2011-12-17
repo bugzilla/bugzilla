@@ -34,6 +34,7 @@ use Bugzilla::Error;
 use Bugzilla::User;
 use Bugzilla::BugMail;
 use Bugzilla::Util;
+use Bugzilla::Token;
 
 # Just in case someone already has an account, let them get the correct footer
 # on an error message. The user is logged out just after the account is

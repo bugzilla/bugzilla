@@ -3572,7 +3572,7 @@ sub _populate_bug_see_also_class {
     }
 
     $dbh->bz_add_column('bug_see_also', 'class',
-        {TYPE => 'varchar(255)', NOTNULL => 1}, '');
+        {TYPE => 'varchar(255)', NOTNULL => 1, DEFAULT => "''"}, '');
 
     my $result = $dbh->selectall_arrayref(
         "SELECT id, value FROM bug_see_also");

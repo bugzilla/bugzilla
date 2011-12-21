@@ -22,10 +22,11 @@ package Bugzilla::Extension::FlagTypeComment;
 use strict;
 use base qw(Bugzilla::Extension);
 
-use Bugzilla::FlagType;
-use Bugzilla::Util 'trick_taint';
-
 use Bugzilla::Extension::FlagTypeComment::Constants;
+
+use Bugzilla::FlagType;
+use Bugzilla::Util qw(trick_taint);
+use Scalar::Util qw(blessed);
 
 our $VERSION = '1';
 
@@ -83,7 +84,14 @@ sub _set_ftc_states {
     if ($file =~ /^admin\//) {
         # admin
         my $type = $vars->{'type'} || return;
-        if ($type->target_type eq 'bug') {
+        my ($target_type, $id);
+        if (blessed($type)) {
+            ($target_type, $id) = ($type->target_type, $type->id);
+        } else {
+            ($target_type, $id) = ($type->{target_type}, $type->{id});
+            trick_taint($id);
+        }
+        if ($target_type eq 'bug') {
             return unless FLAGTYPE_COMMENT_BUG_FLAGS;
         } else {
             return unless FLAGTYPE_COMMENT_ATTACHMENT_FLAGS;
@@ -93,7 +101,7 @@ sub _set_ftc_states {
                FROM flagtype_comments WHERE type_id=?",
             'state',
             undef,
-            $type->id);
+            $id);
 
     } else {
         # creating/editing attachment / viewing bug

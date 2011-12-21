@@ -125,7 +125,18 @@ href="http://www.mozilla.org/support/">Visit the mozilla.org support page</a> be
   [% END %]
 
   [% FOREACH p = c.products %]
-    <tr>
+    [% class = "" %]
+    [% has_entry_groups = 0 %]
+    [% FOREACH gid = p.group_controls.keys %]
+      [% IF p.group_controls.$gid.entry %]
+        [% has_entry_groups = 1 %]
+        [% class = class _ " group_$gid" %]
+      [% END %]
+    [% END %]
+    <tr class="[% "group_secure" IF has_entry_groups +%] [% class FILTER html %]"
+    [%- IF has_entry_groups %] title="This product requires one or more
+ group memberships in order to enter [% terms.bugs %] in it. You have them,  but be
+ aware not everyone else does."[% END %]>
       <th align="right" valign="top">
       [% IF p.name == "Mozilla PR" AND target == "enter_bug.cgi" AND NOT format AND NOT cgi.param("debug") %]
         <a href="[% target FILTER uri %]?product=[% p.name FILTER uri -%]

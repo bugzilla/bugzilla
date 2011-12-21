@@ -42,6 +42,7 @@ use Bugzilla::Auth::Persist::Cookie;
 use Bugzilla::CGI;
 use Bugzilla::Extension;
 use Bugzilla::DB;
+use Bugzilla::Hook;
 use Bugzilla::Install::Localconfig qw(read_localconfig);
 use Bugzilla::Install::Requirements qw(OPTIONAL_MODULES);
 use Bugzilla::Install::Util qw(init_console);
@@ -596,12 +597,20 @@ sub fields {
 }
 
 sub active_custom_fields {
-    my $class = shift;
-    if (!exists $class->request_cache->{active_custom_fields}) {
-        $class->request_cache->{active_custom_fields} =
-          Bugzilla::Field->match({ custom => 1, obsolete => 0 });
+    my ($class, $params) = @_;
+    my $cache_id = 'active_custom_fields';
+    if ($params) {
+        $cache_id .= ($params->{product} ? '_p' . $params->{product}->id : '') .
+                     ($params->{component} ? '_c' . $params->{component}->id : '') .
+                     ($params->{type} ? '_t' . $params->{type} : '');
     }
-    return @{$class->request_cache->{active_custom_fields}};
+    if (!exists $class->request_cache->{$cache_id}) {
+        my $fields = Bugzilla::Field->match({ custom => 1, obsolete => 0});
+        Bugzilla::Hook::process('active_custom_fields', 
+                                { fields => \$fields, params => $params });
+        $class->request_cache->{$cache_id} = $fields;
+    }
+    return @{$class->request_cache->{$cache_id}};
 }
 
 sub has_flags {

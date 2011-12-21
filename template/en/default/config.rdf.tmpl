@@ -171,7 +171,7 @@
               [% IF show_flags %]
                 <bz:flag_types>
                   <Seq>
-                    [% flag_types = component.flag_types(is_active=>1).bug.merge(component.flag_types(is_active=>1).attachment) %]
+                    [% flag_types = component.flag_types.bug.merge(component.flag_types.attachment) %]
                     [% FOREACH flag_type = flag_types %]
                       [% all_visible_flag_types.${flag_type.id} = flag_type %]
                       <li resource="[% escaped_urlbase %]flag.cgi?id=[% flag_type.id FILTER uri

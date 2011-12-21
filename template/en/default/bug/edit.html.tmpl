@@ -870,7 +870,7 @@
   [% show_bug_flags = 0 %]
   [% bug_flags_set = 0 %]
   [% show_more_flags = 0 %]
-  [% FOREACH type = bug.flag_types %]
+  [% FOREACH type = bug.flag_types(is_active=>1) %]
     [% IF (type.flags && type.flags.size > 0) || (user.id && type.is_active) %]
       [% show_bug_flags = 1 %]
     [% END %]
@@ -929,9 +929,8 @@
 [% BLOCK section_customfields %]
 [%# *** Custom Fields *** %]
   [% USE Bugzilla %]
-  [% FOREACH field = Bugzilla.active_custom_fields %]
+  [% FOREACH field = Bugzilla.active_custom_fields(product=>bug.product_obj,component=>bug.component_obj,type=>1) %]
     [% NEXT IF NOT user.id AND field.value == "---" %]
-    [% NEXT IF cf_hidden_in_product(field.name, bug.product, bug.component, 1) %]
     <tr>
       [% PROCESS bug/field.html.tmpl value = bug.${field.name}
                                      editable = bug.check_can_change_field(field.name, 0, 1)

@@ -186,6 +186,26 @@ sub _get_field_values_sort_key {
     return \%field_values;
 }
 
+sub active_custom_fields {
+    my ($self, $args) = @_;
+    my $fields    = $args->{'fields'};
+    my $params    = $args->{'params'};
+    my $product   = $params->{'product'};
+    my $component = $params->{'component'};
+
+    return if !$product;
+
+    my $product_name   = blessed $product ? $product->name : $product;
+    my $component_name = blessed $component ? $component->name : $component;
+
+    my @tmp_fields;
+    foreach my $field (@$$fields) { 
+        next if cf_hidden_in_product($field->name, $product_name, $component_name, $params->{'type'}); 
+        push(@tmp_fields, $field);
+    }
+    $$fields = \@tmp_fields;
+}
+
 sub cf_hidden_in_product {
     my ($field_name, $product_name, $component_name, $custom_flag_mode) = @_;
 
@@ -196,8 +216,11 @@ sub cf_hidden_in_product {
    
     # Also in buglist.cgi, we pass in a list of components instead 
     # of a single compoent name everywhere else.
-    my $component_list = ref $component_name ? $component_name 
-                                             : [ $component_name ];
+    my $component_list = [];
+    if ($component_name) {
+        $component_list = ref $component_name ? $component_name 
+                                              : [ $component_name ];
+    }
 
     if ($custom_flag_mode) {
         if ($custom_flag_mode == 1) {

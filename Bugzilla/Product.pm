@@ -114,7 +114,7 @@ sub create {
 # for each product in the list, particularly with hundreds or thousands
 # of products.
 sub preload {
-    my ($products, $preload_flagtypes) = @_;
+    my ($products, $preload_flagtypes, $flagtypes_params) = @_;
     my %prods = map { $_->id => $_ } @$products;
     my @prod_ids = keys %prods;
     return unless @prod_ids;
@@ -132,7 +132,7 @@ sub preload {
         }
     }
     if ($preload_flagtypes) {
-        $_->flag_types foreach @$products;
+        $_->flag_types($flagtypes_params) foreach @$products;
     }
 }
 

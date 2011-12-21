@@ -20,19 +20,22 @@
 [% PROCESS global/variables.none.tmpl %]
 [% PROCESS 'global/field-descs.none.tmpl' %]
 
-Here are your outstanding requests older than [% threshold %] days:
+The following is a list of requests people have made of you, which have been
+outstanding more than [% threshold %] days. To avoid disappointing others, please deal with
+them as quickly as possible. Here is some guidance on handling requests:
+  https://wiki.mozilla.org/BMO/Handling_Requests
 
-[% FOREACH request = requests.keys %]
-[%+ request +%]
-[%+ "-" FILTER repeat(request.length) +%]
+[% FOREACH request_type = requests.keys %]
+[%+ request_type +%]
+[%+ "-" FILTER repeat(request_type.length) +%]
 
-  [% FOREACH bug = requests.$request %]
-  [%+ terms.Bug +%] [%+ bug.id %]: [% bug.summary +%] ([% bug.age %] days old)
-    [%+ urlbase %]show_bug.cgi?id=[% bug.id +%]
+  [% FOREACH request = requests.$request_type %]
+  [%+ terms.Bug +%] [%+ request.bug_id %]: [% request.summary +%] ([% request.age %] days old)
+    [%+ urlbase %]show_bug.cgi?id=[% request.bug_id +%]
+    [% IF request.attach_id %]
+    [%+ urlbase %]attachment.cgi?id=[% request.attach_id %]&action=edit
+    [% END %]
   [%+ END +%]
 [% END %]
 To see all your outstanding requests, visit:
-[%+ urlbase %]request.cgi?action=queue&requestee=[% recipient.email FILTER uri %]&group=type
-
-For guidance on handling requests, see:
-https://wiki.mozilla.org/BMO/Handling_Requests
+[%+ urlbase %]request.cgi?action=queue&requestee=[% recipient.email FILTER url_quote %]&group=type

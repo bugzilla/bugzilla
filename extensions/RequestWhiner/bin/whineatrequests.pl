@@ -40,7 +40,8 @@ my $dbh = Bugzilla->dbh;
 
 my $sth_get_requests =
     $dbh->prepare("SELECT profiles.login_name,
-                          flagtypes.name, 
+                          flagtypes.name,
+                          flags.attach_id,
                           bugs.bug_id, 
                           bugs.short_desc, " .
                           $dbh->sql_to_days('NOW()') . 
@@ -68,6 +69,7 @@ my $requests = {};
     
 while (my ($login_name,
            $flag_name, 
+           $attach_id,
            $bug_id, 
            $short_desc, 
            $age_in_days) = $sth_get_requests->fetchrow_array()) 
@@ -81,9 +83,10 @@ while (my ($login_name,
     }
         
     push(@{ $requests->{$login_name}->{$flag_name} }, {
-        id      => $bug_id,
-        summary => $short_desc,
-        age     => $age_in_days
+        bug_id    => $bug_id,
+        attach_id => $attach_id,
+        summary   => $short_desc,
+        age       => $age_in_days
     });
 }
 
@@ -97,7 +100,7 @@ foreach my $recipient (keys %$requests) {
     mail({
         from      => Bugzilla->params->{'mailfrom'},
         recipient => $user,
-        subject   => "Outstanding Requests",
+        subject   => "Your Outstanding Requests",
         requests  => $requests->{$recipient},
         threshold => WHINE_AFTER_DAYS
     });

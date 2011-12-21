@@ -29,17 +29,27 @@
   </head>
   <body bgcolor="#FFFFFF">
 
-<p>Here are your outstanding requests older than [% threshold FILTER html%] 
-days:</p>
+<p>The following is a list of requests people have made of you, which have been
+outstanding more than [% threshold FILTER html %] days. To avoid disappointing
+others, please deal with them as quickly as possible.
+(<a href="https://wiki.mozilla.org/BMO/Handling_Requests">Here is some
+guidance on handling requests</a>.)
+</p>
 
-[% FOREACH request = requests.keys %]
-<h3>[% request FILTER html %]</h3>
+[% FOREACH request_type = requests.keys %]
+<h3>[% request_type FILTER html %]</h3>
 
 <ul>
-  [% FOREACH bug = requests.$request %]
+  [% FOREACH request = requests.$request_type %]
   <li>
-    <a href="[% urlbase FILTER none %]show_bug.cgi?id=[% bug.id FILTER none %]">[% terms.Bug %]
-    [%+ bug.id FILTER none %]: [% bug.summary FILTER html %]</a> ([% bug.age FILTER none %] days old)
+    <a href="[% urlbase FILTER none %]show_bug.cgi?id=[% request.bug_id FILTER none %]">[% terms.Bug %]
+    [%+ request.bug_id FILTER none %]: [% request.summary FILTER html %]</a> ([% request.age FILTER none %] days old)
+    [% IF request.attach_id %]
+      <br>
+      <small>(<a href="[% urlbase FILTER none %]attachment.cgi?id=[% request.attach_id FILTER none %]&action=edit">Details</a> |
+      <a href="[% urlbase FILTER none %]attachment.cgi?id=[% request.attach_id FILTER none %]&action=diff">Diff</a> |
+      <a href="[% urlbase FILTER none %]page.cgi?id=splinter.html&bug=[% request.bug_id FILTER none %]&attachment=[% request.attach_id FILTER none %]">Splinter Review</a>)</small>
+    [% END %]
   </li>
   [% END %]
 </ul>
@@ -47,8 +57,6 @@ days:</p>
 [% END %]
 
 <p><a href="[% urlbase FILTER none %]request.cgi?action=queue&requestee=[% recipient.email FILTER uri %]&group=type">See all your outstanding requests</a>.</p>
-
-<p>A href="https://wiki.mozilla.org/BMO/Handling_Requests">Get guidance on handling requests</a>.</p>
 
   </body>
 </html>

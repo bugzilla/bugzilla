@@ -214,6 +214,26 @@ sub clean_search_url {
     }
 }
 
+sub check_etag {
+    my ($self, $valid_etag) = @_;
+
+    # ETag support.
+    my $if_none_match = $self->http('If-None-Match');
+    return if !$if_none_match;
+
+    my @if_none = split(/[\s,]+/, $if_none_match);
+    foreach my $possible_etag (@if_none) {
+        # remove quotes from begin and end of the string
+        $possible_etag =~ s/^\"//g;
+        $possible_etag =~ s/\"$//g;
+        if ($possible_etag eq $valid_etag or $possible_etag eq '*') {
+            print $self->header(-ETag => $possible_etag,
+                                -status => '304 Not Modified');
+            exit;
+        }
+    }
+}
+
 # Overwrite to ensure nph doesn't get set, and unset HEADERS_ONCE
 sub multipart_init {
     my $self = shift;

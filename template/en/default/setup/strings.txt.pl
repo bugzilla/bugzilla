@@ -433,7 +433,7 @@ the database, and that file has been renamed to ##data##/comments.bak
 You may delete the renamed file once you have confirmed that all your
 quips were moved successfully.
 END
-    update_queries_to_tags => "Populating the new tags table:",
+    update_queries_to_tags => "Populating the new 'tag' table:",
     webdot_bad_htaccess => <<END,
 WARNING: Dependency graph images are not accessible.
 Delete ##dir##/.htaccess and re-run checksetup.pl.

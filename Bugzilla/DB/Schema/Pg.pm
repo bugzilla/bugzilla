@@ -114,7 +114,30 @@ sub get_rename_table_sql {
         # is case-insensitive and will return an error about a duplicate name
         return ();
     }
-    return ("ALTER TABLE $old_name RENAME TO $new_name");
+
+    my @sql = ("ALTER TABLE $old_name RENAME TO $new_name");
+
+    # If there's a SERIAL column on this table, we also need to rename the
+    # sequence.
+    # If there is a PRIMARY KEY, we need to rename it too.
+    my @columns = $self->get_table_columns($old_name);
+    foreach my $column (@columns) {
+        my $def = $self->get_column_abstract($old_name, $column);
+        if ($def->{TYPE} =~ /SERIAL/i) {
+            my $old_seq = "${old_name}_${column}_seq";
+            my $new_seq = "${new_name}_${column}_seq";
+            push(@sql, "ALTER SEQUENCE $old_seq RENAME TO $new_seq");
+            push(@sql, "ALTER TABLE $new_name ALTER COLUMN $column
+                             SET DEFAULT NEXTVAL('$new_seq')");
+        }
+        if ($def->{PRIMARYKEY}) {
+            my $old_pk = "${old_name}_pkey";
+            my $new_pk = "${new_name}_pkey";
+            push(@sql, "ALTER INDEX $old_pk RENAME to $new_pk");
+        }
+    }
+
+    return @sql;
 }
 
 sub get_set_serial_sql {

@@ -3611,6 +3611,13 @@ sub _rename_tags_to_tag {
         $dbh->bz_add_index('tag', 'tag_user_id_idx',
                            {FIELDS => [qw(user_id name)], TYPE => 'UNIQUE'});
     }
+    if (my $bug_tag_fk = $dbh->bz_fk_info('bug_tag', 'tag_id')) {
+        # bz_rename_table() didn't handle FKs correctly.
+        if ($bug_tag_fk->{TABLE} eq 'tags') {
+            $bug_tag_fk->{TABLE} = 'tag';
+            $dbh->bz_alter_fk('bug_tag', 'tag_id', $bug_tag_fk);
+        }
+    }
 }
 
 sub _on_delete_set_null_for_audit_log_userid {

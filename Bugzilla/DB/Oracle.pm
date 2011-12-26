@@ -648,6 +648,10 @@ sub bz_setup_database {
                 my $fk_name = $self->_bz_schema->_get_fk_name($table,
                                                               $column,
                                                               $references);
+                # bz_rename_table didn't rename the trigger correctly.
+                if ($table eq 'bug_tag' && $to_table eq 'tags') {
+                    $to_table = 'tag';
+                }
                 if ( $update =~ /CASCADE/i ){
                      my $trigger_name = uc($fk_name . "_UC");
                      my $exist_trigger = $self->selectcol_arrayref(

@@ -548,7 +548,7 @@ sub bz_setup_foreign_keys {
             # prior to 4.2, and also to handle problems caused
             # by enabling an extension pre-4.2, disabling it for
             # the 4.2 upgrade, and then re-enabling it later.
-            if (!$fk) {
+            unless ($fk && $fk->{created}) {
                 my $standard_def = 
                     $self->_bz_schema->get_column_abstract($table, $column);
                 if (exists $standard_def->{REFERENCES}) {
@@ -1058,6 +1058,18 @@ sub bz_rename_table {
     my $new = $self->bz_table_info($new_name);
     ThrowCodeError('db_rename_conflict', { old => $old_name,
                                            new => $new_name }) if $new;
+
+    # FKs will all have the wrong names unless we drop and then let them
+    # be re-created later. Under normal circumstances, checksetup.pl will
+    # automatically re-create these dropped FKs at the end of its DB upgrade
+    # run, so we don't need to re-create them in this method.
+    my @columns = $self->bz_table_columns($old_name);
+    foreach my $column (@columns) {
+        # these just return silently if there's no FK to drop
+        $self->bz_drop_fk($old_name, $column);
+        $self->bz_drop_related_fks($old_name, $column);
+    }
+
     my @sql = $self->_bz_real_schema->get_rename_table_sql($old_name, $new_name);
     print get_text('install_table_rename', 
                    { old => $old_name, new => $new_name }) . "\n"

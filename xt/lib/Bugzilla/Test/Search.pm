@@ -887,7 +887,6 @@ sub run {
     my $params = Bugzilla->params;
     local $params->{'useclassification'} = 1;
     local $params->{'useqacontact'} = 1;
-    local $params->{'usebugaliases'} = 1;
     local $params->{'usetargetmilestone'} = 1;
     local $params->{'mail_delivery_method'} = 'None';
     local $params->{'timetrackinggroup'} = $everybody->name;

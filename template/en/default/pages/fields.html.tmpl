@@ -220,7 +220,6 @@
 
   [% NEXT IF field == 'status_whiteboard' AND !Param('usestatuswhiteboard') %]
   [% NEXT IF field == 'target_milestone' AND !Param('usetargetmilestone') %]
-  [% NEXT IF field == 'alias' AND !Param('usebugaliases') %]
 
   [%# For now we don't have help for attachment fields and so on. %]
   [% NEXT IF field.match('\.') %]

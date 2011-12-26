@@ -352,9 +352,8 @@ TUI_hide_default('attachment_text_field');
 
     <td>&nbsp;</td>
     [%# Calculate the number of rows we can use for flags %]
-    [% num_rows = 6 + (Param("useqacontact") ? 1 : 0) +
-                      (user.is_timetracker ? 3 : 0) +
-                      (Param("usebugaliases") ? 1 : 0)
+    [% num_rows = 7 + (Param("useqacontact") ? 1 : 0) +
+                      (user.is_timetracker ? 3 : 0)
     %]
 
     <td rowspan="[% num_rows FILTER html %]">
@@ -464,7 +463,6 @@ TUI_hide_default('attachment_text_field');
   </tr>
 [% END %]
 
-[% IF Param("usebugaliases") %]
   <tr>
     [% INCLUDE "bug/field-label.html.tmpl"
       field = bug_fields.alias editable = 1
@@ -473,7 +471,6 @@ TUI_hide_default('attachment_text_field');
       <input name="alias" size="20" value="[% alias FILTER html %]">
     </td>
   </tr>
-[% END %]
 
   <tr>
     [% INCLUDE "bug/field-label.html.tmpl"

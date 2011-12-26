@@ -40,7 +40,6 @@ use Storable qw(dclone);
 # Maps parameters that control columns to the names of columns.
 use constant COLUMN_PARAMS => {
     'useclassification'   => ['classification'],
-    'usebugaliases'       => ['alias'],
     'usetargetmilestone'  => ['target_milestone'],
     'useqacontact'        => ['qa_contact', 'qa_contact_realname'],
     'usestatuswhiteboard' => ['status_whiteboard'],

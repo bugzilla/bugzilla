@@ -337,12 +337,11 @@ sub new {
     # If we get something that looks like a word (not a number),
     # make it the "name" param.
     if (!defined $param || (!ref($param) && $param !~ /^\d+$/)) {
-        # But only if aliases are enabled.
-        if (Bugzilla->params->{'usebugaliases'} && $param) {
+        if ($param) {
             $param = { name => $param };
         }
         else {
-            # Aliases are off, and we got something that's not a number.
+            # We got something that's not a number.
             my $error_self = {};
             bless $error_self, $class;
             $error_self->{'bug_id'} = $param;
@@ -611,8 +610,7 @@ sub possible_duplicates {
 # C<rep_platform> - B<Required> The platform the bug was found against.
 # C<version>      - B<Required> The version of the product the bug was found in.
 #
-# C<alias>        - An alias for this bug. Will be ignored if C<usebugaliases>
-#                   is off.
+# C<alias>        - An alias for this bug.
 # C<target_milestone> - When this bug is expected to be fixed.
 # C<status_whiteboard> - A string.
 # C<bug_status>   - The initial status of the bug, a string.
@@ -1202,7 +1200,7 @@ sub _send_bugmail {
 sub _check_alias {
    my ($invocant, $alias) = @_;
    $alias = trim($alias);
-   return undef if (!Bugzilla->params->{'usebugaliases'} || !$alias);
+   return undef if (!$alias);
 
     # Make sure the alias isn't too long.
     if (length($alias) > 20) {
@@ -3696,7 +3694,6 @@ sub choices {
 # the ID of the bug if it exists or the undefined value if it doesn't.
 sub bug_alias_to_id {
     my ($alias) = @_;
-    return undef unless Bugzilla->params->{"usebugaliases"};
     my $dbh = Bugzilla->dbh;
     trick_taint($alias);
     return $dbh->selectrow_array(

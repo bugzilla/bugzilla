@@ -383,14 +383,7 @@ sub history {
         # alias is returned in case users passes a mixture of ids and aliases
         # then they get to know which bug activity relates to which value  
         # they passed
-        if (Bugzilla->params->{'usebugaliases'}) {
-            $item{alias} = $self->type('string', $bug->alias);
-        }
-        else {
-            # For API reasons, we always want the value to appear, we just
-            # don't want it to have a value if aliases are turned off.
-            $item{alias} = undef;
-        }
+        $item{alias} = $self->type('string', $bug->alias);
 
         push(@return, \%item);
     }
@@ -527,14 +520,7 @@ sub update {
         # alias is returned in case users pass a mixture of ids and aliases,
         # so that they can know which set of changes relates to which value
         # they passed.
-        if (Bugzilla->params->{'usebugaliases'}) {
-            $hash{alias} = $self->type('string', $bug->alias);
-        }
-        else {
-            # For API reasons, we always want the alias field to appear, we
-            # just don't want it to have a value if aliases are turned off.
-            $hash{alias} = $self->type('string', '');
-        }
+        $hash{alias} = $self->type('string', $bug->alias);
 
         my %changes = %{ $all_changes{$bug->id} };
         foreach my $field (keys %changes) {
@@ -1573,10 +1559,6 @@ from the Bugzilla database to fetch. If it contains any non-numeric
 characters, it is considered to be a bug alias instead, and the bug with 
 that alias will be loaded. 
 
-Note that it's possible for aliases to be disabled in Bugzilla, in which
-case you will be told that you have specified an invalid bug_id if you
-try to specify an alias. (It will be error 100.)
-
 =item C<permissive> B<EXPERIMENTAL>
 
 C<boolean> Normally, if you request any inaccessible or invalid bug ids,
@@ -1825,8 +1807,7 @@ invalid bug error.
 
 =item 100 (Invalid Bug Alias)
 
-If you specified an alias and either: (a) the Bugzilla you're querying
-doesn't support aliases or (b) there is no bug with that alias.
+If you specified an alias and there is no bug with that alias.
 
 =item 101 (Invalid Bug ID)
 
@@ -1913,10 +1894,6 @@ from the Bugzilla database to fetch. If it contains any non-numeric
 characters, it is considered to be a bug alias instead, and the data bug 
 with that alias will be loaded. 
 
-Note that it's possible for aliases to be disabled in Bugzilla, in which
-case you will be told that you have specified an invalid bug_id if you
-try to specify an alias. (It will be error 100.)
-
 =back
 
 =item B<Returns>
@@ -1932,8 +1909,7 @@ C<int> The numeric id of the bug.
 
 =item alias
 
-C<string> The alias of this bug. If there is no alias or aliases are 
-disabled in this Bugzilla, this will be undef.
+C<string> The alias of this bug. If there is no alias, this will be undef.
 
 =item history
 
@@ -2035,9 +2011,7 @@ most-common database to use with Bugzilla, and MySQL is not case sensitive).
 
 =item C<alias>
 
-C<string> The unique alias for this bug. Note that you can search
-by alias even if the alias field is disabled in this Bugzilla, but
-it's likely that there won't be any aliases set on bugs, in that case.
+C<string> The unique alias for this bug.
 
 =item C<assigned_to>
 
@@ -2534,8 +2508,7 @@ C<99999.99>.
 
 =item 100 (Invalid Bug Alias) 
 
-If you specified an alias and either: (a) the Bugzilla you're querying
-doesn't support aliases or (b) there is no bug with that alias.
+If you specified an alias and there is no bug with that alias.
 
 =item 101 (Invalid Bug ID)
 
@@ -2892,8 +2865,7 @@ C<int> The id of the bug that was updated.
 
 =item C<alias>
 
-C<string> The alias of the bug that was updated, if aliases are enabled and
-this bug has an alias.
+C<string> The alias of the bug that was updated, if this bug has an alias.
 
 =item C<last_change_time>
 

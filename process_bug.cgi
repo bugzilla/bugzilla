@@ -306,7 +306,7 @@ if (defined $cgi->param('newcc')
 if (defined $cgi->param('id')) {
     # Since aliases are unique (like bug numbers), they can only be changed
     # for one bug at a time.
-    if (Bugzilla->params->{"usebugaliases"} && defined $cgi->param('alias')) {
+    if (defined $cgi->param('alias')) {
         $set_all_fields{alias} = $cgi->param('alias');
     }
 }

@@ -72,12 +72,6 @@ sub get_param_list {
   },
 
   {
-   name => 'usebugaliases',
-   type => 'b',
-   default => 0
-  },
-
-  {
    name => 'use_see_also',
    type => 'b',
    default => 1

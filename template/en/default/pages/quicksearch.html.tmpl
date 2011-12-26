@@ -46,17 +46,14 @@
     [%+ field_descs.product FILTER html %],
     [%+ field_descs.component FILTER html %], 
     [%+ IF use_keywords %][%+ field_descs.keywords FILTER html %],[% END %]
-    [%+ IF Param('usebugaliases') %][% field_descs.alias FILTER html %],[% END %]
+    [%+ field_descs.alias FILTER html %],
     [%+ field_descs.short_desc FILTER html %], 
     [%+ IF Param('usestatuswhiteboard') %][% field_descs.status_whiteboard FILTER html %],[% END %]
     and [% field_descs.longdesc FILTER html %] fields for your word or words.</li>
 
   <li>Typing just a <strong>number</strong> in the search box will take
-    you directly to the [% terms.bug %] with that ID. 
-    [% IF Param('usebugaliases') %]
-      Also, just typing the <strong>alias</strong> of [% terms.abug %]
-      will take you to that [% terms.bug %].
-    [% END %]
+    you directly to the [% terms.bug %] with that ID. Also, just typing the
+    <strong>alias</strong> of [% terms.abug %] will take you to that [% terms.bug %].
   </li>
 
   <li>Adding more terms <strong>narrows down</strong> the search, it does not

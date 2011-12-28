@@ -355,6 +355,7 @@ sub cancelChangeEmail {
 sub request_create_account {
     my $token = shift;
 
+    Bugzilla->user->check_account_creation_enabled;
     my (undef, $date, $login_name) = Bugzilla::Token::GetTokenData($token);
     $vars->{'token'} = $token;
     $vars->{'email'} = $login_name . Bugzilla->params->{'emailsuffix'};
@@ -376,6 +377,7 @@ sub request_create_account {
 sub confirm_create_account {
     my $token = shift;
 
+    Bugzilla->user->check_account_creation_enabled;
     my (undef, undef, $login_name) = Bugzilla::Token::GetTokenData($token);
 
     my $password = $cgi->param('passwd1') || '';

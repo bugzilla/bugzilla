@@ -298,6 +298,8 @@ sub cancelChangeEmail {
 sub request_create_account {
     my ($date, $login_name, $token) = @_;
 
+    Bugzilla->user->check_account_creation_enabled;
+
     $vars->{'token'} = $token;
     $vars->{'email'} = $login_name . Bugzilla->params->{'emailsuffix'};
     $vars->{'expiration_ts'} = ctime(str2time($date) + MAX_TOKEN_AGE * 86400);
@@ -309,6 +311,8 @@ sub request_create_account {
 
 sub confirm_create_account {
     my ($login_name, $token) = @_;
+
+    Bugzilla->user->check_account_creation_enabled;
 
     my $password = $cgi->param('passwd1') || '';
     validate_password($password, $cgi->param('passwd2') || '');

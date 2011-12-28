@@ -438,7 +438,7 @@ sub dump {
     
     require Data::Dumper;
     say "<pre>Bugzilla::Chart object:";
-    print Data::Dumper::Dumper($self);
+    print html_quote(Data::Dumper::Dumper($self));
     print "</pre>";
 }
 

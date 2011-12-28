@@ -110,6 +110,7 @@ use constant WS_ERROR_CODE => {
     # User errors are 500-600.
     account_exists        => 500,
     illegal_email_address => 501,
+    auth_cant_create_account    => 501,
     account_creation_disabled   => 501,
     account_creation_restricted => 501,
     password_too_short    => 502,

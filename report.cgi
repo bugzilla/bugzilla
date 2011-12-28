@@ -309,9 +309,9 @@ print $cgi->header(-type => $format->{'ctype'},
 if ($cgi->param('debug')) {
     require Data::Dumper;
     print "<pre>data hash:\n";
-    print Data::Dumper::Dumper(%data) . "\n\n";
+    print html_quote(Data::Dumper::Dumper(%data)) . "\n\n";
     print "data array:\n";
-    print Data::Dumper::Dumper(@image_data) . "\n\n</pre>";
+    print html_quote(Data::Dumper::Dumper(@image_data)) . "\n\n</pre>";
 }
 
 # All formats point to the same section of the documentation.

@@ -373,7 +373,7 @@ sub data {
 
 =item C<datasize>
 
-the length (in characters) of the attachment content
+the length (in bytes) of the attachment content
 
 =back
 

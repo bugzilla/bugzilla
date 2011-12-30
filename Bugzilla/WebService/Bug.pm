@@ -933,6 +933,10 @@ sub _attachment_to_hash {
         $item->{'data'} = $self->type('base64', $attach->data);
     }
 
+    if (filter_wants $filters, 'size') {
+        $item->{'size'} = $self->type('int', $attach->datasize);
+    }
+
     return $item;
 }
 
@@ -1286,6 +1290,10 @@ diagram above) are:
 
 C<base64> The raw data of the attachment, encoded as Base64.
 
+=item C<size>
+
+C<int> The length (in bytes) of the attachment.
+
 =item C<creation_time>
 
 C<dateTime> The time the attachment was created.
@@ -1372,6 +1380,8 @@ C<summary>.
 
 =item In Bugzilla B<4.2>, the C<is_url> return value was removed
 (this attribute no longer exists for attachments).
+
+=item The C<size> return value was added in Bugzilla B<5.0>.
 
 =back
 

@@ -68,19 +68,19 @@
   <p>
   Sorry, there
   [% IF version.bug_count > 1 %] 
-    are [% version.bug_count FILTER none %] [%+ terms.bugs %] 
+    are [% version.bug_count FILTER none %] outstanding [% terms.bugs %]
   [% ELSE %]
-    is [% version.bug_count FILTER none %] [%+ terms.bug %] 
+    is [% version.bug_count FILTER none %] outstanding [% terms.bug %]
   [% END %]
 
-  outstanding for this version. You must move 
+  for this version. You must move
 
   [% IF version.bug_count > 1 %]
      those [% terms.bugs %] 
   [% ELSE %]
      that [% terms.bug %]
   [% END %]
-  to another version before you can delete this one.
+  to another version before this version can be deleted.
   </p>
 [% ELSE %]
 

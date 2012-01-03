@@ -10,7 +10,7 @@ YAHOO.util.Event.onDOMReady(function() {
   admin_usermenu.render(document.body);
 });
 
-function show_admin_username(event, id, email) {
+function show_admin_usermenu(event, id, email) {
   if (!admin_usermenu)
     return;
   admin_usermenu.getItem(0).cfg.setProperty('url', 'editusers.cgi?action=edit&userid=' + id);

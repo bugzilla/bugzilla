@@ -29,8 +29,11 @@
  * version: function which returns a version (eg. detected from UserAgent)
  * support: string which is displayed at the top of the duplicates page
  * secgroup: the group to place confidential bugs into
+ * defaultComponent: the default compoent to select.  Defaults to 'General'
+ * noComponentSelection: when true, the default component will always be
+ *     used.  Defaults to 'false';
  * detectPlatform: when true the platform and op_sys will be set from the
- *                 browser's user agent.  when false, these will be set to All
+ *     browser's user agent.  when false, these will be set to All
  */
 
 var products = {
@@ -52,6 +55,8 @@ var products = {
         return false;
       }
     },
+    defaultComponent: "Untriaged",
+    noComponentSelection: true,
     detectPlatform: true,
     support:
       'If you are new to Firefox or Bugzilla, please consider checking ' +

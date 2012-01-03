@@ -168,6 +168,19 @@ var product = {
       Dom.addClass("product_support", "hidden");
     }
 
+    // show/hide component selection row
+    if (products[productName].noComponentSelection) {
+      if (!Dom.hasClass('componentTR', 'hidden')) {
+        Dom.addClass('componentTR', 'hidden');
+        bugForm.toggleOddEven();
+      }
+    } else {
+      if (Dom.hasClass('componentTR', 'hidden')) {
+        Dom.removeClass('componentTR', 'hidden');
+        bugForm.toggleOddEven();
+      }
+    }
+
     if (this._loaded == productName)
       return;
 
@@ -548,7 +561,7 @@ var dupes = {
 
 var bugForm = {
   _visibleHelpPanel: null,
-  _mandatoryFields: [ 'short_desc', 'component_select', 'version_select' ],
+  _mandatoryFields: [],
 
   onInit: function() {
     Dom.get('user_agent').value = navigator.userAgent;
@@ -602,38 +615,59 @@ var bugForm = {
 
     // build components
 
-    // check for a general component
-    var defaultComponent = false;
-    for (var i = 0, n = product.details.components.length; i < n; i++) {
-      var component = product.details.components[i];
-      if (component.is_active == '1') {
-        if (component.name.match(/general/i)) {
-          defaultComponent = component.name;
-          break;
+    var elComponent = Dom.get('component');
+    if (products[productName].noComponentSelection) {
+
+      elComponent.value = products[productName].defaultComponent; 
+      bugForm._mandatoryFields = [ 'short_desc', 'version_select' ];
+
+    } else {
+
+      bugForm._mandatoryFields = [ 'short_desc', 'component_select', 'version_select' ];
+
+      // check for the default component
+      var defaultRegex = products[productName].defaultComponent
+        ? new RegExp('^' + products[productName].defaultComponent + '$', 'i')
+        : new RegExp('General', 'i');
+      var preselectedComponent = false;
+      for (var i = 0, n = product.details.components.length; i < n; i++) {
+        var component = product.details.components[i];
+        if (component.is_active == '1') {
+          if (defaultRegex.test(component.name)) {
+            preselectedComponent = component.name;
+            break;
+          }
         }
       }
-    }
 
-    // if there isn't a default component, default to blank
-    if (!defaultComponent) {
-      elComponents.options[elComponents.options.length] = new Option('', '');
-    }
-
-    // build component select
-    for (var i = 0, n = product.details.components.length; i < n; i++) {
-      var component = product.details.components[i];
-      if (component.is_active == '1') {
-        elComponents.options[elComponents.options.length] =
-          new Option(component.name, component.name);
+      // if there isn't a default component, default to blank
+      if (!preselectedComponent) {
+        elComponents.options[elComponents.options.length] = new Option('', '');
       }
-    }
 
-    var elComponent = Dom.get('component');
-    if (elComponent.value == '' && defaultComponent)
-      elComponent.value = defaultComponent;
-    if (elComponent.value != '') {
-      elComponents.value = elComponent.value;
-      this.onComponentChange(elComponent.value);
+      // build component select
+      for (var i = 0, n = product.details.components.length; i < n; i++) {
+        var component = product.details.components[i];
+        if (component.is_active == '1') {
+          elComponents.options[elComponents.options.length] =
+            new Option(component.name, component.name);
+        }
+      }
+
+      var validComponent = false;
+      for (var i = 0, n = elComponents.options.length; i < n && !validComponent; i++) {
+        if (elComponents.options[i].value == elComponent.value)
+          validComponent = true;
+      }
+      if (!validComponent)
+        elComponent.value = '';
+      if (elComponent.value == '' && preselectedComponent)
+        elComponent.value = preselectedComponent;
+      if (elComponent.value != '') {
+        elComponents.value = elComponent.value;
+        this.onComponentChange(elComponent.value);
+      }
+
     }
 
     // build versions
@@ -739,6 +773,18 @@ var bugForm = {
     Dom.get('data').value = '';
     this.onFileChange();
     return false;
+  },
+
+  toggleOddEven: function() {
+    var rows = Dom.get('bugForm').getElementsByTagName('TR');
+    var doToggle = false;
+    for (var i = 0, n = rows.length; i < n; i++) {
+      if (doToggle) {
+        rows[i].className = rows[i].className == 'odd' ? 'even' : 'odd';
+      } else {
+        doToggle = rows[i].id == 'componentTR';
+      }
+    }
   },
 
   _getFilename: function() {

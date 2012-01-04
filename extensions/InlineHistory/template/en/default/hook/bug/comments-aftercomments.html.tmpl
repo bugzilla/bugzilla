@@ -60,7 +60,7 @@
       [%# make attachment changes better %]
       [% IF change.attachid %]
         html += '<a '
-                + 'href="attachment.cgi?action=edit&amp;id=[% change.attachid FILTER none %]" '
+                + 'href="attachment.cgi?id=[% change.attachid FILTER none %]&amp;action=edit" '
                 + 'title="[% change.attach.description FILTER js %]" '
                 + 'class="[% "bz_obsolete" IF change.attach.isobsolete %]"'
                 + '>Attachment #[% change.attachid FILTER none %]</a> - ';

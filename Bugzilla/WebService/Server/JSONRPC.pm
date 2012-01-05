@@ -22,7 +22,18 @@
 package Bugzilla::WebService::Server::JSONRPC;
 
 use strict;
-use base qw(JSON::RPC::Server::CGI Bugzilla::WebService::Server);
+use Bugzilla::WebService::Server;
+BEGIN {
+    our @ISA = qw(Bugzilla::WebService::Server);
+
+    if (eval { require JSON::RPC::Server::CGI }) {
+        unshift(@ISA, 'JSON::RPC::Server::CGI');
+    }
+    else {
+        require JSON::RPC::Legacy::Server::CGI;
+        unshift(@ISA, 'JSON::RPC::Legacy::Server::CGI');
+    }
+}
 
 use Bugzilla::Error;
 use Bugzilla::WebService::Constants;

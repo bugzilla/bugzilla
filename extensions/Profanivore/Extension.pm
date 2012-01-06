@@ -69,7 +69,8 @@ sub mailer_before_send {
         $author    = new Bugzilla::User({ name => $author });
         $recipient = new Bugzilla::User({ name => $recipient });
     
-        if ($author->id && 
+        if ($author &&
+            $author->id && 
             !$author->in_group('editbugs') &&
             $author->id ne $recipient->id) 
         {

@@ -2655,12 +2655,12 @@ ReadOnly: ENTRY, NA/NA, CANEDIT
     </para>
   
     <para>
-      Quips are controlled by the <emphasis>enablequips</emphasis> parameter.
-      It has several possible values: on, approved, frozen or off.
-      In order to enable quips approval you need to set this parameter
-      to "approved". In this way, users are free to submit quips for
-      addition but an administrator must explicitly approve them before
-      they are actually used.
+      Quip submission is controlled by the <emphasis>quip_list_entry_control</emphasis>
+      parameter.  It has several possible values: open, moderated, or closed.
+      In order to enable quips approval you need to set this parameter to
+      "moderated". In this way, users are free to submit quips for addition
+      but an administrator must explicitly approve them before they are
+      actually used.
     </para>
 
     <para>
@@ -2675,7 +2675,7 @@ ReadOnly: ENTRY, NA/NA, CANEDIT
     </para>
 
     <para>
-      Next to each tip there is a checkbox, under the
+      Next to each quip there is a checkbox, under the
       "Approved" column. Quips who have this checkbox checked are
       already approved and will appear next to the search results.
       The ones that have it unchecked are still preserved in the
@@ -2686,6 +2686,11 @@ ReadOnly: ENTRY, NA/NA, CANEDIT
     <para>
       Also, there is a delete link next to each quip,
       which can be used in order to permanently delete a quip.
+    </para>
+
+    <para>
+      Display of quips is controlled by the <emphasis>display_quips</emphasis>
+      user preference.  Possible values are "on" and "off".
     </para>
   </section>
 

@@ -2594,6 +2594,11 @@ ReadOnly: ENTRY, NA/NA, CANEDIT
   <section id="voting">
     <title>Voting</title>
 
+    <para>All of the code for voting in Bugzilla has been moved into an
+    extension, called "Voting", in the <filename>extensions/Voting/</filename>
+    directory. To enable it, you must remove the <filename>disabled</filename>
+    file from that directory, and run <filename>checksetup.pl</filename>.</para>
+
     <para>Voting allows users to be given a pot of votes which they can allocate
     to bugs, to indicate that they'd like them fixed. 
     This allows developers to gauge

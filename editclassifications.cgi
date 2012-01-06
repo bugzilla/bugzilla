@@ -179,9 +179,11 @@ if ($action eq 'update') {
     my $class_old_name = trim($cgi->param('classificationold') || '');
     my $classification = Bugzilla::Classification->check($class_old_name);
 
-    $classification->set_name($class_name);
-    $classification->set_description(scalar $cgi->param('description'));
-    $classification->set_sortkey(scalar $cgi->param('sortkey'));
+    $classification->set_all({
+        name        => $class_name,
+        description => scalar $cgi->param('description'),
+        sortkey     => scalar $cgi->param('sortkey'),
+    });
 
     my $changes = $classification->update;
     delete_token($token);

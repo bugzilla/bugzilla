@@ -54,7 +54,7 @@
       A legal address must contain exactly one '@',
       and at least one '.' after the @.
     [% ELSE %]
-      [%+ Param('emailregexpdesc') %]
+      [%+ Param('emailregexpdesc') FILTER html_light %]
     [% END %]
     It must also not contain any of these special characters:
     <tt>\ ( ) &amp; &lt; &gt; , ; : &quot; [ ]</tt>, or any whitespace.

@@ -15,6 +15,7 @@
 # Contributor(s): Marc Schumann <wurblzap@gmail.com>
 #                 Max Kanat-Alexander <mkanat@bugzilla.org>
 #                 Mads Bondo Dydensborg <mbd@dbc.dk>
+#                 Frédéric Buclin <LpSolit@gmail.com>
 
 package Bugzilla::WebService::Bugzilla;
 
@@ -22,20 +23,64 @@ use strict;
 use base qw(Bugzilla::WebService);
 use Bugzilla::Constants;
 use Bugzilla::Util qw(datetime_from);
+use Bugzilla::WebService::Util qw(filter_wants);
 
 use DateTime;
 
 # Basic info that is needed before logins
 use constant LOGIN_EXEMPT => {
+    parameters => 1,
     timezone => 1,
     version => 1,
 };
 
 use constant READ_ONLY => qw(
     extensions
+    parameters
     timezone
     time
     version
+);
+
+# Logged-out users do not need to know more than that.
+use constant PARAMETERS_LOGGED_OUT => qw(
+    maintainer
+    requirelogin
+);
+
+# These parameters are guessable from the web UI when the user
+# is logged in. So it's safe to access them.
+use constant PARAMETERS_LOGGED_IN => qw(
+    allowemailchange
+    attachment_base
+    commentonchange_resolution
+    commentonduplicate
+    cookiepath
+    defaultopsys
+    defaultplatform
+    defaultpriority
+    defaultseverity
+    duplicate_or_move_bug_status
+    emailregexpdesc
+    emailsuffix
+    letsubmitterchoosemilestone
+    letsubmitterchoosepriority
+    mailfrom
+    maintainer
+    maxattachmentsize
+    maxlocalattachment
+    musthavemilestoneonaccept
+    noresolveonopenblockers
+    password_complexity
+    rememberlogin
+    requirelogin
+    search_allow_no_criteria
+    urlbase
+    use_see_also
+    useclassification
+    useqacontact
+    usestatuswhiteboard
+    usetargetmilestone
 );
 
 sub version {
@@ -79,6 +124,25 @@ sub time {
         tz_offset     => $self->type('string', '+0000'),
         tz_short_name => $self->type('string', 'UTC'),
     };
+}
+
+sub parameters {
+    my ($self, $args) = @_;
+    my $user = Bugzilla->login();
+    my $params = Bugzilla->params;
+    $args ||= {};
+
+    my @params_list = $user->in_group('tweakparams')
+                      ? keys(%$params)
+                      : $user->id ? PARAMETERS_LOGGED_IN : PARAMETERS_LOGGED_OUT;
+
+    my %parameters;
+    foreach my $param (@params_list) {
+        next unless filter_wants($args, $param);
+        $parameters{$param} = $self->type('string', $params->{$param});
+    }
+
+    return { parameters => \%parameters };
 }
 
 1;
@@ -264,6 +328,76 @@ with versions of Bugzilla before 3.6.)
 =item As of Bugzilla B<3.6>, this method returns all data as though the server
 were in the UTC timezone, instead of returning information in the server's
 local timezone.
+
+=back
+
+=back
+
+=head2 parameters
+
+B<UNSTABLE>
+
+=over
+
+=item B<Description>
+
+Returns parameter values currently used in this Bugzilla.
+
+=item B<Params> (none)
+
+=item B<Returns>
+
+A hash with a single item C<parameters> which contains a hash with
+the name of the parameters as keys and their value as values. All
+values are returned as strings.
+The list of parameters returned by this method depends on the user
+credentials:
+
+A logged-out user can only access the C<maintainer> and C<requirelogin> parameters.
+
+A logged-in user can access the following parameters (listed alphabetically):
+    C<allowemailchange>,
+    C<attachment_base>,
+    C<commentonchange_resolution>,
+    C<commentonduplicate>,
+    C<cookiepath>,
+    C<defaultopsys>,
+    C<defaultplatform>,
+    C<defaultpriority>,
+    C<defaultseverity>,
+    C<duplicate_or_move_bug_status>,
+    C<emailregexpdesc>,
+    C<emailsuffix>,
+    C<letsubmitterchoosemilestone>,
+    C<letsubmitterchoosepriority>,
+    C<mailfrom>,
+    C<maintainer>,
+    C<maxattachmentsize>,
+    C<maxlocalattachment>,
+    C<musthavemilestoneonaccept>,
+    C<noresolveonopenblockers>,
+    C<password_complexity>,
+    C<rememberlogin>,
+    C<requirelogin>,
+    C<search_allow_no_criteria>,
+    C<urlbase>,
+    C<use_see_also>,
+    C<useclassification>,
+    C<useqacontact>,
+    C<usestatuswhiteboard>,
+    C<usetargetmilestone>.
+
+A user in the tweakparams group can access all existing parameters.
+New parameters can appear or obsolete parameters can disappear depending
+on the version of Bugzilla and on extensions being installed.
+The list of parameters returned by this method is not stable and will
+never be stable.
+
+=item B<History>
+
+=over
+
+=item Added in Bugzilla B<5.0>.
 
 =back
 

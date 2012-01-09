@@ -21,6 +21,8 @@
   # style:          (optional) The "style"-attribute of the textarea.
   # classes:        (optional) The "class"-attribute of the textarea.
   # wrap:           (deprecated; optional) The "wrap"-attribute of the textarea.
+  # disabled:       (optional) Disable the textarea.
+  # readonly:       (optional) Prevent the textarea from being edited.
   # minrows:        (required) Number of rows the textarea shall have initially
   #                 and when not having focus.
   # maxrows:        (optional) Number of rows the textarea shall have if
@@ -42,6 +44,7 @@
           [% IF classes %] class="[% classes FILTER html %]"[% END %]
           [% IF wrap %] wrap="[% wrap FILTER html %]"[% END %]
           [% IF disabled %] disabled="disabled"[% END %]
+          [% IF readonly %] readonly="readonly"[% END %]
           [% IF defaultrows && user.settings.zoom_textareas.value == 'off' %]
             rows="[% defaultrows FILTER html %]"
           [% ELSE %]

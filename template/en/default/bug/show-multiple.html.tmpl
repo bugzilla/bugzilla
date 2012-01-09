@@ -173,6 +173,18 @@
       </tr>
     [% END %]
 
+    [% IF bug.see_also.size %]
+      <tr>
+        <th>[% field_descs.see_also FILTER html %]:</th>
+        <td colspan="3">
+          [% FOREACH see_also = bug.see_also %]
+            <a href="[% see_also.name FILTER html %]">[% see_also.name FILTER html %]</a>
+            [% "<br>" IF not loop.last() %]
+          [% END %]
+        </td>
+      </tr>
+    [% END %]
+
     [% IF Param("usestatuswhiteboard") %]
       [% PROCESS row cell = "status_whiteboard" fullrow = 1 %]
     [% END %]

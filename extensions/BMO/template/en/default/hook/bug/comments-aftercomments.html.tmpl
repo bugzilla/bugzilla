@@ -1,0 +1,32 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% IF has_tbpl_comment %]
+  <script>
+    YAHOO.util.Event.onDOMReady(function () {
+        var ul = document.getElementsByClassName('bz_collapse_expand_comments');
+        if (ul.length == 0)
+            return; 
+        var li = document.createElement('li');
+        var a = document.createElement('a');
+        Dom.setAttribute(a, 'href', 'javascript:void(0)');
+        Dom.setAttribute(a, 'id', 'toggle_tbplbot_comments');
+        a.innerHTML = 'Collapse TinderboxPushlog Comments';
+        YAHOO.util.Event.on(a, 'click', function() {
+            for (var i = 0, n = tbpl_comment_ids.length; i < n; i++) {
+                var id = tbpl_comment_ids[i];
+                var link = document.getElementById('comment_link_' + id);
+                var text = document.getElementById('comment_text_' + id);
+                collapse_comment(link, text);
+            }
+        });
+        li.appendChild(a);
+        ul[0].appendChild(li);
+    });
+  </script>
+[% END %]

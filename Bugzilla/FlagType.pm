@@ -601,7 +601,7 @@ sub match {
     $tables = join(' ', @$tables);
     $criteria = join(' AND ', @criteria);
 
-    my $flagtype_ids = $dbh->selectcol_arrayref("SELECT id FROM $tables WHERE $criteria");
+    my $flagtype_ids = $dbh->selectcol_arrayref("SELECT flagtypes.id FROM $tables WHERE $criteria");
 
     return Bugzilla::FlagType->new_from_list($flagtype_ids);
 }
@@ -678,6 +678,11 @@ sub sqlify_criteria {
     if (exists($criteria->{is_active})) {
         my $is_active = $criteria->{is_active} ? "1" : "0";
         push(@criteria, "flagtypes.is_active = $is_active");
+    }
+    if (exists($criteria->{active_or_has_flags}) && $criteria->{active_or_has_flags} =~ /^\d+$/) {
+        push(@$tables, "LEFT JOIN flags AS f ON flagtypes.id = f.type_id " . 
+                       "AND f.bug_id = " . $criteria->{active_or_has_flags});
+        push(@criteria, "(flagtypes.is_active = 1 OR f.id IS NOT NULL)");    
     }
     if ($criteria->{product_id}) {
         my $product_id = $criteria->{product_id};

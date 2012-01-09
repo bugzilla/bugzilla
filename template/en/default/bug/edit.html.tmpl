@@ -870,7 +870,7 @@
   [% show_bug_flags = 0 %]
   [% bug_flags_set = 0 %]
   [% show_more_flags = 0 %]
-  [% FOREACH type = bug.flag_types(is_active=>1) %]
+  [% FOREACH type = bug.flag_types %]
     [% IF (type.flags && type.flags.size > 0) || (user.id && type.is_active) %]
       [% show_bug_flags = 1 %]
     [% END %]

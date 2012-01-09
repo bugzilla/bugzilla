@@ -197,6 +197,16 @@
                   [% END %]
                 </a>
               </p>
+            [% ELSIF attachment.contenttype == "text/html" %]
+              [%# For security reasons (clickjacking, embedded scripts), we never
+                # render HTML pages from here. The source code is displayed instead. %]
+              [% INCLUDE global/textarea.html.tmpl
+                 id      = 'viewFrame'
+                 minrows = 10
+                 cols    = 80
+                 defaultcontent = attachment.data
+                 readonly = 'readonly'
+              %]
             [% ELSE %]
               <iframe id="viewFrame" src="attachment.cgi?id=[% attachment.id %]">
                 <b>You cannot view the attachment while viewing its details because your browser does not support IFRAMEs.

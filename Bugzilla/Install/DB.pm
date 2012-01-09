@@ -29,6 +29,7 @@ use Bugzilla::Install::Util qw(indicate_progress install_string);
 use Bugzilla::Util;
 use Bugzilla::Series;
 use Bugzilla::BugUrl;
+use Bugzilla::Field;
 
 use Date::Parse;
 use Date::Format;
@@ -658,6 +659,9 @@ sub update_table_definitions {
 
     # 2011-10-11 miketosh - Bug 690173
     _on_delete_set_null_for_audit_log_userid();
+
+    # 2011-11-28 dkl@mozilla.com - Bug 685611
+    _fix_notnull_defaults();
 
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
@@ -3569,7 +3573,7 @@ sub _populate_bug_see_also_class {
     }
 
     $dbh->bz_add_column('bug_see_also', 'class',
-        {TYPE => 'varchar(255)', NOTNULL => 1}, '');
+        {TYPE => 'varchar(255)', NOTNULL => 1, DEFAULT => "''"}, '');
 
     my $result = $dbh->selectall_arrayref(
         "SELECT id, value FROM bug_see_also");
@@ -3608,6 +3612,13 @@ sub _rename_tags_to_tag {
         $dbh->bz_add_index('tag', 'tag_user_id_idx',
                            {FIELDS => [qw(user_id name)], TYPE => 'UNIQUE'});
     }
+    if (my $bug_tag_fk = $dbh->bz_fk_info('bug_tag', 'tag_id')) {
+        # bz_rename_table() didn't handle FKs correctly.
+        if ($bug_tag_fk->{TABLE} eq 'tags') {
+            $bug_tag_fk->{TABLE} = 'tag';
+            $dbh->bz_alter_fk('bug_tag', 'tag_id', $bug_tag_fk);
+        }
+    }
 }
 
 sub _on_delete_set_null_for_audit_log_userid {
@@ -3616,6 +3627,31 @@ sub _on_delete_set_null_for_audit_log_userid {
     if ($fk and !defined $fk->{DELETE}) {
         $fk->{DELETE} = 'SET NULL';
         $dbh->bz_alter_fk('audit_log', 'user_id', $fk);
+    }
+}
+
+sub _fix_notnull_defaults {
+    my $dbh = Bugzilla->dbh;
+
+    $dbh->bz_alter_column('bugs', 'bug_file_loc', 
+                          {TYPE => 'MEDIUMTEXT', NOTNULL => 1,  
+                           DEFAULT => "''"}, '');
+
+    my $custom_fields = Bugzilla::Field->match({ 
+        custom => 1, type => [ FIELD_TYPE_FREETEXT, FIELD_TYPE_TEXTAREA ] 
+    });
+
+    foreach my $field (@$custom_fields) {
+        if ($field->type == FIELD_TYPE_FREETEXT) {
+            $dbh->bz_alter_column('bugs', $field->name,
+                                  {TYPE => 'varchar(255)', NOTNULL => 1,
+                                   DEFAULT => "''"}, '');
+        }
+        if ($field->type == FIELD_TYPE_TEXTAREA) {
+            $dbh->bz_alter_column('bugs', $field->name,
+                                  {TYPE => 'MEDIUMTEXT', NOTNULL => 1,
+                                   DEFAULT => "''"}, '');
+        }
     }
 }
 

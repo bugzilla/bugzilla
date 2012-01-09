@@ -1984,6 +1984,32 @@ sub is_available_username {
     return 1;
 }
 
+sub check_account_creation_enabled {
+    my $self = shift;
+
+    # If we're using e.g. LDAP for login, then we can't create a new account.
+    $self->authorizer->user_can_create_account
+      || ThrowUserError('auth_cant_create_account');
+
+    Bugzilla->params->{'createemailregexp'}
+      || ThrowUserError('account_creation_disabled');
+}
+
+sub check_and_send_account_creation_confirmation {
+    my ($self, $login) = @_;
+
+    $login = $self->check_login_name_for_creation($login);
+    my $creation_regexp = Bugzilla->params->{'createemailregexp'};
+
+    if ($login !~ /$creation_regexp/i) {
+        ThrowUserError('account_creation_restricted');
+    }
+
+    # Create and send a token for this new account.
+    require Bugzilla::Token;
+    Bugzilla::Token::issue_new_user_account_token($login);
+}
+
 # This is used in a few performance-critical areas where we don't want to
 # do check() and pull all the user data from the database.
 sub login_to_id {
@@ -2539,6 +2565,17 @@ Params: login_name - B<Required> The login name for the new user.
 
 Takes a username as its only argument. Throws an error if there is no
 user with that username. Returns a C<Bugzilla::User> object.
+
+=item C<check_account_creation_enabled>
+
+Checks that users can create new user accounts, and throws an error
+if user creation is disabled.
+
+=item C<check_and_send_account_creation_confirmation($login)>
+
+If the user request for a new account passes validation checks, an email
+is sent to this user for confirmation. Otherwise an error is thrown
+indicating why the request has been rejected.
 
 =item C<is_available_username>
 

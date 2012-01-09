@@ -255,7 +255,8 @@ use constant ABSTRACT_SCHEMA => {
             assigned_to         => {TYPE => 'INT3', NOTNULL => 1,
                                     REFERENCES => {TABLE  => 'profiles',
                                                    COLUMN => 'userid'}},
-            bug_file_loc        => {TYPE => 'MEDIUMTEXT'},
+            bug_file_loc        => {TYPE => 'MEDIUMTEXT', 
+                                    NOTNULL => 1, DEFAULT => "''"},
             bug_severity        => {TYPE => 'varchar(64)', NOTNULL => 1},
             bug_status          => {TYPE => 'varchar(64)', NOTNULL => 1},
             creation_ts         => {TYPE => 'DATETIME'},
@@ -501,7 +502,7 @@ use constant ABSTRACT_SCHEMA => {
                                       COLUMN => 'bug_id',
                                       DELETE => 'CASCADE'}},
             value  => {TYPE => 'varchar(255)', NOTNULL => 1},
-            class  => {TYPE => 'varchar(255)', NOTNULL => 1},
+            class  => {TYPE => 'varchar(255)', NOTNULL => 1, DEFAULT => "''"},
         ],
         INDEXES => [
             bug_see_also_bug_id_idx => {FIELDS => [qw(bug_id value)], 

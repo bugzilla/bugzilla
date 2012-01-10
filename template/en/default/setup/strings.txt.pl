@@ -60,7 +60,7 @@ EOT
     commands_optional => 'COMMANDS TO INSTALL OPTIONAL MODULES:',
     commands_required => <<EOT,
 COMMANDS TO INSTALL REQUIRED MODULES (You *must* run all these commands
-and then re-run this script):
+and then re-run checksetup.pl):
 EOT
     continue_without_answers => <<'END',
 Re-run checksetup.pl in interactive mode (without an 'answers' file)
@@ -140,12 +140,14 @@ END
 ERROR: Using install-module.pl requires that you install "make".
 END
     lc_new_vars => <<'END',
-This version of Bugzilla contains some variables that you may want to 
-change and adapt to your local settings. Please edit the file 
-##localconfig## and then rerun checksetup.pl.
+This version of Bugzilla contains some variables that you may want to
+change and adapt to your local settings. The following variables are
+new to ##localconfig## since you last ran checksetup.pl:
 
-The following variables are new to ##localconfig## since you last ran
-checksetup.pl:  ##new_vars##
+##new_vars##
+
+Please edit the file ##localconfig## and then re-run checksetup.pl
+to complete your installation.
 END
     lc_old_vars => <<'END',
 The following variables are no longer used in ##localconfig##, and

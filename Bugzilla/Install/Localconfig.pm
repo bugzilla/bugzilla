@@ -32,11 +32,12 @@ use strict;
 
 use Bugzilla::Constants;
 use Bugzilla::Install::Util qw(bin_loc install_string);
-use Bugzilla::Util qw(generate_random_password);
+use Bugzilla::Util qw(generate_random_password wrap_hard);
 
 use Data::Dumper;
 use File::Basename qw(dirname);
 use Safe;
+use Term::ANSIColor;
 
 use base qw(Exporter);
 
@@ -273,8 +274,10 @@ sub update_localconfig {
 
     if (@new_vars) {
         my $newstuff = join(', ', @new_vars);
-        print "\n", install_string('lc_new_vars',
-            { localconfig => $filename, new_vars => $newstuff }), "\n";
+        print "\n";
+        print colored(install_string('lc_new_vars', { localconfig => $filename,
+                                                      new_vars => wrap_hard($newstuff, 70) }),
+                      COLOR_ERROR), "\n";
         exit;
     }
 

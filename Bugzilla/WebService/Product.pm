@@ -704,7 +704,7 @@ The same as L</create>.
 
 =over
 
-=item Added in Bugzilla B<5.0>.
+=item Added in Bugzilla B<4.4>.
 
 =back
 

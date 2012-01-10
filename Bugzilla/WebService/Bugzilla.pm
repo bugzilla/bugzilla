@@ -397,7 +397,7 @@ never be stable.
 
 =over
 
-=item Added in Bugzilla B<5.0>.
+=item Added in Bugzilla B<4.4>.
 
 =back
 

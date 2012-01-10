@@ -1381,7 +1381,7 @@ C<summary>.
 =item In Bugzilla B<4.2>, the C<is_url> return value was removed
 (this attribute no longer exists for attachments).
 
-=item The C<size> return value was added in Bugzilla B<5.0>.
+=item The C<size> return value was added in Bugzilla B<4.4>.
 
 =back
 
@@ -1533,7 +1533,7 @@ that id.
 =item In Bugzilla B<4.0>, the C<author> return value was renamed to
 C<creator>.
 
-=item C<count> was added to the return value in Bugzilla B<5.0>.
+=item C<count> was added to the return value in Bugzilla B<4.4>.
 
 =back
 
@@ -2356,7 +2356,7 @@ argument.
 loop errors had a generic code of C<32000>.
 
 =item The ability to file new bugs with a C<resolution> was added in
-Bugzilla B<5.0>.
+Bugzilla B<4.4>.
 
 =back
 

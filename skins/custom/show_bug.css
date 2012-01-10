@@ -58,3 +58,14 @@
 	float: right;
 }
 
+/* style all field labels the same */
+
+.field_label, .field_label a {
+    color: #000;
+    font-weight: bold;
+}
+
+.field_label a {
+    cursor: help;
+}
+

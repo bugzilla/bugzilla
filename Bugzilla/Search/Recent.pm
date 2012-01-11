@@ -19,6 +19,10 @@ use Bugzilla::Util;
 
 use constant DB_TABLE => 'profile_search';
 use constant LIST_ORDER => 'id DESC';
+# Do not track buglists viewed by users.
+use constant AUDIT_CREATES => 0;
+use constant AUDIT_UPDATES => 0;
+use constant AUDIT_REMOVES => 0;
 
 use constant DB_COLUMNS => qw(
     id

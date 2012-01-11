@@ -22,6 +22,10 @@ use URI::QueryParam;
 use constant DB_TABLE   => 'bug_see_also';
 use constant NAME_FIELD => 'value';
 use constant LIST_ORDER => 'id';
+# See Also is tracked in bugs_activity.
+use constant AUDIT_CREATES => 0;
+use constant AUDIT_UPDATES => 0;
+use constant AUDIT_REMOVES => 0;
 
 use constant DB_COLUMNS => qw(
     id

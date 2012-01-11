@@ -55,6 +55,7 @@ use constant DB_TABLE   => 'attachments';
 use constant ID_FIELD   => 'attach_id';
 use constant LIST_ORDER => ID_FIELD;
 # Attachments are tracked in bugs_activity.
+use constant AUDIT_CREATES => 0;
 use constant AUDIT_UPDATES => 0;
 
 sub DB_COLUMNS {

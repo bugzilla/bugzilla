@@ -29,7 +29,9 @@ use constant VALIDATOR_DEPENDENCIES => {};
 # XXX At some point, this will be joined with FIELD_MAP.
 use constant REQUIRED_FIELD_MAP  => {};
 use constant EXTRA_REQUIRED_FIELDS => ();
+use constant AUDIT_CREATES => 1;
 use constant AUDIT_UPDATES => 1;
+use constant AUDIT_REMOVES => 1;
 
 # This allows the JSON-RPC interface to return Bugzilla::Object instances
 # as though they were hashes. In the future, this may be modified to return
@@ -397,7 +399,7 @@ sub remove_from_db {
     my $id_field = $self->ID_FIELD;
     my $dbh = Bugzilla->dbh;
     $dbh->bz_start_transaction();
-    $self->audit_log(AUDIT_REMOVE);
+    $self->audit_log(AUDIT_REMOVE) if $self->AUDIT_REMOVES;
     $dbh->do("DELETE FROM $table WHERE $id_field = ?", undef, $self->id);
     $dbh->bz_commit_transaction();
     undef $self;
@@ -545,7 +547,7 @@ sub insert_create_data {
 
     Bugzilla::Hook::process('object_end_of_create', { class => $class,
                                                       object => $object });
-    $object->audit_log(AUDIT_CREATE);
+    $object->audit_log(AUDIT_CREATE) if $object->AUDIT_CREATES;
 
     return $object;
 }

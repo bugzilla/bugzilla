@@ -23,7 +23,9 @@ use Scalar::Util qw(blessed);
 ####    Initialization     ####
 ###############################
 
-# Updates of comments are audited in bugs_activity instead of audit_log.
+# Creation and updating of comments are audited in longdescs
+# and bugs_activity respectively instead of audit_log.
+use constant AUDIT_CREATES => 0;
 use constant AUDIT_UPDATES => 0;
 
 use constant DB_COLUMNS => qw(

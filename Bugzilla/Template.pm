@@ -307,8 +307,8 @@ sub get_attachment_link {
         # Whitespace matters here because these links are in <pre> tags.
         return qq|<span class="$className">|
                . qq|<a href="${linkval}" name="attach_${attachid}" title="$title">$link_text</a>|
-               . qq|${patchlink}|
                . qq| <a href="${linkval}&amp;action=edit" title="$title">[details]</a>|
+               . qq|${patchlink}|
                . qq|</span>|;
     }
     else {

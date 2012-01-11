@@ -2518,7 +2518,7 @@ ReadOnly: ENTRY, NA/NA, CANEDIT
       <title>Viewing/Editing legal values</title>
       <para>
         Editing legal values requires <quote>admin</quote> privileges.
-        Select "Legal Values" from the Administration page. A list of all
+        Select "Field Values" from the Administration page. A list of all
         fields, both system fields and Custom Fields, for which legal values
         can be edited appears. Click a field name to edit its legal values.
       </para>

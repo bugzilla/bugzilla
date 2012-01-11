@@ -69,3 +69,6 @@
     cursor: help;
 }
 
+.edit_form table td:first-child {
+    width: 0px;
+}

@@ -1,24 +1,9 @@
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Original Code are the Bugzilla tests.
-#
-# The Initial Developer of the Original Code is Jacob Steenhagen.
-# Portions created by Jacob Steenhagen are
-# Copyright (C) 2001 Jacob Steenhagen. All
-# Rights Reserved.
-#
-# Contributor(s): Gervase Markham <gerv@gerv.net>
-#
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 #################
 #Bugzilla Test 9#

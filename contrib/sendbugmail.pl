@@ -1,16 +1,10 @@
 #!/usr/bin/perl -w
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-#                    sendbugmail.pl
-#
-# Nick Barnes, Ravenbrook Limited, 2004-04-01.
-#
-# Bugzilla email script for Bugzilla 2.17.4 and later.  Invoke this to send
-# bugmail for a bug which has been changed directly in the database.
-# This uses Bugzilla's own BugMail facility, and will email the
-# users associated with the bug.  Replaces the old "processmail"
-# script.
-# 
-# Usage: perl -T contrib/sendbugmail.pl bug_id user_email
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 use lib qw(. lib);
 

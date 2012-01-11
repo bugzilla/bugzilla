@@ -27,15 +27,15 @@
   </tr>
 
   [% FOREACH state = ftc_states %]
-  <tr>
-    <td>&nbsp;</td>
-    <td>
-      for [% state.state FILTER html %]<br>
-      <textarea
-        id="ftc_text_[% loop.index FILTER none %]"
-        name="ftc_text_[% loop.index FILTER none %]"
-        cols="50" rows="2">[% state.text FILTER html %]</textarea>
-    </td>
-  </tr>
+    <tr>
+      <td>&nbsp;</td>
+      <td>
+        for [% state FILTER html %]<br>
+        <textarea
+          id="ftc_[% type.id FILTER html %]_[% state FILTER html %]"
+          name="ftc_[% type.id FILTER html %]_[% state FILTER html %]"
+          cols="50" rows="2">[% ftc_flags.${type.id}.$state FILTER html %]</textarea>
+      </td>
+    </tr>
   [% END %]
 [% END %]

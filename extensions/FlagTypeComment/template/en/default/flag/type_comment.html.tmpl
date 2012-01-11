@@ -20,7 +20,7 @@
   #   byron jones <glob@mozilla.com>
   #%]
 
-[% IF ftc_states.size %]
+[% IF ftc_flags.keys.size %]
   <script type="text/javascript">
   YAHOO.util.Event.onDOMReady(function() {
     var selects = YAHOO.util.Dom.getElementsByClassName('flag_select');
@@ -34,10 +34,10 @@
     var state = ev.target.value;
     var commentEl = document.getElementById('comment');
     if (!commentEl) return;
-    [% FOREACH state = ftc_states %]
-      [% IF state.flagtype %]
-        if ([% state.flagtype FILTER none %] == id && '[% state.state FILTER js %]' == state) {
-          var text = '[% state.text FILTER js %]';
+    [% FOREACH type_id = ftc_flags.keys %]
+      [% FOREACH state = ftc_states %]
+        if ([% type_id FILTER none %] == id && '[% state FILTER js %]' == state) {
+          var text = '[% ftc_flags.$type_id.$state FILTER js %]';
           var value = commentEl.value;
           if (value == text) {
             return;

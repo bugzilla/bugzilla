@@ -80,7 +80,8 @@ sub _set_ftc_states {
     my ($file, $vars) = @_;
     my $dbh = Bugzilla->dbh;
 
-    my $db_states;
+    my $ftc_flags;
+    my $db_result;
     if ($file =~ /^admin\//) {
         # admin
         my $type = $vars->{'type'} || return;
@@ -96,11 +97,11 @@ sub _set_ftc_states {
         } else {
             return unless FLAGTYPE_COMMENT_ATTACHMENT_FLAGS;
         }
-        $db_states = $dbh->selectall_hashref(
+        $db_result = $dbh->selectall_arrayref(
             "SELECT type_id AS flagtype, on_status AS state, comment AS text
-               FROM flagtype_comments WHERE type_id=?",
-            'state',
-            undef,
+               FROM flagtype_comments 
+              WHERE type_id = ?",
+            { Slice => {} },
             $id);
 
     } else {
@@ -123,21 +124,21 @@ sub _set_ftc_states {
         });
 
         my $types = join(',', map { $_->id } @$flag_types);
-        $db_states = $dbh->selectall_hashref(
+        my $states = "'" . join("','", FLAGTYPE_COMMENT_STATES) . "'";
+        $db_result = $dbh->selectall_arrayref(
             "SELECT type_id AS flagtype, on_status AS state, comment AS text
-               FROM flagtype_comments WHERE type_id IN ($types)",
-            'state');
+               FROM flagtype_comments 
+              WHERE type_id IN ($types) AND on_status IN ($states)", 
+            { Slice => {} }); 
     }
 
-    my @edit_states;
-    foreach my $state (FLAGTYPE_COMMENT_STATES) {
-        if (exists $db_states->{$state}) {
-            push @edit_states, $db_states->{$state};
-        } else {
-            push @edit_states, { state => $state, text => '' };
-        }
+    foreach my $row (@$db_result) {
+        $ftc_flags->{$row->{'flagtype'}} ||= {};
+        $ftc_flags->{$row->{'flagtype'}}{$row->{'state'}} = $row->{text};
     }
-    $vars->{'ftc_states'} = \@edit_states;
+
+    $vars->{'ftc_states'} = [ FLAGTYPE_COMMENT_STATES ];
+    $vars->{'ftc_flags'}  = $ftc_flags;
 }
 
 #########
@@ -159,9 +160,8 @@ sub _set_flagtypes {
     my $input = Bugzilla->input_params;
     my $dbh = Bugzilla->dbh;
 
-    my $i = 0;
     foreach my $state (FLAGTYPE_COMMENT_STATES) {
-        my $text = $input->{"ftc_text_$i"} || '';
+        my $text = $input->{"ftc_${flagtype_id}_$state"} || '';
         $text =~ s/\r\n/\n/g;
         trick_taint($text);
 
@@ -190,7 +190,6 @@ sub _set_flagtypes {
                 undef,
                 $flagtype_id, $state);
         }
-        $i++;
     }
 }
 

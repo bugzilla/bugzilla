@@ -198,7 +198,10 @@ to some group are shown by default.
       [% PROCESS start_new_table %]
     [% END %]
     [% buglist.${request.bug_id} = 1 %]
-    <tr>
+
+    <tr class="bz_bugitem bz_[% request.bug_severity FILTER css_class_quote -%]
+                          bz_[% request.priority FILTER css_class_quote -%]
+                          bz_[% request.bug_status FILTER css_class_quote %]">
       [% FOREACH column = display_columns %]
         [% NEXT IF column == group_field || excluded_columns.contains(column) %]
         <td>
@@ -238,7 +241,7 @@ to some group are shown by default.
 [% BLOCK display_bug %]
   <a href="show_bug.cgi?id=[% request.bug_id %]"
      [%- ' class="bz_secure"' IF request.restricted %]>
-    [% request.bug_id %]: [%+ request.bug_summary FILTER html %]</a>
+    [% request.bug_id %] ([% request.priority FILTER html %]/[% request.bug_severity FILTER html %]): [%+ request.bug_summary FILTER html %]</a>
 [% END %]
 
 [% BLOCK display_attachment %]

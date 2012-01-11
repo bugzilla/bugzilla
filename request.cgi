@@ -115,7 +115,10 @@ sub queue {
                 requesters.realname, requesters.login_name,
                 requestees.realname, requestees.login_name, COUNT(privs.group_id),
     " . $dbh->sql_date_format('flags.modification_date', '%Y.%m.%d %H:%i') . ",
-                attachments.ispatch " .
+                attachments.ispatch, 
+                bugs.bug_status,  
+                bugs.priority,  
+                bugs.bug_severity " .  
     # Use the flags and flagtypes tables for information about the flags,
     # the bugs and attachments tables for target info, the profiles tables
     # for setter and requestee info, the products/components tables
@@ -298,6 +301,9 @@ sub queue {
           'restricted'      => $data[13] ? 1 : 0,
           'created'         => $data[14], 
           'ispatch'         => $data[15], 
+          'bug_status'      => $data[16],  
+          'priority'        => $data[17],  
+          'bug_severity'    => $data[18],  
         };
         push(@requests, $request);
     }

@@ -587,7 +587,7 @@ TUI_hide_default('attachment_text_field');
     </tr>
   [% END %]
 
-  [% IF Param("maxattachmentsize") %]
+  [% IF Param("maxattachmentsize") || Param("maxlocalattachment") %]
   <tr>
     <th>Attachment:</th>
     <td colspan="3">

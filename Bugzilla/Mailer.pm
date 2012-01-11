@@ -111,7 +111,9 @@ sub MessageToMTA {
     my $from = $email->header('From');
 
     my ($hostname, @args);
+    my $mailer_class = $method;
     if ($method eq "Sendmail") {
+        $mailer_class = 'Bugzilla::Send::Sendmail';
         if (ON_WINDOWS) {
             $Email::Send::Sendmail::SENDMAIL = SENDMAIL_EXE;
         }
@@ -180,7 +182,7 @@ sub MessageToMTA {
     else {
         # This is useful for both Sendmail and Qmail, so we put it out here.
         local $ENV{PATH} = SENDMAIL_PATH;
-        my $mailer = Email::Send->new({ mailer => $method, 
+        my $mailer = Email::Send->new({ mailer => $mailer_class, 
                                         mailer_args => \@args });
         my $retval = $mailer->send($email);
         ThrowCodeError('mail_send_error', { msg => $retval, mail => $email })

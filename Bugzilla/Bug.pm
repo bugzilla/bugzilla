@@ -74,6 +74,7 @@ use constant ID_FIELD   => 'bug_id';
 use constant NAME_FIELD => 'alias';
 use constant LIST_ORDER => ID_FIELD;
 # Bugs have their own auditing table, bugs_activity.
+use constant AUDIT_CREATES => 0;
 use constant AUDIT_UPDATES => 0;
 
 # This is a sub because it needs to call other subroutines.

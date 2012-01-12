@@ -32,7 +32,8 @@ use base qw(Exporter);
 
 our @EXPORT_OK = qw(user_activity_report
                     triage_reports
-                    group_admins);
+                    group_admins
+                    email_queue_report);
 
 sub user_activity_report {
     my ($vars) = @_;
@@ -558,6 +559,30 @@ sub group_admins {
     }
 
     $vars->{'groups'} = \@groups;
+}
+
+sub email_queue_report {
+    my ($vars, $filter) = @_;
+    my $dbh = Bugzilla->dbh;
+    my $user = Bugzilla->user;
+
+    $user->in_group('admin')
+        || ThrowUserError('auth_failure', { group  => 'admin', 
+                                            action => 'run', 
+                                            object => 'email_queue' });
+
+    my $query = "
+        SELECT j.jobid,
+               j.run_after AS timestamp,
+               COUNT(e.jobid) AS error_count,
+               MAX(e.error_time) AS error_time,
+               e.message AS error_message
+          FROM ts_job j
+               LEFT JOIN ts_error e ON e.jobid = j.jobid
+      GROUP BY j.jobid
+      ORDER BY j.run_after";
+
+    $vars->{'jobs'} = $dbh->selectall_arrayref($query, { Slice => {} });
 }
 
 1;

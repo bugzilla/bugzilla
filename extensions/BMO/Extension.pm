@@ -56,7 +56,8 @@ use Bugzilla::Extension::BMO::Data qw($cf_visible_in_products
                                       %product_sec_groups);
 use Bugzilla::Extension::BMO::Reports qw(user_activity_report
                                          triage_reports
-                                         group_admins);
+                                         group_admins
+                                         email_queue_report);
 
 our $VERSION = '0.1';
 
@@ -168,6 +169,9 @@ sub page_before_template {
     }
     elsif ($page eq 'group_admins.html') {
         group_admins($vars);
+    }
+    elsif ($page eq 'email_queue.html') {
+        email_queue_report($vars);
     }
 }
 

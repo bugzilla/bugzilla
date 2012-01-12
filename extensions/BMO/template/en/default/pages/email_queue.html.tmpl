@@ -1,0 +1,53 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% INCLUDE global/header.html.tmpl
+  title = "Job Queue Status"
+  style_urls = [ "extensions/BMO/web/styles/reports.css" ]
+%]
+
+[% IF jobs.size %]
+
+  <p><i>[% jobs.size FILTER none %] email(s) in the queue.</i></p>
+
+  <table id="report" cellspacing="0" border="0">
+  <tr id="report-header">
+    <th>Time</th>
+    <th>Error Count</th>
+    <th>Last Error</th>
+    <th>Error Message</th>
+  </tr>
+  [% FOREACH job IN jobs %]
+    <tr class="report item [% loop.count % 2 == 1 ? "report_row_odd" : "report_row_even" %]">
+      <td nowrap>[% time2str("%Y-%m-%d %H:%M:%S %Z", job.timestamp) FILTER html %]</td>
+      <td nowrap>[% job.error_count FILTER html %]</td>
+      <td nowrap>
+        [% IF job.error_count %]
+          [% time2str("%Y-%m-%d %H:%M:%S %Z", job.error_time) FILTER html %]
+        [% ELSE %]
+          -
+        [% END %]
+      </td>
+      <td>
+        [% IF job.error_count %]
+          [% job.error_message FILTER html %]
+        [% ELSE %]
+          -
+        [% END %]
+      </td>
+    </tr>
+  [% END %]
+  </table>
+
+[% ELSE %]
+
+<p><i>The email queue is empty.</i></p>
+
+[% END %]
+
+[% INCLUDE global/footer.html.tmpl %]

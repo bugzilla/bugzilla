@@ -2,10 +2,6 @@
   display: none;
 }
 
-#triage_form th {
-    text-align: left;
-}
-
 #product, #component {
     width: 20em;
 }
@@ -14,8 +10,12 @@
   background: #ccccff;
 }
 
-#report td {
-  padding: 1px 10px 1px 10px;
+#report td, #report th {
+  padding: 3px 10px 3px 3px;
+}
+
+#report th {
+    text-align: left;
 }
 
 #report-header {
@@ -32,6 +32,6 @@
     color: #000000;
 }
 
-tr.report_item:hover {
+#report tr:hover {
     background-color: #ccccff;
 }

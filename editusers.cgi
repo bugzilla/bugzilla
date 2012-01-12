@@ -632,6 +632,9 @@ if ($action eq 'search') {
                          $userid, $timestamp);
     }
 
+    # Remove any recent searches from the profile_search table
+    $dbh->do('DELETE FROM profile_search WHERE user_id = ?', undef, $otherUserID);
+
     # Finally, remove the user account itself.
     $dbh->do('DELETE FROM profiles WHERE userid = ?', undef, $otherUserID);
 

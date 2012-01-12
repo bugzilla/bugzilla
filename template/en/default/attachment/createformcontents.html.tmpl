@@ -84,6 +84,7 @@
                   {type => "image/gif",  desc => "GIF image"},
                   {type => "image/jpeg", desc => "JPEG image"},
                   {type => "image/png",  desc => "PNG image"},
+                  {type => "application/pdf", desc => "PDF document"},
                   {type => "application/octet-stream", desc => "binary file"}]
   %]
   [% Hook.process("mimetypes", "attachment/createformcontents.html.tmpl") %]

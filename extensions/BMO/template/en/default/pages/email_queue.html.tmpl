@@ -17,14 +17,27 @@
 
   <table id="report" cellspacing="0" border="0">
   <tr id="report-header">
-    <th>Time</th>
+    <th>Insert Time</th>
+    <th>Run Time</th>
+    <th>Age</th>
     <th>Error Count</th>
     <th>Last Error</th>
     <th>Error Message</th>
   </tr>
   [% FOREACH job IN jobs %]
     <tr class="report item [% loop.count % 2 == 1 ? "report_row_odd" : "report_row_even" %]">
-      <td nowrap>[% time2str("%Y-%m-%d %H:%M:%S %Z", job.timestamp) FILTER html %]</td>
+      <td nowrap>[% time2str("%Y-%m-%d %H:%M:%S %Z", job.insert_time) FILTER html %]</td>
+      <td nowrap>[% time2str("%Y-%m-%d %H:%M:%S %Z", job.run_time) FILTER html %]</td>
+      <td nowrap>
+        [% age = now - job.insert_time %]
+        [% IF age < 60 %]
+          [% age FILTER none %]s
+        [% ELSIF age < 60 * 60 %]
+          [% age / 60 FILTER format('%.0f') %]m
+        [% ELSE %]
+          [% age / (60 * 60) FILTER format('%.0f') %]h
+        [% END %]
+      </td>
       <td nowrap>[% job.error_count FILTER html %]</td>
       <td nowrap>
         [% IF job.error_count %]

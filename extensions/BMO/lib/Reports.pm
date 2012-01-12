@@ -573,7 +573,8 @@ sub email_queue_report {
 
     my $query = "
         SELECT j.jobid,
-               j.run_after AS timestamp,
+               j.insert_time,
+               j.run_after AS run_time,
                COUNT(e.jobid) AS error_count,
                MAX(e.error_time) AS error_time,
                e.message AS error_message
@@ -583,6 +584,7 @@ sub email_queue_report {
       ORDER BY j.run_after";
 
     $vars->{'jobs'} = $dbh->selectall_arrayref($query, { Slice => {} });
+    $vars->{'now'} = (time);
 }
 
 1;

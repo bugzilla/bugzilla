@@ -59,20 +59,18 @@ sub mailer_before_send {
     my $author    = $email->header("X-Bugzilla-Who");
     my $recipient = $email->header("To");
     
-    if ($author && $recipient) {
+    if ($author && $recipient && lc($author) ne lc($recipient)) {
         my $email_suffix = Bugzilla->params->{'emailsuffix'};
         if ($email_suffix ne '') {
             $recipient =~ s/\Q$email_suffix\E$//;
             $author    =~ s/\Q$email_suffix\E$//;
         }
-        
-        $author    = new Bugzilla::User({ name => $author });
-        $recipient = new Bugzilla::User({ name => $recipient });
-    
+
+        $author = new Bugzilla::User({ name => $author });
+
         if ($author &&
             $author->id && 
-            !$author->in_group('editbugs') &&
-            $author->id ne $recipient->id) 
+            !$author->in_group('editbugs'))
         {
             my $body = $email->body_str();
 

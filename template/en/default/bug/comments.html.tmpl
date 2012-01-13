@@ -35,7 +35,9 @@
 
       /* <textarea id="comment"> */
       var textarea = document.getElementById('comment');
-      textarea.value += replytext;
+      if (textarea.value != replytext) {
+          textarea.value += replytext;
+      }
 
       textarea.focus();
   } 

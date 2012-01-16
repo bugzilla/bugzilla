@@ -27,7 +27,7 @@ use warnings;
 
 use Bugzilla::Config::Common;
 
-our $sortkey = 30;
+our $sortkey = 1350;
 
 sub get_param_list {
     my ($class) = @_;

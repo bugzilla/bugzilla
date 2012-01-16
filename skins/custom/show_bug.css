@@ -72,3 +72,11 @@
 .edit_form table td:first-child {
     width: 0px;
 }
+
+/* fix flag table's vertical alignment */
+
+table#flags {
+    border-collapse: collapse;
+    border-spacing: 0px;
+}
+

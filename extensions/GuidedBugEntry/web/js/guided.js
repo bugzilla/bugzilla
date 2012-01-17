@@ -273,6 +273,7 @@ var dupes = {
     this._dataTableColumns = [
       { key: "id", label: labels.id, formatter: this._formatId },
       { key: "summary", label: labels.summary, formatter: "text" },
+      { key: "component", label: labels.component, formatter: "text" },
       { key: "status", label: labels.status, formatter: this._formatStatus },
       { key: "update_token", label: '', formatter: this._formatCc }
     ];
@@ -514,7 +515,7 @@ var dupes = {
               summary: dupes.getSummary(),
               limit: 12,
               include_fields: [ "id", "summary", "status", "resolution",
-                "update_token", "cc" ]
+                "update_token", "cc", "component" ]
           }
       };
 

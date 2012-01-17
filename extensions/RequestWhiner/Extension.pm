@@ -23,8 +23,21 @@ package Bugzilla::Extension::RequestWhiner;
 use strict;
 use base qw(Bugzilla::Extension);
 
+use Bugzilla::Constants qw(bz_locations);
+use Bugzilla::Install::Filesystem;
+
 our $VERSION = '0.01';
 
-# All the code is in the script in bin/.
+sub install_filesystem {
+    my ($self, $args) = @_;
+    my $files = $args->{'files'};
+
+    my $extensionsdir = bz_locations()->{'extensionsdir'};
+    my $scriptname = $extensionsdir . "/" . __PACKAGE__->NAME . "/bin/whineatrequests.pl";
+    
+    $files->{$scriptname} = { 
+        perms => Bugzilla::Install::Filesystem::WS_EXECUTE
+    };
+}
 
 __PACKAGE__->NAME;

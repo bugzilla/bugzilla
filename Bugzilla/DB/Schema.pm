@@ -901,7 +901,10 @@ use constant ABSTRACT_SCHEMA => {
     profile_search => {
         FIELDS => [
             id         => {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
-            user_id    => {TYPE => 'INT3', NOTNULL => 1},
+            user_id    => {TYPE => 'INT3', NOTNULL => 1, 
+                           REFERENCES => {TABLE  => 'profiles', 
+                                          COLUMN => 'userid', 
+                                          DELETE => 'CASCADE'}},
             bug_list   => {TYPE => 'MEDIUMTEXT', NOTNULL => 1},
             list_order => {TYPE => 'MEDIUMTEXT'},
         ],

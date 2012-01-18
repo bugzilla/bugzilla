@@ -57,8 +57,7 @@ use Bugzilla::Extension::BMO::Data qw($cf_visible_in_products
 use Bugzilla::Extension::BMO::Reports qw(user_activity_report
                                          triage_reports
                                          group_admins
-                                         email_queue_report
-                                         release_tracking_report);
+                                         email_queue_report);
 
 our $VERSION = '0.1';
 
@@ -173,9 +172,6 @@ sub page_before_template {
     }
     elsif ($page eq 'email_queue.html') {
         email_queue_report($vars);
-    }
-    elsif ($page eq 'release_tracking_report.html') {
-        release_tracking_report($vars);
     }
 }
 

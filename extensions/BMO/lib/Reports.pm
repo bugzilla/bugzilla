@@ -20,20 +20,26 @@
 package Bugzilla::Extension::BMO::Reports;
 use strict;
 
-use Bugzilla::User;
-use Bugzilla::Util qw(trim detaint_natural);
-use Bugzilla::Error;
+use Bugzilla::Extension::BMO::Data qw($cf_disabled_flags);
+
 use Bugzilla::Constants;
+use Bugzilla::Error;
+use Bugzilla::Field;
+use Bugzilla::User;
+use Bugzilla::Util qw(trim detaint_natural trick_taint correct_urlbase);
 
 use Date::Parse;
 use DateTime;
+use JSON qw(-convert_blessed_universally);
+use List::MoreUtils qw(uniq);
 
 use base qw(Exporter);
 
 our @EXPORT_OK = qw(user_activity_report
                     triage_reports
                     group_admins
-                    email_queue_report);
+                    email_queue_report
+                    release_tracking_report);
 
 sub user_activity_report {
     my ($vars) = @_;
@@ -59,20 +65,10 @@ sub user_activity_report {
         }
         Bugzilla::User::match_field({ 'who' => {'type' => 'multi'} });
 
-        ThrowUserError('user_activity_missing_from_date') unless $from;
-        my $from_time = _parse_date($from)
-            or ThrowUserError('user_activity_invalid_date', { date => $from });
-        my $from_dt = DateTime->from_epoch(epoch => $from_time)
-                              ->set_time_zone('local')
-                              ->truncate(to => 'day');
+        my $from_dt = _string_to_datetime($from);
         $from = $from_dt->ymd();
 
-        ThrowUserError('user_activity_missing_to_date') unless $to;
-        my $to_time = _parse_date($to)
-            or ThrowUserError('user_activity_invalid_date', { date => $to });
-        my $to_dt = DateTime->from_epoch(epoch => $to_time)
-                            ->set_time_zone('local')
-                            ->truncate(to => 'day');
+        my $to_dt = _string_to_datetime($to);
         $to = $to_dt->ymd();
         # add one day to include all activity that happened on the 'to' date
         $to_dt->add(days => 1);
@@ -296,6 +292,20 @@ sub user_activity_report {
     $vars->{'who_count'} = scalar @who;
     $vars->{'from'} = $from;
     $vars->{'to'} = $to;
+}
+
+sub _string_to_datetime {
+    my $input = shift;
+    my $time = _parse_date($input)
+        or ThrowUserError('report_invalid_date', { date => $input });
+    return _time_to_datetime($time);
+}
+
+sub _time_to_datetime {
+    my $time = shift;
+    return DateTime->from_epoch(epoch => $time)
+                   ->set_time_zone('local')
+                   ->truncate(to => 'day');
 }
 
 sub _parse_date {
@@ -525,7 +535,7 @@ sub triage_reports {
 }
 
 sub group_admins {
-    my ($vars, $filter) = @_;
+    my ($vars) = @_;
     my $dbh = Bugzilla->dbh;
     my $user = Bugzilla->user;
 
@@ -585,6 +595,337 @@ sub email_queue_report {
 
     $vars->{'jobs'} = $dbh->selectall_arrayref($query, { Slice => {} });
     $vars->{'now'} = (time);
+}
+
+sub release_tracking_report {
+    my ($vars) = @_;
+    my $dbh = Bugzilla->dbh;
+    my $input = Bugzilla->input_params;
+    my $user = Bugzilla->user;
+
+    my @flag_names = qw(
+        approval-mozilla-release
+        approval-mozilla-beta
+        approval-mozilla-aurora
+        approval-comm-release
+        approval-comm-beta
+        approval-comm-aurora
+    );
+
+    my @flags_json;
+    my @fields_json;
+    my @products_json;
+
+    #
+    # tracking flags
+    #
+
+    my $all_products = $user->get_selectable_products;
+    my @usable_products;
+
+    # build list of flags and their matching products
+
+    foreach my $flag_name (@flag_names) {
+        # grab all matching flag_types
+        my @flag_types = @{Bugzilla::FlagType::match({ name => $flag_name, is_active => 1 })};
+
+        # we need a list of products, based on inclusions/exclusions
+        my @products;
+        my %flag_types;
+        foreach my $flag_type (@flag_types) {
+            $flag_types{$flag_type->name} = $flag_type->id;
+            my $has_all = 0;
+            my @exclusion_ids;
+            my @inclusion_ids;
+            foreach my $flag_type (@flag_types) {
+                if (scalar keys %{$flag_type->inclusions}) {
+                    my $inclusions = $flag_type->inclusions;
+                    foreach my $key (keys %$inclusions) {
+                        push @inclusion_ids, ($inclusions->{$key} =~ /^(\d+)/);
+                    }
+                } elsif (scalar keys %{$flag_type->exclusions}) {
+                    my $exclusions = $flag_type->exclusions;
+                    foreach my $key (keys %$exclusions) {
+                        push @exclusion_ids, ($exclusions->{$key} =~ /^(\d+)/);
+                    }
+                } else {
+                    $has_all = 1;
+                    last;
+                }
+            }
+
+            if ($has_all) {
+                push @products, @$all_products;
+            } elsif (scalar @exclusion_ids) {
+                push @products, @$all_products;
+                foreach my $exclude_id (uniq @exclusion_ids) {
+                    @products = grep { $_->id != $exclude_id } @products;
+                }
+            } else {
+                foreach my $include_id (uniq @inclusion_ids) {
+                    push @products, grep { $_->id == $include_id } @$all_products;
+                }
+            }
+        }
+        @products = uniq @products;
+        push @usable_products, @products;
+        my @product_ids = map { $_->id } sort { lc($a->name) cmp lc($b->name) } @products;
+
+        push @flags_json, {
+            name => $flag_name,
+            id => $flag_types{$flag_name} || 0,
+            products => \@product_ids,
+            fields => [],
+        };
+    }
+    @usable_products = uniq @usable_products;
+
+    # build a list of tracking flags for each product
+    # also build the list of all fields
+
+    my @unlink_products;
+    foreach my $product (@usable_products) {
+        my @fields =
+            grep { _is_active_status_field($_->name) }
+            Bugzilla->active_custom_fields({ product => $product });
+        my @field_ids = map { $_->id } @fields;
+        if (!scalar @fields) {
+            push @unlink_products, $product;
+            next;
+        }
+
+        # product
+        push @products_json, {
+            name => $product->name,
+            id => $product->id,
+            fields => \@field_ids,
+        };
+
+        # add fields to flags
+        foreach my $rh (@flags_json) {
+            if (grep { $_ eq $product->id } @{$rh->{products}}) {
+                push @{$rh->{fields}}, @field_ids;
+            }
+        }
+
+        # add fields to fields_json
+        foreach my $field (@fields) {
+            my $existing = 0;
+            foreach my $rh (@fields_json) {
+                if ($rh->{id} == $field->id) {
+                    $existing = 1;
+                    last;
+                }
+            }
+            if (!$existing) {
+                push @fields_json, {
+                    name => $field->name,
+                    id => $field->id,
+                };
+            }
+        }
+    }
+    foreach my $rh (@flags_json) {
+        my @fields = uniq @{$rh->{fields}};
+        $rh->{fields} = \@fields;
+    }
+
+    # remove products which aren't linked with status fields
+
+    foreach my $rh (@flags_json) {
+        my @product_ids;
+        foreach my $id (@{$rh->{products}}) {
+            unless (grep { $_->id == $id } @unlink_products) {
+                push @product_ids, $id;
+            }
+            $rh->{products} = \@product_ids;
+        }
+    }
+
+    #
+    # rapid release dates
+    #
+
+    my @ranges;
+    my $start_date = _string_to_datetime('2011-08-16');
+    my $end_date = $start_date->clone->add(weeks => 6)->add(days => -1);
+    my $now_date = _time_to_datetime((time));
+
+    while ($start_date <= $now_date) {
+        unshift @ranges, {
+            value => sprintf("%s-%s", $start_date->ymd(''), $end_date->ymd('')),
+            label => sprintf("%s and %s", $start_date->ymd('-'), $end_date->ymd('-')),
+        };
+    
+        $start_date = $end_date->clone;;
+        $start_date->add(days => 1);
+        $end_date->add(weeks => 6);
+    }
+    push @ranges, {
+        value => '*',
+        label => 'Anytime',
+    };
+
+    #
+    # run report
+    #
+
+    if ($input->{q}) {
+        my $q = _parse_query($input->{q});
+
+        my @where;
+        my @params;
+        my $query = "
+            SELECT b.bug_id
+              FROM bugs b
+                   INNER JOIN flags f ON f.bug_id = b.bug_id ";
+
+        if ($q->{start_date}) {
+            $query .= "INNER JOIN bugs_activity a ON a.bug_id = b.bug_id ";
+        }
+
+        $query .= "WHERE ";
+
+        if ($q->{start_date}) {
+            push @where, "(a.fieldid = ?)";
+            push @params, $q->{field_id};
+
+            push @where, "(a.bug_when >= ?)";
+            push @params, $q->{start_date} . ' 00:00:00';
+            push @where, "(a.bug_when < ?)";
+            push @params, $q->{end_date} . ' 00:00:00';
+
+            push @where, "(a.added LIKE ?)";
+            push @params, '%' . $q->{flag_name} . '?%';
+        }
+
+        push @where, "(f.type_id IN (SELECT id FROM flagtypes WHERE name = ?))";
+        push @params, $q->{flag_name};
+
+        push @where, "(f.status = ?)";
+        push @params, $q->{flag_status};
+
+        if ($q->{product_id}) {
+            push @where, "(b.product_id = ?)";
+            push @params, $q->{product_id};
+        }
+
+        if (scalar @{$q->{fields}}) {
+            my @fields;
+            foreach my $field (@{$q->{fields}}) {
+                push @fields,
+                    "(" .
+                    ($field->{value} eq '+' ? '' : '!') .
+                    "(b.".$field->{name}." IN ('fixed','verified'))" .
+                    ") ";
+            }
+            my $join = uc $q->{join};
+            push @where, '(' . join(" $join ", @fields) . ')';
+        }
+
+        $query .= join("\nAND ", @where);
+
+        my $bugs = $dbh->selectcol_arrayref($query, undef, @params);
+        push @$bugs, 0 unless @$bugs;
+
+        my $urlbase = correct_urlbase();
+        my $cgi = Bugzilla->cgi;
+        print $cgi->redirect(
+            -url => "${urlbase}buglist.cgi?bug_id=" . join(',', @$bugs)
+        );
+        exit;
+    }
+
+    #
+    # set template vars
+    #
+
+    my $json = JSON->new();
+    if (0) {
+        # debugging
+        $json->shrink(0);
+        $json->canonical(1);
+        $vars->{flags_json} = $json->pretty->encode(\@flags_json);
+        $vars->{products_json} = $json->pretty->encode(\@products_json);
+        $vars->{fields_json} = $json->pretty->encode(\@fields_json);
+    } else {
+        $json->shrink(1);
+        $vars->{flags_json} = $json->encode(\@flags_json);
+        $vars->{products_json} = $json->encode(\@products_json);
+        $vars->{fields_json} = $json->encode(\@fields_json);
+    }
+
+    $vars->{flag_names} = \@flag_names;
+    $vars->{ranges} = \@ranges;
+    $vars->{default_query} = $input->{q};
+    foreach my $field (qw(product flags range)) {
+        $vars->{$field} = $input->{$field};
+    }
+}
+
+sub _parse_query {
+    my $q = shift;
+    my @query = split(/:/, $q);
+    my $query;
+
+    # field_id for flag changes
+    $query->{field_id} = get_field_id('flagtypes.name');
+
+    # flag_name
+    my $flag_name = shift @query;
+    @{Bugzilla::FlagType::match({ name => $flag_name, is_active => 1 })}
+        or ThrowUserError('report_invalid_parameter', { name => 'flag_name' });
+    trick_taint($flag_name);
+    $query->{flag_name} = $flag_name;
+
+    # flag_status
+    my $flag_status = shift @query;
+    $flag_status =~ /^([\?\-\+])$/
+        or ThrowUserError('report_invalid_parameter', { name => 'flag_status' });
+    $query->{flag_status} = $1;
+
+    # date_range -> from_ymd to_ymd
+    my $date_range = shift @query;
+    if ($date_range ne '*') {
+        $date_range =~ /^(\d\d\d\d)(\d\d)(\d\d)-(\d\d\d\d)(\d\d)(\d\d)$/
+            or ThrowUserError('report_invalid_parameter', { name => 'date_range' });
+        $query->{start_date} = "$1-$2-$3";
+        $query->{end_date} = "$4-$5-$6";
+    }
+
+    # product_id
+    my $product_id = shift @query;
+    $product_id =~ /^(\d+)$/
+        or ThrowUserError('report_invalid_parameter', { name => 'product_id' });
+    $query->{product_id} = $1;
+
+    # join
+    my $join = shift @query;
+    $join =~ /^(and|or)$/
+        or ThrowUserError('report_invalid_parameter', { name => 'join' });
+    $query->{join} = $1;
+
+    # fields
+    my @fields;
+    foreach my $field (@query) {
+        $field =~ /^(\d+)([\-\+])$/
+            or ThrowUserError('report_invalid_parameter', { name => 'fields' });
+        my ($id, $value) = ($1, $2);
+        my $field_obj = Bugzilla::Field->new($id)
+            or ThrowUserError('report_invalid_parameter', { name => 'field_id' });
+        push @fields, { id => $id, value => $value, name => $field_obj->name };
+    }
+    $query->{fields} = \@fields;
+
+    return $query;
+}
+
+sub _is_active_status_field {
+    my ($field_name) = @_;
+    if ($field_name =~ /^cf_status/) {
+        return !grep { $field_name eq $_ } @$cf_disabled_flags
+    }
+    return 0;
 }
 
 1;

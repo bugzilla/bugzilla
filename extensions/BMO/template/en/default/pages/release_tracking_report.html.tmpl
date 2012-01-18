@@ -1,0 +1,103 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% INCLUDE global/header.html.tmpl
+  title = "Release Tracking Report"
+  style_urls = [ "extensions/BMO/web/styles/reports.css" ]
+  javascript_urls = [ "extensions/BMO/web/js/release_tracking_report.js" ]
+%]
+
+<noscript>
+<h1>JavaScript is required to use this report.</h1>
+</noscript>
+
+<script>
+var flags_data = [% flags_json FILTER none %];
+var products_data = [% products_json FILTER none %];
+var fields_data = [% fields_json FILTER none %];
+var default_query = '[% default_query FILTER js %]';
+</script>
+
+<form action="page.cgi" method="get" onSubmit="return onFormSubmit()">
+<input type="hidden" name="id" value="release_tracking_report.html">
+<input type="hidden" name="q" id="q" value="">
+<table>
+
+<tr>
+  <th>Approval:</th>
+  <td>
+    Show bugs where
+    <select id="flag" onChange="onFlagChange()">
+      [% FOREACH flag_name = flag_names %]
+        <option value="[% flag_name FILTER html %]">[% flag_name FILTER html %]</option>
+      [% END %]
+    </select>
+
+    was changed to (and is currently)
+    <select id="flag_value">
+      <option value="?">?</option>
+      <option value="-">-</option>
+      <option value="+">+</option>
+    </select>
+
+    between
+    <select id="range" onChange="serialiseForm()">
+      [% FOREACH range = ranges %]
+        <option value="[% range.value FILTER html %]">
+          [% range.label FILTER html %]
+        </option>
+      [% END %]
+    </select>
+  </td>
+</tr>
+
+<tr>
+  <th>Status:</th>
+  <td>
+    for the product
+    <select id="product" onChange="onProductChange()">
+    </select>
+  </td>
+</tr>
+
+<tr>
+  <td>&nbsp;</td>
+  <td>
+    <select id="op" onChange="serialiseForm()">
+      <option value="and">All selected tracking fields (AND)</option>
+      <option value="or">Any selected tracking fields (OR)</option>
+    </select>
+    [
+      <a href="javascript:void(0)" onClick="selectAllFields()">All</a> |
+      <a href="javascript:void(0)" onClick="selectNoFields()">None</a>
+    ]
+    [
+      <a href="javascript:void(0)" onClick="invertFields()">Invert</a>
+    ]
+    <br>
+    <span id="tracking_span">
+    </span>
+  </td>
+</tr>
+    
+<tr>
+  <td>&nbsp;</td>
+  <td colspan="2">
+    <input type="submit" value="Search">
+    <input type="submit" value="Reset" onClick="onFormReset(); return false">
+    <a href="?" id="bookmark">Bookmarkable Link</a>
+  </td>
+</tr>
+</table>
+</form>
+
+<p>
+  <i>"fixed" in the status field checks for the "verified" status as well as "fixed".</i>
+</p>
+
+[% INCLUDE global/footer.html.tmpl %]

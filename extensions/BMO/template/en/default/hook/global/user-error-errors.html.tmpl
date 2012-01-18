@@ -22,19 +22,15 @@
     [% title = "Missing Username" %]
     You must provide at least one email address to report on.
 
-[% ELSIF error == "user_activity_missing_from_date" %]
-    [% title = "Missing Date" %]
-    You must provided the period start date.
-
-[% ELSIF error == "user_activity_missing_to_date" %]
-    [% title = "Missing Date" %]
-    You must provided the period end date.
-
-[% ELSIF error == "user_activity_invalid_date" %]
+[% ELSIF error == "report_invalid_date" %]
     [% title = "Invalid Date" %]
     The date '[% date FILTER html %]' is invalid.
 
+[% ELSIF error == "report_invalid_parameter" %]
+    [% title = "Invalid Parameter" %]
+    The value for parameter [% name FILTER html %] is invalid.
+
 [% ELSIF error == "invalid_object" %]
-   Invalid [% object FILTER html %]: "[% value FILTER html %]"
+    Invalid [% object FILTER html %]: "[% value FILTER html %]"
 
 [% END %]

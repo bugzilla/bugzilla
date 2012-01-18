@@ -66,7 +66,7 @@
                          lanyards,
                          tshirts,
                          rollupbanners,
-                         horizontalbanners,
+                         horizontalbanner,
                          boothcloth,
                          pens,
                          otherswag)>
@@ -108,7 +108,7 @@
     <lanyards>[% (cgi.param('lanyards') ? 1 : 0) FILTER xml %]</lanyards>
     <tshirts>[% (cgi.param('tshirts') ? 1 : 0) FILTER xml %]</tshirts>
     <rollupbanners>[% (cgi.param('rollupbanners') ? 1 : 0) FILTER xml %]</rollupbanners>
-    <horizontalbanners>[% (cgi.param('horizontalbanners') ? 1 : 0) FILTER xml %]</horizontalbanners>
+    <horizontalbanner>[% (cgi.param('horizontalbanner') ? 1 : 0) FILTER xml %]</horizontalbanner>
     <boothcloth>[% (cgi.param('boothcloth') ? 1 : 0) FILTER xml %]</boothcloth>
     <pens>[% (cgi.param('pens') ? 1 : 0) FILTER xml %]</pens>
     <otherswag>[% cgi.param('otherswag') || '' FILTER xml %]</otherswag>

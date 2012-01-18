@@ -514,6 +514,16 @@ check_token_data($token, 'edit_user_prefs') if $save_changes;
 
 # Do any saving, and then display the current tab.
 SWITCH: for ($current_tab_name) {
+
+    # Extensions must set it to 1 to confirm the tab is valid.
+    my $handled = 0;
+    Bugzilla::Hook::process('user_preferences',
+                            { 'vars'       => $vars,
+                              save_changes => $save_changes,
+                              current_tab  => $current_tab_name,
+                              handled      => \$handled });
+    last SWITCH if $handled;
+
     /^account$/ && do {
         SaveAccount() if $save_changes;
         DoAccount();
@@ -538,14 +548,6 @@ SWITCH: for ($current_tab_name) {
         DoSavedSearches();
         last SWITCH;
     };
-    # Extensions must set it to 1 to confirm the tab is valid.
-    my $handled = 0;
-    Bugzilla::Hook::process('user_preferences',
-                            { 'vars'       => $vars,
-                              save_changes => $save_changes,
-                              current_tab  => $current_tab_name,
-                              handled      => \$handled });
-    last SWITCH if $handled;
 
     ThrowUserError("unknown_tab",
                    { current_tab_name => $current_tab_name });

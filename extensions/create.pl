@@ -14,7 +14,6 @@ use Bugzilla::Error;
 use Bugzilla::Util qw(get_text);
 
 use File::Path qw(mkpath);
-use DateTime;
 
 my $base_dir = bz_locations()->{'extensionsdir'};
 
@@ -34,10 +33,8 @@ foreach my $path (qw(lib web template/en/default/hook),
     mkpath("$extension_dir/$path") || die "$extension_dir/$path: $!";
 }
 
-my $year = DateTime->now()->year;
-
 my $template = Bugzilla->template;
-my $vars = { year => $year, name => $name, path => $extension_dir };
+my $vars = { name => $name, path => $extension_dir };
 my %create_files = (
     'config.pm.tmpl'       => 'Config.pm',
     'extension.pm.tmpl'    => 'Extension.pm',

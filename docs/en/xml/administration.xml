@@ -775,6 +775,68 @@
 
           <varlistentry>
             <term>
+              smtpserver
+            </term>
+            <listitem>
+              <para>
+                This is the SMTP server address, if the <quote>mail_delivery_method</quote>
+                parameter is set to SMTP.  Use "localhost" if you have a local MTA
+                running, otherwise use a remote SMTP server.  Append ":" and the port
+                number, if a non-default port is needed.
+              </para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>
+              smtp_username
+            </term>
+            <listitem>
+              <para>
+                Username to use for SASL authentication to the SMTP server.  Leave
+                this parameter empty if your server does not require authentication.
+              </para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>
+              smtp_password
+            </term>
+            <listitem>
+              <para>
+                Password to use for SASL authentication to the SMTP server. This
+                parameter will be ignored if the <quote>smtp_username</quote>
+                parameter is left empty.
+              </para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>
+              smtp_ssl
+            </term>
+            <listitem>
+              <para>
+                Enable SSL support for connection to the SMTP server.
+              </para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>
+              smtp_debug
+            </term>
+            <listitem>
+              <para>
+                This parameter allows you to enable detailed debugging output.
+                Log messages are printed the web server's error log.
+              </para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>
               whinedays
             </term>
             <listitem>

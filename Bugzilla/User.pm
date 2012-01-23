@@ -195,8 +195,7 @@ sub check_login_name_for_creation {
     my ($invocant, $name) = @_;
     $name = trim($name);
     $name || ThrowUserError('user_login_required');
-    validate_email_syntax($name)
-        || ThrowUserError('illegal_email_address', { addr => $name });
+    check_email_syntax($name);
 
     # Check the name if it's a new user, or if we're changing the name.
     if (!ref($invocant) || $invocant->login ne $name) {

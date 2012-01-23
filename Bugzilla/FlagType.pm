@@ -38,6 +38,8 @@ use Bugzilla::Error;
 use Bugzilla::Util;
 use Bugzilla::Group;
 
+use Email::Address;
+
 use base qw(Bugzilla::Object);
 
 ###############################
@@ -287,15 +289,11 @@ sub _check_cc_list {
       || ThrowUserError('flag_type_cc_list_invalid', { cc_list => $cc_list });
 
     my @addresses = split(/[,\s]+/, $cc_list);
-    # We do not call Util::validate_email_syntax because these
-    # addresses do not require to match 'emailregexp' and do not
-    # depend on 'emailsuffix'. So we limit ourselves to a simple
-    # sanity check:
-    # - match the syntax of a fully qualified email address;
-    # - do not contain any illegal character.
+    my $addr_spec = $Email::Address::addr_spec;
+    # We do not call check_email_syntax() because these addresses do not
+    # require to match 'emailregexp' and do not depend on 'emailsuffix'.
     foreach my $address (@addresses) {
-        ($address =~ /^[\w\.\+\-=]+@[\w\.\-]+\.[\w\-]+$/
-           && $address !~ /[\\\(\)<>&,;:"\[\] \t\r\n]/)
+        ($address !~ /\P{ASCII}/ && $address =~ /^$addr_spec$/)
           || ThrowUserError('illegal_email_address',
                             {addr => $address, default => 1});
     }

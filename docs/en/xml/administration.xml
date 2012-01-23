@@ -288,11 +288,11 @@
               <para>
                 Defines the regular expression used to validate email addresses
                 used for login names. The default attempts to match fully
-                qualified email addresses (i.e. 'user@example.com'). Some
-                Bugzilla installations allow only local user names (i.e 'user' 
-                instead of 'user@example.com'). In that case, the 
-                <command>emailsuffix</command> parameter should be used to define
-                the email domain.    
+                qualified email addresses (i.e. 'user@example.com') in a slightly
+                more restrictive way than what is allowed in RFC 2822.
+                Some Bugzilla installations allow only local user names (i.e 'user'
+                instead of 'user@example.com'). In that case, this parameter
+                should be used to define the email domain.
               </para>
             </listitem>
           </varlistentry>

@@ -20,7 +20,7 @@ use base qw(Exporter);
                              format_time validate_date validate_time datetime_from
                              file_mod_time is_7bit_clean
                              bz_crypt generate_random_password
-                             validate_email_syntax clean_text
+                             validate_email_syntax check_email_syntax clean_text
                              get_text template_var disable_utf8
                              detect_encoding);
 
@@ -552,12 +552,27 @@ sub generate_random_password {
 sub validate_email_syntax {
     my ($addr) = @_;
     my $match = Bugzilla->params->{'emailregexp'};
-    my $ret = ($addr =~ /$match/ && $addr !~ /[\\\(\)<>&,;:"\[\] \t\r\n]/);
+    my $email = $addr . Bugzilla->params->{'emailsuffix'};
+    # This regexp follows RFC 2822 section 3.4.1.
+    my $addr_spec = $Email::Address::addr_spec;
+    # RFC 2822 section 2.1 specifies that email addresses must
+    # be made of US-ASCII characters only.
+    # Email::Address::addr_spec doesn't enforce this.
+    my $ret = ($addr =~ /$match/ && $email !~ /\P{ASCII}/ && $email =~ /^$addr_spec$/);
     if ($ret) {
         # We assume these checks to suffice to consider the address untainted.
         trick_taint($_[0]);
     }
     return $ret ? 1 : 0;
+}
+
+sub check_email_syntax {
+    my ($addr) = @_;
+
+    unless (validate_email_syntax(@_)) {
+        my $email = $addr . Bugzilla->params->{'emailsuffix'};
+        ThrowUserError('illegal_email_address', { addr => $email });
+    }
 }
 
 sub validate_date {
@@ -763,6 +778,7 @@ Bugzilla::Util - Generic utility functions for bugzilla
 
   # Validation Functions
   validate_email_syntax($email);
+  check_email_syntax($email);
   validate_date($date);
 
   # DB-related functions
@@ -1067,6 +1083,12 @@ and tokens.
 
 Do a syntax checking for a legal email address and returns 1 if
 the check is successful, else returns 0.
+Untaints C<$email> if successful.
+
+=item C<check_email_syntax($email)>
+
+Do a syntax checking for a legal email address and throws an error
+if the check fails.
 Untaints C<$email> if successful.
 
 =item C<validate_date($date)>

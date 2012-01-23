@@ -117,9 +117,7 @@ sub requestChangePassword {
     my $login_name = $cgi->param('loginname')
       or ThrowUserError("login_needed_for_password_change");
 
-    validate_email_syntax($login_name)
-      || ThrowUserError('illegal_email_address', {addr => $login_name});
-
+    check_email_syntax($login_name);
     my $user = Bugzilla::User->check($login_name);
 
     # Make sure the user account is active.

@@ -11,7 +11,7 @@
 
 use lib 't';
 use Support::Files;
-use Test::More tests => 15;
+use Test::More tests => 17;
 
 BEGIN { 
     use_ok(Bugzilla);
@@ -57,6 +57,16 @@ foreach my $input (keys %email_strings) {
     is(Bugzilla::Util::email_filter($input), $email_strings{$input}, 
        "email_filter('$input')");
 }
+
+# validate_email_syntax. We need to override some parameters.
+my $params = Bugzilla->params;
+$params->{emailregexp} = '.*';
+$params->{emailsuffix} = '';
+my $ascii_email = 'admin@company.com';
+# U+0430 returns the Cyrillic "а", which looks similar to the ASCII "a".
+my $utf8_email = "\N{U+0430}dmin\@company.com";
+ok(validate_email_syntax($ascii_email), 'correctly formatted ASCII-only email address is valid');
+ok(!validate_email_syntax($utf8_email), 'correctly formatted email address with non-ASCII characters is rejected');
 
 # diff_arrays():
 my @old_array = qw(alpha beta alpha gamma gamma beta alpha delta epsilon gamma);

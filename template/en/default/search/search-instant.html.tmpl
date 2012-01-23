@@ -1,0 +1,83 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% PROCESS global/header.html.tmpl 
+  title = "Instant Search"
+  javascript_urls = [ 'extensions/GuidedBugEntry/web/js/products.js',
+                      'js/instant-search.js', ]
+  yui = [ 'datatable', 'container' ]
+%]
+
+[% default.product.push('Firefox') UNLESS default.product.size %]
+
+<script>
+YAHOO.bugzilla.instantSearch.setLabels( {
+  id: "[% field_descs.bug_id FILTER js %]",
+  summary: "[% field_descs.short_desc FILTER js %]",
+  component: "[% field_descs.component FILTER js %]",
+  status: "[% field_descs.bug_status FILTER js %]",
+});
+</script>
+
+[% WRAPPER search/tabs.html.tmpl %]
+
+<p>
+  This page provides instant results, however only the [% terms.bug %]'s summary
+  is searched.  Products related to the selected product may also be searched.
+</p>
+
+<table>
+  <tr>
+    <td align="right" valign="baseline">
+      <b><label for="product">Product:</label></b>
+    </td>
+    <td>
+      <select name="product" id="product">
+        [% IF Param('useclassification') %]
+          [% FOREACH c = classification %]
+            <optgroup label="[% c.name FILTER html %]">
+            [% FOREACH p = user.get_selectable_products(c.id) %]
+              [% IF p.components.size %]
+                <option value="[% p.name FILTER html %]"
+                  [% " selected" IF lsearch(default.product, p.name) != -1 %]>
+                  [% p.name FILTER html %]
+                </option>
+              [% END %]
+            [% END %]
+            </optgroup>
+          [% END %]
+        [% ELSE %]
+          [% FOREACH p = product %]
+            <option value="[% p.name FILTER html %]"
+              [% " selected" IF lsearch(default.product, p.name) != -1 %]>
+              [% p.name FILTER html %]
+            </option>
+          [% END %]
+        [% END %]
+      </select>
+    </td>
+  </tr>
+  <tr>
+    <td align="right" valign="baseline">
+      <b><label for="content">Words:</label></b>
+    </td>
+    <td>
+      <input id="content" spellcheck="true" size="60"
+             value="[% default.content.0 FILTER html %]">
+    </td>
+  </tr>
+</table>
+<br>
+
+<div id="results"></div>
+
+[% END %]
+
+[% PROCESS global/footer.html.tmpl %]

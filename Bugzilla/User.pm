@@ -65,16 +65,21 @@ use constant DB_TABLE => 'profiles';
 # that you passed in for "name" to new(). That's because historically
 # Bugzilla::User used "name" for the realname field. This should be
 # fixed one day.
-use constant DB_COLUMNS => (
-    'profiles.userid',
-    'profiles.login_name',
-    'profiles.realname',
-    'profiles.mybugslink AS showmybugslink',
-    'profiles.disabledtext',
-    'profiles.disable_mail',
-    'profiles.extern_id',
-    'profiles.is_enabled', 
-);
+sub DB_COLUMNS {
+    my $dbh = Bugzilla->dbh;
+    return (
+        'profiles.userid',
+        'profiles.login_name',
+        'profiles.realname',
+        'profiles.mybugslink AS showmybugslink',
+        'profiles.disabledtext',
+        'profiles.disable_mail',
+        'profiles.extern_id',
+        'profiles.is_enabled',
+        $dbh->sql_date_format('last_seen_date', '%Y-%m-%d') . ' AS last_seen_date',
+    ),
+}
+
 use constant NAME_FIELD => 'login_name';
 use constant ID_FIELD   => 'userid';
 use constant LIST_ORDER => NAME_FIELD;
@@ -258,6 +263,23 @@ sub set_disabledtext {
     $_[0]->set('is_enabled', $_[1] ? 0 : 1);
 }
 
+sub update_last_seen_date {
+    my $self = shift;
+    return unless $self->id;
+    my $dbh = Bugzilla->dbh;
+    my $date = $dbh->selectrow_array(
+        'SELECT ' . $dbh->sql_date_format('NOW()', '%Y-%m-%d'));
+
+    if (!$self->last_seen_date or $date ne $self->last_seen_date) {
+        $self->{last_seen_date} = $date;
+        # We don't use the normal update() routine here as we only
+        # want to update the last_seen_date column, not any other
+        # pending changes
+        $dbh->do("UPDATE profiles SET last_seen_date = ? WHERE userid = ?",
+                 undef, $date, $self->id);
+    }
+}
+
 ################################################################################
 # Methods
 ################################################################################
@@ -272,6 +294,7 @@ sub is_enabled { $_[0]->{'is_enabled'} ? 1 : 0; }
 sub showmybugslink { $_[0]->{showmybugslink}; }
 sub email_disabled { $_[0]->{disable_mail}; }
 sub email_enabled { !($_[0]->{disable_mail}); }
+sub last_seen_date { $_[0]->{last_seen_date}; }
 sub cryptpassword {
     my $self = shift;
     # We don't store it because we never want it in the object (we

@@ -317,8 +317,8 @@ use constant OPERATOR_FIELD_OVERRIDE => {
 use constant SPECIAL_PARSING => {
     # Pronoun Fields (Ones that can accept %user%, etc.)
     assigned_to => \&_contact_pronoun,
-    cc          => \&_cc_pronoun,
-    commenter   => \&_commenter_pronoun,
+    cc          => \&_contact_pronoun,
+    commenter   => \&_contact_pronoun,
     qa_contact  => \&_contact_pronoun,
     reporter    => \&_contact_pronoun,
     
@@ -2022,11 +2022,11 @@ sub _contact_pronoun {
 
 sub _contact_exact_group {
     my ($self, $args) = @_;
-    my ($value, $operator, $field, $chart_id, $joins) =
-        @$args{qw(value operator field chart_id joins)};
+    my ($value, $operator, $field, $chart_id, $joins, $sequence) =
+        @$args{qw(value operator field chart_id joins sequence)};
     my $dbh = Bugzilla->dbh;
     my $user = $self->_user;
-    
+
     $value =~ /\%group\.([^%]+)%/;
     my $group = Bugzilla::Group->check({ name => $1, _error => 'invalid_group_name' });
     $group->check_members_are_visible();
@@ -2034,11 +2034,28 @@ sub _contact_exact_group {
       || ThrowUserError('invalid_group_name', {name => $group->name});
 
     my $group_ids = Bugzilla::Group->flatten_group_membership($group->id);
+
+    if ($field eq 'cc' && $chart_id eq '') {
+        # This is for the email1, email2, email3 fields from query.cgi.
+        $chart_id = "CC$$sequence";
+        $args->{sequence}++;
+    }
+
+    my $from = $field;
+    # These fields need an additional table.
+    if ($field =~ /^(commenter|cc)$/) {
+        my $join_table = $field;
+        $join_table = 'longdescs' if $field eq 'commenter';
+        my $join_table_alias = "${field}_$chart_id";
+        push(@$joins, { table => $join_table, as => $join_table_alias });
+        $from = "$join_table_alias.who";
+    }
+
     my $table = "user_group_map_$chart_id";
     my $join = {
         table => 'user_group_map',
         as    => $table,
-        from  => $field,
+        from  => $from,
         to    => 'user_id',
         extra => [$dbh->sql_in("$table.group_id", $group_ids),
                   "$table.isbless = 0"],
@@ -2049,76 +2066,6 @@ sub _contact_exact_group {
     }
     else {
         $args->{term} = "$table.group_id IS NOT NULL";
-    }
-}
-
-sub _cc_pronoun {
-    my ($self, $args) = @_;
-    my ($full_field, $value) = @$args{qw(full_field value)};
-    my $user = $self->_user;
-
-    if ($value =~ /\%group/) {
-        return $self->_cc_exact_group($args);
-    }
-    elsif ($value =~ /^(%\w+%)$/) {
-        $args->{value} = pronoun($1, $user);
-        $args->{quoted} = $args->{value};
-        $args->{value_is_id} = 1;
-    }
-}
-
-sub _cc_exact_group {
-    my ($self, $args) = @_;
-    my ($chart_id, $sequence, $joins, $operator, $value) =
-        @$args{qw(chart_id sequence joins operator value)};
-    my $user = $self->_user;
-    my $dbh = Bugzilla->dbh;
-    
-    $value =~ m/%group\.([^%]+)%/;
-    my $group = Bugzilla::Group->check({ name => $1, _error => 'invalid_group_name' });
-    $group->check_members_are_visible();
-    $user->in_group($group)
-      || ThrowUserError('invalid_group_name', {name => $group->name});
-
-    my $all_groups = Bugzilla::Group->flatten_group_membership($group->id);
-
-    # This is for the email1, email2, email3 fields from query.cgi.
-    if ($chart_id eq "") {
-        $chart_id = "CC$$sequence";
-        $args->{sequence}++;
-    }
-    
-    my $cc_table = "cc_$chart_id";
-    push(@$joins, { table => 'cc', as => $cc_table });
-    my $group_table = "user_group_map_$chart_id";
-    my $group_join = {
-        table => 'user_group_map',
-        as    => $group_table,
-        from  => "$cc_table.who",
-        to    => 'user_id',
-        extra => [$dbh->sql_in("$group_table.group_id", $all_groups),
-                  "$group_table.isbless = 0"],
-    };
-    push(@$joins, $group_join);
-
-    if ($operator =~ /^not/) {
-        $args->{term} = "$group_table.group_id IS NULL";
-    }
-    else {
-        $args->{term} = "$group_table.group_id IS NOT NULL";
-    }
-}
-
-# XXX This should probably be merged with cc_pronoun.
-sub _commenter_pronoun {
-    my ($self, $args) = @_;
-    my $value = $args->{value};
-    my $user = $self->_user;
-
-    if ($value =~ /^(%\w+%)$/) {
-        $args->{value} = pronoun($1, $user);
-        $args->{quoted} = $args->{value};
-        $args->{value_is_id} = 1;
     }
 }
 

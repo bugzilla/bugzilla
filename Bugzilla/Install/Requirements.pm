@@ -358,9 +358,8 @@ sub OPTIONAL_MODULES {
     {
         package => 'Apache-SizeLimit',
         module  => 'Apache2::SizeLimit',
-        # 0.93 fixes problems on Linux and Windows, and changes the
-        # syntax used by SizeLimit.
-        version => '0.93',
+        # 0.96 properly determines process size on Linux.
+        version => '0.96',
         feature => ['mod_perl'],
     },
     );

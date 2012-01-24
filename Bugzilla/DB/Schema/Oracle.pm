@@ -386,9 +386,27 @@ sub get_rename_table_sql {
         }
         if ($def->{TYPE} =~ /varchar|text/i && $def->{NOTNULL}) {
             push(@sql, _get_notnull_trigger_ddl($new_name, $column));
-            push(@sql, "DROP TRIGGER ${$old_name}_${column}");
+            push(@sql, "DROP TRIGGER ${old_name}_${column}");
         }
     }
+
+    return @sql;
+}
+
+sub get_drop_table_ddl {
+    my ($self, $name) = @_;
+    my @sql;
+
+    my @columns = $self->get_table_columns($name);
+    foreach my $column (@columns) {
+        my $def = $self->get_column_abstract($name, $column);
+        if ($def->{TYPE} =~ /SERIAL/i) {
+            # If there's a SERIAL column on this table, we also need
+            # to remove the sequence.
+            push(@sql, "DROP SEQUENCE ${name}_${column}_SEQ");
+        }
+    }
+    push(@sql, "DROP TABLE $name CASCADE CONSTRAINTS PURGE");
 
     return @sql;
 }

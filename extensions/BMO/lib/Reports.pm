@@ -610,6 +610,9 @@ sub release_tracking_report {
         approval-comm-release
         approval-comm-beta
         approval-comm-aurora
+        approval-calendar-release
+        approval-calendar-beta
+        approval-calendar-aurora
     );
 
     my @flags_json;
@@ -625,9 +628,16 @@ sub release_tracking_report {
 
     # build list of flags and their matching products
 
+    my @invalid_flag_names;
     foreach my $flag_name (@flag_names) {
         # grab all matching flag_types
         my @flag_types = @{Bugzilla::FlagType::match({ name => $flag_name, is_active => 1 })};
+
+        # remove invalid flags
+        if (!@flag_types) {
+            push @invalid_flag_names, $flag_name;
+            next;
+        }
 
         # we need a list of products, based on inclusions/exclusions
         my @products;
@@ -677,6 +687,9 @@ sub release_tracking_report {
             products => \@product_ids,
             fields => [],
         };
+    }
+    foreach my $flag_name (@invalid_flag_names) {
+        @flag_names = grep { $_ ne $flag_name } @flag_names;
     }
     @usable_products = uniq @usable_products;
 
@@ -776,7 +789,7 @@ sub release_tracking_report {
         my @where;
         my @params;
         my $query = "
-            SELECT b.bug_id
+            SELECT DISTINCT b.bug_id
               FROM bugs b
                    INNER JOIN flags f ON f.bug_id = b.bug_id ";
 

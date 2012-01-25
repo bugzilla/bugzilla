@@ -224,6 +224,28 @@ sub _user_is_new {
         || ($user->{creation_age} <= PROFILE_AGE);
 }
 
+sub mailer_before_send {
+    my ($self, $args) = @_;
+    my $email = $args->{email};
+
+    my ($bug_id) = ($email->header('Subject') =~ /^[^\d]+(\d+)/);
+    my $changer_login = $email->header('X-Bugzilla-Who');
+    my $changed_fields = $email->header('X-Bugzilla-Changed-Fields');
+
+    if ($bug_id 
+        && $changer_login 
+        && $changed_fields =~ /Attachment Created/) 
+    {
+        my $changer = Bugzilla::User->new({ name => $changer_login });
+        if ($changer
+            && $changer->first_patch_bug_id 
+            && $changer->first_patch_bug_id == $bug_id) 
+        {
+            $email->header_set('X-Bugzilla-FirstPatch' => $bug_id);
+        }
+    }
+}
+
 sub webservice_user_get {
     my ($self, $args) = @_;
     my ($webservice, $params, $users) = @$args{qw(webservice params users)};

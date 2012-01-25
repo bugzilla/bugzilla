@@ -130,7 +130,7 @@ sub Send {
     my $comments = $bug->comments({ after => $start, to => $end });
     # Skip empty comments.
     @$comments = grep { $_->type || $_->body =~ /\S/ } @$comments;
-
+    
     ###########################################################################
     # Start of email filtering code
     ###########################################################################
@@ -361,6 +361,14 @@ sub sendMail {
     push(@watchingrel, 'None') unless @watchingrel;
     push @watchingrel, map { user_id_to_login($_) } @$watchingRef;
 
+    my @changedfields = uniq map { $_->{field_name} } @display_diffs;
+
+    # Add Attachment Created to changedfields if one or more 
+    # comments contain information about a new attachment
+    if (grep($_->type == CMT_ATTACHMENT_CREATED, @send_comments)) {
+        push(@changedfields, 'Attachment Created');
+    }
+
     my $vars = {
         date => $date,
         to_user => $user,
@@ -371,7 +379,7 @@ sub sendMail {
         reasonswatchheader => join(" ", @watchingrel),
         changer => $changer,
         diffs => \@display_diffs,
-        changedfields => [uniq map { $_->{field_name} } @display_diffs],
+        changedfields => \@changedfields, 
         new_comments => \@send_comments,
         threadingmarker => build_thread_marker($bug->id, $user->id, !$bug->lastdiffed),
     };

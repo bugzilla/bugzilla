@@ -18,7 +18,7 @@ use Bugzilla::Util;
 
 sub should_handle {
     my ($class, $uri) = @_;
-    return ($uri->path =~ m|/browse/[A-Z]+-\d+$|) ? 1 : 0;
+    return ($uri->path =~ m|/browse/[A-Z][A-Z]+-\d+$|) ? 1 : 0;
 }
 
 sub _check_value {

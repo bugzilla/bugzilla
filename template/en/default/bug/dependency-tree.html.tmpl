@@ -64,7 +64,7 @@
         [% IF ids.size %]
             depends on 
         [% ELSE %]
-            does not depend on any [% 'open' IF hide_resolved %].
+            does not depend on any [% 'open ' IF hide_resolved %][% terms.bugs %].
         [% END %]
     [% ELSIF type == 2 %]
         [% tree_name = "blocked_tree" %]

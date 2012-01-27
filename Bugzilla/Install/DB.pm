@@ -3485,6 +3485,37 @@ sub _fix_series_indexes {
     return if $dbh->bz_index_info('series', 'series_category_idx');
 
     $dbh->bz_drop_index('series', 'series_creator_idx');
+
+    # Fix duplicated names under the same category/subcategory before
+    # adding the more restrictive index.
+    my $duplicated_series = $dbh->selectall_arrayref(
+         'SELECT s1.series_id, s1.category, s1.subcategory, s1.name
+            FROM series AS s1
+      INNER JOIN series AS s2
+              ON s1.category = s2.category
+             AND s1.subcategory = s2.subcategory
+             AND s1.name = s2.name
+           WHERE s1.series_id != s2.series_id');
+    my $sth_series_update = $dbh->prepare('UPDATE series SET name = ? WHERE series_id = ?');
+    my $sth_series_query = $dbh->prepare('SELECT 1 FROM series WHERE name = ?
+                                          AND category = ? AND subcategory = ?');
+
+    my %renamed_series;
+    foreach my $series (@$duplicated_series) {
+        my ($series_id, $category, $subcategory, $name) = @$series;
+        # Leave the first series alone, then rename duplicated ones.
+        if ($renamed_series{"${category}_${subcategory}_${name}"}++) {
+            print "Renaming series ${category}/${subcategory}/${name}...\n";
+            my $c = 0;
+            my $exists = 1;
+            while ($exists) {
+                $sth_series_query->execute($name . ++$c, $category, $subcategory);
+                $exists = $sth_series_query->fetchrow_array;
+            }
+            $sth_series_update->execute($name . $c, $series_id);
+        }
+    }
+
     $dbh->bz_add_index('series', 'series_creator_idx', ['creator']);
     $dbh->bz_add_index('series', 'series_category_idx',
         {FIELDS => [qw(category subcategory name)], TYPE => 'UNIQUE'});

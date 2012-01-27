@@ -95,7 +95,7 @@
 
 [% INCLUDE req_table reqs = OPTIONAL_MODULES
                      new  = ['Encode', 'Encode-Detect']
-                     updated = ['PatchReader']
+                     updated = ['PatchReader', 'Apache-SizeLimit']
                      include_feature = 1 %]
 
 <h3 id="v42_req_apache">Optional Apache Modules</h3>
@@ -218,6 +218,10 @@
     dependencies is now much faster.</li>
   <li><strong>Attachments:</strong> The encoding of text files can be automatically
     detected when uploading them as attachments.</li>
+  <li><strong>Attachments:</strong> Clickjacking could possibly occur in an attachment 
+    Details page if a user attached a specially formatted HTML file. To fix this 
+    potential problem, the Details page always displays the HTML source instead and 
+    users can see rendered page by clicking on View.</li>
   <li><strong>Flags:</strong> Changing the requestee of a flag no longer changes
     the requester.</li>
   <li><strong>Reports:</strong> If JavaScript is enabled in your web browser,
@@ -425,7 +429,7 @@
   release:</p>
 
 <ul>
-  <li>The <kdb>B[% %]ug.create</kdb> WebService method now throws an error if you
+  <li>The <kbd>B[% %]ug.create</kbd> WebService method now throws an error if you
     pass a group name which doesn't exist. In [% terms.Bugzilla %] 4.0 and 4.0.1,
     this group name was silently ignored, leaving your [% terms.bug %] unsecure
     if no other group applied.
@@ -436,7 +440,7 @@
     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=663208">[% terms.Bug %] 663208</a>)</li>
   <li>Marking [% terms.abug %] as a duplicate now works in Internet Explorer 9.
     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=656769">[% terms.Bug %] 656769</a>)</li>
-  <li><kdb>importxml.pl</kdb> no longer crashes when importing keywords (regressed
+  <li><kbd>importxml.pl</kbd> no longer crashes when importing keywords (regressed
     in 4.0).
     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=657707">[% terms.Bug %] 657707</a>)</li>
   <li>Data entered while reporting a new [% terms.bug %] could be lost if you had
@@ -449,7 +453,7 @@
   <li>The XML-RPC interface now works with SOAP::Lite 0.711 and 0.712 under mod_perl.
     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=600810">[% terms.Bug %] 600810</a>)</li>
   <li>LWP 6.00 and newer require Perl 5.8.8 and above. When installing this module
-    using <kdb>install-module.pl</kdb> on a Perl installation older than 5.8.8,
+    using <kbd>install-module.pl</kbd> on a Perl installation older than 5.8.8,
     LWP 5.837 will be installed instead.
     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=655912">[% terms.Bug %] 655912</a>)</li>
   <li>Viewing [% terms.abug %] report should be significantly faster when your

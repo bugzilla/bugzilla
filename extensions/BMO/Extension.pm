@@ -529,11 +529,6 @@ sub bug_format_comment {
     });
   
     push (@$regexes, {
-        match => qr/\b((?:CVE|CAN)-\d{4}-\d{4})\b/,
-        replace => \&_link_cve
-    });
-
-    push (@$regexes, {
         match => qr/\br(\d{4,})\b/,
         replace => \&_link_svn
     });

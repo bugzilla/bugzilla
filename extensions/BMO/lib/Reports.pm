@@ -208,6 +208,7 @@ sub user_activity_report {
         my $operation = {};
         my $changes = [];
         my $incomplete_data = 0;
+        my %bug_ids;
 
         foreach my $entry (@$list) {
             my ($fieldname, $bugid, $attachid, $when, $removed, $added, $who,
@@ -256,6 +257,8 @@ sub user_activity_report {
                     $changes = [];
                 }
 
+                $bug_ids{$bugid} = 1;
+
                 $operation->{'bug'} = $bugid;
                 $operation->{'who'} = $who;
                 $operation->{'when'} = $when;
@@ -285,6 +288,9 @@ sub user_activity_report {
 
         $vars->{'incomplete_data'} = $incomplete_data;
         $vars->{'operations'} = \@operations;
+
+        my @bug_ids = sort { $a <=> $b } keys %bug_ids;
+        $vars->{'bug_ids'} = \@bug_ids;
     }
 
     $vars->{'action'} = $input->{'action'};

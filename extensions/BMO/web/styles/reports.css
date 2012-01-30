@@ -6,6 +6,11 @@
     width: 20em;
 }
 
+#parameters th {
+    text-align: left;
+    vertical-align: middle !important;
+}
+
 #report tr.bugitem:hover {
   background: #ccccff;
 }

@@ -28,17 +28,9 @@
   title = "User Activity Report" _ who_title
   yui = [ 'autocomplete', 'calendar' ]
   javascript_urls = [ "js/util.js", "js/field.js" ]
+  style_urls = [ "extensions/BMO/web/styles/reports.css" ]
+
 %]
-
-<style>
-#report tr:hover {
-  background: #dddddd;
-}
-
-#report-header {
-  background: #dddddd;
-}
-</style>
 
 [% PROCESS "global/field-descs.none.tmpl" %]
 [% PROCESS bug/time.html.tmpl %]
@@ -46,11 +38,12 @@
 <form id="activity_form" name="activity_form" action="page.cgi" method="get">
 <input type="hidden" name="id" value="user_activity.html">
 <input type="hidden" name="action" value="run">
-<table>
+<table id="parameters">
+
 <tr>
-  <td>
-    <b>Who</b>:
-  </td>
+  <th>
+    Who:
+  </th>
   <td>
     [% INCLUDE global/userselect.html.tmpl
        id => "who"
@@ -62,9 +55,9 @@
     %]
     &nbsp;
   </td>
-  <td>
-    <b>Period</b>:
-  </td>
+  <th>
+    Period:
+  </th>
   <td>
     <input type="text" id="from" name="from" size="11"
       align="right" value="[% from FILTER html %]" maxlength="10"
@@ -73,11 +66,7 @@
       onclick="showCalendar('from')"><span>Calendar</span>
     </button>
     <div id="con_calendar_from"></div>
-  </td>
-  <td>
-    -
-  </td>
-  <td>
+    to
     <input type="text" name="to" size="11" id="to"
       align="right" value ="[% to FILTER html %]" maxlength="10"
       onchange="updateCalendarFromField(this)">
@@ -90,6 +79,7 @@
     <input type="submit" id="run" value="Generate Report">
   </td>
 </tr>
+
 </table>
 </form>
 
@@ -158,6 +148,11 @@
       </tr>
     [% END %]
   </table>
+  <p>
+    <a href="buglist.cgi?bug_id=[% bug_ids.join(',') FILTER url_quote %]">
+    Show as a [% terms.Bug %] List</a>
+  </p>
+
 [% ELSE %]
   <p>
     No changes.

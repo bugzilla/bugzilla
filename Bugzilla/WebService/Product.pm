@@ -34,6 +34,11 @@ use constant MAPPED_RETURNS => {
     isactive => 'is_open',
 };
 
+use constant FIELD_MAP => {
+    has_unconfirmed => 'allows_unconfirmed',
+    is_open         => 'isactive',
+};
+
 ##################################################
 # Add aliases here for method name compatibility #
 ##################################################
@@ -105,16 +110,22 @@ sub create {
                                             action => "add",
                                             object => "products"});
     # Create product
-    my $product = Bugzilla::Product->create({
-        allows_unconfirmed => $params->{has_unconfirmed},
-        classification     => $params->{classification},
-        name               => $params->{name},
-        description        => $params->{description},
-        version            => $params->{version},
-        defaultmilestone   => $params->{default_milestone},
-        isactive           => $params->{is_open},
-        create_series      => $params->{create_series}
-    });
+    my $args = {
+        name             => $params->{name},
+        description      => $params->{description},
+        version          => $params->{version},
+        defaultmilestone => $params->{default_milestone},
+        # create_series has no default value.
+        create_series    => defined $params->{create_series} ?
+                              $params->{create_series} : 1
+    };
+    foreach my $field (qw(has_unconfirmed is_open classification)) {
+        if (defined $params->{$field}) {
+            my $name = FIELD_MAP->{$field} || $field;
+            $args->{$name} = $params->{$field};
+        }
+    }
+    my $product = Bugzilla::Product->create($args);
     return { id => $self->type('int', $product->id) };
 }
 
@@ -516,6 +527,7 @@ B<Required> C<string> The default version for this product.
 =item C<has_unconfirmed> 
 
 C<boolean> Allow the UNCONFIRMED status to be set on bugs in this product.
+Default: true.
 
 =item C<classification>
 
@@ -523,17 +535,17 @@ C<string> The name of the Classification which contains this product.
 
 =item C<default_milestone> 
 
-C<string> The default milestone for this product.
+C<string> The default milestone for this product. Default '---'.
 
 =item C<is_open> 
 
 C<boolean> True if the product is currently allowing bugs to be entered
-into it.
+into it. Default: true.
 
 =item C<create_series>
 
 C<boolean> True if you want series for New Charts to be created for this
-new product.
+new product. Default: true.
 
 =back
 
@@ -544,6 +556,10 @@ A hash with one element, id. This is the id of the newly-filed product.
 =item B<Errors>
 
 =over
+
+=item 51 (Classification does not exist)
+
+You must specify an existing classification name.
 
 =item 700 (Product blank name)
 
@@ -566,10 +582,6 @@ You must specify a description for this product.
 =item 704 (Product must have version)
 
 You must specify a version for this product.
-
-=item 705 (Product must define a defaut milestone)
-
-You must define a default milestone.
 
 =back
 
@@ -685,7 +697,35 @@ Here's an example of what a return value might look like:
 
 =item B<Errors>
 
-The same as L</create>.
+=over
+
+=item 700 (Product blank name)
+
+You must specify a non-blank name for this product.
+
+=item 701 (Product name too long)
+
+The name specified for this product was longer than the maximum
+allowed length.
+
+=item 702 (Product name already exists)
+
+You specified the name of a product that already exists.
+(Product names must be globally unique in Bugzilla.)
+
+=item 703 (Product must have description)
+
+You must specify a description for this product.
+
+=item 704 (Product must have version)
+
+You must specify a version for this product.
+
+=item 705 (Product must define a default milestone)
+
+You must define a default milestone.
+
+=back
 
 =back
 

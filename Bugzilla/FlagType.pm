@@ -310,7 +310,7 @@ sub _check_cc_list {
     # - do not contain any illegal character.
     foreach my $address (@addresses) {
         ($address =~ /^[\w\.\+\-=]+@[\w\.\-]+\.[\w\-]+$/
-           && $address !~ /[\\\(\)<>&,;:"\[\] \t\r\n]/)
+           && $address !~ /[\\\(\)<>&,;:"\[\] \t\r\n\P{ASCII}]/)
           || ThrowUserError('illegal_email_address',
                             {addr => $address, default => 1});
     }

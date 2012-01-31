@@ -851,9 +851,8 @@
     [% ELSE %]
       [%+ Param('emailregexpdesc') FILTER html_light %]
     [% END %]
-    It must also not contain any of these special characters:
-    <tt>\ ( ) &amp; &lt; &gt; , ; : &quot; [ ]</tt>, or any whitespace.
-    
+    It also must not contain any illegal characters.
+
   [% ELSIF error == "illegal_frequency" %]
     [% title = "Too Frequent" %]
     Unless you are an administrator, you may not create series which are 
@@ -1018,6 +1017,11 @@
     When using JSON-RPC over GET, you must specify a 'method'
     parameter. See the documentation at
     [%+ docs_urlbase FILTER html %]api/Bugzilla/WebService/Server/JSONRPC.html
+
+  [% ELSIF error == "json_rpc_illegal_content_type" %]
+    When using JSON-RPC over POST, you cannot send data as
+    [%+ content_type FILTER html %]. Only application/json and
+    application/json-rpc are allowed.
 
   [% ELSIF error == "json_rpc_invalid_params" %]
     Could not parse the 'params' argument as valid JSON.

@@ -374,6 +374,17 @@ sub _argument_type_check {
                            { method => $self->_bz_method_name });
         }
     }
+    else {
+        # CSRF is also possible when using |Content-Type: text/plain| with POST.
+        # There are some other content types which must also be banned for
+        # security reasons.
+        my $content_type = $self->cgi->content_type;
+        # The charset can be appended to the content type, so we use a regexp.
+        if (grep { $content_type =~ m{\Q$_\E}i } CONTENT_TYPE_BLACKLIST) {
+            ThrowUserError('json_rpc_illegal_content_type',
+                            { content_type => $content_type });
+        }
+    }
 
     # This is the best time to do login checks.
     $self->handle_login();

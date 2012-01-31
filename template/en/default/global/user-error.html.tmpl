@@ -1003,6 +1003,10 @@
     parameter. See the documentation at
     [%+ docs_urlbase FILTER html %]api/Bugzilla/WebService/Server/JSONRPC.html
 
+  [% ELSIF error == "json_rpc_illegal_content_type" %]
+    When using JSON-RPC over POST, you cannot use [% content_type FILTER html %]
+    as content type. The recommended content type is application/json.
+
   [% ELSIF error == "json_rpc_invalid_params" %]
     Could not parse the 'params' argument as valid JSON.
     Error: [% err_msg FILTER html %]

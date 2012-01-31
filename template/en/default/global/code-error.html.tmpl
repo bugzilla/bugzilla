@@ -48,8 +48,7 @@
     [% ELSE %]
       [%+ Param('emailregexpdesc') FILTER html_light %]
     [% END %]
-    It must also not contain any of these special characters:
-    <tt>\ ( ) &amp; &lt; &gt; , ; : &quot; [ ]</tt>, or any whitespace.
+    It also must not contain any illegal characters.
 
   [% ELSIF error == "authres_unhandled" %]
     The result value of [% value FILTER html %] was not handled by

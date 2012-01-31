@@ -996,6 +996,10 @@
       [%+ constants.LOGIN_LOCKOUT_INTERVAL FILTER html %] minutes.
     [% END %]
 
+  [% ELSIF error == "json_rpc_illegal_content_type" %]
+    When using JSON-RPC over POST, you cannot use [% content_type FILTER html %]
+    as content type. The recommended content type is application/json.
+
   [% ELSIF error == "json_rpc_post_only" %]
     For security reasons, you may only use JSON-RPC with the POST
     HTTP method.

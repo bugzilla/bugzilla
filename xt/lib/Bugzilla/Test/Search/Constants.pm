@@ -235,10 +235,6 @@ use constant CHANGED_VALUE_BROKEN => (
 # while the other fails. In this case, we have a special override for
 # "operator-value", which uniquely identifies tests.
 use constant KNOWN_BROKEN => {
-    "equals-%group.<1-bug_group>%" => {
-        commenter => { contains => [1,2,3,4,5] },
-    },
-
     greaterthan   => { GREATERTHAN_BROKEN },
     greaterthaneq => { GREATERTHAN_BROKEN },
 

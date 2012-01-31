@@ -831,9 +831,8 @@
     [% ELSE %]
       [%+ Param('emailregexpdesc') FILTER html_light %]
     [% END %]
-    It must also not contain any of these special characters:
-    <tt>\ ( ) &amp; &lt; &gt; , ; : &quot; [ ]</tt>, or any whitespace.
-    
+    It also must not contain any illegal characters.
+
   [% ELSIF error == "illegal_frequency" %]
     [% title = "Too Frequent" %]
     Unless you are an administrator, you may not create series which are 

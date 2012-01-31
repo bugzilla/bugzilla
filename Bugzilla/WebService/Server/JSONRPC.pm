@@ -351,7 +351,19 @@ sub _argument_type_check {
 
     Bugzilla->input_params($params);
 
-    if ($self->request->method ne 'POST') {
+    if ($self->request->method eq 'POST') {
+        # CSRF is possible via XMLHttpRequest when the Content-Type header
+        # is not application/json (for example: text/plain or
+        # application/x-www-form-urlencoded).
+        # application/json is the single official MIME type, per RFC 4627.
+        my $content_type = $self->cgi->content_type;
+        # The charset can be appended to the content type, so we use a regexp.
+        if ($content_type !~ m{^application/json(-rpc)?(;.*)?$}i) {
+            ThrowUserError('json_rpc_illegal_content_type',
+                            { content_type => $content_type });
+        }
+    }
+    else {
         # When being called using GET, we don't allow calling
         # methods that can change data. This protects us against cross-site
         # request forgeries.

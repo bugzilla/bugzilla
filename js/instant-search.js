@@ -28,7 +28,7 @@ YAHOO.bugzilla.instantSearch = {
   currentSearchProduct: '',
 
   onInit: function() {
-    YAHOO.util.Connect.setDefaultPostHeader('text/plain; charset=UTF-8');
+    YAHOO.util.Connect.setDefaultPostHeader('application/json; charset=UTF-8');
 
     this.elContent = Dom.get('content');
     this.elList = Dom.get('results');

@@ -55,6 +55,18 @@ function trySubmit() {
   var location = document.getElementById('location').value;
   var shortdesc = 'Event - (' + date + ' ' + time + ') - ' + location + ' - ' + topic;
   document.getElementById('short_desc').value = shortdesc;
+
+  // If intended audience is employees only, add mozilla-corporation-confidential group
+  var audience = document.getElementById('audience').value;
+  if (audience == 'Employees Only') {
+    var brownbagRequestForm = document.getElementById('brownbagRequestForm');
+    var groups = document.createElement('input');
+    groups.type = 'hidden';
+    groups.name = 'groups';
+    groups.value = 'mozilla-corporation-confidential';
+    brownbagRequestForm.appendChild(groups);
+  }
+
   return true;
 }
 </script>
@@ -71,7 +83,6 @@ function trySubmit() {
   <input type="hidden" name="bug_severity" id="bug_severity" value="normal">
   <input type="hidden" name="comment" id="comment" value="">
   <input type="hidden" name="short_desc" id="short_desc" value="">
-  <input type="hidden" name="groups" value="mozilla-corporation-confidential">
   <input type="hidden" name="token" value="[% token FILTER html %]">
 
 <table>

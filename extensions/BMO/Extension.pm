@@ -900,4 +900,13 @@ sub post_bug_after_creation {
     }
 }
 
+sub buglist_columns {
+    my ($self, $args) = @_;
+    my $columns = $args->{columns};
+    $columns->{'cc_count'} = {
+        name => '(SELECT COUNT(*) FROM cc WHERE cc.bug_id = bugs.bug_id)',
+        title => 'CC Count',
+    };
+}
+
 __PACKAGE__->NAME;

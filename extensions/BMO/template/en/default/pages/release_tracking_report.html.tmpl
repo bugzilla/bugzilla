@@ -31,7 +31,7 @@ var default_query = '[% default_query FILTER js %]';
 <tr>
   <th>Approval:</th>
   <td>
-    Show bugs where
+    Show [% terms.bugs %] where
     <select id="flag" onChange="onFlagChange()">
       [% FOREACH flag_name = flag_names %]
         <option value="[% flag_name FILTER html %]">[% flag_name FILTER html %]</option>

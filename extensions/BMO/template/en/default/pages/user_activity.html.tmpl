@@ -149,7 +149,7 @@
     [% END %]
   </table>
   <p>
-    <a href="buglist.cgi?bug_id=[% bug_ids.join(',') FILTER url_quote %]">
+    <a href="buglist.cgi?bug_id=[% bug_ids.join(',') FILTER uri %]">
     Show as a [% terms.Bug %] List</a>
   </p>
 

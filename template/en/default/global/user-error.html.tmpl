@@ -160,6 +160,8 @@
       use
     [% ELSIF action == "approve" %]
       approve
+    [% ELSIF action == "admin_activity" %]
+      view admin activity for
     [% ELSE %]
       [%+ Hook.process('auth_failure_action') %]
     [% END %]

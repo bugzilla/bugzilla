@@ -51,6 +51,17 @@
   ]
 %]
 
+[% IF editusers %]
+  [% columns.push({
+     heading     => 'Admin History'
+     content     => 'View'
+     contentlink => 'editusers.cgi?action=admin_activity' _
+                            '&amp;userid=%%userid%%' _
+                            listselectionurlparams
+   })  
+  %]
+[% END %]
+
 [% IF Param('allowuserdeletion') && editusers %]
   [% columns.push({heading     => 'Action'
                    content     => 'Delete'

@@ -35,7 +35,7 @@
   #%]
 
 [% title = BLOCK %]
-  Account History for '[% otheruser.login FILTER html %]'
+  [% IF action == 'admin_activity' %]Admin[% ELSE %]Account[% END %] History for '[% otheruser.login FILTER html %]'
 [% END %]
 
 

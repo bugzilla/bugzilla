@@ -116,9 +116,15 @@
   <input type="hidden" name="token" value="[% token FILTER html %]">
   [% INCLUDE listselectionhiddenfields %]
 
-  or <a href="editusers.cgi?action=activity&amp;userid=[% otheruser.id %]"
-        title="View Account History for '
-        [%- otheruser.login FILTER html %]'">View Account History</a>
+  [% IF editusers %], [% ELSE %] or [% END %]
+  <a href="editusers.cgi?action=activity&amp;userid=[% otheruser.id %]"
+     title="View Account History for '
+     [%- otheruser.login FILTER html %]'">View Account History</a>
+  [% IF editusers %]
+    or <a href="editusers.cgi?action=admin_activity&amp;userid=[% otheruser.id %]"
+          title="View Account History for '
+          [%- otheruser.login FILTER html %]'">View Admin History</a>
+  [% END %]
 </p>
 </form>
 <p>

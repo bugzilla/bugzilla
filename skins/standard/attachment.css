@@ -232,6 +232,11 @@ div#update_container {
     margin-left: 2%;
 }
 
+.viewall_frame {
+    width: 75%;
+    height: 350px;
+}
+
 .details span.bz_private{
   border-left: 1px solid darkred;
   padding-left: 0.5em;

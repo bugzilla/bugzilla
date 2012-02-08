@@ -29,7 +29,8 @@
 %]
 
 [% IF user.in_group("mozilla-corporation-confidential")
-   OR user.in_group("mozilla-messaging-confidential") %]
+   OR user.in_group("mozilla-messaging-confidential")
+   OR user.in_group("mozilla-foundation-confidential") %]
 
 <div style='text-align: center; width: 98%; font-size: 2em; font-weight: bold; margin: 10px;'>MoLegal</div>
 

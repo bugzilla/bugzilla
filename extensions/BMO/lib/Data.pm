@@ -261,6 +261,7 @@ our %always_fileable_group = (
     'marketing-private'                 => 1,
     'mozilla-confidential'              => 1,
     'mozilla-corporation-confidential'  => 1,
+    'mozilla-foundation-confidential'   => 1, 
     'mozilla-messaging-confidential'    => 1,
     'tamarin-security'                  => 1,
     'websites-security'                 => 1,

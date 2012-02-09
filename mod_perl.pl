@@ -59,9 +59,9 @@ Bugzilla::CGI->compile(qw(:cgi :push));
 
 use Apache2::SizeLimit;
 # This means that every httpd child will die after processing
-# a CGI if it is taking up more than 100MB of RAM all by itself,
+# a CGI if it is taking up more than 1600MB of RAM all by itself,
 # not counting RAM it is sharing with the other httpd processes.
-Apache2::SizeLimit->set_max_unshared_size(100_000);
+Apache2::SizeLimit->set_max_unshared_size(1_600_000);
 
 my $cgi_path = Bugzilla::Constants::bz_locations()->{'cgi_path'};
 

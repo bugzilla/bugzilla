@@ -1,21 +1,9 @@
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public License Version
-# 1.1 (the "License"); you may not use this file except in compliance with the
-# License. You may obtain a copy of the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS IS" basis,
-# WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
-# the specific language governing rights and limitations under the License.
-#
-# The Original Code is the BMO Bugzilla Extension.
-#
-# The Initial Developer of the Original Code is Byron Jones.  Portions created
-# by the Initial Developer are Copyright (C) 2011 the Mozilla Foundation. All
-# Rights Reserved.
-#
-# Contributor(s):
-#   Byron Jones <glob@mozilla.com>
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::Extension::BMO::Reports;
 use strict;
@@ -47,8 +35,13 @@ sub user_activity_report {
     my $input = Bugzilla->input_params;
 
     my @who = ();
-    my $from = trim($input->{'from'});
-    my $to = trim($input->{'to'});
+    my $from = trim($input->{'from'} || '');
+    my $to = trim($input->{'to'} || '');
+    my $action = $input->{'action'} || '';
+
+    # fix non-breaking hyphens
+    $from =~ s/\N{U+2011}/-/g;
+    $to =~ s/\N{U+2011}/-/g;
 
     if ($from eq '') {
         my $dt = DateTime->now()->subtract('weeks' => 8);
@@ -59,7 +52,7 @@ sub user_activity_report {
         $to = $dt->ymd('-');
     }
 
-    if ($input->{'action'} eq 'run') {
+    if ($action eq 'run') {
         if ($input->{'who'} eq '') {
             ThrowUserError('user_activity_missing_username');
         }
@@ -117,6 +110,8 @@ sub user_activity_report {
             push @params, @who;
             push @params, ($from_dt, $to_dt);
         }
+
+        my $order = $input->{'sort'} eq 'bug' ? 'bug_id' : 'bug_when';
 
         my $comment_filter = '';
         if (!Bugzilla->user->is_insider) {
@@ -200,7 +195,7 @@ sub user_activity_report {
                    AND attachments.creation_ts >= ? AND attachments.creation_ts <= ?
                    $attachments_where
 
-          ORDER BY bug_when ";
+          ORDER BY $order ";
 
         my $list = $dbh->selectall_arrayref($query, undef, @params);
 
@@ -243,14 +238,18 @@ sub user_activity_report {
                     $incomplete_data = 1;
                 }
 
-                # An operation, done by 'who' at time 'when', has a number of
-                # 'changes' associated with it.
-                # If this is the start of a new operation, store the data from the
-                # previous one, and set up the new one.
-                if ($operation->{'who'}
-                    && ($who ne $operation->{'who'}
-                        || $when ne $operation->{'when'}))
-                {
+                # Start a new changeset if required (depends on the sort order)
+                my $is_new_changeset;
+                if ($order eq 'bug_when') {
+                    $is_new_changeset =
+                        $operation->{'who'} &&
+                        ($who ne $operation->{'who'} || $when ne $operation->{'when'});
+                } else {
+                    $is_new_changeset = 
+                        $operation->{'bug'} &&
+                        $bugid != $operation->{'bug'};
+                }
+                if ($is_new_changeset) {
                     $operation->{'changes'} = $changes;
                     push (@operations, $operation);
                     $operation = {};
@@ -267,6 +266,7 @@ sub user_activity_report {
                 $change{'attachid'} = $attachid;
                 $change{'removed'} = $removed;
                 $change{'added'} = $added;
+                $change{'when'} = $when;
                 
                 if ($comment_id) {
                     $change{'comment'} = Bugzilla::Comment->new($comment_id);
@@ -293,11 +293,12 @@ sub user_activity_report {
         $vars->{'bug_ids'} = \@bug_ids;
     }
 
-    $vars->{'action'} = $input->{'action'};
+    $vars->{'action'} = $action;
     $vars->{'who'} = join(',', @who);
     $vars->{'who_count'} = scalar @who;
     $vars->{'from'} = $from;
     $vars->{'to'} = $to;
+    $vars->{'sort'} = $input->{'sort'};
 }
 
 sub _string_to_datetime {

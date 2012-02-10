@@ -1,21 +1,9 @@
-[%# The contents of this file are subject to the Mozilla Public
-  # License Version 1.1 (the "License"); you may not use this file
-  # except in compliance with the License. You may obtain a copy of
-  # the License at http://www.mozilla.org/MPL/
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
   #
-  # Software distributed under the License is distributed on an "AS
-  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-  # implied. See the License for the specific language governing
-  # rights and limitations under the License.
-  #
-  # The Original Code is the BMO Extension
-  #
-  # The Initial Developer of the Original Code is the Mozilla Foundation
-  # Portions created by the Initial Developers are Copyright (C) 2011 the
-  # Initial Developer. All Rights Reserved.
-  #
-  # Contributor(s):
-  #   Byron Jones <bjones@mozilla.com>
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
   #%]
 
 [% IF who %]
@@ -75,6 +63,15 @@
     </button>
     <div id="con_calendar_to"></div>
   </td>
+  <th>
+    Sort:
+  </th>
+  <td>
+    <select name="sort">
+      <option value="when" [% 'selected' IF sort == 'when' %]>When</option>
+      <option value="bug" [% 'selected' IF sort == 'bug' %]>[% terms.Bug %]</option>
+    </select>
+  </td>
   <td>
     <input type="submit" id="run" value="Generate Report">
   </td>
@@ -107,49 +104,67 @@
       [% IF who_count > 1 %]
         <th>Who</th>
       [% END %]
-      <th>When</th>
-      <th>[% terms.Bug %]</th>
+      [% IF sort == 'when' %]
+        <th class="sorted">[% INCLUDE sort_when_link %]</th>
+        <th>[% INCLUDE sort_bug_link %]</th>
+      [% ELSE %]
+        <th class="sorted">[% INCLUDE sort_bug_link %]</th>
+        <th>[% INCLUDE sort_when_link %]</th>
+      [% END %]
       <th>What</th>
       <th>Removed</th>
       <th>Added</th>
     </tr>
 
     [% FOREACH operation = operations %]
-      <tr>
-        [% IF who_count > 1 %]
-          <td rowspan="[% operation.changes.size %]" valign="top">
-            [% operation.who FILTER email FILTER html %]
+      [% tr_class = loop.count % 2 ? 'report_row_even' : 'report_row_odd' %]
+      [% FOREACH change = operation.changes %]
+        <tr class="[% tr_class FILTER none %]">
+          [% IF loop.count == 1 %]
+            [% IF who_count > 1 %]
+              <td>[% operation.who FILTER email FILTER html %]</td>
+            [% END %]
+            [% IF sort == 'when' %]
+              <td>[% change.when FILTER time FILTER no_break %]</td>
+              <td>[% operation.bug FILTER bug_link(operation.bug) FILTER none %]</td>
+            [% ELSE %]
+              <td>[% operation.bug FILTER bug_link(operation.bug) FILTER none %]</td>
+              <td>[% change.when FILTER time FILTER no_break %]</td>
+            [% END %]
+          [% ELSE %]
+            [% IF who_count > 1 %]
+              <td>&nbsp;</td>
+            [% END %]
+            <td>&nbsp;</td>
+            [% IF sort == 'when' %]
+              <td>&nbsp;</td>
+            [% ELSE %]
+              <td>[% change.when FILTER time FILTER no_break %]</td>
+            [% END %]
+          [% END %]
+          <td>
+            [% IF change.attachid %]
+              <a href="attachment.cgi?id=[% change.attachid FILTER url %]"
+                 title="[% change.attach.description FILTER html %]
+                        [%- %] - [% change.attach.filename FILTER html %]"
+              >Attachment #[% change.attachid FILTER html %]</a>
+            [% END %]
+            [%IF change.comment.defined && change.fieldname == 'longdesc' %]
+               [% "Comment $change.comment.count"
+                  FILTER bug_link(operation.bug, comment_num => change.comment.count)
+                  FILTER none %]
+            [% ELSE %]
+              [%+ field_descs.${change.fieldname} FILTER html %]
+            [% END %]
           </td>
-        [% END %]
-        <td rowspan="[% operation.changes.size %]" valign="top">
-          [% operation.when FILTER time FILTER no_break %]
-        </td>
-        <td rowspan="[% operation.changes.size %]" valign="top">
-          [% operation.bug FILTER bug_link(operation.bug) FILTER none %]
-        </td>
-        [% FOREACH change = operation.changes %]
-          [% "</tr><tr>" IF loop.index > 0 %]
-            <td>
-              [% IF change.attachid %]
-                <a href="attachment.cgi?id=[% change.attachid FILTER uri %]"
-                   title="[% change.attach.description FILTER html %]
-                          [%- %] - [% change.attach.filename FILTER html %]"
-                >Attachment #[% change.attachid FILTER html %]</a>
-              [% END %]
-              [%IF change.comment.defined && change.fieldname == 'longdesc' %]
-                 [% "Comment $change.comment.count" FILTER bug_link(operation.bug, comment_num => change.comment.count) FILTER none %]
-              [% ELSE %]
-                [%+ field_descs.${change.fieldname} FILTER html %]
-              [% END %]
-            </td>
-            [% PROCESS change_column change_type = change.removed %]
-            [% PROCESS change_column change_type = change.added %]
-        [% END %]
-      </tr>
+          [% PROCESS change_column change_type = change.removed %]
+          [% PROCESS change_column change_type = change.added %]
+        </tr>
+      [% END %]
     [% END %]
   </table>
   <p>
-    <a href="buglist.cgi?bug_id=[% bug_ids.join(',') FILTER uri %]">
+    <a href="buglist.cgi?bug_id=[% bug_ids.join(',') FILTER url %]">
     Show as a [% terms.Bug %] List</a>
   </p>
 
@@ -185,5 +200,20 @@
 [% END %]
 [% END %]
 
-
 [% INCLUDE global/footer.html.tmpl %]
+
+[% BLOCK sort_when_link %]
+  <a href="page.cgi?id=user_activity.html&amp;action=run&amp;
+    [%~%]who=[% who FILTER url %]&amp;
+    [%~%]from=[% from FILTER url %]&amp;
+    [%~%]to=[% to FILTER url %]&amp;
+    [%~%]sort=when">When</a>
+[% END %]
+
+[% BLOCK sort_bug_link %]
+  <a href="page.cgi?id=user_activity.html&amp;action=run&amp;
+    [%~%]who=[% who FILTER url %]&amp;
+    [%~%]from=[% from FILTER url %]&amp;
+    [%~%]to=[% to FILTER url %]&amp;
+    [%~%]sort=bug">[% terms.Bug %]</a>
+[% END %]

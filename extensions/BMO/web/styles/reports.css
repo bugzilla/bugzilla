@@ -23,22 +23,34 @@
     text-align: left;
 }
 
+#report th.sorted {
+    text-decoration: underline;
+}
+
 #report-header {
-  background: #dddddd;
+  background: #cccccc;
 }
 
 .report_row_odd {
-    background-color: #F7F7F7;
+    background-color: #eeeeee;
     color: #000000;
 }
 
 .report_row_even {
-    background-color: #FFFFFF;
+    background-color: #ffffff;
     color: #000000;
 }
 
 #report tr:hover {
     background-color: #ccccff;
+}
+
+#report {
+    border: 1px solid #888888;
+}
+
+#report th, #report td {
+    border: 0px;
 }
 
 .disabled {

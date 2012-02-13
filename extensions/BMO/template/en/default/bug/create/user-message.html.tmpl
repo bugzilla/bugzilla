@@ -19,123 +19,19 @@
   # Contributor(s): Matthew Tuck <matty@chariot.net.au>
   #%]
 
-[%# Migration note: this file corresponds to the old Param
-  # 'entryheaderhtml'
-  #%]
-
-[%# You can make the output of this template product-specific by using
-  # Template Toolkit IF statements.  The current product name is stored in
-  # the 'product' variable.
-  #%]
-
 [% PROCESS global/variables.none.tmpl %]
 
-[% IF product == "Bugzilla" %]
-  [% IF format == "guided" %]
-<p align="center">
-<table WIDTH="90%" BGCOLOR="#FFFFFF" style="border: 8px double red;"><tr>
-<td valign="middle" align="center"><img width="200" height="200" src="extensions/BMO/web/images/stop-sign.gif"></td>
-<td align="center" valign="middle">
-<font size="+2"><b>
-Are you here because you have a problem with
-<a href="http://www.mozilla.com/firefox/">Firefox</a> or
-<a href="http://www.mozilla.com/thunderbird/">Thunderbird</a>?</b><br>
-<b>If so, you're in the wrong place.</b></font><br>
-
-If you are having a problem with Firefox,
-<a href="https://bugzilla.mozilla.org/enter_bug.cgi?product=Firefox">file
-your [% terms.bug %] in the Firefox product</a>.<br>
-
-If you are having a problem with Thunderbird,
-<a href="https://bugzilla.mozilla.org/enter_bug.cgi?product=Thunderbird">file
-your [% terms.bug %] in the Thunderbird product</a>.<br>
-
-If none of those is a good fit for your [% terms.bug %], you can pick from
-the <a href="https://bugzilla.mozilla.org/enter_bug.cgi">full product list</a>.
-</td></tr></table>
-
-</p>
-
-<h3>Step 0 - Make sure you are in the right place</h3>
-
-  [% END %]
-
 <p>
-<b>The product you have chosen is for [% terms.bug %] reports and enhancement requests for the 
-<a href="http://www.bugzilla.org/">[% terms.Bugzilla +%] [%+ terms.bug %] tracking software</a> only.</b>
-If your [% terms.bug %] is not reporting that [% terms.Bugzilla %] is broken or that you'd like
-a new feature in [% terms.Bugzilla %], your [% terms.bug %] report does not belong in this product.
-[% IF format == "guided" %]
-   See the instructions next to the stop sign above.
-[% ELSE %]
-   Please <a href="https://bugzilla.mozilla.org/enter_bug.cgi">choose a different product</a>.
-[% END %]
+  [% UNLESS cloned_bug_id %]
+    Consider using the
+    <a href="enter_bug.cgi?product=[% product.name FILTER html %]&amp;format=guided"
+    ><img src="extensions/BMO/web/images/guided.png" width="16" height="16" align="absmiddle" border="0">
+    [%+ terms.Bugzilla %] Helper</a> instead of this form.
+  [% END +%]
+  Before reporting a [% terms.bug %], make sure you've read our
+  <a href="http://www.mozilla.org/quality/bug-writing-guidelines.html">
+  [% terms.bug %] writing guidelines</a> and double checked that your [% terms.bug %] hasn't already
+  been reported. Consult our list of <a href="https://bugzilla.mozilla.org/duplicates.cgi">
+  most frequently reported [% terms.bugs %]</a> and <a href="https://bugzilla.mozilla.org/query.cgi">
+  search through descriptions</a> of previously reported [% terms.bugs %].
 </p>
-
-<p><b>We WILL NOT accept [% terms.bug %] reports for [% terms.Bugzilla %]
-installed via the Debian packaging system.  If you obtained [% terms.Bugzilla %] from Debian,
-please visit the <a href="http://www.debian.org/support">Debian Support page</a>,
-or file a [% terms.bug %] on the <a href="http://bugs.debian.org/cgi-bin/pkgreport.cgi?pkg=bugzilla">Debian
-[% terms.Bug %] Tracker</a>.</b>  The Debian package maintainer will then determine whether the [% terms.bug %]
-is specific to the package or not, and can move the [% terms.bug %] "upstream" if needed.</p>
-
-<p>
-[% terms.Bugs %] specific to bugzilla.mozilla.org, rather than the [% terms.Bugzilla %] software in
-general (which is used by many sites), should be filed in the
-<a href="enter_bug.cgi?product=mozilla.org">mozilla.org product</a>.
-</p>
-
-<p>
-Please do not file test [% terms.bugs %] or support requests here!  You 
-can test [% terms.Bugzilla %] at 
-<a href="http://landfill.bugzilla.org/">landfill.bugzilla.org</a> and ask
-for support in the 
-<a href="news://news.mozilla.org/mozilla.support.bugzilla">
-mozilla.support.bugzilla newsgroup</a>,
-<a href="mailto:support-bugzilla&#64;lists.mozilla.org">
-support-bugzilla&#64;lists.mozilla.org mailing list</a>, or 
-<a href="irc://irc.mozilla.org/mozwebtools">#mozwebtools IRC channel</a>.
-</p>
-
-<hr>
-
-[% ELSE %]
-
-  [% IF format != "guided" %]
-<p>
-[% UNLESS cloned_bug_id %]
-Consider using the
-<a href="enter_bug.cgi?product=[% product.name FILTER html %]&amp;format=guided"
-><img src="extensions/BMO/web/images/guided.png" width="16" height="16" align="absmiddle" border="0">
-[% terms.Bugzilla %] Helper</a> instead of this form.
-[% END +%]
-Before reporting a [% terms.bug %], make sure you've read our
-<a href="http://www.mozilla.org/quality/bug-writing-guidelines.html">
-[% terms.bug %] writing guidelines</a> and double checked that your [% terms.bug %] hasn't already
-been reported. Consult our list of
-<a href="https://bugzilla.mozilla.org/duplicates.cgi">
-most frequently reported [% terms.bugs %]</a> and
-<a href="https://bugzilla.mozilla.org/query.cgi">search through descriptions</a>
-of previously reported [% terms.bugs %].
-</p>
-  [% ELSE %]
-<p>
-  This form prompts you for the information required to
-  file a good [% terms.bug %] report (or enhancement request.)
-  It may seem lengthy, but developers need all this information
-  to understand and reproduce the [% terms.bug %], which is the first step towards
-  fixing it. Please note that <strong>we do not accept [% terms.bug %] reports by
-  email</strong> - please do not email developers or mozilla.org staff
-  with [% terms.bug %] reports. <font color="red">Also, please do not
-  file [% terms.bugs %] on browser/email software older than two weeks - first,
-  download a newer build of
-  <a href="http://ftp.mozilla.org/pub/mozilla.org/firefox/nightly/latest-trunk/">Firefox</a>,
-  <a href="http://ftp.mozilla.org/pub/mozilla.org/thunderbird/nightly/latest-comm-central/">Thunderbird</a>,
-  <a href="http://ftp.mozilla.org/pub/mozilla.org/seamonkey/nightly/latest-comm-central-trunk/">SeaMonkey</a>,
-  or
-  <a href="http://ftp.mozilla.org/pub/mozilla.org/camino/nightly/">Camino</a>
-  and check that the problem is still present.
-  </font>
-</p>
-  [% END %]
-[% END %]

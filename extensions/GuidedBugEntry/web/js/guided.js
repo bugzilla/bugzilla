@@ -500,7 +500,7 @@ var dupes = {
       // run the search
       Dom.removeClass(dupes._elList, 'hidden');
 
-	    dupes._dataTable.showTableMessage(
+      dupes._dataTable.showTableMessage(
         'Searching for similar issues...&nbsp;&nbsp;&nbsp;' +
         '<img src="extensions/GuidedBugEntry/web/images/throbber.gif"' + 
         ' width="16" height="11">',

@@ -144,7 +144,7 @@
           [% END %]
           <td>
             [% IF change.attachid %]
-              <a href="attachment.cgi?id=[% change.attachid FILTER url %]"
+              <a href="attachment.cgi?id=[% change.attachid FILTER uri %]"
                  title="[% change.attach.description FILTER html %]
                         [%- %] - [% change.attach.filename FILTER html %]"
               >Attachment #[% change.attachid FILTER html %]</a>
@@ -164,7 +164,7 @@
     [% END %]
   </table>
   <p>
-    <a href="buglist.cgi?bug_id=[% bug_ids.join(',') FILTER url %]">
+    <a href="buglist.cgi?bug_id=[% bug_ids.join(',') FILTER uri %]">
     Show as a [% terms.Bug %] List</a>
   </p>
 
@@ -204,16 +204,16 @@
 
 [% BLOCK sort_when_link %]
   <a href="page.cgi?id=user_activity.html&amp;action=run&amp;
-    [%~%]who=[% who FILTER url %]&amp;
-    [%~%]from=[% from FILTER url %]&amp;
-    [%~%]to=[% to FILTER url %]&amp;
+    [%~%]who=[% who FILTER uri %]&amp;
+    [%~%]from=[% from FILTER uri %]&amp;
+    [%~%]to=[% to FILTER uri %]&amp;
     [%~%]sort=when">When</a>
 [% END %]
 
 [% BLOCK sort_bug_link %]
   <a href="page.cgi?id=user_activity.html&amp;action=run&amp;
-    [%~%]who=[% who FILTER url %]&amp;
-    [%~%]from=[% from FILTER url %]&amp;
-    [%~%]to=[% to FILTER url %]&amp;
+    [%~%]who=[% who FILTER uri %]&amp;
+    [%~%]from=[% from FILTER uri %]&amp;
+    [%~%]to=[% to FILTER uri %]&amp;
     [%~%]sort=bug">[% terms.Bug %]</a>
 [% END %]

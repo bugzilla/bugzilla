@@ -146,7 +146,7 @@ dupes.setLabels(
     <td class="product_img">
       <a href="javascript:void(0)"
       [% IF onclick %]
-      onclick="[% onclick FILTER none %]"
+      onclick="[% onclick FILTER html %]"
       [% ELSE %]
       onclick="product.select('[% name FILTER js %]')"
       [% END %]
@@ -157,7 +157,7 @@ dupes.setLabels(
       <h2>
         <a href="javascript:void(0)"
         [% IF onclick %]
-        onclick="[% onclick FILTER none %]"
+        onclick="[% onclick FILTER html %]"
         [% ELSE %]
         onclick="product.select('[% name FILTER js %]')"
         [% END %]

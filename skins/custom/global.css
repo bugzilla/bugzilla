@@ -4,26 +4,26 @@
  */
 
 body {
-	margin: 0;
-	padding: 15px 15px 2px 15px;
-	background: none;
+    margin: 0;
+    padding: 15px 15px 2px 15px;
+    background: none;
 }
 
 #header {
-	margin-bottom: 0.5em;
+    margin-bottom: 0.5em;
 }
 
 #header .links {
-	font-size: 90%;
+    font-size: 90%;
 }
 
 #header .btn, #header .txt {
-	font-size: 100%;
+    font-size: 100%;
 }
 
 #header #information {
-	color: #dddddd;
-	font-size: small;
+    color: #dddddd;
+    font-size: small;
 }
 
 pre {

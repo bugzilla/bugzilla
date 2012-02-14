@@ -65,15 +65,21 @@ use constant AUDIT_REMOVES => 0;
 
 use constant SKIP_REQUESTEE_ON_ERROR => 1;
 
-use constant DB_COLUMNS => qw(
-    id
-    type_id
-    bug_id
-    attach_id
-    requestee_id
-    setter_id
-    status
-);
+sub DB_COLUMNS {
+    my $dbh = Bugzilla->dbh;
+    return qw(
+        id
+        type_id
+        bug_id
+        attach_id
+        requestee_id
+        setter_id
+        status), 
+        $dbh->sql_date_format('creation_date', '%Y.%m.%d %H:%i:%s') .
+                              ' AS creation_date', 
+        $dbh->sql_date_format('modification_date', '%Y.%m.%d %H:%i:%s') .
+                              ' AS modification_date';
+}
 
 use constant UPDATE_COLUMNS => qw(
     requestee_id
@@ -118,6 +124,14 @@ Returns the ID of the attachment this flag belongs to, if any.
 
 Returns the status '+', '-', '?' of the flag.
 
+=item C<creation_date>
+
+Returns the timestamp when the flag was created.
+
+=item C<modification_date>
+
+Returns the timestamp when the flag was last modified.
+
 =back
 
 =cut
@@ -130,6 +144,8 @@ sub attach_id    { return $_[0]->{'attach_id'};    }
 sub status       { return $_[0]->{'status'};       }
 sub setter_id    { return $_[0]->{'setter_id'};    }
 sub requestee_id { return $_[0]->{'requestee_id'}; }
+sub creation_date     { return $_[0]->{'creation_date'};     }
+sub modification_date { return $_[0]->{'modification_date'}; }
 
 ###############################
 ####       Methods         ####
@@ -414,10 +430,14 @@ Creates a flag record in the database.
 
 sub create {
     my ($class, $flag, $timestamp) = @_;
-    $timestamp ||= Bugzilla->dbh->selectrow_array('SELECT NOW()');
+    $timestamp ||= Bugzilla->dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
 
     my $params = {};
     my @columns = grep { $_ ne 'id' } $class->_get_db_columns;
+
+    # Some columns use date formatting so use alias instead
+    @columns = map { /\s+AS\s+(.*)$/ ? $1 : $_ } @columns;
+
     $params->{$_} = $flag->{$_} foreach @columns;
 
     $params->{creation_date} = $params->{modification_date} = $timestamp;
@@ -436,6 +456,7 @@ sub update {
     if (scalar(keys %$changes)) {
         $dbh->do('UPDATE flags SET modification_date = ? WHERE id = ?',
                  undef, ($timestamp, $self->id));
+        $self->{'modification_date'} = format_time($timestamp, '%Y.%m.%d %T');
     }
     return $changes;
 }

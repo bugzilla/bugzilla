@@ -268,8 +268,8 @@ var inline_history = {
           if (!match) continue;
           requesteeLogin = this.htmlDecode(match[1]);
           match = requesteeLogin.match(/<([^>]+)>/);
-          if (!match) continue;
-          requesteeLogin = match[1];
+          if (match)
+            requesteeLogin = match[1];
         }
 
         var flagValue = requestee ? flag + '(' + requesteeLogin + ')' : flag;

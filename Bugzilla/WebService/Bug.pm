@@ -841,6 +841,9 @@ sub _bug_to_hash {
                        @{ $bug->see_also };
         $item{'see_also'} = \@see_also;
     }
+    if (filter_wants $params, 'flags') {
+        $item{'flags'} = [ map { $self->_flag_to_hash($_) } @{$bug->flags} ];
+    }
 
     # And now custom fields
     my @custom_fields = Bugzilla->active_custom_fields;
@@ -889,9 +892,6 @@ sub _bug_to_hash {
 sub _attachment_to_hash {
     my ($self, $attach, $filters) = @_;
 
-    # Skipping attachment flags for now.
-    delete $attach->{flags};
-
     my $item = filter $filters, {
         creation_time    => $self->type('dateTime', $attach->attached),
         last_change_time => $self->type('dateTime', $attach->modification_time),
@@ -920,6 +920,31 @@ sub _attachment_to_hash {
 
     if (filter_wants $filters, 'size') {
         $item->{'size'} = $self->type('int', $attach->datasize);
+    }
+
+    if (filter_wants $filters, 'flags') {
+        $item->{'flags'} = [ map { $self->_flag_to_hash($_) } @{$attach->flags} ];
+    }
+
+    return $item;
+}
+
+sub _flag_to_hash {
+    my ($self, $flag) = @_;
+
+    my $item = {
+        id                => $self->type('int', $flag->id),
+        name              => $self->type('string', $flag->name),
+        type_id           => $self->type('int', $flag->type_id),
+        creation_date     => $self->type('dateTime', $flag->creation_date), 
+        modification_date => $self->type('dateTime', $flag->modification_date), 
+        status            => $self->type('string', $flag->status)
+    };
+
+    foreach my $field (qw(setter requestee)) {
+        my $field_id = $field . "_id";
+        $item->{$field} = $self->type('string', $flag->$field->login)
+            if $flag->$field_id;
     }
 
     return $item;
@@ -1326,6 +1351,48 @@ Also returned as C<attacher>, for backwards-compatibility with older
 Bugzillas. (However, this backwards-compatibility will go away in Bugzilla
 5.0.)
 
+=item C<flags>
+
+An array of hashes containing the information about flags currently set
+for each attachment. Each flag hash contains the following items:
+
+=over
+
+=item C<id> 
+
+C<int> The id of the flag.
+
+=item C<name>
+
+C<string> The name of the flag.
+
+=item C<type_id>
+
+C<int> The type id of the flag.
+
+=item C<creation_date>
+
+C<dateTime> The timestamp when this flag was originally created.
+
+=item C<modification_date>
+
+C<dateTime> The timestamp when the flag was last modified.
+
+=item C<status>
+
+C<string> The current status of the flag.
+
+=item C<setter>
+
+C<string> The login name of the user who created or last modified the flag.
+
+=item C<requestee>
+
+C<string> The login name of the user this flag has been requested to be granted or denied.
+Note, this field is only returned if a requestee is set.
+
+=back
+
 =back
 
 =item B<Errors>
@@ -1361,6 +1428,8 @@ C<summary>.
 (this attribute no longer exists for attachments).
 
 =item The C<size> return value was added in Bugzilla B<4.4>.
+
+=item The C<flags> array was added in Bugzilla B<4.4>.
 
 =back
 
@@ -1629,6 +1698,48 @@ take.
 If you are not in the time-tracking group, this field will not be included
 in the return value.
 
+=item C<flags>
+
+An array of hashes containing the information about flags currently set
+for the bug. Each flag hash contains the following items:
+
+=over
+
+=item C<id> 
+
+C<int> The id of the flag.
+
+=item C<name>
+
+C<string> The name of the flag.
+
+=item C<type_id>
+
+C<int> The type id of the flag.
+
+=item C<creation_date>
+
+C<dateTime> The timestamp when this flag was originally created.
+
+=item C<modification_date>
+
+C<dateTime> The timestamp when the flag was last modified.
+
+=item C<status>
+
+C<string> The current status of the flag.
+
+=item C<setter>
+
+C<string> The login name of the user who created or last modified the flag.
+
+=item C<requestee>
+
+C<string> The login name of the user this flag has been requested to be granted or denied.
+Note, this field is only returned if a requestee is set.
+
+=back
+
 =item C<groups>
 
 C<array> of C<string>s. The names of all the groups that this bug is in.
@@ -1855,8 +1966,9 @@ C<op_sys>, C<platform>, C<qa_contact>, C<remaining_time>, C<see_also>,
 C<target_milestone>, C<update_token>, C<url>, C<version>, C<whiteboard>,
 and all custom fields.
 
-=back
+=item The C<flags> array was added in Bugzilla B<4.4>.
 
+=back
 
 =back
 

@@ -16,13 +16,14 @@
 
 [% USE Bugzilla %]
 
-<p>Type in one or more words (or pieces of words) to search for:</p>
+<p><label for="quicksearch">Type in one or more words (or pieces of words)
+  to search for:</label></p>
 
 <form name="f" action="buglist.cgi" method="get"
       onsubmit="if (this.quicksearch.value == '')
                 { alert('Please enter one or more search terms first.');
                   return false; } return true;">
-  <input type="text" size="40" name="quicksearch">
+  <input type="text" size="40" name="quicksearch" id="quicksearch">
   <input type="submit" value="Search" id="find">
 </form>
 

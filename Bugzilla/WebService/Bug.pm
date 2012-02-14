@@ -988,19 +988,14 @@ value looks like this:
 
  {
      bugs => {
-         1345 => {
-             attachments => [
-                 { (attachment) },
-                 { (attachment) }
-             ]
-         },
-         9874 => {
-             attachments => [
-                 { (attachment) },
-                 { (attachment) }
-             ]
-
-         },
+         1345 => [
+             { (attachment) },
+             { (attachment) }
+         ],
+         9874 => [
+             { (attachment) },
+             { (attachment) }
+         ],
      },
 
      attachments => {
@@ -1011,9 +1006,8 @@ value looks like this:
 
 The attachments of any bugs that you specified in the C<ids> argument in
 input are returned in C<bugs> on output. C<bugs> is a hash that has integer
-bug IDs for keys and contains a single key, C<attachments>. That key points
-to an arrayref that contains attachments as a hash. (Fields for attachments
-are described below.)
+bug IDs for keys and the values are arrayrefs that contain hashes as attachments.
+(Fields for attachments are described below.)
 
 For any attachments that you specified directly in C<attachment_ids>, they
 are returned in C<attachments> on output. This is a hash where the attachment

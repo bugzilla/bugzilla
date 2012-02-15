@@ -18,6 +18,20 @@ if ($ENV{MOD_PERL}) {
 
 use Bugzilla::WebService::Constants;
 
+# Allow WebService methods to call XMLRPC::Lite's type method directly
+BEGIN {
+    *Bugzilla::WebService::type = sub {
+        my ($self, $type, $value) = @_;
+        if ($type eq 'dateTime') {
+            # This is the XML-RPC implementation,  see the README in Bugzilla/WebService/.
+            # Our "base" implementation is in Bugzilla::WebService::Server.
+            $value = Bugzilla::WebService::Server->datetime_format_outbound($value);
+            $value =~ s/-//g;
+        }
+        return XMLRPC::Data->type($type)->value($value);
+    };
+}
+
 sub initialize {
     my $self = shift;
     my %retval = $self->SUPER::initialize(@_);

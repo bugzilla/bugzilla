@@ -48,7 +48,7 @@ sub compile_file {
 
     my $libs = '';
     if ($ENV{PERL5LIB}) {
-       $libs = join " ", map { "-I$_" } split /$Config{path_sep}/, $ENV{PERL5LIB};
+       $libs = join " ", map { "-I\"$_\"" } split /$Config{path_sep}/, $ENV{PERL5LIB};
     }
     my $perl = qq{"$^X"};
     my $output = `$perl $libs -wc$T $file 2>&1`;

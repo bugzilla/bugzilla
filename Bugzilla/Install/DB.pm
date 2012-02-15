@@ -663,6 +663,12 @@ sub update_table_definitions {
     # 2011-11-28 dkl@mozilla.com - Bug 685611
     _fix_notnull_defaults();
 
+    # 2012-02-15 LpSolit@gmail.com - Bug 722113
+    if ($dbh->bz_index_info('profile_search', 'profile_search_user_id')) {
+        $dbh->bz_drop_index('profile_search', 'profile_search_user_id');
+        $dbh->bz_add_index('profile_search', 'profile_search_user_id_idx', [qw(user_id)]);
+    }
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################

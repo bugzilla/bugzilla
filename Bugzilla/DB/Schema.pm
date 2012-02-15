@@ -909,7 +909,7 @@ use constant ABSTRACT_SCHEMA => {
             list_order => {TYPE => 'MEDIUMTEXT'},
         ],
         INDEXES => [
-            profile_search_user_id => [qw(user_id)],
+            profile_search_user_id_idx => [qw(user_id)],
         ],
     },
 

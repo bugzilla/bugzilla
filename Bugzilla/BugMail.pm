@@ -363,10 +363,10 @@ sub sendMail {
 
     my @changedfields = uniq map { $_->{field_name} } @display_diffs;
 
-    # Add Attachment Created to changedfields if one or more 
+    # Add attachments.created to changedfields if one or more
     # comments contain information about a new attachment
     if (grep($_->type == CMT_ATTACHMENT_CREATED, @send_comments)) {
-        push(@changedfields, 'Attachment Created');
+        push(@changedfields, 'attachments.created');
     }
 
     my $vars = {

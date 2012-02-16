@@ -234,7 +234,7 @@ sub mailer_before_send {
 
     if ($bug_id 
         && $changer_login 
-        && $changed_fields =~ /Attachment Created/) 
+        && $changed_fields =~ /attachments.created/) 
     {
         my $changer = Bugzilla::User->new({ name => $changer_login });
         if ($changer

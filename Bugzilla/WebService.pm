@@ -21,8 +21,6 @@ package Bugzilla::WebService;
 use strict;
 use Bugzilla::WebService::Server;
 
-use XMLRPC::Lite;
-
 # Used by the JSON-RPC server to convert incoming date fields apprpriately.
 use constant DATE_FIELDS => {};
 # Used by the JSON-RPC server to convert incoming base64 fields appropriately.
@@ -38,24 +36,6 @@ use constant READ_ONLY => ();
 sub login_exempt {
     my ($class, $method) = @_;
     return $class->LOGIN_EXEMPT->{$method};
-}
-
-sub type {
-    my ($self, $type, $value) = @_;
-    if ($type eq 'dateTime') {
-        $value = $self->datetime_format_outbound($value);
-    }
-    return XMLRPC::Data->type($type)->value($value);
-}
-
-# This is the XML-RPC implementation, see the README in Bugzilla/WebService/.
-# Our "base" implementation is in Bugzilla::WebService::Server.
-sub datetime_format_outbound {
-    my $self = shift;
-    my $value = Bugzilla::WebService::Server->datetime_format_outbound(@_);
-    # XML-RPC uses an ISO-8601 format that doesn't have any hyphens.
-    $value =~ s/-//g;
-    return $value;
 }
 
 1;

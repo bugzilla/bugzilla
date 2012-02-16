@@ -81,17 +81,21 @@ use constant AUDIT_REMOVES => 0;
 
 use constant SKIP_REQUESTEE_ON_ERROR => 1;
 
-use constant DB_COLUMNS => qw(
-    id
-    type_id
-    bug_id
-    attach_id
-    creation_date
-    modification_date
-    requestee_id
-    setter_id
-    status
-);
+sub DB_COLUMNS {
+    my $dbh = Bugzilla->dbh;
+    return qw(
+        id
+        type_id
+        bug_id
+        attach_id
+        requestee_id
+        setter_id
+        status), 
+        $dbh->sql_date_format('creation_date', '%Y.%m.%d %H:%i:%s') .
+                              ' AS creation_date', 
+        $dbh->sql_date_format('modification_date', '%Y.%m.%d %H:%i:%s') .
+                              ' AS modification_date';
+}
 
 use constant UPDATE_COLUMNS => qw(
     requestee_id
@@ -442,10 +446,14 @@ Creates a flag record in the database.
 
 sub create {
     my ($class, $flag, $timestamp) = @_;
-    $timestamp ||= Bugzilla->dbh->selectrow_array('SELECT NOW()');
+    $timestamp ||= Bugzilla->dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
 
     my $params = {};
     my @columns = grep { $_ ne 'id' } $class->_get_db_columns;
+
+    # Some columns use date formatting so use alias instead
+    @columns = map { /\s+AS\s+(.*)$/ ? $1 : $_ } @columns;
+
     $params->{$_} = $flag->{$_} foreach @columns;
 
     $params->{creation_date} = $params->{modification_date} = $timestamp;
@@ -464,7 +472,7 @@ sub update {
     if (scalar(keys %$changes)) {
         $dbh->do('UPDATE flags SET modification_date = ? WHERE id = ?',
                  undef, ($timestamp, $self->id));
-        $self->{'modification_date'} = $timestamp;
+        $self->{'modification_date'} = format_time($timestamp,  '%Y.%m.%d %T');
     }
     return $changes;
 }

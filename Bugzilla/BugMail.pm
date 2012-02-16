@@ -326,6 +326,14 @@ sub sendMail {
     push(@watchingrel, 'None') unless @watchingrel;
     push @watchingrel, map { user_id_to_login($_) } @$watchingRef;
 
+    my @changedfields = uniq map { $_->{field_name} } @display_diffs;
+    
+    # Add attachments.created to changedfields if one or more
+    # comments contain information about a new attachment
+    if (grep($_->type == CMT_ATTACHMENT_CREATED, @send_comments)) {
+        push(@changedfields, 'attachments.created');
+    }
+
     my $vars = {
         date => $date,
         to_user => $user,
@@ -336,7 +344,7 @@ sub sendMail {
         reasonswatchheader => join(" ", @watchingrel),
         changer => $changer,
         diffs => \@display_diffs,
-        changedfields => [uniq map { $_->{field_name} } @display_diffs],
+        changedfields => \@changedfields, 
         new_comments => \@send_comments,
         threadingmarker => build_thread_marker($bug->id, $user->id, !$bug->lastdiffed),
     };

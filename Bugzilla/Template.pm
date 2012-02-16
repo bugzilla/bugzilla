@@ -12,6 +12,7 @@ use strict;
 
 use Bugzilla::Bug;
 use Bugzilla::Constants;
+use Bugzilla::WebService::Constants;
 use Bugzilla::Hook;
 use Bugzilla::Install::Requirements;
 use Bugzilla::Install::Util qw(install_string template_include_path 
@@ -48,9 +49,9 @@ sub SAFE_URL_REGEXP {
     return qr/($safe_protocols):[^\s<>\"]+[\w\/]/i;
 }
 
-# Convert the constants in the Bugzilla::Constants module into a hash we can
-# pass to the template object for reflection into its "constants" namespace
-# (which is like its "variables" namespace, but for constants).  To do so, we
+# Convert the constants in the Bugzilla::Constants and Bugzilla::WebService::Constants
+# modules into a hash we can pass to the template object for reflection into its "constants" 
+# namespace (which is like its "variables" namespace, but for constants). To do so, we
 # traverse the arrays of exported and exportable symbols and ignoring the rest
 # (which, if Constants.pm exports only constants, as it should, will be nothing else).
 sub _load_constants {
@@ -63,6 +64,18 @@ sub _load_constants {
         }
         else {
             my @list = (Bugzilla::Constants->$constant);
+            $constants{$constant} = (scalar(@list) == 1) ? $list[0] : \@list;
+        }
+    }
+
+    foreach my $constant (@Bugzilla::WebService::Constants::EXPORT, 
+                          @Bugzilla::WebService::Constants::EXPORT_OK)
+    {
+        if (ref Bugzilla::WebService::Constants->$constant) {
+            $constants{$constant} = Bugzilla::WebService::Constants->$constant;
+        }
+        else {
+            my @list = (Bugzilla::WebService::Constants->$constant);
             $constants{$constant} = (scalar(@list) == 1) ? $list[0] : \@list;
         }
     }

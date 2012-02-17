@@ -72,6 +72,22 @@
 
 <h2 id="v40_point">Updates in this 4.0.x Release</h2>
 
+<h3>4.0.5</h3>
+
+<p>This release fixes one security issue. See the
+  <a href="http://www.bugzilla.org/security/4.0.4/">Security Advisory</a>
+  for details.</p>
+
+<p>In addition, the following important change has been made in this release:</p>
+
+<ul>
+  <li>Clickjacking could possibly occur in the attachment "View All" page if a user
+  attached a specially formatted HTML file. To fix this potential problem, the
+  "View All" page now always displays the source code for all attachments whose
+  MIME type is <em>text/html</em>.
+  (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=722161">[% terms.Bug %] 722161</a>)</li>
+</ul>
+
 <h3>4.0.4</h3>
 
 <p>This release fixes two security issues. See the

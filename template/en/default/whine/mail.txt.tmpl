@@ -28,7 +28,7 @@
 [% IF queries.size %]
   [% FOREACH query=queries %]
 
-[%+ query.title +%]
+[%+ query.title +%] ([% query.bugs.size %] [%+ terms.bugs %])
 [%+ "-" FILTER repeat(query.title.length) %]
 
   [% FOREACH bug=query.bugs %]

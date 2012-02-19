@@ -43,7 +43,7 @@
 [% IF queries.size %]
   [% FOREACH query=queries %]
 
-    <h2>[%+ query.title FILTER html %]</h2>
+    <h2>[%+ query.title FILTER html %] ([% query.bugs.size %] [%+ terms.bugs %])</h2>
 
     <table width="100%">
       <tr>

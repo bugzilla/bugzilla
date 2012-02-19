@@ -389,6 +389,21 @@ the summary line).
 
 =back
 
+=head2 bug_url_sub_classes
+
+Allows you to add more L<Bugzilla::BugUrl> sub-classes.
+
+See the C<MoreBugUrl> extension to see how things work.
+
+Params:
+
+=over
+
+=item C<sub_classes> - An arrayref of strings which represent L<Bugzilla::BugUrl>
+sub-classes.
+
+=back
+
 =head2 buglist_columns
 
 This happens in L<Bugzilla::Search/COLUMNS>, which determines legal bug

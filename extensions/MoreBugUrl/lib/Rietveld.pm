@@ -5,7 +5,7 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-package Bugzilla::BugUrl::ReviewBoard;
+package Bugzilla::Extension::MoreBugUrl::Rietveld;
 use strict;
 use base qw(Bugzilla::BugUrl);
 
@@ -15,26 +15,29 @@ use base qw(Bugzilla::BugUrl);
 
 sub should_handle {
     my ($class, $uri) = @_;
-    return ($uri->path =~ m|/r/\d+/?$|) ? 1 : 0;
+    return ($uri->authority =~ /\.appspot\.com$/i
+            and $uri->path =~ m#^/\d+(?:/|/show)?$#) ? 1 : 0;
 }
 
 sub _check_value {
-    my $class = shift;
+    my ($class, $uri) = @_;
 
-    my $uri = $class->SUPER::_check_value(@_);
+    $uri = $class->SUPER::_check_value($uri);
 
-    # Review Board URLs have only one form (the trailing slash is optional):
-    #   http://reviews.reviewboard.org/r/111/
+    # Rietveld URLs have three forms:
+    #   http(s)://example.appspot.com/1234
+    #   http(s)://example.appspot.com/1234/
+    #   http(s)://example.appspot.com/1234/show
+    if ($uri->path =~ m#^/(\d+)(?:/|/show)$#) {
+        # This is the shortest standard URL form for Rietveld issues,
+        # and so we reduce all URLs to this.
+        $uri->path('/' . $1);
+    }
 
     # Make sure there are no query parameters.
     $uri->query(undef);
     # And remove any # part if there is one.
     $uri->fragment(undef);
-
-    # make sure the trailing slash is present
-    if ($uri->path !~ m|/$|) {
-        $uri->path($uri->path . '/');
-    }
 
     return $uri;
 }

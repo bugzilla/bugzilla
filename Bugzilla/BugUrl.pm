@@ -12,6 +12,7 @@ use base qw(Bugzilla::Object);
 use Bugzilla::Util;
 use Bugzilla::Error;
 use Bugzilla::Constants;
+use Bugzilla::Hook;
 
 use URI::QueryParam;
 
@@ -56,8 +57,6 @@ use constant SUB_CLASSES => qw(
     Bugzilla::BugUrl::Trac
     Bugzilla::BugUrl::MantisBT
     Bugzilla::BugUrl::SourceForge
-    Bugzilla::BugUrl::ReviewBoard
-    Bugzilla::BugUrl::Rietveld
 );
 
 ###############################
@@ -121,8 +120,12 @@ sub should_handle {
 sub class_for {
     my ($class, $value) = @_;
 
+    my @sub_classes = $class->SUB_CLASSES;
+    Bugzilla::Hook::process("bug_url_sub_classes",
+        { sub_classes => \@sub_classes });
+
     my $uri = URI->new($value);
-    foreach my $subclass ($class->SUB_CLASSES) {
+    foreach my $subclass (@sub_classes) {
         eval "use $subclass";
         die $@ if $@;
         return wantarray ? ($subclass, $uri) : $subclass

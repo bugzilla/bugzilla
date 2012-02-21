@@ -1,49 +1,48 @@
-[%# The contents of this file are subject to the Mozilla Public
-  # License Version 1.1 (the "License"); you may not use this file
-  # except in compliance with the License. You may obtain a copy of
-  # the License at http://www.mozilla.org/MPL/
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
   #
-  # Software distributed under the License is distributed on an "AS
-  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-  # implied. See the License for the specific language governing
-  # rights and limitations under the License.
-  #
-  # The Original Code is the BMO Extension
-  #
-  # The Initial Developer of the Original Code is the Mozilla Foundation
-  # Portions created by the Initial Developers are Copyright (C) 2011 the
-  # Initial Developer. All Rights Reserved.
-  #
-  # Contributor(s):
-  #   Byron Jones <bjones@mozilla.com>
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
   #%]
 
 <h2>Other Reports</h2>
 
 <ul>
   <li>
-    <strong><a href="[% urlbase FILTER none
-    %]page.cgi?id=user_activity.html">User Changes</a></strong> - Show changes
-    made by an individual user.
+    <strong>
+      <a href="[% urlbase FILTER none %]page.cgi?id=user_activity.html">User Changes</a>
+    </strong> - Show changes made by an individual user.
   </li>
   <li>
-    <strong><a href="[% urlbase FILTER none
-    %]page.cgi?id=triage_reports.html">Triage Report</a></strong> - Report
-    on UNCONFIRMED [% terms.bugs %] to assist triage.
+    <strong>
+      <a href="[% urlbase FILTER none %]page.cgi?id=triage_reports.html">Triage Report</a>
+    </strong> - Report on UNCONFIRMED [% terms.bugs %] to assist triage.
   </li>
   <li>
-    <strong><a href="[% urlbase FILTER none
-    %]page.cgi?id=release_tracking_report.html">Release Tracking Report</a></strong> -
-    For triaging release-train flag information.
+    <strong>
+      <a href="[% urlbase FILTER none %]page.cgi?id=release_tracking_report.html">Release Tracking Report</a>
+    </strong> - For triaging release-train flag information.
   </li>
   [% IF user.in_group('editusers') %]
     <li>
-      <strong><a href="[% urlbase FILTER none
-      %]page.cgi?id=group_admins.html">Group Admins</a></strong> - Group Admins Report
+      <strong>
+        <a href="[% urlbase FILTER none %]page.cgi?id=group_admins.html">Group Admins</a>
+      </strong> - Group Admins Report
     </li>
+  [% END %]
+  [% IF user.in_group('editusers') || user.in_group('infrasec') %]
     <li>
-      <strong><a href="[% urlbase FILTER none
-      %]page.cgi?id=email_queue.html">Email Queue</a></strong> - TheSchwartz queue
+      <strong>
+        <a href="[% urlbase FILTER none %]page.cgi?id=group_membership.html">Group Membership Report</a>
+      </strong> - Lists the groups a user is a member of.
+    </li>
+  [% END %]
+  [% IF user.in_group('admin') %]
+    <li>
+      <strong>
+        <a href="[% urlbase FILTER none %]page.cgi?id=email_queue.html">Email Queue</a>
+      </strong> - TheSchwartz queue
     </li>
   [% END %]
 </ul>

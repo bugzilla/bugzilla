@@ -25,9 +25,10 @@ use base qw(Exporter);
 
 our @EXPORT_OK = qw(user_activity_report
                     triage_reports
-                    group_admins
+                    group_admins_report
                     email_queue_report
-                    release_tracking_report);
+                    release_tracking_report
+                    group_membership_report);
 
 sub user_activity_report {
     my ($vars) = @_;
@@ -541,7 +542,7 @@ sub triage_reports {
     $vars->{'input'} = $input;
 }
 
-sub group_admins {
+sub group_admins_report {
     my ($vars) = @_;
     my $dbh = Bugzilla->dbh;
     my $user = Bugzilla->user;
@@ -576,6 +577,108 @@ sub group_admins {
     }
 
     $vars->{'groups'} = \@groups;
+}
+
+sub group_membership_report {
+    my ($page, $vars) = @_;
+    my $dbh = Bugzilla->dbh;
+    my $user = Bugzilla->user;
+    my $cgi = Bugzilla->cgi;
+
+    ($user->in_group('editusers') || $user->in_group('infrasec'))
+        || ThrowUserError('auth_failure', { group  => 'editusers', 
+                                            action => 'run', 
+                                            object => 'group_admins' });
+
+    my $who = $cgi->param('who');
+    if (!defined($who) || $who eq '') {
+        if ($page eq 'group_membership.txt') {
+            print $cgi->redirect("page.cgi?id=group_membership.html&output=txt");
+            exit;
+        }
+        $vars->{'output'} = $cgi->param('output');
+        return;
+    }
+
+    Bugzilla::User::match_field({ 'who' => {'type' => 'multi'} });
+    $who = Bugzilla->input_params->{'who'};
+    $who = ref($who) ? $who : [ $who ];
+
+    my @users;
+    foreach my $login (@$who) {
+        my $u = Bugzilla::User->new(login_to_id($login, 1));
+
+        # this is lifted from $user->groups() 
+        # we need to show which groups are direct and which are inherited
+
+        my $groups_to_check = $dbh->selectcol_arrayref(
+            q{SELECT DISTINCT group_id
+                FROM user_group_map
+               WHERE user_id = ? AND isbless = 0}, undef, $u->id);
+
+        my $rows = $dbh->selectall_arrayref(
+            "SELECT DISTINCT grantor_id, member_id
+               FROM group_group_map
+              WHERE grant_type = " . GROUP_MEMBERSHIP);
+
+        my %group_membership;
+        foreach my $row (@$rows) {
+            my ($grantor_id, $member_id) = @$row;
+            push (@{ $group_membership{$member_id} }, $grantor_id);
+        }
+
+        my %checked_groups;
+        my %direct_groups;
+        my %indirect_groups;
+        my %groups;
+
+        foreach my $member_id (@$groups_to_check) {
+            $direct_groups{$member_id} = 1;
+        }
+
+        while (scalar(@$groups_to_check) > 0) {
+            my $member_id = shift @$groups_to_check;
+            if (!$checked_groups{$member_id}) {
+                $checked_groups{$member_id} = 1;
+                my $members = $group_membership{$member_id};
+                my @new_to_check = grep(!$checked_groups{$_}, @$members);
+                push(@$groups_to_check, @new_to_check);
+                foreach my $id (@new_to_check) {
+                    $indirect_groups{$id} = $member_id;
+                }
+                $groups{$member_id} = 1;
+            }
+        }
+
+        my @groups;
+        my $ra_groups = Bugzilla::Group->new_from_list([keys %groups]);
+        foreach my $group (@$ra_groups) {
+            my $via;
+            if ($direct_groups{$group->id}) {
+                $via = '';
+            } else {
+                foreach my $g (@$ra_groups) {
+                    if ($g->id == $indirect_groups{$group->id}) {
+                        $via = $g->name;
+                        last;
+                    }
+                }
+            }
+            push @groups, {
+                name => $group->name,
+                desc => $group->description,
+                via  => $via,
+            };
+        }
+
+        push @users, {
+            user   => $u,
+            groups => \@groups,
+        };
+    }
+
+    $vars->{'who'} = $who;
+    $vars->{'users'} = \@users;
 }
 
 sub email_queue_report {

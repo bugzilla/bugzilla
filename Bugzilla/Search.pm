@@ -321,7 +321,9 @@ use constant SPECIAL_PARSING => {
     commenter   => \&_contact_pronoun,
     qa_contact  => \&_contact_pronoun,
     reporter    => \&_contact_pronoun,
-    
+    'setters.login_name' => \&_contact_pronoun,
+    'requestees.login_name' => \&_contact_pronoun,
+
     # Date Fields that accept the 1d, 1w, 1m, 1y, etc. format.
     creation_ts => \&_timestamp_translate,
     deadline    => \&_timestamp_translate,

@@ -14,6 +14,7 @@ our @EXPORT = qw(
     WS_ERROR_CODE
     ERROR_UNKNOWN_FATAL
     ERROR_UNKNOWN_TRANSIENT
+    XMLRPC_CONTENT_TYPE_WHITELIST
 
     WS_DISPATCH
 );
@@ -162,6 +163,8 @@ use constant WS_ERROR_CODE => {
     unknown_method       => -32601,
     json_rpc_post_only   => 32610,
     json_rpc_invalid_callback => 32611,
+    xmlrpc_illegal_content_type   => 32612, 
+    json_rpc_illegal_content_type => 32613, 
 };
 
 # These are the fallback defaults for errors not in ERROR_CODE.
@@ -169,6 +172,11 @@ use constant ERROR_UNKNOWN_FATAL     => -32000;
 use constant ERROR_UNKNOWN_TRANSIENT => 32000;
 
 use constant ERROR_GENERAL       => 999;
+
+use constant XMLRPC_CONTENT_TYPE_WHITELIST => qw(
+    text/xml
+    application/xml
+);
 
 sub WS_DISPATCH {
     # We "require" here instead of "use" above to avoid a dependency loop.

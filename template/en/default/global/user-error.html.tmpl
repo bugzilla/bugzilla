@@ -1685,6 +1685,11 @@
     &lt;[% type FILTER html %]&gt; field. (See the XML-RPC specification
     for details.)
 
+  [% ELSIF error == "xmlrpc_illegal_content_type" %]
+    When using XML-RPC, you cannot send data as
+    [%+ content_type FILTER html %]. Only text/xml 
+    and application/xml are allowed.
+
   [% ELSIF error == "zero_length_file" %]
     [% title = "File Is Empty" %]
     The file you are trying to attach is empty, does not exist, or you don't

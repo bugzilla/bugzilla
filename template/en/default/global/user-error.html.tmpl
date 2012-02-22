@@ -1702,7 +1702,7 @@
   [% ELSIF error == "xmlrpc_illegal_content_type" %]
     When using XML-RPC, you cannot send data as
     [%+ content_type FILTER html %]. Allowed content types 
-    are [% constants.XMLRPC_CONTENT_TYPE_WHITELIST.join(', ') %].
+    are [% constants.XMLRPC_CONTENT_TYPE_WHITELIST.join(', ') FILTER html %].
 
   [% ELSIF error == "zero_length_file" %]
     [% title = "File Is Empty" %]

@@ -349,14 +349,7 @@ Splinter.Patch.Hunk.prototype = {
                     lines[currentStart + currentNewCount][2] |= Splinter.Patch.ADDED | noNewLine;
                 }
                 currentNewCount++;
-            } // else if (op == '\\') {
-                // Handled with preceding line
-            // } else {
-                // Junk in the patch - hope the patch got line wrapped and just ignoring
-                // it produces something meaningful. (For a patch displayer, anyways.
-                // would be bad for applying the patch.)
-                // Utils.assertNotReached();
-            // }
+            }
         }   
 
         // git mail-formatted patches end with --\n<git version> like a signature
@@ -841,7 +834,7 @@ Splinter.Review.File.prototype = {
                     j++;
                 }
                 if (showPatchRemovals < patchRemovals) {
-                    str += "> ... " + patchRemovals - showPatchRemovals + " more ...\n";
+                    str += "> ... " + (patchRemovals - showPatchRemovals) + " more ...\n";
                     j += patchRemovals - showPatchRemovals;
                 }
                 while (j < unchangedLines + patchRemovals + showPatchAdditions) {
@@ -849,7 +842,7 @@ Splinter.Review.File.prototype = {
                     j++;
                 }
                 if (showPatchAdditions < patchAdditions) {
-                    str += "> ... " + patchAdditions - showPatchAdditions + " more ...\n";
+                    str += "> ... " + (patchAdditions - showPatchAdditions) + " more ...\n";
                     j += patchAdditions - showPatchAdditions;
                 }
             } else {
@@ -984,7 +977,7 @@ Splinter.Review.Review.prototype = {
                     }
                     // The check for /^$/ is because if Bugzilla is line-wrapping it also
                     // strips completely whitespace lines
-                    if (line.match(/^>?\s+/) || line.match(/^$/)) {
+                    if (line.match(/^>\s+/) || line.match(/^$/)) {
                         oldLine += count;
                         newLine += count;
                         lastSegmentOld = 0;
@@ -998,9 +991,16 @@ Splinter.Review.Review.prototype = {
                     } else if (line.match(/^\\/)) {
                         // '\ No newline at end of file' - ignore
                     } else {
-                        // Ignore assumming it's a result of line-wrapping
-                        // https://bugzilla.mozilla.org/show_bug.cgi?id=509152
-                        YAHOO.log("WARNING: Bad content in hunk: " + line);
+                        if (console)
+                            console.log("WARNING: Bad content in hunk: " + line);
+                        if (line != 'NaN more ...') {
+                            // Tack onto current comment even thou it's invalid
+                            if (commentText == null) {
+                                commentText = line;
+                            } else {
+                                commentText += "\n" + line;
+                            }
+                        }
                     }
 
                     if ((oldStart == null || oldLine == oldStart + oldCount) &&
@@ -1012,26 +1012,33 @@ Splinter.Review.Review.prototype = {
                 }
 
                 if (commentText == null) {
-                    YAHOO.log("WARNING: No comment found in hunk");
+                    if (console)
+                        console.log("WARNING: No comment found in hunk");
                     commentText = "";
                 }
 
 
                 var location;
-                if (type == Splinter.Patch.CHANGED) {
-                    if (lastSegmentOld >= lastSegmentNew) {
+                try {
+                    if (type == Splinter.Patch.CHANGED) {
+                        if (lastSegmentOld >= lastSegmentNew) {
+                            oldLine--;
+                        }
+                        if (lastSegmentOld <= lastSegmentNew) {
+                            newLine--;
+                        }
+                        location = file.patchFile.getLocation(oldLine, newLine);
+                    } else if (type == Splinter.Patch.REMOVED) {
                         oldLine--;
-                    }
-                    if (lastSegmentOld <= lastSegmentNew) {
+                        location = file.patchFile.getLocation(oldLine, null);
+                    } else if (type == Splinter.Patch.ADDED) {
                         newLine--;
+                        location = file.patchFile.getLocation(null, newLine);
                     }
-                    location = file.patchFile.getLocation(oldLine, newLine);
-                } else if (type == Splinter.Patch.REMOVED) {
-                    oldLine--;
-                    location = file.patchFile.getLocation(oldLine, null);
-                } else if (type == Splinter.Patch.ADDED) {
-                    newLine--;
-                    location = file.patchFile.getLocation(null, newLine);
+                } catch(e) {
+                    if (console)
+                        console.error(e);
+                    location = 0;
                 }
                 file.addComment(location, type, Splinter.Utils.strip(commentText));
             }
@@ -1217,40 +1224,6 @@ Splinter.displayError = function (msg) {
     Dom.get('error').appendChild(Dom.get(el));
     Dom.setStyle('error', 'display', 'block');
 };
-
-//Splinter.updateAttachmentStatus = function (attachment, newStatus, success, failure) {
-//    var data = {
-//        action: 'update',
-//        id: attachment.id,
-//        description: attachment.description,
-//        filename: attachment.filename,
-//        ispatch: attachment.isPatch ? 1 : 0,
-//        isobsolete: attachment.isObsolete ? 1 : 0,
-//        isprivate: attachment.isPrivate ? 1 : 0,
-//        'attachments.status': newStatus
-//    };
-//
-//    if (attachment.token) {
-//        data.token = attachment.token;
-//    }
-//
-//    $.ajax({
-//        data : data,
-//        dataType : 'text',
-//        error : function(xmlHttpRequest, textStatus, errorThrown) {
-//            failure();
-//        },
-//        success : function(data, textStatus) {
-//            if (data.search(Splinter.UPDATE_ATTACHMENT_SUCCESS) != -1) {
-//                       success();
-//            } else {
-//                       failure();
-//            }
-//        },
-//        type : 'POST',
-//        url : "attachment.cgi"
-//    });
-//}
 
 Splinter.publishReview = function () {
     Splinter.saveComment();
@@ -1778,7 +1751,9 @@ Splinter.onRowDblClick = function (e) {
         if (delta < - 20) {
             type = Splinter.Patch.REMOVED;
         } else if (delta < 20) {
-            type = Splinter.Patch.CHANGED;
+            // CHANGED comments disabled due to breakage
+            // type = Splinter.Patch.CHANGED;
+            type = Splinter.Patch.ADDED;
         } else {
             type = Splinter.Patch.ADDED;
         }
@@ -2210,7 +2185,6 @@ Splinter.showPatchFile = function (file) {
 Splinter.addFileNavigationLink = function (file) {
     var basename = file.filename.replace(/.*\//, "");
     Splinter.addNavigationLink(file.filename, basename, function() {
-    // Splinter.addNavigationLink(file.filename, file.filename, function() {
         Splinter.showPatchFile(file);
     });
 };
@@ -2220,16 +2194,6 @@ Splinter.start = function () {
     Dom.setStyle('navigationContainer', 'display', 'block');
     Dom.setStyle('overview', 'display', 'block');
     Dom.setStyle('files', 'display', 'block');
-
-    //for (var i = 0; i < Splinter.configAttachmentStatuses.length; i++) {
-    //    $("<option></option").text(Splinter.configAttachmentStatuses[i])
-    //    .appendTo($("#attachmentStatus")); }
-
-    //if (Splinter.theAttachment.status != null)
-    //    $("#attachmentStatus")
-    //        .val(Splinter.theAttachment.status)
-    //        .change(Splinter.queueUpdateHaveDraft);
-    //else
     Dom.setStyle('attachmentStatusSpan', 'display', 'none');
 
     if (Splinter.thePatch.intro) {

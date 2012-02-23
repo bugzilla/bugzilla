@@ -93,9 +93,6 @@
          attachment.date = Splinter.Bug.parseDate('[% attachment.attached FILTER time("%Y-%m-%d %T %z") FILTER js %]');
          attachment.whoName = Splinter.Utils.strip('[% attachment.attacher.name FILTER js %]');
          attachment.whoEmail = Splinter.Utils.strip('[% attachment.attacher.email FILTER js %]');
-         // attachment.status = Splinter.Utils.strip($(this).children('status').text());
-         // if (attachment.status == "")
-         //     attachment.status = null;
          attachment.isPatch = [% attachment.ispatch ? 1 : 0 %];
          attachment.isObsolete = [% attachment.isobsolete ? 1 : 0 %];
          attachment.isPrivate = [% attachment.isprivate ? 1 : 0 %];

@@ -69,6 +69,7 @@
       theBug.reporterName = Splinter.Utils.strip('[% bug.reporter.name FILTER js %]');
   
       [% FOREACH comment = bug.comments %]
+         [% NEXT IF comment.is_private && !user.is_insider %]
          var comment = new Splinter.Bug.Comment();
          comment.whoName = Splinter.Utils.strip('[% comment.author.name FILTER js %]');
          comment.whoEmail = Splinter.Utils.strip('[% comment.author.email FILTER js %]');

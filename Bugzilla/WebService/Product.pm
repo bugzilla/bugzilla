@@ -47,23 +47,28 @@ BEGIN { *get_products = \&get }
 
 # Get the ids of the products the user can search
 sub get_selectable_products {
+    Bugzilla->switch_to_shadow_db();
     return {ids => [map {$_->id} @{Bugzilla->user->get_selectable_products}]}; 
 }
 
 # Get the ids of the products the user can enter bugs against
 sub get_enterable_products {
+    Bugzilla->switch_to_shadow_db();
     return {ids => [map {$_->id} @{Bugzilla->user->get_enterable_products}]}; 
 }
 
 # Get the union of the products the user can search and enter bugs against.
 sub get_accessible_products {
+    Bugzilla->switch_to_shadow_db();
     return {ids => [map {$_->id} @{Bugzilla->user->get_accessible_products}]}; 
 }
 
 # Get a list of actual products, based on list of ids or names
 sub get {
     my ($self, $params) = validate(@_, 'ids', 'names');
-    
+
+    Bugzilla->switch_to_shadow_db();
+
     # Only products that are in the users accessible products, 
     # can be allowed to be returned
     my $accessible_products = Bugzilla->user->get_accessible_products;

@@ -60,47 +60,49 @@
   Splinter.attachmentId = Splinter.Utils.isDigits('[% attach_id FILTER html %]') ? parseInt('[% attach_id FILTER js %]') : NaN;
 
   if (!isNaN(Splinter.bugId)) {
-      var theBug = new Splinter.Bug.Bug();
-      theBug.id = parseInt('[% bug.id FILTER js %]');
-      theBug.token = '[% update_token FILTER js %]';
-      theBug.shortDesc = Splinter.Utils.strip('[% bug.short_desc FILTER js %]');
-      theBug.creationDate = Splinter.Bug.parseDate('[% bug.creation_ts FILTER time("%Y-%m-%d %T %z") FILTER js %]');
-      theBug.reporterEmail = Splinter.Utils.strip('[% bug.reporter.email FILTER js %]');
-      theBug.reporterName = Splinter.Utils.strip('[% bug.reporter.name FILTER js %]');
-  
-      [% FOREACH comment = bug.comments %]
-         [% NEXT IF comment.is_private && !user.is_insider %]
-         var comment = new Splinter.Bug.Comment();
-         comment.whoName = Splinter.Utils.strip('[% comment.author.name FILTER js %]');
-         comment.whoEmail = Splinter.Utils.strip('[% comment.author.email FILTER js %]');
-         comment.date = Splinter.Bug.parseDate('[% comment.creation_ts FILTER time("%Y-%m-%d %T %z") FILTER js %]');
-         comment.text = '[% comment.thetext FILTER js %]';
-         theBug.comments.push(comment);
-      [% END %]
+    var theBug = new Splinter.Bug.Bug();
+    theBug.id = parseInt('[% bug.id FILTER js %]');
+    theBug.token = '[% update_token FILTER js %]';
+    theBug.shortDesc = Splinter.Utils.strip('[% bug.short_desc FILTER js %]');
+    theBug.creationDate = Splinter.Bug.parseDate('[% bug.creation_ts FILTER time("%Y-%m-%d %T %z") FILTER js %]');
+    theBug.reporterEmail = Splinter.Utils.strip('[% bug.reporter.email FILTER js %]');
+    theBug.reporterName = Splinter.Utils.strip('[% bug.reporter.name FILTER js %]');
 
-      [% FOREACH attachment = bug.attachments %]
-         [% NEXT IF attachment.isprivate && !user.is_insider && attachment.attacher.id != user.id %]        
-         var attachid = parseInt('[% attachment.id FILTER js %]');
-         var attachment = new Splinter.Bug.Attachment('', attachid);
-         [% IF attachment.id == attach_id && attachment.ispatch %]
-           [% flag_types = attachment.flag_types %]
-           [% can_edit = attachment.validate_can_edit %]
-           attachment.data = '[% attach_data FILTER js %]';
-           attachment.token = '[% issue_hash_token([attachment.id, attachment.modification_time]) FILTER js %]';
-         [% END %]
-         attachment.description = Splinter.Utils.strip('[% attachment.description FILTER js %]');
-         attachment.filename = Splinter.Utils.strip('[% attachment.filename FILTER js %]');
-         attachment.contenttypeentry = Splinter.Utils.strip('[% attachment.contenttypeentry FILTER js %]');
-         attachment.date = Splinter.Bug.parseDate('[% attachment.attached FILTER time("%Y-%m-%d %T %z") FILTER js %]');
-         attachment.whoName = Splinter.Utils.strip('[% attachment.attacher.name FILTER js %]');
-         attachment.whoEmail = Splinter.Utils.strip('[% attachment.attacher.email FILTER js %]');
-         attachment.isPatch = [% attachment.ispatch ? 1 : 0 %];
-         attachment.isObsolete = [% attachment.isobsolete ? 1 : 0 %];
-         attachment.isPrivate = [% attachment.isprivate ? 1 : 0 %];
-         theBug.attachments.push(attachment);
+    [% FOREACH comment = bug.comments %]
+      [% NEXT IF comment.is_private && !user.is_insider %]
+      [% NEXT UNLESS comment.thetext.match('(?i)^\s*review\s+of\s+attachment\s+\d+\s*:') %]
+      var comment = new Splinter.Bug.Comment();
+      comment.whoName = Splinter.Utils.strip('[% comment.author.name FILTER js %]');
+      comment.whoEmail = Splinter.Utils.strip('[% comment.author.email FILTER js %]');
+      comment.date = Splinter.Bug.parseDate('[% comment.creation_ts FILTER time("%Y-%m-%d %T %z") FILTER js %]');
+      comment.text = '[% comment.thetext FILTER js %]';
+      theBug.comments.push(comment);
+    [% END %]
+
+    [% FOREACH attachment = bug.attachments %]
+      [% NEXT IF attachment.isprivate && !user.is_insider && attachment.attacher.id != user.id %]        
+      [% NEXT IF !attachment.ispatch || attachment.isobsolete %]
+      var attachid = parseInt('[% attachment.id FILTER js %]');
+      var attachment = new Splinter.Bug.Attachment('', attachid);
+      [% IF attachment.id == attach_id && attachment.ispatch %]
+        [% flag_types = attachment.flag_types %]
+        [% can_edit = attachment.validate_can_edit %]
+        attachment.data = '[% attach_data FILTER js %]';
+        attachment.token = '[% issue_hash_token([attachment.id, attachment.modification_time]) FILTER js %]';
       [% END %]
-     
-      Splinter.theBug = theBug;
+      attachment.description = Splinter.Utils.strip('[% attachment.description FILTER js %]');
+      attachment.filename = Splinter.Utils.strip('[% attachment.filename FILTER js %]');
+      attachment.contenttypeentry = Splinter.Utils.strip('[% attachment.contenttypeentry FILTER js %]');
+      attachment.date = Splinter.Bug.parseDate('[% attachment.attached FILTER time("%Y-%m-%d %T %z") FILTER js %]');
+      attachment.whoName = Splinter.Utils.strip('[% attachment.attacher.name FILTER js %]');
+      attachment.whoEmail = Splinter.Utils.strip('[% attachment.attacher.email FILTER js %]');
+      attachment.isPatch = [% attachment.ispatch ? 1 : 0 %];
+      attachment.isObsolete = [% attachment.isobsolete ? 1 : 0 %];
+      attachment.isPrivate = [% attachment.isprivate ? 1 : 0 %];
+      theBug.attachments.push(attachment);
+    [% END %]
+
+    Splinter.theBug = theBug;
   }
 </script>
 

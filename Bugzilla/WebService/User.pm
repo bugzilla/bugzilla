@@ -201,17 +201,17 @@ sub get {
     my $in_group = $self->_filter_users_by_group(
         \@user_objects, $params); 
     if (Bugzilla->user->in_group('editusers')) {
-        @users =
+        @users = 
             map {filter $params, {
                 id        => $self->type('int', $_->id),
                 real_name => $self->type('string', $_->name),
                 name      => $self->type('string', $_->login),
                 email     => $self->type('string', $_->email),
                 can_login => $self->type('boolean', $_->is_enabled ? 1 : 0),
+                groups    => $self->_filter_bless_groups($_->groups), 
                 email_enabled     => $self->type('boolean', $_->email_enabled),
                 login_denied_text => $self->type('string', $_->disabledtext),
             }} @$in_group;
-
     }    
     else {
         @users =
@@ -221,6 +221,7 @@ sub get {
                 name      => $self->type('string', $_->login),
                 email     => $self->type('string', $_->email),
                 can_login => $self->type('boolean', $_->is_enabled ? 1 : 0),
+                groups    => $self->_filter_bless_groups($_->groups),
             }} @$in_group;
     }
 
@@ -255,6 +256,29 @@ sub _user_in_any_group {
         return 1 if $user->in_group($group);
     }
     return 0;
+}
+
+sub _filter_bless_groups {
+    my ($self, $groups) = @_;
+    my $user = Bugzilla->user;
+
+    my @filtered_groups;
+    foreach my $group (@$groups) {
+        next unless ($user->in_group('editusers') || $user->can_bless($group->id));
+        push(@filtered_groups, $self->_group_to_hash($group));
+    }
+
+    return \@filtered_groups;
+}
+
+sub _group_to_hash {
+    my ($self, $group) = @_;
+    my $item = {
+        id          => $self->type('int', $group->id), 
+        name        => $self->type('string', $group->name), 
+        description => $self->type('string', $group->description), 
+    };
+    return $item;
 }
 
 1;
@@ -579,10 +603,32 @@ C<string> A text field that holds the reason for disabling a user from logging
 into bugzilla, if empty then the user account is enabled. Otherwise it is 
 disabled/closed.
 
+=item groups
+
+C<array> An array of group hashes the user is a member of. Each hash describes
+the group and contains the following items:
+
+=over
+
+=item id
+
+C<int> The group id
+
+=item name
+
+C<string> The name of the group
+
+=item description
+
+C<string> The description for the group
+
+=back
+
 B<Note>: If you are not logged in to Bugzilla when you call this function, you
 will only be returned the C<id>, C<name>, and C<real_name> items. If you are
 logged in and not in editusers group, you will only be returned the C<id>, C<name>, 
-C<real_name>, C<email>, and C<can_login> items.
+C<real_name>, C<email>, and C<can_login> items. The groups returned are filtered
+based on your permission to bless each group.
 
 =back
 
@@ -617,6 +663,8 @@ function.
 
 =item C<include_disabled> added in Bugzilla B<4.0>. Default behavior 
 for C<match> has changed to only returning enabled accounts.
+
+=item C<groups> Added in Bugzilla B<4.4>.
 
 =back
 

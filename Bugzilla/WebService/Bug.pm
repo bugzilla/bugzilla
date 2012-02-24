@@ -67,6 +67,8 @@ BEGIN {
 sub fields {
     my ($self, $params) = validate(@_, 'ids', 'names');
 
+    Bugzilla->switch_to_shadow_db();
+
     my @fields;
     if (defined $params->{ids}) {
         my $ids = $params->{ids};
@@ -227,7 +229,7 @@ sub comments {
     my $bug_ids = $params->{ids} || [];
     my $comment_ids = $params->{comment_ids} || [];
 
-    my $dbh  = Bugzilla->dbh;
+    my $dbh  = Bugzilla->switch_to_shadow_db();
     my $user = Bugzilla->user;
 
     my %bugs;
@@ -295,6 +297,8 @@ sub _translate_comment {
 sub get {
     my ($self, $params) = validate(@_, 'ids');
 
+    Bugzilla->switch_to_shadow_db();
+
     my $ids = $params->{ids};
     defined $ids || ThrowCodeError('param_required', { param => 'ids' });
 
@@ -328,6 +332,8 @@ sub get {
 # $call = $rpc->call( 'Bug.history', { ids => [1,2] });
 sub history {
     my ($self, $params) = validate(@_, 'ids');
+
+    Bugzilla->switch_to_shadow_db();
 
     my $ids = $params->{ids};
     defined $ids || ThrowCodeError('param_required', { param => 'ids' });
@@ -378,7 +384,9 @@ sub history {
 
 sub search {
     my ($self, $params) = @_;
-    
+   
+    Bugzilla->switch_to_shadow_db();
+
     if ( defined($params->{offset}) and !defined($params->{limit}) ) {
         ThrowCodeError('param_required', 
                        { param => 'limit', function => 'Bug.search()' });
@@ -427,6 +435,8 @@ sub search {
 sub possible_duplicates {
     my ($self, $params) = validate(@_, 'product');
     my $user = Bugzilla->user;
+
+    Bugzilla->switch_to_shadow_db();
 
     # Undo the array-ification that validate() does, for "summary".
     $params->{summary} || ThrowCodeError('param_required',
@@ -539,6 +549,8 @@ sub create {
 
 sub legal_values {
     my ($self, $params) = @_;
+
+    Bugzilla->switch_to_shadow_db();
 
     defined $params->{field} 
         or ThrowCodeError('param_required', { param => 'field' });
@@ -720,6 +732,8 @@ sub update_see_also {
 
 sub attachments {
     my ($self, $params) = validate(@_, 'ids', 'attachment_ids');
+
+    Bugzilla->switch_to_shadow_db();
 
     if (!(defined $params->{ids}
           or defined $params->{attachment_ids}))

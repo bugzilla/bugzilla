@@ -114,6 +114,8 @@ sub create {
 sub get {
     my ($self, $params) = validate(@_, 'names', 'ids');
 
+    Bugzilla->switch_to_shadow_db();
+
     defined($params->{names}) || defined($params->{ids})
         || defined($params->{match})
         || ThrowCodeError('params_required', 

@@ -492,6 +492,7 @@ th.required:before, span.required_star {
 }
 input.required, select.required, span.required_explanation {
     background-color: #fff7cd;
+    color: #000;
 }
 
 .calendar_button {

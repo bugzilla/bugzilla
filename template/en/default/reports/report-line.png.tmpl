@@ -8,8 +8,6 @@
 
 [% y_label = "$terms.Bugs" %]
 
-[% PROCESS "global/field-descs.none.tmpl" %]
-
 [% col_field_disp = field_descs.$col_field || col_field %]
 
 [% FOR i IN [ 0 .. data.0.0.max ] %]

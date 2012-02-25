@@ -26,8 +26,6 @@
   style_urls = ['skins/standard/admin.css']
 %]
 
-[% PROCESS "global/field-descs.none.tmpl" %]
-
 [% IF changes.name.defined %]
   <p>
   Updated product name from '[% changes.name.0 FILTER html %]' to

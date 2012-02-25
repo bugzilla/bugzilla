@@ -6,8 +6,6 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% PROCESS 'global/field-descs.none.tmpl' %]
-
 [% filtered_desc = blocked_tree.$bugid.short_desc FILTER html %]
 [% PROCESS global/header.html.tmpl
    title           = "Dependency tree for $terms.Bug $bugid"

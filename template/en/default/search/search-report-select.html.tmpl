@@ -11,8 +11,6 @@
   # default.$name.0: string. The default value for the block, if any.
   #%]
 
-[% PROCESS "global/field-descs.none.tmpl" %]
-
 [% BLOCK select %]
   [% Hook.process('rep_fields', 'search/search-report-select.html.tmpl') %]
 

@@ -10,8 +10,6 @@
    desc = "Set up $terms.bug change policies"
 %]
 
-[% PROCESS "global/field-descs.none.tmpl" %]
-
 [% accept_status = display_value('bug_status', 'IN_PROGRESS') FILTER html %]
 
 [% param_descs = {

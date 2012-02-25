@@ -6,8 +6,6 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
   
-[% PROCESS "global/field-descs.none.tmpl" %]
-
 [% field_label = field_descs.${change.field_name} %]
 [% old_value = display_value(change.field_name, change.old) %]
 [% new_value = display_value(change.field_name, change.new) %]

@@ -115,6 +115,7 @@ use constant OS_MAP => (
     qr/\(.*Win(?:dows[ -]|)NT.*\)/ => ["Windows NT"],
     qr/\(.*Windows.*NT.*\)/ => ["Windows NT"],
     # OS X
+    qr/\(.*Mac OS X (?:|Mach-O |\()10.7.*\)/ => ["Mac OS X 10.7"],
     qr/\(.*Mac OS X (?:|Mach-O |\()10.6.*\)/ => ["Mac OS X 10.6"],
     qr/\(.*Mac OS X (?:|Mach-O |\()10.5.*\)/ => ["Mac OS X 10.5"],
     qr/\(.*Mac OS X (?:|Mach-O |\()10.4.*\)/ => ["Mac OS X 10.4"],

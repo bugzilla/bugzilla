@@ -12,6 +12,7 @@
   # queries: array of hashes containing:
   #     bugs: array containing hashes of fieldnames->values for each bug
   #     title: the title given in the whine scheduling mechanism
+  #     name: the name of the query
   # author: user object for the person who scheduled this whine
   # recipient: user object for the intended recipient of the message
   #%]
@@ -71,6 +72,10 @@
         </tr>
       [% END %]
     </table>
+
+    <p align="left">
+    <a href="[% urlbase FILTER html %]buglist.cgi?cmdtype=runnamed&amp;namedcmd=[% query.name FILTER uri %]">View as [% terms.bug %] list</a>
+    </p>
   [% END %]
 [% ELSE %]
 

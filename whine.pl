@@ -338,6 +338,7 @@ while (my $event = get_next_event) {
 #  - queries        array of hashes containing:
 #          - bugs:  array of hashes mapping fieldnames to values for this bug
 #          - title: text title given to this query in the whine event
+#          - name:  text name of this query
 #  - schedule_id    integer id of the schedule being run
 #  - subject        Subject line for the message
 #  - recipient      user object for the recipient

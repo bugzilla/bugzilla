@@ -294,6 +294,7 @@ sub pickos {
             /\(.*VMS.*\)/ && do {push @os, "OpenVMS";};
             /\(.*Win.*\)/ && do {
               /\(.*Windows XP.*\)/ && do {push @os, "Windows XP";};
+              /\(.*Windows NT 6\.2.*\)/ && do {push @os, "Windows 8";};
               /\(.*Windows NT 6\.1.*\)/ && do {push @os, "Windows 7";};
               /\(.*Windows NT 6\.0.*\)/ && do {push @os, "Windows Vista";};
               /\(.*Windows NT 5\.2.*\)/ && do {push @os, "Windows Server 2003";};

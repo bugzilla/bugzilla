@@ -21,6 +21,13 @@
         onsubmit="if (this.quicksearch.value == '')
                   { alert('Please enter one or more search terms first.');
                     return false; } return true;">
+    <input type="hidden" id="no_redirect" name="no_redirect" value="0">
+    <script type="text/javascript">
+      if (history && history.replaceState) {
+        var no_redirect = document.getElementById("no_redirect");
+        no_redirect.value = 1;
+      }
+    </script>
     <input class="txt" type="text" id="quicksearch[% qs_suffix FILTER html %]" name="quicksearch" 
            title="Quick Search" value="[% quicksearch FILTER html %]">
     <input class="btn" type="submit" value="Search" 

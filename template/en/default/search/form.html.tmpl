@@ -8,7 +8,12 @@
 
 [% PROCESS "global/field-descs.none.tmpl" %]
 
+<input type="hidden" id="no_redirect" name="no_redirect" value="0">
 <script type="text/javascript">
+  if (history && history.replaceState) {
+    var no_redirect = document.getElementById("no_redirect");
+    no_redirect.value = 1;
+  }
 
 // Hide the Advanced Fields by default, unless the user has a cookie
 // that specifies otherwise.

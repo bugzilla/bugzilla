@@ -189,7 +189,10 @@ sub clean_search_url {
 
     # list_id is added in buglist.cgi after calling clean_search_url,
     # and doesn't need to be saved in saved searches.
-    $self->delete('list_id'); 
+    $self->delete('list_id');
+
+    # no_redirect is used internally by redirect_search_url().
+    $self->delete('no_redirect');
 
     # And now finally, if query_format is our only parameter, that
     # really means we have no parameters, so we should delete query_format.
@@ -445,6 +448,7 @@ sub redirect_search_url {
         return;
     }
 
+    my $no_redirect = $self->param('no_redirect');
     $self->clean_search_url();
 
     # Make sure we still have params still after cleaning otherwise we 
@@ -457,6 +461,10 @@ sub redirect_search_url {
         my $recent_search = Bugzilla::Search::Recent->create_placeholder;
         $self->param('list_id', $recent_search->id);
     }
+
+    # Browsers which support history.replaceState do not need to be
+    # redirected. We can fix the URL on the fly.
+    return if $no_redirect;
 
     # GET requests that lacked a list_id are always redirected. POST requests
     # are only redirected if they're under the CGI_URI_LIMIT though.

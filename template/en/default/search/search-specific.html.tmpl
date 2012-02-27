@@ -28,6 +28,13 @@ for "crash secure SSL flash".
 <form name="queryform" method="get" action="buglist.cgi">
 <input type="hidden" name="query_format" value="specific">
 <input type="hidden" name="order" value="relevance desc">
+<input type="hidden" id="no_redirect" name="no_redirect" value="0">
+<script type="text/javascript">
+  if (history && history.replaceState) {
+    var no_redirect = document.getElementById("no_redirect");
+    no_redirect.value = 1;
+  }
+</script>
 
 <table summary="Search fields" class="bz_simple_search_form">
   <tr>

@@ -28,6 +28,7 @@ use base qw(Exporter);
 
 @Bugzilla::Error::EXPORT = qw(ThrowCodeError ThrowTemplateError ThrowUserError ThrowErrorPage);
 
+use Bugzilla::Arecibo;
 use Bugzilla::Constants;
 use Bugzilla::WebService::Constants;
 use Bugzilla::Util;
@@ -93,9 +94,22 @@ sub _throw_error {
 
     my $template = Bugzilla->template;
     if (Bugzilla->error_mode == ERROR_MODE_WEBPAGE) {
+        if (arecibo_should_notify($vars->{error})) {
+            $vars->{maintainers_notified} = 1;
+            $vars->{uid} = arecibo_generate_id();
+            $vars->{processed} = {};
+        } else {
+            $vars->{maintainers_notified} = 0;
+        }
+
         print Bugzilla->cgi->header();
         $template->process($name, $vars)
           || ThrowTemplateError($template->error());
+
+        if ($vars->{maintainers_notified}) {
+            arecibo_handle_error(
+                $vars->{error}, $vars->{processed}->{error_message}, $vars->{uid});
+        }
     }
     # There are some tests that throw and catch a lot of errors,
     # and calling $template->process over and over for those errors
@@ -181,31 +195,33 @@ sub ThrowTemplateError {
     $vars->{'template_error_msg'} = $template_err;
     $vars->{'error'} = "template_error";
 
+    $vars->{'uid'} = arecibo_generate_id();
+    arecibo_handle_error('error', $template_err, $vars->{'uid'});
+
     my $template = Bugzilla->template;
 
     # Try a template first; but if this one fails too, fall back
     # on plain old print statements.
     if (!$template->process("global/code-error.html.tmpl", $vars)) {
-        my $maintainer = Bugzilla->params->{'maintainer'};
+        my $maintainer = html_quote(Bugzilla->params->{'maintainer'});
         my $error = html_quote($vars->{'template_error_msg'});
         my $error2 = html_quote($template->error());
+        my $uid = html_quote($vars->{'uid'});
         print <<END;
         <tt>
           <p>
-            Bugzilla has suffered an internal error. Please save this page and 
-            send it to $maintainer with details of what you were doing at the 
-            time this message appeared.
+            Bugzilla has suffered an internal error:
           </p>
-          <script type="text/javascript"> <!--
-          document.write("<p>URL: " + 
-                          document.location.href.replace(/&/g,"&amp;")
-                                                .replace(/</g,"&lt;")
-                                                .replace(/>/g,"&gt;") + "</p>");
-          // -->
-          </script>
-          <p>Template->process() failed twice.<br>
-          First error: $error<br>
-          Second error: $error2</p>
+          <p>
+            $error
+          </p>
+          <!-- template error, no real need to show this to the user
+          $error2
+          -->
+          <p>
+            The <a href="mailto:$maintainer">Bugzilla maintainers</a> have
+            been notified of this error [#$uid].
+          </p>
         </tt>
 END
     }

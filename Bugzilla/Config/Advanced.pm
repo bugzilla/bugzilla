@@ -68,6 +68,12 @@ use constant get_param_list => (
    type => 'b',
    default => 0
   },
+
+  {
+   name => 'arecibo_server',
+   type => 't',
+   default => '',
+  },
 );
 
 1;

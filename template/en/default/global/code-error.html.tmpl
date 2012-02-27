@@ -503,33 +503,23 @@
    admindocslinks = admindocslinks
 %]
 
-<tt>
-  <p>
-    [% terms.Bugzilla %] has suffered an internal error. Please save this page and send
-    it to [% Param("maintainer") %] with details of what you were doing at
-    the time this message appeared.
-  </p>
-  <script type="text/javascript"> <!--
-    document.write("<p>URL: " + 
-                    document.location.href.replace(/&/g,"&amp;")
-                                          .replace(/</g,"&lt;")
-                                          .replace(/>/g,"&gt;") + "</p>");
-  // -->
-  </script>
-</tt>
+[%# return the generated error_message for arecibo %]
+[% processed.error_message = error_message %]
 
-<table cellpadding="20">
-  <tr>
-    <td bgcolor="#ff0000">
-      <font size="+2">
-        [% error_message FILTER none %]
-      </font>
-    </td>
-  </tr>
-</table>
+<p>
+  [% terms.Bugzilla %] has suffered an internal error:
+</p>
 
-<p>Traceback:</p>
-<pre>[% traceback FILTER html %]</pre>
+<p class="throw_error">
+  [% error_message FILTER none %]
+</p>
+
+[% IF maintainers_notified %]
+<p>
+  The [% terms.Bugzilla %] maintainers have been notified of this error
+  [#[% uid FILTER html %]].
+</p>
+[% END %]
 
 [% IF variables %]
   <pre>

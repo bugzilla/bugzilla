@@ -1036,12 +1036,14 @@ sub get_enterable_products {
         # And all of these products must have at least one component
         # and one version.
         $enterable_ids = $dbh->selectcol_arrayref(
-               'SELECT DISTINCT products.id FROM products
-            INNER JOIN components ON components.product_id = products.id
-            INNER JOIN versions ON versions.product_id = products.id
-                 WHERE products.id IN (' . join(',', @$enterable_ids) . ')
-                   AND components.isactive = 1
-                   AND versions.isactive = 1');
+            'SELECT DISTINCT products.id FROM products
+              WHERE ' . $dbh->sql_in('products.id', $enterable_ids) .
+              ' AND products.id IN (SELECT DISTINCT components.product_id
+                                      FROM components
+                                     WHERE components.isactive = 1)
+                AND products.id IN (SELECT DISTINCT versions.product_id
+                                      FROM versions
+                                     WHERE versions.isactive = 1)');
     }
 
     $self->{enterable_products} =

@@ -76,8 +76,10 @@ sub type {
     my $field_obj = blessed $field ? $field : Bugzilla::Field->check($field);
     my $field_name = $field_obj->name;
 
-    if ($class->CLASS_MAP->{$field_name}) {
-        return $class->CLASS_MAP->{$field_name};
+    if (my $package = $class->CLASS_MAP->{$field_name}) {
+        # Callers expect the module to be already loaded.
+        eval "require $package";
+        return $package;
     }
 
     # For generic classes, we use a lowercase class name, so as

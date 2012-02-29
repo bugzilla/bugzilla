@@ -10,7 +10,6 @@ package Bugzilla::Template;
 
 use strict;
 
-use Bugzilla::Bug;
 use Bugzilla::Constants;
 use Bugzilla::WebService::Constants;
 use Bugzilla::Hook;
@@ -19,10 +18,8 @@ use Bugzilla::Install::Util qw(install_string template_include_path
                                include_languages);
 use Bugzilla::Keyword;
 use Bugzilla::Util;
-use Bugzilla::User;
 use Bugzilla::Error;
 use Bugzilla::Search;
-use Bugzilla::Status;
 use Bugzilla::Token;
 
 use Cwd qw(abs_path);
@@ -315,7 +312,10 @@ sub get_bug_link {
     my $dbh = Bugzilla->dbh;
 
     if (defined $bug) {
-        $bug = blessed($bug) ? $bug : new Bugzilla::Bug($bug);
+        if (!blessed($bug)) {
+            require Bugzilla::Bug;
+            $bug = new Bugzilla::Bug($bug);
+        }
         return $link_text if $bug->{error};
     }
 

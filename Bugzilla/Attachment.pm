@@ -593,12 +593,12 @@ sub _check_is_private {
 
 =over
 
-=item C<get_attachments_by_bug($bug_id)>
+=item C<get_attachments_by_bug($bug)>
 
 Description: retrieves and returns the attachments the currently logged in
              user can view for the given bug.
 
-Params:     C<$bug_id> - integer - the ID of the bug for which
+Params:     C<$bug> - Bugzilla::Bug object - the bug for which
             to retrieve and return attachments.
 
 Returns:    a reference to an array of attachment objects.
@@ -606,14 +606,14 @@ Returns:    a reference to an array of attachment objects.
 =cut
 
 sub get_attachments_by_bug {
-    my ($class, $bug_id, $vars) = @_;
+    my ($class, $bug, $vars) = @_;
     my $user = Bugzilla->user;
     my $dbh = Bugzilla->dbh;
 
     # By default, private attachments are not accessible, unless the user
     # is in the insider group or submitted the attachment.
     my $and_restriction = '';
-    my @values = ($bug_id);
+    my @values = ($bug->id);
 
     unless ($user->is_insider) {
         $and_restriction = 'AND (isprivate = 0 OR submitter_id = ?)';
@@ -625,15 +625,18 @@ sub get_attachments_by_bug {
                                                undef, @values);
 
     my $attachments = Bugzilla::Attachment->new_from_list($attach_ids);
+    $_->{bug} = $bug foreach @$attachments;
 
     # To avoid $attachment->flags to run SQL queries itself for each
     # attachment listed here, we collect all the data at once and
     # populate $attachment->{flags} ourselves.
+    # We also load all attachers at once for the same reason.
     if ($vars->{preload}) {
+        # Preload flags.
         $_->{flags} = [] foreach @$attachments;
         my %att = map { $_->id => $_ } @$attachments;
 
-        my $flags = Bugzilla::Flag->match({ bug_id      => $bug_id,
+        my $flags = Bugzilla::Flag->match({ bug_id      => $bug->id,
                                             target_type => 'attachment' });
 
         # Exclude flags for private attachments you cannot see.
@@ -641,6 +644,14 @@ sub get_attachments_by_bug {
 
         push(@{$att{$_->attach_id}->{flags}}, $_) foreach @$flags;
         $attachments = [sort {$a->id <=> $b->id} values %att];
+
+        # Preload attachers.
+        my %user_ids = map { $_->{submitter_id} => 1 } @$attachments;
+        my $users = Bugzilla::User->new_from_list([keys %user_ids]);
+        my %user_map = map { $_->id => $_ } @$users;
+        foreach my $attachment (@$attachments) {
+            $attachment->{attacher} = $user_map{$attachment->{submitter_id}};
+        }
     }
     return $attachments;
 }

@@ -123,7 +123,7 @@ sub arecibo_handle_error {
     my $message = join(" ", map { trim($_) } grep { $_ ne '' } @message);
 
     # don't send to arecibo unless configured
-    my $arecibo_server = Bugzilla->params->{arecibo_server};
+    my $arecibo_server = Bugzilla->params->{arecibo_server} || '';
     my $send_to_arecibo = $arecibo_server ne '';
     if ($send_to_arecibo) {
         # message content filtering

@@ -19,6 +19,8 @@
 
 [%# INTERFACE:
   #   field: a Bugzilla::Field object
+  #   product: (optional) a Bugzilla::Product object. When specified,
+  #            components are restricted to this product.
   #%]
 
 [% FOREACH controlled_field = field.controls_visibility_of %]
@@ -29,7 +31,15 @@
   [%- END %]
   ]);
 [% END %]
-[% FOREACH legal_value = field.legal_values %]
+
+[% legal_values = [] %]
+[% IF field.name == "component" AND product %]
+  [% legal_values = product.components %]
+[% ELSE %]
+  [% legal_values = field.legal_values %]
+[% END %]
+
+[% FOREACH legal_value = legal_values %]
   [% FOREACH controlled_field = legal_value.controlled_values.keys %]
     [% SET cont_ids = [] %]
     [% FOREACH val = legal_value.controlled_values.$controlled_field %]

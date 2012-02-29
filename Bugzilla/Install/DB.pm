@@ -3605,7 +3605,7 @@ sub _populate_bug_see_also_class {
     if ($dbh->bz_column_info('bug_see_also', 'class')) {
         # The length was incorrectly set to 64 instead of 255.
         $dbh->bz_alter_column('bug_see_also', 'class',
-                              {TYPE => 'varchar(255)', NOTNULL => 1});
+                {TYPE => 'varchar(255)', NOTNULL => 1, DEFAULT => "''"});
         return;
     }
 

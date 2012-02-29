@@ -529,6 +529,11 @@ sub no_checksetup_from_cgi {
 # Used by install_string
 sub _get_string_from_file {
     my ($string_id, $file) = @_;
+    # If we already loaded the file, then use its copy from the cache.
+    if (my $strings = _cache()->{strings_from_file}->{$file}) {
+        return $strings->{$string_id};
+    }
+
     # This module is only needed by checksetup.pl,
     # so only load it when needed.
     require Safe;
@@ -537,6 +542,7 @@ sub _get_string_from_file {
     my $safe = new Safe;
     $safe->rdo($file);
     my %strings = %{$safe->varglob('strings')};
+    _cache()->{strings_from_file}->{$file} = \%strings;
     return $strings{$string_id};
 }
 

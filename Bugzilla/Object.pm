@@ -228,8 +228,11 @@ sub match {
             }            
             next;
         }
-        
-        $class->_check_field($field, 'match');
+
+        # It's always safe to use the field defined by classes as being
+        # their ID field. In particular, this means that new_from_list()
+        # is exempted from this check.
+        $class->_check_field($field, 'match') unless $field eq $class->ID_FIELD;
 
         if (ref $value eq 'ARRAY') {
             # IN () is invalid SQL, and if we have an empty list

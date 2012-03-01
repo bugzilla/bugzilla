@@ -774,6 +774,15 @@ sub in_group_id {
     return grep($_->id == $id, @{ $self->groups }) ? 1 : 0;
 }
 
+# This is a helper to get all groups which have an icon to be displayed
+# besides the name of the commenter.
+sub groups_with_icon {
+    my $self = shift;
+
+    my @groups = grep { $_->icon_url } @{ $self->groups };
+    return \@groups;
+}
+
 sub get_products_by_permission {
     my ($self, $group) = @_;
     # Make sure $group exists on a per-product basis.

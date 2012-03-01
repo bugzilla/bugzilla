@@ -6,9 +6,4 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% style_urls.push('extensions/BMO/web/styles/edit_bug.css') %]
-[% javascript_urls.push('extensions/BMO/web/js/edit_bug.js') %]
-[% title = "$bug.bug_id &ndash; $filtered_desc" %]
-[% javascript = javascript _ 
-                "document.title = document.title.replace(/^" _ terms.Bug _ " /, '');"
-%]
+[% title = title.replace('^' _ terms.Bug _ ' ', '') %]

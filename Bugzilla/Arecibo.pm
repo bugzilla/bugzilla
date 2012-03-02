@@ -222,6 +222,7 @@ sub _in_eval {
     my $in_eval = 0;
     for (my $stack = 1; my $sub = (caller($stack))[3]; $stack++) {
         last if $sub =~ /^ModPerl/;
+        last if $sub =~ /^Bugzilla::Template/;
         $in_eval = 1 if $sub =~ /^\(eval\)/;
     }
     return $in_eval;
@@ -232,7 +233,7 @@ BEGIN {
     CGI::Carp::set_die_handler(sub {
         return if _in_eval();
         my $message = shift;
-        my $is_compilation_failure = $message =~ /\bcompilation aborted\b/;
+        my $is_compilation_failure = $message =~ /\bcompilation (aborted|failed)\b/i;
         if (!$is_compilation_failure) {
             eval { Bugzilla::Error::ThrowTemplateError($message) };
         }

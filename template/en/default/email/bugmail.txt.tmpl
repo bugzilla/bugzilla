@@ -50,21 +50,17 @@ You are receiving this mail because:
 [% BLOCK generate_diffs %]
   [% urlbase %]show_bug.cgi?id=[% bug.id %]
 
-[%+ last_changer = "" %]
+[%+ last_changer = 0 %]
   [% FOREACH change = diffs %]
-    [% IF !isnew && change.who.login != last_changer %]
-      [% last_changer = change.who.login %]
+    [% IF !isnew && changer.id != last_changer %]
+      [% last_changer = changer.id %]
       [% IF change.blocker %]
         [% terms.Bug %] [%+ bug.id %] depends on [% terms.bug %] [%+ change.blocker.id %], which changed state.
 
 [%+ terms.Bug %] [%+ change.blocker.id %] Summary: [% change.blocker.short_desc %]
 [%+ urlbase %]show_bug.cgi?id=[% change.blocker.id %]
       [% ELSE %]
-        [%~ IF change.who.name %]
-          [% change.who.name _ " <" _ change.who.login _ ">" %]
-        [% ELSE %]
-          [% change.who.login %]
-        [% END %] changed:
+        [%~ changer.identity %] changed:
       [% END %]
 
            What    |Removed                     |Added

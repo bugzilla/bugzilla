@@ -47,10 +47,10 @@
 
 [% BLOCK generate_diffs %]
   [% SET in_table = 0 %]
-  [% last_changer = "" %]
+  [% last_changer = 0 %]
     [% FOREACH change = diffs %]
-      [% IF !isnew && change.who.login != last_changer %]
-        [% last_changer = change.who.login %]
+      [% IF !isnew && changer.id != last_changer %]
+        [% last_changer = changer.id %]
         [% IF in_table == 1 %]
           </table>
           [% SET in_table = 0 %]

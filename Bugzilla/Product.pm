@@ -109,7 +109,8 @@ sub preload {
     my @prod_ids = keys %prods;
     return unless @prod_ids;
 
-    my $dbh = Bugzilla->dbh;
+    # We cannot |use| it due to a dependency loop with Bugzilla::User.
+    require Bugzilla::Component;
     foreach my $field (qw(component version milestone)) {
         my $classname = "Bugzilla::" . ucfirst($field);
         my $objects = $classname->match({ product_id => \@prod_ids });

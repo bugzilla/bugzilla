@@ -63,6 +63,7 @@
 
 [% DEFAULT start_at = 0 mode = "show" %]
 [% sort_order = user.settings.comment_sort_order.value %]
+[% user_cache = template_cache.users %]
 
 [%# NOTE: (start_at > 0) means we came here from a midair collision,
   #       in which case we don't care what the user's preference is.
@@ -176,13 +177,18 @@
         </span>
 
         <span class="bz_comment_user">
-          [% INCLUDE global/user.html.tmpl who = comment.author %]
-          [% Hook.process('user', 'bug/comments.html.tmpl') %]
-        </span>
+          [%# No need to recreate the exact same template if we already have it. %]
+          [% commenter_id = comment.author.id %]
+          [% UNLESS user_cache.$commenter_id %]
+            [% user_cache.$commenter_id = BLOCK %]
+              [% INCLUDE global/user.html.tmpl who = comment.author %]
+            [% END %]
+          [% END %]
+          [% user_cache.$commenter_id FILTER none %]
+       </span>
 
         <span class="bz_comment_user_images">
-          [% FOREACH group = comment.author.direct_group_membership %]
-            [% NEXT UNLESS group.icon_url %]
+          [% FOREACH group = comment.author.groups_with_icon %]
             <img src="[% group.icon_url FILTER html %]"
                  alt="[% group.name FILTER html %]"
                  title="[% group.name FILTER html %] - [% group.description FILTER html %]">

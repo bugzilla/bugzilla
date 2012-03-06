@@ -33,6 +33,10 @@ YAHOO.util.Event.addListener(window, "load", function() {
   this.Linkify = function(elLiner, oRecord, oColumn, oData) {
     if (oData == 0)
       elLiner.innerHTML = ".";
+    else if (oRecord.getData("row_title") == "Total")
+      elLiner.innerHTML = "<a href='[% urlbase %]&amp;[% col_field FILTER js %]="
+                          + oColumn.field + "[% '&amp;' _ row_vals IF row_vals %]'>"
+                          + oData + "</a>";
     else
       elLiner.innerHTML = "<a href='[% urlbase %]&amp;[% row_field FILTER js %]="
                           + oRecord.getData("row_title").replace(/\s+$/,"")
@@ -43,6 +47,10 @@ YAHOO.util.Event.addListener(window, "load", function() {
   this.LinkifyTotal = function(elLiner, oRecord, oColumn, oData) {
     if (oData == 0)
       elLiner.innerHTML = ".";
+    else if (oRecord.getData("row_title") == "Total")
+      elLiner.innerHTML = "<a href='[% urlbase %][% '&amp;' _ row_vals IF row_vals %]
+                          [%~ '&amp;' _ col_vals IF col_vals %]'>"
+                          + oData + "</a>";
     else
       elLiner.innerHTML = "<a href='[% urlbase %]&amp;[% row_field FILTER js %]="
                           + oRecord.getData("row_title").replace(/\s+$/,"")

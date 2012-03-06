@@ -36,13 +36,14 @@
 
 [% col_field_disp = field_descs.$col_field || col_field %]
 [% row_field_disp = field_descs.$row_field || row_field %]
-  
+
+[% urlbase = BLOCK %]buglist.cgi?[% buglistbase FILTER html %][% END %]
 [% IF tbl == "-total-" %]
-  [% urlbase = BLOCK %]buglist.cgi?[% buglistbase FILTER html %]
-  [% "&amp;$tbl_vals" IF tbl_vals %][% END %]
-[% ELSE %]
-  [% urlbase = BLOCK %]buglist.cgi?[% buglistbase FILTER html %]&amp;
-  [% tbl_field FILTER uri %]=[% tbl FILTER uri %][% END %]
+  [% IF tbl_vals %]
+    [% urlbase = urlbase _ "&amp;" _ tbl_vals %]
+  [% END %]
+[% ELSIF tbl_field %]
+  [% urlbase = BLOCK %][% urlbase %]&amp;[% tbl_field FILTER uri %]=[% tbl FILTER uri %][% END %]
 [% END %]
 
 <script type="text/javascript">

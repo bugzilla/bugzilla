@@ -28,6 +28,7 @@ use Bugzilla::Object;
 use Bugzilla::User;
 use Bugzilla::Util qw(correct_urlbase trim trick_taint);
 use Bugzilla::Error;
+use Crypt::OpenPGP::Armour;
 use Crypt::OpenPGP::KeyRing;
 use Crypt::OpenPGP;
 use Crypt::SMIME;
@@ -86,10 +87,9 @@ sub object_validators {
             
             if ($value =~ /PUBLIC KEY/) {
                 # PGP keys must be ASCII-armoured.
-                my $ring = new Crypt::OpenPGP::KeyRing(Data => $value);
-                $ring->read if $ring;
-                if (!defined $ring || !scalar $ring->blocks) {
-                    ThrowUserError('securemail_invalid_key');
+                if (!Crypt::OpenPGP::Armour->unarmour($value)) {
+                    ThrowUserError('securemail_invalid_key',
+                                   { errstr => Crypt::OpenPGP::Armour->errstr });
                 }
             }
             elsif ($value =~ /BEGIN CERTIFICATE/) {
@@ -100,12 +100,12 @@ sub object_validators {
                 trick_taint($value);
 
                 my $smime = Crypt::SMIME->new();
-                
                 eval {
                     $smime->setPublicKey([$value]);
                 };                
                 if ($@) {
-                    ThrowUserError('securemail_invalid_key');
+                    ThrowUserError('securemail_invalid_key',
+                                   { errstr => $@ });
                 }
             }
             else {
@@ -276,6 +276,7 @@ sub _make_secure {
                                       Cipher     => 'CAST5',
                                       Armour     => 1);
         if (defined $encrypted) {
+            $email->encoding_set('');
             $email->body_set($encrypted);
         }
         else {

@@ -427,9 +427,8 @@ sub diff {
 sub viewall {
     # Retrieve and validate parameters
     my $bug = Bugzilla::Bug->check(scalar $cgi->param('bugid'));
-    my $bugid = $bug->id;
 
-    my $attachments = Bugzilla::Attachment->get_attachments_by_bug($bugid);
+    my $attachments = Bugzilla::Attachment->get_attachments_by_bug($bug);
     # Ignore deleted attachments.
     @$attachments = grep { $_->datasize } @$attachments;
 
@@ -605,7 +604,7 @@ sub edit {
   my $attachment = validateID();
 
   my $bugattachments =
-      Bugzilla::Attachment->get_attachments_by_bug($attachment->bug_id);
+      Bugzilla::Attachment->get_attachments_by_bug($attachment->bug);
   # We only want attachment IDs.
   @$bugattachments = map { $_->id } @$bugattachments;
 

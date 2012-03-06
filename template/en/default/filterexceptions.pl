@@ -88,7 +88,6 @@
 ],
 
 'reports/report-table.html.tmpl' => [
-  '"&amp;$tbl_vals" IF tbl_vals', 
   '"&amp;$col_vals" IF col_vals', 
   '"&amp;$row_vals" IF row_vals', 
   'classes.$row_idx.$col_idx', 

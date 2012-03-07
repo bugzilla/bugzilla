@@ -1,27 +1,9 @@
-# ***** BEGIN LICENSE BLOCK *****
-# Version: MPL 1.1
-# 
-# The contents of this file are subject to the Mozilla Public License Version
-# 1.1 (the "License"); you may not use this file except in compliance with the
-# License. You may obtain a copy of the License at http://www.mozilla.org/MPL/
-# 
-# Software distributed under the License is distributed on an "AS IS" basis,
-# WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
-# the specific language governing rights and limitations under the License.
-# 
-# The Original Code is the InlineHistory Bugzilla Extension;
-# Derived from the Bugzilla Tweaks Addon.
-# 
-# The Initial Developer of the Original Code is the Mozilla Foundation.
-# Portions created by the Initial Developer are Copyright (C) 2011 the Initial
-# Developer. All Rights Reserved.
-# 
-# Contributor(s):
-#   Johnathan Nightingale <johnath@mozilla.com>
-#   Ehsan Akhgari <ehsan@mozilla.com>
-#   Byron Jones <glob@mozilla.com>
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# ***** END LICENSE BLOCK *****
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::Extension::InlineHistory;
 use strict;
@@ -31,7 +13,7 @@ use Bugzilla::User::Setting;
 use Bugzilla::Constants;
 use Bugzilla::Attachment;
 
-our $VERSION = '1.4';
+our $VERSION = '1.5';
 
 # don't show inline history for bugs with lots of changes
 use constant MAXIMUM_ACTIVITY_COUNT => 500;
@@ -40,25 +22,16 @@ sub template_before_process {
     my ($self, $args) = @_;
     my $file = $args->{'file'};
     my $vars = $args->{'vars'};
+
+    return if $file ne 'bug/edit.html.tmpl';
+
     my $user = Bugzilla->user;
     my $dbh = Bugzilla->dbh;
-
-    return unless $user && $user->id && $user->settings;
-    return unless $user->settings->{'inline_history'}->{'value'} eq 'on';
-
-    # in the header we just need to set the var, to ensure the css and
-    # javascript get included
-    if ($file eq 'bug/show-header.html.tmpl') {
-        $vars->{'ih_activity'} = 1;
-        return;
-    } elsif ($file ne 'bug/edit.html.tmpl') {
-        return;
-    }
+    return unless $user->id && $user->settings->{'inline_history'}->{'value'} eq 'on';
 
     # note: bug/edit.html.tmpl doesn't support multiple bugs
-    my $bug_id = exists $vars->{'bugs'}
-        ? $vars->{'bugs'}[0]->id
-        : $vars->{'bug'}->id;
+    my $bug = exists $vars->{'bugs'} ? $vars->{'bugs'}[0] : $vars->{'bug'};
+    my $bug_id = $bug->id;
 
     # build bug activity
     my ($activity) = Bugzilla::Bug::GetBugActivity($bug_id);
@@ -71,24 +44,32 @@ sub template_before_process {
         return;
     }
 
-    Bugzilla->request_cache->{ih_user_cache} ||= {};
-    my $user_cache = Bugzilla->request_cache->{ih_user_cache};
+    # prime caches with objects already loaded
+    my %user_cache;
+    foreach my $comment (@{$bug->comments}) {
+        $user_cache{$comment->{author}->login} = $comment->{author};
+    }
+
+    my %attachment_cache;
+    foreach my $attachment (@{$bug->attachments}) {
+        $attachment_cache{$attachment->id} = $attachment;
+    }
+
+    # build a list of bugs we need to check visibility of, so we can check with a single query
+    my %visible_bug_ids;
 
     # augment and tweak
     foreach my $operation (@$activity) {
         # make operation.who an object
-        if (!$user_cache->{$operation->{who}}) {
-            $user_cache->{$operation->{who}} 
-                = Bugzilla::User->new({ name => $operation->{who} });
-        }
-        $operation->{who} = $user_cache->{$operation->{who}};
+        $user_cache{$operation->{who}} ||= Bugzilla::User->new({ name => $operation->{who} });
+        $operation->{who} = $user_cache{$operation->{who}};
 
         for (my $i = 0; $i < scalar(@{$operation->{changes}}); $i++) {
             my $change = $operation->{changes}->[$i];
 
             # make an attachment object
             if ($change->{attachid}) {
-                $change->{attach} = Bugzilla::Attachment->new($change->{attachid});
+                $change->{attach} = $attachment_cache{$change->{attachid}};
             }
 
             # empty resolutions are displayed as --- by default
@@ -110,10 +91,20 @@ sub template_before_process {
             }
 
             # identify buglist changes
-            $change->{buglist} = 
-                $change->{fieldname} eq 'blocked' ||
+            if ($change->{fieldname} eq 'blocked' ||
                 $change->{fieldname} eq 'dependson' ||
-                $change->{fieldname} eq 'dupe';
+                $change->{fieldname} eq 'dupe'
+            ) {
+                $change->{buglist} = 1;
+                foreach my $what (qw(removed added)) {
+                    my @buglist = split(/[\s,]+/, $change->{$what});
+                    foreach my $id (@buglist) {
+                        if ($id && $id =~ /^\d+$/) {
+                            $visible_bug_ids{$id} = 1;
+                        }
+                    }
+                }
+            }
 
             # split multiple flag changes (must be processed last)
             if ($change->{fieldname} eq 'flagtypes.name') {
@@ -148,6 +139,8 @@ sub template_before_process {
             }
         }
     }
+
+    $user->visible_bugs([keys %visible_bug_ids]);
 
     $vars->{'ih_activity'} = $activity;
 }

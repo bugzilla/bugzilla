@@ -1,32 +1,12 @@
-[%# ***** BEGIN LICENSE BLOCK *****
-  # Version: MPL 1.1
-  # 
-  # The contents of this file are subject to the Mozilla Public License Version
-  # 1.1 (the "License"); you may not use this file except in compliance with
-  # the License. You may obtain a copy of the License at
-  # http://www.mozilla.org/MPL/
-  # 
-  # Software distributed under the License is distributed on an "AS IS" basis,
-  # WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
-  # for the specific language governing rights and limitations under the
-  # License.
-  # 
-  # The Original Code is the InlineHistory Bugzilla Extension;
-  # Derived from the Bugzilla Tweaks Addon.
-  # 
-  # The Initial Developer of the Original Code is the Mozilla Foundation.
-  # Portions created by the Initial Developer are Copyright (C) 2011 the
-  # Initial Developer. All Rights Reserved.
-  # 
-  # Contributor(s):
-  #   Johnathan Nightingale <johnath@mozilla.com>
-  #   Ehsan Akhgari <ehsan@mozilla.com>
-  #   Byron Jones <glob@mozilla.com>
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
   #
-  # ***** END LICENSE BLOCK *****
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% IF ih_activity %]
+[% RETURN UNLESS ih_activity %]
 [%# this div exists to allow bugzilla-tweaks to detect when we're active %]
 <div id="inline-history-ext"></div>
 
@@ -38,15 +18,20 @@
     var html = '';
     [% has_cc = 0 %]
     [% has_flag = 0 %]
+    [% changer_identity = "" %]
+    [% changer_login = operation.who.login %]
+    [% change_date = operation.when FILTER time %]
+
     [% FOREACH change = operation.changes %]
       [%# track flag changes %]
       [% IF change.fieldname == 'flagtypes.name' && change.added != '' %]
+        [% changer_identity = operation.who.identity UNLESS changer_identity %]
         var item = new Array(5);
-        item[0] = '[% operation.who.login FILTER js %]';
-        item[1] = '[% operation.when FILTER time FILTER js %]';
+        item[0] = '[% changer_login FILTER js %]';
+        item[1] = '[% change_date FILTER js %]';
         item[2] = '[% change.attachid FILTER js %]';
         item[3] = '[% change.added FILTER js %]';
-        item[4] = '[% operation.who.identity FILTER js %]';
+        item[4] = '[% changer_identity FILTER js %]';
         ih_activity_flags.push(item);
         [% has_flag = 1 %]
       [% END %]
@@ -109,13 +94,21 @@
         html += '</span>';
       [% END %]
     [% END %]
+
+    [% changer_id = operation.who.id %]
+    [% UNLESS user_cache.$changer_id %]
+      [% user_cache.$changer_id = BLOCK %]
+        [% INCLUDE global/user.html.tmpl who = comment.author %]
+      [% END %]
+    [% END %]
+
     var item = new Array(7);
-    item[0] = '[% operation.who.login FILTER js %]';
-    item[1] = '[% operation.when FILTER time FILTER js %]';
+    item[0] = '[% changer_login FILTER js %]';
+    item[1] = '[% change_date FILTER js %]';
     item[2] = html;
     item[3] = '<div class="bz_comment_head">'
               + '<span class="bz_comment_user">'
-              + '[% INCLUDE global/user.html.tmpl who = operation.who FILTER js %]'
+              + '[% user_cache.$changer_id FILTER js %]'
               + '</span>'
               + '<span class="bz_comment_time"> ' + item[1] + ' </span>'
               + '</div>';
@@ -126,7 +119,6 @@
   [% END %]
   inline_history.init();
 </script>
-[% END %]
 
 [% BLOCK add_change %]
   html += '[%~%]
@@ -149,9 +141,9 @@
            change.fieldname == 'qa_contact' ||
            change.fieldname == 'cc' ||
            change.fieldname == 'flagtypes.name' %]
-    [% display_value(change.fieldname, value) FILTER email FILTER js %]
+    [% value FILTER email FILTER js %]
   [% ELSE %]
-    [% display_value(change.fieldname, value) FILTER html FILTER js %]
+    [% value FILTER html FILTER js %]
   [% END %]
   [%~ %]';
 [% END %]

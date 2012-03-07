@@ -20,9 +20,7 @@ our $VERSION = '0.1';
 
 sub page_before_template {
     my ($self, $args) = @_;
-
     my ($vars, $page) = @$args{qw(vars page_id)};
-    my $input = Bugzilla->input_params;
 
     if ($page eq 'splinter.html') {
         # Login is required for performing a review
@@ -34,6 +32,7 @@ sub page_before_template {
         # If both are give they will be checked later to make
         # sure they are connected.
 
+        my $input = Bugzilla->input_params;
         if ($input->{'bug'}) {
             $vars->{'bug_id'} = $input->{'bug'};
             $vars->{'attach_id'} = $input->{'attachment'};

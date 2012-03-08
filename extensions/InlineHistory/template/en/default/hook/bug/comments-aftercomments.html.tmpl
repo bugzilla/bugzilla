@@ -98,7 +98,7 @@
     [% changer_id = operation.who.id %]
     [% UNLESS user_cache.$changer_id %]
       [% user_cache.$changer_id = BLOCK %]
-        [% INCLUDE global/user.html.tmpl who = comment.author %]
+        [% INCLUDE global/user.html.tmpl who = operation.who %]
       [% END %]
     [% END %]
 

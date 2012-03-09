@@ -333,6 +333,7 @@ TUI_hide_default('information_query');
       <select name="emailtype[% n %]">
       [% FOREACH qv = [
         { name => "substring", description => "contains" },
+        { name => "notsubstring", description => "doesn't contain" },
         { name => "exact", description => "is" },
         { name => "notequals", description => "is not" },
         { name => "regexp", description => "matches regexp" },

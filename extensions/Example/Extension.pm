@@ -807,6 +807,20 @@ sub bug_check_can_change_field {
     }
 }
 
+sub admin_editusers_action {
+    my ($self, $args) = @_;
+    my ($vars, $action, $user) = @$args{qw(vars action user)};
+    my $template = Bugzilla->template;
+
+    if ($action eq 'my_action') {
+        # Allow to restrict the search to any group the user is allowed to bless.
+        $vars->{'restrictablegroups'} = $user->bless_groups();
+        $template->process('admin/users/search.html.tmpl', $vars)
+            || ThrowTemplateError($template->error());
+        exit;
+    }
+}
+
 sub user_preferences {
     my ($self, $args) = @_;
     my $tab = $args->{current_tab};

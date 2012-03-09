@@ -50,6 +50,9 @@ my $token          = $cgi->param('token');
 $vars->{'editusers'} = $editusers;
 mirrorListSelectionValues();
 
+Bugzilla::Hook::process('admin_editusers_action',
+    { vars => $vars, user => $user, action => $action });
+
 ###########################################################################
 if ($action eq 'search') {
     # Allow to restrict the search to any group the user is allowed to bless.

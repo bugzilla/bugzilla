@@ -1354,6 +1354,30 @@ name), you can get it from here.
 
 =back
 
+=head2 admin_editusers_action
+
+This hook allows you to add additional actions to the admin Users page,
+
+Params:
+
+=over
+
+=item C<vars>
+
+You can add as many new key/value pairs as you want to this hashref.
+It will be passed to the template.
+
+=item C<action>
+
+A text which indicates the different behaviors that edit_users.cgi will have.
+With this hook you can change the behavior of an action or add new actions.
+
+=item C<user>
+
+This is a Bugzilla::User object of the user.
+
+=back
+
 =head2 user_preferences
 
 This hook allows you to add additional panels to the User Preferences page,

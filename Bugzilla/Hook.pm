@@ -1356,7 +1356,7 @@ name), you can get it from here.
 
 =head2 admin_editusers_action
 
-This hook allows you to add additional actions to the admin Users page,
+This hook allows you to add additional actions to the admin Users page.
 
 Params:
 

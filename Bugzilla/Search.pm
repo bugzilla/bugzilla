@@ -799,7 +799,7 @@ sub _extra_columns {
     my ($self) = @_;
     # Everything that's going to be in the ORDER BY must also be
     # in the SELECT.
-    $self->{extra_columns} ||= [ $self->_valid_order_columns ];
+    push(@{ $self->{extra_columns} }, $self->_valid_order_columns);
     return @{ $self->{extra_columns} };
 }
 

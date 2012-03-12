@@ -268,10 +268,10 @@ sub input_params {
     return $cache->{input_params};
 }
 
+our $_localconfig;
 sub localconfig {
-    my $class = shift;
-    $class->request_cache->{localconfig} ||= read_localconfig();
-    return $class->request_cache->{localconfig};
+    $_localconfig ||= read_localconfig();
+    return $_localconfig;
 }
 
 sub params {

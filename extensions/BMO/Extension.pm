@@ -878,7 +878,7 @@ sub post_bug_after_creation {
             $new_bug = Bugzilla::Bug->create({ 
                 short_desc        => 'Investigate Lost Device',
                 product           => 'mozilla.org',
-                component         => 'Infrastructure Security',
+                component         => 'Security Assurance: Incident',
                 status_whiteboard => '[infrasec:incident]',
                 bug_severity      => 'critical',
                 cc                => [ 'mcoates@mozilla.com', 'jstevensen@mozilla.com' ],

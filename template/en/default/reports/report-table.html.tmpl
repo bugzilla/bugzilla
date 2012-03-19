@@ -36,13 +36,14 @@
 
 [% col_field_disp = field_descs.$col_field || col_field %]
 [% row_field_disp = field_descs.$row_field || row_field %]
-  
+
+[% urlbase = BLOCK %]buglist.cgi?[% buglistbase FILTER html %][% END %]
 [% IF tbl == "-total-" %]
-  [% urlbase = BLOCK %]buglist.cgi?[% buglistbase FILTER html %]
-  [% "&amp;$tbl_vals" IF tbl_vals %][% END %]
-[% ELSE %]
-  [% urlbase = BLOCK %]buglist.cgi?[% buglistbase FILTER html %]&amp;
-  [% tbl_field FILTER uri %]=[% tbl FILTER uri %][% END %]
+  [% IF tbl_vals %]
+    [% urlbase = urlbase _ "&amp;" _ tbl_vals %]
+  [% END %]
+[% ELSIF tbl_field %]
+  [% urlbase = BLOCK %][% urlbase %]&amp;[% tbl_field FILTER uri %]=[% tbl FILTER uri %][% END %]
 [% END %]
 
 <script type="text/javascript">
@@ -50,6 +51,10 @@ YAHOO.util.Event.addListener(window, "load", function() {
   this.Linkify = function(elLiner, oRecord, oColumn, oData) {
     if (oData == 0)
       elLiner.innerHTML = ".";
+    else if (oRecord.getData("row_title") == "Total")
+      elLiner.innerHTML = "<a href='[% urlbase %]&amp;[% col_field FILTER js %]="
+                          + oColumn.field + "[% '&amp;' _ row_vals IF row_vals %]'>"
+                          + oData + "</a>";
     else
       elLiner.innerHTML = "<a href='[% urlbase %]&amp;[% row_field FILTER js %]="
                           + oRecord.getData("row_title").replace(/\s+$/,"")
@@ -60,6 +65,10 @@ YAHOO.util.Event.addListener(window, "load", function() {
   this.LinkifyTotal = function(elLiner, oRecord, oColumn, oData) {
     if (oData == 0)
       elLiner.innerHTML = ".";
+    else if (oRecord.getData("row_title") == "Total")
+      elLiner.innerHTML = "<a href='[% urlbase %][% '&amp;' _ row_vals IF row_vals %]
+                          [%~ '&amp;' _ col_vals IF col_vals %]'>"
+                          + oData + "</a>";
     else
       elLiner.innerHTML = "<a href='[% urlbase %]&amp;[% row_field FILTER js %]="
                           + oRecord.getData("row_title").replace(/\s+$/,"")
@@ -93,7 +102,7 @@ YAHOO.util.Event.addListener(window, "load", function() {
   var myColumnDefs = [
         {key:"row_title", label:"", sortable:true, sortOptions: { sortFunction:totalNumberSorter }},
         [% FOREACH col = col_names %]
-          {key:"[% col FILTER js %]", label:"[% col FILTER js %]", sortable:true,
+          {key:"[% col FILTER js %]", label:"[% display_value(col_field, col) FILTER js %]", sortable:true,
            formatter:this.Linkify, sortOptions: { defaultDir: YAHOO.widget.DataTable.CLASS_DESC, sortFunction:totalNumberSorter }},
         [% END %]
         {key:"total", label:"Total", sortable:true, formatter:this.LinkifyTotal,

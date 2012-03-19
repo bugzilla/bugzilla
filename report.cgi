@@ -36,7 +36,6 @@ use List::MoreUtils qw(uniq);
 my $cgi = Bugzilla->cgi;
 my $template = Bugzilla->template;
 my $vars = {};
-my $buffer = $cgi->query_string();
 
 # Go straight back to query.cgi if we are adding a boolean chart.
 if (grep(/^cmd-/, $cgi->param())) {
@@ -49,9 +48,6 @@ if (grep(/^cmd-/, $cgi->param())) {
 }
 
 Bugzilla->login();
-
-my $dbh = Bugzilla->switch_to_shadow_db();
-
 my $action = $cgi->param('action') || 'menu';
 
 if ($action eq "menu") {
@@ -61,6 +57,9 @@ if ($action eq "menu") {
       || ThrowTemplateError($template->error());
     exit;
 }
+
+# Sanitize the URL, to make URLs shorter.
+$cgi->clean_search_url;
 
 my $col_field = $cgi->param('x_axis_field') || '';
 my $row_field = $cgi->param('y_axis_field') || '';
@@ -135,6 +134,7 @@ my $query = $search->sql;
 $::SIG{TERM} = 'DEFAULT';
 $::SIG{PIPE} = 'DEFAULT';
 
+my $dbh = Bugzilla->switch_to_shadow_db();
 my $results = $dbh->selectall_arrayref($query);
 
 # We have a hash of hashes for the data itself, and a hash to hold the 
@@ -243,10 +243,10 @@ if ($action eq "wrap") {
     # We need to keep track of the defined restrictions on each of the 
     # axes, because buglistbase, below, throws them away. Without this, we
     # get buglistlinks wrong if there is a restriction on an axis field.
-    $vars->{'col_vals'} = join("&", $buffer =~ /[&?]($col_field=[^&]+)/g);
-    $vars->{'row_vals'} = join("&", $buffer =~ /[&?]($row_field=[^&]+)/g);
-    $vars->{'tbl_vals'} = join("&", $buffer =~ /[&?]($tbl_field=[^&]+)/g);
-    
+    $vars->{'col_vals'} = get_field_restrictions($col_field);
+    $vars->{'row_vals'} = get_field_restrictions($row_field);
+    $vars->{'tbl_vals'} = get_field_restrictions($tbl_field);
+
     # We need a number of different variants of the base URL for different
     # URLs in the HTML.
     $vars->{'buglistbase'} = $cgi->canonicalise_query(
@@ -345,4 +345,11 @@ sub check_value {
         $value = ' ' if (!defined $value || $value eq '');
     }
     return $value;
+}
+
+sub get_field_restrictions {
+    my $field = shift;
+    my $cgi = Bugzilla->cgi;
+
+    return join('&', map {"$field=$_"} $cgi->param($field));
 }

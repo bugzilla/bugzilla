@@ -27,7 +27,7 @@
 
 <script type="text/javascript">
 <!--
-  /* Adds the reply text to the `comment' textarea */
+  /* Adds the reply text to the 'comment' textarea */
   function replyToComment(id, real_id, name) {
       var prefix = "(In reply to " + name + " from comment #" + id + ")\n";
       var replytext = "";
@@ -185,6 +185,7 @@
             [% END %]
           [% END %]
           [% user_cache.$commenter_id FILTER none %]
+          [% Hook.process('user', 'bug/comments.html.tmpl') %]
        </span>
 
         <span class="bz_comment_user_images">

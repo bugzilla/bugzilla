@@ -68,10 +68,13 @@
   </span>
 
   [% IF debug %]
-    <p class="bz_query">[% query FILTER html %]</p>
-    [% IF query_explain.defined %]
-      <pre class="bz_query_explain">[% query_explain FILTER html %]</pre>
-    [% END %]
+    <div class="bz_query_debug">
+      <p>[% query FILTER html %]</p>
+      <p>Execution time: [% query_time FILTER html %] seconds</p>
+      [% IF query_explain.defined %]
+        <pre>[% query_explain FILTER html %]</pre>
+      [% END %]
+    </div>
   [% END %]
 
   [% IF user.settings.display_quips.value == 'on' %]

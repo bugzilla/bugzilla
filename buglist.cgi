@@ -32,6 +32,7 @@ use Bugzilla::Status;
 use Bugzilla::Token;
 
 use Date::Parse;
+use Time::HiRes qw(gettimeofday tv_interval);
 
 my $cgi = Bugzilla->cgi;
 my $dbh = Bugzilla->dbh;
@@ -792,8 +793,10 @@ $::SIG{TERM} = 'DEFAULT';
 $::SIG{PIPE} = 'DEFAULT';
 
 # Execute the query.
+my $start_time = [gettimeofday()];
 my $buglist_sth = $dbh->prepare($query);
 $buglist_sth->execute();
+$vars->{query_time} = tv_interval($start_time);
 
 
 ################################################################################

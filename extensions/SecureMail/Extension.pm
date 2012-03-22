@@ -258,40 +258,31 @@ sub mailer_before_send {
 }
 
 sub _make_secure {
-    my ($email, $key, $is_bugmail) = @_;
+    my ($email, $key, $sanitise_subject) = @_;
 
-    my $bug_id = undef;
     my $subject = $email->header('Subject');
+    my ($bug_id) = $subject =~ /^\D+(\d+)/;
 
-    # We only change the subject if it's a bugmail; password mails don't have
-    # confidential information in the subject.
-    if ($is_bugmail) {            
-        $subject =~ /^[^\d]+(\d+)/;
-        $bug_id = $1;
-        
-        my $new_subject = $subject;
-        # This is designed to still work if the admin changes the word
-        # 'bug' to something else. However, it could break if they change
-        # the format of the subject line in another way.
-        $new_subject =~ s/($bug_id\])\s+(.*)$/$1 (Secure bug updated)/;
-        $email->header_set('Subject', $new_subject);
+    my $key_type = 0;
+    if ($key && $key =~ /PUBLIC KEY/) {
+        $key_type = 'PGP';
+    }
+    elsif ($key && $key =~ /BEGIN CERTIFICATE/) {
+        $key_type = 'S/MIME';
     }
 
-    if ($key && $key =~ /PUBLIC KEY/) {
+    if ($key_type && $sanitise_subject) {
+        # Subject gets placed in the body so it can still be read
+        my $body = $email->body_str;
+        $body = "Subject: $subject\015\012\015\012" . $body;
+        $email->body_str_set($body);
+    }
+
+    if ($key_type eq 'PGP') {
         ##################
         # PGP Encryption #
         ##################
 
-        # We need to work with the body as a decoded string as we may
-        # modify it
-        my $body = $email->body_str;
-        if ($is_bugmail) {
-            # Subject gets placed in the body so it can still be read
-            $body = "Subject: $subject\n\n" . $body;
-        }
-        # Crypt::OpenPGP requires an encoded string
-        $body = encode('UTF8', $body);
-        
         my $pubring = new Crypt::OpenPGP::KeyRing(Data => $key);
         my $pgp = new Crypt::OpenPGP(PubRing => $pubring);
         
@@ -301,7 +292,7 @@ sub _make_secure {
         # We use the CAST5 cipher because the Rijndael (AES) module doesn't
         # like us for some reason I don't have time to debug fully.
         # ("key must be an untainted string scalar")
-        my $encrypted = $pgp->encrypt(Data       => $body, 
+        my $encrypted = $pgp->encrypt(Data       => $email->body, 
                                       Recipients => "@", 
                                       Cipher     => 'CAST5',
                                       Armour     => 1);
@@ -312,8 +303,9 @@ sub _make_secure {
         else {
             $email->body_set('Error during Encryption: ' . $pgp->errstr);
         }
+
     }
-    elsif ($key && $key =~ /BEGIN CERTIFICATE/) {
+    elsif ($key_type eq 'S/MIME') {
         #####################
         # S/MIME Encryption #
         #####################
@@ -351,6 +343,14 @@ sub _make_secure {
           || ThrowTemplateError($template->error());
         
         $email->body_set($message);
+    }
+
+    if ($sanitise_subject) {
+        # This is designed to still work if the admin changes the word
+        # 'bug' to something else. However, it could break if they change
+        # the format of the subject line in another way.
+        $subject =~ s/($bug_id\])\s+(.*)$/$1 (Secure bug updated)/;
+        $email->header_set('Subject', $subject);
     }
 }
 

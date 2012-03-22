@@ -207,7 +207,8 @@ sub mailer_before_send {
     # Decide whether to make secure.
     # This is a bit of a hack; it would be nice if it were more clear 
     # what sort a particular email is.
-    my $is_bugmail      = $email->header('X-Bugzilla-Status');
+    my $is_bugmail      = $email->header('X-Bugzilla-Status') ||
+                          $email->header('X-Bugzilla-Type') eq 'request';
     my $is_passwordmail = !$is_bugmail && ($email->body =~ /cfmpw.*cxlpw/s);
     my $is_test_email   = $email->header('X-Bugzilla-Type') =~ /securemail-test/ ? 1 : 0;
 

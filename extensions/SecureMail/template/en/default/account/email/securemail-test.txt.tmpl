@@ -1,0 +1,23 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+From: [% Param('mailfrom') %]
+To: [% to_user %]
+Subject: [% terms.Bugzilla %] SecureMail Test Email
+X-Bugzilla-Type: securemail-test
+
+Congratulations! If you can read this, then your SecureMail encryption
+key uploaded to [% terms.Bugzilla %] is working properly.
+
+To update your SecureMail preferences at any time, please go to:
+[%+ urlbase %]userprefs.cgi?tab=securemail
+
+Sincerely,
+Your Friendly [% terms.Bugzilla %] Administrator

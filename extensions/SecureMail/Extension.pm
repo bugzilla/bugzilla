@@ -28,6 +28,8 @@ use Bugzilla::Object;
 use Bugzilla::User;
 use Bugzilla::Util qw(correct_urlbase trim trick_taint);
 use Bugzilla::Error;
+use Bugzilla::Mailer;
+
 use Crypt::OpenPGP::Armour;
 use Crypt::OpenPGP::KeyRing;
 use Crypt::OpenPGP;
@@ -153,6 +155,7 @@ sub user_preferences {
     my $save    = $args->{'save_changes'};
     my $handled = $args->{'handled'};
     my $vars    = $args->{'vars'};
+    my $params  = Bugzilla->input_params;
     
     return unless $tab eq 'securemail';
 
@@ -161,9 +164,14 @@ sub user_preferences {
     my $user = new Bugzilla::User(Bugzilla->user->id);
     
     if ($save) {
-        my $public_key = Bugzilla->input_params->{'public_key'};
-        $user->set('public_key', $public_key);
+        $user->set('public_key', $params->{'public_key'});
         $user->update();
+
+        # Send user a test email
+        if ($user->{'public_key'}) {
+            _send_test_email($user);
+            $vars->{'test_email_sent'} = 1;
+        }
     }
     
     $vars->{'public_key'} = $user->{'public_key'};
@@ -171,6 +179,21 @@ sub user_preferences {
     # Set the 'handled' scalar reference to true so that the caller
     # knows the panel name is valid and that an extension took care of it.
     $$handled = 1;
+}
+
+sub _send_test_email {
+    my ($user) = @_;
+    my $template = Bugzilla->template_inner($user->settings->{'lang'}->{'value'});
+
+    my $vars = {
+        to_user => $user->email, 
+    };
+
+    my $msg = "";
+    $template->process("account/email/securemail-test.txt.tmpl", $vars, \$msg)
+        || ThrowTemplateError($template->error());
+
+    MessageToMTA($msg);
 }
 
 ##############################################################################
@@ -186,8 +209,9 @@ sub mailer_before_send {
     # what sort a particular email is.
     my $is_bugmail      = $email->header('X-Bugzilla-Status');
     my $is_passwordmail = !$is_bugmail && ($email->body =~ /cfmpw.*cxlpw/s);
-    
-    if ($is_bugmail || $is_passwordmail) {
+    my $is_test_email   = $email->header('X-Bugzilla-Type') =~ /securemail-test/ ? 1 : 0;
+
+    if ($is_bugmail || $is_passwordmail || $is_test_email) {
         # Convert the email's To address into a User object
         my $login = $email->header('To');        
         my $emailsuffix = Bugzilla->params->{'emailsuffix'};

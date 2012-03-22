@@ -17,6 +17,12 @@
   # Contributor(s): Max Kanat-Alexander <mkanat@bugzilla.org>
   #%]
 
+[% IF test_email_sent %]
+  <div id="message">
+    An encrypted test email has been sent to your address.
+  </div>
+[% END %]
+
 <p>Some [% terms.bugs %] in this [% terms.Bugzilla %] are in groups the administrator has 
 deemed 'secure'. This means emails containing information about those [% terms.bugs %] 
 will only be sent encrypted. Enter your PGP/GPG public key or 
@@ -30,3 +36,5 @@ SMIME certificate here to receive full update emails for such [% terms.bugs %].<
 
 <textarea id="public_key" name="public_key" cols="72" rows="12">
   [%- public_key FILTER html %]</textarea>
+
+<p>Submitting valid changes will automatically send an encrypted test email to your address.</p>

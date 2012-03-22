@@ -119,7 +119,7 @@ td.bz_total {
   margin-top: .25em;
 }
 
-.bz_query_explain {
+.bz_query_debug {
     text-align: left;
 }
 

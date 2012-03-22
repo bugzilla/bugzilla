@@ -2060,6 +2060,9 @@ May not be an array.
 
 C<string> The login name of the user who created the bug.
 
+You can also pass this argument with the name C<reporter>, for
+backwards compatibility with older Bugzillas.
+
 =item C<id>
 
 C<int> The numeric id of the bug.
@@ -2095,13 +2098,6 @@ C<string> The Priority field on a bug.
 =item C<product>
 
 C<string> The name of the Product that the bug is in.
-
-=item C<creator>
-
-C<string> The login name of the user who reported the bug.
-
-You can also pass this argument with the name C<reporter>, for
-backwards compatibility with older Bugzillas.
 
 =item C<resolution>
 

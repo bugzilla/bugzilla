@@ -25,6 +25,9 @@
   [% script_name = login_target _ connector _ "GoAheadAndLogIn=1" %]
   <a id="login_link[% qs_suffix %]" href="[% script_name FILTER html %]"
      onclick="return show_mini_login_form('[% qs_suffix %]')">Log In</a>
+
+  [% Hook.process('additional_methods') %]
+  
   <form action="[% login_target FILTER html %]" method="POST" 
         class="mini_login bz_default_hidden"
         id="mini_login[% qs_suffix FILTER html %]"

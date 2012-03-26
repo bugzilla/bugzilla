@@ -524,7 +524,7 @@ use constant MAX_CLASSIFICATION_SIZE => 64;
 use constant MAX_PRODUCT_SIZE => 64;
 
 # The longest milestone name allowed.
-use constant MAX_MILESTONE_SIZE => 20;
+use constant MAX_MILESTONE_SIZE => 64;
 
 # The longest component name allowed.
 use constant MAX_COMPONENT_SIZE => 64;

@@ -3765,7 +3765,7 @@ sub get_activity {
                bugs_activity.comment_id
           FROM bugs_activity
                $suppjoins
-     LEFT JOIN fielddefs
+    INNER JOIN fielddefs
             ON bugs_activity.fieldid = fielddefs.id
     INNER JOIN profiles
             ON profiles.userid = bugs_activity.who

@@ -1680,7 +1680,11 @@ sub _handle_chart {
     $search_args{quoted} = $self->_quote_unless_numeric(\%search_args);
     # This should add a "term" selement to %search_args.
     $self->do_search_function(\%search_args);
-    
+
+    # If term is left empty, then this means the criteria
+    # has no effect and can be ignored.
+    return unless $search_args{term};
+
     # All the things here that don't get pulled out of
     # %search_args are their original values before
     # do_search_function modified them.   

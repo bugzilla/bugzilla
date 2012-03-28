@@ -6,5 +6,12 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% relationships.push({ id = constants.REL_COMPONENT_WATCHER, description = "Component" }) %]
-[% no_added_removed.push(constants.REL_COMPONENT_WATCHER) %]
+[% CALL columns.splice(5, 0, { name => 'watch_user', heading => 'Watch User' }) %]
+
+[% FOREACH my_component = product.components %]
+  [% overrides.watch_user.name.${my_component.name} = {
+        override_content => 1
+        content          => my_component.watch_user.login
+     }
+  %]
+[% END %]

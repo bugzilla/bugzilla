@@ -1,22 +1,9 @@
-[%#
-  # The contents of this file are subject to the Mozilla Public
-  # License Version 1.1 (the "License"); you may not use this file
-  # except in compliance with the License. You may obtain a copy of
-  # the License at http://www.mozilla.org/MPL/
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
   #
-  # Software distributed under the License is distributed on an "AS
-  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-  # implied. See the License for the specific language governing
-  # rights and limitations under the License.
-  #
-  # The Original Code is the Component Watching Extension
-  #
-  # The Initial Developer of the Original Code is the Mozilla Foundation
-  # Portions created by the Initial Developers are Copyright (C) 2011 the
-  # Initial Developer. All Rights Reserved.
-  #
-  # Contributor(s):
-  #   Byron Jones <bjones@mozilla.com>
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
   #%]
 
 [%# initialise product to component mapping #%]
@@ -29,15 +16,22 @@ var useclassification = false;
 var first_load = true;
 var last_sel = [];
 var cpts = new Array();
+var watch_users = new Array();
 [% n = 0 %]
 [% FOREACH prod = selectable_products %]
   cpts['[% n %]'] = [
     [%- FOREACH comp = prod.components %]'[% comp.name FILTER js %]'[% ", " UNLESS loop.last %] [%- END -%] ];
-  [% n = n+1 %]
+  [% n = n + 1 %]
+  [% FOREACH comp = prod.components %]
+    [% IF comp.watch_user %]
+      if (!watch_users['[% prod.name FILTER js %]'])
+        watch_users['[% prod.name FILTER js %]'] = new Array();
+      watch_users['[% prod.name FILTER js %]']['[% comp.name FILTER js %]'] = '[% comp.watch_user.login FILTER js %]';
+    [% END %]
+  [% END %]
 [% END %]
 </script>
-<script type="text/javascript"
-  src="[% 'js/productform.js' FILTER mtime FILTER html %]">
+<script type="text/javascript" src="[% 'js/productform.js' FILTER mtime FILTER html %]">
 </script>
 
 <script>
@@ -52,6 +46,19 @@ function onSelectProduct() {
     // support IE
     component.add(new Option('__Any__', ''), 0);
   }
+  onSelectComponent();
+}
+
+function onSelectComponent() {
+  var product_select = Dom.get('product');
+  var product = product_select.options[product_select.selectedIndex].value;
+  var component = Dom.get('component').value;
+  if (component && watch_users[product] && watch_users[product][component]) {
+    Dom.get('watch-user-email').innerHTML = watch_users[product][component];
+    Dom.get('watch-user-div').style.display = '';
+  } else {
+    Dom.get('watch-user-div').style.display = 'none';
+  }
 }
 
 YAHOO.util.Event.onDOMReady(onSelectProduct);
@@ -64,8 +71,8 @@ watch "__Any__".
 
 <table border="0" cellpadding="3" cellspacing="0">
 <tr>
-  <td align="right">Product</td>
-  <td>
+  <td align="right">Product:</td>
+  <td colspan="2">
     <select name="add_product" id="product" onChange="onSelectProduct()">
     [% FOREACH product IN selectable_products %]
       <option>[% product.name FILTER html %]</option>
@@ -74,9 +81,9 @@ watch "__Any__".
   </td>
 </tr>
 <tr>
-  <td align="right" valign="top">Component</td>
+  <td align="right" valign="top">Component:</td>
   <td>
-    <select name="add_component" id="component" multiple size="5">
+    <select name="add_component" id="component" multiple size="5" onChange="onSelectComponent()">
       <option value="">__Any__</option>
     [% FOREACH product IN selectable_products %]
       [% FOREACH component IN product.components %]
@@ -84,6 +91,14 @@ watch "__Any__".
       [% END %]
     [% END %]
     </select>
+  </td>
+  <td valign="top">
+    <div id="watch-user-div"
+         title="You can also watch a component by following this user. [% ~%]
+                CC'ing this user on a [% terms.bug %] will trigger notifications to all watchers of this component."
+         style="cursor:help">
+      Watch User: <span id="watch-user-email"></span>
+    </div>
   </td>
 </tr>
 <tr>

@@ -6,5 +6,10 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% relationships.push({ id = constants.REL_COMPONENT_WATCHER, description = "Component" }) %]
-[% no_added_removed.push(constants.REL_COMPONENT_WATCHER) %]
+[% IF changes.watch_user.defined %]
+  [% IF comp.watch_user %]
+    <li>Watch User updated to '[% comp.watch_user.login FILTER html %]'</li>
+  [% ELSE %]
+    <li>Watch User deleted</li>
+  [% END %]
+[% END %]

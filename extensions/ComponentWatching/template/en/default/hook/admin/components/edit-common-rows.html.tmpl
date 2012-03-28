@@ -6,5 +6,15 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% relationships.push({ id = constants.REL_COMPONENT_WATCHER, description = "Component" }) %]
-[% no_added_removed.push(constants.REL_COMPONENT_WATCHER) %]
+<tr>
+  <td valign="top"><label for="watch_user">Watch User:</label></td>
+  <td>
+    [% INCLUDE global/userselect.html.tmpl
+       name    => "watch_user"
+       id      => "watch_user"
+       value   => comp.watch_user.login
+       size    => 64
+       emptyok => 1
+    %]
+  </td>
+</tr>

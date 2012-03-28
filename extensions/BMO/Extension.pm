@@ -564,7 +564,8 @@ sub bug_check_groups {
     my ($self, $args) = @_;
     my $group_names = $args->{'group_names'};
     my $add_groups = $args->{'add_groups'};
-   
+
+    return unless $group_names;
     $group_names = ref $group_names 
                    ? $group_names 
                    : [ map { trim($_) } split(',', $group_names) ];

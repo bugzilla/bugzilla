@@ -175,7 +175,8 @@ sub directive_ok {
     return 1 if $directive =~ /^(IF|END|UNLESS|FOREACH|PROCESS|INCLUDE|
                                  BLOCK|USE|ELSE|NEXT|LAST|DEFAULT|FLUSH|
                                  ELSIF|SET|SWITCH|CASE|WHILE|RETURN|STOP|
-                                 TRY|CATCH|FINAL|THROW|CLEAR|MACRO|FILTER)/x;
+                                 TRY|CATCH|FINAL|THROW|CLEAR|MACRO|FILTER|
+                                 CALL)/x;
 
     # ? :
     if ($directive =~ /.+\?(.+):(.+)/) {

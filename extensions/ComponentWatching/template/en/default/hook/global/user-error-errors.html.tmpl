@@ -6,5 +6,8 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% relationships.push({ id = constants.REL_COMPONENT_WATCHER, description = "Component" }) %]
-[% no_added_removed.push(constants.REL_COMPONENT_WATCHER) %]
+[% IF error == "component_watch_invalid_watch_user" %]
+   [% title = "Invalid Watch User" %]
+   The "Watch User" must be a <b>.bugs</b> email address.<br>
+   For example: <i>accessibility-apis@core.bugs</i>
+[% END %]

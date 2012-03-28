@@ -1,9 +1,23 @@
-# This Source Code Form is subject to the terms of the Mozilla Public
-# License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# -*- Mode: perl; indent-tabs-mode: nil -*-
 #
-# This Source Code Form is "Incompatible With Secondary Licenses", as
-# defined by the Mozilla Public License, v. 2.0.
+# The contents of this file are subject to the Mozilla Public
+# License Version 1.1 (the "License"); you may not use this file
+# except in compliance with the License. You may obtain a copy of
+# the License at http://www.mozilla.org/MPL/
+#
+# Software distributed under the License is distributed on an "AS
+# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# rights and limitations under the License.
+#
+# The Original Code is the Component Watching Extension
+#
+# The Initial Developer of the Original Code is the Mozilla Foundation
+# Portions created by the Initial Developers are Copyright (C) 2011 the
+# Initial Developer. All Rights Reserved.
+#
+# Contributor(s):
+#   Byron Jones <bjones@mozilla.com>
 
 package Bugzilla::Extension::ComponentWatching;
 use strict;
@@ -14,9 +28,8 @@ use Bugzilla::Error;
 use Bugzilla::Group;
 use Bugzilla::User;
 use Bugzilla::User::Setting;
-use Bugzilla::Util qw(trim);
 
-our $VERSION = '2';
+our $VERSION = '1.1';
 
 use constant REL_COMPONENT_WATCHER => 15;
 
@@ -59,22 +72,6 @@ sub db_schema_abstract_schema {
     };
 }
 
-sub install_update_db {
-    my $dbh = Bugzilla->dbh;
-    $dbh->bz_add_column(
-        'components', 
-        'watch_user', 
-        {
-            TYPE => 'INT3',
-            REFERENCES => {
-                TABLE  => 'profiles',
-                COLUMN => 'userid',
-                DELETE => 'SET NULL',
-            }
-        }
-    );
-}
-
 #
 # templates
 #
@@ -84,87 +81,6 @@ sub template_before_create {
     my $config = $args->{config};
     my $constants = $config->{CONSTANTS};
     $constants->{REL_COMPONENT_WATCHER} = REL_COMPONENT_WATCHER;
-}
-
-#
-# user-watch
-#
-
-BEGIN {
-    *Bugzilla::Component::watch_user = \&_component_watch_user;
-}
-
-sub _component_watch_user {
-    my ($self) = @_;
-    return unless $self->{watch_user};
-    $self->{watch_user_object} ||= Bugzilla::User->new($self->{watch_user});
-    return $self->{watch_user_object};
-}
-
-sub object_columns {
-    my ($self, $args) = @_;
-    my $class = $args->{class};
-    my $columns = $args->{columns};
-    return unless $class->isa('Bugzilla::Component');
-
-    push(@$columns, 'watch_user');
-}
-
-sub object_update_columns {
-    my ($self, $args) = @_;
-    my $object = $args->{object};
-    my $columns = $args->{columns};
-    return unless $object->isa('Bugzilla::Component');
-
-    push(@$columns, 'watch_user');
-
-    # editcomponents.cgi doesn't call set_all, so we have to do this here
-    my $input = Bugzilla->input_params;
-    $object->set('watch_user', $input->{watch_user});
-}
-
-sub object_validators {
-    my ($self, $args) = @_;
-    my $class = $args->{class};
-    my $validators = $args->{validators};
-    return unless $class->isa('Bugzilla::Component');
-
-    $validators->{watch_user} = \&_check_watch_user;
-}
-
-sub object_before_create {
-    my ($self, $args) = @_;
-    my $class = $args->{class};
-    my $params = $args->{params};
-    return unless $class->isa('Bugzilla::Component');
-
-    my $input = Bugzilla->input_params;
-    $params->{watch_user} = $input->{watch_user};
-}
-
-sub object_end_of_update {
-    my ($self, $args) = @_;
-    my $object = $args->{object};
-    my $old_object = $args->{old_object};
-    my $changes = $args->{changes};
-    return unless $object->isa('Bugzilla::Component');
-
-    my $old_id = $old_object->watch_user ? $old_object->watch_user->id : 0;
-    my $new_id = $object->watch_user ? $object->watch_user->id : 0;
-    return unless $old_id == $new_id;
-
-    $changes->{watch_user} = [ $old_id ? $old_id : undef, $new_id ? $new_id : undef ];
-}
-
-sub _check_watch_user {
-    my ($self, $value, $field) = @_;
-
-    $value = trim($value || '');
-    return if $value eq '';
-    if ($value !~ /\.bugs$/i) {
-        ThrowUserError('component_watch_invalid_watch_user');
-    }
-    return Bugzilla::User->check($value)->id;
 }
 
 #
@@ -179,16 +95,15 @@ sub user_preferences {
     my $save = $args->{'save_changes'};
     my $handled = $args->{'handled'};
     my $user = Bugzilla->user;
-    my $input = Bugzilla->input_params;
 
     if ($save) {
         my ($sth, $sthAdd, $sthDel);
 
-        if ($input->{'add'} && $input->{'add_product'}) {
+        if (Bugzilla->input_params->{'add'}) {
             # add watch
 
-            my $productName = $input->{'add_product'};
-            my $ra_componentNames = $input->{'add_component'};
+            my $productName = Bugzilla->input_params->{'add_product'};
+            my $ra_componentNames = Bugzilla->input_params->{'add_component'};
             $ra_componentNames = [$ra_componentNames] unless ref($ra_componentNames);
 
             # load product and verify access
@@ -217,7 +132,7 @@ sub user_preferences {
         } else {
             # remove watch(s)
 
-            foreach my $name (keys %$input) {
+            foreach my $name (keys %{Bugzilla->input_params}) {
                 if ($name =~ /^del_(\d+)$/) {
                     _deleteProductWatch($user, $1);
                 } elsif ($name =~ /^del_(\d+)_(\d+)$/) {
@@ -270,7 +185,6 @@ sub bugmail_recipients {
         }
     }
 
-    # add component watchers
     my $dbh = Bugzilla->dbh;
     my $sth = $dbh->prepare("
         SELECT user_id
@@ -282,35 +196,6 @@ sub bugmail_recipients {
     while (my ($uid) = $sth->fetchrow_array) {
         if (!exists $recipients->{$uid}) {
             $recipients->{$uid}->{+REL_COMPONENT_WATCHER} = Bugzilla::BugMail::BIT_WATCHING();
-        }
-    }
-
-    # add component watchers from watch-users
-    my $uidList = join(',', keys %$recipients);
-    $sth = $dbh->prepare("
-        SELECT component_watch.user_id
-          FROM components
-               INNER JOIN component_watch ON component_watch.component_id = components.id
-         WHERE components.watch_user in ($uidList)
-    ");
-    $sth->execute();
-    while (my ($uid) = $sth->fetchrow_array) {
-        if (!exists $recipients->{$uid}) {
-            $recipients->{$uid}->{+REL_COMPONENT_WATCHER} = Bugzilla::BugMail::BIT_WATCHING();
-        }
-    }
-
-    # add watch-users from component watchers
-    $sth = $dbh->prepare("
-        SELECT watch_user
-          FROM components
-         WHERE (id = ? OR id = ?)
-               AND (watch_user IS NOT NULL)
-    ");
-    $sth->execute($oldComponentId, $newComponentId);
-    while (my ($uid) = $sth->fetchrow_array) {
-        if (!exists $recipients->{$uid}) {
-            $recipients->{$uid}->{+REL_COMPONENT_WATCHER} = Bugzilla::BugMail::BIT_DIRECT();
         }
     }
 }

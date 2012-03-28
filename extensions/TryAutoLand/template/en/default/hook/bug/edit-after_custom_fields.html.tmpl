@@ -1,0 +1,101 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% IF user.in_group('hg-try') %]
+  [% autoland_attachments = [] %]
+  [% autoland_waiting = 0 %]
+  [% autoland_running = 0 %]
+  [% autoland_finished = 0 %]
+  [% FOREACH attachment = bug.attachments %]
+    [% NEXT IF attachment.isprivate && !user.is_insider && attachment.attacher.id != user.id %]
+    [% NEXT IF attachment.isobsolete %]
+    [% NEXT IF !attachment.ispatch %]
+    [% autoland_attachments.push(attachment) %]
+    [% IF attachment.autoland_checked %]
+      [% IF attachment.autoland_status == 'waiting' %]
+        [% autoland_waiting = autoland_waiting + 1 %]
+      [% END %]
+      [% IF attachment.autoland_status == 'running' %]
+        [% autoland_running = autoland_running + 1 %]
+      [% END %]
+      [% IF attachment.autoland_status == 'success' || attachment.autoland_status == 'failed' %]
+        [% autoland_finished = autoland_finished + 1 %]
+      [% END %]
+    [% END %]
+  [% END %]
+  [% IF autoland_attachments.size %]
+    <tr>
+      <th class="field_label field_land_autoland">
+        <a title="[% help_html.autoland FILTER txt FILTER collapse FILTER html %]"
+           class="field_help_link" href="https://wiki.mozilla.org/Build:Autoland">
+          AutoLand:</a>
+      </th>
+      <td>
+        <span id="autoland_edit_container">
+          (<a href="#" id="autoland_edit_action">edit</a>)
+          Total: [% autoland_attachments.size FILTER html %] - 
+          <span class="autoland_waiting">Waiting:</span> [% autoland_waiting FILTER html %] -
+          <span class="autoland_running">Running:</span> [% autoland_running FILTER html %] - 
+          <span class="autoland_success">Finished:</span> [% autoland_finished FILTER html %]
+        </span>
+        <div id="autoland_edit_input">
+          Branches (required):<br>
+          <input type="text" id="autoland_branches" name="autoland_branches" 
+                 value="[% bug.autoland_branches FILTER html %]" size="40"
+                 class="text_input"><br>
+          Try Syntax (required): (Default: [% autoland_default_try_syntax FILTER html %])<br>
+          <input type="text" id="autoland_try_syntax" name="autoland_try_syntax" 
+                 value="[% bug.autoland_try_syntax || autoland_default_try_syntax FILTER html %]" size="40"
+                 class="text_input"><br>
+          Patches:
+          <br>
+          <table id="autoland_edit_table">
+          [% FOREACH attachment = autoland_attachments %]
+            <tr>
+              <td>
+                [% IF attachment.autoland_checked %]
+                  <input type="hidden" name="defined_autoland_attachments" 
+                         value="[% attachment.id FILTER html %]">
+                [% END %]
+                <input type="checkbox" name="autoland_attachments" value="[% attachment.id FILTER html %]"
+                       [% ' checked="checked"' IF attachment.autoland_checked %]
+                       [% IF attachment.autoland_status == 'running' || attachment.autoland_status == 'waiting' %]
+                         disabled="disabled"
+                       [% END %]>
+              </td>
+              <td>
+                <span title="[% attachment.description FILTER html %]">
+                  [% attachment.filename FILTER html %]
+                </span>
+              <td>
+                [% IF attachment.autoland_checked %]
+                  <span class="autoland_[% attachment.autoland_status FILTER html %]">
+                    [% attachment.autoland_status FILTER html %]
+                  </span>
+                [% END %]
+              </td>
+              <td>
+                [% IF attachment.autoland_checked %]
+                  [% attachment.autoland_status_when FILTER time('%Y-%m-%d %H:%M') %]
+                [% END %]
+              </td>
+            </tr>
+          [% END %]
+          </table>
+        </div>
+        <script type="text/javascript">
+          hideEditableField('autoland_edit_container',  
+                            'autoland_edit_input',  
+                            'autoland_edit_action',  
+                            '',  
+                            '');  
+        </script>
+      </td>
+    </tr>
+  [% END %]
+[% END %]

@@ -350,7 +350,7 @@ sub _make_secure {
         # This is designed to still work if the admin changes the word
         # 'bug' to something else. However, it could break if they change
         # the format of the subject line in another way.
-        $subject =~ s/($bug_id\])\s+(.*)$/$1 (Secure bug updated)/;
+        $subject =~ s/($bug_id\])\s+(.*)$/$1 (Secure bug $bug_id updated)/;
         $email->header_set('Subject', $subject);
     }
 }

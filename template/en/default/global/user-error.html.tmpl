@@ -1436,6 +1436,27 @@
     The name of the query must be less than [% constants.MAX_LEN_QUERY_NAME FILTER html %]
     characters long.
 
+  [% ELSIF error == "quicksearch_invalid_query" %]
+    [% title = "Invalid Query" %]
+    Your query is invalid.
+    [% IF operators %]
+      The [% operators.shift FILTER html %] operator cannot be followed by
+      [%+ operators.shift FILTER html %].
+    [% ELSE %]
+      A query cannot start with AND or OR, nor can it end with AND, OR or NOT.
+      They are reserved operators and must be quoted if you want to look for
+      these strings.
+    [% END %]
+
+  [% ELSIF error == "quicksearch_unbalanced_quotes" %]
+    [% title = "Badly Formatted Query" %]
+    [% terms.Bugzilla %] is unable to parse your query correctly:
+    <em>[% string FILTER html %]</em>.<br>
+    If you use quotes to enclose strings, make sure both quotes are present.
+    If you really want to look for a quote in a string, type \" instead of ".
+    For instance, <em>"I'm so \"special\", really"</em> (with quotes) will be
+    interpreted as <em>I'm so "special", really</em>.
+
   [% ELSIF error == "quicksearch_unknown_field" %]
     [% title = "QuickSearch Error" %]
     There is a problem with your search:

@@ -34,7 +34,7 @@ use base qw(Exporter);
 @Bugzilla::Util::EXPORT = qw(trick_taint detaint_natural
                              detaint_signed
                              html_quote url_quote xml_quote
-                             css_class_quote html_light_quote url_decode
+                             css_class_quote html_light_quote
                              i_am_cgi correct_urlbase remote_ip
                              do_ssl_redirect_if_required use_attachbase
                              diff_arrays on_main_db
@@ -241,14 +241,6 @@ sub xml_quote {
                [\x{D800}-\x{DFFF}]|
                [\x{FFFE}-\x{FFFF}])//gx;
     return $var;
-}
-
-sub url_decode {
-    my ($todecode) = (@_);
-    $todecode =~ tr/+/ /;       # pluses become spaces
-    $todecode =~ s/%([0-9a-fA-F]{2})/pack("c",hex($1))/ge;
-    utf8::decode($todecode) if Bugzilla->params->{'utf8'};
-    return $todecode;
 }
 
 sub i_am_cgi {
@@ -756,9 +748,6 @@ Bugzilla::Util - Generic utility functions for bugzilla
   xml_quote($var);
   email_filter($var);
 
-  # Functions for decoding
-  $rv = url_decode($var);
-
   # Functions that tell you about your environment
   my $is_cgi   = i_am_cgi();
   my $urlbase  = correct_urlbase();
@@ -869,10 +858,6 @@ and forward slashes are replaced by underscores.
 This is similar to C<html_quote>, except that ' is escaped to &apos;. This
 is kept separate from html_quote partly for compatibility with previous code
 (for &apos;) and partly for future handling of non-ASCII characters.
-
-=item C<url_decode($val)>
-
-Converts the %xx encoding from the given URL back to its original form.
 
 =item C<email_filter>
 

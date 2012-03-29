@@ -6,7 +6,7 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% IF user.in_group('hg-try') %]
+[% IF user.in_group('autoland') %]
   [% autoland_attachments = [] %]
   [% autoland_waiting = 0 %]
   [% autoland_running = 0 %]

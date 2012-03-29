@@ -110,14 +110,17 @@ sub getBugs {
     ];
 }
 
-# TryAutoLand.updateStatus({ attach_id => $attach_id, status => $status })
+# TryAutoLand.update({ attach_id => $attach_id, action => $action, status => $status })
 # Let's BMO know if a patch has landed or not and BMO will update the auto_land table accordingly
-# $status will be a predetermined set of pending/complete codes -- when pending, the UI for submitting 
-# autoland will be locked and once complete status update occurs the UI can be unlocked and this entry 
-# can be removed from tracking by WebService API 
+# If $action eq 'status', $status will be a predetermined set of status values -- when waiting, 
+# the UI for submitting autoland will be locked and once complete status update occurs or the 
+# mapping is removed, the UI can be unlocked for the $attach_id
 # Allowed statuses: waiting, running, failed, or success
+#
+# If $action eq 'remove', the attach_id will be removed from the mapping table and the UI
+# will be unlocked for the $attach_id.
 
-sub updateStatus { 
+sub update { 
     my ($self, $params) = @_;
     my $user = Bugzilla->user;
     my $dbh  = Bugzilla->dbh;
@@ -127,15 +130,25 @@ sub updateStatus {
                                          object => "autoland_attachments" });
     }
 
-    foreach my $param ('attach_id', 'status') {
+    foreach my $param ('attach_id', 'action') {
         defined $params->{$param}
-            || ThrowUserError('param_required', 
+            || ThrowCodeError('param_required', 
                               { param => $param });
     }
 
+    my $action    = delete $params->{'action'};
     my $attach_id = delete $params->{'attach_id'};
     my $status    = delete $params->{'status'};
- 
+
+    if ($action eq 'status' && !$status) {
+        ThrowCodeError('param_required', { param => 'status' });
+    }
+
+    grep($_ eq $action, ('remove', 'status'))
+        || ThrowUserError('autoland_update_invalid_action',  
+                          { action => $action, 
+                            valid  => ["remove", "status"] });
+
     my $attachment = Bugzilla::Attachment->new($attach_id);
     $attachment
         || ThrowUserError('autoland_invalid_attach_id',
@@ -155,15 +168,22 @@ sub updateStatus {
         || ThrowUserError('autoland_invalid_attach_id',
                           { attach_id => $attach_id });
 
-    # Update the status
-    $attachment->autoland_update_status($status);
+    if ($action eq 'status') {
+        # Update the status
+        $attachment->autoland_update_status($status);
 
-    return { 
-        id          => $self->type('int', $attachment->id),
-        who         => $self->type('string', $attachment->autoland_who->login),
-        status      => $self->type('string', $attachment->autoland_status),
-        status_when => $self->type('dateTime', $attachment->autoland_status_when),
-    };
+        return { 
+            id          => $self->type('int', $attachment->id),
+            who         => $self->type('string', $attachment->autoland_who->login),
+            status      => $self->type('string', $attachment->autoland_status),
+            status_when => $self->type('dateTime', $attachment->autoland_status_when),
+        };
+    }
+    elsif ($action eq 'remove') {
+        $attachment->autoland_remove();    
+    }
+
+    return {};
 }
 
 1;

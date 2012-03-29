@@ -17,8 +17,7 @@ my $rpc = new JSON::RPC::Client;
 
 $rpc->ua->ssl_opts(verify_hostname => 0);
 
-my $uri = "https://bugzilla-stage-tip.mozilla.org/jsonrpc.cgi";
-#my $uri = "http://fedora/autoland/jsonrpc.cgi";
+my $uri = "http://fedora/726193/jsonrpc.cgi";
 
 #$rpc->ua->cookie_jar($cookie_jar);
 
@@ -43,10 +42,12 @@ my $uri = "https://bugzilla-stage-tip.mozilla.org/jsonrpc.cgi";
 ###################################
 
 my $attach_id = shift;
+my $action    = shift;
 my $status    = shift;
 
-$result = $rpc->call($uri, { method => 'TryAutoLand.updateStatus', 
-                             params => { attach_id         => $attach_id, 
+$result = $rpc->call($uri, { method => 'TryAutoLand.update', 
+                             params => { attach_id         => $attach_id,
+                                         action            => $action, 
                                          status            => $status, 
                                          Bugzilla_login    => $username, 
                                          Bugzilla_password => $password  } });

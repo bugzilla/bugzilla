@@ -47,10 +47,11 @@ print "Successfully logged in.\n";
 ###################################
 
 my $attach_id = shift;
+my $action    = shift;
 my $status    = shift;
 
-$call = $rpc->call('TryAutoLand.updateStatus', 
-                   { attach_id => $attach_id, status => $status });
+$call = $rpc->call('TryAutoLand.update', 
+                   { attach_id => $attach_id, action => $action, status => $status });
 
 my $result = "";
 if ( $call->faultstring ) {

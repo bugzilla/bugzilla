@@ -29,6 +29,7 @@ BEGIN {
     *Bugzilla::Attachment::autoland_status        = \&_autoland_attachment_status;
     *Bugzilla::Attachment::autoland_status_when   = \&_autoland_attachment_status_when;
     *Bugzilla::Attachment::autoland_update_status = \&_autoland_attachment_update_status;
+    *Bugzilla::Attachment::autoland_remove        = \&_autoland_attachment_remove;
 }
 
 sub db_schema_abstract_schema {
@@ -179,7 +180,8 @@ sub _autoland_attachment_update_status {
 
     grep($_ eq $status, VALID_STATUSES)
         || ThrowUserError('autoland_invalid_status',
-                          { status => $status });
+                          { status => $status, 
+                            valid  => [ VALID_STATUSES ] });
 
     if ($self->autoland_status ne $status) {
         my $timestamp = $dbh->selectrow_array("SELECT LOCALTIMESTAMP(0)");
@@ -193,6 +195,17 @@ sub _autoland_attachment_update_status {
     return 1;
 }
 
+sub _autoland_attachment_remove {
+    my ($self) = @_;
+    my $dbh = Bugzilla->dbh;
+    return undef if !$self->autoland_checked;
+    $dbh->do("DELETE FROM autoland_attachments WHERE attach_id = ?", undef, $self->id);
+    delete $self->{'autoland_checked'};
+    delete $self->{'autoland_who'};
+    delete $self->{'autoland_status'};
+    delete $self->{'autoland_status_when'};
+}
+
 sub object_end_of_update {
     my ($self, $args) = @_;
     my $object = $args->{'object'};
@@ -201,7 +214,7 @@ sub object_end_of_update {
     my $cgi    = Bugzilla->cgi;
     my $params = Bugzilla->input_params;
 
-    return if !$user->in_group('hg-try');
+    return if !$user->in_group('autoland');
 
     if ($object->isa('Bugzilla::Bug')) {
         # First make any needed changes to the branches and try_syntax fields
@@ -291,7 +304,7 @@ sub template_before_process {
     my $vars = $args->{'vars'};
 
     # in the header we just need to set the var to ensure the css gets included
-    if ($file eq 'bug/show-header.html.tmpl' && Bugzilla->user->in_group('hg-try') ) {
+    if ($file eq 'bug/show-header.html.tmpl' && Bugzilla->user->in_group('autoland') ) {
         $vars->{'autoland'} = 1;
     }
 

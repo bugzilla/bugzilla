@@ -9,7 +9,8 @@
 [% IF error == "autoland_invalid_status" %]
   [% title = "AutoLand Invalid Status" %]
   The status '[% status FILTER html %]' is not a valid
-  status for the AutoLand extension.
+  status for the AutoLand extension. Valid statuses 
+  are [% valid.join(', ') FILTER html %].
 
 [% ELSIF error == "autoland_invalid_attach_id" %]
   [% title = "AutoLand Invalid Attachment ID" %]
@@ -17,12 +18,16 @@
   a valid id for the AutoLand extension.
 
 [% ELSIF error == "autoland_empty_try_syntax" %]
-  [% title = "Autoland Empty Try Syntax" %]
+  [% title = "AutoLand Empty Try Syntax" %]
   You cannot have a value for Branches and have an empty Try Syntax value.
 
 [% ELSIF error == "autoland_empty_branches" %]
-  [% title = "Autoland Empty Branches" %]
+  [% title = "AutoLand Empty Branches" %]
   You cannot check one or more patches for AutoLanding and have an empty 
   Branches value.
 
+[% ELSIF error == "autoland_update_invalid_action" %]
+  [% title = "AutoLand Update Invalid Action" %]
+  The action '[% action FILTER html %]' is not a valid action. 
+  Valid actions are [% valid.join(', ') FILTER html %].
 [% END %]

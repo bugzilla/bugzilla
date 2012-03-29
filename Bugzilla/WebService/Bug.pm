@@ -886,6 +886,7 @@ sub _bug_to_hash {
         # No need to format $bug->deadline specially, because Bugzilla::Bug
         # already does it for us.
         $item{'deadline'} = $self->type('string', $bug->deadline);
+        $item{'actual_time'} = $self->type('double', $bug->actual_time);
     }
 
     if (Bugzilla->user->id) {
@@ -1654,6 +1655,13 @@ the valid ids. Each hash contains the following items:
 
 =over
 
+=item C<actual_time>
+
+C<double> The total number of hours that this bug has taken (so far).
+
+If you are not in the time-tracking group, this field will not be included
+in the return value.
+
 =item C<alias>
 
 C<string> The unique alias of this bug.
@@ -1981,6 +1989,9 @@ C<target_milestone>, C<update_token>, C<url>, C<version>, C<whiteboard>,
 and all custom fields.
 
 =item The C<flags> array was added in Bugzilla B<4.4>.
+
+=item The C<actual_time> item was added to the C<bugs> return value
+in Bugzilla B<4.4>.
 
 =back
 

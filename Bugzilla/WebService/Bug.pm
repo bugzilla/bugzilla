@@ -104,11 +104,12 @@ sub fields {
 
         my (@values, $has_values);
         if ( ($field->is_select and $field->name ne 'product')
-             or grep($_ eq $field->name, PRODUCT_SPECIFIC_FIELDS))
+             or grep($_ eq $field->name, PRODUCT_SPECIFIC_FIELDS)
+             or $field->name eq 'keywords')
         {
              $has_values = 1;
              @values = @{ $self->_legal_field_values({ field => $field }) };
-        }
+        } 
 
         if (grep($_ eq $field->name, PRODUCT_SPECIFIC_FIELDS)) {
              $value_field = 'product';
@@ -198,6 +199,15 @@ sub _legal_field_values {
         }
     }
 
+    elsif ($field_name eq 'keywords') {
+        my @legal_keywords = Bugzilla::Keyword->get_all;
+        foreach my $value (@legal_keywords) {
+            push (@result, {
+               name     => $self->type('string', $value->name),
+               description => $self->type('string', $value->description),
+            });
+        }
+    }
     else {
         my @values = Bugzilla::Field::Choice->type($field)->get_all();
         foreach my $value (@values) {
@@ -1100,7 +1110,7 @@ values of the field are shown in the user interface. Can be null.
 
 This is an array of hashes, representing the legal values for
 select-type (drop-down and multiple-selection) fields. This is also
-populated for the C<component>, C<version>, and C<target_milestone>
+populated for the C<component>, C<version>, C<target_milestone>, and C<keywords>
 fields, but not for the C<product> field (you must use
 L<Product.get_accessible_products|Bugzilla::WebService::Product/get_accessible_products>
 for that.
@@ -1132,6 +1142,11 @@ If C<value_field> is defined for this field, then this value is only shown
 if the C<value_field> is set to one of the values listed in this array.
 Note that for per-product fields, C<value_field> is set to C<'product'>
 and C<visibility_values> will reflect which product(s) this value appears in.
+
+=item C<description>
+
+C<string> The description of the value. This item is only included for the
+C<keywords> field.
 
 =item C<is_open>
 

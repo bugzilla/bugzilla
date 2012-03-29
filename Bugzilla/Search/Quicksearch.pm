@@ -408,7 +408,7 @@ sub _handle_field_names {
                     # If the string was quoted to protect some special
                     # characters such as commas and colons, we need
                     # to remove quotes.
-                    if ($value =~ /^(["'])(.+)\g1$/) {
+                    if ($value =~ /^(["'])(.+)\1$/) {
                         $value = $2;
                         $value =~ s/\\(["'])/$1/g;
                     }

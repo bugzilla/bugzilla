@@ -26,7 +26,7 @@ use base qw(Bugzilla::Extension);
 use Bugzilla::Group;
 use Bugzilla::Object;
 use Bugzilla::User;
-use Bugzilla::Util qw(correct_urlbase trim trick_taint);
+use Bugzilla::Util qw(correct_urlbase trim trick_taint is_7bit_clean);
 use Bugzilla::Error;
 use Bugzilla::Mailer;
 
@@ -275,6 +275,9 @@ sub _make_secure {
     if ($key_type && $sanitise_subject) {
         # Subject gets placed in the body so it can still be read
         my $body = $email->body_str;
+        if (!is_7bit_clean($subject)) {
+            $email->encoding_set('quoted-printable');
+        }
         $body = "Subject: $subject\015\012\015\012" . $body;
         $email->body_str_set($body);
     }

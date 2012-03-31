@@ -1904,7 +1904,7 @@ sub _timestamp_translate {
     my $value = $args->{value};
     my $dbh = Bugzilla->dbh;
 
-    return if $value !~ /^[\+\-]?\d+[hdwmy]$/i;
+    return if $value !~ /^[\+\-]?\d+[hdwmy]s?$/i;
     
     $args->{value}  = SqlifyDate($value);
     $args->{quoted} = $dbh->quote($args->{value});

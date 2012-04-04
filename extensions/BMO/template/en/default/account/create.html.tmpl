@@ -146,6 +146,7 @@ function onSubmit() {
     <td>
       <input size="35" id="login" name="login" placeholder="you@example.com">[% Param('emailsuffix') FILTER html %]</td>
     <td>
+      <input type="hidden" id="token" name="token" value="[% issue_hash_token(['create_account']) FILTER html %]">
       <input type="submit" value="Create Account">
      </td>
     </tr>

@@ -47,6 +47,9 @@
         id="mini_login[% qs_suffix FILTER html %]"
         onsubmit="return check_mini_login_fields( '[% qs_suffix FILTER html %]' );"
   >
+    
+    [% Hook.process('additional_methods') %]
+  
     <input id="Bugzilla_login[% qs_suffix FILTER html %]" 
            class="bz_login"
            name="Bugzilla_login"

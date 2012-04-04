@@ -1,0 +1,19 @@
+ToDo:
+
+* Cache the LWP::UserAgent in Login.pm?
+
+* Fix Bugzilla::Auth::Login::Stack to allow failure part way down the chain
+  (currently, it seems that both CGI and BrowserID have to be last in order
+  to report login failures correctly.)
+  
+* JS inclusions noticeably slow page load. Do we want a local copy of 
+  browserid.js? Do the browserid folks object to that? How can we get good 
+  performance? How can we avoid including it in every logged-in page? Can we 
+  do demand loading onclick, and/or load-on-reveal?
+
+* Fix -8px margin-bottom hack in login-small-additional_methods.html.tmpl
+
+
+
+
+

@@ -1,0 +1,23 @@
+[% IF Param('user_info_class').split(',').contains('BrowserID') %]
+<script src="https://browserid.org/include.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+function browserid_sign_in() {
+    navigator.id.getVerifiedEmail(function(assertion) {
+        if (assertion) {
+            // This code will be invoked once the user has successfully
+            // selected an email address they control to sign in with.
+            window.location.href = "[% target FILTER none %]index.cgi?browserid_assertion=" + assertion;
+        } else {
+            // something went wrong!  the user isn't logged in.
+            alert("Oh no! Something went wrong...");
+        }
+    });
+}
+</script>
+
+<p>
+Or, you could login using BrowserID: 
+<img src="extensions/BrowserID/web/sign_in_orange.png" onclick="browserid_sign_in()">
+</p>
+[% END %]

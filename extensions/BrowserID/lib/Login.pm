@@ -25,6 +25,8 @@ use base qw(Bugzilla::Auth::Login);
 
 use Bugzilla::Constants;
 use Bugzilla::Util;
+use Bugzilla::Error;
+use Bugzilla::Token;
 
 use JSON;
 use LWP::UserAgent;
@@ -36,15 +38,20 @@ sub get_login_info {
     my ($self) = @_;
 
     my $cgi = Bugzilla->cgi;
+
     my $assertion = $cgi->param("browserid_assertion");
     # Avoid the assertion being copied into any 'echoes' of the current URL
     # in the page.
     $cgi->delete('browserid_assertion');
-
+    
     if (!$assertion) {
         return { failure => AUTH_NODATA };
     }
     
+    my $token = $cgi->param("token");
+    $cgi->delete('token');
+    check_hash_token($token, ['login']);
+        
     my $urlbase = new URI(correct_urlbase());
     my $audience = $urlbase->scheme . "://" . $urlbase->host_port;
     
@@ -59,12 +66,9 @@ sub get_login_info {
         $info = decode_json($response->content());
     };
     
-    # XXX Add 120 secs because 'expires' is currently broken in deployed 
-    # BrowserID server - it returns exact current time, so is immediately
-    # expired! This should be fixed soon.
     if ($info->{'status'} eq "okay" &&
         $info->{'audience'} eq $audience &&
-        (($info->{'expires'} / 1000) + 120) > time())
+        ($info->{'expires'} / 1000) > time())
     {
         my $login_data = {
             'username' => $info->{'email'}
@@ -76,20 +80,19 @@ sub get_login_info {
         
         my $user = $result->{'user'};
         
-        # BrowserID logins are currently restricted to less powerful accounts -
-        # the most you can have is 'editbugs'. This is while the technology 
-        # is maturing. So we need to check that the user doesn't have 'too 
-        # many permissions' to log in this way. 
+        # You can restrict people in a particular group from logging in using
+        # BrowserID by making that group a member of a group called
+        # "no-browser-id".
         #
-        # If a newly-created account has too many permissions, this code will
+        # If you have your "createemailregexp" set up in such a way that a
+        # newly-created account is a member of "no-browser-id", this code will
         # create an account for them and then fail their login. Which isn't
         # great, but they can still use normal-Bugzilla-login password 
         # recovery.
-        my @safe_groups = ('everyone', 'canconfirm', 'editbugs');        
-        foreach my $group (@{ $user->groups() }) {
-            if (!grep { $group->name eq $_ } @safe_groups) {
-                return { failure => AUTH_LOGINFAILED };
-            }
+        if ($user->in_group('no-browser-id')) {
+            # We use a custom error here, for greater clarity, rather than
+            # returning a failure code.
+            ThrowUserError('browserid_account_too_powerful');
         }
     
         $login_data->{'user'} = $user;

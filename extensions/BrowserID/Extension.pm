@@ -29,7 +29,7 @@ sub auth_login_methods {
     my ($self, $args) = @_;
     my $modules = $args->{'modules'};
     if (exists($modules->{'BrowserID'})) {
-        $modules->{'BrowserID'} = 'Bugzilla/Extension/BrowserID/Login.pm';        
+        $modules->{'BrowserID'} = 'Bugzilla/Extension/BrowserID/Login.pm';
     }
 }
 
@@ -42,9 +42,6 @@ sub config_modify_panels {
                 grep { $_->{'name'} eq 'user_info_class' } @$auth_panel_params;
 
     if ($user_info_class) {
-        # XXX Bugzilla::Auth::Login::Stack doesn't let a hard failure stop the
-        # login process :-(( We put it in both ways round for now, for testing.
-        push(@{ $user_info_class->{'choices'} }, "CGI,BrowserID");
         push(@{ $user_info_class->{'choices'} }, "BrowserID,CGI");
     }
 }

@@ -1402,6 +1402,11 @@ sub _special_parse_chfield {
         $clause->add($from_clause);
     }
     if ($date_to ne '') {
+        # chfieldto is supposed to be a relative date or a date of the form
+        # YYYY-MM-DD, i.e. without the time appended to it. We append the
+        # time ourselves so that the end date is correctly taken into account.
+        $date_to .= ' 23:59:59' if $date_to =~ /^\d{4}-\d{1,2}-\d{1,2}$/;
+
         my $to_clause = new Bugzilla::Search::Clause('OR');
         foreach my $field (@fields) {
             $to_clause->add($field, 'changedbefore', $date_to);

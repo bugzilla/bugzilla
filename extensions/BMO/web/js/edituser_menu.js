@@ -18,8 +18,8 @@ function show_admin_usermenu(event, id, email) {
     'page.cgi?id=user_activity.html&action=run' +
     '&from=' + YAHOO.util.Date.format(new Date(new Date() - (1000 * 60 * 60 * 24 * 14)), {format: '%Y-%m-%d'}) +
     '&to=' + YAHOO.util.Date.format(new Date(), {format: '%Y-%m-%d'}) +
-    '&who=' + escape(email));
-  admin_usermenu.getItem(2).cfg.setProperty('url', 'mailto:' + escape(email));
+    '&who=' + encodeURIComponent(email));
+  admin_usermenu.getItem(2).cfg.setProperty('url', 'mailto:' + encodeURIComponent(email));
   admin_usermenu.cfg.setProperty('xy', YAHOO.util.Event.getXY(event));
   admin_usermenu.show();
 }

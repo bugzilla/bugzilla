@@ -227,9 +227,12 @@ sub mailer_before_send {
         if ($is_bugmail) {
             # This is also a bit of a hack, but there's no header with the 
             # bug ID in. So we take the first number in the subject.
-            my ($bug_id) = ($email->header('Subject') =~ /^[^\d]+(\d+)/);
+            my ($bug_id) = ($email->header('Subject') =~ /\[\D+(\d+)\]/);
             my $bug = new Bugzilla::Bug($bug_id);
-            if ($bug && !grep($_->{secure_mail}, @{ $bug->groups_in })) {
+            if ($bug 
+                && !$bug->{'error'} 
+                && !grep($_->{secure_mail}, @{ $bug->groups_in })) 
+            {
                 $make_secure = 0;
             }
         }
@@ -262,7 +265,7 @@ sub _make_secure {
     my ($email, $key, $sanitise_subject) = @_;
 
     my $subject = $email->header('Subject');
-    my ($bug_id) = $subject =~ /^\D+(\d+)/;
+    my ($bug_id) = $subject =~ /\[\D+(\d+)\]/;
 
     my $key_type = 0;
     if ($key && $key =~ /PUBLIC KEY/) {

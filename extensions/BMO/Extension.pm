@@ -45,6 +45,7 @@ use Bugzilla::Extension::BMO::Constants;
 use Bugzilla::Extension::BMO::FakeBug;
 use Bugzilla::Extension::BMO::Data qw($cf_visible_in_products
                                       $cf_flags
+                                      $cf_project_flags
                                       $cf_disabled_flags
                                       %group_to_cc_map
                                       $blocking_trusted_setters
@@ -77,7 +78,8 @@ sub template_before_process {
     my $vars = $args->{'vars'};
     
     $vars->{'cf_hidden_in_product'} = \&cf_hidden_in_product;
-    $vars->{'cf_flag_disabled'} = \&cf_flag_disabled;
+    $vars->{'cf_is_project_flag'}   = \&cf_is_project_flag;
+    $vars->{'cf_flag_disabled'}     = \&cf_flag_disabled;
     
     if ($file =~ /^list\/list/) {
         # Purpose: enable correct sorting of list table
@@ -216,6 +218,14 @@ sub active_custom_fields {
         push(@tmp_fields, $field);
     }
     $$fields = \@tmp_fields;
+}
+
+sub cf_is_project_flag {
+    my ($field_name) = @_;
+    foreach my $flag_re (@$cf_project_flags) {
+        return 1 if $field_name =~ $flag_re;
+    }
+    return 0;
 }
 
 sub cf_hidden_in_product {

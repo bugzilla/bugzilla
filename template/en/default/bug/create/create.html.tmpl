@@ -670,11 +670,15 @@ TUI_hide_default('attachment_text_field');
 </tbody>
 [% END %]
 
-[% display_bug_flags = 0 %]
+[% tracking_flags = [] %]
+[% project_flags  = [] %]
 [% FOREACH field = Bugzilla.active_custom_fields(product=>product,type=>2) %]
   [% NEXT UNLESS field.enter_bug %]
-  [% display_bug_flags = 1 %]
-  [% LAST %]
+  [% IF cf_is_project_flag(field.name) %]
+    [% project_flags.push(field) %]
+  [% ELSE %]
+    [% tracking_flags.push(field) %]
+  [% END %]
 [% END %]
 
 [% display_flags = 0 %]
@@ -685,7 +689,7 @@ TUI_hide_default('attachment_text_field');
   [% LAST IF display_flags && any_flags_requesteeable %]
 [% END %]
 
-[% IF display_bug_flags || display_flags %]
+[% IF project_flags.size || tracking_flags.size || display_flags %]
   <tbody class="expert_fields">
     <tr>
       <th>Flags:</th>
@@ -703,15 +707,33 @@ TUI_hide_default('attachment_text_field');
 
             <table cellpadding="0" cellspacing="0">
             <tr>
-              [% IF display_bug_flags %]
+              [% IF project_flags.size %]
+                <td>
+                  <table id="bug_project_flags">
+                    <tr>
+                      <th colspan="2" style="text-align:left">Project Flags:</th>
+                    </tr>
+                    <tr>
+                      [% FOREACH field = project_flags %]
+                        [% SET value = ${field.name}.defined ? ${field.name} : "" %]
+                        <tr>
+                          [% INCLUDE bug/field.html.tmpl 
+                            bug = default, field = field, value = value, editable = 1, 
+                            value_span = 3 %]
+                        </tr>
+                      [% END %]
+                    </tr>
+                  </table>
+                </td>
+              [% END %]
+              [% IF tracking_flags.size %]
                 <td>
                   <table id="bug_tracking_flags">
                     <tr>
                       <th colspan="2" style="text-align:left">Tracking Flags:</th>
                     </tr>
                     <tr>
-                      [% FOREACH field = Bugzilla.active_custom_fields(product=>product,type=>2) %]
-                        [% NEXT UNLESS field.enter_bug %]
+                      [% FOREACH field = tracking_flags %]
                         [% SET value = ${field.name}.defined ? ${field.name} : "" %]
                         <tr>
                           [% INCLUDE bug/field.html.tmpl 

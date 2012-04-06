@@ -27,7 +27,8 @@ use base qw(Exporter);
 use Tie::IxHash;
 
 our @EXPORT_OK = qw($cf_visible_in_products
-                    $cf_flags $cf_disabled_flags
+                    $cf_flags $cf_project_flags
+                    $cf_disabled_flags
                     %group_to_cc_map
                     $blocking_trusted_setters
                     $blocking_trusted_requesters
@@ -47,6 +48,18 @@ our @EXPORT_OK = qw($cf_visible_in_products
 # IxHash keeps them in insertion order, and so we get regexp priorities right.
 our $cf_visible_in_products;
 tie(%$cf_visible_in_products, "Tie::IxHash", 
+    qw/^cf_blocking_kilimanjaro/ => {
+        "Firefox"       => [], 
+        "Thunderbird"   => [], 
+        "Testing"       => [], 
+        "mozilla.org"   => [], 
+        "Core"          => [], 
+        "NSS"           => [], 
+        "NSPR"          => [], 
+        "Toolkit"       => [], 
+        "Fennec"        => [], 
+        "Fennec Native" => [],
+    }, 
     qr/^cf_blocking_fennec/ => {
         "addons.mozilla.org"    => [],
         "AUS"                   => [],
@@ -154,6 +167,10 @@ our $cf_flags = [
     qr/^cf_(?:blocking|tracking|status)_/,
 ];
 
+our $cf_project_flags = [
+    qr/^cf_blocking_kilimanjaro/,
+];
+
 # List of disabled fields.
 # Temp kludge until custom fields can be disabled correctly upstream.
 # Disabled fields are hidden unless they have a value set
@@ -229,6 +246,7 @@ our $blocking_trusted_setters = {
     qr/^cf_tracking_thunderbird/  => 'thunderbird-drivers',
     qr/^cf_tracking_seamonkey/    => 'seamonkey-council',
     qr/^cf_blocking_seamonkey/    => 'seamonkey-council',
+    qr/^cf_blocking_kilimanjaro/  => 'kilimanjaro-drivers', 
     '_default'                    => 'mozilla-stable-branch-drivers',
 };
 

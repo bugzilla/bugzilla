@@ -1,4 +1,5 @@
 
+#bug_project_flags .field_label, 
 #bug_tracking_flags .field_label {
     font-weight: normal !important;
 }

@@ -23,16 +23,52 @@
   # ***** END LICENSE BLOCK *****
   #%]
 
-[% show_custom_flags = 0 %]
-[% FOREACH field = Bugzilla.active_custom_fields %]
+[% tracking_flags = [] %]
+[% project_flags  = [] %]
+[% FOREACH field = Bugzilla.active_custom_fields(product=>bug.product_obj,component=>bug.component_obj,type=>2) %]
   [% NEXT IF NOT user.id AND bug.${field.name} == "---" %]
-  [% NEXT IF cf_hidden_in_product(field.name, bug.product, bug.component, 2) %]
-  [% show_custom_flags = 1 %]
-  [% LAST %]
+  [% NEXT IF cf_flag_disabled(field.name, bug) %]
+  [% IF cf_is_project_flag(field.name) %]
+    [% project_flags.push(field) %]
+  [% ELSE %]
+    [% tracking_flags.push(field) %]
+  [% END %]
 [% END %]
 
-[% IF show_custom_flags %]
-  [% custom_flags = [] %]
+[% IF project_flags.size %]
+  <tr>
+    <th class="field_label">
+      <label>Project Flags:</label>
+    </td>
+    <td>
+      <table id="project-flags">
+      [% FOREACH field = project_flags %]
+        [% NEXT IF NOT user.id AND field.value == "---" %]
+        <tr id="row_[% field.name FILTER js %]">
+          <td>&nbsp;</td>
+          <td>
+            <label for="[% field.name FILTER html %]">
+              [% field_descs.${field.name} FILTER html %]:
+            </label>
+          </td>
+          <td>
+            [% PROCESS bug/field.html.tmpl value = bug.${field.name}
+                                           editable = user.id
+                                           no_tds = 1 %]
+            [% IF user.id %]
+              <span id="ro_[% field.name FILTER html %]" class="bz_hidden">
+                [% bug.${field.name} FILTER html %]
+              </span>
+            [% END %]
+          </td>
+        </tr>
+      [% END %]
+      </table>
+    </td>
+  </tr>
+[% END %]
+
+[% IF tracking_flags.size %]
   <tr>
     <td class="" colspan="2">
       <label><b>Tracking Flags:</b></label>
@@ -46,11 +82,8 @@
   <tr>
     <td colspan="2">
       <table id="custom-flags">
-      [% FOREACH field = Bugzilla.active_custom_fields %]
+      [% FOREACH field = tracking_flags %]
         [% NEXT IF NOT user.id AND field.value == "---" %]
-        [% NEXT IF cf_hidden_in_product(field.name, bug.product, bug.component, 2) %]
-        [% NEXT IF cf_flag_disabled(field.name, bug) %]
-        [% custom_flags.push(field.name) %]
         <tr id="row_[% field.name FILTER js %]">
           <td>&nbsp;</td>
           <td>
@@ -74,9 +107,9 @@
     </td>
   </tr>
   <script type="text/javascript">
-    var bmo_custom_flags = new Array([% custom_flags.size FILTER none %]);
-    [% FOREACH field_name = custom_flags %]
-      bmo_custom_flags['[% field_name FILTER js %]'] = '[% bug.${field_name} FILTER js %]';
+    var bmo_custom_flags = new Array([% tracking_flags.size FILTER none %]);
+    [% FOREACH field = tracking_flags %]
+      bmo_custom_flags['[% field.name FILTER js %]'] = '[% bug.${field.name} FILTER js %]';
     [% END %]
     bmo_hide_tracking_flags();
   </script>

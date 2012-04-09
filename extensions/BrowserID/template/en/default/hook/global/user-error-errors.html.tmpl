@@ -1,0 +1,9 @@
+[% IF error == "browserid_account_too_powerful" %]
+   [% title = "Account Too Powerful" %]
+   Your account's macho studliness is too much for BrowserID. I'm afraid you 
+   will have to log in using the conventional method.
+   <br><br>
+   (BrowserID logins are disabled for accounts which are members of certain
+    particularly sensitive groups, while we gain experience with the
+    technology.)
+[% END %]

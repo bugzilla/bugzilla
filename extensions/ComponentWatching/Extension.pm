@@ -178,6 +178,7 @@ sub user_preferences {
 
     my $save = $args->{'save_changes'};
     my $handled = $args->{'handled'};
+    my $vars = $args->{'vars'};
     my $user = Bugzilla->user;
     my $input = Bugzilla->input_params;
 
@@ -189,7 +190,7 @@ sub user_preferences {
 
             my $productName = $input->{'add_product'};
             my $ra_componentNames = $input->{'add_component'};
-            $ra_componentNames = [$ra_componentNames] unless ref($ra_componentNames);
+            $ra_componentNames = [$ra_componentNames || ''] unless ref($ra_componentNames);
 
             # load product and verify access
             my $product = Bugzilla::Product->new({ name => $productName });
@@ -227,7 +228,9 @@ sub user_preferences {
         }
     }
 
-    $args->{'vars'}->{'watches'} = _getWatches($user);
+    $vars->{'add_product'} = $input->{'product'};
+    $vars->{'add_component'} = $input->{'component'};
+    $vars->{'watches'} = _getWatches($user);
 
     $$handled = 1;
 }

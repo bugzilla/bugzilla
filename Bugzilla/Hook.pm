@@ -432,6 +432,41 @@ The definition is structured as:
 
 =back
 
+=head2 buglist_column_joins
+
+This allows you to join additional tables to display additional columns
+in buglists. This hook is generally used in combination with the
+C<buglist_columns> hook.
+
+Params:
+
+=over
+
+=item C<column_joins> - A hashref containing data to return back to
+L<Bugzilla::Search>. This hashref contains names of the columns as keys and 
+a hashref about table to join as values. This hashref has the following keys:
+
+=over
+
+=item C<table> - The name of the additional table to join.
+
+=item C<as> - (optional) The alias used for the additional table. This alias
+must not conflict with an existing alias already used in the query.
+
+=item C<from> - (optional) The name of the column in the C<bugs> table which
+the additional table should be linked to. If omitted, C<bug_id> will be used.
+
+=item C<to> - (optional) The name of the column in the additional table which
+should be linked to the column in the C<bugs> table, see C<from> above.
+If omitted, C<bug_id> will be used.
+
+=item C<join> - (optional) Either INNER or LEFT. Determine how the additional
+table should be joined with the C<bugs> table. If omitted, LEFT is used.
+
+=back
+
+=back
+
 =head2 search_operator_field_override
 
 This allows you to modify L<Bugzilla::Search/OPERATOR_FIELD_OVERRIDE>,

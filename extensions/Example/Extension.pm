@@ -181,6 +181,22 @@ sub buglist_columns {
     
     my $columns = $args->{'columns'};
     $columns->{'example'} = { 'name' => 'bugs.delta_ts' , 'title' => 'Example' };
+    $columns->{'product_desc'} = { 'name'  => 'prod_desc.description',
+                                   'title' => 'Product Description' };
+}
+
+sub buglist_column_joins {
+    my ($self, $args) = @_;
+    my $joins = $args->{'column_joins'};
+
+    # This column is added using the "buglist_columns" hook
+    $joins->{'product_desc'} = {
+        from  => 'product_id',
+        to    => 'id',
+        table => 'products',
+        as    => 'prod_desc',
+        join  => 'INNER',
+    };
 }
 
 sub search_operator_field_override {

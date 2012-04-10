@@ -192,11 +192,16 @@ sub ThrowTemplateError {
         die("error: template error: $template_err");
     }
 
+    # mod_perl overrides exit to call die with this string
+    # we never want to display this to the user
+    exit if $template_err =~ /\bModPerl::Util::exit\b/;
+
     $vars->{'template_error_msg'} = $template_err;
     $vars->{'error'} = "template_error";
 
     $vars->{'uid'} = arecibo_generate_id();
     arecibo_handle_error('error', $template_err, $vars->{'uid'});
+    $vars->{'template_error_msg'} =~ s/ at \S+ line \d+\.\s*$//;
 
     my $template = Bugzilla->template;
 

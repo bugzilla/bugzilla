@@ -32,6 +32,7 @@ use Bugzilla::Util;
 
 use List::Util qw(min max);
 use List::MoreUtils qw(firstidx);
+use Text::ParseWords qw(parse_line);
 
 use base qw(Exporter);
 @Bugzilla::Search::Quicksearch::EXPORT = qw(quicksearch);
@@ -142,54 +143,95 @@ sub quicksearch {
     $searchstring =~ s/(^[\s,]+|[\s,]+$)//g;
     ThrowUserError('buglist_parameters_required') unless ($searchstring);
 
-    $fulltext = Bugzilla->user->setting('quicksearch_fulltext') eq 'on' ? 1 : 0;
-
     if ($searchstring =~ m/^[0-9,\s]*$/) {
         _bug_numbers_only($searchstring);
     }
     else {
         _handle_alias($searchstring);
 
-        # Globally translate " AND ", " OR ", " NOT " to space, pipe, dash.
-        $searchstring =~ s/\s+AND\s+/ /g;
-        $searchstring =~ s/\s+OR\s+/|/g;
-        $searchstring =~ s/\s+NOT\s+/ -/g;
+        # Retain backslashes and quotes, to know which strings are quoted,
+        # and which ones are not.
+        my @words = parse_line('\s+', 1, $searchstring);
+        # If parse_line() returns no data, this means strings are badly quoted.
+        # Rather than trying to guess what the user wanted to do, we throw an error.
+        scalar(@words)
+          || ThrowUserError('quicksearch_unbalanced_quotes', {string => $searchstring});
 
-        my @words = splitString($searchstring);
-        _handle_status_and_resolution(\@words);
+        # A query cannot start with AND or OR, nor can it end with AND, OR or NOT.
+        ThrowUserError('quicksearch_invalid_query')
+          if ($words[0] =~ /^(?:AND|OR)$/ || $words[$#words] =~ /^(?:AND|OR|NOT)$/);
+
+        my (@qswords, @or_group);
+        while (scalar @words) {
+            my $word = shift @words;
+            # AND is the default word separator, similar to a whitespace,
+            # but |a AND OR b| is not a valid combination.
+            if ($word eq 'AND') {
+                ThrowUserError('quicksearch_invalid_query', {operators => ['AND', 'OR']})
+                  if $words[0] eq 'OR';
+            }
+            # |a OR AND b| is not a valid combination.
+            # |a OR OR b| is equivalent to |a OR b| and so is harmless.
+            elsif ($word eq 'OR') {
+                ThrowUserError('quicksearch_invalid_query', {operators => ['OR', 'AND']})
+                  if $words[0] eq 'AND';
+            }
+            # NOT negates the following word.
+            # |NOT AND| and |NOT OR| are not valid combinations.
+            # |NOT NOT| is fine but has no effect as they cancel themselves.
+            elsif ($word eq 'NOT') {
+                $word = shift @words;
+                next if $word eq 'NOT';
+                if ($word eq 'AND' || $word eq 'OR') {
+                    ThrowUserError('quicksearch_invalid_query', {operators => ['NOT', $word]});
+                }
+                unshift(@words, "-$word");
+            }
+            else {
+                # OR groups words together, as OR has higher precedence than AND.
+                push(@or_group, $word);
+                # If the next word is not OR, then we are not in a OR group,
+                # or we are leaving it.
+                if (!defined $words[0] || $words[0] ne 'OR') {
+                    push(@qswords, join('|', @or_group));
+                    @or_group = ();
+                }
+            }
+        }
+
+        _handle_status_and_resolution(\@qswords);
 
         my (@unknownFields, %ambiguous_fields);
+        $fulltext = Bugzilla->user->setting('quicksearch_fulltext') eq 'on' ? 1 : 0;
 
         # Loop over all main-level QuickSearch words.
-        foreach my $qsword (@words) {
-            my $negate = substr($qsword, 0, 1) eq '-';
-            if ($negate) {
-                $qsword = substr($qsword, 1);
-            }
+        foreach my $qsword (@qswords) {
+            my @or_operand = parse_line('\|', 1, $qsword);
+            foreach my $term (@or_operand) {
+                my $negate = substr($term, 0, 1) eq '-';
+                if ($negate) {
+                    $term = substr($term, 1);
+                }
 
-            # No special first char
-            if (!_handle_special_first_chars($qsword, $negate)) {
-                # Split by '|' to get all operands for a boolean OR.
-                foreach my $or_operand (split(/\|/, $qsword)) {
-                    if (!_handle_field_names($or_operand, $negate,
-                                             \@unknownFields, 
-                                             \%ambiguous_fields))
-                    {
-                        # Having ruled out the special cases, we may now split
-                        # by comma, which is another legal boolean OR indicator.
-                        foreach my $word (split(/,/, $or_operand)) {
-                            if (!_special_field_syntax($word, $negate)) {
-                                _default_quicksearch_word($word, $negate);
-                            }
-                            _handle_urls($word, $negate);
-                        }
+                next if _handle_special_first_chars($term, $negate);
+                next if _handle_field_names($term, $negate, \@unknownFields,
+                                            \%ambiguous_fields);
+
+                # Having ruled out the special cases, we may now split
+                # by comma, which is another legal boolean OR indicator.
+                # Remove quotes from quoted words, if any.
+                @words = parse_line(',', 0, $term);
+                foreach my $word (@words) {
+                    if (!_special_field_syntax($word, $negate)) {
+                        _default_quicksearch_word($word, $negate);
                     }
+                    _handle_urls($word, $negate);
                 }
             }
             $chart++;
             $and = 0;
             $or = 0;
-        } # foreach (@words)
+        }
 
         # Inform user about any unknown fields
         if (scalar(@unknownFields) || scalar(keys %ambiguous_fields)) {
@@ -315,7 +357,7 @@ sub _handle_special_first_chars {
 
     my $firstChar = substr($qsword, 0, 1);
     my $baseWord = substr($qsword, 1);
-    my @subWords = split(/[\|,]/, $baseWord);
+    my @subWords = split(/,/, $baseWord);
 
     if ($firstChar eq '#') {
         addChart('short_desc', 'substring', $baseWord, $negate);
@@ -347,7 +389,7 @@ sub _handle_special_first_chars {
 
 sub _handle_field_names {
     my ($or_operand, $negate, $unknownFields, $ambiguous_fields) = @_;
-    
+
     # Flag and requestee shortcut
     if ($or_operand =~ /^(?:flag:)?([^\?]+\?)([^\?]*)$/) {
         addChart('flagtypes.name', 'substring', $1, $negate);
@@ -355,32 +397,40 @@ sub _handle_field_names {
         addChart('requestees.login_name', 'substring', $2, $negate);
         return 1;
     }
-    
-    # generic field1,field2,field3:value1,value2 notation
-    if ($or_operand =~ /^([^:]+):([^:]+)$/) {
-        my @fields = split(/,/, $1);
-        my @values = split(/,/, $2);
+
+    # Generic field1,field2,field3:value1,value2 notation.
+    # We have to correctly ignore commas and colons in quotes.
+    my @field_values = parse_line(':', 1, $or_operand);
+    if (scalar @field_values == 2) {
+        my @fields = parse_line(',', 1, $field_values[0]);
+        my @values = parse_line(',', 1, $field_values[1]);
         foreach my $field (@fields) {
             my $translated = _translate_field_name($field);
             # Skip and record any unknown fields
             if (!defined $translated) {
                 push(@$unknownFields, $field);
-                next;
             }
             # If we got back an array, that means the substring is
             # ambiguous and could match more than field name
             elsif (ref $translated) {
                 $ambiguous_fields->{$field} = $translated;
-                next;
             }
-            foreach my $value (@values) {
-                my $operator = FIELD_OPERATOR->{$translated} || 'substring';
-                addChart($translated, $operator, $value, $negate);
+            else {
+                foreach my $value (@values) {
+                    my $operator = FIELD_OPERATOR->{$translated} || 'substring';
+                    # If the string was quoted to protect some special
+                    # characters such as commas and colons, we need
+                    # to remove quotes.
+                    if ($value =~ /^(["'])(.+)\1$/) {
+                        $value = $2;
+                        $value =~ s/\\(["'])/$1/g;
+                    }
+                    addChart($translated, $operator, $value, $negate);
+                }
             }
         }
         return 1;
     }
-    
     return 0;
 }
 
@@ -516,41 +566,6 @@ sub _handle_urls {
 # Helpers
 ###########################################################################
 
-# Split string on whitespace, retaining quoted strings as one
-sub splitString {
-    my $string = shift;
-    my @quoteparts;
-    my @parts;
-    my $i = 0;
-
-    # Now split on quote sign; be tolerant about unclosed quotes
-    @quoteparts = split(/"/, $string);
-    foreach my $part (@quoteparts) {
-        # After every odd quote, quote special chars
-        if ($i++ %2) {
-            $part = url_quote($part);
-            # Protect the minus sign from being considered
-            # as negation, in quotes.
-            $part =~ s/(?<=^)\-/%2D/;
-        }
-    }
-    # Join again
-    $string = join('"', @quoteparts);
-
-    # Now split on unescaped whitespace
-    @parts = split(/\s+/, $string);
-    foreach (@parts) {
-        # Protect plus signs from becoming a blank.
-        # If "+" appears as the first character, leave it alone
-        # as it has a special meaning. Strings which start with
-        # "+" must be quoted.
-        s/(?<!^)\+/%2B/g;
-        # Remove quotes
-        s/"//g;
-    }
-    return @parts;
-}
-
 # Quote and escape a phrase appropriately for a "content matches" search.
 sub _matches_phrase {
     my ($phrase) = @_;
@@ -616,7 +631,7 @@ sub makeChart {
     my $cgi = Bugzilla->cgi;
     $cgi->param("field$expr", $field);
     $cgi->param("type$expr",  $type);
-    $cgi->param("value$expr", url_decode($value));
+    $cgi->param("value$expr", $value);
 }
 
 1;

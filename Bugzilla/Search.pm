@@ -959,7 +959,8 @@ sub _column_join {
     my ($self, $field) = @_;
     # The _realname fields require the same join as the username fields.
     $field =~ s/_realname$//;
-    my $join_info = COLUMN_JOINS->{$field};
+    my $column_joins = $self->_get_column_joins();
+    my $join_info = $column_joins->{$field};
     if ($join_info) {
         # Don't allow callers to modify the constant.
         $join_info = dclone($join_info);
@@ -1795,6 +1796,20 @@ sub _get_operator_field_override {
 
     $cache->{operator_field_override} = \%operator_field_override;
     return $cache->{operator_field_override};
+}
+
+sub _get_column_joins {
+    my $self = shift;
+    my $cache = Bugzilla->request_cache;
+
+    return $cache->{column_joins} if defined $cache->{column_joins};
+
+    my %column_joins = %{ COLUMN_JOINS() };
+    Bugzilla::Hook::process('buglist_column_joins',
+                            { column_joins => \%column_joins });
+
+    $cache->{column_joins} = \%column_joins;
+    return $cache->{column_joins};
 }
 
 ###########################

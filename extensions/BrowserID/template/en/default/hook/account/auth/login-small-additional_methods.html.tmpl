@@ -7,9 +7,26 @@ function browserid_sign_in() {
         if (assertion) {
             // This code will be invoked once the user has successfully
             // selected an email address they control to sign in with.
-            var token = "[% issue_hash_token(['login']) FILTER html %]";
-            window.location.href = "[% login_target FILTER none %]?token="
-                + token + "&browserid_assertion=" + assertion;
+            var browseridForm = document.createElement('form');
+            browseridForm.action = '[% login_target FILTER js %]';
+            browseridForm.method = 'POST';
+            browseridForm.style.display = 'none';
+            
+            var tokenField = document.createElement('input');
+            tokenField.type = 'hidden';
+            tokenField.name = 'token';
+            tokenField.value = '[% issue_hash_token(['login']) FILTER js %]';
+            browseridForm.appendChild(tokenField);
+
+            var assertionField = document.createElement('input');
+            assertionField.type = 'hidden';
+            assertionField.name = 'browserid_assertion';
+            assertionField.value = assertion;
+            browseridForm.appendChild(assertionField);
+
+            document.body.appendChild(browseridForm);
+            browseridForm.submit();
+            return true;
         }
     });
 }

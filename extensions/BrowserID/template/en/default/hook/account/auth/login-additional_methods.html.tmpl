@@ -1,4 +1,8 @@
 [% IF Param('user_info_class').split(',').contains('BrowserID') %]
+
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+
 <script src="https://browserid.org/include.js" type="text/javascript"></script>
 
 <script type="text/javascript">
@@ -7,9 +11,40 @@ function browserid_sign_in() {
         if (assertion) {
             // This code will be invoked once the user has successfully
             // selected an email address they control to sign in with.
-            var token = "[% issue_hash_token(['login']) FILTER html %]";
-            window.location.href = "[% login_target FILTER none %]?token="
-                + token + "&browserid_assertion=" + assertion;
+            var browseridForm = document.createElement('form');
+            browseridForm.action = '[% target FILTER js %]';
+            browseridForm.method = 'POST';
+            browseridForm.style.display = 'none';
+            
+            var tokenField = document.createElement('input');
+            tokenField.type = 'hidden';
+            tokenField.name = 'token';
+            tokenField.value = '[% issue_hash_token(['login']) FILTER js %]';
+            browseridForm.appendChild(tokenField);
+
+            var assertionField = document.createElement('input');
+            assertionField.type = 'hidden';
+            assertionField.name = 'browserid_assertion';
+            assertionField.value = assertion;
+            browseridForm.appendChild(assertionField);
+
+            var hidden_fields =[];
+            var field_count = 0;
+            [% FOREACH field = cgi.param() %]
+              [% NEXT IF field.search("^(Bugzilla_(login|password|restrictlogin)|token|browserid_assertion)$") %]
+              [% FOREACH mvalue = cgi.param(field).slice(0) %]
+                hidden_fields[field_count] = document.createElement('input');
+                hidden_fields[field_count].type = 'hidden';
+                hidden_fields[field_count].name = '[% field FILTER js %]';
+                hidden_fields[field_count].value = '[% mvalue FILTER html_linebreak FILTER js %]';
+                browseridForm.appendChild(hidden_fields[field_count]);
+              [% END %]
+              field_count++;
+            [% END %]
+
+            document.body.appendChild(browseridForm);
+            browseridForm.submit();
+            return true;
         }
     });
 }

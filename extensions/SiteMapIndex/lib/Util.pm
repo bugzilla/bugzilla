@@ -46,7 +46,7 @@ sub bug_is_ok_to_index {
     my ($bug) = @_;
     return 1 unless blessed($bug) && $bug->isa('Bugzilla::Bug');
     my $creation_ts = datetime_from($bug->creation_ts);
-    return ($creation_ts lt too_young_date()) ? 1 : 0;
+    return ($creation_ts && $creation_ts lt too_young_date()) ? 1 : 0;
 }
 
 # We put two things in the Sitemap: a list of Browse links for products,

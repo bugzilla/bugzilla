@@ -202,22 +202,31 @@
                                                  'keyword_autocomplete');
        </script>
   [% END %]
-[% ELSIF field.type == constants.FIELD_TYPE_TEXTAREA %]
-  <div class="uneditable_textarea">[% value FILTER html %]</div>
-[% ELSIF field.type == constants.FIELD_TYPE_BUG_ID %]
-    [% IF value %]  
-        [% value FILTER bug_link(value, use_alias => 1) FILTER none %]
-    [% END %]
-[% ELSIF field.type == constants.FIELD_TYPE_BUG_URLS %]
-  [% '<ul class="bug_urls">' IF value.size %]
-    [% FOREACH bug_url = value %]
-      <li>
-        [% PROCESS bug_url_link bug_url = bug_url %]
-      </li>
-    [% END %]
-  [% '</ul>' IF value.size %]
 [% ELSE %]
-  [% value.join(', ') FILTER html %]
+  [% SWITCH field.type %]
+    [% CASE constants.FIELD_TYPE_TEXTAREA %]
+      <div class="uneditable_textarea">[% value FILTER html %]</div>
+    [% CASE constants.FIELD_TYPE_BUG_ID %]
+      [% IF value %]  
+          [% value FILTER bug_link(value, use_alias => 1) FILTER none %]
+      [% END %]
+    [% CASE [ constants.FIELD_TYPE_SINGLE_SELECT 
+              constants.FIELD_TYPE_MULTI_SELECT ] %]
+      [% FOREACH val = value %]
+        [% display_value(field.name, val) FILTER html %]
+        [% ', ' UNLESS loop.last() %]
+      [% END %]
+    [% CASE constants.FIELD_TYPE_BUG_URLS %]
+      [% '<ul class="bug_urls">' IF value.size %]
+        [% FOREACH bug_url = value %]
+          <li>
+            [% PROCESS bug_url_link bug_url = bug_url %]
+          </li>
+        [% END %]
+      [% '</ul>' IF value.size %]
+    [% CASE %]
+      [% value.join(', ') FILTER html %]
+  [% END %]
 [% END %]
 [% Hook.process('end_field_column') %]
 [% '</td>' IF NOT no_tds %]

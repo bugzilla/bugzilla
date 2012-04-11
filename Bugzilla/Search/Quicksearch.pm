@@ -116,7 +116,7 @@ use constant COMPONENT_EXCEPTIONS => (
 );
 
 # Quicksearch-wide globals for boolean charts.
-our ($chart, $and, $or, $fulltext);
+our ($chart, $and, $or, $fulltext, $bug_status_set);
 
 sub quicksearch {
     my ($searchstring) = (@_);
@@ -186,7 +186,8 @@ sub quicksearch {
             }
         }
 
-        _handle_status_and_resolution(\@qswords);
+        _handle_status_and_resolution($qswords[0]);
+        shift(@qswords) if $bug_status_set;
 
         my (@unknownFields, %ambiguous_fields);
         $fulltext = Bugzilla->user->setting('quicksearch_fulltext') eq 'on' ? 1 : 0;
@@ -218,6 +219,12 @@ sub quicksearch {
             $chart++;
             $and = 0;
             $or = 0;
+        }
+
+        # If there is no mention of a bug status, we restrict the query
+        # to open bugs by default.
+        unless ($bug_status_set) {
+            $cgi->param('bug_status', BUG_STATE_OPEN);
         }
 
         # Inform user about any unknown fields
@@ -290,48 +297,26 @@ sub _handle_alias {
 }
 
 sub _handle_status_and_resolution {
-    my ($words) = @_;
+    my $word = shift;
     my $legal_statuses = get_legal_field_values('bug_status');
-    my $legal_resolutions = get_legal_field_values('resolution');
-
-    my @openStates = BUG_STATE_OPEN;
-    my @closedStates;
     my (%states, %resolutions);
+    $bug_status_set = 1;
 
-    foreach (@$legal_statuses) {
-        push(@closedStates, $_) unless is_open_state($_);
+    if ($word eq 'OPEN') {
+        $states{$_} = 1 foreach BUG_STATE_OPEN;
     }
-    foreach (@openStates) { $states{$_} = 1 }
-    if ($words->[0] eq 'ALL') {
-        foreach (@$legal_statuses) { $states{$_} = 1 }
-        shift @$words;
-    }
-    elsif ($words->[0] eq 'OPEN') {
-        shift @$words;
-    }
-    elsif ($words->[0] =~ /^[A-Z_]+(,[_A-Z]+)*$/) {
-        # e.g. CON,IN_PR,FIX
-        undef %states;
-        if (matchPrefixes(\%states,
-                          \%resolutions,
-                          [split(/,/, $words->[0])],
-                          $legal_statuses,
-                          $legal_resolutions)) {
-            shift @$words;
-        }
-        else {
-            # Carry on if no match found
-            foreach (@openStates) { $states{$_} = 1 }
-        }
-    }
-    else {
-        # Default: search for unresolved bugs only.
-        # Put custom code here if you would like to change this behaviour.
+    # If we want all bugs, then there is nothing to do.
+    elsif ($word ne 'ALL'
+           && !matchPrefixes(\%states, \%resolutions, $word, $legal_statuses))
+    {
+        $bug_status_set = 0;
     }
 
     # If we have wanted resolutions, allow closed states
     if (keys(%resolutions)) {
-        foreach (@closedStates) { $states{$_} = 1 }
+        foreach my $status (@$legal_statuses) {
+            $states{$status} = 1 unless is_open_state($status);
+        }
     }
 
     Bugzilla->cgi->param('bug_status', keys(%states));
@@ -403,6 +388,9 @@ sub _handle_field_names {
                 $ambiguous_fields->{$field} = $translated;
             }
             else {
+                if ($translated eq 'bug_status' || $translated eq 'resolution') {
+                    $bug_status_set = 1;
+                }
                 foreach my $value (@values) {
                     my $operator = FIELD_OPERATOR->{$translated} || 'substring';
                     # If the string was quoted to protect some special
@@ -559,14 +547,14 @@ sub _matches_phrase {
 
 # Expand found prefixes to states or resolutions
 sub matchPrefixes {
-    my $hr_states = shift;
-    my $hr_resolutions = shift;
-    my $ar_prefixes = shift;
-    my $ar_check_states = shift;
-    my $ar_check_resolutions = shift;
+    my ($hr_states, $hr_resolutions, $word, $ar_check_states) = @_;
+    return unless $word =~ /^[A-Z_]+(,[A-Z_]+)*$/;
+
+    my @ar_prefixes = split(/,/, $word);
+    my $ar_check_resolutions = get_legal_field_values('resolution');
     my $foundMatch = 0;
 
-    foreach my $prefix (@$ar_prefixes) {
+    foreach my $prefix (@ar_prefixes) {
         foreach (@$ar_check_states) {
             if (/^$prefix/) {
                 $$hr_states{$_} = 1;

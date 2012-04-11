@@ -112,7 +112,8 @@ sub user_activity_report {
             push @params, ($from_dt, $to_dt);
         }
 
-        my $order = $input->{'sort'} eq 'bug' ? 'bug_id, bug_when' : 'bug_when';
+        my $order = ($input->{'sort'} && $input->{'sort'} eq 'bug')
+                    ? 'bug_id, bug_when' : 'bug_when';
 
         my $comment_filter = '';
         if (!Bugzilla->user->is_insider) {

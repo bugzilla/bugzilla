@@ -31,8 +31,9 @@ use Bugzilla::Token;
 use JSON;
 use LWP::UserAgent;
 
-use constant requires_verification => 0;
-use constant is_automatic          => 1;
+use constant requires_verification   => 0;
+use constant is_automatic            => 1;
+use constant user_can_create_account => 1;
 
 sub get_login_info {
     my ($self) = @_;

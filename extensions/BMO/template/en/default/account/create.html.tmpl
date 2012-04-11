@@ -149,9 +149,11 @@ function onSubmit() {
       <input type="hidden" id="token" name="token" value="[% issue_hash_token(['create_account']) FILTER html %]">
       <input type="submit" value="Create Account">
      </td>
-    </tr>
+  </tr>
   </table>
   </form>
+
+  [% Hook.process('additional_methods') %]
 
 </td>
 

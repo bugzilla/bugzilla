@@ -53,6 +53,7 @@ sub new {
             prefix => 'ts_',
         }],
         driver_cache_expiration => DRIVER_CACHE_TIME,
+        prioritize => 1,
     );
 
     return $self;
@@ -70,12 +71,19 @@ sub insert {
     my $self = shift;
     my $job = shift;
 
-    my $mapped_job = Bugzilla::JobQueue->job_map()->{$job};
-    ThrowCodeError('jobqueue_no_job_mapping', { job => $job })
-        if !$mapped_job;
-    unshift(@_, $mapped_job);
+    if (!ref($job)) {
+        my $mapped_job = Bugzilla::JobQueue->job_map()->{$job};
+        ThrowCodeError('jobqueue_no_job_mapping', { job => $job })
+            if !$mapped_job;
 
-    my $retval = $self->SUPER::insert(@_);
+        $job = new TheSchwartz::Job(
+            funcname => $mapped_job,
+            arg      => $_[0],
+            priority => $_[1] || 5
+        );
+    }
+    
+    my $retval = $self->SUPER::insert($job);
     # XXX Need to get an error message here if insert fails, but
     # I don't see any way to do that in TheSchwartz.
     ThrowCodeError('jobqueue_insert_failed', { job => $job, errmsg => $@ })

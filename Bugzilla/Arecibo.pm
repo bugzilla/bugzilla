@@ -77,7 +77,7 @@ use constant CONFIG => {
 
     # any error messages matching these regex's will not be sent to arecibo
     ignore => [
-        qr/^Software caused connection abort/,
+        qr/Software caused connection abort/,
     ],
 };
 
@@ -167,10 +167,18 @@ sub arecibo_handle_error {
     my $username = '';
     eval { $username = Bugzilla->user->login };
 
+    my $request = '';
+    foreach my $name (sort { lc($a) cmp lc($b) } keys %ENV) {
+        $request .= "$name=$ENV{$name}\n";
+    }
+    chomp($request);
+
     my $data = [
+        ip         => remote_ip(),
         msg        => $message,
         priority   => $priority,
         server     => hostname(),
+        request    => $request,
         status     => '500',
         timestamp  => email_gmdate(),
         traceback  => $traceback,

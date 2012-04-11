@@ -398,7 +398,7 @@ sub update_table_definitions {
               "WHERE initialqacontact = 0");
 
     _migrate_email_prefs_to_new_table();
-    _initialize_dependency_tree_changes_email_pref();
+    _initialize_new_email_prefs();
     _change_all_mysql_booleans_to_tinyint();
 
     # make classification_id field type be consistent with DB:Schema
@@ -2396,13 +2396,16 @@ sub _migrate_email_prefs_to_new_table {
     }
 }
 
-sub _initialize_dependency_tree_changes_email_pref {
+sub _initialize_new_email_prefs {
     my $dbh = Bugzilla->dbh;
     # Check for any "new" email settings that wouldn't have been ported over
     # during the block above.  Since these settings would have otherwise
     # fallen under EVT_OTHER, we'll just clone those settings.  That way if
     # folks have already disabled all of that mail, there won't be any change.
-    my %events = ("Dependency Tree Changes" => EVT_DEPEND_BLOCK);
+    my %events = (
+        "Dependency Tree Changes" => EVT_DEPEND_BLOCK,
+        "Product/Component Changes" => EVT_COMPONENT,
+    );
 
     foreach my $desc (keys %events) {
         my $event = $events{$desc};

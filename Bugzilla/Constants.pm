@@ -105,7 +105,7 @@ use Memoize;
     POS_EVENTS
     EVT_OTHER EVT_ADDED_REMOVED EVT_COMMENT EVT_ATTACHMENT EVT_ATTACHMENT_DATA
     EVT_PROJ_MANAGEMENT EVT_OPENED_CLOSED EVT_KEYWORD EVT_CC EVT_DEPEND_BLOCK
-    EVT_BUG_CREATED
+    EVT_BUG_CREATED EVT_COMPONENT
 
     NEG_EVENTS
     EVT_UNCONFIRMED EVT_CHANGED_BY_ME 
@@ -356,11 +356,13 @@ use constant EVT_KEYWORD            => 7;
 use constant EVT_CC                 => 8;
 use constant EVT_DEPEND_BLOCK       => 9;
 use constant EVT_BUG_CREATED        => 10;
+use constant EVT_COMPONENT          => 11;
 
 use constant POS_EVENTS => EVT_OTHER, EVT_ADDED_REMOVED, EVT_COMMENT, 
                            EVT_ATTACHMENT, EVT_ATTACHMENT_DATA, 
                            EVT_PROJ_MANAGEMENT, EVT_OPENED_CLOSED, EVT_KEYWORD,
-                           EVT_CC, EVT_DEPEND_BLOCK, EVT_BUG_CREATED;
+                           EVT_CC, EVT_DEPEND_BLOCK, EVT_BUG_CREATED,
+                           EVT_COMPONENT;
 
 use constant EVT_UNCONFIRMED        => 50;
 use constant EVT_CHANGED_BY_ME      => 51;

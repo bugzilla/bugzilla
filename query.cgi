@@ -186,6 +186,7 @@ foreach my $val (editable_bug_fields()) {
 if ($user->is_timetracker) {
     push @chfields, "work_time";
 } else {
+    @chfields = grep($_ ne "deadline", @chfields);
     @chfields = grep($_ ne "estimated_time", @chfields);
     @chfields = grep($_ ne "remaining_time", @chfields);
 }

@@ -1404,7 +1404,7 @@ It will be passed to the template.
 
 =item C<action>
 
-A text which indicates the different behaviors that edit_users.cgi will have.
+A text which indicates the different behaviors that editusers.cgi will have.
 With this hook you can change the behavior of an action or add new actions.
 
 =item C<user>

@@ -72,6 +72,21 @@
 
 <h2 id="v40_point">Updates in this 4.0.x Release</h2>
 
+<h3>4.0.6</h3>
+
+<p>This release fixes one security issue. See the
+  <a href="http://www.bugzilla.org/security/3.6.8/">Security Advisory</a>
+  for details.</p>
+
+<p>In addition, the following [% terms.bug %] has been fixed in this release:</p>
+
+<ul>
+  <li>Due to a regression introduced when fixing CVE-2012-0453, if an XML-RPC
+    client sets the charset as part of its Content-Type header, we were
+    incorrectly rejecting the request. The header is now correctly parsed.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=731219">[% terms.Bug %] 731219</a>)</li>
+</ul>
+
 <h3>4.0.5</h3>
 
 <p>This release fixes one security issue. See the

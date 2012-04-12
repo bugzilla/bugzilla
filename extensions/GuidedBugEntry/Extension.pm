@@ -67,10 +67,12 @@ sub enter_bug_start {
     # we use the __default__ format to bypass the guided entry
     # it isn't understood upstream, so remove it once a product
     # has been selected.
-    $cgi->delete('format') 
-        if $cgi->param('format')
-           && $cgi->param('format') eq "__default__"
-           && $cgi->param('product') ne '';
+    if (
+        ($cgi->param('format') && $cgi->param('format') eq "__default__")
+        && ($cgi->param('product') && $cgi->param('product') ne '')
+    ) {
+        $cgi->delete('format') 
+    }
 }
 
 sub _init_vars {

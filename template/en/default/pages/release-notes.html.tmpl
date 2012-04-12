@@ -16,7 +16,7 @@
 
 <ul class="bz_toc">
   <li><a href="#v42_introduction">Introduction</a></li>
-  <!-- li><a href="#v42_point">Updates in this 4.2.x Release</a></li -->
+  <li><a href="#v42_point">Updates in this 4.2.x Release</a></li>
   <li><a href="#v42_req">Minimum Requirements</a></li>
   <li><a href="#v42_feat">New Features and Improvements</a></li>
   <li><a href="#v42_issues">Outstanding Issues</a></li>
@@ -38,8 +38,53 @@
   in between your version and this one, <strong>particularly the Upgrading
   section of each version's release notes</strong>.</p>
 
-<!-- h2 id="v42_point">Updates in this 4.2.x Release</h2 -->
+<h2 id="v42_point">Updates in this 4.2.x Release</h2>
 
+<h3>4.2.1</h3>
+
+<p>This release fixes one security issue. See the
+  <a href="http://www.bugzilla.org/security/3.6.8/">Security Advisory</a>
+  for details.</p>
+
+<p>In addition, the following important fixes/changes have been made in this
+  release:</p>
+
+<ul>
+  <li>Due to a regression introduced when fixing CVE-2012-0453, if an XML-RPC
+    client sets the charset as part of its Content-Type header, we were
+    incorrectly rejecting the request. The header is now correctly parsed.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=731219">[% terms.Bug %] 731219</a>)</li>
+  <li>Email notifications about status changes in blockers were incorrectly
+    formatted. Several pieces of text were missing in the emails.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=731586">[% terms.Bug %] 731586</a>)</li>
+  <li>Many [% terms.bugs %] related to the searching system have been fixed.
+    (<a href="https://bugzilla.mozilla.org/buglist.cgi?bug_id=58179,715270,730984,731163,737436">
+    [% terms.Bugs %] 58179, 715270, 730984, 731163 and 737436</a>)</li>
+  <li>When using the QuickSearch box, complex queries are now parsed correctly.
+    It also behaves correctly with non-ASCII characters (such as é, ä, ü, etc.).
+    (<a href="https://bugzilla.mozilla.org/buglist.cgi?bug_id=554819,663377,730207">
+    [% terms.Bugs %] 554819, 663377 and 730207</a>)</li>
+  <li>The 'take' link besides the assignee field now works correctly when
+    the <kbd>usemenuforusers</kbd> parameter is turned on.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=734997">[% terms.Bug %] 734997</a>)</li>
+  <li>URLs in the 'Total' row at the bottom of tabular reports were broken
+    when JavaScript was enabled and a user field was used for the vertical
+    axis.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=731323">[% terms.Bug %] 731323</a>)</li>
+  <li>Some performance problems have been fixed for installations with many
+    products, components or versions.
+    (<a href="https://bugzilla.mozilla.org/buglist.cgi?bug_id=695514,731055">
+    [% terms.Bugs %] 695514 and 731055</a>)</li>
+  <li>A new hook named <kbd>buglist_column_joins</kbd> has been added to let
+    extensions alter the <kbd>Bugzilla::Search::COLUMN_JOINS</kbd> hash.
+    Now more fields can be displayed as columns in buglists, in combination
+    with the already existing <kbd>buglist_columns</kbd> hook.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=743991">[% terms.Bug %] 743991</a>)</li>
+  <li>A new hook named <kbd>admin_editusers_action</kbd> has been added to let
+    extensions alter the behavior of <kbd>editusers.cgi</kbd>. This lets you add
+    new features to this script very easily.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=730794">[% terms.Bug %] 730794</a>)</li>
+</ul>
 
 <h2 id="v42_req">Minimum Requirements</h2>
 

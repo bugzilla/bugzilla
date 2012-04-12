@@ -105,6 +105,23 @@
 
 [% END %]
 
+[% IF Param('useclassification') %]
+  <bz:classifications>
+    <Seq>
+      [% FOREACH classification = classifications %]
+      <li>
+        <bz:classification rdf:about="[% escaped_urlbase %]classification.cgi?name=
+          [% classification.name FILTER uri %]">
+          <bz:name>[% classification.name FILTER html %]</bz:name>
+          <bz:description>[% classification.description FILTER html %]</bz:description>
+          <bz:sortkey>[% classification.sortkey FILTER html %]</bz:sortkey>
+        </bz:classification>
+      </li>
+      [% END %]
+    </Seq>
+  </bz:classifications>
+[% END %]
+
   <bz:products>
     <Seq>
       [% FOREACH product = products %]
@@ -112,7 +129,9 @@
           <bz:product rdf:about="[% escaped_urlbase %]product.cgi?name=[% product.name FILTER uri %]">
             <bz:name>[% product.name FILTER html %]</bz:name>
             <bz:allows_unconfirmed>[% product.allows_unconfirmed FILTER html %]</bz:allows_unconfirmed>
-
+            [% IF Param('useclassification') %]
+              <bz:classification>[% class_names.${product.classification_id}.name FILTER html %]</bz:classification>
+            [% END %]
             <bz:components>
               <Seq>
                 [% FOREACH component = product.components %]

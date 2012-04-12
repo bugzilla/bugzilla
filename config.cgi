@@ -69,6 +69,18 @@ if ($cgi->param('product')) {
 # We set the 2nd argument to 1 to also preload flag types.
 Bugzilla::Product::preload($vars->{'products'}, 1);
 
+if (Bugzilla->params->{'useclassification'}) {
+    my $class = {};
+    # Get all classifications with at least one selectable product.
+    foreach my $product (@{$vars->{'products'}}) {
+        $class->{$product->classification_id} ||= $product->classification;
+    }
+    my @classifications = sort {$a->sortkey <=> $b->sortkey
+        || lc($a->name) cmp lc($b->name)} (values %$class);
+    $vars->{'class_names'} = $class;
+    $vars->{'classifications'} = \@classifications;
+}
+
 # Allow consumers to specify whether or not they want flag data.
 if (defined $cgi->param('flags')) {
     $vars->{'show_flags'} = $cgi->param('flags');

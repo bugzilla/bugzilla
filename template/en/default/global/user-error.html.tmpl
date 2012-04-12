@@ -1618,7 +1618,8 @@
     [% ELSIF type == "account" %]
       an account
     [% END %]
-    token too recently to request another. Please wait a while and try again.
+    token too recently to request another. 
+    Please wait [% constants.ACCOUNT_CHANGE_INTERVAL %] minutes then try again.
 
   [% ELSIF error == "unknown_action" %]
     [% IF action %]

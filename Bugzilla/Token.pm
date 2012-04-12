@@ -46,7 +46,7 @@ sub issue_new_user_account_token {
     # Is there already a pending request for this login name? If yes, do not throw
     # an error because the user may have lost his email with the token inside.
     # But to prevent using this way to mailbomb an email address, make sure
-    # the last request is at least 10 minutes old before sending a new email.
+    # the last request is old enough before sending a new email (default: 10 minutes).
 
     my $pending_requests = $dbh->selectrow_array(
         'SELECT COUNT(*)
@@ -54,7 +54,7 @@ sub issue_new_user_account_token {
           WHERE tokentype = ?
                 AND ' . $dbh->sql_istrcmp('eventdata', '?') . '
                 AND issuedate > '
-                    . $dbh->sql_date_math('NOW()', '-', 10, 'MINUTE'),
+                    . $dbh->sql_date_math('NOW()', '-', ACCOUNT_CHANGE_INTERVAL, 'MINUTE'),
         undef, ('account', $login_name));
 
     ThrowUserError('too_soon_for_new_token', {'type' => 'account'}) if $pending_requests;
@@ -122,7 +122,7 @@ sub IssuePasswordToken {
         'SELECT 1 FROM tokens
           WHERE userid = ? AND tokentype = ?
                 AND issuedate > ' 
-                    . $dbh->sql_date_math('NOW()', '-', 10, 'MINUTE'),
+                    . $dbh->sql_date_math('NOW()', '-', ACCOUNT_CHANGE_INTERVAL, 'MINUTE'),
         undef, ($user->id, 'password'));
 
     ThrowUserError('too_soon_for_new_token', {'type' => 'password'}) if $too_soon;

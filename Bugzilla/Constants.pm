@@ -140,6 +140,7 @@ use Memoize;
     MAX_SUDO_TOKEN_AGE
     MAX_LOGIN_ATTEMPTS
     LOGIN_LOCKOUT_INTERVAL
+    ACCOUNT_CHANGE_INTERVAL
     MAX_STS_AGE
 
     SAFE_PROTOCOLS
@@ -408,6 +409,10 @@ use constant MAX_LOGIN_ATTEMPTS => 5;
 # If the maximum login attempts occur during this many minutes, the
 # account is locked.
 use constant LOGIN_LOCKOUT_INTERVAL => 30;
+
+# The time in minutes a user must wait before he can request another email to
+# create a new account or change his password.
+use constant ACCOUNT_CHANGE_INTERVAL => 10;
 
 # The maximum number of seconds the Strict-Transport-Security header
 # will remain valid. Default is one week.

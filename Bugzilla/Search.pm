@@ -1924,16 +1924,22 @@ sub _timestamp_translate {
     my $value = $args->{value};
     my $dbh = Bugzilla->dbh;
 
-    return if $value !~ /^[\+\-]?\d+[hdwmy]s?$/i;
-    
-    $args->{value}  = SqlifyDate($value);
-    $args->{quoted} = $dbh->quote($args->{value});
+    return if $value !~ /^(?:[\+\-]?\d+[hdwmy]s?|now)$/i;
+
+    # By default, the time is appended to the date, which we don't want
+    # for deadlines.
+    $value = SqlifyDate($value);
+    if ($args->{field} eq 'deadline') {
+        ($value) = split(/\s/, $value);
+    }
+    $args->{value} = $value;
+    $args->{quoted} = $dbh->quote($value);
 }
 
 sub SqlifyDate {
     my ($str) = @_;
     my $fmt = "%Y-%m-%d %H:%M:%S";
-    $str = "" if !defined $str;
+    $str = "" if (!defined $str || lc($str) eq 'now');
     if ($str eq "") {
         my ($sec, $min, $hour, $mday, $month, $year, $wday) = localtime(time());
         return sprintf("%4d-%02d-%02d 00:00:00", $year+1900, $month+1, $mday);

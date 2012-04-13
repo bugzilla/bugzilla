@@ -348,8 +348,10 @@ sub history {
     my $ids = $params->{ids};
     defined $ids || ThrowCodeError('param_required', { param => 'ids' });
 
-    my @return;
+    my %api_name = reverse %{ Bugzilla::Bug::FIELD_MAP() };
+    $api_name{'bug_group'} = 'groups';
 
+    my @return;
     foreach my $bug_id (@$ids) {
         my %item;
         my $bug = Bugzilla::Bug->check($bug_id);
@@ -365,14 +367,15 @@ sub history {
             $bug_history{who}  = $self->type('string', $changeset->{who});
             $bug_history{changes} = [];
             foreach my $change (@{ $changeset->{changes} }) {
+                my $api_field = $api_name{$change->{fieldname}} || $change->{fieldname};
                 my $attach_id = delete $change->{attachid};
                 if ($attach_id) {
                     $change->{attachment_id} = $self->type('int', $attach_id);
                 }
                 $change->{removed} = $self->type('string', $change->{removed});
                 $change->{added}   = $self->type('string', $change->{added});
-                $change->{field_name} = $self->type('string',
-                    delete $change->{fieldname});
+                $change->{field_name} = $self->type('string', $api_field);
+                delete $change->{fieldname};
                 push (@{$bug_history{changes}}, $change);
             }
             
@@ -2108,6 +2111,10 @@ The same as L</get>.
 =over
 
 =item Added in Bugzilla B<3.4>.
+
+=item Field names changed to be more consistent with other methods in Bugzilla B<4.4>.
+
+=item As of Bugzilla B<4.4>, field names now match names used by L<Bug.update|/"update"> for consistency.
 
 =back
 

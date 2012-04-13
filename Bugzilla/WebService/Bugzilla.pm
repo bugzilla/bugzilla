@@ -11,7 +11,8 @@ use strict;
 use base qw(Bugzilla::WebService);
 use Bugzilla::Constants;
 use Bugzilla::Util qw(datetime_from);
-use Bugzilla::WebService::Util qw(filter_wants);
+use Bugzilla::WebService::Util qw(validate filter_wants);
+use Bugzilla::Util qw(trick_taint);
 
 use DateTime;
 
@@ -111,6 +112,33 @@ sub time {
         tz_name       => $self->type('string', 'UTC'),
         tz_offset     => $self->type('string', '+0000'),
         tz_short_name => $self->type('string', 'UTC'),
+    };
+}
+
+sub last_audit_time {
+    my ($self, $params) = validate(@_, 'class');
+    my $dbh = Bugzilla->dbh;
+    
+    my $sql_statement = "SELECT MAX(at_time) FROM audit_log";
+    my $class_values =  $params->{class};
+    my @class_values_quoted;
+    foreach my $class_value (@$class_values) {
+        push (@class_values_quoted, $dbh->quote($class_value)) 
+            if $class_value =~ /^Bugzilla(::[a-zA-Z0-9_]+)*$/;
+    }
+
+    if (@class_values_quoted) {
+        $sql_statement .= " WHERE " . $dbh->sql_in('class', \@class_values_quoted);
+    }
+
+    my $last_audit_time = $dbh->selectrow_array("$sql_statement");
+ 
+    # All Webservices return times in UTC; Use UTC here for backwards compat.
+    # Hardcode values where appropriate
+    $last_audit_time = datetime_from($last_audit_time, 'UTC');
+    
+    return {
+        last_audit_time => $self->type('dateTime', $last_audit_time)
     };
 }
 
@@ -380,6 +408,47 @@ New parameters can appear or obsolete parameters can disappear depending
 on the version of Bugzilla and on extensions being installed.
 The list of parameters returned by this method is not stable and will
 never be stable.
+
+=item B<History>
+
+=over
+
+=item Added in Bugzilla B<4.4>.
+
+=back
+
+=back
+
+=head2 last_audit_time
+
+B<EXPERIMENTAL>
+
+=over
+
+=item B<Description>
+
+Gets the latest time of the audit_log table.
+
+=item B<Params>
+
+You can pass the optional parameter C<class> to get the maximum for only 
+the listed classes.
+
+=over
+
+=item C<class> (array) - An array of strings representing the class names.
+
+B<Note:> The class names are defined as "Bugzilla::<class_name>". For the product
+use Bugzilla:Product.
+
+=back
+
+=item B<Returns>
+
+A hash with a single item, C<last_audit_time>, that is the maximum of the
+at_time from the audit_log.
+
+=item B<Errors> (none)
 
 =item B<History>
 

@@ -112,6 +112,30 @@ This describes what hooks exist in Bugzilla currently. They are mostly
 in alphabetical order, but some related hooks are near each other instead
 of being alphabetical.
 
+=head2 admin_editusers_action
+
+This hook allows you to add additional actions to the admin Users page.
+
+Params:
+
+=over
+
+=item C<vars>
+
+You can add as many new key/value pairs as you want to this hashref.
+It will be passed to the template.
+
+=item C<action>
+
+A text which indicates the different behaviors that editusers.cgi will have.
+With this hook you can change the behavior of an action or add new actions.
+
+=item C<user>
+
+This is a Bugzilla::User object of the user.
+
+=back
+
 =head2 attachment_process_data
 
 This happens at the very beginning process of the attachment creation.
@@ -1386,30 +1410,6 @@ C<bug/show.html.tmpl>).
 A L<Template::Context> object. Usually you will not have to use this, but
 if you need information about the template itself (other than just its
 name), you can get it from here.
-
-=back
-
-=head2 admin_editusers_action
-
-This hook allows you to add additional actions to the admin Users page.
-
-Params:
-
-=over
-
-=item C<vars>
-
-You can add as many new key/value pairs as you want to this hashref.
-It will be passed to the template.
-
-=item C<action>
-
-A text which indicates the different behaviors that editusers.cgi will have.
-With this hook you can change the behavior of an action or add new actions.
-
-=item C<user>
-
-This is a Bugzilla::User object of the user.
 
 =back
 

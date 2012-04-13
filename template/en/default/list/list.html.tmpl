@@ -57,7 +57,7 @@
   style = style
   atomlink = "buglist.cgi?$urlquerypart&title=$title&ctype=atom" 
   yui = [ 'autocomplete', 'calendar' ]
-  javascript_urls = [ "js/util.js", "js/field.js" ]
+  javascript_urls = [ "js/util.js", "js/field.js", "js/TUI.js" ]
   style_urls = [ "skins/standard/buglist.css" ]
   doc_section = "query.html#list"
 %]
@@ -99,6 +99,15 @@
   'changedfrom', 'changedto', 'changedby', 'notsubstring', 'nowords',
   'nowordssubstr', 'notmatches',
 ] %]
+<a id="search_description_controller" class="bz_default_hidden"
+   href="javascript:TUI_toggle_class('search_description')">Hide Search Description</a>
+[%# Show the link if the browser supports JS %]
+<script type="text/javascript">
+  TUI_alternates['search_description'] = 'Show Search Description';
+  YAHOO.util.Dom.removeClass('search_description_controller', 
+                             'bz_default_hidden');
+</script>
+
 <ul class="search_description">
 [% FOREACH desc_item = search_description %]
   <li>

@@ -18,7 +18,7 @@ use Bugzilla::WebService::Constants;
 use Bugzilla::WebService::Util qw(filter filter_wants validate);
 use Bugzilla::Bug;
 use Bugzilla::BugMail;
-use Bugzilla::Util qw(trick_taint trim);
+use Bugzilla::Util qw(trick_taint trim diff_arrays);
 use Bugzilla::Version;
 use Bugzilla::Milestone;
 use Bugzilla::Status;
@@ -782,6 +782,44 @@ sub attachments {
     }
 
     return { bugs => \%bugs, attachments => \%attachments };
+}
+
+sub update_tags {
+    my ($self, $params) = @_;
+
+    Bugzilla->login(LOGIN_REQUIRED);
+
+    my $ids  = $params->{ids};
+    my $tags = $params->{tags};
+
+    ThrowCodeError('param_required',
+                   { function => 'Bug.update_tags', 
+                     param    => 'ids' }) if !defined $ids;
+
+    ThrowCodeError('param_required',
+                   { function => 'Bug.update_tags', 
+                     param    => 'tags' }) if !defined $tags;
+
+    my %changes;
+    foreach my $bug_id (@$ids) {
+        my $bug = Bugzilla::Bug->check($bug_id);
+        my @old_tags = @{ $bug->tags };
+
+        $bug->remove_tag($_) foreach @{ $tags->{remove} || [] };
+        $bug->add_tag($_) foreach @{ $tags->{add} || [] };
+
+        my ($removed, $added) = diff_arrays(\@old_tags, $bug->tags);
+
+        my @removed = map { $self->type('string', $_) } @$removed;
+        my @added   = map { $self->type('string', $_) } @$added;
+
+        $changes{$bug->id}->{tags} = {
+            removed => \@removed,
+            added   => \@added
+        };
+    }
+
+    return { changes => \%changes };
 }
 
 ##############################
@@ -3263,6 +3301,68 @@ this bug.
 =item Added in Bugzilla B<3.4>.
 
 =item Before Bugzilla B<3.6>, error 115 had a generic error code of 32000.
+
+=back
+
+=back
+
+
+=head2 update_tags
+
+B<UNSTABLE>
+
+=item B<Description>
+
+Adds or removes tags on bugs.
+
+=item B<Params>
+
+=over
+
+=item C<ids>
+
+B<Required> C<array> An array of ints and/or strings--the ids
+or aliases of bugs that you want to add or remove tags to. All the tags
+will be added or removed to all these bugs.
+
+=item C<tags>
+
+B<Required> C<hash> A hash representing tags to be added and/or removed.
+The hash has the following fields:
+
+=over
+
+=item C<add> An array of C<string>s representing tag names
+to be added to the bugs.
+
+It is safe to specify tags that are already associated with the 
+bugs--they will just be silently ignored.
+
+=item C<remove> An array of C<string>s representing tag names
+to be removed from the bugs.
+
+It is safe to specify tags that are not associated with any
+bugs--they will just be silently ignored.
+
+=back
+
+=item B<Returns>
+
+C<changes>, a hash containing bug IDs as keys and one single value
+name "tags" which is also a hash, with C<added> and C<removed> as keys.
+See L</update_see_also> for an example of how it looks like.
+
+=item B<Errors>
+
+This method can throw the same errors as L</get>.
+
+=back
+
+=item B<History>
+
+=over
+
+=item Added in Bugzilla B<4.4>.
 
 =back
 

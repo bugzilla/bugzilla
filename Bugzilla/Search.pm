@@ -644,6 +644,7 @@ use constant GROUP_BY_SKIP => qw(
     keywords
     longdescs.count
     percentage_complete
+    tag
 );
 
 ###############

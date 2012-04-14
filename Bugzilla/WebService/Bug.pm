@@ -3311,6 +3311,8 @@ this bug.
 
 B<UNSTABLE>
 
+=over
+
 =item B<Description>
 
 Adds or removes tags on bugs.
@@ -3346,6 +3348,8 @@ bugs--they will just be silently ignored.
 
 =back
 
+=back
+
 =item B<Returns>
 
 C<changes>, a hash containing bug IDs as keys and one single value
@@ -3355,8 +3359,6 @@ See L</update_see_also> for an example of how it looks like.
 =item B<Errors>
 
 This method can throw the same errors as L</get>.
-
-=back
 
 =item B<History>
 

@@ -57,8 +57,7 @@
       <tr>
         <th><div id="avail_header" class="bz_default_hidden">Available Columns</div></th>
         <th></th>
-        <th>Selected Columns</th>
-        <th></th>
+        <th colspan="2">Selected Columns</th>
       </tr>
       <tr>
         <td>
@@ -68,11 +67,13 @@
           </select>
         </td>
         <td>
-          <input class="image_button bz_default_hidden" type="button" 
-                 id="select_button" name="select" onclick="move_select()">
+          <button type="button" id="select_button" name="select"
+                  class="bz_default_hidden arrow_button"
+                  onclick="move_select()">&rarr;</button>
           <br><br>
-          <input class="image_button bz_default_hidden" type="button" 
-                 id="deselect_button" name="deselect" onclick="move_deselect()">
+          <button type="button" id="deselect_button" name="deselect"
+                  class="bz_default_hidden arrow_button"
+                  onclick="move_deselect()">&larr;</button>
         </td>
         <td>
           <select name="selected_columns" id="selected_columns" 
@@ -93,11 +94,13 @@
           </select>
         </td>
         <td>
-          <input class="image_button bz_default_hidden" type="button" 
-                 id="up_button" name="up" onclick="move_up()">
+          <button type="button" id="up_button" name="up"
+                  class="bz_default_hidden arrow_button"
+                  onclick="move_up()">&uarr;</button>
           <br><br>
-          <input class="image_button bz_default_hidden" type="button"
-                 id="down_button" name="down" onclick="move_down()">
+          <button type="button" id="down_button" name="down"
+                  class="bz_default_hidden arrow_button"
+                  onclick="move_down()">&darr;</button>
         </td>
       </tr>
     </table>

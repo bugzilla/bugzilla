@@ -409,6 +409,12 @@ dl dl > dt {
     white-space: normal !important;
 }
 
+/* Arrow buttons are buttons with only &uarr;, &darr;, &larr; or &rarr; on
+ * them. We want these to look a little less spidery. */
+.arrow_button {
+    font-size: 150%;
+}
+
 /* Style of the attachment table and time tracking table */
 #attachment_table {
     border-collapse: collapse;
@@ -559,31 +565,4 @@ input.required, select.required, span.required_explanation {
 .validation_error_field, input.validation_error_field {
     border: 2px solid #B70000;
     background-color: #FFEBEB;
-}
-
-/*****************/
-/* colchange.cgi */
-/*****************/
-
-.image_button {
-    background-repeat: no-repeat;
-    background-position: center center;
-    width: 30px;
-    height: 20px;
-}
-
-#select_button {
-    background-image: url(global/right.png);
-}
-
-#deselect_button {
-    background-image: url(global/left.png);
-}
-
-#up_button {
-    background-image: url(global/up.png);
-}
-
-#down_button {
-    background-image: url(global/down.png);
 }

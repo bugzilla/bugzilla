@@ -397,71 +397,88 @@ use constant COLUMN_DEPENDS => {
 # certain columns in the buglist. For the most part, Search.pm uses
 # DB::Schema to figure out what needs to be joined, but for some
 # fields it needs a little help.
-use constant COLUMN_JOINS => {
-    actual_time => {
-        table => '(SELECT bug_id, SUM(work_time) AS total'
-                 . ' FROM longdescs GROUP BY bug_id)',
-        join  => 'INNER',
-    },
-    assigned_to => {
-        from  => 'assigned_to',
-        to    => 'userid',
-        table => 'profiles',
-        join  => 'INNER',
-    },
-    reporter => {
-        from  => 'reporter',
-        to    => 'userid',
-        table => 'profiles',
-        join  => 'INNER',
-    },
-    qa_contact => {
-        from  => 'qa_contact',
-        to    => 'userid',
-        table => 'profiles',
-    },
-    component => {
-        from  => 'component_id',
-        to    => 'id',
-        table => 'components',
-        join  => 'INNER',
-    },
-    product => {
-        from  => 'product_id',
-        to    => 'id',
-        table => 'products',
-        join  => 'INNER',
-    },
-    classification => {
-        table => 'classifications',
-        from  => 'map_product.classification_id',
-        to    => 'id',
-        join  => 'INNER',
-    },
-    'flagtypes.name' => {
-        as    => 'map_flags',
-        table => 'flags',
-        extra => ['map_flags.attach_id IS NULL'],
-        then_to => {
-            as    => 'map_flagtypes',
-            table => 'flagtypes',
-            from  => 'map_flags.type_id',
-            to    => 'id',
+sub COLUMN_JOINS {
+    my $invocant = shift;
+    my $user = blessed($invocant) ? $invocant->_user : Bugzilla->user;
+
+    my $joins = {
+        actual_time => {
+            table => '(SELECT bug_id, SUM(work_time) AS total'
+                     . ' FROM longdescs GROUP BY bug_id)',
+            join  => 'INNER',
         },
-    },
-    keywords => {
-        table => 'keywords',
-        then_to => {
-            as    => 'map_keyworddefs',
-            table => 'keyworddefs',
-            from  => 'map_keywords.keywordid',
-            to    => 'id',
+        assigned_to => {
+            from  => 'assigned_to',
+            to    => 'userid',
+            table => 'profiles',
+            join  => 'INNER',
         },
-    },
-    'longdescs.count' => {
-        table => 'longdescs',
-        join  => 'INNER',
-    },
+        reporter => {
+            from  => 'reporter',
+            to    => 'userid',
+            table => 'profiles',
+            join  => 'INNER',
+        },
+        qa_contact => {
+            from  => 'qa_contact',
+            to    => 'userid',
+            table => 'profiles',
+        },
+        component => {
+            from  => 'component_id',
+            to    => 'id',
+            table => 'components',
+            join  => 'INNER',
+        },
+        product => {
+            from  => 'product_id',
+            to    => 'id',
+            table => 'products',
+            join  => 'INNER',
+        },
+        classification => {
+            table => 'classifications',
+            from  => 'map_product.classification_id',
+            to    => 'id',
+            join  => 'INNER',
+        },
+        'flagtypes.name' => {
+            as    => 'map_flags',
+            table => 'flags',
+            extra => ['map_flags.attach_id IS NULL'],
+            then_to => {
+                as    => 'map_flagtypes',
+                table => 'flagtypes',
+                from  => 'map_flags.type_id',
+                to    => 'id',
+            },
+        },
+        keywords => {
+            table => 'keywords',
+            then_to => {
+                as    => 'map_keyworddefs',
+                table => 'keyworddefs',
+                from  => 'map_keywords.keywordid',
+                to    => 'id',
+            },
+        },
+        'longdescs.count' => {
+            table => 'longdescs',
+            join  => 'INNER',
+        },
+        tag => {
+            as => 'map_bug_tag',
+            table => 'bug_tag',
+            then_to => {
+                as => 'map_tag',
+                table => 'tag',
+                extra => ['map_tag.user_id = ' . $user->id],
+                from => 'map_bug_tag.tag_id',
+                to => 'id',
+            },
+        }
+    };
+    return $joins;
 };
 
 # This constant defines the columns that can be selected in a query 
@@ -527,6 +544,8 @@ sub COLUMNS {
         'keywords' => $dbh->sql_group_concat('DISTINCT map_keyworddefs.name'),
         
         'longdescs.count' => 'COUNT(DISTINCT map_longdescs_count.comment_id)',
+
+        tag => $dbh->sql_group_concat($dbh->sql_string_concat('map_tag.name')),
     );
 
     # Backward-compatibility for old field names. Goes new_name => old_name.
@@ -1816,7 +1835,7 @@ sub _get_column_joins {
 
     return $cache->{column_joins} if defined $cache->{column_joins};
 
-    my %column_joins = %{ COLUMN_JOINS() };
+    my %column_joins = %{ $self->COLUMN_JOINS() };
     Bugzilla::Hook::process('buglist_column_joins',
                             { column_joins => \%column_joins });
 

@@ -121,6 +121,7 @@ use constant OS_MAP => (
     qr/\(.*HP-?UX.*\)/ => ["HP-UX"],
     # Windows
     qr/\(.*Windows XP.*\)/ => ["Windows XP"],
+    qr/\(.*Windows NT 6\.2.*\)/ => ["Windows 8"], 
     qr/\(.*Windows NT 6\.1.*\)/ => ["Windows 7"],
     qr/\(.*Windows NT 6\.0.*\)/ => ["Windows Vista"],
     qr/\(.*Windows NT 5\.2.*\)/ => ["Windows Server 2003"],

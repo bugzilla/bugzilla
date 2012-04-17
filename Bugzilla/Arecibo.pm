@@ -78,6 +78,7 @@ use constant CONFIG => {
     # any error messages matching these regex's will not be sent to arecibo
     ignore => [
         qr/Software caused connection abort/,
+        qr/Could not check out .*\/cvsroot/,
     ],
 };
 

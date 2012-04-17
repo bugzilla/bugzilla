@@ -486,7 +486,10 @@ sub _page_user {
         }
     }
 
-    $dbh->do('DELETE FROM votes WHERE vote_count <= 0');
+    if ($canedit && $bug) {
+        $dbh->do('DELETE FROM votes WHERE vote_count = 0 AND who = ?',
+                 undef, $who->id);
+    }
     $dbh->bz_commit_transaction();
 
     $vars->{'canedit'} = $canedit;

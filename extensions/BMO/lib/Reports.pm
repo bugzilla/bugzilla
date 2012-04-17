@@ -718,6 +718,7 @@ sub release_tracking_report {
         approval-mozilla-release
         approval-mozilla-beta
         approval-mozilla-aurora
+        approval-mozilla-central
         approval-comm-release
         approval-comm-beta
         approval-comm-aurora

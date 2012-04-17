@@ -792,8 +792,8 @@ sub _param_array {
 }
 
 sub _params { $_[0]->{params} }
-
 sub _user { return $_[0]->{user} }
+sub _sharer_id { $_[0]->{sharer} }
 
 ##############################
 # Internal Accessors: SELECT #
@@ -2567,8 +2567,8 @@ sub _multiselect_table {
     }
     elsif ($field eq 'tag') {
         $args->{full_field} = 'tag.name';
-        return "bug_tag INNER JOIN tag ON bug_tag.tag_id = tag.id"
-                                       . " AND user_id = " . $self->_user->id;
+        return "bug_tag INNER JOIN tag ON bug_tag.tag_id = tag.id AND user_id = "
+               . ($self->_sharer_id || $self->_user->id);
     }
     elsif ($field eq 'bug_group') {
         $args->{full_field} = 'groups.name';

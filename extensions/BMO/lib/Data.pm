@@ -289,6 +289,7 @@ our %always_fileable_group = (
     'mozilla-corporation-confidential'  => 1,
     'mozilla-foundation-confidential'   => 1, 
     'mozilla-messaging-confidential'    => 1,
+    'partner-confidential'              => 1, 
     'tamarin-security'                  => 1,
     'websites-security'                 => 1,
     'webtools-security'                 => 1,

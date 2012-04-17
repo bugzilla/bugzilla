@@ -687,6 +687,37 @@ Params:
 
 =back
 
+=head2 error_catch
+
+This hook allows extensions to catch errors thrown by Bugzilla and
+take the appropriate actions.
+
+Params:
+
+=over
+
+=item C<error>
+
+A string representing the error code thrown by Bugzilla. This string
+matches the C<error> variable in C<global/user-error.html.tmpl> and
+C<global/code-error.html.tmpl>.
+
+=item C<message>
+
+If the error mode is set to C<ERROR_MODE_WEBPAGE>, you get a reference to
+the whole HTML page with the error message in it, including its header and
+footer. If you need to extract the error message itself, you can do it by
+looking at the content of the table cell whose ID is C<error_msg>.
+If the error mode is not set to C<ERROR_MODE_WEBPAGE>, you get a reference
+to the error message itself.
+
+=item C<vars>
+
+This hash contains all the data passed to the error template. Its content
+depends on the error thrown.
+
+=back
+
 =head2 flag_end_of_update
 
 This happens at the end of L<Bugzilla::Flag/update_flags>, after all other

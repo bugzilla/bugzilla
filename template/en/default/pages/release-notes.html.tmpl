@@ -55,7 +55,7 @@
 
 <h3>4.2.1</h3>
 
-<p>This release fixes one security issue. See the
+<p>This release fixes two security issues. See the
   <a href="http://www.bugzilla.org/security/3.6.8/">Security Advisory</a>
   for details.</p>
 
@@ -71,8 +71,8 @@
     formatted. Several pieces of text were missing in the emails.
     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=731586">[% terms.Bug %] 731586</a>)</li>
   <li>Many [% terms.bugs %] related to the searching system have been fixed.
-    (<a href="https://bugzilla.mozilla.org/buglist.cgi?bug_id=58179,715270,730984,731163,737436">
-    [% terms.Bugs %] 58179, 715270, 730984, 731163 and 737436</a>)</li>
+    (<a href="https://bugzilla.mozilla.org/buglist.cgi?bug_id=58179,715270,730984,731163,737436,745320">
+    [% terms.Bugs %] 58179, 715270, 730984, 731163, 737436 and 745320</a>)</li>
   <li>When using the QuickSearch box, complex queries are now parsed correctly.
     It also behaves correctly with non-ASCII characters (such as é, ä, ü, etc.).
     (<a href="https://bugzilla.mozilla.org/buglist.cgi?bug_id=554819,663377,730207">
@@ -93,6 +93,9 @@
     Now more fields can be displayed as columns in buglists, in combination
     with the already existing <kbd>buglist_columns</kbd> hook.
     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=743991">[% terms.Bug %] 743991</a>)</li>
+  <li>A new hook named <kbd>error_catch</kbd> has been added to let extensions
+    alter the way errors are thrown.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=745197">[% terms.Bug %] 745197</a>)</li>
   <li>A new hook named <kbd>admin_editusers_action</kbd> has been added to let
     extensions alter the behavior of <kbd>editusers.cgi</kbd>. This lets you add
     new features to this script very easily.

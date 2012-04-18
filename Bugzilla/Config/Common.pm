@@ -23,7 +23,7 @@ use base qw(Exporter);
     qw(check_multi check_numeric check_regexp check_url check_group
        check_sslbase check_priority check_severity check_platform
        check_opsys check_shadowdb check_urlbase check_webdotbase
-       check_user_verify_class
+       check_user_verify_class check_ip
        check_mail_delivery_method check_notification check_utf8
        check_bug_status check_smtp_auth check_theschwartz_available
        check_maxattachmentsize check_email check_smtp_ssl
@@ -100,6 +100,15 @@ sub check_sslbase {
             return "Failed to connect to $host:$port; unable to enable SSL";
         }
         close(SOCK);
+    }
+    return "";
+}
+
+sub check_ip {
+    my $inbound_proxies = shift;
+    my @proxies = split(/[\s,]+/, $inbound_proxies);
+    foreach my $proxy (@proxies) {
+        validate_ip($proxy) || return "$proxy is not a valid IPv4 or IPv6 address";
     }
     return "";
 }

@@ -46,7 +46,8 @@ use constant get_param_list => (
   {
    name => 'inbound_proxies',
    type => 't',
-   default => ''
+   default => '',
+   checker => \&check_ip
   },
 
   {

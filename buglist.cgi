@@ -112,16 +112,6 @@ if (defined $cgi->param('ctype') && $cgi->param('ctype') eq "rss") {
     $cgi->param('ctype', "atom");
 }
 
-# The js ctype presents a security risk; a malicious site could use it  
-# to gather information about secure bugs. So, we only allow public bugs to be
-# retrieved with this format.
-#
-# Note that if and when this call clears cookies or has other persistent 
-# effects, we'll need to do this another way instead.
-if ((defined $cgi->param('ctype')) && ($cgi->param('ctype') eq "js")) {
-    Bugzilla->logout_request();
-}
-
 # An agent is a program that automatically downloads and extracts data
 # on its user's behalf.  If this request comes from an agent, we turn off
 # various aspects of bug list functionality so agent requests succeed

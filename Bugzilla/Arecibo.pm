@@ -20,9 +20,9 @@ our @EXPORT = qw(
 use Apache2::Log;
 use Apache2::SubProcess;
 use Carp;
-use Email::Date::Format 'email_gmdate';
+use Email::Date::Format qw(email_gmdate);
 use LWP::UserAgent;
-use POSIX 'setsid';
+use POSIX qw(setsid nice);
 use Sys::Hostname;
 
 use Bugzilla::Util;
@@ -200,6 +200,7 @@ sub arecibo_handle_error {
         open(STDOUT, '>/dev/null');
         open(STDERR, '>/dev/null');
         setsid();
+        nice(19);
 
         # post to arecibo (ignore any errors)
         my $agent = LWP::UserAgent->new(

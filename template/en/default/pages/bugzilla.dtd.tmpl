@@ -56,6 +56,7 @@
                 token?, 
                 group*, 
                 flag*, 
+                comment_sort_order*,
                 long_desc*, 
                 attachment*)?)>
 <!ATTLIST [% "bug" %]
@@ -116,11 +117,13 @@
 [% FOREACH field = Bugzilla.active_custom_fields %]
 <!ELEMENT [% field.name FILTER xml %] (#PCDATA)>
 [% END %]
-<!ELEMENT long_desc (commentid, attachid?, who, bug_when, work_time?, thetext)>
+<!ELEMENT comment_sort_order (#PCDATA)>
+<!ELEMENT long_desc (commentid, comment_count, attachid?, who, bug_when, work_time?, thetext)>
 <!ATTLIST long_desc
           isprivate (0|1) #REQUIRED
 >
 <!ELEMENT commentid (#PCDATA)>
+<!ELEMENT comment_count (#PCDATA)>
 <!ELEMENT who (#PCDATA)>
 <!ATTLIST who
           name CDATA #REQUIRED

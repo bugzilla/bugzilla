@@ -314,6 +314,7 @@ our %product_sec_groups = (
     "quality.mozilla.org"          => 'websites-security',
     "Skywriter"                    => 'websites-security',
     "support.mozillamessaging.com" => 'websites-security',
+    "Community Tools"              => 'websites-security',
     "Bugzilla"                     => 'bugzilla-security',
     "bugzilla.mozilla.org"         => 'bugzilla-security',
     "Testopia"                     => 'bugzilla-security',

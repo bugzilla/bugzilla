@@ -311,7 +311,8 @@ foreach my $f (@files)
     # symlinks), this can't escape to delete anything it shouldn't
     # (unless someone moves the location of $webdotdir, of course)
     trick_taint($f);
-    if (file_mod_time($f) < $since) {
+    my $mtime = file_mod_time($f);
+    if ($mtime && $mtime < $since) {
         unlink $f;
     }
 }

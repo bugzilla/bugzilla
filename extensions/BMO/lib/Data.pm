@@ -329,6 +329,15 @@ our %product_sec_groups = (
     "Tamarin"                      => 'tamarin-security',
     "Mozilla PR"                   => 'pr-private',
     "Socorro"                      => 'client-services-security', 
+    "MailNews Core Graveyard"      => 'core-security',
+    "Mozilla Grants"               => 'core-security',
+    "Mozilla Reps"                 => 'core-security',
+    "Penelope"                     => 'core-security',
+    "Talkback"                     => 'core-security',
+    "Tracking"                     => 'core-security',
+    "Untriaged Bugs"               => 'core-security',
+    "Web Apps"                     => 'core-security',
+    "Websites Graveyard"           => 'core-security',
     "_default"                     => 'core-security'
 );
 

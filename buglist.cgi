@@ -95,13 +95,6 @@ if (defined $cgi->param('ctype') && $cgi->param('ctype') eq "rss") {
     $cgi->param('ctype', "atom");
 }
 
-# An agent is a program that automatically downloads and extracts data
-# on its user's behalf.  If this request comes from an agent, we turn off
-# various aspects of bug list functionality so agent requests succeed
-# and coexist nicely with regular user requests.  Currently the only agent
-# we know about is Firefox's microsummary feature.
-my $agent = ($cgi->http('X-Moz') && $cgi->http('X-Moz') =~ /\bmicrosummary\b/);
-
 # Determine the format in which the user would like to receive the output.
 # Uses the default format if the user did not specify an output format;
 # otherwise validates the user's choice against the list of available formats.
@@ -125,9 +118,8 @@ my $serverpush =
       && $ENV{'HTTP_USER_AGENT'} =~ /Mozilla.[3-9]/ 
         && (($ENV{'HTTP_USER_AGENT'} !~ /[Cc]ompatible/) || ($ENV{'HTTP_USER_AGENT'} =~ /MSIE 5.*Mac_PowerPC/))
           && $ENV{'HTTP_USER_AGENT'} !~ /WebKit/
-            && !$agent
-              && !defined($cgi->param('serverpush'))
-                || $cgi->param('serverpush');
+            && !defined($cgi->param('serverpush'))
+              || $cgi->param('serverpush');
 
 my $order = $cgi->param('order') || "";
 
@@ -1064,7 +1056,7 @@ $vars->{'quicksearch'} = $searchstring;
 my $contenttype;
 my $disposition = "inline";
 
-if ($format->{'extension'} eq "html" && !$agent) {
+if ($format->{'extension'} eq "html") {
     my $list_id = $cgi->param('list_id') || $cgi->param('regetlastlist');
     my $search = $user->save_last_search(
         { bugs => \@bugidlist, order => $order, vars => $vars, list_id => $list_id });

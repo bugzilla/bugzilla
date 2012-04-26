@@ -18,8 +18,7 @@ use base qw(Exporter);
                              diff_arrays on_main_db say
                              trim wrap_hard wrap_comment find_wrap_point
                              format_time validate_date validate_time datetime_from
-                             file_mod_time is_7bit_clean
-                             bz_crypt generate_random_password
+                             is_7bit_clean bz_crypt generate_random_password
                              validate_email_syntax check_email_syntax clean_text
                              get_text template_var disable_utf8
                              detect_encoding);
@@ -560,14 +559,6 @@ sub datetime_from {
     return $dt;
 }
 
-sub file_mod_time {
-    my ($filename) = (@_);
-    my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
-        $atime,$mtime,$ctime,$blksize,$blocks)
-        = stat($filename);
-    return $mtime;
-}
-
 sub bz_crypt {
     my ($password, $salt) = @_;
 
@@ -849,9 +840,6 @@ Bugzilla::Util - Generic utility functions for bugzilla
   format_time($time);
   datetime_from($time, $timezone);
 
-  # Functions for dealing with files
-  $time = file_mod_time($filename);
-
   # Cryptographic Functions
   $crypted_password = bz_crypt($password);
   $new_password = generate_random_password($password_length);
@@ -1116,18 +1104,6 @@ valid date format that C<strptime> understands, we return C<undef>.
 You can optionally specify a timezone for the returned date. If not
 specified, defaults to the currently-logged-in user's timezone, or
 the Bugzilla server's local timezone if there isn't a logged-in user.
-
-=back
-
-
-=head2 Files
-
-=over 4
-
-=item C<file_mod_time($filename)>
-
-Takes a filename and returns the modification time. It returns it in the format
-of the "mtime" parameter of the perl "stat" function.
 
 =back
 

@@ -60,6 +60,7 @@ tie(%$cf_visible_in_products, "Tie::IxHash",
         "Testing"          => [],
         "Thunderbird"      => [],
         "Toolkit"          => [],
+        "Tracking"         => [],
         "Web Apps"         => [],
     }, 
     qr/^cf_blocking_fennec/ => {

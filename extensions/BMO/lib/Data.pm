@@ -335,4 +335,7 @@ our %product_sec_groups = (
     "_default"                     => 'core-security'
 );
 
+# Default security groups for products should always been fileable
+map { $always_fileable_group{$_} = 1 } values %product_sec_groups;
+
 1;

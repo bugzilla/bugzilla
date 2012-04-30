@@ -581,7 +581,7 @@ sub bug_check_groups {
                    : [ map { trim($_) } split(',', $group_names) ];
 
     foreach my $name (@$group_names) {
-        if ($always_fileable_group{$name}) {
+        if (exists $always_fileable_group{$name}) {
             my $group = new Bugzilla::Group({ name => $name }) or next;
             $add_groups->{$group->id} = $group;
         }

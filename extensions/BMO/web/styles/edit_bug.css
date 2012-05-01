@@ -31,3 +31,8 @@
 .bz_hidden {
     display: none;
 }
+
+.bz_collapse_comment {
+    font-family: monospace;
+}
+

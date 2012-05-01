@@ -57,7 +57,27 @@
       }
 
       textarea.focus();
-  } 
+  }
+
+  function toggleCommentWrap(a, id) {
+    var spans = document.getElementById('comment_text_' + id).getElementsByTagName('span');
+    var old_class;
+    var new_class;
+    if (a.innerHTML == 'wrap') {
+      a.innerHTML = 'unwrap';
+      old_class = 'quote';
+      new_class = 'quote_wrapped';
+    } else {
+      a.innerHTML = 'wrap';
+      old_class = 'quote_wrapped';
+      new_class = 'quote';
+    }
+    for (var i = 0, l = spans.length; i < l; i++) {
+      if (spans[i].className == old_class)
+        spans[i].className = new_class;
+    }
+    return false;
+  }
 //-->
 </script>
 
@@ -146,6 +166,10 @@
 
         [% IF mode == "edit" %]
           <span class="bz_comment_actions">
+            [% IF comment_text.search("(?:^>|\n>)") %]
+              [<a class="bz_wrap_link" href="#"
+                  onclick="return toggleCommentWrap(this, [% count %])">wrap</a>]
+            [% END %]
             [<a class="bz_reply_link" href="#add_comment"
               [% IF user.settings.quote_replies.value != 'off' %]
                 onclick="replyToComment('[% count %]', '[% comment.id %]', '[% comment.author.name || comment.author.nick FILTER html FILTER js %]'); return false;"

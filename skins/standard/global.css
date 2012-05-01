@@ -365,6 +365,10 @@ div#docslinks {
     white-space: pre;
 }
 
+.bz_comment_text span.quote_wrapped {
+    color: #65379c;
+}
+
 table#flags th,
 table#flags td {
     vertical-align: middle;

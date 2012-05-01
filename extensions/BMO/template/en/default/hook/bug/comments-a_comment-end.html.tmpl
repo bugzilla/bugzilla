@@ -6,7 +6,14 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% IF comment.author.login_name == 'tbplbot@gmail.com' %]
+[% IF user.id && comment.author.login_name == 'tbplbot@gmail.com' %]
   [% has_tbpl_comment = 1 %]
-  <script>tbpl_comment_ids.push([% count FILTER none %]);</script>
+  <script>
+    var id = [% count FILTER none %];
+    tbpl_comment_ids.push(id);
+    collapse_comment(
+      document.getElementById('comment_link_' + id),
+      document.getElementById('comment_text_' + id)
+    );
+  </script>
 [% END %]

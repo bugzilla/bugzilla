@@ -7,6 +7,8 @@
   #%]
 
 [% IF has_tbpl_comment %]
+  [% expand_caption   = 'Expand TinderboxPushlog Comments' %]
+  [% collapse_caption = 'Collapse TinderboxPushlog Comments' %]
   <script>
     YAHOO.util.Event.onDOMReady(function () {
         var ul = document.getElementsByClassName('bz_collapse_expand_comments');
@@ -16,14 +18,22 @@
         var a = document.createElement('a');
         Dom.setAttribute(a, 'href', 'javascript:void(0)');
         Dom.setAttribute(a, 'id', 'toggle_tbplbot_comments');
-        a.innerHTML = 'Collapse TinderboxPushlog Comments';
+        a.innerHTML = '[% expand_caption FILTER js %]';
         YAHOO.util.Event.on(a, 'click', function() {
+            var do_expand = a.innerHTML == '[% expand_caption FILTER js %]';
             for (var i = 0, n = tbpl_comment_ids.length; i < n; i++) {
                 var id = tbpl_comment_ids[i];
                 var link = document.getElementById('comment_link_' + id);
                 var text = document.getElementById('comment_text_' + id);
-                collapse_comment(link, text);
+                if (do_expand) {
+                    expand_comment(link, text);
+                } else {
+                    collapse_comment(link, text);
+                }
             }
+            a.innerHTML = do_expand
+              ? '[% collapse_caption FILTER js %]'
+              : '[% expand_caption FILTER js %]';
         });
         li.appendChild(a);
         ul[0].appendChild(li);

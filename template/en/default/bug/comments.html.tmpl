@@ -240,4 +240,5 @@
   [%- comment_text FILTER quoteUrls(bug, comment) -%]
 </pre>
     </div>
+    [% Hook.process('a_comment-end', 'bug/comments.html.tmpl') %]
 [% END %]

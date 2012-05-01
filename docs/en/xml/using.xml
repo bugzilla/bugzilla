@@ -659,16 +659,6 @@
         </member>
       </simplelist>
       </para>
-
-      <para>
-        If you would like to access the bug list from another program
-        it is often useful to have the list returned in something other
-        than HTML. By adding the ctype=type parameter into the bug list URL
-        you can specify several alternate formats. Besides the types described
-        above, the following formats are also supported: ECMAScript, also known
-        as JavaScript (ctype=js), and Resource Description Framework RDF/XML
-        (ctype=rdf).
-      </para>
     </section>
 
     <section id="individual-buglists">

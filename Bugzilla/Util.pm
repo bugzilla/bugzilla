@@ -35,7 +35,7 @@ use base qw(Exporter);
                              detaint_signed
                              html_quote url_quote xml_quote
                              css_class_quote html_light_quote
-                             i_am_cgi correct_urlbase remote_ip
+                             i_am_cgi correct_urlbase remote_ip validate_ip
                              do_ssl_redirect_if_required use_attachbase
                              diff_arrays on_main_db
                              trim wrap_hard wrap_comment find_wrap_point
@@ -285,10 +285,101 @@ sub correct_urlbase {
 sub remote_ip {
     my $ip = $ENV{'REMOTE_ADDR'} || '127.0.0.1';
     my @proxies = split(/[\s,]+/, Bugzilla->params->{'inbound_proxies'});
-    if (first { $_ eq $ip } @proxies) {
-        $ip = $ENV{'HTTP_X_FORWARDED_FOR'} if $ENV{'HTTP_X_FORWARDED_FOR'};
+
+    # If the IP address is one of our trusted proxies, then we look at
+    # the X-Forwarded-For header to determine the real remote IP address.
+    if ($ENV{'HTTP_X_FORWARDED_FOR'} && first { $_ eq $ip } @proxies) {
+        my @ips = split(/[\s,]+/, $ENV{'HTTP_X_FORWARDED_FOR'});
+        # This header can contain several IP addresses. We want the
+        # IP address of the machine which connected to our proxies as
+        # all other IP addresses may be fake or internal ones.
+        # Note that this may block a whole external proxy, but we have
+        # no way to determine if this proxy is malicious or trustable.
+        foreach my $remote_ip (reverse @ips) {
+            if (!first { $_ eq $remote_ip } @proxies) {
+                # Keep the original IP address if the remote IP is invalid.
+                $ip = validate_ip($remote_ip) || $ip;
+                last;
+            }
+        }
     }
     return $ip;
+}
+
+sub validate_ip {
+    my $ip = shift;
+    return is_ipv4($ip) || is_ipv6($ip);
+}
+
+# Copied from Data::Validate::IP::is_ipv4().
+sub is_ipv4 {
+    my $ip = shift;
+    return unless defined $ip;
+
+    my @octets = $ip =~ /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
+    return unless scalar(@octets) == 4;
+
+    foreach my $octet (@octets) {
+        return unless ($octet >= 0 && $octet <= 255 && $octet !~ /^0\d{1,2}$/);
+    }
+
+    # The IP address is valid and can now be detainted.
+    return join('.', @octets);
+}
+
+# Copied from Data::Validate::IP::is_ipv6().
+sub is_ipv6 {
+    my $ip = shift;
+    return unless defined $ip;
+
+    # If there is a :: then there must be only one :: and the length
+    # can be variable. Without it, the length must be 8 groups.
+    my @chunks = split(':', $ip);
+
+    # Need to check if the last chunk is an IPv4 address, if it is we
+    # pop it off and exempt it from the normal IPv6 checking and stick
+    # it back on at the end. If there is only one chunk and it's an IPv4
+    # address, then it isn't an IPv6 address.
+    my $ipv4;
+    my $expected_chunks = 8;
+    if (@chunks > 1 && is_ipv4($chunks[$#chunks])) {
+        $ipv4 = pop(@chunks);
+        $expected_chunks--;
+    }
+
+    my $empty = 0;
+    # Workaround to handle trailing :: being valid.
+    if ($ip =~ /[0-9a-f]{1,4}::$/) {
+        $empty++;
+    # Single trailing ':' is invalid.
+    } elsif ($ip =~ /:$/) {
+        return;
+    }
+
+    foreach my $chunk (@chunks) {
+        return unless $chunk =~ /^[0-9a-f]{0,4}$/i;
+        $empty++ if $chunk eq '';
+    }
+    # More than one :: block is bad, but if it starts with :: it will
+    # look like two, so we need an exception.
+    if ($empty == 2 && $ip =~ /^::/) {
+        # This is ok
+    } elsif ($empty > 1) {
+        return;
+    }
+
+    push(@chunks, $ipv4) if $ipv4;
+    # Need 8 chunks, or we need an empty section that could be filled
+    # to represent the missing '0' sections.
+    return unless (@chunks == $expected_chunks || @chunks < $expected_chunks && $empty);
+
+    my $ipv6 = join(':', @chunks);
+    # The IP address is valid and can now be detainted.
+    trick_taint($ipv6);
+
+    # Need to handle the exception of trailing :: being valid.
+    return "${ipv6}::" if $ip =~ /::$/;
+    return $ipv6;
 }
 
 sub use_attachbase {
@@ -883,6 +974,17 @@ in a command-line script.
 
 Returns either the C<sslbase> or C<urlbase> parameter, depending on the
 current setting for the C<ssl_redirect> parameter.
+
+=item C<remote_ip()>
+
+Returns the IP address of the remote client. If Bugzilla is behind
+a trusted proxy, it will get the remote IP address by looking at the
+X-Forwarded-For header.
+
+=item C<validate_ip($ip)>
+
+Returns the sanitized IP address if it is a valid IPv4 or IPv6 address,
+else returns undef.
 
 =item C<use_attachbase()>
 

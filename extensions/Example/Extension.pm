@@ -196,6 +196,22 @@ sub buglist_columns {
     
     my $columns = $args->{'columns'};
     $columns->{'example'} = { 'name' => 'bugs.delta_ts' , 'title' => 'Example' };
+    $columns->{'product_desc'} = { 'name'  => 'prod_desc.description',
+                                   'title' => 'Product Description' };
+}
+
+sub buglist_column_joins {
+    my ($self, $args) = @_;
+    my $joins = $args->{'column_joins'};
+
+    # This column is added using the "buglist_columns" hook
+    $joins->{'product_desc'} = {
+        from  => 'product_id',
+        to    => 'id',
+        table => 'products',
+        as    => 'prod_desc',
+        join  => 'INNER',
+    };
 }
 
 sub search_operator_field_override {
@@ -337,6 +353,25 @@ sub enter_bug_entrydefaultvars {
     
     my $vars = $args->{vars};
     $vars->{'example'} = 1;
+}
+
+sub error_catch {
+    my ($self, $args) = @_;
+    # Customize the error message displayed when someone tries to access
+    # page.cgi with an invalid page ID, and keep track of this attempt
+    # in the web server log.
+    return unless Bugzilla->error_mode == ERROR_MODE_WEBPAGE;
+    return unless $args->{error} eq 'bad_page_cgi_id';
+
+    my $page_id = $args->{vars}->{page_id};
+    my $login = Bugzilla->user->identity || "Someone";
+    warn "$login attempted to access page.cgi with id = $page_id";
+
+    my $page = $args->{message};
+    my $new_error_msg = "Ah ah, you tried to access $page_id? Good try!";
+    $new_error_msg = html_quote($new_error_msg);
+    # There are better tools to parse an HTML page, but it's just an example.
+    $$page =~ s/(?<=<td id="error_msg" class="throw_error">).*(?=<\/td>)/$new_error_msg/si;
 }
 
 sub flag_end_of_update {

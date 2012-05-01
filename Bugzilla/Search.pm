@@ -792,8 +792,8 @@ sub _param_array {
 }
 
 sub _params { $_[0]->{params} }
-
 sub _user { return $_[0]->{user} }
+sub _sharer_id { $_[0]->{sharer} }
 
 ##############################
 # Internal Accessors: SELECT #
@@ -959,7 +959,8 @@ sub _column_join {
     my ($self, $field) = @_;
     # The _realname fields require the same join as the username fields.
     $field =~ s/_realname$//;
-    my $join_info = COLUMN_JOINS->{$field};
+    my $column_joins = $self->_get_column_joins();
+    my $join_info = $column_joins->{$field};
     if ($join_info) {
         # Don't allow callers to modify the constant.
         $join_info = dclone($join_info);
@@ -1800,6 +1801,20 @@ sub _get_operator_field_override {
     return $cache->{operator_field_override};
 }
 
+sub _get_column_joins {
+    my $self = shift;
+    my $cache = Bugzilla->request_cache;
+
+    return $cache->{column_joins} if defined $cache->{column_joins};
+
+    my %column_joins = %{ COLUMN_JOINS() };
+    Bugzilla::Hook::process('buglist_column_joins',
+                            { column_joins => \%column_joins });
+
+    $cache->{column_joins} = \%column_joins;
+    return $cache->{column_joins};
+}
+
 ###########################
 # Search Function Helpers #
 ###########################
@@ -1912,16 +1927,22 @@ sub _timestamp_translate {
     my $value = $args->{value};
     my $dbh = Bugzilla->dbh;
 
-    return if $value !~ /^[\+\-]?\d+[hdwmy]s?$/i;
-    
-    $args->{value}  = SqlifyDate($value);
-    $args->{quoted} = $dbh->quote($args->{value});
+    return if $value !~ /^(?:[\+\-]?\d+[hdwmy]s?|now)$/i;
+
+    # By default, the time is appended to the date, which we don't want
+    # for deadlines.
+    $value = SqlifyDate($value);
+    if ($args->{field} eq 'deadline') {
+        ($value) = split(/\s/, $value);
+    }
+    $args->{value} = $value;
+    $args->{quoted} = $dbh->quote($value);
 }
 
 sub SqlifyDate {
     my ($str) = @_;
     my $fmt = "%Y-%m-%d %H:%M:%S";
-    $str = "" if !defined $str;
+    $str = "" if (!defined $str || lc($str) eq 'now');
     if ($str eq "") {
         my ($sec, $min, $hour, $mday, $month, $year, $wday) = localtime(time());
         return sprintf("%4d-%02d-%02d 00:00:00", $year+1900, $month+1, $mday);
@@ -2549,8 +2570,8 @@ sub _multiselect_table {
     }
     elsif ($field eq 'tag') {
         $args->{full_field} = 'tag.name';
-        return "bug_tag INNER JOIN tag ON bug_tag.tag_id = tag.id"
-                                       . " AND user_id = " . $self->_user->id;
+        return "bug_tag INNER JOIN tag ON bug_tag.tag_id = tag.id AND user_id = "
+               . ($self->_sharer_id || $self->_user->id);
     }
     elsif ($field eq 'bug_group') {
         $args->{full_field} = 'groups.name';

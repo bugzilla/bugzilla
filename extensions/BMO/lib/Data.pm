@@ -164,9 +164,7 @@ tie(%$cf_visible_in_products, "Tie::IxHash",
     },
     qw/^cf_due_date$/ => {
         "Mozilla Reps" => [],
-        "mozilla.org"  => [
-            "Security Assurance: Review Needed"
-        ], 
+        "mozilla.org"  => ["Security Assurance: Review Request"], 
     }, 
 );
 

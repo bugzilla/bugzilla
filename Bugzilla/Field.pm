@@ -249,7 +249,7 @@ use constant DEFAULT_FIELDS => (
     {name => 'see_also',              desc => "See Also",
      type => FIELD_TYPE_BUG_URLS},
     {name => 'tag',                   desc => 'Tags', buglist => 1},
-    {name => 'master_bug_id',         desc => 'Master Bug ID',
+    {name => 'master_bug_id',         desc => 'Master Bug ID'},
 );
 
 ################

@@ -49,11 +49,11 @@
 
 [% BLOCK render_sighting_row %]
     <tr id="s[% target.id FILTER html %]">
-      <[% tag %]>
+      <[% tag FILTER html %]>
         [% target.bug_id FILTER bug_link(target) FILTER none %]
-      </[% tag %]>
-      <[% tag %]>
+      </[% tag FILTER html %]>
+      <[% tag FILTER html %]>
         [% PROCESS bug/status.html.tmpl %]
-      </[% tag %]>
+      </[% tag FILTER html %]>
     </tr>
 [% END %]

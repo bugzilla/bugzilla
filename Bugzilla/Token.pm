@@ -1,24 +1,9 @@
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Original Code is the Bugzilla Bug Tracking System.
-#
-# The Initial Developer of the Original Code is Netscape Communications
-# Corporation. Portions created by Netscape are
-# Copyright (C) 1998 Netscape Communications Corporation. All
-# Rights Reserved.
-#
-# Contributor(s):    Myk Melez <myk@mozilla.org>
-#                    Frédéric Buclin <LpSolit@gmail.com>
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 ################################################################################
 # Module Initialization
@@ -61,7 +46,7 @@ sub issue_new_user_account_token {
     # Is there already a pending request for this login name? If yes, do not throw
     # an error because the user may have lost his email with the token inside.
     # But to prevent using this way to mailbomb an email address, make sure
-    # the last request is at least 10 minutes old before sending a new email.
+    # the last request is old enough before sending a new email (default: 10 minutes).
 
     my $pending_requests = $dbh->selectrow_array(
         'SELECT COUNT(*)
@@ -69,7 +54,7 @@ sub issue_new_user_account_token {
           WHERE tokentype = ?
                 AND ' . $dbh->sql_istrcmp('eventdata', '?') . '
                 AND issuedate > '
-                    . $dbh->sql_date_math('NOW()', '-', 10, 'MINUTE'),
+                    . $dbh->sql_date_math('NOW()', '-', ACCOUNT_CHANGE_INTERVAL, 'MINUTE'),
         undef, ('account', $login_name));
 
     ThrowUserError('too_soon_for_new_token', {'type' => 'account'}) if $pending_requests;
@@ -137,7 +122,7 @@ sub IssuePasswordToken {
         'SELECT 1 FROM tokens
           WHERE userid = ? AND tokentype = ?
                 AND issuedate > ' 
-                    . $dbh->sql_date_math('NOW()', '-', 10, 'MINUTE'),
+                    . $dbh->sql_date_math('NOW()', '-', ACCOUNT_CHANGE_INTERVAL, 'MINUTE'),
         undef, ($user->id, 'password'));
 
     ThrowUserError('too_soon_for_new_token', {'type' => 'password'}) if $too_soon;
@@ -176,9 +161,14 @@ sub issue_hash_token {
     $data ||= [];
     $time ||= time();
 
+    # For the user ID, use the actual ID if the user is logged in.
+    # Otherwise, use the remote IP, in case this is for something
+    # such as creating an account or logging in.
+    my $user_id = Bugzilla->user->id || remote_ip();
+
     # The concatenated string is of the form
-    # token creation time + site-wide secret + user ID + data
-    my @args = ($time, Bugzilla->localconfig->{'site_wide_secret'}, Bugzilla->user->id, @$data);
+    # token creation time + site-wide secret + user ID (either ID or remote IP) + data
+    my @args = ($time, Bugzilla->localconfig->{'site_wide_secret'}, $user_id, @$data);
 
     my $token = join('*', @args);
     # Wide characters cause md5_hex() to die.

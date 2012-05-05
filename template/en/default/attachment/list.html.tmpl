@@ -1,25 +1,12 @@
-[%# The contents of this file are subject to the Mozilla Public
-  # License Version 1.1 (the "License"); you may not use this file
-  # except in compliance with the License. You may obtain a copy of
-  # the License at http://www.mozilla.org/MPL/
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
   #
-  # Software distributed under the License is distributed on an "AS
-  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-  # implied. See the License for the specific language governing
-  # rights and limitations under the License.
-  #
-  # The Original Code is the Bugzilla Bug Tracking System.
-  #
-  # The Initial Developer of the Original Code is Netscape Communications
-  # Corporation. Portions created by Netscape are
-  # Copyright (C) 1998 Netscape Communications Corporation. All
-  # Rights Reserved.
-  #
-  # Contributor(s): Myk Melez <myk@mozilla.org>
-  #                 Frédéric Buclin <LpSolit@gmail.com>
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% RETURN UNLESS attachments.size || Param("maxattachmentsize") %]
+[% RETURN UNLESS attachments.size || Param("maxattachmentsize") || Param("maxlocalattachment") %]
 
 <script type="text/javascript">
 <!--
@@ -63,6 +50,7 @@ function toggle_display(link) {
 
   [% count = 0 %]
   [% obsolete_attachments = 0 %]
+  [% user_cache = template_cache.users %]
 
   [% FOREACH attachment = attachments %]
     [% count = count + 1 %]
@@ -101,7 +89,14 @@ function toggle_display(link) {
                title="Go to the comment associated with the attachment">
               [%- attachment.attached FILTER time %]</a>,
 
-            [% INCLUDE global/user.html.tmpl who = attachment.attacher %]
+            [%# No need to recreate the exact same template if we already have it. %]
+            [% attacher_id = attachment.attacher.id %]
+            [% UNLESS user_cache.$attacher_id %]
+              [% user_cache.$attacher_id = BLOCK %]
+                [% INCLUDE global/user.html.tmpl who = attachment.attacher %]
+              [% END %]
+            [% END %]
+            [% user_cache.$attacher_id FILTER none %]
           </span>
         </td>
 
@@ -159,7 +154,7 @@ function toggle_display(link) {
           [% END %]
         </span>
       [% END %]
-      [% IF Param("maxattachmentsize") %]
+      [% IF Param("maxattachmentsize") || Param("maxlocalattachment") %]
         <a href="attachment.cgi?bugid=[% bugid %]&amp;action=enter">Add an attachment</a>
         (proposed patch, testcase, etc.)
       [% END %]

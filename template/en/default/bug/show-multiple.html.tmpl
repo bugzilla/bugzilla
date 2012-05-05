@@ -1,29 +1,10 @@
-[%# The contents of this file are subject to the Mozilla Public
-  # License Version 1.1 (the "License"); you may not use this file
-  # except in compliance with the License. You may obtain a copy of
-  # the License at http://www.mozilla.org/MPL/
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
   #
-  # Software distributed under the License is distributed on an "AS
-  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-  # implied. See the License for the specific language governing
-  # rights and limitations under the License.
-  #
-  # The Original Code is the Bugzilla Bug Tracking System.
-  #
-  # The Initial Developer of the Original Code is Netscape Communications
-  # Corporation. Portions created by Netscape are
-  # Copyright (C) 1998 Netscape Communications Corporation. All
-  # Rights Reserved.
-  #
-  # Contributor(s): Terry Weissman <terry@mozilla.org>
-  #                 Gervase Markham <gerv@gerv.net>
-  #                 Toms Baugis <toms@myrealbox.com>
-  #                 Olav Vitters <olav@bkor.dhs.org>
-  #                 Max Kanat-Alexander <mkanat@bugzilla.org>
-  #                 Elliotte Martin <emartin@everythingsolved.com>
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
   #%]
-
-[% PROCESS "global/field-descs.none.tmpl" %]
 
 [% PROCESS global/header.html.tmpl
   title = "Full Text $terms.Bug Listing"
@@ -65,7 +46,7 @@
   <h1>
     [% terms.Bug %] 
     <a href="show_bug.cgi?id=[% bug.bug_id FILTER html %]">[% bug.bug_id FILTER html %]</a>
-    [% IF Param("usebugaliases") AND bug.alias AND NOT bug.error %]
+    [% IF bug.alias AND NOT bug.error %]
       (<a href="show_bug.cgi?id=[% bug.alias FILTER uri %]">
         [% bug.alias FILTER html %]</a>)
     [% END %]
@@ -77,7 +58,7 @@
       <td class="error">
         [% IF bug.error == "InvalidBugId" %]
           '[%+ bug.bug_id FILTER html %]' is not a valid [% terms.bug %] number
-          [%- IF Param("usebugaliases") %] nor a known [% terms.bug %] alias[% END %].
+          nor a known [% terms.bug %] alias.
         [% ELSIF bug.error == "NotPermitted" %]
           You are not allowed to view this [% terms.bug %].
         [% ELSIF bug.error == "NotFound" %]
@@ -168,6 +149,18 @@
                      [% bug.bug_file_loc FILTER html %]</a>
           [% ELSE %]
             [% bug.bug_file_loc FILTER html %]
+          [% END %]
+        </td>
+      </tr>
+    [% END %]
+
+    [% IF bug.see_also.size %]
+      <tr>
+        <th>[% field_descs.see_also FILTER html %]:</th>
+        <td colspan="3">
+          [% FOREACH see_also = bug.see_also %]
+            <a href="[% see_also.name FILTER html %]">[% see_also.name FILTER html %]</a>
+            [% "<br>" IF not loop.last() %]
           [% END %]
         </td>
       </tr>

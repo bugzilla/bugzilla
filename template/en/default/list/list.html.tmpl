@@ -1,21 +1,9 @@
-[%# The contents of this file are subject to the Mozilla Public
-  # License Version 1.1 (the "License"); you may not use this file
-  # except in compliance with the License. You may obtain a copy of
-  # the License at http://www.mozilla.org/MPL/
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
   #
-  # Software distributed under the License is distributed on an "AS
-  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-  # implied. See the License for the specific language governing
-  # rights and limitations under the License.
-  #
-  # The Original Code is the Bugzilla Bug Tracking System.
-  #
-  # The Initial Developer of the Original Code is Netscape Communications
-  # Corporation. Portions created by Netscape are
-  # Copyright (C) 1998 Netscape Communications Corporation. All
-  # Rights Reserved.
-  #
-  # Contributor(s): Myk Melez <myk@mozilla.org>
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
   #%]
 
 [%# INTERFACE:
@@ -30,13 +18,35 @@
 
 [% PROCESS "global/field-descs.none.tmpl" %]
 
-[% title = "$terms.Bug List" %]
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+
+[% unfiltered_title = "$terms.Bug List" %]
 [% IF searchname || defaultsavename %]
-  [% title = title _ ": " _ (searchname OR defaultsavename) FILTER html %]
+  [% unfiltered_title = unfiltered_title _ ": " _ (searchname OR defaultsavename) %]
 [% END %]
+[% title = unfiltered_title FILTER html %]
 
 [% qorder = order FILTER uri IF order %]
 
+[% javascript =  BLOCK %]
+  [% new_url = cgi.self_url %]
+  [% IF quicksearch %]
+    [% new_url = BLOCK ~%]
+      buglist.cgi?quicksearch=[% quicksearch FILTER uri %]
+      [%~ IF cgi.param('list_id') ~%]
+        &list_id=[% cgi.param('list_id') FILTER uri %]
+      [%~ END %]
+    [% END %]
+  [% END %]
+
+  if (history && history.replaceState) {
+    history.replaceState(null, "[% unfiltered_title FILTER js %]",
+                         "[% new_url FILTER js %]");
+    document.title = "[% unfiltered_title FILTER js %]";
+  }
+  [% javascript FILTER none %]
+[% END %]
 
 [%############################################################################%]
 [%# Page Header                                                              #%]
@@ -47,7 +57,7 @@
   style = style
   atomlink = "buglist.cgi?$urlquerypart&title=$title&ctype=atom" 
   yui = [ 'autocomplete', 'calendar' ]
-  javascript_urls = [ "js/util.js", "js/field.js" ]
+  javascript_urls = [ "js/util.js", "js/field.js", "js/TUI.js" ]
   style_urls = [ "skins/standard/buglist.css" ]
   doc_section = "query.html#list"
 %]
@@ -58,10 +68,13 @@
   </span>
 
   [% IF debug %]
-    <p class="bz_query">[% query FILTER html %]</p>
-    [% IF query_explain.defined %]
-      <pre class="bz_query_explain">[% query_explain FILTER html %]</pre>
-    [% END %]
+    <div class="bz_query_debug">
+      <p>[% query FILTER html %]</p>
+      <p>Execution time: [% query_time FILTER html %] seconds</p>
+      [% IF query_explain.defined %]
+        <pre>[% query_explain FILTER html %]</pre>
+      [% END %]
+    </div>
   [% END %]
 
   [% IF user.settings.display_quips.value == 'on' %]
@@ -86,6 +99,15 @@
   'changedfrom', 'changedto', 'changedby', 'notsubstring', 'nowords',
   'nowordssubstr', 'notmatches',
 ] %]
+<a id="search_description_controller" class="bz_default_hidden"
+   href="javascript:TUI_toggle_class('search_description')">Hide Search Description</a>
+[%# Show the link if the browser supports JS %]
+<script type="text/javascript">
+  TUI_alternates['search_description'] = 'Show Search Description';
+  YAHOO.util.Dom.removeClass('search_description_controller', 
+                             'bz_default_hidden');
+</script>
+
 <ul class="search_description">
 [% FOREACH desc_item = search_description %]
   <li>
@@ -201,7 +223,7 @@
       
       <td valign="middle" class="bz_query_links">
         <a href="buglist.cgi?
-        [% urlquerypart FILTER html %]&amp;ctype=csv&human=1">CSV</a> |
+        [% urlquerypart FILTER html %]&amp;ctype=csv&amp;human=1">CSV</a> |
         <a href="buglist.cgi?
         [% urlquerypart FILTER html %]&amp;title=
         [%- title FILTER html %]&amp;ctype=atom">Feed</a> |

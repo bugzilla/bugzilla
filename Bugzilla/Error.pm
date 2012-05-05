@@ -1,25 +1,9 @@
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Original Code is the Bugzilla Bug Tracking System.
-#
-# The Initial Developer of the Original Code is Netscape Communications
-# Corporation. Portions created by Netscape are
-# Copyright (C) 1998 Netscape Communications Corporation. All
-# Rights Reserved.
-#
-# Contributor(s): Bradley Baetz <bbaetz@acm.org>
-#                 Marc Schumann <wurblzap@gmail.com>
-#                 Frédéric Buclin <LpSolit@gmail.com>
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::Error;
 
@@ -30,7 +14,7 @@ use base qw(Exporter);
 
 use Bugzilla::Constants;
 use Bugzilla::WebService::Constants;
-use Bugzilla::Util;
+use Bugzilla::Hook;
 
 use Carp;
 use Data::Dumper;
@@ -62,12 +46,13 @@ sub _throw_error {
     my $datadir = bz_locations()->{'datadir'};
     # If a writable $datadir/errorlog exists, log error details there.
     if (-w "$datadir/errorlog") {
+        require Bugzilla::Util;
         require Data::Dumper;
         my $mesg = "";
         for (1..75) { $mesg .= "-"; };
         $mesg .= "\n[$$] " . time2str("%D %H:%M:%S ", time());
         $mesg .= "$name $error ";
-        $mesg .= remote_ip();
+        $mesg .= Bugzilla::Util::remote_ip();
         $mesg .= Bugzilla->user->login;
         $mesg .= (' actually ' . Bugzilla->sudoer->login) if Bugzilla->sudoer;
         $mesg .= "\n";
@@ -92,57 +77,61 @@ sub _throw_error {
     }
 
     my $template = Bugzilla->template;
-    if (Bugzilla->error_mode == ERROR_MODE_WEBPAGE) {
-        print Bugzilla->cgi->header();
-        $template->process($name, $vars)
-          || ThrowTemplateError($template->error());
-    }
+    my $message;
     # There are some tests that throw and catch a lot of errors,
     # and calling $template->process over and over for those errors
     # is too slow. So instead, we just "die" with a dump of the arguments.
+    if (Bugzilla->error_mode != ERROR_MODE_TEST) {
+        $template->process($name, $vars, \$message)
+          || ThrowTemplateError($template->error());
+    }
+
+    # Let's call the hook first, so that extensions can override
+    # or extend the default behavior, or add their own error codes.
+    Bugzilla::Hook::process('error_catch', { error => $error, vars => $vars,
+                                             message => \$message });
+
+    if (Bugzilla->error_mode == ERROR_MODE_WEBPAGE) {
+        print Bugzilla->cgi->header();
+        print $message;
+    }
     elsif (Bugzilla->error_mode == ERROR_MODE_TEST) {
         die Dumper($vars);
     }
-    else {
-        my $message;
-        $template->process($name, $vars, \$message)
-          || ThrowTemplateError($template->error());
-        if (Bugzilla->error_mode == ERROR_MODE_DIE) {
-            die("$message\n");
+    elsif (Bugzilla->error_mode == ERROR_MODE_DIE) {
+        die("$message\n");
+    }
+    elsif (Bugzilla->error_mode == ERROR_MODE_DIE_SOAP_FAULT
+           || Bugzilla->error_mode == ERROR_MODE_JSON_RPC)
+    {
+        # Clone the hash so we aren't modifying the constant.
+        my %error_map = %{ WS_ERROR_CODE() };
+        Bugzilla::Hook::process('webservice_error_codes',
+                                { error_map => \%error_map });
+        my $code = $error_map{$error};
+        if (!$code) {
+            $code = ERROR_UNKNOWN_FATAL if $name =~ /code/i;
+            $code = ERROR_UNKNOWN_TRANSIENT if $name =~ /user/i;
         }
-        elsif (Bugzilla->error_mode == ERROR_MODE_DIE_SOAP_FAULT
-               || Bugzilla->error_mode == ERROR_MODE_JSON_RPC)
-        {
-            # Clone the hash so we aren't modifying the constant.
-            my %error_map = %{ WS_ERROR_CODE() };
-            require Bugzilla::Hook;
-            Bugzilla::Hook::process('webservice_error_codes', 
-                                    { error_map => \%error_map });
-            my $code = $error_map{$error};
-            if (!$code) {
-                $code = ERROR_UNKNOWN_FATAL if $name =~ /code/i;
-                $code = ERROR_UNKNOWN_TRANSIENT if $name =~ /user/i;
-            }
 
-            if (Bugzilla->error_mode == ERROR_MODE_DIE_SOAP_FAULT) {
-                die SOAP::Fault->faultcode($code)->faultstring($message);
-            }
-            else {
-                my $server = Bugzilla->_json_server;
-                # Technically JSON-RPC isn't allowed to have error numbers
-                # higher than 999, but we do this to avoid conflicts with
-                # the internal JSON::RPC error codes.
-                $server->raise_error(code    => 100000 + $code,
-                                     message => $message,
-                                     id      => $server->{_bz_request_id},
-                                     version => $server->version);
-                # Most JSON-RPC Throw*Error calls happen within an eval inside
-                # of JSON::RPC. So, in that circumstance, instead of exiting,
-                # we die with no message. JSON::RPC checks raise_error before
-                # it checks $@, so it returns the proper error.
-                die if _in_eval();
-                $server->response($server->error_response_header);
-            }
+        if (Bugzilla->error_mode == ERROR_MODE_DIE_SOAP_FAULT) {
+            die SOAP::Fault->faultcode($code)->faultstring($message);
+        }
+        else {
+            my $server = Bugzilla->_json_server;
+            # Technically JSON-RPC isn't allowed to have error numbers
+            # higher than 999, but we do this to avoid conflicts with
+            # the internal JSON::RPC error codes.
+            $server->raise_error(code    => 100000 + $code,
+                                 message => $message,
+                                 id      => $server->{_bz_request_id},
+                                 version => $server->version);
+            # Most JSON-RPC Throw*Error calls happen within an eval inside
+            # of JSON::RPC. So, in that circumstance, instead of exiting,
+            # we die with no message. JSON::RPC checks raise_error before
+            # it checks $@, so it returns the proper error.
+            die if _in_eval();
+            $server->response($server->error_response_header);
         }
     }
     exit;
@@ -186,6 +175,8 @@ sub ThrowTemplateError {
     # Try a template first; but if this one fails too, fall back
     # on plain old print statements.
     if (!$template->process("global/code-error.html.tmpl", $vars)) {
+        require Bugzilla::Util;
+        import Bugzilla::Util qw(html_quote);
         my $maintainer = Bugzilla->params->{'maintainer'};
         my $error = html_quote($vars->{'template_error_msg'});
         my $error2 = html_quote($template->error());

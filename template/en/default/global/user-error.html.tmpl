@@ -1,23 +1,9 @@
-[%# The contents of this file are subject to the Mozilla Public
-  # License Version 1.1 (the "License"); you may not use this file
-  # except in compliance with the License. You may obtain a copy of
-  # the License at http://www.mozilla.org/MPL/
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
   #
-  # Software distributed under the License is distributed on an "AS
-  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-  # implied. See the License for the specific language governing
-  # rights and limitations under the License.
-  #
-  # The Original Code is the Bugzilla Bug Tracking System.
-  #
-  # The Initial Developer of the Original Code is Netscape Communications
-  # Corporation. Portions created by Netscape are
-  # Copyright (C) 1998 Netscape Communications Corporation. All
-  # Rights Reserved.
-  #
-  # Contributor(s): Gervase Markham <gerv@gerv.net>
-  #                 Frédéric Buclin <LpSolit@gmail.com>
-  #                 Max Kanat-Alexander <mkanat@bugzilla.org>
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
   #%]
 
 [%# INTERFACE:
@@ -268,6 +254,8 @@
         <li>A ticket in a Trac installation.</li>
         <li>A b[% %]ug in a MantisBT installation.</li>
         <li>A b[% %]ug on sourceforge.net.</li>
+        <li>An issue on github.com.</li>
+        [% Hook.process('bug_url_invalid_tracker') %]
       </ul>
     [% ELSIF reason == 'id' %]
       There is no valid [% terms.bug %] id in that URL.
@@ -852,11 +840,10 @@
       A legal address must contain exactly one '@',
       and at least one '.' after the @.
     [% ELSE %]
-      [%+ Param('emailregexpdesc') %]
+      [%+ Param('emailregexpdesc') FILTER html_light %]
     [% END %]
-    It must also not contain any of these special characters:
-    <tt>\ ( ) &amp; &lt; &gt; , ; : &quot; [ ]</tt>, or any whitespace.
-    
+    It also must not contain any illegal characters.
+
   [% ELSIF error == "illegal_frequency" %]
     [% title = "Too Frequent" %]
     Unless you are an administrator, you may not create series which are 
@@ -914,9 +901,7 @@
     [% END %]
     [% IF bug_id %]
       '[% bug_id FILTER html %]' is not a valid [% terms.bug %] number
-      [% IF Param("usebugaliases") %]
-        nor an alias to [% terms.abug %]
-      [% END %].
+      nor an alias to [% terms.abug %].
     [% ELSE %]
       [% IF field %]
         The '[% field_descs.$field FILTER html %]' field
@@ -1021,6 +1006,11 @@
     When using JSON-RPC over GET, you must specify a 'method'
     parameter. See the documentation at
     [%+ docs_urlbase FILTER html %]api/Bugzilla/WebService/Server/JSONRPC.html
+
+  [% ELSIF error == "json_rpc_illegal_content_type" %]
+    When using JSON-RPC over POST, you cannot send data as
+    [%+ content_type FILTER html %]. Only application/json and
+    application/json-rpc are allowed.
 
   [% ELSIF error == "json_rpc_invalid_params" %]
     Could not parse the 'params' argument as valid JSON.
@@ -1447,6 +1437,27 @@
     The name of the query must be less than [% constants.MAX_LEN_QUERY_NAME FILTER html %]
     characters long.
 
+  [% ELSIF error == "quicksearch_invalid_query" %]
+    [% title = "Invalid Query" %]
+    Your query is invalid.
+    [% IF operators %]
+      The [% operators.shift FILTER html %] operator cannot be followed by
+      [%+ operators.shift FILTER html %].
+    [% ELSE %]
+      A query cannot start with AND or OR, nor can it end with AND, OR or NOT.
+      They are reserved operators and must be quoted if you want to look for
+      these strings.
+    [% END %]
+
+  [% ELSIF error == "quicksearch_unbalanced_quotes" %]
+    [% title = "Badly Formatted Query" %]
+    [% terms.Bugzilla %] is unable to parse your query correctly:
+    <em>[% string FILTER html %]</em>.<br>
+    If you use quotes to enclose strings, make sure both quotes are present.
+    If you really want to look for a quote in a string, type \" instead of ".
+    For instance, <em>"I'm so \"special\", really"</em> (with quotes) will be
+    interpreted as <em>I'm so "special", really</em>.
+
   [% ELSIF error == "quicksearch_unknown_field" %]
     [% title = "QuickSearch Error" %]
     There is a problem with your search:
@@ -1613,7 +1624,9 @@
     [% ELSIF type == "account" %]
       an account
     [% END %]
-    token too recently to request another. Please wait a while and try again.
+    token too recently to request another. 
+    Please wait [% constants.ACCOUNT_CHANGE_INTERVAL FILTER html %] minutes
+    then try again.
 
   [% ELSIF error == "unknown_action" %]
     [% IF action %]
@@ -1714,6 +1727,11 @@
     "[% value FILTER html %]" is not a valid value for a
     &lt;[% type FILTER html %]&gt; field. (See the XML-RPC specification
     for details.)
+
+  [% ELSIF error == "xmlrpc_illegal_content_type" %]
+    When using XML-RPC, you cannot send data as
+    [%+ content_type FILTER html %]. Allowed content types 
+    are [% constants.XMLRPC_CONTENT_TYPE_WHITELIST.join(', ') FILTER html %].
 
   [% ELSIF error == "zero_length_file" %]
     [% title = "File Is Empty" %]

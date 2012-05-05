@@ -1,24 +1,10 @@
 #!/usr/bin/perl -wT
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Original Code is the Bugzilla Bug Tracking System.
-#
-# The Initial Developer of the Original Code is Netscape Communications
-# Corporation. Portions created by Netscape are
-# Copyright (C) 1998 Netscape Communications Corporation. All
-# Rights Reserved.
-#
-# Contributor(s): Erik Stambaugh <erik@dasbistro.com>
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 ################################################################################
 # Script Initialization
@@ -352,6 +338,7 @@ while (my $event = get_next_event) {
 #  - queries        array of hashes containing:
 #          - bugs:  array of hashes mapping fieldnames to values for this bug
 #          - title: text title given to this query in the whine event
+#          - name:  text name of this query
 #  - schedule_id    integer id of the schedule being run
 #  - subject        Subject line for the message
 #  - recipient      user object for the recipient
@@ -447,12 +434,22 @@ sub run_queries {
         # Bugzilla::Search to execute a saved query.  It's exceedingly weird,
         # but that's how it works.
         my $searchparams = new Bugzilla::CGI($savedquery);
+        my @orderstrings = split(/,\s*/, $searchparams->param('order'));
         my $search = new Bugzilla::Search(
             'fields' => \@searchfields,
             'params' => scalar $searchparams->Vars,
             'user'   => $args->{'recipient'}, # the search runs as the recipient
+            'order'  => \@orderstrings
         );
-        my $sqlquery = $search->sql;
+        # If a query fails for whatever reason, it shouldn't kill the script.
+        my $sqlquery = eval { $search->sql };
+        if ($@) {
+            print STDERR get_text('whine_query_failed', { query_name => $thisquery->{'name'},
+                                                          author => $args->{'author'},
+                                                          reason => $@ }) . "\n";
+            next;
+        }
+
         $sth = $dbh->prepare($sqlquery);
         $sth->execute;
 

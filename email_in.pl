@@ -1,23 +1,10 @@
 #!/usr/bin/perl -wT
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Original Code is the Bugzilla Inbound Email System.
-#
-# The Initial Developer of the Original Code is Akamai Technologies, Inc.
-# Portions created by Akamai are Copyright (C) 2006 Akamai Technologies, 
-# Inc. All Rights Reserved.
-#
-# Contributor(s): Max Kanat-Alexander <mkanat@bugzilla.org>
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 use strict;
 use warnings;
@@ -169,22 +156,29 @@ sub parse_mail {
     return \%fields;
 }
 
+sub check_email_fields {
+    my ($fields) = @_;
+
+    my ($retval, $non_conclusive_fields) =
+      Bugzilla::User::match_field({
+        'assigned_to'   => { 'type' => 'single' },
+        'qa_contact'    => { 'type' => 'single' },
+        'cc'            => { 'type' => 'multi'  },
+        'newcc'         => { 'type' => 'multi'  }
+      }, $fields, MATCH_SKIP_CONFIRM);
+
+    if ($retval != USER_MATCH_SUCCESS) {
+        ThrowUserError('user_match_too_many', {fields => $non_conclusive_fields});
+    }
+}
+
 sub post_bug {
     my ($fields) = @_;
     debug_print('Posting a new bug...');
 
     my $user = Bugzilla->user;
 
-    my ($retval, $non_conclusive_fields) =
-      Bugzilla::User::match_field({
-        'assigned_to'   => { 'type' => 'single' },
-        'qa_contact'    => { 'type' => 'single' },
-        'cc'            => { 'type' => 'multi'  }
-      }, $fields, MATCH_SKIP_CONFIRM);
-
-    if ($retval != USER_MATCH_SUCCESS) {
-        ThrowUserError('user_match_too_many', {fields => $non_conclusive_fields});
-    }
+    check_email_fields($fields);
 
     my $bug = Bugzilla::Bug->create($fields);
     debug_print("Created bug " . $bug->id);
@@ -224,6 +218,8 @@ sub process_bug {
         $fields{'cc'} = [split(',', $fields{'removecc'})];
         $fields{'removecc'} = 1;
     }
+
+    check_email_fields(\%fields);
 
     my $cgi = Bugzilla->cgi;
     foreach my $field (keys %fields) {

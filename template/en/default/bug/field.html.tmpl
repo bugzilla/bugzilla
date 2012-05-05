@@ -1,25 +1,9 @@
-[%# The contents of this file are subject to the Mozilla Public
-  # License Version 1.1 (the "License"); you may not use this file
-  # except in compliance with the License. You may obtain a copy of
-  # the License at http://www.mozilla.org/MPL/
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
   #
-  # Software distributed under the License is distributed on an "AS
-  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-  # implied. See the License for the specific language governing
-  # rights and limitations under the License.
-  #
-  # The Original Code is the Bugzilla Bug Tracking System.
-  #
-  # The Initial Developer of the Original Code is Netscape Communications
-  # Corporation. Portions created by Netscape are
-  # Copyright (C) 1998 Netscape Communications Corporation. All
-  # Rights Reserved.
-  #
-  # Contributor(s): Myk Melez <myk@mozilla.org>
-  #                 Max Kanat-Alexander <mkanat@bugzilla.org>
-  #                 Elliotte Martin <elliotte_martin@yahoo.com>
-  #                 Guy Pyrzak <guy.pyrzak@gmail.com>
-  #                 Reed Loden <reed@reedloden.com>
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
   #%]
 
 [%# INTERFACE:
@@ -33,10 +17,6 @@
   #               the field value.
   #   no_tds: boolean; if true, don't display the label <th> or the 
   #           wrapping <td> for the field.
-  #   desc_url: string; Normally the label of a non-custom field links to
-  #             fields.html. If you want it to link elsewhere, specify the
-  #             relative URL you want to link to, here. Remember to call
-  #             url_quote on any query string arguments.
   #   bug (optional): The current Bugzilla::Bug being displayed, or a hash 
   #                   with default field values being displayed on a page.
   #%]
@@ -153,7 +133,8 @@
         <script type="text/javascript">
         <!--
           initHidingOptionsForIE('[% field.name FILTER js %]');
-          [%+ INCLUDE "bug/field-events.js.tmpl" field = field %]
+          [%+ INCLUDE "bug/field-events.js.tmpl"
+                      field = field, product = bug.product_obj %]
         //-->
         </script>
 
@@ -205,22 +186,31 @@
                                                  'keyword_autocomplete');
        </script>
   [% END %]
-[% ELSIF field.type == constants.FIELD_TYPE_TEXTAREA %]
-  <div class="uneditable_textarea">[% value FILTER html %]</div>
-[% ELSIF field.type == constants.FIELD_TYPE_BUG_ID %]
-    [% IF value %]  
-        [% value FILTER bug_link(value, use_alias => 1) FILTER none %]
-    [% END %]
-[% ELSIF field.type == constants.FIELD_TYPE_BUG_URLS %]
-  [% '<ul class="bug_urls">' IF value.size %]
-    [% FOREACH bug_url = value %]
-      <li>
-        [% PROCESS bug_url_link bug_url = bug_url %]
-      </li>
-    [% END %]
-  [% '</ul>' IF value.size %]
 [% ELSE %]
-  [% value.join(', ') FILTER html %]
+  [% SWITCH field.type %]
+    [% CASE constants.FIELD_TYPE_TEXTAREA %]
+      <div class="uneditable_textarea">[% value FILTER html %]</div>
+    [% CASE constants.FIELD_TYPE_BUG_ID %]
+      [% IF value %]  
+          [% value FILTER bug_link(value, use_alias => 1) FILTER none %]
+      [% END %]
+    [% CASE [ constants.FIELD_TYPE_SINGLE_SELECT 
+              constants.FIELD_TYPE_MULTI_SELECT ] %]
+      [% FOREACH val = value %]
+        [% display_value(field.name, val) FILTER html %]
+        [% ', ' UNLESS loop.last() %]
+      [% END %]
+    [% CASE constants.FIELD_TYPE_BUG_URLS %]
+      [% '<ul class="bug_urls">' IF value.size %]
+        [% FOREACH bug_url = value %]
+          <li>
+            [% PROCESS bug_url_link bug_url = bug_url %]
+          </li>
+        [% END %]
+      [% '</ul>' IF value.size %]
+    [% CASE %]
+      [% value.join(', ') FILTER html %]
+  [% END %]
 [% END %]
 [% Hook.process('end_field_column') %]
 [% '</td>' IF NOT no_tds %]

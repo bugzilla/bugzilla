@@ -1,22 +1,9 @@
-[%# The contents of this file are subject to the Mozilla Public
-  # License Version 1.1 (the "License"); you may not use this file
-  # except in compliance with the License. You may obtain a copy of
-  # the License at http://www.mozilla.org/MPL/
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
   #
-  # Software distributed under the License is distributed on an "AS
-  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-  # implied. See the License for the specific language governing
-  # rights and limitations under the License.
-  #
-  # The Original Code is the Bugzilla Bug Tracking System.
-  #
-  # The Initial Developer of the Original Code is Netscape Communications
-  # Corporation. Portions created by Netscape are
-  # Copyright (C) 1998 Netscape Communications Corporation. All
-  # Rights Reserved.
-  #
-  # Contributor(s): Dave Lawrence <dkl@redhat.com>
-  #                 Pascal Held <paheld@gmail.com>
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
   #%]
 
 [% PROCESS global/header.html.tmpl
@@ -30,7 +17,6 @@
   this feature requires cookies to work.
 </p>
 
-[% PROCESS "global/field-descs.none.tmpl" %]
 [% field_descs.short_short_desc     = "Summary (first 60 characters)" %]
 [% field_descs.short_desc           = "Summary (Full)" %]
 [% field_descs.assigned_to_realname = "$field_descs.assigned_to Real Name" %]
@@ -55,8 +41,7 @@
       <tr>
         <th><div id="avail_header" class="bz_default_hidden">Available Columns</div></th>
         <th></th>
-        <th>Selected Columns</th>
-        <th></th>
+        <th colspan="2">Selected Columns</th>
       </tr>
       <tr>
         <td>
@@ -66,11 +51,13 @@
           </select>
         </td>
         <td>
-          <input class="image_button bz_default_hidden" type="button" 
-                 id="select_button" name="select" onclick="move_select()">
+          <button type="button" id="select_button" name="select"
+                  class="bz_default_hidden arrow_button"
+                  onclick="move_select()">&rarr;</button>
           <br><br>
-          <input class="image_button bz_default_hidden" type="button" 
-                 id="deselect_button" name="deselect" onclick="move_deselect()">
+          <button type="button" id="deselect_button" name="deselect"
+                  class="bz_default_hidden arrow_button"
+                  onclick="move_deselect()">&larr;</button>
         </td>
         <td>
           <select name="selected_columns" id="selected_columns" 
@@ -91,11 +78,13 @@
           </select>
         </td>
         <td>
-          <input class="image_button bz_default_hidden" type="button" 
-                 id="up_button" name="up" onclick="move_up()">
+          <button type="button" id="up_button" name="up"
+                  class="bz_default_hidden arrow_button"
+                  onclick="move_up()">&uarr;</button>
           <br><br>
-          <input class="image_button bz_default_hidden" type="button"
-                 id="down_button" name="down" onclick="move_down()">
+          <button type="button" id="down_button" name="down"
+                  class="bz_default_hidden arrow_button"
+                  onclick="move_down()">&darr;</button>
         </td>
       </tr>
     </table>
@@ -140,4 +129,3 @@
 </form>
 
 [% PROCESS global/footer.html.tmpl %]
-

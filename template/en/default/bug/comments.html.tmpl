@@ -1,23 +1,9 @@
-[%# The contents of this file are subject to the Mozilla Public
-  # License Version 1.1 (the "License"); you may not use this file
-  # except in compliance with the License. You may obtain a copy of
-  # the License at http://www.mozilla.org/MPL/
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
   #
-  # Software distributed under the License is distributed on an "AS
-  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-  # implied. See the License for the specific language governing
-  # rights and limitations under the License.
-  #
-  # The Original Code is the Bugzilla Bug Tracking System.
-  #
-  # The Initial Developer of the Original Code is Netscape Communications
-  # Corporation. Portions created by Netscape are
-  # Copyright (C) 1998 Netscape Communications Corporation. All
-  # Rights Reserved.
-  #
-  # Contributor(s): Gervase Markham <gerv@gerv.net>
-  #                 Max Kanat-Alexander <mkanat@bugzilla.org>
-  #                 Shane H. W. Travis <travis@sedsystems.ca>
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
   #%]
 
 [% PROCESS bug/time.html.tmpl %]
@@ -49,7 +35,9 @@
 
       /* <textarea id="comment"> */
       var textarea = document.getElementById('comment');
-      textarea.value += replytext;
+      if (textarea.value != replytext) {
+          textarea.value += replytext;
+      }
 
       textarea.focus();
   } 
@@ -58,6 +46,7 @@
 
 [% DEFAULT start_at = 0 mode = "show" %]
 [% sort_order = user.settings.comment_sort_order.value %]
+[% user_cache = template_cache.users %]
 
 [%# NOTE: (start_at > 0) means we came here from a midair collision,
   #       in which case we don't care what the user's preference is.
@@ -157,7 +146,7 @@
               [% END %]
             >reply</a>]
             <script type="text/javascript"><!--
-              addCollapseLink([% count %]); // -->
+              addCollapseLink([% count %], 'Toggle comment display'); // -->
             </script>
           </span>
         [% END %]
@@ -182,12 +171,18 @@
         </span>
 
         <span class="bz_comment_user">
-          [% INCLUDE global/user.html.tmpl who = comment.author %]
+          [%# No need to recreate the exact same template if we already have it. %]
+          [% commenter_id = comment.author.id %]
+          [% UNLESS user_cache.$commenter_id %]
+            [% user_cache.$commenter_id = BLOCK %]
+              [% INCLUDE global/user.html.tmpl who = comment.author %]
+            [% END %]
+          [% END %]
+          [% user_cache.$commenter_id FILTER none %]
         </span>
 
         <span class="bz_comment_user_images">
-          [% FOREACH group = comment.author.direct_group_membership %]
-            [% NEXT UNLESS group.icon_url %]
+          [% FOREACH group = comment.author.groups_with_icon %]
             <img src="[% group.icon_url FILTER html %]"
                  alt="[% group.name FILTER html %]"
                  title="[% group.name FILTER html %] - [% group.description FILTER html %]">

@@ -1,21 +1,9 @@
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Original Code is the Bugzilla Bug Tracking System.
-#
-# Contributor(s): Dan Mosedale <dmose@mozilla.org>
-#                 Frédéric Buclin <LpSolit@gmail.com>
-#                 Myk Melez <myk@mozilla.org>
-#                 Greg Hendricks <ghendricks@novell.com>
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 =head1 NAME
 
@@ -152,10 +140,12 @@ use constant UPDATE_COLUMNS => qw(
 use constant SQL_DEFINITIONS => {
     # Using commas because these are constants and they shouldn't
     # be auto-quoted by the "=>" operator.
-    FIELD_TYPE_FREETEXT,      { TYPE => 'varchar(255)' },
+    FIELD_TYPE_FREETEXT,      { TYPE => 'varchar(255)', 
+                                NOTNULL => 1, DEFAULT => "''"},
     FIELD_TYPE_SINGLE_SELECT, { TYPE => 'varchar(64)', NOTNULL => 1,
                                 DEFAULT => "'---'" },
-    FIELD_TYPE_TEXTAREA,      { TYPE => 'MEDIUMTEXT' },
+    FIELD_TYPE_TEXTAREA,      { TYPE => 'MEDIUMTEXT', 
+                                NOTNULL => 1, DEFAULT => "''"},
     FIELD_TYPE_DATETIME,      { TYPE => 'DATETIME'   },
     FIELD_TYPE_BUG_ID,        { TYPE => 'INT3'       },
 };
@@ -258,9 +248,8 @@ use constant DEFAULT_FIELDS => (
     {name => "owner_idle_time",       desc => "Time Since Assignee Touched"},
     {name => 'see_also',              desc => "See Also",
      type => FIELD_TYPE_BUG_URLS},
-    {name => 'tag',                   desc => 'Tags'},
+    {name => 'tag',                   desc => 'Tags', buglist => 1},
     {name => 'master_bug_id',         desc => 'Master Bug ID',
-     in_new_bugmail => 1, is_numeric => 1},
 );
 
 ################

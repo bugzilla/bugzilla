@@ -1,25 +1,9 @@
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Original Code is the Bugzilla Bug Tracking System.
-#
-# The Initial Developer of the Original Code is Netscape Communications
-# Corporation. Portions created by Netscape are
-# Copyright (C) 1998 Netscape Communications Corporation. All
-# Rights Reserved.
-#
-# Contributor(s): Myk Melez <myk@mozilla.org>
-#                 Jouni Heikniemi <jouni@heikniemi.net>
-#                 Frédéric Buclin <LpSolit@gmail.com>
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 use strict;
 
@@ -75,19 +59,27 @@ use base qw(Bugzilla::Object Exporter);
 use constant DB_TABLE => 'flags';
 use constant LIST_ORDER => 'id';
 # Flags are tracked in bugs_activity.
+use constant AUDIT_CREATES => 0;
 use constant AUDIT_UPDATES => 0;
+use constant AUDIT_REMOVES => 0;
 
 use constant SKIP_REQUESTEE_ON_ERROR => 1;
 
-use constant DB_COLUMNS => qw(
-    id
-    type_id
-    bug_id
-    attach_id
-    requestee_id
-    setter_id
-    status
-);
+sub DB_COLUMNS {
+    my $dbh = Bugzilla->dbh;
+    return qw(
+        id
+        type_id
+        bug_id
+        attach_id
+        requestee_id
+        setter_id
+        status), 
+        $dbh->sql_date_format('creation_date', '%Y.%m.%d %H:%i:%s') .
+                              ' AS creation_date', 
+        $dbh->sql_date_format('modification_date', '%Y.%m.%d %H:%i:%s') .
+                              ' AS modification_date';
+}
 
 use constant UPDATE_COLUMNS => qw(
     requestee_id
@@ -132,6 +124,14 @@ Returns the ID of the attachment this flag belongs to, if any.
 
 Returns the status '+', '-', '?' of the flag.
 
+=item C<creation_date>
+
+Returns the timestamp when the flag was created.
+
+=item C<modification_date>
+
+Returns the timestamp when the flag was last modified.
+
 =back
 
 =cut
@@ -144,6 +144,8 @@ sub attach_id    { return $_[0]->{'attach_id'};    }
 sub status       { return $_[0]->{'status'};       }
 sub setter_id    { return $_[0]->{'setter_id'};    }
 sub requestee_id { return $_[0]->{'requestee_id'}; }
+sub creation_date     { return $_[0]->{'creation_date'};     }
+sub modification_date { return $_[0]->{'modification_date'}; }
 
 ###############################
 ####       Methods         ####
@@ -282,7 +284,7 @@ sub count {
 sub set_flag {
     my ($class, $obj, $params) = @_;
 
-    my ($bug, $attachment);
+    my ($bug, $attachment, $obj_flag, $requestee_changed);
     if (blessed($obj) && $obj->isa('Bugzilla::Attachment')) {
         $attachment = $obj;
         $bug = $attachment->bug;
@@ -320,13 +322,14 @@ sub set_flag {
             ($obj_flagtype) = grep { $_->id == $flag->type_id } @{$obj->flag_types};
             push(@{$obj_flagtype->{flags}}, $flag);
         }
-        my ($obj_flag) = grep { $_->id == $flag->id } @{$obj_flagtype->{flags}};
+        ($obj_flag) = grep { $_->id == $flag->id } @{$obj_flagtype->{flags}};
         # If the flag has the correct type but cannot be found above, this means
         # the flag is going to be removed (e.g. because this is a pending request
         # and the attachment is being marked as obsolete).
         return unless $obj_flag;
 
-        $class->_validate($obj_flag, $obj_flagtype, $params, $bug, $attachment);
+        ($obj_flag, $requestee_changed) =
+            $class->_validate($obj_flag, $obj_flagtype, $params, $bug, $attachment);
     }
     # Create a new flag.
     elsif ($params->{type_id}) {
@@ -358,11 +361,20 @@ sub set_flag {
             }
         }
 
-        $class->_validate(undef, $obj_flagtype, $params, $bug, $attachment);
+        ($obj_flag, $requestee_changed) =
+            $class->_validate(undef, $obj_flagtype, $params, $bug, $attachment);
     }
     else {
         ThrowCodeError('param_required', { function => $class . '->set_flag',
                                            param    => 'id/type_id' });
+    }
+
+    if ($obj_flag
+        && $requestee_changed
+        && $obj_flag->requestee_id
+        && $obj_flag->requestee->setting('requestee_cc') eq 'on')
+    {
+        $bug->add_cc($obj_flag->requestee);
     }
 }
 
@@ -383,23 +395,25 @@ sub _validate {
     $obj_flag->_set_status($params->{status});
     $obj_flag->_set_requestee($params->{requestee}, $attachment, $params->{skip_roe});
 
+    # The requestee ID can be undefined.
+    my $requestee_changed = ($obj_flag->requestee_id || 0) != ($old_requestee_id || 0);
+
     # The setter field MUST NOT be updated if neither the status
     # nor the requestee fields changed.
-    if (($obj_flag->status ne $old_status)
-        # The requestee ID can be undefined.
-        || (($obj_flag->requestee_id || 0) != ($old_requestee_id || 0)))
-    {
+    if (($obj_flag->status ne $old_status) || $requestee_changed) {
         $obj_flag->_set_setter($params->{setter});
     }
 
     # If the flag is deleted, remove it from the list.
     if ($obj_flag->status eq 'X') {
         @{$flag_type->{flags}} = grep { $_->id != $obj_flag->id } @{$flag_type->{flags}};
+        return;
     }
     # Add the newly created flag to the list.
     elsif (!$obj_flag->id) {
         push(@{$flag_type->{flags}}, $obj_flag);
     }
+    return wantarray ? ($obj_flag, $requestee_changed) : $obj_flag;
 }
 
 =pod
@@ -416,10 +430,14 @@ Creates a flag record in the database.
 
 sub create {
     my ($class, $flag, $timestamp) = @_;
-    $timestamp ||= Bugzilla->dbh->selectrow_array('SELECT NOW()');
+    $timestamp ||= Bugzilla->dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
 
     my $params = {};
     my @columns = grep { $_ ne 'id' } $class->_get_db_columns;
+
+    # Some columns use date formatting so use alias instead
+    @columns = map { /\s+AS\s+(.*)$/ ? $1 : $_ } @columns;
+
     $params->{$_} = $flag->{$_} foreach @columns;
 
     $params->{creation_date} = $params->{modification_date} = $timestamp;
@@ -438,6 +456,7 @@ sub update {
     if (scalar(keys %$changes)) {
         $dbh->do('UPDATE flags SET modification_date = ? WHERE id = ?',
                  undef, ($timestamp, $self->id));
+        $self->{'modification_date'} = format_time($timestamp, '%Y.%m.%d %T');
     }
     return $changes;
 }

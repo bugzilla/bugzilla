@@ -1,33 +1,10 @@
 #!/usr/bin/perl -wT
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Original Code is the Bugzilla Bug Tracking System.
-#
-# The Initial Developer of the Original Code is Netscape Communications
-# Corporation. Portions created by Netscape are
-# Copyright (C) 1998 Netscape Communications Corporation. All
-# Rights Reserved.
-#
-# Contributor(s): Terry Weissman <terry@mozilla.org>
-#                 Dan Mosedale <dmose@mozilla.org>
-#                 Dave Miller <justdave@syndicomm.com>
-#                 Christopher Aillon <christopher@aillon.com>
-#                 Myk Melez <myk@mozilla.org>
-#                 Jeff Hedlund <jeff.hedlund@matrixsi.com>
-#                 Frédéric Buclin <LpSolit@gmail.com>
-#                 Lance Larsh <lance.larsh@oracle.com>
-#                 Akamai Technologies <bugzilla-dev@akamai.com>
-#                 Max Kanat-Alexander <mkanat@bugzilla.org>
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 # Implementation notes for this file:
 #
@@ -143,9 +120,7 @@ if (defined $cgi->param('delta_ts'))
     my $delta_ts_z = datetime_from($cgi->param('delta_ts'));
     my $first_delta_tz_z =  datetime_from($first_bug->delta_ts);
     if ($first_delta_tz_z ne $delta_ts_z) {
-        ($vars->{'operations'}) =
-            Bugzilla::Bug::GetBugActivity($first_bug->id, undef,
-                                          scalar $cgi->param('delta_ts'));
+        ($vars->{'operations'}) = $first_bug->get_activity(undef, $cgi->param('delta_ts'));
 
         $vars->{'title_tag'} = "mid_air";
     
@@ -308,7 +283,7 @@ if (defined $cgi->param('newcc')
 if (defined $cgi->param('id')) {
     # Since aliases are unique (like bug numbers), they can only be changed
     # for one bug at a time.
-    if (Bugzilla->params->{"usebugaliases"} && defined $cgi->param('alias')) {
+    if (defined $cgi->param('alias')) {
         $set_all_fields{alias} = $cgi->param('alias');
     }
 }
@@ -375,6 +350,9 @@ foreach my $bug (@bug_objects) {
 
     $bug->send_changes($changes, $vars);
 }
+
+# Delete the session token used for the mass-change.
+delete_token($token) unless $cgi->param('id');
 
 if (Bugzilla->usage_mode == USAGE_MODE_EMAIL) {
     # Do nothing.

@@ -1,28 +1,25 @@
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Original Code is the Bugzilla JSON Webservices Interface.
-#
-# The Initial Developer of the Original Code is the San Jose State
-# University Foundation. Portions created by the Initial Developer
-# are Copyright (C) 2008 the Initial Developer. All Rights Reserved.
-#
-# Contributor(s): 
-#   Max Kanat-Alexander <mkanat@bugzilla.org>
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::WebService::Server::JSONRPC;
 
 use strict;
-use base qw(JSON::RPC::Server::CGI Bugzilla::WebService::Server);
+use Bugzilla::WebService::Server;
+BEGIN {
+    our @ISA = qw(Bugzilla::WebService::Server);
+
+    if (eval { require JSON::RPC::Server::CGI }) {
+        unshift(@ISA, 'JSON::RPC::Server::CGI');
+    }
+    else {
+        require JSON::RPC::Legacy::Server::CGI;
+        unshift(@ISA, 'JSON::RPC::Legacy::Server::CGI');
+    }
+}
 
 use Bugzilla::Error;
 use Bugzilla::WebService::Constants;
@@ -354,7 +351,19 @@ sub _argument_type_check {
 
     Bugzilla->input_params($params);
 
-    if ($self->request->method ne 'POST') {
+    if ($self->request->method eq 'POST') {
+        # CSRF is possible via XMLHttpRequest when the Content-Type header
+        # is not application/json (for example: text/plain or
+        # application/x-www-form-urlencoded).
+        # application/json is the single official MIME type, per RFC 4627.
+        my $content_type = $self->cgi->content_type;
+        # The charset can be appended to the content type, so we use a regexp.
+        if ($content_type !~ m{^application/json(-rpc)?(;.*)?$}i) {
+            ThrowUserError('json_rpc_illegal_content_type',
+                            { content_type => $content_type });
+        }
+    }
+    else {
         # When being called using GET, we don't allow calling
         # methods that can change data. This protects us against cross-site
         # request forgeries.

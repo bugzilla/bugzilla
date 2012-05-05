@@ -1,24 +1,10 @@
 #!/usr/bin/perl -wT
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Original Code is the Bugzilla Bug Tracking System.
-#
-# Contributor(s): Marc Schumann <wurblzap@gmail.com>
-#                 Lance Larsh <lance.larsh@oracle.com>
-#                 Frédéric Buclin <LpSolit@gmail.com>
-#                 David Lawrence <dkl@redhat.com>
-#                 Vlad Dascalu <jocuri@softhome.net>
-#                 Gavin Shelley  <bugzilla@chimpychompy.org>
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 use strict;
 use lib qw(. lib);
@@ -64,6 +50,9 @@ my $token          = $cgi->param('token');
 $vars->{'editusers'} = $editusers;
 mirrorListSelectionValues();
 
+Bugzilla::Hook::process('admin_editusers_action',
+    { vars => $vars, user => $user, action => $action });
+
 ###########################################################################
 if ($action eq 'search') {
     # Allow to restrict the search to any group the user is allowed to bless.
@@ -78,7 +67,8 @@ if ($action eq 'search') {
     my $matchtype     = $cgi->param('matchtype');
     my $grouprestrict = $cgi->param('grouprestrict') || '0';
     my $enabled_only  = $cgi->param('enabled_only') || '0';
-    my $query = 'SELECT DISTINCT userid, login_name, realname, is_enabled ' .
+    my $query = 'SELECT DISTINCT userid, login_name, realname, is_enabled, ' .
+                $dbh->sql_date_format('last_seen_date', '%Y-%m-%d') . ' AS last_seen_date ' .
                 'FROM profiles';
     my @bindValues;
     my $nextCondition;

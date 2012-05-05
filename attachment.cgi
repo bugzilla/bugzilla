@@ -1,33 +1,10 @@
 #!/usr/bin/perl -wT
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Original Code is the Bugzilla Bug Tracking System.
-#
-# The Initial Developer of the Original Code is Netscape Communications
-# Corporation. Portions created by Netscape are
-# Copyright (C) 1998 Netscape Communications Corporation. All
-# Rights Reserved.
-#
-# Contributor(s): Terry Weissman <terry@mozilla.org>
-#                 Myk Melez <myk@mozilla.org>
-#                 Daniel Raichle <draichle@gmx.net>
-#                 Dave Miller <justdave@syndicomm.com>
-#                 Alexander J. Vincent <ajvincent@juno.com>
-#                 Max Kanat-Alexander <mkanat@bugzilla.org>
-#                 Greg Hendricks <ghendricks@novell.com>
-#                 Frédéric Buclin <LpSolit@gmail.com>
-#                 Marc Schumann <wurblzap@gmail.com>
-#                 Byron Jones <bugzilla@glob.com.au>
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 ################################################################################
 # Script Initialization
@@ -450,9 +427,8 @@ sub diff {
 sub viewall {
     # Retrieve and validate parameters
     my $bug = Bugzilla::Bug->check(scalar $cgi->param('bugid'));
-    my $bugid = $bug->id;
 
-    my $attachments = Bugzilla::Attachment->get_attachments_by_bug($bugid);
+    my $attachments = Bugzilla::Attachment->get_attachments_by_bug($bug);
     # Ignore deleted attachments.
     @$attachments = grep { $_->datasize } @$attachments;
 
@@ -512,7 +488,7 @@ sub enter {
     $vars->{'flag_types'} = $flag_types;
     $vars->{'any_flags_requesteeble'} =
         grep { $_->is_requestable && $_->is_requesteeble } @$flag_types;
-    $vars->{'token'} = issue_session_token('create_attachment:');
+    $vars->{'token'} = issue_session_token('create_attachment');
 
     print $cgi->header();
 
@@ -535,27 +511,7 @@ sub insert {
 
     # Detect if the user already used the same form to submit an attachment
     my $token = trim($cgi->param('token'));
-    if ($token) {
-        my ($creator_id, $date, $old_attach_id) = Bugzilla::Token::GetTokenData($token);
-        unless ($creator_id 
-            && ($creator_id == $user->id) 
-                && ($old_attach_id =~ "^create_attachment:")) 
-        {
-            # The token is invalid.
-            ThrowUserError('token_does_not_exist');
-        }
-    
-        $old_attach_id =~ s/^create_attachment://;
-   
-        if ($old_attach_id) {
-            $vars->{'bugid'} = $bugid;
-            $vars->{'attachid'} = $old_attach_id;
-            print $cgi->header();
-            $template->process("attachment/cancel-create-dupe.html.tmpl",  $vars)
-                || ThrowTemplateError($template->error());
-            exit;
-        }
-    }
+    check_token_data($token, 'create_attachment', 'index.cgi');
 
     # Check attachments the user tries to mark as obsolete.
     my @obsolete_attachments;
@@ -580,6 +536,9 @@ sub insert {
          isprivate     => scalar $cgi->param('isprivate'),
          mimetype      => $content_type,
          });
+
+    # Delete the token used to create this attachment.
+    delete_token($token);
 
     foreach my $obsolete_attachment (@obsolete_attachments) {
         $obsolete_attachment->set_is_obsolete(1);
@@ -618,12 +577,6 @@ sub insert {
   }
   $bug->update($timestamp);
 
-  if ($token) {
-      trick_taint($token);
-      $dbh->do('UPDATE tokens SET eventdata = ? WHERE token = ?', undef,
-               ("create_attachment:" . $attachment->id, $token));
-  }
-
   $dbh->bz_commit_transaction;
 
   # Define the variables and functions that will be passed to the UI template.
@@ -651,7 +604,7 @@ sub edit {
   my $attachment = validateID();
 
   my $bugattachments =
-      Bugzilla::Attachment->get_attachments_by_bug($attachment->bug_id);
+      Bugzilla::Attachment->get_attachments_by_bug($attachment->bug);
   # We only want attachment IDs.
   @$bugattachments = map { $_->id } @$bugattachments;
 
@@ -699,8 +652,7 @@ sub update {
         if (defined $cgi->param('delta_ts')
             && $cgi->param('delta_ts') ne $attachment->modification_time)
         {
-            ($vars->{'operations'}) =
-                Bugzilla::Bug::GetBugActivity($bug->id, $attachment->id, $cgi->param('delta_ts'));
+            ($vars->{'operations'}) = $bug->get_activity($attachment->id, $cgi->param('delta_ts'));
 
             # The token contains the old modification_time. We need a new one.
             $cgi->param('token', issue_hash_token([$attachment->id, $attachment->modification_time]));
@@ -818,10 +770,6 @@ sub delete_attachment {
         # Paste the reason provided by the admin into a comment.
         $bug->add_comment($msg);
 
-        # If the attachment is stored locally, remove it.
-        if (-e $attachment->_get_local_filename) {
-            unlink $attachment->_get_local_filename;
-        }
         $attachment->remove_from_db();
 
         # Now delete the token.

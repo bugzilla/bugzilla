@@ -1,34 +1,9 @@
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Original Code is the Bugzilla Bug Tracking System.
-#
-# The Initial Developer of the Original Code is Netscape Communications
-# Corporation. Portions created by Netscape are
-# Copyright (C) 1998 Netscape Communications Corporation. All
-# Rights Reserved.
-#
-# Contributor(s): Terry Weissman <terry@mozilla.org>,
-#                 Bryce Nesbitt <bryce-mozilla@nextbus.com>
-#                 Dan Mosedale <dmose@mozilla.org>
-#                 Alan Raetz <al_raetz@yahoo.com>
-#                 Jacob Steenhagen <jake@actex.net>
-#                 Matthew Tuck <matty@chariot.net.au>
-#                 Bradley Baetz <bbaetz@student.usyd.edu.au>
-#                 J. Paul Reed <preed@sigkill.com>
-#                 Gervase Markham <gerv@gerv.net>
-#                 Byron Jones <bugzilla@glob.com.au>
-#                 Frédéric Buclin <LpSolit@gmail.com>
-#                 Max Kanat-Alexander <mkanat@bugzilla.org>
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::Mailer;
 
@@ -87,25 +62,6 @@ sub MessageToMTA {
     # thus to hopefully avoid auto replies.
     $email->header_set('Auto-Submitted', 'auto-generated');
 
-    $email->walk_parts(sub {
-        my ($part) = @_;
-        return if $part->parts > 1; # Top-level
-        my $content_type = $part->content_type || '';
-        if ($content_type !~ /;/) {
-            my $body = $part->body;
-            if (Bugzilla->params->{'utf8'}) {
-                $part->charset_set('UTF-8');
-                # encoding_set works only with bytes, not with utf8 strings.
-                my $raw = $part->body_raw;
-                if (utf8::is_utf8($raw)) {
-                    utf8::encode($raw);
-                    $part->body_set($raw);
-                }
-            }
-            $part->encoding_set('quoted-printable') if !is_7bit_clean($body);
-        }
-    });
-
     # MIME-Version must be set otherwise some mailsystems ignore the charset
     $email->header_set('MIME-Version', '1.0') if !$email->header('MIME-Version');
 
@@ -130,7 +86,9 @@ sub MessageToMTA {
     my $from = $email->header('From');
 
     my ($hostname, @args);
+    my $mailer_class = $method;
     if ($method eq "Sendmail") {
+        $mailer_class = 'Bugzilla::Send::Sendmail';
         if (ON_WINDOWS) {
             $Email::Send::Sendmail::SENDMAIL = SENDMAIL_EXE;
         }
@@ -171,6 +129,29 @@ sub MessageToMTA {
     Bugzilla::Hook::process('mailer_before_send', 
                             { email => $email, mailer_args => \@args });
 
+    $email->walk_parts(sub {
+        my ($part) = @_;
+        return if $part->parts > 1; # Top-level
+        my $content_type = $part->content_type || '';
+        $content_type =~ /charset=['"](.+)['"]/;
+        # If no charset is defined or is the default us-ascii,
+        # then we encode the email to UTF-8 if Bugzilla has utf8 enabled.
+        # XXX - This is a hack to workaround bug 723944.
+        if (!$1 || $1 eq 'us-ascii') {
+            my $body = $part->body;
+            if (Bugzilla->params->{'utf8'}) {
+                $part->charset_set('UTF-8');
+                # encoding_set works only with bytes, not with utf8 strings.
+                my $raw = $part->body_raw;
+                if (utf8::is_utf8($raw)) {
+                    utf8::encode($raw);
+                    $part->body_set($raw);
+                }
+            }
+            $part->encoding_set('quoted-printable') if !is_7bit_clean($body);
+        }
+    });
+
     if ($method eq "Test") {
         my $filename = bz_locations()->{'datadir'} . '/mailer.testfile';
         open TESTFILE, '>>', $filename;
@@ -181,7 +162,7 @@ sub MessageToMTA {
     else {
         # This is useful for both Sendmail and Qmail, so we put it out here.
         local $ENV{PATH} = SENDMAIL_PATH;
-        my $mailer = Email::Send->new({ mailer => $method, 
+        my $mailer = Email::Send->new({ mailer => $mailer_class, 
                                         mailer_args => \@args });
         my $retval = $mailer->send($email);
         ThrowCodeError('mail_send_error', { msg => $retval, mail => $email })

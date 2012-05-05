@@ -1,24 +1,9 @@
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Original Code is the Bugzilla Bug Tracking System.
-#
-# The Initial Developer of the Original Code is Everything Solved, Inc.
-# Portions created by the Initial Developers are Copyright (C) 2009 the
-# Initial Developer. All Rights Reserved.
-#
-# Contributor(s):
-#   Max Kanat-Alexander <mkanat@bugzilla.org>
-#   Frédéric Buclin <LpSolit@gmail.com>
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::Extension::Example;
 use strict;
@@ -196,6 +181,22 @@ sub buglist_columns {
     
     my $columns = $args->{'columns'};
     $columns->{'example'} = { 'name' => 'bugs.delta_ts' , 'title' => 'Example' };
+    $columns->{'product_desc'} = { 'name'  => 'prod_desc.description',
+                                   'title' => 'Product Description' };
+}
+
+sub buglist_column_joins {
+    my ($self, $args) = @_;
+    my $joins = $args->{'column_joins'};
+
+    # This column is added using the "buglist_columns" hook
+    $joins->{'product_desc'} = {
+        from  => 'product_id',
+        to    => 'id',
+        table => 'products',
+        as    => 'prod_desc',
+        join  => 'INNER',
+    };
 }
 
 sub search_operator_field_override {
@@ -337,6 +338,25 @@ sub enter_bug_entrydefaultvars {
     
     my $vars = $args->{vars};
     $vars->{'example'} = 1;
+}
+
+sub error_catch {
+    my ($self, $args) = @_;
+    # Customize the error message displayed when someone tries to access
+    # page.cgi with an invalid page ID, and keep track of this attempt
+    # in the web server log.
+    return unless Bugzilla->error_mode == ERROR_MODE_WEBPAGE;
+    return unless $args->{error} eq 'bad_page_cgi_id';
+
+    my $page_id = $args->{vars}->{page_id};
+    my $login = Bugzilla->user->identity || "Someone";
+    warn "$login attempted to access page.cgi with id = $page_id";
+
+    my $page = $args->{message};
+    my $new_error_msg = "Ah ah, you tried to access $page_id? Good try!";
+    $new_error_msg = html_quote($new_error_msg);
+    # There are better tools to parse an HTML page, but it's just an example.
+    $$page =~ s/(?<=<td id="error_msg" class="throw_error">).*(?=<\/td>)/$new_error_msg/si;
 }
 
 sub flag_end_of_update {
@@ -819,6 +839,20 @@ sub bug_check_can_change_field {
     {
         push(@$priv_results, PRIVILEGES_REQUIRED_NONE);
         return;
+    }
+}
+
+sub admin_editusers_action {
+    my ($self, $args) = @_;
+    my ($vars, $action, $user) = @$args{qw(vars action user)};
+    my $template = Bugzilla->template;
+
+    if ($action eq 'my_action') {
+        # Allow to restrict the search to any group the user is allowed to bless.
+        $vars->{'restrictablegroups'} = $user->bless_groups();
+        $template->process('admin/users/search.html.tmpl', $vars)
+            || ThrowTemplateError($template->error());
+        exit;
     }
 }
 

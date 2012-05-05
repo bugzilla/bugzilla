@@ -1,28 +1,10 @@
 #!/usr/bin/perl -wT
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Original Code is the Bugzilla Bug Tracking System.
-# 
-# The Initial Developer of the Original Code is Netscape Communications
-# Corporation. Portions created by Netscape are Copyright (C) 1998
-# Netscape Communications Corporation. All Rights Reserved.
-# 
-# Contributor(s): Terry Weissman <terry@mozilla.org>
-#                 Dave Miller <justdave@syndicomm.com>
-#                 Joe Robins <jmrobins@tgix.com>
-#                 Gervase Markham <gerv@gerv.net>
-#                 Shane H. W. Travis <travis@sedsystems.ca>
-#                 Nitish Bezzala <nbezzala@yahoo.com>
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 ##############################################################################
 #
@@ -207,7 +189,7 @@ $vars->{'qa_contact_disabled'}  = !$has_editbugs;
 
 $vars->{'cloned_bug_id'}         = $cloned_bug_id;
 
-$vars->{'token'}             = issue_session_token('createbug:');
+$vars->{'token'} = issue_session_token('create_bug');
 
 
 my @enter_bug_fields = grep { $_->enter_bug } Bugzilla->active_custom_fields;
@@ -277,12 +259,13 @@ if ($cloned_bug_id) {
 } # end of cloned bug entry form
 
 else {
-
     $default{'component_'}    = formvalue('component');
     $default{'priority'}      = formvalue('priority', Bugzilla->params->{'defaultpriority'});
     $default{'bug_severity'}  = formvalue('bug_severity', Bugzilla->params->{'defaultseverity'});
-    $default{'rep_platform'}  = detect_platform();
-    $default{'op_sys'}        = detect_op_sys();
+    $default{'rep_platform'}  = formvalue('rep_platform', 
+                                          Bugzilla->params->{'defaultplatform'} || detect_platform());
+    $default{'op_sys'}        = formvalue('op_sys', 
+                                          Bugzilla->params->{'defaultopsys'} || detect_op_sys());
 
     $vars->{'alias'}          = formvalue('alias');
     $vars->{'short_desc'}     = formvalue('short_desc');
@@ -384,4 +367,3 @@ my $format = $template->get_format("bug/create/create",
 print $cgi->header($format->{'ctype'});
 $template->process($format->{'template'}, $vars)
   || ThrowTemplateError($template->error());          
-

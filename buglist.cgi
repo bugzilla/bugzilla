@@ -1,29 +1,10 @@
 #!/usr/bin/perl -wT
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Original Code is the Bugzilla Bug Tracking System.
-#
-# The Initial Developer of the Original Code is Netscape Communications
-# Corporation. Portions created by Netscape are
-# Copyright (C) 1998 Netscape Communications Corporation. All
-# Rights Reserved.
-#
-# Contributor(s): Terry Weissman <terry@mozilla.org>
-#                 Dan Mosedale <dmose@mozilla.org>
-#                 Stephan Niemz  <st.n@gmx.net>
-#                 Andreas Franke <afranke@mathweb.org>
-#                 Myk Melez <myk@mozilla.org>
-#                 Max Kanat-Alexander <mkanat@bugzilla.org>
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 ################################################################################
 # Script Initialization
@@ -51,24 +32,26 @@ use Bugzilla::Status;
 use Bugzilla::Token;
 
 use Date::Parse;
+use Time::HiRes qw(gettimeofday tv_interval);
 
 my $cgi = Bugzilla->cgi;
 my $dbh = Bugzilla->dbh;
 my $template = Bugzilla->template;
 my $vars = {};
-my $buffer = $cgi->query_string();
 
 # We have to check the login here to get the correct footer if an error is
 # thrown and to prevent a logged out user to use QuickSearch if 'requirelogin'
 # is turned 'on'.
 my $user = Bugzilla->login();
 
+$cgi->redirect_search_url();
+
+my $buffer = $cgi->query_string();
 if (length($buffer) == 0) {
     print $cgi->header(-refresh=> '10; URL=query.cgi');
     ThrowUserError("buglist_parameters_required");
 }
 
-$cgi->redirect_search_url();
 
 # Determine whether this is a quicksearch query.
 my $searchstring = $cgi->param('quicksearch');
@@ -82,7 +65,7 @@ if (defined($searchstring)) {
 # If configured to not allow empty words, reject empty searches from the
 # Find a Specific Bug search form, including words being a single or 
 # several consecutive whitespaces only.
-if (!Bugzilla->params->{'specific_search_allow_empty_words'}
+if (!Bugzilla->params->{'search_allow_no_criteria'}
     && defined($cgi->param('content')) && $cgi->param('content') =~ /^\s*$/)
 {
     ThrowUserError("buglist_parameters_required");
@@ -112,23 +95,6 @@ if (defined $cgi->param('ctype') && $cgi->param('ctype') eq "rss") {
     $cgi->param('ctype', "atom");
 }
 
-# The js ctype presents a security risk; a malicious site could use it  
-# to gather information about secure bugs. So, we only allow public bugs to be
-# retrieved with this format.
-#
-# Note that if and when this call clears cookies or has other persistent 
-# effects, we'll need to do this another way instead.
-if ((defined $cgi->param('ctype')) && ($cgi->param('ctype') eq "js")) {
-    Bugzilla->logout_request();
-}
-
-# An agent is a program that automatically downloads and extracts data
-# on its user's behalf.  If this request comes from an agent, we turn off
-# various aspects of bug list functionality so agent requests succeed
-# and coexist nicely with regular user requests.  Currently the only agent
-# we know about is Firefox's microsummary feature.
-my $agent = ($cgi->http('X-Moz') && $cgi->http('X-Moz') =~ /\bmicrosummary\b/);
-
 # Determine the format in which the user would like to receive the output.
 # Uses the default format if the user did not specify an output format;
 # otherwise validates the user's choice against the list of available formats.
@@ -152,9 +118,8 @@ my $serverpush =
       && $ENV{'HTTP_USER_AGENT'} =~ /Mozilla.[3-9]/ 
         && (($ENV{'HTTP_USER_AGENT'} !~ /[Cc]ompatible/) || ($ENV{'HTTP_USER_AGENT'} =~ /MSIE 5.*Mac_PowerPC/))
           && $ENV{'HTTP_USER_AGENT'} !~ /WebKit/
-            && !$agent
-              && !defined($cgi->param('serverpush'))
-                || $cgi->param('serverpush');
+            && !defined($cgi->param('serverpush'))
+              || $cgi->param('serverpush');
 
 my $order = $cgi->param('order') || "";
 
@@ -164,14 +129,13 @@ my $params;
 # If the user is retrieving the last bug list they looked at, hack the buffer
 # storing the query string so that it looks like a query retrieving those bugs.
 if (my $last_list = $cgi->param('regetlastlist')) {
-    my ($bug_ids, $order);
+    my $bug_ids;
 
     # Logged-out users use the old cookie method for storing the last search.
     if (!$user->id or $last_list eq 'cookie') {
-        $cgi->cookie('BUGLIST') || ThrowUserError("missing_cookie");
-        $order = "reuse last sort" unless $order;
-        $bug_ids = $cgi->cookie('BUGLIST');
+        $bug_ids = $cgi->cookie('BUGLIST') or ThrowUserError("missing_cookie");
         $bug_ids =~ s/[:-]/,/g;
+        $order ||= "reuse last sort";
     }
     # But logged in users store the last X searches in the DB so they can
     # have multiple bug lists available.
@@ -179,10 +143,11 @@ if (my $last_list = $cgi->param('regetlastlist')) {
         my $last_search = Bugzilla::Search::Recent->check(
             { id => $last_list });
         $bug_ids = join(',', @{ $last_search->bug_list });
-        $order   = $last_search->list_order if !$order;
+        $order ||= $last_search->list_order;
     }
     # set up the params for this new query
     $params = new Bugzilla::CGI({ bug_id => $bug_ids, order => $order });
+    $params->param('list_id', $last_list);
 }
 
 # Figure out whether or not the user is doing a fulltext search.  If not,
@@ -228,7 +193,9 @@ sub LookupNamedQuery {
     $query->url
        || ThrowUserError("buglist_parameters_required");
 
-    return wantarray ? ($query->url, $query->id) : $query->url;
+    # Detaint $sharer_id.
+    $sharer_id = $query->user->id if $sharer_id;
+    return wantarray ? ($query->url, $query->id, $sharer_id) : $query->url;
 }
 
 # Inserts a Named Query (a "Saved Search") into the database, or
@@ -347,6 +314,7 @@ sub _close_standby_message {
 
 my $cmdtype   = $cgi->param('cmdtype')   || '';
 my $remaction = $cgi->param('remaction') || '';
+my $sharer_id;
 
 # Backwards-compatibility - the old interface had cmdtype="runnamed" to run
 # a named command, and we can't break this because it's in bookmarks.
@@ -383,8 +351,9 @@ $filename =~ s/"/\\"/g; # escape quotes
 if ($cmdtype eq "dorem") {  
     if ($remaction eq "run") {
         my $query_id;
-        ($buffer, $query_id) = LookupNamedQuery(scalar $cgi->param("namedcmd"),
-                                                scalar $cgi->param('sharer_id'));
+        ($buffer, $query_id, $sharer_id) =
+          LookupNamedQuery(scalar $cgi->param("namedcmd"),
+                           scalar $cgi->param('sharer_id'));
         # If this is the user's own query, remember information about it
         # so that it can be modified easily.
         $vars->{'searchname'} = $cgi->param('namedcmd');
@@ -698,69 +667,39 @@ if (!$order || $order =~ /^reuse/i) {
     }
 }
 
+my @order_columns;
 if ($order) {
     # Convert the value of the "order" form field into a list of columns
     # by which to sort the results.
     ORDER: for ($order) {
         /^Bug Number$/ && do {
-            $order = "bug_id";
+            @order_columns = ("bug_id");
             last ORDER;
         };
         /^Importance$/ && do {
-            $order = "priority,bug_severity";
+            @order_columns = ("priority", "bug_severity");
             last ORDER;
         };
         /^Assignee$/ && do {
-            $order = "assigned_to,bug_status,priority,bug_id";
+            @order_columns = ("assigned_to", "bug_status", "priority",
+                              "bug_id");
             last ORDER;
         };
         /^Last Changed$/ && do {
-            $order = "changeddate,bug_status,priority,assigned_to,bug_id";
+            @order_columns = ("changeddate", "bug_status", "priority",
+                              "assigned_to", "bug_id");
             last ORDER;
         };
         do {
-            my (@order, @invalid_fragments);
-
-            # A custom list of columns.  Make sure each column is valid.
-            foreach my $fragment (split(/,/, $order)) {
-                $fragment = trim($fragment);
-                next unless $fragment;
-                my ($column_name, $direction) = split_order_term($fragment);
-                $column_name = translate_old_column($column_name);
-
-                # Special handlings for certain columns
-                next if $column_name eq 'relevance' && !$fulltext;
-                                
-                if (exists $columns->{$column_name}) {
-                    $direction = " $direction" if $direction;
-                    push(@order, "$column_name$direction");
-                }
-                else {
-                    push(@invalid_fragments, $fragment);
-                }
-            }
-            if (scalar @invalid_fragments) {
-                $vars->{'message'} = 'invalid_column_name';
-                $vars->{'invalid_fragments'} = \@invalid_fragments;
-            }
-
-            $order = join(",", @order);
-            # Now that we have checked that all columns in the order are valid,
-            # detaint the order string.
-            trick_taint($order) if $order;
+            # A custom list of columns. Bugzilla::Search will validate items.
+            @order_columns = split(/\s*,\s*/, $order);
         };
     }
 }
 
-if (!$order) {
+if (!scalar @order_columns) {
     # DEFAULT
-    $order = "bug_status,priority,assigned_to,bug_id";
-}
-
-my @orderstrings = split(/,\s*/, $order);
-
-if ($fulltext and grep { /^relevance/ } @orderstrings) {
-    $vars->{'message'} = 'buglist_sorted_by_relevance'
+    @order_columns = ("bug_status", "priority", "assigned_to", "bug_id");
 }
 
 # In the HTML interface, by default, we limit the returned results,
@@ -774,9 +713,20 @@ if ($format->{'extension'} eq 'html' && !defined $params->param('limit')) {
 # Generate the basic SQL query that will be used to generate the bug list.
 my $search = new Bugzilla::Search('fields' => \@selectcolumns, 
                                   'params' => scalar $params->Vars,
-                                  'order' => \@orderstrings);
+                                  'order'  => \@order_columns,
+                                  'sharer' => $sharer_id);
 my $query = $search->sql;
 $vars->{'search_description'} = $search->search_description;
+$order = join(',', $search->order);
+
+if (scalar @{$search->invalid_order_columns}) {
+    $vars->{'message'} = 'invalid_column_name';
+    $vars->{'invalid_fragments'} = $search->invalid_order_columns;
+}
+
+if ($fulltext and grep { /^relevance/ } $search->order) {
+    $vars->{'message'} = 'buglist_sorted_by_relevance'
+}
 
 # We don't want saved searches and other buglist things to save
 # our default limit.
@@ -830,8 +780,10 @@ $::SIG{TERM} = 'DEFAULT';
 $::SIG{PIPE} = 'DEFAULT';
 
 # Execute the query.
+my $start_time = [gettimeofday()];
 my $buglist_sth = $dbh->prepare($query);
 $buglist_sth->execute();
+$vars->{query_time} = tv_interval($start_time);
 
 
 ################################################################################
@@ -972,14 +924,6 @@ if ($format->{'extension'} eq 'ics') {
     }
 }
 
-# The list of query fields in URL query string format, used when creating
-# URLs to the same query results page with different parameters (such as
-# a different sort order or when taking some action on the set of query
-# results).  To get this string, we call the Bugzilla::CGI::canoncalise_query
-# function with a list of elements to be removed from the URL.
-$vars->{'urlquerypart'} = $params->canonicalise_query('order',
-                                                      'cmdtype',
-                                                      'query_based_on');
 $vars->{'order'} = $order;
 $vars->{'caneditbugs'} = 1;
 $vars->{'time_info'} = $time_info;
@@ -1112,17 +1056,20 @@ $vars->{'quicksearch'} = $searchstring;
 my $contenttype;
 my $disposition = "inline";
 
-if ($format->{'extension'} eq "html" && !$agent) {
-    if (!$cgi->param('regetlastlist')) {
-        Bugzilla->user->save_last_search(
-            { bugs => \@bugidlist, order => $order, vars => $vars,
-              list_id => scalar $cgi->param('list_id') });
-    }
+if ($format->{'extension'} eq "html") {
+    my $list_id = $cgi->param('list_id') || $cgi->param('regetlastlist');
+    my $search = $user->save_last_search(
+        { bugs => \@bugidlist, order => $order, vars => $vars, list_id => $list_id });
+    $cgi->param('list_id', $search->id) if $search;
     $contenttype = "text/html";
 }
 else {
     $contenttype = $format->{'ctype'};
 }
+
+# Set 'urlquerypart' once the buglist ID is known.
+$vars->{'urlquerypart'} = $params->canonicalise_query('order', 'cmdtype',
+                                                      'query_based_on');
 
 if ($format->{'extension'} eq "csv") {
     # We set CSV files to be downloaded, as they are designed for importing

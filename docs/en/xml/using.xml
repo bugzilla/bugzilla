@@ -1,4 +1,11 @@
 <?xml version="1.0"?>
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+     License, v. 2.0. If a copy of the MPL was not distributed with this
+     file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+     This Source Code Form is "Incompatible With Secondary Licenses", as
+     defined by the Mozilla Public License, v. 2.0.
+-->
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
                       "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
     <!ENTITY % myents SYSTEM "bugzilla.ent">
@@ -663,16 +670,6 @@
         in your page footer giving you quick access to run it again later.
         </member>
       </simplelist>
-      </para>
-
-      <para>
-        If you would like to access the bug list from another program
-        it is often useful to have the list returned in something other
-        than HTML. By adding the ctype=type parameter into the bug list URL
-        you can specify several alternate formats. Besides the types described
-        above, the following formats are also supported: ECMAScript, also known
-        as JavaScript (ctype=js), and Resource Description Framework RDF/XML
-        (ctype=rdf).
       </para>
     </section>
 
@@ -1962,4 +1959,3 @@ sgml-shorttag:t
 sgml-tag-region-if-active:t
 End:
 -->
-

@@ -1,24 +1,9 @@
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Original Code is the Bugzilla Bug Tracking System.
-#
-# The Initial Developer of the Original Code is Netscape Communications
-# Corporation. Portions created by Netscape are
-# Copyright (C) 1998 Netscape Communications Corporation. All
-# Rights Reserved.
-#
-# Contributor(s): Zach Lipton <zach@zachlipton.com>
-#                 Max Kanat-Alexander <mkanat@bugzilla.org>
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::Hook;
 use strict;
@@ -126,6 +111,30 @@ They will be passed as arguments to the hook method in the extension.
 This describes what hooks exist in Bugzilla currently. They are mostly
 in alphabetical order, but some related hooks are near each other instead
 of being alphabetical.
+
+=head2 admin_editusers_action
+
+This hook allows you to add additional actions to the admin Users page.
+
+Params:
+
+=over
+
+=item C<vars>
+
+You can add as many new key/value pairs as you want to this hashref.
+It will be passed to the template.
+
+=item C<action>
+
+A text which indicates the different behaviors that editusers.cgi will have.
+With this hook you can change the behavior of an action or add new actions.
+
+=item C<user>
+
+This is a Bugzilla::User object of the user.
+
+=back
 
 =head2 attachment_process_data
 
@@ -404,6 +413,21 @@ the summary line).
 
 =back
 
+=head2 bug_url_sub_classes
+
+Allows you to add more L<Bugzilla::BugUrl> sub-classes.
+
+See the C<MoreBugUrl> extension to see how things work.
+
+Params:
+
+=over
+
+=item C<sub_classes> - An arrayref of strings which represent L<Bugzilla::BugUrl>
+sub-classes.
+
+=back
+
 =head2 buglist_columns
 
 This happens in L<Bugzilla::Search/COLUMNS>, which determines legal bug
@@ -429,6 +453,41 @@ following fields:
 The definition is structured as:
 
  $columns->{$id} = { name => $name, title => $title };
+
+=back
+
+=head2 buglist_column_joins
+
+This allows you to join additional tables to display additional columns
+in buglists. This hook is generally used in combination with the
+C<buglist_columns> hook.
+
+Params:
+
+=over
+
+=item C<column_joins> - A hashref containing data to return back to
+L<Bugzilla::Search>. This hashref contains names of the columns as keys and 
+a hashref about table to join as values. This hashref has the following keys:
+
+=over
+
+=item C<table> - The name of the additional table to join.
+
+=item C<as> - (optional) The alias used for the additional table. This alias
+must not conflict with an existing alias already used in the query.
+
+=item C<from> - (optional) The name of the column in the C<bugs> table which
+the additional table should be linked to. If omitted, C<bug_id> will be used.
+
+=item C<to> - (optional) The name of the column in the additional table which
+should be linked to the column in the C<bugs> table, see C<from> above.
+If omitted, C<bug_id> will be used.
+
+=item C<join> - (optional) Either INNER or LEFT. Determine how the additional
+table should be joined with the C<bugs> table. If omitted, LEFT is used.
+
+=back
 
 =back
 
@@ -625,6 +684,37 @@ Params:
 =over
 
 =item C<vars> - A hashref. The variables that will be passed into the template.
+
+=back
+
+=head2 error_catch
+
+This hook allows extensions to catch errors thrown by Bugzilla and
+take the appropriate actions.
+
+Params:
+
+=over
+
+=item C<error>
+
+A string representing the error code thrown by Bugzilla. This string
+matches the C<error> variable in C<global/user-error.html.tmpl> and
+C<global/code-error.html.tmpl>.
+
+=item C<message>
+
+If the error mode is set to C<ERROR_MODE_WEBPAGE>, you get a reference to
+the whole HTML page with the error message in it, including its header and
+footer. If you need to extract the error message itself, you can do it by
+looking at the content of the table cell whose ID is C<error_msg>.
+If the error mode is not set to C<ERROR_MODE_WEBPAGE>, you get a reference
+to the error message itself.
+
+=item C<vars>
+
+This hash contains all the data passed to the error template. Its content
+depends on the error thrown.
 
 =back
 

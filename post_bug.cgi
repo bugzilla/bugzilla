@@ -1,28 +1,10 @@
 #!/usr/bin/perl -wT
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Original Code is the Bugzilla Bug Tracking System.
-#
-# The Initial Developer of the Original Code is Netscape Communications
-# Corporation. Portions created by Netscape are
-# Copyright (C) 1998 Netscape Communications Corporation. All
-# Rights Reserved.
-#
-# Contributor(s): Terry Weissman <terry@mozilla.org>
-#                 Dan Mosedale <dmose@mozilla.org>
-#                 Joe Robins <jmrobins@tgix.com>
-#                 Gervase Markham <gerv@gerv.net>
-#                 Marc Schumann <wurblzap@gmail.com>
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 use strict;
 use lib qw(. lib);
@@ -62,30 +44,7 @@ unless ($cgi->param()) {
 
 # Detect if the user already used the same form to submit a bug
 my $token = trim($cgi->param('token'));
-if ($token) {
-    my ($creator_id, $date, $old_bug_id) = Bugzilla::Token::GetTokenData($token);
-    unless ($creator_id
-              && ($creator_id == $user->id)
-              && ($old_bug_id =~ "^createbug:"))
-    {
-        # The token is invalid.
-        ThrowUserError('token_does_not_exist');
-    }
-
-    $old_bug_id =~ s/^createbug://;
-
-    if ($old_bug_id && (!$cgi->param('ignore_token')
-                        || ($cgi->param('ignore_token') != $old_bug_id)))
-    {
-        $vars->{'bugid'} = $old_bug_id;
-        $vars->{'allow_override'} = defined $cgi->param('ignore_token') ? 0 : 1;
-
-        print $cgi->header();
-        $template->process("bug/create/confirm-create-dupe.html.tmpl", $vars)
-           || ThrowTemplateError($template->error());
-        exit;
-    }
-}    
+check_token_data($token, 'create_bug', 'index.cgi');
 
 # do a match on the fields if applicable
 Bugzilla::User::match_field ({
@@ -169,8 +128,10 @@ foreach my $field (@multi_selects) {
 
 my $bug = Bugzilla::Bug->create(\%bug_params);
 
-# Get the bug ID back.
+# Get the bug ID back and delete the token used to create this bug.
 my $id = $bug->bug_id;
+delete_token($token);
+
 # We do this directly from the DB because $bug->creation_ts has the seconds
 # formatted out of it (which should be fixed some day).
 my $timestamp = $dbh->selectrow_array(
@@ -242,12 +203,6 @@ $vars->{'bug'} = $bug;
 Bugzilla::Hook::process('post_bug_after_creation', { vars => $vars });
 
 ThrowCodeError("bug_error", { bug => $bug }) if $bug->error;
-
-if ($token) {
-    trick_taint($token);
-    $dbh->do('UPDATE tokens SET eventdata = ? WHERE token = ?', undef, 
-             ("createbug:$id", $token));
-}
 
 my $recipients = { changer => $user };
 my $bug_sent = Bugzilla::BugMail::Send($id, $recipients);

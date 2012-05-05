@@ -1,23 +1,9 @@
-[%# The contents of this file are subject to the Mozilla Public
-  # License Version 1.1 (the "License"); you may not use this file
-  # except in compliance with the License. You may obtain a copy of
-  # the License at http://www.mozilla.org/MPL/
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
   #
-  # Software distributed under the License is distributed on an "AS
-  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-  # implied. See the License for the specific language governing
-  # rights and limitations under the License.
-  #
-  # The Original Code is the Bugzilla Bug Tracking System.
-  #
-  # The Initial Developer of the Original Code is Netscape Communications
-  # Corporation. Portions created by Netscape are
-  # Copyright (C) 1998 Netscape Communications Corporation. All
-  # Rights Reserved.
-  #
-  # Contributor(s): Dave Miller <justdave@bugzilla.org>
-  #                 Frédéric Buclin <LpSolit@gmail.com>
-  #                 Marc Schumann <wurblzap@gmail.com>
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
   #%]
 [%
    title = "User Authentication"
@@ -107,10 +93,13 @@
                   "front page will require a login. No anonymous users will " _
                   "be permitted.",
 
-  emailregexp => "This defines the regexp to use for legal email addresses. The " _
-                 "default tries to match fully qualified email addresses. Another " _
-                 "popular value to put here is <tt>^[^@]+$</tt>, which means " _
-                 "'local usernames, no @ allowed.'",
+  emailregexp =>
+    "This defines the regular expression to use for legal email addresses. " _
+    "The default tries to match fully qualified email addresses. " _
+    "Use <tt>.*</tt> to accept any email address following the " _
+    "<a href='http://tools.ietf.org/html/rfc2822#section-3.4.1'>RFC 2822</a> " _
+    "specification. Another popular value to put here is <tt>^[^@]+$</tt>, " _
+    "which means 'local usernames, no @ allowed.'",
 
   emailregexpdesc => "This describes in English words what kinds of legal addresses " _
                      "are allowed by the <tt>emailregexp</tt> param.",

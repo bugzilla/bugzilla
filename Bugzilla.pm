@@ -1,26 +1,9 @@
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Original Code is the Bugzilla Bug Tracking System.
-#
-# The Initial Developer of the Original Code is Netscape Communications
-# Corporation. Portions created by Netscape are
-# Copyright (C) 1998 Netscape Communications Corporation. All
-# Rights Reserved.
-#
-# Contributor(s): Bradley Baetz <bbaetz@student.usyd.edu.au>
-#                 Erik Stambaugh <erik@dasbistro.com>
-#                 A. Karl Kornel <karl@kornel.name>
-#                 Marc Schumann <wurblzap@gmail.com>
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla;
 
@@ -285,10 +268,10 @@ sub input_params {
     return $cache->{input_params};
 }
 
+our $_localconfig;
 sub localconfig {
-    my $class = shift;
-    $class->request_cache->{localconfig} ||= read_localconfig();
-    return $class->request_cache->{localconfig};
+    $_localconfig ||= read_localconfig();
+    return $_localconfig;
 }
 
 sub params {
@@ -388,6 +371,12 @@ sub login {
         $class->set_user($authenticated_user);
     }
 
+    if ($class->sudoer) {
+        $class->sudoer->update_last_seen_date();
+    } else {
+        $class->user->update_last_seen_date();
+    }
+
     return $class->user;
 }
 
@@ -456,8 +445,14 @@ sub error_mode {
     if (defined $newval) {
         $class->request_cache->{error_mode} = $newval;
     }
-    return $class->request_cache->{error_mode}
-        || (i_am_cgi() ? ERROR_MODE_WEBPAGE : ERROR_MODE_DIE);
+
+    # XXX - Once we require Perl 5.10.1, this test can be replaced by //.
+    if (exists $class->request_cache->{error_mode}) {
+        return $class->request_cache->{error_mode};
+    }
+    else {
+        return (i_am_cgi() ? ERROR_MODE_WEBPAGE : ERROR_MODE_DIE);
+    }
 }
 
 # This is used only by Bugzilla::Error to throw errors.
@@ -496,8 +491,14 @@ sub usage_mode {
         }
         $class->request_cache->{usage_mode} = $newval;
     }
-    return $class->request_cache->{usage_mode}
-        || (i_am_cgi()? USAGE_MODE_BROWSER : USAGE_MODE_CMDLINE);
+
+    # XXX - Once we require Perl 5.10.1, this test can be replaced by //.
+    if (exists $class->request_cache->{usage_mode}) {
+        return $class->request_cache->{usage_mode};
+    }
+    else {
+        return (i_am_cgi()? USAGE_MODE_BROWSER : USAGE_MODE_CMDLINE);
+    }
 }
 
 sub installation_mode {

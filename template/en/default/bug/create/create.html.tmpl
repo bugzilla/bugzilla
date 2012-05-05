@@ -1,30 +1,10 @@
-[%# The contents of this file are subject to the Mozilla Public
-  # License Version 1.1 (the "License"); you may not use this file
-  # except in compliance with the License. You may obtain a copy of
-  # the License at http://www.mozilla.org/MPL/
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
   #
-  # Software distributed under the License is distributed on an "AS
-  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-  # implied. See the License for the specific language governing
-  # rights and limitations under the License.
-  #
-  # The Original Code is the Bugzilla Bug Tracking System.
-  #
-  # The Initial Developer of the Original Code is Netscape Communications
-  # Corporation. Portions created by Netscape are
-  # Copyright (C) 1998 Netscape Communications Corporation. All
-  # Rights Reserved.
-  #
-  # Contributor(s): Gervase Markham <gerv@gerv.net>
-  #                 Ville Skyttä <ville.skytta@iki.fi>
-  #                 Shane H. W. Travis <travis@sedsystems.ca>
-  #                 Marc Schumann <wurblzap@gmail.com>
-  #                 Akamai Technologies <bugzilla-dev@akamai.com>
-  #                 Max Kanat-Alexander <mkanat@bugzilla.org>
-  #                 Frédéric Buclin <LpSolit@gmail.com>
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
   #%]
-
-[% PROCESS "global/field-descs.none.tmpl" %]
 
 [% title = BLOCK %]Enter [% terms.Bug %]: [% product.name FILTER html %][% END %]
 
@@ -251,7 +231,7 @@ TUI_hide_default('attachment_text_field');
       <script type="text/javascript">
        <!--
          [%+ INCLUDE "bug/field-events.js.tmpl" 
-                    field = bug_fields.component %]
+                     field = bug_fields.component, product = product %]
        //-->
        </script>
     </td>
@@ -352,9 +332,8 @@ TUI_hide_default('attachment_text_field');
 
     <td>&nbsp;</td>
     [%# Calculate the number of rows we can use for flags %]
-    [% num_rows = 6 + (Param("useqacontact") ? 1 : 0) +
-                      (user.is_timetracker ? 3 : 0) +
-                      (Param("usebugaliases") ? 1 : 0)
+    [% num_rows = 7 + (Param("useqacontact") ? 1 : 0) +
+                      (user.is_timetracker ? 3 : 0)
     %]
 
     <td rowspan="[% num_rows FILTER html %]">
@@ -464,7 +443,6 @@ TUI_hide_default('attachment_text_field');
   </tr>
 [% END %]
 
-[% IF Param("usebugaliases") %]
   <tr>
     [% INCLUDE "bug/field-label.html.tmpl"
       field = bug_fields.alias editable = 1
@@ -473,7 +451,6 @@ TUI_hide_default('attachment_text_field');
       <input name="alias" size="20" value="[% alias FILTER html %]">
     </td>
   </tr>
-[% END %]
 
   <tr>
     [% INCLUDE "bug/field-label.html.tmpl"
@@ -590,7 +567,7 @@ TUI_hide_default('attachment_text_field');
     </tr>
   [% END %]
 
-  [% IF Param("maxattachmentsize") %]
+  [% IF Param("maxattachmentsize") || Param("maxlocalattachment") %]
   <tr>
     <th>Attachment:</th>
     <td colspan="3">

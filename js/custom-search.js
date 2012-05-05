@@ -1,21 +1,9 @@
-/* The contents of this file are subject to the Mozilla Public
- * License Version 1.1 (the "License"); you may not use this file
- * except in compliance with the License. You may obtain a copy of
- * the License at http://www.mozilla.org/MPL/
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Software distributed under the License is distributed on an "AS
- * IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
- * implied. See the License for the specific language governing
- * rights and limitations under the License.
- *
- * The Original Code is the Bugzilla Bug Tracking System.
- *
- * The Initial Developer of the Original Code is BugzillaSource, Inc.
- * Portions created by the Initial Developer are Copyright (C) 2011 
- * the Initial Developer. All Rights Reserved.
- *
- * Contributor(s): 
- *   Max Kanat-Alexander <mkanat@bugzilla.org>
+ * This Source Code Form is "Incompatible With Secondary Licenses", as
+ * defined by the Mozilla Public License, v. 2.0.
  */
 
 var PAREN_INDENT_EM = 2;
@@ -140,14 +128,29 @@ function custom_search_close_paren() {
 // using the query string, which query.cgi can read to re-create the page
 // exactly as the user had it before.
 function fix_query_string(form_member) {
-    if (!(window.history && window.history.replaceState))
+    // window.History comes from history.js.
+    // It falls back to the normal window.history object for HTML5 browsers.
+    if (!(window.History && window.History.replaceState))
         return;
 
     var form = YAHOO.util.Dom.getAncestorByTagName(form_member, 'form');
     var query = YAHOO.util.Connect.setForm(form);
-    window.history.replaceState(null, document.title, '?' + query);
+    window.History.replaceState(null, document.title, '?' + query);
 }
 
+// Browsers that do not support HTML5's history.replaceState gain an emulated
+// version via history.js, with the full query_string in the location's hash.
+// We rewrite the URL to include the hash and redirect to the new location,
+// which causes custom search fields to work.
+function redirect_html4_browsers() {
+    var hash = document.location.hash;
+    if (hash == '') return;
+    hash = hash.substring(1);
+    if (hash.substring(0, 10) != 'query.cgi?') return;
+    var url = document.location + "";
+    url = url.substring(0, url.indexOf('query.cgi#')) + hash;
+    document.location = url;
+}
 
 function _cs_fix_ids(parent, preserve_values) {
     // Update the label of the checkbox.

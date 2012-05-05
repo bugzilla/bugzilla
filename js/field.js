@@ -1,22 +1,9 @@
-/* The contents of this file are subject to the Mozilla Public
- * License Version 1.1 (the "License"); you may not use this file
- * except in compliance with the License. You may obtain a copy of
- * the License at http://www.mozilla.org/MPL/
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Software distributed under the License is distributed on an "AS
- * IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
- * implied. See the License for the specific language governing
- * rights and limitations under the License.
- *
- * The Original Code is the Bugzilla Bug Tracking System.
- *
- * The Initial Developer of the Original Code is Everything Solved, Inc.
- * Portions created by Everything Solved are Copyright (C) 2007 Everything
- * Solved, Inc. All Rights Reserved.
- *
- * Contributor(s): Max Kanat-Alexander <mkanat@bugzilla.org>
- *                 Guy Pyrzak <guy.pyrzak@gmail.com>
- *                 Reed Loden <reed@reedloden.com>
+ * This Source Code Form is "Incompatible With Secondary Licenses", as
+ * defined by the Mozilla Public License, v. 2.0.
  */
 
 /* This library assumes that the needed YUI libraries have been loaded 
@@ -218,12 +205,12 @@ function setupEditLink(id) {
     hideEditableField(link_container, input_container, link);
 }
 
-/* Hide input fields and show the text with (edit) next to it */  
+/* Hide input/select fields and show the text with (edit) next to it */
 function hideEditableField( container, input, action, field_id, original_value, new_value ) {
     YAHOO.util.Dom.removeClass(container, 'bz_default_hidden');
     YAHOO.util.Dom.addClass(input, 'bz_default_hidden');
     YAHOO.util.Event.addListener(action, 'click', showEditableField,
-                                 new Array(container, input, new_value));
+                                 new Array(container, input, field_id, new_value));
     if(field_id != ""){
         YAHOO.util.Event.addListener(window, 'load', checkForChangedFieldValues,
                         new Array(container, input, field_id, original_value));
@@ -231,13 +218,14 @@ function hideEditableField( container, input, action, field_id, original_value, 
 }
 
 /* showEditableField (e, ContainerInputArray)
- * Function hides the (edit) link and the text and displays the input
+ * Function hides the (edit) link and the text and displays the input/select field
  *
  * var e: the event
  * var ContainerInputArray: An array containing the (edit) and text area and the input being displayed
  * var ContainerInputArray[0]: the container that will be hidden usually shows the (edit) or (take) text
  * var ContainerInputArray[1]: the input area and label that will be displayed
- * var ContainerInputArray[2]: the new value to set the input field to when (take) is clicked
+ * var ContainerInputArray[2]: the input/select field id for which the new value must be set
+ * var ContainerInputArray[3]: the new value to set the input/select field to when (take) is clicked
  */
 function showEditableField (e, ContainerInputArray) {
     var inputs = new Array();
@@ -250,18 +238,32 @@ function showEditableField (e, ContainerInputArray) {
     YAHOO.util.Dom.removeClass(inputArea, 'bz_default_hidden');
     if ( inputArea.tagName.toLowerCase() == "input" ) {
         inputs.push(inputArea);
+    } else if (ContainerInputArray[2]) {
+        inputs.push(document.getElementById(ContainerInputArray[2]));
     } else {
         inputs = inputArea.getElementsByTagName('input');
     }
     if ( inputs.length > 0 ) {
         // Change the first field's value to ContainerInputArray[2]
         // if present before focusing.
-        if (ContainerInputArray[2]) {
-            inputs[0].value = ContainerInputArray[2];
+        var type = inputs[0].tagName.toLowerCase();
+        if (ContainerInputArray[3]) {
+            if ( type == "input" ) {
+                inputs[0].value = ContainerInputArray[3];
+            } else {
+                for (var i = 0; inputs[0].length; i++) {
+                    if ( inputs[0].options[i].value == ContainerInputArray[3] ) {
+                        inputs[0].options[i].selected = true;
+                        break;
+                    }
+                }
+            }
         }
         // focus on the first field, this makes it easier to edit
         inputs[0].focus();
-        inputs[0].select();
+        if ( type == "input" ) {
+            inputs[0].select();
+        }
     }
     YAHOO.util.Event.preventDefault(e);
 }

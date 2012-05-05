@@ -1,29 +1,9 @@
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Original Code is the Bugzilla Bug Tracking System.
-#
-# The Initial Developer of the Original Code is the Mozilla Foundation
-# Portions created by the Initial Developer are Copyright (C) 2011 the
-# Initial Developer. All Rights Reserved.
-#
-# Contributor(s):
-#   Terry Weissman <terry@mozilla.org>
-#   Dave Miller <justdave@syndicomm.com>
-#   Joe Robins <jmrobins@tgix.com>
-#   Gervase Markham <gerv@gerv.net>
-#   Shane H. W. Travis <travis@sedsystems.ca>
-#   Nitish Bezzala <nbezzala@yahoo.com>
-#   Byron Jones <glob@mozilla.com>
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::UserAgent;
 
@@ -121,6 +101,7 @@ use constant OS_MAP => (
     qr/\(.*HP-?UX.*\)/ => ["HP-UX"],
     # Windows
     qr/\(.*Windows XP.*\)/ => ["Windows XP"],
+    qr/\(.*Windows NT 6\.2.*\)/ => ["Windows 8"],
     qr/\(.*Windows NT 6\.1.*\)/ => ["Windows 7"],
     qr/\(.*Windows NT 6\.0.*\)/ => ["Windows Vista"],
     qr/\(.*Windows NT 5\.2.*\)/ => ["Windows Server 2003"],
@@ -135,6 +116,7 @@ use constant OS_MAP => (
     qr/\(.*Win(?:dows[ -]|)NT.*\)/ => ["Windows NT"],
     qr/\(.*Windows.*NT.*\)/ => ["Windows NT"],
     # OS X
+    qr/\(.*Mac OS X (?:|Mach-O |\()10.7.*\)/ => ["Mac OS X 10.7"],
     qr/\(.*Mac OS X (?:|Mach-O |\()10.6.*\)/ => ["Mac OS X 10.6"],
     qr/\(.*Mac OS X (?:|Mach-O |\()10.5.*\)/ => ["Mac OS X 10.5"],
     qr/\(.*Mac OS X (?:|Mach-O |\()10.4.*\)/ => ["Mac OS X 10.4"],
@@ -244,4 +226,3 @@ field value will be returned.  If no suitable value is detected,
 C<detect_op_sys> returns I<Other>.
 
 =back
-

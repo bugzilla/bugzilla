@@ -1,23 +1,9 @@
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Original Code is the Bugzilla Bug Tracking System.
-#
-# The Initial Developer of the Original Code is Everything Solved, Inc.
-# Portions created by the Initial Developer are Copyright (C) 2010 the
-# Initial Developer. All Rights Reserved.
-#
-# Contributor(s):
-#   Max Kanat-Alexander <mkanat@bugzilla.org>
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::Search::Recent;
 use strict;
@@ -33,6 +19,10 @@ use Bugzilla::Util;
 
 use constant DB_TABLE => 'profile_search';
 use constant LIST_ORDER => 'id DESC';
+# Do not track buglists viewed by users.
+use constant AUDIT_CREATES => 0;
+use constant AUDIT_UPDATES => 0;
+use constant AUDIT_REMOVES => 0;
 
 use constant DB_COLUMNS => qw(
     id
@@ -57,14 +47,16 @@ sub create {
     my $class = shift;
     my $dbh = Bugzilla->dbh;
     $dbh->bz_start_transaction();
-    my $search = $class->SUPER::create(@_);   
+    my $search = $class->SUPER::create(@_);
+    my $user_id = $search->user_id;
 
     # Enforce there only being SAVE_NUM_SEARCHES per user.
-    my ($num_searches, $min_id) = $dbh->selectrow_array(
-        'SELECT COUNT(*), MIN(id) FROM profile_search WHERE user_id = ?',
-        undef, $search->user_id);
-    if ($num_searches > SAVE_NUM_SEARCHES) {
-        $dbh->do('DELETE FROM profile_search WHERE id = ?', undef, $min_id);
+    my $min_id = $dbh->selectrow_array(
+        'SELECT id FROM profile_search WHERE user_id = ? ORDER BY id DESC '
+        . $dbh->sql_limit(1, SAVE_NUM_SEARCHES), undef, $user_id);
+    if ($min_id) {
+        $dbh->do('DELETE FROM profile_search WHERE user_id = ? AND id <= ?',
+                 undef, ($user_id, $min_id));
     }
     $dbh->bz_commit_transaction();
     return $search;

@@ -1,24 +1,9 @@
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Original Code is the Bugzilla Bug Tracking System.
-#
-# The Initial Developer of the Original Code is Mozilla Corporation.
-# Portions created by the Initial Developer are Copyright (C) 2008
-# Mozilla Corporation. All Rights Reserved.
-#
-# Contributor(s): 
-#   Mark Smith <mark@mozilla.com>
-#   Max Kanat-Alexander <mkanat@bugzilla.org>
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::JobQueue;
 
@@ -68,6 +53,7 @@ sub new {
             prefix => 'ts_',
         }],
         driver_cache_expiration => DRIVER_CACHE_TIME,
+        prioritize => 1,
     );
 
     return $self;
@@ -85,12 +71,19 @@ sub insert {
     my $self = shift;
     my $job = shift;
 
-    my $mapped_job = Bugzilla::JobQueue->job_map()->{$job};
-    ThrowCodeError('jobqueue_no_job_mapping', { job => $job })
-        if !$mapped_job;
-    unshift(@_, $mapped_job);
+    if (!ref($job)) {
+        my $mapped_job = Bugzilla::JobQueue->job_map()->{$job};
+        ThrowCodeError('jobqueue_no_job_mapping', { job => $job })
+            if !$mapped_job;
 
-    my $retval = $self->SUPER::insert(@_);
+        $job = new TheSchwartz::Job(
+            funcname => $mapped_job,
+            arg      => $_[0],
+            priority => $_[1] || 5
+        );
+    }
+    
+    my $retval = $self->SUPER::insert($job);
     # XXX Need to get an error message here if insert fails, but
     # I don't see any way to do that in TheSchwartz.
     ThrowCodeError('jobqueue_insert_failed', { job => $job, errmsg => $@ })

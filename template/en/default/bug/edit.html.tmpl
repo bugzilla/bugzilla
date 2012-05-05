@@ -1,30 +1,10 @@
-[%# The contents of this file are subject to the Mozilla Public
-  # License Version 1.1 (the "License"); you may not use this file
-  # except in compliance with the License. You may obtain a copy of
-  # the License at http://www.mozilla.org/MPL/
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
   #
-  # Software distributed under the License is distributed on an "AS
-  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-  # implied. See the License for the specific language governing
-  # rights and limitations under the License.
-  #
-  # The Original Code is the Bugzilla Bug Tracking System.
-  #
-  # The Initial Developer of the Original Code is Netscape Communications
-  # Corporation. Portions created by Netscape are
-  # Copyright (C) 1998 Netscape Communications Corporation. All
-  # Rights Reserved.
-  #
-  # Contributor(s): Gervase Markham <gerv@gerv.net>
-  #                 Vaskin Kissoyan <vkissoyan@yahoo.com>
-  #                 Max Kanat-Alexander <mkanat@bugzilla.org>
-  #                 Frédéric Buclin <LpSolit@gmail.com>
-  #                 Olav Vitters <olav@bkor.dhs.org>
-  #                 Guy Pyrzak <guy.pyrzak@gmail.com>
-  #                 Elliotte Martin <emartin@everythingsolved.com>
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
   #%]
-
-[% PROCESS "global/field-descs.none.tmpl" %]
 
 [% PROCESS bug/time.html.tmpl %]
 
@@ -192,10 +172,8 @@
      <a href="show_bug.cgi?id=[% bug.bug_id %]">
         [%-# %]<b>[% terms.Bug %]&nbsp;[% bug.bug_id FILTER html %]</b>
      [%-# %]</a> -<span id="summary_alias_container" class="bz_default_hidden"> 
-      [% IF Param("usebugaliases") %]
-        [% IF bug.alias != "" %]
-          (<span id="alias_nonedit_display">[% bug.alias FILTER html %]</span>) 
-        [% END %]
+      [% IF bug.alias != "" %]
+        (<span id="alias_nonedit_display">[% bug.alias FILTER html %]</span>) 
       [% END %]
       <span id="short_desc_nonedit_display">[% bug.short_desc FILTER quoteUrls(bug) %]</span>
       [% IF bug.check_can_change_field('short_desc', 0, 1) || 
@@ -207,8 +185,7 @@
        
     <div id="summary_alias_input">
       <table id="summary"> 
-        [% IF Param("usebugaliases") %]
-          <tr>
+        <tr>
           [% IF bug.check_can_change_field('alias', 0, 1) %]      
             <td>
               <label 
@@ -230,7 +207,6 @@
                                   && bug.alias %]
           </td>
         </tr>
-        [% END %] 
         [%# *** Summary *** %]
         <tr>
           <td>
@@ -490,15 +466,11 @@
 [%############################################################################%]
 [% BLOCK section_url_keyword_whiteboard %]
   <tr>
-    <td class="field_label">
-      <label for="bug_file_loc" accesskey="u"><b>
-        [% IF is_safe_url(bug.bug_file_loc) %]
-          <a href="[% bug.bug_file_loc FILTER html %]"><u>U</u>RL</a>
-        [% ELSE %]
-          <u>U</u>RL
-        [% END %]
-      [%%]</b></label>:
-    </td>
+    [% INCLUDE "bug/field-label.html.tmpl"
+      field = bug_fields.bug_file_loc
+      editable = 1
+      accesskey = "u"
+    %]
     <td>
       [% IF bug.check_can_change_field("bug_file_loc", 0, 1) %]
         <span id="bz_url_edit_container" class="bz_default_hidden"> 
@@ -846,11 +818,19 @@
 [% BLOCK section_flags %]
   [%# *** Flags *** %]
   [% show_bug_flags = 0 %]
+  [% bug_flags_set = 0 %]
+  [% show_more_flags = 0 %]
   [% FOREACH type = bug.flag_types %]
     [% IF (type.flags && type.flags.size > 0) || (user.id && type.is_active) %]
       [% show_bug_flags = 1 %]
-      [% LAST %]
     [% END %]
+    [% IF type.is_active && (!type.flags || type.is_multiplicable) %]
+      [% show_more_flags = 1 %]
+    [% END %]
+    [% IF type.flags && type.flags.size > 0 %]
+      [% bug_flags_set = 1 %]
+    [% END %]
+    [% LAST IF show_bug_flags && show_more_flags && bug_flags_set %]
   [% END %]
   [% IF show_bug_flags %]
     <tr>
@@ -865,6 +845,27 @@
           [% PROCESS "flag/list.html.tmpl" flag_no_header = 1
                                            flag_types = bug.flag_types
                                            any_flags_requesteeble = bug.any_flags_requesteeble %]
+        [% END %]
+        [% IF show_more_flags %]
+          <span id="bz_flags_more_container" class="bz_default_hidden">
+            [% IF !bug_flags_set %]<em>None yet set</em>[% END %]
+            (<a href="#" id="bz_flags_more_action">[% IF !bug_flags_set %]set[% ELSE %]more[% END %] flags</a>)
+          </span>
+          <script type="text/javascript">
+            YAHOO.util.Dom.removeClass('bz_flags_more_container', 'bz_default_hidden');
+            var table = YAHOO.util.Dom.get("flags");
+            var rows = YAHOO.util.Dom.getElementsByClassName('bz_flag_type', 'tbody', table);
+            for (var i = 0; i < rows.length; i++) {
+                YAHOO.util.Dom.addClass(rows[i], 'bz_default_hidden');
+            }
+            YAHOO.util.Event.addListener('bz_flags_more_action', 'click', function (e) {
+                YAHOO.util.Dom.addClass('bz_flags_more_container', 'bz_default_hidden');
+                for (var i = 0; i < rows.length; i++) {
+                    YAHOO.util.Dom.removeClass(rows[i], 'bz_default_hidden');
+                }
+                YAHOO.util.Event.preventDefault(e);
+            }); 
+          </script>
         [% END %]
       </td>
     </tr>

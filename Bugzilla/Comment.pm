@@ -1,23 +1,9 @@
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Original Code is the Bugzilla Bug Tracking System.
-#
-# The Initial Developer of the Original Code is James Robson.
-# Portions created by James Robson are Copyright (c) 2009 James Robson.
-# All rights reserved.
-#
-# Contributor(s): James Robson <arbingersys@gmail.com> 
-#                 Christian Legnitto <clegnitto@mozilla.com> 
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 use strict;
 
@@ -37,7 +23,9 @@ use Scalar::Util qw(blessed);
 ####    Initialization     ####
 ###############################
 
-# Updates of comments are audited in bugs_activity instead of audit_log.
+# Creation and updating of comments are audited in longdescs
+# and bugs_activity respectively instead of audit_log.
+use constant AUDIT_CREATES => 0;
 use constant AUDIT_UPDATES => 0;
 
 use constant DB_COLUMNS => qw(

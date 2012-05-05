@@ -1,35 +1,9 @@
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Original Code is the Bugzilla Bug Tracking System.
-#
-# The Initial Developer of the Original Code is Netscape Communications
-# Corporation. Portions created by Netscape are
-# Copyright (C) 1998 Netscape Communications Corporation. All
-# Rights Reserved.
-#
-# Contributor(s): Myk Melez <myk@mozilla.org>
-#                 Erik Stambaugh <erik@dasbistro.com>
-#                 Bradley Baetz <bbaetz@acm.org>
-#                 Joel Peshkin <bugreport@peshkin.net> 
-#                 Byron Jones <bugzilla@glob.com.au>
-#                 Shane H. W. Travis <travis@sedsystems.ca>
-#                 Max Kanat-Alexander <mkanat@bugzilla.org>
-#                 Gervase Markham <gerv@gerv.net>
-#                 Lance Larsh <lance.larsh@oracle.com>
-#                 Justin C. De Vries <judevries@novell.com>
-#                 Dennis Melentyev <dennis.melentyev@infopulse.com.ua>
-#                 Frédéric Buclin <LpSolit@gmail.com>
-#                 Mads Bondo Dydensborg <mbd@dbc.dk>
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 ################################################################################
 # Module Initialization
@@ -91,16 +65,21 @@ use constant DB_TABLE => 'profiles';
 # that you passed in for "name" to new(). That's because historically
 # Bugzilla::User used "name" for the realname field. This should be
 # fixed one day.
-use constant DB_COLUMNS => (
-    'profiles.userid',
-    'profiles.login_name',
-    'profiles.realname',
-    'profiles.mybugslink AS showmybugslink',
-    'profiles.disabledtext',
-    'profiles.disable_mail',
-    'profiles.extern_id',
-    'profiles.is_enabled', 
-);
+sub DB_COLUMNS {
+    my $dbh = Bugzilla->dbh;
+    return (
+        'profiles.userid',
+        'profiles.login_name',
+        'profiles.realname',
+        'profiles.mybugslink AS showmybugslink',
+        'profiles.disabledtext',
+        'profiles.disable_mail',
+        'profiles.extern_id',
+        'profiles.is_enabled',
+        $dbh->sql_date_format('last_seen_date', '%Y-%m-%d') . ' AS last_seen_date',
+    ),
+}
+
 use constant NAME_FIELD => 'login_name';
 use constant ID_FIELD   => 'userid';
 use constant LIST_ORDER => NAME_FIELD;
@@ -221,8 +200,7 @@ sub check_login_name_for_creation {
     my ($invocant, $name) = @_;
     $name = trim($name);
     $name || ThrowUserError('user_login_required');
-    validate_email_syntax($name)
-        || ThrowUserError('illegal_email_address', { addr => $name });
+    check_email_syntax($name);
 
     # Check the name if it's a new user, or if we're changing the name.
     if (!ref($invocant) || $invocant->login ne $name) {
@@ -285,6 +263,23 @@ sub set_disabledtext {
     $_[0]->set('is_enabled', $_[1] ? 0 : 1);
 }
 
+sub update_last_seen_date {
+    my $self = shift;
+    return unless $self->id;
+    my $dbh = Bugzilla->dbh;
+    my $date = $dbh->selectrow_array(
+        'SELECT ' . $dbh->sql_date_format('NOW()', '%Y-%m-%d'));
+
+    if (!$self->last_seen_date or $date ne $self->last_seen_date) {
+        $self->{last_seen_date} = $date;
+        # We don't use the normal update() routine here as we only
+        # want to update the last_seen_date column, not any other
+        # pending changes
+        $dbh->do("UPDATE profiles SET last_seen_date = ? WHERE userid = ?",
+                 undef, $date, $self->id);
+    }
+}
+
 ################################################################################
 # Methods
 ################################################################################
@@ -299,6 +294,7 @@ sub is_enabled { $_[0]->{'is_enabled'} ? 1 : 0; }
 sub showmybugslink { $_[0]->{showmybugslink}; }
 sub email_disabled { $_[0]->{disable_mail}; }
 sub email_enabled { !($_[0]->{disable_mail}); }
+sub last_seen_date { $_[0]->{last_seen_date}; }
 sub cryptpassword {
     my $self = shift;
     # We don't store it because we never want it in the object (we
@@ -516,26 +512,21 @@ sub save_last_search {
 
     return if !@$bug_ids;
 
+    my $search;
     if ($self->id) {
         on_main_db {
-            my $search;
             if ($list_id) {
-                # Use eval so that people can still use old search links or
-                # links that don't belong to them.
-                $search = eval { Bugzilla::Search::Recent->check(
-                                    { id => $list_id }) };
+                $search = Bugzilla::Search::Recent->check_quietly({ id => $list_id });
             }
 
             if ($search) {
-                # We only update placeholders. (Placeholders are
-                # Saved::Search::Recent objects with empty bug lists.)
-                # Otherwise, we could just keep creating new searches
-                # for the same refreshed list over and over.
-                if (!@{ $search->bug_list }) {
-                    $search->set_list_order($order);
+                if (join(',', @{$search->bug_list}) ne join(',', @$bug_ids)) {
                     $search->set_bug_list($bug_ids);
-                    $search->update();
                 }
+                if (!$search->list_order || $order ne $search->list_order) {
+                    $search->set_list_order($order);
+                }
+                $search->update();
             }
             else {
                 # If we already have an existing search with a totally
@@ -548,10 +539,13 @@ sub save_last_search {
                     user_id => $self->id, bug_list => $list_string });
            
                 if (!scalar(@$existing_search)) {
-                    Bugzilla::Search::Recent->create({
+                    $search = Bugzilla::Search::Recent->create({
                         user_id    => $self->id,
                         bug_list   => $bug_ids,
                         list_order => $order });
+                }
+                else {
+                    $search = $existing_search->[0];
                 }
             }
         };
@@ -574,6 +568,7 @@ sub save_last_search {
             $vars->{'toolong'} = 1;
         }
     }
+    return $search;
 }
 
 sub settings {
@@ -777,6 +772,15 @@ sub in_group {
 sub in_group_id {
     my ($self, $id) = @_;
     return grep($_->id == $id, @{ $self->groups }) ? 1 : 0;
+}
+
+# This is a helper to get all groups which have an icon to be displayed
+# besides the name of the commenter.
+sub groups_with_icon {
+    my $self = shift;
+
+    my @groups = grep { $_->icon_url } @{ $self->groups };
+    return \@groups;
 }
 
 sub get_products_by_permission {
@@ -1041,12 +1045,14 @@ sub get_enterable_products {
         # And all of these products must have at least one component
         # and one version.
         $enterable_ids = $dbh->selectcol_arrayref(
-               'SELECT DISTINCT products.id FROM products
-            INNER JOIN components ON components.product_id = products.id
-            INNER JOIN versions ON versions.product_id = products.id
-                 WHERE products.id IN (' . join(',', @$enterable_ids) . ')
-                   AND components.isactive = 1
-                   AND versions.isactive = 1');
+            'SELECT DISTINCT products.id FROM products
+              WHERE ' . $dbh->sql_in('products.id', $enterable_ids) .
+              ' AND products.id IN (SELECT DISTINCT components.product_id
+                                      FROM components
+                                     WHERE components.isactive = 1)
+                AND products.id IN (SELECT DISTINCT versions.product_id
+                                      FROM versions
+                                     WHERE versions.isactive = 1)');
     }
 
     $self->{enterable_products} =
@@ -1142,24 +1148,6 @@ sub can_set_flag {
     return (!$flag_type->grant_group_id
             || $self->in_group_id($flag_type->grant_group_id)) ? 1 : 0;
 }
-
-sub direct_group_membership {
-    my $self = shift;
-    my $dbh = Bugzilla->dbh;
-
-    if (!$self->{'direct_group_membership'}) {
-        my $gid = $dbh->selectcol_arrayref('SELECT id
-                                              FROM groups
-                                        INNER JOIN user_group_map
-                                                ON groups.id = user_group_map.group_id
-                                             WHERE user_id = ?
-                                               AND isbless = 0',
-                                             undef, $self->id);
-        $self->{'direct_group_membership'} = Bugzilla::Group->new_from_list($gid);
-    }
-    return $self->{'direct_group_membership'};
-}
-
 
 # visible_groups_inherited returns a reference to a list of all the groups
 # whose members are visible to this user.
@@ -1632,7 +1620,9 @@ our %names_to_events = (
     'attachments.mimetype'    => EVT_ATTACHMENT_DATA,
     'attachments.ispatch'     => EVT_ATTACHMENT_DATA,
     'dependson'               => EVT_DEPEND_BLOCK,
-    'blocked'                 => EVT_DEPEND_BLOCK);
+    'blocked'                 => EVT_DEPEND_BLOCK,
+    'product'                 => EVT_COMPONENT,
+    'component'               => EVT_COMPONENT);
 
 # Returns true if the user wants mail for a given bug change.
 # Note: the "+" signs before the constants suppress bareword quoting.
@@ -1651,7 +1641,7 @@ sub wants_bug_mail {
         }
         else {
             # Catch-all for any change not caught by a more specific event
-            $events{+EVT_OTHER} = 1;            
+            $events{+EVT_OTHER} = 1;
         }
 
         # If the user is in a particular role and the value of that role
@@ -1982,6 +1972,32 @@ sub is_available_username {
     }
 
     return 1;
+}
+
+sub check_account_creation_enabled {
+    my $self = shift;
+
+    # If we're using e.g. LDAP for login, then we can't create a new account.
+    $self->authorizer->user_can_create_account
+      || ThrowUserError('auth_cant_create_account');
+
+    Bugzilla->params->{'createemailregexp'}
+      || ThrowUserError('account_creation_disabled');
+}
+
+sub check_and_send_account_creation_confirmation {
+    my ($self, $login) = @_;
+
+    $login = $self->check_login_name_for_creation($login);
+    my $creation_regexp = Bugzilla->params->{'createemailregexp'};
+
+    if ($login !~ /$creation_regexp/i) {
+        ThrowUserError('account_creation_restricted');
+    }
+
+    # Create and send a token for this new account.
+    require Bugzilla::Token;
+    Bugzilla::Token::issue_new_user_account_token($login);
 }
 
 # This is used in a few performance-critical areas where we don't want to
@@ -2456,11 +2472,6 @@ Returns a reference to an array of users.  The array is populated with hashrefs
 containing the login, identity and visibility.  Users that are not visible to this
 user will have 'visible' set to zero.
 
-=item C<direct_group_membership>
-
-Returns a reference to an array of group objects. Groups the user belong to
-by group inheritance are excluded from the list.
-
 =item C<visible_groups_inherited>
 
 Returns a list of all groups whose members should be visible to this user.
@@ -2539,6 +2550,17 @@ Params: login_name - B<Required> The login name for the new user.
 
 Takes a username as its only argument. Throws an error if there is no
 user with that username. Returns a C<Bugzilla::User> object.
+
+=item C<check_account_creation_enabled>
+
+Checks that users can create new user accounts, and throws an error
+if user creation is disabled.
+
+=item C<check_and_send_account_creation_confirmation($login)>
+
+If the user request for a new account passes validation checks, an email
+is sent to this user for confirmation. Otherwise an error is thrown
+indicating why the request has been rejected.
 
 =item C<is_available_username>
 

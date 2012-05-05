@@ -1,4 +1,11 @@
 <?xml version="1.0"?>
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+     License, v. 2.0. If a copy of the MPL was not distributed with this
+     file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+     This Source Code Form is "Incompatible With Secondary Licenses", as
+     defined by the Mozilla Public License, v. 2.0.
+-->
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
                       "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
     <!ENTITY % myents SYSTEM "bugzilla.ent">
@@ -272,4 +279,3 @@ sgml-parent-document:("Bugzilla-Guide.xml" "book" "chapter")
 sgml-shorttag:t 
 sgml-tag-region-if-active:t 
 End: -->
-

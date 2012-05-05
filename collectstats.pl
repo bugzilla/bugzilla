@@ -1,29 +1,10 @@
 #!/usr/bin/perl -w
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Original Code is the Bugzilla Bug Tracking System.
-#
-# The Initial Developer of the Original Code is Netscape Communications
-# Corporation. Portions created by Netscape are
-# Copyright (C) 1998 Netscape Communications Corporation. All
-# Rights Reserved.
-#
-# Contributor(s): Terry Weissman <terry@mozilla.org>,
-#                 Harrison Page <harrison@netscape.com>
-#                 Gervase Markham <gerv@gerv.net>
-#                 Richard Walters <rwalters@qualcomm.com>
-#                 Jean-Sebastien Guay <jean_seb@hybride.com>
-#                 Frédéric Buclin <LpSolit@gmail.com>
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 use strict;
 use lib qw(. lib);
@@ -41,6 +22,7 @@ use Bugzilla::Search;
 use Bugzilla::User;
 use Bugzilla::Product;
 use Bugzilla::Field;
+use Bugzilla::Install::Filesystem qw(fix_dir_permissions);
 
 my %switch;
 GetOptions(\%switch, 'help|h', 'regenerate');
@@ -139,31 +121,27 @@ my $tstart = time;
 my @myproducts = Bugzilla::Product->get_all;
 unshift(@myproducts, "-All-");
 
+my $dir = "$datadir/mining";
+if (!-d $dir) {
+    mkdir $dir or die "mkdir $dir failed: $!";
+    fix_dir_permissions($dir);
+}
+
 foreach (@myproducts) {
-    my $dir = "$datadir/mining";
-
-    &check_data_dir ($dir);
-
     if ($switch{'regenerate'}) {
         regenerate_stats($dir, $_, \%bug_resolution, \%bug_status, \%removed);
     } else {
         &collect_stats($dir, $_);
     }
 }
+# Fix permissions for all files in mining/.
+fix_dir_permissions($dir);
+
 my $tend = time;
 # Uncomment the following line for performance testing.
-#print "Total time taken " . delta_time($tstart, $tend) . "\n";
+#say "Total time taken " . delta_time($tstart, $tend);
 
 CollectSeriesData();
-
-sub check_data_dir {
-    my $dir = shift;
-
-    if (! -d $dir) {
-        mkdir $dir, 0755;
-        chmod 0755, $dir;
-    }
-}
 
 sub collect_stats {
     my $dir = shift;
@@ -250,7 +228,6 @@ FIN
     }
     print DATA (join '|', @row) . "\n";
     close DATA;
-    chmod 0644, $file;
 }
 
 sub get_old_data {
@@ -406,14 +383,12 @@ FIN
             foreach (@resolutions) { print DATA "|$bugcount{$_}"; }
             print DATA "\n";
         }
-        
+
         # Finish up output feedback for this product.
         my $tend = time;
-        print "\rRegenerating $product \[100.0\%] - " .
-            delta_time($tstart, $tend) . "\n";
-            
+        say "\rRegenerating $product \[100.0\%] - " . delta_time($tstart, $tend);
+
         close DATA;
-        chmod 0640, $file;
     }
 }
 
@@ -507,6 +482,7 @@ sub CollectSeriesData {
         eval {
             my $search = new Bugzilla::Search('params' => scalar $cgi->Vars,
                                               'fields' => ["bug_id"],
+                                              'allow_unlimited' => 1,
                                               'user'   => $user);
             my $sql = $search->sql;
             $data = $shadow_dbh->selectall_arrayref($sql);

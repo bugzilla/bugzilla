@@ -1,25 +1,10 @@
 #!/usr/bin/perl -wT
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Original Code is the Bugzilla Bug Tracking System.
-#
-# The Initial Developer of the Original Code is Netscape Communications
-# Corporation. Portions created by Netscape are
-# Copyright (C) 1998 Netscape Communications Corporation. All
-# Rights Reserved.
-#
-# Contributor(s): Myk Melez <myk@mozilla.org>
-#                 Frédéric Buclin <LpSolit@gmail.com>
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 use strict;
 use lib qw(. lib);
@@ -132,9 +117,7 @@ sub requestChangePassword {
     my $login_name = $cgi->param('loginname')
       or ThrowUserError("login_needed_for_password_change");
 
-    validate_email_syntax($login_name)
-      || ThrowUserError('illegal_email_address', {addr => $login_name});
-
+    check_email_syntax($login_name);
     my $user = Bugzilla::User->check($login_name);
 
     # Make sure the user account is active.
@@ -298,6 +281,8 @@ sub cancelChangeEmail {
 sub request_create_account {
     my ($date, $login_name, $token) = @_;
 
+    Bugzilla->user->check_account_creation_enabled;
+
     $vars->{'token'} = $token;
     $vars->{'email'} = $login_name . Bugzilla->params->{'emailsuffix'};
     $vars->{'expiration_ts'} = ctime(str2time($date) + MAX_TOKEN_AGE * 86400);
@@ -309,6 +294,8 @@ sub request_create_account {
 
 sub confirm_create_account {
     my ($login_name, $token) = @_;
+
+    Bugzilla->user->check_account_creation_enabled;
 
     my $password = $cgi->param('passwd1') || '';
     validate_password($password, $cgi->param('passwd2') || '');

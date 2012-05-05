@@ -1,4 +1,11 @@
 <?xml version="1.0"?>
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+     License, v. 2.0. If a copy of the MPL was not distributed with this
+     file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+     This Source Code Form is "Incompatible With Secondary Licenses", as
+     defined by the Mozilla Public License, v. 2.0.
+-->
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
                       "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
     <!ENTITY % myents SYSTEM "bugzilla.ent">
@@ -281,11 +288,11 @@
               <para>
                 Defines the regular expression used to validate email addresses
                 used for login names. The default attempts to match fully
-                qualified email addresses (i.e. 'user@example.com'). Some
-                Bugzilla installations allow only local user names (i.e 'user' 
-                instead of 'user@example.com'). In that case, the 
-                <command>emailsuffix</command> parameter should be used to define
-                the email domain.    
+                qualified email addresses (i.e. 'user@example.com') in a slightly
+                more restrictive way than what is allowed in RFC 2822.
+                Some Bugzilla installations allow only local user names (i.e 'user'
+                instead of 'user@example.com'). In that case, this parameter
+                should be used to define the email domain.
               </para>
             </listitem>
           </varlistentry>
@@ -762,6 +769,68 @@
                 of all emails sent by this Bugzilla installation. Some email
                 servers require mail to be from a valid email address, therefore
                 it is recommended to choose a valid email address here.
+              </para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>
+              smtpserver
+            </term>
+            <listitem>
+              <para>
+                This is the SMTP server address, if the <quote>mail_delivery_method</quote>
+                parameter is set to SMTP.  Use "localhost" if you have a local MTA
+                running, otherwise use a remote SMTP server.  Append ":" and the port
+                number, if a non-default port is needed.
+              </para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>
+              smtp_username
+            </term>
+            <listitem>
+              <para>
+                Username to use for SASL authentication to the SMTP server.  Leave
+                this parameter empty if your server does not require authentication.
+              </para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>
+              smtp_password
+            </term>
+            <listitem>
+              <para>
+                Password to use for SASL authentication to the SMTP server. This
+                parameter will be ignored if the <quote>smtp_username</quote>
+                parameter is left empty.
+              </para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>
+              smtp_ssl
+            </term>
+            <listitem>
+              <para>
+                Enable SSL support for connection to the SMTP server.
+              </para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>
+              smtp_debug
+            </term>
+            <listitem>
+              <para>
+                This parameter allows you to enable detailed debugging output.
+                Log messages are printed the web server's error log.
               </para>
             </listitem>
           </varlistentry>
@@ -2367,6 +2436,11 @@ ReadOnly: ENTRY, NA/NA, CANEDIT
               several types available:
                <simplelist>
                  <member>
+                   Bug ID: A field where you can enter the ID of another bug from
+                   the same Bugzilla installation. To point to a bug in a remote
+                   installation, use the See Also field instead.
+                 </member>
+                 <member>
                    Large Text Box: A multiple line box for entering free text.
                  </member>
                  <member>
@@ -2405,6 +2479,16 @@ ReadOnly: ENTRY, NA/NA, CANEDIT
 
           <listitem>
             <para>
+              <emphasis>Reverse Relationship Description:</emphasis>
+              When the custom field is of type <quote>Bug ID</quote>, you can
+              enter text here which will be used as label in the referenced
+              bug to list bugs which point to it. This gives you the ability
+              to have a mutual relationship between two bugs.
+            </para>
+          </listitem>
+
+          <listitem>
+            <para>
               <emphasis>Can be set on bug creation:</emphasis>
               Boolean that determines whether this field can be set on
               bug creation. If not selected, then a bug must be created 
@@ -2427,6 +2511,45 @@ ReadOnly: ENTRY, NA/NA, CANEDIT
               <emphasis>Is obsolete:</emphasis>
               Boolean that determines whether this field should
               be displayed at all. Obsolete Custom Fields are hidden.
+            </para>
+          </listitem>
+
+          <listitem>
+            <para>
+              <emphasis>Is mandatory:</emphasis>
+              Boolean that determines whether this field must be set.
+              For single and multi-select fields, this means that a (non-default)
+              value must be selected, and for text and date fields, some text
+              must be entered.
+            </para>
+          </listitem>
+
+          <listitem>
+            <para>
+              <emphasis>Field only appears when:</emphasis>
+              A custom field can be made visible when some criteria is met.
+              For instance, when the bug belongs to one or more products,
+              or when the bug is of some given severity. If left empty, then
+              the custom field will always be visible, in all bugs.
+            </para>
+          </listitem>
+
+          <listitem>
+            <para>
+              <emphasis>Field that controls the values that appear in this field:</emphasis>
+              When the custom field is of type <quote>Drop Down</quote> or
+              <quote>Multiple-Selection Box</quote>, you can restrict the
+              availability of the values of the custom field based on the
+              value of another field. This criteria is independent of the
+              criteria used in the <quote>Field only appears when</quote>
+              setting. For instance, you may decide that some given value
+              <quote>valueY</quote> is only available when the bug status
+              is RESOLVED while the value <quote>valueX</quote> should
+              always be listed.
+              Once you have selected the field which should control the
+              availability of the values of this custom field, you can
+              edit values of this custom field to set the criteria, see
+              <xref linkend="edit-values-list" />.
             </para>
           </listitem>
         </itemizedlist>
@@ -2463,20 +2586,19 @@ ReadOnly: ENTRY, NA/NA, CANEDIT
     <title>Legal Values</title>
 
     <para>
-      Since Bugzilla 2.20 RC1, legal values for Operating Systems, platforms,
-      bug priorities and severities can be edited from the User Interface
-      directly. This means that it is no longer required to manually edit
-      <filename>localconfig</filename>. Starting with Bugzilla 2.23.3, 
-      the list of valid resolutions can be customized from the same interface.
-      Since Bugzilla 3.1.1 the list of valid bug statuses can be customized
-      as well.
+      Legal values for the operating system, platform, bug priority and
+      severity, custom fields of type <quote>Drop Down</quote> and
+      <quote>Multiple-Selection Box</quote> (see <xref linkend="custom-fields" />),
+      as well as the list of valid bug statuses and resolutions can be
+      customized from the same interface. You can add, edit, disable and
+      remove values which can be used with these fields.
     </para>
 
     <section id="edit-values-list">
       <title>Viewing/Editing legal values</title>
       <para>
         Editing legal values requires <quote>admin</quote> privileges.
-        Select "Legal Values" from the Administration page. A list of all
+        Select "Field Values" from the Administration page. A list of all
         fields, both system fields and Custom Fields, for which legal values
         can be edited appears. Click a field name to edit its legal values.
       </para>
@@ -2484,6 +2606,11 @@ ReadOnly: ENTRY, NA/NA, CANEDIT
         There is no limit to how many values a field can have, but each value 
         must be unique to that field. The sortkey is important to display these
         values in the desired order.
+      </para>
+      <para>
+        When the availability of the values of a custom field is controlled
+        by another field, you can select from here which value of the other field
+        must be set for the value of the custom field to appear.
       </para>
     </section>
 
@@ -2535,6 +2662,11 @@ ReadOnly: ENTRY, NA/NA, CANEDIT
 
   <section id="voting">
     <title>Voting</title>
+
+    <para>All of the code for voting in Bugzilla has been moved into an
+    extension, called "Voting", in the <filename>extensions/Voting/</filename>
+    directory. To enable it, you must remove the <filename>disabled</filename>
+    file from that directory, and run <filename>checksetup.pl</filename>.</para>
 
     <para>Voting allows users to be given a pot of votes which they can allocate
     to bugs, to indicate that they'd like them fixed. 
@@ -2592,12 +2724,12 @@ ReadOnly: ENTRY, NA/NA, CANEDIT
     </para>
   
     <para>
-      Quips are controlled by the <emphasis>enablequips</emphasis> parameter.
-      It has several possible values: on, approved, frozen or off.
-      In order to enable quips approval you need to set this parameter
-      to "approved". In this way, users are free to submit quips for
-      addition but an administrator must explicitly approve them before
-      they are actually used.
+      Quip submission is controlled by the <emphasis>quip_list_entry_control</emphasis>
+      parameter.  It has several possible values: open, moderated, or closed.
+      In order to enable quips approval you need to set this parameter to
+      "moderated". In this way, users are free to submit quips for addition
+      but an administrator must explicitly approve them before they are
+      actually used.
     </para>
 
     <para>
@@ -2612,7 +2744,7 @@ ReadOnly: ENTRY, NA/NA, CANEDIT
     </para>
 
     <para>
-      Next to each tip there is a checkbox, under the
+      Next to each quip there is a checkbox, under the
       "Approved" column. Quips who have this checkbox checked are
       already approved and will appear next to the search results.
       The ones that have it unchecked are still preserved in the
@@ -2623,6 +2755,11 @@ ReadOnly: ENTRY, NA/NA, CANEDIT
     <para>
       Also, there is a delete link next to each quip,
       which can be used in order to permanently delete a quip.
+    </para>
+
+    <para>
+      Display of quips is controlled by the <emphasis>display_quips</emphasis>
+      user preference.  Possible values are "on" and "off".
     </para>
   </section>
 
@@ -3033,4 +3170,3 @@ sgml-shorttag:t
 sgml-tag-region-if-active:t
 End:
 -->
-

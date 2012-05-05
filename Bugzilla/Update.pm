@@ -1,18 +1,9 @@
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Original Code is the Bugzilla Bug Tracking System.
-#
-# Contributor(s): Frédéric Buclin <LpSolit@gmail.com>
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::Update;
 
@@ -20,8 +11,6 @@ use strict;
 
 use Bugzilla::Constants;
 
-use constant REMOTE_FILE   => 'http://updates.bugzilla.org/bugzilla-update.xml';
-use constant LOCAL_FILE    => "/bugzilla-update.xml"; # Relative to datadir.
 use constant TIME_INTERVAL => 86400; # Default is one day, in seconds.
 use constant TIMEOUT       => 5; # Number of seconds before timeout.
 
@@ -30,26 +19,25 @@ sub get_notifications {
     return if !Bugzilla->feature('updates');
     return if (Bugzilla->params->{'upgrade_notification'} eq 'disabled');
 
-    my $local_file = bz_locations()->{'datadir'} . LOCAL_FILE;
+    my $local_file = bz_locations()->{'datadir'} . '/' . LOCAL_FILE;
     # Update the local XML file if this one doesn't exist or if
     # the last modification time (stat[9]) is older than TIME_INTERVAL.
     if (!-e $local_file || (time() - (stat($local_file))[9] > TIME_INTERVAL)) {
         unlink $local_file; # Make sure the old copy is away.
-        if (-e $local_file) {
-            return { 'error' => 'no_update', xml_file => $local_file };
-        }
+        return { 'error' => 'no_update' } if (-e $local_file);
+
         my $error = _synchronize_data();
         # If an error is returned, leave now.
         return $error if $error;
     }
 
     # If we cannot access the local XML file, ignore it.
-    return {'error' => 'no_access', 'xml_file' => $local_file} unless (-r $local_file);
+    return { 'error' => 'no_access' } unless (-r $local_file);
 
     my $twig = XML::Twig->new();
     $twig->safe_parsefile($local_file);
     # If the XML file is invalid, return.
-    return {'error' => 'corrupted', 'xml_file' => $local_file} if $@;
+    return { 'error' => 'corrupted' } if $@;
     my $root = $twig->root;
 
     my @releases;
@@ -119,7 +107,7 @@ sub get_notifications {
 }
 
 sub _synchronize_data {
-    my $local_file = bz_locations()->{'datadir'} . LOCAL_FILE;
+    my $local_file = bz_locations()->{'datadir'} . '/' . LOCAL_FILE;
 
     my $ua = LWP::UserAgent->new();
     $ua->timeout(TIMEOUT);
@@ -133,7 +121,7 @@ sub _synchronize_data {
     else {
         $ua->env_proxy;
     }
-    $ua->mirror(REMOTE_FILE, $local_file);
+    my $response = eval { $ua->mirror(REMOTE_FILE, $local_file) };
 
     # $ua->mirror() forces the modification time of the local XML file
     # to match the modification time of the remote one.
@@ -144,11 +132,14 @@ sub _synchronize_data {
         # Try to alter its last modification time.
         my $can_alter = utime(undef, undef, $local_file);
         # This error should never happen.
-        $can_alter || return {'error' => 'no_update', 'xml_file' => $local_file};
+        $can_alter || return { 'error' => 'no_update' };
+    }
+    elsif ($response && $response->is_error) {
+        # We have been unable to download the file.
+        return { 'error' => 'cannot_download', 'reason' => $response->status_line };
     }
     else {
-        # We have been unable to download the file.
-        return {'error' => 'cannot_download', 'xml_file' => $local_file};
+        return { 'error' => 'no_write', 'reason' => $@ };
     }
 
     # Everything went well.

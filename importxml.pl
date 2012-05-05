@@ -1,29 +1,10 @@
 #!/usr/bin/perl -wT
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Original Code is the Bugzilla Bug Tracking System.
-#
-# The Initial Developer of the Original Code is Netscape Communications
-# Corporation. Portions created by Netscape are
-# Copyright (C) 1998 Netscape Communications Corporation. All
-# Rights Reserved.
-#
-# Contributor(s): Dawn Endico <endico@mozilla.org>
-#                 Gregary Hendricks <ghendricks@novell.com>
-#                 Vance Baarda <vrb@novell.com>
-#                 Guzman Braso <gbn@hqso.net>
-#                 Erik Purins <epurins@day1studios.com>
-#                 Frédéric Buclin <LpSolit@gmail.com>
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 # This script reads in xml bug data from standard input and inserts
 # a new bug into bugzilla. Everything before the beginning <?xml line
@@ -860,7 +841,6 @@ sub process_bug {
     my $valid_status = check_field('bug_status',  
                                   scalar $bug_fields{'bug_status'}, 
                                   undef, ERR_LEVEL );
-    my $is_open = is_open_state($bug_fields{'bug_status'}); 
     my $status = $bug_fields{'bug_status'} || undef;
     my $resolution = $bug_fields{'resolution'} || undef;
     
@@ -910,7 +890,7 @@ sub process_bug {
 
     if ($status) {
         if($valid_status){
-            if($is_open){
+            if (is_open_state($status)) {
                 if ($resolution) {
                     $err .= "Resolution set on an open status.\n";
                     $err .= "   Dropping resolution $resolution\n";
@@ -944,7 +924,7 @@ sub process_bug {
                     }
                 }
             }
-            else{ # $is_open is false
+            else {
                if (!$resolution) {
                    $err .= "Missing Resolution. Setting status to ";
                    if($everconfirmed){
@@ -1348,4 +1328,3 @@ XML doesn't exist.
      importxml.pl [options] bugsfile.xml
 
 =cut
-

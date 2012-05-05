@@ -1,24 +1,9 @@
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Original Code is the Bugzilla Bug Tracking System.
-#
-# The Initial Developer of the Original Code is Oracle Corporation. 
-# Portions created by Oracle are Copyright (C) 2007 Oracle Corporation. 
-# All Rights Reserved.
-#
-# Contributor(s): Lance Larsh <lance.larsh@oracle.com>
-#                 Xiaoou Wu   <xiaoou.wu@oracle.com>
-#                 Max Kanat-Alexander <mkanat@bugzilla.org>
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 =head1 NAME
 
@@ -40,6 +25,8 @@ use base qw(Bugzilla::DB);
 
 use DBD::Oracle;
 use DBD::Oracle qw(:ora_types);
+use List::Util qw(max);
+
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Util;
@@ -50,6 +37,8 @@ use Bugzilla::Util;
 use constant EMPTY_STRING  => '__BZ_EMPTY_STR__';
 use constant ISOLATION_LEVEL => 'READ COMMITTED';
 use constant BLOB_TYPE => { ora_type => ORA_BLOB };
+# The max size allowed for LOB fields, in kilobytes.
+use constant MIN_LONG_READ_LEN => 32 * 1024;
 use constant FULLTEXT_OR => ' OR ';
 
 sub new {
@@ -68,8 +57,8 @@ sub new {
     my $dsn = "dbi:Oracle:host=$host;sid=$dbname";
     $dsn .= ";port=$port" if $port;
     my $attrs = { FetchHashKeyName => 'NAME_lc',  
-                  LongReadLen => ( Bugzilla->params->{'maxattachmentsize'}
-                                     || 1000 ) * 1024, 
+                  LongReadLen => max(Bugzilla->params->{'maxattachmentsize'},
+                                     MIN_LONG_READ_LEN) * 1024,
                 };
     my $self = $class->db_new({ dsn => $dsn, user => $user, 
                                 pass => $pass, attrs => $attrs });
@@ -154,13 +143,6 @@ sub sql_string_concat {
     my ($self, @params) = @_;
 
     return 'CONCAT(' . join(', ', @params) . ')';
-}
-
-sub sql_string_until {
-    my ($self, $string, $substring) = @_;
-    return "SUBSTR($string, 1, " 
-           . $self->sql_position($substring, $string)
-           . " - 1)";
 }
 
 sub sql_to_days {
@@ -641,6 +623,10 @@ sub bz_setup_database {
                 my $fk_name = $self->_bz_schema->_get_fk_name($table,
                                                               $column,
                                                               $references);
+                # bz_rename_table didn't rename the trigger correctly.
+                if ($table eq 'bug_tag' && $to_table eq 'tags') {
+                    $to_table = 'tag';
+                }
                 if ( $update =~ /CASCADE/i ){
                      my $trigger_name = uc($fk_name . "_UC");
                      my $exist_trigger = $self->selectcol_arrayref(

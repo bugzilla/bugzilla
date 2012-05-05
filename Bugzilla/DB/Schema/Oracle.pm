@@ -1,24 +1,9 @@
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Original Code is the Bugzilla Bug Tracking System.
-#
-# The Initial Developer of the Original Code is Oracle Corporation.
-# Portions created by Oracle are Copyright (C) 2007 Oracle Corporation.
-# All Rights Reserved.
-#
-# Contributor(s): Lance Larsh <lance.larsh@oracle.com>
-#                 Xiaoou Wu <xiaoou.wu@oracle.com>
-#                 Max Kanat-Alexander <mkanat@bugzilla.org>
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::DB::Schema::Oracle;
 
@@ -351,23 +336,63 @@ sub get_rename_column_ddl {
     my $def = $self->get_column_abstract($table, $old_name);
     if ($def->{TYPE} =~ /SERIAL/i) {
         # We have to rename the series also, and fix the default of the series.
-        push(@sql, "RENAME ${table}_${old_name}_SEQ TO 
-                      ${table}_${new_name}_seq");
-        my $serial_sql =
-                       "CREATE OR REPLACE TRIGGER ${table}_${new_name}_TR "
-                     . " BEFORE INSERT ON ${table} "
-                     . " FOR EACH ROW "
-                     . " BEGIN "
-                     . "   SELECT ${table}_${new_name}_SEQ.NEXTVAL "
-                     . "   INTO :NEW.${new_name} FROM DUAL; "
-                     . " END;";
-        push(@sql, $serial_sql);
+        my $old_seq = "${table}_${old_name}_SEQ";
+        my $new_seq = "${table}_${new_name}_SEQ";
+        push(@sql, "RENAME $old_seq TO $new_seq");
+        push(@sql, $self->_get_create_trigger_ddl($table, $new_name, $new_seq));
         push(@sql, "DROP TRIGGER ${table}_${old_name}_TR");
     }
     if ($def->{TYPE} =~ /varchar|text/i && $def->{NOTNULL} ) {
         push(@sql, _get_notnull_trigger_ddl($table,$new_name));
         push(@sql, "DROP TRIGGER ${table}_${old_name}");
     }
+    return @sql;
+}
+
+sub get_rename_table_sql {
+    my ($self, $old_name, $new_name) = @_;
+    if (lc($old_name) eq lc($new_name)) {
+        # if the only change is a case change, return an empty list.
+        return ();
+    }
+
+    my @sql = ("ALTER TABLE $old_name RENAME TO $new_name");
+    my @columns = $self->get_table_columns($old_name);
+    foreach my $column (@columns) {
+        my $def = $self->get_column_abstract($old_name, $column);
+        if ($def->{TYPE} =~ /SERIAL/i) {
+            # If there's a SERIAL column on this table, we also need
+            # to rename the sequence.
+            my $old_seq = "${old_name}_${column}_SEQ";
+            my $new_seq = "${new_name}_${column}_SEQ";
+            push(@sql, "RENAME $old_seq TO $new_seq");
+            push(@sql, $self->_get_create_trigger_ddl($new_name, $column, $new_seq));
+            push(@sql, "DROP TRIGGER ${old_name}_${column}_TR");
+        }
+        if ($def->{TYPE} =~ /varchar|text/i && $def->{NOTNULL}) {
+            push(@sql, _get_notnull_trigger_ddl($new_name, $column));
+            push(@sql, "DROP TRIGGER ${old_name}_${column}");
+        }
+    }
+
+    return @sql;
+}
+
+sub get_drop_table_ddl {
+    my ($self, $name) = @_;
+    my @sql;
+
+    my @columns = $self->get_table_columns($name);
+    foreach my $column (@columns) {
+        my $def = $self->get_column_abstract($name, $column);
+        if ($def->{TYPE} =~ /SERIAL/i) {
+            # If there's a SERIAL column on this table, we also need
+            # to remove the sequence.
+            push(@sql, "DROP SEQUENCE ${name}_${column}_SEQ");
+        }
+    }
+    push(@sql, "DROP TABLE $name CASCADE CONSTRAINTS PURGE");
+
     return @sql;
 }
 
@@ -398,17 +423,22 @@ sub _get_create_seq_ddl {
                    . " NOMAXVALUE "
                    . " NOCYCLE "
                    . " NOCACHE";
-     my $serial_sql = "CREATE OR REPLACE TRIGGER ${table}_${column}_TR "
-                    . " BEFORE INSERT ON ${table} "
-                    . " FOR EACH ROW "
-                    . " BEGIN "
-                    . "   SELECT ${seq_name}.NEXTVAL "
-                    . "   INTO :NEW.${column} FROM DUAL; "
-                    . " END;";
     push (@ddl, $seq_sql);
-    push (@ddl, $serial_sql);
+    push(@ddl, $self->_get_create_trigger_ddl($table, $column, $seq_name));
 
     return @ddl;
+}
+
+sub _get_create_trigger_ddl {
+    my ($self, $table, $column, $seq_name) = @_;
+    my $serial_sql = "CREATE OR REPLACE TRIGGER ${table}_${column}_TR "
+                   . " BEFORE INSERT ON $table "
+                   . " FOR EACH ROW "
+                   . " BEGIN "
+                   . "   SELECT ${seq_name}.NEXTVAL "
+                   . "   INTO :NEW.$column FROM DUAL; "
+                   . " END;";
+    return $serial_sql;
 }
 
 sub get_set_serial_sql { 

@@ -1,25 +1,9 @@
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Original Code is the Bugzilla Bug Tracking System.
-#
-# The Initial Developer of the Original Code is Netscape Communications
-# Corporation. Portions created by Netscape are
-# Copyright (C) 1998 Netscape Communications Corporation. All
-# Rights Reserved.
-#
-# Contributor(s): Bradley Baetz <bbaetz@student.usyd.edu.au>
-#                 Byron Jones <bugzilla@glob.com.au>
-#                 Marc Schumann <wurblzap@gmail.com>
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::CGI;
 use strict;
@@ -205,12 +189,35 @@ sub clean_search_url {
 
     # list_id is added in buglist.cgi after calling clean_search_url,
     # and doesn't need to be saved in saved searches.
-    $self->delete('list_id'); 
+    $self->delete('list_id');
+
+    # no_redirect is used internally by redirect_search_url().
+    $self->delete('no_redirect');
 
     # And now finally, if query_format is our only parameter, that
     # really means we have no parameters, so we should delete query_format.
     if ($self->param('query_format') && scalar($self->param()) == 1) {
         $self->delete('query_format');
+    }
+}
+
+sub check_etag {
+    my ($self, $valid_etag) = @_;
+
+    # ETag support.
+    my $if_none_match = $self->http('If-None-Match');
+    return if !$if_none_match;
+
+    my @if_none = split(/[\s,]+/, $if_none_match);
+    foreach my $possible_etag (@if_none) {
+        # remove quotes from begin and end of the string
+        $possible_etag =~ s/^\"//g;
+        $possible_etag =~ s/\"$//g;
+        if ($possible_etag eq $valid_etag or $possible_etag eq '*') {
+            print $self->header(-ETag => $possible_etag,
+                                -status => '304 Not Modified');
+            exit;
+        }
     }
 }
 
@@ -305,6 +312,10 @@ sub header {
     unless ($self->url_is_attachment_base) {
         unshift(@_, '-x_frame_options' => 'SAMEORIGIN');
     }
+
+    # Add X-XSS-Protection header to prevent simple XSS attacks
+    # and enforce the blocking (rather than the rewriting) mode.
+    unshift(@_, '-x_xss_protection' => '1; mode=block');
 
     return $self->SUPER::header(@_) || "";
 }
@@ -437,6 +448,7 @@ sub redirect_search_url {
         return;
     }
 
+    my $no_redirect = $self->param('no_redirect');
     $self->clean_search_url();
 
     # Make sure we still have params still after cleaning otherwise we 
@@ -449,6 +461,10 @@ sub redirect_search_url {
         my $recent_search = Bugzilla::Search::Recent->create_placeholder;
         $self->param('list_id', $recent_search->id);
     }
+
+    # Browsers which support history.replaceState do not need to be
+    # redirected. We can fix the URL on the fly.
+    return if $no_redirect;
 
     # GET requests that lacked a list_id are always redirected. POST requests
     # are only redirected if they're under the CGI_URI_LIMIT though.

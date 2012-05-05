@@ -1,20 +1,9 @@
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Initial Developer of the Original Code is Everything Solved.
-# Portions created by Everything Solved are Copyright (C) 2007
-# Everything Solved. All Rights Reserved.
-#
-# The Original Code is the Bugzilla Bug Tracking System.
-#
-# Contributor(s): Max Kanat-Alexander <mkanat@bugzilla.org>
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 # This file contains a single hash named %strings, which is used by the
 # installation code to display strings before Template-Toolkit can safely
@@ -60,7 +49,7 @@ EOT
     commands_optional => 'COMMANDS TO INSTALL OPTIONAL MODULES:',
     commands_required => <<EOT,
 COMMANDS TO INSTALL REQUIRED MODULES (You *must* run all these commands
-and then re-run this script):
+and then re-run checksetup.pl):
 EOT
     continue_without_answers => <<'END',
 Re-run checksetup.pl in interactive mode (without an 'answers' file)
@@ -140,12 +129,14 @@ END
 ERROR: Using install-module.pl requires that you install "make".
 END
     lc_new_vars => <<'END',
-This version of Bugzilla contains some variables that you may want to 
-change and adapt to your local settings. Please edit the file 
-##localconfig## and then rerun checksetup.pl.
+This version of Bugzilla contains some variables that you may want to
+change and adapt to your local settings. The following variables are
+new to ##localconfig## since you last ran checksetup.pl:
 
-The following variables are new to ##localconfig## since you last ran
-checksetup.pl:  ##new_vars##
+##new_vars##
+
+Please edit the file ##localconfig## and then re-run checksetup.pl
+to complete your installation.
 END
     lc_old_vars => <<'END',
 The following variables are no longer used in ##localconfig##, and
@@ -433,7 +424,7 @@ the database, and that file has been renamed to ##data##/comments.bak
 You may delete the renamed file once you have confirmed that all your
 quips were moved successfully.
 END
-    update_queries_to_tags => "Populating the new tags table:",
+    update_queries_to_tags => "Populating the new 'tag' table:",
     webdot_bad_htaccess => <<END,
 WARNING: Dependency graph images are not accessible.
 Delete ##dir##/.htaccess and re-run checksetup.pl.

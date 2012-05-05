@@ -1,21 +1,9 @@
-[%# The contents of this file are subject to the Mozilla Public
-  # License Version 1.1 (the "License"); you may not use this file
-  # except in compliance with the License. You may obtain a copy of
-  # the License at http://www.mozilla.org/MPL/
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
   #
-  # Software distributed under the License is distributed on an "AS
-  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-  # implied. See the License for the specific language governing
-  # rights and limitations under the License.
-  #
-  # The Original Code is the Bugzilla Bug Tracking System.
-  #
-  # The Initial Developer of the Original Code is Netscape Communications
-  # Corporation. Portions created by Netscape are
-  # Copyright (C) 1998 Netscape Communications Corporation. All
-  # Rights Reserved.
-  #
-  # Contributor(s): Gervase Markham <gerv@gerv.net>
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
   #%]
 
 [%# INTERFACE:
@@ -32,8 +20,6 @@
   # in this file; if you do not wish to change it, use the "none" filter.
   #%]
 
-[% PROCESS "global/field-descs.none.tmpl" %]
-
 [% DEFAULT title = "Internal Error" %]
 
 [% error_message = BLOCK %]
@@ -46,10 +32,9 @@
       A legal address must contain exactly one '@',
       and at least one '.' after the @.
     [% ELSE %]
-      [%+ Param('emailregexpdesc') %]
+      [%+ Param('emailregexpdesc') FILTER html_light %]
     [% END %]
-    It must also not contain any of these special characters:
-    <tt>\ ( ) &amp; &lt; &gt; , ; : &quot; [ ]</tt>, or any whitespace.
+    It also must not contain any illegal characters.
 
   [% ELSIF error == "authres_unhandled" %]
     The result value of [% value FILTER html %] was not handled by
@@ -468,6 +453,10 @@
   [% ELSIF error == "invalid_post_bug_submit_action" %]
     Invalid setting for post_bug_submit_action
 
+  [% ELSIF error == "search_field_operator_unsupported" %]
+    [% terms.Bugzilla %] does not support the search type
+    "[% operator FILTER html %]".
+
   [% ELSE %]
     [%# Try to find hooked error messages %]
     [% error_message = Hook.process("errors") %]
@@ -523,10 +512,8 @@
 
 <table cellpadding="20">
   <tr>
-    <td bgcolor="#ff0000">
-      <font size="+2">
-        [% error_message FILTER none %]
-      </font>
+    <td id="error_msg" class="throw_error">
+      [% error_message FILTER none %]
     </td>
   </tr>
 </table>

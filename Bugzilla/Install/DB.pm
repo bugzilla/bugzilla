@@ -1,19 +1,9 @@
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Original Code is the Bugzilla Bug Tracking System.
-#
-# Contributor(s): Max Kanat-Alexander <mkanat@bugzilla.org>
-#                 Noel Cragg <noel@red-bean.com>
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::Install::DB;
 
@@ -29,6 +19,7 @@ use Bugzilla::Install::Util qw(indicate_progress install_string);
 use Bugzilla::Util;
 use Bugzilla::Series;
 use Bugzilla::BugUrl;
+use Bugzilla::Field;
 
 use Date::Parse;
 use Date::Format;
@@ -188,15 +179,6 @@ sub update_table_definitions {
                         {TYPE => 'BOOLEAN', NOTNULL => 1}, 1);
 
     _populate_milestones_table();
-
-    # 2000-03-22 Changed the default value for target_milestone to be "---"
-    # (which is still not quite correct, but much better than what it was
-    # doing), and made the size of the value field in the milestones table match
-    # the size of the target_milestone field in the bugs table.
-    $dbh->bz_alter_column('bugs', 'target_milestone',
-        {TYPE => 'varchar(20)', NOTNULL => 1, DEFAULT => "'---'"});
-    $dbh->bz_alter_column('milestones', 'value',
-                          {TYPE => 'varchar(20)', NOTNULL => 1});
 
     _add_products_defaultmilestone();
 
@@ -397,7 +379,7 @@ sub update_table_definitions {
               "WHERE initialqacontact = 0");
 
     _migrate_email_prefs_to_new_table();
-    _initialize_dependency_tree_changes_email_pref();
+    _initialize_new_email_prefs();
     _change_all_mysql_booleans_to_tinyint();
 
     # make classification_id field type be consistent with DB:Schema
@@ -656,8 +638,33 @@ sub update_table_definitions {
     # 2011-06-15 dkl@mozilla.com - Bug 658929
     _migrate_disabledtext_boolean();
 
+    # 2011-11-01 glob@mozilla.com - Bug 240437
+    $dbh->bz_add_column('profiles', 'last_seen_date', {TYPE => 'DATETIME'});
+
     # 2011-10-11 miketosh - Bug 690173
     _on_delete_set_null_for_audit_log_userid();
+    
+    # 2011-11-23 gerv@gerv.net - Bug 705058 - make filenames longer
+    $dbh->bz_alter_column('attachments', 'filename', 
+                                    { TYPE => 'varchar(255)', NOTNULL => 1 });
+
+    # 2011-11-28 dkl@mozilla.com - Bug 685611
+    _fix_notnull_defaults();
+
+    # 2012-02-15 LpSolit@gmail.com - Bug 722113
+    if ($dbh->bz_index_info('profile_search', 'profile_search_user_id')) {
+        $dbh->bz_drop_index('profile_search', 'profile_search_user_id');
+        $dbh->bz_add_index('profile_search', 'profile_search_user_id_idx', [qw(user_id)]);
+    }
+
+    # 2012-03-23 LpSolit@gmail.com - Bug 448551
+    $dbh->bz_alter_column('bugs', 'target_milestone',
+                          {TYPE => 'varchar(64)', NOTNULL => 1, DEFAULT => "'---'"});
+
+    $dbh->bz_alter_column('milestones', 'value', {TYPE => 'varchar(64)', NOTNULL => 1});
+
+    $dbh->bz_alter_column('products', 'defaultmilestone',
+                          {TYPE => 'varchar(64)', NOTNULL => 1, DEFAULT => "'---'"});
 
     # 2011-08-29 rowebb@gmail.com - Bug 679547
     $dbh->bz_add_column('bugs', 'master_bug_id', {TYPE => 'INT3'});
@@ -2207,7 +2214,7 @@ sub _convert_attachments_filename_from_mediumtext {
     # shouldn't be there for security.  Buggy browsers include them,
     # and attachment.cgi now takes them out, but old ones need converting.
     my $ref = $dbh->bz_column_info("attachments", "filename");
-    if ($ref->{TYPE} ne 'varchar(100)') {
+    if ($ref->{TYPE} ne 'varchar(100)' && $ref->{TYPE} ne 'varchar(255)') {
         print "Removing paths from filenames in attachments table...";
 
         my $sth = $dbh->prepare("SELECT attach_id, filename FROM attachments " .
@@ -2389,13 +2396,16 @@ sub _migrate_email_prefs_to_new_table {
     }
 }
 
-sub _initialize_dependency_tree_changes_email_pref {
+sub _initialize_new_email_prefs {
     my $dbh = Bugzilla->dbh;
     # Check for any "new" email settings that wouldn't have been ported over
     # during the block above.  Since these settings would have otherwise
     # fallen under EVT_OTHER, we'll just clone those settings.  That way if
     # folks have already disabled all of that mail, there won't be any change.
-    my %events = ("Dependency Tree Changes" => EVT_DEPEND_BLOCK);
+    my %events = (
+        "Dependency Tree Changes" => EVT_DEPEND_BLOCK,
+        "Product/Component Changes" => EVT_COMPONENT,
+    );
 
     foreach my $desc (keys %events) {
         my $event = $events{$desc};
@@ -3479,6 +3489,37 @@ sub _fix_series_indexes {
     return if $dbh->bz_index_info('series', 'series_category_idx');
 
     $dbh->bz_drop_index('series', 'series_creator_idx');
+
+    # Fix duplicated names under the same category/subcategory before
+    # adding the more restrictive index.
+    my $duplicated_series = $dbh->selectall_arrayref(
+         'SELECT s1.series_id, s1.category, s1.subcategory, s1.name
+            FROM series AS s1
+      INNER JOIN series AS s2
+              ON s1.category = s2.category
+             AND s1.subcategory = s2.subcategory
+             AND s1.name = s2.name
+           WHERE s1.series_id != s2.series_id');
+    my $sth_series_update = $dbh->prepare('UPDATE series SET name = ? WHERE series_id = ?');
+    my $sth_series_query = $dbh->prepare('SELECT 1 FROM series WHERE name = ?
+                                          AND category = ? AND subcategory = ?');
+
+    my %renamed_series;
+    foreach my $series (@$duplicated_series) {
+        my ($series_id, $category, $subcategory, $name) = @$series;
+        # Leave the first series alone, then rename duplicated ones.
+        if ($renamed_series{"${category}_${subcategory}_${name}"}++) {
+            print "Renaming series ${category}/${subcategory}/${name}...\n";
+            my $c = 0;
+            my $exists = 1;
+            while ($exists) {
+                $sth_series_query->execute($name . ++$c, $category, $subcategory);
+                $exists = $sth_series_query->fetchrow_array;
+            }
+            $sth_series_update->execute($name . $c, $series_id);
+        }
+    }
+
     $dbh->bz_add_index('series', 'series_creator_idx', ['creator']);
     $dbh->bz_add_index('series', 'series_category_idx',
         {FIELDS => [qw(category subcategory name)], TYPE => 'UNIQUE'});
@@ -3562,12 +3603,12 @@ sub _populate_bug_see_also_class {
     if ($dbh->bz_column_info('bug_see_also', 'class')) {
         # The length was incorrectly set to 64 instead of 255.
         $dbh->bz_alter_column('bug_see_also', 'class',
-                              {TYPE => 'varchar(255)', NOTNULL => 1});
+                {TYPE => 'varchar(255)', NOTNULL => 1, DEFAULT => "''"});
         return;
     }
 
     $dbh->bz_add_column('bug_see_also', 'class',
-        {TYPE => 'varchar(255)', NOTNULL => 1}, '');
+        {TYPE => 'varchar(255)', NOTNULL => 1, DEFAULT => "''"}, '');
 
     my $result = $dbh->selectall_arrayref(
         "SELECT id, value FROM bug_see_also");
@@ -3606,6 +3647,13 @@ sub _rename_tags_to_tag {
         $dbh->bz_add_index('tag', 'tag_user_id_idx',
                            {FIELDS => [qw(user_id name)], TYPE => 'UNIQUE'});
     }
+    if (my $bug_tag_fk = $dbh->bz_fk_info('bug_tag', 'tag_id')) {
+        # bz_rename_table() didn't handle FKs correctly.
+        if ($bug_tag_fk->{TABLE} eq 'tags') {
+            $bug_tag_fk->{TABLE} = 'tag';
+            $dbh->bz_alter_fk('bug_tag', 'tag_id', $bug_tag_fk);
+        }
+    }
 }
 
 sub _on_delete_set_null_for_audit_log_userid {
@@ -3614,6 +3662,31 @@ sub _on_delete_set_null_for_audit_log_userid {
     if ($fk and !defined $fk->{DELETE}) {
         $fk->{DELETE} = 'SET NULL';
         $dbh->bz_alter_fk('audit_log', 'user_id', $fk);
+    }
+}
+
+sub _fix_notnull_defaults {
+    my $dbh = Bugzilla->dbh;
+
+    $dbh->bz_alter_column('bugs', 'bug_file_loc', 
+                          {TYPE => 'MEDIUMTEXT', NOTNULL => 1,  
+                           DEFAULT => "''"}, '');
+
+    my $custom_fields = Bugzilla::Field->match({ 
+        custom => 1, type => [ FIELD_TYPE_FREETEXT, FIELD_TYPE_TEXTAREA ] 
+    });
+
+    foreach my $field (@$custom_fields) {
+        if ($field->type == FIELD_TYPE_FREETEXT) {
+            $dbh->bz_alter_column('bugs', $field->name,
+                                  {TYPE => 'varchar(255)', NOTNULL => 1,
+                                   DEFAULT => "''"}, '');
+        }
+        if ($field->type == FIELD_TYPE_TEXTAREA) {
+            $dbh->bz_alter_column('bugs', $field->name,
+                                  {TYPE => 'MEDIUMTEXT', NOTNULL => 1,
+                                   DEFAULT => "''"}, '');
+        }
     }
 }
 

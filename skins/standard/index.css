@@ -1,18 +1,10 @@
- /* The contents of this file are subject to the Mozilla Public
-  * License Version 1.1 (the "License"); you may not use this file
-  * except in compliance with the License. You may obtain a copy of
-  * the License at http://www.mozilla.org/MPL/
-  *
-  * Software distributed under the License is distributed on an "AS
-  * IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-  * implied. See the License for the specific language governing
-  * rights and limitations under the License.
-  *
-  * The Original Code is the Bugzilla Bug Tracking System.
-  *
-  * Contributor(s): Vitaly Harisov <vitaly@rathedg.com>
-  *                 Guy Pyrzak <guy.pyrzak@gmail.com> 
-  */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * This Source Code Form is "Incompatible With Secondary Licenses", as
+ * defined by the Mozilla Public License, v. 2.0.
+ */
 
 /* index page (begin) */
 
@@ -26,7 +18,6 @@
        easier on customizers. */
     .intro, .outro {
         text-align: center;
-        width: 20em;
     }
 
     /* Hide from NN4 */
@@ -49,24 +40,32 @@
     {
         font-weight: bold;
     }
-    
+
     .bz_common_actions {
-        display: block;
-        height: 170px;
-        width: 145px;
-        float: left;
-        margin: 0 2ex 2em 0;
         text-align: center;
     }
-    .bz_common_actions span {
+    .bz_common_actions ul {
+        list-style-type: none;
+        padding: 0;
+    }
+    .bz_common_actions ul li {
+        display: inline;
+        vertical-align: top;
+    }
+    .bz_common_actions ul li a {
+        display: inline-block;
+        height: 170px;
+        width: 145px;
+        margin: 0 2ex 2em 0;
+    }
+    .bz_common_actions ul li a span {
         position: relative;
-        top: 95%;
+        top: 90%;
         font-weight: bold;
     }
-    .bz_common_actions,
-    .bz_common_actions:visited,
-    .bz_common_actions:hover
-    {
+    .bz_common_actions a,
+    .bz_common_actions a:visited,
+    .bz_common_actions a:hover {
         text-decoration: none;
     }
     #enter_bug { background: url(index/file-a-bug.png)     no-repeat; }

@@ -1,19 +1,9 @@
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Original Code is the Bugzilla Bug Tracking System.
-#
-# Contributor(s): Max Kanat-Alexander <mkanat@bugzilla.org>
-#                 Bill Barry <after.fallout@gmail.com>
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::Install::Filesystem;
 
@@ -46,6 +36,7 @@ our @EXPORT = qw(
     update_filesystem
     create_htaccess
     fix_all_file_permissions
+    fix_dir_permissions
     fix_file_permissions
 );
 
@@ -169,6 +160,7 @@ sub FILESYSTEM {
 
         'contrib/README'       => { perms => OWNER_WRITE },
         'contrib/*/README'     => { perms => OWNER_WRITE },
+        'contrib/Bugzilla.pm'  => { perms => OWNER_WRITE },
         'docs/bugzilla.ent'    => { perms => OWNER_WRITE },
         'docs/makedocs.pl'     => { perms => OWNER_EXECUTE },
         'docs/style.css'       => { perms => WS_SERVE },
@@ -645,6 +637,26 @@ sub _update_old_charts {
     } 
 }
 
+sub fix_dir_permissions {
+    my ($dir) = @_;
+    return if ON_WINDOWS;
+    # Note that _get_owner_and_group is always silent here.
+    my ($owner_id, $group_id) = _get_owner_and_group();
+
+    my $perms;
+    my $fs = FILESYSTEM();
+    if ($perms = $fs->{recurse_dirs}->{$dir}) {
+        _fix_perms_recursively($dir, $owner_id, $group_id, $perms);
+    }
+    elsif ($perms = $fs->{all_dirs}->{$dir}) {
+        _fix_perms($dir, $owner_id, $group_id, $perms);
+    }
+    else {
+        # Do nothing. We know nothing about this directory.
+        warn "Unknown directory $dir";
+    }
+}
+
 sub fix_file_permissions {
     my ($file) = @_;
     return if ON_WINDOWS;
@@ -842,6 +854,12 @@ Params:      C<$output> - C<true> if you want this function to print
                  out information about what it's doing.
 
 Returns:     nothing
+
+=item C<fix_dir_permissions>
+
+Given the name of a directory, its permissions will be fixed according to
+how they are supposed to be set in Bugzilla's current configuration.
+If it fails to set the permissions, a warning will be printed to STDERR.
 
 =item C<fix_file_permissions>
 

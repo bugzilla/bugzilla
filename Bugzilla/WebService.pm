@@ -1,27 +1,15 @@
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Original Code is the Bugzilla Bug Tracking System.
-#
-# Contributor(s): Marc Schumann <wurblzap@gmail.com>
-#                 Max Kanat-Alexander <mkanat@bugzilla.org>
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 # This is the base class for $self in WebService method calls. For the 
 # actual RPC server, see Bugzilla::WebService::Server and its subclasses.
 package Bugzilla::WebService;
 use strict;
 use Bugzilla::WebService::Server;
-
-use XMLRPC::Lite;
 
 # Used by the JSON-RPC server to convert incoming date fields apprpriately.
 use constant DATE_FIELDS => {};
@@ -38,24 +26,6 @@ use constant READ_ONLY => ();
 sub login_exempt {
     my ($class, $method) = @_;
     return $class->LOGIN_EXEMPT->{$method};
-}
-
-sub type {
-    my ($self, $type, $value) = @_;
-    if ($type eq 'dateTime') {
-        $value = $self->datetime_format_outbound($value);
-    }
-    return XMLRPC::Data->type($type)->value($value);
-}
-
-# This is the XML-RPC implementation, see the README in Bugzilla/WebService/.
-# Our "base" implementation is in Bugzilla::WebService::Server.
-sub datetime_format_outbound {
-    my $self = shift;
-    my $value = Bugzilla::WebService::Server->datetime_format_outbound(@_);
-    # XML-RPC uses an ISO-8601 format that doesn't have any hyphens.
-    $value =~ s/-//g;
-    return $value;
 }
 
 1;

@@ -1,23 +1,9 @@
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Original Code is the Bugzilla Bug Tracking System.
-#
-# The Initial Developer of the Original Code is Everything Solved.
-# Portions created by Everything Solved are Copyright (C) 2006 
-# Everything Solved. All Rights Reserved.
-#
-# Contributor(s): Max Kanat-Alexander <mkanat@bugzilla.org>
-#                 Frédéric Buclin <LpSolit@gmail.com>
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 use strict;
 
@@ -43,7 +29,9 @@ use constant VALIDATOR_DEPENDENCIES => {};
 # XXX At some point, this will be joined with FIELD_MAP.
 use constant REQUIRED_FIELD_MAP  => {};
 use constant EXTRA_REQUIRED_FIELDS => ();
+use constant AUDIT_CREATES => 1;
 use constant AUDIT_UPDATES => 1;
+use constant AUDIT_REMOVES => 1;
 
 # This allows the JSON-RPC interface to return Bugzilla::Object instances
 # as though they were hashes. In the future, this may be modified to return
@@ -226,8 +214,11 @@ sub match {
             }            
             next;
         }
-        
-        $class->_check_field($field, 'match');
+
+        # It's always safe to use the field defined by classes as being
+        # their ID field. In particular, this means that new_from_list()
+        # is exempted from this check.
+        $class->_check_field($field, 'match') unless $field eq $class->ID_FIELD;
 
         if (ref $value eq 'ARRAY') {
             # IN () is invalid SQL, and if we have an empty list
@@ -411,7 +402,7 @@ sub remove_from_db {
     my $id_field = $self->ID_FIELD;
     my $dbh = Bugzilla->dbh;
     $dbh->bz_start_transaction();
-    $self->audit_log(AUDIT_REMOVE);
+    $self->audit_log(AUDIT_REMOVE) if $self->AUDIT_REMOVES;
     $dbh->do("DELETE FROM $table WHERE $id_field = ?", undef, $self->id);
     $dbh->bz_commit_transaction();
     undef $self;
@@ -559,7 +550,7 @@ sub insert_create_data {
 
     Bugzilla::Hook::process('object_end_of_create', { class => $class,
                                                       object => $object });
-    $object->audit_log(AUDIT_CREATE);
+    $object->audit_log(AUDIT_CREATE) if $object->AUDIT_CREATES;
 
     return $object;
 }

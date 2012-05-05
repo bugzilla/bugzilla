@@ -1,29 +1,9 @@
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Original Code is the Bugzilla Bug Tracking System.
-#
-# The Initial Developer of the Original Code is Netscape Communications
-# Corporation. Portions created by Netscape are
-# Copyright (C) 1998 Netscape Communications Corporation. All
-# Rights Reserved.
-#
-# Contributor(s): Dave Miller <davem00@aol.com>
-#                 Gayathri Swaminath <gayathrik00@aol.com>
-#                 Jeroen Ruigrok van der Werven <asmodai@wxs.nl>
-#                 Dave Lawrence <dkl@redhat.com>
-#                 Tomas Kopal <Tomas.Kopal@altap.cz>
-#                 Max Kanat-Alexander <mkanat@bugzilla.org>
-#                 Lance Larsh <lance.larsh@oracle.com>
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 =head1 NAME
 
@@ -192,18 +172,6 @@ sub sql_string_concat {
     return '(CAST(' . join(' AS text) || CAST(', @params) . ' AS text))';
 }
 
-sub sql_string_until {
-    my ($self, $string, $substring) = @_;
-
-    # PostgreSQL does not permit a negative substring length; therefore we
-    # use CASE to only perform the SUBSTRING operation when $substring can
-    # be found withing $string.
-    my $position = $self->sql_position($substring, $string);
-    return "CASE WHEN $position != 0"
-             . " THEN SUBSTRING($string FROM 1 FOR $position - 1)"
-             . " ELSE $string END";
-}
-
 # Tell us whether or not a particular sequence exists in the DB.
 sub bz_sequence_exists {
     my ($self, $seq_name) = @_;
@@ -294,14 +262,18 @@ END
     $self->bz_add_index('products', 'products_name_lower_idx',
         {FIELDS => ['LOWER(name)'], TYPE => 'UNIQUE'});
 
-    # bz_rename_column didn't correctly rename the sequence.
-    if ($self->bz_column_info('fielddefs', 'id')
-        && $self->bz_sequence_exists('fielddefs_fieldid_seq')) 
-    {
-        print "Fixing fielddefs_fieldid_seq sequence...\n";
-        $self->do("ALTER TABLE fielddefs_fieldid_seq RENAME TO fielddefs_id_seq");
-        $self->do("ALTER TABLE fielddefs ALTER COLUMN id
-                    SET DEFAULT NEXTVAL('fielddefs_id_seq')");
+    # bz_rename_column and bz_rename_table didn't correctly rename
+    # the sequence.
+    $self->_fix_bad_sequence('fielddefs', 'id', 'fielddefs_fieldid_seq', 'fielddefs_id_seq');
+    # If the 'tags' table still exists, then bz_rename_table()
+    # will fix the sequence for us.
+    if (!$self->bz_table_info('tags')) {
+        my $res = $self->_fix_bad_sequence('tag', 'id', 'tags_id_seq', 'tag_id_seq');
+        # If $res is true, then the sequence has been renamed, meaning that
+        # the primary key must be renamed too.
+        if ($res) {
+            $self->do('ALTER INDEX tags_pkey RENAME TO tag_pkey');
+        }
     }
 
     # Certain sequences got upgraded before we required Pg 8.3, and
@@ -330,6 +302,20 @@ END
             }
         }
     }
+}
+
+sub _fix_bad_sequence {
+    my ($self, $table, $column, $old_seq, $new_seq) = @_;
+    if ($self->bz_column_info($table, $column)
+        && $self->bz_sequence_exists($old_seq))
+    {
+        print "Fixing $old_seq sequence...\n";
+        $self->do("ALTER SEQUENCE $old_seq RENAME TO $new_seq");
+        $self->do("ALTER TABLE $table ALTER COLUMN $column
+                    SET DEFAULT NEXTVAL('$new_seq')");
+        return 1;
+    }
+    return 0;
 }
 
 # Renames things that differ only in case.

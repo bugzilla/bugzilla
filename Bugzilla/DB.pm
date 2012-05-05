@@ -1,30 +1,9 @@
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Original Code is the Bugzilla Bug Tracking System.
-#
-# The Initial Developer of the Original Code is Netscape Communications
-# Corporation. Portions created by Netscape are
-# Copyright (C) 1998 Netscape Communications Corporation. All
-# Rights Reserved.
-#
-# Contributor(s): Terry Weissman <terry@mozilla.org>
-#                 Dan Mosedale <dmose@mozilla.org>
-#                 Jacob Steenhagen <jake@bugzilla.org>
-#                 Bradley Baetz <bbaetz@student.usyd.edu.au>
-#                 Christopher Aillon <christopher@aillon.com>
-#                 Tomas Kopal <Tomas.Kopal@altap.cz>
-#                 Max Kanat-Alexander <mkanat@bugzilla.org>
-#                 Lance Larsh <lance.larsh@oracle.com>
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::DB;
 
@@ -397,8 +376,11 @@ sub sql_string_concat {
 
 sub sql_string_until {
     my ($self, $string, $substring) = @_;
-    return "SUBSTRING($string FROM 1 FOR " .
-                      $self->sql_position($substring, $string) . " - 1)";
+
+    my $position = $self->sql_position($substring, $string);
+    return "CASE WHEN $position != 0"
+             . " THEN SUBSTR($string, 1, $position - 1)"
+             . " ELSE $string END";
 }
 
 sub sql_in {
@@ -545,7 +527,7 @@ sub bz_setup_foreign_keys {
             # prior to 4.2, and also to handle problems caused
             # by enabling an extension pre-4.2, disabling it for
             # the 4.2 upgrade, and then re-enabling it later.
-            if (!$fk) {
+            unless ($fk && $fk->{created}) {
                 my $standard_def = 
                     $self->_bz_schema->get_column_abstract($table, $column);
                 if (exists $standard_def->{REFERENCES}) {
@@ -1055,6 +1037,18 @@ sub bz_rename_table {
     my $new = $self->bz_table_info($new_name);
     ThrowCodeError('db_rename_conflict', { old => $old_name,
                                            new => $new_name }) if $new;
+
+    # FKs will all have the wrong names unless we drop and then let them
+    # be re-created later. Under normal circumstances, checksetup.pl will
+    # automatically re-create these dropped FKs at the end of its DB upgrade
+    # run, so we don't need to re-create them in this method.
+    my @columns = $self->bz_table_columns($old_name);
+    foreach my $column (@columns) {
+        # these just return silently if there's no FK to drop
+        $self->bz_drop_fk($old_name, $column);
+        $self->bz_drop_related_fks($old_name, $column);
+    }
+
     my @sql = $self->_bz_real_schema->get_rename_table_sql($old_name, $new_name);
     print get_text('install_table_rename', 
                    { old => $old_name, new => $new_name }) . "\n"

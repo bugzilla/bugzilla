@@ -1,24 +1,9 @@
-/* The contents of this file are subject to the Mozilla Public
- * License Version 1.1 (the "License"); you may not use this file
- * except in compliance with the License. You may obtain a copy of
- * the License at http://www.mozilla.org/MPL/
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Software distributed under the License is distributed on an "AS
- * IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
- * implied. See the License for the specific language governing
- * rights and limitations under the License.
- *
- * The Original Code is the Bugzilla Bug Tracking System.
- *
- * The Initial Developer of the Original Code is Netscape Communications
- * Corporation. Portions created by Netscape are
- * Copyright (C) 1998 Netscape Communications Corporation. All
- * Rights Reserved.
- *
- * Contributor(s): Frédéric Buclin <LpSolit@gmail.com>
- *                 Max Kanat-Alexander <mkanat@bugzilla.org>
- *                 Edmund Wong <ewong@pw-wspx.org>
- *                 Anthony Pipkin <a.pipkin@yahoo.com>
+ * This Source Code Form is "Incompatible With Secondary Licenses", as
+ * defined by the Mozilla Public License, v. 2.0.
  */
 
 function updateCommentPrivacy(checkbox, id) {
@@ -67,13 +52,11 @@ function toggle_all_comments(action) {
 
 function collapse_comment(link, comment) {
     link.innerHTML = "[+]";
-    link.title = "Expand the comment.";
     YAHOO.util.Dom.addClass(comment, 'collapsed');
 }
 
 function expand_comment(link, comment) {
     link.innerHTML = "[-]";
-    link.title = "Collapse the comment";
     YAHOO.util.Dom.removeClass(comment, 'collapsed');
 }
 
@@ -127,11 +110,11 @@ function wrapReplyText(text) {
 /* This way, we are sure that browsers which do not support JS
    * won't display this link  */
 
-function addCollapseLink(count) {
+function addCollapseLink(count, title) {
     document.write(' <a href="#" class="bz_collapse_comment"' +
                    ' id="comment_link_' + count +
                    '" onclick="toggle_comment_display(this, ' +  count +
-                   '); return false;" title="Collapse the comment.">[-]<\/a> ');
+                   '); return false;" title="' + title + '">[-]<\/a> ');
 }
 
 function goto_add_comments( anchor ){

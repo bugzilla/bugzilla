@@ -1,22 +1,9 @@
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Original Code is the Bugzilla Bug Tracking System.
-#
-# Contributor(s): Marc Schumann <wurblzap@gmail.com>
-#                 Max Kanat-Alexander <mkanat@bugzilla.org>
-#                 Rosie Clarkson <rosie.clarkson@planningportal.gov.uk>
-#                 
-# Portions © Crown copyright 2009 - Rosie Clarkson (development@planningportal.gov.uk) for the Planning Portal
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::WebService::Server::XMLRPC;
 
@@ -30,6 +17,20 @@ if ($ENV{MOD_PERL}) {
 }
 
 use Bugzilla::WebService::Constants;
+
+# Allow WebService methods to call XMLRPC::Lite's type method directly
+BEGIN {
+    *Bugzilla::WebService::type = sub {
+        my ($self, $type, $value) = @_;
+        if ($type eq 'dateTime') {
+            # This is the XML-RPC implementation,  see the README in Bugzilla/WebService/.
+            # Our "base" implementation is in Bugzilla::WebService::Server.
+            $value = Bugzilla::WebService::Server->datetime_format_outbound($value);
+            $value =~ s/-//g;
+        }
+        return XMLRPC::Data->type($type)->value($value);
+    };
+}
 
 sub initialize {
     my $self = shift;
@@ -72,10 +73,21 @@ use XMLRPC::Lite;
 our @ISA = qw(XMLRPC::Deserializer);
 
 use Bugzilla::Error;
+use Bugzilla::WebService::Constants qw(XMLRPC_CONTENT_TYPE_WHITELIST);
 use Scalar::Util qw(tainted);
 
 sub deserialize {
     my $self = shift;
+
+    # Only allow certain content types to protect against CSRF attacks
+    my $content_type = lc($ENV{'CONTENT_TYPE'});
+    # Remove charset, etc, if provided
+    $content_type =~ s/^([^;]+);.*/$1/;
+    if (!grep($_ eq $content_type, XMLRPC_CONTENT_TYPE_WHITELIST)) {
+        ThrowUserError('xmlrpc_illegal_content_type',
+                       { content_type => $ENV{'CONTENT_TYPE'} });
+    }
+
     my ($xml) = @_;
     my $som = $self->SUPER::deserialize(@_);
     if (tainted($xml)) {

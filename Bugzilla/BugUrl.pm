@@ -133,8 +133,7 @@ sub class_for {
             if $subclass->should_handle($uri);
     }
 
-    ThrowUserError('bug_url_invalid', { url    => $value,
-                                        reason => 'show_bug' });
+    ThrowUserError('bug_url_invalid', { url => $value });
 }
 
 sub _check_class {

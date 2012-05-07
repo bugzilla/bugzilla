@@ -13,6 +13,7 @@ use constant MORE_SUB_CLASSES => qw(
     Bugzilla::Extension::MoreBugUrl::ReviewBoard
     Bugzilla::Extension::MoreBugUrl::Rietveld
     Bugzilla::Extension::MoreBugUrl::RT
+    Bugzilla::Extension::MoreBugUrl::GetSatisfaction
 );
 
 # We need to update bug_see_also table because both

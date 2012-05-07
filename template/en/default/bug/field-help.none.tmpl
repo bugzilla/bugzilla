@@ -137,6 +137,13 @@ status_whiteboard =>
   "Each $terms.bug has a free-form single line text entry box for"
   _ " adding tags and status information.",
 
+tag =>
+  "Unlike ${vars.field_descs.keywords} which are global and visible by
+   all users, ${vars.field_descs.tag} are personal and can only be
+   viewed and edited by their author.
+   Editing them won't send any notification to other users. Use them
+   to tag and keep track of ${terms.bugs}.",
+
 target_milestone =>
    "The $vars.field_descs.target_milestone field is used to define when the"
    _ " engineer the $terms.bug is assigned to expects to fix it.",

@@ -928,7 +928,9 @@ sub create {
             'use_keywords' => sub { return Bugzilla::Keyword->any_exist; },
 
             # All the keywords.
-            'all_keywords' => sub { return Bugzilla::Keyword->get_all(); },
+            'all_keywords' => sub {
+                return [map { $_->name } Bugzilla::Keyword->get_all()];
+            },
 
             'feature_enabled' => sub { return Bugzilla->feature(@_); },
 

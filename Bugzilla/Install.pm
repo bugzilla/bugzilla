@@ -61,8 +61,6 @@ sub SETTINGS {
     csv_colsepchar     => { options => [',',';'], default => ',' },
     # 2005-10-26 wurblzap@gmail.com -- Bug 291459
     zoom_textareas     => { options => ["on", "off"], default => "on" },
-    # 2005-10-21 LpSolit@gmail.com -- Bug 313020
-    per_bug_queries    => { options => ['on', 'off'], default => 'off' },
     # 2006-05-01 olav@bkor.dhs.org -- Bug 7710
     state_addselfcc    => { options => ['always', 'never',  'cc_unless_role'],
                             default => 'cc_unless_role' },
@@ -192,6 +190,9 @@ sub update_settings {
                     $settings{$setting}->{subclass}, undef,
                     !$any_settings);
     }
+
+    # Delete the obsolete 'per_bug_queries' user preference. Bug 616191.
+    $dbh->do('DELETE FROM setting WHERE name = ?', undef, 'per_bug_queries');
 }
 
 sub update_system_groups {

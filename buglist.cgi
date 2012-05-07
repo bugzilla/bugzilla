@@ -23,10 +23,8 @@ use Bugzilla::Search;
 use Bugzilla::Search::Quicksearch;
 use Bugzilla::Search::Recent;
 use Bugzilla::Search::Saved;
-use Bugzilla::User;
 use Bugzilla::Bug;
 use Bugzilla::Product;
-use Bugzilla::Keyword;
 use Bugzilla::Field;
 use Bugzilla::Status;
 use Bugzilla::Token;
@@ -445,51 +443,18 @@ elsif (($cmdtype eq "doit") && defined $cgi->param('remtype')) {
         my $new_query = $cgi->param('newquery');
         my $token = $cgi->param('token');
         check_hash_token($token, ['savedsearch']);
-        # If list_of_bugs is true, we are adding/removing tags to/from
-        # individual bugs.
-        if ($cgi->param('list_of_bugs')) {
-            # We add/remove tags based on the action choosen.
-            my $action = trim($cgi->param('action') || '');
-            $action =~ /^(add|remove)$/
-              || ThrowUserError('unknown_action', {action => $action});
-
-            my $method = "${action}_tag";
-
-            # If no new tag name has been given, use the selected one.
-            $query_name ||= $cgi->param('oldqueryname')
-              or ThrowUserError('no_tag_to_edit', {action => $action});
-
-            my @buglist;
-            # Validate all bug IDs before editing tags in any of them.
-            foreach my $bug_id (split(/[\s,]+/, $cgi->param('bug_ids'))) {
-                next unless $bug_id;
-                push(@buglist, Bugzilla::Bug->check($bug_id));
-            }
-
-            foreach my $bug (@buglist) {
-                $bug->$method($query_name);
-            }
-
-            $vars->{'message'} = 'tag_updated';
-            $vars->{'action'} = $action;
-            $vars->{'tag'} = $query_name;
-            $vars->{'buglist'} = [map { $_->id } @buglist];
+        my $existed_before = InsertNamedQuery($query_name, $new_query, 1);
+        if ($existed_before) {
+            $vars->{'message'} = "buglist_updated_named_query";
         }
         else {
-            my $existed_before = InsertNamedQuery($query_name, $new_query, 1);
-            if ($existed_before) {
-                $vars->{'message'} = "buglist_updated_named_query";
-            }
-            else {
-                $vars->{'message'} = "buglist_new_named_query";
-            }
-
-            # Make sure to invalidate any cached query data, so that the footer is
-            # correctly displayed
-            $user->flush_queries_cache();
-
-            $vars->{'queryname'} = $query_name;
+            $vars->{'message'} = "buglist_new_named_query";
         }
+        $vars->{'queryname'} = $query_name;
+
+        # Make sure to invalidate any cached query data, so that the footer is
+        # correctly displayed
+        $user->flush_queries_cache();
 
         print $cgi->header();
         $template->process("global/message.html.tmpl", $vars)

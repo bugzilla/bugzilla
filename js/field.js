@@ -870,27 +870,29 @@ YAHOO.bugzilla.userAutocomplete = {
     }
 };
 
-YAHOO.bugzilla.keywordAutocomplete = {
-    dataSource : null,
-    init_ds : function(){
-        this.dataSource = new YAHOO.util.LocalDataSource( YAHOO.bugzilla.keyword_array );
+YAHOO.bugzilla.fieldAutocomplete = {
+    dataSource : [],
+    init_ds : function( field ) {
+        this.dataSource[field] =
+          new YAHOO.util.LocalDataSource( YAHOO.bugzilla.field_array[field] );
     },
     init : function( field, container ) {
-        if( this.dataSource == null ){
-            this.init_ds();
+        if( this.dataSource[field] == null ) {
+            this.init_ds( field );
         }
-        var keywordAutoComp = new YAHOO.widget.AutoComplete(field, container, this.dataSource);
-        keywordAutoComp.maxResultsDisplayed = YAHOO.bugzilla.keyword_array.length;
-        keywordAutoComp.minQueryLength = 0;
-        keywordAutoComp.useIFrame = true;
-        keywordAutoComp.delimChar = [","," "];
-        keywordAutoComp.resultTypeList = false;
-        keywordAutoComp.queryDelay = 0;
-        /*  Causes all the possibilities in the keyword to appear when a user 
+        var fieldAutoComp =
+          new YAHOO.widget.AutoComplete(field, container, this.dataSource[field]);
+        fieldAutoComp.maxResultsDisplayed = YAHOO.bugzilla.field_array[field].length;
+        fieldAutoComp.minQueryLength = 0;
+        fieldAutoComp.useIFrame = true;
+        fieldAutoComp.delimChar = [","," "];
+        fieldAutoComp.resultTypeList = false;
+        fieldAutoComp.queryDelay = 0;
+        /*  Causes all the possibilities in the field to appear when a user
          *  focuses on the textbox 
          */
-        keywordAutoComp.textboxFocusEvent.subscribe( function(){
-            var sInputValue = YAHOO.util.Dom.get('keywords').value;
+        fieldAutoComp.textboxFocusEvent.subscribe( function(){
+            var sInputValue = YAHOO.util.Dom.get(field).value;
             if( sInputValue.length === 0 ){
                 this.sendQuery(sInputValue);
                 this.collapseContainer();

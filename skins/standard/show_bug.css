@@ -118,7 +118,7 @@ table#flags {
     float: right;
 }
 
-.text_input, .bz_userfield, #keyword_container {
+.text_input, .bz_userfield, #keywords_container, #tag_container {
     width: 100%;
 }
 .bz_bug .bz_alias_short_desc_container {

@@ -523,9 +523,18 @@
         [% INCLUDE bug/field.html.tmpl
            bug = bug, field = bug_fields.keywords, value = bug.keywords
            editable = bug.check_can_change_field("keywords", 0, 1),
-           no_tds = 1
+           no_tds = 1, possible_values = all_keywords
         %]
       </td>
+    </tr>
+  [% END %]
+
+  [% IF user.id %]
+    <tr>
+      [% INCLUDE bug/field.html.tmpl
+         bug = bug, field = bug_fields.tag, value = bug.tags.join(", "),
+         editable = 1, possible_values = user.tags.keys
+      %]
     </tr>
   [% END %]
 [% END %]

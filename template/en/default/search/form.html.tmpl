@@ -142,6 +142,7 @@ TUI_hide_default('information_query');
     %]
     <div class="search_field_row">
       [% type = field_container.field.name _ "_type" %]
+      [% possible_values = field_container.field.name == 'keywords' ? all_keywords : [] %]
       [% INCLUDE "search/field.html.tmpl" 
           field => field_container.field
           types => field_container.qtypes || query_types

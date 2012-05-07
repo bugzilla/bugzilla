@@ -35,20 +35,22 @@
        types = types, 
        selected = type_selected
     %]
-    <div id="keyword_container">
+    <div id="[% field.name FILTER html %]_container">
        <input name="[% field.name FILTER html %]" 
               id="[% field.name FILTER html %]" size="40"
               [% IF onchange %] onchange="[% onchange FILTER html %]"[% END %]
               value="[% value FILTER html %]">
-       <div id="keyword_autocomplete"></div>
+       <div id="[% field.name FILTER html %]_autocomplete"></div>
     </div>
     <script type="text/javascript" defer="defer">
-      YAHOO.bugzilla.keyword_array = [
-        [%- FOREACH keyword = all_keywords %]
-          [%-# %]"[% keyword.name FILTER js %]"
+      if (typeof YAHOO.bugzilla.field_array === "undefined")
+        YAHOO.bugzilla.field_array = [];
+      YAHOO.bugzilla.field_array["[% field.name FILTER js %]"] = [
+        [%- FOREACH val = possible_values %]
+          [%-# %]"[% val FILTER js %]"
           [%- "," IF NOT loop.last %][% END %]];
-      YAHOO.bugzilla.keywordAutocomplete.init('[% field.name FILTER js %]',
-                                              'keyword_autocomplete');
+      YAHOO.bugzilla.fieldAutocomplete.init('[% field.name FILTER js %]',
+                                            '[% field.name FILTER js %]_autocomplete');
     </script>
   [% CASE constants.FIELD_TYPE_DATETIME %]
     [% INCLUDE "bug/field-label.html.tmpl"

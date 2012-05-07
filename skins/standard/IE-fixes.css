@@ -44,7 +44,7 @@ form#Create #comp_desc {
     display: inline;
 }
 
-#keyword_container .yui-ac-content {
+#keywords_container .yui-ac-content {
     _height: 30em; /* ie6 */
 }
 

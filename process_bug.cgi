@@ -28,10 +28,6 @@ use Bugzilla::Bug;
 use Bugzilla::User;
 use Bugzilla::Util;
 use Bugzilla::Error;
-use Bugzilla::Field;
-use Bugzilla::Product;
-use Bugzilla::Component;
-use Bugzilla::Keyword;
 use Bugzilla::Flag;
 use Bugzilla::Status;
 use Bugzilla::Token;
@@ -330,6 +326,14 @@ if (defined $cgi->param('id')) {
     my ($flags, $new_flags) = Bugzilla::Flag->extract_flags_from_cgi(
         $first_bug, undef, $vars);
     $first_bug->set_flags($flags, $new_flags);
+
+    # Tags can only be set to one bug at once.
+    if (should_set('tag')) {
+        my @new_tags = split(/[\s,]+/, $cgi->param('tag'));
+        my ($tags_removed, $tags_added) = diff_arrays($first_bug->tags, \@new_tags);
+        $first_bug->remove_tag($_) foreach @$tags_removed;
+        $first_bug->add_tag($_) foreach @$tags_added;
+    }
 }
 
 ##############################

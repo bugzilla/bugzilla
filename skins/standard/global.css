@@ -526,12 +526,12 @@ input.required, select.required, span.required_explanation {
     overflow-x: hidden;
 }
 
-#keyword_container {
+#keywords_container {
     padding-top: .2em;
 }
 
 
-#keyword_container .yui-ac-content {
+#keywords_container .yui-ac-content {
     margin-left: -1px;
 }
 

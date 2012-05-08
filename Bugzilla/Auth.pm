@@ -38,6 +38,7 @@ use Bugzilla::User::Setting ();
 use Bugzilla::Auth::Login::Stack;
 use Bugzilla::Auth::Verify::Stack;
 use Bugzilla::Auth::Persist::Cookie;
+use Socket;
 
 sub new {
     my ($class, $params) = @_;
@@ -215,10 +216,18 @@ sub _handle_login_result {
             my $default_settings = Bugzilla::User::Setting::get_defaults();
             my $template = Bugzilla->template_inner(
                                $default_settings->{lang}->{default_value});
+            my $address = $attempts->[0]->{ip_addr};
+            # Note: inet_aton will only resolve IPv4 addresses.
+            # For IPv6 we'll need to use inet_pton which requires Perl 5.12.
+            my $n = inet_aton($address);
+            if ($n) {
+                $address = gethostbyaddr($n, AF_INET) . " ($address)"
+            }
             my $vars = {
                 locked_user => $user,
                 attempts    => $attempts,
                 unlock_at   => $unlock_at,
+                address     => $address,
             };
             my $message;
             $template->process('email/lockout.txt.tmpl', $vars, \$message)

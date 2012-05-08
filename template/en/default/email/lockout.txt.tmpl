@@ -8,10 +8,10 @@
 
 From: [% Param('mailfrom') %]
 To: [% Param('maintainer') %]
-Subject: [[% terms.Bugzilla %]] Account Lock-Out: [% locked_user.login %] ([% attempts.0.ip_addr %])
+Subject: [[% terms.Bugzilla %]] Account Lock-Out: [% locked_user.login %] ([% address %])
 X-Bugzilla-Type: admin
 
-The IP address [% attempts.0.ip_addr %] failed too many login attempts (
+The address [% address %] failed too many login attempts (
 [%- constants.MAX_LOGIN_ATTEMPTS +%]) for
 the account [% locked_user.login %]. 
 

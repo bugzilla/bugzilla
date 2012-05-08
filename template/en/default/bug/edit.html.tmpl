@@ -181,13 +181,11 @@
       <table id="summary"> 
         <tr>
           [% IF bug.check_can_change_field('alias', 0, 1) %]      
+            [% INCLUDE "bug/field-label.html.tmpl"
+               field = bug_fields.alias
+               editable = 1
+            %]
             <td>
-              <label 
-                for="alias" 
-                title="a name for the 
-                       [% terms.bug %] that can be used in place of its ID number, 
-                       [%%] e.g. when adding it to a list of dependencies"
-                >Alias</label>:</td><td>
           [% ELSIF bug.alias %]
             <td colspan="2">(
           [% ELSE %]
@@ -203,9 +201,11 @@
         </tr>
         [%# *** Summary *** %]
         <tr>
-          <td>
-            <label accesskey="s" for="short_desc"><u>S</u>ummary</label>:
-          </td>
+          [% INCLUDE "bug/field-label.html.tmpl"
+            field = bug_fields.short_desc
+            editable = 1
+            accesskey = "s"
+          %]
           <td>
             [% PROCESS input inputname => "short_desc" size => "80" colspan => 2
                              maxlength => 255 spellcheck => "true" no_td => 1 %]

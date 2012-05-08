@@ -200,7 +200,9 @@ sub warn_if_interdiff_might_fail {
 
     # Verify that the revisions in the files are the same.
     foreach my $file (keys %{$old_file_list}) {
-        if ($old_file_list->{$file}{old_revision} ne
+        if (exists $old_file_list->{$file}{old_revision}
+            && exists $new_file_list->{$file}{old_revision}
+            && $old_file_list->{$file}{old_revision} ne
             $new_file_list->{$file}{old_revision})
         {
             return 'interdiff2';

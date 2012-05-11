@@ -49,6 +49,7 @@ our @EXPORT_OK = qw($cf_visible_in_products
 our $cf_visible_in_products;
 tie(%$cf_visible_in_products, "Tie::IxHash", 
     qw/^cf_blocking_kilimanjaro/ => {
+        "Boot2Gecko"       => [],
         "Core"             => [],
         "Fennec"           => [],
         "Fennec Native"    => [],

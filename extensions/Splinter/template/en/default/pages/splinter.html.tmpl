@@ -81,7 +81,7 @@
 
     [% FOREACH attachment = bug.attachments %]
       [% NEXT IF attachment.isprivate && !user.is_insider && attachment.attacher.id != user.id %]        
-      [% NEXT IF !attachment.ispatch || attachment.isobsolete %]
+      [% NEXT IF !attachment.ispatch %]
       var attachid = parseInt('[% attachment.id FILTER js %]');
       var attachment = new Splinter.Bug.Attachment('', attachid);
       [% IF attachment.id == attach_id && attachment.ispatch %]

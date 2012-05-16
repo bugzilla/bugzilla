@@ -458,6 +458,7 @@ sub description { return $_[0]->{description} }
 A string providing detailed info about the field;
 
 =back
+
 =cut
 
 sub long_desc { return $_[0]->{long_desc} }

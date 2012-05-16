@@ -25,14 +25,20 @@
 Reporter: [% original_reporter.identity FILTER none %]
 [%- END -%]
 
-  [% IF !no_display_action_needed %]
-Action needed: Please immediately reset the LDAP password for this user. 
-The user reported that their mobile or laptop device has been lost or stolen. 
-This ticket was automatically generated from the employee incident reporting 
-form. A second ticket has been filed (see blocker bugs) for InfraSec to review the 
-impact of this lost device.
+  [% IF cgi.param('display_action') %]
+    [% IF cgi.param('display_action') == 'ldap' %]
+Action needed: Please immediately reset the LDAP password for this user.
+    [% ELSIF cgi.param('display_action') == 'ssh' %]
+Action needed: Please immediately disable the SSH key for this user.
+    [% END %]
+
+The user reported that their mobile or laptop device has been lost or stolen.
+This ticket was automatically generated from the employee incident reporting
+form.  An additional ticket has been filed (see blocker bugs) for InfraSec to
+review the impact of this lost device.
   [% END %]
 
+Type of device: [% cgi.param('device') %]
 Was the device encrypted?: [% cgi.param('encrypted') %]
 Any user data on the device?: [% cgi.param('userdata') %]
   [% IF cgi.param('userdata') == 'Yes' %]

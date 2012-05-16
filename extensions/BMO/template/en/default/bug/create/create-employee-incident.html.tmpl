@@ -18,19 +18,18 @@
   #   David Lawrence <dkl@mozilla.com>
   #%]
 
-[% PROCESS global/variables.none.tmpl %]                                      
-                                                                              
-[% PROCESS global/header.html.tmpl                                            
-   title = "Mozilla Corporation/Foundation Employee Incident" 
+[% PROCESS global/variables.none.tmpl %]
+
+[% PROCESS global/header.html.tmpl
+   title = "Mozilla Corporation/Foundation Employee Incident"
 %]
-                                                                            
-[% USE Bugzilla %]                                                            
+
+[% USE Bugzilla %]
 
 <script type="text/javascript">
-<!--
     var type_desc = new Array();
     type_desc['safety'] = "If this is an emergency please immediately call your local police or emergency number.";
-    type_desc['stolen'] = "Please report a lost Mozilla laptop or any mobile device that was used to access<br> " + 
+    type_desc['stolen'] = "Please report a lost Mozilla laptop or any mobile device that was used to access<br> " +
                           "Mozilla email or contained passwords for Mozilla servers, devices, applications, etc.";
 
     function validateAndSubmit() {
@@ -45,6 +44,9 @@
         var select = YAHOO.util.Dom.get('incident_type');
         var selectValue = select.options[select.selectedIndex].value;
         if (selectValue == 'stolen') {
+            if (!isFilledOut('device')) {
+                alert_text += "Please provide the type of device.\n";
+            }
             if (!isFilledOut('encrypted')) {
                 alert_text += "Please answer whether the device was encrypted.\n";
             }
@@ -87,18 +89,20 @@
 
         // Alter the product/component/group based on type selected
         if (selectValue == 'stolen') {
-            document.getElementById('product').value      = 'mozilla.org';
-            document.getElementById('component').value    = 'Server Operations: Desktop Issues';
-            document.getElementById('groups').value       = 'infra';
-            document.getElementById('cc').value           = 'mcoates@mozilla.com, jstevensen@mozilla.com, afowler@mozilla.com';
-            document.getElementById('bug_severity').value = 'critical';
+            document.getElementById('product').value        = 'mozilla.org';
+            document.getElementById('component').value      = 'Server Operations: Desktop Issues';
+            document.getElementById('groups').value         = 'infra';
+            document.getElementById('cc').value             = 'mcoates@mozilla.com, jstevensen@mozilla.com, afowler@mozilla.com';
+            document.getElementById('bug_severity').value   = 'critical';
+            document.getElementById('display_action').value = 'ldap';
         }
         else {
-            document.getElementById('product').value      = 'Mozilla Corporation';
-            document.getElementById('component').value    = 'Facilities Management';
-            document.getElementById('groups').value       = 'hr';
-            document.getElementById('cc').value           = 'dcohen@mozilla.com, mcoates@mozilla.com, jill@mozilla.com';
-            document.getElementById('bug_severity').value = 'normal';
+            document.getElementById('product').value        = 'Mozilla Corporation';
+            document.getElementById('component').value      = 'Facilities Management';
+            document.getElementById('groups').value         = 'hr';
+            document.getElementById('cc').value             = 'dcohen@mozilla.com, mcoates@mozilla.com, jill@mozilla.com';
+            document.getElementById('bug_severity').value   = 'normal';
+            document.getElementById('display_action').value = '';
         }
     }
 
@@ -115,21 +119,20 @@
     }
 
     function isFilledOut(elem_id)  {
-        var str = document.getElementById(elem_id).value; 
-        return str.length > 0 && str != "noneselected"; 
-    } 
+        var str = document.getElementById(elem_id).value;
+        return str.length > 0 && str != "noneselected";
+    }
 
     YAHOO.util.Event.onDOMReady(function () {
         setType(document.getElementById('incident_type'));
         toggleEnabled('userdata', 'Yes', 'sensitivedata');
         toggleEnabled('rememberpasswords', 'Yes', 'criticalsites');
     });
-// -->
 </script>
 
 <p><strong>Please use this form for employee incidents only!</strong></p>
 <p>If you have a [% terms.bug %] to file, go <a href="enter_bug.cgi">here</a>.</p>
-<p><span style="color: red;">*</span></strong> Required Fields</p>
+<p><span style="color: red;">*</span> Required Fields</p>
 <form method="post" action="post_bug.cgi" id="incidentForm" enctype="multipart/form-data"
       onSubmit="return validateAndSubmit();">
   <input type="hidden" id="product" name="product" value="">
@@ -142,6 +145,7 @@
   <input type="hidden" id="groups" name="groups" value="">
   <input type="hidden" id="format" name="format" value="employee-incident">
   <input type="hidden" id="bug_severity" name="bug_severity" value="">
+  <input type="hidden" id="display_action" name="display_action" value="">
   <input type="hidden" id="token" name="token" value="[% token FILTER html %]">
 
   <table>
@@ -161,7 +165,7 @@
           <strong><span style="color: red;">*</span> Summary:</strong>
         </td>
         <td>
-          <input name="short_desc" id="short_desc" size="60" 
+          <input name="short_desc" id="short_desc" size="60"
                  value="[% short_desc FILTER html %]">
         </td>
       </tr>
@@ -173,6 +177,25 @@
           <table>
           <tr>
             <td>
+              <label for="device">
+                <strong><span style="color: red;">*</span></strong>
+                Type of device lost:
+              </label>
+            </td>
+            <td>
+              <select name="device" id="device">
+                <option value="">---</option>
+                <option value="Mobile Phone">Mobile Phone</option>
+                <option value="Tablet">Tablet</option>
+                <option value="Laptop">Laptop</option>
+                <option value="WorkStation">WorkStation</option>
+                <option value="Portable Storage Device">Portable Storage Device</option>
+                <option value="Other">Other (describe in 'Extra Notes')</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td>
               <label for="encrypted">
                 <strong><span style="color: red;">*</span></strong>
                 To your knowledge,  was your device encrypted?
@@ -181,7 +204,7 @@
             <td>
               <select name="encrypted" id="encrypted">
                 <option value="">---</option>
-                <option value="No">No</option> 
+                <option value="No">No</option>
                 <option value="Yes">Yes</option>
               </select>
             </td>
@@ -197,10 +220,10 @@
               <select name="userdata" id="userdata"
                       onchange="toggleEnabled('userdata', 'Yes', 'sensitivedata');">
                 <option value="">---</option>
-                <option value="No">No</option>  
+                <option value="No">No</option>
                 <option value="Yes">Yes</option>
               </select>
-            </td> 
+            </td>
            </tr>
            </table>
         </td>
@@ -220,13 +243,13 @@
         <td>
           <label for="rememberpasswords">
             <strong><span style="color: red;">*</span></strong>
-            Was your browser configured to remember passwords 
+            Was your browser configured to remember passwords
             (<a href="http://support.mozilla.com/en-US/kb/make-firefox-remember-usernames-and-passwords">more info</a>)?
           </label>
-          <select name="rememberpasswords" id="rememberpasswords" 
+          <select name="rememberpasswords" id="rememberpasswords"
                   onchange="toggleEnabled('rememberpasswords', 'Yes', 'criticalsites');">
             <option value="">---</option>
-            <option value="No">No</option>  
+            <option value="No">No</option>
             <option value="Yes">Yes</option>
           </select>
         </td>
@@ -249,7 +272,7 @@
           [% comment FILTER html %]</textarea>
       </td>
     </tr>
-    <tr> 
+    <tr>
       <td>&nbsp;</td>
       <td>
         <input type="submit" id="commit" value="Submit Request">
@@ -262,4 +285,4 @@
   Thanks for contacting us. You will be notified by email of any progress made in resolving your request.
 </p>
 
-[% PROCESS global/footer.html.tmpl %]                   
+[% PROCESS global/footer.html.tmpl %]

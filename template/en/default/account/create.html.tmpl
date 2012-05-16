@@ -36,11 +36,20 @@
   at <a href="mailto:[% Param("maintainer") %]">[% Param("maintainer") %]</a>.
 </p>
 
+<p>
+  A user account is required to report new [% terms.bugs %] or to comment into
+  existing ones, as you may be contacted for more information if needed.
+  This also lets other users clearly identify who is the author of comments
+  or changes made into [% terms.bugs %]. <b>Note that your email address will
+  <u>never</u> be displayed to logged out users. Only registered users will be
+  able to see it.</b>
+</p>
+
 [% IF Param('createemailregexp') == '.*' && Param('emailsuffix') == '' %]
 <p>
   <b>PRIVACY NOTICE:</b> [% terms.Bugzilla %] is an open [% terms.bug %]
   tracking system. Activity on most [% terms.bugs %], including email
-  addresses, will be visible to the public. We <b>recommend</b> using a
+  addresses, will be visible to registered users. We <b>recommend</b> using a
   secondary account or free web email service (such as Gmail, Yahoo,
   Hotmail, or similar) to avoid receiving spam at your primary email address.
 </p>

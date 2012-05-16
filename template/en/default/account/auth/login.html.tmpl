@@ -22,7 +22,7 @@
 [% USE Bugzilla %]
 
 <p>
-  I need a legitimate login and password to continue.
+  [% terms.Bugzilla %] needs a legitimate login and password to continue.
 </p>
 
 <form name="login" action="[% target FILTER html %]" method="POST"
@@ -88,6 +88,14 @@
     <p>
       If you don't have a [% terms.Bugzilla %] account, you can
       <a href="createaccount.cgi">create a new account</a>.
+      [% IF Param("requirelogin") %]
+        A user account is required because this [% terms.Bugzilla %]
+        installation is only accessible to authenticated users.
+      [% ELSIF target.match("_bug\.cgi$") %]
+        A user account is required to file a new [% terms.bug %] or to comment
+        into existing ones so that you can be contacted if more information is
+        needed.
+      [% END %]
     </p>
   [% END %]
 

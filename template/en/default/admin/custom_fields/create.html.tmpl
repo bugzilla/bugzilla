@@ -96,18 +96,16 @@ YAHOO.util.Event.onDOMReady(function() {onChangeType(document.getElementById('ty
     </tr>
 
     <tr>
-      <th class="narrow_label">
-        <label for="reverse_desc">Reverse Relationship Description:</label>
-      </th>
+      <th class="narrow_label">Long Description:</th>
       <td>
-        <input type="text" id="reverse_desc" name="reverse_desc" value="" size="40" disabled="disabled">
-        <br/>
-        Use this label for the list of [% terms.bugs %] that link to
-        [%+ terms.abug %] with this 
-        [%+ field_types.${constants.FIELD_TYPE_BUG_ID} FILTER html %]
-        field. For example, if the description is "Is a duplicate of",
-        the reverse description would be "Duplicates of this [% terms.bug %]".
-        Leave blank to disable the list for this field.
+         [% INCLUDE global/textarea.html.tmpl
+          name           = 'long_desc'
+          id             = 'long_desc'
+          minrows        = 3
+          maxrows        = 5
+          cols           = 46
+          defaultcontent = defaultcontent
+        %]
       </td>
       <th>
         <label for="visibility_field_id">Field only appears when:</label>
@@ -134,7 +132,19 @@ YAHOO.util.Event.onDOMReady(function() {onChangeType(document.getElementById('ty
     </tr>
 
     <tr>
-      <td colspan="2">&nbsp;</td>
+      <th class="narrow_label">
+        <label for="reverse_desc">Reverse Relationship Description:</label>
+      </th>
+      <td>
+        <input type="text" id="reverse_desc" name="reverse_desc" value="" size="40" disabled="disabled">
+        <br/>
+        Use this label for the list of [% terms.bugs %] that link to
+        [%+ terms.abug %] with this 
+        [%+ field_types.${constants.FIELD_TYPE_BUG_ID} FILTER html %]
+        field. For example, if the description is "Is a duplicate of",
+        the reverse description would be "Duplicates of this [% terms.bug %]".
+        Leave blank to disable the list for this field.
+      </td>
       <th>
         <label for="value_field_id">
           Field that controls the values<br>

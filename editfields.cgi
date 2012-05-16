@@ -49,6 +49,7 @@ elsif ($action eq 'new') {
     $vars->{'field'} = Bugzilla::Field->create({
         name        => scalar $cgi->param('name'),
         description => scalar $cgi->param('desc'),
+        long_desc   => scalar $cgi->param('long_desc'),
         type        => scalar $cgi->param('type'),
         sortkey     => scalar $cgi->param('sortkey'),
         mailhead    => scalar $cgi->param('new_bugmail'),
@@ -99,6 +100,7 @@ elsif ($action eq 'update') {
     $field || ThrowUserError('customfield_nonexistent', {'name' => $name});
 
     $field->set_description($cgi->param('desc'));
+    $field->set_long_desc($cgi->param('long_desc'));
     $field->set_sortkey($cgi->param('sortkey'));
     $field->set_in_new_bugmail($cgi->param('new_bugmail'));
     $field->set_enter_bug($cgi->param('enter_bug'));

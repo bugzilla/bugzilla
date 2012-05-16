@@ -80,6 +80,7 @@ use constant DB_COLUMNS => qw(
     id
     name
     description
+    long_desc
     type
     custom
     mailhead
@@ -97,6 +98,7 @@ use constant DB_COLUMNS => qw(
 use constant VALIDATORS => {
     custom       => \&_check_custom,
     description  => \&_check_description,
+    long_desc    => \&_check_long_desc,
     enter_bug    => \&_check_enter_bug,
     buglist      => \&Bugzilla::Object::check_boolean,
     mailhead     => \&_check_mailhead,
@@ -123,6 +125,7 @@ use constant VALIDATOR_DEPENDENCIES => {
 
 use constant UPDATE_COLUMNS => qw(
     description
+    long_desc
     mailhead
     sortkey
     obsolete
@@ -277,6 +280,15 @@ sub _check_description {
     $desc = clean_text($desc);
     $desc || ThrowUserError('field_missing_description');
     return $desc;
+}
+
+sub _check_long_desc {
+    my ($invocant, $long_desc) = @_;
+    $long_desc = clean_text($long_desc || '');
+    if (length($long_desc) > MAX_FIELD_LONG_DESC_LENGTH) {
+        ThrowUserError('field_long_desc_too_long');
+    }
+    return $long_desc;
 }
 
 sub _check_enter_bug { return $_[1] ? 1 : 0; }
@@ -438,6 +450,17 @@ on the "show bug" page;
 =cut
 
 sub description { return $_[0]->{description} }
+
+=over
+
+=item C<long_desc>
+
+A string providing detailed info about the field;
+
+=back
+=cut
+
+sub long_desc { return $_[0]->{long_desc} }
 
 =over
 
@@ -824,6 +847,8 @@ They will throw an error if you try to set the values to something invalid.
 
 =item C<set_description>
 
+=item C<set_long_desc>
+
 =item C<set_enter_bug>
 
 =item C<set_obsolete>
@@ -850,6 +875,7 @@ They will throw an error if you try to set the values to something invalid.
 =cut
 
 sub set_description    { $_[0]->set('description', $_[1]); }
+sub set_long_desc      { $_[0]->set('long_desc',   $_[1]); }
 sub set_enter_bug      { $_[0]->set('enter_bug',   $_[1]); }
 sub set_is_numeric     { $_[0]->set('is_numeric',  $_[1]); }
 sub set_obsolete       { $_[0]->set('obsolete',    $_[1]); }
@@ -971,6 +997,8 @@ Just like L<Bugzilla::Object/create>. Takes the following parameters:
 =item C<name> B<Required> - The name of the field.
 
 =item C<description> B<Required> - The field label to display in the UI.
+
+=item C<long_desc> - A longer description of the field.
 
 =item C<mailhead> - boolean - Whether this field appears at the
 top of the bugmail for a newly-filed bug. Defaults to 0.

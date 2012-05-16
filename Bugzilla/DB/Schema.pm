@@ -670,6 +670,7 @@ use constant ABSTRACT_SCHEMA => {
             custom      => {TYPE => 'BOOLEAN', NOTNULL => 1,
                             DEFAULT => 'FALSE'},
             description => {TYPE => 'TINYTEXT', NOTNULL => 1},
+            long_desc   => {TYPE => 'varchar(255)', NOTNULL => 1, DEFAULT => "''"},
             mailhead    => {TYPE => 'BOOLEAN', NOTNULL => 1,
                             DEFAULT => 'FALSE'},
             sortkey     => {TYPE => 'INT2', NOTNULL => 1},

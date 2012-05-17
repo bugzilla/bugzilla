@@ -41,11 +41,6 @@
        name => "initialowner"
        heading => "Default Assignee"
      },
-     {
-       name => "isactive"
-       heading => "Active"
-       yesno_field => 1
-     },
    ]
 %]
 
@@ -57,6 +52,16 @@
      }) %]
 
 [% END %]
+
+[% columns.push({
+     name => "initial_cc_names"
+     heading => "Initial CC list"
+   },
+   {
+     name => "isactive"
+     heading => "Active"
+     yesno_field => 1
+   }) %]
 
 [% IF showbugcounts %]
 
@@ -75,9 +80,10 @@
      contentlink => delete_contentlink
    }) %]
 
-[%# Overrides the initialowner and the initialqacontact with right values %]
+[%# Overrides the initialowner, the initialqacontact, and the initial_cc_names with right values %]
 [% overrides.initialowner = {} %]
 [% overrides.initialqacontact = {} %]
+[% overrides.initial_cc_names = {} %]
 
 [%# "component" is a reserved word in Template Toolkit. %]
 [% FOREACH my_component = product.components %]
@@ -89,6 +95,15 @@
   [% overrides.initialqacontact.name.${my_component.name} = {
        override_content => 1
        content => my_component.default_qa_contact.login
+     }
+  %]
+  [% SET initial_cc_list = [] %]
+  [% FOREACH cc_user = my_component.initial_cc %]
+    [% initial_cc_list.push(cc_user.login) %]
+  [% END %]
+  [% overrides.initial_cc_names.name.${my_component.name} = {
+       override_content => 1
+       content => initial_cc_list.join(', ')
      }
   %]
 [% END %]

@@ -63,6 +63,7 @@
           [% PROCESS add_change value = change.added %]
         [% END %]
         [% IF change.removed != '' %]
+          [% "html += '<br>';" IF change.added != '' %]
           html += 'No longer [% label FILTER lcfirst FILTER js %]: ';
           [% PROCESS add_change value = change.removed %]
         [% END %]

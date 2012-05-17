@@ -883,6 +883,7 @@ YAHOO.bugzilla.fieldAutocomplete = {
         var fieldAutoComp =
           new YAHOO.widget.AutoComplete(field, container, this.dataSource[field]);
         fieldAutoComp.maxResultsDisplayed = YAHOO.bugzilla.field_array[field].length;
+        fieldAutoComp.formatResult = fieldAutoComp.formatEscapedResult;
         fieldAutoComp.minQueryLength = 0;
         fieldAutoComp.useIFrame = true;
         fieldAutoComp.delimChar = [","," "];

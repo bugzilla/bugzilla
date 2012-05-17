@@ -38,7 +38,23 @@ var guided = {
 
   setStep: function(newStep, noSetHistory) {
     // initialise new step
-    eval(newStep + '.onShow()');
+    switch(newStep) {
+      case 'product':
+        product.onShow();
+        break;
+      case 'otherProducts':
+        otherProducts.onShow();
+        break;
+      case 'dupes':
+        dupes.onShow();
+        break;
+      case 'bugForm':
+        bugForm.onShow();
+        break;
+      default:
+        guided.setStep('product');
+        return;
+    }
 
     // change visibility of _step div
     if (this._currentStep)

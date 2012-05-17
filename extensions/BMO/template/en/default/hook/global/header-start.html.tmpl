@@ -33,7 +33,7 @@
   [% END %]
 [% END %]
 
-[% IF user.in_group('editusers') || user.bless_groups.size > 0 %]
+[% IF user.in_group('canconfirm') %]
   [% yui.push('container', 'menu') %]
   [% style_urls.push('js/yui/assets/skins/sam/menu.css') %]
   [% javascript_urls.push('extensions/BMO/web/js/edituser_menu.js') %]

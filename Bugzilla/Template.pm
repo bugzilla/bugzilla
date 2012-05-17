@@ -69,7 +69,7 @@ use constant FORMAT_2_SIZE => [19,55];
 # Pseudo-constant.
 sub SAFE_URL_REGEXP {
     my $safe_protocols = join('|', SAFE_PROTOCOLS);
-    return qr/($safe_protocols):[^\s<>\"]+[\w\/]/i;
+    return qr/($safe_protocols):[^:\s<>\"][^\s<>\"]+[\w\/]/i;
 }
 
 # Convert the constants in the Bugzilla::Constants module into a hash we can

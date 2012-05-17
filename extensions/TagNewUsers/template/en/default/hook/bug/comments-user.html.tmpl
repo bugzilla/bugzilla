@@ -32,6 +32,9 @@ ELSE %][% comment.author.creation_age FILTER html %] day[% "s" IF comment.author
 (New to [% terms.Bugzilla %])
 </span>
 [% END %]
-[% IF comment.is_about_attachment && comment.author.first_patch_bug_id == bug.id %]
+[% IF comment.is_about_attachment
+      && comment.author.first_patch_bug_id == bug.id
+      && comment.attachment.ispatch
+%]
 <span class="new_user">(First Patch)</span>
 [% END %]

@@ -16,12 +16,12 @@
   #
   # Contributor(s): Max Kanat-Alexander <mkanat@bugzilla.org>
   #%]
-[% IF group.is_bug_group %]
+[% IF group.is_bug_group || group.name == Param('insidergroup') %]
   <tr>
     <th>Secure Bugmail:</th>
     <td>
       <input type="checkbox" id="secure_mail" name="secure_mail"
               [% ' checked="checked"' IF group.secure_mail %]>
-    </td>  
+    </td>
   </tr>
 [% END %]

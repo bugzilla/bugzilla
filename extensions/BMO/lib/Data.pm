@@ -326,6 +326,7 @@ our %product_sec_groups = (
     "Mozilla Metrics"              => 'metrics-private',
     "mozilla.org"                  => 'mozilla-confidential',
     "Mozilla PR"                   => 'pr-private',
+    "Mozilla QA"                   => 'mozilla-corporation-confidential',
     "Mozilla Reps"                 => 'mozilla-reps',
     "Mozilla Services"             => 'mozilla-services-security',
     "mozillaignite"                => 'websites-security',

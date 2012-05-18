@@ -319,9 +319,10 @@ TUI_hide_default('information_query');
           <div id="con_calendar_chfieldto"></div>
     (YYYY-MM-DD or relative dates)
     <script type="text/javascript">
-      createCalendar('chfieldfrom');
-      createCalendar('chfieldto');
-    </script>
+      <!--
+        [%+ PROCESS "global/calendar.js.tmpl" id = 'chfieldfrom' %]
+        [% PROCESS "global/calendar.js.tmpl" id = 'chfieldto' %]
+      //--></script>
   </li>    
 </ul>
 

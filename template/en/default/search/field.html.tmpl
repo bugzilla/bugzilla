@@ -82,9 +82,10 @@
     
     <span id="con_calendar_[% field.name FILTER html %]to"></span>
     <script type="text/javascript">
-      createCalendar('[% field.name FILTER js %]');
-      createCalendar('[% field.name FILTER js %]to');
-    </script>
+      <!--
+        [%+ PROCESS "global/calendar.js.tmpl" id = field.name %]
+        [% PROCESS "global/calendar.js.tmpl" id = field.name _ 'to' %]
+      //--></script>
   [% CASE [ constants.FIELD_TYPE_SINGLE_SELECT, 
             constants.FIELD_TYPE_MULTI_SELECT ] %]
     <div id="container_[% field.name FILTER html %]" class="search_field_grid">      

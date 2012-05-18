@@ -332,10 +332,10 @@
 
 </form>
 <script type="text/javascript">
-<!--
-  createCalendar('start_date');
-  createCalendar('end_date');
-  document.forms['summary'].start_date.focus();
-//--></script>
+  <!--
+    [%+ PROCESS "global/calendar.js.tmpl" id = 'start_date' %]
+    [% PROCESS "global/calendar.js.tmpl" id = 'end_date' %]
+    document.forms['summary'].start_date.focus();
+  //--></script>
 <hr noshade size=1>
 [% END %]

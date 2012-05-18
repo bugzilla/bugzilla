@@ -56,8 +56,9 @@
       <div id="con_calendar_[% field.name FILTER html %]"></div>
 
       <script type="text/javascript">
-        createCalendar('[% field.name FILTER js %]')
-      </script>
+        <!--
+          [%+ PROCESS "global/calendar.js.tmpl" id = field.name %]
+        //--></script>
     [% CASE constants.FIELD_TYPE_BUG_ID %]
         <span id="[% field.name FILTER html %]_input_area">
           <input name="[% field.name FILTER html %]" id="[% field.name FILTER html %]"

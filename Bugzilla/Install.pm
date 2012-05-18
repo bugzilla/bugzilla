@@ -319,7 +319,7 @@ sub create_admin {
         print get_text('install_admin_get_email') . ' ';
         $login = <STDIN>;
         chomp $login;
-        eval { Bugzilla::User->check_login_name_for_creation($login); };
+        eval { Bugzilla::User->check_login_name($login); };
         if ($@) {
             say $@;
             undef $login;

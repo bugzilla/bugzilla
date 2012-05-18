@@ -193,7 +193,6 @@ sub confirmChangeEmail {
 sub changeEmail {
     my ($userid, $eventdata, $token) = @_;
     my $dbh = Bugzilla->dbh;
-
     my ($old_email, $new_email) = split(/:/,$eventdata);
 
     # Check the user entered the correct old email address
@@ -208,20 +207,14 @@ sub changeEmail {
         ThrowUserError("account_exists", { email => $new_email } );
     } 
 
-    # Update the user's login name in the profiles table and delete the token
-    # from the tokens table.
     $dbh->bz_start_transaction();
-    $dbh->do(q{UPDATE   profiles
-               SET      login_name = ?
-               WHERE    userid = ?},
-             undef, ($new_email, $userid));
+    my $user = Bugzilla::User->check({ id => $userid });
+    # Update the user's login name in the profiles table.
+    $user->set_login($new_email);
+    $user->update({ keep_session => 1, keep_tokens => 1 });
     delete_token($token);
     $dbh->do(q{DELETE FROM tokens WHERE userid = ?
                AND tokentype = 'emailnew'}, undef, $userid);
-
-    # The email address has been changed, so we need to rederive the groups
-    my $user = new Bugzilla::User($userid);
-    $user->derive_regexp_groups;
 
     $dbh->bz_commit_transaction();
 
@@ -250,9 +243,7 @@ sub cancelChangeEmail {
         # check to see if it has been altered
         if ($user->login ne $old_email) {
             $user->set_login($old_email);
-            $user->update();
-            # email has changed, so rederive groups
-            $user->derive_regexp_groups;
+            $user->update({ keep_session => 1 });
 
             $vars->{'message'} = "email_change_canceled_reinstated";
         } 

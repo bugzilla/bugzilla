@@ -88,7 +88,7 @@ use constant VALIDATORS => {
     cryptpassword => \&_check_password,
     disable_mail  => \&_check_disable_mail,
     disabledtext  => \&_check_disabledtext,
-    login_name    => \&check_login_name_for_creation,
+    login_name    => \&check_login_name,
     realname      => \&_check_realname,
     extern_id     => \&_check_extern_id,
     is_enabled    => \&_check_is_enabled, 
@@ -150,20 +150,25 @@ sub super_user {
 
 sub update {
     my $self = shift;
+    my $options = shift;
+    
     my $changes = $self->SUPER::update(@_);
     my $dbh = Bugzilla->dbh;
 
     if (exists $changes->{login_name}) {
-        # If we changed the login, silently delete any tokens.
-        $dbh->do('DELETE FROM tokens WHERE userid = ?', undef, $self->id);
+        # Delete all the tokens related to the userid
+        $dbh->do('DELETE FROM tokens WHERE userid = ?', undef, $self->id)
+          unless $options->{keep_tokens};
         # And rederive regex groups
         $self->derive_regexp_groups();
     }
 
     # Logout the user if necessary.
     Bugzilla->logout_user($self) 
-        if (exists $changes->{login_name} || exists $changes->{disabledtext}
-            || exists $changes->{cryptpassword});
+        if (!$options->{keep_session}
+            && (exists $changes->{login_name}
+                || exists $changes->{disabledtext}
+                || exists $changes->{cryptpassword}));
 
     # XXX Can update profiles_activity here as soon as it understands
     #     field names like login_name.
@@ -196,7 +201,7 @@ sub _check_extern_id {
 
 # This is public since createaccount.cgi needs to use it before issuing
 # a token for account creation.
-sub check_login_name_for_creation {
+sub check_login_name {
     my ($invocant, $name) = @_;
     $name = trim($name);
     $name || ThrowUserError('user_login_required');
@@ -204,7 +209,9 @@ sub check_login_name_for_creation {
 
     # Check the name if it's a new user, or if we're changing the name.
     if (!ref($invocant) || $invocant->login ne $name) {
-        is_available_username($name) 
+        my @params = ($name);
+        push(@params, $invocant->login) if ref($invocant);
+        is_available_username(@params)
             || ThrowUserError('account_exists', { email => $name });
     }
 
@@ -1952,8 +1959,8 @@ sub is_available_username {
     # was unsafe and required weird escaping; using substring to pull out
     # the new/old email addresses and sql_position() to find the delimiter (':')
     # is cleaner/safer
-    my $eventdata = $dbh->selectrow_array(
-        "SELECT eventdata
+    my ($tokentype, $eventdata) = $dbh->selectrow_array(
+        "SELECT tokentype, eventdata
            FROM tokens
           WHERE (tokentype = 'emailold'
                 AND SUBSTRING(eventdata, 1, (" .
@@ -1965,7 +1972,10 @@ sub is_available_username {
 
     if ($eventdata) {
         # Allow thru owner of token
-        if($old_username && ($eventdata eq "$old_username:$username")) {
+        if ($old_username
+            && (($tokentype eq 'emailnew' && $eventdata eq "$old_username:$username")
+                || ($tokentype eq 'emailold' && $eventdata eq "$username:$old_username")))
+        {
             return 1;
         }
         return 0;
@@ -1988,7 +1998,7 @@ sub check_account_creation_enabled {
 sub check_and_send_account_creation_confirmation {
     my ($self, $login) = @_;
 
-    $login = $self->check_login_name_for_creation($login);
+    $login = $self->check_login_name($login);
     my $creation_regexp = Bugzilla->params->{'createemailregexp'};
 
     if ($login !~ /$creation_regexp/i) {

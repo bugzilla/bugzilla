@@ -119,6 +119,7 @@ use constant OS_MAP => (
     qr/\(.*QNX.*\)/ => ["Neutrino"],
     qr/\(.*VMS.*\)/ => ["OpenVMS"],
     qr/\(.*HP-?UX.*\)/ => ["HP-UX"],
+    qr/\(.*Android.*\)/ => ["Android"],
     # Windows
     qr/\(.*Windows XP.*\)/ => ["Windows XP"],
     qr/\(.*Windows NT 6\.2.*\)/ => ["Windows 8"], 

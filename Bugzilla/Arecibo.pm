@@ -25,6 +25,7 @@ use LWP::UserAgent;
 use POSIX qw(setsid nice);
 use Sys::Hostname;
 
+use Bugzilla::Constants;
 use Bugzilla::Util;
 
 use constant CONFIG => {
@@ -264,21 +265,28 @@ sub _arecibo_die_handler {
         $nested_error = $@ if $@;
     }
 
-    # right now it's hard to determine if we've already returned a content-type
-    # header, it's better to return two than none
-    print "Content-type: text/html\n\n";
-
     if ($is_compilation_failure ||
         $in_cgi_carp_die ||
         ($nested_error && $nested_error !~ /\bModPerl::Util::exit\b/)
     ) {
-        $nested_error = html_quote($nested_error);
         my $uid = arecibo_generate_id();
         my $notified = arecibo_handle_error('error', $message, $uid);
+
+        # if we aren't dying from a web page, let perl deal with it.  this
+        # does the right thing with respect to returning web service errors
+        if (Bugzilla->error_mode != ERROR_MODE_WEBPAGE) {
+            CORE::die($message);
+        }
+
+        # right now it's hard to determine if we've already returned a
+        # content-type header, it's better to return two than none
+        print "Content-type: text/html\n\n";
+
         my $maintainer = html_quote(Bugzilla->params->{'maintainer'});
         $message =~ s/ at \S+ line \d+\.\s*$//;
         $message = html_quote($message);
         $uid = html_quote($uid);
+        $nested_error = html_quote($nested_error);
         print qq(
             <h1>Bugzilla has suffered an internal error</h1>
             <pre>$message</pre>

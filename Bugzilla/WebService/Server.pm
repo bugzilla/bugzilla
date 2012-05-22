@@ -26,7 +26,6 @@ use Scalar::Util qw(blessed);
 sub handle_login {
     my ($self, $class, $method, $full_method) = @_;
     eval "require $class";
-    warn($@) if $@;
     ThrowCodeError('unknown_method', {method => $full_method}) if $@;
     return if ($class->login_exempt($method) 
                and !defined Bugzilla->input_params->{Bugzilla_login});

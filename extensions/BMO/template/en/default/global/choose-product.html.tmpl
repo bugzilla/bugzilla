@@ -32,29 +32,58 @@
 [% IF target == "enter_bug.cgi" %]
   [% title = "Enter $terms.Bug" %]
   [% h2 = BLOCK %]First, you must pick a product on which to enter [% terms.abug %]. [% END %]
+  [% yui = [ 'autocomplete' ] %]
+  [% javascript_urls = [ "js/field.js", "js/create_bug.js", 
+                         "extensions/BMO/web/js/choose_product.js" ] %]
 [% ELSIF target == "describecomponents.cgi" %]
   [% title = "Browse" %]
   [% h2 = "Please specify the product whose components you want described." %]
 [% END %]
 
+[% style_urls = [ "extensions/BMO/web/styles/choose_product.css" ] %]
+
 [% DEFAULT title = "Choose a Product" %]
 [% PROCESS global/header.html.tmpl %]
 
-<center>
+<div id="choose_product">
+
 <hr>
-<p><span style="font-family: verdana,helvetica;">Looking for technical support or help getting your site to work with Mozilla? <a
-href="http://www.mozilla.org/support/">Visit the mozilla.org support page</a> before filing [% terms.bugs %].</span></p>
+<p>
+  Looking for technical support or help getting your site to work with Mozilla?
+  <a href="http://www.mozilla.org/support/">Visit the mozilla.org support page</a>
+  before filing [% terms.bugs %].
+</p>
 <hr>
-</center>
 
 <br>
 [% USE Bugzilla %]
 [% cgi = Bugzilla.cgi %]
 [% SET classification = cgi.param('classification') %]
 [% IF NOT ((cgi.param("full")) OR (user.settings.product_chooser.value == 'full_product_chooser')) %]
-[% IF target == "enter_bug.cgi" %]
-<h2 align="center">Which product is affected by the problem you would like to report?</h2>
+
+[% IF target == 'enter_bug.cgi' %]
+<h2>Which product is affected by the problem you would like to report?</h2>
+<div id="prod_comp_search_main">
+  <div id="prod_comp_search_autocomplete">
+    <div id="prod_comp_search_label">
+      Type to find product and component by name or description
+    </div>
+    <input id="prod_comp_search" id="prod_comp_search" type="text" size="60">
+    <div id="prod_comp_search_autocomplete_container"></div>
+  </div>
+</div>
+<script type="text/javascript">
+  if(typeof(YAHOO.bugzilla.prodCompSearch) !== 'undefined' 
+     && YAHOO.bugzilla.prodCompSearch != null) 
+  {
+    YAHOO.bugzilla.prodCompSearch.init(
+      "prod_comp_search", "prod_comp_search_autocomplete_container", "[% format FILTER js %]");
+  }
+</script>
+
+<h2>or choose from the following selections</h2>
 [% END %]
+
 <table align="center" border="0" width="600" cellpadding="5" cellspacing="0">
 [% INCLUDE easyproduct
    name="Core"
@@ -81,7 +110,7 @@ href="http://www.mozilla.org/support/">Visit the mozilla.org support page</a> be
    icon="seamonkey.png"
 %]
 [% INCLUDE easyproduct
-   name="Fennec"
+   name="Fennec Native"
    icon="fennec.png"
 %]
 [% INCLUDE easyproduct
@@ -158,10 +187,13 @@ href="http://www.mozilla.org/support/">Visit the mozilla.org support page</a> be
 
 <br>
 [% IF target == "enter_bug.cgi" AND user.settings.product_chooser.value != 'full_product_chooser' %]
-<p align="center">You can choose to get this screen by default when you click "New [% terms.Bug %]" by changing your <a href="userprefs.cgi?tab=settings">preferences</a>.</p>
+<p>You can choose to get this screen by default when you click "New [% terms.Bug %]" 
+by changing your <a href="userprefs.cgi?tab=settings">preferences</a>.</p>
 [% END %]
 [% END %]
 <br>
+
+</div>
 
 [% PROCESS global/footer.html.tmpl %]
 

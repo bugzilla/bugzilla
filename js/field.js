@@ -902,7 +902,8 @@ YAHOO.bugzilla.fieldAutocomplete = {
          */
         fieldAutoComp.textboxFocusEvent.subscribe( function(){
             var sInputValue = YAHOO.util.Dom.get(field).value;
-            if( sInputValue.length === 0 ){
+            if( sInputValue.length === 0
+                && YAHOO.bugzilla.field_array[field].length > 0 ){
                 this.sendQuery(sInputValue);
                 this.collapseContainer();
                 this.expandContainer();

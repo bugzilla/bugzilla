@@ -54,13 +54,18 @@
     </Seq>
   </bz:resolution>
 
-  <bz:keyword>
+  <bz:keywords>
     <Seq>
-      [% FOREACH item = keyword %]
-        <li>[% item FILTER html %]</li>
+      [% FOREACH keyword = keywords %]
+        <li>
+          <bz:keyword rdf:about="[% escaped_urlbase %]keyword.cgi?name=[% keyword.name FILTER uri %]">
+            <bz:name>[% keyword.name FILTER html %]</bz:name>
+            <bz:description>[% keyword.description FILTER html %]</bz:description>
+          </bz:keyword>
+        </li>
       [% END %]
     </Seq>
-  </bz:keyword>
+  </bz:keywords>
 
   <bz:platform>
     <Seq>

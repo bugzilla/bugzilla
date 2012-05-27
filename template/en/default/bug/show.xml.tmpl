@@ -76,7 +76,8 @@
             <filename>[% a.filename FILTER xml %]</filename>
             <type>[% a.contenttype FILTER xml %]</type>
             <size>[% a.datasize FILTER xml %]</size>
-            <attacher>[% a.attacher.email FILTER email FILTER xml %]</attacher>
+            <attacher[% IF a.attacher.name != '' %] name="[% a.attacher.name FILTER xml %]"[% END -%]>
+            [% a.attacher.email FILTER email FILTER xml %]</attacher>
             [%# This is here so automated clients can still use attachment.cgi %]
             [% IF displayfields.token && user.id %]
               <token>[% issue_hash_token([a.id, a.modification_time]) FILTER xml %]</token>

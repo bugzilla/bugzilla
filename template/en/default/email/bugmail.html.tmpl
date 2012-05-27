@@ -22,6 +22,7 @@
           [% IF comment.count %]
             <b>[% "Comment # ${comment.count}" FILTER bug_link( bug, 
               {comment_num => comment.count, full_url => 1}) FILTER none %] 
+              on [% "$terms.bug $bug.id" FILTER bug_link( bug, { full_url => 1 }) FILTER none %]
               from [% INCLUDE global/user.html.tmpl who = comment.author %]</b>
           [% END %]
         <pre>[% comment.body_full({ wrap => 1 }) FILTER quoteUrls(bug, comment) %]</pre>

@@ -195,10 +195,18 @@ sub changeEmail {
     my $dbh = Bugzilla->dbh;
     my ($old_email, $new_email) = split(/:/,$eventdata);
 
-    # Check the user entered the correct old email address
-    if (lc($cgi->param('email')) ne lc($old_email)) {
-        ThrowUserError("email_confirmation_failed");
+    $dbh->bz_start_transaction();
+    
+    my $user = Bugzilla::User->check({ id => $userid });
+    my $realpassword = $user->cryptpassword;
+    my $cgipassword  = $cgi->param('password');
+
+    # Make sure the user who wants to change the email address
+    # is the real account owner.
+    if (bz_crypt($cgipassword, $realpassword) ne $realpassword) {
+        ThrowUserError("old_password_incorrect");
     }
+
     # The new email address should be available as this was 
     # confirmed initially so cancel token if it is not still available
     if (! is_available_username($new_email,$old_email)) {
@@ -207,8 +215,6 @@ sub changeEmail {
         ThrowUserError("account_exists", { email => $new_email } );
     } 
 
-    $dbh->bz_start_transaction();
-    my $user = Bugzilla::User->check({ id => $userid });
     # Update the user's login name in the profiles table.
     $user->set_login($new_email);
     $user->update({ keep_session => 1, keep_tokens => 1 });

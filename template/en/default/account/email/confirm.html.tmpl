@@ -14,7 +14,7 @@
 [% PROCESS global/header.html.tmpl %]
 
 <p>
-  To change your email address, please enter the old email address:
+  To change your email address, please enter your current password:
 </p>
 
 <form method="post" action="token.cgi">
@@ -22,8 +22,8 @@
   <input type="hidden" name="a" value="chgem">
   <table>
     <tr>
-      <th align="right">Old Email Address:</th>
-      <td><input type="text" name="email" size="36"></td>
+      <th align="right">Password:</th>
+      <td><input type="password" name="password" size="36"></td>
     </tr>
     <tr>
       <th align="right">&nbsp;</th>

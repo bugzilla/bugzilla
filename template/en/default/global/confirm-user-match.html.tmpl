@@ -134,8 +134,6 @@
                 [% ELSE %]
                   matched
                   <b>[% query.value.users.0.identity FILTER html %]</b>
-                  <input type="hidden" name="[% field.key FILTER html %]"
-                         value="[% query.value.users.0.login FILTER html %]">
                 [% END %]
             [% ELSE %]
                 [% IF (query.key.length < 3) && !Param('emailsuffix') %]
@@ -160,8 +158,10 @@
 
 [% IF matchsuccess == 1 %]
 
-  [% SET exclude_these = 
-           matches.keys.merge(['Bugzilla_login', 'Bugzilla_password']) %]
+  [% SET exclude_these = ['Bugzilla_login', 'Bugzilla_password'] %]
+  [% FOREACH key IN matches.keys %]
+    [% exclude_these.push(key) IF cgi.param(key) == '' %]
+  [% END %]
   [% SET exclude = '^' _ exclude_these.join('|') _ '$' %]
   [% PROCESS "global/hidden-fields.html.tmpl" exclude = exclude %]
 

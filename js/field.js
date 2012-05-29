@@ -770,6 +770,7 @@ YAHOO.bugzilla.keywordAutocomplete = {
         }
         var keywordAutoComp = new YAHOO.widget.AutoComplete(field, container, this.dataSource);
         keywordAutoComp.maxResultsDisplayed = YAHOO.bugzilla.keyword_array.length;
+        keywordAutoComp.formatResult = keywordAutoComp.formatEscapedResult;
         keywordAutoComp.minQueryLength = 0;
         keywordAutoComp.useIFrame = true;
         keywordAutoComp.delimChar = [","," "];

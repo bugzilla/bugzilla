@@ -79,7 +79,8 @@
         
 [% IF userdefaultquery %]
   <p>
-    <a href="query.cgi?nukedefaultquery=1">
+    <a href="query.cgi?nukedefaultquery=1&amp;token=
+       [%- issue_hash_token(['nukedefaultquery']) FILTER uri %]">
       Set my default search back to the system default</a>.
   </p>
 [% END %]

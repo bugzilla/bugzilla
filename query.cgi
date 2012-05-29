@@ -39,6 +39,7 @@ use Bugzilla::Product;
 use Bugzilla::Keyword;
 use Bugzilla::Field;
 use Bugzilla::Install::Util qw(vers_cmp);
+use Bugzilla::Token;
 
 my $cgi = Bugzilla->cgi;
 my $dbh = Bugzilla->dbh;
@@ -51,6 +52,8 @@ my $userid = $user->id;
 
 if ($cgi->param('nukedefaultquery')) {
     if ($userid) {
+        my $token = $cgi->param('token');
+        check_hash_token($token, ['nukedefaultquery']);
         $dbh->do("DELETE FROM namedqueries" .
                  " WHERE userid = ? AND name = ?", 
                  undef, ($userid, DEFAULT_QUERY_NAME));

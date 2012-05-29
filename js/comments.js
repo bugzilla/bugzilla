@@ -56,7 +56,7 @@ function collapse_comment(link, comment) {
 }
 
 function expand_comment(link, comment) {
-    link.innerHTML = "[-]";
+    link.innerHTML = "[&minus;]";
     YAHOO.util.Dom.removeClass(comment, 'collapsed');
 }
 
@@ -114,7 +114,7 @@ function addCollapseLink(count, title) {
     document.write(' <a href="#" class="bz_collapse_comment"' +
                    ' id="comment_link_' + count +
                    '" onclick="toggle_comment_display(this, ' +  count +
-                   '); return false;" title="' + title + '">[-]<\/a> ');
+                   '); return false;" title="' + title + '">[&minus;]<\/a> ');
 }
 
 function goto_add_comments( anchor ){

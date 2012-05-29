@@ -45,6 +45,7 @@ my $add_comment;
 my $private;
 my $work_time;
 my $fetch_extension_info = 0;
+my $debug;
 
 GetOptions('help|h|?'       => \$help,
            'uri=s'          => \$Bugzilla_uri,
@@ -58,7 +59,8 @@ GetOptions('help|h|?'       => \$help,
            'comment:s'      => \$add_comment,
            'private:i'      => \$private,
            'worktime:f'     => \$work_time,
-           'extension_info'    => \$fetch_extension_info
+           'extension_info' => \$fetch_extension_info,
+           'debug'          => \$debug
           ) or pod2usage({'-verbose' => 0, '-exitval' => 1});
 
 =head1 OPTIONS
@@ -130,6 +132,10 @@ An optional double precision number specifying the work time for B<--comment>.
 If specified on the command line, the script returns the information about the
 extensions that are installed.
 
+=item --debug
+
+Enable tracing at the debug level of XMLRPC requests and responses.
+
 =back
 
 =head1 DESCRIPTION
@@ -166,6 +172,16 @@ of C<http://your.bugzilla.installation/path/to/bugzilla/xmlrpc.cgi>.
 
 my $proxy = XMLRPC::Lite->proxy($Bugzilla_uri,
                                 'cookie_jar' => $cookie_jar);
+
+=head2 Debugging
+
+Enable tracing at the debug level of XMLRPC requests and responses if requested.
+
+=cut
+
+if ($debug) {
+   $proxy->import(+trace => 'debug');
+}
 
 =head2 Checking Bugzilla's version
 

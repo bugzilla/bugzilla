@@ -59,7 +59,7 @@
             [%+ attachment.datasize FILTER unitconvert %]
           [% ELSE %]
             <em>deleted</em>
-          [% END %], created by [%+ INCLUDE global/user.html.tmpl who = attachment.attacher %]
+          [% END %], created by [%+ INCLUDE global/user.html.tmpl who = attachment.attacher %] on [%+ attachment.attached FILTER time %]
           [% IF attachment.isprivate %];
             <span class="bz_private">only visible to <strong>[% Param('insidergroup') FILTER html %]</strong> members</span>
           [% END %]
@@ -100,7 +100,12 @@
             <span class="label">Creator:</span>
             [%+ INCLUDE global/user.html.tmpl who = attachment.attacher %]
           </div>
-          
+
+          <div id="attachment_created">
+            <span class="label">Created:</span>
+            [%+ attachment.attached FILTER time %]
+          </div>
+
           <div id="attachment_size">
             <span class="label">Size:</span>
             [% IF attachment.datasize %]

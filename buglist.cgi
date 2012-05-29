@@ -434,6 +434,8 @@ if ($cmdtype eq "dorem") {
 elsif (($cmdtype eq "doit") && defined $cgi->param('remtype')) {
     if ($cgi->param('remtype') eq "asdefault") {
         $user = Bugzilla->login(LOGIN_REQUIRED);
+        my $token = $cgi->param('token');
+        check_hash_token($token, ['searchknob']);
         InsertNamedQuery(DEFAULT_QUERY_NAME, $buffer);
         $vars->{'message'} = "buglist_new_default_query";
     }

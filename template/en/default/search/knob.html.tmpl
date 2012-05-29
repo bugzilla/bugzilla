@@ -23,6 +23,9 @@
    "Last Changed" => "Last Changed" } %]
 
 <input type="hidden" name="cmdtype" value="doit">
+[% IF user.id %]
+  <input type="hidden" name="token" value="[% issue_hash_token(['searchknob']) FILTER html %]">
+[% END %]
 
 <p>
   <label for="order">Sort results by</label>:
@@ -39,7 +42,7 @@
   <input type="submit" id="[% button_name FILTER html %]"
          value="[% button_name FILTER html %]">
   [% IF known_name %]
-    [%# We store known_name in case the user add a boolean chart. %]
+    [%# We store known_name in case the user adds a boolean chart. %]
     <input type="hidden" name="known_name" value="[% known_name FILTER html %]">
 
     [%# The name of the existing query will be passed to buglist.cgi. %]
@@ -51,14 +54,16 @@
   [% END %]
 </p>
 
-<p>
-  &nbsp;&nbsp;&nbsp;
-  <input type="checkbox" id="remasdefault"
-         name="remtype" value="asdefault">
-  <label for="remasdefault">
-    and remember these as my default search options
-  </label>
-</p>
+[% IF user.id %]
+  <p>
+    &nbsp;&nbsp;&nbsp;
+    <input type="checkbox" id="remasdefault"
+           name="remtype" value="asdefault">
+    <label for="remasdefault">
+      and remember these as my default search options
+    </label>
+  </p>
+[% END %]
         
 [% IF userdefaultquery %]
   <p>

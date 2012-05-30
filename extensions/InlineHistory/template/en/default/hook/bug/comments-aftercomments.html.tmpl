@@ -135,8 +135,11 @@
           UNLESS is_safe_url(value) %]>
     [%~%][% value FILTER html FILTER js %]</a>
   [% ELSIF change.fieldname == 'see_also' %]
-    [%~%]<a href="[% value FILTER html FILTER js %]" target="_blank">
-    [%~%][% value FILTER html FILTER js %]</a>
+    [% FOREACH see_also = value.split(', ') %]
+      [%~%]<a href="[% see_also FILTER html FILTER js %]" target="_blank">
+      [%~%][% see_also FILTER html FILTER js %]</a>
+      [%- ", " IF NOT loop.last %]
+    [% END %]
   [% ELSIF change.fieldname == 'assigned_to' ||
            change.fieldname == 'reporter' ||
            change.fieldname == 'qa_contact' ||

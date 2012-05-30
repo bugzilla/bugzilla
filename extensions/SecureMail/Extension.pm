@@ -242,15 +242,15 @@ sub mailer_before_send {
             # If the insider group has securemail enabled..
             my $insider_group = Bugzilla::Group->new({ name => Bugzilla->params->{'insidergroup'} });
             if ($insider_group->{secure_mail} && $make_secure == SECURE_NONE) {
+                my $comment_is_private = Bugzilla->dbh->selectcol_arrayref(
+                    "SELECT isprivate FROM longdescs WHERE bug_id=? ORDER BY bug_when",
+                    undef, $bug_id);
                 # Encrypt if there are private comments on an otherwise public bug
                 while ($body =~ /[\r\n]--- Comment #(\d+)/g) {
-                    my $comment_id = $1;
-                    if ($comment_id) {
-                        my ($comment) = grep { $_->{count} == $comment_id } @{ $bug->comments };
-                        if ($comment && $comment->is_private) {
-                            $make_secure = SECURE_BODY;
-                            last;
-                        }
+                    my $comment_number = $1;
+                    if ($comment_number && $comment_is_private->[$comment_number]) {
+                        $make_secure = SECURE_BODY;
+                        last;
                     }
                 }
                 # Encrypt if updating a private attachment without a comment

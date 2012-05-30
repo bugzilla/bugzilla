@@ -27,6 +27,7 @@ use Sys::Hostname;
 
 use Bugzilla::Constants;
 use Bugzilla::Util;
+use Bugzilla::WebService::Constants;
 
 use constant CONFIG => {
     # 'types' maps from the error message to types and priorities
@@ -127,8 +128,21 @@ sub arecibo_handle_error {
     # don't send to arecibo unless configured
     my $arecibo_server = Bugzilla->params->{arecibo_server} || '';
     my $send_to_arecibo = $arecibo_server ne '';
+
+    # web service filtering
+    if ($send_to_arecibo
+        && (Bugzilla->error_mode == ERROR_MODE_DIE_SOAP_FAULT || Bugzilla->error_mode == ERROR_MODE_JSON_RPC))
+    {
+        my ($code) = $message =~ /^(-?\d+): /;
+        if ($code
+            && !($code == ERROR_UNKNOWN_FATAL || $code == ERROR_UNKNOWN_TRANSIENT))
+        {
+            $send_to_arecibo = 0;
+        }
+    }
+
+    # message content filtering
     if ($send_to_arecibo) {
-        # message content filtering
         foreach my $re (@{CONFIG->{ignore}}) {
             if ($message =~ $re) {
                 $send_to_arecibo = 0;

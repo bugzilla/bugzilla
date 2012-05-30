@@ -21,8 +21,8 @@
     margin-left: auto;
 }
 
-#prod_comp_search_label {
-    text-align: center;
+#prod_comp_search_main .hidden {
+    display: none;
 }
 
 #prod_comp_search_main li.yui-ac-highlight a {

@@ -21,6 +21,7 @@ YAHOO.bugzilla.prodCompSearch = {
             search : decodeURIComponent(enteredText)
           } ]
       };
+      YAHOO.util.Dom.removeClass('prod_comp_throbber', 'hidden');
       return YAHOO.lang.JSON.stringify(json_object);
     },
     resultListFormat : function(oResultData, enteredText, sResultMatch) {
@@ -60,6 +61,10 @@ YAHOO.bugzilla.prodCompSearch = {
         this.autoComplete.useIFrame = true;
         this.autoComplete.maxResultsDisplayed = 25;
         this.autoComplete.suppressInputUpdate = true;
+        this.autoComplete.doBeforeLoadData = function(sQuery, oResponse, oPayload) {
+            YAHOO.util.Dom.addClass('prod_comp_throbber', 'hidden');
+            return true;
+        };
         this.autoComplete.textboxFocusEvent.subscribe(function () {
             var input = YAHOO.util.Dom.get(field);
             if (input.value && input.value.length > 3) {

@@ -98,22 +98,7 @@ var product = {
   _loaded: '',
   _preselectedComponent: '',
 
-  onInit: function() {
-    // BMO only
-    if (YAHOO.bugzilla.prodCompSearch.autoComplete) {
-      // show a throbber while searching for products
-      var autoComplete = YAHOO.bugzilla.prodCompSearch.autoComplete;
-      var orig_generateRequest = autoComplete.generateRequest;
-      autoComplete.generateRequest = function(sQuery) {
-        Dom.removeClass('prod_comp_throbber', 'hidden');
-        return orig_generateRequest(sQuery);
-      };
-      autoComplete.doBeforeLoadData = function(sQuery, oResponse, oPayload) {
-        Dom.addClass('prod_comp_throbber', 'hidden');
-        return true;
-      };
-    }
-  },
+  onInit: function() { },
 
   onShow: function() {
     Dom.removeClass('advanced', 'hidden');

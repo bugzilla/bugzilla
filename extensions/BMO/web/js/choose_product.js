@@ -10,6 +10,7 @@ YAHOO.bugzilla.prodCompSearch = {
     counter : 0,
     format  : '',
     dataSource : null,
+    autoComplete: null,
     generateRequest : function (enteredText) {
       YAHOO.bugzilla.prodCompSearch.counter = YAHOO.bugzilla.prodCompSearch.counter + 1;
       YAHOO.util.Connect.setDefaultPostHeader('application/json', true);
@@ -50,16 +51,16 @@ YAHOO.bugzilla.prodCompSearch = {
             this.init_ds();
         }
         this.format = format;
-        var prodCompSearch = new YAHOO.widget.AutoComplete(field, container, this.dataSource);
-        prodCompSearch.generateRequest = this.generateRequest;
-        prodCompSearch.formatResult = this.resultListFormat;
-        prodCompSearch.minQueryLength = 3;
-        prodCompSearch.autoHighlight = false;
-        prodCompSearch.queryDelay = 0.05;
-        prodCompSearch.useIFrame = true;
-        prodCompSearch.maxResultsDisplayed = 25;
-        prodCompSearch.suppressInputUpdate = true;
-        prodCompSearch.textboxFocusEvent.subscribe(function () {
+        this.autoComplete = new YAHOO.widget.AutoComplete(field, container, this.dataSource);
+        this.autoComplete.generateRequest = this.generateRequest;
+        this.autoComplete.formatResult = this.resultListFormat;
+        this.autoComplete.minQueryLength = 3;
+        this.autoComplete.autoHighlight = false;
+        this.autoComplete.queryDelay = 0.05;
+        this.autoComplete.useIFrame = true;
+        this.autoComplete.maxResultsDisplayed = 25;
+        this.autoComplete.suppressInputUpdate = true;
+        this.autoComplete.textboxFocusEvent.subscribe(function () {
             var input = YAHOO.util.Dom.get(field);
             if (input.value && input.value.length > 3) {
                 this.sendQuery(input.value);

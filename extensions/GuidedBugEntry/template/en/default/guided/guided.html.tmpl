@@ -1,40 +1,26 @@
-[%# ***** BEGIN LICENSE BLOCK *****
-  # Version: MPL 1.1
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
   #
-  # The contents of this file are subject to the Mozilla Public License Version
-  # 1.1 (the "License"); you may not use this file except in compliance with
-  # the License. You may obtain a copy of the License at
-  # http://www.mozilla.org/MPL/
-  #
-  # Software distributed under the License is distributed on an "AS IS" basis,
-  # WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
-  # for the specific language governing rights and limitations under the
-  # License.
-  #
-  # The Original Code is the GuidedBugEntry Bugzilla Extension.
-  #
-  # The Initial Developer of the Original Code is
-  # the Mozilla Foundation.
-  # Portions created by the Initial Developer are Copyright (C) 2011
-  # the Initial Developer. All Rights Reserved.
-  #
-  # Contributor(s):
-  #   Byron Jones <glob@mozilla.com>
-  #
-  # ***** END LICENSE BLOCK ***** */
-  #%]
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
 
 [% PROCESS global/variables.none.tmpl %]
 
+[% js_urls = [ 'extensions/GuidedBugEntry/web/js/products.js',
+               'extensions/GuidedBugEntry/web/js/guided.js',
+               'js/field.js', 'js/TUI.js', 'js/bug.js' ] %]
+[% js_urls.push('extensions/BMO/web/js/choose_product.js') IF BMO %]
+
+[% yui_modules = [ 'history', 'datatable', 'container' ] %]
+[% yui_modules.push('autocomplete') IF BMO %]
+
 [% PROCESS global/header.html.tmpl
-   title = "Enter A $terms.Bug"
-   javascript_urls = [
-                       'extensions/GuidedBugEntry/web/js/products.js',
-                       'extensions/GuidedBugEntry/web/js/guided.js',
-                       'js/field.js', 'js/TUI.js', 'js/bug.js' ]
+   title = "Enter A Bug"
+   javascript_urls = js_urls
    style_urls = [ 'extensions/GuidedBugEntry/web/style/guided.css',
                   'js/yui/assets/skins/sam/container.css' ]
-   yui = [ 'history', 'datatable', 'container' ]
+   yui = yui_modules
 %]
 
 <iframe id="yui-history-iframe" src="extensions/GuidedBugEntry/web/yui-history-iframe.txt"></iframe>
@@ -270,6 +256,29 @@ dupes.setLabels(
 <h3>
   None of the above; my [% terms.bug %] is in:
 </h3>
+
+[% IF BMO %]
+  <div id="prod_comp_search_main">
+    <div id="prod_comp_search_autocomplete">
+      <div id="prod_comp_search_label">
+        Type to find product and component by name or description:
+        <img id="prod_comp_throbber" src="extensions/GuidedBugEntry/web/images/throbber.gif"
+             class="hidden" width="16" height="11">
+      </div>
+      <input id="prod_comp_search" type="text" size="60">
+      <div id="prod_comp_search_autocomplete_container"></div>
+    </div>
+  </div>
+  <script type="text/javascript">
+    if (typeof(YAHOO.bugzilla.prodCompSearch) !== 'undefined' && YAHOO.bugzilla.prodCompSearch != null)
+      YAHOO.bugzilla.prodCompSearch.init('prod_comp_search', 'prod_comp_search_autocomplete_container', 'guided');
+  </script>
+
+  <h3>
+    Or select a product:
+  </h3>
+[% END %]
+
 [% END %]
 
 [% BLOCK exit_block %]

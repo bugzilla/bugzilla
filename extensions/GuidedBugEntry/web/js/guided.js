@@ -1,27 +1,9 @@
-/* ***** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * The Original Code is the GuidedBugEntry Bugzilla Extension.
- *
- * The Initial Developer of the Original Code is
- * the Mozilla Foundation.
- * Portions created by the Initial Developer are Copyright (C) 2011
- * the Initial Developer. All Rights Reserved.
- *
- * Contributor(s):
- *   Byron Jones <glob@mozilla.com>
- *
- * ***** END LICENSE BLOCK ***** */
+ * This Source Code Form is "Incompatible With Secondary Licenses", as
+ * defined by the Mozilla Public License, v. 2.0. */
 
 // global
 
@@ -67,7 +49,9 @@ var guided = {
 
     // update history
     if (History && !noSetHistory) {
-      History.navigate('h', newStep + "|" + product.getName());
+      History.navigate('h', newStep + '|' + product.getName() +
+                            (product.getPreselectedComponent() ? '|' + product.getPreselectedComponent() : '')
+      );
     }
   },
 
@@ -91,8 +75,9 @@ var guided = {
   },
 
   _onStateChange: function(state, noSetHistory) {
-    state = state.split("|");
+    state = state.split('|');
     product.setName(state[1] || '');
+    product.setPreselectedComponent(state[2] || '');
     guided.setStep(state[0], noSetHistory);
   },
 
@@ -111,8 +96,24 @@ var product = {
   details: false,
   _counter: 0,
   _loaded: '',
+  _preselectedComponent: '',
 
-  onInit: function() { },
+  onInit: function() {
+    // BMO only
+    if (YAHOO.bugzilla.prodCompSearch.autoComplete) {
+      // show a throbber while searching for products
+      var autoComplete = YAHOO.bugzilla.prodCompSearch.autoComplete;
+      var orig_generateRequest = autoComplete.generateRequest;
+      autoComplete.generateRequest = function(sQuery) {
+        Dom.removeClass('prod_comp_throbber', 'hidden');
+        return orig_generateRequest(sQuery);
+      };
+      autoComplete.doBeforeLoadData = function(sQuery, oResponse, oPayload) {
+        Dom.addClass('prod_comp_throbber', 'hidden');
+        return true;
+      };
+    }
+  },
 
   onShow: function() {
     Dom.removeClass('advanced', 'hidden');
@@ -127,6 +128,14 @@ var product = {
 
   getName: function() {
     return Dom.get('product').value;
+  },
+
+  getPreselectedComponent: function() {
+    return this._preselectedComponent;
+  },
+
+  setPreselectedComponent: function(value) {
+    this._preselectedComponent = value;
   },
 
   _getNameAndRelated: function() {
@@ -635,7 +644,7 @@ var bugForm = {
     var elComponent = Dom.get('component');
     if (products[productName] && products[productName].noComponentSelection) {
 
-      elComponent.value = products[productName].defaultComponent; 
+      elComponent.value = products[productName].defaultComponent;
       bugForm._mandatoryFields = [ 'short_desc', 'version_select' ];
 
     } else {
@@ -643,9 +652,15 @@ var bugForm = {
       bugForm._mandatoryFields = [ 'short_desc', 'component_select', 'version_select' ];
 
       // check for the default component
-      var defaultRegex = products[productName] && products[productName].defaultComponent
-        ? new RegExp('^' + products[productName].defaultComponent + '$', 'i')
-        : new RegExp('General', 'i');
+      var defaultRegex;
+      if (product.getPreselectedComponent()) {
+        defaultRegex = new RegExp('^' + quoteMeta(product.getPreselectedComponent()) + '$', 'i')
+      } else if(products[productName] && products[productName].defaultComponent) {
+        defaultRegex = new RegExp('^' + quoteMeta(products[productName].defaultComponent) + '$', 'i')
+      } else {
+        defaultRegex = new RegExp('General', 'i');
+      }
+
       var preselectedComponent = false;
       for (var i = 0, n = product.details.components.length; i < n; i++) {
         var component = product.details.components[i];
@@ -899,3 +914,6 @@ var bugForm = {
   }
 }
 
+function quoteMeta(value) {
+  return value.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+}

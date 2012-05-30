@@ -1,23 +1,9 @@
-# -*- Mode: perl; indent-tabs-mode: nil -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# The contents of this file are subject to the Mozilla Public
-# License Version 1.1 (the "License"); you may not use this file
-# except in compliance with the License. You may obtain a copy of
-# the License at http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS
-# IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-# implied. See the License for the specific language governing
-# rights and limitations under the License.
-#
-# The Original Code is the GuidedBugEntry Bugzilla Extension.
-#
-# The Initial Developer of the Original Code is the Mozilla Foundation
-# Portions created by the Initial Developer are Copyright (C) 2011 the
-# Initial Developer. All Rights Reserved.
-#
-# Contributor(s):
-#   Byron Jones <glob@mozilla.com>
+# This Source Code Form is "Incompatible With Secondary Licenses", as
+# defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::Extension::GuidedBugEntry;
 use strict;
@@ -52,16 +38,18 @@ sub enter_bug_start {
     ) {
         # skip the first step if a product is provided
         if ($cgi->param('product')) {
-            print $cgi->redirect('enter_bug.cgi?format=guided#h=dupes|' .
-                url_quote($cgi->param('product')));
+            print $cgi->redirect('enter_bug.cgi?format=guided#h=dupes' .
+                '|' . url_quote($cgi->param('product')) .
+                '|' . url_quote($cgi->param('component'))
+                );
             exit;
         }
 
         $self->_init_vars($vars);
         print $cgi->header();
         $template->process('guided/guided.html.tmpl', $vars)
-          || ThrowTemplateError($template->error());          
-        exit;       
+          || ThrowTemplateError($template->error());
+        exit;
     }
 
     # we use the __default__ format to bypass the guided entry
@@ -71,7 +59,7 @@ sub enter_bug_start {
         ($cgi->param('format') && $cgi->param('format') eq "__default__")
         && ($cgi->param('product') && $cgi->param('product') ne '')
     ) {
-        $cgi->delete('format') 
+        $cgi->delete('format');
     }
 }
 
@@ -104,6 +92,9 @@ sub _init_vars {
 
     $vars->{'platform'} = detect_platform();
     $vars->{'op_sys'} = detect_op_sys();
+
+    eval 'use Bugzilla::Extension::BMO::Data';
+    $vars->{'BMO'} = $@ ? 0 : 1;
 }
 
 sub page_before_template {

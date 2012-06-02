@@ -77,13 +77,16 @@ my $debug = 0;
 my $mail  = '';
 my $attach_path = '';
 my $help  = 0;
-my ($default_product_name, $default_component_name);
+my $bug_page = 'show_bug.cgi?id=';
+my $default_product_name = '';
+my $default_component_name = '';
 
 my $result = GetOptions(
     "verbose|debug+" => \$debug,
     "mail|sendmail!" => \$mail,
     "attach_path=s"  => \$attach_path,
     "help|?"         => \$help,
+    "bug_page=s"     => \$bug_page,
     "product=s"      => \$default_product_name,
     "component=s"    => \$default_component_name,
 );
@@ -101,9 +104,6 @@ my $xml;
 my $dbh = Bugzilla->dbh;
 my $params = Bugzilla->params;
 my ($timestamp) = $dbh->selectrow_array("SELECT NOW()");
-
-$default_product_name = '' if !defined $default_product_name;
-$default_component_name = '' if !defined $default_component_name;
 
 ###############################################################################
 # Helper sub routines                                                         #
@@ -404,6 +404,8 @@ sub process_bug {
     my $exporter_login   = $root->{'att'}->{'exporter'};
     my $exporter         = new Bugzilla::User({ name => $exporter_login });
     my $urlbase          = $root->{'att'}->{'urlbase'};
+    my $url              = $urlbase . $bug_page;
+    trick_taint($url);
 
     # We will store output information in this variable.
     my $log = "";
@@ -504,7 +506,6 @@ sub process_bug {
         # Same goes for bug #'s Since we don't know if the referenced bug
         # is also being moved, lets make sure they know it means a different
         # bugzilla.
-        my $url = $urlbase . "show_bug.cgi?id=";
         $data =~ s/([Bb]ugs?\s*\#?\s*(\d+))/$url$2/g;
 
         # Keep the original commenter if possible, else we will fall back
@@ -525,7 +526,7 @@ sub process_bug {
     $comments .= format_time(scalar localtime(time()), '%Y-%m-%d %R %Z') . " ";
     $comments .= " ---\n\n";
     $comments .= "This bug was previously known as _bug_ $bug_fields{'bug_id'} at ";
-    $comments .= $urlbase . "show_bug.cgi?id=" . $bug_fields{'bug_id'} . "\n";
+    $comments .= $url . $bug_fields{'bug_id'} . "\n";
     if ( defined $bug_fields{'dependson'} ) {
         $comments .= "This bug depended on bug(s) " .
                      join(' ', _to_array($bug_fields{'dependson'})) . ".\n";
@@ -1200,7 +1201,7 @@ sub process_bug {
         }
     }
 
-    $log .= "Bug ${urlbase}show_bug.cgi?id=$bug_fields{'bug_id'} ";
+    $log .= "Bug ${url}$bug_fields{'bug_id'} ";
     $log .= "imported as bug $id.\n";
     $log .= $params->{"urlbase"} . "show_bug.cgi?id=$id\n\n";
     if ($err) {
@@ -1293,6 +1294,13 @@ Send mail to exporter with a log of bugs imported and any errors.
 
 The path to the attachment files. (Required if encoding="filename"
 is used for attachments.)
+
+=item B<--bug_page>
+
+The page that links to the bug on top of urlbase. Its default value
+is "show_bug.cgi?id=", which is what Bugzilla installations use.
+You only need to pass this argument if you are importing bugs from
+another bug tracking system.
 
 =item B<--product=name>
 

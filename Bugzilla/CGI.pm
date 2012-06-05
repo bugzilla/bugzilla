@@ -221,35 +221,6 @@ sub check_etag {
     }
 }
 
-# Overwrite to ensure nph doesn't get set, and unset HEADERS_ONCE
-sub multipart_init {
-    my $self = shift;
-
-    # Keys are case-insensitive, map to lowercase
-    my %args = @_;
-    my %param;
-    foreach my $key (keys %args) {
-        $param{lc $key} = $args{$key};
-    }
-
-    # Set the MIME boundary and content-type
-    my $boundary = $param{'-boundary'}
-        || '------- =_' . generate_random_password(16);
-    delete $param{'-boundary'};
-    $self->{'separator'} = "\r\n--$boundary\r\n";
-    $self->{'final_separator'} = "\r\n--$boundary--\r\n";
-    $param{'-type'} = SERVER_PUSH($boundary);
-
-    # Note: CGI.pm::multipart_init up to v3.04 explicitly set nph to 0
-    # CGI.pm::multipart_init v3.05 explicitly sets nph to 1
-    # CGI.pm's header() sets nph according to a param or $CGI::NPH, which
-    # is the desired behaviour.
-
-    return $self->header(
-        %param,
-    ) . "WARNING: YOUR BROWSER DOESN'T SUPPORT THIS SERVER-PUSH TECHNOLOGY." . $self->multipart_end;
-}
-
 # Have to add the cookies in.
 sub multipart_start {
     my $self = shift;

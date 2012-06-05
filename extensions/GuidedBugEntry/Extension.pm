@@ -40,7 +40,7 @@ sub enter_bug_start {
         if ($cgi->param('product')) {
             print $cgi->redirect('enter_bug.cgi?format=guided#h=dupes' .
                 '|' . url_quote($cgi->param('product')) .
-                '|' . url_quote($cgi->param('component'))
+                '|' . url_quote($cgi->param('component') || '')
                 );
             exit;
         }

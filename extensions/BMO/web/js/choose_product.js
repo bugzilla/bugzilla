@@ -25,14 +25,8 @@ YAHOO.bugzilla.prodCompSearch = {
       return YAHOO.lang.JSON.stringify(json_object);
     },
     resultListFormat : function(oResultData, enteredText, sResultMatch) {
-        var url  = "enter_bug.cgi?product=" + encodeURIComponent(oResultData[0]) +
-                   "&component=" +  encodeURIComponent(oResultData[1]);
-        if (YAHOO.bugzilla.prodCompSearch.format) {
-            url = url + "&format=" + encodeURIComponent(YAHOO.bugzilla.prodCompSearch.format);
-        }
-        return ("<a href=\"" + url + "\"><b>" +
-                _escapeHTML(oResultData[0]) + "</b> :: " + 
-                _escapeHTML(oResultData[1]) + "</a>");
+        return YAHOO.lang.escapeHTML(oResultData[0]) + " :: " + 
+               YAHOO.lang.escapeHTML(oResultData[1]);
     },
     init_ds : function(){
         this.dataSource = new YAHOO.util.XHRDataSource("jsonrpc.cgi");
@@ -70,6 +64,16 @@ YAHOO.bugzilla.prodCompSearch = {
             if (input.value && input.value.length > 3) {
                 this.sendQuery(input.value);
             }
+        });
+        this.autoComplete.itemSelectEvent.subscribe(function (e, args) {
+            var oData = args[2];
+            var url  = "enter_bug.cgi?product=" + encodeURIComponent(oData[0]) +
+                       "&component=" +  encodeURIComponent(oData[1]);
+            var format = YAHOO.bugzilla.prodCompSearch.format;
+            if (format) {
+                url += "&format=" + encodeURIComponent(format);
+            }
+            window.location.href = url;
         });
     }
 }

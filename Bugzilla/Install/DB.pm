@@ -670,6 +670,9 @@ sub update_table_definitions {
     $dbh->bz_alter_column('products', 'defaultmilestone',
                           {TYPE => 'varchar(64)', NOTNULL => 1, DEFAULT => "'---'"});
 
+    # 2012-04-15 Frank@Frank-Becker.de - Bug 740536
+    $dbh->bz_add_index('audit_log', 'audit_log_class_idx', ['class', 'at_time']);
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################

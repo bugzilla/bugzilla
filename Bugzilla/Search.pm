@@ -2515,6 +2515,7 @@ sub _multiselect_multiple {
     
     my @terms;
     foreach my $word (@words) {
+        next if $word eq '';
         $args->{value} = $word;
         $args->{quoted} = $dbh->quote($word);
         push(@terms, $self->_multiselect_term($args));
@@ -2682,15 +2683,14 @@ sub _anyexact {
 
 sub _anywordsubstr {
     my ($self, $args) = @_;
-    my ($full_field, $value) = @$args{qw(full_field value)};
-    
+
     my @terms = $self->_substring_terms($args);
     $args->{term} = join("\n\tOR ", @terms);
 }
 
 sub _allwordssubstr {
     my ($self, $args) = @_;
-    
+
     my @terms = $self->_substring_terms($args);
     $args->{term} = join("\n\tAND ", @terms);
 }

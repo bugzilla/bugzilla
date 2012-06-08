@@ -1953,6 +1953,12 @@ sub _check_field_is_mandatory {
 
     return if !$field->is_visible_on_bug($params || $invocant);
 
+    return if ($field->type == FIELD_TYPE_SINGLE_SELECT
+                 && scalar @{ get_legal_field_values($field->name) } == 1);
+
+    return if ($field->type == FIELD_TYPE_MULTI_SELECT
+                 && !scalar @{ get_legal_field_values($field->name) });
+
     if (ref($value) eq 'ARRAY') {
         $value = join('', @$value);
     }

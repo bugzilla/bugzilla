@@ -48,7 +48,7 @@ function SetCheckboxes(setting) {
     var theinput = document.userprefsform.elements[count];
     if (theinput.type == "checkbox" && !theinput.disabled) {
       if (theinput.name.match("neg")) {
-        theinput.checked = false;
+        theinput.checked = !setting;
       }
       else {
         theinput.checked = setting;

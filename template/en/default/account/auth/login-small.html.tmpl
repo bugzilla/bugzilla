@@ -110,7 +110,8 @@
           });
     }
     </script>
-    <a href="#" onclick="return hide_mini_login_form('[% qs_suffix %]')">[x]</a>
+    <a href="#" id="hide_mini_login[% qs_suffix FILTER html %]" 
+       onclick="return hide_mini_login_form('[% qs_suffix %]')">[x]</a>
   </form>
 </li>
 <li id="forgot_container[% qs_suffix %]">

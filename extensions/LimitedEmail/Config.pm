@@ -31,7 +31,8 @@ use constant FILTERS => [
     qr/^(glob|dkl|justdave)\@mozilla\.com$/i,
     qr/^byron\.jones\@gmail\.com$/i,
     qr/^gerv\@mozilla\.org$/i,
-    qr/^reed\@reedloden\.com/i,
+    qr/^reed\@reedloden\.com$/i,
+    qr/^shyam\@mozilla\.com$/i,
 ];
 
 use constant BLACK_HOLE => 'nobody@mozilla.org';

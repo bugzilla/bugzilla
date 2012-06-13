@@ -15,6 +15,10 @@
 [% yui_modules = [ 'history', 'datatable', 'container' ] %]
 [% yui_modules.push('autocomplete') IF BMO %]
 
+[% IF BMO %]
+  [% onload = "YAHOO.util.Dom.get('prod_comp_search').focus();" %]
+[% END %]
+
 [% PROCESS global/header.html.tmpl
    title = "Enter A Bug"
    javascript_urls = js_urls

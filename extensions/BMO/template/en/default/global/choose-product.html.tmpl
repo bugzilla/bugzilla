@@ -35,6 +35,7 @@
   [% yui = [ 'autocomplete' ] %]
   [% javascript_urls = [ "js/field.js", "js/create_bug.js", 
                          "extensions/BMO/web/js/choose_product.js" ] %]
+  [% onload = "YAHOO.util.Dom.get('prod_comp_search').focus();" %]
 [% ELSIF target == "describecomponents.cgi" %]
   [% title = "Browse" %]
   [% h2 = "Please specify the product whose components you want described." %]

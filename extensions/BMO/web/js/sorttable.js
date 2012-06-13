@@ -189,7 +189,7 @@ sorttable = {
          // reverse the table, which is quicker
          sorttable.reverse_table(cell);
 
-         sorttable._mark_column_as_sorted(cell, '&#x25B2;', 1);
+         sorttable._mark_column_as_sorted(cell, '&#x25BC;', 1);
          return 1;
       }
 
@@ -198,7 +198,7 @@ sorttable = {
          // re-reverse the table, which is quicker
          sorttable.reverse_table(cell);
 
-         sorttable._mark_column_as_sorted(cell, '&#x25BC;', 0);
+         sorttable._mark_column_as_sorted(cell, '&#x25B2;', 0);
 
          return 1;
       }

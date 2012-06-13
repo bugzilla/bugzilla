@@ -37,4 +37,5 @@ use constant FILTERS => [
 
 use constant BLACK_HOLE => 'nobody@mozilla.org';
 
+
 __PACKAGE__->NAME;

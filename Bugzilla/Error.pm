@@ -95,6 +95,20 @@ sub _throw_error {
     my $template = Bugzilla->template;
     my $message;
 
+    # There are some tests that throw and catch a lot of errors,
+    # and calling $template->process over and over for those errors
+    # is too slow. So instead, we just "die" with a dump of the arguments.
+    if (Bugzilla->error_mode != ERROR_MODE_TEST) {
+        $template->process($name, $vars, \$message)
+          || ThrowTemplateError($template->error());
+    }
+
+    # Let's call the hook first, so that extensions can override
+    # or extend the default behavior, or add their own error codes.
+    require Bugzilla::Hook;
+    Bugzilla::Hook::process('error_catch', { error => $error, vars => $vars,
+                                             message => \$message });
+
     if (Bugzilla->error_mode == ERROR_MODE_WEBPAGE) {
         if (arecibo_should_notify($vars->{error})) {
             $vars->{maintainers_notified} = 1;
@@ -112,25 +126,6 @@ sub _throw_error {
             arecibo_handle_error(
                 $vars->{error}, $vars->{processed}->{error_message}, $vars->{uid});
         }
-    }
-
-    # There are some tests that throw and catch a lot of errors,
-    # and calling $template->process over and over for those errors
-    # is too slow. So instead, we just "die" with a dump of the arguments.
-    if (Bugzilla->error_mode != ERROR_MODE_TEST) {
-        $template->process($name, $vars, \$message)
-          || ThrowTemplateError($template->error());
-    }
-
-    # Let's call the hook first, so that extensions can override
-    # or extend the default behavior, or add their own error codes.
-    require Bugzilla::Hook;
-    Bugzilla::Hook::process('error_catch', { error => $error, vars => $vars,
-                                             message => \$message });
-
-    if (Bugzilla->error_mode == ERROR_MODE_WEBPAGE) {
-        print Bugzilla->cgi->header();
-        print $message;
     }
     elsif (Bugzilla->error_mode == ERROR_MODE_TEST) {
         die Dumper($vars);

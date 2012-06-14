@@ -400,6 +400,8 @@ sub _make_secure {
                            $vars, \$message)
           || ThrowTemplateError($template->error());
 
+        $email->parts_set([]);
+        $email->content_type_set('text/plain');
         $email->body_set($message);
     }
 

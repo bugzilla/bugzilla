@@ -43,12 +43,28 @@ sub attachment_process_data {
         $params->{'contenttypemethod'} eq 'autodetect' &&
         $attributes->{'mimetype'} eq 'application/octet-stream') 
     {
-        # data is either a filehandle, or the data itself
-        my $fh = ${$args->{'data'}};
+        # data attribute can be either scalar data or filehandle
+        # bugzilla.org/docs/3.6/en/html/api/Bugzilla/Attachment.html#create
+        my $fh = $attributes->{'data'};
         if (!ref($fh)) {
-            $fh = IO::Scalar->new(\$fh);
+            my $data = $attributes->{'data'};
+            $fh = new IO::Scalar \$data;
         }
-
+        else {
+            # CGI.pm sends us an Fh that isn't actually an IO::Handle, but
+            # has a method for getting an actual handle out of it.
+            if (!$fh->isa('IO::Handle')) {
+                $fh = $fh->handle;
+                # ->handle returns an literal IO::Handle, even though the
+                # underlying object is a file. So we rebless it to be a proper
+                # IO::File object so that we can call ->seek on it and so on.
+                # Just in case CGI.pm fixes this some day, we check ->isa first.
+                if (!$fh->isa('IO::File')) {
+                    bless $fh, 'IO::File';
+                }
+            }            
+        }
+        
         my $mimetype = mimetype($fh);
         if ($mimetype) {
             $attributes->{'mimetype'} = $mimetype;

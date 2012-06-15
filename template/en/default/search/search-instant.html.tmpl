@@ -15,7 +15,9 @@
   yui = [ 'datatable', 'container' ]
 %]
 
-[% default.product.push('Firefox') UNLESS default.product.size %]
+[% UNLESS default.exists('product') && default.product.size %]
+  [% default.product = [ 'Firefox' ] %]
+[% END %]
 
 <script>
 YAHOO.bugzilla.instantSearch.setLabels( {
@@ -46,7 +48,7 @@ YAHOO.bugzilla.instantSearch.setLabels( {
             [% FOREACH p = user.get_selectable_products(c.id) %]
               [% IF p.components.size %]
                 <option value="[% p.name FILTER html %]"
-                  [% " selected" IF default.product && lsearch(default.product, p.name) != -1 %]>
+                  [% " selected" IF lsearch(default.product, p.name) != -1 %]>
                   [% p.name FILTER html %]
                 </option>
               [% END %]
@@ -56,7 +58,7 @@ YAHOO.bugzilla.instantSearch.setLabels( {
         [% ELSE %]
           [% FOREACH p = product %]
             <option value="[% p.name FILTER html %]"
-              [% " selected" IF default.product && lsearch(default.product, p.name) != -1 %]>
+              [% " selected" IF lsearch(default.product, p.name) != -1 %]>
               [% p.name FILTER html %]
             </option>
           [% END %]

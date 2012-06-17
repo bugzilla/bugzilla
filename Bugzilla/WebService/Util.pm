@@ -108,11 +108,12 @@ sub translate {
 
 sub params_to_objects {
     my ($params, $class) = @_;
+    my (@objects, @objects_by_ids);
 
-    my @objects = map { $class->check($_) } 
+    @objects = map { $class->check($_) } 
         @{ $params->{names} } if $params->{names};
 
-    my @objects_by_ids = map { $class->check({ id => $_ }) } 
+    @objects_by_ids = map { $class->check({ id => $_ }) } 
         @{ $params->{ids} } if $params->{ids};
 
     push(@objects, @objects_by_ids);

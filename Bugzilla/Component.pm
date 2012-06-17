@@ -487,10 +487,12 @@ Component.pm represents a Product Component object.
 
  Params:      $param - If you pass an integer, the integer is the
                        component ID from the database that we want to
-                       read in. If you pass in a hash with the 'name'
-                       and 'product' keys, then the value of the name
-                       key is the name of a component being in the given
-                       product.
+                       read in. 
+                       However, If you pass in a hash, it must contain
+                       two keys:
+                       name (string): the name of the component
+                       product (object): an object of Bugzilla::Product
+                       representing the product that the component belongs to.
 
  Returns:     A Bugzilla::Component object.
 

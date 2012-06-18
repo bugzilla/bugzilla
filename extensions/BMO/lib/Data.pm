@@ -319,6 +319,7 @@ our %always_fileable_group = (
     'tamarin-security'                  => 1,
     'websites-security'                 => 1,
     'webtools-security'                 => 1,
+    'winqual-data'                      => 1,
 );
 
 # Mapping of products to their security bits
@@ -341,6 +342,7 @@ our %product_sec_groups = (
     "Mozilla Reps"                 => 'mozilla-reps',
     "Mozilla Services"             => 'mozilla-services-security',
     "mozillaignite"                => 'websites-security',
+    "Privacy"                      => 'privacy',
     "quality.mozilla.org"          => 'websites-security',
     "Skywriter"                    => 'websites-security',
     "Socorro"                      => 'client-services-security',

@@ -250,19 +250,20 @@ $default{'product'} = $product->name;
 
 if ($cloned_bug_id) {
 
-    $default{'component_'}    = $cloned_bug->component;
-    $default{'priority'}      = $cloned_bug->priority;
-    $default{'bug_severity'}  = $cloned_bug->bug_severity;
-    $default{'rep_platform'}  = $cloned_bug->rep_platform;
-    $default{'op_sys'}        = $cloned_bug->op_sys;
+    $default{'component_'}       = $cloned_bug->component;
+    $default{'priority'}         = $cloned_bug->priority;
+    $default{'bug_severity'}     = $cloned_bug->bug_severity;
+    $default{'rep_platform'}     = $cloned_bug->rep_platform;
+    $default{'op_sys'}           = $cloned_bug->op_sys;
 
-    $vars->{'short_desc'}     = $cloned_bug->short_desc;
-    $vars->{'bug_file_loc'}   = $cloned_bug->bug_file_loc;
-    $vars->{'keywords'}       = $cloned_bug->keywords;
-    $vars->{'dependson'}      = join (", ", $cloned_bug_id, @{$cloned_bug->dependson});
-    $vars->{'blocked'}        = join (", ", @{$cloned_bug->blocked});
-    $vars->{'deadline'}       = $cloned_bug->deadline;
-    $vars->{'estimated_time'} = $cloned_bug->estimated_time;
+    $vars->{'short_desc'}        = $cloned_bug->short_desc;
+    $vars->{'bug_file_loc'}      = $cloned_bug->bug_file_loc;
+    $vars->{'keywords'}          = $cloned_bug->keywords;
+    $vars->{'dependson'}         = join (", ", $cloned_bug_id, @{$cloned_bug->dependson});
+    $vars->{'blocked'}           = join (", ", @{$cloned_bug->blocked});
+    $vars->{'deadline'}          = $cloned_bug->deadline;
+    $vars->{'estimated_time'}    = $cloned_bug->estimated_time;
+    $vars->{'status_whiteboard'} = $cloned_bug->status_whiteboard;
 
     if (defined $cloned_bug->cc) {
         $vars->{'cc'}         = join (", ", @{$cloned_bug->cc});

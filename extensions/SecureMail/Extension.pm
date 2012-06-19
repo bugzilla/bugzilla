@@ -281,8 +281,13 @@ sub mailer_before_send {
         # does that.
         my $public_key = $user ? $user->{'public_key'} : '';
 
+        # Check if the new bugmail prefix should be added to the subject.
+        my $add_new = ($email->header('X-Bugzilla-Type') eq 'new' &&
+                       $user &&
+                       $user->settings->{'bugmail_new_prefix'}->{'value'} eq 'on') ? 1 : 0;
+
         if ($make_secure != SECURE_NONE) {
-            _make_secure($email, $public_key, $is_bugmail && $make_secure == SECURE_ALL);
+            _make_secure($email, $public_key, $is_bugmail && $make_secure == SECURE_ALL, $add_new);
         }
     }
 }
@@ -313,7 +318,7 @@ sub _should_secure_bug {
 }
 
 sub _make_secure {
-    my ($email, $key, $sanitise_subject) = @_;
+    my ($email, $key, $sanitise_subject, $add_new) = @_;
 
     my $subject = $email->header('Subject');
     my ($bug_id) = $subject =~ /\[\D+(\d+)\]/;
@@ -409,7 +414,8 @@ sub _make_secure {
         # This is designed to still work if the admin changes the word
         # 'bug' to something else. However, it could break if they change
         # the format of the subject line in another way.
-        $subject =~ s/($bug_id\])\s+(.*)$/$1 (Secure bug $bug_id updated)/;
+        my $new = $add_new ? ' New:' : '';
+        $subject =~ s/($bug_id\])\s+(.*)$/$1$new (Secure bug $bug_id updated)/;
         $email->header_set('Subject', $subject);
     }
 }

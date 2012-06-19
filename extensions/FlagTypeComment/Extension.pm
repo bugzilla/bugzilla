@@ -120,7 +120,7 @@ sub _set_ftc_states {
             'product_id'   => $bug->product_id,
             'component_id' => $bug->component_id,
             'bug_id'       => $bug->id,
-            'active_or_has_bugs' => $bug->id, 
+            'active_or_has_flags' => $bug->id, 
         });
 
         my $types = join(',', map { $_->id } @$flag_types);

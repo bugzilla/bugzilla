@@ -249,13 +249,14 @@ our $cf_disabled_flags = [
 
 # Who to CC on particular bugmails when certain groups are added or removed.
 our %group_to_cc_map = (
-  'addons-security'          => 'amo-editors@mozilla.org', 
-  'bugzilla-security'        => 'security@bugzilla.org',
-  'client-services-security' => 'amo-admins@mozilla.org',
-  'core-security'            => 'security@mozilla.org',
-  'tamarin-security'         => 'tamarinsecurity@adobe.com',
-  'websites-security'        => 'website-drivers@mozilla.org',
-  'webtools-security'        => 'webtools-security@mozilla.org',
+  'addons-security'           => ['amo-editors@mozilla.org'], 
+  'bugzilla-security'         => ['security@bugzilla.org'],
+  'client-services-security'  => ['amo-admins@mozilla.org', 'web-security@mozilla.org'],
+  'core-security'             => ['security@mozilla.org'],
+  'mozilla-services-security' => ['web-security@mozilla.org'],
+  'tamarin-security'          => ['tamarinsecurity@adobe.com'],
+  'websites-security'         => ['web-security@mozilla.org'],
+  'webtools-security'         => ['web-security@mozilla.org'],
 );
 
 # Only users in certain groups can change certain custom fields in 

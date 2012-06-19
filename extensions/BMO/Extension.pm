@@ -237,7 +237,7 @@ sub cf_hidden_in_product {
                                            : $product_name;
    
     # Also in buglist.cgi, we pass in a list of components instead 
-    # of a single compoent name everywhere else.
+    # of a single component name everywhere else.
     my $component_list = [];
     if ($component_name) {
         $component_list = ref $component_name ? $component_name 
@@ -342,9 +342,11 @@ sub _cc_if_special_group {
     
     return if !$group;
     
-    if ($group_to_cc_map{$group}) {
-        my $id = login_to_id($group_to_cc_map{$group});
-        $recipients->{$id}->{+REL_CC} = Bugzilla::BugMail::BIT_DIRECT();
+    if (exists $group_to_cc_map{$group}) {
+        foreach my $login (@{ $group_to_cc_map{$group} }) {
+            my $id = login_to_id($login);
+            $recipients->{$id}->{+REL_CC} = Bugzilla::BugMail::BIT_DIRECT();
+        }
     }
 }
 

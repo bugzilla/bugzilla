@@ -38,6 +38,15 @@ Do not reply to this email. You can add comments to this [% terms.bug %] at
 [% END %]
 [%+ comment.body_full({ is_bugmail => 1, wrap => 1 }) %]
 [% END %]
+[% IF referenced_bugs.size %]
+
+Referenced [% terms.Bugs %]:
+
+[% FOREACH ref = referenced_bugs %]
+[%+ urlbase %]show_bug.cgi?id=[% ref.id %]
+[%+ "[" _ terms.Bug _ " " _ ref.id _ "] " _ ref.short_desc FILTER wrap_comment(76) %]
+[% END %]
+[% END %]
 
 -- [%# Protect the trailing space of the signature marker %]
 You are receiving this mail because:

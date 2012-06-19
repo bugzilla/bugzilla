@@ -107,6 +107,7 @@ sub Send {
     my %user_cache = map { $_->id => $_ } (@assignees, @qa_contacts, @ccs);
 
     my @diffs;
+    my @referenced_bugs;
     if (!$start) {
         @diffs = _get_new_bugmail_fields($bug);
     }
@@ -122,15 +123,31 @@ sub Send {
                        new => $params->{changes}->{resolution}->[1],
                        login_name => $changer->login,
                        blocker => $params->{blocker} });
+        push(@referenced_bugs, $params->{blocker}->id);
     }
     else {
-        push(@diffs, _get_diffs($bug, $end, \%user_cache));
+        my ($diffs, $referenced) = _get_diffs($bug, $end, \%user_cache);
+        push(@diffs, @$diffs);
+        push(@referenced_bugs, @$referenced);
     }
 
     my $comments = $bug->comments({ after => $start, to => $end });
     # Skip empty comments.
     @$comments = grep { $_->type || $_->body =~ /\S/ } @$comments;
-    
+
+    # Add duplicate bug to referenced bug list
+    foreach my $comment (@$comments) {
+        if ($comment->type == CMT_DUPE_OF || $comment->type == CMT_HAS_DUPE) {
+            push(@referenced_bugs, $comment->extra_data);
+        }
+    }
+
+    # Add dependencies to referenced bug list on new bugs
+    if (!$start) {
+        push @referenced_bugs, @{ $bug->dependson };
+        push @referenced_bugs, @{ $bug->blocked };
+    }
+
     ###########################################################################
     # Start of email filtering code
     ###########################################################################
@@ -229,6 +246,9 @@ sub Send {
     my $date = $params->{dep_only} ? $end : $bug->delta_ts;
     $date = format_time($date, '%a, %d %b %Y %T %z', 'UTC');
 
+    # Remove duplicate references, and convert to bug objects
+    @referenced_bugs = @{ Bugzilla::Bug->new_from_list([uniq @referenced_bugs]) };
+
     foreach my $user_id (keys %recipients) {
         my %rels_which_want;
         my $sent_mail = 0;
@@ -267,17 +287,33 @@ sub Send {
             }
 
             # Make sure the user isn't in the nomail list, and the dep check passed.
-            # BMO: normally we would check the login names of the
-            # user objects in the bugmail_recipients hook instead. There we could
-            # remove the (bugs|tld)$ addresses from the recipients. But the hook comes
-            # to early before watchers are decided and these addresses need to be 
-            # there for this to work. This may change with recent enhancements to 
-            # component watching. need to investigate further.
+            # BMO: never send emails to bugs or .tld addresses.  this check needs to
+            # happen after the bugmail_recipients hook.
             if ($user->email_enabled && $dep_ok &&
                 ($user->login !~ /bugs$/) &&
                 ($user->login !~ /\.tld$/))
             {
                 # OK, OK, if we must. Email the user.
+
+                # Don't show summaries for bugs the user can't access, and
+                # provide a hook for extensions such as SecureMail to filter
+                # this list.
+                #
+                # We build an array with the short_desc as a separate item to
+                # allow extensions to modify the summary without touching the
+                # bug object.
+                my $referenced_bugs = [];
+                foreach my $ref (@{ $user->visible_bugs(\@referenced_bugs) }) {
+                    push @$referenced_bugs, {
+                        bug         => $ref,
+                        id          => $ref->id,
+                        short_desc  => $ref->short_desc,
+                    };
+                }
+                Bugzilla::Hook::process('bugmail_referenced_bugs',
+                                        { updated_bug     => $bug,
+                                          referenced_bugs => $referenced_bugs });
+
                 $sent_mail = sendMail(
                     { to       => $user, 
                       bug      => $bug,
@@ -288,6 +324,7 @@ sub Send {
                                   $watching{$user_id} : undef,
                       diffs    => \@diffs,
                       rels_which_want => \%rels_which_want,
+                      referenced_bugs => $referenced_bugs,
                     });
             }
         }
@@ -323,6 +360,7 @@ sub sendMail {
     my $watchingRef = $params->{watchers};
     my @diffs = @{ $params->{diffs} };
     my $relRef      = $params->{rels_which_want};
+    my $referenced_bugs = $params->{referenced_bugs};
 
     # Only display changes the user is allowed see.
     my @display_diffs;
@@ -382,6 +420,7 @@ sub sendMail {
         changedfields => \@changedfields, 
         new_comments => \@send_comments,
         threadingmarker => build_thread_marker($bug->id, $user->id, !$bug->lastdiffed),
+        referenced_bugs => $referenced_bugs,
     };
     my $msg =  _generate_bugmail($user, $vars);
     MessageToMTA($msg);
@@ -412,7 +451,7 @@ sub _generate_bugmail {
             || ThrowTemplateError($template->error());
         push @parts, Email::MIME->create(
             attributes => {
-                content_type => "text/html",         
+                content_type => "text/html",
             },
             body => $msg_html,
         );
@@ -452,10 +491,11 @@ sub _get_diffs {
              WHERE bugs_activity.bug_id = ?
                    $when_restriction
           ORDER BY bugs_activity.bug_when", {Slice=>{}}, @args);
+    my $referenced_bugs = [];
 
     foreach my $diff (@$diffs) {
-        $user_cache->{$diff->{who}} ||= new Bugzilla::User($diff->{who}); 
-        $diff->{who} =  $user_cache->{$diff->{who}};
+        $user_cache->{$diff->{who}} ||= new Bugzilla::User($diff->{who});
+        $diff->{who} = $user_cache->{$diff->{who}};
         if ($diff->{attach_id}) {
             $diff->{isprivate} = $dbh->selectrow_array(
                 'SELECT isprivate FROM attachments WHERE attach_id = ?',
@@ -466,9 +506,13 @@ sub _get_diffs {
              $diff->{num} = $comment->count;
              $diff->{isprivate} = $diff->{new};
          }
+         elsif ($diff->{field_name} eq 'dependson' || $diff->{field_name} eq 'blocked') {
+            push @$referenced_bugs, grep { /^\d+$/ } split(/[\s,]+/, $diff->{old});
+            push @$referenced_bugs, grep { /^\d+$/ } split(/[\s,]+/, $diff->{new});
+         }
     }
 
-    return @$diffs;
+    return ($diffs, $referenced_bugs);
 }
 
 sub _get_new_bugmail_fields {

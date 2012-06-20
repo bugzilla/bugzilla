@@ -332,6 +332,7 @@ our %product_sec_groups = (
     "Community Tools"              => 'websites-security',
     "Legal"                        => 'legal',
     "Marketing"                    => 'marketing-private',
+    "Marketplace"                  => 'client-services-security', 
     "Mozilla Corporation"          => 'mozilla-corporation-confidential',
     "Mozilla Developer Network"    => 'websites-security',
     "Mozilla Grants"               => 'grants',

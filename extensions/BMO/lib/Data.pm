@@ -344,6 +344,7 @@ our %product_sec_groups = (
     "Mozilla Reps"                 => 'mozilla-reps',
     "Mozilla Services"             => 'mozilla-services-security',
     "mozillaignite"                => 'websites-security',
+    "Popcorn"                      => 'websites-security',
     "Privacy"                      => 'privacy',
     "quality.mozilla.org"          => 'websites-security',
     "Skywriter"                    => 'websites-security',

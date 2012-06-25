@@ -373,9 +373,9 @@ var inline_history = {
   },
 
   htmlDecode: function(v) {
-    var e = document.createElement('div');
+    var e = document.createElement('textarea');
     e.innerHTML = v;
-    return e.childNodes.length == 0 ? '' : e.childNodes[0].nodeValue;
+    return e.value;
   },
 
   trim: function(s) {

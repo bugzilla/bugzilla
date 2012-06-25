@@ -330,6 +330,7 @@ our %product_sec_groups = (
     "Bugzilla"                     => 'bugzilla-security',
     "bugzilla.mozilla.org"         => 'bugzilla-security',
     "Community Tools"              => 'websites-security',
+    "Input"                        => 'websites-security',
     "Legal"                        => 'legal',
     "Marketing"                    => 'marketing-private',
     "Marketplace"                  => 'client-services-security', 

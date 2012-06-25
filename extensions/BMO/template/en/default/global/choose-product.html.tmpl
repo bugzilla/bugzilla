@@ -29,19 +29,20 @@
 
 [% PROCESS global/variables.none.tmpl %]
 
+[% style_urls = [ "extensions/BMO/web/styles/choose_product.css" ] %] 
+
 [% IF target == "enter_bug.cgi" %]
   [% title = "Enter $terms.Bug" %]
   [% h2 = BLOCK %]First, you must pick a product on which to enter [% terms.abug %]. [% END %]
   [% yui = [ 'autocomplete' ] %]
   [% javascript_urls = [ "js/field.js", "js/create_bug.js", 
-                         "extensions/BMO/web/js/choose_product.js" ] %]
+                         "extensions/BMO/web/js/prod_comp_search.js" ] %]
   [% onload = "YAHOO.util.Dom.get('prod_comp_search').focus();" %]
+  [% style_urls.push("extensions/BMO/web/styles/prod_comp_search.css") %]
 [% ELSIF target == "describecomponents.cgi" %]
   [% title = "Browse" %]
   [% h2 = "Please specify the product whose components you want described." %]
 [% END %]
-
-[% style_urls = [ "extensions/BMO/web/styles/choose_product.css" ] %]
 
 [% DEFAULT title = "Choose a Product" %]
 [% PROCESS global/header.html.tmpl %]
@@ -64,27 +65,10 @@
 
 [% IF target == 'enter_bug.cgi' %]
 <h2>Which product is affected by the problem you would like to report?</h2>
-<div id="prod_comp_search_main">
-  <div id="prod_comp_search_autocomplete">
-    <div id="prod_comp_search_label">
-      Type to find product and component by name or description:
-      <img id="prod_comp_throbber" src="extensions/BMO/web/images/throbber.gif"
-           class="hidden" width="16" height="11">
-    </div>
-    <input id="prod_comp_search" type="text" size="60">
-    <div id="prod_comp_search_autocomplete_container"></div>
-  </div>
-</div>
-<script type="text/javascript">
-  if(typeof(YAHOO.bugzilla.prodCompSearch) !== 'undefined' 
-     && YAHOO.bugzilla.prodCompSearch != null) 
-  {
-    YAHOO.bugzilla.prodCompSearch.init(
-      "prod_comp_search", "prod_comp_search_autocomplete_container", "[% format FILTER js %]");
-  }
-</script>
-
+[% PROCESS "global/prod-comp-search.html.tmpl" %]
 <h2>or choose from the following selections</h2>
+[% ELSE %]
+<h2>[% h2 FILTER html %]</h2>
 [% END %]
 
 <table align="center" border="0" width="600" cellpadding="5" cellspacing="0">
@@ -144,7 +128,14 @@
 </tr>
 </table>
 [% ELSE %]
+
+[% IF target == 'enter_bug.cgi' %]
+<h2>Which product is affected by the problem you would like to report?</h2>
+[% PROCESS "global/prod-comp-search.html.tmpl" %]
+<h2>or choose from the following selections</h2>
+[% ELSE %]
 <h2>[% h2 FILTER html %]</h2>
+[% END %]
 
 <table>
 

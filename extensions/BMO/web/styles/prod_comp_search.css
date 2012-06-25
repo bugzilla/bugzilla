@@ -5,12 +5,18 @@
  * This Source Code Form is "Incompatible With Secondary Licenses", as
  * defined by the Mozilla Public License, v. 2.0. */
 
-#choose_product h2,
-#choose_product p {
-    text-align: center;
+#prod_comp_search_main {
+    width: 400px;
+    margin-right: auto;
+    margin-left: auto;
 }
 
-#choose_product td h2,
-#choose_product td p {
-    text-align: left;
+#prod_comp_search_main .hidden {
+    display: none;
+}
+
+#prod_comp_search_main li.yui-ac-highlight a {
+    text-decoration: none;
+    color: #FFFFFF;
+    display: block;
 }

@@ -10,7 +10,7 @@
 [% js_urls = [ 'extensions/GuidedBugEntry/web/js/products.js',
                'extensions/GuidedBugEntry/web/js/guided.js',
                'js/field.js', 'js/TUI.js', 'js/bug.js' ] %]
-[% js_urls.push('extensions/BMO/web/js/choose_product.js') IF BMO %]
+[% js_urls.push('extensions/BMO/web/js/prod_comp_search.js') IF BMO %]
 
 [% yui_modules = [ 'history', 'datatable', 'container' ] %]
 [% yui_modules.push('autocomplete') IF BMO %]

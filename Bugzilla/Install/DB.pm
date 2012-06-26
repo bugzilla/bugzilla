@@ -669,6 +669,11 @@ sub update_table_definitions {
         $dbh->bz_add_index('profile_search', 'profile_search_user_id_idx', [qw(user_id)]);
     }
 
+    # 2012-06-06 dkl@mozilla.com - Bug 762288
+    $dbh->bz_alter_column('bugs_activity', 'removed', 
+                          { TYPE => 'varchar(255)' });
+    $dbh->bz_add_index('bugs_activity', 'bugs_activity_removed_idx', ['removed']);
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################

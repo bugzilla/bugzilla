@@ -673,6 +673,11 @@ sub update_table_definitions {
     # 2012-04-15 Frank@Frank-Becker.de - Bug 740536
     $dbh->bz_add_index('audit_log', 'audit_log_class_idx', ['class', 'at_time']);
 
+    # 2012-06-06 dkl@mozilla.com - Bug 762288
+    $dbh->bz_alter_column('bugs_activity', 'removed', 
+                          { TYPE => 'varchar(255)' });
+    $dbh->bz_add_index('bugs_activity', 'bugs_activity_removed_idx', ['removed']);
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################

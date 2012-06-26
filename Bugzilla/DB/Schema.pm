@@ -338,7 +338,7 @@ use constant ABSTRACT_SCHEMA => {
                           REFERENCES    =>  {TABLE  =>  'fielddefs',
                                              COLUMN =>  'id'}},
             added     => {TYPE => 'varchar(255)'},
-            removed   => {TYPE => 'TINYTEXT'},
+            removed   => {TYPE => 'varchar(255)'},
             comment_id => {TYPE => 'INT3', 
                            REFERENCES => { TABLE  => 'longdescs',
                                            COLUMN => 'comment_id',
@@ -350,6 +350,7 @@ use constant ABSTRACT_SCHEMA => {
             bugs_activity_bug_when_idx => ['bug_when'],
             bugs_activity_fieldid_idx => ['fieldid'],
             bugs_activity_added_idx   => ['added'],
+            bugs_activity_removed_idx => ['removed'], 
         ],
     },
 

@@ -919,7 +919,7 @@
   [% USE Bugzilla %]
   [% FOREACH field = Bugzilla.active_custom_fields %]
     <tr>
-      [% PROCESS bug/field.html.tmpl value = bug.${field.name}
+      [% INCLUDE bug/field.html.tmpl value = bug.${field.name}
                                      editable = bug.check_can_change_field(field.name, 0, 1)
                                      value_span = 2 %]
     </tr>

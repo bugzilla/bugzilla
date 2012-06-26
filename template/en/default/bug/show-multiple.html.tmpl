@@ -195,7 +195,7 @@
         [% field_counter = field_counter + 1 %]
         [%# Odd-numbered fields get an opening <tr> %]
         [% '<tr>' IF field_counter % 2 %]
-        [% PROCESS bug/field.html.tmpl value=bug.${field.name} editable=0 %]
+        [% INCLUDE bug/field.html.tmpl value=bug.${field.name} editable=0 %]
         [%# Even-numbered fields get a closing <tr> %]
         [% '</tr>' IF !(field_counter % 2) %]
         [% IF extra_field_item %]

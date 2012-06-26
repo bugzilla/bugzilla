@@ -378,6 +378,12 @@ sub make_admin {
         write_params();
     }
 
+    # Make sure the new admin isn't disabled
+    if ($user->disabledtext) {
+	$user->set_disabledtext('');
+	$user->update();
+    }
+
     if (Bugzilla->usage_mode == USAGE_MODE_CMDLINE) {
         say "\n", get_text('install_admin_created', { user => $user });
     }

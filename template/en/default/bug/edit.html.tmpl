@@ -956,27 +956,27 @@
 [% BLOCK section_timetracking %]
   <table class="bz_time_tracking_table">
     <tr>
+      [% INCLUDE "bug/field-label.html.tmpl"
+         field = bug_fields.estimated_time, editable = 1
+      %]
       <th>
-        <label for="estimated_time">Orig. Est.</label>
+        Current Est.:
       </th>
+      [% INCLUDE "bug/field-label.html.tmpl"
+         field = bug_fields.work_time, editable = 1
+      %]
+      [% INCLUDE "bug/field-label.html.tmpl"
+         field = bug_fields.remaining_time, editable = 1
+      %]
+      [% INCLUDE "bug/field-label.html.tmpl"
+         field = bug_fields.percentage_complete, editable = 1
+      %]
       <th>
-        Current Est.
+        Gain:
       </th>
-      <th>
-        <label for="work_time">Hours Worked</label>
-      </th>
-      <th>
-        <label for="remaining_time">Hours Left</label>
-      </th>
-      <th>
-        %Complete
-      </th>
-      <th>
-        Gain
-      </th>
-      <th>
-        <label for="deadline">Deadline</label>
-      </th>
+      [% INCLUDE "bug/field-label.html.tmpl"
+         field = bug_fields.deadline, editable = 1
+      %]
     </tr>
     <tr>
       <td>

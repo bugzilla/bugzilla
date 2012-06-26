@@ -127,7 +127,9 @@
   </tr>
   [% IF user.is_timetracker %]
     <tr>
-      <th><label for="estimated_time">Estimated Hours:</label></th>
+      [% INCLUDE "bug/field-label.html.tmpl"
+         field = bug_fields.estimated_time, editable = 1
+      %]
       <td>
         <input id="estimated_time"
                name="estimated_time"
@@ -139,7 +141,9 @@
           editable = 1, allow_dont_change = 1 %]
     </tr>
     <tr>
-      <th><label for="remaining_time">Remaining Hours:</label></th>
+      [% INCLUDE "bug/field-label.html.tmpl"
+         field = bug_fields.remaining_time, editable = 1
+      %]
       <td>
         <input id="remaining_time"
                name="remaining_time"

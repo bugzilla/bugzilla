@@ -136,12 +136,13 @@ sub html_light_quote {
         # Specific rules for allowed elements. If no specific rule is set
         # for a given element, then the default is used.
         my @rules = (a => {
-                           href  => $protocol_regexp,
-                           title => 1,
-                           id    => 1,
-                           name  => 1,
-                           class => 1,
-                           '*'   => 0, # Reject all other attributes.
+                           href   => $protocol_regexp,
+                           target => qr{^(?:_blank|_parent|_self|_top)$}i,
+                           title  => 1,
+                           id     => 1,
+                           name   => 1,
+                           class  => 1,
+                           '*'    => 0, # Reject all other attributes.
                           },
                      blockquote => {
                                     cite => $protocol_regexp,

@@ -574,6 +574,8 @@ sub insert {
       $owner = $bug->assigned_to->login;
       $bug->set_assigned_to($user);
   }
+
+  $bug->add_cc($user) if $cgi->param('addselfcc');
   $bug->update($timestamp);
 
   $dbh->bz_commit_transaction;
@@ -685,6 +687,8 @@ sub update {
                                       type => CMT_ATTACHMENT_UPDATED,
                                       extra_data => $attachment->id });
     }
+
+    $bug->add_cc($user) if $cgi->param('addselfcc');
 
     if ($can_edit) {
         my ($flags, $new_flags) =

@@ -722,15 +722,10 @@
       <td>
         [% IF user.id %]
           [% IF NOT bug.cc || NOT bug.cc.contains(user.login) %]
-            [% has_role = bug.user.isreporter
-                          || bug.assigned_to.id == user.id
-                          || (Param('useqacontact')
-                              && bug.qa_contact
-                              && bug.qa_contact.id == user.id) %]
             <input type="checkbox" id="addselfcc" name="addselfcc"
               [% " checked=\"checked\""
                    IF user.settings.state_addselfcc.value == 'always'
-                      || (!has_role
+                      || (!bug.user.has_any_role
                           && user.settings.state_addselfcc.value == 'cc_unless_role') %]>
             <label for="addselfcc">Add me to CC list</label>
             <br> 

@@ -47,7 +47,7 @@ use Bugzilla::Hook;
 use Date::Parse;
 use Date::Format;
 use Scalar::Util qw(blessed);
-use List::MoreUtils qw(uniq);
+use List::MoreUtils qw(uniq firstidx);
 
 use constant BIT_DIRECT    => 1;
 use constant BIT_WATCHING  => 2;
@@ -490,7 +490,7 @@ sub _get_diffs {
                 ON fielddefs.id = bugs_activity.fieldid
              WHERE bugs_activity.bug_id = ?
                    $when_restriction
-          ORDER BY bugs_activity.bug_when", {Slice=>{}}, @args);
+          ORDER BY bugs_activity.bug_when, fielddefs.description", {Slice=>{}}, @args);
     my $referenced_bugs = [];
 
     foreach my $diff (@$diffs) {
@@ -519,6 +519,20 @@ sub _get_new_bugmail_fields {
     my $bug = shift;
     my @fields = @{ Bugzilla->fields({obsolete => 0, in_new_bugmail => 1}) };
     my @diffs;
+
+    # Show fields in the same order as the DEFAULT_FIELDS list, which mirrors
+    # 4.0's behavour and provides sane grouping of similar fields.
+    # Any additional fields are sorted by descrsiption
+    my @prepend;
+    foreach my $name (map { $_->{name} } Bugzilla::Field::DEFAULT_FIELDS) {
+        my $idx = firstidx { $_->name eq $name } @fields;
+        if ($idx != -1) {
+            push(@prepend, $fields[$idx]);
+            splice(@fields, $idx, 1);
+        }
+    }
+    @fields = sort { $a->description cmp $b->description } @fields;
+    @fields = (@prepend, @fields);
 
     foreach my $field (@fields) {
         my $name = $field->name;

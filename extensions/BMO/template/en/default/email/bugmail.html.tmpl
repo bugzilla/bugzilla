@@ -1,0 +1,198 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS "global/field-descs.none.tmpl" %]
+[% PROCESS "global/reason-descs.none.tmpl" %]
+
+[% isnew = bug.lastdiffed ? 0 : 1 %]
+<html>
+<head>
+  <base href="[% urlbase FILTER html %]">
+  <style>
+    body {
+      font-family: sans-serif;
+      color: #444444;
+    }
+    hr {
+      border: 1px dashed #969696;
+    }
+    .diffs .head td {
+      border-bottom: 1px solid #969696;
+    }
+    .diffs .c1, .diffs .c2 {
+      border-right: 1px solid #969696;
+    }
+    .new .c1 {
+      border-right: 1px solid #969696;
+    }
+    #noreply, #reason {
+      font-size: 90%;
+      color: #666666;
+    }
+  </style>
+</head>
+<body>
+
+  [% IF !to_user.in_group('editbugs') %]
+    <div id="noreply">
+      Do not reply to this email. You can add comments to this [% terms.bug %] at
+      [%# using the bug_link filter here causes a weird template error %]
+      <a href="[% urlbase FILTER html %]/show_bug.cgi?id=[% bug.id FILTER none %]">
+      [% urlbase FILTER html %]/show_bug.cgi?id=[% bug.id FILTER none %]</a>
+    </div>
+    <br>
+  [% END %]
+
+  [% IF isnew %]
+    [% PROCESS generate_new %]
+  [% ELSE %]
+    [% PROCESS generate_diffs %]
+  [% END %]
+
+  [% IF new_comments.size %]
+    <div id="comments">
+      [% FOREACH comment = new_comments.reverse %]
+        <div>
+          [% IF comment.count %]
+            <b>
+              [% "Comment # ${comment.count}"
+                FILTER bug_link(bug, { comment_num => comment.count, full_url => 1 }) FILTER none %]
+              on [% "$terms.Bug $bug.id" FILTER bug_link(bug, { full_url => 1 }) FILTER none %]
+              from [% INCLUDE global/user.html.tmpl who = comment.author %]
+              at [% comment.creation_ts FILTER time %]
+            </b>
+          [% END %]
+          <pre>[% comment.body_full({ wrap => 1 }) FILTER quoteUrls(bug, comment) %]</pre>
+        </div>
+      [% END %]
+    </div>
+    <br>
+  [% END %]
+
+  [% IF referenced_bugs.size %]
+    <div id="referenced">
+      <hr>
+      <b>Referenced [% terms.Bugs %]:</b>
+      <ul>
+        [% FOREACH ref = referenced_bugs %]
+          <li>
+            [<a href="[% urlbase FILTER html %]/show_bug.cgi?id=[% ref.id FILTER none %]">
+            [% terms.Bug %]&nbsp;[% ref.id FILTER none %]</a>] [% ref.short_desc FILTER html %]
+          </li>
+        [% END %]
+      </ul>
+    </div>
+    <br>
+  [% END %]
+
+  <div id="reason">
+    <hr>
+    <b>You are receiving this mail because:</b>
+    <ul>
+      [% FOREACH reason = reasons %]
+        [% IF reason_descs.$reason  %]
+          <li>[% reason_descs.$reason FILTER html %]</li>
+        [% END %]
+      [% END %]
+      [% FOREACH reason = reasons_watch %]
+        [% IF watch_reason_descs.$reason %]
+          <li>[% watch_reason_descs.$reason FILTER html %]</li>
+        [% END %]
+      [% END %]
+    </ul>
+  </div>
+</body>
+</html>
+
+[% BLOCK generate_new %]
+  <div class="new">
+    <table border="0" cellspacing="0" cellpadding="3">
+    [% FOREACH change = diffs %]
+      [% PROCESS "email/bugmail-common.txt.tmpl" %]
+      <tr>
+        <td class="c1" nowrap><b>[% field_label FILTER html %]</b></td>
+        <td class="c2">
+          [% IF change.field_name == "bug_id" %]
+            [% new_value FILTER bug_link(bug, full_url => 1) FILTER none %]
+          [% ELSE %]
+            [% new_value FILTER html %]
+          [% END %]
+        </td>
+      </tr>
+    [% END %]
+    </table>
+  </div>
+  <br>
+[% END %]
+
+[% BLOCK generate_diffs %]
+  [% SET in_table = 0 %]
+  [% last_changer = 0 %]
+  [% FOREACH change = diffs %]
+    [% PROCESS "email/bugmail-common.txt.tmpl" %]
+    [% IF changer.id != last_changer %]
+      [% last_changer = changer.id %]
+      [% IF in_table == 1 %]
+          </table>
+        </div>
+        <br>
+        [% SET in_table = 0 %]
+      [% END %]
+
+      <b>
+        [% IF change.blocker %]
+          [% "${terms.Bug} ${bug.id}" FILTER bug_link(bug, full_url => 1) FILTER none %]
+          depends on
+          <a href="[% urlbase FILTER html %]/show_bug.cgi?id=[% bug.id FILTER none %]">
+          [% terms.Bug %]&nbsp;[% bug.id FILTER none %]</a>,
+          which changed state.<br>
+        [% ELSE %]
+          [% INCLUDE global/user.html.tmpl who = change.who %] changed
+          [%+ "${terms.Bug} ${bug.id}" FILTER bug_link(bug, full_url => 1) FILTER none %]
+          at [% change.bug_when FILTER time %]</b>:<br>
+        [% END %]
+      </b>
+
+      [% IF in_table == 0 %]
+        <br>
+        <div class="diffs">
+          <table border="0" cellspacing="0" cellpadding="5">
+        [% SET in_table = 1 %]
+      [% END %]
+      <tr class="head">
+        <td class="c1"><b>What</b></td>
+        <td class="c2"><b>Removed</b></td>
+        <td class="c3"><b>Added</b></td>
+      </tr>
+    [% END %]
+
+    <tr>
+      <td class="c1" nowrap>[% field_label FILTER html %]</td>
+      <td class="c2">
+        [% IF old_value %]
+          [% old_value FILTER html %]
+        [% ELSE %]
+          &nbsp;
+        [% END %]
+      </td>
+      <td>
+        [% IF new_value %]
+          [% new_value FILTER html %]
+        [% ELSE %]
+          &nbsp;
+        [% END %]
+      </td>
+    </tr>
+  [% END %]
+  [% IF in_table %]
+      </table>
+    </div>
+    <br>
+  [% END %]
+[% END %]
+

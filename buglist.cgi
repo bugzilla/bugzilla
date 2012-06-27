@@ -477,7 +477,9 @@ if ($cmdtype eq "dorem") {
         # Generate and return the UI (HTML page) from the appropriate template.
         $vars->{'message'} = "buglist_query_gone";
         $vars->{'namedcmd'} = $qname;
-        $vars->{'url'} = "buglist.cgi?newquery=" . url_quote($buffer) . "&cmdtype=doit&remtype=asnamed&newqueryname=" . url_quote($qname);
+        $vars->{'url'} = "buglist.cgi?newquery=" . url_quote($buffer)
+                         . "&cmdtype=doit&remtype=asnamed&newqueryname=" . url_quote($qname)
+                         . "&token=" . url_quote(issue_hash_token(['savedsearch']));
         $template->process("global/message.html.tmpl", $vars)
           || ThrowTemplateError($template->error());
         exit;

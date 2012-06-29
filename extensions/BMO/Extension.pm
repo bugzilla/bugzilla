@@ -955,4 +955,5 @@ sub buglist_columns {
     };
 }
 
+
 __PACKAGE__->NAME;

@@ -210,21 +210,23 @@ sub Send {
                             { bug => $bug, recipients => \%recipients,
                               users => \%user_cache, diffs => \@diffs });
 
-    # Find all those user-watching anyone on the current list, who is not
-    # on it already themselves.
-    my $involved = join(",", keys %recipients);
+    if (scalar keys %recipients) {
+        # Find all those user-watching anyone on the current list, who is not
+        # on it already themselves.
+        my $involved = join(",", keys %recipients);
 
-    my $userwatchers =
-        $dbh->selectall_arrayref("SELECT watcher, watched FROM watch
-                                  WHERE watched IN ($involved)");
+        my $userwatchers =
+            $dbh->selectall_arrayref("SELECT watcher, watched FROM watch
+                                    WHERE watched IN ($involved)");
 
-    # Mark these people as having the role of the person they are watching
-    foreach my $watch (@$userwatchers) {
-        while (my ($role, $bits) = each %{$recipients{$watch->[1]}}) {
-            $recipients{$watch->[0]}->{$role} |= BIT_WATCHING
-                if $bits & BIT_DIRECT;
+        # Mark these people as having the role of the person they are watching
+        foreach my $watch (@$userwatchers) {
+            while (my ($role, $bits) = each %{$recipients{$watch->[1]}}) {
+                $recipients{$watch->[0]}->{$role} |= BIT_WATCHING
+                    if $bits & BIT_DIRECT;
+            }
+            push(@{$watching{$watch->[0]}}, $watch->[1]);
         }
-        push(@{$watching{$watch->[0]}}, $watch->[1]);
     }
 
     # Global watcher

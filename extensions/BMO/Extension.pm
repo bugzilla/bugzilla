@@ -273,12 +273,19 @@ sub cf_hidden_in_product {
             foreach my $product (keys %$products) {
                 my $components = $products->{$product};
 
-                my $found_component = 0;    
+                my $found_component = 0;
                 if (@$components) {
                     foreach my $component (@$components) {
-                        if (grep($_ eq $component, @$component_list)) {
-                            $found_component = 1;
-                            last;
+                        if (ref($component) eq 'Regexp') {
+                            if (grep($_ =~ $component, @$component_list)) {
+                                $found_component = 1;
+                                last;
+                            }
+                        } else {
+                            if (grep($_ eq $component, @$component_list)) {
+                                $found_component = 1;
+                                last;
+                            }
                         }
                     }
                 }

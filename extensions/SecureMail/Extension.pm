@@ -331,16 +331,6 @@ sub _make_secure {
         $key_type = 'S/MIME';
     }
 
-    if ($key_type && $sanitise_subject) {
-        # Subject gets placed in the body so it can still be read
-        my $body = $email->body_str;
-        if (!is_7bit_clean($subject)) {
-            $email->encoding_set('quoted-printable');
-        }
-        $body = "Subject: $subject\015\012\015\012" . $body;
-        $email->body_str_set($body);
-    }
-
     if ($key_type eq 'PGP') {
         ##################
         # PGP Encryption #
@@ -349,29 +339,81 @@ sub _make_secure {
         my $pubring = new Crypt::OpenPGP::KeyRing(Data => $key);
         my $pgp = new Crypt::OpenPGP(PubRing => $pubring);
 
-        # "@" matches every key in the public key ring, which is fine,
-        # because there's only one key in our keyring.
-        #
-        # We use the CAST5 cipher because the Rijndael (AES) module doesn't
-        # like us for some reason I don't have time to debug fully.
-        # ("key must be an untainted string scalar")
-        my $encrypted = $pgp->encrypt(Data       => $email->body,
-                                      Recipients => "@",
-                                      Cipher     => 'CAST5',
-                                      Armour     => 1);
-        if (defined $encrypted) {
-            $email->encoding_set('');
-            $email->body_set($encrypted);
+        if (scalar $email->parts > 1) {
+            my $old_boundary = $email->{ct}{attributes}{boundary};
+            my $to_encrypt = "Content-Type: " . $email->content_type . "\n\n";
+            
+            # We need to do some fix up of each part for proper encoding and then 
+            # stringify all parts for encrypting. We have to retain the old 
+            # boundaries as well so that the email client can reconstruct the 
+            # original message properly.
+            $email->walk_parts(\&_fix_part);
+            
+            $email->walk_parts(sub {
+                my ($part) = @_;
+                return if $part->parts > 1; # Top-level
+                if ($sanitise_subject && $part->content_type =~ /text\/plain/) {
+                    if (!is_7bit_clean($subject)) {
+                        $part->encoding_set('quoted-printable');
+                    }
+                    $part->body_str_set("Subject: $subject\015\012\015\012" . $part->body_str);
+                }
+                $to_encrypt .= "--$old_boundary\n" . $part->as_string . "\n";
+            });
+            $to_encrypt .= "--$old_boundary--";
+
+            # Now create the new properly formatted PGP parts containing the 
+            # encrypted original message 
+            my @new_parts = (
+                Email::MIME->create(
+                    attributes => {
+                        content_type => 'application/pgp-encrypted',
+                        encoding     => '7bit', 
+                    },
+                    body => "Version: 1\n",
+                ),
+                Email::MIME->create(
+                    attributes => {
+                        content_type => 'application/octet-stream',
+                        filename     => 'encrypted.asc',
+                        disposition  => 'inline',
+                        encoding     => '7bit', 
+                    },            
+                    body => _pgp_encrypt($pgp, $to_encrypt)
+                ),            
+            );
+            $email->parts_set(\@new_parts);
+            my $new_boundary = $email->{ct}{attributes}{boundary};
+            # Redo the old content type header with the new boundaries
+            # and other information needed for PGP
+            $email->header_set("Content-Type", 
+                               "multipart/encrypted; " .
+                               "protocol=\"application/pgp-encrypted\"; " . 
+                               "boundary=\"$new_boundary\"");
         }
         else {
-            $email->body_set('Error during Encryption: ' . $pgp->errstr);
+            $email->body_set(_pgp_encrypt($pgp, $email->body));
         }
-
     }
+
     elsif ($key_type eq 'S/MIME') {
         #####################
         # S/MIME Encryption #
         #####################
+
+        $email->walk_parts(\&_fix_part);
+
+        if ($sanitise_subject) {
+            $email->walk_parts(sub {
+                my ($part) = @_;
+                return if $part->parts > 1; # Top-level
+                if ($part->content_type =~ /text\/plain/) {
+                    # Subject gets placed in the body so it can still be read
+                    $part->body_str_set("Subject: $subject\015\012\015\012" . $part->body);
+                }
+            });
+        }
+
         my $smime = Crypt::SMIME->new();
         my $encrypted;
 
@@ -385,12 +427,14 @@ sub _make_secure {
             # out its component parts.
             my $enc_obj = new Email::MIME($encrypted);
             $email->header_obj_set($enc_obj->header_obj());
+            $email->parts_set([]);
             $email->body_set($enc_obj->body());
+            $email->content_type_set('application/pkcs7-mime');
         }
         else {
             $email->body_set('Error during Encryption: ' . $@);
         }
-    }
+    }  
     else {
         # No encryption key provided; send a generic, safe email.
         my $template = Bugzilla->template;
@@ -417,6 +461,50 @@ sub _make_secure {
         my $new = $add_new ? ' New:' : '';
         $subject =~ s/($bug_id\])\s+(.*)$/$1$new (Secure bug $bug_id updated)/;
         $email->header_set('Subject', $subject);
+    }
+}
+
+sub _pgp_encrypt {
+    my ($pgp, $text) = @_;
+    # "@" matches every key in the public key ring, which is fine,
+    # because there's only one key in our keyring.
+    #
+    # We use the CAST5 cipher because the Rijndael (AES) module doesn't
+    # like us for some reason I don't have time to debug fully.
+    # ("key must be an untainted string scalar")
+    my $encrypted = $pgp->encrypt(Data       => $text,
+                                  Recipients => "@",
+                                  Cipher     => 'CAST5',
+                                  Armour     => 1);
+    if (!defined $encrypted) {
+        return 'Error during Encryption: ' . $pgp->errstr;
+    }
+    return $encrypted;
+}
+
+# Copied from Bugzilla/Mailer as this extension runs before
+# this code there and Mailer.pm will no longer see the original
+# message.
+sub _fix_part {
+    my ($part) = @_;
+    return if $part->parts > 1; # Top-level
+    my $content_type = $part->content_type || '';
+    $content_type =~ /charset=['"](.+)['"]/;
+    # If no charset is defined or is the default us-ascii,
+    # then we encode the email to UTF-8 if Bugzilla has utf8 enabled.
+    # XXX - This is a hack to workaround bug 723944.
+    if (!$1 || $1 eq 'us-ascii') {
+        my $body = $part->body;
+        if (Bugzilla->params->{'utf8'}) {
+            $part->charset_set('UTF-8');
+            # encoding_set works only with bytes, not with utf8 strings.
+            my $raw = $part->body_raw;
+            if (utf8::is_utf8($raw)) {
+                utf8::encode($raw);
+                $part->body_set($raw);
+            }
+        }
+        $part->encoding_set('quoted-printable') if !is_7bit_clean($body);
     }
 }
 

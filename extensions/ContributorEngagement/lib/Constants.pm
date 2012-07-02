@@ -21,7 +21,7 @@ use constant EMAIL_FROM => 'bugzilla-daemon@mozilla.org';
 
 use constant ENABLED_PRODUCTS => (
     "Core",
-    "Fennec Native", 
+    "Firefox for Android", 
     "Firefox",
     "Testing", 
     "Toolkit", 

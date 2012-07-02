@@ -48,7 +48,7 @@ var products = {
   },
 
   "Fennec": {
-    related: [ "Fennec Native", "Core", "Toolkit" ],
+    related: [ "Firefox for Android", "Core", "Toolkit" ],
     detectPlatform: true,
     support:
       'If you are new to Firefox or Bugzilla, please consider checking ' +
@@ -57,7 +57,7 @@ var products = {
       ' <b>Firefox Help</b></a> instead of creating a bug.'
   },
 
-  "Fennec Native": {
+  "Firefox for Android": {
     related: [ "Fennec", "Core", "Toolkit" ],
     detectPlatform: true,
     support:

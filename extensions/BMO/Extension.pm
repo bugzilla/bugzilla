@@ -787,34 +787,33 @@ sub search_operator_field_override {
 }
 
 sub _short_desc_matches {
-    # copy of Bugzilla::Search::_content_matches
+    # copy of Bugzilla::Search::_content_matches with comment searching removed
 
-    my $self = shift;
-    my %func_args = @_;
-    my ($chartid, $supptables, $term, $groupby, $fields, $t, $v) =
-        @func_args{qw(chartid supptables term groupby fields t v)};
+    my ($self, $args) = @_;
+    my ($chart_id, $joins, $fields, $operator, $value) =
+        @$args{qw(chart_id joins fields operator value)};
     my $dbh = Bugzilla->dbh;
 
     # Add the fulltext table to the query so we can search on it.
-    my $table = "bugs_fulltext_$$chartid";
-    push(@$supptables, "LEFT JOIN bugs_fulltext AS $table " .
-                       "ON bugs.bug_id = $table.bug_id");
+    my $table = "bugs_fulltext_$chart_id";
+    push(@$joins, { table => 'bugs_fulltext', as => $table });
 
     # Create search terms to add to the SELECT and WHERE clauses.
-    my ($term1, $rterm1) = $dbh->sql_fulltext_search("$table.short_desc", $$v, 1);
-    $rterm1 = $term1 if !$rterm1;
+    my ($term, $rterm) =
+        $dbh->sql_fulltext_search("$table.short_desc", $value, 2);
+    $rterm = $term if !$rterm;
 
     # The term to use in the WHERE clause.
-    $$term = $term1;
-    if ($$t =~ /not/i) {
-        $$term = "NOT($$term)";
+    if ($operator =~ /not/i) {
+        $term = "NOT($term)";
     }
+    $args->{term} = $term;
 
-    my $current = Bugzilla::Search::COLUMNS->{'relevance'}->{name};
+    my $current = $self->COLUMNS->{'relevance'}->{name};
     $current = $current ? "$current + " : '';
     # For NOT searches, we just add 0 to the relevance.
-    my $select_term = $$t =~ /not/ ? 0 : "($current$rterm1)";
-    Bugzilla::Search::COLUMNS->{'relevance'}->{name} = $select_term;
+    my $select_term = $operator =~ /not/ ? 0 : "($current$rterm)";
+    $self->COLUMNS->{'relevance'}->{name} = $select_term;
 }
 
 sub mailer_before_send {

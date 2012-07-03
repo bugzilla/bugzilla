@@ -360,6 +360,20 @@ sub OPTIONAL_MODULES {
         version => '0.96',
         feature => ['mod_perl'],
     },
+
+    # typesniffer
+    {
+        package => 'File-MimeInfo',
+        module  => 'File::MimeInfo::Magic',
+        version => '0',
+        feature => ['typesniffer'],
+    },
+    {
+        package => 'IO-stringy',
+        module  => 'IO::Scalar',
+        version => '0',
+        feature => ['typesniffer'],
+    },
     );
 
     my $extra_modules = _get_extension_requirements('OPTIONAL_MODULES');

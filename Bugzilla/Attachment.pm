@@ -513,6 +513,52 @@ sub _check_content_type {
     }
     trick_taint($content_type);
 
+    # $ENV{HOME} must be defined when using File::MimeInfo::Magic,
+    # see https://rt.cpan.org/Public/Bug/Display.html?id=41744.
+    local $ENV{HOME} = $ENV{HOME} || File::Spec->rootdir();
+
+    # If we have autodetected application/octet-stream from the Content-Type
+    # header, let's have a better go using a sniffer if available.
+    if (defined Bugzilla->input_params->{contenttypemethod}
+        && Bugzilla->input_params->{contenttypemethod} eq 'autodetect'
+        && $content_type eq 'application/octet-stream'
+        && Bugzilla->feature('typesniffer'))
+    {
+        import File::MimeInfo::Magic qw(mimetype);
+        require IO::Scalar;
+
+        # data is either a filehandle, or the data itself.
+        my $fh = $params->{data};
+        if (!ref($fh)) {
+            $fh = new IO::Scalar \$fh;
+        }
+        elsif (!$fh->isa('IO::Handle')) {
+            # CGI.pm sends us an Fh that isn't actually an IO::Handle, but
+            # has a method for getting an actual handle out of it.
+            $fh = $fh->handle;
+            # ->handle returns an literal IO::Handle, even though the
+            # underlying object is a file. So we rebless it to be a proper
+            # IO::File object so that we can call ->seek on it and so on.
+            # Just in case CGI.pm fixes this some day, we check ->isa first.
+            if (!$fh->isa('IO::File')) {
+                bless $fh, 'IO::File';
+            }
+        }
+
+        my $mimetype = mimetype($fh);
+        $content_type = $mimetype if $mimetype;
+    }
+
+    # Make sure patches are viewable in the browser
+    if (!ref($invocant)
+        && defined Bugzilla->input_params->{contenttypemethod}
+        && Bugzilla->input_params->{contenttypemethod} eq 'autodetect'
+        && $content_type =~ m{text/x-(?:diff|patch)})
+    {
+        $params->{ispatch} = 1;
+        $content_type = 'text/plain';
+    }
+
     return $content_type;
 }
 
@@ -925,13 +971,6 @@ sub get_content_type {
         $content_type =
             $cgi->uploadInfo($cgi->param('data'))->{'Content-Type'};
         $content_type || ThrowUserError("missing_content_type");
-
-        # Set the ispatch flag to 1 if the content type
-        # is text/x-diff or text/x-patch
-        if ($content_type =~ m{text/x-(?:diff|patch)}) {
-            $cgi->param('ispatch', 1);
-            $content_type = 'text/plain';
-        }
 
         # Internet Explorer sends image/x-png for PNG images,
         # so convert that to image/png to match other browsers.

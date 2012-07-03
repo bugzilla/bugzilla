@@ -10,4 +10,8 @@
    [% title = "Invalid Watch User" %]
    The "Watch User" must be a <b>.bugs</b> email address.<br>
    For example: <i>accessibility-apis@core.bugs</i>
+[% ELSIF error == "component_watch_missing_watch_user" %]
+   [% title = "Missing Watch User" %]
+   You must provide a <b>.bugs</b> email address for the "Watch User".<br>
+   For example: <i>accessibility-apis@core.bugs</i>
 [% END %]

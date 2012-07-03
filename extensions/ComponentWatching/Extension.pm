@@ -160,7 +160,9 @@ sub _check_watch_user {
     my ($self, $value, $field) = @_;
 
     $value = trim($value || '');
-    return if $value eq '';
+    if ($value eq '') {
+        ThrowUserError('component_watch_missing_watch_user');
+    }
     if ($value !~ /\.bugs$/i) {
         ThrowUserError('component_watch_invalid_watch_user');
     }

@@ -342,7 +342,7 @@ sub bugmail_recipients {
             }
         }
     }
-}    
+}
 
 sub _cc_if_special_group {
     my ($group, $recipients) = @_;

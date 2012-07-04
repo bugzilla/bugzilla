@@ -165,7 +165,7 @@ sub detect_platform {
 }
 
 sub detect_op_sys {
-    my $userAgent = $ENV{'HTTP_USER_AGENT'};
+    my $userAgent = $ENV{'HTTP_USER_AGENT'} || '';
     my @detected;
     my $iterator = natatime(2, OS_MAP);
     while (my($re, $ra) = $iterator->()) {

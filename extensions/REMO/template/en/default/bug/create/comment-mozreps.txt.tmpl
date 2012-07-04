@@ -50,6 +50,13 @@ IM:
 -
 [% END %]
 
+Mozillians.org Account:
+[% IF cgi.param('mozillian') %]
+[%+ cgi.param('mozillian') %]
+[% ELSE %]
+-
+[% END %]
+
 References:
 [% IF cgi.param('references') %]
 [%+ cgi.param('references') %]
@@ -60,6 +67,13 @@ References:
 Currently Involved with Mozilla:
 [% IF cgi.param('involved') %]
 [%+ cgi.param('involved') %]
+[% ELSE %]
+-
+[% END %]
+
+When First Contributed:
+[% IF cgi.param('firstcontribute') %]
+[%+ cgi.param('firstcontribute') %]
 [% ELSE %]
 -
 [% END %]

@@ -53,6 +53,17 @@ function mandatory(ids) {
   return result;
 }
 
+function underageWarning (el) {
+  if (el.checked) {
+    Dom.removeClass('underage_warning', 'bz_default_hidden');
+    Dom.get('submit').disabled = true;
+  }
+  else {
+    Dom.addClass('underage_warning', 'bz_default_hidden');
+    Dom.get('submit').disabled = false;
+  }
+}
+
 function submitForm() {
   if (!mandatory([ 'first_name', 'last_name', 'sex', 'city', 'country',
                    'languages', 'learn', 'motivation', 'privacy' ])
@@ -104,7 +115,18 @@ function submitForm() {
 
 <tr class="odd">
   <th>Are you under 18 years old?:</th>
-  <td><input type="checkbox" id="underage" name="underage" value="1"></td>
+  <td>
+    <input type="checkbox" id="underage" name="underage" 
+           value="1" onclick="underageWarning(this);"><br>
+  </td>
+</tr>
+
+<tr id="underage_warning" class="odd bz_default_hidden">
+  <td colspan="2">
+    Mozilla Reps program is not currently accepting people under 18 years old.
+    Sorry for the inconvenience. In the meantime please check with your local Mozilla
+    group for other contribution opportunities
+  </td>
 </tr>
 
 <tr class="even">
@@ -139,26 +161,38 @@ function submitForm() {
 </tr>
 
 <tr class="odd">
+  <th>Mozillians.org Account:</th>
+  <td><input id="mozillian" name="mozillian" size="40"></td>
+</tr>
+
+<tr class="even">
   <th colspan="2">
     References:
   </th>
 </tr>
-<tr class="odd">
+<tr class="even">
   <td colspan="2">
     <textarea id="references" name="references" rows="4"
               placeholder="Add contact info of people referencing you."></textarea>
   </td>
 </tr>
 
-<tr class="even">
+<tr class="odd">
   <th colspan="2">
     How are you involved with Mozilla?
   </th>
 </tr>
-<tr class="even">
+<tr class="odd">
   <td colspan="2">
     <textarea id="involved" name="involved" rows="4" placeholder="Add-ons,  l10n,  SUMO,  QA,  ..."></textarea>
   </td>
+</tr>
+
+<tr class="even">
+  <th>
+    When did you first start contributing to Mozilla?
+  </th>
+  <td><input id="firstcontribute" name="firstcontribute" size="40"></td>
 </tr>
 
 <tr class="odd">
@@ -195,7 +229,9 @@ function submitForm() {
 
 <tr class="even">
   <td>&nbsp;</td>
-  <td align="right"><input type="submit" value="Submit" onclick="return submitForm()"></td>
+  <td align="right">
+    <input id="submit" type="submit" value="Submit" onclick="return submitForm()">
+  </td>
 </tr>
 
 </table>

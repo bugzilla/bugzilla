@@ -31,6 +31,8 @@ use Bugzilla::User;
 use Bugzilla::Util qw(correct_urlbase trim trick_taint is_7bit_clean);
 use Bugzilla::Error;
 use Bugzilla::Mailer;
+use Bugzilla::Constants;
+use Bugzilla::Install::Util qw(vers_cmp);
 
 use Crypt::OpenPGP::Armour;
 use Crypt::OpenPGP::KeyRing;
@@ -43,6 +45,12 @@ our $VERSION = '0.5';
 use constant SECURE_NONE => 0;
 use constant SECURE_BODY => 1;
 use constant SECURE_ALL  => 2;
+
+our $FILTER_BUG_LINKS = 1;
+if(vers_cmp(BUGZILLA_VERSION, '4.2') > -1) {
+    eval "require HTML::Tree";
+    $FILTER_BUG_LINKS = 0 if $@;
+}
 
 ##############################################################################
 # Creating new columns
@@ -62,6 +70,13 @@ sub install_update_db {
 ##############################################################################
 # Maintaining new columns
 ##############################################################################
+
+BEGIN {
+    *Bugzilla::Group::secure_mail = \&_secure_mail;
+}
+
+sub _secure_mail { return $_[0]->{'secure_mail'}; }
+
 # Make sure generic functions know about the additional fields in the user
 # and group objects.
 sub object_columns {
@@ -241,7 +256,7 @@ sub mailer_before_send {
             }
             # If the insider group has securemail enabled..
             my $insider_group = Bugzilla::Group->new({ name => Bugzilla->params->{'insidergroup'} });
-            if ($insider_group->{secure_mail} && $make_secure == SECURE_NONE) {
+            if ($insider_group->secure_mail && $make_secure == SECURE_NONE) {
                 my $comment_is_private = Bugzilla->dbh->selectcol_arrayref(
                     "SELECT isprivate FROM longdescs WHERE bug_id=? ORDER BY bug_when",
                     undef, $bug_id);
@@ -270,7 +285,7 @@ sub mailer_before_send {
             # we default to secure).
             if ($user &&
                 !$user->{'public_key'} &&
-                !grep($_->{secure_mail}, @{ $user->groups }))
+                !grep($_->secure_mail, @{ $user->groups }))
             {
                 $make_secure = SECURE_NONE;
             }
@@ -286,7 +301,13 @@ sub mailer_before_send {
                        $user &&
                        $user->settings->{'bugmail_new_prefix'}->{'value'} eq 'on') ? 1 : 0;
 
-        if ($make_secure != SECURE_NONE) {
+        if ($make_secure == SECURE_NONE) {
+            # Filter the bug_links in HTML email in case the bugs the links
+            # point are "secured" bugs and the user may not be able to see 
+            # the summaries.
+            _filter_bug_links($email) if $FILTER_BUG_LINKS;
+        }
+        else {
             _make_secure($email, $public_key, $is_bugmail && $make_secure == SECURE_ALL, $add_new);
         }
     }
@@ -301,7 +322,7 @@ sub bugmail_referenced_bugs {
     return if _should_secure_bug($args->{'updated_bug'});
     # Replace the subject if required
     foreach my $ref (@$referenced_bugs) {
-        if (grep($_->{'secure_mail'}, @{ $ref->{'bug'}->groups_in })) {
+        if (grep($_->secure_mail, @{ $ref->{'bug'}->groups_in })) {
             $ref->{'short_desc'} = "(Secure bug)";
         }
     }
@@ -314,7 +335,7 @@ sub _should_secure_bug {
     return
         !$bug
         || $bug->{'error'}
-        || grep($_->{secure_mail}, @{ $bug->groups_in });
+        || grep($_->secure_mail, @{ $bug->groups_in });
 }
 
 sub _make_secure {
@@ -506,6 +527,27 @@ sub _fix_part {
         }
         $part->encoding_set('quoted-printable') if !is_7bit_clean($body);
     }
+}
+
+sub _filter_bug_links {
+    my ($email) = @_;
+    $email->walk_parts(sub {
+        my $part = shift;
+        return if $part->content_type !~ /text\/html/;
+        my$body = $part->body;
+        my $tree = HTML::Tree->new->parse_content($body);
+        my @links = $tree->look_down( _tag  => q{a}, class => qr/bz_bug_link/ );
+        foreach my $link (@links) {
+            my $href = $link->attr('href');
+            my ($bug_id) = $href =~ /\Qshow_bug.cgi?id=\E(\d+)/;
+            my $bug = new Bugzilla::Bug($bug_id);
+            if ($bug && _should_secure_bug($bug)) {
+                $link->attr('title', '(secure bug)');
+                $link->attr('class', 'bz_bug_link');
+            }
+        }
+        $part->body_set($tree->as_HTML);
+    });
 }
 
 __PACKAGE__->NAME;

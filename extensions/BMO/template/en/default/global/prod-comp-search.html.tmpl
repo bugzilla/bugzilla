@@ -23,5 +23,18 @@
   {
     YAHOO.bugzilla.prodCompSearch.init(
       "prod_comp_search", "prod_comp_search_autocomplete_container", "[% format FILTER js %]");
+    [% IF target == "describecomponents.cgi" %]
+      YAHOO.bugzilla.prodCompSearch.autoComplete.itemSelectEvent.subscribe(function (e, args) {
+        var oData = args[2];
+        var url = "describecomponents.cgi?product=" + encodeURIComponent(oData[0]) +
+                  "&component=" +  encodeURIComponent(oData[1]) + 
+                  "#" + encodeURIComponent(oData[1]);
+        var format = YAHOO.bugzilla.prodCompSearch.format;
+        if (format) {
+          url += "&format=" + encodeURIComponent(format);
+        }
+        window.location.href = url;
+      });
+    [% END %]
   }
 </script>

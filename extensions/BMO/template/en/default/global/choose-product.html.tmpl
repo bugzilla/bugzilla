@@ -33,16 +33,17 @@
 
 [% IF target == "enter_bug.cgi" %]
   [% title = "Enter $terms.Bug" %]
-  [% h2 = BLOCK %]First, you must pick a product on which to enter [% terms.abug %]. [% END %]
-  [% yui = [ 'autocomplete' ] %]
-  [% javascript_urls = [ "js/field.js", "js/create_bug.js", 
-                         "extensions/BMO/web/js/prod_comp_search.js" ] %]
-  [% onload = "YAHOO.util.Dom.get('prod_comp_search').focus();" %]
-  [% style_urls.push("extensions/BMO/web/styles/prod_comp_search.css") %]
+  [% h2 = "Which product is affected by the problem you would like to report?" %]
 [% ELSIF target == "describecomponents.cgi" %]
   [% title = "Browse" %]
-  [% h2 = "Please specify the product whose components you want described." %]
+  [% h2 = "Which product would you like to have described?" %]
 [% END %]
+
+[% yui = [ 'autocomplete' ] %]
+[% javascript_urls = [ "js/field.js", "js/create_bug.js", 
+                       "extensions/BMO/web/js/prod_comp_search.js" ] %]
+[% onload = "YAHOO.util.Dom.get('prod_comp_search').focus();" %]
+[% style_urls.push("extensions/BMO/web/styles/prod_comp_search.css") %]
 
 [% DEFAULT title = "Choose a Product" %]
 [% PROCESS global/header.html.tmpl %]
@@ -57,19 +58,16 @@
 </p>
 <hr>
 
-<br>
+<h2>[% h2 FILTER html %]</h2>
+
+[% PROCESS "global/prod-comp-search.html.tmpl" %]
+
+<h2>or choose from the following selections</h2>
+
 [% USE Bugzilla %]
 [% cgi = Bugzilla.cgi %]
 [% SET classification = cgi.param('classification') %]
 [% IF NOT ((cgi.param("full")) OR (user.settings.product_chooser.value == 'full_product_chooser')) %]
-
-[% IF target == 'enter_bug.cgi' %]
-<h2>Which product is affected by the problem you would like to report?</h2>
-[% PROCESS "global/prod-comp-search.html.tmpl" %]
-<h2>or choose from the following selections</h2>
-[% ELSE %]
-<h2>[% h2 FILTER html %]</h2>
-[% END %]
 
 <table align="center" border="0" width="600" cellpadding="5" cellspacing="0">
 [% INCLUDE easyproduct
@@ -128,14 +126,6 @@
 </tr>
 </table>
 [% ELSE %]
-
-[% IF target == 'enter_bug.cgi' %]
-<h2>Which product is affected by the problem you would like to report?</h2>
-[% PROCESS "global/prod-comp-search.html.tmpl" %]
-<h2>or choose from the following selections</h2>
-[% ELSE %]
-<h2>[% h2 FILTER html %]</h2>
-[% END %]
 
 <table>
 

@@ -41,7 +41,9 @@ print $cgi->header();
 # This script does nothing but displaying mostly static data.
 Bugzilla->switch_to_shadow_db;
 
-my $product_name = trim($cgi->param('product') || '');
+my $product_name   = trim($cgi->param('product') || '');
+my $component_mark = trim($cgi->param('component') || '');
+
 my $product = new Bugzilla::Product({'name' => $product_name});
 
 unless ($product && $user->can_access_product($product->name)) {
@@ -82,7 +84,8 @@ unless ($product && $user->can_access_product($product->name)) {
 # End Data/Security Validation
 ######################################################################
 
-$vars->{'product'} = $product;
+$vars->{'product'}        = $product;
+$vars->{'component_mark'} = $component_mark;
 
 $template->process("reports/components.html.tmpl", $vars)
   || ThrowTemplateError($template->error());

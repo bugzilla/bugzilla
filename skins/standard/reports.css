@@ -90,3 +90,8 @@
   color: #333;
 }
 
+.component_hilite {
+    background-color: lightgreen;
+    margin: 0;
+    padding: 1em 0;
+}

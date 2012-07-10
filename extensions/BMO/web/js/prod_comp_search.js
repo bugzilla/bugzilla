@@ -75,5 +75,8 @@ YAHOO.bugzilla.prodCompSearch = {
             }
             window.location.href = url;
         });
+        this.autoComplete.dataReturnEvent.subscribe(function(type, args) {
+          args[0].autoHighlight = args[2].length == 1;
+        });
     }
 }

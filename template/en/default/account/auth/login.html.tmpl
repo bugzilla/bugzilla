@@ -97,8 +97,6 @@
   # their password, assuming that our auth method allows that.
   #%]
 
-  [% Hook.process('additional_methods') %]
-
   [% IF Param("createemailregexp") && user.authorizer.user_can_create_account %]
     <hr>
 

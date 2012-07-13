@@ -819,7 +819,39 @@ sub _short_desc_matches {
 sub mailer_before_send {
     my ($self, $args) = @_;
     my $email = $args->{email};
- 
+
+    # Add X-Bugzilla-Tracking header
+    if ($email->header('X-Bugzilla-ID')) {
+        my $bug_id = $email->header('X-Bugzilla-ID');
+
+        # return if we cannot successfully load the bug object
+        my $bug = new Bugzilla::Bug($bug_id);
+        return if !$bug;
+
+        # The BMO hook in active_custom_fields will filter 
+        # the fields for us based on product and component
+        my @fields = Bugzilla->active_custom_fields({
+            product   => $bug->product_obj, 
+            component => $bug->component_obj,
+            type      => 2,  
+        });
+
+        my @set_values = ();
+        foreach my $field (@fields) {
+            my $field_name = $field->name;
+            next if cf_flag_disabled($field_name, $bug);
+            next if !$bug->$field_name || $bug->$field_name eq '---';
+            push(@set_values, $field->description . ":" . $bug->$field_name);
+        }
+
+        if (@set_values) {
+            $email->header_set('X-Bugzilla-Tracking' => join(' ', @set_values));
+        } 
+    }
+
+    # attachments disabled, see bug 714488
+    return;
+
     # If email is a request for a review, add the attachment itself
     # to the email as an attachment. Attachment must be content type
     # text/plain and below a certain size. Otherwise the email already 

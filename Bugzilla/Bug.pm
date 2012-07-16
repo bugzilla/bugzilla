@@ -3819,14 +3819,26 @@ sub GetBugActivity {
                 $changes = [];
             }
 
+            # If this is the same field as the previoius item, then concatenate
+            # the data into the same change.
+            if ($operation->{'who'} && $who eq $operation->{'who'}
+                && $when eq $operation->{'when'}
+                && $fieldname eq $operation->{'fieldname'}
+                && ($attachid || 0) == ($operation->{'attachid'} || 0))
+            {
+                my $old_change = pop @$changes;
+                $removed = _join_activity_entries($fieldname, $old_change->{'removed'}, $removed);
+                $added = _join_activity_entries($fieldname, $old_change->{'added'}, $added);
+            }
+
             $operation->{'who'} = $who;
             $operation->{'when'} = $when;
+            $operation->{'fieldname'} = $change{'fieldname'} = $fieldname;
+            $operation->{'attachid'} = $change{'attachid'} = $attachid;
 
-            $change{'fieldname'} = $fieldname;
-            $change{'attachid'} = $attachid;
             $change{'removed'} = $removed;
             $change{'added'} = $added;
-            
+
             if ($comment_id) {
                 $change{'comment'} = Bugzilla::Comment->new($comment_id);
             }
@@ -3843,6 +3855,37 @@ sub GetBugActivity {
     return(\@operations, $incomplete_data);
 }
 
+sub _join_activity_entries {
+    my ($field, $current_change, $new_change) = @_;
+    # We need to insert characters as these were removed by old
+    # LogActivityEntry code.
+
+    if ($current_change eq '') {
+        return $new_change;
+    }
+
+    # Buglists and see_also need the comma restored
+    if ($field eq 'dependson' || $field eq 'blocked' || $field eq 'see_also') {
+        if (substr($new_change, 0, 1) eq ',') {
+            return $current_change . $new_change;
+        } else {
+            return $current_change . ', ' . $new_change;
+        }
+    }
+
+    # Assume bug_file_loc contain a single url, don't insert a delimiter
+    if ($field eq 'bug_file_loc') {
+        return $current_change . $new_change;
+    }
+
+    # All other fields get a space
+    if (substr($new_change, 0, 1) eq ' ') {
+        return $current_change . $new_change;
+    } else {
+        return $current_change . ' ' . $new_change;
+    }
+}
+
 # Update the bugs_activity table to reflect changes made in bugs.
 sub LogActivityEntry {
     my ($i, $col, $removed, $added, $whoid, $timestamp, $comment_id) = @_;
@@ -3857,7 +3900,6 @@ sub LogActivityEntry {
             my $commaposition = find_wrap_point($removed, MAX_LINE_LENGTH);
             $removestr = substr($removed, 0, $commaposition);
             $removed = substr($removed, $commaposition);
-            $removed =~ s/^[,\s]+//; # remove any comma or space
         } else {
             $removed = ""; # no more entries
         }
@@ -3865,7 +3907,6 @@ sub LogActivityEntry {
             my $commaposition = find_wrap_point($added, MAX_LINE_LENGTH);
             $addstr = substr($added, 0, $commaposition);
             $added = substr($added, $commaposition);
-            $added =~ s/^[,\s]+//; # remove any comma or space
         } else {
             $added = ""; # no more entries
         }

@@ -736,6 +736,7 @@ sub release_tracking_report {
         approval-calendar-release
         approval-calendar-beta
         approval-calendar-aurora
+        approval-mozilla-esr10
     );
 
     my @flags_json;

@@ -201,6 +201,13 @@ sub user_activity_report {
 
         my $list = $dbh->selectall_arrayref($query, undef, @params);
 
+        if ($input->{debug}) {
+            while (my $param = shift @params) {
+                $query =~ s/\?/$dbh->quote($param)/e;
+            }
+            $vars->{debug_sql} = $query;
+        }
+
         my @operations;
         my $operation = {};
         my $changes = [];
@@ -245,7 +252,11 @@ sub user_activity_report {
                 if ($order eq 'bug_when') {
                     $is_new_changeset =
                         $operation->{'who'} &&
-                        ($who ne $operation->{'who'} || $when ne $operation->{'when'});
+                        (
+                            $who ne $operation->{'who'}
+                            || $when ne $operation->{'when'}
+                            || $bugid != $operation->{'bug'}
+                        );
                 } else {
                     $is_new_changeset = 
                         $operation->{'bug'} &&
@@ -895,7 +906,7 @@ sub release_tracking_report {
     # run report
     #
 
-    if ($input->{q}) {
+    if ($input->{q} && !$input->{edit}) {
         my $q = _parse_query($input->{q});
 
         my @where;
@@ -921,7 +932,7 @@ sub release_tracking_report {
             push @params, $q->{end_date} . ' 00:00:00';
 
             push @where, "(a.added LIKE ?)";
-            push @params, '%' . $q->{flag_name} . '?%';
+            push @params, '%' . $q->{flag_name} . $q->{flag_status} . '%';
         }
 
         push @where, "(f.type_id IN (SELECT id FROM flagtypes WHERE name = ?))";
@@ -949,6 +960,16 @@ sub release_tracking_report {
         }
 
         $query .= join("\nAND ", @where);
+
+        if ($input->{debug}) {
+            print "Content-Type: text/plain\n\n";
+            $query =~ s/\?/\000/g;
+            foreach my $param (@params) {
+                $query =~ s/\000/$param/;
+            }
+            print "$query\n";
+            exit;
+        }
 
         my $bugs = $dbh->selectcol_arrayref($query, undef, @params);
         push @$bugs, 0 unless @$bugs;

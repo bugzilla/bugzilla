@@ -78,6 +78,9 @@
 </tr>
 
 </table>
+[% IF debug_sql %]
+  <input type="hidden" name="debug" value="1">
+[% END %]
 </form>
 
 <script type="text/javascript">
@@ -86,6 +89,10 @@
 </script>
 
 [% IF action == 'run' %]
+
+[% IF debug_sql %]
+  <pre>[% debug_sql FILTER html %]</pre>
+[% END %]
 
 [% IF incomplete_data %]
   <p>

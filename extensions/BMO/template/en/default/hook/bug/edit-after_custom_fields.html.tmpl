@@ -70,17 +70,15 @@
 
 [% IF tracking_flags.size %]
   <tr>
-    <td class="" colspan="2">
-      <label><b>Tracking Flags:</b></label>
-      [% IF user.id %]
-      <span id="edit_tracking_fields_action">
-      (<a onclick="bmo_show_tracking_flags()" href="javascript:void(0)">edit</a>)
-      </span>
-      [% END %]
+    <th class="field_label">
+      <label>Tracking Flags:</label>
     </td>
-  </tr>
-  <tr>
-    <td colspan="2">
+    <td>
+      [% IF user.id %]
+        <span id="edit_tracking_fields_action">
+          (<a onclick="bmo_show_tracking_flags()" href="javascript:void(0)">edit</a>)
+        </span>
+      [% END %]
       <table id="custom-flags">
       [% FOREACH field = tracking_flags %]
         [% NEXT IF NOT user.id AND field.value == "---" %]

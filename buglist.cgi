@@ -1117,7 +1117,8 @@ else {
 
 # Set 'urlquerypart' once the buglist ID is known.
 $vars->{'urlquerypart'} = $params->canonicalise_query('order', 'cmdtype',
-                                                      'query_based_on');
+                                                      'query_based_on',
+                                                      'token');
 
 if ($format->{'extension'} eq "csv") {
     # We set CSV files to be downloaded, as they are designed for importing

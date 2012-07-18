@@ -34,7 +34,7 @@ Redirect permanent /duplicates.html https://bugzilla.mozilla.org/duplicates.cgi
 
 RewriteEngine On
 RewriteRule ^favicon\.ico$ extensions/BMO/web/images/favicon.ico
-RewriteRule ^form[\.:](itrequest|brownbag|mozlist|mktgevent|poweredby|presentation|swag|trademark|recoverykey)$ enter_bug.cgi?product=mozilla.org&format=$1
+RewriteRule ^form[\.:](itrequest|mozlist|mktgevent|poweredby|presentation|swag|trademark|recoverykey)$ enter_bug.cgi?product=mozilla.org&format=$1
 RewriteRule ^form[\.:]legal$ enter_bug.cgi?product=Legal&format=legal
 RewriteRule ^form[\.:]mozpr$ enter_bug.cgi?product=Mozilla+PR&format=mozpr
 RewriteRule ^form[\.:]reps[\.:]mentorship$ enter_bug.cgi?product=Mozilla+Reps&format=mozreps
@@ -42,4 +42,4 @@ RewriteRule ^form[\.:]reps[\.:]budget$ enter_bug.cgi?product=Mozilla+Reps&format
 RewriteRule ^form[\.:]reps[\.:]swag$ enter_bug.cgi?product=Mozilla+Reps&format=remo-swag
 RewriteRule ^form[\.:]reps[\.:]payment$ page.cgi?id=remo-form-payment.html
 RewriteRule ^form[\.:]employee[\.\-:]incident$ enter_bug.cgi?product=mozilla.org&format=employee-incident
-
+RewriteRule ^form[\.:]brownbag$ enter_bug.cgi?product=Air\ Mozilla&format=brownbag

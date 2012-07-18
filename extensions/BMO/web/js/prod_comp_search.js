@@ -9,6 +9,7 @@
 YAHOO.bugzilla.prodCompSearch = {
     counter : 0,
     format  : '',
+    cloned_bug_id : '',
     dataSource : null,
     autoComplete: null,
     generateRequest : function (enteredText) {
@@ -41,11 +42,11 @@ YAHOO.bugzilla.prodCompSearch = {
             fields : [ "product", "component" ]
         };
     },
-    init : function( field, container, format) {
-        if( this.dataSource == null ){
+    init : function(field, container, format, cloned_bug_id) {
+        if (this.dataSource == null)
             this.init_ds();
-        }
         this.format = format;
+        this.cloned_bug_id = cloned_bug_id;
         this.autoComplete = new YAHOO.widget.AutoComplete(field, container, this.dataSource);
         this.autoComplete.generateRequest = this.generateRequest;
         this.autoComplete.formatResult = this.resultListFormat;
@@ -70,9 +71,11 @@ YAHOO.bugzilla.prodCompSearch = {
             var url  = "enter_bug.cgi?product=" + encodeURIComponent(oData[0]) +
                        "&component=" +  encodeURIComponent(oData[1]);
             var format = YAHOO.bugzilla.prodCompSearch.format;
-            if (format) {
+            if (format)
                 url += "&format=" + encodeURIComponent(format);
-            }
+            var cloned_bug_id = YAHOO.bugzilla.prodCompSearch.cloned_bug_id;
+            if (cloned_bug_id)
+                url += "&cloned_bug_id=" + encodeURIComponent(cloned_bug_id);
             window.location.href = url;
         });
         this.autoComplete.dataReturnEvent.subscribe(function(type, args) {

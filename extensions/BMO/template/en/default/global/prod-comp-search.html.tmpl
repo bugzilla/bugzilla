@@ -22,7 +22,10 @@
      && YAHOO.bugzilla.prodCompSearch != null) 
   {
     YAHOO.bugzilla.prodCompSearch.init(
-      "prod_comp_search", "prod_comp_search_autocomplete_container", "[% format FILTER js %]");
+      "prod_comp_search",
+      "prod_comp_search_autocomplete_container",
+      "[% format FILTER js %]",
+      "[% cloned_bug_id FILTER js %]");
     [% IF target == "describecomponents.cgi" %]
       YAHOO.bugzilla.prodCompSearch.autoComplete.itemSelectEvent.subscribe(function (e, args) {
         var oData = args[2];

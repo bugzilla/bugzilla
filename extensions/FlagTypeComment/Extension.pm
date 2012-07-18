@@ -90,7 +90,7 @@ sub _set_ftc_states {
             ($target_type, $id) = ($type->target_type, $type->id);
         } else {
             ($target_type, $id) = ($type->{target_type}, $type->{id});
-            trick_taint($id);
+            trick_taint($id) if $id;
         }
         if ($target_type eq 'bug') {
             return unless FLAGTYPE_COMMENT_BUG_FLAGS;

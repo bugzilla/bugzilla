@@ -1,48 +1,17 @@
-[%# 1.0@bugzilla.org %]                                                       
-[%# The contents of this file are subject to the Mozilla Public               
-  # License Version 1.1 (the "License"); you may not use this file            
-  # except in compliance with the License. You may obtain a copy of           
-  # the License at http://www.mozilla.org/MPL/                                
-  #                                                                           
-  # Software distributed under the License is distributed on an "AS           
-  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or                
-  # implied. See the License for the specific language governing              
-  # rights and limitations under the License.                                 
-  #                                                                           
-  # The Original Code is the Bugzilla Bug Tracking System.                    
-  #                                                                           
-  # The Initial Developer of the Original Code is Netscape Communications     
-  # Corporation. Portions created by Netscape are                             
-  # Copyright (C) 1998 Netscape Communications Corporation. All               
-  # Rights Reserved.                                                          
-  #                                                                           
-  # Contributor(s): Gervase Markham <gerv@gerv.net>                       
-  #                 Ville Skyttä <ville.skytta@iki.fi>
-  #                 John Hoogstrate <hoogstrate@zeelandnet.nl>
-  #%]                                                                         
-                                                                              
-[% PROCESS global/variables.none.tmpl %]                                      
-                                                                              
-[% PROCESS global/header.html.tmpl                                            
-   title = "Mozilla Corporation/Foundation IT Requests" 
-   javascript_urls = [ 'js/field.js' ]
-   yui = [ 'autocomplete' ]                                  
-%]
-                                                                            
-[% USE Bugzilla %]                                                            
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
 
-<p><strong>Please use this form for IT requests only!</strong></p>
-<p>If you have a [% terms.bug %] to file, go <a href="enter_bug.cgi">here</a>.</p>
+[% PROCESS global/variables.none.tmpl %]
 
-<form method="post" action="post_bug.cgi" id="itRequestForm" enctype="multipart/form-data">
-  <input type="hidden" name="product" value="mozilla.org">
-  <input type="hidden" name="rep_platform" value="All">
-  <input type="hidden" name="op_sys" value="Other">
-  <input type="hidden" name="priority" value="--">
-  <input type="hidden" name="version" value="other">
-  <input type="hidden" name="token" value="[% token FILTER html %]">
-  <script type="text/javascript">
-  <!--
+[% USE date(format = '%Y%m%d') %]
+[% use_service_now = date.format(date.now) >= 20120723 %]
+
+[% inline_javascript = BLOCK %]
   function setsevdesc(theSelect) {
     var theValue = theSelect.options[theSelect.selectedIndex].value;
     if (theValue == 'blocker') {
@@ -56,20 +25,75 @@
       document.getElementById('critdesc').style.display = 'none';
     }
   }
-    var compdesc = new Array();
-    [% FOREACH comp IN product.components %]
-    compdesc['[% comp.name FILTER js %]'] = '[% comp.description FILTER js %]';
-    [% END %]
-    compdesc['invalid'] = '';
+
+  var compdesc = new Array();
+  [% FOREACH comp IN product.components %]
+  compdesc['[% comp.name FILTER js %]'] = '[% comp.description FILTER js %]';
+  [% END %]
+  compdesc['invalid'] = '';
+
   function setcompdesc(theRadio) {
-    var theValue = theRadio.value;
-    document.getElementById('compdescription').innerHTML = compdesc[theValue];
+    if (theRadio.id == 'componentmvd' [% ' && false' UNLESS use_service_now %]) {
+      [%# helpdesk issue/request %]
+      document.getElementById('main_form').style.display = 'none';
+      document.getElementById('service_now_form').style.display = '';
+      document.getElementById('compdescription').innerHTML =
+        'Use <a href="https://mozilla.service-now.com/">Service Now</a> to:<br>' +
+        'Request an LDAP/E-mail/etc. account<br>' +
+        'Desktop/Laptop/Printer/Phone/Tablet/License problem/order/request';
+    } else {
+      document.getElementById('main_form').style.display = '';
+      document.getElementById('service_now_form').style.display = 'none';
+      var theValue = theRadio.value;
+      document.getElementById('compdescription').innerHTML = compdesc[theValue];
+    }
   }
-  // -->
-  </script>
+
+  function on_submit() {
+    [% IF use_service_now %]
+      if (document.getElementById('componentmvd').checked) {
+        [%# redirect desktop issues to service-now #%]
+        document.location.href = 'https://mozilla.service-now.com/';
+        return false;
+      }
+    [% END %]
+    return true;
+  }
+
+  YAHOO.util.Event.onDOMReady(function() {
+    var comps = document.getElementsByName('component');
+    for (var i = 0, l = comps.length; i < l; i++) {
+      if (comps[i].checked) {
+        setcompdesc(comps[i]);
+        break;
+      }
+    }
+  });
+[% END %]
+
+[% PROCESS global/header.html.tmpl
+   title = "Mozilla Corporation/Foundation IT Requests"
+   javascript = inline_javascript
+   javascript_urls = [ 'js/field.js' ]
+   yui = [ 'autocomplete' ]
+%]
+
+[% USE Bugzilla %]
+
+<p><strong>Please use this form for IT requests only!</strong></p>
+<p>If you have a [% terms.bug %] to file, go <a href="enter_bug.cgi">here</a>.</p>
+
+<form method="post" action="post_bug.cgi" id="itRequestForm" enctype="multipart/form-data"
+      onsubmit="return on_submit()">
+  <input type="hidden" name="product" value="mozilla.org">
+  <input type="hidden" name="rep_platform" value="All">
+  <input type="hidden" name="op_sys" value="Other">
+  <input type="hidden" name="priority" value="--">
+  <input type="hidden" name="version" value="other">
+  <input type="hidden" name="token" value="[% token FILTER html %]">
   <table>
     <tr>
-        
+
   <td align="right">
     <strong>Urgency:</strong>
   </td>
@@ -94,10 +118,16 @@
     <tr>
       <td align="right"><strong>Request Type:</strong></td>
       <td style="white-space: nowrap;">
-        <input type="radio" name="component" id="componentac" onclick="setcompdesc(this)" value="Server Operations: Account Requests">
-        <label for="componentac">Request an LDAP/E-mail/etc. account</label><br>
+        [% UNLESS use_service_now %]
+          <input type="radio" name="component" id="componentac" onclick="setcompdesc(this)" value="Server Operations: Account Requests">
+          <label for="componentac">Request an LDAP/E-mail/etc. account</label><br>
+        [% END %]
         <input type="radio" name="component" id="componentmvd" onclick="setcompdesc(this)" value="Server Operations: Desktop Issues">
-        <label for="componentmvd">Desktop/Laptop/Printer/Phone/Tablet/License problem/order/request</label><br>
+        [% IF use_service_now %]
+          <label for="componentmvd">Helpdesk issue/request</label><br>
+        [% ELSE %]
+          <label for="componentmvd">Desktop/Laptop/Printer/Phone/Tablet/License problem/order/request</label><br>
+        [% END %]
         <input type="radio" name="component" id="componenttbm" onclick="setcompdesc(this)" value="Server Operations: RelEng">
         <label for="componenttbm">Report a problem with a tinderbox machine</label><br>
         <input type="radio" name="component" id="componentwcp" onclick="setcompdesc(this)" value="Server Operations: Web Operations">
@@ -106,83 +136,103 @@
         <label for="componentacl">Request a firewall change</label><br>
         <input type="radio" name="component" id="componentso" onclick="setcompdesc(this)" value="Server Operations">
         <label for="componentso">Any other issue</label><br>
-        Mailing list requests should be filed <a href="[% ulrbase FILTER none %]enter_bug.cgi?product=mozilla.org&format=mozlist">here</a> instead.
+        Mailing list requests should be filed <a href="[% ulrbase FILTER none %]enter_bug.cgi?product=mozilla.org&amp;format=mozlist">here</a> instead.
       </td>
       <td id="compdescription" align="left" style="color: green; padding-left: 1em">
       </td>
-    <tr>
-      <td align="right"><strong>Summary:</strong></td>
-      <td colspan="3">
-        <input name="short_desc" size="60" value="[% short_desc FILTER html %]">
-      </td>
     </tr>
 
-    <tr>
-      <td align="right"><strong>CC&nbsp;(optional):</strong></td>
-      <td colspan="3">
-        [% INCLUDE global/userselect.html.tmpl
-           id => "cc"
-           name => "cc"
-           value => cc
-           size => 60
-           multiple => 5
-        %]
-      </td>
-    </tr>
+    <tbody id="main_form">
 
-    <tr><td align="right" valign="top"><strong>Description:</strong></td>
-      <td colspan="3">
-        <textarea name="comment" rows="10" cols="80">
-          [% comment FILTER html %]</textarea>
-        <br>
-      </td>
-    </tr>
+      <tr>
+        <td align="right"><strong>Summary:</strong></td>
+        <td colspan="3">
+          <input name="short_desc" size="60" value="[% short_desc FILTER html %]">
+        </td>
+      </tr>
 
-    <tr>
-      <td align="right"><strong>URL&nbsp;(optional):</strong></td>
-      <td colspan="3">
-        <input name="bug_file_loc" size="60"
-               value="[% bug_file_loc FILTER html %]">
-      </td>
-    </tr>
+      <tr>
+        <td align="right"><strong>CC&nbsp;(optional):</strong></td>
+        <td colspan="3">
+          [% INCLUDE global/userselect.html.tmpl
+            id => "cc"
+            name => "cc"
+            value => cc
+            size => 60
+            multiple => 5
+          %]
+        </td>
+      </tr>
 
-    <tr><td colspan="4">&nbsp;</td></tr>
+      <tr><td align="right" valign="top"><strong>Description:</strong></td>
+        <td colspan="3">
+          <textarea name="comment" rows="10" cols="80">
+            [% comment FILTER html %]</textarea>
+          <br>
+        </td>
+      </tr>
 
-    <tr>
-      <td colspan="4">
-        <strong>Attachment&nbsp;(optional):</strong>
-      </td>
-    </tr>
+      <tr>
+        <td align="right"><strong>URL&nbsp;(optional):</strong></td>
+        <td colspan="3">
+          <input name="bug_file_loc" size="60"
+                value="[% bug_file_loc FILTER html %]">
+        </td>
+      </tr>
 
-    <tr>
-      <td align="right">File:</td>
-      <td colspan="3">
-        <em>Enter the path to the file on your computer.</em><br>
-        <input type="file" id="data" name="data" size="50">
-        <input type="hidden" name="contenttypemethod" value="autodetect" />
-      </td>
-    </tr>
+      <tr><td colspan="4">&nbsp;</td></tr>
 
-    <tr>
-      <td align="right">Description:</td>
-      <td colspan="3">
-        <em>Describe the attachment briefly.</em><br>
-        <input type="text" id="description" name="description" size="60" maxlength="200">
-      </td>
-    </tr>
+      <tr>
+        <td colspan="4">
+          <strong>Attachment&nbsp;(optional):</strong>
+        </td>
+      </tr>
+
+      <tr>
+        <td align="right">File:</td>
+        <td colspan="3">
+          <em>Enter the path to the file on your computer.</em><br>
+          <input type="file" id="data" name="data" size="50">
+          <input type="hidden" name="contenttypemethod" value="autodetect" />
+        </td>
+      </tr>
+
+      <tr>
+        <td align="right">Description:</td>
+        <td colspan="3">
+          <em>Describe the attachment briefly.</em><br>
+          <input type="text" id="description" name="description" size="60" maxlength="200">
+        </td>
+      </tr>
+
+      <tr>
+        <td>&nbsp;</td>
+        <td>
+          <br>
+          <!-- infra -->
+          <input type="checkbox" name="groups" id="groups" value="infra" checked="checked">
+          <label for="groups"><strong>This is an internal issue which should not be publicly visible.</strong></label><br>
+          (please uncheck this box if it isn't)<br>
+          <br>
+          <input type="submit" id="commit" value="Submit Request"><br>
+          <br>
+          Thanks for contacting us.  You will be notified by email of any progress made in resolving your request.
+        </td>
+      </tr>
+
+    </tbody>
+
+    <tbody id="service_now_form" style="display:none">
+      <tr>
+        <td>&nbsp;</td>
+        <td>
+          <br>
+          <input type="submit" value="Go to Service Now">
+        </td>
+      </tr>
+    </tbody>
   </table>
-
-  <br>
-  <!-- infra -->
-  <input type="checkbox" name="groups" id="groups" value="infra" checked="checked"><label for="groups"><strong>This is an internal issue which should not be publicly visible.</strong></label><br>(please uncheck this box if it isn't)
-  <br><br>
-
-        <input type="submit" id="commit" value="Submit Request">
 </form>
 
-<p>Thanks for contacting us. 
-   You will be notified by email of any progress made in resolving your
-   request.
-</p>
 
-[% PROCESS global/footer.html.tmpl %]                   
+[% PROCESS global/footer.html.tmpl %]

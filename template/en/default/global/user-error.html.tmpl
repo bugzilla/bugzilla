@@ -1795,6 +1795,8 @@
       [% error_message FILTER none %]
     [% END %]
   [% END %]
+
+  [% Hook.process('error_message') %]
 [% END %]
 
 [%# We only want HTML error messages for ERROR_MODE_WEBPAGE %]

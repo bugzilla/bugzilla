@@ -1,0 +1,20 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% IF user.id && comment.author.login_name == 'tbplbot@gmail.com' %]
+  [% has_tbpl_comment = 1 %]
+  <script>
+    var id = [% count FILTER none %];
+    tbpl_comment_ids.push(id);
+    YAHOO.util.Dom.addClass(comment, 'collapsed');
+    collapse_comment(
+      document.getElementById('comment_link_' + id),
+      document.getElementById('comment_text_' + id)
+    );
+  </script>
+[% END %]

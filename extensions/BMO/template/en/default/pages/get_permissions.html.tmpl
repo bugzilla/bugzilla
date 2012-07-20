@@ -1,0 +1,44 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/header.html.tmpl
+   title = "Upgrade Permissions"
+%]
+
+<h3>How to apply for upgraded permissions</h3>
+
+<p>
+  If you want <kbd>canconfirm</kbd>, email <a href="mailto:bmo-perms@mozilla.org">
+  bmo-perms@mozilla.org</a> the URLs of three good [% terms.bug %] reports you have filed.
+</p>
+
+<p>
+  If you want <kbd>editbugs</kbd>, email <a href="mailto:bmo-perms@mozilla.org">
+  bmo-perms@mozilla.org</a> either:
+  <ul>
+    <li>
+      The URLs of two [% terms.bugs %] to which you have attached patches 
+      or testcases; or
+    </li>
+    <li>
+      The URLs of the relevant comment on three [% terms.bugs %] which you 
+      wanted to change, but couldn't, and so added a comment instead.
+    </li>
+  </ul>
+</p>
+
+<p>
+  <kbd>editbugs</kbd> implies <kbd>canconfirm</kbd>; there's no need to apply for both. 
+</p>
+
+<p>
+  Don't forget to include your [% terms.Bugzilla %] ID if it's not the email address 
+  you are emailing from.
+</p>
+
+[% PROCESS global/footer.html.tmpl %]

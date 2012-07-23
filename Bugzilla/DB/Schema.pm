@@ -918,6 +918,8 @@ use constant ABSTRACT_SCHEMA => {
 
     profiles_activity => {
         FIELDS => [
+            id            => {TYPE => 'MEDIUMSERIAL', NOTNULL => 1, 
+                              PRIMARYKEY => 1}, 
             userid        => {TYPE => 'INT3', NOTNULL => 1,
                               REFERENCES => {TABLE  => 'profiles', 
                                              COLUMN => 'userid',

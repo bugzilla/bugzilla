@@ -35,6 +35,8 @@ use Bugzilla::Field;
 use Bugzilla::Status;
 use Bugzilla::UserAgent;
 
+use List::MoreUtils qw(none);
+
 my $user = Bugzilla->login(LOGIN_REQUIRED);
 
 my $cloned_bug;
@@ -231,7 +233,8 @@ if ($cloned_bug_id) {
         $vars->{'cc'}         = formvalue('cc');
     }
     
-    if ($cloned_bug->reporter->id != $user->id) {
+    if ($cloned_bug->reporter->id != $user->id
+        && none { $_ eq $cloned_bug->reporter->login } @{$cloned_bug->cc}) {
         $vars->{'cc'} = join (", ", $cloned_bug->reporter->login, $vars->{'cc'}); 
     }
 

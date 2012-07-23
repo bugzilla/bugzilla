@@ -678,6 +678,10 @@ sub update_table_definitions {
                           { TYPE => 'varchar(255)' });
     $dbh->bz_add_index('bugs_activity', 'bugs_activity_removed_idx', ['removed']);
 
+    # 2012-06-13 dkl@mozilla.com - Bug 764457
+    $dbh->bz_add_column('bugs_activity', 'id', 
+                        {TYPE => 'MEDIUMSERIAL', NOTNULL => 1, PRIMARYKEY => 1});
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################

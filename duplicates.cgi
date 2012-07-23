@@ -13,7 +13,7 @@ use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Util;
 use Bugzilla::Error;
-use Bugzilla::Search;
+use Bugzilla::Bug;
 use Bugzilla::Field;
 use Bugzilla::Product;
 

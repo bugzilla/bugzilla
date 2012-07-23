@@ -303,10 +303,17 @@
 <div id="attachment_list">
   Attachments on [% "$terms.bug ${attachment.bug_id}" FILTER bug_link(attachment.bug_id) FILTER none %]:
   [% FOREACH a = attachments %]
-    [% IF a == attachment.id %]
-      [%+ a %]
+    [% IF a.isobsolete %]
+      <span class="bz_obsolete">
+    [% END %]
+    [% IF a.id == attachment.id %]
+      [%+ a.id FILTER html %]
     [% ELSE %]
-      <a href="attachment.cgi?id=[% a %]&amp;action=edit">[% a %]</a>
+      <a href="attachment.cgi?id=[% a.id FILTER uri %]&amp;action=edit"
+         title="[% a.description FILTER html %]">[% a.id FILTER html %]</a>
+    [% END %]
+    [% IF a.isobsolete %]
+      </span>
     [% END %]
     [% " |" UNLESS loop.last() %]
   [% END %]

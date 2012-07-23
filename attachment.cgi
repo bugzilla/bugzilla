@@ -606,8 +606,6 @@ sub edit {
 
   my $bugattachments =
       Bugzilla::Attachment->get_attachments_by_bug($attachment->bug);
-  # We only want attachment IDs.
-  @$bugattachments = map { $_->id } @$bugattachments;
 
   my $any_flags_requesteeble =
     grep { $_->is_requestable && $_->is_requesteeble } @{$attachment->flag_types};

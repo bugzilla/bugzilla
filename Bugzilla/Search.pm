@@ -822,28 +822,38 @@ sub _add_extra_column {
 }
 
 # These are the columns that we're going to be actually SELECTing.
+sub _display_columns {
+    my ($self) = @_;
+    # Do not alter the list specified here at all, even if they are duplicated.
+    # Those are passed by the caller, and the caller expects to get them back
+    # in the exact same order.
+    $self->{display_columns} ||= [$self->_input_columns, $self->_extra_columns];
+    return @{ $self->{display_columns} };
+}
+
+# These are the columns that are involved in the query.
 sub _select_columns {
     my ($self) = @_;
     return @{ $self->{select_columns} } if $self->{select_columns};
 
     my @select_columns;
-    foreach my $column ($self->_input_columns, $self->_extra_columns) {
+    foreach my $column ($self->_display_columns) {
         if (my $add_first = COLUMN_DEPENDS->{$column}) {
             push(@select_columns, @$add_first);
         }
         push(@select_columns, $column);
     }
-    
+    # Remove duplicated columns.
     $self->{select_columns} = [uniq @select_columns];
     return @{ $self->{select_columns} };
 }
 
-# This takes _select_columns and translates it into the actual SQL that
+# This takes _display_columns and translates it into the actual SQL that
 # will go into the SELECT clause.
 sub _sql_select {
     my ($self) = @_;
     my @sql_fields;
-    foreach my $column ($self->_select_columns) {
+    foreach my $column ($self->_display_columns) {
         my $alias = $column;
         # Aliases cannot contain dots in them. We convert them to underscores.
         $alias =~ s/\./_/g;

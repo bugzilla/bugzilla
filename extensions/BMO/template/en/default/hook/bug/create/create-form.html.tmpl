@@ -2,17 +2,31 @@
     <th>Security:</th>
     <td colspan="3">
       [% sec_group = sec_groups.${product.name} || sec_groups._default %]
-
-      <input type="checkbox" name="groups" 
-             value="[% sec_group FILTER none %]" id="groups"
-        [% FOREACH g = group %]
-          [% IF g.name == sec_group %]
-            [% " checked=\"checked\"" IF g.checked %]
-          [% END %]
-        [% END %]
-      >
-      <label for="groups">Many users could be harmed by this security problem: 
-      it should be kept hidden from the public until it is resolved.</label>
-      <br><br>
+      [% PROCESS group_checkbox
+                 name = sec_group
+                 desc = "Many users could be harmed by this security problem: " _
+                        "it should be kept hidden from the public until it is resolved."
+      %]
+      [% IF user.in_group('partner-confidential-visible') %]
+        [% PROCESS group_checkbox
+                   name = 'partner-confidential'
+                   desc = "Restrict the visiblity of this " _ terms.bug _ " to " _
+                          "the assignee, QA contact, and CC list only."
+        %]
+      [% END %]
+      <br>
     </td>
   </tr>
+
+[% BLOCK group_checkbox %]
+  <input type="checkbox" name="groups"
+         value="[% name FILTER none %]" id="group_[% name FILTER html %]"
+    [% FOREACH g = group %]
+      [% IF g.name == name %]
+        [% ' checked="checked"' IF g.checked %]
+        [% LAST %]
+      [% END %]
+    [% END %]
+  >
+  <label for="group_[% name FILTER html %]">[% desc FILTER html %]</label><br>
+[% END %]

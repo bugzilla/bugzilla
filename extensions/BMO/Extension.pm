@@ -47,13 +47,14 @@ use Bugzilla::Extension::BMO::Data qw($cf_visible_in_products
                                       $cf_flags
                                       $cf_project_flags
                                       $cf_disabled_flags
-                                      %group_to_cc_map
+                                      %group_change_notification
                                       $blocking_trusted_setters
                                       $blocking_trusted_requesters
                                       $status_trusted_wanters
                                       $status_trusted_setters
                                       $other_setters
                                       %always_fileable_group
+                                      %group_auto_cc
                                       %product_sec_groups);
 use Bugzilla::Extension::BMO::Reports qw(user_activity_report
                                          triage_reports
@@ -349,8 +350,8 @@ sub _cc_if_special_group {
     
     return if !$group;
     
-    if (exists $group_to_cc_map{$group}) {
-        foreach my $login (@{ $group_to_cc_map{$group} }) {
+    if (exists $group_change_notification{$group}) {
+        foreach my $login (@{ $group_change_notification{$group} }) {
             my $id = login_to_id($login);
             $recipients->{$id}->{+REL_CC} = Bugzilla::BugMail::BIT_DIRECT();
         }
@@ -649,6 +650,23 @@ sub object_end_of_create_validators {
                 else {
                     $params->{'mimetype'} = "application/octet-stream";
                 }
+            }
+        }
+    }
+}
+
+# Automatically CC users to bugs based on group & product
+sub bug_end_of_create {
+    my ($self, $args) = @_;
+    my $bug = $args->{'bug'};
+
+    foreach my $group_name (keys %group_auto_cc) {
+        if ($bug->in_group(Bugzilla::Group->new({ name => $group_name }))) {
+            my $ra_logins = exists $group_auto_cc{$group_name}->{$bug->product}
+                ? $group_auto_cc{$group_name}->{$bug->product}
+                : $group_auto_cc{$group_name}->{'_default'};
+            foreach my $login (@$ra_logins) {
+                $bug->add_cc($login);
             }
         }
     }

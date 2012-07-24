@@ -29,13 +29,14 @@ use Tie::IxHash;
 our @EXPORT_OK = qw($cf_visible_in_products
                     $cf_flags $cf_project_flags
                     $cf_disabled_flags
-                    %group_to_cc_map
+                    %group_change_notification
                     $blocking_trusted_setters
                     $blocking_trusted_requesters
                     $status_trusted_wanters
                     $status_trusted_setters
                     $other_setters
                     %always_fileable_group
+                    %group_auto_cc
                     %product_sec_groups);
 
 # Which custom fields are visible in which products and components.
@@ -255,7 +256,7 @@ our $cf_disabled_flags = [
 ];
 
 # Who to CC on particular bugmails when certain groups are added or removed.
-our %group_to_cc_map = (
+our %group_change_notification = (
   'addons-security'           => ['amo-editors@mozilla.org'], 
   'bugzilla-security'         => ['security@bugzilla.org'],
   'client-services-security'  => ['amo-admins@mozilla.org', 'web-security@mozilla.org'],
@@ -369,6 +370,13 @@ our %product_sec_groups = (
     "Websites Graveyard"           => 'websites-security',
     "Webtools"                     => 'webtools-security',
     "_default"                     => 'core-security'
+);
+
+# Automatically CC users to bugs filed into configured groups and products
+our %group_auto_cc = (
+    'partner-confidential' => {
+        '_default' => ['mbest@mozilla.com'],
+    },
 );
 
 # Default security groups for products should always been fileable

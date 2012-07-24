@@ -51,7 +51,7 @@ foreach my $arg (@ARGV)
          print "usage:\n syncLDAP.pl [options]\n\n";
          print "options:\n";
          print " -r Readonly, do not make changes to Bugzilla tables\n";
-         print " -d No disable, don't disable users, which are not in LDAP\n";
+         print " -d No disable, don't disable login by users who are not in LDAP\n";
          print " -u No update, don't update users, which have different description in LDAP\n";
          print " -c No create, don't create users, which are in LDAP but not in Bugzilla\n";
          print " -q Quiet mode, give less output\n";
@@ -194,7 +194,7 @@ while( my ($create_key, $create_value) = each(%create_users) ) {
 }
 
 if($quiet == 0) {
-   print "\nUsers to disable: \n";
+   print "\nUsers to disable login for: \n";
    while( my ($key, $value) = each(%disable_users) ) {
      print " " . $key . " '" . $value->{'realname'} . "'\n";
    }
@@ -221,7 +221,7 @@ if($quiet == 0) {
 # now do the DB-Update
 ###
 if($readonly == 0) {
-   print "Performing DB update:\nPhase 1: disabling not-existing users... " unless $quiet;
+   print "Performing DB update:\nPhase 1: disabling login for users not in LDAP... " unless $quiet;
 
    my $sth_disable = $dbh->prepare(
        'UPDATE profiles

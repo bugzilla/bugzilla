@@ -42,9 +42,9 @@
             [% ELSIF field == 'cryptpassword' %]
               A new password has been set.
             [% ELSIF field == 'disabledtext' %]
-              The disable text has been modified.
+              The "login disabled" text has been modified.
             [% ELSIF field == 'is_enabled' %]
-              The user has been [% otheruser.is_enabled ? 'enabled' : 'disabled' %].
+              Logging in with this user account has been [% otheruser.is_enabled ? 'enabled' : 'disabled' %].
             [% ELSIF field == 'extern_id' %]
               The user's External Login ID has been modified.
             [% ELSIF field == 'disable_mail' %]
@@ -97,8 +97,8 @@
     successfully.
 
   [% ELSIF message_tag == "account_disabled" %]
-    The user account [% account FILTER html %] is disabled, so you
-    cannot change its password.
+    Logging in with this user account [% account FILTER html %] is disabled, so
+    you cannot change its password.
 
   [% ELSIF message_tag == "attachment_creation_failed" %]
     The [% terms.bug %] was created successfully, but attachment creation

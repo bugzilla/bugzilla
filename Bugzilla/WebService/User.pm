@@ -412,10 +412,10 @@ to the webservice, for the duration of the session.
 
 The username does not exist, or the password is wrong.
 
-=item 301 (Account Disabled)
+=item 301 (Login Disabled)
 
-The account has been disabled.  A reason may be specified with the
-error.
+The ability to login with this account has been disabled.  A reason may be
+specified with the error.
 
 =item 305 (New Password Required)
 

@@ -57,6 +57,11 @@ sub new {
     # Make sure our outgoing cookie list is empty on each invocation
     $self->{Bugzilla_cookie_list} = [];
 
+    # Path-Info is of no use for Bugzilla and interacts badly with IIS.
+    # Moreover, it causes unexepected behaviors, such as totally breaking
+    # the rendering of pages. Skip it!
+    print $self->redirect($self->url(-path => 0, -query => 1)) if $self->path_info;
+
     # Send appropriate charset
     $self->charset(Bugzilla->params->{'utf8'} ? 'UTF-8' : '');
 

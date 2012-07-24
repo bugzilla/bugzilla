@@ -1965,13 +1965,13 @@ C<int> The numeric bug_id of this bug.
 
 =item faultString 
 
-c<string> This will only be returned for invalid bugs if the C<permissive>
+C<string> This will only be returned for invalid bugs if the C<permissive>
 argument was set when calling Bug.get, and it is an error indicating that 
 the bug id was invalid.
 
 =item faultCode
 
-c<int> This will only be returned for invalid bugs if the C<permissive>
+C<int> This will only be returned for invalid bugs if the C<permissive>
 argument was set when calling Bug.get, and it is the error code for the 
 invalid bug error.
 

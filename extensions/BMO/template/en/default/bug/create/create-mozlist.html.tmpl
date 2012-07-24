@@ -1,31 +1,16 @@
-[%# 1.0@bugzilla.org %]                                                       
-[%# The contents of this file are subject to the Mozilla Public               
-  # License Version 1.1 (the "License"); you may not use this file            
-  # except in compliance with the License. You may obtain a copy of           
-  # the License at http://www.mozilla.org/MPL/                                
-  #                                                                           
-  # Software distributed under the License is distributed on an "AS           
-  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or                
-  # implied. See the License for the specific language governing              
-  # rights and limitations under the License.                                 
-  #                                                                           
-  # The Original Code is the Bugzilla Bug Tracking System.                    
-  #                                                                           
-  # The Initial Developer of the Original Code is Netscape Communications     
-  # Corporation. Portions created by Netscape are                             
-  # Copyright (C) 1998 Netscape Communications Corporation. All               
-  # Rights Reserved.                                                          
-  #                                                                           
-  # Contributor(s): Gervase Markham <gerv@gerv.net>                       
-  #                 Ville Skyttä <ville.skytta@iki.fi>
-  #                 John Hoogstrate <hoogstrate@zeelandnet.nl>
-  #%]                                                                         
-                                                                              
-[% PROCESS global/variables.none.tmpl %]                                      
-                                                                              
-[% PROCESS global/header.html.tmpl                                            
-   title = "Mozilla Discussion Forum / Mailing List Requests" 
-   javascript_urls = [ 'extensions/BMO/web/js/form_validate.js', 
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% PROCESS global/header.html.tmpl
+   title = "Mozilla Discussion Forum / Mailing List Requests"
+   javascript_urls = [ 'extensions/BMO/web/js/form_validate.js',
                        'js/field.js' ]
    yui = [ 'autocomplete' ]
 %]
@@ -48,6 +33,7 @@
             YAHOO.util.Dom.setStyle('listCommentTR', 'display', 'table-row');
             YAHOO.util.Dom.setStyle('CCTR', 'display', 'table-row');
             YAHOO.util.Dom.setStyle('URLTR', 'display', 'table-row');
+            YAHOO.util.Dom.setStyle('serviceNow', 'display', 'none');
             YAHOO.util.Dom.setStyle('groups', 'display', 'none');
             group.disabled = true;
             YAHOO.util.Dom.setStyle('submitDiv', 'display', 'block');
@@ -63,24 +49,26 @@
             YAHOO.util.Dom.setStyle('listCommentTR', 'display', 'table-row');
             YAHOO.util.Dom.setStyle('CCTR', 'display', 'table-row');
             YAHOO.util.Dom.setStyle('URLTR', 'display', 'table-row');
+            YAHOO.util.Dom.setStyle('serviceNow', 'display', 'none');
             YAHOO.util.Dom.setStyle('groups', 'display', 'table-row');
             group.disabled = false;
             YAHOO.util.Dom.setStyle('submitDiv', 'display', 'block');
         } else {
-            YAHOO.util.Dom.setStyle('listNameTR', 'display', 'table-row');
+            YAHOO.util.Dom.setStyle('listNameTR', 'display', 'none');
             YAHOO.util.Dom.setStyle('listNameDiscussion', 'display', 'none');
-            YAHOO.util.Dom.setStyle('listNameOther', 'display', 'inline');
+            YAHOO.util.Dom.setStyle('listNameOther', 'display', 'none');
             YAHOO.util.Dom.setStyle('listAdminTR', 'display', 'none');
-            YAHOO.util.Dom.setStyle('listShortDescTR', 'display', 'table-row');
+            YAHOO.util.Dom.setStyle('listShortDescTR', 'display', 'none');
             YAHOO.util.Dom.setStyle('listShortDescMailman', 'display', 'none');
-            YAHOO.util.Dom.setStyle('listShortDescZimbra', 'display', 'inline');
+            YAHOO.util.Dom.setStyle('listShortDescZimbra', 'display', 'none');
             YAHOO.util.Dom.setStyle('listLongDescTR', 'display', 'none');
-            YAHOO.util.Dom.setStyle('listCommentTR', 'display', 'table-row');
-            YAHOO.util.Dom.setStyle('CCTR', 'display', 'table-row');
-            YAHOO.util.Dom.setStyle('URLTR', 'display', 'table-row');
-            YAHOO.util.Dom.setStyle('groups', 'display', 'table-row');
+            YAHOO.util.Dom.setStyle('listCommentTR', 'display', 'none');
+            YAHOO.util.Dom.setStyle('CCTR', 'display', 'none');
+            YAHOO.util.Dom.setStyle('URLTR', 'display', 'none');
+            YAHOO.util.Dom.setStyle('serviceNow', 'display', 'table-row');
+            YAHOO.util.Dom.setStyle('groups', 'display', 'none');
             group.disabled = false;
-            YAHOO.util.Dom.setStyle('submitDiv', 'display', 'block');
+            YAHOO.util.Dom.setStyle('submitDiv', 'display', 'none');
         }
     }
 
@@ -104,8 +92,8 @@
                 document.getElementById('component').value = "Discussion Forums";
                 short_desc = "Discussion Forum: " + listName;
             } else if (listType == "mozilla.com" ) {
-                document.getElementById('component').value = "Server Operations: Desktop Issues";
-                short_desc = "[Zimbra Distribution List Request] " + listName + "@" + listType;
+                document.location.href = 'https://mozilla.service-now.com/';
+                return false;
             } else {
                 document.getElementById('component').value = "Server Operations";
                 short_desc = "[Mailman List Request] " + listName + "@" + listType;
@@ -126,15 +114,25 @@
             alert(alert_text);
             return false;
         }
- 
+
         document.getElementById('short_desc').value = short_desc;
 
         return true;
     }
+
+    YAHOO.util.Event.onDOMReady(function() {
+        var elements = document.getElementsByName('listType');
+        for (var i = 0, l = elements.length; i < l; i++) {
+            if (elements[i].checked) {
+                toggleGroup(elements[i]);
+                break;
+            }
+        }
+    });
 // -->
 </script>
-                                                                            
-<form method="post" action="post_bug.cgi" id="mozListRequestForm" 
+
+<form method="post" action="post_bug.cgi" id="mozListRequestForm"
       enctype="multipart/form-data" onSubmit="return trySubmit();">
   <input type="hidden" id="format" name="format" value="mozlist">
   <input type="hidden" id="product" name="product" value="mozilla.org">
@@ -153,20 +151,20 @@
     <td>
       <dl>
       <dt>
-        <input type="radio" name="listType" id="lists_mozilla_org" 
+        <input type="radio" name="listType" id="lists_mozilla_org"
                onclick="toggleGroup(this);" value="lists.mozilla.org">
         <label for="lists_mozilla_org">Standard Discussion Forum</label>
       </dt>
       <dd>
         <label for="lists_mozilla_org">
           This option gives you a Mozilla <a href="https://www.mozilla.org/about/forums/">Discussion Forum</a>.
-          These are the normal mechanism for public discussion in the Mozilla project. They are made up of a 
-          mailing list, a newsgroup and a Google Group (which maintains the list archives), all linked together. 
+          These are the normal mechanism for public discussion in the Mozilla project. They are made up of a
+          mailing list, a newsgroup and a Google Group (which maintains the list archives), all linked together.
           Users can add and remove themselves. If you aren't sure, pick this one.
         </label>
       </dd>
       <dt>
-        <input type="radio" name="listType" id="mozilla_org" 
+        <input type="radio" name="listType" id="mozilla_org"
                onclick="toggleGroup(this);" value="mozilla.org">
         <label for="mozilla_org">Mailing List Only</label>
       </dt>
@@ -180,7 +178,7 @@
         </label>
       </dd>
       <dt>
-        <input type="radio" name="listType" id="mozilla_com" 
+        <input type="radio" name="listType" id="mozilla_com"
                onclick="toggleGroup(this)" value="mozilla.com">
         <label for="mozilla_com">Distribution List</label>
       </dt>
@@ -218,7 +216,7 @@
          multiple => 5
        %]
        <br>
-       <b>Note:</b>The list administrator is also initially considered to be the list moderator 
+       <b>Note:</b>The list administrator is also initially considered to be the list moderator
        and will be responsible for moderation tasks unless delegated to someone else.  For
        convenience, [% terms.Bugzilla %] user accounts will autocomplete. The administrator is not required
        to have a [% terms.Bugzilla %] account, and you can enter an address that doesn't autocomplete if
@@ -283,24 +281,37 @@
              value="[% bug_file_loc FILTER html %]">
     </td>
   </tr>
+  <tr id="serviceNow" style="display: none">
+    <td>&nbsp;</td>
+    <td>
+      <p>
+        Please use <b>Service Now</b> to request a distribution list.
+      </p>
+      <input type="submit" value="Go to Service Now">
+    </td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td>
+      <br>
+      <div id="groups" style="display:none;">
+        <input type="checkbox" name="groups" id="group_35" value="infra" disabled="true">
+        <label for="group_35"><strong>This is an internal issue which should not be publicly visible.</strong></label>
+        <br><br>
+      </div>
+
+      <div id="submitDiv" style="display: none;">
+        <input type="submit" id="commit" value="Submit Request">
+        <p>
+          Thanks for contacting us. You will be notified by email of any progress made
+          in resolving your request.
+        </p>
+      </div>
+    </td>
+  </tr>
   </table>
   <br>
 
-  <div id="groups" style="display:none;">
-    <!-- infra -->
-    <input type="checkbox" name="groups" id="group_35" value="infra" disabled="true">
-    <label for="group_35"><strong>This is an internal issue which should not be publicly visible.</strong></label>
-    <br><br>
-  </div>
-
-  <div id="submitDiv" style="display: none;">
-    <input type="submit" id="commit" value="Submit Request">
-
-<p>
-  Thanks for contacting us. You will be notified by email of any progress made 
-  in resolving your request.
-</p>
-  </div>
 </form>
 
-[% PROCESS global/footer.html.tmpl %]                   
+[% PROCESS global/footer.html.tmpl %]

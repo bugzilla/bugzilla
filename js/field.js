@@ -787,5 +787,8 @@ YAHOO.bugzilla.keywordAutocomplete = {
                 this.expandContainer();
             }
         });
+        fieldAutoComp.dataRequestEvent.subscribe( function(type, args) {
+            args[0].autoHighlight = args[1] != '';
+        });
     }
 };

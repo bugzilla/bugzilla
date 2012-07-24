@@ -312,6 +312,7 @@ sub _translate_comment {
         creator    => $self->type('string', $comment->author->login),
         author     => $self->type('string', $comment->author->login),
         time       => $self->type('dateTime', $comment->creation_ts),
+        creation_time => $self->type('dateTime', $comment->creation_ts),
         is_private => $self->type('boolean', $comment->is_private),
         text       => $self->type('string', $comment->body_full),
         attachment_id => $self->type('int', $attach_id),
@@ -1641,6 +1642,13 @@ Bugzillas. (However, this backwards-compatibility will go away in Bugzilla
 
 C<dateTime> The time (in Bugzilla's timezone) that the comment was added.
 
+=item creation_time
+
+C<dateTime> This is exactly same as the C<time> key. Use this field instead of
+C<time> for consistency with other methods including L</get> and L</attachments>.
+For compatibility, C<time> is still usable. However, please note that C<time>
+may be deprecated and removed in a future release.
+
 =item is_private
 
 C<boolean> True if this comment is private (only visible to a certain
@@ -1681,6 +1689,8 @@ that id.
 C<creator>.
 
 =back
+
+=item C<creation_time> was added in Bugzilla B<4.4>.
 
 =back
 

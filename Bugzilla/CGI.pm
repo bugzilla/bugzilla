@@ -58,7 +58,7 @@ sub new {
     $self->{Bugzilla_cookie_list} = [];
 
     # Path-Info is of no use for Bugzilla and interacts badly with IIS.
-    # Moreover, it causes unexepected behaviors, such as totally breaking
+    # Moreover, it causes unexpected behaviors, such as totally breaking
     # the rendering of pages. Skip it!
     print $self->redirect($self->url(-path => 0, -query => 1)) if $self->path_info;
 

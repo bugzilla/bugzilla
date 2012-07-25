@@ -128,6 +128,7 @@ tie(%$cf_visible_in_products, "Tie::IxHash",
     qr/^cf_colo_site$/ => {
         "mozilla.org"           => [
             "Server Operations",
+            "Server Operations: DCOps",
             "Server Operations: Projects",
             "Server Operations: RelEng",
             "Server Operations: Security",

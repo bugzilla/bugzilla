@@ -322,7 +322,7 @@ use constant ABSTRACT_SCHEMA => {
 
     bugs_activity => {
         FIELDS => [
-            id        => {TYPE => 'MEDIUMSERIAL', NOTNULL => 1, 
+            id        => {TYPE => 'INTSERIAL', NOTNULL => 1, 
                           PRIMARYKEY => 1}, 
             bug_id    => {TYPE => 'INT3', NOTNULL => 1,
                           REFERENCES    =>  {TABLE  =>  'bugs',

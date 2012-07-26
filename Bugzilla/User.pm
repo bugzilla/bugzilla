@@ -1069,7 +1069,7 @@ sub get_accessible_products {
                        @{$self->get_selectable_products},
                        @{$self->get_enterable_products};
     
-    return [ values %products ];
+    return [ sort { $a->name cmp $b->name } values %products ];
 }
 
 sub check_can_admin_product {

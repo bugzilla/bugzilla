@@ -150,7 +150,7 @@
                value="[% dontchange FILTER html %]"
                size="6">
       </td>
-      [% INCLUDE bug/field.html.tmpl
+      [% PROCESS bug/field.html.tmpl 
           field = bug_fields.deadline, value = dontchange
           editable = 1, allow_dont_change = 1 %]
     </tr>
@@ -285,7 +285,7 @@
   [% bug = 0 %]
   [% FOREACH field = Bugzilla.active_custom_fields %]
     <tr>
-      [% INCLUDE bug/field.html.tmpl value = dontchange
+      [% PROCESS bug/field.html.tmpl value = dontchange
                                      editable = 1
                                      allow_dont_change = 1 %]
     </tr>

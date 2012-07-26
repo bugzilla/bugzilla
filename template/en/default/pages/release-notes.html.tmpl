@@ -72,6 +72,28 @@
 
 <h2 id="v40_point">Updates in this 4.0.x Release</h2>
 
+<h3>4.0.7</h3>
+
+<p>This release fixes one security issue. See the
+  <a href="http://www.bugzilla.org/security/3.6.9/">Security Advisory</a>
+  for details.</p>
+
+<p>In addition, the following [% terms.bugs %] have been fixed in this release:</p>
+
+<ul>
+  <li>A regression introduced in [% terms.Bugzilla %] 4.0 caused some login
+    names to be ignored when entered in the CC list of [% terms.bugs %].
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=756314">[% terms.Bug %] 756314</a>)</li>
+  <li>Keywords are now correctly escaped in the auto-complete form to prevent
+    any XSS abuse.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=754561">[% terms.Bug %] 754561</a>)</li>
+  <li>A regression introduced in [% terms.Bugzilla %] 4.0rc2 when fixing
+    CVE-2011-0046 caused the "Un-forget the search" link to not work correctly
+    anymore when restoring a deleted saved search, because this link was
+    lacking a valid token.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=768870">[% terms.Bug %] 768870</a>)</li>
+</ul>
+
 <h3>4.0.6</h3>
 
 <p>This release fixes two security issues. See the

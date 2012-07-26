@@ -411,6 +411,12 @@ Sometimes this is C<undef>, meaning that we are parsing text that is
 not a bug comment (but could still be some other part of a bug, like
 the summary line).
 
+=item C<user>
+
+The L<Bugzilla::User> object representing the user who will see the text.
+This is useful to determine how much confidential information can be displayed
+to the user.
+
 =back
 
 =head2 bug_url_sub_classes

@@ -266,13 +266,16 @@ sub quoteUrls {
 sub get_attachment_link {
     my ($attachid, $link_text) = @_;
     my $dbh = Bugzilla->dbh;
+    my $user = Bugzilla->user;
 
     my $attachment = new Bugzilla::Attachment($attachid);
 
     if ($attachment) {
         my $title = "";
         my $className = "";
-        if (Bugzilla->user->can_see_bug($attachment->bug_id)) {
+        if ($user->can_see_bug($attachment->bug_id)
+            && (!$attachment->isprivate || $user->is_insider))
+        {
             $title = $attachment->description;
         }
         if ($attachment->isobsolete) {

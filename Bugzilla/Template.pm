@@ -153,8 +153,9 @@ sub get_format {
 # If you want to modify this routine, read the comments carefully
 
 sub quoteUrls {
-    my ($text, $bug, $comment) = (@_);
+    my ($text, $bug, $comment, $user) = @_;
     return $text unless $text;
+    $user ||= Bugzilla->user;
 
     # We use /g for speed, but uris can have other things inside them
     # (http://foo/bug#3 for example). Filtering that out filters valid
@@ -184,7 +185,7 @@ sub quoteUrls {
     my @hook_regexes;
     Bugzilla::Hook::process('bug_format_comment',
         { text => \$text, bug => $bug, regexes => \@hook_regexes,
-          comment => $comment });
+          comment => $comment, user => $user });
 
     foreach my $re (@hook_regexes) {
         my ($match, $replace) = @$re{qw(match replace)};
@@ -206,7 +207,7 @@ sub quoteUrls {
         map { qr/$_/ } grep($_, Bugzilla->params->{'urlbase'}, 
                             Bugzilla->params->{'sslbase'})) . ')';
     $text =~ s~\b(${urlbase_re}\Qshow_bug.cgi?id=\E([0-9]+)(\#c([0-9]+))?)\b
-              ~($things[$count++] = get_bug_link($3, $1, { comment_num => $5 })) &&
+              ~($things[$count++] = get_bug_link($3, $1, { comment_num => $5, user => $user })) &&
                ("\0\0" . ($count-1) . "\0\0")
               ~egox;
 
@@ -235,7 +236,7 @@ sub quoteUrls {
 
     # attachment links
     $text =~ s~\b(attachment\s*\#?\s*(\d+)(?:\s+\[details\])?)
-              ~($things[$count++] = get_attachment_link($2, $1)) &&
+              ~($things[$count++] = get_attachment_link($2, $1, $user)) &&
                ("\0\0" . ($count-1) . "\0\0")
               ~egmxi;
 
@@ -252,7 +253,7 @@ sub quoteUrls {
     $text =~ s~\b($bug_re(?:\s*,?\s*$comment_re)?|$comment_re)
               ~ # We have several choices. $1 here is the link, and $2-4 are set
                 # depending on which part matched
-               (defined($2) ? get_bug_link($2, $1, { comment_num => $3 }) :
+               (defined($2) ? get_bug_link($2, $1, { comment_num => $3, user => $user }) :
                               "<a href=\"$current_bugurl#c$4\">$1</a>")
               ~egox;
 
@@ -261,7 +262,7 @@ sub quoteUrls {
     $text =~ s~(?<=^\*\*\*\ This\ bug\ has\ been\ marked\ as\ a\ duplicate\ of\ )
                (\d+)
                (?=\ \*\*\*\Z)
-              ~get_bug_link($1, $1)
+              ~get_bug_link($1, $1, { user => $user })
               ~egmx;
 
     # Now remove the encoding hacks in reverse order
@@ -275,15 +276,18 @@ sub quoteUrls {
 
 # Creates a link to an attachment, including its title.
 sub get_attachment_link {
-    my ($attachid, $link_text) = @_;
+    my ($attachid, $link_text, $user) = @_;
     my $dbh = Bugzilla->dbh;
+    $user ||= Bugzilla->user;
 
     my $attachment = new Bugzilla::Attachment($attachid);
 
     if ($attachment) {
         my $title = "";
         my $className = "";
-        if (Bugzilla->user->can_see_bug($attachment->bug_id)) {
+        if ($user->can_see_bug($attachment->bug_id)
+            && (!$attachment->isprivate || $user->is_insider))
+        {
             $title = $attachment->description;
         }
         if ($attachment->isobsolete) {
@@ -323,6 +327,7 @@ sub get_attachment_link {
 sub get_bug_link {
     my ($bug, $link_text, $options) = @_;
     $options ||= {};
+    $options->{user} ||= Bugzilla->user;
     my $dbh = Bugzilla->dbh;
 
     if (defined $bug) {
@@ -699,10 +704,10 @@ sub create {
             clean_text => \&Bugzilla::Util::clean_text ,
 
             quoteUrls => [ sub {
-                               my ($context, $bug, $comment) = @_;
+                               my ($context, $bug, $comment, $user) = @_;
                                return sub {
                                    my $text = shift;
-                                   return quoteUrls($text, $bug, $comment);
+                                   return quoteUrls($text, $bug, $comment, $user);
                                };
                            },
                            1
@@ -718,10 +723,9 @@ sub create {
                           1
                         ],
 
-            bug_list_link => sub
-            {
-                my $buglist = shift;
-                return join(", ", map(get_bug_link($_, $_), split(/ *, */, $buglist)));
+            bug_list_link => sub {
+                my ($buglist, $options) = @_;
+                return join(", ", map(get_bug_link($_, $_, $options), split(/ *, */, $buglist)));
             },
 
             # In CSV, quotes are doubled, and any value containing a quote or a

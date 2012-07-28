@@ -7,7 +7,7 @@
   #%]
 
 <div id="status">
-  [% INCLUDE bug/field.html.tmpl
+  [% PROCESS bug/field.html.tmpl
       no_tds = 1
       field  = bug_fields.bug_status
       value  = bug.bug_status
@@ -22,7 +22,7 @@
   [% END %]
 
   <span id="resolution_settings">
-  [% INCLUDE bug/field.html.tmpl
+  [% PROCESS bug/field.html.tmpl
       no_tds = 1
       field  = bug_fields.resolution
       value  = bug.resolution

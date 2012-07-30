@@ -17,7 +17,7 @@ use Bugzilla::Error;
 use Bugzilla::Status;
 
 use File::Basename;
-use Digest::MD5 qw(md5_hex);
+use Digest::SHA qw(hmac_sha256_base64);
 
 # If we're using bug groups for products, we should apply those restrictions
 # to viewing reports, as well.  Time to check the login in that case.
@@ -88,14 +88,12 @@ else {
     # Filenames must not be guessable as they can point to products
     # you are not allowed to see. Also, different projects can have
     # the same product names.
-    my $key = Bugzilla->localconfig->{'site_wide_secret'};
     my $project = bz_locations()->{'project'} || '';
-    my $image_file =  join(':', ($key, $project, $prod_id, @datasets));
-    # Wide characters cause md5_hex() to die.
-    if (Bugzilla->params->{'utf8'}) {
-        utf8::encode($image_file) if utf8::is_utf8($image_file);
-    }
-    $image_file = md5_hex($image_file) . '.png';
+    my $image_file =  join(':', ($project, $prod_id, @datasets));
+    my $key = Bugzilla->localconfig->{'site_wide_secret'};
+    $image_file = hmac_sha256_base64($image_file, $key) . '.png';
+    $image_file =~ s/\+/-/g;
+    $image_file =~ s/\//_/g;
     trick_taint($image_file);
 
     if (! -e "$graph_dir/$image_file") {

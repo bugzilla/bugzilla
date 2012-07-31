@@ -454,8 +454,8 @@ sub update_table_definitions {
     _clean_control_characters_from_short_desc();
     
     # 2005-12-07 altlst@sonic.net -- Bug 225221
-    # 2012-07-24 dkl@mozilla.com - Bug 776982
-    _fix_longdescs_primary_key();
+    $dbh->bz_add_column('longdescs', 'comment_id',
+        {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1});
 
     _stop_storing_inactive_flags();
     _change_short_desc_from_mediumtext_to_varchar();
@@ -607,7 +607,7 @@ sub update_table_definitions {
     _fix_series_creator_fk();
 
     # 2009-11-14 dkl@redhat.com - Bug 310450
-    $dbh->bz_add_column('bugs_activity', 'comment_id', {TYPE => 'INT3'});
+    $dbh->bz_add_column('bugs_activity', 'comment_id', {TYPE => 'INT4'});
 
     # 2010-04-07 LpSolit@gmail.com - Bug 69621
     $dbh->bz_drop_column('bugs', 'keywords');
@@ -686,6 +686,9 @@ sub update_table_definitions {
     $dbh->bz_alter_column('bugs_activity', 'id', 
                           {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1});
 
+
+    # 2012-07-24 dkl@mozilla.com - Bug 776982
+    _fix_longdescs_primary_key();
 
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
@@ -3715,16 +3718,11 @@ sub _fix_notnull_defaults {
 
 sub _fix_longdescs_primary_key {
     my $dbh = Bugzilla->dbh;
-    my $column_def = {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1};
-    if (!$dbh->bz_column_info('longdescs', 'comment_id')) {
-        $dbh->bz_add_column('longdescs', 'comment_id', $column_def);
-    }
-    elsif ($dbh->bz_column_info('longdescs', 'comment_id')->{TYPE} ne 'INTSERIAL') {
-        $dbh->bz_drop_fk('bugs_activity', 'comment_id');
+    if ($dbh->bz_column_info('longdescs', 'comment_id')->{TYPE} ne 'INTSERIAL') {
+        $dbh->bz_drop_related_fks('longdescs', 'comment_id');
         $dbh->bz_alter_column('bugs_activity', 'comment_id', {TYPE => 'INT4'});
-        $dbh->bz_alter_column('longdescs', 'comment_id', $column_def);
-        $dbh->bz_add_fk('bugs_activity', 'comment_id', 
-                        {TABLE => 'longdescs', COLUMN => 'comment_id', DELETE => 'CASCADE'});
+        $dbh->bz_alter_column('longdescs', 'comment_id',
+                              {TYPE => 'INTSERIAL',  NOTNULL => 1,  PRIMARYKEY => 1});
     }
 }
 

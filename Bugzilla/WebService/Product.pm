@@ -67,6 +67,9 @@ sub get_accessible_products {
 sub get {
     my ($self, $params) = validate(@_, 'ids', 'names');
 
+    defined $params->{ids} || defined $params->{names}
+        || ThrowCodeError("params_required", { function => "Product.get",
+                                               params => ['ids', 'names'] });
     Bugzilla->switch_to_shadow_db();
 
     # Only products that are in the users accessible products, 
@@ -363,7 +366,9 @@ B<EXPERIMENTAL>
 
 Returns a list of information about the products passed to it.
 
-Note: Can also be called as "get_products" for compatibilty with Bugzilla 3.0 API.
+B<Note>: You must at least specify one of C<ids> or C<names>.
+
+B<Note>: Can also be called as "get_products" for compatibilty with Bugzilla 3.0 API.
 
 =item B<Params>
 

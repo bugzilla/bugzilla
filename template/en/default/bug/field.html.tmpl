@@ -21,14 +21,14 @@
   #                   with default field values being displayed on a page.
   #%]
 
-[% SET hidden = 0 %]
-[% IF bug AND !field.is_visible_on_bug(bug) %]
-  [% SET hidden = 1 %]
-[% END %]
-
 [% IF NOT no_tds %]
-  [% PROCESS "bug/field-label.html.tmpl" %]
-  <td class="field_value [% ' bz_hidden_field' IF hidden %]"
+  [% field_hidden = 0 %]
+  [% IF bug AND !field.is_visible_on_bug(bug) %]
+    [% field_hidden = 1 %]
+  [% END %]
+
+  [% INCLUDE "bug/field-label.html.tmpl" hidden = field_hidden %]
+  <td class="field_value [% ' bz_hidden_field' IF field_hidden %]"
       id="field_container_[% field.name FILTER html %]" 
       [% " colspan=\"$value_span\"" FILTER none IF value_span %]>
 [% END %]

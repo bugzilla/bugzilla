@@ -341,7 +341,7 @@ use constant ABSTRACT_SCHEMA => {
                                              COLUMN =>  'id'}},
             added     => {TYPE => 'varchar(255)'},
             removed   => {TYPE => 'varchar(255)'},
-            comment_id => {TYPE => 'INT3', 
+            comment_id => {TYPE => 'INT4', 
                            REFERENCES => { TABLE  => 'longdescs',
                                            COLUMN => 'comment_id',
                                            DELETE => 'CASCADE'}},
@@ -376,7 +376,7 @@ use constant ABSTRACT_SCHEMA => {
 
     longdescs => {
         FIELDS => [
-            comment_id      => {TYPE => 'MEDIUMSERIAL',  NOTNULL => 1,
+            comment_id      => {TYPE => 'INTSERIAL',  NOTNULL => 1,
                                 PRIMARYKEY => 1},
             bug_id          => {TYPE => 'INT3',  NOTNULL => 1,
                                 REFERENCES => {TABLE => 'bugs',

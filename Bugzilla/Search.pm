@@ -722,7 +722,8 @@ sub search_description {
 
 sub boolean_charts_to_custom_search {
     my ($self, $cgi_buffer) = @_;
-    my @as_params = $self->_boolean_charts->as_params;
+    my $boolean_charts = $self->_boolean_charts;
+    my @as_params = $boolean_charts ? $boolean_charts->as_params : ();
 
     # We need to start our new ids after the last custom search "f" id.
     # We can just pick the last id in the array because they are sorted
@@ -1337,7 +1338,7 @@ sub _parse_basic_fields {
         }
         $clause->add($field_name, $operator, $pass_value);
     }
-    return $clause;
+    return @{$clause->children} ? $clause : undef;
 }
 
 sub _special_parse_bug_status {
@@ -1457,7 +1458,7 @@ sub _special_parse_chfield {
         $clause->add($to_clause);
     }
 
-    return $clause;
+    return @{$clause->children} ? $clause : undef;
 }
 
 sub _special_parse_deadline {
@@ -1472,8 +1473,8 @@ sub _special_parse_deadline {
     if (my $to = $params->{'deadlineto'}) {
         $clause->add('deadline', 'lessthaneq', $to);
     }
-    
-    return $clause;
+
+    return @{$clause->children} ? $clause : undef;
 }
 
 sub _special_parse_email {
@@ -1503,8 +1504,8 @@ sub _special_parse_email {
         
         $clause->add($or_clause);
     }
-    
-    return $clause;
+
+    return @{$clause->children} ? $clause : undef;
 }
 
 sub _special_parse_resolution {
@@ -1613,17 +1614,20 @@ sub _boolean_charts {
         }
         $clause->add($and_clause);
     }
-    
-    return $clause;
+
+    return @{$clause->children} ? $clause : undef;
 }
 
 sub _custom_search {
     my ($self) = @_;
     my $params = $self->_params;
 
+    my @field_ids = $self->_field_ids;
+    return unless scalar @field_ids;
+
     my $current_clause = new Bugzilla::Search::Clause($params->{j_top});
     my @clause_stack;
-    foreach my $id ($self->_field_ids) {
+    foreach my $id (@field_ids) {
         my $field = $params->{"f$id"};
         if ($field eq 'OP') {
             my $joiner = $params->{"j$id"};

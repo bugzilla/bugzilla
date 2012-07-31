@@ -22,21 +22,23 @@ our @EXPORT_OK = qw(
     params_to_objects
 );
 
-sub filter ($$) {
-    my ($params, $hash) = @_;
+sub filter ($$;$) {
+    my ($params, $hash, $prefix) = @_;
     my %newhash = %$hash;
 
     foreach my $key (keys %$hash) {
-        delete $newhash{$key} if !filter_wants($params, $key);
+        delete $newhash{$key} if !filter_wants($params, $key, $prefix);
     }
 
     return \%newhash;
 }
 
-sub filter_wants ($$) {
-    my ($params, $field) = @_;
+sub filter_wants ($$;$) {
+    my ($params, $field, $prefix) = @_;
     my %include = map { $_ => 1 } @{ $params->{'include_fields'} || [] };
     my %exclude = map { $_ => 1 } @{ $params->{'exclude_fields'} || [] };
+
+    $field = "${prefix}.${field}" if $prefix;
 
     if (defined $params->{include_fields}) {
         return 0 if !$include{$field};
@@ -149,6 +151,13 @@ This helps implement the C<include_fields> and C<exclude_fields> arguments
 of WebService methods. Given a hash (the second argument to this subroutine),
 this will remove any keys that are I<not> in C<include_fields> and then remove
 any keys that I<are> in C<exclude_fields>.
+
+An optional third option can be passed that prefixes the field name to allow
+filtering of data two or more levels deep.
+
+For example, if you want to filter out the C<id> key/value in components returned
+by Product.get, you would use the value C<component.id> in your C<exclude_fields>
+list.
 
 =head2 filter_wants
 

@@ -421,36 +421,41 @@
       </td>
       <td>
         [% IF bug.check_can_change_field("qa_contact", 0, 1) %]
-          [% IF bug.qa_contact != "" %]
-           <div id="bz_qa_contact_edit_container" class="bz_default_hidden">
+          <div id="bz_qa_contact_edit_container" class="bz_default_hidden">
             <span>
-              <span id="bz_qa_contact_edit_display">
-              [% INCLUDE global/user.html.tmpl who = bug.qa_contact %]</span>
+              [% INCLUDE global/user.html.tmpl who = bug.qa_contact %]
               (<a href="#" id="bz_qa_contact_edit_action">edit</a>)
+              [% IF bug.qa_contact.id != user.id %]
+                (<a title="Change QA contact to yourself" 
+                    href="#" id="bz_qa_contact_take_action">take</a>)
+              [% END %]
             </span>
           </div>
-          [% END %]
           <div id="bz_qa_contact_input">
             [% INCLUDE global/userselect.html.tmpl
-                id => "qa_contact"
-                name => "qa_contact"
-                value => bug.qa_contact.login
-                size => 30
-                classes => ["bz_userfield"]
-                emptyok => 1
+               id      => "qa_contact"
+               name    => "qa_contact"
+               value   => bug.qa_contact.login
+               size    => 30
+               classes => ["bz_userfield"]
+               emptyok => 1
             %]
             <br>
             <input type="checkbox" id="set_default_qa_contact" name="set_default_qa_contact" value="1">
             <label for="set_default_qa_contact" id="set_default_qa_contact_label">Reset QA Contact to default</label>
           </div>
           <script type="text/javascript">
-            [% IF bug.qa_contact != "" %]
-              hideEditableField('bz_qa_contact_edit_container', 
-                                 'bz_qa_contact_input', 
-                                 'bz_qa_contact_edit_action', 
-                                 'qa_contact', 
-                                 '[% bug.qa_contact.login FILTER js %]');
-            [% END %]
+            hideEditableField('bz_qa_contact_edit_container', 
+                              'bz_qa_contact_input', 
+                              'bz_qa_contact_edit_action', 
+                              'qa_contact', 
+                              '[% bug.qa_contact.login FILTER js %]');
+            hideEditableField('bz_qa_contact_edit_container', 
+                              'bz_qa_contact_input', 
+                              'bz_qa_contact_take_action', 
+                              'qa_contact', 
+                              '[% bug.qa_contact.login FILTER js %]',
+                              '[% user.login FILTER js %]');
             initDefaultCheckbox('qa_contact');
           </script>
         [% ELSE %]

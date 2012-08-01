@@ -53,6 +53,48 @@
 
 <h2 id="v42_point">Updates in this 4.2.x Release</h2>
 
+<h3>4.2.2</h3>
+
+<p>This release fixes two security issues. See the
+  <a href="http://www.bugzilla.org/security/3.6.9/">Security Advisory</a>
+  for details.</p>
+
+<p>In addition, the following important fixes/changes have been made in this
+  release:</p>
+
+<ul>
+  <li>A regression introduced in [% terms.Bugzilla %] 4.0 caused some login
+    names to be ignored when entered in the CC list of [% terms.bugs %].
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=756314">[% terms.Bug %] 756314</a>)</li>
+  <li>Some queries could trigger an invalid SQL query if strings entered by
+    the user contained leading or trailing whitespaces.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=760075">[% terms.Bug %] 760075</a>)</li>
+  <li>The auto-completion form for keywords no longer automatically selects
+    the first keyword in the list when the field is empty.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=764517">[% terms.Bug %] 764517</a>)</li>
+  <li>A regression in [% terms.Bugzilla %] 4.2 prevented classifications
+    from being used in graphical and tabular reports in the "Multiple Tables"
+    field.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=753688">[% terms.Bug %] 753688</a>)</li>
+  <li>Attachments created by the <kbd>email_in.pl</kbd> script were associated
+    to the wrong comment.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=762785">[% terms.Bug %] 762785</a>)</li>
+  <li>Very long dependency lists can now be viewed correctly.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=762783">[% terms.Bug %] 762783</a>)</li>
+  <li>Keywords are now correctly escaped in the auto-completion form to prevent
+    any XSS abuse.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=754561">[% terms.Bug %] 754561</a>)</li>
+  <li>A regression introduced in [% terms.Bugzilla %] 4.0rc2 when fixing
+    CVE-2011-0046 caused the "Un-forget the search" link to not work correctly
+    anymore when restoring a deleted saved search, because this link was
+    lacking a valid token.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=768870">[% terms.Bug %] 768870</a>)</li>
+  <li>Two minor CSRF vulnerabilities have been fixed which could let an attacker
+    alter your default search criteria in the Advanced Search page.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=754672">[% terms.Bugs %] 754672</a>
+    and <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=754673">754673</a>)</li>
+</ul>
+
 <h3>4.2.1</h3>
 
 <p>This release fixes two security issues. See the

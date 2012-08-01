@@ -30,6 +30,7 @@ use HTML::FormatText::WithLinks;
 use Pod::Usage;
 use Encode;
 use Scalar::Util qw(blessed);
+use List::MoreUtils qw(firstidx);
 
 use Bugzilla;
 use Bugzilla::Attachment;
@@ -37,6 +38,7 @@ use Bugzilla::Bug;
 use Bugzilla::BugMail;
 use Bugzilla::Constants;
 use Bugzilla::Error;
+use Bugzilla::Field;
 use Bugzilla::Mailer;
 use Bugzilla::Token;
 use Bugzilla::User;
@@ -131,6 +133,29 @@ sub parse_mail {
     # a bug_id specified in the body of the email.
     if (!$fields{'bug_id'} && !$fields{'short_desc'}) {
         $fields{'short_desc'} = $summary;
+    }
+
+    # The Importance/X-Priority field is only used when creating a new bug.
+    # 1) If somebody specifies a priority, use it.
+    # 2) If there is an Importance or X-Priority header, use it as
+    #    something that is relative to the default priority.
+    #    If the value is High or 1, increase the priority by 1.
+    #    If the value is Low or 5, decrease the priority by 1.
+    # 3) Otherwise, use the default priority.
+    # Note: this will only work if the 'letsubmitterchoosepriority'
+    # parameter is enabled.
+    my $importance = $input_email->header('Importance')
+                     || $input_email->header('X-Priority');
+    if (!$fields{'bug_id'} && !$fields{'priority'} && $importance) {
+        my @legal_priorities = @{get_legal_field_values('priority')};
+        my $i = firstidx { $_ eq Bugzilla->params->{'defaultpriority'} } @legal_priorities;
+        if ($importance =~ /(high|[12])/i) {
+            $i-- unless $i == 0;
+        }
+        elsif ($importance =~ /(low|[45])/i) {
+            $i++ unless $i == $#legal_priorities;
+        }
+        $fields{'priority'} = $legal_priorities[$i];
     }
 
     my $comment = '';

@@ -48,9 +48,9 @@ function validateAndSubmit() {
   var alert_text = '';
   if(!isFilledOut('firstname')) alert_text += "Please enter your first name\n";
   if(!isFilledOut('lastname')) alert_text += "Please enter your last name\n";
-  if(!isFilledOut('wikiprofile')) alert_text += "Please enter your wiki user profile\n";
+  if(!isFilledOut('profilepage')) alert_text += "Please enter your Mozilla Reps profile page\n";
   if(!isFilledOut('eventname')) alert_text += "Please enter your event name\n";
-  if(!isFilledOut('wikipage')) alert_text += "Please enter the event wiki page.\n";
+  if(!isFilledOut('eventpage')) alert_text += "Please enter the event page.\n";
   if(!isFilledOut('attendance')) alert_text += "Please enter the estimated attendance.\n";
   if(!isFilledOut('shiptofirstname')) alert_text += "Please enter the shipping first name\n";
   if(!isFilledOut('shiptolastname')) alert_text += "Please enter the shipping last name\n";
@@ -106,9 +106,12 @@ function validateAndSubmit() {
 </tr>
 
 <tr class="odd">
-  <td><strong>Wiki User Profile: <span style="color: red;" title="Required">*</span></strong></td>
   <td>
-    <input type="text" name="wikiprofile" id="wikiprofile" size="40">
+    <strong>Mozilla Reps Profile Page: 
+      <span style="color: red;" title="Required">*</span></strong>
+  </td>
+  <td>
+    <input type="text" name="profilepage" id="profilepage" size="40">
   </td>
 </tr>
 
@@ -120,9 +123,9 @@ function validateAndSubmit() {
 </tr>
 
 <tr class="odd">
-  <td><strong>Event Wiki Page: <span style="color: red;" title="Required">*</span></strong></td>
+  <td><strong>Event Page: <span style="color: red;" title="Required">*</span></strong></td>
   <td>
-    <input type="text" name="wikipage" id="wikipage" size="40">
+    <input type="text" name="eventpage" id="eventpage" size="40">
   </td>
 </tr>
 
@@ -206,7 +209,9 @@ function validateAndSubmit() {
 </tr>
 
 <tr class="odd">
-  <td><strong>Custom Reference (Fiscal or VAT-number, if known):</strong><br><small>(if your country requires this)</small></td>
+  <td><strong>Custom Reference<br>
+    (Fiscal or VAT-number, if known):</strong><br><small>(if your country requires this)</small>
+  </td>
   <td><input name="shiptoidrut" id="shiptoidrut" size="40"></td>
 </tr>
 
@@ -217,28 +222,23 @@ function validateAndSubmit() {
   </td>
 </tr>
 
-<tr class="even">
+<tr class="odd">
   <td><!--spacer-->&nbsp;</td>
   <td><!--spacer-->&nbsp;</td>
 </tr>
 
-<tr class="odd">
+<tr class="even">
   <td colspan="2"><strong>Swag Requested:</strong></td>
 </tr>
 
-<tr class="even">
+<tr class="odd">
   <td><strong>Stickers:</strong></td>
   <td><input type="checkbox" id="stickers" name="stickers" value="1"></td>
 </tr>
 
-<tr class="odd">
+<tr class="even">
   <td><strong>Buttons:</strong></td>
   <td><input type="checkbox" id="buttons" name="buttons" value="1"></td>
-</tr>
-
-<tr class="even">
-  <td><strong>Posters:</strong></td>
-  <td><input type="checkbox" id="posters" name="posters" value="1"></td>
 </tr>
 
 <tr class="odd">

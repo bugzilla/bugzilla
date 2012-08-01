@@ -135,7 +135,7 @@ sub parse_mail {
         $fields{'short_desc'} = $summary;
     }
 
-    # The Importance/X-Priority field is only used when creating a new bug.
+    # The Importance/X-Priority headers are only used when creating a new bug.
     # 1) If somebody specifies a priority, use it.
     # 2) If there is an Importance or X-Priority header, use it as
     #    something that is relative to the default priority.

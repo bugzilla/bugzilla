@@ -149,30 +149,31 @@ function set_assign_to() {
             }
         [% END %]
 
-        // First, we disable all flags. Then we re-enable those
-        // which are available for the selected component.
-        var inputElements = document.getElementsByTagName("select");
-        var inputElement, flagField;
-        for ( var i=0 ; i<inputElements.length ; i++ ) {
-            inputElement = inputElements.item(i);
-            if (inputElement.name.search(/^flag_type-(\d+)$/) != -1) {
-                var id = inputElement.name.replace(/^flag_type-(\d+)$/, "$1");
-                inputElement.disabled = true;
-                // Also hide the requestee field, if it exists.
-                inputElement = document.getElementById("requestee_type-" + id);
-                if (inputElement)
-                  YAHOO.util.Dom.addClass(inputElement.parentNode, 'bz_default_hidden');
+        // We show or hide the available flags depending on the selected component.
+        var flag_rows = YAHOO.util.Dom.getElementsByClassName('bz_flag_type', 'tbody');
+        for (var i = 0; i < flag_rows.length; i++) {
+            // Each flag table row should have one flag form select element
+            // We get the flag type id from the id attribute of the select.
+            var flag_select = YAHOO.util.Dom.getElementsByClassName('flag_select', 
+                                                                    'select', 
+                                                                    flag_rows[i])[0];
+            var type_id = flag_select.id.split('-')[1];
+            var can_set = flag_select.options.length > 1 ? 1 : 0;
+            var show = 0;
+            // Loop through the allowed flag ids for the selected component
+            // and if we match, then show the row, otherwise hide the row.
+            for (var j = 0; j < flags[index].length; j++) {
+                if (flags[index][j] == type_id) {
+                    show = 1;
+                    break;
+                }
             }
-        }
-        // Now enable flags available for the selected component.
-        for (var i = 0; i < flags[index].length; i++) {
-            flagField = document.getElementById("flag_type-" + flags[index][i]);
-            // Do not enable flags the user cannot set nor request.
-            if (flagField && flagField.options.length > 1) {
-                flagField.disabled = false;
-                // Re-enabling the requestee field depends on the status
-                // of the flag.
-                toggleRequesteeField(flagField, 1);
+            if (show && can_set) {
+                flag_select.disabled = false;
+                YAHOO.util.Dom.removeClass(flag_rows[i], 'bz_default_hidden');
+            } else {
+                flag_select.disabled = true;
+                YAHOO.util.Dom.addClass(flag_rows[i], 'bz_default_hidden');
             }
         }
     }

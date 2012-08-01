@@ -1716,6 +1716,20 @@ Splinter.EL = function (element, cls, text, title) {
     return e;
 };
 
+Splinter.textTD = function (cls, text, title) {
+  if (text == "") {
+    return Splinter.EL("td", cls, "\u00a0", title);
+  }
+  var m = text.match(/^(.*?)(\s+)$/);
+  if (m) {
+    var td = Splinter.EL("td", cls, m[1], title);
+    td.insertBefore(Splinter.EL("span", cls + " trailing-whitespace", m[2], title), null);
+    return td;
+  } else {
+    return Splinter.EL("td", cls, text, title);
+  }
+}
+
 Splinter.getElementPosition = function (element) {
     var left = element.offsetLeft;
     var top = element.offsetTop;
@@ -1841,7 +1855,7 @@ Splinter.appendPatchHunk = function (file, hunk, tableType, includeComments, cli
         if (tableType != Splinter.Patch.ADDED) {
             if (oldText != null) {
                 tr.appendChild(Splinter.EL("td", "line-number", oldLine.toString(), title));
-                tr.appendChild(Splinter.EL("td", "old-line " + oldStyle, oldText != "" ? oldText : "\u00a0", title));
+                tr.appendChild(Splinter.textTD("old-line " + oldStyle, oldText, title));
                 oldLine++;
             } else {
                 tr.appendChild(Splinter.EL("td", "line-number"));
@@ -1856,7 +1870,7 @@ Splinter.appendPatchHunk = function (file, hunk, tableType, includeComments, cli
         if (tableType != Splinter.Patch.REMOVED) {
             if (newText != null) {
                 tr.appendChild(Splinter.EL("td", "line-number", newLine.toString(), title));
-                tr.appendChild(Splinter.EL("td", "new-line " + newStyle, newText != "" ? newText : "\u00a0", title));
+                tr.appendChild(Splinter.textTD("new-line " + newStyle, newText, title));
                 newLine++;
             } else if (tableType == Splinter.Patch.CHANGED) {
                 tr.appendChild(Splinter.EL("td", "line-number"));

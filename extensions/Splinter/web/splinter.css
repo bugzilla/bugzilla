@@ -413,3 +413,7 @@ div.review-patch-comment-text {
 .file-reviewed-nav {
     text-decoration: line-through;
 }
+
+.trailing-whitespace {
+    background: #ffaaaa;
+}

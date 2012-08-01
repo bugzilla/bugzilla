@@ -75,10 +75,17 @@ email address that matches this regular expression.</p>
   in comments in [% terms.bugs %] besides the name of the author of comments.
 </p>
 
-<p>By default, the new group will be associated with existing 
-products. Unchecking the "Insert new group into all existing 
-products" option will prevent this and make the group become 
-visible only when its controls have been added to a product.</p>
+[% IF Param("makeproductgroups") %]
+  <p>By default, the new group will be associated with existing products.
+  Unchecking the "Insert new group into all existing products" option will
+  prevent this and make the group become visible only when its controls have
+  been added to a product.</p>
+[% ELSE %]
+  <p>Checking the "Insert new group into all existing products" option will
+  make the new group be associated with existing products. Leaving it unchecked
+  will make the group become visible only when its controls have been added to
+  a product.</p>
+[% END %]
 
 <p>Back to the <a href="./">main [% terms.bugs %] page</a>
 

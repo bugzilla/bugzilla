@@ -39,8 +39,8 @@ Rep team.</p>
 function trySubmit() {
   var firstname = document.getElementById('firstname').value;
   var lastname = document.getElementById('lastname').value;
-  var wikipage = document.getElementById('wikipage').value;
-  var shortdesc = 'Budget Request - ' + firstname + ' ' + lastname + ' - ' + wikipage; 
+  var eventpage = document.getElementById('eventpage').value;
+  var shortdesc = 'Budget Request - ' + firstname + ' ' + lastname + ' - ' + eventpage; 
   document.getElementById('short_desc').value = shortdesc;
   return true;
 }
@@ -49,8 +49,8 @@ function validateAndSubmit() {
   var alert_text = '';
   if(!isFilledOut('firstname')) alert_text += "Please enter your first name\n";
   if(!isFilledOut('lastname')) alert_text += "Please enter your last name\n";
-  if(!isFilledOut('wikiprofile')) alert_text += "Please enter a wiki user profile.\n";
-  if(!isFilledOut('wikipage')) alert_text += "Please enter a wiki page address.\n";
+  if(!isFilledOut('profilepage')) alert_text += "Please enter a Mozilla Reps profile page.\n";
+  if(!isFilledOut('eventpage')) alert_text += "Please enter a event page address.\n";
   if(!isFilledOut('successmeasure')) alert_text += "Please enter how you will measure the success of the event.\n";
   if(!isFilledOut('budgettotal')) alert_text += "Please enter the total budget for the event.\n";
   if(!isFilledOut('service1') || !isFilledOut('cost1')) alert_text += "Please enter at least one service and cost value.\n";
@@ -112,16 +112,22 @@ function togglePaymentInfo (e) {
 </tr>
 
 <tr class="odd">
-  <td><strong>Wiki user profile:<span style="color: red;">*</span></strong></td>
   <td>
-    <input type="text" name="wikiprofile" id="wikiprofile" value="" size="40" placeholder="JohnDoe">
+    <strong>Mozilla Reps Profile Page: <span style="color: red;">*</span></strong>
+  </td>
+  <td>
+    <input type="text" name="profilepage" id="profilepage" 
+           value="" size="40" placeholder="https://reps.mozilla.org/u/JohnDoe">
   </td>
 </tr>
 
 <tr class="even">
-  <td><strong>Event wiki page: <span style="color: red;">*</span></strong></td>
   <td>
-    <input type="text" name="wikipage" id="wikipage" value="" size="40" placeholder="http://wiki.mozilla.org/JohnDoe">
+    <strong>Event Page: <span style="color: red;">*</span></strong>
+  </td>
+  <td>
+    <input type="text" name="eventpage" id="eventpage" 
+           value="" size="40" placeholder="https://reps.mozilla.org/e/TestEvent">
   </td>
 </tr>
 

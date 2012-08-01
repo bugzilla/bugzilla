@@ -106,7 +106,7 @@ function set_assign_to() {
         var flag_rows = YAHOO.util.Dom.getElementsByClassName('bz_flag_type', 'tbody');
         for (var i = 0; i < flag_rows.length; i++) {
             // Each flag table row should have one flag form select element
-            // We get the flag type id from the id attribute of the select
+            // We get the flag type id from the id attribute of the select.
             var flag_select = YAHOO.util.Dom.getElementsByClassName('flag_select', 
                                                                     'select', 
                                                                     flag_rows[i])[0];
@@ -114,7 +114,7 @@ function set_assign_to() {
             var can_set = flag_select.options.length > 1 ? 1 : 0;
             var show = 0;
             // Loop through the allowed flag ids for the selected component
-            // and if we match, then show the row, otherwise hide the row
+            // and if we match, then show the row, otherwise hide the row.
             for (var j = 0; j < flags[index].length; j++) {
                 if (flags[index][j] == type_id) {
                     show = 1;

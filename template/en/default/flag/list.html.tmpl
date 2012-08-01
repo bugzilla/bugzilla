@@ -91,6 +91,7 @@
 [%# Display a table row for flags %]
 
 [% BLOCK flag_row %]
+  [% RETURN IF !flag && !((type.is_requestable && user.can_request_flag(type)) || user.can_set_flag(type)) %]
   [% SET fid = flag ? "flag-$flag.id" : "flag_type-$type.id" %]
   <tbody[% ' class="bz_flag_type"' IF !flag %]>
     <tr>
@@ -107,9 +108,6 @@
       </td>
       <td>
         <select id="[% fid FILTER html %]" name="[% fid FILTER html %]"
-                [% IF !flag && !((type.is_requestable && user.can_request_flag(type)) || user.can_set_flag(type)) %]
-                  disabled="disabled"
-                [% END %]
                 title="[% type.description FILTER html %]"
                 onchange="toggleRequesteeField(this);"
                 class="flag_select flag_type-[% type.id %]">

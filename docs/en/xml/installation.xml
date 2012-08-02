@@ -2394,7 +2394,7 @@ bash$ <command>./checksetup.pl</command>
           <warning>
             <para>
               The period at the beginning of the command
-              <command>./checksetup.pl</command> is important and can not
+              <command>./checksetup.pl</command> is important and cannot
               be omitted.
             </para>
           </warning>

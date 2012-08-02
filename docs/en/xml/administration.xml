@@ -2362,7 +2362,7 @@ ReadOnly: ENTRY, NA/NA, CANEDIT
     <para>
     Keywords are global, rather than per-product. If the administrator changes
     a keyword currently applied to any bugs, the keyword cache must be rebuilt
-    using the <xref linkend="sanitycheck"/> script. Currently keywords can not
+    using the <xref linkend="sanitycheck"/> script. Currently keywords cannot
     be marked obsolete to prevent future usage.
     </para>
     <para>
@@ -2386,7 +2386,7 @@ ReadOnly: ENTRY, NA/NA, CANEDIT
     </para>
     <tip>
       <para>
-        Before adding a Custom Field, make sure that Bugzilla can not already
+        Before adding a Custom Field, make sure that Bugzilla cannot already
         do the desired behavior. Many Bugzilla options are not enabled by 
         default, and many times Administrators find that simply enabling
         certain options that already exist is sufficient. 
@@ -3160,7 +3160,7 @@ ReadOnly: ENTRY, NA/NA, CANEDIT
     To run the "Sanity Check" script, log in as an Administrator and click the
     "Sanity Check" link in the admin page. Any problems that are found will be
     displayed in red letters. If the script is capable of fixing a problem,
-    it will present a link to initiate the fix. If the script can not
+    it will present a link to initiate the fix. If the script cannot
     fix the problem it will require manual database administration or recovery.
     </para>
     <para>

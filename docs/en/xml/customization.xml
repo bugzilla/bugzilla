@@ -488,7 +488,7 @@
      except group restrictions (unless they are members of the groups they 
      are trying to change). Bug reporters also have the ability to edit some 
      fields, but in a more restrictive manner. Other users, without 
-     <emphasis>editbugs</emphasis> privileges, can not edit 
+     <emphasis>editbugs</emphasis> privileges, cannot edit 
      bugs, except to comment and add themselves to the CC list.
     </para> 
     

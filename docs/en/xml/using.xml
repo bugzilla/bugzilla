@@ -1531,7 +1531,7 @@
           </term>
           <listitem>
             <para> 
-             Indicates user can not be impersonated by other users.
+             Indicates user cannot be impersonated by other users.
             </para>
           </listitem>
         </varlistentry>
@@ -2014,7 +2014,7 @@
         <para>
           When running queries, the whining system acts as if you are the user
           executing the query.  This means that the whining system will ignore
-          bugs that match your query, but that you can not access.
+          bugs that match your query, but that you cannot access.
         </para>
       </note>
 

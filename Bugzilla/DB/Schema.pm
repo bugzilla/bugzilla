@@ -416,7 +416,8 @@ use constant ABSTRACT_SCHEMA => {
                                             DELETE => 'CASCADE'}},
         ],
         INDEXES => [
-            dependencies_blocked_idx   => ['blocked'],
+            dependencies_blocked_idx => {FIELDS => [qw(blocked dependson)],
+                                         TYPE   => 'UNIQUE'},
             dependencies_dependson_idx => ['dependson'],
         ],
     },

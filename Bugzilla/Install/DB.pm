@@ -694,6 +694,9 @@ sub update_table_definitions {
     # 2012-07-24 dkl@mozilla.com - Bug 776982
     _fix_longdescs_primary_key();
 
+    # 2012-08-02 dkl@mozilla.com - Bug 756953
+    _fix_dependencies_dupes();
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################
@@ -3723,6 +3726,31 @@ sub _fix_longdescs_primary_key {
         $dbh->bz_alter_column('longdescs', 'comment_id',
                               {TYPE => 'INTSERIAL',  NOTNULL => 1,  PRIMARYKEY => 1});
     }
+}
+
+sub _fix_dependencies_dupes {
+    my $dbh = Bugzilla->dbh;
+    my $blocked_idx = $dbh->bz_index_info('dependencies', 'dependencies_blocked_idx');
+    if ($blocked_idx && scalar @{$blocked_idx->{'FIELDS'}} < 2) {
+        # Remove duplicated entries
+        my $dupes = $dbh->selectall_arrayref("
+            SELECT blocked, dependson, COUNT(*) AS count
+              FROM dependencies " .
+            $dbh->sql_group_by('blocked, dependson') . "
+            HAVING COUNT(*) > 1",
+            { Slice => {} });
+        print "Removing duplicated entries from the 'dependencies' table...\n" if @$dupes;
+        foreach my $dupe (@$dupes) {
+            $dbh->do("DELETE FROM dependencies
+                      WHERE blocked = ? AND dependson = ?",
+                     undef, $dupe->{blocked}, $dupe->{dependson});
+            $dbh->do("INSERT INTO dependencies (blocked, dependson) VALUES (?, ?)",
+                     undef, $dupe->{blocked}, $dupe->{dependson});
+        }
+        $dbh->bz_drop_index('dependencies', 'dependencies_blocked_idx');
+        $dbh->bz_add_index('dependencies', 'dependencies_blocked_idx',
+                           { FIELDS => [qw(blocked dependson)], TYPE => 'UNIQUE' });
+    }   
 }
 
 1;

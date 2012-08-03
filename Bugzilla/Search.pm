@@ -835,10 +835,19 @@ sub _add_extra_column {
 # These are the columns that we're going to be actually SELECTing.
 sub _display_columns {
     my ($self) = @_;
-    # Do not alter the list specified here at all, even if they are duplicated.
-    # Those are passed by the caller, and the caller expects to get them back
-    # in the exact same order.
-    $self->{display_columns} ||= [$self->_input_columns, $self->_extra_columns];
+    return @{ $self->{display_columns} } if $self->{display_columns};
+
+    # Do not alter the list from _input_columns at all, even if there are
+    # duplicated columns. Those are passed by the caller, and the caller
+    # expects to get them back in the exact same order.
+    my @columns = $self->_input_columns;
+
+    # Only add columns which are not already listed.
+    my %list = map { $_ => 1 } @columns;
+    foreach my $column ($self->_extra_columns) {
+        push(@columns, $column) unless $list{$column}++;
+    }
+    $self->{display_columns} = \@columns;
     return @{ $self->{display_columns} };
 }
 

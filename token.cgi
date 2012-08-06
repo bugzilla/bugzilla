@@ -114,6 +114,11 @@ sub requestChangePassword {
     Bugzilla->user->authorizer->can_change_password
       || ThrowUserError("password_change_requests_not_allowed");
 
+    # Check the hash token to make sure this user actually submitted
+    # the forgotten password form.
+    my $token = $cgi->param('token');
+    check_hash_token($token, ['reqpw']);
+
     my $login_name = $cgi->param('loginname')
       or ThrowUserError("login_needed_for_password_change");
 

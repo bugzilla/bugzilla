@@ -108,6 +108,11 @@ if ( $action eq 'reqpw' ) {
         ThrowUserError("password_change_requests_not_allowed");
     }
 
+    # Check the hash token to make sure this user actually submitted
+    # the forgotten password form.
+    my $token = $cgi->param('token');
+    check_hash_token($token, ['reqpw']);
+
     validate_email_syntax($login_name)
         || ThrowUserError('illegal_email_address', {addr => $login_name});
 

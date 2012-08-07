@@ -118,6 +118,7 @@
           [%- type.name FILTER html FILTER no_break -%]</label>
       </td>
       <td>
+        <input type="hidden" id="[% fid FILTER html %]_dirty">
         <select id="[% fid FILTER html %]" name="[% fid FILTER html %]"
                 [% IF !flag && !((type.is_requestable && user.can_request_flag(type)) || user.can_set_flag(type)) %]
                   disabled="disabled"

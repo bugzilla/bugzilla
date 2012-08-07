@@ -35,7 +35,7 @@
 [% header = "$terms.Bug&nbsp;$bug.bug_id" %]
 [% header_addl_info = "Last modified: $filtered_timestamp" %]
 [% yui = ['autocomplete', 'calendar'] %]
-[% javascript_urls = [ "js/util.js", "js/field.js" ] %]
+[% javascript_urls = [ "js/util.js", "js/field.js", "js/show_bug.js" ] %]
 [% IF bug.defined %]
   [% unfiltered_title = "$terms.Bug $bug.bug_id – $bug.short_desc" %]
   [% javascript =  BLOCK %]

@@ -21,10 +21,10 @@
         onsubmit="if (this.quicksearch.value == '')
                   { alert('Please enter one or more search terms first.');
                     return false; } return true;">
-    <input type="hidden" id="no_redirect" name="no_redirect" value="0">
+    <input type="hidden" id="no_redirect[% qs_suffix FILTER html %]" name="no_redirect" value="0">
     <script type="text/javascript">
       if (history && history.replaceState) {
-        var no_redirect = document.getElementById("no_redirect");
+        var no_redirect = document.getElementById("no_redirect[% qs_suffix FILTER js %]");
         no_redirect.value = 1;
       }
     </script>

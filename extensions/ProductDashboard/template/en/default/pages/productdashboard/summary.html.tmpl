@@ -1,0 +1,205 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+<script type="text/javascript">
+<!--
+var column_defs = [
+    { key:"name", label:"Name", sortable:true },
+    { key:"count", label:"Count", sortable:true },
+    { key:"percentage", label:"Percentage", sortable:false }
+];
+var fields = [
+    { key:"name" },
+    { key:"count", parser:"number" },
+    { key:"percentage" }
+];
+addStatListener("bug_counts", "bug_counts_table", column_defs, fields, {});
+addStatListener("status_counts", "status_counts_table", column_defs, fields, {});
+addStatListener("priority_counts", "priority_counts_table", column_defs, fields, {});
+addStatListener("severity_counts", "severity_counts_table", column_defs, fields, {});
+addStatListener("assignee_counts", "assignee_counts_table", column_defs, fields, {});
+-->
+</script>
+
+<p>
+  <a href="#counts">Counts</a>
+  <span class="separator"> | </span>
+  <a href="#status">Status</a>
+  <span class="separator"> | </span>
+  <a href="#priority">Priority</a>
+  <span class="separator"> | </span>
+  <a href="#severity">Severity</a>
+  <span class="separator"> | </span>
+  <a href="#assignee">Assignee</a>
+</p>
+
+<div class="yui-skin-sam">
+  <a name="counts"></a>
+  <b>[% terms.Bug %] Counts</b>
+  <div id="bug_counts">
+    <table id="bug_counts_table" border="0" cellspacing="3" cellpadding="0">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Count</th>
+        <th>Percentage</th>
+      </tr>
+    </thead>
+    <tbody>
+    <tr>
+      <td><a href="[% bug_link_all FILTER html %]">Total [% terms.Bugs %]</a></td>
+      <td>[% total_bugs FILTER html %]</td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td><a href="[% bug_link_open FILTER html %]">Open [% terms.Bugs %]</a></td>
+      <td>[% total_open_bugs FILTER html %]</td>
+      <td width="70%">
+        [% INCLUDE bar_graph count = total_open_bugs full_bug_count = total_bugs %]
+      </td>
+    </tr>
+    <tr>
+      <td><a href="[% bug_link_closed FILTER html %]">Closed [% terms.Bugs %]</a></td>
+      <td>[% total_closed_bugs FILTER html %]</td>
+      <td width="70%">
+        [% INCLUDE bar_graph count = total_closed_bugs full_bug_count = total_bugs %]
+      </td>
+    </tr>
+    </tbody>
+    </table>
+  </div>
+  <br>
+  <a name="status"></a>
+  <b>Status</b>
+  (<a href="#top">back to top</a>)
+  <div id="status_counts">
+    <table id="status_counts_table" border="0" cellspacing="3" cellpadding="0">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Count</th>
+        <th>Percentage</th>
+      </tr>
+    </thead>
+    <tbody> 
+    [% FOREACH col = by_status %]
+      [% NEXT IF col.0 == 'CLOSED' %]
+      <tr>
+        <td>
+          <a href="[% bug_link_all FILTER html %]&amp;bug_status=[% col.0 FILTER uri %]">
+          [% col.0 FILTER html %]</a>
+        </td>
+        <td>
+          [% col.1 FILTER html %]
+        </td>
+        <td width="70%">
+          [% INCLUDE bar_graph count = col.1 %]
+        </td>
+      </tr>
+    [% END %]
+    </tbody>
+    </table>
+  </div>
+  <br>
+  <a name="priority"></a>
+  <b>Priority</b>
+  (<a href="#top">back to top</a>)
+  <div id="priority_counts">
+    <table id="priority_counts_table" border="0" cellspacing="3" cellpadding="0">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Count</th>
+        <th>Percentage</th>
+      </tr>
+    </thead>
+    </tbody>
+    [% FOREACH col = by_priority %]
+      <tr>
+        <td>
+          <a href="[% bug_link FILTER html %]&amp;priority=[% col.0 FILTER uri %]">
+          [% col.0 FILTER html %]</a>
+        </td>
+        <td>
+          [% col.1 FILTER html %]
+        </td>
+        <td width="70%">
+          [% INCLUDE bar_graph count = col.1 %]
+        </td>
+      </tr>
+    [% END %]
+    </tbody>
+    </table>
+  </div>
+  <br>
+  <a name="severity"></a>
+  <b>Severity</b>
+  (<a href="#top">back to top</a>)
+  <div id="severity_counts">
+    <table id="severity_counts_table" border="0" cellspacing="3" cellpadding="0">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Count</th>
+        <th>Percentage</th>
+      </tr>
+    </thead>
+    <tbody>
+    [% FOREACH col = by_severity %]
+      <tr>
+        <td>
+          <a href="[% bug_link FILTER html %]&amp;bug_severity=[% col.0 FILTER uri %]">
+          [% col.0 FILTER html %]</a>
+        </td>
+        <td align="right">
+          [% col.1 FILTER html %]
+        </td>
+        <td width="70%">
+          [% INCLUDE bar_graph count = col.1 %]
+        </td>
+      </tr>
+    [% END %]
+    </tbody>
+    </table>
+  </div>
+  <br>
+  <a name="assignee"></a>
+  <b>Assignee</b>
+  (<a href="#top">back to top</a>)
+  <div id="assignee_counts">
+    <table id="assignee_counts_table" border="0" cellspacing="3" cellpadding="0">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Count</th>
+        <th>Percentage</th>
+      </tr>
+    </thead>
+    <tbody>
+    [% FOREACH col = by_assignee %]
+      <tr>
+        <td>
+          [% IF user.id %]
+            <a href="[% bug_link FILTER html %]&amp;emailassigned_to1=1&amp;emailtype1=exact&amp;email1=[% col.0.email FILTER uri %]">
+            [% col.0.email FILTER html %]</a>
+          [% ELSE %]
+            [% col.0.realname || "No Name" FILTER html %]
+          [% END %]
+        </td>
+        <td>
+          [% col.1 FILTER html %]
+        </td>
+        <td width="70%">
+          [% INCLUDE bar_graph count = col.1 %]
+        </td>
+      </tr>
+    [% END %]
+    </tbody>
+    </table>
+  </div>
+</div>

@@ -1,0 +1,54 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+<script type="text/javascript">
+<!--
+var column_defs = [
+    { key:"milestone", label:"Milestone", sortable:true },
+    { key:"percentage complete", label:"Percentage Complete", sortable:false },
+    { key:"links", label:"Links", sortable:false }, 
+];
+var fields = [
+    { key:"milestone" },
+    { key:"percentage complete" },
+    { key:"links" }
+];
+
+addStatListener("bug_milestones", "bug_milestones_table", column_defs, fields, {});
+-->
+</script>
+
+<div class="yui-skin-sam">
+<div id="bug_milestones">
+  <table id="bug_milestones_table" border="0" cellspacing="3" cellpadding="0">
+    <thead>
+      <tr>
+        <th>Milestone</th>
+        <th>Percentage Complete</th>
+        <th>Links</th>
+      </tr>
+    </thead>
+    <tbody>
+      [% FOREACH milestone = by_roadmap %]
+      <tr>
+        <td>[% milestone.name FILTER html %]</td>
+        <td width="70%">
+        [% INCLUDE bar_graph count = milestone.closed_bugs full_bug_count = milestone.total_bugs %]
+        </td>
+        <td>
+          <a href="[% milestone.link_closed FILTER html %]">
+            [% milestone.closed_bugs FILTER html %]</a>&nbsp;of&nbsp;
+          <a href="[% milestone.link_total FILTER html %]">
+            [% milestone.total_bugs FILTER html %]</a>&nbsp;bugs have been closed
+        </td>
+      </tr>
+      [% END %]
+    </tbody>
+    </table>
+  </div>
+</div>

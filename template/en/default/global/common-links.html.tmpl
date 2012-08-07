@@ -55,6 +55,8 @@
     [% END %]
   [%-# Work around FF bug: keep this on one line %]</li>
 
+  [% Hook.process('action-links') %]
+
   [% IF user.login %]
     <li><span class="separator">| </span><a href="userprefs.cgi">Preferences</a></li>
     [% IF user.in_group('tweakparams') || user.in_group('editusers') || user.can_bless

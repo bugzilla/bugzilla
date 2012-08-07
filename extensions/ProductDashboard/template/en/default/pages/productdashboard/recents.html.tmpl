@@ -1,0 +1,132 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+<style>
+  .yui-skin-sam .yui-dt table {width:100%;}
+</style>
+  
+<script type="text/javascript">
+<!--
+var column_defs = [
+    { key:"id", label:"ID", sortable:true, sortOptions:{ sortFunction:sortBugIdLinks } },
+    { key:"bug_status", label:"Status", sortable:true },
+    { key:"version", label:"Version", sortable:true },
+    { key:"component", label:"Component", sortable:true },
+    { key:"bug_severity", label:"Severity", sortable:true, sortOptions:{ sortFunction:sortBugSeverity } },
+    { key:"Summary", label:"Summary", sortable:false },
+];
+var fields = [
+    { key:"id" },
+    { key:"bug_status" },
+    { key:"version" },
+    { key:"component" },
+    { key:"bug_severity" },
+    { key:"Summary" }
+];
+addStatListener("recently_opened", "recently_opened_table", column_defs, fields, {
+    [% IF recently_opened.size > 25 %] paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25 }) [% END %]
+});
+addStatListener("recently_closed", "recently_closed_table", column_defs, fields, {
+    [% IF recently_closed.size > 25 %] paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25 }) [% END %]
+});
+-->
+</script>
+  
+<p>
+  Activity within the last <input type="text" size="4" name="recent_days" 
+                                  value="[% recent_days FILTER html %]">
+  days (between 1 and 100) or from 
+  <input name="date_from" size="10" id="date_from"
+         value="[% date_from FILTER html %]"
+         onchange="updateCalendarFromField(this)">
+  <button type="button" class="calendar_button"
+          id="button_calendar_date_from"
+          onclick="showCalendar('date_from')">
+    <span>Calendar</span>
+  </button>
+  <span id="con_calendar_date_from"></span>
+  to 
+  <input name="date_to" size="10" id="date_to"
+         value="[% date_to FILTER html %]"
+         onchange="updateCalendarFromField(this)">
+  <button type="button" class="calendar_button"
+          id="button_calendar_date_to"
+          onclick="showCalendar('date_to')">
+    <span>Calendar</span>
+  </button>
+  <span id="con_calendar_date_to"></span>
+  <script type="text/javascript">
+    createCalendar('date_from')
+    createCalendar('date_to')
+  </script>
+  <input type="submit" name="change" value="Change">
+</p>
+<p>
+  <a href="#recently_opened">Recently Opened</a>
+  <span class="separator"> | </span>
+  <a href="#recently_closed">Recently Closed</a>
+</p>
+  
+<div class="yui-skin-sam">
+  <a name="recently_opened"></a>
+  <b>[% recently_opened.size FILTER html %] Recently Opened [% terms.Bugs %]</b>
+  <div id="recently_opened">
+    <table id="recently_opened_table" cellspacing="3" cellpadding="0" border="0" width="100%">
+    <thead>
+        <tr bgcolor="#CCCCCC">
+          [% FOREACH column = [ "ID", "Status", "Version", "Component", "Severity" "Summary" ] %]
+            <th>[% column FILTER html %]</th>
+          [% END %]
+        </tr>
+    </thead>
+    <tbody>
+    [% FOREACH bug = recently_opened %]
+      [% count = loop.count() %]
+      <tr class="[%+ count % 2 == 1 ? "bz_row_odd" : "bz_row_even" -%]">
+        <td align="center"><a href="[% urlbase FILTER none %]show_bug.cgi?id=[% bug.id FILTER uri %]">
+          [% bug.id FILTER html %]</a></td>
+        <td align="center">[% bug.status FILTER html %]</td>
+        <td align="center">[% bug.version FILTER html %]</td>
+        <td align="center">[% bug.component FILTER html %]</td>
+        <td align="center">[% bug.severity FILTER html %]</td>
+        <td>[% bug.summary FILTER html %]</td>
+      </tr>
+    [% END %]
+    </tbody>
+    </table>
+  </div>
+  <br>
+  <a name="recently_closed"></a>
+  <b>[% recently_closed.size FILTER html %] Recently Closed [% terms.Bugs %]</b>
+  (<a href="#top">back to top</a>)
+  <div id="recently_closed">
+    <table id="recently_closed_table" cellspacing="3" cellpadding="0" border="0" width="100%">
+    <thead>
+        <tr bgcolor="#CCCCCC">
+          [% FOREACH column = [ "ID", "Status", "Version", "Component", "Severity" "Summary" ] %]
+            <th>[% column FILTER html %]</th>
+          [% END %]
+        </tr>
+    </thead>
+    <tbody>
+    [% FOREACH bug = recently_closed %]
+      [% count = loop.count() %]
+      <tr class="[%+ count % 2 == 1 ? "bz_row_odd" : "bz_row_even" -%]">
+        <td align="center"><a href="[% urlbase FILTER none %]show_bug.cgi?id=[% bug.id FILTER uri %]">
+          [% bug.id FILTER html %]</a></td>
+        <td align="center">[% bug.status FILTER html %]</td>
+        <td align="center">[% bug.version FILTER html %]</td>
+        <td align="center">[% bug.component FILTER html %]</td>
+        <td align="center">[% bug.severity FILTER html %]</td>
+        <td>[% bug.summary FILTER html %]</td>
+      </tr>
+    [% END %]
+    </tbody>
+    </table>
+  </div>
+</div>

@@ -1,0 +1,73 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+<style>
+  .yui-skin-sam .yui-dt table {width:100%;}
+</style>
+  
+<script type="text/javascript">
+<!--
+var column_defs = [
+    { key:"id", label:"ID", sortable:true, sortOptions:{ sortFunction:sortBugIdLinks } },
+    { key:"count", label:"Count", sortable:true },
+    { key:"bug_status", label:"Status", sortable:true },
+    { key:"version", label:"Version", sortable:true },
+    { key:"component", label:"Component", sortable:true },
+    { key:"bug_severity", label:"Severity", sortable:true, sortOptions:{ sortFunction:sortBugSeverity } },
+    { key:"Summary", label:"Summary", sortable:false },
+];
+var fields = [
+    { key:"id" },
+    { key:"count", parser:"number" },
+    { key:"bug_status" },
+    { key:"version" },
+    { key:"component" },
+    { key:"bug_severity" },
+    { key:"Summary" }
+];
+addStatListener("popularity_counts", "popularity_counts_table", column_defs, fields, {
+    [% IF by_popularity.size > 25 %] paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25 }) [% END %]
+});
+-->
+</script>
+  
+[% IF by_popularity.size %]
+  <b>[% by_popularity.size FILTER html %]&nbsp;[% terms.Bugs %] Found</b>
+  <div class="yui-skin-sam">
+    <div id="popularity_counts">
+      <table id="popularity_counts_table" cellspacing="3" cellpadding="0" border="0" width="100%">
+      <thead>  
+        <tr bgcolor="#CCCCCC">
+          [% FOREACH column = [ "ID", "Count", "Status", "Version"
+                                "Component", "Severity" "Summary" ] %]
+
+            <th>[% column FILTER html %]</th>
+          [% END %]
+        </tr>
+      </thead>
+      <tbody>
+      [% FOREACH bug = by_popularity %]
+        [% count = loop.count() %]
+        <tr class="[%+ count % 2 == 1 ? "bz_row_odd" : "bz_row_even" -%]">
+          <td align="center"><a href="[% urlbase FILTER none %]show_bug.cgi?id=[% bug.id FILTER uri %]">
+            [% bug.id FILTER html %]</a></td>
+          <td align="center">[% bug.votes FILTER html %]</td>
+          <td align="center">[% bug.status FILTER html %]</td>
+          <td align="center">[% bug.version FILTER html %]</td>
+          <td align="center">[% bug.component FILTER html %]</td>
+          <td align="center">[% bug.severity FILTER html %]</td>
+          <td>[% bug.summary FILTER html %]</td>
+        </tr>
+      [% END %]
+      </tbody>
+      </table>
+    </div>
+  </div>
+[% ELSE %]
+  <h3>No [% terms.bugs %] found.</h3>
+[% END %]

@@ -1,0 +1,209 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% filtered_product = product.name FILTER html %]
+[% PROCESS global/header.html.tmpl
+  title = "Product Dashboard: $filtered_product"
+  style_urls = [ "skins/standard/buglist.css", 
+                 "js/yui/assets/skins/sam/paginator.css", 
+                 "extensions/ProductDashboard/web/styles/productdashboard.css" ]
+  yui = [ "datatable", "paginator", "calendar" ]
+  javascript_urls = [ "js/util.js", "js/field.js", 
+                      "extensions/ProductDashboard/web/js/productdashboard.js" ]
+%]
+
+<script type="text/javascript">
+<!--
+  [%# Set up severities list for proper sorting %]
+  var severities = new Array();
+  [% sort_count = 0 %]
+  [% FOREACH s = severities %]
+    severities['[% s FILTER js %]'] = [% sort_count FILTER js %];
+    [% sort_count = sort_count + 1 %]
+  [% END %]
+-->
+</script>
+
+[% url_filtered_product = product.name FILTER uri %]
+[% url_filtered_status  = bug_status FILTER uri %]
+
+[% tabs = [
+    {
+      name  => "summary",
+      label => "Summary",
+      link  => "page.cgi?id=productdashboard.html&amp;product=$url_filtered_product&bug_status=$url_filtered_status&tab=summary"
+    },
+    {
+      name  => "recents",
+      label => "Recents",
+      link  => "page.cgi?id=productdashboard.html&amp;product=$url_filtered_product&bug_status=$url_filtered_status&tab=recents"
+    },
+    {
+      name  => "components",
+      label => "Components/Versions",
+      link  => "page.cgi?id=productdashboard.html&amp;product=$url_filtered_product&bug_status=$url_filtered_status&tab=components"
+    },
+    {
+      name  => "duplicates",
+      label => "Duplicates",
+      link  => "page.cgi?id=productdashboard.html&amp;product=$url_filtered_product&bug_status=$url_filtered_status&tab=duplicates"
+    },
+    {
+      name  => "popularity",
+      label => "Popularity",
+      link  => "page.cgi?id=productdashboard.html&amp;product=$url_filtered_product&bug_status=$url_filtered_status&tab=popularity"
+    },
+    {
+      name  => "roadmap",
+      label => "Road Map",
+      link  => "page.cgi?id=productdashboard.html&amp;product=$url_filtered_product&bug_status=$url_filtered_status&tab=roadmap"
+    },
+  ]
+%]
+
+[% FOREACH tab IN tabs %]
+  [% IF tab.name == current_tab_name %]
+    [% current_tab = tab %]
+    [% LAST %]
+  [% END %]
+[% END %]
+
+[% full_bug_count = 0 %]
+[% IF bug_status == 'open' %]
+  [% full_bug_count = total_open_bugs %]
+[% ELSIF bug_status == 'closed' %]
+  [% full_bug_count = total_closed_bugs %]
+[% ELSE %]
+  [% full_bug_count = total_bugs %]
+[% END %]
+
+[% bug_link = bug_link_all %]
+[% IF bug_status == 'open' %]
+  [% bug_link = bug_link_open %]
+[% ELSIF bug_status == 'closed' %]
+  [% bug_link = bug_link_closed %]
+[% END %]
+
+<div class="yui-skin-sam">
+  <a name="top"></a>
+
+  <form action="page.cgi" method="get">
+  <input type="hidden" name="id"  value="productdashboard.html">
+  <input type="hidden" name="tab" value="[% current_tab.name FILTER html %]">
+
+  [% IF summary.keys %]
+    <input type="hidden" name="[% summary.type FILTER html %]" value="[% summary.value FILTER html %]">
+  [% END %]
+  
+  [% IF product %]
+    <span id="product_dashboard_links">
+      <ul>
+        <li><a href="[% urlbase FILTER none %]enter_bug.cgi?product=[% product.name FILTER uri %]">
+            Create a new [% terms.bug %] in this product</a></li>
+        <li><a href="[% urlbase FILTER none %]describecomponents.cgi?product=[% product.name FILTER uri %]">
+            Show full component descriptions for this product</a></li>
+      </ul>
+    </span>
+  [% END %]
+
+  <h3>Product: [% product.name FILTER html %]</h3>
+  <select name="product">
+    [% FOREACH c = classifications %]
+      <optgroup label="[% c.name FILTER html %]">
+      [% FOREACH p = c.products %]
+        <option value="[% p.name FILTER html %]" 
+          [% IF p.name == product.name %]selected="selected"[% END %]>
+        [% p.name FILTER html %]</option>
+      [% END %]</optgroup>
+    [% END %]
+  </select>
+  <select name="bug_status" id="bug_status">
+    [% statuses = [ { name = 'open', label = "Open $terms.Bugs" },
+                    { name = 'closed', label = "Closed $terms.Bugs" },
+                    { name = 'all', label = "All $terms.Bugs" } ] %]
+    [% FOREACH status = statuses %]
+      <option value="[% status.name FILTER html %]" 
+        [% " selected" IF bug_status == "${status.name}" %]>
+        [% status.label FILTER html %]
+      </option>
+    [% END %]
+  </select>
+
+  <input type="submit" value="[% IF product %]Change[% ELSE %]Submit[% END %]">
+
+  [% IF product %]
+
+    <p><i>[% product.description FILTER none %]</i></p>
+
+    [% WRAPPER global/tabs.html.tmpl 
+       tabs        = tabs
+       current_tab = current_tab
+    %]
+
+    <h3>[% current_tab.label FILTER html %]</h3>
+
+    [% IF current_tab.name == 'summary' %]
+      [% PROCESS pages/productdashboard/summary.html.tmpl %]
+    [% END %]
+
+    [% IF current_tab.name == 'recents' %]
+      [% PROCESS pages/productdashboard/recents.html.tmpl %]
+    [% END %]
+
+    [% IF current_tab.name == 'components' %]
+      [% PROCESS pages/productdashboard/components.html.tmpl %]
+    [% END %]
+
+    [% IF current_tab.name == 'duplicates' %]
+      [% PROCESS pages/productdashboard/duplicates.html.tmpl %]
+    [% END %]
+
+    [% IF current_tab.name == 'popularity' %]
+      [% PROCESS pages/productdashboard/popularity.html.tmpl %]
+    [% END %]
+
+    [% IF current_tab.name == 'roadmap' && Param('usetargetmilestone') %]
+      [% PROCESS pages/productdashboard/roadmap.html.tmpl %]
+    [% END %]
+
+    [% END %][%# END WRAPPER %]
+  [% END %]
+
+  </form>
+</div>
+
+[% PROCESS global/footer.html.tmpl %]
+
+[% BLOCK bar_graph %]
+  [% IF full_bug_count > 0 %][%# No divide by zero %]
+    [% percentage_bugs = (count / full_bug_count) * 100 FILTER format('%02.2f') %]
+  [% ELSE %]
+    [% percentage_bugs = 0 %]
+  [% END %]
+  <div class="bar_graph">
+    <table cellpadding="0" cellspacing="0" width="300px">
+    <tr>
+      <td width="[% percentage_bugs FILTER html %]%">
+        <table cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+          <td bgcolor="#3c78b5">
+            <a title="[% percentage_bugs FILTER html %]%">
+              <img src="extensions/ProductDashboard/web/images/spacer.gif" height=10 width="100%" title="[% percentage_bugs FILTER html %]%">
+            </a>
+          </td>
+        </tr>
+        </table>
+      </td>
+      <td width="[% 100 - percentage_bugs FILTER html %]%">&nbsp;&nbsp;&nbsp;[% percentage_bugs FILTER html %]%</td>
+    </tr>
+    </table>
+  </div>
+[% END %]
+

@@ -9,6 +9,7 @@
 [%# initialise product to component mapping #%]
 
 [% SET selectable_products = user.get_selectable_products %]
+[% SET dont_show_button = 1 %]
 
 <script>
 var Dom = YAHOO.util.Dom;
@@ -66,14 +67,31 @@ function onSelectComponent() {
   } else {
     Dom.get('watch-user-div').style.display = 'none';
   }
+  Dom.get('add').disabled = Dom.get('component').selectedIndex == -1;
 }
 
 YAHOO.util.Event.onDOMReady(onSelectProduct);
+
+function onRemoveChange() {
+  var cbs = Dom.get('remove_table').getElementsByTagName('input');
+  for (var i = 0, l = cbs.length; i < l; i++) {
+    if (cbs[i].checked) {
+      Dom.get('remove').disabled = false;
+      return;
+    }
+  }
+  Dom.get('remove').disabled = true;
+}
+
+YAHOO.util.Event.onDOMReady(onRemoveChange);
+
 </script>
 
 <p>
-Select the components you want to watch.  To watch all components in a product,
-watch "__Any__".
+  Select the components you want to watch.
+  To watch all components in a product, watch "__Any__".<br>
+  Use <a href="userprefs.cgi?tab=email">Email Preferences</a> to filter which
+  notification emails you receive.
 </p>
 
 <table border="0" cellpadding="3" cellspacing="0">
@@ -116,57 +134,99 @@ watch "__Any__".
 </tr>
 </table>
 
-<p>
-Use <a href="userprefs.cgi?tab=email">Email Preferences</a> to filter which
-notification emails you receive.
-</p>
-
 <hr>
 <p>
-You are currently watching:
+  You are currently watching:
 </p>
 
 [% IF watches.size %]
 
-<table border="0" cellpadding="5" cellspacing="0">
-<tr>
-  <td>&nbsp;</td>
-  <td><b>Product</b></td>
-  <td><b>Component</b></td>
-</tr>
-[% FOREACH watch IN watches %]
+  <table border="0" cellpadding="3" cellspacing="0" id="remove_table">
   <tr>
-  [% IF (watch.component) %]
-    <td><input type="checkbox" name="del_[% watch.product.id FILTER html %]_[% watch.component.id FILTER html %]" value="1"></td>
-    <td>[% watch.component.product.name FILTER html %]</td>
-    <td>
-      <a href="buglist.cgi?product=[% watch.product.name FILTER uri ~%]
-               &component=[% watch.component.name FILTER uri %]&resolution=---">
-      [% watch.component.name FILTER html %]
-      </a>
-    </td>
-  [% ELSE %]
-    <td><input type="checkbox" name="del_[% watch.product.id FILTER html %]" value="1"></td>
-    <td>[% watch.product.name FILTER html %]</td>
-    <td>
-      <a href="describecomponents.cgi?product=[% watch.product.name FILTER html %]">
-      __Any__
-      </a>
-    </td>
-  [% END %]
+    <td>&nbsp;</td>
+    <td><b>Product</b></td>
+    <td>&nbsp;<b>Component</b></td>
   </tr>
-[% END %]
-</table>
+  [% FOREACH watch IN watches %]
+    <tr>
+    [% IF (watch.component) %]
+      <td>
+        <input type="checkbox" onChange="onRemoveChange()" id="cwdel_[% loop.count %]" value="1"
+               name="del_[% watch.product.id FILTER html %]_[% watch.component.id FILTER html %]">
+      </td>
+      <td>
+        <label for="cwdel_[% loop.count %]">
+          [% watch.component.product.name FILTER html %]
+        </label>
+      </td>
+      <td>&nbsp;
+        <a href="buglist.cgi?product=[% watch.product.name FILTER url_quote ~%]
+                &component=[% watch.component.name FILTER url_quote %]&resolution=---">
+        [% watch.component.name FILTER html %]
+        </a>
+      </td>
+    [% ELSE %]
+      <td>
+        <input type="checkbox" onChange="onRemoveChange()" id="cwdel_[% loop.count %]" value="1"
+               name="del_[% watch.product.id FILTER html %]" value="1">
+      </td>
+      <td>
+        <label for="cwdel_[% loop.count %]">
+          [% watch.product.name FILTER html %]
+        </label>
+      </td>
+      <td>&nbsp;
+        <a href="describecomponents.cgi?product=[% watch.product.name FILTER url_quote %]">
+        __Any__
+        </a>
+      </td>
+    [% END %]
+    </tr>
+  [% END %]
+  </table>
 
-<p>
-Select the items you want to stop watching.
-</p>
+  <input id="remove" type="submit" value="Remove Selected">
 
 [% ELSE %]
 
-<p>
-<i>You are not watching any components.</i>
-</p>
+  <p>
+    <i>You are not watching any components directly.</i>
+  </p>
+
+[% END %]
+
+[% IF user_watches.size %]
+
+  <hr>
+  <p>
+    [% watches.size ? "In addition," : "However," %]
+    you are watching the following components by watching users:
+  </p>
+
+  <table border="0" cellpadding="3" cellspacing="0">
+  <tr>
+    <td><b>User</b></td>
+    <td>&nbsp;<b>Product</b></td>
+    <td>&nbsp;<b>Component</b></td>
+  </tr>
+  [% FOREACH watch IN user_watches %]
+    <tr>
+      <td>[% watch.user.login FILTER html %]</td>
+      <td>&nbsp;[% watch.component.product.name FILTER html %]</td>
+      <td>&nbsp;
+        <a href="buglist.cgi?product=[% watch.product.name FILTER url_quote ~%]
+                &component=[% watch.component.name FILTER url_quote %]&resolution=---">
+        [% watch.component.name FILTER html %]
+        </a>
+      </td>
+    </tr>
+  [% END %]
+  </table>
+
+  <p>
+    Use <a href="userprefs.cgi?tab=email#new_watched_by_you">Email Preferences</a>
+    to manage this list.
+  </p>
 
 [% END %]
 

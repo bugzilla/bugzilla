@@ -62,8 +62,8 @@ sub db_schema_abstract_schema {
 sub install_update_db {
     my $dbh = Bugzilla->dbh;
     $dbh->bz_add_column(
-        'components', 
-        'watch_user', 
+        'components',
+        'watch_user',
         {
             TYPE => 'INT3',
             REFERENCES => {
@@ -151,7 +151,7 @@ sub object_end_of_update {
 
     my $old_id = $old_object->watch_user ? $old_object->watch_user->id : 0;
     my $new_id = $object->watch_user ? $object->watch_user->id : 0;
-    return unless $old_id == $new_id;
+    return if $old_id == $new_id;
 
     $changes->{watch_user} = [ $old_id ? $old_id : undef, $new_id ? $new_id : undef ];
 }
@@ -230,9 +230,10 @@ sub user_preferences {
         }
     }
 
-    $vars->{'add_product'} = $input->{'product'};
+    $vars->{'add_product'}   = $input->{'product'};
     $vars->{'add_component'} = $input->{'component'};
-    $vars->{'watches'} = _getWatches($user);
+    $vars->{'watches'}       = _getWatches($user);
+    $vars->{'user_watches'}  = _getUserWatches($user);
 
     $$handled = 1;
 }
@@ -335,7 +336,7 @@ sub _getWatches {
     my $dbh = Bugzilla->dbh;
 
     my $sth = $dbh->prepare("
-        SELECT product_id, component_id 
+        SELECT product_id, component_id
           FROM component_watch
          WHERE user_id = ?
     ");
@@ -355,7 +356,40 @@ sub _getWatches {
         push @watches, \%watch;
     }
 
-    @watches = sort { 
+    @watches = sort {
+        $a->{'product'}->name cmp $b->{'product'}->name
+        || $a->{'component'}->name cmp $b->{'component'}->name
+    } @watches;
+
+    return \@watches;
+}
+
+sub _getUserWatches {
+    my ($user) = @_;
+    my $dbh = Bugzilla->dbh;
+
+    my $sth = $dbh->prepare("
+        SELECT components.product_id, components.id as component, profiles.login_name
+          FROM watch
+               INNER JOIN components ON components.watch_user = watched
+               INNER JOIN profiles ON profiles.userid = watched
+         WHERE watcher = ?
+    ");
+    $sth->execute($user->id);
+    my @watches;
+    while (my ($productId, $componentId, $login) = $sth->fetchrow_array) {
+        my $product = Bugzilla::Product->new($productId);
+        next unless $product && $user->can_access_product($product);
+
+        my %watch = (
+            product => $product,
+            component => Bugzilla::Component->new($componentId),
+            user      => Bugzilla::User->check($login),
+        );
+        push @watches, \%watch;
+    }
+
+    @watches = sort {
         $a->{'product'}->name cmp $b->{'product'}->name
         || $a->{'component'}->name cmp $b->{'component'}->name
     } @watches;
@@ -368,7 +402,7 @@ sub _addProductWatch {
     my $dbh = Bugzilla->dbh;
 
     my $sth = $dbh->prepare("
-        SELECT 1 
+        SELECT 1
           FROM component_watch
          WHERE user_id = ? AND product_id = ? AND component_id IS NULL
     ");
@@ -393,7 +427,7 @@ sub _addComponentWatch {
     my $dbh = Bugzilla->dbh;
 
     my $sth = $dbh->prepare("
-        SELECT 1 
+        SELECT 1
           FROM component_watch
          WHERE user_id = ?
                AND (component_id = ?  OR (product_id = ? AND component_id IS NULL))
@@ -435,13 +469,13 @@ sub _addDefaultSettings {
     my $dbh = Bugzilla->dbh;
 
     my $sth = $dbh->prepare("
-        SELECT 1 
+        SELECT 1
           FROM email_setting
          WHERE user_id = ? AND relationship = ?
     ");
     $sth->execute($user->id, REL_COMPONENT_WATCHER);
     return if $sth->fetchrow_array;
-    
+
     my @defaultEvents = (
         EVT_OTHER,
         EVT_COMMENT,

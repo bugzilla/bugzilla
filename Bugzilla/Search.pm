@@ -545,7 +545,7 @@ sub COLUMNS {
         
         'longdescs.count' => 'COUNT(DISTINCT map_longdescs_count.comment_id)',
 
-        tag => $dbh->sql_group_concat($dbh->sql_string_concat('map_tag.name')),
+        tag => $dbh->sql_group_concat('DISTINCT ' . $dbh->sql_string_concat('map_tag.name')),
     );
 
     # Backward-compatibility for old field names. Goes new_name => old_name.

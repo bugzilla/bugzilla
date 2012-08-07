@@ -2296,6 +2296,12 @@ sub _long_desc_changedbefore_after {
     };
     push(@$joins, $join);
     $args->{term} = "$table.bug_when IS NOT NULL";
+
+    # If the user is not part of the insiders group, they cannot see
+    # private comments
+    if (!$self->_user->is_insider) {
+        $args->{term} .= " AND $table.isprivate = 0";
+    }
 }
 
 sub _content_matches {
@@ -2778,8 +2784,10 @@ sub _changedbefore_changedafter {
         extra => ["$table.fieldid = $field_id",
                   "$table.bug_when $sql_operator $sql_date"],
     };
-    push(@$joins, $join);
+
     $args->{term} = "$table.bug_when IS NOT NULL";
+    $self->_changed_security_check($args, $join);
+    push(@$joins, $join);
 }
 
 sub _changedfrom_changedto {
@@ -2798,9 +2806,10 @@ sub _changedfrom_changedto {
         extra => ["$table.fieldid = $field_id",
                   "$table.$column = $quoted"],
     };
-    push(@$joins, $join);
 
     $args->{term} = "$table.bug_when IS NOT NULL";
+    $self->_changed_security_check($args, $join);
+    push(@$joins, $join);
 }
 
 sub _changedby {
@@ -2819,8 +2828,32 @@ sub _changedby {
         extra => ["$table.fieldid = $field_id",
                   "$table.who = $user_id"],
     };
-    push(@$joins, $join);
+
     $args->{term} = "$table.bug_when IS NOT NULL";
+    $self->_changed_security_check($args, $join);
+    push(@$joins, $join);
+}
+
+sub _changed_security_check {
+    my ($self, $args, $join) = @_;
+    my ($chart_id, $field) = @$args{qw(chart_id field)};
+
+    my $field_object = $self->_chart_fields->{$field}
+        || ThrowCodeError("invalid_field_name", { field => $field });
+    my $field_id = $field_object->id;
+
+    # If the user is not part of the insiders group, they cannot see
+    # changes to attachments (including attachment flags) that are private
+    if ($field =~ /^(?:flagtypes\.name$|attach)/ and !$self->_user->is_insider) {
+        $join->{then_to} = {
+            as    => "attach_${field_id}_$chart_id",
+            table => 'attachments',
+            from  => "act_${field_id}_$chart_id.attach_id",
+            to    => 'attach_id',
+        };
+
+        $args->{term} .= " AND COALESCE(attach_${field_id}_$chart_id.isprivate, 0) = 0";
+    }
 }
 
 ######################

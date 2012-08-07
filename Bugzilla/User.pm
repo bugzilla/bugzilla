@@ -578,6 +578,25 @@ sub save_last_search {
     return $search;
 }
 
+sub reports {
+    my $self = shift;
+    return $self->{reports} if defined $self->{reports};
+    return [] unless $self->id;
+
+    my $dbh = Bugzilla->dbh;
+    my $report_ids = $dbh->selectcol_arrayref(
+        'SELECT id FROM reports WHERE user_id = ?', undef, $self->id);
+    require Bugzilla::Report;
+    $self->{reports} = Bugzilla::Report->new_from_list($report_ids);
+    return $self->{reports};
+}
+
+sub flush_reports_cache {
+    my $self = shift;
+
+    delete $self->{reports};
+}
+
 sub settings {
     my ($self) = @_;
 
@@ -2274,6 +2293,17 @@ Should only be called by C<Bugzilla::Auth::login>, for the most part.
 =item C<disabledtext>
 
 Returns the disable text of the user, if any.
+
+=item C<reports>
+
+Returns an arrayref of the user's own saved reports. The array contains 
+L<Bugzilla::Reports> objects.
+
+=item C<flush_reports_cache>
+
+Some code modifies the set of stored reports. Because C<Bugzilla::User> does
+not handle these modifications, but does cache the result of calling C<reports>
+internally, such code must call this method to flush the cached result.
 
 =item C<settings>
 

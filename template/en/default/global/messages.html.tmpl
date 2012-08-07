@@ -795,6 +795,15 @@
     or you don't have access to it. The following is a list of the
     products you can choose from.
 
+  [% ELSIF message_tag == "report_created" %]
+    OK, you have a new saved report named <em>[% reportname FILTER html %]</em>.
+
+  [% ELSIF message_tag == "report_deleted" %]
+    OK, the <em>[% reportname FILTER html %]</em> report is gone.
+
+  [% ELSIF message_tag == "report_updated" %]
+    The saved report <em>[% reportname FILTER html %]</em> has been updated.
+
   [% ELSIF message_tag == "remaining_time_zeroed" %]
     The [% field_descs.remaining_time FILTER html %] field has been 
     set to zero automatically as part of closing this [% terms.bug %]

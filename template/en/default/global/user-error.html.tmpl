@@ -1480,6 +1480,14 @@
     To reassign [% terms.abug %], you must provide an address for
     the new assignee.
 
+  [% ELSIF error == "report_name_missing" %]
+    [% title = "No Report Name Specified" %]
+    You must enter a name for your report.
+
+  [% ELSIF error == "report_access_denied" %]
+    [% title = "Report Access Denied" %]
+    You cannot access this report.
+
   [% ELSIF error == "require_component" %]
     [% title = "Component Needed" %]
     To file this [% terms.bug %], you must first choose a component.

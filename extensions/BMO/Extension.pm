@@ -549,7 +549,7 @@ sub bug_format_comment {
     });
 
     push (@$regexes, {
-        match => qr/(?<!\/)\b((?:CVE|CAN)-\d{4}-\d{4})\b/,
+        match => qr/(?<!\/|=)\b((?:CVE|CAN)-\d{4}-\d{4})\b/,
         replace => \&_link_cve
     });
   

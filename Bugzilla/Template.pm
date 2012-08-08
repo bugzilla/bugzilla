@@ -40,6 +40,10 @@ use constant FORMAT_3_SIZE => [19,28,28];
 use constant FORMAT_DOUBLE => '%19s %-55s';
 use constant FORMAT_2_SIZE => [19,55];
 
+# Use a per-process provider to cache compiled templates in memory across
+# requests.
+our %shared_providers;
+
 # Pseudo-constant.
 sub SAFE_URL_REGEXP {
     my $safe_protocols = join('|', SAFE_PROTOCOLS);
@@ -603,6 +607,10 @@ sub create {
 
         COMPILE_DIR => bz_locations()->{'template_cache'},
 
+        # Don't check for a template update until 1 hour has passed since the
+        # last check.
+        STAT_TTL    => 60 * 60,
+
         # Initialize templates (f.e. by loading plugins like Hook).
         PRE_PROCESS => ["global/variables.none.tmpl"],
 
@@ -973,6 +981,9 @@ sub create {
             'default_authorizer' => new Bugzilla::Auth(),
         },
     };
+    my $provider_key = join(':', @{ $config->{INCLUDE_PATH} });
+    $shared_providers{$provider_key} ||= Template::Provider->new($config);
+    $config->{LOAD_TEMPLATES} = [ $shared_providers{$provider_key} ];
 
     local $Template::Config::CONTEXT = 'Bugzilla::Template::Context';
 
@@ -1037,6 +1048,9 @@ sub precompile_templates {
             # effect of writing the compiled version to disk.
             $template->context->template($file);
         }
+
+        # Clear out the cached Provider object
+        undef %shared_providers;
     }
 
     # Under mod_perl, we look for templates using the absolute path of the

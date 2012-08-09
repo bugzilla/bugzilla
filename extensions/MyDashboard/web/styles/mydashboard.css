@@ -1,0 +1,90 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * This Source Code Form is "Incompatible With Secondary Licenses", as
+ * defined by the Mozilla Public License, v. 2.0. */
+
+#mydashboard .yui-skin-sam .yui-dt table {
+    width:100%;
+}
+#mydashboard #query-links { 
+    display: table; 
+    padding-left: 1ex; 
+    padding-right:1ex;
+}
+#mydashboard #links-standard, 
+#mydashboard #links-saved, 
+#mydashboard #links-special {
+    display: table-row;
+    list-style-type: none;
+}
+#mydashboard .label {
+    display: table-cell;
+    white-space: nowrap;
+    vertical-align: top;
+    padding-right: 1ex;
+    font-weight: bold;
+}
+#mydashboard .links {
+    display: table-cell;
+    vertical-align: top;
+}
+#mydashboard .separator {
+    color: #000000;
+}
+#mydashboard .query_heading {
+    font-size: 18px;
+    font-weight: strong;
+    color: rgb(72, 72, 72);
+}
+#mydashboard .query_description {
+    font-size: 90%;
+    font-style: italic;
+    padding-bottom: 5px;
+    color: rgb(109, 117, 129);
+}
+#mydashboard .bug_list,
+#mydashboard .back_top {
+    font-size: 80%;
+}
+#mydashboard table {
+    margin-bottom: 10px;
+
+}
+#mydashboard hr {
+    color: #000;
+    background-color: #000;
+    border: 0;
+    height: 1px;
+    width: 100%;
+}
+
+#mydashboard_container {
+    margin: 0 auto;
+}
+
+#left {
+    float: left;
+    width: 58%;
+}
+
+#right {
+    float: right;
+    width: 40%;
+}
+
+#file_bug_container {
+    text-align: left;
+}
+
+#query_list_container {
+    text-align:center;
+}
+
+#file_bug_container,
+#query_list_container {
+    margin-bottom: 10px;
+    border: 1px solid rgb(116,126,147);
+    padding: 10px;
+}

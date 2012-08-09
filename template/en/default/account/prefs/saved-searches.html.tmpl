@@ -67,6 +67,7 @@
           Share With a Group
         </th>
       [% END %]
+      [% Hook.process('saved-header') %]
     </tr>
     <tr>
       <td>My [% terms.Bugs %]</td>
@@ -145,6 +146,7 @@
             [% END %]
           </td>
         [% END %]
+        [% Hook.process('saved-row') %]
       </tr>
     [% END %]
   </table>

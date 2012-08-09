@@ -1,0 +1,289 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% PROCESS global/header.html.tmpl
+  title = "My Dashboard"
+  style_urls = [ "skins/standard/buglist.css",
+                 "js/yui/assets/skins/sam/paginator.css", 
+                 "extensions/MyDashboard/web/styles/mydashboard.css",
+                 "extensions/MyDashboard/web/styles/prod_comp_search.css" ]
+  yui = [ "datatable", "paginator", "autocomplete" ]
+  javascript_urls = [ "extensions/MyDashboard/web/js/mydashboard.js",
+                      "extensions/MyDashboard/web/js/prod_comp_search.js" ]
+  onload = "showQuerySection();"
+%]
+
+<script type="text/javascript">
+<!--
+  [%# Set up severities list for proper sorting %]
+  var severities = new Array();
+  [% sort_count = 0 %]
+  [% FOREACH s = severities %]
+    severities['[% s FILTER js %]'] = [% sort_count FILTER js %];
+    [% sort_count = sort_count + 1 %]
+  [% END %]
+
+  var full_query_list = [];
+  [% FOREACH r = results %]
+    full_query_list.push('[% r.name FILTER js %]');
+  [% END %]
+-->
+</script>
+
+[% standard_results = [] %]
+[% saved_results    = [] %]
+[% FOREACH r = results %]
+  [% standard_results.push(r) IF !r.saved %]
+  [% saved_results.push(r) IF r.saved %]
+[% END %]
+
+<div id="mydashboard">
+  <div class="yui-skin-sam">
+    <div id="left">
+      <div id="query_list_container">
+        <strong>Choose query:</strong>
+        <select id="query" name="query" onchange="showQuerySection();">
+          <optgroup id="standard_queries" label="Standard">
+            [% FOREACH r = standard_results %]
+              <option value="[% r.name FILTER html %]">[% r.heading FILTER html %]</option>
+            [% END%]
+          </optgroup>
+          <optgroup id="saved_queries" label="Saved">
+            [% FOREACH r = saved_results %]
+              <option value="[% r.name FILTER html %]">[% r.heading FILTER html %]</option>
+            [% END %]
+          </optgroup>
+        </select>
+        [% IF NOT saved_results.size %]
+          <smaller>
+            (<a href="userprefs.cgi?tab=saved-searches">add or remove saved searches</a>)
+          </smaller>
+        [% END %]
+      </div>
+
+      [% FOREACH r = standard_results %]
+        [% PROCESS query_results r = r %]
+      [% END %]
+
+      [% FOREACH r = saved_results %]
+        [% PROCESS query_results r = r %]
+      [% END %]
+    </div>
+
+    <div id="right">
+      <div id="file_bug_container">
+        [% PROCESS "mydashboard/prod-comp-search.html.tmpl" %]
+      </div>
+
+      <div id="requestee_container"> 
+        <div class="query_heading">
+          Flags Requested of You
+        </div>
+        <span class="flags_found">
+          [% requestee_list.size FILTER html %]&nbsp;flags found
+        </span>
+        <div id="requestee_table_container">
+          <table id="requestee_table" cellspacing="0" cellpadding="3" width="100%">
+          <thead>
+          <tr bgcolor="#dedede">
+            <th>Requester</th>
+            <th>Flag</th>
+            <th>[% terms.Bug %]</th>
+            <th>Created</th>
+          </tr>
+          </thead>
+          <tbody>
+          [% FOREACH request = requestee_list %]
+            <tr class="bz_bugitem [%+ loop.count() % 2 == 0 ? "bz_row_odd" : "bz_row_even" %]">
+              <td>[% request.requester FILTER html %]</td>
+              <td>[% request.type FILTER html %][% request.status FILTER html %]</td>
+              <td>
+              [% IF request.attach_id %]
+                <a href="[% urlbase FILTER none %]attachment.cgi?action=edit&id=[% request.attach_id FILTER uri %]">
+                  [% request.attach_id FILTER html %]: [%+ request.attach_summary FILTER html %]</a>
+              [% ELSE %]
+                <a href="[% urlbase FILTER none %]show_bug.cgi?id=[% request.bug_id FILTER uri %]">
+                  [% request.bug_id FILTER html %]: [%+ request.bug_summary FILTER html %]</a>
+              [% END %]
+              </td>
+              <td>[% request.created FILTER time('%Y.%m.%d') FILTER html %]</td>
+            </tr>
+          [% END %]
+          </tbody>
+          </table>
+        </div>
+      </div>
+      <script>
+      <!--
+        var requestee_column_defs = [
+          { key:"requester", label:"Requester", sortable:true },
+          { key:"flag", label:"Flag", sortable:true },
+          { key:"bug", label:"Bug", sortable:true },
+          { key:"created", label:"Created", sortable:true }
+        ];
+        var requestee_fields = [
+          { key:"requester" },
+          { key:"flag" },
+          { key:"bug" },
+          { key:"created" }
+        ];
+        addStatListener("requestee_table_container", "requestee_table", requestee_column_defs, requestee_fields, {
+          paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25, alwaysVisible: false })
+        });
+      -->
+      </script>
+
+      <div id="requester_container">
+        <div class="query_heading">
+          Flags You Have Requested
+        </div>
+        <span class="flags_found">
+          [% requester_list.size FILTER html %]&nbsp;flags found
+        </span>
+        <div id="requester_table_container">
+          <table id="requester_table" cellspacing="0" cellpadding="3" width="100%">
+          <thead bgcolor="#dedede">
+          <tr>
+            <th>Requestee</th>
+            <th>Flag</th>
+            <th>[% terms.Bug %]</th>
+            <th>Created</th>
+          </tr>
+          </thead>
+          <tbody>
+          [% FOREACH request = requester_list %]
+            <tr class="bz_bugitem [%+ loop.count() % 2 == 0 ? "bz_row_odd" : "bz_row_even" %]">
+              <td>[% request.requestee FILTER html %]</td>
+              <td>[% request.type FILTER html %][% request.status FILTER html %]</td>
+              <td>
+              [% IF request.attach_id %]
+                <a href="[% urlbase FILTER none %]attachment.cgi?action=edit&id=[% request.attach_id FILTER uri %]">
+                  [% request.attach_id FILTER html %]: [%+ request.attach_summary FILTER html %]</a>
+              [% ELSE %]
+                <a href="[% urlbase FILTER none %]show_bug.cgi?id=[% request.bug_id FILTER uri %]">
+                  [% request.bug_id FILTER html %]: [%+ request.bug_summary FILTER html %]</a>
+              [% END %]
+              </td>
+              <td>[% request.created FILTER time('%Y.%m.%d') FILTER html %]</td>
+            </tr>
+          [% END %]
+          </tbody>
+          </table>
+        </div>
+      </div>
+      <script>
+      <!--
+        var requester_column_defs = [
+          { key:"requestee", label:"Requestee", sortable:true },
+          { key:"flag", label:"Flag", sortable:true },
+          { key:"bug", label:"Bug", sortable:true },
+          { key:"created", label:"Created", sortable:true }
+        ];
+        var requester_fields = [
+          { key:"requestee" },
+          { key:"flag" },
+          { key:"bug" },
+          { key:"created" }
+        ];
+        addStatListener("requester_table_container", "requester_table", requester_column_defs, requester_fields, {
+          paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25, alwaysVisible: false })
+        });
+      -->
+      </script>
+
+      <div id="activeproducts">
+        <div class="query_heading">
+          Products with Open [% terms.Bugs %]
+        </div>
+        <div id="activeproducts_table_container">
+          <table id="activeproducts_table" cellspacing="0" cellpadding="4" width="100%">
+          <thead>
+          <tr bgcolor="#dedede">
+            <th>Count</th>
+            <th>Product</th>
+          </tr>
+          </thead>
+          <tbody>
+          [% FOREACH product = products %]
+            <tr class="bz_bugitem [%+ loop.count() % 2 == 0 ? "bz_row_odd" : "bz_row_even" %]">
+              <td align="right">[% product.count FILTER html %]</td>
+              <td><a href="buglist.cgi?product=[% product.product FILTER uri %][% products_buffer FILTER none %]">
+                  [% product.product FILTER html %]</a></td>
+            </tr>
+          [% END %]
+          </tbody>
+          </table>
+        </div>
+      </div>
+      <script>
+      <!--
+        var product_column_defs = [
+          { key:"count", label:"Count", sortable:true },
+          { key:"product", label:"Product", sortable:true }
+        ];
+        var product_fields = [
+          { key:"count", parser:"number" },
+          { key:"product" }
+        ];
+        addStatListener("activeproducts_table_container", "activeproducts_table", product_column_defs, product_fields, {
+          paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25, alwaysVisible: false })
+        });
+      -->
+      </script>
+
+    </div>
+    <div style="clear:both;"></div>
+  </div>
+</div>
+
+[% PROCESS global/footer.html.tmpl %]
+
+[% BLOCK query_results %]
+  <div id="[% r.name FILTER html %]_container" class="bz_default_hidden">
+    [% IF r.description %]
+      <div class="query_description">
+        [% r.description FILTER html %]
+      </div>
+    [% END %]
+    <span class="bugs_found">
+      <a href="[% urlbase FILTER none %]buglist.cgi?[% r.buffer FILTER none %]">
+        [% r.bugs.size FILTER html %]&nbsp;[% terms.bugs %] found</a>
+    </span>
+    <div id="[% r.name FILTER html %]_table_container">
+      <table id="[% r.name FILTER html %]_table" cellspacing="0" cellpadding="3" width="100%">
+      <thead>
+      <tr>
+          <th>ID</th>
+          <th>Updated</th>
+          <th>Status</th>
+          <th>Summary</th>
+      </tr>
+      </thead>
+      <tbody>
+      [% FOREACH bug = r.bugs %]
+        <tr class="bz_bugitem [%+ loop.count() % 2 == 0 ? "bz_row_odd" : "bz_row_even" %]">
+          <td align="center"><a href="show_bug.cgi?id=[% bug.bug_id FILTER uri %]">[% bug.bug_id FILTER html %]</a></td>
+          <td align="center">[% bug.updated FILTER html %]</td>
+          <td align="center">[% bug.bug_status FILTER html %]</td>
+          <td>[% bug.short_desc FILTER html %]</td>
+        </tr>
+      [% END %]
+      </tbody>
+      </table>
+    </div>
+    <script>
+    <!--
+      addStatListener("[% r.name FILTER js %]_table_container", "[% r.name FILTER js %]_table", query_column_defs, query_fields, {
+        paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25, alwaysVisible: false })
+      });
+    -->
+    </script>
+  </div>
+[% END %]

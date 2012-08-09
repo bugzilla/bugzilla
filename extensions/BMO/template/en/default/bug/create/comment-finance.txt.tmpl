@@ -1,0 +1,35 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+
+Request Type: [% cgi.param('component') %]
+Summary: [% cgi.param('short_desc') %]
+Priority to your Team: [% cgi.param('team_priority') %]
+Timeframe for Signature: [% cgi.param('signature_time') %]
+
+Name of Other Party: 
+[%+ cgi.param('other_party') %]
+
+Business Objective: 
+[%+ cgi.param('business_obj') %]
+
+What is this purchase?:
+[%+ cgi.param('what_purchase') %]
+
+Why is this purchase needed?:
+[%+ cgi.param('why_purchase') %]
+
+What is the risk if this is not purchased?:
+[%+ cgi.param('risk_purchase') %]
+
+What is the alternative?:
+[%+ cgi.param('alternative_purchase') %]
+
+Total Cost: [% cgi.param('total_cost') %]

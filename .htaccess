@@ -33,6 +33,7 @@ Redirect permanent /etiquette.html https://bugzilla.mozilla.org/page.cgi?id=etiq
 Redirect permanent /duplicates.html https://bugzilla.mozilla.org/duplicates.cgi
 
 RewriteEngine On
+RewriteBase /4.2-bmo/
 RewriteRule ^favicon\.ico$ extensions/BMO/web/images/favicon.ico
 RewriteRule ^form[\.:](itrequest|mozlist|mktgevent|poweredby|presentation|swag|trademark|recoverykey)$ enter_bug.cgi?product=mozilla.org&format=$1
 RewriteRule ^form[\.:]legal$ enter_bug.cgi?product=Legal&format=legal
@@ -43,3 +44,4 @@ RewriteRule ^form[\.:]reps[\.:]swag$ enter_bug.cgi?product=Mozilla+Reps&format=r
 RewriteRule ^form[\.:]reps[\.:]payment$ page.cgi?id=remo-form-payment.html
 RewriteRule ^form[\.:]employee[\.\-:]incident$ enter_bug.cgi?product=mozilla.org&format=employee-incident
 RewriteRule ^form[\.:]brownbag$ enter_bug.cgi?product=Air\ Mozilla&format=brownbag
+RewriteRule ^form[\.:]finance$ enter_bug.cgi?product=Finance&format=finance

@@ -1,0 +1,257 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% inline_style = BLOCK %]
+  #bug_form input[type=text], #bug_form input[type=file], #cc_autocomplete, #bug_form textarea {
+    width: 100%;
+  }
+[% END %]
+
+[% inline_js = BLOCK %]
+  var compdesc = new Array();
+  [% FOREACH comp = product.components %]
+    compdesc['[% comp.name FILTER js %]'] = '[% comp.description FILTER js %]';
+  [% END %]
+  function showCompDesc(component) {
+    var value = component.value;
+    document.getElementById('comp_description').innerHTML = compdesc[value];
+  }
+
+  function onSubmit() {
+    var alert_text = '';
+    if (!isFilledOut('component'))
+      alert_text += "Please select a value for request type.\n";
+    if (!isFilledOut('short_desc'))
+      alert_text += "Please enter a value for the summary.\n";
+    if (!isFilledOut('team_priority'))
+      alert_text += "Please select a value for team priority.\n";
+    if (!isFilledOut('signature_time'))
+      alert_text += "Please enter a value for signture timeframe.\n";
+    if (!isFilledOut('other_party'))
+      alert_text += "Please enter a value for the name of other party.\n";
+    if (!isFilledOut('business_obj'))
+      alert_text += "Please enter a value for business objective.\n";
+    if (!isFilledOut('what_purchase'))
+      alert_text += "Please enter a value for what you are purchasing.\n";
+    if (!isFilledOut('why_purchase'))
+      alert_text += "Please enter a value for why the purchase is needed.\n";
+    if (!isFilledOut('risk_purchase'))
+      alert_text += "Please enter a value for the risk if not purchased.\n";
+    if (!isFilledOut('alternative_purchase'))
+      alert_text += "Please enter a value for the purchase alternative.\n";
+    if (!isFilledOut('total_cost'))
+      alert_text += "Please enter a value for total cost.\n";
+    if (!isFilledOut('attachment'))
+      alert_text += "Please enter an attachment.\n";
+
+    if (alert_text != '') {
+      alert(alert_text);
+      return false;
+    }
+
+    return true;
+  }
+[% END %]
+
+[% PROCESS global/header.html.tmpl
+   title = "Finance"
+   style = inline_style
+   style_urls = [ 'skins/standard/enter_bug.css' ]
+   javascript = inline_js
+   javascript_urls = [ 'extensions/BMO/web/js/form_validate.js',
+                       'js/attachment.js', 'js/field.js', 'js/util.js' ]
+   onload = "showCompDesc(document.getElementById('component'));"
+%]
+
+<h2>Finance</h2>
+
+<p>All fields are mandatory</p>
+
+<form method="post" action="post_bug.cgi" id="bug_form" class="enter_bug_form"
+      enctype="multipart/form-data" onsubmit="return onSubmit();">
+<input type="hidden" name="format" value="finance">
+<input type="hidden" name="product" value="Finance">
+<input type="hidden" name="rep_platform" value="All">
+<input type="hidden" name="op_sys" value="Other">
+<input type="hidden" name="priority" value="--">
+<input type="hidden" name="version" value="unspecified">
+<input type="hidden" name="bug_severity" id="bug_severity" value="normal">
+<input type="hidden" name="comment" id="comment" value="">
+<input type="hidden" name="groups" id="groups" value="finance">
+<input type="hidden" name="token" value="[% token FILTER html %]">
+
+<table>
+
+<tr>
+  <th>
+    <label for="component">Request Type:</label>
+  </th>
+  <td>
+    <select name="component" id="component" onchange="showCompDesc(this);">
+      [%- FOREACH c = product.components %]
+        [% NEXT IF NOT c.is_active %]
+        <option value="[% c.name FILTER html %]"
+                id="v[% c.id FILTER html %]_component"
+          [% IF c.name == default.component_ %]
+                selected="selected"
+          [% END %]>
+          [% c.name FILTER html -%]
+        </option>
+      [%- END %]
+    </select
+  </td>
+</tr>
+
+<tr>
+  <td></td>
+  <td id="comp_description" align="left" style="color: green; padding-left: 1em"></td>
+</tr>
+
+<tr>
+  <th>
+    <label for="short_desc">Description:</label>
+  </th>
+  <td>
+    <i>Short description of what is being asked to sign</i><br>
+    <input name="short_desc" id="short_desc" size="60"
+           value="[% short_desc FILTER html %]">
+  </td>
+</tr>
+
+<tr>
+  <th>
+    <label for="team_priority">Priority to your Team:</label>
+  </th>
+  <td>
+    <select id="team_priority" name="team_priority">
+      <option value="Low">Low</option>
+      <option value="Medium">Medium</option>
+      <option value="High">High</option>
+    </select>
+  </td>
+</tr>
+
+<tr>
+  <th>
+    <label for="signature_time">Timeframe for Signature:</label>
+  </th>
+  <td>
+    <select id="signature_time" name="signature_time">
+      <option value="24 hours">Within 24 hours</option>
+      <option value="2 days">2 days</option>
+      <option value="A week">A week</option>
+      <option value="2 - 4 weeks" selected>2 -4 weeks</option>
+    </select>
+  </td>
+</tr>
+
+<tr>
+  <th>
+    <label for="other_party">Name of Other Party:</label>
+  </th>
+  <td>
+    <i>Include full legal entity name and any other relevant contact information</i><br>
+    <textarea id="other_party" name="other_party"
+              rows="5" cols="40"></textarea>
+  </td>
+<tr>
+
+<tr>
+  <th>
+    <label for="business_obj">Business Objective:</label>
+  </th>
+  <td>
+    <i>
+      Which Initiative or Overall goal this purchase is for. i.e. B2G, Data Center, Network, etc.</i><br>
+    <textarea id="business_obj" name="business_obj" rows="5" cols="40"></textarea>
+  </td>
+<tr>
+
+<tr>
+  <th>
+    <label for="what_purchase">If this is a purchase order,<br>what are we purchasing?</label>
+  </th>
+  <td>
+    <i>
+      Describe your request, what items are we purchasing, including number of 
+      units if available.<br>Also provide context and background. Enter No if not
+      a purchase order.</i><br>
+    <textarea name="what_purchase" id="what_purchase" rows="5" cols="40"></textarea>
+  </td>
+</tr>
+
+<tr>
+  <th>
+    <label for="why_purchase">Why is this purchase needed?</label>
+  </th>
+  <td>
+    <i>
+      Why do we need this? What is the work around if this is not approved?</i><br>
+    <textarea name="why_purchase" id="why_purchase" rows="5" cols="40"></textarea>
+  </td>
+</tr>
+
+<tr>
+  <th>
+    <label for="risk_purchase">What is the risk if<br>this is not purchased?</label>
+  </th>
+  <td>
+    <i>
+      What will happen if this is not purchased?</i><br>
+    <textarea name="risk_purchase" id="risk_purchase" rows="5" cols="40"></textarea>
+  </td>
+</tr>
+
+<tr>
+  <th>
+    <label for="alternative_purchase">What is the alternative?</label>
+  </th>
+  <td>
+    <i>
+      How did the team come to this recommendation? Did we get other bids, if so, how many?</i><br>
+    <textarea name="alternative_purchase" id="alternative_purchase" rows="5" cols="40"></textarea>
+  </td>
+</tr>
+
+<tr>
+  <th>
+    <label for="total_cost">Total Cost</label>
+  </th>
+  <td>
+    <input type="text" name="total_cost" id="total_cost" value="" size="60">
+  </td>
+</tr>
+
+<tr>
+  <th>
+    <label for="attachment">Attachment:</label>
+  </th>
+  <td>
+    <i>Upload document that needs to be signed. If this is a Purchase Request form,<br> 
+      also upload any supporting document such as draft SOW, quote, order form, etc.</i>
+    <div>
+      <input type="file" id="attachment" name="data" size="50">
+      <input type="hidden" name="contenttypemethod" value="autodetect">
+      <input type="hidden" name="description" value="Finance Document">
+    </div>
+  </td>
+</tr>
+
+<tr>
+  <td>&nbsp;</td>
+  <td>
+    <input type="submit" id="commit" value="Submit Request">
+  </td>
+</tr>
+</table>
+
+</form>
+
+[% PROCESS global/footer.html.tmpl %]

@@ -114,7 +114,7 @@ sub _page_dashboard {
     if ($current_tab_name eq 'summary') {
         $vars->{'by_priority'} = by_priority($product, $bug_status);
         $vars->{'by_severity'} = by_severity($product, $bug_status);
-        $vars->{'by_assignee'} = by_assignee($product, $bug_status);
+        $vars->{'by_assignee'} = by_assignee($product, $bug_status, 25);
         $vars->{'by_status'}   = by_status($product, $bug_status);
     }
 

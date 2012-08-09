@@ -220,9 +220,11 @@ sub by_value_summary {
 }
 
 sub by_assignee {
-    my ($product, $bug_status) = @_;
+    my ($product, $bug_status, $limit) = @_;
     my $dbh = Bugzilla->dbh;
     my $extra;
+
+    $limit = detaint_natural($limit) ? $dbh->sql_limit($limit) : "";
 
     $extra = "AND bugs.bug_status IN (" . open_states() . ")" if $bug_status eq 'open';
     $extra = "AND bugs.bug_status IN (" . closed_states() . ")" if $bug_status eq 'closed';
@@ -234,7 +236,8 @@ sub by_assignee {
                                            AND bugs.assigned_to = profiles.userid
                                            $extra
                                      GROUP BY profiles.login_name
-                                     ORDER BY COUNT(bugs.bug_id) DESC", undef, $product->id)};
+                                     ORDER BY COUNT(bugs.bug_id) DESC $limit", 
+                                   undef, $product->id)};
 
     return \@result;
 }

@@ -13,8 +13,7 @@ use lib qw(. lib);
 use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Error;
-use Bugzilla::User;
-use Bugzilla::Keyword;
+use Bugzilla::Util;
 use Bugzilla::Bug;
 
 my $cgi = Bugzilla->cgi;
@@ -38,7 +37,7 @@ if (!$cgi->param('id') && $single) {
 my $format = $template->get_format("bug/show", scalar $cgi->param('format'), 
                                    scalar $cgi->param('ctype'));
 
-my @bugs;
+my (@bugs, @illegal_bugs);
 my %marks;
 
 # If the user isn't logged in, we use data from the shadow DB. If he plans
@@ -64,22 +63,23 @@ if ($single) {
     foreach my $id ($cgi->param('id')) {
         # Be kind enough and accept URLs of the form: id=1,2,3.
         my @ids = split(/,/, $id);
-        foreach (@ids) {
-            my $bug = new Bugzilla::Bug($_);
-            # This is basically a backwards-compatibility hack from when
-            # Bugzilla::Bug->new used to set 'NotPermitted' if you couldn't
-            # see the bug.
-            if (!$bug->{error} && !$user->can_see_bug($bug->bug_id)) {
-                $bug->{error} = 'NotPermitted';
+        foreach my $bug_id (@ids) {
+            next unless $bug_id;
+            my $bug = new Bugzilla::Bug($bug_id);
+            if (!$bug->{error} && $user->can_see_bug($bug->bug_id)) {
+                push(@bugs, $bug);
             }
-            push(@bugs, $bug);
+            else {
+                push(@illegal_bugs, { bug_id => trim($bug_id),
+                                      error => $bug->{error} || 'NotPermitted' });
+            }
         }
     }
 }
 
 Bugzilla::Bug->preload(\@bugs);
 
-$vars->{'bugs'} = \@bugs;
+$vars->{'bugs'} = [@bugs, @illegal_bugs];
 $vars->{'marks'} = \%marks;
 
 my @bugids = map {$_->bug_id} grep {!$_->error} @bugs;

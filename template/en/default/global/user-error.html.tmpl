@@ -77,9 +77,13 @@
 
   [% ELSIF error == "alias_in_use" %]
     [% title = "Alias In Use" %]
-    [% terms.Bug %] [%+ bug_id FILTER bug_link(bug_id) FILTER none %]
+    [% IF user.can_see_bug(bug_id) %]
+      [% terms.Bug %] [%+ bug_id FILTER bug_link(bug_id) FILTER none %]
+    [% ELSE %]
+      Another [% terms.bug %]
+    [% END %]
     has already taken the alias <em>[% alias FILTER html %]</em>.
-    Please choose another one.
+    Please choose another alias.
 
   [% ELSIF error == "alias_is_numeric" %]
     [% title = "Alias Is Numeric" %]

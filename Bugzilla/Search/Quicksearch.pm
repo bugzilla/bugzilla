@@ -285,9 +285,10 @@ sub _handle_alias {
     if ($searchstring =~ /^([^,\s]+)$/) {
         my $alias = $1;
         # We use this direct SQL because we want quicksearch to be VERY fast.
-        my $is_alias = Bugzilla->dbh->selectrow_array(
-            q{SELECT 1 FROM bugs WHERE alias = ?}, undef, $alias);
-        if ($is_alias) {
+        my $bug_id = Bugzilla->dbh->selectrow_array(
+            q{SELECT bug_id FROM bugs WHERE alias = ?}, undef, $alias);
+        # If the user cannot see the bug, do not resolve its alias.
+        if ($bug_id && Bugzilla->user->can_see_bug($bug_id)) {
             $alias = url_quote($alias);
             print Bugzilla->cgi->redirect(
                 -uri => correct_urlbase() . "show_bug.cgi?id=$alias");

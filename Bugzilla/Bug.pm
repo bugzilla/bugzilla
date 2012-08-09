@@ -358,12 +358,14 @@ sub check {
 
     # Bugzilla::Bug throws lots of special errors, so we don't call
     # SUPER::check, we just call our new and do our own checks.
-    my $self = $class->new(trim($id));
-    # For error messages, use the id that was returned by new(), because
-    # it's cleaned up.
-    $id = $self->id;
+    $id = trim($id);
+    my $self = $class->new($id);
 
     if ($self->{error}) {
+        # For error messages, use the id that was returned by new(), because
+        # it's cleaned up.
+        $id = $self->id;
+
         if ($self->{error} eq 'NotFound') {
              ThrowUserError("bug_id_does_not_exist", { bug_id => $id });
         }
@@ -375,7 +377,7 @@ sub check {
     }
 
     unless ($field && $field =~ /^(dependson|blocked|dup_id)$/) {
-        $self->check_is_visible;
+        $self->check_is_visible($id);
     }
     return $self;
 }
@@ -391,16 +393,19 @@ sub check_for_edit {
 }
 
 sub check_is_visible {
-    my $self = shift;
+    my ($self, $input_id) = @_;
+    $input_id ||= $self->id;
     my $user = Bugzilla->user;
 
     if (!$user->can_see_bug($self->id)) {
         # The error the user sees depends on whether or not they are
         # logged in (i.e. $user->id contains the user's positive integer ID).
+        # If we are validating an alias, then use it in the error message
+        # instead of its corresponding bug ID, to not disclose it.
         if ($user->id) {
-            ThrowUserError("bug_access_denied", { bug_id => $self->id });
+            ThrowUserError("bug_access_denied", { bug_id => $input_id });
         } else {
-            ThrowUserError("bug_access_query", { bug_id => $self->id });
+            ThrowUserError("bug_access_query", { bug_id => $input_id });
         }
     }
 }
@@ -1471,9 +1476,7 @@ sub _check_dependencies {
             : split(/[\s,]+/, $deps_in{$type});
         # Eliminate nulls.
         @bug_ids = grep {$_} @bug_ids;
-        # We do this up here to make sure all aliases are converted to IDs.
-        @bug_ids = map { $invocant->check($_, $type)->id } @bug_ids;
-       
+
         my @check_access = @bug_ids;
         # When we're updating a bug, only added or removed bug_ids are 
         # checked for whether or not we can see/edit those bugs.
@@ -1503,7 +1506,8 @@ sub _check_dependencies {
                 }
             }
         }
-        
+        # Replace all aliases by their corresponding bug ID.
+        @bug_ids = map { $_ =~ /^(\d+)$/ ? $1 : $invocant->check($_, $type)->id } @bug_ids;
         $deps_in{$type} = \@bug_ids;
     }
 
@@ -1520,8 +1524,9 @@ sub _check_dependencies {
 sub _check_dup_id {
     my ($self, $dupe_of) = @_;
     my $dbh = Bugzilla->dbh;
-    
-    $dupe_of = trim($dupe_of);
+
+    # Store the bug ID/alias passed by the user for visibility checks.
+    my $orig_dupe_of = $dupe_of = trim($dupe_of);
     $dupe_of || ThrowCodeError('undefined_field', { field => 'dup_id' });
     # Validate the bug ID. The second argument will force check() to only
     # make sure that the bug exists, and convert the alias to the bug ID
@@ -1534,7 +1539,7 @@ sub _check_dup_id {
 
     # If we come here, then the duplicate is new. We have to make sure
     # that we can view/change it (issue A on bug 96085).
-    $dupe_of_bug->check_is_visible;
+    $dupe_of_bug->check_is_visible($orig_dupe_of);
 
     # Make sure a loop isn't created when marking this bug
     # as duplicate.

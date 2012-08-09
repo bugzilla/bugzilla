@@ -85,7 +85,8 @@
   [% count = count + increment %]
 [% END %]
 
-[% IF user.settings.comment_box_position.value == "before_comments" && user.id %]
+[% IF mode == "edit" && user.id
+      && user.settings.comment_box_position.value == "before_comments" %]
   <div class="bz_add_comment">
     <a href="#" 
        onclick="return goto_add_comments();">

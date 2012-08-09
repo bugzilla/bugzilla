@@ -107,6 +107,18 @@ my @fields = @{Bugzilla::Field->match({obsolete => 0})};
 if (!$user->is_timetracker) {
     @fields = grep { $_->name !~ /^(estimated_time|remaining_time|work_time|percentage_complete|deadline)$/ } @fields;
 }
+
+my %FIELD_PARAMS = (
+    classification    => 'useclassification',
+    target_milestone  => 'usetargetmilestone',
+    qa_contact        => 'useqacontact',
+    status_whiteboard => 'usestatuswhiteboard',
+    see_also          => 'use_see_also',
+);
+foreach my $field (@fields) {
+    my $param = $FIELD_PARAMS{$field->name};
+    $field->{is_active} =  Bugzilla->params->{$param} if $param;
+}
 $vars->{'field'} = \@fields;
 
 display_data($vars);

@@ -101,7 +101,7 @@
   [% IF summary.keys %]
     <input type="hidden" name="[% summary.type FILTER html %]" value="[% summary.value FILTER html %]">
   [% END %]
-  
+
   [% IF product %]
     <span id="product_dashboard_links">
       <ul>
@@ -113,7 +113,7 @@
     </span>
   [% END %]
 
-  <h3>Product: [% product.name FILTER html %]</h3>
+  <strong>Choose product:</strong>
   <select name="product">
     [% FOREACH c = classifications %]
       <optgroup label="[% c.name FILTER html %]">
@@ -139,6 +139,7 @@
   <input type="submit" value="[% IF product %]Change[% ELSE %]Submit[% END %]">
 
   [% IF product %]
+    <h2>[% product.name FILTER html %]</h2>
 
     <p><i>[% product.description FILTER none %]</i></p>
 

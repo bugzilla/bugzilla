@@ -53,20 +53,17 @@ sub _page_dashboard {
                       -expires => "Fri, 01-Jan-1970 00:00:00 GMT");
 
     # If the user cannot enter bugs in any product, stop here.
-    my @enterable_products = @{$user->get_enterable_products};
-    ThrowUserError('no_products') unless scalar(@enterable_products);
-
-    my $classification = Bugzilla->params->{'useclassification'} ?
-        $input->{'classification'} : '__all';
+    scalar @{$user->get_selectable_products}
+        || ThrowUserError('no_products');
 
     # Create data structures representing each classification
-    my @classifications = (); 
+    my @classifications = ();
     foreach my $c (@{$user->get_selectable_classifications}) {
         # Create hash to hold attributes for each classification.
-        my %classification = ( 
-            'name'       => $c->name, 
+        my %classification = (
+            'name'       => $c->name,
             'products'   => [ @{$user->get_selectable_products($c->id)} ]
-        );  
+        );
         # Assign hash back to classification array.
         push @classifications, \%classification;
     }
@@ -86,7 +83,7 @@ sub _page_dashboard {
 
     # We need to check and make sure that the user has permission
     # to enter a bug against this product.
-    if (!$user->can_enter_product($product ? $product->name : $product_name)) {
+    if (!$product || !$user->can_enter_product($product->name)) {
         return;
     }
 

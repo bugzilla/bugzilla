@@ -37,7 +37,8 @@ use Bugzilla::Component;
 use Bugzilla::Version;
 use Bugzilla::Milestone;
 
-use Bugzilla::Extension::ProductDashboard::Util qw(open_states closed_states);
+use Bugzilla::Extension::ProductDashboard::Util qw(open_states closed_states
+                                                   quoted_open_states quoted_closed_states);
 
 sub total_bugs {
     my $product = shift;
@@ -55,7 +56,7 @@ sub total_open_bugs {
 
     return $dbh->selectrow_array("SELECT COUNT(bug_id) 
                                     FROM bugs 
-                                   WHERE bug_status IN (" . open_states() . ") 
+                                   WHERE bug_status IN (" . join(',', quoted_open_states()) . ") 
                                          AND product_id = ?", undef, $product->id);
 }
 
@@ -92,8 +93,8 @@ sub by_version {
     my $dbh = Bugzilla->dbh;
     my $extra;
 
-    $extra = "AND bugs.bug_status IN (" . open_states() . ")" if $bug_status eq 'open';
-    $extra = "AND bugs.bug_status IN (" . closed_states() . ")" if $bug_status eq 'closed';
+    $extra = "AND bugs.bug_status IN (" . join(',', quoted_open_states()) . ")" if $bug_status eq 'open';
+    $extra = "AND bugs.bug_status IN (" . join(',', quoted_closed_states()) . ")" if $bug_status eq 'closed';
 
     return $dbh->selectall_arrayref("SELECT version, COUNT(bug_id) 
                                        FROM bugs 
@@ -108,8 +109,8 @@ sub by_milestone {
     my $dbh = Bugzilla->dbh;
     my $extra;
 
-    $extra = "AND bugs.bug_status IN (" . open_states() . ")" if $bug_status eq 'open';
-    $extra = "AND bugs.bug_status IN (" . closed_states() . ")" if $bug_status eq 'closed';
+    $extra = "AND bugs.bug_status IN (" . join(',', quoted_open_states()) . ")" if $bug_status eq 'open';
+    $extra = "AND bugs.bug_status IN (" . join(',', quoted_closed_states()) . ")" if $bug_status eq 'closed';
 
     return $dbh->selectall_arrayref("SELECT target_milestone, COUNT(bug_id) 
                                        FROM bugs 
@@ -124,8 +125,8 @@ sub by_priority {
     my $dbh = Bugzilla->dbh;
     my $extra;
 
-    $extra = "AND bugs.bug_status IN (" . open_states() . ")" if $bug_status eq 'open';
-    $extra = "AND bugs.bug_status IN (" . closed_states() . ")" if $bug_status eq 'closed';
+    $extra = "AND bugs.bug_status IN (" . join(',', quoted_open_states()) . ")" if $bug_status eq 'open';
+    $extra = "AND bugs.bug_status IN (" . join(',', quoted_closed_states()) . ")" if $bug_status eq 'closed';
 
     return $dbh->selectall_arrayref("SELECT priority, COUNT(bug_id) 
                                        FROM bugs 
@@ -140,8 +141,8 @@ sub by_severity {
     my $dbh = Bugzilla->dbh;
     my $extra;
 
-    $extra = "AND bugs.bug_status IN (" . open_states() . ")" if $bug_status eq 'open';
-    $extra = "AND bugs.bug_status IN (" . closed_states() . ")" if $bug_status eq 'closed';
+    $extra = "AND bugs.bug_status IN (" . join(',', quoted_open_states()) . ")" if $bug_status eq 'open';
+    $extra = "AND bugs.bug_status IN (" . join(',', quoted_closed_states()) . ")" if $bug_status eq 'closed';
 
     return $dbh->selectall_arrayref("SELECT bug_severity, COUNT(bug_id) 
                                        FROM bugs 
@@ -156,8 +157,8 @@ sub by_component {
     my $dbh = Bugzilla->dbh;
     my $extra;
 
-    $extra = "AND bugs.bug_status IN (" . open_states() . ")" if $bug_status eq 'open';
-    $extra = "AND bugs.bug_status IN (" . closed_states() . ")" if $bug_status eq 'closed';
+    $extra = "AND bugs.bug_status IN (" . join(',', quoted_open_states()) . ")" if $bug_status eq 'open';
+    $extra = "AND bugs.bug_status IN (" . join(',', quoted_closed_states()) . ")" if $bug_status eq 'closed';
 
     return $dbh->selectall_arrayref("SELECT components.name, COUNT(bugs.bug_id) 
                                        FROM bugs INNER JOIN components ON bugs.component_id = components.id 
@@ -195,8 +196,8 @@ sub by_value_summary {
         $query .= "AND bugs.target_milestone = ? " if $type eq 'target_milestone';
     }
 
-    $query .= "AND bugs.bug_status IN (" . open_states() . ") " if $bug_status eq 'open';
-    $query .= "AND bugs.bug_status IN (" . closed_states() . ") " if $bug_status eq 'closed';
+    $query .= "AND bugs.bug_status IN (" . join(',', quoted_open_states()) . ") " if $bug_status eq 'open';
+    $query .= "AND bugs.bug_status IN (" . join(',', quoted_closed_states()) . ") " if $bug_status eq 'closed';
 
     trick_taint($value);
 
@@ -226,8 +227,8 @@ sub by_assignee {
 
     $limit = detaint_natural($limit) ? $dbh->sql_limit($limit) : "";
 
-    $extra = "AND bugs.bug_status IN (" . open_states() . ")" if $bug_status eq 'open';
-    $extra = "AND bugs.bug_status IN (" . closed_states() . ")" if $bug_status eq 'closed';
+    $extra = "AND bugs.bug_status IN (" . join(',', quoted_open_states()) . ")" if $bug_status eq 'open';
+    $extra = "AND bugs.bug_status IN (" . join(',', quoted_closed_states()) . ")" if $bug_status eq 'closed';
 
     my @result = map { [ Bugzilla::User->new($_->[0]), $_->[1] ] }
         @{$dbh->selectall_arrayref("SELECT bugs.assigned_to AS userid, COUNT(bugs.bug_id)
@@ -247,8 +248,8 @@ sub by_status {
     my $dbh = Bugzilla->dbh;
     my $extra;
 
-    $extra = "AND bugs.bug_status IN (" . open_states() . ")" if $bug_status eq 'open';
-    $extra = "AND bugs.bug_status IN (" . closed_states() . ")" if $bug_status eq 'closed';
+    $extra = "AND bugs.bug_status IN (" . join(',', quoted_open_states()) . ")" if $bug_status eq 'open';
+    $extra = "AND bugs.bug_status IN (" . join(',', quoted_closed_states()) . ")" if $bug_status eq 'closed';
 
     return $dbh->selectall_arrayref("SELECT bugs.bug_status, COUNT(bugs.bug_id) 
                                        FROM bugs
@@ -277,8 +278,8 @@ sub bug_milestone_by_status {
     my $dbh = Bugzilla->dbh;
     my $extra;
 
-    $extra = "AND bugs.bug_status IN (" . open_states() . ")" if $bug_status eq 'open';
-    $extra = "AND bugs.bug_status IN (" . closed_states() . ")" if $bug_status eq 'closed';
+    $extra = "AND bugs.bug_status IN (" . join(',', quoted_open_states()) . ")" if $bug_status eq 'open';
+    $extra = "AND bugs.bug_status IN (" . join(',', quoted_closed_states()) . ")" if $bug_status eq 'closed';
 
     return $dbh->selectrow_array("SELECT COUNT(bug_id)
                                     FROM bugs 
@@ -296,8 +297,8 @@ sub by_duplicate {
     $limit = detaint_natural($limit) ? $dbh->sql_limit($limit) : "";
 
     my $extra;
-    $extra = "AND bugs.bug_status IN (" . open_states() . ")" if $bug_status eq 'open';
-    $extra = "AND bugs.bug_status IN (" . closed_states() . ")" if $bug_status eq 'closed';
+    $extra = "AND bugs.bug_status IN (" . join(',', quoted_open_states()) . ")" if $bug_status eq 'open';
+    $extra = "AND bugs.bug_status IN (" . join(',', quoted_closed_states()) . ")" if $bug_status eq 'closed';
 
     my $unfiltered_bugs = $dbh->selectall_arrayref("SELECT bugs.bug_id AS id,
                                                            bugs.bug_status AS status,
@@ -326,8 +327,8 @@ sub by_popularity {
     $limit = detaint_natural($limit) ? $dbh->sql_limit($limit) : ""; 
 
     my $extra;
-    $extra = "AND bugs.bug_status IN (" . open_states() . ")" if $bug_status eq 'open';
-    $extra = "AND bugs.bug_status IN (" . closed_states() . ")" if $bug_status eq 'closed';
+    $extra = "AND bugs.bug_status IN (" . join(',', quoted_open_states()) . ")" if $bug_status eq 'open';
+    $extra = "AND bugs.bug_status IN (" . join(',', quoted_closed_states()) . ")" if $bug_status eq 'closed';
 
     my $unfiltered_bugs = $dbh->selectall_arrayref("SELECT bugs.bug_id AS id,
                                                            bugs.bug_status AS status,
@@ -371,7 +372,7 @@ sub recently_opened {
             || ThrowUserError('illegal_date', { date   => $date_to,
                                                 format => 'YYYY-MM-DD' });
         $date_part = "AND bugs.creation_ts >= ? AND bugs.creation_ts <= ?";
-        push(@values, $date_from, $date_to);
+        push(@values, trick_taint($date_from), trick_taint($date_to));
     }
     else {
         $date_part = "AND bugs.creation_ts >= NOW() - " . $dbh->sql_to_days('?');
@@ -387,7 +388,7 @@ sub recently_opened {
                                                       FROM bugs, components
                                                      WHERE bugs.product_id = ?
                                                            AND bugs.component_id = components.id
-                                                           AND bugs.bug_status IN (" . open_states() . ")
+                                                           AND bugs.bug_status IN (" . join(',', quoted_open_states()) . ")
                                                            $date_part
                                                   ORDER BY bugs.bug_id DESC $limit",
                                                    {'Slice' => {}}, @values);
@@ -419,7 +420,7 @@ sub recently_closed {
             || ThrowUserError('illegal_date', { date   => $date_to,
                                                 format => 'YYYY-MM-DD' });
         $date_part = "AND bugs.creation_ts >= ? AND bugs.creation_ts <= ?";
-        push(@values, $date_from, $date_to);
+        push(@values, trick_taint($date_from), trick_taint($date_to));
     }
     else {
         $date_part = "AND bugs.creation_ts >= NOW() - " . $dbh->sql_to_days('?');
@@ -435,9 +436,9 @@ sub recently_closed {
                                                        FROM bugs, components, bugs_activity
                                                       WHERE bugs.product_id = ?
                                                             AND bugs.component_id = components.id
-                                                            AND bugs.bug_status IN (" . closed_states() . ")
+                                                            AND bugs.bug_status IN (" . join(',', quoted_closed_states()) . ")
                                                             AND bugs.bug_id = bugs_activity.bug_id
-                                                            AND bugs_activity.added IN (" . closed_states() . ")
+                                                            AND bugs_activity.added IN (" . join(',', quoted_closed_states()) . ")
                                                             $date_part
                                                    ORDER BY bugs.bug_id DESC $limit",
                                                     {'Slice' => {}}, @values);

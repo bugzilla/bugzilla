@@ -27,15 +27,44 @@ var showQuerySection = function () {
 
 var query_column_defs = [
     { key:"id", label:"ID", sortable:true, sortOptions:{ sortFunction:sortBugIdLinks } },
-    { key:"updated", label:"Updated", sortable:false }, 
+    { key:"updated", label:"Updated", sortable:true },
     { key:"bug_status", label:"Status", sortable:true },
     { key:"summary", label:"Summary", sortable:true },
 ];
+
 var query_fields = [
     { key:"id" },
     { key:"updated" },
     { key:"bug_status" },
     { key:"summary" }
+];
+
+var requestee_column_defs = [
+  { key:"requester", label:"Requester", sortable:true },
+  { key:"flag", label:"Flag", sortable:true },
+  { key:"bug", label:"Bug", sortable:true },
+  { key:"created", label:"Created", sortable:true }
+];
+
+var requestee_fields = [
+  { key:"requester" },
+  { key:"flag" },
+  { key:"bug" },
+  { key:"created" }
+];
+
+var requester_column_defs = [
+  { key:"requestee", label:"Requestee", sortable:true },
+  { key:"flag", label:"Flag", sortable:true },
+  { key:"bug", label:"Bug", sortable:true },
+  { key:"created", label:"Created", sortable:true }
+];
+
+var requester_fields = [
+  { key:"requestee" },
+  { key:"flag" },
+  { key:"bug" },
+  { key:"created" }
 ];
 
 function addStatListener (div_name, table_name, column_defs, fields, options) {
@@ -113,7 +142,7 @@ var sortBugPriority = function(a, b, desc) {
     else if(!YAHOO.lang.isValue(b)) {
         return -1;
     }
-    
+
     var new_a = new Number(priorities[YAHOO.lang.trim(a.getData('priority'))]);
     var new_b = new Number(priorities[YAHOO.lang.trim(b.getData('priority'))]);
 

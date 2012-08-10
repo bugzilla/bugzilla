@@ -170,7 +170,7 @@ sub _standard_saved_queries {
     my $user = Bugzilla->user;
 
     # Default sort order
-    my $order = ["bug_id"];
+    my $order = ["changeddate desc", "bug_id"];
 
     # List of columns that we will be selecting. In the future this should be configurable
     # Share with buglist.cgi?
@@ -257,7 +257,7 @@ sub _flags_requested {
              attachments.description AS attach_summary,
              requesters.realname AS requester, 
              requestees.realname AS requestee,
-             " . $dbh->sql_date_format('flags.creation_date', '%Y.%m.%d %H:%i') . " AS created
+             " . $dbh->sql_date_format('flags.creation_date', '%Y:%m:%d') . " AS created
         FROM flags 
              LEFT JOIN attachments
                   ON ($attach_join_clause)
@@ -291,7 +291,7 @@ sub _flags_requested {
     $query .= ") ";
 
     # Order the records (within each group).
-    my $group_order_by = " GROUP BY flags.bug_id ORDER BY flagtypes.name, flags.creation_date";
+    my $group_order_by = " GROUP BY flags.bug_id ORDER BY flags.creation_date, flagtypes.name";
 
     my $requestee_list = $dbh->selectall_arrayref($query . 
                                                   " AND requestees.login_name = ? " . 

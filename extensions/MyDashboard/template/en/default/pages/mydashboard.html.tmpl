@@ -111,7 +111,7 @@
                   [% request.bug_id FILTER html %]: [%+ request.bug_summary FILTER html %]</a>
               [% END %]
               </td>
-              <td>[% request.created FILTER time('%Y.%m.%d') FILTER html %]</td>
+              <td>[% request.created FILTER time('%Y:%m:%d') FILTER html %]</td>
             </tr>
           [% END %]
           </tbody>
@@ -120,18 +120,6 @@
       </div>
       <script>
       <!--
-        var requestee_column_defs = [
-          { key:"requester", label:"Requester", sortable:true },
-          { key:"flag", label:"Flag", sortable:true },
-          { key:"bug", label:"Bug", sortable:true },
-          { key:"created", label:"Created", sortable:true }
-        ];
-        var requestee_fields = [
-          { key:"requester" },
-          { key:"flag" },
-          { key:"bug" },
-          { key:"created" }
-        ];
         addStatListener("requestee_table_container", "requestee_table", requestee_column_defs, requestee_fields, {
           paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25, alwaysVisible: false })
         });
@@ -169,7 +157,7 @@
                   [% request.bug_id FILTER html %]: [%+ request.bug_summary FILTER html %]</a>
               [% END %]
               </td>
-              <td>[% request.created FILTER time('%Y.%m.%d') FILTER html %]</td>
+              <td>[% request.created FILTER time('%Y:%m:%d') FILTER html %]</td>
             </tr>
           [% END %]
           </tbody>
@@ -178,18 +166,6 @@
       </div>
       <script>
       <!--
-        var requester_column_defs = [
-          { key:"requestee", label:"Requestee", sortable:true },
-          { key:"flag", label:"Flag", sortable:true },
-          { key:"bug", label:"Bug", sortable:true },
-          { key:"created", label:"Created", sortable:true }
-        ];
-        var requester_fields = [
-          { key:"requestee" },
-          { key:"flag" },
-          { key:"bug" },
-          { key:"created" }
-        ];
         addStatListener("requester_table_container", "requester_table", requester_column_defs, requester_fields, {
           paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25, alwaysVisible: false })
         });
@@ -227,7 +203,7 @@
       [% FOREACH bug = r.bugs %]
         <tr class="bz_bugitem [%+ loop.count() % 2 == 0 ? "bz_row_odd" : "bz_row_even" %]">
           <td align="center"><a href="show_bug.cgi?id=[% bug.bug_id FILTER uri %]">[% bug.bug_id FILTER html %]</a></td>
-          <td align="center">[% bug.updated FILTER html %]</td>
+          <td align="center">[% bug.changeddate FILTER time('%Y:%m:%d') FILTER html %]</td>
           <td align="center">[% bug.bug_status FILTER html %]</td>
           <td>[% bug.short_desc FILTER html %]</td>
         </tr>

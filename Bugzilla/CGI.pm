@@ -59,14 +59,20 @@ sub new {
 
     # Path-Info is of no use for Bugzilla and interacts badly with IIS.
     # Moreover, it causes unexpected behaviors, such as totally breaking
-    # the rendering of pages. Skip it!
-    print $self->redirect($self->url(-path => 0, -query => 1)) if $self->path_info;
+    # the rendering of pages.
+    my $script = basename($0);
+    if ($self->path_info) {
+        my @whitelist;
+        Bugzilla::Hook::process('path_info_whitelist', { whitelist => \@whitelist });
+        if (!grep($_ eq $script, @whitelist)) {
+            print $self->redirect($self->url(-path => 0, -query => 1));
+        }
+    }
 
     # Send appropriate charset
     $self->charset(Bugzilla->params->{'utf8'} ? 'UTF-8' : '');
 
     # Redirect to urlbase/sslbase if we are not viewing an attachment.
-    my $script = basename($0);
     if ($self->url_is_attachment_base and $script ne 'attachment.cgi') {
         $self->redirect_to_urlbase();
     }

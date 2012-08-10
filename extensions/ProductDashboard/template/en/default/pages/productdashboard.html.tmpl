@@ -139,16 +139,22 @@
   <input type="submit" value="[% IF product %]Change[% ELSE %]Submit[% END %]">
 
   [% IF product %]
-    <h2>[% product.name FILTER html %]</h2>
+    <div class="product_name">
+      [% product.name FILTER html %]
+    </div>
 
-    <p><i>[% product.description FILTER none %]</i></p>
+    <div class="product_description">
+      [% product.description FILTER none %]
+    </div>
 
     [% WRAPPER global/tabs.html.tmpl 
        tabs        = tabs
        current_tab = current_tab
     %]
 
-    <h3>[% current_tab.label FILTER html %]</h3>
+    <div class="current_tab_label">
+      [% current_tab.label FILTER html %]
+    </div>
 
     [% IF current_tab.name == 'summary' %]
       [% PROCESS pages/productdashboard/summary.html.tmpl %]

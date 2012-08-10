@@ -7,6 +7,19 @@
 
 #product_dashboard_links {
     float: right;
-    border: 1px solid;
     padding-right: 25px;
+    border: 1px solid rgb(116, 126, 147);
+}
+
+.product_name {
+    font-size: 2em;
+    margin: 10px 0 10px 0;
+    color: rgb(109, 117, 129);
+}
+
+.product_description {
+    font-size: 90%;
+    font-style: italic;
+    padding-bottom: 5px;
+    margin-bottom: 10px;
 }

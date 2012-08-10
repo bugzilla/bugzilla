@@ -214,7 +214,6 @@ sub get {
                 groups    => $self->_filter_bless_groups($_->groups), 
                 email_enabled     => $self->type('boolean', $_->email_enabled),
                 login_denied_text => $self->type('string', $_->disabledtext),
-                saved_searches    => [map { $self->_query_to_hash($_) } @{ $_->queries }],
             }} @$in_group;
     }    
     else {
@@ -226,7 +225,6 @@ sub get {
                 email     => $self->type('string', $_->email),
                 can_login => $self->type('boolean', $_->is_enabled ? 1 : 0),
                 groups    => $self->_filter_bless_groups($_->groups),
-                saved_searches => [map { $self->_query_to_hash($_) } @{ $_->queries }],
             }} @$in_group;
     }
 
@@ -346,17 +344,6 @@ sub _group_to_hash {
         name        => $self->type('string', $group->name), 
         description => $self->type('string', $group->description), 
     };
-    return $item;
-}
-
-sub _query_to_hash {
-    my ($self, $query) = @_;
-    my $item = {
-        id   => $self->type('int', $query->id),
-        name => $self->type('string', $query->name),
-        url  => $self->type('string', $query->url),
-    };
-
     return $item;
 }
 
@@ -801,34 +788,6 @@ C<string> The description for the group
 
 =back
 
-=over
-
-=item saved_searches
-
-C<array> An array of hashes, each of which represents a user's saved search and has
-the following keys:
-
-=over
-
-=item id
-
-C<int> An integer id uniquely identifying the saved search.
-
-=item name
-
-C<string> The name of the saved search.
-
-=item url
-
-C<string> The CGI parameters for the saved search.
-
-=back
-
-B<Note>: The elements of the returned array (i.e. hashes) are ordered by the 
-name of each saved search.
-
-=back
-
 B<Note>: If you are not logged in to Bugzilla when you call this function, you
 will only be returned the C<id>, C<name>, and C<real_name> items. If you are
 logged in and not in editusers group, you will only be returned the C<id>, C<name>, 
@@ -870,8 +829,6 @@ function.
 for C<match> has changed to only returning enabled accounts.
 
 =item C<groups> Added in Bugzilla B<4.4>.
-
-=item C<saved_searches> Added in Bugzilla B<4.4>.
 
 =back
 

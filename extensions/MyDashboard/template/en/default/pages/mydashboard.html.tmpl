@@ -48,7 +48,7 @@
   <div class="yui-skin-sam">
     <div id="left">
       <div id="query_list_container">
-        <strong>Choose query:</strong>
+        Choose query:
         <select id="query" name="query" onchange="showQuerySection();">
           <optgroup id="standard_queries" label="Standard">
             [% FOREACH r = standard_results %]
@@ -61,11 +61,9 @@
             [% END %]
           </optgroup>
         </select>
-        [% IF NOT saved_results.size %]
-          <smaller>
-            (<a href="userprefs.cgi?tab=saved-searches">add or remove saved searches</a>)
-          </smaller>
-        [% END %]
+        <small>
+          (<a href="userprefs.cgi?tab=saved-searches">add or remove saved searches</a>)
+        </small>
       </div>
 
       [% FOREACH r = standard_results %]

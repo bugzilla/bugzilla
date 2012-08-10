@@ -234,7 +234,7 @@ sub _standard_saved_queries {
         my $params = new Bugzilla::CGI($qdef->{params});
 
         my $search = new Bugzilla::Search( fields => \@select_columns,
-                                           params => $params,
+                                           params => scalar $params->Vars,
                                            order  => $order );
         my $query = $search->sql();
 

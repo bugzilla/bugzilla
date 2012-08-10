@@ -195,47 +195,6 @@
         });
       -->
       </script>
-
-      <div id="activeproducts">
-        <div class="query_heading">
-          Products with Open [% terms.Bugs %]
-        </div>
-        <div id="activeproducts_table_container">
-          <table id="activeproducts_table" cellspacing="0" cellpadding="4" width="100%">
-          <thead>
-          <tr bgcolor="#dedede">
-            <th>Count</th>
-            <th>Product</th>
-          </tr>
-          </thead>
-          <tbody>
-          [% FOREACH product = products %]
-            <tr class="bz_bugitem [%+ loop.count() % 2 == 0 ? "bz_row_odd" : "bz_row_even" %]">
-              <td align="right">[% product.count FILTER html %]</td>
-              <td><a href="buglist.cgi?product=[% product.product FILTER uri %][% products_buffer FILTER none %]">
-                  [% product.product FILTER html %]</a></td>
-            </tr>
-          [% END %]
-          </tbody>
-          </table>
-        </div>
-      </div>
-      <script>
-      <!--
-        var product_column_defs = [
-          { key:"count", label:"Count", sortable:true },
-          { key:"product", label:"Product", sortable:true }
-        ];
-        var product_fields = [
-          { key:"count", parser:"number" },
-          { key:"product" }
-        ];
-        addStatListener("activeproducts_table_container", "activeproducts_table", product_column_defs, product_fields, {
-          paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25, alwaysVisible: false })
-        });
-      -->
-      </script>
-
     </div>
     <div style="clear:both;"></div>
   </div>

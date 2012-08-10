@@ -19,6 +19,8 @@ use Bugzilla::Status;
 use Bugzilla::Field;
 use Bugzilla::Search::Saved;
 
+use Bugzilla::Extension::MyDashboard::Util qw(open_states closed_states
+                                              quoted_open_states quoted_closed_states);
 use Bugzilla::Extension::MyDashboard::TimeAgo qw(time_ago);
 
 use DateTime;
@@ -56,7 +58,7 @@ sub QUERY_DEFS {
             heading     => "In Progress Reported by You",
             description => 'You reported the bug, the developer accepted the bug and is hopefully working on it.',
             params      => {
-                'bug_status'     => [ map { $_->name } grep($_->name ne 'NEW' && $_->name ne 'MODIFIED', _open_states()) ],
+                'bug_status'     => [ map { $_->name } grep($_->name ne 'NEW' && $_->name ne 'MODIFIED', open_states()) ],
                 'emailreporter1' => 1,
                 'emailtype1'     => 'exact',
                 'email1'         => $user->login
@@ -156,42 +158,10 @@ sub page_before_template {
     # Switch to shadow db since we are just reading information
     Bugzilla->switch_to_shadow_db();
 
-    _active_product_counts($vars);
     _standard_saved_queries($vars);
     _flags_requested($vars);
 
     $vars->{'severities'} = get_legal_field_values('bug_severity');
-}
-
-our $_open_states;
-sub _open_states {
-    $_open_states ||= Bugzilla::Status->match({ is_open => 1, isactive => 1 });
-    return wantarray ? @$_open_states : $_open_states;
-}
-
-our $_quoted_open_states;
-sub _quoted_open_states {
-    my $dbh = Bugzilla->dbh;
-    $_quoted_open_states ||= [ map { $dbh->quote($_->name) } _open_states() ];
-    return wantarray ? @$_quoted_open_states : $_quoted_open_states;
-}
-
-sub _active_product_counts {
-    my ($vars) = @_;
-    my $dbh  = Bugzilla->dbh;
-    my $user = Bugzilla->user;
-
-    my @enterable_products = @{$user->get_enterable_products()};
-    $vars->{'products'} 
-        = $dbh->selectall_arrayref("SELECT products.name AS product, count(*) AS count
-                                      FROM bugs,products
-                                     WHERE bugs.product_id=products.id 
-                                           AND products.isactive = 1 
-                                           AND bugs.bug_status IN (" . join(',', _quoted_open_states()) . ")
-                                           AND products.id IN (" . join(',', map { $_->id } @enterable_products) . ")
-                                     GROUP BY products.name ORDER BY count DESC", { Slice => {} });
-
-    $vars->{'products_buffer'} = "&" . join('&', map { "bug_status=" . $_->name } _open_states());
 }
 
 sub _standard_saved_queries {
@@ -306,7 +276,7 @@ sub _flags_requested {
                   AND ccmap.bug_id = bugs.bug_id ";
 
     # Limit query to pending requests and open bugs only
-    $query .= " WHERE bugs.bug_status IN (" . join(',', _quoted_open_states()) . ")
+    $query .= " WHERE bugs.bug_status IN (" . join(',', quoted_open_states()) . ")
                       AND flags.status = '?' ";
 
     # Weed out bug the user does not have access to

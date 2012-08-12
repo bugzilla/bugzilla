@@ -52,3 +52,7 @@ form#Create #comp_desc {
     /* color:inherit */
     color: expression(this.parentNode.currentStyle['color']);
 }
+
+#graphical_report {
+  width: auto\9; /* IE6-8 */
+}

@@ -77,3 +77,28 @@
   padding-bottom: .5em;
   color: #333;
 }
+
+.t1 {
+  background-color: #ffffff; /* white */
+}
+
+.t2 {
+  background-color: #dfefff;  /* light blue */
+}
+
+.t3 {
+  background-color: #dddddd;  /* grey */
+}
+
+.t4 {
+  background-color: #c3d3ed; /* darker blue */
+}
+
+.ttotal, .ttotal td {
+  background-color: #cfffdf; /* light green */
+}
+
+#graphical_report {
+  max-width: 100%;
+  height: auto;
+}

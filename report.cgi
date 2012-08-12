@@ -103,20 +103,18 @@ if (!($col_field || $row_field || $tbl_field)) {
     ThrowUserError("no_axes_defined");
 }
 
-my $width = $cgi->param('width');
-my $height = $cgi->param('height');
+# There is no UI for these parameters anymore,
+# but they are still here just in case.
+my $width = $cgi->param('width') || 1024;
+my $height = $cgi->param('height') || 600;
 
-if (defined($width)) {
-   (detaint_natural($width) && $width > 0)
-     || ThrowCodeError("invalid_dimensions");
-   $width <= 2000 || ThrowUserError("chart_too_large");
-}
+(detaint_natural($width) && $width > 0)
+  || ThrowCodeError("invalid_dimensions");
+$width <= 2000 || ThrowUserError("chart_too_large");
 
-if (defined($height)) {
-   (detaint_natural($height) && $height > 0)
-     || ThrowCodeError("invalid_dimensions");
-   $height <= 2000 || ThrowUserError("chart_too_large");
-}
+(detaint_natural($height) && $height > 0)
+  || ThrowCodeError("invalid_dimensions");
+$height <= 2000 || ThrowUserError("chart_too_large");
 
 # These shenanigans are necessary to make sure that both vertical and 
 # horizontal 1D tables convert to the correct dimension when you ask to
@@ -244,7 +242,7 @@ $vars->{'row_names'} = \@row_names;
 $vars->{'tbl_names'} = \@tbl_names;
 
 # Below a certain width, we don't see any bars, so there needs to be a minimum.
-if ($width && $cgi->param('format') eq "bar") {
+if ($cgi->param('format') eq "bar") {
     my $min_width = (scalar(@col_names) || 1) * 20;
 
     if (!$cgi->param('cumulate')) {
@@ -254,9 +252,8 @@ if ($width && $cgi->param('format') eq "bar") {
     $vars->{'min_width'} = $min_width;
 }
 
-$vars->{'width'} = $width if $width;
-$vars->{'height'} = $height if $height;
-
+$vars->{'width'} = $width;
+$vars->{'height'} = $height;
 $vars->{'query'} = $query;
 $vars->{'saved_report_id'} = $cgi->param('saved_report_id');
 $vars->{'debug'} = $cgi->param('debug');

@@ -1,0 +1,40 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+[% INCLUDE global/header.html.tmpl
+   title = "$terms.Bugzilla Data For Researchers"
+%]
+
+<h2>[% terms.Bugzilla %] Data For Researchers</h2>
+
+<p>In the past we have made sanitized (that is, with all security [% terms.bug %] information removed) dumps of the
+  bugzilla.mozilla.org database available to researchers from <i>bona fide</i> academic institutions who
+  are willing to agree to our requirements for data handling and user privacy. We would much prefer
+  individuals to request this service rather than attempt to spider the data using the web interface.</p>
+
+<p>Because we are familiar with the [% terms.Bugzilla %] data and its possible flaws and biases, we are
+  also happy to answer questions about it, and review papers which make use of it pre-publication. Please
+  let us know if you would like us to do that.</p>
+
+<p>To request a sanitized copy of the database, please file a [% terms.bug %] against
+  <a href="enter_bug.cgi?product=bugzilla.mozilla.org&component=Administration">
+  bugzilla.mozilla.org/Administration</a> with the following information included.</p>
+
+<ul>
+  <li>Description of why you need the copy.</li>
+  <li>The academic institution you are associated with along with any course related information.</li>
+  <li>Contact information for yourself and your professor, mentor, or person overseeing your work.</li>
+  <li>How soon you will need the data.</li>
+</ul>
+
+<p>Once the request has been approved you will be asked to sign an <i>Agreement for Receipt and Use
+of [% terms.Bugzilla %] Data</i>. An administrator will then create the MySQL dump of the sanitized data and place
+it somewhere you will be able to access it.</p>
+
+[% INCLUDE global/footer.html.tmpl %]

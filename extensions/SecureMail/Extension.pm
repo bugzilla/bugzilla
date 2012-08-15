@@ -550,4 +550,25 @@ sub _filter_bug_links {
     });
 }
 
+sub whine_before_send {
+    my ($self, $args) = @_;
+    my $params = $args->{params};
+
+    return if !exists $params->{queries};
+
+    foreach my $query (@{ $params->{queries} }) {
+        foreach my $bug (@{ $query->{bugs} }) {
+            my $bug_obj = new Bugzilla::Bug($bug->{bug_id});
+            next if !_should_secure_bug($bug_obj);
+            $bug->{priority}     = '--';
+            $bug->{bug_severity} = '--';
+            $bug->{rep_platform} = '--';
+            $bug->{assigned_to}  = '--';
+            $bug->{bug_status}   = '--';
+            $bug->{resolution}   = '--';
+            $bug->{'short_desc'} = "(Secure bug)";
+        }
+    }
+}
+
 __PACKAGE__->NAME;

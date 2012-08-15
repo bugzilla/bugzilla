@@ -1289,6 +1289,22 @@ your template.
 
 =back
 
+=head2 path_info_whitelist
+
+By default, Bugzilla removes the Path-Info information from URLs before
+passing data to CGI scripts. If this information is needed for your
+customizations, you can enumerate the pages you want to whitelist here.
+
+Params:
+
+=over
+
+=item C<whitelist>
+
+An array of script names that will not have their Path-Info automatically
+removed.
+
+=back
 
 =head2 post_bug_after_creation
 

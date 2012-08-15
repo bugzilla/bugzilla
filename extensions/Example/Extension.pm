@@ -44,6 +44,20 @@ use constant REL_EXAMPLE => -127;
 
 our $VERSION = '1.0';
 
+sub admin_editusers_action {
+    my ($self, $args) = @_;
+    my ($vars, $action, $user) = @$args{qw(vars action user)};
+    my $template = Bugzilla->template;
+
+    if ($action eq 'my_action') {
+        # Allow to restrict the search to any group the user is allowed to bless.
+        $vars->{'restrictablegroups'} = $user->bless_groups();
+        $template->process('admin/users/search.html.tmpl', $vars)
+            || ThrowTemplateError($template->error());
+        exit;
+    }
+}
+
 sub attachment_process_data {
     my ($self, $args) = @_;
     my $type     = $args->{attributes}->{mimetype};
@@ -77,6 +91,44 @@ sub auth_verify_methods {
     my $modules = $args->{modules};
     if (exists $modules->{Example}) {
         $modules->{Example} = 'Bugzilla/Extension/Example/Auth/Verify.pm';
+    }
+}
+
+sub bug_check_can_change_field {
+    my ($self, $args) = @_;
+
+    my ($bug, $field, $new_value, $old_value, $priv_results)
+        = @$args{qw(bug field new_value old_value priv_results)};
+
+    my $user = Bugzilla->user;
+
+    # Disallow a bug from being reopened if currently closed unless user 
+    # is in 'admin' group
+    if ($field eq 'bug_status' && $bug->product_obj->name eq 'Example') {
+        if (!is_open_state($old_value) && is_open_state($new_value) 
+            && !$user->in_group('admin')) 
+        {
+            push(@$priv_results, PRIVILEGES_REQUIRED_EMPOWERED);
+            return;
+        }
+    }
+
+    # Disallow a bug's keywords from being edited unless user is the
+    # reporter of the bug 
+    if ($field eq 'keywords' && $bug->product_obj->name eq 'Example' 
+        && $user->login ne $bug->reporter->login) 
+    {
+        push(@$priv_results, PRIVILEGES_REQUIRED_REPORTER);
+        return;
+    }
+
+    # Allow updating of priority even if user cannot normally edit the bug 
+    # and they are in group 'engineering'
+    if ($field eq 'priority' && $bug->product_obj->name eq 'Example'
+        && $user->in_group('engineering')) 
+    {
+        push(@$priv_results, PRIVILEGES_REQUIRED_NONE);
+        return;
     }
 }
 
@@ -691,6 +743,12 @@ sub page_before_template {
     }
 }
 
+sub path_info_whitelist {
+    my ($self, $args) = @_;
+    my $whitelist = $args->{whitelist};
+    push(@$whitelist, "page.cgi");
+}
+
 sub post_bug_after_creation {
     my ($self, $args) = @_;
     
@@ -816,58 +874,6 @@ sub template_before_process {
 
     if ($file eq 'bug/edit.html.tmpl') {
         $vars->{'viewing_the_bug_form'} = 1;
-    }
-}
-
-sub bug_check_can_change_field {
-    my ($self, $args) = @_;
-
-    my ($bug, $field, $new_value, $old_value, $priv_results)
-        = @$args{qw(bug field new_value old_value priv_results)};
-
-    my $user = Bugzilla->user;
-
-    # Disallow a bug from being reopened if currently closed unless user 
-    # is in 'admin' group
-    if ($field eq 'bug_status' && $bug->product_obj->name eq 'Example') {
-        if (!is_open_state($old_value) && is_open_state($new_value) 
-            && !$user->in_group('admin')) 
-        {
-            push(@$priv_results, PRIVILEGES_REQUIRED_EMPOWERED);
-            return;
-        }
-    }
-
-    # Disallow a bug's keywords from being edited unless user is the
-    # reporter of the bug 
-    if ($field eq 'keywords' && $bug->product_obj->name eq 'Example' 
-        && $user->login ne $bug->reporter->login) 
-    {
-        push(@$priv_results, PRIVILEGES_REQUIRED_REPORTER);
-        return;
-    }
-
-    # Allow updating of priority even if user cannot normally edit the bug 
-    # and they are in group 'engineering'
-    if ($field eq 'priority' && $bug->product_obj->name eq 'Example'
-        && $user->in_group('engineering')) 
-    {
-        push(@$priv_results, PRIVILEGES_REQUIRED_NONE);
-        return;
-    }
-}
-
-sub admin_editusers_action {
-    my ($self, $args) = @_;
-    my ($vars, $action, $user) = @$args{qw(vars action user)};
-    my $template = Bugzilla->template;
-
-    if ($action eq 'my_action') {
-        # Allow to restrict the search to any group the user is allowed to bless.
-        $vars->{'restrictablegroups'} = $user->bless_groups();
-        $template->process('admin/users/search.html.tmpl', $vars)
-            || ThrowTemplateError($template->error());
-        exit;
     }
 }
 

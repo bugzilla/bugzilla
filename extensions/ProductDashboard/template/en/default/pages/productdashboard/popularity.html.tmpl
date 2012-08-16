@@ -12,27 +12,28 @@
   
 <script type="text/javascript">
 <!--
-var column_defs = [
-    { key:"id", label:"ID", sortable:true, sortOptions:{ sortFunction:sortBugIdLinks } },
-    { key:"count", label:"Count", sortable:true },
-    { key:"bug_status", label:"Status", sortable:true },
-    { key:"version", label:"Version", sortable:true },
-    { key:"component", label:"Component", sortable:true },
-    { key:"bug_severity", label:"Severity", sortable:true, sortOptions:{ sortFunction:sortBugSeverity } },
-    { key:"Summary", label:"Summary", sortable:false },
+PD.options = {
+  paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25, alwaysVisible: false })
+};
+PD.column_defs = [
+  { key:"id", label:"ID", sortable:true, sortOptions:{ sortFunction: PD.sortBugIdLinks } },
+  { key:"count", label:"Count", sortable:true },
+  { key:"bug_status", label:"Status", sortable:true },
+  { key:"version", label:"Version", sortable:true },
+  { key:"component", label:"Component", sortable:true },
+  { key:"bug_severity", label:"Severity", sortable:true, sortOptions:{ sortFunction: PD.sortBugSeverity } },
+  { key:"Summary", label:"Summary", sortable:false },
 ];
-var fields = [
-    { key:"id" },
-    { key:"count", parser:"number" },
-    { key:"bug_status" },
-    { key:"version" },
-    { key:"component" },
-    { key:"bug_severity" },
-    { key:"Summary" }
+PD.fields = [
+  { key:"id" },
+  { key:"count", parser:"number" },
+  { key:"bug_status" },
+  { key:"version" },
+  { key:"component" },
+  { key:"bug_severity" },
+  { key:"Summary" }
 ];
-addStatListener("popularity_counts", "popularity_counts_table", column_defs, fields, {
-    [% IF by_popularity.size > 25 %] paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25 }) [% END %]
-});
+PD.addStatListener("popularity_counts", "popularity_counts_table", PD.column_defs, PD.fields, PD.options);
 -->
 </script>
   

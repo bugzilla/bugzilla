@@ -12,28 +12,27 @@
   
 <script type="text/javascript">
 <!--
-var column_defs = [
-    { key:"id", label:"ID", sortable:true, sortOptions:{ sortFunction:sortBugIdLinks } },
-    { key:"bug_status", label:"Status", sortable:true },
-    { key:"version", label:"Version", sortable:true },
-    { key:"component", label:"Component", sortable:true },
-    { key:"bug_severity", label:"Severity", sortable:true, sortOptions:{ sortFunction:sortBugSeverity } },
-    { key:"Summary", label:"Summary", sortable:false },
+PD.options = {
+  paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25, alwaysVisible: false })
+};
+PD.column_defs = [
+  { key:"id", label:"ID", sortable:true, sortOptions:{ sortFunction: PD.sortBugIdLinks } },
+  { key:"bug_status", label:"Status", sortable:true },
+  { key:"version", label:"Version", sortable:true },
+  { key:"component", label:"Component", sortable:true },
+  { key:"bug_severity", label:"Severity", sortable:true, sortOptions:{ sortFunction: PD.sortBugSeverity } },
+  { key:"Summary", label:"Summary", sortable:false },
 ];
-var fields = [
-    { key:"id" },
-    { key:"bug_status" },
-    { key:"version" },
-    { key:"component" },
-    { key:"bug_severity" },
-    { key:"Summary" }
+PD.fields = [
+  { key:"id" },
+  { key:"bug_status" },
+  { key:"version" },
+  { key:"component" },
+  { key:"bug_severity" },
+  { key:"Summary" }
 ];
-addStatListener("recently_opened", "recently_opened_table", column_defs, fields, {
-    [% IF recently_opened.size > 25 %] paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25 }) [% END %]
-});
-addStatListener("recently_closed", "recently_closed_table", column_defs, fields, {
-    [% IF recently_closed.size > 25 %] paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25 }) [% END %]
-});
+PD.addStatListener("recently_opened", "recently_opened_table", PD.column_defs, PD.fields, PD.options);
+PD.addStatListener("recently_closed", "recently_closed_table", PD.column_defs, PD.fields, PD.options);
 -->
 </script>
   

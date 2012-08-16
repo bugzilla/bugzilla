@@ -17,22 +17,22 @@
   yui = [ "datatable", "paginator", "autocomplete" ]
   javascript_urls = [ "extensions/MyDashboard/web/js/mydashboard.js",
                       "extensions/MyDashboard/web/js/prod_comp_search.js" ]
-  onload = "showQuerySection();"
+  onload = "MD.showQuerySection();"
 %]
 
 <script type="text/javascript">
 <!--
   [%# Set up severities list for proper sorting %]
-  var severities = new Array();
+  MD.severities = new Array();
   [% sort_count = 0 %]
   [% FOREACH s = severities %]
-    severities['[% s FILTER js %]'] = [% sort_count FILTER js %];
+    MD.severities['[% s FILTER js %]'] = [% sort_count FILTER js %];
     [% sort_count = sort_count + 1 %]
   [% END %]
 
-  var full_query_list = [];
+  MD.full_query_list = [];
   [% FOREACH r = results %]
-    full_query_list.push('[% r.name FILTER js %]');
+    MD.full_query_list.push('[% r.name FILTER js %]');
   [% END %]
 -->
 </script>
@@ -49,7 +49,7 @@
     <div id="left">
       <div id="query_list_container">
         Choose query:
-        <select id="query" name="query" onchange="showQuerySection();">
+        <select id="query" name="query" onchange="MD.showQuerySection();">
           <optgroup id="standard_queries" label="Standard">
             [% FOREACH r = standard_results %]
               <option value="[% r.name FILTER html %]">[% r.heading FILTER html %]</option>
@@ -120,9 +120,8 @@
       </div>
       <script>
       <!--
-        addStatListener("requestee_table_container", "requestee_table", requestee_column_defs, requestee_fields, {
-          paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25, alwaysVisible: false })
-        });
+        MD.addStatListener("requestee_table_container", "requestee_table",
+                           MD.requestee_column_defs, MD.requestee_fields, MD.options);
       -->
       </script>
 
@@ -166,9 +165,8 @@
       </div>
       <script>
       <!--
-        addStatListener("requester_table_container", "requester_table", requester_column_defs, requester_fields, {
-          paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25, alwaysVisible: false })
-        });
+        MD.addStatListener("requester_table_container", "requester_table",
+                           MD.requester_column_defs, MD.requester_fields, MD.options);
       -->
       </script>
     </div>
@@ -213,9 +211,8 @@
     </div>
     <script>
     <!--
-      addStatListener("[% r.name FILTER js %]_table_container", "[% r.name FILTER js %]_table", query_column_defs, query_fields, {
-        paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25, alwaysVisible: false })
-      });
+      MD.addStatListener("[% r.name FILTER js %]_table_container", "[% r.name FILTER js %]_table",
+                         MD.query_column_defs, MD.query_fields, MD.options);
     -->
     </script>
   </div>

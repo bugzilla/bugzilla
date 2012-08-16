@@ -187,6 +187,18 @@ sub _standard_saved_queries {
 
     ### Saved query definitions 
     ### These are enabled through the userprefs.cgi UI
+
+    if ($user->showmybugslink) {
+        my $query = Bugzilla->params->{mybugstemplate};
+        $query =~ s/%userid%/$user->login/;
+        push(@query_defs, {
+            name        => 'mybugs',
+            heading     => "My Bugs",
+            saved       => 1,
+            params      => $query,
+        });
+    }
+
     foreach my $q (@{$user->queries}) {
         next if !$q->in_mydashboard;
         push(@query_defs, { name    => $q->name,

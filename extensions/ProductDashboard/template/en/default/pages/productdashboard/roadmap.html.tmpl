@@ -8,18 +8,20 @@
 
 <script type="text/javascript">
 <!--
-var column_defs = [
-    { key:"milestone", label:"Milestone", sortable:true },
-    { key:"percentage complete", label:"Percentage Complete", sortable:false },
-    { key:"links", label:"Links", sortable:false }, 
+PD.options = {
+  paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25, alwaysVisible: false })
+};
+PD.column_defs = [
+  { key:"milestone", label:"Milestone", sortable:true },
+  { key:"percentage complete", label:"Percentage Complete", sortable:false },
+  { key:"links", label:"Links", sortable:false }, 
 ];
-var fields = [
-    { key:"milestone" },
-    { key:"percentage complete" },
-    { key:"links" }
+PD.fields = [
+  { key:"milestone" },
+  { key:"percentage complete" },
+  { key:"links" }
 ];
-
-addStatListener("bug_milestones", "bug_milestones_table", column_defs, fields, {});
+PD.addStatListener("bug_milestones", "bug_milestones_table", PD.column_defs, PD.fields, PD.options);
 -->
 </script>
 

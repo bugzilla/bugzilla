@@ -6,7 +6,11 @@
  * defined by the Mozilla Public License, v. 2.0. 
  */
 
-function addStatListener (div_name, table_name, column_defs, fields, options) {
+YAHOO.namespace('ProductDashboard');
+
+var PD = YAHOO.ProductDashboard;
+
+PD.addStatListener = function (div_name, table_name, column_defs, fields, options) {
     YAHOO.util.Event.addListener(window, "load", function() {
         YAHOO.example.StatsFromMarkup = new function() {
             this.myDataSource = new YAHOO.util.DataSource(YAHOO.util.Dom.get(table_name));
@@ -20,7 +24,7 @@ function addStatListener (div_name, table_name, column_defs, fields, options) {
 }
 
 // Custom sort handler to sort by bug id inside an anchor tag
-var sortBugIdLinks = function(a, b, desc) {
+PD.sortBugIdLinks = function (a, b, desc) {
     // Deal with empty values
     if (!YAHOO.lang.isValue(a)) {
         return (!YAHOO.lang.isValue(b)) ? 0 : 1;
@@ -52,7 +56,7 @@ var sortBugIdLinks = function(a, b, desc) {
 }
 
 // Custom sort handler for bug severities
-var sortBugSeverity = function(a, b, desc) {
+PD.sortBugSeverity = function (a, b, desc) {
     // Deal with empty values
     if (!YAHOO.lang.isValue(a)) {
         return (!YAHOO.lang.isValue(b)) ? 0 : 1; 
@@ -73,7 +77,7 @@ var sortBugSeverity = function(a, b, desc) {
 }
 
 // Custom sort handler for bug priorities
-var sortBugPriority = function(a, b, desc) {
+PD.sortBugPriority = function (a, b, desc) {
     // Deal with empty values
     if (!YAHOO.lang.isValue(a)) {
         return (!YAHOO.lang.isValue(b)) ? 0 : 1;

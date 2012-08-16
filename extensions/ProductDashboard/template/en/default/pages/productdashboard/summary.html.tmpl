@@ -8,21 +8,24 @@
 
 <script type="text/javascript">
 <!--
-var column_defs = [
-    { key:"name", label:"Name", sortable:true },
-    { key:"count", label:"Count", sortable:true },
-    { key:"percentage", label:"Percentage", sortable:false }
+PD.options = {
+  paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25, alwaysVisible: false })
+};
+PD.column_defs = [
+  { key:"name", label:"Name", sortable:true },
+  { key:"count", label:"Count", sortable:true },
+  { key:"percentage", label:"Percentage", sortable:false }
 ];
-var fields = [
-    { key:"name" },
-    { key:"count", parser:"number" },
-    { key:"percentage" }
+PD.fields = [
+  { key:"name" },
+  { key:"count", parser:"number" },
+  { key:"percentage" }
 ];
-addStatListener("bug_counts", "bug_counts_table", column_defs, fields, {});
-addStatListener("status_counts", "status_counts_table", column_defs, fields, {});
-addStatListener("priority_counts", "priority_counts_table", column_defs, fields, {});
-addStatListener("severity_counts", "severity_counts_table", column_defs, fields, {});
-addStatListener("assignee_counts", "assignee_counts_table", column_defs, fields, {});
+PD.addStatListener("bug_counts", "bug_counts_table", PD.column_defs, PD.fields, PD.options);
+PD.addStatListener("status_counts", "status_counts_table", PD.column_defs, PD.fields, PD.options);
+PD.addStatListener("priority_counts", "priority_counts_table", PD.column_defs, PD.fields, PD.options);
+PD.addStatListener("severity_counts", "severity_counts_table", PD.column_defs, PD.fields, PD.options);
+PD.addStatListener("assignee_counts", "assignee_counts_table", PD.column_defs, PD.fields, PD.options);
 -->
 </script>
 

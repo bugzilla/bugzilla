@@ -6,7 +6,11 @@
  * defined by the Mozilla Public License, v. 2.0. 
  */
 
-var showQuerySection = function () {
+YAHOO.namespace('MyDashboard');
+
+var MD = YAHOO.MyDashboard;
+
+MD.showQuerySection = function () {
     var query_select = YAHOO.util.Dom.get('query');
     var selected_value = '';
     for (var i = 0, l = query_select.options.length; i < l; i++) {
@@ -14,9 +18,9 @@ var showQuerySection = function () {
             selected_value = query_select.options[i].value;
         }
     }
-    for (var i = 0, l = full_query_list.length; i < l; i++) {
-        var query = full_query_list[i];
-        if (selected_value == full_query_list[i]) {
+    for (var i = 0, l = MD.full_query_list.length; i < l; i++) {
+        var query = MD.full_query_list[i];
+        if (selected_value == MD.full_query_list[i]) {
             YAHOO.util.Dom.removeClass(query + '_container', 'bz_default_hidden');
         }
         else {
@@ -25,63 +29,63 @@ var showQuerySection = function () {
     }
 }
 
-var query_column_defs = [
-    { key:"id", label:"ID", sortable:true, sortOptions:{ sortFunction:sortBugIdLinks } },
+MD.query_column_defs = [
+    { key:"id", label:"ID", sortable:true, sortOptions:{ sortFunction: MD.sortBugIdLinks } },
     { key:"updated", label:"Updated", sortable:true },
     { key:"bug_status", label:"Status", sortable:true },
     { key:"summary", label:"Summary", sortable:true },
 ];
 
-var query_fields = [
+MD.query_fields = [
     { key:"id" },
     { key:"updated" },
     { key:"bug_status" },
     { key:"summary" }
 ];
 
-var requestee_column_defs = [
+MD.requestee_column_defs = [
   { key:"requester", label:"Requester", sortable:true },
   { key:"flag", label:"Flag", sortable:true },
   { key:"bug", label:"Bug", sortable:true },
   { key:"created", label:"Created", sortable:true }
 ];
 
-var requestee_fields = [
+MD.requestee_fields = [
   { key:"requester" },
   { key:"flag" },
   { key:"bug" },
   { key:"created" }
 ];
 
-var requester_column_defs = [
+MD.requester_column_defs = [
   { key:"requestee", label:"Requestee", sortable:true },
   { key:"flag", label:"Flag", sortable:true },
   { key:"bug", label:"Bug", sortable:true },
   { key:"created", label:"Created", sortable:true }
 ];
 
-var requester_fields = [
+MD.requester_fields = [
   { key:"requestee" },
   { key:"flag" },
   { key:"bug" },
   { key:"created" }
 ];
 
-function addStatListener (div_name, table_name, column_defs, fields, options) {
+MD.addStatListener = function (div_name, table_name, column_defs, fields, options) {
     YAHOO.util.Event.addListener(window, "load", function() {
         YAHOO.example.StatsFromMarkup = new function() {
             this.myDataSource = new YAHOO.util.DataSource(YAHOO.util.Dom.get(table_name));
             this.myDataSource.responseType = YAHOO.util.DataSource.TYPE_HTMLTABLE;
             this.myDataSource.responseSchema = { fields:fields };
             this.myDataTable = new YAHOO.widget.DataTable(div_name, column_defs, this.myDataSource, options);
-            this.myDataTable.subscribe("rowMouseoverEvent", this.myDataTable.onEventHighlightRow); 
-            this.myDataTable.subscribe("rowMouseoutEvent", this.myDataTable.onEventUnhighlightRow); 
+            this.myDataTable.subscribe("rowMouseoverEvent", this.myDataTable.onEventHighlightRow);
+            this.myDataTable.subscribe("rowMouseoutEvent", this.myDataTable.onEventUnhighlightRow);
         };
     });
 }
 
 // Custom sort handler to sort by bug id inside an anchor tag
-var sortBugIdLinks = function(a, b, desc) {
+MD.sortBugIdLinks = function (a, b, desc) {
     // Deal with empty values
     if (!YAHOO.lang.isValue(a)) {
         return (!YAHOO.lang.isValue(b)) ? 0 : 1;
@@ -113,17 +117,17 @@ var sortBugIdLinks = function(a, b, desc) {
 }
 
 // Custom sort handler for bug severities
-var sortBugSeverity = function(a, b, desc) {
+MD.sortBugSeverity = function (a, b, desc) {
     // Deal with empty values
     if (!YAHOO.lang.isValue(a)) {
-        return (!YAHOO.lang.isValue(b)) ? 0 : 1; 
+        return (!YAHOO.lang.isValue(b)) ? 0 : 1;
     }
     else if(!YAHOO.lang.isValue(b)) {
         return -1;
     }
 
-    var new_a = new Number(severities[YAHOO.lang.trim(a.getData('bug_severity'))]);
-    var new_b = new Number(severities[YAHOO.lang.trim(b.getData('bug_severity'))]);
+    var new_a = new Number(MD.severities[YAHOO.lang.trim(a.getData('bug_severity'))]);
+    var new_b = new Number(MD.severities[YAHOO.lang.trim(b.getData('bug_severity'))]);
 
     if (!desc) {
         return YAHOO.util.Sort.compare(new_a, new_b);
@@ -134,7 +138,7 @@ var sortBugSeverity = function(a, b, desc) {
 }
 
 // Custom sort handler for bug priorities
-var sortBugPriority = function(a, b, desc) {
+MD.sortBugPriority = function (a, b, desc) {
     // Deal with empty values
     if (!YAHOO.lang.isValue(a)) {
         return (!YAHOO.lang.isValue(b)) ? 0 : 1;
@@ -143,8 +147,8 @@ var sortBugPriority = function(a, b, desc) {
         return -1;
     }
 
-    var new_a = new Number(priorities[YAHOO.lang.trim(a.getData('priority'))]);
-    var new_b = new Number(priorities[YAHOO.lang.trim(b.getData('priority'))]);
+    var new_a = new Number(MD.priorities[YAHOO.lang.trim(a.getData('priority'))]);
+    var new_b = new Number(MD.priorities[YAHOO.lang.trim(b.getData('priority'))]);
 
     if (!desc) {
         return YAHOO.util.Sort.compare(new_a, new_b);

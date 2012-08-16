@@ -11,21 +11,21 @@
 [% filtered_product = product.name FILTER html %]
 [% PROCESS global/header.html.tmpl
   title = "Product Dashboard: $filtered_product"
-  style_urls = [ "skins/standard/buglist.css", 
-                 "js/yui/assets/skins/sam/paginator.css", 
+  style_urls = [ "skins/standard/buglist.css",
+                 "js/yui/assets/skins/sam/paginator.css",
                  "extensions/ProductDashboard/web/styles/productdashboard.css" ]
   yui = [ "datatable", "paginator", "calendar" ]
-  javascript_urls = [ "js/util.js", "js/field.js", 
+  javascript_urls = [ "js/util.js", "js/field.js",
                       "extensions/ProductDashboard/web/js/productdashboard.js" ]
 %]
 
 <script type="text/javascript">
 <!--
   [%# Set up severities list for proper sorting %]
-  var severities = new Array();
+  PD.severities = new Array();
   [% sort_count = 0 %]
   [% FOREACH s = severities %]
-    severities['[% s FILTER js %]'] = [% sort_count FILTER js %];
+    PD.severities['[% s FILTER js %]'] = [% sort_count FILTER js %];
     [% sort_count = sort_count + 1 %]
   [% END %]
 -->

@@ -16,30 +16,29 @@
 
   <script type="text/javascript">
   <!--
-  var column_defs = [
-      { key:"id", label:"ID", sortable:true, sortOptions:{ sortFunction:sortBugIdLinks } },
-      { key:"bug_status", label:"Status", sortable:true },
-      { key:"version", label:"Version", sortable:true },
-      { key:"component", label:"Component", sortable:true },
-      { key:"bug_severity", label:"Severity", sortable:true, sortOptions:{ sortFunction:sortBugSeverity } },
-      { key:"Summary", label:"Summary", sortable:false },
+  PD.options = {
+    paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25, alwaysVisible: false })
+  };
+  PD.column_defs = [
+    { key:"id", label:"ID", sortable:true, sortOptions:{ sortFunction: PD.sortBugIdLinks } },
+    { key:"bug_status", label:"Status", sortable:true },
+    { key:"version", label:"Version", sortable:true },
+    { key:"component", label:"Component", sortable:true },
+    { key:"bug_severity", label:"Severity", sortable:true, sortOptions:{ sortFunction: PD.sortBugSeverity } },
+    { key:"Summary", label:"Summary", sortable:false },
   ];
-  var fields = [
-      { key:"id" },
-      { key:"bug_status" },
-      { key:"version" },
-      { key:"component" },
-      { key:"bug_severity" },
-      { key:"Summary" }
+  PD.fields = [
+    { key:"id" },
+    { key:"bug_status" },
+    { key:"version" },
+    { key:"component" },
+    { key:"bug_severity" },
+    { key:"Summary" }
   ];
   [% IF user.is_timetracker %]
-    addStatListener("past_due", "past_due_table", column_defs, fields, {
-        [% IF summary.past_due.size > 25 %] paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25 }) [% END %]
-    });
+    PD.addStatListener("past_due", "past_due_table", PD.column_defs, PD.fields, PD.options);
   [% END %]
-  addStatListener("updated_recently", "updated_recently_table", column_defs, fields, {
-      [% IF summary.updated_recently.size > 25 %] paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25 }) [% END %]
-  });
+  PD.addStatListener("updated_recently", "updated_recently_table", PD.column_defs, PD.fields, PD.options);
   -->
   </script>
 
@@ -121,21 +120,24 @@
 
   <script type="text/javascript">
   <!--
-  var column_defs = [
-      { key:"name", label:"Name", sortable:true },
-      { key:"count", label:"Count", sortable:true },
-      { key:"percentage", label:"Percentage", sortable:false },
-      { key:"bug_list", label:"[% terms.Bug %] List", sortable:false }
+  PD.options = {
+    paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25,  alwaysVisible: false })
+  };
+  PD.column_defs = [
+    { key:"name", label:"Name", sortable:true },
+    { key:"count", label:"Count", sortable:true },
+    { key:"percentage", label:"Percentage", sortable:false },
+    { key:"bug_list", label:"[% terms.Bug %] List", sortable:false }
   ];
-  var fields = [
-      { key:"name" },
-      { key:"count", parser:"number" },
-      { key:"percentage" },
-      { key:"bug_list" }
+  PD.fields = [
+    { key:"name" },
+    { key:"count", parser:"number" },
+    { key:"percentage" },
+    { key:"bug_list" }
   ];
-  addStatListener("component_counts", "component_counts_table", column_defs, fields, {});
-  addStatListener("version_counts", "version_counts_table", column_defs, fields, {});
-  addStatListener("milestone_counts", "milestone_counts_table", column_defs, fields, {});
+  PD.addStatListener("component_counts", "component_counts_table", PD.column_defs, PD.fields, PD.options);
+  PD.addStatListener("version_counts", "version_counts_table", PD.column_defs, PD.fields, PD.options);
+  PD.addStatListener("milestone_counts", "milestone_counts_table", PD.column_defs, PD.fields, PD.options);
   -->
   </script>
 

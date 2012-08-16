@@ -206,7 +206,7 @@ sub arecibo_handle_error {
     ];
 
     # fork then post
-    $SIG{CHLD} = 'IGNORE';
+    local $SIG{CHLD} = 'IGNORE';
     my $pid = fork();
     if (defined($pid) && $pid == 0) {
         # detach

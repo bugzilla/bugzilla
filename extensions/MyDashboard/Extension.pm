@@ -190,7 +190,9 @@ sub _standard_saved_queries {
 
     if ($user->showmybugslink) {
         my $query = Bugzilla->params->{mybugstemplate};
-        $query =~ s/%userid%/$user->login/;
+        my $login = $user->login;
+        $query =~ s/%userid%/$login/;
+        $query =~ s/^buglist.cgi\?//;
         push(@query_defs, {
             name        => 'mybugs',
             heading     => "My Bugs",
@@ -207,7 +209,7 @@ sub _standard_saved_queries {
                             params  => $q->url });
     }
 
-    my $date_now = DateTime->now(time_zone => Bugzilla->local_timezone);
+    #my $date_now = DateTime->now(time_zone => Bugzilla->local_timezone);
 
     ### Collect the query results for display in the template
 
@@ -230,10 +232,10 @@ sub _standard_saved_queries {
             my $bug = {};
             foreach my $column (@select_columns) {
                 $bug->{$column} = shift @$row;
-                if ($column eq 'changeddate') {
-                   my $date_then = datetime_from($bug->{$column});
-                   $bug->{'updated'} = time_ago($date_then, $date_now);
-                }
+                #if ($column eq 'changeddate') {
+                #   my $date_then = datetime_from($bug->{$column});
+                #   $bug->{'updated'} = time_ago($date_then, $date_now);
+                #}
             }
             push(@bugs, $bug);
         }

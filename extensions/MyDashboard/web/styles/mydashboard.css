@@ -8,56 +8,24 @@
 #mydashboard .yui-skin-sam .yui-dt table {
     width:100%;
 }
-#mydashboard #query-links { 
-    display: table; 
-    padding-left: 1ex; 
-    padding-right:1ex;
-}
-#mydashboard #links-standard, 
-#mydashboard #links-saved, 
-#mydashboard #links-special {
-    display: table-row;
-    list-style-type: none;
-}
-#mydashboard .label {
-    display: table-cell;
-    white-space: nowrap;
-    vertical-align: top;
-    padding-right: 1ex;
-    font-weight: bold;
-}
-#mydashboard .links {
-    display: table-cell;
-    vertical-align: top;
-}
-#mydashboard .separator {
-    color: #000000;
-}
+
 #mydashboard .query_heading {
     font-size: 18px;
     font-weight: strong;
+    padding-bottom: 5px;
     color: rgb(72, 72, 72);
 }
+
 #mydashboard .query_description {
     font-size: 90%;
     font-style: italic;
     padding-bottom: 5px;
     color: rgb(109, 117, 129);
 }
-#mydashboard .bug_list,
-#mydashboard .back_top {
-    font-size: 80%;
-}
-#mydashboard table {
-    margin-bottom: 10px;
 
-}
-#mydashboard hr {
-    color: #000;
-    background-color: #000;
-    border: 0;
-    height: 1px;
-    width: 100%;
+#mydashboard .bugs_found,
+#mydashboard .flags_found {
+    font-size: 80%;
 }
 
 #mydashboard_container {

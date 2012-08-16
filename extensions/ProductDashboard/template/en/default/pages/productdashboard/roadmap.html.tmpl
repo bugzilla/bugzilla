@@ -8,9 +8,6 @@
 
 <script type="text/javascript">
 <!--
-PD.options = {
-  paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25, alwaysVisible: false })
-};
 PD.column_defs = [
   { key:"milestone", label:"Milestone", sortable:true },
   { key:"percentage complete", label:"Percentage Complete", sortable:false },
@@ -21,7 +18,9 @@ PD.fields = [
   { key:"percentage complete" },
   { key:"links" }
 ];
-PD.addStatListener("bug_milestones", "bug_milestones_table", PD.column_defs, PD.fields, PD.options);
+PD.addStatListener("bug_milestones", "bug_milestones_table",
+                   PD.column_defs, PD.fields,
+                   { paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25, alwaysVisible: false }) });
 -->
 </script>
 

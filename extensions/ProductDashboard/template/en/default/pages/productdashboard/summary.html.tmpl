@@ -8,9 +8,6 @@
 
 <script type="text/javascript">
 <!--
-PD.options = {
-  paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25, alwaysVisible: false })
-};
 PD.column_defs = [
   { key:"name", label:"Name", sortable:true },
   { key:"count", label:"Count", sortable:true },
@@ -21,11 +18,21 @@ PD.fields = [
   { key:"count", parser:"number" },
   { key:"percentage" }
 ];
-PD.addStatListener("bug_counts", "bug_counts_table", PD.column_defs, PD.fields, PD.options);
-PD.addStatListener("status_counts", "status_counts_table", PD.column_defs, PD.fields, PD.options);
-PD.addStatListener("priority_counts", "priority_counts_table", PD.column_defs, PD.fields, PD.options);
-PD.addStatListener("severity_counts", "severity_counts_table", PD.column_defs, PD.fields, PD.options);
-PD.addStatListener("assignee_counts", "assignee_counts_table", PD.column_defs, PD.fields, PD.options);
+PD.addStatListener("bug_counts", "bug_counts_table",
+                   PD.column_defs, PD.fields,
+                   { paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25, alwaysVisible: false }) });
+PD.addStatListener("status_counts", "status_counts_table",
+                   PD.column_defs, PD.fields,
+                   { paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25, alwaysVisible: false }) });
+PD.addStatListener("priority_counts", "priority_counts_table",
+                   PD.column_defs, PD.fields,
+                   { paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25, alwaysVisible: false }) });
+PD.addStatListener("severity_counts", "severity_counts_table",
+                   PD.column_defs, PD.fields,
+                   { paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25, alwaysVisible: false }) });
+PD.addStatListener("assignee_counts", "assignee_counts_table",
+                   PD.column_defs, PD.fields,
+                   { paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25, alwaysVisible: false }) });
 -->
 </script>
 

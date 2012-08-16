@@ -29,10 +29,6 @@ MD.showQuerySection = function () {
     }
 }
 
-MD.options = {
-  paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25, alwaysVisible: false })
-};
-
 MD.query_column_defs = [
     { key:"id", label:"ID", sortable:true, sortOptions:{ sortFunction: MD.sortBugIdLinks } },
     { key:"updated", label:"Updated", sortable:true },

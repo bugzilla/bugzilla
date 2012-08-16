@@ -12,9 +12,6 @@
   
 <script type="text/javascript">
 <!--
-PD.options = {
-  paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25, alwaysVisible: false })
-};
 PD.column_defs = [
   { key:"id", label:"ID", sortable:true, sortOptions:{ sortFunction: PD.sortBugIdLinks } },
   { key:"count", label:"Count", sortable:true },
@@ -33,7 +30,9 @@ PD.fields = [
   { key:"bug_severity" },
   { key:"Summary" }
 ];
-PD.addStatListener("popularity_counts", "popularity_counts_table", PD.column_defs, PD.fields, PD.options);
+PD.addStatListener("popularity_counts", "popularity_counts_table",
+                   PD.column_defs, PD.fields,
+                   { paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25, alwaysVisible: false }) });
 -->
 </script>
 

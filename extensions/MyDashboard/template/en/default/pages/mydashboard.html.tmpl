@@ -121,7 +121,8 @@
       <script>
       <!--
         MD.addStatListener("requestee_table_container", "requestee_table",
-                           MD.requestee_column_defs, MD.requestee_fields, MD.options);
+                           MD.requestee_column_defs, MD.requestee_fields,
+                           { paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25, alwaysVisible: false }) });
       -->
       </script>
 
@@ -166,7 +167,8 @@
       <script>
       <!--
         MD.addStatListener("requester_table_container", "requester_table",
-                           MD.requester_column_defs, MD.requester_fields, MD.options);
+                           MD.requester_column_defs, MD.requester_fields,
+                           { paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25,  alwaysVisible: false }) });
       -->
       </script>
     </div>
@@ -212,7 +214,8 @@
     <script>
     <!--
       MD.addStatListener("[% r.name FILTER js %]_table_container", "[% r.name FILTER js %]_table",
-                         MD.query_column_defs, MD.query_fields, MD.options);
+                         MD.query_column_defs, MD.query_fields,
+                         { paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25, alwaysVisible: false }) });
     -->
     </script>
   </div>

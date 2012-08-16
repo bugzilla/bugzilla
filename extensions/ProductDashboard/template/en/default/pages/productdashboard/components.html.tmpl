@@ -118,9 +118,6 @@
 
   <script type="text/javascript">
   <!--
-  PD.options = {
-    paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25,  alwaysVisible: false })
-  };
   PD.column_defs = [
     { key:"name", label:"Name", sortable:true },
     { key:"count", label:"Count", sortable:true },
@@ -133,9 +130,15 @@
     { key:"percentage" },
     { key:"bug_list" }
   ];
-  PD.addStatListener("component_counts", "component_counts_table", PD.column_defs, PD.fields, PD.options);
-  PD.addStatListener("version_counts", "version_counts_table", PD.column_defs, PD.fields, PD.options);
-  PD.addStatListener("milestone_counts", "milestone_counts_table", PD.column_defs, PD.fields, PD.options);
+  PD.addStatListener("component_counts", "component_counts_table",
+                     PD.column_defs, PD.fields,
+                     { paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25, alwaysVisible: false }) });
+  PD.addStatListener("version_counts", "version_counts_table",
+                     PD.column_defs, PD.fields,
+                     { paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25, alwaysVisible: false }) });
+  PD.addStatListener("milestone_counts", "milestone_counts_table",
+                     PD.column_defs, PD.fields,
+                     { paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25, alwaysVisible: false }) });
   -->
   </script>
 

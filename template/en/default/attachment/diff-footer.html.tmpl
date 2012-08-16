@@ -20,6 +20,12 @@
 
 </form>
 
+[% IF !file_count %]
+<div id="error_msg" class="throw_error">
+  No valid patch files were found in the attachment.
+</div>
+[% END %]
+
 [% IF headers %]
 
   <br>

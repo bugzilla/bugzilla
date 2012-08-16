@@ -33,8 +33,8 @@ sub process_diff {
     my ($reader, $last_reader) = setup_patch_readers(undef, $context);
 
     if ($format eq 'raw') {
-        require PatchReader::DiffPrinter::raw;
-        $last_reader->sends_data_to(new PatchReader::DiffPrinter::raw());
+        require Bugzilla::PatchReader::DiffPrinter::raw;
+        $last_reader->sends_data_to(new Bugzilla::PatchReader::DiffPrinter::raw());
         # Actually print out the patch.
         print $cgi->header(-type => 'text/plain',
                            -x_content_type_options => "nosniff",
@@ -115,8 +115,8 @@ sub process_interdiff {
     my ($reader, $last_reader) = setup_patch_readers("", $context);
 
     if ($format eq 'raw') {
-        require PatchReader::DiffPrinter::raw;
-        $last_reader->sends_data_to(new PatchReader::DiffPrinter::raw());
+        require Bugzilla::PatchReader::DiffPrinter::raw;
+        $last_reader->sends_data_to(new Bugzilla::PatchReader::DiffPrinter::raw());
         # Actually print out the patch.
         print $cgi->header(-type => 'text/plain',
                            -x_content_type_options => "nosniff",
@@ -154,29 +154,29 @@ sub get_unified_diff {
     my ($attachment, $format) = @_;
 
     # Bring in the modules we need.
-    require PatchReader::Raw;
-    require PatchReader::FixPatchRoot;
-    require PatchReader::DiffPrinter::raw;
-    require PatchReader::PatchInfoGrabber;
+    require Bugzilla::PatchReader::Raw;
+    require Bugzilla::PatchReader::FixPatchRoot;
+    require Bugzilla::PatchReader::DiffPrinter::raw;
+    require Bugzilla::PatchReader::PatchInfoGrabber;
     require File::Temp;
 
     $attachment->ispatch
       || ThrowCodeError('must_be_patch', { 'attach_id' => $attachment->id });
 
     # Reads in the patch, converting to unified diff in a temp file.
-    my $reader = new PatchReader::Raw;
+    my $reader = new Bugzilla::PatchReader::Raw;
     my $last_reader = $reader;
 
     # Fixes patch root (makes canonical if possible).
     if (Bugzilla->params->{'cvsroot'}) {
         my $fix_patch_root =
-            new PatchReader::FixPatchRoot(Bugzilla->params->{'cvsroot'});
+            new Bugzilla::PatchReader::FixPatchRoot(Bugzilla->params->{'cvsroot'});
         $last_reader->sends_data_to($fix_patch_root);
         $last_reader = $fix_patch_root;
     }
 
     # Grabs the patch file info.
-    my $patch_info_grabber = new PatchReader::PatchInfoGrabber();
+    my $patch_info_grabber = new Bugzilla::PatchReader::PatchInfoGrabber();
     $last_reader->sends_data_to($patch_info_grabber);
     $last_reader = $patch_info_grabber;
 
@@ -186,7 +186,7 @@ sub get_unified_diff {
         # The HTML page will be displayed with the UTF-8 encoding.
         binmode $fh, ':utf8';
     }
-    my $raw_printer = new PatchReader::DiffPrinter::raw($fh);
+    my $raw_printer = new Bugzilla::PatchReader::DiffPrinter::raw($fh);
     $last_reader->sends_data_to($raw_printer);
     $last_reader = $raw_printer;
 
@@ -230,13 +230,13 @@ sub setup_patch_readers {
 
     # Define the patch readers.
     # The reader that reads the patch in (whatever its format).
-    require PatchReader::Raw;
-    my $reader = new PatchReader::Raw;
+    require Bugzilla::PatchReader::Raw;
+    my $reader = new Bugzilla::PatchReader::Raw;
     my $last_reader = $reader;
     # Fix the patch root if we have a cvs root.
     if (Bugzilla->params->{'cvsroot'}) {
-        require PatchReader::FixPatchRoot;
-        $last_reader->sends_data_to(new PatchReader::FixPatchRoot(Bugzilla->params->{'cvsroot'}));
+        require Bugzilla::PatchReader::FixPatchRoot;
+        $last_reader->sends_data_to(new Bugzilla::PatchReader::FixPatchRoot(Bugzilla->params->{'cvsroot'}));
         $last_reader->sends_data_to->diff_root($diff_root) if defined($diff_root);
         $last_reader = $last_reader->sends_data_to;
     }
@@ -245,12 +245,12 @@ sub setup_patch_readers {
     if ($context ne 'patch' && Bugzilla->localconfig->{cvsbin} 
         && Bugzilla->params->{'cvsroot_get'}) 
     {
-        require PatchReader::AddCVSContext;
+        require Bugzilla::PatchReader::AddCVSContext;
         # We need to set $cvsbin as global, because PatchReader::CVSClient
         # needs it in order to find 'cvs'.
         $main::cvsbin = Bugzilla->localconfig->{cvsbin};
         $last_reader->sends_data_to(
-          new PatchReader::AddCVSContext($context, Bugzilla->params->{'cvsroot_get'}));
+          new Bugzilla::PatchReader::AddCVSContext($context, Bugzilla->params->{'cvsroot_get'}));
         $last_reader = $last_reader->sends_data_to;
     }
 
@@ -262,7 +262,7 @@ sub setup_template_patch_reader {
     my $cgi = Bugzilla->cgi;
     my $template = Bugzilla->template;
 
-    require PatchReader::DiffPrinter::template;
+    require Bugzilla::PatchReader::DiffPrinter::template;
 
     # Define the vars for templates.
     if (defined $cgi->param('headers')) {
@@ -281,7 +281,7 @@ sub setup_template_patch_reader {
     print $cgi->header(-type => 'text/html',
                        -expires => '+3M');
 
-    $last_reader->sends_data_to(new PatchReader::DiffPrinter::template($template,
+    $last_reader->sends_data_to(new Bugzilla::PatchReader::DiffPrinter::template($template,
                                 "attachment/diff-header.$format.tmpl",
                                 "attachment/diff-file.$format.tmpl",
                                 "attachment/diff-footer.$format.tmpl",

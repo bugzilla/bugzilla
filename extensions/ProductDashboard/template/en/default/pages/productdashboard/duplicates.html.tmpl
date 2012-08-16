@@ -37,7 +37,9 @@ PD.addStatListener("duplicate_counts", "duplicate_counts_table", PD.column_defs,
 });
 -->
 </script>
-  
+
+<h3>Most duplicated [% terms.bugs %]</h3>
+
 [% IF by_duplicate.size %]
   <b>[% by_duplicate.size FILTER html %]&nbsp;[% terms.Bugs %] Found</b>
   <div class="yui-skin-sam">
@@ -47,7 +49,7 @@ PD.addStatListener("duplicate_counts", "duplicate_counts_table", PD.column_defs,
         <tr bgcolor="#CCCCCC">
           [% FOREACH column = [ "ID", "Dupe Count", "Status", "Version"
                                 "Component", "Severity" "Summary" ] %]
-  
+ 
             <th>[% column FILTER html %]</th>
           [% END %]
         </tr>
@@ -71,5 +73,5 @@ PD.addStatListener("duplicate_counts", "duplicate_counts_table", PD.column_defs,
     </div>
   </div>
 [% ELSE %]
-  <h3>No duplicate [% terms.bugs %] found.</h3>
+  <b>No duplicate [% terms.bugs %] found.</b>
 [% END %]

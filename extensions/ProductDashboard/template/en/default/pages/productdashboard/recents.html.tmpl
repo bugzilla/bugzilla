@@ -35,7 +35,9 @@ PD.addStatListener("recently_opened", "recently_opened_table", PD.column_defs, P
 PD.addStatListener("recently_closed", "recently_closed_table", PD.column_defs, PD.fields, PD.options);
 -->
 </script>
-  
+
+<h3>Most recently opened and closed [% terms.bugs %]</h3>
+
 <p>
   Activity within the last <input type="text" size="4" name="recent_days" 
                                   value="[% recent_days FILTER html %]">

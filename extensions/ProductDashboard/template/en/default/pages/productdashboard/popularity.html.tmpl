@@ -36,7 +36,9 @@ PD.fields = [
 PD.addStatListener("popularity_counts", "popularity_counts_table", PD.column_defs, PD.fields, PD.options);
 -->
 </script>
-  
+
+<h3>Most voted on [% terms.bugs %]</h3>
+
 [% IF by_popularity.size %]
   <b>[% by_popularity.size FILTER html %]&nbsp;[% terms.Bugs %] Found</b>
   <div class="yui-skin-sam">
@@ -70,5 +72,5 @@ PD.addStatListener("popularity_counts", "popularity_counts_table", PD.column_def
     </div>
   </div>
 [% ELSE %]
-  <h3>No [% terms.bugs %] found.</h3>
+  <b>No [% terms.bugs %] found.</b>
 [% END %]

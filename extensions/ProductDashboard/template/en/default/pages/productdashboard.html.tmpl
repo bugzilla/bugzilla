@@ -56,17 +56,22 @@
       link  => "page.cgi?id=productdashboard.html&amp;product=$url_filtered_product&bug_status=$url_filtered_status&tab=duplicates"
     },
     {
-      name  => "popularity",
-      label => "Popularity",
-      link  => "page.cgi?id=productdashboard.html&amp;product=$url_filtered_product&bug_status=$url_filtered_status&tab=popularity"
-    },
-    {
       name  => "roadmap",
       label => "Road Map",
       link  => "page.cgi?id=productdashboard.html&amp;product=$url_filtered_product&bug_status=$url_filtered_status&tab=roadmap"
     },
   ]
 %]
+
+[% IF product.votesperuser %]
+  [%
+    tabs.push({
+      name  => "popularity",
+      label => "Popularity",
+      link  => "page.cgi?id=productdashboard.html&amp;product=$url_filtered_product&bug_status=$url_filtered_status&tab=popularity"
+    })
+  %]
+[% END %]
 
 [% FOREACH tab IN tabs %]
   [% IF tab.name == current_tab_name %]
@@ -151,10 +156,6 @@
        tabs        = tabs
        current_tab = current_tab
     %]
-
-    <div class="current_tab_label">
-      [% current_tab.label FILTER html %]
-    </div>
 
     [% IF current_tab.name == 'summary' %]
       [% PROCESS pages/productdashboard/summary.html.tmpl %]

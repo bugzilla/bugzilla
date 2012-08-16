@@ -116,8 +116,6 @@
 
 [% ELSE %]
 
-  [% summary_url = "page.cgi?id=productdashboard.html&amp;product=$url_filtered_product&bug_status=$url_filtered_status&tab=components" %]
-
   <script type="text/javascript">
   <!--
   PD.options = {
@@ -141,13 +139,17 @@
   -->
   </script>
 
+  [% summary_url = "page.cgi?id=productdashboard.html&amp;product=$url_filtered_product&bug_status=$url_filtered_status&tab=components" %]
+
+  <h3>[% terms.Bug %] counts per component, version and milestone.</h3>
+
   <p>
     <a href="#component">Component</a> |
     <a href="#version">Version</a> |
     <a href="#milestone">Milestone</a>
   </p>
 
-  <p>Click on value to show additional information</p>
+  <p>Click on a value to show a list of most recently updated bugs.</p>
 
   <div class="yui-skin-sam"> 
     <a name="component"></a>

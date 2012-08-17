@@ -61,11 +61,18 @@ sub new {
     # Moreover, it causes unexpected behaviors, such as totally breaking
     # the rendering of pages.
     my $script = basename($0);
-    if ($self->path_info) {
+    if (my $path_info = $self->path_info) {
         my @whitelist;
         Bugzilla::Hook::process('path_info_whitelist', { whitelist => \@whitelist });
         if (!grep($_ eq $script, @whitelist)) {
-            print $self->redirect($self->url(-path => 0, -query => 1));
+            # IIS includes the full path to the script in PATH_INFO,
+            # so we have to extract the real PATH_INFO from it,
+            # else we will be redirected outside Bugzilla.
+            my $script_name = $self->script_name;
+            $path_info =~ s/^\Q$script_name\E//;
+            if ($path_info) {
+                print $self->redirect($self->url(-path => 0, -query => 1));
+            }
         }
     }
 

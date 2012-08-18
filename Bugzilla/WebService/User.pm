@@ -202,31 +202,32 @@ sub get {
     }
    
     my $in_group = $self->_filter_users_by_group(
-        \@user_objects, $params); 
-    if (Bugzilla->user->in_group('editusers')) {
-        @users = 
-            map {filter $params, {
-                id        => $self->type('int', $_->id),
-                real_name => $self->type('string', $_->name),
-                name      => $self->type('string', $_->login),
-                email     => $self->type('string', $_->email),
-                can_login => $self->type('boolean', $_->is_enabled ? 1 : 0),
-                groups    => $self->_filter_bless_groups($_->groups), 
-                email_enabled     => $self->type('boolean', $_->email_enabled),
-                login_denied_text => $self->type('string', $_->disabledtext),
-            }} @$in_group;
-    }    
-    else {
-        @users =
-            map {filter $params, {
-                id        => $self->type('int', $_->id),
-                real_name => $self->type('string', $_->name),
-                name      => $self->type('string', $_->login),
-                email     => $self->type('string', $_->email),
-                can_login => $self->type('boolean', $_->is_enabled ? 1 : 0),
-                groups    => $self->_filter_bless_groups($_->groups),
-            }} @$in_group;
-    }
+        \@user_objects, $params);
+
+    # Make the @users array bigger in advance to gain some performance.
+    $#users += $#$in_group;
+
+    foreach my $user (@$in_group) {
+        my $user_info = {
+            id        => $self->type('int', $user->id),
+            real_name => $self->type('string', $user->name),
+            name      => $self->type('string', $user->login),
+            email     => $self->type('string', $user->email),
+            can_login => $self->type('boolean', $user->is_enabled ? 1 : 0),
+            groups    => $self->_filter_bless_groups($user->groups),
+        };
+        
+        if (Bugzilla->user->in_group('editusers')) {
+            $user_info->{email_enabled}     = $self->type('boolean', $user->email_enabled);
+            $user_info->{login_denied_text} = $self->type('string', $user->disabledtext);
+        }
+        
+        if (Bugzilla->user->id == $user->id) {
+            $user_info->{saved_searches} = [map { $self->_query_to_hash($_) } @{ $user->queries }];
+        }
+        
+        push(@users, filter($params, $user_info));
+}
 
     return { users => \@users };
 }
@@ -344,6 +345,17 @@ sub _group_to_hash {
         name        => $self->type('string', $group->name), 
         description => $self->type('string', $group->description), 
     };
+    return $item;
+}
+
+sub _query_to_hash {
+    my ($self, $query) = @_;
+    my $item = {
+        id   => $self->type('int', $query->id),
+        name => $self->type('string', $query->name),
+        url  => $self->type('string', $query->url),
+    };
+
     return $item;
 }
 
@@ -788,11 +800,34 @@ C<string> The description for the group
 
 =back
 
+=item saved_searches
+
+C<array> An array of hashes, each of which represents a user's saved search and has
+the following keys:
+
+=over
+
+=item id
+
+C<int> An integer id uniquely identifying the saved search.
+
+=item name
+
+C<string> The name of the saved search.
+
+=item url
+
+C<string> The CGI parameters for the saved search.
+
+=back
+
 B<Note>: If you are not logged in to Bugzilla when you call this function, you
 will only be returned the C<id>, C<name>, and C<real_name> items. If you are
 logged in and not in editusers group, you will only be returned the C<id>, C<name>, 
-C<real_name>, C<email>, and C<can_login> items. The groups returned are filtered
-based on your permission to bless each group.
+C<real_name>, C<email>, C<can_login>, and C<groups> items. The groups returned are
+filtered based on your permission to bless each group.
+The C<saved_searches> item is only returned if you are querying your own account,
+even if you are in the editusers group.
 
 =back
 
@@ -828,7 +863,7 @@ function.
 =item C<include_disabled> added in Bugzilla B<4.0>. Default behavior 
 for C<match> has changed to only returning enabled accounts.
 
-=item C<groups> Added in Bugzilla B<4.4>.
+=item C<groups> and C<saved_searches> added in Bugzilla B<4.4>.
 
 =back
 

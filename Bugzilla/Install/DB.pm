@@ -3770,6 +3770,7 @@ sub _shorten_long_quips {
             print " $quipid";
             $query->execute($quip_str, $quipid);
         }
+        print "\n";
     }
     $dbh->bz_alter_column('quips', 'quip', { TYPE => 'varchar(512)', NOTNULL => 1});
 }

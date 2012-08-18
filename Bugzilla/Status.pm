@@ -175,8 +175,8 @@ sub _status_condition {
     my ($self, $old_status) = @_;
     my @values;
     my $cond = 'old_status IS NULL';
-    # For newly-filed bugs
-    if ($old_status) {
+    # We may pass a fake status object to represent the initial unset state.
+    if ($old_status && $old_status->id)  {
         $cond = 'old_status = ?';
         push(@values, $old_status->id);
     }

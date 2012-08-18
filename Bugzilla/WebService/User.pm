@@ -204,9 +204,6 @@ sub get {
     my $in_group = $self->_filter_users_by_group(
         \@user_objects, $params);
 
-    # Make the @users array bigger in advance to gain some performance.
-    $#users += $#$in_group;
-
     foreach my $user (@$in_group) {
         my $user_info = {
             id        => $self->type('int', $user->id),

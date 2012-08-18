@@ -65,6 +65,10 @@ if ($action eq "add") {
                    || $user->in_group('bz_quip_moderators') || 0;
     my $comment = $cgi->param("quip");
     $comment || ThrowUserError("need_quip");
+    
+    ThrowUserError("quip_too_long", { length => length($comment) }) 
+        if length($comment) > MAX_QUIP_LENGTH;
+
     trick_taint($comment); # Used in a placeholder below
 
     $dbh->do("INSERT INTO quips (userid, quip, approved) VALUES (?, ?, ?)",

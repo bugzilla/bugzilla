@@ -1484,7 +1484,7 @@ use constant ABSTRACT_SCHEMA => {
                          REFERENCES => {TABLE  => 'profiles', 
                                         COLUMN => 'userid',
                                         DELETE => 'SET NULL'}},
-            quip     => {TYPE => 'MEDIUMTEXT', NOTNULL => 1},
+            quip     => {TYPE => 'varchar(512)', NOTNULL => 1},
             approved => {TYPE => 'BOOLEAN', NOTNULL => 1,
                          DEFAULT => 'TRUE'},
         ],

@@ -161,6 +161,7 @@ use Memoize;
     MAX_BUG_URL_LENGTH
     MAX_POSSIBLE_DUPLICATES
     MAX_ATTACH_FILENAME_LENGTH
+    MAX_QUIP_LENGTH
 
     PASSWORD_DIGEST_ALGORITHM
     PASSWORD_SALT_LENGTH
@@ -555,6 +556,9 @@ use constant MAX_POSSIBLE_DUPLICATES => 25;
 # be truncated to this value). Do not increase above 255 without making the
 # necessary schema changes to store longer names.
 use constant MAX_ATTACH_FILENAME_LENGTH => 255;
+
+# Maximum length of a quip.
+use constant MAX_QUIP_LENGTH => 512;
 
 # This is the name of the algorithm used to hash passwords before storing
 # them in the database. This can be any string that is valid to pass to

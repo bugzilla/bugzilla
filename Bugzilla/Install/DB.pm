@@ -697,6 +697,9 @@ sub update_table_definitions {
     # 2012-08-02 dkl@mozilla.com - Bug 756953
     _fix_dependencies_dupes();
 
+    # 2012-08-01 koosha.khajeh@gmail.com - Bug 187753
+    _shorten_long_quips();
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################
@@ -3164,8 +3167,6 @@ sub _change_text_types {
         { TYPE => 'TINYTEXT', NOTNULL => 1 });
     $dbh->bz_alter_column('groups', 'description',
         { TYPE => 'MEDIUMTEXT', NOTNULL => 1 });
-    $dbh->bz_alter_column('quips', 'quip',
-        { TYPE => 'MEDIUMTEXT', NOTNULL => 1 });
     $dbh->bz_alter_column('namedqueries', 'query',
         { TYPE => 'LONGTEXT', NOTNULL => 1 });
 
@@ -3751,6 +3752,26 @@ sub _fix_dependencies_dupes {
         $dbh->bz_add_index('dependencies', 'dependencies_blocked_idx',
                            { FIELDS => [qw(blocked dependson)], TYPE => 'UNIQUE' });
     }   
+}
+
+sub _shorten_long_quips {
+    my $dbh = Bugzilla->dbh;
+    my $quips = $dbh->selectall_arrayref("SELECT quipid, quip FROM quips
+                                          WHERE CHAR_LENGTH(quip) > 512");
+
+    if (@$quips) {
+        print "Shortening quips longer than 512 characters:";
+
+        my $query = $dbh->prepare("UPDATE quips SET quip = ? WHERE quipid = ?");
+
+        foreach my $quip (@$quips) {
+            my ($quipid, $quip_str) = @$quip;
+            $quip_str = substr($quip_str, 0, 509) . "...";
+            print " $quipid";
+            $query->execute($quip_str, $quipid);
+        }
+    }
+    $dbh->bz_alter_column('quips', 'quip', { TYPE => 'varchar(512)', NOTNULL => 1});
 }
 
 1;

@@ -25,11 +25,8 @@ use Bugzilla::Constants;
 use Bugzilla::Util;
 use Bugzilla::Error;
 use Bugzilla::Bug;
-use Bugzilla::User;
 use Bugzilla::Hook;
-use Bugzilla::Product;
 use Bugzilla::Classification;
-use Bugzilla::Keyword;
 use Bugzilla::Token;
 use Bugzilla::Field;
 use Bugzilla::Status;
@@ -67,23 +64,7 @@ if ($product_name eq '') {
     my @classifications;
 
     unless ($classification && $classification ne '__all') {
-        if (Bugzilla->params->{'useclassification'}) {
-            my $class;
-            # Get all classifications with at least one enterable product.
-            foreach my $product (@enterable_products) {
-                $class->{$product->classification_id}->{'object'} ||=
-                    new Bugzilla::Classification($product->classification_id);
-                # Nice way to group products per classification, without querying
-                # the DB again.
-                push(@{$class->{$product->classification_id}->{'products'}}, $product);
-            }
-            @classifications = sort {$a->{'object'}->sortkey <=> $b->{'object'}->sortkey
-                                     || lc($a->{'object'}->name) cmp lc($b->{'object'}->name)}
-                                    (values %$class);
-        }
-        else {
-            @classifications = ({object => undef, products => \@enterable_products});
-        }
+        @classifications = @{sort_products_by_classification(\@enterable_products)};
     }
 
     unless ($classification) {

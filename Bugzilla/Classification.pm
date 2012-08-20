@@ -15,7 +15,8 @@ use Bugzilla::Util;
 use Bugzilla::Error;
 use Bugzilla::Product;
 
-use base qw(Bugzilla::Field::ChoiceInterface Bugzilla::Object);
+use base qw(Bugzilla::Field::ChoiceInterface Bugzilla::Object Exporter);
+@Bugzilla::Classification::EXPORT = qw(sort_products_by_classification);
 
 ###############################
 ####    Initialization     ####
@@ -152,6 +153,38 @@ sub products {
 sub description { return $_[0]->{'description'}; }
 sub sortkey     { return $_[0]->{'sortkey'};     }
 
+
+###############################
+####       Helpers         ####
+###############################
+
+# This function is a helper to sort products to be listed
+# in global/choose-product.html.tmpl.
+
+sub sort_products_by_classification {
+    my $products = shift;
+    my $list;
+
+    if (Bugzilla->params->{'useclassification'}) {
+        my $class = {};
+        # Get all classifications with at least one product.
+        foreach my $product (@$products) {
+            $class->{$product->classification_id}->{'object'} ||=
+                new Bugzilla::Classification($product->classification_id);
+            # Nice way to group products per classification, without querying
+            # the DB again.
+            push(@{$class->{$product->classification_id}->{'products'}}, $product);
+        }
+        $list = [sort {$a->{'object'}->sortkey <=> $b->{'object'}->sortkey
+                       || lc($a->{'object'}->name) cmp lc($b->{'object'}->name)}
+                      (values %$class)];
+    }
+    else {
+        $list = [{object => undef, products => $products}];
+    }
+    return $list;
+}
+
 1;
 
 __END__
@@ -205,6 +238,23 @@ A Classification is a higher-level grouping of Products.
  Params:      none.
 
  Returns:     A reference to an array of Bugzilla::Product objects.
+
+=back
+
+=head1 SUBROUTINES
+
+=over
+
+=item C<sort_products_by_classification>
+
+ Description: This is a helper which returns a list of products sorted
+              by classification in a form suitable to be passed to the
+              global/choose-product.html.tmpl template.
+
+ Params:      An arrayref of product objects.
+
+ Returns:     An arrayref of hashes suitable to be passed to
+              global/choose-product.html.tmpl.
 
 =back
 

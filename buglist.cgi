@@ -213,7 +213,7 @@ sub LookupNamedQuery {
     Bugzilla->login(LOGIN_REQUIRED);
 
     my $query = Bugzilla::Search::Saved->check(
-        { user => $sharer_id, name => $name });
+        { user => $sharer_id, name => $name, _error => 'missing_query' });
 
     $query->url
        || ThrowUserError("buglist_parameters_required");

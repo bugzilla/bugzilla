@@ -1171,7 +1171,7 @@
     [% title = "Missing Search" %]
     [% docslinks = {'query.html' => "Searching for $terms.bugs",
                     'query.html#list' => "$terms.Bug lists"} %]
-    The search named <em>[% queryname FILTER html %]</em>
+    The search named <em>[% name FILTER html %]</em>
     [% IF sharer_id && sharer_id != user.id %]
       has not been made visible to you.
     [% ELSE %]

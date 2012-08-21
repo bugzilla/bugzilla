@@ -15,7 +15,7 @@ function getPreSelectedIndex(el) {
             }
         }
     }
-    return 0;
+    return -1;
 }
 
 // Force the browser to honour the selected option when a page is refreshed,
@@ -27,12 +27,15 @@ YAHOO.util.Event.onDOMReady(function() {
         var el_dirty = document.getElementById(el.name + '_dirty');
         if (el_dirty) {
             if (!el_dirty.value) {
-                el.selectedIndex = getPreSelectedIndex(el);
+                var preSelectedIndex = getPreSelectedIndex(el);
+                if (preSelectedIndex != -1)
+                    el.selectedIndex = preselectedIndex;
             }
             YAHOO.util.Event.on(el, "change", function(e) {
-                var el = e.target;
+                var el = e.target || e.srcElement;
                 var preSelectedIndex = getPreSelectedIndex(el);
-                document.getElementById(el.name + '_dirty').value = preSelectedIndex == el.selectedIndex ? '' : '1';
+                if (preSelectedIndex != -1)
+                    document.getElementById(el.name + '_dirty').value = preSelectedIndex == el.selectedIndex ? '' : '1';
             });
         }
     }

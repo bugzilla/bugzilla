@@ -372,6 +372,7 @@ our %product_sec_groups = (
     "Websites"                     => 'websites-security',
     "Websites Graveyard"           => 'websites-security',
     "Webtools"                     => 'webtools-security',
+    "www.mozilla.org"              => 'websites-security',
     "_default"                     => 'core-security'
 );
 

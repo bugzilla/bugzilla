@@ -8,9 +8,9 @@
 
 [% PROCESS "global/field-descs.none.tmpl" %]
 [% PROCESS "global/reason-descs.none.tmpl" %]
+[% isnew = bug.lastdiffed ? 0 : 1 %]
 [% show_new = isnew
               && (to_user.settings.bugmail_new_prefix.value == 'on') %]
-[% isnew = bug.lastdiffed ? 0 : 1 %]
 
 From: [% Param('mailfrom') %]
 To: [% to_user.email %]

@@ -7,5 +7,6 @@
   #%]
 
 [% IF user.login %]
-  <li><span class="separator"> | </span><a href="[% urlbase %]page.cgi?id=mydashboard.html">My Dashboard</a></li>
+  <li><span class="separator"> | </span>
+    <a href="[% urlbase FILTER none %]page.cgi?id=mydashboard.html">My Dashboard</a></li>
 [% END %]

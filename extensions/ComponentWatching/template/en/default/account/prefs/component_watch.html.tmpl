@@ -160,8 +160,8 @@ YAHOO.util.Event.onDOMReady(onRemoveChange);
         </label>
       </td>
       <td>&nbsp;
-        <a href="buglist.cgi?product=[% watch.product.name FILTER url_quote ~%]
-                &component=[% watch.component.name FILTER url_quote %]&resolution=---">
+        <a href="buglist.cgi?product=[% watch.product.name FILTER uri ~%]
+                &component=[% watch.component.name FILTER uri %]&resolution=---">
         [% watch.component.name FILTER html %]
         </a>
       </td>
@@ -176,7 +176,7 @@ YAHOO.util.Event.onDOMReady(onRemoveChange);
         </label>
       </td>
       <td>&nbsp;
-        <a href="describecomponents.cgi?product=[% watch.product.name FILTER url_quote %]">
+        <a href="describecomponents.cgi?product=[% watch.product.name FILTER uri %]">
         __Any__
         </a>
       </td>
@@ -214,8 +214,8 @@ YAHOO.util.Event.onDOMReady(onRemoveChange);
       <td>[% watch.user.login FILTER html %]</td>
       <td>&nbsp;[% watch.component.product.name FILTER html %]</td>
       <td>&nbsp;
-        <a href="buglist.cgi?product=[% watch.product.name FILTER url_quote ~%]
-                &component=[% watch.component.name FILTER url_quote %]&resolution=---">
+        <a href="buglist.cgi?product=[% watch.product.name FILTER uri ~%]
+                &component=[% watch.component.name FILTER uri %]&resolution=---">
         [% watch.component.name FILTER html %]
         </a>
       </td>

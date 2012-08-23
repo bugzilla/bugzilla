@@ -46,12 +46,6 @@ use constant SECURE_NONE => 0;
 use constant SECURE_BODY => 1;
 use constant SECURE_ALL  => 2;
 
-our $FILTER_BUG_LINKS = 1;
-if(vers_cmp(BUGZILLA_VERSION, '4.2') > -1) {
-    eval "require HTML::Tree";
-    $FILTER_BUG_LINKS = 0 if $@;
-}
-
 ##############################################################################
 # Creating new columns
 #
@@ -305,7 +299,7 @@ sub mailer_before_send {
             # Filter the bug_links in HTML email in case the bugs the links
             # point are "secured" bugs and the user may not be able to see 
             # the summaries.
-            _filter_bug_links($email) if $FILTER_BUG_LINKS;
+            _filter_bug_links($email);
         }
         else {
             _make_secure($email, $public_key, $is_bugmail && $make_secure == SECURE_ALL, $add_new);
@@ -534,7 +528,7 @@ sub _filter_bug_links {
     $email->walk_parts(sub {
         my $part = shift;
         return if $part->content_type !~ /text\/html/;
-        my$body = $part->body;
+        my $body = $part->body;
         my $tree = HTML::Tree->new->parse_content($body);
         my @links = $tree->look_down( _tag  => q{a}, class => qr/bz_bug_link/ );
         foreach my $link (@links) {
@@ -546,7 +540,10 @@ sub _filter_bug_links {
                 $link->attr('class', 'bz_bug_link');
             }
         }
-        $part->body_set($tree->as_HTML);
+        $body = $tree->as_HTML;
+        $part->body_set($body);
+        $part->charset_set('UTF-8') if Bugzilla->params->{'utf8'};
+        $part->encoding_set('quoted-printable');
     });
 }
 

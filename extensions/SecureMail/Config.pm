@@ -22,36 +22,26 @@
 package Bugzilla::Extension::SecureMail;
 use strict;
 
-use Bugzilla::Constants;
-use Bugzilla::Install::Util qw(vers_cmp);
-
 use constant NAME => 'SecureMail';
 
-sub REQUIRED_MODULES {
-    my $modules = [
-        {
-            package => 'Crypt-OpenPGP',
-            module  => 'Crypt::OpenPGP',
-            # 1.02 added the ability for new() to take KeyRing objects for the
-            # PubRing argument.
-            version => '1.02',
-        },
-        {
-            package => 'Crypt-SMIME',
-            module  => 'Crypt::SMIME',
-            version => 0,
-        },
-    ];
-    if (vers_cmp(BUGZILLA_VERSION, '4.2') > -1) {
-        push(@$modules, 
-            {
-                package => 'HTML-Tree', 
-                module  => 'HTML::Tree', 
-                version => 0, 
-            }
-        );
+use constant REQUIRED_MODULES => [
+    {
+        package => 'Crypt-OpenPGP',
+        module  => 'Crypt::OpenPGP',
+        # 1.02 added the ability for new() to take KeyRing objects for the
+        # PubRing argument.
+        version => '1.02',
+    },
+    {
+        package => 'Crypt-SMIME',
+        module  => 'Crypt::SMIME',
+        version => 0,
+    },
+    {
+        package => 'HTML-Tree',
+        module  => 'HTML::Tree',
+        version => 0,
     }
-    return $modules;
-}
+];
 
 __PACKAGE__->NAME;

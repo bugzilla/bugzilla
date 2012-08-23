@@ -172,7 +172,7 @@ use constant OS_MAP => (
 );
 
 sub detect_platform {
-    my $userAgent = $ENV{'HTTP_USER_AGENT'};
+    my $userAgent = $ENV{'HTTP_USER_AGENT'} || '';
     my @detected;
     my $iterator = natatime(2, PLATFORMS_MAP);
     while (my($re, $ra) = $iterator->()) {

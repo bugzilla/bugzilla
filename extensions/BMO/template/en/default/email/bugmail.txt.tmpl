@@ -19,7 +19,7 @@ Do not reply to this email. You can add comments to this [% terms.bug %] at
 [% FOREACH comment = new_comments %]
 
 [%- IF comment.count %]
---- Comment #[% comment.count %] from [% comment.author.identity %] ---
+--- Comment #[% comment.count %] from [% comment.author.identity %] [%+ comment.creation_ts FILTER time(undef, to_user.timezone) %] ---
 [% END %]
 [%+ comment.body_full({ is_bugmail => 1, wrap => 1 }) %]
 [% END %]
@@ -34,7 +34,8 @@ Referenced [% terms.Bugs %]:
 [% END %]
 
 -- [%# Protect the trailing space of the signature marker %]
-You are receiving this mail because:
+Configure [% terms.bug %]mail: [% urlbase %]userprefs.cgi?tab=email
+------- You are receiving this mail because: -------
 [% SET reason_lines = [] %]
 [% FOREACH reason = reasons %]
   [% reason_lines.push(reason_descs.$reason) IF reason_descs.$reason %]

@@ -443,6 +443,7 @@ sub _make_secure {
             $email->parts_set([]);
             $email->body_set($enc_obj->body());
             $email->content_type_set('application/pkcs7-mime');
+            $email->charset_set('UTF-8') if Bugzilla->params->{'utf8'};
         }
         else {
             $email->body_set('Error during Encryption: ' . $@);

@@ -31,8 +31,6 @@ use Bugzilla::User;
 use Bugzilla::Util qw(correct_urlbase trim trick_taint is_7bit_clean);
 use Bugzilla::Error;
 use Bugzilla::Mailer;
-use Bugzilla::Constants;
-use Bugzilla::Install::Util qw(vers_cmp);
 
 use Crypt::OpenPGP::Armour;
 use Crypt::OpenPGP::KeyRing;
@@ -366,13 +364,13 @@ sub _make_secure {
             
             $email->walk_parts(sub {
                 my ($part) = @_;
-                return if $part->parts > 1; # Top-level
                 if ($sanitise_subject && $part->content_type =~ /text\/plain/) {
                     if (!is_7bit_clean($subject)) {
                         $part->encoding_set('quoted-printable');
                     }
                     $part->body_str_set("Subject: $subject\015\012\015\012" . $part->body_str);
                 }
+                return if $part->parts > 1; # Top-level
                 $to_encrypt .= "--$old_boundary\n" . $part->as_string . "\n";
             });
             $to_encrypt .= "--$old_boundary--";
@@ -421,11 +419,11 @@ sub _make_secure {
         if ($sanitise_subject) {
             $email->walk_parts(sub {
                 my ($part) = @_;
-                return if $part->parts > 1; # Top-level
                 if ($part->content_type =~ /text\/plain/) {
                     # Subject gets placed in the body so it can still be read
                     $part->body_str_set("Subject: $subject\015\012\015\012" . $part->body);
                 }
+                return if $part->parts > 1; # Top-level
             });
         }
 

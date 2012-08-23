@@ -401,12 +401,15 @@ sub sendMail {
     push(@watchingrel, 'None') unless @watchingrel;
     push @watchingrel, map { user_id_to_login($_) } @$watchingRef;
 
-    my @changedfields = uniq map { $_->{field_name} } @display_diffs;
+    # BMO: Use field descriptions instead of field names in header
+    my @changedfields = uniq map { $_->{field_desc} } @display_diffs;
+    my @changedfieldnames = uniq map { $_->{field_name} } @display_diffs;
 
     # Add attachments.created to changedfields if one or more
     # comments contain information about a new attachment
     if (grep($_->type == CMT_ATTACHMENT_CREATED, @send_comments)) {
-        push(@changedfields, 'attachments.created');
+        push(@changedfields, 'Attachment Created');
+        push(@changedfieldnames, 'attachment.created');
     }
 
     my $vars = {
@@ -419,7 +422,8 @@ sub sendMail {
         reasonswatchheader => join(" ", @watchingrel),
         changer => $changer,
         diffs => \@display_diffs,
-        changedfields => \@changedfields, 
+        changedfields => \@changedfields,
+        changedfieldnames => \@changedfieldnames,
         new_comments => \@send_comments,
         threadingmarker => build_thread_marker($bug->id, $user->id, !$bug->lastdiffed),
         referenced_bugs => $referenced_bugs,
@@ -484,6 +488,7 @@ sub _get_diffs {
 
     my $diffs = $dbh->selectall_arrayref(
            "SELECT fielddefs.name AS field_name,
+                   fielddefs.description AS field_desc,
                    bugs_activity.bug_when, bugs_activity.removed AS old,
                    bugs_activity.added AS new, bugs_activity.attach_id,
                    bugs_activity.comment_id, bugs_activity.who

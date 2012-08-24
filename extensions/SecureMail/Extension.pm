@@ -391,9 +391,9 @@ sub _make_secure {
                         filename     => 'encrypted.asc',
                         disposition  => 'inline',
                         encoding     => '7bit', 
-                    },            
+                    },
                     body => _pgp_encrypt($pgp, $to_encrypt)
-                ),            
+                ),
             );
             $email->parts_set(\@new_parts);
             my $new_boundary = $email->{ct}{attributes}{boundary};
@@ -405,6 +405,12 @@ sub _make_secure {
                                "boundary=\"$new_boundary\"");
         }
         else {
+            if ($sanitise_subject) {
+                if (!is_7bit_clean($subject)) {
+                    $email->encoding_set('quoted-printable');
+                }
+                $email->body_str_set("Subject: $subject\015\012\015\012" . $email->body_str);
+            }
             $email->body_set(_pgp_encrypt($pgp, $email->body));
         }
     }

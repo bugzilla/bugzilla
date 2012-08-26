@@ -294,6 +294,9 @@ sub adjust_statement {
     my $is_select = ($part =~ m/^\s*SELECT\b/io);
     my $has_from =  ($part =~ m/\bFROM\b/io) if $is_select;
 
+    # Oracle includes the time in CURRENT_DATE.
+    $part =~ s/\bCURRENT_DATE\b/TRUNC(CURRENT_DATE)/io;
+
     # Oracle use SUBSTR instead of SUBSTRING
     $part =~ s/\bSUBSTRING\b/SUBSTR/io;
    
@@ -321,6 +324,9 @@ sub adjust_statement {
         # Look for a FROM if this is a SELECT and we haven't found one yet
         $has_from = ($nonstring =~ m/\bFROM\b/io) 
                     if ($is_select and !$has_from);
+
+        # Oracle includes the time in CURRENT_DATE.
+        $nonstring =~ s/\bCURRENT_DATE\b/TRUNC(CURRENT_DATE)/io;
 
         # Oracle use SUBSTR instead of SUBSTRING
         $nonstring =~ s/\bSUBSTRING\b/SUBSTR/io;

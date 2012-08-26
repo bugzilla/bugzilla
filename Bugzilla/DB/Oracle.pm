@@ -310,8 +310,9 @@ sub adjust_statement {
     my $has_from =  ($part =~ m/\bFROM\b/io) if $is_select;
 
     # Oracle recognizes CURRENT_DATE, but not CURRENT_DATE()
-    $part =~ s/\bCURRENT_DATE\b\(\)/CURRENT_DATE/io;
-    
+    # and its CURRENT_DATE is a date+time, so wrap in TRUNC()
+    $part =~ s/\bCURRENT_DATE\b(?:\(\))?/TRUNC(CURRENT_DATE)/io;
+
     # Oracle use SUBSTR instead of SUBSTRING
     $part =~ s/\bSUBSTRING\b/SUBSTR/io;
    
@@ -341,7 +342,8 @@ sub adjust_statement {
                     if ($is_select and !$has_from);
 
         # Oracle recognizes CURRENT_DATE, but not CURRENT_DATE()
-        $nonstring =~ s/\bCURRENT_DATE\b\(\)/CURRENT_DATE/io;
+        # and its CURRENT_DATE is a date+time, so wrap in TRUNC()
+        $nonstring =~ s/\bCURRENT_DATE\b(?:\(\))?/TRUNC(CURRENT_DATE)/io;
 
         # Oracle use SUBSTR instead of SUBSTRING
         $nonstring =~ s/\bSUBSTRING\b/SUBSTR/io;

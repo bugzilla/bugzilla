@@ -29,6 +29,11 @@ use constant REQUIRED_MODULES => [
         package => 'Regexp-Common',
         module  => 'Regexp::Common',
         version => 0
+    },
+    {
+        package => 'HTML-Tree',
+        module  => 'HTML::Tree',
+        version => 0,
     }
 ];
 

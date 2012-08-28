@@ -1056,19 +1056,20 @@ SetEnv LD_LIBRARY_PATH /u01/app/oracle/product/10.2.0/lib/
                 <programlisting>
 &lt;Directory /var/www/html/bugzilla&gt;
 AddHandler cgi-script .cgi
-Options +Indexes +ExecCGI
-DirectoryIndex index.cgi
-AllowOverride Limit FileInfo Indexes
+Options +ExecCGI
+DirectoryIndex index.cgi index.html
+AllowOverride Limit FileInfo Indexes Options
 &lt;/Directory&gt;
                 </programlisting>
     
                 <para>
                 These instructions: allow apache to run .cgi files found
                 within the bugzilla directory; instructs the server to look
-                for a file called <filename>index.cgi</filename> if someone
+                for a file called <filename>index.cgi</filename> or, if not
+                found, <filename>index.html</filename> if someone
                 only types the directory name into the browser; and allows
                 Bugzilla's <filename>.htaccess</filename> files to override
-                global permissions.
+                some global permissions.
                 </para>
     
                 <note>

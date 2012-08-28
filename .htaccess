@@ -2,6 +2,9 @@
 <FilesMatch ^(.*\.pm|.*\.pl|.*localconfig.*)$>
   deny from all
 </FilesMatch>
+
+Options -Indexes
+
 <IfModule mod_expires.c>
 <IfModule mod_headers.c>
 <IfModule mod_env.c>

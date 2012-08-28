@@ -566,7 +566,9 @@ sub _get_new_bugmail_fields {
         # If there isn't anything to show, don't include this header.
         next unless $value;
 
-        push(@diffs, {field_name => $name, new => $value});
+        push(@diffs, {field_name => $name,
+                      field_desc => $field->description,
+                      new => $value});
     }
 
     return @diffs;

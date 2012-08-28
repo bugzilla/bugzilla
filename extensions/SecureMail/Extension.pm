@@ -261,7 +261,9 @@ sub mailer_before_send {
                     }
                 }
                 # Encrypt if updating a private attachment without a comment
-                if ($email->header('X-Bugzilla-Changed-Fields') =~ /Attachment #(\d+)/) {
+                if ($email->header('X-Bugzilla-Changed-Fields')
+                    && $email->header('X-Bugzilla-Changed-Fields') =~ /Attachment #(\d+)/)
+                {
                     my $attachment = Bugzilla::Attachment->new($1);
                     if ($attachment && $attachment->isprivate) {
                         $make_secure = SECURE_BODY;
@@ -532,10 +534,12 @@ sub _filter_bug_links {
     my ($email) = @_;
     $email->walk_parts(sub {
         my $part = shift;
-        return if $part->content_type !~ /text\/html/;
+        my $content_type = $part->content_type;
+        return if !$content_type || $content_type !~ /text\/html/;
         my $body = $part->body;
         my $tree = HTML::Tree->new->parse_content($body);
         my @links = $tree->look_down( _tag  => q{a}, class => qr/bz_bug_link/ );
+        my $updated = 0;
         foreach my $link (@links) {
             my $href = $link->attr('href');
             my ($bug_id) = $href =~ /\Qshow_bug.cgi?id=\E(\d+)/;
@@ -543,12 +547,15 @@ sub _filter_bug_links {
             if ($bug && _should_secure_bug($bug)) {
                 $link->attr('title', '(secure bug)');
                 $link->attr('class', 'bz_bug_link');
+                $updated = 1;
             }
         }
-        $body = $tree->as_HTML;
-        $part->body_set($body);
-        $part->charset_set('UTF-8') if Bugzilla->params->{'utf8'};
-        $part->encoding_set('quoted-printable');
+        if ($updated) {
+            $body = $tree->as_HTML;
+            $part->body_set($body);
+            $part->charset_set('UTF-8') if Bugzilla->params->{'utf8'};
+            $part->encoding_set('quoted-printable');
+        }
     });
 }
 

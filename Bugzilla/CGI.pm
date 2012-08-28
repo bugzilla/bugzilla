@@ -169,6 +169,11 @@ sub clean_search_url {
     # Delete leftovers from the login form
     $self->delete('Bugzilla_remember', 'GoAheadAndLogIn');
 
+    # Delete the token if we're not updating the defaults
+    unless (defined $self->param('remtype') && $self->param('remtype') eq 'asdefault') {
+        $self->delete("token");
+    }
+
     foreach my $num (1,2,3) {
         # If there's no value in the email field, delete the related fields.
         if (!$self->param("email$num")) {

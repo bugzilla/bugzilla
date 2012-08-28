@@ -38,6 +38,9 @@
         &list_id=[% cgi.param('list_id') FILTER uri %]
       [%~ END %]
     [% END %]
+  [% ELSIF cgi.param('token') != '' %]
+    [% new_url = 'buglist.cgi?'
+                 _ cgi.canonicalise_query('token', 'cmdtype', 'remtype') %]
   [% END %]
 
   if (history && history.replaceState) {

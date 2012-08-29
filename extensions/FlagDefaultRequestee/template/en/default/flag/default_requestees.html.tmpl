@@ -1,0 +1,101 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% IF flag_default_requestees.keys.size %]
+  <script type="text/javascript">
+  var currently_requested = new Array();
+  var default_requestees = new Array();
+  [% FOREACH id = flag_currently_requested.keys %]
+    currently_requested.push('[% id FILTER js %]');
+  [% END %]
+  [% FOREACH id = flag_default_requestees.keys %]
+    default_requestees['id_[% id FILTER js %]'] = '[% flag_default_requestees.$id FILTER js %]';
+  [% END %]
+
+  function fdrSetDefaultRequestee(field, default_requestee) {
+    field.value = default_requestee;
+    field.focus();
+    field.select();
+  }
+
+  function fdrOnChange(ev) {
+    var parts = ev.target.id.split('-');
+    var flag = parts[0];
+    var id = parts[1];
+    var state = ev.target.value;
+    var requestee_field;
+
+    if (flag.search(/_type/) == -1) {
+      for (var i = 0; i < currently_requested.length; i++) {
+        if (id == currently_requested[i]) {
+          return;
+        }
+      }
+      requestee_field = YAHOO.util.Dom.get('requestee-' + id);
+      parts = ev.target.className.split('-');
+      id = parts[1];
+    }
+    else {
+      requestee_field = YAHOO.util.Dom.get('requestee_type-' + id);
+    }
+
+    var current_requestee = requestee_field.value;
+    var default_requestee = default_requestees['id_' + id];
+
+    if (state == '?' && !current_requestee && default_requestee) {
+      fdrSetDefaultRequestee(requestee_field, default_requestees['id_' + id]); 
+    }
+    else if (state == '?' && current_requestee != default_requestee) {
+      fdrShowDefaultLink(requestee_field, id);
+    }
+  }
+
+  YAHOO.util.Event.onDOMReady(function() {
+    var selects = YAHOO.util.Dom.getElementsByClassName('flag_select');
+    for (var i = 0; i < selects.length; i++) {
+      YAHOO.util.Event.on(selects[i], 'change', fdrOnChange);
+    }
+
+    for (var i = 0; i < currently_requested.length; i++) {
+      var flag_id = currently_requested[i];
+      var flag_field = YAHOO.util.Dom.get('flag-' + flag_id);
+      var requestee_field = YAHOO.util.Dom.get('requestee-' + flag_id);
+      var parts = flag_field.className.split('-');
+      var type_id = parts[1];
+      var current_requestee = requestee_field.value;
+      var default_requestee = default_requestees['id_' + type_id];
+      if (current_requestee != default_requestee) {
+        fdrShowDefaultLink(requestee_field, type_id, flag_id);
+      }
+    }
+  });
+
+  function fdrHideDefaultLink (flag_id) {
+    YAHOO.util.Dom.addClass('default_requestee_' + flag_id, 'bz_default_hidden');
+  }
+
+  function fdrShowDefaultLink (requestee_field, type_id, flag_id) {
+    var default_requestee = default_requestees['id_' + type_id];
+
+    var default_link = document.createElement('a');
+    YAHOO.util.Dom.setAttribute(default_link, 'href', 'javascript:void(0)');
+    default_link.appendChild(document.createTextNode('default requestee'));
+    YAHOO.util.Event.addListener(default_link, 'click', function() {
+      fdrSetDefaultRequestee(requestee_field, default_requestee);
+      fdrHideDefaultLink(flag_id);
+    });
+
+    var default_span = document.createElement('span');
+    YAHOO.util.Dom.setAttribute(default_span, 'id', 'default_requestee_' + flag_id);
+    default_span.appendChild(document.createTextNode('('));
+    default_span.appendChild(default_link);
+    default_span.appendChild(document.createTextNode(')'));
+    requestee_field.parentNode.appendChild(default_span);
+  }
+  </script>
+[% END %]

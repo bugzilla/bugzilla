@@ -1,0 +1,21 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+<tr>
+  <th>Default Requestee:</th>
+  <td>
+    If flag is specifically requestable, this user will be entered in the
+    requestee field by default unless the user changes it.<br>
+    [% INCLUDE global/userselect.html.tmpl 
+       name    => 'default_requestee'
+       id      => 'default_requestee'
+       value   => type.default_requestee.login
+       classes => ['requestee']
+     %]
+  </td>
+</tr>

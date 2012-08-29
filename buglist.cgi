@@ -465,6 +465,8 @@ elsif (($cmdtype eq "doit") && defined $cgi->param('remtype')) {
         $user = Bugzilla->login(LOGIN_REQUIRED);
         my $token = $cgi->param('token');
         check_hash_token($token, ['searchknob']);
+        $buffer = $params->canonicalise_query('cmdtype', 'remtype',
+                                              'query_based_on', 'token');
         InsertNamedQuery(DEFAULT_QUERY_NAME, $buffer);
         $vars->{'message'} = "buglist_new_default_query";
     }

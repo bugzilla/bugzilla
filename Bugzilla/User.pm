@@ -1528,6 +1528,8 @@ sub match_field {
         my @logins;
         for my $query (@queries) {
             $query = trim($query);
+            next if $query eq '';
+
             my $users = match(
                 $query,   # match string
                 $limit,   # match limit

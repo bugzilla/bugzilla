@@ -170,7 +170,10 @@ sub clean_search_url {
     $self->delete('Bugzilla_remember', 'GoAheadAndLogIn');
 
     # Delete the token if we're not updating the defaults
-    unless (defined $self->param('remtype') && $self->param('remtype') eq 'asdefault') {
+    unless (defined $self->param('remtype')
+            && ($self->param('remtype') eq 'asdefault'
+                || $self->param('remtype') eq 'asnamed'))
+    {
         $self->delete("token");
     }
 

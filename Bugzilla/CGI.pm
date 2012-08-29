@@ -16,15 +16,6 @@ use Bugzilla::Search::Recent;
 
 use File::Basename;
 
-BEGIN {
-    if (ON_WINDOWS) {
-        # Help CGI find the correct temp directory as the default list
-        # isn't Windows friendly (Bug 248988)
-        $ENV{'TMPDIR'} = $ENV{'TEMP'} || $ENV{'TMP'} || "$ENV{'WINDIR'}\\TEMP";
-    }
-    *AUTOLOAD = \&CGI::AUTOLOAD;
-}
-
 sub _init_bz_cgi_globals {
     my $invocant = shift;
     # We need to disable output buffering - see bug 179174

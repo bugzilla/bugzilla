@@ -53,6 +53,44 @@
 
 <h2 id="v42_point">Updates in this 4.2.x Release</h2>
 
+<h3>4.2.3</h3>
+
+<p>This release fixes two security issues. See the
+  <a href="http://www.bugzilla.org/security/3.6.10/">Security Advisory</a>
+  for details.</p>
+
+<p>In addition, the following important fixes/changes have been made in this
+  release:</p>
+
+<ul>
+  <li>Attaching a file to [% terms.abug %] was broken due to a change in
+    Perl 5.16.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=771100">[% terms.Bug %] 771100</a>)</li>
+  <li>A regression in [% terms.Bugzilla %] 4.2.2 made Oracle crash when
+    displaying a buglist.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=780028">[% terms.Bug %] 780028</a>)</li>
+  <li>It was possible to search on history for comments and attachments you
+    cannot see (though these private comments and attachments are never disclosed).
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=779709">[% terms.Bug %] 779709</a>)</li>
+  <li>PostgreSQL databases could be created with the wrong encoding despite
+    the utf8 parameter being enabled.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=783786">[% terms.Bug %] 783786</a>)</li>
+  <li>Scheduled whines could be sent at the wrong time on Oracle.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=559539">[% terms.Bug %] 559539</a>)</li>
+  <li>Tokens are no longer included in saved queries.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=772953">[% terms.Bug %] 772953</a>)</li>
+  <li>An admin could unintentionally break the display of buglists if a custom
+    field description contains a &lt; or &gt; character, because these characters
+    were not filtered.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=785917">[% terms.Bug %] 785917</a>)</li>
+  <li>Adding or removing a DB column in Oracle didn't handle SERIAL columns
+    correctly.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=731156">[% terms.Bug %] 731156</a>)</li>
+  <li>A minor CSRF vulnerability in token.cgi allowed possible unauthorized
+    password reset e-mail requests.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=706271">[% terms.Bug %] 706271</a>)</li>
+</ul>
+
 <h3>4.2.2</h3>
 
 <p>This release fixes two security issues. See the
@@ -432,6 +470,9 @@
     [%- terms.Bug %] 584742</a>: When viewing [% terms.abug %], WebKit-based
     browsers can automatically reset a field's selected value when the field
     has disabled values.</li>
+  <li><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=780053">
+    [%- terms.Bug %] 780053</a>: Oracle crashes when listing keywords, tags
+    or flags in buglists.</li>
 </ul>
 
 

@@ -833,7 +833,7 @@
     [% IF (type.flags && type.flags.size > 0) || (user.id && type.is_active) %]
       [% show_bug_flags = 1 %]
     [% END %]
-    [% IF type.is_active && (!type.flags || type.is_multiplicable) %]
+    [% IF user.id && type.is_active && (!type.flags || type.is_multiplicable) %]
       [% show_more_flags = 1 %]
     [% END %]
     [% IF type.flags && type.flags.size > 0 %]

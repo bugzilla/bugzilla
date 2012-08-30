@@ -49,6 +49,7 @@ use Encode::MIME::Header;
 use Email::Address;
 use Email::MIME;
 use Email::Send;
+use Sys::Hostname;
 
 sub MessageToMTA {
     my ($msg, $send_now) = (@_);
@@ -140,6 +141,12 @@ sub MessageToMTA {
         if (!defined $email->header('Date')) {
             $email->header_set('Date', time2str("%a, %d %b %Y %T %z", time()));
         }
+    }
+
+    # For tracking/diagnostic purposes, add our hostname
+    my $generated_by = $email->header('X-Generated-By') || '';
+    if ($generated_by =~ tr/\/// < 3) {
+        $email->header_set('X-Generated-By' => $generated_by . '/' . hostname() . "($$)");
     }
 
     if ($method eq "SMTP") {

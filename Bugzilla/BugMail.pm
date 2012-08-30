@@ -48,6 +48,7 @@ use Date::Parse;
 use Date::Format;
 use Scalar::Util qw(blessed);
 use List::MoreUtils qw(uniq firstidx);
+use Sys::Hostname;
 
 use constant BIT_DIRECT    => 1;
 use constant BIT_WATCHING  => 2;
@@ -465,6 +466,10 @@ sub _generate_bugmail {
 
     # TT trims the trailing newline, and threadingmarker may be ignored.
     my $email = new Email::MIME("$msg_header\n");
+
+    # For tracking/diagnostic purposes, add our hostname
+    $email->header_set('X-Generated-By' => hostname());
+
     if (scalar(@parts) == 1) {
         $email->content_type_set($parts[0]->content_type);
     } else {

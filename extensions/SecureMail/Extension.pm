@@ -407,6 +407,7 @@ sub _make_secure {
                                "boundary=\"$new_boundary\"");
         }
         else {
+            _fix_part($email);
             if ($sanitise_subject) {
                 if (!is_7bit_clean($subject)) {
                     $email->encoding_set('quoted-printable');

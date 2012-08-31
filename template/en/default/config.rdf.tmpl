@@ -179,6 +179,7 @@
             <bz:component rdf:about="[% escaped_urlbase %]component.cgi?name=[% component.name FILTER uri
                           %]&amp;product=[% product.name FILTER uri %]">
               <bz:name>[% component.name FILTER html %]</bz:name>
+              <bz:is_active>[% component.is_active FILTER html %]</bz:is_active>
               [% IF show_flags %]
                 <bz:flag_types>
                   <Seq>
@@ -206,6 +207,7 @@
           <li>
             <bz:version rdf:about="[% escaped_urlbase %]version.cgi?name=[% version.name FILTER uri %]">
               <bz:name>[% version.name FILTER html %]</bz:name>
+              <bz:is_active>[% version.is_active FILTER html %]</bz:is_active>
             </bz:version>
           </li>
         [% END %]
@@ -221,6 +223,7 @@
             <li>
               <bz:target_milestone rdf:about="[% escaped_urlbase %]milestone.cgi?name=[% milestone.name FILTER uri %]">
                 <bz:name>[% milestone.name FILTER html %]</bz:name>
+                <bz:is_active>[% milestone.is_active FILTER html %]</bz:is_active>
               </bz:target_milestone>
             </li>
           [% END %]

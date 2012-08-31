@@ -167,6 +167,7 @@ sub _legal_field_values {
                     sort_key => $self->type('int', $sortkey),
                     sortkey  => $self->type('int', $sortkey), # deprecated
                     visibility_values => [$self->type('string', $product_name)],
+                    is_active         => $self->type('boolean', $value->is_active()),
                 });
             }
         }
@@ -1189,6 +1190,11 @@ If C<value_field> is defined for this field, then this value is only shown
 if the C<value_field> is set to one of the values listed in this array.
 Note that for per-product fields, C<value_field> is set to C<'product'>
 and C<visibility_values> will reflect which product(s) this value appears in.
+
+=item C<is_active>
+
+C<boolean> True when the version, target_milestone or component is active,
+false when the element is retired.
 
 =item C<description>
 

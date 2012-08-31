@@ -11,7 +11,7 @@
 ###Compilation###
 
 use strict;
-use 5.008001;
+use 5.10.1;
 use lib qw(. lib t);
 use Config;
 use Support::Files;

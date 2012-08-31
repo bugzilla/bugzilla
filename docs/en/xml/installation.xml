@@ -1559,7 +1559,7 @@ AddType application/rdf+xml .rdf</screen>
            You should be able to find a compiled binary at <ulink 
            url="http://aspn.activestate.com/ASPN/Downloads/ActivePerl/" />.
            The following instructions assume that you are using version
-           5.8.1 of ActiveState.
+           &min-perl-ver; of ActiveState.
           </para>
 
           <note>
@@ -1589,32 +1589,20 @@ C:\perl&gt; <command>ppm install &lt;module name&gt;</command>
         </programlisting>
 
         <para>
-          The best source for the Windows PPM modules needed for Bugzilla
-          is probably the theory58S website, which you can add to your list
-          of repositories as follows (for Perl 5.8.x):
+          If you are using Perl 5.10.1, the best source for the Windows PPM modules
+          needed for Bugzilla is probably the theory58S website, which you can add
+          to your list of repositories as follows:
         </para>
 
-        <programlisting>
-<command>ppm repo add theory58S http://theoryx5.uwinnipeg.ca/ppms/</command>
-        </programlisting>
-
-        <para>
-          If you are using Perl 5.10.x, you cannot use the same PPM modules as Perl
-          5.8.x as they are incompatible. In this case, you should add the following
-          repository:
-        </para>
         <programlisting>
 <command>ppm repo add theory58S http://cpan.uwinnipeg.ca/PPMPackages/10xx/</command>
         </programlisting>
 
-        <note>
-          <para>
-            In versions prior to 5.8.8 build 819 of PPM the command is 
-            <programlisting>
-<command>ppm repository add theory58S http://theoryx5.uwinnipeg.ca/ppms/</command>
-            </programlisting>
-          </para>
-        </note>
+        <para>
+          If you are using Perl 5.12 or newer, you no longer need to add
+          this repository. All modules you need are already available from
+	  the ActiveState repository.
+        </para>
         <note>
           <para>
             The PPM repository stores modules in 'packages' that may have

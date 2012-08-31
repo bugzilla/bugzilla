@@ -1246,11 +1246,9 @@ sub db_new {
                        ShowErrorStatement => 1,
                        HandleError => \&_handle_error,
                        TaintIn => 1,
-                       FetchHashKeyName => 'NAME',  
-                       # Note: NAME_lc causes crash on ActiveState Perl
-                       # 5.8.4 (see Bug 253696)
-                       # XXX - This will likely cause problems in DB
-                       # back ends that twiddle column case (Oracle?)
+                       # See https://rt.perl.org/rt3/Public/Bug/Display.html?id=30933
+                       # for the reason to use NAME instead of NAME_lc (bug 253696).
+                       FetchHashKeyName => 'NAME',
                      };
 
     if ($override_attrs) {

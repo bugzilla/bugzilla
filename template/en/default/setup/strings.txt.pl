@@ -382,15 +382,6 @@ END
 *                                                                     *
 *   ppm repo add theory58S ##theory_url##
 EOT
-    ppm_repo_up => <<EOT,
-*                                                                     *
-* Then you have to do (also as an Administrator):                     *
-*                                                                     *
-*   ppm repo up theory58S                                             *
-*                                                                     *
-* Do that last command over and over until you see "theory58S" at the *
-* top of the displayed list.                                          *
-EOT
     template_precompile   => "Precompiling templates...",
     template_removal_failed => <<END,
 WARNING: The directory '##template_cache##' could not be removed.

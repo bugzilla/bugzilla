@@ -65,7 +65,7 @@ Attachment [% attidsummary %]
 [%- FILTER bullet = wrap(80) %]
 
 [% USE Bugzilla %]
-[%-# .defined is necessary to avoid a taint issue in Perl < 5.10.1, see bug 509794. %]
+[%-# .defined is necessary to avoid a taint issue, see bug 509794. %]
 [% IF Bugzilla.cgi.param("comment").defined && Bugzilla.cgi.param("comment").length > 0 %]
 ------- Additional Comments from [% user.identity %]
 [%+ Bugzilla.cgi.param("comment") %]

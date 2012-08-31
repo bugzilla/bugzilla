@@ -13,7 +13,7 @@
 ######################################################################
 
 use strict;
-use 5.008001;
+use 5.10.1;
 use File::Basename;
 use Getopt::Long qw(:config bundling);
 use Pod::Usage;

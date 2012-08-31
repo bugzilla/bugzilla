@@ -167,20 +167,9 @@ sub install_module {
     if (!$module) {
         die install_string('no_such_module', { module => $name }) . "\n";
     }
-    my $version = $module->cpan_version;
-    my $module_name = $name;
-
-    if ($name eq 'LWP::UserAgent' && $^V lt v5.8.8) {
-        # LWP 6.x requires Perl 5.8.8 or newer.
-        # As PAUSE only indexes the very last version of each module,
-        # we have to specify the path to the tarball ourselves.
-        $name = 'GAAS/libwww-perl-5.837.tar.gz';
-        # This tarball contains LWP::UserAgent 5.835.
-        $version = '5.835';
-    }
 
     print install_string('install_module', 
-              { module => $module_name, version => $version }) . "\n";
+              { module => $name, version => $module->cpan_version }) . "\n";
 
     if ($test) {
         CPAN::Shell->force('install', $name);

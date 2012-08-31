@@ -8,6 +8,7 @@
 package Bugzilla::Util;
 
 use strict;
+use feature ':5.10';
 
 use base qw(Exporter);
 @Bugzilla::Util::EXPORT = qw(trick_taint detaint_natural detaint_signed
@@ -404,13 +405,6 @@ sub diff_arrays {
     return (\@removed, \@added);
 }
 
-# XXX - This is a temporary subroutine till we require Perl 5.10.1.
-# This will happen before Bugzilla 5.0rc1.
-sub say (@) {
-    print @_;
-    print "\n";
-}
-
 sub trim {
     my ($str) = @_;
     if ($str) {
@@ -437,11 +431,6 @@ sub wrap_comment {
         $wrappedcomment .= ($line . "\n");
       }
       else {
-        # Due to a segfault in Text::Tabs::expand() when processing tabs with
-        # Unicode (see http://rt.perl.org/rt3/Public/Bug/Display.html?id=52104),
-        # we have to remove tabs before processing the comment. This restriction
-        # can go away when we require Perl 5.8.9 or newer.
-        $line =~ s/\t/    /g;
         $wrappedcomment .= (wrap('', '', $line) . "\n");
       }
     }
@@ -590,15 +579,9 @@ sub bz_crypt {
         if (Bugzilla->params->{'utf8'}) {
             utf8::encode($password) if utf8::is_utf8($password);
         }
-    
+
         # Crypt the password.
         $crypted_password = crypt($password, $salt);
-
-        # HACK: Perl has bug where returned crypted password is considered
-        # tainted. See http://rt.perl.org/rt3/Public/Bug/Display.html?id=59998
-        unless(tainted($password) || tainted($salt)) {
-            trick_taint($crypted_password);
-        } 
     }
     else {
         my $hasher = Digest->new($algorithm);

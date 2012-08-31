@@ -321,12 +321,17 @@ sub set_all {
     my %field_values = %$params;
 
     my @sorted_names = $self->_sort_by_dep(keys %field_values);
+
     foreach my $key (@sorted_names) {
         # It's possible for one set_ method to delete a key from $params
         # for another set method, so if that's happened, we don't call the
         # other set method.
         next if !exists $field_values{$key};
         my $method = "set_$key";
+        if (!$self->can($method)) {
+            my $class = ref($self) || $self;
+            ThrowCodeError("unknown_method", { method => "${class}::${method}" });
+        }
         $self->$method($field_values{$key}, \%field_values);
     }
     Bugzilla::Hook::process('object_end_of_set_all', 

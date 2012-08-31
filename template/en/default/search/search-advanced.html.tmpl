@@ -31,12 +31,11 @@
 
 
 [% js_data = BLOCK %]
-var queryform = "queryform"
-
+var queryform = "queryform";
 function remove_token() {
-  var asDefault = document.getElementById('remasdefault');
-  if (queryform.token && asDefault && !asDefault.checked) {
-    queryform.token.value = '';
+  if (queryform.token) {
+    var asDefault = document.getElementById('remasdefault');
+    queryform.token.disabled = !asDefault.checked;
   }
 }
 [% END %]

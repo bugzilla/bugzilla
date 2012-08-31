@@ -310,8 +310,9 @@ sub adjust_statement {
     my $has_from =  ($part =~ m/\bFROM\b/io) if $is_select;
 
     # Oracle recognizes CURRENT_DATE, but not CURRENT_DATE()
-    $part =~ s/\bCURRENT_DATE\b\(\)/CURRENT_DATE/io;
-    
+    # and its CURRENT_DATE is a date+time, so wrap in TRUNC()
+    $part =~ s/\bCURRENT_DATE\b(?:\(\))?/TRUNC(CURRENT_DATE)/io;
+
     # Oracle use SUBSTR instead of SUBSTRING
     $part =~ s/\bSUBSTRING\b/SUBSTR/io;
    
@@ -341,7 +342,8 @@ sub adjust_statement {
                     if ($is_select and !$has_from);
 
         # Oracle recognizes CURRENT_DATE, but not CURRENT_DATE()
-        $nonstring =~ s/\bCURRENT_DATE\b\(\)/CURRENT_DATE/io;
+        # and its CURRENT_DATE is a date+time, so wrap in TRUNC()
+        $nonstring =~ s/\bCURRENT_DATE\b(?:\(\))?/TRUNC(CURRENT_DATE)/io;
 
         # Oracle use SUBSTR instead of SUBSTRING
         $nonstring =~ s/\bSUBSTRING\b/SUBSTR/io;
@@ -635,11 +637,25 @@ sub bz_setup_database {
 
     $self->SUPER::bz_setup_database(@_);
 
+    my $sth = $self->prepare("SELECT OBJECT_NAME FROM USER_OBJECTS WHERE OBJECT_NAME = ?");
     my @tables = $self->bz_table_list_real();
+
     foreach my $table (@tables) {
         my @columns = $self->bz_table_columns_real($table);
         foreach my $column (@columns) {
             my $def = $self->bz_column_info($table, $column);
+            # bz_add_column() before Bugzilla 4.2.3 didn't handle primary keys
+            # correctly (bug 731156). We have to add missing sequences and
+            # triggers ourselves.
+            if ($def->{TYPE} =~ /SERIAL/i) {
+                my $sequence = "${table}_${column}_SEQ";
+                my $exists = $self->selectrow_array($sth, undef, $sequence);
+                if (!$exists) {
+                    my @sql = $self->_get_create_seq_ddl($table, $column);
+                    $self->do($_) foreach @sql;
+                }
+            }
+
             if ($def->{REFERENCES}) {
                 my $references = $def->{REFERENCES};
                 my $update = $references->{UPDATE} || 'CASCADE';
@@ -653,15 +669,13 @@ sub bz_setup_database {
                     $to_table = 'tag';
                 }
                 if ( $update =~ /CASCADE/i ){
-                     my $trigger_name = uc($fk_name . "_UC");
-                     my $exist_trigger = $self->selectcol_arrayref(
-                         "SELECT OBJECT_NAME FROM USER_OBJECTS 
-                          WHERE OBJECT_NAME = ?", undef, $trigger_name);
+                    my $trigger_name = uc($fk_name . "_UC");
+                    my $exist_trigger = $self->selectcol_arrayref($sth, undef, $trigger_name);
                     if(@$exist_trigger) {
                         $self->do("DROP TRIGGER $trigger_name");
                     }
   
-                     my $tr_str = "CREATE OR REPLACE TRIGGER $trigger_name"
+                    my $tr_str = "CREATE OR REPLACE TRIGGER $trigger_name"
                          . " AFTER UPDATE OF $to_column ON $to_table "
                          . " REFERENCING "
                          . " NEW AS NEW "
@@ -672,21 +686,45 @@ sub bz_setup_database {
                          . "        SET $column = :NEW.$to_column"
                          . "      WHERE $column = :OLD.$to_column;"
                          . " END $trigger_name;";
-                         $self->do($tr_str);
-               }
-         }
-     }
-   }
+                    $self->do($tr_str);
+                }
+            }
+        }
+    }
 
    # Drop the trigger which causes bug 541553
    my $trigger_name = "PRODUCTS_MILESTONEURL";
-   my $exist_trigger = $self->selectcol_arrayref(
-       "SELECT OBJECT_NAME FROM USER_OBJECTS
-        WHERE OBJECT_NAME = ?", undef, $trigger_name);
+   my $exist_trigger = $self->selectcol_arrayref($sth, undef, $trigger_name);
    if(@$exist_trigger) {
        $self->do("DROP TRIGGER $trigger_name");
    }
 }
+
+# These two methods have been copied from Bugzilla::DB::Schema::Oracle.
+sub _get_create_seq_ddl {
+    my ($self, $table, $column) = @_;
+
+    my $seq_name = "${table}_${column}_SEQ";
+    my $seq_sql = "CREATE SEQUENCE $seq_name INCREMENT BY 1 START WITH 1 " .
+                  "NOMAXVALUE NOCYCLE NOCACHE";
+    my $trigger_sql = $self->_get_create_trigger_ddl($table, $column, $seq_name);
+    return ($seq_sql, $trigger_sql);
+}
+
+sub _get_create_trigger_ddl {
+    my ($self, $table, $column, $seq_name) = @_;
+
+    my $trigger_sql = "CREATE OR REPLACE TRIGGER ${table}_${column}_TR "
+                    . " BEFORE INSERT ON $table "
+                    . " FOR EACH ROW "
+                    . " BEGIN "
+                    . "   SELECT ${seq_name}.NEXTVAL "
+                    . "   INTO :NEW.$column FROM DUAL; "
+                    . " END;";
+    return $trigger_sql;
+}
+
+############################################################################
 
 package Bugzilla::DB::Oracle::st;
 use base qw(DBI::st);

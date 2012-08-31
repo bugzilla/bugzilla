@@ -167,7 +167,7 @@ sub _legal_field_values {
                     sort_key => $self->type('int', $sortkey),
                     sortkey  => $self->type('int', $sortkey), # deprecated
                     visibility_values => [$self->type('string', $product_name)],
-                    is_active         => $self->type('boolean', $value->is_active()),
+                    is_active         => $self->type('boolean', $value->is_active),
                 });
             }
         }
@@ -1193,8 +1193,9 @@ and C<visibility_values> will reflect which product(s) this value appears in.
 
 =item C<is_active>
 
-C<boolean> True when the version, target_milestone or component is active,
-false when the element is retired.
+C<boolean> This value is defined only for certain product specific fields
+such as version, target_milestone or component. When true, the value is active,
+otherwise the value is not active.
 
 =item C<description>
 
@@ -1251,6 +1252,8 @@ You specified an invalid field name or id.
 =item The C<is_mandatory> return value was added in Bugzilla B<4.0>.
 
 =item C<sortkey> was renamed to C<sort_key> in Bugzilla B<4.2>.
+
+=item C<is_active> return key for C<values> was added in Bugzilla B<4.4>.
 
 =back
 

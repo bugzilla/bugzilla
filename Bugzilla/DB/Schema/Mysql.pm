@@ -13,7 +13,9 @@ package Bugzilla::DB::Schema::Mysql;
 #
 ###############################################################################
 
+use 5.10.1;
 use strict;
+
 use Bugzilla::Error;
 
 use base qw(Bugzilla::DB::Schema);

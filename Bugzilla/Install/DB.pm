@@ -10,6 +10,7 @@ package Bugzilla::Install::DB;
 # NOTE: This package may "use" any modules that it likes,
 # localconfig is available, and params are up to date. 
 
+use 5.10.1;
 use strict;
 
 use Bugzilla::Constants;

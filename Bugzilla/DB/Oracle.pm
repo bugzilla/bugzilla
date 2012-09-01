@@ -20,7 +20,10 @@ For interface details see L<Bugzilla::DB> and L<DBI>.
 =cut
 
 package Bugzilla::DB::Oracle;
+
+use 5.10.1;
 use strict;
+
 use base qw(Bugzilla::DB);
 
 use DBD::Oracle;
@@ -706,6 +709,10 @@ sub _get_create_trigger_ddl {
 ############################################################################
 
 package Bugzilla::DB::Oracle::st;
+
+use 5.10.1;
+use strict;
+
 use base qw(DBI::st);
  
 sub fetchrow_arrayref {

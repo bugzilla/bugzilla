@@ -5,9 +5,11 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
+package Bugzilla::Search;
+
+use 5.10.1;
 use strict;
 
-package Bugzilla::Search;
 use base qw(Exporter);
 @Bugzilla::Search::EXPORT = qw(
     IsValidQueryType

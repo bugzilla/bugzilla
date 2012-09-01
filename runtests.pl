@@ -6,7 +6,7 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-# Make it harder for us to do dangerous things in Perl.
+use 5.10.1;
 use diagnostics;
 use strict;
 use lib qw(lib);

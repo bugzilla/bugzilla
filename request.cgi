@@ -6,13 +6,8 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-################################################################################
-# Script Initialization
-################################################################################
-
-# Make it harder for us to do dangerous things in Perl.
+use 5.10.1;
 use strict;
-
 use lib qw(. lib);
 
 use Bugzilla;
@@ -33,10 +28,6 @@ my $template = Bugzilla->template;
 my $action = $cgi->param('action') || '';
 
 print $cgi->header();
-
-################################################################################
-# Main Body Execution
-################################################################################
 
 my $fields;
 $fields->{'requester'}->{'type'} = 'single';

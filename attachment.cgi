@@ -6,13 +6,8 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-################################################################################
-# Script Initialization
-################################################################################
-
-# Make it harder for us to do dangerous things in Perl.
+use 5.10.1;
 use strict;
-
 use lib qw(. lib);
 
 use Bugzilla;
@@ -24,11 +19,9 @@ use Bugzilla::FlagType;
 use Bugzilla::User;
 use Bugzilla::Util;
 use Bugzilla::Bug;
-use Bugzilla::Field;
 use Bugzilla::Attachment;
 use Bugzilla::Attachment::PatchReader;
 use Bugzilla::Token;
-use Bugzilla::Keyword;
 
 use Encode qw(encode find_encoding);
 
@@ -39,10 +32,6 @@ use Encode qw(encode find_encoding);
 local our $cgi = Bugzilla->cgi;
 local our $template = Bugzilla->template;
 local our $vars = {};
-
-################################################################################
-# Main Body Execution
-################################################################################
 
 # All calls to this script should contain an "action" variable whose
 # value determines what the user wants to do.  The code below checks

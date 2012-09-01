@@ -6,6 +6,8 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::Auth::Persist::Cookie;
+
+use 5.10.1;
 use strict;
 use fields qw();
 

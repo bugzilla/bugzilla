@@ -6,7 +6,10 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::BugUrl;
+
+use 5.10.1;
 use strict;
+
 use base qw(Bugzilla::Object);
 
 use Bugzilla::Util;

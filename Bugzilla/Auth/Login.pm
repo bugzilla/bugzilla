@@ -7,6 +7,7 @@
 
 package Bugzilla::Auth::Login;
 
+use 5.10.1;
 use strict;
 use fields qw();
 

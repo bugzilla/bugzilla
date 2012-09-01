@@ -6,7 +6,10 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::Search::Condition;
+
+use 5.10.1;
 use strict;
+
 use base qw(Exporter);
 our @EXPORT_OK = qw(condition);
 

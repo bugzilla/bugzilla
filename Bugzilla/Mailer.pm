@@ -7,6 +7,7 @@
 
 package Bugzilla::Mailer;
 
+use 5.10.1;
 use strict;
 
 use base qw(Exporter);

@@ -6,14 +6,8 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-###############################################################################
-# Script Initialization
-###############################################################################
-
-# Make it harder for us to do dangerous things in Perl.
+use 5.10.1;
 use strict;
-
-# Include the Bugzilla CGI and general utility library.
 use lib qw(. lib);
 
 use Bugzilla;
@@ -36,10 +30,6 @@ if ($cgi->param('logout')) {
     # Make sure that templates or other code doesn't get confused about this.
     $cgi->delete('logout');
 }
-
-###############################################################################
-# Main Body Execution
-###############################################################################
 
 # Return the appropriate HTTP response headers.
 print $cgi->header();

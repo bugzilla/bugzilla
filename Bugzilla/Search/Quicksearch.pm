@@ -7,7 +7,7 @@
 
 package Bugzilla::Search::Quicksearch;
 
-# Make it harder for us to do dangerous things in Perl.
+use 5.10.1;
 use strict;
 
 use Bugzilla::Error;

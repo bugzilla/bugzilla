@@ -7,8 +7,8 @@
 
 package Bugzilla::Util;
 
+use 5.10.1;
 use strict;
-use feature ':5.10';
 
 use base qw(Exporter);
 @Bugzilla::Util::EXPORT = qw(trick_taint detaint_natural detaint_signed
@@ -16,7 +16,7 @@ use base qw(Exporter);
                              css_class_quote html_light_quote
                              i_am_cgi correct_urlbase remote_ip validate_ip
                              do_ssl_redirect_if_required use_attachbase
-                             diff_arrays on_main_db say
+                             diff_arrays on_main_db
                              trim wrap_hard wrap_comment find_wrap_point
                              format_time validate_date validate_time datetime_from
                              is_7bit_clean bz_crypt generate_random_password

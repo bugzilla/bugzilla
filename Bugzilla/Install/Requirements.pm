@@ -13,6 +13,7 @@ package Bugzilla::Install::Requirements;
 # Subroutines may "require" and "import" from modules, but they
 # MUST NOT "use."
 
+use 5.10.1;
 use strict;
 
 use Bugzilla::Constants;

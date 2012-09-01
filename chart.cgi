@@ -27,6 +27,7 @@
 # Bonus:
 # Offer subscription when you get a "series already exists" error?
 
+use 5.10.1;
 use strict;
 use lib qw(. lib);
 
@@ -37,7 +38,6 @@ use Bugzilla::Error;
 use Bugzilla::Util;
 use Bugzilla::Chart;
 use Bugzilla::Series;
-use Bugzilla::User;
 use Bugzilla::Token;
 
 # For most scripts we don't make $cgi and $template global variables. But

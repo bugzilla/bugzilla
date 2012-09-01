@@ -11,6 +11,7 @@ package Bugzilla::Install::Util;
 # module may require *only* Bugzilla::Constants and built-in
 # perl modules.
 
+use 5.10.1;
 use strict;
 
 use Bugzilla::Constants;

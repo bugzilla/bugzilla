@@ -7,7 +7,9 @@
 
 package Bugzilla::WebService::Product;
 
+use 5.10.1;
 use strict;
+
 use base qw(Bugzilla::WebService);
 use Bugzilla::Product;
 use Bugzilla::User;

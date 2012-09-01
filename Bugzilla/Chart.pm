@@ -5,8 +5,6 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-use strict;
-
 # This module represents a chart.
 #
 # Note that it is perfectly legal for the 'lines' member variable of this
@@ -14,6 +12,9 @@ use strict;
 # in it. If this is true, the 'labels' array will also have empty members at
 # the same points.
 package Bugzilla::Chart;
+
+use 5.10.1;
+use strict;
 
 use Bugzilla::Error;
 use Bugzilla::Util;

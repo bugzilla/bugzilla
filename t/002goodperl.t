@@ -16,7 +16,7 @@ use lib 't';
 
 use Support::Files;
 
-use Test::More tests => (scalar(@Support::Files::testitems) * 3);
+use Test::More tests => (scalar(@Support::Files::testitems) * 4);
 
 my @testitems = @Support::Files::testitems; # get the files to test.
 
@@ -81,6 +81,28 @@ foreach my $file (@testitems) {
         ok(1,"$file uses strict");
     } else {
         ok(0,"$file DOES NOT use strict --WARNING");
+    }
+}
+
+foreach my $file (@testitems) {
+    my $found_use_feature = 0;
+    $file =~ s/\s.*$//; # nuke everything after the first space (#comment)
+    next if (!$file); # skip null entries
+    if (! open (FILE, $file)) {
+        ok(0,"could not open $file --WARNING");
+        next;
+    }
+    while (my $file_line = <FILE>) {
+        if ($file_line =~ m/^\s*use 5.10.1/) {
+            $found_use_feature = 1;
+            last;
+        }
+    }
+    close (FILE);
+    if ($found_use_feature) {
+        ok(1,"$file requires Perl 5.10.1");
+    } else {
+        ok(0,"$file DOES NOT require Perl 5.10.1 --WARNING");
     }
 }
 

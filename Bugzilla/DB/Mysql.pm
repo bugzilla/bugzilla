@@ -20,7 +20,10 @@ For interface details see L<Bugzilla::DB> and L<DBI>.
 =cut
 
 package Bugzilla::DB::Mysql;
+
+use 5.10.1;
 use strict;
+
 use base qw(Bugzilla::DB);
 
 use Bugzilla::Constants;

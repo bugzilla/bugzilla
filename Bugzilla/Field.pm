@@ -57,6 +57,7 @@ in addition to what is documented here.
 
 package Bugzilla::Field;
 
+use 5.10.1;
 use strict;
 
 use base qw(Exporter Bugzilla::Object);

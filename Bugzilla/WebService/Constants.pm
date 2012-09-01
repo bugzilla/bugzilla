@@ -7,7 +7,9 @@
 
 package Bugzilla::WebService::Constants;
 
+use 5.10.1;
 use strict;
+
 use base qw(Exporter);
 
 our @EXPORT = qw(

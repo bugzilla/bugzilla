@@ -6,7 +6,10 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::RNG;
+
+use 5.10.1;
 use strict;
+
 use base qw(Exporter);
 use Bugzilla::Constants qw(ON_WINDOWS);
 

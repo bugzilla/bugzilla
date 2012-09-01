@@ -11,7 +11,9 @@
 
 package Bugzilla::JobQueue::Runner;
 
+use 5.10.1;
 use strict;
+
 use Cwd qw(abs_path);
 use File::Basename;
 use File::Copy;

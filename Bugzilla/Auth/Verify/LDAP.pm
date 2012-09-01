@@ -6,7 +6,10 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::Auth::Verify::LDAP;
+
+use 5.10.1;
 use strict;
+
 use base qw(Bugzilla::Auth::Verify);
 use fields qw(
     ldap

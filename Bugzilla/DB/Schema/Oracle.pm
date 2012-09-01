@@ -13,6 +13,7 @@ package Bugzilla::DB::Schema::Oracle;
 #
 ###############################################################################
 
+use 5.10.1;
 use strict;
 
 use base qw(Bugzilla::DB::Schema);

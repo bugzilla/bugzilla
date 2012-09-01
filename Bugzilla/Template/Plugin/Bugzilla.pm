@@ -7,6 +7,7 @@
 
 package Bugzilla::Template::Plugin::Bugzilla;
 
+use 5.10.1;
 use strict;
 
 use base qw(Template::Plugin);

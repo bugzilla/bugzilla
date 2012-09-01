@@ -8,7 +8,9 @@
 
 package Bugzilla::User::Setting;
 
+use 5.10.1;
 use strict;
+
 use base qw(Exporter);
 
 

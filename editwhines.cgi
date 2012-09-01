@@ -10,8 +10,8 @@
 # Script Initialization
 ################################################################################
 
+use 5.10.1;
 use strict;
-
 use lib qw(. lib);
 
 use Bugzilla;

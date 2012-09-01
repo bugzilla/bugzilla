@@ -7,7 +7,9 @@
 
 package Bugzilla::WebService::Bug;
 
+use 5.10.1;
 use strict;
+
 use base qw(Bugzilla::WebService);
 
 use Bugzilla::Comment;

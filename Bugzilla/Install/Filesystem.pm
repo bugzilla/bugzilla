@@ -15,6 +15,7 @@ package Bugzilla::Install::Filesystem;
 # * Files do not have the correct permissions.
 # * The database does not exist.
 
+use 5.10.1;
 use strict;
 
 use Bugzilla::Constants;

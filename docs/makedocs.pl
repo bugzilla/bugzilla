@@ -8,7 +8,9 @@
 
 # This script compiles all the documentation.
 
+use 5.10.1;
 use strict;
+
 use Cwd;
 
 # We need to be in this directory to use our libraries.
@@ -87,8 +89,8 @@ sub MakeDocs {
 
     my ($name, $cmdline) = @_;
 
-    print "Creating $name documentation ...\n" if defined $name;
-    print "$cmdline\n\n";
+    say "Creating $name documentation ..." if defined $name;
+    say "$cmdline\n";
     system $cmdline;
     print "\n";
 
@@ -96,7 +98,7 @@ sub MakeDocs {
 
 sub make_pod {
 
-    print "Creating API documentation...\n";
+    say "Creating API documentation...";
 
     my $converter = Pod::Simple::HTMLBatch::Bugzilla->new;
     # Don't output progress information.

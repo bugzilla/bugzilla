@@ -6,6 +6,8 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::Migrate;
+
+use 5.10.1;
 use strict;
 
 use Bugzilla::Attachment;
@@ -16,7 +18,7 @@ use Bugzilla::Error;
 use Bugzilla::Install::Requirements ();
 use Bugzilla::Install::Util qw(indicate_progress);
 use Bugzilla::Product;
-use Bugzilla::Util qw(get_text trim generate_random_password say);
+use Bugzilla::Util qw(get_text trim generate_random_password);
 use Bugzilla::User ();
 use Bugzilla::Status ();
 use Bugzilla::Version;

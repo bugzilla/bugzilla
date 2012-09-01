@@ -7,6 +7,7 @@
 
 package Bugzilla;
 
+use 5.10.1;
 use strict;
 
 # We want any compile errors to get to the browser, if possible.

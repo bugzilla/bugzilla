@@ -7,6 +7,7 @@
 
 package Bugzilla::Config::Common;
 
+use 5.10.1;
 use strict;
 
 use Email::Address;

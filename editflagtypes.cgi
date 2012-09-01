@@ -6,15 +6,10 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-################################################################################
-# Script Initialization
-################################################################################
-
-# Make it harder for us to do dangerous things in Perl.
+use 5.10.1;
 use strict;
 use lib qw(. lib);
 
-# Use Bugzilla's flag modules for handling flag types.
 use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Flag;

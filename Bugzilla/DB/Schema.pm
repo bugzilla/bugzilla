@@ -15,7 +15,9 @@ package Bugzilla::DB::Schema;
 #
 ###########################################################################
 
+use 5.10.1;
 use strict;
+
 use Bugzilla::Error;
 use Bugzilla::Hook;
 use Bugzilla::Util;

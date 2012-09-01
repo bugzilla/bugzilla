@@ -7,7 +7,9 @@
 
 package Bugzilla::WebService::Server::XMLRPC;
 
+use 5.10.1;
 use strict;
+
 use XMLRPC::Transport::HTTP;
 use Bugzilla::WebService::Server;
 if ($ENV{MOD_PERL}) {
@@ -66,7 +68,10 @@ sub handle_login {
 # This exists to validate input parameters (which XMLRPC::Lite doesn't do)
 # and also, in some cases, to more-usefully decode them.
 package Bugzilla::XMLRPC::Deserializer;
+
+use 5.10.1;
 use strict;
+
 # We can't use "use base" because XMLRPC::Serializer doesn't return
 # a true value.
 use XMLRPC::Lite;
@@ -161,7 +166,10 @@ sub _validation_subs {
 1;
 
 package Bugzilla::XMLRPC::SOM;
+
+use 5.10.1;
 use strict;
+
 use XMLRPC::Lite;
 our @ISA = qw(XMLRPC::SOM);
 use Bugzilla::WebService::Util qw(taint_data);
@@ -184,8 +192,11 @@ sub paramsin {
 # This package exists to fix a UTF-8 bug in SOAP::Lite.
 # See http://rt.cpan.org/Public/Bug/Display.html?id=32952.
 package Bugzilla::XMLRPC::Serializer;
-use Scalar::Util qw(blessed);
+
+use 5.10.1;
 use strict;
+
+use Scalar::Util qw(blessed);
 # We can't use "use base" because XMLRPC::Serializer doesn't return
 # a true value.
 use XMLRPC::Lite;

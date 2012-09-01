@@ -18,8 +18,8 @@
 # 3) If we are processing just the one id, then it is stored in @idlist for
 # later processing.
 
+use 5.10.1;
 use strict;
-
 use lib qw(. lib);
 
 use Bugzilla;

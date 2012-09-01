@@ -7,6 +7,7 @@
 
 package Bugzilla::Whine::Query;
 
+use 5.10.1;
 use strict;
 
 use base qw(Bugzilla::Object);

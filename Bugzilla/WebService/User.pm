@@ -7,10 +7,11 @@
 
 package Bugzilla::WebService::User;
 
+use 5.10.1;
 use strict;
+
 use base qw(Bugzilla::WebService);
 
-use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Group;

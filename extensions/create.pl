@@ -6,8 +6,10 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
+use 5.10.1;
 use strict;
 use lib qw(. lib);
+
 use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Error;
@@ -54,7 +56,7 @@ foreach my $template_file (keys %create_files) {
    close($fh);
 }
 
-print get_text('extension_created', $vars), "\n";
+say get_text('extension_created', $vars);
 
 __END__
 

@@ -8,6 +8,7 @@
 
 package Bugzilla::Template;
 
+use 5.10.1;
 use strict;
 
 use Bugzilla::Constants;

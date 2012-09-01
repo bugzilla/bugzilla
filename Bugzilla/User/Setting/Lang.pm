@@ -7,6 +7,7 @@
 
 package Bugzilla::User::Setting::Lang;
 
+use 5.10.1;
 use strict;
 
 use base qw(Bugzilla::User::Setting);

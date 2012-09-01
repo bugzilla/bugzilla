@@ -5,11 +5,11 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-use strict;
-
 package Bugzilla::Status;
 
-use Bugzilla::Error;
+use 5.10.1;
+use strict;
+
 # This subclasses Bugzilla::Field::Choice instead of implementing 
 # ChoiceInterface, because a bug status literally is a special type
 # of Field::Choice, not just an object that happens to have the same
@@ -22,6 +22,8 @@ use base qw(Bugzilla::Field::Choice Exporter);
     is_open_state 
     closed_bug_statuses
 );
+
+use Bugzilla::Error;
 
 ################################
 #####   Initialization     #####

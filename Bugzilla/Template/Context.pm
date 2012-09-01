@@ -7,7 +7,10 @@
 
 # This exists to implement the template-before_process hook.
 package Bugzilla::Template::Context;
+
+use 5.10.1;
 use strict;
+
 use base qw(Template::Context);
 
 use Bugzilla::Hook;

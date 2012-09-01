@@ -6,7 +6,10 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::Job::Mailer;
+
+use 5.10.1;
 use strict;
+
 use Bugzilla::Mailer;
 BEGIN { eval "use base qw(TheSchwartz::Worker)"; }
 

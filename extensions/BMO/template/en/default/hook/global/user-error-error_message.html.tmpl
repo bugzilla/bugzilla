@@ -8,8 +8,8 @@
 
 [% IF error == 'illegal_change' || error == 'illegal_change_deps' %]
   <p>
-    If you are attempting to confirm an unconfirmed [% terms.bug %] or edit the fields of a [% terms.bug %],
-    <a href="[% urlbase FILTER none %]page.cgi=get_permissions.html">find
+    If you are attempting to confirm an unconfirmed [% terms.bug %] or edit the
+    fields of a [% terms.bug %], <a href="page.cgi?id=get_permissions.html">find
     out how to get the necessary permissions</a>.
   </p>
 [% END %]

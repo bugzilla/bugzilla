@@ -222,6 +222,7 @@ sub get {
         
         if (Bugzilla->user->id == $user->id) {
             $user_info->{saved_searches} = [map { $self->_query_to_hash($_) } @{ $user->queries }];
+            $user_info->{saved_reports}  = [map { $self->_report_to_hash($_) } @{ $user->reports }];
         }
         
         push(@users, filter($params, $user_info));
@@ -349,11 +350,20 @@ sub _group_to_hash {
 sub _query_to_hash {
     my ($self, $query) = @_;
     my $item = {
-        id   => $self->type('int', $query->id),
-        name => $self->type('string', $query->name),
-        url  => $self->type('string', $query->url),
+        id    => $self->type('int', $query->id),
+        name  => $self->type('string', $query->name),
+        query => $self->type('string', $query->url),
     };
+    return $item;
+}
 
+sub _report_to_hash {
+    my ($self, $report) = @_;
+    my $item = {
+        id    => $self->type('int', $report->id),
+        name  => $self->type('string', $report->name),
+        query => $self->type('string', $report->query),
+    };
     return $item;
 }
 
@@ -813,9 +823,30 @@ C<int> An integer id uniquely identifying the saved search.
 
 C<string> The name of the saved search.
 
-=item url
+=item query
 
 C<string> The CGI parameters for the saved search.
+
+=back
+
+=item saved_reports
+
+C<array> An array of hashes, each of which represents a user's saved report and has
+the following keys:
+
+=over
+
+=item id
+
+C<int> An integer id uniquely identifying the saved report.
+
+=item name
+
+C<string> The name of the saved report.
+
+=item query
+
+C<string> The CGI parameters for the saved report.
 
 =back
 
@@ -824,8 +855,8 @@ will only be returned the C<id>, C<name>, and C<real_name> items. If you are
 logged in and not in editusers group, you will only be returned the C<id>, C<name>, 
 C<real_name>, C<email>, C<can_login>, and C<groups> items. The groups returned are
 filtered based on your permission to bless each group.
-The C<saved_searches> item is only returned if you are querying your own account,
-even if you are in the editusers group.
+The C<saved_searches> and C<saved_reports> items are only returned if you are
+querying your own account, even if you are in the editusers group.
 
 =back
 
@@ -858,10 +889,11 @@ function.
 
 =item C<group_ids> and C<groups> were added in Bugzilla B<4.0>.
 
-=item C<include_disabled> added in Bugzilla B<4.0>. Default behavior 
-for C<match> has changed to only returning enabled accounts.
+=item C<include_disabled> was added in Bugzilla B<4.0>. Default
+behavior for C<match> was changed to only return enabled accounts.
 
-=item C<groups> and C<saved_searches> added in Bugzilla B<4.4>.
+=item C<groups>, C<saved_searches>, and C<saved_reports> were added
+in Bugzilla B<4.4>.
 
 =back
 

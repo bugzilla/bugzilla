@@ -75,7 +75,7 @@ PerlChildInitHandler "sub { Bugzilla::RNG::srand(); srand(); }"
     PerlCleanupHandler  Apache2::SizeLimit Bugzilla::ModPerl::CleanupHandler
     PerlOptions +ParseHeaders
     Options +ExecCGI
-    AllowOverride Limit FileInfo Indexes
+    AllowOverride Limit FileInfo Indexes Options
     DirectoryIndex index.cgi index.html
 </Directory>
 EOT

@@ -128,6 +128,7 @@ sub new {
     # so that's what we use, and I don't know of any way in SQLite to
     # alias the SQL "substr" function to be called "SUBSTRING".
     $self->sqlite_create_function('substring', 3, \&CORE::substr);
+    $self->sqlite_create_function('char_length', 1, sub { length($_[0]) });
     $self->sqlite_create_function('mod', 2, \&_sqlite_mod);
     $self->sqlite_create_function('now', 0, \&_sqlite_now);
     $self->sqlite_create_function('localtimestamp', 1, \&_sqlite_now);

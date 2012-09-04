@@ -153,23 +153,43 @@ if (defined $cgi->param('delta_ts'))
             Bugzilla::Bug::GetBugActivity($first_bug->id, undef,
                                           scalar $cgi->param('delta_ts'));
 
-        $vars->{'title_tag'} = "mid_air";
-    
         ThrowCodeError('undefined_field', { field => 'longdesclength' })
             if !defined $cgi->param('longdesclength');
 
-        $vars->{'start_at'} = $cgi->param('longdesclength');
+        my $start_at = $cgi->param('longdesclength');
+
         # Always sort midair collision comments oldest to newest,
         # regardless of the user's personal preference.
-        $vars->{'comments'} = $first_bug->comments({ order => "oldest_to_newest" });
-        $vars->{'bug'} = $first_bug;
+        my $comments = $first_bug->comments({ order => "oldest_to_newest" });
 
         # The token contains the old delta_ts. We need a new one.
         $cgi->param('token', issue_hash_token([$first_bug->id, $first_bug->delta_ts]));
-        # Warn the user about the mid-air collision and ask them what to do.
-        $template->process("bug/process/midair.html.tmpl", $vars)
-          || ThrowTemplateError($template->error());
-        exit;
+
+        # Show midair if previous changes made other than CC
+        # and/or one or more comments were made
+        my $do_midair = scalar @$comments > $start_at ? 1 : 0;
+
+        if (!$do_midair) {
+            foreach my $operation (@{ $vars->{'operations'} }) {
+                foreach my $change (@{ $operation->{'changes'} }) {
+                    $do_midair = 1 if $change->{'fieldname'} ne 'cc';
+                    last;
+                }
+                last if $do_midair;
+            }
+        }
+
+        if ($do_midair) {
+            $vars->{'title_tag'} = "mid_air";
+            $vars->{'start_at'} = $start_at;
+            $vars->{'comments'} = $comments;
+            $vars->{'bug'} = $first_bug;
+
+            # Warn the user about the mid-air collision and ask them what to do.
+            $template->process("bug/process/midair.html.tmpl", $vars)
+                || ThrowTemplateError($template->error());
+            exit;
+        }
     }
 }
 

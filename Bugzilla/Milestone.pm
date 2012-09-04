@@ -64,7 +64,7 @@ sub new {
     my $dbh = Bugzilla->dbh;
 
     my $product;
-    if (ref $param) {
+    if (ref $param and !defined $param->{id}) {
         $product = $param->{product};
         my $name = $param->{name};
         if (!defined $product) {
@@ -241,7 +241,9 @@ Bugzilla::Milestone - Bugzilla product milestone class.
 
     use Bugzilla::Milestone;
 
-    my $milestone = new Bugzilla::Milestone({ name => $name, product => $product });
+    my $milestone = new Bugzilla::Milestone({ name => $name, product => $product_obj });
+    my $milestone = Bugzilla::Milestone->check({ name => $name, product => $product_obj });
+    my $milestone = Bugzilla::Milestone->check({ id => $id });
 
     my $name       = $milestone->name;
     my $product_id = $milestone->product_id;
@@ -265,7 +267,7 @@ Milestone.pm represents a Product Milestone object.
 
 =over
 
-=item C<new({name => $name, product => $product})>
+=item C<< new({name => $name, product => $product}) >>
 
  Description: The constructor is used to load an existing milestone
               by passing a product object and a milestone name.
@@ -355,7 +357,7 @@ Milestone.pm represents a Product Milestone object.
 
 =over
 
-=item C<create({value => $value, product => $product, sortkey => $sortkey})>
+=item C<< create({value => $value, product => $product, sortkey => $sortkey}) >>
 
  Description: Create a new milestone for the given product.
 

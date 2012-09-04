@@ -65,7 +65,7 @@ sub new {
     my $dbh = Bugzilla->dbh;
 
     my $product;
-    if (ref $param) {
+    if (ref $param and !defined $param->{id}) {
         $product = $param->{product};
         my $name = $param->{name};
         if (!defined $product) {
@@ -207,14 +207,16 @@ Bugzilla::Version - Bugzilla product version class.
 
     use Bugzilla::Version;
 
-    my $version = new Bugzilla::Version({ name => $name, product => $product });
+    my $version = new Bugzilla::Version({ name => $name, product => $product_obj });
+    my $version = Bugzilla::Version->check({ name => $name, product => $product_obj });
+    my $version = Bugzilla::Version->check({ id => $id });
 
     my $value = $version->name;
     my $product_id = $version->product_id;
     my $product = $version->product;
 
     my $version = Bugzilla::Version->create(
-        { value => $name, product => $product });
+        { value => $name, product => $product_obj });
 
     $version->set_name($new_name);
     $version->update();

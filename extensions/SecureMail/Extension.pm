@@ -225,8 +225,9 @@ sub mailer_before_send {
                           $email->header('X-Bugzilla-Type') eq 'request';
     my $is_passwordmail = !$is_bugmail && ($body =~ /cfmpw.*cxlpw/s);
     my $is_test_email   = $email->header('X-Bugzilla-Type') =~ /securemail-test/ ? 1 : 0;
+    my $is_whine_email  = $email->header('X-Bugzilla-Type') eq 'whine' ? 1 : 0;
 
-    if ($is_bugmail || $is_passwordmail || $is_test_email) {
+    if ($is_bugmail || $is_passwordmail || $is_test_email || $is_whine_email) {
         # Convert the email's To address into a User object
         my $login = $email->header('To');
         my $emailsuffix = Bugzilla->params->{'emailsuffix'};
@@ -284,6 +285,12 @@ sub mailer_before_send {
                 $make_secure = SECURE_NONE;
             }
         }
+        elsif ($is_whine_email) {
+            # When a whine email has one or more secure bugs in the body, then
+            # encrypt the entire email body. Subject can be left alone as it
+            # comes from the whine settings.
+            $make_secure = _should_secure_whine($email) ? SECURE_BODY : SECURE_NONE;
+        }
 
         # If finding the user fails for some reason, but we determine we
         # should be encrypting, we want to make the mail safe. An empty key
@@ -330,6 +337,28 @@ sub _should_secure_bug {
         !$bug
         || $bug->{'error'}
         || grep($_->secure_mail, @{ $bug->groups_in });
+}
+
+sub _should_secure_whine {
+    my ($email) = @_;
+    my $should_secure = 0;
+    $email->walk_parts(sub {
+        my $part = shift;
+        my $content_type = $part->content_type;
+        return if !$content_type || $content_type !~ /^text\/plain/;
+        my $body = $part->body;
+        my @bugids = $body =~ /Bug (\d+):/g;
+        foreach my $id (@bugids) {
+            $id = trim($id);
+            next if !$id;
+            my $bug = new Bugzilla::Bug($id);
+            if ($bug && _should_secure_bug($bug)) {
+                $should_secure = 1;
+                last;
+            }
+        }
+    });
+    return $should_secure ? 1 : 0;
 }
 
 sub _make_secure {
@@ -558,27 +587,6 @@ sub _filter_bug_links {
             $part->encoding_set('quoted-printable');
         }
     });
-}
-
-sub whine_before_send {
-    my ($self, $args) = @_;
-    my $params = $args->{params};
-
-    return if !exists $params->{queries};
-
-    foreach my $query (@{ $params->{queries} }) {
-        foreach my $bug (@{ $query->{bugs} }) {
-            my $bug_obj = new Bugzilla::Bug($bug->{bug_id});
-            next if !_should_secure_bug($bug_obj);
-            $bug->{priority}     = '--';
-            $bug->{bug_severity} = '--';
-            $bug->{rep_platform} = '--';
-            $bug->{assigned_to}  = '--';
-            $bug->{bug_status}   = '--';
-            $bug->{resolution}   = '--';
-            $bug->{'short_desc'} = "(Secure bug)";
-        }
-    }
 }
 
 __PACKAGE__->NAME;

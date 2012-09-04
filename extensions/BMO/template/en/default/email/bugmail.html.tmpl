@@ -30,7 +30,7 @@
     .new .c1 {
       border-right: 1px solid #969696;
     }
-    #noreply, #reason {
+    #noreply, #reason, #tracking {
       font-size: 90%;
       color: #666666;
     }
@@ -90,6 +90,25 @@
     <br>
   [% END %]
 
+[% USE Bugzilla %]
+[% tracking_flags = [] %]
+[% FOREACH field = Bugzilla.active_custom_fields(product => bug.product_obj, component => bug.component_obj, type => 2) %]
+  [% NEXT IF cf_flag_disabled(field.name, bug) %]
+  [% NEXT IF bug.${field.name} == "---" %]
+  [% tracking_flags.push(field) %]
+[% END %]
+[% IF tracking_flags.size %]
+  <div id="tracking">
+    <hr>
+    <b>Tracking Flags:</b>
+    <ul>
+      [% FOREACH field = tracking_flags %]
+        <li>[% field.description FILTER html %]:[% bug.${field.name} FILTER html %]</li>
+      [% END %]
+    </ul>
+  </div>
+[% END %]
+
   <div id="reason">
     <hr>
     <b>You are receiving this mail because:</b>
@@ -106,6 +125,7 @@
       [% END %]
     </ul>
   </div>
+
 </body>
 </html>
 

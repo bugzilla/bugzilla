@@ -35,6 +35,21 @@ Referenced [% terms.Bugs %]:
 
 -- [%# Protect the trailing space of the signature marker %]
 Configure [% terms.bug %]mail: [% urlbase %]userprefs.cgi?tab=email
+
+[% USE Bugzilla %]
+[% tracking_flags = [] %]
+[% FOREACH field = Bugzilla.active_custom_fields(product => bug.product_obj, component => bug.component_obj, type => 2) %]
+  [% NEXT IF cf_flag_disabled(field.name, bug) %]
+  [% NEXT IF bug.${field.name} == "---" %]
+  [% tracking_flags.push(field) %]
+[% END %]
+[% IF tracking_flags.size %]
+------- Tracking Flags: -------
+[% FOREACH field = tracking_flags %]
+[%+ field.description %]:[% bug.${field.name} %]
+[% END %]
+[% END %]
+
 ------- You are receiving this mail because: -------
 [% SET reason_lines = [] %]
 [% FOREACH reason = reasons %]

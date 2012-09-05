@@ -54,12 +54,13 @@ sub create {
     my $user_id = $search->user_id;
 
     # Enforce there only being SAVE_NUM_SEARCHES per user.
-    my $min_id = $dbh->selectrow_array(
-        'SELECT id FROM profile_search WHERE user_id = ? ORDER BY id DESC '
-        . $dbh->sql_limit(1, SAVE_NUM_SEARCHES), undef, $user_id);
-    if ($min_id) {
-        $dbh->do('DELETE FROM profile_search WHERE user_id = ? AND id <= ?',
-                 undef, ($user_id, $min_id));
+    my @ids = @{ $dbh->selectcol_arrayref(
+        "SELECT id FROM profile_search WHERE user_id = ? ORDER BY id",
+        undef, $user_id) };
+    if (scalar(@ids) > SAVE_NUM_SEARCHES) {
+        splice(@ids, - SAVE_NUM_SEARCHES);
+        $dbh->do(
+            "DELETE FROM profile_search WHERE id IN (" . join(',', @ids) . ")");
     }
     $dbh->bz_commit_transaction();
     return $search;

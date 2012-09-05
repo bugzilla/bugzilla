@@ -1,0 +1,17 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+
+[% IF orange_factor && cgi.user_agent.match('(?i)gecko') %]
+  [% style_urls.push('extensions/OrangeFactor/web/style/orangefactor.css') %]
+  [% javascript_urls.push('extensions/OrangeFactor/web/js/sparklines.min.js') %]
+  [% javascript_urls.push('extensions/OrangeFactor/web/js/orange_factor.js') %]
+[% END %]
+

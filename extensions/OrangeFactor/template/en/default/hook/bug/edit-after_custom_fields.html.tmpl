@@ -11,15 +11,16 @@
 
 [% IF orange_factor %]
   <tr>
-    <td valign="top">
-      <label><b>Orange Factor:</b></label>
-      (<a href="https://brasstacks.mozilla.com/orangefactor/?display=Bug&bugid=[% bug.bug_id FILTER url_quote %]">link</a>)
-    </td>
+    <th class="field_label" valign="top">
+      Orange Factor:
+    </th>
     <td>
       [% IF cgi.user_agent.match('(?i)gecko') %]
         <canvas id="orange-graph" class="bz_default_hidden"></canvas>
         <span id="orange-count"></span>
       [% END %]
+      (<a href="https://brasstacks.mozilla.com/orangefactor/?display=Bug&bugid=[% bug.bug_id FILTER url_quote %]"
+          title="Click to load Orange Factor page for this bug">link</a>)
     </td>
   </tr>
 [% END %]

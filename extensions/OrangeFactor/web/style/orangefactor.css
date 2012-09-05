@@ -6,7 +6,8 @@
  * defined by the Mozilla Public License, v. 2.0. */
 
 #orange-graph {
+    display: block;
     width: 180px;
     height: 38px;
-    margin-right: .5em;
+    margin: 0 .5em .5em 0;
 }

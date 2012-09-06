@@ -168,8 +168,8 @@
         [% IF change.blocker %]
           [% "${terms.Bug} ${bug.id}" FILTER bug_link(bug, full_url => 1) FILTER none %]
           depends on
-          <a href="[% urlbase FILTER html %]/show_bug.cgi?id=[% bug.id FILTER none %]">
-          [% terms.Bug %]&nbsp;[% bug.id FILTER none %]</a>,
+          <a href="[% urlbase FILTER html %]/show_bug.cgi?id=[% change.blocker.id FILTER none %]">
+          [% terms.Bug %]&nbsp;[% change.blocker.id FILTER none %]</a>,
           which changed state.<br>
         [% ELSE %]
           [% INCLUDE global/user.html.tmpl who = change.who %] changed

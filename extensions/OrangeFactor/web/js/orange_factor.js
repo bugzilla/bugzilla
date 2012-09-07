@@ -11,20 +11,22 @@ YAHOO.namespace('OrangeFactor');
 var OrangeFactor = YAHOO.OrangeFactor;
 
 OrangeFactor.dayMs = 24 * 60 * 60 * 1000,
-OrangeFactor.limit = 28;
+OrangeFactor.limit = 7;
 
 OrangeFactor.getOrangeCount = function (data) {
     data = data.oranges;
     var total = 0,
         days = [],
-        date = OrangeFactor.getCurrentDateMs() - (OrangeFactor.limit + 1) * OrangeFactor.dayMs;
+        date = OrangeFactor.getCurrentDateMs() - OrangeFactor.limit * OrangeFactor.dayMs;
     for(var i = 0; i < OrangeFactor.limit; i++) {
         var iso = OrangeFactor.dateString(new Date(date));
-        days.push(data[iso] ? data[iso].orangecount : 0);
+        var count = data[iso] ? data[iso].orangecount : 0;
+        days.push(count);
+        total += count;
         date += OrangeFactor.dayMs;
     }
     OrangeFactor.displayGraph(days);
-    OrangeFactor.displayCount(days[days.length - 1]);
+    OrangeFactor.displayCount(total);
 }
 
 OrangeFactor.displayGraph = function (dayCounts) {
@@ -34,24 +36,25 @@ OrangeFactor.displayGraph = function (dayCounts) {
     var graphContainer = YAHOO.util.Dom.get('orange-graph');
     Dom.removeClass(graphContainer, 'bz_default_hidden');
     YAHOO.util.Dom.setAttribute(graphContainer, 'title',
-                                'failures over the past month, max in a day: ' + max);
+                                'failures over the past week, max in a day: ' + max);
     var  opts = {
-        "percentage_lines":[0.25, 0.5, 0.75], 
-        "fill_between_percentage_lines": true, 
-        "left_padding": 0, 
-        "right_padding": 0, 
+        "percentage_lines":[0.25, 0.5, 0.75],
+        "fill_between_percentage_lines": false,
+        "left_padding": 0,
+        "right_padding": 0,
         "top_padding": 0,
-        "bottom_padding": 0, 
-        "background": "#D0D0D0", 
-        "stroke": "#000000", 
-        "percentage_fill_color": "#CCCCFF"
+        "bottom_padding": 0,
+        "background": "#D0D0D0",
+        "stroke": "#000000",
+        "percentage_fill_color": "#CCCCFF",
+        "scale_from_zero": true,
     };
     new Sparkline('orange-graph', dayCounts, opts).draw();
 }
 
 OrangeFactor.displayCount = function (count) {
     var countContainer = YAHOO.util.Dom.get('orange-count');
-    countContainer.innerHTML = encodeURIComponent(count) + ' failures in the past day';
+    countContainer.innerHTML = encodeURIComponent(count) + ' failures in the past week';
 }
 
 OrangeFactor.dateString = function (date) {
@@ -70,10 +73,8 @@ OrangeFactor.getCurrentDateMs = function () {
 
 OrangeFactor.orangify = function () {
     var bugId = document.forms['changeform'].id.value;
-    var endDay = OrangeFactor.dateString(new Date(OrangeFactor.getCurrentDateMs() - 1 * OrangeFactor.dayMs));
-    var startDay = OrangeFactor.dateString(new Date(OrangeFactor.getCurrentDateMs() - (OrangeFactor.limit + 1) * OrangeFactor.dayMs));
-    var url = "https://brasstacks.mozilla.com/orangefactor/api/count?startday=" + encodeURIComponent(startDay) +
-              "&endday=" + encodeURIComponent(endDay) + "&bugid=" + encodeURIComponent(bugId) + 
+    var url = "https://brasstacks.mozilla.com/orangefactor/api/count?" +
+              "bugid=" + encodeURIComponent(bugId) +
               "&callback=OrangeFactor.getOrangeCount";
     var script = document.createElement('script');
     Dom.setAttribute(script, 'src', url);

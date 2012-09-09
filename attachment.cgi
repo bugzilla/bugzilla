@@ -414,8 +414,7 @@ sub view {
     }
     print $cgi->header(-type=>"$contenttype; name=\"$filename\"",
                        -content_disposition=> "$disposition; filename=\"$filename\"",
-                       -content_length => $attachment->datasize,
-                       -x_content_type_options => "nosniff");
+                       -content_length => $attachment->datasize);
     disable_utf8();
     print $attachment->data;
 }

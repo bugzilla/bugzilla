@@ -42,8 +42,8 @@
     <div id="noreply">
       Do not reply to this email. You can add comments to this [% terms.bug %] at
       [%# using the bug_link filter here causes a weird template error %]
-      <a href="[% urlbase FILTER html %]/show_bug.cgi?id=[% bug.id FILTER none %]">
-      [% urlbase FILTER html %]/show_bug.cgi?id=[% bug.id FILTER none %]</a>
+      <a href="[% urlbase FILTER html %]show_bug.cgi?id=[% bug.id FILTER none %]">
+      [% urlbase FILTER html %]show_bug.cgi?id=[% bug.id FILTER none %]</a>
     </div>
     <br>
   [% END %]
@@ -81,7 +81,7 @@
       <ul>
         [% FOREACH ref = referenced_bugs %]
           <li>
-            [<a href="[% urlbase FILTER html %]/show_bug.cgi?id=[% ref.id FILTER none %]">
+            [<a href="[% urlbase FILTER html %]show_bug.cgi?id=[% ref.id FILTER none %]">
             [% terms.Bug %]&nbsp;[% ref.id FILTER none %]</a>] [% ref.short_desc FILTER html %]
           </li>
         [% END %]
@@ -168,7 +168,7 @@
         [% IF change.blocker %]
           [% "${terms.Bug} ${bug.id}" FILTER bug_link(bug, full_url => 1) FILTER none %]
           depends on
-          <a href="[% urlbase FILTER html %]/show_bug.cgi?id=[% change.blocker.id FILTER none %]">
+          <a href="[% urlbase FILTER html %]show_bug.cgi?id=[% change.blocker.id FILTER none %]">
           [% terms.Bug %]&nbsp;[% change.blocker.id FILTER none %]</a>,
           which changed state.<br>
         [% ELSE %]

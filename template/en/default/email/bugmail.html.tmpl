@@ -48,7 +48,7 @@
       <ul>
       [% FOREACH ref = referenced_bugs %]
         <li>
-          [<a href="[% urlbase FILTER html %]/show_bug.cgi?id=[% ref.id FILTER none %]">
+          [<a href="[% urlbase FILTER html %]show_bug.cgi?id=[% ref.id FILTER none %]">
           [% terms.Bug %]&nbsp;[% ref.id FILTER none %]</a>] [% ref.short_desc FILTER html %]
         </li>
       [% END %]

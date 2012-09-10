@@ -37,6 +37,7 @@ use Crypt::OpenPGP::KeyRing;
 use Crypt::OpenPGP;
 use Crypt::SMIME;
 use Encode;
+use HTML::Tree;
 
 our $VERSION = '0.5';
 
@@ -386,20 +387,17 @@ sub _make_secure {
         if (scalar $email->parts > 1) {
             my $old_boundary = $email->{ct}{attributes}{boundary};
             my $to_encrypt = "Content-Type: " . $email->content_type . "\n\n";
-            
+
             # We need to do some fix up of each part for proper encoding and then 
             # stringify all parts for encrypting. We have to retain the old 
             # boundaries as well so that the email client can reconstruct the 
             # original message properly.
             $email->walk_parts(\&_fix_part);
-            
+
             $email->walk_parts(sub {
                 my ($part) = @_;
-                if ($sanitise_subject && $part->content_type =~ /text\/plain/) {
-                    if (!is_7bit_clean($subject)) {
-                        $part->encoding_set('quoted-printable');
-                    }
-                    $part->body_str_set("Subject: $subject\015\012\015\012" . $part->body_str);
+                if ($sanitise_subject) {
+                    _insert_subject($part, $subject);
                 }
                 return if $part->parts > 1; # Top-level
                 $to_encrypt .= "--$old_boundary\n" . $part->as_string . "\n";
@@ -438,10 +436,7 @@ sub _make_secure {
         else {
             _fix_part($email);
             if ($sanitise_subject) {
-                if (!is_7bit_clean($subject)) {
-                    $email->encoding_set('quoted-printable');
-                }
-                $email->body_str_set("Subject: $subject\015\012\015\012" . $email->body_str);
+                _insert_subject($email, $subject);
             }
             $email->body_set(_pgp_encrypt($pgp, $email->body));
         }
@@ -455,14 +450,7 @@ sub _make_secure {
         $email->walk_parts(\&_fix_part);
 
         if ($sanitise_subject) {
-            $email->walk_parts(sub {
-                my ($part) = @_;
-                if ($part->content_type =~ /text\/plain/) {
-                    # Subject gets placed in the body so it can still be read
-                    $part->body_str_set("Subject: $subject\015\012\015\012" . $part->body);
-                }
-                return if $part->parts > 1; # Top-level
-            });
+            $email->walk_parts(sub { _insert_subject($_[0], $subject) });
         }
 
         my $smime = Crypt::SMIME->new();
@@ -486,7 +474,7 @@ sub _make_secure {
         else {
             $email->body_set('Error during Encryption: ' . $@);
         }
-    }  
+    }
     else {
         # No encryption key provided; send a generic, safe email.
         my $template = Bugzilla->template;
@@ -534,6 +522,27 @@ sub _pgp_encrypt {
     return $encrypted;
 }
 
+# Insert the subject into the part's body, as the subject of the message will
+# be sanitised.
+# XXX this incorrectly assumes all parts of the message are the body
+# we should only alter parts who's parent is multipart/alternative
+sub _insert_subject {
+    my ($part, $subject) = @_;
+    my $content_type = $part->content_type or return;
+    if ($content_type =~ /^text\/plain/) {
+        if (!is_7bit_clean($subject)) {
+            $part->encoding_set('quoted-printable');
+        }
+        $part->body_str_set("Subject: $subject\015\012\015\012" . $part->body_str);
+    }
+    elsif ($content_type =~ /^text\/html/) {
+        my $tree = HTML::Tree->new->parse_content($part->body_str);
+        my $body = $tree->look_down(qw(_tag body));
+        $body->unshift_content(['div', "Subject: $subject"], ['br']);
+        _set_body_from_tree($part, $tree);
+    }
+}
+
 # Copied from Bugzilla/Mailer as this extension runs before
 # this code there and Mailer.pm will no longer see the original
 # message.
@@ -566,8 +575,7 @@ sub _filter_bug_links {
         my $part = shift;
         my $content_type = $part->content_type;
         return if !$content_type || $content_type !~ /text\/html/;
-        my $body = $part->body;
-        my $tree = HTML::Tree->new->parse_content($body);
+        my $tree = HTML::Tree->new->parse_content($part->body);
         my @links = $tree->look_down( _tag  => q{a}, class => qr/bz_bug_link/ );
         my $updated = 0;
         foreach my $link (@links) {
@@ -581,12 +589,16 @@ sub _filter_bug_links {
             }
         }
         if ($updated) {
-            $body = $tree->as_HTML;
-            $part->body_set($body);
-            $part->charset_set('UTF-8') if Bugzilla->params->{'utf8'};
-            $part->encoding_set('quoted-printable');
+            _set_body_from_tree($part, $tree);
         }
     });
+}
+
+sub _set_body_from_tree {
+    my ($part, $tree) = @_;
+    $part->body_set($tree->as_HTML);
+    $part->charset_set('UTF-8') if Bugzilla->params->{'utf8'};
+    $part->encoding_set('quoted-printable');
 }
 
 __PACKAGE__->NAME;

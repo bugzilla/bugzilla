@@ -227,7 +227,6 @@
 
 'global/confirm-user-match.html.tmpl' => [
   'script',
-  'fields.${field_name}.flag_type.name',
 ],
 
 'global/site-navigation.html.tmpl' => [

@@ -34,6 +34,8 @@ use lib qw(. lib);
 use Bugzilla;
 use Bugzilla::User;
 use Bugzilla::Mailer;
+use Email::MIME;
+
 use Bugzilla::Extension::RequestWhiner::Constants;
 
 my $dbh = Bugzilla->dbh;
@@ -66,7 +68,7 @@ $sth_get_requests->execute();
 
 # Build data structure
 my $requests = {};
-    
+
 while (my ($login_name,
            $flag_name, 
            $attach_id,
@@ -77,11 +79,11 @@ while (my ($login_name,
     if (!defined($requests->{$login_name})) {
         $requests->{$login_name} = {};
     }
-    
+
     if (!defined($requests->{$login_name}->{$flag_name})) {
         $requests->{$login_name}->{$flag_name} = [];
     }
-        
+
     push(@{ $requests->{$login_name}->{$flag_name} }, {
         bug_id    => $bug_id,
         attach_id => $attach_id,
@@ -117,39 +119,37 @@ exit;
 sub mail {
     my $args = shift;
     my $addressee = $args->{recipient};
+    my $template = Bugzilla->template;
+    my ($content, @parts);
 
-    my $template = 
-           Bugzilla->template_inner($addressee->settings->{'lang'}->{'value'});
-    my $msg = ''; # it's a temporary variable to hold the template output
-    $args->{'alternatives'} ||= [];
+    $template->process("requestwhiner/mail.txt.tmpl", $args, \$content)
+        || die($template->error());
+    push(@parts, Email::MIME->create(
+        attributes => {
+            content_type => "text/plain",
+        },
+        body => $content,
+    ));
 
-    # Put together the different multipart MIME segments
-    $template->process("requestwhiner/mail.txt.tmpl", $args, \$msg)
-        or die($template->error());
-    push @{$args->{'alternatives'}},
-        {
-            'content' => $msg,
-            'type'    => 'text/plain',
-        };
-    $msg = '';
+    $content = '';
+    $template->process("requestwhiner/mail.html.tmpl", $args, \$content)
+        || die($template->error());
 
-    $template->process("requestwhiner/mail.html.tmpl", $args, \$msg)
-        or die($template->error());
-    push @{$args->{'alternatives'}},
-        {
-            'content' => $msg,
-            'type'    => 'text/html',
-        };
-    $msg = '';
+    push(@parts, Email::MIME->create(
+        attributes => {
+            content_type => "text/html",
+        },
+        body => $content,
+    ));
 
-    # Now produce a ready-to-mail MIME-encoded message
-    $args->{'boundary'} = "----------" . $$ . "--" . time() . "-----";
+    $content = '';
+    $template->process("requestwhiner/header.txt.tmpl", $args, \$content)
+        || die($template->error());
 
-    $template->process("whine/multipart-mime.txt.tmpl", $args, \$msg)
-        or die($template->error());
+    # TT trims the trailing newline
+    my $email = new Email::MIME("$content\n");
+    $email->content_type_set('multipart/alternative');
+    $email->parts_set(\@parts);
 
-    MessageToMTA($msg);
-
-    delete $args->{'boundary'};
-    delete $args->{'alternatives'};
+    MessageToMTA($email);
 }

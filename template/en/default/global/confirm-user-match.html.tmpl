@@ -199,7 +199,7 @@
   [% ELSIF field_labels.$field_name %]
     [% field_labels.$field_name FILTER html %]
   [% ELSIF field_name.match("^requestee") %]
-    [% fields.${field_name}.flag_type.name %] requestee
+    [% fields.${field_name}.flag_type.name FILTER html %] requestee
   [% ELSE %]
     [% field_name FILTER html %]
   [% END %]

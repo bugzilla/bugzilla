@@ -54,7 +54,8 @@ OrangeFactor.displayGraph = function (dayCounts) {
 
 OrangeFactor.displayCount = function (count) {
     var countContainer = YAHOO.util.Dom.get('orange-count');
-    countContainer.innerHTML = encodeURIComponent(count) + ' failures in the past week';
+    countContainer.innerHTML = encodeURIComponent(count) + 
+                               ' failures on trunk in the past week';
 }
 
 OrangeFactor.dateString = function (date) {
@@ -74,7 +75,8 @@ OrangeFactor.getCurrentDateMs = function () {
 OrangeFactor.orangify = function () {
     var bugId = document.forms['changeform'].id.value;
     var url = "https://brasstacks.mozilla.com/orangefactor/api/count?" +
-              "bugid=" + encodeURIComponent(bugId) +
+              "bugid=" + encodeURIComponent(bugId) + 
+              "&tree=trunk" +
               "&callback=OrangeFactor.getOrangeCount";
     var script = document.createElement('script');
     Dom.setAttribute(script, 'src', url);

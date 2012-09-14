@@ -941,7 +941,9 @@ sub _bz_raw_column_info {
               $index = name of an index
  Returns:     An abstract index definition, always in hashref format.
               If the index does not exist, the function returns undef.
+
 =cut
+
 sub bz_index_info_real {
     my ($self, $table, $index) = @_;
 

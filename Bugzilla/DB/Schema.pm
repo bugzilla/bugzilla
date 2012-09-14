@@ -1866,6 +1866,7 @@ C<ALTER TABLE> SQL statement
 
 
 sub get_fk_ddl {
+
 =item C<_get_fk_ddl>
 
 =over
@@ -1879,7 +1880,9 @@ Protected method. Translates the C<REFERENCES> item of a column into SQL.
 =over
 
 =item C<$table>  - The name of the table the reference is from.
+
 =item C<$column> - The name of the column the reference is from
+
 =item C<$references> - The C<REFERENCES> hashref from a column.
 
 =back
@@ -1980,6 +1983,7 @@ Converts a TYPE from the L</ABSTRACT_SCHEMA> format into the real SQL type.
 }
 
 sub get_column {
+
 =item C<get_column($table, $column)>
 
  Description: Public method to get the abstract definition of a column.
@@ -2845,6 +2849,7 @@ sub serialize_abstract {
               in the same fashion as) the current version of Schema. 
               However, it will represent the serialized data instead of
               ABSTRACT_SCHEMA.
+
 =cut
 
 sub deserialize_abstract {

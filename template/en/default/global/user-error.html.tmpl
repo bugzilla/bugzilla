@@ -226,12 +226,12 @@
     The attachment you are attempting to access has been removed.
 
   [% ELSIF error == "bug_access_denied" %]
-    [% title = "Access Denied" %]
+    [% title = "$terms.Bug Access Denied" %]
     [% admindocslinks = {'groups.html' => 'Group Security'} %]
     You are not authorized to access [% terms.bug %] #[% bug_id FILTER html %].
 
   [% ELSIF error == "bug_access_query" %]
-    [% title = "Access Denied" %]
+    [% title = "$terms.Bug Access Denied" %]
     [% docslinks = {'myaccount.html' => 'Creating an account'} %]
     You are not authorized to access [% terms.bug %] #[% bug_id FILTER html %].
     To see this [% terms.bug %], you must

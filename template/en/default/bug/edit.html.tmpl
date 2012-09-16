@@ -830,13 +830,13 @@
   [% bug_flags_set = 0 %]
   [% show_more_flags = 0 %]
   [% FOREACH type = bug.flag_types %]
-    [% IF (type.flags && type.flags.size > 0) || (user.id && type.is_active) %]
+    [% IF type.flags.size || (user.id && type.is_active && user.can_request_flag(type)) %]
       [% show_bug_flags = 1 %]
     [% END %]
-    [% IF user.id && type.is_active && (!type.flags || type.is_multiplicable) %]
+    [% IF user.id && type.is_active && (!type.flags.size || type.is_multiplicable) %]
       [% show_more_flags = 1 %]
     [% END %]
-    [% IF type.flags && type.flags.size > 0 %]
+    [% IF type.flags.size %]
       [% bug_flags_set = 1 %]
     [% END %]
     [% LAST IF show_bug_flags && show_more_flags && bug_flags_set %]
@@ -850,7 +850,7 @@
     </tr>
     <tr>
       <td colspan="2">
-        [% IF bug.flag_types.size > 0 %]
+        [% IF bug.flag_types.size %]
           [% PROCESS "flag/list.html.tmpl" flag_no_header = 1
                                            flag_types = bug.flag_types
                                            any_flags_requesteeble = bug.any_flags_requesteeble %]

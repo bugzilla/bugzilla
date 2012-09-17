@@ -1,0 +1,86 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% show_needinfo      = 0 %]
+[% needinfo_requested = 0 %]
+[% needinfo_from      = "" %]
+[% needinfo_from_any  = 0 %]
+
+[% FOREACH type = bug.flag_types %]
+  [% IF type.name == 'needinfo' %]
+    [% show_needinfo = 1 %]
+    [% FOREACH flag = type.flags %]
+      [% IF flag.status == '?' %]
+        [% needinfo_requested = 1 %]
+        [% IF flag.requestee.login %]
+          [% needinfo_from = flag.requestee.login %]
+        [% ELSE %]
+          [% needinfo_from_any = 1 %]
+        [% END %]
+      [% END %]
+    [% END %]
+  [% END %]
+[% END %]
+
+[% IF show_needinfo %]
+  [%# Displays NEEDINFO tag in bug header %]
+  [% IF needinfo_requested %]
+    <script>
+      var summary_container = document.getElementById('static_bug_status');
+      summary_container.appendChild(document.createTextNode('[NEEDINFO]'));
+    </script>
+  [% END %]
+
+  <div id="needinfo_container">
+    [% IF needinfo_requested %]
+      [% IF needinfo_from == user.login || needinfo_from_any %]
+        Adding comment will automatically clear needinfo request.
+      [% ELSE %]
+        <input type="checkbox" id="needinfo_override" name="needinfo_override" value="1">
+        <label for="needinfo_override">
+          I am providing the requested information for this [% terms.bug %] (this will clear needinfo request).
+        </label>
+      [% END %]
+    [% END %]
+
+    [% IF user.in_group('canconfirm') && !is_attachment 
+       && !needinfo_requested && bug.status.is_open %]
+      <script>
+        function needinfoRole (select) {
+          YAHOO.util.Dom.get('needinfo').checked = true;
+          if (select.value == 'other') {
+            YAHOO.util.Dom.removeClass('needinfo_from_container', 'bz_default_hidden');
+            YAHOO.util.Dom.get('needinfo_from').focus();
+          }
+          else {
+            YAHOO.util.Dom.addClass('needinfo_from_container', 'bz_default_hidden');
+          }
+        }
+      </script>
+      <input type="checkbox" name="needinfo" value="1" id="needinfo">
+      <label for="needinfo">Need additional information from</label>
+      <select name="needinfo_role" id="needinfo_role" onchange="needinfoRole(this);">
+        <option value="">anyone</option>
+        <option value="reporter">reporter</option>
+        <option value="assigned_to">assignee</option>
+        [% IF Param('useqacontact') && bug.qa_contact.login != "" %]
+          <option value="qa_contact">qa contact</option>
+        [% END %]
+        <option value="other">other</option>
+      </select>
+      <span id="needinfo_from_container" class="bz_default_hidden">
+        [%+ INCLUDE global/userselect.html.tmpl
+                    id       => "needinfo_from"
+                    name     => "needinfo_from"
+                    size     => 30
+                    value    => ""
+        %]
+      </span>
+    [% END %]
+  </div>
+[% END %]

@@ -142,18 +142,18 @@ sub bug_end_of_update {
         my ($removed, $added) = Bugzilla::Flag->update_flags($bug, $old_bug, $timestamp);
         if ($removed || $added) {
             my $field = 'flagtypes.name';
-            $removed ||= '';
-            $added ||= '';
+            $removed = defined $removed ? $removed : '';
+            $added = defined $added ? $added : '';
             LogActivityEntry($bug->id, $field, $removed, $added, $user->id, $timestamp);
 
             # Do not overwrite other flag changes
             if ($changes->{$field}) {
-                if ($changes->{$field}->[0]) {
-                    $removed = $changes->{$field}->[0] . ",$removed";
-                }
-                if ($changes->{$field}->[1]) {
-                    $added = $changes->{$field}->[1] . ",$added";
-                }
+                $removed = defined $changes->{$field}->[0]
+                           ? $changes->{$field}->[0] . ", $removed"
+                           : $removed;
+                $added = defined $changes->{$field}->[1]
+                         ? $changes->{$field}->[1] . ", $added"
+                         : $added;
             }
             $changes->{$field} = [$removed, $added];
         }

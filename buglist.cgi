@@ -46,7 +46,6 @@ $cgi->redirect_search_url();
 
 my $buffer = $cgi->query_string();
 if (length($buffer) == 0) {
-    print $cgi->header(-refresh=> '10; URL=query.cgi');
     ThrowUserError("buglist_parameters_required");
 }
 

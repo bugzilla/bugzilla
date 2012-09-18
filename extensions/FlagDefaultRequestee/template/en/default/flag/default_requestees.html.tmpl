@@ -43,12 +43,14 @@
     else {
       requestee_field = YAHOO.util.Dom.get('requestee_type-' + id);
     }
+    if (!requestee_field) return;
 
     var current_requestee = requestee_field.value;
     var default_requestee = default_requestees['id_' + id];
+    if (!default_requestee) return;
 
     if (state == '?' && !current_requestee && default_requestee) {
-      fdrSetDefaultRequestee(requestee_field, default_requestees['id_' + id]); 
+      fdrSetDefaultRequestee(requestee_field, default_requestees['id_' + id]);
     }
     else if (state == '?' && current_requestee != default_requestee) {
       fdrShowDefaultLink(requestee_field, id);
@@ -65,10 +67,12 @@
       var flag_id = currently_requested[i];
       var flag_field = YAHOO.util.Dom.get('flag-' + flag_id);
       var requestee_field = YAHOO.util.Dom.get('requestee-' + flag_id);
+      if (!requestee_field) continue;
       var parts = flag_field.className.split('-');
       var type_id = parts[1];
       var current_requestee = requestee_field.value;
       var default_requestee = default_requestees['id_' + type_id];
+      if (!default_requestee) continue;
       if (current_requestee != default_requestee) {
         fdrShowDefaultLink(requestee_field, type_id, flag_id);
       }
@@ -92,10 +96,10 @@
 
     var default_span = document.createElement('span');
     YAHOO.util.Dom.setAttribute(default_span, 'id', 'default_requestee_' + flag_id);
-    default_span.appendChild(document.createTextNode('('));
+    default_span.appendChild(document.createTextNode("\u00a0("));
     default_span.appendChild(default_link);
     default_span.appendChild(document.createTextNode(')'));
-    requestee_field.parentNode.appendChild(default_span);
+    requestee_field.parentNode.parentNode.appendChild(default_span);
   }
   </script>
 [% END %]

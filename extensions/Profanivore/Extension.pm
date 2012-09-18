@@ -43,7 +43,7 @@ sub bug_format_comment {
         $comment->author->id != Bugzilla->user->id) 
     {
         push (@$regexes, {
-            match => RE_profanity(),
+            match => RE_profanity('-i'),
             replace => \&_replace_profanity
         });
     }
@@ -122,7 +122,7 @@ sub _fix_encoding {
 
 sub _filter_text {
     my $text = shift;
-    my $offensive = RE_profanity();
+    my $offensive = RE_profanity('-i');
     $text =~ s/$offensive/****/g;
     return $text;
 }

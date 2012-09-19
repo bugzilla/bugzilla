@@ -577,9 +577,9 @@
 
   [% ELSIF error == "fieldvalue_sortkey_invalid" %]
     [% title = "Invalid Field Value Sortkey" %]
-    The sortkey '[% sortkey FILTER html %]' for the 
-    [%+ field.description FILTER html %] field is not a valid 
-    (positive) number.
+    The sortkey '[% sortkey FILTER html %]' for the
+    [%+ field.description FILTER html %] field must be an integer
+    between 0 and [% constants.MAX_SMALLINT FILTER none %].
 
   [% ELSIF error == "fieldvalue_still_has_bugs" %]
     [% title = "You Cannot Delete This Field Value" %]

@@ -80,7 +80,9 @@
     </td>
     [% IF Param("useqacontact") %]
       <td class="component_qa_contact">
-        [% INCLUDE global/user.html.tmpl who = comp.default_qa_contact %]
+        [% IF comp.default_qa_contact %]
+          [% INCLUDE global/user.html.tmpl who = comp.default_qa_contact %]
+        [% END %]
       </td>
     [% END %]
   </tr>

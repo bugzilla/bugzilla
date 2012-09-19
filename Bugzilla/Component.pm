@@ -349,6 +349,8 @@ sub default_assignee {
 sub default_qa_contact {
     my $self = shift;
 
+    return if !$self->{'initialqacontact'};
+
     if (!defined $self->{'default_qa_contact'}) {
         $self->{'default_qa_contact'} =
             new Bugzilla::User($self->{'initialqacontact'});
@@ -528,7 +530,8 @@ Component.pm represents a Product Component object.
 
  Params:      none.
 
- Returns:     A Bugzilla::User object.
+ Returns:     A Bugzilla::User object if the default QA contact is defined for
+              the component. Otherwise, returns undef.
 
 =item C<initial_cc>
 

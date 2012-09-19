@@ -204,7 +204,7 @@
         <li>Default assignee updated to '[% comp.default_assignee.login FILTER html %]'</li>
       [% END %]
       [% IF changes.initialqacontact.defined %]
-        [% IF comp.default_qa_contact.id %]
+        [% IF comp.default_qa_contact %]
           <li>Default QA contact updated to '[% comp.default_qa_contact.login FILTER html %]'</li>
         [% ELSE %]
           <li>Default QA contact deleted</li>

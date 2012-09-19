@@ -1685,7 +1685,6 @@ sub _check_qa_contact {
     $qa_contact = trim($qa_contact) if !ref $qa_contact;
     my $component = blessed($invocant) ? $invocant->component_obj
                                        : $params->{component};
-    my $id;
     if (!ref $invocant) {
         # Bugs get no QA Contact on creation if useqacontact is off.
         return undef if !Bugzilla->params->{useqacontact};
@@ -1694,13 +1693,14 @@ sub _check_qa_contact {
         if (!Bugzilla->user->in_group('editbugs', $component->product_id)
             || !$qa_contact)
         {
-            $id = $component->default_qa_contact->id;
+            return $component->default_qa_contact ? $component->default_qa_contact->id : undef;
         }
     }
-    
+
     # If a QA Contact was specified or if we're updating, check
     # the QA Contact for validity.
-    if (!defined $id && $qa_contact) {
+    my $id;
+    if ($qa_contact) {
         $qa_contact = Bugzilla::User->check($qa_contact) if !ref $qa_contact;
         $id = $qa_contact->id;
         # create() checks this another way, so we don't have to run this
@@ -3418,9 +3418,6 @@ sub qa_contact {
     if (Bugzilla->params->{'useqacontact'} && $self->{'qa_contact'}) {
         $self->{'qa_contact_obj'} = new Bugzilla::User($self->{'qa_contact'});
     } else {
-        # XXX - This is somewhat inconsistent with the assignee/reporter 
-        # methods, which will return an empty User if they get a 0. 
-        # However, we're keeping it this way now, for backwards-compatibility.
         $self->{'qa_contact_obj'} = undef;
     }
     return $self->{'qa_contact_obj'};

@@ -234,8 +234,9 @@ sub _component_to_hash {
             $self->type('string' , $component->description),
         default_assigned_to =>
             $self->type('string' , $component->default_assignee->login),
-        default_qa_contact =>
-            $self->type('string' , $component->default_qa_contact->login),
+        default_qa_contact => 
+            $self->type('string' , $component->default_qa_contact ?
+                                   $component->default_qa_contact->login : ''),
         sort_key =>  # sort_key is returned to match Bug.fields
             0,
         is_active =>
@@ -454,7 +455,7 @@ default.
 =item C<default_qa_contact>
 
 C<string> The login name of the user who will be set as the QA Contact for
-new bugs by default.
+new bugs by default. Empty string if the QA contact is not defined.
 
 =item C<sort_key>
 

@@ -14,9 +14,11 @@
 <html>
   <head>
     <title>[% terms.Bugzilla %] is pondering your search</title>
+    <link href="[% 'skins/standard/global.css' FILTER mtime %]"
+          rel="stylesheet" type="text/css">
   </head>
   <body>
-    <h1 style="margin-top: 20%; text-align: center;">Please stand by ...</h1>
+    <h1 style="margin-top: 20%; text-align: center; font-size: xx-large;">Please stand by ...</h1>
 
     [% IF debug %]
       <p>[% query FILTER html %]</p>

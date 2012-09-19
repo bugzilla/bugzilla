@@ -256,7 +256,7 @@ sub _check_sortkey {
     return 0 if !$value;
     # Store for the error message in case detaint_natural clears it.
     my $orig_value = $value;
-    detaint_natural($value)
+    (detaint_natural($value) && $value <= MAX_SMALLINT)
         || ThrowUserError('fieldvalue_sortkey_invalid',
                           { sortkey => $orig_value,
                             field   => $invocant->field });

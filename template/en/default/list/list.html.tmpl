@@ -191,9 +191,8 @@
     [% IF bugs.size > 0 %]
       <td valign="middle" class="bz_query_buttons">
         <form method="post" action="show_bug.cgi">
-          [% FOREACH id = buglist %]
-            <input type="hidden" name="id" value="[% id FILTER html %]">
-          [% END %]
+          [% id = buglist.join(",") %]
+          <input type="hidden" name="id" value="[% id FILTER html %]">
           <input type="hidden" name="format" value="multiple">
           <input type="submit" id="long_format" value="Long Format">
         </form>

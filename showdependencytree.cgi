@@ -95,7 +95,7 @@ sub GenerateTree {
     # Record this depth in the global $realdepth variable if it's farther 
     # than we've gone before.
     $realdepth = max($realdepth, $depth);
-
+    Bugzilla->user->visible_bugs(\@dependencies); 
     foreach my $dep_id (@dependencies) {
         # Get this dependency's record from the database and generate
         # its sub-tree if we haven't already done so (which happens

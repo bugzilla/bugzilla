@@ -63,15 +63,27 @@ if ($single) {
     foreach my $id ($cgi->param('id')) {
         # Be kind enough and accept URLs of the form: id=1,2,3.
         my @ids = split(/,/, $id);
+        my @check_bugs;
+
         foreach my $bug_id (@ids) {
             next unless $bug_id;
             my $bug = new Bugzilla::Bug($bug_id);
-            if (!$bug->{error} && $user->can_see_bug($bug->bug_id)) {
+            if (!$bug->{error}) {
+                push(@check_bugs, $bug);
+            }
+            else {
+                push(@illegal_bugs, { bug_id => trim($bug_id), error => $bug->{error} });
+            }
+        }
+
+        $user->visible_bugs(\@check_bugs);
+
+        foreach my $bug (@check_bugs) {
+            if ($user->can_see_bug($bug->id)) {
                 push(@bugs, $bug);
             }
             else {
-                push(@illegal_bugs, { bug_id => trim($bug_id),
-                                      error => $bug->{error} || 'NotPermitted' });
+                push(@illegal_bugs, { bug_id => $bug->id, error => 'NotPermitted' });
             }
         }
     }

@@ -275,7 +275,7 @@ if ($do_report) {
                                         function=>"summarize_time"});
         }
         @bugs = get_blocker_ids($bugs[0]);
-        @bugs = grep { $user->can_see_bug($_) } @bugs;
+        @bugs = @{ $user->visible_bugs(\@bugs) };
     }
 
     $start_date = trim $cgi->param('start_date');

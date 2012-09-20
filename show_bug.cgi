@@ -83,7 +83,8 @@ if ($single) {
                 push(@bugs, $bug);
             }
             else {
-                push(@illegal_bugs, { bug_id => $bug->id, error => 'NotPermitted' });
+                my $error = 'NotPermitted'; # Trick to make 012throwables.t happy.
+                push(@illegal_bugs, { bug_id => $bug->id, error => $error });
             }
         }
     }

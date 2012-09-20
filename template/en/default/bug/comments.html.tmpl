@@ -147,7 +147,7 @@
 [%############################################################################%]
 
 [% BLOCK a_comment %]
-  [% RETURN IF comment.is_private AND ! user.is_insider %]
+  [% RETURN IF comment.is_private AND NOT (user.is_insider || user.id == comment.author.id) %]
   [% comment_text = comment.body_full %]
   [% RETURN IF comment_text == '' AND (comment.work_time - 0) != 0 AND !user.is_timetracker %]
 

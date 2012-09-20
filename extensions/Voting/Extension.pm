@@ -435,6 +435,7 @@ sub _page_user {
                                     ORDER BY votes.bug_id',
                                       undef, ($who->id, $product->id));
 
+        $user->visible_bugs([map { $_->[0] } @$vote_list]);
         foreach (@$vote_list) {
             my ($id, $count, $summary) = @$_;
             $total += $count;

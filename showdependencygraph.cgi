@@ -169,7 +169,10 @@ my $sth = $dbh->prepare(
               q{SELECT bug_status, resolution, short_desc
                   FROM bugs
                  WHERE bugs.bug_id = ?});
-foreach my $k (keys(%seen)) {
+
+my @bug_ids = keys %seen;
+$user->visible_bugs(\@bug_ids);
+foreach my $k (@bug_ids) {
     # Retrieve bug information from the database
     my ($stat, $resolution, $summary) = $dbh->selectrow_array($sth, undef, $k);
 

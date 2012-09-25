@@ -19,7 +19,7 @@
         <canvas id="orange-graph" class="bz_default_hidden"></canvas>
         <span id="orange-count"></span>
       [% END %]
-      (<a href="https://brasstacks.mozilla.com/orangefactor/?display=Bug&bugid=[% bug.bug_id FILTER url_quote %]"
+      (<a href="https://brasstacks.mozilla.com/orangefactor/?display=Bug&bugid=[% bug.bug_id FILTER uri %]"
           title="Click to load Orange Factor page for this [% terms.bug %]">link</a>)
     </td>
   </tr>

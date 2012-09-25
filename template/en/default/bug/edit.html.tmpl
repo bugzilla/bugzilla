@@ -1102,6 +1102,7 @@
   <td>
     [% IF bug.check_can_change_field(selname, 0, 1) 
           AND bug.choices.${selname}.size > 1 %]
+      <input type="hidden" id="[% selname %]_dirty">
       <select id="[% selname %]" name="[% selname %]">
         [% FOREACH x = bug.choices.${selname} %]
           [% NEXT IF NOT x.is_active AND x.name != bug.${selname} %]

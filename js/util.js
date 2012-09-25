@@ -230,6 +230,27 @@ function bz_selectedOptions(aSelect) {
 }
 
 /**
+ * Returns all Option elements that have the "selected" attribute, as an array.
+ * Returns an empty array if nothing is selected.
+ *
+ * @param aSelect The select you want the pre-selected values of.
+ */
+function bz_preselectedOptions(aSelect) {
+    var options = aSelect.options;
+    var selected = new Array();
+    for (var i = 0, l = options.length; i < l; i++) {
+        var attributes = options[i].attributes;
+        for (var j = 0, m = attributes.length; j < m; j++) {
+            if (attributes[j].name == 'selected') {
+                if (!aSelect.multiple) return options[i];
+                selected.push(options[i]);
+            }
+        }
+    }
+    return selected;
+}
+
+/**
  * Tells you where (what index) in a <select> a particular option is.
  * Returns -1 if the value is not in the <select>
  *

@@ -4,6 +4,7 @@
   #
   # This Source Code Form is "Incompatible With Secondary Licenses", as
   # defined by the Mozilla Public License, v. 2.0.
+  #%]
 
 [% PROCESS global/variables.none.tmpl %]
 
@@ -14,10 +15,6 @@
 
 [% yui_modules = [ 'history', 'datatable', 'container' ] %]
 [% yui_modules.push('autocomplete') IF BMO %]
-
-[% IF BMO %]
-  [% onload = "YAHOO.util.Dom.get('prod_comp_search').focus();" %]
-[% END %]
 
 [% PROCESS global/header.html.tmpl
    title = "Enter A Bug"
@@ -114,6 +111,28 @@ dupes.setLabels(
    onclick="guided.setStep('otherProducts')"
 %]
 </table>
+
+[% IF BMO  %]
+  <h3>
+    Or search for a Product:
+  </h3>
+
+  <div id="prod_comp_search_main">
+    <div id="prod_comp_search_autocomplete">
+      <div id="prod_comp_search_label">
+        Type to find product and component by name or description:
+        <img id="prod_comp_throbber" src="extensions/GuidedBugEntry/web/images/throbber.gif"
+             class="hidden" width="16" height="11">
+      </div>
+      <input id="prod_comp_search" type="text" size="60">
+      <div id="prod_comp_search_autocomplete_container"></div>
+    </div>
+  </div>
+  <script type="text/javascript">
+    if (typeof(YAHOO.bugzilla.prodCompSearch) !== 'undefined' && YAHOO.bugzilla.prodCompSearch != null)
+      YAHOO.bugzilla.prodCompSearch.init('prod_comp_search', 'prod_comp_search_autocomplete_container', 'guided');
+  </script>
+[% END %]
 
 </div>
 [% END %]
@@ -260,29 +279,6 @@ dupes.setLabels(
 <h3>
   None of the above; my [% terms.bug %] is in:
 </h3>
-
-[% IF BMO %]
-  <div id="prod_comp_search_main">
-    <div id="prod_comp_search_autocomplete">
-      <div id="prod_comp_search_label">
-        Type to find product and component by name or description:
-        <img id="prod_comp_throbber" src="extensions/GuidedBugEntry/web/images/throbber.gif"
-             class="hidden" width="16" height="11">
-      </div>
-      <input id="prod_comp_search" type="text" size="60">
-      <div id="prod_comp_search_autocomplete_container"></div>
-    </div>
-  </div>
-  <script type="text/javascript">
-    if (typeof(YAHOO.bugzilla.prodCompSearch) !== 'undefined' && YAHOO.bugzilla.prodCompSearch != null)
-      YAHOO.bugzilla.prodCompSearch.init('prod_comp_search', 'prod_comp_search_autocomplete_container', 'guided');
-  </script>
-
-  <h3>
-    Or select a product:
-  </h3>
-[% END %]
-
 [% END %]
 
 [% BLOCK exit_block %]

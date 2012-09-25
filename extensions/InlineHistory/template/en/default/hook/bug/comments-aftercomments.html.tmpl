@@ -18,14 +18,13 @@
     var html = '';
     [% has_cc = 0 %]
     [% has_flag = 0 %]
-    [% changer_identity = "" %]
+    [% changer_identity = operation.who.identity %]
     [% changer_login = operation.who.login %]
     [% change_date = operation.when FILTER time %]
 
     [% FOREACH change = operation.changes %]
       [%# track flag changes %]
       [% IF change.fieldname == 'flagtypes.name' && change.added != '' %]
-        [% changer_identity = operation.who.identity UNLESS changer_identity %]
         var item = new Array(5);
         item[0] = '[% changer_login FILTER js %]';
         item[1] = '[% change_date FILTER js %]';

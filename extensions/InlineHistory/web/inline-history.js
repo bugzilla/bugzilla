@@ -264,7 +264,7 @@ var inline_history = {
           ) {
             html +=
               setterSpan + ': '
-              + '<a href="#' + flagItem[5] + '">' + flag + '</a>'
+              + '<a href="#' + flagItem[5] + '">' + flag + '</a> '
               + requestee + '<br>';
             found = true;
             break;
@@ -373,6 +373,7 @@ var inline_history = {
   },
 
   htmlDecode: function(v) {
+    if (!v.match(/&/)) return v;
     var e = document.createElement('textarea');
     e.innerHTML = v;
     return e.value;

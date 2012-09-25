@@ -28,9 +28,8 @@
     [% IF user.id %]
       <a class="email" href="mailto:[% who.email FILTER html %]"
       [% IF who.id && user.in_group('canconfirm') %]
-         onclick="show_admin_usermenu(event, [% who.id FILTER none %], '[% who.email FILTER js %]',
-                  [% IF (user.in_group('editusers') || user.bless_groups.size > 0) %]true[% ELSE %]false[% END %]);
-                  return false"
+         onclick="return show_usermenu(event, [% who.id FILTER none %], '[% who.email FILTER js %]',
+                  [% IF (user.in_group('editusers') || user.bless_groups.size > 0) %]true[% ELSE %]false[% END %]);"
       [% END %]
          title="[% who.identity FILTER html %]">
     [%- END -%]

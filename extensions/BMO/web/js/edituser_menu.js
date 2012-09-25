@@ -1,30 +1,33 @@
-var admin_usermenu;
+var usermenu_widget;
 
 YAHOO.util.Event.onDOMReady(function() {
-  admin_usermenu = new YAHOO.widget.Menu('admin_usermenu', { position : 'dynamic' });
-  admin_usermenu.addItems([
+  usermenu_widget = new YAHOO.widget.Menu('usermenu_widget', { position : 'dynamic' });
+  usermenu_widget.addItems([
     { text: 'Activity', url: '#', target: '_blank' },
     { text: 'Mail',     url: '#', target: '_blank' },
     { text: 'Edit',     url: '#', target: '_blank' }
   ]);
-  admin_usermenu.render(document.body);
+  usermenu_widget.render(document.body);
 });
 
-function show_admin_usermenu(event, id, email, show_edit) {
-  if (!admin_usermenu)
-    return;
-  admin_usermenu.getItem(0).cfg.setProperty('url',
+function show_usermenu(event, id, email, show_edit) {
+  if (!usermenu_widget)
+    return true;
+  if (event.ctrlKey || event.shiftKey || event.altKey || event.metaKey)
+    return true;
+  usermenu_widget.getItem(0).cfg.setProperty('url',
     'page.cgi?id=user_activity.html&action=run' +
     '&from=' + YAHOO.util.Date.format(new Date(new Date() - (1000 * 60 * 60 * 24 * 14)), {format: '%Y-%m-%d'}) +
     '&to=' + YAHOO.util.Date.format(new Date(), {format: '%Y-%m-%d'}) +
     '&who=' + encodeURIComponent(email));
-  admin_usermenu.getItem(1).cfg.setProperty('url', 'mailto:' + encodeURIComponent(email));
+  usermenu_widget.getItem(1).cfg.setProperty('url', 'mailto:' + encodeURIComponent(email));
   if (show_edit) {
-    admin_usermenu.getItem(2).cfg.setProperty('url', 'editusers.cgi?action=edit&userid=' + id);
+    usermenu_widget.getItem(2).cfg.setProperty('url', 'editusers.cgi?action=edit&userid=' + id);
   } else {
-    admin_usermenu.removeItem(2);
+    usermenu_widget.removeItem(2);
   }
-  admin_usermenu.cfg.setProperty('xy', YAHOO.util.Event.getXY(event));
-  admin_usermenu.show();
+  usermenu_widget.cfg.setProperty('xy', YAHOO.util.Event.getXY(event));
+  usermenu_widget.show();
+  return false;
 }
 

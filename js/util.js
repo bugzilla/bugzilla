@@ -202,6 +202,55 @@ function bz_populateSelectFromArray(aSelect, aArray) {
 }
 
 /**
+ * Returns all Option elements that are selected in a <select>,
+ * as an array. Returns an empty array if nothing is selected.
+ *
+ * @param aSelect The select you want the selected values of.
+ */
+function bz_selectedOptions(aSelect) {
+    // HTML 5
+    if (aSelect.selectedOptions) {
+        return aSelect.selectedOptions;
+    }
+
+    var start_at = aSelect.selectedIndex;
+    if (start_at == -1) return [];
+    var first_selected =  aSelect.options[start_at];
+    if (!aSelect.multiple) return first_selected;
+    // selectedIndex is specified as being the "first selected item",
+    // so we can start from there.
+    var selected = [first_selected];
+    var options_length = aSelect.options.length;
+    // We start after first_selected
+    for (var i = start_at + 1; i < options_length; i++) {
+        var this_option = aSelect.options[i];
+        if (this_option.selected) selected.push(this_option);
+    }
+    return selected;
+}
+
+/**
+ * Returns all Option elements that have the "selected" attribute, as an array.
+ * Returns an empty array if nothing is selected.
+ *
+ * @param aSelect The select you want the pre-selected values of.
+ */
+function bz_preselectedOptions(aSelect) {
+    var options = aSelect.options;
+    var selected = new Array();
+    for (var i = 0, l = options.length; i < l; i++) {
+        var attributes = options[i].attributes;
+        for (var j = 0, m = attributes.length; j < m; j++) {
+            if (attributes[j].name == 'selected') {
+                if (!aSelect.multiple) return options[i];
+                selected.push(options[i]);
+            }
+        }
+    }
+    return selected;
+}
+
+/**
  * Tells you whether or not a particular value is selected in a select,
  * whether it's a multi-select or a single-select. The check is 
  * case-sensitive.

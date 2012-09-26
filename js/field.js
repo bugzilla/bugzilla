@@ -795,3 +795,51 @@ YAHOO.bugzilla.keywordAutocomplete = {
         });
     }
 };
+
+/**
+ * Force the browser to honour the selected option when a page is refreshed,
+ * but only if the user hasn't explicitly selected a different option.
+ */
+function initDirtyFieldTracking() {
+    // old IE versions don't provide the information we need to make this fix work
+    // however they aren't affected by this issue, so it's ok to ignore them
+    if (YAHOO.env.ua.ie > 0 && YAHOO.env.ua.ie <= 8) return;
+    var selects = document.getElementById('changeform').getElementsByTagName('select');
+    for (var i = 0, l = selects.length; i < l; i++) {
+        var el = selects[i];
+        var el_dirty = document.getElementById(el.name + '_dirty');
+        if (!el_dirty) continue;
+        if (!el_dirty.value) {
+            var preSelected = bz_preselectedOptions(el);
+            if (!el.multiple) {
+                preSelected.selected = true;
+            } else {
+                el.selectedIndex = -1;
+                for (var j = 0, m = preSelected.length; j < m; j++) {
+                    preSelected[j].selected = true;
+                }
+            }
+        }
+        YAHOO.util.Event.on(el, "change", function(e) {
+            var el = e.target || e.srcElement;
+            var preSelected = bz_preselectedOptions(el);
+            var currentSelected = bz_selectedOptions(el);
+            var isDirty = false;
+            if (!el.multiple) {
+                isDirty = preSelected.index != currentSelected.index;
+            } else {
+                if (preSelected.length != currentSelected.length) {
+                    isDirty = true;
+                } else {
+                    for (var i = 0, l = preSelected.length; i < l; i++) {
+                        if (currentSelected[i].index != preSelected[i].index) {
+                            isDirty = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            document.getElementById(el.name + '_dirty').value = isDirty ? '1' : '';
+        });
+    }
+}

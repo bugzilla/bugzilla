@@ -149,7 +149,8 @@
             <bz:versions>
               <Seq>
                 [% FOREACH version = product.versions %]
-                  <li resource="[% escaped_urlbase %]version.cgi?name=[% version.name FILTER uri %]"/>
+                  <li resource="[% escaped_urlbase %]version.cgi?name=[% version.name FILTER uri
+                      %]&amp;product=[% product.name FILTER uri %]"/>
                 [% END %]
               </Seq>
             </bz:versions>
@@ -158,7 +159,8 @@
               <bz:target_milestones>
                 <Seq>
                   [% FOREACH milestone = product.milestones %]
-                    <li resource="[% escaped_urlbase %]milestone.cgi?name=[% milestone.name FILTER uri %]"/>
+                    <li resource="[% escaped_urlbase %]milestone.cgi?name=[% milestone.name FILTER uri
+                        %]&amp;product=[% product.name FILTER uri %]"/>
                   [% END %]
                 </Seq>
               </bz:target_milestones>
@@ -205,7 +207,8 @@
       [% FOREACH product = products %]
         [% FOREACH version = product.versions %]
           <li>
-            <bz:version rdf:about="[% escaped_urlbase %]version.cgi?name=[% version.name FILTER uri %]">
+            <bz:version rdf:about="[% escaped_urlbase %]version.cgi?name=[% version.name FILTER uri
+                        %]&amp;product=[% product.name FILTER uri %]">
               <bz:name>[% version.name FILTER html %]</bz:name>
               <bz:is_active>[% version.is_active FILTER html %]</bz:is_active>
             </bz:version>
@@ -221,7 +224,8 @@
         [% FOREACH product = products %]
           [% FOREACH milestone = product.milestones %]
             <li>
-              <bz:target_milestone rdf:about="[% escaped_urlbase %]milestone.cgi?name=[% milestone.name FILTER uri %]">
+              <bz:target_milestone rdf:about="[% escaped_urlbase %]milestone.cgi?name=[% milestone.name FILTER uri
+                                   %]&amp;product=[% product.name FILTER uri %]">
                 <bz:name>[% milestone.name FILTER html %]</bz:name>
                 <bz:is_active>[% milestone.is_active FILTER html %]</bz:is_active>
               </bz:target_milestone>

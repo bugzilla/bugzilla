@@ -1,0 +1,11 @@
+<dt>
+  <b>[% display_value("bug_status", "READY") FILTER html %]</b>
+</dt>
+<dd>
+  This [% terms.bug %] has enough information so that the developer can
+  start working on a fix. The [% terms.bug %] has the required testcases,
+  crash data, detailed specs, etc. [% terms.Bugs %] in this state may be 
+  accepted, and become <b>[% display_value("bug_status", "ASSIGNED") FILTER html %]</b>,  
+  passed on to someone else, and remain <b>[% display_value("bug_status", "READY") FILTER html %]</b>,
+  or resolved and marked <b>[% display_value("bug_status", "RESOLVED") FILTER html %]</b>.
+</dd>

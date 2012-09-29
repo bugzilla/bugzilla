@@ -621,22 +621,10 @@ sub count {
 # Private Functions
 ######################################################################
 
-=begin private
-
-=head1 PRIVATE FUNCTIONS
-
-=over
-
-=item C<sqlify_criteria($criteria, $tables)>
-
-Converts a hash of criteria into a list of SQL criteria.
-$criteria is a reference to the criteria (field => value), 
-$tables is a reference to an array of tables being accessed 
-by the query.
-
-=back
-
-=cut
+# Converts a hash of criteria into a list of SQL criteria.
+# $criteria is a reference to the criteria (field => value), 
+# $tables is a reference to an array of tables being accessed 
+# by the query.
 
 sub sqlify_criteria {
     my ($criteria, $tables) = @_;
@@ -714,27 +702,3 @@ sub sqlify_criteria {
 }
 
 1;
-
-=end private
-
-=head1 SEE ALSO
-
-=over
-
-=item B<Bugzilla::Flags>
-
-=back
-
-=head1 CONTRIBUTORS
-
-=over
-
-=item Myk Melez <myk@mozilla.org>
-
-=item Kevin Benton <kevin.benton@amd.com>
-
-=item Frédéric Buclin <LpSolit@gmail.com>
-
-=back
-
-=cut

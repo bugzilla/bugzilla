@@ -123,7 +123,7 @@
           <a href="query.cgi?[% switchbase %]&amp;format=report-table">Edit this report</a>
         [% ELSE %]
           <a href="query.cgi?[% switchbase %]&amp;chart_format=
-                  [%~ format %]&amp;format=report-graph&amp;cumulate=[% cumulate %]">
+                  [%~ format FILTER uri %]&amp;format=report-graph&amp;cumulate=[% cumulate %]">
           Edit this report</a>
         [% END %]
       </td>
@@ -135,7 +135,7 @@
         [% ELSE %]
           <form method="get" action="report.cgi">
             <input type="submit" id="remember" value="Remember report"> as
-            <input type="hidden" name="query" value="[% switchbase %]&amp;format=[% format FILTER html %]&amp;action=wrap">
+            <input type="hidden" name="query" value="[% switchbase %]&amp;format=[% format FILTER uri %]&amp;action=wrap">
             <input type="hidden" name="action" value="add">
             <input type="hidden" name="token" value="[% issue_hash_token(['save_report']) FILTER html %]">
             <input type="text" id="name" name="name" size="20" value="" maxlength="64">

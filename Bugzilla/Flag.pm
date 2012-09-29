@@ -1057,29 +1057,4 @@ sub _flag_types {
     return $flag_types;
 }
 
-=head1 SEE ALSO
-
-=over
-
-=item B<Bugzilla::FlagType>
-
-=back
-
-
-=head1 CONTRIBUTORS
-
-=over
-
-=item Myk Melez <myk@mozilla.org>
-
-=item Jouni Heikniemi <jouni@heikniemi.net>
-
-=item Kevin Benton <kevin.benton@amd.com>
-
-=item Frédéric Buclin <LpSolit@gmail.com>
-
-=back
-
-=cut
-
 1;

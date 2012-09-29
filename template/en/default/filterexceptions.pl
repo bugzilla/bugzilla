@@ -90,7 +90,6 @@
   'formaturl', 
   'other_format.name', 
   'switchbase',
-  'format',
   'cumulate',
 ],
 

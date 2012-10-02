@@ -14,7 +14,7 @@ var inline_history = {
     Dom = YAHOO.util.Dom;
 
     // remove 'has been marked as a duplicate of this bug' comments
-    var reDuplicate = /\*\*\* \S+ \d+ has been marked as a duplicate of this/;
+    var reDuplicate = /^\*\*\* \S+ \d+ has been marked as a duplicate of this/;
     var reBugId = /show_bug\.cgi\?id=(\d+)/;
     var comments = Dom.getElementsByClassName("bz_comment", 'div', 'comments');
     for (var i = 1, il = comments.length; i < il; i++) {

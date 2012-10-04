@@ -348,7 +348,7 @@
 ],
 
 'admin/table.html.tmpl' => [
-  'link_uri'
+  'contentlink'
 ],
 
 'admin/custom_fields/cf-js.js.tmpl' => [

@@ -19,6 +19,15 @@
   #               receiving mail for that reason when in that role.
   #%]
 
+[%# If the user's bugmail has been disabled by admins, show a warning. %]
+[% IF user.email_disabled %]
+  <div class="warningmessages">
+    Your [% terms.bug %]mail has been disabled by the [% terms.Bugzilla %]
+    administrator.  Please contact [% Param('maintainer') %] to enable
+    [%+ terms.bug %]mails.
+  </div>
+[% END %]
+
 <p>
   If you don't like getting a notification for "trivial"
   changes to [% terms.bugs %], you can use the settings below to

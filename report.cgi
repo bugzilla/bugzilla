@@ -304,6 +304,10 @@ $template->process("$format->{'template'}", $vars)
 sub get_names {
     my ($names, $isnumeric, $field_name) = @_;
     my ($field, @sorted);
+    # XXX - This is a hack to handle the actual_time/work_time field,
+    # because it's named 'actual_time' in Search.pm but 'work_time' in Field.pm.
+    $_[2] = $field_name = 'work_time' if $field_name eq 'actual_time';
+
     # _realname fields aren't real Bugzilla::Field objects, but they are a
     # valid axis, so we don't vailidate them as Bugzilla::Field objects.
     $field = Bugzilla::Field->check($field_name) 

@@ -271,8 +271,7 @@ sub input_params {
 
 our $_localconfig;
 sub localconfig {
-    $_localconfig ||= read_localconfig();
-    return $_localconfig;
+    return $_[0]->process_cache->{localconfig} ||= read_localconfig();
 }
 
 sub params {
@@ -641,6 +640,15 @@ sub request_cache {
         return $request->pnotes();
     }
     return $_request_cache;
+}
+
+# This is a per-process cache.  Under mod_cgi it's identical to the
+# request_cache.  When using mod_perl, items in this cache live until the
+# worker process is terminated.
+our $_process_cache = {};
+
+sub process_cache {
+    return $_process_cache;
 }
 
 # Private methods

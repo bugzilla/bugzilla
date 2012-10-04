@@ -87,13 +87,23 @@ sub mailer_before_send {
                     }
                     _fix_encoding($part);
                     my $body = $part->body_str;
+                    my $new_body;
                     if ($part->content_type =~ /^text\/html/) {
-                        $body = _filter_html($body);
+                        $new_body = _filter_html($body);
+                        if ($new_body ne $body) {
+                            # HTML::Tree removes unnecessary whitespace,
+                            # resulting in very long lines.  We need to use
+                            # quoted-printable encoding to avoid exceeding
+                            # email's maximum line length.
+                            $part->encoding_set('quoted-printable');
+                        }
                     }
                     elsif ($part->content_type =~ /^text\/plain/) {
-                        $body = _filter_text($body);
+                        $new_body = _filter_text($body);
                     }
-                    $part->body_str_set($body);
+                    if ($new_body && $new_body ne $body) {
+                        $part->body_str_set($new_body);
+                    }
                 });
             }
             # Single part email
@@ -133,23 +143,27 @@ sub _filter_html {
     my $comments_div = $tree->look_down( _tag => 'div', id => 'comments' );
     return $html if !$comments_div;
     my @comments = $comments_div->look_down( _tag => 'pre' );
+    my $dirty = 0;
     foreach my $comment (@comments) {
-        _filter_html_node($comment);
+        _filter_html_node($comment, \$dirty);
     }
-    return $tree->as_HTML;
+    return $dirty ? $tree->as_HTML : $html;
 }
 
 sub _filter_html_node {
-    my $node = shift;
+    my ($node, $dirty) = @_;
     my $content = [ $node->content_list ];
     foreach my $item_r ($node->content_refs_list) {
         if (ref $$item_r) {
             _filter_html_node($$item_r);
         } else {
-            $$item_r = _filter_text($$item_r);
+            my $new_text = _filter_text($$item_r);
+            if ($new_text ne $$item_r) {
+                $$item_r = $new_text;
+                $$dirty = 1;
+            }
         }
     }
-    return $node;
 }
 
 __PACKAGE__->NAME;

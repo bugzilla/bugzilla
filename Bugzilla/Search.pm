@@ -2088,8 +2088,8 @@ sub _contact_pronoun {
     my ($self, $args) = @_;
     my $value = $args->{value};
     my $user = $self->_user;
-    
-    if ($value =~ /^\%group/) {
+
+    if ($value =~ /^\%group\.[^%]+%$/) {
         $self->_contact_exact_group($args);
     }
     elsif ($value =~ /^(%\w+%)$/) {
@@ -2106,11 +2106,17 @@ sub _contact_exact_group {
     my $dbh = Bugzilla->dbh;
     my $user = $self->_user;
 
+    # We already know $value will match this regexp, else we wouldn't be here.
     $value =~ /\%group\.([^%]+)%/;
-    my $group = Bugzilla::Group->check({ name => $1, _error => 'invalid_group_name' });
-    $group->check_members_are_visible();
+    my $group_name = $1;
+    my $group = Bugzilla::Group->check({ name => $group_name, _error => 'invalid_group_name' });
+    # Pass $group_name instead of $group->name to the error message
+    # to not leak the existence of the group.
     $user->in_group($group)
-      || ThrowUserError('invalid_group_name', {name => $group->name});
+      || ThrowUserError('invalid_group_name', { name => $group_name });
+    # Now that we know the user belongs to this group, it's safe
+    # to disclose more information.
+    $group->check_members_are_visible();
 
     my $group_ids = Bugzilla::Group->flatten_group_membership($group->id);
 

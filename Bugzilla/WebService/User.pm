@@ -308,10 +308,12 @@ sub _filter_users_by_group {
                      @{ $group_ids || [] };
     my @name_groups = map { Bugzilla::Group->check($_) } 
                           @{ $group_names || [] };
-    push(@groups, @name_groups);
-    
+    my %unique_groups;
+    foreach my $group (@groups, @name_groups) {
+        $unique_groups{$group->id} ||= $group;
+    }
 
-    my @in_group = grep { $self->_user_in_any_group($_, \@groups) }
+    my @in_group = grep { $self->_user_in_any_group($_, [values %unique_groups]) }
                         @$users;
     return \@in_group;
 }

@@ -97,13 +97,13 @@ sub _set_ftc_states {
         } else {
             return unless FLAGTYPE_COMMENT_ATTACHMENT_FLAGS;
         }
-        $db_result = $dbh->selectall_arrayref(
-            "SELECT type_id AS flagtype, on_status AS state, comment AS text
-               FROM flagtype_comments 
-              WHERE type_id = ?",
-            { Slice => {} },
-            $id);
-
+        if ($id) {
+            $db_result = $dbh->selectall_arrayref(
+                "SELECT type_id AS flagtype, on_status AS state, comment AS text
+                   FROM flagtype_comments 
+                  WHERE type_id = ?",
+                { Slice => {} }, $id);
+        }
     } else {
         # creating/editing attachment / viewing bug
         my $bug;
@@ -161,7 +161,10 @@ sub _set_flagtypes {
     my $dbh = Bugzilla->dbh;
 
     foreach my $state (FLAGTYPE_COMMENT_STATES) {
-        my $text = $input->{"ftc_${flagtype_id}_$state"} || '';
+        next if (!defined $input->{"ftc_${flagtype_id}_$state"}
+                 && !defined $input->{"ftc_new_$state"});
+
+        my $text = $input->{"ftc_${flagtype_id}_$state"} || $input->{"ftc_new_$state"} || '';
         $text =~ s/\r\n/\n/g;
         trick_taint($text);
 

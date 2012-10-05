@@ -27,13 +27,17 @@
   </tr>
 
   [% FOREACH state = ftc_states %]
+    [% ftc_type_id = "ftc_${type.id}_$state" %]
+    [% IF action == 'insert' %]
+      [% ftc_type_id = "ftc_new_$state" %]
+    [% END %]
     <tr>
       <td>&nbsp;</td>
       <td>
         for [% state FILTER html %]<br>
         <textarea
-          id="ftc_[% type.id FILTER html %]_[% state FILTER html %]"
-          name="ftc_[% type.id FILTER html %]_[% state FILTER html %]"
+          id="[% ftc_type_id FILTER html %]"
+          name="[% ftc_type_id FILTER html %]"
           cols="50" rows="2">[% ftc_flags.${type.id}.$state FILTER html %]</textarea>
       </td>
     </tr>

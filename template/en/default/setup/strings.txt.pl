@@ -371,7 +371,7 @@ OPTIONAL NOTE: If you want to be able to use the 'difference between two
 patches' feature of Bugzilla (which requires the PatchReader Perl module
 as well), you should install patchutils from:
 
-    http://cyberelk.net/tim/patchutils/
+    http://cyberelk.net/tim/software/patchutils/
 END
     ppm_repo_add => <<EOT,
 ***********************************************************************

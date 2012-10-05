@@ -269,7 +269,6 @@ sub input_params {
     return $cache->{input_params};
 }
 
-our $_localconfig;
 sub localconfig {
     return $_[0]->process_cache->{localconfig} ||= read_localconfig();
 }

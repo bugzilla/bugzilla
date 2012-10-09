@@ -65,7 +65,6 @@ my $buffer = $cgi->query_string();
 my $user = Bugzilla->login();
 
 if (length($buffer) == 0) {
-    print $cgi->header(-refresh=> '10; URL=query.cgi');
     ThrowUserError("buglist_parameters_required");
 }
 

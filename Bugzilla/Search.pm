@@ -2152,6 +2152,15 @@ sub _contact_exact_group {
     }
 }
 
+sub _get_user_id {
+    my ($self, $value) = @_;
+
+    if ($value =~ /^%\w+%$/) {
+        return pronoun($value, $self->_user);
+    }
+    return login_to_id($value, THROW_ERROR);
+}
+
 #####################################################################
 # Search Functions
 #####################################################################
@@ -2282,7 +2291,7 @@ sub _long_desc_changedby {
     
     my $table = "longdescs_$chart_id";
     push(@$joins, { table => 'longdescs', as => $table });
-    my $user_id = login_to_id($value, THROW_ERROR);
+    my $user_id = $self->_get_user_id($value);
     $args->{term} = "$table.who = $user_id";
 }
 
@@ -2378,7 +2387,7 @@ sub _work_time_changedby {
     
     my $table = "longdescs_$chart_id";
     push(@$joins, { table => 'longdescs', as => $table });
-    my $user_id = login_to_id($value, THROW_ERROR);
+    my $user_id = $self->_get_user_id($value);
     $args->{term} = "$table.who = $user_id AND $table.work_time != 0";
 }
 
@@ -2827,7 +2836,7 @@ sub _changedby {
         || ThrowCodeError("invalid_field_name", { field => $field });
     my $field_id = $field_object->id;
     my $table = "act_${field_id}_$chart_id";
-    my $user_id  = login_to_id($value, THROW_ERROR);
+    my $user_id  = $self->_get_user_id($value);
     my $join = {
         table => 'bugs_activity',
         as    => $table,

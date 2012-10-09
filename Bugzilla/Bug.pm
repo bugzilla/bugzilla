@@ -2854,7 +2854,8 @@ sub add_see_also {
         # ref bug id for sending changes email.
         my $ref_bug = delete $field_values->{ref_bug};
         if ($class->isa('Bugzilla::BugUrl::Bugzilla::Local')
-            and !$skip_recursion)
+            and !$skip_recursion
+            and $ref_bug->check_can_change_field('see_also', '', $self->id, \$privs))
         {
             $ref_bug->add_see_also($self->id, 'skip_recursion');
             push @{ $self->{_update_ref_bugs} }, $ref_bug;
@@ -2886,12 +2887,15 @@ sub remove_see_also {
     # we need to notify changes for that bug too.
     $removed_bug_url = $removed_bug_url->[0];
     if (!$skip_recursion and $removed_bug_url
-        and $removed_bug_url->isa('Bugzilla::BugUrl::Bugzilla::Local'))
+        and $removed_bug_url->isa('Bugzilla::BugUrl::Bugzilla::Local')
+        and $removed_bug_url->ref_bug_url)
     {
         my $ref_bug
             = Bugzilla::Bug->check($removed_bug_url->ref_bug_url->bug_id);
 
-        if (Bugzilla->user->can_edit_product($ref_bug->product_id)) {
+        if (Bugzilla->user->can_edit_product($ref_bug->product_id)
+            and $ref_bug->check_can_change_field('see_also', $self->id, '', \$privs))
+        {
             my $self_url = $removed_bug_url->local_uri($self->id);
             $ref_bug->remove_see_also($self_url, 'skip_recursion');
             push @{ $self->{_update_ref_bugs} }, $ref_bug;

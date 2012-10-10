@@ -1,0 +1,30 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+
+Where does this data come from:
+
+[%+ cgi.param('source') %]
+
+What people and things does this data describe, and what fields does it contain:
+
+[%+ cgi.param('data_desc') %]
+
+What parts of this data do you want to release:
+
+[%+ cgi.param('release') %]
+
+Why are we releasing this data, and what do we hope people will do with it:
+
+[%+ cgi.param('why') %]
+
+Is there a particular time by which you would like to release this data:
+
+[%+ cgi.param('when') %]

@@ -1,0 +1,219 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% inline_style = BLOCK %]
+  #bug_form input[type=text], #bug_form input[type=file], #cc_autocomplete, #bug_form textarea {
+    width: 100%;
+  }
+[% END %]
+
+[% inline_js = BLOCK %]
+  function onSubmit() {
+    var error = '';
+    if (!isFilledOut('short_desc')) error += 'Please enter a summary.\n';
+    if (!isFilledOut('attachment')) error += 'Please attach the data set/representative sample.\n';
+    if (!isFilledOut('source'))     error += 'Please enter the data source.\n';
+    if (!isFilledOut('data_desc'))  error += 'Please enter the data description.\n';
+    if (!isFilledOut('release'))    error += 'Please enter the parts of data you want released.\n';
+    if (!isFilledOut('why'))        error += 'Please enter why you want to release this data.\n';
+    if (!isFilledOut('when'))       error += 'Please enter when you would like to release this data.\n';
+
+    if (error) {
+      alert(error);
+      return false;
+    }
+
+    return true;
+  }
+[% END %]
+
+[% PROCESS global/header.html.tmpl
+   title = "Privacy - Data Release Proposal"
+   style = inline_style
+   style_urls = [ 'skins/standard/enter_bug.css' ]
+   javascript      = inline_js
+   javascript_urls = [ 'extensions/BMO/web/js/form_validate.js',
+                       'js/attachment.js', 'js/field.js', 'js/util.js' ]
+   yui = [ 'autocomplete' ]
+%]
+
+<h2>Privacy - Data Release Proposal</h2>
+
+<p>
+  Before filling out this form, please look at the
+  <a href="https://wiki.mozilla.org/Privacy/How_To/Deidentify" target="_blank">guide</a>
+  for releasing info about people.
+</p>
+
+<p>
+  All fields except for CC are required.
+</p>
+
+<form method="post" action="post_bug.cgi" id="bug_form" class="enter_bug_form"
+      enctype="multipart/form-data" onSubmit="return onSubmit()">
+<input type="hidden" name="format" value="privacy-data">
+<input type="hidden" name="product" value="Privacy">
+<input type="hidden" name="component" value="Data Release Proposal">
+<input type="hidden" name="rep_platform" value="All">
+<input type="hidden" name="op_sys" value="Other">
+<input type="hidden" name="priority" value="--">
+<input type="hidden" name="version" value="unspecified">
+<input type="hidden" name="bug_severity" id="bug_severity" value="normal">
+<input type="hidden" name="comment" id="comment" value="">
+<input type="hidden" name="groups" id="groups" value="privacy">
+<input type="hidden" name="token" value="[% token FILTER html %]">
+
+<table>
+
+<tr>
+  <th>
+    <label for="short_desc">Summary:</label>
+  </th>
+  <td>
+    <input type="text" name="short_desc" id="short_desc" value="" size="60">
+  </td>
+</tr>
+
+<tr>
+  <th>
+    <label for="cc">CC:</label>
+  </th>
+  <td>
+    [% INCLUDE global/userselect.html.tmpl
+       id => "cc"
+       name => "cc"
+       value => cc
+       size => 60
+       multiple => 5
+    %]
+  </td>
+  <td>
+    <i>&nbsp;Optional</i>
+  </td>
+</tr>
+
+<tr>
+  <th>
+    <label for="attachment">Data Set:</label>
+  </th>
+  <td>
+    <i>Please attach the data set, or a representative sample.</i>
+    <div>
+      <input type="file" id="attachment" name="data" size="50">
+      <input type="hidden" name="contenttypemethod" value="autodetect">
+      <input type="hidden" name="description" value="Data Set">
+    </div>
+  </td>
+</tr>
+
+<tr>
+  <th>
+    <label for="source">Source:</label>
+  </th>
+  <td>
+    <i>Where does this data come from?</i>
+    <div>
+      <textarea name="source" id="source" rows="5" cols="40"></textarea>
+    </div>
+  </td>
+</tr>
+
+<tr>
+  <th>
+    <label for="data_desc">Data Description:</label>
+  </th>
+  <td>
+    <i>What people and things does this data describe, and what fields does it contain?</i>
+    <div>
+      <textarea name="data_desc" id="data_desc" rows="5" cols="40"></textarea>
+    </div>
+  </td>
+</tr>
+
+<tr>
+  <th>
+    <label for="release">Release:</label>
+  </th>
+  <td>
+    <i>What parts of this data do you want to release?</i>
+    <div>
+      <textarea name="release" id="release" rows="5" cols="40"></textarea>
+    </div>
+  </td>
+</tr>
+
+<tr>
+  <th>
+    <label for="why">Why:</label>
+  </th>
+  <td>
+    <i>Why are we releasing this data, and what do we hope people will do with it?</i>
+    <div>
+      <textarea name="why" id="why" rows="5" cols="40"></textarea>
+    </div>
+  </td>
+</tr>
+
+<tr>
+  <th>
+    <label for="when">Release Time:</label>
+  </th>
+  <td>
+    <i>Is there a particular time by which you would like to release this data?</i>
+    <div>
+      <input type="text" name="when" id="when" value="" size="60">
+    </div>
+  </td>
+</tr>
+
+<tr>
+  <td colspan="2">
+    Expect to discover that you've missed a few of things, so plan for a couple weeks to get them corrected.
+  </td>
+</tr>
+
+<tr>
+  <td>&nbsp;</td>
+  <td>
+    <input type="submit" id="commit" value="Submit Request">
+  </td>
+</tr>
+</table>
+
+</form>
+
+<script type="text/javascript">
+function trySubmit() {
+  var topic = document.getElementById('topic').value;
+  var date = document.getElementById('date').value;
+  var time = document.getElementById('time_hour').value + ':' + 
+             document.getElementById('time_minute').value + 
+             document.getElementById('ampm').value + " " +
+             document.getElementById('time_zone').value;
+  var location = document.getElementById('location').value;
+  var shortdesc = 'Event - (' + date + ' ' + time + ') - ' + location + ' - ' + topic;
+  document.getElementById('short_desc').value = shortdesc;
+
+  // If intended audience is employees only, add mozilla-corporation-confidential group
+  var audience = document.getElementById('audience').value;
+  if (audience == 'Employees Only') {
+    var brownbagRequestForm = document.getElementById('brownbagRequestForm');
+    var groups = document.createElement('input');
+    groups.type = 'hidden';
+    groups.name = 'groups';
+    groups.value = 'mozilla-corporation-confidential';
+    brownbagRequestForm.appendChild(groups);
+  }
+
+  return true;
+}
+</script>
+
+[% PROCESS global/footer.html.tmpl %]

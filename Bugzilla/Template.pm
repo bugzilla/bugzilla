@@ -997,6 +997,12 @@ sub create {
             'default_authorizer' => new Bugzilla::Auth(),
         },
     };
+    # Use a per-process provider to cache compiled templates in memory across
+    # requests.
+    my $provider_key = join(':', @{ $config->{INCLUDE_PATH} });
+    my $shared_providers = Bugzilla->process_cache->{shared_providers} ||= {};
+    $shared_providers->{$provider_key} ||= Template::Provider->new($config);
+    $config->{LOAD_TEMPLATES} = [ $shared_providers->{$provider_key} ];
 
     local $Template::Config::CONTEXT = 'Bugzilla::Template::Context';
 
@@ -1077,6 +1083,9 @@ sub precompile_templates {
 
     # If anything created a Template object before now, clear it out.
     delete Bugzilla->request_cache->{template};
+
+    # Clear out the cached Provider object
+    Bugzilla->process_cache->{shared_providers} = undef;
 
     print install_string('done') . "\n" if $output;
 }

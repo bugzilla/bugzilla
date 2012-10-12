@@ -129,11 +129,11 @@
     <tr>
       <th>Sort Key:</th>
       <td>
-        a number between 1 and [% constants.MAX_SMALLINT FILTER none %] by which
+        a number between 0 and [% constants.MAX_SMALLINT FILTER none %] by which
         this type will be sorted when displayed to users in a list; ignore if you
         don't care what order the types appear in or if you want them to appear
         in alphabetical order.<br>
-        <input type="text" name="sortkey" value="[% type.sortkey || 1 %]" size="5" maxlength="5"
+        <input type="text" name="sortkey" value="[% type.sortkey || 0 %]" size="5" maxlength="5"
                [%- ' disabled="disabled"' UNLESS can_fully_edit %]>
       </td>
     </tr>

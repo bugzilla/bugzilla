@@ -83,4 +83,14 @@
       </span>
     [% END %]
   </div>
+  <script>
+    // HACK: Shift the needinfo container to a different location
+    // below commit button but before status drop down. This allows
+    // for better tab navigation
+    YAHOO.util.Event.onDOMReady(function() {
+      var needinfo = YAHOO.util.Dom.get('needinfo_container');
+      var status = YAHOO.util.Dom.get('bug_status_bottom');
+      status.parentNode.insertBefore(needinfo, status);
+    });
+  </script>
 [% END %]

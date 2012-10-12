@@ -82,7 +82,7 @@ use constant VALIDATORS => {
     description      => \&_check_description,
     cc_list          => \&_check_cc_list,
     target_type      => \&_check_target_type,
-    sortkey          => \&_check_sortey,
+    sortkey          => \&_check_sortkey,
     is_active        => \&Bugzilla::Object::check_boolean,
     is_requestable   => \&Bugzilla::Object::check_boolean,
     is_requesteeble  => \&Bugzilla::Object::check_boolean,
@@ -308,7 +308,7 @@ sub _check_target_type {
     return $target_type;
 }
 
-sub _check_sortey {
+sub _check_sortkey {
     my ($invocant, $sortkey) = @_;
 
     (detaint_natural($sortkey) && $sortkey <= MAX_SMALLINT)

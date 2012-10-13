@@ -1294,8 +1294,7 @@
       Either you mis-typed the name or that user has not yet registered
       for a [% terms.Bugzilla %] account.
     [% ELSIF class == "Bugzilla::Keyword" %]
-      The legal keyword names are <a href="describekeywords.cgi">listed
-      here</a>.
+      See the list of available <a href="describekeywords.cgi">keywords</a>.
     [% END %]
 
   [% ELSIF error == "old_password_incorrect" %]
@@ -1651,7 +1650,7 @@
 
   [% ELSIF error == "unknown_tab" %]
     [% title = "Unknown Tab" %]
-    <code>[% current_tab_name FILTER html %]</code> is not a legal tab name.
+    There is no tab named <code>[% current_tab_name FILTER html %]</code>.
 
   [% ELSIF error == "version_already_exists" %]
     [% title = "Version Already Exists" %]

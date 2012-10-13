@@ -244,6 +244,23 @@ sub quoteUrls {
                               "<a href=\"$current_bugurl#c$4\">$1</a>")
               ~egox;
 
+    # Handle a list of bug ids: bugs 1, #2, 3, 4
+    # Currently, the only delimiter supported is comma.
+    # Concluding "and" and "or" are not supported.
+    my $bugs_word = template_var('terms')->{bugs};
+
+    my $bugs_re = qr/\Q$bugs_word\E\s*\#?\s*
+                     \d+(?:\s*,\s*\#?\s*\d+)+/ix;
+    while ($text =~ m/($bugs_re)/go) {
+        my $offset = $-[0];
+        my $length = $+[0] - $-[0];
+        my $match  = $1;
+
+        $match =~ s/((?:#\s*)?(\d+))/get_bug_link($2, $1);/eg;
+        # Replace the old string with the linkified one.
+        substr($text, $offset, $length) = $match;
+    }
+
     # Old duplicate markers. These don't use $bug_word because they are old
     # and were never customizable.
     $text =~ s~(?<=^\*\*\*\ This\ bug\ has\ been\ marked\ as\ a\ duplicate\ of\ )

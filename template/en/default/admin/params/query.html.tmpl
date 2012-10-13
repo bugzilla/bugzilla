@@ -32,11 +32,11 @@
                        "load, try increasing this number.",
 
   mybugstemplate => "This is the URL to use to bring up a simple 'all of my $terms.bugs' " _
-                    "list for a user. %userid% will get replaced with the login name of a user.",
+                    "list for a user. %userid% will get replaced with the login name of a user. " _
+                    "Special characters must be URL-encoded.",
 
   defaultquery => "This is the default query that initially comes up when you " _
-                  "access the advanced query page. It's in URL parameter " _
-                  "format, which makes it hard to read. Sorry!",
+                  "access the advanced query page. It's in URL parameter format.",
 
   search_allow_no_criteria =>
     "Unless the code explicitly allows all $terms.bugs to be returned, this " _

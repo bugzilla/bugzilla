@@ -338,6 +338,7 @@ while (my $event = get_next_event) {
 #  - queries        array of hashes containing:
 #          - bugs:  array of hashes mapping fieldnames to values for this bug
 #          - title: text title given to this query in the whine event
+#          - columnlist: array of fieldnames to display in the mail
 #          - name:  text name of this query
 #  - schedule_id    integer id of the schedule being run
 #  - subject        Subject line for the message
@@ -408,6 +409,7 @@ sub run_queries {
               'name'          => $_->[0],
               'title'         => $_->[1],
               'onemailperbug' => $_->[2],
+              'columnlist'    => [],
               'bugs'          => [],
             }
         );
@@ -434,7 +436,16 @@ sub run_queries {
         # Bugzilla::Search to execute a saved query.  It's exceedingly weird,
         # but that's how it works.
         my $searchparams = new Bugzilla::CGI($savedquery);
-        my @orderstrings = split(/,\s*/, $searchparams->param('order'));
+
+        # Use the columnlist for the saved query, if it exists, and make
+        # sure bug_id is always in the list.
+        if (my $columnlist = $searchparams->param('columnlist')) {
+            @searchfields = split(/[\s,]+/, $columnlist);
+            unshift(@searchfields, 'bug_id') unless grep { $_ eq 'bug_id' } @searchfields;
+        }
+        push @{$thisquery->{'columnlist'}}, @searchfields;
+
+        my @orderstrings = split(/,\s*/, $searchparams->param('order') || '');
         my $search = new Bugzilla::Search(
             'fields' => \@searchfields,
             'params' => scalar $searchparams->Vars,
@@ -466,6 +477,7 @@ sub run_queries {
                     {
                         'name' => $thisquery->{'name'},
                         'title' => $thisquery->{'title'},
+                        'columnlist' => $thisquery->{'columnlist'},
                         'bugs' => [ $bug ],
                     },
                 ];

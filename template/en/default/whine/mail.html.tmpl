@@ -13,6 +13,7 @@
   #     bugs: array containing hashes of fieldnames->values for each bug
   #     title: the title given in the whine scheduling mechanism
   #     name: the name of the query
+  #     columnlist: array of fieldnames to display in the mail
   # author: user object for the person who scheduled this whine
   # recipient: user object for the intended recipient of the message
   #%]
@@ -47,26 +48,20 @@
     <table width="100%">
       <tr>
         <th align="left">ID</th>
-        <th align="left">Sev</th>
-        <th align="left">Pri</th> 
-        <th align="left">HW</th>
-        <th align="left">Assignee</th>
-        <th align="left">Status</th>
-        <th align="left">Resolution</th>
-        <th align="left">Summary</th>
+        [% FOREACH col = query.columnlist %]
+          [% NEXT IF col == 'bug_id' %]
+          <th align="left">[% field_descs.$col FILTER html %]</th>
+        [% END %]
       </tr>
 
       [% FOREACH bug=query.bugs %]
         <tr>
           <td align="left"><a href="[%+ urlbase FILTER html %]show_bug.cgi?id=
               [%- bug.bug_id %]">[% bug.bug_id %]</a></td>
-          <td align="left">[% display_value("bug_severity", bug.bug_severity) FILTER html %]</td>
-          <td align="left">[% display_value("priority", bug.priority) FILTER html %]</td>
-          <td align="left">[% display_value("rep_platform", bug.rep_platform) FILTER html %]</td>
-          <td align="left">[% bug.assigned_to FILTER html %]</td>
-          <td align="left">[% display_value("bug_status", bug.bug_status) FILTER html %]</td>
-          <td align="left">[% display_value("resolution", bug.resolution) FILTER html %]</td>
-          <td align="left">[% bug.short_desc FILTER html %]</td>
+          [% FOREACH col = query.columnlist %]
+            [% NEXT IF col == 'bug_id' %]
+            <td align="left">[% display_value(col, bug.$col) FILTER html %]</td>
+          [% END %]
         </tr>
       [% END %]
     </table>

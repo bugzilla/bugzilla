@@ -131,7 +131,7 @@ any keys that I<are> in C<exclude_fields>.
 
 =item C<validate>
 
-This helps in the validation of parameters passed into the WebSerice
+This helps in the validation of parameters passed into the WebService
 methods. Currently it converts listed parameters into an array reference
 if the client only passed a single scalar value. It modifies the parameters
 hash in place so other parameters should be unaltered.

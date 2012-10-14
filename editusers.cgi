@@ -145,8 +145,7 @@ if ($action eq 'search') {
             } elsif ($matchtype eq 'exact') {
                 $query .= $expr . ' = ?';
             } else { # substr or unknown
-                $query .= $dbh->sql_istrcmp($expr, '?', 'LIKE');
-                $matchstr = "%$matchstr%";
+                $query .= $dbh->sql_iposition('?', $expr) . ' > 0';
             }
             $nextCondition = 'AND';
             push(@bindValues, $matchstr);

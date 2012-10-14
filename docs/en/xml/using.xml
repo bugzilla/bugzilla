@@ -1922,7 +1922,7 @@
 
       <para>
          Each whining event is associated with zero or more schedules.  A 
-         schedule is used to specify when the query (specified below) is to be
+         schedule is used to specify when the search (specified below) is to be
          run.  A new event starts out with no schedules (which means it will 
          never run, as it is not scheduled to run).  To add a schedule, press
          the "Add a new schedule" button.
@@ -1981,7 +1981,7 @@
         is any saved search to be run as part of the specified schedule (see
         above).  You start out without any searches associated with the event
         (which means that the event will not run, as there will never be any
-        results to return).  To add a search, press the "Include search" button.
+        results to return).  To add a search, press the "Add a search" button.
       </para>
 
       <para>
@@ -2004,29 +2004,29 @@
 
       <note>
         <para>
-          When running queries, the whining system acts as if you are the user
-          executing the query.  This means that the whining system will ignore
-          bugs that match your query, but that you cannot access.
+          When running searches, the whining system acts as if you are the user
+          executing the search.  This means that the whining system will ignore
+          bugs that match your search, but that you cannot access.
         </para>
       </note>
 
       <para>
-        Once you have chosen the saved search to be executed, give the query a 
+        Once you have chosen the saved search to be executed, give the search a 
         descriptive title.  This title will appear in the email, above the 
-        results of the query.  If you choose "One message per bug", the query 
+        results of the search.  If you choose "One message per bug", the search 
         title will appear at the top of each email that contains a bug matching
-        your query.
+        your search.
       </para>
 
       <para>
-        Finally, decide if the results of the query should be sent in a single
+        Finally, decide if the results of the search should be sent in a single
         email, or if each bug should appear in its own email.
       </para>
 
       <warning>
         <para>
           Think carefully before checking the "One message per bug" box.  If
-          you create a query that matches thousands of bugs, you will receive 
+          you create a search that matches thousands of bugs, you will receive 
           thousands of emails!
         </para>
       </warning>
@@ -2037,7 +2037,7 @@
 
       <para>
         Once you have defined at least one schedule, and created at least one 
-        query, go ahead and "Update/Commit".  This will save your Event and make
+        search, go ahead and "Update/Commit".  This will save your Event and make
         it available for immediate execution.
       </para>
 

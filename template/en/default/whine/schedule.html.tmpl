@@ -27,7 +27,7 @@
 %]
 
 <p>
-  "Whining" is when [% terms.Bugzilla %] executes a saved query at a regular interval
+  "Whining" is when [% terms.Bugzilla %] executes a saved search at a regular interval
   and sends the resulting list of [% terms.bugs %] via email.
 </p>
 
@@ -48,8 +48,8 @@
 <p>
   Searches come from saved searches, which are created by executing a <a
   href="query.cgi">search</a>, then telling [% terms.Bugzilla %] to remember
-  the search under a particular name.  Add a query by clicking "Add a new
-  query", and select the desired saved search name under "Search" and add a
+  the search under a particular name.  Add a search by clicking "Add a 
+  search", and select the desired saved search name under "Search" and add a
   title for the [% terms.bug %] table.  The optional number entered under
   "Sort" will determine the execution order (lowest to highest) if multiple
   queries are listed.  If you check "One message per [% terms.bug %]," each [%
@@ -216,7 +216,7 @@
       </td>
       <td align="left">
         No searches <br>
-        <input type="submit" value="Add a new query"
+        <input type="submit" value="Add a search"
                name="add_query_[% event.key %]"
                id="add_query_[% event.key %]">
       </td>
@@ -282,7 +282,7 @@
 
           <tr>
             <td colspan="3">
-              <input type="submit" value="Add a new query"
+              <input type="submit" value="Add a search"
                      name="add_query_[% event.key %]"
                      id="add_query_[% event.key %]">
             </td>
@@ -322,7 +322,7 @@
     </select>
 
   [% ELSE %]
-    Please visit the <a href="query.cgi">Search</a> page and save a query
+    Please visit the <a href="query.cgi">Search</a> page and save a search
   [% END %]
 
 [%+ END %]

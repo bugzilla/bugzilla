@@ -490,7 +490,9 @@ use constant DB_MODULE => {
                 dbd => {
                     package => 'DBD-Pg',
                     module  => 'DBD::Pg',
-                    version => '1.45',
+                    # 2.7.0 fixes a problem with quoting strings
+                    # containing backslashes in them.
+                    version => '2.7.0',
                 },
                 name => 'PostgreSQL'},
      'oracle'=> {db => 'Bugzilla::DB::Oracle', db_version => '10.02.0',

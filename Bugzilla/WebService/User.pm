@@ -157,8 +157,8 @@ sub get {
             \@user_objects, $params);
         @users = map {filter $params, {
                      id        => $self->type('int', $_->id),
-                     real_name => $self->type('string', $_->name), 
-                     name      => $self->type('string', $_->login),
+                     real_name => $self->type('string', $_->name),
+                     name      => $self->type('email', $_->login),
                  }} @$in_group;
 
         return { users => \@users };
@@ -199,7 +199,7 @@ sub get {
             }
         }
     }
-   
+
     my $in_group = $self->_filter_users_by_group(
         \@user_objects, $params); 
     if (Bugzilla->user->in_group('editusers')) {
@@ -207,8 +207,8 @@ sub get {
             map {filter $params, {
                 id        => $self->type('int', $_->id),
                 real_name => $self->type('string', $_->name),
-                name      => $self->type('string', $_->login),
-                email     => $self->type('string', $_->email),
+                name      => $self->type('email', $_->login),
+                email     => $self->type('email', $_->email),
                 can_login => $self->type('boolean', $_->is_enabled ? 1 : 0),
                 groups    => $self->_filter_bless_groups($_->groups), 
                 email_enabled     => $self->type('boolean', $_->email_enabled),
@@ -221,8 +221,8 @@ sub get {
             map {filter $params, {
                 id        => $self->type('int', $_->id),
                 real_name => $self->type('string', $_->name),
-                name      => $self->type('string', $_->login),
-                email     => $self->type('string', $_->email),
+                name      => $self->type('email', $_->login),
+                email     => $self->type('email', $_->email),
                 can_login => $self->type('boolean', $_->is_enabled ? 1 : 0),
                 groups    => $self->_filter_bless_groups($_->groups),
                 saved_searches => [map { $self->_query_to_hash($_) } @{ $_->queries }],

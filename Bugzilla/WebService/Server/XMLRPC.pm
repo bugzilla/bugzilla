@@ -30,6 +30,7 @@ if ($ENV{MOD_PERL}) {
 }
 
 use Bugzilla::WebService::Constants;
+use Bugzilla::Util;
 
 # Allow WebService methods to call XMLRPC::Lite's type method directly
 BEGIN {
@@ -40,6 +41,12 @@ BEGIN {
             # Our "base" implementation is in Bugzilla::WebService::Server.
             $value = Bugzilla::WebService::Server->datetime_format_outbound($value);
             $value =~ s/-//g;
+        }
+        elsif ($type eq 'email') {
+            $type = 'string';
+            if (Bugzilla->params->{'webservice_email_filter'}) {
+                $value = email_filter($value);
+            }
         }
         return XMLRPC::Data->type($type)->value($value);
     };

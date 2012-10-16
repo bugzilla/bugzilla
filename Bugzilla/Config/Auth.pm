@@ -97,6 +97,12 @@ sub get_param_list {
   },
 
   {
+   name => 'webservice_email_filter',
+   type => 'b',
+   default => 0
+  },
+
+  {
    name => 'emailregexp',
    type => 't',
    default => q:^[\\w\\.\\+\\-=]+@[\\w\\.\\-]+\\.[\\w\\-]+$:,

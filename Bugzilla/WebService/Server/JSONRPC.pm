@@ -38,7 +38,7 @@ BEGIN {
 use Bugzilla::Error;
 use Bugzilla::WebService::Constants;
 use Bugzilla::WebService::Util qw(taint_data);
-use Bugzilla::Util qw(correct_urlbase trim disable_utf8);
+use Bugzilla::Util;
 
 use HTTP::Message;
 use MIME::Base64 qw(decode_base64 encode_base64);
@@ -220,6 +220,9 @@ sub type {
     elsif ($type eq 'base64') {
         utf8::encode($value) if utf8::is_utf8($value);
         $retval = encode_base64($value, '');
+    }
+    elsif ($type eq 'email' && Bugzilla->params->{'webservice_email_filter'}) {
+        $retval = email_filter($value);
     }
 
     return $retval;

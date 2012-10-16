@@ -172,11 +172,11 @@ sub _component_to_hash {
         name =>
             $self->type('string', $component->name),
         description =>
-            $self->type('string' , $component->description),
+            $self->type('string', $component->description),
         default_assigned_to =>
-            $self->type('string' , $component->default_assignee->login),
+            $self->type('email', $component->default_assignee->login),
         default_qa_contact =>
-            $self->type('string' , $component->default_qa_contact->login),
+            $self->type('email', $component->default_qa_contact->login),
         sort_key =>  # sort_key is returned to match Bug.fields
             0,
         is_active =>

@@ -26,6 +26,10 @@ my $cgi = Bugzilla->cgi;
 my $template = Bugzilla->template;
 my $vars = {};
 
+# We use a dummy product instance with ID 0, representing all products
+my $product_all = {id => 0};
+bless($product_all, 'Bugzilla::Product');
+
 if (!Bugzilla->feature('old_charts')) {
     ThrowCodeError('feature_disabled', { feature => 'old_charts' });
 }
@@ -33,11 +37,11 @@ if (!Bugzilla->feature('old_charts')) {
 my $dir       = bz_locations()->{'datadir'} . "/mining";
 my $graph_dir = bz_locations()->{'graphsdir'};
 my $graph_url = basename($graph_dir);
-my $product_name = $cgi->param('product') || '';
+my $product_id = $cgi->param('product_id');
 
 Bugzilla->switch_to_shadow_db();
 
-if (!$product_name) {
+if (! defined($product_id)) {
     # Can we do bug charts?
     (-d $dir && -d $graph_dir) 
       || ThrowCodeError('chart_dir_nonexistent',
@@ -55,10 +59,10 @@ if (!$product_name) {
         push(@datasets, $datasets);
     }
 
-    # We only want those products that the user has permissions for.
-    my @myproducts = ('-All-');
-    # Extract product names from objects and add them to the list.
-    push( @myproducts, map { $_->name } @{$user->get_selectable_products} );
+    # Start our product list with an entry for all products, then add those
+    # products that the user has permissions for.
+    my @myproducts = ($product_all);
+    push( @myproducts, @{$user->get_selectable_products} );
 
     $vars->{'datasets'} = \@datasets;
     $vars->{'products'} = \@myproducts;
@@ -66,16 +70,21 @@ if (!$product_name) {
     print $cgi->header();
 }
 else {
-    # For security and correctness, validate the value of the "product" form variable.
-    # Valid values are those products for which the user has permissions which appear
-    # in the "product" drop-down menu on the report generation form.
-    my ($product) = grep { $_->name eq $product_name } @{$user->get_selectable_products};
-    ($product || $product_name eq '-All-')
-      || ThrowUserError('invalid_product_name', {product => $product_name});
-
-    # Product names can change over time. Their ID cannot; so use the ID
-    # to generate the filename.
-    my $prod_id = $product ? $product->id : 0;
+    my $product;
+    # For security and correctness, validate the value of the "product_id" form
+    # variable. Valid values are IDs of those products for which the user has
+    # permissions which appear in the "product_id" drop-down menu on the report
+    # generation form. The product_id 0 is a special case, meaning "All
+    # Products".
+    if ($product_id) {
+        $product = Bugzilla::Product->new($product_id);
+        $product && $user->can_see_product($product->name)
+            || ThrowUserError('product_access_denied',
+                              {id => $product_id});
+    }
+    else {
+        $product = $product_all;
+    }
 
     # Make sure there is something to plot.
     my @datasets = $cgi->param('datasets');
@@ -87,9 +96,9 @@ else {
 
     # Filenames must not be guessable as they can point to products
     # you are not allowed to see. Also, different projects can have
-    # the same product names.
+    # the same product IDs.
     my $project = bz_locations()->{'project'} || '';
-    my $image_file =  join(':', ($project, $prod_id, @datasets));
+    my $image_file =  join(':', ($project, $product->id, @datasets));
     my $key = Bugzilla->localconfig->{'site_wide_secret'};
     $image_file = hmac_sha256_base64($image_file, $key) . '.png';
     $image_file =~ s/\+/-/g;
@@ -116,8 +125,8 @@ sub get_data {
     my $dir = shift;
 
     my @datasets;
-    open(DATA, '<', "$dir/-All-")
-      || ThrowCodeError('chart_file_open_fail', {filename => "$dir/-All-"});
+    open(DATA, '<', "$dir/0")
+      || ThrowCodeError('chart_file_open_fail', {filename => "$dir/0"});
 
     while (<DATA>) {
         if (/^# fields?: (.+)\s*$/) {
@@ -131,18 +140,13 @@ sub get_data {
 
 sub generate_chart {
     my ($dir, $image_file, $product, $datasets) = @_;
-    $product = $product ? $product->name : '-All-';
-    my $data_file = $product;
-    $data_file =~ s/\//-/gs;
-    $data_file = $dir . '/' . $data_file;
+    my $data_file = $dir . '/' . $product->id;
 
     if (! open FILE, $data_file) {
-        if ($product eq '-All-') {
-            $product = '';
-        }
         ThrowCodeError('chart_data_not_generated', {'product' => $product});
     }
 
+    my $product_in_title = $product->id ? $product->name : 'All Products';
     my @fields;
     my @labels = qw(DATE);
     my %datasets = map { $_ => 1 } @$datasets;
@@ -205,7 +209,7 @@ sub generate_chart {
 
     my %settings =
         (
-         "title" => "Status Counts for $product",
+         "title" => "Status Counts for $product_in_title",
          "x_label" => "Dates",
          "y_label" => "Bug Counts",
          "legend_labels" => \@labels,

@@ -962,10 +962,6 @@
     [% title = "Invalid Parameter" %]
     The new value for [% name FILTER html %] is invalid: [% err FILTER html %].
 
-  [% ELSIF error == "invalid_product_name" %]
-    [% title = "Invalid Product Name" %]
-    The product name '[% product FILTER html %]' is invalid or does not exist.
-
   [% ELSIF error == "invalid_regexp" %]
     [% title = "Invalid regular expression" %]
     The regular expression you entered is invalid.

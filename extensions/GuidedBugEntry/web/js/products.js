@@ -94,7 +94,21 @@ var products = {
 
   "Thunderbird": {
     related: [ "Core", "Toolkit", "MailNews Core" ],
-    detectPlatform: true
+    detectPlatform: true,
+    defaultComponent: "Untriaged",
+    componentFilter : function(components) {
+        var index = -1;
+        for (var i = 0, l = components.length; i < l; i++) {
+            if (components[i].name == 'General') {
+                index = i;
+                break;
+            }
+        }
+        if (index != -1) {
+            components.splice(index, 1);
+        }
+        return components;
+    }
   },
 
   "Penelope": {

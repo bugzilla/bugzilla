@@ -624,6 +624,11 @@ var bugForm = {
     }
     Dom.get('submit').disabled = false;
 
+    // filter components
+    if (products[productName] && products[productName].componentFilter) {
+        product.details.components = products[productName].componentFilter(product.details.components);
+    }
+
     // build components
 
     var elComponent = Dom.get('component');

@@ -159,8 +159,8 @@ sub get {
             \@user_objects, $params);
         @users = map {filter $params, {
                      id        => $self->type('int', $_->id),
-                     real_name => $self->type('string', $_->name), 
-                     name      => $self->type('string', $_->login),
+                     real_name => $self->type('string', $_->name),
+                     name      => $self->type('email', $_->login),
                  }} @$in_group;
 
         return { users => \@users };
@@ -201,7 +201,7 @@ sub get {
             }
         }
     }
-   
+
     my $in_group = $self->_filter_users_by_group(
         \@user_objects, $params);
 
@@ -209,22 +209,22 @@ sub get {
         my $user_info = {
             id        => $self->type('int', $user->id),
             real_name => $self->type('string', $user->name),
-            name      => $self->type('string', $user->login),
-            email     => $self->type('string', $user->email),
+            name      => $self->type('email', $user->login),
+            email     => $self->type('email', $user->email),
             can_login => $self->type('boolean', $user->is_enabled ? 1 : 0),
             groups    => $self->_filter_bless_groups($user->groups),
         };
-        
+
         if (Bugzilla->user->in_group('editusers')) {
             $user_info->{email_enabled}     = $self->type('boolean', $user->email_enabled);
             $user_info->{login_denied_text} = $self->type('string', $user->disabledtext);
         }
-        
+
         if (Bugzilla->user->id == $user->id) {
             $user_info->{saved_searches} = [map { $self->_query_to_hash($_) } @{ $user->queries }];
             $user_info->{saved_reports}  = [map { $self->_report_to_hash($_) } @{ $user->reports }];
         }
-        
+
         push(@users, filter($params, $user_info));
 }
 

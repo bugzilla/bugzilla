@@ -302,8 +302,8 @@ sub _translate_comment {
     return filter $filters, {
         id         => $self->type('int', $comment->id),
         bug_id     => $self->type('int', $comment->bug_id),
-        creator    => $self->type('string', $comment->author->login),
-        author     => $self->type('string', $comment->author->login),
+        creator    => $self->type('email', $comment->author->login),
+        author     => $self->type('email', $comment->author->login),
         time       => $self->type('dateTime', $comment->creation_ts),
         creation_time => $self->type('dateTime', $comment->creation_ts),
         is_private => $self->type('boolean', $comment->is_private),
@@ -873,18 +873,18 @@ sub _bug_to_hash {
     # We don't do the SQL calls at all if the filter would just
     # eliminate them anyway.
     if (filter_wants $params, 'assigned_to') {
-        $item{'assigned_to'} = $self->type('string', $bug->assigned_to->login);
+        $item{'assigned_to'} = $self->type('email', $bug->assigned_to->login);
     }
     if (filter_wants $params, 'blocks') {
         my @blocks = map { $self->type('int', $_) } @{ $bug->blocked };
         $item{'blocks'} = \@blocks;
     }
     if (filter_wants $params, 'cc') {
-        my @cc = map { $self->type('string', $_) } @{ $bug->cc || [] };
+        my @cc = map { $self->type('email', $_) } @{ $bug->cc || [] };
         $item{'cc'} = \@cc;
     }
     if (filter_wants $params, 'creator') {
-        $item{'creator'} = $self->type('string', $bug->reporter->login);
+        $item{'creator'} = $self->type('email', $bug->reporter->login);
     }
     if (filter_wants $params, 'depends_on') {
         my @depends_on = map { $self->type('int', $_) } @{ $bug->dependson };
@@ -908,7 +908,7 @@ sub _bug_to_hash {
     }
     if (filter_wants $params, 'qa_contact') {
         my $qa_login = $bug->qa_contact ? $bug->qa_contact->login : '';
-        $item{'qa_contact'} = $self->type('string', $qa_login);
+        $item{'qa_contact'} = $self->type('email', $qa_login);
     }
     if (filter_wants $params, 'see_also') {
         my @see_also = map { $self->type('string', $_->name) }
@@ -985,7 +985,7 @@ sub _attachment_to_hash {
     # the filter wants them.
     foreach my $field (qw(creator attacher)) {
         if (filter_wants $filters, $field) {
-            $item->{$field} = $self->type('string', $attach->attacher->login);
+            $item->{$field} = $self->type('email', $attach->attacher->login);
         }
     }
 
@@ -1018,7 +1018,7 @@ sub _flag_to_hash {
 
     foreach my $field (qw(setter requestee)) {
         my $field_id = $field . "_id";
-        $item->{$field} = $self->type('string', $flag->$field->login)
+        $item->{$field} = $self->type('email', $flag->$field->login)
             if $flag->$field_id;
     }
 

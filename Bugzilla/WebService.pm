@@ -72,6 +72,11 @@ A floating-point number. May be null.
 
 A string. May be null.
 
+=item C<email>
+
+A string representing an email address. This value, when returned, 
+may be filtered based on if the user is logged in or not. May be null.
+
 =item C<dateTime>
 
 A date/time. Represented differently in different interfaces to this API.

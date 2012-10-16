@@ -22,7 +22,7 @@ use base qw(Exporter);
                              is_7bit_clean bz_crypt generate_random_password
                              validate_email_syntax check_email_syntax clean_text
                              get_text template_var disable_utf8
-                             detect_encoding);
+                             detect_encoding email_filter);
 
 use Bugzilla::Constants;
 use Bugzilla::RNG qw(irand);

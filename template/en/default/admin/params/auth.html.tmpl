@@ -93,6 +93,13 @@
                   "front page will require a login. No anonymous users will " _
                   "be permitted.",
 
+  webservice_email_filter =>
+    "Filter email addresses returned by the WebService API depending on " _
+    "if the user is logged in or not. This works similarly to how the " _
+    "web UI currently filters email addresses. If <tt>requirelogin</tt> " _
+    "is enabled, then this parameter has no effect as users must be logged " _
+    "in to use Bugzilla.",
+
   emailregexp =>
     "This defines the regular expression to use for legal email addresses. " _
     "The default tries to match fully qualified email addresses. " _

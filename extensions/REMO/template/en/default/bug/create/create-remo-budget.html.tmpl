@@ -1,22 +1,9 @@
-[%# 1.0@bugzilla.org %]
-[%# The contents of this file are subject to the Mozilla Public
-  # License Version 1.1 (the "License"); you may not use this file
-  # except in compliance with the License. You may obtain a copy of
-  # the License at http://www.mozilla.org/MPL/
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
   #
-  # Software distributed under the License is distributed on an "AS
-  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-  # implied. See the License for the specific language governing
-  # rights and limitations under the License.
-  #
-  # The Original Code is the Bugzilla Bug Tracking System.
-  #
-  # The Initial Developer of the Original Code is Mozilla Corporation.
-  # Portions created by Mozilla are Copyright (C) 2008 Mozilla
-  # Corporation. All Rights Reserved.
-  #
-  # Contributor(s): Reed Loden <reed@mozilla.com>
-  #                 David Tran <dtran@mozilla.com>
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
   #%]
 
 [% PROCESS global/variables.none.tmpl %]
@@ -51,10 +38,10 @@ function validateAndSubmit() {
   if(!isFilledOut('lastname')) alert_text += "Please enter your last name\n";
   if(!isFilledOut('profilepage')) alert_text += "Please enter a Mozilla Reps profile page.\n";
   if(!isFilledOut('eventpage')) alert_text += "Please enter a event page address.\n";
-  if(!isFilledOut('successmeasure')) alert_text += "Please enter how you will measure the success of the event.\n";
+  if(!isFilledOut('mentoremail')) alert_text += "Please enter a valid Bugzilla email for mentor.\n";
+  if(!isFilledOut('country')) alert_text += "Please enter a valid value for country.\n";
   if(!isFilledOut('budgettotal')) alert_text += "Please enter the total budget for the event.\n";
   if(!isFilledOut('service1') || !isFilledOut('cost1')) alert_text += "Please enter at least one service and cost value.\n";
-  if(!isFilledOut('metric1') || !isFilledOut('success1')) alert_text += "Please enter at least one metric and success scenario.\n";
 
   //Everything required is filled out..try to submit the form!
   if(alert_text == '') {
@@ -67,12 +54,11 @@ function validateAndSubmit() {
 }
 
 function togglePaymentInfo (e) {
-  var div = document.getElementById('paymentinfo');
   if (e.checked == true) {
-    div.style.display = 'block';
+    YAHOO.util.Dom.removeClass('paymentinfo','bz_default_hidden');
   }
   else {
-    div.style.display = 'none';
+    YAHOO.util.Dom.addClass('paymentinfo','bz_default_hidden');
   }
 }
 
@@ -80,10 +66,20 @@ function togglePaymentInfo (e) {
 
 <h1>Mozilla Reps - Budget Request Form</h1>
 
+<p>
+  If your request is Community IT related please file it 
+  <a href="https://bugzilla.mozilla.org/enter_bug.cgi?product=Mozilla%20Reps;component=Community%20IT%20Requests">here</a>.
+</p>
+
+<p>
+  <span class="required_star">*</span> - <span class="required_explanation">Required Fields</span>
+</p>
+
 <form method="post" action="post_bug.cgi" id="swagRequestForm" enctype="multipart/form-data"
       onSubmit="return validateAndSubmit();">
 
   <input type="hidden" name="format" value="remo-budget">
+  <input type="hidden" name="created-format" value="remo-budget">
   <input type="hidden" name="product" value="Mozilla Reps">
   <input type="hidden" name="component" value="Budget Requests">
   <input type="hidden" name="rep_platform" value="All">
@@ -98,23 +94,21 @@ function togglePaymentInfo (e) {
 <table id="reps-form">
 
 <tr class="odd">
-  <td><strong>First Name: <span style="color: red;">*</span></strong></td>
+  <th class="field_label required">First Name:</th>
   <td>
     <input type="text" name="firstname" id="firstname" value="" size="40" placeholder="John">
   </td>
 </tr>
 
 <tr class="even">
-  <td><strong>Last Name: <span style="color: red;">*</span></strong></td>
+  <th class="field_label required">Last Name:</th>
   <td>
     <input type="text" name="lastname" id="lastname" value="" size="40" placeholder="Doe">
   </td>
 </tr>
 
 <tr class="odd">
-  <td>
-    <strong>Mozilla Reps Profile Page: <span style="color: red;">*</span></strong>
-  </td>
+  <th class="field_label required">Mozilla Reps Profile Page:</th>
   <td>
     <input type="text" name="profilepage" id="profilepage" 
            value="" size="40" placeholder="https://reps.mozilla.org/u/JohnDoe">
@@ -122,35 +116,39 @@ function togglePaymentInfo (e) {
 </tr>
 
 <tr class="even">
-  <td>
-    <strong>Event Page: <span style="color: red;">*</span></strong>
-  </td>
+  <th class="field_label required">Event Page:</th>
   <td>
     <input type="text" name="eventpage" id="eventpage" 
            value="" size="40" placeholder="https://reps.mozilla.org/e/TestEvent">
   </td>
 </tr>
-
 <tr class="odd">
-  <td><!--spacer-->&nbsp;</td>
-  <td><!--spacer-->&nbsp;</td>
+  <th class="field_label required">Bugzilla Email of Your Mentor:</th>
+  <td>
+    [% INCLUDE global/userselect.html.tmpl
+       id    => "mentoremail"
+       name  => "mentoremail"
+       value => ""
+       size  => 40
+    %]
+  </td>
 </tr>
 
 <tr class="even">
-  <td colspan="2">
-    <strong>Is advance payment needed?</strong>
-    <input type="checkbox" name="advancepayment" id="advancepayment" value="1"
-           onchange="togglePaymentInfo(this);">
-    <div id="paymentinfo" style="display:none;">
-      Please send an email to William at mozilla.com with all the information below:<br>
-      <br>
-      Payment information:<br>
-      Bank name:<br>
-      Bank address: <br> 
-      IBAN:<br>
-      Swift code/BIC:<br>
-      Additional bank details (if necessary):
-    </div>
+  <th class="field_label">Paypal Account Email:</th>
+  <td>
+    <input type="text" name="paypal" id="paypal"
+           value="" size="40" placeholder=""><br>
+    <span style="font-size: smaller;">
+      * Currently, you CANNOT make payments using other online payment services.</span>
+  </td>
+</tr>
+
+<tr class="even">
+  <th class="field_label required">Country You Reside:</th>
+  <td>
+    <input type="text" name="country" id="country"
+           value="" size="40" placeholder="USA">
   </td>
 </tr>
 
@@ -160,81 +158,90 @@ function togglePaymentInfo (e) {
 </tr>
 
 <tr class="even">
+  <th class="field_label">Is advance payment needed?</th>
+  <td>
+    <input type="checkbox" name="advancepayment" id="advancepayment" value="1"
+           onchange="togglePaymentInfo(this);">
+  </td>
+</tr>
+
+<tr id="paymentinfo" class="even bz_default_hidden">
   <td colspan="2">
-    <strong>Budget breakdown:</strong><br>
-    Total amount requested in $USD:  <span style="color: red;">*</span>
-    <input type="text" name="budgettotal" id="budgettotal" value="" size="40"><br>
-    Costs per service:
+    Please send an email to William at mozilla.com with all the information below:<br>
+    <br>
+    Payment information:<br>
+    Bank name:<br>
+    Bank address: <br> 
+    IBAN:<br>
+    Swift code/BIC:<br>
+    Additional bank details (if necessary):
+  </td>
+</tr>
+
+<tr class="odd">
+  <td><!--spacer-->&nbsp;</td>
+  <td><!--spacer-->&nbsp;</td>
+</tr>
+
+<tr class="even">
+  <th colspan="2" class="field_label">Budget Request:</th>
+</tr>
+
+<tr class="even">
+  <th class="field_label required">Total amount requested in $USD:</th>
+  <td>
+    <input type="text" name="budgettotal" id="budgettotal" value="" size="40">
+  </td>
+ </tr>
+
+<tr class="even">
+  <th colspan="2" class="field_label">Costs per service:</th>
+</tr>
+
+<tr class="even">
+  <td colspan="2">
     <table>
     <tr>
-      <td>Service 1:  <span style="color: red;">*</span></td>
+      <th class="field_label required">Service 1:</th>
       <td><input type="text" id="service1" name="service1" size="30"></td>
-      <td>Cost 1: <span style="color: red;">*</span></td>
+      <th class="field_label required">Cost 1:</th>
       <td><input type="text" id="cost1" name="cost1" size="30"></td>
     </tr>
     <tr>
-      <td>Service 2:</td>                        
-      <td><input type="text" id="service2" name="service2" size="30"></td>                        
-      <td>Cost 2:</td>                  
+      <th class="field_lable">Service 2:</th>
+      <td><input type="text" id="service2" name="service2" size="30"></td>
+      <th class="field_lable">Cost 2:</th>
       <td><input type="text" id="cost2" name="cost2" size="30"></td>
     </tr>
     <tr>
-      <td>Service 3:</td>                        
-      <td><input type="text" id="service3" name="service3" size="30"></td>                        
-      <td>Cost 3:</td>                  
+      <th class="field_lable">Service 3:</th>
+      <td><input type="text" id="service3" name="service3" size="30"></td>
+      <th class="field_lable">Cost 3:</th>
       <td><input type="text" id="cost3" name="cost3" size="30"></td>
     </tr>
     <tr>
-      <td>Service 4:</td>                        
-      <td><input type="text" id="service4" name="service4" size="30"></td>                        
-      <td>Cost 4:</td>                  
+      <th class="field_lable">Service 4:</th>
+      <td><input type="text" id="service4" name="service4" size="30"></td>
+      <th class="field_lable">Cost 4:</th>
       <td><input type="text" id="cost4" name="cost4" size="30"></td>
     </tr>
     <tr>
-      <td>Service 5:</td>                        
-      <td><input type="text" id="service5" name="service5" size="30"></td>                        
-      <td>Cost 5:</td>                  
+      <th class="field_lable">Service 5:</th>
+      <td><input type="text" id="service5" name="service5" size="30"></td>
+      <th class="field_lable">Cost 5:</th>
       <td><input type="text" id="cost5" name="cost5" size="30"></td>
     </tr>
     </table>
-    Additional costs:<br>
-    <textarea id="costadditional" name="costadditional" rows="5" cols="50"></textarea>
   </td>
 </tr>
 
-<tr class="odd">
-  <td><!--spacer-->&nbsp;</td>
-  <td><!--spacer-->&nbsp;</td>
+<tr class="even">
+  <th colspan="2" class="field_label">Additional costs:</th>
 </tr>
 
 <tr class="even">
   <td colspan="2">
-    <strong>Success measurement:</strong><br>
-    How will the event help push the Mozilla project forward? 
-    <span style="color: red;">*</span><br>
-    <textarea id="successmeasure" name="successmeasure" rows="5" cols="50"></textarea>
-    <table>
-    </tr>
-      <td>Metric 1: <span style="color: red;">*</span></td>
-      <td><input type="text" id="metric1" name="metric1" size="30">
-      <td>Success scenario: <span style="color: red;">*</span></td>
-      <td><input type="text" id="success1" name="success1" size="30">
-    </tr>
-    <tr>
-      <td>Metric 2:</td>                         
-      <td><input type="text" id="metric2" name="metric2" size="30">
-      <td>Success scenario:</td> 
-      <td><input type="text" id="success2" name="success2" size="30">
-    </tr>
-    <tr>
-      <td>Metric 3:</td>                         
-      <td><input type="text" id="metric3" name="metric3" size="30">
-      <td>Success scenario:</td> 
-      <td><input type="text" id="success3" name="success3" size="30">
-    </tr>
-    </table>
-    Additional information:<br>
-    <textarea id="successadditional" name="successadditional" rows="5" cols="50"></textarea>
+    <textarea id="costadditional" name="costadditional" rows="5" cols="50"></textarea>
   </td>
 </tr>
 
@@ -249,8 +256,14 @@ function togglePaymentInfo (e) {
 
 </form>
 
+<p style="font-weight:bold;">
+  Budget requests received less than 3 weeks before the targeted launch date of the
+  event/activity in question will automatically be rejected  (exceptions can be made
+  but only with council approval). This 3-week  “buffer” guarantees that each budget
+  request undergoes the same thorough selection process.
+</p>
+
 <p>
-  <strong><span style="color: red;">*</span></strong> - Required field<br />
   Thanks for contacting us.
 </p>
 

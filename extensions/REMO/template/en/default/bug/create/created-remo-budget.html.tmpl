@@ -1,0 +1,27 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% PROCESS global/header.html.tmpl
+   title = "Mozilla Reps Budget Request Form"
+%]
+
+<h1>Thank you!</h1>
+
+<p>
+  Your budget request has been successfully submitted. Please make sure to
+  follow-up with your mentor so (s)he can verify your request. CC him/her
+  on the bug if needed.
+</p>
+
+<p style="font-size: x-small">
+  Reference: <a href="show_bug.cgi?id=[% id FILTER url_quote %]">#[% id FILTER html %]</a>
+</p>
+
+[% PROCESS global/footer.html.tmpl %]

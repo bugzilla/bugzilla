@@ -33,6 +33,9 @@ Requester info:
 Requester: [% cgi.param('firstname') %] [%+ cgi.param('lastname') %] 
 Profile page: [% cgi.param('profilepage') %]
 Event page: [% cgi.param('eventpage') %]
+Mentor Email: [% cgi.param('mentoremail') %]
+Paypal Account: [% cgi.param('paypal') %]
+Country You Reside: [% cgi.param('country') %]
 Advance payment needed: [% IF cgi.param('advancepayment') %]Yes[% ELSE %]No[% END %]
 
 Budget breakdown: 
@@ -47,18 +50,6 @@ Service 5: [% cgi.param('service5') %]  Cost: [% cgi.param('cost5') %]
 
 Additional costs: (add comment box)
 [% cgi.param('costadditional') %]
-
-Success measurement: 
-
-How will the event help push the Mozilla project forward?
-[%+ cgi.param('successmeasure') %]
-
-Metric 1: [% cgi.param('metric1') %]  Success scenario: [% cgi.param('success1') %]
-Metric 2: [% cgi.param('metric2') %]  Success scenario: [% cgi.param('success2') %]
-Metric 3: [% cgi.param('metric3') %]  Success scenario: [% cgi.param('success3') %]
-
-Additional information:
-[%+ cgi.param('successadditional') %]
 
 [%+ cgi.param("comment") IF cgi.param("comment") %]
 

@@ -112,7 +112,8 @@ sub bz_explain {
 sub sql_group_concat {
     my ($self, $text, $separator) = @_;
     $separator = $self->quote(', ') if !defined $separator;
-    return "group_concat(T_CLOB_DELIM($text, $separator))";
+    my ($distinct, $rest) = $text =~/^(\s*DISTINCT\s|)(.+)$/i;
+    return "group_concat($distinct T_CLOB_DELIM(NVL($rest, ' '), $separator))";
 }
 
 sub sql_regexp {
@@ -527,14 +528,17 @@ sub bz_setup_database {
               . " RETURN NUMBER IS BEGIN RETURN LENGTH(COLUMN_NAME); END;");
     
     # Create types for group_concat
-    my $t_clob_delim = $self->selectcol_arrayref("
-        SELECT TYPE_NAME FROM USER_TYPES WHERE TYPE_NAME=?",
-        undef, 'T_CLOB_DELIM'); 
-
-    if ( !@$t_clob_delim ) {
-        $self->do("CREATE OR REPLACE TYPE T_CLOB_DELIM AS OBJECT "
-              . "( p_CONTENT CLOB, p_DELIMITER VARCHAR2(256));");
-    }
+    $self->do("DROP TYPE T_GROUP_CONCAT");
+    $self->do("CREATE OR REPLACE TYPE T_CLOB_DELIM AS OBJECT "
+          . "( p_CONTENT CLOB, p_DELIMITER VARCHAR2(256)"
+          . ", MAP MEMBER FUNCTION T_CLOB_DELIM_ToVarchar return VARCHAR2"
+          . ");");
+    $self->do("CREATE OR REPLACE TYPE BODY T_CLOB_DELIM IS
+                  MAP MEMBER FUNCTION T_CLOB_DELIM_ToVarchar return VARCHAR2 is
+                  BEGIN
+                      RETURN p_CONTENT;
+                  END;
+              END;");
 
     $self->do("CREATE OR REPLACE TYPE T_GROUP_CONCAT AS OBJECT 
                (  CLOB_CONTENT CLOB,

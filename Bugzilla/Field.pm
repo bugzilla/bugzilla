@@ -1035,7 +1035,11 @@ sub create {
     # the parameter isn't sent to create().
     $params->{sortkey} = undef if !exists $params->{sortkey};
     $params->{type} ||= 0;
-    
+    # We mark the custom field as obsolete till it has been fully created,
+    # to avoid race conditions when viewing bugs at the same time.
+    my $is_obsolete = $params->{obsolete};
+    $params->{obsolete} = 1 if $params->{custom};
+
     $dbh->bz_start_transaction();
     $class->check_required_create_fields(@_);
     my $field_values      = $class->run_create_validators($params);
@@ -1064,6 +1068,10 @@ sub create {
             # Insert a default value of "---" into the legal values table.
             $dbh->do("INSERT INTO $name (value) VALUES ('---')");
         }
+
+        # Restore the original obsolete state of the custom field.
+        $dbh->do('UPDATE fielddefs SET obsolete = 0 WHERE id = ?', undef, $field->id)
+          unless $is_obsolete;
     }
 
     return $field;

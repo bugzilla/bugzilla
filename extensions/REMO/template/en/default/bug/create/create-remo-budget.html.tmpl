@@ -39,7 +39,7 @@ function validateAndSubmit() {
   if(!isFilledOut('lastname')) alert_text += "Please enter your last name\n";
   if(!isFilledOut('profilepage')) alert_text += "Please enter a Mozilla Reps profile page.\n";
   if(!isFilledOut('eventpage')) alert_text += "Please enter a event page address.\n";
-  if(!isFilledOut('mentoremail')) alert_text += "Please enter a valid Bugzilla email for mentor.\n";
+  if(!isFilledOut('mentoremail')) alert_text += "Please enter a valid [% terms.Bugzilla %] email for mentor.\n";
   if(!isFilledOut('country')) alert_text += "Please enter a valid value for country.\n";
   if(!isFilledOut('budgettotal')) alert_text += "Please enter the total budget for the event.\n";
   if(!isFilledOut('service1') || !isFilledOut('cost1')) alert_text += "Please enter at least one service and cost value.\n";
@@ -116,7 +116,7 @@ function validateAndSubmit() {
 </tr>
 
 <tr class="odd">
-  <th class="field_label required">Bugzilla Email of Your Mentor:</th>
+  <th class="field_label required">[% terms.Bugzilla %] Email of Your Mentor:</th>
   <td>
     [% INCLUDE global/userselect.html.tmpl
        id    => "mentoremail"

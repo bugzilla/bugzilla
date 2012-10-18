@@ -27,8 +27,9 @@ function trySubmit() {
   var firstname = document.getElementById('firstname').value;
   var lastname = document.getElementById('lastname').value;
   var eventpage = document.getElementById('eventpage').value;
-  var shortdesc = 'Budget Request - ' + firstname + ' ' + lastname + ' - ' + eventpage; 
+  var shortdesc = 'Budget Request - ' + firstname + ' ' + lastname + ' - ' + eventpage;
   document.getElementById('short_desc').value = shortdesc;
+  document.getElementById('cc').value = document.getElementById('mentoremail').value;
   return true;
 }
 
@@ -52,16 +53,6 @@ function validateAndSubmit() {
   alert(alert_text);
   return false;
 }
-
-function togglePaymentInfo (e) {
-  if (e.checked == true) {
-    YAHOO.util.Dom.removeClass('paymentinfo','bz_default_hidden');
-  }
-  else {
-    YAHOO.util.Dom.addClass('paymentinfo','bz_default_hidden');
-  }
-}
-
 </script>
 
 <h1>Mozilla Reps - Budget Request Form</h1>
@@ -88,6 +79,7 @@ function togglePaymentInfo (e) {
   <input type="hidden" name="version" value="unspecified">
   <input type="hidden" name="bug_severity" id="bug_severity" value="normal">
   <input type="hidden" name="short_desc" id="short_desc" value="">
+  <input type="hidden" name="cc" id="cc" value="">
   <input type="hidden" name="groups" value="mozilla-reps">
   <input type="hidden" name="token" value="[% token FILTER html %]">
 
@@ -122,6 +114,7 @@ function togglePaymentInfo (e) {
            value="" size="40" placeholder="https://reps.mozilla.org/e/TestEvent">
   </td>
 </tr>
+
 <tr class="odd">
   <th class="field_label required">Bugzilla Email of Your Mentor:</th>
   <td>
@@ -144,7 +137,7 @@ function togglePaymentInfo (e) {
   </td>
 </tr>
 
-<tr class="even">
+<tr class="odd">
   <th class="field_label required">Country You Reside:</th>
   <td>
     <input type="text" name="country" id="country"
@@ -152,29 +145,10 @@ function togglePaymentInfo (e) {
   </td>
 </tr>
 
-<tr class="odd">
-  <td><!--spacer-->&nbsp;</td>
-  <td><!--spacer-->&nbsp;</td>
-</tr>
-
 <tr class="even">
   <th class="field_label">Is advance payment needed?</th>
   <td>
-    <input type="checkbox" name="advancepayment" id="advancepayment" value="1"
-           onchange="togglePaymentInfo(this);">
-  </td>
-</tr>
-
-<tr id="paymentinfo" class="even bz_default_hidden">
-  <td colspan="2">
-    Please send an email to William at mozilla.com with all the information below:<br>
-    <br>
-    Payment information:<br>
-    Bank name:<br>
-    Bank address: <br> 
-    IBAN:<br>
-    Swift code/BIC:<br>
-    Additional bank details (if necessary):
+    <input type="checkbox" name="advancepayment" id="advancepayment" value="1">
   </td>
 </tr>
 

@@ -762,7 +762,6 @@ sub delete_attachment {
         # The token is valid. Delete the content of the attachment.
         my $msg;
         $vars->{'attachment'} = $attachment;
-        $vars->{'date'} = $date;
         $vars->{'reason'} = clean_text($cgi->param('reason') || '');
 
         $template->process("attachment/delete_reason.txt.tmpl", $vars, \$msg)

@@ -114,10 +114,11 @@ sub REQUIRED_MODULES {
         module  => 'DateTime::TimeZone',
         version => ON_WINDOWS ? '0.79' : '0.71'
     },
+    # 1.54 is required for Perl 5.10+. It also makes DBD::Oracle happy.
     {
         package => 'DBI',
         module  => 'DBI',
-        version => (vers_cmp($perl_ver, '5.13.3') > -1) ? '1.614' : '1.41'
+        version => (vers_cmp($perl_ver, '5.13.3') > -1) ? '1.614' : '1.54'
     },
     # 2.22 fixes various problems related to UTF8 strings in hash keys,
     # as well as line endings on Windows.

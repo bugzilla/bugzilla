@@ -161,6 +161,8 @@ sub quicksearch {
         ThrowUserError('quicksearch_invalid_query')
           if ($words[0] =~ /^(?:AND|OR)$/ || $words[$#words] =~ /^(?:AND|OR|NOT)$/);
 
+        $fulltext = Bugzilla->user->setting('quicksearch_fulltext') eq 'on' ? 1 : 0;
+
         my (@qswords, @or_group);
         while (scalar @words) {
             my $word = shift @words;
@@ -187,6 +189,10 @@ sub quicksearch {
                 }
                 unshift(@words, "-$word");
             }
+            # --comment and ++comment disable or enable fulltext searching
+            elsif ($word =~ /^(--|\+\+)comments?$/i) {
+                $fulltext = $1 eq '--' ? 0 : 1;
+            }
             else {
                 # OR groups words together, as OR has higher precedence than AND.
                 push(@or_group, $word);
@@ -203,7 +209,6 @@ sub quicksearch {
         shift(@qswords) if $bug_status_set;
 
         my (@unknownFields, %ambiguous_fields);
-        $fulltext = Bugzilla->user->setting('quicksearch_fulltext') eq 'on' ? 1 : 0;
 
         # Loop over all main-level QuickSearch words.
         foreach my $qsword (@qswords) {

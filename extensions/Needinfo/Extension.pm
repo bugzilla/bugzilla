@@ -62,6 +62,11 @@ sub bug_end_of_update {
 
     return if $params->{needinfo_done};
 
+    # do a match if applicable
+    Bugzilla::User::match_field({ 
+        'needinfo_from' => { 'type' => 'single' }
+    });
+
     my $needinfo      = delete $params->{needinfo};
     my $needinfo_from = delete $params->{needinfo_from};
     my $needinfo_role = delete $params->{needinfo_role};

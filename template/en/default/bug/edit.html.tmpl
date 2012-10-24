@@ -1111,6 +1111,8 @@
         <br>
         [% PROCESS commit_button id=""%]
 
+        [% Hook.process("after_comment_commit_button", 'bug/edit.html.tmpl') %]
+
         <table id="bug_status_bottom"
                class="status" cellspacing="0" cellpadding="0">
           <tr>

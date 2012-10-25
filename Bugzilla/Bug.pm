@@ -3787,7 +3787,7 @@ sub get_activity {
                $datepart
                $attachpart
                $suppwhere
-      ORDER BY bugs_activity.bug_when";
+      ORDER BY bugs_activity.bug_when, bugs_activity.id";
 
     my $list = $dbh->selectall_arrayref($query, undef, @args);
 
@@ -3845,8 +3845,8 @@ sub get_activity {
                 && ($attachid || 0) == ($operation->{'attachid'} || 0))
             {
                 my $old_change = pop @$changes;
-                $removed = $old_change->{'removed'} . $removed;
-                $added = $old_change->{'added'} . $added;
+                $removed = _join_activity_entries($fieldname, $old_change->{'removed'}, $removed);
+                $added = _join_activity_entries($fieldname, $old_change->{'added'}, $added);
             }
             $operation->{'who'} = $who;
             $operation->{'when'} = $when;
@@ -3871,6 +3871,35 @@ sub get_activity {
     return(\@operations, $incomplete_data);
 }
 
+sub _join_activity_entries {
+    my ($field, $current_change, $new_change) = @_;
+    # We need to insert characters as these were removed by old
+    # LogActivityEntry code.
+
+    return $new_change if $current_change eq '';
+
+    # Buglists and see_also need the comma restored
+    if ($field eq 'dependson' || $field eq 'blocked' || $field eq 'see_also') {
+        if (substr($new_change, 0, 1) eq ',' || substr($new_change, 0, 1) eq ' ') {
+            return $current_change . $new_change;
+        } else {
+            return $current_change . ', ' . $new_change;
+        }
+    }
+
+    # Assume bug_file_loc contain a single url, don't insert a delimiter
+    if ($field eq 'bug_file_loc') {
+        return $current_change . $new_change;
+    }
+
+    # All other fields get a space
+    if (substr($new_change, 0, 1) eq ' ') {
+        return $current_change . $new_change;
+    } else {
+        return $current_change . ' ' . $new_change;
+    }
+}
+
 # Update the bugs_activity table to reflect changes made in bugs.
 sub LogActivityEntry {
     my ($i, $col, $removed, $added, $whoid, $timestamp, $comment_id) = @_;
@@ -3885,7 +3914,6 @@ sub LogActivityEntry {
             my $commaposition = find_wrap_point($removed, MAX_LINE_LENGTH);
             $removestr = substr($removed, 0, $commaposition);
             $removed = substr($removed, $commaposition);
-            $removed =~ s/^[,\s]+//; # remove any comma or space
         } else {
             $removed = ""; # no more entries
         }
@@ -3893,7 +3921,6 @@ sub LogActivityEntry {
             my $commaposition = find_wrap_point($added, MAX_LINE_LENGTH);
             $addstr = substr($added, 0, $commaposition);
             $added = substr($added, $commaposition);
-            $added =~ s/^[,\s]+//; # remove any comma or space
         } else {
             $added = ""; # no more entries
         }

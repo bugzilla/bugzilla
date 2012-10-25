@@ -30,8 +30,15 @@ var resolution    = [ [% FOREACH x = resolution %]'[% x FILTER js %]', [% END %]
 // Keywords
 // ========
 
-var keyword       = [ [% FOREACH x = keyword %]'[% x FILTER js %]', [% END %] ];
-
+var keyword       = [ [% FOREACH k = keywords %]'[% k.name FILTER js %]', [% END %] ];
+var keyword_descs = [
+[% FOREACH k = keywords %]
+  {
+    name:        '[% k.name FILTER js %]',
+    description: '[% k.description FILTER js %]',
+  },
+[% END %]
+];
 
 // Platforms
 // =========

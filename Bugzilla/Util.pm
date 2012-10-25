@@ -458,11 +458,11 @@ sub find_wrap_point {
     if (!$string) { return 0 }
     if (length($string) < $maxpos) { return length($string) }
     my $wrappoint = rindex($string, ",", $maxpos); # look for comma
-    if ($wrappoint < 0) {  # can't find comma
+    if ($wrappoint <= 0) {  # can't find comma
         $wrappoint = rindex($string, " ", $maxpos); # look for space
-        if ($wrappoint < 0) {  # can't find space
+        if ($wrappoint <= 0) {  # can't find space
             $wrappoint = rindex($string, "-", $maxpos); # look for hyphen
-            if ($wrappoint < 0) {  # can't find hyphen
+            if ($wrappoint <= 0) {  # can't find hyphen
                 $wrappoint = $maxpos;  # just truncate it
             } else {
                 $wrappoint++; # leave hyphen on the left side

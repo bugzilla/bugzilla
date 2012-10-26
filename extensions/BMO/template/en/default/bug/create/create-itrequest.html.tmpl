@@ -45,20 +45,18 @@
       var theValue = theRadio.value;
       var compDescText = compdesc[theValue];
       if (theRadio.id == 'componentso') {
-        compDescText = compDescText + '<br><br>' + serviceNowText;   
+        compDescText = compDescText + '<br><br>' + serviceNowText;
       }
       document.getElementById('compdescription').innerHTML = compDescText;
     }
   }
 
   function on_submit() {
-    [% IF use_service_now %]
-      if (document.getElementById('componentmvd').checked) {
-        [%# redirect desktop issues to service-now #%]
-        document.location.href = 'https://mozilla.service-now.com/';
-        return false;
-      }
-    [% END %]
+    if (document.getElementById('componentmvd').checked) {
+      [%# redirect desktop issues to service-now #%]
+      document.location.href = 'https://mozilla.service-now.com/';
+      return false;
+    }
     return true;
   }
 

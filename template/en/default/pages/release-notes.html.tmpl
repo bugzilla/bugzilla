@@ -53,6 +53,53 @@
 
 <h2 id="v42_point">Updates in this 4.2.x Release</h2>
 
+<h3>4.2.4</h3>
+
+<p>This release fixes several security issues. See the
+  <a href="http://www.bugzilla.org/security/3.6.11/">Security Advisory</a>
+  for details.</p>
+
+<p>In addition, the following important fixes/changes have been made in this
+  release:</p>
+
+<ul>
+  <li>Queries involving group substitution were crashing when the "usevisibilitygroups"
+    parameter was enabled. Also, CVE-2011-2979 was not fully fixed in
+    [%+ terms.Bugzilla %] 4.1.3.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=788098">[% terms.Bug %] 788098</a>)</li>
+  <li>Flag names were not properly escaped when displayed on the "confirm user
+    match" page. An admin could unintentionally break the display of this page
+    if a flag name contains a &lt; or &gt; character, because these characters
+    were not filtered.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=790215">[% terms.Bug %] 790215</a>)</li>
+  <li>We now prevent private WebServices methods from being called by external
+    applications.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=793826">[% terms.Bug %] 793826</a>)</li>
+  <li>PostgreSQL 9.2 requires DBD::Pg 2.19.3.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=799721">[% terms.Bug %] 799721</a>)</li>
+  <li>Oracle was crashing when listing keywords or flags in buglists.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=780053">[% terms.Bug %] 780053</a>)</li>
+  <li>Oracle was crashing when typing several bare words in the QuickSearch field.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=804505">[% terms.Bug %] 804505</a>)</li>
+  <li>[% terms.Bugs %] with the resolution MOVED couldn't be edited anymore.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=757935">[% terms.Bug %] 757935</a>)</li>
+  <li>Editing dependencies from the "Change Several [% terms.Bugs %] at Once"
+    page didn't work as expected. [% terms.Bug %] IDs were incorrectly parsed.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=790909">[% terms.Bug %] 790909</a>)</li>
+  <li>The "Actual Hours" axis now works correctly in tabular and graphical reports.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=794389">[% terms.Bug %] 794389</a>)</li>
+  <li><kbd>checksetup.pl</kbd> was failing to run if the Voting extension was
+    enabled on a fresh installation and some mandatory modules were missing.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=652047">[% terms.Bug %] 652047</a>)</li>
+  <li>[% terms.Bugzilla %] no longer crashes when viewing [% terms.abug %] while
+    a custom field is being added.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=531243">[% terms.Bug %] 531243</a>)</li>
+  <li>For improved security, we now send the "X-Content-Type-Options:&nbsp;nosniff"
+    and "X-XSS-Protection:&nbsp;block" headers with every response.
+    ([% terms.Bugs %] <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=671612">671612</a>
+    and <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=680771">680771</a>)</li>
+</ul>
+
 <h3>4.2.3</h3>
 
 <p>This release fixes two security issues. See the
@@ -129,7 +176,7 @@
     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=768870">[% terms.Bug %] 768870</a>)</li>
   <li>Two minor CSRF vulnerabilities have been fixed which could let an attacker
     alter your default search criteria in the Advanced Search page.
-    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=754672">[% terms.Bugs %] 754672</a>
+    ([% terms.Bugs %] <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=754672">754672</a>
     and <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=754673">754673</a>)</li>
 </ul>
 
@@ -613,8 +660,8 @@
     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=640719">[% terms.Bug %] 640719</a>)</li>
   <li>Email notifications about dependencies and flags had the wrong
     timestamp.
-    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=643910">[% terms.Bug %] 643910</a>
-    and  (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=652165">[% terms.Bug %] 652165</a>)</li>
+    ([% terms.Bugs %] <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=643910">643910</a>
+    and <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=652165">652165</a>)</li>
   <li>You can now select "UTC" as a valid timezone in General Preferences.
     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=646209">[% terms.Bug %] 646209</a>)</li>
   <li>Automatic duplicate detection now works on PostgreSQL (although

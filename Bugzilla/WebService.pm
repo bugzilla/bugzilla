@@ -294,13 +294,15 @@ would return something like:
 
 =back
 
-=head2 WebService Methods
+=head2 WebService Modules
 
 =over
 
 =item L<Bugzilla::WebService::Bug>
 
 =item L<Bugzilla::WebService::Bugzilla>
+
+=item L<Bugzilla::WebService::Classification>
 
 =item L<Bugzilla::WebService::Group>
 

@@ -6,10 +6,11 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% show_needinfo      = 0 %]
-[% needinfo_requested = 0 %]
-[% needinfo_from      = "" %]
-[% needinfo_from_any  = 0 %]
+[% show_needinfo       = 0 %]
+[% needinfo_requested  = 0 %]
+[% needinfo_from       = "" %]
+[% needinfo_from_any   = 0 %]
+[% can_create_needinfo = 0 %]
 
 [% FOREACH type = bug.flag_types %]
   [% IF type.name == 'needinfo' %]
@@ -22,6 +23,19 @@
         [% ELSE %]
           [% needinfo_from_any = 1 %]
         [% END %]
+      [% END %]
+    [% END %]
+  [% END %]
+[% END %]
+
+[% IF user.in_group('canconfirm') && !needinfo_requested %]
+  [% IF bug.status.is_open %]
+    [% can_create_needinfo = 1 %]
+  [% ELSE %]
+    [% FOREACH field = Bugzilla.active_custom_fields(product=>bug.product_obj, component=>bug.component_obj, type=>2) %]
+      [% IF field.description.match('^status-firefox') && bug.${field.name} == 'affected' %]
+        [% can_create_needinfo = 1 %]
+        [% LAST %]
       [% END %]
     [% END %]
   [% END %]
@@ -48,8 +62,7 @@
       [% END %]
     [% END %]
 
-    [% IF user.in_group('canconfirm') && !is_attachment 
-       && !needinfo_requested && bug.status.is_open %]
+    [% IF can_create_needinfo %]
       <script>
         function needinfoRole (select) {
           YAHOO.util.Dom.get('needinfo').checked = true;

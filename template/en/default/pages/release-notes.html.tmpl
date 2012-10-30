@@ -61,6 +61,18 @@
 
 <h2 id="v36_point">Updates in this 3.6.x Release</h2>
 
+<h3>3.6.12</h3>
+
+<p>This release fixes two security issues. See the
+  <a href="http://www.bugzilla.org/security/3.6.11/">Security Advisory</a>
+  for details.</p>
+
+<p>This release also fixes a problem where flag names were not properly
+  escaped when displayed on the "confirm user match" page. An admin could
+  unintentionally break the display of this page if a flag name contains
+  a &lt; or &gt; character, because these characters were not filtered.
+  (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=790215">[% terms.Bug %] 790215</a>)</p>
+
 <h3>3.6.11</h3>
 
 <p>This release fixes one security issue. See the

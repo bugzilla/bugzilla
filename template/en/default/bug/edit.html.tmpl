@@ -260,20 +260,20 @@
       %]
     </tr>
     <tr>
-      <th class="field_label">
-        <label for="version">Version</label>:
-      </th>
-
+      [% INCLUDE "bug/field-label.html.tmpl"
+        field = bug_fields.version editable = 1 %]
+        
       [% PROCESS select selname => "version" %]
     </tr>
     [%############%]    
     [%# PLATFORM #%]
     [%############%]    
     <tr>
-      <th class="field_label">
-        <label for="rep_platform" accesskey="h">
-          [% field_descs.rep_platform FILTER html %]</label>:
-      </th>
+      [% INCLUDE "bug/field-label.html.tmpl"
+        field = bug_fields.
+        rep_platform editable = 1
+        accesskey = "h"
+      %]
       <td class="field_value">
        [% INCLUDE bug/field.html.tmpl
             bug = bug, field = bug_fields.rep_platform,
@@ -413,9 +413,11 @@
 
     [% IF Param('useqacontact') %]
     <tr>
-      <th class="field_label">
-        <label for="qa_contact" accesskey="q"><u>Q</u>A Contact</label>:
-      </th>
+      [% INCLUDE "bug/field-label.html.tmpl"
+        field = bug_fields.qa_contact
+        editable = 1
+        accesskey = "q"
+      %]
       <td>
         [% IF bug.check_can_change_field("qa_contact", 0, 1) %]
           <div id="bz_qa_contact_edit_container" class="bz_default_hidden">
@@ -513,9 +515,11 @@
   
   [% IF Param('usestatuswhiteboard') %]
     <tr>
-      <th class="field_label">
-        <label for="status_whiteboard" accesskey="w"><u>W</u>hiteboard</label>:
-      </th>
+      [% INCLUDE "bug/field-label.html.tmpl"
+        field = bug_fields.status_whiteboard
+        editable = 1
+        accesskey = "w"
+      %]
       [% PROCESS input inputname => "status_whiteboard" size => "40" colspan => 2 %]
     </tr>
   [% END %]

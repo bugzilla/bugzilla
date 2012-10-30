@@ -72,6 +72,27 @@
 
 <h2 id="v40_point">Updates in this 4.0.x Release</h2>
 
+<h3>4.0.9</h3>
+
+<p>This release fixes several security issues. See the
+  <a href="http://www.bugzilla.org/security/3.6.11/">Security Advisory</a>
+  for details.</p>
+
+<p>In addition, the following [% terms.bugs %] have been fixed in this release:</p>
+
+<ul>
+  <li>Flag names were not properly escaped when displayed on the "confirm user
+    match" page. An admin could unintentionally break the display of this page
+    if a flag name contains a &lt; or &gt; character, because these characters
+    were not filtered.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=790215">[% terms.Bug %] 790215</a>)</li>
+  <li>[% terms.Bugs %] with the resolution MOVED couldn't be edited anymore.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=757935">[% terms.Bug %] 757935</a>)</li>
+  <li>Editing dependencies from the "Change Several [% terms.Bugs %] at Once"
+    page didn't work as expected. [% terms.Bug %] IDs were incorrectly parsed.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=790909">[% terms.Bug %] 790909</a>)</li>
+</ul>
+
 <h3>4.0.8</h3>
 
 <p>This release fixes two security issues. See the

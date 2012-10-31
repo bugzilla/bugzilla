@@ -1,0 +1,13 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% IF message_tag == "moz_project_review_creation_failed" %]
+  The parent [% terms.bug %] was created successfully,  but creation of
+  the dependent [% terms.bugs %] failed. The error has been logged
+  and no further action is required at this time.
+[% END %]

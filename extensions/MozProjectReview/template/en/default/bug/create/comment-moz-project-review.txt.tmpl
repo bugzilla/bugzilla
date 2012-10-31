@@ -1,0 +1,34 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+
+Initial Questions:
+
+Project/Feature Name: [% cgi.param('short_desc') %]
+Tracking [% terms.Bug %] ID:[% cgi.param('tracking_id') %]
+Description:
+[%+ cgi.param('description') %]
+Additional Information:
+[%+ cgi.param('additional') %]
+Urgency: [% cgi.param('urgency') %]
+Current Goal: [% cgi.param('goal') %]
+Release Date: [% cgi.param('release_date') %]
+Project Status: [% cgi.param('project_status') %]
+Mozilla Data: [% cgi.param('mozilla_data') %]
+New or Change: [% cgi.param('new_or_change') %]
+Mozilla Project: [% cgi.param('mozilla_project') %]
+Mozilla Related: [% cgi.param('mozilla_related') %]
+Separate Party: [% cgi.param('separate_party') %]
+[% IF cgi.param('separate_part') == 'Yes' %]
+Type of Relationship: [% cgi.param('relationship_type') %]
+Data Access: [% cgi.param('data_access') %]
+Privacy Policy: [% cgi.param('privacy_policy') %]
+Vendor Cost: [% cgi.param('vendor_cost') %]
+[% END %]

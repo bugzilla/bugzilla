@@ -1,0 +1,26 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+
+[% PROCESS "bug/create/comment-moz-project-review.txt.tmpl" %]
+
+Finance Questions:
+
+What is the purchase for?:
+[%+ cgi.param('finance_purchase_what') %]
+Why is the purchase needed?:
+[%+ cgi.param('finance_purchase_why') %]
+What is the risk if not purchased?:
+[%+ cgi.param('finance_purchase_risk') %]
+What is the alternative?: 
+[%+ cgi.param('finance_purchase_alternative') %]
+Is this line item in budget?: [% cgi.param('finance_purchase_inbudget') %]
+What is the urgency?: [% cgi.param('finance_purchase_urgency') %]
+Total Cost: [% cgi.param('finance_purchase_cost') %]

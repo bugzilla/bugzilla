@@ -1,0 +1,41 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * This Source Code Form is "Incompatible With Secondary Licenses", as
+ * defined by the Mozilla Public License, v. 2.0. */
+
+.header {
+  width:95%;
+  border-bottom: 1px solid rgb(116,126,147);
+  font-size: 1.5em;
+  color: rgb(102,100,88);
+  padding-bottom: 5px;
+  margin-bottom: 5px;
+  margin-top: 12px;
+}
+.field_row {
+  width:100%;
+  min-width:700px;
+}
+.field_label {
+  float:left;
+  width:20%;
+}
+.field_data {
+  float:left;
+  width:75%;
+  margin-left:5px;
+  margin-bottom:5px;
+}
+.field_description {
+  font-style:italic;
+  font-size:90%;
+  color: rgb(102,100,88);
+}
+span.required:before {
+  content: "* ";
+}
+span.required:before, span.required_star {
+  color: red;
+}

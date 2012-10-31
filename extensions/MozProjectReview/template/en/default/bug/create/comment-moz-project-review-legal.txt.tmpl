@@ -1,0 +1,22 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+
+[% PROCESS "bug/create/comment-moz-project-review.txt.tmpl" %]
+
+Legal Questions:
+
+Priority: [% cgi.param('legal_priority') %]
+Other Party: [% cgi.param('legal_other_party') %]
+Business Objective: [% cgi.param('legal_business_objective') %]
+URL: [% cgi.param('legal_url') %]
+SOW Details: [% cgi.param('legal_sow_details') %]
+Description:
+[%+ cgi.param('legal_description') %]

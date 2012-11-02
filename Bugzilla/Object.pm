@@ -795,7 +795,7 @@ your own C<DB_COLUMNS> subroutine in a subclass.)
 The name of the column that should be considered to be the unique
 "name" of this object. The 'name' is a B<string> that uniquely identifies
 this Object in the database. Defaults to 'name'. When you specify 
-C<{name => $name}> to C<new()>, this is the column that will be 
+C<< {name => $name} >> to C<new()>, this is the column that will be 
 matched against in the DB.
 
 =item C<ID_FIELD>
@@ -1083,8 +1083,9 @@ Notes:       In order for this function to work in your subclass,
              your subclass's L</ID_FIELD> must be of C<SERIAL>
              type in the database.
 
-             Subclass Implementors: This function basically just
-             calls L</check_required_create_fields>, then
+Subclass Implementors:
+             This function basically just calls 
+             L</check_required_create_fields>, then
              L</run_create_validators>, and then finally
              L</insert_create_data>. So if you have a complex system that
              you need to implement, you can do it by calling these
@@ -1277,9 +1278,9 @@ C<0> otherwise.
 
  Returns:     A list of objects, or an empty list if there are none.
 
- Notes:       Note that you must call this as C<$class->get_all>. For 
-              example, C<Bugzilla::Keyword->get_all>. 
-              C<Bugzilla::Keyword::get_all> will not work.
+ Notes:       Note that you must call this as $class->get_all. For 
+              example, Bugzilla::Keyword->get_all. 
+              Bugzilla::Keyword::get_all will not work.
 
 =back
 

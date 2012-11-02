@@ -520,17 +520,14 @@ sub possible_duplicates {
     if ($dbh->FULLTEXT_OR) {
         my $joined_terms = join($dbh->FULLTEXT_OR, @words);
         ($where_sql, $relevance_sql) = 
-            $dbh->sql_fulltext_search('bugs_fulltext.short_desc', 
-                                      $joined_terms, 1);
+            $dbh->sql_fulltext_search('bugs_fulltext.short_desc', $joined_terms);
         $relevance_sql ||= $where_sql;
     }
     else {
         my (@where, @relevance);
-        my $count = 0;
         foreach my $word (@words) {
-            $count++;
             my ($term, $rel_term) = $dbh->sql_fulltext_search(
-                'bugs_fulltext.short_desc', $word, $count);
+                'bugs_fulltext.short_desc', $word);
             push(@where, $term);
             push(@relevance, $rel_term || $term);
         }

@@ -159,10 +159,13 @@ sub sql_from_days{
 
     return " TO_DATE($date,'J') ";
 }
+
 sub sql_fulltext_search {
-    my ($self, $column, $text, $label) = @_;
+    my ($self, $column, $text) = @_;
+    state $label = 0;
     $text = $self->quote($text);
     trick_taint($text);
+    $label++;
     return "CONTAINS($column,$text,$label) > 0", "SCORE($label)";
 }
 

@@ -668,7 +668,7 @@ for each placeholder in C<condition>, in order.
 
 This is to allow subclasses to have complex parameters, and then to
 translate those parameters into C<condition> and C<values> when they
-call C<$self->SUPER::new> (which is this function, usually).
+call C<< $self->SUPER::new >> (which is this function, usually).
 
 If you try to call C<new> outside of a subclass with the C<condition>
 and C<values> parameters, Bugzilla will throw an error. These parameters

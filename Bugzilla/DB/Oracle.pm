@@ -41,6 +41,8 @@ use constant BLOB_TYPE => { ora_type => ORA_BLOB };
 use constant MIN_LONG_READ_LEN => 32 * 1024;
 use constant FULLTEXT_OR => ' OR ';
 
+our $fulltext_label = 0;
+
 sub new {
     my ($class, $params) = @_;
     my ($user, $pass, $host, $dbname, $port) = 
@@ -156,11 +158,13 @@ sub sql_from_days{
 
     return " TO_DATE($date,'J') ";
 }
+
 sub sql_fulltext_search {
-    my ($self, $column, $text, $label) = @_;
+    my ($self, $column, $text) = @_;
     $text = $self->quote($text);
     trick_taint($text);
-    return "CONTAINS($column,$text,$label) > 0", "SCORE($label)";
+    $fulltext_label++;
+    return "CONTAINS($column,$text,$fulltext_label) > 0", "SCORE($fulltext_label)";
 }
 
 sub sql_date_format {

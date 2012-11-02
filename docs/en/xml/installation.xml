@@ -205,8 +205,8 @@
 
       <para>
         <ulink url="http://www.bugzilla.org/download/">Download a Bugzilla tarball</ulink>
-        (or check it out from CVS) and place
-        it in a suitable directory, accessible by the default web server user 
+        (or <ulink url="https://wiki.mozilla.org/Bugzilla:Bzr">check it out from Bzr</ulink>)
+        and place it in a suitable directory, accessible by the default web server user
         (probably <quote>apache</quote> or <quote>www</quote>). 
         Good locations are either directly in the web server's document directories or
         in <filename>/usr/local</filename> with a symbolic link to the web server's 

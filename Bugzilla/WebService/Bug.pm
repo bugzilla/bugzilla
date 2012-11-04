@@ -2174,9 +2174,9 @@ The same as L</get>.
 
 =item Added in Bugzilla B<3.4>.
 
-=item Field names changed to be more consistent with other methods in Bugzilla B<4.4>.
-
-=item As of Bugzilla B<4.4>, field names now match names used by L<Bug.update|/"update"> for consistency.
+=item Field names returned by the C<field_name> field changed to be
+consistent with other methods. Since Bugzilla B<4.4>, they now match
+names used by L<Bug.update|/"update"> for consistency.
 
 =back
 

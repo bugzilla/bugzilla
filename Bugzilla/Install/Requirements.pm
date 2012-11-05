@@ -128,10 +128,11 @@ sub REQUIRED_MODULES {
         module  => 'Template',
         version => '2.22'
     },
+    # 2.04 implement the "Test" method (to write to data/mailer.testfile).
     {
         package => 'Email-Send',
         module  => 'Email::Send',
-        version => ON_WINDOWS ? '2.16' : '2.00',
+        version => ON_WINDOWS ? '2.16' : '2.04',
         blacklist => ['^2\.196$']
     },
     {

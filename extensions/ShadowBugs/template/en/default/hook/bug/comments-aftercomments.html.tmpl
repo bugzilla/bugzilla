@@ -1,0 +1,70 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% RETURN UNLESS is_shadow_bug %]
+
+[% public_bug = bug.cf_shadow_bug_obj %]
+[% count = 0 %]
+[% FOREACH comment = shadow_comments %]
+  [% IF count >= start_at %]
+    [% PROCESS a_comment %]
+  [% END %]
+  [% count = count + increment %]
+[% END %]
+
+[% BLOCK a_comment %]
+  [% RETURN IF comment.is_private AND NOT (user.is_insider || user.id == comment.author.id) %]
+  [% comment_text = comment.body_full %]
+  [% RETURN IF comment_text == '' %]
+
+  <div id="pc[% count %]" class="bz_comment[% " bz_private" IF comment.is_private %]
+              shadow_bug_comment bz_default_hidden
+              [% " bz_first_comment" IF count == description %]">
+    [% IF count == description %]
+      [% class_name = "bz_first_comment_head" %]
+      [% comment_label = "Public Description" %]
+    [% ELSE %]
+      [% class_name = "bz_comment_head" %]
+      [% comment_label = "Public Comment " _ count %]
+    [% END %]
+
+    <div class="[% class_name FILTER html %]">
+      <span class="bz_comment_number">
+        <a href="show_bug.cgi?id=[% public_bug.bug_id FILTER none %]#c[% count %]">
+          [%- comment_label FILTER html %]</a>
+      </span>
+
+      <span class="bz_comment_user">
+        [% commenter_id = comment.author.id %]
+        [% UNLESS user_cache.$commenter_id %]
+          [% user_cache.$commenter_id = BLOCK %]
+            [% INCLUDE global/user.html.tmpl who = comment.author %]
+          [% END %]
+        [% END %]
+        [% user_cache.$commenter_id FILTER none %]
+        [% Hook.process('user', 'bug/comments.html.tmpl') %]
+      </span>
+
+      <span class="bz_comment_user_images">
+        [% FOREACH group = comment.author.groups_with_icon %]
+          <img src="[% group.icon_url FILTER html %]"
+                alt="[% group.name FILTER html %]"
+                title="[% group.name FILTER html %] - [% group.description FILTER html %]">
+        [% END %]
+      </span>
+
+      <span class="bz_comment_time">
+        [%+ comment.creation_ts FILTER time %]
+      </span>
+    </div>
+
+<pre class="bz_comment_text">
+  [%- comment_text FILTER quoteUrls(public_bug, comment) -%]
+</pre>
+    </div>
+[% END %]

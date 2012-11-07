@@ -1,0 +1,27 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% RETURN IF Bugzilla.is_cf_shadow_bug_hidden(bug) %]
+[% field = Bugzilla.process_cache.shadow_bug_field %]
+[% shadowed_by = bug.related_bugs(field).pop %]
+<tr>
+  [% IF shadowed_by && user.can_see_bug(shadowed_by) %]
+    <th class="field_label">
+      [% field.reverse_desc FILTER html %]:
+    </th>
+    <td>
+      [% shadowed_by.id FILTER bug_link(shadowed_by, use_alias => 1) FILTER none %][% " " %]
+    </td>
+  [% ELSE %]
+    [% PROCESS bug/field.html.tmpl
+        value      = bug.cf_shadow_bug
+        editable   = bug.check_can_change_field(field.name, 0, 1)
+        no_tds     = false
+        value_span = 2 %]
+  [% END %]
+</tr>

@@ -90,10 +90,16 @@ sub template_before_process {
                 $change->{added} = $change->{added} ? 'true' : 'false';
             }
 
+            my $field_obj;
+            if ($change->{fieldname} =~ /^cf_/) {
+                $field_obj = Bugzilla::Field->new({ name => $change->{fieldname} });
+            }
+
             # identify buglist changes
             if ($change->{fieldname} eq 'blocked' ||
                 $change->{fieldname} eq 'dependson' ||
-                $change->{fieldname} eq 'dupe'
+                $change->{fieldname} eq 'dupe' ||
+                ($field_obj && $field_obj->type == FIELD_TYPE_BUG_ID)
             ) {
                 $change->{buglist} = 1;
                 foreach my $what (qw(removed added)) {

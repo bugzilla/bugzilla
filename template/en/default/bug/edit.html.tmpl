@@ -938,6 +938,8 @@
   [% USE Bugzilla %]
   [% FOREACH field = Bugzilla.active_custom_fields(product=>bug.product_obj,component=>bug.component_obj,type=>1) %]
     [% NEXT IF NOT user.id AND field.value == "---" %]
+    [% Hook.process('custom_field', 'bug/edit.html.tmpl') %]
+    [% NEXT IF field.hidden %]
     <tr>
       [% PROCESS bug/field.html.tmpl value = bug.${field.name}
                                      editable = bug.check_can_change_field(field.name, 0, 1)

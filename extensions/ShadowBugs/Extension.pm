@@ -58,7 +58,7 @@ sub template_before_process {
         || $file eq 'bug/show.html.tmpl'
         || $file eq 'bug/show-header.html.tmpl';
     my $bug = exists $vars->{'bugs'} ? $vars->{'bugs'}[0] : $vars->{'bug'};
-    return unless $bug->cf_shadow_bug;
+    return unless $bug && $bug->cf_shadow_bug;
     $vars->{is_shadow_bug} = 1;
 
     if ($file eq 'bug/edit.html.tmpl') {

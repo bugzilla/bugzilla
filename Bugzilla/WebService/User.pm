@@ -212,7 +212,6 @@ sub get {
             name      => $self->type('email', $user->login),
             email     => $self->type('email', $user->email),
             can_login => $self->type('boolean', $user->is_enabled ? 1 : 0),
-            groups    => $self->_filter_bless_groups($user->groups),
         };
 
         if (Bugzilla->user->in_group('editusers')) {
@@ -223,6 +222,13 @@ sub get {
         if (Bugzilla->user->id == $user->id) {
             $user_info->{saved_searches} = [map { $self->_query_to_hash($_) } @{ $user->queries }];
             $user_info->{saved_reports}  = [map { $self->_report_to_hash($_) } @{ $user->reports }];
+        }
+
+        if (Bugzilla->user->id == $user->id || Bugzilla->user->in_group('editusers')) {
+            $user_info->{groups} = [map {$self->_group_to_hash($_)} @{ $user->groups }];
+        }
+        else {
+            $user_info->{groups} = $self->_filter_bless_groups($user->groups);
         }
 
         push(@users, filter($params, $user_info));
@@ -332,7 +338,7 @@ sub _filter_bless_groups {
 
     my @filtered_groups;
     foreach my $group (@$groups) {
-        next unless ($user->in_group('editusers') || $user->can_bless($group->id));
+        next unless $user->can_bless($group->id);
         push(@filtered_groups, $self->_group_to_hash($group));
     }
 
@@ -791,8 +797,11 @@ disabled/closed.
 
 =item groups
 
-C<array> An array of group hashes the user is a member of. Each hash describes
-the group and contains the following items:
+C<array> An array of group hashes the user is a member of. If the currently
+logged in user is querying his own account or is a member of the 'editusers'
+group, the array will contain all the groups that the user is a
+member of. Otherwise, the array will only contain groups that the logged in
+user can bless. Each hash describes the group and contains the following items:
 
 =over
 

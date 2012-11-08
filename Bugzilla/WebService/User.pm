@@ -232,7 +232,7 @@ sub get {
         }
 
         push(@users, filter($params, $user_info));
-}
+    }
 
     return { users => \@users };
 }

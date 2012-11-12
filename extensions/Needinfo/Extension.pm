@@ -60,7 +60,10 @@ sub bug_end_of_update {
     my $cgi    = Bugzilla->cgi;
     my $params = Bugzilla->input_params;
 
+    # Set needinfo_done param to true so as to not loop back here
     return if $params->{needinfo_done};
+    $params->{needinfo_done} = 1;
+    Bugzilla->input_params($params);
 
     # do a match if applicable
     Bugzilla::User::match_field({ 
@@ -161,12 +164,11 @@ sub bug_end_of_update {
                          : $added;
             }
             $changes->{$field} = [$removed, $added];
+
+            # Adding a flag may result in CC'ing a user, call update to process
+            $bug->update() if $added;
         }
     }
-
-    # Set needinfo_done param to true so as to not loop back here
-    $params->{needinfo_done} = 1;
-    Bugzilla->input_params($params);
 }
 
 __PACKAGE__->NAME;

@@ -31,7 +31,7 @@ my $product_all = {id => 0};
 bless($product_all, 'Bugzilla::Product');
 
 if (!Bugzilla->feature('old_charts')) {
-    ThrowCodeError('feature_disabled', { feature => 'old_charts' });
+    ThrowUserError('feature_disabled', { feature => 'old_charts' });
 }
 
 my $dir       = bz_locations()->{'datadir'} . "/mining";

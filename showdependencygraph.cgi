@@ -81,7 +81,7 @@ sub AddLink {
     }
 }
 
-ThrowCodeError("missing_bug_id") if !defined $cgi->param('id');
+ThrowUserError("missing_bug_id") unless $cgi->param('id');
 
 # The list of valid directions. Some are not proposed in the dropdrown
 # menu despite the fact that they are valid.

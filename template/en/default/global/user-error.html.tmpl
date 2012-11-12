@@ -225,6 +225,11 @@
     [% title = "Attachment Removed" %]
     The attachment you are attempting to access has been removed.
 
+  [% ELSIF error == "bad_page_cgi_id" %]
+    [% title = "Invalid Page ID" %]
+    The ID <code>[% page_id FILTER html %]</code> is not a
+    valid page identifier.
+
   [% ELSIF error == "bug_access_denied" %]
     [% title = "$terms.Bug Access Denied" %]
     [% admindocslinks = {'groups.html' => 'Group Security'} %]
@@ -456,9 +461,23 @@
   [% ELSIF error == "extension_create_no_name" %]
     You must specify a name for your extension, as an argument to this script.
 
+  [% ELSIF error == "extension_disabled" %]
+    [% title = "Extension Disabled" %]
+    You cannot access this page because the extension '[% name FILTER html %]'
+    is disabled.
+
   [% ELSIF error == "extension_first_letter_caps" %]
     The first letter of your extension's name must be a capital letter.
     (You specified '[% name FILTER html %]'.)
+
+  [% ELSIF error == "feature_disabled" %]
+    The [% install_string("feature_$feature") FILTER html %] feature is not
+    available in this [% terms.Bugzilla %].
+    [% IF user.in_group('admin') %]
+      If you would like to enable this feature, please run
+      <kbd>checksetup.pl</kbd> to see how to install the necessary
+      requirements for this feature.
+    [% END %]
 
   [% ELSIF error == "field_already_exists" %]
     [% title = "Field Already Exists" %]
@@ -613,6 +632,10 @@
     creation page in the appropriate text field.
     <br>Alternately, if your attachment is an image, you could convert
     it to a compressible format like JPG or PNG and try again.
+
+  [% ELSIF error == "flag_requestee_disabled" %]
+    [% title = "Flag not Requestable from Specific Person" %]
+    You can't ask a specific person for <em>[% type.name FILTER html %]</em>.
 
   [% ELSIF error == "flag_requestee_needs_privs" %]
     [% title = "Flag Requestee Needs Privileges" %]
@@ -937,6 +960,10 @@
     Invalid datasets <em>[% datasets.join(":") FILTER html %]</em>. Only digits,
     letters and colons are allowed.
 
+  [% ELSIF error == "invalid_dimensions" %]
+    [% title = "Invalid Dimensions" %]
+    The width or height specified is not a positive integer.
+
   [% ELSIF error == "invalid_format" %]
     [% title = "Invalid Format" %]
     The format "[% format FILTER html %]" is invalid (must be one of
@@ -953,6 +980,9 @@
     [% title = "Invalid group name" %]
     The group you specified, [% name FILTER html %], is not valid here.
 
+  [% ELSIF error == "invalid_keyword_id" %]
+    The keyword ID <em>[% id FILTER html %]</em> couldn't be found.
+
   [% ELSIF error == "invalid_maxrows" %]
     [% title = "Invalid Max Rows" %]
     The maximum number of rows, '[% maxrows FILTER html %]', must be
@@ -965,6 +995,17 @@
   [% ELSIF error == "invalid_regexp" %]
     [% title = "Invalid regular expression" %]
     The regular expression you entered is invalid.
+
+  [% ELSIF error == "invalid_user" %]
+    [% title = "Invalid User" %]
+    There is no user account
+    [% IF user_id %]
+      with ID <em>[% user_id FILTER html %]</em>.
+    [% ELSIF user_login %]
+      with login name <em>[% user_login FILTER html %]</em>.
+    [% ELSE %]
+      given.
+    [% END %]
 
   [% ELSIF error == "invalid_user_group" %]
     [% title = "Invalid User Group" %]
@@ -1106,11 +1147,20 @@
     [% title = "Misarranged Dates" %]
     Your start date ([% datefrom FILTER html %]) is after 
     your end date ([% dateto FILTER html %]).
-    
+
+  [% ELSIF error == "mismatched_bug_ids_on_obsolete" %]
+    Attachment [% attach_id FILTER html %] is attached to another [% terms.bug %],
+    but you tried to flag it as obsolete while creating a new attachment to
+    [%+ terms.bug %] [%+ my_bug_id FILTER html %].
+
   [% ELSIF error == "missing_attachment_description" %]
     [% title = "Missing Attachment Description" %]
     You must enter a description for the attachment.
-    
+
+  [% ELSIF error == "missing_bug_id" %]
+    [% title = "Missing $terms.Bug ID" %]
+    No [% terms.bug %] ID was given.
+
   [% ELSIF error == "missing_category" %]
     [% title = "Missing Category" %]
     You did not specify a category for this series.
@@ -1135,13 +1185,7 @@
      You asked [% terms.Bugzilla %] to auto-detect the content type, but
      your browser did not specify a content type when uploading the file, 
      so you must enter a content type manually.
-                
-  [% ELSIF error == "missing_content_type_method" %]
-    [% title = "Missing Content-Type Determination Method" %]
-    You must choose a method for determining the content type,
-    either <em>auto-detect</em>, <em>select from list</em>, or <em>enter 
-    manually</em>.
-        
+
   [% ELSIF error == "missing_cookie" %]
     [% title = "Missing Cookie" %]
     Sorry, I seem to have lost the cookie that recorded
@@ -1173,6 +1217,10 @@
     [% ELSE %]
       does not exist.
     [% END %]
+
+  [% ELSIF error == "need_quipid" %]
+    [% title = "Missing Quip ID" %]
+    A valid quip ID is needed.
 
   [% ELSIF error == "missing_resolution" %]
     [% title = "Resolution Required" %]
@@ -1484,6 +1532,14 @@
     [% title = "Illegal Reassignment" %]
     To reassign [% terms.abug %], you must provide an address for
     the new assignee.
+
+  [% ELSIF error == "report_axis_invalid" %]
+    [% title = "Invalid Axis" %]
+    <em>[% val FILTER html %]</em> is not a valid value for
+    [%+ IF    fld == "x" %]the horizontal axis
+    [%+ ELSIF fld == "y" %]the vertical axis
+    [%+ ELSIF fld == "z" %]the multiple tables/images
+    [%+ ELSE %]a report axis[% END %] field.
 
   [% ELSIF error == "report_name_missing" %]
     [% title = "No Report Name Specified" %]

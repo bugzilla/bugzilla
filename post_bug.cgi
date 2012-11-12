@@ -199,8 +199,6 @@ $vars->{'bug'} = $bug;
 
 Bugzilla::Hook::process('post_bug_after_creation', { vars => $vars });
 
-ThrowCodeError("bug_error", { bug => $bug }) if $bug->error;
-
 my $recipients = { changer => $user };
 my $bug_sent = Bugzilla::BugMail::Send($id, $recipients);
 $bug_sent->{type} = 'created';

@@ -665,7 +665,7 @@ sub _check_requestee {
         # is specifically requestable. For existing flags, if the requestee
         # was set before the flag became specifically unrequestable, the
         # user can either remove him or leave him alone.
-        ThrowCodeError('flag_requestee_disabled', { type => $self->type })
+        ThrowUserError('flag_requestee_disabled', { type => $self->type })
           if !$self->type->is_requesteeble;
 
         # Make sure the requestee can see the bug.
@@ -719,7 +719,7 @@ sub _check_setter {
     # By default, the currently logged in user is the setter.
     $setter ||= Bugzilla->user;
     (blessed($setter) && $setter->isa('Bugzilla::User') && $setter->id)
-      || ThrowCodeError('invalid_user');
+      || ThrowUserError('invalid_user');
 
     # set_status() has already been called. So this refers
     # to the new flag status.

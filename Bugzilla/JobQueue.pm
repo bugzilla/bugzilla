@@ -40,7 +40,7 @@ sub new {
     my $class = shift;
 
     if (!Bugzilla->feature('jobqueue')) {
-        ThrowCodeError('feature_disabled', { feature => 'jobqueue' });
+        ThrowUserError('feature_disabled', { feature => 'jobqueue' });
     }
 
     my $lc = Bugzilla->localconfig;

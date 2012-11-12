@@ -755,7 +755,7 @@ sub validate_obsolete {
         $vars->{'attach_id'} = $attachid;
 
         detaint_natural($attachid)
-          || ThrowCodeError('invalid_attach_id_to_obsolete', $vars);
+          || ThrowUserError('invalid_attach_id', $vars);
 
         # Make sure the attachment exists in the database.
         my $attachment = new Bugzilla::Attachment($attachid)
@@ -770,7 +770,7 @@ sub validate_obsolete {
         if ($attachment->bug_id != $bug->bug_id) {
             $vars->{'my_bug_id'} = $bug->bug_id;
             $vars->{'attach_bug_id'} = $attachment->bug_id;
-            ThrowCodeError('mismatched_bug_ids_on_obsolete', $vars);
+            ThrowUserError('mismatched_bug_ids_on_obsolete', $vars);
         }
 
         next if $attachment->isobsolete;
@@ -878,7 +878,7 @@ sub run_create_validators {
 
     $params->{creation_ts} ||= Bugzilla->dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
     $params->{modification_time} = $params->{creation_ts};
-    $params->{submitter_id} = Bugzilla->user->id || ThrowCodeError('invalid_user');
+    $params->{submitter_id} = Bugzilla->user->id || ThrowUserError('invalid_user');
 
     return $params;
 }
@@ -961,10 +961,18 @@ sub get_content_type {
     return 'text/plain' if ($cgi->param('ispatch') || $cgi->param('attach_text'));
 
     my $content_type;
-    if (!defined $cgi->param('contenttypemethod')) {
-        ThrowUserError("missing_content_type_method");
+    my $method = $cgi->param('contenttypemethod') || '';
+
+    if ($method eq 'list') {
+        # The user selected a content type from the list, so use their
+        # selection.
+        $content_type = $cgi->param('contenttypeselection');
     }
-    elsif ($cgi->param('contenttypemethod') eq 'autodetect') {
+    elsif ($method eq 'manual') {
+        # The user entered a content type manually, so use their entry.
+        $content_type = $cgi->param('contenttypeentry');
+    }
+    else {
         defined $cgi->upload('data') || ThrowUserError('file_not_specified');
         # The user asked us to auto-detect the content type, so use the type
         # specified in the HTTP request headers.
@@ -977,19 +985,6 @@ sub get_content_type {
         if ($content_type eq 'image/x-png') {
             $content_type = 'image/png';
         }
-    }
-    elsif ($cgi->param('contenttypemethod') eq 'list') {
-        # The user selected a content type from the list, so use their
-        # selection.
-        $content_type = $cgi->param('contenttypeselection');
-    }
-    elsif ($cgi->param('contenttypemethod') eq 'manual') {
-        # The user entered a content type manually, so use their entry.
-        $content_type = $cgi->param('contenttypeentry');
-    }
-    else {
-        ThrowCodeError("illegal_content_type_method",
-                       { contenttypemethod => $cgi->param('contenttypemethod') });
     }
     return $content_type;
 }

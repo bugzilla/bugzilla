@@ -15,7 +15,7 @@ use Bugzilla::Error;
 use Bugzilla::WebService::Constants;
 BEGIN {
     if (!Bugzilla->feature('xmlrpc')) {
-        ThrowCodeError('feature_disabled', { feature => 'xmlrpc' });
+        ThrowUserError('feature_disabled', { feature => 'xmlrpc' });
     }
 }
 use Bugzilla::WebService::Server::XMLRPC;

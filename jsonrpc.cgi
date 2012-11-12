@@ -15,7 +15,7 @@ use Bugzilla::Error;
 use Bugzilla::WebService::Constants;
 BEGIN {
     if (!Bugzilla->feature('jsonrpc')) {
-        ThrowCodeError('feature_disabled', { feature => 'jsonrpc' });
+        ThrowUserError('feature_disabled', { feature => 'jsonrpc' });
     }
 }
 use Bugzilla::WebService::Server::JSONRPC;

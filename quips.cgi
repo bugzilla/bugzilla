@@ -123,8 +123,7 @@ if ($action eq "delete") {
                                          action => "delete",
                                          object => "quips"});
     my $quipid = $cgi->param("quipid");
-    ThrowCodeError("need_quipid") unless $quipid =~ /(\d+)/; 
-    $quipid = $1;
+    detaint_natural($quipid) || ThrowUserError("need_quipid");
     check_hash_token($token, ['quips', $quipid]);
 
     ($vars->{'deleted_quip'}) = $dbh->selectrow_array(

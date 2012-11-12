@@ -758,7 +758,7 @@ sub detect_encoding {
     my $data = shift;
 
     Bugzilla->feature('detect_charset')
-      || ThrowCodeError('feature_disabled', { feature => 'detect_charset' });
+      || ThrowUserError('feature_disabled', { feature => 'detect_charset' });
 
     require Encode::Detect::Detector;
     import Encode::Detect::Detector 'detect';

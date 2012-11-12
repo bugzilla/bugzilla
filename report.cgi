@@ -109,11 +109,11 @@ my $width = $cgi->param('width') || 1024;
 my $height = $cgi->param('height') || 600;
 
 (detaint_natural($width) && $width > 0)
-  || ThrowCodeError("invalid_dimensions");
+  || ThrowUserError("invalid_dimensions");
 $width <= 2000 || ThrowUserError("chart_too_large");
 
 (detaint_natural($height) && $height > 0)
-  || ThrowCodeError("invalid_dimensions");
+  || ThrowUserError("invalid_dimensions");
 $height <= 2000 || ThrowUserError("chart_too_large");
 
 my $formatparam = $cgi->param('format') || '';
@@ -130,7 +130,7 @@ if ($formatparam eq "table") {
 }
 else {
     if (!Bugzilla->feature('graphical_reports')) {
-        ThrowCodeError('feature_disabled', { feature => 'graphical_reports' });
+        ThrowUserError('feature_disabled', { feature => 'graphical_reports' });
     }
 
     if ($row_field && !$col_field) {
@@ -146,13 +146,13 @@ my $valid_columns = Bugzilla::Search::REPORT_COLUMNS;
 # Validate the values in the axis fields or throw an error.
 !$row_field 
   || ($valid_columns->{$row_field} && trick_taint($row_field))
-  || ThrowCodeError("report_axis_invalid", {fld => "x", val => $row_field});
+  || ThrowUserError("report_axis_invalid", {fld => "x", val => $row_field});
 !$col_field 
   || ($valid_columns->{$col_field} && trick_taint($col_field))
-  || ThrowCodeError("report_axis_invalid", {fld => "y", val => $col_field});
+  || ThrowUserError("report_axis_invalid", {fld => "y", val => $col_field});
 !$tbl_field 
   || ($valid_columns->{$tbl_field} && trick_taint($tbl_field))
-  || ThrowCodeError("report_axis_invalid", {fld => "z", val => $tbl_field});
+  || ThrowUserError("report_axis_invalid", {fld => "z", val => $tbl_field});
 
 my @axis_fields = grep { $_ } ($row_field, $col_field, $tbl_field);
 

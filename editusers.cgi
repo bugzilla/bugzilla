@@ -700,7 +700,7 @@ sub check_user {
         $otherUser = new Bugzilla::User({ name => $otherUserLogin });
         $vars->{'user_login'} = $otherUserLogin;
     }
-    ($otherUser && $otherUser->id) || ThrowCodeError('invalid_user', $vars);
+    ($otherUser && $otherUser->id) || ThrowUserError('invalid_user', $vars);
 
     return $otherUser;
 }

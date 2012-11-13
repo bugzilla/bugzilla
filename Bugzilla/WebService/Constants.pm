@@ -156,6 +156,10 @@ use constant WS_ERROR_CODE => {
     attachment_url_disabled => 605,
     zero_length_file       => 606,
 
+    # Group errors are 800-900.
+    # Errors 800 - 803 are reserved for 4.2 and newer.
+    invalid_group_name => 804,
+
     # Errors thrown by the WebService itself. The ones that are negative 
     # conform to http://xmlrpc-epi.sourceforge.net/specs/rfc.fault_codes.php
     xmlrpc_invalid_value => -32600,

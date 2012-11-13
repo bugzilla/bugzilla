@@ -310,17 +310,23 @@ sub _filter_users_by_group {
     # If no groups are specified, we return all users.
     return $users if (!$group_ids and !$group_names);
 
-    my @groups = map { Bugzilla::Group->check({ id => $_ }) } 
-                     @{ $group_ids || [] };
-    my @name_groups = map { Bugzilla::Group->check($_) } 
-                          @{ $group_names || [] };
-    my %unique_groups;
-    foreach my $group (@groups, @name_groups) {
-        $unique_groups{$group->id} ||= $group;
-    }
+    my $user = Bugzilla->user;
+    my (@groups, %groups);
 
-    my @in_group = grep { $self->_user_in_any_group($_, [values %unique_groups]) }
-                        @$users;
+    if ($group_ids) {
+        @groups = map { Bugzilla::Group->check({ id => $_ }) } @$group_ids;
+        $groups{$_->id} = $_ foreach @groups;
+    }
+    if ($group_names) {
+        foreach my $name (@$group_names) {
+            my $group = Bugzilla::Group->check({ name => $name, _error => 'invalid_group_name' });
+            $user->in_group($group) || ThrowUserError('invalid_group_name', { name => $name });
+            $groups{$group->id} = $group;
+        }
+    }
+    @groups = values %groups;
+
+    my @in_group = grep { $self->_user_in_any_group($_, \@groups) } @$users;
     return \@in_group;
 }
 
@@ -875,10 +881,10 @@ querying your own account, even if you are in the editusers group.
 
 =over
 
-=item 51 (Bad Login Name or Group Name)
+=item 51 (Bad Login Name or Group ID)
 
 You passed an invalid login name in the "names" array or a bad
-group name/id in the C<groups>/C<group_ids> arguments.
+group ID in the C<group_ids> argument.
 
 =item 304 (Authorization Required)
 
@@ -889,6 +895,11 @@ wanted to get information about by user id.
 
 Logged-out users cannot use the "ids" or "match" arguments to this 
 function.
+
+=item 804 (Invalid Group Name)
+
+You passed a group name in the C<groups> argument which either does not
+exist or you do not belong to it.
 
 =back
 
@@ -902,6 +913,9 @@ function.
 
 =item C<include_disabled> was added in Bugzilla B<4.0>. Default
 behavior for C<match> was changed to only return enabled accounts.
+
+=item Error 804 has been added in Bugzilla 4.0.9 and 4.2.4. It's now
+illegal to pass a group name you don't belong to.
 
 =item C<groups>, C<saved_searches>, and C<saved_reports> were added
 in Bugzilla B<4.4>.

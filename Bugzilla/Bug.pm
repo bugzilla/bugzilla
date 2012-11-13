@@ -152,6 +152,9 @@ sub VALIDATORS {
         elsif ($field->type == FIELD_TYPE_BUG_ID) {
             $validator = \&_check_bugid_field;
         }
+        elsif ($field->type == FIELD_TYPE_TEXTAREA) {
+            $validator = \&_check_textarea_field;
+        }
         else {
             $validator = \&_check_default_field;
         }
@@ -2020,6 +2023,19 @@ sub _check_bugid_field {
     }
 
     return $checked_id;
+}
+
+sub _check_textarea_field {
+    my ($invocant, $text, $field) = @_;
+
+    $text = (defined $text) ? trim($text) : '';
+
+    # Web browsers submit newlines as \r\n.
+    # Sanitize all input to match the web standard.
+    # XMLRPC input could be either \n or \r\n
+    $text =~ s/\r?\n/\r\n/g;
+
+    return $text;
 }
 
 sub _check_relationship_loop {

@@ -19,12 +19,18 @@
 
 [%# INTERFACE:
   #   field: a Bugzilla::Field object
+  #   product: (optional) a Bugzilla::Product object.
   #%]
 
 [% FOREACH controlled_field = field.controls_visibility_of %]
+  [% vis_value = controlled_field.visibility_value %]
+  [% NEXT IF field.name == "product"
+             && vis_value.id != product.id
+             && !user.can_enter_product(vis_value) %]
+  [% NEXT IF field.name == "component" && vis_value.product_id != product.id %]
+
   showFieldWhen('[% controlled_field.name FILTER js %]',
-                '[% field.name FILTER js %]',
-                '[% controlled_field.visibility_value.name FILTER js %]');
+                '[% field.name FILTER js %]', '[% vis_value.name FILTER js %]');
 [% END %]
 [% FOREACH legal_value = field.legal_values %]
   [% FOREACH controlled_field = legal_value.controlled_values.keys %]

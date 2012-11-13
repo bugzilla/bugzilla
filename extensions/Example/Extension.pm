@@ -709,10 +709,12 @@ sub _check_short_desc {
     my $invocant = shift;
     my $value = $invocant->$original(@_);
     if ($value !~ /example/i) {
-        # Uncomment this line to make Bugzilla throw an error every time
+        # Use this line to make Bugzilla throw an error every time
         # you try to file a bug or update a bug without the word "example"
         # in the summary.
-        #ThrowUserError('example_short_desc_invalid');
+        if (0) {
+            ThrowUserError('example_short_desc_invalid');
+        }
     }
     return $value;
 }

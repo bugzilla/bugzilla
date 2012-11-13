@@ -386,5 +386,5 @@ sub get_field_restrictions {
     my $field = shift;
     my $cgi = Bugzilla->cgi;
 
-    return join('&', map {"$field=$_"} $cgi->param($field));
+    return join('&amp;', map {url_quote($field) . '=' . url_quote($_)} $cgi->param($field));
 }

@@ -47,6 +47,13 @@ foreach my $include_path (@include_paths) {
         $file =~ s|\\|/|g if ON_WINDOWS;  # convert \ to / in path if on windows
         $test_templates{$file} = () 
             if $file =~ m#global/(code|user)-error\.html\.tmpl#;
+
+        # Make sure the extension is not disabled
+        if ($file =~ m#^(extensions/[^/]+/)#) {
+            $test_templates{$file} = ()
+                if ! -e "${1}disabled"
+                && $file =~ m#global/(code|user)-error-errors\.html\.tmpl#;
+        }
     }
 }
 
@@ -59,7 +66,7 @@ plan tests => $tests;
 
 # Collect all errors defined in templates
 foreach my $file (keys %test_templates) {
-    $file =~ m|template/([^/]+).*/global/([^/]+)-error\.html\.tmpl|;
+    $file =~ m|template/([^/]+).*/global/([^/]+)-error(?:-errors)?\.html\.tmpl|;
     my $lang = $1;
     my $errtype = $2;
 

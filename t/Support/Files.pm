@@ -16,6 +16,14 @@ use File::Find;
 find(sub { push(@files, $File::Find::name) if $_ =~ /\.pm$/;}, 'Bugzilla');
 push(@files, 'extensions/create.pl');
 
+my @extensions = glob('extensions/*');
+foreach my $extension (@extensions) {
+    # Skip disabled extensions
+    next if -e "$extension/disabled";
+
+    find(sub { push(@files, $File::Find::name) if $_ =~ /\.pm$/;}, $extension);
+}
+
 sub isTestingFile {
     my ($file) = @_;
     my $exclude;

@@ -156,6 +156,7 @@ use constant WS_ERROR_CODE => {
     group_exists => 801,
     empty_group_description => 802,
     invalid_regexp => 803,
+    invalid_group_name => 804,
 
     # Classification errors are 900-1000
     auth_classification_not_enabled => 900,

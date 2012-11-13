@@ -256,8 +256,7 @@
     setting in [% constants.bz_locations.localconfig FILTER html %].
 
   [% ELSIF error == "mismatched_bug_ids_on_obsolete" %]
-    Attachment [% attach_id FILTER html %] ([% description FILTER html %]) 
-    is attached to [% terms.bug %] [%+ attach_bug_id FILTER html %], 
+    Attachment [% attach_id FILTER html %] is attached to another [% terms.bug %],
     but you tried to flag it as obsolete while creating a new attachment to 
     [% terms.bug %] [%+ my_bug_id FILTER html %].
 

@@ -102,7 +102,7 @@ YAHOO.util.Event.addListener(window, "load", function() {
   var myColumnDefs = [
         {key:"row_title", label:"", sortable:true, sortOptions: { sortFunction:totalNumberSorter }},
         [% FOREACH col = col_names %]
-          {key:"[% col FILTER js %]", label:"[% display_value(col_field, col) FILTER js %]", sortable:true,
+          {key:"[% col FILTER js %]", label:"[% display_value(col_field, col) FILTER html FILTER js %]", sortable:true,
            formatter:this.Linkify, sortOptions: { defaultDir: YAHOO.widget.DataTable.CLASS_DESC, sortFunction:totalNumberSorter }},
         [% END %]
         {key:"total", label:"Total", sortable:true, formatter:this.LinkifyTotal,

@@ -17,7 +17,6 @@ use Bugzilla::Extension::Push::Constants;
 use Bugzilla::Extension::Push::Util;
 use Bugzilla::Util qw(generate_random_password);
 use DateTime;
-use Net::RabbitMQ;
 
 sub init {
     my ($self) = @_;
@@ -107,6 +106,7 @@ sub _connect {
     $self->stop();
 
     $logger->debug('AMQP: Connecting to RabbitMQ ' . $config->{host} . ':' . $config->{port});
+    require Net::RabbitMQ;
     my $mq = Net::RabbitMQ->new();
     $mq->connect(
         $config->{host},

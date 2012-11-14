@@ -121,16 +121,15 @@ OLDATTACH2NEW = {
   "max_attachment_size": [% (Param('maxattachmentsize') * 1000) FILTER json %],
   
 [% IF Param('useclassification') %]
-  [% classifications = user.get_selectable_classifications() %]
   [% cl_name_for = {} %]
-  "classification": { 
-  [% FOREACH cl IN classifications %]
+  "classification": {
+  [% FOREACH cl IN user.get_selectable_classifications() %]
     [% cl_name_for.${cl.id} = cl.name %]
     "[% cl.name FILTER json %]": {
       "id": [% cl.id FILTER json %],
       "description": "[% cl.description FILTER json %]",
       "products": [
-      [% FOREACH product IN cl.products %]
+      [% FOREACH product IN user.get_selectable_products(cl.id) %]
         "[% product.name FILTER json %]"[% ',' UNLESS loop.last() %]
       [% END %]
       ]

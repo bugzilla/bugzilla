@@ -166,6 +166,7 @@ use constant WS_ERROR_CODE => {
     group_exists => 801,
     empty_group_description => 802,
     invalid_regexp => 803,
+    invalid_group_name => 804,
 
     # Errors thrown by the WebService itself. The ones that are negative 
     # conform to http://xmlrpc-epi.sourceforge.net/specs/rfc.fault_codes.php

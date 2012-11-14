@@ -593,7 +593,8 @@ sub fields {
         }
     }
 
-    return $do_by_name ? \%requested : [values %requested];
+    return $do_by_name ? \%requested
+        : [sort { $a->sortkey <=> $b->sortkey || $a->name cmp $b->name } values %requested];
 }
 
 sub active_custom_fields {
@@ -865,7 +866,7 @@ in a hashref:
 =item C<by_name>
 
 If false (or not specified), this method will return an arrayref of
-the requested fields. The order of the returned fields is random.
+the requested fields.
 
 If true, this method will return a hashref of fields, where the keys
 are field names and the valules are L<Bugzilla::Field> objects.

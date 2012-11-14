@@ -30,9 +30,8 @@
 
 [% PROCESS bug/time.html.tmpl %]
 
-  <script type="text/javascript">
-  <!--
-
+<script type="text/javascript">
+<!--
 [% IF user.is_timetracker %]
   var fRemainingTime = [% bug.remaining_time %]; // holds the original value
   function adjustRemainingTime() {
@@ -53,6 +52,7 @@
   }
 [% END %]
 
+[% IF user.id %]
   /* Index all classifications so we can keep track of the classification
    * for the selected product, which could control field visibility.
    */
@@ -61,9 +61,9 @@
       all_classifications['[% product.name FILTER js %]'] = '
           [%- product.classification.name FILTER js %]';
   [%- END %]
-
-  //-->
-  </script>
+[% END %]
+//-->
+</script>
 
 <form name="changeform" id="changeform" method="post" action="process_bug.cgi">
 

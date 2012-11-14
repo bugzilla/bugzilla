@@ -1025,11 +1025,6 @@ sub create {
     my ($params) = @_;
     my $dbh = Bugzilla->dbh;
 
-    # This makes sure the "sortkey" validator runs, even if
-    # the parameter isn't sent to create().
-    $params->{sortkey} = undef if !exists $params->{sortkey};
-    $params->{type} ||= 0;
-
     # BMO: disable bug updates during field creation
     # using an eval as try/finally
     my $field;
@@ -1039,32 +1034,27 @@ sub create {
             write_params();
         }
 
-        # Purpose: if the field is active in the fields list before all of the 
-        # data structures are created, anything accessing Bug.pm will crash. So
-        # stash a copy of the intended obsolete value for later and force it
-        # to be obsolete on initial creation.
-        # Upstreaming: https://bugzilla.mozilla.org/show_bug.cgi?id=531243
-        my $original_obsolete;
-        if ($params->{'custom'}) {
-            $original_obsolete = $params->{'obsolete'};
-            $params->{'obsolete'} = 1;
-        }
+        # This makes sure the "sortkey" validator runs, even if
+        # the parameter isn't sent to create().
+        $params->{sortkey} = undef if !exists $params->{sortkey};
+        $params->{type} ||= 0;
+        # We mark the custom field as obsolete till it has been fully created,
+        # to avoid race conditions when viewing bugs at the same time.
+        my $is_obsolete = $params->{obsolete};
+        $params->{obsolete} = 1 if $params->{custom};
 
         $dbh->bz_start_transaction();
         $class->check_required_create_fields(@_);
         my $field_values      = $class->run_create_validators($params);
         my $visibility_values = delete $field_values->{visibility_values};
         my $field             = $class->insert_create_data($field_values);
-    
+
         $field->set_visibility_values($visibility_values);
         $field->_update_visibility_values();
 
         $dbh->bz_commit_transaction();
 
         if ($field->custom) {
-            # Restore the obsolete value that got stashed earlier (in memory)
-            $field->set_obsolete($original_obsolete);
-
             my $name = $field->name;
             my $type = $field->type;
             if (SQL_DEFINITIONS->{$type}) {
@@ -1082,8 +1072,9 @@ sub create {
                 $dbh->do("INSERT INTO $name (value) VALUES ('---')");
             }
 
-            # Safe to write the original 'obsolete' value to the database now
-            $field->update;
+            # Restore the original obsolete state of the custom field.
+            $dbh->do('UPDATE fielddefs SET obsolete = 0 WHERE id = ?', undef, $field->id)
+              unless $is_obsolete;
         }
     };
 

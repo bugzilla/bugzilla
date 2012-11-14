@@ -2348,9 +2348,9 @@ sub _content_matches {
     
     # Create search terms to add to the SELECT and WHERE clauses.
     my ($term1, $rterm1) =
-        $dbh->sql_fulltext_search("$table.$comments_col", $value, 1);
+        $dbh->sql_fulltext_search("$table.$comments_col", $value);
     my ($term2, $rterm2) =
-        $dbh->sql_fulltext_search("$table.short_desc", $value, 2);
+        $dbh->sql_fulltext_search("$table.short_desc", $value);
     $rterm1 = $term1 if !$rterm1;
     $rterm2 = $term2 if !$rterm2;
 

@@ -1,0 +1,134 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/header.html.tmpl
+  title = "Push Administration: Configuration"
+  javascript_urls = [ 'extensions/Push/web/admin.js' ]
+  style_urls = [ 'extensions/Push/web/admin.css' ]
+%]
+
+<script>
+var push_defaults = new Array();
+[% FOREACH option = push.config.options %]
+  [% IF option.name != 'enabled' && option.default != '' %]
+    push_defaults['global_[% option.name FILTER js %]'] = '[% option.default FILTER js %]';
+  [% END %]
+[% END %]
+[% FOREACH connector = connectors.list %]
+  [% FOREACH option = connector.config.options %]
+    [% IF option.name != 'enabled' && option.default != '' %]
+      push_defaults['[% connector.name FILTER js %]_[% option.name FILTER js %]'] = '[% option.default FILTER js %]';
+    [% END %]
+  [% END %]
+[% END %]
+</script>
+
+<form method="POST" action="page.cgi">
+<input type="hidden" name="id" value="push_config.html">
+<input type="hidden" name="save" value="1">
+
+<table border="0" cellspacing="0" cellpadding="5" width="100%">
+
+[% PROCESS options
+           name = 'global',
+           config = push.config
+%]
+
+[% FOREACH connector = connectors.list %]
+  [% PROCESS options
+             name = connector.name
+             config = connector.config
+  %]
+[% END %]
+
+<tr>
+  <td>&nbsp;</td>
+  <td colspan="2"><hr></td>
+</tr>
+
+<tr>
+  <td>&nbsp;</td>
+  <td colspan="2">
+    <input type="submit" value="Submit Changes">
+    <input type="submit" value="Reset to Defaults" onclick="reset_to_defaults(); return false">
+  </td>
+</tr>
+
+
+<tr>
+  <td style="min-width: 10em">&nbsp;</td>
+  <td>&nbsp;</td>
+  <td width="100%">&nbsp;</td>
+</tr>
+
+</table>
+
+</form>
+
+[% INCLUDE global/footer.html.tmpl %]
+
+[% BLOCK options %]
+  <tr class="connector">
+    <th>[% name FILTER ucfirst FILTER html %]</th>
+    <td colspan="2"><hr></td>
+  </tr>
+  [% FOREACH option = config.options %]
+    [% class = name _ '_tr' IF option.name != 'enabled' %]
+    <tr class="[% class FILTER html %] option">
+      <th>
+        [% IF option.required %]
+          <span class="required_option" title="Mandatory option">*</span>&nbsp;
+        [% END %]
+        [% option.label FILTER html %]
+      </th>
+      <td>
+        [% IF option.type == 'string' %]
+          <input type="text" name="[% name FILTER html %].[% option.name FILTER html %]"
+                 value="[% config.${option.name} FILTER html %]" size="60"
+                 id="[% name FILTER html %]_[% option.name FILTER html %]">
+
+        [% ELSIF option.type == 'password' %]
+          <input type="password" name="[% name FILTER html %].[% option.name FILTER html %]"
+                 value="[% config.${option.name} FILTER html %]" size="60"
+                 id="[% name FILTER html %]_[% option.name FILTER html %]">
+
+        [% ELSIF option.type == 'select' %]
+          <select name="[% name FILTER html %].[% option.name FILTER html %]"
+                  id="[% name FILTER html %]_[% option.name FILTER html %]"
+            [% IF option.name == 'enabled' && name != 'global' %]
+              onchange="toggle_options(this.value == 'Enabled', '[% name FILTER js %]')"
+            [% END %]
+          >
+            [% IF option.name != 'enabled' && !option.required %]
+              <option value="""
+               [% ' selected' IF config.${option.name} == "" %]></option>
+            [% END %]
+            [% FOREACH value = option.values %]
+              <option value="[% value FILTER html %]"
+               [% ' selected' IF config.${option.name} == value %]>[% value FILTER html %]</option>
+            [% END %]
+          </select>
+
+        [% ELSE %]
+          unsupported option type '[% option.type FILTER html %]'
+        [% END %]
+      </td>
+      [% IF option.help %]
+        <td class="help">[% option.help FILTER html %]</td>
+      [% ELSE %]
+        <td>&nbsp;</td>
+      [% END %]
+    </tr>
+  [% END %]
+  [% IF name != 'global' %]
+    <script>
+      var is_enabled = document.getElementById('[% name FILTER js %]_enabled').value == 'Enabled';
+      toggle_options(is_enabled, '[% name FILTER js %]');
+    </script>
+  [% END %]
+[% END %]

@@ -1,0 +1,102 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/header.html.tmpl
+  title = "Push Administration: Queues"
+  javascript_urls = [ 'extensions/Push/web/admin.js' ]
+  style_urls = [ 'extensions/Push/web/admin.css' ]
+%]
+
+<table id="report" cellspacing="0">
+
+[% PROCESS show_queue
+           queue = push.queue
+           title = 'Pending'
+         pending = 1
+%]
+
+[% FOREACH connector = push.connectors.list %]
+  [% NEXT UNLESS connector.enabled %]
+  [% PROCESS show_queue
+             queue = connector.backlog
+             title = connector.name _ ' Backlog'
+           pending = 0
+  %]
+[% END %]
+
+</table>
+
+[% INCLUDE global/footer.html.tmpl %]
+
+[% BLOCK show_queue %]
+  [% count = queue.count %]
+  <tr class="report-header">
+    <th colspan="2">
+      [% title FILTER html %] Queue ([% count FILTER html %])
+    </th>
+    [% IF queue.backoff && count %]
+      <th class="rhs" colspan="5">
+        Next Attempt: [% queue.backoff.next_attempt_ts FILTER time %]
+      </th>
+    [% ELSE %]
+      <th colspan="5">&nbsp;</td>
+    [% END %]
+  </tr>
+
+  [% IF count %]
+    <tr class="report-subheader">
+      <th nowrap>Timestamp</th>
+      <th nowrap>Change Set</th>
+      [% IF pending %]
+        <th nowrap colspan="4">Routing Key</th>
+      [% ELSE %]
+        <th nowrap>Routing Key</th>
+        <th nowrap>Last Attempt</th>
+        <th nowrap>Attempts</th>
+        <th nowrap>Last Error</th>
+      [% END %]
+      <th>&nbsp;</th>
+    </tr>
+  [% END %]
+
+  [% FOREACH message = queue.list('limit', 10) %]
+    <tr class="row [% loop.count % 2 == 1 ? "report_row_odd" : "report_row_even" %]">
+      <td nowrap>[% message.push_ts FILTER html %]</td>
+      <td nowrap>[% message.change_set FILTER html %]</td>
+      [% IF pending %]
+        <td nowrap colspan="4">[% message.routing_key FILTER html %]</td>
+      [% ELSE %]
+        <td nowrap>[% message.routing_key FILTER html %]</td>
+        [% IF message.attempt_ts %]
+          <td nowrap>[% message.attempt_ts FILTER time %]</td>
+          <td nowrap>[% message.attempts FILTER html %]</td>
+          <td width="100%">
+            [% IF message.last_error.length > 40 %]
+              [% last_error = message.last_error.substr(0, 40) _ '...' %]
+            [% ELSE %]
+              [% last_error = message.last_error %]
+            [% END %]
+            [% last_error FILTER html %]</td>
+        [% ELSE %]
+          <td>-</td>
+          <td>-</td>
+          <td width="100%">-</td>
+        [% END %]
+      [% END %]
+      <td class="rhs">
+        <a href="?id=push_queues_view.html&amp;[% ~%]
+                  message=[% message.id FILTER url_quote %]&amp;[% ~%]
+                  connector=[% queue.connector FILTER url_quote %]">View</a>
+      </td>
+    </tr>
+  [% END %]
+
+  <tr>
+    <td colspan="7">&nbsp;</td>
+  </tr>
+[% END %]

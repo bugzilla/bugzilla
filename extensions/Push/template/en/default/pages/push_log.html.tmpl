@@ -1,0 +1,45 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/header.html.tmpl
+  title = "Push Administration: Logs"
+  javascript_urls = [ 'extensions/Push/web/admin.js' ]
+  style_urls = [ 'extensions/Push/web/admin.css' ]
+%]
+[% logs = push.log %]
+
+<table id="report" cellspacing="0">
+
+[% IF logs.count %]
+  <tr class="report-subheader">
+    <th nowrap>Connector</th>
+    <th nowrap>Event Timestamp</th>
+    <th nowrap>Processed Timestamp</th>
+    <th nowrap>Status</th>
+    <th nowrap>Message</th>
+  </tr>
+[% END %]
+
+[% FOREACH log = logs.list %]
+  <tr class="row [% loop.count % 2 == 1 ? "report_row_odd" : "report_row_even" %]">
+    <td nowrap>[% log.connector FILTER html %]</td>
+    <td nowrap>[% log.push_ts FILTER time FILTER html %]</td>
+    <td nowrap>[% log.processed_ts FILTER time FILTER html %]</td>
+    <td nowrap>[% log.result_string FILTER html %]</td>
+    <td>[% log.data FILTER html %]</td>
+  </tr>
+[% END %]
+
+<tr>
+  <td colspan="5">&nbsp;</td>
+</tr>
+
+</table>
+
+[% INCLUDE global/footer.html.tmpl %]
+

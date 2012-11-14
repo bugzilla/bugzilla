@@ -1,0 +1,25 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% IF error == "push_invalid_payload" %]
+  [% title = "Invalid payload" %]
+  An invalid or empty payload was passed to Push.
+
+[% ELSIF error == "push_invalid_change_set" %]
+  [% title = "Invalid change_set" %]
+  An invalid or empty change_set was passed to Push.
+
+[% ELSIF error == "push_invalid_routing_key" %]
+  [% title = "Invalid routing_key" %]
+  An invalid or empty routing_key was passed to Push.
+
+[% ELSIF error == "push_invalid_connector" %]
+  [% title = "Invalid connector" %]
+  An invalid connector was passed to Push.
+
+[% END %]

@@ -1,0 +1,71 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * This Source Code Form is "Incompatible With Secondary Licenses", as
+ * defined by the Mozilla Public License, v. 2.0. */
+
+.connector th {
+    text-align: left;
+    vertical-align: middle !important;
+}
+
+.option th {
+    text-align: right;
+    font-weight: normal !important;
+    vertical-align: middle !important;
+}
+
+.option .help {
+    font-style: italic;
+}
+
+.hidden {
+    display: none;
+}
+
+.required_option {
+    color: red;
+    cursor: help;
+}
+
+#report {
+    border: 1px solid #888888;
+    width: 100%;
+}
+
+#report td, #report th {
+    padding: 3px 10px 3px 3px;
+    border: 0px;
+}
+
+#report th {
+    text-align: left;
+}
+
+.report-header {
+    background: #cccccc;
+}
+
+.report-subheader {
+    background: #ffffff;
+}
+
+.report_row_odd {
+    background-color: #eeeeee;
+    color: #000000;
+}
+
+.report_row_even {
+    background-color: #ffffff;
+    color: #000000;
+}
+
+#report tr.row:hover {
+    background-color: #ccccff;
+}
+
+.rhs {
+    text-align: right !important;
+}
+

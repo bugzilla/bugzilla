@@ -1,0 +1,16 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% IF message_tag == "push_config_updated" %]
+  Changes to the configuration have been saved.
+  Please allow up to 60 seconds for the change to be active.
+
+[% ELSIF message_tag == "push_message_deleted" %]
+  The message has been deleted.
+
+[% END %]

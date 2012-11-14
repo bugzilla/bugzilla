@@ -1,0 +1,80 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/header.html.tmpl
+  title = "Push Administration: Queues: Payload"
+  javascript_urls = [ 'extensions/Push/web/admin.js' ]
+  style_urls = [ 'extensions/Push/web/admin.css' ]
+%]
+
+[% IF !message_obj %]
+    <a href="?id=push_queues.html">Return</a>
+    [% RETURN %]
+[% END %]
+
+<table id="report" cellspacing="0">
+
+<tr>
+  <th class="report-header" nowrap>Connector</th>
+  <td width="100%">[% message_obj.connector || '-' FILTER html %]</td>
+</tr>
+<tr>
+  <th class="report-header" nowrap>Message ID</th>
+  <td width="100%">[% message_obj.message_id FILTER html %]</td>
+</tr>
+<tr>
+  <th class="report-header" nowrap>Push Time</th>
+  <td width="100%">[% message_obj.push_ts FILTER time FILTER html %]</td>
+</tr>
+<tr>
+  <th class="report-header" nowrap>Change Set</th>
+  <td width="100%">[% message_obj.change_set FILTER html %]</td>
+</tr>
+<tr>
+  <th class="report-header" nowrap>Routing Key</th>
+  <td width="100%">[% message_obj.routing_key FILTER html %]</td>
+</tr>
+
+[% IF message_obj.attempts %]
+  <tr>
+    <th class="report-header" nowrap>Attempts</th>
+    <td width="100%">[% message_obj.attempts FILTER html %]</td>
+  </tr>
+  <tr>
+    <th class="report-header" nowrap>Last Attempt Time</th>
+    <td width="100%">[% message_obj.attempt_ts FILTER time FILTER html %]</td>
+  </tr>
+  <tr>
+    <th class="report-header" nowrap>Last Error</th>
+    <td width="100%"><b>[% message_obj.last_error FILTER html %]</b></td>
+  </tr>
+[% END %]
+
+<tr>
+  <td colspan="2">
+    [% IF json %]
+      <pre>[% json FILTER html %]</pre>
+    [% ELSE %]
+      <pre>[% message_obj.payload FILTER html %]</pre>
+    [% END %]
+  </td>
+</tr>
+
+<tr class="report-header">
+  <th colspan="2">
+    <a href="?id=push_queues.html">Return</a> |
+    <a onclick="return confirm('Are you sure you want to delete this message forever (a long time)?')"
+       href="?id=push_queues_view.html&amp;delete=1
+       [%- %]&amp;message=[% message_obj.id FILTER url_quote %]
+       [%- %]&amp;connector=[% message_obj.connector FILTER url_quote %]">Delete</a>
+  </th>
+</tr>
+
+</table>
+
+[% INCLUDE global/footer.html.tmpl %]

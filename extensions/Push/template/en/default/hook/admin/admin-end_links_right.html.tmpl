@@ -1,0 +1,18 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% IF user.in_group('admin') %]
+  <dt id="push">
+    Push
+  </dt>
+  <dd>
+    <a href="page.cgi?id=push_config.html">Configuration</a><br>
+    <a href="page.cgi?id=push_queues.html">Queues</a><br>
+    <a href="page.cgi?id=push_log.html">Log</a><br>
+  </dd>
+[% END %]

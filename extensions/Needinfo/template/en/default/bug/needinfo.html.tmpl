@@ -6,29 +6,23 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% show_needinfo       = 0 %]
-[% needinfo_requested  = 0 %]
-[% needinfo_from       = "" %]
-[% needinfo_from_any   = 0 %]
-[% can_create_needinfo = 0 %]
+[% needinfo_flagtype   = "" %]
+[% needinfo_flags      = [] %]
+[% can_create_needinfo = 0  %]
 
 [% FOREACH type = bug.flag_types %]
   [% IF type.name == 'needinfo' %]
-    [% show_needinfo = 1 %]
+    [% needinfo_flagtype = type %]
     [% FOREACH flag = type.flags %]
       [% IF flag.status == '?' %]
-        [% needinfo_requested = 1 %]
-        [% IF flag.requestee.login %]
-          [% needinfo_from = flag.requestee.login %]
-        [% ELSE %]
-          [% needinfo_from_any = 1 %]
-        [% END %]
+        [% needinfo_flags.push(flag) %]
       [% END %]
     [% END %]
+    [% LAST IF needinfo_flagtype %]
   [% END %]
 [% END %]
 
-[% IF user.in_group('canconfirm') && !needinfo_requested %]
+[% IF user.in_group('canconfirm') %]
   [% IF bug.status.is_open %]
     [% can_create_needinfo = 1 %]
   [% ELSE %]
@@ -41,28 +35,32 @@
   [% END %]
 [% END %]
 
-[% IF show_needinfo %]
-  [%# Displays NEEDINFO tag in bug header %]
-  [% IF needinfo_requested %]
-    <script>
-      var summary_container = document.getElementById('static_bug_status');
-      summary_container.appendChild(document.createTextNode('[NEEDINFO]'));
-    </script>
-  [% END %]
-
+[% IF needinfo_flagtype %]
   <div id="needinfo_container">
-    [% IF needinfo_requested %]
-      [% IF needinfo_from == user.login || needinfo_from_any %]
-        Adding comment will automatically clear needinfo request.
-      [% ELSE %]
-        <input type="checkbox" id="needinfo_override" name="needinfo_override" value="1">
-        <label for="needinfo_override">
-          I am providing the requested information for this [% terms.bug %] (this will clear needinfo request).
-        </label>
+    [% IF needinfo_flags.size > 0 %]
+      [%# Displays NEEDINFO tag in bug header %]
+      <script>
+        var summary_container = document.getElementById('static_bug_status');
+        summary_container.appendChild(document.createTextNode('[NEEDINFO]'));
+      </script>
+
+      [% FOREACH flag = needinfo_flags %]
+        [% IF !flag.requestee || flag.requestee.id == user.id %]
+          Adding a comment will automatically clear needinfo the request for
+          <em>[% IF !flag.requestee %]anyone[% ELSE %][% flag.requestee.login FILTER html %][% END %]</em>.
+        [% ELSE %]
+          <input type="checkbox" id="needinfo_override_[% flag.id FILTER html %]"
+                 name="needinfo_override_[% flag.id FILTER html %]" value="1">
+          <label for="needinfo_override_[% flag.id FILTER html %]">
+            I am providing the requested information for <em>[% flag.requestee.login FILTER html %]</em>
+            (will clear the needinfo request).
+          </label>
+        [% END %]
+        <br>
       [% END %]
     [% END %]
 
-    [% IF can_create_needinfo %]
+    [% IF can_create_needinfo && (needinfo_flags.size == 0 || needinfo_flagtype.is_multiplicable) %]
       <script>
         function needinfoRole (select) {
           YAHOO.util.Dom.get('needinfo').checked = true;
@@ -94,6 +92,7 @@
                     value    => ""
         %]
       </span>
+      <br>
     [% END %]
   </div>
 [% END %]

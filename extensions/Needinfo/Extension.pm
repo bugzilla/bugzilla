@@ -73,8 +73,14 @@ sub bug_end_of_update {
     my $needinfo      = delete $params->{needinfo};
     my $needinfo_from = delete $params->{needinfo_from};
     my $needinfo_role = delete $params->{needinfo_role};
-    my $override      = delete $params->{needinfo_override};
     my $is_private    = $params->{'comment_is_private'};
+
+    my @needinfo_overrides;
+    foreach my $key (grep(/^needinfo_override_/, keys %$params)) {
+        my ($id) = $key =~ /(\d+)$/;
+        # Should always be true if key exists (checkbox) but better to be sure
+        push(@needinfo_overrides, $id) if $id && $params->{$key};
+    }
 
     # Set the needinfo flag if user is requesting more information
     my @new_flags;
@@ -83,7 +89,6 @@ sub bug_end_of_update {
     if ($user->in_group('canconfirm') && $needinfo) {
         foreach my $type (@{ $bug->flag_types }) {
             next if $type->name ne 'needinfo';
-            next if @{ $type->{flags} };
 
             my $needinfo_flag = { type_id => $type->id, status => '?' };
 
@@ -123,7 +128,7 @@ sub bug_end_of_update {
         $clear_needinfo = 1 if $flag->status ne '?';
 
         # Clear if current user has selected override
-        $clear_needinfo = 1 if $override;
+        $clear_needinfo = 1 if grep($_ == $flag->id, @needinfo_overrides);
 
         # Clear if bug is being closed
         if (($bug->bug_status ne $old_bug->bug_status)

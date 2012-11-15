@@ -19,7 +19,6 @@ use Bugzilla::Extension::Push::Util;
 use Bugzilla::User;
 
 use Digest::MD5 qw(md5_hex);
-use File::Temp;
 
 sub options {
     return (
@@ -181,7 +180,7 @@ sub send {
     );
 
     # create temp files;
-    my $temp_dir = File::Temp->newdir();
+    my $temp_dir = File::Temp::Directory->new();
     my $local_dir = $temp_dir->dirname;
     _write_file("$local_dir/$filename.sync", $xml);
     _write_file("$local_dir/$filename.sync.check", $md5);
@@ -202,20 +201,20 @@ sub send {
         password => $self->config->{sftp_pass},
     );
 
-    $logger->debug("Uploading $local_dir/$filename.add");
-    $sftp->put("$local_dir/$filename.add", "$remote_dir$filename.add")
-        or return (PUSH_RESULT_ERROR, "Failed to upload $local_dir/$filename.add");
+    $logger->debug("Uploading $local_dir/$filename.sync");
+    $sftp->put("$local_dir/$filename.sync", "$remote_dir$filename.sync")
+        or return (PUSH_RESULT_ERROR, "Failed to upload $local_dir/$filename.sync");
 
-    $logger->debug("Uploading $local_dir/$filename.add.check");
-    $sftp->put("$local_dir/$filename.add.check", "$remote_dir$filename.add.check")
-        or return (PUSH_RESULT_ERROR, "Failed to upload $local_dir/$filename.add.check");
+    $logger->debug("Uploading $local_dir/$filename.sync.check");
+    $sftp->put("$local_dir/$filename.sync.check", "$remote_dir$filename.sync.check")
+        or return (PUSH_RESULT_ERROR, "Failed to upload $local_dir/$filename.sync.check");
 
     $logger->debug("Uploading $local_dir/$filename.done");
     $sftp->put("$local_dir/$filename.done", "$remote_dir$filename.done")
         or return (PUSH_RESULT_ERROR, "Failed to upload $local_dir/$filename.done");
 
     # success
-    return (PUSH_RESULT_OK, "uploaded $filename.add");
+    return (PUSH_RESULT_OK, "uploaded $filename.sync");
 }
 
 sub _get_bug_data {
@@ -235,6 +234,81 @@ sub _write_file {
     open(my $fh, ">$filename") or die "Failed to write to $filename: $!\n";
     print $fh $content;
     close($fh) or die "Failed to write to $filename: $!\n";
+}
+
+1;
+
+# File::Temp->newdir() requires a newer version of File::Temp than we have on
+# production, so here's a small inline package which performs the same task.
+
+package File::Temp::Directory;
+
+use strict;
+use warnings;
+
+use File::Temp;
+use File::Path qw(rmtree);
+use File::Spec;
+
+my @chars;
+
+sub new {
+    my ($class) = @_;
+    my $self = {};
+    bless($self, $class);
+
+    @chars = qw/ A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
+                 a b c d e f g h i j k l m n o p q r s t u v w x y z
+                 0 1 2 3 4 5 6 7 8 9 _
+               /;
+
+    $self->{TEMPLATE} = File::Spec->catdir(File::Spec->tmpdir, 'X' x 10);
+    $self->{DIRNAME} = $self->_mktemp();
+    return $self;
+}
+
+sub _mktemp {
+    my ($self) = @_;
+    my $path = $self->_random_name();
+    while(1) {
+        if (mkdir($path, 0700)) {
+            # in case of odd umask
+            chmod(0700, $path);
+            return $path;
+        } else {
+            # abort with error if the reason for failure was anything except eexist
+            die "Could not create directory $path: $!\n" unless ($!{EEXIST});
+            # loop round for another try
+        }
+        $path = $self->_random_name();
+    }
+
+    return $path;
+}
+
+sub _random_name {
+    my ($self) = @_;
+    my $path = $self->{TEMPLATE};
+    $path =~ s/X/$chars[int(rand(@chars))]/ge;
+    return $path;
+}
+
+sub dirname {
+    my ($self) = @_;
+    return $self->{DIRNAME};
+}
+
+sub DESTROY {
+    my ($self) = @_;
+    local($., $@, $!, $^E, $?);
+    if (-d $self->{DIRNAME}) {
+        # Some versions of rmtree will abort if you attempt to remove the
+        # directory you are sitting in. We protect that and turn it into a
+        # warning. We do this because this occurs during object destruction and
+        # so can not be caught by the user.
+        eval { rmtree($self->{DIRNAME}, 0, 0); };
+        warn $@ if ($@ && $^W);
+    }
 }
 
 1;

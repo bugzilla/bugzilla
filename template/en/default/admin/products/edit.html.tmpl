@@ -43,7 +43,9 @@
       <td>
         [% IF product.components.size -%]
           [% FOREACH component = product.components %]
-            <b>[% component.name FILTER html %]:</b>&nbsp;
+            <a href="editcomponents.cgi?action=edit&product=
+            [%- product.name FILTER uri %]&component=
+            [%- component.name FILTER uri %]">[% component.name FILTER html %]</a>:&nbsp;
             [% IF component.description %]
               [% component.description FILTER html_light %]
             [% ELSE %]

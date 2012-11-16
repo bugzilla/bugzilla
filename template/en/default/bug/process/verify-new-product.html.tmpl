@@ -100,7 +100,25 @@
 </table>
 
 [% IF verify_bug_groups %]
-  <h3>Verify [% terms.Bug %] Group</h3>
+  [% mandatory_groups = [] %]
+  [% optional_groups = [] %]
+
+  [% FOREACH gid = product.group_controls.keys %]
+    [% group = product.group_controls.$gid %]
+    [% NEXT UNLESS group.group.is_active %]
+
+    [% IF group.membercontrol == constants.CONTROLMAPMANDATORY
+          || (group.othercontrol ==  constants.CONTROLMAPMANDATORY && !user.in_group(group.group.name)) %]
+      [% mandatory_groups.push(group) %]
+    [% ELSIF (group.membercontrol != constants.CONTROLMAPNA && user.in_group(group.group.name))
+              || group.othercontrol != constants.CONTROLMAPNA %]
+      [% optional_groups.push(group) %]
+    [% END %]
+  [% END %]
+  
+  [% IF old_groups.size || optional_groups.size || mandatory_groups.size %]
+    <h3>Verify [% terms.Bug %] Group</h3>
+  [% END %]
   
   [% IF old_groups.size %]
     <p>These groups are not legal for the '[% product.name FILTER html %]'
@@ -118,21 +136,6 @@
     </p>
   [% END %]
 
-  [% mandatory_groups = [] %]
-  [% optional_groups = [] %]
-
-  [% FOREACH gid = product.group_controls.keys %]
-    [% group = product.group_controls.$gid %]
-    [% NEXT UNLESS group.group.is_active %]
-
-    [% IF group.membercontrol == constants.CONTROLMAPMANDATORY
-          || (group.othercontrol ==  constants.CONTROLMAPMANDATORY && !user.in_group(group.group.name)) %]
-      [% mandatory_groups.push(group) %]
-    [% ELSIF (group.membercontrol != constants.CONTROLMAPNA && user.in_group(group.group.name))
-              || group.othercontrol != constants.CONTROLMAPNA %]
-      [% optional_groups.push(group) %]
-    [% END %]
-  [% END %]
 
   [% IF optional_groups.size %]
     <p>These groups are optional. You can decide to restrict [% terms.bugs %] to

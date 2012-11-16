@@ -18,7 +18,6 @@
   #   Dave Lawrence <dkl@mozilla.com>
   #%]
 
-[% USE Bugzilla %]
 [% IF Bugzilla.request_cache.bmo_fields_page %]
   [% filtered_severity_blocker     = display_value("bug_severity", "blocker") FILTER html %]
   [% filtered_severity_critical    = display_value("bug_severity", "critical") FILTER html %]

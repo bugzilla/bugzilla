@@ -5,7 +5,7 @@
   # This Source Code Form is "Incompatible With Secondary Licenses", as
   # defined by the Mozilla Public License, v. 2.0.
   #%]
-                                      
+
 [% BLOCK formattimeunit %]
   [%# INTERFACE:
     # time_unit:  the number converting, converts to 2 decimal places
@@ -13,11 +13,7 @@
     #             1 decimal place
     #%]
   [% time_unit = time_unit FILTER format('%.2f') %]
-  [% IF time_unit.match('0\Z') %]
-    [% time_unit FILTER format('%.1f') %]
-  [% ELSE %]
-    [% time_unit FILTER format('%.2f') %]
-  [% END %]
+  [% time_unit.replace('0\Z', '') %]
 [% END %]
 
 [% BLOCK calculatepercentage %]

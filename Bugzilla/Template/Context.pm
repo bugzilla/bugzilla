@@ -84,6 +84,13 @@ sub stash {
     return $stash;
 }
 
+sub filter {
+    my ($self, $name, $args) = @_;
+    # If we pass an alias for the filter name, the filter code is cached
+    # instead of looking for it at each call.
+    $self->SUPER::filter($name, $args, $name);
+}
+
 # We need a DESTROY sub for the same reason that Bugzilla::CGI does.
 sub DESTROY {
     my $self = shift;

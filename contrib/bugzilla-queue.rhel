@@ -70,7 +70,7 @@ usage ()
 start ()
 {
     if [ -f "$PIDFILE" ]; then
-	checkpid `cat $PIDFILE` && return 0
+	checkpid `cat $PIDFILE` && return 2
     fi
     echo -n "Starting $NAME: "
     touch $PIDFILE
@@ -85,7 +85,7 @@ start ()
 
 stop ()
 {
-    [ -f /var/lock/subsys/$NAME ] || return 0
+    [ -f /var/lock/subsys/$NAME ] || return 2
     echo -n "Killing $NAME: "
     killproc $NAME
     echo
@@ -100,7 +100,7 @@ restart ()
 
 condrestart ()
 {
-    [ -e /var/lock/subsys/$NAME ] && restart || return 0
+    [ -e /var/lock/subsys/$NAME ] && restart || return 2
 }
 
 
@@ -110,7 +110,7 @@ case "$1" in
     status) $BIN -p $PIDFILE -n $NAME check; RETVAL=$?;;
     restart) restart; RETVAL=$? ;;
     condrestart) condrestart; RETVAL=$? ;;
-    *) usage ; RETVAL=2 ;;
+    *) usage ;;
 esac
 
 exit $RETVAL

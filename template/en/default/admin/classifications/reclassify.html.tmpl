@@ -13,11 +13,11 @@
 <form method=post action="editclassifications.cgi">
   <table border=0 cellpadding=4 cellspacing=0>
     <tr>
-      <td valign="top">Classification:</td>
+      <th align="right">Classification:</th>
       <td valign="top" colspan=3>[% classification.name FILTER html %]</td>
 
     </tr><tr>
-      <td valign="top">Description:</td>
+      <th align="right">Description:</th>
       <td valign="top" colspan=3>
         [% IF classification.description %]
           [% classification.description FILTER html_light %]
@@ -27,11 +27,11 @@
       </td>
 
     </tr><tr>
-      <td valign="top">Sortkey:</td>
+      <th align="right">Sortkey:</th>
       <td valign="top" colspan=3>[% classification.sortkey FILTER html %]</td>
 
     </tr><tr>
-      <td valign="top">Products:</td>
+      <th align="right">Products:</th>
       <td valign="top">Other Classifications</td>
       <td></td>
       <td valign="top">This Classification</td>

@@ -90,8 +90,8 @@
       [% END %]
       <td class="rhs">
         <a href="?id=push_queues_view.html&amp;[% ~%]
-                  message=[% message.id FILTER url_quote %]&amp;[% ~%]
-                  connector=[% queue.connector FILTER url_quote %]">View</a>
+                  message=[% message.id FILTER uri %]&amp;[% ~%]
+                  connector=[% queue.connector FILTER uri %]">View</a>
       </td>
     </tr>
   [% END %]

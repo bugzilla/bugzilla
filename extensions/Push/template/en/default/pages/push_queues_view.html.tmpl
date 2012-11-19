@@ -70,8 +70,8 @@
     <a href="?id=push_queues.html">Return</a> |
     <a onclick="return confirm('Are you sure you want to delete this message forever (a long time)?')"
        href="?id=push_queues_view.html&amp;delete=1
-       [%- %]&amp;message=[% message_obj.id FILTER url_quote %]
-       [%- %]&amp;connector=[% message_obj.connector FILTER url_quote %]">Delete</a>
+       [%- %]&amp;message=[% message_obj.id FILTER uri %]
+       [%- %]&amp;connector=[% message_obj.connector FILTER uri %]">Delete</a>
   </th>
 </tr>
 

@@ -339,7 +339,11 @@
     </tr>
     </table>
 
-    <ul class="links">
+    [% PROCESS "global/common-links.html.tmpl" qs_suffix = "_top" %]
+
+  </div>
+
+<!--<ul class="links">
       <li><a href="enter_bug.cgi">New</a></li>
       <li><a href="describecomponents.cgi">Browse</a></li>
       <li><a href="query.cgi">Search</a></li>
@@ -353,8 +357,7 @@
       </li>
       <li><a href="https://bugzilla-stage-tip.mozilla.org/page.cgi?id=frontpage.html">Front Page</a></li>
       <li><a href="page.cgi?id=browse.html">Product Browser</a></li>
-    </ul>
-  </div>
+    </ul> -->
 
 [% ELSE %]
 

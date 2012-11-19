@@ -28,10 +28,9 @@
   <li><span class="separator">| </span><a href="describecomponents.cgi">Browse</a></li>
   <li><span class="separator">| </span><a href="query.cgi">Search</a></li>
 
-  [% IF user.settings.skin.value != 'Mozilla' %]
-    <li class="form">
-      <span class="separator">| </span>
-      <form action="buglist.cgi" method="get"
+  <li class="form">
+    <span class="separator">| </span>
+    <form action="buglist.cgi" method="get"
           onsubmit="if (this.quicksearch.value == '')
                     { alert('Please enter one or more search terms first.');
                       return false; } return true;">
@@ -39,11 +38,13 @@
              title="Quick Search" value="[% quicksearch FILTER html %]">
       <input class="btn" type="submit" value="Search" 
              id="find[% qs_suffix FILTER html %]">
-      [%-# Work around FF bug: keep this on one line %]</form>
-    <a href="page.cgi?id=quicksearch.html" title="Quicksearch Help">[?]</a></li>
-  
-    <li><span class="separator">| </span><a href="report.cgi">Reports</a></li>
-  
+    [%-# Work around FF bug: keep this on one line %]</form>
+    <a href="page.cgi?id=quicksearch.html" title="Quicksearch Help">[?]</a>
+  </li>
+
+  <li><span class="separator">| </span><a href="report.cgi">Reports</a></li>
+
+  [% IF user.settings.skin.value != 'Mozilla' %]
     <li>
       [% IF Param('shutdownhtml') || Bugzilla.has_flags %]
         <span class="separator">| </span>
@@ -69,9 +70,9 @@
             || user.get_products_by_permission("editcomponents").size %]
         <li><span class="separator">| </span><a href="admin.cgi">Administration</a></li>
       [% END %]
-  
+
       [% PROCESS link_to_documentation %]
-  
+
       <li>
         <span class="separator">| </span>
         [% IF user.authorizer.can_logout %]
@@ -88,9 +89,9 @@
         [% END %]
       [%-# Work around FF bug: keep this on one line %]</li>
     [% ELSE %]
-    
+
       [% PROCESS link_to_documentation %]
-      
+
       [% IF Param('createemailregexp')
             && user.authorizer.user_can_create_account %]
         <li id="new_account_container[% qs_suffix FILTER html %]">
@@ -98,7 +99,7 @@
           <a href="createaccount.cgi">New&nbsp;Account</a>
         </li>
       [% END %]
-  
+
       [%# Only display one login form when we're on a LOGIN_REQUIRED page. That
         # way, we're guaranteed that the user will use the form that has 
         # hidden_fields in it (the center form) instead of this one. Also, it's

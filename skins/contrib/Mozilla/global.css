@@ -129,6 +129,10 @@ hr {
     font-weight: bold;
 }
 
+.links .separator {
+    display: none;
+}
+
 #quicksearch_top, #quicksearch_main {
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
@@ -138,6 +142,10 @@ hr {
     background: url(search.png) 5px center no-repeat, linear-gradient(#fafafa, #fff);
     padding-left: 26px;
     width: 200px;
+}
+
+#footer .links .form {
+    display: none;
 }
 
 #find_top {
@@ -233,10 +241,6 @@ hr {
     float: none;
     height: auto;
     width: auto;
-}
-
-#quicksearch_main {
-    padding-left: 5px;
 }
 
 #quicksearch_links {

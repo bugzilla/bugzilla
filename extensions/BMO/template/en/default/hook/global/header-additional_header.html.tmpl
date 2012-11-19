@@ -24,12 +24,6 @@
 <link id="shorturl" rev="canonical" href="https://bugzil.la/[% bug.bug_id FILTER uri %]">
 [% END %]
 
-<style type="text/css">
-body {
-  background: url("extensions/BMO/web/images/background.png") repeat-x;
-}
-</style>
-
 [%# *** Bug List Navigation *** %]
 [% IF bug %]
   [% SET my_search = user.recent_search_for(bug) %]

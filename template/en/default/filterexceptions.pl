@@ -267,9 +267,7 @@
 ],
 
 'bug/process/results.html.tmpl' => [
-  'title.$type', 
-  '"$terms.Bug $id" FILTER bug_link(id)',
-  '"$terms.bug $id" FILTER bug_link(id)',
+  'title.$type.ucfirst',
 ],
 
 'bug/create/create.html.tmpl' => [

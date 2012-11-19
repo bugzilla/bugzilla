@@ -121,12 +121,11 @@ sub REQUIRED_MODULES {
         module  => 'DBI',
         version => (vers_cmp($perl_ver, '5.13.3') > -1) ? '1.614' : '1.54'
     },
-    # 2.22 fixes various problems related to UTF8 strings in hash keys,
-    # as well as line endings on Windows.
+    # 2.24 contains several useful text virtual methods.
     {
         package => 'Template-Toolkit',
         module  => 'Template',
-        version => '2.22'
+        version => '2.24'
     },
     # 2.04 implement the "Test" method (to write to data/mailer.testfile).
     {

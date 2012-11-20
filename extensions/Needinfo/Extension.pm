@@ -10,7 +10,6 @@ use strict;
 
 use base qw(Bugzilla::Extension);
 
-use Bugzilla::Bug;
 use Bugzilla::User;
 use Bugzilla::Flag;
 use Bugzilla::FlagType;
@@ -49,7 +48,7 @@ sub install_update_db {
 
 # Clear the needinfo? flag if comment is being given by
 # requestee or someone used the override flag.
-sub bug_end_of_update {
+sub bug_start_of_update {
     my ($self, $args) = @_;
     my $bug       = $args->{bug};
     my $old_bug   = $args->{old_bug};
@@ -157,7 +156,6 @@ sub bug_end_of_update {
             my $field = 'flagtypes.name';
             $removed = defined $removed ? $removed : '';
             $added = defined $added ? $added : '';
-            LogActivityEntry($bug->id, $field, $removed, $added, $user->id, $timestamp);
 
             # Do not overwrite other flag changes
             if ($changes->{$field}) {
@@ -169,9 +167,6 @@ sub bug_end_of_update {
                          : $added;
             }
             $changes->{$field} = [$removed, $added];
-
-            # Adding a flag may result in CC'ing a user, call update to process
-            $bug->update() if $added;
         }
     }
 }

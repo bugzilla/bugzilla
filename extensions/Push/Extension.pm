@@ -40,14 +40,15 @@ BEGIN {
     *Bugzilla::push_ext = \&_get_instance;
 }
 
-my $_instance;
 sub _get_instance {
-    if (!$_instance) {
-        $_instance = Bugzilla::Extension::Push::Push->new();
-        $_instance->logger(Bugzilla::Extension::Push::Logger->new());
-        $_instance->connectors(Bugzilla::Extension::Push::Connectors->new());
+    my $cache = Bugzilla->request_cache;
+    if (!$cache->{'push.instance'}) {
+        my $instance = Bugzilla::Extension::Push::Push->new();
+        $cache->{'push.instance'} = $instance;
+        $instance->logger(Bugzilla::Extension::Push::Logger->new());
+        $instance->connectors(Bugzilla::Extension::Push::Connectors->new());
     }
-    return $_instance;
+    return $cache->{'push.instance'};
 }
 
 #
@@ -332,14 +333,18 @@ sub object_end_of_create {
 
 sub object_end_of_update {
     my ($self, $args) = @_;
+
+    # User objects are updated with every page load (to touch the session
+    # token).  Because we ignore user objects, there's no need to create an
+    # instance of Push to check if we're enabled.
+    my $object = _get_object_from_args($args);
+    return if !$object || $object->isa('Bugzilla::User');
+
     return unless $self->_enabled;
 
     # it's better to process objects from a non-generic end_of_update where
     # possible; don't process them here to avoid duplicate messages
-    my $object = _get_object_from_args($args);
-    return if !$object ||
-        $object->isa('Bugzilla::Bug') ||
-        $object->isa('Bugzilla::Flag');
+    return if $object->isa('Bugzilla::Bug') || $object->isa('Bugzilla::Flag');
 
     $self->_object_modified($args);
 }

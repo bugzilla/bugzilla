@@ -1,31 +1,44 @@
 [% IF Param('user_info_class').split(',').contains('BrowserID') %]
 <script src="https://browserid.org/include.js" type="text/javascript"></script>
 
+[%# Note this code is a tiny bit different from the other copy; the name of
+  # the variable containing the login url is 'login_target' rather than
+  # 'target' #%]
+
 <script type="text/javascript">
+function createHidden(name, value, form) {
+    var field = document.createElement('input');
+    field.type = 'hidden';
+    field.name = name;
+    field.value = value;;
+    form.appendChild(field);
+}
+
 function browserid_sign_in() {
     navigator.id.getVerifiedEmail(function(assertion) {
         if (assertion) {
             // This code will be invoked once the user has successfully
             // selected an email address they control to sign in with.
-            var browseridForm = document.createElement('form');
-            browseridForm.action = '[% login_target FILTER js %]';
-            browseridForm.method = 'POST';
-            browseridForm.style.display = 'none';
-            
-            var tokenField = document.createElement('input');
-            tokenField.type = 'hidden';
-            tokenField.name = 'token';
-            tokenField.value = '[% issue_hash_token(['login']) FILTER js %]';
-            browseridForm.appendChild(tokenField);
+            var form = document.createElement('form');
+            form.action = '[% login_target FILTER js %]';
+            form.method = 'POST';
+            form.style.display = 'none';
 
-            var assertionField = document.createElement('input');
-            assertionField.type = 'hidden';
-            assertionField.name = 'browserid_assertion';
-            assertionField.value = assertion;
-            browseridForm.appendChild(assertionField);
+            createHidden('token', '[% issue_hash_token(['login']) FILTER js %]', form);
+            createHidden('Bugzilla_remember', 'on', form);
+            createHidden('browserid_assertion', assertion, form);
 
-            document.body.appendChild(browseridForm);
-            browseridForm.submit();
+            [% FOREACH field = cgi.param() %]
+              [% NEXT IF field.search("^(Bugzilla_(login|password|restrictlogin)|token|browserid_assertion)$") %]
+              [% FOREACH mvalue = cgi.param(field).slice(0) %]
+                createHidden('[% field FILTER js %]',
+                             '[% mvalue FILTER html_linebreak FILTER js %]',
+                             form);
+              [% END %]
+            [% END %]
+
+            document.body.appendChild(form);
+            form.submit();
             return true;
         }
     });

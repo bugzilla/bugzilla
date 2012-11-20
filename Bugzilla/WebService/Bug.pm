@@ -2585,7 +2585,9 @@ these bugs.
 
 =item C<data>
 
-B<Required> C<base64> The content of the attachment.
+B<Required> C<base64> or C<string> The content of the attachment.
+If the content of the attachment is not ASCII text, you must encode
+it in base64 and declare it as the C<base64> type.
 
 =item C<file_name>
 

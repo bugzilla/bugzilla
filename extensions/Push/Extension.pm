@@ -326,7 +326,8 @@ sub object_end_of_create {
     # possible; don't process them here to avoid duplicate messages
     my $object = _get_object_from_args($args);
     return if !$object ||
-        $object->isa('Bugzilla::Bug');
+        $object->isa('Bugzilla::Bug') ||
+        blessed($object) =~ /^Bugzilla::Extension/;
 
     $self->_object_created($args);
 }
@@ -344,7 +345,9 @@ sub object_end_of_update {
 
     # it's better to process objects from a non-generic end_of_update where
     # possible; don't process them here to avoid duplicate messages
-    return if $object->isa('Bugzilla::Bug') || $object->isa('Bugzilla::Flag');
+    return if $object->isa('Bugzilla::Bug') ||
+        $object->isa('Bugzilla::Flag') ||
+        blessed($object) =~ /^Bugzilla::Extension/;
 
     $self->_object_modified($args);
 }

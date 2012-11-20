@@ -287,20 +287,20 @@ if ($bug_id) {
 
 =head2 Retrieving Product Information
 
-Call C<Product.get_product> with the name of the product you want to know more
-of.
+Call C<Product.get> with the name of the product you want to know more of.
 The call will return a C<Bugzilla::Product> object.
 
 =cut
 
 if ($product_name) {
-    $soapresult = $proxy->call('Product.get_product', $product_name);
+    $soapresult = $proxy->call('Product.get', {'names' => [$product_name]});
     _die_on_fault($soapresult);
     $result = $soapresult->result;
 
     if (ref($result) eq 'HASH') {
+        $result = $result->{'products'}->[0];
         foreach (keys(%$result)) {
-            print "$_: $$result{$_}\n";
+            print "$_: $result->{$_}\n";
         }
     }
     else {

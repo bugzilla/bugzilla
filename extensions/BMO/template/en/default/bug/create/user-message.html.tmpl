@@ -35,3 +35,20 @@
   most frequently reported [% terms.bugs %]</a> and <a href="https://bugzilla.mozilla.org/query.cgi">
   search through descriptions</a> of previously reported [% terms.bugs %].
 </p>
+
+[% IF product.name == 'Bugzilla' &&
+      (user.in_group('mozilla-corporation') || user.in_group('mozilla-foundation')) %]
+  <div id="bug_create_warning">
+    <div id="bug_create_warning_image">
+      <img src="extensions/BMO/web/images/sign_warning.png" width="32" height="32">
+    </div>
+    <div id="bug_create_warning_text">
+      <b>Mozilla employees</b><br>
+      This is not the place to request configuration, permission, or
+      account changes to this installation of [% terms.Bugzilla %] (bugzilla.mozilla.org).<br>
+      File such changes under the appropriate component in the
+      <a href="enter_bug.cgi?product=bugzilla.mozilla.org;component=Administration"><b>bugzilla.mozilla.org</b></a>
+      product.
+    </div>
+  </div>
+[% END %]

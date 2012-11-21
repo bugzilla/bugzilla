@@ -13,7 +13,22 @@
 }
 
 .hidden_text {
-    opacity: 0;      
+    opacity: 0;
     filter: alpha(opacity=0);
 }
 
+#bug_create_warning {
+    border: 1px solid #dddddd;
+    background: #fff9db;
+    color: #666458;
+    padding: 5px;
+}
+
+#bug_create_warning_image {
+    float: left;
+    padding: 5px;
+}
+
+#bug_create_warning_text {
+    margin-left: 42px;
+}

@@ -52,8 +52,6 @@ sub bug_start_of_update {
     my ($self, $args) = @_;
     my $bug       = $args->{bug};
     my $old_bug   = $args->{old_bug};
-    my $timestamp = $args->{timestamp};
-    my $changes   = $args->{changes};
 
     my $user   = Bugzilla->user;
     my $cgi    = Bugzilla->cgi;
@@ -151,23 +149,6 @@ sub bug_start_of_update {
 
     if (@flags || @new_flags) {
         $bug->set_flags(\@flags, \@new_flags);
-        my ($removed, $added) = Bugzilla::Flag->update_flags($bug, $old_bug, $timestamp);
-        if ($removed || $added) {
-            my $field = 'flagtypes.name';
-            $removed = defined $removed ? $removed : '';
-            $added = defined $added ? $added : '';
-
-            # Do not overwrite other flag changes
-            if ($changes->{$field}) {
-                $removed = defined $changes->{$field}->[0]
-                           ? $changes->{$field}->[0] . ", $removed"
-                           : $removed;
-                $added = defined $changes->{$field}->[1]
-                         ? $changes->{$field}->[1] . ", $added"
-                         : $added;
-            }
-            $changes->{$field} = [$removed, $added];
-        }
     }
 }
 

@@ -25,12 +25,12 @@ sub template_before_process {
     return unless $user && $user->id && $user->settings;
     return unless $user->settings->{'orange_factor'}->{'value'} eq 'on';
 
-    # in the header we just need to set the var, to 
-    # ensure the css and javascript get included
+    # in the header we just need to set the var,
+    # to ensure the css and javascript get included
     if ($file eq 'bug/show-header.html.tmpl'
         || $file eq 'bug/edit.html.tmpl') {
         my $bug = exists $vars->{'bugs'} ? $vars->{'bugs'}[0] : $vars->{'bug'};
-        if ($bug && $bug->status_whiteboard =~ /\[orange\]/) {
+        if ($bug && grep($_->name eq 'intermittent-failure', @{ $bug->keyword_objects })) {
             $vars->{'orange_factor'} = 1;
         }
     }

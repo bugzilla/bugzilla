@@ -64,6 +64,10 @@
   <script type="text/javascript" src="[% 'js/history.js/native.history.js' FILTER mtime %]"></script>
   <script type="text/javascript">
     redirect_html4_browsers();
+    [%# These are alternative labels for the AND and OR options in and_all_select %]
+    var cs_and_label = 'Match ALL of the following:';
+    var cs_or_label  = 'Match ANY of the following:';
+    cs_reconfigure('custom_search_last_row');
   </script>
 </div>
 
@@ -120,7 +124,8 @@
       (
       [% indent_level = indent_level + 1 %]
     [% ELSIF condition.f == "CP" %]
-      <input type="hidden" name="f[% cond_num FILTER html %]" value="CP">
+      <input type="hidden" name="f[% cond_num FILTER html %]"
+             id="f[% cond_num FILTER html %]" value="CP">
       )
     [% ELSE %]
       <select name="f[% cond_num FILTER html %]" title="Field"
@@ -164,9 +169,11 @@
   <div class="any_all_select">
     <select name="[% name FILTER html %]" id="[% name FILTER html %]"
             onchange="fix_query_string(this)">
-      <option value="AND">Match ALL of the following:</option>
+      <option value="AND">Match ALL of the following separately:</option>
       <option value="OR" [% ' selected="selected"' IF selected == "OR" %]>
-        Match ANY of the following:</option>
+        Match ANY of the following separately:</option>
+      <option value="AND_G" [% ' selected' IF selected == "AND_G" %]>
+        Match ALL of the following against the same field:</option>
     </select>
     [% IF with_advanced_link %]
       <a id="custom_search_advanced_controller"

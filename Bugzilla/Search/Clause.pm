@@ -42,6 +42,11 @@ sub children {
     return $self->{children};
 }
 
+sub update_search_args {
+    my ($self, $search_args) = @_;
+    # abstract
+}
+
 sub joiner { return $_[0]->{joiner} }
 
 sub has_translated_conditions {
@@ -83,7 +88,7 @@ sub walk_conditions {
     my ($self, $callback) = @_;
     foreach my $child (@{ $self->children }) {
         if ($child->isa('Bugzilla::Search::Condition')) {
-            $callback->($child);
+            $callback->($self, $child);
         }
         else {
             $child->walk_conditions($callback);

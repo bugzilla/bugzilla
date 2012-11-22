@@ -201,16 +201,16 @@ sub sql_position {
 }
 
 sub sql_in {
-    my ($self, $column_name, $in_list_ref) = @_;
+    my ($self, $column_name, $in_list_ref, $negate) = @_;
     my @in_list = @$in_list_ref;
-    return $self->SUPER::sql_in($column_name, $in_list_ref) if $#in_list < 1000;
+    return $self->SUPER::sql_in($column_name, $in_list_ref, $negate) if $#in_list < 1000;
     my @in_str;
     while (@in_list) {
         my $length = $#in_list + 1;
         my $splice = $length > 1000 ? 1000 : $length;
         my @sub_in_list = splice(@in_list, 0, $splice);
         push(@in_str, 
-             $self->SUPER::sql_in($column_name, \@sub_in_list)); 
+             $self->SUPER::sql_in($column_name, \@sub_in_list, $negate));
     }
     return "( " . join(" OR ", @in_str) . " )";
 }

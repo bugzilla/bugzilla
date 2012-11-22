@@ -1602,6 +1602,17 @@
     and the "matches" search can only be used with the "content"
     field.
 
+  [% ELSIF error == "search_grouped_field_invalid" %]
+    [% terms.Bugzilla %] does not support using the 
+    "[%+ field_descs.$field FILTER html %]" ([% field FILTER html %])
+    field with grouped search conditions.
+
+  [% ELSIF error == "search_grouped_invalid_nesting" %]
+    You cannot nest clauses within grouped search conditions.
+
+  [% ELSIF error == "search_grouped_field_mismatch" %]
+    All conditions under a groups search must use the same field.
+
   [% ELSIF error == "search_field_operator_invalid" %]
     [% terms.Bugzilla %] does not support using the 
     "[%+ field_descs.$field FILTER html %]" ([% field FILTER html %])

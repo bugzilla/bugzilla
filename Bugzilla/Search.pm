@@ -21,6 +21,7 @@ use Bugzilla::Group;
 use Bugzilla::User;
 use Bugzilla::Field;
 use Bugzilla::Search::Clause;
+use Bugzilla::Search::ClauseGroup;
 use Bugzilla::Search::Condition qw(condition);
 use Bugzilla::Status;
 use Bugzilla::Keyword;
@@ -1149,8 +1150,8 @@ sub _translate_join {
     
     die "join with no table: " . Dumper($join_info) if !$join_info->{table};
     die "join with no 'as': " . Dumper($join_info) if !$join_info->{as};
-        
-    my $from_table = "bugs";
+
+    my $from_table = $join_info->{bugs_table} || "bugs";
     my $from  = $join_info->{from} || "bug_id";
     if ($from =~ /^(\w+)\.(\w+)$/) {
         ($from_table, $from) = ($1, $2);
@@ -1555,7 +1556,7 @@ sub _charts_to_conditions {
     my $clause = $self->_charts;
     my @joins;
     $clause->walk_conditions(sub {
-        my ($condition) = @_;
+        my ($clause, $condition) = @_;
         return if !$condition->translated;
         push(@joins, @{ $condition->translated->{joins} });
     });
@@ -1575,7 +1576,7 @@ sub _params_to_data_structure {
     my ($self) = @_;
     
     # First we get the "special" charts, representing all the normal
-    # field son the search page. This may modify _params, so it needs to
+    # fields on the search page. This may modify _params, so it needs to
     # happen first.
     my $clause = $self->_special_charts;
 
@@ -1584,7 +1585,7 @@ sub _params_to_data_structure {
     
     # And then process the modern "custom search" format.
     $clause->add( $self->_custom_search );
-   
+    
     return $clause;
 }
 
@@ -1615,7 +1616,7 @@ sub _boolean_charts {
                 my $identifier = "$chart_id-$and_id-$or_id";
                 my $field = $params->{"field$identifier"};
                 my $operator = $params->{"type$identifier"};
-                my $value = $params->{"value$identifier"};                
+                my $value = $params->{"value$identifier"};
                 $or_clause->add($field, $operator, $value);
             }
             $and_clause->add($or_clause);
@@ -1634,13 +1635,19 @@ sub _custom_search {
     my @field_ids = $self->_field_ids;
     return unless scalar @field_ids;
 
-    my $current_clause = new Bugzilla::Search::Clause($params->{j_top});
+    my $joiner = $params->{j_top} || '';
+    my $current_clause = $joiner eq 'AND_G'
+        ? new Bugzilla::Search::ClauseGroup()
+        : new Bugzilla::Search::Clause($joiner);
+
     my @clause_stack;
     foreach my $id (@field_ids) {
         my $field = $params->{"f$id"};
         if ($field eq 'OP') {
-            my $joiner = $params->{"j$id"};
-            my $new_clause = new Bugzilla::Search::Clause($joiner);
+            my $joiner = $params->{"j$id"} || '';
+            my $new_clause = $joiner eq 'AND_G'
+                ? new Bugzilla::Search::ClauseGroup()
+                : new Bugzilla::Search::Clause($joiner);
             $new_clause->negate($params->{"n$id"});
             $current_clause->add($new_clause);
             push(@clause_stack, $current_clause);
@@ -1679,14 +1686,12 @@ sub _field_ids {
 }
 
 sub _handle_chart {
-    my ($self, $chart_id, $condition) = @_;
+    my ($self, $chart_id, $clause, $condition) = @_;
     my $dbh = Bugzilla->dbh;
     my $params = $self->_params;
     my ($field, $operator, $value) = $condition->fov;
-
-    $field = FIELD_MAP->{$field} || $field;
-
     return if (!defined $field or !defined $operator or !defined $value);
+    $field = FIELD_MAP->{$field} || $field;
     
     my $string_value;
     if (ref $value eq 'ARRAY') {
@@ -1717,15 +1722,19 @@ sub _handle_chart {
     # on multiple values, like anyexact.
     
     my %search_args = (
-        chart_id   => $chart_id,
-        sequence   => $chart_id,
-        field      => $field,
-        full_field => $full_field,
-        operator   => $operator,
-        value      => $string_value,
-        all_values => $value,
-        joins      => [],
+        chart_id     => $chart_id,
+        sequence     => $chart_id,
+        field        => $field,
+        full_field   => $full_field,
+        operator     => $operator,
+        value        => $string_value,
+        all_values   => $value,
+        joins        => [],
+        bugs_table   => 'bugs',
+        table_suffix => '',
     );
+    $clause->update_search_args(\%search_args);
+
     $search_args{quoted} = $self->_quote_unless_numeric(\%search_args);
     # This should add a "term" selement to %search_args.
     $self->do_search_function(\%search_args);
@@ -1741,7 +1750,12 @@ sub _handle_chart {
         field => $field, type => $operator,
         value => $string_value, term => $search_args{term},
     });
-    
+
+    foreach my $join (@{ $search_args{joins} }) {
+        $join->{bugs_table}   = $search_args{bugs_table};
+        $join->{table_suffix} = $search_args{table_suffix};
+    }
+
     $condition->translated(\%search_args);
 }
 
@@ -1897,8 +1911,14 @@ sub _quote_unless_numeric {
 }
 
 sub build_subselect {
-    my ($outer, $inner, $table, $cond) = @_;
-    return "$outer IN (SELECT $inner FROM $table WHERE $cond)";
+    my ($outer, $inner, $table, $cond, $negate) = @_;
+    # Execute subselects immediately to avoid dependent subqueries, which are
+    # large performance hits on MySql
+    my $q = "SELECT DISTINCT $inner FROM $table WHERE $cond";
+    my $dbh = Bugzilla->dbh;
+    my $list = $dbh->selectcol_arrayref($q);
+    return $negate ? "1=1" : "1=2" unless @$list;
+    return $dbh->sql_in($outer, $list, $negate);
 }
 
 # Used by anyexact to get the list of input values. This allows us to
@@ -2651,8 +2671,7 @@ sub _multiselect_term {
     my $term = $args->{term};
     $term .= $args->{_extra_where} || '';
     my $select = $args->{_select_field} || 'bug_id';
-    my $not_sql = $not ? "NOT " : '';
-    return "bugs.bug_id ${not_sql}IN (SELECT $select FROM $table WHERE $term)";
+    return build_subselect("$args->{bugs_table}.bug_id", $select, $table, $term, $not);
 }
 
 ###############################

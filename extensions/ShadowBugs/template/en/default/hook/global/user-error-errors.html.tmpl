@@ -6,7 +6,7 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% IF error == 'illegal_shadow_bug_public' %]
+[% IF error == "illegal_shadow_bug_public" %]
   [% title = "Invalid Shadow " _ terms.Bug %]
   You cannot shadow [% terms.bug %] [%+ id FILTER html %] because it is not a
   public [% terms.bug %].

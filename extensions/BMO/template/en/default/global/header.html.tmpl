@@ -95,7 +95,7 @@
 <html lang="en">
   <head>
     [% Hook.process("start") %]
-    <title>[% title %]</title>
+    <title>[% title FILTER none %]</title>
 
     [% IF Param('utf8') %]
       <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -141,7 +141,7 @@
       #%]
     [% IF style %]
       <style type="text/css">
-        [% style %]
+        [% style FILTER none %]
       </style>
     [% END %]
 
@@ -221,7 +221,7 @@
           [% END %]
         [% END %]
         [% IF javascript %]
-          [% javascript %]
+          [% javascript FILTER none %]
         [% END %]
     // -->
     </script>
@@ -247,7 +247,7 @@
   # but set the onload attribute in the DEFAULT directive above.
   #%]
 
-  <body onload="[% onload %]"
+  <body onload="[% onload FILTER none %]"
         class="[% urlbase.replace('^https?://','').replace('/$','').replace('[-~@:/.]+','-') %]
                [% FOREACH class = bodyclasses %]
                  [% ' ' %][% class FILTER css_class_quote %]
@@ -367,18 +367,18 @@
 <tr>
     <td id="title">
       <p>[% terms.BugzillaTitle %]
-      [% " &ndash; $header" IF header %]</p>
+      [% " &ndash; $header" FILTER none IF header %]</p>
     </td>
 
   [% IF subheader %]
     <td id="subtitle">
-      <p class="subheader">[% subheader %]</p>
+      <p class="subheader">[% subheader FILTER none %]</p>
     </td>
   [% END %]
 
   [% IF header_addl_info %]
     <td id="information">
-      <p class="header_addl_info">[% header_addl_info %]</p>
+      <p class="header_addl_info">[% header_addl_info FILTER none %]</p>
     </td>
   [% END %]
 </tr>
@@ -415,7 +415,7 @@
 [% END %]
 
 [% IF message %]
-<div id="message">[% message %]</div>
+<div id="message">[% message FILTER none %]</div>
 [% END %]
 
 [% BLOCK format_css_link %]

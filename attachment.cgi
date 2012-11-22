@@ -140,7 +140,7 @@ sub validateID {
                           { attach_id => scalar $cgi->param($param) });
   
     # Make sure the attachment exists in the database.
-    my $attachment = new Bugzilla::Attachment($attach_id)
+    my $attachment = new Bugzilla::Attachment({ id => $attach_id, cache => 1 })
         || ThrowUserError("invalid_attach_id", { attach_id => $attach_id });
 
     return $attachment if ($dont_validate_access || check_can_access($attachment));
@@ -152,7 +152,7 @@ sub check_can_access {
     my $user = Bugzilla->user;
 
     # Make sure the user is authorized to access this attachment's bug.
-    Bugzilla::Bug->check($attachment->bug_id);
+    Bugzilla::Bug->check({ id => $attachment->bug_id, cache => 1 });
     if ($attachment->isprivate && $user->id != $attachment->attacher->id 
         && !$user->is_insider) 
     {
@@ -414,7 +414,7 @@ sub diff {
 # HTML page.
 sub viewall {
     # Retrieve and validate parameters
-    my $bug = Bugzilla::Bug->check(scalar $cgi->param('bugid'));
+    my $bug = Bugzilla::Bug->check({ id => scalar $cgi->param('bugid'), cache => 1 });
 
     my $attachments = Bugzilla::Attachment->get_attachments_by_bug($bug);
     # Ignore deleted attachments.

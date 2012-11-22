@@ -810,8 +810,8 @@ sub flag_types {
 
 sub classification {
     my $self = shift;
-    $self->{'classification'} ||= 
-        new Bugzilla::Classification($self->classification_id);
+    $self->{'classification'} ||=
+        new Bugzilla::Classification({ id => $self->classification_id, cache => 1 });
     return $self->{'classification'};
 }
 

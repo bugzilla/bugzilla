@@ -284,7 +284,7 @@ sub get_attachment_link {
     my $dbh = Bugzilla->dbh;
     $user ||= Bugzilla->user;
 
-    my $attachment = new Bugzilla::Attachment($attachid);
+    my $attachment = new Bugzilla::Attachment({ id => $attachid, cache => 1 });
 
     if ($attachment) {
         my $title = "";
@@ -334,10 +334,10 @@ sub get_bug_link {
     $options->{user} ||= Bugzilla->user;
     my $dbh = Bugzilla->dbh;
 
-    if (defined $bug) {
+    if (defined $bug && $bug ne '') {
         if (!blessed($bug)) {
             require Bugzilla::Bug;
-            $bug = new Bugzilla::Bug($bug);
+            $bug = new Bugzilla::Bug({ id => $bug, cache => 1 });
         }
         return $link_text if $bug->{error};
     }

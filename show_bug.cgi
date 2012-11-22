@@ -47,7 +47,7 @@ Bugzilla->switch_to_shadow_db unless $user->id;
 
 if ($single) {
     my $id = $cgi->param('id');
-    push @bugs, Bugzilla::Bug->check($id);
+    push @bugs, Bugzilla::Bug->check({ id => $id, cache => 1 });
     if (defined $cgi->param('mark')) {
         foreach my $range (split ',', $cgi->param('mark')) {
             if ($range =~ /^(\d+)-(\d+)$/) {
@@ -67,7 +67,7 @@ if ($single) {
 
         foreach my $bug_id (@ids) {
             next unless $bug_id;
-            my $bug = new Bugzilla::Bug($bug_id);
+            my $bug = new Bugzilla::Bug({ id => $bug_id, cache => 1 });
             if (!$bug->{error}) {
                 push(@check_bugs, $bug);
             }

@@ -295,16 +295,24 @@ The call will return a C<Bugzilla::Product> object.
 if ($product_name) {
     $soapresult = $proxy->call('Product.get', {'names' => [$product_name]});
     _die_on_fault($soapresult);
-    $result = $soapresult->result;
+    $result = $soapresult->result()->{'products'}->[0];
 
-    if (ref($result) eq 'HASH') {
-        $result = $result->{'products'}->[0];
-        foreach (keys(%$result)) {
-            print "$_: $result->{$_}\n";
+    # Iterate all entries, the values may be scalars or array refs with hash refs.
+    foreach my $key (sort(keys %$result)) {
+      my $value = $result->{$key};
+
+      if (ref($value)) {
+        my $counter = 0;
+        foreach my $hash (@$value) {
+          while (my ($innerKey, $innerValue) = each %$hash) {
+            print "$key.$counter.$innerKey: $innerValue\n";
+          }
+          ++$counter;
         }
-    }
-    else {
-        print "$result\n";
+      }
+      else {
+        print "$key: $value\n"
+      }
     }
 }
 

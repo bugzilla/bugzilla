@@ -3,14 +3,13 @@ use strict;
 
 use Cwd 'abs_path';
 use File::Basename;
-BEGIN {
-    my $root = abs_path(dirname(__FILE__) . '/../..');
-    chdir($root);
-}
-use lib qw(. lib);
+use FindBin;
+use lib "$FindBin::Bin/../..";
+use lib "$FindBin::Bin/../../lib";
 
 use Bugzilla;
 use Bugzilla::Constants;
+use Bugzilla::FlagType;
 use Bugzilla::Util;
 
 Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
@@ -23,8 +22,8 @@ Eg. movebugs.pl mozilla.org bmo bugzilla.mozilla.org admin
 Will move all bugs in the mozilla.org:bmo component to the
 bugzilla.mozilla.org:admin component.
 
-The new product must have matching versions and milestones from the old
-product.
+The new product must have matching versions, milestones, and flags from the old
+product (will be validated by this script).
 USAGE
 }
 
@@ -103,6 +102,24 @@ foreach my $milestone (@$ra_milestones) {
     push @missing_milestones, $milestone unless $has_milestone;
 }
 
+# check flags
+my @missing_flags;
+my $ra_old_types = $dbh->selectcol_arrayref(
+    "SELECT DISTINCT type_id
+       FROM flags
+            INNER JOIN flagtypes ON flagtypes.id = flags.type_id
+      WHERE $where_sql");
+my $ra_new_types =
+    Bugzilla::FlagType::match({ product_id   => $new_product_id,
+                                component_id => $new_component_id });
+foreach my $old_type (@$ra_old_types) {
+    unless (grep { $_->id == $old_type } @$ra_new_types) {
+        my $flagtype = Bugzilla::FlagType->new($old_type);
+        push @missing_flags, $flagtype->name . ' (' . $flagtype->target_type . ')';
+    }
+}
+
+# show missing
 my $missing_error = '';
 if (@missing_versions) {
     $missing_error .= "'$new_product' is missing the following version(s):\n  " .
@@ -111,6 +128,10 @@ if (@missing_versions) {
 if (@missing_milestones) {
     $missing_error .= "'$new_product' is missing the following milestone(s):\n  " .
         join("\n  ", @missing_milestones) . "\n";
+}
+if (@missing_flags) {
+    $missing_error .= "'$new_product'::'$new_component' is missing the following flag(s):\n  " .
+        join("\n  ", @missing_flags) . "\n";
 }
 die $missing_error if $missing_error;
 

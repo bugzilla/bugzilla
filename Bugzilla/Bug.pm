@@ -3734,9 +3734,7 @@ sub editable_bug_fields {
         # Custom multi-select fields are not stored in the bugs table.
         splice(@fields, $location, 1) if ($location > -1);
     }
-    # Sorted because the old @::log_columns variable, which this replaces,
-    # was sorted.
-    return sort(@fields);
+    return @fields;
 }
 
 # XXX - When Bug::update() will be implemented, we should make this routine
@@ -4048,9 +4046,10 @@ sub check_can_change_field {
     # $PrivilegesRequired = PRIVILEGES_REQUIRED_REPORTER : the reporter, assignee or an empowered user;
     # $PrivilegesRequired = PRIVILEGES_REQUIRED_ASSIGNEE : the assignee or an empowered user;
     # $PrivilegesRequired = PRIVILEGES_REQUIRED_EMPOWERED : an empowered user.
-    
-    # Only users in the time-tracking group can change time-tracking fields.
-    if ( grep($_ eq $field, TIMETRACKING_FIELDS) ) {
+
+    # Only users in the time-tracking group can change time-tracking fields,
+    # including the deadline.
+    if (grep { $_ eq $field } (TIMETRACKING_FIELDS, 'deadline')) {
         if (!$user->is_timetracker) {
             $$PrivilegesRequired = PRIVILEGES_REQUIRED_EMPOWERED;
             return 0;

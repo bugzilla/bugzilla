@@ -522,11 +522,9 @@ else {
 # Remove the timetracking columns if they are not a part of the group
 # (happens if a user had access to time tracking and it was revoked/disabled)
 if (!$user->is_timetracker) {
-   @displaycolumns = grep($_ ne 'estimated_time', @displaycolumns);
-   @displaycolumns = grep($_ ne 'remaining_time', @displaycolumns);
-   @displaycolumns = grep($_ ne 'actual_time', @displaycolumns);
-   @displaycolumns = grep($_ ne 'percentage_complete', @displaycolumns);
-   @displaycolumns = grep($_ ne 'deadline', @displaycolumns);
+   foreach my $tt_field (TIMETRACKING_FIELDS) {
+       @displaycolumns = grep($_ ne $tt_field, @displaycolumns);
+   }
 }
 
 # Remove the relevance column if the user is not doing a fulltext search.

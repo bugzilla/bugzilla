@@ -111,7 +111,7 @@ if ($cgi->param("field")) {
 }
 
 unless ($user->is_timetracker) {
-    @fieldlist = grep($_ !~ /(^deadline|_time)$/, @fieldlist);
+    @fieldlist = grep($_ !~ /_time$/, @fieldlist);
 }
 
 foreach (@fieldlist) {

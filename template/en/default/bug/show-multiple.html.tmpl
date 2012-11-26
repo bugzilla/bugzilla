@@ -233,6 +233,8 @@
           </table>
         </td>
       </tr>
+    [% END %]
+    [% IF Param("timetrackinggroup") && bug.deadline %]
       [% PROCESS row cell="deadline" %]
     [% END %]
 

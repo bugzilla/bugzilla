@@ -190,9 +190,9 @@ foreach my $val (editable_bug_fields()) {
 if ($user->is_timetracker) {
     push @chfields, "work_time";
 } else {
-    @chfields = grep($_ ne "deadline", @chfields);
-    @chfields = grep($_ ne "estimated_time", @chfields);
-    @chfields = grep($_ ne "remaining_time", @chfields);
+    foreach my $tt_field (TIMETRACKING_FIELDS) {
+        @chfields = grep($_ ne $tt_field, @chfields);
+    }
 }
 @chfields = (sort(@chfields));
 $vars->{'chfield'} = \@chfields;

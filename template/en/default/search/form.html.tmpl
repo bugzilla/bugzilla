@@ -114,7 +114,7 @@ TUI_hide_default('information_query');
     [%+ field_descs.longdesc FILTER html %]s, [%+ field_descs.bug_file_loc FILTER html %], 
     [% IF Param('usestatuswhiteboard') %] [%+ field_descs.status_whiteboard FILTER html %], [%+ END %]
     [% IF use_keywords %] [%+ field_descs.keywords FILTER html %], [%+ END %]
-    [% IF user.is_timetracker %] [%+ field_descs.deadline FILTER html %], [%+ END %]
+    [% IF Param('timetrackinggroup') %] [%+ field_descs.deadline FILTER html %], [%+ END %]
     [% terms.Bug %] Numbers, [%+ field_descs.version FILTER html %], 
     [% IF Param('usetargetmilestone') %] [%+ field_descs.target_milestone FILTER html %], [%+ END %]
     [% field_descs.bug_severity FILTER html %], [%+ field_descs.priority FILTER html %], [%+ field_descs.rep_platform FILTER html %], 
@@ -153,8 +153,7 @@ TUI_hide_default('information_query');
     </div>
   [% END %]
 
-  [%# Deadline %]
-  [% IF user.is_timetracker %]
+  [% IF Param('timetrackinggroup') %]
     <div class="search_field_row">
         [% INCLUDE "search/field.html.tmpl" 
                     field = bug_fields.deadline 

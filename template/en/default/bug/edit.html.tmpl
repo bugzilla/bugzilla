@@ -65,8 +65,8 @@
           
           [% PROCESS section_spacer %]
           
-          [%# *** severity, priority, version and milestone *** %]
-          [% PROCESS section_details2 %]            
+          [%# *** severity, priority, version, milestone, and deadline *** %]
+          [% PROCESS section_details2 %]
           
           [%# *** assigned to and qa contact *** %]
           [% PROCESS section_people %]
@@ -355,7 +355,10 @@
         [% PROCESS select selname = "target_milestone" %]
       </tr>
     [% END %]
-  
+
+    [% IF Param("timetrackinggroup") && bug.deadline %]
+      [% INCLUDE bug/field.html.tmpl field = bug_fields.deadline, value = bug.deadline, editable = 0 %]
+    [% END %]
 [% END %]
 
 [%############################################################################%]

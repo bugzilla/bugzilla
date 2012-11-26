@@ -1174,7 +1174,8 @@
       Users who belong to the group specified by the <quote>timetrackinggroup</quote>
       parameter have access to time-related fields. Developers can see
       deadlines and estimated times to fix bugs, and can provide time spent
-      on these bugs.
+      on these bugs. Users who do not belong to this group can only see the deadline,
+      but not edit it. Other time-related fields remain invisible to them.
     </para>
 
     <para>

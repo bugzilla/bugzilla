@@ -100,7 +100,9 @@ $vars->{'closed_status'} = \@closed_status;
 my @fields = @{Bugzilla::Field->match({obsolete => 0})};
 # Exclude fields the user cannot query.
 if (!$user->is_timetracker) {
-    @fields = grep { $_->name !~ /^(estimated_time|remaining_time|work_time|percentage_complete|deadline)$/ } @fields;
+    foreach my $tt_field (TIMETRACKING_FIELDS) {
+        @fields = grep { $_->name ne $tt_field } @fields;
+    }
 }
 
 my %FIELD_PARAMS = (

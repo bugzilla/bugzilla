@@ -418,7 +418,7 @@ sub search {
     delete $params->{WHERE};
 
     unless (Bugzilla->user->is_timetracker) {
-        delete $params->{$_} foreach qw(estimated_time remaining_time deadline);
+        delete $params->{$_} foreach TIMETRACKING_FIELDS;
     }
 
     # Do special search types for certain fields.
@@ -851,6 +851,9 @@ sub _bug_to_hash {
         classification   => $self->type('string', $bug->classification),
         component        => $self->type('string', $bug->component),
         creation_time    => $self->type('dateTime', $bug->creation_ts),
+        # No need to format $bug->deadline specially, because Bugzilla::Bug
+        # already does it for us.
+        deadline         => $self->type('string', $bug->deadline),
         id               => $self->type('int', $bug->bug_id),
         is_confirmed     => $self->type('boolean', $bug->everconfirmed),
         last_change_time => $self->type('dateTime', $bug->delta_ts),
@@ -943,9 +946,6 @@ sub _bug_to_hash {
     if (Bugzilla->user->is_timetracker) {
         $item{'estimated_time'} = $self->type('double', $bug->estimated_time);
         $item{'remaining_time'} = $self->type('double', $bug->remaining_time);
-        # No need to format $bug->deadline specially, because Bugzilla::Bug
-        # already does it for us.
-        $item{'deadline'} = $self->type('string', $bug->deadline);
         $item{'actual_time'} = $self->type('double', $bug->actual_time);
     }
 
@@ -1781,9 +1781,6 @@ C<string> The login name of the person who filed this bug (the reporter).
 
 C<string> The day that this bug is due to be completed, in the format
 C<YYYY-MM-DD>.
-
-If you are not in the time-tracking group, this field will not be included
-in the return value.
 
 =item C<depends_on>
 

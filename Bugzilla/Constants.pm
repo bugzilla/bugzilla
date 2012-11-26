@@ -399,8 +399,7 @@ use constant ABNORMAL_SELECTS => {
 # The fields from fielddefs that are blocked from non-timetracking users.
 # work_time is sometimes called actual_time.
 use constant TIMETRACKING_FIELDS =>
-    qw(estimated_time remaining_time work_time actual_time
-       percentage_complete deadline);
+    qw(estimated_time remaining_time work_time actual_time percentage_complete);
 
 # The maximum number of days a token will remain valid.
 use constant MAX_TOKEN_AGE => 3;

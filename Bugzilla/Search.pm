@@ -1475,9 +1475,8 @@ sub _special_parse_chfield {
 
 sub _special_parse_deadline {
     my ($self) = @_;
-    return if !$self->_user->is_timetracker;
     my $params = $self->_params;
-    
+
     my $clause = new Bugzilla::Search::Clause();
     if (my $from = $params->{'deadlinefrom'}) {
         $clause->add('deadline', 'greaterthaneq', $from);

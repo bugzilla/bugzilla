@@ -214,8 +214,7 @@
 
   <dt id="[% field FILTER html %]">[% field_desc FILTER html %]</dt>
     <dd>
-      [% SET help_text = field_help_map.${field_desc}.help %]
-      [% help_text FILTER none %]
+      [% field_help_map.${field_desc}.help FILTER html_light %]
     </dd>
 [% END %]
 </dl>

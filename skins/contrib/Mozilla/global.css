@@ -89,6 +89,7 @@ hr {
 
 #titles #title {
     width: 150px;
+    font-size: 120%;
 }
 
 #titles #tab {
@@ -98,6 +99,7 @@ hr {
 #titles #login {
     text-align: right;
     padding-right: 2em;
+    color: #404040;
 }
 
 #header .links {
@@ -233,14 +235,6 @@ hr {
 
 #page-index td:first-child {
     text-align: center;
-}
-
-#page-index a {
-    background: none;
-    display: inline;
-    float: none;
-    height: auto;
-    width: auto;
 }
 
 #quicksearch_links {

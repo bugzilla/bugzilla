@@ -633,17 +633,17 @@ Component.pm represents a Product Component object.
  Description: Create a new component for the given product.
 
  Params:      The hashref must have the following keys:
-              name            - name of the new component (string). This name
-                                must be unique within the product.
-              product         - a Bugzilla::Product object to which
-                                the Component is being added.
-              description     - description of the new component (string).
-              initialowner    - login name of the default assignee (string).
+              name             - name of the new component (string). This name
+                                 must be unique within the product.
+              product          - a Bugzilla::Product object to which
+                                 the Component is being added.
+              description      - description of the new component (string).
+              initialowner     - login name of the default assignee (string).
               The following keys are optional:
-              initiaqacontact - login name of the default QA contact (string),
-                                or an empty string to clear it.
-              initial_cc      - an arrayref of login names to add to the
-                                CC list by default.
+              initialqacontact - login name of the default QA contact (string),
+                                 or an empty string to clear it.
+              initial_cc       - an arrayref of login names to add to the
+                                 CC list by default.
 
  Returns:     A Bugzilla::Component object.
 

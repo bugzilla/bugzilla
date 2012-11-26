@@ -196,9 +196,7 @@ sub init_page {
 #####################################################################
 
 sub template {
-    my $class = shift;
-    $class->request_cache->{template} ||= Bugzilla::Template->create();
-    return $class->request_cache->{template};
+    return $_[0]->request_cache->{template} ||= Bugzilla::Template->create();
 }
 
 sub template_inner {
@@ -206,9 +204,7 @@ sub template_inner {
     my $cache = $class->request_cache;
     my $current_lang = $cache->{template_current_lang}->[0];
     $lang ||= $current_lang || '';
-    $class->request_cache->{"template_inner_$lang"}
-        ||= Bugzilla::Template->create(language => $lang);
-    return $class->request_cache->{"template_inner_$lang"};
+    return $cache->{"template_inner_$lang"} ||= Bugzilla::Template->create(language => $lang);
 }
 
 our $extension_packages;
@@ -267,9 +263,7 @@ sub feature {
 }
 
 sub cgi {
-    my $class = shift;
-    $class->request_cache->{cgi} ||= new Bugzilla::CGI();
-    return $class->request_cache->{cgi};
+    return $_[0]->request_cache->{cgi} ||= new Bugzilla::CGI();
 }
 
 sub input_params {
@@ -293,15 +287,11 @@ sub localconfig {
 }
 
 sub params {
-    my $class = shift;
-    $class->request_cache->{params} ||= Bugzilla::Config::read_param_file();
-    return $class->request_cache->{params};
+    return $_[0]->request_cache->{params} ||= Bugzilla::Config::read_param_file();
 }
 
 sub user {
-    my $class = shift;
-    $class->request_cache->{user} ||= new Bugzilla::User;
-    return $class->request_cache->{user};
+    return $_[0]->request_cache->{user} ||= new Bugzilla::User;
 }
 
 sub set_user {
@@ -310,8 +300,7 @@ sub set_user {
 }
 
 sub sudoer {
-    my $class = shift;    
-    return $class->request_cache->{sudoer};
+    return $_[0]->request_cache->{sudoer};
 }
 
 sub sudo_request {
@@ -427,28 +416,20 @@ sub logout_request {
 }
 
 sub job_queue {
-    my $class = shift;
     require Bugzilla::JobQueue;
-    $class->request_cache->{job_queue} ||= Bugzilla::JobQueue->new();
-    return $class->request_cache->{job_queue};
+    return $_[0]->request_cache->{job_queue} ||= Bugzilla::JobQueue->new();
 }
 
 sub dbh {
-    my $class = shift;
     # If we're not connected, then we must want the main db
-    $class->request_cache->{dbh} ||= $class->dbh_main;
-
-    return $class->request_cache->{dbh};
+    return $_[0]->request_cache->{dbh} ||= $_[0]->dbh_main;
 }
 
 sub dbh_main {
-    my $class = shift;
-    $class->request_cache->{dbh_main} ||= Bugzilla::DB::connect_main();
-    return $class->request_cache->{dbh_main};
+    return $_[0]->request_cache->{dbh_main} ||= Bugzilla::DB::connect_main();
 }
 
 sub languages {
-    my $class = shift;
     return Bugzilla::Install::Util::supported_languages();
 }
 
@@ -624,13 +605,8 @@ sub has_flags {
 }
 
 sub local_timezone {
-    my $class = shift;
-
-    if (!defined $class->request_cache->{local_timezone}) {
-        $class->request_cache->{local_timezone} =
-          DateTime::TimeZone->new(name => 'local');
-    }
-    return $class->request_cache->{local_timezone};
+    return $_[0]->request_cache->{local_timezone}
+             ||= DateTime::TimeZone->new(name => 'local');
 }
 
 # This creates the request cache for non-mod_perl installations.

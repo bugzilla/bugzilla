@@ -57,7 +57,6 @@ use Digest;
 use Email::Address;
 use List::Util qw(first);
 use Scalar::Util qw(tainted blessed);
-use Template::Filters;
 use Text::Wrap;
 use Encode qw(encode decode resolve_alias);
 use Encode::Guess;
@@ -87,7 +86,11 @@ sub detaint_signed {
 #             visible strings.
 # Bug 319331: Handle BiDi disruptions.
 sub html_quote {
-    my ($var) = Template::Filters::html_filter(@_);
+    my $var = shift;
+    $var =~ s/&/&amp;/g;
+    $var =~ s/</&lt;/g;
+    $var =~ s/>/&gt;/g;
+    $var =~ s/"/&quot;/g;
     # Obscure '@'.
     $var =~ s/\@/\&#64;/g;
     if (Bugzilla->params->{'utf8'}) {
@@ -729,10 +732,12 @@ sub get_text {
 
 sub template_var {
     my $name = shift;
-    my $cache = Bugzilla->request_cache->{util_template_var} ||= {};
-    my $template = Bugzilla->template_inner;
-    my $lang = $template->context->{bz_language};
+    my $request_cache = Bugzilla->request_cache;
+    my $cache = $request_cache->{util_template_var} ||= {};
+    my $lang = $request_cache->{template_current_lang}->[0];
     return $cache->{$lang}->{$name} if defined $cache->{$lang};
+
+    my $template = Bugzilla->template_inner($lang);
     my %vars;
     # Note: If we suddenly start needing a lot of template_var variables,
     # they should move into their own template, not field-descs.
@@ -749,11 +754,7 @@ sub template_var {
 
 sub display_value {
     my ($field, $value) = @_;
-    my $value_descs = template_var('value_descs');
-    if (defined $value_descs->{$field}->{$value}) {
-        return $value_descs->{$field}->{$value};
-    }
-    return $value;
+    return template_var('value_descs')->{$field}->{$value} // $value;
 }
 
 sub disable_utf8 {

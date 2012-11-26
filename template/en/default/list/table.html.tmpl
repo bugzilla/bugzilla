@@ -42,6 +42,7 @@
 [% field_descs.reporter_realname    = field_descs.reporter    %]
 [% field_descs.qa_contact_realname  = field_descs.qa_contact  %]
 
+[%# Setting maxlength => 0 means no limit. We set it for performance reasons. %]
 [% abbrev = 
   {
     "bug_severity"         => { maxlength => 3 , title => "Sev" } , 
@@ -55,19 +56,19 @@
     "qa_contact"           => { maxlength => 30 , ellipsis => "..." , title => "QAContact" } , 
     "qa_contact_realname"  => { maxlength => 20 , ellipsis => "..." , title => "QAContact" } , 
     "resolution"        => { maxlength => 4 } , 
-    "short_desc"        => { wrap => 1 } ,
+    "short_desc"        => { maxlength => 0, wrap => 1 } ,
     "short_short_desc"  => { maxlength => 60 , ellipsis => "..." , wrap => 1 } ,
-    "status_whiteboard" => { title => "Whiteboard" , wrap => 1 } , 
-    "keywords"          => { wrap => 1 } ,
-    "flagtypes.name"    => { wrap => 1 } ,
+    "status_whiteboard" => { maxlength => 0, title => "Whiteboard" , wrap => 1 } , 
+    "keywords"          => { maxlength => 0, wrap => 1 } ,
+    "flagtypes.name"    => { maxlength => 0, wrap => 1 } ,
     "component"         => { maxlength => 8 , title => "Comp" } , 
     "product"           => { maxlength => 8 } , 
     "version"           => { maxlength => 5 , title => "Vers" } , 
     "op_sys"            => { maxlength => 4 } , 
     "bug_file_loc"      => { maxlength => 30 } , 
-    "target_milestone"  => { title => "TargetM" } , 
-    "longdescs.count"   => { title => "# Comments" },
-    "percentage_complete" => { format_value => "%d %%" } , 
+    "target_milestone"  => { maxlength => 0, title => "TargetM" } , 
+    "longdescs.count"   => { maxlength => 0, title => "# Comments" },
+    "percentage_complete" => { maxlength => 0, format_value => "%d %%" } , 
   }
 %]
 
@@ -157,13 +158,13 @@
 [% END %]
 
 [% BLOCK order_arrow %]
-  [% IF order.match("^$id DESC") %]
+  [% IF order.search("^$id DESC") %]
     <span class="bz_sort_order_primary">&#x25BC;</span>
-  [% ELSIF order.match("^$id(,\\s*|\$)") %]
+  [% ELSIF order.search("^$id(,\\s*|\$)") %]
     <span class="bz_sort_order_primary">&#x25B2;</span>
-  [% ELSIF order.match("\\b$id DESC") %]
+  [% ELSIF order.search("\\b$id DESC") %]
     <span class="bz_sort_order_secondary">&#x25BC;</span>
-  [% ELSIF order.match("\\b$id(,\\s*|\$)") %]
+  [% ELSIF order.search("\\b$id(,\\s*|\$)") %]
     <span class="bz_sort_order_secondary">&#x25B2;</span>
   [% END %]
 [% END %]
@@ -199,7 +200,8 @@
     </td>
 
     [% FOREACH column = displaycolumns %]
-    <td [% 'style="white-space: nowrap"' IF NOT abbrev.$column.wrap %]
+    [% col_abbrev = abbrev.$column %]
+    <td [% 'style="white-space: nowrap"' IF NOT col_abbrev.wrap %]
         class="bz_[% column FILTER css_class_quote %]_column"
         [% SWITCH column %]
           [% CASE 'opendate' %]
@@ -211,11 +213,11 @@
             sorttable_customkey="[% sortkey FILTER html %]"
         [% END %]
     >
-      [% IF abbrev.$column.maxlength %]
+      [% IF col_abbrev.maxlength %]
         <span title="[%- display_value(column, bug.$column) FILTER html %]">
       [% END %]
-      [% IF abbrev.$column.format_value %] 
-        [%- bug.$column FILTER format(abbrev.$column.format_value) FILTER html -%] 
+      [% IF col_abbrev.format_value %] 
+        [%- bug.$column FILTER format(col_abbrev.format_value) FILTER html -%] 
       [% ELSIF column == 'actual_time' ||
                column == 'remaining_time' ||
                column == 'estimated_time' %]
@@ -223,16 +225,16 @@
       [%# Display the login name of the user if their real name is empty. %]
       [% ELSIF column.match('_realname$') && bug.$column == '' %]
         [% SET login_column = column.remove('_realname$') %]
-        [% bug.${login_column}.truncate(abbrev.$column.maxlength, 
-                                        abbrev.$column.ellipsis) FILTER html %]
+        [% bug.${login_column}.truncate(col_abbrev.maxlength, 
+                                        col_abbrev.ellipsis) FILTER html %]
       [% ELSIF column == 'short_desc' || column == "short_short_desc" %]
         <a href="show_bug.cgi?id=[% bug.bug_id FILTER html %]">
-          [%- bug.$column.truncate(abbrev.$column.maxlength, abbrev.$column.ellipsis) FILTER html -%]
+          [%- bug.$column.truncate(col_abbrev.maxlength, col_abbrev.ellipsis) FILTER html -%]
         </a>
       [% ELSE %]
-        [%- display_value(column, bug.$column).truncate(abbrev.$column.maxlength, abbrev.$column.ellipsis) FILTER html -%]
+        [%- display_value(column, bug.$column).truncate(col_abbrev.maxlength, col_abbrev.ellipsis) FILTER html -%]
       [% END %]
-      [% IF abbrev.$column.maxlength %]
+      [% IF col_abbrev.maxlength %]
         </span>
       [% END %]
     </td>
@@ -240,7 +242,7 @@
 
   </tr>
 
-  [% IF loop.last() && time_info.time_present == 1 %]
+  [% IF time_info.time_present %]
     [% PROCESS time_summary_line %]
   [% END %]
 

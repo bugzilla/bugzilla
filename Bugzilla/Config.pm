@@ -35,7 +35,6 @@ use strict;
 use base qw(Exporter);
 use Bugzilla::Constants;
 use Bugzilla::Hook;
-use Bugzilla::Install::Filesystem qw(fix_file_permissions);
 use Data::Dumper;
 use File::Temp;
 
@@ -301,7 +300,10 @@ sub write_params {
     rename $tmpname, $param_file
       or die "Can't rename $tmpname to $param_file: $!";
 
-    fix_file_permissions($param_file);
+    # It's not common to edit parameters and loading
+    # Bugzilla::Install::Filesystem is slow.
+    require Bugzilla::Install::Filesystem;
+    Bugzilla::Install::Filesystem::fix_file_permissions($param_file);
 
     # And now we have to reset the params cache so that Bugzilla will re-read
     # them.

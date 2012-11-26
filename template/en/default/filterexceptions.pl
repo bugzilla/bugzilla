@@ -280,8 +280,7 @@
 
 
 'bug/time.html.tmpl' => [
-  'time_unit FILTER format(\'%.1f\')', 
-  'time_unit FILTER format(\'%.2f\')', 
+  "time_unit.replace('0\\Z', '')",
   '(act / (act + rem)) * 100 
        FILTER format("%d")', 
 ],

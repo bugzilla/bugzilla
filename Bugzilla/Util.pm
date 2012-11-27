@@ -779,12 +779,12 @@ sub detect_encoding {
     }
 
     # Encode::Detect sometimes mis-detects various ISO encodings as iso-8859-8,
-    # but Encode::Guess can usually tell which one it is.
-    if ($encoding && $encoding eq 'iso-8859-8') {
+    # or cp1255, but Encode::Guess can usually tell which one it is.
+    if ($encoding && ($encoding eq 'iso-8859-8' || $encoding eq 'cp1255')) {
         my $decoded_as = _guess_iso($data, 'iso-8859-8', 
             # These are ordered this way because it gives the most 
             # accurate results.
-            qw(iso-8859-7 iso-8859-2));
+            qw(cp1252 iso-8859-7 iso-8859-2));
         $encoding = $decoded_as if $decoded_as;
     }
 

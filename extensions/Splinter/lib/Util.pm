@@ -53,7 +53,8 @@ sub attachment_id_is_valid {
     detaint_natural($attach_id) || return 0;
 
     # Make sure the attachment exists in the database.
-    my $attachment = new Bugzilla::Attachment($attach_id) || return 0;
+    my $attachment = new Bugzilla::Attachment({ id => $attach_id, cache => 1 })
+      || return 0;
 
     return $attachment 
         if ($dont_validate_access || attachment_is_visible($attachment));
@@ -135,7 +136,7 @@ sub add_review_links_to_email {
     if ($email->header('Subject') =~ /^\[Bug\s+(\d+)\]/ 
         && Bugzilla->user->can_see_bug($1))
     {
-        $bug = Bugzilla::Bug->new($1);
+        $bug = Bugzilla::Bug->new({ id => $1, cache => 1 });
     }
 
     return unless defined $bug;

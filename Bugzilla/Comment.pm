@@ -143,7 +143,8 @@ sub is_about_attachment {
 sub attachment {
     my ($self) = @_;
     return undef if not $self->is_about_attachment;
-    $self->{attachment} ||= new Bugzilla::Attachment($self->extra_data);
+    $self->{attachment} ||=
+        new Bugzilla::Attachment({ id => $self->extra_data, cache => 1 });
     return $self->{attachment};
 }
 

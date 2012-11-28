@@ -36,7 +36,7 @@ sub page_before_template {
         if ($input->{'bug'}) {
             $vars->{'bug_id'} = $input->{'bug'};
             $vars->{'attach_id'} = $input->{'attachment'};
-            $vars->{'bug'} = Bugzilla::Bug->check($input->{'bug'});
+            $vars->{'bug'} = Bugzilla::Bug->check({ id => $input->{'bug'}, cache => 1 });
         }
 
         if ($input->{'attachment'}) {

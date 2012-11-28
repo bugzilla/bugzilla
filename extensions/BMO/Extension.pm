@@ -144,7 +144,8 @@ sub template_before_process {
 
     if ($file =~ /^attachment\/diff-header\./) {
         my $attachid = $vars->{attachid} ? $vars->{attachid} : $vars->{newid};
-        $vars->{attachment} = Bugzilla::Attachment->new($attachid) if $attachid;
+        $vars->{attachment} = Bugzilla::Attachment->new({ id => $attachid, cache => 1 })
+            if $attachid;
     }
 }
 

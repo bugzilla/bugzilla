@@ -160,7 +160,7 @@ sub bug {
     my $self = shift;
 
     require Bugzilla::Bug;
-    $self->{bug} ||= Bugzilla::Bug->new($self->bug_id);
+    $self->{bug} ||= Bugzilla::Bug->new({ id => $self->bug_id, cache => 1 });
     return $self->{bug};
 }
 

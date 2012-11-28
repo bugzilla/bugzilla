@@ -62,7 +62,7 @@ Bugzilla->switch_to_shadow_db unless $user->id;
 
 if ($single) {
     my $id = $cgi->param('id');
-    push @bugs, Bugzilla::Bug->check($id);
+    push @bugs, Bugzilla::Bug->check({ id => $id, cache => 1 });
     if (defined $cgi->param('mark')) {
         foreach my $range (split ',', $cgi->param('mark')) {
             if ($range =~ /^(\d+)-(\d+)$/) {
@@ -78,8 +78,8 @@ if ($single) {
     foreach my $id ($cgi->param('id')) {
         # Be kind enough and accept URLs of the form: id=1,2,3.
         my @ids = split(/,/, $id);
-        foreach (@ids) {
-            my $bug = new Bugzilla::Bug($_);
+        foreach my $bug_id (@ids) {
+            my $bug = new Bugzilla::Bug({ id => $bug_id, cache => 1 });
             # This is basically a backwards-compatibility hack from when
             # Bugzilla::Bug->new used to set 'NotPermitted' if you couldn't
             # see the bug.

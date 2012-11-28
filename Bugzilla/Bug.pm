@@ -333,10 +333,14 @@ sub new {
 
     # If we get something that looks like a word (not a number),
     # make it the "name" param.
-    if (!defined $param || (!ref($param) && $param !~ /^\d+$/)) {
+    if (!defined $param
+        || (!ref($param) && $param =~ /\D/)
+        || (ref($param) && $param->{id} =~ /\D/))
+    {
         # But only if aliases are enabled.
         if (Bugzilla->params->{'usebugaliases'} && $param) {
-            $param = { name => $param };
+            $param = { name => ref($param) ? $param->{id} : $param,
+                       cache => ref($param) ? $param->{cache} : 0 };
         }
         else {
             # Aliases are off, and we got something that's not a number.
@@ -368,6 +372,13 @@ sub new {
     }
 
     return $self;
+}
+
+sub cache_key {
+    my $class = shift;
+    my $key = $class->SUPER::cache_key(@_)
+      || return;
+    return $key . ',' . Bugzilla->user->id;
 }
 
 sub check {
@@ -3241,7 +3252,8 @@ sub component_obj {
     my ($self) = @_;
     return $self->{component_obj} if defined $self->{component_obj};
     return {} if $self->{error};
-    $self->{component_obj} = new Bugzilla::Component($self->{component_id});
+    $self->{component_obj} =
+        new Bugzilla::Component({ id => $self->{component_id}, cache => 1 });
     return $self->{component_obj};
 }
 
@@ -3410,7 +3422,8 @@ sub product {
 sub product_obj {
     my $self = shift;
     return {} if $self->{error};
-    $self->{product_obj} ||= new Bugzilla::Product($self->{product_id});
+    $self->{product_obj} ||=
+        new Bugzilla::Product({ id => $self->{product_id}, cache => 1 });
     return $self->{product_obj};
 }
 

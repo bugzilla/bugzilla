@@ -70,8 +70,11 @@ usage() if $help;
 my $user_id = login_to_id('nobody@mozilla.org');
 $user_id or usage("Can't find user ID for 'nobody\@mozilla.org'\n");
 
-my $field_id = get_field_id('keywords');
-$field_id or usage("Can't find field ID for 'keywords' field\n");
+my $keywords_field_id = get_field_id('keywords');
+$keywords_field_id or usage("Can't find field ID for 'keywords' field\n");
+
+my $whiteboard_field_id = get_field_id('status_whiteboard');
+$whiteboard_field_id or usage("Can't find field ID for 'whiteboard' field\n");
 
 # intermittent-keyword id (assumes already created)
 my $keyword_obj = Bugzilla::Keyword->new({ name => 'intermittent-failure' });
@@ -113,7 +116,7 @@ foreach my $bug (@$bugs) {
                      undef, $bug_id, $keyword_id);
             $dbh->do("INSERT INTO bugs_activity(bug_id, who, bug_when, fieldid, removed, added) " .
        	             "VALUES (?, ?, ?, ?, '', 'intermittent-failure')",
-                     undef, $bug_id, $user_id, $timestamp, $field_id);
+                     undef, $bug_id, $user_id, $timestamp, $keywords_field_id);
             $dbh->do("UPDATE bugs SET delta_ts = ?, lastdiffed = ? WHERE bug_id = ?",
                      undef, $timestamp, $timestamp, $bug_id);
         }
@@ -130,7 +133,7 @@ foreach my $bug (@$bugs) {
                      undef, $whiteboard, $bug_id);
             $dbh->do("INSERT INTO bugs_activity(bug_id, who, bug_when, fieldid, removed, added) " .
        	             "VALUES (?, ?, ?, ?, ?, ?)",
-                     undef, $bug_id, $user_id, $timestamp, $field_id, $old_whiteboard, $whiteboard);
+                     undef, $bug_id, $user_id, $timestamp, $whiteboard_field_id, $old_whiteboard, $whiteboard);
             $dbh->do("UPDATE bugs SET delta_ts = ?, lastdiffed = ? WHERE bug_id = ?",
                      undef, $timestamp, $timestamp, $bug_id);
         }

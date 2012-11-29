@@ -2246,7 +2246,7 @@ an object based on that, or undef if it does not exist.
 =item C<save_last_search>
 
 Saves the users most recent search in the database if logged in, or in the
-BUGLIST cookie if not logged in. Paramaters are bug_ids, order, vars and
+BUGLIST cookie if not logged in. Parameters are bug_ids, order, vars and
 list_id.
 
 =back

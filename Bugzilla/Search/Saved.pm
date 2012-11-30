@@ -386,3 +386,21 @@ Returns how many users (besides the author of the saved search) are
 using the saved search, i.e. have it displayed in their footer.
 
 =back
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item create
+
+=item set_name
+
+=item set_url
+
+=item rename_field_value
+
+=item user
+
+=item used_in_whine
+
+=back

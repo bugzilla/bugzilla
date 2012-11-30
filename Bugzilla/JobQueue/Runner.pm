@@ -231,3 +231,31 @@ job queue.
 
 This is a subclass of L<Daemon::Generic> that is used by L<jobqueue>
 to run the Bugzilla job queue.
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item gd_check
+
+=item gd_run
+
+=item gd_can_install
+
+=item gd_other_cmd
+
+=item gd_more_opt
+
+=item gd_postconfig
+
+=item gd_usage
+
+=item gd_getopt
+
+=item gd_preconfig
+
+=item gd_can_uninstall
+
+=item gd_setup_signals
+
+=back

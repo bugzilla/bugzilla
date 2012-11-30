@@ -1346,3 +1346,15 @@ sub get_field_id {
 1;
 
 __END__
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item match
+
+=item set_is_numeric
+
+=item update
+
+=back

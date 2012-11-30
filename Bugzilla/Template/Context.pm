@@ -98,3 +98,15 @@ sub DESTROY {
 };
 
 1;
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item stash
+
+=item filter
+
+=item process
+
+=back

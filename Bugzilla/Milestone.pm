@@ -370,3 +370,13 @@ Milestone.pm represents a Product Milestone object.
  Returns:     A Bugzilla::Milestone object.
 
 =back
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item set_is_active
+
+=item is_active
+
+=back

@@ -653,3 +653,21 @@ Component.pm represents a Product Component object.
 =back
 
 =cut
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item is_set_on_bug
+
+=item product_id
+
+=item bug_ids
+
+=item set_is_active
+
+=item description
+
+=item is_active
+
+=back

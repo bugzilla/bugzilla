@@ -334,3 +334,23 @@ must call C<type> to get a class you can call methods on.
 
 This class implements mutators for all of the settable accessors in
 L<Bugzilla::Field::ChoiceInterface>.
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item create
+
+=item remove_from_db
+
+=item set_is_active
+
+=item set_sortkey
+
+=item set_name
+
+=item update
+
+=item set_visibility_value
+
+=back

@@ -989,3 +989,29 @@ sub get_content_type {
 
 
 1;
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item set_filename
+
+=item set_is_obsolete
+
+=item DB_COLUMNS
+
+=item set_is_private
+
+=item set_content_type
+
+=item set_description
+
+=item get_content_type
+
+=item set_flags
+
+=item set_is_patch
+
+=item update
+
+=back

@@ -319,3 +319,11 @@ would return something like:
 =item L<Bugzilla::WebService::User>
 
 =back
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item login_exempt
+
+=back

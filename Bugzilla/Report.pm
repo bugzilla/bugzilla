@@ -133,3 +133,17 @@ of L<Bugzilla::Object>, and thus provides all methods that
 L<Bugzilla::Object> provides.
 
 =cut
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item create
+
+=item query
+
+=item set_query
+
+=item set_name
+
+=back

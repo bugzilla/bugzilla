@@ -500,3 +500,33 @@ sub get_set_serial_sql {
 } 
 
 1;
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item get_rename_column_ddl
+
+=item get_add_fks_sql
+
+=item get_drop_index_ddl
+
+=item get_rename_table_sql
+
+=item get_add_column_ddl
+
+=item get_set_serial_sql
+
+=item get_drop_column_ddl
+
+=item get_drop_table_ddl
+
+=item get_drop_fk_sql
+
+=item get_table_ddl
+
+=item get_alter_column_ddl
+
+=item get_fk_ddl
+
+=back

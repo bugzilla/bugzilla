@@ -95,3 +95,13 @@ sub update_search_args {
 }
 
 1;
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item add
+
+=item update_search_args
+
+=back

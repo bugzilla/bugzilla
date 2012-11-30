@@ -476,3 +476,15 @@ sub _get_new_bugmail_fields {
 }
 
 1;
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item relationships
+
+=item sendMail
+
+=item Send
+
+=back

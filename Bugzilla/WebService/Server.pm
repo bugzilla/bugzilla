@@ -56,3 +56,15 @@ sub datetime_format_outbound {
 }
 
 1;
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item handle_login
+
+=item datetime_format_outbound
+
+=item datetime_format_inbound
+
+=back

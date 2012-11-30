@@ -1186,3 +1186,29 @@ Returns:     nothing
 =head1 SEE ALSO
 
 L<Bugzilla>, L<Template>
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item multiline_sprintf
+
+=item create
+
+=item css_files
+
+=item mtime_filter
+
+=item yui_resolve_deps
+
+=item process
+
+=item get_bug_link
+
+=item quoteUrls
+
+=item get_attachment_link
+
+=item SAFE_URL_REGEXP
+
+=back

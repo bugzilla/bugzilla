@@ -3013,3 +3013,19 @@ L<Bugzilla::DB>
 L<http://www.bugzilla.org/docs/developer.html#sql-schema>
 
 =cut
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item get_table_indexes_abstract
+
+=item get_create_database_sql
+
+=item get_add_fks_sql
+
+=item get_fk_ddl
+
+=item get_drop_fk_sql
+
+=back

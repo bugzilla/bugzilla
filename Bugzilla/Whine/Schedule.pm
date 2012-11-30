@@ -156,3 +156,11 @@ the group is still active, otherwise it will contain a single array element
 for the L<Bugzilla::User> in L</mailto>.
 
 =back
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item eventid
+
+=back

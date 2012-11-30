@@ -286,3 +286,21 @@ sub setup_template_patch_reader {
 1;
 
 __END__
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item get_unified_diff
+
+=item process_diff
+
+=item warn_if_interdiff_might_fail
+
+=item setup_template_patch_reader
+
+=item process_interdiff
+
+=item setup_patch_readers
+
+=back

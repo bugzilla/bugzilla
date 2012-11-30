@@ -385,4 +385,6 @@ Params:      none
 
 Returns:     A hashref containing the current params in C<$datadir/params>.
 
+=item C<param_panels()>
+
 =back

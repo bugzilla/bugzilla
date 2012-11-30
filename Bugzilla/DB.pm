@@ -2681,3 +2681,63 @@ our check for implementation of C<new> by derived class useless.
 L<DBI>
 
 L<Bugzilla::Constants/DB_MODULE>
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item bz_add_fks
+
+=item bz_add_fk
+
+=item bz_drop_index_raw
+
+=item bz_table_info
+
+=item bz_add_index_raw
+
+=item bz_get_related_fks
+
+=item quote
+
+=item bz_drop_fk
+
+=item bz_drop_field_tables
+
+=item bz_drop_related_fks
+
+=item bz_table_columns
+
+=item bz_drop_foreign_keys
+
+=item bz_alter_column_raw
+
+=item bz_table_list_real
+
+=item bz_fk_info
+
+=item bz_setup_database
+
+=item bz_setup_foreign_keys
+
+=item bz_table_indexes
+
+=item bz_check_regexp
+
+=item bz_enum_initial_values
+
+=item bz_alter_fk
+
+=item bz_set_next_serial_value
+
+=item bz_table_list
+
+=item bz_table_columns_real
+
+=item bz_check_server_version
+
+=item bz_server_version
+
+=item bz_add_field_tables
+
+=back

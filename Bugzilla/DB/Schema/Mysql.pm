@@ -383,3 +383,27 @@ sub get_rename_column_ddl {
 }
 
 1;
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item get_rename_column_ddl
+
+=item get_create_database_sql
+
+=item get_drop_index_ddl
+
+=item get_set_serial_sql
+
+=item get_rename_indexes_ddl
+
+=item get_drop_fk_sql
+
+=item MYISAM_TABLES
+
+=item column_info_to_column
+
+=item get_alter_column_ddl
+
+=back

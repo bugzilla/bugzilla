@@ -608,3 +608,21 @@ sub makeChart {
 }
 
 1;
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item FIELD_MAP
+
+=item quicksearch
+
+=item negateComparisonType
+
+=item makeChart
+
+=item addChart
+
+=item matchPrefixes
+
+=back

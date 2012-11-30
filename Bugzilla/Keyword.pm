@@ -166,3 +166,17 @@ implements.
 =back
 
 =cut
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item set_description
+
+=item bug_count
+
+=item set_name
+
+=item description
+
+=back

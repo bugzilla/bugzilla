@@ -188,3 +188,17 @@ sub _get_alter_type_sql {
 }
 
 1;
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item get_rename_column_ddl
+
+=item get_rename_table_sql
+
+=item get_create_database_sql
+
+=item get_set_serial_sql
+
+=back

@@ -1165,3 +1165,19 @@ if Bugzilla is currently using the shadowdb or not. Used like:
  }
 
 =back
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item do_ssl_redirect_if_required
+
+=item validate_time
+
+=item is_ipv4
+
+=item is_ipv6
+
+=item display_value
+
+=back

@@ -3395,3 +3395,15 @@ This method can throw the same errors as L</get>.
 =back
 
 =back
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item get_bugs
+
+=item possible_duplicates
+
+=item get_history
+
+=back

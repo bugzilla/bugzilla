@@ -129,3 +129,27 @@ sub as_params {
 }
 
 1;
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item has_translated_conditions
+
+=item as_string
+
+=item add
+
+=item children
+
+=item negate
+
+=item update_search_args
+
+=item walk_conditions
+
+=item joiner
+
+=item as_params
+
+=back

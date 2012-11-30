@@ -248,3 +248,25 @@ below.
 =back
 
 =cut
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item DEFAULT_VERSION
+
+=item set_is_active
+
+=item set_name
+
+=item product_id
+
+=item is_active
+
+=item remove_from_db
+
+=item product
+
+=item update
+
+=back

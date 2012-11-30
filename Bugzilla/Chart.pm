@@ -428,3 +428,29 @@ sub dump {
 }
 
 1;
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item remove
+
+=item add
+
+=item dump
+
+=item readData
+
+=item getSeriesIDs
+
+=item data
+
+=item init
+
+=item getVisibleSeries
+
+=item generateDateProgression
+
+=item sum
+
+=back

@@ -299,3 +299,39 @@ SQLite-specific implementation. It is instantiated by the Bugzilla::DB module
 and should never be used directly.
 
 For interface details see L<Bugzilla::DB> and L<DBI>.
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item sql_date_format
+
+=item bz_explain
+
+=item sql_position
+
+=item sql_iposition
+
+=item sql_group_by
+
+=item sql_not_regexp
+
+=item sql_limit
+
+=item sql_date_math
+
+=item sql_to_days
+
+=item sql_from_days
+
+=item bz_table_list_real
+
+=item sql_regexp
+
+=item sql_group_concat
+
+=item sql_istring
+
+=item bz_setup_database
+
+=back

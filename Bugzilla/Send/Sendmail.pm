@@ -94,3 +94,10 @@ sub _map_exitcode {
 
 1;
 
+=head1 B<Methods in need of POD>
+
+=over
+
+=item send
+
+=back

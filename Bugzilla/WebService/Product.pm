@@ -856,3 +856,11 @@ You must define a default milestone.
 =back
 
 =back
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item get_products
+
+=back

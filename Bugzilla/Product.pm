@@ -1070,3 +1070,37 @@ C<Bugzilla::Product::preload($products)>.
 L<Bugzilla::Object>
 
 =cut
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item set_allows_unconfirmed
+
+=item allows_unconfirmed
+
+=item set_name
+
+=item set_default_milestone
+
+=item set_group_controls
+
+=item create
+
+=item set_description
+
+=item set_is_active
+
+=item classification_id
+
+=item description
+
+=item default_milestone
+
+=item remove_from_db
+
+=item is_active
+
+=item update
+
+=back

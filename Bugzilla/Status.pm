@@ -297,3 +297,27 @@ C<1> if a comment is required on this change, C<0> if not.
 =back
 
 =cut
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item create
+
+=item BUG_STATE_OPEN
+
+=item is_static
+
+=item is_open_state
+
+=item is_active
+
+=item remove_from_db
+
+=item DB_COLUMNS
+
+=item is_open
+
+=item VALIDATORS
+
+=back

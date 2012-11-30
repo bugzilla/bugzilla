@@ -653,3 +653,13 @@ sub bz_locations {
 BEGIN { memoize('bz_locations') };
 
 1;
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item DB_MODULE
+
+=item contenttypes
+
+=back

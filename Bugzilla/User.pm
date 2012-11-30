@@ -2728,3 +2728,57 @@ is done with the data.
 =head1 SEE ALSO
 
 L<Bugzilla|Bugzilla>
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item email_enabled
+
+=item cryptpassword
+
+=item clear_login_failures
+
+=item set_disable_mail
+
+=item has_audit_entries
+
+=item groups_with_icon
+
+=item check_login_name
+
+=item set_extern_id
+
+=item mail_settings
+
+=item email_disabled
+
+=item update
+
+=item is_timetracker
+
+=item is_enabled
+
+=item queryshare_groups_as_string
+
+=item set_login
+
+=item set_password
+
+=item last_seen_date
+
+=item set_disabledtext
+
+=item update_last_seen_date
+
+=item set_name
+
+=item DB_COLUMNS
+
+=item extern_id
+
+=item visible_bugs
+
+=item UPDATE_COLUMNS
+
+=back

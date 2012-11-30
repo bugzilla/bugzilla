@@ -299,3 +299,25 @@ sub get_drop_fk_sql {
 
 
 1;
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item get_rename_column_ddl
+
+=item get_add_fks_sql
+
+=item get_drop_fk_sql
+
+=item get_create_database_sql
+
+=item get_alter_column_ddl
+
+=item get_add_column_ddl
+
+=item get_type_ddl
+
+=item get_drop_column_ddl
+
+=back

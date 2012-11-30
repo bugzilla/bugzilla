@@ -452,3 +452,53 @@ Checks that the value is a valid number
 Checks that the value is a valid regexp
 
 =back
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item check_notification
+
+=item check_priority
+
+=item check_ip
+
+=item check_user_verify_class
+
+=item check_bug_status
+
+=item check_shadowdb
+
+=item check_smtp_auth
+
+=item check_url
+
+=item check_urlbase
+
+=item check_email
+
+=item check_webdotbase
+
+=item get_param_list
+
+=item check_maxattachmentsize
+
+=item check_utf8
+
+=item check_group
+
+=item check_opsys
+
+=item check_platform
+
+=item check_severity
+
+=item check_sslbase
+
+=item check_mail_delivery_method
+
+=item check_theschwartz_available
+
+=item check_smtp_ssl
+
+=back

@@ -920,3 +920,11 @@ Returns a hashref where file names are the keys and the value is the feature
 that must be enabled in order to compile that file.
 
 =back
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item print_module_instructions
+
+=back

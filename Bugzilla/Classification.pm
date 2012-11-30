@@ -260,3 +260,21 @@ A Classification is a higher-level grouping of Products.
 =back
 
 =cut
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item set_description
+
+=item sortkey
+
+=item set_name
+
+=item description
+
+=item remove_from_db
+
+=item set_sortkey
+
+=back

@@ -334,3 +334,11 @@ Note that calling this function prints a B<lot> of information to
 STDOUT and STDERR.
 
 =back
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item check_cpan_requirements
+
+=back

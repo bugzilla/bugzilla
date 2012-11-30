@@ -270,3 +270,29 @@ sub remove_from_db {
 }
 
 1;
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item creator
+
+=item existsInDatabase
+
+=item name
+
+=item getCategoryID
+
+=item initFromParameters
+
+=item initFromCGI
+
+=item initFromDatabase
+
+=item remove_from_db
+
+=item writeToDatabase
+
+=item id
+
+=back

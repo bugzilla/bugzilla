@@ -189,3 +189,11 @@ parameters passed to a WebService method (the first parameter to this function).
 Helps make life simpler for WebService methods that internally create objects
 via both "ids" and "names" fields. Also de-duplicates objects that were loaded
 by both "ids" and "names". Returns an arrayref of objects.
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item taint_data
+
+=back

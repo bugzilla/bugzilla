@@ -69,3 +69,27 @@ sub condition {
 }
 
 1;
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item as_string
+
+=item fov
+
+=item value
+
+=item negate
+
+=item translated
+
+=item operator
+
+=item as_params
+
+=item condition
+
+=item field
+
+=back

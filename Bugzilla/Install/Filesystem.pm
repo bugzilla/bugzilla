@@ -930,3 +930,29 @@ how they are supposed to be set in Bugzilla's current configuration.
 If it fails to set the permissions, a warning will be printed to STDERR.
 
 =back
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item CGI_WRITE
+
+=item DIR_WS_SERVE
+
+=item DIR_ALSO_WS_SERVE
+
+=item WS_SERVE
+
+=item FILESYSTEM
+
+=item WS_EXECUTE
+
+=item CGI_READ
+
+=item DIR_CGI_READ
+
+=item DIR_CGI_WRITE
+
+=item DIR_CGI_OVERWRITE
+
+=back

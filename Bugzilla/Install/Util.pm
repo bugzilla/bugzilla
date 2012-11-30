@@ -915,3 +915,35 @@ is greater than C<$b>.
 =back
 
 =back
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item supported_languages
+
+=item extension_template_directory
+
+=item extension_code_files
+
+=item extension_web_directory
+
+=item trick_taint
+
+=item success
+
+=item trim
+
+=item extension_package_directory
+
+=item set_output_encoding
+
+=item extension_requirement_packages
+
+=item prevent_windows_dialog_boxes
+
+=item sortQvalue
+
+=item no_checksetup_from_cgi
+
+=back

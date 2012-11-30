@@ -1160,3 +1160,49 @@ or any custom fields are created. The default implementation does nothing.
 
 This is run after all data is inserted into Bugzilla. The default
 implementation does nothing.
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item do_migration
+
+=item verbose
+
+=item bug_fields
+
+=item insert_users
+
+=item users
+
+=item check_requirements
+
+=item bugs
+
+=item map_value
+
+=item insert_products
+
+=item products
+
+=item translate_all_bugs
+
+=item config_file_name
+
+=item dry_run
+
+=item name
+
+=item create_custom_fields
+
+=item reset_serial_values
+
+=item read_config
+
+=item write_config
+
+=item insert_bugs
+
+=item create_legal_values
+
+=back

@@ -118,3 +118,15 @@ Bugzilla to use some sort of service to schedule jobs to happen asyncronously.
 See the synopsis above for an easy to follow example on how to insert a
 job into the queue.  Give it a name and some arguments and the job will
 be sent away to be done later.
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item insert
+
+=item bz_databases
+
+=item job_map
+
+=back

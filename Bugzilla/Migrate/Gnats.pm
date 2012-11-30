@@ -699,3 +699,23 @@ sub translate_value {
 }
 
 1;
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item user_map
+
+=item user_to_email
+
+=item add_user
+
+=item translate_value
+
+=item before_insert
+
+=item translate_bug
+
+=item CONFIG_VARS
+
+=back

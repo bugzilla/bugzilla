@@ -419,3 +419,29 @@ A string, the full text of the comment as it would be displayed to an end-user.
 =back
 
 =cut
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item set_type
+
+=item bug
+
+=item set_extra_data
+
+=item set_is_private
+
+=item attachment
+
+=item is_about_attachment
+
+=item extra_data
+
+=item preload
+
+=item type
+
+=item update
+
+=back

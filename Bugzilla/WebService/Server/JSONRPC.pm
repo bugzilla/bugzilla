@@ -571,3 +571,25 @@ the JSON-RPC library that Bugzilla uses, not by Bugzilla.
 =head1 SEE ALSO
 
 L<Bugzilla::WebService>
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item response
+
+=item response_header
+
+=item cgi
+
+=item retrieve_json_from_get
+
+=item create_json_coder
+
+=item type
+
+=item handle_login
+
+=item datetime_format_outbound
+
+=back

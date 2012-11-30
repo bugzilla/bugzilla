@@ -1059,3 +1059,29 @@ sub _flag_types {
 }
 
 1;
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item update_activity
+
+=item setter_id
+
+=item bug
+
+=item requestee_id
+
+=item DB_COLUMNS
+
+=item set_flag
+
+=item type_id
+
+=item snapshot
+
+=item update_flags
+
+=item update
+
+=back

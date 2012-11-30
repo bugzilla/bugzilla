@@ -809,3 +809,13 @@ package name of the loaded extension.
 
 Calls L</load> for every enabled extension installed into Bugzilla,
 and returns an arrayref of all the package names that were loaded.
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item modify_inc
+
+=item my_inc
+
+=back

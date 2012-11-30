@@ -203,3 +203,11 @@ sub WS_DISPATCH {
 };
 
 1;
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item WS_DISPATCH
+
+=back

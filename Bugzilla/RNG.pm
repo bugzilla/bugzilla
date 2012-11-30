@@ -219,3 +219,15 @@ sub _win2k_seed {
 }
 
 1;
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item srand
+
+=item rand
+
+=item irand
+
+=back

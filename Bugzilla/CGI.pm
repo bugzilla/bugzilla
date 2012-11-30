@@ -640,3 +640,25 @@ Redirects from the current URL to one prefixed by the urlbase parameter.
 =head1 SEE ALSO
 
 L<CGI|CGI>, L<CGI::Cookie|CGI::Cookie>
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item check_etag
+
+=item clean_search_url
+
+=item url_is_attachment_base
+
+=item should_set
+
+=item multipart_start
+
+=item redirect_search_url
+
+=item param
+
+=item header
+
+=back

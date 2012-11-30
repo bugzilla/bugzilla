@@ -648,3 +648,47 @@ user_group_map for any user with DIRECT or REGEXP membership IN() the list
 of groups returned.
 
 =back
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item icon_url
+
+=item set_name
+
+=item bugs
+
+=item granted_by_direct
+
+=item set_user_regexp
+
+=item flag_types
+
+=item products
+
+=item set_icon_url
+
+=item set_description
+
+=item set_is_active
+
+=item user_regexp
+
+=item members_direct
+
+=item is_bug_group
+
+=item grant_direct
+
+=item description
+
+=item is_active
+
+=item remove_from_db
+
+=item is_active_bug_group
+
+=item update
+
+=back

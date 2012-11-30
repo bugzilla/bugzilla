@@ -932,3 +932,25 @@ Tells you whether or not a specific feature is enabled. For names
 of features, see C<OPTIONAL_MODULES> in C<Bugzilla::Install::Requirements>.
 
 =back
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item process_cache
+
+=item init_page
+
+=item extensions
+
+=item logout_user_by_id
+
+=item localconfig
+
+=item active_custom_fields
+
+=item request_cache
+
+=item has_flags
+
+=back

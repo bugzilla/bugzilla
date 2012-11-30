@@ -597,3 +597,13 @@ although they can be used separately.
 =back
 
 =cut
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item check_hash_token
+
+=item issue_hash_token
+
+=back

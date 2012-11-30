@@ -379,3 +379,15 @@ perl-SOAP-Lite package in versions 0.68-1 and above.
 =head1 SEE ALSO
 
 L<Bugzilla::WebService>
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item make_response
+
+=item initialize
+
+=item handle_login
+
+=back

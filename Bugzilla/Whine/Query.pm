@@ -122,3 +122,11 @@ bugs or one email per bug.
 The title of this object as it appears in the user forms and emails.
 
 =back
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item eventid
+
+=back

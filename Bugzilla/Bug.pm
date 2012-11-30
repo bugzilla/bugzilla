@@ -4283,3 +4283,269 @@ sub _multi_select_accessor {
 }
 
 1;
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item remove_cc
+
+=item add_see_also
+
+=item choices
+
+=item keywords
+
+=item blocked
+
+=item qa_contact
+
+=item add_comment
+
+=item bug_severity
+
+=item dup_id
+
+=item set_priority
+
+=item any_flags_requesteeble
+
+=item set_bug_status
+
+=item estimated_time
+
+=item set_platform
+
+=item statuses_available
+
+=item set_custom_field
+
+=item remove_see_also
+
+=item remove_from_db
+
+=item product_obj
+
+=item reporter_accessible
+
+=item set_summary
+
+=item LogActivityEntry
+
+=item set_assigned_to
+
+=item add_group
+
+=item bug_file_loc
+
+=item DATE_COLUMNS
+
+=item set_component
+
+=item delta_ts
+
+=item set_resolution
+
+=item version
+
+=item deadline
+
+=item fields
+
+=item dependson
+
+=item check_can_change_field
+
+=item update
+
+=item set_op_sys
+
+=item cache_key
+
+=item bug_group
+
+=item comments
+
+=item map_fields
+
+=item assigned_to
+
+=item user
+
+=item ValidateDependencies
+
+=item short_desc
+
+=item duplicate_ids
+
+=item isopened
+
+=item remaining_time
+
+=item set_deadline
+
+=item preload
+
+=item groups_in
+
+=item clear_resolution
+
+=item set_estimated_time
+
+=item in_group
+
+=item status
+
+=item get_activity
+
+=item reporter
+
+=item rep_platform
+
+=item DB_COLUMNS
+
+=item flag_types
+
+=item bug_status
+
+=item attachments
+
+=item flags
+
+=item set_flags
+
+=item actual_time
+
+=item component
+
+=item UPDATE_COLUMNS
+
+=item set_cclist_accessible
+
+=item product
+
+=item VALIDATORS
+
+=item show_attachment_flags
+
+=item set_comment_is_private
+
+=item set_severity
+
+=item send_changes
+
+=item add_tag
+
+=item bug_id
+
+=item reset_qa_contact
+
+=item remove_group
+
+=item set_alias
+
+=item set_dup_id
+
+=item set_target_milestone
+
+=item cc_users
+
+=item everconfirmed
+
+=item check_is_visible
+
+=item check_for_edit
+
+=item match
+
+=item VALIDATOR_DEPENDENCIES
+
+=item possible_duplicates
+
+=item set_url
+
+=item add_cc
+
+=item blocks_obj
+
+=item set_status_whiteboard
+
+=item product_id
+
+=item error
+
+=item reset_assigned_to
+
+=item status_whiteboard
+
+=item create
+
+=item set_all
+
+=item set_reporter_accessible
+
+=item classification_id
+
+=item tags
+
+=item modify_keywords
+
+=item priority
+
+=item keyword_objects
+
+=item set_dependencies
+
+=item depends_on_obj
+
+=item cclist_accessible
+
+=item cc
+
+=item duplicates
+
+=item component_obj
+
+=item see_also
+
+=item groups
+
+=item default_bug_status
+
+=item related_bugs
+
+=item editable_bug_fields
+
+=item resolution
+
+=item lastdiffed
+
+=item classification
+
+=item alias
+
+=item op_sys
+
+=item remove_tag
+
+=item percentage_complete
+
+=item EmitDependList
+
+=item bug_alias_to_id
+
+=item set_qa_contact
+
+=item creation_ts
+
+=item set_version
+
+=item component_id
+
+=item new_bug_statuses
+
+=item set_remaining_time
+
+=item target_milestone
+
+=back

@@ -201,3 +201,17 @@ sub _check_value {
 }
 
 1;
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item should_handle
+
+=item class_for
+
+=item class
+
+=item bug_id
+
+=back

@@ -270,3 +270,13 @@ I<any> of the currently selected values are this value.
 Returns C<0> otherwise.
 
 =back
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item FIELD_NAME
+
+=item controlled_values_array
+
+=back

@@ -2939,3 +2939,37 @@ sub _translate_old_column {
 }
 
 1;
+
+=head1 B<Methods in need of POD>
+
+=over
+
+=item invalid_order_columns
+
+=item COLUMN_JOINS
+
+=item sql
+
+=item split_order_term
+
+=item SqlifyDate
+
+=item REPORT_COLUMNS
+
+=item pronoun
+
+=item COLUMNS
+
+=item order
+
+=item search_description
+
+=item IsValidQueryType
+
+=item build_subselect
+
+=item do_search_function
+
+=item boolean_charts_to_custom_search
+
+=back

@@ -30,7 +30,7 @@
     .new .c1 {
       border-right: 1px solid #969696;
     }
-    #noreply, #reason, #tracking {
+    #noreply, #reason, #tracking, #bug_details {
       font-size: 90%;
       color: #666666;
     }
@@ -89,6 +89,11 @@
     </div>
     <br>
   [% END %]
+
+  <div id="bug_details">
+    <hr>
+    Product | Component: [% bug.product FILTER html %] | [% bug.component FILTER html %]
+  </div>
 
 [% USE Bugzilla %]
 [% tracking_flags = [] %]

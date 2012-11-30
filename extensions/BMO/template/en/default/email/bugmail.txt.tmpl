@@ -36,6 +36,9 @@ Referenced [% terms.Bugs %]:
 -- [%# Protect the trailing space of the signature marker %]
 Configure [% terms.bug %]mail: [% urlbase %]userprefs.cgi?tab=email
 
+-------------------------------
+Product | Component: [%+ bug.product +%] | [%+ bug.component %]
+
 [% USE Bugzilla %]
 [% tracking_flags = [] %]
 [% FOREACH field = Bugzilla.active_custom_fields(product => bug.product_obj, component => bug.component_obj, type => 2) %]

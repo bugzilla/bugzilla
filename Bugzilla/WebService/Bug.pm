@@ -659,10 +659,9 @@ sub add_attachment {
 
     $_->send_changes() foreach @bugs;
 
-    my %attachments = map { $_->id => $self->_attachment_to_hash($_, $params) }
-                          @created;
+    my @created_ids = map { $_->id } @created;
 
-    return { attachments => \%attachments };
+    return { ids => \@created_ids };
 }
 
 sub add_comment {
@@ -2562,7 +2561,7 @@ Bugzilla B<4.4>.
 
 =head2 add_attachment
 
-B<UNSTABLE>
+B<STABLE>
 
 =over
 
@@ -2625,9 +2624,8 @@ Defaults to False if not specified.
 
 =item B<Returns>
 
-A single item C<attachments>, which contains the created
-attachments in the same format as the C<attachments> return
-value from L</attachments>.
+A single item C<ids>, which contains an array of the
+attachment id(s) created.
 
 =item B<Errors>
 
@@ -2665,6 +2663,8 @@ You set the "data" field to an empty string.
 =item Added in Bugzilla B<4.0>.
 
 =item The C<is_url> parameter was removed in Bugzilla B<4.2>.
+
+=item The return value has changed in Bugzilla B<4.4>.
 
 =back
 

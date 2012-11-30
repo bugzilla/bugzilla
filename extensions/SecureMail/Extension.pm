@@ -195,6 +195,29 @@ sub user_preferences {
     $$handled = 1;
 }
 
+sub template_before_process {
+    my ($self, $args) = @_;
+    my $file = $args->{'file'};
+    my $vars = $args->{'vars'};
+
+    # Bug dependency emails contain the subject of the dependent bug
+    # right before the diffs when a status has gone from open/closed
+    # or closed/open. We need to sanitize the subject of change.blocker
+    # similar to how we do referenced bugs
+    return unless
+        $file eq 'email/bugmail.html.tmpl'
+        || $file eq 'email/bugmail.txt.tmpl';
+
+    if (defined $vars->{diffs}) {
+        foreach my $change (@{ $vars->{diffs} }) {
+            next if !defined $change->{blocker};
+            if (grep($_->secure_mail, @{ $change->{blocker}->groups_in })) {
+                $change->{blocker}->{short_desc} = "(Secure bug)";
+            }
+        }
+    }
+}
+
 sub _send_test_email {
     my ($user) = @_;
     my $template = Bugzilla->template_inner($user->settings->{'lang'}->{'value'});

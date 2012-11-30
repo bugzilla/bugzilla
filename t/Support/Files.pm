@@ -42,6 +42,7 @@ foreach $currentfile (@files) {
     if (isTestingFile($currentfile)) {
         push(@testitems,$currentfile);
     }
+    push(@module_files, $currentfile) if $currentfile =~ /\.pm$/;
 }
 
 

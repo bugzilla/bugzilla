@@ -11,8 +11,18 @@ use warnings;
 
 use base qw(Bugzilla::WebService);
 
+use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Util qw(detaint_natural trick_taint);
+use Bugzilla::WebService::Util qw(validate);
+
+use Bugzilla::Extension::MyDashboard::Queries qw(QUERY_DEFS query_bugs query_flags);
+
+use constant READ_ONLY => qw(
+    prod_comp_search
+    run_bug_query
+    run_flag_query
+);
 
 sub prod_comp_search {
     my ($self, $params) = @_;
@@ -78,6 +88,44 @@ sub prod_comp_search {
         { Slice => {} });
 
     return { products => $products };
+}
+
+sub run_bug_query {
+    my($self, $params) = @_;
+    my $user = Bugzilla->login(LOGIN_REQUIRED);
+
+    defined $params->{query}
+        || ThrowCodeError('param_required',
+                          { function => 'MyDashboard.run_bug_query',
+                            param    => 'query' });
+
+    my $result;
+    foreach my $qdef (QUERY_DEFS) {
+        next if $qdef->{name} ne $params->{query};
+        my ($bugs, $query_string) = query_bugs($qdef);
+        $query_string =~ s/^POSTDATA=&//;
+        $qdef->{bugs}   = $bugs;
+        $qdef->{buffer} = $query_string;
+        $result = $qdef;
+        last;
+    }
+
+    return { result => $result };
+}
+
+sub run_flag_query {
+    my ($self, $params) =@_;
+    my $user = Bugzilla->login(LOGIN_REQUIRED);
+
+    defined $params->{type}
+        || ThrowCodeError('param_required',
+                         { function => 'MyDashboard.run_flag_query',
+                           param    => 'type' });
+
+    my $type = $params->{type};
+    my $results = query_flags($type);
+
+    return { result => { $type => $results }};
 }
 
 1;

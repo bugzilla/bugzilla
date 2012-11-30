@@ -6,154 +6,301 @@
  * defined by the Mozilla Public License, v. 2.0. 
  */
 
-YAHOO.namespace('MyDashboard');
+// Main query code
+YUI().use("node", "datatable", "datatable-sort", "json-stringify",
+          "datatable-datasource", "datasource-io", "datasource-jsonschema",
+          "gallery-paginator-view", "gallery-datatable-paginator", function (Y) {
+    var counter = 0,
+        dataSource = null,
+        dataTable = null;
 
-var MD = YAHOO.MyDashboard;
+    var updateQueryTable = function(query_name) {
+        if (!query_name) return;
 
-MD.showQuerySection = function () {
-    var query_select = YAHOO.util.Dom.get('query');
-    var selected_value = '';
-    for (var i = 0, l = query_select.options.length; i < l; i++) {
-        if (query_select.options[i].selected) {
-            selected_value = query_select.options[i].value;
-        }
-    }
-    for (var i = 0, l = MD.full_query_list.length; i < l; i++) {
-        var query = MD.full_query_list[i];
-        if (selected_value == MD.full_query_list[i]) {
-            YAHOO.util.Dom.removeClass(query + '_container', 'bz_default_hidden');
-        }
-        else {
-            YAHOO.util.Dom.addClass(query + '_container', 'bz_default_hidden');
-        }
-    }
-}
+        counter = counter + 1;
 
-MD.query_column_defs = [
-    { key:"id", label:"ID", sortable:true, sortOptions:{ sortFunction: MD.sortBugIdLinks } },
-    { key:"updated", label:"Updated", sortable:true },
-    { key:"bug_status", label:"Status", sortable:true },
-    { key:"summary", label:"Summary", sortable:true },
-];
-
-MD.query_fields = [
-    { key:"id" },
-    { key:"updated" },
-    { key:"bug_status" },
-    { key:"summary" }
-];
-
-MD.requestee_column_defs = [
-  { key:"requester", label:"Requester", sortable:true },
-  { key:"flag", label:"Flag", sortable:true },
-  { key:"bug", label:"Bug", sortable:true },
-  { key:"created", label:"Created", sortable:true }
-];
-
-MD.requestee_fields = [
-  { key:"requester" },
-  { key:"flag" },
-  { key:"bug" },
-  { key:"created" }
-];
-
-MD.requester_column_defs = [
-  { key:"requestee", label:"Requestee", sortable:true },
-  { key:"flag", label:"Flag", sortable:true },
-  { key:"bug", label:"Bug", sortable:true },
-  { key:"created", label:"Created", sortable:true }
-];
-
-MD.requester_fields = [
-  { key:"requestee" },
-  { key:"flag" },
-  { key:"bug" },
-  { key:"created" }
-];
-
-MD.addStatListener = function (div_name, table_name, column_defs, fields, options) {
-    YAHOO.util.Event.addListener(window, "load", function() {
-        YAHOO.example.StatsFromMarkup = new function() {
-            this.myDataSource = new YAHOO.util.DataSource(YAHOO.util.Dom.get(table_name));
-            this.myDataSource.responseType = YAHOO.util.DataSource.TYPE_HTMLTABLE;
-            this.myDataSource.responseSchema = { fields:fields };
-            this.myDataTable = new YAHOO.widget.DataTable(div_name, column_defs, this.myDataSource, options);
-            this.myDataTable.subscribe("rowMouseoverEvent", this.myDataTable.onEventHighlightRow);
-            this.myDataTable.subscribe("rowMouseoutEvent", this.myDataTable.onEventUnhighlightRow);
+        var callback = {
+            success: function(e) {
+                if (e.response) {
+                    Y.one("#query_container .query_description").setHTML(e.response.meta.description);
+                    Y.one("#query_container .query_heading").setHTML(e.response.meta.heading);
+                    Y.one("#query_bugs_found").setHTML(
+                        '<a href="buglist.cgi?' + e.response.meta.buffer +
+                        '">' + e.response.results.length + ' bugs found</a>');
+                    Y.one("#query_container .status").addClass('bz_default_hidden');
+                    dataTable.set('data', e.response.results);
+                    dataTable.render("#query_table");
+                }
+            },
+            failure: function(o) {
+                var resp = o.responseText;
+                alert("IO request failed : " + resp);
+            }
         };
+
+        var json_object = {
+            version: "1.1",
+            method:  "MyDashboard.run_bug_query",
+            id:      counter,
+            params:  { query : query_name }
+        };
+
+        var stringified = Y.JSON.stringify(json_object);
+
+        Y.one("#query_container .status").removeClass('bz_default_hidden');
+
+        dataSource.sendRequest({
+            request: stringified,
+            cfg: {
+                method:  "POST",
+                headers: { 'Content-Type': 'application/json' }
+            },
+            callback: callback
+        });
+    };
+
+    dataSource = new Y.DataSource.IO({ source: 'jsonrpc.cgi' });
+    dataTable = new Y.DataTable({
+        columns: [
+            { key:"bug_id", label:"Bug", sortable:true,
+              formatter: '<a href="show_bug.cgi?id={value}" target="_blank">{value}</a>', allowHTML: true },
+            { key:"changeddate", label:"Updated", sortable:true },
+            { key:"bug_status", label:"Status", sortable:true },
+            { key:"short_desc", label:"Summary", sortable:true },
+        ],
+        strings: {
+            emptyMessage: 'No query data found.',
+        },
+        paginator: new Y.PaginatorView({
+            container: '#query_pagination_top'
+        })
     });
-}
 
-// Custom sort handler to sort by bug id inside an anchor tag
-MD.sortBugIdLinks = function (a, b, desc) {
-    // Deal with empty values
-    if (!YAHOO.lang.isValue(a)) {
-        return (!YAHOO.lang.isValue(b)) ? 0 : 1;
-    }
-    else if(!YAHOO.lang.isValue(b)) {
-        return -1;
-    }
-    // Now we need to pull out the ID text and convert to Numbers
-    // First we do 'a'
-    var container = document.createElement("bug_id_link");
-    container.innerHTML = a.getData("id");
-    var anchors = container.getElementsByTagName("a");
-    var text = anchors[0].textContent;
-    if (text === undefined) text = anchors[0].innerText;
-    var new_a = new Number(text);
-    // Then we do 'b'
-    container.innerHTML = b.getData("id");
-    anchors = container.getElementsByTagName("a");
-    text = anchors[0].textContent;
-    if (text == undefined) text = anchors[0].innerText;
-    var new_b = new Number(text);
+    dataTable.plug(Y.Plugin.DataTableSort);
 
-    if (!desc) {
-        return YAHOO.util.Sort.compare(new_a, new_b);
-    }
-    else {
-        return YAHOO.util.Sort.compare(new_b, new_a);
-    }
-}
+    dataTable.plug(Y.Plugin.DataTableDataSource, {
+        datasource: dataSource,
+        initialRequest: updateQueryTable("assignedbugs"),
+    });
 
-// Custom sort handler for bug severities
-MD.sortBugSeverity = function (a, b, desc) {
-    // Deal with empty values
-    if (!YAHOO.lang.isValue(a)) {
-        return (!YAHOO.lang.isValue(b)) ? 0 : 1;
-    }
-    else if(!YAHOO.lang.isValue(b)) {
-        return -1;
-    }
+    dataSource.plug(Y.Plugin.DataSourceJSONSchema, {
+        schema: {
+            resultListLocator: "result.result.bugs",
+            resultFields: ["bug_id", "changeddate", "bug_status", "short_desc"],
+            metaFields: {
+                description: "result.result.description",
+                heading:     "result.result.heading",
+                buffer:      "result.result.buffer"
+            }
+        }
+    });
 
-    var new_a = new Number(MD.severities[YAHOO.lang.trim(a.getData('bug_severity'))]);
-    var new_b = new Number(MD.severities[YAHOO.lang.trim(b.getData('bug_severity'))]);
+    Y.one('#query').on('change', function(e) {
+        var index = e.target.get('selectedIndex');
+        var selected_value = e.target.get("options").item(index).getAttribute('value');
+        updateQueryTable(selected_value);
+    });
 
-    if (!desc) {
-        return YAHOO.util.Sort.compare(new_a, new_b);
-    }
-    else {
-        return YAHOO.util.Sort.compare(new_b, new_a);
-    }
-}
+    Y.one('#query_refresh').on('click', function(e) {
+        var query_select = Y.one('#query');
+        var index = query_select.get('selectedIndex');
+        var selected_value = query_select.get("options").item(index).getAttribute('value');
+        updateQueryTable(selected_value);
+    });
+});
 
-// Custom sort handler for bug priorities
-MD.sortBugPriority = function (a, b, desc) {
-    // Deal with empty values
-    if (!YAHOO.lang.isValue(a)) {
-        return (!YAHOO.lang.isValue(b)) ? 0 : 1;
-    }
-    else if(!YAHOO.lang.isValue(b)) {
-        return -1;
-    }
+// Flag tables
+YUI().use("node", "datatable", "datatable-sort", "json-stringify",
+          "datatable-datasource", "datasource-io", "datasource-jsonschema", function (Y) {
+    // Common
+    var counter = 0;
+    var dataSource = {
+        requestee: null,
+        requester: null
+    };
+    var dataTable = {
+        requestee: null,
+        requester: null
+    };
 
-    var new_a = new Number(MD.priorities[YAHOO.lang.trim(a.getData('priority'))]);
-    var new_b = new Number(MD.priorities[YAHOO.lang.trim(b.getData('priority'))]);
+    var updateFlagTable = function (type) {
+        if (!type) return;
 
-    if (!desc) {
-        return YAHOO.util.Sort.compare(new_a, new_b);
-    }
-    else {
-        return YAHOO.util.Sort.compare(new_b, new_a);
-    }
-}
+        counter = counter + 1;
+
+        var callback = {
+            success: function(e) {
+                if (e.response) {
+                    Y.one("#" + type + "_flags_found").setHTML(
+                        e.response.results.length + ' flags found');
+                    Y.one("#" + type + "_container .status").addClass('bz_default_hidden');
+                    dataTable[type].set('data', e.response.results);
+                    dataTable[type].render("#" + type + "_table");
+                }
+            },
+            failure: function(o) {
+                var resp = o.responseText;
+                alert("IO request failed : " + resp);
+            }
+        };
+
+        var json_object = {
+            version: "1.1",
+            method:  "MyDashboard.run_flag_query",
+            id:      counter,
+            params:  { type : type }
+        };
+
+        var stringified = Y.JSON.stringify(json_object);
+
+        Y.one("#" + type + "_container .status").removeClass('bz_default_hidden');
+
+        dataSource[type].sendRequest({
+            request: stringified,
+            cfg: {
+                method:  "POST",
+                headers: { 'Content-Type': 'application/json' }
+            },
+            callback: callback
+        });
+    };
+
+    // Requestee
+    dataSource.requestee = new Y.DataSource.IO({ source: 'jsonrpc.cgi' });
+    dataTable.requestee = new Y.DataTable({
+        columns: [
+            { key:"requester", label:"Requester", sortable:true },
+            { key:"flag", label:"Flag", sortable:true },
+            { key:"bug_id", label:"Bug", sortable:true,
+              formatter: '<a href="show_bug.cgi?id={value}" target="_blank">{value}</a>', allowHTML: true },
+            { key:"changeddate", label:"Updated", sortable:true },
+            { key:"created", label:"Created", sortable:true }
+        ],
+        strings: {
+            emptyMessage: 'No flag data found.',
+        }
+    });
+
+    dataTable.requestee.plug(Y.Plugin.DataTableSort);
+
+    dataTable.requestee.plug(Y.Plugin.DataTableDataSource, {
+        datasource: dataSource,
+        initialRequest: updateFlagTable("requestee"),
+    });
+
+    dataSource.requestee.plug(Y.Plugin.DataSourceJSONSchema, {
+        schema: {
+            resultListLocator: "result.result.requestee",
+            resultFields: ["requester", "flag", "bug_id", "created"]
+        }
+    });
+
+    dataTable.requestee.render("#requestee_table");
+
+    Y.one('#requestee_refresh').on('click', function(e) {
+        updateFlagTable('requestee');
+    });
+
+    // Requester
+    dataSource.requester = new Y.DataSource.IO({ source: 'jsonrpc.cgi' });
+    dataTable.requester = new Y.DataTable({
+        columns: [
+            { key:"requestee", label:"Requestee", sortable:true },
+            { key:"flag", label:"Flag", sortable:true },
+            { key:"bug_id", label:"Bug", sortable:true,
+              formatter: '<a href="show_bug.cgi?id={value}" target="_blank">{value}</a>', allowHTML: true },
+            { key:"created", label:"Created", sortable:true }
+        ],
+        strings: {
+            emptyMessage: 'No flag data found.',
+        }
+    });
+
+    dataTable.requester.plug(Y.Plugin.DataTableSort);
+
+    dataTable.requester.plug(Y.Plugin.DataTableDataSource, {
+        datasource: dataSource,
+        initialRequest: updateFlagTable("requester"),
+    });
+
+    dataSource.requester.plug(Y.Plugin.DataSourceJSONSchema, {
+        schema: {
+            resultListLocator: "result.result.requester",
+            resultFields: ["requestee", "flag", "bug_id", "created"]
+        }
+    });
+
+    Y.one('#requester_refresh').on('click', function(e) {
+        updateFlagTable('requester');
+    });
+});
+
+YUI().use("node", "json-stringify", "autocomplete", "autocomplete-highlighters",
+          "datasource-io", "datasource-jsonschema", function (Y) {
+    var counter = 0,
+        format = '',
+        cloned_bug_id = '',
+        dataSource = null,
+        autoComplete = null;
+
+    var generateRequest = function (enteredText) {
+        counter = counter + 1;
+        var json_object = {
+            version: "1.1",
+            method : "MyDashboard.prod_comp_search",
+            id : counter,
+            params : { search: enteredText }
+        };
+        Y.one("#prod_comp_throbber").removeClass('bz_default_hidden');
+        return Y.JSON.stringify(json_object);
+    };
+
+    var resultListFormat = function(oResultData, enteredText, sResultMatch) {
+        return Y.Lang.escapeHTML(oResultData[0]) + " :: " +
+               Y.Lang.escapeHTML(oResultData[1]);
+    };
+
+    var dataSource = new Y.DataSource.IO({
+        source: 'jsonrpc.cgi',
+        connTimeout: 30000,
+        connMethodPost: true,
+        connXhrMode: 'cancelStaleRequests',
+        maxCacheEntries: 5,
+        responseSchema: {
+            resultsList : "result.products",
+            metaFields : { error: "error", jsonRpcId: "id"},
+            fields : [ "product", "component" ]
+        }
+    });
+
+    Y.one('#prod_comp_search').plug(Y.Plugin.AutoComplete, {
+        resultHighlighter: 'phraseMatch',
+        source: dataSource,
+        minQueryLength: 3,
+        queryDelay: 0.05,
+        generateRequest: generateRequest,
+        formatResult: resultListFormat,
+        maxResultsDisplayed: 25,
+        suppressInputUpdate: true,
+        doBeforeLoadData: function(sQuery, oResponse, oPayload) {
+            Y.one("#prod_comp_throbber").addClass('bz_default_hidden');
+            return true;
+        }
+    });
+
+//    autoComplete.textboxFocusEvent.subscribe(function () {
+//        var input = Y.one(field);
+//        if (input.value && input.value.length > 3) {
+//            sendQuery(input.value);
+//        }
+//    });
+//
+//    autoComplete.itemSelectEvent.subscribe(function (e, args) {
+//        var oData = args[2];
+//        var url  = "enter_bug.cgi?product=" + encodeURIComponent(oData[0]) +
+//                   "&component=" +  encodeURIComponent(oData[1]);
+//        autoComplete.dataReturnEvent.subscribe(function(type, args) {
+//            args[0].autoHighlight = args[2].length == 1;
+//        });
+//    });
+});

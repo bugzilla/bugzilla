@@ -10,53 +10,34 @@
 
 [% PROCESS global/header.html.tmpl
   title = "My Dashboard"
-  style_urls = [ "skins/standard/buglist.css",
-                 "js/yui/assets/skins/sam/paginator.css", 
-                 "extensions/MyDashboard/web/styles/mydashboard.css",
+  style_urls = [ "extensions/MyDashboard/web/styles/mydashboard.css",
                  "extensions/MyDashboard/web/styles/prod_comp_search.css" ]
-  yui = [ "datatable", "paginator", "autocomplete" ]
-  javascript_urls = [ "extensions/MyDashboard/web/js/mydashboard.js",
-                      "extensions/MyDashboard/web/js/prod_comp_search.js" ]
-  onload = "MD.showQuerySection();"
 %]
 
-<script type="text/javascript">
-<!--
-  [%# Set up severities list for proper sorting %]
-  MD.severities = new Array();
-  [% sort_count = 0 %]
-  [% FOREACH s = severities %]
-    MD.severities['[% s FILTER js %]'] = [% sort_count FILTER js %];
-    [% sort_count = sort_count + 1 %]
-  [% END %]
-
-  MD.full_query_list = [];
-  [% FOREACH r = results %]
-    MD.full_query_list.push('[% r.name FILTER js %]');
-  [% END %]
--->
-</script>
-
-[% standard_results = [] %]
-[% saved_results    = [] %]
-[% FOREACH r = results %]
-  [% standard_results.push(r) IF !r.saved %]
-  [% saved_results.push(r) IF r.saved %]
+[% standard_queries = [] %]
+[% saved_queries    = [] %]
+[% FOREACH q = queries %]
+  [% standard_queries.push(q) IF !q.saved %]
+  [% saved_queries.push(q) IF q.saved %]
 [% END %]
 
+<script src="http://yui.yahooapis.com/3.7.3/build/yui/yui-min.js"></script>
+[%# These need to load after yui-min.js %]
+<script type="text/javascript" src="[% 'extensions/MyDashboard/web/js/mydashboard.js' FILTER mtime FILTER html %]"></script>
+
 <div id="mydashboard">
-  <div class="yui-skin-sam">
+  <div class="yui3-skin-sam">
     <div id="left">
       <div id="query_list_container">
         Choose query:
-        <select id="query" name="query" onchange="MD.showQuerySection();">
+        <select id="query" name="query">
           <optgroup id="standard_queries" label="Standard">
-            [% FOREACH r = standard_results %]
+            [% FOREACH r = standard_queries %]
               <option value="[% r.name FILTER html %]">[% r.heading FILTER html %]</option>
             [% END%]
           </optgroup>
           <optgroup id="saved_queries" label="Saved">
-            [% FOREACH r = saved_results %]
+            [% FOREACH r = saved_queries %]
               <option value="[% r.name FILTER html %]">[% r.heading FILTER html %]</option>
             [% END %]
           </optgroup>
@@ -66,157 +47,49 @@
         </small>
       </div>
 
-      [% FOREACH r = standard_results %]
-        [% PROCESS query_results r = r %]
-      [% END %]
-
-      [% FOREACH r = saved_results %]
-        [% PROCESS query_results r = r %]
-      [% END %]
+      <div id="query_container">
+        <div class="query_heading"></div>
+        <div class="query_description"></div>
+        <span class="items_found" id="query_bugs_found">0 bugs found</span>
+        | <a class="refresh" href="javascript:void(0);" id="query_refresh">Refresh</a>
+        <span class="status">Loading...</span>
+        <div id="query_pagination_top"></div>
+        <div id="query_table"></div>
+      </div>
     </div>
 
     <div id="right">
-      <div id="file_bug_container">
-        [% PROCESS "mydashboard/prod-comp-search.html.tmpl" %]
+      <div id="prod_comp_search_main">
+        <div id="prod_comp_search_label">
+          File [% terms.Bug %]:
+          <img id="prod_comp_throbber" src="extensions/BMO/web/images/throbber.gif"
+               class="bz_default_hidden" width="16" height="11">
+        </div>
+        <input id="prod_comp_search" type="text" size="60">
       </div>
 
       <div id="requestee_container"> 
         <div class="query_heading">
           Flags Requested of You
         </div>
-        <span class="flags_found">
-          [% requestee_list.size FILTER html %]&nbsp;flags found
-        </span>
-        <div id="requestee_table_container">
-          <table id="requestee_table" cellspacing="0" cellpadding="3" width="100%">
-          <thead>
-          <tr bgcolor="#dedede">
-            <th>Requester</th>
-            <th>Flag</th>
-            <th>[% terms.Bug %]</th>
-            <th>Created</th>
-          </tr>
-          </thead>
-          <tbody>
-          [% FOREACH request = requestee_list %]
-            <tr class="bz_bugitem [%+ loop.count() % 2 == 0 ? "bz_row_odd" : "bz_row_even" %]">
-              <td>[% request.requester FILTER html %]</td>
-              <td>[% request.type FILTER html %][% request.status FILTER html %]</td>
-              <td>
-              [% IF request.attach_id %]
-                <a href="[% urlbase FILTER none %]attachment.cgi?action=edit&id=[% request.attach_id FILTER uri %]">
-                  [% request.attach_id FILTER html %]: [%+ request.attach_summary FILTER html %]</a>
-              [% ELSE %]
-                <a href="[% urlbase FILTER none %]show_bug.cgi?id=[% request.bug_id FILTER uri %]">
-                  [% request.bug_id FILTER html %]: [%+ request.bug_summary FILTER html %]</a>
-              [% END %]
-              </td>
-              <td>[% request.created FILTER time('%Y:%m:%d') FILTER html %]</td>
-            </tr>
-          [% END %]
-          </tbody>
-          </table>
-        </div>
+        <span class="items_found" id="requestee_flags_found">0 flags found</span>
+        | <a class="refresh" href="javascript:void(0);" id="requestee_refresh">Refresh</a>
+        <span class="status">Loading...</span>
+        <div id="requestee_table"></div>
       </div>
-      <script>
-      <!--
-        MD.addStatListener("requestee_table_container", "requestee_table",
-                           MD.requestee_column_defs, MD.requestee_fields,
-                           { paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25, alwaysVisible: false }) });
-      -->
-      </script>
 
       <div id="requester_container">
         <div class="query_heading">
           Flags You Have Requested
         </div>
-        <span class="flags_found">
-          [% requester_list.size FILTER html %]&nbsp;flags found
-        </span>
-        <div id="requester_table_container">
-          <table id="requester_table" cellspacing="0" cellpadding="3" width="100%">
-          <thead bgcolor="#dedede">
-          <tr>
-            <th>Requestee</th>
-            <th>Flag</th>
-            <th>[% terms.Bug %]</th>
-            <th>Created</th>
-          </tr>
-          </thead>
-          <tbody>
-          [% FOREACH request = requester_list %]
-            <tr class="bz_bugitem [%+ loop.count() % 2 == 0 ? "bz_row_odd" : "bz_row_even" %]">
-              <td>[% request.requestee FILTER html %]</td>
-              <td>[% request.type FILTER html %][% request.status FILTER html %]</td>
-              <td>
-              [% IF request.attach_id %]
-                <a href="[% urlbase FILTER none %]attachment.cgi?action=edit&id=[% request.attach_id FILTER uri %]">
-                  [% request.attach_id FILTER html %]: [%+ request.attach_summary FILTER html %]</a>
-              [% ELSE %]
-                <a href="[% urlbase FILTER none %]show_bug.cgi?id=[% request.bug_id FILTER uri %]">
-                  [% request.bug_id FILTER html %]: [%+ request.bug_summary FILTER html %]</a>
-              [% END %]
-              </td>
-              <td>[% request.created FILTER time('%Y:%m:%d') FILTER html %]</td>
-            </tr>
-          [% END %]
-          </tbody>
-          </table>
-        </div>
+        <span class="items_found" id="requester_flags_found">0 flags found</span>
+        | <a class="refresh" href="javascript:void(0);" id="requester_refresh">Refresh</a>
+        <span class="status">Loading...</span>
+        <div id="requester_table"></div>
       </div>
-      <script>
-      <!--
-        MD.addStatListener("requester_table_container", "requester_table",
-                           MD.requester_column_defs, MD.requester_fields,
-                           { paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25,  alwaysVisible: false }) });
-      -->
-      </script>
     </div>
     <div style="clear:both;"></div>
   </div>
 </div>
 
 [% PROCESS global/footer.html.tmpl %]
-
-[% BLOCK query_results %]
-  <div id="[% r.name FILTER html %]_container" class="bz_default_hidden">
-    [% IF r.description %]
-      <div class="query_description">
-        [% r.description FILTER html %]
-      </div>
-    [% END %]
-    <span class="bugs_found">
-      <a href="[% urlbase FILTER none %]buglist.cgi?[% r.buffer FILTER none %]">
-        [% r.bugs.size FILTER html %]&nbsp;[% terms.bugs %] found</a>
-    </span>
-    <div id="[% r.name FILTER html %]_table_container">
-      <table id="[% r.name FILTER html %]_table" cellspacing="0" cellpadding="3" width="100%">
-      <thead>
-      <tr>
-          <th>ID</th>
-          <th>Updated</th>
-          <th>Status</th>
-          <th>Summary</th>
-      </tr>
-      </thead>
-      <tbody>
-      [% FOREACH bug = r.bugs %]
-        <tr class="bz_bugitem [%+ loop.count() % 2 == 0 ? "bz_row_odd" : "bz_row_even" %]">
-          <td align="center"><a href="show_bug.cgi?id=[% bug.bug_id FILTER uri %]">[% bug.bug_id FILTER html %]</a></td>
-          <td align="center">[% bug.changeddate FILTER time('%Y:%m:%d') FILTER html %]</td>
-          <td align="center">[% bug.bug_status FILTER html %]</td>
-          <td>[% bug.short_desc FILTER html %]</td>
-        </tr>
-      [% END %]
-      </tbody>
-      </table>
-    </div>
-    <script>
-    <!--
-      MD.addStatListener("[% r.name FILTER js %]_table_container", "[% r.name FILTER js %]_table",
-                         MD.query_column_defs, MD.query_fields,
-                         { paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25, alwaysVisible: false }) });
-    -->
-    </script>
-  </div>
-[% END %]

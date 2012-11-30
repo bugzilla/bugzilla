@@ -9,6 +9,10 @@ package Bugzilla::Extension::MyDashboard::Util;
 
 use strict;
 
+use Bugzilla::CGI;
+use Bugzilla::Search;
+use Bugzilla::Status;
+
 use base qw(Exporter);
 @Bugzilla::Extension::MyDashboard::Util::EXPORT = qw(
     open_states
@@ -16,8 +20,6 @@ use base qw(Exporter);
     quoted_open_states
     quoted_closed_states
 );
-
-use Bugzilla::Status;
 
 our $_open_states;
 sub open_states {

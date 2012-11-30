@@ -31,18 +31,26 @@
 [% filtered_desc = bug.short_desc FILTER html %]
 [% subheader = filtered_desc %]
 [% filtered_timestamp = bug.delta_ts FILTER time %]
-[% title = "$terms.Bug $bug.bug_id &ndash; $filtered_desc" %]
+[% title = "$terms.Bug $bug.bug_id &ndash; " %]
+[% IF bug.alias != '' %]
+  [% title = title _ "($bug.alias) " %]
+[% END %]
+[% title = title _ filtered_desc %]
 [% header = "$terms.Bug&nbsp;$bug.bug_id" %]
 [% header_addl_info = "Last modified: $filtered_timestamp" %]
 [% yui = ['autocomplete', 'calendar'] %]
 [% javascript_urls = [ "js/util.js", "js/field.js" ] %]
 [% IF bug.defined %]
-  [% unfiltered_title = "$terms.Bug $bug.bug_id – $bug.short_desc" %]
+  [% unfiltered_title = "$terms.Bug $bug.bug_id – " %]
+  [% IF bug.alias != '' %]
+    [% unfiltered_title = unfiltered_title _ "($bug.alias) " %]
+  [% END %]
+  [% unfiltered_title = unfiltered_title _ bug.short_desc %]
   [% javascript =  BLOCK %]
     if (history && history.replaceState) {
       if(!document.location.href.match(/show_bug\.cgi/)) {
-        history.replaceState( null, 
-                             "[% unfiltered_title FILTER js %]",  
+        history.replaceState( null,
+                             "[% unfiltered_title FILTER js %]",
                              "show_bug.cgi?id=[% bug.bug_id FILTER js %]" );
         document.title = "[% unfiltered_title FILTER js %]";
       }

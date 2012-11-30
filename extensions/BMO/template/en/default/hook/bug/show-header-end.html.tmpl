@@ -8,7 +8,11 @@
 
 [% style_urls.push('extensions/BMO/web/styles/edit_bug.css') %]
 [% javascript_urls.push('extensions/BMO/web/js/edit_bug.js') %]
-[% title = "$bug.bug_id &ndash; $filtered_desc" %]
+[% title = "$bug.bug_id &ndash; " %]
+[% IF bug.alias != '' %]
+  [% title = title _ "($bug.alias) " %]
+[% END %]
+[% title = title _ filtered_desc %]
 [% javascript = javascript _ 
                 "document.title = document.title.replace(/^" _ terms.Bug _ " /, '');"
 %]

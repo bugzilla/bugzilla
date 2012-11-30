@@ -208,7 +208,7 @@ sub check_login_name {
     check_email_syntax($name);
 
     # Check the name if it's a new user, or if we're changing the name.
-    if (!ref($invocant) || $invocant->login ne $name) {
+    if (!ref($invocant) || lc($invocant->login) ne lc($name)) {
         my @params = ($name);
         push(@params, $invocant->login) if ref($invocant);
         is_available_username(@params)

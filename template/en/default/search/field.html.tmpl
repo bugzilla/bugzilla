@@ -158,10 +158,21 @@
   });
 
   [% SET sub_field = value_controllers.${field.name}.$accessor %]
+  [% SET prod_per_class = {} %]
+  [% IF field.name == "classification" %]
+    [% FOREACH p = product %]
+      [% prod_per_class.${p.classification_id}.${p.id} = 1 %]
+    [% END %]
+  [% END %]
+
   [% FOREACH legal_value = legal_values %]
     [% SET controlled_ids = [] %]
-    [% FOREACH sub_value = legal_value.$accessor %]
-      [% controlled_ids.push(sub_value.id) %]
+    [% IF field.name == "classification" %]
+      [% controlled_ids = prod_per_class.${legal_value.id}.keys %]
+    [% ELSE %]
+      [% FOREACH sub_value = legal_value.$accessor %]
+        [% controlled_ids.push(sub_value.id) %]
+      [% END %]
     [% END %]
     [% NEXT IF !controlled_ids.size %]
       showValueWhen('[% sub_field.name FILTER js %]',

@@ -240,7 +240,7 @@ F<extensions/Foo.pm>:
 
  package Bugzilla::Extension::Foo
  use strict;
- use base qw(Bugzilla::Extension);
+ use parent qw(Bugzilla::Extension);
 
  our $VERSION = '0.02';
  use constant NAME => 'Foo';

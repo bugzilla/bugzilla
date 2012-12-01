@@ -10,7 +10,7 @@ package Pod::Simple::HTML::Bugzilla;
 use 5.10.1;
 use strict;
 
-use base qw(Pod::Simple::HTML);
+use parent qw(Pod::Simple::HTML);
 
 # Without this constant, HTMLBatch will throw undef warnings.
 use constant VERSION    => $Pod::Simple::HTML::VERSION;

@@ -10,7 +10,7 @@ package Bugzilla::Component;
 use 5.10.1;
 use strict;
 
-use base qw(Bugzilla::Field::ChoiceInterface Bugzilla::Object);
+use parent qw(Bugzilla::Field::ChoiceInterface Bugzilla::Object);
 
 use Bugzilla::Constants;
 use Bugzilla::Util;

@@ -76,7 +76,7 @@ END
 my $extension_pm = <<END;
 package Bugzilla::Extension::$extension_name;
 use strict;
-use base qw(Bugzilla::Extension);
+use parent qw(Bugzilla::Extension);
 
 $modules
 

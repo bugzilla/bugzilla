@@ -10,7 +10,7 @@ package Bugzilla::Migrate::Gnats;
 use 5.10.1;
 use strict;
 
-use base qw(Bugzilla::Migrate);
+use parent qw(Bugzilla::Migrate);
 
 use Bugzilla::Constants;
 use Bugzilla::Install::Util qw(indicate_progress);

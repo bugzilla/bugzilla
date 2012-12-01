@@ -13,7 +13,7 @@ use strict;
 use DBI;
 
 # Inherit the DB class from DBI::db.
-use base qw(DBI::db);
+use parent -norequire, qw(DBI::db);
 
 use Bugzilla::Constants;
 use Bugzilla::Install::Requirements;

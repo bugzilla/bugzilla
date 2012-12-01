@@ -50,7 +50,7 @@ use Bugzilla::Mailer;
 use Bugzilla::Constants;
 use Bugzilla::Field;
 
-use base qw(Bugzilla::Object Exporter);
+use parent qw(Bugzilla::Object Exporter);
 @Bugzilla::Flag::EXPORT = qw(SKIP_REQUESTEE_ON_ERROR);
 
 ###############################

@@ -10,7 +10,7 @@ package Bugzilla::DB::Sqlite;
 use 5.10.1;
 use strict;
 
-use base qw(Bugzilla::DB);
+use parent qw(Bugzilla::DB);
 
 use Bugzilla::Constants;
 use Bugzilla::Error;

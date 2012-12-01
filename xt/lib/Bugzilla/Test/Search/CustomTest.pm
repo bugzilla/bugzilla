@@ -9,7 +9,7 @@
 # Tests like this are specified in CUSTOM_SEARCH_TESTS in
 # Bugzilla::Test::Search::Constants.
 package Bugzilla::Test::Search::CustomTest;
-use base qw(Bugzilla::Test::Search::FieldTest);
+use parent qw(Bugzilla::Test::Search::FieldTest);
 use strict;
 use warnings;
 

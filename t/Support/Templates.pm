@@ -10,7 +10,7 @@ package Support::Templates;
 use strict;
 
 use lib 't';
-use base qw(Exporter);
+use parent qw(Exporter);
 @Support::Templates::EXPORT = 
          qw(@languages @include_paths $english_default_include_path
          %include_path @referenced_files %actual_files $num_actual_files);

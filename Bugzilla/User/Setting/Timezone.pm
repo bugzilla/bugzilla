@@ -12,7 +12,7 @@ use strict;
 
 use DateTime::TimeZone;
 
-use base qw(Bugzilla::User::Setting);
+use parent qw(Bugzilla::User::Setting);
 
 use Bugzilla::Constants;
 

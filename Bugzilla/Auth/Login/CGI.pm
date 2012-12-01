@@ -10,7 +10,7 @@ package Bugzilla::Auth::Login::CGI;
 use 5.10.1;
 use strict;
 
-use base qw(Bugzilla::Auth::Login);
+use parent qw(Bugzilla::Auth::Login);
 use constant user_can_create_account => 1;
 
 use Bugzilla::Constants;

@@ -24,7 +24,7 @@ use Scalar::Util qw(tainted);
 use Term::ANSIColor qw(colored);
 use PerlIO;
 
-use base qw(Exporter);
+use parent qw(Exporter);
 our @EXPORT_OK = qw(
     bin_loc
     get_version_and_os

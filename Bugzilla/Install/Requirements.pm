@@ -23,7 +23,7 @@ use List::Util qw(max);
 use Safe;
 use Term::ANSIColor;
 
-use base qw(Exporter);
+use parent qw(Exporter);
 our @EXPORT = qw(
     REQUIRED_MODULES
     OPTIONAL_MODULES

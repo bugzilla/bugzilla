@@ -22,7 +22,7 @@ use Pod::Usage;
 use Bugzilla::Constants;
 use Bugzilla::JobQueue;
 use Bugzilla::Util qw(get_text);
-BEGIN { eval "use base qw(Daemon::Generic)"; }
+BEGIN { eval "use parent qw(Daemon::Generic)"; }
 
 our $VERSION = BUGZILLA_VERSION;
 

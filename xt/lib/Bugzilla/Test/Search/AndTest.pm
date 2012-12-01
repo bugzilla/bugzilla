@@ -8,7 +8,7 @@
 # This test combines two field/operator combinations using AND in
 # a single boolean chart.
 package Bugzilla::Test::Search::AndTest;
-use base qw(Bugzilla::Test::Search::OrTest);
+use parent qw(Bugzilla::Test::Search::OrTest);
 
 use Bugzilla::Test::Search::Constants;
 use List::MoreUtils qw(all);

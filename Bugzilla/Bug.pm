@@ -36,7 +36,7 @@ use URI;
 use URI::QueryParam;
 use Scalar::Util qw(blessed);
 
-use base qw(Bugzilla::Object Exporter);
+use parent qw(Bugzilla::Object Exporter);
 @Bugzilla::Bug::EXPORT = qw(
     bug_alias_to_id
     LogActivityEntry

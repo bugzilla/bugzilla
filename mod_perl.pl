@@ -113,7 +113,7 @@ package Bugzilla::ModPerl::ResponseHandler;
 use 5.10.1;
 use strict;
 
-use base qw(ModPerl::Registry);
+use parent qw(ModPerl::Registry);
 use Bugzilla;
 
 sub handler : method {

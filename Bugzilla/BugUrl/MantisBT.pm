@@ -10,7 +10,7 @@ package Bugzilla::BugUrl::MantisBT;
 use 5.10.1;
 use strict;
 
-use base qw(Bugzilla::BugUrl);
+use parent qw(Bugzilla::BugUrl);
 
 ###############################
 ####        Methods        ####

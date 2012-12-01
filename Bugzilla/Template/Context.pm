@@ -11,7 +11,7 @@ package Bugzilla::Template::Context;
 use 5.10.1;
 use strict;
 
-use base qw(Template::Context);
+use parent qw(Template::Context);
 
 use Bugzilla::Hook;
 use Scalar::Util qw(blessed);

@@ -18,7 +18,7 @@ use strict;
 
 use Bugzilla::Error;
 
-use base qw(Bugzilla::DB::Schema);
+use parent qw(Bugzilla::DB::Schema);
 
 # This is for column_info_to_column, to know when a tinyint is a 
 # boolean and when it's really a tinyint. This only has to be accurate

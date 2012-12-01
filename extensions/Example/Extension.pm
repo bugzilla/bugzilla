@@ -7,7 +7,7 @@
 
 package Bugzilla::Extension::Example;
 use strict;
-use base qw(Bugzilla::Extension);
+use parent qw(Bugzilla::Extension);
 
 use Bugzilla::Constants;
 use Bugzilla::Error;

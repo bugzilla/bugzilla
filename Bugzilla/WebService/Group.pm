@@ -10,7 +10,7 @@ package Bugzilla::WebService::Group;
 use 5.10.1;
 use strict;
 
-use base qw(Bugzilla::WebService);
+use parent qw(Bugzilla::WebService);
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::WebService::Util qw(validate translate params_to_objects);

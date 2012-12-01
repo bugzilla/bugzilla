@@ -46,7 +46,7 @@ use Bugzilla::Hook;
 use File::Copy;
 use List::Util qw(max);
 
-use base qw(Bugzilla::Object);
+use parent qw(Bugzilla::Object);
 
 ###############################
 ####    Initialization     ####

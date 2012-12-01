@@ -7,7 +7,7 @@
 
 package Bugzilla::Extension::Example::Auth::Verify;
 use strict;
-use base qw(Bugzilla::Auth::Verify);
+use parent qw(Bugzilla::Auth::Verify);
 use Bugzilla::Constants;
 
 # A verifier that always fails.

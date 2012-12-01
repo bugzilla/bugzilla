@@ -10,7 +10,7 @@ package Bugzilla::DB::Schema::Sqlite;
 use 5.10.1;
 use strict;
 
-use base qw(Bugzilla::DB::Schema);
+use parent qw(Bugzilla::DB::Schema);
 
 use Bugzilla::Error;
 use Bugzilla::Util qw(generate_random_password);

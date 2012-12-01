@@ -7,7 +7,7 @@
 
 package Bugzilla::Extension::MoreBugUrl;
 use strict;
-use base qw(Bugzilla::Extension);
+use parent qw(Bugzilla::Extension);
 
 use constant MORE_SUB_CLASSES => qw(
     Bugzilla::Extension::MoreBugUrl::ReviewBoard

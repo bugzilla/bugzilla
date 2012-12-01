@@ -10,7 +10,7 @@ package Bugzilla::WebService::Util;
 use 5.10.1;
 use strict;
 
-use base qw(Exporter);
+use parent qw(Exporter);
 
 # We have to "require", not "use" this, because otherwise it tries to
 # use features of Test::More during import().

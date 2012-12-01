@@ -10,7 +10,7 @@ package Bugzilla::Search::Saved;
 use 5.10.1;
 use strict;
 
-use base qw(Bugzilla::Object);
+use parent qw(Bugzilla::Object);
 
 use Bugzilla::CGI;
 use Bugzilla::Constants;

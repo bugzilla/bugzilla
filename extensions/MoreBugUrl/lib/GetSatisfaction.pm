@@ -7,7 +7,7 @@
 
 package Bugzilla::Extension::MoreBugUrl::GetSatisfaction;
 use strict;
-use base qw(Bugzilla::BugUrl);
+use parent qw(Bugzilla::BugUrl);
 
 ###############################
 ####        Methods        ####

@@ -41,7 +41,7 @@ use Bugzilla::Group;
 
 use Email::Address;
 
-use base qw(Bugzilla::Object);
+use parent qw(Bugzilla::Object);
 
 ###############################
 ####    Initialization     ####

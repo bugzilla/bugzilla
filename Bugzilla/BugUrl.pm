@@ -10,7 +10,7 @@ package Bugzilla::BugUrl;
 use 5.10.1;
 use strict;
 
-use base qw(Bugzilla::Object);
+use parent qw(Bugzilla::Object);
 
 use Bugzilla::Util;
 use Bugzilla::Error;

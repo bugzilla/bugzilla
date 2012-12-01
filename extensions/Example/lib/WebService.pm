@@ -8,7 +8,7 @@
 package Bugzilla::Extension::Example::WebService;
 use strict;
 use warnings;
-use base qw(Bugzilla::WebService);
+use parent qw(Bugzilla::WebService);
 use Bugzilla::Error;
 
 # This can be called as Example.hello() from the WebService.

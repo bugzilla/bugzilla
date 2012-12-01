@@ -10,7 +10,7 @@ package Bugzilla::Send::Sendmail;
 use 5.10.1;
 use strict;
 
-use base qw(Email::Send::Sendmail);
+use parent qw(Email::Send::Sendmail);
 
 use Return::Value;
 use Symbol qw(gensym);

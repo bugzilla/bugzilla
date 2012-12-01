@@ -10,7 +10,7 @@ package Bugzilla::CGI;
 use 5.10.1;
 use strict;
 
-use base qw(CGI);
+use parent qw(CGI);
 
 use Bugzilla::Constants;
 use Bugzilla::Error;

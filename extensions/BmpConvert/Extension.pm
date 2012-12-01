@@ -7,7 +7,7 @@
 
 package Bugzilla::Extension::BmpConvert;
 use strict;
-use base qw(Bugzilla::Extension);
+use parent qw(Bugzilla::Extension);
 
 use Image::Magick;
 

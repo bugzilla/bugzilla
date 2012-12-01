@@ -10,7 +10,7 @@ package Bugzilla::Install::CPAN;
 use 5.10.1;
 use strict;
 
-use base qw(Exporter);
+use parent qw(Exporter);
 our @EXPORT = qw(
     BZ_LIB
 

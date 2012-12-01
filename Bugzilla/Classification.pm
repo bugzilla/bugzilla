@@ -16,7 +16,7 @@ use Bugzilla::Util;
 use Bugzilla::Error;
 use Bugzilla::Product;
 
-use base qw(Bugzilla::Field::ChoiceInterface Bugzilla::Object Exporter);
+use parent qw(Bugzilla::Field::ChoiceInterface Bugzilla::Object Exporter);
 @Bugzilla::Classification::EXPORT = qw(sort_products_by_classification);
 
 ###############################

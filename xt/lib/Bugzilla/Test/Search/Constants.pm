@@ -12,7 +12,7 @@
 # More detailed information on each constant is available in the comments
 # in this file.
 package Bugzilla::Test::Search::Constants;
-use base qw(Exporter);
+use parent qw(Exporter);
 use Bugzilla::Constants;
 use Bugzilla::Util qw(generate_random_password);
 

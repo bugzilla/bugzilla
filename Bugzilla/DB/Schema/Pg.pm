@@ -16,7 +16,7 @@ package Bugzilla::DB::Schema::Pg;
 use 5.10.1;
 use strict;
 
-use base qw(Bugzilla::DB::Schema);
+use parent qw(Bugzilla::DB::Schema);
 use Storable qw(dclone);
 
 #------------------------------------------------------------------------------

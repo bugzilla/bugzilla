@@ -7,7 +7,7 @@
 
 package Bugzilla::Extension::Voting;
 use strict;
-use base qw(Bugzilla::Extension);
+use parent qw(Bugzilla::Extension);
 
 use Bugzilla::Bug;
 use Bugzilla::BugMail;

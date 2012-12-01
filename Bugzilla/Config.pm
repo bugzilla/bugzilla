@@ -10,7 +10,7 @@ package Bugzilla::Config;
 use 5.10.1;
 use strict;
 
-use base qw(Exporter);
+use parent qw(Exporter);
 use Bugzilla::Constants;
 use Bugzilla::Hook;
 use Data::Dumper;

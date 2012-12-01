@@ -24,7 +24,7 @@ package Bugzilla::DB::Oracle;
 use 5.10.1;
 use strict;
 
-use base qw(Bugzilla::DB);
+use parent qw(Bugzilla::DB);
 
 use DBD::Oracle;
 use DBD::Oracle qw(:ora_types);
@@ -720,7 +720,7 @@ package Bugzilla::DB::Oracle::st;
 use 5.10.1;
 use strict;
 
-use base qw(DBI::st);
+use parent qw(DBI::st);
  
 sub fetchrow_arrayref {
     my $self = shift;

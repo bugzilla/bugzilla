@@ -79,7 +79,7 @@ package Bugzilla::XMLRPC::Deserializer;
 use 5.10.1;
 use strict;
 
-# We can't use "use base" because XMLRPC::Serializer doesn't return
+# We can't use "use parent" because XMLRPC::Serializer doesn't return
 # a true value.
 use XMLRPC::Lite;
 our @ISA = qw(XMLRPC::Deserializer);
@@ -204,7 +204,7 @@ use 5.10.1;
 use strict;
 
 use Scalar::Util qw(blessed);
-# We can't use "use base" because XMLRPC::Serializer doesn't return
+# We can't use "use parent" because XMLRPC::Serializer doesn't return
 # a true value.
 use XMLRPC::Lite;
 our @ISA = qw(XMLRPC::Serializer);

@@ -110,7 +110,7 @@
         <table>
           [% FOREACH c = product.components %]
             <tr>
-              <th align="right">[% c.name FILTER html %]:</th>
+              <th>[% c.name FILTER html %]:</th>
               [%# descriptions are intentionally not filtered to allow html content %]
               <td>
                 [% IF c.description %]

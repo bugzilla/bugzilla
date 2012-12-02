@@ -35,7 +35,7 @@
     [% PROCESS "admin/products/edit-common.html.tmpl" %]
 
     <tr>
-      <th align="right" valign="top">
+      <th valign="top">
         <a href="editcomponents.cgi?product=[% product.name FILTER uri %]">
         Edit components:
         </a>
@@ -59,7 +59,7 @@
       </td>
     </tr>
     <tr>
-      <th align="right" valign="top">
+      <th valign="top">
         <a href="editversions.cgi?product=[% product.name FILTER uri %]">Edit
 versions:</a>
       </th>
@@ -76,7 +76,7 @@ versions:</a>
     </tr>
     [% IF Param('usetargetmilestone') %]
       <tr>
-        <th align="right" valign="top">
+        <th valign="top">
           <a href="editmilestones.cgi?product=[% product.name FILTER uri %]">
           Edit milestones:</a>
         </th>
@@ -93,7 +93,7 @@ versions:</a>
       </tr>
     [% END %]
     <tr>
-      <th align="right" valign="top">
+      <th valign="top">
         <a href="editproducts.cgi?action=editgroupcontrols&product=
           [%- product.name FILTER uri %]">
           Edit Group Access Controls:
@@ -122,7 +122,7 @@ versions:</a>
       </td>
     </tr>
     <tr>
-      <th align="right">[% terms.Bugs %]:</th>
+      <th>[% terms.Bugs %]:</th>
       <td><a href="buglist.cgi?product=[% product.name FILTER uri %]">
             [% product.bug_count FILTER html %]</a></td>
     </tr>

@@ -28,26 +28,26 @@
   <input type="hidden" name="a" value="confirm_new_account">
   <table>
     <tr>
-      <th align="right">Email Address:</th>
+      <th>Email Address:</th>
       <td>[% email FILTER html %]</td>
     </tr>
     <tr>
-      <th align="right"><small><i>(OPTIONAL)</i></small> <label for="realname">Real Name</label>:</th>
+      <th><small><i>(OPTIONAL)</i></small> <label for="realname">Real Name</label>:</th>
       <td><input type="text" id="realname" name="realname" value=""></td>
     </tr>
     <tr>
-      <th align="right"><label for="passwd1">Type your password</label>:</th>
+      <th><label for="passwd1">Type your password</label>:</th>
       <td>
         <input type="password" id="passwd1" name="passwd1" value="">
         (minimum [% constants.USER_PASSWORD_MIN_LENGTH FILTER none %] characters)
       </td>
     </tr>
     <tr>
-      <th align="right"><label for="passwd2">Confirm your password</label>:</th>
+      <th><label for="passwd2">Confirm your password</label>:</th>
       <td><input type="password" id="passwd2" name="passwd2" value=""></td>
     </tr>
     <tr>
-      <th align="right">&nbsp;</th>
+      <th>&nbsp;</th>
       <td><input type="submit" id="confirm" value="Create"></td>
     </tr>
   </table>

@@ -35,13 +35,13 @@
     [% PROCESS "admin/products/edit-common.html.tmpl" %]
 
     <tr>
-      <th align="right">Version:</th>
+      <th>Version:</th>
       <td><input size="20" maxlength="64" name="version" 
                 value="[% version FILTER html %]">
       </td>
     </tr>
     <tr>
-      <th align="right">Create chart datasets for this product:</th>
+      <th>Create chart datasets for this product:</th>
       <td>
         <input type="checkbox" name="createseries" value="1" checked="checked">
       </td>

@@ -25,19 +25,19 @@
 <form method="post" action="editvalues.cgi">
   <table border="0" cellpadding="4" cellspacing="0">
     <tr>
-      <th align="right"><label for="value">Value:</label></th>
+      <th><label for="value">Value:</label></th>
       <td>
         <input id="value" name="value" size="30"
                maxlength="[% constants.MAX_FIELD_VALUE_SIZE FILTER none %]">
       </td>
     </tr>
     <tr>
-      <th align="right"><label for="sortkey">Sortkey:</label></th>
+      <th><label for="sortkey">Sortkey:</label></th>
       <td><input id="sortkey" name="sortkey" size="6" maxlength="6"></td>
     </tr>
     [% IF field.name == "bug_status" %]
       <tr>
-        <th align="right"><label for="is_open">Status Type:</label></th>
+        <th><label for="is_open">Status Type:</label></th>
         <td>
           <input type="radio" id="open_status" name="is_open" value="1" 
                  checked="checked">
@@ -56,7 +56,7 @@
     [% END %]
     [% IF field.value_field %]
       <tr>
-        <th align="right">
+        <th>
           <label for="visibility_value_id">Only appears when 
            [%+ field.value_field.description FILTER html %] is set to:
           </label>

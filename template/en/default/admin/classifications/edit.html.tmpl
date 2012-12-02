@@ -16,7 +16,7 @@
     [% PROCESS "admin/classifications/edit-common.html.tmpl" %]
 
     <tr valign=top>
-      <th align="right">
+      <th>
         <a href="editproducts.cgi?classification=[% classification.name FILTER uri %]">
         Edit Products</a>:
       </th>
@@ -25,7 +25,7 @@
           <table>
             [% FOREACH product = classification.products %]
               <tr>
-                <th align=right valign=top>[% product.name FILTER html %]</th>
+                <th valign=top>[% product.name FILTER html %]</th>
                 <td valign=top>
                   [% IF product.description %]
                     [% product.description FILTER html_light %]

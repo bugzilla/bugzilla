@@ -53,7 +53,7 @@
   [% p = [{id => 0, name => "{Start}", is_open => 1}] %]
   [% FOREACH status = p.merge(statuses) %]
     <tr class="highlight">
-      <th align="right" class="[% status.is_open ? "open-status" : "closed-status" %]">
+      <th class="[% status.is_open ? "open-status" : "closed-status" %]">
         [% display_value("bug_status", status.name) FILTER html %]
       </th>
 

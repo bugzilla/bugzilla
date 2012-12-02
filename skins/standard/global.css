@@ -549,3 +549,7 @@ input.required, select.required, span.required_explanation {
     border: 2px solid #B70000;
     background-color: #FFEBEB;
 }
+
+form th {
+    text-align: right;
+}

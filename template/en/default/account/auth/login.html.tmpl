@@ -29,14 +29,14 @@
 [%- IF Bugzilla.cgi.param("data") %] enctype="multipart/form-data"[% END %]>
   <table>
     <tr>
-      <th align="right"><label for="Bugzilla_login">Login:</label></th>
+      <th><label for="Bugzilla_login">Login:</label></th>
       <td>
         <input size="35" id="Bugzilla_login" name="Bugzilla_login">
         [% Param('emailsuffix') FILTER html %]
       </td>
     </tr>
     <tr>
-      <th align="right"><label for="Bugzilla_password">Password:</label></th>
+      <th><label for="Bugzilla_password">Password:</label></th>
       <td>
         <input type="password" size="35" id="Bugzilla_password" name="Bugzilla_password">
       </td>

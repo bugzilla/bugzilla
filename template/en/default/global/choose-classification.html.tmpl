@@ -21,7 +21,7 @@
 
 <table>
   <tr>
-    <th align="right">
+    <th>
       <a href="[% target FILTER uri %]?classification=__all
             [% IF cloned_bug_id %]&amp;cloned_bug_id=[% cloned_bug_id FILTER uri %][% END -%] 
             [%- IF format %]&amp;format=[% format FILTER uri %][% END %]">
@@ -36,7 +36,7 @@
 
 [% FOREACH class = classifications %]
   <tr>
-    <th align="right">
+    <th>
       <a href="[% target FILTER uri %]?classification=[% class.name FILTER uri -%]
             [%- IF cloned_bug_id %]&amp;cloned_bug_id=[% cloned_bug_id FILTER uri %][% END -%] 
             [%- IF format %]&amp;format=[% format FILTER uri %][% END %]">

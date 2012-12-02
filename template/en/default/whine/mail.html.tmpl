@@ -47,10 +47,10 @@
 
     <table width="100%">
       <tr>
-        <th align="left">ID</th>
+        <th>ID</th>
         [% FOREACH col = query.columnlist %]
           [% NEXT IF col == 'bug_id' %]
-          <th align="left">[% field_descs.$col FILTER html %]</th>
+          <th>[% field_descs.$col FILTER html %]</th>
         [% END %]
       </tr>
 

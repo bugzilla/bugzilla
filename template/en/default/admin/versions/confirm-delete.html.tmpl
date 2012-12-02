@@ -18,6 +18,7 @@
 
 [% PROCESS global/header.html.tmpl
   title = title
+  style_urls = ['skins/standard/admin.css']
 %]
 
 <table border="1" cellpadding="4" cellspacing="0">
@@ -52,7 +53,7 @@
 <h2>Confirmation</h2>
 
 [% IF version.bug_count %]
-  <p>
+  <p class="confirmation">
   Sorry, there
   [% IF version.bug_count > 1 %] 
     are [% version.bug_count FILTER none %] outstanding [% terms.bugs %]

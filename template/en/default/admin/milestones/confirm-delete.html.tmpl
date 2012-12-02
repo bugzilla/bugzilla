@@ -18,6 +18,7 @@
 
 [% PROCESS global/header.html.tmpl
   title = title
+  style_urls = ['skins/standard/admin.css']
 %]
 
 <table border="1" cellpadding="4" cellspacing="0">
@@ -53,8 +54,7 @@
   
 [% IF milestone.bug_count %]
 
-  <table border="0" cellpadding="20" width="70%" bgcolor="red">
-  <tr><td>
+  <p class="confirmation">
     There
     [% IF milestone.bug_count > 1 %] 
       are [% milestone.bug_count FILTER none %] [%+ terms.bugs %] 
@@ -65,9 +65,7 @@
     <b><blink>ALL</blink></b> of these [% terms.bugs %] will be retargeted
     to [% product.default_milestone FILTER html %], the default milestone for 
     the [% product.name FILTER html %] product.
-  </td></tr>
-  </table>
-
+  </p>
 [% END %]
 
 <p>Do you really want to delete this milestone?<p>

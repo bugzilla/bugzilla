@@ -27,6 +27,12 @@
     background-color: inherit;
 }
 
+.confirmation {
+    background-color: red;
+    padding: 3ex;
+    width: 70%;
+}
+
 p.areyoureallyreallysure {
     color: red;
     font-size: 120%;

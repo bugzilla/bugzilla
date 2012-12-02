@@ -194,7 +194,7 @@
 
   [% IF !Param("allowbugdeletion") %]
 
-    <p>Sorry, there
+    <p class="confirmation">Sorry, there
 
     [% IF product.bug_count > 1 %]
       are [% product.bug_count FILTER html %] [%+ terms.bugs %]

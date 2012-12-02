@@ -19,6 +19,7 @@ from '[% product.name FILTER html %]' product
 
 [% PROCESS global/header.html.tmpl
   title = title
+  style_urls = ['skins/standard/admin.css']
 %]
 
 <table border="1" cellpadding="4" cellspacing="0">
@@ -92,7 +93,7 @@ from '[% product.name FILTER html %]' product
 [% IF comp.bug_count %]
 
   [% IF !Param("allowbugdeletion") %]
-  <p>
+  <p class="confirmation">
     Sorry, there
 
     [% IF comp.bug_count > 1 %] 

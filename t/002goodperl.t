@@ -33,7 +33,7 @@ foreach my $file (@testitems) {
     my $ext = $1;
 
     if ($file_line1 !~ m/^#\!/) {
-        ok(1,"$file does not have a shebang");	
+        ok(1,"$file does not have a shebang");
     } else {
         my $flags;
         if (!defined $ext || $ext eq "pl") {

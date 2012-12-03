@@ -289,7 +289,8 @@ sub OPTIONAL_MODULES {
     {
         package => 'Test-Taint',
         module  => 'Test::Taint',
-        version => 0,
+        # 1.06 no longer throws warnings with Perl 5.10+.
+        version => 1.06,
         feature => ['jsonrpc', 'xmlrpc'],
     },
     {

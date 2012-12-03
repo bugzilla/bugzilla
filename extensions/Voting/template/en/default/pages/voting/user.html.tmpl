@@ -134,7 +134,7 @@
               [% END %]
             </a></td>
             <td align="center">
-              [% bug.id FILTER bug_link(bug) FILTER none %]
+              [% bug.id FILTER bug_link(bug.id) FILTER none %]
             </td>
             <td>
               [% bug.summary FILTER html %]

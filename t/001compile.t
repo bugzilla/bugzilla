@@ -15,7 +15,8 @@ use 5.10.1;
 use lib qw(. lib t);
 use Config;
 use Support::Files;
-use Test::More tests => scalar(@Support::Files::testitems);
+use Test::More tests => scalar(@Support::Files::testitems)
+                        + scalar(@Support::Files::test_files);
 
 BEGIN { 
     use_ok('Bugzilla::Constants');
@@ -59,7 +60,7 @@ sub compile_file {
     ok(!$return_val, $file) or diag('--ERROR');
 }
 
-my @testitems = @Support::Files::testitems;
+my @testitems = (@Support::Files::testitems, @Support::Files::test_files);
 my $file_features = map_files_to_features();
 
 # Test the scripts by compiling them

@@ -13,29 +13,29 @@
 use lib 't';
 use Support::Files;
 
-BEGIN { # yes the indenting is off, deal with it
-#add the words to check here:
-@evilwords = qw(
-anyways
-appearence
-arbitary
-cancelled
-critera
-databasa
-dependan
-existance
-existant
-paramater
-refered
-repsentation
-suported
-varsion
-);
-
-$testcount = scalar(@Support::Files::testitems);
+BEGIN {
+    #add the words to check here:
+    @evilwords = qw(
+        anyways
+        appearence
+        arbitary
+        cancelled
+        critera
+        databasa
+        dependan
+        existance
+        existant
+        paramater
+        refered
+        repsentation
+        suported
+        varsion
+    );
 }
 
-use Test::More tests => $testcount;
+# -1 because 006spellcheck.t must not be checked.
+use Test::More tests => scalar(@Support::Files::testitems)
+                        + scalar(@Support::Files::test_files) - 1;
 
 # Capture the TESTOUT from Test::More or Test::Builder for printing errors.
 # This will handle verbosity for us automatically.
@@ -51,7 +51,7 @@ my $fh;
     }
 }
 
-my @testitems = @Support::Files::testitems;
+my @testitems = (@Support::Files::testitems, @Support::Files::test_files);
 
 # at last, here we actually run the test...
 my $evilwordsregexp = join('|', @evilwords);
@@ -59,6 +59,9 @@ my $evilwordsregexp = join('|', @evilwords);
 foreach my $file (@testitems) {
     $file =~ s/\s.*$//; # nuke everything after the first space (#comment)
     next if (!$file); # skip null entries
+    # Do not try to validate this file as it obviously contains a list
+    # of wrongly spelled words.
+    next if ($file eq 't/006spellcheck.t');
 
     if (open (FILE, $file)) { # open the file for reading
 

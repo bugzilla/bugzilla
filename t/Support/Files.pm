@@ -24,6 +24,8 @@ foreach my $extension (@extensions) {
     find(sub { push(@files, $File::Find::name) if $_ =~ /\.pm$/;}, $extension);
 }
 
+@test_files = glob('t/*.t');
+
 sub isTestingFile {
     my ($file) = @_;
     my $exclude;

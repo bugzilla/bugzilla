@@ -37,6 +37,7 @@ Subject: [% flagtype_name %] [%+ subject_status %]: [[% terms.Bug %] [%+ bug.bug
   [Attachment [% attachment.id %]] [% attachment.description FILTER clean_text %][% END %]
 Date: [% date %]
 X-Bugzilla-Type: request
+[%+ INCLUDE "email/header-common.txt.tmpl" %]
 [%+ threadingmarker %]
 
 [%+ USE wrap -%]

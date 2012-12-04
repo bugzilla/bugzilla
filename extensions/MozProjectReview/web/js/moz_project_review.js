@@ -16,7 +16,6 @@ MPR.required_fields = {
         "short_desc": "Please enter a value for project or feature name in the initial questions section",
         "cc": "Please enter a value for points of contact in the initial questions section",
         "urgency": "Please enter a value for urgency in the initial questions section",
-        "release_date": "Please enter a value for release date in the initial questions section",
         "project_status": "Please select a value for project status in the initial questions section",
         "mozilla_data": "Please select a value for mozilla data in the initial questions section",
         "new_or_change": "Please select a value for new or change to existing project in the initial questions section",

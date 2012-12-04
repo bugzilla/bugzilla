@@ -104,11 +104,34 @@
       </span>
     </div>
 
-    <div id="goal_row" class="field_row">
-      <span class="field_label">Current Goal:</span>
+    <div id="key_initiative_row" class="field_row">
+      <span class="field_label required">Key Initiative:</span>
       <span class="field_data">
-        <div class="field_description">Does it support a current Mozilla goal (if so, which one)?</div>
-        <input type="text" name="goal" id="goal" size="60">
+        <div class="field_description">Which key initiative does this support?</div>
+        <select name="key_initiative" id="key_initiative"
+                onchange="MPR.toggleVisibleById(this,'Other','key_initiative_other_row');">
+          <option value="">Select One</option>
+          <option value="Firefox Desktop">Firefox Desktop</option>
+          <option value="Firefox Mobile">Firefox Mobile</option>
+          <option value="Firefox OS">Firefox OS</option>
+          <option value="Firefox Platform">Firefox Platform</option>
+          <option value="Marketplace / Apps">Marketplace / Apps</option>
+          <option value="Services: Persona">Services: Persona</option>
+          <option value="Services: WebRTC">Services: WebRTC</option>
+          <option value="Services: UP">Services: UP</option>
+          <option value="Services: Social API">Services: Social API</option>
+          <option value="Labs / Research / H3">Labs / Research / H3</option>
+          <option value="Product Support">Product Support</option>
+          <option value="Corp Support">Corp Support</option>
+          <option value="Other">Other</option>
+        </select>
+      </span>
+    </div>
+
+    <div id="key_initiative_other_row" class="field_row bz_default_hidden">
+      <span class="field_label">&nbsp;</span>
+      <span class="field_data">
+        <input type="text" name="key_initiative_other" id="key_initiative_other" size="60">
       </span>
     </div>
 

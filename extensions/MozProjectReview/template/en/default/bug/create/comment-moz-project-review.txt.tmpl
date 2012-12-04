@@ -18,7 +18,9 @@ Description:
 Additional Information:
 [%+ cgi.param('additional') %]
 Urgency: [% cgi.param('urgency') %]
-Current Goal: [% cgi.param('goal') %]
+Key Initiative: [% cgi.param('key_initiative') == 'Other'
+                   ? cgi.param('key_initiative_other')
+                   : cgi.param('key_initiative') %]
 Release Date: [% cgi.param('release_date') %]
 Project Status: [% cgi.param('project_status') %]
 Mozilla Data: [% cgi.param('mozilla_data') %]

@@ -16,6 +16,7 @@ MPR.required_fields = {
         "short_desc": "Please enter a value for project or feature name in the initial questions section",
         "cc": "Please enter a value for points of contact in the initial questions section",
         "urgency": "Please enter a value for urgency in the initial questions section",
+        "key_initiative": "Please select a value for key initiative in the initial questions section",
         "project_status": "Please select a value for project status in the initial questions section",
         "mozilla_data": "Please select a value for mozilla data in the initial questions section",
         "new_or_change": "Please select a value for new or change to existing project in the initial questions section",
@@ -99,16 +100,19 @@ MPR.validateAndSubmit = function () {
     var alert_text = '';
     var section = '';
     for (section in MPR.required_fields) {
-        console.log("section: " + section);
         if (!Dom.hasClass(section, 'bz_default_hidden')) {
             var field = '';
             for (field in MPR.required_fields[section]) {
-                console.log("field: " + field);
                 if (!MPR.isFilledOut(field)) {
                     alert_text += MPR.required_fields[section][field] + "\n";
                 }
             }
         }
+    }
+
+    if (Dom.get('key_initiative').value == 'Other') {
+        if (!MPR.isFilledOut('key_initiative_other'))
+            alert_text += "Please enter a value for key initiative in the initial questions section\n";
     }
 
     if (Dom.get('separate_party').value == 'Yes') {

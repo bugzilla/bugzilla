@@ -121,7 +121,6 @@ sub QUERY_DEFS {
     foreach my $q (@{$user->queries}) {
         next if !$q->in_mydashboard;
         push(@query_defs, { name    => $q->name,
-                            heading => $q->name,
                             saved   => 1,
                             params  => $q->url });
     }
@@ -186,7 +185,7 @@ sub query_flags {
              attachments.description AS attach_summary,
              requesters.realname AS requester, 
              requestees.realname AS requestee,
-             " . $dbh->sql_date_format('flags.creation_date', '%Y:%m:%d') . " AS created
+             " . $dbh->sql_date_format('flags.creation_date', '%Y:-%m-%d %H:%i') . " AS created
         FROM flags 
              LEFT JOIN attachments
                   ON ($attach_join_clause)

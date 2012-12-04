@@ -10,8 +10,11 @@
 
 [% PROCESS global/header.html.tmpl
   title = "My Dashboard"
-  style_urls = [ "extensions/MyDashboard/web/styles/mydashboard.css",
-                 "extensions/MyDashboard/web/styles/prod_comp_search.css" ]
+  style_urls = [ "extensions/MyDashboard/web/styles/mydashboard.css" ]
+  javascript_urls = [ "js/yui3/yui/yui-min.js",
+                      "extensions/MyDashboard/web/js/query.js",
+                      "extensions/MyDashboard/web/js/flags.js",
+                      "extensions/MyDashboard/web/js/prod_comp_search.js" ]
 %]
 
 [% standard_queries = [] %]
@@ -21,10 +24,6 @@
   [% saved_queries.push(q) IF q.saved %]
 [% END %]
 
-<script src="http://yui.yahooapis.com/3.7.3/build/yui/yui-min.js"></script>
-[%# These need to load after yui-min.js %]
-<script type="text/javascript" src="[% 'extensions/MyDashboard/web/js/mydashboard.js' FILTER mtime FILTER html %]"></script>
-
 <div id="mydashboard">
   <div class="yui3-skin-sam">
     <div id="left">
@@ -33,12 +32,12 @@
         <select id="query" name="query">
           <optgroup id="standard_queries" label="Standard">
             [% FOREACH r = standard_queries %]
-              <option value="[% r.name FILTER html %]">[% r.heading FILTER html %]</option>
+              <option value="[% r.name FILTER html %]">[% r.heading || r.name FILTER html %]</option>
             [% END%]
           </optgroup>
           <optgroup id="saved_queries" label="Saved">
             [% FOREACH r = saved_queries %]
-              <option value="[% r.name FILTER html %]">[% r.heading FILTER html %]</option>
+              <option value="[% r.name FILTER html %]">[% r.heading || r.name FILTER html %]</option>
             [% END %]
           </optgroup>
         </select>

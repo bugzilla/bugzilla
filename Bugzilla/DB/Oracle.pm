@@ -720,7 +720,7 @@ package Bugzilla::DB::Oracle::st;
 use 5.10.1;
 use strict;
 
-use parent qw(DBI::st);
+use parent -norequire, qw(DBI::st);
  
 sub fetchrow_arrayref {
     my $self = shift;

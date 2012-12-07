@@ -51,22 +51,16 @@
     text-align:center;
 }
 
-#file_bug_container,
+#prod_comp_search_container,
 #query_list_container {
     margin-bottom: 10px;
     border: 1px solid rgb(116,126,147);
     padding: 10px;
+    height: 40px;
 }
 
 #prod_comp_search_main {
-    width: 400px;
-    margin-right: auto;
     margin-left: auto;
+    margin-right: auto;
     text-align: left;
-}
-
-#prod_comp_search_main li.yui-ac-highlight a {
-    text-decoration: none;
-    color: #FFFFFF;
-    display: block;
 }

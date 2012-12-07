@@ -12,6 +12,7 @@ use strict;
 use Bugzilla;
 use Bugzilla::CGI;
 use Bugzilla::Search;
+use Bugzilla::Util qw(format_time);
 
 use Bugzilla::Extension::MyDashboard::Util qw(open_states quoted_open_states);
 use Bugzilla::Extension::MyDashboard::TimeAgo qw(time_ago);
@@ -136,7 +137,6 @@ sub query_bugs {
 
     my $search = new Bugzilla::Search( fields => [ SELECT_COLUMNS ],
                                        params => scalar $params->Vars,
-
                                        order  => [ QUERY_ORDER ]);
 
     my $query = $search->sql();
@@ -149,10 +149,11 @@ sub query_bugs {
         my $bug = {};
         foreach my $column (SELECT_COLUMNS) {
             $bug->{$column} = shift @$row;
-            #if ($column eq 'changeddate') {
+            if ($column eq 'changeddate') {
+                $bug->{$column} = format_time($bug->{$column}, '%Y-%m-%d %H:%M');
             #   my $date_then = datetime_from($bug->{$column});
             #   $bug->{'updated'} = time_ago($date_then, $date_now);
-            #}
+            }
         }
         push(@bugs, $bug);
     }
@@ -185,7 +186,7 @@ sub query_flags {
              attachments.description AS attach_summary,
              requesters.realname AS requester, 
              requestees.realname AS requestee,
-             " . $dbh->sql_date_format('flags.creation_date', '%Y:-%m-%d %H:%i') . " AS created
+             " . $dbh->sql_date_format('flags.creation_date', '%Y-%m-%d %H:%i') . " AS created
         FROM flags 
              LEFT JOIN attachments
                   ON ($attach_join_clause)

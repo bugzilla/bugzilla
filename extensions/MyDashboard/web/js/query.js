@@ -76,7 +76,7 @@ YUI({
         },
         paginator: new Y.PaginatorView({
             model: new Y.PaginatorModel({ itemsPerPage: 25 }),
-            container: '#query_pagination_top',
+            container: 'query_pagination_top',
         })
     });
 

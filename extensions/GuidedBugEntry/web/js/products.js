@@ -68,7 +68,7 @@ var products = {
   },
 
   "SeaMonkey": {
-    related: [ "Core", "Toolkit" ],
+    related: [ "Core", "Toolkit", "MailNews Core" ],
     detectPlatform: true,
     version: function() {
       var re = /SeaMonkey\/(\d+)\.(\d+)/i;

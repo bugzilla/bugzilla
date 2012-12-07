@@ -2281,7 +2281,7 @@ sub _user_nonchanged {
             my $table = $first_join->{table};
             my $columns = "bug_id";
             $columns .= ",isprivate" if @{ $first_join->{extra} };
-            my $new_table = "SELECT $columns FROM $table AS $as $join_sql";
+            my $new_table = "SELECT DISTINCT $columns FROM $table AS $as $join_sql";
             $first_join->{table} = "($new_table)";
             # We always want to LEFT JOIN the generated table.
             delete $first_join->{join};

@@ -163,6 +163,21 @@ sub prod_comp_search {
       ORDER BY products.name $limit", 
         { Slice => {} });
 
+    # To help mozilla staff file bmo administration bugs into the right
+    # component, sort bmo in front of bugzilla.
+    if ($user->in_group('mozilla-corporation') || $user->in_group('mozilla-foundation')) {
+        $products = [
+            sort {
+                return 1 if $a->{product} eq 'Bugzilla'
+                            && $b->{product} eq 'bugzilla.mozilla.org';
+                return -1 if $b->{product} eq 'Bugzilla'
+                             && $a->{product} eq 'bugzilla.mozilla.org';
+                return lc($a->{product}) cmp lc($b->{product})
+                       || lc($a->{component}) cmp lc($b->{component});
+            } @$products
+        ];
+    }
+
     return { products => $products };
 }
 

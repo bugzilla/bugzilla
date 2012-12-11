@@ -1,0 +1,47 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% INCLUDE global/header.html.tmpl
+  title = "Query Database"
+  style_urls = [ "extensions/BMO/web/styles/reports.css" ]
+%]
+
+<form method="post" action="page.cgi">
+<input type="hidden" name="id" value="query_database.html">
+<textarea cols="80" rows="10" name="query">[% query FILTER html %]</textarea><br>
+<input type="submit" value="Execute">
+</form>
+
+[% IF executed %]
+  <hr>
+
+  [% IF sql_error %]
+    <b>[% sql_error FILTER html %]</b>
+  [% ELSIF rows.size %]
+    <table border="0" cellspacing="0" id="report">
+      <tr>
+        [% FOREACH column = columns %]
+          <th>[% column FILTER html %]</th>
+        [% END %]
+      </tr>
+      [% FOREACH row = rows %]
+        [% tr_class = loop.count % 2 ? 'report_row_even' : 'report_row_odd' %]
+        <tr class="[% tr_class FILTER html %]">
+          [% FOREACH field = row %]
+            <td>[% field FILTER html %]</td>
+          [% END %]
+        </tr>
+      [% END %]
+    </table>
+  [% ELSE %]
+    <i>no results</i>
+  [% END %]
+
+[% END %]
+
+[% INCLUDE global/footer.html.tmpl %]

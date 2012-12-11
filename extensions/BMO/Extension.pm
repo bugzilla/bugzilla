@@ -40,6 +40,7 @@ use Scalar::Util qw(blessed);
 use Date::Parse;
 use DateTime;
 use Encode qw(find_encoding);
+use Sys::Syslog qw(:DEFAULT setlogsock);
 
 use Bugzilla::Extension::BMO::Constants;
 use Bugzilla::Extension::BMO::FakeBug;
@@ -184,6 +185,9 @@ sub page_before_template {
     }
     elsif ($page eq 'release_tracking_report.html') {
         release_tracking_report($vars);
+    }
+    elsif ($page eq 'query_database.html') {
+        query_database($vars);
     }
 }
 
@@ -1010,6 +1014,63 @@ sub buglist_columns {
         name => '(SELECT COUNT(*) FROM cc WHERE cc.bug_id = bugs.bug_id)',
         title => 'CC Count',
     };
+}
+
+sub query_database {
+    my ($vars) = @_;
+
+    # validate group membership
+    my $user = Bugzilla->user;
+    $user->in_group('query_database')
+        || ThrowUserError('auth_failure', { group  => 'query_database',
+                                            action => 'access',
+                                            object => 'query_database' });
+
+    # read query
+    my $input = Bugzilla->input_params;
+    my $query = $input->{query};
+    $vars->{query} = $query;
+
+    if ($query) {
+        trick_taint($query);
+        $vars->{executed} = 1;
+
+        # add limit if missing
+        if ($query !~ /\sLIMIT\s+\d+\s*$/si) {
+            $query .= ' LIMIT 1000';
+            $vars->{query} = $query;
+        }
+
+        # log query
+        setlogsock('unix');
+        openlog('apache', 'cons', 'pid', 'local4');
+        syslog('notice', sprintf("[db_query] %s %s", $user->login, $query));
+        closelog();
+
+        # connect to database and execute
+        # switching to the shadow db gives us a read-only connection
+        my $dbh = Bugzilla->switch_to_shadow_db();
+        my $sth;
+        eval {
+            $sth = $dbh->prepare($query);
+            $sth->execute();
+        };
+        if ($@) {
+            $vars->{sql_error} = $@;
+            return;
+        }
+
+        # build result
+        my $columns = $sth->{NAME};
+        my $rows;
+        while (my @row = $sth->fetchrow_array) {
+            push @$rows, \@row;
+        }
+
+        # return results
+        $vars->{columns} = $columns;
+        $vars->{rows} = $rows;
+    }
 }
 
 __PACKAGE__->NAME;

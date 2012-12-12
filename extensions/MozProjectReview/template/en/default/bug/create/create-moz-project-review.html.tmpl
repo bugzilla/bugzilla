@@ -507,6 +507,33 @@
   <div id="finance_questions" class="bz_default_hidden">
     <div class="header">Finance</div>
 
+     <div id="finance_purchase_vendor_row" class="field_row">
+       <span class="field_label required">Vendor:</span>
+       <span class="field_data">
+         <input type="text" name="finance_purchase_vendor" maxsize="255" size="60" id="finance_purchase_vendor">
+       </span>
+     </div>
+
+    <div id="finance_purchase_inbudget_row" class="field_row">
+      <span class="field_label required">Is this line item in budget?:</span>
+      <span class="field_data">
+        <select name="finance_purchase_inbudget" id="finance_purchase_inbudget"
+                onchange="MPR.toggleVisibleById(this, 'No', 'finance_purchase_notinbudget_why_row');">
+          <option value="">Select One</option>
+          <option value="Yes">Yes</option>
+          <option value="No">No</option>
+        </select>
+      </span>
+    </div>
+
+    <div id="finance_purchase_notinbudget_why_row" class="field_row bz_default_hidden">
+      <span class="field_label required">Not In Budget Why:</span>
+      <span class="field_data">
+        <em>Please include additional description for this out of budget line item</em><br>
+        <textarea name="finance_purchase_notinbudget_why" id="finance_purchase_notinbudget_why" rows="10" cols="80"></textarea>
+      </span>
+    </div>
+
     <div id="finance_purchase_what_row" class="field_row">
       <span class="field_label required">What is the purchase for?:</span>
       <span class="field_data">
@@ -532,17 +559,6 @@
       <span class="field_label required">What is the alternative?:</span>
       <span class="field_data">
         <textarea name="finance_purchase_alternative" id="finance_purchase_alternative" rows="10" cols="80"></textarea>
-      </span>
-    </div>
-
-    <div id="finance_purchase_inbudget_row" class="field_row">
-      <span class="field_label required">Is this line item in budget?:</span>
-      <span class="field_data">
-        <select name="finance_purchase_inbudget" id="finance_purchase_inbudget">
-          <option value="">Select One</option>
-          <option value="Yes">Yes</option>
-          <option value="No">No</option>
-        </select>
       </span>
     </div>
 

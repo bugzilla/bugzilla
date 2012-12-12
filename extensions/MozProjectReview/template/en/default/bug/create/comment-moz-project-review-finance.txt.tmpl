@@ -13,6 +13,12 @@
 
 Finance Questions:
 
+Vendor: [% cgi.param('finance_purchase_vendor') %]
+Is this line item in budget?: [% cgi.param('finance_purchase_inbudget') %]
+[% IF cgi.param('finance_purchase_inbudget') == 'No' %]
+Not In Budget Why:
+[%+ cgi.param('finance_purchase_notinbudget_why') %]
+[% END %]
 What is the purchase for?:
 [%+ cgi.param('finance_purchase_what') %]
 Why is the purchase needed?:
@@ -21,6 +27,5 @@ What is the risk if not purchased?:
 [%+ cgi.param('finance_purchase_risk') %]
 What is the alternative?: 
 [%+ cgi.param('finance_purchase_alternative') %]
-Is this line item in budget?: [% cgi.param('finance_purchase_inbudget') %]
 What is the urgency?: [% cgi.param('finance_purchase_urgency') %]
 Total Cost: [% cgi.param('finance_purchase_cost') %]

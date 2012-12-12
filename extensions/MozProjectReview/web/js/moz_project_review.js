@@ -23,6 +23,7 @@ MPR.required_fields = {
         "separate_party": "Please select a value for separate party in the initial questions section"
     },
     "finance_questions": {
+        "finance_purchase_vendor": "Please enter a value for vendor in the finance questions section",
         "finance_purchase_what": "Please enter a value for what in the finance questions section",
         "finance_purchase_why": "Please enter a value for why in the finance questions section",
         "finance_purchase_risk": "Please enter a value for risk in the finance questions section",
@@ -119,6 +120,11 @@ MPR.validateAndSubmit = function () {
         if (!MPR.isFilledOut('relationship_type')) alert_text += "Please select a value for type of relationship\n";
         if (!MPR.isFilledOut('data_access')) alert_text += "Please select a value for data access\n";
         if (!MPR.isFilledOut('vendor_cost')) alert_text += "Please select a value for vendor cost\n";
+    }
+
+    if (Dom.get('finance_purchase_inbudget').value == 'No') {
+        if (!MPR.isFilledOut('finance_purchase_notinbudget_why')) 
+            alert_text += "Please include additional description for the out of budget line item\n";
     }
 
     if (alert_text) {

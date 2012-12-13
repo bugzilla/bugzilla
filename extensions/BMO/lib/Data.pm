@@ -49,7 +49,7 @@ our @EXPORT_OK = qw($cf_visible_in_products
 # IxHash keeps them in insertion order, and so we get regexp priorities right.
 our $cf_visible_in_products;
 tie(%$cf_visible_in_products, "Tie::IxHash", 
-    qw/^cf_blocking_kilimanjaro|cf_blocking_basecamp/ => {
+    qw/^cf_blocking_kilimanjaro|cf_blocking_basecamp|cf_blocking_b2g/ => {
         "Boot2Gecko"          => [],
         "Core"                => [],
         "Fennec"              => [],
@@ -188,6 +188,7 @@ our $cf_flags = [
 
 our $cf_project_flags = [
     'cf_blocking_kilimanjaro',
+    'cf_blocking_b2g',
     'cf_blocking_basecamp',
 ];
 
@@ -308,6 +309,8 @@ our $blocking_trusted_setters = {
     qr/^cf_blocking_seamonkey/    => 'seamonkey-council',
     qr/^cf_blocking_kilimanjaro/  => 'kilimanjaro-drivers',
     qr/^cf_blocking_basecamp/     => 'kilimanjaro-drivers',
+    qr/^cf_tracking_b2g/          => 'kilimanjaro-drivers',
+    qr/^cf_blocking_b2g/          => 'kilimanjaro-drivers',
     '_default'                    => 'mozilla-stable-branch-drivers',
 };
 

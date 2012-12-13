@@ -379,7 +379,7 @@ sub _check_trusted {
 
 sub _is_field_set {
     my $value = shift;
-    return $value ne '---' && $value ne '?';
+    return $value ne '---' && $value !~ /\?$/;
 }
 
 sub bug_check_can_change_field {
@@ -409,8 +409,8 @@ sub bug_check_can_change_field {
                 push (@$priv_results, PRIVILEGES_REQUIRED_EMPOWERED);
             }
         }
-        
-        if ($new_value eq '?') {
+
+        if ($new_value =~ /\?$/) {
             _check_trusted($field, $blocking_trusted_requesters, $priv_results);
         }
         if ($user->id) {

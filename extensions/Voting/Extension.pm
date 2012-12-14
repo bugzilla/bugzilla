@@ -628,7 +628,7 @@ sub _update_votes {
         # Set header_done to 1 only after the first bug.
         $vars->{'header_done'} = 1;
     }
-    $vars->{'votes_recorded'} = 1;
+    $vars->{'message'} = 'votes_recorded';
 }
 
 ######################

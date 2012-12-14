@@ -18,5 +18,13 @@ Other Party: [% cgi.param('legal_other_party') %]
 Business Objective: [% cgi.param('legal_business_objective') %]
 URL: [% cgi.param('legal_url') %]
 SOW Details: [% cgi.param('legal_sow_details') %]
+[% IF cgi.param('legal_vendor_services_where') %]
+Vendor Services from Where: 
+[% IF cgi.param('legal_vendor_services_where') == 'A single country' %]
+[%- cgi.param('legal_vendor_single_country') %]
+[% ELSE %]
+[%- cgi.param('legal_vendor_services_where') %]
+[% END %]
+[% END %]
 Description:
 [%+ cgi.param('legal_description') %]

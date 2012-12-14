@@ -10,6 +10,7 @@ YAHOO.namespace('MozProjectReview');
 
 var MPR = YAHOO.MozProjectReview;
 var Dom = YAHOO.util.Dom;
+var Event = YAHOO.util.Event;
 
 MPR.required_fields = {
     "initial_questions": {
@@ -49,7 +50,8 @@ MPR.toggleSpecialSections = function () {
         Dom.removeClass('sec_review_questions', 'bz_default_hidden');
     }
     else {
-        Dom.addClass('legal_questions', 'bz_default_hidden');
+        if (Dom.get('separate_party').value != 'Yes')
+            Dom.addClass('legal_questions', 'bz_default_hidden');
         Dom.addClass('privacy_policy_project_questions', 'bz_default_hidden');
         Dom.addClass('data_safety_questions', 'bz_default_hidden');
         Dom.addClass('sec_review_questions', 'bz_default_hidden');
@@ -111,6 +113,19 @@ MPR.validateAndSubmit = function () {
         }
     }
 
+    if (Dom.get('relationship_type').value == 'Vendor/Services'
+        && Dom.get('legal_vendor_services_where').value == '')
+    {
+        alert_text += "Please select a value for vendor services where\n";
+    }
+
+    if (Dom.get('relationship_type').value == 'Vendor/Services'
+        && Dom.get('legal_vendor_services_where').value == 'A single country'
+        && Dom.get('legal_vendor_single_country').value == '')
+    {
+        alert_text += "Please select a value for vendor services where single country\n";
+    }
+
     if (Dom.get('key_initiative').value == 'Other') {
         if (!MPR.isFilledOut('key_initiative_other'))
             alert_text += "Please enter a value for key initiative in the initial questions section\n";
@@ -156,3 +171,10 @@ MPR.isFilledOut = function (elem_id)  {
     var str = Dom.get(elem_id).value;
     return str.length > 0 ? true : false;
 }
+
+Event.addListener('legal_vendor_services_where', 'change', function(e) {
+    if (this.value == 'A single country')
+        Dom.removeClass('legal_vendor_single_country', 'bz_default_hidden');
+    else
+        Dom.addClass('legal_vendor_single_country', 'bz_default_hidden');
+});

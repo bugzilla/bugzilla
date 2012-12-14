@@ -233,10 +233,15 @@
         </div>
         <select name="separate_party" id="separate_party"
                 onchange="MPR.toggleVisibleById(this,'Yes','initial_separate_party_questions');
-                          if (this.value == 'No')
+                          if (this.value == 'No') {
                             Dom.addClass('finance_questions','bz_default_hidden');
-                          if (this.value == 'Yes')
-                            MPR.toggleVisibleById('relationship_type','Hardware Purchase','finance_questions');">
+                            if (Dom.get('mozilla_data').value != 'Yes')
+                                Dom.addClass('legal_questions', 'bz_default_hidden');
+                          }
+                          else {
+                            Dom.removeClass('legal_questions', 'bz_default_hidden');
+                            MPR.toggleVisibleById('relationship_type','Hardware Purchase','finance_questions');
+                          }">
           <option value="">Select One</option>
           <option value="Yes">Yes</option>
           <option value="No">No</option>
@@ -250,8 +255,12 @@
         <span class="field_data">
           <div class="field_description">What type of relationship?</div>
           <select name="relationship_type" id="relationship_type"
-                  onchange="MPR.toggleVisibleById(this,'Vendor/Services','legal_sow_details_row');
-                            MPR.toggleVisibleById(this,'Hardware Purchase','finance_questions');">
+                  onchange="MPR.toggleVisibleById(this, 'Vendor/Services', 'legal_sow_details_row');
+                            MPR.toggleVisibleById(this, 'Vendor/Services', 'legal_vendor_services_where_row');
+                            MPR.toggleVisibleById(this, 'Hardware Purchase', 'finance_questions');
+                            if (this.value == 'Hardware Purchase') Dom.addClass('legal_questions', 'bz_default_hidden');
+                            else if (Dom.get('separate_party').value == 'Yes' || Dom.get('mozilla_data').value == 'Yes')
+                              Dom.removeClass('legal_questions', 'bz_default_hidden');">
             <option value="">Select One</option>
             <option value="Vendor/Services">Vendor/Services</option>
             <option value="Distribution/Bundling">Distribution/Bundling</option>
@@ -500,6 +509,25 @@
       <span class="field_data">
         <div class="field_description">If applicable</div>
         <textarea name="legal_sow_details" id="legal_sow_details" rows="10" cols="80"></textarea>
+      </span>
+    </div>
+
+    <div id="legal_vendor_services_where_row" class="field_row bz_default_hidden">
+      <span class="field_label required">Vendor Services Location:</span>
+      <span class="field_data">
+        <div class="field_description">Where will the services primarily be provided?</div>
+        <select name="legal_vendor_services_where" id="legal_vendor_services_where">
+          <option value="">Select One</option>
+          <option value="U.S.">U.S.</option>
+          <option value="Europe">Europe</option>
+          <option value="Canada">Canada</option>
+          <option value="Global">Global</option>
+          <option value="Another region of the world">Another region of the world</option>
+          <option value="A single country">A single country</option>
+        </select>
+        <br>
+        <input class="bz_default_hidden" type="text"
+               name="legal_vendor_single_country" id="legal_vendor_single_country" size="60">
       </span>
     </div>
   </div>

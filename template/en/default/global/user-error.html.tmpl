@@ -1042,6 +1042,8 @@
       [%+ remaining FILTER html %] more attempt(s), you will be
       locked out of this account for 
       [%+ constants.LOGIN_LOCKOUT_INTERVAL FILTER html %] minutes.
+      To avoid being locked out, you can reset your password using
+      the "Forgot Password" link.
     [% END %]
 
   [% ELSIF error == "json_rpc_get_method_required" %]

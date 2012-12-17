@@ -1323,11 +1323,12 @@ sub _check_bug_status {
     }
 
     # Check if a comment is required for this change.
-    if ($new_status->comment_required_on_change_from($old_status) && !$comment)
+    if ($new_status->comment_required_on_change_from($old_status)
+        && !$comment->{'thetext'})
     {
         ThrowUserError('comment_required',
-          { old => $old_status->name, new => $new_status->name,
-            field => 'bug_status' });
+          { old => $old_status ? $old_status->name : undef,
+            new => $new_status->name, field => 'bug_status' });
     }
     
     if (ref $invocant 

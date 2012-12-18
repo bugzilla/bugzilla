@@ -791,6 +791,10 @@ sub update {
 
     my ($changes, $old_bug) = $self->SUPER::update(@_);
 
+    Bugzilla::Hook::process('bug_start_of_update',
+        { timestamp => $delta_ts, bug => $self,
+           old_bug => $old_bug, changes => $changes });
+
     # Certain items in $changes have to be fixed so that they hold
     # a name instead of an ID.
     foreach my $field (qw(product_id component_id)) {

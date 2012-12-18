@@ -434,6 +434,39 @@ to the user.
 
 =back
 
+=head2 bug_start_of_update
+
+This happens near the beginning of L<Bugzilla::Bug/update>, after L<Bugzilla::Object/update>
+is called, but before all other special changes are made to the database. Once use case is
+this allows for adding your own entries to the C<changes> hash which gets added to the
+bugs_activity table later keeping you from having to do it yourself. Also this is also helpful
+if your extension needs to add CC members, flags, keywords, groups, etc. This generally
+occurs inside a database transaction.
+
+Params:
+
+=over
+
+=item C<bug> 
+
+The changed bug object, with all fields set to their updated values.
+
+=item C<old_bug>
+
+A bug object pulled from the database before the fields were set to
+their updated values (so it has the old values available for each field).
+
+=item C<timestamp> 
+
+The timestamp used for all updates in this transaction, as a SQL date
+string.
+
+=item C<changes> 
+
+The hash of changed fields. C<< $changes->{field} = [old, new] >>
+
+=back
+
 =head2 buglist_columns
 
 This happens in L<Bugzilla::Search/COLUMNS>, which determines legal bug

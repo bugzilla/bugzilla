@@ -137,7 +137,8 @@ sub attachment {
 
 sub author { 
     my $self = shift;
-    $self->{'author'} ||= new Bugzilla::User($self->{'who'});
+    $self->{'author'}
+      ||= new Bugzilla::User({ id => $self->{'who'}, cache => 1 });
     return $self->{'author'};
 }
 

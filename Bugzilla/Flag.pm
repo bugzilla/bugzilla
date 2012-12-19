@@ -181,22 +181,20 @@ is an attachment flag, else undefined.
 sub type {
     my $self = shift;
 
-    $self->{'type'} ||= new Bugzilla::FlagType($self->{'type_id'});
-    return $self->{'type'};
+    return $self->{'type'} ||= new Bugzilla::FlagType($self->{'type_id'});
 }
 
 sub setter {
     my $self = shift;
 
-    $self->{'setter'} ||= new Bugzilla::User($self->{'setter_id'});
-    return $self->{'setter'};
+    return $self->{'setter'} ||= new Bugzilla::User({ id => $self->{'setter_id'}, cache => 1 });
 }
 
 sub requestee {
     my $self = shift;
 
     if (!defined $self->{'requestee'} && $self->{'requestee_id'}) {
-        $self->{'requestee'} = new Bugzilla::User($self->{'requestee_id'});
+        $self->{'requestee'} = new Bugzilla::User({ id => $self->{'requestee_id'}, cache => 1 });
     }
     return $self->{'requestee'};
 }
@@ -206,16 +204,15 @@ sub attachment {
     return undef unless $self->attach_id;
 
     require Bugzilla::Attachment;
-    $self->{'attachment'} ||= new Bugzilla::Attachment($self->attach_id);
-    return $self->{'attachment'};
+    return $self->{'attachment'}
+      ||= new Bugzilla::Attachment({ id => $self->attach_id, cache => 1 });
 }
 
 sub bug {
     my $self = shift;
 
     require Bugzilla::Bug;
-    $self->{'bug'} ||= new Bugzilla::Bug($self->bug_id);
-    return $self->{'bug'};
+    return $self->{'bug'} ||= new Bugzilla::Bug({ id => $self->bug_id, cache => 1 });
 }
 
 ################################

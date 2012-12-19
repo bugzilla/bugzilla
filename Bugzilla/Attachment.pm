@@ -190,9 +190,8 @@ the user who attached the attachment
 
 sub attacher {
     my $self = shift;
-    return $self->{attacher} if exists $self->{attacher};
-    $self->{attacher} = new Bugzilla::User($self->{submitter_id});
-    return $self->{attacher};
+    return $self->{attacher}
+      ||= new Bugzilla::User({ id => $self->{submitter_id}, cache => 1 });
 }
 
 =over

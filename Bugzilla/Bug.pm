@@ -3199,8 +3199,6 @@ sub cc {
         ORDER BY profiles.login_name},
       undef, $self->bug_id);
 
-    $self->{'cc'} = undef if !scalar(@{$self->{'cc'}});
-
     return $self->{'cc'};
 }
 

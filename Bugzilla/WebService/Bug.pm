@@ -882,7 +882,7 @@ sub _bug_to_hash {
         $item{'blocks'} = \@blocks;
     }
     if (filter_wants $params, 'cc') {
-        my @cc = map { $self->type('email', $_) } @{ $bug->cc || [] };
+        my @cc = map { $self->type('email', $_) } @{ $bug->cc };
         $item{'cc'} = \@cc;
     }
     if (filter_wants $params, 'creator') {

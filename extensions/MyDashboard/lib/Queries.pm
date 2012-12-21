@@ -133,6 +133,9 @@ sub query_bugs {
     my $qdef = shift;
     my $dbh  = Bugzilla->dbh;
 
+    ## HACK to remove POST
+    delete $ENV{REQUEST_METHOD};
+
     my $params = new Bugzilla::CGI($qdef->{params});
 
     my $search = new Bugzilla::Search( fields => [ SELECT_COLUMNS ],

@@ -39,11 +39,9 @@
   [% h2 = "Which product would you like to have described?" %]
 [% END %]
 
-[% yui = [ 'autocomplete' ] %]
-[% javascript_urls = [ "js/field.js", "js/create_bug.js", 
-                       "extensions/BMO/web/js/prod_comp_search.js" ] %]
-[% onload = "YAHOO.util.Dom.get('prod_comp_search').focus();" %]
-[% style_urls.push("extensions/BMO/web/styles/prod_comp_search.css") %]
+[% javascript_urls = [ "extensions/ProdCompSearch/web/js/prod_comp_search.js" ] %]
+[% onload = "document.getElementById('prod_comp_search').focus();" %]
+[% style_urls.push("extensions/ProdCompSearch/web/styles/prod_comp_search.css") %]
 
 [% DEFAULT title = "Choose a Product" %]
 [% PROCESS global/header.html.tmpl %]
@@ -60,7 +58,19 @@
 
 <h2>[% h2 FILTER html %]</h2>
 
-[% PROCESS "global/prod-comp-search.html.tmpl" %]
+<script>
+  [% IF format %]
+    ProdCompsearch.format = '[% format FILTER js %]';
+  [% END %]
+  [% IF cloned_bug_id %]
+    ProdCompSearch.cloned_bug_id = '[% cloned_bug_id FILTER js %]';
+  [% END %]
+</script>
+<div id="prod_comp_search_main">
+  [% PROCESS prodcompsearch/form.html.tmpl 
+     input_label = "Type to find product and component by name or description:"
+  %]
+</div>
 
 <h2>or choose from the following selections</h2>
 

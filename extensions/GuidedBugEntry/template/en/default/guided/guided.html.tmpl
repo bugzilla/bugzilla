@@ -112,26 +112,24 @@ dupes.setLabels(
 %]
 </table>
 
-[% IF BMO  %]
+[% IF BMO %]
   <h3>
     Or search for a Product:
   </h3>
 
-  <div id="prod_comp_search_main">
-    <div id="prod_comp_search_autocomplete">
-      <div id="prod_comp_search_label">
-        Type to find product and component by name or description:
-        <img id="prod_comp_throbber" src="extensions/GuidedBugEntry/web/images/throbber.gif"
-             class="hidden" width="16" height="11">
-      </div>
-      <input id="prod_comp_search" type="text" size="60">
-      <div id="prod_comp_search_autocomplete_container"></div>
-    </div>
-  </div>
-  <script type="text/javascript">
-    if (typeof(YAHOO.bugzilla.prodCompSearch) !== 'undefined' && YAHOO.bugzilla.prodCompSearch != null)
-      YAHOO.bugzilla.prodCompSearch.init('prod_comp_search', 'prod_comp_search_autocomplete_container', 'guided');
+  <script>
+    [% IF format %]
+      ProdCompsearch.format = '[% format FILTER js %]';
+    [% END %]
+    [% IF cloned_bug_id %]
+      ProdCompSearch.cloned_bug_id = '[% cloned_bug_id FILTER js %]';
+    [% END %]
   </script>
+  <div id="prod_comp_search_main">
+    [% PROCESS prodcompsearch/form.html.tmpl
+       input_label = "Type to find product and component by name or description:"
+    %]
+  </div>
 [% END %]
 
 </div>

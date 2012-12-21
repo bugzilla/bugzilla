@@ -10,11 +10,11 @@
 
 [% PROCESS global/header.html.tmpl
   title = "My Dashboard"
-  style_urls = [ "extensions/MyDashboard/web/styles/mydashboard.css" ]
-  javascript_urls = [ "js/yui3/yui/yui-min.js",
-                      "extensions/MyDashboard/web/js/query.js",
+  style_urls = [ "extensions/MyDashboard/web/styles/mydashboard.css",
+                 "extensions/ProdCompSearch/web/styles/prod_comp_search.css" ]
+  javascript_urls = [ "extensions/MyDashboard/web/js/query.js",
                       "extensions/MyDashboard/web/js/flags.js",
-                      "extensions/MyDashboard/web/js/prod_comp_search.js" ]
+                      "extensions/ProdCompSearch/web/js/prod_comp_search.js" ]
 %]
 
 [% standard_queries = [] %]
@@ -51,22 +51,16 @@
         <div class="query_description"></div>
         <span class="items_found" id="query_bugs_found">0 bugs found</span>
         | <a class="refresh" href="javascript:void(0);" id="query_refresh">Refresh</a>
-        <span class="status">Loading...</span>
         <div id="query_pagination_top"></div>
         <div id="query_table"></div>
       </div>
     </div>
 
     <div id="right">
-      <div id="prod_comp_search_container">
-        <div id="prod_comp_search_main">
-          <div id="prod_comp_search_label">
-            File [% terms.Bug %]:
-            <img id="prod_comp_throbber" src="extensions/BMO/web/images/throbber.gif"
-                 class="bz_default_hidden" width="16" height="11">
-          </div>
-          <input id="prod_comp_search" type="text" size="60">
-        </div>
+      <div id="prod_comp_search_main">
+        [% PROCESS prodcompsearch/form.html.tmpl
+           input_label = "File a $terms.Bug:" 
+        %]
       </div>
 
       <div id="requestee_container"> 
@@ -75,7 +69,6 @@
         </div>
         <span class="items_found" id="requestee_flags_found">0 flags found</span>
         | <a class="refresh" href="javascript:void(0);" id="requestee_refresh">Refresh</a>
-        <span class="status">Loading...</span>
         <div id="requestee_table"></div>
       </div>
 
@@ -85,7 +78,6 @@
         </div>
         <span class="items_found" id="requester_flags_found">0 flags found</span>
         | <a class="refresh" href="javascript:void(0);" id="requester_refresh">Refresh</a>
-        <span class="status">Loading...</span>
         <div id="requester_table"></div>
       </div>
     </div>

@@ -33,9 +33,7 @@ YUI({
                 if (e.response) {
                     Y.one("#" + type + "_flags_found").setHTML(
                         e.response.results.length + ' flags found');
-                    Y.one("#" + type + "_container .status").addClass('bz_default_hidden');
                     dataTable[type].set('data', e.response.results);
-                    dataTable[type].render("#" + type + "_table");
                 }
             },
             failure: function(o) {
@@ -53,7 +51,9 @@ YUI({
 
         var stringified = Y.JSON.stringify(json_object);
 
-        Y.one("#" + type + "_container .status").removeClass('bz_default_hidden');
+        dataTable[type].set('data', []);
+        dataTable[type].render("#" + type + "_table");
+        dataTable[type].showMessage('loadingMessage');
 
         dataSource[type].sendRequest({
             request: stringified,

@@ -38,29 +38,16 @@
     width: 40%;
 }
 
-.items_found, .refresh, .status {
+.items_found, .refresh {
     font-size: 80%;
-}
-
-.status {
-    color: red;
-    float: right;
 }
 
 #query_list_container {
     text-align:center;
 }
 
-#prod_comp_search_container,
-#query_list_container {
-    margin-bottom: 10px;
-    border: 1px solid rgb(116,126,147);
-    padding: 10px;
-    height: 40px;
-}
-
+#query_list_container, 
 #prod_comp_search_main {
-    margin-left: auto;
-    margin-right: auto;
-    text-align: left;
+    padding: 20px !important;
+    height: 40px;
 }

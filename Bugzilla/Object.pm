@@ -117,7 +117,7 @@ sub _init {
     return $object;
 }
 
-# Provides a mechanism for objects to be cached in the request_cahce
+# Provides a mechanism for objects to be cached in the request_cache
 sub _cache_get {
     my $class = shift;
     my ($param) = @_;

@@ -55,6 +55,7 @@
   [% FOREACH controlled_field = legal_value.controlled_values.keys %]
     [% SET cont_ids = [] %]
     [% FOREACH val = legal_value.controlled_values.$controlled_field %]
+      [% NEXT IF !val.is_active %]
       [% cont_ids.push(val.id) %]
     [% END %]
     [% NEXT IF !cont_ids.size %]

@@ -236,7 +236,8 @@ sub quoteUrls {
     # empty string
     my $bug_word = template_var('terms')->{bug};
     my $bug_re = qr/\Q$bug_word\E\s*\#?\s*(\d+)/i;
-    my $comment_re = qr/comment\s*\#?\s*(\d+)/i;
+    my $comment_word = template_var('terms')->{comment};
+    my $comment_re = qr/(?:\Q$comment_word\E|comment)\s*\#?\s*(\d+)/i;
     $text =~ s~\b($bug_re(?:\s*,?\s*$comment_re)?|$comment_re)
               ~ # We have several choices. $1 here is the link, and $2-4 are set
                 # depending on which part matched
@@ -258,6 +259,19 @@ sub quoteUrls {
 
         $match =~ s/((?:#\s*)?(\d+))/get_bug_link($2, $1);/eg;
         # Replace the old string with the linkified one.
+        substr($text, $offset, $length) = $match;
+    }
+
+    my $comments_word = template_var('terms')->{comments};
+
+    my $comments_re = qr/(?:comments|\Q$comments_word\E)\s*\#?\s*
+                         \d+(?:\s*,\s*\#?\s*\d+)+/ix;
+    while ($text =~ m/($comments_re)/go) {
+        my $offset = $-[0];
+        my $length = $+[0] - $-[0];
+        my $match  = $1;
+
+        $match =~ s|((?:#\s*)?(\d+))|<a href="$current_bugurl#c$2">$1</a>|g;
         substr($text, $offset, $length) = $match;
     }
 

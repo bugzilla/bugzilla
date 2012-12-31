@@ -591,11 +591,10 @@ sub bz_crypt {
     }
     else {
         my $hasher = Digest->new($algorithm);
-        # We only want to use the first characters of the salt, no
-        # matter how long of a salt we may have been passed.
-        $salt = substr($salt, 0, PASSWORD_SALT_LENGTH);
+        # Newly created salts won't yet have a comma.
+        ($salt) = $salt =~ /^([^,]+),?/;
         $hasher->add($password, $salt);
-        $crypted_password = $salt . $hasher->b64digest . "{$algorithm}";
+        $crypted_password = $salt . ',' . $hasher->b64digest . "{$algorithm}";
     }
 
     # Return the crypted password.

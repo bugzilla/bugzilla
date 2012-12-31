@@ -567,10 +567,10 @@ use constant MAX_QUIP_LENGTH => 512;
 # This is the name of the algorithm used to hash passwords before storing
 # them in the database. This can be any string that is valid to pass to
 # Perl's "Digest" module. Note that if you change this, it won't take
-# effect until a user changes his password.
+# effect until a user logs in or changes his password.
 use constant PASSWORD_DIGEST_ALGORITHM => 'SHA-256';
-# How long of a salt should we use? Note that if you change this, none
-# of your users will be able to log in until they reset their passwords.
+# How long of a salt should we use? Note that if you change this, it
+# won't take effect until a user logs in or changes his password.
 use constant PASSWORD_SALT_LENGTH => 8;
 
 # Certain scripts redirect to GET even if the form was submitted originally

@@ -24,6 +24,9 @@ my $vars = {};
 Bugzilla->switch_to_shadow_db;
 
 $vars->{'keywords'} = Bugzilla::Keyword->get_all_with_bug_count();
+if (!@{$vars->{keywords}}) {
+    ThrowUserError("no_keywords");
+}
 $vars->{'caneditkeywords'} = $user->in_group("editkeywords");
 
 print $cgi->header();

@@ -13,6 +13,8 @@
 [% PROCESS extensions/license.txt.tmpl %]
 
 package B[% %]ugzilla::Extension::[% name %]::Util;
+
+use 5.10.1;
 use strict;
 use parent qw(Exporter);
 our @EXPORT = qw(

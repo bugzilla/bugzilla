@@ -6,6 +6,8 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::Extension::MoreBugUrl::Rietveld;
+
+use 5.10.1;
 use strict;
 use parent qw(Bugzilla::BugUrl);
 

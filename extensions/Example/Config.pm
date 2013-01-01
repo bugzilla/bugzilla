@@ -6,6 +6,8 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::Extension::Example;
+
+use 5.10.1;
 use strict;
 use constant NAME => 'Example';
 use constant REQUIRED_MODULES => [

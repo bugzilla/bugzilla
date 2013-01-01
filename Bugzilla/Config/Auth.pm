@@ -82,7 +82,7 @@ sub get_param_list {
   {
    name => 'emailregexp',
    type => 't',
-   default => q:^[\\w\\.\\+\\-=]+@[\\w\\.\\-]+\\.[\\w\\-]+$:,
+   default => q:^[\\w\\.\\+\\-=']+@[\\w\\.\\-]+\\.[\\w\\-]+$:,
    checker => \&check_regexp
   },
 

@@ -212,7 +212,7 @@ TUI_hide_default('attachment_text_field');
           [% NEXT IF NOT c.is_active %]
           <option value="[% c.name FILTER html %]"
                   id="v[% c.id FILTER html %]_component"
-            [% IF c.name == default.component_ %]
+            [% IF c.name.lower == default.component_.lower %]
               [%# This is for bug/field.html.tmpl, for visibility-related
                 # controls. %]
               [% default.component_id = c.id %]

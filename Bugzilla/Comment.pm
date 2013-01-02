@@ -80,7 +80,7 @@ use constant VALIDATOR_DEPENDENCIES => {
 sub update {
     my $self = shift;
     my $changes = $self->SUPER::update(@_);
-    $self->bug->_sync_fulltext();
+    $self->bug->_sync_fulltext( update_comments => 1);
     return $changes;
 }
 

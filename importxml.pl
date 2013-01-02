@@ -1191,7 +1191,7 @@ sub process_bug {
                               $c->{isprivate}, $c->{thetext}, 0);
     }
     $sth_comment->execute($id, $exporterid, $timestamp, 0, $comments, $worktime);
-    Bugzilla::Bug->new($id)->_sync_fulltext('new_bug');
+    Bugzilla::Bug->new($id)->_sync_fulltext( new_bug => 1);
 
     # Add this bug to each group of which its product is a member.
     my $sth_group = $dbh->prepare("INSERT INTO bug_group_map (bug_id, group_id) 

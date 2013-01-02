@@ -719,7 +719,7 @@ sub create {
     # Because MySQL doesn't support transactions on the fulltext table,
     # we do this after we've committed the transaction. That way we're
     # sure we're inserting a good Bug ID.
-    $bug->_sync_fulltext('new bug');
+    $bug->_sync_fulltext( new_bug => 1 );
 
     return $bug;
 }
@@ -1014,9 +1014,10 @@ sub update {
     # in the middle of a transaction, and if that transaction is rolled
     # back, this change will *not* be rolled back. As we expect rollbacks
     # to be extremely rare, that is OK for us.
-    $self->_sync_fulltext()
-        if $self->{added_comments} || $changes->{short_desc}
-           || $self->{comment_isprivate};
+    $self->_sync_fulltext(
+        update_short_desc => $changes->{short_desc},
+        update_comments   => $self->{added_comments} || $self->{comment_isprivate}
+    );
 
     # Remove obsolete internal variables.
     delete $self->{'_old_assigned_to'};
@@ -1050,25 +1051,43 @@ sub _extract_multi_selects {
 
 # Should be called any time you update short_desc or change a comment.
 sub _sync_fulltext {
-    my ($self, $new_bug) = @_;
+    my ($self, %options) = @_;
     my $dbh = Bugzilla->dbh;
-    if ($new_bug) {
-        $dbh->do('INSERT INTO bugs_fulltext (bug_id, short_desc)
-                  SELECT bug_id, short_desc FROM bugs WHERE bug_id = ?',
-                 undef, $self->id);
+
+    my($all_comments, $public_comments);
+    if ($options{new_bug} || $options{update_comments}) {
+        my $comments = $dbh->selectall_arrayref(
+            'SELECT thetext, isprivate FROM longdescs WHERE bug_id = ?',
+            undef, $self->id);
+        $all_comments = join("\n", map { $_->[0] } @$comments);
+        my @no_private = grep { !$_->[1] } @$comments;
+        $public_comments = join("\n", map { $_->[0] } @no_private);
     }
-    else {
-        $dbh->do('UPDATE bugs_fulltext SET short_desc = ? WHERE bug_id = ?',
-                 undef, $self->short_desc, $self->id);
+
+    if ($options{new_bug}) {
+        $dbh->do('INSERT INTO bugs_fulltext (bug_id, short_desc, comments,
+                                             comments_noprivate)
+                 VALUES (?, ?, ?, ?)',
+                 undef,
+                 $self->id, $self->short_desc, $all_comments, $public_comments);
+    } else {
+        my(@names, @values);
+        if ($options{update_short_desc}) {
+            push @names, 'short_desc';
+            push @values, $self->short_desc;
+        }
+        if ($options{update_comments}) {
+            push @names, ('comments', 'comments_noprivate');
+            push @values, ($all_comments, $public_comments);
+        }
+        if (@names) {
+            $dbh->do('UPDATE bugs_fulltext SET ' .
+                     join(', ', map { "$_ = ?" } @names) .
+                     ' WHERE bug_id = ?',
+                     undef,
+                     @values, $self->id);
+        }
     }
-    my $comments = $dbh->selectall_arrayref(
-        'SELECT thetext, isprivate FROM longdescs WHERE bug_id = ?',
-        undef, $self->id);
-    my $all = join("\n", map { $_->[0] } @$comments);
-    my @no_private = grep { !$_->[1] } @$comments;
-    my $nopriv_string = join("\n", map { $_->[0] } @no_private);
-    $dbh->do('UPDATE bugs_fulltext SET comments = ?, comments_noprivate = ?
-               WHERE bug_id = ?', undef, $all, $nopriv_string, $self->id);
 }
 
 sub remove_from_db {

@@ -1990,11 +1990,11 @@ sub _check_field_is_mandatory {
 
 sub _check_date_field {
     my ($invocant, $date) = @_;
-    return _check_datetime_field($invocant, $date, 1);
+    return $invocant->_check_datetime_field($date, undef, {date_only => 1});
 }
 
 sub _check_datetime_field {
-    my ($invocant, $date_time, $date_only) = @_;
+    my ($invocant, $date_time, $field, $params) = @_;
 
     # Empty datetimes are empty strings or strings only containing
     # 0's, whitespace, and punctuation.
@@ -2008,7 +2008,7 @@ sub _check_datetime_field {
         ThrowUserError('illegal_date', { date   => $date,
                                          format => 'YYYY-MM-DD' });
     }
-    if ($time && $date_only) {
+    if ($time && $params->{date_only}) {
         ThrowUserError('illegal_date', { date   => $date_time,
                                          format => 'YYYY-MM-DD' });
     }

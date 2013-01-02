@@ -147,10 +147,11 @@ sub REQUIRED_MODULES {
         # in a URL query string.
         version => '1.37',
     },
+    # 0.32 fixes several memory leaks in the XS version of some functions.
     {
         package => 'List-MoreUtils',
         module  => 'List::MoreUtils',
-        version => 0.22,
+        version => 0.32,
     },
     {
         package => 'Math-Random-ISAAC',

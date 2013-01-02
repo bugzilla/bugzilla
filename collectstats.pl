@@ -204,13 +204,14 @@ sub collect_stats {
 
     if (!$exists || scalar(@data)) {
         my $fields = join('|', ('DATE', @statuses, @resolutions));
+        my $product_name = $product->name;
         print DATA <<FIN;
 # Bugzilla Daily Bug Stats
 #
 # Do not edit me! This file is generated.
 #
 # fields: $fields
-# Product: $product->name
+# Product: $product_name
 # Created: $when
 FIN
     }
@@ -308,13 +309,14 @@ sub regenerate_stats {
 
     if (open DATA, ">$file") {
         my $fields = join('|', ('DATE', @statuses, @resolutions));
+        my $product_name = $product->name;
         print DATA <<FIN;
 # Bugzilla Daily Bug Stats
 #
 # Do not edit me! This file is generated.
 #
 # fields: $fields
-# Product: $product->name
+# Product: $product_name
 # Created: $when
 FIN
         # For each day, generate a line of statistics.
@@ -323,7 +325,7 @@ FIN
         for (my $day = $start + 1; $day <= $end; $day++) {
             # Some output feedback
             my $percent_done = ($day - $start - 1) * 100 / $total_days;
-            printf "\rRegenerating %s \[\%.1f\%\%]", $product->name,
+            printf "\rRegenerating %s \[\%.1f\%\%]", $product_name,
                                                      $percent_done;
 
             # Get a list of bugs that were created the previous day, and
@@ -372,7 +374,7 @@ FIN
 
         # Finish up output feedback for this product.
         my $tend = time;
-        say "\rRegenerating " . $product->name . ' [100.0%] - ' .
+        say "\rRegenerating " . $product_name . ' [100.0%] - ' .
             delta_time($tstart, $tend);
 
         close DATA;

@@ -49,8 +49,10 @@ sub start {
     }
 
     while(1) {
-        $self->_reload();
-        $self->push();
+        if ($self->_dbh_check()) {
+            $self->_reload();
+            $self->push();
+        }
         sleep(POLL_INTERVAL_SECONDS);
     }
 }
@@ -244,6 +246,19 @@ sub log {
     my ($self) = @_;
     $self->{log} ||= Bugzilla::Extension::Push::Log->new();
     return $self->{log};
+}
+
+sub _dbh_check {
+    my ($self) = @_;
+    eval {
+        Bugzilla->dbh->selectrow_array("SELECT 1 FROM push");
+    };
+    if ($@) {
+        $self->logger->error(clean_error($@));
+        return 0;
+    } else {
+        return 1;
+    }
 }
 
 1;

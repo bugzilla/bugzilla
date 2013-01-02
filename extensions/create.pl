@@ -20,6 +20,7 @@ use File::Path qw(mkpath);
 my $base_dir = bz_locations()->{'extensionsdir'};
 
 my $name = $ARGV[0] or ThrowUserError('extension_create_no_name');
+$name = ucfirst($name);
 if ($name !~ /^[A-Z]/) {
     ThrowUserError('extension_first_letter_caps', { name => $name });
 }

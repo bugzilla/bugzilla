@@ -66,7 +66,7 @@ sub _initialize {
         LONGBLOB =>     'bytea',
 
         DATETIME =>     'timestamp(0) without time zone',
-
+        DATE     =>     'date',
     };
 
     $self->_adjust_schema;

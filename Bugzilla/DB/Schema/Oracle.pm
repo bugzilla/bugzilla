@@ -56,7 +56,7 @@ sub _initialize {
         LONGBLOB =>     'blob',
 
         DATETIME =>     'date',
-
+        DATE     =>     'date',
     };
 
     $self->_adjust_schema;

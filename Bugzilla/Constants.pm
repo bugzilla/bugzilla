@@ -104,10 +104,12 @@ use Memoize;
     FIELD_TYPE_MULTI_SELECT
     FIELD_TYPE_TEXTAREA
     FIELD_TYPE_DATETIME
+    FIELD_TYPE_DATE
     FIELD_TYPE_BUG_ID
     FIELD_TYPE_BUG_URLS
     FIELD_TYPE_KEYWORDS
-
+    FIELD_TYPE_HIGHEST_PLUS_ONE
+    
     EMPTY_DATETIME_REGEX
 
     ABNORMAL_SELECTS
@@ -385,6 +387,10 @@ use constant FIELD_TYPE_DATETIME  => 5;
 use constant FIELD_TYPE_BUG_ID  => 6;
 use constant FIELD_TYPE_BUG_URLS => 7;
 use constant FIELD_TYPE_KEYWORDS => 8;
+use constant FIELD_TYPE_DATE => 9;
+# Add new field types above this line, and change the below value in the
+# obvious fashion
+use constant FIELD_TYPE_HIGHEST_PLUS_ONE => 10;
 
 use constant EMPTY_DATETIME_REGEX => qr/^[0\-:\sA-Za-z]+$/; 
 

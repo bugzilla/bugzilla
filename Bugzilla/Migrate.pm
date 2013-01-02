@@ -447,8 +447,11 @@ sub translate_value {
     }
 
     my $field_obj = $self->bug_fields->{$field};
-    if ($field eq 'creation_ts' or $field eq 'delta_ts'
-        or ($field_obj and $field_obj->type == FIELD_TYPE_DATETIME))
+    if ($field eq 'creation_ts'
+        or $field eq 'delta_ts'
+        or ($field_obj and
+             ($field_obj->type == FIELD_TYPE_DATETIME
+              or $field_obj->type == FIELD_TYPE_DATE)))
     {
         $value = trim($value);
         return undef if !$value;

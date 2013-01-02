@@ -32,14 +32,23 @@
   <b>[% terms.Bug %] List:</b>
 
   ([% this_bug_idx + 1 %] of [% last_bug_list.size %])
+  
+  [% IF this_bug_idx > 0 %]
+    <a href="show_bug.cgi?id=
+             [%- last_bug_list.first FILTER uri %]&amp;list_id=
+             [%- my_search.id FILTER uri %]">First</a>
+  [% ELSE %]
+    <i><font color="#777777">First</font></i>
+  [% END %]
 
-  <a href="show_bug.cgi?id=
-           [%- last_bug_list.first FILTER uri %]&amp;list_id=
-           [%- my_search.id FILTER uri %]">First</a>
-  <a href="show_bug.cgi?id=
-           [%- last_bug_list.last FILTER uri %]&amp;list_id=
-           [%- my_search.id FILTER uri %]">Last</a>
-
+  [% IF this_bug_idx + 1 < last_bug_list.size %]
+    <a href="show_bug.cgi?id=
+             [%- last_bug_list.last FILTER uri %]&amp;list_id=
+             [%- my_search.id FILTER uri %]">Last</a>
+  [% ELSE %]
+    <i><font color="#777777">Last</font></i>
+  [% END %]
+  
   [% IF this_bug_idx > 0 %]
     [% prev_bug = this_bug_idx - 1 %]
     <a href="show_bug.cgi?id=

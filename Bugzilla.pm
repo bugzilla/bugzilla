@@ -943,6 +943,10 @@ this Bugzilla installation.
 Tells you whether or not a specific feature is enabled. For names
 of features, see C<OPTIONAL_MODULES> in C<Bugzilla::Install::Requirements>.
 
+=item C<clear_request_cache>
+
+Removes all entries from the C<request_cache>.
+
 =back
 
 =head1 B<Methods in need of POD>

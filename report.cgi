@@ -309,11 +309,8 @@ my $format = $template->get_format("reports/report", $formatparam,
 # set debug=1 to always get an HTML content-type, and view the error.
 $format->{'ctype'} = "text/html" if $cgi->param('debug');
 
-my @time = localtime(time());
-my $date = sprintf "%04d-%02d-%02d", 1900+$time[5],$time[4]+1,$time[3];
-my $filename = "report-$date.$format->{extension}";
-print $cgi->header(-type => $format->{'ctype'},
-                   -content_disposition => "inline; filename=$filename");
+$cgi->set_dated_content_disp("inline", "report", $format->{extension});
+print $cgi->header($format->{'ctype'});
 
 # Problems with this CGI are often due to malformed data. Setting debug=1
 # prints out both data structures.

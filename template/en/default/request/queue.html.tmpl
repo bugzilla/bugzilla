@@ -207,6 +207,8 @@ to some group are shown by default.
     </tr>
   [% END %]
   [% PROCESS display_buglist %]
+  <br><br>
+  <a href="request.cgi?[% urlquerypart FILTER html %]&amp;ctype=csv">View entire list as CSV</a>
 [% END %]
 
 [% PROCESS global/footer.html.tmpl %]
@@ -264,6 +266,6 @@ to some group are shown by default.
   </table>
   [% NEXT UNLESS buglist.keys.size %]
   <a href="buglist.cgi?bug_id=
-           [%- buglist.keys.nsort.join(",") FILTER html %]">(view as
-  [%+ terms.bug %] list)</a>
+           [%- buglist.keys.nsort.join(",") FILTER html %]">View as
+  [%+ terms.bug %] list</a>
 [% END %]

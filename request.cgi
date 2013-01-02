@@ -26,8 +26,12 @@ my $cgi = Bugzilla->cgi;
 Bugzilla->switch_to_shadow_db;
 my $template = Bugzilla->template;
 my $action = $cgi->param('action') || '';
+my $format = $template->get_format('request/queue', 
+                                   scalar($cgi->param('format')),
+                                   scalar($cgi->param('ctype')));
 
-print $cgi->header();
+$cgi->set_dated_content_disp("inline", "requests", $format->{extension});
+print $cgi->header($format->{'ctype'});
 
 my $fields;
 $fields->{'requester'}->{'type'} = 'single';
@@ -42,7 +46,7 @@ unless (defined $cgi->param('requestee')
 Bugzilla::User::match_field($fields);
 
 if ($action eq 'queue') {
-    queue();
+    queue($format);
 }
 else {
     my $flagtypes = get_flag_types();
@@ -60,7 +64,7 @@ else {
     }
     $vars->{'components'} = [ sort { $a cmp $b } keys %components ];
 
-    $template->process('request/queue.html.tmpl', $vars)
+    $template->process($format->{'template'}, $vars)
       || ThrowTemplateError($template->error());
 }
 exit;
@@ -70,6 +74,7 @@ exit;
 ################################################################################
 
 sub queue {
+    my $format = shift;
     my $cgi = Bugzilla->cgi;
     my $dbh = Bugzilla->dbh;
     my $template = Bugzilla->template;
@@ -295,8 +300,10 @@ sub queue {
     }
     $vars->{'components'} = [ sort { $a cmp $b } keys %components ];
 
+    $vars->{'urlquerypart'} = $cgi->canonicalise_query('ctype');
+
     # Generate and return the UI (HTML page) from the appropriate template.
-    $template->process("request/queue.html.tmpl", $vars)
+    $template->process($format->{'template'}, $vars)
       || ThrowTemplateError($template->error());
 }
 

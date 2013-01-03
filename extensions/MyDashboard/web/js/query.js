@@ -9,9 +9,17 @@
 // Main query code
 YUI({
     base: 'js/yui3/',
-    combine: false
+    combine: false, 
+    groups: {
+        gallery: {
+            combine: false,
+            base: 'js/yui3/',
+            patterns: { 'gallery-': {} }
+        }
+    }
 }).use("node", "datatable", "datatable-sort", "datatable-message", "json-stringify",
-       "datatable-datasource", "datasource-io", "datasource-jsonschema", "cookie", function (Y) {
+       "datatable-datasource", "datasource-io", "datasource-jsonschema", "cookie",
+       "gallery-datatable-row-expansion-bmo", "handlebars", function (Y) {
     var counter = 0,
         dataSource = null,
         dataTable = null, 
@@ -83,7 +91,8 @@ YUI({
     dataSource.plug(Y.Plugin.DataSourceJSONSchema, {
         schema: {
             resultListLocator: "result.result.bugs",
-            resultFields: ["bug_id", "changeddate", "bug_status", "short_desc"],
+            resultFields: ["bug_id", "changeddate", "bug_status", 
+                           "short_desc", "last_changes"],
             metaFields: {
                 description: "result.result.description",
                 heading:     "result.result.heading",
@@ -94,12 +103,32 @@ YUI({
 
     dataTable = new Y.DataTable({
         columns: [
-            { key:"bug_id", label:"Bug", sortable:true,
+            { key: Y.Plugin.DataTableRowExpansion.column_key, label: ' ' },
+            { key: "bug_id", label: "Bug", sortable: true,
               formatter: '<a href="show_bug.cgi?id={value}" target="_blank">{value}</a>', allowHTML: true },
-            { key:"changeddate", label:"Updated", sortable:true },
-            { key:"bug_status", label:"Status", sortable:true },
-            { key:"short_desc", label:"Summary", sortable:true },
+            { key: "changeddate", label: "Updated", sortable: true },
+            { key: "bug_status", label: "Status", sortable: true },
+            { key: "short_desc", label: "Summary", sortable: true },
         ],
+    });
+
+    var last_changes_source = Y.one('#last-changes-template').getHTML(),
+        last_changes_template = Y.Handlebars.compile(last_changes_source);
+
+    dataTable.plug(Y.Plugin.DataTableRowExpansion, {
+        uniqueIdKey: 'bug_id',
+        template: function(data) {
+            var last_changes = {};
+            if (data.last_changes.email) {
+                last_changes = {
+                    activity: data.last_changes.activity, 
+                    email: data.last_changes.email,
+                    when: data.last_changes.when, 
+                    comment: data.last_changes.comment,
+                };
+            }
+            return last_changes_template(last_changes);
+        }
     });
 
     dataTable.plug(Y.Plugin.DataTableSort);

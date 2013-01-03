@@ -24,6 +24,49 @@
   [% saved_queries.push(q) IF q.saved %]
 [% END %]
 
+<script id="last-changes-template" type="text/x-handlebars-template">
+  {{#if email}}
+    <div id="last_changes">
+      <div id="last_changes_header">
+        Last Changes :: {{email}} :: {{when}}
+      </div>
+      {{#if activity}}
+        <table id="activity">
+        {{#each activity}}
+          <tr>
+            <td class="field_label">{{field_name}}:</td>
+            <td class="field_data">
+              {{#if removed}}
+                {{#unless added}}
+                  Removed: 
+                {{/unless}}
+                {{removed}}
+              {{/if}}
+              {{#if added}}
+                {{#if removed}}
+                  &rarr;
+                {{/if}}
+              {{/if}}
+              {{#if added}}
+                {{#unless removed}}
+                  Added:
+                {{/unless}}
+                {{added}}
+              {{/if}}
+            </td>
+          </tr>
+        {{/each}}
+        </table>
+      {{/if}}
+      {{#if comment}}
+        <pre class='bz_comment_text'>{{comment}}</pre>
+      {{/if}}
+    {{else}}
+      This is a new [% terms.bug %] and no changes have been made yet.
+    {{/if}}
+  </div>
+</script>
+
 <div id="mydashboard">
   <div class="yui3-skin-sam">
     <div id="left">

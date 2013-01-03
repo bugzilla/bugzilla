@@ -373,13 +373,13 @@ sub history {
         $bug_id = $bug->id;
         $item{id} = $self->type('int', $bug_id);
 
-        my ($activity) = Bugzilla::Bug::GetBugActivity($bug_id);
+        my ($activity) = Bugzilla::Bug::GetBugActivity($bug_id, undef, $params->{start_time});
 
         my @history;
         foreach my $changeset (@$activity) {
             my %bug_history;
             $bug_history{when} = $self->type('dateTime', $changeset->{when});
-            $bug_history{who}  = $self->type('string', $changeset->{who});
+            $bug_history{who}  = $self->type('email', $changeset->{who});
             $bug_history{changes} = [];
             foreach my $change (@{ $changeset->{changes} }) {
                 my $api_field = $api_name{$change->{fieldname}} || $change->{fieldname};
@@ -2120,6 +2120,11 @@ with that alias will be loaded.
 Note that it's possible for aliases to be disabled in Bugzilla, in which
 case you will be told that you have specified an invalid bug_id if you
 try to specify an alias. (It will be error 100.)
+
+=item C<start_time>
+
+An optional C<datetime> string that only shows changes at and after a specific
+time.
 
 =back
 

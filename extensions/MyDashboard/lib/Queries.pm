@@ -10,12 +10,15 @@ package Bugzilla::Extension::MyDashboard::Queries;
 use strict;
 
 use Bugzilla;
+use Bugzilla::Bug;
 use Bugzilla::CGI;
 use Bugzilla::Search;
 use Bugzilla::Util qw(format_time);
 
 use Bugzilla::Extension::MyDashboard::Util qw(open_states quoted_open_states);
 use Bugzilla::Extension::MyDashboard::TimeAgo qw(time_ago);
+
+use Data::Dumper;
 
 use base qw(Exporter);
 our @EXPORT = qw(
@@ -241,6 +244,5 @@ sub query_flags {
 
     return undef;
 }
-
 
 1;

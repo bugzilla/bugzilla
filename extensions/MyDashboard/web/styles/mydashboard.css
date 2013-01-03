@@ -51,3 +51,14 @@
     padding: 20px !important;
     height: 40px;
 }
+
+#last_changes_header {
+    font-size: 12px;
+    font-weight: bold;
+    padding-bottom: 5px;
+    border-bottom: 1px solid rgb(200, 200, 186);
+}
+
+#last_changes .field_label {
+    text-align: left;
+}

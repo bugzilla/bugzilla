@@ -23,3 +23,23 @@
     padding-bottom: 5px;
     margin-bottom: 10px;
 }
+
+.percentage {
+    position:relative;
+    width: 200px;
+    border: 1px solid rgb(203, 203, 203);
+    position: relative;
+    padding: 3px;
+}
+
+.bar{
+    background-color: #00ff00;
+    height: 20px;
+}
+
+.percent{
+    position: absolute;
+    display: inline-block;
+    top: 3px;
+    left: 48%;
+}

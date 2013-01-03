@@ -66,7 +66,7 @@ sub total_closed_bugs {
 
     return $dbh->selectrow_array("SELECT COUNT(bug_id) 
                                     FROM bugs 
-                                   WHERE bug_status IN ('CLOSED') 
+                                   WHERE bug_status IN (" . join(',', quoted_closed_states()) . ") 
                                          AND product_id = ?", undef, $product->id);
 }
 
@@ -96,12 +96,14 @@ sub by_version {
     $extra = "AND bugs.bug_status IN (" . join(',', quoted_open_states()) . ")" if $bug_status eq 'open';
     $extra = "AND bugs.bug_status IN (" . join(',', quoted_closed_states()) . ")" if $bug_status eq 'closed';
 
-    return $dbh->selectall_arrayref("SELECT version, COUNT(bug_id) 
+    return $dbh->selectall_arrayref("SELECT version, COUNT(bug_id),
+                                            ROUND(((COUNT(bugs.bug_id) / ( SELECT COUNT(*) FROM bugs WHERE bugs.product_id = ? $extra)) * 100))
                                        FROM bugs 
                                       WHERE product_id = ? 
                                             $extra
                                       GROUP BY version
-                                      ORDER BY COUNT(bug_id) DESC", undef, $product->id);
+                                      ORDER BY COUNT(bug_id) DESC",
+                                    undef, $product->id, $product->id);
 }
 
 sub by_milestone {
@@ -112,12 +114,14 @@ sub by_milestone {
     $extra = "AND bugs.bug_status IN (" . join(',', quoted_open_states()) . ")" if $bug_status eq 'open';
     $extra = "AND bugs.bug_status IN (" . join(',', quoted_closed_states()) . ")" if $bug_status eq 'closed';
 
-    return $dbh->selectall_arrayref("SELECT target_milestone, COUNT(bug_id) 
+    return $dbh->selectall_arrayref("SELECT target_milestone, COUNT(bug_id),
+                                            ROUND(((COUNT(bugs.bug_id) / ( SELECT COUNT(*) FROM bugs WHERE bugs.product_id = ? $extra)) * 100))
                                        FROM bugs 
                                       WHERE product_id = ?
                                             $extra
                                       GROUP BY target_milestone
-                                      ORDER BY COUNT(bug_id) DESC", undef, $product->id);
+                                      ORDER BY COUNT(bug_id) DESC",
+                                    undef, $product->id, $product->id);
 }
 
 sub by_priority {
@@ -128,12 +132,14 @@ sub by_priority {
     $extra = "AND bugs.bug_status IN (" . join(',', quoted_open_states()) . ")" if $bug_status eq 'open';
     $extra = "AND bugs.bug_status IN (" . join(',', quoted_closed_states()) . ")" if $bug_status eq 'closed';
 
-    return $dbh->selectall_arrayref("SELECT priority, COUNT(bug_id) 
+    return $dbh->selectall_arrayref("SELECT priority, COUNT(bug_id),
+                                            ROUND(((COUNT(bugs.bug_id) / ( SELECT COUNT(*) FROM bugs WHERE bugs.product_id = ? $extra)) * 100))
                                        FROM bugs 
                                       WHERE product_id = ?
                                             $extra
                                       GROUP BY priority
-                                      ORDER BY COUNT(bug_id) DESC", undef, $product->id);
+                                      ORDER BY COUNT(bug_id) DESC",
+                                    undef, $product->id, $product->id);
 }
 
 sub by_severity {
@@ -144,12 +150,14 @@ sub by_severity {
     $extra = "AND bugs.bug_status IN (" . join(',', quoted_open_states()) . ")" if $bug_status eq 'open';
     $extra = "AND bugs.bug_status IN (" . join(',', quoted_closed_states()) . ")" if $bug_status eq 'closed';
 
-    return $dbh->selectall_arrayref("SELECT bug_severity, COUNT(bug_id) 
+    return $dbh->selectall_arrayref("SELECT bug_severity, COUNT(bug_id),
+                                            ROUND(((COUNT(bugs.bug_id) / ( SELECT COUNT(*) FROM bugs WHERE bugs.product_id = ? $extra)) * 100))
                                        FROM bugs 
                                       WHERE product_id = ? 
                                             $extra
                                       GROUP BY bug_severity
-                                      ORDER BY COUNT(bug_id) DESC", undef, $product->id);
+                                      ORDER BY COUNT(bug_id) DESC",
+                                    undef, $product->id, $product->id);
 }
 
 sub by_component {
@@ -160,12 +168,14 @@ sub by_component {
     $extra = "AND bugs.bug_status IN (" . join(',', quoted_open_states()) . ")" if $bug_status eq 'open';
     $extra = "AND bugs.bug_status IN (" . join(',', quoted_closed_states()) . ")" if $bug_status eq 'closed';
 
-    return $dbh->selectall_arrayref("SELECT components.name, COUNT(bugs.bug_id) 
+    return $dbh->selectall_arrayref("SELECT components.name, COUNT(bugs.bug_id),
+                                            ROUND(((COUNT(bugs.bug_id) / ( SELECT COUNT(*) FROM bugs WHERE bugs.product_id = ? $extra)) * 100))
                                        FROM bugs INNER JOIN components ON bugs.component_id = components.id 
                                       WHERE bugs.product_id = ?
                                             $extra
                                       GROUP BY components.name
-                                      ORDER BY COUNT(bugs.bug_id) DESC", undef, $product->id);
+                                      ORDER BY COUNT(bugs.bug_id) DESC",
+                                    undef, $product->id, $product->id);
 }
 
 sub by_value_summary {
@@ -225,20 +235,21 @@ sub by_assignee {
     my $dbh = Bugzilla->dbh;
     my $extra;
 
-    $limit = detaint_natural($limit) ? $dbh->sql_limit($limit) : "";
+    $limit = ($limit && detaint_natural($limit)) ? $dbh->sql_limit($limit) : "";
 
     $extra = "AND bugs.bug_status IN (" . join(',', quoted_open_states()) . ")" if $bug_status eq 'open';
     $extra = "AND bugs.bug_status IN (" . join(',', quoted_closed_states()) . ")" if $bug_status eq 'closed';
 
-    my @result = map { [ Bugzilla::User->new($_->[0]), $_->[1] ] }
-        @{$dbh->selectall_arrayref("SELECT bugs.assigned_to AS userid, COUNT(bugs.bug_id)
+    my @result = map { [ Bugzilla::User->new($_->[0]), $_->[1], $_->[2] ] }
+        @{$dbh->selectall_arrayref("SELECT bugs.assigned_to AS userid, COUNT(bugs.bug_id),
+                                           ROUND(((COUNT(bugs.bug_id) / ( SELECT COUNT(*) FROM bugs WHERE bugs.product_id = ? $extra)) * 100))
                                       FROM bugs, profiles
                                      WHERE bugs.product_id = ?
                                            AND bugs.assigned_to = profiles.userid
                                            $extra
                                      GROUP BY profiles.login_name
                                      ORDER BY COUNT(bugs.bug_id) DESC $limit", 
-                                   undef, $product->id)};
+                                   undef, $product->id, $product->id)};
 
     return \@result;
 }
@@ -251,12 +262,14 @@ sub by_status {
     $extra = "AND bugs.bug_status IN (" . join(',', quoted_open_states()) . ")" if $bug_status eq 'open';
     $extra = "AND bugs.bug_status IN (" . join(',', quoted_closed_states()) . ")" if $bug_status eq 'closed';
 
-    return $dbh->selectall_arrayref("SELECT bugs.bug_status, COUNT(bugs.bug_id) 
+    return $dbh->selectall_arrayref("SELECT bugs.bug_status, COUNT(bugs.bug_id),
+                                            ROUND(((COUNT(bugs.bug_id) / ( SELECT COUNT(*) FROM bugs WHERE bugs.product_id = ? $extra)) * 100))
                                        FROM bugs
                                       WHERE bugs.product_id = ?
                                             $extra 
                                       GROUP BY bugs.bug_status
-                                      ORDER BY COUNT(bugs.bug_id) DESC", undef, $product->id);
+                                      ORDER BY COUNT(bugs.bug_id) DESC",
+                                    undef, $product->id, $product->id);
 }
 
 sub total_bug_milestone {
@@ -267,10 +280,7 @@ sub total_bug_milestone {
                                     FROM bugs 
                                    WHERE target_milestone = ? 
                                          AND product_id = ?",
-                                 undef, 
-                                 $milestone->name,
-                                 $product->id);
-
+                                 undef, $milestone->name, $product->id);
 }
 
 sub bug_milestone_by_status {
@@ -294,7 +304,7 @@ sub bug_milestone_by_status {
 sub by_duplicate {
     my ($product, $bug_status, $limit) = @_;
     my $dbh = Bugzilla->dbh;
-    $limit = detaint_natural($limit) ? $dbh->sql_limit($limit) : "";
+    $limit = ($limit && detaint_natural($limit)) ? $dbh->sql_limit($limit) : "";
 
     my $extra;
     $extra = "AND bugs.bug_status IN (" . join(',', quoted_open_states()) . ")" if $bug_status eq 'open';
@@ -324,7 +334,7 @@ sub by_duplicate {
 sub by_popularity {
     my ($product, $bug_status, $limit) = @_;
     my $dbh = Bugzilla->dbh;
-    $limit = detaint_natural($limit) ? $dbh->sql_limit($limit) : ""; 
+    $limit = ($limit && detaint_natural($limit)) ? $dbh->sql_limit($limit) : ""; 
 
     my $extra;
     $extra = "AND bugs.bug_status IN (" . join(',', quoted_open_states()) . ")" if $bug_status eq 'open';
@@ -359,7 +369,7 @@ sub recently_opened {
     my $date_to   = $params->{'date_to'};
 
     $days ||= 7;
-    $limit = detaint_natural($limit) ? $dbh->sql_limit($limit) : "";
+    $limit = ($limit && detaint_natural($limit)) ? $dbh->sql_limit($limit) : "";
 
     my @values = ($product->id);
 
@@ -375,7 +385,7 @@ sub recently_opened {
         push(@values, trick_taint($date_from), trick_taint($date_to));
     }
     else {
-        $date_part = "AND bugs.creation_ts >= NOW() - " . $dbh->sql_to_days('?');
+        $date_part = "AND bugs.creation_ts >= CURRENT_DATE() - INTERVAL ? DAY";
         push(@values, $days);
     }
 
@@ -407,7 +417,7 @@ sub recently_closed {
     my $date_to   = $params->{'date_to'};
 
     $days ||= 7;
-    $limit = detaint_natural($limit) ? $dbh->sql_limit($limit) : "";
+    $limit = ($limit && detaint_natural($limit)) ? $dbh->sql_limit($limit) : "";
 
     my @values = ($product->id);
 
@@ -419,11 +429,11 @@ sub recently_closed {
         validate_date($date_to)
             || ThrowUserError('illegal_date', { date   => $date_to,
                                                 format => 'YYYY-MM-DD' });
-        $date_part = "AND bugs.creation_ts >= ? AND bugs.creation_ts <= ?";
+        $date_part = "AND bugs_activity.bug_when >= ? AND bugs_activity.bug_when <= ?";
         push(@values, trick_taint($date_from), trick_taint($date_to));
     }
     else {
-        $date_part = "AND bugs.creation_ts >= NOW() - " . $dbh->sql_to_days('?');
+        $date_part = "AND bugs_activity.bug_when >= CURRENT_DATE() - INTERVAL ? DAY";
         push(@values, $days);
     }
 

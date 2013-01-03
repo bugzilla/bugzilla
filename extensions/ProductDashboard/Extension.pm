@@ -108,10 +108,13 @@ sub _page_dashboard {
     $vars->{'total_closed_bugs'} = total_closed_bugs($product);
     $vars->{'severities'}        = get_legal_field_values('bug_severity');
 
+    $vars->{'open_bugs_percentage'}   = int($vars->{'total_open_bugs'} / $vars->{'total_bugs'} * 100);
+    $vars->{'closed_bugs_percentage'} = int($vars->{'total_closed_bugs'} / $vars->{'total_bugs'} * 100);
+
     if ($current_tab_name eq 'summary') {
         $vars->{'by_priority'} = by_priority($product, $bug_status);
         $vars->{'by_severity'} = by_severity($product, $bug_status);
-        $vars->{'by_assignee'} = by_assignee($product, $bug_status);
+        $vars->{'by_assignee'} = by_assignee($product, $bug_status, 50);
         $vars->{'by_status'}   = by_status($product, $bug_status);
     }
 
@@ -173,11 +176,14 @@ sub _page_dashboard {
             $milestone_stats{'name'} = $milestone->name;
             $milestone_stats{'total_bugs'} = total_bug_milestone($product, $milestone);
             $milestone_stats{'open_bugs'}  = bug_milestone_by_status($product, $milestone, 'open');
-            $milestone_stats{'closed_bugs'} = bug_milestone_by_status($product, $milestone, 'closed'); 
+            $milestone_stats{'closed_bugs'} = bug_milestone_by_status($product, $milestone, 'closed');
             $milestone_stats{'link_total'} = bug_milestone_link_total($product, $milestone);
             $milestone_stats{'link_open'} = bug_milestone_link_open($product, $milestone);
             $milestone_stats{'link_closed'} = bug_milestone_link_closed($product, $milestone);
-            push (@{$vars->{by_roadmap}}, \%milestone_stats);
+            $milestone_stats{'percentage'} = $milestone_stats{'total_bugs'} 
+                                             ? int(($milestone_stats{'closed_bugs'} / $milestone_stats{'total_bugs'}) * 100)
+                                             : 0;
+            push (@{$vars->{'by_roadmap'}}, \%milestone_stats);
         }
     }
 }

@@ -8,19 +8,36 @@
 
 [% PROCESS global/variables.none.tmpl %]
 
+[% javascript_urls = [ "js/util.js", "js/field.js" ] %]
+
+[% IF current_tab_name == 'summary' %]
+  [% javascript_urls.push("extensions/ProductDashboard/web/js/summary.js") %]
+  [% ELSIF current_tab_name == 'recents' %]
+  [% yui = [ "calendar" ] %]
+  [% javascript_urls.push("js/field.js") %]
+  [% javascript_urls.push("js/util.js") %]
+  [% javascript_urls.push("extensions/ProductDashboard/web/js/recents.js") %]
+[% ELSIF current_tab_name == 'components' %]
+  [% javascript_urls.push("extensions/ProductDashboard/web/js/components.js") %]
+[% ELSIF current_tab_name == 'duplicates' %]
+  [% javascript_urls.push("extensions/ProductDashboard/web/js/duplicates.js") %]
+[% ELSIF current_tab_name == 'popularity' %]
+  [% javascript_urls.push("extensions/ProductDashboard/web/js/popularity.js") %]
+[% ELSIF current_tab_name == 'roadmap' && Param('usetargetmilestone') %]
+  [% javascript_urls.push("extensions/ProductDashboard/web/js/roadmap.js") %]
+[% END %]
+
 [% filtered_product = product.name FILTER html %]
 [% PROCESS global/header.html.tmpl
   title = "Product Dashboard: $filtered_product"
   style_urls = [ "skins/standard/buglist.css",
                  "js/yui/assets/skins/sam/paginator.css",
                  "extensions/ProductDashboard/web/styles/productdashboard.css" ]
-  yui = [ "datatable", "paginator", "calendar" ]
-  javascript_urls = [ "js/util.js", "js/field.js",
-                      "extensions/ProductDashboard/web/js/productdashboard.js" ]
 %]
 
 <script type="text/javascript">
 <!--
+  PD = {};
   [%# Set up severities list for proper sorting %]
   PD.severities = new Array();
   [% sort_count = 0 %]
@@ -96,7 +113,7 @@
   [% bug_link = bug_link_closed %]
 [% END %]
 
-<div class="yui-skin-sam">
+<div class="yui3-skin-sam">
   <a name="top"></a>
 
   <form action="page.cgi" method="get">

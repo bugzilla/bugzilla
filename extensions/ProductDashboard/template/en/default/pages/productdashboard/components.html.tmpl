@@ -8,259 +8,139 @@
 
 [% IF summary.keys %]
 
-  <h3>Summary for [% summary.type FILTER html %]: [% summary.value FILTER html %]</h3>
+<h3>Summary for [% summary.type FILTER html %]: [% summary.value FILTER html %]</h3>
 
-  <style>
-    .yui-skin-sam .yui-dt table {width:100%;}
-  </style>
-
-  <script type="text/javascript">
-  <!--
-  PD.options = {
-    paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25, alwaysVisible: false })
-  };
-  PD.column_defs = [
-    { key:"id", label:"ID", sortable:true, sortOptions:{ sortFunction: PD.sortBugIdLinks } },
-    { key:"bug_status", label:"Status", sortable:true },
-    { key:"version", label:"Version", sortable:true },
-    { key:"component", label:"Component", sortable:true },
-    { key:"bug_severity", label:"Severity", sortable:true, sortOptions:{ sortFunction: PD.sortBugSeverity } },
-    { key:"Summary", label:"Summary", sortable:false },
-  ];
-  PD.fields = [
-    { key:"id" },
-    { key:"bug_status" },
-    { key:"version" },
-    { key:"component" },
-    { key:"bug_severity" },
-    { key:"Summary" }
-  ];
+<script>
+<!--
+  // Past due bugs
   [% IF user.is_timetracker %]
-    PD.addStatListener("past_due", "past_due_table", PD.column_defs, PD.fields, PD.options);
-  [% END %]
-  PD.addStatListener("updated_recently", "updated_recently_table", PD.column_defs, PD.fields, PD.options);
-  -->
-  </script>
-
-  [% IF user.is_timetracker %]
-    <p>
-      <a href="#past_due">Past Due</a> |
-      <a href="#updated_recently">Updated Recently</a> 
-    </p>
+    PD.past_due = [
+    [% FOREACH bug = summary.past_due %]
+      { 
+        id: '[% bug.id FILTER js %]',
+        bug_status: '[% bug.status FILTER js %]', 
+        version: '[% bug.version FILTER js %]',
+        component: '[% bug.component FILTER js %]', 
+        severity: '[% bug.severity FILTER js %]',
+        summary: '[% bug.summary FILTER js %]'
+      }, 
+    [% END %] 
+    ];
   [% END %]
 
-  <div class="yui-skin-sam">
+  // Bugs updated recently
+  PD.updated_recently = [
+  [% FOREACH bug = summary.updated_recently %]
+    { 
+      id: '[% bug.id FILTER js %]',
+      bug_status: '[% bug.status FILTER js %]', 
+      version: '[% bug.version FILTER js %]',
+      component: '[% bug.component FILTER js %]', 
+      severity: '[% bug.severity FILTER js %]',
+      summary: '[% bug.summary FILTER js %]'
+    }, 
+  [% END %]
+  ];
+-->
+</script>
 
-    [% IF user.is_timetracker %]
-      <a name="past_due"></a>
-      <b>[% summary.past_due.size FILTER html %] Past Due [% terms.Bugs %]</b> (deadline is before today's date)
-      (<a href="[% bug_link FILTER html %]&amp;[% summary.type FILTER uri %]=[% summary.value FILTER uri %]&field0-0-0=deadline&type0-0-0=lessthan&value0-0-0=[% summary.timestamp FILTER uri %]&order=deadline">full list</a>)
-      <div id="past_due">
-        <table id="past_due_table" cellspacing="3" cellpadding="0" border="0" width="100%">
-        <thead>
-            <tr bgcolor="#CCCCCC">
-              [% FOREACH column = [ "ID", "Status", "Version", "Component", "Severity" "Summary" ] %]
-                <th>[% column FILTER html %]</th>
-              [% END %]
-            </tr>
-        </thead>
-        <tbody>
-        [% FOREACH bug = summary.past_due %]
-          [% count = loop.count() %]
-          <tr class="[%+ count % 2 == 1 ? "bz_row_odd" : "bz_row_even" -%]">
-            <td align="center"><a href="[% urlbase FILTER none %]show_bug.cgi?id=[% bug.id FILTER uri %]">
-              [% bug.id FILTER html %]</a></td>
-            <td align="center">[% bug.status FILTER html %]</td>
-            <td align="center">[% bug.version FILTER html %]</td>
-            <td align="center">[% bug.component FILTER html %]</td>
-            <td align="center">[% bug.severity FILTER html %]</td>
-            <td>[% bug.summary FILTER html %]</td>
-          </tr>
-        [% END %]
-        </tbody>
-        </table>
-      </div>
-      <br>
-    [% END %]
+[% IF user.is_timetracker %]
+  <p>
+    <a href="#past_due">Past Due</a> |
+    <a href="#updated_recently">Updated Recently</a> 
+  </p>
+[% END %]
 
-    <a name="updated_recently"></a>
-    <b>[% summary.updated_recently.size FILTER html %] Most Recently Updated [% terms.Bugs %]</b>
-    [% IF user.is_timetracker %](<a href="#top">back to top</a>)[% END %]
-    (<a href="[% bug_link FILTER html %]&amp;[% summary.type FILTER uri %]=[% summary.value FILTER uri %]&order=changeddate DESC">full list</a>)
-    <div id="updated_recently">
-      <table id="updated_recently_table" cellspacing="3" cellpadding="0" border="0" width="100%">
-      <thead>
-          <tr bgcolor="#CCCCCC">
-            [% FOREACH column = [ "ID", "Status", "Version", "Component", "Severity" "Summary" ] %]
-              <th>[% column FILTER html %]</th>
-            [% END %]
-          </tr>
-      </thead>
-      <tbody>
-      [% FOREACH bug = summary.updated_recently %]
-        [% count = loop.count() %]
-        <tr class="[%+ count % 2 == 1 ? "bz_row_odd" : "bz_row_even" -%]">
-          <td align="center"><a href="[% urlbase FILTER none %]show_bug.cgi?id=[% bug.id FILTER uri %]">
-            [% bug.id FILTER html %]</a></td>
-          <td align="center">[% bug.status FILTER html %]</td>
-          <td align="center">[% bug.version FILTER html %]</td>
-          <td align="center">[% bug.component FILTER html %]</td>
-          <td align="center">[% bug.severity FILTER html %]</td>
-          <td>[% bug.summary FILTER html %]</td>
-        </tr>
-      [% END %]
-      </tbody>
-      </table>
-    </div>
-  </div>
+<div class="yui3-skin-sam">
+
+  [% IF user.is_timetracker %]
+    <a name="past_due"></a>
+    <b>[% summary.past_due.size FILTER html %] Past Due [% terms.Bugs %]</b> (deadline is before today's date)
+    (<a href="[% bug_link FILTER html %]&amp;[% summary.type FILTER uri %]=[% summary.value FILTER uri %]&field0-0-0=deadline&type0-0-0=lessthan&value0-0-0=[% summary.timestamp FILTER uri %]&order=deadline">full list</a>)
+    <div id="past_due"></div>
+    <br>
+  [% END %]
+
+  <a name="updated_recently"></a>
+  <b>[% summary.updated_recently.size FILTER html %] Most Recently Updated [% terms.Bugs %]</b>
+  [% IF user.is_timetracker %](<a href="#top">back to top</a>)[% END %]
+  (<a href="[% bug_link FILTER html %]&amp;[% summary.type FILTER uri %]=[% summary.value FILTER uri %]&order=changeddate DESC">full list</a>)
+  <div id="updated_recently"></div>
+</div>
 
 [% ELSE %]
 
-  <script type="text/javascript">
-  <!--
-  PD.column_defs = [
-    { key:"name", label:"Name", sortable:true },
-    { key:"count", label:"Count", sortable:true },
-    { key:"percentage", label:"Percentage", sortable:false },
-    { key:"bug_list", label:"[% terms.Bug %] List", sortable:false }
-  ];
-  PD.fields = [
-    { key:"name" },
-    { key:"count", parser:"number" },
-    { key:"percentage" },
-    { key:"bug_list" }
-  ];
-  PD.addStatListener("component_counts", "component_counts_table",
-                     PD.column_defs, PD.fields,
-                     { paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25, alwaysVisible: false }) });
-  PD.addStatListener("version_counts", "version_counts_table",
-                     PD.column_defs, PD.fields,
-                     { paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25, alwaysVisible: false }) });
-  PD.addStatListener("milestone_counts", "milestone_counts_table",
-                     PD.column_defs, PD.fields,
-                     { paginator: new YAHOO.widget.Paginator({ rowsPerPage: 25, alwaysVisible: false }) });
-  -->
-  </script>
+<script type="text/javascript">
+<!--
+  PD.product_name = '[% product.name FILTER js %]';
+  PD.bug_status = '[% bug_status FILTER js %]';
 
-  [% summary_url = "page.cgi?id=productdashboard.html&amp;product=$url_filtered_product&bug_status=$url_filtered_status&tab=components" %]
-
-  <h3>[% terms.Bug %] counts per component, version and milestone.</h3>
-
-  <p>
-    <a href="#component">Component</a> |
-    <a href="#version">Version</a> |
-    <a href="#milestone">Milestone</a>
-  </p>
-
-  <p>Click on a value to show a list of most recently updated [% terms.bugs %].</p>
-
-  <div class="yui-skin-sam"> 
-    <a name="component"></a>
-    <b>Component</b>
-    <div id="component_counts">
-      <table id="component_counts_table" border="0" cellspacing="3" cellpadding="0">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Count</th>
-          <th>Percentage</th>
-          <th>[% terms.Bug %] List</th>
-        </tr>
-      </thead>
-      <tbody>
-      [% FOREACH col = by_component %]
-        <tr>
-          <td>
-            <a href="[% summary_url FILTER none %]&component=[% col.0 FILTER uri %]">
-            [% col.0 FILTER html %]</a>
-          </td>
-          <td align="right">
-            [% col.1 FILTER html %]
-          </td>
-          <td width="70%">
-            [% INCLUDE bar_graph count = col.1 %]
-          </td>
-          <td> 
-            <a href="[% bug_link FILTER html %]&amp;component=[% col.0 FILTER uri %]">View</a>
-          </td>
-        </tr>
-      [% END %]
-      </tbody>
-      </table>
-    </div>
-    <br>
-    <a name="version"></a>
-    <b>Version</b>
-    (<a href="#top">back to top</a>)
-    <div id="version_counts">
-      <table id="version_counts_table" border="0" cellspacing="3" cellpadding="0">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Count</th>
-          <th>Percentage</th>
-          <th>[% terms.Bug %] List</th>
-        </tr>
-      </thead>
-      <tbody>
-      [% FOREACH col = by_version %]
-        <tr>
-          <td>
-            <a href="[% summary_url FILTER none %]&version=[% col.0 FILTER uri %]">
-            [% col.0 FILTER html %]</a>
-          </td>
-          <td align="right">
-            [% col.1 FILTER html %]
-          </td>
-          <td width="70%">
-            [% INCLUDE bar_graph count = col.1 %]
-          </td>
-          <td> 
-            <a href="[% bug_link FILTER html %]&amp;version=[% col.0 FILTER uri %]">View</a>
-          </td>
-        </tr>
-      [% END %]
-      </tbody>
-      </table>
-    </div>
-
-    [% IF Param('usetargetmilestone') %]
-      <br>
-      <a name="milestone"></a>
-      <b>Milestone</b>
-      (<a href="#top">back to top</a>)
-      <div id="milestone_counts">
-        <table id="milestone_counts_table" border="0" cellspacing="3" cellpadding="0">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Count</th>
-            <th>Percentage</th>
-            <th>[% terms.Bug %] List</th>
-          </tr>
-        </thead>
-        <tbody>
-        [% FOREACH col = by_milestone %]
-          <tr>
-            <td>
-              <a href="[% summary_url FILTER none %]&target_milestone=[% col.0 FILTER uri %]">
-              [% col.0 FILTER html %]</a>
-            </td>
-            <td align="right">
-              [% col.1 FILTER html %]
-            </td>
-            <td width="70%">
-              [% INCLUDE bar_graph count = col.1 %]
-            </td>
-            <td> 
-              <a href="[% bug_link FILTER html %]&amp;target_milestone=[% col.0 FILTER uri %]">View</a>
-            </td>
-          </tr>
-        [% END %]
-        </tbody>
-        </table>
-      </div>
+  // Component counts 
+  PD.component_counts = [
+    [% FOREACH col = by_component %]
+      {
+        name: "[% col.0 FILTER js %]",    
+        count: [% col.1 || 0 FILTER js %],
+        percentage: [% col.2 || 0 FILTER js %], 
+        link: '<a href="[% bug_link FILTER html %]&amp;component=[% col.0 FILTER uri %]">Link</a>'
+      }, 
     [% END %]
-  </div>
+  ];
+
+  // Version counts
+  PD.version_counts = [
+    [% FOREACH col = by_version %]
+      {
+        name: "[% col.0 FILTER js %]",    
+        count: [% col.1 || 0 FILTER js %],
+        percentage: [% col.2 || 0 FILTER js %], 
+        link: '<a href="[% bug_link FILTER html %]&amp;version=[% col.0 FILTER uri %]">Link</a>'
+      }, 
+    [% END %]
+  ];
+
+  [% IF Param('usetargetmilestone') %]
+    // Milestone counts
+    PD.milestone_counts = [
+      [% FOREACH col = by_milestone %]
+        {
+          name: "[% col.0 FILTER js %]",
+          count: [% col.1 || 0 FILTER js %],
+          percentage: [% col.2 || 0 FILTER js %],
+          link: '<a href="[% bug_link FILTER html %]&amp;target_milestone=[% col.0 FILTER uri %]">Link</a>'
+        },
+      [% END %]
+    ];
+  [% END %]
+-->
+</script>
+
+<h3>[% terms.Bug %] counts per component, version and milestone.</h3>
+
+<p>
+  <a href="#component">Component</a> |
+  <a href="#version">Version</a> |
+  <a href="#milestone">Milestone</a>
+</p>
+
+<p>Click on a value to show a list of most recently updated [% terms.bugs %].</p>
+
+<div class="yui3-skin-sam"> 
+  <a name="component"></a>
+  <b>Component</b>
+  <div id="component_counts"></div>
+  <br>
+  <a name="version"></a>
+  <b>Version</b>
+  (<a href="#top">back to top</a>)
+  <div id="version_counts"></div>
+  [% IF Param('usetargetmilestone') %]
+    <br>
+    <a name="milestone"></a>
+    <b>Milestone</b>
+    (<a href="#top">back to top</a>)
+    <div id="milestone_counts"></div>
+  [% END %]
+</div>
 
 [% END %]

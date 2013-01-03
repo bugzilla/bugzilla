@@ -1912,13 +1912,24 @@ sub _quote_unless_numeric {
 
 sub build_subselect {
     my ($outer, $inner, $table, $cond, $negate) = @_;
-    # Execute subselects immediately to avoid dependent subqueries, which are
-    # large performance hits on MySql
-    my $q = "SELECT DISTINCT $inner FROM $table WHERE $cond";
-    my $dbh = Bugzilla->dbh;
-    my $list = $dbh->selectcol_arrayref($q);
-    return $negate ? "1=1" : "1=2" unless @$list;
-    return $dbh->sql_in($outer, $list, $negate);
+
+    if ($table eq 'longdescs') {
+        # There is no index on the longdescs.thetext column and so it takes
+        # a long time to scan the whole table unconditionally. For this table,
+        # we return the subselect and let the DB optimizer restrict the search
+        # to some given bug list only based on other search criteria available.
+        my $not = $negate ? "NOT" : "";
+        return "$outer $not IN (SELECT DISTINCT $inner FROM $table WHERE $cond)";
+    }
+    else {
+        # Execute subselects immediately to avoid dependent subqueries, which are
+        # large performance hits on MySql
+        my $q = "SELECT DISTINCT $inner FROM $table WHERE $cond";
+        my $dbh = Bugzilla->dbh;
+        my $list = $dbh->selectcol_arrayref($q);
+        return $negate ? "1=1" : "1=2" unless @$list;
+        return $dbh->sql_in($outer, $list, $negate);
+    }
 }
 
 # Used by anyexact to get the list of input values. This allows us to

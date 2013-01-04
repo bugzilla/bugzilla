@@ -46,13 +46,12 @@ function trySubmit() {
   var shortdesc = 'Event - (' + date + ' ' + time + ') - ' + location + ' - ' + topic;
   document.getElementById('short_desc').value = shortdesc;
 
-  var public_yes = document.getElementById('public_yes').checked;
-  var public_no = document.getElementById('public_no').checked;
-  if (!public_yes && !public_no) {
+  var public = document.getElementById('public');
+  if (!public.value) {
     alert('You must select whether the event is public or not');
     return false;   
   }
-  if (public_no) {
+  if (public.value != 'The Public') {
     var brownbagRequestForm = document.getElementById('brownbagRequestForm');
     var groups = document.createElement('input');
     groups.type = 'hidden';
@@ -91,17 +90,7 @@ function trySubmit() {
   <input type="hidden" name="short_desc" id="short_desc" value="">
   <input type="hidden" name="token" value="[% token FILTER html %]">
 
-[% FOREACH type = product.flag_types.bug %]
-  [% NEXT IF type.name != 'pr-review' %]
-  <input type="hidden" id="flag_type-[% type.id FILTER html %]" 
-         name="flag_type-[% type.id FILTER html %]" value="?">
-  <input type="hidden" id="flag_type-[% type.id FILTER html %]" 
-         name="requestee_type-[% type.id FILTER html %]"
-         value="PRreview@mozilla.com">
-[% END %]
-
 <table>
-
 <tr>
   <th class="field_label">
     <label for="presenter">Presenter:</label>
@@ -204,6 +193,24 @@ function trySubmit() {
       <option value="UTC+13">UTC+13</option>
       <option value="UTC+14">UTC+14</option>
     </select>
+    <br>
+    <table>
+    <tr>
+      <th>Summer:</th>
+      <td>MTV/SFO/PDX/YVR UTC-7</td>
+      <td>TOR/BOS UTC-4</td>
+      <td>LON UTC+1</td>
+      <td>PAR/BER UTC+2</td>
+    </tr>
+    <tr>
+      <th>Winter:</th>
+      <td>MTV/SFO/PDX/YVR UTC-8</td>
+      <td>TOR/BOS UTC-3</td>
+      <td>LON UTC</td>
+      <td>PAR/BER UTC+1</td>
+    </tr>
+    </table>
+    </div>
   </td>
 </tr>
 
@@ -250,29 +257,17 @@ function trySubmit() {
 </tr>  
 
 <tr>
-  <th class="field_label">This event may be<br>viewed by the public:</th>
+  <th class="field_label">This event may be seen by:</th>
   <td>
-    If <strong>No</strong> is chosen, this request will only be visible internally as well
-    as the reporter and anyone designated in the CC field.<br>
-    <input type="radio" name="public" id="public_yes" value="Yes">
-    <label for="public_yes">Yes</label><br>
-    <input type="radio" name="public" id="public_no" value="No">
-    <label for="public_no">No</label>
+    If anything other than <strong>The Public</strong> is chosen, this request will only be 
+    visible internally as well as the reporter and anyone designated in the CC field.<br>
+    <select name="public" id="public">
+      <option value="">Select One</option>
+      <option value="The Public">The Public</option>
+      <option value="Vouched Mozillians and MoCo/MoFo Staff">Vouched Mozillians and MoCo/MoFo Staff</option>
+      <option value="MoCo/MoFo Staff Only">MoCo/MoFo Staff Only</option>
+    </select>
   </td>
-</tr>
-
-<tr>
-  <th class="field_label">
-    <label for="airmozilla">Air Mozilla Broadcasting?</label>
-  </th>
-  <td align="left"><input type="checkbox" name="airmozilla" id="airmozilla"></td>
-</tr>
-
-<tr>
-  <th class="field_label">
-    <label for="ithelp">Need IT to help run A/V?</label>
-  </th>
-  <td align="left"><input type="checkbox" name="ithelp" id="ithelp" value="yes" checked></td>
 </tr>
 
 <tr>

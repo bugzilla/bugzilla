@@ -195,11 +195,12 @@ hr {
     border-radius: 0 0 5px 5px;
     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
     display: none; 
-    padding: 4px 8px;
+    padding: 4px;
     position: absolute;
     right: -1px;
     top: 26px;
     z-index: 2;
+    text-align: left;
 }
 
 .links .dropdown:hover ul {
@@ -373,16 +374,20 @@ table.edit_form hr {
     color: #404040;
 }
 
-.bz_comment {
+/* .bz_comment {
     background: transparent;
     border: none;
     margin: 0 0 30px;
     padding: 0;
     width: 674px;
-}
+} */
 
 .bz_comment_table {
-    width: 75%;
+    width: 90%;
+}
+
+.bz_comment {
+    width: 70em;
 }
 
 .bz_comment pre {
@@ -515,8 +520,8 @@ table.edit_form hr {
     border-top: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 0;
     color: #bbb;
-    margin: 15px -15px 0;
-    padding: 48px 15px;
+    margin-left: -15px;
+    padding: 20px;
 }
 
 #footer #useful-links {
@@ -527,8 +532,8 @@ table.edit_form hr {
 #footer > * {
     margin-right: auto;
     margin-left: auto;
-    padding: 0 0 0 320px !important;
-    width: 670px;
+    padding: 0 0 0 200px !important;
+    width: 80%;
 }
 
 #commit, #commit_top {
@@ -581,6 +586,10 @@ table.edit_form hr {
 
 #flags label {
     font-weight: normal;
+}
+
+.tabs td.spacer {
+    background: transparent;
 }
 
 /* Smaller than standard 990 (devices and browsers) */

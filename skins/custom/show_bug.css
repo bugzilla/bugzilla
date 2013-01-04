@@ -45,24 +45,12 @@
     margin-top: 0px;
 }
 
-/* put the width on the TD rather than the PRE to stop the col resizing
-   when comments are hidden */
-.bz_comment {
-    width: 55em;
-}
 .bz_comment_text {
     width: auto;
 }
 
 .bz_comment_number {
     float: right;
-}
-
-/* style all field labels the same */
-
-.field_label, .field_label a {
-    color: #000;
-    font-weight: bold;
 }
 
 .field_label a {

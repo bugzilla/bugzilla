@@ -22,6 +22,13 @@ use List::Util qw(max);
 use Safe;
 use Term::ANSIColor;
 
+# Return::Value 1.666002 pollutes the error log with warnings about this
+# deprecated module. We have to set NO_CLUCK = 1 before loading Email::Send
+# in have_vers() to disable these warnings.
+BEGIN {
+    $Return::Value::NO_CLUCK = 1;
+}
+
 use base qw(Exporter);
 our @EXPORT = qw(
     REQUIRED_MODULES

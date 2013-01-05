@@ -11,6 +11,12 @@ use 5.10.1;
 use strict;
 
 use Bugzilla::Config::Common;
+# Return::Value 1.666002 pollutes the error log with warnings about this
+# deprecated module. We have to set NO_CLUCK = 1 before loading Email::Send
+# to disable these warnings.
+BEGIN {
+    $Return::Value::NO_CLUCK = 1;
+}
 use Email::Send;
 
 our $sortkey = 1200;

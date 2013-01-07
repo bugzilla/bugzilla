@@ -1,9 +1,10 @@
-[% IF Param('user_info_class').split(',').contains('BrowserID') %]
+[% IF Param('user_info_class').split(',').contains('BrowserID')
+      && Param('browserid_includejs_url') %]
 
 [% USE Bugzilla %]
 [% cgi = Bugzilla.cgi %]
 
-<script src="https://browserid.org/include.js" type="text/javascript"></script>
+<script src="[% Param('browserid_includejs_url') %]" type="text/javascript"></script>
 
 <script type="text/javascript">
 function createHidden(name, value, form) {

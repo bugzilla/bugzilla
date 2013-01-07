@@ -46,4 +46,10 @@ sub config_modify_panels {
     }
 }
 
+sub config_add_panels {
+    my ($self, $args) = @_;
+    my $modules = $args->{panel_modules};
+    $modules->{BrowserID} = "Bugzilla::Extension::BrowserID::Config";
+}
+
 __PACKAGE__->NAME;

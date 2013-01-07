@@ -45,7 +45,7 @@ sub get_login_info {
     # in the page.
     $cgi->delete('browserid_assertion');
     
-    if (!$assertion) {
+    if (!$assertion || !Bugzilla->params->{browserid_verify_url}) {
         return { failure => AUTH_NODATA };
     }
     
@@ -60,7 +60,7 @@ sub get_login_info {
     
     my $info = { 'status' => 'browserid-server-broken' };
     eval {
-        my $response = $ua->post("https://browserid.org/verify",
+        my $response = $ua->post(Bugzilla->params->{browserid_verify_url},
                                  [assertion => $assertion, 
                                   audience  => $audience]);
 

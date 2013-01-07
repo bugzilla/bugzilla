@@ -1,0 +1,20 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%
+  title = "BrowserID"
+  desc = "Configure BrowserID Authentication"
+%]
+
+[% param_descs = {
+  browserid_verify_server => "This is the URL for the BrowserID (Persona) authority that the " _
+                             "user will be verified against. Example: <kbd>https://browserid.org</kbd>.",
+  browserid_includejs_server => "This is the URL needed by BrowserID to load the necessary javascript " _
+                                "library for authentication. Example: <kbd>https://browserid.org</kbd>."
+ }
+%]

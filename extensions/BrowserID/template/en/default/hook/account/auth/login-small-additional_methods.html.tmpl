@@ -1,5 +1,6 @@
-[% IF Param('user_info_class').split(',').contains('BrowserID') %]
-<script src="https://browserid.org/include.js" type="text/javascript"></script>
+[% IF Param('user_info_class').split(',').contains('BrowserID')
+      && Param('browserid_includejs_url') %]
+<script src="[% Param('browserid_includejs_url') %]" type="text/javascript"></script>
 
 [%# Note this code is a tiny bit different from the other copy; the name of
   # the variable containing the login url is 'login_target' rather than

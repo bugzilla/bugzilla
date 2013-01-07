@@ -400,7 +400,7 @@ use constant ABSTRACT_SCHEMA => {
             extra_data      => {TYPE => 'varchar(255)'}
         ],
         INDEXES => [
-            longdescs_bug_id_idx   => ['bug_id'],
+            longdescs_bug_id_idx   => [qw(bug_id work_time)],
             longdescs_who_idx     => [qw(who bug_id)],
             longdescs_bug_when_idx => ['bug_when'],
         ],

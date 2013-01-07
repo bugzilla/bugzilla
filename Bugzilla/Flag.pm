@@ -79,7 +79,7 @@ use constant AUDIT_CREATES => 0;
 use constant AUDIT_UPDATES => 0;
 use constant AUDIT_REMOVES => 0;
 
-use constant SKIP_REQUESTEE_ON_ERROR => 0;
+use constant SKIP_REQUESTEE_ON_ERROR => 1;
 
 sub DB_COLUMNS {
     my $dbh = Bugzilla->dbh;

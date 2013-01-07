@@ -700,6 +700,9 @@ sub update_table_definitions {
     # 2012-08-01 koosha.khajeh@gmail.com - Bug 187753
     _shorten_long_quips();
 
+    # 2012-12-23 LpSolit@gmail.com - Bug 824361
+    _fix_longdescs_indexes();
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################
@@ -3726,6 +3729,15 @@ sub _fix_longdescs_primary_key {
         $dbh->bz_alter_column('bugs_activity', 'comment_id', {TYPE => 'INT4'});
         $dbh->bz_alter_column('longdescs', 'comment_id',
                               {TYPE => 'INTSERIAL',  NOTNULL => 1,  PRIMARYKEY => 1});
+    }
+}
+
+sub _fix_longdescs_indexes {
+    my $dbh = Bugzilla->dbh;
+    my $bug_id_idx = $dbh->bz_index_info('longdescs', 'longdescs_bug_id_idx');
+    if ($bug_id_idx && scalar @{$bug_id_idx->{'FIELDS'}} < 2) {
+        $dbh->bz_drop_index('longdescs', 'longdescs_bug_id_idx');
+        $dbh->bz_add_index('longdescs', 'longdescs_bug_id_idx', [qw(bug_id work_time)]);
     }
 }
 

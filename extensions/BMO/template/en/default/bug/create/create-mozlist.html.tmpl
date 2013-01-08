@@ -9,104 +9,23 @@
 [% PROCESS global/variables.none.tmpl %]
 
 [% PROCESS global/header.html.tmpl
-   title = "Mozilla Discussion Forum / Mailing List Requests"
+   title = "Mozilla Discussion Forum"
    javascript_urls = [ 'extensions/BMO/web/js/form_validate.js',
                        'js/field.js' ]
    yui = [ 'autocomplete' ]
+   style = ".mandatory{color:red;font-size:80%;}"
 %]
 
 <script type="text/javascript">
 <!--
-    function toggleGroup (theRadio) {
-        var radioValue = theRadio.value;
-        var groupDiv = YAHOO.util.Dom.get('groups');
-        var group = YAHOO.util.Dom.get('group_35');
-        if (radioValue == 'lists.mozilla.org') {
-            YAHOO.util.Dom.setStyle('listNameTR', 'display', 'table-row');
-            YAHOO.util.Dom.setStyle('listNameDiscussion', 'display', 'inline');
-            YAHOO.util.Dom.setStyle('listNameOther', 'display', 'none');
-            YAHOO.util.Dom.setStyle('listAdminTR', 'display', 'table-row');
-            YAHOO.util.Dom.setStyle('listShortDescTR', 'display', 'table-row');
-            YAHOO.util.Dom.setStyle('listShortDescMailman', 'display', 'inline');
-            YAHOO.util.Dom.setStyle('listShortDescZimbra', 'display', 'none');
-            YAHOO.util.Dom.setStyle('listLongDescTR', 'display', 'table-row');
-            YAHOO.util.Dom.setStyle('listCommentTR', 'display', 'table-row');
-            YAHOO.util.Dom.setStyle('CCTR', 'display', 'table-row');
-            YAHOO.util.Dom.setStyle('URLTR', 'display', 'table-row');
-            YAHOO.util.Dom.setStyle('serviceNow', 'display', 'none');
-            YAHOO.util.Dom.setStyle('groups', 'display', 'none');
-            group.disabled = true;
-            YAHOO.util.Dom.setStyle('submitDiv', 'display', 'block');
-        } else if (radioValue == 'mozilla.org') {
-            YAHOO.util.Dom.setStyle('listNameTR', 'display', 'table-row');
-            YAHOO.util.Dom.setStyle('listNameDiscussion', 'display', 'none');
-            YAHOO.util.Dom.setStyle('listNameOther', 'display', 'inline');
-            YAHOO.util.Dom.setStyle('listAdminTR', 'display', 'table-row');
-            YAHOO.util.Dom.setStyle('listShortDescTR', 'display', 'table-row');
-            YAHOO.util.Dom.setStyle('listShortDescMailman', 'display', 'inline');
-            YAHOO.util.Dom.setStyle('listShortDescZimbra', 'display', 'none');
-            YAHOO.util.Dom.setStyle('listLongDescTR', 'display', 'table-row');
-            YAHOO.util.Dom.setStyle('listCommentTR', 'display', 'table-row');
-            YAHOO.util.Dom.setStyle('CCTR', 'display', 'table-row');
-            YAHOO.util.Dom.setStyle('URLTR', 'display', 'table-row');
-            YAHOO.util.Dom.setStyle('serviceNow', 'display', 'none');
-            YAHOO.util.Dom.setStyle('groups', 'display', 'table-row');
-            group.disabled = false;
-            YAHOO.util.Dom.setStyle('submitDiv', 'display', 'block');
-        } else {
-            YAHOO.util.Dom.setStyle('listNameTR', 'display', 'none');
-            YAHOO.util.Dom.setStyle('listNameDiscussion', 'display', 'none');
-            YAHOO.util.Dom.setStyle('listNameOther', 'display', 'none');
-            YAHOO.util.Dom.setStyle('listAdminTR', 'display', 'none');
-            YAHOO.util.Dom.setStyle('listShortDescTR', 'display', 'none');
-            YAHOO.util.Dom.setStyle('listShortDescMailman', 'display', 'none');
-            YAHOO.util.Dom.setStyle('listShortDescZimbra', 'display', 'none');
-            YAHOO.util.Dom.setStyle('listLongDescTR', 'display', 'none');
-            YAHOO.util.Dom.setStyle('listCommentTR', 'display', 'none');
-            YAHOO.util.Dom.setStyle('CCTR', 'display', 'none');
-            YAHOO.util.Dom.setStyle('URLTR', 'display', 'none');
-            YAHOO.util.Dom.setStyle('serviceNow', 'display', 'table-row');
-            YAHOO.util.Dom.setStyle('groups', 'display', 'none');
-            group.disabled = false;
-            YAHOO.util.Dom.setStyle('submitDiv', 'display', 'none');
-        }
-    }
-
     function trySubmit() {
-        var listName = document.getElementById('listName').value;
-        var listAdmin = document.getElementById('listAdmin').value;
-        var listTypeRadio = document.getElementsByName('listType');
-        var listType = "";
-
-        for (var i = 0; i < listTypeRadio.length; i++) {
-            if (listTypeRadio[i].checked) {
-                listType = listTypeRadio[i].value;
-            }
-        }
-
         var alert_text = "";
-        var short_desc = "";
-
-        if (listType) {
-            if (listType == "lists.mozilla.org") {
-                document.getElementById('component').value = "Discussion Forums";
-                short_desc = "Discussion Forum: " + listName;
-            } else if (listType == "mozilla.com" ) {
-                document.location.href = 'https://mozilla.service-now.com/';
-                return false;
-            } else {
-                document.getElementById('component').value = "Server Operations";
-                short_desc = "[Mailman List Request] " + listName + "@" + listType;
-            }
-        } else {
-            alert_text += "Please select a list type\n";
-        }
 
         if (!isFilledOut('listName')) {
             alert_text += "Please enter the list name\n";
         }
 
-        if ((!isValidEmail(listAdmin)) && (listType != 'mozilla.com')) {
+        if (!isValidEmail(document.getElementById('listAdmin').value)) {
             alert_text += "Please enter a valid email address for the list administrator\n";
         }
 
@@ -115,22 +34,31 @@
             return false;
         }
 
-        document.getElementById('short_desc').value = short_desc;
+        var listName = document.getElementById('listName').value;
+        document.getElementById('short_desc').value = "Discussion Forum: " + listName;
 
         return true;
     }
-
-    YAHOO.util.Event.onDOMReady(function() {
-        var elements = document.getElementsByName('listType');
-        for (var i = 0, l = elements.length; i < l; i++) {
-            if (elements[i].checked) {
-                toggleGroup(elements[i]);
-                break;
-            }
-        }
-    });
 // -->
 </script>
+
+<p>
+  <b>Create a Mozilla Discussion Forum</b><br>
+  This option gives you a Mozilla <a
+  href="https://www.mozilla.org/about/forums/">Discussion Forum</a>.
+  These are the normal mechanism for public discussion in the Mozilla
+  project. They are made up of a mailing list on
+  <b>lists.mozilla.org</b>, a newsgroup on <b>news.mozilla.org</b> and
+  a <b>Google Group</b> (which maintains the list archives), all linked
+  together.  Users can add and remove themselves.
+</p>
+
+<div id="message">
+  <b>Note:</b>
+  You must use <a href="https://mozilla.service-now.com/"><b>Service Now</b></a> 
+  to request a distribution list or a standard mailing list.
+</div>
+<br>
 
 <form method="post" action="post_bug.cgi" id="mozListRequestForm"
       enctype="multipart/form-data" onSubmit="return trySubmit();">
@@ -141,104 +69,50 @@
   <input type="hidden" id="priority" name="priority" value="--">
   <input type="hidden" id="version" name="version" value="other">
   <input type="hidden" id="short_desc" name="short_desc" value="">
-  <input type="hidden" id="component" name="component" value="">
+  <input type="hidden" id="component" name="component" value="Discussion Forums">
   <input type="hidden" id="bug_severity" name="bug_severity" value="normal">
   <input type="hidden" id="token" name="token" value="[% token FILTER html %]">
 
   <table>
-  <tr id="listTypeTR" style="display: table-row;">
-    <td align="right" width="15%"><strong>List Type:</strong></td>
+  <tr>
+    <th class="field_label">
+      <span class="mandatory" title="Required">*</span> List Name:
+    </th>
     <td>
-      <dl>
-      <dt>
-        <input type="radio" name="listType" id="lists_mozilla_org"
-               onclick="toggleGroup(this);" value="lists.mozilla.org">
-        <label for="lists_mozilla_org">Standard Discussion Forum</label>
-      </dt>
-      <dd>
-        <label for="lists_mozilla_org">
-          This option gives you a Mozilla <a
-          href="https://www.mozilla.org/about/forums/">Discussion Forum</a>.
-          These are the normal mechanism for public discussion in the Mozilla
-          project. They are made up of a mailing list on
-          <b>lists.mozilla.org</b>, a newsgroup on <b>news.mozilla.org</b> and
-          a <b>Google Group</b> (which maintains the list archives), all linked
-          together.  Users can add and remove themselves. If you aren't sure,
-          pick this one.
-        </label>
-      </dd>
-      <dt>
-        <input type="radio" name="listType" id="mozilla_org"
-               onclick="toggleGroup(this);" value="mozilla.org">
-        <label for="mozilla_org">Mailing List Only</label>
-      </dt>
-      <dd>
-        <label for="mozilla_org">
-          This option gives you a mailing list without the other access mechanisms. The
-          list can be private, although Mozilla is an "open by default" organization so
-          you need a good reason to have a private list. The archives are maintained by
-          Mailman, our mailing list software. Subscription can be open or
-          moderator-controlled. This type of list is normally hosted on the <b>mozilla.org</b> domain.
-        </label>
-      </dd>
-      <dt>
-        <input type="radio" name="listType" id="mozilla_com"
-               onclick="toggleGroup(this)" value="mozilla.com">
-        <label for="mozilla_com">Distribution List</label>
-      </dt>
-      <dd>
-        <label for="mozilla_com">
-          This option gives you a distribution list - basically, a mail exploder - on
-          <b>mozilla.com</b>. (This option is only appropriate for things which relate
-          specifically to Mozilla Corporation, such as confidential partner projects
-          or internal department lists.) Send email to the address, and it gets remailed
-          out to everyone on the list. There are no archives, and the "subscriber" list
-          is controlled by the IT team.
-        </label>
-      </dd>
-      </dl>
-      <hr>
+      The desired name for the newsgroup. Should start with 'mozilla.' and fit somewhere 
+      in the hierarchy described <a href="https://www.mozilla.org/about/forums/">here</a>.<br>
+      <input name="listName" id="listName" size="60" value="[% listName FILTER html %]">
     </td>
   </tr>
-  <tr id="listNameTR" style="display: none;">
-    <td align="right" valign="top"><strong>List Name:</strong></td>
+  <tr>
+    <th class="field_label">
+     <span class="mandatory" title="Required">*</span> List Administrator:
+    </th>
     <td>
-      <input name="listName" id="listName" size="60" value="[% listName FILTER html %]"><br>
-      <span id="listNameDiscussion" style="display: none;">The desired name for the newsgroup. Should start with 'mozilla.' and fit somewhere in the hierarchy described <a href="https://www.mozilla.org/about/forums/">here</a>.</span>
-      <span id="listNameOther" style="display: none;">Only enter the part before the @, the domain name is chosen based on the list type.</span>
-      <hr>
-    </td>
-  </tr>
-  <tr id="listAdminTR" style="display: none;">
-    <td align="right" valign="top" width="15%"><strong>List Administrator:</strong></td>
-    <td>
-      [% INCLUDE global/userselect.html.tmpl
-         id => "listAdmin"
-         name => "listAdmin"
-         value => ""
-         size => 60
-         multiple => 5
-       %]
-       <br>
        <b>Note:</b>The list administrator is also initially considered to be the list moderator
        and will be responsible for moderation tasks unless delegated to someone else.  For
-       convenience, [% terms.Bugzilla %] user accounts will autocomplete. The administrator is not required
-       to have a [% terms.Bugzilla %] account, and you can enter an address that doesn't autocomplete if
-       necessary.<hr />
+       convenience, [% terms.Bugzilla %] user accounts will autocomplete but it does not have
+       to be a [% terms.Bugzilla %] account.<br>
+      [% INCLUDE global/userselect.html.tmpl
+         id       => "listAdmin"
+         name     => "listAdmin"
+         value    => ""
+         size     => 60
+         multiple => 5
+       %]
     </td>
   </tr>
-  <tr id="listShortDescTR" style="display: none;">
-    <td align="right" valign="top"><strong>Short one-line description:</strong></td>
+  <tr>
+    <td class="field_label">Short Description:</th>
     <td>
-      <input name="listShortDesc" id="listShortDesc" size="60" value="[% listShortDesc FILTER html %]"><br />
-      <span id="listShortDescMailman" style="display: none;">This will be shown to users on the index of lists on the server.</span>
-      <span id="listShortDescZimbra" style="display: none;">This will be shown as the "real name" in the Zimbra address book.</span>
-      <hr />
+      This will be shown to users on the index of lists on the server.<br>
+      <input name="listShortDesc" id="listShortDesc" size="60" value="[% listShortDesc FILTER html %]">
     </td>
   </tr>
-  <tr id="listLongDescTR" style="display: none;">
-    <td align="right" valign="top"><strong>Long description:</strong></td>
-    <td colspan="3">
+  <tr>
+    <td class="field_label">Long Description:</th>
+    <td>
+      This will be shown at the top of the list's listinfo page.<br>
       [% INCLUDE global/textarea.html.tmpl
          name           = 'listLongDesc'
          id             = 'listLongDesc'
@@ -247,13 +121,11 @@
          cols           = constants.COMMENT_COLS
          defaultcontent = listLongDesc
        %]
-      <br>This will be shown at the top of the list's listinfo page.
-      <hr>
     </td>
   </tr>
-  <tr id="listCommentTR" style="display: none;">
-    <td align="right" valign="top"><strong>Additional comments:</strong></td>
-    <td colspan="3">
+  <tr>
+    <th class="field_label">Additional Comments:</th>
+    <td>
       Justification for the list, special instructions, etc.<br>
       [% INCLUDE global/textarea.html.tmpl
          name           = 'comment'
@@ -263,11 +135,10 @@
          cols           = constants.COMMENT_COLS
          defaultcontent = comment
        %]
-       <hr>
     </td>
   </tr>
-  <tr id="CCTR" style="display: none;">
-    <td align="right"><strong>CC&nbsp;(optional):</strong></td>
+  <tr>
+    <th class="field_label">CC:</th>
     <td>
       [% INCLUDE global/userselect.html.tmpl
          id => "cc"
@@ -278,44 +149,29 @@
        %]
     </td>
   </tr>
-  <tr id="URLTR" style="display: none;">
-    <td align="right"><strong>URL&nbsp;(optional):</strong></td>
+  <tr>
+    <th class="field_label">URL:</th>
     <td colspan="3">
       <input name="bug_file_loc" size="60"
              value="[% bug_file_loc FILTER html %]">
     </td>
   </tr>
-  <tr id="serviceNow" style="display: none">
-    <td>&nbsp;</td>
-    <td>
-      <p>
-        Please use <b>Service Now</b> to request a distribution list.
-      </p>
-      <input type="submit" value="Go to Service Now">
-    </td>
-  </tr>
   <tr>
-    <td>&nbsp;</td>
+    <td align="right">
+      <input type="checkbox" name="groups" id="group_35" value="infra">
+    </td>
     <td>
-      <br>
-      <div id="groups" style="display:none;">
-        <input type="checkbox" name="groups" id="group_35" value="infra" disabled="true">
-        <label for="group_35"><strong>This is an internal issue which should not be publicly visible.</strong></label>
-        <br><br>
-      </div>
-
-      <div id="submitDiv" style="display: none;">
-        <input type="submit" id="commit" value="Submit Request">
-        <p>
-          Thanks for contacting us. You will be notified by email of any progress made
-          in resolving your request.
-        </p>
-      </div>
+      <label for="group_35"><b>This is an internal issue which should not be publicly visible.</b></label>
     </td>
   </tr>
   </table>
-  <br>
 
+  <input type="submit" id="commit" value="Submit Request">
+
+  <p>
+    Thanks for contacting us. You will be notified by email of any progress made
+    in resolving your request.
+  </p>
 </form>
 
 [% PROCESS global/footer.html.tmpl %]

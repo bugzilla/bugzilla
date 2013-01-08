@@ -886,18 +886,43 @@ sub release_tracking_report {
     my @ranges;
     my $start_date = _string_to_datetime('2011-08-16');
     my $end_date = $start_date->clone->add(weeks => 6)->add(days => -1);
-    my $now_date = _time_to_datetime((time));
+    my $now_date = _string_to_datetime('2012-11-19');
 
     while ($start_date <= $now_date) {
         unshift @ranges, {
             value => sprintf("%s-%s", $start_date->ymd(''), $end_date->ymd('')),
             label => sprintf("%s and %s", $start_date->ymd('-'), $end_date->ymd('-')),
         };
-    
+
         $start_date = $end_date->clone;;
         $start_date->add(days => 1);
         $end_date->add(weeks => 6);
     }
+
+    # 2012-11-20 - 2013-01-06 was a 7 week release cycle instead of 6
+    $start_date = _string_to_datetime('2012-11-20');
+    $end_date = $start_date->clone->add(weeks => 7)->add(days => -1);
+    unshift @ranges, {
+        value => sprintf("%s-%s", $start_date->ymd(''), $end_date->ymd('')),
+        label => sprintf("%s and %s", $start_date->ymd('-'), $end_date->ymd('-')),
+    };
+
+    # Back on track with 6 week releases
+    $start_date = _string_to_datetime('2013-01-08');
+    $end_date = $start_date->clone->add(weeks => 6)->add(days => -1);
+    $now_date = _time_to_datetime((time));
+
+    while ($start_date <= $now_date) {
+        unshift @ranges, {
+            value => sprintf("%s-%s", $start_date->ymd(''), $end_date->ymd('')),
+            label => sprintf("%s and %s", $start_date->ymd('-'), $end_date->ymd('-')),
+        };
+
+        $start_date = $end_date->clone;;
+        $start_date->add(days => 1);
+        $end_date->add(weeks => 6);
+    }
+
     push @ranges, {
         value => '*',
         label => 'Anytime',

@@ -666,10 +666,11 @@ sub bug_end_of_create {
     my $bug = $args->{'bug'};
 
     foreach my $group_name (keys %group_auto_cc) {
-        if ($bug->in_group(Bugzilla::Group->new({ name => $group_name }))) {
+        my $group_obj = Bugzilla::Group->new({ name => $group_name });
+        if ($group_obj && $bug->in_group($group_obj)) {
             my $ra_logins = exists $group_auto_cc{$group_name}->{$bug->product}
-                ? $group_auto_cc{$group_name}->{$bug->product}
-                : $group_auto_cc{$group_name}->{'_default'};
+                            ? $group_auto_cc{$group_name}->{$bug->product}
+                            : $group_auto_cc{$group_name}->{'_default'};
             foreach my $login (@$ra_logins) {
                 $bug->add_cc($login);
             }

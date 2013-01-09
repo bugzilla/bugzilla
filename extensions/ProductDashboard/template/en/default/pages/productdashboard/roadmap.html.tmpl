@@ -13,7 +13,7 @@
     {
       name: '[% milestone.name FILTER js %]',
       percentage: '[% milestone.percentage FILTER js %]',
-      link: '<a href="[% milestone.link_closed FILTER html %]">[% milestone.closed_bugs FILTER html %]</a> of <a href="[% milestone.link_total FILTER html %]"> [% milestone.total_bugs FILTER html %]</a> bugs have been closed',
+      link: '<a href="[% milestone.link_closed FILTER html %]">[% milestone.closed_bugs FILTER html %]</a> of <a href="[% milestone.link_total FILTER html %]"> [% milestone.total_bugs FILTER html %]</a> [% terms.bugs %] have been closed',
     },
   [% END %]
   ];

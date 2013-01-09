@@ -12,7 +12,7 @@
 
 <script>
 <!--
-  // Past due bugs
+  // Past due 
   [% IF user.is_timetracker %]
     PD.past_due = [
     [% FOREACH bug = summary.past_due %]
@@ -28,7 +28,7 @@
     ];
   [% END %]
 
-  // Bugs updated recently
+  // Updated recently
   PD.updated_recently = [
   [% FOREACH bug = summary.updated_recently %]
     { 

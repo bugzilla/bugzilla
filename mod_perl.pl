@@ -64,7 +64,7 @@ use Apache2::SizeLimit;
 if (Bugzilla->params->{'urlbase'} eq 'https://bugzilla.mozilla.org/') {
     Apache2::SizeLimit->set_max_unshared_size(1_600_000);
 } else {
-    Apache2::SizeLimit->set_max_unshared_size(100_000);
+    Apache2::SizeLimit->set_max_unshared_size(600_000);
 }
 
 my $cgi_path = Bugzilla::Constants::bz_locations()->{'cgi_path'};

@@ -49,15 +49,14 @@ sub filter_wants ($$;$) {
     my ($params, $field, $prefix) = @_;
     my %include = map { $_ => 1 } @{ $params->{'include_fields'} || [] };
     my %exclude = map { $_ => 1 } @{ $params->{'exclude_fields'} || [] };
-    my $field_temp;
 
     $field = "${prefix}.${field}" if $prefix;
 
     if (defined $params->{include_fields}) {
-        return 0 if !$include{$field_temp};
+        return 0 if !$include{$field};
     }
     if (defined $params->{exclude_fields}) {
-        return 0 if $exclude{$field_temp};
+        return 0 if $exclude{$field};
     }
 
     return 1;

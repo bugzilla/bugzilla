@@ -334,8 +334,8 @@ sub new {
     # If we get something that looks like a word (not a number),
     # make it the "name" param.
     if (!defined $param
-        || (!ref($param) && $param =~ /\D/)
-        || (ref($param) && $param->{id} =~ /\D/))
+        || (!ref($param) && (!$param || $param =~ /\D/))
+        || (ref($param) && (!$param->{id} || $param->{id} =~ /\D/)))
     {
         # But only if aliases are enabled.
         if (Bugzilla->params->{'usebugaliases'} && $param) {

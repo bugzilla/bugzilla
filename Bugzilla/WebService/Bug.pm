@@ -325,7 +325,8 @@ sub get {
     Bugzilla->switch_to_shadow_db();
 
     my $ids = $params->{ids};
-    defined $ids || ThrowCodeError('param_required', { param => 'ids' });
+    (defined $ids && scalar @$ids) 
+        || ThrowCodeError('param_required', { param => 'ids' });
 
     my @bugs;
     my @faults;

@@ -383,18 +383,22 @@ sub cache_key {
 
 sub check {
     my $class = shift;
-    my ($id, $field) = @_;
-
-    ThrowUserError('improper_bug_id_field_value', { field => $field }) unless defined $id;
+    my ($param, $field) = @_;
 
     # Bugzilla::Bug throws lots of special errors, so we don't call
     # SUPER::check, we just call our new and do our own checks.
-    my $self = $class->new(trim($id));
-    # For error messages, use the id that was returned by new(), because
-    # it's cleaned up.
-    $id = $self->id;
+    my $id = ref($param)
+        ? ($param->{id} = trim($param->{id}))
+        : ($param = trim($param));
+    ThrowUserError('improper_bug_id_field_value', { field => $field }) unless defined $id;
+
+    my $self = $class->new($param);
 
     if ($self->{error}) {
+        # For error messages, use the id that was returned by new(), because
+        # it's cleaned up.
+        $id = $self->id;
+
         if ($self->{error} eq 'NotFound') {
              ThrowUserError("bug_id_does_not_exist", { bug_id => $id });
         }

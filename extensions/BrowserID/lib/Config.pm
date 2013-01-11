@@ -20,12 +20,12 @@ sub get_param_list {
         {
             name    => 'browserid_verify_url',
             type    => 't',
-            default => 'https://browserid.org/verify',
+            default => 'https://verifier.login.persona.org/verify',
         },
         {
             name    => 'browserid_includejs_url',
             type    => 't',
-            default => 'https://browserid.org/include.js',
+            default => 'https://login.persona.org/include.js',
         }
     );
 

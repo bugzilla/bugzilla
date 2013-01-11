@@ -12,9 +12,11 @@
 %]
 
 [% param_descs = {
-  browserid_verify_server => "This is the URL for the BrowserID (Persona) authority that the " _
-                             "user will be verified against. Example: <kbd>https://browserid.org</kbd>.",
-  browserid_includejs_server => "This is the URL needed by BrowserID to load the necessary javascript " _
-                                "library for authentication. Example: <kbd>https://browserid.org</kbd>."
+  browserid_verify_url => "This is the URL for the BrowserID authority that the " _
+                          "user will be verified against. " _
+                          "Example: <kbd>https://verifier.login.persona.org/verify</kbd>.",
+  browserid_includejs_url => "This is the URL needed by BrowserID to load the necessary " _
+                             "javascript library for authentication. " _
+                             "Example: <kbd>https://browserid.org</kbd>."
  }
 %]

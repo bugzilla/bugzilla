@@ -1,0 +1,61 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% RETURN IF user.login
+             || !Param('browserid_includejs_url')
+             || !Param('user_info_class').split(',').contains('BrowserID') %]
+
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+
+[% login_target = cgi.url("-relative" => 1, "-query" => 1) %]
+[% IF !login_target OR login_target.match("^token.cgi") %]
+  [% login_target = "index.cgi" %]
+[% END %]
+
+[% login_target = urlbase _ login_target %]
+
+<script src="[% Param('browserid_includejs_url') %]" type="text/javascript"></script>
+
+<script type="text/javascript">
+function createHidden(name, value, form) {
+  var field = document.createElement('input');
+  field.type = 'hidden';
+  field.name = name;
+  field.value = value;;
+  form.appendChild(field);
+}
+
+function browserid_sign_in() {
+  navigator.id.get(function(assertion) {
+    if (assertion) {
+      // This code will be invoked once the user has successfully
+      // selected an email address they control to sign in with.
+      var form = document.createElement('form');
+      form.action = '[% login_target FILTER js %]';
+      form.method = 'POST';
+      form.style.display = 'none';
+
+      createHidden('token', '[% issue_hash_token(['login']) FILTER js %]', form);
+      createHidden('Bugzilla_remember', 'on', form);
+      createHidden('browserid_assertion', assertion, form);
+
+      [% FOREACH field = cgi.param() %]
+        [% NEXT IF field.search("^(Bugzilla_(login|password|restrictlogin)|token|browserid_assertion)$") %]
+        [% FOREACH mvalue = cgi.param(field).slice(0) %]
+          createHidden('[% field FILTER js %]', '[% mvalue FILTER html_linebreak FILTER js %]', form);
+        [% END %]
+      [% END %]
+
+      document.body.appendChild(form);
+      form.submit();
+      return true;
+    }
+  });
+}
+</script>

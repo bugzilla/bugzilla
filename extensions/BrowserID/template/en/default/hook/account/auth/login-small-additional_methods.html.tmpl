@@ -1,4 +1,16 @@
 [% IF Param('user_info_class').split(',').contains('BrowserID')
       && Param('browserid_includejs_url') %]
-<img src="extensions/BrowserID/web/sign_in_orange.png" onclick="browserid_sign_in()" style="margin-bottom: -8px"> or
+<script type="text/javascript">
+  YAHOO.util.Event.addListener('login_link[% qs_suffix FILTER js %]','click', function () {
+      var login_link = YAHOO.util.Dom.get('browserid_mini_login[% qs_suffix FILTER js %]');
+      YAHOO.util.Dom.removeClass(login_link, 'bz_default_hidden');
+  });
+  YAHOO.util.Event.addListener('hide_mini_login[% qs_suffix FILTER js %]','click', function () {
+      var login_link = YAHOO.util.Dom.get('browserid_mini_login[% qs_suffix FILTER js %]');
+      YAHOO.util.Dom.addClass(login_link, 'bz_default_hidden');
+  });
+</script>
+<span id="browserid_mini_login[% qs_suffix FILTER html %]" class="bz_default_hidden">
+  <img src="extensions/BrowserID/web/sign_in_orange.png" onclick="browserid_sign_in()" style="margin-bottom: -8px"> or
+</span>
 [% END %]

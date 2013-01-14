@@ -982,7 +982,7 @@ sub create {
                 }
                 return \@optional;
             },
-            'default_authorizer' => new Bugzilla::Auth(),
+            'default_authorizer' => sub { return Bugzilla::Auth->new() },
         },
     };
     # Use a per-process provider to cache compiled templates in memory across

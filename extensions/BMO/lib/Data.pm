@@ -198,6 +198,7 @@ our $cf_project_flags = [
 our $cf_disabled_flags = [
     'cf_blocking_20',
     'cf_status_20',
+    'cf_blocking_basecamp',
     'cf_tracking_firefox5',
     'cf_status_firefox5',
     'cf_blocking_thunderbird32',

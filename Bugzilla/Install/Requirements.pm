@@ -19,7 +19,6 @@ use Bugzilla::Constants;
 use Bugzilla::Install::Util qw(vers_cmp install_string bin_loc 
                                extension_requirement_packages);
 use List::Util qw(max);
-use Safe;
 use Term::ANSIColor;
 
 # Return::Value 1.666002 pollutes the error log with warnings about this

@@ -387,13 +387,10 @@ sub mtime_filter {
 #
 #  1. YUI CSS
 #  2. Standard Bugzilla stylesheet set (persistent)
-#  3. Standard Bugzilla stylesheet set (selectable)
-#  4. All third-party "skin" stylesheet sets (selectable)
-#  5. Page-specific styles
-#  6. Custom Bugzilla stylesheet set (persistent)
-#
-# "Selectable" skin file sets may be either preferred or alternate.
-# Exactly one is preferred, determined by the "skin" user preference.
+#  3. Third-party "skin" stylesheet set, per user prefs (persistent)
+#  4. Page-specific styles
+#  5. Custom Bugzilla stylesheet set (persistent)
+
 sub css_files {
     my ($style_urls, $yui, $yui_css) = @_;
     
@@ -410,18 +407,10 @@ sub css_files {
     
     my @css_sets = map { _css_link_set($_) } @requested_css;
     
-    my %by_type = (standard => [], alternate => {}, skin => [], custom => []);
+    my %by_type = (standard => [], skin => [], custom => []);
     foreach my $set (@css_sets) {
         foreach my $key (keys %$set) {
-            if ($key eq 'alternate') {
-                foreach my $alternate_skin (keys %{ $set->{alternate} }) {
-                    my $files = $by_type{alternate}->{$alternate_skin} ||= [];
-                    push(@$files, $set->{alternate}->{$alternate_skin});
-                }
-            }
-            else {
-                push(@{ $by_type{$key} }, $set->{$key});
-            }
+            push(@{ $by_type{$key} }, $set->{$key});
         }
     }
     
@@ -438,27 +427,15 @@ sub _css_link_set {
     if ($file_name !~ m{(^|/)skins/standard/}) {
         return \%set;
     }
-    
-    my $skin_user_prefs = Bugzilla->user->settings->{skin};
+
+    my $skin = Bugzilla->user->settings->{skin}->{value};
     my $cgi_path = bz_locations()->{'cgi_path'};
-    # If the DB is not accessible, user settings are not available.
-    my $all_skins = $skin_user_prefs ? $skin_user_prefs->legal_values : [];
-    my %skin_urls;
-    foreach my $option (@$all_skins) {
-        next if $option eq 'standard';
-        my $skin_file_name = $file_name;
-        $skin_file_name =~ s{(^|/)skins/standard/}{skins/contrib/$option/};
-        if (my $mtime = _mtime("$cgi_path/$skin_file_name")) {
-            $skin_urls{$option} = mtime_filter($skin_file_name, $mtime);
-        }
+    my $skin_file_name = $file_name;
+    $skin_file_name =~ s{(^|/)skins/standard/}{skins/contrib/$skin/};
+    if (my $mtime = _mtime("$cgi_path/$skin_file_name")) {
+        $set{skin} = mtime_filter($skin_file_name, $mtime);
     }
-    $set{alternate} = \%skin_urls;
-    
-    my $skin = $skin_user_prefs->{'value'};
-    if ($skin ne 'standard' and defined $set{alternate}->{$skin}) {
-        $set{skin} = delete $set{alternate}->{$skin};
-    }
-    
+
     my $custom_file_name = $file_name;
     $custom_file_name =~ s{(^|/)skins/standard/}{skins/custom/};
     if (my $custom_mtime = _mtime("$cgi_path/$custom_file_name")) {

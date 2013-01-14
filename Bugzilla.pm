@@ -605,7 +605,7 @@ sub has_flags {
 }
 
 sub local_timezone {
-    return $_[0]->request_cache->{local_timezone}
+    return $_[0]->process_cache->{local_timezone}
              ||= DateTime::TimeZone->new(name => 'local');
 }
 

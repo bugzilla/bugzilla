@@ -616,11 +616,11 @@ sub has_flags {
 sub local_timezone {
     my $class = shift;
 
-    if (!defined $class->request_cache->{local_timezone}) {
-        $class->request_cache->{local_timezone} =
+    if (!defined $class->process_cache->{local_timezone}) {
+        $class->process_cache->{local_timezone} =
           DateTime::TimeZone->new(name => 'local');
     }
-    return $class->request_cache->{local_timezone};
+    return $class->process_cache->{local_timezone};
 }
 
 # This creates the request cache for non-mod_perl installations.

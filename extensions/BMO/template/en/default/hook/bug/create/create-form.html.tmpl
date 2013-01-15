@@ -10,7 +10,7 @@
       [% IF user.in_group('partner-confidential-visible') %]
         [% PROCESS group_checkbox
                    name = 'partner-confidential'
-                   desc = "Restrict the visiblity of this " _ terms.bug _ " to " _
+                   desc = "Restrict the visibility of this " _ terms.bug _ " to " _
                           "the assignee, QA contact, and CC list only."
         %]
       [% END %]

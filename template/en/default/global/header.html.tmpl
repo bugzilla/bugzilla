@@ -37,6 +37,10 @@
   # atomlink: Atom link URL, May contain HTML
   #%]
 
+[% IF message %]
+  [% PROCESS global/messages.html.tmpl %]
+[% END %]
+
 [% DEFAULT
   subheader = ""
   header_addl_info = ""
@@ -293,7 +297,6 @@
 [% END %]
 
 [% IF message %]
-  [% PROCESS global/messages.html.tmpl %]
   <div id="message">[% message %]</div>
 [% END %]
 

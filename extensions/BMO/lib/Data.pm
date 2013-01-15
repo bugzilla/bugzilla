@@ -400,6 +400,7 @@ our %product_sec_groups = (
     "Skywriter"                    => 'websites-security',
     "Socorro"                      => 'client-services-security',
     "support.mozilla.org"          => 'websites-security',
+    "support.mozilla.org Graveyard" => 'websites-security',
     "support.mozillamessaging.com" => 'websites-security',
     "Talkback"                     => 'talkback-private',
     "Tamarin"                      => 'tamarin-security',

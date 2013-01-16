@@ -61,7 +61,9 @@
 %]
 
 [% IF debug %]
-  <p>[% query FILTER html %]</p>
+  [% FOREACH query = queries %]
+    <p>[% query.sql FILTER html %]</p>
+  [% END %]
 [% END %]
 
 <div align="center">

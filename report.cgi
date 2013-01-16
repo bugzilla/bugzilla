@@ -163,13 +163,12 @@ my $search = new Bugzilla::Search(
     params => scalar $params->Vars,
     allow_unlimited => 1,
 );
-my $query = $search->sql;
 
 $::SIG{TERM} = 'DEFAULT';
 $::SIG{PIPE} = 'DEFAULT';
 
-my $dbh = Bugzilla->switch_to_shadow_db();
-my $results = $dbh->selectall_arrayref($query);
+Bugzilla->switch_to_shadow_db();
+my ($results, $extra_data) = $search->data;
 
 # We have a hash of hashes for the data itself, and a hash to hold the 
 # row/col/table names.
@@ -256,7 +255,7 @@ if ($formatparam eq "bar") {
 
 $vars->{'width'} = $width;
 $vars->{'height'} = $height;
-$vars->{'query'} = $query;
+$vars->{'queries'} = $extra_data;
 $vars->{'saved_report_id'} = $cgi->param('saved_report_id');
 $vars->{'debug'} = $cgi->param('debug');
 

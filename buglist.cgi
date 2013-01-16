@@ -30,7 +30,6 @@ use Bugzilla::Status;
 use Bugzilla::Token;
 
 use Date::Parse;
-use Time::HiRes qw(gettimeofday tv_interval);
 
 my $cgi = Bugzilla->cgi;
 my $dbh = Bugzilla->dbh;
@@ -682,8 +681,7 @@ my $search = new Bugzilla::Search('fields' => \@selectcolumns,
                                   'params' => scalar $params->Vars,
                                   'order'  => \@order_columns,
                                   'sharer' => $sharer_id);
-my $query = $search->sql;
-$vars->{'search_description'} = $search->search_description;
+
 $order = join(',', $search->order);
 
 if (scalar @{$search->invalid_order_columns}) {
@@ -702,18 +700,6 @@ $params->delete('limit') if $vars->{'default_limited'};
 ################################################################################
 # Query Execution
 ################################################################################
-
-if ($cgi->param('debug')) {
-    $vars->{'debug'} = 1;
-    $vars->{'query'} = $query;
-    # Explains are limited to admins because you could use them to figure
-    # out how many hidden bugs are in a particular product (by doing
-    # searches and looking at the number of rows the explain says it's
-    # examining).
-    if ($user->in_group('admin')) {
-        $vars->{'query_explain'} = $dbh->bz_explain($query);
-    }
-}
 
 # Time to use server push to display an interim message to the user until
 # the query completes and we can display the bug list.
@@ -747,11 +733,25 @@ $::SIG{TERM} = 'DEFAULT';
 $::SIG{PIPE} = 'DEFAULT';
 
 # Execute the query.
-my $start_time = [gettimeofday()];
-my $buglist_sth = $dbh->prepare($query);
-$buglist_sth->execute();
-$vars->{query_time} = tv_interval($start_time);
+my ($data, $extra_data) = $search->data;
+$vars->{'search_description'} = $search->search_description;
 
+if ($cgi->param('debug')) {
+    $vars->{'debug'} = 1;
+    $vars->{'queries'} = $extra_data;
+    my $query_time = 0;
+    $query_time += $_->{'time'} foreach @$extra_data;
+    $vars->{'query_time'} = $query_time;
+    # Explains are limited to admins because you could use them to figure
+    # out how many hidden bugs are in a particular product (by doing
+    # searches and looking at the number of rows the explain says it's
+    # examining).
+    if ($user->in_group('admin')) {
+        foreach my $query (@$extra_data) {
+            $query->{explain} = $dbh->bz_explain($query->{sql});
+        }
+    }
+}
 
 ################################################################################
 # Results Retrieval
@@ -783,14 +783,14 @@ my @bugidlist;
 
 my @bugs; # the list of records
 
-while (my @row = $buglist_sth->fetchrow_array()) {
+foreach my $row (@$data) {
     my $bug = {}; # a record
 
     # Slurp the row of data into the record.
     # The second from last column in the record is the number of groups
     # to which the bug is restricted.
     foreach my $column (@selectcolumns) {
-        $bug->{$column} = shift @row;
+        $bug->{$column} = shift @$row;
     }
 
     # Process certain values further (i.e. date format conversion).

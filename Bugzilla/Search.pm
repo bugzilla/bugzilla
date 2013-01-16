@@ -32,9 +32,10 @@ use Data::Dumper;
 use Date::Format;
 use Date::Parse;
 use Scalar::Util qw(blessed);
-use List::MoreUtils qw(all part uniq);
+use List::MoreUtils qw(all firstidx part uniq);
 use POSIX qw(INT_MAX);
 use Storable qw(dclone);
+use Time::HiRes qw(gettimeofday tv_interval);
 
 # Description Of Boolean Charts
 # -----------------------------
@@ -686,7 +687,70 @@ sub new {
 # Public Accessors #
 ####################
 
-sub sql {
+sub data {
+    my $self = shift;
+    return $self->{data} if $self->{data};
+    my $dbh = Bugzilla->dbh;
+
+    # If all fields belong to the 'bugs' table, there is no need to split
+    # the original query into two pieces. Else we override the 'fields'
+    # argument to first get bug IDs based on the search criteria defined
+    # by the caller, and the desired fields are collected in the 2nd query.
+    my @orig_fields = $self->_input_columns;
+    my $all_in_bugs_table = 1;
+    foreach my $field (@orig_fields) {
+        next if $self->COLUMNS->{$field}->{name} =~ /^bugs\.\w+$/;
+        $self->{fields} = ['bug_id'];
+        $all_in_bugs_table = 0;
+        last;
+    }
+
+    my $start_time = [gettimeofday()];
+    my $sql = $self->_sql;
+    # Do we just want bug IDs to pass to the 2nd query or all the data immediately?
+    my $func = $all_in_bugs_table ? 'selectall_arrayref' : 'selectcol_arrayref';
+    my $bug_ids = $dbh->$func($sql);
+    my @extra_data = ({sql => $sql, time => tv_interval($start_time)});
+    # Restore the original 'fields' argument, just in case.
+    $self->{fields} = \@orig_fields unless $all_in_bugs_table;
+
+    # If there are no bugs found, or all fields are in the 'bugs' table,
+    # there is no need for another query.
+    if (!scalar @$bug_ids || $all_in_bugs_table) {
+        $self->{data} = $bug_ids;
+        return wantarray ? ($self->{data}, \@extra_data) : $self->{data};
+    }
+
+    # Make sure the bug_id will be returned. If not, append it to the list.
+    my $pos = firstidx { $_ eq 'bug_id' } @orig_fields;
+    if ($pos < 0) {
+        push(@orig_fields, 'bug_id');
+        $pos = $#orig_fields;
+    }
+
+    # Now create a query with the buglist above as the single criteria
+    # and the fields that the caller wants. No need to redo security checks;
+    # the list has already been validated above.
+    my $search = $self->new('fields' => \@orig_fields,
+                            'params' => {bug_id => $bug_ids, bug_id_type => 'anyexact'},
+                            'sharer' => $self->_sharer_id,
+                            'user'   => $self->_user,
+                            'allow_unlimited'    => 1,
+                            '_no_security_check' => 1);
+
+    $start_time = [gettimeofday()];
+    $sql = $search->_sql;
+    my $unsorted_data = $dbh->selectall_arrayref($sql);
+    push(@extra_data, {sql => $sql, time => tv_interval($start_time)});
+    # Let's sort the data. We didn't do it in the query itself because
+    # we already know in which order to sort bugs thanks to the first query,
+    # and this avoids additional table joins in the SQL query.
+    my %data = map { $_->[$pos] => $_ } @$unsorted_data;
+    $self->{data} = [map { $data{$_} } @$bug_ids];
+    return wantarray ? ($self->{data}, \@extra_data) : $self->{data};
+}
+
+sub _sql {
     my ($self) = @_;
     return $self->{sql} if $self->{sql};
     my $dbh = Bugzilla->dbh;
@@ -720,7 +784,7 @@ sub search_description {
     # Make sure that the description has actually been generated if
     # people are asking for the whole thing.
     else {
-        $self->sql;
+        $self->_sql;
     }
     return $self->{'search_description'};
 }
@@ -1116,6 +1180,7 @@ sub _standard_joins {
     my ($self) = @_;
     my $user = $self->_user;
     my @joins;
+    return () if $self->{_no_security_check};
 
     my $security_join = {
         table => 'bug_group_map',
@@ -1192,6 +1257,7 @@ sub _translate_join {
 # group security.
 sub _standard_where {
     my ($self) = @_;
+    return ('1=1') if $self->{_no_security_check};
     # If replication lags badly between the shadow db and the main DB,
     # it's possible for bugs to show up in searches before their group
     # controls are properly set. To prevent this, when initially creating
@@ -2960,6 +3026,112 @@ sub _translate_old_column {
 
 1;
 
+__END__
+
+=head1 NAME
+
+Bugzilla::Search - Provides methods to run queries against bugs.
+
+=head1 SYNOPSIS
+
+    use Bugzilla::Search;
+
+    my $search = new Bugzilla::Search({'fields' => \@fields,
+                                       'params' => \%search_criteria,
+                                       'sharer' => $sharer_id,
+                                       'user'   => $user_obj,
+                                       'allow_unlimited' => 1});
+
+    my $data = $search->data;
+    my ($data, $extra_data) = $search->data;
+
+=head1 DESCRIPTION
+
+Search.pm represents a search object. It's the single way to collect
+data about bugs in a secure way. The list of bugs matching criteria
+defined by the caller are filtered based on the user privileges.
+
+=head1 METHODS
+
+=head2 new
+
+=over
+
+=item B<Description>
+
+Create a Bugzilla::Search object.
+
+=item B<Params>
+
+=over
+
+=item C<fields>
+
+An arrayref representing the bug attributes for which data is desired.
+Legal attributes are listed in the fielddefs DB table. At least one field
+must be defined, typically the 'bug_id' field.
+
+=item C<params>
+
+A hashref representing search criteria. Each key => value pair represents
+a search criteria, where the key is the search field and the value is the
+value for this field. At least one search criteria must be defined if the
+'search_allow_no_criteria' parameter is turned off, else an error is thrown.
+
+=item C<sharer>
+
+When a saved search is shared by a user, this is his user ID.
+
+=item C<user>
+
+A L<Bugzilla::User> object representing the user to whom the data is addressed.
+All security checks are done based on this user object, so it's not safe
+to share results of the query with other users as not all users have the
+same privileges or have the same role for all bugs in the list. If this
+parameter is not defined, then the currently logged in user is taken into
+account. If no user is logged in, then only public bugs will be returned.
+
+=item C<allow_unlimited>
+
+If set to a true value, the number of bugs retrieved by the query is not
+limited.
+
+=back
+
+=item B<Returns>
+
+A L<Bugzilla::Search> object.
+
+=back
+
+=head2 data
+
+=over
+
+=item B<Description>
+
+Returns bugs matching search criteria passed to C<new()>.
+
+=item B<Params>
+
+None
+
+=item B<Returns>
+
+In scalar context, this method returns a reference to a list of bugs.
+Each item of the list represents a bug, which is itself a reference to
+a list where each item represents a bug attribute, in the same order as
+specified in the C<fields> parameter of C<new()>.
+
+In list context, this methods also returns a reference to a list containing
+references to hashes. For each hash, two keys are defined: C<sql> contains
+the SQL query which has been executed, and C<time> contains the time spent
+to execute the SQL query, in seconds. There can be either a single hash, or
+two hashes if two SQL queries have been executed sequentially to get all the
+required data.
+
+=back
+
 =head1 B<Methods in need of POD>
 
 =over
@@ -2967,8 +3139,6 @@ sub _translate_old_column {
 =item invalid_order_columns
 
 =item COLUMN_JOINS
-
-=item sql
 
 =item split_order_term
 

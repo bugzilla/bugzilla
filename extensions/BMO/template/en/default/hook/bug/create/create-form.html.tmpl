@@ -14,6 +14,14 @@
                           "the assignee, QA contact, and CC list only."
         %]
       [% END %]
+      [% IF user.in_group('mozilla-corporation-confidential-visible')
+            && !user.in_group('mozilla-corporation-confidential') %]
+        [% PROCESS group_checkbox
+                   name = 'mozilla-corporation-confidential'
+                   desc = "Restrict the visibility of this " _ terms.bug _ " to " _
+                          "Mozilla Employees and Contractors only."
+        %]
+      [% END %]
       <br>
     </td>
   </tr>

@@ -881,14 +881,9 @@ sub create {
             # Currently logged in user, if any
             # If an sudo session is in progress, this is the user we're faking
             'user' => sub { return Bugzilla->user; },
-           
+
             # Currenly active language
-            # XXX Eventually this should probably be replaced with something
-            # like Bugzilla->language.
-            'current_language' => sub {
-                my ($language) = include_languages();
-                return $language;
-            },
+            'current_language' => sub { return Bugzilla->current_language; },
 
             # If an sudo session is in progress, this is the user who
             # started the session.
@@ -899,7 +894,7 @@ sub create {
 
             # Allow templates to access docs url with users' preferred language
             'docs_urlbase' => sub { 
-                my ($language) = include_languages();
+                my $language = Bugzilla->current_language;
                 my $docs_urlbase = Bugzilla->params->{'docs_urlbase'};
                 $docs_urlbase =~ s/\%lang\%/$language/;
                 return $docs_urlbase;

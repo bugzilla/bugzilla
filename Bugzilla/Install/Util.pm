@@ -370,7 +370,10 @@ sub include_languages {
 
     # Basically, the way this works is that we have a list of languages
     # that we *want*, and a list of languages that Bugzilla actually
-    # supports.
+    # supports. If there is only one language installed, we take it.
+    my $supported = supported_languages();
+    return @$supported if @$supported == 1;
+
     my $wanted;
     if ($params->{language}) {
         # We can pass several languages at once as an arrayref
@@ -381,7 +384,6 @@ sub include_languages {
     else {
         $wanted = _wanted_languages();
     }
-    my $supported = supported_languages();
     my $actual    = _wanted_to_actual_languages($wanted, $supported);
     return @$actual;
 }

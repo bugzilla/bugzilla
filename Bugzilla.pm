@@ -27,7 +27,7 @@ use Bugzilla::Extension;
 use Bugzilla::DB;
 use Bugzilla::Install::Localconfig qw(read_localconfig);
 use Bugzilla::Install::Requirements qw(OPTIONAL_MODULES);
-use Bugzilla::Install::Util qw(init_console);
+use Bugzilla::Install::Util qw(init_console include_languages);
 use Bugzilla::Template;
 use Bugzilla::User;
 use Bugzilla::Error;
@@ -436,6 +436,10 @@ sub dbh_main {
 sub languages {
     my $class = shift;
     return Bugzilla::Install::Util::supported_languages();
+}
+
+sub current_language {
+    return $_[0]->request_cache->{current_language} ||= (include_languages())[0];
 }
 
 sub error_mode {
@@ -934,6 +938,10 @@ The main database handle. See L<DBI>.
 
 Currently installed languages.
 Returns a reference to a list of RFC 1766 language tags of installed languages.
+
+=item C<current_language>
+
+The currently active language.
 
 =item C<switch_to_shadow_db>
 
